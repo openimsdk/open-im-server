@@ -53,7 +53,7 @@ func (MessageApi) SetOptions(options map[string]bool, value bool) {
 	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, value)
 }
 
-func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg) *msg.SendMsgReq {
+func (m MessageApi) newUserSendMsgReq(_ *gin.Context, params *apistruct.SendMsg) *msg.SendMsgReq {
 	var newContent string
 	options := make(map[string]bool, 5)
 	switch params.ContentType {

@@ -2,7 +2,7 @@
 # Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 
-name: Dependency Review
+name: OpenIM Dependency Review
 on: [pull_request]
 
 permissions:

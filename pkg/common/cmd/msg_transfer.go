@@ -15,6 +15,9 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/OpenIMSDK/protocol/constant"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/spf13/cobra"
 
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
@@ -39,4 +42,26 @@ func (m *MsgTransferCmd) addRunE() {
 func (m *MsgTransferCmd) Exec() error {
 	m.addRunE()
 	return m.Execute()
+}
+
+func (m *MsgTransferCmd) GetPortFromConfig(portType string) int {
+	fmt.Println("GetPortFromConfig:", portType)
+	if portType == constant.FlagPort {
+		return 0
+	} else if portType == constant.FlagPrometheusPort {
+		n := m.getTransferProgressFlagValue()
+		return config2.Config.Prometheus.MessageTransferPrometheusPort[n]
+	}
+	return 0
+}
+func (m *MsgTransferCmd) AddTransferProgressFlag() {
+	m.Command.Flags().IntP(constant.FlagTransferProgressIndex, "n", 0, "transfer progress index")
+}
+func (m *MsgTransferCmd) getTransferProgressFlagValue() int {
+	nindex, err := m.Command.Flags().GetInt(constant.FlagTransferProgressIndex)
+	if err != nil {
+		fmt.Println("get transfercmd error,make sure it is k8s env or not")
+		return 0
+	}
+	return nindex
 }

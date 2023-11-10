@@ -24,38 +24,49 @@ on:
     types: [created]
 
 jobs:
-  create-pr:
+  sync-issue-to-pr:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.base.ref == 'main'
-    # && github.event.pull_request.merged == true
     steps:
-        - name: Check out code
-          uses: actions/checkout@v4
-          with:
-            fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Sync Issue to PR
+        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+        run: |
+          PR_BODY="${{ github.event.pull_request.body }}"
 
-        - name: Create PR to release branch
-          run: |
-            ISSUEID=$(gh pr view ${{ github.event.pull_request.number }} --repo $OWNER/$REPO | grep -oP 'Fixes #\K\d+')
-            echo "===========> $ISSUEID"
-            ISSUE=$(gh issue view $ISSUEID --repo $OWNER/$REPO --json labels,assignees,milestone,title)
-            echo "===========> $ISSUE"
+          ISSUE_NUMBER=$(echo "$PR_BODY" | grep -oP 'Fixes #\K\d+')
+          if [[ -z "$ISSUE_NUMBER" ]]; then
+            echo "No Issue number found."
+            exit 1
+          fi
 
-            LABELS=$(echo $ISSUE | jq -r '.labels[] | select(.name) | .name' | jq -R -r -s -c 'split("\n")[:-1] | join(",")')
-            ASSIGNEES=$(echo $ISSUE | jq -r '.assignees[] | select(.login) | .login' | jq -R -s -c 'split("\n")[:-1] | join(",")')
-            MILESTONE=$(echo $ISSUE | jq -r '.milestone | select(.title) | .title')
-            TITLE=$(echo $ISSUE | jq -r '.title')
+          echo "Issue number found: $ISSUE_NUMBER"
 
-            gh pr edit ${{ github.event.pull_request.number }} --repo $OWNER/$REPO --add-label "$LABELS" --add-assignee "$ASSIGNEES" --milestone "$MILESTONE"
+          # Using GitHub CLI to get issue details
+          gh issue view "$ISSUE_NUMBER" --repo "${{ github.repository }}" --json labels,assignees,milestone,title > issue_data.json
 
-            # git checkout -b bot/merge-to-release-$ISSUEID
-            # git push origin bot/merge-to-release-$ISSUEID
-            # gh pr create --base release --head bot/merge-to-release-$ISSUEID --title "Merge main to release" --body ""
-            # gh pr create --base main --head feat/auto-release-pr-624  --title "The bug is fixed" --body "$x" --repo openimsdk/open-im-server --reviewer "cubxxw"
-          continue-on-error: true
-          env:
-              GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-              GH_TOKEN: ${{ github.token }}
-              ISSUE: ${{ github.event.issue.html_url }}
-              OWNER: ${{ github.repository_owner }}
-              REPO: ${{ github.event.repository.name }}
+          # Check if jq is installed
+          if ! command -v jq &> /dev/null; then
+            echo "Installing jq..."
+            sudo apt-get install -y jq
+          fi
+
+          # Parse data with jq
+          LABELS=$(jq -r '.labels | map(.name) | join(",")' issue_data.json)
+          ASSIGNEES=$(jq -r '.assignees | map(.login) | join(",")' issue_data.json)
+          MILESTONE=$(jq -r '.milestone.title' issue_data.json)
+
+          # Check if any of the fields are empty and set them to None
+          LABELS=${LABELS:-None}
+          ASSIGNEES=${ASSIGNEES:-None}
+          MILESTONE=${MILESTONE:-None}
+
+          # Edit the PR with issue details, handling empty fields
+          gh pr edit "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" \
+            ${LABELS:+--add-label "$LABELS"} \
+            ${ASSIGNEES:+--add-assignee "$ASSIGNEES"} \
+            ${MILESTONE:+--milestone "$MILESTONE"}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}

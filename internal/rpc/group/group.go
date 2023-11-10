@@ -475,11 +475,13 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbgroup.GetGro
 		return nil, err
 	}
 	resp.Members = utils.Slice(members, func(e *relationtb.GroupMemberModel) *sdkws.GroupMemberFullInfo {
-		if e.Nickname == "" {
-			e.Nickname = publicUserInfoMap[e.UserID].Nickname
-		}
-		if e.FaceURL == "" {
-			e.FaceURL = publicUserInfoMap[e.UserID].FaceURL
+		if userInfo, ok := publicUserInfoMap[e.UserID]; ok {
+			if e.Nickname == "" {
+				e.Nickname = userInfo.Nickname
+			}
+			if e.FaceURL == "" {
+				e.FaceURL = userInfo.FaceURL
+			}
 		}
 		return convert.Db2PbGroupMember(e)
 	})
@@ -626,11 +628,13 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbgroup.GetG
 		return nil, err
 	}
 	resp.Members = utils.Slice(members, func(e *relationtb.GroupMemberModel) *sdkws.GroupMemberFullInfo {
-		if e.Nickname == "" {
-			e.Nickname = publicUserInfoMap[e.UserID].Nickname
-		}
-		if e.FaceURL == "" {
-			e.FaceURL = publicUserInfoMap[e.UserID].FaceURL
+		if userInfo, ok := publicUserInfoMap[e.UserID]; ok {
+			if e.Nickname == "" {
+				e.Nickname = userInfo.Nickname
+			}
+			if e.FaceURL == "" {
+				e.FaceURL = userInfo.FaceURL
+			}
 		}
 		return convert.Db2PbGroupMember(e)
 	})
@@ -686,7 +690,11 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbgroup.
 		return e.GroupID
 	})
 	resp.GroupRequests = utils.Slice(groupRequests, func(e *relationtb.GroupRequestModel) *sdkws.GroupRequest {
-		return convert.Db2PbGroupRequest(e, userMap[e.UserID], convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, groupMemberNumMap[e.GroupID]))
+		var ownerUserID string
+		if owner, ok := ownerMap[e.GroupID]; ok {
+			ownerUserID = owner.UserID
+		}
+		return convert.Db2PbGroupRequest(e, userMap[e.UserID], convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerUserID, groupMemberNumMap[e.GroupID]))
 	})
 	return resp, nil
 }
@@ -1052,16 +1060,20 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) 
 	ownerMemberMap := utils.SliceToMap(ownerMembers, func(e *relationtb.GroupMemberModel) string {
 		return e.GroupID
 	})
-	if ids := utils.Single(groupIDs, utils.Keys(ownerMemberMap)); len(ids) > 0 {
-		return nil, errs.ErrDatabase.Wrap("group not owner " + strings.Join(ids, ","))
-	}
 	groupMemberNumMap, err := s.GroupDatabase.MapGroupMemberNum(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
 	resp.Groups = utils.Slice(groups, func(group *relationtb.GroupModel) *pbgroup.CMSGroup {
-		member := ownerMemberMap[group.GroupID]
-		return convert.Db2PbCMSGroup(group, member.UserID, member.Nickname, uint32(groupMemberNumMap[group.GroupID]))
+		var (
+			userID   string
+			username string
+		)
+		if member, ok := ownerMemberMap[group.GroupID]; ok {
+			userID = member.UserID
+			username = member.Nickname
+		}
+		return convert.Db2PbCMSGroup(group, userID, username, groupMemberNumMap[group.GroupID])
 	})
 	return resp, nil
 }
@@ -1073,18 +1085,20 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbgroup.GetGr
 		return nil, err
 	}
 	resp.Total = total
-	nameMap, err := s.GetPublicUserInfoMap(ctx, utils.Filter(members, func(e *relationtb.GroupMemberModel) (string, bool) {
+	publicUserInfoMap, err := s.GetPublicUserInfoMap(ctx, utils.Filter(members, func(e *relationtb.GroupMemberModel) (string, bool) {
 		return e.UserID, e.Nickname == "" || e.FaceURL == ""
 	}), true)
 	if err != nil {
 		return nil, err
 	}
 	resp.Members = utils.Slice(members, func(e *relationtb.GroupMemberModel) *sdkws.GroupMemberFullInfo {
-		if e.Nickname == "" {
-			e.Nickname = nameMap[e.UserID].Nickname
-		}
-		if e.FaceURL == "" {
-			e.FaceURL = nameMap[e.UserID].FaceURL
+		if userInfo, ok := publicUserInfoMap[e.UserID]; ok {
+			if e.Nickname == "" {
+				e.Nickname = userInfo.Nickname
+			}
+			if e.FaceURL == "" {
+				e.FaceURL = userInfo.FaceURL
+			}
 		}
 		return convert.Db2PbGroupMember(e)
 	})
@@ -1113,16 +1127,13 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbgrou
 	groupIDs := utils.Distinct(utils.Slice(requests, func(e *relationtb.GroupRequestModel) string {
 		return e.GroupID
 	}))
-	groups, err := s.GroupDatabase.FindNotDismissedGroup(ctx, groupIDs)
+	groups, err := s.GroupDatabase.FindGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
 	groupMap := utils.SliceToMap(groups, func(e *relationtb.GroupModel) string {
 		return e.GroupID
 	})
-	if ids := utils.Single(groupIDs, utils.Keys(groupMap)); len(ids) > 0 {
-		return nil, errs.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
-	}
 	owners, err := s.FindGroupMember(ctx, groupIDs, nil, []int32{constant.GroupOwner})
 	if err != nil {
 		return nil, err
@@ -1130,15 +1141,16 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbgrou
 	ownerMap := utils.SliceToMap(owners, func(e *relationtb.GroupMemberModel) string {
 		return e.GroupID
 	})
-	if ids := utils.Single(groupIDs, utils.Keys(ownerMap)); len(ids) > 0 {
-		return nil, errs.ErrData.Wrap("group no owner", strings.Join(ids, ","))
-	}
 	groupMemberNum, err := s.GroupDatabase.MapGroupMemberNum(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
 	resp.GroupRequests = utils.Slice(requests, func(e *relationtb.GroupRequestModel) *sdkws.GroupRequest {
-		return convert.Db2PbGroupRequest(e, user, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNum[e.GroupID])))
+		var ownerUserID string
+		if owner, ok := ownerMap[e.GroupID]; ok {
+			ownerUserID = owner.UserID
+		}
+		return convert.Db2PbGroupRequest(e, user, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerUserID, groupMemberNum[e.GroupID]))
 	})
 	return resp, nil
 }
@@ -1471,17 +1483,19 @@ func (s *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbgroup.Ge
 		return nil, err
 	}
 	publicUserInfoMap, err := s.GetPublicUserInfoMap(ctx, utils.Filter(members, func(e *relationtb.GroupMemberModel) (string, bool) {
-		return e.UserID, e.Nickname == ""
+		return e.UserID, e.Nickname == "" || e.FaceURL == ""
 	}), true)
 	if err != nil {
 		return nil, err
 	}
 	resp.Members = utils.Slice(members, func(e *relationtb.GroupMemberModel) *sdkws.GroupMemberFullInfo {
-		if e.Nickname == "" {
-			e.Nickname = publicUserInfoMap[e.UserID].Nickname
-		}
-		if e.FaceURL == "" {
-			e.FaceURL = publicUserInfoMap[e.UserID].FaceURL
+		if userInfo, ok := publicUserInfoMap[e.UserID]; ok {
+			if e.Nickname == "" {
+				e.Nickname = userInfo.Nickname
+			}
+			if e.FaceURL == "" {
+				e.FaceURL = userInfo.FaceURL
+			}
 		}
 		return convert.Db2PbGroupMember(e)
 	})
@@ -1513,11 +1527,13 @@ func (s *groupServer) GetGroupMemberRoleLevel(ctx context.Context, req *pbgroup.
 		return nil, err
 	}
 	resp.Members = utils.Slice(members, func(e *relationtb.GroupMemberModel) *sdkws.GroupMemberFullInfo {
-		if e.Nickname == "" {
-			e.Nickname = publicUserInfoMap[e.UserID].Nickname
-		}
-		if e.FaceURL == "" {
-			e.FaceURL = publicUserInfoMap[e.UserID].FaceURL
+		if userInfo, ok := publicUserInfoMap[e.UserID]; ok {
+			if e.Nickname == "" {
+				e.Nickname = userInfo.Nickname
+			}
+			if e.FaceURL == "" {
+				e.FaceURL = userInfo.FaceURL
+			}
 		}
 		return convert.Db2PbGroupMember(e)
 	})
@@ -1553,15 +1569,16 @@ func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 	ownerMap := utils.SliceToMap(owners, func(e *relationtb.GroupMemberModel) string {
 		return e.GroupID
 	})
-	if ids := utils.Single(groupIDs, utils.Keys(ownerMap)); len(ids) > 0 {
-		return nil, errs.ErrData.Wrap("group no owner", strings.Join(ids, ","))
-	}
 	groupMemberNum, err := s.GroupDatabase.MapGroupMemberNum(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
 	resp.GroupRequests = utils.Slice(requests, func(e *relationtb.GroupRequestModel) *sdkws.GroupRequest {
-		return convert.Db2PbGroupRequest(e, nil, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNum[e.GroupID])))
+		var ownerUserID string
+		if owner, ok := ownerMap[e.GroupID]; ok {
+			ownerUserID = owner.UserID
+		}
+		return convert.Db2PbGroupRequest(e, nil, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerUserID, groupMemberNum[e.GroupID]))
 	})
 	resp.Total = total
 	return resp, nil

@@ -21,8 +21,9 @@ import (
 	"path/filepath"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"gopkg.in/yaml.v3"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 )
 
 //go:embed version
@@ -33,6 +34,16 @@ const (
 	NotificationFileName = "notification.yaml"
 	DefaultFolderPath    = "../config/"
 )
+
+// return absolude path join ../config/, this is k8s container config path
+func GetDefaultConfigPath() string {
+	b, err := filepath.Abs(os.Args[0])
+	if err != nil {
+		fmt.Println("filepath.Abs error,err=", err)
+		return ""
+	}
+	return filepath.Join(filepath.Dir(b), "../config/")
+}
 
 // getProjectRoot returns the absolute path of the project root directory
 func GetProjectRoot() string {
@@ -64,9 +75,11 @@ func initConfig(config interface{}, configName, configFolderPath string) error {
 	_, err := os.Stat(configFolderPath)
 	if err != nil {
 		if !os.IsNotExist(err) {
+			fmt.Println("stat config path error:", err.Error())
 			return fmt.Errorf("stat config path error: %w", err)
 		}
 		configFolderPath = filepath.Join(GetProjectRoot(), "config", configName)
+		fmt.Println("flag's path,enviment's path,default path all is not exist,using project path:", configFolderPath)
 	}
 	data, err := os.ReadFile(configFolderPath)
 	if err != nil {
@@ -85,7 +98,7 @@ func InitConfig(configFolderPath string) error {
 		if envConfigPath != "" {
 			configFolderPath = envConfigPath
 		} else {
-			configFolderPath = DefaultFolderPath
+			configFolderPath = GetDefaultConfigPath()
 		}
 	}
 

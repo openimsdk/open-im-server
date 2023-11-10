@@ -39,13 +39,13 @@ func StartTask() error {
 	log.ZInfo(context.Background(), "start chatRecordsClearTime cron task", "cron config", config.Config.ChatRecordsClearTime)
 	_, err = c.AddFunc(config.Config.ChatRecordsClearTime, msgTool.AllConversationClearMsgAndFixSeq)
 	if err != nil {
-		fmt.Println("start allConversationClearMsgAndFixSeq cron failed", err.Error(), config.Config.ChatRecordsClearTime)
+		log.ZError(context.Background(), "start allConversationClearMsgAndFixSeq cron failed", err)
 		panic(err)
 	}
 	log.ZInfo(context.Background(), "start msgDestruct cron task", "cron config", config.Config.MsgDestructTime)
 	_, err = c.AddFunc(config.Config.MsgDestructTime, msgTool.ConversationsDestructMsgs)
 	if err != nil {
-		fmt.Println("start conversationsDestructMsgs cron failed", err.Error(), config.Config.ChatRecordsClearTime)
+		log.ZError(context.Background(), "start conversationsDestructMsgs cron failed", err)
 		panic(err)
 	}
 	c.Start()
