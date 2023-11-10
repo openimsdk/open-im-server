@@ -24,6 +24,10 @@ coverage:
         paths:
           - tools/* # only include coverage in "tools/" folder
         informational: true # Always pass check
+      test: # declare a new status context "test"
+        paths:
+          - test/* # only include coverage in "test/" folder
+        informational: true # Always pass check
       # internal: # declare a new status context "internal"
       #   paths:
       #     - internal/* # only include coverage in "internal/" folder

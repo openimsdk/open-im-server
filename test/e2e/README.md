@@ -90,7 +90,7 @@ ginkgo -v --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace 
 You can also run a specific test or group of tests by specifying the path to the test directory:
 
 ```bash
-ginkgo -v ./test/e2e/chat/
+ginkgo -v ./test/e2e/chat
 ```
 
 Or you can use Makefile to run the tests:

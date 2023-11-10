@@ -172,7 +172,7 @@ test-api:
 	@$(MAKE) go.test.api
 
 ## test-e2e: Run e2e test
-test-api:
+test-e2e:
 	@$(MAKE) go.test.e2e
 
 ## updates: Check for updates to go.mod dependencies. ✨
