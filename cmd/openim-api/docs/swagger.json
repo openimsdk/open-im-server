@@ -122,6 +122,131 @@
                 }
             }
         },
+        "/user/get_users_online_status": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get user online status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get user online status",
+                "operationId": "GetUsersOnlineStatus",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Operation Id",
+                        "name": "OperationId",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/msggateway.GetUsersOnlineStatusReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/apiresp.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/msggateway.GetUsersOnlineStatusResp_SuccessResult"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Errcode is 400, which is generally a parameter input error.",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "ERRCODE is 500 generally an internal error of the server",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/user/set_global_msg_recv_opt": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Set the overall disturbance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Set the overall disturbance",
+                "operationId": "SetGlobalRecvMessageOpt",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Operation Id",
+                        "name": "OperationId",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "GlobalRecvmsGopt is the global disturbance setting 0 to turn off 1 to open",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.SetGlobalRecvMessageOptReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.SetGlobalRecvMessageOptResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Errcode is 400, which is generally a parameter input error.",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "ERRCODE is 500 generally an internal error of the server",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/user/update_user_info": {
             "post": {
                 "security": [
@@ -229,6 +354,21 @@
         }
     },
     "definitions": {
+        "apiresp.ApiResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "errCode": {
+                    "type": "integer"
+                },
+                "errDlt": {
+                    "type": "string"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
         "auth.UserTokenReq": {
             "type": "object",
             "properties": {
@@ -250,6 +390,54 @@
                     "type": "integer"
                 },
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "msggateway.GetUsersOnlineStatusReq": {
+            "type": "object",
+            "properties": {
+                "userIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "msggateway.GetUsersOnlineStatusResp_SuccessDetail": {
+            "type": "object",
+            "properties": {
+                "connID": {
+                    "type": "string"
+                },
+                "isBackground": {
+                    "type": "boolean"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "msggateway.GetUsersOnlineStatusResp_SuccessResult": {
+            "type": "object",
+            "properties": {
+                "detailPlatformStatus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/msggateway.GetUsersOnlineStatusResp_SuccessDetail"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "userID": {
                     "type": "string"
                 }
             }
@@ -301,6 +489,20 @@
                     }
                 }
             }
+        },
+        "user.SetGlobalRecvMessageOptReq": {
+            "type": "object",
+            "properties": {
+                "globalRecvMsgOpt": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.SetGlobalRecvMessageOptResp": {
+            "type": "object"
         },
         "user.UpdateUserInfoReq": {
             "type": "object",

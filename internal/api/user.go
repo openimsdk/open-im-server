@@ -69,6 +69,19 @@ func (u *UserApi) UpdateUserInfo(c *gin.Context) {
 	a2r.Call(user.UserClient.UpdateUserInfo, u.Client, c)
 }
 
+// @Summary Set the overall disturbance
+// @Description Set the overall disturbance
+// @Tags User
+// @ID SetGlobalRecvMessageOpt
+// @Accept json
+// @Param OperationId header string true "Operation Id"
+// @Param req body user.SetGlobalRecvMessageOptReq true "GlobalRecvmsGopt is the global disturbance setting 0 to turn off 1 to open"
+// @Produce json
+// @Success 200 {object} user.SetGlobalRecvMessageOptResp
+// @Failure 500 {object} error "ERRCODE is 500 generally an internal error of the server"
+// @Failure 400 {object} error "Errcode is 400, which is generally a parameter input error."
+// @Security	ApiKeyAuth
+// @Router /user/set_global_msg_recv_opt [post]
 func (u *UserApi) SetGlobalRecvMessageOpt(c *gin.Context) {
 	a2r.Call(user.UserClient.SetGlobalRecvMessageOpt, u.Client, c)
 }
@@ -104,7 +117,19 @@ func (u *UserApi) GetUsers(c *gin.Context) {
 	a2r.Call(user.UserClient.GetPaginationUsers, u.Client, c)
 }
 
-// GetUsersOnlineStatus Get user online status.
+// @Summary Get user online status
+// @Description Get user online status
+// @Tags User
+// @ID GetUsersOnlineStatus
+// @Accept json
+// @Param OperationId header string true "Operation Id"
+// @Param req body msggateway.GetUsersOnlineStatusReq true "Request"
+// @Produce json
+// @Success 200 {object} apiresp.ApiResponse{data=[]msggateway.GetUsersOnlineStatusResp_SuccessResult}
+// @Failure 500 {object} error "ERRCODE is 500 generally an internal error of the server"
+// @Failure 400 {object} error "Errcode is 400, which is generally a parameter input error."
+// @Security	ApiKeyAuth
+// @Router /user/get_users_online_status [post]
 func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 	var req msggateway.GetUsersOnlineStatusReq
 	if err := c.BindJSON(&req); err != nil {
@@ -236,7 +261,6 @@ func (u *UserApi) UnSubscriberStatus(c *gin.Context) {
 	a2r.Call(user.UserClient.SubscribeOrCancelUsersStatus, u.Client, c)
 }
 
-// GetUserStatus Get the online status of the user.
 func (u *UserApi) GetUserStatus(c *gin.Context) {
 	a2r.Call(user.UserClient.GetUserStatus, u.Client, c)
 }

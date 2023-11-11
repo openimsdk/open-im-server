@@ -1,5 +1,15 @@
 basePath: /
 definitions:
+  apiresp.ApiResponse:
+    properties:
+      data: {}
+      errCode:
+        type: integer
+      errDlt:
+        type: string
+      errMsg:
+        type: string
+    type: object
   auth.UserTokenReq:
     properties:
       platformID:
@@ -14,6 +24,37 @@ definitions:
       expireTimeSeconds:
         type: integer
       token:
+        type: string
+    type: object
+  msggateway.GetUsersOnlineStatusReq:
+    properties:
+      userIDs:
+        items:
+          type: string
+        type: array
+    type: object
+  msggateway.GetUsersOnlineStatusResp_SuccessDetail:
+    properties:
+      connID:
+        type: string
+      isBackground:
+        type: boolean
+      platform:
+        type: string
+      status:
+        type: string
+      token:
+        type: string
+    type: object
+  msggateway.GetUsersOnlineStatusResp_SuccessResult:
+    properties:
+      detailPlatformStatus:
+        items:
+          $ref: '#/definitions/msggateway.GetUsersOnlineStatusResp_SuccessDetail'
+        type: array
+      status:
+        type: string
+      userID:
         type: string
     type: object
   sdkws.UserInfo:
@@ -46,6 +87,15 @@ definitions:
         items:
           $ref: '#/definitions/sdkws.UserInfo'
         type: array
+    type: object
+  user.SetGlobalRecvMessageOptReq:
+    properties:
+      globalRecvMsgOpt:
+        type: integer
+      userID:
+        type: string
+    type: object
+  user.SetGlobalRecvMessageOptResp:
     type: object
   user.UpdateUserInfoReq:
     properties:
@@ -146,6 +196,86 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get user information
+      tags:
+      - User
+  /user/get_users_online_status:
+    post:
+      consumes:
+      - application/json
+      description: Get user online status
+      operationId: GetUsersOnlineStatus
+      parameters:
+      - description: Operation Id
+        in: header
+        name: OperationId
+        required: true
+        type: string
+      - description: Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/msggateway.GetUsersOnlineStatusReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiresp.ApiResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/msggateway.GetUsersOnlineStatusResp_SuccessResult'
+                  type: array
+              type: object
+        "400":
+          description: Errcode is 400, which is generally a parameter input error.
+          schema: {}
+        "500":
+          description: ERRCODE is 500 generally an internal error of the server
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get user online status
+      tags:
+      - User
+  /user/set_global_msg_recv_opt:
+    post:
+      consumes:
+      - application/json
+      description: Set the overall disturbance
+      operationId: SetGlobalRecvMessageOpt
+      parameters:
+      - description: Operation Id
+        in: header
+        name: OperationId
+        required: true
+        type: string
+      - description: GlobalRecvmsGopt is the global disturbance setting 0 to turn
+          off 1 to open
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/user.SetGlobalRecvMessageOptReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.SetGlobalRecvMessageOptResp'
+        "400":
+          description: Errcode is 400, which is generally a parameter input error.
+          schema: {}
+        "500":
+          description: ERRCODE is 500 generally an internal error of the server
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Set the overall disturbance
       tags:
       - User
   /user/update_user_info:

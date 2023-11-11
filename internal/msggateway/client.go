@@ -135,7 +135,7 @@ func (c *Client) readMessage() {
 			return
 		}
 		log.ZDebug(c.ctx, "readMessage", "messageType", messageType)
-		if c.closed == true { // 连接刚置位已经关闭，但是协程还没退出的场景
+		if c.closed == true { // Scenes where the connection has been closed, but the coroutine has not exited
 			c.closedErr = ErrConnClosed
 			return
 		}

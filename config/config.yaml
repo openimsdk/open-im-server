@@ -63,7 +63,8 @@ mysql:
 # Maximum connection pool size
 mongo:
   uri: ''
-  address: [ 172.28.0.1:37017 ]
+  address: [ 127.0.0.1:37017 ]
+  # address: [ 172.28.0.1:37017 ]
   database: openIM_v3
   username: root
   password: openIM123
@@ -87,9 +88,14 @@ redis:
 # It's not recommended to modify this topic name
 # Consumer group ID, it's not recommended to modify
 kafka:
+  # username: 'root'
+  # password: ''
+  # username: 'user1'
+  # password: '123'
   username: ''
   password: ''
-  addr: [ 172.28.0.1:19094 ]
+  # addr: [ 172.28.0.1:19094 ]
+  addr: [ 127.0.0.1:9094 ]
   latestMsgToRedis:
     topic: "latestMsgToRedis"
   offlineMsgToMongo:
@@ -140,10 +146,12 @@ object:
   apiURL: "http://127.0.0.1:10002"
   minio:
     bucket: "openim"
-    endpoint: "http://172.28.0.1:10005"
+    # endpoint: "http://172.28.0.1:10005"
+    endpoint: "http:///127.0.0.1:10005"
     accessKeyID: "root"
     secretAccessKey: "openIM123"
     sessionToken: ''
+    # signEndpoint: "http://127.0.0.1:10005"
     signEndpoint: "http://127.0.0.1:10005"
     publicRead: false
   cos:
@@ -251,8 +259,8 @@ push:
 # Built-in app manager user IDs
 # Built-in app manager nicknames
 manager:
-  userID: [ "openIM123456", "openIM654321", "openIMAdmin" ]
-  nickname: [ "system1", "system2", "system3" ]
+  userID: [ "openIM123456", "openIM654321", "openIMAdmin" ,"tpx"]
+  nickname: [ "system1", "system2", "system3" ,"truongpx999"]
 
 # Multi-platform login policy
 # For each platform(Android, iOS, Windows, Mac, web), only one can be online at a time

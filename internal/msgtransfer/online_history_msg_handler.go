@@ -170,7 +170,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 	}
 }
 
-// 获取消息/通知 存储的消息列表， 不存储并且推送的消息列表，.
+// Get message/notify the storage message list, not store and push the message list,
 func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 	totalMsgs []*ContextMsg,
 ) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*sdkws.MsgData) {
