@@ -1,5 +1,7 @@
 ## Run the Tests
 
+read: [Test Docs](./docs/contrib/test.md)
+
 To run a single test or set of tests, you'll need the [Ginkgo](https://github.com/onsi/ginkgo) tool installed on your
 machine:
 

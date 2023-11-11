@@ -200,8 +200,7 @@ openim::log::status() {
   done
 }
 
-openim::log::success()
-{
+openim::log::success() {
   local V="${V:-0}"
   if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
       return

@@ -89,11 +89,11 @@ services:
     ports:
     - "${KAFKA_PORT}:9094"
     volumes:
-      - ./scripts/create_topic.sh:/opt/bitnami/kafka/create_topic.sh
+      - ./scripts/create-topic.sh:/opt/bitnami/kafka/create-topic.sh
       - ${DATA_DIR}/components/kafka:/bitnami/kafka
     command: >
       bash -c "
-      /opt/bitnami/scripts/kafka/run.sh & sleep 5; /opt/bitnami/kafka/create_topic.sh; wait
+      /opt/bitnami/scripts/kafka/run.sh & sleep 5; /opt/bitnami/kafka/create-topic.sh; wait
       "
     environment:
        - TZ=Asia/Shanghai
@@ -142,67 +142,3 @@ services:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS}
 
-#   openim-server:
-#     # image: ghcr.io/openimsdk/openim-server:main
-#     # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:main
-#     # image: openim/openim-server:main
-#     image: ${IMAGE_REGISTRY}/openim-server:main
-# #    build: .
-#     container_name: openim-server
-#     ports:
-#       - ${OPENIM_WS_PORT}:10001
-#       - ${API_OPENIM_PORT}:10002
-#     healthcheck:
-#       test: ["CMD", "/openim/openim-server/scripts/check-all.sh"]
-#       interval: 300s
-#       timeout: 10s
-#       retries: 5
-#     volumes:
-#       - ./logs:/openim/openim-server/logs
-#       - ./_output/logs:/openim/openim-server/_output/logs
-#       - ./config:/openim/openim-server/config
-#       - ./scripts:/openim/openim-server/scripts
-#     restart: always
-#     depends_on:
-#       - kafka
-#       - mysql
-#       - mongodb
-#       - redis
-#       - minio
-#     logging:
-#       driver: json-file
-#       options:
-#         max-size: "1g"
-#         max-file: "2"
-#     networks:
-#       server:
-#         ipv4_address: ${OPENIM_SERVER_NETWORK_ADDRESS}
-
-#   prometheus:
-#     image: prom/prometheus
-#     volumes:
-#       - ./.docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
-#     container_name: prometheus
-#     ports:
-#       - ${PROMETHEUS_PORT}:9091
-#     depends_on:
-#       - openim-server
-#     command: --web.listen-address=:9091 --config.file="/etc/prometheus/prometheus.yml"
-#     networks:
-#       openim-server:
-#         ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS}
-
-#   grafana:
-#     image: grafana/grafana
-#     volumes:
-#       - ./.docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
-#       - ./.docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
-#       - ./.docker-compose_cfg/node-exporter-full_rev1.json:/var/lib/grafana/dashboards/node-exporter-full_rev1.json
-#     container_name: grafana
-#     ports:
-#       - ${GRAFANA_PORT}:3000
-#     depends_on:
-#       - prometheus
-#     networks:
-#       openim-server:
-#         ipv4_address: ${GRAFANA_NETWORK_ADDRESS}

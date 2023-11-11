@@ -51,7 +51,7 @@ scripts/
 ├── golangci.yml                        # Configuration for GolangCI linting.
 ├── init-config.sh                      # Initialize configurations.
 ├── init-env.sh                         # Initialize the environment.
-├── init_pwd.sh                         # Initialize or set password.
+├── init-pwd.sh                         # Initialize or set password.
 ├── install                             # Installation scripts directory.
 │   ├── README.md                       # Installation documentation.
 │   ├── common.sh                       # Common utilities for installation.
@@ -123,7 +123,7 @@ Each directory and script in the structure should be understood as a part of a l
 
 **PATH:** `scripts/lib/logging.sh`
 
-+ [log details](../docs/conversions/bash_log.md)
++ [log details](../docs/contrib/bash-log.md)
 
 ## Supported platforms
 
@@ -154,7 +154,7 @@ $ make demo
 
 More about `make` read:
 
-+ [makefile](../docs/conversions/go_code.md)
++ [makefile](../docs/contrib/go-code.md)
 
 Instructions for producing the demo movie:
 

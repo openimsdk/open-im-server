@@ -16,7 +16,6 @@ package msgtransfer
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 
 	"github.com/IBM/sarama"
 	"google.golang.org/protobuf/proto"
@@ -27,6 +26,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	kfk "github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 )
 
 type OnlineHistoryMongoConsumerHandler struct {
@@ -75,9 +75,9 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(
 			"conversationID",
 			msgFromMQ.ConversationID,
 		)
-		prom_metrics.MsgInsertMongoFailedCounter.Inc()
+		prommetrics.MsgInsertMongoFailedCounter.Inc()
 	} else {
-		prom_metrics.MsgInsertMongoSuccessCounter.Inc()
+		prommetrics.MsgInsertMongoSuccessCounter.Inc()
 	}
 	var seqs []int64
 	for _, msg := range msgFromMQ.MsgData {

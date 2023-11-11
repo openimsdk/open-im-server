@@ -29,6 +29,10 @@
 
 </p>
 
+## 🟢 扫描微信进群交流
+<img src="https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg" width="300">
+
+
 ## Ⓜ️ 关于 OpenIM
 
 OpenIM 不仅仅是一个开源的即时消息组件，它是你的应用程序生态系统的一个不可或缺的部分。查看下面的图表，了解 AppServer、AppClient、OpenIMServer 和 OpenIMSDK 是如何交互的。
@@ -86,22 +90,22 @@ OpenIM 我们的目标是建立一个顶级的开源社区。我们有一套标�
 
 在开始之前，请确保你的更改是有需求的。最好的方法是创建一个[新的讨论](https://github.com/openimsdk/open-im-server/discussions/new/choose) 或 [Slack 通信](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)，或者如果你发现一个问题，首先[报告它](https://github.com/openimsdk/open-im-server/issues/new/choose)。
 
-+ [代码标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/go_code.md)
++ [代码标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/go-code.md)
 
-+ [Docker 镜像标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md)
++ [Docker 镜像标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/images.md)
 
-+ [目录标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/directory.md)
++ [目录标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/directory.md)
 
-+ [提交标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/commit.md)
++ [提交标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/commit.md)
 
-+ [版本控制标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md)
++ [版本控制标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/version.md)
 
-+ [接口标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/interface.md)
++ [接口标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/interface.md)
 
 + [OpenIM配置和环境变量设置](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md)
 
 > **Note**
-> 针对中国的用户，阅读我们的 [Docker 镜像标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md) 以便使用国内 aliyun 的镜像地址。OpenIM 也有针对中国的 gitee 同步仓库，你可以在 [gitee.com](https://gitee.com/openimsdk) 上找到它。
+> 针对中国的用户，阅读我们的 [Docker 镜像标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/images.md) 以便使用国内 aliyun 的镜像地址。OpenIM 也有针对中国的 gitee 同步仓库，你可以在 [gitee.com](https://gitee.com/openimsdk) 上找到它。
 
 ## :link: 链接
 
