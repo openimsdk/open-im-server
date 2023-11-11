@@ -250,6 +250,9 @@ def "RPC_LISTEN_IP" "0.0.0.0"                       # RPC的监听IP
 def "PROMETHEUS_PORT" "19090"                       # Prometheus的端口
 def "PROMETHEUS_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # Prometheus的地址
 
+###################### node-exporter 配置 ######################
+def "NODE_EXPORTER_PORT" "19100"                       # node-exporter的端口
+def "NODE_EXPORTER_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # node-exporter的地址
 ###################### Grafana 配置信息 ######################
 def "GRAFANA_PORT" "3000"                        # Grafana的端口
 def "GRAFANA_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # Grafana的地址
@@ -367,7 +370,7 @@ readonly THIRD_PROM_PORT=${THIRD_PROM_PORT:-'21301'}
 
 # Message Transfer 服务的 Prometheus 端口列表
 readonly MSG_TRANSFER_PROM_PORT=${MSG_TRANSFER_PROM_PORT:-'21400, 21401, 21402, 21403'}
-
+readonly MSG_TRANSFER_PROM_ADDRESS_PORT="${DOCKER_BRIDGE_GATEWAY}:21400, ${DOCKER_BRIDGE_GATEWAY}:21401, ${DOCKER_BRIDGE_GATEWAY}:21402, ${DOCKER_BRIDGE_GATEWAY}:21403"
 ###################### OpenIM openim-api ######################
 def "OPENIM_API_HOST" "127.0.0.1"
 def "OPENIM_API_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-api" # OpenIM openim-api 二进制文件路径
