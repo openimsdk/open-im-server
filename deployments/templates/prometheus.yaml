@@ -40,7 +40,7 @@ scrape_configs:
           namespace: 'default'
   - job_name: 'openimserver-openim-msgtransfer'
     static_configs:
-      - targets: [ '${MSG_TRANSFER_PROM_ADDRESS_PORT}' ]
+      - targets: [ ${MSG_TRANSFER_PROM_ADDRESS_PORT} ]
         labels:
           namespace: 'default'
   - job_name: 'openimserver-openim-push'
