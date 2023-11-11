@@ -16,9 +16,11 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/OpenIMSDK/protocol/constant"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/spf13/cobra"
+
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
 )
