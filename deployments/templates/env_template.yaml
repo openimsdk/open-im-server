@@ -102,7 +102,10 @@ GRAFANA_NETWORK_ADDRESS=${GRAFANA_NETWORK_ADDRESS}
 # Address or hostname for the node_exporter network.
 # Default: NODE_EXPORTER_NETWORK_ADDRESS=172.28.0.13
 NODE_EXPORTER_NETWORK_ADDRESS=${NODE_EXPORTER_NETWORK_ADDRESS}
-
+  
+# Address or hostname for the OpenIM admin network.
+# Default: OPENIM_ADMIN_NETWORK_ADDRESS=172.28.0.14
+OPENIM_ADMIN_FRONT_NETWORK_ADDRESS=${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS}
 
 # ===============================================
 # = Component Extension Configuration =
@@ -299,3 +302,7 @@ PROMETHEUS_PORT=${PROMETHEUS_PORT}
 # Port for the grafana.
 # Default: GRAFANA_PORT=3000
 GRAFANA_PORT=${GRAFANA_PORT}
+  
+# Port for the admin front.
+# Default: OPENIM_ADMIN_FRONT_PORT=11002
+OPENIM_ADMIN_FRONT_PORT=${OPENIM_ADMIN_FRONT_PORT}

@@ -141,6 +141,15 @@ services:
     networks:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS}
+  openim-admin:
+    image: ${IMAGE_REGISTRY}/openim-admin:latest
+    container_name: openim-admin
+    restart: always
+    ports:
+      - "${OPENIM_ADMIN_FRONT_PORT}:80"
+    networks:
+      server:
+        ipv4_address: ${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS}
 
   prometheus:
     image: prom/prometheus

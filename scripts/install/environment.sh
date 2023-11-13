@@ -118,6 +118,8 @@ LAST_OCTET=$((LAST_OCTET + 1))
 GRAFANA_NETWORK_ADDRESS=$(generate_ip)
 LAST_OCTET=$((LAST_OCTET + 1))
 NODE_EXPORTER_NETWORK_ADDRESS=$(generate_ip)
+LAST_OCTET=$((LAST_OCTET + 1))
+OPENIM_ADMIN_FRONT_NETWORK_ADDRESS=$(generate_ip)
 ###################### openim 配置 ######################
 # read: https://github.com/openimsdk/open-im-server/blob/main/deployment/README.md
 def "OPENIM_DATA_DIR" "/data/openim"
@@ -242,6 +244,9 @@ def "KAFKA_CONSUMERGROUPID_PUSH" "push"                     # `Kafka` 的消费�
 def "OPENIM_WEB_PORT" "11001"                       # openim-web的端口
 def "OPENIM_WEB_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # openim-web的地址
 def "OPENIM_WEB_DIST_PATH" "/app/dist"              # openim-web的dist路径
+
+###################### openim-admin-front 配置信息 ######################
+def "OPENIM_ADMIN_FRONT_PORT" "11002"                       # openim-admin-front的端口
 
 ###################### RPC 配置信息 ######################
 def "RPC_REGISTER_IP"                               # RPC的注册IP
