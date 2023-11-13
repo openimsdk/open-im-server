@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"time"
 
 	"github.com/redis/go-redis/v9"
