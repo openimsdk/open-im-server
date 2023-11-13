@@ -18,14 +18,18 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"time"
+
+	"github.com/OpenIMSDK/protocol/constant"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 
 	"github.com/redis/go-redis/v9"
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
@@ -33,7 +37,6 @@ import (
 	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
-	"go.mongodb.org/mongo-driver/mongo"
 
 	pbmsg "github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -421,28 +424,28 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][
 		return
 	}
 	type MsgData struct {
-		SendID           string                 `protobuf:"bytes,1,opt,name=sendID,proto3" json:"sendID"`
-		RecvID           string                 `protobuf:"bytes,2,opt,name=recvID,proto3" json:"recvID"`
-		GroupID          string                 `protobuf:"bytes,3,opt,name=groupID,proto3" json:"groupID"`
-		ClientMsgID      string                 `protobuf:"bytes,4,opt,name=clientMsgID,proto3" json:"clientMsgID"`
-		ServerMsgID      string                 `protobuf:"bytes,5,opt,name=serverMsgID,proto3" json:"serverMsgID"`
+		SendID           string                 `protobuf:"bytes,1,opt,name=sendID,proto3"            json:"sendID"`
+		RecvID           string                 `protobuf:"bytes,2,opt,name=recvID,proto3"            json:"recvID"`
+		GroupID          string                 `protobuf:"bytes,3,opt,name=groupID,proto3"           json:"groupID"`
+		ClientMsgID      string                 `protobuf:"bytes,4,opt,name=clientMsgID,proto3"       json:"clientMsgID"`
+		ServerMsgID      string                 `protobuf:"bytes,5,opt,name=serverMsgID,proto3"       json:"serverMsgID"`
 		SenderPlatformID int32                  `protobuf:"varint,6,opt,name=senderPlatformID,proto3" json:"senderPlatformID"`
-		SenderNickname   string                 `protobuf:"bytes,7,opt,name=senderNickname,proto3" json:"senderNickname"`
-		SenderFaceURL    string                 `protobuf:"bytes,8,opt,name=senderFaceURL,proto3" json:"senderFaceURL"`
-		SessionType      int32                  `protobuf:"varint,9,opt,name=sessionType,proto3" json:"sessionType"`
-		MsgFrom          int32                  `protobuf:"varint,10,opt,name=msgFrom,proto3" json:"msgFrom"`
-		ContentType      int32                  `protobuf:"varint,11,opt,name=contentType,proto3" json:"contentType"`
-		Content          string                 `protobuf:"bytes,12,opt,name=content,proto3" json:"content"`
-		Seq              int64                  `protobuf:"varint,14,opt,name=seq,proto3" json:"seq"`
-		SendTime         int64                  `protobuf:"varint,15,opt,name=sendTime,proto3" json:"sendTime"`
-		CreateTime       int64                  `protobuf:"varint,16,opt,name=createTime,proto3" json:"createTime"`
-		Status           int32                  `protobuf:"varint,17,opt,name=status,proto3" json:"status"`
-		IsRead           bool                   `protobuf:"varint,18,opt,name=isRead,proto3" json:"isRead"`
-		Options          map[string]bool        `protobuf:"bytes,19,rep,name=options,proto3" json:"options" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
-		OfflinePushInfo  *sdkws.OfflinePushInfo `protobuf:"bytes,20,opt,name=offlinePushInfo,proto3" json:"offlinePushInfo"`
-		AtUserIDList     []string               `protobuf:"bytes,21,rep,name=atUserIDList,proto3" json:"atUserIDList"`
-		AttachedInfo     string                 `protobuf:"bytes,22,opt,name=attachedInfo,proto3" json:"attachedInfo"`
-		Ex               string                 `protobuf:"bytes,23,opt,name=ex,proto3" json:"ex"`
+		SenderNickname   string                 `protobuf:"bytes,7,opt,name=senderNickname,proto3"    json:"senderNickname"`
+		SenderFaceURL    string                 `protobuf:"bytes,8,opt,name=senderFaceURL,proto3"     json:"senderFaceURL"`
+		SessionType      int32                  `protobuf:"varint,9,opt,name=sessionType,proto3"      json:"sessionType"`
+		MsgFrom          int32                  `protobuf:"varint,10,opt,name=msgFrom,proto3"         json:"msgFrom"`
+		ContentType      int32                  `protobuf:"varint,11,opt,name=contentType,proto3"     json:"contentType"`
+		Content          string                 `protobuf:"bytes,12,opt,name=content,proto3"          json:"content"`
+		Seq              int64                  `protobuf:"varint,14,opt,name=seq,proto3"             json:"seq"`
+		SendTime         int64                  `protobuf:"varint,15,opt,name=sendTime,proto3"        json:"sendTime"`
+		CreateTime       int64                  `protobuf:"varint,16,opt,name=createTime,proto3"      json:"createTime"`
+		Status           int32                  `protobuf:"varint,17,opt,name=status,proto3"          json:"status"`
+		IsRead           bool                   `protobuf:"varint,18,opt,name=isRead,proto3"          json:"isRead"`
+		Options          map[string]bool        `protobuf:"bytes,19,rep,name=options,proto3"          json:"options"          protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
+		OfflinePushInfo  *sdkws.OfflinePushInfo `protobuf:"bytes,20,opt,name=offlinePushInfo,proto3"  json:"offlinePushInfo"`
+		AtUserIDList     []string               `protobuf:"bytes,21,rep,name=atUserIDList,proto3"     json:"atUserIDList"`
+		AttachedInfo     string                 `protobuf:"bytes,22,opt,name=attachedInfo,proto3"     json:"attachedInfo"`
+		Ex               string                 `protobuf:"bytes,23,opt,name=ex,proto3"               json:"ex"`
 	}
 	var quoteMsg struct {
 		Text              string          `json:"text,omitempty"`
