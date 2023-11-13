@@ -453,20 +453,22 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][
 		log.ZError(ctx, "json.Unmarshal", err)
 		return
 	}
-	if quoteMsg.QuoteMessage == nil || quoteMsg.QuoteMessage.ContentType == constant.MsgRevokeNotification {
-		return
-	}
+	//if quoteMsg.QuoteMessage == nil || quoteMsg.QuoteMessage.ContentType == constant.MsgRevokeNotification {
+	//	return
+	//}
 	var msgs []*unrelationtb.MsgInfoModel
 	if v, ok := cache[quoteMsg.QuoteMessage.Seq]; ok {
 		msgs = v
 	} else {
-		ms, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, db.msg.GetDocID(conversationID, quoteMsg.QuoteMessage.Seq), []int64{quoteMsg.QuoteMessage.Seq})
-		if err != nil {
-			log.ZError(ctx, "GetMsgBySeqIndexIn1Doc", err, "conversationID", conversationID, "seq", quoteMsg.QuoteMessage.Seq)
-			return
+		if quoteMsg.QuoteMessage.Seq > 0 {
+			ms, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, db.msg.GetDocID(conversationID, quoteMsg.QuoteMessage.Seq), []int64{quoteMsg.QuoteMessage.Seq})
+			if err != nil {
+				log.ZError(ctx, "GetMsgBySeqIndexIn1Doc", err, "conversationID", conversationID, "seq", quoteMsg.QuoteMessage.Seq)
+				return
+			}
+			msgs = ms
+			cache[quoteMsg.QuoteMessage.Seq] = ms
 		}
-		msgs = ms
-		cache[quoteMsg.QuoteMessage.Seq] = ms
 	}
 	if len(msgs) != 0 && msgs[0].Msg.ContentType != constant.MsgRevokeNotification {
 		return
