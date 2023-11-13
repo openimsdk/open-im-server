@@ -159,6 +159,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     hostname: grafana
+    user: root
     restart: always
     ports:
       - "${GRAFANA_PORT}:3000"
