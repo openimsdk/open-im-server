@@ -22,7 +22,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 )
 
-func (c *MsgTool) ConvertTools() {
+func (c *MsgTool) convertTools() {
 	ctx := mcontext.NewCtx("convert")
 	conversationIDs, err := c.conversationDatabase.GetAllConversationIDs(ctx)
 	if err != nil {
