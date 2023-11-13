@@ -147,7 +147,7 @@ EOF
     
     cd scripts;
     chmod +x *.sh;
-    ./init_pwd.sh;
+    ./init-pwd.sh;
     ./env_check.sh;
     cd ..;
     docker-compose up -d;

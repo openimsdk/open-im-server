@@ -378,20 +378,20 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	}
 	failedNum, err := db.cache.SetMessageToCache(ctx, conversationID, msgs)
 	if err != nil {
-		prom_metrics.MsgInsertRedisFailedCounter.Add(float64(failedNum))
+		prommetrics.MsgInsertRedisFailedCounter.Add(float64(failedNum))
 		log.ZError(ctx, "setMessageToCache error", err, "len", len(msgs), "conversationID", conversationID)
 	} else {
-		prom_metrics.MsgInsertRedisSuccessCounter.Inc()
+		prommetrics.MsgInsertRedisSuccessCounter.Inc()
 	}
 	err = db.cache.SetMaxSeq(ctx, conversationID, currentMaxSeq)
 	if err != nil {
 		log.ZError(ctx, "db.cache.SetMaxSeq error", err, "conversationID", conversationID)
-		prom_metrics.SeqSetFailedCounter.Inc()
+		prommetrics.SeqSetFailedCounter.Inc()
 	}
 	err2 := db.cache.SetHasReadSeqs(ctx, conversationID, userSeqMap)
 	if err != nil {
 		log.ZError(ctx, "SetHasReadSeqs error", err2, "userSeqMap", userSeqMap, "conversationID", conversationID)
-		prom_metrics.SeqSetFailedCounter.Inc()
+		prommetrics.SeqSetFailedCounter.Inc()
 	}
 	return lastMaxSeq, isNew, utils.Wrap(err, "")
 }

@@ -20,4 +20,20 @@ coverage:
         paths:
           - pkg/* # only include coverage in "pkg/" folder
         informational: true # Always pass check
+      tools: # declare a new status context "tools"
+        paths:
+          - tools/* # only include coverage in "tools/" folder
+        informational: true # Always pass check
+      test: # declare a new status context "test"
+        paths:
+          - test/* # only include coverage in "test/" folder
+        informational: true # Always pass check
+      # internal: # declare a new status context "internal"
+      #   paths:
+      #     - internal/* # only include coverage in "internal/" folder
+      #   informational: true # Always pass check
+      # cmd: # declare a new status context "cmd"
+      #   paths:
+      #     - cmd/* # only include coverage in "cmd/" folder
+      #   informational: true # Always pass check
     patch: off # disable the commit only checks

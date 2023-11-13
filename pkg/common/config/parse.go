@@ -49,7 +49,7 @@ func GetDefaultConfigPath() string {
 func GetProjectRoot() string {
 	b, _ := filepath.Abs(os.Args[0])
 
-	return filepath.Join(filepath.Dir(b), "../../..")
+	return filepath.Join(filepath.Dir(b), "../../../../..")
 }
 
 func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
@@ -67,6 +67,7 @@ func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
 		opts = msgprocessor.WithOptions(opts, msgprocessor.WithHistory(true), msgprocessor.WithPersistent())
 	}
 	opts = msgprocessor.WithOptions(opts, msgprocessor.WithSendMsg(cfg.IsSendMsg))
+
 	return opts
 }
 
@@ -89,6 +90,7 @@ func initConfig(config interface{}, configName, configFolderPath string) error {
 		return fmt.Errorf("unmarshal yaml error: %w", err)
 	}
 	fmt.Println("use config", configFolderPath)
+
 	return nil
 }
 

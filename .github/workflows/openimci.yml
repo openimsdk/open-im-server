@@ -64,7 +64,8 @@ jobs:
     - name: Install Task
       uses: arduino/setup-task@v1
       with:
-        version: 2.x
+        version: '3.x' # If available, use the latest major version that's compatible
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Module Operations
       run: |
@@ -122,7 +123,8 @@ jobs:
     - name: Install Task
       uses: arduino/setup-task@v1
       with:
-        version: 2.x
+        version: '3.x' # If available, use the latest major version that's compatible
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Run OpenIM make install start
       run: |
         sudo make install
@@ -145,10 +147,13 @@ jobs:
       with:
         go-version: ${{ matrix.go_version }}
       id: go
+
     - name: Install Task
       uses: arduino/setup-task@v1
       with:
-        version: 2.x
+        version: '3.x' # If available, use the latest major version that's compatible
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Docker Operations
       run: |
         curl -o docker-compose.yml https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml
@@ -160,18 +165,15 @@ jobs:
         sudo make tidy
         sudo make tools.verify.go-gitlint
 
-    - name: Build, Start and Check Services
+    - name: Build, Start, Check Services and Print Logs
       run: |
-        sudo make init
-        sudo make build
-        sudo make start
-        sudo make check
+        sudo make init && \
+        sudo make build && \
+        sudo make start && \
+        sudo make check || \
+        (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
 
-    - name: Print OpenIM Logs
-      run: sudo cat ./_output/logs/* 2>/dev/null
-      continue-on-error: true
-
-  openim-build-image:
+  openim-test-build-image:
     name: Build OpenIM Docker Image
     runs-on: ubuntu-latest
     environment:
@@ -184,10 +186,13 @@ jobs:
       with:
         go-version: ${{ matrix.go_version }}
       id: go
+
     - name: Install Task
       uses: arduino/setup-task@v1
       with:
-        version: 2.x
+        version: '3.x' # If available, use the latest major version that's compatible
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Test Docker Build
       run: |
         sudo make image

@@ -106,7 +106,7 @@ $ helm repo add brigade https://openimsdk.github.io/openim-charts
 
 ### OpenIM Image Strategy
 
-Automated offerings include aliyun, ghcr, docker hub: [Image Documentation](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md)
+Automated offerings include aliyun, ghcr, docker hub: [Image Documentation](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/images.md)
 
 **Local Test Build Method:**
 

@@ -70,8 +70,7 @@ ITALIC_PREFIX="\033[3m"     # Italic prefix
 CYAN_PREFIX="\033[0;36m"     # Cyan prefix
 
 # Print colors you can use
-openim::color::print_color()
-{
+openim::color::print_color() {
   echo
   echo -e ${bmagenta}--back-color:${normal}
   echo "bblack; bgreen; bblue; bcyan; bred; byellow; bmagenta; bwhite"
