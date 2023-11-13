@@ -461,15 +461,10 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, userID, conversat
 		log.ZError(ctx, "GetMsgBySeqIndexIn1Doc", err, "conversationID", conversationID, "seq", quoteMsg.QuoteMessage.Seq)
 		return
 	}
-	if len(msgs) == 0 {
-		quoteMsg.QuoteMessage = nil
-	} else {
-		if msgs[0].Msg.ContentType == constant.MsgRevokeNotification {
-			quoteMsg.QuoteMessage = nil
-			//quoteMsg.QuoteMessage.ContentType = constant.MsgRevokeNotification
-			//quoteMsg.QuoteMessage.Content = msgs[0].Msg.Content
-		}
+	if len(msgs) != 0 && msgs[0].Msg.ContentType != constant.MsgRevokeNotification {
+		return
 	}
+	quoteMsg.QuoteMessage = nil
 	data, err := json.Marshal(&quoteMsg)
 	if err != nil {
 		log.ZError(ctx, "json.Marshal", err)
