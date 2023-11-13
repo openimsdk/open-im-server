@@ -453,9 +453,9 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][
 		log.ZError(ctx, "json.Unmarshal", err)
 		return
 	}
-	//if quoteMsg.QuoteMessage == nil || quoteMsg.QuoteMessage.ContentType == constant.MsgRevokeNotification {
-	//	return
-	//}
+	if quoteMsg.QuoteMessage == nil || quoteMsg.QuoteMessage.ContentType == constant.MsgRevokeNotification {
+		return
+	}
 	var msgs []*unrelationtb.MsgInfoModel
 	if v, ok := cache[quoteMsg.QuoteMessage.Seq]; ok {
 		msgs = v
