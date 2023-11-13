@@ -420,30 +420,31 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, userID, conversat
 	if msg.Msg.Content == "" {
 		return
 	}
+	//var quoteMsgItem map[string]json.RawMessage
 	var quoteMsg struct {
 		Text              string          `json:"text,omitempty"`
-		QuoteMsg          *sdkws.MsgData  `json:"quote_msg,omitempty"`
+		QuoteMessage      *sdkws.MsgData  `json:"quoteMessage,omitempty"`
 		MessageEntityList json.RawMessage `json:"messageEntityList,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(msg.Msg.Content), &quoteMsg); err != nil {
 		log.ZError(ctx, "json.Unmarshal", err)
 		return
 	}
-	if quoteMsg.QuoteMsg == nil || quoteMsg.QuoteMsg.ContentType == constant.MsgRevokeNotification {
+	if quoteMsg.QuoteMessage == nil {
 		return
 	}
-	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, db.msg.GetDocID(conversationID, quoteMsg.QuoteMsg.Seq), []int64{quoteMsg.QuoteMsg.Seq})
+	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, db.msg.GetDocID(conversationID, quoteMsg.QuoteMessage.Seq), []int64{quoteMsg.QuoteMessage.Seq})
 	if err != nil {
-		log.ZError(ctx, "GetMsgBySeqIndexIn1Doc", err, "conversationID", conversationID, "seq", quoteMsg.QuoteMsg.Seq)
+		log.ZError(ctx, "GetMsgBySeqIndexIn1Doc", err, "conversationID", conversationID, "seq", quoteMsg.QuoteMessage.Seq)
 		return
 	}
 	if len(msgs) == 0 {
-		return
-	}
-	if msgs[0].Msg.ContentType == constant.MsgRevokeNotification {
-		quoteMsg.QuoteMsg.ContentType = constant.MsgRevokeNotification
-		quoteMsg.QuoteMsg.Content = []byte(msgs[0].Msg.Content)
-		return
+		quoteMsg.QuoteMessage = nil
+	} else {
+		if msgs[0].Msg.ContentType == constant.MsgRevokeNotification {
+			quoteMsg.QuoteMessage.ContentType = constant.MsgRevokeNotification
+			quoteMsg.QuoteMessage.Content = []byte(msgs[0].Msg.Content)
+		}
 	}
 	data, err := json.Marshal(&quoteMsg)
 	if err != nil {

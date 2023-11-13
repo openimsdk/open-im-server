@@ -144,9 +144,9 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 }
 
 func GetDB() *commonMsgDatabase {
-	config.Config.Mongo.Address = []string{"192.168.44.128:37017"}
+	config.Config.Mongo.Address = []string{"203.56.175.233:37017"}
 	// config.Config.Mongo.Timeout = 60
-	config.Config.Mongo.Database = "openIM"
+	config.Config.Mongo.Database = "openIM_v3"
 	// config.Config.Mongo.Source = "admin"
 	config.Config.Mongo.Username = "root"
 	config.Config.Mongo.Password = "openIM123"
@@ -232,37 +232,17 @@ func Test_FindBySeq(t *testing.T) {
 //	}
 //}
 
-//func Test_Delete1(t *testing.T) {
-//	config.Config.Mongo.DBAddress = []string{"192.168.44.128:37017"}
-//	config.Config.Mongo.DBTimeout = 60
-//	config.Config.Mongo.DBDatabase = "openIM"
-//	config.Config.Mongo.DBSource = "admin"
-//	config.Config.Mongo.DBUserName = "root"
-//	config.Config.Mongo.DBPassword = "openIM123"
-//	config.Config.Mongo.DBMaxPoolSize = 100
-//	config.Config.Mongo.DBRetainChatRecords = 3650
-//	config.Config.Mongo.ChatRecordsClearTime = "0 2 * * 3"
-//
-//	mongo, err := unrelation.NewMongo()
-//	if err != nil {
-//		panic(err)
-//	}
-//	err = mongo.GetDatabase().Client().Ping(context.Background(), nil)
-//	if err != nil {
-//		panic(err)
-//	}
-//
-//	c := mongo.GetClient().Database("openIM").Collection("msg")
-//
-//	var o unrelationtb.MsgDocModel
-//
-//	err = c.FindOne(context.Background(), bson.M{"doc_id": "test:0"}).Decode(&o)
-//	if err != nil {
-//		panic(err)
-//	}
-//
-//	for i, model := range o.Msg {
-//		fmt.Println(i, model == nil)
-//	}
-//
-//}
+func TestName(t *testing.T) {
+	db := GetDB()
+	var seqs []int64
+	for i := int64(1); i <= 4; i++ {
+		seqs = append(seqs, i)
+	}
+	msgs, err := db.getMsgBySeqsRange(context.Background(), "4931176757", "si_3866692501_4931176757", seqs, seqs[0], seqs[len(seqs)-1])
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(msgs)
+
+}
