@@ -7,10 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 func TestDisLock(t *testing.T) {
