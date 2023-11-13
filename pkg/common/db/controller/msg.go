@@ -16,7 +16,9 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 	"time"
 
@@ -397,7 +399,7 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
 	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, seqs) {
 		// log.ZDebug(ctx, "getMsgBySeqs", "docID", docID, "seqs", seqs)
-		msgs, err := db.findMsgInfoBySeq(ctx, userID, docID, seqs)
+		msgs, err := db.findMsgInfoBySeq(ctx, userID, docID, conversationID, seqs)
 		if err != nil {
 			return nil, err
 		}
@@ -408,12 +410,53 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversat
 	return totalMsgs, nil
 }
 
-func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID string, seqs []int64) (totalMsgs []*unrelationtb.MsgInfoModel, err error) {
+func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, userID, conversationID string, msg *unrelationtb.MsgInfoModel) {
+	if msg.IsRead {
+		msg.Msg.IsRead = true
+	}
+	if msg.Msg.ContentType != constant.Quote {
+		return
+	}
+	if msg.Msg.Content == "" {
+		return
+	}
+	var quoteMsg struct {
+		Text              string          `json:"text,omitempty"`
+		QuoteMsg          *sdkws.MsgData  `json:"quote_msg,omitempty"`
+		MessageEntityList json.RawMessage `json:"messageEntityList,omitempty"`
+	}
+	if err := json.Unmarshal([]byte(msg.Msg.Content), &quoteMsg); err != nil {
+		log.ZError(ctx, "json.Unmarshal", err)
+		return
+	}
+	if quoteMsg.QuoteMsg == nil || quoteMsg.QuoteMsg.ContentType == constant.MsgRevokeNotification {
+		return
+	}
+	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, db.msg.GetDocID(conversationID, quoteMsg.QuoteMsg.Seq), []int64{quoteMsg.QuoteMsg.Seq})
+	if err != nil {
+		log.ZError(ctx, "GetMsgBySeqIndexIn1Doc", err, "conversationID", conversationID, "seq", quoteMsg.QuoteMsg.Seq)
+		return
+	}
+	if len(msgs) == 0 {
+		return
+	}
+	if msgs[0].Msg.ContentType == constant.MsgRevokeNotification {
+		quoteMsg.QuoteMsg.ContentType = constant.MsgRevokeNotification
+		quoteMsg.QuoteMsg.Content = []byte(msgs[0].Msg.Content)
+		return
+	}
+	data, err := json.Marshal(&quoteMsg)
+	if err != nil {
+		log.ZError(ctx, "json.Marshal", err)
+		return
+	}
+	msg.Msg.Content = string(data)
+}
+
+func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID string, conversationID string, seqs []int64) (totalMsgs []*unrelationtb.MsgInfoModel, err error) {
 	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, docID, seqs)
 	for _, msg := range msgs {
-		if msg.IsRead {
-			msg.Msg.IsRead = true
-		}
+		db.handlerDBMsg(ctx, userID, conversationID, msg)
 	}
 	return msgs, err
 }
@@ -422,7 +465,7 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, userID strin
 	log.ZDebug(ctx, "getMsgBySeqsRange", "conversationID", conversationID, "allSeqs", allSeqs, "begin", begin, "end", end)
 	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, allSeqs) {
 		log.ZDebug(ctx, "getMsgBySeqsRange", "docID", docID, "seqs", seqs)
-		msgs, err := db.findMsgInfoBySeq(ctx, userID, docID, seqs)
+		msgs, err := db.findMsgInfoBySeq(ctx, userID, docID, conversationID, seqs)
 		if err != nil {
 			return nil, err
 		}
