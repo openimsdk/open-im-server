@@ -31,7 +31,7 @@ readonly ENV_FILE=${ENV_FILE:-"${OPENIM_ROOT}/scripts/install/environment.sh"}
 declare -A TEMPLATES=(
   ["${OPENIM_ROOT}/deployments/templates/env_template.yaml"]="${OPENIM_ROOT}/.env"
   ["${OPENIM_ROOT}/deployments/templates/openim.yaml"]="${OPENIM_ROOT}/config/config.yaml"
-  ["${OPENIM_ROOT}/deployments/templates/prometheus.yaml"]="${OPENIM_ROOT}/config/prometheus.yaml"
+  ["${OPENIM_ROOT}/deployments/templates/prometheus.yml"]="${OPENIM_ROOT}/config/prometheus.yml"
 )
 
 for template in "${!TEMPLATES[@]}"; do
