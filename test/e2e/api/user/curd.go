@@ -1,7 +1,10 @@
 package user
 
 import (
+	"fmt"
+
 	gettoken "github.com/openimsdk/open-im-server/v3/test/e2e/api/token"
+	"github.com/openimsdk/open-im-server/v3/test/e2e/framework/config"
 )
 
 // UserInfoRequest represents a request to get or update user information
@@ -17,14 +20,20 @@ type GetUsersOnlineStatusRequest struct {
 
 // GetUsersInfo retrieves detailed information for a list of user IDs
 func GetUsersInfo(token string, userIDs []string) error {
+
+	url := fmt.Sprintf("http://%s:%s/user/get_users_info", config.LoadConfig().APIHost, config.LoadConfig().APIPort)
+
 	requestBody := UserInfoRequest{
 		UserIDs: userIDs,
 	}
-	return sendPostRequestWithToken("http://your-api-host:port/user/get_users_info", token, requestBody)
+	return sendPostRequestWithToken(url, token, requestBody)
 }
 
 // UpdateUserInfo updates the information for a user
 func UpdateUserInfo(token, userID, nickname, faceURL string) error {
+
+	url := fmt.Sprintf("http://%s:%s/user/update_user_info", config.LoadConfig().APIHost, config.LoadConfig().APIPort)
+
 	requestBody := UserInfoRequest{
 		UserInfo: &gettoken.User{
 			UserID:   userID,
@@ -32,13 +41,16 @@ func UpdateUserInfo(token, userID, nickname, faceURL string) error {
 			FaceURL:  faceURL,
 		},
 	}
-	return sendPostRequestWithToken("http://your-api-host:port/user/update_user_info", token, requestBody)
+	return sendPostRequestWithToken(url, token, requestBody)
 }
 
 // GetUsersOnlineStatus retrieves the online status for a list of user IDs
 func GetUsersOnlineStatus(token string, userIDs []string) error {
+
+	url := fmt.Sprintf("http://%s:%s/user/get_users_online_status", config.LoadConfig().APIHost, config.LoadConfig().APIPort)
+
 	requestBody := GetUsersOnlineStatusRequest{
 		UserIDs: userIDs,
 	}
-	return sendPostRequestWithToken("http://your-api-host:port/user/get_users_online_status", token, requestBody)
+	return sendPostRequestWithToken(url, token, requestBody)
 }

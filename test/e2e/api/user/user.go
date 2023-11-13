@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	gettoken "github.com/openimsdk/open-im-server/v3/test/e2e/api/token"
+	"github.com/openimsdk/open-im-server/v3/test/e2e/framework/config"
 )
 
 // ForceLogoutRequest represents a request to force a user logout
@@ -34,30 +35,39 @@ type Pagination struct {
 
 // ForceLogout forces a user to log out
 func ForceLogout(token, userID string, platformID int) error {
+
+	url := fmt.Sprintf("http://%s:%s/auth/force_logout", config.LoadConfig().APIHost, config.LoadConfig().APIPort)
+
 	requestBody := ForceLogoutRequest{
 		PlatformID: platformID,
 		UserID:     userID,
 	}
-	return sendPostRequestWithToken("http://your-api-host:port/auth/force_logout", token, requestBody)
+	return sendPostRequestWithToken(url, token, requestBody)
 }
 
 // CheckUserAccount checks if the user accounts exist
 func CheckUserAccount(token string, userIDs []string) error {
+
+	url := fmt.Sprintf("http://%s:%s/user/account_check", config.LoadConfig().APIHost, config.LoadConfig().APIPort)
+
 	requestBody := CheckUserAccountRequest{
 		CheckUserIDs: userIDs,
 	}
-	return sendPostRequestWithToken("http://your-api-host:port/user/account_check", token, requestBody)
+	return sendPostRequestWithToken(url, token, requestBody)
 }
 
 // GetUsers retrieves a list of users with pagination
 func GetUsers(token string, pageNumber, showNumber int) error {
+
+	url := fmt.Sprintf("http://%s:%s/user/account_check", config.LoadConfig().APIHost, config.LoadConfig().APIPort)
+
 	requestBody := GetUsersRequest{
 		Pagination: Pagination{
 			PageNumber: pageNumber,
 			ShowNumber: showNumber,
 		},
 	}
-	return sendPostRequestWithToken("http://your-api-host:port/user/get_users", token, requestBody)
+	return sendPostRequestWithToken(url, token, requestBody)
 }
 
 // sendPostRequestWithToken sends a POST request with a token in the header

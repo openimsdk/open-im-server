@@ -38,9 +38,8 @@ IAM_ROOT=$(dirname "${BASH_SOURCE[0]}")/../..
 [[ -z ${COMMON_SOURCED} ]] && source ${IAM_ROOT}/scripts/install/common.sh
 
 # API Server API Address:Port
-INSECURE_OPENIMAPI=${IAM_APISERVER_HOST}:${API_OPENIM_PORT}
+INSECURE_OPENIMAPI="http://${OPENIM_API_HOST}:${API_OPENIM_PORT}"
 INSECURE_OPENIMAUTO=${OPENIM_RPC_AUTH_HOST}:${OPENIM_AUTH_PORT}
-
 CCURL="curl -f -s -XPOST" # Create
 UCURL="curl -f -s -XPUT" # Update
 RCURL="curl -f -s -XGET" # Retrieve
@@ -73,7 +72,7 @@ function openim::test::auth() {
 
 # Define a function to get a token (Admin Token)
 openim::test::get_token() {
-  token_response=$(${CCURL} "${OperationID}" "${Header}" http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/auth/user_token \
+  token_response=$(${CCURL} "${OperationID}" "${Header}" ${INSECURE_OPENIMAPI}/auth/user_token \
       -d'{"secret": "'"$SECRET"'","platformID": 1,"userID": "openIM123456"}')
   token=$(echo $token_response | grep -Po 'token[" :]+\K[^"]+')
   echo "$token"
@@ -94,7 +93,7 @@ EOF
   )
   echo "Requesting force logout for user: $request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/auth/force_logout" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/auth/force_logout" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -127,7 +126,7 @@ EOF
   echo "Request body for user registration: $request_body"
 
   # Send the registration request
-  local user_register_response=$(${CCURL} "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/user/user_register" -d "${request_body}")
+  local user_register_response=$(${CCURL} "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/user/user_register" -d "${request_body}")
 
   # Check for errors in the response
   openim::test::check_error "$user_register_response"
@@ -148,7 +147,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/user/account_check" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/user/account_check" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -166,7 +165,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/user/get_users" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/user/get_users" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -184,7 +183,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/user/get_users_info" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/user/get_users_info" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -204,7 +203,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/user/get_users_online_status" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/user/get_users_online_status" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -223,7 +222,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/user/update_user_info" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/user/update_user_info" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -238,7 +237,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/user/get_subscribe_users_status" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/user/get_subscribe_users_status" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -259,7 +258,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/user/subscribe_users_status" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/user/subscribe_users_status" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -275,7 +274,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/user/set_global_msg_recv_opt" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/user/set_global_msg_recv_opt" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -330,7 +329,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/friend/is_friend" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/is_friend" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -346,7 +345,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/friend/delete_friend" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/delete_friend" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -365,7 +364,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/friend/get_friend_apply_list" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/get_friend_apply_list" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -384,7 +383,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/friend/get_friend_list" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/get_friend_list" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -401,7 +400,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/friend/set_friend_remark" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/set_friend_remark" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -419,7 +418,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/friend/add_friend" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/add_friend" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -437,7 +436,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/friend/import_friend" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/import_friend" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -456,7 +455,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/friend/add_friend_response" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/add_friend_response" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -475,7 +474,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/friend/get_self_friend_apply_list" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/get_self_friend_apply_list" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -491,7 +490,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/friend/add_black" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/add_black" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -507,7 +506,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/friend/remove_black" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/remove_black" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -526,7 +525,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/friend/get_black_list" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/get_black_list" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -619,7 +618,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/create_group" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/create_group" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -639,7 +638,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/invite_user_to_group" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/invite_user_to_group" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -656,7 +655,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/transfer_group" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/transfer_group" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -671,7 +670,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/get_groups_info" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/get_groups_info" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -690,7 +689,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/kick_group" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/kick_group" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -706,7 +705,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/get_group_members_info" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/get_group_members_info" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -725,7 +724,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/get_group_member_list" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/get_group_member_list" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -744,7 +743,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/get_joined_group_list" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/get_joined_group_list" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -769,7 +768,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/set_group_member_info" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/set_group_member_info" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -784,7 +783,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/mute_group" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/mute_group" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -799,7 +798,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/cancel_mute_group" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/cancel_mute_group" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -814,7 +813,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/dismiss_group" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/dismiss_group" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -830,7 +829,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/cancel_mute_group_member" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/cancel_mute_group_member" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -848,7 +847,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/join_group" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/join_group" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -873,7 +872,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/set_group_info" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/set_group_info" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -890,7 +889,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/quit_group" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/quit_group" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -909,7 +908,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/get_recv_group_applicationList" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/get_recv_group_applicationList" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -927,7 +926,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/group_application_response" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/group_application_response" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -946,7 +945,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/get_user_req_group_applicationList" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/get_user_req_group_applicationList" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -963,7 +962,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/mute_group_member" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/mute_group_member" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -981,7 +980,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/group/get_group_users_req_application_list" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/group/get_group_users_req_application_list" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -1078,7 +1077,7 @@ function openim::test::group() {
 
 # Define a function to register a user
 openim::register_user() {
-  user_register_response=$(${CCURL} "${Header}" http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/user/user_register \
+  user_register_response=$(${CCURL} "${Header}" ${INSECURE_OPENIMAPI}/user/user_register \
     -d'{
       "secret": "openIM123",
       "users": [{"userID": "11111112","nickname": "yourNickname","faceURL": "yourFaceURL"}]
@@ -1090,7 +1089,7 @@ openim::register_user() {
 # Define a function to check the account
 openim::test::check_account() {
   local token=$1
-  account_check_response=$(${CCURL} "${Header}" -H"operationID: 1646445464564" -H"token: ${token}" http://localhost:${API_OPENIM_PORT}/user/account_check \
+  account_check_response=$(${CCURL} "${Header}" -H"operationID: 1646445464564" -H"token: ${token}" ${INSECURE_OPENIMAPI}/user/account_check \
         -d'{
           "checkUserIDs": ["11111111","11111112"]
         }')
@@ -1164,7 +1163,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/msg/send_msg" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/msg/send_msg" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -1185,7 +1184,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/msg/revoke_msg" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/msg/revoke_msg" -d "${request_body}")
 
   openim::test::check_error "$response"
 }
@@ -1203,7 +1202,7 @@ EOF
 )
   echo "$request_body"
 
-  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "http://${OPENIM_API_HOST}:${API_OPENIM_PORT}/msg/user_clear_all_msg" -d "${request_body}")
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/msg/user_clear_all_msg" -d "${request_body}")
 
   openim::test::check_error "$response"
 }

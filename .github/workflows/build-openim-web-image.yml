@@ -15,11 +15,11 @@
 name: Build OpenIM Web Docker image
 
 on:
-  schedule:
-  - cron: '30 3 * * *'
+#   schedule:
+#   - cron: '30 3 * * *'
   push:
     branches:
-      - main
+    #   - main
       - release-*
     tags:
       - v*

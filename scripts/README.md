@@ -39,7 +39,7 @@ scripts/
 ├── demo.sh                             # Demonstration or example script.
 ├── docker-check-service.sh             # Docker script to check services' status.
 ├── docker-start-all.sh                 # Docker script to start all containers/services.
-├── ensure_tag.sh                       # Ensure correct tags or labeling.
+├── ensure-tag.sh                       # Ensure correct tags or labeling.
 ├── env_check.sh                        # Environment verification and checking.
 ├── gen-swagger-docs.sh                 # Script to generate Swagger documentation.
 ├── genconfig.sh                        # Generate configuration files.
