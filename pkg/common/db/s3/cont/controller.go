@@ -20,10 +20,11 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 
 	"github.com/google/uuid"
 
@@ -144,7 +145,7 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 		}
 		var authSign *s3.AuthSignResult
 		if maxParts > 0 {
-			partNumbers := make([]int, partNumber)
+			partNumbers := make([]int, maxParts)
 			for i := 0; i < maxParts; i++ {
 				partNumbers[i] = i + 1
 			}
@@ -174,7 +175,6 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 		return nil, err
 	}
 	if md5Sum := md5.Sum([]byte(strings.Join(partHashs, partSeparator))); hex.EncodeToString(md5Sum[:]) != upload.Hash {
-		fmt.Println("CompleteUpload sum:", hex.EncodeToString(md5Sum[:]), "upload hash:", upload.Hash)
 		return nil, errors.New("md5 mismatching")
 	}
 	if info, err := c.StatObject(ctx, c.HashPath(upload.Hash)); err == nil {

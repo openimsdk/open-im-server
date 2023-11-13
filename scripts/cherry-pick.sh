@@ -14,7 +14,7 @@
 # limitations under the License.
 
 
-# Usage Instructions: https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/git_cherry-pick.md
+# Usage Instructions: https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/gitcherry-pick.md
 
 # Checkout a PR from GitHub. (Yes, this is sitting in a Git tree. How
 # meta.) Assumes you care about pulls from remote "upstream" and
@@ -68,7 +68,7 @@ if [[ "$#" -lt 2 ]]; then
   echo "  Set UPSTREAM_REMOTE (default: upstream) and FORK_REMOTE (default: origin)"
   echo "  to override the default remote names to what you have locally."
   echo
-  echo "  For merge process info, see https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/git_cherry-pick.md"
+  echo "  For merge process info, see https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/gitcherry-pick.md"
   exit 2
 fi
 
@@ -145,7 +145,7 @@ Cherry pick of ${PULLSUBJ} on ${rel}.
 
 ${numandtitle}
 
-For details on the cherry pick process, see the [cherry pick requests](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/git_cherry-pick.md) page.
+For details on the cherry pick process, see the [cherry pick requests](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/gitcherry-pick.md) page.
 
 \`\`\`release-note
 

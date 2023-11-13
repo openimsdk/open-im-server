@@ -16,12 +16,14 @@ package tools
 
 import (
 	"context"
+	"math/rand"
+	"time"
+
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	"math/rand"
-	"time"
 )
 
 //func (c *MsgTool) ConversationsDestructMsgs() {
@@ -54,7 +56,8 @@ import (
 //			continue
 //		}
 //		if len(seqs) > 0 {
-//			if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, []string{conversation.OwnerUserID}, conversation.ConversationID, map[string]interface{}{"latest_msg_destruct_time": now}); err != nil {
+// 			if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, []string{conversation.OwnerUserID}, conversation.ConversationID, map[string]interface{}{"latest_msg_destruct_time": now}); err
+// != nil {
 //				log.ZError(ctx, "updateUsersConversationFiled failed", err, "conversationID", conversation.ConversationID, "ownerUserID", conversation.OwnerUserID)
 //				continue
 //			}
@@ -104,7 +107,8 @@ func (c *MsgTool) ConversationsDestructMsgs() {
 		}
 		temp := make([]*relation.ConversationModel, 0, len(conversations))
 		for i, conversation := range conversations {
-			if conversation.IsMsgDestruct && conversation.MsgDestructTime != 0 && (time.Now().Unix() > (conversation.MsgDestructTime+conversation.LatestMsgDestructTime.Unix()+8*60*60)) || conversation.LatestMsgDestructTime.IsZero() {
+			if conversation.IsMsgDestruct && conversation.MsgDestructTime != 0 && (time.Now().Unix() > (conversation.MsgDestructTime+conversation.LatestMsgDestructTime.Unix()+8*60*60)) ||
+				conversation.LatestMsgDestructTime.IsZero() {
 				temp = append(temp, conversations[i])
 			}
 		}

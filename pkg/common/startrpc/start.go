@@ -16,20 +16,22 @@ package startrpc
 
 import (
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net"
 	"net/http"
 	"strconv"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/mw"
@@ -55,7 +57,7 @@ func Start(
 		return err
 	}
 	defer listener.Close()
-	client, err := discovery_register.NewDiscoveryRegister(config.Config.Envs.Discovery)
+	client, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
 		return utils.Wrap1(err)
 	}
@@ -70,8 +72,8 @@ func Start(
 	// ctx 中间件
 	if config.Config.Prometheus.Enable {
 		//////////////////////////
-		cusMetrics := prom_metrics.GetGrpcCusMetrics(rpcRegisterName)
-		reg, metric, err = prom_metrics.NewGrpcPromObj(cusMetrics)
+		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName)
+		reg, metric, err = prommetrics.NewGrpcPromObj(cusMetrics)
 		options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
 			grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))
 	} else {

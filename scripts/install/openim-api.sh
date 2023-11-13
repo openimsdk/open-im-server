@@ -33,8 +33,7 @@ readonly OPENIM_API_SERVICE_TARGETS=(
 )
 readonly OPENIM_API_SERVICE_LISTARIES=("${OPENIM_API_SERVICE_TARGETS[@]##*/}")
 
-function openim::api::start()
-{
+function openim::api::start() {
     echo "++ OPENIM_API_SERVICE_LISTARIES: ${OPENIM_API_SERVICE_LISTARIES[@]}"
     echo "++ OPENIM_API_PORT_LISTARIES: ${OPENIM_API_PORT_LISTARIES[@]}"
     echo "++ OpenIM API config path: ${OPENIM_API_CONFIG}"

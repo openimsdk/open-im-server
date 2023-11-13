@@ -17,13 +17,12 @@ package main
 import (
 	"context"
 	"fmt"
-	ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginPrometheus"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 	"net"
 	_ "net/http/pprof"
 	"strconv"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
+	ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
@@ -33,6 +32,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 )
 
 func main() {
@@ -65,7 +65,7 @@ func run(port int, proPort int) error {
 	var client discoveryregistry.SvcDiscoveryRegistry
 
 	// Determine whether zk is passed according to whether it is a clustered deployment
-	client, err = discovery_register.NewDiscoveryRegister(config.Config.Envs.Discovery)
+	client, err = kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
 		log.ZError(context.Background(), "Failed to initialize discovery register", err)
 
@@ -86,7 +86,7 @@ func run(port int, proPort int) error {
 	router := api.NewGinRouter(client, rdb)
 	//////////////////////////////
 	if config.Config.Prometheus.Enable {
-		p := ginProm.NewPrometheus("app", prom_metrics.GetGinCusMetrics("Api"))
+		p := ginProm.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
 		p.SetListenAddress(fmt.Sprintf(":%d", proPort))
 		p.Use(router)
 	}

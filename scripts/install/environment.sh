@@ -15,7 +15,7 @@
 
 # This is a file that initializes variables for the automation script that initializes the config file
 # You need to supplement the script according to the specification.
-# Read: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/init_config.md
+# Read: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/init-config.md
 # 格式化 bash 注释：https://tool.lu/shell/
 # 配置中心文档：https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md
 
@@ -46,7 +46,7 @@ function def() {
 def "DATA_DIR" "${OPENIM_ROOT}"
 
 # 设置统一的用户名，方便记忆
-def "USER" "root"
+def "OPENIM_USER" "root"
 
 # 设置统一的密码，方便记忆
 readonly PASSWORD=${PASSWORD:-'openIM123'}
@@ -166,7 +166,7 @@ def "ZOOKEEPER_PASSWORD" ""                        # Zookeeper的密码
 ###################### MySQL 配置信息 ######################
 def "MYSQL_PORT" "13306"                       # MySQL的端口
 def "MYSQL_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # MySQL的地址
-def "MYSQL_USERNAME" "${USER}"                 # MySQL的用户名
+def "MYSQL_USERNAME" "${OPENIM_USER}"                 # MySQL的用户名
 # MySQL的密码
 readonly MYSQL_PASSWORD=${MYSQL_PASSWORD:-"${PASSWORD}"}
 def "MYSQL_DATABASE" "${DATABASE_NAME}"        # MySQL的数据库名
@@ -181,7 +181,7 @@ def "MONGO_URI"                                # MongoDB的URI
 def "MONGO_PORT" "37017"                       # MongoDB的端口
 def "MONGO_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # MongoDB的地址
 def "MONGO_DATABASE" "${DATABASE_NAME}"        # MongoDB的数据库名
-def "MONGO_USERNAME" "${USER}"                 # MongoDB的用户名
+def "MONGO_USERNAME" "${OPENIM_USER}"                 # MongoDB的用户名
 # MongoDB的密码
 readonly MONGO_PASSWORD=${MONGO_PASSWORD:-"${PASSWORD}"}
 def "MONGO_MAX_POOL_SIZE" "100"                # 最大连接池大小
@@ -198,7 +198,7 @@ def "MINIO_PORT" "10005"    # MinIO的端口
 # MinIO的端点URL
 def MINIO_ADDRESS "${DOCKER_BRIDGE_GATEWAY}"
 readonly MINIO_ENDPOINT=${MINIO_ENDPOINT:-"http://${MINIO_ADDRESS}:${MINIO_PORT}"}
-def "MINIO_ACCESS_KEY" "${USER}"                                                  # MinIO的访问密钥ID
+def "MINIO_ACCESS_KEY" "${OPENIM_USER}"                                                  # MinIO的访问密钥ID
 readonly MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-"${PASSWORD}"}
 def "MINIO_SESSION_TOKEN"                                                         # MinIO的会话令牌
 readonly MINIO_SIGN_ENDPOINT=${MINIO_SIGN_ENDPOINT:-"http://${OPENIM_IP}:${MINIO_PORT}"} # signEndpoint为minio公网地址

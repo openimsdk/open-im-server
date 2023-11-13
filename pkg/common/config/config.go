@@ -78,17 +78,20 @@ type configStruct struct {
 	} `yaml:"mongo"`
 
 	Redis struct {
-		ClusterMode bool     `yaml:"clusterMode"`
-		Address     []string `yaml:"address"`
-		Username    string   `yaml:"username"`
-		Password    string   `yaml:"password"`
+		ClusterMode    bool     `yaml:"clusterMode"`
+		Address        []string `yaml:"address"`
+		Username       string   `yaml:"username"`
+		Password       string   `yaml:"password"`
+		EnablePipeline bool     `yaml:"enablePipeline"`
 	} `yaml:"redis"`
 
 	Kafka struct {
-		Username string   `yaml:"username"`
-		Password string   `yaml:"password"`
-		Addr     []string `yaml:"addr"`
-		TLS      *struct {
+		Username     string   `yaml:"username"`
+		Password     string   `yaml:"password"`
+		ProducerAck  string   `yaml:"producerAck"`
+		CompressType string   `yaml:"compressType"`
+		Addr         []string `yaml:"addr"`
+		TLS          *struct {
 			CACrt              string `yaml:"caCrt"`
 			ClientCrt          string `yaml:"clientCrt"`
 			ClientKey          string `yaml:"clientKey"`
@@ -229,6 +232,7 @@ type configStruct struct {
 	ChatRecordsClearTime              string `yaml:"chatRecordsClearTime"`
 	MsgDestructTime                   string `yaml:"msgDestructTime"`
 	Secret                            string `yaml:"secret"`
+	EnableCronLocker                  bool   `yaml:"enableCronLocker"`
 	TokenPolicy                       struct {
 		Expire int64 `yaml:"expire"`
 	} `yaml:"tokenPolicy"`

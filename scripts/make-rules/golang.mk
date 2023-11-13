@@ -193,6 +193,18 @@ go.lint: tools.verify.golangci-lint
 go.test:
 	@$(GO) test ./...
 
+## go.test.api: Run api test
+.PHONY: go.test.api
+go.test.api:
+	@echo "===========> Run api test"
+	@$(ROOT_DIR)/scripts/install/test.sh openim::test::test
+
+## go.test.e2e: Run e2e test
+.PHONY: go.test.e2e
+go.test.e2e: tools.verify.ginkgo
+	@echo "===========> Run e2e test"
+	@$(TOOLS_DIR)/ginkgo -v $(ROOT_DIR)/test/e2e
+
 ## go.demo: Run demo
 .PHONY: go.demo
 go.demo:
