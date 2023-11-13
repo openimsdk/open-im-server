@@ -142,7 +142,7 @@ services:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS}
   openim-admin:
-    image: ${IMAGE_REGISTRY}/openim-admin:latest
+    image: ghcr.io/openimsdk/openim-admin-front:v3.4.0
     container_name: openim-admin
     restart: always
     ports:
