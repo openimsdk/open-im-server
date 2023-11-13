@@ -28,12 +28,21 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
+var (
+	// singleton pattern.
+	redisClient redis.UniversalClient
+)
+
 const (
 	maxRetry = 10 // number of retries
 )
 
 // NewRedis Initialize redis connection.
 func NewRedis() (redis.UniversalClient, error) {
+	if redisClient != nil {
+		return redisClient, nil
+	}
+
 	if len(config.Config.Redis.Address) == 0 {
 		return nil, errors.New("redis address is empty")
 	}
@@ -66,5 +75,6 @@ func NewRedis() (redis.UniversalClient, error) {
 		return nil, fmt.Errorf("redis ping %w", err)
 	}
 
+	redisClient = rdb
 	return rdb, err
 }
