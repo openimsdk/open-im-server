@@ -465,8 +465,9 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, userID, conversat
 		quoteMsg.QuoteMessage = nil
 	} else {
 		if msgs[0].Msg.ContentType == constant.MsgRevokeNotification {
-			quoteMsg.QuoteMessage.ContentType = constant.MsgRevokeNotification
-			quoteMsg.QuoteMessage.Content = msgs[0].Msg.Content
+			quoteMsg.QuoteMessage = nil
+			//quoteMsg.QuoteMessage.ContentType = constant.MsgRevokeNotification
+			//quoteMsg.QuoteMessage.Content = msgs[0].Msg.Content
 		}
 	}
 	data, err := json.Marshal(&quoteMsg)
