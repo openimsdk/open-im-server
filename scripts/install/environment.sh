@@ -116,7 +116,8 @@ LAST_OCTET=$((LAST_OCTET + 1))
 PROMETHEUS_NETWORK_ADDRESS=$(generate_ip)
 LAST_OCTET=$((LAST_OCTET + 1))
 GRAFANA_NETWORK_ADDRESS=$(generate_ip)
-
+LAST_OCTET=$((LAST_OCTET + 1))
+NODE_EXPORTER_NETWORK_ADDRESS=$(generate_ip)
 ###################### openim 配置 ######################
 # read: https://github.com/openimsdk/open-im-server/blob/main/deployment/README.md
 def "OPENIM_DATA_DIR" "/data/openim"

@@ -98,6 +98,10 @@ PROMETHEUS_NETWORK_ADDRESS=${PROMETHEUS_NETWORK_ADDRESS}
 # Address or hostname for the Grafana network.
 # Default: GRAFANA_NETWORK_ADDRESS=172.28.0.12
 GRAFANA_NETWORK_ADDRESS=${GRAFANA_NETWORK_ADDRESS}
+  
+# Address or hostname for the node_exporter network.
+# Default: NODE_EXPORTER_NETWORK_ADDRESS=172.28.0.13
+NODE_EXPORTER_NETWORK_ADDRESS=${NODE_EXPORTER_NETWORK_ADDRESS}
 
 
 # ===============================================

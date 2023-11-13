@@ -152,17 +152,8 @@ services:
     ports:
       - "${PROMETHEUS_PORT}:9090"
     networks:
-      - server
-
-  node-exporter:
-    image: quay.io/prometheus/node-exporter
-    container_name: node-exporter
-    hostname: node-exporter
-    restart: always
-    ports:
-      - "${NODE_EXPORTER_PORT}:9100"
-    networks:
-      - server
+      server:
+        ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS}
 
   grafana:
     image: grafana/grafana
@@ -174,4 +165,16 @@ services:
     volumes:
       - ${DATA_DIR}/components/grafana:/var/lib/grafana
     networks:
-      - server
+      server:
+        ipv4_address: ${GRAFANA_NETWORK_ADDRESS}
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: node-exporter
+    hostname: node-exporter
+    restart: always
+    ports:
+      - "${NODE_EXPORTER_PORT}:9100"
+    networks:
+      server:
+        ipv4_address: ${NODE_EXPORTER_NETWORK_ADDRESS}
