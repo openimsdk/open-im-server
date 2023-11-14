@@ -118,8 +118,9 @@ func GetNotificationConversationIDByConversationID(conversationID string) string
 	l := strings.Split(conversationID, "_")
 	if len(l) > 1 {
 		l[0] = "n"
-		return conversationID
+		return strings.Join(l, "_")
 	}
+
 	return ""
 }
 
