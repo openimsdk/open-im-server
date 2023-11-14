@@ -48,3 +48,26 @@ func UserPb2DB(user *sdkws.UserInfo) *relationtb.UserModel {
 	userDB.GlobalRecvMsgOpt = user.GlobalRecvMsgOpt
 	return &userDB
 }
+
+func UserPb2DBMap(user *sdkws.UserInfo) map[string]any {
+	if user == nil {
+		return nil
+	}
+	val := make(map[string]any)
+	if user.Nickname != "" {
+		val["nickname"] = user.Nickname
+	}
+	if user.FaceURL != "" {
+		val["face_url"] = user.FaceURL
+	}
+	if user.Ex != "" {
+		val["ex"] = user.FaceURL
+	}
+	if user.AppMangerLevel != 0 {
+		val["app_manger_level"] = user.AppMangerLevel
+	}
+	if user.GlobalRecvMsgOpt != 0 {
+		val["global_recv_msg_opt"] = user.GlobalRecvMsgOpt
+	}
+	return val
+}

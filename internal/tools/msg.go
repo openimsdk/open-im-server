@@ -91,7 +91,7 @@ func InitMsgTool() (*MsgTool, error) {
 	userDatabase := controller.NewUserDatabase(
 		userDB,
 		cache.NewUserCacheRedis(rdb, relation.NewUserGorm(db), cache.GetDefaultOpt()),
-		tx.NewGorm(db),
+		tx.NewMongo(mongo.GetClient()),
 		userMongoDB,
 	)
 	groupDatabase := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase(), nil)

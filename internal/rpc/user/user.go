@@ -17,6 +17,7 @@ package user
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
 	"strings"
 	"time"
 
@@ -77,10 +78,10 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	for k, v := range config.Config.Manager.UserID {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k], AppMangerLevel: constant.AppAdmin})
 	}
-	userDB := relation.NewUserGorm(db)
+	userDB := newmgo.NewUserMongo(mongo.GetDatabase())
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
 	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
-	database := controller.NewUserDatabase(userDB, cache, tx.NewGorm(db), userMongoDB)
+	database := controller.NewUserDatabase(userDB, cache, tx.NewMongo(mongo.GetClient()), userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
@@ -118,12 +119,11 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err := CallbackBeforeUpdateUserInfo(ctx, req); err != nil {
 		return nil, err
 	}
-	user := convert.UserPb2DB(req.UserInfo)
-	if err != nil {
-		return nil, err
+	data := convert.UserPb2DBMap(req.UserInfo)
+	if len(data) == 0 {
+		return nil, errs.ErrArgs.Wrap("no data to update")
 	}
-	err = s.Update(ctx, user)
-	if err != nil {
+	if err := s.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
 	_ = s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
@@ -189,12 +189,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 }
 
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
-	var pageNumber, showNumber int32
-	if req.Pagination != nil {
-		pageNumber = req.Pagination.PageNumber
-		showNumber = req.Pagination.ShowNumber
-	}
-	users, total, err := s.Page(ctx, pageNumber, showNumber)
+	total, users, err := s.Page(ctx, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -259,11 +254,11 @@ func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Ge
 
 // GetAllUserID Get user account by page.
 func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDReq) (resp *pbuser.GetAllUserIDResp, err error) {
-	userIDs, err := s.UserDatabase.GetAllUserID(ctx, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	total, userIDs, err := s.UserDatabase.GetAllUserID(ctx, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
-	return &pbuser.GetAllUserIDResp{UserIDs: userIDs}, nil
+	return &pbuser.GetAllUserIDResp{Total: int32(total), UserIDs: userIDs}, nil
 }
 
 // SubscribeOrCancelUsersStatus Subscribe online or cancel online users.

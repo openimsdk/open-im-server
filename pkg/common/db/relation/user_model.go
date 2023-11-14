@@ -32,7 +32,8 @@ type UserGorm struct {
 }
 
 func NewUserGorm(db *gorm.DB) relation.UserModelInterface {
-	return &UserGorm{NewMetaDB(db, &relation.UserModel{})}
+	//return &UserGorm{NewMetaDB(db, &relation.UserModel{})}
+	return nil
 }
 
 // 插入多条.

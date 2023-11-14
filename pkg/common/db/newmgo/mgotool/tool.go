@@ -64,11 +64,27 @@ func FindOne[T any](ctx context.Context, coll *mongo.Collection, filter any, opt
 }
 
 func FindPage[T any](ctx context.Context, coll *mongo.Collection, filter any, pagination Pagination, opts ...*options.FindOptions) (int64, []T, error) {
-	count, err := Count[T](ctx, coll, filter)
+	countOpt := options.Count()
+	for _, opt := range opts {
+		if opt.Skip != nil {
+			countOpt.SetSkip(*opt.Skip)
+		}
+		if opt.Limit != nil {
+			countOpt.SetLimit(*opt.Limit)
+		}
+	}
+	count, err := Count(ctx, coll, filter, countOpt)
 	if err != nil {
 		return 0, nil, err
 	}
-	opt := options.Find().SetSkip(int64(pagination.GetPageNumber() * pagination.GetShowNumber())).SetLimit(int64(pagination.GetShowNumber()))
+	if count == 0 || pagination == nil {
+		return count, nil, nil
+	}
+	skip := int64(pagination.GetPageNumber()-1) * int64(pagination.GetShowNumber())
+	if skip < 0 || skip >= count || pagination.GetShowNumber() <= 0 {
+		return count, nil, nil
+	}
+	opt := options.Find().SetSkip(skip).SetLimit(int64(pagination.GetShowNumber()))
 	res, err := Find[T](ctx, coll, filter, append(opts, opt)...)
 	if err != nil {
 		return 0, nil, err
@@ -78,4 +94,13 @@ func FindPage[T any](ctx context.Context, coll *mongo.Collection, filter any, pa
 
 func Count(ctx context.Context, coll *mongo.Collection, filter any, opts ...*options.CountOptions) (int64, error) {
 	return coll.CountDocuments(ctx, filter, opts...)
+}
+
+func Exist(ctx context.Context, coll *mongo.Collection, filter any, opts ...*options.CountOptions) (bool, error) {
+	opts = append(opts, options.Count().SetLimit(1))
+	count, err := Count(ctx, coll, filter, opts...)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }
