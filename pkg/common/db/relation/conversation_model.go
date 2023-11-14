@@ -50,7 +50,7 @@ func (c *ConversationGorm) UpdateByMap(
 	ctx context.Context,
 	userIDList []string,
 	conversationID string,
-	args map[string]interface{},
+	args map[string]any,
 ) (rows int64, err error) {
 	result := c.db(ctx).Where("owner_user_id IN (?) and  conversation_id=?", userIDList, conversationID).Updates(args)
 	return result.RowsAffected, utils.Wrap(result.Error, "")

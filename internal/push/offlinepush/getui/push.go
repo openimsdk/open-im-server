@@ -159,7 +159,7 @@ func (g *Client) singlePush(ctx context.Context, token, userID string, pushReq P
 	return g.request(ctx, pushURL, pushReq, token, nil)
 }
 
-func (g *Client) request(ctx context.Context, url string, input interface{}, token string, output interface{}) error {
+func (g *Client) request(ctx context.Context, url string, input any, token string, output any) error {
 	header := map[string]string{"token": token}
 	resp := &Resp{}
 	resp.Data = output
@@ -170,7 +170,7 @@ func (g *Client) postReturn(
 	ctx context.Context,
 	url string,
 	header map[string]string,
-	input interface{},
+	input any,
 	output RespI,
 	timeout int,
 ) error {

@@ -150,7 +150,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 	if _, err := s.FindWithError(ctx, []string{req.UserID}); err != nil {
 		return nil, err
 	}
-	m := make(map[string]interface{}, 1)
+	m := make(map[string]any, 1)
 	m["global_recv_msg_opt"] = req.GlobalRecvMsgOpt
 	if err := s.UpdateByMap(ctx, req.UserID, m); err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 	if err != nil {
 		return nil, err
 	}
-	userIDs := make(map[string]interface{}, 0)
+	userIDs := make(map[string]any, 0)
 	for _, v := range users {
 		userIDs[v.UserID] = nil
 	}

@@ -51,7 +51,7 @@ func (ConversationModel) TableName() string {
 type ConversationModelInterface interface {
 	Create(ctx context.Context, conversations []*ConversationModel) (err error)
 	Delete(ctx context.Context, groupIDs []string) (err error)
-	UpdateByMap(ctx context.Context, userIDs []string, conversationID string, args map[string]interface{}) (rows int64, err error)
+	UpdateByMap(ctx context.Context, userIDs []string, conversationID string, args map[string]any) (rows int64, err error)
 	Update(ctx context.Context, conversation *ConversationModel) (err error)
 	Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*ConversationModel, err error)
 	FindUserID(ctx context.Context, userIDs []string, conversationIDs []string) ([]string, error)

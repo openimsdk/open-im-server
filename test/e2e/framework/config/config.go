@@ -43,8 +43,8 @@ type Config struct {
 // LoadConfig loads the configurations from environment variables or default values.
 func LoadConfig() *Config {
 	return &Config{
-		APIHost:             getEnv("OPENIM_API_HOST", "127.0.0.1"),
-		APIPort:             getEnv("API_OPENIM_PORT", "10002"),
+		APIHost: getEnv("OPENIM_API_HOST", "127.0.0.1"),
+		APIPort: getEnv("API_OPENIM_PORT", "10002"),
 
 		// TODO: Set default variable
 		MsgGatewayHost:      getEnv("OPENIM_MSGGATEWAY_HOST", "default-msggateway-host"),

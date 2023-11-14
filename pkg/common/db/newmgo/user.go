@@ -21,7 +21,7 @@ type UserModel struct {
 
 type UserModelInterface interface {
 	Create(ctx context.Context, users []*UserModel) (err error)
-	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
+	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
 	// 获取指定用户信息  不存在，也不返回错误
 	Find(ctx context.Context, userIDs []string) (users []*UserModel, err error)
 	// 获取某个用户信息  不存在，则返回错误

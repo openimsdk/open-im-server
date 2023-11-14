@@ -47,7 +47,7 @@ func (g *GroupGorm) Create(ctx context.Context, groups []*relation.GroupModel) (
 	return utils.Wrap(g.DB.Create(&groups).Error, "")
 }
 
-func (g *GroupGorm) UpdateMap(ctx context.Context, groupID string, args map[string]interface{}) (err error) {
+func (g *GroupGorm) UpdateMap(ctx context.Context, groupID string, args map[string]any) (err error) {
 	return utils.Wrap(g.DB.Where("group_id = ?", groupID).Model(&relation.GroupModel{}).Updates(args).Error, "")
 }
 

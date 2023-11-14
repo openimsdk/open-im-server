@@ -145,7 +145,7 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 	conversation.ConversationType = req.Conversation.ConversationType
 	conversation.UserID = req.Conversation.UserID
 	conversation.GroupID = req.Conversation.GroupID
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 	if req.Conversation.RecvMsgOpt != nil {
 		m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
 		if req.Conversation.RecvMsgOpt.Value != conv.RecvMsgOpt {
@@ -284,7 +284,7 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 
 func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbconversation.SetConversationMaxSeqReq) (*pbconversation.SetConversationMaxSeqResp, error) {
 	if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, req.OwnerUserID, req.ConversationID,
-		map[string]interface{}{"max_seq": req.MaxSeq}); err != nil {
+		map[string]any{"max_seq": req.MaxSeq}); err != nil {
 		return nil, err
 	}
 	return &pbconversation.SetConversationMaxSeqResp{}, nil

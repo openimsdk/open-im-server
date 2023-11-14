@@ -325,7 +325,7 @@ func (c *msgCache) GetTokensWithoutError(ctx context.Context, userID string, pla
 
 func (c *msgCache) SetTokenMapByUidPid(ctx context.Context, userID string, platform int, m map[string]int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platform)
-	mm := make(map[string]interface{})
+	mm := make(map[string]any)
 	for k, v := range m {
 		mm[k] = v
 	}

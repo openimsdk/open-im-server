@@ -40,7 +40,7 @@ type UserDatabase interface {
 	// Update update (non-zero value) external guarantee userID exists
 	//Update(ctx context.Context, user *relation.UserModel) (err error)
 	// UpdateByMap update (zero value) external guarantee userID exists
-	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
+	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
 	// Page If not found, no error is returned
 	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relation.UserModel, count int64, err error)
 	// IsExist true as long as one exists
@@ -138,7 +138,7 @@ func (u *userDatabase) Update(ctx context.Context, user *relation.UserModel) (er
 }
 
 // UpdateByMap update (zero value) externally guarantees that userID exists.
-func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
+func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error) {
 	if err := u.userDB.UpdateByMap(ctx, userID, args); err != nil {
 		return err
 	}

@@ -48,7 +48,7 @@ func (GroupModel) TableName() string {
 type GroupModelInterface interface {
 	NewTx(tx any) GroupModelInterface
 	Create(ctx context.Context, groups []*GroupModel) (err error)
-	UpdateMap(ctx context.Context, groupID string, args map[string]interface{}) (err error)
+	UpdateMap(ctx context.Context, groupID string, args map[string]any) (err error)
 	UpdateStatus(ctx context.Context, groupID string, status int32) (err error)
 	Find(ctx context.Context, groupIDs []string) (groups []*GroupModel, err error)
 	FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*GroupModel, err error)

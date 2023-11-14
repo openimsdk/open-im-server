@@ -43,7 +43,7 @@ type FriendModelInterface interface {
 	// 删除ownerUserID指定的好友
 	Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error)
 	// 更新ownerUserID单个好友信息 更新零值
-	UpdateByMap(ctx context.Context, ownerUserID string, friendUserID string, args map[string]interface{}) (err error)
+	UpdateByMap(ctx context.Context, ownerUserID string, friendUserID string, args map[string]any) (err error)
 	// 更新好友信息的非零值
 	Update(ctx context.Context, friends []*FriendModel) (err error)
 	// 更新好友备注（也支持零值 ）

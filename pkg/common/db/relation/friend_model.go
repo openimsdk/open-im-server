@@ -58,7 +58,7 @@ func (f *FriendGorm) UpdateByMap(
 	ctx context.Context,
 	ownerUserID string,
 	friendUserID string,
-	args map[string]interface{},
+	args map[string]any,
 ) (err error) {
 	return utils.Wrap(
 		f.db(ctx).Where("owner_user_id = ? AND friend_user_id = ? ", ownerUserID, friendUserID).Updates(args).Error,
@@ -82,7 +82,7 @@ func (f *FriendGorm) UpdateRemark(ctx context.Context, ownerUserID, friendUserID
 			"",
 		)
 	}
-	m := make(map[string]interface{}, 1)
+	m := make(map[string]any, 1)
 	m["remark"] = ""
 	return utils.Wrap(f.db(ctx).Where("owner_user_id = ?", ownerUserID).Updates(m).Error, "")
 }

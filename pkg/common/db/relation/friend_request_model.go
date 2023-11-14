@@ -57,7 +57,7 @@ func (f *FriendRequestGorm) UpdateByMap(
 	ctx context.Context,
 	fromUserID string,
 	toUserID string,
-	args map[string]interface{},
+	args map[string]any,
 ) (err error) {
 	return utils.Wrap(
 		f.db(ctx).

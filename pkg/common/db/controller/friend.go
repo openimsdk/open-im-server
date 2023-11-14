@@ -127,7 +127,7 @@ func (f *friendDatabase) AddFriendRequest(
 		}
 		// 无错误 则更新
 		if err == nil {
-			m := make(map[string]interface{}, 1)
+			m := make(map[string]any, 1)
 			m["handle_result"] = 0
 			m["handle_msg"] = ""
 			m["req_msg"] = reqMsg

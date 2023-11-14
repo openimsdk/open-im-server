@@ -54,7 +54,7 @@ func TestPost(t *testing.T) {
 		ctx     context.Context
 		url     string
 		header  map[string]string
-		data    interface{}
+		data    any
 		timeout int
 	}
 	tests := []struct {
@@ -84,8 +84,8 @@ func TestPostReturn(t *testing.T) {
 		ctx           context.Context
 		url           string
 		header        map[string]string
-		input         interface{}
-		output        interface{}
+		input         any
+		output        any
 		timeOutSecond int
 	}
 	tests := []struct {
@@ -109,7 +109,7 @@ func Test_callBackPostReturn(t *testing.T) {
 		ctx            context.Context
 		url            string
 		command        string
-		input          interface{}
+		input          any
 		output         callbackstruct.CallbackResp
 		callbackConfig config.CallBackConfig
 	}

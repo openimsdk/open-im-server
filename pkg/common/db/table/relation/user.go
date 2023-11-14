@@ -55,7 +55,7 @@ func (UserModel) TableName() string {
 
 type UserModelInterface interface {
 	Create(ctx context.Context, users []*UserModel) (err error)
-	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
+	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
 	Update(ctx context.Context, user *UserModel) (err error)
 	// 获取指定用户信息  不存在，也不返回错误
 	Find(ctx context.Context, userIDs []string) (users []*UserModel, err error)

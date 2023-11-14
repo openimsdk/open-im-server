@@ -15,11 +15,11 @@
 package body
 
 type PushObj struct {
-	Platform     interface{} `json:"platform"`
-	Audience     interface{} `json:"audience"`
-	Notification interface{} `json:"notification,omitempty"`
-	Message      interface{} `json:"message,omitempty"`
-	Options      interface{} `json:"options,omitempty"`
+	Platform     any `json:"platform"`
+	Audience     any `json:"audience"`
+	Notification any `json:"notification,omitempty"`
+	Message      any `json:"message,omitempty"`
+	Options      any `json:"options,omitempty"`
 }
 
 func (p *PushObj) SetPlatform(pf *Platform) {
