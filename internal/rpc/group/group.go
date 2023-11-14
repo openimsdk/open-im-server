@@ -300,7 +300,9 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		s.Notification.GroupCreatedNotification(ctx, tips)
 	}
 	reqCallBackAfter := &pbgroup.CreateGroupReq{
-		GroupInfo: resp.GroupInfo,
+		MemberUserIDs: userIDs,
+		GroupInfo:     resp.GroupInfo,
+		OwnerUserID:   req.OwnerUserID,
 	}
 
 	if err := CallbackAfterCreateGroup(ctx, reqCallBackAfter); err != nil {
