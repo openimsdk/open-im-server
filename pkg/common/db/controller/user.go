@@ -38,7 +38,7 @@ type UserDatabase interface {
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db
 	Create(ctx context.Context, users []*relation.UserModel) (err error)
 	// Update update (non-zero value) external guarantee userID exists
-	Update(ctx context.Context, user *relation.UserModel) (err error)
+	//Update(ctx context.Context, user *relation.UserModel) (err error)
 	// UpdateByMap update (zero value) external guarantee userID exists
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
 	// Page If not found, no error is returned
