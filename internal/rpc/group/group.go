@@ -225,6 +225,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	if len(userMap) != len(userIDs) {
 		return nil, errs.ErrUserIDNotFound.Wrap("user not found")
 	}
+	// Callback Before create Group
 	if err := CallbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
 	}
@@ -298,6 +299,14 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		}
 		s.Notification.GroupCreatedNotification(ctx, tips)
 	}
+	reqCallBackAfter := &pbgroup.CreateGroupReq{
+		GroupInfo: resp.GroupInfo,
+	}
+
+	if err := CallbackAfterCreateGroup(ctx, reqCallBackAfter); err != nil {
+		return nil, err
+	}
+
 	return resp, nil
 }
 

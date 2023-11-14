@@ -86,6 +86,48 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 	return nil
 }
 
+func CallbackAfterCreateGroup(ctx context.Context, req *group.CreateGroupReq) (err error) {
+	if !config.Config.Callback.CallbackBeforeCreateGroup.Enable {
+		return nil
+	}
+	cbReq := &callbackstruct.CallbackBeforeCreateGroupReq{
+		CallbackCommand: "callbackAfterCreateGroupCommand",
+		OperationID:     mcontext.GetOperationID(ctx),
+		GroupInfo:       req.GroupInfo,
+	}
+	cbReq.InitMemberList = append(cbReq.InitMemberList, &apistruct.GroupAddMemberInfo{
+		UserID:    req.OwnerUserID,
+		RoleLevel: constant.GroupOwner,
+	})
+	for _, userID := range req.AdminUserIDs {
+		cbReq.InitMemberList = append(cbReq.InitMemberList, &apistruct.GroupAddMemberInfo{
+			UserID:    userID,
+			RoleLevel: constant.GroupAdmin,
+		})
+	}
+	for _, userID := range req.MemberUserIDs {
+		cbReq.InitMemberList = append(cbReq.InitMemberList, &apistruct.GroupAddMemberInfo{
+			UserID:    userID,
+			RoleLevel: constant.GroupOrdinaryUsers,
+		})
+	}
+	resp := &callbackstruct.CallbackBeforeCreateGroupResp{}
+	err = http.CallBackPostReturn(
+		ctx,
+		config.Config.Callback.CallbackUrl,
+		cbReq,
+		resp,
+		config.Config.Callback.CallbackBeforeCreateGroup,
+	)
+	if err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
 func CallbackBeforeMemberJoinGroup(
 	ctx context.Context,
 	groupMember *relation.GroupMemberModel,

@@ -51,10 +51,11 @@ type CallbackResp interface {
 }
 
 type CommonCallbackResp struct {
-	ActionCode int    `json:"actionCode"`
+	ActionCode int32  `json:"actionCode"`
 	ErrCode    int32  `json:"errCode"`
 	ErrMsg     string `json:"errMsg"`
 	ErrDlt     string `json:"errDlt"`
+	NextCode   int32  `json:"nextCode"`
 }
 
 func (c CommonCallbackResp) Parse() error {
