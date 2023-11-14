@@ -3,14 +3,10 @@ package mgotool
 import (
 	"context"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-type Pagination interface {
-	GetPageNumber() int32
-	GetShowNumber() int32
-}
 
 func Anys[T any](ts []T) []any {
 	val := make([]any, len(ts))
@@ -18,6 +14,19 @@ func Anys[T any](ts []T) []any {
 		val[i] = ts[i]
 	}
 	return val
+}
+
+func findOptionToCountOption(opts []*options.FindOptions) *options.CountOptions {
+	countOpt := options.Count()
+	for _, opt := range opts {
+		if opt.Skip != nil {
+			countOpt.SetSkip(*opt.Skip)
+		}
+		if opt.Limit != nil {
+			countOpt.SetLimit(*opt.Limit)
+		}
+	}
+	return countOpt
 }
 
 func InsertMany[T any](ctx context.Context, coll *mongo.Collection, val []T, opts ...*options.InsertManyOptions) error {
@@ -63,17 +72,8 @@ func FindOne[T any](ctx context.Context, coll *mongo.Collection, filter any, opt
 	return res, nil
 }
 
-func FindPage[T any](ctx context.Context, coll *mongo.Collection, filter any, pagination Pagination, opts ...*options.FindOptions) (int64, []T, error) {
-	countOpt := options.Count()
-	for _, opt := range opts {
-		if opt.Skip != nil {
-			countOpt.SetSkip(*opt.Skip)
-		}
-		if opt.Limit != nil {
-			countOpt.SetLimit(*opt.Limit)
-		}
-	}
-	count, err := Count(ctx, coll, filter, countOpt)
+func FindPage[T any](ctx context.Context, coll *mongo.Collection, filter any, pagination pagination.Pagination, opts ...*options.FindOptions) (int64, []T, error) {
+	count, err := Count(ctx, coll, filter, findOptionToCountOption(opts))
 	if err != nil {
 		return 0, nil, err
 	}
@@ -104,3 +104,21 @@ func Exist(ctx context.Context, coll *mongo.Collection, filter any, opts ...*opt
 	}
 	return count > 0, nil
 }
+
+func DeleteOne(ctx context.Context, coll *mongo.Collection, filter any, opts ...*options.DeleteOptions) error {
+	if _, err := coll.DeleteOne(ctx, filter, opts...); err != nil {
+		return errs.Wrap(err)
+	}
+	return nil
+}
+
+func DeleteMany(ctx context.Context, coll *mongo.Collection, filter any, opts ...*options.DeleteOptions) error {
+	if _, err := coll.DeleteMany(ctx, filter, opts...); err != nil {
+		return errs.Wrap(err)
+	}
+	return nil
+}
+
+//func Upsert[T any](ctx context.Context, coll *mongo.Collection, val *T, opts ...*options.InsertManyOptions) error {
+//	return nil
+//}

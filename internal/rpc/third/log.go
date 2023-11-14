@@ -120,7 +120,7 @@ func (t *thirdServer) SearchLogs(ctx context.Context, req *third.SearchLogsReq) 
 	if req.StartTime > req.EndTime {
 		return nil, errs.ErrArgs.Wrap("startTime>endTime")
 	}
-	total, logs, err := t.thirdDatabase.SearchLogs(ctx, req.Keyword, time.UnixMilli(req.StartTime), time.UnixMilli(req.EndTime), req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	total, logs, err := t.thirdDatabase.SearchLogs(ctx, req.Keyword, time.UnixMilli(req.StartTime), time.UnixMilli(req.EndTime), req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -128,18 +128,16 @@ func (t *thirdServer) SearchLogs(ctx context.Context, req *third.SearchLogsReq) 
 	for _, log := range logs {
 		userIDs = append(userIDs, log.UserID)
 	}
-	users, err := t.thirdDatabase.FindUsers(ctx, userIDs)
+	userMap, err := t.userRpcClient.GetUsersInfoMap(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
-	IDtoName := make(map[string]string)
-	for _, user := range users {
-		IDtoName[user.UserID] = user.Nickname
-	}
 	for _, pbLog := range pbLogs {
-		pbLog.Nickname = IDtoName[pbLog.UserID]
+		if user, ok := userMap[pbLog.UserID]; ok {
+			pbLog.Nickname = user.Nickname
+		}
 	}
 	resp.LogsInfos = pbLogs
-	resp.Total = total
+	resp.Total = uint32(total)
 	return &resp, nil
 }

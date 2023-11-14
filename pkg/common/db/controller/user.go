@@ -17,8 +17,8 @@ package controller
 import (
 	"context"
 	"github.com/OpenIMSDK/tools/tx"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo/mgotool"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/user"
@@ -43,11 +43,11 @@ type UserDatabase interface {
 	// UpdateByMap update (zero value) external guarantee userID exists
 	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
 	// Page If not found, no error is returned
-	Page(ctx context.Context, pagination mgotool.Pagination) (count int64, users []*relation.UserModel, err error)
+	Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
 	// IsExist true as long as one exists
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 	// GetAllUserID Get all user IDs
-	GetAllUserID(ctx context.Context, pagination mgotool.Pagination) (int64, []string, error)
+	GetAllUserID(ctx context.Context, pagination pagination.Pagination) (int64, []string, error)
 	// InitOnce Inside the function, first query whether it exists in the db, if it exists, do nothing; if it does not exist, insert it
 	InitOnce(ctx context.Context, users []*relation.UserModel) (err error)
 	// CountTotal Get the total number of users
@@ -142,7 +142,7 @@ func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[
 }
 
 // Page Gets, returns no error if not found.
-func (u *userDatabase) Page(ctx context.Context, pagination mgotool.Pagination) (count int64, users []*relation.UserModel, err error) {
+func (u *userDatabase) Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
 	return u.userDB.Page(ctx, pagination)
 }
 
@@ -159,7 +159,7 @@ func (u *userDatabase) IsExist(ctx context.Context, userIDs []string) (exist boo
 }
 
 // GetAllUserID Get all user IDs.
-func (u *userDatabase) GetAllUserID(ctx context.Context, pagination mgotool.Pagination) (total int64, userIDs []string, err error) {
+func (u *userDatabase) GetAllUserID(ctx context.Context, pagination pagination.Pagination) (total int64, userIDs []string, err error) {
 	return u.userDB.GetAllUserID(ctx, pagination)
 }
 

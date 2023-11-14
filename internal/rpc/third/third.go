@@ -17,6 +17,8 @@ package third
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"net/url"
 	"time"
 
@@ -33,13 +35,22 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	mongo, err := unrelation.NewMongo()
+	if err != nil {
+		return err
+	}
+	logdb, err := newmgo.NewLogMongo(mongo.GetDatabase())
+	if err != nil {
+		return err
+	}
+	s3db, err := newmgo.NewS3Mongo(mongo.GetDatabase())
+	if err != nil {
+		return err
+	}
 	apiURL := config.Config.Object.ApiURL
 	if apiURL == "" {
 		return fmt.Errorf("api url is empty")
@@ -53,13 +64,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	apiURL += "object/"
 	rdb, err := cache.NewRedis()
 	if err != nil {
-		return err
-	}
-	db, err := relation.NewGormDB()
-	if err != nil {
-		return err
-	}
-	if err := db.AutoMigrate(&relationtb.ObjectModel{}); err != nil {
 		return err
 	}
 	// 根据配置文件策略选择 oss 方式
@@ -78,17 +82,11 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	//specialerror.AddErrHandler(func(err error) errs.CodeError {
-	//	if o.IsNotFound(err) {
-	//		return errs.ErrRecordNotFound
-	//	}
-	//	return nil
-	//})
 	third.RegisterThirdServer(server, &thirdServer{
 		apiURL:        apiURL,
-		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb), db),
+		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb), logdb),
 		userRpcClient: rpcclient.NewUserRpcClient(client),
-		s3dataBase:    controller.NewS3Database(rdb, o, relation.NewObjectInfo(db)),
+		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
 		defaultExpire: time.Hour * 24 * 7,
 	})
 	return nil

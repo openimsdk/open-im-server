@@ -4,16 +4,17 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo/mgotool"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
 
-func NewUserMongo(db *mongo.Database) relation.UserModelInterface {
+func NewUserMongo(db *mongo.Database) (relation.UserModelInterface, error) {
 	return &UserMgo{
 		coll: db.Collection("user"),
-	}
+	}, nil
 }
 
 type UserMgo struct {
@@ -39,11 +40,11 @@ func (u *UserMgo) Take(ctx context.Context, userID string) (user *relation.UserM
 	return mgotool.FindOne[*relation.UserModel](ctx, u.coll, bson.M{"user_id": userID})
 }
 
-func (u *UserMgo) Page(ctx context.Context, pagination mgotool.Pagination) (count int64, users []*relation.UserModel, err error) {
+func (u *UserMgo) Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
 	return mgotool.FindPage[*relation.UserModel](ctx, u.coll, bson.M{}, pagination)
 }
 
-func (u *UserMgo) GetAllUserID(ctx context.Context, pagination mgotool.Pagination) (int64, []string, error) {
+func (u *UserMgo) GetAllUserID(ctx context.Context, pagination pagination.Pagination) (int64, []string, error) {
 	return mgotool.FindPage[string](ctx, u.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"user_id": 1}))
 }
 

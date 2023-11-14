@@ -78,7 +78,10 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	for k, v := range config.Config.Manager.UserID {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k], AppMangerLevel: constant.AppAdmin})
 	}
-	userDB := newmgo.NewUserMongo(mongo.GetDatabase())
+	userDB, err := newmgo.NewUserMongo(mongo.GetDatabase())
+	if err != nil {
+		return err
+	}
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
 	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
 	database := controller.NewUserDatabase(userDB, cache, tx.NewMongo(mongo.GetClient()), userMongoDB)

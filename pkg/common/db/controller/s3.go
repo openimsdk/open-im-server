@@ -79,7 +79,7 @@ func (s *s3Database) SetObject(ctx context.Context, info *relation.ObjectModel) 
 }
 
 func (s *s3Database) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (time.Time, string, error) {
-	obj, err := s.cache.GetName(ctx, name)
+	obj, err := s.cache.GetName(ctx, s.s3.Engine(), name)
 	if err != nil {
 		return time.Time{}, "", err
 	}
