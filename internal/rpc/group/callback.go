@@ -88,10 +88,10 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 }
 
 func CallbackAfterCreateGroup(ctx context.Context, req *group.CreateGroupReq) (err error) {
-	if !config.Config.Callback.CallbackBeforeCreateGroup.Enable {
+	if !config.Config.Callback.CallbackAfterCreateGroup.Enable {
 		return nil
 	}
-	cbReq := &callbackstruct.CallbackBeforeCreateGroupReq{
+	cbReq := &callbackstruct.CallbackAfterCreateGroupReq{
 		CallbackCommand: "callbackAfterCreateGroupCommand",
 		OperationID:     mcontext.GetOperationID(ctx),
 		GroupInfo:       req.GroupInfo,
@@ -112,13 +112,13 @@ func CallbackAfterCreateGroup(ctx context.Context, req *group.CreateGroupReq) (e
 			RoleLevel: constant.GroupOrdinaryUsers,
 		})
 	}
-	resp := &callbackstruct.CallbackBeforeCreateGroupResp{}
+	resp := &callbackstruct.CallbackAfterCreateGroupResp{}
 	err = http.CallBackPostReturn(
 		ctx,
 		config.Config.Callback.CallbackUrl,
 		cbReq,
 		resp,
-		config.Config.Callback.CallbackBeforeCreateGroup,
+		config.Config.Callback.CallbackAfterCreateGroup,
 	)
 	if err != nil {
 		if err == errs.ErrCallbackContinue {

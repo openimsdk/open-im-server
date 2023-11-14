@@ -50,6 +50,17 @@ type CallbackBeforeCreateGroupResp struct {
 	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
 }
 
+type CallbackAfterCreateGroupReq struct {
+	OperationID     string `json:"operationID"`
+	CallbackCommand `json:"callbackCommand"`
+	*common.GroupInfo
+	InitMemberList []*apistruct.GroupAddMemberInfo `json:"initMemberList"`
+}
+
+type CallbackAfterCreateGroupResp struct {
+	CommonCallbackResp
+}
+
 type CallbackBeforeMemberJoinGroupReq struct {
 	CallbackCommand `json:"callbackCommand"`
 	OperationID     string `json:"operationID"`
