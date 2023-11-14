@@ -34,7 +34,7 @@ release.tag: tools.verify.gsemver release.ensure-tag
 ## release.ensure-tag: ensure tag
 .PHONY: release.ensure-tag
 release.ensure-tag: tools.verify.gsemver
-	@scripts/ensure_tag.sh
+	@scripts/ensure-tag.sh
 
 ## release.help: Display help information about the release package
 .PHONY: release.help

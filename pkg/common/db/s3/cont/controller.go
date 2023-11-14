@@ -175,7 +175,6 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 		return nil, err
 	}
 	if md5Sum := md5.Sum([]byte(strings.Join(partHashs, partSeparator))); hex.EncodeToString(md5Sum[:]) != upload.Hash {
-		fmt.Println("CompleteUpload sum:", hex.EncodeToString(md5Sum[:]), "upload hash:", upload.Hash)
 		return nil, errors.New("md5 mismatching")
 	}
 	if info, err := c.StatObject(ctx, c.HashPath(upload.Hash)); err == nil {

@@ -17,13 +17,18 @@ package tools
 import (
 	"context"
 	"fmt"
-	"sync"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"
 
 	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 )
 
 func StartTask() error {
@@ -32,23 +37,75 @@ func StartTask() error {
 	if err != nil {
 		return err
 	}
-	msgTool.ConvertTools()
-	c := cron.New()
-	var wg sync.WaitGroup
-	wg.Add(1)
+
+	msgTool.convertTools()
+
+	rdb, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
+
+	// register cron tasks
+	var crontab = cron.New()
 	log.ZInfo(context.Background(), "start chatRecordsClearTime cron task", "cron config", config.Config.ChatRecordsClearTime)
-	_, err = c.AddFunc(config.Config.ChatRecordsClearTime, msgTool.AllConversationClearMsgAndFixSeq)
+	_, err = crontab.AddFunc(config.Config.ChatRecordsClearTime, cronWrapFunc(rdb, "cron_clear_msg_and_fix_seq", msgTool.AllConversationClearMsgAndFixSeq))
 	if err != nil {
 		log.ZError(context.Background(), "start allConversationClearMsgAndFixSeq cron failed", err)
 		panic(err)
 	}
+
 	log.ZInfo(context.Background(), "start msgDestruct cron task", "cron config", config.Config.MsgDestructTime)
-	_, err = c.AddFunc(config.Config.MsgDestructTime, msgTool.ConversationsDestructMsgs)
+	_, err = crontab.AddFunc(config.Config.MsgDestructTime, cronWrapFunc(rdb, "cron_conversations_destruct_msgs", msgTool.ConversationsDestructMsgs))
 	if err != nil {
 		log.ZError(context.Background(), "start conversationsDestructMsgs cron failed", err)
 		panic(err)
 	}
-	c.Start()
-	wg.Wait()
+
+	// start crontab
+	crontab.Start()
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	<-sigs
+
+	// stop crontab, Wait for the running task to exit.
+	ctx := crontab.Stop()
+
+	select {
+	case <-ctx.Done():
+		// graceful exit
+
+	case <-time.After(15 * time.Second):
+		// forced exit on timeout
+	}
+
 	return nil
+}
+
+// netlock redis lock.
+func netlock(rdb redis.UniversalClient, key string, ttl time.Duration) bool {
+	value := "used"
+	ok, err := rdb.SetNX(context.Background(), key, value, ttl).Result() // nolint
+	if err != nil {
+		// when err is about redis server, return true.
+		return false
+	}
+
+	return ok
+}
+
+func cronWrapFunc(rdb redis.UniversalClient, key string, fn func()) func() {
+	enableCronLocker := config.Config.EnableCronLocker
+	return func() {
+		// if don't enable cron-locker, call fn directly.
+		if !enableCronLocker {
+			fn()
+			return
+		}
+
+		// when acquire redis lock, call fn().
+		if netlock(rdb, key, 5*time.Second) {
+			fn()
+		}
+	}
 }
