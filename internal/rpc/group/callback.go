@@ -69,6 +69,7 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 		if err == errs.ErrCallbackContinue {
 			return nil
 		}
+
 		return err
 	}
 	utils.NotNilReplace(&req.GroupInfo.GroupID, resp.GroupID)
