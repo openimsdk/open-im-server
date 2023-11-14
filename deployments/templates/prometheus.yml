@@ -20,14 +20,14 @@ rule_files:
 # Here it's Prometheus itself.
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  # prometheus抓取的监控的信息
+  # Monitored information captured by prometheus
   - job_name: 'node-exporter'
     static_configs:
       - targets: [ '${NODE_EXPORTER_ADDRESS}:${NODE_EXPORTER_PORT}' ]
         labels:
           namespace: 'default'
 
-  # prometheus抓取应用服务
+  # prometheus fetches application services
   - job_name: 'openimserver-openim-api'
     static_configs:
       - targets: [ '${OPENIM_SERVER_ADDRESS}:${API_PROM_PORT}' ]
