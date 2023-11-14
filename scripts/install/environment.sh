@@ -349,7 +349,8 @@ def "IOS_BADGE_COUNT" "true"    # IOS徽章计数
 def "IOS_PRODUCTION" "false"    # IOS生产
 
 ###################### Prometheus 配置信息 ######################
-def "PROMETHEUS_ENABLE" "false" # 是否启用 Prometheus
+# 是否启用 Prometheus
+readonly PROMETHEUS_ENABLE=${PROMETHEUS_ENABLE:-'false'}
 def "PROMETHEUS_URL" "${GRAFANA_ADDRESS}:${GRAFANA_PORT}"
 # Api 服务的 Prometheus 端口
 readonly API_PROM_PORT=${API_PROM_PORT:-'20100'}

@@ -198,7 +198,7 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: ./logs/
+  storageLocation: ../logs/
   rotationTime: 24
   remainRotationCount: 2
   remainLogLevel: 6
@@ -382,7 +382,7 @@ callback:
 # The number of Prometheus ports per service needs to correspond to rpcPort
 # The number of ports needs to be consistent with msg_transfer_service_num in script/path_info.sh
 prometheus:
-  enable: true
+  enable: false
   prometheusUrl: "https://openim.prometheus"
   apiPrometheusPort: [20100]
   userPrometheusPort: [ 20110 ]

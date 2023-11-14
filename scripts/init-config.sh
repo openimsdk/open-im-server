@@ -46,6 +46,7 @@ for template in "${!TEMPLATES[@]}"; do
       openim::log::error "Error processing template file ${template}"
       exit 1
     }
+    sleep 0.5
   done
 done
 
