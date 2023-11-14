@@ -401,3 +401,5 @@ Sessionx.vim
 dist/
 .env
 config/config.yaml
+
+**__debug_bin

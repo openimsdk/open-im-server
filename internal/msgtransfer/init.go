@@ -37,9 +37,9 @@ import (
 )
 
 type MsgTransfer struct {
-	persistentCH   *PersistentConsumerHandler         // 聊天记录持久化到mysql的消费者 订阅的topic: ws2ms_chat
-	historyCH      *OnlineHistoryRedisConsumerHandler // 这个消费者聚合消息, 订阅的topic：ws2ms_chat, 修改通知发往msg_to_modify topic, 消息存入redis后Incr Redis, 再发消息到ms2pschat topic推送， 发消息到msg_to_mongo topic持久化
-	historyMongoCH *OnlineHistoryMongoConsumerHandler // mongoDB批量插入, 成功后删除redis中消息，以及处理删除通知消息删除的 订阅的topic: msg_to_mongo
+	persistentCH   *PersistentConsumerHandler         // Topic: WS2MS_Chat subscribed to consumers who are durable to MySQL consumers
+	historyCH      *OnlineHistoryRedisConsumerHandler // This consumer aggregation message, Topic subscribed: ws2ms_chat, modify notification to msg_to_modify topic, the message is stored in redis, and then send a message to MS2PSChat Topic push, send messages to msg_to_mongo topic durability
+	historyMongoCH *OnlineHistoryMongoConsumerHandler // MongoDB batch insertion, delete the message in Redis after success, and process the TOPIC: msg_to_mongo of the deleted notification message deleted
 	// modifyCH       *ModifyMsgConsumerHandler          // 负责消费修改消息通知的consumer, 订阅的topic: msg_to_modify
 }
 

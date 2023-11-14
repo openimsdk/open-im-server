@@ -147,12 +147,15 @@ object:
   minio:
     bucket: "openim"
     # endpoint: "http://172.28.0.1:10005"
-    endpoint: "http:///127.0.0.1:10005"
+    endpoint: "http://127.0.0.1:10005"
+    # endpoint: "http://192.168.136.215:10005"
     accessKeyID: "root"
     secretAccessKey: "openIM123"
     sessionToken: ''
     # signEndpoint: "http://127.0.0.1:10005"
-    signEndpoint: "http://127.0.0.1:10005"
+    # signEndpoint: "http://127.0.0.1:10005"
+    signEndpoint: "http://172.16.3.19:10005"
+    # signEndpoint: "http://192.168.136.215:10005"
     publicRead: false
   cos:
     bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com

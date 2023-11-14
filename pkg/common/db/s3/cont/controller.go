@@ -106,6 +106,9 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 		if err != nil {
 			return nil, err
 		}
+
+		// rawURL = strings.Replace(rawURL, "127.0.0.1", "192.168.136.215", 1)
+
 		return &InitiateUploadResult{
 			UploadID: newMultipartUploadID(multipartUploadID{
 				Type: UploadTypePresigned,
@@ -125,7 +128,7 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 			},
 		}, nil
 	} else {
-		// 分片上传
+		// Upload
 		upload, err := c.impl.InitiateMultipartUpload(ctx, c.HashPath(hash))
 		if err != nil {
 			return nil, err

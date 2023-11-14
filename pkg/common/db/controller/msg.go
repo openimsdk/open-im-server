@@ -54,7 +54,7 @@ type CommonMsgDatabase interface {
 	// 刪除redis中消息缓存
 	DeleteMessagesFromCache(ctx context.Context, conversationID string, seqs []int64) error
 	DelUserDeleteMsgsList(ctx context.Context, conversationID string, seqs []int64)
-	// incrSeq然后批量插入缓存
+	// Incrseq and then insert the cache in batches
 	BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNewConversation bool, err error)
 
 	//  通过seqList获取mongo中写扩散消息
