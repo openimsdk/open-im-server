@@ -3,7 +3,7 @@ global:
   smtp_from: '18565885972@163.com'
   smtp_smarthost: 'smtp.163.com:465'
   smtp_auth_username: '18565885972@163.com'
-  smtp_auth_password: 'ZTASKEORBBNKWPRV'
+  smtp_auth_password: 'YOURAUTHPASSWORD'
   smtp_require_tls: false
   smtp_hello: 'xxx监控告警'
 
@@ -21,5 +21,5 @@ receivers:
     email_configs:
       - to: '2393740379@qq.com'
         html: '{{ template "email.to.html" . }}'
-        headers: { Subject: "[WARN]告警" }
+        headers: { Subject: "[OPENIM-SERVER]告警" }
         send_resolved: true
