@@ -19,7 +19,7 @@ route:
 receivers:
   - name: 'email'
     email_configs:
-      - to: '2393740379@qq.com'
+      - to: '239374037@qq.com'
         html: '{{ template "email.to.html" . }}'
         headers: { Subject: "[OPENIM-SERVER]告警" }
         send_resolved: true
