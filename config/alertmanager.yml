@@ -1,0 +1,25 @@
+global:
+  resolve_timeout: 5m
+  smtp_from: '18565885972@163.com'
+  smtp_smarthost: 'smtp.163.com:465'
+  smtp_auth_username: '18565885972@163.com'
+  smtp_auth_password: 'ZTASKEORBBNKWPRV'
+  smtp_require_tls: false
+  smtp_hello: 'xxx监控告警'
+
+templates:
+  - '/etc/alertmanager/email.tmpl'
+
+route:
+  group_by: ['alertname']
+  group_wait: 5s
+  group_interval: 5s
+  repeat_interval: 5m
+  receiver: 'email'
+receivers:
+  - name: 'email'
+    email_configs:
+      - to: '2393740379@qq.com'
+        html: '{{ template "email.to.html" . }}'
+        headers: { Subject: "[WARN]告警" }
+        send_resolved: true

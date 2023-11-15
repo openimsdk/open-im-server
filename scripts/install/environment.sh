@@ -120,6 +120,8 @@ LAST_OCTET=$((LAST_OCTET + 1))
 NODE_EXPORTER_NETWORK_ADDRESS=$(generate_ip)
 LAST_OCTET=$((LAST_OCTET + 1))
 OPENIM_ADMIN_FRONT_NETWORK_ADDRESS=$(generate_ip)
+LAST_OCTET=$((LAST_OCTET + 1))
+ALERT_MANAGER_NETWORK_ADDRESS=$(generate_ip)
 ###################### openim 配置 ######################
 # read: https://github.com/openimsdk/open-im-server/blob/main/deployment/README.md
 def "OPENIM_DATA_DIR" "/data/openim"
@@ -259,6 +261,11 @@ def "PROMETHEUS_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # Prometheus的地址
 ###################### node-exporter 配置 ######################
 def "NODE_EXPORTER_PORT" "19100"                       # node-exporter的端口
 def "NODE_EXPORTER_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # node-exporter的地址
+
+###################### alertmanagerS 配置 ######################
+def "ALERT_MANAGER_PORT" "19093"                       # node-exporter的端口
+def "ALERT_MANAGER_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # node-exporter的地址
+
 ###################### Grafana 配置信息 ######################
 def "GRAFANA_PORT" "3000"                        # Grafana的端口
 def "GRAFANA_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # Grafana的地址
