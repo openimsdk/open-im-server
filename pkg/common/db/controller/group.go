@@ -35,12 +35,10 @@ type GroupDatabase interface {
 	CreateGroup(ctx context.Context, groups []*relationtb.GroupModel, groupMembers []*relationtb.GroupMemberModel) error
 	TakeGroup(ctx context.Context, groupID string) (group *relationtb.GroupModel, err error)
 	FindGroup(ctx context.Context, groupIDs []string) (groups []*relationtb.GroupModel, err error)
-	//FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*relationtb.GroupModel, err error)
 	SearchGroup(ctx context.Context, keyword string, pagination pagination.Pagination) (int64, []*relationtb.GroupModel, error)
 	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
 	DismissGroup(ctx context.Context, groupID string, deleteMember bool) error // 解散群，并删除群成员
-	//GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error)
-	// GroupMember
+
 	TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationtb.GroupMemberModel, err error)
 	TakeGroupOwner(ctx context.Context, groupID string) (*relationtb.GroupMemberModel, error)
 	FindGroupMembers(ctx context.Context, groupID string, userIDs []string) (groupMembers []*relationtb.GroupMemberModel, err error)            // *
@@ -48,7 +46,6 @@ type GroupDatabase interface {
 	FindGroupMemberRoleLevels(ctx context.Context, groupID string, roleLevels []int32) (groupMembers []*relationtb.GroupMemberModel, err error) // *
 	FindGroupMemberAll(ctx context.Context, groupID string) (groupMembers []*relationtb.GroupMemberModel, err error)                            // *
 	FindGroupsOwner(ctx context.Context, groupIDs []string) ([]*relationtb.GroupMemberModel, error)
-	FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationtb.GroupMemberModel, error)
 	FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error)
 	FindGroupMemberNum(ctx context.Context, groupID string) (uint32, error)
 	FindUserManagedGroupID(ctx context.Context, userID string) (groupIDs []string, err error)
@@ -97,10 +94,6 @@ type groupDatabase struct {
 	ctxTx          tx.CtxTx
 	cache          cache.GroupCache
 }
-
-//func (g *groupDatabase) GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error) {
-//	return g.groupDB.GetGroupIDsByGroupType(ctx, groupType)
-//}
 
 func (g *groupDatabase) FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error) {
 	return g.cache.GetGroupMemberIDs(ctx, groupID)
@@ -282,7 +275,7 @@ func (g *groupDatabase) PageGetGroupMember(
 	return uint32(len(groupMemberIDs)), members, nil
 }
 
-func (g *groupDatabase) SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pagination pagination.Pagination) (int64, []*relationtb.GroupMemberModel, error) {
+func (g *groupDatabase) SearchGroupMember(ctx context.Context, keyword string, groupID string, pagination pagination.Pagination) (int64, []*relationtb.GroupMemberModel, error) {
 	return g.groupMemberDB.SearchMember(ctx, keyword, groupIDs, userIDs, roleLevels, pagination)
 }
 

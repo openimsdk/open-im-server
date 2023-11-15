@@ -17,8 +17,6 @@ package group
 import (
 	"context"
 
-	"github.com/OpenIMSDK/tools/utils"
-
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
@@ -55,34 +53,35 @@ import (
 //}
 
 func (s *groupServer) PopulateGroupMember(ctx context.Context, members ...*relationtb.GroupMemberModel) error {
-	if len(members) == 0 {
-		return nil
-	}
-	emptyUserIDs := make(map[string]struct{})
-	for _, member := range members {
-		if member.Nickname == "" || member.FaceURL == "" {
-			emptyUserIDs[member.UserID] = struct{}{}
-		}
-	}
-	if len(emptyUserIDs) > 0 {
-		users, err := s.User.GetPublicUserInfoMap(ctx, utils.Keys(emptyUserIDs), true)
-		if err != nil {
-			return err
-		}
-		for i, member := range members {
-			user, ok := users[member.UserID]
-			if !ok {
-				continue
-			}
-			if member.Nickname == "" {
-				members[i].Nickname = user.Nickname
-			}
-			if member.FaceURL == "" {
-				members[i].FaceURL = user.FaceURL
-			}
-		}
-	}
-	return nil
+	return s.Notification.PopulateGroupMember(ctx, members...)
+	//if len(members) == 0 {
+	//	return nil
+	//}
+	//emptyUserIDs := make(map[string]struct{})
+	//for _, member := range members {
+	//	if member.Nickname == "" || member.FaceURL == "" {
+	//		emptyUserIDs[member.UserID] = struct{}{}
+	//	}
+	//}
+	//if len(emptyUserIDs) > 0 {
+	//	users, err := s.User.GetPublicUserInfoMap(ctx, utils.Keys(emptyUserIDs), true)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	for i, member := range members {
+	//		user, ok := users[member.UserID]
+	//		if !ok {
+	//			continue
+	//		}
+	//		if member.Nickname == "" {
+	//			members[i].Nickname = user.Nickname
+	//		}
+	//		if member.FaceURL == "" {
+	//			members[i].FaceURL = user.FaceURL
+	//		}
+	//	}
+	//}
+	//return nil
 }
 
 //func (s *groupServer) TakeGroupMembers(ctx context.Context, groupID string, userID string) (*relationtb.GroupMemberModel, error) {

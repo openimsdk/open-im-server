@@ -130,9 +130,11 @@ type groupServer struct {
 
 func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgroup.NotificationUserInfoUpdateReq) (*pbgroup.NotificationUserInfoUpdateResp, error) {
 	defer log.ZDebug(ctx, "return")
-
-	members, err := s.db.FindGroupMember(ctx, nil, []string{req.UserID}, nil)
+	members, err := s.db.FindGroupMemberUser(ctx, nil, req.UserID)
 	if err != nil {
+		return nil, err
+	}
+	if err := s.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
 	groupIDs := make([]string, 0, len(members))
@@ -1231,103 +1233,232 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbgroup.CancelMu
 	return resp, nil
 }
 
+//func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGroupMemberInfoReq) (*pbgroup.SetGroupMemberInfoResp, error) {
+//	resp := &pbgroup.SetGroupMemberInfoResp{}
+//	if len(req.Members) == 0 {
+//		return nil, errs.ErrArgs.Wrap("members empty")
+//	}
+//	for i := range req.Members {
+//		req.Members[i].FaceURL = nil
+//	}
+//	duplicateMap := make(map[[2]string]struct{})
+//	userIDMap := make(map[string]struct{})
+//	groupIDMap := make(map[string]struct{})
+//	for _, member := range req.Members {
+//		key := [...]string{member.GroupID, member.UserID}
+//		if _, ok := duplicateMap[key]; ok {
+//			return nil, errs.ErrArgs.Wrap("group user duplicate")
+//		}
+//		duplicateMap[key] = struct{}{}
+//		userIDMap[member.UserID] = struct{}{}
+//		groupIDMap[member.GroupID] = struct{}{}
+//	}
+//	groupIDs := utils.Keys(groupIDMap)
+//	userIDs := utils.Keys(userIDMap)
+//	// todo
+//	members, err := s.FindGroupMember(ctx, groupIDs, append(userIDs, mcontext.GetOpUserID(ctx)), nil)
+//	if err != nil {
+//		return nil, err
+//	}
+//	for _, member := range members {
+//		delete(duplicateMap, [...]string{member.GroupID, member.UserID})
+//	}
+//	if len(duplicateMap) > 0 {
+//		return nil, errs.ErrArgs.Wrap("user not found" + strings.Join(utils.Slice(utils.Keys(duplicateMap), func(e [2]string) string {
+//			return fmt.Sprintf("[group: %s user: %s]", e[0], e[1])
+//		}), ","))
+//	}
+//	memberMap := utils.SliceToMap(members, func(e *relationtb.GroupMemberModel) [2]string {
+//		return [...]string{e.GroupID, e.UserID}
+//	})
+//	if !authverify.IsAppManagerUid(ctx) {
+//		opUserID := mcontext.GetOpUserID(ctx)
+//		for _, member := range req.Members {
+//			if member.RoleLevel != nil {
+//				switch member.RoleLevel.Value {
+//				case constant.GroupOrdinaryUsers, constant.GroupAdmin:
+//				default:
+//					return nil, errs.ErrArgs.Wrap("invalid role level")
+//				}
+//			}
+//			opMember, ok := memberMap[[...]string{member.GroupID, opUserID}]
+//			if !ok {
+//				return nil, errs.ErrArgs.Wrap(fmt.Sprintf("user %s not in group %s", opUserID, member.GroupID))
+//			}
+//			if member.UserID == opUserID {
+//				if member.RoleLevel != nil {
+//					return nil, errs.ErrNoPermission.Wrap("can not change self role level")
+//				}
+//				continue
+//			}
+//			if opMember.RoleLevel == constant.GroupOrdinaryUsers {
+//				return nil, errs.ErrNoPermission.Wrap("ordinary users can not change other role level")
+//			}
+//			dbMember, ok := memberMap[[...]string{member.GroupID, member.UserID}]
+//			if !ok {
+//				return nil, errs.ErrRecordNotFound.Wrap(fmt.Sprintf("user %s not in group %s", member.UserID, member.GroupID))
+//			}
+//			//if opMember.RoleLevel == constant.GroupOwner {
+//			//	continue
+//			//}
+//			//if dbMember.RoleLevel == constant.GroupOwner {
+//			//	return nil, errs.ErrNoPermission.Wrap("change group owner")
+//			//}
+//			//if opMember.RoleLevel == constant.GroupAdmin && dbMember.RoleLevel == constant.GroupAdmin {
+//			//	return nil, errs.ErrNoPermission.Wrap("admin can not change other admin role info")
+//			//}
+//			switch opMember.RoleLevel {
+//			case constant.GroupOrdinaryUsers:
+//				return nil, errs.ErrNoPermission.Wrap("ordinary users can not change other role level")
+//			case constant.GroupAdmin:
+//				if dbMember.RoleLevel != constant.GroupOrdinaryUsers {
+//					return nil, errs.ErrNoPermission.Wrap("admin can not change other role level")
+//				}
+//				if member.RoleLevel != nil {
+//					return nil, errs.ErrNoPermission.Wrap("admin can not change other role level")
+//				}
+//			case constant.GroupOwner:
+//				//if member.RoleLevel != nil && member.RoleLevel.Value == constant.GroupOwner {
+//				//	return nil, errs.ErrNoPermission.Wrap("owner only one")
+//				//}
+//			}
+//		}
+//	}
+//	for _, member := range req.Members {
+//		if member.RoleLevel == nil {
+//			continue
+//		}
+//		if memberMap[[...]string{member.GroupID, member.UserID}].RoleLevel == constant.GroupOwner {
+//			return nil, errs.ErrArgs.Wrap(fmt.Sprintf("group %s user %s is owner", member.GroupID, member.UserID))
+//		}
+//	}
+//	for i := 0; i < len(req.Members); i++ {
+//		if err := CallbackBeforeSetGroupMemberInfo(ctx, req.Members[i]); err != nil {
+//			return nil, err
+//		}
+//	}
+//	if err = s.db.UpdateGroupMembers(ctx, utils.Slice(req.Members, func(e *pbgroup.SetGroupMemberInfo) *relationtb.BatchUpdateGroupMember {
+//		return &relationtb.BatchUpdateGroupMember{
+//			GroupID: e.GroupID,
+//			UserID:  e.UserID,
+//			Map:     UpdateGroupMemberMap(e),
+//		}
+//	})); err != nil {
+//		return nil, err
+//	}
+//	for _, member := range req.Members {
+//		if member.RoleLevel != nil {
+//			switch member.RoleLevel.Value {
+//			case constant.GroupAdmin:
+//				s.Notification.GroupMemberSetToAdminNotification(ctx, member.GroupID, member.UserID)
+//			case constant.GroupOrdinaryUsers:
+//				s.Notification.GroupMemberSetToOrdinaryUserNotification(ctx, member.GroupID, member.UserID)
+//			}
+//		}
+//		if member.Nickname != nil || member.FaceURL != nil || member.Ex != nil {
+//			log.ZDebug(ctx, "setGroupMemberInfo notification", "member", member.UserID)
+//			if err := s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID); err != nil {
+//				log.ZError(ctx, "setGroupMemberInfo notification failed", err, "member", member.UserID, "groupID", member.GroupID)
+//			}
+//		}
+//	}
+//	return resp, nil
+//}
+
+func (s *groupServer) setGroupMemberInfo(ctx context.Context, memberCache map[string]*relationtb.GroupMemberModel, member *pbgroup.SetGroupMemberInfo) error {
+
+	return nil
+}
+
 func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGroupMemberInfoReq) (*pbgroup.SetGroupMemberInfoResp, error) {
 	resp := &pbgroup.SetGroupMemberInfoResp{}
 	if len(req.Members) == 0 {
 		return nil, errs.ErrArgs.Wrap("members empty")
 	}
+	opUserID := mcontext.GetOpUserID(ctx)
+	if opUserID == "" {
+		return nil, errs.ErrNoPermission.Wrap("no op user id")
+	}
+	isAppManagerUid := authverify.IsAppManagerUid(ctx)
 	for i := range req.Members {
 		req.Members[i].FaceURL = nil
 	}
-	duplicateMap := make(map[[2]string]struct{})
-	userIDMap := make(map[string]struct{})
-	groupIDMap := make(map[string]struct{})
-	for _, member := range req.Members {
-		key := [...]string{member.GroupID, member.UserID}
-		if _, ok := duplicateMap[key]; ok {
-			return nil, errs.ErrArgs.Wrap("group user duplicate")
-		}
-		duplicateMap[key] = struct{}{}
-		userIDMap[member.UserID] = struct{}{}
-		groupIDMap[member.GroupID] = struct{}{}
-	}
-	groupIDs := utils.Keys(groupIDMap)
-	userIDs := utils.Keys(userIDMap)
-	// todo
-	members, err := s.FindGroupMember(ctx, groupIDs, append(userIDs, mcontext.GetOpUserID(ctx)), nil)
-	if err != nil {
-		return nil, err
-	}
-	for _, member := range members {
-		delete(duplicateMap, [...]string{member.GroupID, member.UserID})
-	}
-	if len(duplicateMap) > 0 {
-		return nil, errs.ErrArgs.Wrap("user not found" + strings.Join(utils.Slice(utils.Keys(duplicateMap), func(e [2]string) string {
-			return fmt.Sprintf("[group: %s user: %s]", e[0], e[1])
-		}), ","))
-	}
-	memberMap := utils.SliceToMap(members, func(e *relationtb.GroupMemberModel) [2]string {
-		return [...]string{e.GroupID, e.UserID}
-	})
-	if !authverify.IsAppManagerUid(ctx) {
-		opUserID := mcontext.GetOpUserID(ctx)
-		for _, member := range req.Members {
-			if member.RoleLevel != nil {
-				switch member.RoleLevel.Value {
-				case constant.GroupOrdinaryUsers, constant.GroupAdmin:
-				default:
-					return nil, errs.ErrArgs.Wrap("invalid role level")
-				}
-			}
-			opMember, ok := memberMap[[...]string{member.GroupID, opUserID}]
-			if !ok {
-				return nil, errs.ErrArgs.Wrap(fmt.Sprintf("user %s not in group %s", opUserID, member.GroupID))
-			}
-			if member.UserID == opUserID {
-				if member.RoleLevel != nil {
-					return nil, errs.ErrNoPermission.Wrap("can not change self role level")
-				}
-				continue
-			}
-			if opMember.RoleLevel == constant.GroupOrdinaryUsers {
-				return nil, errs.ErrNoPermission.Wrap("ordinary users can not change other role level")
-			}
-			dbMember, ok := memberMap[[...]string{member.GroupID, member.UserID}]
-			if !ok {
-				return nil, errs.ErrRecordNotFound.Wrap(fmt.Sprintf("user %s not in group %s", member.UserID, member.GroupID))
-			}
-			//if opMember.RoleLevel == constant.GroupOwner {
-			//	continue
-			//}
-			//if dbMember.RoleLevel == constant.GroupOwner {
-			//	return nil, errs.ErrNoPermission.Wrap("change group owner")
-			//}
-			//if opMember.RoleLevel == constant.GroupAdmin && dbMember.RoleLevel == constant.GroupAdmin {
-			//	return nil, errs.ErrNoPermission.Wrap("admin can not change other admin role info")
-			//}
-			switch opMember.RoleLevel {
-			case constant.GroupOrdinaryUsers:
-				return nil, errs.ErrNoPermission.Wrap("ordinary users can not change other role level")
-			case constant.GroupAdmin:
-				if dbMember.RoleLevel != constant.GroupOrdinaryUsers {
-					return nil, errs.ErrNoPermission.Wrap("admin can not change other role level")
-				}
-				if member.RoleLevel != nil {
-					return nil, errs.ErrNoPermission.Wrap("admin can not change other role level")
-				}
+	groupMembers := make(map[string][]*pbgroup.SetGroupMemberInfo)
+	for i, member := range req.Members {
+		if member.RoleLevel != nil {
+			switch member.RoleLevel.Value {
 			case constant.GroupOwner:
-				//if member.RoleLevel != nil && member.RoleLevel.Value == constant.GroupOwner {
-				//	return nil, errs.ErrNoPermission.Wrap("owner only one")
-				//}
+				return nil, errs.ErrNoPermission.Wrap("cannot set ungroup owner")
+			case constant.GroupAdmin, constant.GroupOrdinaryUsers:
+			default:
+				return nil, errs.ErrArgs.Wrap("invalid role level")
 			}
 		}
+		groupMembers[member.GroupID] = append(groupMembers[member.GroupID], req.Members[i])
 	}
-	for _, member := range req.Members {
-		if member.RoleLevel == nil {
-			continue
+	for groupID, members := range groupMembers {
+		temp := make(map[string]struct{})
+		userIDs := make([]string, len(members)+1)
+		for _, member := range members {
+			if _, ok := temp[member.UserID]; ok {
+				return nil, errs.ErrArgs.Wrap(fmt.Sprintf("repeat group %s user %s", member.GroupID, member.UserID))
+			}
+			temp[member.UserID] = struct{}{}
+			userIDs = append(userIDs, member.UserID)
 		}
-		if memberMap[[...]string{member.GroupID, member.UserID}].RoleLevel == constant.GroupOwner {
-			return nil, errs.ErrArgs.Wrap(fmt.Sprintf("group %s user %s is owner", member.GroupID, member.UserID))
+		if _, ok := temp[opUserID]; !ok {
+			userIDs = append(userIDs, opUserID)
+		}
+		dbMembers, err := s.db.FindGroupMembers(ctx, groupID, userIDs)
+		if err != nil {
+			return nil, err
+		}
+		opUserIndex := -1
+		for i, member := range dbMembers {
+			if member.UserID == opUserID {
+				opUserIndex = i
+				break
+			}
+		}
+		switch len(userIDs) - len(dbMembers) {
+		case 0:
+			if !isAppManagerUid {
+				roleLevel := dbMembers[opUserIndex].RoleLevel
+				if roleLevel != constant.GroupOwner {
+					switch roleLevel {
+					case constant.GroupAdmin:
+						for _, member := range dbMembers {
+							if member.RoleLevel == constant.GroupOwner {
+								return nil, errs.ErrNoPermission.Wrap("admin can not change group owner")
+							}
+							if member.RoleLevel == constant.GroupAdmin && member.UserID != opUserID {
+								return nil, errs.ErrNoPermission.Wrap("admin can not change other group admin")
+							}
+						}
+					case constant.GroupOrdinaryUsers:
+						for _, member := range dbMembers {
+							if !(member.RoleLevel == constant.GroupOrdinaryUsers && member.UserID == opUserID) {
+								return nil, errs.ErrNoPermission.Wrap("ordinary users can not change other role level")
+							}
+						}
+					default:
+						for _, member := range dbMembers {
+							if member.RoleLevel >= roleLevel {
+								return nil, errs.ErrNoPermission.Wrap("can not change higher role level")
+							}
+						}
+					}
+				}
+			}
+		case 1:
+			if opUserIndex >= 0 {
+				return nil, errs.ErrArgs.Wrap("user not in group")
+			}
+			if !isAppManagerUid {
+				return nil, errs.ErrNoPermission.Wrap("user not in group")
+			}
+		default:
+			return nil, errs.ErrArgs.Wrap("user not in group")
 		}
 	}
 	for i := 0; i < len(req.Members); i++ {
@@ -1335,7 +1466,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 			return nil, err
 		}
 	}
-	if err = s.db.UpdateGroupMembers(ctx, utils.Slice(req.Members, func(e *pbgroup.SetGroupMemberInfo) *relationtb.BatchUpdateGroupMember {
+	if err := s.db.UpdateGroupMembers(ctx, utils.Slice(req.Members, func(e *pbgroup.SetGroupMemberInfo) *relationtb.BatchUpdateGroupMember {
 		return &relationtb.BatchUpdateGroupMember{
 			GroupID: e.GroupID,
 			UserID:  e.UserID,
@@ -1354,10 +1485,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 			}
 		}
 		if member.Nickname != nil || member.FaceURL != nil || member.Ex != nil {
-			log.ZDebug(ctx, "setGroupMemberInfo notification", "member", member.UserID)
-			if err := s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID); err != nil {
-				log.ZError(ctx, "setGroupMemberInfo notification failed", err, "member", member.UserID, "groupID", member.GroupID)
-			}
+			s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
 		}
 	}
 	return resp, nil
