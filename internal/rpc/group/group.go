@@ -20,6 +20,8 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/OpenIMSDK/tools/tx"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -73,11 +75,23 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
+	groupDB, err := newmgo.NewGroupMongo(mongo.GetDatabase())
+	if err != nil {
+		return err
+	}
+	groupMemberDB, err := newmgo.NewGroupMember(mongo.GetDatabase())
+	if err != nil {
+		return err
+	}
+	groupRequestDB, err := newmgo.NewGroupRequestMgo(mongo.GetDatabase())
+	if err != nil {
+		return err
+	}
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
 	var gs groupServer
-	database := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase(), gs.groupMemberHashCode)
+	database := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, tx.NewMongo(mongo.GetClient()), gs.groupMemberHashCode)
 	gs.GroupDatabase = database
 	gs.User = userRpcClient
 	gs.Notification = notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {

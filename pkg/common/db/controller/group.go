@@ -17,22 +17,17 @@ package controller
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"github.com/dtm-labs/rockscache"
-	"github.com/redis/go-redis/v9"
-	"go.mongodb.org/mongo-driver/mongo"
-	"gorm.io/gorm"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
+	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 )
 
 type GroupDatabase interface {
@@ -40,11 +35,11 @@ type GroupDatabase interface {
 	CreateGroup(ctx context.Context, groups []*relationtb.GroupModel, groupMembers []*relationtb.GroupMemberModel) error
 	TakeGroup(ctx context.Context, groupID string) (group *relationtb.GroupModel, err error)
 	FindGroup(ctx context.Context, groupIDs []string) (groups []*relationtb.GroupModel, err error)
-	FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*relationtb.GroupModel, err error)
-	SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (uint32, []*relationtb.GroupModel, error)
+	//FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*relationtb.GroupModel, err error)
+	SearchGroup(ctx context.Context, keyword string, pagination pagination.Pagination) (int64, []*relationtb.GroupModel, error)
 	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
 	DismissGroup(ctx context.Context, groupID string, deleteMember bool) error // 解散群，并删除群成员
-	GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error)
+	//GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error)
 	// GroupMember
 	TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationtb.GroupMemberModel, err error)
 	TakeGroupOwner(ctx context.Context, groupID string) (*relationtb.GroupMemberModel, error)
@@ -52,11 +47,11 @@ type GroupDatabase interface {
 	FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error)
 	FindGroupMemberNum(ctx context.Context, groupID string) (uint32, error)
 	FindUserManagedGroupID(ctx context.Context, userID string) (groupIDs []string, err error)
-	PageGroupRequest(ctx context.Context, groupIDs []string, pageNumber, showNumber int32) (uint32, []*relationtb.GroupRequestModel, error)
+	PageGroupRequest(ctx context.Context, groupIDs []string, pagination pagination.Pagination) (int64, []*relationtb.GroupRequestModel, error)
 
-	PageGetJoinGroup(ctx context.Context, userID string, pageNumber, showNumber int32) (total uint32, totalGroupMembers []*relationtb.GroupMemberModel, err error)
-	PageGetGroupMember(ctx context.Context, groupID string, pageNumber, showNumber int32) (total uint32, totalGroupMembers []*relationtb.GroupMemberModel, err error)
-	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationtb.GroupMemberModel, error)
+	PageGetJoinGroup(ctx context.Context, userID string, pagination pagination.Pagination) (total int64, totalGroupMembers []*relationtb.GroupMemberModel, err error)
+	PageGetGroupMember(ctx context.Context, groupID string, pagination pagination.Pagination) (total int64, totalGroupMembers []*relationtb.GroupMemberModel, err error)
+	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pagination pagination.Pagination) (int64, []*relationtb.GroupMemberModel, error)
 	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relationtb.GroupMemberModel) error
 	DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*relationtb.GroupSimpleUserID, error)
@@ -68,14 +63,7 @@ type GroupDatabase interface {
 	CreateGroupRequest(ctx context.Context, requests []*relationtb.GroupRequestModel) error
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relationtb.GroupRequestModel, error)
 	FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (int64, []*relationtb.GroupRequestModel, error)
-	PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (uint32, []*relationtb.GroupRequestModel, error)
-	// SuperGroupModelInterface
-	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelationtb.SuperGroupModel, error)
-	FindJoinSuperGroup(ctx context.Context, userID string) ([]string, error)
-	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
-	DeleteSuperGroup(ctx context.Context, groupID string) error
-	DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
-	CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
+	PageGroupRequestUser(ctx context.Context, userID string, pagination pagination.Pagination) (int64, []*relationtb.GroupRequestModel, error)
 
 	// 获取群总数
 	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
@@ -84,63 +72,30 @@ type GroupDatabase interface {
 	DeleteGroupMemberHash(ctx context.Context, groupIDs []string) error
 }
 
-func NewGroupDatabase(
-	group relationtb.GroupModelInterface,
-	member relationtb.GroupMemberModelInterface,
-	request relationtb.GroupRequestModelInterface,
-	tx tx.Tx,
-	ctxTx tx.CtxTx,
-	superGroup unrelationtb.SuperGroupModelInterface,
-	cache cache.GroupCache,
-) GroupDatabase {
-	database := &groupDatabase{
-		groupDB:        group,
-		groupMemberDB:  member,
-		groupRequestDB: request,
-		tx:             tx,
-		ctxTx:          ctxTx,
-		cache:          cache,
-		mongoDB:        superGroup,
-	}
-	return database
-}
-
-func InitGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, database *mongo.Database, hashCode func(ctx context.Context, groupID string) (uint64, error)) GroupDatabase {
+func NewGroupDatabase(rdb redis.UniversalClient, groupDB relationtb.GroupModelInterface, groupMemberDB relationtb.GroupMemberModelInterface, groupRequestDB relationtb.GroupRequestModelInterface, ctxTx tx.CtxTx, hashCode func(ctx context.Context, groupID string) (uint64, error)) GroupDatabase {
 	rcOptions := rockscache.NewDefaultOptions()
 	rcOptions.StrongConsistency = true
 	rcOptions.RandomExpireAdjustment = 0.2
-	return NewGroupDatabase(
-		relation.NewGroupDB(db),
-		relation.NewGroupMemberDB(db),
-		relation.NewGroupRequest(db),
-		tx.NewGorm(db),
-		tx.NewMongo(database.Client()),
-		unrelation.NewSuperGroupMongoDriver(database),
-		cache.NewGroupCacheRedis(
-			rdb,
-			relation.NewGroupDB(db),
-			relation.NewGroupMemberDB(db),
-			relation.NewGroupRequest(db),
-			unrelation.NewSuperGroupMongoDriver(database),
-			hashCode,
-			rcOptions,
-		),
-	)
+	return &groupDatabase{
+		groupDB:        groupDB,
+		groupMemberDB:  groupMemberDB,
+		groupRequestDB: groupRequestDB,
+		ctxTx:          ctxTx,
+		cache:          cache.NewGroupCacheRedis(rdb, groupDB, groupMemberDB, groupRequestDB, hashCode, rcOptions),
+	}
 }
 
 type groupDatabase struct {
 	groupDB        relationtb.GroupModelInterface
 	groupMemberDB  relationtb.GroupMemberModelInterface
 	groupRequestDB relationtb.GroupRequestModelInterface
-	tx             tx.Tx
 	ctxTx          tx.CtxTx
 	cache          cache.GroupCache
-	mongoDB        unrelationtb.SuperGroupModelInterface
 }
 
-func (g *groupDatabase) GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error) {
-	return g.groupDB.GetGroupIDsByGroupType(ctx, groupType)
-}
+//func (g *groupDatabase) GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error) {
+//	return g.groupDB.GetGroupIDsByGroupType(ctx, groupType)
+//}
 
 func (g *groupDatabase) FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error) {
 	return g.cache.GetGroupMemberIDs(ctx, groupID)
@@ -154,41 +109,41 @@ func (g *groupDatabase) FindGroupMemberNum(ctx context.Context, groupID string) 
 	return uint32(num), nil
 }
 
-func (g *groupDatabase) CreateGroup(
-	ctx context.Context,
-	groups []*relationtb.GroupModel,
-	groupMembers []*relationtb.GroupMemberModel,
-) error {
-	cache := g.cache.NewCache()
-	if err := g.tx.Transaction(func(tx any) error {
+func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*relationtb.GroupModel, groupMembers []*relationtb.GroupMemberModel) error {
+	if len(groups)+len(groupMembers) == 0 {
+		return nil
+	}
+	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
+		c := g.cache.NewCache()
 		if len(groups) > 0 {
-			if err := g.groupDB.NewTx(tx).Create(ctx, groups); err != nil {
+			if err := g.groupDB.Create(ctx, groups); err != nil {
 				return err
+			}
+			for _, group := range groups {
+				c = c.DelGroupsInfo(group.GroupID)
+				c = c.DelGroupMembersHash(group.GroupID)
+				c = c.DelGroupsMemberNum(group.GroupID)
+				c = c.DelGroupMemberIDs(group.GroupID)
 			}
 		}
 		if len(groupMembers) > 0 {
-			if err := g.groupMemberDB.NewTx(tx).Create(ctx, groupMembers); err != nil {
+			if err := g.groupMemberDB.Create(ctx, groupMembers); err != nil {
 				return err
 			}
-		}
-		createGroupIDs := utils.DistinctAnyGetComparable(groups, func(group *relationtb.GroupModel) string {
-			return group.GroupID
-		})
-		m := make(map[string]struct{})
-
-		for _, groupMember := range groupMembers {
-			if _, ok := m[groupMember.GroupID]; !ok {
-				m[groupMember.GroupID] = struct{}{}
-				cache = cache.DelGroupMemberIDs(groupMember.GroupID).DelGroupMembersHash(groupMember.GroupID).DelGroupsMemberNum(groupMember.GroupID)
+			temp := make(map[string]struct{})
+			for _, groupMember := range groupMembers {
+				if _, ok := temp[groupMember.GroupID]; !ok {
+					temp[groupMember.GroupID] = struct{}{}
+					c = c.DelGroupMembersHash(groupMember.GroupID)
+					c = c.DelGroupsMemberNum(groupMember.GroupID)
+					c = c.DelGroupMemberIDs(groupMember.GroupID)
+				}
+				c = c.DelJoinedGroupID(groupMember.UserID)
+				c = c.DelGroupMembersInfo(groupMember.GroupID, groupMember.UserID)
 			}
-			cache = cache.DelJoinedGroupID(groupMember.UserID).DelGroupMembersInfo(groupMember.GroupID, groupMember.UserID)
 		}
-		cache = cache.DelGroupsInfo(createGroupIDs...)
-		return nil
-	}); err != nil {
-		return err
-	}
-	return cache.ExecDel(ctx)
+		return c.ExecDel(ctx)
+	})
 }
 
 func (g *groupDatabase) TakeGroup(ctx context.Context, groupID string) (group *relationtb.GroupModel, err error) {
@@ -199,12 +154,8 @@ func (g *groupDatabase) FindGroup(ctx context.Context, groupIDs []string) (group
 	return g.cache.GetGroupsInfo(ctx, groupIDs)
 }
 
-func (g *groupDatabase) SearchGroup(
-	ctx context.Context,
-	keyword string,
-	pageNumber, showNumber int32,
-) (uint32, []*relationtb.GroupModel, error) {
-	return g.groupDB.Search(ctx, keyword, pageNumber, showNumber)
+func (g *groupDatabase) SearchGroup(ctx context.Context, keyword string, pagination pagination.Pagination) (int64, []*relationtb.GroupModel, error) {
+	return g.groupDB.Search(ctx, keyword, pagination)
 }
 
 func (g *groupDatabase) UpdateGroup(ctx context.Context, groupID string, data map[string]any) error {
@@ -254,12 +205,8 @@ func (g *groupDatabase) FindUserManagedGroupID(ctx context.Context, userID strin
 	return g.groupMemberDB.FindUserManagedGroupID(ctx, userID)
 }
 
-func (g *groupDatabase) PageGroupRequest(
-	ctx context.Context,
-	groupIDs []string,
-	pageNumber, showNumber int32,
-) (uint32, []*relationtb.GroupRequestModel, error) {
-	return g.groupRequestDB.PageGroup(ctx, groupIDs, pageNumber, showNumber)
+func (g *groupDatabase) PageGroupRequest(ctx context.Context, groupIDs []string, pagination pagination.Pagination) (int64, []*relationtb.GroupRequestModel, error) {
+	return g.groupRequestDB.PageGroup(ctx, groupIDs, pagination)
 }
 
 func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) (totalGroupMembers []*relationtb.GroupMemberModel, err error) {
@@ -294,8 +241,8 @@ func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, 
 func (g *groupDatabase) PageGetJoinGroup(
 	ctx context.Context,
 	userID string,
-	pageNumber, showNumber int32,
-) (total uint32, totalGroupMembers []*relationtb.GroupMemberModel, err error) {
+	pagination pagination.Pagination,
+) (total int64, totalGroupMembers []*relationtb.GroupMemberModel, err error) {
 	groupIDs, err := g.cache.GetJoinedGroupIDs(ctx, userID)
 	if err != nil {
 		return 0, nil, err
@@ -313,8 +260,8 @@ func (g *groupDatabase) PageGetJoinGroup(
 func (g *groupDatabase) PageGetGroupMember(
 	ctx context.Context,
 	groupID string,
-	pageNumber, showNumber int32,
-) (total uint32, totalGroupMembers []*relationtb.GroupMemberModel, err error) {
+	pagination pagination.Pagination,
+) (total int64, totalGroupMembers []*relationtb.GroupMemberModel, err error) {
 	groupMemberIDs, err := g.cache.GetGroupMemberIDs(ctx, groupID)
 	if err != nil {
 		return 0, nil, err
@@ -330,15 +277,8 @@ func (g *groupDatabase) PageGetGroupMember(
 	return uint32(len(groupMemberIDs)), members, nil
 }
 
-func (g *groupDatabase) SearchGroupMember(
-	ctx context.Context,
-	keyword string,
-	groupIDs []string,
-	userIDs []string,
-	roleLevels []int32,
-	pageNumber, showNumber int32,
-) (uint32, []*relationtb.GroupMemberModel, error) {
-	return g.groupMemberDB.SearchMember(ctx, keyword, groupIDs, userIDs, roleLevels, pageNumber, showNumber)
+func (g *groupDatabase) SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pagination pagination.Pagination) (int64, []*relationtb.GroupMemberModel, error) {
+	return g.groupMemberDB.SearchMember(ctx, keyword, groupIDs, userIDs, roleLevels, pagination)
 }
 
 func (g *groupDatabase) HandlerGroupRequest(
@@ -484,62 +424,9 @@ func (g *groupDatabase) TakeGroupRequest(
 func (g *groupDatabase) PageGroupRequestUser(
 	ctx context.Context,
 	userID string,
-	pageNumber, showNumber int32,
-) (uint32, []*relationtb.GroupRequestModel, error) {
+	pagination pagination.Pagination,
+) (int64, []*relationtb.GroupRequestModel, error) {
 	return g.groupRequestDB.Page(ctx, userID, pageNumber, showNumber)
-}
-
-func (g *groupDatabase) FindSuperGroup(
-	ctx context.Context,
-	groupIDs []string,
-) (models []*unrelationtb.SuperGroupModel, err error) {
-	return g.cache.GetSuperGroupMemberIDs(ctx, groupIDs...)
-}
-
-func (g *groupDatabase) FindJoinSuperGroup(ctx context.Context, userID string) ([]string, error) {
-	return g.cache.GetJoinedSuperGroupIDs(ctx, userID)
-}
-
-func (g *groupDatabase) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDs []string) error {
-	if err := g.mongoDB.CreateSuperGroup(ctx, groupID, initMemberIDs); err != nil {
-		return err
-	}
-	return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(initMemberIDs...).ExecDel(ctx)
-}
-
-func (g *groupDatabase) DeleteSuperGroup(ctx context.Context, groupID string) error {
-	cache := g.cache.NewCache()
-	if err := g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
-		if err := g.mongoDB.DeleteSuperGroup(ctx, groupID); err != nil {
-			return err
-		}
-		models, err := g.cache.GetSuperGroupMemberIDs(ctx, groupID)
-		if err != nil {
-			return err
-		}
-		cache = cache.DelSuperGroupMemberIDs(groupID)
-		if len(models) > 0 {
-			cache = cache.DelJoinedSuperGroupIDs(models[0].MemberIDs...)
-		}
-		return nil
-	}); err != nil {
-		return err
-	}
-	return cache.ExecDel(ctx)
-}
-
-func (g *groupDatabase) DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
-	if err := g.mongoDB.RemoverUserFromSuperGroup(ctx, groupID, userIDs); err != nil {
-		return err
-	}
-	return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(userIDs...).ExecDel(ctx)
-}
-
-func (g *groupDatabase) CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
-	if err := g.mongoDB.AddUserToSuperGroup(ctx, groupID, userIDs); err != nil {
-		return err
-	}
-	return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(userIDs...).ExecDel(ctx)
 }
 
 func (g *groupDatabase) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
@@ -552,10 +439,6 @@ func (g *groupDatabase) CountRangeEverydayTotal(ctx context.Context, start time.
 
 func (g *groupDatabase) FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (int64, []*relationtb.GroupRequestModel, error) {
 	return g.groupRequestDB.FindGroupRequests(ctx, groupID, userIDs)
-}
-
-func (g *groupDatabase) FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*relationtb.GroupModel, err error) {
-	return g.groupDB.FindNotDismissedGroup(ctx, groupIDs)
 }
 
 func (g *groupDatabase) DeleteGroupMemberHash(ctx context.Context, groupIDs []string) error {
