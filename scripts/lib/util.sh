@@ -1121,8 +1121,7 @@ function openim::util::check-file-in-alphabetical-order {
 # Checks whether jq is installed.
 function openim::util::require-jq {
   if ! command -v jq &>/dev/null; then
-    echo "jq not found. Please install." 1>&2
-    return 1
+    openim::log::errexit "jq not found. Please install." 1>&2
   fi
 }
 
@@ -1130,15 +1129,10 @@ function openim::util::require-jq {
 # Checks whether dig is installed and provides installation instructions if it is not.
 function openim::util::require-dig {
   if ! command -v dig &>/dev/null; then
-    echo "dig command not found."
-    echo "Please install 'dig' to use this feature."
-    echo "Installation instructions:"
-    echo "  For Ubuntu/Debian: sudo apt-get install dnsutils"
-    echo "  For CentOS/RedHat: sudo yum install bind-utils"
-    echo "  For macOS: 'dig' should be preinstalled. If missing, try: brew install bind"
-    echo "  For Windows: Install BIND9 tools from https://www.isc.org/download/"
+    openim::log::error "dig command not found."
     return 1
   fi
+  return 0
 }
 
 # outputs md5 hash of $1, works on macOS and Linux

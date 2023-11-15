@@ -123,6 +123,7 @@ function openim::msggateway::status() {
   # Check the running status of the ${SERVER_NAME}. If active (running) is displayed, the ${SERVER_NAME} is started successfully.
   systemctl status ${SERVER_NAME}|grep -q 'active' || {
     openim::log::error "${SERVER_NAME} failed to start, maybe not installed properly"
+    
     return 1
   }
 

@@ -141,8 +141,12 @@ services:
     networks:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS}
+
   openim-admin:
-    image: ghcr.io/openimsdk/openim-admin-front:v3.4.0
+    image: ${IMAGE_REGISTRY}/openim-admin-front:v3.4.0
+    # image: ghcr.io/openimsdk/openim-admin-front:v3.4.0
+    # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-admin-front:v3.4.0
+    # image: openim/openim-admin-front:v3.4.0
     container_name: openim-admin
     restart: always
     ports:
