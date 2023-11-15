@@ -22,7 +22,7 @@ type aesKeyDatabase struct {
 	tx  tx.Tx
 }
 
-func newAesKeyDatabase(key relation.AesKeyModelInterface, tx tx.Tx) *aesKeyDatabase {
+func NewAesKeyDatabase(key relation.AesKeyModelInterface, tx tx.Tx) *aesKeyDatabase {
 	return &aesKeyDatabase{key: key, tx: tx}
 }
 
@@ -44,20 +44,36 @@ func (a *aesKeyDatabase) AcquireAesKey(ctx context.Context, conversationType int
 	}
 	aesKey, err := a.key.GetAesKey(ctx, keyConversationsID)
 	if err != nil {
-		//生成key，并插入
+		generateAesKey := a.generateAesKey(keyConversationsID)
+		keyModel := relation.AesKeyModel{
+			KeyConversationsID: keyConversationsID,
+			Key:                generateAesKey,
+			ConversationType:   conversationType,
+			OwnerUserID:        userId,
+			FriendUserID:       friendId,
+			GroupID:            groupId,
+		}
+		var keys []*relation.AesKeyModel
+		keys = append(keys, &keyModel)
+		err := a.key.Installs(ctx, keys)
+		if err != nil {
+			return &keyModel, err
+		}
 	}
 	return aesKey, nil
 }
 
 func (a *aesKeyDatabase) AcquireAesKeys(ctx context.Context, userId string) (key []*relation.AesKeyModel, err error) {
-	//TODO implement me
-	panic("implement me")
+	return a.key.GetAllAesKey(ctx, userId)
 }
 
 func (a *aesKeyDatabase) generateKeyConversationsID(args ...string) string {
 	sort.Strings(args)
 	combinedStr := strings.Join(args, "")
-	md5Value := md5.Sum([]byte(combinedStr))
+	return combinedStr
+}
+func (a *aesKeyDatabase) generateAesKey(keyConversationsID string) string {
+	md5Value := md5.Sum([]byte(keyConversationsID))
 	md5Str := fmt.Sprintf("%x", md5Value)
 	return md5Str[:16]
 }
