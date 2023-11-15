@@ -1,8 +1,8 @@
 global:
   resolve_timeout: 5m
-  smtp_from: '18565885972@163.com'
+  smtp_from: 'openimalert@163.com'
   smtp_smarthost: 'smtp.163.com:465'
-  smtp_auth_username: '18565885972@163.com'
+  smtp_auth_username: 'openimalert@163.com'
   smtp_auth_password: 'YOURAUTHPASSWORD'
   smtp_require_tls: false
   smtp_hello: 'xxx监控告警'
