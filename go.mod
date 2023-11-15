@@ -32,6 +32,7 @@ require (
 	gorm.io/driver/mysql v1.5.2
 	gorm.io/gorm v1.25.5
 )
+replace github.com/OpenIMSDK/protocol v0.0.31 => ../protocol
 
 require github.com/google/uuid v1.3.1
 

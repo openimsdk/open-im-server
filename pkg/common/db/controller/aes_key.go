@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"sort"
 	"strings"
@@ -19,11 +18,10 @@ type AesKeyDatabase interface {
 
 type aesKeyDatabase struct {
 	key relation.AesKeyModelInterface
-	tx  tx.Tx
 }
 
-func NewAesKeyDatabase(key relation.AesKeyModelInterface, tx tx.Tx) *aesKeyDatabase {
-	return &aesKeyDatabase{key: key, tx: tx}
+func NewAesKeyDatabase(key relation.AesKeyModelInterface) *aesKeyDatabase {
+	return &aesKeyDatabase{key: key}
 }
 
 func (a *aesKeyDatabase) AcquireAesKey(ctx context.Context, conversationType int32, userId, friendId, groupId string) (key *relation.AesKeyModel, err error) {

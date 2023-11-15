@@ -9,4 +9,5 @@ const (
 	RpcMsgServer          = "msg"
 	RpcThirdServer        = "third"
 	RpcUserServer         = "user"
+	RpcAesKeyServer       = "aesKey"
 )

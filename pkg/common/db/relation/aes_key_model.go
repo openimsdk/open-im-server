@@ -11,8 +11,14 @@ type AesKeyGorm struct {
 	*MetaDB
 }
 
+/*
 func NewAesKeyGorm(db *gorm.DB) *AesKeyGorm {
-	return &AesKeyGorm{NewMetaDB(db, &relation.AesKeyModel{})}
+return &AesKeyGorm{NewMetaDB(db, &relation.AesKeyModel{})}
+}
+*/
+func NewAesKeyGorm(db *gorm.DB) relation.AesKeyModelInterface {
+	return &AesKeyGorm{NewMetaDB(db, relation.AesKeyModel{})}
+
 }
 
 func (a *AesKeyGorm) Installs(ctx context.Context, keys []*relation.AesKeyModel) (err error) {
