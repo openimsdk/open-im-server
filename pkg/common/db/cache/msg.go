@@ -20,10 +20,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dtm-labs/rockscache"
 	"golang.org/x/sync/errgroup"
-
-	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
@@ -136,10 +133,7 @@ func NewMsgCacheModel(client redis.UniversalClient) MsgModel {
 
 type msgCache struct {
 	metaCache
-	rdb            redis.UniversalClient
-	expireTime     time.Duration
-	rcClient       *rockscache.Client
-	msgDocDatabase unrelationtb.MsgDocModelInterface
+	rdb redis.UniversalClient
 }
 
 func (c *msgCache) getMaxSeqKey(conversationID string) string {
@@ -176,29 +170,6 @@ func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s st
 	}
 
 	return m, nil
-
-	//pipe := c.rdb.Pipeline()
-	//for _, v := range items {
-	//	if err := pipe.Get(ctx, getkey(v)).Err(); err != nil && err != redis.Nil {
-	//		return nil, errs.Wrap(err)
-	//	}
-	//}
-	//result, err := pipe.Exec(ctx)
-	//if err != nil && err != redis.Nil {
-	//	return nil, errs.Wrap(err)
-	//}
-	//m = make(map[string]int64, len(items))
-	//for i, v := range result {
-	//	seq := v.(*redis.StringCmd)
-	//	if seq.Err() != nil && seq.Err() != redis.Nil {
-	//		return nil, errs.Wrap(v.Err())
-	//	}
-	//	val := utils.StringToInt64(seq.Val())
-	//	if val != 0 {
-	//		m[items[i]] = val
-	//	}
-	//}
-	//return m, nil
 }
 
 func (c *msgCache) SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error {
@@ -224,15 +195,6 @@ func (c *msgCache) setSeqs(ctx context.Context, seqs map[string]int64, getkey fu
 		}
 	}
 	return nil
-	//pipe := c.rdb.Pipeline()
-	//for k, seq := range seqs {
-	//	err := pipe.Set(ctx, getkey(k), seq, 0).Err()
-	//	if err != nil {
-	//		return errs.Wrap(err)
-	//	}
-	//}
-	//_, err := pipe.Exec(ctx)
-	//return err
 }
 
 func (c *msgCache) SetMinSeqs(ctx context.Context, seqs map[string]int64) error {
@@ -637,20 +599,49 @@ func (c *msgCache) DelUserDeleteMsgsList(ctx context.Context, conversationID str
 }
 
 func (c *msgCache) DeleteMessages(ctx context.Context, conversationID string, seqs []int64) error {
+	if config.Config.Redis.EnablePipeline {
+		return c.PipeDeleteMessages(ctx, conversationID, seqs)
+	}
+
+	return c.ParallelDeleteMessages(ctx, conversationID, seqs)
+}
+
+func (c *msgCache) ParallelDeleteMessages(ctx context.Context, conversationID string, seqs []int64) error {
+	wg := errgroup.Group{}
+	wg.SetLimit(concurrentLimit)
+
 	for _, seq := range seqs {
-		if err := c.rdb.Del(ctx, c.getMessageCacheKey(conversationID, seq)).Err(); err != nil {
+		seq := seq
+		wg.Go(func() error {
+			err := c.rdb.Del(ctx, c.getMessageCacheKey(conversationID, seq)).Err()
+			if err != nil {
+				return errs.Wrap(err)
+			}
+			return nil
+		})
+	}
+
+	return wg.Wait()
+}
+
+func (c *msgCache) PipeDeleteMessages(ctx context.Context, conversationID string, seqs []int64) error {
+	pipe := c.rdb.Pipeline()
+	for _, seq := range seqs {
+		_ = pipe.Del(ctx, c.getMessageCacheKey(conversationID, seq))
+	}
+
+	results, err := pipe.Exec(ctx)
+	if err != nil {
+		return errs.Wrap(err, "pipe.del")
+	}
+
+	for _, res := range results {
+		if res.Err() != nil {
 			return errs.Wrap(err)
 		}
 	}
+
 	return nil
-	//pipe := c.rdb.Pipeline()
-	//for _, seq := range seqs {
-	//	if err := pipe.Del(ctx, c.getMessageCacheKey(conversationID, seq)).Err(); err != nil {
-	//		return errs.Wrap(err)
-	//	}
-	//}
-	//_, err := pipe.Exec(ctx)
-	//return errs.Wrap(err)
 }
 
 func (c *msgCache) CleanUpOneConversationAllMsg(ctx context.Context, conversationID string) error {
@@ -667,14 +658,6 @@ func (c *msgCache) CleanUpOneConversationAllMsg(ctx context.Context, conversatio
 		}
 	}
 	return nil
-	//pipe := c.rdb.Pipeline()
-	//for _, v := range vals {
-	//	if err := pipe.Del(ctx, v).Err(); err != nil {
-	//		return errs.Wrap(err)
-	//	}
-	//}
-	//_, err = pipe.Exec(ctx)
-	//return errs.Wrap(err)
 }
 
 func (c *msgCache) DelMsgFromCache(ctx context.Context, userID string, seqs []int64) error {
