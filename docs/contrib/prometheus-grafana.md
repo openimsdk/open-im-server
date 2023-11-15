@@ -9,12 +9,6 @@
 	* 2.2. [Custom OpenIM Metrics](#CustomOpenIMMetrics)
 	* 2.3. [Node Exporter](#NodeExporter)
 
-<!-- vscode-markdown-toc-config
-	numbering=true
-	autoSave=true
-	/vscode-markdown-toc-config -->
-<!-- /vscode-markdown-toc -->
-
 OpenIM offers various flexible deployment options to suit different environments and requirements. Here is a simplified and optimized description of these deployment options:
 
 1. Source Code Deployment:
@@ -28,9 +22,9 @@ OpenIM offers various flexible deployment options to suit different environments
 
 Next, we will introduce the specific steps, monitoring, and management backend configuration for each of these deployment methods, as well as usage tips to help you choose the most suitable deployment option according to your needs.
 
-##  1. <a name='SourceCodeDocker'></a>Source Code & Docker
+## Source Code & Docker
 
-###  1.1. <a name='Deployment'></a>Deployment
+### Deployment
 
 OpenIM deploys openim-server and openim-chat from source code, while other components are deployed via Docker.
 
@@ -49,7 +43,7 @@ make init
 docker compose up -d
 ```
 
-###  1.2. <a name='Configuration'></a>Configuration
+### Configuration
 
 To configure Prometheus data sources in Grafana, follow these steps:
 
@@ -139,13 +133,81 @@ To monitor OpenIM in Grafana, you need to focus on three categories of key metri
 
 ![image-20231114194451673](http://sm.nsddd.top/sm202311141944953.png)
 
-##  2. <a name='Kubernetes'></a>Kubernetes
+
+
+### Monitoring Running in Docker Guide
+
+#### Introduction
+
+This guide provides the steps to run OpenIM using Docker. OpenIM is an open-source instant messaging solution that can be quickly deployed using Docker. For more information, please refer to the [OpenIM Docker GitHub](https://github.com/openimsdk/openim-docker).
+
+#### Prerequisites
+
++ Ensure that Docker and Docker Compose are installed.
++ Basic understanding of Docker and containerization technology.
+
+#### Step 1: Clone the Repository
+
+First, clone the OpenIM Docker repository:
+
+```bash
+git clone https://github.com/openimsdk/openim-docker.git
+```
+
+Navigate to the repository directory and check the `README` file for more information and configuration options.
+
+#### Step 2: Start Docker Compose
+
+In the repository directory, run the following command to start the service:
+
+```bash
+docker-compose up -d
+```
+
+This will download the required Docker images and start the OpenIM service.
+
+#### Step 3: Use the OpenIM Web Interface
+
++ Open a browser in private mode and access [OpenIM Web](http://localhost:11001/).
++ Register two users and try adding friends.
++ Test sending messages and pictures.
+
+#### Running Effect
+
+![image-20231115100811208](http://sm.nsddd.top/sm202311151008639.png)
+
+#### Step 4: Access the Admin Panel
+
++ Access the [OpenIM Admin Panel](http://localhost:11002/).
++ Log in using the default username and password (`admin1:admin1`).
+
+Running Effect Image:
+
+![image-20231115101039837](http://sm.nsddd.top/sm202311151010116.png)
+
+#### Step 5: Access the Monitoring Interface
+
++ Log in to the [Monitoring Interface](http://localhost:3000/login) using the credentials (`admin:admin`).
+
+#### Next Steps
+
++ Configure and manage the services following the steps provided in the OpenIM source code.
++ Refer to the `README` file for advanced configuration and management.
+
+#### Troubleshooting
+
++ If you encounter any issues, please check the documentation on [OpenIM Docker GitHub](https://github.com/openimsdk/openim-docker) or search for related issues in the Issues section.
++ If the problem persists, you can create an issue on the [openim-docker](https://github.com/openimsdk/openim-docker/issues/new/choose) repository or the [openim-server](https://github.com/openimsdk/open-im-server/issues/new/choose) repository.
+
+
+
+## Kubernetes
 
 Refer to [openimsdk/helm-charts](https://github.com/openimsdk/helm-charts).
 
 When deploying and monitoring OpenIM in a Kubernetes environment, you will focus on three main metrics: middleware, custom OpenIM metrics, and Node Exporter. Here are detailed steps and guidelines:
 
-###  2.1. <a name='MiddlewareMonitoring'></a>Middleware Monitoring
+### Middleware Monitoring
 
 Middleware monitoring is crucial to ensure the overall system's stability. Typically, this includes monitoring the following components:
 
@@ -157,14 +219,14 @@ Middleware monitoring is crucial to ensure the overall system's stability. Typic
 
 For Kubernetes environments, you can use the corresponding Prometheus Exporters to collect monitoring data for these middleware components.
 
-###  2.2. <a name='CustomOpenIMMetrics'></a>Custom OpenIM Metrics
+### Custom OpenIM Metrics
 
 Custom OpenIM metrics provide essential information about the OpenIM application itself, such as user activity, message traffic, system performance, and more. To monitor these metrics in Kubernetes:
 
 + Ensure OpenIM application configurations expose Prometheus metrics.
 + When deploying using Helm charts (refer to [OpenIM Helm Charts](https://github.com/openimsdk/helm-charts)), pay attention to configuring relevant monitoring settings.
 
-###  2.3. <a name='NodeExporter'></a>Node Exporter
+### Node Exporter
 
 Node Exporter is used to collect hardware and operating system-level metrics for Kubernetes nodes, such as CPU, memory, disk usage, and more. To integrate Node Exporter in Kubernetes:
 
