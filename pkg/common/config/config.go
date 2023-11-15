@@ -199,8 +199,9 @@ type configStruct struct {
 	} `yaml:"longConnSvr"`
 
 	Push struct {
-		Enable string `yaml:"enable"`
-		GeTui  struct {
+		MaxConcurrentWorkers int    `yaml:"maxConcurrentWorkers"`
+		Enable               string `yaml:"enable"`
+		GeTui                struct {
 			PushUrl      string `yaml:"pushUrl"`
 			AppKey       string `yaml:"appKey"`
 			Intent       string `yaml:"intent"`

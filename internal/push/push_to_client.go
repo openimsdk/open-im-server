@@ -18,8 +18,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"sync"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/conversation"
@@ -40,6 +41,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -285,18 +287,44 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 	if err != nil {
 		return nil, err
 	}
-	// Online push message
-	for _, v := range conns {
-		msgClient := msggateway.NewMsgGatewayClient(v)
-		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: pushToUserIDs})
-		if err != nil {
-			continue
-		}
-		log.ZDebug(ctx, "push result", "reply", reply)
-		if reply != nil && reply.SinglePushResult != nil {
-			wsResults = append(wsResults, reply.SinglePushResult...)
-		}
+
+	var (
+		mu         sync.Mutex
+		wg         = errgroup.Group{}
+		input      = &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: pushToUserIDs}
+		maxWorkers = config.Config.Push.MaxConcurrentWorkers
+	)
+
+	if maxWorkers < 3 {
+		maxWorkers = 3
 	}
+
+	wg.SetLimit(maxWorkers)
+
+	// Online push message
+	for _, conn := range conns {
+		conn := conn // loop var safe
+		wg.Go(func() error {
+			msgClient := msggateway.NewMsgGatewayClient(conn)
+			reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, input)
+			if err != nil {
+				return nil
+			}
+
+			log.ZDebug(ctx, "push result", "reply", reply)
+			if reply != nil && reply.SinglePushResult != nil {
+				mu.Lock()
+				wsResults = append(wsResults, reply.SinglePushResult...)
+				mu.Unlock()
+			}
+
+			return nil
+		})
+	}
+
+	_ = wg.Wait()
+
+	// always return nil
 	return wsResults, nil
 }
 
