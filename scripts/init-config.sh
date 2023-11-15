@@ -31,6 +31,7 @@ readonly ENV_FILE=${ENV_FILE:-"${OPENIM_ROOT}/scripts/install/environment.sh"}
 declare -A TEMPLATES=(
   ["${OPENIM_ROOT}/deployments/templates/env_template.yaml"]="${OPENIM_ROOT}/.env"
   ["${OPENIM_ROOT}/deployments/templates/openim.yaml"]="${OPENIM_ROOT}/config/config.yaml"
+  ["${OPENIM_ROOT}/deployments/templates/prometheus.yml"]="${OPENIM_ROOT}/config/prometheus.yml"
 )
 
 for template in "${!TEMPLATES[@]}"; do
@@ -45,6 +46,7 @@ for template in "${!TEMPLATES[@]}"; do
       openim::log::error "Error processing template file ${template}"
       exit 1
     }
+    sleep 0.5
   done
 done
 

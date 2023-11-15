@@ -1,0 +1,85 @@
+# my global config
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+#alertmanagers:
+#  - static_configs:
+#      - targets: ['172.29.166.17:9093'] #alertmanager地址
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+#  - "node_down.yml"
+# - "first_rules.yml"
+# - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label "job='job_name'"" to any timeseries scraped from this config.
+  # Monitored information captured by prometheus
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: [ '${NODE_EXPORTER_ADDRESS}:${NODE_EXPORTER_PORT}' ]
+        labels:
+          namespace: 'default'
+
+  # prometheus fetches application services
+  - job_name: 'openimserver-openim-api'
+    static_configs:
+      - targets: [ '${OPENIM_SERVER_ADDRESS}:${API_PROM_PORT}' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-msggateway'
+    static_configs:
+      - targets: [ '${OPENIM_SERVER_ADDRESS}:${MSG_GATEWAY_PROM_PORT}' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-msgtransfer'
+    static_configs:
+      - targets: [ ${MSG_TRANSFER_PROM_ADDRESS_PORT} ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-push'
+    static_configs:
+      - targets: [ '${OPENIM_SERVER_ADDRESS}:${PUSH_PROM_PORT}' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-auth'
+    static_configs:
+      - targets: [ '${OPENIM_SERVER_ADDRESS}:${AUTH_PROM_PORT}' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-conversation'
+    static_configs:
+      - targets: [ '${OPENIM_SERVER_ADDRESS}:${CONVERSATION_PROM_PORT}' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-friend'
+    static_configs:
+      - targets: [ '${OPENIM_SERVER_ADDRESS}:${FRIEND_PROM_PORT}' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-group'
+    static_configs:
+      - targets: [ '${OPENIM_SERVER_ADDRESS}:${GROUP_PROM_PORT}' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-msg'
+    static_configs:
+      - targets: [ '${OPENIM_SERVER_ADDRESS}:${MESSAGE_PROM_PORT}' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-third'
+    static_configs:
+      - targets: [ '${OPENIM_SERVER_ADDRESS}:${THIRD_PROM_PORT}' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-user'
+    static_configs:
+      - targets: [ '${OPENIM_SERVER_ADDRESS}:${USER_PROM_PORT}' ]
+        labels:
+          namespace: 'default'

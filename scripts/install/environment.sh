@@ -116,7 +116,10 @@ LAST_OCTET=$((LAST_OCTET + 1))
 PROMETHEUS_NETWORK_ADDRESS=$(generate_ip)
 LAST_OCTET=$((LAST_OCTET + 1))
 GRAFANA_NETWORK_ADDRESS=$(generate_ip)
-
+LAST_OCTET=$((LAST_OCTET + 1))
+NODE_EXPORTER_NETWORK_ADDRESS=$(generate_ip)
+LAST_OCTET=$((LAST_OCTET + 1))
+OPENIM_ADMIN_FRONT_NETWORK_ADDRESS=$(generate_ip)
 ###################### openim 配置 ######################
 # read: https://github.com/openimsdk/open-im-server/blob/main/deployment/README.md
 def "OPENIM_DATA_DIR" "/data/openim"
@@ -242,6 +245,9 @@ def "OPENIM_WEB_PORT" "11001"                       # openim-web的端口
 def "OPENIM_WEB_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # openim-web的地址
 def "OPENIM_WEB_DIST_PATH" "/app/dist"              # openim-web的dist路径
 
+###################### openim-admin-front 配置信息 ######################
+def "OPENIM_ADMIN_FRONT_PORT" "11002"                       # openim-admin-front的端口
+
 ###################### RPC 配置信息 ######################
 def "RPC_REGISTER_IP"                               # RPC的注册IP
 def "RPC_LISTEN_IP" "0.0.0.0"                       # RPC的监听IP
@@ -250,6 +256,9 @@ def "RPC_LISTEN_IP" "0.0.0.0"                       # RPC的监听IP
 def "PROMETHEUS_PORT" "19090"                       # Prometheus的端口
 def "PROMETHEUS_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # Prometheus的地址
 
+###################### node-exporter 配置 ######################
+def "NODE_EXPORTER_PORT" "19100"                       # node-exporter的端口
+def "NODE_EXPORTER_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # node-exporter的地址
 ###################### Grafana 配置信息 ######################
 def "GRAFANA_PORT" "3000"                        # Grafana的端口
 def "GRAFANA_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # Grafana的地址
@@ -340,8 +349,9 @@ def "IOS_BADGE_COUNT" "true"    # IOS徽章计数
 def "IOS_PRODUCTION" "false"    # IOS生产
 
 ###################### Prometheus 配置信息 ######################
-def "PROMETHEUS_ENABLE" "false" # 是否启用 Prometheus
-def "PROMETHEUS_URL" "/prometheus"
+# 是否启用 Prometheus
+readonly PROMETHEUS_ENABLE=${PROMETHEUS_ENABLE:-'false'}
+def "PROMETHEUS_URL" "${GRAFANA_ADDRESS}:${GRAFANA_PORT}"
 # Api 服务的 Prometheus 端口
 readonly API_PROM_PORT=${API_PROM_PORT:-'20100'}
 # User 服务的 Prometheus 端口
@@ -367,6 +377,7 @@ readonly THIRD_PROM_PORT=${THIRD_PROM_PORT:-'21301'}
 
 # Message Transfer 服务的 Prometheus 端口列表
 readonly MSG_TRANSFER_PROM_PORT=${MSG_TRANSFER_PROM_PORT:-'21400, 21401, 21402, 21403'}
+readonly MSG_TRANSFER_PROM_ADDRESS_PORT=${MSG_TRANSFER_PROM_ADDRESS_PORT:-"${DOCKER_BRIDGE_GATEWAY}:21400, ${DOCKER_BRIDGE_GATEWAY}:21401, ${DOCKER_BRIDGE_GATEWAY}:21402, ${DOCKER_BRIDGE_GATEWAY}:21403"}
 
 ###################### OpenIM openim-api ######################
 def "OPENIM_API_HOST" "127.0.0.1"

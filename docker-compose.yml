@@ -67,17 +67,17 @@ services:
         ipv4_address: ${REDIS_NETWORK_ADDRESS}
 
   zookeeper:
-   image: bitnami/zookeeper:3.8
-   container_name: zookeeper
-   ports:
-    - "${ZOOKEEPER_PORT}:2181"
-   volumes:
-     - "/etc/localtime:/etc/localtime"
-   environment:
-     - ALLOW_ANONYMOUS_LOGIN=yes
-     - TZ="Asia/Shanghai"
-   restart: always
-   networks:
+    image: bitnami/zookeeper:3.8
+    container_name: zookeeper
+    ports:
+     - "${ZOOKEEPER_PORT}:2181"
+    volumes:
+      - "/etc/localtime:/etc/localtime"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - TZ="Asia/Shanghai"
+    restart: always
+    networks:
       server:
         ipv4_address: ${ZOOKEEPER_NETWORK_ADDRESS}
 
@@ -142,3 +142,53 @@ services:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS}
 
+  openim-admin:
+    image: ${IMAGE_REGISTRY}/openim-admin-front:v3.4.0
+    # image: ghcr.io/openimsdk/openim-admin-front:v3.4.0
+    # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-admin-front:v3.4.0
+    # image: openim/openim-admin-front:v3.4.0
+    container_name: openim-admin
+    restart: always
+    ports:
+      - "${OPENIM_ADMIN_FRONT_PORT}:80"
+    networks:
+      server:
+        ipv4_address: ${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS}
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    hostname: prometheus
+    restart: always
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    networks:
+      server:
+        ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS}
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    hostname: grafana
+    user: root
+    restart: always
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    volumes:
+      - ${DATA_DIR}/components/grafana:/var/lib/grafana
+    networks:
+      server:
+        ipv4_address: ${GRAFANA_NETWORK_ADDRESS}
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: node-exporter
+    hostname: node-exporter
+    restart: always
+    ports:
+      - "${NODE_EXPORTER_PORT}:9100"
+    networks:
+      server:
+        ipv4_address: ${NODE_EXPORTER_NETWORK_ADDRESS}

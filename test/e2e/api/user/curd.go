@@ -52,5 +52,6 @@ func GetUsersOnlineStatus(token string, userIDs []string) error {
 	requestBody := GetUsersOnlineStatusRequest{
 		UserIDs: userIDs,
 	}
+  
 	return sendPostRequestWithToken(url, token, requestBody)
 }
