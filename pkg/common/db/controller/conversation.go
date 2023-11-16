@@ -16,6 +16,7 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -39,7 +40,7 @@ type ConversationDatabase interface {
 	// FindConversations 根据会话ID获取某个用户的多个会话
 	FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationtb.ConversationModel, error)
 	// FindRecvMsgNotNotifyUserIDs 获取超级大群开启免打扰的用户ID
-	FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
+	//FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 	// GetUserAllConversation 获取一个用户在服务器上所有的会话
 	GetUserAllConversation(ctx context.Context, ownerUserID string) ([]*relationtb.ConversationModel, error)
 	// SetUserConversations 设置用户多个会话属性，如果会话不存在则创建，否则更新,内部保证原子性
@@ -51,7 +52,7 @@ type ConversationDatabase interface {
 	GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error)
 	GetAllConversationIDs(ctx context.Context) ([]string, error)
 	GetAllConversationIDsNumber(ctx context.Context) (int64, error)
-	PageConversationIDs(ctx context.Context, pageNumber, showNumber int32) (conversationIDs []string, err error)
+	PageConversationIDs(ctx context.Context, pagination pagination.Pagination) (conversationIDs []string, err error)
 	//GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
 	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationtb.ConversationModel, error)
 	GetConversationIDsNeedDestruct(ctx context.Context) ([]*relationtb.ConversationModel, error)
@@ -255,9 +256,9 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 	return cache.ExecDel(ctx)
 }
 
-func (c *conversationDatabase) FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error) {
-	return c.cache.GetSuperGroupRecvMsgNotNotifyUserIDs(ctx, groupID)
-}
+//func (c *conversationDatabase) FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error) {
+//	return c.cache.GetSuperGroupRecvMsgNotNotifyUserIDs(ctx, groupID)
+//}
 
 func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error {
 	cache := c.cache.NewCache()
@@ -311,13 +312,9 @@ func (c *conversationDatabase) GetAllConversationIDsNumber(ctx context.Context) 
 	return c.conversationDB.GetAllConversationIDsNumber(ctx)
 }
 
-func (c *conversationDatabase) PageConversationIDs(ctx context.Context, pageNumber, showNumber int32) ([]string, error) {
-	return c.conversationDB.PageConversationIDs(ctx, pageNumber, showNumber)
+func (c *conversationDatabase) PageConversationIDs(ctx context.Context, pagination pagination.Pagination) ([]string, error) {
+	return c.conversationDB.PageConversationIDs(ctx, pagination)
 }
-
-//func (c *conversationDatabase) GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error) {
-//	return c.cache.GetUserAllHasReadSeqs(ctx, ownerUserID)
-//}
 
 func (c *conversationDatabase) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationtb.ConversationModel, error) {
 	return c.conversationDB.GetConversationsByConversationID(ctx, conversationIDs)

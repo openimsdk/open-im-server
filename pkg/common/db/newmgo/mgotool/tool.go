@@ -48,6 +48,14 @@ func UpdateOne(ctx context.Context, coll *mongo.Collection, filter any, update a
 	return nil
 }
 
+func UpdateMany(ctx context.Context, coll *mongo.Collection, filter any, update any, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	res, err := coll.UpdateMany(ctx, filter, update, opts...)
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	return res, nil
+}
+
 func Find[T any](ctx context.Context, coll *mongo.Collection, filter any, opts ...*options.FindOptions) ([]T, error) {
 	cur, err := coll.Find(ctx, filter, opts...)
 	if err != nil {
@@ -92,6 +100,15 @@ func FindPage[T any](ctx context.Context, coll *mongo.Collection, filter any, pa
 	return count, res, nil
 }
 
+func FindPageOnly[T any](ctx context.Context, coll *mongo.Collection, filter any, pagination pagination.Pagination, opts ...*options.FindOptions) ([]T, error) {
+	skip := int64(pagination.GetPageNumber()-1) * int64(pagination.GetShowNumber())
+	if skip < 0 || pagination.GetShowNumber() <= 0 {
+		return nil, nil
+	}
+	opt := options.Find().SetSkip(skip).SetLimit(int64(pagination.GetShowNumber()))
+	return Find[T](ctx, coll, filter, append(opts, opt)...)
+}
+
 func Count(ctx context.Context, coll *mongo.Collection, filter any, opts ...*options.CountOptions) (int64, error) {
 	return coll.CountDocuments(ctx, filter, opts...)
 }
@@ -119,6 +136,14 @@ func DeleteMany(ctx context.Context, coll *mongo.Collection, filter any, opts ..
 	return nil
 }
 
-//func Upsert[T any](ctx context.Context, coll *mongo.Collection, val *T, opts ...*options.InsertManyOptions) error {
-//	return nil
-//}
+func Aggregate[T any](ctx context.Context, coll *mongo.Collection, pipeline any, opts ...*options.AggregateOptions) ([]T, error) {
+	cur, err := coll.Aggregate(ctx, pipeline, opts...)
+	if err != nil {
+		return nil, err
+	}
+	var ts []T
+	if err := cur.All(ctx, &ts); err != nil {
+		return nil, err
+	}
+	return ts, nil
+}

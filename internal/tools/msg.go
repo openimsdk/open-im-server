@@ -17,6 +17,7 @@ package tools
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
 	"math"
 
@@ -106,10 +107,14 @@ func InitMsgTool() (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
+	conversationDB, err := newmgo.NewConversationMongo(mongo.GetDatabase())
+	if err != nil {
+		return nil, err
+	}
 	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, tx.NewMongo(mongo.GetClient()), nil)
 	conversationDatabase := controller.NewConversationDatabase(
-		relation.NewConversationGorm(db),
-		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), relation.NewConversationGorm(db)),
+		conversationDB,
+		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
 		tx.NewGorm(db),
 	)
 	msgRpcClient := rpcclient.NewMessageRpcClient(discov)
@@ -156,7 +161,11 @@ func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 	}
 	for i := 0; i < count; i++ {
 		pageNumber := rand.Int63() % maxPage
-		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, int32(pageNumber), batchNum)
+		pagination := &sdkws.RequestPagination{
+			PageNumber: int32(pageNumber),
+			ShowNumber: batchNum,
+		}
+		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, pagination)
 		if err != nil {
 			log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
 			continue

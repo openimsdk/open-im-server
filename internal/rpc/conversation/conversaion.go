@@ -16,6 +16,9 @@ package conversation
 
 import (
 	"context"
+	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 
 	"google.golang.org/grpc"
 
@@ -54,7 +57,14 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	conversationDB := relation.NewConversationGorm(db)
+	mongo, err := unrelation.NewMongo()
+	if err != nil {
+		return err
+	}
+	conversationDB, err := newmgo.NewConversationMongo(mongo.GetDatabase())
+	if err != nil {
+		return err
+	}
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	pbconversation.RegisterConversationServer(server, &conversationServer{
@@ -229,11 +239,12 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 
 // 获取超级大群开启免打扰的用户ID.
 func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbconversation.GetRecvMsgNotNotifyUserIDsReq) (*pbconversation.GetRecvMsgNotNotifyUserIDsResp, error) {
-	userIDs, err := c.conversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
-	if err != nil {
-		return nil, err
-	}
-	return &pbconversation.GetRecvMsgNotNotifyUserIDsResp{UserIDs: userIDs}, nil
+	//userIDs, err := c.conversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//return &pbconversation.GetRecvMsgNotNotifyUserIDsResp{UserIDs: userIDs}, nil
+	return nil, errors.New("deprecated")
 }
 
 // create conversation without notification for msg redis transfer.
