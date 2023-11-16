@@ -120,6 +120,8 @@ LAST_OCTET=$((LAST_OCTET + 1))
 NODE_EXPORTER_NETWORK_ADDRESS=$(generate_ip)
 LAST_OCTET=$((LAST_OCTET + 1))
 OPENIM_ADMIN_FRONT_NETWORK_ADDRESS=$(generate_ip)
+LAST_OCTET=$((LAST_OCTET + 1))
+ALERT_MANAGER_NETWORK_ADDRESS=$(generate_ip)
 ###################### openim 配置 ######################
 # read: https://github.com/openimsdk/open-im-server/blob/main/deployment/README.md
 def "OPENIM_DATA_DIR" "/data/openim"
@@ -259,6 +261,33 @@ def "PROMETHEUS_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # Prometheus的地址
 ###################### node-exporter 配置 ######################
 def "NODE_EXPORTER_PORT" "19100"                       # node-exporter的端口
 def "NODE_EXPORTER_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # node-exporter的地址
+
+###################### alertmanagerS 配置 ######################
+def "ALERT_MANAGER_PORT" "19093"                       # node-exporter的端口
+def "ALERT_MANAGER_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # node-exporter的地址
+
+###################### AlertManager Configuration Script ######################
+# 解析超时
+readonly ALERTMANAGER_RESOLVE_TIMEOUT=${ALERTMANAGER_RESOLVE_TIMEOUT:-'5m'}
+# 发件人邮箱
+readonly ALERTMANAGER_SMTP_FROM=${ALERTMANAGER_SMTP_FROM:-'alert@openim.io'}
+# SMTP服务器地址和端口
+readonly ALERTMANAGER_SMTP_SMARTHOST=${ALERTMANAGER_SMTP_SMARTHOST:-'smtp.163.com:465'}
+# SMTP认证用户名
+readonly ALERTMANAGER_SMTP_AUTH_USERNAME=${SMTP_USERNAME:-"alert@openim.io"}
+# SMTP认证密码
+readonly ALERTMANAGER_SMTP_AUTH_PASSWORD=${SMTP_PASSWORD:-"YOURAUTHPASSWORD"}
+# SMTP是否需要TLS
+readonly ALERTMANAGER_SMTP_REQUIRE_TLS=${ALERTMANAGER_SMTP_REQUIRE_TLS:-"false"}
+# SMTP HELO/EHLO标识符
+readonly ALERTMANAGER_SMTP_HELLO=${ALERTMANAGER_SMTP_HELLO:-"xxx监控告警"}
+# 邮箱接收人
+readonly ALERTMANAGER_EMAIL_TO=${ALERTMANAGER_EMAIL_TO:-"{EMAIL_TO:-'alert@example.com'}"}
+# 邮箱主题
+readonly ALERTMANAGER_EMAIL_SUBJECT=${ALERTMANAGER_EMAIL_SUBJECT:-"{EMAIL_SUBJECT:-'[Alert] Notification'}"}
+# 是否发送已解决的告警
+readonly ALERTMANAGER_SEND_RESOLVED=${ALERTMANAGER_SEND_RESOLVED:-"{SEND_RESOLVED:-'true'}"}
+
 ###################### Grafana 配置信息 ######################
 def "GRAFANA_PORT" "3000"                        # Grafana的端口
 def "GRAFANA_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # Grafana的地址

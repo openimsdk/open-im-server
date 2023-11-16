@@ -162,11 +162,26 @@ services:
     restart: always
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml
     ports:
       - "${PROMETHEUS_PORT}:9090"
     networks:
       server:
         ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS}
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    hostname: alertmanager
+    restart: always
+    volumes:
+      - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ./config/email.tmpl:/etc/alertmanager/email.tmpl
+    ports:
+      - "${ALERT_MANAGER_PORT}:9093"
+    networks:
+      server:
+        ipv4_address: ${ALERT_MANAGER_NETWORK_ADDRESS}
 
   grafana:
     image: grafana/grafana

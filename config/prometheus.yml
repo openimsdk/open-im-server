@@ -6,13 +6,13 @@ global:
 
 # Alertmanager configuration
 alerting:
-#alertmanagers:
-#  - static_configs:
-#      - targets: ['172.29.166.17:9093'] #alertmanager地址
+  alertmanagers:
+    - static_configs:
+        - targets: ['172.28.0.1:19093']
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
-#  - "node_down.yml"
+  - "instance-down-rules.yml"
 # - "first_rules.yml"
 # - "second_rules.yml"
 

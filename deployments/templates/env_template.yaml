@@ -94,7 +94,7 @@ OPENIM_CHAT_NETWORK_ADDRESS=${OPENIM_CHAT_NETWORK_ADDRESS}
 # Address or hostname for the Prometheus network.
 # Default: PROMETHEUS_NETWORK_ADDRESS=172.28.0.11
 PROMETHEUS_NETWORK_ADDRESS=${PROMETHEUS_NETWORK_ADDRESS}
-
+  
 # Address or hostname for the Grafana network.
 # Default: GRAFANA_NETWORK_ADDRESS=172.28.0.12
 GRAFANA_NETWORK_ADDRESS=${GRAFANA_NETWORK_ADDRESS}
@@ -106,7 +106,10 @@ NODE_EXPORTER_NETWORK_ADDRESS=${NODE_EXPORTER_NETWORK_ADDRESS}
 # Address or hostname for the OpenIM admin network.
 # Default: OPENIM_ADMIN_NETWORK_ADDRESS=172.28.0.14
 OPENIM_ADMIN_FRONT_NETWORK_ADDRESS=${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS}
-
+  
+# Address or hostname for the alertmanager network.
+# Default: ALERT_MANAGER_NETWORK_ADDRESS=172.28.0.15
+ALERT_MANAGER_NETWORK_ADDRESS=${ALERT_MANAGER_NETWORK_ADDRESS}
 # ===============================================
 # = Component Extension Configuration =
 # ===============================================
@@ -306,3 +309,7 @@ GRAFANA_PORT=${GRAFANA_PORT}
 # Port for the admin front.
 # Default: OPENIM_ADMIN_FRONT_PORT=11002
 OPENIM_ADMIN_FRONT_PORT=${OPENIM_ADMIN_FRONT_PORT}
+
+# Port for the alertmanager.
+# Default: ALERT_MANAGER_PORT=19093
+ALERT_MANAGER_PORT=${ALERT_MANAGER_PORT}

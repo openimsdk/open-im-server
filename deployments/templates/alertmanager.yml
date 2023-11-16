@@ -1,0 +1,32 @@
+###################### AlertManager Configuration ######################
+# AlertManager configuration using environment variables
+#
+# Resolve timeout
+# SMTP configuration for sending alerts
+# Templates for email notifications
+# Routing configurations for alerts
+# Receiver configurations
+global:
+  resolve_timeout: ${ALERTMANAGER_RESOLVE_TIMEOUT}
+  smtp_from: ${ALERTMANAGER_SMTP_FROM}
+  smtp_smarthost: ${ALERTMANAGER_SMTP_SMARTHOST}
+  smtp_auth_username: ${ALERTMANAGER_SMTP_AUTH_USERNAME}
+  smtp_auth_password: ${ALERTMANAGER_SMTP_AUTH_PASSWORD}
+  smtp_require_tls: ${ALERTMANAGER_SMTP_REQUIRE_TLS}
+  smtp_hello: ${ALERTMANAGER_SMTP_HELLO}
+
+templates:
+  - /etc/alertmanager/email.tmpl
+
+route:
+  group_wait: 5s
+  group_interval: 5s
+  repeat_interval: 5m
+  receiver: email
+receivers:
+  - name: email
+    email_configs:
+      - to: ${ALERTMANAGER_EMAIL_TO}
+        html: '{{ template "email.to.html" . }}'
+        headers: { Subject: "[OPENIM-SERVER]Alarm" }
+        send_resolved: true
