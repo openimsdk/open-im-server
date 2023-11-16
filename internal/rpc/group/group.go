@@ -104,19 +104,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	gs.conversationRpcClient = conversationRpcClient
 	gs.msgRpcClient = msgRpcClient
 	pbgroup.RegisterGroupServer(server, &gs)
-	//pbgroup.RegisterGroupServer(server, &groupServer{
-	//	db: database,
-	//	User:          userRpcClient,
-	//	Notification: notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
-	//		users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//		return utils.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
-	//	}),
-	//	conversationRpcClient: conversationRpcClient,
-	//	msgRpcClient:          msgRpcClient,
-	//})
 	return nil
 }
 
@@ -1569,7 +1556,7 @@ func (s *groupServer) GetGroupMemberRoleLevel(ctx context.Context, req *pbgroup.
 
 func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *pbgroup.GetGroupUsersReqApplicationListReq) (*pbgroup.GetGroupUsersReqApplicationListResp, error) {
 	resp := &pbgroup.GetGroupUsersReqApplicationListResp{}
-	total, requests, err := s.db.FindGroupRequests(ctx, req.GroupID, req.UserIDs)
+	requests, err := s.db.FindGroupRequests(ctx, req.GroupID, req.UserIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -1610,7 +1597,7 @@ func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 		}
 		return convert.Db2PbGroupRequest(e, nil, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerUserID, groupMemberNum[e.GroupID]))
 	})
-	resp.Total = total
+	resp.Total = int64(len(resp.GroupRequests))
 	return resp, nil
 }
 

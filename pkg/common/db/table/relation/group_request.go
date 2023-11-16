@@ -57,12 +57,11 @@ func (GroupRequestModel) TableName() string {
 }
 
 type GroupRequestModelInterface interface {
-	//NewTx(tx any) GroupRequestModelInterface
 	Create(ctx context.Context, groupRequests []*GroupRequestModel) (err error)
 	Delete(ctx context.Context, groupID string, userID string) (err error)
 	UpdateHandler(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32) (err error)
 	Take(ctx context.Context, groupID string, userID string) (groupRequest *GroupRequestModel, err error)
-	FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (int64, []*GroupRequestModel, error)
+	FindGroupRequests(ctx context.Context, groupID string, userIDs []string) ([]*GroupRequestModel, error)
 	Page(ctx context.Context, userID string, pagination pagination.Pagination) (total int64, groups []*GroupRequestModel, err error)
 	PageGroup(ctx context.Context, groupIDs []string, pagination pagination.Pagination) (total int64, groups []*GroupRequestModel, err error)
 }

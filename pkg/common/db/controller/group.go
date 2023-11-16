@@ -63,7 +63,7 @@ type GroupDatabase interface {
 	// GroupRequest
 	CreateGroupRequest(ctx context.Context, requests []*relationtb.GroupRequestModel) error
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relationtb.GroupRequestModel, error)
-	FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (int64, []*relationtb.GroupRequestModel, error)
+	FindGroupRequests(ctx context.Context, groupID string, userIDs []string) ([]*relationtb.GroupRequestModel, error)
 	PageGroupRequestUser(ctx context.Context, userID string, pagination pagination.Pagination) (int64, []*relationtb.GroupRequestModel, error)
 
 	// 获取群总数
@@ -381,7 +381,7 @@ func (g *groupDatabase) CountRangeEverydayTotal(ctx context.Context, start time.
 	return g.groupDB.CountRangeEverydayTotal(ctx, start, end)
 }
 
-func (g *groupDatabase) FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (int64, []*relationtb.GroupRequestModel, error) {
+func (g *groupDatabase) FindGroupRequests(ctx context.Context, groupID string, userIDs []string) ([]*relationtb.GroupRequestModel, error) {
 	return g.groupRequestDB.FindGroupRequests(ctx, groupID, userIDs)
 }
 
