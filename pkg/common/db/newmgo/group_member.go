@@ -27,6 +27,10 @@ func (g *GroupMemberMgo) Delete(ctx context.Context, groupID string, userIDs []s
 	return mgotool.DeleteMany(ctx, g.coll, bson.M{"group_id": groupID, "user_id": bson.M{"$in": userIDs}})
 }
 
+func (g *GroupMemberMgo) UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) error {
+	return g.Update(ctx, groupID, userID, bson.M{"role_level": roleLevel})
+}
+
 func (g *GroupMemberMgo) Update(ctx context.Context, groupID string, userID string, data map[string]any) (err error) {
 	return mgotool.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID}, bson.M{"$set": data}, true)
 }
@@ -48,7 +52,11 @@ func (g *GroupMemberMgo) TakeOwner(ctx context.Context, groupID string) (groupMe
 	return mgotool.FindOne[*relation.GroupMemberModel](ctx, g.coll, bson.M{"group_id": groupID, "role_level": constant.GroupOwner})
 }
 
-func (g *GroupMemberMgo) SearchMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pagination pagination.Pagination) (total int64, groupList []*relation.GroupMemberModel, err error) {
+func (g *GroupMemberMgo) FindRoleLevelUserIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error) {
+	return mgotool.Find[string](ctx, g.coll, bson.M{"group_id": groupID, "role_level": roleLevel}, options.Find().SetProjection(bson.M{"user_id": 1}))
+}
+
+func (g *GroupMemberMgo) SearchMember(ctx context.Context, keyword string, groupID string, pagination pagination.Pagination) (total int64, groupList []*relation.GroupMemberModel, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -69,4 +77,12 @@ func (g *GroupMemberMgo) FindUserManagedGroupID(ctx context.Context, userID stri
 		},
 	}
 	return mgotool.Find[string](ctx, g.coll, filter, options.Find().SetProjection(bson.M{"group_id": 1}))
+}
+
+func (g *GroupMemberMgo) IsUpdateRoleLevel(data map[string]any) bool {
+	if len(data) == 0 {
+		return false
+	}
+	_, ok := data["role_level"]
+	return ok
 }

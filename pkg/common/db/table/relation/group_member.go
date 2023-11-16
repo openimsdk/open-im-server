@@ -62,16 +62,17 @@ type GroupMemberModelInterface interface {
 	Delete(ctx context.Context, groupID string, userIDs []string) (err error)
 	//DeleteGroup(ctx context.Context, groupIDs []string) (err error)
 	Update(ctx context.Context, groupID string, userID string, data map[string]any) (err error)
-	//UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) (rowsAffected int64, err error)
-	Find(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) (groupMembers []*GroupMemberModel, err error)
+	UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) error
 	FindMemberUserID(ctx context.Context, groupID string) (userIDs []string, err error)
 	Take(ctx context.Context, groupID string, userID string) (groupMember *GroupMemberModel, err error)
 	TakeOwner(ctx context.Context, groupID string) (groupMember *GroupMemberModel, err error)
-	SearchMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pagination pagination.Pagination) (total int64, groupList []*GroupMemberModel, err error)
+	SearchMember(ctx context.Context, keyword string, groupID string, pagination pagination.Pagination) (total int64, groupList []*GroupMemberModel, err error)
+	FindRoleLevelUserIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error)
 	//MapGroupMemberNum(ctx context.Context, groupIDs []string) (count map[string]uint32, err error)
 	//FindJoinUserID(ctx context.Context, groupIDs []string) (groupUsers map[string][]string, err error)
 	FindUserJoinedGroupID(ctx context.Context, userID string) (groupIDs []string, err error)
 	TakeGroupMemberNum(ctx context.Context, groupID string) (count int64, err error)
 	//FindUsersJoinedGroupID(ctx context.Context, userIDs []string) (map[string][]string, error)
 	FindUserManagedGroupID(ctx context.Context, userID string) (groupIDs []string, err error)
+	IsUpdateRoleLevel(data map[string]any) bool
 }

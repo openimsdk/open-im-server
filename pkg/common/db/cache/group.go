@@ -16,6 +16,10 @@ package cache
 
 import (
 	"context"
+	"fmt"
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/errs"
+	"strconv"
 	"time"
 
 	"github.com/OpenIMSDK/tools/log"
@@ -34,8 +38,10 @@ const (
 	groupMemberIDsKey   = "GROUP_MEMBER_IDS:"
 	groupMembersHashKey = "GROUP_MEMBERS_HASH2:"
 	groupMemberInfoKey  = "GROUP_MEMBER_INFO:"
-	joinedGroupsKey     = "JOIN_GROUPS_KEY:"
-	groupMemberNumKey   = "GROUP_MEMBER_NUM_CACHE:"
+	//groupOwnerInfoKey   = "GROUP_OWNER_INFO:"
+	joinedGroupsKey            = "JOIN_GROUPS_KEY:"
+	groupMemberNumKey          = "GROUP_MEMBER_NUM_CACHE:"
+	groupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:"
 )
 
 type GroupCache interface {
@@ -61,9 +67,15 @@ type GroupCache interface {
 	GetGroupMembersInfo(ctx context.Context, groupID string, userID []string) (groupMembers []*relationtb.GroupMemberModel, err error)
 	GetAllGroupMembersInfo(ctx context.Context, groupID string) (groupMembers []*relationtb.GroupMemberModel, err error)
 	GetGroupMembersPage(ctx context.Context, groupID string, userID []string, showNumber, pageNumber int32) (total uint32, groupMembers []*relationtb.GroupMemberModel, err error)
+	FindGroupMemberUser(ctx context.Context, groupIDs []string, userID string) ([]*relationtb.GroupMemberModel, error)
 
+	GetGroupOwner(ctx context.Context, groupID string) (*relationtb.GroupMemberModel, error)
+	GetGroupsOwner(ctx context.Context, groupIDs []string) ([]*relationtb.GroupMemberModel, error)
+	DelGroupRoleLevel(groupID string, roleLevel []int32) GroupCache
+	DelGroupAllRoleLevel(groupID string) GroupCache
 	DelGroupMembersInfo(groupID string, userID ...string) GroupCache
-
+	GetGroupRoleLevelMemberInfo(ctx context.Context, groupID string, roleLevel int32) ([]*relationtb.GroupMemberModel, error)
+	GetGroupRolesLevelMemberInfo(ctx context.Context, groupID string, roleLevels []int32) ([]*relationtb.GroupMemberModel, error)
 	GetGroupMemberNum(ctx context.Context, groupID string) (memberNum int64, err error)
 	DelGroupsMemberNum(groupID ...string) GroupCache
 }
@@ -131,6 +143,10 @@ func (g *GroupCacheRedis) getGroupMemberNumKey(groupID string) string {
 	return groupMemberNumKey + groupID
 }
 
+func (g *GroupCacheRedis) getGroupRoleLevelMemberIDsKey(groupID string, roleLevel int32) string {
+	return groupRoleLevelMemberIDsKey + groupID + "-" + strconv.Itoa(int(roleLevel))
+}
+
 func (g *GroupCacheRedis) GetGroupIndex(group *relationtb.GroupModel, keys []string) (int, error) {
 	key := g.getGroupInfoKey(group.GroupID)
 	for i, _key := range keys {
@@ -153,7 +169,7 @@ func (g *GroupCacheRedis) GetGroupMemberIndex(groupMember *relationtb.GroupMembe
 	return 0, errIndex
 }
 
-// / groupInfo.
+// groupInfo.
 func (g *GroupCacheRedis) GetGroupsInfo(ctx context.Context, groupIDs []string) (groups []*relationtb.GroupModel, err error) {
 	return batchGetCache2(ctx, g.rcClient, g.expireTime, groupIDs, func(groupID string) string {
 		return g.getGroupInfoKey(groupID)
@@ -177,6 +193,31 @@ func (g *GroupCacheRedis) DelGroupsInfo(groupIDs ...string) GroupCache {
 	newGroupCache.AddKeys(keys...)
 
 	return newGroupCache
+}
+
+func (g *GroupCacheRedis) DelGroupsOwner(groupIDs ...string) GroupCache {
+	newGroupCache := g.NewCache()
+	keys := make([]string, 0, len(groupIDs))
+	for _, groupID := range groupIDs {
+		keys = append(keys, g.getGroupRoleLevelMemberIDsKey(groupID, constant.GroupOwner))
+	}
+	newGroupCache.AddKeys(keys...)
+
+	return newGroupCache
+}
+
+func (g *GroupCacheRedis) DelGroupRoleLevel(groupID string, roleLevels []int32) GroupCache {
+	newGroupCache := g.NewCache()
+	keys := make([]string, 0, len(roleLevels))
+	for _, roleLevel := range roleLevels {
+		keys = append(keys, g.getGroupRoleLevelMemberIDsKey(groupID, roleLevel))
+	}
+	newGroupCache.AddKeys(keys...)
+	return newGroupCache
+}
+
+func (g *GroupCacheRedis) DelGroupAllRoleLevel(groupID string) GroupCache {
+	return g.DelGroupRoleLevel(groupID, []int32{constant.GroupOwner, constant.GroupAdmin, constant.GroupOrdinaryUsers})
 }
 
 // groupMembersHash.
@@ -211,7 +252,6 @@ func (g *GroupCacheRedis) DelGroupMembersHash(groupID string) GroupCache {
 	return cache
 }
 
-// groupMemberIDs.
 func (g *GroupCacheRedis) GetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error) {
 	return getCache(ctx, g.rcClient, g.getGroupMemberIDsKey(groupID), g.expireTime, func(ctx context.Context) ([]string, error) {
 		return g.groupMemberDB.FindMemberUserID(ctx, groupID)
@@ -269,12 +309,7 @@ func (g *GroupCacheRedis) GetGroupMembersInfo(ctx context.Context, groupID strin
 	})
 }
 
-func (g *GroupCacheRedis) GetGroupMembersPage(
-	ctx context.Context,
-	groupID string,
-	userIDs []string,
-	showNumber, pageNumber int32,
-) (total uint32, groupMembers []*relationtb.GroupMemberModel, err error) {
+func (g *GroupCacheRedis) GetGroupMembersPage(ctx context.Context, groupID string, userIDs []string, showNumber, pageNumber int32) (total uint32, groupMembers []*relationtb.GroupMemberModel, err error) {
 	groupMemberIDs, err := g.GetGroupMemberIDs(ctx, groupID)
 	if err != nil {
 		return 0, nil, err
@@ -332,4 +367,69 @@ func (g *GroupCacheRedis) DelGroupsMemberNum(groupID ...string) GroupCache {
 	cache.AddKeys(keys...)
 
 	return cache
+}
+
+func (g *GroupCacheRedis) GetGroupOwner(ctx context.Context, groupID string) (*relationtb.GroupMemberModel, error) {
+	members, err := g.GetGroupRoleLevelMemberInfo(ctx, groupID, constant.GroupOwner)
+	if err != nil {
+		return nil, err
+	}
+	if len(members) == 0 {
+		return nil, errs.ErrRecordNotFound.Wrap(fmt.Sprintf("group %s owner not found", groupID))
+	}
+	return members[0], nil
+}
+
+func (g *GroupCacheRedis) GetGroupsOwner(ctx context.Context, groupIDs []string) ([]*relationtb.GroupMemberModel, error) {
+	members := make([]*relationtb.GroupMemberModel, 0, len(groupIDs))
+	for _, groupID := range groupIDs {
+		items, err := g.GetGroupRoleLevelMemberInfo(ctx, groupID, constant.GroupOwner)
+		if err != nil {
+			return nil, err
+		}
+		if len(items) > 0 {
+			members = append(members, items[0])
+		}
+	}
+	return members, nil
+}
+
+func (g *GroupCacheRedis) GetGroupRoleLevelMemberIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error) {
+	return getCache(ctx, g.rcClient, g.getGroupRoleLevelMemberIDsKey(groupID, roleLevel), g.expireTime, func(ctx context.Context) ([]string, error) {
+		return g.groupMemberDB.FindRoleLevelUserIDs(ctx, groupID, roleLevel)
+	})
+}
+
+func (g *GroupCacheRedis) GetGroupRoleLevelMemberInfo(ctx context.Context, groupID string, roleLevel int32) ([]*relationtb.GroupMemberModel, error) {
+	userIDs, err := g.GetGroupRoleLevelMemberIDs(ctx, groupID, roleLevel)
+	if err != nil {
+		return nil, err
+	}
+	return g.GetGroupMembersInfo(ctx, groupID, userIDs)
+}
+
+func (g *GroupCacheRedis) GetGroupRolesLevelMemberInfo(ctx context.Context, groupID string, roleLevels []int32) ([]*relationtb.GroupMemberModel, error) {
+	var userIDs []string
+	for _, roleLevel := range roleLevels {
+		ids, err := g.GetGroupRoleLevelMemberIDs(ctx, groupID, roleLevel)
+		if err != nil {
+			return nil, err
+		}
+		userIDs = append(userIDs, ids...)
+	}
+	return g.GetGroupMembersInfo(ctx, groupID, userIDs)
+}
+
+func (g *GroupCacheRedis) FindGroupMemberUser(ctx context.Context, groupIDs []string, userID string) (_ []*relationtb.GroupMemberModel, err error) {
+	if len(groupIDs) == 0 {
+		groupIDs, err = g.GetJoinedGroupIDs(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return batchGetCache2(ctx, g.rcClient, g.expireTime, groupIDs, func(groupID string) string {
+		return g.getGroupMemberInfoKey(groupID, userID)
+	}, func(ctx context.Context, groupID string) (*relationtb.GroupMemberModel, error) {
+		return g.groupMemberDB.Take(ctx, groupID, userID)
+	})
 }

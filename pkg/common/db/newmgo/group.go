@@ -24,6 +24,10 @@ func (g *GroupMgo) Create(ctx context.Context, groups []*relation.GroupModel) (e
 	return mgotool.InsertMany(ctx, g.coll, groups)
 }
 
+func (g *GroupMgo) UpdateState(ctx context.Context, groupID string, state int32) (err error) {
+	return g.UpdateMap(ctx, groupID, map[string]any{"state": state})
+}
+
 func (g *GroupMgo) UpdateMap(ctx context.Context, groupID string, args map[string]any) (err error) {
 	if len(args) == 0 {
 		return nil

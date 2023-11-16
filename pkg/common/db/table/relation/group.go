@@ -67,12 +67,10 @@ func (GroupModel) TableName() string {
 type GroupModelInterface interface {
 	Create(ctx context.Context, groups []*GroupModel) (err error)
 	UpdateMap(ctx context.Context, groupID string, args map[string]any) (err error)
-	//UpdateStatus(ctx context.Context, groupID string, status int32) (err error)
+	UpdateState(ctx context.Context, groupID string, state int32) (err error)
 	Find(ctx context.Context, groupIDs []string) (groups []*GroupModel, err error)
-	//FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*GroupModel, err error)
 	Take(ctx context.Context, groupID string) (group *GroupModel, err error)
 	Search(ctx context.Context, keyword string, pagination pagination.Pagination) (total int64, groups []*GroupModel, err error)
-	//GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error)
 	// 获取群总数
 	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
 	// 获取范围内群增量
