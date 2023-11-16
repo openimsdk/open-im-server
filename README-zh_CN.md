@@ -30,7 +30,7 @@
 </p>
 
 ## 🟢 扫描微信进群交流
-<img src="https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg" width="300">
+<img src="./docs/images/Wechat.jpg" width="300">
 
 
 ## Ⓜ️ 关于 OpenIM
