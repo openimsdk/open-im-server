@@ -303,6 +303,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		MemberUserIDs: userIDs,
 		GroupInfo:     resp.GroupInfo,
 		OwnerUserID:   req.OwnerUserID,
+		AdminUserIDs:  req.AdminUserIDs,
 	}
 
 	if err := CallbackAfterCreateGroup(ctx, reqCallBackAfter); err != nil {

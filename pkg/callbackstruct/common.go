@@ -16,6 +16,10 @@ package callbackstruct
 
 import "github.com/OpenIMSDK/tools/errs"
 
+const (
+	Next = 1
+)
+
 type CommonCallbackReq struct {
 	SendID           string   `json:"sendID"`
 	CallbackCommand  string   `json:"callbackCommand"`
@@ -57,7 +61,7 @@ type CommonCallbackResp struct {
 }
 
 func (c CommonCallbackResp) Parse() error {
-	if c.ActionCode != errs.NoError || c.NextCode == 1 {
+	if c.ActionCode != errs.NoError || c.NextCode == Next {
 		return errs.NewCodeError(int(c.ErrCode), c.ErrMsg).WithDetail(c.ErrDlt)
 	}
 	return nil

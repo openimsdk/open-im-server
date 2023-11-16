@@ -16,6 +16,7 @@ package group
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/log"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -66,24 +67,14 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 		config.Config.Callback.CallbackBeforeCreateGroup,
 	)
 	if err != nil {
-		if err == errs.ErrCallbackContinue {
+		if errs.Unwrap(err) == errs.ErrCallbackContinue {
+			log.ZWarn(ctx, "callback failed but continue", err, "url", config.Config.Callback.CallbackUrl)
 			return nil
 		}
-
 		return err
 	}
-	utils.NotNilReplace(&req.GroupInfo.GroupID, resp.GroupID)
-	utils.NotNilReplace(&req.GroupInfo.GroupName, resp.GroupName)
-	utils.NotNilReplace(&req.GroupInfo.Notification, resp.Notification)
-	utils.NotNilReplace(&req.GroupInfo.Introduction, resp.Introduction)
-	utils.NotNilReplace(&req.GroupInfo.FaceURL, resp.FaceURL)
-	utils.NotNilReplace(&req.GroupInfo.OwnerUserID, resp.OwnerUserID)
-	utils.NotNilReplace(&req.GroupInfo.Ex, resp.Ex)
-	utils.NotNilReplace(&req.GroupInfo.Status, resp.Status)
-	utils.NotNilReplace(&req.GroupInfo.CreatorUserID, resp.CreatorUserID)
-	utils.NotNilReplace(&req.GroupInfo.GroupType, resp.GroupType)
-	utils.NotNilReplace(&req.GroupInfo.NeedVerification, resp.NeedVerification)
-	utils.NotNilReplace(&req.GroupInfo.LookMemberInfo, resp.LookMemberInfo)
+
+	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }
 
@@ -92,7 +83,7 @@ func CallbackAfterCreateGroup(ctx context.Context, req *group.CreateGroupReq) (e
 		return nil
 	}
 	cbReq := &callbackstruct.CallbackAfterCreateGroupReq{
-		CallbackCommand: "callbackAfterCreateGroupCommand",
+		CallbackCommand: constant.CallbackAfterCreateGroupCommand,
 		OperationID:     mcontext.GetOperationID(ctx),
 		GroupInfo:       req.GroupInfo,
 	}
@@ -121,9 +112,6 @@ func CallbackAfterCreateGroup(ctx context.Context, req *group.CreateGroupReq) (e
 		config.Config.Callback.CallbackAfterCreateGroup,
 	)
 	if err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
