@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	urllib "net/url"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -58,7 +57,8 @@ func Get(url string) (response []byte, err error) {
 	return body, nil
 }
 
-func Post(ctx context.Context, url string, header map[string]string, data interface{}, timeout int) (content []byte, err error) {
+func Post(ctx context.Context, url string, header map[string]string, data interface{}, timeout int) (result []byte, err error) {
+	defer log.ZDebug(ctx, "callbackPost", "url", url, "header", header, "input", data, "output", result, "timeout", timeout, "output")
 	if timeout > 0 {
 		var cancel func()
 		ctx, cancel = context.WithTimeout(ctx, time.Second*time.Duration(timeout))
@@ -89,7 +89,7 @@ func Post(ctx context.Context, url string, header map[string]string, data interf
 	}
 	defer resp.Body.Close()
 
-	result, err := io.ReadAll(resp.Body)
+	result, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -107,25 +107,24 @@ func PostReturn(ctx context.Context, url string, header map[string]string, input
 }
 
 func callBackPostReturn(ctx context.Context, url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
-	defer log.ZDebug(ctx, "callback", "url", url, "command", command, "input", input, "callbackConfig", callbackConfig)
+	defer log.ZDebug(ctx, "callback", "url", url, "input", input, "output", output, "timeout", callbackConfig.CallbackTimeOut)
 
-	v := urllib.Values{}
-	v.Set(constant.CallbackCommand, command)
-	url = url + "?" + v.Encode()
+	//v := urllib.Values{}
+	//v.Set(constant.CallbackCommand, command)
+	//url = url + "/" + v.Encode()
+	url = url + "/" + command
 
 	b, err := Post(ctx, url, nil, input, callbackConfig.CallbackTimeOut)
 	if err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
-			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
-			return errs.ErrCallbackContinue
+			return errs.ErrCallbackContinue.Wrap(err.Error())
 		}
 		return errs.ErrNetwork.Wrap(err.Error())
 	}
 
 	if err = json.Unmarshal(b, output); err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
-			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
-			return errs.ErrCallbackContinue
+			return errs.ErrCallbackContinue.Wrap(err.Error())
 		}
 		return errs.ErrData.Wrap(err.Error())
 	}

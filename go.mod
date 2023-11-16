@@ -12,7 +12,6 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang/protobuf v1.5.3
 	github.com/gorilla/websocket v1.5.0
-	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
 	github.com/minio/minio-go/v7 v7.0.63
@@ -38,7 +37,7 @@ require github.com/google/uuid v1.3.1
 require (
 	github.com/IBM/sarama v1.41.3
 	github.com/OpenIMSDK/protocol v0.0.31
-	github.com/OpenIMSDK/tools v0.0.16
+	github.com/OpenIMSDK/tools v0.0.17
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.7.1

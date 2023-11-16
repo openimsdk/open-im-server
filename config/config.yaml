@@ -364,6 +364,10 @@ callback:
     enable: false
     timeout: 5
     failedContinue: true
+  afterCreateGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
   beforeMemberJoinGroup:
     enable: false
     timeout: 5

@@ -50,6 +50,17 @@ type CallbackBeforeCreateGroupResp struct {
 	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
 }
 
+type CallbackAfterCreateGroupReq struct {
+	OperationID     string `json:"operationID"`
+	CallbackCommand `json:"callbackCommand"`
+	*common.GroupInfo
+	InitMemberList []*apistruct.GroupAddMemberInfo `json:"initMemberList"`
+}
+
+type CallbackAfterCreateGroupResp struct {
+	CommonCallbackResp
+}
+
 type CallbackBeforeMemberJoinGroupReq struct {
 	CallbackCommand `json:"callbackCommand"`
 	OperationID     string `json:"operationID"`
@@ -85,4 +96,75 @@ type CallbackBeforeSetGroupMemberInfoResp struct {
 	Nickname  *string `json:"nickName"`
 	FaceURL   *string `json:"faceURL"`
 	RoleLevel *int32  `json:"roleLevel"`
+}
+
+type CallbackAfterGroupMemberExitReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OperationID     string `json:"operationID"`
+	GroupID         string `json:"groupID"`
+	UserID          string `json:"userID"`
+	GroupType       *int32 `json:"groupType"`
+	ExitType        string `json:"exitType"`
+	MuteEndTime     *int64 `json:"muteEndTime"`
+}
+
+type CallbackAfterGroupMemberExitResp struct {
+	CommonCallbackResp
+}
+
+type CallbackAfterUngroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OperationID     string   `json:"operationID"`
+	GroupID         string   `json:"groupID"`
+	GroupType       *int32   `json:"groupType"`
+	OwnerID         string   `json:"ownerID"`
+	MemberList      []string `json:"memberList"`
+	MuteEndTime     *int64   `json:"muteEndTime"`
+}
+
+type CallbackAfterUngroupResp struct {
+	CommonCallbackResp
+}
+
+type CallbackAfterSetGroupInfoReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OperationID     string `json:"operationID"`
+	GroupID         string `json:"groupID"`
+	GroupType       *int32 `json:"groupType"`
+	UserID          string `json:"userID"`
+	Name            string `json:"name"`
+	Notification    string `json:"notification"`
+	GroupUrl        string `json:"groupUrl"`
+	MuteEndTime     *int64 `json:"muteEndTime"`
+}
+
+type CallbackAfterSetGroupInfoResp struct {
+	CommonCallbackResp
+}
+
+type CallbackAfterRevokeMsgReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OperationID     string `json:"operationID"`
+	GroupID         string `json:"groupID"`
+	GroupType       *int32 `json:"groupType"`
+	UserID          string `json:"userID"`
+	Content         string `json:"content"`
+	MuteEndTime     *int64 `json:"muteEndTime"`
+}
+
+type CallbackAfterRevokeMsgResp struct {
+	CommonCallbackResp
+}
+
+type CallbackGroupMsgReadReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OperationID     string `json:"operationID"`
+	SendID          string `json:"sendID"`
+	ReceiveID       string `json:"receiveID"`
+	UnreadMsgNum    int64  `json:"UnreadMsgNum"`
+	MuteEndTime     *int64 `json:"muteEndTime"`
+}
+
+type CallbackGroupMsgReadResp struct {
+	CommonCallbackResp
 }

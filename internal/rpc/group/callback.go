@@ -18,6 +18,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/OpenIMSDK/tools/log"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/wrapperspb"
@@ -66,23 +68,53 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 		config.Config.Callback.CallbackBeforeCreateGroup,
 	)
 	if err != nil {
-		if err == errs.ErrCallbackContinue {
+		if errs.Unwrap(err) == errs.ErrCallbackContinue {
+			log.ZWarn(ctx, "callback failed but continue", err, "url", config.Config.Callback.CallbackUrl)
 			return nil
 		}
 		return err
 	}
-	utils.NotNilReplace(&req.GroupInfo.GroupID, resp.GroupID)
-	utils.NotNilReplace(&req.GroupInfo.GroupName, resp.GroupName)
-	utils.NotNilReplace(&req.GroupInfo.Notification, resp.Notification)
-	utils.NotNilReplace(&req.GroupInfo.Introduction, resp.Introduction)
-	utils.NotNilReplace(&req.GroupInfo.FaceURL, resp.FaceURL)
-	utils.NotNilReplace(&req.GroupInfo.OwnerUserID, resp.OwnerUserID)
-	utils.NotNilReplace(&req.GroupInfo.Ex, resp.Ex)
-	utils.NotNilReplace(&req.GroupInfo.Status, resp.Status)
-	utils.NotNilReplace(&req.GroupInfo.CreatorUserID, resp.CreatorUserID)
-	utils.NotNilReplace(&req.GroupInfo.GroupType, resp.GroupType)
-	utils.NotNilReplace(&req.GroupInfo.NeedVerification, resp.NeedVerification)
-	utils.NotNilReplace(&req.GroupInfo.LookMemberInfo, resp.LookMemberInfo)
+
+	utils.StructFieldNotNilReplace(req, resp)
+	return nil
+}
+
+func CallbackAfterCreateGroup(ctx context.Context, req *group.CreateGroupReq) (err error) {
+	if !config.Config.Callback.CallbackAfterCreateGroup.Enable {
+		return nil
+	}
+	cbReq := &callbackstruct.CallbackAfterCreateGroupReq{
+		CallbackCommand: "callbackAfterCreateGroupCommand",
+		OperationID:     mcontext.GetOperationID(ctx),
+		GroupInfo:       req.GroupInfo,
+	}
+	cbReq.InitMemberList = append(cbReq.InitMemberList, &apistruct.GroupAddMemberInfo{
+		UserID:    req.OwnerUserID,
+		RoleLevel: constant.GroupOwner,
+	})
+	for _, userID := range req.AdminUserIDs {
+		cbReq.InitMemberList = append(cbReq.InitMemberList, &apistruct.GroupAddMemberInfo{
+			UserID:    userID,
+			RoleLevel: constant.GroupAdmin,
+		})
+	}
+	for _, userID := range req.MemberUserIDs {
+		cbReq.InitMemberList = append(cbReq.InitMemberList, &apistruct.GroupAddMemberInfo{
+			UserID:    userID,
+			RoleLevel: constant.GroupOrdinaryUsers,
+		})
+	}
+	resp := &callbackstruct.CallbackAfterCreateGroupResp{}
+	err = http.CallBackPostReturn(
+		ctx,
+		config.Config.Callback.CallbackUrl,
+		cbReq,
+		resp,
+		config.Config.Callback.CallbackAfterCreateGroup,
+	)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
