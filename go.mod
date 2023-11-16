@@ -41,6 +41,7 @@ require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.7.1
+	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/redis/go-redis/v9 v9.2.1
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.45
 	go.uber.org/automaxprocs v1.5.3
