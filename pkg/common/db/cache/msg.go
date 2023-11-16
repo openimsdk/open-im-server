@@ -645,19 +645,35 @@ func (c *msgCache) PipeDeleteMessages(ctx context.Context, conversationID string
 }
 
 func (c *msgCache) CleanUpOneConversationAllMsg(ctx context.Context, conversationID string) error {
-	vals, err := c.rdb.Keys(ctx, c.allMessageCacheKey(conversationID)).Result()
-	if errors.Is(err, redis.Nil) {
-		return nil
-	}
-	if err != nil {
-		return errs.Wrap(err)
-	}
-	for _, v := range vals {
-		if err := c.rdb.Del(ctx, v).Err(); err != nil {
+	var (
+		cursor uint64
+		keys   []string
+		err    error
+
+		key = c.allMessageCacheKey(conversationID)
+	)
+
+	for {
+		// scan up to 10000 at a time, the count (10000) param refers to the number of scans on redis server.
+		// if the count is too small, needs to be run scan on redis frequently.
+		var limit int64 = 10000
+		keys, cursor, err = c.rdb.Scan(ctx, cursor, key, limit).Result()
+		if err != nil {
 			return errs.Wrap(err)
 		}
+
+		for _, key := range keys {
+			err := c.rdb.Del(ctx, key).Err()
+			if err != nil {
+				return errs.Wrap(err)
+			}
+		}
+
+		// scan end
+		if cursor == 0 {
+			return nil
+		}
 	}
-	return nil
 }
 
 func (c *msgCache) DelMsgFromCache(ctx context.Context, userID string, seqs []int64) error {
