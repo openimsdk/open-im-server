@@ -162,7 +162,7 @@ services:
     restart: always
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./config/instanceDown_rules.yml:/etc/prometheus/instanceDown_rules.yml
+      - ./config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml
     ports:
       - "${PROMETHEUS_PORT}:9090"
     networks:

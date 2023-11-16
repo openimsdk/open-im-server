@@ -98,3 +98,14 @@ jobs:
     - name: Exec OpenIM System uninstall
       run: |
         sudo ./scripts/install/install.sh -u
+
+    - name: gobenchdata publish
+      uses: bobheadxi/gobenchdata@v1
+      with:
+        PRUNE_COUNT: 30
+        GO_TEST_FLAGS: -cpu 1,2
+        PUBLISH: true
+        PUBLISH_BRANCH: gh-pages
+      env:
+        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+      continue-on-error: true

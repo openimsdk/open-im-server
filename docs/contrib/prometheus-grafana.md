@@ -4,10 +4,37 @@
 * 1. [Source Code & Docker](#SourceCodeDocker)
 	* 1.1. [Deployment](#Deployment)
 	* 1.2. [Configuration](#Configuration)
+	* 1.3. [Monitoring Running in Docker Guide](#MonitoringRunninginDockerGuide)
+		* 1.3.1. [Introduction](#Introduction)
+		* 1.3.2. [Prerequisites](#Prerequisites)
+		* 1.3.3. [Step 1: Clone the Repository](#Step1:ClonetheRepository)
+		* 1.3.4. [Step 2: Start Docker Compose](#Step2:StartDockerCompose)
+		* 1.3.5. [Step 3: Use the OpenIM Web Interface](#Step3:UsetheOpenIMWebInterface)
+		* 1.3.6. [Running Effect](#RunningEffect)
+		* 1.3.7. [Step 4: Access the Admin Panel](#Step4:AccesstheAdminPanel)
+		* 1.3.8. [Step 5: Access the Monitoring Interface](#Step5:AccesstheMonitoringInterface)
+		* 1.3.9. [Next Steps](#NextSteps)
+		* 1.3.10. [Troubleshooting](#Troubleshooting)
 * 2. [Kubernetes](#Kubernetes)
 	* 2.1. [Middleware Monitoring](#MiddlewareMonitoring)
 	* 2.2. [Custom OpenIM Metrics](#CustomOpenIMMetrics)
 	* 2.3. [Node Exporter](#NodeExporter)
+* 3. [Setting Up and Configuring AlertManager Using Environment Variables and `make init`](#SettingUpandConfiguringAlertManagerUsingEnvironmentVariablesandmakeinit)
+	* 3.1. [Introduction](#Introduction-1)
+	* 3.2. [Prerequisites](#Prerequisites-1)
+	* 3.3. [Configuration Steps](#ConfigurationSteps)
+		* 3.3.1. [Exporting Environment Variables](#ExportingEnvironmentVariables)
+		* 3.3.2. [Initializing AlertManager](#InitializingAlertManager)
+		* 3.3.3. [Key Configuration Fields](#KeyConfigurationFields)
+		* 3.3.4. [Configuring SMTP Authentication Password](#ConfiguringSMTPAuthenticationPassword)
+		* 3.3.5. [Useful Links for Common Email Servers](#UsefulLinksforCommonEmailServers)
+	* 3.4. [Conclusion](#Conclusion)
+
+<!-- vscode-markdown-toc-config
+	numbering=true
+	autoSave=true
+	/vscode-markdown-toc-config -->
+<!-- /vscode-markdown-toc -->
 
 OpenIM offers various flexible deployment options to suit different environments and requirements. Here is a simplified and optimized description of these deployment options:
 
@@ -22,9 +49,9 @@ OpenIM offers various flexible deployment options to suit different environments
 
 Next, we will introduce the specific steps, monitoring, and management backend configuration for each of these deployment methods, as well as usage tips to help you choose the most suitable deployment option according to your needs.
 
-## Source Code & Docker
+##  1. <a name='SourceCodeDocker'></a>Source Code & Docker
 
-### Deployment
+###  1.1. <a name='Deployment'></a>Deployment
 
 OpenIM deploys openim-server and openim-chat from source code, while other components are deployed via Docker.
 
@@ -43,7 +70,7 @@ make init
 docker compose up -d
 ```
 
-### Configuration
+###  1.2. <a name='Configuration'></a>Configuration
 
 To configure Prometheus data sources in Grafana, follow these steps:
 
@@ -135,18 +162,18 @@ To monitor OpenIM in Grafana, you need to focus on three categories of key metri
 
 
 
-### Monitoring Running in Docker Guide
+###  1.3. <a name='MonitoringRunninginDockerGuide'></a>Monitoring Running in Docker Guide
 
-#### Introduction
+####  1.3.1. <a name='Introduction'></a>Introduction
 
 This guide provides the steps to run OpenIM using Docker. OpenIM is an open-source instant messaging solution that can be quickly deployed using Docker. For more information, please refer to the [OpenIM Docker GitHub](https://github.com/openimsdk/openim-docker).
 
-#### Prerequisites
+####  1.3.2. <a name='Prerequisites'></a>Prerequisites
 
 + Ensure that Docker and Docker Compose are installed.
 + Basic understanding of Docker and containerization technology.
 
-#### Step 1: Clone the Repository
+####  1.3.3. <a name='Step1:ClonetheRepository'></a>Step 1: Clone the Repository
 
 First, clone the OpenIM Docker repository:
 
@@ -156,7 +183,7 @@ git clone https://github.com/openimsdk/openim-docker.git
 
 Navigate to the repository directory and check the `README` file for more information and configuration options.
 
-#### Step 2: Start Docker Compose
+####  1.3.4. <a name='Step2:StartDockerCompose'></a>Step 2: Start Docker Compose
 
 In the repository directory, run the following command to start the service:
 
@@ -166,17 +193,17 @@ docker-compose up -d
 
 This will download the required Docker images and start the OpenIM service.
 
-#### Step 3: Use the OpenIM Web Interface
+####  1.3.5. <a name='Step3:UsetheOpenIMWebInterface'></a>Step 3: Use the OpenIM Web Interface
 
 + Open a browser in private mode and access [OpenIM Web](http://localhost:11001/).
 + Register two users and try adding friends.
 + Test sending messages and pictures.
 
-#### Running Effect
+####  1.3.6. <a name='RunningEffect'></a>Running Effect
 
 ![image-20231115100811208](http://sm.nsddd.top/sm202311151008639.png)
 
-#### Step 4: Access the Admin Panel
+####  1.3.7. <a name='Step4:AccesstheAdminPanel'></a>Step 4: Access the Admin Panel
 
 + Access the [OpenIM Admin Panel](http://localhost:11002/).
 + Log in using the default username and password (`admin1:admin1`).
@@ -185,29 +212,29 @@ Running Effect Image:
 
 ![image-20231115101039837](http://sm.nsddd.top/sm202311151010116.png)
 
-#### Step 5: Access the Monitoring Interface
+####  1.3.8. <a name='Step5:AccesstheMonitoringInterface'></a>Step 5: Access the Monitoring Interface
 
 + Log in to the [Monitoring Interface](http://localhost:3000/login) using the credentials (`admin:admin`).
 
-#### Next Steps
+####  1.3.9. <a name='NextSteps'></a>Next Steps
 
 + Configure and manage the services following the steps provided in the OpenIM source code.
 + Refer to the `README` file for advanced configuration and management.
 
-#### Troubleshooting
+####  1.3.10. <a name='Troubleshooting'></a>Troubleshooting
 
 + If you encounter any issues, please check the documentation on [OpenIM Docker GitHub](https://github.com/openimsdk/openim-docker) or search for related issues in the Issues section.
 + If the problem persists, you can create an issue on the [openim-docker](https://github.com/openimsdk/openim-docker/issues/new/choose) repository or the [openim-server](https://github.com/openimsdk/open-im-server/issues/new/choose) repository.
 
 
 
-## Kubernetes
+##  2. <a name='Kubernetes'></a>Kubernetes
 
 Refer to [openimsdk/helm-charts](https://github.com/openimsdk/helm-charts).
 
 When deploying and monitoring OpenIM in a Kubernetes environment, you will focus on three main metrics: middleware, custom OpenIM metrics, and Node Exporter. Here are detailed steps and guidelines:
 
-### Middleware Monitoring
+###  2.1. <a name='MiddlewareMonitoring'></a>Middleware Monitoring
 
 Middleware monitoring is crucial to ensure the overall system's stability. Typically, this includes monitoring the following components:
 
@@ -219,16 +246,78 @@ Middleware monitoring is crucial to ensure the overall system's stability. Typic
 
 For Kubernetes environments, you can use the corresponding Prometheus Exporters to collect monitoring data for these middleware components.
 
-### Custom OpenIM Metrics
+###  2.2. <a name='CustomOpenIMMetrics'></a>Custom OpenIM Metrics
 
 Custom OpenIM metrics provide essential information about the OpenIM application itself, such as user activity, message traffic, system performance, and more. To monitor these metrics in Kubernetes:
 
 + Ensure OpenIM application configurations expose Prometheus metrics.
 + When deploying using Helm charts (refer to [OpenIM Helm Charts](https://github.com/openimsdk/helm-charts)), pay attention to configuring relevant monitoring settings.
 
-### Node Exporter
+###  2.3. <a name='NodeExporter'></a>Node Exporter
 
 Node Exporter is used to collect hardware and operating system-level metrics for Kubernetes nodes, such as CPU, memory, disk usage, and more. To integrate Node Exporter in Kubernetes:
 
 + Deploy Node Exporter using the appropriate Helm chart. You can find information and guides on [Prometheus Community](https://prometheus.io/docs/guides/node-exporter/).
 + Ensure Node Exporter's data is collected by Prometheus instances within your cluster.
+
+
+
+##  3. <a name='SettingUpandConfiguringAlertManagerUsingEnvironmentVariablesandmakeinit'></a>Setting Up and Configuring AlertManager Using Environment Variables and `make init`
+
+###  3.1. <a name='Introduction-1'></a>Introduction
+
+AlertManager, a component of the Prometheus monitoring system, handles alerts sent by client applications such as the Prometheus server. It takes care of deduplicating, grouping, and routing them to the correct receiver. This document outlines how to set up and configure AlertManager using environment variables and the `make init` command. We will focus on configuring key fields like the sender's email, SMTP settings, and SMTP authentication password.
+
+###  3.2. <a name='Prerequisites-1'></a>Prerequisites
+
++ Basic knowledge of terminal and command-line operations.
++ AlertManager installed on your system.
++ Access to an SMTP server for sending emails.
+
+###  3.3. <a name='ConfigurationSteps'></a>Configuration Steps
+
+####  3.3.1. <a name='ExportingEnvironmentVariables'></a>Exporting Environment Variables
+
+Before initializing AlertManager, you need to set environment variables. These variables are used to configure the AlertManager settings without altering the code. Use the `export` command in your terminal. Here are some key variables you might set:
+
++ `export ALERTMANAGER_RESOLVE_TIMEOUT='5m'`
++ `export ALERTMANAGER_SMTP_FROM='alert@example.com'`
++ `export ALERTMANAGER_SMTP_SMARTHOST='smtp.example.com:465'`
++ `export ALERTMANAGER_SMTP_AUTH_USERNAME='alert@example.com'`
++ `export ALERTMANAGER_SMTP_AUTH_PASSWORD='your_password'`
++ `export ALERTMANAGER_SMTP_REQUIRE_TLS='false'`
+
+####  3.3.2. <a name='InitializingAlertManager'></a>Initializing AlertManager
+
+After setting the necessary environment variables, you can initialize AlertManager by running the `make init` command. This command typically runs a script that prepares AlertManager with the provided configuration.
+
+####  3.3.3. <a name='KeyConfigurationFields'></a>Key Configuration Fields
+
+##### a. Sender's Email (`ALERTMANAGER_SMTP_FROM`)
+
+This variable sets the email address that will appear as the sender in the notifications sent by AlertManager.
+
+##### b. SMTP Configuration
+
++ **SMTP Server (`ALERTMANAGER_SMTP_SMARTHOST`):** Specifies the address and port of the SMTP server used for sending emails.
++ **SMTP Authentication Username (`ALERTMANAGER_SMTP_AUTH_USERNAME`):** The username for authenticating with the SMTP server.
++ **SMTP Authentication Password (`ALERTMANAGER_SMTP_AUTH_PASSWORD`):** The password for SMTP server authentication. It's crucial to keep this value secure.
+
+####  3.3.4. <a name='ConfiguringSMTPAuthenticationPassword'></a>Configuring SMTP Authentication Password
+
+The SMTP authentication password can be set using the `ALERTMANAGER_SMTP_AUTH_PASSWORD` environment variable. It's recommended to use a secure method to set this variable to avoid exposing sensitive information. For instance, you might read the password from a secure file or a secret management tool.
+
+####  3.3.5. <a name='UsefulLinksforCommonEmailServers'></a>Useful Links for Common Email Servers
+
+For specific configurations related to common email servers, you may refer to their respective documentation:
+
++ Gmail SMTP Settings:
+  + [Gmail SMTP Configuration](https://support.google.com/mail/answer/7126229?hl=en)
++ Microsoft Outlook SMTP Settings:
+  + [Outlook Email Settings](https://support.microsoft.com/en-us/office/pop-imap-and-smtp-settings-8361e398-8af4-4e97-b147-6c6c4ac95353)
++ Yahoo Mail SMTP Settings:
+  + [Yahoo SMTP Configuration](https://help.yahoo.com/kb/SLN4724.html)
+
+###  3.4. <a name='Conclusion'></a>Conclusion
+
+Setting up and configuring AlertManager with environment variables provides a flexible and secure way to manage alert settings. By following the above steps, you can easily configure AlertManager for your monitoring needs. Always ensure to secure sensitive information, especially when dealing with SMTP authentication credentials.

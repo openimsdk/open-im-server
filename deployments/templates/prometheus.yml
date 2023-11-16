@@ -12,7 +12,7 @@ alerting:
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
-  - "instanceDown_rules.yml"
+  - "instance-down-rules.yml"
 # - "first_rules.yml"
 # - "second_rules.yml"
 

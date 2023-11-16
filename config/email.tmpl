@@ -1,15 +1,16 @@
 {{ define "email.to.html" }}
 {{ range .Alerts }}
--------------------------openim alert---------------------<br>
-告警程序: prometheus_alert<br>
-告警级别: {{ .Labels.severity }} 级<br>
-告警类型: {{ .Labels.alertname }}<br>
-故障主机: {{ .Labels.instance }}<br>
-故障服务: {{ .Labels.job }}<br>
-告警主题: {{ .Annotations.summary }}<br>
-触发时间: {{ .StartsAt.Format "2020-01-02 15:04:05"}} <br>
-----------------------------------------------------------<br>
-<br>
-<br>
+<!-- Begin of OpenIM Alert -->
+<div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+    <h3>OpenIM Alert</h3>
+    <p><strong>Alert Program:</strong> Prometheus Alert</p>
+    <p><strong>Severity Level:</strong> {{ .Labels.severity }}</p>
+    <p><strong>Alert Type:</strong> {{ .Labels.alertname }}</p>
+    <p><strong>Affected Host:</strong> {{ .Labels.instance }}</p>
+    <p><strong>Affected Service:</strong> {{ .Labels.job }}</p>
+    <p><strong>Alert Subject:</strong> {{ .Annotations.summary }}</p>
+    <p><strong>Trigger Time:</strong> {{ .StartsAt.Format "2006-01-02 15:04:05" }}</p>
+</div>
+<!-- End of OpenIM Alert -->
 {{ end }}
 {{ end }}
