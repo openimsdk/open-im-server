@@ -16,6 +16,7 @@ package msgtransfer
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 
 	"github.com/IBM/sarama"

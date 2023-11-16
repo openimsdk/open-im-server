@@ -17,16 +17,18 @@ package msgtransfer
 import (
 	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
+	"log"
+	"net/http"
+	"sync"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
-	"net/http"
-	"sync"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 
 	"github.com/OpenIMSDK/tools/mw"
 

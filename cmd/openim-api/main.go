@@ -17,11 +17,12 @@ package main
 import (
 	"context"
 	"fmt"
-	ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginPrometheus"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 	"net"
 	_ "net/http/pprof"
 	"strconv"
+
+	ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginPrometheus"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 
