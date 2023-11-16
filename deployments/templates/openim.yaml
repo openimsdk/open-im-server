@@ -312,7 +312,7 @@ iosPush:
 # Timeout in seconds
 # Whether to continue execution if callback fails
 callback:
-  url: "http://192.168.62.1:18888/sdkName"
+  url: "http://43.154.157.177:18888/sdkName"
   beforeSendSingleMsg:
     enable: false
     timeout: 5
