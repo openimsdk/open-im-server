@@ -83,7 +83,7 @@ func CallbackAfterCreateGroup(ctx context.Context, req *group.CreateGroupReq) (e
 		return nil
 	}
 	cbReq := &callbackstruct.CallbackAfterCreateGroupReq{
-		CallbackCommand: constant.CallbackAfterCreateGroupCommand,
+		CallbackCommand: "callbackAfterCreateGroupCommand",
 		OperationID:     mcontext.GetOperationID(ctx),
 		GroupInfo:       req.GroupInfo,
 	}
