@@ -17,6 +17,7 @@ package tools
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
 	"math"
 
 	"github.com/redis/go-redis/v9"
@@ -77,24 +78,35 @@ func InitMsgTool() (*MsgTool, error) {
 		return nil, err
 	}
 	discov, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
-	/*
-		discov, err := zookeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
-			zookeeper.WithFreq(time.Hour), zookeeper.WithRoundRobin(), zookeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
-				config.Config.Zookeeper.Password), zookeeper.WithTimeout(10), zookeeper.WithLogger(log.NewZkLogger()))*/
 	if err != nil {
 		return nil, err
 	}
 	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	userDB := relation.NewUserGorm(db)
+	userDB, err := newmgo.NewUserMongo(mongo.GetDatabase())
+	if err != nil {
+		return nil, err
+	}
 	msgDatabase := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase())
 	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
 	userDatabase := controller.NewUserDatabase(
 		userDB,
-		cache.NewUserCacheRedis(rdb, relation.NewUserGorm(db), cache.GetDefaultOpt()),
+		cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt()),
 		tx.NewMongo(mongo.GetClient()),
 		userMongoDB,
 	)
-	groupDatabase := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase(), nil)
+	groupDB, err := newmgo.NewGroupMongo(mongo.GetDatabase())
+	if err != nil {
+		return nil, err
+	}
+	groupMemberDB, err := newmgo.NewGroupMember(mongo.GetDatabase())
+	if err != nil {
+		return nil, err
+	}
+	groupRequestDB, err := newmgo.NewGroupRequestMgo(mongo.GetDatabase())
+	if err != nil {
+		return nil, err
+	}
+	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, tx.NewMongo(mongo.GetClient()), nil)
 	conversationDatabase := controller.NewConversationDatabase(
 		relation.NewConversationGorm(db),
 		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), relation.NewConversationGorm(db)),

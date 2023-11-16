@@ -73,7 +73,7 @@ type GroupDatabase interface {
 	DeleteGroupMemberHash(ctx context.Context, groupIDs []string) error
 }
 
-func NewGroupDatabase(rdb redis.UniversalClient, groupDB relationtb.GroupModelInterface, groupMemberDB relationtb.GroupMemberModelInterface, groupRequestDB relationtb.GroupRequestModelInterface, ctxTx tx.CtxTx, hashCode func(ctx context.Context, groupID string) (uint64, error)) GroupDatabase {
+func NewGroupDatabase(rdb redis.UniversalClient, groupDB relationtb.GroupModelInterface, groupMemberDB relationtb.GroupMemberModelInterface, groupRequestDB relationtb.GroupRequestModelInterface, ctxTx tx.CtxTx, groupHash cache.GroupHash) GroupDatabase {
 	rcOptions := rockscache.NewDefaultOptions()
 	rcOptions.StrongConsistency = true
 	rcOptions.RandomExpireAdjustment = 0.2
@@ -82,7 +82,7 @@ func NewGroupDatabase(rdb redis.UniversalClient, groupDB relationtb.GroupModelIn
 		groupMemberDB:  groupMemberDB,
 		groupRequestDB: groupRequestDB,
 		ctxTx:          ctxTx,
-		cache:          cache.NewGroupCacheRedis(rdb, groupDB, groupMemberDB, groupRequestDB, hashCode, rcOptions),
+		cache:          cache.NewGroupCacheRedis(rdb, groupDB, groupMemberDB, groupRequestDB, groupHash, rcOptions),
 	}
 }
 

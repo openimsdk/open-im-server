@@ -16,12 +16,10 @@ package group
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -91,7 +89,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
 	var gs groupServer
-	database := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, tx.NewMongo(mongo.GetClient()), gs.groupMemberHashCode)
+	database := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, tx.NewMongo(mongo.GetClient()), grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.db = database
 	gs.User = userRpcClient
 	gs.Notification = notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
@@ -427,14 +425,6 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 }
 
 func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbgroup.GetGroupAllMemberReq) (*pbgroup.GetGroupAllMemberResp, error) {
-	resp := &pbgroup.GetGroupAllMemberResp{}
-	group, err := s.db.TakeGroup(ctx, req.GroupID)
-	if err != nil {
-		return nil, err
-	}
-	if group.Status == constant.GroupStatusDismissed {
-		return nil, errs.ErrData.Wrap("group dismissed")
-	}
 	members, err := s.db.FindGroupMemberAll(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
@@ -442,6 +432,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbgroup.GetGro
 	if err := s.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
+	resp := &pbgroup.GetGroupAllMemberResp{}
 	resp.Members = utils.Slice(members, func(e *relationtb.GroupMemberModel) *sdkws.GroupMemberFullInfo {
 		return convert.Db2PbGroupMember(e)
 	})
@@ -1601,36 +1592,36 @@ func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 	return resp, nil
 }
 
-func (s *groupServer) groupMemberHashCode(ctx context.Context, groupID string) (uint64, error) {
-	userIDs, err := s.db.FindGroupMemberUserID(ctx, groupID)
-	if err != nil {
-		return 0, err
-	}
-	var members []*sdkws.GroupMemberFullInfo
-	if len(userIDs) > 0 {
-		resp, err := s.GetGroupMembersInfo(ctx, &pbgroup.GetGroupMembersInfoReq{GroupID: groupID, UserIDs: userIDs})
-		if err != nil {
-			return 0, err
-		}
-		members = resp.Members
-		utils.Sort(userIDs, true)
-	}
-	memberMap := utils.SliceToMap(members, func(e *sdkws.GroupMemberFullInfo) string {
-		return e.UserID
-	})
-	res := make([]*sdkws.GroupMemberFullInfo, 0, len(members))
-	for _, userID := range userIDs {
-		member, ok := memberMap[userID]
-		if !ok {
-			continue
-		}
-		member.AppMangerLevel = 0
-		res = append(res, member)
-	}
-	data, err := json.Marshal(res)
-	if err != nil {
-		return 0, err
-	}
-	sum := md5.Sum(data)
-	return binary.BigEndian.Uint64(sum[:]), nil
-}
+//func (s *groupServer) groupMemberHashCode(ctx context.Context, groupID string) (uint64, error) {
+//	userIDs, err := s.db.FindGroupMemberUserID(ctx, groupID)
+//	if err != nil {
+//		return 0, err
+//	}
+//	var members []*sdkws.GroupMemberFullInfo
+//	if len(userIDs) > 0 {
+//		resp, err := s.GetGroupMembersInfo(ctx, &pbgroup.GetGroupMembersInfoReq{GroupID: groupID, UserIDs: userIDs})
+//		if err != nil {
+//			return 0, err
+//		}
+//		members = resp.Members
+//		utils.Sort(userIDs, true)
+//	}
+//	memberMap := utils.SliceToMap(members, func(e *sdkws.GroupMemberFullInfo) string {
+//		return e.UserID
+//	})
+//	res := make([]*sdkws.GroupMemberFullInfo, 0, len(members))
+//	for _, userID := range userIDs {
+//		member, ok := memberMap[userID]
+//		if !ok {
+//			continue
+//		}
+//		member.AppMangerLevel = 0
+//		res = append(res, member)
+//	}
+//	data, err := json.Marshal(res)
+//	if err != nil {
+//		return 0, err
+//	}
+//	sum := md5.Sum(data)
+//	return binary.BigEndian.Uint64(sum[:]), nil
+//}

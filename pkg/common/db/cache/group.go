@@ -44,6 +44,10 @@ const (
 	groupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:"
 )
 
+type GroupHash interface {
+	GetGroupHash(ctx context.Context, groupID string) (uint64, error)
+}
+
 type GroupCache interface {
 	metaCache
 	NewCache() GroupCache
@@ -87,7 +91,7 @@ type GroupCacheRedis struct {
 	groupRequestDB relationtb.GroupRequestModelInterface
 	expireTime     time.Duration
 	rcClient       *rockscache.Client
-	hashCode       func(ctx context.Context, groupID string) (uint64, error)
+	groupHash      GroupHash
 }
 
 func NewGroupCacheRedis(
@@ -95,7 +99,7 @@ func NewGroupCacheRedis(
 	groupDB relationtb.GroupModelInterface,
 	groupMemberDB relationtb.GroupMemberModelInterface,
 	groupRequestDB relationtb.GroupRequestModelInterface,
-	hashCode func(ctx context.Context, groupID string) (uint64, error),
+	hashCode GroupHash,
 	opts rockscache.Options,
 ) GroupCache {
 	rcClient := rockscache.NewClient(rdb, opts)
@@ -103,7 +107,7 @@ func NewGroupCacheRedis(
 	return &GroupCacheRedis{
 		rcClient: rcClient, expireTime: groupExpireTime,
 		groupDB: groupDB, groupMemberDB: groupMemberDB, groupRequestDB: groupRequestDB,
-		hashCode:  hashCode,
+		groupHash: hashCode,
 		metaCache: NewMetaCacheRedis(rcClient),
 	}
 }
@@ -169,7 +173,6 @@ func (g *GroupCacheRedis) GetGroupMemberIndex(groupMember *relationtb.GroupMembe
 	return 0, errIndex
 }
 
-// groupInfo.
 func (g *GroupCacheRedis) GetGroupsInfo(ctx context.Context, groupIDs []string) (groups []*relationtb.GroupModel, err error) {
 	return batchGetCache2(ctx, g.rcClient, g.expireTime, groupIDs, func(groupID string) string {
 		return g.getGroupInfoKey(groupID)
@@ -220,14 +223,19 @@ func (g *GroupCacheRedis) DelGroupAllRoleLevel(groupID string) GroupCache {
 	return g.DelGroupRoleLevel(groupID, []int32{constant.GroupOwner, constant.GroupAdmin, constant.GroupOrdinaryUsers})
 }
 
-// groupMembersHash.
 func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID string) (hashCode uint64, err error) {
+	if g.groupHash == nil {
+		return 0, errs.ErrInternalServer.Wrap("group hash is nil")
+	}
 	return getCache(ctx, g.rcClient, g.getGroupMembersHashKey(groupID), g.expireTime, func(ctx context.Context) (uint64, error) {
-		return g.hashCode(ctx, groupID)
+		return g.groupHash.GetGroupHash(ctx, groupID)
 	})
 }
 
 func (g *GroupCacheRedis) GetGroupMemberHashMap(ctx context.Context, groupIDs []string) (map[string]*relationtb.GroupSimpleUserID, error) {
+	if g.groupHash == nil {
+		return nil, errs.ErrInternalServer.Wrap("group hash is nil")
+	}
 	res := make(map[string]*relationtb.GroupSimpleUserID)
 	for _, groupID := range groupIDs {
 		hash, err := g.GetGroupMembersHash(ctx, groupID)
