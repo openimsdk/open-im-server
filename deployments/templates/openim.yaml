@@ -312,7 +312,7 @@ iosPush:
 # Timeout in seconds
 # Whether to continue execution if callback fails
 callback:
-  url: "http://192.168.62.1:8080/sdkName"
+  url: "http://192.168.62.1:18888/sdkName"
   beforeSendSingleMsg:
     enable: false
     timeout: 5
@@ -363,7 +363,7 @@ callback:
   beforeCreateGroup:
     enable: false
     timeout: 5
-    failedContinue: true
+    failedContinue: false
   beforeMemberJoinGroup:
     enable: false
     timeout: 5
