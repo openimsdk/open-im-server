@@ -361,17 +361,17 @@ callback:
     timeout: 5
     failedContinue: true
   beforeCreateGroup:
-    enable: false
+    enable: true
+    timeout: 5
+    failedContinue: false
+  afterCreateGroup:
+    enable: true
     timeout: 5
     failedContinue: false
   beforeMemberJoinGroup:
     enable: false
     timeout: 5
     failedContinue: false
-  afterCreateGroup:
-      enable: false
-      timeout: 5
-      failedContinue: false
   beforeSetGroupMemberInfo:
     enable: false
     timeout: 5
