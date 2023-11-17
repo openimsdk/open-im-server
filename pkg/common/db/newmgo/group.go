@@ -12,7 +12,7 @@ import (
 
 func NewGroupMongo(db *mongo.Database) (relation.GroupModelInterface, error) {
 	return &GroupMgo{
-		coll: db.Collection("user"),
+		coll: db.Collection("group"),
 	}, nil
 }
 
