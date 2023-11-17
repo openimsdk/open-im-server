@@ -8,7 +8,30 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Anys[T any](ts []T) []any {
+func basic[T any]() bool {
+	var t T
+	switch any(t).(type) {
+	case int:
+	case int8:
+	case int16:
+	case int32:
+	case int64:
+	case uint:
+	case uint8:
+	case uint16:
+	case uint32:
+	case uint64:
+	case float32:
+	case float64:
+	case string:
+	case []byte:
+	default:
+		return false
+	}
+	return true
+}
+
+func anes[T any](ts []T) []any {
 	val := make([]any, len(ts))
 	for i := range ts {
 		val[i] = ts[i]
@@ -30,7 +53,7 @@ func findOptionToCountOption(opts []*options.FindOptions) *options.CountOptions 
 }
 
 func InsertMany[T any](ctx context.Context, coll *mongo.Collection, val []T, opts ...*options.InsertManyOptions) error {
-	_, err := coll.InsertMany(ctx, Anys(val), opts...)
+	_, err := coll.InsertMany(ctx, anes(val), opts...)
 	if err != nil {
 		return errs.Wrap(err)
 	}
@@ -63,8 +86,24 @@ func Find[T any](ctx context.Context, coll *mongo.Collection, filter any, opts .
 	}
 	defer cur.Close(ctx)
 	var res []T
-	if err := cur.All(ctx, &res); err != nil {
-		return nil, errs.Wrap(err)
+	if basic[T]() {
+		var temp []map[string]T
+		if err := cur.All(ctx, &temp); err != nil {
+			return nil, errs.Wrap(err)
+		}
+		res = make([]T, 0, len(temp))
+		for _, m := range temp {
+			if len(m) != 1 {
+				return nil, errs.ErrInternalServer.Wrap("mongo find result len(m) != 1")
+			}
+			for _, t := range m {
+				res = append(res, t)
+			}
+		}
+	} else {
+		if err := cur.All(ctx, &res); err != nil {
+			return nil, errs.Wrap(err)
+		}
 	}
 	return res, nil
 }

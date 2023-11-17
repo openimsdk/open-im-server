@@ -41,7 +41,7 @@ func (g *GroupMemberMgo) Find(ctx context.Context, groupIDs []string, userIDs []
 }
 
 func (g *GroupMemberMgo) FindMemberUserID(ctx context.Context, groupID string) (userIDs []string, err error) {
-	return mgotool.Find[string](ctx, g.coll, bson.M{"group_id": groupID}, options.Find().SetProjection(bson.M{"user_id": 1}))
+	return mgotool.Find[string](ctx, g.coll, bson.M{"group_id": groupID}, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}))
 }
 
 func (g *GroupMemberMgo) Take(ctx context.Context, groupID string, userID string) (groupMember *relation.GroupMemberModel, err error) {
@@ -53,7 +53,7 @@ func (g *GroupMemberMgo) TakeOwner(ctx context.Context, groupID string) (groupMe
 }
 
 func (g *GroupMemberMgo) FindRoleLevelUserIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error) {
-	return mgotool.Find[string](ctx, g.coll, bson.M{"group_id": groupID, "role_level": roleLevel}, options.Find().SetProjection(bson.M{"user_id": 1}))
+	return mgotool.Find[string](ctx, g.coll, bson.M{"group_id": groupID, "role_level": roleLevel}, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}))
 }
 
 func (g *GroupMemberMgo) SearchMember(ctx context.Context, keyword string, groupID string, pagination pagination.Pagination) (total int64, groupList []*relation.GroupMemberModel, err error) {
@@ -62,7 +62,7 @@ func (g *GroupMemberMgo) SearchMember(ctx context.Context, keyword string, group
 }
 
 func (g *GroupMemberMgo) FindUserJoinedGroupID(ctx context.Context, userID string) (groupIDs []string, err error) {
-	return mgotool.Find[string](ctx, g.coll, bson.M{"user_id": userID}, options.Find().SetProjection(bson.M{"group_id": 1}))
+	return mgotool.Find[string](ctx, g.coll, bson.M{"user_id": userID}, options.Find().SetProjection(bson.M{"_id": 0, "group_id": 1}))
 }
 
 func (g *GroupMemberMgo) TakeGroupMemberNum(ctx context.Context, groupID string) (count int64, err error) {
@@ -76,7 +76,7 @@ func (g *GroupMemberMgo) FindUserManagedGroupID(ctx context.Context, userID stri
 			"$in": []int{constant.GroupOwner, constant.GroupAdmin},
 		},
 	}
-	return mgotool.Find[string](ctx, g.coll, filter, options.Find().SetProjection(bson.M{"group_id": 1}))
+	return mgotool.Find[string](ctx, g.coll, filter, options.Find().SetProjection(bson.M{"_id": 0, "group_id": 1}))
 }
 
 func (g *GroupMemberMgo) IsUpdateRoleLevel(data map[string]any) bool {
