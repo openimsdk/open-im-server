@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"strings"
 	"time"
 
@@ -25,7 +26,6 @@ import (
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/tx"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
@@ -36,7 +36,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
@@ -56,19 +55,12 @@ type userServer struct {
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	db, err := relation.NewGormDB()
-	if err != nil {
-		return err
-	}
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
-		return err
-	}
-	if err := db.AutoMigrate(&tablerelation.UserModel{}); err != nil {
 		return err
 	}
 	users := make([]*tablerelation.UserModel, 0)
@@ -82,9 +74,13 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	if err != nil {
 		return err
 	}
+	tx, err := tx2.NewAuto(context.Background(), mongo.GetClient())
+	if err != nil {
+		return err
+	}
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
 	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
-	database := controller.NewUserDatabase(userDB, cache, tx.NewMongo(mongo.GetClient()), userMongoDB)
+	database := controller.NewUserDatabase(userDB, cache, tx, userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)

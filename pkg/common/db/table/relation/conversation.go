@@ -91,5 +91,4 @@ type ConversationModelInterface interface {
 	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*ConversationModel, error)
 	GetConversationIDsNeedDestruct(ctx context.Context) ([]*ConversationModel, error)
 	GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error)
-	NewTx(tx any) ConversationModelInterface
 }

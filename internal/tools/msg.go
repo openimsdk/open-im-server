@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"math"
 
 	"github.com/redis/go-redis/v9"
@@ -33,13 +34,11 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/mw"
-	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
@@ -74,10 +73,6 @@ func InitMsgTool() (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
-	db, err := relation.NewGormDB()
-	if err != nil {
-		return nil, err
-	}
 	discov, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
 		return nil, err
@@ -87,12 +82,16 @@ func InitMsgTool() (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
+	tx, err := tx2.NewAuto(context.Background(), mongo.GetClient())
+	if err != nil {
+		return nil, err
+	}
 	msgDatabase := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase())
 	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
 	userDatabase := controller.NewUserDatabase(
 		userDB,
 		cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt()),
-		tx.NewMongo(mongo.GetClient()),
+		tx,
 		userMongoDB,
 	)
 	groupDB, err := newmgo.NewGroupMongo(mongo.GetDatabase())
@@ -111,11 +110,11 @@ func InitMsgTool() (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
-	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, tx.NewMongo(mongo.GetClient()), nil)
+	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, tx, nil)
 	conversationDatabase := controller.NewConversationDatabase(
 		conversationDB,
 		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
-		tx.NewGorm(db),
+		tx,
 	)
 	msgRpcClient := rpcclient.NewMessageRpcClient(discov)
 	msgNotificationSender := notification.NewMsgNotificationSender(rpcclient.WithRpcClient(&msgRpcClient))

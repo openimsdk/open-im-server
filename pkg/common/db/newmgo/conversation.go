@@ -127,8 +127,3 @@ func (c *ConversationMgo) GetConversationIDsNeedDestruct(ctx context.Context) ([
 func (c *ConversationMgo) GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error) {
 	return mgotool.Find[string](ctx, c.coll, bson.M{"conversation_id": conversationID, "recv_msg_opt": bson.M{"$ne": constant.ReceiveMessage}}, options.Find().SetProjection(bson.M{"owner_user_id": 1}))
 }
-
-func (c *ConversationMgo) NewTx(tx any) relation.ConversationModelInterface {
-	//TODO implement me
-	panic("implement me")
-}

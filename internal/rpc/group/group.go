@@ -17,8 +17,8 @@ package group
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/tools/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"
 	"math/big"
 	"math/rand"
@@ -88,8 +88,12 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
+	tx, err := tx2.NewAuto(context.Background(), mongo.GetClient())
+	if err != nil {
+		return err
+	}
 	var gs groupServer
-	database := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, tx.NewMongo(mongo.GetClient()), grouphash.NewGroupHashFromGroupServer(&gs))
+	database := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, tx, grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.db = database
 	gs.User = userRpcClient
 	gs.Notification = notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
