@@ -72,10 +72,11 @@ func (s *s3Database) CompleteMultipartUpload(ctx context.Context, uploadID strin
 }
 
 func (s *s3Database) SetObject(ctx context.Context, info *relation.ObjectModel) error {
+	info.Engine = s.s3.Engine()
 	if err := s.db.SetObject(ctx, info); err != nil {
 		return err
 	}
-	return s.cache.DelObjectName(info.Name).ExecDel(ctx)
+	return s.cache.DelObjectName(info.Engine, info.Name).ExecDel(ctx)
 }
 
 func (s *s3Database) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (time.Time, string, error) {
