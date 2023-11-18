@@ -39,7 +39,7 @@
 OpenIM offers various flexible deployment options to suit different environments and requirements. Here is a simplified and optimized description of these deployment options:
 
 1. Source Code Deployment:
-   + **Regular Source Code Deployment**: Deployment using the `nohup` method. This is a basic deployment method suitable for development and testing environments. For details, refer to the [Regular Source Code Deployment Guide](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment).
+   + **Regular Source Code Deployment**: Deployment using the `nohup` method. This is a basic deployment method suitable for development and testing environments. For details, refer to the [Regular Source Code Deployment Guide](https://docs.openim.io/).
    + **Production-Level Deployment**: Deployment using the `system` method, more suitable for production environments. This method provides higher stability and reliability. For details, refer to the [Production-Level Deployment Guide](https://docs.openim.io/guides/gettingStarted/install-openim-linux-system).
 2. Cluster Deployment:
    + **Kubernetes Deployment**: Provides two deployment methods, including deployment through Helm and sealos. This is suitable for environments that require high availability and scalability. Specific methods can be found in the [Kubernetes Deployment Guide](https://docs.openim.io/guides/gettingStarted/k8s-deployment).
@@ -74,7 +74,7 @@ docker compose up -d
 
 To configure Prometheus data sources in Grafana, follow these steps:
 
-1. **Log in to Grafana**: First, open your web browser and access the Grafana URL. If you haven't changed the port, the address is typically [http://localhost:3000](http://localhost:3000/).
+1. **Log in to Grafana**: First, open your web browser and access the Grafana URL. If you haven't changed the port, the address is typically [http://localhost:13000](http://localhost:13000/).
 
 2. **Log in with default credentials**: Grafana's default username and password are both `admin`. You will be prompted to change the password on your first login.
 
