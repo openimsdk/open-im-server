@@ -215,18 +215,10 @@ MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
 # Default: PROMETHEUS_ADDRESS=172.28.0.1
 PROMETHEUS_ADDRESS=${PROMETHEUS_NETWORK_ADDRESS}
 
-# Port on which Prometheus service is running.
-# Default: PROMETHEUS_PORT=19090
-PROMETHEUS_PORT=${PROMETHEUS_PORT}
-
 # ----- Grafana Configuration -----
 # Address or hostname for the Grafana service.
 # Default: GRAFANA_ADDRESS=172.28.0.1
 GRAFANA_ADDRESS=${GRAFANA_NETWORK_ADDRESS}
-
-# Port on which Grafana service is running.
-# Default: GRAFANA_PORT=13000
-GRAFANA_PORT=${GRAFANA_PORT}
 
 # ======================================
 # ============ OpenIM Web ===============
