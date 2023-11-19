@@ -26,9 +26,6 @@ import (
 	"syscall"
 	"time"
 
-	ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
@@ -38,6 +35,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 )
 
 func main() {
