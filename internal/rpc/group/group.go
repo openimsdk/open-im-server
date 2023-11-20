@@ -1372,7 +1372,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 	}
 	for groupID, members := range groupMembers {
 		temp := make(map[string]struct{})
-		userIDs := make([]string, len(members)+1)
+		userIDs := make([]string, 0, len(members)+1)
 		for _, member := range members {
 			if _, ok := temp[member.UserID]; ok {
 				return nil, errs.ErrArgs.Wrap(fmt.Sprintf("repeat group %s user %s", member.GroupID, member.UserID))
@@ -1450,6 +1450,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 		return nil, err
 	}
 	for _, member := range req.Members {
+
 		if member.RoleLevel != nil {
 			switch member.RoleLevel.Value {
 			case constant.GroupAdmin:
