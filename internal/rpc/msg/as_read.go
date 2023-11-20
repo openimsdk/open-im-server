@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	utils2 "github.com/OpenIMSDK/tools/utils"
 
 	"github.com/redis/go-redis/v9"
 
@@ -147,7 +148,12 @@ func (m *msgServer) MarkConversationAsRead(
 		for i := hasReadSeq + 1; i <= req.HasReadSeq; i++ {
 			seqs = append(seqs, i)
 		}
-
+		//avoid client missed call MarkConversationMessageAsRead by order
+		for _, val := range req.Seqs {
+			if !utils2.Contain(val, seqs...) {
+				seqs = append(seqs, val)
+			}
+		}
 		if len(seqs) > 0 {
 			log.ZDebug(ctx, "MarkConversationAsRead", "seqs", seqs, "conversationID", req.ConversationID)
 			if err = m.MsgDatabase.MarkSingleChatMsgsAsRead(ctx, req.UserID, req.ConversationID, seqs); err != nil {
