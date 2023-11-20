@@ -17,6 +17,8 @@ package group
 import (
 	"context"
 	"fmt"
+	pbconversation "github.com/OpenIMSDK/protocol/conversation"
+	"github.com/OpenIMSDK/protocol/wrapperspb"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
 	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"
@@ -28,9 +30,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-
-	pbconversation "github.com/OpenIMSDK/protocol/conversation"
-	"github.com/OpenIMSDK/protocol/wrapperspb"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 
@@ -875,11 +874,11 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	if err := s.PopulateGroupMember(ctx, owner); err != nil {
 		return nil, err
 	}
-	data := UpdateGroupInfoMap(ctx, req.GroupInfoForSet)
-	if len(data) == 0 {
+	update := UpdateGroupInfoMap(ctx, req.GroupInfoForSet)
+	if len(update) == 0 {
 		return resp, nil
 	}
-	if err := s.db.UpdateGroup(ctx, group.GroupID, data); err != nil {
+	if err := s.db.UpdateGroup(ctx, group.GroupID, update); err != nil {
 		return nil, err
 	}
 	group, err = s.db.TakeGroup(ctx, req.GroupInfoForSet.GroupID)
@@ -894,34 +893,32 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	if opMember != nil {
 		tips.OpUser = s.groupMemberDB2PB(opMember, 0)
 	}
-	var notified bool
-	if len(data) == 1 {
-		switch {
-		case req.GroupInfoForSet.Notification != "":
-			func() {
-				conversation := &pbconversation.ConversationReq{
-					ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.SuperGroupChatType, req.GroupInfoForSet.GroupID),
-					ConversationType: constant.SuperGroupChatType,
-					GroupID:          req.GroupInfoForSet.GroupID,
-				}
-				resp, err := s.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupInfoForSet.GroupID})
-				if err != nil {
-					log.ZWarn(ctx, "GetGroupMemberIDs", err)
-					return
-				}
-				conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
-				if err := s.conversationRpcClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
-					log.ZWarn(ctx, "SetConversations", err, resp.UserIDs, conversation)
-				}
-			}()
-			_ = s.Notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
-			notified = true
-		case req.GroupInfoForSet.GroupName != "":
-			_ = s.Notification.GroupInfoSetNameNotification(ctx, &sdkws.GroupInfoSetNameTips{Group: tips.Group, OpUser: tips.OpUser})
-			notified = true
-		}
+	num := len(update)
+	if req.GroupInfoForSet.Notification != "" {
+		num--
+		func() {
+			conversation := &pbconversation.ConversationReq{
+				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.SuperGroupChatType, req.GroupInfoForSet.GroupID),
+				ConversationType: constant.SuperGroupChatType,
+				GroupID:          req.GroupInfoForSet.GroupID,
+			}
+			resp, err := s.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupInfoForSet.GroupID})
+			if err != nil {
+				log.ZWarn(ctx, "GetGroupMemberIDs", err)
+				return
+			}
+			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
+			if err := s.conversationRpcClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
+				log.ZWarn(ctx, "SetConversations", err, resp.UserIDs, conversation)
+			}
+		}()
+		_ = s.Notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
 	}
-	if !notified {
+	if req.GroupInfoForSet.GroupName != "" {
+		num--
+		_ = s.Notification.GroupInfoSetNameNotification(ctx, &sdkws.GroupInfoSetNameTips{Group: tips.Group, OpUser: tips.OpUser})
+	}
+	if num > 0 {
 		_ = s.Notification.GroupInfoSetNotification(ctx, tips)
 	}
 	return resp, nil
