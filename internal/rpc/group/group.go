@@ -895,7 +895,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		tips.OpUser = s.groupMemberDB2PB(opMember, 0)
 	}
 	var notified bool
-	if len(data) == 1 && req.GroupInfoForSet.Notification != "" {
+	if len(data) == 1 {
 		switch {
 		case req.GroupInfoForSet.Notification != "":
 			func() {
@@ -1346,11 +1346,6 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbgroup.CancelMu
 //	}
 //	return resp, nil
 //}
-
-func (s *groupServer) setGroupMemberInfo(ctx context.Context, memberCache map[string]*relationtb.GroupMemberModel, member *pbgroup.SetGroupMemberInfo) error {
-
-	return nil
-}
 
 func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGroupMemberInfoReq) (*pbgroup.SetGroupMemberInfoResp, error) {
 	resp := &pbgroup.SetGroupMemberInfoResp{}
