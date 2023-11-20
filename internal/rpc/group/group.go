@@ -448,7 +448,7 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbgroup.GetGr
 	if err != nil {
 		return nil, err
 	}
-	if err != nil {
+	if err := s.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
 	resp.Total = uint32(total)
