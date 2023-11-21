@@ -73,6 +73,7 @@ type GroupCache interface {
 	GetGroupMembersPage(ctx context.Context, groupID string, userID []string, showNumber, pageNumber int32) (total uint32, groupMembers []*relationtb.GroupMemberModel, err error)
 	FindGroupMemberUser(ctx context.Context, groupIDs []string, userID string) ([]*relationtb.GroupMemberModel, error)
 
+	GetGroupRoleLevelMemberIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error)
 	GetGroupOwner(ctx context.Context, groupID string) (*relationtb.GroupMemberModel, error)
 	GetGroupsOwner(ctx context.Context, groupIDs []string) ([]*relationtb.GroupMemberModel, error)
 	DelGroupRoleLevel(groupID string, roleLevel []int32) GroupCache

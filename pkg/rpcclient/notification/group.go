@@ -112,9 +112,13 @@ func (g *GroupNotificationSender) getGroupInfo(ctx context.Context, groupID stri
 	if err != nil {
 		return nil, err
 	}
-	owner, err := g.db.TakeGroupOwner(ctx, groupID)
+	ownerUserIDs, err := g.db.GetGroupRoleLevelMemberIDs(ctx, groupID, constant.GroupOwner)
 	if err != nil {
 		return nil, err
+	}
+	var ownerUserID string
+	if len(ownerUserIDs) > 0 {
+		ownerUserID = ownerUserIDs[0]
 	}
 	return &sdkws.GroupInfo{
 		GroupID:                gm.GroupID,
@@ -122,7 +126,7 @@ func (g *GroupNotificationSender) getGroupInfo(ctx context.Context, groupID stri
 		Notification:           gm.Notification,
 		Introduction:           gm.Introduction,
 		FaceURL:                gm.FaceURL,
-		OwnerUserID:            owner.UserID,
+		OwnerUserID:            ownerUserID,
 		CreateTime:             gm.CreateTime.UnixMilli(),
 		MemberCount:            num,
 		Ex:                     gm.Ex,
@@ -146,22 +150,9 @@ func (g *GroupNotificationSender) getGroupMembers(ctx context.Context, groupID s
 		return nil, err
 	}
 	log.ZDebug(ctx, "getGroupMembers", "members", members)
-	users, err := g.getUsersInfoMap(ctx, userIDs)
-	if err != nil {
-		return nil, err
-	}
-	log.ZDebug(ctx, "getUsersInfoMap", "users", users)
 	res := make([]*sdkws.GroupMemberFullInfo, 0, len(members))
 	for _, member := range members {
-		user, ok := users[member.UserID]
-		if !ok {
-			return nil, errs.ErrUserIDNotFound.Wrap(fmt.Sprintf("group %s member %s not in user", member.GroupID, member.UserID))
-		}
-		if member.Nickname == "" {
-			member.Nickname = user.Nickname
-		}
-		res = append(res, g.groupMemberDB2PB(member, user.AppMangerLevel))
-		delete(users, member.UserID)
+		res = append(res, g.groupMemberDB2PB(member, 0))
 	}
 	return res, nil
 }
