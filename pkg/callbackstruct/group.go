@@ -86,3 +86,17 @@ type CallbackBeforeSetGroupMemberInfoResp struct {
 	FaceURL   *string `json:"faceURL"`
 	RoleLevel *int32  `json:"roleLevel"`
 }
+
+// TODO CALLBACK 2
+type CallbackBeforeInviteUserToGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OperationID     string   `json:"operationID"`
+	GroupID         string   `json:"groupID"`
+	Reason          string   `json:"reason"`
+	InvitedUserIDs  []string `json:"invitedUserIDs"`
+	EventTime       int64    `json:"eventTime"`
+}
+type CallbackBeforeInviteUserToGroupResp struct {
+	CommonCallbackResp
+	RefusedMembersAccount []string `json:"refusedMembersAccount,omitempty"` // Optional field to list members whose invitation is refused.
+}

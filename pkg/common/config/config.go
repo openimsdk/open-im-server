@@ -16,7 +16,6 @@ package config
 
 import (
 	"bytes"
-
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"gopkg.in/yaml.v3"
 )
@@ -264,6 +263,8 @@ type configStruct struct {
 		CallbackBeforeCreateGroup          CallBackConfig `yaml:"beforeCreateGroup"`
 		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
 		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
+		//TODO CALLBACK/
+		CallbackBeforeInviteUserToGroup CallBackConfig `yaml:"beforeInviteUserToGroup"`
 	} `yaml:"callback"`
 
 	Prometheus struct {

@@ -65,6 +65,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err := db.AutoMigrate(&relationtb.GroupModel{}, &relationtb.GroupMemberModel{}, &relationtb.GroupRequestModel{}); err != nil {
 		return err
 	}
+	}
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
 		return err
@@ -352,6 +353,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbgroup.GetJo
 
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.InviteUserToGroupReq) (*pbgroup.InviteUserToGroupResp, error) {
 	resp := &pbgroup.InviteUserToGroupResp{}
+
 	if len(req.InvitedUserIDs) == 0 {
 		return nil, errs.ErrArgs.Wrap("user empty")
 	}
@@ -362,6 +364,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	if err != nil {
 		return nil, err
 	}
+
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, errs.ErrDismissedAlready.Wrap()
 	}
@@ -385,6 +388,10 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		}
 		groupMember = groupMembers[0]
 	}
+	//TODO CALLBACK
+	if err := CallbackBeforeInviteUserToGroup(ctx, req); err != nil {
+		return nil, err
+	}
 	if group.NeedVerification == constant.AllNeedVerification {
 		if !authverify.IsAppManagerUid(ctx) {
 			if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
@@ -399,6 +406,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 						HandledTime:   time.Unix(0, 0),
 					})
 				}
+
 				if err := s.GroupDatabase.CreateGroupRequest(ctx, requests); err != nil {
 					return nil, err
 				}
@@ -843,6 +851,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		if err := s.GroupDatabase.CreateGroup(ctx, nil, []*relationtb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
+
 		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
 			return nil, err
 		}

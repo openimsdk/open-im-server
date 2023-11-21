@@ -111,9 +111,6 @@ func CallbackBeforeMemberJoinGroup(
 		config.Config.Callback.CallbackBeforeMemberJoinGroup,
 	)
 	if err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	if resp.MuteEndTime != nil {
@@ -157,9 +154,6 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 		config.Config.Callback.CallbackBeforeSetGroupMemberInfo,
 	)
 	if err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	if resp.FaceURL != nil {
@@ -174,5 +168,41 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 	if resp.Ex != nil {
 		req.Ex = wrapperspb.String(*resp.Ex)
 	}
+	return nil
+}
+
+// TODO CALLBACK
+func CallbackBeforeInviteUserToGroup(ctx context.Context, req *group.InviteUserToGroupReq) (err error) {
+	if !config.Config.Callback.CallbackBeforeInviteUserToGroup.Enable {
+		return nil
+	}
+
+	callbackReq := &callbackstruct.CallbackBeforeInviteUserToGroupReq{
+		CallbackCommand: callbackstruct.CallbackBeforeInviteJoinGroupCommand,
+		OperationID:     mcontext.GetOperationID(ctx),
+		GroupID:         req.GroupID,
+		Reason:          req.Reason,
+		InvitedUserIDs:  req.InvitedUserIDs,
+		EventTime:       time.Now().UnixNano() / int64(time.Millisecond), // Event trigger timestamp in milliseconds
+	}
+
+	resp := &callbackstruct.CallbackBeforeInviteUserToGroupResp{}
+	err = http.CallBackPostReturn(
+		ctx,
+		config.Config.Callback.CallbackUrl,
+		callbackReq,
+		resp,
+		config.Config.Callback.CallbackBeforeInviteUserToGroup,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	if len(resp.RefusedMembersAccount) > 0 {
+		// Handle the scenario where certain members are refused
+		// You might want to update the req.Members list or handle it as per your business logic
+	}
+
 	return nil
 }

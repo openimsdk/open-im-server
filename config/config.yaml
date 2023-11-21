@@ -368,6 +368,13 @@ callback:
     enable: false
     timeout: 5
     failedContinue: true
+
+  ##TODO CALLBACK/
+  beforeInviteUserToGroup:
+    enable: true
+    timeout: 5
+    failedContinue: true
+
   beforeSetGroupMemberInfo:
     enable: false
     timeout: 5
