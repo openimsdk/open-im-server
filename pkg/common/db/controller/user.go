@@ -79,7 +79,6 @@ func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, 
 	return &userDatabase{userDB: userDB, cache: cache, tx: tx, mongoDB: mongoDB}
 }
 
-
 func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel) error {
     // Extract user IDs from the given user models.
     userIDs := utils.Slice(users, func(e *relation.UserModel) string {
