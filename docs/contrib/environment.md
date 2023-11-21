@@ -150,7 +150,7 @@ For convenience, configuration through modifying environment variables is recomm
   + **Description**: API address.
   + **Note**: If the server has an external IP, it will be automatically obtained. For internal networks, set this variable to the IP serving internally.
 
-  ```
+  ```bash
   export API_URL="http://ip:10002"
   ```
 
@@ -412,7 +412,7 @@ Configuration for Grafana, including its port and address.
 
 | Parameter       | Example Value              | Description           |
 | --------------- | -------------------------- | --------------------- |
-| GRAFANA_PORT    | "3000"                     | Port used by Grafana. |
+| GRAFANA_PORT    | "13000"                     | Port used by Grafana. |
 | GRAFANA_ADDRESS | "${DOCKER_BRIDGE_GATEWAY}" | Address for Grafana.  |
 
 ###  2.16. <a name='RPCPortConfigurationVariables'></a>RPC Port Configuration Variables

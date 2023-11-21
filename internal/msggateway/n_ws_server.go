@@ -374,7 +374,7 @@ func (ws *WsServer) unregisterClient(client *Client) {
 	}
 	ws.onlineUserConnNum.Add(-1)
 	ws.SetUserOnlineStatus(client.ctx, client, constant.Offline)
-	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num", ws.onlineUserNum, "online user conn Num",
+	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num", ws.onlineUserNum.Load(), "online user conn Num",
 		ws.onlineUserConnNum.Load(),
 	)
 }

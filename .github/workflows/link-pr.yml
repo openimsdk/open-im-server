@@ -41,7 +41,7 @@ jobs:
             # ./*.md all markdown files in the root directory
           args: --verbose  -E -i --no-progress --exclude-path './CHANGELOG' './**/*.md'
         env:
-          GITHUB_TOKEN: ${{secrets.GH_PAT}}
+          GITHUB_TOKEN: ${{secrets.BOT_GITHUB_TOKEN}}
 
       - name: Create Issue From File
         if: env.lychee_exit_code != 0
