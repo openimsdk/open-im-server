@@ -369,6 +369,7 @@ callback:
     timeout: 5
     failedContinue: true
 
+  ##TODO CALLBACK/
   beforeInviteUserToGroup:
     enable: true
     timeout: 5
