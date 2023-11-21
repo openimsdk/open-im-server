@@ -14,50 +14,51 @@
 
 package relation
 
-import (
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/jinzhu/copier"
-	"google.golang.org/protobuf/proto"
-	"gorm.io/gorm"
-
-	"github.com/OpenIMSDK/protocol/constant"
-	pbmsg "github.com/OpenIMSDK/protocol/msg"
-	sdkws "github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/utils"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-)
-
-type ChatLogGorm struct {
-	*MetaDB
-}
-
-func NewChatLogGorm(db *gorm.DB) relation.ChatLogModelInterface {
-	return &ChatLogGorm{NewMetaDB(db, &relation.ChatLogModel{})}
-}
-
-func (c *ChatLogGorm) Create(msg *pbmsg.MsgDataToMQ) error {
-	chatLog := new(relation.ChatLogModel)
-	copier.Copy(chatLog, msg.MsgData)
-	switch msg.MsgData.SessionType {
-	case constant.GroupChatType, constant.SuperGroupChatType:
-		chatLog.RecvID = msg.MsgData.GroupID
-	case constant.SingleChatType:
-		chatLog.RecvID = msg.MsgData.RecvID
-	}
-	if msg.MsgData.ContentType >= constant.NotificationBegin && msg.MsgData.ContentType <= constant.NotificationEnd {
-		var tips sdkws.TipsComm
-		_ = proto.Unmarshal(msg.MsgData.Content, &tips)
-		marshaler := jsonpb.Marshaler{
-			OrigName:     true,
-			EnumsAsInts:  false,
-			EmitDefaults: false,
-		}
-		chatLog.Content, _ = marshaler.MarshalToString(&tips)
-	} else {
-		chatLog.Content = string(msg.MsgData.Content)
-	}
-	chatLog.CreateTime = utils.UnixMillSecondToTime(msg.MsgData.CreateTime)
-	chatLog.SendTime = utils.UnixMillSecondToTime(msg.MsgData.SendTime)
-	return c.DB.Create(chatLog).Error
-}
+//
+//import (
+//	"github.com/golang/protobuf/jsonpb"
+//	"github.com/jinzhu/copier"
+//	"google.golang.org/protobuf/proto"
+//	"gorm.io/gorm"
+//
+//	"github.com/OpenIMSDK/protocol/constant"
+//	pbmsg "github.com/OpenIMSDK/protocol/msg"
+//	sdkws "github.com/OpenIMSDK/protocol/sdkws"
+//	"github.com/OpenIMSDK/tools/utils"
+//
+//	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+//)
+//
+//type ChatLogGorm struct {
+//	*MetaDB
+//}
+//
+//func NewChatLogGorm(db *gorm.DB) relation.ChatLogModelInterface {
+//	return &ChatLogGorm{NewMetaDB(db, &relation.ChatLogModel{})}
+//}
+//
+//func (c *ChatLogGorm) Create(msg *pbmsg.MsgDataToMQ) error {
+//	chatLog := new(relation.ChatLogModel)
+//	copier.Copy(chatLog, msg.MsgData)
+//	switch msg.MsgData.SessionType {
+//	case constant.GroupChatType, constant.SuperGroupChatType:
+//		chatLog.RecvID = msg.MsgData.GroupID
+//	case constant.SingleChatType:
+//		chatLog.RecvID = msg.MsgData.RecvID
+//	}
+//	if msg.MsgData.ContentType >= constant.NotificationBegin && msg.MsgData.ContentType <= constant.NotificationEnd {
+//		var tips sdkws.TipsComm
+//		_ = proto.Unmarshal(msg.MsgData.Content, &tips)
+//		marshaler := jsonpb.Marshaler{
+//			OrigName:     true,
+//			EnumsAsInts:  false,
+//			EmitDefaults: false,
+//		}
+//		chatLog.Content, _ = marshaler.MarshalToString(&tips)
+//	} else {
+//		chatLog.Content = string(msg.MsgData.Content)
+//	}
+//	chatLog.CreateTime = utils.UnixMillSecondToTime(msg.MsgData.CreateTime)
+//	chatLog.SendTime = utils.UnixMillSecondToTime(msg.MsgData.SendTime)
+//	return c.DB.Create(chatLog).Error
+//}

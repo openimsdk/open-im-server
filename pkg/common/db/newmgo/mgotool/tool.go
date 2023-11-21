@@ -9,28 +9,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-
 func basic[T any]() bool {
 	var t T
 	switch any(t).(type) {
-	case int:
-	case int8:
-	case int16:
-	case int32:
-	case int64:
-	case uint:
-	case uint8:
-	case uint16:
-	case uint32:
-	case uint64:
-	case float32:
-	case float64:
-	case string:
-	case []byte:
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, string, []byte:
+		return true
+	case *int, *int8, *int16, *int32, *int64, *uint, *uint8, *uint16, *uint32, *uint64, *float32, *float64, *string, *[]byte:
+		return true
 	default:
 		return false
 	}
-	return true
 }
 
 func anes[T any](ts []T) []any {
@@ -171,14 +159,6 @@ func DeleteOne(ctx context.Context, coll *mongo.Collection, filter any, opts ...
 }
 
 func DeleteMany(ctx context.Context, coll *mongo.Collection, filter any, opts ...*options.DeleteOptions) error {
-	if _, err := coll.DeleteMany(ctx, filter, opts...); err != nil {
-		return errs.Wrap(err)
-	}
-	return nil
-}
-
-// TODO 
-func Delete[T any](ctx context.Context, coll *mongo.Collection, filter any, opts ...*options.DeleteOptions) error {
 	if _, err := coll.DeleteMany(ctx, filter, opts...); err != nil {
 		return errs.Wrap(err)
 	}

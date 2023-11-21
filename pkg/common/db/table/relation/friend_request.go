@@ -16,12 +16,11 @@ package relation
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-const FriendRequestModelCollectionName = "friend_requests"
 
 type FriendRequestModel struct {
 	ID            primitive.ObjectID `bson:"_id,omitempty"`
@@ -34,10 +33,6 @@ type FriendRequestModel struct {
 	HandleMsg     string             `bson:"handle_msg"`
 	HandleTime    time.Time          `bson:"handle_time"`
 	Ex            string             `bson:"ex"`
-}
-
-func (FriendRequestModel) CollectionName() string {
-	return FriendRequestModelCollectionName
 }
 
 type FriendRequestModelInterface interface {
@@ -53,11 +48,10 @@ type FriendRequestModelInterface interface {
 	Find(ctx context.Context, fromUserID, toUserID string) (friendRequest *FriendRequestModel, err error)
 	Take(ctx context.Context, fromUserID, toUserID string) (friendRequest *FriendRequestModel, err error)
 	// Get list of friend requests received by toUserID
-	FindToUserID(ctx context.Context,toUserID string,pageNumber, showNumber int32,) (friendRequests []*FriendRequestModel, total int64, err error)
+	FindToUserID(ctx context.Context, toUserID string, pagination pagination.Pagination) (total int64, friendRequests []*FriendRequestModel, err error)
 	// Get list of friend requests sent by fromUserID
-	FindFromUserID(ctx context.Context,fromUserID string,pageNumber, showNumber int32,) (friendRequests []*FriendRequestModel, total int64, err error)
+	FindFromUserID(ctx context.Context, fromUserID string, pagination pagination.Pagination) (total int64, friendRequests []*FriendRequestModel, err error)
 	FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*FriendRequestModel, err error)
-	NewTx(tx any) FriendRequestModelInterface
 	// Check if the record exists
 	Exist(ctx context.Context, userID string) (exist bool, err error)
 }

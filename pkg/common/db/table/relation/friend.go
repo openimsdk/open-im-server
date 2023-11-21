@@ -16,22 +16,11 @@ package relation
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-const (
-	FriendModelCollectionName = "friends"
-)
-
-// OwnerUserID    string    `gorm:"column:owner_user_id;primary_key;size:64"`
-// FriendUserID   string    `gorm:"column:friend_user_id;primary_key;size:64"`
-// Remark         string    `gorm:"column:remark;size:255"`
-// CreateTime     time.Time `gorm:"column:create_time;autoCreateTime"`
-// AddSource      int32     `gorm:"column:add_source"`
-// OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
-// Ex             string    `gorm:"column:ex;size:1024"`
 
 // FriendModel represents the data structure for a friend relationship in MongoDB.
 type FriendModel struct {
@@ -45,11 +34,6 @@ type FriendModel struct {
 	Ex             string             `bson:"ex"`
 }
 
-// CollectionName returns the name of the MongoDB collection.
-func (FriendModel) CollectionName() string {
-	return FriendModelCollectionName
-}
-
 // FriendModelInterface defines the operations for managing friends in MongoDB.
 type FriendModelInterface interface {
 	// Create inserts multiple friend records.
@@ -58,9 +42,7 @@ type FriendModelInterface interface {
 	Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error)
 	// UpdateByMap updates specific fields of a friend document using a map.
 	UpdateByMap(ctx context.Context, ownerUserID string, friendUserID string, args map[string]any) (err error)
-	// Update modifies multiple friend documents.
-	// Update(ctx context.Context, friends []*FriendModel) (err error)
-	// UpdateRemark updates the remark for a specific friend.
+	// UpdateRemark modify remarks.
 	UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error)
 	// Take retrieves a single friend document. Returns an error if not found.
 	Take(ctx context.Context, ownerUserID, friendUserID string) (friend *FriendModel, err error)
@@ -71,11 +53,9 @@ type FriendModelInterface interface {
 	// FindReversalFriends finds users who have added the specified user as a friend.
 	FindReversalFriends(ctx context.Context, friendUserID string, ownerUserIDs []string) (friends []*FriendModel, err error)
 	// FindOwnerFriends retrieves a paginated list of friends for a given owner.
-	FindOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*FriendModel, total int64, err error)
+	FindOwnerFriends(ctx context.Context, ownerUserID string, pagination pagination.Pagination) (total int64, friends []*FriendModel, err error)
 	// FindInWhoseFriends finds users who have added the specified user as a friend, with pagination.
-	FindInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*FriendModel, total int64, err error)
+	FindInWhoseFriends(ctx context.Context, friendUserID string, pagination pagination.Pagination) (total int64, friends []*FriendModel, err error)
 	// FindFriendUserIDs retrieves a list of friend user IDs for a given owner.
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
-	// NewTx creates a new transaction.
-	NewTx(tx any) FriendModelInterface
 }
