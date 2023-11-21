@@ -249,3 +249,139 @@ func testPipeGetMessagesBySeqWithLostHalfSeqs(t *testing.T, cid string, seqs []i
 		assert.Equal(t, msg.Seq, seqs[idx])
 	}
 }
+
+func TestPipeDeleteMessages(t *testing.T) {
+	var (
+		cid      = fmt.Sprintf("cid-%v", rand.Int63())
+		seqFirst = rand.Int63()
+		msgs     = []*sdkws.MsgData{}
+	)
+
+	var seqs []int64
+	for i := 0; i < 100; i++ {
+		msgs = append(msgs, &sdkws.MsgData{
+			Seq: seqFirst + int64(i),
+		})
+		seqs = append(seqs, msgs[i].Seq)
+	}
+
+	testPipeSetMessageToCache(t, cid, msgs)
+	testPipeDeleteMessagesOK(t, cid, seqs, msgs)
+
+	// set again
+	testPipeSetMessageToCache(t, cid, msgs)
+	testPipeDeleteMessagesMix(t, cid, seqs[:90], msgs)
+}
+
+func testPipeDeleteMessagesOK(t *testing.T, cid string, seqs []int64, inputMsgs []*sdkws.MsgData) {
+	rdb := redis.NewClient(&redis.Options{})
+	defer rdb.Close()
+
+	cacher := msgCache{rdb: rdb}
+
+	err := cacher.PipeDeleteMessages(context.Background(), cid, seqs)
+	assert.Nil(t, err)
+
+	// validate
+	for _, msg := range inputMsgs {
+		key := cacher.getMessageCacheKey(cid, msg.Seq)
+		val := rdb.Exists(context.Background(), key).Val()
+		assert.EqualValues(t, 0, val)
+	}
+}
+
+func testPipeDeleteMessagesMix(t *testing.T, cid string, seqs []int64, inputMsgs []*sdkws.MsgData) {
+	rdb := redis.NewClient(&redis.Options{})
+	defer rdb.Close()
+
+	cacher := msgCache{rdb: rdb}
+
+	err := cacher.PipeDeleteMessages(context.Background(), cid, seqs)
+	assert.Nil(t, err)
+
+	// validate
+	for idx, msg := range inputMsgs {
+		key := cacher.getMessageCacheKey(cid, msg.Seq)
+		val, err := rdb.Exists(context.Background(), key).Result()
+		assert.Nil(t, err)
+		if idx < 90 {
+			assert.EqualValues(t, 0, val) // not exists
+			continue
+		}
+
+		assert.EqualValues(t, 1, val) // exists
+	}
+}
+
+func TestParallelDeleteMessages(t *testing.T) {
+	var (
+		cid      = fmt.Sprintf("cid-%v", rand.Int63())
+		seqFirst = rand.Int63()
+		msgs     = []*sdkws.MsgData{}
+	)
+
+	var seqs []int64
+	for i := 0; i < 100; i++ {
+		msgs = append(msgs, &sdkws.MsgData{
+			Seq: seqFirst + int64(i),
+		})
+		seqs = append(seqs, msgs[i].Seq)
+	}
+
+	randSeqs := []int64{}
+	for i := seqFirst + 100; i < seqFirst+200; i++ {
+		randSeqs = append(randSeqs, i)
+	}
+
+	testParallelSetMessageToCache(t, cid, msgs)
+	testParallelDeleteMessagesOK(t, cid, seqs, msgs)
+
+	// set again
+	testParallelSetMessageToCache(t, cid, msgs)
+	testParallelDeleteMessagesMix(t, cid, seqs[:90], msgs, 90)
+	testParallelDeleteMessagesOK(t, cid, seqs[90:], msgs[:90])
+
+	// set again
+	testParallelSetMessageToCache(t, cid, msgs)
+	testParallelDeleteMessagesMix(t, cid, randSeqs, msgs, 0)
+}
+
+func testParallelDeleteMessagesOK(t *testing.T, cid string, seqs []int64, inputMsgs []*sdkws.MsgData) {
+	rdb := redis.NewClient(&redis.Options{})
+	defer rdb.Close()
+
+	cacher := msgCache{rdb: rdb}
+
+	err := cacher.PipeDeleteMessages(context.Background(), cid, seqs)
+	assert.Nil(t, err)
+
+	// validate
+	for _, msg := range inputMsgs {
+		key := cacher.getMessageCacheKey(cid, msg.Seq)
+		val := rdb.Exists(context.Background(), key).Val()
+		assert.EqualValues(t, 0, val)
+	}
+}
+
+func testParallelDeleteMessagesMix(t *testing.T, cid string, seqs []int64, inputMsgs []*sdkws.MsgData, lessValNonExists int) {
+	rdb := redis.NewClient(&redis.Options{})
+	defer rdb.Close()
+
+	cacher := msgCache{rdb: rdb}
+
+	err := cacher.PipeDeleteMessages(context.Background(), cid, seqs)
+	assert.Nil(t, err)
+
+	// validate
+	for idx, msg := range inputMsgs {
+		key := cacher.getMessageCacheKey(cid, msg.Seq)
+		val, err := rdb.Exists(context.Background(), key).Result()
+		assert.Nil(t, err)
+		if idx < lessValNonExists {
+			assert.EqualValues(t, 0, val) // not exists
+			continue
+		}
+
+		assert.EqualValues(t, 1, val) // exists
+	}
+}

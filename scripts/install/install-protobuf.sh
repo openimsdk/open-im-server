@@ -22,6 +22,8 @@
 # It can be downloaded from the following link:
 # https://github.com/OpenIMSDK/Open-IM-Protoc/releases/tag/v1.0.0
 # 
+# About the tool:
+# https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/protoc-tools.md
 # Download link (Windows): https://github.com/OpenIMSDK/Open-IM-Protoc/releases/download/v1.0.0/windows.zip
 # Download link (Linux): https://github.com/OpenIMSDK/Open-IM-Protoc/releases/download/v1.0.0/linux.zip
 # 

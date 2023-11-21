@@ -231,7 +231,7 @@ Before you start, please make sure your changes are in demand. The best for that
 - [OpenIM Makefile Utilities](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/util-makefile.md)
 - [OpenIM Script Utilities](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/util-scripts.md)
 - [OpenIM Versioning](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/version.md)
-
+- [Manage backend and monitor deployment](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
 
 ## :busts_in_silhouette: Community
 

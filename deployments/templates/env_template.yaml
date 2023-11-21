@@ -225,7 +225,7 @@ PROMETHEUS_PORT=${PROMETHEUS_PORT}
 GRAFANA_ADDRESS=${GRAFANA_NETWORK_ADDRESS}
 
 # Port on which Grafana service is running.
-# Default: GRAFANA_PORT=3000
+# Default: GRAFANA_PORT=13000
 GRAFANA_PORT=${GRAFANA_PORT}
 
 # ======================================
@@ -303,7 +303,7 @@ NODE_EXPORTER_PORT=${NODE_EXPORTER_PORT}
 PROMETHEUS_PORT=${PROMETHEUS_PORT}
   
 # Port for the grafana.
-# Default: GRAFANA_PORT=3000
+# Default: GRAFANA_PORT=13000
 GRAFANA_PORT=${GRAFANA_PORT}
   
 # Port for the admin front.
