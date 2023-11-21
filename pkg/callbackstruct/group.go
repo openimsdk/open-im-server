@@ -114,20 +114,44 @@ type CallbackAfterJoinGroupResp struct {
 }
 
 type CallbackBeforeSetGroupInfoReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	OperationID     string                  `json:"operationID"`
-	GroupInfoForSet *common.GroupInfoForSet `json:"groupInfoForSet"`
+	CallbackCommand   `json:"callbackCommand"`
+	OperationID       string  `json:"operationID"`
+	GroupID           string  `json:"groupID"`
+	GroupName         string  `json:"groupName"`
+	Notification      string  `json:"notification"`
+	Introduction      string  `json:"introduction"`
+	FaceURL           string  `json:"faceURL"`
+	Ex                *string `json:"ex"`
+	NeedVerification  *int32  `json:"needVerification"`
+	LookMemberInfo    *int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
 }
 
 type CallbackBeforeSetGroupInfoResp struct {
 	CommonCallbackResp
-	GroupInfoForSet *common.GroupInfoForSet `json:"groupInfoForSet"`
+	GroupID           string  ` json:"groupID"`
+	GroupName         string  `json:"groupName"`
+	Notification      string  `json:"notification"`
+	Introduction      string  `json:"introduction"`
+	FaceURL           string  `json:"faceURL"`
+	Ex                *string `json:"ex"`
+	NeedVerification  *int32  `json:"needVerification"`
+	LookMemberInfo    *int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
 }
 
 type CallbackAfterSetGroupInfoReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	OperationID     string                  `json:"operationID"`
-	GroupInfoForSet *common.GroupInfoForSet `json:"groupInfoForSet"`
+	CallbackCommand   `json:"callbackCommand"`
+	OperationID       string  `json:"operationID"`
+	GroupID           string  `json:"groupID"`
+	GroupName         string  `json:"groupName"`
+	Notification      string  `json:"notification"`
+	Introduction      string  `json:"introduction"`
+	FaceURL           string  `json:"faceURL"`
+	Ex                *string `json:"ex"`
+	NeedVerification  *int32  `json:"needVerification"`
+	LookMemberInfo    *int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
 }
 
 type CallbackAfterSetGroupInfoResp struct {

@@ -237,15 +237,48 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq)
 	callbackReq := &callbackstruct.CallbackBeforeSetGroupInfoReq{
 		CallbackCommand: callbackstruct.CallbackBeforeSetGroupInfoCommand,
 		OperationID:     mcontext.GetOperationID(ctx),
-		GroupInfoForSet: req.GroupInfoForSet,
+		GroupID:         req.GroupInfoForSet.GroupID,
+		GroupName:       req.GroupInfoForSet.GroupName,
+		Notification:    req.GroupInfoForSet.Notification,
+		Introduction:    req.GroupInfoForSet.Introduction,
+		FaceURL:         req.GroupInfoForSet.FaceURL,
 	}
+
+	if req.GroupInfoForSet.Ex != nil {
+		callbackReq.Ex = &req.GroupInfoForSet.Ex.Value
+	}
+	if req.GroupInfoForSet.NeedVerification != nil {
+		callbackReq.NeedVerification = &req.GroupInfoForSet.NeedVerification.Value
+	}
+	if req.GroupInfoForSet.LookMemberInfo != nil {
+		callbackReq.LookMemberInfo = &req.GroupInfoForSet.LookMemberInfo.Value
+	}
+	if req.GroupInfoForSet.ApplyMemberFriend != nil {
+		callbackReq.ApplyMemberFriend = &req.GroupInfoForSet.ApplyMemberFriend.Value
+	}
+
 	resp := &callbackstruct.CallbackBeforeSetGroupInfoResp{}
+
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupInfo); err != nil {
 		if err == errs.ErrCallbackContinue {
 			return nil
 		}
 		return err
 	}
+
+	if resp.Ex != nil {
+		req.GroupInfoForSet.Ex = wrapperspb.String(*resp.Ex)
+	}
+	if resp.NeedVerification != nil {
+		req.GroupInfoForSet.NeedVerification = wrapperspb.Int32(*resp.NeedVerification)
+	}
+	if resp.LookMemberInfo != nil {
+		req.GroupInfoForSet.LookMemberInfo = wrapperspb.Int32(*resp.LookMemberInfo)
+	}
+	if resp.ApplyMemberFriend != nil {
+		req.GroupInfoForSet.ApplyMemberFriend = wrapperspb.Int32(*resp.ApplyMemberFriend)
+	}
+
 	return nil
 }
 func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) error {
@@ -255,7 +288,23 @@ func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) 
 	callbackReq := &callbackstruct.CallbackAfterSetGroupInfoReq{
 		CallbackCommand: callbackstruct.CallbackAfterSetGroupInfoCommand,
 		OperationID:     mcontext.GetOperationID(ctx),
-		GroupInfoForSet: req.GroupInfoForSet,
+		GroupID:         req.GroupInfoForSet.GroupID,
+		GroupName:       req.GroupInfoForSet.GroupName,
+		Notification:    req.GroupInfoForSet.Notification,
+		Introduction:    req.GroupInfoForSet.Introduction,
+		FaceURL:         req.GroupInfoForSet.FaceURL,
+	}
+	if req.GroupInfoForSet.Ex != nil {
+		callbackReq.Ex = &req.GroupInfoForSet.Ex.Value
+	}
+	if req.GroupInfoForSet.NeedVerification != nil {
+		callbackReq.NeedVerification = &req.GroupInfoForSet.NeedVerification.Value
+	}
+	if req.GroupInfoForSet.LookMemberInfo != nil {
+		callbackReq.LookMemberInfo = &req.GroupInfoForSet.LookMemberInfo.Value
+	}
+	if req.GroupInfoForSet.ApplyMemberFriend != nil {
+		callbackReq.ApplyMemberFriend = &req.GroupInfoForSet.ApplyMemberFriend.Value
 	}
 	resp := &callbackstruct.CallbackAfterSetGroupInfoResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterSetGroupInfo); err != nil {
@@ -264,6 +313,7 @@ func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) 
 		}
 		return err
 	}
+
 	return nil
 }
 
