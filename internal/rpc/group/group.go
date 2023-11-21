@@ -65,7 +65,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err := db.AutoMigrate(&relationtb.GroupModel{}, &relationtb.GroupMemberModel{}, &relationtb.GroupRequestModel{}); err != nil {
 		return err
 	}
-	}
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
 		return err
