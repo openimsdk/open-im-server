@@ -16,6 +16,7 @@ package tools
 
 import (
 	"context"
+	"github.com/OpenIMSDK/protocol/sdkws"
 	"math/rand"
 	"time"
 
@@ -91,7 +92,11 @@ func (c *MsgTool) ConversationsDestructMsgs() {
 	}
 	for i := 0; i < count; i++ {
 		pageNumber := rand.Int63() % maxPage
-		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, int32(pageNumber), batchNum)
+		pagination := &sdkws.RequestPagination{
+			PageNumber: int32(pageNumber),
+			ShowNumber: batchNum,
+		}
+		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, pagination)
 		if err != nil {
 			log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
 			continue
@@ -133,7 +138,7 @@ func (c *MsgTool) ConversationsDestructMsgs() {
 				continue
 			}
 			if len(seqs) > 0 {
-				if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, []string{conversation.OwnerUserID}, conversation.ConversationID, map[string]interface{}{"latest_msg_destruct_time": now}); err != nil {
+				if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, []string{conversation.OwnerUserID}, conversation.ConversationID, map[string]any{"latest_msg_destruct_time": now}); err != nil {
 					log.ZError(ctx, "updateUsersConversationFiled failed", err, "conversationID", conversation.ConversationID, "ownerUserID", conversation.OwnerUserID)
 					continue
 				}

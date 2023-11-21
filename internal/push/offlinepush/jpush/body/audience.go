@@ -23,7 +23,7 @@ const (
 )
 
 type Audience struct {
-	Object   interface{}
+	Object   any
 	audience map[string][]string
 }
 

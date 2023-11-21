@@ -239,7 +239,7 @@ func dedup(errors []packages.Error) []string {
 
 var outMu sync.Mutex
 
-func serialFprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
+func serialFprintf(w io.Writer, format string, a ...any) (n int, err error) {
 	outMu.Lock()
 	defer outMu.Unlock()
 	return fmt.Fprintf(w, format, a...)

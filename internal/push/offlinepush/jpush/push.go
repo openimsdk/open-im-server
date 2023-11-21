@@ -69,11 +69,11 @@ func (j *JPush) Push(ctx context.Context, userIDs []string, title, content strin
 	pushObj.SetNotification(&no)
 	pushObj.SetMessage(&msg)
 	pushObj.SetOptions(&opt)
-	var resp interface{}
+	var resp any
 	return j.request(ctx, pushObj, resp, 5)
 }
 
-func (j *JPush) request(ctx context.Context, po body.PushObj, resp interface{}, timeout int) error {
+func (j *JPush) request(ctx context.Context, po body.PushObj, resp any, timeout int) error {
 	return http2.PostReturn(
 		ctx,
 		config.Config.Push.Jpns.PushUrl,

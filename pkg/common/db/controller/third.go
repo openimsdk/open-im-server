@@ -16,12 +16,10 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"time"
 
-	"gorm.io/gorm"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	dbimpl "github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
@@ -31,20 +29,13 @@ type ThirdDatabase interface {
 	// about log for debug
 	UploadLogs(ctx context.Context, logs []*relation.Log) error
 	DeleteLogs(ctx context.Context, logID []string, userID string) error
-	SearchLogs(ctx context.Context, keyword string, start time.Time, end time.Time, pageNumber int32, showNumber int32) (uint32, []*relation.Log, error)
+	SearchLogs(ctx context.Context, keyword string, start time.Time, end time.Time, pagination pagination.Pagination) (int64, []*relation.Log, error)
 	GetLogs(ctx context.Context, LogIDs []string, userID string) ([]*relation.Log, error)
-	FindUsers(ctx context.Context, userIDs []string) ([]*relation.UserModel, error)
 }
 
 type thirdDatabase struct {
-	cache  cache.MsgModel
-	logdb  relation.LogInterface
-	userdb relation.UserModelInterface
-}
-
-// FindUsers implements ThirdDatabase.
-func (t *thirdDatabase) FindUsers(ctx context.Context, userIDs []string) ([]*relation.UserModel, error) {
-	return t.userdb.Find(ctx, userIDs)
+	cache cache.MsgModel
+	logdb relation.LogInterface
 }
 
 // DeleteLogs implements ThirdDatabase.
@@ -58,8 +49,8 @@ func (t *thirdDatabase) GetLogs(ctx context.Context, LogIDs []string, userID str
 }
 
 // SearchLogs implements ThirdDatabase.
-func (t *thirdDatabase) SearchLogs(ctx context.Context, keyword string, start time.Time, end time.Time, pageNumber int32, showNumber int32) (uint32, []*relation.Log, error) {
-	return t.logdb.Search(ctx, keyword, start, end, pageNumber, showNumber)
+func (t *thirdDatabase) SearchLogs(ctx context.Context, keyword string, start time.Time, end time.Time, pagination pagination.Pagination) (int64, []*relation.Log, error) {
+	return t.logdb.Search(ctx, keyword, start, end, pagination)
 }
 
 // UploadLogs implements ThirdDatabase.
@@ -67,8 +58,8 @@ func (t *thirdDatabase) UploadLogs(ctx context.Context, logs []*relation.Log) er
 	return t.logdb.Create(ctx, logs)
 }
 
-func NewThirdDatabase(cache cache.MsgModel, db *gorm.DB) ThirdDatabase {
-	return &thirdDatabase{cache: cache, logdb: dbimpl.NewLogGorm(db), userdb: dbimpl.NewUserGorm(db)}
+func NewThirdDatabase(cache cache.MsgModel, logdb relation.LogInterface) ThirdDatabase {
+	return &thirdDatabase{cache: cache, logdb: logdb}
 }
 
 func (t *thirdDatabase) FcmUpdateToken(

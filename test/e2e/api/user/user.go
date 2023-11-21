@@ -71,7 +71,7 @@ func GetUsers(token string, pageNumber, showNumber int) error {
 }
 
 // sendPostRequestWithToken sends a POST request with a token in the header
-func sendPostRequestWithToken(url, token string, body interface{}) error {
+func sendPostRequestWithToken(url, token string, body any) error {
 	reqBytes, err := json.Marshal(body)
 	if err != nil {
 		return err
@@ -98,7 +98,7 @@ func sendPostRequestWithToken(url, token string, body interface{}) error {
 		return err
 	}
 
-	var respData map[string]interface{}
+	var respData map[string]any
 	if err := json.Unmarshal(respBody, &respData); err != nil {
 		return err
 	}

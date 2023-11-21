@@ -125,7 +125,7 @@ func RegisterUser(token, userID, nickname, faceURL string) error {
 		return err
 	}
 
-	var respData map[string]interface{}
+	var respData map[string]any
 	if err := json.Unmarshal(respBody, &respData); err != nil {
 		return err
 	}

@@ -47,7 +47,7 @@ func (b *BlackGorm) Delete(ctx context.Context, blacks []*relation.BlackModel) (
 func (b *BlackGorm) UpdateByMap(
 	ctx context.Context,
 	ownerUserID, blockUserID string,
-	args map[string]interface{},
+	args map[string]any,
 ) (err error) {
 	return utils.Wrap(
 		b.db(ctx).Where("block_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Updates(args).Error,
@@ -63,9 +63,9 @@ func (b *BlackGorm) Find(
 	ctx context.Context,
 	blacks []*relation.BlackModel,
 ) (blackList []*relation.BlackModel, err error) {
-	var where [][]interface{}
+	var where [][]any
 	for _, black := range blacks {
-		where = append(where, []interface{}{black.OwnerUserID, black.BlockUserID})
+		where = append(where, []any{black.OwnerUserID, black.BlockUserID})
 	}
 	return blackList, utils.Wrap(
 		b.db(ctx).Where("(owner_user_id, block_user_id) in ?", where).Find(&blackList).Error,

@@ -14,151 +14,141 @@
 
 package relation
 
-import (
-	"context"
+// type FriendRequestGorm struct {
+// 	*MetaDB
+// }
 
-	"gorm.io/gorm"
+// func NewFriendRequestGorm(db *gorm.DB) relation.FriendRequestModelInterface {
+// 	return &FriendRequestGorm{NewMetaDB(db, &relation.FriendRequestModel{})}
+// }
 
-	"github.com/OpenIMSDK/tools/utils"
+// func (f *FriendRequestGorm) NewTx(tx any) relation.FriendRequestModelInterface {
+// 	return &FriendRequestGorm{NewMetaDB(tx.(*gorm.DB), &relation.FriendRequestModel{})}
+// }
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-)
+// // 插入多条记录.
+// func (f *FriendRequestGorm) Create(ctx context.Context, friendRequests []*relation.FriendRequestModel) (err error) {
+// 	return utils.Wrap(f.db(ctx).Create(&friendRequests).Error, "")
+// }
 
-type FriendRequestGorm struct {
-	*MetaDB
-}
+// // 删除记录.
+// func (f *FriendRequestGorm) Delete(ctx context.Context, fromUserID, toUserID string) (err error) {
+// 	return utils.Wrap(
+// 		f.db(ctx).
+// 			Where("from_user_id = ? AND to_user_id = ?", fromUserID, toUserID).
+// 			Delete(&relation.FriendRequestModel{}).
+// 			Error,
+// 		"",
+// 	)
+// }
 
-func NewFriendRequestGorm(db *gorm.DB) relation.FriendRequestModelInterface {
-	return &FriendRequestGorm{NewMetaDB(db, &relation.FriendRequestModel{})}
-}
+// // 更新零值.
+// func (f *FriendRequestGorm) UpdateByMap(
+// 	ctx context.Context,
+// 	fromUserID string,
+// 	toUserID string,
+// 	args map[string]any,
+// ) (err error) {
+// 	return utils.Wrap(
+// 		f.db(ctx).
+// 			Model(&relation.FriendRequestModel{}).
+// 			Where("from_user_id = ? AND to_user_id =?", fromUserID, toUserID).
+// 			Updates(args).
+// 			Error,
+// 		"",
+// 	)
+// }
 
-func (f *FriendRequestGorm) NewTx(tx any) relation.FriendRequestModelInterface {
-	return &FriendRequestGorm{NewMetaDB(tx.(*gorm.DB), &relation.FriendRequestModel{})}
-}
+// // 更新记录 （非零值）.
+// func (f *FriendRequestGorm) Update(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
+// 	fr2 := *friendRequest
+// 	fr2.FromUserID = ""
+// 	fr2.ToUserID = ""
+// 	return utils.Wrap(
+// 		f.db(ctx).
+// 			Where("from_user_id = ? AND to_user_id =?", friendRequest.FromUserID, friendRequest.ToUserID).
+// 			Updates(fr2).
+// 			Error,
+// 		"",
+// 	)
+// }
 
-// 插入多条记录.
-func (f *FriendRequestGorm) Create(ctx context.Context, friendRequests []*relation.FriendRequestModel) (err error) {
-	return utils.Wrap(f.db(ctx).Create(&friendRequests).Error, "")
-}
+// // 获取来指定用户的好友申请  未找到 不返回错误.
+// func (f *FriendRequestGorm) Find(
+// 	ctx context.Context,
+// 	fromUserID, toUserID string,
+// ) (friendRequest *relation.FriendRequestModel, err error) {
+// 	friendRequest = &relation.FriendRequestModel{}
+// 	err = utils.Wrap(
+// 		f.db(ctx).Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Find(friendRequest).Error,
+// 		"",
+// 	)
+// 	return friendRequest, err
+// }
 
-// 删除记录.
-func (f *FriendRequestGorm) Delete(ctx context.Context, fromUserID, toUserID string) (err error) {
-	return utils.Wrap(
-		f.db(ctx).
-			Where("from_user_id = ? AND to_user_id = ?", fromUserID, toUserID).
-			Delete(&relation.FriendRequestModel{}).
-			Error,
-		"",
-	)
-}
+// func (f *FriendRequestGorm) Take(
+// 	ctx context.Context,
+// 	fromUserID, toUserID string,
+// ) (friendRequest *relation.FriendRequestModel, err error) {
+// 	friendRequest = &relation.FriendRequestModel{}
+// 	err = utils.Wrap(
+// 		f.db(ctx).Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Take(friendRequest).Error,
+// 		"",
+// 	)
+// 	return friendRequest, err
+// }
 
-// 更新零值.
-func (f *FriendRequestGorm) UpdateByMap(
-	ctx context.Context,
-	fromUserID string,
-	toUserID string,
-	args map[string]interface{},
-) (err error) {
-	return utils.Wrap(
-		f.db(ctx).
-			Model(&relation.FriendRequestModel{}).
-			Where("from_user_id = ? AND to_user_id =?", fromUserID, toUserID).
-			Updates(args).
-			Error,
-		"",
-	)
-}
+// // 获取toUserID收到的好友申请列表.
+// func (f *FriendRequestGorm) FindToUserID(
+// 	ctx context.Context,
+// 	toUserID string,
+// 	pageNumber, showNumber int32,
+// ) (friendRequests []*relation.FriendRequestModel, total int64, err error) {
+// 	err = f.db(ctx).Model(&relation.FriendRequestModel{}).Where("to_user_id = ? ", toUserID).Count(&total).Error
+// 	if err != nil {
+// 		return nil, 0, utils.Wrap(err, "")
+// 	}
+// 	err = utils.Wrap(
+// 		f.db(ctx).
+// 			Where("to_user_id = ? ", toUserID).
+// 			Limit(int(showNumber)).
+// 			Offset(int(pageNumber-1)*int(showNumber)).
+// 			Find(&friendRequests).
+// 			Error,
+// 		"",
+// 	)
+// 	return
+// }
 
-// 更新记录 （非零值）.
-func (f *FriendRequestGorm) Update(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
-	fr2 := *friendRequest
-	fr2.FromUserID = ""
-	fr2.ToUserID = ""
-	return utils.Wrap(
-		f.db(ctx).
-			Where("from_user_id = ? AND to_user_id =?", friendRequest.FromUserID, friendRequest.ToUserID).
-			Updates(fr2).
-			Error,
-		"",
-	)
-}
+// // 获取fromUserID发出去的好友申请列表.
+// func (f *FriendRequestGorm) FindFromUserID(
+// 	ctx context.Context,
+// 	fromUserID string,
+// 	pageNumber, showNumber int32,
+// ) (friendRequests []*relation.FriendRequestModel, total int64, err error) {
+// 	err = f.db(ctx).Model(&relation.FriendRequestModel{}).Where("from_user_id = ? ", fromUserID).Count(&total).Error
+// 	if err != nil {
+// 		return nil, 0, utils.Wrap(err, "")
+// 	}
+// 	err = utils.Wrap(
+// 		f.db(ctx).
+// 			Where("from_user_id = ? ", fromUserID).
+// 			Limit(int(showNumber)).
+// 			Offset(int(pageNumber-1)*int(showNumber)).
+// 			Find(&friendRequests).
+// 			Error,
+// 		"",
+// 	)
+// 	return
+// }
 
-// 获取来指定用户的好友申请  未找到 不返回错误.
-func (f *FriendRequestGorm) Find(
-	ctx context.Context,
-	fromUserID, toUserID string,
-) (friendRequest *relation.FriendRequestModel, err error) {
-	friendRequest = &relation.FriendRequestModel{}
-	err = utils.Wrap(
-		f.db(ctx).Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Find(friendRequest).Error,
-		"",
-	)
-	return friendRequest, err
-}
-
-func (f *FriendRequestGorm) Take(
-	ctx context.Context,
-	fromUserID, toUserID string,
-) (friendRequest *relation.FriendRequestModel, err error) {
-	friendRequest = &relation.FriendRequestModel{}
-	err = utils.Wrap(
-		f.db(ctx).Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Take(friendRequest).Error,
-		"",
-	)
-	return friendRequest, err
-}
-
-// 获取toUserID收到的好友申请列表.
-func (f *FriendRequestGorm) FindToUserID(
-	ctx context.Context,
-	toUserID string,
-	pageNumber, showNumber int32,
-) (friendRequests []*relation.FriendRequestModel, total int64, err error) {
-	err = f.db(ctx).Model(&relation.FriendRequestModel{}).Where("to_user_id = ? ", toUserID).Count(&total).Error
-	if err != nil {
-		return nil, 0, utils.Wrap(err, "")
-	}
-	err = utils.Wrap(
-		f.db(ctx).
-			Where("to_user_id = ? ", toUserID).
-			Limit(int(showNumber)).
-			Offset(int(pageNumber-1)*int(showNumber)).
-			Find(&friendRequests).
-			Error,
-		"",
-	)
-	return
-}
-
-// 获取fromUserID发出去的好友申请列表.
-func (f *FriendRequestGorm) FindFromUserID(
-	ctx context.Context,
-	fromUserID string,
-	pageNumber, showNumber int32,
-) (friendRequests []*relation.FriendRequestModel, total int64, err error) {
-	err = f.db(ctx).Model(&relation.FriendRequestModel{}).Where("from_user_id = ? ", fromUserID).Count(&total).Error
-	if err != nil {
-		return nil, 0, utils.Wrap(err, "")
-	}
-	err = utils.Wrap(
-		f.db(ctx).
-			Where("from_user_id = ? ", fromUserID).
-			Limit(int(showNumber)).
-			Offset(int(pageNumber-1)*int(showNumber)).
-			Find(&friendRequests).
-			Error,
-		"",
-	)
-	return
-}
-
-func (f *FriendRequestGorm) FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error) {
-	err = utils.Wrap(
-		f.db(ctx).
-			Where("(from_user_id = ? AND to_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)", fromUserID, toUserID, toUserID, fromUserID).
-			Find(&friends).
-			Error,
-		"",
-	)
-	return
-}
+// func (f *FriendRequestGorm) FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error) {
+// 	err = utils.Wrap(
+// 		f.db(ctx).
+// 			Where("(from_user_id = ? AND to_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)", fromUserID, toUserID, toUserID, fromUserID).
+// 			Find(&friends).
+// 			Error,
+// 		"",
+// 	)
+// 	return
+// }
