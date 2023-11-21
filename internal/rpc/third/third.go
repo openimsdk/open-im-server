@@ -17,14 +17,15 @@ package third
 import (
 	"context"
 	"fmt"
+
 	"net/url"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cos"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/kodo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/minio"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/oss"
-
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/third"
@@ -72,6 +73,8 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		o, err = cos.NewCos()
 	case "oss":
 		o, err = oss.NewOSS()
+	case "kodo":
+		o, err = kodo.NewKodo()
 	default:
 		err = fmt.Errorf("invalid object enable: %s", enable)
 	}
