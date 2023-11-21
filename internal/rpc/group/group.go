@@ -937,6 +937,9 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 			return nil, errs.ErrNoPermission.Wrap("no group owner or admin")
 		}
 	}
+	if err := CallbackBeforeSetGroupInfo(ctx, req); err != nil {
+		return nil, err
+	}
 	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupInfoForSet.GroupID)
 	if err != nil {
 		return nil, err
@@ -1004,6 +1007,9 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		}
 	default:
 		s.Notification.GroupInfoSetNotification(ctx, tips)
+	}
+	if err := CallbackAfterSetGroupInfo(ctx, req); err != nil {
+		return nil, err
 	}
 	return resp, nil
 }

@@ -230,4 +230,41 @@ func CallbackAfterJoinGroup(ctx context.Context, req *group.JoinGroupReq) error 
 	return nil
 }
 
+func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) error {
+	if !config.Config.Callback.CallbackBeforeSetGroupInfo.Enable {
+		return nil
+	}
+	callbackReq := &callbackstruct.CallbackBeforeSetGroupInfoReq{
+		CallbackCommand: callbackstruct.CallbackBeforeSetGroupInfoCommand,
+		OperationID:     mcontext.GetOperationID(ctx),
+		GroupInfoForSet: req.GroupInfoForSet,
+	}
+	resp := &callbackstruct.CallbackBeforeSetGroupInfoResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupInfo); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) error {
+	if !config.Config.Callback.CallbackAfterSetGroupInfo.Enable {
+		return nil
+	}
+	callbackReq := &callbackstruct.CallbackAfterSetGroupInfoReq{
+		CallbackCommand: callbackstruct.CallbackAfterSetGroupInfoCommand,
+		OperationID:     mcontext.GetOperationID(ctx),
+		GroupInfoForSet: req.GroupInfoForSet,
+	}
+	resp := &callbackstruct.CallbackAfterSetGroupInfoResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterSetGroupInfo); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
 // TODO CALLBACK
