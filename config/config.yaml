@@ -135,14 +135,14 @@ api:
 # minio.signEndpoint is minio public network address
 object:
   enable: "minio"
-  apiURL: "http://127.0.0.1:10002"
+  apiURL: "http://125.124.195.201:10002"
   minio:
     bucket: "openim"
     endpoint: "http://172.28.0.1:10005"
     accessKeyID: "root"
     secretAccessKey: "openIM123"
     sessionToken: ''
-    signEndpoint: "http://127.0.0.1:10005"
+    signEndpoint: "http://125.124.195.201:10005"
     publicRead: false
   cos:
     bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
@@ -198,7 +198,7 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: ../logs/
+  storageLocation: /root/open-im-server/logs/
   rotationTime: 24
   remainRotationCount: 2
   remainLogLevel: 6
@@ -312,7 +312,7 @@ iosPush:
 # Timeout in seconds
 # Whether to continue execution if callback fails
 callback:
-  url:
+  url: "http://125.124.195.201:8080/sdkName/callbackBeforeInviteJoinGroupCommand"
   beforeSendSingleMsg:
     enable: false
     timeout: 5
@@ -368,13 +368,6 @@ callback:
     enable: false
     timeout: 5
     failedContinue: true
-
-  ##TODO CALLBACK/
-  beforeInviteUserToGroup:
-    enable: true
-    timeout: 5
-    failedContinue: true
-
   beforeSetGroupMemberInfo:
     enable: false
     timeout: 5
@@ -383,14 +376,18 @@ callback:
     enable: false
     timeout: 5
     failedContinue: true
-
+  ##TODO CALLBACK/
+  beforeInviteUserToGroup:
+    enable: true
+    timeout: 5
+    failedContinue: true
 ###################### Prometheus ######################
 # Prometheus configuration for various services
 # The number of Prometheus ports per service needs to correspond to rpcPort
 # The number of ports needs to be consistent with msg_transfer_service_num in script/path_info.sh
 prometheus:
   enable: false
-  prometheusUrl: "https://openim.prometheus"
+  prometheusUrl: 172.28.0.1:13000
   apiPrometheusPort: [20100]
   userPrometheusPort: [ 20110 ]
   friendPrometheusPort: [ 20120 ]

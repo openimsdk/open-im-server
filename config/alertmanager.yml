@@ -26,7 +26,7 @@ route:
 receivers:
   - name: email
     email_configs:
-      - to: {EMAIL_TO:-'alert@example.com'}
+      - to: '{EMAIL_TO:-'alert@example.com'}'
         html: '{{ template "email.to.html" . }}'
         headers: { Subject: "[OPENIM-SERVER]Alarm" }
         send_resolved: true
