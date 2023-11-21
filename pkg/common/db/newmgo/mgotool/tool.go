@@ -2,11 +2,13 @@ package mgotool
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
 
 func basic[T any]() bool {
 	var t T
@@ -169,6 +171,14 @@ func DeleteOne(ctx context.Context, coll *mongo.Collection, filter any, opts ...
 }
 
 func DeleteMany(ctx context.Context, coll *mongo.Collection, filter any, opts ...*options.DeleteOptions) error {
+	if _, err := coll.DeleteMany(ctx, filter, opts...); err != nil {
+		return errs.Wrap(err)
+	}
+	return nil
+}
+
+// TODO 
+func Delete[T any](ctx context.Context, coll *mongo.Collection, filter any, opts ...*options.DeleteOptions) error {
 	if _, err := coll.DeleteMany(ctx, filter, opts...); err != nil {
 		return errs.Wrap(err)
 	}

@@ -16,6 +16,7 @@ package convert
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
@@ -31,23 +32,22 @@ func FriendPb2DB(friend *sdkws.FriendInfo) *relation.FriendModel {
 	return dbFriend
 }
 
-func FriendDB2Pb(
-	ctx context.Context,
-	friendDB *relation.FriendModel,
+func FriendDB2Pb(ctx context.Context, friendDB *relation.FriendModel,
 	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
 ) (*sdkws.FriendInfo, error) {
-	pbfriend := &sdkws.FriendInfo{FriendUser: &sdkws.UserInfo{}}
-	utils.CopyStructFields(pbfriend, friendDB)
 	users, err := getUsers(ctx, []string{friendDB.FriendUserID})
 	if err != nil {
 		return nil, err
 	}
-	pbfriend.FriendUser.UserID = users[friendDB.FriendUserID].UserID
-	pbfriend.FriendUser.Nickname = users[friendDB.FriendUserID].Nickname
-	pbfriend.FriendUser.FaceURL = users[friendDB.FriendUserID].FaceURL
-	pbfriend.FriendUser.Ex = users[friendDB.FriendUserID].Ex
-	pbfriend.CreateTime = friendDB.CreateTime.Unix()
-	return pbfriend, nil
+	user, ok := users[friendDB.FriendUserID]
+	if !ok {
+		return nil, fmt.Errorf("user not found: %s", friendDB.FriendUserID)
+	}
+
+	return &sdkws.FriendInfo{
+		FriendUser: user,
+		CreateTime: friendDB.CreateTime.Unix(),
+	}, nil
 }
 
 func FriendsDB2Pb(
@@ -117,4 +117,38 @@ func FriendRequestDB2Pb(
 		})
 	}
 	return res, nil
+}
+
+// FriendPb2DBMap converts a FriendInfo protobuf object to a map suitable for database operations.
+// It only includes non-zero or non-empty fields in the map.
+func FriendPb2DBMap(friend *sdkws.FriendInfo) map[string]any {
+	if friend == nil {
+		return nil
+	}
+
+	val := make(map[string]any)
+
+	// Assuming FriendInfo has similar fields to those in FriendModel.
+	// Add or remove fields based on your actual FriendInfo and FriendModel structures.
+	if friend.FriendUser != nil {
+		if friend.FriendUser.UserID != "" {
+			val["friend_user_id"] = friend.FriendUser.UserID
+		}
+		if friend.FriendUser.Nickname != "" {
+			val["nickname"] = friend.FriendUser.Nickname
+		}
+		if friend.FriendUser.FaceURL != "" {
+			val["face_url"] = friend.FriendUser.FaceURL
+		}
+		if friend.FriendUser.Ex != "" {
+			val["ex"] = friend.FriendUser.Ex
+		}
+	}
+	if friend.CreateTime != 0 {
+		val["create_time"] = friend.CreateTime // You might need to convert this to a proper time format.
+	}
+
+	// Include other fields from FriendInfo as needed, similar to the above pattern.
+
+	return val
 }

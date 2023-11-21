@@ -79,20 +79,34 @@ func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, 
 	return &userDatabase{userDB: userDB, cache: cache, tx: tx, mongoDB: mongoDB}
 }
 
-func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel) (err error) {
-	userIDs := utils.Slice(users, func(e *relation.UserModel) string {
-		return e.UserID
-	})
-	result, err := u.userDB.Find(ctx, userIDs)
-	if err != nil {
-		return err
-	}
-	miss := utils.SliceAnySub(users, result, func(e *relation.UserModel) string { return e.UserID })
-	if len(miss) > 0 {
-		_ = u.userDB.Create(ctx, miss)
-	}
-	return nil
+
+func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel) error {
+    // Extract user IDs from the given user models.
+    userIDs := utils.Slice(users, func(e *relation.UserModel) string {
+        return e.UserID
+    })
+
+    // Find existing users in the database.
+    existingUsers, err := u.userDB.Find(ctx, userIDs)
+    if err != nil {
+        return err
+    }
+
+    // Determine which users are missing from the database.
+    missingUsers := utils.SliceAnySub(users, existingUsers, func(e *relation.UserModel) string { 
+        return e.UserID 
+    })
+
+    // Create records for missing users.
+    if len(missingUsers) > 0 {
+        if err := u.userDB.Create(ctx, missingUsers); err != nil {
+            return err 
+        }
+    }
+
+    return nil
 }
+
 
 // FindWithError Get the information of the specified user and return an error if the userID is not found.
 func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {

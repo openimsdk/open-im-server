@@ -37,8 +37,9 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 )
 
@@ -52,41 +53,61 @@ type friendServer struct {
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	db, err := relation.NewGormDB()
+	// Initialize MongoDB
+	mongo, err := unrelation.NewMongo()
 	if err != nil {
 		return err
 	}
-	if err := db.AutoMigrate(&tablerelation.FriendModel{}, &tablerelation.FriendRequestModel{}, &tablerelation.BlackModel{}); err != nil {
-		return err
-	}
+
+	// Initialize Redis
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
-	blackDB := relation.NewBlackGorm(db)
-	friendDB := relation.NewFriendGorm(db)
+
+	friendMongoDB, err := newmgo.NewFriendMongo(mongo.GetDatabase())
+	if err != nil {
+		return err
+	}
+
+	friendRequestMongoDB, err := newmgo.NewFriendRequestMongo(mongo.GetDatabase())
+	if err != nil {
+		return err
+	}
+
+	blackMongoDB, err := newmgo.NewBlackMongo(mongo.GetDatabase())
+	if err != nil {
+		return err
+	}
+
+	// Initialize RPC clients
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
+
+	// Initialize notification sender
 	notificationSender := notification.NewFriendNotificationSender(
 		&msgRpcClient,
 		notification.WithRpcFunc(userRpcClient.GetUsersInfo),
 	)
+
+	// Register Friend server with refactored MongoDB and Redis integrations
 	pbfriend.RegisterFriendServer(server, &friendServer{
 		friendDatabase: controller.NewFriendDatabase(
-			friendDB,
-			relation.NewFriendRequestGorm(db),
-			cache.NewFriendCacheRedis(rdb, friendDB, cache.GetDefaultOpt()),
-			tx.NewGorm(db),
+			friendMongoDB,
+			friendRequestMongoDB,
+			cache.NewFriendCacheRedis(rdb, friendMongoDB, cache.GetDefaultOpt()),
+			tx.NewMongo(mongo.GetClient()),
 		),
 		blackDatabase: controller.NewBlackDatabase(
-			blackDB,
-			cache.NewBlackCacheRedis(rdb, blackDB, cache.GetDefaultOpt()),
+			blackMongoDB,
+			cache.NewBlackCacheRedis(rdb, blackMongoDB, cache.GetDefaultOpt()),
 		),
 		userRpcClient:         &userRpcClient,
 		notificationSender:    notificationSender,
 		RegisterCenter:        client,
 		conversationRpcClient: rpcclient.NewConversationRpcClient(client),
 	})
+
 	return nil
 }
 
