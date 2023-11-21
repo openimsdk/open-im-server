@@ -171,7 +171,6 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 	return nil
 }
 
-// TODO CALLBACK
 func CallbackBeforeInviteUserToGroup(ctx context.Context, req *group.InviteUserToGroupReq) (err error) {
 	if !config.Config.Callback.CallbackBeforeInviteUserToGroup.Enable {
 		return nil
@@ -183,7 +182,7 @@ func CallbackBeforeInviteUserToGroup(ctx context.Context, req *group.InviteUserT
 		GroupID:         req.GroupID,
 		Reason:          req.Reason,
 		InvitedUserIDs:  req.InvitedUserIDs,
-		EventTime:       time.Now().UnixNano() / int64(time.Millisecond), // Event trigger timestamp in milliseconds
+		EventTime:       time.Now().Unix(),
 	}
 
 	resp := &callbackstruct.CallbackBeforeInviteUserToGroupResp{}
@@ -203,6 +202,32 @@ func CallbackBeforeInviteUserToGroup(ctx context.Context, req *group.InviteUserT
 		// Handle the scenario where certain members are refused
 		// You might want to update the req.Members list or handle it as per your business logic
 	}
+	utils.StructFieldNotNilReplace(req, resp)
 
 	return nil
 }
+
+func CallbackAfterJoinGroup(ctx context.Context, req *group.JoinGroupReq) error {
+	if !config.Config.Callback.CallbackAfterJoinGroup.Enable {
+		return nil
+	}
+	callbackReq := &callbackstruct.CallbackAfterJoinGroupReq{
+		CallbackCommand: callbackstruct.CallbackAfterJoinGroupCommand,
+		OperationID:     mcontext.GetOperationID(ctx),
+		GroupID:         req.GroupID,
+		ReqMessage:      req.ReqMessage,
+		JoinSource:      req.JoinSource,
+		InviterUserID:   req.InviterUserID,
+		EventTime:       time.Now().Unix(),
+	}
+	resp := &callbackstruct.CallbackAfterJoinGroupResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterJoinGroup); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
+// TODO CALLBACK

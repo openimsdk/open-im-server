@@ -387,7 +387,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		}
 		groupMember = groupMembers[0]
 	}
-	//TODO CALLBACK
+
 	if err := CallbackBeforeInviteUserToGroup(ctx, req); err != nil {
 		return nil, err
 	}
@@ -807,6 +807,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 	case constant.GroupResponseRefuse:
 		s.Notification.GroupApplicationRejectedNotification(ctx, req)
 	}
+
 	return &pbgroup.GroupApplicationResponseResp{}, nil
 }
 
@@ -855,6 +856,10 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			return nil, err
 		}
 		s.Notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID)
+		//TODO CALLBACK1
+		if err = CallbackAfterJoinGroup(ctx, req); err != nil {
+			return nil, err
+		}
 		return resp, nil
 	}
 	groupRequest := relationtb.GroupRequestModel{

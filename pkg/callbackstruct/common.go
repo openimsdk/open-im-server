@@ -55,6 +55,7 @@ type CommonCallbackResp struct {
 	ErrCode    int32  `json:"errCode"`
 	ErrMsg     string `json:"errMsg"`
 	ErrDlt     string `json:"errDlt"`
+	NextCode   string `json:"nextCode"`
 }
 
 func (c CommonCallbackResp) Parse() error {

@@ -265,6 +265,9 @@ type configStruct struct {
 		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
 		//TODO CALLBACK/
 		CallbackBeforeInviteUserToGroup CallBackConfig `yaml:"beforeInviteUserToGroup"`
+		CallbackAfterJoinGroup          CallBackConfig `yaml:"joinGroupAfter"`
+		CallbackAfterSetGroupInfo       CallBackConfig `yaml:"setGroupInfoAfter"`
+		CallbackBeforeSetGroupInfo      CallBackConfig `yaml:"setGroupInfoBefore"`
 	} `yaml:"callback"`
 
 	Prometheus struct {

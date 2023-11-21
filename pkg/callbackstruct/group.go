@@ -87,7 +87,6 @@ type CallbackBeforeSetGroupMemberInfoResp struct {
 	RoleLevel *int32  `json:"roleLevel"`
 }
 
-// TODO CALLBACK 2
 type CallbackBeforeInviteUserToGroupReq struct {
 	CallbackCommand `json:"callbackCommand"`
 	OperationID     string   `json:"operationID"`
@@ -99,4 +98,19 @@ type CallbackBeforeInviteUserToGroupReq struct {
 type CallbackBeforeInviteUserToGroupResp struct {
 	CommonCallbackResp
 	RefusedMembersAccount []string `json:"refusedMembersAccount,omitempty"` // Optional field to list members whose invitation is refused.
+}
+
+// TODO CALLBACK 2
+
+type CallbackAfterJoinGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OperationID     string `json:"operationID"`
+	GroupID         string `json:"groupID"`
+	ReqMessage      string `json:"reqMessage"`
+	JoinSource      int32  `json:"joinSource"`
+	InviterUserID   string `json:"string"`
+	EventTime       int64  `json:"eventTime"`
+}
+type CallbackAfterJoinGroupResp struct {
+	CommonCallbackResp
 }
