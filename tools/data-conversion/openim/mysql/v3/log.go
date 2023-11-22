@@ -17,6 +17,10 @@ type Log struct {
 	Ex         string    `gorm:"column:ex;type varchar(255)"`
 }
 
+func (Log) TableName() string {
+	return "logs"
+}
+
 type LogInterface interface {
 	Create(ctx context.Context, log []*Log) error
 	Search(ctx context.Context, keyword string, start time.Time, end time.Time, pageNumber int32, showNumber int32) (uint32, []*Log, error)

@@ -10,7 +10,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
@@ -77,7 +77,7 @@ func InitDB() error {
 	for k, v := range config.Config.Manager.UserID {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k], AppMangerLevel: constant.AppAdmin})
 	}
-	userDB, err := newmgo.NewUserMongo(mgo.GetDatabase())
+	userDB, err := mgo.NewUserMongo(mgo.GetDatabase())
 	if err != nil {
 		return err
 	}

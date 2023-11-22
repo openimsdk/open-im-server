@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type Log struct {
+type LogModel struct {
 	LogID      string    `bson:"log_id"`
 	Platform   string    `bson:"platform"`
 	UserID     string    `bson:"user_id"`
@@ -19,8 +19,8 @@ type Log struct {
 }
 
 type LogInterface interface {
-	Create(ctx context.Context, log []*Log) error
-	Search(ctx context.Context, keyword string, start time.Time, end time.Time, pagination pagination.Pagination) (int64, []*Log, error)
+	Create(ctx context.Context, log []*LogModel) error
+	Search(ctx context.Context, keyword string, start time.Time, end time.Time, pagination pagination.Pagination) (int64, []*LogModel, error)
 	Delete(ctx context.Context, logID []string, userID string) error
-	Get(ctx context.Context, logIDs []string, userID string) ([]*Log, error)
+	Get(ctx context.Context, logIDs []string, userID string) ([]*LogModel, error)
 }

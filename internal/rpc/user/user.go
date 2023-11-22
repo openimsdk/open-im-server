@@ -17,7 +17,7 @@ package user
 import (
 	"context"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"strings"
 	"time"
@@ -70,7 +70,7 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	for k, v := range config.Config.Manager.UserID {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k], AppMangerLevel: constant.AppAdmin})
 	}
-	userDB, err := newmgo.NewUserMongo(mongo.GetDatabase())
+	userDB, err := mgo.NewUserMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}

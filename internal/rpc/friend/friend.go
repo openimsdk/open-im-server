@@ -37,7 +37,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
@@ -65,17 +65,17 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		return err
 	}
 
-	friendMongoDB, err := newmgo.NewFriendMongo(mongo.GetDatabase())
+	friendMongoDB, err := mgo.NewFriendMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
 
-	friendRequestMongoDB, err := newmgo.NewFriendRequestMongo(mongo.GetDatabase())
+	friendRequestMongoDB, err := mgo.NewFriendRequestMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
 
-	blackMongoDB, err := newmgo.NewBlackMongo(mongo.GetDatabase())
+	blackMongoDB, err := mgo.NewBlackMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}

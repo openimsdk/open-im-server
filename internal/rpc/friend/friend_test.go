@@ -1,22 +1,19 @@
-package group
+package friend
 
 import (
 	"context"
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/group"
-	"github.com/OpenIMSDK/protocol/wrapperspb"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"
 	"github.com/redis/go-redis/v9"
 	"net"
 	"testing"
-	"time"
 )
 
 var (
@@ -24,9 +21,11 @@ var (
 	mgo *unrelation.Mongo
 	ctx context.Context
 
-	groupDB  *newmgo.GroupMgo
-	memberDB *newmgo.GroupMemberMgo
-	gs       *groupServer
+	friendDB        *mgo.FriendMgo
+	friendRequestDB *mgo.FriendRequestMgo
+	blackDB         *mgo.BlackMgo
+
+	friendDatabase controller.FriendDatabase
 )
 
 func InitDB() error {
@@ -72,23 +71,30 @@ func InitDB() error {
 		panic(err)
 	}
 
-	g, err := newmgo.NewGroupMongo(mgo.GetDatabase())
+	a, err := mgo.NewFriendMongo(mgo.GetDatabase())
 	if err != nil {
 		return err
 	}
-	gm, err := newmgo.NewGroupMember(mgo.GetDatabase())
+	b, err := mgo.NewFriendRequestMongo(mgo.GetDatabase())
 	if err != nil {
 		return err
 	}
-	gr, err := newmgo.NewGroupRequestMgo(mgo.GetDatabase())
+	c, err := mgo.NewBlackMongo(mgo.GetDatabase())
 	if err != nil {
 		return err
 	}
-	groupDB = g.(*newmgo.GroupMgo)
-	memberDB = gm.(*newmgo.GroupMemberMgo)
 
-	gs = &groupServer{}
-	gs.db = controller.NewGroupDatabase(rdb, groupDB, memberDB, gr, tx, grouphash.NewGroupHashFromGroupServer(gs))
+	friendDB = a.(*mgo.FriendMgo)
+	friendRequestDB = b.(*mgo.FriendRequestMgo)
+	blackDB = c.(*mgo.BlackMgo)
+
+	friendDatabase = controller.NewFriendDatabase(
+		friendDB,
+		friendRequestDB,
+		cache.NewFriendCacheRedis(rdb, friendDB, cache.GetDefaultOpt()),
+		tx,
+	)
+
 	return nil
 }
 
@@ -99,31 +105,10 @@ func init() {
 }
 
 func TestName(t *testing.T) {
-	ctx = context.WithValue(context.Background(), constant.OpUserID, "4454892084")
-	resp, err := gs.SetGroupMemberInfo(ctx, &group.SetGroupMemberInfoReq{
-		Members: []*group.SetGroupMemberInfo{
-			{
-				GroupID:   "1731877545",
-				UserID:    "3332974673",
-				Nickname:  wrapperspb.String("nickname"),
-				RoleLevel: wrapperspb.Int32(constant.GroupAdmin),
-			},
-		},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(resp)
+	err := friendDatabase.AgreeFriendRequest(ctx, &relation.FriendRequestModel{FromUserID: "8449222880", ToUserID: "3136372091", HandleResult: 1, HandleMsg: "ok"})
+	t.Log(err)
 }
 
 func Test_GroupCreateCount(t *testing.T) {
-	ctx = context.WithValue(context.Background(), constant.OpUserID, "4454892084")
-	resp, err := gs.GroupCreateCount(ctx, &group.GroupCreateCountReq{
-		Start: 0,
-		End:   time.Now().Add(time.Hour).UnixMilli(),
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(resp)
+
 }

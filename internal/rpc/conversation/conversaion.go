@@ -17,7 +17,7 @@ package conversation
 import (
 	"context"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 
@@ -57,7 +57,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	conversationDB, err := newmgo.NewConversationMongo(mongo.GetDatabase())
+	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}

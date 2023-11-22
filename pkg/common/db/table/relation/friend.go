@@ -18,20 +18,17 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // FriendModel represents the data structure for a friend relationship in MongoDB.
 type FriendModel struct {
-	ID             primitive.ObjectID `bson:"_id,omitempty"`
-	OwnerUserID    string             `bson:"owner_user_id"`
-	FriendUserID   string             `bson:"friend_user_id"`
-	Remark         string             `bson:"remark"`
-	CreateTime     time.Time          `bson:"create_time"`
-	AddSource      int32              `bson:"add_source"`
-	OperatorUserID string             `bson:"operator_user_id"`
-	Ex             string             `bson:"ex"`
+	OwnerUserID    string    `bson:"owner_user_id"`
+	FriendUserID   string    `bson:"friend_user_id"`
+	Remark         string    `bson:"remark"`
+	CreateTime     time.Time `bson:"create_time"`
+	AddSource      int32     `bson:"add_source"`
+	OperatorUserID string    `bson:"operator_user_id"`
+	Ex             string    `bson:"ex"`
 }
 
 // FriendModelInterface defines the operations for managing friends in MongoDB.

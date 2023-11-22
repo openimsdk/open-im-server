@@ -1,4 +1,4 @@
-package mgotool
+package mtool
 
 import (
 	"context"

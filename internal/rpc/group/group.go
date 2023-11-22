@@ -19,7 +19,7 @@ import (
 	"fmt"
 	pbconversation "github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/protocol/wrapperspb"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"
 	"math/big"
@@ -64,15 +64,15 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	groupDB, err := newmgo.NewGroupMongo(mongo.GetDatabase())
+	groupDB, err := mgo.NewGroupMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
-	groupMemberDB, err := newmgo.NewGroupMember(mongo.GetDatabase())
+	groupMemberDB, err := mgo.NewGroupMember(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
-	groupRequestDB, err := newmgo.NewGroupRequestMgo(mongo.GetDatabase())
+	groupRequestDB, err := mgo.NewGroupRequestMgo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}

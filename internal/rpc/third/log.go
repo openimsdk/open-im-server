@@ -32,11 +32,11 @@ func genLogID() string {
 }
 
 func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) (*third.UploadLogsResp, error) {
-	var DBlogs []*relationtb.Log
+	var DBlogs []*relationtb.LogModel
 	userID := ctx.Value(constant.OpUserID).(string)
 	platform := constant.PlatformID2Name[int(req.Platform)]
 	for _, fileURL := range req.FileURLs {
-		log := relationtb.Log{
+		log := relationtb.LogModel{
 			Version:    req.Version,
 			SystemType: req.SystemType,
 			Platform:   platform,
@@ -57,7 +57,7 @@ func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) 
 			}
 		}
 		if log.LogID == "" {
-			return nil, errs.ErrData.Wrap("Log id gen error")
+			return nil, errs.ErrData.Wrap("LogModel id gen error")
 		}
 		DBlogs = append(DBlogs, &log)
 	}
@@ -92,8 +92,8 @@ func (t *thirdServer) DeleteLogs(ctx context.Context, req *third.DeleteLogsReq) 
 	return &third.DeleteLogsResp{}, nil
 }
 
-func dbToPbLogInfos(logs []*relationtb.Log) []*third.LogInfo {
-	db2pbForLogInfo := func(log *relationtb.Log) *third.LogInfo {
+func dbToPbLogInfos(logs []*relationtb.LogModel) []*third.LogInfo {
+	db2pbForLogInfo := func(log *relationtb.LogModel) *third.LogInfo {
 		return &third.LogInfo{
 			Filename:   log.FileName,
 			UserID:     log.UserID,

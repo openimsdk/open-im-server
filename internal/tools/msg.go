@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"math"
 
@@ -78,7 +78,7 @@ func InitMsgTool() (*MsgTool, error) {
 		return nil, err
 	}
 	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	userDB, err := newmgo.NewUserMongo(mongo.GetDatabase())
+	userDB, err := mgo.NewUserMongo(mongo.GetDatabase())
 	if err != nil {
 		return nil, err
 	}
@@ -94,19 +94,19 @@ func InitMsgTool() (*MsgTool, error) {
 		tx,
 		userMongoDB,
 	)
-	groupDB, err := newmgo.NewGroupMongo(mongo.GetDatabase())
+	groupDB, err := mgo.NewGroupMongo(mongo.GetDatabase())
 	if err != nil {
 		return nil, err
 	}
-	groupMemberDB, err := newmgo.NewGroupMember(mongo.GetDatabase())
+	groupMemberDB, err := mgo.NewGroupMember(mongo.GetDatabase())
 	if err != nil {
 		return nil, err
 	}
-	groupRequestDB, err := newmgo.NewGroupRequestMgo(mongo.GetDatabase())
+	groupRequestDB, err := mgo.NewGroupRequestMgo(mongo.GetDatabase())
 	if err != nil {
 		return nil, err
 	}
-	conversationDB, err := newmgo.NewConversationMongo(mongo.GetDatabase())
+	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase())
 	if err != nil {
 		return nil, err
 	}
