@@ -50,10 +50,11 @@ type GWebSocket struct {
 	protocolType     int
 	conn             *websocket.Conn
 	handshakeTimeout time.Duration
+	writeBufferSize  int
 }
 
-func newGWebSocket(protocolType int, handshakeTimeout time.Duration) *GWebSocket {
-	return &GWebSocket{protocolType: protocolType, handshakeTimeout: handshakeTimeout}
+func newGWebSocket(protocolType int, handshakeTimeout time.Duration, wbs int) *GWebSocket {
+	return &GWebSocket{protocolType: protocolType, handshakeTimeout: handshakeTimeout, writeBufferSize: wbs}
 }
 
 func (d *GWebSocket) Close() error {
@@ -65,6 +66,10 @@ func (d *GWebSocket) GenerateLongConn(w http.ResponseWriter, r *http.Request) er
 		HandshakeTimeout: d.handshakeTimeout,
 		CheckOrigin:      func(r *http.Request) bool { return true },
 	}
+	if d.writeBufferSize > 0 { // default is 4kb.
+		upgrader.WriteBufferSize = d.writeBufferSize
+	}
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		return err

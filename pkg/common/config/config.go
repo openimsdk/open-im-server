@@ -196,6 +196,7 @@ type configStruct struct {
 		WebsocketMaxConnNum      int   `yaml:"websocketMaxConnNum"`
 		WebsocketMaxMsgLen       int   `yaml:"websocketMaxMsgLen"`
 		WebsocketTimeout         int   `yaml:"websocketTimeout"`
+		WebsocketWriteBufferSize int   `yaml:"websocketWriteBufferSize"`
 	} `yaml:"longConnSvr"`
 
 	Push struct {

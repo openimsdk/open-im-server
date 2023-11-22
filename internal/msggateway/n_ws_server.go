@@ -68,6 +68,7 @@ type WsServer struct {
 	onlineUserNum     atomic.Int64
 	onlineUserConnNum atomic.Int64
 	handshakeTimeout  time.Duration
+	writeBufferSize   int
 	validate          *validator.Validate
 	cache             cache.MsgModel
 	userClient        *rpcclient.UserRpcClient
@@ -137,6 +138,7 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 	return &WsServer{
 		port:             config.port,
 		wsMaxConnNum:     config.maxConnNum,
+		writeBufferSize:  config.writeBufferSize,
 		handshakeTimeout: config.handshakeTimeout,
 		clientPool: sync.Pool{
 			New: func() interface{} {
@@ -430,7 +432,8 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		httpError(connContext, errs.ErrTokenNotExist.Wrap())
 		return
 	}
-	wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout)
+
+	wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
 	err = wsLongConn.GenerateLongConn(w, r)
 	if err != nil {
 		httpError(connContext, err)

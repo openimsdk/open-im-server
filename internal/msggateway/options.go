@@ -27,6 +27,8 @@ type (
 		handshakeTimeout time.Duration
 		// 允许消息最大长度
 		messageMaxMsgLength int
+		// websocket write buffer, default: 4096, 4kb.
+		writeBufferSize int
 	}
 )
 
@@ -51,5 +53,11 @@ func WithHandshakeTimeout(t time.Duration) Option {
 func WithMessageMaxMsgLength(length int) Option {
 	return func(opt *configs) {
 		opt.messageMaxMsgLength = length
+	}
+}
+
+func WithWriteBufferSize(size int) Option {
+	return func(opt *configs) {
+		opt.writeBufferSize = size
 	}
 }
