@@ -278,7 +278,7 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq)
 	if resp.ApplyMemberFriend != nil {
 		req.GroupInfoForSet.ApplyMemberFriend = wrapperspb.Int32(*resp.ApplyMemberFriend)
 	}
-
+	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }
 func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) error {
@@ -313,7 +313,7 @@ func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) 
 		}
 		return err
 	}
-
+	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }
 

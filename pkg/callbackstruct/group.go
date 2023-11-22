@@ -157,5 +157,3 @@ type CallbackAfterSetGroupInfoReq struct {
 type CallbackAfterSetGroupInfoResp struct {
 	CommonCallbackResp
 }
-
-// TODO CALLBACK 2

@@ -856,7 +856,6 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			return nil, err
 		}
 		s.Notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID)
-		//TODO CALLBACK1
 		if err = CallbackAfterJoinGroup(ctx, req); err != nil {
 			return nil, err
 		}

@@ -79,3 +79,5 @@ type CallbackMsgModifyCommandResp struct {
 	AttachedInfo     *string                `json:"attachedInfo"`
 	Ex               *string                `json:"ex"`
 }
+
+// TODO CALLBACK 2

@@ -392,11 +392,12 @@ callback:
     enable: false
     timeout: 5
     failedContinue: true
-  ##TODO CALLBACK
+
   joinGroupAfter:
     enable: false
     timeout: 5
     failedContinue: true
+    ##TODO CALLBACK TEST
   setGroupInfoAfter:
     enable: false
     timeout: 5
@@ -405,6 +406,8 @@ callback:
     enable: true
     timeout: 5
     failedContinue: true
+
+
 ###################### Prometheus ######################
 # Prometheus configuration for various services
 # The number of Prometheus ports per service needs to correspond to rpcPort
