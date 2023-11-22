@@ -85,6 +85,9 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbfriend.AddBlackReq) 
 	if err != nil {
 		return nil, err
 	}
+	if err := CallbackBeforeAddBlack(ctx, req); err != nil {
+		return nil, err
+	}
 	black := relation.BlackModel{
 		OwnerUserID:    req.OwnerUserID,
 		BlockUserID:    req.BlackUserID,

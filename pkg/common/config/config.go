@@ -268,6 +268,10 @@ type configStruct struct {
 		CallbackAfterSetGroupInfo          CallBackConfig `yaml:"setGroupInfoAfter"`
 		CallbackBeforeSetGroupInfo         CallBackConfig `yaml:"setGroupInfoBefore"`
 		//TODO CALLBACK/
+		CallbackAfterRevokeMsg       CallBackConfig `yaml:"revokeMsgAfter"`
+		CallbackBeforeAddBlack       CallBackConfig `yaml:"addBlackBefore"`
+		CallbackAfterAddFriend       CallBackConfig `yaml:"addFriendAfter"`
+		CallbackBeforeAddFriendAgree CallBackConfig `yaml:"addFriendAgreeBefore"`
 	} `yaml:"callback"`
 
 	Prometheus struct {

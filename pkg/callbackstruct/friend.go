@@ -25,3 +25,37 @@ type CallbackBeforeAddFriendReq struct {
 type CallbackBeforeAddFriendResp struct {
 	CommonCallbackResp
 }
+type CallbackAfterAddFriendReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	FromUserID      string `json:"fromUserID" `
+	ToUserID        string `json:"toUserID"`
+	ReqMsg          string `json:"reqMsg"`
+	OperationID     string `json:"operationID"`
+}
+
+type CallbackAfterAddFriendResp struct {
+	CommonCallbackResp
+}
+type CallbackBeforeAddBlackReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OwnerUserID     string `json:"ownerUserID" `
+	BlackUserID     string `json:"blackUserID"`
+	OperationID     string `json:"operationID"`
+}
+
+type CallbackBeforeAddBlackResp struct {
+	CommonCallbackResp
+}
+
+type CallbackBeforeAddFriendAgreeReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	FromUserID      string `json:"fromUserID" `
+	ToUserID        string `json:"blackUserID"`
+	HandleResult    int32  `json:"HandleResult"'`
+	HandleMsg       string `json:"HandleMsg"'`
+	OperationID     string `json:"operationID"`
+}
+
+type CallbackBeforeAddFriendAgreeResp struct {
+	CommonCallbackResp
+}

@@ -316,5 +316,3 @@ func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) 
 	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }
-
-// TODO CALLBACK

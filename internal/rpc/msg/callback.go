@@ -16,7 +16,6 @@ package msg
 
 import (
 	"context"
-
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"google.golang.org/protobuf/proto"
 
@@ -28,6 +27,7 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
 )
@@ -178,4 +178,23 @@ func callbackMsgModify(ctx context.Context, msg *pbchat.SendMsgReq) error {
 	return nil
 }
 
-//TODO CALLBACK
+func CallbackAfterRevokeMsg(ctx context.Context, req *pbchat.RevokeMsgReq) error {
+	if !config.Config.Callback.CallbackAfterRevokeMsg.Enable {
+		return nil
+	}
+	callbackReq := &cbapi.CallbackAfterRevokeMsgReq{
+		CallbackCommand: cbapi.CallbackAfterRevokeMsgCommand,
+		ConversationID:  req.ConversationID,
+		Seq:             req.Seq,
+		UserID:          req.UserID,
+	}
+	resp := &cbapi.CallbackAfterSendGroupMsgResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterSetGroupInfo); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	utils.StructFieldNotNilReplace(req, resp)
+	return nil
+}

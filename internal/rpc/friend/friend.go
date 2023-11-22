@@ -120,6 +120,9 @@ func (s *friendServer) ApplyToAddFriend(
 		return nil, err
 	}
 	s.notificationSender.FriendApplicationAddNotification(ctx, req)
+	if err := CallbackAfterAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+		return nil, err
+	}
 	return resp, nil
 }
 
@@ -172,6 +175,9 @@ func (s *friendServer) RespondFriendApply(
 		HandleResult: req.HandleResult,
 	}
 	if req.HandleResult == constant.FriendResponseAgree {
+		if err := CallbackBeforeAddFriendAgree(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+			return nil, err
+		}
 		err := s.friendDatabase.AgreeFriendRequest(ctx, &friendRequest)
 		if err != nil {
 			return nil, err
