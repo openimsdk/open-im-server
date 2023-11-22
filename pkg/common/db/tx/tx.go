@@ -21,6 +21,7 @@ func (m *mongoTx) Transaction(ctx context.Context, fn func(ctx context.Context) 
 	if err != nil {
 		return err
 	}
+	defer sess.EndSession(ctx)
 	_, err = sess.WithTransaction(ctx, func(ctx mongo.SessionContext) (interface{}, error) {
 		return nil, fn(ctx)
 	})
