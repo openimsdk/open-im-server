@@ -52,6 +52,4 @@ type FriendRequestModelInterface interface {
 	// Get list of friend requests sent by fromUserID
 	FindFromUserID(ctx context.Context, fromUserID string, pagination pagination.Pagination) (total int64, friendRequests []*FriendRequestModel, err error)
 	FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*FriendRequestModel, err error)
-	// Check if the record exists
-	Exist(ctx context.Context, userID string) (exist bool, err error)
 }

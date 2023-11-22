@@ -21,28 +21,19 @@ type FriendRequestMgo struct {
 }
 
 func (f *FriendRequestMgo) FindToUserID(ctx context.Context, toUserID string, pagination pagination.Pagination) (total int64, friendRequests []*relation.FriendRequestModel, err error) {
-	//TODO implement me
-	panic("implement me")
+	return mgotool.FindPage[*relation.FriendRequestModel](ctx, f.coll, bson.M{"to_user_id": toUserID}, pagination)
 }
 
 func (f *FriendRequestMgo) FindFromUserID(ctx context.Context, fromUserID string, pagination pagination.Pagination) (total int64, friendRequests []*relation.FriendRequestModel, err error) {
-	//TODO implement me
-	panic("implement me")
+	return mgotool.FindPage[*relation.FriendRequestModel](ctx, f.coll, bson.M{"from_user_id": fromUserID}, pagination)
 }
 
 func (f *FriendRequestMgo) FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *FriendRequestMgo) NewTx(tx any) relation.FriendRequestModelInterface {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *FriendRequestMgo) Exist(ctx context.Context, userID string) (exist bool, err error) {
-	//TODO implement me
-	panic("implement me")
+	filter := bson.M{"$or": []bson.M{
+		{"from_user_id": fromUserID, "to_user_id": toUserID},
+		{"from_user_id": toUserID, "to_user_id": fromUserID},
+	}}
+	return mgotool.Find[*relation.FriendRequestModel](ctx, f.coll, filter)
 }
 
 func (f *FriendRequestMgo) Create(ctx context.Context, friendRequests []*relation.FriendRequestModel) error {
