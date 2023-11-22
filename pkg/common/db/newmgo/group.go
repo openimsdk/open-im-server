@@ -72,6 +72,9 @@ func (g *GroupMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time,
 						"date":   "$create_time",
 					},
 				},
+				"count": bson.M{
+					"$sum": 1,
+				},
 			},
 		},
 	}
