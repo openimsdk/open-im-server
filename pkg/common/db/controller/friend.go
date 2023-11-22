@@ -19,8 +19,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"time"
 
-	"gorm.io/gorm"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
@@ -198,7 +196,7 @@ func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 			if err != nil {
 				return err
 			}
-		} else if err != nil && errs.Unwrap(err) != gorm.ErrRecordNotFound {
+		} else if err != nil && (!relation.IsNotFound(err)) {
 			return err
 		}
 
