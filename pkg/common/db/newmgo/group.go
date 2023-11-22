@@ -55,6 +55,37 @@ func (g *GroupMgo) CountTotal(ctx context.Context, before *time.Time) (count int
 }
 
 func (g *GroupMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
-	//TODO implement me
-	panic("implement me")
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{
+				"create_time": bson.M{
+					"$gte": start,
+					"$lt":  end,
+				},
+			},
+		},
+		bson.M{
+			"$group": bson.M{
+				"_id": bson.M{
+					"$dateToString": bson.M{
+						"format": "%Y-%m-%d",
+						"date":   "$create_time",
+					},
+				},
+			},
+		},
+	}
+	type Item struct {
+		Date  string `bson:"_id"`
+		Count int64  `bson:"count"`
+	}
+	items, err := mgotool.Aggregate[Item](ctx, g.coll, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[string]int64, len(items))
+	for _, item := range items {
+		res[item.Date] = item.Count
+	}
+	return res, nil
 }

@@ -84,7 +84,7 @@ func main() {
 	}
 
 	checks := []checkFunc{
-		{name: "Mysql", function: checkMysql},
+		//{name: "Mysql", function: checkMysql},
 		{name: "Mongo", function: checkMongo},
 		{name: "Minio", function: checkMinio},
 		{name: "Redis", function: checkRedis},
