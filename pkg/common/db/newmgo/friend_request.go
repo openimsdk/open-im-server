@@ -52,7 +52,30 @@ func (f *FriendRequestMgo) UpdateByMap(ctx context.Context, formUserID, toUserID
 }
 
 func (f *FriendRequestMgo) Update(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
-	return mgotool.UpdateOne(ctx, f.coll, bson.M{"_id": friendRequest.ID}, bson.M{"$set": friendRequest}, true)
+	updater := bson.M{}
+	if friendRequest.HandleResult != 0 {
+		updater["handle_result"] = friendRequest.HandleResult
+	}
+	if friendRequest.ReqMsg != "" {
+		updater["req_msg"] = friendRequest.ReqMsg
+	}
+	if friendRequest.HandlerUserID != "" {
+		updater["handler_user_id"] = friendRequest.HandlerUserID
+	}
+	if friendRequest.HandleMsg != "" {
+		updater["handle_msg"] = friendRequest.HandleMsg
+	}
+	if !friendRequest.HandleTime.IsZero() {
+		updater["handle_time"] = friendRequest.HandleTime
+	}
+	if friendRequest.Ex != "" {
+		updater["ex"] = friendRequest.Ex
+	}
+	if len(updater) == 0 {
+		return nil
+	}
+	filter := bson.M{"from_user_id": friendRequest.FromUserID, "to_user_id": friendRequest.ToUserID}
+	return mgotool.UpdateOne(ctx, f.coll, filter, bson.M{"$set": updater}, true)
 }
 
 func (f *FriendRequestMgo) Find(ctx context.Context, fromUserID, toUserID string) (friendRequest *relation.FriendRequestModel, err error) {
