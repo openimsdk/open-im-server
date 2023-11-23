@@ -16,7 +16,6 @@ package group
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/log"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -240,6 +239,7 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq)
 		OperationID:     mcontext.GetOperationID(ctx),
 		GroupID:         req.GroupInfoForSet.GroupID,
 		GroupName:       req.GroupInfoForSet.GroupName,
+		EventTime:       time.Now().Unix(),
 	}
 
 	if req.GroupInfoForSet.Ex != nil {
@@ -254,7 +254,6 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq)
 	if req.GroupInfoForSet.ApplyMemberFriend != nil {
 		callbackReq.ApplyMemberFriend = &req.GroupInfoForSet.ApplyMemberFriend.Value
 	}
-	defer log.ZDebug(ctx, "CallbackBeforeSetGroupInfo2", "ex", callbackReq.Ex)
 	resp := &callbackstruct.CallbackBeforeSetGroupInfoResp{}
 
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupInfo); err != nil {
@@ -288,6 +287,7 @@ func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) 
 		OperationID:     mcontext.GetOperationID(ctx),
 		GroupID:         req.GroupInfoForSet.GroupID,
 		GroupName:       req.GroupInfoForSet.GroupName,
+		EventTime:       time.Now().Unix(),
 	}
 	if req.GroupInfoForSet.Ex != nil {
 		callbackReq.Ex = &req.GroupInfoForSet.Ex.Value

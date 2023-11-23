@@ -18,6 +18,7 @@ import (
 	"context"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"google.golang.org/protobuf/proto"
+	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	pbchat "github.com/OpenIMSDK/protocol/msg"
@@ -187,6 +188,7 @@ func CallbackAfterRevokeMsg(ctx context.Context, req *pbchat.RevokeMsgReq) error
 		ConversationID:  req.ConversationID,
 		Seq:             req.Seq,
 		UserID:          req.UserID,
+		EventTime:       time.Now().Unix(),
 	}
 	resp := &cbapi.CallbackAfterSendGroupMsgResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterSetGroupInfo); err != nil {

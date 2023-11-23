@@ -22,8 +22,6 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mcontext"
-
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
@@ -38,7 +36,7 @@ func CallbackBeforeAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriend
 		FromUserID:      req.FromUserID,
 		ToUserID:        req.ToUserID,
 		ReqMsg:          req.ReqMsg,
-		OperationID:     mcontext.GetOperationID(ctx),
+		EventTime:       time.Now().Unix(),
 	}
 	resp := &cbapi.CallbackBeforeAddFriendResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriend); err != nil {
@@ -57,7 +55,7 @@ func CallbackBeforeAddBlack(ctx context.Context, req *pbfriend.AddBlackReq) erro
 		CallbackCommand: cbapi.CallbackBeforeAddBlackCommand,
 		OwnerUserID:     req.OwnerUserID,
 		BlackUserID:     req.BlackUserID,
-		OperationID:     mcontext.GetOperationID(ctx),
+		EventTime:       time.Now().Unix(),
 	}
 	resp := &cbapi.CallbackBeforeAddBlackResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddBlack); err != nil {
@@ -78,7 +76,7 @@ func CallbackAfterAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendR
 		FromUserID:      req.FromUserID,
 		ToUserID:        req.ToUserID,
 		ReqMsg:          req.ReqMsg,
-		OperationID:     mcontext.GetOperationID(ctx),
+		EventTime:       time.Now().Unix(),
 	}
 	resp := &cbapi.CallbackAfterAddFriendResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackAfterAddFriend); err != nil {
@@ -100,7 +98,7 @@ func CallbackBeforeAddFriendAgree(ctx context.Context, req *pbfriend.RespondFrie
 		ToUserID:        req.ToUserID,
 		HandleMsg:       req.HandleMsg,
 		HandleResult:    req.HandleResult,
-		OperationID:     mcontext.GetOperationID(ctx),
+		EventTime:       time.Now().Unix(),
 	}
 	resp := &cbapi.CallbackBeforeAddFriendAgreeResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriendAgree); err != nil {

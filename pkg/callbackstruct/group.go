@@ -125,6 +125,7 @@ type CallbackBeforeSetGroupInfoReq struct {
 	NeedVerification  *int32  `json:"needVerification"`
 	LookMemberInfo    *int32  `json:"lookMemberInfo"`
 	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
+	EventTime         int64   `json:"eventTime"`
 }
 
 type CallbackBeforeSetGroupInfoResp struct {
@@ -152,6 +153,7 @@ type CallbackAfterSetGroupInfoReq struct {
 	NeedVerification  *int32  `json:"needVerification"`
 	LookMemberInfo    *int32  `json:"lookMemberInfo"`
 	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
+	EventTime         int64   `json:"eventTime"`
 }
 
 type CallbackAfterSetGroupInfoResp struct {
