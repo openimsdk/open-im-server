@@ -246,17 +246,17 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq)
 	}
 
 	if req.GroupInfoForSet.Ex != nil {
-		callbackReq.Ex = &req.GroupInfoForSet.Ex.Value
+		callbackReq.Ex = req.GroupInfoForSet.Ex.Value
 	}
-	log.ZDebug(ctx, "debug!!!!!!", callbackReq.Ex)
+	log.ZDebug(ctx, "debug CallbackBeforeSetGroupInfo", callbackReq.Ex)
 	if req.GroupInfoForSet.NeedVerification != nil {
-		callbackReq.NeedVerification = &req.GroupInfoForSet.NeedVerification.Value
+		callbackReq.NeedVerification = req.GroupInfoForSet.NeedVerification.Value
 	}
 	if req.GroupInfoForSet.LookMemberInfo != nil {
-		callbackReq.LookMemberInfo = &req.GroupInfoForSet.LookMemberInfo.Value
+		callbackReq.LookMemberInfo = req.GroupInfoForSet.LookMemberInfo.Value
 	}
 	if req.GroupInfoForSet.ApplyMemberFriend != nil {
-		callbackReq.ApplyMemberFriend = &req.GroupInfoForSet.ApplyMemberFriend.Value
+		callbackReq.ApplyMemberFriend = req.GroupInfoForSet.ApplyMemberFriend.Value
 	}
 	resp := &callbackstruct.CallbackBeforeSetGroupInfoResp{}
 
