@@ -14,7 +14,9 @@ import (
 func NewGroupMongo(db *mongo.Database) (relation.GroupModelInterface, error) {
 	coll := db.Collection("group")
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys:    bson.M{"group_id": 1},
+		Keys: bson.D{
+			{Key: "group_id", Value: 1},
+		},
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {

@@ -12,7 +12,9 @@ import (
 func NewS3Mongo(db *mongo.Database) (relation.ObjectInfoModelInterface, error) {
 	coll := db.Collection("s3")
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys:    bson.M{"name": 1},
+		Keys: bson.D{
+			{Key: "name", Value: 1},
+		},
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {

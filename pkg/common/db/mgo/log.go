@@ -15,14 +15,20 @@ func NewLogMongo(db *mongo.Database) (relation.LogInterface, error) {
 	coll := db.Collection("log")
 	_, err := coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
 		{
-			Keys:    bson.M{"log_id": 1},
+			Keys: bson.D{
+				{Key: "log_id", Value: 1},
+			},
 			Options: options.Index().SetUnique(true),
 		},
 		{
-			Keys: bson.M{"user_id": 1},
+			Keys: bson.D{
+				{Key: "user_id", Value: 1},
+			},
 		},
 		{
-			Keys: bson.M{"create_time": -1},
+			Keys: bson.D{
+				{Key: "create_time", Value: -1},
+			},
 		},
 	})
 	if err != nil {

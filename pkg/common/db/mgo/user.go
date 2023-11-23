@@ -14,7 +14,9 @@ import (
 func NewUserMongo(db *mongo.Database) (relation.UserModelInterface, error) {
 	coll := db.Collection("user")
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys:    bson.M{"user_id": 1},
+		Keys: bson.D{
+			{Key: "user_id", Value: 1},
+		},
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {

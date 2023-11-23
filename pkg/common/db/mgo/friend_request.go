@@ -14,7 +14,10 @@ import (
 func NewFriendRequestMongo(db *mongo.Database) (relation.FriendRequestModelInterface, error) {
 	coll := db.Collection("friend_request")
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys:    bson.M{"from_user_id": 1, "to_user_id": 1},
+		Keys: bson.D{
+			{Key: "from_user_id", Value: 1},
+			{Key: "to_user_id", Value: 1},
+		},
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {

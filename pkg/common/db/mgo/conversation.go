@@ -15,7 +15,10 @@ import (
 func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
 	coll := db.Collection("conversation")
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys:    bson.M{"owner_user_id": 1, "conversation_id": 1},
+		Keys: bson.D{
+			{Key: "owner_user_id", Value: 1},
+			{Key: "conversation_id", Value: 1},
+		},
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {
