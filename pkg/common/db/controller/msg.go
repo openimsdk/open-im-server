@@ -654,16 +654,26 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 
 func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (int64, int64, []*sdkws.MsgData, error) {
 	userMinSeq, err := db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
-	if err != nil && errs.Unwrap(err) != redis.Nil {
-		return 0, 0, nil, err
+	if err != nil {
+		log.ZError(ctx, "cache.GetConversationUserMinSeq error", err)
+		if errs.Unwrap(err) != redis.Nil {
+			return 0, 0, nil, err
+		}
 	}
 	minSeq, err := db.cache.GetMinSeq(ctx, conversationID)
-	if err != nil && errs.Unwrap(err) != redis.Nil {
-		return 0, 0, nil, err
+	if err != nil {
+		log.ZError(ctx, "cache.GetMinSeq error", err)
+		if errs.Unwrap(err) != redis.Nil {
+			return 0, 0, nil, err
+		}
 	}
 	maxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
-	if err != nil && errs.Unwrap(err) != redis.Nil {
-		return 0, 0, nil, err
+	if err != nil {
+		log.ZError(ctx, "cache.GetMaxSeq error", err)
+		if errs.Unwrap(err) != redis.Nil {
+			return 0, 0, nil, err
+		}
+
 	}
 	if userMinSeq < minSeq {
 		minSeq = userMinSeq
@@ -676,34 +686,16 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, co
 	}
 	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, conversationID, newSeqs)
 	if err != nil {
-		if err != redis.Nil {
-			log.ZError(ctx, "get message from redis exception", err, "failedSeqs", failedSeqs, "conversationID", conversationID)
-		}
+		log.ZError(ctx, "get message from redis exception", err, "failedSeqs", failedSeqs, "conversationID", conversationID)
 	}
-	log.ZInfo(
-		ctx,
-		"db.cache.GetMessagesBySeq",
-		"userID",
-		userID,
-		"conversationID",
-		conversationID,
-		"seqs",
-		seqs,
-		"successMsgs",
-		len(successMsgs),
-		"failedSeqs",
-		failedSeqs,
-		"conversationID",
-		conversationID,
-	)
+	log.ZInfo(ctx, "db.cache.GetMessagesBySeq", "userID", userID, "conversationID", conversationID, "seqs", seqs, "successMsgs",
+		len(successMsgs), "failedSeqs", failedSeqs, "conversationID", conversationID)
 
 	if len(failedSeqs) > 0 {
 		mongoMsgs, err := db.getMsgBySeqs(ctx, userID, conversationID, failedSeqs)
 		if err != nil {
-
 			return 0, 0, nil, err
 		}
-
 		successMsgs = append(successMsgs, mongoMsgs...)
 	}
 	return minSeq, maxSeq, successMsgs, nil
