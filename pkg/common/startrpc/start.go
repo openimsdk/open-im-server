@@ -104,6 +104,7 @@ func Start(
 	}
 	go func() {
 		if config.Config.Prometheus.Enable && prometheusPort != 0 {
+			prome.Enable = true
 			if err := prome.StartPrometheusSrv(prometheusPort); err != nil {
 				panic(err.Error())
 			}
