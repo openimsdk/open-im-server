@@ -312,7 +312,7 @@ iosPush:
 # Timeout in seconds
 # Whether to continue execution if callback fails
 callback:
-  url: "http://14.29.168.56:18889/sdkName/callbackBeforeSetGroupInfoCommand"
+  url: ""
   beforeSendSingleMsg:
     enable: false
     timeout: 5
