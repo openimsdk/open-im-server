@@ -25,7 +25,6 @@
 
 </p>
 
-
 ## Ⓜ️ About OpenIM
 
 OpenIM isn't just an open-source instant messaging component, it's an integral part of your application ecosystem. Check out this diagram to understand how AppServer, AppClient, OpenIMServer, and OpenIMSDK interact.
@@ -36,10 +35,10 @@ OpenIM isn't just an open-source instant messaging component, it's an integral p
 
 **OpenIMSDK** seamlessly integrates into your application, delivering a rich, real-time messaging experience without requiring intricate UI integration. It provides:
 
-+ **Local Storage**: For quick data retrieval and message synchronization.
-+ **Listener Callbacks**: Ensuring real-time message interactivity.
-+ **API Encapsulation**: Streamlining development processes.
-+ **Connection Management**: Guaranteeing reliable message delivery.
+- **Local Storage**: For quick data retrieval and message synchronization.
+- **Listener Callbacks**: Ensuring real-time message interactivity.
+- **API Encapsulation**: Streamlining development processes.
+- **Connection Management**: Guaranteeing reliable message delivery.
 
 It's crafted in Golang and supports cross-platform deployment, ensuring a coherent messaging experience across all platforms.
 
@@ -49,14 +48,14 @@ It's crafted in Golang and supports cross-platform deployment, ensuring a cohere
 
 **OpenIMServer**, meticulously developed in Golang, ensures a stellar instant messaging server capability with a multifold approach:
 
-+ **Modular Composition**: It's comprised of several modules, such as the gateway and multiple RPC services, offering a versatile messaging environment.
-+ **Microservices Architecture**: Supporting cluster modes, it assures outstanding performance and scalability to manage communication effectively across various instances.
-+ **Diverse Deployment Options**: Adapts to your operational preferences, offering deployment via source code, Kubernetes, or Docker.
+- **Modular Composition**: It's comprised of several modules, such as the gateway and multiple RPC services, offering a versatile messaging environment.
+- **Microservices Architecture**: Supporting cluster modes, it assures outstanding performance and scalability to manage communication effectively across various instances.
+- **Diverse Deployment Options**: Adapts to your operational preferences, offering deployment via source code, Kubernetes, or Docker.
 
 ### Enhanced Business Functionalities:
 
-+ **REST API**: OpenIMServer provides REST API for business systems, aiming to empower your operations with additional functionalities like group creation and message push via backend interfaces.
-+ **Callbacks**: To expand its utility across varied business forms, OpenIMServer offers callback capabilities. That is, it sends a request to the business server before or after an event occurs, such as sending a message, enriching the interaction and data exchange flow in the communication processes.
+- **REST API**: OpenIMServer provides REST API for business systems, aiming to empower your operations with additional functionalities like group creation and message push via backend interfaces.
+- **Callbacks**: To expand its utility across varied business forms, OpenIMServer offers callback capabilities. That is, it sends a request to the business server before or after an event occurs, such as sending a message, enriching the interaction and data exchange flow in the communication processes.
 
 👉 **[Learn More](https://docs.openim.io/guides/introduction/product)**
 
@@ -94,7 +93,6 @@ It's crafted in Golang and supports cross-platform deployment, ensuring a cohere
 
 -->
 
-
 ## :rocket: Quick Start
 
 You can quickly learn OpenIM engineering solutions, all it takes is one simple command:
@@ -118,7 +116,7 @@ It is recommended to use Docker Compose for deployment, which can easily and qui
 > If you don't know OpenIM's versioning policy, 📚Read our release policy: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/version.md
 
 
-</details> 
+</details>
 
 <details>  <summary>Compile from Source</summary>
 
@@ -196,15 +194,15 @@ Read: Configuration center document：https://github.com/openimsdk/open-im-serve
 
 + https://github.com/openimsdk/open-im-server/blob/main/deployments/README.md
 
-</details> 
+</details>
 -->
 
-+ **[Source Code Deployment Guide](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Production deployment of Linux systems](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/install-openim-linux-system.md)**
-+ **[Docker Deployment Guide](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[Kubernetes Deployment Guide](https://github.com/openimsdk/open-im-server/tree/main/deployments)**
+- **[Source Code Deployment Guide](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
+- **[Production deployment of Linux systems](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/install-openim-linux-system.md)**
+- **[Docker Deployment Guide](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
+- **[Kubernetes Deployment Guide](https://github.com/openimsdk/open-im-server/tree/main/deployments)**
 
-<!-- 
+<!--
 ## :link: OpenIM and your application
 
 OpenIM isn't just an open-source instant messaging component, it's an integral part of your application ecosystem. Check out this diagram to understand how AppServer, AppClient, OpenIMServer, and OpenIMSDK interact.
@@ -258,10 +256,10 @@ Before you start, please make sure your changes are in demand. The best for that
 
 ## :busts_in_silhouette: Community
 
-+ 📚 [OpenIM Community](https://github.com/OpenIMSDK/community)
-+ 💕 [OpenIM Interest Group](https://github.com/Openim-sigs)
-+ 🚀 [Join our Slack community](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [Join our wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
+- 📚 [OpenIM Community](https://github.com/OpenIMSDK/community)
+- 💕 [OpenIM Interest Group](https://github.com/Openim-sigs)
+- 🚀 [Join our Slack community](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+- :eyes: [Join our wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: Community Meetings
 
