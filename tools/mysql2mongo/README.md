@@ -33,7 +33,5 @@ var (
 **执行数据迁移命令：**
 
 ```bash
-make build BINS="mysql2mongo"
+go run main.go
 ```
-
-启动的二进制在 `_output/bin/tools` 中
