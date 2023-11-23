@@ -115,45 +115,45 @@ type CallbackAfterJoinGroupResp struct {
 
 type CallbackBeforeSetGroupInfoReq struct {
 	CallbackCommand   `json:"callbackCommand"`
-	OperationID       string  `json:"operationID"`
-	GroupID           string  `json:"groupID"`
-	GroupName         string  `json:"groupName"`
-	Notification      string  `json:"notification"`
-	Introduction      string  `json:"introduction"`
-	FaceURL           string  `json:"faceURL"`
-	Ex                *string `json:"ex"`
-	NeedVerification  *int32  `json:"needVerification"`
-	LookMemberInfo    *int32  `json:"lookMemberInfo"`
-	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
-	EventTime         int64   `json:"eventTime"`
+	OperationID       string `json:"operationID"`
+	GroupID           string `json:"groupID"`
+	GroupName         string `json:"groupName"`
+	Notification      string `json:"notification"`
+	Introduction      string `json:"introduction"`
+	FaceURL           string `json:"faceURL"`
+	Ex                string `json:"ex"`
+	NeedVerification  int32  `json:"needVerification"`
+	LookMemberInfo    int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend int32  `json:"applyMemberFriend"`
+	EventTime         int64  `json:"eventTime"`
 }
 
 type CallbackBeforeSetGroupInfoResp struct {
 	CommonCallbackResp
-	GroupID           string  ` json:"groupID"`
-	GroupName         string  `json:"groupName"`
-	Notification      string  `json:"notification"`
-	Introduction      string  `json:"introduction"`
-	FaceURL           string  `json:"faceURL"`
-	Ex                *string `json:"ex"`
-	NeedVerification  *int32  `json:"needVerification"`
-	LookMemberInfo    *int32  `json:"lookMemberInfo"`
-	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
+	GroupID           string ` json:"groupID"`
+	GroupName         string `json:"groupName"`
+	Notification      string `json:"notification"`
+	Introduction      string `json:"introduction"`
+	FaceURL           string `json:"faceURL"`
+	Ex                string `json:"ex"`
+	NeedVerification  int32  `json:"needVerification"`
+	LookMemberInfo    int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend int32  `json:"applyMemberFriend"`
 }
 
 type CallbackAfterSetGroupInfoReq struct {
 	CallbackCommand   `json:"callbackCommand"`
-	OperationID       string  `json:"operationID"`
-	GroupID           string  `json:"groupID"`
-	GroupName         string  `json:"groupName"`
-	Notification      string  `json:"notification"`
-	Introduction      string  `json:"introduction"`
-	FaceURL           string  `json:"faceURL"`
-	Ex                *string `json:"ex"`
-	NeedVerification  *int32  `json:"needVerification"`
-	LookMemberInfo    *int32  `json:"lookMemberInfo"`
-	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
-	EventTime         int64   `json:"eventTime"`
+	OperationID       string `json:"operationID"`
+	GroupID           string `json:"groupID"`
+	GroupName         string `json:"groupName"`
+	Notification      string `json:"notification"`
+	Introduction      string `json:"introduction"`
+	FaceURL           string `json:"faceURL"`
+	Ex                string `json:"ex"`
+	NeedVerification  int32  `json:"needVerification"`
+	LookMemberInfo    int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend int32  `json:"applyMemberFriend"`
+	EventTime         int64  `json:"eventTime"`
 }
 
 type CallbackAfterSetGroupInfoResp struct {
