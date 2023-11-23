@@ -1,4 +1,4 @@
-FROM golang:1.18.0 as build
+FROM golang:1.19.0 as build
 
 WORKDIR /openim
 COPY . .
