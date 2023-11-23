@@ -167,6 +167,7 @@ type configStruct struct {
 		OpenImMsgName            string `yaml:"openImMsgName"`
 		OpenImPushName           string `yaml:"openImPushName"`
 		OpenImMessageGatewayName string `yaml:"openImMessageGatewayName"`
+		OpenImMessageTransfer    string `yaml:"openImMessageTransfer"`
 		OpenImGroupName          string `yaml:"openImGroupName"`
 		OpenImAuthName           string `yaml:"openImAuthName"`
 		OpenImConversationName   string `yaml:"openImConversationName"`

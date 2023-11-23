@@ -30,7 +30,12 @@ func NewMsgTransferCmd() MsgTransferCmd {
 
 func (m *MsgTransferCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msgtransfer.StartTransfer(m.getPrometheusPortFlag(cmd))
+		promePort := m.getPrometheusPortFlag(cmd)
+		if promePort == 0 {
+			promePort = m.GetPrometheusPortFlag()
+		}
+
+		return msgtransfer.StartTransfer(promePort)
 	}
 }
 
@@ -38,3 +43,17 @@ func (m *MsgTransferCmd) Exec() error {
 	m.addRunE()
 	return m.Execute()
 }
+
+// func (a *MsgTransferCmd) StartSvr(
+// 	name string,
+// 	rpcFn func(discov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,
+// ) error {
+// 	if a.GetPortFlag() == 0 {
+// 		return errors.New("port is required")
+// 	}
+// 	return startrpc.Start(a.GetPortFlag(), name, a.GetPrometheusPortFlag(), rpcFn)
+// }
+
+// func (a *MsgTransferCmd) Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+// 	return nil
+// }

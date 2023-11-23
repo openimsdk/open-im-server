@@ -196,6 +196,7 @@ rpcRegisterName:
   openImMsgName: Msg
   openImPushName: Push
   openImMessageGatewayName: MessageGateway
+  openImMessageTransfer: MessageTransfer
   openImGroupName: Group
   openImAuthName: Auth
   openImConversationName: Conversation

@@ -22,6 +22,9 @@ import (
 
 func main() {
 	pushCmd := cmd.NewRpcCmd("push")
+	pushCmd.PreLoadConfig()
+	pushCmd.SetSvcName(config.Config.RpcRegisterName.OpenImPushName)
+
 	pushCmd.AddPortFlag()
 	pushCmd.AddPrometheusPortFlag()
 	if err := pushCmd.Exec(); err != nil {

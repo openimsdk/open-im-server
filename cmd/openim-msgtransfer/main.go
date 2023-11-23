@@ -16,12 +16,20 @@ package main
 
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 func main() {
 	msgTransferCmd := cmd.NewMsgTransferCmd()
+	msgTransferCmd.PreLoadConfig()
+	msgTransferCmd.SetSvcName(config.Config.RpcRegisterName.OpenImMessageTransfer)
+
 	msgTransferCmd.AddPrometheusPortFlag()
 	if err := msgTransferCmd.Exec(); err != nil {
 		panic(err.Error())
 	}
+
+	// if err := msgTransferCmd.StartSvr(config.Config.RpcRegisterName.OpenImMessageTransfer, msgTransferCmd.Start); err != nil {
+	// 	panic(err.Error())
+	// }
 }

@@ -135,6 +135,8 @@ func (r *RootCmd) GetPrometheusPortFlag() int {
 			return config.Config.Prometheus.PushPrometheusPort[0]
 		case config.Config.RpcRegisterName.OpenImMessageGatewayName:
 			return config.Config.Prometheus.MessageGatewayPrometheusPort[0]
+		case config.Config.RpcRegisterName.OpenImMessageTransfer:
+			return config.Config.Prometheus.MessageTransferPrometheusPort[0]
 		case config.Config.RpcRegisterName.OpenImThirdName:
 			return config.Config.Prometheus.ThirdPrometheusPort[0]
 		default:

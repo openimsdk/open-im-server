@@ -22,6 +22,9 @@ import (
 
 func main() {
 	rpcCmd := cmd.NewRpcCmd("msg")
+	rpcCmd.PreLoadConfig()
+	rpcCmd.SetSvcName(config.Config.RpcRegisterName.OpenImMsgName)
+
 	rpcCmd.AddPortFlag()
 	rpcCmd.AddPrometheusPortFlag()
 	if err := rpcCmd.Exec(); err != nil {
