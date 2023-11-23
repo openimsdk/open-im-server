@@ -397,7 +397,7 @@ callback:
     enable: false
     timeout: 5
     failedContinue: true
-    ##TODO CALLBACK TEST
+    ##TODO CALLBACK
   setGroupInfoAfter:
     enable: false
     timeout: 5
@@ -410,7 +410,34 @@ callback:
     enable: false
     timeout: 5
     failedContinue: true
-
+  addBlackBefore:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  addFriendAfter:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  addFriendAgreeBefore:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  deleteFriendAfter:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  importFriendsBefore:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  importFriendsAfter:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  removeBlackAfter:
+    enable: false
+    timeout: 5
+    failedContinue: true
 ###################### Prometheus ######################
 # Prometheus configuration for various services
 # The number of Prometheus ports per service needs to correspond to rpcPort

@@ -267,11 +267,15 @@ type configStruct struct {
 		CallbackAfterJoinGroup             CallBackConfig `yaml:"joinGroupAfter"`
 		CallbackAfterSetGroupInfo          CallBackConfig `yaml:"setGroupInfoAfter"`
 		CallbackBeforeSetGroupInfo         CallBackConfig `yaml:"setGroupInfoBefore"`
-		//TODO CALLBACK/
-		CallbackAfterRevokeMsg       CallBackConfig `yaml:"revokeMsgAfter"`
-		CallbackBeforeAddBlack       CallBackConfig `yaml:"addBlackBefore"`
-		CallbackAfterAddFriend       CallBackConfig `yaml:"addFriendAfter"`
-		CallbackBeforeAddFriendAgree CallBackConfig `yaml:"addFriendAgreeBefore"`
+		CallbackAfterRevokeMsg             CallBackConfig `yaml:"revokeMsgAfter"`
+		CallbackBeforeAddBlack             CallBackConfig `yaml:"addBlackBefore"`
+		CallbackAfterAddFriend             CallBackConfig `yaml:"addFriendAfter"`
+		CallbackBeforeAddFriendAgree       CallBackConfig `yaml:"addFriendAgreeBefore"`
+
+		CallbackAfterDeleteFriend   CallBackConfig `yaml:"deleteFriendAfter"`
+		CallbackBeforeImportFriends CallBackConfig `yaml:"importFriendsBefore"`
+		CallbackAfterImportFriends  CallBackConfig `yaml:"importFriendsAfter"`
+		CallbackAfterRemoveBlack    CallBackConfig `yaml:"removeBlackAfter"`
 	} `yaml:"callback"`
 
 	Prometheus struct {

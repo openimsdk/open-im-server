@@ -59,3 +59,42 @@ type CallbackBeforeAddFriendAgreeReq struct {
 type CallbackBeforeAddFriendAgreeResp struct {
 	CommonCallbackResp
 }
+
+type CallbackAfterDeleteFriendReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OwnerUserID     string `json:"ownerUserID" `
+	FriendUserID    string `json:"friendUserID"`
+	EventTime       int64  `json:"eventTime"`
+}
+type CallbackAfterDeleteFriendResp struct {
+	CommonCallbackResp
+}
+
+type CallbackBeforeImportFriendsReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OwnerUserID     string   `json:"ownerUserID" `
+	FriendUserIDs   []string `json:"friendUserIDs"`
+	EventTime       int64    `json:"eventTime"`
+}
+type CallbackBeforeImportFriendsResp struct {
+	CommonCallbackResp
+}
+type CallbackAfterImportFriendsReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OwnerUserID     string   `json:"ownerUserID" `
+	FriendUserIDs   []string `json:"friendUserIDs"`
+	EventTime       int64    `json:"eventTime"`
+}
+type CallbackAfterImportFriendsResp struct {
+	CommonCallbackResp
+}
+
+type CallbackAfterRemoveBlackReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OwnerUserID     string `json:"ownerUserID"`
+	BlackUserID     string `json:"blackUserID""`
+	EventTime       int64  `json:"eventTime"`
+}
+type CallbackAfterRemoveBlackResp struct {
+	CommonCallbackResp
+}

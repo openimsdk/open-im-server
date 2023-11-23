@@ -17,6 +17,7 @@ package friend
 import (
 	"context"
 	"github.com/OpenIMSDK/tools/utils"
+	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
@@ -103,6 +104,87 @@ func CallbackBeforeAddFriendAgree(ctx context.Context, req *pbfriend.RespondFrie
 	}
 	resp := &cbapi.CallbackBeforeAddFriendAgreeResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriendAgree); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	utils.StructFieldNotNilReplace(req, resp)
+	return nil
+}
+func CallbackAfterDeleteFriend(ctx context.Context, req *pbfriend.DeleteFriendReq) error {
+	if !config.Config.Callback.CallbackAfterDeleteFriend.Enable {
+		return nil
+	}
+	cbReq := &cbapi.CallbackAfterDeleteFriendReq{
+		CallbackCommand: cbapi.CallbackAfterDeleteFriendCommand,
+		OwnerUserID:     req.OwnerUserID,
+		FriendUserID:    req.FriendUserID,
+		EventTime:       time.Now().UnixMilli(),
+	}
+	resp := &cbapi.CallbackAfterDeleteFriendResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackAfterDeleteFriend); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	utils.StructFieldNotNilReplace(req, resp)
+	return nil
+}
+func CallbackBeforeImportFriends(ctx context.Context, req *pbfriend.ImportFriendReq) error {
+	if !config.Config.Callback.CallbackBeforeImportFriends.Enable {
+		return nil
+	}
+	cbReq := &cbapi.CallbackBeforeImportFriendsReq{
+		CallbackCommand: cbapi.CallbackBeforeImportFriendsCommand,
+		OwnerUserID:     req.OwnerUserID,
+		FriendUserIDs:   req.FriendUserIDs,
+		EventTime:       time.Now().UnixMilli(),
+	}
+	resp := &cbapi.CallbackBeforeImportFriendsResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeImportFriends); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	utils.StructFieldNotNilReplace(req, resp)
+	return nil
+}
+func CallbackAfterImportFriends(ctx context.Context, req *pbfriend.ImportFriendReq) error {
+	if !config.Config.Callback.CallbackAfterImportFriends.Enable {
+		return nil
+	}
+	cbReq := &cbapi.CallbackAfterImportFriendsReq{
+		CallbackCommand: cbapi.CallbackAfterImportFriendsCommand,
+		OwnerUserID:     req.OwnerUserID,
+		FriendUserIDs:   req.FriendUserIDs,
+		EventTime:       time.Now().UnixMilli(),
+	}
+	resp := &cbapi.CallbackAfterImportFriendsResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackAfterImportFriends); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	utils.StructFieldNotNilReplace(req, resp)
+	return nil
+}
+
+func CallbackAfterRemoveBlack(ctx context.Context, req *pbfriend.RemoveBlackReq) error {
+	if !config.Config.Callback.CallbackAfterRemoveBlack.Enable {
+		return nil
+	}
+	cbReq := &cbapi.CallbackAfterRemoveBlackReq{
+		CallbackCommand: cbapi.CallbackAfterRemoveBlackCommand,
+		OwnerUserID:     req.OwnerUserID,
+		BlackUserID:     req.BlackUserID,
+		EventTime:       time.Now().UnixMilli(),
+	}
+	resp := &cbapi.CallbackAfterRemoveBlackResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackAfterRemoveBlack); err != nil {
 		if err == errs.ErrCallbackContinue {
 			return nil
 		}

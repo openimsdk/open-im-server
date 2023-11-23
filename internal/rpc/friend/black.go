@@ -74,6 +74,9 @@ func (s *friendServer) RemoveBlack(
 		return nil, err
 	}
 	s.notificationSender.BlackDeletedNotification(ctx, req)
+	if err := CallbackAfterRemoveBlack(ctx, req); err != nil {
+		return nil, err
+	}
 	return &pbfriend.RemoveBlackResp{}, nil
 }
 
