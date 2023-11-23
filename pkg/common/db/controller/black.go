@@ -16,7 +16,7 @@ package controller
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
+	"github.com/OpenIMSDK/tools/pagination"
 
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"

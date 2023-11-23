@@ -17,8 +17,8 @@ package user
 import (
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/tools/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"strings"
 	"time"
 
@@ -74,13 +74,9 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	if err != nil {
 		return err
 	}
-	tx, err := tx2.NewAuto(context.Background(), mongo.GetClient())
-	if err != nil {
-		return err
-	}
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
 	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
-	database := controller.NewUserDatabase(userDB, cache, tx, userMongoDB)
+	database := controller.NewUserDatabase(userDB, cache, tx.NewMongo(mongo.GetClient()), userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)

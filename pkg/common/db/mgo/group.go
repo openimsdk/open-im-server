@@ -2,9 +2,9 @@ package mgo
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo/mtool"
+	"github.com/OpenIMSDK/tools/mgoutil"
+	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -30,7 +30,7 @@ type GroupMgo struct {
 }
 
 func (g *GroupMgo) Create(ctx context.Context, groups []*relation.GroupModel) (err error) {
-	return mtool.InsertMany(ctx, g.coll, groups)
+	return mgoutil.InsertMany(ctx, g.coll, groups)
 }
 
 func (g *GroupMgo) UpdateState(ctx context.Context, groupID string, state int32) (err error) {
@@ -41,26 +41,26 @@ func (g *GroupMgo) UpdateMap(ctx context.Context, groupID string, args map[strin
 	if len(args) == 0 {
 		return nil
 	}
-	return mtool.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID}, bson.M{"$set": args}, true)
+	return mgoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID}, bson.M{"$set": args}, true)
 }
 
 func (g *GroupMgo) Find(ctx context.Context, groupIDs []string) (groups []*relation.GroupModel, err error) {
-	return mtool.Find[*relation.GroupModel](ctx, g.coll, bson.M{"group_id": bson.M{"$in": groupIDs}})
+	return mgoutil.Find[*relation.GroupModel](ctx, g.coll, bson.M{"group_id": bson.M{"$in": groupIDs}})
 }
 
 func (g *GroupMgo) Take(ctx context.Context, groupID string) (group *relation.GroupModel, err error) {
-	return mtool.FindOne[*relation.GroupModel](ctx, g.coll, bson.M{"group_id": groupID})
+	return mgoutil.FindOne[*relation.GroupModel](ctx, g.coll, bson.M{"group_id": groupID})
 }
 
 func (g *GroupMgo) Search(ctx context.Context, keyword string, pagination pagination.Pagination) (total int64, groups []*relation.GroupModel, err error) {
-	return mtool.FindPage[*relation.GroupModel](ctx, g.coll, bson.M{"group_name": bson.M{"$regex": keyword}}, pagination)
+	return mgoutil.FindPage[*relation.GroupModel](ctx, g.coll, bson.M{"group_name": bson.M{"$regex": keyword}}, pagination)
 }
 
 func (g *GroupMgo) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
 	if before == nil {
-		return mtool.Count(ctx, g.coll, bson.M{})
+		return mgoutil.Count(ctx, g.coll, bson.M{})
 	}
-	return mtool.Count(ctx, g.coll, bson.M{"create_time": bson.M{"$lt": before}})
+	return mgoutil.Count(ctx, g.coll, bson.M{"create_time": bson.M{"$lt": before}})
 }
 
 func (g *GroupMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
@@ -91,7 +91,7 @@ func (g *GroupMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time,
 		Date  string `bson:"_id"`
 		Count int64  `bson:"count"`
 	}
-	items, err := mtool.Aggregate[Item](ctx, g.coll, pipeline)
+	items, err := mgoutil.Aggregate[Item](ctx, g.coll, pipeline)
 	if err != nil {
 		return nil, err
 	}

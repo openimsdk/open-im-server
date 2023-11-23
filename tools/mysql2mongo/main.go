@@ -27,14 +27,11 @@ func main() {
 	var s3 = "minio" // 文件储存方式 minio, cos, oss
 
 	var (
-		mongoUsername = "root"            // mysql用户名
-		mongoPassword = "openIM123"       // mysql密码
-		mongoHosts    = "127.0.0.1:13306" // mysql地址
-		mongoDatabase = "openIM_v3"       // mysql数据库名字
+		mongoUsername = "root"            // mongodb用户名
+		mongoPassword = "openIM123"       // mongodb密码
+		mongoHosts    = "127.0.0.1:13306" // mongodb地址
+		mongoDatabase = "openIM_v3"       // mongodb数据库名字
 	)
-
-	mysqlAddr = "172.16.8.142:13306"
-	mongoHosts = "172.16.8.142:37017"
 
 	mysqlDSN := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysqlUsername, mysqlPassword, mysqlAddr, mysqlDatabase)
 	mysqlDB, err := gorm.Open(mysql.Open(mysqlDSN), &gorm.Config{Logger: logger.Discard})
@@ -45,9 +42,7 @@ func main() {
 	log.Println("open mysql db success")
 	var mongoURI string
 	if mongoPassword != "" && mongoUsername != "" {
-		mongoURI = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
-			mongoUsername, mongoPassword, mongoHosts,
-			mongoDatabase, 100)
+		mongoURI = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin", mongoUsername, mongoPassword, mongoHosts, mongoDatabase, 100)
 	} else {
 		mongoURI = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin", mongoHosts, mongoDatabase, 100)
 	}
@@ -63,16 +58,16 @@ func main() {
 
 	var tasks []func() error
 	tasks = append(tasks,
-		func() error { return newTask(mysqlDB, mongoDB, mgo.NewUserMongo, c.User) },
-		func() error { return newTask(mysqlDB, mongoDB, mgo.NewFriendMongo, c.Friend) },
-		func() error { return newTask(mysqlDB, mongoDB, mgo.NewFriendRequestMongo, c.FriendRequest) },
-		func() error { return newTask(mysqlDB, mongoDB, mgo.NewBlackMongo, c.Black) },
-		func() error { return newTask(mysqlDB, mongoDB, mgo.NewGroupMongo, c.Group) },
-		func() error { return newTask(mysqlDB, mongoDB, mgo.NewGroupMember, c.GroupMember) },
-		func() error { return newTask(mysqlDB, mongoDB, mgo.NewGroupRequestMgo, c.GroupRequest) },
-		func() error { return newTask(mysqlDB, mongoDB, mgo.NewConversationMongo, c.Conversation) },
-		func() error { return newTask(mysqlDB, mongoDB, mgo.NewS3Mongo, c.Object(s3)) },
-		func() error { return newTask(mysqlDB, mongoDB, mgo.NewLogMongo, c.Log) },
+		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewUserMongo, c.User) },
+		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewFriendMongo, c.Friend) },
+		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewFriendRequestMongo, c.FriendRequest) },
+		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewBlackMongo, c.Black) },
+		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewGroupMongo, c.Group) },
+		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewGroupMember, c.GroupMember) },
+		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewGroupRequestMgo, c.GroupRequest) },
+		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewConversationMongo, c.Conversation) },
+		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewS3Mongo, c.Object(s3)) },
+		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewLogMongo, c.Log) },
 	)
 
 	for _, task := range tasks {
@@ -239,12 +234,13 @@ func (convert) Log(v mysqlModel.Log) mongoModel.LogModel {
 	}
 }
 
-func newTask[MYSQLTABLE interface{ TableName() string }, MONGOMODEL any, MONGOTABLE any](gormDB *gorm.DB, mongoDB *mongo.Database, mongoDBInit func(db *mongo.Database) (MONGOMODEL, error), convert func(v MYSQLTABLE) MONGOTABLE) error {
+// NewTask A mysql table B mongodb model C mongodb table
+func NewTask[A interface{ TableName() string }, B any, C any](gormDB *gorm.DB, mongoDB *mongo.Database, mongoDBInit func(db *mongo.Database) (B, error), convert func(v A) C) error {
 	obj, err := mongoDBInit(mongoDB)
 	if err != nil {
 		return err
 	}
-	var zero MYSQLTABLE
+	var zero A
 	tableName := zero.TableName()
 	coll, err := getColl(obj)
 	if err != nil {
@@ -256,7 +252,7 @@ func newTask[MYSQLTABLE interface{ TableName() string }, MONGOMODEL any, MONGOTA
 	}()
 	const batch = 100
 	for page := 0; ; page++ {
-		var res []MYSQLTABLE
+		var res []A
 		if err := gormDB.Find(&res).Limit(batch).Offset(page * batch).Error; err != nil {
 			return fmt.Errorf("find table %s failed, err: %w", tableName, err)
 		}

@@ -17,8 +17,8 @@ package conversation
 import (
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/tools/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 
 	"google.golang.org/grpc"
@@ -53,10 +53,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	tx, err := tx2.NewAuto(context.Background(), mongo.GetClient())
-	if err != nil {
-		return err
-	}
 	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
@@ -66,7 +62,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbconversation.RegisterConversationServer(server, &conversationServer{
 		conversationNotificationSender: notification.NewConversationNotificationSender(&msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
-		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx),
+		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewMongo(mongo.GetClient())),
 	})
 	return nil
 }

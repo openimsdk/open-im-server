@@ -18,8 +18,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/tx"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"math"
 
 	"github.com/redis/go-redis/v9"
@@ -82,16 +82,13 @@ func InitMsgTool() (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
-	tx, err := tx2.NewAuto(context.Background(), mongo.GetClient())
-	if err != nil {
-		return nil, err
-	}
 	msgDatabase := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase())
 	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
+	ctxTx := tx.NewMongo(mongo.GetClient())
 	userDatabase := controller.NewUserDatabase(
 		userDB,
 		cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt()),
-		tx,
+		ctxTx,
 		userMongoDB,
 	)
 	groupDB, err := mgo.NewGroupMongo(mongo.GetDatabase())
@@ -110,11 +107,11 @@ func InitMsgTool() (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
-	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, tx, nil)
+	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, ctxTx, nil)
 	conversationDatabase := controller.NewConversationDatabase(
 		conversationDB,
 		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
-		tx,
+		ctxTx,
 	)
 	msgRpcClient := rpcclient.NewMessageRpcClient(discov)
 	msgNotificationSender := notification.NewMsgNotificationSender(rpcclient.WithRpcClient(&msgRpcClient))

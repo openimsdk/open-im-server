@@ -2,9 +2,9 @@ package mgo
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo/mtool"
+	"github.com/OpenIMSDK/tools/mgoutil"
+	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -30,45 +30,45 @@ type UserMgo struct {
 }
 
 func (u *UserMgo) Create(ctx context.Context, users []*relation.UserModel) error {
-	return mtool.InsertMany(ctx, u.coll, users)
+	return mgoutil.InsertMany(ctx, u.coll, users)
 }
 
 func (u *UserMgo) UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error) {
 	if len(args) == 0 {
 		return nil
 	}
-	return mtool.UpdateOne(ctx, u.coll, bson.M{"user_id": userID}, bson.M{"$set": args}, true)
+	return mgoutil.UpdateOne(ctx, u.coll, bson.M{"user_id": userID}, bson.M{"$set": args}, true)
 }
 
 func (u *UserMgo) Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
-	return mtool.Find[*relation.UserModel](ctx, u.coll, bson.M{"user_id": bson.M{"$in": userIDs}})
+	return mgoutil.Find[*relation.UserModel](ctx, u.coll, bson.M{"user_id": bson.M{"$in": userIDs}})
 }
 
 func (u *UserMgo) Take(ctx context.Context, userID string) (user *relation.UserModel, err error) {
-	return mtool.FindOne[*relation.UserModel](ctx, u.coll, bson.M{"user_id": userID})
+	return mgoutil.FindOne[*relation.UserModel](ctx, u.coll, bson.M{"user_id": userID})
 }
 
 func (u *UserMgo) Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
-	return mtool.FindPage[*relation.UserModel](ctx, u.coll, bson.M{}, pagination)
+	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, bson.M{}, pagination)
 }
 
 func (u *UserMgo) GetAllUserID(ctx context.Context, pagination pagination.Pagination) (int64, []string, error) {
-	return mtool.FindPage[string](ctx, u.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"user_id": 1}))
+	return mgoutil.FindPage[string](ctx, u.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"user_id": 1}))
 }
 
 func (u *UserMgo) Exist(ctx context.Context, userID string) (exist bool, err error) {
-	return mtool.Exist(ctx, u.coll, bson.M{"user_id": userID})
+	return mgoutil.Exist(ctx, u.coll, bson.M{"user_id": userID})
 }
 
 func (u *UserMgo) GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error) {
-	return mtool.FindOne[int](ctx, u.coll, bson.M{"user_id": userID}, options.FindOne().SetProjection(bson.M{"global_recv_msg_opt": 1}))
+	return mgoutil.FindOne[int](ctx, u.coll, bson.M{"user_id": userID}, options.FindOne().SetProjection(bson.M{"global_recv_msg_opt": 1}))
 }
 
 func (u *UserMgo) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
 	if before == nil {
-		return mtool.Count(ctx, u.coll, bson.M{})
+		return mgoutil.Count(ctx, u.coll, bson.M{})
 	}
-	return mtool.Count(ctx, u.coll, bson.M{"create_time": bson.M{"$lt": before}})
+	return mgoutil.Count(ctx, u.coll, bson.M{"create_time": bson.M{"$lt": before}})
 }
 
 func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
@@ -99,7 +99,7 @@ func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, 
 		Date  string `bson:"_id"`
 		Count int64  `bson:"count"`
 	}
-	items, err := mtool.Aggregate[Item](ctx, u.coll, pipeline)
+	items, err := mgoutil.Aggregate[Item](ctx, u.coll, pipeline)
 	if err != nil {
 		return nil, err
 	}

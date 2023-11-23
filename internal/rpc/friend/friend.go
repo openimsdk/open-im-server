@@ -16,7 +16,7 @@ package friend
 
 import (
 	"context"
-	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
+	"github.com/OpenIMSDK/tools/tx"
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 
@@ -89,17 +89,13 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		&msgRpcClient,
 		notification.WithRpcFunc(userRpcClient.GetUsersInfo),
 	)
-	tx, err := tx2.NewAuto(context.Background(), mongo.GetClient())
-	if err != nil {
-		return err
-	}
 	// Register Friend server with refactored MongoDB and Redis integrations
 	pbfriend.RegisterFriendServer(server, &friendServer{
 		friendDatabase: controller.NewFriendDatabase(
 			friendMongoDB,
 			friendRequestMongoDB,
 			cache.NewFriendCacheRedis(rdb, friendMongoDB, cache.GetDefaultOpt()),
-			tx,
+			tx.NewMongo(mongo.GetClient()),
 		),
 		blackDatabase: controller.NewBlackDatabase(
 			blackMongoDB,

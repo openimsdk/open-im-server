@@ -16,8 +16,8 @@ package controller
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/dtm-labs/rockscache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
