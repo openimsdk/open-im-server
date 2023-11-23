@@ -22,6 +22,9 @@ import (
 
 func main() {
 	authCmd := cmd.NewRpcCmd("auth")
+	authCmd.PreLoadConfig()
+	authCmd.SetSvcName(config.Config.RpcRegisterName.OpenImAuthName)
+
 	authCmd.AddPortFlag()
 	authCmd.AddPrometheusPortFlag()
 	if err := authCmd.Exec(); err != nil {

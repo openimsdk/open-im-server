@@ -78,6 +78,16 @@ func NewRootCmd(name string, opts ...func(*CmdOpts)) (rootCmd *RootCmd) {
 	return rootCmd
 }
 
+func (r *RootCmd) PreLoadConfig() {
+	if err := config2.InitConfig(""); err != nil {
+		panic(err)
+	}
+}
+
+func (r *RootCmd) SetSvcName(name string) {
+	r.Name = name
+}
+
 func (r *RootCmd) addConfFlag() {
 	r.Command.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
 }
@@ -105,6 +115,34 @@ func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) int {
 }
 
 func (r *RootCmd) GetPrometheusPortFlag() int {
+	if r.prometheusPort == 0 {
+		switch r.Name {
+		case config.Config.RpcRegisterName.OpenImAuthName:
+			return config.Config.Prometheus.AuthPrometheusPort[0]
+		case config.Config.RpcRegisterName.OpenImUserName:
+			return config.Config.Prometheus.UserPrometheusPort[0]
+		case config.Config.RpcRegisterName.OpenImFriendName:
+			return config.Config.Prometheus.FriendPrometheusPort[0]
+		case config.Config.RpcRegisterName.OpenImGroupName:
+			return config.Config.Prometheus.GroupPrometheusPort[0]
+		case config.Config.RpcRegisterName.OpenImMsgName:
+			return config.Config.Prometheus.MessagePrometheusPort[0]
+		case config.Config.RpcRegisterName.OpenImConversationName:
+			return config.Config.Prometheus.ConversationPrometheusPort[0]
+		case config.Config.RpcRegisterName.OpenImConversationName:
+			return config.Config.Prometheus.ConversationPrometheusPort[0]
+		case config.Config.RpcRegisterName.OpenImPushName:
+			return config.Config.Prometheus.PushPrometheusPort[0]
+		case config.Config.RpcRegisterName.OpenImMessageGatewayName:
+			return config.Config.Prometheus.MessageGatewayPrometheusPort[0]
+		case config.Config.RpcRegisterName.OpenImThirdName:
+			return config.Config.Prometheus.ThirdPrometheusPort[0]
+		default:
+			return 0
+
+		}
+	}
+
 	return r.prometheusPort
 }
 

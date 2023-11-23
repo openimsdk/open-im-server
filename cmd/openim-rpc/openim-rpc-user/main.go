@@ -21,12 +21,16 @@ import (
 )
 
 func main() {
-	rpcCmd := cmd.NewRpcCmd("user")
+	rpcCmd := cmd.NewRpcCmd("")
+	rpcCmd.PreLoadConfig()
+	rpcCmd.SetSvcName(config.Config.RpcRegisterName.OpenImUserName)
+
 	rpcCmd.AddPortFlag()
 	rpcCmd.AddPrometheusPortFlag()
 	if err := rpcCmd.Exec(); err != nil {
 		panic(err.Error())
 	}
+
 	if err := rpcCmd.StartSvr(config.Config.RpcRegisterName.OpenImUserName, user.Start); err != nil {
 		panic(err.Error())
 	}

@@ -185,7 +185,7 @@ rpcPort:
   openImGroupPort: [ 10150 ]
   openImAuthPort: [ 10160 ]
   openImPushPort: [ 10170 ]
-  openImConversationPort: [ 10180 ]
+  openImConversationPort: [ 10230 ]
   openImThirdPort: [ 10190 ]
 
 ###################### RPC Register Name Configuration ######################
@@ -405,5 +405,5 @@ prometheus:
   pushPrometheusPort: [ 20170 ]
   conversationPrometheusPort: [ 20230 ]
   rtcPrometheusPort: [ 21300 ]
-  thirdPrometheusPort: [ 21301 ]
+  thirdPrometheusPort: [ 20190 ]
   messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] # List of ports
