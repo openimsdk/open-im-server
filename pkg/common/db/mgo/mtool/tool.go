@@ -2,6 +2,7 @@ package mtool
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
@@ -175,4 +176,19 @@ func Aggregate[T any](ctx context.Context, coll *mongo.Collection, pipeline any,
 		return nil, err
 	}
 	return ts, nil
+}
+
+func CreateUniqueIndex(ctx context.Context, coll *mongo.Collection, fields ...string) error {
+	if len(fields) == 0 {
+		return nil
+	}
+	keys := bson.M{}
+	for _, field := range fields {
+		keys[field] = 1
+	}
+	_, err := coll.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys:    keys,
+		Options: options.Index().SetUnique(true),
+	})
+	return err
 }

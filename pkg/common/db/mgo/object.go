@@ -10,9 +10,15 @@ import (
 )
 
 func NewS3Mongo(db *mongo.Database) (relation.ObjectInfoModelInterface, error) {
-	return &S3Mongo{
-		coll: db.Collection("s3"),
-	}, nil
+	coll := db.Collection("s3")
+	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys:    bson.M{"name": 1},
+		Options: options.Index().SetUnique(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &S3Mongo{coll: coll}, nil
 }
 
 type S3Mongo struct {

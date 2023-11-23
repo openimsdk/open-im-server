@@ -11,9 +11,15 @@ import (
 )
 
 func NewBlackMongo(db *mongo.Database) (relation.BlackModelInterface, error) {
-	return &BlackMgo{
-		coll: db.Collection("black"),
-	}, nil
+	coll := db.Collection("black")
+	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys:    bson.M{"owner_user_id": 1, "block_user_id": 1},
+		Options: options.Index().SetUnique(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &BlackMgo{coll: coll}, nil
 }
 
 type BlackMgo struct {

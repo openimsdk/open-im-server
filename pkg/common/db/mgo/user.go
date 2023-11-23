@@ -12,9 +12,15 @@ import (
 )
 
 func NewUserMongo(db *mongo.Database) (relation.UserModelInterface, error) {
-	return &UserMgo{
-		coll: db.Collection("user"),
-	}, nil
+	coll := db.Collection("user")
+	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys:    bson.M{"user_id": 1},
+		Options: options.Index().SetUnique(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &UserMgo{coll: coll}, nil
 }
 
 type UserMgo struct {

@@ -3,6 +3,7 @@ package mgo
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo/mtool"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
@@ -11,9 +12,15 @@ import (
 )
 
 func NewFriendRequestMongo(db *mongo.Database) (relation.FriendRequestModelInterface, error) {
-	return &FriendRequestMgo{
-		coll: db.Collection("friend_request"),
-	}, nil
+	coll := db.Collection("friend_request")
+	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys:    bson.M{"from_user_id": 1, "to_user_id": 1},
+		Options: options.Index().SetUnique(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &FriendRequestMgo{coll: coll}, nil
 }
 
 type FriendRequestMgo struct {

@@ -12,10 +12,23 @@ import (
 )
 
 func NewLogMongo(db *mongo.Database) (relation.LogInterface, error) {
-	lm := &LogMgo{
-		coll: db.Collection("log"),
+	coll := db.Collection("log")
+	_, err := coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
+		{
+			Keys:    bson.M{"log_id": 1},
+			Options: options.Index().SetUnique(true),
+		},
+		{
+			Keys: bson.M{"user_id": 1},
+		},
+		{
+			Keys: bson.M{"create_time": -1},
+		},
+	})
+	if err != nil {
+		return nil, err
 	}
-	return lm, nil
+	return &LogMgo{coll: coll}, nil
 }
 
 type LogMgo struct {

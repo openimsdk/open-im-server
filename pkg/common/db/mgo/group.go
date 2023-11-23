@@ -7,13 +7,20 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
 
 func NewGroupMongo(db *mongo.Database) (relation.GroupModelInterface, error) {
-	return &GroupMgo{
-		coll: db.Collection("group"),
-	}, nil
+	coll := db.Collection("group")
+	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys:    bson.M{"group_id": 1},
+		Options: options.Index().SetUnique(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &GroupMgo{coll: coll}, nil
 }
 
 type GroupMgo struct {

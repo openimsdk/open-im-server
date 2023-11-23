@@ -13,9 +13,15 @@ import (
 )
 
 func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
-	return &ConversationMgo{
-		coll: db.Collection("conversation"),
-	}, nil
+	coll := db.Collection("conversation")
+	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys:    bson.M{"owner_user_id": 1, "conversation_id": 1},
+		Options: options.Index().SetUnique(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &ConversationMgo{coll: coll}, nil
 }
 
 type ConversationMgo struct {
