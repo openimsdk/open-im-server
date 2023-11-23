@@ -124,6 +124,29 @@ It is recommended to use Docker Compose for deployment, which can easily and qui
 
 
 Ur need `Go 1.20` or higher version, and `make`.
+## :book: About `sweep.yaml`
+
+The `sweep.yaml` file is a configuration file for the Sweep AI. It is not meant to be run as a command. Instead, it is used to customize the behavior of the Sweep AI.
+
+Here is an example of how to modify the `sweep.yaml` file:
+
+```yaml
+project: my_project
+method: bayes
+metric:
+  name: loss
+  goal: minimize
+parameters:
+  learning_rate:
+    min: 0.001
+    max: 0.1
+  batch_size:
+    values: [16, 32, 64, 128]
+```
+
+In this example, we are configuring the Sweep AI to optimize the `learning_rate` and `batch_size` parameters for a project named `my_project`. The goal is to minimize the `loss` metric.
+
+After modifying the `sweep.yaml` file, the changes will be automatically picked up by the Sweep AI in the next run. There is no need to restart the Sweep AI or perform any other actions.
 
 
 ```bash
