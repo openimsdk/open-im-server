@@ -93,7 +93,6 @@ type CallbackBeforeInviteUserToGroupReq struct {
 	GroupID         string   `json:"groupID"`
 	Reason          string   `json:"reason"`
 	InvitedUserIDs  []string `json:"invitedUserIDs"`
-	EventTime       int64    `json:"eventTime"`
 }
 type CallbackBeforeInviteUserToGroupResp struct {
 	CommonCallbackResp
@@ -107,7 +106,6 @@ type CallbackAfterJoinGroupReq struct {
 	ReqMessage      string `json:"reqMessage"`
 	JoinSource      int32  `json:"joinSource"`
 	InviterUserID   string `json:"inviterUserID"`
-	EventTime       int64  `json:"eventTime"`
 }
 type CallbackAfterJoinGroupResp struct {
 	CommonCallbackResp
@@ -125,7 +123,6 @@ type CallbackBeforeSetGroupInfoReq struct {
 	NeedVerification  int32  `json:"needVerification"`
 	LookMemberInfo    int32  `json:"lookMemberInfo"`
 	ApplyMemberFriend int32  `json:"applyMemberFriend"`
-	EventTime         int64  `json:"eventTime"`
 }
 
 type CallbackBeforeSetGroupInfoResp struct {
@@ -153,7 +150,6 @@ type CallbackAfterSetGroupInfoReq struct {
 	NeedVerification  *int32  `json:"needVerification"`
 	LookMemberInfo    *int32  `json:"lookMemberInfo"`
 	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
-	EventTime         int64   `json:"eventTime"`
 }
 
 type CallbackAfterSetGroupInfoResp struct {

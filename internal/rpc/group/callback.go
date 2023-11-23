@@ -183,7 +183,6 @@ func CallbackBeforeInviteUserToGroup(ctx context.Context, req *group.InviteUserT
 		GroupID:         req.GroupID,
 		Reason:          req.Reason,
 		InvitedUserIDs:  req.InvitedUserIDs,
-		EventTime:       time.Now().Unix(),
 	}
 
 	resp := &callbackstruct.CallbackBeforeInviteUserToGroupResp{}
@@ -219,7 +218,6 @@ func CallbackAfterJoinGroup(ctx context.Context, req *group.JoinGroupReq) error 
 		ReqMessage:      req.ReqMessage,
 		JoinSource:      req.JoinSource,
 		InviterUserID:   req.InviterUserID,
-		EventTime:       time.Now().Unix(),
 	}
 	resp := &callbackstruct.CallbackAfterJoinGroupResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterJoinGroup); err != nil {
@@ -242,7 +240,6 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq)
 		Introduction:    req.GroupInfoForSet.Introduction,
 		FaceURL:         req.GroupInfoForSet.FaceURL,
 		GroupName:       req.GroupInfoForSet.GroupName,
-		EventTime:       time.Now().Unix(),
 	}
 
 	if req.GroupInfoForSet.Ex != nil {
@@ -293,7 +290,6 @@ func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) 
 		Introduction:    req.GroupInfoForSet.Introduction,
 		FaceURL:         req.GroupInfoForSet.FaceURL,
 		GroupName:       req.GroupInfoForSet.GroupName,
-		EventTime:       time.Now().Unix(),
 	}
 	if req.GroupInfoForSet.Ex != nil {
 		callbackReq.Ex = &req.GroupInfoForSet.Ex.Value
