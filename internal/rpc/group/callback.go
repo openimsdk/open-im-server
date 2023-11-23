@@ -16,6 +16,7 @@ package group
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/log"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -236,8 +237,10 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq)
 	}
 	callbackReq := &callbackstruct.CallbackBeforeSetGroupInfoReq{
 		CallbackCommand: callbackstruct.CallbackBeforeSetGroupInfoCommand,
-		OperationID:     mcontext.GetOperationID(ctx),
 		GroupID:         req.GroupInfoForSet.GroupID,
+		Notification:    req.GroupInfoForSet.Notification,
+		Introduction:    req.GroupInfoForSet.Introduction,
+		FaceURL:         req.GroupInfoForSet.FaceURL,
 		GroupName:       req.GroupInfoForSet.GroupName,
 		EventTime:       time.Now().Unix(),
 	}
@@ -245,6 +248,7 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq)
 	if req.GroupInfoForSet.Ex != nil {
 		callbackReq.Ex = &req.GroupInfoForSet.Ex.Value
 	}
+	log.ZDebug(ctx, "debug!!!!!!", callbackReq.Ex)
 	if req.GroupInfoForSet.NeedVerification != nil {
 		callbackReq.NeedVerification = &req.GroupInfoForSet.NeedVerification.Value
 	}
@@ -284,8 +288,10 @@ func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) 
 	}
 	callbackReq := &callbackstruct.CallbackAfterSetGroupInfoReq{
 		CallbackCommand: callbackstruct.CallbackAfterSetGroupInfoCommand,
-		OperationID:     mcontext.GetOperationID(ctx),
 		GroupID:         req.GroupInfoForSet.GroupID,
+		Notification:    req.GroupInfoForSet.Notification,
+		Introduction:    req.GroupInfoForSet.Introduction,
+		FaceURL:         req.GroupInfoForSet.FaceURL,
 		GroupName:       req.GroupInfoForSet.GroupName,
 		EventTime:       time.Now().Unix(),
 	}
