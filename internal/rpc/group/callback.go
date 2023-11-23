@@ -232,7 +232,6 @@ func CallbackAfterJoinGroup(ctx context.Context, req *group.JoinGroupReq) error 
 }
 
 func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) error {
-	defer log.ZDebug(ctx, "CallbackBeforeSetGroupInfo1")
 	if !config.Config.Callback.CallbackBeforeSetGroupInfo.Enable {
 		return nil
 	}
@@ -255,7 +254,7 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq)
 	if req.GroupInfoForSet.ApplyMemberFriend != nil {
 		callbackReq.ApplyMemberFriend = &req.GroupInfoForSet.ApplyMemberFriend.Value
 	}
-	defer log.ZDebug(ctx, "CallbackBeforeSetGroupInfo2")
+	defer log.ZDebug(ctx, "CallbackBeforeSetGroupInfo2", "ex", callbackReq.Ex)
 	resp := &callbackstruct.CallbackBeforeSetGroupInfoResp{}
 
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupInfo); err != nil {
