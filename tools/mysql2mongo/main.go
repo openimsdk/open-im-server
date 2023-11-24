@@ -11,7 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"log"
 	"reflect"
 )
@@ -29,12 +28,12 @@ func main() {
 	var (
 		mongoUsername = "root"            // mongodb用户名
 		mongoPassword = "openIM123"       // mongodb密码
-		mongoHosts    = "127.0.0.1:13306" // mongodb地址
+		mongoHosts    = "127.0.0.1:37017" // mongodb地址
 		mongoDatabase = "openIM_v3"       // mongodb数据库名字
 	)
 
 	mysqlDSN := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysqlUsername, mysqlPassword, mysqlAddr, mysqlDatabase)
-	mysqlDB, err := gorm.Open(mysql.Open(mysqlDSN), &gorm.Config{Logger: logger.Discard})
+	mysqlDB, err := gorm.Open(mysql.Open(mysqlDSN), &gorm.Config{ /* Logger: logger.Discard */ })
 	if err != nil {
 		log.Println("open mysql db failed", err)
 		return
@@ -248,13 +247,13 @@ func NewTask[A interface{ TableName() string }, B any, C any](gormDB *gorm.DB, m
 	}
 	var count int
 	defer func() {
-		log.Printf("convert %s %d records", tableName, count)
+		log.Printf("completed convert %s total %d\n", tableName, count)
 	}()
 	const batch = 100
 	for page := 0; ; page++ {
-		var res []A
-		if err := gormDB.Find(&res).Limit(batch).Offset(page * batch).Error; err != nil {
-			return fmt.Errorf("find table %s failed, err: %w", tableName, err)
+		res := make([]A, 0, batch)
+		if err := gormDB.Limit(batch).Offset(page * batch).Find(&res).Error; err != nil {
+			return fmt.Errorf("find mysql table %s failed, err: %w", tableName, err)
 		}
 		if len(res) == 0 {
 			return nil
@@ -264,12 +263,13 @@ func NewTask[A interface{ TableName() string }, B any, C any](gormDB *gorm.DB, m
 			temp[i] = convert(res[i])
 		}
 		if _, err := coll.InsertMany(context.Background(), temp); err != nil {
-			return err
+			return fmt.Errorf("insert mongo table %s failed, err: %w", tableName, err)
 		}
 		count += len(res)
 		if len(res) < batch {
 			return nil
 		}
+		log.Printf("current convert %s completed %d\n", tableName, count)
 	}
 }
 
