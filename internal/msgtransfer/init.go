@@ -17,17 +17,15 @@ package msgtransfer
 import (
 	"errors"
 	"fmt"
-	"log"
-	"net/http"
-	"sync"
-	"time"
-
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"log"
+	"net/http"
+	"sync"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -120,10 +118,6 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	}*/
 	////////////////////////////
 	if config.Config.Prometheus.Enable {
-		go func() {
-			time.Sleep(7 * time.Minute)
-			prommetrics.MsgInsertRedisFailedCounter.Inc()
-		}()
 		reg := prometheus.NewRegistry()
 		reg.MustRegister(
 			collectors.NewGoCollector(),
