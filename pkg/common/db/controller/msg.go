@@ -357,7 +357,9 @@ func (db *commonMsgDatabase) DelUserDeleteMsgsList(ctx context.Context, conversa
 }
 
 func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
-	currentMaxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
+	cancelCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
+	defer cancel()
+	currentMaxSeq, err := db.cache.GetMaxSeq(cancelCtx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		log.ZError(ctx, "db.cache.GetMaxSeq", err)
 		return 0, false, err
@@ -386,7 +388,9 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	} else {
 		prommetrics.MsgInsertRedisSuccessCounter.Add(float64(len(msgs)))
 	}
-	err = db.cache.SetMaxSeq(ctx, conversationID, currentMaxSeq)
+	cancelCtx, cancel = context.WithTimeout(ctx, 1*time.Minute)
+	defer cancel()
+	err = db.cache.SetMaxSeq(cancelCtx, conversationID, currentMaxSeq)
 	if err != nil {
 		log.ZError(ctx, "db.cache.SetMaxSeq error", err, "conversationID", conversationID)
 		prommetrics.SeqSetFailedCounter.Inc()

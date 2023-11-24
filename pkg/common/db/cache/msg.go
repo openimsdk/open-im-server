@@ -173,7 +173,20 @@ func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s st
 }
 
 func (c *msgCache) SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error {
-	return c.setSeq(ctx, conversationID, maxSeq, c.getMaxSeqKey)
+	var retErr error
+	for {
+		select {
+		case <-ctx.Done():
+			return errs.Wrap(retErr, "SetMaxSeq redis retry too many amount")
+		default:
+			retErr = c.setSeq(ctx, conversationID, maxSeq, c.getMaxSeqKey)
+			if retErr != nil {
+				time.Sleep(time.Second * 2)
+				continue
+			}
+			return nil
+		}
+	}
 }
 
 func (c *msgCache) GetMaxSeqs(ctx context.Context, conversationIDs []string) (m map[string]int64, err error) {
@@ -181,7 +194,21 @@ func (c *msgCache) GetMaxSeqs(ctx context.Context, conversationIDs []string) (m 
 }
 
 func (c *msgCache) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
-	return c.getSeq(ctx, conversationID, c.getMaxSeqKey)
+	var retErr error
+	var retData int64
+	for {
+		select {
+		case <-ctx.Done():
+			return -1, errs.Wrap(retErr, "GetMaxSeq redis retry too many amount")
+		default:
+			retData, retErr = c.getSeq(ctx, conversationID, c.getMaxSeqKey)
+			if retErr != nil && errs.Unwrap(retErr) != redis.Nil {
+				time.Sleep(time.Second * 2)
+				continue
+			}
+			return retData, retErr
+		}
+	}
 }
 
 func (c *msgCache) SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error {
