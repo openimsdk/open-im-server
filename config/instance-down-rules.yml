@@ -13,7 +13,7 @@ groups:
   - name: database_insert_failure_alerts
     rules:
       - alert: DatabaseInsertFailed
-        expr: (increase(MsgInsertRedisFailedCounter[5m]) > 0) or (increase(MsgInsertMongoFailedCounter[5m]) > 0)
+        expr: (increase(msg_insert_redis_failed_total[5m]) > 0) or (increase(msg_insert_mongo_failed_total[5m]) > 0)
         for: 1m
         labels:
           severity: critical
