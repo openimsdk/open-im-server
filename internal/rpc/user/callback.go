@@ -16,11 +16,8 @@ package user
 
 import (
 	"context"
-
-	"github.com/OpenIMSDK/protocol/constant"
 	pbuser "github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
@@ -33,15 +30,14 @@ func CallbackBeforeUpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInf
 		return nil
 	}
 	cbReq := &cbapi.CallbackBeforeUpdateUserInfoReq{
-		CallbackCommand: constant.CallbackBeforeUpdateUserInfoCommand,
-		OperationID:     mcontext.GetOperationID(ctx),
+		CallbackCommand: cbapi.CallbackBeforeUpdateUserInfoCommand,
 		UserID:          req.UserInfo.UserID,
 		FaceURL:         &req.UserInfo.FaceURL,
 		Nickname:        &req.UserInfo.Nickname,
 	}
 	resp := &cbapi.CallbackBeforeUpdateUserInfoResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfo); err != nil {
-		if err == errs.ErrCallbackContinue {
+		if errs.Unwrap(err) == errs.ErrCallbackContinue {
 			return nil
 		}
 		return err
@@ -49,5 +45,66 @@ func CallbackBeforeUpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInf
 	utils.NotNilReplace(&req.UserInfo.FaceURL, resp.FaceURL)
 	utils.NotNilReplace(&req.UserInfo.Ex, resp.Ex)
 	utils.NotNilReplace(&req.UserInfo.Nickname, resp.Nickname)
+	return nil
+}
+
+func CallbackAfterUpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) error {
+	if !config.Config.Callback.CallbackAfterUpdateUserInfo.Enable {
+		return nil
+	}
+	cbReq := &cbapi.CallbackAfterUpdateUserInfoReq{
+		CallbackCommand: cbapi.CallbackAfterUpdateUserInfoCommand,
+		UserID:          req.UserInfo.UserID,
+		FaceURL:         req.UserInfo.FaceURL,
+		Nickname:        req.UserInfo.Nickname,
+	}
+	resp := &cbapi.CallbackAfterUpdateUserInfoResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfo); err != nil {
+		if errs.Unwrap(err) == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
+func CallbackBeforeUserRegister(ctx context.Context, req *pbuser.UserRegisterReq) error {
+	if !config.Config.Callback.CallbackBeforeUserRegister.Enable {
+		return nil
+	}
+	cbReq := &cbapi.CallbackBeforeUserRegisterReq{
+		CallbackCommand: cbapi.CallbackBeforeUserRegisterCommand,
+		Secret:          req.Secret,
+		Users:           req.Users,
+	}
+
+	resp := &cbapi.CallbackBeforeUserRegisterResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfo); err != nil {
+		if errs.Unwrap(err) == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	utils.NotNilReplace(&req.Users, &resp.Users)
+	return nil
+}
+
+func CallbackAfterUserRegister(ctx context.Context, req *pbuser.UserRegisterReq) error {
+	if !config.Config.Callback.CallbackAfterUserRegister.Enable {
+		return nil
+	}
+	cbReq := &cbapi.CallbackAfterUserRegisterReq{
+		CallbackCommand: cbapi.CallbackAfterUserRegisterCommand,
+		Secret:          req.Secret,
+		Users:           req.Users,
+	}
+
+	resp := &cbapi.CallbackBeforeUserRegisterResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfo); err != nil {
+		if errs.Unwrap(err) == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
 	return nil
 }

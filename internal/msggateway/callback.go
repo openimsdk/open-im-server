@@ -16,6 +16,7 @@ package msggateway
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/errs"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -37,7 +38,7 @@ func CallbackUserOnline(ctx context.Context, userID string, platformID int, isAp
 	req := cbapi.CallbackUserOnlineReq{
 		UserStatusCallbackReq: cbapi.UserStatusCallbackReq{
 			UserStatusBaseCallback: cbapi.UserStatusBaseCallback{
-				CallbackCommand: constant.CallbackUserOnlineCommand,
+				CallbackCommand: cbapi.CallbackUserOnlineCommand,
 				OperationID:     mcontext.GetOperationID(ctx),
 				PlatformID:      platformID,
 				Platform:        constant.PlatformIDToName(platformID),
@@ -49,7 +50,14 @@ func CallbackUserOnline(ctx context.Context, userID string, platformID int, isAp
 		ConnID:          connID,
 	}
 	resp := cbapi.CommonCallbackResp{}
-	return http.CallBackPostReturn(ctx, callBackURL(), &req, &resp, config.Config.Callback.CallbackUserOnline)
+	err := http.CallBackPostReturn(ctx, callBackURL(), &req, &resp, config.Config.Callback.CallbackUserOnline)
+	if err != nil {
+		if errs.Unwrap(err) == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
 }
 
 func CallbackUserOffline(ctx context.Context, userID string, platformID int, connID string) error {
@@ -59,7 +67,7 @@ func CallbackUserOffline(ctx context.Context, userID string, platformID int, con
 	req := &cbapi.CallbackUserOfflineReq{
 		UserStatusCallbackReq: cbapi.UserStatusCallbackReq{
 			UserStatusBaseCallback: cbapi.UserStatusBaseCallback{
-				CallbackCommand: constant.CallbackUserOfflineCommand,
+				CallbackCommand: cbapi.CallbackUserOfflineCommand,
 				OperationID:     mcontext.GetOperationID(ctx),
 				PlatformID:      platformID,
 				Platform:        constant.PlatformIDToName(platformID),
@@ -70,7 +78,14 @@ func CallbackUserOffline(ctx context.Context, userID string, platformID int, con
 		ConnID: connID,
 	}
 	resp := &cbapi.CallbackUserOfflineResp{}
-	return http.CallBackPostReturn(ctx, callBackURL(), req, resp, config.Config.Callback.CallbackUserOffline)
+	err := http.CallBackPostReturn(ctx, callBackURL(), req, resp, config.Config.Callback.CallbackUserOffline)
+	if err != nil {
+		if errs.Unwrap(err) == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
 }
 
 func CallbackUserKickOff(ctx context.Context, userID string, platformID int) error {
@@ -80,7 +95,7 @@ func CallbackUserKickOff(ctx context.Context, userID string, platformID int) err
 	req := &cbapi.CallbackUserKickOffReq{
 		UserStatusCallbackReq: cbapi.UserStatusCallbackReq{
 			UserStatusBaseCallback: cbapi.UserStatusBaseCallback{
-				CallbackCommand: constant.CallbackUserKickOffCommand,
+				CallbackCommand: cbapi.CallbackUserKickOffCommand,
 				OperationID:     mcontext.GetOperationID(ctx),
 				PlatformID:      platformID,
 				Platform:        constant.PlatformIDToName(platformID),
@@ -90,7 +105,14 @@ func CallbackUserKickOff(ctx context.Context, userID string, platformID int) err
 		Seq: time.Now().UnixMilli(),
 	}
 	resp := &cbapi.CommonCallbackResp{}
-	return http.CallBackPostReturn(ctx, callBackURL(), req, resp, config.Config.Callback.CallbackUserOffline)
+	err := http.CallBackPostReturn(ctx, callBackURL(), req, resp, config.Config.Callback.CallbackUserOffline)
+	if err != nil {
+		if errs.Unwrap(err) == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
 }
 
 // func callbackUserOnline(operationID, userID string, platformID int, token string, isAppBackground bool, connID

@@ -44,7 +44,7 @@ func callbackOfflinePush(
 	req := &callbackstruct.CallbackBeforePushReq{
 		UserStatusBatchCallbackReq: callbackstruct.UserStatusBatchCallbackReq{
 			UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
-				CallbackCommand: constant.CallbackOfflinePushCommand,
+				CallbackCommand: callbackstruct.CallbackOfflinePushCommand,
 				OperationID:     mcontext.GetOperationID(ctx),
 				PlatformID:      int(msg.SenderPlatformID),
 				Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
@@ -83,7 +83,7 @@ func callbackOnlinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgDat
 	req := callbackstruct.CallbackBeforePushReq{
 		UserStatusBatchCallbackReq: callbackstruct.UserStatusBatchCallbackReq{
 			UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
-				CallbackCommand: constant.CallbackOnlinePushCommand,
+				CallbackCommand: callbackstruct.CallbackOnlinePushCommand,
 				OperationID:     mcontext.GetOperationID(ctx),
 				PlatformID:      int(msg.SenderPlatformID),
 				Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
@@ -99,7 +99,14 @@ func callbackOnlinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgDat
 		Content:     GetContent(msg),
 	}
 	resp := &callbackstruct.CallbackBeforePushResp{}
-	return http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOnlinePush)
+	err := http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOnlinePush)
+	if err != nil {
+		if errs.Unwrap(err) == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
 }
 
 func callbackBeforeSuperGroupOnlinePush(
@@ -113,7 +120,7 @@ func callbackBeforeSuperGroupOnlinePush(
 	}
 	req := callbackstruct.CallbackBeforeSuperGroupOnlinePushReq{
 		UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
-			CallbackCommand: constant.CallbackSuperGroupOnlinePushCommand,
+			CallbackCommand: callbackstruct.CallbackSuperGroupOnlinePushCommand,
 			OperationID:     mcontext.GetOperationID(ctx),
 			PlatformID:      int(msg.SenderPlatformID),
 			Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
@@ -129,11 +136,12 @@ func callbackBeforeSuperGroupOnlinePush(
 	}
 	resp := &callbackstruct.CallbackBeforeSuperGroupOnlinePushResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
-		if err == errs.ErrCallbackContinue {
+		if errs.Unwrap(err) == errs.ErrCallbackContinue {
 			return nil
 		}
 		return err
 	}
+	return nil
 	if len(resp.UserIDs) != 0 {
 		*pushToUserIDs = resp.UserIDs
 	}

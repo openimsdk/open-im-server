@@ -164,7 +164,7 @@ object:
 # These ports are passed into the program by the script and are not recommended to modify
 # For launching multiple programs, just fill in multiple ports separated by commas
 # For example, [10110, 10111]
-rpcPort: 
+rpcPort:
   openImUserPort: [ ${OPENIM_USER_PORT} ]
   openImFriendPort: [ ${OPENIM_FRIEND_PORT} ]
   openImMessagePort: [ ${OPENIM_MESSAGE_PORT} ]
@@ -312,7 +312,7 @@ iosPush:
 # Timeout in seconds
 # Whether to continue execution if callback fails
 callback:
-  url:
+  url: "http://43.154.157.177:18889/sdkName"
   beforeSendSingleMsg:
     enable: false
     timeout: 5
@@ -361,19 +361,71 @@ callback:
     timeout: 5
     failedContinue: true
   beforeCreateGroup:
-    enable: false
+    enable: true
     timeout: 5
-    failedContinue: true
+    failedContinue: false
+  afterCreateGroup:
+    enable: true
+    timeout: 5
+    failedContinue: false
   beforeMemberJoinGroup:
     enable: false
     timeout: 5
-    failedContinue: true
+    failedContinue: false
   beforeSetGroupMemberInfo:
     enable: false
     timeout: 5
     failedContinue: true
   setMessageReactionExtensions:
     enable: false
+    timeout: 5
+    failedContinue: true
+  quitGroup:
+    enable: true
+    timeout: 5
+    failedContinue: true
+  killGroupMember:
+    enable: true
+    timeout: 5
+    failedContinue: true
+  dismissGroup:
+    enable: true
+    timeout: 5
+    failedContinue: true
+  joinGroup:
+    enable: true
+    timeout: 5
+    failedContinue: true
+  groupMsgRead:
+    enable: true
+    timeout: 5
+    failedContinue: true
+  singleMsgRead:
+    enable: true
+    timeout: 5
+    failedContinue: true
+  updateUserInfo:
+    enable: true
+    timeout: 5
+    failedContinue: true
+  beforeUserRegister:
+    enable: true
+    timeout: 5
+    failedContinue: true
+  afterUserRegister:
+    enable: true
+    timeout: 5
+    failedContinue: true
+  transferGroupOwner:
+    enable: true
+    timeout: 5
+    failedContinue: true
+  beforeSetFriendRemark:
+    enable: true
+    timeout: 5
+    failedContinue: true
+  afterSetFriendRemark:
+    enable: true
     timeout: 5
     failedContinue: true
 

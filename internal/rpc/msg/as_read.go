@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 
 	"github.com/redis/go-redis/v9"
 
@@ -179,6 +180,15 @@ func (m *msgServer) MarkConversationAsRead(
 			return nil, err
 		}
 
+	}
+	reqCall := &cbapi.CallbackGroupMsgReadReq{
+		SendID:       conversation.OwnerUserID,
+		ReceiveID:    req.UserID,
+		UnreadMsgNum: req.HasReadSeq,
+		ContentType:  int64(conversation.ConversationType),
+	}
+	if err := CallbackGroupMsgRead(ctx, reqCall); err != nil {
+		return nil, err
 	}
 
 	return &msg.MarkConversationAsReadResp{}, nil
