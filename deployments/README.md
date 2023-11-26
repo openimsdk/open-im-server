@@ -84,8 +84,8 @@ $ sudo sealos run labring/kubernetes:v1.25.0 labring/helm:v3.8.2 labring/calico:
 If you are local, you can also use Kind and Minikube to test, for example, using Kind:
 
 ```bash
-$ sGO111MODULE="on" go get sigs.k8s.io/kind@v0.11.1
-$ skind create cluster
+$ GO111MODULE="on" go get sigs.k8s.io/kind@v0.11.1
+$ kind create cluster
 ```
 
 ### Installing helm
