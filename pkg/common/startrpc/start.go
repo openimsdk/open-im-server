@@ -15,14 +15,21 @@
 package startrpc
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
+	"sync"
+	"syscall"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -56,31 +63,37 @@ func Start(
 	if err != nil {
 		return err
 	}
+
 	defer listener.Close()
 	client, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
 		return utils.Wrap1(err)
 	}
+
 	defer client.Close()
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	registerIP, err := network.GetRpcRegisterIP(config.Config.Rpc.RegisterIP)
 	if err != nil {
 		return err
 	}
+
 	var reg *prometheus.Registry
 	var metric *grpcprometheus.ServerMetrics
-	// ctx 中间件
 	if config.Config.Prometheus.Enable {
-		//////////////////////////
 		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName)
-		reg, metric, err = prommetrics.NewGrpcPromObj(cusMetrics)
+		reg, metric, _ = prommetrics.NewGrpcPromObj(cusMetrics)
 		options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
 			grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))
 	} else {
 		options = append(options, mw.GrpcServer())
 	}
+
 	srv := grpc.NewServer(options...)
-	defer srv.GracefulStop()
+	once := sync.Once{}
+	defer func() {
+		once.Do(srv.GracefulStop)
+	}()
+
 	err = rpcFn(client, srv)
 	if err != nil {
 		return utils.Wrap1(err)
@@ -94,7 +107,10 @@ func Start(
 	if err != nil {
 		return utils.Wrap1(err)
 	}
-	go func() {
+
+	var wg errgroup.Group
+
+	wg.Go(func() error {
 		if config.Config.Prometheus.Enable && prometheusPort != 0 {
 			metric.InitializeMetrics(srv)
 			// Create a HTTP server for prometheus.
@@ -103,7 +119,34 @@ func Start(
 				log.Fatal("Unable to start a http server.")
 			}
 		}
+		return nil
+	})
+
+	wg.Go(func() error {
+		return utils.Wrap1(srv.Serve(listener))
+	})
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	<-sigs
+
+	var (
+		done = make(chan struct{}, 1)
+		gerr error
+	)
+
+	go func() {
+		once.Do(srv.GracefulStop)
+		gerr = wg.Wait()
+		close(done)
 	}()
 
-	return utils.Wrap1(srv.Serve(listener))
+	select {
+	case <-done:
+		return gerr
+
+	case <-time.After(15 * time.Second):
+		return utils.Wrap1(errors.New("timeout exit"))
+	}
+
 }

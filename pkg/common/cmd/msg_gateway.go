@@ -17,12 +17,12 @@ package cmd
 import (
 	"log"
 
-	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
-	v3config "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
 	"github.com/spf13/cobra"
 
 	"github.com/OpenIMSDK/protocol/constant"
+
+	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
+	v3config "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type MsgGatewayCmd struct {
@@ -60,14 +60,19 @@ func (m *MsgGatewayCmd) Exec() error {
 	m.addRunE()
 	return m.Execute()
 }
+
 func (m *MsgGatewayCmd) GetPortFromConfig(portType string) int {
-	if portType == constant.FlagWsPort {
+	switch portType {
+	case constant.FlagWsPort:
 		return v3config.Config.LongConnSvr.OpenImWsPort[0]
-	} else if portType == constant.FlagPort {
+
+	case constant.FlagPort:
 		return v3config.Config.LongConnSvr.OpenImMessageGatewayPort[0]
-	} else if portType == constant.FlagPrometheusPort {
+
+	case constant.FlagPrometheusPort:
 		return v3config.Config.Prometheus.MessageGatewayPrometheusPort[0]
-	} else {
+
+	default:
 		return 0
 	}
 }
