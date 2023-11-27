@@ -80,18 +80,53 @@ type TextElem struct {
 type RevokeElem struct {
 	RevokeMsgClientID string `mapstructure:"revokeMsgClientID" validate:"required"`
 }
+
+type PictureElemForNotificationElem struct {
+	SourcePath      string          `mapstructure:"sourcePath"`
+	SourcePicture   PictureBaseInfo `mapstructure:"sourcePicture"   validate:"required"`
+	BigPicture      PictureBaseInfo `mapstructure:"bigPicture"      validate:"required"`
+	SnapshotPicture PictureBaseInfo `mapstructure:"snapshotPicture" validate:"required"`
+}
+type SoundElemForNotificationElem struct {
+	UUID      string `mapstructure:"uuid"`
+	SoundPath string `mapstructure:"soundPath"`
+	SourceURL string `mapstructure:"sourceUrl" validate:"required"`
+	DataSize  int64  `mapstructure:"dataSize"`
+	Duration  int64  `mapstructure:"duration" validate:"required,min=1"`
+}
+type VideoElemForNotificationElem struct {
+	VideoPath      string `mapstructure:"videoPath" `
+	VideoUUID      string `mapstructure:"videoUUID"`
+	VideoURL       string `mapstructure:"videoUrl" validate:"required"`
+	VideoType      string `mapstructure:"videoType" validate:"required"`
+	VideoSize      int64  `mapstructure:"videoSize" validate:"required"`
+	Duration       int64  `mapstructure:"duration" validate:"required"`
+	SnapshotPath   string `mapstructure:"snapshotPath"`
+	SnapshotUUID   string `mapstructure:"snapshotUUID"`
+	SnapshotSize   int64  `mapstructure:"snapshotSize"`
+	SnapshotURL    string `mapstructure:"snapshotUrl" validate:"required"`
+	SnapshotWidth  int32  `mapstructure:"snapshotWidth" validate:"required"`
+	SnapshotHeight int32  `mapstructure:"snapshotHeight"validate:"required"`
+}
+type FileElemForNotificationElem struct {
+	FilePath  string `mapstructure:"filePath" `
+	UUID      string `mapstructure:"uuid"`
+	SourceURL string `mapstructure:"sourceUrl" validate:"required"`
+	FileName  string `mapstructure:"fileName" validate:"required"`
+	FileSize  int64  `mapstructure:"fileSize" validate:"required"`
+}
 type OANotificationElem struct {
-	NotificationName    string      `mapstructure:"notificationName"    json:"notificationName"    validate:"required"`
-	NotificationFaceURL string      `mapstructure:"notificationFaceURL" json:"notificationFaceURL"`
-	NotificationType    int32       `mapstructure:"notificationType"    json:"notificationType"    validate:"required"`
-	Text                string      `mapstructure:"text"                json:"text"                validate:"required"`
-	Url                 string      `mapstructure:"url"                 json:"url"`
-	MixType             int32       `mapstructure:"mixType"             json:"mixType"`
-	PictureElem         PictureElem `mapstructure:"pictureElem"         json:"pictureElem"`
-	SoundElem           SoundElem   `mapstructure:"soundElem"           json:"soundElem"`
-	VideoElem           VideoElem   `mapstructure:"videoElem"           json:"videoElem"`
-	FileElem            FileElem    `mapstructure:"fileElem"            json:"fileElem"`
-	Ex                  string      `mapstructure:"ex"                  json:"ex"`
+	NotificationName    string       `mapstructure:"notificationName"    json:"notificationName"    validate:"required"`
+	NotificationFaceURL string       `mapstructure:"notificationFaceURL" json:"notificationFaceURL"`
+	NotificationType    int32        `mapstructure:"notificationType"    json:"notificationType"    validate:"required"`
+	Text                string       `mapstructure:"text"                json:"text"                validate:"required"`
+	Url                 string       `mapstructure:"url"                 json:"url"`
+	MixType             int32        `mapstructure:"mixType"             json:"mixType"`
+	PictureElem         *PictureElem `mapstructure:"pictureElem"         json:"pictureElem"`
+	SoundElem           *SoundElem   `mapstructure:"soundElem"           json:"soundElem"`
+	VideoElem           *VideoElem   `mapstructure:"videoElem"           json:"videoElem"`
+	FileElem            *FileElem    `mapstructure:"fileElem"            json:"fileElem"`
+	Ex                  string       `mapstructure:"ex"                  json:"ex"`
 }
 type MessageRevoked struct {
 	RevokerID       string `mapstructure:"revokerID"       json:"revokerID"       validate:"required"`
