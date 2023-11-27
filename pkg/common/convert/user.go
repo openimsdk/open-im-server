@@ -15,8 +15,6 @@
 package convert
 
 import (
-	"time"
-
 	"github.com/OpenIMSDK/protocol/sdkws"
 
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
@@ -43,7 +41,6 @@ func UserPb2DB(user *sdkws.UserInfo) *relationtb.UserModel {
 	userDB.Nickname = user.Nickname
 	userDB.FaceURL = user.FaceURL
 	userDB.Ex = user.Ex
-	userDB.CreateTime = time.UnixMilli(user.CreateTime)
 	userDB.AppMangerLevel = user.AppMangerLevel
 	userDB.GlobalRecvMsgOpt = user.GlobalRecvMsgOpt
 	return &userDB
