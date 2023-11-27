@@ -19,9 +19,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"strings"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
@@ -150,19 +150,44 @@ func (m *MessageApi) DeleteMsgPhysicalBySeq(c *gin.Context) {
 func (m *MessageApi) DeleteMsgPhysical(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMsgPhysical, m.Client, c)
 }
-
+func isValidFileExtension(fileURL string, validExtensions []string) bool {
+	for _, ext := range validExtensions {
+		if strings.HasSuffix(strings.ToLower(fileURL), ext) {
+			return true
+		}
+	}
+	return false
+}
 func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendMsgReq *msg.SendMsgReq, err error) {
 	var data interface{}
 	log.ZDebug(c, "getSendMsgReq", "req", req.Content)
 	switch req.ContentType {
 	case constant.Text:
 		data = apistruct.TextElem{}
+
 	case constant.Picture:
 		data = apistruct.PictureElem{}
+		validPictureExtensions := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".heic", ".webp", ".svg"}
+		if !isValidFileExtension(data.(apistruct.PictureElem).SnapshotPicture.Url, validPictureExtensions) {
+			return nil, errs.ErrArgs.WithDetail("SnapshotPicture file must be in a valid format (e.g., .jpg, .jpeg, .png, .gif, .bmp, .tiff, .heic, .webp, .svg)")
+		}
+		if !isValidFileExtension(data.(apistruct.PictureElem).BigPicture.Url, validPictureExtensions) {
+			return nil, errs.ErrArgs.WithDetail("BigPicture file must be in a valid format (e.g., .jpg, .jpeg, .png, .gif, .bmp, .tiff, .heic, .webp, .svg)")
+		}
+		if !isValidFileExtension(data.(apistruct.PictureElem).SourcePicture.Url, validPictureExtensions) {
+			return nil, errs.ErrArgs.WithDetail("SourcePicture file must be in a valid format (e.g., .jpg, .jpeg, .png, .gif, .bmp, .tiff, .heic, .webp, .svg)")
+		}
 	case constant.Voice:
 		data = apistruct.SoundElem{}
+		if !isValidFileExtension(data.(apistruct.PictureElem).SourcePicture.Url, validPictureExtensions) {
+			return nil, errs.ErrArgs.WithDetail("picture file must be in a valid format (e.g., .jpg, .jpeg, .png, .gif, .bmp, .tiff, .heic, .webp, .svg)")
+		}
 	case constant.Video:
 		data = apistruct.VideoElem{}
+		validVideoExtensions := []string{".mp4", ".avi", ".mov", ".wmv", ".flv", ".mkv"}
+		if !isValidFileExtension(data.(apistruct.VideoElem).VideoURL, validVideoExtensions) {
+			return nil, errs.ErrArgs.WithDetail("video file must be in a valid format (e.g., .mp4, .avi, .mov, .wmv, .flv, .mkv)")
+		}
 	case constant.File:
 		data = apistruct.FileElem{}
 	case constant.Custom:

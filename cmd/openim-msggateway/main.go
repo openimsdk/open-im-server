@@ -23,6 +23,7 @@ func main() {
 	msgGatewayCmd.AddWsPortFlag()
 	msgGatewayCmd.AddPortFlag()
 	msgGatewayCmd.AddPrometheusPortFlag()
+
 	if err := msgGatewayCmd.Exec(); err != nil {
 		panic(err.Error())
 	}
