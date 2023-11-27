@@ -218,7 +218,7 @@ func (s *friendServer) SetFriendRemark(
 ) (resp *pbfriend.SetFriendRemarkResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 
-	if err := CallbackBeforeSetFriendRemark(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+	if err = CallbackBeforeSetFriendRemark(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	resp = &pbfriend.SetFriendRemarkResp{}

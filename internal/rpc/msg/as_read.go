@@ -172,7 +172,7 @@ func (m *msgServer) updateReadStatus(ctx context.Context, req *msg.MarkConversat
 		ContentType:  int64(conversation.ConversationType),
 	}
 	if err := CallbackGroupMsgRead(ctx, reqCall); err != nil {
-		return nil, err
+		return err
 	}
 
 	if req.HasReadSeq > hasReadSeq {

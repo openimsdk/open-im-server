@@ -312,122 +312,127 @@ iosPush:
 # Timeout in seconds
 # Whether to continue execution if callback fails
 callback:
-  url: "http://43.154.157.177:18889/sdkName"
+  url:
   beforeSendSingleMsg:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterSendSingleMsg:
-    enable: false
-    timeout: 5
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeSendGroupMsg:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterSendGroupMsg:
-    enable: false
-    timeout: 5
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   msgModify:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   userOnline:
-    enable: false
-    timeout: 5
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   userOffline:
-    enable: false
-    timeout: 5
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   userKickOff:
-    enable: false
-    timeout: 5
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   offlinePush:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   onlinePush:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   superGroupOnlinePush:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeAddFriend:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeUpdateUserInfo:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeCreateGroup:
-    enable: true
-    timeout: 5
-    failedContinue: false
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterCreateGroup:
-    enable: true
-    timeout: 5
-    failedContinue: false
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeMemberJoinGroup:
-    enable: false
-    timeout: 5
-    failedContinue: false
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeSetGroupMemberInfo:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   setMessageReactionExtensions:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   quitGroup:
-    enable: true
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   killGroupMember:
-    enable: true
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   dismissGroup:
-    enable: true
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   joinGroup:
-    enable: true
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   groupMsgRead:
-    enable: true
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   singleMsgRead:
-    enable: true
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   updateUserInfo:
-    enable: true
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeUserRegister:
-    enable: true
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterUserRegister:
-    enable: true
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   transferGroupOwner:
-    enable: true
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeSetFriendRemark:
-    enable: true
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterSetFriendRemark:
-    enable: true
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
 
 ###################### Prometheus ######################
 # Prometheus configuration for various services

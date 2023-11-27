@@ -21,7 +21,6 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 	pbchat "github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
@@ -78,9 +77,6 @@ func callbackBeforeSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) er
 	}
 	resp := &cbapi.CallbackBeforeSendSingleMsgResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -96,9 +92,6 @@ func callbackAfterSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) err
 	}
 	resp := &cbapi.CallbackAfterSendSingleMsgResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -114,9 +107,6 @@ func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) err
 	}
 	resp := &cbapi.CallbackBeforeSendGroupMsgResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -132,9 +122,6 @@ func callbackAfterSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) erro
 	}
 	resp := &cbapi.CallbackAfterSendGroupMsgResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -149,9 +136,6 @@ func callbackMsgModify(ctx context.Context, msg *pbchat.SendMsgReq) error {
 	}
 	resp := &cbapi.CallbackMsgModifyCommandResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	if resp.Content != nil {
@@ -185,9 +169,6 @@ func CallbackGroupMsgRead(ctx context.Context, req *cbapi.CallbackGroupMsgReadRe
 
 	resp := &cbapi.CallbackGroupMsgReadResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -202,9 +183,6 @@ func CallbackSingleMsgRead(ctx context.Context, req *cbapi.CallbackSingleMsgRead
 	resp := &cbapi.CallbackGroupMsgReadResp{}
 
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil

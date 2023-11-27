@@ -17,7 +17,6 @@ package user
 import (
 	"context"
 	pbuser "github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
@@ -37,9 +36,6 @@ func CallbackBeforeUpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInf
 	}
 	resp := &cbapi.CallbackBeforeUpdateUserInfoResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfo); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	utils.NotNilReplace(&req.UserInfo.FaceURL, resp.FaceURL)
@@ -60,9 +56,6 @@ func CallbackAfterUpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfo
 	}
 	resp := &cbapi.CallbackAfterUpdateUserInfoResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfo); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -80,9 +73,6 @@ func CallbackBeforeUserRegister(ctx context.Context, req *pbuser.UserRegisterReq
 
 	resp := &cbapi.CallbackBeforeUserRegisterResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfo); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	utils.NotNilReplace(&req.Users, &resp.Users)
@@ -101,9 +91,6 @@ func CallbackAfterUserRegister(ctx context.Context, req *pbuser.UserRegisterReq)
 
 	resp := &cbapi.CallbackBeforeUserRegisterResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfo); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil

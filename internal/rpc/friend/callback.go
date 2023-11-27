@@ -19,7 +19,6 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
-	"github.com/OpenIMSDK/tools/errs"
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
@@ -37,9 +36,6 @@ func CallbackBeforeAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriend
 	}
 	resp := &cbapi.CallbackBeforeAddFriendResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriend); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -57,9 +53,6 @@ func CallbackBeforeSetFriendRemark(ctx context.Context, req *pbfriend.SetFriendR
 	}
 	resp := &cbapi.CallbackBeforeSetFriendRemarkResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriend); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	utils.NotNilReplace(&req.Remark, &resp.Remark)
@@ -78,9 +71,6 @@ func CallbackAfterSetFriendRemark(ctx context.Context, req *pbfriend.SetFriendRe
 	}
 	resp := &cbapi.CallbackAfterSetFriendRemarkResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriend); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil

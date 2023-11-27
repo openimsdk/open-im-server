@@ -842,7 +842,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		ReqMessage: req.ReqMessage,
 	}
 
-	if err := CallbackApplyJoinGroupBefore(ctx, reqCall); err != nil {
+	if err = CallbackApplyJoinGroupBefore(ctx, reqCall); err != nil {
 		return nil, err
 	}
 	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.InviterUserID)

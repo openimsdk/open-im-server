@@ -19,7 +19,6 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
 
@@ -62,9 +61,6 @@ func callbackOfflinePush(
 	}
 	resp := &callbackstruct.CallbackBeforePushResp{}
 	if err := http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOfflinePush); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	if len(resp.UserIDs) != 0 {
@@ -99,11 +95,7 @@ func callbackOnlinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgDat
 		Content:     GetContent(msg),
 	}
 	resp := &callbackstruct.CallbackBeforePushResp{}
-	err := http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOnlinePush)
-	if err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
+	if err := http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOnlinePush); err != nil {
 		return err
 	}
 	return nil
@@ -136,9 +128,6 @@ func callbackBeforeSuperGroupOnlinePush(
 	}
 	resp := &callbackstruct.CallbackBeforeSuperGroupOnlinePushResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
-		if errs.Unwrap(err) == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
