@@ -87,7 +87,7 @@ type OANotificationElem struct {
 	NotificationType    int32        `mapstructure:"notificationType"    json:"notificationType"    validate:"required"`
 	Text                string       `mapstructure:"text"                json:"text"                validate:"required"`
 	Url                 string       `mapstructure:"url"                 json:"url"`
-	MixType             int32        `mapstructure:"mixType"             json:"mixType"`
+	MixType             int32        `mapstructure:"mixType"             json:"mixType" validate:"required"`
 	PictureElem         *PictureElem `mapstructure:"pictureElem"         json:"pictureElem"`
 	SoundElem           *SoundElem   `mapstructure:"soundElem"           json:"soundElem"`
 	VideoElem           *VideoElem   `mapstructure:"videoElem"           json:"videoElem"`
