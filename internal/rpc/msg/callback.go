@@ -17,16 +17,14 @@ package msg
 import (
 	"context"
 	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/errs"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	pbchat "github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
-	"google.golang.org/protobuf/proto"
-
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -161,5 +159,51 @@ func callbackMsgModify(ctx context.Context, msg *pbchat.SendMsgReq) error {
 	utils.NotNilReplace(&msg.MsgData.AttachedInfo, resp.AttachedInfo)
 	utils.NotNilReplace(&msg.MsgData.Ex, resp.Ex)
 	log.ZDebug(ctx, "callbackMsgModify", "msg", msg.MsgData)
+	return nil
+}
+func CallbackGroupMsgRead(ctx context.Context, req *cbapi.CallbackGroupMsgReadReq) error {
+	if !config.Config.Callback.CallbackGroupMsgRead.Enable || req.ContentType != constant.Text {
+		return nil
+	}
+	req.CallbackCommand = cbapi.CallbackGroupMsgReadCommand
+
+	resp := &cbapi.CallbackGroupMsgReadResp{}
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CallbackSingleMsgRead(ctx context.Context, req *cbapi.CallbackSingleMsgReadReq) error {
+	if !config.Config.Callback.CallbackSingleMsgRead.Enable || req.ContentType != constant.Text {
+		return nil
+	}
+	req.CallbackCommand = cbapi.CallbackSingleMsgRead
+
+	resp := &cbapi.CallbackGroupMsgReadResp{}
+
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
+		return err
+	}
+	return nil
+}
+func CallbackAfterRevokeMsg(ctx context.Context, req *pbchat.RevokeMsgReq) error {
+	if !config.Config.Callback.CallbackAfterRevokeMsg.Enable {
+		return nil
+	}
+	callbackReq := &cbapi.CallbackAfterRevokeMsgReq{
+		CallbackCommand: cbapi.CallbackAfterRevokeMsgCommand,
+		ConversationID:  req.ConversationID,
+		Seq:             req.Seq,
+		UserID:          req.UserID,
+	}
+	resp := &cbapi.CallbackAfterSendGroupMsgResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterSetGroupInfo); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }

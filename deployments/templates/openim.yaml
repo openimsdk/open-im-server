@@ -434,67 +434,65 @@ callback:
     timeout: ${CALLBACK_TIMEOUT}
     failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterGroupMsgRead:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterGroupMsgRevoke:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterJoinGroup:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeInviteUserToGroup:
-    enable: false
-    timeout: 5
-    failedContinue: true
-
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   joinGroupAfter:
-    enable: false
-    timeout: 5
-    failedContinue: true
-    ##TODO CALLBACK
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   setGroupInfoAfter:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   setGroupInfoBefore:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   revokeMsgAfter:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   addBlackBefore:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   addFriendAfter:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   addFriendAgreeBefore:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   deleteFriendAfter:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   importFriendsBefore:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   importFriendsAfter:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   removeBlackAfter:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
 ###################### Prometheus ######################
 # Prometheus configuration for various services
 # The number of Prometheus ports per service needs to correspond to rpcPort
