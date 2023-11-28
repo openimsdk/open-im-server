@@ -19,7 +19,6 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
 
@@ -44,7 +43,7 @@ func callbackOfflinePush(
 	req := &callbackstruct.CallbackBeforePushReq{
 		UserStatusBatchCallbackReq: callbackstruct.UserStatusBatchCallbackReq{
 			UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
-				CallbackCommand: constant.CallbackOfflinePushCommand,
+				CallbackCommand: callbackstruct.CallbackOfflinePushCommand,
 				OperationID:     mcontext.GetOperationID(ctx),
 				PlatformID:      int(msg.SenderPlatformID),
 				Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
@@ -62,9 +61,6 @@ func callbackOfflinePush(
 	}
 	resp := &callbackstruct.CallbackBeforePushResp{}
 	if err := http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOfflinePush); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	if len(resp.UserIDs) != 0 {
@@ -83,7 +79,7 @@ func callbackOnlinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgDat
 	req := callbackstruct.CallbackBeforePushReq{
 		UserStatusBatchCallbackReq: callbackstruct.UserStatusBatchCallbackReq{
 			UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
-				CallbackCommand: constant.CallbackOnlinePushCommand,
+				CallbackCommand: callbackstruct.CallbackOnlinePushCommand,
 				OperationID:     mcontext.GetOperationID(ctx),
 				PlatformID:      int(msg.SenderPlatformID),
 				Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
@@ -99,7 +95,10 @@ func callbackOnlinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgDat
 		Content:     GetContent(msg),
 	}
 	resp := &callbackstruct.CallbackBeforePushResp{}
-	return http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOnlinePush)
+	if err := http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOnlinePush); err != nil {
+		return err
+	}
+	return nil
 }
 
 func callbackBeforeSuperGroupOnlinePush(
@@ -113,7 +112,7 @@ func callbackBeforeSuperGroupOnlinePush(
 	}
 	req := callbackstruct.CallbackBeforeSuperGroupOnlinePushReq{
 		UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
-			CallbackCommand: constant.CallbackSuperGroupOnlinePushCommand,
+			CallbackCommand: callbackstruct.CallbackSuperGroupOnlinePushCommand,
 			OperationID:     mcontext.GetOperationID(ctx),
 			PlatformID:      int(msg.SenderPlatformID),
 			Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
@@ -129,11 +128,9 @@ func callbackBeforeSuperGroupOnlinePush(
 	}
 	resp := &callbackstruct.CallbackBeforeSuperGroupOnlinePushResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
+	return nil
 	if len(resp.UserIDs) != 0 {
 		*pushToUserIDs = resp.UserIDs
 	}

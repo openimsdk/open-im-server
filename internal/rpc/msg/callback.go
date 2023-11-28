@@ -16,9 +16,11 @@ package msg
 
 import (
 	"context"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	pbchat "github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
@@ -73,14 +75,11 @@ func callbackBeforeSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) er
 		return nil
 	}
 	req := &cbapi.CallbackBeforeSendSingleMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackBeforeSendSingleMsgCommand),
+		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeSendSingleMsgCommand),
 		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbapi.CallbackBeforeSendSingleMsgResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -91,14 +90,11 @@ func callbackAfterSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) err
 		return nil
 	}
 	req := &cbapi.CallbackAfterSendSingleMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackAfterSendSingleMsgCommand),
+		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendSingleMsgCommand),
 		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbapi.CallbackAfterSendSingleMsgResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -109,14 +105,11 @@ func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) err
 		return nil
 	}
 	req := &cbapi.CallbackAfterSendGroupMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackBeforeSendGroupMsgCommand),
+		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeSendGroupMsgCommand),
 		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbapi.CallbackBeforeSendGroupMsgResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -127,14 +120,11 @@ func callbackAfterSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) erro
 		return nil
 	}
 	req := &cbapi.CallbackAfterSendGroupMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackAfterSendGroupMsgCommand),
+		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendGroupMsgCommand),
 		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbapi.CallbackAfterSendGroupMsgResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -145,13 +135,10 @@ func callbackMsgModify(ctx context.Context, msg *pbchat.SendMsgReq) error {
 		return nil
 	}
 	req := &cbapi.CallbackMsgModifyCommandReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackMsgModifyCommand),
+		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackMsgModifyCommand),
 	}
 	resp := &cbapi.CallbackMsgModifyCommandResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	if resp.Content != nil {
@@ -174,26 +161,5 @@ func callbackMsgModify(ctx context.Context, msg *pbchat.SendMsgReq) error {
 	utils.NotNilReplace(&msg.MsgData.AttachedInfo, resp.AttachedInfo)
 	utils.NotNilReplace(&msg.MsgData.Ex, resp.Ex)
 	log.ZDebug(ctx, "callbackMsgModify", "msg", msg.MsgData)
-	return nil
-}
-
-func CallbackAfterRevokeMsg(ctx context.Context, req *pbchat.RevokeMsgReq) error {
-	if !config.Config.Callback.CallbackAfterRevokeMsg.Enable {
-		return nil
-	}
-	callbackReq := &cbapi.CallbackAfterRevokeMsgReq{
-		CallbackCommand: cbapi.CallbackAfterRevokeMsgCommand,
-		ConversationID:  req.ConversationID,
-		Seq:             req.Seq,
-		UserID:          req.UserID,
-	}
-	resp := &cbapi.CallbackAfterSendGroupMsgResp{}
-	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterSetGroupInfo); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
-		return err
-	}
-	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }

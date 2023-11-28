@@ -282,7 +282,7 @@ readonly ALERTMANAGER_SMTP_REQUIRE_TLS=${ALERTMANAGER_SMTP_REQUIRE_TLS:-"false"}
 # SMTP HELO/EHLO标识符
 readonly ALERTMANAGER_SMTP_HELLO=${ALERTMANAGER_SMTP_HELLO:-"xxx监控告警"}
 # 邮箱接收人
-readonly ALERTMANAGER_EMAIL_TO=${ALERTMANAGER_EMAIL_TO:-"{EMAIL_TO:-'alert@example.com'}"}
+readonly ALERTMANAGER_EMAIL_TO=${ALERTMANAGER_EMAIL_TO:-"alert@example.com"}
 # 邮箱主题
 readonly ALERTMANAGER_EMAIL_SUBJECT=${ALERTMANAGER_EMAIL_SUBJECT:-"{EMAIL_SUBJECT:-'[Alert] Notification'}"}
 # 是否发送已解决的告警
@@ -376,6 +376,10 @@ def "FRIEND_VERIFY" "false"     # 朋友验证
 def "IOS_PUSH_SOUND" "xxx"      # IOS推送声音
 def "IOS_BADGE_COUNT" "true"    # IOS徽章计数
 def "IOS_PRODUCTION" "false"    # IOS生产
+# callback 配置
+def "CALLBACK_ENABLE" "true"          # 是否开启 Callback
+def "CALLBACK_TIMEOUT" "5"            # 最长超时时间
+def "CALLBACK_FAILED_CONTINUE" "true" # 失败后是否继续
 
 ###################### Prometheus 配置信息 ######################
 # 是否启用 Prometheus
