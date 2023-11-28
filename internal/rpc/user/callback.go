@@ -75,8 +75,8 @@ func CallbackBeforeUserRegister(ctx context.Context, req *pbuser.UserRegisterReq
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfo); err != nil {
 		return err
 	}
-	if !*config.Config.Callback.CallbackBeforeUserRegister.CallbackFailedContinue {
-		utils.NotNilReplace(&req.Users, &resp.Users)
+	if len(resp.Users) != 0 {
+		req.Users = resp.Users
 	}
 	return nil
 }
