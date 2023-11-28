@@ -16,7 +16,6 @@ package friend
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/utils"
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
