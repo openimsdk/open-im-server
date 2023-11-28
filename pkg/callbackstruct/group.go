@@ -132,33 +132,6 @@ type CallbackAfterUngroupReq struct {
 type CallbackAfterUngroupResp struct {
 	CommonCallbackResp
 }
-
-type CallbackAfterSetGroupInfoReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	GroupID         string `json:"groupID"`
-	GroupType       *int32 `json:"groupType"`
-	UserID          string `json:"userID"`
-	Name            string `json:"name"`
-	Notification    string `json:"notification"`
-	GroupUrl        string `json:"groupUrl"`
-}
-
-type CallbackAfterSetGroupInfoResp struct {
-	CommonCallbackResp
-}
-
-type CallbackAfterRevokeMsgReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	GroupID         string `json:"groupID"`
-	GroupType       *int32 `json:"groupType"`
-	UserID          string `json:"userID"`
-	Content         string `json:"content"`
-}
-
-type CallbackAfterRevokeMsgResp struct {
-	CommonCallbackResp
-}
-
 type CallbackQuitGroupReq struct {
 	CallbackCommand `json:"callbackCommand"`
 	GroupID         string `json:"groupID"`

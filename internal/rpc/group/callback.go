@@ -16,6 +16,7 @@ package group
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"time"
 
@@ -192,6 +193,8 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 	if resp.Ex != nil {
 		req.Ex = wrapperspb.String(*resp.Ex)
 	}
+	return nil
+}
 func CallbackAfterSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMemberInfo) (err error) {
 	if !config.Config.Callback.CallbackBeforeSetGroupMemberInfo.Enable {
 		return nil
@@ -297,5 +300,144 @@ func CallbackTransferGroupOwnerAfter(ctx context.Context, req *pbgroup.TransferG
 	}
 	return nil
 }
+func CallbackBeforeInviteUserToGroup(ctx context.Context, req *group.InviteUserToGroupReq) (err error) {
+	if !config.Config.Callback.CallbackBeforeInviteUserToGroup.Enable {
+		return nil
+	}
+
+	callbackReq := &callbackstruct.CallbackBeforeInviteUserToGroupReq{
+		CallbackCommand: callbackstruct.CallbackBeforeInviteJoinGroupCommand,
+		OperationID:     mcontext.GetOperationID(ctx),
+		GroupID:         req.GroupID,
+		Reason:          req.Reason,
+		InvitedUserIDs:  req.InvitedUserIDs,
+	}
+
+	resp := &callbackstruct.CallbackBeforeInviteUserToGroupResp{}
+	err = http.CallBackPostReturn(
+		ctx,
+		config.Config.Callback.CallbackUrl,
+		callbackReq,
+		resp,
+		config.Config.Callback.CallbackBeforeInviteUserToGroup,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	if len(resp.RefusedMembersAccount) > 0 {
+		// Handle the scenario where certain members are refused
+		// You might want to update the req.Members list or handle it as per your business logic
+	}
+	utils.StructFieldNotNilReplace(req, resp)
+
+	return nil
+}
+
+func CallbackAfterJoinGroup(ctx context.Context, req *group.JoinGroupReq) error {
+	if !config.Config.Callback.CallbackAfterJoinGroup.Enable {
+		return nil
+	}
+	callbackReq := &callbackstruct.CallbackAfterJoinGroupReq{
+		CallbackCommand: callbackstruct.CallbackAfterJoinGroupCommand,
+		OperationID:     mcontext.GetOperationID(ctx),
+		GroupID:         req.GroupID,
+		ReqMessage:      req.ReqMessage,
+		JoinSource:      req.JoinSource,
+		InviterUserID:   req.InviterUserID,
+	}
+	resp := &callbackstruct.CallbackAfterJoinGroupResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterJoinGroup); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
+func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) error {
+	if !config.Config.Callback.CallbackBeforeSetGroupInfo.Enable {
+		return nil
+	}
+	callbackReq := &callbackstruct.CallbackBeforeSetGroupInfoReq{
+		CallbackCommand: callbackstruct.CallbackBeforeSetGroupInfoCommand,
+		GroupID:         req.GroupInfoForSet.GroupID,
+		Notification:    req.GroupInfoForSet.Notification,
+		Introduction:    req.GroupInfoForSet.Introduction,
+		FaceURL:         req.GroupInfoForSet.FaceURL,
+		GroupName:       req.GroupInfoForSet.GroupName,
+	}
+
+	if req.GroupInfoForSet.Ex != nil {
+		callbackReq.Ex = req.GroupInfoForSet.Ex.Value
+	}
+	log.ZDebug(ctx, "debug CallbackBeforeSetGroupInfo", callbackReq.Ex)
+	if req.GroupInfoForSet.NeedVerification != nil {
+		callbackReq.NeedVerification = req.GroupInfoForSet.NeedVerification.Value
+	}
+	if req.GroupInfoForSet.LookMemberInfo != nil {
+		callbackReq.LookMemberInfo = req.GroupInfoForSet.LookMemberInfo.Value
+	}
+	if req.GroupInfoForSet.ApplyMemberFriend != nil {
+		callbackReq.ApplyMemberFriend = req.GroupInfoForSet.ApplyMemberFriend.Value
+	}
+	resp := &callbackstruct.CallbackBeforeSetGroupInfoResp{}
+
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupInfo); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+
+	if resp.Ex != nil {
+		req.GroupInfoForSet.Ex = wrapperspb.String(*resp.Ex)
+	}
+	if resp.NeedVerification != nil {
+		req.GroupInfoForSet.NeedVerification = wrapperspb.Int32(*resp.NeedVerification)
+	}
+	if resp.LookMemberInfo != nil {
+		req.GroupInfoForSet.LookMemberInfo = wrapperspb.Int32(*resp.LookMemberInfo)
+	}
+	if resp.ApplyMemberFriend != nil {
+		req.GroupInfoForSet.ApplyMemberFriend = wrapperspb.Int32(*resp.ApplyMemberFriend)
+	}
+	utils.StructFieldNotNilReplace(req, resp)
+	return nil
+}
+func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) error {
+	if !config.Config.Callback.CallbackAfterSetGroupInfo.Enable {
+		return nil
+	}
+	callbackReq := &callbackstruct.CallbackAfterSetGroupInfoReq{
+		CallbackCommand: callbackstruct.CallbackAfterSetGroupInfoCommand,
+		GroupID:         req.GroupInfoForSet.GroupID,
+		Notification:    req.GroupInfoForSet.Notification,
+		Introduction:    req.GroupInfoForSet.Introduction,
+		FaceURL:         req.GroupInfoForSet.FaceURL,
+		GroupName:       req.GroupInfoForSet.GroupName,
+	}
+	if req.GroupInfoForSet.Ex != nil {
+		callbackReq.Ex = &req.GroupInfoForSet.Ex.Value
+	}
+	if req.GroupInfoForSet.NeedVerification != nil {
+		callbackReq.NeedVerification = &req.GroupInfoForSet.NeedVerification.Value
+	}
+	if req.GroupInfoForSet.LookMemberInfo != nil {
+		callbackReq.LookMemberInfo = &req.GroupInfoForSet.LookMemberInfo.Value
+	}
+	if req.GroupInfoForSet.ApplyMemberFriend != nil {
+		callbackReq.ApplyMemberFriend = &req.GroupInfoForSet.ApplyMemberFriend.Value
+	}
+	resp := &callbackstruct.CallbackAfterSetGroupInfoResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterSetGroupInfo); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }

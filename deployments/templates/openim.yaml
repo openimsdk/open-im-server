@@ -434,37 +434,37 @@ callback:
     timeout: ${CALLBACK_TIMEOUT}
     failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterGroupMsgRead:
-    enable: false
-    timeout: 5
-    failedContinue: true
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterGroupMsgRevoke:
-    enable: false
+    enable: ${CALLBACK_ENABLE}
     timeout: 5
     failedContinue: true
   afterJoinGroup:
-    enable: false
+    enable: ${CALLBACK_ENABLE}
     timeout: 5
     failedContinue: true
   beforeInviteUserToGroup:
-    enable: false
+    enable: ${CALLBACK_ENABLE}
     timeout: 5
     failedContinue: true
 
   joinGroupAfter:
-    enable: false
+    enable: ${CALLBACK_ENABLE}
     timeout: 5
     failedContinue: true
     ##TODO CALLBACK
   setGroupInfoAfter:
-    enable: false
+    enable: ${CALLBACK_ENABLE}
     timeout: 5
     failedContinue: true
   setGroupInfoBefore:
-    enable: false
+    enable: ${CALLBACK_ENABLE}
     timeout: 5
     failedContinue: true
   revokeMsgAfter:
-    enable: false
+    enable: ${CALLBACK_ENABLE}
     timeout: 5
     failedContinue: true
   addBlackBefore:

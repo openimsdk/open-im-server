@@ -35,17 +35,6 @@ type CallBackAddFriendReplyBeforeResp struct {
 	CommonCallbackResp
 }
 
-type CallbackAfterAddFriendReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	FromUserID      string `json:"fromUserID" `
-	ToUserID        string `json:"toUserID"`
-	ReqMsg          string `json:"reqMsg"`
-}
-
-type CallbackAfterAddFriendResp struct {
-	CommonCallbackResp
-}
-
 type CallbackBeforeSetFriendRemarkReq struct {
 	CallbackCommand `json:"callbackCommand"`
 	OwnerUserID     string `json:"ownerUserID"`
