@@ -13,8 +13,8 @@
 
 ### 2. 迁移 OpenIM MySQL 数据
 
-+ 位置: `open-im-server/v3/tools/data-conversion/openim/mysql.go`
-+ 配置 `mysql.go` 文件中的数据库信息。
++ 位置: `open-im-server/tools/data-conversion/openim/cmd/conversion-mysql.go`
++ 配置 `conversion-mysql.go` 文件中的数据库信息。
 + 手动创建 V3 版本的数据库，并确保字符集为 `utf8mb4`。
 
 ```bash
@@ -47,7 +47,7 @@ make build BINS="conversion-mysql"
 ### 3. 转换聊天消息（可选）
 
 + 只支持转换存储在 Kafka 中的消息。
-+ 位置: `open-im-server/v3/tools/data-conversion/openim/msg.go`
++ 位置: `open-im-server/tools/data-conversion/openim/conversion-msg/conversion-msg.go`
 + 配置 `msg.go` 文件中的消息和服务器信息。
 
 ```bash
@@ -69,7 +69,7 @@ make build BINS="conversion-msg"
 ### 4. 转换业务服务器数据
 
 + 只支持转换存储在 Kafka 中的消息。
-+ 位置: `open-im-server/v3/tools/data-conversion/chat/chat.go`
++ 位置: `open-im-server/tools/data-conversion/chat/cmd/conversion-chat/chat.go`
 + 需要手动创建 V3 版本的数据库，并确保字符集为 `utf8mb4`。
 + 配置 `main.go` 文件中的数据库信息。
 
