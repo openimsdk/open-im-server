@@ -163,3 +163,29 @@ func callbackMsgModify(ctx context.Context, msg *pbchat.SendMsgReq) error {
 	log.ZDebug(ctx, "callbackMsgModify", "msg", msg.MsgData)
 	return nil
 }
+func CallbackGroupMsgRead(ctx context.Context, req *cbapi.CallbackGroupMsgReadReq) error {
+	if !config.Config.Callback.CallbackGroupMsgRead.Enable || req.ContentType != constant.Text {
+		return nil
+	}
+	req.CallbackCommand = cbapi.CallbackGroupMsgReadCommand
+
+	resp := &cbapi.CallbackGroupMsgReadResp{}
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CallbackSingleMsgRead(ctx context.Context, req *cbapi.CallbackSingleMsgReadReq) error {
+	if !config.Config.Callback.CallbackSingleMsgRead.Enable || req.ContentType != constant.Text {
+		return nil
+	}
+	req.CallbackCommand = cbapi.CallbackSingleMsgRead
+
+	resp := &cbapi.CallbackGroupMsgReadResp{}
+
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
+		return err
+	}
+	return nil
+}
