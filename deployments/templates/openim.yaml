@@ -377,7 +377,7 @@ callback:
     timeout: 5
     failedContinue: true
   afterGroupMsgRead:
-    enable: true
+    enable: false
     timeout: 5
     failedContinue: true
   afterGroupMsgRevoke:
