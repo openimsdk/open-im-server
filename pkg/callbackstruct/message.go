@@ -79,3 +79,46 @@ type CallbackMsgModifyCommandResp struct {
 	AttachedInfo     *string                `json:"attachedInfo"`
 	Ex               *string                `json:"ex"`
 }
+
+type CallbackSendGroupMsgErrorReq struct {
+	CommonCallbackReq
+	GroupID string `json:"groupID"`
+}
+
+type CallbackSendGroupMsgErrorResp struct {
+	CommonCallbackResp
+}
+
+type CallbackSingleMsgRevokeReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	SendID          string `json:"sendID"`
+	ReceiveID       string `json:"receiveID"`
+	Content         string `json:"content"`
+}
+
+type CallbackSingleMsgRevokeResp struct {
+	CommonCallbackResp
+}
+
+type CallbackGroupMsgReadReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	SendID          string `json:"sendID"`
+	ReceiveID       string `json:"receiveID"`
+	UnreadMsgNum    int64  `json:"unreadMsgNum"`
+	ContentType     int64  `json:"contentType"`
+}
+
+type CallbackGroupMsgReadResp struct {
+	CommonCallbackResp
+}
+
+type CallbackSingleMsgReadReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	SendID          string `json:"sendID"`
+	ReceiveID       string `json:"receiveID"`
+	ContentType     int64  `json:"contentType"`
+}
+
+type CallbackSingleMsgReadResp struct {
+	CommonCallbackResp
+}

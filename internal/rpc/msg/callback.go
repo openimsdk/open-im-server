@@ -16,13 +16,11 @@ package msg
 
 import (
 	"context"
-
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	pbchat "github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
@@ -74,14 +72,11 @@ func callbackBeforeSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) er
 		return nil
 	}
 	req := &cbapi.CallbackBeforeSendSingleMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackBeforeSendSingleMsgCommand),
+		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeSendSingleMsgCommand),
 		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbapi.CallbackBeforeSendSingleMsgResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -92,14 +87,11 @@ func callbackAfterSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) err
 		return nil
 	}
 	req := &cbapi.CallbackAfterSendSingleMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackAfterSendSingleMsgCommand),
+		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendSingleMsgCommand),
 		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbapi.CallbackAfterSendSingleMsgResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -110,14 +102,11 @@ func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) err
 		return nil
 	}
 	req := &cbapi.CallbackAfterSendGroupMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackBeforeSendGroupMsgCommand),
+		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeSendGroupMsgCommand),
 		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbapi.CallbackBeforeSendGroupMsgResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -128,14 +117,11 @@ func callbackAfterSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) erro
 		return nil
 	}
 	req := &cbapi.CallbackAfterSendGroupMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackAfterSendGroupMsgCommand),
+		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendGroupMsgCommand),
 		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbapi.CallbackAfterSendGroupMsgResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -146,13 +132,10 @@ func callbackMsgModify(ctx context.Context, msg *pbchat.SendMsgReq) error {
 		return nil
 	}
 	req := &cbapi.CallbackMsgModifyCommandReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackMsgModifyCommand),
+		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackMsgModifyCommand),
 	}
 	resp := &cbapi.CallbackMsgModifyCommandResp{}
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	if resp.Content != nil {
@@ -175,5 +158,32 @@ func callbackMsgModify(ctx context.Context, msg *pbchat.SendMsgReq) error {
 	utils.NotNilReplace(&msg.MsgData.AttachedInfo, resp.AttachedInfo)
 	utils.NotNilReplace(&msg.MsgData.Ex, resp.Ex)
 	log.ZDebug(ctx, "callbackMsgModify", "msg", msg.MsgData)
+	return nil
+}
+
+func CallbackGroupMsgRead(ctx context.Context, req *cbapi.CallbackGroupMsgReadReq) error {
+	if !config.Config.Callback.CallbackGroupMsgRead.Enable || req.ContentType != constant.Text {
+		return nil
+	}
+	req.CallbackCommand = cbapi.CallbackGroupMsgReadCommand
+
+	resp := &cbapi.CallbackGroupMsgReadResp{}
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CallbackSingleMsgRead(ctx context.Context, req *cbapi.CallbackSingleMsgReadReq) error {
+	if !config.Config.Callback.CallbackSingleMsgRead.Enable || req.ContentType != constant.Text {
+		return nil
+	}
+	req.CallbackCommand = cbapi.CallbackSingleMsgRead
+
+	resp := &cbapi.CallbackGroupMsgReadResp{}
+
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
+		return err
+	}
 	return nil
 }

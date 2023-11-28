@@ -139,6 +139,9 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	for _, friendID := range friends {
 		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	}
+	if err := CallbackAfterUpdateUserInfo(ctx, req); err != nil {
+		return nil, err
+	}
 	if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
 		log.ZError(ctx, "NotificationUserInfoUpdate", err, "userID", req.UserInfo.UserID)
 	}
@@ -230,6 +233,9 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	if exist {
 		return nil, errs.ErrRegisteredAlready.Wrap("userID registered already")
 	}
+	if err := CallbackBeforeUserRegister(ctx, req); err != nil {
+		return nil, err
+	}
 	now := time.Now()
 	users := make([]*tablerelation.UserModel, 0, len(req.Users))
 	for _, user := range req.Users {
@@ -244,6 +250,10 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 		})
 	}
 	if err := s.Create(ctx, users); err != nil {
+		return nil, err
+	}
+
+	if err := CallbackAfterUserRegister(ctx, req); err != nil {
 		return nil, err
 	}
 	return resp, nil

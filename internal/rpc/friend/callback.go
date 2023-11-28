@@ -16,12 +16,9 @@ package friend
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/utils"
 
-	"github.com/OpenIMSDK/protocol/constant"
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mcontext"
-
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
@@ -32,17 +29,48 @@ func CallbackBeforeAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriend
 		return nil
 	}
 	cbReq := &cbapi.CallbackBeforeAddFriendReq{
-		CallbackCommand: constant.CallbackBeforeAddFriendCommand,
+		CallbackCommand: cbapi.CallbackBeforeAddFriendCommand,
 		FromUserID:      req.FromUserID,
 		ToUserID:        req.ToUserID,
 		ReqMsg:          req.ReqMsg,
-		OperationID:     mcontext.GetOperationID(ctx),
 	}
 	resp := &cbapi.CallbackBeforeAddFriendResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriend); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
+		return err
+	}
+	return nil
+}
+
+func CallbackBeforeSetFriendRemark(ctx context.Context, req *pbfriend.SetFriendRemarkReq) error {
+	if !config.Config.Callback.CallbackBeforeSetFriendRemark.Enable {
+		return nil
+	}
+	cbReq := &cbapi.CallbackBeforeSetFriendRemarkReq{
+		CallbackCommand: cbapi.CallbackBeforeSetFriendRemark,
+		OwnerUserID:     req.OwnerUserID,
+		FriendUserID:    req.FriendUserID,
+		Remark:          req.Remark,
+	}
+	resp := &cbapi.CallbackBeforeSetFriendRemarkResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriend); err != nil {
+		return err
+	}
+	utils.NotNilReplace(&req.Remark, &resp.Remark)
+	return nil
+}
+
+func CallbackAfterSetFriendRemark(ctx context.Context, req *pbfriend.SetFriendRemarkReq) error {
+	if !config.Config.Callback.CallbackAfterSetFriendRemark.Enable {
+		return nil
+	}
+	cbReq := &cbapi.CallbackAfterSetFriendRemarkReq{
+		CallbackCommand: cbapi.CallbackAfterSetFriendRemark,
+		OwnerUserID:     req.OwnerUserID,
+		FriendUserID:    req.FriendUserID,
+		Remark:          req.Remark,
+	}
+	resp := &cbapi.CallbackAfterSetFriendRemarkResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriend); err != nil {
 		return err
 	}
 	return nil

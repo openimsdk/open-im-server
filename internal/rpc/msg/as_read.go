@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 
 	utils2 "github.com/OpenIMSDK/tools/utils"
 
@@ -163,6 +164,15 @@ func (m *msgServer) updateReadStatus(ctx context.Context, req *msg.MarkConversat
 		if err := m.MsgDatabase.MarkSingleChatMsgsAsRead(ctx, req.UserID, req.ConversationID, seqs); err != nil {
 			return err
 		}
+	}
+	reqCall := &cbapi.CallbackGroupMsgReadReq{
+		SendID:       conversation.OwnerUserID,
+		ReceiveID:    req.UserID,
+		UnreadMsgNum: req.HasReadSeq,
+		ContentType:  int64(conversation.ConversationType),
+	}
+	if err := CallbackGroupMsgRead(ctx, reqCall); err != nil {
+		return err
 	}
 
 	if req.HasReadSeq > hasReadSeq {

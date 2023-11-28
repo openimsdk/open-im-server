@@ -254,6 +254,8 @@ type configStruct struct {
 		CallbackBeforeSendGroupMsg         CallBackConfig `yaml:"beforeSendGroupMsg"`
 		CallbackAfterSendGroupMsg          CallBackConfig `yaml:"afterSendGroupMsg"`
 		CallbackMsgModify                  CallBackConfig `yaml:"msgModify"`
+		CallbackSingleMsgRead              CallBackConfig `yaml:"singleMsgRead"`
+		CallbackGroupMsgRead               CallBackConfig `yaml:"groupMsgRead"`
 		CallbackUserOnline                 CallBackConfig `yaml:"userOnline"`
 		CallbackUserOffline                CallBackConfig `yaml:"userOffline"`
 		CallbackUserKickOff                CallBackConfig `yaml:"userKickOff"`
@@ -261,10 +263,21 @@ type configStruct struct {
 		CallbackOnlinePush                 CallBackConfig `yaml:"onlinePush"`
 		CallbackBeforeSuperGroupOnlinePush CallBackConfig `yaml:"superGroupOnlinePush"`
 		CallbackBeforeAddFriend            CallBackConfig `yaml:"beforeAddFriend"`
+		CallbackBeforeSetFriendRemark      CallBackConfig `yaml:"callbackBeforeSetFriendRemark"`
+		CallbackAfterSetFriendRemark       CallBackConfig `yaml:"callbackAfterSetFriendRemark"`
 		CallbackBeforeUpdateUserInfo       CallBackConfig `yaml:"beforeUpdateUserInfo"`
+		CallbackBeforeUserRegister         CallBackConfig `yaml:"beforeUserRegister"`
+		CallbackAfterUpdateUserInfo        CallBackConfig `yaml:"updateUserInfo"`
+		CallbackAfterUserRegister          CallBackConfig `yaml:"afterUserRegister"`
 		CallbackBeforeCreateGroup          CallBackConfig `yaml:"beforeCreateGroup"`
+		CallbackAfterCreateGroup           CallBackConfig `yaml:"afterCreateGroup"`
 		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
 		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
+		CallbackQuitGroup                  CallBackConfig `yaml:"quitGroup"`
+		CallbackKillGroupMember            CallBackConfig `yaml:"killGroupMember"`
+		CallbackDismissGroup               CallBackConfig `yaml:"dismissGroup"`
+		CallbackBeforeJoinGroup            CallBackConfig `yaml:"joinGroup"`
+		CallbackTransferGroupOwnerAfter    CallBackConfig `yaml:"transferGroupOwner"`
 	} `yaml:"callback"`
 
 	Prometheus struct {

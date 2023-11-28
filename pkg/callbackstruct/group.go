@@ -50,9 +50,18 @@ type CallbackBeforeCreateGroupResp struct {
 	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
 }
 
+type CallbackAfterCreateGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	*common.GroupInfo
+	InitMemberList []*apistruct.GroupAddMemberInfo `json:"initMemberList"`
+}
+
+type CallbackAfterCreateGroupResp struct {
+	CommonCallbackResp
+}
+
 type CallbackBeforeMemberJoinGroupReq struct {
 	CallbackCommand `json:"callbackCommand"`
-	OperationID     string `json:"operationID"`
 	GroupID         string `json:"groupID"`
 	UserID          string `json:"userID"`
 	Ex              string `json:"ex"`
@@ -70,7 +79,6 @@ type CallbackBeforeMemberJoinGroupResp struct {
 
 type CallbackBeforeSetGroupMemberInfoReq struct {
 	CallbackCommand `json:"callbackCommand"`
-	OperationID     string  `json:"operationID"`
 	GroupID         string  `json:"groupID"`
 	UserID          string  `json:"userID"`
 	Nickname        *string `json:"nickName"`
@@ -85,4 +93,124 @@ type CallbackBeforeSetGroupMemberInfoResp struct {
 	Nickname  *string `json:"nickName"`
 	FaceURL   *string `json:"faceURL"`
 	RoleLevel *int32  `json:"roleLevel"`
+}
+
+type CallbackAfterSetGroupMemberInfoReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string  `json:"groupID"`
+	UserID          string  `json:"userID"`
+	Nickname        *string `json:"nickName"`
+	FaceURL         *string `json:"faceURL"`
+	RoleLevel       *int32  `json:"roleLevel"`
+	Ex              *string `json:"ex"`
+}
+
+type CallbackAfterSetGroupMemberInfoResp struct {
+	CommonCallbackResp
+}
+
+type CallbackAfterGroupMemberExitReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string `json:"groupID"`
+	UserID          string `json:"userID"`
+	GroupType       *int32 `json:"groupType"`
+	ExitType        string `json:"exitType"`
+}
+
+type CallbackAfterGroupMemberExitResp struct {
+	CommonCallbackResp
+}
+
+type CallbackAfterUngroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string   `json:"groupID"`
+	GroupType       *int32   `json:"groupType"`
+	OwnerID         string   `json:"ownerID"`
+	MemberList      []string `json:"memberList"`
+}
+
+type CallbackAfterUngroupResp struct {
+	CommonCallbackResp
+}
+
+type CallbackAfterSetGroupInfoReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string `json:"groupID"`
+	GroupType       *int32 `json:"groupType"`
+	UserID          string `json:"userID"`
+	Name            string `json:"name"`
+	Notification    string `json:"notification"`
+	GroupUrl        string `json:"groupUrl"`
+}
+
+type CallbackAfterSetGroupInfoResp struct {
+	CommonCallbackResp
+}
+
+type CallbackAfterRevokeMsgReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string `json:"groupID"`
+	GroupType       *int32 `json:"groupType"`
+	UserID          string `json:"userID"`
+	Content         string `json:"content"`
+}
+
+type CallbackAfterRevokeMsgResp struct {
+	CommonCallbackResp
+}
+
+type CallbackQuitGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string `json:"groupID"`
+	UserID          string `json:"userID"`
+}
+
+type CallbackQuitGroupResp struct {
+	CommonCallbackResp
+}
+
+type CallbackKillGroupMemberReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string   `json:"groupID"`
+	KickedUserIDs   []string `json:"kickedUserIDs"`
+	Reason          string   `json:"reason"`
+}
+
+type CallbackKillGroupMemberResp struct {
+	CommonCallbackResp
+}
+
+type CallbackDisMissGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string   `json:"groupID"`
+	OwnerID         string   `json:"ownerID"`
+	GroupType       string   `json:"groupType"`
+	MembersID       []string `json:"membersID"`
+}
+
+type CallbackDisMissGroupResp struct {
+	CommonCallbackResp
+}
+
+type CallbackJoinGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string `json:"groupID"`
+	GroupType       string `json:"groupType"`
+	ApplyID         string `json:"applyID"`
+	ReqMessage      string `json:"reqMessage"`
+}
+
+type CallbackJoinGroupResp struct {
+	CommonCallbackResp
+}
+
+type CallbackTransferGroupOwnerReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string `json:"groupID"`
+	OldOwnerUserID  string `json:"oldOwnerUserID"`
+	NewOwnerUserID  string `json:"newOwnerUserID"`
+}
+
+type CallbackTransferGroupOwnerResp struct {
+	CommonCallbackResp
 }
