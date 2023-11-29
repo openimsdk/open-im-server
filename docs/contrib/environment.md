@@ -37,6 +37,7 @@
 	* 2.20. [Prometheus Configuration](#PrometheusConfiguration-1)
 		* 2.20.1. [General Configuration](#GeneralConfiguration)
 		* 2.20.2. [Service-Specific Prometheus Ports](#Service-SpecificPrometheusPorts)
+	* 2.21. [Qiniu Cloud Kodo Configuration](#QiniuCloudKODOConfiguration)
 
 ## 0. <a name='TableofContents'></a>OpenIM Config File
 
@@ -528,3 +529,18 @@ This section involves configuring Prometheus, including enabling/disabling it an
 | RTC Service              | `RTC_PROM_PORT`          | '21300'                      | Prometheus port for the RTC service.               |
 | Third Service            | `THIRD_PROM_PORT`        | '21301'                      | Prometheus port for the Third service.             |
 | Message Transfer Service | `MSG_TRANSFER_PROM_PORT` | '21400, 21401, 21402, 21403' | Prometheus ports for the Message Transfer service. |
+
+
+###  2.21. <a name='QiniuCloudKODOConfiguration'></a>Qiniu Cloud Kodo Configuration
+
+This section involves setting up Qiniu Cloud Kodo, including its endpoint, bucket name, and credentials.
+
+| Parameter             | Example Value                                                | Description                              |
+| --------------------- | ------------------------------------------------------------ | ---------------------------------------- |
+| KODO_ENDPOINT          | "[http://s3.cn-east-1.qiniucs.com](http://s3.cn-east-1.qiniucs.com)" | Endpoint URL for Qiniu Cloud Kodo.      |
+| KODO_BUCKET            | "demo-9999999"                                               | Bucket name for Qiniu Cloud Kodo.       |
+| KODO_BUCKET_URL        | "[http://your.domain.com](http://your.domain.com)" | Bucket URL for Qiniu Cloud Kodo.        |
+| KODO_ACCESS_KEY_ID     | [User Defined]                                               | Access key ID for Qiniu Cloud Kodo.     |
+| KODO_ACCESS_KEY_SECRET | [User Defined]                                               | Access key secret for Qiniu Cloud Kodo. |
+| KODO_SESSION_TOKEN     | [User Defined]                                               | Session token for Qiniu Cloud Kodo.     |
+| KODO_PUBLIC_READ       | "false"                                                      | Public read access.                      |

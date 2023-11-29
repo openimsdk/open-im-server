@@ -158,6 +158,14 @@ object:
     accessKeySecret: ${OSS_ACCESS_KEY_SECRET}
     sessionToken: ${OSS_SESSION_TOKEN}
     publicRead: ${OSS_PUBLIC_READ}
+  kodo:
+    endpoint: "${KODO_ENDPOINT}"
+    bucket: "${KODO_BUCKET}"
+    bucketURL: "${KODO_BUCKET_URL}"
+    accessKeyID: ${KODO_ACCESS_KEY_ID}
+    accessKeySecret: ${KODO_ACCESS_KEY_SECRET}
+    sessionToken: ${KODO_SESSION_TOKEN}
+    publicRead: ${KODO_PUBLIC_READ}
 
 ###################### RPC Port Configuration ######################
 # RPC service ports
