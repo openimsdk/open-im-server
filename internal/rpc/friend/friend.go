@@ -103,7 +103,7 @@ func (s *friendServer) ApplyToAddFriend(
 	if req.ToUserID == req.FromUserID {
 		return nil, errs.ErrCanNotAddYourself.Wrap()
 	}
-	if err := CallbackBeforeAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+	if err = CallbackBeforeAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	if _, err := s.userRpcClient.GetUsersInfoMap(ctx, []string{req.ToUserID, req.FromUserID}); err != nil {
@@ -120,7 +120,7 @@ func (s *friendServer) ApplyToAddFriend(
 		return nil, err
 	}
 	s.notificationSender.FriendApplicationAddNotification(ctx, req)
-	if err := CallbackAfterAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+	if err = CallbackAfterAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	return resp, nil

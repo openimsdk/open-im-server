@@ -19,6 +19,7 @@ type CallbackBeforeAddFriendReq struct {
 	FromUserID      string `json:"fromUserID" `
 	ToUserID        string `json:"toUserID"`
 	ReqMsg          string `json:"reqMsg"`
+	Ex              string `json:"ex"`
 }
 
 type CallbackBeforeAddFriendResp struct {
@@ -105,6 +106,7 @@ type CallbackBeforeImportFriendsReq struct {
 }
 type CallbackBeforeImportFriendsResp struct {
 	CommonCallbackResp
+	FriendUserIDs []string `json:"friendUserIDs"`
 }
 type CallbackAfterImportFriendsReq struct {
 	CallbackCommand `json:"callbackCommand"`

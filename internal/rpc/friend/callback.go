@@ -33,6 +33,7 @@ func CallbackBeforeAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriend
 		FromUserID:      req.FromUserID,
 		ToUserID:        req.ToUserID,
 		ReqMsg:          req.ReqMsg,
+		Ex:              req.Ex,
 	}
 	resp := &cbapi.CallbackBeforeAddFriendResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriend); err != nil {
@@ -91,7 +92,6 @@ func CallbackBeforeAddBlack(ctx context.Context, req *pbfriend.AddBlackReq) erro
 		}
 		return err
 	}
-	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }
 func CallbackAfterAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) error {
@@ -111,7 +111,7 @@ func CallbackAfterAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendR
 		}
 		return err
 	}
-	utils.StructFieldNotNilReplace(req, resp)
+
 	return nil
 }
 func CallbackBeforeAddFriendAgree(ctx context.Context, req *pbfriend.RespondFriendApplyReq) error {
@@ -132,7 +132,6 @@ func CallbackBeforeAddFriendAgree(ctx context.Context, req *pbfriend.RespondFrie
 		}
 		return err
 	}
-	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }
 func CallbackAfterDeleteFriend(ctx context.Context, req *pbfriend.DeleteFriendReq) error {
@@ -151,7 +150,6 @@ func CallbackAfterDeleteFriend(ctx context.Context, req *pbfriend.DeleteFriendRe
 		}
 		return err
 	}
-	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }
 func CallbackBeforeImportFriends(ctx context.Context, req *pbfriend.ImportFriendReq) error {
@@ -170,7 +168,9 @@ func CallbackBeforeImportFriends(ctx context.Context, req *pbfriend.ImportFriend
 		}
 		return err
 	}
-	utils.StructFieldNotNilReplace(req, resp)
+	if len(resp.FriendUserIDs) != 0 {
+		req.FriendUserIDs = resp.FriendUserIDs
+	}
 	return nil
 }
 func CallbackAfterImportFriends(ctx context.Context, req *pbfriend.ImportFriendReq) error {
@@ -189,7 +189,6 @@ func CallbackAfterImportFriends(ctx context.Context, req *pbfriend.ImportFriendR
 		}
 		return err
 	}
-	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }
 
@@ -209,6 +208,5 @@ func CallbackAfterRemoveBlack(ctx context.Context, req *pbfriend.RemoveBlackReq)
 		}
 		return err
 	}
-	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }
