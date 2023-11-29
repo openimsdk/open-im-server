@@ -15,17 +15,24 @@
 package msgtransfer
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/tools/mw"
+	"net/http"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+	"time"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
-	"net/http"
-	"sync"
+
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mw"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -50,18 +57,22 @@ func StartTransfer(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
-	if err := db.AutoMigrate(&relationtb.ChatLogModel{}); err != nil {
+
+	if err = db.AutoMigrate(&relationtb.ChatLogModel{}); err != nil {
 		fmt.Printf("gorm: AutoMigrate ChatLogModel err: %v\n", err)
 	}
+
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
+
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
 		return err
 	}
-	if err := mongo.CreateMsgIndex(); err != nil {
+
+	if err = mongo.CreateMsgIndex(); err != nil {
 		return err
 	}
 	client, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
@@ -72,9 +83,11 @@ func StartTransfer(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
+
 	if err := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
 		return err
 	}
+
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	msgModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
@@ -98,35 +111,68 @@ func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase,
 }
 
 func (m *MsgTransfer) Start(prometheusPort int) error {
-	var wg sync.WaitGroup
-	wg.Add(1)
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
 	if prometheusPort <= 0 {
 		return errors.New("prometheusPort not correct")
 	}
+
 	if config.Config.ChatPersistenceMysql {
 		// go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(m.persistentCH)
 	} else {
 		fmt.Println("msg transfer not start mysql consumer")
 	}
-	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.historyCH)
-	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.historyMongoCH)
-	// go m.modifyCH.modifyMsgConsumerGroup.RegisterHandleAndConsumer(m.modifyCH)
-	/*err := prome.StartPrometheusSrv(prometheusPort)
-	if err != nil {
-		return err
-	}*/
-	////////////////////////////
+
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.historyCH)
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.historyMongoCH)
+	}()
+
 	if config.Config.Prometheus.Enable {
-		reg := prometheus.NewRegistry()
-		reg.MustRegister(
-			collectors.NewGoCollector(),
-		)
-		reg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer")...)
-		http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
-		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil))
+		go func() {
+			proreg := prometheus.NewRegistry()
+			proreg.MustRegister(
+				collectors.NewGoCollector(),
+			)
+			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer")...)
+			http.Handle("/metrics", promhttp.HandlerFor(proreg, promhttp.HandlerOpts{Registry: proreg}))
+			err := http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil)
+			if err != nil && err != http.ErrServerClosed {
+				panic(err)
+			}
+		}()
 	}
-	////////////////////////////////////////
-	wg.Wait()
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	<-sigs
+
+	// graceful close kafka client.
+	go m.historyCH.historyConsumerGroup.Close()
+	go m.historyMongoCH.historyConsumerGroup.Close()
+
+	done := make(chan struct{}, 1)
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		log.ZInfo(context.Background(), "msgtrasfer exit successfully")
+	case <-time.After(15 * time.Second):
+		log.ZError(context.Background(), "msgtransfer force to exit, timeout 15s", nil)
+	}
+
 	return nil
 }
