@@ -157,6 +157,7 @@ jobs:
 
     - name: Docker Operations
       run: |
+        sudo make init
         sudo docker compose up -d
         sudo sleep 20
 
