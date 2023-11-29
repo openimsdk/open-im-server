@@ -17,8 +17,8 @@
 # ======================================
 
 # The user for authentication or system operations.
-# Default: USER=root
-USER=${USER}
+# Default: OPENIM_USER=root
+USER=${OPENIM_USER}
 
 # Password associated with the specified user for authentication.
 # Default: PASSWORD=openIM123
@@ -58,58 +58,20 @@ DOCKER_BRIDGE_GATEWAY=${DOCKER_BRIDGE_GATEWAY}
 # Address or hostname for the MySQL network.
 # Default: MYSQL_NETWORK_ADDRESS=172.28.0.2
 MYSQL_NETWORK_ADDRESS=${MYSQL_NETWORK_ADDRESS}
-
-# Address or hostname for the MongoDB network.
-# Default: MONGO_NETWORK_ADDRESS=172.28.0.3
 MONGO_NETWORK_ADDRESS=${MONGO_NETWORK_ADDRESS}
-
-# Address or hostname for the Redis network.
-# Default: REDIS_NETWORK_ADDRESS=172.28.0.4
 REDIS_NETWORK_ADDRESS=${REDIS_NETWORK_ADDRESS}
-
-# Address or hostname for the Kafka network.
-# Default: KAFKA_NETWORK_ADDRESS=172.28.0.5
 KAFKA_NETWORK_ADDRESS=${KAFKA_NETWORK_ADDRESS}
-
-# Address or hostname for the ZooKeeper network.
-# Default: ZOOKEEPER_NETWORK_ADDRESS=172.28.0.6
 ZOOKEEPER_NETWORK_ADDRESS=${ZOOKEEPER_NETWORK_ADDRESS}
-
-# Address or hostname for the MinIO network.
-# Default: MINIO_NETWORK_ADDRESS=172.28.0.7
 MINIO_NETWORK_ADDRESS=${MINIO_NETWORK_ADDRESS}
-
-# Address or hostname for the OpenIM web network.
-# Default: OPENIM_WEB_NETWORK_ADDRESS=172.28.0.8
 OPENIM_WEB_NETWORK_ADDRESS=${OPENIM_WEB_NETWORK_ADDRESS}
-
-# Address or hostname for the OpenIM server network.
-# Default: OPENIM_SERVER_NETWORK_ADDRESS=172.28.0.9
 OPENIM_SERVER_NETWORK_ADDRESS=${OPENIM_SERVER_NETWORK_ADDRESS}
-
-# Address or hostname for the OpenIM chat network.
-# Default: OPENIM_CHAT_NETWORK_ADDRESS=172.28.0.10
 OPENIM_CHAT_NETWORK_ADDRESS=${OPENIM_CHAT_NETWORK_ADDRESS}
-
-# Address or hostname for the Prometheus network.
-# Default: PROMETHEUS_NETWORK_ADDRESS=172.28.0.11
 PROMETHEUS_NETWORK_ADDRESS=${PROMETHEUS_NETWORK_ADDRESS}
-  
-# Address or hostname for the Grafana network.
-# Default: GRAFANA_NETWORK_ADDRESS=172.28.0.12
 GRAFANA_NETWORK_ADDRESS=${GRAFANA_NETWORK_ADDRESS}
-  
-# Address or hostname for the node_exporter network.
-# Default: NODE_EXPORTER_NETWORK_ADDRESS=172.28.0.13
 NODE_EXPORTER_NETWORK_ADDRESS=${NODE_EXPORTER_NETWORK_ADDRESS}
-  
-# Address or hostname for the OpenIM admin network.
-# Default: OPENIM_ADMIN_NETWORK_ADDRESS=172.28.0.14
 OPENIM_ADMIN_FRONT_NETWORK_ADDRESS=${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS}
-  
-# Address or hostname for the alertmanager network.
-# Default: ALERT_MANAGER_NETWORK_ADDRESS=172.28.0.15
 ALERT_MANAGER_NETWORK_ADDRESS=${ALERT_MANAGER_NETWORK_ADDRESS}
+
 # ===============================================
 # = Component Extension Configuration =
 # ===============================================
