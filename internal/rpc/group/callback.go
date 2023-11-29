@@ -200,7 +200,7 @@ func CallbackAfterSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMem
 		return nil
 	}
 	callbackReq := callbackstruct.CallbackAfterSetGroupMemberInfoReq{
-		CallbackCommand: callbackstruct.CallbackBeforeSetGroupMemberInfoCommand,
+		CallbackCommand: callbackstruct.CallbackAfterSetGroupMemberInfoCommand,
 		GroupID:         req.GroupID,
 		UserID:          req.UserID,
 	}
@@ -217,7 +217,7 @@ func CallbackAfterSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMem
 		callbackReq.Ex = &req.Ex.Value
 	}
 	resp := &callbackstruct.CallbackAfterSetGroupMemberInfoResp{}
-	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupMemberInfo); err != nil {
+	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterSetGroupMemberInfo); err != nil {
 		return err
 	}
 	return nil

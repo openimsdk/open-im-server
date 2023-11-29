@@ -1,19 +1,19 @@
 package callbackstruct
 
-const CallbackBeforeInviteJoinGroupCommand = "CallbackBeforeInviteJoinGroupCommand"
-const CallbackAfterJoinGroupCommand = "CallbackAfterJoinGroupCommand"
-const CallbackAfterSetGroupInfoCommand = "CallbackAfterSetGroupInfoCommand"
-const CallbackBeforeSetGroupInfoCommand = "CallbackBeforeSetGroupInfoCommand"
+const CallbackBeforeInviteJoinGroupCommand = "callbackBeforeInviteJoinGroupCommand"
+const CallbackAfterJoinGroupCommand = "callbackAfterJoinGroupCommand"
+const CallbackAfterSetGroupInfoCommand = "callbackAfterSetGroupInfoCommand"
+const CallbackBeforeSetGroupInfoCommand = "callbackBeforeSetGroupInfoCommand"
 
-const CallbackAfterRevokeMsgCommand = "CallbackBeforeAfterMsgCommand"
-const CallbackBeforeAddBlackCommand = "CallbackBeforeAddBlackCommand"
-const CallbackAfterAddFriendCommand = "CallbackAfterAddFriendCommand"
-const CallbackBeforeAddFriendAgreeCommand = "CallbackBeforeAddFriendAgreeCommand"
+const CallbackAfterRevokeMsgCommand = "callbackBeforeAfterMsgCommand"
+const CallbackBeforeAddBlackCommand = "callbackBeforeAddBlackCommand"
+const CallbackAfterAddFriendCommand = "callbackAfterAddFriendCommand"
+const CallbackBeforeAddFriendAgreeCommand = "callbackBeforeAddFriendAgreeCommand"
 
-const CallbackAfterDeleteFriendCommand = "CallbackAfterDeleteFriendCommand"
-const CallbackBeforeImportFriendsCommand = "CallbackBeforeImportFriendsCommand"
-const CallbackAfterImportFriendsCommand = "CallbackAfterImportFriendsCommand"
-const CallbackAfterRemoveBlackCommand = "CallbackAfterRemoveBlackCommand"
+const CallbackAfterDeleteFriendCommand = "callbackAfterDeleteFriendCommand"
+const CallbackBeforeImportFriendsCommand = "callbackBeforeImportFriendsCommand"
+const CallbackAfterImportFriendsCommand = "callbackAfterImportFriendsCommand"
+const CallbackAfterRemoveBlackCommand = "callbackAfterRemoveBlackCommand"
 
 const (
 	CallbackQuitGroupCommand                = "callbackQuitGroupCommand"
@@ -44,5 +44,6 @@ const (
 	CallbackBeforeCreateGroupCommand        = "callbackBeforeCreateGroupCommand"
 	CallbackAfterCreateGroupCommand         = "callbackAfterCreateGroupCommand"
 	CallbackBeforeMemberJoinGroupCommand    = "callbackBeforeMemberJoinGroupCommand"
-	CallbackBeforeSetGroupMemberInfoCommand = "CallbackBeforeSetGroupMemberInfoCommand"
+	CallbackBeforeSetGroupMemberInfoCommand = "callbackBeforeSetGroupMemberInfoCommand"
+	CallbackAfterSetGroupMemberInfoCommand  = "callbackAfterSetGroupMemberInfoCommand"
 )

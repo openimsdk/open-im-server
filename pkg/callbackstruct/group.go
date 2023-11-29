@@ -109,30 +109,6 @@ type CallbackAfterSetGroupMemberInfoResp struct {
 	CommonCallbackResp
 }
 
-type CallbackAfterGroupMemberExitReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	GroupID         string `json:"groupID"`
-	UserID          string `json:"userID"`
-	GroupType       *int32 `json:"groupType"`
-	ExitType        string `json:"exitType"`
-}
-
-type CallbackAfterGroupMemberExitResp struct {
-	CommonCallbackResp
-}
-
-type CallbackAfterUngroupReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	GroupID         string   `json:"groupID"`
-	GroupType       *int32   `json:"groupType"`
-	OwnerID         string   `json:"ownerID"`
-	MemberList      []string `json:"memberList"`
-}
-
-type CallbackAfterUngroupResp struct {
-	CommonCallbackResp
-}
-
 type CallbackQuitGroupReq struct {
 	CallbackCommand `json:"callbackCommand"`
 	GroupID         string `json:"groupID"`

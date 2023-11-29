@@ -381,6 +381,10 @@ callback:
     enable: ${CALLBACK_ENABLE}
     timeout: ${CALLBACK_TIMEOUT}
     failedContinue: ${CALLBACK_FAILED_CONTINUE}
+  afterSetGroupMemberInfo:
+    enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   setMessageReactionExtensions:
     enable: ${CALLBACK_ENABLE}
     timeout: ${CALLBACK_TIMEOUT}
