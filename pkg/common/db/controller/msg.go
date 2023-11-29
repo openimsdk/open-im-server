@@ -357,7 +357,9 @@ func (db *commonMsgDatabase) DelUserDeleteMsgsList(ctx context.Context, conversa
 }
 
 func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
-	currentMaxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
+	cancelCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
+	defer cancel()
+	currentMaxSeq, err := db.cache.GetMaxSeq(cancelCtx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		log.ZError(ctx, "db.cache.GetMaxSeq", err)
 		return 0, false, err
@@ -384,19 +386,21 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 		prommetrics.MsgInsertRedisFailedCounter.Add(float64(failedNum))
 		log.ZError(ctx, "setMessageToCache error", err, "len", len(msgs), "conversationID", conversationID)
 	} else {
-		prommetrics.MsgInsertRedisSuccessCounter.Inc()
+		prommetrics.MsgInsertRedisSuccessCounter.Add(float64(len(msgs)))
 	}
-	err = db.cache.SetMaxSeq(ctx, conversationID, currentMaxSeq)
+	cancelCtx, cancel = context.WithTimeout(ctx, 1*time.Minute)
+	defer cancel()
+	err = db.cache.SetMaxSeq(cancelCtx, conversationID, currentMaxSeq)
 	if err != nil {
 		log.ZError(ctx, "db.cache.SetMaxSeq error", err, "conversationID", conversationID)
 		prommetrics.SeqSetFailedCounter.Inc()
 	}
 	err2 := db.cache.SetHasReadSeqs(ctx, conversationID, userSeqMap)
-	if err != nil {
+	if err2 != nil {
 		log.ZError(ctx, "SetHasReadSeqs error", err2, "userSeqMap", userSeqMap, "conversationID", conversationID)
 		prommetrics.SeqSetFailedCounter.Inc()
 	}
-	return lastMaxSeq, isNew, utils.Wrap(err, "")
+	return lastMaxSeq, isNew, errs.Wrap(err, "redis SetMaxSeq error")
 }
 
 func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
@@ -654,16 +658,26 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 
 func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (int64, int64, []*sdkws.MsgData, error) {
 	userMinSeq, err := db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
-	if err != nil && errs.Unwrap(err) != redis.Nil {
-		return 0, 0, nil, err
+	if err != nil {
+		log.ZError(ctx, "cache.GetConversationUserMinSeq error", err)
+		if errs.Unwrap(err) != redis.Nil {
+			return 0, 0, nil, err
+		}
 	}
 	minSeq, err := db.cache.GetMinSeq(ctx, conversationID)
-	if err != nil && errs.Unwrap(err) != redis.Nil {
-		return 0, 0, nil, err
+	if err != nil {
+		log.ZError(ctx, "cache.GetMinSeq error", err)
+		if errs.Unwrap(err) != redis.Nil {
+			return 0, 0, nil, err
+		}
 	}
 	maxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
-	if err != nil && errs.Unwrap(err) != redis.Nil {
-		return 0, 0, nil, err
+	if err != nil {
+		log.ZError(ctx, "cache.GetMaxSeq error", err)
+		if errs.Unwrap(err) != redis.Nil {
+			return 0, 0, nil, err
+		}
+
 	}
 	if userMinSeq < minSeq {
 		minSeq = userMinSeq
@@ -676,34 +690,16 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, co
 	}
 	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, conversationID, newSeqs)
 	if err != nil {
-		if err != redis.Nil {
-			log.ZError(ctx, "get message from redis exception", err, "failedSeqs", failedSeqs, "conversationID", conversationID)
-		}
+		log.ZError(ctx, "get message from redis exception", err, "failedSeqs", failedSeqs, "conversationID", conversationID)
 	}
-	log.ZInfo(
-		ctx,
-		"db.cache.GetMessagesBySeq",
-		"userID",
-		userID,
-		"conversationID",
-		conversationID,
-		"seqs",
-		seqs,
-		"successMsgs",
-		len(successMsgs),
-		"failedSeqs",
-		failedSeqs,
-		"conversationID",
-		conversationID,
-	)
+	log.ZInfo(ctx, "db.cache.GetMessagesBySeq", "userID", userID, "conversationID", conversationID, "seqs", seqs, "successMsgs",
+		len(successMsgs), "failedSeqs", failedSeqs, "conversationID", conversationID)
 
 	if len(failedSeqs) > 0 {
 		mongoMsgs, err := db.getMsgBySeqs(ctx, userID, conversationID, failedSeqs)
 		if err != nil {
-
 			return 0, 0, nil, err
 		}
-
 		successMsgs = append(successMsgs, mongoMsgs...)
 	}
 	return minSeq, maxSeq, successMsgs, nil
