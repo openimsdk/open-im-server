@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/tools/utils"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
@@ -43,12 +44,22 @@ func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 	if err != nil {
 		return err
 	}
+
 	hubServer := NewServer(rpcPort, prometheusPort, longServer)
-	go func() {
-		err := hubServer.Start()
+
+	wg := errgroup.Group{}
+	wg.Go(func() error {
+		err = hubServer.Start()
 		if err != nil {
-			panic(utils.Wrap1(err))
+			return utils.Wrap1(err)
 		}
-	}()
-	return hubServer.LongConnServer.Run()
+		return err
+	})
+
+	wg.Go(func() error {
+		return hubServer.LongConnServer.Run()
+	})
+
+	err = wg.Wait()
+	return err
 }

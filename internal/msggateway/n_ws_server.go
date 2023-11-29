@@ -18,9 +18,12 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -156,10 +159,22 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 }
 
 func (ws *WsServer) Run() error {
-	var client *Client
-	go func() {
+	var (
+		client *Client
+		wg     errgroup.Group
+
+		sigs = make(chan os.Signal, 1)
+		done = make(chan struct{}, 1)
+	)
+
+	server := http.Server{Addr: ":" + utils.IntToString(ws.port), Handler: nil}
+
+	wg.Go(func() error {
 		for {
 			select {
+			case <-done:
+				return nil
+
 			case client = <-ws.registerChan:
 				ws.registerClient(client)
 			case client = <-ws.unregisterChan:
@@ -168,10 +183,34 @@ func (ws *WsServer) Run() error {
 				ws.multiTerminalLoginChecker(onlineInfo.clientOK, onlineInfo.oldClients, onlineInfo.newClient)
 			}
 		}
+	})
+
+	wg.Go(func() error {
+		http.HandleFunc("/", ws.wsHandler)
+		return server.ListenAndServe()
+	})
+
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	<-sigs
+
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+
+		// graceful exit operation for server
+		_ = server.Shutdown(ctx)
+		_ = wg.Wait()
+		close(done)
 	}()
-	http.HandleFunc("/", ws.wsHandler)
-	// http.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {})
-	return http.ListenAndServe(":"+utils.IntToString(ws.port), nil) // Start listening
+
+	select {
+	case <-done:
+		return nil
+
+	case <-time.After(15 * time.Second):
+		return utils.Wrap1(errors.New("timeout exit"))
+	}
+
 }
 
 var concurrentRequest = 3
