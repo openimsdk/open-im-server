@@ -21,9 +21,10 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/wrapperspb"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+
+	pbgroup "github.com/OpenIMSDK/protocol/group"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
@@ -37,7 +38,7 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 		return nil
 	}
 	cbReq := &callbackstruct.CallbackBeforeCreateGroupReq{
-		CallbackCommand: constant.CallbackBeforeCreateGroupCommand,
+		CallbackCommand: callbackstruct.CallbackBeforeCreateGroupCommand,
 		OperationID:     mcontext.GetOperationID(ctx),
 		GroupInfo:       req.GroupInfo,
 	}
@@ -58,17 +59,7 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 		})
 	}
 	resp := &callbackstruct.CallbackBeforeCreateGroupResp{}
-	err = http.CallBackPostReturn(
-		ctx,
-		config.Config.Callback.CallbackUrl,
-		cbReq,
-		resp,
-		config.Config.Callback.CallbackBeforeCreateGroup,
-	)
-	if err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
+	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeCreateGroup); err != nil {
 		return err
 	}
 	utils.NotNilReplace(&req.GroupInfo.GroupID, resp.GroupID)
@@ -86,6 +77,37 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 	return nil
 }
 
+func CallbackAfterCreateGroup(ctx context.Context, req *group.CreateGroupReq) (err error) {
+	if !config.Config.Callback.CallbackAfterCreateGroup.Enable {
+		return nil
+	}
+	cbReq := &callbackstruct.CallbackAfterCreateGroupReq{
+		CallbackCommand: callbackstruct.CallbackAfterCreateGroupCommand,
+		GroupInfo:       req.GroupInfo,
+	}
+	cbReq.InitMemberList = append(cbReq.InitMemberList, &apistruct.GroupAddMemberInfo{
+		UserID:    req.OwnerUserID,
+		RoleLevel: constant.GroupOwner,
+	})
+	for _, userID := range req.AdminUserIDs {
+		cbReq.InitMemberList = append(cbReq.InitMemberList, &apistruct.GroupAddMemberInfo{
+			UserID:    userID,
+			RoleLevel: constant.GroupAdmin,
+		})
+	}
+	for _, userID := range req.MemberUserIDs {
+		cbReq.InitMemberList = append(cbReq.InitMemberList, &apistruct.GroupAddMemberInfo{
+			UserID:    userID,
+			RoleLevel: constant.GroupOrdinaryUsers,
+		})
+	}
+	resp := &callbackstruct.CallbackAfterCreateGroupResp{}
+	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackAfterCreateGroup); err != nil {
+		return err
+	}
+	return nil
+}
+
 func CallbackBeforeMemberJoinGroup(
 	ctx context.Context,
 	groupMember *relation.GroupMemberModel,
@@ -95,25 +117,14 @@ func CallbackBeforeMemberJoinGroup(
 		return nil
 	}
 	callbackReq := &callbackstruct.CallbackBeforeMemberJoinGroupReq{
-		CallbackCommand: constant.CallbackBeforeMemberJoinGroupCommand,
-		OperationID:     mcontext.GetOperationID(ctx),
+		CallbackCommand: callbackstruct.CallbackBeforeMemberJoinGroupCommand,
 		GroupID:         groupMember.GroupID,
 		UserID:          groupMember.UserID,
 		Ex:              groupMember.Ex,
 		GroupEx:         groupEx,
 	}
 	resp := &callbackstruct.CallbackBeforeMemberJoinGroupResp{}
-	err = http.CallBackPostReturn(
-		ctx,
-		config.Config.Callback.CallbackUrl,
-		callbackReq,
-		resp,
-		config.Config.Callback.CallbackBeforeMemberJoinGroup,
-	)
-	if err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
+	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeMemberJoinGroup); err != nil {
 		return err
 	}
 	if resp.MuteEndTime != nil {
@@ -131,8 +142,7 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 		return nil
 	}
 	callbackReq := callbackstruct.CallbackBeforeSetGroupMemberInfoReq{
-		CallbackCommand: constant.CallbackBeforeSetGroupMemberInfoCommand,
-		OperationID:     mcontext.GetOperationID(ctx),
+		CallbackCommand: callbackstruct.CallbackBeforeSetGroupMemberInfoCommand,
 		GroupID:         req.GroupID,
 		UserID:          req.UserID,
 	}
@@ -149,17 +159,7 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 		callbackReq.Ex = &req.Ex.Value
 	}
 	resp := &callbackstruct.CallbackBeforeSetGroupMemberInfoResp{}
-	err = http.CallBackPostReturn(
-		ctx,
-		config.Config.Callback.CallbackUrl,
-		callbackReq,
-		resp,
-		config.Config.Callback.CallbackBeforeSetGroupMemberInfo,
-	)
-	if err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
+	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupMemberInfo); err != nil {
 		return err
 	}
 	if resp.FaceURL != nil {
@@ -173,6 +173,112 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 	}
 	if resp.Ex != nil {
 		req.Ex = wrapperspb.String(*resp.Ex)
+	}
+	return nil
+}
+
+func CallbackAfterSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMemberInfo) (err error) {
+	if !config.Config.Callback.CallbackBeforeSetGroupMemberInfo.Enable {
+		return nil
+	}
+	callbackReq := callbackstruct.CallbackAfterSetGroupMemberInfoReq{
+		CallbackCommand: callbackstruct.CallbackBeforeSetGroupMemberInfoCommand,
+		GroupID:         req.GroupID,
+		UserID:          req.UserID,
+	}
+	if req.Nickname != nil {
+		callbackReq.Nickname = &req.Nickname.Value
+	}
+	if req.FaceURL != nil {
+		callbackReq.FaceURL = &req.FaceURL.Value
+	}
+	if req.RoleLevel != nil {
+		callbackReq.RoleLevel = &req.RoleLevel.Value
+	}
+	if req.Ex != nil {
+		callbackReq.Ex = &req.Ex.Value
+	}
+	resp := &callbackstruct.CallbackAfterSetGroupMemberInfoResp{}
+	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupMemberInfo); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CallbackQuitGroup(ctx context.Context, req *group.QuitGroupReq) (err error) {
+	if !config.Config.Callback.CallbackQuitGroup.Enable {
+		return nil
+	}
+	cbReq := &callbackstruct.CallbackQuitGroupReq{
+		CallbackCommand: callbackstruct.CallbackQuitGroupCommand,
+		GroupID:         req.GroupID,
+		UserID:          req.UserID,
+	}
+	resp := &callbackstruct.CallbackQuitGroupResp{}
+	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackQuitGroup); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CallbackKillGroupMember(ctx context.Context, req *pbgroup.KickGroupMemberReq) (err error) {
+	if !config.Config.Callback.CallbackKillGroupMember.Enable {
+		return nil
+	}
+	cbReq := &callbackstruct.CallbackKillGroupMemberReq{
+		CallbackCommand: callbackstruct.CallbackKillGroupCommand,
+		GroupID:         req.GroupID,
+		KickedUserIDs:   req.KickedUserIDs,
+	}
+	resp := &callbackstruct.CallbackKillGroupMemberResp{}
+	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackQuitGroup); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CallbackDismissGroup(ctx context.Context, req *callbackstruct.CallbackDisMissGroupReq) (err error) {
+	if !config.Config.Callback.CallbackDismissGroup.Enable {
+		return nil
+	}
+	req.CallbackCommand = callbackstruct.CallbackDisMissGroupCommand
+	resp := &callbackstruct.CallbackDisMissGroupResp{}
+	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackQuitGroup); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CallbackApplyJoinGroupBefore(ctx context.Context, req *callbackstruct.CallbackJoinGroupReq) (err error) {
+	if !config.Config.Callback.CallbackBeforeJoinGroup.Enable {
+		return nil
+	}
+
+	req.CallbackCommand = callbackstruct.CallbackBeforeJoinGroupCommand
+
+	resp := &callbackstruct.CallbackJoinGroupResp{}
+	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeJoinGroup); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CallbackTransferGroupOwnerAfter(ctx context.Context, req *pbgroup.TransferGroupOwnerReq) (err error) {
+	if !config.Config.Callback.CallbackTransferGroupOwnerAfter.Enable {
+		return nil
+	}
+
+	cbReq := &callbackstruct.CallbackTransferGroupOwnerReq{
+		CallbackCommand: callbackstruct.CallbackTransferGroupOwnerAfter,
+		GroupID:         req.GroupID,
+		OldOwnerUserID:  req.OldOwnerUserID,
+		NewOwnerUserID:  req.NewOwnerUserID,
+	}
+
+	resp := &callbackstruct.CallbackTransferGroupOwnerResp{}
+	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeJoinGroup); err != nil {
+		return err
 	}
 	return nil
 }

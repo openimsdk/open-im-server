@@ -217,6 +217,10 @@ func (s *friendServer) SetFriendRemark(
 	req *pbfriend.SetFriendRemarkReq,
 ) (resp *pbfriend.SetFriendRemarkResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
+
+	if err = CallbackBeforeSetFriendRemark(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+		return nil, err
+	}
 	resp = &pbfriend.SetFriendRemarkResp{}
 	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
@@ -226,6 +230,9 @@ func (s *friendServer) SetFriendRemark(
 		return nil, err
 	}
 	if err := s.friendDatabase.UpdateRemark(ctx, req.OwnerUserID, req.FriendUserID, req.Remark); err != nil {
+		return nil, err
+	}
+	if err := CallbackAfterSetFriendRemark(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	s.notificationSender.FriendRemarkSetNotification(ctx, req.OwnerUserID, req.FriendUserID)

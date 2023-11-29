@@ -37,6 +37,7 @@
 	* 2.20. [Prometheus Configuration](#PrometheusConfiguration-1)
 		* 2.20.1. [General Configuration](#GeneralConfiguration)
 		* 2.20.2. [Service-Specific Prometheus Ports](#Service-SpecificPrometheusPorts)
+	* 2.21. [Qiniu Cloud Kodo Configuration](#QiniuCloudKODOConfiguration)
 
 ## 0. <a name='TableofContents'></a>OpenIM Config File
 
@@ -466,7 +467,7 @@ This section involves configuring the log settings, including storage location, 
 This section involves setting up additional configuration variables for Websocket, Push Notifications, and Chat.
 
 | Parameter               | Example Value     | Description                        |
-| ----------------------- | ----------------- | ---------------------------------- |
+|-------------------------|-------------------|------------------------------------|
 | WEBSOCKET_MAX_CONN_NUM  | "100000"          | Maximum Websocket connections      |
 | WEBSOCKET_MAX_MSG_LEN   | "4096"            | Maximum Websocket message length   |
 | WEBSOCKET_TIMEOUT       | "10"              | Websocket timeout                  |
@@ -500,9 +501,9 @@ This section involves setting up additional configuration variables for Websocke
 | TOKEN_EXPIRE            | "90"              | Token Expiry Time                  |
 | FRIEND_VERIFY           | "false"           | Friend Verification Enable         |
 | IOS_PUSH_SOUND          | "xxx"             | iOS                                |
-
-
-
+| CALLBACK_ENABLE         | "true"            | Enable callback                    |                         |                   |                                    |
+| CALLBACK_TIMEOUT        | "5"               | Maximum timeout for callback call  |
+| CALLBACK_FAILED_CONTINUE| "true"            | fails to continue to the next step |
 ###  2.20. <a name='PrometheusConfiguration-1'></a>Prometheus Configuration
 
 This section involves configuring Prometheus, including enabling/disabling it and setting up ports for various services.
@@ -528,3 +529,18 @@ This section involves configuring Prometheus, including enabling/disabling it an
 | RTC Service              | `RTC_PROM_PORT`          | '21300'                      | Prometheus port for the RTC service.               |
 | Third Service            | `THIRD_PROM_PORT`        | '21301'                      | Prometheus port for the Third service.             |
 | Message Transfer Service | `MSG_TRANSFER_PROM_PORT` | '21400, 21401, 21402, 21403' | Prometheus ports for the Message Transfer service. |
+
+
+###  2.21. <a name='QiniuCloudKODOConfiguration'></a>Qiniu Cloud Kodo Configuration
+
+This section involves setting up Qiniu Cloud Kodo, including its endpoint, bucket name, and credentials.
+
+| Parameter             | Example Value                                                | Description                              |
+| --------------------- | ------------------------------------------------------------ | ---------------------------------------- |
+| KODO_ENDPOINT          | "[http://s3.cn-east-1.qiniucs.com](http://s3.cn-east-1.qiniucs.com)" | Endpoint URL for Qiniu Cloud Kodo.      |
+| KODO_BUCKET            | "demo-9999999"                                               | Bucket name for Qiniu Cloud Kodo.       |
+| KODO_BUCKET_URL        | "[http://your.domain.com](http://your.domain.com)" | Bucket URL for Qiniu Cloud Kodo.        |
+| KODO_ACCESS_KEY_ID     | [User Defined]                                               | Access key ID for Qiniu Cloud Kodo.     |
+| KODO_ACCESS_KEY_SECRET | [User Defined]                                               | Access key secret for Qiniu Cloud Kodo. |
+| KODO_SESSION_TOKEN     | [User Defined]                                               | Session token for Qiniu Cloud Kodo.     |
+| KODO_PUBLIC_READ       | "false"                                                      | Public read access.                      |

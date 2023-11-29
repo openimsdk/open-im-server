@@ -223,6 +223,15 @@ def "OSS_ACCESS_KEY_SECRET"                                             # 阿里
 def "OSS_SESSION_TOKEN"                                                 # 阿里云OSS的会话令牌
 def "OSS_PUBLIC_READ" "false"                                           # 公有读
 
+#七牛云配置信息
+def "KODO_ENDPOINT" "http://s3.cn-east-1.qiniucs.com"                    # 七牛云OSS的端点URL
+def "KODO_BUCKET" "demo-9999999"                                         # 七牛云OSS的存储桶名称
+def "KODO_BUCKET_URL" "http://your.domain.com"                           # 七牛云OSS的存储桶URL
+def "KODO_ACCESS_KEY_ID"                                                 # 七牛云OSS的访问密钥ID
+def "KODO_ACCESS_KEY_SECRET"                                             # 七牛云OSS的密钥
+def "KODO_SESSION_TOKEN"                                                 # 七牛云OSS的会话令牌
+def "KODO_PUBLIC_READ" "false"                                           # 公有读
+
 ###################### Redis 配置信息 ######################
 def "REDIS_PORT" "16379"                                    # Redis的端口
 def "REDIS_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}"              # Redis的地址
@@ -376,6 +385,10 @@ def "FRIEND_VERIFY" "false"     # 朋友验证
 def "IOS_PUSH_SOUND" "xxx"      # IOS推送声音
 def "IOS_BADGE_COUNT" "true"    # IOS徽章计数
 def "IOS_PRODUCTION" "false"    # IOS生产
+# callback 配置
+def "CALLBACK_ENABLE" "true"          # 是否开启 Callback
+def "CALLBACK_TIMEOUT" "5"            # 最长超时时间
+def "CALLBACK_FAILED_CONTINUE" "true" # 失败后是否继续
 
 ###################### Prometheus 配置信息 ######################
 # 是否启用 Prometheus
