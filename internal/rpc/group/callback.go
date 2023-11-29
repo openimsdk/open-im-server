@@ -16,7 +16,6 @@ package group
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"time"
 
@@ -176,9 +175,6 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 		config.Config.Callback.CallbackBeforeSetGroupMemberInfo,
 	)
 	if err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	if resp.FaceURL != nil {
@@ -349,9 +345,6 @@ func CallbackAfterJoinGroup(ctx context.Context, req *group.JoinGroupReq) error 
 	}
 	resp := &callbackstruct.CallbackAfterJoinGroupResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterJoinGroup); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -386,9 +379,6 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq)
 	resp := &callbackstruct.CallbackBeforeSetGroupInfoResp{}
 
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupInfo); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 
@@ -433,9 +423,6 @@ func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) 
 	}
 	resp := &callbackstruct.CallbackAfterSetGroupInfoResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterSetGroupInfo); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	utils.StructFieldNotNilReplace(req, resp)

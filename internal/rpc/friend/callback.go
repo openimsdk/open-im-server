@@ -17,7 +17,6 @@ package friend
 import (
 	"context"
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -87,9 +86,6 @@ func CallbackBeforeAddBlack(ctx context.Context, req *pbfriend.AddBlackReq) erro
 	}
 	resp := &cbapi.CallbackBeforeAddBlackResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddBlack); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -106,9 +102,6 @@ func CallbackAfterAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendR
 	}
 	resp := &cbapi.CallbackAfterAddFriendResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackAfterAddFriend); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 
@@ -127,9 +120,6 @@ func CallbackBeforeAddFriendAgree(ctx context.Context, req *pbfriend.RespondFrie
 	}
 	resp := &cbapi.CallbackBeforeAddFriendAgreeResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriendAgree); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -145,9 +135,6 @@ func CallbackAfterDeleteFriend(ctx context.Context, req *pbfriend.DeleteFriendRe
 	}
 	resp := &cbapi.CallbackAfterDeleteFriendResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackAfterDeleteFriend); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -163,9 +150,6 @@ func CallbackBeforeImportFriends(ctx context.Context, req *pbfriend.ImportFriend
 	}
 	resp := &cbapi.CallbackBeforeImportFriendsResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeImportFriends); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	if len(resp.FriendUserIDs) != 0 {
@@ -184,9 +168,6 @@ func CallbackAfterImportFriends(ctx context.Context, req *pbfriend.ImportFriendR
 	}
 	resp := &cbapi.CallbackAfterImportFriendsResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackAfterImportFriends); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
@@ -203,9 +184,6 @@ func CallbackAfterRemoveBlack(ctx context.Context, req *pbfriend.RemoveBlackReq)
 	}
 	resp := &cbapi.CallbackAfterRemoveBlackResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackAfterRemoveBlack); err != nil {
-		if err == errs.ErrCallbackContinue {
-			return nil
-		}
 		return err
 	}
 	return nil
