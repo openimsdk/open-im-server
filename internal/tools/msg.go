@@ -17,10 +17,12 @@ package tools
 import (
 	"context"
 	"fmt"
+	"math"
+
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/tx"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	"math"
 
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"

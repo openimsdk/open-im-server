@@ -16,8 +16,9 @@ package controller
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/pagination"
 	"time"
+
+	"github.com/OpenIMSDK/tools/pagination"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
@@ -237,7 +238,9 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 			if err != nil {
 				return err
 			}
-			cache = cache.DelConversationIDs(ownerUserID).DelUserConversationIDsHash(ownerUserID).DelConversationNotReceiveMessageUserIDs(utils.Slice(notExistConversations, func(e *relationtb.ConversationModel) string { return e.ConversationID })...)
+			cache = cache.DelConversationIDs(ownerUserID).
+				DelUserConversationIDsHash(ownerUserID).
+				DelConversationNotReceiveMessageUserIDs(utils.Slice(notExistConversations, func(e *relationtb.ConversationModel) string { return e.ConversationID })...)
 		}
 		return cache.ExecDel(ctx)
 	})

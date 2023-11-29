@@ -2,14 +2,16 @@ package mgo
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
@@ -56,7 +58,12 @@ func (c *ConversationMgo) Find(ctx context.Context, ownerUserID string, conversa
 }
 
 func (c *ConversationMgo) FindUserID(ctx context.Context, userIDs []string, conversationIDs []string) ([]string, error) {
-	return mgoutil.Find[string](ctx, c.coll, bson.M{"owner_user_id": bson.M{"$in": userIDs}, "conversation_id": bson.M{"$in": conversationIDs}}, options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1}))
+	return mgoutil.Find[string](
+		ctx,
+		c.coll,
+		bson.M{"owner_user_id": bson.M{"$in": userIDs}, "conversation_id": bson.M{"$in": conversationIDs}},
+		options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1}),
+	)
 }
 
 func (c *ConversationMgo) FindUserIDAllConversationID(ctx context.Context, userID string) ([]string, error) {
@@ -134,5 +141,10 @@ func (c *ConversationMgo) GetConversationIDsNeedDestruct(ctx context.Context) ([
 }
 
 func (c *ConversationMgo) GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error) {
-	return mgoutil.Find[string](ctx, c.coll, bson.M{"conversation_id": conversationID, "recv_msg_opt": bson.M{"$ne": constant.ReceiveMessage}}, options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1}))
+	return mgoutil.Find[string](
+		ctx,
+		c.coll,
+		bson.M{"conversation_id": conversationID, "recv_msg_opt": bson.M{"$ne": constant.ReceiveMessage}},
+		options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1}),
+	)
 }

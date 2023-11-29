@@ -16,10 +16,12 @@ package controller
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/OpenIMSDK/tools/tx"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	"time"
 
 	"github.com/OpenIMSDK/protocol/user"
 

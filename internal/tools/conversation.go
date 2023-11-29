@@ -16,9 +16,10 @@ package tools
 
 import (
 	"context"
-	"github.com/OpenIMSDK/protocol/sdkws"
 	"math/rand"
 	"time"
+
+	"github.com/OpenIMSDK/protocol/sdkws"
 
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"

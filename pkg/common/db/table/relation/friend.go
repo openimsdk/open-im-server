@@ -16,8 +16,9 @@ package relation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/pagination"
 	"time"
+
+	"github.com/OpenIMSDK/tools/pagination"
 )
 
 // FriendModel represents the data structure for a friend relationship in MongoDB.

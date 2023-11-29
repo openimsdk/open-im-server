@@ -17,10 +17,12 @@ package user
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/tools/tx"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/tools/tx"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"

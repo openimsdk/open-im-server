@@ -5,12 +5,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strconv"
+
 	"github.com/go-sql-driver/mysql"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	mongoModel "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-	mysqlModel "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/mysql/v3"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,10 +19,12 @@ import (
 	gormMysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
-	"os"
-	"reflect"
-	"strconv"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
+	mongoModel "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+	mysqlModel "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/mysql/v3"
 )
 
 const (
@@ -31,9 +34,12 @@ const (
 )
 
 func main() {
-	var path string
-	flag.StringVar(&path, "c", "", "path config file")
+	var dir string
+	flag.StringVar(&dir, "c", "../../../../../", "path to config directory")
 	flag.Parse()
+
+	path := filepath.Join(dir, "config.yaml")
+
 	if err := Main(path); err != nil {
 		log.Fatal(err)
 		return

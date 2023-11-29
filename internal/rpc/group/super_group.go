@@ -17,6 +17,7 @@ package group
 import (
 	"context"
 	"errors"
+
 	pbgroup "github.com/OpenIMSDK/protocol/group"
 )
 

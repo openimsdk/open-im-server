@@ -17,7 +17,9 @@ package conversation
 import (
 	"context"
 	"errors"
+
 	"github.com/OpenIMSDK/tools/tx"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 

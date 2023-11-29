@@ -2,8 +2,9 @@ package relation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/pagination"
 	"time"
+
+	"github.com/OpenIMSDK/tools/pagination"
 )
 
 type LogModel struct {

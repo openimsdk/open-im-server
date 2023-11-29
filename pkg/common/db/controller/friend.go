@@ -16,8 +16,9 @@ package controller
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/pagination"
 	"time"
+
+	"github.com/OpenIMSDK/tools/pagination"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/errs"
@@ -97,7 +98,10 @@ func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 			m["create_time"] = time.Now()
 			return f.friendRequest.UpdateByMap(ctx, fromUserID, toUserID, m)
 		case relation.IsNotFound(err):
-			return f.friendRequest.Create(ctx, []*relation.FriendRequestModel{{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex, CreateTime: time.Now(), HandleTime: time.Unix(0, 0)}})
+			return f.friendRequest.Create(
+				ctx,
+				[]*relation.FriendRequestModel{{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex, CreateTime: time.Now(), HandleTime: time.Unix(0, 0)}},
+			)
 		default:
 			return err
 		}

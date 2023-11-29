@@ -20,9 +20,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 func TestCheckMysql(t *testing.T) {
