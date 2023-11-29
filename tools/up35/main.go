@@ -17,6 +17,7 @@ import (
 	"gopkg.in/yaml.v3"
 	gormMysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"log"
 	"os"
 	"reflect"
@@ -51,7 +52,7 @@ func InitConfig(path string) error {
 func GetMysql() (*gorm.DB, error) {
 	conf := config.Config.Mysql
 	mysqlDSN := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", conf.Username, conf.Password, conf.Address[0], conf.Database)
-	return gorm.Open(gormMysql.Open(mysqlDSN), &gorm.Config{ /* Logger: logger.Discard */ })
+	return gorm.Open(gormMysql.Open(mysqlDSN), &gorm.Config{Logger: logger.Discard})
 }
 
 func GetMongo() (*mongo.Database, error) {
@@ -89,6 +90,9 @@ func Main(path string) error {
 	mysqlDB, err := GetMysql()
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1049 {
+			if err := SetMongoDataVersion(mongoDB, version.Value); err != nil {
+				return err
+			}
 			return nil // database not exist
 		}
 		return err
@@ -115,12 +119,17 @@ func Main(path string) error {
 		}
 	}
 
-	filter := bson.M{"key": versionKey, "value": version.Value}
-	update := bson.M{"$set": bson.M{"key": versionKey, "value": strconv.Itoa(versionValue)}}
-	if _, err := mongoDB.Collection(versionTable).UpdateOne(context.Background(), filter, update, options.Update().SetUpsert(true)); err != nil {
+	if err := SetMongoDataVersion(mongoDB, version.Value); err != nil {
 		return err
 	}
 	return nil
+}
+
+func SetMongoDataVersion(db *mongo.Database, curver string) error {
+	filter := bson.M{"key": versionKey, "value": curver}
+	update := bson.M{"$set": bson.M{"key": versionKey, "value": strconv.Itoa(versionValue)}}
+	_, err := db.Collection(versionTable).UpdateOne(context.Background(), filter, update, options.Update().SetUpsert(true))
+	return err
 }
 
 // NewTask A mysql table B mongodb model C mongodb table
