@@ -133,6 +133,9 @@ func exactIP(urll string) string {
 }
 
 func checkMysql() error {
+	if config.Config.Mysql == nil {
+		return nil
+	}
 	var sqlDB *sql.DB
 	defer func() {
 		if sqlDB != nil {

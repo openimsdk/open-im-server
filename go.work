@@ -13,5 +13,5 @@ use (
 	./tools/component
 	./tools/url2im
 	./tools/data-conversion
-	./tools/mysql2mongo
+	./tools/up35
 )
