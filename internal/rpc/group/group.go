@@ -366,6 +366,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbgroup.GetJo
 
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.InviteUserToGroupReq) (*pbgroup.InviteUserToGroupResp, error) {
 	resp := &pbgroup.InviteUserToGroupResp{}
+
 	if len(req.InvitedUserIDs) == 0 {
 		return nil, errs.ErrArgs.Wrap("user empty")
 	}
@@ -376,6 +377,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	if err != nil {
 		return nil, err
 	}
+
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, errs.ErrDismissedAlready.Wrap()
 	}
@@ -399,6 +401,10 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		}
 		groupMember = groupMembers[0]
 	}
+
+	if err := CallbackBeforeInviteUserToGroup(ctx, req); err != nil {
+		return nil, err
+	}
 	if group.NeedVerification == constant.AllNeedVerification {
 		if !authverify.IsAppManagerUid(ctx) {
 			if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
@@ -413,6 +419,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 						HandledTime:   time.Unix(0, 0),
 					})
 				}
+
 				if err := s.GroupDatabase.CreateGroupRequest(ctx, requests); err != nil {
 					return nil, err
 				}
@@ -818,6 +825,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 	case constant.GroupResponseRefuse:
 		s.Notification.GroupApplicationRejectedNotification(ctx, req)
 	}
+
 	return &pbgroup.GroupApplicationResponseResp{}, nil
 }
 
@@ -872,10 +880,14 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		if err := s.GroupDatabase.CreateGroup(ctx, nil, []*relationtb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
+
 		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
 			return nil, err
 		}
 		s.Notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID)
+		if err = CallbackAfterJoinGroup(ctx, req); err != nil {
+			return nil, err
+		}
 		return resp, nil
 	}
 	groupRequest := relationtb.GroupRequestModel{
@@ -957,6 +969,9 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 			return nil, errs.ErrNoPermission.Wrap("no group owner or admin")
 		}
 	}
+	if err := CallbackBeforeSetGroupInfo(ctx, req); err != nil {
+		return nil, err
+	}
 	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupInfoForSet.GroupID)
 	if err != nil {
 		return nil, err
@@ -1024,6 +1039,9 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		}
 	default:
 		s.Notification.GroupInfoSetNotification(ctx, tips)
+	}
+	if err := CallbackAfterSetGroupInfo(ctx, req); err != nil {
+		return nil, err
 	}
 	return resp, nil
 }

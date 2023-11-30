@@ -80,26 +80,6 @@ type CallbackMsgModifyCommandResp struct {
 	Ex               *string                `json:"ex"`
 }
 
-type CallbackSendGroupMsgErrorReq struct {
-	CommonCallbackReq
-	GroupID string `json:"groupID"`
-}
-
-type CallbackSendGroupMsgErrorResp struct {
-	CommonCallbackResp
-}
-
-type CallbackSingleMsgRevokeReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	SendID          string `json:"sendID"`
-	ReceiveID       string `json:"receiveID"`
-	Content         string `json:"content"`
-}
-
-type CallbackSingleMsgRevokeResp struct {
-	CommonCallbackResp
-}
-
 type CallbackGroupMsgReadReq struct {
 	CallbackCommand `json:"callbackCommand"`
 	SendID          string `json:"sendID"`

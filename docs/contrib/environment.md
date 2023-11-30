@@ -501,7 +501,7 @@ This section involves setting up additional configuration variables for Websocke
 | TOKEN_EXPIRE            | "90"              | Token Expiry Time                  |
 | FRIEND_VERIFY           | "false"           | Friend Verification Enable         |
 | IOS_PUSH_SOUND          | "xxx"             | iOS                                |
-| CALLBACK_ENABLE         | "true"            | Enable callback                    |                         |                   |                                    |
+| CALLBACK_ENABLE         | "false"            | Enable callback                    | 
 | CALLBACK_TIMEOUT        | "5"               | Maximum timeout for callback call  |
 | CALLBACK_FAILED_CONTINUE| "true"            | fails to continue to the next step |
 ###  2.20. <a name='PrometheusConfiguration-1'></a>Prometheus Configuration

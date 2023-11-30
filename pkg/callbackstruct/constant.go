@@ -1,5 +1,20 @@
 package callbackstruct
 
+const CallbackBeforeInviteJoinGroupCommand = "callbackBeforeInviteJoinGroupCommand"
+const CallbackAfterJoinGroupCommand = "callbackAfterJoinGroupCommand"
+const CallbackAfterSetGroupInfoCommand = "callbackAfterSetGroupInfoCommand"
+const CallbackBeforeSetGroupInfoCommand = "callbackBeforeSetGroupInfoCommand"
+
+const CallbackAfterRevokeMsgCommand = "callbackBeforeAfterMsgCommand"
+const CallbackBeforeAddBlackCommand = "callbackBeforeAddBlackCommand"
+const CallbackAfterAddFriendCommand = "callbackAfterAddFriendCommand"
+const CallbackBeforeAddFriendAgreeCommand = "callbackBeforeAddFriendAgreeCommand"
+
+const CallbackAfterDeleteFriendCommand = "callbackAfterDeleteFriendCommand"
+const CallbackBeforeImportFriendsCommand = "callbackBeforeImportFriendsCommand"
+const CallbackAfterImportFriendsCommand = "callbackAfterImportFriendsCommand"
+const CallbackAfterRemoveBlackCommand = "callbackAfterRemoveBlackCommand"
+
 const (
 	CallbackQuitGroupCommand                = "callbackQuitGroupCommand"
 	CallbackKillGroupCommand                = "callbackKillGroupCommand"
@@ -29,5 +44,6 @@ const (
 	CallbackBeforeCreateGroupCommand        = "callbackBeforeCreateGroupCommand"
 	CallbackAfterCreateGroupCommand         = "callbackAfterCreateGroupCommand"
 	CallbackBeforeMemberJoinGroupCommand    = "callbackBeforeMemberJoinGroupCommand"
-	CallbackBeforeSetGroupMemberInfoCommand = "CallbackBeforeSetGroupMemberInfoCommand"
+	CallbackBeforeSetGroupMemberInfoCommand = "callbackBeforeSetGroupMemberInfoCommand"
+	CallbackAfterSetGroupMemberInfoCommand  = "callbackAfterSetGroupMemberInfoCommand"
 )

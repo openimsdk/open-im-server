@@ -27,7 +27,7 @@ route:
 receivers:
   - name: email
     email_configs:
-      - to: ${ALERTMANAGER_EMAIL_TO}
+      - to: '${ALERTMANAGER_EMAIL_TO}'
         html: '{{ template "email.to.html" . }}'
         headers: { Subject: "[OPENIM-SERVER]Alarm" }
         send_resolved: true
