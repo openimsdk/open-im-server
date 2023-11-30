@@ -28,6 +28,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
@@ -229,6 +231,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	if len(userMap) != len(userIDs) {
 		return nil, errs.ErrUserIDNotFound.Wrap("user not found")
 	}
+	// Callback Before create Group
 	if err := CallbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
 	}
@@ -287,6 +290,40 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		}
 	}
 	s.Notification.GroupCreatedNotification(ctx, tips)
+	if req.GroupInfo.GroupType == constant.SuperGroup {
+		go func() {
+			for _, userID := range userIDs {
+				s.Notification.SuperGroupNotification(ctx, userID, userID)
+			}
+		}()
+	} else {
+		// s.Notification.GroupCreatedNotification(ctx, group, groupMembers, userMap)
+		tips := &sdkws.GroupCreatedTips{
+			Group:          resp.GroupInfo,
+			OperationTime:  group.CreateTime.UnixMilli(),
+			GroupOwnerUser: s.groupMemberDB2PB(groupMembers[0], userMap[groupMembers[0].UserID].AppMangerLevel),
+		}
+		for _, member := range groupMembers {
+			member.Nickname = userMap[member.UserID].Nickname
+			tips.MemberList = append(tips.MemberList, s.groupMemberDB2PB(member, userMap[member.UserID].AppMangerLevel))
+			if member.UserID == opUserID {
+				tips.OpUser = s.groupMemberDB2PB(member, userMap[member.UserID].AppMangerLevel)
+				break
+			}
+		}
+		s.Notification.GroupCreatedNotification(ctx, tips)
+	}
+	reqCallBackAfter := &pbgroup.CreateGroupReq{
+		MemberUserIDs: userIDs,
+		GroupInfo:     resp.GroupInfo,
+		OwnerUserID:   req.OwnerUserID,
+		AdminUserIDs:  req.AdminUserIDs,
+	}
+
+	if err := CallbackAfterCreateGroup(ctx, reqCallBackAfter); err != nil {
+		return nil, err
+	}
+
 	return resp, nil
 }
 
@@ -338,6 +375,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbgroup.GetJo
 
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.InviteUserToGroupReq) (*pbgroup.InviteUserToGroupResp, error) {
 	resp := &pbgroup.InviteUserToGroupResp{}
+
 	if len(req.InvitedUserIDs) == 0 {
 		return nil, errs.ErrArgs.Wrap("user empty")
 	}
@@ -348,6 +386,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	if err != nil {
 		return nil, err
 	}
+
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, errs.ErrDismissedAlready.Wrap()
 	}
@@ -370,6 +409,10 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		if err := s.PopulateGroupMember(ctx, groupMember); err != nil {
 			return nil, err
 		}
+	}
+
+	if err := CallbackBeforeInviteUserToGroup(ctx, req); err != nil {
+		return nil, err
 	}
 	if group.NeedVerification == constant.AllNeedVerification {
 		if !authverify.IsAppManagerUid(ctx) {
@@ -552,6 +595,10 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	}
 	s.Notification.MemberKickedNotification(ctx, tips)
 	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, req.KickedUserIDs); err != nil {
+		return nil, err
+	}
+
+	if err := CallbackKillGroupMember(ctx, req); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -743,6 +790,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 	case constant.GroupResponseRefuse:
 		s.Notification.GroupApplicationRejectedNotification(ctx, req)
 	}
+
 	return &pbgroup.GroupApplicationResponseResp{}, nil
 }
 
@@ -758,6 +806,17 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 	}
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, errs.ErrDismissedAlready.Wrap()
+	}
+
+	reqCall := &callbackstruct.CallbackJoinGroupReq{
+		GroupID:    req.GroupID,
+		GroupType:  string(group.GroupType),
+		ApplyID:    req.InviterUserID,
+		ReqMessage: req.ReqMessage,
+	}
+
+	if err = CallbackApplyJoinGroupBefore(ctx, reqCall); err != nil {
+		return nil, err
 	}
 	_, err = s.db.TakeGroupMember(ctx, req.GroupID, req.InviterUserID)
 	if err == nil {
@@ -783,10 +842,14 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		if err := s.db.CreateGroup(ctx, nil, []*relationtb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
+
 		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
 			return nil, err
 		}
 		s.Notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID)
+		if err = CallbackAfterJoinGroup(ctx, req); err != nil {
+			return nil, err
+		}
 		return resp, nil
 	}
 	groupRequest := relationtb.GroupRequestModel{
@@ -832,6 +895,10 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 		return nil, err
 	}
 
+	// callback
+	if err := CallbackQuitGroup(ctx, req); err != nil {
+		return nil, err
+	}
 	return resp, nil
 }
 
@@ -858,6 +925,9 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		if err := s.PopulateGroupMember(ctx, opMember); err != nil {
 			return nil, err
 		}
+	}
+	if err := CallbackBeforeSetGroupInfo(ctx, req); err != nil {
+		return nil, err
 	}
 	group, err := s.db.TakeGroup(ctx, req.GroupInfoForSet.GroupID)
 	if err != nil {
@@ -925,6 +995,9 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	if num > 0 {
 		_ = s.Notification.GroupInfoSetNotification(ctx, tips)
 	}
+	if err := CallbackAfterSetGroupInfo(ctx, req); err != nil {
+		return nil, err
+	}
 	return resp, nil
 }
 
@@ -965,6 +1038,10 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 		}
 	}
 	if err := s.db.TransferGroupOwner(ctx, req.GroupID, req.OldOwnerUserID, req.NewOwnerUserID, newOwner.RoleLevel); err != nil {
+		return nil, err
+	}
+
+	if err := CallbackTransferGroupOwnerAfter(ctx, req); err != nil {
 		return nil, err
 	}
 	s.Notification.GroupOwnerTransferredNotification(ctx, req)
@@ -1119,6 +1196,20 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 		}
 		s.Notification.GroupDismissedNotification(ctx, tips)
 	}
+	membersID, err := s.GroupDatabase.FindGroupMemberUserID(ctx, group.GroupID)
+	if err != nil {
+		return nil, err
+	}
+	reqCall := &callbackstruct.CallbackDisMissGroupReq{
+		GroupID:   req.GroupID,
+		OwnerID:   owner.UserID,
+		MembersID: membersID,
+		GroupType: string(group.GroupType),
+	}
+	if err := CallbackDismissGroup(ctx, reqCall); err != nil {
+		return nil, err
+	}
+
 	return resp, nil
 }
 
@@ -1333,6 +1424,12 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 			s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
 		}
 	}
+	for i := 0; i < len(req.Members); i++ {
+		if err := CallbackAfterSetGroupMemberInfo(ctx, req.Members[i]); err != nil {
+			return nil, err
+		}
+	}
+
 	return resp, nil
 }
 

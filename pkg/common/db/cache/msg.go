@@ -173,7 +173,20 @@ func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s st
 }
 
 func (c *msgCache) SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error {
-	return c.setSeq(ctx, conversationID, maxSeq, c.getMaxSeqKey)
+	var retErr error
+	for {
+		select {
+		case <-ctx.Done():
+			return errs.Wrap(retErr, "SetMaxSeq redis retry too many amount")
+		default:
+			retErr = c.setSeq(ctx, conversationID, maxSeq, c.getMaxSeqKey)
+			if retErr != nil {
+				time.Sleep(time.Second * 2)
+				continue
+			}
+			return nil
+		}
+	}
 }
 
 func (c *msgCache) GetMaxSeqs(ctx context.Context, conversationIDs []string) (m map[string]int64, err error) {
@@ -181,7 +194,21 @@ func (c *msgCache) GetMaxSeqs(ctx context.Context, conversationIDs []string) (m 
 }
 
 func (c *msgCache) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
-	return c.getSeq(ctx, conversationID, c.getMaxSeqKey)
+	var retErr error
+	var retData int64
+	for {
+		select {
+		case <-ctx.Done():
+			return -1, errs.Wrap(retErr, "GetMaxSeq redis retry too many amount")
+		default:
+			retData, retErr = c.getSeq(ctx, conversationID, c.getMaxSeqKey)
+			if retErr != nil && errs.Unwrap(retErr) != redis.Nil {
+				time.Sleep(time.Second * 2)
+				continue
+			}
+			return retData, retErr
+		}
+	}
 }
 
 func (c *msgCache) SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error {
@@ -645,19 +672,35 @@ func (c *msgCache) PipeDeleteMessages(ctx context.Context, conversationID string
 }
 
 func (c *msgCache) CleanUpOneConversationAllMsg(ctx context.Context, conversationID string) error {
-	vals, err := c.rdb.Keys(ctx, c.allMessageCacheKey(conversationID)).Result()
-	if errors.Is(err, redis.Nil) {
-		return nil
-	}
-	if err != nil {
-		return errs.Wrap(err)
-	}
-	for _, v := range vals {
-		if err := c.rdb.Del(ctx, v).Err(); err != nil {
+	var (
+		cursor uint64
+		keys   []string
+		err    error
+
+		key = c.allMessageCacheKey(conversationID)
+	)
+
+	for {
+		// scan up to 10000 at a time, the count (10000) param refers to the number of scans on redis server.
+		// if the count is too small, needs to be run scan on redis frequently.
+		var limit int64 = 10000
+		keys, cursor, err = c.rdb.Scan(ctx, cursor, key, limit).Result()
+		if err != nil {
 			return errs.Wrap(err)
 		}
+
+		for _, key := range keys {
+			err := c.rdb.Del(ctx, key).Err()
+			if err != nil {
+				return errs.Wrap(err)
+			}
+		}
+
+		// scan end
+		if cursor == 0 {
+			return nil
+		}
 	}
-	return nil
 }
 
 func (c *msgCache) DelMsgFromCache(ctx context.Context, userID string, seqs []int64) error {

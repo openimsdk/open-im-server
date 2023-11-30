@@ -50,9 +50,18 @@ type CallbackBeforeCreateGroupResp struct {
 	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
 }
 
+type CallbackAfterCreateGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	*common.GroupInfo
+	InitMemberList []*apistruct.GroupAddMemberInfo `json:"initMemberList"`
+}
+
+type CallbackAfterCreateGroupResp struct {
+	CommonCallbackResp
+}
+
 type CallbackBeforeMemberJoinGroupReq struct {
 	CallbackCommand `json:"callbackCommand"`
-	OperationID     string `json:"operationID"`
 	GroupID         string `json:"groupID"`
 	UserID          string `json:"userID"`
 	Ex              string `json:"ex"`
@@ -70,7 +79,6 @@ type CallbackBeforeMemberJoinGroupResp struct {
 
 type CallbackBeforeSetGroupMemberInfoReq struct {
 	CallbackCommand `json:"callbackCommand"`
-	OperationID     string  `json:"operationID"`
 	GroupID         string  `json:"groupID"`
 	UserID          string  `json:"userID"`
 	Nickname        *string `json:"nickName"`
@@ -85,4 +93,143 @@ type CallbackBeforeSetGroupMemberInfoResp struct {
 	Nickname  *string `json:"nickName"`
 	FaceURL   *string `json:"faceURL"`
 	RoleLevel *int32  `json:"roleLevel"`
+}
+
+type CallbackAfterSetGroupMemberInfoReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string  `json:"groupID"`
+	UserID          string  `json:"userID"`
+	Nickname        *string `json:"nickName"`
+	FaceURL         *string `json:"faceURL"`
+	RoleLevel       *int32  `json:"roleLevel"`
+	Ex              *string `json:"ex"`
+}
+
+type CallbackAfterSetGroupMemberInfoResp struct {
+	CommonCallbackResp
+}
+
+type CallbackQuitGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string `json:"groupID"`
+	UserID          string `json:"userID"`
+}
+
+type CallbackQuitGroupResp struct {
+	CommonCallbackResp
+}
+
+type CallbackKillGroupMemberReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string   `json:"groupID"`
+	KickedUserIDs   []string `json:"kickedUserIDs"`
+	Reason          string   `json:"reason"`
+}
+
+type CallbackKillGroupMemberResp struct {
+	CommonCallbackResp
+}
+
+type CallbackDisMissGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string   `json:"groupID"`
+	OwnerID         string   `json:"ownerID"`
+	GroupType       string   `json:"groupType"`
+	MembersID       []string `json:"membersID"`
+}
+
+type CallbackDisMissGroupResp struct {
+	CommonCallbackResp
+}
+
+type CallbackJoinGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string `json:"groupID"`
+	GroupType       string `json:"groupType"`
+	ApplyID         string `json:"applyID"`
+	ReqMessage      string `json:"reqMessage"`
+}
+
+type CallbackJoinGroupResp struct {
+	CommonCallbackResp
+}
+
+type CallbackTransferGroupOwnerReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	GroupID         string `json:"groupID"`
+	OldOwnerUserID  string `json:"oldOwnerUserID"`
+	NewOwnerUserID  string `json:"newOwnerUserID"`
+}
+
+type CallbackTransferGroupOwnerResp struct {
+	CommonCallbackResp
+}
+
+type CallbackBeforeInviteUserToGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OperationID     string   `json:"operationID"`
+	GroupID         string   `json:"groupID"`
+	Reason          string   `json:"reason"`
+	InvitedUserIDs  []string `json:"invitedUserIDs"`
+}
+type CallbackBeforeInviteUserToGroupResp struct {
+	CommonCallbackResp
+	RefusedMembersAccount []string `json:"refusedMembersAccount,omitempty"` // Optional field to list members whose invitation is refused.
+}
+
+type CallbackAfterJoinGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OperationID     string `json:"operationID"`
+	GroupID         string `json:"groupID"`
+	ReqMessage      string `json:"reqMessage"`
+	JoinSource      int32  `json:"joinSource"`
+	InviterUserID   string `json:"inviterUserID"`
+}
+type CallbackAfterJoinGroupResp struct {
+	CommonCallbackResp
+}
+
+type CallbackBeforeSetGroupInfoReq struct {
+	CallbackCommand   `json:"callbackCommand"`
+	OperationID       string `json:"operationID"`
+	GroupID           string `json:"groupID"`
+	GroupName         string `json:"groupName"`
+	Notification      string `json:"notification"`
+	Introduction      string `json:"introduction"`
+	FaceURL           string `json:"faceURL"`
+	Ex                string `json:"ex"`
+	NeedVerification  int32  `json:"needVerification"`
+	LookMemberInfo    int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend int32  `json:"applyMemberFriend"`
+}
+
+type CallbackBeforeSetGroupInfoResp struct {
+	CommonCallbackResp
+	GroupID           string  ` json:"groupID"`
+	GroupName         string  `json:"groupName"`
+	Notification      string  `json:"notification"`
+	Introduction      string  `json:"introduction"`
+	FaceURL           string  `json:"faceURL"`
+	Ex                *string `json:"ex"`
+	NeedVerification  *int32  `json:"needVerification"`
+	LookMemberInfo    *int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
+}
+
+type CallbackAfterSetGroupInfoReq struct {
+	CallbackCommand   `json:"callbackCommand"`
+	OperationID       string  `json:"operationID"`
+	GroupID           string  `json:"groupID"`
+	GroupName         string  `json:"groupName"`
+	Notification      string  `json:"notification"`
+	Introduction      string  `json:"introduction"`
+	FaceURL           string  `json:"faceURL"`
+	Ex                *string `json:"ex"`
+	NeedVerification  *int32  `json:"needVerification"`
+	LookMemberInfo    *int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
+}
+
+type CallbackAfterSetGroupInfoResp struct {
+	CommonCallbackResp
 }

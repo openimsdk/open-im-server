@@ -110,7 +110,7 @@ install_docker_compose() {
     read NEW_USER
     is_empty $NEW_USER
     if [ $? -eq 0 ]; then 
-        USER=$NEW_USER
+        OPENIM_USER=$NEW_USER
     fi 
 
     echo "Please input the password, default is openIM123, press enter to use default"
@@ -131,12 +131,12 @@ install_docker_compose() {
     fi
     set -e
     export MINIO_ENDPOINT
-    export USER
+    export OPENIM_USER
     export PASSWORD
     export DATA_DIR
 
     cat <<EOF > .env
-USER=${USER}
+OPENIM_USER=${OPENIM_USER}
 PASSWORD=${PASSWORD}
 MINIO_ENDPOINT=${MINIO_ENDPOINT}
 DATA_DIR=${DATA_DIR}

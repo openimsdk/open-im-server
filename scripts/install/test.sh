@@ -1168,6 +1168,74 @@ EOF
   openim::test::check_error "$response"
 }
 
+# Searches for messages.
+openim::test::search_msg() {
+  local sendID="${1}"
+  local recvID="${2}"
+  local msgType="${3}"
+  local sendTime="${4}"
+  local sessionType="${5}"
+  local pageNumber="${6}"
+  local showNumber="${7}"
+
+  # Construct the request body
+  local request_body=$(cat <<EOF
+{
+  "sendID": "${sendID}",
+  "recvID": "${recvID}",
+  "msgType": ${msgType},
+  "sendTime": "${sendTime}",
+  "sessionType": ${sessionType},
+  "pagination": {
+    "pageNumber": ${pageNumber},
+    "showNumber": ${showNumber}
+  }
+}
+EOF
+)
+  echo "$request_body"
+
+  # Send the request
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/msg/search_msg" -d "${request_body}")
+
+  # Check the response for errors
+  openim::test::check_error "$response"
+}
+
+# Pulls messages by sequence.
+openim::test::pull_msg_by_seq() {
+  local userID="${1}"
+  local conversationID="${2}"
+  local beginSeq="${3}"
+  local endSeq="${4}"
+  local num="${5}"
+  local order="${6}"  # Assuming 0 for ascending, 1 for descending
+
+  # Construct the request body
+  local request_body=$(cat <<EOF
+{
+  "userID": "${userID}",
+  "seqRanges": [
+    {
+      "conversationID": "${conversationID}",
+      "begin": ${beginSeq},
+      "end": ${endSeq},
+      "num": ${num}
+    }
+  ],
+  "order": ${order}
+}
+EOF
+)
+  echo "$request_body"
+
+  # Send the request
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/msg/pull_msg_by_seq" -d "${request_body}")
+
+  # Check the response for errors
+  openim::test::check_error "$response"
+}
+
 # Revokes a message.
 openim::test::revoke_msg() {
   local userID="${1}"
@@ -1220,15 +1288,35 @@ function openim::test::msg()
 
   # 0. Send a message.
   openim::test::send_msg "${SEND_USER_ID}" "${RECV_USER_ID}" "${GROUP_ID}"
-  
+
+  # Wait for a short duration to ensure message is sent
+  # 1. Search for the message
+  local SEARCH_TIME="2023-01-01T00:00:00Z" # You may need to adjust this
+  local MSG_TYPE=101
+  local SESSION_TYPE=1
+  local PAGE_NUMBER=1
+  local SHOW_NUMBER=20
+
+  echo "Searching for messages between ${SEND_USER_ID} and ${RECV_USER_ID}..."
+  openim::test::search_msg "${MANAGER_USERID_1}" "${RECV_USER_ID}" "${MSG_TYPE}" "${SEARCH_TIME}" "${SESSION_TYPE}" "${PAGE_NUMBER}" "${SHOW_NUMBER}"
+
+  # 3. Pull messages by sequence.
+  local CONVERSATION_ID="ci_${SEND_USER_ID}_${RECV_USER_ID}" # Adjust as per your conversation ID format
+  local BEGIN_SEQ=0
+  local END_SEQ=10
+  local NUM=5
+  local ORDER=0 # Assuming 0 for ascending order
+  openim::test::pull_msg_by_seq "${RECV_USER_ID}" "${CONVERSATION_ID}" "${BEGIN_SEQ}" "${END_SEQ}" "${NUM}" "${ORDER}"
+
+
   # Assuming message sending was successful and returned a sequence number.
   local SEQ_NUMBER=1 # This should be the actual sequence number of the message sent.
-  
-  # 1. Revoke a message.
+
+  # 2. Revoke a message.
   # TODO：
   # openim::test::revoke_msg "${RECV_USER_ID}" "si_${SEND_USER_ID}_${RECV_USER_ID}" "${SEQ_NUMBER}"
-
-  # 2. Clear all messages for a user.
+  
+  # 4. Clear all messages for a user.
   openim::test::user_clear_all_msg "${RECV_USER_ID}"
 
   # Log the completion of the message test suite.

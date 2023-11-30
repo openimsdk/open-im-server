@@ -15,9 +15,8 @@
 package convert
 
 import (
-	"time"
-
 	"github.com/OpenIMSDK/protocol/sdkws"
+	"time"
 
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )

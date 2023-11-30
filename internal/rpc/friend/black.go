@@ -74,6 +74,9 @@ func (s *friendServer) RemoveBlack(
 		return nil, err
 	}
 	s.notificationSender.BlackDeletedNotification(ctx, req)
+	if err := CallbackAfterRemoveBlack(ctx, req); err != nil {
+		return nil, err
+	}
 	return &pbfriend.RemoveBlackResp{}, nil
 }
 
@@ -83,6 +86,9 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbfriend.AddBlackReq) 
 	}
 	_, err := s.userRpcClient.GetUsersInfo(ctx, []string{req.OwnerUserID, req.BlackUserID})
 	if err != nil {
+		return nil, err
+	}
+	if err := CallbackBeforeAddBlack(ctx, req); err != nil {
 		return nil, err
 	}
 	black := relation.BlackModel{
