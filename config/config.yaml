@@ -158,7 +158,14 @@ object:
     accessKeySecret: ''
     sessionToken: ''
     publicRead: false
-
+  kodo:
+    endpoint: "http://s3.cn-east-1.qiniucs.com"
+    bucket: "demo-9999999"
+    bucketURL: "http://your.domain.com"
+    accessKeyID: ''
+    accessKeySecret: ''
+    sessionToken: ''
+    publicRead: false
 ###################### RPC Port Configuration ######################
 # RPC service ports
 # These ports are passed into the program by the script and are not recommended to modify

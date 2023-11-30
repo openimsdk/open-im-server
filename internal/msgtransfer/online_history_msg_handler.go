@@ -252,7 +252,10 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(
 			return
 		}
 		log.ZDebug(ctx, "success to next topic", "conversationID", conversationID)
-		och.msgDatabase.MsgToMongoMQ(ctx, key, conversationID, storageList, lastSeq)
+		err = och.msgDatabase.MsgToMongoMQ(ctx, key, conversationID, storageList, lastSeq)
+		if err != nil {
+			log.ZError(ctx, "MsgToMongoMQ error", err)
+		}
 		och.toPushTopic(ctx, key, conversationID, storageList)
 	}
 }
@@ -277,9 +280,6 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(
 		lastSeq, isNewConversation, err := och.msgDatabase.BatchInsertChat2Cache(ctx, conversationID, storageList)
 		if err != nil && errs.Unwrap(err) != redis.Nil {
 			log.ZError(ctx, "batch data insert to redis err", err, "storageMsgList", storageList)
-			och.singleMsgFailedCountMutex.Lock()
-			och.singleMsgFailedCount += uint64(len(storageList))
-			och.singleMsgFailedCountMutex.Unlock()
 			return
 		}
 		if isNewConversation {
@@ -311,10 +311,10 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(
 		}
 
 		log.ZDebug(ctx, "success incr to next topic")
-		och.singleMsgSuccessCountMutex.Lock()
-		och.singleMsgSuccessCount += uint64(len(storageList))
-		och.singleMsgSuccessCountMutex.Unlock()
-		och.msgDatabase.MsgToMongoMQ(ctx, key, conversationID, storageList, lastSeq)
+		err = och.msgDatabase.MsgToMongoMQ(ctx, key, conversationID, storageList, lastSeq)
+		if err != nil {
+			log.ZError(ctx, "MsgToMongoMQ error", err)
+		}
 		och.toPushTopic(ctx, key, conversationID, storageList)
 	}
 }
