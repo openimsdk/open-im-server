@@ -70,6 +70,10 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
+	if len(req.UserIDs) == 0 {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail("UserIDs array is empty").Wrap())
+		return
+	}
 	conns, err := u.Discov.GetConns(c, config.Config.RpcRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		apiresp.GinError(c, err)
@@ -132,6 +136,10 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 	var req msggateway.GetUsersOnlineStatusReq
 	if err := c.BindJSON(&req); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	if len(req.UserIDs) == 0 {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail("UserIDs array is empty").Wrap())
 		return
 	}
 	conns, err := u.Discov.GetConns(c, config.Config.RpcRegisterName.OpenImMessageGatewayName)

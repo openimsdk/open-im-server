@@ -78,6 +78,7 @@ type FriendDatabase interface {
 	) (friends []*relation.FriendModel, err error)
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
 	FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error)
+	UpdateFriendPinStatus(ctx context.Context, ownerUserID string, friendUserID string) (err error)
 }
 
 type friendDatabase struct {
@@ -371,4 +372,12 @@ func (f *friendDatabase) FindFriendUserIDs(
 
 func (f *friendDatabase) FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error) {
 	return f.friendRequest.FindBothFriendRequests(ctx, fromUserID, toUserID)
+}
+
+// 星標好友
+func (f *friendDatabase) UpdateFriendPinStatus(ctx context.Context, ownerUserID string, friendUserID string) (err error) {
+	if err := f.friend.UpdatePinStatus(ctx, ownerUserID, friendUserID); err != nil {
+		return err
+	}
+	return f.cache.DelFriend(ownerUserID, friendUserID).ExecDel(ctx)
 }

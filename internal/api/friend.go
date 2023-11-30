@@ -64,6 +64,9 @@ func (o *FriendApi) GetDesignatedFriends(c *gin.Context) {
 func (o *FriendApi) SetFriendRemark(c *gin.Context) {
 	a2r.Call(friend.FriendClient.SetFriendRemark, o.Client, c)
 }
+func (o *FriendApi) SetPinFriends(c *gin.Context) {
+	a2r.Call(friend.FriendClient.PinFriends, o.Client, c)
+}
 
 func (o *FriendApi) AddBlack(c *gin.Context) {
 	a2r.Call(friend.FriendClient.AddBlack, o.Client, c)
