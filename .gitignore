@@ -391,3 +391,4 @@ Sessionx.vim
 dist/
 .env
 config/config.yaml
+config/alertmanager.yml
