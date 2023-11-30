@@ -61,6 +61,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if msgs[0].ContentType == constant.MsgRevokeNotification {
 		return nil, errs.ErrMsgAlreadyRevoke.Wrap("msg already revoke")
 	}
+
 	data, _ := json.Marshal(msgs[0])
 	log.ZInfo(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
 	var role int32
@@ -126,6 +127,9 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		recvID = msgs[0].RecvID
 	}
 	if err := m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips); err != nil {
+		return nil, err
+	}
+	if err = CallbackAfterRevokeMsg(ctx, req); err != nil {
 		return nil, err
 	}
 	return &msg.RevokeMsgResp{}, nil

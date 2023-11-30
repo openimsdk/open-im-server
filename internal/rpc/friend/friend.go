@@ -103,7 +103,7 @@ func (s *friendServer) ApplyToAddFriend(
 	if req.ToUserID == req.FromUserID {
 		return nil, errs.ErrCanNotAddYourself.Wrap()
 	}
-	if err := CallbackBeforeAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+	if err = CallbackBeforeAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	if _, err := s.userRpcClient.GetUsersInfoMap(ctx, []string{req.ToUserID, req.FromUserID}); err != nil {
@@ -120,6 +120,9 @@ func (s *friendServer) ApplyToAddFriend(
 		return nil, err
 	}
 	s.notificationSender.FriendApplicationAddNotification(ctx, req)
+	if err = CallbackAfterAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+		return nil, err
+	}
 	return resp, nil
 }
 
@@ -141,6 +144,10 @@ func (s *friendServer) ImportFriends(
 	if utils.Duplicate(req.FriendUserIDs) {
 		return nil, errs.ErrArgs.Wrap("friend userID repeated")
 	}
+	if err := CallbackBeforeImportFriends(ctx, req); err != nil {
+		return nil, err
+	}
+
 	if err := s.friendDatabase.BecomeFriends(ctx, req.OwnerUserID, req.FriendUserIDs, constant.BecomeFriendByImport); err != nil {
 		return nil, err
 	}
@@ -150,6 +157,9 @@ func (s *friendServer) ImportFriends(
 			ToUserID:     userID,
 			HandleResult: constant.FriendResponseAgree,
 		})
+	}
+	if err := CallbackAfterImportFriends(ctx, req); err != nil {
+		return nil, err
 	}
 	return &pbfriend.ImportFriendResp{}, nil
 }
@@ -172,6 +182,9 @@ func (s *friendServer) RespondFriendApply(
 		HandleResult: req.HandleResult,
 	}
 	if req.HandleResult == constant.FriendResponseAgree {
+		if err := CallbackBeforeAddFriendAgree(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+			return nil, err
+		}
 		err := s.friendDatabase.AgreeFriendRequest(ctx, &friendRequest)
 		if err != nil {
 			return nil, err
@@ -208,6 +221,9 @@ func (s *friendServer) DeleteFriend(
 		return nil, err
 	}
 	s.notificationSender.FriendDeletedNotification(ctx, req)
+	if err := CallbackAfterDeleteFriend(ctx, req); err != nil {
+		return nil, err
+	}
 	return resp, nil
 }
 

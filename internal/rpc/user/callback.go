@@ -91,8 +91,8 @@ func CallbackAfterUserRegister(ctx context.Context, req *pbuser.UserRegisterReq)
 		Users:           req.Users,
 	}
 
-	resp := &cbapi.CallbackBeforeUserRegisterResp{}
-	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfo); err != nil {
+	resp := &cbapi.CallbackAfterUserRegisterResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackAfterUpdateUserInfo); err != nil {
 		return err
 	}
 	return nil

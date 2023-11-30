@@ -16,7 +16,6 @@ package config
 
 import (
 	"bytes"
-
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"gopkg.in/yaml.v3"
 )
@@ -282,11 +281,25 @@ type configStruct struct {
 		CallbackAfterCreateGroup           CallBackConfig `yaml:"afterCreateGroup"`
 		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
 		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
+		CallbackAfterSetGroupMemberInfo    CallBackConfig `yaml:"afterSetGroupMemberInfo"`
 		CallbackQuitGroup                  CallBackConfig `yaml:"quitGroup"`
 		CallbackKillGroupMember            CallBackConfig `yaml:"killGroupMember"`
 		CallbackDismissGroup               CallBackConfig `yaml:"dismissGroup"`
 		CallbackBeforeJoinGroup            CallBackConfig `yaml:"joinGroup"`
 		CallbackTransferGroupOwnerAfter    CallBackConfig `yaml:"transferGroupOwner"`
+		CallbackBeforeInviteUserToGroup    CallBackConfig `yaml:"beforeInviteUserToGroup"`
+		CallbackAfterJoinGroup             CallBackConfig `yaml:"joinGroupAfter"`
+		CallbackAfterSetGroupInfo          CallBackConfig `yaml:"setGroupInfoAfter"`
+		CallbackBeforeSetGroupInfo         CallBackConfig `yaml:"setGroupInfoBefore"`
+		CallbackAfterRevokeMsg             CallBackConfig `yaml:"revokeMsgAfter"`
+		CallbackBeforeAddBlack             CallBackConfig `yaml:"addBlackBefore"`
+		CallbackAfterAddFriend             CallBackConfig `yaml:"addFriendAfter"`
+		CallbackBeforeAddFriendAgree       CallBackConfig `yaml:"addFriendAgreeBefore"`
+
+		CallbackAfterDeleteFriend   CallBackConfig `yaml:"deleteFriendAfter"`
+		CallbackBeforeImportFriends CallBackConfig `yaml:"importFriendsBefore"`
+		CallbackAfterImportFriends  CallBackConfig `yaml:"importFriendsAfter"`
+		CallbackAfterRemoveBlack    CallBackConfig `yaml:"removeBlackAfter"`
 	} `yaml:"callback"`
 
 	Prometheus struct {

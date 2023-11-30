@@ -19,6 +19,7 @@ type CallbackBeforeAddFriendReq struct {
 	FromUserID      string `json:"fromUserID" `
 	ToUserID        string `json:"toUserID"`
 	ReqMsg          string `json:"reqMsg"`
+	Ex              string `json:"ex"`
 }
 
 type CallbackBeforeAddFriendResp struct {
@@ -32,17 +33,6 @@ type CallBackAddFriendReplyBeforeReq struct {
 }
 
 type CallBackAddFriendReplyBeforeResp struct {
-	CommonCallbackResp
-}
-
-type CallbackAfterAddFriendReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	FromUserID      string `json:"fromUserID" `
-	ToUserID        string `json:"toUserID"`
-	ReqMsg          string `json:"reqMsg"`
-}
-
-type CallbackAfterAddFriendResp struct {
 	CommonCallbackResp
 }
 
@@ -66,5 +56,72 @@ type CallbackAfterSetFriendRemarkReq struct {
 }
 
 type CallbackAfterSetFriendRemarkResp struct {
+	CommonCallbackResp
+}
+type CallbackAfterAddFriendReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	FromUserID      string `json:"fromUserID" `
+	ToUserID        string `json:"toUserID"`
+	ReqMsg          string `json:"reqMsg"`
+}
+
+type CallbackAfterAddFriendResp struct {
+	CommonCallbackResp
+}
+type CallbackBeforeAddBlackReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OwnerUserID     string `json:"ownerUserID" `
+	BlackUserID     string `json:"blackUserID"`
+}
+
+type CallbackBeforeAddBlackResp struct {
+	CommonCallbackResp
+}
+
+type CallbackBeforeAddFriendAgreeReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	FromUserID      string `json:"fromUserID" `
+	ToUserID        string `json:"blackUserID"`
+	HandleResult    int32  `json:"HandleResult"`
+	HandleMsg       string `json:"HandleMsg"`
+}
+
+type CallbackBeforeAddFriendAgreeResp struct {
+	CommonCallbackResp
+}
+
+type CallbackAfterDeleteFriendReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OwnerUserID     string `json:"ownerUserID" `
+	FriendUserID    string `json:"friendUserID"`
+}
+type CallbackAfterDeleteFriendResp struct {
+	CommonCallbackResp
+}
+
+type CallbackBeforeImportFriendsReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OwnerUserID     string   `json:"ownerUserID" `
+	FriendUserIDs   []string `json:"friendUserIDs"`
+}
+type CallbackBeforeImportFriendsResp struct {
+	CommonCallbackResp
+	FriendUserIDs []string `json:"friendUserIDs"`
+}
+type CallbackAfterImportFriendsReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OwnerUserID     string   `json:"ownerUserID" `
+	FriendUserIDs   []string `json:"friendUserIDs"`
+}
+type CallbackAfterImportFriendsResp struct {
+	CommonCallbackResp
+}
+
+type CallbackAfterRemoveBlackReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OwnerUserID     string `json:"ownerUserID"`
+	BlackUserID     string `json:"blackUserID"`
+}
+type CallbackAfterRemoveBlackResp struct {
 	CommonCallbackResp
 }

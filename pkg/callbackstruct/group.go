@@ -109,56 +109,6 @@ type CallbackAfterSetGroupMemberInfoResp struct {
 	CommonCallbackResp
 }
 
-type CallbackAfterGroupMemberExitReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	GroupID         string `json:"groupID"`
-	UserID          string `json:"userID"`
-	GroupType       *int32 `json:"groupType"`
-	ExitType        string `json:"exitType"`
-}
-
-type CallbackAfterGroupMemberExitResp struct {
-	CommonCallbackResp
-}
-
-type CallbackAfterUngroupReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	GroupID         string   `json:"groupID"`
-	GroupType       *int32   `json:"groupType"`
-	OwnerID         string   `json:"ownerID"`
-	MemberList      []string `json:"memberList"`
-}
-
-type CallbackAfterUngroupResp struct {
-	CommonCallbackResp
-}
-
-type CallbackAfterSetGroupInfoReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	GroupID         string `json:"groupID"`
-	GroupType       *int32 `json:"groupType"`
-	UserID          string `json:"userID"`
-	Name            string `json:"name"`
-	Notification    string `json:"notification"`
-	GroupUrl        string `json:"groupUrl"`
-}
-
-type CallbackAfterSetGroupInfoResp struct {
-	CommonCallbackResp
-}
-
-type CallbackAfterRevokeMsgReq struct {
-	CallbackCommand `json:"callbackCommand"`
-	GroupID         string `json:"groupID"`
-	GroupType       *int32 `json:"groupType"`
-	UserID          string `json:"userID"`
-	Content         string `json:"content"`
-}
-
-type CallbackAfterRevokeMsgResp struct {
-	CommonCallbackResp
-}
-
 type CallbackQuitGroupReq struct {
 	CallbackCommand `json:"callbackCommand"`
 	GroupID         string `json:"groupID"`
@@ -212,5 +162,74 @@ type CallbackTransferGroupOwnerReq struct {
 }
 
 type CallbackTransferGroupOwnerResp struct {
+	CommonCallbackResp
+}
+
+type CallbackBeforeInviteUserToGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OperationID     string   `json:"operationID"`
+	GroupID         string   `json:"groupID"`
+	Reason          string   `json:"reason"`
+	InvitedUserIDs  []string `json:"invitedUserIDs"`
+}
+type CallbackBeforeInviteUserToGroupResp struct {
+	CommonCallbackResp
+	RefusedMembersAccount []string `json:"refusedMembersAccount,omitempty"` // Optional field to list members whose invitation is refused.
+}
+
+type CallbackAfterJoinGroupReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	OperationID     string `json:"operationID"`
+	GroupID         string `json:"groupID"`
+	ReqMessage      string `json:"reqMessage"`
+	JoinSource      int32  `json:"joinSource"`
+	InviterUserID   string `json:"inviterUserID"`
+}
+type CallbackAfterJoinGroupResp struct {
+	CommonCallbackResp
+}
+
+type CallbackBeforeSetGroupInfoReq struct {
+	CallbackCommand   `json:"callbackCommand"`
+	OperationID       string `json:"operationID"`
+	GroupID           string `json:"groupID"`
+	GroupName         string `json:"groupName"`
+	Notification      string `json:"notification"`
+	Introduction      string `json:"introduction"`
+	FaceURL           string `json:"faceURL"`
+	Ex                string `json:"ex"`
+	NeedVerification  int32  `json:"needVerification"`
+	LookMemberInfo    int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend int32  `json:"applyMemberFriend"`
+}
+
+type CallbackBeforeSetGroupInfoResp struct {
+	CommonCallbackResp
+	GroupID           string  ` json:"groupID"`
+	GroupName         string  `json:"groupName"`
+	Notification      string  `json:"notification"`
+	Introduction      string  `json:"introduction"`
+	FaceURL           string  `json:"faceURL"`
+	Ex                *string `json:"ex"`
+	NeedVerification  *int32  `json:"needVerification"`
+	LookMemberInfo    *int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
+}
+
+type CallbackAfterSetGroupInfoReq struct {
+	CallbackCommand   `json:"callbackCommand"`
+	OperationID       string  `json:"operationID"`
+	GroupID           string  `json:"groupID"`
+	GroupName         string  `json:"groupName"`
+	Notification      string  `json:"notification"`
+	Introduction      string  `json:"introduction"`
+	FaceURL           string  `json:"faceURL"`
+	Ex                *string `json:"ex"`
+	NeedVerification  *int32  `json:"needVerification"`
+	LookMemberInfo    *int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
+}
+
+type CallbackAfterSetGroupInfoResp struct {
 	CommonCallbackResp
 }

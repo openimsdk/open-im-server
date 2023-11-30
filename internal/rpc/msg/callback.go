@@ -24,8 +24,8 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
-
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
 )
@@ -98,10 +98,10 @@ func callbackAfterSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) err
 }
 
 func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) error {
-	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable {
+	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable {
 		return nil
 	}
-	req := &cbapi.CallbackAfterSendGroupMsgReq{
+	req := &cbapi.CallbackBeforeSendGroupMsgReq{
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeSendGroupMsgCommand),
 		GroupID:           msg.MsgData.GroupID,
 	}
@@ -160,7 +160,6 @@ func callbackMsgModify(ctx context.Context, msg *pbchat.SendMsgReq) error {
 	log.ZDebug(ctx, "callbackMsgModify", "msg", msg.MsgData)
 	return nil
 }
-
 func CallbackGroupMsgRead(ctx context.Context, req *cbapi.CallbackGroupMsgReadReq) error {
 	if !config.Config.Callback.CallbackGroupMsgRead.Enable || req.ContentType != constant.Text {
 		return nil
@@ -180,10 +179,27 @@ func CallbackSingleMsgRead(ctx context.Context, req *cbapi.CallbackSingleMsgRead
 	}
 	req.CallbackCommand = cbapi.CallbackSingleMsgRead
 
-	resp := &cbapi.CallbackGroupMsgReadResp{}
+	resp := &cbapi.CallbackSingleMsgReadResp{}
 
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
 		return err
 	}
+	return nil
+}
+func CallbackAfterRevokeMsg(ctx context.Context, req *pbchat.RevokeMsgReq) error {
+	if !config.Config.Callback.CallbackAfterRevokeMsg.Enable {
+		return nil
+	}
+	callbackReq := &cbapi.CallbackAfterRevokeMsgReq{
+		CallbackCommand: cbapi.CallbackAfterRevokeMsgCommand,
+		ConversationID:  req.ConversationID,
+		Seq:             req.Seq,
+		UserID:          req.UserID,
+	}
+	resp := &cbapi.CallbackAfterRevokeMsgResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterRevokeMsg); err != nil {
+		return err
+	}
+	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }

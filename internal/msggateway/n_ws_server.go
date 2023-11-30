@@ -121,6 +121,7 @@ func (ws *WsServer) UnRegister(c *Client) {
 }
 
 func (ws *WsServer) Validate(s interface{}) error {
+	//?question?
 	return nil
 }
 
