@@ -1196,7 +1196,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 		}
 		s.Notification.GroupDismissedNotification(ctx, tips)
 	}
-	membersID, err := s.GroupDatabase.FindGroupMemberUserID(ctx, group.GroupID)
+	membersID, err := s.db.FindGroupMemberUserID(ctx, group.GroupID)
 	if err != nil {
 		return nil, err
 	}
