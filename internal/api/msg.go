@@ -125,6 +125,10 @@ func (m *MessageApi) GetConversationsHasReadAndMaxSeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetConversationsHasReadAndMaxSeq, m.Client, c)
 }
 
+func (m *MessageApi) GetConversationsUnreadSeqAndMaxSeq(c *gin.Context) {
+	a2r.Call(msg.MsgClient.GetConversationsUnreadSeqAndMaxSeq, m.Client, c)
+}
+
 func (m *MessageApi) SetConversationHasReadSeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SetConversationHasReadSeq, m.Client, c)
 }
@@ -191,6 +195,9 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
+	if req.RecvID == "" {
+		apiresp.GinError(c, errs.ErrArgs.Wrap("recvId is empty"))
+	}
 	if !authverify.IsAppManagerUid(c) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
@@ -230,6 +237,12 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 	if err := c.BindJSON(&req); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
+	}
+	if req.SendUserID == "" {
+		apiresp.GinError(c, errs.ErrArgs.Wrap("sendUserID is empty"))
+	}
+	if req.RecvUserID == "" {
+		apiresp.GinError(c, errs.ErrArgs.Wrap("recvUserID is empty"))
 	}
 	if !authverify.IsAppManagerUid(c) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))

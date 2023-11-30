@@ -71,6 +71,47 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	return resp, nil
 }
 
+func (m *msgServer) GetConversationsUnreadSeqAndMaxSeq(ctx context.Context, req *msg.GetConversationsUnreadSeqAndMaxSeqReq) (resp *msg.GetConversationsUnreadSeqAndMaxSeqResp, err error) {
+	var conversationIDs []string
+	if len(req.ConversationIDs) == 0 {
+		conversationIDs, err = m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		conversationIDs = req.ConversationIDs
+	}
+	hasReadSeqs, err := m.MsgDatabase.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
+	if err != nil {
+		return nil, err
+	}
+	conversations, err := m.Conversation.GetConversations(ctx, req.UserID, conversationIDs)
+	if err != nil {
+		return nil, err
+	}
+	conversationMaxSeqMap := make(map[string]int64)
+	for _, conversation := range conversations {
+		if conversation.MaxSeq != 0 {
+			conversationMaxSeqMap[conversation.ConversationID] = conversation.MaxSeq
+		}
+	}
+	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
+	if err != nil {
+		return nil, err
+	}
+	resp = &msg.GetConversationsUnreadSeqAndMaxSeqResp{Seqs: make(map[string]*msg.UnreadSeqs)}
+	for conversarionID, maxSeq := range maxSeqs {
+		resp.Seqs[conversarionID] = &msg.UnreadSeqs{
+			UnreadSeq: hasReadSeqs[conversarionID],
+			MaxSeq:    maxSeq,
+		}
+		if v, ok := conversationMaxSeqMap[conversarionID]; ok {
+			resp.Seqs[conversarionID].MaxSeq = v
+		}
+	}
+	return resp, nil
+}
+
 func (m *msgServer) SetConversationHasReadSeq(
 	ctx context.Context,
 	req *msg.SetConversationHasReadSeqReq,
