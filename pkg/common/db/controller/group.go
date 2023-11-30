@@ -16,9 +16,10 @@ package controller
 
 import (
 	"context"
-	"github.com/dtm-labs/rockscache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"time"
+
+	"github.com/OpenIMSDK/tools/pagination"
+	"github.com/dtm-labs/rockscache"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/tx"
@@ -74,7 +75,14 @@ type GroupDatabase interface {
 	DeleteGroupMemberHash(ctx context.Context, groupIDs []string) error
 }
 
-func NewGroupDatabase(rdb redis.UniversalClient, groupDB relationtb.GroupModelInterface, groupMemberDB relationtb.GroupMemberModelInterface, groupRequestDB relationtb.GroupRequestModelInterface, ctxTx tx.CtxTx, groupHash cache.GroupHash) GroupDatabase {
+func NewGroupDatabase(
+	rdb redis.UniversalClient,
+	groupDB relationtb.GroupModelInterface,
+	groupMemberDB relationtb.GroupMemberModelInterface,
+	groupRequestDB relationtb.GroupRequestModelInterface,
+	ctxTx tx.CtxTx,
+	groupHash cache.GroupHash,
+) GroupDatabase {
 	rcOptions := rockscache.NewDefaultOptions()
 	rcOptions.StrongConsistency = true
 	rcOptions.RandomExpireAdjustment = 0.2

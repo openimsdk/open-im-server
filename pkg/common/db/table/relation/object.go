@@ -19,10 +19,6 @@ import (
 	"time"
 )
 
-const (
-	ObjectInfoModelTableName = "object"
-)
-
 type ObjectModel struct {
 	Name        string    `bson:"name"`
 	UserID      string    `bson:"user_id"`
@@ -33,22 +29,6 @@ type ObjectModel struct {
 	ContentType string    `bson:"content_type"`
 	Group       string    `bson:"group"`
 	CreateTime  time.Time `bson:"create_time"`
-}
-
-//type ObjectModel struct {
-//	Name        string    `gorm:"column:name;primary_key"`
-//	UserID      string    `gorm:"column:user_id"`
-//	Hash        string    `gorm:"column:hash"`
-//	Engine      string    `gorm:"column:engine"`
-//	Key         string    `gorm:"column:key"`
-//	Size        int64     `gorm:"column:size"`
-//	ContentType string    `gorm:"column:content_type"`
-//	Cause       string    `gorm:"column:cause"`
-//	CreateTime  time.Time `gorm:"column:create_time"`
-//}
-
-func (ObjectModel) TableName() string {
-	return ObjectInfoModelTableName
 }
 
 type ObjectInfoModelInterface interface {

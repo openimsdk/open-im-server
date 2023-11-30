@@ -18,26 +18,19 @@ import (
 	"context"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/OpenIMSDK/tools/pagination"
 )
 
-const FriendRequestModelCollectionName = "friend_requests"
-
 type FriendRequestModel struct {
-	ID            primitive.ObjectID `bson:"_id,omitempty"`
-	FromUserID    string             `bson:"from_user_id"`
-	ToUserID      string             `bson:"to_user_id"`
-	HandleResult  int32              `bson:"handle_result"`
-	ReqMsg        string             `bson:"req_msg"`
-	CreateTime    time.Time          `bson:"create_time"`
-	HandlerUserID string             `bson:"handler_user_id"`
-	HandleMsg     string             `bson:"handle_msg"`
-	HandleTime    time.Time          `bson:"handle_time"`
-	Ex            string             `bson:"ex"`
-}
-
-func (FriendRequestModel) CollectionName() string {
-	return FriendRequestModelCollectionName
+	FromUserID    string    `bson:"from_user_id"`
+	ToUserID      string    `bson:"to_user_id"`
+	HandleResult  int32     `bson:"handle_result"`
+	ReqMsg        string    `bson:"req_msg"`
+	CreateTime    time.Time `bson:"create_time"`
+	HandlerUserID string    `bson:"handler_user_id"`
+	HandleMsg     string    `bson:"handle_msg"`
+	HandleTime    time.Time `bson:"handle_time"`
+	Ex            string    `bson:"ex"`
 }
 
 type FriendRequestModelInterface interface {
@@ -53,11 +46,8 @@ type FriendRequestModelInterface interface {
 	Find(ctx context.Context, fromUserID, toUserID string) (friendRequest *FriendRequestModel, err error)
 	Take(ctx context.Context, fromUserID, toUserID string) (friendRequest *FriendRequestModel, err error)
 	// Get list of friend requests received by toUserID
-	FindToUserID(ctx context.Context,toUserID string,pageNumber, showNumber int32,) (friendRequests []*FriendRequestModel, total int64, err error)
+	FindToUserID(ctx context.Context, toUserID string, pagination pagination.Pagination) (total int64, friendRequests []*FriendRequestModel, err error)
 	// Get list of friend requests sent by fromUserID
-	FindFromUserID(ctx context.Context,fromUserID string,pageNumber, showNumber int32,) (friendRequests []*FriendRequestModel, total int64, err error)
+	FindFromUserID(ctx context.Context, fromUserID string, pagination pagination.Pagination) (total int64, friendRequests []*FriendRequestModel, err error)
 	FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*FriendRequestModel, err error)
-	NewTx(tx any) FriendRequestModelInterface
-	// Check if the record exists
-	Exist(ctx context.Context, userID string) (exist bool, err error)
 }

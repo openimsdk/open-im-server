@@ -17,17 +17,17 @@ package third
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-
 	"net/url"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cos"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/kodo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/minio"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/oss"
+
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/third"
@@ -44,11 +44,11 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	logdb, err := newmgo.NewLogMongo(mongo.GetDatabase())
+	logdb, err := mgo.NewLogMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
-	s3db, err := newmgo.NewS3Mongo(mongo.GetDatabase())
+	s3db, err := mgo.NewS3Mongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
@@ -77,8 +77,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		o, err = cos.NewCos()
 	case "oss":
 		o, err = oss.NewOSS()
-	case "kodo":
-		o, err = kodo.NewKodo()
 	default:
 		err = fmt.Errorf("invalid object enable: %s", enable)
 	}

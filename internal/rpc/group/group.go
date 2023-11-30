@@ -17,18 +17,19 @@ package group
 import (
 	"context"
 	"fmt"
-	pbconversation "github.com/OpenIMSDK/protocol/conversation"
-	"github.com/OpenIMSDK/protocol/wrapperspb"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
-	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"
+	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"math/big"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+	pbconversation "github.com/OpenIMSDK/protocol/conversation"
+	"github.com/OpenIMSDK/protocol/wrapperspb"
+	"github.com/OpenIMSDK/tools/tx"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -53,19 +54,11 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	db, err := relation.NewGormDB()
-	if err != nil {
-		return err
-	}
-	if err := db.AutoMigrate(&relationtb.GroupModel{}, &relationtb.GroupMemberModel{}, &relationtb.GroupRequestModel{}); err != nil {
-		return err
-	}
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
 		return err
@@ -74,27 +67,23 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	groupDB, err := newmgo.NewGroupMongo(mongo.GetDatabase())
+	groupDB, err := mgo.NewGroupMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
-	groupMemberDB, err := newmgo.NewGroupMember(mongo.GetDatabase())
+	groupMemberDB, err := mgo.NewGroupMember(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
-	groupRequestDB, err := newmgo.NewGroupRequestMgo(mongo.GetDatabase())
+	groupRequestDB, err := mgo.NewGroupRequestMgo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
-	tx, err := tx2.NewAuto(context.Background(), mongo.GetClient())
-	if err != nil {
-		return err
-	}
 	var gs groupServer
-	database := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, tx, grouphash.NewGroupHashFromGroupServer(&gs))
+	database := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, tx.NewMongo(mongo.GetClient()), grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.db = database
 	gs.User = userRpcClient
 	gs.Notification = notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {

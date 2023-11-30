@@ -18,10 +18,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"hash/crc32"
 	"strconv"
 	"time"
+
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 
 	"github.com/OpenIMSDK/tools/log"
 

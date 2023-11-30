@@ -16,34 +16,10 @@ package relation
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"time"
-)
 
-const (
-	conversationModelTableName = "conversations"
+	"github.com/OpenIMSDK/tools/pagination"
 )
-
-//type ConversationModel struct {
-//	OwnerUserID           string    `gorm:"column:owner_user_id;primary_key;type:char(128)"     json:"OwnerUserID"`
-//	ConversationID        string    `gorm:"column:conversation_id;primary_key;type:char(128)"   json:"conversationID"`
-//	ConversationType      int32     `gorm:"column:conversation_type"                            json:"conversationType"`
-//	UserID                string    `gorm:"column:user_id;type:char(64)"                        json:"userID"`
-//	GroupID               string    `gorm:"column:group_id;type:char(128)"                      json:"groupID"`
-//	RecvMsgOpt            int32     `gorm:"column:recv_msg_opt"                                 json:"recvMsgOpt"`
-//	IsPinned              bool      `gorm:"column:is_pinned"                                    json:"isPinned"`
-//	IsPrivateChat         bool      `gorm:"column:is_private_chat"                              json:"isPrivateChat"`
-//	BurnDuration          int32     `gorm:"column:burn_duration;default:30"                     json:"burnDuration"`
-//	GroupAtType           int32     `gorm:"column:group_at_type"                                json:"groupAtType"`
-//	AttachedInfo          string    `gorm:"column:attached_info;type:varchar(1024)"             json:"attachedInfo"`
-//	Ex                    string    `gorm:"column:ex;type:varchar(1024)"                        json:"ex"`
-//	MaxSeq                int64     `gorm:"column:max_seq"                                      json:"maxSeq"`
-//	MinSeq                int64     `gorm:"column:min_seq"                                      json:"minSeq"`
-//	CreateTime            time.Time `gorm:"column:create_time;index:create_time;autoCreateTime"`
-//	IsMsgDestruct         bool      `gorm:"column:is_msg_destruct;default:false"`
-//	MsgDestructTime       int64     `gorm:"column:msg_destruct_time;default:604800"`
-//	LatestMsgDestructTime time.Time `gorm:"column:latest_msg_destruct_time;autoCreateTime"`
-//}
 
 type ConversationModel struct {
 	OwnerUserID           string    `bson:"owner_user_id"`
@@ -66,10 +42,6 @@ type ConversationModel struct {
 	LatestMsgDestructTime time.Time `bson:"latest_msg_destruct_time"`
 }
 
-func (ConversationModel) TableName() string {
-	return conversationModelTableName
-}
-
 type ConversationModelInterface interface {
 	Create(ctx context.Context, conversations []*ConversationModel) (err error)
 	Delete(ctx context.Context, groupIDs []string) (err error)
@@ -83,11 +55,9 @@ type ConversationModelInterface interface {
 	FindUserIDAllConversations(ctx context.Context, userID string) (conversations []*ConversationModel, err error)
 	FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 	GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) (opt int, err error)
-	//FindSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 	GetAllConversationIDs(ctx context.Context) ([]string, error)
 	GetAllConversationIDsNumber(ctx context.Context) (int64, error)
 	PageConversationIDs(ctx context.Context, pagination pagination.Pagination) (conversationIDs []string, err error)
-	//GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (hashReadSeqs map[string]int64, err error)
 	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*ConversationModel, error)
 	GetConversationIDsNeedDestruct(ctx context.Context) ([]*ConversationModel, error)
 	GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error)

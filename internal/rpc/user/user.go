@@ -17,10 +17,12 @@ package user
 import (
 	"context"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
-	tx2 "github.com/openimsdk/open-im-server/v3/pkg/common/db/tx"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/tools/tx"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -70,17 +72,13 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	for k, v := range config.Config.Manager.UserID {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k], AppMangerLevel: constant.AppAdmin})
 	}
-	userDB, err := newmgo.NewUserMongo(mongo.GetDatabase())
-	if err != nil {
-		return err
-	}
-	tx, err := tx2.NewAuto(context.Background(), mongo.GetClient())
+	userDB, err := mgo.NewUserMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
 	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
-	database := controller.NewUserDatabase(userDB, cache, tx, userMongoDB)
+	database := controller.NewUserDatabase(userDB, cache, tx.NewMongo(mongo.GetClient()), userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)

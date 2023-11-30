@@ -16,8 +16,9 @@ package relation
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
 	"time"
+
+	"github.com/OpenIMSDK/tools/pagination"
 )
 
 type UserModel struct {

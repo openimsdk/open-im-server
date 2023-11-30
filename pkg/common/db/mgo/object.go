@@ -1,18 +1,28 @@
-package newmgo
+package mgo
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo/mgotool"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+
+	"github.com/OpenIMSDK/tools/mgoutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 func NewS3Mongo(db *mongo.Database) (relation.ObjectInfoModelInterface, error) {
-	return &S3Mongo{
-		coll: db.Collection("s3"),
-	}, nil
+	coll := db.Collection("s3")
+	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "name", Value: 1},
+		},
+		Options: options.Index().SetUnique(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &S3Mongo{coll: coll}, nil
 }
 
 type S3Mongo struct {
@@ -30,16 +40,16 @@ func (o *S3Mongo) SetObject(ctx context.Context, obj *relation.ObjectModel) erro
 		"group":        obj.Group,
 		"create_time":  obj.CreateTime,
 	}
-	return mgotool.UpdateOne(ctx, o.coll, filter, bson.M{"$set": update}, false, options.Update().SetUpsert(true))
+	return mgoutil.UpdateOne(ctx, o.coll, filter, bson.M{"$set": update}, false, options.Update().SetUpsert(true))
 }
 
 func (o *S3Mongo) Take(ctx context.Context, engine string, name string) (*relation.ObjectModel, error) {
 	if engine == "" {
-		return mgotool.FindOne[*relation.ObjectModel](ctx, o.coll, bson.M{"name": name})
+		return mgoutil.FindOne[*relation.ObjectModel](ctx, o.coll, bson.M{"name": name})
 	}
-	return mgotool.FindOne[*relation.ObjectModel](ctx, o.coll, bson.M{"name": name, "engine": engine})
+	return mgoutil.FindOne[*relation.ObjectModel](ctx, o.coll, bson.M{"name": name, "engine": engine})
 }
 
 func (o *S3Mongo) Delete(ctx context.Context, engine string, name string) error {
-	return mgotool.DeleteOne(ctx, o.coll, bson.M{"name": name, "engine": engine})
+	return mgoutil.DeleteOne(ctx, o.coll, bson.M{"name": name, "engine": engine})
 }

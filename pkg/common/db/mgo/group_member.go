@@ -1,18 +1,31 @@
-package newmgo
+package mgo
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo/mgotool"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/pagination"
+	"github.com/OpenIMSDK/tools/mgoutil"
+	"github.com/OpenIMSDK/tools/pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 func NewGroupMember(db *mongo.Database) (relation.GroupMemberModelInterface, error) {
-	return &GroupMemberMgo{coll: db.Collection("group_member")}, nil
+	coll := db.Collection("group_member")
+	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "group_id", Value: 1},
+			{Key: "user_id", Value: 1},
+		},
+		Options: options.Index().SetUnique(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &GroupMemberMgo{coll: coll}, nil
 }
 
 type GroupMemberMgo struct {
@@ -20,11 +33,11 @@ type GroupMemberMgo struct {
 }
 
 func (g *GroupMemberMgo) Create(ctx context.Context, groupMembers []*relation.GroupMemberModel) (err error) {
-	return mgotool.InsertMany(ctx, g.coll, groupMembers)
+	return mgoutil.InsertMany(ctx, g.coll, groupMembers)
 }
 
 func (g *GroupMemberMgo) Delete(ctx context.Context, groupID string, userIDs []string) (err error) {
-	return mgotool.DeleteMany(ctx, g.coll, bson.M{"group_id": groupID, "user_id": bson.M{"$in": userIDs}})
+	return mgoutil.DeleteMany(ctx, g.coll, bson.M{"group_id": groupID, "user_id": bson.M{"$in": userIDs}})
 }
 
 func (g *GroupMemberMgo) UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) error {
@@ -32,7 +45,7 @@ func (g *GroupMemberMgo) UpdateRoleLevel(ctx context.Context, groupID string, us
 }
 
 func (g *GroupMemberMgo) Update(ctx context.Context, groupID string, userID string, data map[string]any) (err error) {
-	return mgotool.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID}, bson.M{"$set": data}, true)
+	return mgoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID}, bson.M{"$set": data}, true)
 }
 
 func (g *GroupMemberMgo) Find(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) (groupMembers []*relation.GroupMemberModel, err error) {
@@ -41,19 +54,19 @@ func (g *GroupMemberMgo) Find(ctx context.Context, groupIDs []string, userIDs []
 }
 
 func (g *GroupMemberMgo) FindMemberUserID(ctx context.Context, groupID string) (userIDs []string, err error) {
-	return mgotool.Find[string](ctx, g.coll, bson.M{"group_id": groupID}, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}))
+	return mgoutil.Find[string](ctx, g.coll, bson.M{"group_id": groupID}, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}))
 }
 
 func (g *GroupMemberMgo) Take(ctx context.Context, groupID string, userID string) (groupMember *relation.GroupMemberModel, err error) {
-	return mgotool.FindOne[*relation.GroupMemberModel](ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID})
+	return mgoutil.FindOne[*relation.GroupMemberModel](ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID})
 }
 
 func (g *GroupMemberMgo) TakeOwner(ctx context.Context, groupID string) (groupMember *relation.GroupMemberModel, err error) {
-	return mgotool.FindOne[*relation.GroupMemberModel](ctx, g.coll, bson.M{"group_id": groupID, "role_level": constant.GroupOwner})
+	return mgoutil.FindOne[*relation.GroupMemberModel](ctx, g.coll, bson.M{"group_id": groupID, "role_level": constant.GroupOwner})
 }
 
 func (g *GroupMemberMgo) FindRoleLevelUserIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error) {
-	return mgotool.Find[string](ctx, g.coll, bson.M{"group_id": groupID, "role_level": roleLevel}, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}))
+	return mgoutil.Find[string](ctx, g.coll, bson.M{"group_id": groupID, "role_level": roleLevel}, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}))
 }
 
 func (g *GroupMemberMgo) SearchMember(ctx context.Context, keyword string, groupID string, pagination pagination.Pagination) (total int64, groupList []*relation.GroupMemberModel, err error) {
@@ -62,11 +75,11 @@ func (g *GroupMemberMgo) SearchMember(ctx context.Context, keyword string, group
 }
 
 func (g *GroupMemberMgo) FindUserJoinedGroupID(ctx context.Context, userID string) (groupIDs []string, err error) {
-	return mgotool.Find[string](ctx, g.coll, bson.M{"user_id": userID}, options.Find().SetProjection(bson.M{"_id": 0, "group_id": 1}))
+	return mgoutil.Find[string](ctx, g.coll, bson.M{"user_id": userID}, options.Find().SetProjection(bson.M{"_id": 0, "group_id": 1}))
 }
 
 func (g *GroupMemberMgo) TakeGroupMemberNum(ctx context.Context, groupID string) (count int64, err error) {
-	return mgotool.Count(ctx, g.coll, bson.M{"group_id": groupID})
+	return mgoutil.Count(ctx, g.coll, bson.M{"group_id": groupID})
 }
 
 func (g *GroupMemberMgo) FindUserManagedGroupID(ctx context.Context, userID string) (groupIDs []string, err error) {
@@ -76,7 +89,7 @@ func (g *GroupMemberMgo) FindUserManagedGroupID(ctx context.Context, userID stri
 			"$in": []int{constant.GroupOwner, constant.GroupAdmin},
 		},
 	}
-	return mgotool.Find[string](ctx, g.coll, filter, options.Find().SetProjection(bson.M{"_id": 0, "group_id": 1}))
+	return mgoutil.Find[string](ctx, g.coll, filter, options.Find().SetProjection(bson.M{"_id": 0, "group_id": 1}))
 }
 
 func (g *GroupMemberMgo) IsUpdateRoleLevel(data map[string]any) bool {

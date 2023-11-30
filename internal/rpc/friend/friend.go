@@ -17,6 +17,8 @@ package friend
 import (
 	"context"
 
+	"github.com/OpenIMSDK/tools/tx"
+
 	"github.com/OpenIMSDK/protocol/sdkws"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -32,12 +34,11 @@ import (
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
 	registry "github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/newmgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
@@ -65,17 +66,17 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		return err
 	}
 
-	friendMongoDB, err := newmgo.NewFriendMongo(mongo.GetDatabase())
+	friendMongoDB, err := mgo.NewFriendMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
 
-	friendRequestMongoDB, err := newmgo.NewFriendRequestMongo(mongo.GetDatabase())
+	friendRequestMongoDB, err := mgo.NewFriendRequestMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
 
-	blackMongoDB, err := newmgo.NewBlackMongo(mongo.GetDatabase())
+	blackMongoDB, err := mgo.NewBlackMongo(mongo.GetDatabase())
 	if err != nil {
 		return err
 	}
@@ -89,7 +90,6 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		&msgRpcClient,
 		notification.WithRpcFunc(userRpcClient.GetUsersInfo),
 	)
-
 	// Register Friend server with refactored MongoDB and Redis integrations
 	pbfriend.RegisterFriendServer(server, &friendServer{
 		friendDatabase: controller.NewFriendDatabase(
@@ -311,15 +311,12 @@ func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context,
 }
 
 // ok 获取接收到的好友申请（即别人主动申请的）.
-func (s *friendServer) GetPaginationFriendsApplyTo(
-	ctx context.Context,
-	req *pbfriend.GetPaginationFriendsApplyToReq,
-) (resp *pbfriend.GetPaginationFriendsApplyToResp, err error) {
+func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *pbfriend.GetPaginationFriendsApplyToReq) (resp *pbfriend.GetPaginationFriendsApplyToResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	friendRequests, total, err := s.friendDatabase.PageFriendRequestToMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	total, friendRequests, err := s.friendDatabase.PageFriendRequestToMe(ctx, req.UserID, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -333,16 +330,13 @@ func (s *friendServer) GetPaginationFriendsApplyTo(
 }
 
 // ok 获取主动发出去的好友申请列表.
-func (s *friendServer) GetPaginationFriendsApplyFrom(
-	ctx context.Context,
-	req *pbfriend.GetPaginationFriendsApplyFromReq,
-) (resp *pbfriend.GetPaginationFriendsApplyFromResp, err error) {
+func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *pbfriend.GetPaginationFriendsApplyFromReq) (resp *pbfriend.GetPaginationFriendsApplyFromResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.GetPaginationFriendsApplyFromResp{}
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	friendRequests, total, err := s.friendDatabase.PageFriendRequestFromMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	total, friendRequests, err := s.friendDatabase.PageFriendRequestFromMe(ctx, req.UserID, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -355,10 +349,7 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(
 }
 
 // ok.
-func (s *friendServer) IsFriend(
-	ctx context.Context,
-	req *pbfriend.IsFriendReq,
-) (resp *pbfriend.IsFriendResp, err error) {
+func (s *friendServer) IsFriend(ctx context.Context, req *pbfriend.IsFriendReq) (resp *pbfriend.IsFriendResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.IsFriendResp{}
 	resp.InUser1Friends, resp.InUser2Friends, err = s.friendDatabase.CheckIn(ctx, req.UserID1, req.UserID2)
@@ -368,15 +359,12 @@ func (s *friendServer) IsFriend(
 	return resp, nil
 }
 
-func (s *friendServer) GetPaginationFriends(
-	ctx context.Context,
-	req *pbfriend.GetPaginationFriendsReq,
-) (resp *pbfriend.GetPaginationFriendsResp, err error) {
+func (s *friendServer) GetPaginationFriends(ctx context.Context, req *pbfriend.GetPaginationFriendsReq) (resp *pbfriend.GetPaginationFriendsResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	friends, total, err := s.friendDatabase.PageOwnerFriends(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	total, friends, err := s.friendDatabase.PageOwnerFriends(ctx, req.UserID, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -389,10 +377,7 @@ func (s *friendServer) GetPaginationFriends(
 	return resp, nil
 }
 
-func (s *friendServer) GetFriendIDs(
-	ctx context.Context,
-	req *pbfriend.GetFriendIDsReq,
-) (resp *pbfriend.GetFriendIDsResp, err error) {
+func (s *friendServer) GetFriendIDs(ctx context.Context, req *pbfriend.GetFriendIDsReq) (resp *pbfriend.GetFriendIDsResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
