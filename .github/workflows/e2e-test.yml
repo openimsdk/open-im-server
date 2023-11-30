@@ -22,6 +22,9 @@ on:
     # run e2e test every 4 hours
     - cron: 0 */4 * * *
 
+env:
+  CALLBACK_ENABLE: true
+
 jobs:
   build:
     name: Test
@@ -70,9 +73,9 @@ jobs:
 
     - name: Docker Operations
       run: |
-        curl -o docker-compose.yml https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml
+        sudo make init
         sudo docker compose up -d
-        sudo sleep 60
+        sudo sleep 20
 
     - name: Module Operations
       run: |

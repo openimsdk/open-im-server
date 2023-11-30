@@ -52,3 +52,4 @@ jobs:
           OCO_MODEL: gpt-3.5-turbo-16k
           OCO_LANGUAGE: en
           OCO_PROMPT_MODULE: conventional-commit
+        continue-on-error: true

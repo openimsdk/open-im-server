@@ -127,6 +127,7 @@ jobs:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Run OpenIM make install start
       run: |
+        sudo make init && \
         sudo make install
 
   execute-scripts:
@@ -156,9 +157,9 @@ jobs:
 
     - name: Docker Operations
       run: |
-        curl -o docker-compose.yml https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml
+        sudo make init
         sudo docker compose up -d
-        sudo sleep 60
+        sudo sleep 20
 
     - name: Module Operations
       run: |
@@ -195,4 +196,5 @@ jobs:
 
     - name: Test Docker Build
       run: |
+        sudo make init
         sudo make image
