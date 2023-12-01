@@ -102,7 +102,11 @@ func (m *msgServer) GetConversationsUnreadSeqAndMaxSeq(ctx context.Context, req 
 	resp = &msg.GetConversationsUnreadSeqAndMaxSeqResp{Seqs: make(map[string]*msg.UnreadSeqs)}
 	for conversarionID, maxSeq := range maxSeqs {
 		resp.Seqs[conversarionID] = &msg.UnreadSeqs{
+<<<<<<< HEAD
 			UnreadSeq: maxSeq - hasReadSeqs[conversarionID],
+=======
+			UnreadSeq: hasReadSeqs[conversarionID],
+>>>>>>> c13411da69a6457ba810c071a5d7f462eaa1531e
 			MaxSeq:    maxSeq,
 		}
 		if v, ok := conversationMaxSeqMap[conversarionID]; ok {

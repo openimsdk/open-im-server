@@ -274,8 +274,13 @@ github.com/lestrrat-go/strftime v1.0.6 h1:CFGsDEt1pOpFNU+TJB0nhz9jl+K0hZSLE205Ah
 github.com/lestrrat-go/strftime v1.0.6/go.mod h1:f7jQKgV5nnJpYgdEasS+/y7EsTb8ykN2z68n3TtcTaw=
 github.com/lithammer/shortuuid v3.0.0+incompatible h1:NcD0xWW/MZYXEHa6ITy6kaXN5nwm/V115vj2YXfhS0w=
 github.com/lithammer/shortuuid v3.0.0+incompatible/go.mod h1:FR74pbAuElzOUuenUHTK2Tciko1/vKuIKS9dSkDrA4w=
+<<<<<<< HEAD
 github.com/luhaoling/protocol v0.0.0-20231201032120-22bebe035ae3 h1:tWCCSHzacKfJ1v63rNu65fVLytsFV7rCdI+EjwwZmx8=
 github.com/luhaoling/protocol v0.0.0-20231201032120-22bebe035ae3/go.mod h1:F25dFrwrIx3lkNoiuf6FkCfxuwf8L4Z8UIsdTHP/r0Y=
+=======
+github.com/luhaoling/protocol v0.0.0-20231130102222-4fd608e76fe6 h1:6AUtZlgujfj/7YrIJ7YTR0/F9s9BDDJWDJAaqEtLbII=
+github.com/luhaoling/protocol v0.0.0-20231130102222-4fd608e76fe6/go.mod h1:F25dFrwrIx3lkNoiuf6FkCfxuwf8L4Z8UIsdTHP/r0Y=
+>>>>>>> c13411da69a6457ba810c071a5d7f462eaa1531e
 github.com/mattn/go-isatty v0.0.19 h1:JITubQf0MOLdlGRuRq+jtsDlekdYPia9ZFsB8h/APPA=
 github.com/mattn/go-isatty v0.0.19/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/matttproud/golang_protobuf_extensions v1.0.4 h1:mmDVorXM7PCGKw94cs5zkfA9PSy5pEvNWRP0ET0TIVo=
