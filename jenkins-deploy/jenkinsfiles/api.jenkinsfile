@@ -21,7 +21,7 @@ pipeline {
         CONF_PATH = "/openim/config/"
 
         ORGANIZATION_NAME="truongpx396"
-        SERVICE_NAME_INFRA="open-im-server-k8s-deploy"
+        SERVICE_NAME_INFRA="OpenIM-K8S-Deployment"
 	}
 	parameters {
       	gitParameter(
@@ -86,20 +86,6 @@ pipeline {
         }
         stage('Docker Build') {
              steps {
-                // container ('docker') {
-                //   withCredentials([usernamePassword(credentialsId: "${HARBOR_ID}", passwordVariable: 'password', usernameVariable: 'username')]) {
-                //     sh """
-                //       docker build -t ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} -f ${BASEDIR}/deploy/dockerfile/${params.RELEASE_PROJECTS}.Dockerfile .
-                //       docker tag ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
-
-                //       docker login -u ${username} -p ${password} ${HARBOR_URL}
-
-                //       docker push ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
-                //       docker rmi ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
-                //       docker rmi ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
-                //     """
-                //   }
-                // }
                 withDockerRegistry([ credentialsId: "DockerHub", url: "" ]){
                     sh """  
                       echo `Build image ...`
@@ -135,7 +121,6 @@ pipeline {
 
          stage('Update infra') {
           steps {
-
              contentReplace(
                  configs: [
                    fileContentReplaceConfig(
@@ -159,7 +144,7 @@ pipeline {
                       sh """
                           echo "${GITHUB_TOKEN}"
                           export BUILD_ID=${CommitHash}-${BUILD_NUM}
-                          git config user.email "jenkins@example.com"
+                          git config user.email "jenkins@magiclab396.com"
                           git config user.name "Jenkins"
                           git add open-im-server/${params.RELEASE_PROJECTS}/deployment.yaml && git commit -m "Update ${params.RELEASE_PROJECTS} image tag to ${CommitHash}-${BUILD_NUM}"
                           git push -f https://${GITHUB_TOKEN}@github.com/${ORGANIZATION_NAME}/${SERVICE_NAME_INFRA}.git HEAD:main
@@ -168,18 +153,5 @@ pipeline {
               }
            }
          }
-
-
-        // stage('Deploy') {
-        //     steps {
-        //         container ('helm-kubectl') {
-        //            sh """
-        //            envsubst < ${BASEDIR}/deploy/k8sdeployment_dev/default-configMap-test.yaml | kubectl apply -f -
-        //            envsubst < ${BASEDIR}/deploy/k8sdeployment_dev/default-namespace-test.yaml | kubectl apply -f -
-        //            envsubst < ${BASEDIR}/deploy/k8sdeployment_dev/api.yaml | kubectl apply -f - && kubectl rollout status -f -
-        //            """
-        //         }
-        //     }
-        // }
     }
 }
