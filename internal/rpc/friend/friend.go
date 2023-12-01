@@ -121,7 +121,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 	if req.ToUserID == req.FromUserID {
 		return nil, errs.ErrCanNotAddYourself.Wrap()
 	}
-	if err := CallbackBeforeAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+	if err = CallbackBeforeAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	if _, err := s.userRpcClient.GetUsersInfoMap(ctx, []string{req.ToUserID, req.FromUserID}); err != nil {
@@ -138,6 +138,9 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 		return nil, err
 	}
 	s.notificationSender.FriendApplicationAddNotification(ctx, req)
+	if err = CallbackAfterAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+		return nil, err
+	}
 	return resp, nil
 }
 
@@ -156,6 +159,10 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 	if utils.Duplicate(req.FriendUserIDs) {
 		return nil, errs.ErrArgs.Wrap("friend userID repeated")
 	}
+	if err := CallbackBeforeImportFriends(ctx, req); err != nil {
+		return nil, err
+	}
+
 	if err := s.friendDatabase.BecomeFriends(ctx, req.OwnerUserID, req.FriendUserIDs, constant.BecomeFriendByImport); err != nil {
 		return nil, err
 	}
@@ -165,6 +172,9 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 			ToUserID:     userID,
 			HandleResult: constant.FriendResponseAgree,
 		})
+	}
+	if err := CallbackAfterImportFriends(ctx, req); err != nil {
+		return nil, err
 	}
 	return &pbfriend.ImportFriendResp{}, nil
 }
@@ -184,6 +194,9 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.Res
 		HandleResult: req.HandleResult,
 	}
 	if req.HandleResult == constant.FriendResponseAgree {
+		if err := CallbackBeforeAddFriendAgree(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+			return nil, err
+		}
 		err := s.friendDatabase.AgreeFriendRequest(ctx, &friendRequest)
 		if err != nil {
 			return nil, err
@@ -217,12 +230,19 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbfriend.DeleteFri
 		return nil, err
 	}
 	s.notificationSender.FriendDeletedNotification(ctx, req)
+	if err := CallbackAfterDeleteFriend(ctx, req); err != nil {
+		return nil, err
+	}
 	return resp, nil
 }
 
 // ok.
 func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbfriend.SetFriendRemarkReq) (resp *pbfriend.SetFriendRemarkResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
+
+	if err = CallbackBeforeSetFriendRemark(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+		return nil, err
+	}
 	resp = &pbfriend.SetFriendRemarkResp{}
 	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
@@ -232,6 +252,9 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbfriend.SetFri
 		return nil, err
 	}
 	if err := s.friendDatabase.UpdateRemark(ctx, req.OwnerUserID, req.FriendUserID, req.Remark); err != nil {
+		return nil, err
+	}
+	if err := CallbackAfterSetFriendRemark(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	s.notificationSender.FriendRemarkSetNotification(ctx, req.OwnerUserID, req.FriendUserID)

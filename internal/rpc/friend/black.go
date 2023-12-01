@@ -27,10 +27,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
-func (s *friendServer) GetPaginationBlacks(
-	ctx context.Context,
-	req *pbfriend.GetPaginationBlacksReq,
-) (resp *pbfriend.GetPaginationBlacksResp, err error) {
+func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *pbfriend.GetPaginationBlacksReq) (resp *pbfriend.GetPaginationBlacksResp, err error) {
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -58,10 +55,7 @@ func (s *friendServer) IsBlack(ctx context.Context, req *pbfriend.IsBlackReq) (*
 	return resp, nil
 }
 
-func (s *friendServer) RemoveBlack(
-	ctx context.Context,
-	req *pbfriend.RemoveBlackReq,
-) (*pbfriend.RemoveBlackResp, error) {
+func (s *friendServer) RemoveBlack(ctx context.Context, req *pbfriend.RemoveBlackReq) (*pbfriend.RemoveBlackResp, error) {
 	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}

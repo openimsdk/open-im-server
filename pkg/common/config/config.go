@@ -16,7 +16,6 @@ package config
 
 import (
 	"bytes"
-
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"gopkg.in/yaml.v3"
 )
@@ -155,6 +154,15 @@ type configStruct struct {
 			SessionToken    string `yaml:"sessionToken"`
 			PublicRead      bool   `yaml:"publicRead"`
 		} `yaml:"oss"`
+		Kodo struct {
+			Endpoint        string `yaml:"endpoint"`
+			Bucket          string `yaml:"bucket"`
+			BucketURL       string `yaml:"bucketURL"`
+			AccessKeyID     string `yaml:"accessKeyID"`
+			AccessKeySecret string `yaml:"accessKeySecret"`
+			SessionToken    string `yaml:"sessionToken"`
+			PublicRead      bool   `yaml:"publicRead"`
+		} `yaml:"kodo"`
 	} `yaml:"object"`
 
 	RpcPort struct {
@@ -198,6 +206,7 @@ type configStruct struct {
 		WebsocketMaxConnNum      int   `yaml:"websocketMaxConnNum"`
 		WebsocketMaxMsgLen       int   `yaml:"websocketMaxMsgLen"`
 		WebsocketTimeout         int   `yaml:"websocketTimeout"`
+		WebsocketWriteBufferSize int   `yaml:"websocketWriteBufferSize"`
 	} `yaml:"longConnSvr"`
 
 	Push struct {
@@ -255,6 +264,8 @@ type configStruct struct {
 		CallbackBeforeSendGroupMsg         CallBackConfig `yaml:"beforeSendGroupMsg"`
 		CallbackAfterSendGroupMsg          CallBackConfig `yaml:"afterSendGroupMsg"`
 		CallbackMsgModify                  CallBackConfig `yaml:"msgModify"`
+		CallbackSingleMsgRead              CallBackConfig `yaml:"singleMsgRead"`
+		CallbackGroupMsgRead               CallBackConfig `yaml:"groupMsgRead"`
 		CallbackUserOnline                 CallBackConfig `yaml:"userOnline"`
 		CallbackUserOffline                CallBackConfig `yaml:"userOffline"`
 		CallbackUserKickOff                CallBackConfig `yaml:"userKickOff"`
@@ -262,10 +273,35 @@ type configStruct struct {
 		CallbackOnlinePush                 CallBackConfig `yaml:"onlinePush"`
 		CallbackBeforeSuperGroupOnlinePush CallBackConfig `yaml:"superGroupOnlinePush"`
 		CallbackBeforeAddFriend            CallBackConfig `yaml:"beforeAddFriend"`
+		CallbackBeforeSetFriendRemark      CallBackConfig `yaml:"callbackBeforeSetFriendRemark"`
+		CallbackAfterSetFriendRemark       CallBackConfig `yaml:"callbackAfterSetFriendRemark"`
 		CallbackBeforeUpdateUserInfo       CallBackConfig `yaml:"beforeUpdateUserInfo"`
+		CallbackBeforeUserRegister         CallBackConfig `yaml:"beforeUserRegister"`
+		CallbackAfterUpdateUserInfo        CallBackConfig `yaml:"updateUserInfo"`
+		CallbackAfterUserRegister          CallBackConfig `yaml:"afterUserRegister"`
 		CallbackBeforeCreateGroup          CallBackConfig `yaml:"beforeCreateGroup"`
+		CallbackAfterCreateGroup           CallBackConfig `yaml:"afterCreateGroup"`
 		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
 		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
+		CallbackAfterSetGroupMemberInfo    CallBackConfig `yaml:"afterSetGroupMemberInfo"`
+		CallbackQuitGroup                  CallBackConfig `yaml:"quitGroup"`
+		CallbackKillGroupMember            CallBackConfig `yaml:"killGroupMember"`
+		CallbackDismissGroup               CallBackConfig `yaml:"dismissGroup"`
+		CallbackBeforeJoinGroup            CallBackConfig `yaml:"joinGroup"`
+		CallbackTransferGroupOwnerAfter    CallBackConfig `yaml:"transferGroupOwner"`
+		CallbackBeforeInviteUserToGroup    CallBackConfig `yaml:"beforeInviteUserToGroup"`
+		CallbackAfterJoinGroup             CallBackConfig `yaml:"joinGroupAfter"`
+		CallbackAfterSetGroupInfo          CallBackConfig `yaml:"setGroupInfoAfter"`
+		CallbackBeforeSetGroupInfo         CallBackConfig `yaml:"setGroupInfoBefore"`
+		CallbackAfterRevokeMsg             CallBackConfig `yaml:"revokeMsgAfter"`
+		CallbackBeforeAddBlack             CallBackConfig `yaml:"addBlackBefore"`
+		CallbackAfterAddFriend             CallBackConfig `yaml:"addFriendAfter"`
+		CallbackBeforeAddFriendAgree       CallBackConfig `yaml:"addFriendAgreeBefore"`
+
+		CallbackAfterDeleteFriend   CallBackConfig `yaml:"deleteFriendAfter"`
+		CallbackBeforeImportFriends CallBackConfig `yaml:"importFriendsBefore"`
+		CallbackAfterImportFriends  CallBackConfig `yaml:"importFriendsAfter"`
+		CallbackAfterRemoveBlack    CallBackConfig `yaml:"removeBlackAfter"`
 	} `yaml:"callback"`
 
 	Prometheus struct {

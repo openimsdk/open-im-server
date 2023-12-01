@@ -14,9 +14,10 @@
 
 package callbackstruct
 
+import "github.com/OpenIMSDK/protocol/sdkws"
+
 type CallbackBeforeUpdateUserInfoReq struct {
 	CallbackCommand `json:"callbackCommand"`
-	OperationID     string  `json:"operationID"`
 	UserID          string  `json:"userID"`
 	Nickname        *string `json:"nickName"`
 	FaceURL         *string `json:"faceURL"`
@@ -27,4 +28,36 @@ type CallbackBeforeUpdateUserInfoResp struct {
 	Nickname *string `json:"nickName"`
 	FaceURL  *string `json:"faceURL"`
 	Ex       *string `json:"ex"`
+}
+
+type CallbackAfterUpdateUserInfoReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	UserID          string `json:"userID"`
+	Nickname        string `json:"nickName"`
+	FaceURL         string `json:"faceURL"`
+	Ex              string `json:"ex"`
+}
+type CallbackAfterUpdateUserInfoResp struct {
+	CommonCallbackResp
+}
+
+type CallbackBeforeUserRegisterReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	Secret          string            `json:"secret"`
+	Users           []*sdkws.UserInfo `json:"users"`
+}
+
+type CallbackBeforeUserRegisterResp struct {
+	CommonCallbackResp
+	Users []*sdkws.UserInfo `json:"users"`
+}
+
+type CallbackAfterUserRegisterReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	Secret          string            `json:"secret"`
+	Users           []*sdkws.UserInfo `json:"users"`
+}
+
+type CallbackAfterUserRegisterResp struct {
+	CommonCallbackResp
 }

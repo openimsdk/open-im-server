@@ -63,7 +63,7 @@ PROXY=
 GITHUB_TOKEN=
 
 # Default user is "root". If you need to modify it, uncomment and replace accordingly.
-# USER=root 
+# OPENIM_USER=root 
 
 # Default password for redis, mysql, mongo, as well as accessSecret in config/config.yaml.
 # Remember, it should be a combination of 8 or more numbers and letters. If you want to set a different password, uncomment and replace "openIM123".
@@ -244,10 +244,10 @@ function download_source_code() {
 function set_openim_env() {
     warn "This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command."
     # Set default values for user input
-    # If the USER environment variable is not set, it defaults to 'root'
-    if [ -z "$USER" ]; then
-        USER="root"
-        debug "USER is not set. Defaulting to 'root'."
+    # If the OPENIM_USER environment variable is not set, it defaults to 'root'
+    if [ -z "$OPENIM_USER" ]; then
+        OPENIM_USER="root"
+        debug "OPENIM_USER is not set. Defaulting to 'root'."
     fi
 
     # If the PASSWORD environment variable is not set, it defaults to 'openIM123'
@@ -321,7 +321,7 @@ function cmd_help() {
 
 function parseinput() {
     # set default values
-    # USER=root
+    # OPENIM_USER=root
     # PASSWORD=openIM123
     # ENDPOINT=http://127.0.0.1:10005
     # API=http://127.0.0.1:10002/object/
@@ -347,7 +347,7 @@ function parseinput() {
                 ;;
             -u|--user)
                 shift
-                USER=$1
+                OPENIM_USER=$1
                 ;;
             -p|--password)
                 shift

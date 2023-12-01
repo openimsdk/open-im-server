@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	urllib "net/url"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -106,18 +105,19 @@ func PostReturn(ctx context.Context, url string, header map[string]string, input
 	return err
 }
 
-func callBackPostReturn(ctx context.Context, url, command string, input any, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
-	defer log.ZDebug(ctx, "callback", "url", url, "command", command, "input", input, "callbackConfig", callbackConfig)
-
-	v := urllib.Values{}
-	v.Set(constant.CallbackCommand, command)
-	url = url + "?" + v.Encode()
+func callBackPostReturn(ctx context.Context, url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
+	defer log.ZDebug(ctx, "callback", "url", url, "command", command, "input", input, "output", output, "callbackConfig", callbackConfig)
+	//
+	//v := urllib.Values{}
+	//v.Set(constant.CallbackCommand, command)
+	//url = url + "/" + v.Encode()
+	url = url + "/" + command
 
 	b, err := Post(ctx, url, nil, input, callbackConfig.CallbackTimeOut)
 	if err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
 			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
-			return errs.ErrCallbackContinue
+			return nil
 		}
 		return errs.ErrNetwork.Wrap(err.Error())
 	}
@@ -125,7 +125,7 @@ func callBackPostReturn(ctx context.Context, url, command string, input any, out
 	if err = json.Unmarshal(b, output); err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
 			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
-			return errs.ErrCallbackContinue
+			return nil
 		}
 		return errs.ErrData.Wrap(err.Error())
 	}

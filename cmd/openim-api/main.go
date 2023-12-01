@@ -18,11 +18,13 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/http"
 	_ "net/http/pprof"
+	"os"
+	"os/signal"
 	"strconv"
-
-	ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"syscall"
+	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
@@ -33,6 +35,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 )
 
 func main() {
@@ -51,13 +55,12 @@ func run(port int, proPort int) error {
 	if port == 0 || proPort == 0 {
 		err := "port or proPort is empty:" + strconv.Itoa(port) + "," + strconv.Itoa(proPort)
 		log.ZError(context.Background(), err, nil)
-
 		return fmt.Errorf(err)
 	}
+
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		log.ZError(context.Background(), "Failed to initialize Redis", err)
-
 		return err
 	}
 	log.ZInfo(context.Background(), "api start init discov client")
@@ -68,30 +71,29 @@ func run(port int, proPort int) error {
 	client, err = kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
 		log.ZError(context.Background(), "Failed to initialize discovery register", err)
-
 		return err
 	}
+
 	if err = client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
 		log.ZError(context.Background(), "Failed to create RPC root nodes", err)
-
 		return err
 	}
+
 	log.ZInfo(context.Background(), "api register public config to discov")
 	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.Config.EncodeConfig()); err != nil {
 		log.ZError(context.Background(), "Failed to register public config to discov", err)
-
 		return err
 	}
+
 	log.ZInfo(context.Background(), "api register public config to discov success")
 	router := api.NewGinRouter(client, rdb)
-	//////////////////////////////
 	if config.Config.Prometheus.Enable {
 		p := ginProm.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
 		p.SetListenAddress(fmt.Sprintf(":%d", proPort))
 		p.Use(router)
 	}
-	/////////////////////////////////
 	log.ZInfo(context.Background(), "api init router success")
+
 	var address string
 	if config.Config.Api.ListenIP != "" {
 		address = net.JoinHostPort(config.Config.Api.ListenIP, strconv.Itoa(port))
@@ -100,10 +102,25 @@ func run(port int, proPort int) error {
 	}
 	log.ZInfo(context.Background(), "start api server", "address", address, "OpenIM version", config.Version)
 
-	err = router.Run(address)
-	if err != nil {
-		log.ZError(context.Background(), "api run failed", err, "address", address)
+	server := http.Server{Addr: address, Handler: router}
+	go func() {
+		err = server.ListenAndServe()
+		if err != nil && err != http.ErrServerClosed {
+			log.ZError(context.Background(), "api run failed", err, "address", address)
+			os.Exit(1)
+		}
+	}()
 
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	<-sigs
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	// graceful shutdown operation.
+	if err := server.Shutdown(ctx); err != nil {
+		log.ZError(context.Background(), "failed to api-server shutdown", err)
 		return err
 	}
 
