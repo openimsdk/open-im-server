@@ -16,7 +16,6 @@ package friend
 
 import (
 	"context"
-
 	"github.com/OpenIMSDK/protocol/sdkws"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -445,4 +444,8 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 		})
 	}
 	return resp, nil
+}
+
+func (s *friendServer) PinFriends(ctx context.Context, req *pbfriend.PinFriendsReq) (*pbfriend.PinFriendsResp, error) {
+	return nil, nil
 }

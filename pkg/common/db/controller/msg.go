@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -98,6 +99,7 @@ type CommonMsgDatabase interface {
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
 	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
 	SearchMessage(ctx context.Context, req *pbmsg.SearchMessageReq) (total int32, msgData []*sdkws.MsgData, err error)
+	FindOneByDocIDs(ctx context.Context, docIDs []string, seqs map[string]int64) (map[string]*sdkws.MsgData, error)
 
 	// to mq
 	MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) error
@@ -1045,6 +1047,23 @@ func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbmsg.Searc
 		totalMsgs = append(totalMsgs, convert.MsgDB2Pb(msg.Msg))
 	}
 	return total, totalMsgs, nil
+}
+
+func (db *commonMsgDatabase) FindOneByDocIDs(ctx context.Context, conversationIDs []string, seqs map[string]int64) (map[string]*sdkws.MsgData, error) {
+	totalMsgs := make(map[string]*sdkws.MsgData)
+	for _, conversationID := range conversationIDs {
+		len := seqs[conversationID]
+		seq := len / 100
+		index := (len % 100) - 1
+
+		docID := conversationID + ":" + fmt.Sprintf("%d", seq)
+		msgs, err := db.msgDocDatabase.FindOneByDocID(ctx, docID)
+		if err != nil {
+			return nil, err
+		}
+		totalMsgs[conversationID] = convert.MsgDB2Pb(msgs.Msg[index].Msg)
+	}
+	return totalMsgs, nil
 }
 
 func (db *commonMsgDatabase) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string) {

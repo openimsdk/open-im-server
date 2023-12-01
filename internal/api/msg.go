@@ -125,8 +125,8 @@ func (m *MessageApi) GetConversationsHasReadAndMaxSeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetConversationsHasReadAndMaxSeq, m.Client, c)
 }
 
-func (m *MessageApi) GetConversationsUnreadSeqAndMaxSeq(c *gin.Context) {
-	a2r.Call(msg.MsgClient.GetConversationsUnreadSeqAndMaxSeq, m.Client, c)
+func (m *MessageApi) GetConversationsList(c *gin.Context) {
+	a2r.Call(msg.MsgClient.GetConversationList, m.Client, c)
 }
 
 func (m *MessageApi) SetConversationHasReadSeq(c *gin.Context) {
