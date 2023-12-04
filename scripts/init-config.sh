@@ -45,7 +45,7 @@ for template in "${!TEMPLATES[@]}"; do
   IFS=';' read -ra OUTPUT_FILES <<< "${TEMPLATES[$template]}"
   for output_file in "${OUTPUT_FILES[@]}"; do
     if [[ -f "${output_file}" ]]; then
-      read -p "File ${output_file} already exists. Overwrite? (Y/N): " -r
+      read -p "File ${output_file} already exists. Overwrite? (Y/N): "
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         openim::log::info "Overwriting ${output_file}. Previous configuration will be lost."
       else
