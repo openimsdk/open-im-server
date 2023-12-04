@@ -117,9 +117,6 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 		return nil, err
 	}
 	data := convert.UserPb2DBMap(req.UserInfo)
-	if len(data) == 0 {
-		return nil, errs.ErrArgs.Wrap("no data to update")
-	}
 	if err := s.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
