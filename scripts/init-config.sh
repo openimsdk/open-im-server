@@ -50,7 +50,7 @@ for template in "${!TEMPLATES[@]}"; do
     if [[ -f "${output_file}" ]]; then
       echo -n "File ${output_file} already exists. Overwrite? (Y/N): "
       read -r -n 1 REPLY
-      echo  # 新增一行，以便在用户输入后换行
+      echo  # Adds a line to wrap after user input
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         openim::log::info "Overwriting ${output_file}. Previous configuration will be lost."
       else
