@@ -41,9 +41,9 @@ else
 fi
 
 "${OPENIM_ROOT}"/scripts/init-config.sh
-
 pushd "${OPENIM_ROOT}"
 ${DOCKER_COMPOSE_COMMAND} stop
+curl https://gitee.com/openimsdk/openim-docker/raw/main/example/full-openim-server-and-chat.yml -o docker-compose.yml
 ${DOCKER_COMPOSE_COMMAND} up --remove-orphans -d
 sleep 60
 ${DOCKER_COMPOSE_COMMAND} logs openim-server
