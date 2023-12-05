@@ -11,22 +11,6 @@ networks:
           gateway: '${DOCKER_BRIDGE_GATEWAY}'
 
 services:
-  mysql:
-    image: mysql:5.7
-    ports:
-      - "${MYSQL_PORT}:3306"
-    container_name: mysql
-    volumes:
-      - "${DATA_DIR}/components/mysql/data:/var/lib/mysql"
-      - "/etc/localtime:/etc/localtime"
-    environment:
-      MYSQL_ROOT_PASSWORD: "${MYSQL_PASSWORD}"
-    restart: always
-    networks:
-      server:
-        # open-im-server_server
-        ipv4_address: ${MYSQL_NETWORK_ADDRESS}
-
   mongodb:
     image: mongo:6.0.2
     ports:
