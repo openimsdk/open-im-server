@@ -53,19 +53,6 @@ rpcRegisterName:
   openImAdminName: ${OPENIM_ADMIN_NAME}
   openImChatName: ${OPENIM_CHAT_NAME}
 
-###################### MySQL ######################
-mysql:
-  #  address: [ 127.0.0.1:13306 ]            #目前仅支持单机
-  #  username: root                          #用户名
-  #  password: openIM123                     #密码
-  #  database: openIM_v2                     #不建议修改
-  #  maxOpenConn: 1000                       #最大连接数
-  #  maxIdleConn: 100                        #最大空闲连接数
-  #  maxLifeTime: 60                         #连接可以重复使用的最长时间（秒）
-  #  logLevel: 4                             #日志级别 1=slient 2=error 3=warn 4=info
-  #  slowThreshold: 500                      #慢语句阈值 （毫秒）
-  database: openim_enterprise
-
 ###################### Log ######################
 log:
   storageLocation: ../logs/           #存放目录

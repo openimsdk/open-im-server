@@ -55,9 +55,6 @@ DOCKER_BRIDGE_SUBNET=${DOCKER_BRIDGE_SUBNET}
 # Default: DOCKER_BRIDGE_GATEWAY=172.28.0.1
 DOCKER_BRIDGE_GATEWAY=${DOCKER_BRIDGE_GATEWAY}
 
-# Address or hostname for the MySQL network.
-# Default: MYSQL_NETWORK_ADDRESS=172.28.0.2
-MYSQL_NETWORK_ADDRESS=${MYSQL_NETWORK_ADDRESS}
 MONGO_NETWORK_ADDRESS=${MONGO_NETWORK_ADDRESS}
 REDIS_NETWORK_ADDRESS=${REDIS_NETWORK_ADDRESS}
 KAFKA_NETWORK_ADDRESS=${KAFKA_NETWORK_ADDRESS}
@@ -85,20 +82,6 @@ ZOOKEEPER_ADDRESS=${ZOOKEEPER_NETWORK_ADDRESS}
 # Port for ZooKeeper service.
 # Default: ZOOKEEPER_PORT=12181
 ZOOKEEPER_PORT=${ZOOKEEPER_PORT}
-
-# ----- MySQL Configuration -----
-
-# Address or hostname for the MySQL service.
-# Default: MYSQL_ADDRESS=172.28.0.1
-MYSQL_ADDRESS=${MYSQL_NETWORK_ADDRESS}
-
-# Port on which MySQL database service is running.
-# Default: MYSQL_PORT=13306
-MYSQL_PORT=${MYSQL_PORT}
-
-# Password to authenticate with the MySQL database service.
-# Default: MYSQL_PASSWORD=openIM123
-MYSQL_PASSWORD=${MYSQL_PASSWORD}
 
 # ----- MongoDB Configuration -----
 # Address or hostname for the MongoDB service.

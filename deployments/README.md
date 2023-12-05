@@ -154,8 +154,6 @@ GO111MODULE=on go get github.com/roboll/helmfile@latest
 ```
 
 ```bash
-export MYSQL_ADDRESS=im-mysql
-export MYSQL_PORT=3306
 export MONGO_ADDRESS=im-mongo
 export MONGO_PORT=27017
 export REDIS_ADDRESS=im-redis-master

@@ -101,7 +101,6 @@ readonly OPENIM_SERVER_PORT_LISTARIES=("${OPENIM_SERVER_PORT_TARGETS[@]##*/}")
 
 openim::common::dependency_name() {
     local targets=(
-        mysql
         redis
         zookeeper
         kafka
@@ -117,13 +116,11 @@ readonly OPENIM_DEPENDENCY_TARGETS
 # This function returns a list of ports for various services
 #  - zookeeper
 #  - kafka
-#  - mysql
 #  - mongodb
 #  - redis
 #  - minio
 openim::common::dependency_port() {
   local targets=(
-    ${MYSQL_PORT} # MySQL port 
     ${REDIS_PORT} # Redis port
     ${ZOOKEEPER_PORT} # Zookeeper port
     ${KAFKA_PORT} # Kafka port

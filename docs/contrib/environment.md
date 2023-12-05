@@ -296,19 +296,6 @@ Feel free to explore the MinIO documentation for more advanced configurations an
 | `ZOOKEEPER_USERNAME` | `""`                     | Username for Zookeeper. |
 | `ZOOKEEPER_PASSWORD` | `""`                     | Password for Zookeeper. |
 
-###  2.6. <a name='MySQLConfiguration'></a>MySQL Configuration
-
-**Description**: Configuration for MySQL, including port, address, and credentials.
-
-| Parameter        | Example Value            | Description         |
-| ---------------- | ------------------------ | ------------------- |
-| `MYSQL_PORT`     | `"13306"`                | Port for MySQL.     |
-| `MYSQL_ADDRESS`  | Docker Bridge Gateway IP | Address for MySQL.  |
-| `MYSQL_USERNAME` | User-defined             | Username for MySQL. |
-| `MYSQL_PASSWORD` | User-defined             | Password for MySQL. |
-
-Note: The configurations for other services (e.g., MONGO, REDIS, KAFKA, etc.) follow a similar pattern to MySQL and can be documented in a similar manner.
-
 ###  2.7. <a name='MongoDBConfiguration'></a>MongoDB Configuration
 
 This section involves setting up MongoDB, including its port, address, and credentials.
