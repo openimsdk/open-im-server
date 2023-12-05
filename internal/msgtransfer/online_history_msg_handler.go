@@ -61,7 +61,7 @@ type TriggerChannelValue struct {
 
 type Cmd2Value struct {
 	Cmd   int
-	Value interface{}
+	Value any
 }
 type ContextMsg struct {
 	message *sdkws.MsgData

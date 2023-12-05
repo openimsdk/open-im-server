@@ -46,15 +46,13 @@ func (a *RpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *RpcCmd) StartSvr(
-	name string,
-	rpcFn func(discov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,
-) error {
+func (a *RpcCmd) StartSvr(name string, rpcFn func(discov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) error {
 	if a.GetPortFlag() == 0 {
 		return errors.New("port is required")
 	}
 	return startrpc.Start(a.GetPortFlag(), name, a.GetPrometheusPortFlag(), rpcFn)
 }
+
 func (a *RpcCmd) GetPortFromConfig(portType string) int {
 	switch a.Name {
 	case RpcPushServer:

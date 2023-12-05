@@ -15,9 +15,8 @@
 package relation
 
 import (
-	"gorm.io/gorm"
-
 	"github.com/OpenIMSDK/tools/utils"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type BatchUpdateGroupMember struct {
@@ -32,5 +31,5 @@ type GroupSimpleUserID struct {
 }
 
 func IsNotFound(err error) bool {
-	return utils.Unwrap(err) == gorm.ErrRecordNotFound
+	return utils.Unwrap(err) == mongo.ErrNoDocuments
 }

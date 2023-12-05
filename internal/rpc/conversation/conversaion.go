@@ -16,6 +16,12 @@ package conversation
 
 import (
 	"context"
+	"errors"
+
+	"github.com/OpenIMSDK/tools/tx"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 
 	"google.golang.org/grpc"
 
@@ -24,13 +30,11 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
@@ -43,24 +47,24 @@ type conversationServer struct {
 }
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	db, err := relation.NewGormDB()
-	if err != nil {
-		return err
-	}
-	if err := db.AutoMigrate(&tablerelation.ConversationModel{}); err != nil {
-		return err
-	}
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
-	conversationDB := relation.NewConversationGorm(db)
+	mongo, err := unrelation.NewMongo()
+	if err != nil {
+		return err
+	}
+	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase())
+	if err != nil {
+		return err
+	}
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	pbconversation.RegisterConversationServer(server, &conversationServer{
 		conversationNotificationSender: notification.NewConversationNotificationSender(&msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
-		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
+		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewMongo(mongo.GetClient())),
 	})
 	return nil
 }
@@ -145,7 +149,7 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 	conversation.ConversationType = req.Conversation.ConversationType
 	conversation.UserID = req.Conversation.UserID
 	conversation.GroupID = req.Conversation.GroupID
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 	if req.Conversation.RecvMsgOpt != nil {
 		m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
 		if req.Conversation.RecvMsgOpt.Value != conv.RecvMsgOpt {
@@ -229,11 +233,12 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 
 // 获取超级大群开启免打扰的用户ID.
 func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbconversation.GetRecvMsgNotNotifyUserIDsReq) (*pbconversation.GetRecvMsgNotNotifyUserIDsResp, error) {
-	userIDs, err := c.conversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
-	if err != nil {
-		return nil, err
-	}
-	return &pbconversation.GetRecvMsgNotNotifyUserIDsResp{UserIDs: userIDs}, nil
+	//userIDs, err := c.conversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//return &pbconversation.GetRecvMsgNotNotifyUserIDsResp{UserIDs: userIDs}, nil
+	return nil, errors.New("deprecated")
 }
 
 // create conversation without notification for msg redis transfer.
@@ -284,7 +289,7 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 
 func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbconversation.SetConversationMaxSeqReq) (*pbconversation.SetConversationMaxSeqResp, error) {
 	if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, req.OwnerUserID, req.ConversationID,
-		map[string]interface{}{"max_seq": req.MaxSeq}); err != nil {
+		map[string]any{"max_seq": req.MaxSeq}); err != nil {
 		return nil, err
 	}
 	return &pbconversation.SetConversationMaxSeqResp{}, nil

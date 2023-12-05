@@ -48,7 +48,7 @@ func (m *MsgMongoDriver) ConvertMsgsDocLen(ctx context.Context, conversationIDs 
 				log.ZError(ctx, "convertAll delete many failed", err, "conversationID", conversationID)
 				continue
 			}
-			var newMsgDocs []interface{}
+			var newMsgDocs []any
 			for _, msgDoc := range msgDocs {
 				if int64(len(msgDoc.Msg)) == m.model.GetSingleGocMsgNum() {
 					continue

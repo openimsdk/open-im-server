@@ -12,4 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package relation // import "github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
+package relation
+
+import (
+	"gorm.io/gorm"
+
+	"github.com/OpenIMSDK/tools/utils"
+)
+
+type BatchUpdateGroupMember struct {
+	GroupID string
+	UserID  string
+	Map     map[string]any
+}
+
+type GroupSimpleUserID struct {
+	Hash      uint64
+	MemberNum uint32
+}
+
+func IsNotFound(err error) bool {
+	return utils.Unwrap(err) == gorm.ErrRecordNotFound
+}
