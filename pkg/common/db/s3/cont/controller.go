@@ -46,6 +46,10 @@ type Controller struct {
 	impl  s3.Interface
 }
 
+func (c *Controller) Engine() string {
+	return c.impl.Engine()
+}
+
 func (c *Controller) HashPath(md5 string) string {
 	return path.Join(hashPath, md5)
 }

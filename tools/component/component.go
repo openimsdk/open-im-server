@@ -84,7 +84,7 @@ func main() {
 	}
 
 	checks := []checkFunc{
-		{name: "Mysql", function: checkMysql},
+		//{name: "Mysql", function: checkMysql},
 		{name: "Mongo", function: checkMongo},
 		{name: "Minio", function: checkMinio},
 		{name: "Redis", function: checkRedis},
@@ -133,6 +133,9 @@ func exactIP(urll string) string {
 }
 
 func checkMysql() error {
+	if config.Config.Mysql == nil {
+		return nil
+	}
 	var sqlDB *sql.DB
 	defer func() {
 		if sqlDB != nil {

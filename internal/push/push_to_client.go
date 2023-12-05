@@ -133,7 +133,7 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 	return nil
 }
 
-func (p *Pusher) UnmarshalNotificationElem(bytes []byte, t interface{}) error {
+func (p *Pusher) UnmarshalNotificationElem(bytes []byte, t any) error {
 	var notification sdkws.NotificationElem
 	if err := json.Unmarshal(bytes, &notification); err != nil {
 		return err

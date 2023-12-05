@@ -150,7 +150,7 @@ func (m *MessageApi) DeleteMsgPhysical(c *gin.Context) {
 }
 
 func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendMsgReq *msg.SendMsgReq, err error) {
-	var data interface{}
+	var data any
 	log.ZDebug(c, "getSendMsgReq", "req", req.Content)
 	switch req.ContentType {
 	case constant.Text:

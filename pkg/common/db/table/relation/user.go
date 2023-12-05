@@ -17,20 +17,18 @@ package relation
 import (
 	"context"
 	"time"
-)
 
-const (
-	UserModelTableName = "users"
+	"github.com/OpenIMSDK/tools/pagination"
 )
 
 type UserModel struct {
-	UserID           string    `gorm:"column:user_id;primary_key;size:64"`
-	Nickname         string    `gorm:"column:name;size:255"`
-	FaceURL          string    `gorm:"column:face_url;size:255"`
-	Ex               string    `gorm:"column:ex;size:1024"`
-	CreateTime       time.Time `gorm:"column:create_time;index:create_time;autoCreateTime"`
-	AppMangerLevel   int32     `gorm:"column:app_manger_level;default:1"`
-	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
+	UserID           string    `bson:"user_id"`
+	Nickname         string    `bson:"nickname"`
+	FaceURL          string    `bson:"face_url"`
+	Ex               string    `bson:"ex"`
+	AppMangerLevel   int32     `bson:"app_manger_level"`
+	GlobalRecvMsgOpt int32     `bson:"global_recv_msg_opt"`
+	CreateTime       time.Time `bson:"create_time"`
 }
 
 func (u *UserModel) GetNickname() string {
@@ -41,29 +39,22 @@ func (u *UserModel) GetFaceURL() string {
 	return u.FaceURL
 }
 
-func (u *UserModel) GetUserID() string {
+func (u UserModel) GetUserID() string {
 	return u.UserID
 }
 
-func (u *UserModel) GetEx() string {
+func (u UserModel) GetEx() string {
 	return u.Ex
-}
-
-func (UserModel) TableName() string {
-	return UserModelTableName
 }
 
 type UserModelInterface interface {
 	Create(ctx context.Context, users []*UserModel) (err error)
-	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
-	Update(ctx context.Context, user *UserModel) (err error)
-	// 获取指定用户信息  不存在，也不返回错误
+	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
 	Find(ctx context.Context, userIDs []string) (users []*UserModel, err error)
-	// 获取某个用户信息  不存在，则返回错误
 	Take(ctx context.Context, userID string) (user *UserModel, err error)
-	// 获取用户信息 不存在，不返回错误
-	Page(ctx context.Context, pageNumber, showNumber int32) (users []*UserModel, count int64, err error)
-	GetAllUserID(ctx context.Context, pageNumber, showNumber int32) (userIDs []string, err error)
+	Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*UserModel, err error)
+	Exist(ctx context.Context, userID string) (exist bool, err error)
+	GetAllUserID(ctx context.Context, pagination pagination.Pagination) (count int64, userIDs []string, err error)
 	GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error)
 	// 获取用户总数
 	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)

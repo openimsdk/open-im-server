@@ -17,62 +17,43 @@ package relation
 import (
 	"context"
 	"time"
+
+	"github.com/OpenIMSDK/tools/pagination"
 )
 
-const (
-	FriendModelTableName = "friends"
-)
-
+// FriendModel represents the data structure for a friend relationship in MongoDB.
 type FriendModel struct {
-	OwnerUserID    string    `gorm:"column:owner_user_id;primary_key;size:64"`
-	FriendUserID   string    `gorm:"column:friend_user_id;primary_key;size:64"`
-	Remark         string    `gorm:"column:remark;size:255"`
-	CreateTime     time.Time `gorm:"column:create_time;autoCreateTime"`
-	AddSource      int32     `gorm:"column:add_source"`
-	OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
-	Ex             string    `gorm:"column:ex;size:1024"`
+	OwnerUserID    string    `bson:"owner_user_id"`
+	FriendUserID   string    `bson:"friend_user_id"`
+	Remark         string    `bson:"remark"`
+	CreateTime     time.Time `bson:"create_time"`
+	AddSource      int32     `bson:"add_source"`
+	OperatorUserID string    `bson:"operator_user_id"`
+	Ex             string    `bson:"ex"`
 }
 
-func (FriendModel) TableName() string {
-	return FriendModelTableName
-}
-
+// FriendModelInterface defines the operations for managing friends in MongoDB.
 type FriendModelInterface interface {
-	// 插入多条记录
+	// Create inserts multiple friend records.
 	Create(ctx context.Context, friends []*FriendModel) (err error)
-	// 删除ownerUserID指定的好友
+	// Delete removes specified friends of the owner user.
 	Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error)
-	// 更新ownerUserID单个好友信息 更新零值
-	UpdateByMap(ctx context.Context, ownerUserID string, friendUserID string, args map[string]interface{}) (err error)
-	// 更新好友信息的非零值
-	Update(ctx context.Context, friends []*FriendModel) (err error)
-	// 更新好友备注（也支持零值 ）
+	// UpdateByMap updates specific fields of a friend document using a map.
+	UpdateByMap(ctx context.Context, ownerUserID string, friendUserID string, args map[string]any) (err error)
+	// UpdateRemark modify remarks.
 	UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error)
-	// 获取单个好友信息，如没找到 返回错误
+	// Take retrieves a single friend document. Returns an error if not found.
 	Take(ctx context.Context, ownerUserID, friendUserID string) (friend *FriendModel, err error)
-	// 查找好友关系，如果是双向关系，则都返回
+	// FindUserState finds the friendship status between two users.
 	FindUserState(ctx context.Context, userID1, userID2 string) (friends []*FriendModel, err error)
-	// 获取 owner指定的好友列表 如果有friendUserIDs不存在，也不返回错误
+	// FindFriends retrieves a list of friends for a given owner. Missing friends do not cause an error.
 	FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*FriendModel, err error)
-	// 获取哪些人添加了friendUserID 如果有ownerUserIDs不存在，也不返回错误
-	FindReversalFriends(
-		ctx context.Context,
-		friendUserID string,
-		ownerUserIDs []string,
-	) (friends []*FriendModel, err error)
-	// 获取ownerUserID好友列表 支持翻页
-	FindOwnerFriends(
-		ctx context.Context,
-		ownerUserID string,
-		pageNumber, showNumber int32,
-	) (friends []*FriendModel, total int64, err error)
-	// 获取哪些人添加了friendUserID 支持翻页
-	FindInWhoseFriends(
-		ctx context.Context,
-		friendUserID string,
-		pageNumber, showNumber int32,
-	) (friends []*FriendModel, total int64, err error)
-	// 获取好友UserID列表
+	// FindReversalFriends finds users who have added the specified user as a friend.
+	FindReversalFriends(ctx context.Context, friendUserID string, ownerUserIDs []string) (friends []*FriendModel, err error)
+	// FindOwnerFriends retrieves a paginated list of friends for a given owner.
+	FindOwnerFriends(ctx context.Context, ownerUserID string, pagination pagination.Pagination) (total int64, friends []*FriendModel, err error)
+	// FindInWhoseFriends finds users who have added the specified user as a friend, with pagination.
+	FindInWhoseFriends(ctx context.Context, friendUserID string, pagination pagination.Pagination) (total int64, friends []*FriendModel, err error)
+	// FindFriendUserIDs retrieves a list of friend user IDs for a given owner.
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
-	NewTx(tx any) FriendModelInterface
 }

@@ -2703,7 +2703,7 @@ func RegisterMsgServer(s *grpc.Server, srv MsgServer) {
 	s.RegisterService(&_Msg_serviceDesc, srv)
 }
 
-func _Msg_GetMaxAndMinSeq_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_GetMaxAndMinSeq_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(sdk_ws.GetMaxAndMinSeqReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2715,13 +2715,13 @@ func _Msg_GetMaxAndMinSeq_Handler(srv interface{}, ctx context.Context, dec func
 		Server:     srv,
 		FullMethod: "/msg.msg/GetMaxAndMinSeq",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).GetMaxAndMinSeq(ctx, req.(*sdk_ws.GetMaxAndMinSeqReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_PullMessageBySeqList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_PullMessageBySeqList_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(sdk_ws.PullMessageBySeqListReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2733,13 +2733,13 @@ func _Msg_PullMessageBySeqList_Handler(srv interface{}, ctx context.Context, dec
 		Server:     srv,
 		FullMethod: "/msg.msg/PullMessageBySeqList",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).PullMessageBySeqList(ctx, req.(*sdk_ws.PullMessageBySeqListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_SendMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_SendMsg_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(SendMsgReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2751,13 +2751,13 @@ func _Msg_SendMsg_Handler(srv interface{}, ctx context.Context, dec func(interfa
 		Server:     srv,
 		FullMethod: "/msg.msg/SendMsg",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).SendMsg(ctx, req.(*SendMsgReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_DelMsgList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_DelMsgList_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(sdk_ws.DelMsgListReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2769,13 +2769,13 @@ func _Msg_DelMsgList_Handler(srv interface{}, ctx context.Context, dec func(inte
 		Server:     srv,
 		FullMethod: "/msg.msg/DelMsgList",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).DelMsgList(ctx, req.(*sdk_ws.DelMsgListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_DelSuperGroupMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_DelSuperGroupMsg_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(DelSuperGroupMsgReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2787,13 +2787,13 @@ func _Msg_DelSuperGroupMsg_Handler(srv interface{}, ctx context.Context, dec fun
 		Server:     srv,
 		FullMethod: "/msg.msg/DelSuperGroupMsg",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).DelSuperGroupMsg(ctx, req.(*DelSuperGroupMsgReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_ClearMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_ClearMsg_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(ClearMsgReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2805,13 +2805,13 @@ func _Msg_ClearMsg_Handler(srv interface{}, ctx context.Context, dec func(interf
 		Server:     srv,
 		FullMethod: "/msg.msg/ClearMsg",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).ClearMsg(ctx, req.(*ClearMsgReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_SetMsgMinSeq_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_SetMsgMinSeq_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(SetMsgMinSeqReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2823,13 +2823,13 @@ func _Msg_SetMsgMinSeq_Handler(srv interface{}, ctx context.Context, dec func(in
 		Server:     srv,
 		FullMethod: "/msg.msg/SetMsgMinSeq",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).SetMsgMinSeq(ctx, req.(*SetMsgMinSeqReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_SetSendMsgStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_SetSendMsgStatus_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(SetSendMsgStatusReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2841,13 +2841,13 @@ func _Msg_SetSendMsgStatus_Handler(srv interface{}, ctx context.Context, dec fun
 		Server:     srv,
 		FullMethod: "/msg.msg/SetSendMsgStatus",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).SetSendMsgStatus(ctx, req.(*SetSendMsgStatusReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_GetSendMsgStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_GetSendMsgStatus_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(GetSendMsgStatusReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2859,13 +2859,13 @@ func _Msg_GetSendMsgStatus_Handler(srv interface{}, ctx context.Context, dec fun
 		Server:     srv,
 		FullMethod: "/msg.msg/GetSendMsgStatus",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).GetSendMsgStatus(ctx, req.(*GetSendMsgStatusReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_GetSuperGroupMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_GetSuperGroupMsg_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(GetSuperGroupMsgReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2877,13 +2877,13 @@ func _Msg_GetSuperGroupMsg_Handler(srv interface{}, ctx context.Context, dec fun
 		Server:     srv,
 		FullMethod: "/msg.msg/GetSuperGroupMsg",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).GetSuperGroupMsg(ctx, req.(*GetSuperGroupMsgReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_GetWriteDiffMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_GetWriteDiffMsg_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(GetWriteDiffMsgReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2895,13 +2895,13 @@ func _Msg_GetWriteDiffMsg_Handler(srv interface{}, ctx context.Context, dec func
 		Server:     srv,
 		FullMethod: "/msg.msg/GetWriteDiffMsg",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).GetWriteDiffMsg(ctx, req.(*GetWriteDiffMsgReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_SetMessageReactionExtensions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_SetMessageReactionExtensions_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(SetMessageReactionExtensionsReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2913,13 +2913,13 @@ func _Msg_SetMessageReactionExtensions_Handler(srv interface{}, ctx context.Cont
 		Server:     srv,
 		FullMethod: "/msg.msg/SetMessageReactionExtensions",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).SetMessageReactionExtensions(ctx, req.(*SetMessageReactionExtensionsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_GetMessageListReactionExtensions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_GetMessageListReactionExtensions_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(GetMessageListReactionExtensionsReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2931,13 +2931,13 @@ func _Msg_GetMessageListReactionExtensions_Handler(srv interface{}, ctx context.
 		Server:     srv,
 		FullMethod: "/msg.msg/GetMessageListReactionExtensions",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).GetMessageListReactionExtensions(ctx, req.(*GetMessageListReactionExtensionsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_AddMessageReactionExtensions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_AddMessageReactionExtensions_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(AddMessageReactionExtensionsReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2949,13 +2949,13 @@ func _Msg_AddMessageReactionExtensions_Handler(srv interface{}, ctx context.Cont
 		Server:     srv,
 		FullMethod: "/msg.msg/AddMessageReactionExtensions",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).AddMessageReactionExtensions(ctx, req.(*AddMessageReactionExtensionsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_DeleteMessageReactionExtensions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_DeleteMessageReactionExtensions_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(DeleteMessageListReactionExtensionsReq)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -2967,7 +2967,7 @@ func _Msg_DeleteMessageReactionExtensions_Handler(srv interface{}, ctx context.C
 		Server:     srv,
 		FullMethod: "/msg.msg/DeleteMessageReactionExtensions",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(MsgServer).DeleteMessageReactionExtensions(ctx, req.(*DeleteMessageListReactionExtensionsReq))
 	}
 	return interceptor(ctx, in, info, handler)

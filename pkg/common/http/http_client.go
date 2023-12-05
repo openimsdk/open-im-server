@@ -57,7 +57,7 @@ func Get(url string) (response []byte, err error) {
 	return body, nil
 }
 
-func Post(ctx context.Context, url string, header map[string]string, data interface{}, timeout int) (content []byte, err error) {
+func Post(ctx context.Context, url string, header map[string]string, data any, timeout int) (content []byte, err error) {
 	if timeout > 0 {
 		var cancel func()
 		ctx, cancel = context.WithTimeout(ctx, time.Second*time.Duration(timeout))
@@ -96,7 +96,7 @@ func Post(ctx context.Context, url string, header map[string]string, data interf
 	return result, nil
 }
 
-func PostReturn(ctx context.Context, url string, header map[string]string, input, output interface{}, timeOutSecond int) error {
+func PostReturn(ctx context.Context, url string, header map[string]string, input, output any, timeOutSecond int) error {
 	b, err := Post(ctx, url, header, input, timeOutSecond)
 	if err != nil {
 		return err

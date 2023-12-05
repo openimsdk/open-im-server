@@ -49,7 +49,7 @@ type LongConnServer interface {
 	wsHandler(w http.ResponseWriter, r *http.Request)
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
-	Validate(s interface{}) error
+	Validate(s any) error
 	SetCacheHandler(cache cache.MsgModel)
 	SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry)
 	KickUserConn(client *Client) error
@@ -58,6 +58,12 @@ type LongConnServer interface {
 	Compressor
 	Encoder
 	MessageHandler
+}
+
+var bufferPool = sync.Pool{
+	New: func() any {
+		return make([]byte, 1024)
+	},
 }
 
 type WsServer struct {
@@ -120,7 +126,7 @@ func (ws *WsServer) UnRegister(c *Client) {
 	ws.unregisterChan <- c
 }
 
-func (ws *WsServer) Validate(s interface{}) error {
+func (ws *WsServer) Validate(s any) error {
 	//?question?
 	return nil
 }
@@ -145,7 +151,7 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 		writeBufferSize:  config.writeBufferSize,
 		handshakeTimeout: config.handshakeTimeout,
 		clientPool: sync.Pool{
-			New: func() interface{} {
+			New: func() any {
 				return new(Client)
 			},
 		},

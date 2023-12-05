@@ -71,7 +71,7 @@ func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
 	return opts
 }
 
-func initConfig(config interface{}, configName, configFolderPath string) error {
+func initConfig(config any, configName, configFolderPath string) error {
 	configFolderPath = filepath.Join(configFolderPath, configName)
 	_, err := os.Stat(configFolderPath)
 	if err != nil {
