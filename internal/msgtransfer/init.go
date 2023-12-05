@@ -17,21 +17,20 @@ package msgtransfer
 import (
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
+	"sync"
+
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
-	"net/http"
-	"sync"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -39,20 +38,12 @@ import (
 )
 
 type MsgTransfer struct {
-	persistentCH   *PersistentConsumerHandler         // 聊天记录持久化到mysql的消费者 订阅的topic: ws2ms_chat
 	historyCH      *OnlineHistoryRedisConsumerHandler // 这个消费者聚合消息, 订阅的topic：ws2ms_chat, 修改通知发往msg_to_modify topic, 消息存入redis后Incr Redis, 再发消息到ms2pschat topic推送， 发消息到msg_to_mongo topic持久化
 	historyMongoCH *OnlineHistoryMongoConsumerHandler // mongoDB批量插入, 成功后删除redis中消息，以及处理删除通知消息删除的 订阅的topic: msg_to_mongo
 	// modifyCH       *ModifyMsgConsumerHandler          // 负责消费修改消息通知的consumer, 订阅的topic: msg_to_modify
 }
 
 func StartTransfer(prometheusPort int) error {
-	db, err := relation.NewGormDB()
-	if err != nil {
-		return err
-	}
-	if err := db.AutoMigrate(&relationtb.ChatLogModel{}); err != nil {
-		fmt.Printf("gorm: AutoMigrate ChatLogModel err: %v\n", err)
-	}
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
@@ -78,21 +69,16 @@ func StartTransfer(prometheusPort int) error {
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	msgModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
-	msgMysModel := relation.NewChatLogGorm(db)
-	chatLogDatabase := controller.NewChatLogDatabase(msgMysModel)
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
-	msgTransfer := NewMsgTransfer(chatLogDatabase, msgDatabase, &conversationRpcClient, &groupRpcClient)
+	msgTransfer := NewMsgTransfer(msgDatabase, &conversationRpcClient, &groupRpcClient)
 	return msgTransfer.Start(prometheusPort)
 }
 
-func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase,
-	msgDatabase controller.CommonMsgDatabase,
-	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient,
-) *MsgTransfer {
+func NewMsgTransfer(msgDatabase controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) *MsgTransfer {
 	return &MsgTransfer{
-		persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient),
+		historyCH:      NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient),
 		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase),
 	}
 }

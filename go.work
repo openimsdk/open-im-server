@@ -13,4 +13,5 @@ use (
 	./tools/component
 	./tools/url2im
 	./tools/data-conversion
+	./tools/up35
 )

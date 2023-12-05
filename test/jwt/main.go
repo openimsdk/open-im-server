@@ -25,7 +25,7 @@ func main() {
 
 	// Verify the token
 	claims := &jwt.MapClaims{}
-	parsedT, err := jwt.ParseWithClaims(rawJWT, claims, func(token *jwt.Token) (interface{}, error) {
+	parsedT, err := jwt.ParseWithClaims(rawJWT, claims, func(token *jwt.Token) (any, error) {
 		// Validate the alg is HMAC signature
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

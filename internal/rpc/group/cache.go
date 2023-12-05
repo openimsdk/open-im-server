@@ -26,7 +26,7 @@ func (s *groupServer) GetGroupInfoCache(
 	ctx context.Context,
 	req *pbgroup.GetGroupInfoCacheReq,
 ) (resp *pbgroup.GetGroupInfoCacheResp, err error) {
-	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupID)
+	group, err := s.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (s *groupServer) GetGroupMemberCache(
 	ctx context.Context,
 	req *pbgroup.GetGroupMemberCacheReq,
 ) (resp *pbgroup.GetGroupMemberCacheResp, err error) {
-	members, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.GroupMemberID)
+	members, err := s.db.TakeGroupMember(ctx, req.GroupID, req.GroupMemberID)
 	if err != nil {
 		return nil, err
 	}
