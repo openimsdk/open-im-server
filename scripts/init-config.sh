@@ -39,13 +39,18 @@ openim::log::info "Read more configuration information: https://github.com/openi
 
 for template in "${!TEMPLATES[@]}"; do
   if [[ ! -f "${template}" ]]; then
-    openim::log::error_exit "template file ${template} does not exist..."
+    openim::log::error_exit "Template file ${template} does not exist..."
+    exit 1
   fi
+done
 
+for template in "${!TEMPLATES[@]}"; do
   IFS=';' read -ra OUTPUT_FILES <<< "${TEMPLATES[$template]}"
   for output_file in "${OUTPUT_FILES[@]}"; do
     if [[ -f "${output_file}" ]]; then
-      read -p "File ${output_file} already exists. Overwrite? (Y/N): "
+      echo -n "File ${output_file} already exists. Overwrite? (Y/N): "
+      read -r -n 1 REPLY
+      echo  # Adds a line to wrap after user input
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         openim::log::info "Overwriting ${output_file}. Previous configuration will be lost."
       else
@@ -55,6 +60,10 @@ for template in "${!TEMPLATES[@]}"; do
     fi
 
     openim::log::info "⌚  Working with template file: ${template} to ${output_file}..."
+    if [[ ! -f "${OPENIM_ROOT}/scripts/genconfig.sh" ]]; then
+      openim::log::error "genconfig.sh script not found"
+      exit 1
+    fi
     "${OPENIM_ROOT}/scripts/genconfig.sh" "${ENV_FILE}" "${template}" > "${output_file}" || {
       openim::log::error "Error processing template file ${template}"
       exit 1
@@ -62,5 +71,6 @@ for template in "${!TEMPLATES[@]}"; do
     sleep 0.5
   done
 done
+
 
 openim::log::success "✨  All configuration files have been successfully generated!"
