@@ -434,3 +434,37 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 	}
 	return resp, nil
 }
+func (s *friendServer) PinFriends(
+	ctx context.Context,
+	req *pbfriend.PinFriendsReq,
+) (*pbfriend.PinFriendsResp, error) {
+	if len(req.FriendUserIDs) == 0 {
+		return nil, errs.ErrArgs.Wrap("friendIDList is empty")
+	}
+	if utils.Duplicate(req.FriendUserIDs) {
+		return nil, errs.ErrArgs.Wrap("friendIDList repeated")
+	}
+	var isPinned bool
+	if req.IsPinned != nil {
+		isPinned = req.IsPinned.Value
+	} else {
+		return nil, errs.ErrArgs.Wrap("isPinned is nil")
+	}
+
+	//檢查是不是在好友列表裏
+	_, err := s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	//全部置頂
+	//把所有friendslist的isPinned都設置為true
+	for _, friendID := range req.FriendUserIDs {
+		if err := s.friendDatabase.UpdateFriendPinStatus(ctx, req.OwnerUserID, friendID, isPinned); err != nil {
+			return nil, err
+		}
+	}
+
+	resp := &pbfriend.PinFriendsResp{}
+	return resp, nil
+}

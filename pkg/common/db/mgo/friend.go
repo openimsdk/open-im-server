@@ -2,6 +2,7 @@ package mgo
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
@@ -128,4 +129,18 @@ func (f *FriendMgo) FindInWhoseFriends(ctx context.Context, friendUserID string,
 func (f *FriendMgo) FindFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error) {
 	filter := bson.M{"owner_user_id": ownerUserID}
 	return mgoutil.Find[string](ctx, f.coll, filter, options.Find().SetProjection(bson.M{"_id": 0, "friend_user_id": 1}))
+}
+
+// UpdatePinStatus update friend's pin status
+func (f *FriendMgo) UpdatePinStatus(ctx context.Context, ownerUserID string, friendUserID string, isPinned bool) (err error) {
+
+	filter := bson.M{"owner_user_id": ownerUserID, "friend_user_id": friendUserID}
+	update := bson.M{"$set": bson.M{"is_pinned": isPinned}}
+
+	_, err = f.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return errs.Wrap(err, "update pin error")
+	}
+
+	return nil
 }

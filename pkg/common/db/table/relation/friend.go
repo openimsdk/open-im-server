@@ -56,4 +56,6 @@ type FriendModelInterface interface {
 	FindInWhoseFriends(ctx context.Context, friendUserID string, pagination pagination.Pagination) (total int64, friends []*FriendModel, err error)
 	// FindFriendUserIDs retrieves a list of friend user IDs for a given owner.
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
+	// UpdatePinStatus update friend's pin status
+	UpdatePinStatus(ctx context.Context, ownerUserID string, friendUserID string, isPinned bool) (err error)
 }
