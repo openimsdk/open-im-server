@@ -35,26 +35,6 @@ zookeeper:
   username: ${ZOOKEEPER_USERNAME}
   password: ${ZOOKEEPER_PASSWORD}
 
-###################### Mysql ######################
-# MySQL configuration
-# Currently, only single machine setup is supported
-#
-# Maximum number of open connections
-# Maximum number of idle connections
-# Maximum lifetime in seconds a connection can be reused
-# Log level: 1=slient, 2=error, 3=warn, 4=info
-# Slow query threshold in milliseconds
-mysql:
-  address: [ ${MYSQL_ADDRESS}:${MYSQL_PORT} ]
-  username: ${MYSQL_USERNAME}
-  password: ${MYSQL_PASSWORD}
-  database: ${MYSQL_DATABASE}
-  maxOpenConn: ${MYSQL_MAX_OPEN_CONN}
-  maxIdleConn: ${MYSQL_MAX_IDLE_CONN}
-  maxLifeTime: ${MYSQL_MAX_LIFETIME}
-  logLevel: ${MYSQL_LOG_LEVEL}
-  slowThreshold: ${MYSQL_SLOW_THRESHOLD}
-
 ###################### Mongo ######################
 # MongoDB configuration
 # If uri is not empty, it will be used directly
