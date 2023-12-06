@@ -43,7 +43,7 @@ jobs:
 # docker.io/openim/openim-web:latest
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.3.0
         with:
           images: openim/openim-web
           # generate Docker tags based on the following events/attributes
@@ -84,7 +84,7 @@ jobs:
 # registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-web:latest
       - name: Extract metadata (tags, labels) for Docker
         id: meta2
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.3.0
         with:
           images: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-web
 
@@ -117,7 +117,7 @@ jobs:
 # ghcr.io/openimsdk/openim-web:latest
       - name: Extract metadata (tags, labels) for Docker
         id: meta2
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.3.0
         with:
           images: ghcr.io/openimsdk/openim-web
 
