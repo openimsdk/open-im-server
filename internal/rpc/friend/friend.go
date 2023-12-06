@@ -342,6 +342,12 @@ func (s *friendServer) PinFriends(
 	if utils.Duplicate(req.FriendUserIDs) {
 		return nil, errs.ErrArgs.Wrap("friendIDList repeated")
 	}
+	var isPinned bool
+	if req.IsPinned != nil {
+		isPinned = req.IsPinned.Value
+	} else {
+		return nil, errs.ErrArgs.Wrap("isPinned is nil")
+	}
 
 	//檢查是不是在好友列表裏
 	_, err := s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
@@ -352,7 +358,7 @@ func (s *friendServer) PinFriends(
 	//全部置頂
 	//把所有friendslist的isPinned都設置為true
 	for _, friendID := range req.FriendUserIDs {
-		if err := s.friendDatabase.UpdateFriendPinStatus(ctx, req.OwnerUserID, friendID); err != nil {
+		if err := s.friendDatabase.UpdateFriendPinStatus(ctx, req.OwnerUserID, friendID, isPinned); err != nil {
 			return nil, err
 		}
 	}

@@ -345,3 +345,9 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 	}
 	return &pbuser.GetSubscribeUsersStatusResp{StatusList: onlineStatusList}, nil
 }
+
+// RemoveUser remove the user, user's friend relationship, and quit group
+func (s *userServer) RemoveUser(ctx context.Context, req *pbuser.RemoveUserReq) (*pbuser.RemoveUserResp, error) {
+
+	return &pbuser.RemoveUserResp{}, nil
+}

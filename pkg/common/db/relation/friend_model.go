@@ -191,3 +191,13 @@ func (f *FriendGorm) FindFriendUserIDs(ctx context.Context, ownerUserID string) 
 		"",
 	)
 }
+func (f *FriendGorm) UpdatePinStatus(ctx context.Context, ownerUserID string, friendUserID string, isPinned bool) (err error) {
+	return utils.Wrap(
+		f.db(ctx).
+			Model(&relation.FriendModel{}).
+			Where("owner_user_id = ? AND friend_user_id = ?", ownerUserID, friendUserID).
+			Update("is_pinned", isPinned).
+			Error,
+		"UpdatePinStatus failed",
+	)
+}

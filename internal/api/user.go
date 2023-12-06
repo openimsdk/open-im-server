@@ -207,3 +207,14 @@ func (u *UserApi) GetUserStatus(c *gin.Context) {
 func (u *UserApi) GetSubscribeUsersStatus(c *gin.Context) {
 	a2r.Call(user.UserClient.GetSubscribeUsersStatus, u.Client, c)
 }
+func (u *UserApi) RemoveUser(c *gin.Context) {
+	//刪除所有用戶相關的好友
+	//用戶刪除了對方 但對方還有好友 特殊情況
+
+	//刪除所有用戶加入的群
+
+	//通訊錄好友，消息列表，朋友圈可能出bug
+	//...
+
+	a2r.Call(user.UserClient.RemoveUser, u.Client, c)
+}

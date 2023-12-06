@@ -75,5 +75,5 @@ type FriendModelInterface interface {
 	// 获取好友UserID列表
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
 	NewTx(tx any) FriendModelInterface
-	//UpdatePinStatus(ctx context.Context, ownerUserID string, friendUserID string) (err error)
+	UpdatePinStatus(ctx context.Context, ownerUserID string, friendUserID string, isPinned bool) (err error)
 }
