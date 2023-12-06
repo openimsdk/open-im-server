@@ -16,32 +16,58 @@ package convert
 
 import (
 	"github.com/OpenIMSDK/protocol/sdkws"
+	"time"
 
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
-func UsersDB2Pb(users []*relationtb.UserModel) (result []*sdkws.UserInfo) {
+func UsersDB2Pb(users []*relationtb.UserModel) []*sdkws.UserInfo {
+	result := make([]*sdkws.UserInfo, 0, len(users))
 	for _, user := range users {
-		var userPb sdkws.UserInfo
-		userPb.UserID = user.UserID
-		userPb.Nickname = user.Nickname
-		userPb.FaceURL = user.FaceURL
-		userPb.Ex = user.Ex
-		userPb.CreateTime = user.CreateTime.UnixMilli()
-		userPb.AppMangerLevel = user.AppMangerLevel
-		userPb.GlobalRecvMsgOpt = user.GlobalRecvMsgOpt
-		result = append(result, &userPb)
+		userPb := &sdkws.UserInfo{
+			UserID:           user.UserID,
+			Nickname:         user.Nickname,
+			FaceURL:          user.FaceURL,
+			Ex:               user.Ex,
+			CreateTime:       user.CreateTime.UnixMilli(),
+			AppMangerLevel:   user.AppMangerLevel,
+			GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
+		}
+		result = append(result, userPb)
 	}
 	return result
 }
 
 func UserPb2DB(user *sdkws.UserInfo) *relationtb.UserModel {
-	var userDB relationtb.UserModel
-	userDB.UserID = user.UserID
-	userDB.Nickname = user.Nickname
-	userDB.FaceURL = user.FaceURL
-	userDB.Ex = user.Ex
-	userDB.AppMangerLevel = user.AppMangerLevel
-	userDB.GlobalRecvMsgOpt = user.GlobalRecvMsgOpt
-	return &userDB
+	return &relationtb.UserModel{
+		UserID:           user.UserID,
+		Nickname:         user.Nickname,
+		FaceURL:          user.FaceURL,
+		Ex:               user.Ex,
+		CreateTime:       time.UnixMilli(user.CreateTime),
+		AppMangerLevel:   user.AppMangerLevel,
+		GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
+	}
+}
+
+func UserPb2DBMap(user *sdkws.UserInfo) map[string]any {
+	if user == nil {
+		return nil
+	}
+	val := make(map[string]any)
+	fields := map[string]any{
+		"nickname":            user.Nickname,
+		"face_url":            user.FaceURL,
+		"ex":                  user.Ex,
+		"app_manager_level":   user.AppMangerLevel,
+		"global_recv_msg_opt": user.GlobalRecvMsgOpt,
+	}
+	for key, value := range fields {
+		if v, ok := value.(string); ok && v != "" {
+			val[key] = v
+		} else if v, ok := value.(int32); ok && v != 0 {
+			val[key] = v
+		}
+	}
+	return val
 }

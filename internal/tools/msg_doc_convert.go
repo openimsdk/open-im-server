@@ -32,7 +32,7 @@ func (c *MsgTool) convertTools() {
 	for _, conversationID := range conversationIDs {
 		conversationIDs = append(conversationIDs, msgprocessor.GetNotificationConversationIDByConversationID(conversationID))
 	}
-	userIDs, err := c.userDatabase.GetAllUserID(ctx, 0, 0)
+	_, userIDs, err := c.userDatabase.GetAllUserID(ctx, nil)
 	if err != nil {
 		log.ZError(ctx, "get all user ids failed", err)
 		return

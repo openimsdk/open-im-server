@@ -64,7 +64,7 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 				Key:         haErr.Object.Key,
 				Size:        haErr.Object.Size,
 				ContentType: req.ContentType,
-				Cause:       req.Cause,
+				Group:       req.Cause,
 				CreateTime:  time.Now(),
 			}
 			if err := t.s3dataBase.SetObject(ctx, obj); err != nil {
@@ -143,7 +143,7 @@ func (t *thirdServer) CompleteMultipartUpload(ctx context.Context, req *third.Co
 		Key:         result.Key,
 		Size:        result.Size,
 		ContentType: req.ContentType,
-		Cause:       req.Cause,
+		Group:       req.Cause,
 		CreateTime:  time.Now(),
 	}
 	if err := t.s3dataBase.SetObject(ctx, obj); err != nil {

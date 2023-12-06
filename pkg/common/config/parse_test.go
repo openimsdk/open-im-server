@@ -76,7 +76,7 @@ func TestGetOptionsByNotification(t *testing.T) {
 
 func Test_initConfig(t *testing.T) {
 	type args struct {
-		config           interface{}
+		config           any
 		configName       string
 		configFolderPath string
 	}

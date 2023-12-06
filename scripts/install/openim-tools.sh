@@ -61,6 +61,7 @@ openim::tools::pre_start_name() {
   local targets=(
     ncpu
     component
+    up35
   )
   echo "${targets[@]}"
 }

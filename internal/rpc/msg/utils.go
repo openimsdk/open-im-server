@@ -15,12 +15,11 @@
 package msg
 
 import (
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/redis/go-redis/v9"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
@@ -45,7 +44,7 @@ func isMessageHasReadEnabled(msgData *sdkws.MsgData) bool {
 
 func IsNotFound(err error) bool {
 	switch utils.Unwrap(err) {
-	case redis.Nil, gorm.ErrRecordNotFound:
+	case redis.Nil, mongo.ErrNoDocuments:
 		return true
 	default:
 		return false
