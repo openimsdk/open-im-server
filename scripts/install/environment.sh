@@ -95,8 +95,6 @@ generate_ip() {
 LAST_OCTET=$((LAST_OCTET + 1))
 DOCKER_BRIDGE_GATEWAY=$(generate_ip)
 LAST_OCTET=$((LAST_OCTET + 1))
-MYSQL_NETWORK_ADDRESS=$(generate_ip)
-LAST_OCTET=$((LAST_OCTET + 1))
 MONGO_NETWORK_ADDRESS=$(generate_ip)
 LAST_OCTET=$((LAST_OCTET + 1))
 REDIS_NETWORK_ADDRESS=$(generate_ip)
@@ -167,19 +165,6 @@ def "ZOOKEEPER_PORT" "12181"                       # Zookeeper的端口
 def "ZOOKEEPER_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # Zookeeper的地址
 def "ZOOKEEPER_USERNAME" ""                        # Zookeeper的用户名
 def "ZOOKEEPER_PASSWORD" ""                        # Zookeeper的密码
-
-###################### MySQL 配置信息 ######################
-def "MYSQL_PORT" "13306"                       # MySQL的端口
-def "MYSQL_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # MySQL的地址
-def "MYSQL_USERNAME" "${OPENIM_USER}"                 # MySQL的用户名
-# MySQL的密码
-readonly MYSQL_PASSWORD=${MYSQL_PASSWORD:-"${PASSWORD}"}
-def "MYSQL_DATABASE" "${DATABASE_NAME}"        # MySQL的数据库名
-def "MYSQL_MAX_OPEN_CONN" "1000"               # 最大打开的连接数
-def "MYSQL_MAX_IDLE_CONN" "100"                # 最大空闲连接数
-def "MYSQL_MAX_LIFETIME" "60"                  # 连接可以重用的最大生命周期（秒）
-def "MYSQL_LOG_LEVEL" "4"                      # 日志级别
-def "MYSQL_SLOW_THRESHOLD" "500"               # 慢查询阈值（毫秒）
 
 ###################### MongoDB 配置信息 ######################
 def "MONGO_URI"                                # MongoDB的URI
