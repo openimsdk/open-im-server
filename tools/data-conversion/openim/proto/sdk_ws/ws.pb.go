@@ -4156,8 +4156,8 @@ func (m *SignalReq) GetGetTokenByRoomID() *SignalGetTokenByRoomIDReq {
 }
 
 // XXX_OneofFuncs is for the internal use of the proto package.
-func (*SignalReq) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _SignalReq_OneofMarshaler, _SignalReq_OneofUnmarshaler, _SignalReq_OneofSizer, []interface{}{
+func (*SignalReq) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []any) {
+	return _SignalReq_OneofMarshaler, _SignalReq_OneofUnmarshaler, _SignalReq_OneofSizer, []any{
 		(*SignalReq_Invite)(nil),
 		(*SignalReq_InviteInGroup)(nil),
 		(*SignalReq_Cancel)(nil),
@@ -4523,8 +4523,8 @@ func (m *SignalResp) GetGetTokenByRoomID() *SignalGetTokenByRoomIDReply {
 }
 
 // XXX_OneofFuncs is for the internal use of the proto package.
-func (*SignalResp) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _SignalResp_OneofMarshaler, _SignalResp_OneofUnmarshaler, _SignalResp_OneofSizer, []interface{}{
+func (*SignalResp) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []any) {
+	return _SignalResp_OneofMarshaler, _SignalResp_OneofUnmarshaler, _SignalResp_OneofSizer, []any{
 		(*SignalResp_Invite)(nil),
 		(*SignalResp_InviteInGroup)(nil),
 		(*SignalResp_Cancel)(nil),

@@ -19,6 +19,11 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/tx"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
+
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -31,13 +36,11 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/mw"
-	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
@@ -72,33 +75,45 @@ func InitMsgTool() (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
-	db, err := relation.NewGormDB()
-	if err != nil {
-		return nil, err
-	}
 	discov, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
-	/*
-		discov, err := zookeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
-			zookeeper.WithFreq(time.Hour), zookeeper.WithRoundRobin(), zookeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
-				config.Config.Zookeeper.Password), zookeeper.WithTimeout(10), zookeeper.WithLogger(log.NewZkLogger()))*/
 	if err != nil {
 		return nil, err
 	}
 	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	userDB := relation.NewUserGorm(db)
+	userDB, err := mgo.NewUserMongo(mongo.GetDatabase())
+	if err != nil {
+		return nil, err
+	}
 	msgDatabase := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase())
 	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
+	ctxTx := tx.NewMongo(mongo.GetClient())
 	userDatabase := controller.NewUserDatabase(
 		userDB,
-		cache.NewUserCacheRedis(rdb, relation.NewUserGorm(db), cache.GetDefaultOpt()),
-		tx.NewGorm(db),
+		cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt()),
+		ctxTx,
 		userMongoDB,
 	)
-	groupDatabase := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase(), nil)
+	groupDB, err := mgo.NewGroupMongo(mongo.GetDatabase())
+	if err != nil {
+		return nil, err
+	}
+	groupMemberDB, err := mgo.NewGroupMember(mongo.GetDatabase())
+	if err != nil {
+		return nil, err
+	}
+	groupRequestDB, err := mgo.NewGroupRequestMgo(mongo.GetDatabase())
+	if err != nil {
+		return nil, err
+	}
+	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase())
+	if err != nil {
+		return nil, err
+	}
+	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, ctxTx, nil)
 	conversationDatabase := controller.NewConversationDatabase(
-		relation.NewConversationGorm(db),
-		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), relation.NewConversationGorm(db)),
-		tx.NewGorm(db),
+		conversationDB,
+		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
+		ctxTx,
 	)
 	msgRpcClient := rpcclient.NewMessageRpcClient(discov)
 	msgNotificationSender := notification.NewMsgNotificationSender(rpcclient.WithRpcClient(&msgRpcClient))
@@ -144,7 +159,11 @@ func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 	}
 	for i := 0; i < count; i++ {
 		pageNumber := rand.Int63() % maxPage
-		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, int32(pageNumber), batchNum)
+		pagination := &sdkws.RequestPagination{
+			PageNumber: int32(pageNumber),
+			ShowNumber: batchNum,
+		}
+		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, pagination)
 		if err != nil {
 			log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
 			continue

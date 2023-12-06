@@ -391,3 +391,5 @@ Sessionx.vim
 dist/
 .env
 config/config.yaml
+config/alertmanager.yml
+config/prometheus.yml

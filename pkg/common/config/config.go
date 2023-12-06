@@ -44,6 +44,18 @@ type POfflinePush struct {
 	Ext    string `yaml:"ext"`
 }
 
+type MYSQL struct {
+	Address       []string `yaml:"address"`
+	Username      string   `yaml:"username"`
+	Password      string   `yaml:"password"`
+	Database      string   `yaml:"database"`
+	MaxOpenConn   int      `yaml:"maxOpenConn"`
+	MaxIdleConn   int      `yaml:"maxIdleConn"`
+	MaxLifeTime   int      `yaml:"maxLifeTime"`
+	LogLevel      int      `yaml:"logLevel"`
+	SlowThreshold int      `yaml:"slowThreshold"`
+}
+
 type configStruct struct {
 	Envs struct {
 		Discovery string `yaml:"discovery"`
@@ -55,17 +67,7 @@ type configStruct struct {
 		Password string   `yaml:"password"`
 	} `yaml:"zookeeper"`
 
-	Mysql struct {
-		Address       []string `yaml:"address"`
-		Username      string   `yaml:"username"`
-		Password      string   `yaml:"password"`
-		Database      string   `yaml:"database"`
-		MaxOpenConn   int      `yaml:"maxOpenConn"`
-		MaxIdleConn   int      `yaml:"maxIdleConn"`
-		MaxLifeTime   int      `yaml:"maxLifeTime"`
-		LogLevel      int      `yaml:"logLevel"`
-		SlowThreshold int      `yaml:"slowThreshold"`
-	} `yaml:"mysql"`
+	Mysql *MYSQL `yaml:"mysql"`
 
 	Mongo struct {
 		Uri         string   `yaml:"uri"`
