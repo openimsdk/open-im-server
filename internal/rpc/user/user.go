@@ -334,3 +334,48 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 	}
 	return &pbuser.GetSubscribeUsersStatusResp{StatusList: onlineStatusList}, nil
 }
+
+// ProcessUserCommandAdd user general function add
+func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
+	// Assuming you have a method in s.UserDatabase to add a user command
+	err := s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbuser.ProcessUserCommandAddResp{}, nil
+}
+
+// ProcessUserCommandDelete user general function delete
+func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.ProcessUserCommandDeleteReq) (*pbuser.ProcessUserCommandDeleteResp, error) {
+	// Assuming you have a method in s.UserDatabase to delete a user command
+	err := s.UserDatabase.DeleteUserCommand(ctx, req.UserID, req.Type, req.Uuid)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbuser.ProcessUserCommandDeleteResp{}, nil
+}
+
+// ProcessUserCommandUpdate user general function update
+func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
+	// Assuming you have a method in s.UserDatabase to update a user command
+	err := s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbuser.ProcessUserCommandUpdateResp{}, nil
+}
+
+// ProcessUserCommandGet user general function get
+func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
+	// Fetch user commands from the database
+	commands, err := s.UserDatabase.GetUserCommands(ctx, req.UserID, req.Type)
+	if err != nil {
+		return nil, err
+	}
+
+	// The commands variable is already a map[string]string, so you can directly return it
+	return &pbuser.ProcessUserCommandGetResp{UuidValue: commands}, nil
+}

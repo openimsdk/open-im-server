@@ -73,6 +73,67 @@ func (u *UserMgo) CountTotal(ctx context.Context, before *time.Time) (count int6
 	return mgoutil.Count(ctx, u.coll, bson.M{"create_time": bson.M{"$lt": before}})
 }
 
+type UserCommand struct {
+	UserID   string            `bson:"userID"`
+	Type     int32             `bson:"type"`
+	Commands map[string]string `bson:"commands"`
+}
+
+func (u *UserMgo) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
+	collection := u.coll.Database().Collection("userCommands")
+
+	filter := bson.M{"userID": userID, "type": Type}
+	update := bson.M{"$set": bson.M{"commands." + UUID: value}}
+	options := options.Update().SetUpsert(true)
+
+	_, err := collection.UpdateOne(ctx, filter, update, options)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (u *UserMgo) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
+	collection := u.coll.Database().Collection("userCommands")
+
+	filter := bson.M{"userID": userID, "type": Type}
+	update := bson.M{"$unset": bson.M{"commands." + UUID: ""}}
+
+	_, err := collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
+	collection := u.coll.Database().Collection("userCommands")
+
+	// Create a filter to identify the document
+	filter := bson.M{"userID": userID, "type": Type}
+
+	// Create an update statement to set the new value for the command
+	update := bson.M{"$set": bson.M{"commands." + UUID: value}}
+
+	// Perform the update operation
+	_, err := collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32) (map[string]string, error) {
+	collection := u.coll.Database().Collection("userCommands")
+
+	filter := bson.M{"userID": userID, "type": Type}
+	var result UserCommand
+	err := collection.FindOne(ctx, filter).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+	return result.Commands, nil
+}
+
 func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
 	pipeline := bson.A{
 		bson.M{
