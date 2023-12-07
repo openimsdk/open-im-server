@@ -199,3 +199,5 @@ func (u *UserApi) GetUserStatus(c *gin.Context) {
 func (u *UserApi) GetSubscribeUsersStatus(c *gin.Context) {
 	a2r.Call(user.UserClient.GetSubscribeUsersStatus, u.Client, c)
 }
+
+// Get
