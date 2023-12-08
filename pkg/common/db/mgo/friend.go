@@ -135,9 +135,12 @@ func (f *FriendMgo) FindFriendUserIDs(ctx context.Context, ownerUserID string) (
 func (f *FriendMgo) UpdatePinStatus(ctx context.Context, ownerUserID string, friendUserID string, isPinned bool) (err error) {
 
 	filter := bson.M{"owner_user_id": ownerUserID, "friend_user_id": friendUserID}
+	// Create an update operation to set the "is_pinned" field to false for all documents.
 	update := bson.M{"$set": bson.M{"is_pinned": isPinned}}
 
-	_, err = f.coll.UpdateOne(ctx, filter, update)
+	// Perform the update operation for all documents in the collection.
+	_, err = f.coll.UpdateMany(ctx, filter, update)
+
 	if err != nil {
 		return errs.Wrap(err, "update pin error")
 	}
