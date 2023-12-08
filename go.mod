@@ -53,24 +53,6 @@ require (
 	cloud.google.com/go/iam v1.1.2 // indirect
 	cloud.google.com/go/longrunning v0.5.1 // indirect
 	cloud.google.com/go/storage v1.30.1 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.23.1 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.5.1 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.25.4 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.16.3 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.5 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.4 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.5.4 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.7.1 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/v4a v1.2.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.2.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.16.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.43.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.17.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.20.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.25.4 // indirect
-	github.com/aws/smithy-go v1.17.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -130,7 +112,6 @@ require (
 	github.com/prometheus/client_model v0.4.1-0.20230718164431-9a2bf3000d16 // indirect
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.11.1 // indirect
-	github.com/qiniu/go-sdk/v7 v7.18.2 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/sergi/go-diff v1.0.0 // indirect
