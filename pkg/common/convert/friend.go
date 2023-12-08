@@ -17,8 +17,6 @@ package convert
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/protocol/wrapperspb"
-
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
 
@@ -76,11 +74,7 @@ func FriendsDB2Pb(
 		friendPb.FriendUser.FaceURL = users[friend.FriendUserID].FaceURL
 		friendPb.FriendUser.Ex = users[friend.FriendUserID].Ex
 		friendPb.CreateTime = friend.CreateTime.Unix()
-		if friend.IsPinned != nil {
-			friendPb.IsPinned = wrapperspb.Bool(*friend.IsPinned)
-		} else {
-			friendPb.IsPinned = nil
-		}
+		friendPb.IsPinned = friend.IsPinned
 		friendsPb = append(friendsPb, friendPb)
 	}
 	return friendsPb, nil

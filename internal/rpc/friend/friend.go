@@ -16,7 +16,6 @@ package friend
 
 import (
 	"context"
-	"github.com/OpenIMSDK/protocol/wrapperspb"
 	"github.com/OpenIMSDK/tools/tx"
 
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -407,10 +406,7 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 		}
 		var friendInfo *sdkws.FriendInfo
 		if friend := friendMap[userID]; friend != nil {
-			var isPinnedBool bool
-			if friend.IsPinned != nil {
-				isPinnedBool = *friend.IsPinned // ignoring error for simplicity
-			}
+
 			friendInfo = &sdkws.FriendInfo{
 				OwnerUserID:    friend.OwnerUserID,
 				Remark:         friend.Remark,
@@ -418,7 +414,7 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 				AddSource:      friend.AddSource,
 				OperatorUserID: friend.OperatorUserID,
 				Ex:             friend.Ex,
-				IsPinned:       wrapperspb.Bool(isPinnedBool),
+				IsPinned:       friend.IsPinned,
 			}
 		}
 		var blackInfo *sdkws.BlackInfo
