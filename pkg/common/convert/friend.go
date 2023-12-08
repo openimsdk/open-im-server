@@ -76,7 +76,11 @@ func FriendsDB2Pb(
 		friendPb.FriendUser.FaceURL = users[friend.FriendUserID].FaceURL
 		friendPb.FriendUser.Ex = users[friend.FriendUserID].Ex
 		friendPb.CreateTime = friend.CreateTime.Unix()
-		friendPb.IsPinned = wrapperspb.Bool(*friend.IsPinned)
+		if friend.IsPinned != nil {
+			friendPb.IsPinned = wrapperspb.Bool(*friend.IsPinned)
+		} else {
+			friendPb.IsPinned = nil
+		}
 		friendsPb = append(friendsPb, friendPb)
 	}
 	return friendsPb, nil
