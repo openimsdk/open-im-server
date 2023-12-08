@@ -30,7 +30,7 @@ type FriendModel struct {
 	AddSource      int32     `bson:"add_source"`
 	OperatorUserID string    `bson:"operator_user_id"`
 	Ex             string    `bson:"ex"`
-	IsPinned       *string   `bson:"is_pinned"`
+	IsPinned       *bool     `bson:"is_pinned"`
 }
 
 // FriendModelInterface defines the operations for managing friends in MongoDB.
