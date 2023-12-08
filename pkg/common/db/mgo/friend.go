@@ -3,6 +3,7 @@ package mgo
 import (
 	"context"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
@@ -133,9 +134,9 @@ func (f *FriendMgo) FindFriendUserIDs(ctx context.Context, ownerUserID string) (
 
 // UpdatePinStatus update friend's pin status
 func (f *FriendMgo) UpdatePinStatus(ctx context.Context, ownerUserID string, friendUserID string, isPinned bool) (err error) {
-
+	log.ZDebug(ctx, "ispinned", "check", isPinned)
 	filter := bson.M{"owner_user_id": ownerUserID, "friend_user_id": friendUserID}
-	// Create an update operation to set the "is_pinned" field to false for all documents.
+	// Create an update operation to set the "is_pinned" field to isPinned for all documents.
 	update := bson.M{"$set": bson.M{"is_pinned": isPinned}}
 
 	// Perform the update operation for all documents in the collection.
