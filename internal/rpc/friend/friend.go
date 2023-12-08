@@ -17,8 +17,6 @@ package friend
 import (
 	"context"
 	"github.com/OpenIMSDK/protocol/wrapperspb"
-	"strconv"
-
 	"github.com/OpenIMSDK/tools/tx"
 
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -411,7 +409,7 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 		if friend := friendMap[userID]; friend != nil {
 			var isPinnedBool bool
 			if friend.IsPinned != nil {
-				isPinnedBool, _ = strconv.ParseBool(*friend.IsPinned) // ignoring error for simplicity
+				isPinnedBool = *friend.IsPinned // ignoring error for simplicity
 			}
 			friendInfo = &sdkws.FriendInfo{
 				OwnerUserID:    friend.OwnerUserID,
