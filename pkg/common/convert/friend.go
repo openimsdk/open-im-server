@@ -63,6 +63,7 @@ func FriendsDB2Pb(
 	for _, friendDB := range friendsDB {
 		userID = append(userID, friendDB.FriendUserID)
 	}
+
 	users, err := getUsers(ctx, userID)
 	if err != nil {
 		return nil, err
