@@ -450,7 +450,7 @@ func (s *friendServer) PinFriends(
 	} else {
 		return nil, errs.ErrArgs.Wrap("isPinned is nil")
 	}
-
+	log.ZDebug(ctx, "pinfriend1", "s", req)
 	//檢查是不是在好友列表裏
 	_, err := s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
@@ -458,8 +458,9 @@ func (s *friendServer) PinFriends(
 	}
 
 	//全部置頂
-	//把所有friendslist的isPinned都設置為true
+	//把所有friendslist的isPinned都設置為isPinned
 	for _, friendID := range req.FriendUserIDs {
+		log.ZDebug(ctx, "pinfriend2", "s", req)
 		if err := s.friendDatabase.UpdateFriendPinStatus(ctx, req.OwnerUserID, friendID, isPinned); err != nil {
 			return nil, err
 		}
