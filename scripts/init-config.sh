@@ -29,7 +29,7 @@ readonly ENV_FILE=${ENV_FILE:-"${OPENIM_ROOT}/scripts/install/environment.sh"}
 
 # (en: Defines an associative array where the keys are the template files and the values are the corresponding output files.)
 declare -A TEMPLATES=(
-  ["${OPENIM_ROOT}/deployments/templates/env_template.yaml"]="${OPENIM_ROOT}/.env"
+  ["${OPENIM_ROOT}/deployments/templates/env-template.yaml"]="${OPENIM_ROOT}/.env"
   ["${OPENIM_ROOT}/deployments/templates/openim.yaml"]="${OPENIM_ROOT}/config/config.yaml"
   ["${OPENIM_ROOT}/deployments/templates/prometheus.yml"]="${OPENIM_ROOT}/config/prometheus.yml"
   ["${OPENIM_ROOT}/deployments/templates/alertmanager.yml"]="${OPENIM_ROOT}/config/alertmanager.yml"
