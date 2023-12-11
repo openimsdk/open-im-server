@@ -73,6 +73,7 @@ services:
     image: 'bitnami/kafka:${KAFKA_IMAGE_VERSION:-3.5.1}'
     container_name: kafka
     restart: always
+    user: ${KAFKA_USER:-root}
     ports:
       - "${KAFKA_PORT:-19094}:9094"
     volumes:

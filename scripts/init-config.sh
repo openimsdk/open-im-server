@@ -168,7 +168,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Generate configuration files if requested
-if [[ "${FORCE_OVERWRITE}" == true ]]; then
+if [[ "${FORCE_OVERWRITE}" == true || "${SKIP_EXISTING}" == false ]]; then
   generate_config_files
 fi
 
