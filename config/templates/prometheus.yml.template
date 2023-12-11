@@ -1,0 +1,85 @@
+# my global config
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['172.28.0.1:19093']
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  - "instance-down-rules.yml"
+# - "first_rules.yml"
+# - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label "job='job_name'"" to any timeseries scraped from this config.
+  # Monitored information captured by prometheus
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: [ '172.28.0.1:19100' ]
+        labels:
+          namespace: 'default'
+
+  # prometheus fetches application services
+  - job_name: 'openimserver-openim-api'
+    static_configs:
+      - targets: [ '172.28.0.1:20100' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-msggateway'
+    static_configs:
+      - targets: [ '172.28.0.1:20140' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-msgtransfer'
+    static_configs:
+      - targets: [ 172.28.0.1:21400, 172.28.0.1:21401, 172.28.0.1:21402, 172.28.0.1:21403 ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-push'
+    static_configs:
+      - targets: [ '172.28.0.1:20170' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-auth'
+    static_configs:
+      - targets: [ '172.28.0.1:20160' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-conversation'
+    static_configs:
+      - targets: [ '172.28.0.1:20230' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-friend'
+    static_configs:
+      - targets: [ '172.28.0.1:20120' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-group'
+    static_configs:
+      - targets: [ '172.28.0.1:20150' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-msg'
+    static_configs:
+      - targets: [ '172.28.0.1:20130' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-third'
+    static_configs:
+      - targets: [ '172.28.0.1:21301' ]
+        labels:
+          namespace: 'default'
+  - job_name: 'openimserver-openim-rpc-user'
+    static_configs:
+      - targets: [ '172.28.0.1:20110' ]
+        labels:
+          namespace: 'default'
