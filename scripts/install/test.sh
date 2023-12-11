@@ -529,6 +529,26 @@ EOF
 
   openim::test::check_error "$response"
 }
+# Updates the pin status of a friend.
+openim::test::update_pin_status() {
+  local ownerUserID="${1}"
+  local friendUserID="${2}"
+  local isPinned="${3}"
+
+  local request_body=$(cat <<EOF
+{
+  "ownerUserID": "${ownerUserID}",
+  "friendUserID": "${friendUserID}",
+  "isPinned": ${isPinned}
+}
+EOF
+)
+  echo "Requesting to update pin status: $request_body"
+
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/update_pin_status" -d "${request_body}")
+
+  openim::test::check_error "$response"
+}
 
 # [openim::test::friend function description]
 # The `openim::test::friend` function serves as a test suite for friend-related operations.
@@ -583,6 +603,10 @@ function openim::test::friend() {
   # TODO：
 #   openim::test::import_friend "${TEST_USER_ID}" "11111114" "11111115"
 
+  # 13. pin Friend
+  # Add this call to your test suite where appropriate
+  openim::test::update_pin_status "${TEST_USER_ID}" "${FRIEND_USER_ID}" true
+  openim::test::update_pin_status "${TEST_USER_ID}" "${FRIEND_USER_ID}" false
   # Log the completion of the friend test suite.
   openim::log::success "Friend test suite completed successfully."
 }
