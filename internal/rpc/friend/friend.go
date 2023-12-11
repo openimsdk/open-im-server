@@ -16,6 +16,7 @@ package friend
 
 import (
 	"context"
+	"errors"
 
 	"github.com/OpenIMSDK/tools/tx"
 
@@ -51,6 +52,10 @@ type friendServer struct {
 	notificationSender    *notification.FriendNotificationSender
 	conversationRpcClient rpcclient.ConversationRpcClient
 	RegisterCenter        registry.SvcDiscoveryRegistry
+}
+
+func (s *friendServer) PinFriends(ctx context.Context, req *pbfriend.PinFriendsReq) (*pbfriend.PinFriendsResp, error) {
+	return nil, errors.New("implement me")
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
