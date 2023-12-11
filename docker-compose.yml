@@ -18,9 +18,9 @@ services:
     container_name: mongo
     command: --wiredTigerCacheSizeGB 1 --auth
     volumes:
-      - "${DATA_DIR:-/root/workspaces/openim/open-im-server}/components/mongodb/data/db:/data/db"
-      - "${DATA_DIR:-/root/workspaces/openim/open-im-server}/components/mongodb/data/logs:/data/logs"
-      - "${DATA_DIR:-/root/workspaces/openim/open-im-server}/components/mongodb/data/conf:/etc/mongo"
+      - "${DATA_DIR:-./}/components/mongodb/data/db:/data/db"
+      - "${DATA_DIR:-./}/components/mongodb/data/logs:/data/logs"
+      - "${DATA_DIR:-./}/components/mongodb/data/conf:/etc/mongo"
       - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
     environment:
       - TZ=Asia/Shanghai
@@ -40,8 +40,8 @@ services:
     ports:
       - "${REDIS_PORT:-16379}:6379"
     volumes:
-      - "${DATA_DIR:-/root/workspaces/openim/open-im-server}/components/redis/data:/data"
-      - "${DATA_DIR:-/root/workspaces/openim/open-im-server}/components/redis/config/redis.conf:/usr/local/redis/config/redis.conf"
+      - "${DATA_DIR:-./}/components/redis/data:/data"
+      - "${DATA_DIR:-./}/components/redis/config/redis.conf:/usr/local/redis/config/redis.conf"
     environment:
       TZ: Asia/Shanghai
     restart: always
@@ -77,7 +77,7 @@ services:
       - "${KAFKA_PORT:-19094}:9094"
     volumes:
       - ./scripts/create-topic.sh:/opt/bitnami/kafka/create-topic.sh
-      - "${DATA_DIR:-/root/workspaces/openim/open-im-server}/components/kafka:/bitnami/kafka"
+      - "${DATA_DIR:-./}/components/kafka:/bitnami/kafka"
     command: >
       bash -c "/opt/bitnami/scripts/kafka/run.sh & sleep 5; /opt/bitnami/kafka/create-topic.sh; wait"
     environment:
@@ -101,8 +101,8 @@ services:
       - "9090:9090"
     container_name: minio
     volumes:
-      - "${DATA_DIR:-/root/workspaces/openim/open-im-server}/components/mnt/data:/data"
-      - "${DATA_DIR:-/root/workspaces/openim/open-im-server}/components/mnt/config:/root/.minio"
+      - "${DATA_DIR:-./}/components/mnt/data:/data"
+      - "${DATA_DIR:-./}/components/mnt/config:/root/.minio"
     environment:
       MINIO_ROOT_USER: "${MINIO_ACCESS_KEY:-root}"
       MINIO_ROOT_PASSWORD: "${MINIO_SECRET_KEY:-openIM123}"
@@ -174,7 +174,7 @@ services:
   #   ports:
   #     - "${GRAFANA_PORT:-13000}:3000"
   #   volumes:
-  #     - ${DATA_DIR:-/root/workspaces/openim/open-im-server}/components/grafana:/var/lib/grafana
+  #     - ${DATA_DIR:-./}/components/grafana:/var/lib/grafana
   #   networks:
   #     server:
   #       ipv4_address: ${GRAFANA_NETWORK_ADDRESS:-172.28.0.11}
