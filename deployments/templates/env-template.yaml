@@ -90,11 +90,11 @@ MONGO_ADDRESS=${MONGO_NETWORK_ADDRESS}
 
 # Port on which MongoDB service is running.
 # Default: MONGO_PORT=37017
-MONGO_PORT=${MONGO_PORT}
+# MONGO_PORT=${MONGO_PORT}
 
 # Username to authenticate with the MongoDB service.
 # Default: MONGO_USERNAME=root
-MONGO_USERNAME=${MONGO_USERNAME}
+# MONGO_USERNAME=${MONGO_USERNAME}
 
 # Password to authenticate with the MongoDB service.
 # Default: MONGO_PASSWORD=openIM123
@@ -121,6 +121,9 @@ REDIS_PASSWORD=${REDIS_PASSWORD}
 # Address or hostname for the Kafka service.
 # Default: KAFKA_ADDRESS=172.28.0.1
 KAFKA_ADDRESS=${KAFKA_NETWORK_ADDRESS}
+
+# Kakfa username to authenticate with the Kafka service.
+# KAFKA_USERNAME=${KAFKA_USERNAME}
 
 # Port on which Kafka distributed streaming platform is running.
 # Default: KAFKA_PORT=19092
@@ -149,7 +152,7 @@ MINIO_PORT=${MINIO_PORT}
 
 # Access key to authenticate with the MinIO service.
 # Default: MINIO_ACCESS_KEY=root
-MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+# MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
 
 # Secret key corresponding to the access key for MinIO authentication.
 # Default: MINIO_SECRET_KEY=openIM123
