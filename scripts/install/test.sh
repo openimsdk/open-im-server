@@ -614,9 +614,9 @@ function openim::test::friend() {
 
   # 13. pin Friend
   # Add this call to your test suite where appropriate
-  openim::test::update_pin_status "${TEST_USER_ID}" true ${FRIEND_USER_ID}
+  openim::test::update_pin_status "${TEST_USER_ID}" true "${FRIEND_USER_ID}"
 
-  openim::test::update_pin_status "${TEST_USER_ID}" false ${FRIEND_USER_ID}
+  openim::test::update_pin_status "${TEST_USER_ID}" false "${FRIEND_USER_ID}"
 
   # Log the completion of the friend test suite.
   openim::log::success "Friend test suite completed successfully."
