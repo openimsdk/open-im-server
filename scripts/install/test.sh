@@ -547,7 +547,7 @@ openim::test::update_pin_status() {
   local request_body=$(cat <<EOF
 {
   "ownerUserID": "${ownerUserID}",
-  "friendUserIDs": [${friendUserIDs}],
+  "friendUserID": [${friendUserIDs}],
   "isPinned": ${isPinned}
 }
 EOF
