@@ -451,14 +451,13 @@ func (s *friendServer) PinFriends(
 	} else {
 		return nil, errs.ErrArgs.Wrap("isPinned is nil")
 	}
-	//檢查是不是在好友列表裏
+	//check whther in friend list
 	_, err := s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	//全部置頂
-	//把所有friendslist的isPinned都設置為isPinned
+	//set friendslist friend pin status to isPinned
 	for _, friendID := range req.FriendUserIDs {
 		if err := s.friendDatabase.UpdateFriendPinStatus(ctx, req.OwnerUserID, friendID, isPinned); err != nil {
 			return nil, err
