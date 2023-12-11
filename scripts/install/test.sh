@@ -555,7 +555,7 @@ EOF
   echo "Requesting to update pin status: $request_body"
 
   local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/update_pin_status" -d "${request_body}")
-
+  echo "Response: $response"
   openim::test::check_error "$response"
 }
 
