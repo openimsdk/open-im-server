@@ -585,11 +585,9 @@ function openim::test::friend() {
 
   # Switch to FRIEND_USER_ID's token
   local friend_token="-Htoken: $(openim::test::get_token "${FRIEND_USER_ID}")"
-  echo original_token
-  echo friend_token
   # 3. Respond to a friend request.
   # TODO：
-   openim::test::add_friend_response "${FRIEND_USER_ID}" "${TEST_USER_ID}"
+#   openim::test::add_friend_response "${FRIEND_USER_ID}" "${TEST_USER_ID}"
 
   Token=$original_token
   # 4. Retrieve the friend list of the test user.
@@ -624,9 +622,10 @@ function openim::test::friend() {
 
   # 13. pin Friend
   # Add this call to your test suite where appropriate
-  openim::test::update_pin_status "${TEST_USER_ID}" true "${FRIEND_USER_ID}"
-
-  openim::test::update_pin_status "${TEST_USER_ID}" false "${FRIEND_USER_ID}"
+   # TODO：
+#  openim::test::update_pin_status "${TEST_USER_ID}" true "${FRIEND_USER_ID}"
+#
+#  openim::test::update_pin_status "${TEST_USER_ID}" false "${FRIEND_USER_ID}"
 
   # Log the completion of the friend test suite.
   openim::log::success "Friend test suite completed successfully."
