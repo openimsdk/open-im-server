@@ -529,6 +529,7 @@ EOF
 
   openim::test::check_error "$response"
 }
+
 # Updates the pin status of multiple friends.
 openim::test::update_pin_status() {
   local ownerUserID="${1}"
