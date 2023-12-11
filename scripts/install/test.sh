@@ -587,7 +587,7 @@ function openim::test::friend() {
   local original_token=$Token
 
   # Switch to FRIEND_USER_ID's token
-  local friend_token="-Htoken: $(openim::test::get_token "${TEST_USER_ID}")"
+  local friend_token="-Htoken: $(openim::test::get_token "${FRIEND_USER_ID}")"
   # 3. Respond to a friend request.
   # TODO：
    openim::test::add_friend_response "${FRIEND_USER_ID}" "${TEST_USER_ID}"
