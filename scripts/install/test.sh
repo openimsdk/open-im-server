@@ -547,7 +547,7 @@ openim::test::update_pin_status() {
   local request_body=$(cat <<EOF
 {
   "ownerUserID": "${ownerUserID}",
-  "friendUserID": [${friendUserIDs}],
+  "friendUserIDs": [${friendUserIDs}],
   "isPinned": ${isPinned}
 }
 EOF
@@ -581,7 +581,7 @@ function openim::test::friend() {
 
   # 3. Respond to a friend request.
   # TODO：
-#   openim::test::add_friend_response "${FRIEND_USER_ID}" "${TEST_USER_ID}"
+   openim::test::add_friend_response "${FRIEND_USER_ID}" "${TEST_USER_ID}"
 
   # 4. Retrieve the friend list of the test user.
   openim::test::get_friend_list "${TEST_USER_ID}"
