@@ -66,7 +66,7 @@ function openim::api::start() {
     for ((j = 0; j < ${#OPENIM_API_SERVICE_PORTS[@]}; j++)); do
         openim::log::info "Starting ${OPENIM_API_SERVICE_LISTARIES[$i]} service, port: ${OPENIM_API_SERVICE_PORTS[j]}, binary root: ${OPENIM_OUTPUT_HOSTBIN}/${OPENIM_API_SERVICE_LISTARIES[$i]}"
         openim::api::start_service "${OPENIM_API_SERVICE_LISTARIES[$i]}" "${OPENIM_API_PORT_LISTARIES[j]}"
-        sleep 1
+        sleep 2
       done
     done
 
