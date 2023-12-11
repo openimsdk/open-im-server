@@ -70,7 +70,6 @@ function openim::test::auth() {
 
 #################################### Auth Module ####################################
 
-# Define a function to get a token (Admin Token)
 # Define a function to get a token for a specific user
 openim::test::get_token() {
   local user_id="${1:-openIM123456}" # Default user ID if not provided
@@ -586,7 +585,8 @@ function openim::test::friend() {
 
   # Switch to FRIEND_USER_ID's token
   local friend_token="-Htoken: $(openim::test::get_token "${FRIEND_USER_ID}")"
-
+  echo original_token
+  echo friend_token
   # 3. Respond to a friend request.
   # TODO：
    openim::test::add_friend_response "${FRIEND_USER_ID}" "${TEST_USER_ID}"
