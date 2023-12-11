@@ -71,12 +71,15 @@ function openim::test::auth() {
 #################################### Auth Module ####################################
 
 # Define a function to get a token (Admin Token)
+# Define a function to get a token for a specific user
 openim::test::get_token() {
+  local user_id="${1:-openIM123456}" # Default user ID if not provided
   token_response=$(${CCURL} "${OperationID}" "${Header}" ${INSECURE_OPENIMAPI}/auth/user_token \
-      -d'{"secret": "'"$SECRET"'","platformID": 1,"userID": "openIM123456"}')
+      -d'{"secret": "'"$SECRET"'","platformID": 1,"userID": "'$user_id'"}')
   token=$(echo $token_response | grep -Po 'token[" :]+\K[^"]+')
   echo "$token"
 }
+
 
 Header="-HContent-Type: application/json"
 OperationID="-HoperationID: 1646445464564"
@@ -572,17 +575,24 @@ function openim::test::friend() {
   openim::test::user_register "${TEST_USER_ID}" "user01" "new_face_url"
   openim::test::user_register "${FRIEND_USER_ID}" "frient01" "new_face_url"
   openim::test::user_register "${BLACK_USER_ID}" "frient02" "new_face_url"
-  
+
   # 1. Check if two users are friends.
   openim::test::is_friend "${TEST_USER_ID}" "${FRIEND_USER_ID}"
 
   # 2. Send a friend request from one user to another.
   openim::test::add_friend "${TEST_USER_ID}" "${FRIEND_USER_ID}"
 
+  openim::test::get_token "${FRIEND_USER_ID}"
+
+  local original_token=$Token
+
+  # Switch to FRIEND_USER_ID's token
+  local friend_token="-Htoken: $(openim::test::get_token "${TEST_USER_ID}")"
   # 3. Respond to a friend request.
   # TODO：
    openim::test::add_friend_response "${FRIEND_USER_ID}" "${TEST_USER_ID}"
 
+  Token=$original_token
   # 4. Retrieve the friend list of the test user.
   openim::test::get_friend_list "${TEST_USER_ID}"
 
