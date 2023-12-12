@@ -278,7 +278,6 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 			break
 		}
 	}
-	s.Notification.GroupCreatedNotification(ctx, tips)
 	if req.GroupInfo.GroupType == constant.SuperGroup {
 		go func() {
 			for _, userID := range userIDs {
