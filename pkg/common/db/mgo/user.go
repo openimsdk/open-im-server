@@ -2,6 +2,7 @@ package mgo
 
 import (
 	"context"
+	"github.com/OpenIMSDK/protocol/user"
 	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
@@ -74,24 +75,22 @@ func (u *UserMgo) CountTotal(ctx context.Context, before *time.Time) (count int6
 }
 
 type UserCommand struct {
-	UserID   string            `bson:"userID"`
-	Type     int32             `bson:"type"`
-	Commands map[string]string `bson:"commands"`
+	UserID   string                      `bson:"userID"`
+	Type     int32                       `bson:"type"`
+	Commands map[string]user.CommandInfo `bson:"commands"`
 }
 
 func (u *UserMgo) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
 	collection := u.coll.Database().Collection("userCommands")
 
 	filter := bson.M{"userID": userID, "type": Type}
-	update := bson.M{"$set": bson.M{"commands." + UUID: value}}
+	update := bson.M{"$set": bson.M{"commands." + UUID: user.CommandInfo{Time: time.Now().Unix(), Value: value}}}
 	options := options.Update().SetUpsert(true)
 
 	_, err := collection.UpdateOne(ctx, filter, update, options)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
+
 func (u *UserMgo) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
 	collection := u.coll.Database().Collection("userCommands")
 
@@ -99,30 +98,18 @@ func (u *UserMgo) DeleteUserCommand(ctx context.Context, userID string, Type int
 	update := bson.M{"$unset": bson.M{"commands." + UUID: ""}}
 
 	_, err := collection.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
 	collection := u.coll.Database().Collection("userCommands")
 
-	// Create a filter to identify the document
 	filter := bson.M{"userID": userID, "type": Type}
+	update := bson.M{"$set": bson.M{"commands." + UUID: user.CommandInfo{Time: time.Now().Unix(), Value: value}}}
 
-	// Create an update statement to set the new value for the command
-	update := bson.M{"$set": bson.M{"commands." + UUID: value}}
-
-	// Perform the update operation
 	_, err := collection.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
-
-func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32) (map[string]string, error) {
+func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32) (map[string]user.CommandInfo, error) {
 	collection := u.coll.Database().Collection("userCommands")
 
 	filter := bson.M{"userID": userID, "type": Type}

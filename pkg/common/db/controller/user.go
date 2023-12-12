@@ -73,7 +73,7 @@ type UserDatabase interface {
 	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
 	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error
 	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
-	GetUserCommands(ctx context.Context, userID string, Type int32) (map[string]string, error)
+	GetUserCommands(ctx context.Context, userID string, Type int32) (map[string]user.CommandInfo, error)
 }
 
 type userDatabase struct {
@@ -242,7 +242,7 @@ func (u *userDatabase) DeleteUserCommand(ctx context.Context, userID string, Typ
 func (u *userDatabase) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
 	return u.userDB.UpdateUserCommand(ctx, userID, Type, UUID, value)
 }
-func (u *userDatabase) GetUserCommands(ctx context.Context, userID string, Type int32) (map[string]string, error) {
+func (u *userDatabase) GetUserCommands(ctx context.Context, userID string, Type int32) (map[string]user.CommandInfo, error) {
 	commands, err := u.userDB.GetUserCommands(ctx, userID, Type)
 	return commands, err
 }
