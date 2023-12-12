@@ -17,7 +17,7 @@
 OPENIM_VERBOSE="${OPENIM_VERBOSE:-5}"
 
 # Enable logging by default. Set to false to disable.
-ENABLE_LOGGING=true
+ENABLE_LOGGING="${ENABLE_LOGGING:-true}"
 
 # If OPENIM_OUTPUT is not set, set it to the default value
 if [[ ! -v OPENIM_OUTPUT ]]; then
