@@ -376,7 +376,7 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 	}
 
 	// Create a slice to store CommandInfoResp
-	var commandInfoSlice []*pbuser.CommandInfoResp
+	commandInfoSlice := []*pbuser.CommandInfoResp{}
 
 	for _, v := range commands {
 		commandInfoSlice = append(commandInfoSlice, &pbuser.CommandInfoResp{
