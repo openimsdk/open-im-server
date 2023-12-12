@@ -111,14 +111,26 @@ func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int
 }
 func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32) (map[string]user.CommandInfo, error) {
 	collection := u.coll.Database().Collection("userCommands")
-
 	filter := bson.M{"userID": userID, "type": Type}
-	var result UserCommand
-	err := collection.FindOne(ctx, filter).Decode(&result)
+
+	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
-	return result.Commands, nil
+	defer cursor.Close(ctx)
+	results := make(map[string]user.CommandInfo)
+	for cursor.Next(ctx) {
+		var result struct {
+			Key   string           `bson:"key"`
+			Value user.CommandInfo `bson:"value"`
+		}
+		err = cursor.Decode(&result)
+		if err != nil {
+			return nil, err
+		}
+		results[result.Key] = result.Value
+	}
+	return results, nil
 }
 
 func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
