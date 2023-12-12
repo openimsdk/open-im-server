@@ -109,7 +109,7 @@ func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int
 	_, err := collection.UpdateOne(ctx, filter, update)
 	return err
 }
-func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32) (map[string]user.CommandInfo, error) {
+func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32) ([]user.CommandInfoResp, error) {
 	collection := u.coll.Database().Collection("userCommands")
 	filter := bson.M{"userID": userID, "type": Type}
 
@@ -119,17 +119,32 @@ func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32
 	}
 	defer cursor.Close(ctx)
 
-	commands := make(map[string]user.CommandInfo)
+	var commands []user.CommandInfoResp
+
 	for cursor.Next(ctx) {
-		var result UserCommand // Assuming UserCommand includes a map or similar structure
-		err = cursor.Decode(&result)
-		if err != nil {
+		var commandInfo user.CommandInfoResp
+
+		// Define a struct that represents your MongoDB document structure
+		var document struct {
+			UUID       string `bson:"uuid"`
+			Value      string `bson:"value"`
+			CreateTime int64  `bson:"createTime"`
+		}
+
+		if err := cursor.Decode(&document); err != nil {
 			return nil, err
 		}
 
-		for key, command := range result.Commands {
-			commands[key] = command
-		}
+		// Populate the user.CommandInfoResp struct with the required fields
+		commandInfo.Uuid = document.UUID
+		commandInfo.Value = document.Value
+		commandInfo.CreateTime = document.CreateTime
+
+		commands = append(commands, commandInfo)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
 	}
 
 	return commands, nil

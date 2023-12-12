@@ -65,5 +65,5 @@ type UserModelInterface interface {
 	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
 	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error
 	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
-	GetUserCommands(ctx context.Context, userID string, Type int32) (map[string]user.CommandInfo, error)
+	GetUserCommands(ctx context.Context, userID string, Type int32) ([]user.CommandInfoResp, error)
 }
