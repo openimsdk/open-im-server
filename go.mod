@@ -33,7 +33,7 @@ require github.com/google/uuid v1.3.1
 
 require (
 	github.com/IBM/sarama v1.41.3
-	github.com/OpenIMSDK/protocol v0.0.32 
+	github.com/OpenIMSDK/protocol v0.0.33
 	github.com/OpenIMSDK/tools v0.0.18
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
@@ -153,9 +153,5 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-)
-replace (
-	github.com/OpenIMSDK/protocol v0.0.32  => github.com/AndrewZuo01/protocol v0.0.0-20231212083449-90062db5018f
-
 )
 
