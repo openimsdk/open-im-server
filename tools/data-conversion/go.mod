@@ -3,16 +3,16 @@ module github.com/openimsdk/open-im-server/v3/tools/data-conversion
 go 1.19
 
 require (
-	github.com/IBM/sarama v1.41.2
-	github.com/OpenIMSDK/protocol v0.0.23
-	github.com/OpenIMSDK/tools v0.0.14
+	github.com/IBM/sarama v1.42.1
+	github.com/OpenIMSDK/protocol v0.0.33
+	github.com/OpenIMSDK/tools v0.0.20
 	github.com/golang/protobuf v1.5.3
-	github.com/openimsdk/open-im-server/v3 v3.3.2
-	golang.org/x/net v0.17.0
-	google.golang.org/grpc v1.57.0
+	github.com/openimsdk/open-im-server/v3 v3.4.0
+	golang.org/x/net v0.19.0
+	google.golang.org/grpc v1.60.0
 	google.golang.org/protobuf v1.31.0
-	gorm.io/driver/mysql v1.5.1
-	gorm.io/gorm v1.25.4
+	gorm.io/driver/mysql v1.5.2
+	gorm.io/gorm v1.25.5
 )
 
 require (
@@ -28,7 +28,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.15.3 // indirect
+	github.com/go-playground/validator/v10 v10.15.5 // indirect
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
@@ -63,10 +63,10 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/image v0.12.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230807174057-1744710a1577 // indirect
+	golang.org/x/crypto v0.16.0 // indirect
+	golang.org/x/image v0.13.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20231012201019-e917dd12ba7a // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
