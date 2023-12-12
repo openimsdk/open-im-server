@@ -7,55 +7,57 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: '${DOCKER_BRIDGE_SUBNET}'
-          gateway: '${DOCKER_BRIDGE_GATEWAY}'
+        - subnet: '${DOCKER_BRIDGE_SUBNET:-172.28.0.0/16}'
+          gateway: '${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}'
 
 services:
   mongodb:
-    image: mongo:6.0.2
+    image: mongo:${MONGODB_IMAGE_VERSION-6.0.2}
     ports:
-      - "${MONGO_PORT}:27017"
+      - "${MONGO_PORT:-37017}:27017"
     container_name: mongo
     command: --wiredTigerCacheSizeGB 1 --auth
     volumes:
-      - "${DATA_DIR}/components/mongodb/data/db:/data/db"
-      - "${DATA_DIR}/components/mongodb/data/logs:/data/logs"
-      - "${DATA_DIR}/components/mongodb/data/conf:/etc/mongo"
-      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro"
+      - "${DATA_DIR:-./}/components/mongodb/data/db:/data/db"
+      - "${DATA_DIR:-./}/components/mongodb/data/logs:/data/logs"
+      - "${DATA_DIR:-./}/components/mongodb/data/conf:/etc/mongo"
+      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
     environment:
       - TZ=Asia/Shanghai
       - wiredTigerCacheSizeGB=1
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
-      - MONGO_INITDB_DATABASE=${MONGO_DATABASE}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME:-root}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-openIM123}
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE:-openIM_v3}
     restart: always
     networks:
       server:
-        ipv4_address: ${MONGO_NETWORK_ADDRESS}
+        ipv4_address: ${MONGO_NETWORK_ADDRESS:-172.28.0.2}
 
   redis:
-    image: redis:7.0.0
+    # image: redis:7.0.0
+    image: redis:${REDIS_IMAGE_VERSION:-7.0.0}
     container_name: redis
     ports:
-      - "${REDIS_PORT}:6379"
+      - "${REDIS_PORT:-16379}:6379"
     volumes:
-      - "${DATA_DIR}/components/redis/data:/data"
-      - "${DATA_DIR}/components/redis/config/redis.conf:/usr/local/redis/config/redis.conf"
+      - "${DATA_DIR:-./}/components/redis/data:/data"
+      - "${DATA_DIR:-./}/components/redis/config/redis.conf:/usr/local/redis/config/redis.conf"
     environment:
       TZ: Asia/Shanghai
     restart: always
     sysctls:
       net.core.somaxconn: 1024
-    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    command: redis-server --requirepass ${REDIS_PASSWORD:-openIM123} --appendonly yes
     networks:
       server:
-        ipv4_address: ${REDIS_NETWORK_ADDRESS}
+        ipv4_address: ${REDIS_NETWORK_ADDRESS:-172.28.0.3}
 
   zookeeper:
-    image: bitnami/zookeeper:3.8
+    # image: bitnami/zookeeper:3.8
+    image: bitnami/zookeeper:${ZOOKEEPER_IMAGE_VERSION:-3.8}
     container_name: zookeeper
     ports:
-     - "${ZOOKEEPER_PORT}:2181"
+     - "${ZOOKEEPER_PORT:-12181}:2181"
     volumes:
       - "/etc/localtime:/etc/localtime"
     environment:
@@ -64,81 +66,77 @@ services:
     restart: always
     networks:
       server:
-        ipv4_address: ${ZOOKEEPER_NETWORK_ADDRESS}
+        ipv4_address: ${ZOOKEEPER_NETWORK_ADDRESS:-172.28.0.5}
 
   kafka:
-    image: 'bitnami/kafka:3.5.1'
+    # image: 'bitnami/kafka:3.5.1'
+    image: 'bitnami/kafka:${KAFKA_IMAGE_VERSION:-3.5.1}'
     container_name: kafka
-    user: root
     restart: always
+    user: ${KAFKA_USER:-root}
     ports:
-    - "${KAFKA_PORT}:9094"
+      - "${KAFKA_PORT:-19094}:9094"
     volumes:
       - ./scripts/create-topic.sh:/opt/bitnami/kafka/create-topic.sh
-      - ${DATA_DIR}/components/kafka:/bitnami/kafka
+      - "${DATA_DIR:-./}/components/kafka:/bitnami/kafka"
     command: >
-      bash -c "
-      /opt/bitnami/scripts/kafka/run.sh & sleep 5; /opt/bitnami/kafka/create-topic.sh; wait
-      "
+      bash -c "/opt/bitnami/scripts/kafka/run.sh & sleep 5; /opt/bitnami/kafka/create-topic.sh; wait"
     environment:
        - TZ=Asia/Shanghai
        - KAFKA_CFG_NODE_ID=0
        - KAFKA_CFG_PROCESS_ROLES=controller,broker
        - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@<your_host>:9093
        - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://${DOCKER_BRIDGE_GATEWAY}:${KAFKA_PORT}
+       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}:${KAFKA_PORT:-19094}
        - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
        - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     networks:
       server:
-        ipv4_address: ${KAFKA_NETWORK_ADDRESS}
+        ipv4_address: ${KAFKA_NETWORK_ADDRESS:-172.28.0.4}
 
   minio:
-    image: minio/minio
+    # image: minio/minio
+    image: minio/minio:${MINIO_IMAGE_VERSION:-latest}
     ports:
-      - "${MINIO_PORT}:9000"
+      - "${MINIO_PORT:-10005}:9000"
       - "9090:9090"
     container_name: minio
     volumes:
-      - "${DATA_DIR}/components/mnt/data:/data"
-      - "${DATA_DIR}/components/mnt/config:/root/.minio"
+      - "${DATA_DIR:-./}/components/mnt/data:/data"
+      - "${DATA_DIR:-./}/components/mnt/config:/root/.minio"
     environment:
-      MINIO_ROOT_USER: "${MINIO_ACCESS_KEY}"
-      MINIO_ROOT_PASSWORD: "${MINIO_SECRET_KEY}"
+      MINIO_ROOT_USER: "${MINIO_ACCESS_KEY:-root}"
+      MINIO_ROOT_PASSWORD: "${MINIO_SECRET_KEY:-openIM123}"
     restart: always
     command: minio server /data --console-address ':9090'
     networks:
       server:
-        ipv4_address: ${MINIO_NETWORK_ADDRESS}
+        ipv4_address: ${MINIO_NETWORK_ADDRESS:-172.28.0.6}
 
   openim-web:
-    # image: ghcr.io/openimsdk/openim-web:latest
-    # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-web:latest
-    # image: openim/openim-web:latest
-    image: ${IMAGE_REGISTRY}/openim-web:latest
+    # image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-web:latest
+    image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-web:${OPENIM_WEB_IMAGE_VERSION:-latest}
     container_name: openim-web
     environment:
-      - OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH}
-      - OPENIM_WEB_PORT=${OPENIM_WEB_PORT}
+      - OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH:-/app/dist}
+      - OPENIM_WEB_PORT=${OPENIM_WEB_PORT:-11001}
     restart: always
     ports:
-      - "${OPENIM_WEB_PORT}:11001"
+      - "${OPENIM_WEB_PORT:-11001}:11001"
     networks:
       server:
-        ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS}
+        ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS:-172.28.0.7}
 
+  # Uncomment and configure the following services as needed
   # openim-admin:
-  #   image: ${IMAGE_REGISTRY}/openim-admin-front:v3.4.0
-  #   # image: ghcr.io/openimsdk/openim-admin-front:v3.4.0
-  #   # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-admin-front:v3.4.0
-  #   # image: openim/openim-admin-front:v3.4.0
+  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin-front:v3.4.0
   #   container_name: openim-admin
   #   restart: always
   #   ports:
-  #     - "${OPENIM_ADMIN_FRONT_PORT}:80"
+  #     - "${OPENIM_ADMIN_FRONT_PORT:-11002}:80"
   #   networks:
   #     server:
-  #       ipv4_address: ${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS}
+  #       ipv4_address: ${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS:-172.28.0.13}
 
   # prometheus:
   #   image: prom/prometheus
@@ -149,10 +147,10 @@ services:
   #     - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
   #     - ./config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml
   #   ports:
-  #     - "${PROMETHEUS_PORT}:9090"
+  #     - "${PROMETHEUS_PORT:-19090}:9090"
   #   networks:
   #     server:
-  #       ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS}
+  #       ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS:-172.28.0.10}
 
   # alertmanager:
   #   image: prom/alertmanager
@@ -163,10 +161,10 @@ services:
   #     - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
   #     - ./config/email.tmpl:/etc/alertmanager/email.tmpl
   #   ports:
-  #     - "${ALERT_MANAGER_PORT}:9093"
+  #     - "${ALERT_MANAGER_PORT:-19093}:9093"
   #   networks:
   #     server:
-  #       ipv4_address: ${ALERT_MANAGER_NETWORK_ADDRESS}
+  #       ipv4_address: ${ALERT_MANAGER_NETWORK_ADDRESS:-172.28.0.14}
 
   # grafana:
   #   image: grafana/grafana
@@ -175,12 +173,12 @@ services:
   #   user: root
   #   restart: always
   #   ports:
-  #     - "${GRAFANA_PORT}:3000"
+  #     - "${GRAFANA_PORT:-13000}:3000"
   #   volumes:
-  #     - ${DATA_DIR}/components/grafana:/var/lib/grafana
+  #     - ${DATA_DIR:-./}/components/grafana:/var/lib/grafana
   #   networks:
   #     server:
-  #       ipv4_address: ${GRAFANA_NETWORK_ADDRESS}
+  #       ipv4_address: ${GRAFANA_NETWORK_ADDRESS:-172.28.0.11}
 
   # node-exporter:
   #   image: quay.io/prometheus/node-exporter
@@ -188,7 +186,7 @@ services:
   #   hostname: node-exporter
   #   restart: always
   #   ports:
-  #     - "${NODE_EXPORTER_PORT}:9100"
+  #     - "${NODE_EXPORTER_PORT:-19100}:9100"
   #   networks:
   #     server:
-  #       ipv4_address: ${NODE_EXPORTER_NETWORK_ADDRESS}
+  #       ipv4_address: ${NODE_EXPORTER_NETWORK_ADDRESS:-172.28.0.12}

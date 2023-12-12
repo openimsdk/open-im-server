@@ -52,6 +52,10 @@ type friendServer struct {
 	RegisterCenter        registry.SvcDiscoveryRegistry
 }
 
+func (s *friendServer) PinFriends(ctx context.Context, req *pbfriend.PinFriendsReq) (*pbfriend.PinFriendsResp, error) {
+	return nil, errs.ErrInternalServer.Wrap("not implemented")
+}
+
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	// Initialize MongoDB
 	mongo, err := unrelation.NewMongo()
