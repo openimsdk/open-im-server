@@ -3,6 +3,7 @@ package mgo
 import (
 	"context"
 	"github.com/OpenIMSDK/protocol/user"
+	"github.com/OpenIMSDK/tools/log"
 	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
@@ -122,6 +123,7 @@ func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32
 	var commands []user.CommandInfoResp
 
 	for cursor.Next(ctx) {
+		log.ZDebug(ctx, "mongo", cursor)
 		var commandInfo user.CommandInfoResp
 
 		// Define a struct that represents your MongoDB document structure
