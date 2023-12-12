@@ -4,6 +4,8 @@ go 1.19
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
+	github.com/OpenIMSDK/protocol v0.0.31
+	github.com/OpenIMSDK/tools v0.0.20
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/dtm-labs/rockscache v0.1.1
 	github.com/gin-gonic/gin v1.9.1
@@ -33,8 +35,6 @@ require github.com/google/uuid v1.3.1
 
 require (
 	github.com/IBM/sarama v1.41.3
-	github.com/OpenIMSDK/protocol v0.0.31
-	github.com/OpenIMSDK/tools v0.0.18
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/redis/go-redis/v9 v9.2.1
