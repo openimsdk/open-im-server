@@ -375,13 +375,17 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 		return nil, err
 	}
 
-	// Create a new map with the required type
-	commandPointers := make(map[string]*pbuser.CommandInfo)
-	for k, v := range commands {
-		vCopy := v // Create a copy of v
-		commandPointers[k] = &vCopy
+	// Create a slice to store CommandInfoResp
+	var commandInfoSlice []*pbuser.CommandInfoResp
+
+	for _, v := range commands {
+		commandInfoSlice = append(commandInfoSlice, &pbuser.CommandInfoResp{
+			Uuid:       v.Uuid,
+			Value:      v.Value,
+			CreateTime: v.CreateTime,
+		})
 	}
 
-	// Return the new map
-	return &pbuser.ProcessUserCommandGetResp{UuidValue: commandPointers}, nil
+	// Return the new slice
+	return &pbuser.ProcessUserCommandGetResp{KVArray: commandInfoSlice}, nil
 }

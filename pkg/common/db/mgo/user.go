@@ -128,7 +128,7 @@ func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32
 		var document struct {
 			UUID       string `bson:"uuid"`
 			Value      string `bson:"value"`
-			CreateTime int64  `bson:"createTime"`
+			CreateTime int64  `bson:"time"`
 		}
 
 		if err := cursor.Decode(&document); err != nil {
