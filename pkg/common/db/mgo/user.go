@@ -3,7 +3,6 @@ package mgo
 import (
 	"context"
 	"github.com/OpenIMSDK/protocol/user"
-	log2 "github.com/OpenIMSDK/tools/log"
 	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
@@ -75,37 +74,34 @@ func (u *UserMgo) CountTotal(ctx context.Context, before *time.Time) (count int6
 	return mgoutil.Count(ctx, u.coll, bson.M{"create_time": bson.M{"$lt": before}})
 }
 
-type UserCommand struct {
-	UserID   string                      `bson:"userID"`
-	Type     int32                       `bson:"type"`
-	Commands map[string]user.CommandInfo `bson:"commands"`
-}
-
 func (u *UserMgo) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
 	collection := u.coll.Database().Collection("userCommands")
 
-	filter := bson.M{"userID": userID, "type": Type}
-	update := bson.M{"$set": bson.M{"commands." + UUID: user.CommandInfo{Time: time.Now().Unix(), Value: value}}}
-	options := options.Update().SetUpsert(true)
+	// Create a new document instead of updating an existing one
+	doc := bson.M{
+		"userID":     userID,
+		"type":       Type,
+		"uuid":       UUID,
+		"createTime": time.Now().Unix(), // assuming you want the creation time in Unix timestamp
+		"value":      value,
+	}
 
-	_, err := collection.UpdateOne(ctx, filter, update, options)
+	_, err := collection.InsertOne(ctx, doc)
 	return err
 }
-
 func (u *UserMgo) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
 	collection := u.coll.Database().Collection("userCommands")
 
-	filter := bson.M{"userID": userID, "type": Type}
-	update := bson.M{"$unset": bson.M{"commands." + UUID: ""}}
+	filter := bson.M{"userID": userID, "type": Type, "uuid": UUID}
 
-	_, err := collection.UpdateOne(ctx, filter, update)
+	_, err := collection.DeleteOne(ctx, filter)
 	return err
 }
 func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
 	collection := u.coll.Database().Collection("userCommands")
 
-	filter := bson.M{"userID": userID, "type": Type}
-	update := bson.M{"$set": bson.M{"commands." + UUID: user.CommandInfo{Time: time.Now().Unix(), Value: value}}}
+	filter := bson.M{"userID": userID, "type": Type, "uuid": UUID}
+	update := bson.M{"$set": bson.M{"value": value, "createTime": time.Now().Unix()}}
 
 	_, err := collection.UpdateOne(ctx, filter, update)
 	return err
@@ -123,24 +119,21 @@ func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32
 	var commands []user.CommandInfoResp
 
 	for cursor.Next(ctx) {
-
-		var commandInfo user.CommandInfoResp
-
-		// Define a struct that represents your MongoDB document structure
 		var document struct {
 			UUID       string `bson:"uuid"`
 			Value      string `bson:"value"`
-			CreateTime int64  `bson:"time"`
+			CreateTime int64  `bson:"createTime"`
 		}
-		log2.ZDebug(ctx, "cursor", cursor)
+
 		if err := cursor.Decode(&document); err != nil {
 			return nil, err
 		}
-		log2.ZDebug(ctx, "document", document)
-		// Populate the user.CommandInfoResp struct with the required fields
-		commandInfo.Uuid = document.UUID
-		commandInfo.Value = document.Value
-		commandInfo.CreateTime = document.CreateTime
+
+		commandInfo := user.CommandInfoResp{
+			Uuid:       document.UUID,
+			Value:      document.Value,
+			CreateTime: document.CreateTime,
+		}
 
 		commands = append(commands, commandInfo)
 	}
