@@ -30,7 +30,7 @@ Executing `make tools` ensures verification and installation of the default tool
 - go-junit-report
 - go-gitlint
 
-The installation path is situated at `/root/workspaces/openim/Open-IM-Server/_output/tools/`.
+The installation path is situated at `./_output/tools/`.
 
 ## Toolset Categories
 
