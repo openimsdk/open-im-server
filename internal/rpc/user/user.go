@@ -368,7 +368,6 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 	return &pbuser.ProcessUserCommandUpdateResp{}, nil
 }
 
-// ProcessUserCommandGet user general function get
 func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
 	// Fetch user commands from the database
 	commands, err := s.UserDatabase.GetUserCommands(ctx, req.UserID, req.Type)
@@ -376,6 +375,13 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 		return nil, err
 	}
 
-	// The commands variable is already a map[string]string, so you can directly return it
-	return &pbuser.ProcessUserCommandGetResp{UuidValue: commands}, nil
+	// Create a new map with the required type
+	commandPointers := make(map[string]*pbuser.CommandInfo)
+	for k, v := range commands {
+		vCopy := v // Create a copy of v
+		commandPointers[k] = &vCopy
+	}
+
+	// Return the new map
+	return &pbuser.ProcessUserCommandGetResp{UuidValue: commandPointers}, nil
 }
