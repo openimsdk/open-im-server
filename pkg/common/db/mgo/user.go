@@ -118,19 +118,21 @@ func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	results := make(map[string]user.CommandInfo)
+
+	commands := make(map[string]user.CommandInfo)
 	for cursor.Next(ctx) {
-		var result struct {
-			Key   string           `bson:"key"`
-			Value user.CommandInfo `bson:"value"`
-		}
+		var result UserCommand // Assuming UserCommand includes a map or similar structure
 		err = cursor.Decode(&result)
 		if err != nil {
 			return nil, err
 		}
-		results[result.Key] = result.Value
+
+		for key, command := range result.Commands {
+			commands[key] = command
+		}
 	}
-	return results, nil
+
+	return commands, nil
 }
 
 func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
