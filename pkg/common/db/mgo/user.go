@@ -116,7 +116,8 @@ func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32
 	}
 	defer cursor.Close(ctx)
 
-	var commands []user.CommandInfoResp
+	// Initialize commands as an empty slice
+	commands := []user.CommandInfoResp{}
 
 	for cursor.Next(ctx) {
 		var document struct {
