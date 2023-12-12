@@ -375,8 +375,8 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 		return nil, err
 	}
 
-	// Create a slice to store CommandInfoResp
-	commandInfoSlice := []*pbuser.CommandInfoResp{}
+	// Initialize commandInfoSlice as an empty slice
+	commandInfoSlice := make([]*pbuser.CommandInfoResp, 0, len(commands))
 
 	for _, v := range commands {
 		commandInfoSlice = append(commandInfoSlice, &pbuser.CommandInfoResp{
@@ -386,6 +386,6 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 		})
 	}
 
-	// Return the new slice
+	// Return the response with the slice, which is empty but not nil if there are no commands
 	return &pbuser.ProcessUserCommandGetResp{KVArray: commandInfoSlice}, nil
 }
