@@ -101,7 +101,7 @@ func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int
 	collection := u.coll.Database().Collection("userCommands")
 
 	filter := bson.M{"userID": userID, "type": Type, "uuid": UUID}
-	update := bson.M{"$set": bson.M{"value": value, "createTime": time.Now().Unix()}}
+	update := bson.M{"$set": bson.M{"value": value}}
 
 	_, err := collection.UpdateOne(ctx, filter, update)
 	return err
