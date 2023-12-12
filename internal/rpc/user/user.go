@@ -378,14 +378,17 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 	// Initialize commandInfoSlice as an empty slice
 	commandInfoSlice := make([]*pbuser.CommandInfoResp, 0, len(commands))
 
-	for _, v := range commands {
+	for i := range commands {
+		// Access each command using index to avoid copying the struct
+		command := &commands[i] // Change here: use a pointer to the struct to avoid copying
+
 		commandInfoSlice = append(commandInfoSlice, &pbuser.CommandInfoResp{
-			Uuid:       v.Uuid,
-			Value:      v.Value,
-			CreateTime: v.CreateTime,
+			Uuid:       command.Uuid,
+			Value:      command.Value,
+			CreateTime: command.CreateTime,
 		})
 	}
 
-	// Return the response with the slice, which is empty but not nil if there are no commands
+	// Return the response with the slice
 	return &pbuser.ProcessUserCommandGetResp{KVArray: commandInfoSlice}, nil
 }

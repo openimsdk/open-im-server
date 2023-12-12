@@ -106,7 +106,7 @@ func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int
 	_, err := collection.UpdateOne(ctx, filter, update)
 	return err
 }
-func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32) ([]user.CommandInfoResp, error) {
+func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error) {
 	collection := u.coll.Database().Collection("userCommands")
 	filter := bson.M{"userID": userID, "type": Type}
 
@@ -116,8 +116,8 @@ func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32
 	}
 	defer cursor.Close(ctx)
 
-	// Initialize commands as an empty slice
-	commands := []user.CommandInfoResp{}
+	// Initialize commands as a slice of pointers
+	commands := []*user.CommandInfoResp{}
 
 	for cursor.Next(ctx) {
 		var document struct {
@@ -130,7 +130,7 @@ func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32
 			return nil, err
 		}
 
-		commandInfo := user.CommandInfoResp{
+		commandInfo := &user.CommandInfoResp{ // Change here: use a pointer to the struct
 			Uuid:       document.UUID,
 			Value:      document.Value,
 			CreateTime: document.CreateTime,
