@@ -88,8 +88,19 @@ generate_config_files() {
   done
 }
 
+declare -A env_vars=(
+    ["OPENIM_IP"]="172.28.0.1"
+    ["DATA_DIR"]="./"
+    ["LOG_STORAGE_LOCATION"]="../logs/"
+)
+
 # Function to generate example files
 generate_example_files() {
+  env_cmd="env -i"
+  for var in "${!env_vars[@]}"; do
+      env_cmd+=" $var='${env_vars[$var]}'"
+  done
+
   for template in "${!EXAMPLES[@]}"; do
     local example_file="${EXAMPLES[$template]}"
     if [[ -f "${example_file}" ]]; then
@@ -116,7 +127,7 @@ generate_example_files() {
       openim::log::error "genconfig.sh script not found"
       exit 1
     fi
-    "${OPENIM_ROOT}/scripts/genconfig.sh" "${ENV_FILE}" "${template}" > "${example_file}" || {
+    eval "$env_cmd ${OPENIM_ROOT}/scripts/genconfig.sh '${ENV_FILE}' '${template}' > '${example_file}'" || {
       openim::log::error "Error processing template file ${template}"
       exit 1
     }
