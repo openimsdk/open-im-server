@@ -106,7 +106,7 @@ func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int
 	_, err := collection.UpdateOne(ctx, filter, update)
 	return err
 }
-func (u *UserMgo) GetUserCommands(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error) {
+func (u *UserMgo) GetUserCommand(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error) {
 	collection := u.coll.Database().Collection("userCommands")
 	filter := bson.M{"userID": userID, "type": Type}
 

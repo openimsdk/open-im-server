@@ -378,10 +378,8 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 	// Initialize commandInfoSlice as an empty slice
 	commandInfoSlice := make([]*pbuser.CommandInfoResp, 0, len(commands))
 
-	for i := range commands {
-		// Access each command using index to avoid copying the struct
-		command := &commands[i] // Change here: use a pointer to the struct to avoid copying
-
+	for _, command := range commands {
+		// No need to use index since command is already a pointer
 		commandInfoSlice = append(commandInfoSlice, &pbuser.CommandInfoResp{
 			Uuid:       command.Uuid,
 			Value:      command.Value,
