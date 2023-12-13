@@ -37,6 +37,7 @@ func NewMongo() (*Mongo, error) {
 	var mongoClient *mongo.Client
 	var err error
 
+	// Retry connecting to MongoDB
 	for i := 0; i <= maxRetry; i++ {
 		ctx, cancel := context.WithTimeout(context.Background(), mongoConnTimeout)
 		defer cancel()
