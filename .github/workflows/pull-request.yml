@@ -46,7 +46,7 @@ jobs:
 
       - uses: actions/setup-node@v4
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
       - name: Run go modules tidy
         run: |
           sudo make tidy
