@@ -80,11 +80,13 @@ func (cli *K8sDR) CloseConn(conn *grpc.ClientConn) {
 // do not use this method for call rpc
 func (cli *K8sDR) GetClientLocalConns() map[string][]*grpc.ClientConn {
 	fmt.Println("should not call this function!!!!!!!!!!!!!!!!!!!!!!!!!")
+
 	return nil
 }
 
 // Close closes the K8sDR client.
 func (cli *K8sDR) Close() {
+
 	// Close any open resources here (if applicable)
 	return
 }
