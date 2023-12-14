@@ -46,7 +46,12 @@ func NewK8sDiscoveryRegister() (discoveryregistry.SvcDiscoveryRegistry, error) {
 }
 
 func (cli *K8sDR) Register(serviceName, host string, port int, opts ...grpc.DialOption) error {
-	cli.rpcRegisterAddr = serviceName
+	if serviceName != config.Config.RpcRegisterName.OpenImMessageGatewayName {
+		cli.rpcRegisterAddr = serviceName
+	} else {
+		cli.rpcRegisterAddr = cli.getSelfHost(context.Background())
+	}
+
 	return nil
 }
 func (cli *K8sDR) UnRegister() error {
@@ -65,6 +70,25 @@ func (cli *K8sDR) RegisterConf2Registry(key string, conf []byte) error {
 func (cli *K8sDR) GetConfFromRegistry(key string) ([]byte, error) {
 
 	return nil, nil
+}
+func (cli *K8sDR) getSelfHost(ctx context.Context) string {
+	port := 88
+	instance := "openimserver"
+	selfPodName := os.Getenv("MY_POD_NAME")
+	ns := os.Getenv("MY_POD_NAMESPACE")
+	statefuleIndex := 0
+	gatewayEnds := strings.Split(config.Config.RpcRegisterName.OpenImMessageGatewayName, ":")
+	if len(gatewayEnds) != 2 {
+		log.ZError(ctx, "msggateway RpcRegisterName is error:config.Config.RpcRegisterName.OpenImMessageGatewayName", errors.New("config error"))
+	} else {
+		port, _ = strconv.Atoi(gatewayEnds[1])
+	}
+	podInfo := strings.Split(selfPodName, "-")
+	instance = podInfo[0]
+	count := len(podInfo)
+	statefuleIndex, _ = strconv.Atoi(podInfo[count-1])
+	host := fmt.Sprintf("%s-openim-msggateway-%d.%s-openim-msggateway-headless.%s.svc.cluster.local:%d", instance, statefuleIndex, instance, ns, port)
+	return host
 }
 
 // like openimserver-openim-msggateway-0.openimserver-openim-msggateway-headless.openim-lin.svc.cluster.local:88
