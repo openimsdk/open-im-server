@@ -360,7 +360,9 @@ func (m *msgServer) getConversationInfo(
 	for conversationID, chatLog := range chatLogs {
 		pbchatLog := &msg.ConversationElem{}
 		msgInfo := &msg.MsgInfo{}
-		utils2.CopyStructFields(msgInfo, chatLog)
+		if err := utils2.CopyStructFields(msgInfo, chatLog); err != nil {
+			return nil, err
+		}
 		switch chatLog.SessionType {
 		case constant.SingleChatType:
 			if chatLog.SendID == userID {
