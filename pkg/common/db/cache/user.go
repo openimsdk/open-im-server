@@ -22,6 +22,8 @@ import (
 	"strconv"
 	"time"
 
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+
 	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -31,8 +33,6 @@ import (
 
 	"github.com/dtm-labs/rockscache"
 	"github.com/redis/go-redis/v9"
-
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 const (
@@ -59,7 +59,8 @@ type UserCache interface {
 
 type UserCacheRedis struct {
 	metaCache
-	rdb        redis.UniversalClient
+	rdb redis.UniversalClient
+	//userDB     relationtb.UserModelInterface
 	userDB     relationtb.UserModelInterface
 	expireTime time.Duration
 	rcClient   *rockscache.Client
@@ -100,39 +101,13 @@ func (u *UserCacheRedis) getUserGlobalRecvMsgOptKey(userID string) string {
 }
 
 func (u *UserCacheRedis) GetUserInfo(ctx context.Context, userID string) (userInfo *relationtb.UserModel, err error) {
-	return getCache(
-		ctx,
-		u.rcClient,
-		u.getUserInfoKey(userID),
-		u.expireTime,
-		func(ctx context.Context) (*relationtb.UserModel, error) {
-			return u.userDB.Take(ctx, userID)
-		},
+	return getCache(ctx, u.rcClient, u.getUserInfoKey(userID), u.expireTime, func(ctx context.Context) (*relationtb.UserModel, error) {
+		return u.userDB.Take(ctx, userID)
+	},
 	)
 }
 
 func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationtb.UserModel, error) {
-	//var keys []string
-	//for _, userID := range userIDs {
-	//	keys = append(keys, u.getUserInfoKey(userID))
-	//}
-	//return batchGetCache(
-	//	ctx,
-	//	u.rcClient,
-	//	keys,
-	//	u.expireTime,
-	//	func(user *relationtb.UserModel, keys []string) (int, error) {
-	//		for i, key := range keys {
-	//			if key == u.getUserInfoKey(user.UserID) {
-	//				return i, nil
-	//			}
-	//		}
-	//		return 0, errIndex
-	//	},
-	//	func(ctx context.Context) ([]*relationtb.UserModel, error) {
-	//		return u.userDB.Find(ctx, userIDs)
-	//	},
-	//)
 	return batchGetCache2(ctx, u.rcClient, u.expireTime, userIDs, func(userID string) string {
 		return u.getUserInfoKey(userID)
 	}, func(ctx context.Context, userID string) (*relationtb.UserModel, error) {
@@ -214,8 +189,7 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, userID string, statu
 	UserIDNum := crc32.ChecksumIEEE([]byte(userID))
 	modKey := strconv.Itoa(int(UserIDNum % statusMod))
 	key := olineStatusKey + modKey
-	log.ZDebug(ctx, "SetUserStatus args", "userID", userID, "status", status,
-		"platformID", platformID, "modKey", modKey, "key", key)
+	log.ZDebug(ctx, "SetUserStatus args", "userID", userID, "status", status, "platformID", platformID, "modKey", modKey, "key", key)
 	isNewKey, err := u.rdb.Exists(ctx, key).Result()
 	if err != nil {
 		return errs.Wrap(err)

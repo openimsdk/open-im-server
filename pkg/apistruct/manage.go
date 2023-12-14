@@ -36,7 +36,7 @@ type SendMsg struct {
 	SenderPlatformID int32 `json:"senderPlatformID"`
 
 	// Content is the actual content of the message, required and excluded from Swagger documentation.
-	Content map[string]interface{} `json:"content" binding:"required" swaggerignore:"true"`
+	Content map[string]any `json:"content" binding:"required" swaggerignore:"true"`
 
 	// ContentType is an integer that represents the type of the content.
 	ContentType int32 `json:"contentType" binding:"required"`

@@ -19,27 +19,20 @@ import (
 	"time"
 )
 
-const (
-	ObjectInfoModelTableName = "object"
-)
-
 type ObjectModel struct {
-	Name        string    `gorm:"column:name;primary_key"`
-	UserID      string    `gorm:"column:user_id"`
-	Hash        string    `gorm:"column:hash"`
-	Key         string    `gorm:"column:key"`
-	Size        int64     `gorm:"column:size"`
-	ContentType string    `gorm:"column:content_type"`
-	Cause       string    `gorm:"column:cause"`
-	CreateTime  time.Time `gorm:"column:create_time"`
-}
-
-func (ObjectModel) TableName() string {
-	return ObjectInfoModelTableName
+	Name        string    `bson:"name"`
+	UserID      string    `bson:"user_id"`
+	Hash        string    `bson:"hash"`
+	Engine      string    `bson:"engine"`
+	Key         string    `bson:"key"`
+	Size        int64     `bson:"size"`
+	ContentType string    `bson:"content_type"`
+	Group       string    `bson:"group"`
+	CreateTime  time.Time `bson:"create_time"`
 }
 
 type ObjectInfoModelInterface interface {
-	NewTx(tx any) ObjectInfoModelInterface
 	SetObject(ctx context.Context, obj *ObjectModel) error
-	Take(ctx context.Context, name string) (*ObjectModel, error)
+	Take(ctx context.Context, engine string, name string) (*ObjectModel, error)
+	Delete(ctx context.Context, engine string, name string) error
 }

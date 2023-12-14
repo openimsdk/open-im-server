@@ -22,17 +22,6 @@ set -o pipefail
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
 
-# Start MySQL service
-docker run -d \
-    --name mysql \
-    -p 13306:3306 \
-    -p 23306:33060 \
-    -v "${DATA_DIR}/components/mysql/data:/var/lib/mysql" \
-    -v "/etc/localtime:/etc/localtime" \
-    -e MYSQL_ROOT_PASSWORD=${PASSWORD} \
-    --restart always \
-    mysql:5.7
-
 # Start MongoDB service
 docker run -d \
     --name mongo \

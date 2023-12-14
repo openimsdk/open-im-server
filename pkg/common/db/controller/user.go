@@ -18,16 +18,19 @@ import (
 	"context"
 	"time"
 
+	"github.com/OpenIMSDK/tools/pagination"
+	"github.com/OpenIMSDK/tools/tx"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+
 	"github.com/OpenIMSDK/protocol/user"
 
 	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 type UserDatabase interface {
@@ -38,15 +41,15 @@ type UserDatabase interface {
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db
 	Create(ctx context.Context, users []*relation.UserModel) (err error)
 	// Update update (non-zero value) external guarantee userID exists
-	Update(ctx context.Context, user *relation.UserModel) (err error)
+	//Update(ctx context.Context, user *relation.UserModel) (err error)
 	// UpdateByMap update (zero value) external guarantee userID exists
-	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
+	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
 	// Page If not found, no error is returned
-	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relation.UserModel, count int64, err error)
+	Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
 	// IsExist true as long as one exists
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 	// GetAllUserID Get all user IDs
-	GetAllUserID(ctx context.Context, pageNumber, showNumber int32) ([]string, error)
+	GetAllUserID(ctx context.Context, pagination pagination.Pagination) (int64, []string, error)
 	// InitOnce Inside the function, first query whether it exists in the db, if it exists, do nothing; if it does not exist, insert it
 	InitOnce(ctx context.Context, users []*relation.UserModel) (err error)
 	// CountTotal Get the total number of users
@@ -68,28 +71,40 @@ type UserDatabase interface {
 }
 
 type userDatabase struct {
+	tx      tx.CtxTx
 	userDB  relation.UserModelInterface
 	cache   cache.UserCache
-	tx      tx.Tx
 	mongoDB unrelationtb.UserModelInterface
 }
 
-func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx tx.Tx, mongoDB unrelationtb.UserModelInterface) UserDatabase {
+func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx tx.CtxTx, mongoDB unrelationtb.UserModelInterface) UserDatabase {
 	return &userDatabase{userDB: userDB, cache: cache, tx: tx, mongoDB: mongoDB}
 }
 
-func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel) (err error) {
+func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel) error {
+	// Extract user IDs from the given user models.
 	userIDs := utils.Slice(users, func(e *relation.UserModel) string {
 		return e.UserID
 	})
-	result, err := u.userDB.Find(ctx, userIDs)
+
+	// Find existing users in the database.
+	existingUsers, err := u.userDB.Find(ctx, userIDs)
 	if err != nil {
 		return err
 	}
-	miss := utils.SliceAnySub(users, result, func(e *relation.UserModel) string { return e.UserID })
-	if len(miss) > 0 {
-		_ = u.userDB.Create(ctx, miss)
+
+	// Determine which users are missing from the database.
+	missingUsers := utils.SliceAnySub(users, existingUsers, func(e *relation.UserModel) string {
+		return e.UserID
+	})
+
+	// Create records for missing users.
+	if len(missingUsers) > 0 {
+		if err := u.userDB.Create(ctx, missingUsers); err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
@@ -107,50 +122,42 @@ func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (use
 
 // Find Get the information of the specified user. If the userID is not found, no error will be returned.
 func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
-	users, err = u.cache.GetUsersInfo(ctx, userIDs)
-	return
+	return u.cache.GetUsersInfo(ctx, userIDs)
 }
 
 // Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db.
 func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) (err error) {
-	if err := u.tx.Transaction(func(tx any) error {
-		err = u.userDB.Create(ctx, users)
-		if err != nil {
+	return u.tx.Transaction(ctx, func(ctx context.Context) error {
+		if err = u.userDB.Create(ctx, users); err != nil {
 			return err
 		}
-		return nil
-	}); err != nil {
-		return err
-	}
-	var userIDs []string
-	for _, user := range users {
-		userIDs = append(userIDs, user.UserID)
-	}
-	return u.cache.DelUsersInfo(userIDs...).ExecDel(ctx)
+		return u.cache.DelUsersInfo(utils.Slice(users, func(e *relation.UserModel) string {
+			return e.UserID
+		})...).ExecDel(ctx)
+	})
 }
 
-// Update (non-zero value) externally guarantees that userID exists.
-func (u *userDatabase) Update(ctx context.Context, user *relation.UserModel) (err error) {
-	if err := u.userDB.Update(ctx, user); err != nil {
-		return err
-	}
-	return u.cache.DelUsersInfo(user.UserID).ExecDel(ctx)
-}
+//// Update (non-zero value) externally guarantees that userID exists.
+//func (u *userDatabase) Update(ctx context.Context, user *relation.UserModel) (err error) {
+//	if err := u.userDB.Update(ctx, user); err != nil {
+//		return err
+//	}
+//	return u.cache.DelUsersInfo(user.UserID).ExecDel(ctx)
+//}
 
 // UpdateByMap update (zero value) externally guarantees that userID exists.
-func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
-	if err := u.userDB.UpdateByMap(ctx, userID, args); err != nil {
-		return err
-	}
-	return u.cache.DelUsersInfo(userID).ExecDel(ctx)
+func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error) {
+	return u.tx.Transaction(ctx, func(ctx context.Context) error {
+		if err := u.userDB.UpdateByMap(ctx, userID, args); err != nil {
+			return err
+		}
+		return u.cache.DelUsersInfo(userID).ExecDel(ctx)
+	})
 }
 
 // Page Gets, returns no error if not found.
-func (u *userDatabase) Page(
-	ctx context.Context,
-	pageNumber, showNumber int32,
-) (users []*relation.UserModel, count int64, err error) {
-	return u.userDB.Page(ctx, pageNumber, showNumber)
+func (u *userDatabase) Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+	return u.userDB.Page(ctx, pagination)
 }
 
 // IsExist Does userIDs exist? As long as there is one, it will be true.
@@ -166,8 +173,8 @@ func (u *userDatabase) IsExist(ctx context.Context, userIDs []string) (exist boo
 }
 
 // GetAllUserID Get all user IDs.
-func (u *userDatabase) GetAllUserID(ctx context.Context, pageNumber, showNumber int32) (userIDs []string, err error) {
-	return u.userDB.GetAllUserID(ctx, pageNumber, showNumber)
+func (u *userDatabase) GetAllUserID(ctx context.Context, pagination pagination.Pagination) (total int64, userIDs []string, err error) {
+	return u.userDB.GetAllUserID(ctx, pagination)
 }
 
 // CountTotal Get the total number of users.

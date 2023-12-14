@@ -20,11 +20,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OpenIMSDK/tools/tx"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/tx"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
@@ -35,7 +38,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
@@ -54,20 +56,29 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
+func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
+	return nil, errs.ErrInternalServer.Wrap("not implemented")
+}
+
+func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
+	return nil, errs.ErrInternalServer.Wrap("not implemented")
+}
+
+func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.ProcessUserCommandDeleteReq) (*pbuser.ProcessUserCommandDeleteResp, error) {
+	return nil, errs.ErrInternalServer.Wrap("not implemented")
+}
+
+func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
+	return nil, errs.ErrInternalServer.Wrap("not implemented")
+}
+
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	db, err := relation.NewGormDB()
-	if err != nil {
-		return err
-	}
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
-		return err
-	}
-	if err := db.AutoMigrate(&tablerelation.UserModel{}); err != nil {
 		return err
 	}
 	users := make([]*tablerelation.UserModel, 0)
@@ -77,10 +88,13 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	for k, v := range config.Config.Manager.UserID {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k], AppMangerLevel: constant.AppAdmin})
 	}
-	userDB := relation.NewUserGorm(db)
+	userDB, err := mgo.NewUserMongo(mongo.GetDatabase())
+	if err != nil {
+		return err
+	}
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
 	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
-	database := controller.NewUserDatabase(userDB, cache, tx.NewGorm(db), userMongoDB)
+	database := controller.NewUserDatabase(userDB, cache, tx.NewMongo(mongo.GetClient()), userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
@@ -118,12 +132,8 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err := CallbackBeforeUpdateUserInfo(ctx, req); err != nil {
 		return nil, err
 	}
-	user := convert.UserPb2DB(req.UserInfo)
-	if err != nil {
-		return nil, err
-	}
-	err = s.Update(ctx, user)
-	if err != nil {
+	data := convert.UserPb2DBMap(req.UserInfo)
+	if err := s.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
 	_ = s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
@@ -153,7 +163,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 	if _, err := s.FindWithError(ctx, []string{req.UserID}); err != nil {
 		return nil, err
 	}
-	m := make(map[string]interface{}, 1)
+	m := make(map[string]any, 1)
 	m["global_recv_msg_opt"] = req.GlobalRecvMsgOpt
 	if err := s.UpdateByMap(ctx, req.UserID, m); err != nil {
 		return nil, err
@@ -175,7 +185,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 	if err != nil {
 		return nil, err
 	}
-	userIDs := make(map[string]interface{}, 0)
+	userIDs := make(map[string]any, 0)
 	for _, v := range users {
 		userIDs[v.UserID] = nil
 	}
@@ -192,12 +202,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 }
 
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
-	var pageNumber, showNumber int32
-	if req.Pagination != nil {
-		pageNumber = req.Pagination.PageNumber
-		showNumber = req.Pagination.ShowNumber
-	}
-	users, total, err := s.Page(ctx, pageNumber, showNumber)
+	total, users, err := s.Page(ctx, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -269,11 +274,11 @@ func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Ge
 
 // GetAllUserID Get user account by page.
 func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDReq) (resp *pbuser.GetAllUserIDResp, err error) {
-	userIDs, err := s.UserDatabase.GetAllUserID(ctx, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	total, userIDs, err := s.UserDatabase.GetAllUserID(ctx, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
-	return &pbuser.GetAllUserIDResp{UserIDs: userIDs}, nil
+	return &pbuser.GetAllUserIDResp{Total: int32(total), UserIDs: userIDs}, nil
 }
 
 // SubscribeOrCancelUsersStatus Subscribe online or cancel online users.

@@ -127,7 +127,6 @@ jobs:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Run OpenIM make install start
       run: |
-        sudo make init && \
         sudo make install
 
   execute-scripts:

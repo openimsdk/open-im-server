@@ -99,16 +99,6 @@ func (m *Mongo) CreateMsgIndex() error {
 	return m.createMongoIndex(unrelation.Msg, true, "doc_id")
 }
 
-func (m *Mongo) CreateSuperGroupIndex() error {
-	if err := m.createMongoIndex(unrelation.CSuperGroup, true, "group_id"); err != nil {
-		return err
-	}
-	if err := m.createMongoIndex(unrelation.CUserToSuperGroup, true, "user_id"); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...string) error {
 	db := m.db.Database(config.Config.Mongo.Database).Collection(collection)
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)

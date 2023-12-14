@@ -27,7 +27,7 @@ import (
 func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[string]any {
 	m := make(map[string]any)
 	if group.GroupName != "" {
-		m["name"] = group.GroupName
+		m["group_name"] = group.GroupName
 	}
 	if group.Notification != "" {
 		m["notification"] = group.Notification

@@ -28,7 +28,7 @@ import (
 )
 
 func Secret() jwt.Keyfunc {
-	return func(token *jwt.Token) (interface{}, error) {
+	return func(token *jwt.Token) (any, error) {
 		return []byte(config.Config.Secret), nil
 	}
 }
@@ -55,7 +55,7 @@ func CheckAdmin(ctx context.Context) error {
 	return errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
 
-func ParseRedisInterfaceToken(redisToken interface{}) (*tokenverify.Claims, error) {
+func ParseRedisInterfaceToken(redisToken any) (*tokenverify.Claims, error) {
 	return tokenverify.GetClaimFromToken(string(redisToken.([]uint8)), Secret())
 }
 

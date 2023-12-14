@@ -235,7 +235,7 @@ func Test_FindBySeq(t *testing.T) {
 func TestName(t *testing.T) {
 	db := GetDB()
 	var seqs []int64
-	for i := int64(1); i <= 4; i++ {
+	for i := int64(1); i <= 50; i++ {
 		seqs = append(seqs, i)
 	}
 	msgs, err := db.getMsgBySeqsRange(context.Background(), "4931176757", "si_3866692501_4931176757", seqs, seqs[0], seqs[len(seqs)-1])

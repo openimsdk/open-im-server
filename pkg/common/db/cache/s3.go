@@ -14,8 +14,8 @@ import (
 
 type ObjectCache interface {
 	metaCache
-	GetName(ctx context.Context, name string) (*relationtb.ObjectModel, error)
-	DelObjectName(names ...string) ObjectCache
+	GetName(ctx context.Context, engine string, name string) (*relationtb.ObjectModel, error)
+	DelObjectName(engine string, names ...string) ObjectCache
 }
 
 func NewObjectCacheRedis(rdb redis.UniversalClient, objDB relationtb.ObjectInfoModelInterface) ObjectCache {
@@ -44,23 +44,23 @@ func (g *objectCacheRedis) NewCache() ObjectCache {
 	}
 }
 
-func (g *objectCacheRedis) DelObjectName(names ...string) ObjectCache {
+func (g *objectCacheRedis) DelObjectName(engine string, names ...string) ObjectCache {
 	objectCache := g.NewCache()
 	keys := make([]string, 0, len(names))
 	for _, name := range names {
-		keys = append(keys, g.getObjectKey(name))
+		keys = append(keys, g.getObjectKey(name, engine))
 	}
 	objectCache.AddKeys(keys...)
 	return objectCache
 }
 
-func (g *objectCacheRedis) getObjectKey(name string) string {
-	return "OBJECT:" + name
+func (g *objectCacheRedis) getObjectKey(engine string, name string) string {
+	return "OBJECT:" + engine + ":" + name
 }
 
-func (g *objectCacheRedis) GetName(ctx context.Context, name string) (*relationtb.ObjectModel, error) {
-	return getCache(ctx, g.rcClient, g.getObjectKey(name), g.expireTime, func(ctx context.Context) (*relationtb.ObjectModel, error) {
-		return g.objDB.Take(ctx, name)
+func (g *objectCacheRedis) GetName(ctx context.Context, engine string, name string) (*relationtb.ObjectModel, error) {
+	return getCache(ctx, g.rcClient, g.getObjectKey(name, engine), g.expireTime, func(ctx context.Context) (*relationtb.ObjectModel, error) {
+		return g.objDB.Take(ctx, engine, name)
 	})
 }
 

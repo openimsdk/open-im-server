@@ -52,6 +52,41 @@ type GroupNotificationSender struct {
 	db           controller.GroupDatabase
 }
 
+func (g *GroupNotificationSender) PopulateGroupMember(ctx context.Context, members ...*relation.GroupMemberModel) error {
+	if len(members) == 0 {
+		return nil
+	}
+	emptyUserIDs := make(map[string]struct{})
+	for _, member := range members {
+		if member.Nickname == "" || member.FaceURL == "" {
+			emptyUserIDs[member.UserID] = struct{}{}
+		}
+	}
+	if len(emptyUserIDs) > 0 {
+		users, err := g.getUsersInfo(ctx, utils.Keys(emptyUserIDs))
+		if err != nil {
+			return err
+		}
+		userMap := make(map[string]CommonUser)
+		for i, user := range users {
+			userMap[user.GetUserID()] = users[i]
+		}
+		for i, member := range members {
+			user, ok := userMap[member.UserID]
+			if !ok {
+				continue
+			}
+			if member.Nickname == "" {
+				members[i].Nickname = user.GetNickname()
+			}
+			if member.FaceURL == "" {
+				members[i].FaceURL = user.GetFaceURL()
+			}
+		}
+	}
+	return nil
+}
+
 func (g *GroupNotificationSender) getUser(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
 	users, err := g.getUsersInfo(ctx, []string{userID})
 	if err != nil {
@@ -77,9 +112,13 @@ func (g *GroupNotificationSender) getGroupInfo(ctx context.Context, groupID stri
 	if err != nil {
 		return nil, err
 	}
-	owner, err := g.db.TakeGroupOwner(ctx, groupID)
+	ownerUserIDs, err := g.db.GetGroupRoleLevelMemberIDs(ctx, groupID, constant.GroupOwner)
 	if err != nil {
 		return nil, err
+	}
+	var ownerUserID string
+	if len(ownerUserIDs) > 0 {
+		ownerUserID = ownerUserIDs[0]
 	}
 	return &sdkws.GroupInfo{
 		GroupID:                gm.GroupID,
@@ -87,7 +126,7 @@ func (g *GroupNotificationSender) getGroupInfo(ctx context.Context, groupID stri
 		Notification:           gm.Notification,
 		Introduction:           gm.Introduction,
 		FaceURL:                gm.FaceURL,
-		OwnerUserID:            owner.UserID,
+		OwnerUserID:            ownerUserID,
 		CreateTime:             gm.CreateTime.UnixMilli(),
 		MemberCount:            num,
 		Ex:                     gm.Ex,
@@ -103,39 +142,18 @@ func (g *GroupNotificationSender) getGroupInfo(ctx context.Context, groupID stri
 }
 
 func (g *GroupNotificationSender) getGroupMembers(ctx context.Context, groupID string, userIDs []string) ([]*sdkws.GroupMemberFullInfo, error) {
-	members, err := g.db.FindGroupMember(ctx, []string{groupID}, userIDs, nil)
+	members, err := g.db.FindGroupMembers(ctx, groupID, userIDs)
 	if err != nil {
+		return nil, err
+	}
+	if err := g.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
 	log.ZDebug(ctx, "getGroupMembers", "members", members)
-	users, err := g.getUsersInfoMap(ctx, userIDs)
-	if err != nil {
-		return nil, err
-	}
-	log.ZDebug(ctx, "getUsersInfoMap", "users", users)
 	res := make([]*sdkws.GroupMemberFullInfo, 0, len(members))
 	for _, member := range members {
-		user, ok := users[member.UserID]
-		if !ok {
-			return nil, errs.ErrUserIDNotFound.Wrap(fmt.Sprintf("group %s member %s not in user", member.GroupID, member.UserID))
-		}
-		if member.Nickname == "" {
-			member.Nickname = user.Nickname
-		}
-		res = append(res, g.groupMemberDB2PB(member, user.AppMangerLevel))
-		delete(users, member.UserID)
+		res = append(res, g.groupMemberDB2PB(member, 0))
 	}
-	//for userID, info := range users {
-	//	if info.AppMangerLevel == constant.AppAdmin {
-	//		res = append(res, &sdkws.GroupMemberFullInfo{
-	//			GroupID:        groupID,
-	//			UserID:         userID,
-	//			Nickname:       info.Nickname,
-	//			FaceURL:        info.FaceURL,
-	//			AppMangerLevel: info.AppMangerLevel,
-	//		})
-	//	}
-	//}
 	return res, nil
 }
 
@@ -163,8 +181,11 @@ func (g *GroupNotificationSender) getGroupMember(ctx context.Context, groupID st
 }
 
 func (g *GroupNotificationSender) getGroupOwnerAndAdminUserID(ctx context.Context, groupID string) ([]string, error) {
-	members, err := g.db.FindGroupMember(ctx, []string{groupID}, nil, []int32{constant.GroupOwner, constant.GroupAdmin})
+	members, err := g.db.FindGroupMemberRoleLevels(ctx, groupID, []int32{constant.GroupOwner, constant.GroupAdmin})
 	if err != nil {
+		return nil, err
+	}
+	if err := g.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
 	fn := func(e *relation.GroupMemberModel) string { return e.UserID }

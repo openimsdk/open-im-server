@@ -38,7 +38,7 @@ const (
 var errIndex = errors.New("err index")
 
 type metaCache interface {
-	ExecDel(ctx context.Context) error
+	ExecDel(ctx context.Context, distinct ...bool) error
 	// delete key rapid
 	DelKey(ctx context.Context, key string) error
 	AddKeys(keys ...string)
@@ -57,7 +57,10 @@ type metaCacheRedis struct {
 	retryInterval time.Duration
 }
 
-func (m *metaCacheRedis) ExecDel(ctx context.Context) error {
+func (m *metaCacheRedis) ExecDel(ctx context.Context, distinct ...bool) error {
+	if len(distinct) > 0 && distinct[0] {
+		m.keys = utils.Distinct(m.keys)
+	}
 	if len(m.keys) > 0 {
 		log.ZDebug(ctx, "delete cache", "keys", m.keys)
 		for _, key := range m.keys {
