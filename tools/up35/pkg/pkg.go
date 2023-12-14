@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"log"
 	"os"
 	"reflect"
 	"strconv"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/go-sql-driver/mysql"
 	"go.mongodb.org/mongo-driver/bson"

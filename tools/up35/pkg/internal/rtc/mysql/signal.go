@@ -16,7 +16,7 @@ type SignalModel struct {
 	SessionType   int32     `gorm:"column:sesstion_type"`
 	InitiateTime  time.Time `gorm:"column:initiate_time"`
 	EndTime       time.Time `gorm:"column:end_time"`
-	FileURL       string    `gorm:"column:file_url" json:"-"`
+	FileURL       string    `gorm:"column:file_url"                                                  json:"-"`
 
 	Title         string `gorm:"column:title;size:128"`
 	Desc          string `gorm:"column:desc;size:1024"`

@@ -2,14 +2,16 @@ package mgo
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/OpenIMSDK/tools/utils"
-	"github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mongo/table"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"time"
+
+	"github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mongo/table"
 )
 
 func NewSignalInvitation(db *mongo.Database) (table.SignalInvitationInterface, error) {

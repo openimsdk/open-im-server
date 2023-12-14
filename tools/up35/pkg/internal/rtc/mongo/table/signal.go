@@ -2,11 +2,12 @@ package table
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
-	"time"
 )
 
 type SignalModel struct {

@@ -2,14 +2,16 @@ package mgo
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/OpenIMSDK/tools/utils"
-	"github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mongo/table"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"time"
+
+	"github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mongo/table"
 )
 
 func NewMeetingInvitation(db *mongo.Database) (table.MeetingInvitationInterface, error) {
@@ -55,7 +57,12 @@ func (x *meetingInvitation) CreateMeetingInvitationInfo(ctx context.Context, roo
 
 func (x *meetingInvitation) GetUserInvitedMeetingIDs(ctx context.Context, userID string) (meetingIDs []string, err error) {
 	fiveDaysAgo := time.Now().AddDate(0, 0, -5)
-	return mgoutil.Find[string](ctx, x.coll, bson.M{"user_id": userID, "create_time": bson.M{"$gte": fiveDaysAgo}}, options.Find().SetSort(bson.M{"create_time": -1}).SetProjection(bson.M{"_id": 0, "room_id": 1}))
+	return mgoutil.Find[string](
+		ctx,
+		x.coll,
+		bson.M{"user_id": userID, "create_time": bson.M{"$gte": fiveDaysAgo}},
+		options.Find().SetSort(bson.M{"create_time": -1}).SetProjection(bson.M{"_id": 0, "room_id": 1}),
+	)
 }
 
 func (x *meetingInvitation) Delete(ctx context.Context, roomIDs []string) error {

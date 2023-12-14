@@ -1,11 +1,12 @@
 package pkg
 
 import (
+	"time"
+
 	mongoModel "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	mysqlModel "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/mysql/v3"
 	mongoModelRtc "github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mongo/table"
 	mysqlModelRtc "github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mysql"
-	"time"
 )
 
 type convert struct{}

@@ -2,10 +2,12 @@ package mgo
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/tools/mgoutil"
-	"github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mongo/table"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mongo/table"
 )
 
 func NewMeetingRecord(db *mongo.Database) (table.MeetingRecordInterface, error) {

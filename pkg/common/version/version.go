@@ -25,7 +25,7 @@ func Get() Info {
 	}
 }
 
-// GetClientVersion returns the git version of the OpenIM client repository
+// GetClientVersion returns the git version of the OpenIM client repository.
 func GetClientVersion() (*OpenIMClientVersion, error) {
 	clientVersion, err := getClientVersion()
 	if err != nil {
@@ -52,7 +52,7 @@ func getClientVersion() (string, error) {
 	return ref.Hash().String(), nil
 }
 
-// GetSingleVersion returns single version of sealer
+// GetSingleVersion returns single version of sealer.
 func GetSingleVersion() string {
 	return gitVersion
 }

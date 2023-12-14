@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	// The default template version
+	// The default template version.
 	defaultTemplateVersion = "v1.3.0"
 )
 
@@ -84,7 +84,7 @@ func main() {
 	select {}
 }
 
-// getLatestVersion fetches the latest version number from a given URL
+// getLatestVersion fetches the latest version number from a given URL.
 func getLatestVersion(url string) (string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -102,7 +102,7 @@ func getLatestVersion(url string) (string, error) {
 	return latestVersion, nil
 }
 
-// downloadAndExtract downloads a file from a URL and extracts it to a destination directory
+// downloadAndExtract downloads a file from a URL and extracts it to a destination directory.
 func downloadAndExtract(url, destDir string) error {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -141,7 +141,7 @@ func downloadAndExtract(url, destDir string) error {
 	return cmd.Run()
 }
 
-// startProcess starts a process and prints any errors encountered
+// startProcess starts a process and prints any errors encountered.
 func startProcess(cmdPath string) {
 	cmd := exec.Command(cmdPath)
 	cmd.Stdout = os.Stdout

@@ -66,8 +66,8 @@ func NewRedis() (redis.UniversalClient, error) {
 			Addr:       config.Config.Redis.Address[0],
 			Username:   config.Config.Redis.Username,
 			Password:   config.Config.Redis.Password,
-			DB:         0,                            // use default DB
-			PoolSize:   100,                          // connection pool size
+			DB:         0,   // use default DB
+			PoolSize:   100, // connection pool size
 			MaxRetries: maxRetry,
 		})
 	}

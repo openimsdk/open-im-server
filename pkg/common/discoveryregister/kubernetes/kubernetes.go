@@ -77,7 +77,7 @@ func (cli *K8sDR) CloseConn(conn *grpc.ClientConn) {
 	conn.Close()
 }
 
-// do not use this method for call rpc
+// do not use this method for call rpc.
 func (cli *K8sDR) GetClientLocalConns() map[string][]*grpc.ClientConn {
 	fmt.Println("should not call this function!!!!!!!!!!!!!!!!!!!!!!!!!")
 

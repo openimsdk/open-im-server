@@ -35,7 +35,7 @@ const (
 	DefaultFolderPath    = "../config/"
 )
 
-// return absolude path join ../config/, this is k8s container config path
+// return absolude path join ../config/, this is k8s container config path.
 func GetDefaultConfigPath() string {
 	b, err := filepath.Abs(os.Args[0])
 	if err != nil {
@@ -45,7 +45,7 @@ func GetDefaultConfigPath() string {
 	return filepath.Join(filepath.Dir(b), "../config/")
 }
 
-// getProjectRoot returns the absolute path of the project root directory
+// getProjectRoot returns the absolute path of the project root directory.
 func GetProjectRoot() string {
 	b, _ := filepath.Abs(os.Args[0])
 
