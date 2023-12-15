@@ -24,10 +24,6 @@ USER=${OPENIM_USER}
 # Default: PASSWORD=openIM123
 PASSWORD=${PASSWORD}
 
-# Endpoint for the MinIO object storage service.
-# Default: MINIO_ENDPOINT=http://172.28.0.1:10005
-MINIO_ENDPOINT=${MINIO_ENDPOINT}
-
 # Base URL for the application programming interface (API).
 # Default: API_URL=http://172.28.0.1:10002
 API_URL=${API_URL}
