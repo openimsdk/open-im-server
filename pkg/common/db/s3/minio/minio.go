@@ -441,3 +441,39 @@ func (m *Minio) getObjectData(ctx context.Context, name string, limit int64) ([]
 	}
 	return io.ReadAll(io.LimitReader(object, limit))
 }
+
+func (m *Minio) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
+	if err := m.initMinio(ctx); err != nil {
+		return nil, err
+	}
+	policy := minio.NewPostPolicy()
+	if err := policy.SetKey(name); err != nil {
+		return nil, err
+	}
+	expires := time.Now().Add(duration)
+	if err := policy.SetExpires(expires); err != nil {
+		return nil, err
+	}
+	if err := policy.SetContentLengthRange(0, size); err != nil {
+		return nil, err
+	}
+	if contentType != "" {
+		if err := policy.SetContentType(contentType); err != nil {
+			return nil, err
+		}
+	}
+	if err := policy.SetBucket(config.Config.Object.Minio.Bucket); err != nil {
+		return nil, err
+	}
+	u, fd, err := m.core.PresignedPostPolicy(ctx, policy)
+	if err != nil {
+		panic(err)
+	}
+	return &s3.FormData{
+		URL:      u.String(),
+		File:     "file",
+		Header:   nil,
+		FormData: fd,
+		Expires:  expires,
+	}, nil
+}

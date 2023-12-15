@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/OpenIMSDK/protocol v0.0.31
+	github.com/OpenIMSDK/protocol v0.0.35
 	github.com/OpenIMSDK/tools v0.0.20
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/dtm-labs/rockscache v0.1.1
@@ -154,3 +154,5 @@ require (
 	golang.org/x/crypto v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
+
+replace github.com/OpenIMSDK/protocol => C:\Users\openIM\Desktop\fork\protocol

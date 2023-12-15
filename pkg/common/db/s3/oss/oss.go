@@ -327,3 +327,7 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	params := getURLParams(*o.bucket.Client.Conn, rawParams)
 	return getURL(o.um, o.bucket.BucketName, name, params).String(), nil
 }
+
+func (o *OSS) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
+	return nil, errors.New("oss temporarily not supported")
+}

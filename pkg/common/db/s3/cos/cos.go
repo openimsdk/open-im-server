@@ -326,3 +326,7 @@ func (c *Cos) getPresignedURL(ctx context.Context, name string, expire time.Dura
 	}
 	return c.client.Object.GetObjectURL(name), nil
 }
+
+func (c *Cos) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
+	return nil, errors.New("cos temporarily not supported")
+}
