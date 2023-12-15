@@ -111,6 +111,7 @@ generate_example_files() {
     local example_file="${COPY_EXAMPLES[$template]}"
     process_file "$template" "$example_file" false
   done
+
 }
 
 # Function to process a single file, either by generating or copying
@@ -146,10 +147,17 @@ process_file() {
       openim::log::error "genconfig.sh script not found"
       exit 1
     fi
-    "${OPENIM_ROOT}/scripts/genconfig.sh" "${ENV_FILE}" "${template}" > "${output_file}" || {
-      openim::log::error "Error processing template file ${template}"
-      exit 1
-    }
+    if [[ -n "${env_cmd}" ]]; then
+        eval "$env_cmd ${OPENIM_ROOT}/scripts/genconfig.sh '${ENV_FILE}' '${template}' > '${output_file}'" || {
+        openim::log::error "Error processing template file ${template}"
+        exit 1
+        }
+    else
+        "${OPENIM_ROOT}/scripts/genconfig.sh" "${ENV_FILE}" "${template}" > "${output_file}" || {
+        openim::log::error "Error processing template file ${template}"
+        exit 1
+        }
+    fi
   else
     openim::log::info "📋 Copying ${template} to ${output_file}..."
     cp "${template}" "${output_file}" || {
@@ -167,9 +175,10 @@ declare -A env_vars=(
     ["LOG_STORAGE_LOCATION"]="../logs/"
 )
 
-# Function to clean configuration files
 clean_config_files() {
-  for output_file in "${TEMPLATES[@]}"; do
+  local all_templates=("${TEMPLATES[@]}" "${COPY_TEMPLATES[@]}")
+  
+  for output_file in "${all_templates[@]}"; do
     if [[ -f "${output_file}" ]]; then
       rm -f "${output_file}"
       openim::log::info "Removed configuration file: ${output_file}"
@@ -179,7 +188,10 @@ clean_config_files() {
 
 # Function to clean example files
 clean_example_files() {
-  for example_file in "${EXAMPLES[@]}"; do
+  # 合并 EXAMPLES 和 COPY_EXAMPLES 数组
+  local all_examples=("${EXAMPLES[@]}" "${COPY_EXAMPLES[@]}")
+  
+  for example_file in "${all_examples[@]}"; do
     if [[ -f "${example_file}" ]]; then
       rm -f "${example_file}"
       openim::log::info "Removed example file: ${example_file}"
