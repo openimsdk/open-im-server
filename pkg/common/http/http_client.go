@@ -127,7 +127,7 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
 			return nil
 		}
-		return errs.ErrData.Wrap(err.Error())
+		return errs.ErrData.WithDetail(err.Error() + "response format error")
 	}
 
 	return output.Parse()
