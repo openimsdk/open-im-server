@@ -12,18 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Determines if a message should be sent. If set to false, it triggers a silent sync without a message. If true, it requires triggering a conversation.
+# For rpc notification, send twice: once as a message and once as a notification.
+# The options field 'isNotification' indicates if it's a notification.
 groupCreated:
-  isSendMsg: true #是否发送消息，false不发消息为无声的触发同步。true发消息需要触发会话，rpc notification直接发两次，一次消息一次通知, options字段isNotification是否为通知
-  reliabilityLevel: 1 # 1为online才发送 2为必达
-  unreadCount: false # 只在isSendMsg为true的情况下有作用
+  isSendMsg: true
+
+# Reliability level of the message sending.
+# Set to 1 to send only when online, 2 for guaranteed delivery.
+  reliabilityLevel: 1
+
+# This setting is effective only when 'isSendMsg' is true.
+# It controls whether to count unread messages.
+  unreadCount: false
+
+# Configuration for offline push notifications.
   offlinePush:
-    enable: false # 开启该开关
-    title: "create group title" # xx create the group
+    # Enables or disables offline push notifications.
+    enable: false
+
+    # Title for the notification when a group is created.
+    title: "create group title"
+
+    # Description for the notification.
     desc: "create group desc"
+
+    # Additional information for the notification.
     ext: "create group ext"
 
-# 不加消息contentType，content统一json 结构体使用pb的
-
+# Content type is not added here.
+# Content should use a JSON structure conforming to the protobuf format.
 
 groupInfoSet:
   isSendMsg: false
@@ -334,4 +352,3 @@ conversationSetPrivate:
     title: "burn after reading"
     desc: "burn after reading"
     ext: "burn after reading"
-

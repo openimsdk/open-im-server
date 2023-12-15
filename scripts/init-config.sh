@@ -35,6 +35,9 @@ declare -A TEMPLATES=(
   ["${OPENIM_ROOT}/deployments/templates/openim.yaml"]="${OPENIM_ROOT}/config/config.yaml"
   ["${OPENIM_ROOT}/deployments/templates/prometheus.yml"]="${OPENIM_ROOT}/config/prometheus.yml"
   ["${OPENIM_ROOT}/deployments/templates/alertmanager.yml"]="${OPENIM_ROOT}/config/alertmanager.yml"
+  ["${OPENIM_ROOT}/deployments/templates/email.tmpl"]="${OPENIM_ROOT}/config/email.tmpl"
+  ["${OPENIM_ROOT}/deployments/templates/instance-down-rules.yml"]="${OPENIM_ROOT}/config/instance-down-rules.yml"
+  ["${OPENIM_ROOT}/deployments/templates/notification.yaml"]="${OPENIM_ROOT}/config/notification.yaml"
 )
 
 # Templates for example files
@@ -43,6 +46,9 @@ declare -A EXAMPLES=(
   ["${OPENIM_ROOT}/deployments/templates/openim.yaml"]="${OPENIM_ROOT}/config/templates/config.yaml.template"
   ["${OPENIM_ROOT}/deployments/templates/prometheus.yml"]="${OPENIM_ROOT}/config/templates/prometheus.yml.template"
   ["${OPENIM_ROOT}/deployments/templates/alertmanager.yml"]="${OPENIM_ROOT}/config/templates/alertmanager.yml.template"
+  ["${OPENIM_ROOT}/deployments/templates/email.tmpl"]="${OPENIM_ROOT}/config/templates/email.tmpl.template"
+  ["${OPENIM_ROOT}/deployments/templates/instance-down-rules.yml"]="${OPENIM_ROOT}/config/templates/instance-down-rules.yml.template"
+  ["${OPENIM_ROOT}/deployments/templates/notification.yaml"]="${OPENIM_ROOT}/config/templates/notification.yaml.template"
 )
 
 # Command-line options
