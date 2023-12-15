@@ -33,7 +33,6 @@ openim::log::info "\n# Begin to check all openim service"
 # OpenIM status
 # Elegant printing function
 print_services_and_ports() {
-    # 获取数组
     declare -g service_names=("${!1}")
     declare -g service_ports=("${!2}")
 

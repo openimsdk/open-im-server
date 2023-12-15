@@ -38,6 +38,7 @@ config/alertmanager.yml
 config/prometheus.yml
 config/email.tmpl
 config/notification.yaml
+config/instance-down-rules.yml
 
 ### OpenIM deploy ###
 deployments/openim-server/charts
