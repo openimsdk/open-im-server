@@ -46,7 +46,6 @@ type Mongo struct {
 func NewMongo() (*Mongo, error) {
 	specialerror.AddReplace(mongo.ErrNoDocuments, errs.ErrRecordNotFound)
 	uri := buildMongoURI()
-	fmt.Println("mongo:", uri)
 
 	var mongoClient *mongo.Client
 	var err error
