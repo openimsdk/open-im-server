@@ -165,16 +165,24 @@ jobs:
     
         echo "/usr/local/bin" >> $GITHUB_PATH
         echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
-
-        brew install --cask docker
-        open /Applications/Docker.app
       continue-on-error: true
 
-    - name: Docker Operations
+    - name: Set up Docker for Ubuntu
+      if: runner.os == 'Linux'
       run: |
         sudo make init
         sudo docker compose up -d
         sudo sleep 20
+
+    - name: Set up Docker for macOS
+      if: runner.os == 'macOS'
+      run: |
+        brew install --cask docker
+        open /Applications/Docker.app
+
+        brew install docker-compose
+        docker-compose up -d
+        sleep 20
 
     - name: Module Operations
       run: |
