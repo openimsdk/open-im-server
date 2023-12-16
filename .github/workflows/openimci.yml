@@ -177,8 +177,8 @@ jobs:
     - name: Set up Docker for macOS
       if: runner.os == 'macOS'
       run: |
-        brew install --cask docker
-        open /Applications/Docker.app
+        brew install docker
+        # open /Applications/Docker.app
 
         sleep 10
         docker-compose --version || brew install docker-compose
