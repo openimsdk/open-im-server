@@ -166,6 +166,12 @@ jobs:
         echo "/usr/local/bin" >> $GITHUB_PATH
         echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
 
+        brew install --cask docker
+        open /Applications/Docker.app
+
+        while ! docker system info > /dev/null 2>&1; do sleep 1; done
+
+
     - name: Docker Operations
       run: |
         sudo make init
