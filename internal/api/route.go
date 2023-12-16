@@ -176,6 +176,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		msgGroup.POST("/mark_conversation_as_read", m.MarkConversationAsRead)
 		msgGroup.POST("/get_conversations_has_read_and_max_seq", m.GetConversationsHasReadAndMaxSeq)
 		msgGroup.POST("/set_conversation_has_read_seq", m.SetConversationHasReadSeq)
+		msgGroup.POST("/get_conversations_list", m.GetConversationsList)
 
 		msgGroup.POST("/clear_conversation_msg", m.ClearConversationsMsg)
 		msgGroup.POST("/user_clear_all_msg", m.UserClearAllMsg)

@@ -129,6 +129,10 @@ func (m *MessageApi) SetConversationHasReadSeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SetConversationHasReadSeq, m.Client, c)
 }
 
+func (m *MessageApi) GetConversationsList(c *gin.Context) {
+	a2r.Call(msg.MsgClient.GetConversationList, m.Client, c)
+}
+
 func (m *MessageApi) ClearConversationsMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.ClearConversationsMsg, m.Client, c)
 }
