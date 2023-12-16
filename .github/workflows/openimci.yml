@@ -184,17 +184,34 @@ jobs:
         docker-compose up -d
         sleep 20
 
-    - name: Module Operations
+    - name: Module Operations for Ubuntu
+      if: runner.os == 'Linux'
       run: |
         sudo make tidy
         sudo make tools.verify.go-gitlint
 
-    - name: Build, Start, Check Services and Print Logs
+    - name: Module Operations for macOS
+      if: runner.os == 'macOS'
+      run: |
+        make tidy
+        make tools.verify.go-gitlint
+
+    - name: Build, Start, Check Services and Print Logs for Ubuntu
+      if: runner.os == 'Linux'
       run: |
         sudo make init && \
         sudo make build && \
         sudo make start && \
         sudo make check || \
+        (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
+
+    - name: Build, Start, Check Services and Print Logs for macOS
+      if: runner.os == 'macOS'
+      run: |
+        make init && \
+        make build && \
+        make start && \
+        make check || \
         (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
 
   openim-test-build-image:
