@@ -157,8 +157,6 @@ jobs:
     - name: Install latest Bash (macOS only)
       if: runner.os == 'macOS'
       run: |
-        docker
-        sudo docker
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         brew update
     
