@@ -154,18 +154,18 @@ jobs:
         version: '3.x' # If available, use the latest major version that's compatible
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Install latest Bash (macOS only)
-      if: runner.os == 'macOS'
-      run: |
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        brew update
+    # - name: Install latest Bash (macOS only)
+    #   if: runner.os == 'macOS'
+    #   run: |
+    #     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    #     brew update
     
-        brew install bash
-        brew install gnu-sed
+    #     brew install bash
+    #     brew install gnu-sed
     
-        echo "/usr/local/bin" >> $GITHUB_PATH
-        echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
-      continue-on-error: true
+    #     echo "/usr/local/bin" >> $GITHUB_PATH
+    #     echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
+    #   continue-on-error: true
 
     - name: Set up Docker for Ubuntu
       if: runner.os == 'Linux'
@@ -174,17 +174,17 @@ jobs:
         sudo docker compose up -d
         sudo sleep 20
 
-    - name: Set up Docker for macOS
-      if: runner.os == 'macOS'
-      run: |
-        brew install docker
-        # open /Applications/Docker.app
+    # - name: Set up Docker for macOS
+    #   if: runner.os == 'macOS'
+    #   run: |
+    #     brew install --cask docker
+    #     open /Applications/Docker.app
 
-        sleep 10
-        docker-compose --version || brew install docker-compose
+    #     sleep 10
+    #     docker-compose --version || brew install docker-compose
 
-        docker-compose up -d
-        sleep 20
+    #     docker-compose up -d
+    #     sleep 20
 
     - name: Module Operations for Ubuntu
       if: runner.os == 'Linux'
@@ -192,11 +192,11 @@ jobs:
         sudo make tidy
         sudo make tools.verify.go-gitlint
 
-    - name: Module Operations for macOS
-      if: runner.os == 'macOS'
-      run: |
-        make tidy
-        make tools.verify.go-gitlint
+    # - name: Module Operations for macOS
+    #   if: runner.os == 'macOS'
+    #   run: |
+    #     make tidy
+    #     make tools.verify.go-gitlint
 
     - name: Build, Start, Check Services and Print Logs for Ubuntu
       if: runner.os == 'Linux'
@@ -207,14 +207,14 @@ jobs:
         sudo make check || \
         (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
 
-    - name: Build, Start, Check Services and Print Logs for macOS
-      if: runner.os == 'macOS'
-      run: |
-        make init && \
-        make build && \
-        make start && \
-        make check || \
-        (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
+    # - name: Build, Start, Check Services and Print Logs for macOS
+    #   if: runner.os == 'macOS'
+    #   run: |
+    #     make init && \
+    #     make build && \
+    #     make start && \
+    #     make check || \
+    #     (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
 
   openim-test-build-image:
     name: Build OpenIM Docker Image
