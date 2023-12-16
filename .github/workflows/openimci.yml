@@ -180,7 +180,9 @@ jobs:
         brew install --cask docker
         open /Applications/Docker.app
 
-        # brew install docker-compose
+        sleep 10
+        docker-compose --version || brew install docker-compose
+
         docker-compose up -d
         sleep 20
 
