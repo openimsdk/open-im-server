@@ -157,10 +157,14 @@ jobs:
     - name: Install latest Bash (macOS only)
       if: runner.os == 'macOS'
       run: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        brew update
+    
         brew install bash
-        sudo bash -c 'echo /usr/local/bin/bash >> /etc/shells'
-        chsh -s /usr/local/bin/bash
-        echo "Bash version: $(bash --version)"
+        brew install gnu-sed
+    
+        echo "/usr/local/bin" >> $GITHUB_PATH
+        echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
 
     - name: Docker Operations
       run: |
