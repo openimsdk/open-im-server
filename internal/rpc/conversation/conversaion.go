@@ -90,9 +90,10 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbconvers
 }
 
 func (m *conversationServer) GetConversationList(ctx context.Context, req *pbconversation.GetConversationListReq) (resp *pbconversation.GetConversationListResp, err error) {
+	log.ZDebug(ctx, "GetConversationList", "seqs", req, "userID", req.UserID)
 	var conversationIDs []string
 	if len(req.ConversationIDs) == 0 {
-		conversationIDs, err = m.conversationDatabase.GetConversationIDs(ctx, req.UserID)
+		conversationIDs, err = m.Conversation.GetConversationIDs(ctx, req.UserID)
 		if err != nil {
 			return nil, err
 		}
