@@ -154,6 +154,14 @@ jobs:
         version: '3.x' # If available, use the latest major version that's compatible
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Install latest Bash (macOS only)
+      if: runner.os == 'macOS'
+      run: |
+        brew install bash
+        sudo bash -c 'echo /usr/local/bin/bash >> /etc/shells'
+        chsh -s /usr/local/bin/bash
+        echo "Bash version: $(bash --version)"
+
     - name: Docker Operations
       run: |
         sudo make init
