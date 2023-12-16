@@ -130,14 +130,14 @@ jobs:
         sudo make install
 
   execute-scripts:
-    name: Execute OpenIM script on ${{ matrix.os }}
+    name: Execute OpenIM Script On ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     environment:
       name: openim
     strategy:
       matrix:
         go_version: ["1.20"]
-        os: ["ubuntu-latest"]
+        os: ["ubuntu-latest", "macos-latest"]
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
