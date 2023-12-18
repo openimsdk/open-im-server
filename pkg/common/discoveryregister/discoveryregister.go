@@ -39,4 +39,3 @@ func NewDiscoveryRegister(envType string) (discoveryregistry.SvcDiscoveryRegistr
 	default:
 		return nil, errors.New("envType not correct")
 	}
-}

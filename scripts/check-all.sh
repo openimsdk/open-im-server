@@ -47,7 +47,6 @@ print_services_and_ports() {
     echo "+-------------------------+----------+"
 }
 
-
 # Print out services and their ports
 print_services_and_ports OPENIM_SERVER_NAME_TARGETS OPENIM_SERVER_PORT_TARGETS
 

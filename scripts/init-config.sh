@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # This script automatically initializes various configuration files and can generate example files.
 
 set -o errexit
@@ -168,12 +167,6 @@ process_file() {
 
   sleep 0.5
 }
-
-declare -A env_vars=(
-    ["OPENIM_IP"]="172.28.0.1"
-    ["DATA_DIR"]="./"
-    ["LOG_STORAGE_LOCATION"]="../logs/"
-)
 
 clean_config_files() {
   local all_templates=("${TEMPLATES[@]}" "${COPY_TEMPLATES[@]}")
