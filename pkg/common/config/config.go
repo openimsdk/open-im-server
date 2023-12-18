@@ -16,6 +16,7 @@ package config
 
 import (
 	"bytes"
+
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"gopkg.in/yaml.v3"
 )

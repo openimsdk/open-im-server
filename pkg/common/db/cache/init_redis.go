@@ -18,6 +18,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -43,6 +45,9 @@ func NewRedis() (redis.UniversalClient, error) {
 		return redisClient, nil
 	}
 
+	// Read configuration from environment variables
+	overrideConfigFromEnv()
+
 	if len(config.Config.Redis.Address) == 0 {
 		return nil, errors.New("redis address is empty")
 	}
@@ -60,9 +65,9 @@ func NewRedis() (redis.UniversalClient, error) {
 		rdb = redis.NewClient(&redis.Options{
 			Addr:       config.Config.Redis.Address[0],
 			Username:   config.Config.Redis.Username,
-			Password:   config.Config.Redis.Password, // no password set
-			DB:         0,                            // use default DB
-			PoolSize:   100,                          // connection pool size
+			Password:   config.Config.Redis.Password,
+			DB:         0,   // use default DB
+			PoolSize:   100, // connection pool size
 			MaxRetries: maxRetry,
 		})
 	}
@@ -77,4 +82,17 @@ func NewRedis() (redis.UniversalClient, error) {
 
 	redisClient = rdb
 	return rdb, err
+}
+
+// overrideConfigFromEnv overrides configuration fields with environment variables if present.
+func overrideConfigFromEnv() {
+	if envAddr := os.Getenv("REDIS_ADDRESS"); envAddr != "" {
+		config.Config.Redis.Address = strings.Split(envAddr, ",") // Assuming addresses are comma-separated
+	}
+	if envUser := os.Getenv("REDIS_USERNAME"); envUser != "" {
+		config.Config.Redis.Username = envUser
+	}
+	if envPass := os.Getenv("REDIS_PASSWORD"); envPass != "" {
+		config.Config.Redis.Password = envPass
+	}
 }

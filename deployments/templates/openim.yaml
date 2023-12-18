@@ -37,13 +37,20 @@ zookeeper:
 
 ###################### Mongo ######################
 # MongoDB configuration
-# If uri is not empty, it will be used directly
-#
-# MongoDB address for standalone setup, Mongos address for sharded cluster setup
-# Default MongoDB database name
-# Maximum connection pool size
+
+# If uri is not empty, it will be used directly for the MongoDB connection.
+# This is a complete MongoDB URI string.
+# Example: mongodb://user:password@host1:port1,host2:port2/dbname?options
 mongo:
   uri: ${MONGO_URI}
+
+# List of MongoDB server addresses.
+# Used for constructing the MongoDB URI if 'uri' above is empty.
+# For a standalone setup, specify the address of the single server.
+# For a sharded cluster, specify the addresses of the Mongos servers.
+# Example: [ '172.28.0.1:37017', '172.28.0.2:37017' ]
+# Default MongoDB database name
+# Maximum connection pool size
   address: [ ${MONGO_ADDRESS}:${MONGO_PORT} ]
   database: ${MONGO_DATABASE}
   username: ${MONGO_USERNAME}
