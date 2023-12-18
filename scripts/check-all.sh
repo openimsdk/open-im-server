@@ -33,8 +33,8 @@ openim::log::info "\n# Begin to check all openim service"
 # OpenIM status
 # Elegant printing function
 print_services_and_ports() {
-    declare -g service_names=("${!1}")
-    declare -g service_ports=("${!2}")
+    local -n service_names=$1
+    local -n service_ports=$2
 
     echo "+-------------------------+----------+"
     echo "| Service Name            | Port     |"
