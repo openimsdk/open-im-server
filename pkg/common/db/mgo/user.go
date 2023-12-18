@@ -16,6 +16,7 @@ package mgo
 
 import (
 	"context"
+	"github.com/OpenIMSDK/protocol/user"
 	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
@@ -85,6 +86,78 @@ func (u *UserMgo) CountTotal(ctx context.Context, before *time.Time) (count int6
 		return mgoutil.Count(ctx, u.coll, bson.M{})
 	}
 	return mgoutil.Count(ctx, u.coll, bson.M{"create_time": bson.M{"$lt": before}})
+}
+
+func (u *UserMgo) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
+	collection := u.coll.Database().Collection("userCommands")
+
+	// Create a new document instead of updating an existing one
+	doc := bson.M{
+		"userID":     userID,
+		"type":       Type,
+		"uuid":       UUID,
+		"createTime": time.Now().Unix(), // assuming you want the creation time in Unix timestamp
+		"value":      value,
+	}
+
+	_, err := collection.InsertOne(ctx, doc)
+	return err
+}
+func (u *UserMgo) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
+	collection := u.coll.Database().Collection("userCommands")
+
+	filter := bson.M{"userID": userID, "type": Type, "uuid": UUID}
+
+	_, err := collection.DeleteOne(ctx, filter)
+	return err
+}
+func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
+	collection := u.coll.Database().Collection("userCommands")
+
+	filter := bson.M{"userID": userID, "type": Type, "uuid": UUID}
+	update := bson.M{"$set": bson.M{"value": value}}
+
+	_, err := collection.UpdateOne(ctx, filter, update)
+	return err
+}
+func (u *UserMgo) GetUserCommand(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error) {
+	collection := u.coll.Database().Collection("userCommands")
+	filter := bson.M{"userID": userID, "type": Type}
+
+	cursor, err := collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	// Initialize commands as a slice of pointers
+	commands := []*user.CommandInfoResp{}
+
+	for cursor.Next(ctx) {
+		var document struct {
+			UUID       string `bson:"uuid"`
+			Value      string `bson:"value"`
+			CreateTime int64  `bson:"createTime"`
+		}
+
+		if err := cursor.Decode(&document); err != nil {
+			return nil, err
+		}
+
+		commandInfo := &user.CommandInfoResp{ // Change here: use a pointer to the struct
+			Uuid:       document.UUID,
+			Value:      document.Value,
+			CreateTime: document.CreateTime,
+		}
+
+		commands = append(commands, commandInfo)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return commands, nil
 }
 
 func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {

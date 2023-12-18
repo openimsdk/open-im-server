@@ -53,10 +53,6 @@ type friendServer struct {
 	RegisterCenter        registry.SvcDiscoveryRegistry
 }
 
-func (s *friendServer) PinFriends(ctx context.Context, req *pbfriend.PinFriendsReq) (*pbfriend.PinFriendsResp, error) {
-	return nil, errs.ErrInternalServer.Wrap("not implemented")
-}
-
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	// Initialize MongoDB
 	mongo, err := unrelation.NewMongo()
@@ -411,6 +407,7 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 		}
 		var friendInfo *sdkws.FriendInfo
 		if friend := friendMap[userID]; friend != nil {
+
 			friendInfo = &sdkws.FriendInfo{
 				OwnerUserID:    friend.OwnerUserID,
 				Remark:         friend.Remark,
@@ -418,6 +415,7 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 				AddSource:      friend.AddSource,
 				OperatorUserID: friend.OperatorUserID,
 				Ex:             friend.Ex,
+				IsPinned:       friend.IsPinned,
 			}
 		}
 		var blackInfo *sdkws.BlackInfo
@@ -436,5 +434,37 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 			BlackInfo:  blackInfo,
 		})
 	}
+	return resp, nil
+}
+func (s *friendServer) PinFriends(
+	ctx context.Context,
+	req *pbfriend.PinFriendsReq,
+) (*pbfriend.PinFriendsResp, error) {
+	if len(req.FriendUserIDs) == 0 {
+		return nil, errs.ErrArgs.Wrap("friendIDList is empty")
+	}
+	if utils.Duplicate(req.FriendUserIDs) {
+		return nil, errs.ErrArgs.Wrap("friendIDList repeated")
+	}
+	var isPinned bool
+	if req.IsPinned != nil {
+		isPinned = req.IsPinned.Value
+	} else {
+		return nil, errs.ErrArgs.Wrap("isPinned is nil")
+	}
+	//check whther in friend list
+	_, err := s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	//set friendslist friend pin status to isPinned
+	for _, friendID := range req.FriendUserIDs {
+		if err := s.friendDatabase.UpdateFriendPinStatus(ctx, req.OwnerUserID, friendID, isPinned); err != nil {
+			return nil, err
+		}
+	}
+
+	resp := &pbfriend.PinFriendsResp{}
 	return resp, nil
 }

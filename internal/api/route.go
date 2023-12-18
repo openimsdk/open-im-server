@@ -77,6 +77,11 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		userRouterGroup.POST("/subscribe_users_status", ParseToken, u.SubscriberStatus)
 		userRouterGroup.POST("/get_users_status", ParseToken, u.GetUserStatus)
 		userRouterGroup.POST("/get_subscribe_users_status", ParseToken, u.GetSubscribeUsersStatus)
+
+		userRouterGroup.POST("/process_user_command_add", ParseToken, u.ProcessUserCommandAdd)
+		userRouterGroup.POST("/process_user_command_delete", ParseToken, u.ProcessUserCommandDelete)
+		userRouterGroup.POST("/process_user_command_update", ParseToken, u.ProcessUserCommandUpdate)
+		userRouterGroup.POST("/process_user_command_get", ParseToken, u.ProcessUserCommandGet)
 	}
 	// friend routing group
 	friendRouterGroup := r.Group("/friend", ParseToken)
@@ -98,6 +103,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		friendRouterGroup.POST("/is_friend", f.IsFriend)
 		friendRouterGroup.POST("/get_friend_id", f.GetFriendIDs)
 		friendRouterGroup.POST("/get_specified_friends_info", f.GetSpecifiedFriendsInfo)
+		friendRouterGroup.POST("/set_pin_friend", f.SetPinFriends)
 	}
 	g := NewGroupApi(*groupRpc)
 	groupRouterGroup := r.Group("/group", ParseToken)

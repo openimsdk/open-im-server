@@ -327,8 +327,6 @@ func CallbackBeforeInviteUserToGroup(ctx context.Context, req *group.InviteUserT
 		// Handle the scenario where certain members are refused
 		// You might want to update the req.Members list or handle it as per your business logic
 	}
-	utils.StructFieldNotNilReplace(req, resp)
-
 	return nil
 }
 
@@ -395,7 +393,10 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq)
 	if resp.ApplyMemberFriend != nil {
 		req.GroupInfoForSet.ApplyMemberFriend = wrapperspb.Int32(*resp.ApplyMemberFriend)
 	}
-	utils.StructFieldNotNilReplace(req, resp)
+	utils.NotNilReplace(&req.GroupInfoForSet.GroupID, &resp.GroupID)
+	utils.NotNilReplace(&req.GroupInfoForSet.GroupName, &resp.GroupName)
+	utils.NotNilReplace(&req.GroupInfoForSet.FaceURL, &resp.FaceURL)
+	utils.NotNilReplace(&req.GroupInfoForSet.Introduction, &resp.Introduction)
 	return nil
 }
 func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) error {
@@ -426,6 +427,5 @@ func CallbackAfterSetGroupInfo(ctx context.Context, req *group.SetGroupInfoReq) 
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterSetGroupInfo); err != nil {
 		return err
 	}
-	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }

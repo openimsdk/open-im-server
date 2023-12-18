@@ -68,6 +68,12 @@ type UserDatabase interface {
 	GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error)
 	// SetUserStatus Set the user status and store the user status in redis
 	SetUserStatus(ctx context.Context, userID string, status, platformID int32) error
+
+	//CRUD user command
+	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
+	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error
+	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
+	GetUserCommands(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error)
 }
 
 type userDatabase struct {
@@ -226,4 +232,17 @@ func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*
 // SetUserStatus Set the user status and save it in redis.
 func (u *userDatabase) SetUserStatus(ctx context.Context, userID string, status, platformID int32) error {
 	return u.cache.SetUserStatus(ctx, userID, status, platformID)
+}
+func (u *userDatabase) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
+	return u.userDB.AddUserCommand(ctx, userID, Type, UUID, value)
+}
+func (u *userDatabase) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
+	return u.userDB.DeleteUserCommand(ctx, userID, Type, UUID)
+}
+func (u *userDatabase) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
+	return u.userDB.UpdateUserCommand(ctx, userID, Type, UUID, value)
+}
+func (u *userDatabase) GetUserCommands(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error) {
+	commands, err := u.userDB.GetUserCommand(ctx, userID, Type)
+	return commands, err
 }

@@ -202,6 +202,5 @@ func CallbackAfterRevokeMsg(ctx context.Context, req *pbchat.RevokeMsgReq) error
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterRevokeMsg); err != nil {
 		return err
 	}
-	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }
