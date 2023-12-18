@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package token
 
 import (
@@ -9,7 +23,7 @@ import (
 	"net/http"
 )
 
-// API endpoints and other constants
+// API endpoints and other constants.
 const (
 	APIHost         = "http://127.0.0.1:10002"
 	UserTokenURL    = APIHost + "/auth/user_token"
@@ -18,27 +32,27 @@ const (
 	OperationID     = "1646445464564"
 )
 
-// UserTokenRequest represents a request to get a user token
+// UserTokenRequest represents a request to get a user token.
 type UserTokenRequest struct {
 	Secret     string `json:"secret"`
 	PlatformID int    `json:"platformID"`
 	UserID     string `json:"userID"`
 }
 
-// UserTokenResponse represents a response containing a user token
+// UserTokenResponse represents a response containing a user token.
 type UserTokenResponse struct {
 	Token   string `json:"token"`
 	ErrCode int    `json:"errCode"`
 }
 
-// User represents user data for registration
+// User represents user data for registration.
 type User struct {
 	UserID   string `json:"userID"`
 	Nickname string `json:"nickname"`
 	FaceURL  string `json:"faceURL"`
 }
 
-// UserRegisterRequest represents a request to register a user
+// UserRegisterRequest represents a request to register a user.
 type UserRegisterRequest struct {
 	Secret string `json:"secret"`
 	Users  []User `json:"users"`
@@ -58,7 +72,7 @@ func main() {
 	}
 }
 
-// GetUserToken requests a user token from the API
+// GetUserToken requests a user token from the API.
 func GetUserToken(userID string) (string, error) {
 	reqBody := UserTokenRequest{
 		Secret:     SecretKey,
@@ -88,7 +102,7 @@ func GetUserToken(userID string) (string, error) {
 	return tokenResp.Token, nil
 }
 
-// RegisterUser registers a new user using the API
+// RegisterUser registers a new user using the API.
 func RegisterUser(token, userID, nickname, faceURL string) error {
 	user := User{
 		UserID:   userID,

@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"google.golang.org/protobuf/proto"
 
@@ -24,6 +25,7 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"

@@ -28,6 +28,8 @@ openim::log::info "\n# Use Docker to start all openim service"
 
 trap 'openim::util::onCtrlC' INT
 
+"${OPENIM_ROOT}"/scripts/init-config.sh --skip
+
 "${OPENIM_ROOT}"/scripts/start-all.sh
 
 sleep 5

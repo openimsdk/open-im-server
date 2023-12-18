@@ -16,11 +16,11 @@ package apistruct
 
 type PictureBaseInfo struct {
 	UUID   string `mapstructure:"uuid"`
-	Type   string `mapstructure:"type" validate:"required"`
+	Type   string `mapstructure:"type"   validate:"required"`
 	Size   int64  `mapstructure:"size"`
-	Width  int32  `mapstructure:"width" validate:"required"`
+	Width  int32  `mapstructure:"width"  validate:"required"`
 	Height int32  `mapstructure:"height" validate:"required"`
-	Url    string `mapstructure:"url" validate:"required"`
+	Url    string `mapstructure:"url"    validate:"required"`
 }
 
 type PictureElem struct {
@@ -34,28 +34,28 @@ type SoundElem struct {
 	SoundPath string `mapstructure:"soundPath"`
 	SourceURL string `mapstructure:"sourceUrl" validate:"required"`
 	DataSize  int64  `mapstructure:"dataSize"`
-	Duration  int64  `mapstructure:"duration" validate:"required,min=1"`
+	Duration  int64  `mapstructure:"duration"  validate:"required,min=1"`
 }
 type VideoElem struct {
-	VideoPath      string `mapstructure:"videoPath" `
+	VideoPath      string `mapstructure:"videoPath"`
 	VideoUUID      string `mapstructure:"videoUUID"`
-	VideoURL       string `mapstructure:"videoUrl" validate:"required"`
-	VideoType      string `mapstructure:"videoType" validate:"required"`
-	VideoSize      int64  `mapstructure:"videoSize" validate:"required"`
-	Duration       int64  `mapstructure:"duration" validate:"required"`
+	VideoURL       string `mapstructure:"videoUrl"       validate:"required"`
+	VideoType      string `mapstructure:"videoType"      validate:"required"`
+	VideoSize      int64  `mapstructure:"videoSize"      validate:"required"`
+	Duration       int64  `mapstructure:"duration"       validate:"required"`
 	SnapshotPath   string `mapstructure:"snapshotPath"`
 	SnapshotUUID   string `mapstructure:"snapshotUUID"`
 	SnapshotSize   int64  `mapstructure:"snapshotSize"`
-	SnapshotURL    string `mapstructure:"snapshotUrl" validate:"required"`
-	SnapshotWidth  int32  `mapstructure:"snapshotWidth" validate:"required"`
+	SnapshotURL    string `mapstructure:"snapshotUrl"    validate:"required"`
+	SnapshotWidth  int32  `mapstructure:"snapshotWidth"  validate:"required"`
 	SnapshotHeight int32  `mapstructure:"snapshotHeight" validate:"required"`
 }
 type FileElem struct {
-	FilePath  string `mapstructure:"filePath" `
+	FilePath  string `mapstructure:"filePath"`
 	UUID      string `mapstructure:"uuid"`
 	SourceURL string `mapstructure:"sourceUrl" validate:"required"`
-	FileName  string `mapstructure:"fileName" validate:"required"`
-	FileSize  int64  `mapstructure:"fileSize" validate:"required"`
+	FileName  string `mapstructure:"fileName"  validate:"required"`
+	FileSize  int64  `mapstructure:"fileSize"  validate:"required"`
 }
 type AtElem struct {
 	Text       string   `mapstructure:"text"`
@@ -63,9 +63,9 @@ type AtElem struct {
 	IsAtSelf   bool     `mapstructure:"isAtSelf"`
 }
 type LocationElem struct {
-	Description string  `mapstructure:"description" `
-	Longitude   float64 `mapstructure:"longitude" validate:"required"`
-	Latitude    float64 `mapstructure:"latitude" validate:"required"`
+	Description string  `mapstructure:"description"`
+	Longitude   float64 `mapstructure:"longitude"   validate:"required"`
+	Latitude    float64 `mapstructure:"latitude"    validate:"required"`
 }
 type CustomElem struct {
 	Data        string `mapstructure:"data"        validate:"required"`
@@ -87,7 +87,7 @@ type OANotificationElem struct {
 	NotificationType    int32        `mapstructure:"notificationType"    json:"notificationType"    validate:"required"`
 	Text                string       `mapstructure:"text"                json:"text"                validate:"required"`
 	Url                 string       `mapstructure:"url"                 json:"url"`
-	MixType             int32        `mapstructure:"mixType"             json:"mixType" validate:"required"`
+	MixType             int32        `mapstructure:"mixType"             json:"mixType"             validate:"required"`
 	PictureElem         *PictureElem `mapstructure:"pictureElem"         json:"pictureElem"`
 	SoundElem           *SoundElem   `mapstructure:"soundElem"           json:"soundElem"`
 	VideoElem           *VideoElem   `mapstructure:"videoElem"           json:"videoElem"`

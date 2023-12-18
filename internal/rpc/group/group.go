@@ -17,12 +17,13 @@ package group
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"math/big"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 
 	pbconversation "github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/protocol/wrapperspb"
