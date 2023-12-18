@@ -48,6 +48,7 @@ jobs:
           images: openim/openim-server
           # generate Docker tags based on the following events/attributes
           tags: |
+            type=ref,event=tag
             type=schedule
             type=ref,event=branch
             type=ref,event=pr
@@ -90,6 +91,7 @@ jobs:
           images: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server
           # generate Docker tags based on the following events/attributes
           tags: |
+            type=ref,event=tag
             type=schedule
             type=ref,event=branch
             type=ref,event=pr
@@ -133,6 +135,7 @@ jobs:
           images: ghcr.io/openimsdk/openim-server
           # generate Docker tags based on the following events/attributes
           tags: |
+            type=ref,event=tag
             type=schedule
             type=ref,event=branch
             type=ref,event=pr

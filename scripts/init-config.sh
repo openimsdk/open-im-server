@@ -2,7 +2,7 @@
 # Copyright © 2023 OpenIM. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
-# You may not use this file except in compliance with the License.
+# you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
@@ -44,11 +44,26 @@ declare -A EXAMPLES=(
   ["${OPENIM_ROOT}/deployments/templates/alertmanager.yml"]="${OPENIM_ROOT}/config/templates/alertmanager.yml.template"
 )
 
+# Templates for config Copy file
+declare -A COPY_TEMPLATES=(
+  ["${OPENIM_ROOT}/deployments/templates/email.tmpl"]="${OPENIM_ROOT}/config/email.tmpl"
+  ["${OPENIM_ROOT}/deployments/templates/instance-down-rules.yml"]="${OPENIM_ROOT}/config/instance-down-rules.yml"
+  ["${OPENIM_ROOT}/deployments/templates/notification.yaml"]="${OPENIM_ROOT}/config/notification.yaml"
+)
+
+# Templates for config Copy file
+declare -A COPY_EXAMPLES=(
+  ["${OPENIM_ROOT}/deployments/templates/email.tmpl"]="${OPENIM_ROOT}/config/templates/email.tmpl.template"
+  ["${OPENIM_ROOT}/deployments/templates/instance-down-rules.yml"]="${OPENIM_ROOT}/config/templates/instance-down-rules.yml.template"
+  ["${OPENIM_ROOT}/deployments/templates/notification.yaml"]="${OPENIM_ROOT}/config/templates/notification.yaml.template"
+)
+
 # Command-line options
 FORCE_OVERWRITE=false
 SKIP_EXISTING=false
 GENERATE_EXAMPLES=false
-CLEAN_ENV_EXAMPLES=false
+CLEAN_CONFIG=false
+CLEAN_EXAMPLES=false
 
 # Function to display help information
 show_help() {
@@ -58,82 +73,122 @@ show_help() {
   echo "  --force                Overwrite existing files without prompt"
   echo "  --skip                 Skip generation if file exists"
   echo "  --examples             Generate example files"
-  echo "  --clean-env-examples   Generate example files in a clean environment"
+  echo "  --clean-config         Clean all configuration files"
+  echo "  --clean-examples       Clean all example files"
 }
 
-# Function to generate configuration files
+# Function to generate and copy configuration files
 generate_config_files() {
-  # Loop through each template in TEMPLATES
+  # Handle TEMPLATES array
   for template in "${!TEMPLATES[@]}"; do
-    # Read the corresponding output files for the template
-    IFS=';' read -ra OUTPUT_FILES <<< "${TEMPLATES[$template]}"
-    for output_file in "${OUTPUT_FILES[@]}"; do
-      # Check if the output file already exists
-      if [[ -f "${output_file}" ]]; then
-        # Handle existing file based on command-line options
-        if [[ "${FORCE_OVERWRITE}" == true ]]; then
-          openim::log::info "Force overwriting ${output_file}."
-        elif [[ "${SKIP_EXISTING}" == true ]]; then
-          openim::log::info "Skipping generation of ${output_file} as it already exists."
-          continue
-        else
-          # Ask user for confirmation to overwrite
-          echo -n "File ${output_file} already exists. Overwrite? (Y/N): "
-          read -r -n 1 REPLY
-          echo
-          if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            openim::log::info "Skipping generation of ${output_file}."
-            continue
-          fi
-        fi
-      fi
+    local output_file="${TEMPLATES[$template]}"
+    process_file "$template" "$output_file" true
+  done
 
-      # Process the template file to generate the output file
-      openim::log::info "⌚  Working with template file: ${template} to generate ${output_file}..."
-      if [[ ! -f "${OPENIM_ROOT}/scripts/genconfig.sh" ]]; then
-        openim::log::error "genconfig.sh script not found"
-        exit 1
-      fi
-      "${OPENIM_ROOT}/scripts/genconfig.sh" "${ENV_FILE}" "${template}" > "${output_file}" || {
-        openim::log::error "Error processing template file ${template}"
-        exit 1
-      }
-      sleep 0.5
-    done
+  # Handle COPY_TEMPLATES array
+  for template in "${!COPY_TEMPLATES[@]}"; do
+    local output_file="${COPY_TEMPLATES[$template]}"
+    process_file "$template" "$output_file" false
   done
 }
 
 # Function to generate example files
 generate_example_files() {
-  for template in "${!EXAMPLES[@]}"; do
-    local example_file="${EXAMPLES[$template]}"
-    if [[ ! -f "${example_file}" ]]; then
-      openim::log::info "Generating example file: ${example_file} from ${template}..."
-      cp "${template}" "${example_file}"
-    fi
-  done
-}
-
-declare -A env_vars=(
-    ["OPENIM_IP"]="172.28.0.1"
-    ["DATA_DIR"]="./"
-    ["LOG_STORAGE_LOCATION"]="../logs/"
-)
-
-generate_clean_environment_examples() {
   env_cmd="env -i"
   for var in "${!env_vars[@]}"; do
       env_cmd+=" $var='${env_vars[$var]}'"
   done
 
+  # Processing EXAMPLES array
   for template in "${!EXAMPLES[@]}"; do
     local example_file="${EXAMPLES[$template]}"
-    openim::log::info "Generating example file: ${example_file} from ${template}..."
+    process_file "$template" "$example_file" true
+  done
 
-    eval "$env_cmd ${OPENIM_ROOT}/scripts/genconfig.sh '${ENV_FILE}' '${template}' > '${example_file}'" || {
-      openim::log::error "Error processing template file ${template}"
+  # Processing COPY_EXAMPLES array
+  for template in "${!COPY_EXAMPLES[@]}"; do
+    local example_file="${COPY_EXAMPLES[$template]}"
+    process_file "$template" "$example_file" false
+  done
+
+}
+
+# Function to process a single file, either by generating or copying
+process_file() {
+  local template=$1
+  local output_file=$2
+  local use_genconfig=$3
+
+  if [[ -f "${output_file}" ]]; then
+    if [[ "${FORCE_OVERWRITE}" == true ]]; then
+      openim::log::info "Force overwriting ${output_file}."
+    elif [[ "${SKIP_EXISTING}" == true ]]; then
+      openim::log::info "Skipping generation of ${output_file} as it already exists."
+      return
+    else
+      echo -n "File ${output_file} already exists. Overwrite? (Y/N): "
+      read -r -n 1 REPLY
+      echo
+      if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        openim::log::info "Skipping generation of ${output_file}."
+        return
+      fi
+    fi
+  else
+    if [[ "${SKIP_EXISTING}" == true ]]; then
+      openim::log::info "Generating ${output_file} as it does not exist."
+    fi
+  fi
+
+  if [[ "$use_genconfig" == true ]]; then
+    openim::log::info "⌚  Working with template file: ${template} to generate ${output_file}..."
+    if [[ ! -f "${OPENIM_ROOT}/scripts/genconfig.sh" ]]; then
+      openim::log::error "genconfig.sh script not found"
+      exit 1
+    fi
+    if [[ -n "${env_cmd}" ]]; then
+        eval "$env_cmd ${OPENIM_ROOT}/scripts/genconfig.sh '${ENV_FILE}' '${template}' > '${output_file}'" || {
+        openim::log::error "Error processing template file ${template}"
+        exit 1
+        }
+    else
+        "${OPENIM_ROOT}/scripts/genconfig.sh" "${ENV_FILE}" "${template}" > "${output_file}" || {
+        openim::log::error "Error processing template file ${template}"
+        exit 1
+        }
+    fi
+  else
+    openim::log::info "📋 Copying ${template} to ${output_file}..."
+    cp "${template}" "${output_file}" || {
+      openim::log::error "Error copying template file ${template}"
       exit 1
     }
+  fi
+
+  sleep 0.5
+}
+
+clean_config_files() {
+  local all_templates=("${TEMPLATES[@]}" "${COPY_TEMPLATES[@]}")
+  
+  for output_file in "${all_templates[@]}"; do
+    if [[ -f "${output_file}" ]]; then
+      rm -f "${output_file}"
+      openim::log::info "Removed configuration file: ${output_file}"
+    fi
+  done
+}
+
+# Function to clean example files
+clean_example_files() {
+  # 合并 EXAMPLES 和 COPY_EXAMPLES 数组
+  local all_examples=("${EXAMPLES[@]}" "${COPY_EXAMPLES[@]}")
+  
+  for example_file in "${all_examples[@]}"; do
+    if [[ -f "${example_file}" ]]; then
+      rm -f "${example_file}"
+      openim::log::info "Removed example file: ${example_file}"
+    fi
   done
 }
 
@@ -155,8 +210,12 @@ while [[ $# -gt 0 ]]; do
       GENERATE_EXAMPLES=true
       shift
       ;;
-    --clean-env-examples)
-      CLEAN_ENV_EXAMPLES=true
+    --clean-config)
+      CLEAN_CONFIG=true
+      shift
+      ;;
+    --clean-examples)
+      CLEAN_EXAMPLES=true
       shift
       ;;
     *)
@@ -167,19 +226,29 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Clean configuration files if --clean-config option is provided
+if [[ "${CLEAN_CONFIG}" == true ]]; then
+  clean_config_files
+fi
+
+# Clean example files if --clean-examples option is provided
+if [[ "${CLEAN_EXAMPLES}" == true ]]; then
+  clean_example_files
+fi
+
 # Generate configuration files if requested
-if [[ "${FORCE_OVERWRITE}" == true || "${SKIP_EXISTING}" == false ]]; then
+if [[ "${FORCE_OVERWRITE}" == true || "${SKIP_EXISTING}" == false ]] && [[ "${CLEAN_CONFIG}" == false ]]; then
+  generate_config_files
+fi
+
+# Generate configuration files if requested
+if [[ "${SKIP_EXISTING}" == true ]]; then
   generate_config_files
 fi
 
 # Generate example files if --examples option is provided
-if [[ "${GENERATE_EXAMPLES}" == true ]]; then
+if [[ "${GENERATE_EXAMPLES}" == true ]] && [[ "${CLEAN_EXAMPLES}" == false ]]; then
   generate_example_files
 fi
 
-# Generate example files in a clean environment if --clean-env-examples option is provided
-if [[ "${CLEAN_ENV_EXAMPLES}" == true ]]; then
-  generate_clean_environment_examples
-fi
-
-openim::log::success "Configuration and example files generation complete!"
+openim::log::success "Configuration and example files operation complete!"

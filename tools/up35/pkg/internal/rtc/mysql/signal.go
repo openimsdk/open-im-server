@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package relation
 
 import (
@@ -16,7 +30,7 @@ type SignalModel struct {
 	SessionType   int32     `gorm:"column:sesstion_type"`
 	InitiateTime  time.Time `gorm:"column:initiate_time"`
 	EndTime       time.Time `gorm:"column:end_time"`
-	FileURL       string    `gorm:"column:file_url" json:"-"`
+	FileURL       string    `gorm:"column:file_url"                                                  json:"-"`
 
 	Title         string `gorm:"column:title;size:128"`
 	Desc          string `gorm:"column:desc;size:1024"`
