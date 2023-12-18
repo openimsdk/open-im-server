@@ -801,6 +801,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		GroupType:  string(group.GroupType),
 		ApplyID:    req.InviterUserID,
 		ReqMessage: req.ReqMessage,
+		Ex:         req.Ex,
 	}
 
 	if err = CallbackApplyJoinGroupBefore(ctx, reqCall); err != nil {
@@ -847,6 +848,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		JoinSource:  req.JoinSource,
 		ReqTime:     time.Now(),
 		HandledTime: time.Unix(0, 0),
+		Ex:          req.Ex,
 	}
 	if err := s.db.CreateGroupRequest(ctx, []*relationtb.GroupRequestModel{&groupRequest}); err != nil {
 		return nil, err
