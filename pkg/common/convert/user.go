@@ -72,3 +72,22 @@ func UserPb2DBMap(user *sdkws.UserInfo) map[string]any {
 	}
 	return val
 }
+func UserPb2DBMapEx(user *sdkws.UserInfoWithEx) map[string]any {
+	if user == nil {
+		return nil
+	}
+	val := make(map[string]any)
+
+	// Map fields from UserInfoWithEx to val
+	val["nickname"] = user.Nickname
+	val["face_url"] = user.FaceURL
+
+	if user.Ex != nil {
+		val["ex"] = user.Ex.Value
+	}
+	if user.GlobalRecvMsgOpt != 0 {
+		val["global_recv_msg_opt"] = user.GlobalRecvMsgOpt
+	}
+
+	return val
+}

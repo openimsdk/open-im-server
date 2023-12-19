@@ -44,7 +44,6 @@ func CallbackBeforeUpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInf
 	utils.NotNilReplace(&req.UserInfo.Nickname, resp.Nickname)
 	return nil
 }
-
 func CallbackAfterUpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) error {
 	if !config.Config.Callback.CallbackAfterUpdateUserInfo.Enable {
 		return nil
