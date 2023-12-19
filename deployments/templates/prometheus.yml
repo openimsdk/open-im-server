@@ -44,12 +44,12 @@ scrape_configs:
   # prometheus fetches application services
   - job_name: 'openimserver-openim-api'
     static_configs:
-      - targets: [ '${OPENIM_SERVER_ADDRESS}:${API_PROM_PORT}' ]
+      - targets: [ '${DOCKER_BRIDGE_GATEWAY}:${API_PROM_PORT}' ]
         labels:
           namespace: 'default'
   - job_name: 'openimserver-openim-msggateway'
     static_configs:
-      - targets: [ '${OPENIM_SERVER_ADDRESS}:${MSG_GATEWAY_PROM_PORT}' ]
+      - targets: [ '${DOCKER_BRIDGE_GATEWAY}:${MSG_GATEWAY_PROM_PORT}' ]
         labels:
           namespace: 'default'
   - job_name: 'openimserver-openim-msgtransfer'
@@ -59,41 +59,41 @@ scrape_configs:
           namespace: 'default'
   - job_name: 'openimserver-openim-push'
     static_configs:
-      - targets: [ '${OPENIM_SERVER_ADDRESS}:${PUSH_PROM_PORT}' ]
+      - targets: [ '${DOCKER_BRIDGE_GATEWAY}:${PUSH_PROM_PORT}' ]
         labels:
           namespace: 'default'
   - job_name: 'openimserver-openim-rpc-auth'
     static_configs:
-      - targets: [ '${OPENIM_SERVER_ADDRESS}:${AUTH_PROM_PORT}' ]
+      - targets: [ '${DOCKER_BRIDGE_GATEWAY}:${AUTH_PROM_PORT}' ]
         labels:
           namespace: 'default'
   - job_name: 'openimserver-openim-rpc-conversation'
     static_configs:
-      - targets: [ '${OPENIM_SERVER_ADDRESS}:${CONVERSATION_PROM_PORT}' ]
+      - targets: [ '${DOCKER_BRIDGE_GATEWAY}:${CONVERSATION_PROM_PORT}' ]
         labels:
           namespace: 'default'
   - job_name: 'openimserver-openim-rpc-friend'
     static_configs:
-      - targets: [ '${OPENIM_SERVER_ADDRESS}:${FRIEND_PROM_PORT}' ]
+      - targets: [ '${DOCKER_BRIDGE_GATEWAY}:${FRIEND_PROM_PORT}' ]
         labels:
           namespace: 'default'
   - job_name: 'openimserver-openim-rpc-group'
     static_configs:
-      - targets: [ '${OPENIM_SERVER_ADDRESS}:${GROUP_PROM_PORT}' ]
+      - targets: [ '${DOCKER_BRIDGE_GATEWAY}:${GROUP_PROM_PORT}' ]
         labels:
           namespace: 'default'
   - job_name: 'openimserver-openim-rpc-msg'
     static_configs:
-      - targets: [ '${OPENIM_SERVER_ADDRESS}:${MESSAGE_PROM_PORT}' ]
+      - targets: [ '${DOCKER_BRIDGE_GATEWAY}:${MESSAGE_PROM_PORT}' ]
         labels:
           namespace: 'default'
   - job_name: 'openimserver-openim-rpc-third'
     static_configs:
-      - targets: [ '${OPENIM_SERVER_ADDRESS}:${THIRD_PROM_PORT}' ]
+      - targets: [ '${DOCKER_BRIDGE_GATEWAY}:${THIRD_PROM_PORT}' ]
         labels:
           namespace: 'default'
   - job_name: 'openimserver-openim-rpc-user'
     static_configs:
-      - targets: [ '${OPENIM_SERVER_ADDRESS}:${USER_PROM_PORT}' ]
+      - targets: [ '${DOCKER_BRIDGE_GATEWAY}:${USER_PROM_PORT}' ]
         labels:
           namespace: 'default'
