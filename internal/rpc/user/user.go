@@ -148,9 +148,9 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 		return nil, err
 	}
 
-	//if err := CallbackBeforeUpdateUserInfo(ctx, req); err != nil {
-	//	return nil, err
-	//}
+	if err := CallbackBeforeUpdateUserInfoEx(ctx, req); err != nil {
+		return nil, err
+	}
 	data := convert.UserPb2DBMapEx(req.UserInfo)
 	if err := s.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
@@ -168,9 +168,9 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	for _, friendID := range friends {
 		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	}
-	//if err := CallbackAfterUpdateUserInfo(ctx, req); err != nil {
-	//	return nil, err
-	//}
+	if err := CallbackAfterUpdateUserInfoEx(ctx, req); err != nil {
+		return nil, err
+	}
 	if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
 		log.ZError(ctx, "NotificationUserInfoUpdate", err, "userID", req.UserInfo.UserID)
 	}
