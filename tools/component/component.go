@@ -149,12 +149,12 @@ func checkMongo() (string, error) {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	str := "ths addr is:" + strings.Join(config.Config.Mongo.Address, ",")
 	if err != nil {
-		return "", errs.Wrap(err, str)
+		return "", errs.Wrap(errStr(err, str))
 	}
 	defer client.Disconnect(context.TODO())
 
 	if err = client.Ping(context.TODO(), nil); err != nil {
-		return "", errs.Wrap(err, str)
+		return "", errs.Wrap(errStr(err, str))
 	}
 
 	return str, nil
@@ -198,7 +198,8 @@ func checkMinio() (string, error) {
 	// Parse endpoint URL to determine if SSL is enabled
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return "", errs.Wrap(err)
+		str := "the endpoint is:" + endpoint
+		return "", errs.Wrap(errStr(err, str))
 	}
 	secure := u.Scheme == "https" || useSSL == "true"
 
@@ -207,20 +208,22 @@ func checkMinio() (string, error) {
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
 		Secure: secure,
 	})
-	str := "the addr is:" + u.Host
+	str := "ths addr is:" + u.Host
 	if err != nil {
-		return "", errs.Wrap(err, str)
+		strs := fmt.Sprintf("%v;host:%s,accessKeyID:%s,secretAccessKey:%s,Secure:%v", err, u.Host, accessKeyID, secretAccessKey, secure)
+		return "", errs.Wrap(err, strs)
 	}
 
 	// Perform health check
 	cancel, err := minioClient.HealthCheck(time.Duration(minioHealthCheckDuration) * time.Second)
 	if err != nil {
-		return "", errs.Wrap(err, str)
+		return "", errs.Wrap(errStr(err, str))
 	}
 	defer cancel()
 
 	if minioClient.IsOffline() {
-		return "", ErrComponentStart.Wrap("Minio server is offline", str)
+		str := fmt.Sprintf("Minio server is offline;%s", str)
+		return "", ErrComponentStart.Wrap(str)
 	}
 
 	// Check for localhost in API URL and Minio SignEndpoint
@@ -263,7 +266,7 @@ func checkRedis() (string, error) {
 	_, err := redisClient.Ping(context.Background()).Result()
 	str := "the addr is:" + strings.Join(redisAddresses, ",")
 	if err != nil {
-		return "", errs.Wrap(err, str)
+		return "", errs.Wrap(errStr(err, str))
 	}
 
 	return str, nil
@@ -284,14 +287,14 @@ func checkZookeeper() (string, error) {
 	str := "the addr is:" + address
 	c, _, err := zk.Connect(zookeeperAddresses, time.Second) // Adjust the timeout as necessary
 	if err != nil {
-		return "", errs.Wrap(err, str)
+		return "", errs.Wrap(errStr(err, str))
 	}
 	defer c.Close()
 
 	// Set authentication if username and password are provided
 	if username != "" && password != "" {
 		if err := c.AddAuth(schema, []byte(username+":"+password)); err != nil {
-			return "", errs.Wrap(err)
+			return "", errs.Wrap(errStr(err, str))
 		}
 	}
 
@@ -328,7 +331,7 @@ func checkKafka() (string, error) {
 	str := "the addr is:" + address
 	kafkaClient, err := sarama.NewClient(kafkaAddresses, cfg)
 	if err != nil {
-		return "", errs.Wrap(err, str)
+		return "", errs.Wrap(errStr(err, str))
 	}
 	defer kafkaClient.Close()
 
@@ -377,4 +380,8 @@ func successPrint(s string) {
 
 func warningPrint(s string) {
 	colorPrint(colorYellow, "Warning: But %v", s)
+}
+
+func errStr(err error, str string) error {
+	return fmt.Errorf("%v;%s", err, str)
 }
