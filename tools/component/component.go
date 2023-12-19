@@ -103,11 +103,11 @@ func main() {
 		for _, check := range checks {
 			str, err := check.function()
 			if err != nil {
-				errorPrint(fmt.Sprintf("Starting %s failed: %v", check.name, err))
+				errorPrint(fmt.Sprintf("Starting %s failed, %v", check.name, err))
 				allSuccess = false
 				break
 			} else {
-				successPrint(fmt.Sprintf("%s connected successfully, the connected address is: %s", check.name, str))
+				successPrint(fmt.Sprintf("%s connected successfully, %s", check.name, str))
 			}
 		}
 
@@ -147,7 +147,7 @@ func checkMongo() (string, error) {
 	uri := getEnv("MONGO_URI", buildMongoURI())
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-	str := "addr:" + uri
+	str := "ths addr is:" + strings.Join(config.Config.Mongo.Address, ",")
 	if err != nil {
 		return "", errs.Wrap(err, str)
 	}
@@ -207,7 +207,7 @@ func checkMinio() (string, error) {
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
 		Secure: secure,
 	})
-	str := "addr:" + u.Host
+	str := "the addr is:" + u.Host
 	if err != nil {
 		return "", errs.Wrap(err, str)
 	}
@@ -261,7 +261,7 @@ func checkRedis() (string, error) {
 
 	// Ping Redis to check connectivity
 	_, err := redisClient.Ping(context.Background()).Result()
-	str := "address:" + strings.Join(redisAddresses, ",")
+	str := "the addr is:" + strings.Join(redisAddresses, ",")
 	if err != nil {
 		return "", errs.Wrap(err, str)
 	}
@@ -281,7 +281,7 @@ func checkZookeeper() (string, error) {
 	zookeeperAddresses := strings.Split(address, ",")
 
 	// Connect to Zookeeper
-	str := "addr:" + address
+	str := "the addr is:" + address
 	c, _, err := zk.Connect(zookeeperAddresses, time.Second) // Adjust the timeout as necessary
 	if err != nil {
 		return "", errs.Wrap(err, str)
@@ -325,7 +325,7 @@ func checkKafka() (string, error) {
 	// kafka.SetupTLSConfig(cfg)
 
 	// Create Kafka client
-	str := "addr:" + address
+	str := "the addr is:" + address
 	kafkaClient, err := sarama.NewClient(kafkaAddresses, cfg)
 	if err != nil {
 		return "", errs.Wrap(err, str)
