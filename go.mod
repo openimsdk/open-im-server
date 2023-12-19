@@ -5,7 +5,7 @@ go 1.19
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/OpenIMSDK/protocol v0.0.31
-	github.com/OpenIMSDK/tools v0.0.20
+	github.com/OpenIMSDK/tools v0.0.21
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/dtm-labs/rockscache v0.1.1
 	github.com/gin-gonic/gin v1.9.1
@@ -38,6 +38,7 @@ require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/redis/go-redis/v9 v9.2.1
+	github.com/stathat/consistent v1.0.0
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.45
 	go.uber.org/automaxprocs v1.5.3
 	golang.org/x/sync v0.4.0
@@ -141,6 +142,7 @@ require (
 	gopkg.in/src-d/go-billy.v4 v4.3.2 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gorm.io/gorm v1.23.8 // indirect
+	stathat.com/c/consistent v1.0.0 // indirect
 )
 
 require (

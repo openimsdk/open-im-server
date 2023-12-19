@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/stathat/consistent"
 	"os"
 	"strconv"
 	"strings"
@@ -37,19 +38,25 @@ func NewDiscoveryRegister(envType string) (discoveryregistry.SvcDiscoveryRegistr
 }
 
 type K8sDR struct {
-	options         []grpc.DialOption
-	rpcRegisterAddr string
+	options               []grpc.DialOption
+	rpcRegisterAddr       string
+	gatewayHostConsistent *consistent.Consistent
 }
 
 func NewK8sDiscoveryRegister() (discoveryregistry.SvcDiscoveryRegistry, error) {
-	return &K8sDR{}, nil
+	gatewayConsistent := consistent.New()
+	gatewayHosts := getMsgGatewayHost(context.Background())
+	for _, v := range gatewayHosts {
+		gatewayConsistent.Add(v)
+	}
+	return &K8sDR{gatewayHostConsistent: gatewayConsistent}, nil
 }
 
 func (cli *K8sDR) Register(serviceName, host string, port int, opts ...grpc.DialOption) error {
 	if serviceName != config.Config.RpcRegisterName.OpenImMessageGatewayName {
 		cli.rpcRegisterAddr = serviceName
 	} else {
-		cli.rpcRegisterAddr = cli.getSelfHost(context.Background())
+		cli.rpcRegisterAddr = getSelfHost(context.Background())
 	}
 
 	return nil
@@ -71,7 +78,14 @@ func (cli *K8sDR) GetConfFromRegistry(key string) ([]byte, error) {
 
 	return nil, nil
 }
-func (cli *K8sDR) getSelfHost(ctx context.Context) string {
+func (cli *K8sDR) GetUserIdHashGatewayHost(ctx context.Context, userId string) (string, error) {
+	host, err := cli.gatewayHostConsistent.Get(userId)
+	if err != nil {
+		log.ZError(ctx, "GetUserIdHashGatewayHost error", err)
+	}
+	return host, err
+}
+func getSelfHost(ctx context.Context) string {
 	port := 88
 	instance := "openimserver"
 	selfPodName := os.Getenv("MY_POD_NAME")
@@ -92,7 +106,7 @@ func (cli *K8sDR) getSelfHost(ctx context.Context) string {
 }
 
 // like openimserver-openim-msggateway-0.openimserver-openim-msggateway-headless.openim-lin.svc.cluster.local:88
-func (cli *K8sDR) getMsgGatewayHost(ctx context.Context) []string {
+func getMsgGatewayHost(ctx context.Context) []string {
 	port := 88
 	instance := "openimserver"
 	selfPodName := os.Getenv("MY_POD_NAME")
@@ -122,7 +136,7 @@ func (cli *K8sDR) GetConns(ctx context.Context, serviceName string, opts ...grpc
 		return []*grpc.ClientConn{conn}, err
 	} else {
 		var ret []*grpc.ClientConn
-		gatewayHosts := cli.getMsgGatewayHost(ctx)
+		gatewayHosts := getMsgGatewayHost(ctx)
 		for _, host := range gatewayHosts {
 			conn, err := grpc.DialContext(ctx, host, append(cli.options, opts...)...)
 			if err != nil {
@@ -138,6 +152,7 @@ func (cli *K8sDR) GetConn(ctx context.Context, serviceName string, opts ...grpc.
 
 	return grpc.DialContext(ctx, serviceName, append(cli.options, opts...)...)
 }
+
 func (cli *K8sDR) GetSelfConnTarget() string {
 
 	return cli.rpcRegisterAddr
