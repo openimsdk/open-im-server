@@ -436,35 +436,40 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 	}
 	return resp, nil
 }
-func (s *friendServer) PinFriends(
+func (s *friendServer) UpdateFriends(
 	ctx context.Context,
-	req *pbfriend.PinFriendsReq,
-) (*pbfriend.PinFriendsResp, error) {
+	req *pbfriend.UpdateFriendsReq,
+) (*pbfriend.UpdateFriendsResp, error) {
 	if len(req.FriendUserIDs) == 0 {
 		return nil, errs.ErrArgs.Wrap("friendIDList is empty")
 	}
 	if utils.Duplicate(req.FriendUserIDs) {
 		return nil, errs.ErrArgs.Wrap("friendIDList repeated")
 	}
-	var isPinned bool
-	if req.IsPinned != nil {
-		isPinned = req.IsPinned.Value
-	} else {
-		return nil, errs.ErrArgs.Wrap("isPinned is nil")
-	}
-	//check whther in friend list
+
 	_, err := s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	//set friendslist friend pin status to isPinned
 	for _, friendID := range req.FriendUserIDs {
-		if err := s.friendDatabase.UpdateFriendPinStatus(ctx, req.OwnerUserID, friendID, isPinned); err != nil {
-			return nil, err
+		if req.IsPinned != nil {
+			if err := s.friendDatabase.UpdateFriendPinStatus(ctx, req.OwnerUserID, friendID, req.IsPinned.Value); err != nil {
+				return nil, err
+			}
+		}
+		if req.Remark != nil {
+			if err := s.friendDatabase.UpdateFriendRemark(ctx, req.OwnerUserID, friendID, req.Remark.Value); err != nil {
+				return nil, err
+			}
+		}
+		if req.Ex != nil {
+			if err := s.friendDatabase.UpdateFriendEx(ctx, req.OwnerUserID, friendID, req.Ex.Value); err != nil {
+				return nil, err
+			}
 		}
 	}
 
-	resp := &pbfriend.PinFriendsResp{}
+	resp := &pbfriend.UpdateFriendsResp{}
 	return resp, nil
 }

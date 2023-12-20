@@ -155,4 +155,7 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
 
-replace github.com/OpenIMSDK/protocol v0.0.36 => github.com/AndrewZuo01/protocol v0.0.0-20231219031520-648989b91fca
+replace github.com/OpenIMSDK/protocol v0.0.36 => github.com/AndrewZuo01/protocol v0.0.0-20231220081029-2bda660f0e88
+
+
+
