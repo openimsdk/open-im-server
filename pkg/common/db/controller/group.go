@@ -205,7 +205,7 @@ func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string, delete
 			if err != nil {
 				return err
 			}
-			if err := g.groupMemberDB.Delete(ctx, groupID, nil); err != nil {
+			if err := g.groupMemberDB.Delete(ctx, groupID, userIDs); err != nil {
 				return err
 			}
 			c = c.DelJoinedGroupID(userIDs...).
