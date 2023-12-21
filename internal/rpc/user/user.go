@@ -148,11 +148,11 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 		return nil, err
 	}
 
-	if err := CallbackBeforeUpdateUserInfoEx(ctx, req); err != nil {
+	if err = CallbackBeforeUpdateUserInfoEx(ctx, req); err != nil {
 		return nil, err
 	}
 	data := convert.UserPb2DBMapEx(req.UserInfo)
-	if err := s.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
+	if err = s.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
 	_ = s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
