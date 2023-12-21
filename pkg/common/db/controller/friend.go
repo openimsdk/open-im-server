@@ -82,6 +82,7 @@ type FriendDatabase interface {
 
 	// UpdateFriendEx updates the 'ex' field for a friend
 	UpdateFriendEx(ctx context.Context, ownerUserID string, friendUserID string, ex string) (err error)
+
 }
 
 type friendDatabase struct {
