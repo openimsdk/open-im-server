@@ -142,6 +142,7 @@ require (
 	gopkg.in/src-d/go-billy.v4 v4.3.2 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gorm.io/gorm v1.23.8 // indirect
+	stathat.com/c/consistent v1.0.0 // indirect
 )
 
 require (
