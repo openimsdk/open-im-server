@@ -104,18 +104,18 @@ Docker deployment offers a slightly more intricate template. Within the [openim-
 Configuration file modifications can be made by specifying corresponding environment variables, for instance:
 
 ```bash
-export CHAT_BRANCH="main"   
-export SERVER_BRANCH="main" 
+export CHAT_IMAGE_VERSION="main"   
+export SERVER_IMAGE_VERSION="main" 
 ```
 
 These variables are stored within the [`environment.sh`](https://github.com/OpenIMSDK/openim-docker/blob/main/scripts/install/environment.sh) configuration:
 
 ```bash
-readonly CHAT_BRANCH=${CHAT_BRANCH:-'main'}
-readonly SERVER_BRANCH=${SERVER_BRANCH:-'main'}
+readonly CHAT_IMAGE_VERSION=${CHAT_IMAGE_VERSION:-'main'}
+readonly SERVER_IMAGE_VERSION=${SERVER_IMAGE_VERSION:-'main'}
 ```
 
-Setting a variable, e.g., `export CHAT_BRANCH="release-v1.3"`, will prioritize `CHAT_BRANCH="release-v1.3"` as the variable value. Ultimately, the chosen image version is determined, and rendering is achieved through `make init` (or `./scripts/init-config.sh`).
+Setting a variable, e.g., `export CHAT_IMAGE_VERSION="release-v1.3"`, will prioritize `CHAT_IMAGE_VERSION="release-v1.3"` as the variable value. Ultimately, the chosen image version is determined, and rendering is achieved through `make init` (or `./scripts/init-config.sh`).
 
 > Note: Direct modifications to the `config.yaml` file are also permissible without utilizing `make init`.
 

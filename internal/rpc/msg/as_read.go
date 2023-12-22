@@ -16,16 +16,18 @@ package msg
 
 import (
 	"context"
+
 	utils2 "github.com/OpenIMSDK/tools/utils"
 
 	"github.com/redis/go-redis/v9"
 
-	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+
+	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 )
 
 func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *msg.GetConversationsHasReadAndMaxSeqReq) (resp *msg.GetConversationsHasReadAndMaxSeqResp, err error) {
@@ -173,7 +175,7 @@ func (m *msgServer) MarkConversationAsRead(
 			m.conversationAndGetRecvID(conversation, req.UserID), seqs, hasReadSeq); err != nil {
 			return nil, err
 		}
-		
+
 	} else if conversation.ConversationType == constant.SuperGroupChatType ||
 		conversation.ConversationType == constant.NotificationChatType {
 		if req.HasReadSeq > hasReadSeq {

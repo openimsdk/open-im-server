@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package version
 
 // Base version information.
@@ -15,7 +29,7 @@ package version
 // When releasing a new Kubernetes version, this file is updated by
 // build/mark_new_version.sh to reflect the new version, and then a
 // git annotated tag (using format vX.Y where X == Major version and Y
-// == Minor version) is created to point to the commit that updates
+// == Minor version) is created to point to the commit that updates.
 var (
 	// TODO: Deprecate gitMajor and gitMinor, use only gitVersion
 	// instead. First step in deprecation, keep the fields but make

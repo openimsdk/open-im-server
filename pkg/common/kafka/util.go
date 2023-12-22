@@ -15,6 +15,8 @@
 package kafka
 
 import (
+	"os"
+
 	"github.com/IBM/sarama"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -32,4 +34,13 @@ func SetupTLSConfig(cfg *sarama.Config) {
 			[]byte(config.Config.Kafka.TLS.ClientKeyPwd),
 		)
 	}
+}
+
+// getEnvOrConfig returns the value of the environment variable if it exists,
+// otherwise, it returns the value from the configuration file.
+func getEnvOrConfig(envName string, configValue string) string {
+	if value, exists := os.LookupEnv(envName); exists {
+		return value
+	}
+	return configValue
 }

@@ -16,6 +16,7 @@ package relation
 
 import (
 	"context"
+	"github.com/OpenIMSDK/protocol/user"
 	"time"
 
 	"github.com/OpenIMSDK/tools/pagination"
@@ -60,4 +61,9 @@ type UserModelInterface interface {
 	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
 	// 获取范围内用户增量
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
+	//CRUD user command
+	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
+	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error
+	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
+	GetUserCommand(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error)
 }

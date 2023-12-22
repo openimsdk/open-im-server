@@ -56,22 +56,6 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
-func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
-	return nil, errs.ErrInternalServer.Wrap("not implemented")
-}
-
-func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
-	return nil, errs.ErrInternalServer.Wrap("not implemented")
-}
-
-func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.ProcessUserCommandDeleteReq) (*pbuser.ProcessUserCommandDeleteResp, error) {
-	return nil, errs.ErrInternalServer.Wrap("not implemented")
-}
-
-func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
-	return nil, errs.ErrInternalServer.Wrap("not implemented")
-}
-
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
@@ -349,4 +333,60 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 		return nil, err
 	}
 	return &pbuser.GetSubscribeUsersStatusResp{StatusList: onlineStatusList}, nil
+}
+
+// ProcessUserCommandAdd user general function add
+func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
+	// Assuming you have a method in s.UserDatabase to add a user command
+	err := s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbuser.ProcessUserCommandAddResp{}, nil
+}
+
+// ProcessUserCommandDelete user general function delete
+func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.ProcessUserCommandDeleteReq) (*pbuser.ProcessUserCommandDeleteResp, error) {
+	// Assuming you have a method in s.UserDatabase to delete a user command
+	err := s.UserDatabase.DeleteUserCommand(ctx, req.UserID, req.Type, req.Uuid)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbuser.ProcessUserCommandDeleteResp{}, nil
+}
+
+// ProcessUserCommandUpdate user general function update
+func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
+	// Assuming you have a method in s.UserDatabase to update a user command
+	err := s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbuser.ProcessUserCommandUpdateResp{}, nil
+}
+
+func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
+	// Fetch user commands from the database
+	commands, err := s.UserDatabase.GetUserCommands(ctx, req.UserID, req.Type)
+	if err != nil {
+		return nil, err
+	}
+
+	// Initialize commandInfoSlice as an empty slice
+	commandInfoSlice := make([]*pbuser.CommandInfoResp, 0, len(commands))
+
+	for _, command := range commands {
+		// No need to use index since command is already a pointer
+		commandInfoSlice = append(commandInfoSlice, &pbuser.CommandInfoResp{
+			Uuid:       command.Uuid,
+			Value:      command.Value,
+			CreateTime: command.CreateTime,
+		})
+	}
+
+	// Return the response with the slice
+	return &pbuser.ProcessUserCommandGetResp{KVArray: commandInfoSlice}, nil
 }
