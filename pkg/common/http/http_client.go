@@ -112,7 +112,6 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 	//v.Set(constant.CallbackCommand, command)
 	//url = url + "/" + v.Encode()
 	url = url + "/" + command
-
 	b, err := Post(ctx, url, nil, input, callbackConfig.CallbackTimeOut)
 	if err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
@@ -121,6 +120,7 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 		}
 		return errs.ErrNetwork.Wrap(err.Error())
 	}
+	defer log.ZDebug(ctx, "callback", "data", string(b))
 
 	if err = json.Unmarshal(b, output); err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {

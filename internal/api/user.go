@@ -15,8 +15,6 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msggateway"
 	"github.com/OpenIMSDK/protocol/user"
@@ -24,6 +22,7 @@ import (
 	"github.com/OpenIMSDK/tools/apiresp"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/gin-gonic/gin"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -218,4 +217,16 @@ func (u *UserApi) ProcessUserCommandUpdate(c *gin.Context) {
 // ProcessUserCommandGet user general function get
 func (u *UserApi) ProcessUserCommandGet(c *gin.Context) {
 	a2r.Call(user.UserClient.ProcessUserCommandGet, u.Client, c)
+}
+
+func (u *UserApi) AddNotificationAccount(c *gin.Context) {
+	a2r.Call(user.UserClient.AddNotificationAccount, u.Client, c)
+}
+
+func (u *UserApi) UpdateNotificationAccountInfo(c *gin.Context) {
+	a2r.Call(user.UserClient.UpdateNotificationAccountInfo, u.Client, c)
+}
+
+func (u *UserApi) SearchNotificationAccount(c *gin.Context) {
+	a2r.Call(user.UserClient.SearchNotificationAccount, u.Client, c)
 }

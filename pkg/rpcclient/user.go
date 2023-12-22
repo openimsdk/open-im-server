@@ -179,3 +179,10 @@ func (u *UserRpcClient) SetUserStatus(ctx context.Context, userID string, status
 	})
 	return err
 }
+
+func (u *UserRpcClient) GetNotificationByID(ctx context.Context, userID string) error {
+	_, err := u.Client.GetNotificationAccount(ctx, &user.GetNotificationAccountReq{
+		UserID: userID,
+	})
+	return err
+}
