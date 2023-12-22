@@ -19,8 +19,6 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 	"sync"
 
-	"github.com/OpenIMSDK/tools/utils"
-
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/constant"
