@@ -138,7 +138,7 @@ function openim::rpc::start() {
         done
     done
 
-    sleep 0.5
+    sleep 1
 
     openim::util::check_ports ${OPENIM_RPC_PORT_TARGETS[@]}
     # openim::util::check_ports ${OPENIM_RPC_PROM_PORT_TARGETS[@]}

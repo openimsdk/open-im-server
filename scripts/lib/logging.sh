@@ -17,10 +17,10 @@
 OPENIM_VERBOSE="${OPENIM_VERBOSE:-5}"
 
 # Enable logging by default. Set to false to disable.
-ENABLE_LOGGING=true
+ENABLE_LOGGING="${ENABLE_LOGGING:-true}"
 
 # If OPENIM_OUTPUT is not set, set it to the default value
-if [[ ! -v OPENIM_OUTPUT ]]; then
+if [ -z "${OPENIM_OUTPUT+x}" ]; then
     OPENIM_OUTPUT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../_output" && pwd -P)"
 fi
 

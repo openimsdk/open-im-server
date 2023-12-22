@@ -302,8 +302,12 @@ openim::util::check_ports() {
     # Iterate over each given port.
     for port in "$@"; do
         # Use the `ss` command to find process information related to the given port.
-        local info=$(ss -ltnp | grep ":$port" || true)
-        
+        if command -v ss > /dev/null 2>&1; then
+            info=$(ss -ltnp | grep ":$port" || true)
+        else
+            info=$(netstat -ltnp | grep ":$port" || true)
+        fi
+
         # If there's no process information, it means the process associated with the port is not running.
         if [[ -z $info ]]; then
             not_started+=($port)
@@ -364,6 +368,18 @@ openim::util::check_ports() {
 # openim::util::check_process_names nginx mysql redis
 # The function returns a status of 1 if any of the processes is not running.
 openim::util::check_process_names() {
+    # Function to get the port of a process
+    get_port() {
+        local pid=$1
+        if command -v ss > /dev/null 2>&1; then
+            # used ss comment
+            ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2
+        else
+            # used netstat comment replace ss
+            netstat -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | sed 's/.*://'
+        fi
+    }
+
     # Arrays to collect details of processes
     local not_started=()
     local started=()
@@ -382,7 +398,7 @@ openim::util::check_process_names() {
             for pid in "${pids[@]}"; do
                 local command=$(ps -p $pid -o cmd=)
                 local start_time=$(ps -p $pid -o lstart=)
-                local port=$(ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2)
+                local port=$(get_port $pid)
 
                 # Check if port information was found for the PID
                 if [[ -z $port ]]; then
@@ -419,6 +435,7 @@ openim::util::check_process_names() {
         return 0
     fi
 }
+
 # openim::util::check_process_names docker-pr
 
 # The `openim::util::stop_services_on_ports` function stops services running on specified ports.

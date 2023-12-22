@@ -66,8 +66,8 @@ def "ENV_FILE" ""${OPENIM_ROOT}"/scripts/install/environment.sh"
 
 ###################### Docker compose ###################
 # OPENIM AND CHAT
-def "CHAT_BRANCH" "main"
-def "SERVER_BRANCH" "main"
+def "CHAT_IMAGE_VERSION" "main"
+def "SERVER_IMAGE_VERSION" "main"
 
 # Choose the appropriate image address, the default is GITHUB image,
 # you can choose docker hub, for Chinese users can choose Ali Cloud
@@ -139,7 +139,7 @@ readonly API_OPENIM_PORT=${API_OPENIM_PORT:-'10002'}
 def "API_LISTEN_IP" "0.0.0.0" # API的监听IP
 
 ###################### openim-chat 配置信息 ######################
-def "OPENIM_CHAT_DATA_DIR" "./openim-chat/${CHAT_BRANCH}"
+def "OPENIM_CHAT_DATA_DIR" "./openim-chat/${CHAT_IMAGE_VERSION}"
 def "OPENIM_CHAT_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # OpenIM服务地址
 def "OPENIM_CHAT_API_PORT" "10008"                   # OpenIM API端口
 def "CHAT_API_LISTEN_IP" ""                          # OpenIM API的监听IP

@@ -101,6 +101,16 @@ type thirdServer struct {
 	defaultExpire time.Duration
 }
 
+func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateFormDataReq) (*third.InitiateFormDataResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteFormDataReq) (*third.CompleteFormDataResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {
 	err = t.thirdDatabase.FcmUpdateToken(ctx, req.Account, int(req.PlatformID), req.FcmToken, req.ExpireTime)
 	if err != nil {

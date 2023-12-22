@@ -32,10 +32,13 @@ _output/
 deployments/charts/generated-configs/
 
 ### OpenIM Config ###
-config/config.yaml
-./config/config.yaml
 .env
-./.env
+config/config.yaml
+config/alertmanager.yml
+config/prometheus.yml
+config/email.tmpl
+config/notification.yaml
+config/instance-down-rules.yml
 
 ### OpenIM deploy ###
 deployments/openim-server/charts
@@ -389,7 +392,3 @@ Sessionx.vim
 # End of https://www.toptal.com/developers/gitignore/api/go,git,vim,tags,test,emacs,backup,jetbrains
 .idea
 dist/
-.env
-config/config.yaml
-config/alertmanager.yml
-config/prometheus.yml

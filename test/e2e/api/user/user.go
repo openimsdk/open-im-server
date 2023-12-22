@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package user
 
 import (
@@ -11,29 +25,29 @@ import (
 	"github.com/openimsdk/open-im-server/v3/test/e2e/framework/config"
 )
 
-// ForceLogoutRequest represents a request to force a user logout
+// ForceLogoutRequest represents a request to force a user logout.
 type ForceLogoutRequest struct {
 	PlatformID int    `json:"platformID"`
 	UserID     string `json:"userID"`
 }
 
-// CheckUserAccountRequest represents a request to check a user account
+// CheckUserAccountRequest represents a request to check a user account.
 type CheckUserAccountRequest struct {
 	CheckUserIDs []string `json:"checkUserIDs"`
 }
 
-// GetUsersRequest represents a request to get a list of users
+// GetUsersRequest represents a request to get a list of users.
 type GetUsersRequest struct {
 	Pagination Pagination `json:"pagination"`
 }
 
-// Pagination specifies the page number and number of items per page
+// Pagination specifies the page number and number of items per page.
 type Pagination struct {
 	PageNumber int `json:"pageNumber"`
 	ShowNumber int `json:"showNumber"`
 }
 
-// ForceLogout forces a user to log out
+// ForceLogout forces a user to log out.
 func ForceLogout(token, userID string, platformID int) error {
 
 	url := fmt.Sprintf("http://%s:%s/auth/force_logout", config.LoadConfig().APIHost, config.LoadConfig().APIPort)
@@ -45,7 +59,7 @@ func ForceLogout(token, userID string, platformID int) error {
 	return sendPostRequestWithToken(url, token, requestBody)
 }
 
-// CheckUserAccount checks if the user accounts exist
+// CheckUserAccount checks if the user accounts exist.
 func CheckUserAccount(token string, userIDs []string) error {
 
 	url := fmt.Sprintf("http://%s:%s/user/account_check", config.LoadConfig().APIHost, config.LoadConfig().APIPort)
@@ -56,7 +70,7 @@ func CheckUserAccount(token string, userIDs []string) error {
 	return sendPostRequestWithToken(url, token, requestBody)
 }
 
-// GetUsers retrieves a list of users with pagination
+// GetUsers retrieves a list of users with pagination.
 func GetUsers(token string, pageNumber, showNumber int) error {
 
 	url := fmt.Sprintf("http://%s:%s/user/account_check", config.LoadConfig().APIHost, config.LoadConfig().APIPort)
@@ -70,7 +84,7 @@ func GetUsers(token string, pageNumber, showNumber int) error {
 	return sendPostRequestWithToken(url, token, requestBody)
 }
 
-// sendPostRequestWithToken sends a POST request with a token in the header
+// sendPostRequestWithToken sends a POST request with a token in the header.
 func sendPostRequestWithToken(url, token string, body any) error {
 	reqBytes, err := json.Marshal(body)
 	if err != nil {
