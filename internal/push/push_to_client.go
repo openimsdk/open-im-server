@@ -151,16 +151,6 @@ func (p *Pusher) k8sOfflinePush2SuperGroup(ctx context.Context, groupID string, 
 		}
 	}
 	if len(needOfflinePushUserIDs) > 0 {
-		if msg.ContentType != constant.SignalingNotification {
-			notNotificationUserIDs, err := p.conversationLocalCache.GetRecvMsgNotNotifyUserIDs(ctx, groupID)
-			if err != nil {
-				return err
-			}
-
-			needOfflinePushUserIDs = utils.SliceSub(needOfflinePushUserIDs, notNotificationUserIDs)
-		}
-	}
-	if len(needOfflinePushUserIDs) > 0 {
 		var offlinePushUserIDs []string
 		err := callbackOfflinePush(ctx, needOfflinePushUserIDs, msg, &offlinePushUserIDs)
 		if err != nil {
@@ -170,20 +160,23 @@ func (p *Pusher) k8sOfflinePush2SuperGroup(ctx context.Context, groupID string, 
 		if len(offlinePushUserIDs) > 0 {
 			needOfflinePushUserIDs = offlinePushUserIDs
 		}
-		resp, err := p.conversationRpcClient.Client.GetConversationOfflinePushUserIDs(
-			ctx,
-			&conversation.GetConversationOfflinePushUserIDsReq{ConversationID: utils.GenGroupConversationID(groupID), UserIDs: needOfflinePushUserIDs},
-		)
-		if err != nil {
-			return err
-		}
-		if len(resp.UserIDs) > 0 {
-			err = p.offlinePushMsg(ctx, groupID, msg, resp.UserIDs)
+		if msg.ContentType != constant.SignalingNotification {
+			resp, err := p.conversationRpcClient.Client.GetConversationOfflinePushUserIDs(
+				ctx,
+				&conversation.GetConversationOfflinePushUserIDsReq{ConversationID: utils.GenGroupConversationID(groupID), UserIDs: needOfflinePushUserIDs},
+			)
 			if err != nil {
-				log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg)
 				return err
 			}
+			if len(resp.UserIDs) > 0 {
+				err = p.offlinePushMsg(ctx, groupID, msg, resp.UserIDs)
+				if err != nil {
+					log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg)
+					return err
+				}
+			}
 		}
+
 	}
 	return nil
 }
@@ -287,14 +280,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 		}
 
 		needOfflinePushUserIDs := utils.DifferenceString(onlineSuccessUserIDs, pushToUserIDs)
-		if msg.ContentType != constant.SignalingNotification {
-			notNotificationUserIDs, err := p.conversationLocalCache.GetRecvMsgNotNotifyUserIDs(ctx, groupID)
-			if err != nil {
-				return err
-			}
 
-			needOfflinePushUserIDs = utils.SliceSub(needOfflinePushUserIDs, notNotificationUserIDs)
-		}
 		// Use offline push messaging
 		if len(needOfflinePushUserIDs) > 0 {
 			var offlinePushUserIDs []string
@@ -306,24 +292,27 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			if len(offlinePushUserIDs) > 0 {
 				needOfflinePushUserIDs = offlinePushUserIDs
 			}
-			resp, err := p.conversationRpcClient.Client.GetConversationOfflinePushUserIDs(
-				ctx,
-				&conversation.GetConversationOfflinePushUserIDsReq{ConversationID: utils.GenGroupConversationID(groupID), UserIDs: needOfflinePushUserIDs},
-			)
-			if err != nil {
-				return err
-			}
-			if len(resp.UserIDs) > 0 {
-				err = p.offlinePushMsg(ctx, groupID, msg, resp.UserIDs)
+			if msg.ContentType != constant.SignalingNotification {
+				resp, err := p.conversationRpcClient.Client.GetConversationOfflinePushUserIDs(
+					ctx,
+					&conversation.GetConversationOfflinePushUserIDsReq{ConversationID: utils.GenGroupConversationID(groupID), UserIDs: needOfflinePushUserIDs},
+				)
 				if err != nil {
-					log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg)
 					return err
 				}
-				if _, err := p.GetConnsAndOnlinePush(ctx, msg, utils.IntersectString(resp.UserIDs, webAndPcBackgroundUserIDs)); err != nil {
-					log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg, "userIDs", utils.IntersectString(needOfflinePushUserIDs, webAndPcBackgroundUserIDs))
-					return err
+				if len(resp.UserIDs) > 0 {
+					err = p.offlinePushMsg(ctx, groupID, msg, resp.UserIDs)
+					if err != nil {
+						log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg)
+						return err
+					}
+					if _, err := p.GetConnsAndOnlinePush(ctx, msg, utils.IntersectString(resp.UserIDs, webAndPcBackgroundUserIDs)); err != nil {
+						log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg, "userIDs", utils.IntersectString(needOfflinePushUserIDs, webAndPcBackgroundUserIDs))
+						return err
+					}
 				}
 			}
+
 		}
 	}
 	return nil
