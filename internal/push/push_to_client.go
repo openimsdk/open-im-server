@@ -361,9 +361,11 @@ func (p *Pusher) k8sOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUs
 	}
 	wg.SetLimit(maxWorkers)
 	for conn, userIds := range usersConns {
+		tcon := conn
+		tuserIds := userIds
 		wg.Go(func() error {
-			input := &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: userIds}
-			msgClient := msggateway.NewMsgGatewayClient(conn)
+			input := &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: tuserIds}
+			msgClient := msggateway.NewMsgGatewayClient(tcon)
 			reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, input)
 			if err != nil {
 				return nil
