@@ -345,7 +345,7 @@ func (p *Pusher) k8sOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUs
 			usersHost[tHost] = []string{v}
 		}
 	}
-	log.ZDebug(ctx, "genUsers send hosts struct:", usersHost)
+	log.ZDebug(ctx, "genUsers send hosts struct:", "usersHost", usersHost)
 	var usersConns = make(map[*grpc.ClientConn][]string)
 	for host, userIds := range usersHost {
 		tconn, _ := p.discov.GetConn(ctx, host)
