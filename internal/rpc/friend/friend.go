@@ -52,7 +52,12 @@ type friendServer struct {
 	RegisterCenter        registry.SvcDiscoveryRegistry
 }
 
-func (s *friendServer) PinFriends(ctx context.Context, req *pbfriend.PinFriendsReq) (*pbfriend.PinFriendsResp, error) {
+func (s *friendServer) UpdateFriends(ctx context.Context, req *pbfriend.UpdateFriendsReq) (*pbfriend.UpdateFriendsResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *friendServer) PinFriends(ctx context.Context, req *pbfriend.UpdateFriendsReq) (*pbfriend.UpdateFriendsResp, error) {
 	return nil, errs.ErrInternalServer.Wrap("not implemented")
 }
 
