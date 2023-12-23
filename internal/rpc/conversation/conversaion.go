@@ -93,7 +93,7 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 	log.ZDebug(ctx, "GetConversationList", "seqs", req, "userID", req.UserID)
 	var conversationIDs []string
 	if len(req.ConversationIDs) == 0 {
-		conversationIDs, err = m.Conversation.GetConversationIDs(ctx, req.UserID)
+		conversationIDs, err = m.conversationDatabase.GetConversationIDs(ctx, req.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -101,36 +101,43 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 		conversationIDs = req.ConversationIDs
 	}
 	log.ZDebug(ctx, "GetConversationList1", "seqs", req, "userID", req.UserID)
-	conversations, err := m.Conversation.GetConversations(ctx, req.UserID, conversationIDs)
+
+	conversations, err := m.conversationDatabase.FindConversations(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
 	log.ZDebug(ctx, "GetConversationList2", "seqs", req, "userID", req.UserID)
+
 	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
 	log.ZDebug(ctx, "GetConversationList3", "seqs", req, "userID", req.UserID)
+
 	chatLogs, err := m.MsgDatabase.FindOneByDocIDs(ctx, conversationIDs, maxSeqs)
 	if err != nil {
 		return nil, err
 	}
 	log.ZDebug(ctx, "GetConversationList4", "seqs", req, "userID", req.UserID)
+
 	conversationMsg, err := m.getConversationInfo(ctx, chatLogs, req.UserID)
 	if err != nil {
 		return nil, err
 	}
 	log.ZDebug(ctx, "GetConversationList5", "seqs", req, "userID", req.UserID)
+
 	hasReadSeqs, err := m.MsgDatabase.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
 	log.ZDebug(ctx, "GetConversationList6", "seqs", req, "userID", req.UserID)
+
 	conversation_unreadCount := make(map[string]int64)
 	for conversationID, maxSeq := range maxSeqs {
 		conversation_unreadCount[conversationID] = maxSeq - hasReadSeqs[conversationID]
 	}
 	log.ZDebug(ctx, "GetConversationList7", "seqs", req, "userID", req.UserID)
+
 	conversation_isPinkTime := make(map[int64]string)
 	conversation_notPinkTime := make(map[int64]string)
 	for _, v := range conversations {
@@ -148,6 +155,7 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 		ConversationElems: []*pbconversation.ConversationElem{},
 	}
 	log.ZDebug(ctx, "GetConversationList8", "seqs", req, "userID", req.UserID)
+
 	m.conversationSort(conversation_isPinkTime, resp, conversation_unreadCount, conversationMsg)
 	m.conversationSort(conversation_notPinkTime, resp, conversation_unreadCount, conversationMsg)
 	return resp, nil
