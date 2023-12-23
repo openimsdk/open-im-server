@@ -154,8 +154,8 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 	resp = &pbconversation.GetConversationListResp{
 		ConversationElems: []*pbconversation.ConversationElem{},
 	}
-	log.ZDebug(ctx, "GetConversationList7.1", "conversation_isPinkTime", conversation_isPinkTime)
-	log.ZDebug(ctx, "GetConversationList7.2", "conversation_notPinkTime", conversation_notPinkTime)
+	log.ZDebug(ctx, "GetConversationList7.1", "seqs", req, "conversation_isPinkTime", conversation_isPinkTime)
+	log.ZDebug(ctx, "GetConversationList7.2", "seqs", req, "conversation_notPinkTime", conversation_notPinkTime)
 	m.conversationSort(conversation_isPinkTime, resp, conversation_unreadCount, conversationMsg)
 	m.conversationSort(conversation_notPinkTime, resp, conversation_unreadCount, conversationMsg)
 	log.ZDebug(ctx, "GetConversationList8", "seqs", req, "resp", resp)
