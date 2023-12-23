@@ -100,43 +100,36 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 	} else {
 		conversationIDs = req.ConversationIDs
 	}
-	log.ZDebug(ctx, "GetConversationList1", "seqs", req, "conversationIDs", conversationIDs)
 
 	conversations, err := m.conversationDatabase.FindConversations(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "GetConversationList2", "seqs", req, "conversations", conversations)
 
 	maxSeqs, err := m.msgRpcClient.GetMaxSeqs(ctx, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "GetConversationList3", "seqs", req, "maxSeqs", maxSeqs)
 
 	chatLogs, err := m.msgRpcClient.GetMsgByConversationIDs(ctx, conversationIDs, maxSeqs)
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "GetConversationList4", "seqs", req, "chatLogs", chatLogs)
 
 	conversationMsg, err := m.getConversationInfo(ctx, chatLogs, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "GetConversationList5", "seqs", req, "conversationMsg", conversationMsg)
 
 	hasReadSeqs, err := m.msgRpcClient.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "GetConversationList6", "seqs", req, "hasReadSeqs", hasReadSeqs)
 
 	conversation_unreadCount := make(map[string]int64)
 	for conversationID, maxSeq := range maxSeqs {
 		conversation_unreadCount[conversationID] = maxSeq - hasReadSeqs[conversationID]
 	}
-	log.ZDebug(ctx, "GetConversationList7", "seqs", req, "conversation_unreadCount", conversation_unreadCount)
 
 	conversation_isPinkTime := make(map[int64]string)
 	conversation_notPinkTime := make(map[int64]string)
@@ -154,12 +147,9 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 	resp = &pbconversation.GetConversationListResp{
 		ConversationElems: []*pbconversation.ConversationElem{},
 	}
-	log.ZDebug(ctx, "GetConversationList7.1", "seqs", req, "conversation_isPinkTime", conversation_isPinkTime)
-	log.ZDebug(ctx, "GetConversationList7.2", "seqs", req, "conversation_notPinkTime", conversation_notPinkTime)
+
 	m.conversationSort(conversation_isPinkTime, resp, conversation_unreadCount, conversationMsg)
-	log.ZDebug(ctx, "GetConversationList8.0", "seqs", req, "resp", resp)
 	m.conversationSort(conversation_notPinkTime, resp, conversation_unreadCount, conversationMsg)
-	log.ZDebug(ctx, "GetConversationList8", "seqs", req, "resp", resp)
 	return resp, nil
 }
 

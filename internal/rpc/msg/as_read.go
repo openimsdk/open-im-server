@@ -16,10 +16,8 @@ package msg
 
 import (
 	"context"
-	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
-	"sort"
-
 	utils2 "github.com/OpenIMSDK/tools/utils"
+	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 
 	"github.com/redis/go-redis/v9"
 
@@ -68,69 +66,6 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 			resp.Seqs[conversarionID].MaxSeq = v
 		}
 	}
-	return resp, nil
-}
-
-func (m *msgServer) GetConversationList(ctx context.Context, req *msg.GetConversationListReq) (resp *msg.GetConversationListResp, err error) {
-	var conversationIDs []string
-	if len(req.ConversationIDs) == 0 {
-		conversationIDs, err = m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		conversationIDs = req.ConversationIDs
-	}
-
-	conversations, err := m.Conversation.GetConversations(ctx, req.UserID, conversationIDs)
-	if err != nil {
-		return nil, err
-	}
-
-	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
-	if err != nil {
-		return nil, err
-	}
-
-	chatLogs, err := m.MsgDatabase.FindOneByDocIDs(ctx, conversationIDs, maxSeqs)
-	if err != nil {
-		return nil, err
-	}
-
-	conversationMsg, err := m.getConversationInfo(ctx, chatLogs, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-
-	hasReadSeqs, err := m.MsgDatabase.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
-	if err != nil {
-		return nil, err
-	}
-
-	conversation_unreadCount := make(map[string]int64)
-	for conversationID, maxSeq := range maxSeqs {
-		conversation_unreadCount[conversationID] = maxSeq - hasReadSeqs[conversationID]
-	}
-
-	conversation_isPinkTime := make(map[int64]string)
-	conversation_notPinkTime := make(map[int64]string)
-	for _, v := range conversations {
-		conversationID := v.ConversationID
-		time := conversationMsg[conversationID].MsgInfo.LatestMsgRecvTime
-		conversationMsg[conversationID].RecvMsgOpt = v.RecvMsgOpt
-		if v.IsPinned {
-			conversationMsg[conversationID].IsPinned = v.IsPinned
-			conversation_isPinkTime[time] = conversationID
-			continue
-		}
-		conversation_notPinkTime[time] = conversationID
-	}
-	resp = &msg.GetConversationListResp{
-		ConversationElems: []*msg.ConversationElem{},
-	}
-
-	m.conversationSort(conversation_isPinkTime, resp, conversation_unreadCount, conversationMsg)
-	m.conversationSort(conversation_notPinkTime, resp, conversation_unreadCount, conversationMsg)
 	return resp, nil
 }
 
@@ -287,103 +222,4 @@ func (m *msgServer) sendMarkAsReadNotification(
 		log.ZWarn(ctx, "send has read Receipt err", err)
 	}
 	return nil
-}
-
-func (m *msgServer) conversationSort(
-	conversations map[int64]string,
-	resp *msg.GetConversationListResp,
-	conversation_unreadCount map[string]int64,
-	conversationMsg map[string]*msg.ConversationElem,
-) {
-	keys := []int64{}
-	for key := range conversations {
-		keys = append(keys, key)
-	}
-
-	sort.Slice(keys[:], func(i, j int) bool {
-		return keys[i] > keys[j]
-	})
-	index := 0
-
-	cons := make([]*msg.ConversationElem, len(conversations))
-	for _, v := range keys {
-		conversationID := conversations[v]
-		conversationElem := conversationMsg[conversationID]
-		conversationElem.UnreadCount = conversation_unreadCount[conversationID]
-		cons[index] = conversationElem
-		index++
-	}
-	resp.ConversationElems = append(resp.ConversationElems, cons...)
-}
-
-func (m *msgServer) getConversationInfo(
-	ctx context.Context,
-	chatLogs map[string]*sdkws.MsgData,
-	userID string) (map[string]*msg.ConversationElem, error) {
-	var (
-		sendIDs         []string
-		groupIDs        []string
-		sendMap         = make(map[string]*sdkws.UserInfo)
-		groupMap        = make(map[string]*sdkws.GroupInfo)
-		conversationMsg = make(map[string]*msg.ConversationElem)
-	)
-	for _, chatLog := range chatLogs {
-		switch chatLog.SessionType {
-		case constant.SingleChatType:
-			if chatLog.SendID == userID {
-				sendIDs = append(sendIDs, chatLog.RecvID)
-			}
-			sendIDs = append(sendIDs, chatLog.SendID)
-		case constant.GroupChatType, constant.SuperGroupChatType:
-			groupIDs = append(groupIDs, chatLog.GroupID)
-			sendIDs = append(sendIDs, chatLog.SendID)
-		}
-	}
-	if len(sendIDs) != 0 {
-		sendInfos, err := m.User.GetUsersInfo(ctx, sendIDs)
-		if err != nil {
-			return nil, err
-		}
-		for _, sendInfo := range sendInfos {
-			sendMap[sendInfo.UserID] = sendInfo
-		}
-	}
-	if len(groupIDs) != 0 {
-		groupInfos, err := m.Group.GetGroupInfos(ctx, groupIDs, false)
-		if err != nil {
-			return nil, err
-		}
-		for _, groupInfo := range groupInfos {
-			groupMap[groupInfo.GroupID] = groupInfo
-		}
-	}
-	for conversationID, chatLog := range chatLogs {
-		pbchatLog := &msg.ConversationElem{}
-		msgInfo := &msg.MsgInfo{}
-		if err := utils2.CopyStructFields(msgInfo, chatLog); err != nil {
-			return nil, err
-		}
-		switch chatLog.SessionType {
-		case constant.SingleChatType:
-			if chatLog.SendID == userID {
-				msgInfo.FaceURL = sendMap[chatLog.RecvID].FaceURL
-				msgInfo.SenderName = sendMap[chatLog.RecvID].Nickname
-				break
-			}
-			msgInfo.FaceURL = sendMap[chatLog.SendID].FaceURL
-			msgInfo.SenderName = sendMap[chatLog.SendID].Nickname
-		case constant.GroupChatType, constant.SuperGroupChatType:
-			msgInfo.GroupName = groupMap[chatLog.GroupID].GroupName
-			msgInfo.GroupFaceURL = groupMap[chatLog.GroupID].FaceURL
-			msgInfo.GroupMemberCount = groupMap[chatLog.GroupID].MemberCount
-			msgInfo.GroupID = chatLog.GroupID
-			msgInfo.GroupType = groupMap[chatLog.GroupID].GroupType
-			msgInfo.SenderName = sendMap[chatLog.SendID].Nickname
-		}
-		pbchatLog.ConversationID = conversationID
-		msgInfo.LatestMsgRecvTime = chatLog.SendTime
-		pbchatLog.MsgInfo = msgInfo
-		conversationMsg[conversationID] = pbchatLog
-	}
-	return conversationMsg, nil
 }
