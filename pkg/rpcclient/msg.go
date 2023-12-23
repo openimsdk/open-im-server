@@ -155,6 +155,29 @@ func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqRe
 	return resp, err
 }
 
+func (m *MessageRpcClient) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
+	resp, err := m.Client.GetMaxSeqs(ctx, &msg.GetMaxSeqsReq{
+		ConversationIDs: conversationIDs,
+	})
+	return resp.MaxSeqs, err
+}
+
+func (m *MessageRpcClient) GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
+	resp, err := m.Client.GetHasReadSeqs(ctx, &msg.GetHasReadSeqsReq{
+		UserID:          userID,
+		ConversationIDs: conversationIDs,
+	})
+	return resp.MaxSeqs, err
+}
+
+func (m *MessageRpcClient) GetMsgByConversationIDs(ctx context.Context, docIDs []string, seqs map[string]int64) (map[string]*sdkws.MsgData, error) {
+	resp, err := m.Client.GetMsgByConversationIDs(ctx, &msg.GetMsgByConversationIDsReq{
+		ConversationIDs: docIDs,
+		MaxSeqs:         seqs,
+	})
+	return resp.MsgDatas, err
+}
+
 func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
 	resp, err := m.Client.PullMessageBySeqs(ctx, req)
 	return resp, err

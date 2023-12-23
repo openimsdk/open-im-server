@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/localcache"
 	"sort"
 
 	"github.com/OpenIMSDK/tools/tx"
@@ -44,10 +43,8 @@ import (
 )
 
 type conversationServer struct {
-	Conversation                   *rpcclient.ConversationRpcClient
-	MsgDatabase                    controller.CommonMsgDatabase
+	MsgRpcClient                   *rpcclient.MessageRpcClient
 	User                           *rpcclient.UserRpcClient
-	ConversationLocalCache         *localcache.ConversationLocalCache
 	groupRpcClient                 *rpcclient.GroupRpcClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
@@ -100,43 +97,43 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 	} else {
 		conversationIDs = req.ConversationIDs
 	}
-	log.ZDebug(ctx, "GetConversationList1", "seqs", req, "userID", req.UserID)
+	log.ZDebug(ctx, "GetConversationList1", "seqs", req, "conversationIDs", conversationIDs)
 
 	conversations, err := m.conversationDatabase.FindConversations(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "GetConversationList2", "seqs", req, "userID", req.UserID)
+	log.ZDebug(ctx, "GetConversationList2", "seqs", req, "conversations", conversations)
 
-	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
+	maxSeqs, err := m.MsgRpcClient.GetMaxSeqs(ctx, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "GetConversationList3", "seqs", req, "userID", req.UserID)
+	log.ZDebug(ctx, "GetConversationList3", "seqs", req, "maxSeqs", maxSeqs)
 
-	chatLogs, err := m.MsgDatabase.FindOneByDocIDs(ctx, conversationIDs, maxSeqs)
+	chatLogs, err := m.MsgRpcClient.GetMsgByConversationIDs(ctx, conversationIDs, maxSeqs)
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "GetConversationList4", "seqs", req, "userID", req.UserID)
+	log.ZDebug(ctx, "GetConversationList4", "seqs", req, "chatLogs", chatLogs)
 
 	conversationMsg, err := m.getConversationInfo(ctx, chatLogs, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "GetConversationList5", "seqs", req, "userID", req.UserID)
+	log.ZDebug(ctx, "GetConversationList5", "seqs", req, "conversationMsg", conversationMsg)
 
-	hasReadSeqs, err := m.MsgDatabase.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
+	hasReadSeqs, err := m.MsgRpcClient.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "GetConversationList6", "seqs", req, "userID", req.UserID)
+	log.ZDebug(ctx, "GetConversationList6", "seqs", req, "hasReadSeqs", hasReadSeqs)
 
 	conversation_unreadCount := make(map[string]int64)
 	for conversationID, maxSeq := range maxSeqs {
 		conversation_unreadCount[conversationID] = maxSeq - hasReadSeqs[conversationID]
 	}
-	log.ZDebug(ctx, "GetConversationList7", "seqs", req, "userID", req.UserID)
+	log.ZDebug(ctx, "GetConversationList7", "seqs", req, "conversation_unreadCount", conversation_unreadCount)
 
 	conversation_isPinkTime := make(map[int64]string)
 	conversation_notPinkTime := make(map[int64]string)
@@ -154,10 +151,10 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 	resp = &pbconversation.GetConversationListResp{
 		ConversationElems: []*pbconversation.ConversationElem{},
 	}
-	log.ZDebug(ctx, "GetConversationList8", "seqs", req, "userID", req.UserID)
 
 	m.conversationSort(conversation_isPinkTime, resp, conversation_unreadCount, conversationMsg)
 	m.conversationSort(conversation_notPinkTime, resp, conversation_unreadCount, conversationMsg)
+	log.ZDebug(ctx, "GetConversationList8", "seqs", req, "resp", resp)
 	return resp, nil
 }
 
