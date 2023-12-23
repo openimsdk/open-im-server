@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/log"
 
 	pbmsg "github.com/OpenIMSDK/protocol/msg"
 )
@@ -32,10 +33,12 @@ func (m *msgServer) GetConversationMaxSeq(
 }
 
 func (m *msgServer) GetMaxSeqs(ctx context.Context, req *pbmsg.GetMaxSeqsReq) (*pbmsg.SeqsInfoResp, error) {
+	log.ZDebug(ctx, "GetMaxSeqsServer", "seqs", req)
 	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, req.ConversationIDs)
 	if err != nil {
 		return nil, err
 	}
+	log.ZDebug(ctx, "GetMaxSeqsServer", "maxSeqs", maxSeqs)
 	return &pbmsg.SeqsInfoResp{MaxSeqs: maxSeqs}, nil
 }
 

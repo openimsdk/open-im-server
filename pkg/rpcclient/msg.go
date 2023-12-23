@@ -156,6 +156,7 @@ func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqRe
 }
 
 func (m *MessageRpcClient) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
+	log.ZDebug(ctx, "GetMaxSeqs", "seqs", "conversations", conversationIDs)
 	resp, err := m.Client.GetMaxSeqs(ctx, &msg.GetMaxSeqsReq{
 		ConversationIDs: conversationIDs,
 	})
