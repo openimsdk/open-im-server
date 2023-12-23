@@ -43,8 +43,8 @@ import (
 )
 
 type conversationServer struct {
-	MsgRpcClient                   *rpcclient.MessageRpcClient
-	User                           *rpcclient.UserRpcClient
+	msgRpcClient                   *rpcclient.MessageRpcClient
+	user                           *rpcclient.UserRpcClient
 	groupRpcClient                 *rpcclient.GroupRpcClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
@@ -65,7 +65,10 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	}
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
+	userRpcClient := rpcclient.NewUserRpcClient(client)
 	pbconversation.RegisterConversationServer(server, &conversationServer{
+		msgRpcClient:                   &msgRpcClient,
+		user:                           &userRpcClient,
 		conversationNotificationSender: notification.NewConversationNotificationSender(&msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewMongo(mongo.GetClient())),
@@ -105,13 +108,13 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 	}
 	log.ZDebug(ctx, "GetConversationList2", "seqs", req, "conversations", conversations)
 
-	maxSeqs, err := m.MsgRpcClient.GetMaxSeqs(ctx, conversationIDs)
+	maxSeqs, err := m.msgRpcClient.GetMaxSeqs(ctx, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
 	log.ZDebug(ctx, "GetConversationList3", "seqs", req, "maxSeqs", maxSeqs)
 
-	chatLogs, err := m.MsgRpcClient.GetMsgByConversationIDs(ctx, conversationIDs, maxSeqs)
+	chatLogs, err := m.msgRpcClient.GetMsgByConversationIDs(ctx, conversationIDs, maxSeqs)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +126,7 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 	}
 	log.ZDebug(ctx, "GetConversationList5", "seqs", req, "conversationMsg", conversationMsg)
 
-	hasReadSeqs, err := m.MsgRpcClient.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
+	hasReadSeqs, err := m.msgRpcClient.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -476,7 +479,7 @@ func (c *conversationServer) getConversationInfo(
 		}
 	}
 	if len(sendIDs) != 0 {
-		sendInfos, err := c.User.GetUsersInfo(ctx, sendIDs)
+		sendInfos, err := c.user.GetUsersInfo(ctx, sendIDs)
 		if err != nil {
 			return nil, err
 		}
