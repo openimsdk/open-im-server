@@ -192,9 +192,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	if req.RecvID == "" {
-		apiresp.GinError(c, errs.ErrArgs.Wrap("recvId is empty"))
-	}
+
 	if !authverify.IsAppManagerUid(c) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
@@ -228,19 +226,14 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 	req := struct {
 		Key        string `json:"key"`
 		Data       string `json:"data"`
-		SendUserID string `json:"sendUserID"`
-		RecvUserID string `json:"recvUserID"`
+		SendUserID string `json:"sendUserID" binding:"required"`
+		RecvUserID string `json:"recvUserID" binding:"required"`
 	}{}
 	if err := c.BindJSON(&req); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	if req.SendUserID == "" {
-		apiresp.GinError(c, errs.ErrArgs.Wrap("sendUserID is empty"))
-	}
-	if req.RecvUserID == "" {
-		apiresp.GinError(c, errs.ErrArgs.Wrap("recvUserID is empty"))
-	}
+
 	if !authverify.IsAppManagerUid(c) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return

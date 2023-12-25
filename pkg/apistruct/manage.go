@@ -60,7 +60,7 @@ type SendMsg struct {
 // SendMsgReq extends SendMsg with the requirement of RecvID when SessionType indicates a one-on-one or notification chat.
 type SendMsgReq struct {
 	// RecvID uniquely identifies the receiver and is required for one-on-one or notification chat types.
-	RecvID string `json:"recvID" binding:"required_if" message:"recvID is required if sessionType is SingleChatType or NotificationChatType"`
+	RecvID string `json:"recvID" binding:"required_if" message:"recvID is required if sessionType is SingleChatType or NotificationChatType" binding:"required"`
 	SendMsg
 }
 

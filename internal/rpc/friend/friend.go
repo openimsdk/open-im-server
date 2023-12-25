@@ -436,10 +436,10 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 	}
 	return resp, nil
 }
-func (s *friendServer) PinFriends(
+func (s *friendServer) UpdateFriends(
 	ctx context.Context,
-	req *pbfriend.PinFriendsReq,
-) (*pbfriend.PinFriendsResp, error) {
+	req *pbfriend.UpdateFriendsReq) (
+	*pbfriend.UpdateFriendsResp, error) {
 	if len(req.FriendUserIDs) == 0 {
 		return nil, errs.ErrArgs.Wrap("friendIDList is empty")
 	}
@@ -465,6 +465,6 @@ func (s *friendServer) PinFriends(
 		}
 	}
 
-	resp := &pbfriend.PinFriendsResp{}
+	resp := &pbfriend.UpdateFriendsResp{}
 	return resp, nil
 }
