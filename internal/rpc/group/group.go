@@ -1171,7 +1171,6 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 		return nil, errs.ErrDismissedAlready.Wrap("group status is dismissed")
 	}
 	if err := s.db.DismissGroup(ctx, req.GroupID, req.DeleteMember); err != nil {
-		log.ZDebug(ctx, "debug", "???????????????????????????????", err)
 		return nil, err
 	}
 	if !req.DeleteMember {
