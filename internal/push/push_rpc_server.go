@@ -16,9 +16,8 @@ package push
 
 import (
 	"context"
-	"sync"
-
 	"github.com/OpenIMSDK/tools/utils"
+	"sync"
 
 	"google.golang.org/grpc"
 
