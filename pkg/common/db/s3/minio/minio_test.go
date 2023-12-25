@@ -1,9 +1,15 @@
 package minio
 
 import (
+	"bytes"
 	"context"
-	"github.com/minio/minio-go/v7"
+	"errors"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"path"
 	"testing"
 	"time"
 )
@@ -18,20 +24,56 @@ func TestName(t *testing.T) {
 		panic(err)
 	}
 	min := tmp.(*Minio)
-	cli := min.core.Client
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
-	policy := minio.NewPostPolicy()
-	_ = policy.SetExpires(time.Now().Add(time.Hour))
-	_ = policy.SetKey("test.txt")
-	_ = policy.SetBucket(config.Config.Object.Minio.Bucket)
-	policy.SetContentType("text/plain")
-	u, fd, err := cli.PresignedPostPolicy(ctx, policy)
+
+	text := []byte("hello world!")
+	name := "posttest.txt"
+
+	u, err := min.FormData(context.Background(), "posttest.txt", int64(len(text)), "image/png", time.Second*1000)
 	if err != nil {
 		panic(err)
 	}
-	t.Log(u)
-	for k, v := range fd {
+	t.Log(u.URL)
+	for k, v := range u.FormData {
 		t.Log(k, v)
 	}
+	if err := PostFile(u, name, text); err != nil {
+		t.Error(err)
+	}
+}
+
+func PostFile(fd *s3.FormData, name string, data []byte) error {
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	for k, v := range fd.FormData {
+		if err := writer.WriteField(k, v); err != nil {
+			return err
+		}
+	}
+	fileWriter, err := writer.CreateFormFile(fd.File, path.Base(name))
+	if err != nil {
+		return err
+	}
+	if _, err := fileWriter.Write(data); err != nil {
+		return nil
+	}
+	defer writer.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	reqBody := body.Bytes()
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fd.URL, bytes.NewReader(reqBody))
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.ContentLength = int64(len(reqBody))
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return errors.New(string(respBody))
+	}
+	return nil
 }

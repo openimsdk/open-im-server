@@ -57,6 +57,8 @@ const (
 	imageThumbnailPath = "openim/thumbnail"
 )
 
+const successCode = http.StatusOK
+
 func NewMinio(cache cache.MinioCache) (s3.Interface, error) {
 	u, err := url.Parse(config.Config.Object.Minio.Endpoint)
 	if err != nil {
@@ -457,23 +459,27 @@ func (m *Minio) FormData(ctx context.Context, name string, size int64, contentTy
 	if err := policy.SetContentLengthRange(0, size); err != nil {
 		return nil, err
 	}
+	if err := policy.SetSuccessStatusAction(strconv.Itoa(successCode)); err != nil {
+		return nil, err
+	}
 	if contentType != "" {
 		if err := policy.SetContentType(contentType); err != nil {
 			return nil, err
 		}
 	}
-	if err := policy.SetBucket(config.Config.Object.Minio.Bucket); err != nil {
+	if err := policy.SetBucket(m.bucket); err != nil {
 		return nil, err
 	}
 	u, fd, err := m.core.PresignedPostPolicy(ctx, policy)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	return &s3.FormData{
-		URL:      u.String(),
-		File:     "file",
-		Header:   nil,
-		FormData: fd,
-		Expires:  expires,
+		URL:          u.String(),
+		File:         "file",
+		Header:       nil,
+		FormData:     fd,
+		Expires:      expires,
+		SuccessCodes: []int{successCode},
 	}, nil
 }

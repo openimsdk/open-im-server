@@ -75,11 +75,12 @@ type CopyObjectInfo struct {
 }
 
 type FormData struct {
-	URL      string            `json:"url"`
-	File     string            `json:"file"`
-	Header   http.Header       `json:"header"`
-	FormData map[string]string `json:"form"`
-	Expires  time.Time         `json:"expires"`
+	URL          string            `json:"url"`
+	File         string            `json:"file"`
+	Header       http.Header       `json:"header"`
+	FormData     map[string]string `json:"form"`
+	Expires      time.Time         `json:"expires"`
+	SuccessCodes []int             `json:"successActionStatus"`
 }
 
 type SignPart struct {
