@@ -39,7 +39,7 @@ const (
 	groupMemberIDsKey   = "GROUP_MEMBER_IDS:"
 	groupMembersHashKey = "GROUP_MEMBERS_HASH2:"
 	groupMemberInfoKey  = "GROUP_MEMBER_INFO:"
-	//groupOwnerInfoKey   = "GROUP_OWNER_INFO:"
+	//groupOwnerInfoKey   = "GROUP_OWNER_INFO:".
 	joinedGroupsKey            = "JOIN_GROUPS_KEY:"
 	groupMemberNumKey          = "GROUP_MEMBER_NUM_CACHE:"
 	groupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:"

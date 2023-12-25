@@ -79,6 +79,7 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbfriend.AddBlackReq) 
 		BlockUserID:    req.BlackUserID,
 		OperatorUserID: mcontext.GetOpUserID(ctx),
 		CreateTime:     time.Now(),
+		Ex:             req.Ex,
 	}
 	if err := s.blackDatabase.Create(ctx, []*relation.BlackModel{&black}); err != nil {
 		return nil, err

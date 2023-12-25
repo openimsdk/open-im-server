@@ -17,11 +17,11 @@ package unrelation
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -34,7 +34,8 @@ import (
 )
 
 const (
-	maxRetry = 10 // number of retries
+	maxRetry         = 10 // number of retries
+	mongoConnTimeout = 10 * time.Second
 )
 
 type Mongo struct {
@@ -44,90 +45,122 @@ type Mongo struct {
 // NewMongo Initialize MongoDB connection.
 func NewMongo() (*Mongo, error) {
 	specialerror.AddReplace(mongo.ErrNoDocuments, errs.ErrRecordNotFound)
-	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
-	if config.Config.Mongo.Uri != "" {
-		uri = config.Config.Mongo.Uri
-	} else {
-		mongodbHosts := ""
-		for i, v := range config.Config.Mongo.Address {
-			if i == len(config.Config.Mongo.Address)-1 {
-				mongodbHosts += v
-			} else {
-				mongodbHosts += v + ","
-			}
-		}
-		if config.Config.Mongo.Password != "" && config.Config.Mongo.Username != "" {
-			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
-				config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts,
-				config.Config.Mongo.Database, config.Config.Mongo.MaxPoolSize)
-		} else {
-			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
-				mongodbHosts, config.Config.Mongo.Database,
-				config.Config.Mongo.MaxPoolSize)
-		}
-	}
-	fmt.Println("mongo:", uri)
+	uri := buildMongoURI()
+
 	var mongoClient *mongo.Client
-	var err error = nil
+	var err error
+
+	// Retry connecting to MongoDB
 	for i := 0; i <= maxRetry; i++ {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		ctx, cancel := context.WithTimeout(context.Background(), mongoConnTimeout)
 		defer cancel()
 		mongoClient, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 		if err == nil {
 			return &Mongo{db: mongoClient}, nil
 		}
-		if cmdErr, ok := err.(mongo.CommandError); ok {
-			if cmdErr.Code == 13 || cmdErr.Code == 18 {
-				return nil, err
-			} else {
-				fmt.Printf("Failed to connect to MongoDB: %s\n", err)
-			}
+		if shouldRetry(err) {
+			fmt.Printf("Failed to connect to MongoDB, retrying: %s\n", err)
+			time.Sleep(time.Second) // exponential backoff could be implemented here
+			continue
 		}
+		return nil, err
 	}
 	return nil, err
 }
 
+func buildMongoURI() string {
+	uri := os.Getenv("MONGO_URI")
+	if uri != "" {
+		return uri
+	}
+
+	username := os.Getenv("MONGO_USERNAME")
+	password := os.Getenv("MONGO_PASSWORD")
+	address := os.Getenv("MONGO_ADDRESS")
+	port := os.Getenv("MONGO_PORT")
+	database := os.Getenv("MONGO_DATABASE")
+	maxPoolSize := os.Getenv("MONGO_MAX_POOL_SIZE")
+
+	if username == "" {
+		username = config.Config.Mongo.Username
+	}
+	if password == "" {
+		password = config.Config.Mongo.Password
+	}
+	if address == "" {
+		address = strings.Join(config.Config.Mongo.Address, ",")
+	} else if port != "" {
+		address = fmt.Sprintf("%s:%s", address, port)
+	}
+	if database == "" {
+		database = config.Config.Mongo.Database
+	}
+	if maxPoolSize == "" {
+		maxPoolSize = fmt.Sprint(config.Config.Mongo.MaxPoolSize)
+	}
+
+	uriFormat := "mongodb://%s/%s?maxPoolSize=%s&authSource=admin"
+	if username != "" && password != "" {
+		uriFormat = "mongodb://%s:%s@%s/%s?maxPoolSize=%s&authSource=admin"
+		return fmt.Sprintf(uriFormat, username, password, address, database, maxPoolSize)
+	}
+	return fmt.Sprintf(uriFormat, address, database, maxPoolSize)
+}
+
+func shouldRetry(err error) bool {
+	if cmdErr, ok := err.(mongo.CommandError); ok {
+		return cmdErr.Code != 13 && cmdErr.Code != 18
+	}
+	return true
+}
+
+// GetClient returns the MongoDB client.
 func (m *Mongo) GetClient() *mongo.Client {
 	return m.db
 }
 
+// GetDatabase returns the specific database from MongoDB.
 func (m *Mongo) GetDatabase() *mongo.Database {
 	return m.db.Database(config.Config.Mongo.Database)
 }
 
+// CreateMsgIndex creates an index for messages in MongoDB.
 func (m *Mongo) CreateMsgIndex() error {
 	return m.createMongoIndex(unrelation.Msg, true, "doc_id")
 }
 
+// createMongoIndex creates an index in a MongoDB collection.
 func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...string) error {
-	db := m.db.Database(config.Config.Mongo.Database).Collection(collection)
+	db := m.GetDatabase().Collection(collection)
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
 	indexView := db.Indexes()
-	keysDoc := bson.D{}
-	// create composite indexes
-	for _, key := range keys {
-		if strings.HasPrefix(key, "-") {
-			keysDoc = append(keysDoc, bson.E{Key: strings.TrimLeft(key, "-"), Value: -1})
-			// keysDoc = keysDoc.Append(strings.TrimLeft(key, "-"), bsonx.Int32(-1))
-		} else {
-			keysDoc = append(keysDoc, bson.E{Key: key, Value: 1})
-			// keysDoc = keysDoc.Append(key, bsonx.Int32(1))
-		}
-	}
-	// create index
+
+	keysDoc := buildIndexKeys(keys)
+
 	index := mongo.IndexModel{
 		Keys: keysDoc,
 	}
 	if isUnique {
 		index.Options = options.Index().SetUnique(true)
 	}
-	result, err := indexView.CreateOne(
-		context.Background(),
-		index,
-		opts,
-	)
+
+	_, err := indexView.CreateOne(context.Background(), index, opts)
 	if err != nil {
-		return utils.Wrap(err, result)
+		return utils.Wrap(err, "CreateIndex")
 	}
 	return nil
+}
+
+// buildIndexKeys builds the BSON document for index keys.
+func buildIndexKeys(keys []string) bson.D {
+	keysDoc := bson.D{}
+	for _, key := range keys {
+		direction := 1 // default direction is ascending
+		if strings.HasPrefix(key, "-") {
+			direction = -1 // descending order for prefixed with "-"
+			key = strings.TrimLeft(key, "-")
+		}
+		keysDoc = append(keysDoc, bson.E{Key: key, Value: direction})
+	}
+	return keysDoc
 }

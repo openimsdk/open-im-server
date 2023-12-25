@@ -70,13 +70,15 @@ function openim::test::auth() {
 
 #################################### Auth Module ####################################
 
-# Define a function to get a token (Admin Token)
+# Define a function to get a token for a specific user
 openim::test::get_token() {
+  local user_id="${1:-openIM123456}" # Default user ID if not provided
   token_response=$(${CCURL} "${OperationID}" "${Header}" ${INSECURE_OPENIMAPI}/auth/user_token \
-      -d'{"secret": "'"$SECRET"'","platformID": 1,"userID": "openIM123456"}')
+      -d'{"secret": "'"$SECRET"'","platformID": 1,"userID": "'$user_id'"}')
   token=$(echo $token_response | grep -Po 'token[" :]+\K[^"]+')
   echo "$token"
 }
+
 
 Header="-HContent-Type: application/json"
 OperationID="-HoperationID: 1646445464564"
@@ -530,6 +532,36 @@ EOF
   openim::test::check_error "$response"
 }
 
+# Updates the pin status of multiple friends.
+openim::test::update_pin_status() {
+  local ownerUserID="${1}"
+  shift  # Shift the arguments to skip the first one (ownerUserID)
+  local isPinned="${1}"
+  shift  # Shift the arguments to skip the isPinned argument
+
+  # Constructing the list of friendUserIDs
+  local friendUserIDsArray=()
+  for friendUserID in "$@"; do
+    friendUserIDsArray+=("\"${friendUserID}\"")
+  done
+  local friendUserIDs=$(IFS=,; echo "${friendUserIDsArray[*]}")
+
+  local request_body=$(cat <<EOF
+{
+  "ownerUserID": "${ownerUserID}",
+  "friendUserIDs": [${friendUserIDs}],
+  "isPinned": ${isPinned}
+}
+EOF
+)
+  echo "Requesting to update pin status: $request_body"
+
+  local response=$(${CCURL} "${Token}" "${OperationID}" "${Header}" "${INSECURE_OPENIMAPI}/friend/update_pin_status" -d "${request_body}")
+  echo "Response: $response"
+  openim::test::check_error "$response"
+}
+
+
 # [openim::test::friend function description]
 # The `openim::test::friend` function serves as a test suite for friend-related operations.
 # It sequentially invokes all friend-related test functions to ensure the API's friend operations are functioning correctly.
@@ -542,17 +574,22 @@ function openim::test::friend() {
   openim::test::user_register "${TEST_USER_ID}" "user01" "new_face_url"
   openim::test::user_register "${FRIEND_USER_ID}" "frient01" "new_face_url"
   openim::test::user_register "${BLACK_USER_ID}" "frient02" "new_face_url"
-  
+
   # 1. Check if two users are friends.
   openim::test::is_friend "${TEST_USER_ID}" "${FRIEND_USER_ID}"
 
   # 2. Send a friend request from one user to another.
   openim::test::add_friend "${TEST_USER_ID}" "${FRIEND_USER_ID}"
 
+  local original_token=$Token
+
+  # Switch to FRIEND_USER_ID's token
+  local friend_token="-Htoken: $(openim::test::get_token "${FRIEND_USER_ID}")"
   # 3. Respond to a friend request.
   # TODO：
 #   openim::test::add_friend_response "${FRIEND_USER_ID}" "${TEST_USER_ID}"
 
+  Token=$original_token
   # 4. Retrieve the friend list of the test user.
   openim::test::get_friend_list "${TEST_USER_ID}"
 
@@ -582,6 +619,13 @@ function openim::test::friend() {
   # 12. Import friends for the user (Optional).
   # TODO：
 #   openim::test::import_friend "${TEST_USER_ID}" "11111114" "11111115"
+
+  # 13. pin Friend
+  # Add this call to your test suite where appropriate
+   # TODO：
+#  openim::test::update_pin_status "${TEST_USER_ID}" true "${FRIEND_USER_ID}"
+#
+#  openim::test::update_pin_status "${TEST_USER_ID}" false "${FRIEND_USER_ID}"
 
   # Log the completion of the friend test suite.
   openim::log::success "Friend test suite completed successfully."

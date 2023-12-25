@@ -34,7 +34,6 @@ services:
         ipv4_address: ${MONGO_NETWORK_ADDRESS:-172.28.0.2}
 
   redis:
-    # image: redis:7.0.0
     image: redis:${REDIS_IMAGE_VERSION:-7.0.0}
     container_name: redis
     ports:
@@ -53,7 +52,6 @@ services:
         ipv4_address: ${REDIS_NETWORK_ADDRESS:-172.28.0.3}
 
   zookeeper:
-    # image: bitnami/zookeeper:3.8
     image: bitnami/zookeeper:${ZOOKEEPER_IMAGE_VERSION:-3.8}
     container_name: zookeeper
     ports:
@@ -69,7 +67,6 @@ services:
         ipv4_address: ${ZOOKEEPER_NETWORK_ADDRESS:-172.28.0.5}
 
   kafka:
-    # image: 'bitnami/kafka:3.5.1'
     image: 'bitnami/kafka:${KAFKA_IMAGE_VERSION:-3.5.1}'
     container_name: kafka
     restart: always
@@ -95,7 +92,6 @@ services:
         ipv4_address: ${KAFKA_NETWORK_ADDRESS:-172.28.0.4}
 
   minio:
-    # image: minio/minio
     image: minio/minio:${MINIO_IMAGE_VERSION:-latest}
     ports:
       - "${MINIO_PORT:-10005}:9000"
@@ -114,7 +110,6 @@ services:
         ipv4_address: ${MINIO_NETWORK_ADDRESS:-172.28.0.6}
 
   openim-web:
-    # image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-web:latest
     image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-web:${OPENIM_WEB_IMAGE_VERSION:-latest}
     container_name: openim-web
     environment:

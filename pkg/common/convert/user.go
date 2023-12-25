@@ -15,8 +15,9 @@
 package convert
 
 import (
-	"github.com/OpenIMSDK/protocol/sdkws"
 	"time"
+
+	"github.com/OpenIMSDK/protocol/sdkws"
 
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
@@ -63,7 +64,7 @@ func UserPb2DBMap(user *sdkws.UserInfo) map[string]any {
 		"global_recv_msg_opt": user.GlobalRecvMsgOpt,
 	}
 	for key, value := range fields {
-		if v, ok := value.(string); ok && v != "" {
+		if v, ok := value.(string); ok {
 			val[key] = v
 		} else if v, ok := value.(int32); ok && v != 0 {
 			val[key] = v

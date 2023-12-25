@@ -33,21 +33,19 @@ openim::log::info "\n# Begin to check all openim service"
 # OpenIM status
 # Elegant printing function
 print_services_and_ports() {
-    # 获取数组
-    declare -g service_names=("${!1}")
-    declare -g service_ports=("${!2}")
+    service_names=("$1[@]")
+    service_ports=("$2[@]")
 
     echo "+-------------------------+----------+"
     echo "| Service Name            | Port     |"
     echo "+-------------------------+----------+"
 
-    for index in "${!service_names[@]}"; do
-        printf "| %-23s | %-8s |\n" "${service_names[$index]}" "${service_ports[$index]}"
+    for index in "${!service_names}"; do
+        printf "| %-23s | %-8s |\n" "${!service_names[$index]}" "${!service_ports[$index]}"
     done
 
     echo "+-------------------------+----------+"
 }
-
 
 # Print out services and their ports
 print_services_and_ports OPENIM_SERVER_NAME_TARGETS OPENIM_SERVER_PORT_TARGETS
