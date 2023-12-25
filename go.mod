@@ -34,10 +34,11 @@ require github.com/google/uuid v1.3.1
 require (
 	github.com/IBM/sarama v1.41.3
 	github.com/OpenIMSDK/protocol v0.0.36
-	github.com/OpenIMSDK/tools v0.0.20
+	github.com/OpenIMSDK/tools v0.0.21
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/redis/go-redis/v9 v9.2.1
+	github.com/stathat/consistent v1.0.0
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.45
 	go.uber.org/automaxprocs v1.5.3
 	golang.org/x/sync v0.4.0
@@ -141,6 +142,7 @@ require (
 	gopkg.in/src-d/go-billy.v4 v4.3.2 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gorm.io/gorm v1.23.8 // indirect
+	stathat.com/c/consistent v1.0.0 // indirect
 )
 
 require (
@@ -154,7 +156,3 @@ require (
 	golang.org/x/crypto v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
-//replace (
-//	github.com/OpenIMSDK/protocol v0.0.34 => github.com/AndrewZuo01/protocol v0.0.0-20231218034338-b8d838e0b182
-//)
-
