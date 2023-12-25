@@ -142,6 +142,10 @@ func (p *Pusher) UnmarshalNotificationElem(bytes []byte, t any) error {
 
 	return json.Unmarshal([]byte(notification.Detail), t)
 }
+
+/*
+k8s deployment,offline push group messages function
+*/
 func (p *Pusher) k8sOfflinePush2SuperGroup(ctx context.Context, groupID string, msg *sdkws.MsgData, wsResults []*msggateway.SingleMsgToUserResults) error {
 
 	var needOfflinePushUserIDs []string
