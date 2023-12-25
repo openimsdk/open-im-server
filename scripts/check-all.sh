@@ -33,15 +33,15 @@ openim::log::info "\n# Begin to check all openim service"
 # OpenIM status
 # Elegant printing function
 print_services_and_ports() {
-    local -n service_names=$1
-    local -n service_ports=$2
+    service_names=("$1[@]")
+    service_ports=("$2[@]")
 
     echo "+-------------------------+----------+"
     echo "| Service Name            | Port     |"
     echo "+-------------------------+----------+"
 
-    for index in "${!service_names[@]}"; do
-        printf "| %-23s | %-8s |\n" "${service_names[$index]}" "${service_ports[$index]}"
+    for index in "${!service_names}"; do
+        printf "| %-23s | %-8s |\n" "${!service_names[$index]}" "${!service_ports[$index]}"
     done
 
     echo "+-------------------------+----------+"
