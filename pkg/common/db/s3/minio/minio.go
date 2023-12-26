@@ -476,6 +476,12 @@ func (m *Minio) FormData(ctx context.Context, name string, size int64, contentTy
 	if err != nil {
 		return nil, err
 	}
+	sign, err := url.Parse(m.signEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	u.Scheme = sign.Scheme
+	u.Host = sign.Host
 	return &s3.FormData{
 		URL:          u.String(),
 		File:         "file",
