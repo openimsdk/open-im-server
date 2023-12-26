@@ -338,13 +338,16 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 func (o *OSS) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
 	// https://help.aliyun.com/zh/oss/developer-reference/postobject?spm=a2c4g.11186623.0.0.1cb83cebkP55nn
 	expires := time.Now().Add(duration)
+	conditions := []any{
+		map[string]string{"bucket": o.bucket.BucketName},
+		map[string]string{"key": name},
+	}
+	if size > 0 {
+		conditions = append(conditions, []any{"content-length-range", 0, size})
+	}
 	policy := map[string]any{
 		"expiration": expires.Format("2006-01-02T15:04:05.000Z"),
-		"conditions": []any{
-			map[string]string{"bucket": o.bucket.BucketName},
-			[]any{"content-length-range", 0, size},
-			//map[string]string{"content-type": contentType},
-		},
+		"conditions": conditions,
 	}
 	policyJson, err := json.Marshal(policy)
 	if err != nil {
@@ -367,6 +370,9 @@ func (o *OSS) FormData(ctx context.Context, name string, size int64, contentType
 			"signature":             base64.StdEncoding.EncodeToString(h.Sum(nil)),
 		},
 		SuccessCodes: []int{successCode},
+	}
+	if contentType != "" {
+		fd.FormData["x-oss-content-type"] = contentType
 	}
 	return fd, nil
 }

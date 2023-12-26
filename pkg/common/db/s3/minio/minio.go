@@ -456,8 +456,10 @@ func (m *Minio) FormData(ctx context.Context, name string, size int64, contentTy
 	if err := policy.SetExpires(expires); err != nil {
 		return nil, err
 	}
-	if err := policy.SetContentLengthRange(0, size); err != nil {
-		return nil, err
+	if size > 0 {
+		if err := policy.SetContentLengthRange(0, size); err != nil {
+			return nil, err
+		}
 	}
 	if err := policy.SetSuccessStatusAction(strconv.Itoa(successCode)); err != nil {
 		return nil, err

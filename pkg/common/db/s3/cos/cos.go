@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -336,68 +335,52 @@ func (c *Cos) getPresignedURL(ctx context.Context, name string, expire time.Dura
 }
 
 func (c *Cos) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
-	//res, _, err := c.client.Object.ListUploads(ctx, &cos.ObjectListUploadsOptions{})
-	//if err != nil {
-	//	return nil, err
-	//}
+	// https://cloud.tencent.com/document/product/436/14690
 	now := time.Now()
 	expiration := now.Add(duration)
 	keyTime := fmt.Sprintf("%d;%d", now.Unix(), expiration.Unix())
 	conditions := []any{
-		map[string]string{"success_action_status": strconv.Itoa(successCode)},
-		[]any{"content-length-range", 0, size},
+		map[string]string{"q-sign-algorithm": "sha1"},
+		map[string]string{"q-ak": c.credential.SecretID},
 		map[string]string{"q-sign-time": keyTime},
 		map[string]string{"key": name},
-		map[string]string{"q-sign-algorithm": "sha1"},
 	}
-	if c.credential.SessionToken != "" {
-		conditions = append(conditions, map[string]string{"x-cos-security-token": c.credential.SessionToken})
+	if contentType != "" {
+		conditions = append(conditions, map[string]string{"Content-Type": contentType})
 	}
 	policy := map[string]any{
 		"expiration": expiration.Format("2006-01-02T15:04:05.000Z"),
-		"conditions": []any{
-			//map[string]string{"bucket": res.Bucket},
-			//map[string]string{"acl": "default"},
-			map[string]string{"q-sign-algorithm": "sha1"},
-			map[string]string{"q-ak": c.credential.SecretID},
-			map[string]string{"q-sign-time": keyTime},
-
-			//map[string]string{"success_action_status": strconv.Itoa(successCode)},
-			//[]any{"content-length-range", 0, size},
-			//map[string]string{"key": name},
-			//map[string]string{"x-cos-security-token": c.credential.SessionToken},
-		},
+		"conditions": conditions,
 	}
 	policyJson, err := json.Marshal(policy)
 	if err != nil {
 		return nil, err
 	}
-	//signKey := hmacSha1val(c.credential.SecretKey, keyTime)
-	//policyStr := hmacSha1val(sha1val(signKey), string(policyJson))
+	signKey := hmacSha1val(c.credential.SecretKey, keyTime)
+	strToSign := sha1val(string(policyJson))
+	signature := hmacSha1val(signKey, strToSign)
 
-	policyStr := base64.StdEncoding.EncodeToString(policyJson)
-	h := hmac.New(sha1.New, []byte(c.credential.SecretKey))
-	if _, err := io.WriteString(h, policyStr); err != nil {
-		return nil, err
-	}
 	fd := &s3.FormData{
 		URL:     c.client.BaseURL.BucketURL.String(),
 		File:    "file",
 		Expires: expiration,
 		FormData: map[string]string{
-			"key":              name,
-			"policy":           policyStr,
-			"q-sign-algorithm": "sha1",
-			"q-ak":             c.credential.SecretID,
-			"q-key-time":       keyTime,
-			"q-signature":      hex.EncodeToString(h.Sum(nil)),
+			"policy":                base64.StdEncoding.EncodeToString(policyJson),
+			"q-sign-algorithm":      "sha1",
+			"q-ak":                  c.credential.SecretID,
+			"q-key-time":            keyTime,
+			"q-signature":           signature,
+			"key":                   name,
+			"success_action_status": strconv.Itoa(successCode),
 		},
 		SuccessCodes: []int{successCode},
+	}
+	if contentType != "" {
+		fd.FormData["Content-Type"] = contentType
 	}
 	if c.credential.SessionToken != "" {
 		fd.FormData["x-cos-security-token"] = c.credential.SessionToken
 	}
-	// 2019-08-30 17:38:12
 	return fd, nil
 }
 
