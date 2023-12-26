@@ -185,8 +185,6 @@ func (t *thirdServer) AccessURL(ctx context.Context, req *third.AccessURLReq) (*
 	}, nil
 }
 
-const direct = "direct"
-
 func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateFormDataReq) (*third.InitiateFormDataResp, error) {
 	if req.Name == "" {
 		return nil, errs.ErrArgs.Wrap("name is empty")
@@ -242,6 +240,9 @@ func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateF
 		Header:   toPbMapArray(resp.Header),
 		FormData: resp.FormData,
 		Expires:  resp.Expires.UnixMilli(),
+		SuccessCodes: utils.Slice(resp.SuccessCodes, func(code int) int32 {
+			return int32(code)
+		}),
 	}, nil
 }
 
