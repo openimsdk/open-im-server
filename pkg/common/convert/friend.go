@@ -17,7 +17,6 @@ package convert
 import (
 	"context"
 	"fmt"
-
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
 
@@ -62,6 +61,7 @@ func FriendsDB2Pb(
 	for _, friendDB := range friendsDB {
 		userID = append(userID, friendDB.FriendUserID)
 	}
+
 	users, err := getUsers(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -74,6 +74,7 @@ func FriendsDB2Pb(
 		friendPb.FriendUser.FaceURL = users[friend.FriendUserID].FaceURL
 		friendPb.FriendUser.Ex = users[friend.FriendUserID].Ex
 		friendPb.CreateTime = friend.CreateTime.Unix()
+		friendPb.IsPinned = friend.IsPinned
 		friendsPb = append(friendsPb, friendPb)
 	}
 	return friendsPb, nil

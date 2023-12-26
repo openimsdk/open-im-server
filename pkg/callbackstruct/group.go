@@ -148,6 +148,7 @@ type CallbackJoinGroupReq struct {
 	GroupType       string `json:"groupType"`
 	ApplyID         string `json:"applyID"`
 	ReqMessage      string `json:"reqMessage"`
+	Ex              string `json:"ex"`
 }
 
 type CallbackJoinGroupResp struct {

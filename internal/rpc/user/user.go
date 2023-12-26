@@ -17,6 +17,7 @@ package user
 import (
 	"context"
 	"errors"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -91,6 +92,12 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	}
 	for k, v := range config.Config.Manager.UserID {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k], AppMangerLevel: constant.AppAdmin})
+	}
+	if len(config.Config.IMAdmin.UserID) != len(config.Config.IMAdmin.Nickname) {
+		return errors.New("len(config.Config.AppNotificationAdmin.AppManagerUid) != len(config.Config.AppNotificationAdmin.Nickname)")
+	}
+	for k, v := range config.Config.IMAdmin.UserID {
+		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.IMAdmin.Nickname[k], AppMangerLevel: constant.AppNotificationAdmin})
 	}
 	userDB, err := mgo.NewUserMongo(mongo.GetDatabase())
 	if err != nil {
@@ -353,4 +360,181 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 		return nil, err
 	}
 	return &pbuser.GetSubscribeUsersStatusResp{StatusList: onlineStatusList}, nil
+}
+
+// ProcessUserCommandAdd user general function add
+func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
+	// Assuming you have a method in s.UserDatabase to add a user command
+	err := s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbuser.ProcessUserCommandAddResp{}, nil
+}
+
+// ProcessUserCommandDelete user general function delete
+func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.ProcessUserCommandDeleteReq) (*pbuser.ProcessUserCommandDeleteResp, error) {
+	// Assuming you have a method in s.UserDatabase to delete a user command
+	err := s.UserDatabase.DeleteUserCommand(ctx, req.UserID, req.Type, req.Uuid)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbuser.ProcessUserCommandDeleteResp{}, nil
+}
+
+// ProcessUserCommandUpdate user general function update
+func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
+	// Assuming you have a method in s.UserDatabase to update a user command
+	err := s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbuser.ProcessUserCommandUpdateResp{}, nil
+}
+
+func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
+	// Fetch user commands from the database
+	commands, err := s.UserDatabase.GetUserCommands(ctx, req.UserID, req.Type)
+	if err != nil {
+		return nil, err
+	}
+
+	// Initialize commandInfoSlice as an empty slice
+	commandInfoSlice := make([]*pbuser.CommandInfoResp, 0, len(commands))
+
+	for _, command := range commands {
+		// No need to use index since command is already a pointer
+		commandInfoSlice = append(commandInfoSlice, &pbuser.CommandInfoResp{
+			Uuid:       command.Uuid,
+			Value:      command.Value,
+			CreateTime: command.CreateTime,
+		})
+	}
+
+	// Return the response with the slice
+	return &pbuser.ProcessUserCommandGetResp{KVArray: commandInfoSlice}, nil
+}
+
+func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.AddNotificationAccountReq) (*pbuser.AddNotificationAccountResp, error) {
+	if err := authverify.CheckIMAdmin(ctx); err != nil {
+		return nil, err
+	}
+
+	var userID string
+	for i := 0; i < 20; i++ {
+		userId := s.genUserID()
+		_, err := s.UserDatabase.FindWithError(ctx, []string{userId})
+		if err == nil {
+			continue
+		}
+		userID = userId
+		break
+	}
+	if userID == "" {
+		return nil, errs.ErrInternalServer.Wrap("gen user id failed")
+	}
+
+	user := &tablerelation.UserModel{
+		UserID:         userID,
+		Nickname:       req.NickName,
+		FaceURL:        req.FaceURL,
+		CreateTime:     time.Now(),
+		AppMangerLevel: constant.AppNotificationAdmin,
+	}
+	if err := s.UserDatabase.Create(ctx, []*tablerelation.UserModel{user}); err != nil {
+		return nil, err
+	}
+
+	return &pbuser.AddNotificationAccountResp{}, nil
+}
+
+func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbuser.UpdateNotificationAccountInfoReq) (*pbuser.UpdateNotificationAccountInfoResp, error) {
+	if err := authverify.CheckIMAdmin(ctx); err != nil {
+		return nil, err
+	}
+
+	if _, err := s.UserDatabase.FindWithError(ctx, []string{req.UserID}); err != nil {
+		return nil, errs.ErrArgs.Wrap()
+	}
+
+	user := map[string]interface{}{}
+
+	if req.NickName != "" {
+		user["nickname"] = req.NickName
+	}
+
+	if req.FaceURL != "" {
+		user["face_url"] = req.FaceURL
+	}
+
+	if err := s.UserDatabase.UpdateByMap(ctx, req.UserID, user); err != nil {
+		return nil, err
+	}
+
+	return &pbuser.UpdateNotificationAccountInfoResp{}, nil
+}
+
+func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.SearchNotificationAccountReq) (*pbuser.SearchNotificationAccountResp, error) {
+	if err := authverify.CheckIMAdmin(ctx); err != nil {
+		return nil, err
+	}
+
+	_, users, err := s.UserDatabase.Page(ctx, req.Pagination)
+	if err != nil {
+		return nil, err
+	}
+
+	var total int64
+	accounts := make([]*pbuser.NotificationAccountInfo, 0, len(users))
+	for _, v := range users {
+		if v.AppMangerLevel != constant.AppNotificationAdmin {
+			continue
+		}
+		temp := &pbuser.NotificationAccountInfo{
+			UserID:   v.UserID,
+			FaceURL:  v.FaceURL,
+			NickName: v.Nickname,
+		}
+		accounts = append(accounts, temp)
+		total += 1
+	}
+	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: accounts}, nil
+}
+
+func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (*pbuser.UpdateUserInfoExResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *userServer) GetNotificationAccount(ctx context.Context, req *pbuser.GetNotificationAccountReq) (*pbuser.GetNotificationAccountResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.Wrap("userID is empty")
+	}
+	user, err := s.UserDatabase.GetUserByID(ctx, req.UserID)
+	if err != nil {
+		return nil, errs.ErrUserIDNotFound.Wrap()
+	}
+	if user.AppMangerLevel == constant.AppAdmin || user.AppMangerLevel == constant.AppNotificationAdmin {
+		return &pbuser.GetNotificationAccountResp{}, nil
+	}
+
+	return nil, errs.ErrNoPermission.Wrap("notification messages cannot be sent for this ID")
+}
+
+func (s *userServer) genUserID() string {
+	const l = 10
+	data := make([]byte, l)
+	rand.Read(data)
+	chars := []byte("0123456789")
+	for i := 0; i < len(data); i++ {
+		if i == 0 {
+			data[i] = chars[1:][data[i]%9]
+		} else {
+			data[i] = chars[data[i]%10]
+		}
+	}
+	return string(data)
 }

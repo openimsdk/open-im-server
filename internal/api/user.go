@@ -15,8 +15,6 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msggateway"
 	"github.com/OpenIMSDK/protocol/user"
@@ -24,6 +22,7 @@ import (
 	"github.com/OpenIMSDK/tools/apiresp"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/gin-gonic/gin"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -198,4 +197,36 @@ func (u *UserApi) GetUserStatus(c *gin.Context) {
 // GetSubscribeUsersStatus Get the online status of subscribers.
 func (u *UserApi) GetSubscribeUsersStatus(c *gin.Context) {
 	a2r.Call(user.UserClient.GetSubscribeUsersStatus, u.Client, c)
+}
+
+// ProcessUserCommandAdd user general function add
+func (u *UserApi) ProcessUserCommandAdd(c *gin.Context) {
+	a2r.Call(user.UserClient.ProcessUserCommandAdd, u.Client, c)
+}
+
+// ProcessUserCommandDelete user general function delete
+func (u *UserApi) ProcessUserCommandDelete(c *gin.Context) {
+	a2r.Call(user.UserClient.ProcessUserCommandDelete, u.Client, c)
+}
+
+// ProcessUserCommandUpdate  user general function update
+func (u *UserApi) ProcessUserCommandUpdate(c *gin.Context) {
+	a2r.Call(user.UserClient.ProcessUserCommandUpdate, u.Client, c)
+}
+
+// ProcessUserCommandGet user general function get
+func (u *UserApi) ProcessUserCommandGet(c *gin.Context) {
+	a2r.Call(user.UserClient.ProcessUserCommandGet, u.Client, c)
+}
+
+func (u *UserApi) AddNotificationAccount(c *gin.Context) {
+	a2r.Call(user.UserClient.AddNotificationAccount, u.Client, c)
+}
+
+func (u *UserApi) UpdateNotificationAccountInfo(c *gin.Context) {
+	a2r.Call(user.UserClient.UpdateNotificationAccountInfo, u.Client, c)
+}
+
+func (u *UserApi) SearchNotificationAccount(c *gin.Context) {
+	a2r.Call(user.UserClient.SearchNotificationAccount, u.Client, c)
 }

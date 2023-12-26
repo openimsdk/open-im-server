@@ -16,6 +16,7 @@ package config
 
 import (
 	"bytes"
+
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"gopkg.in/yaml.v3"
 )
@@ -234,6 +235,11 @@ type configStruct struct {
 		UserID   []string `yaml:"userID"`
 		Nickname []string `yaml:"nickname"`
 	} `yaml:"manager"`
+
+	IMAdmin struct {
+		UserID   []string `yaml:"userID"`
+		Nickname []string `yaml:"nickname"`
+	} `yaml:"im-admin"`
 
 	MultiLoginPolicy                  int    `yaml:"multiLoginPolicy"`
 	ChatPersistenceMysql              bool   `yaml:"chatPersistenceMysql"`

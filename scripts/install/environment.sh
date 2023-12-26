@@ -66,8 +66,8 @@ def "ENV_FILE" ""${OPENIM_ROOT}"/scripts/install/environment.sh"
 
 ###################### Docker compose ###################
 # OPENIM AND CHAT
-def "CHAT_BRANCH" "main"
-def "SERVER_BRANCH" "main"
+def "CHAT_IMAGE_VERSION" "main"
+def "SERVER_IMAGE_VERSION" "main"
 
 # Choose the appropriate image address, the default is GITHUB image,
 # you can choose docker hub, for Chinese users can choose Ali Cloud
@@ -139,7 +139,7 @@ readonly API_OPENIM_PORT=${API_OPENIM_PORT:-'10002'}
 def "API_LISTEN_IP" "0.0.0.0" # API的监听IP
 
 ###################### openim-chat 配置信息 ######################
-def "OPENIM_CHAT_DATA_DIR" "./openim-chat/${CHAT_BRANCH}"
+def "OPENIM_CHAT_DATA_DIR" "./openim-chat/${CHAT_IMAGE_VERSION}"
 def "OPENIM_CHAT_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # OpenIM服务地址
 def "OPENIM_CHAT_API_PORT" "10008"                   # OpenIM API端口
 def "CHAT_API_LISTEN_IP" ""                          # OpenIM API的监听IP
@@ -353,6 +353,8 @@ def "MANAGER_USERID_3" "openIMAdmin"  # 管理员ID 3
 def "NICKNAME_1" "system1"            # 昵称1
 def "NICKNAME_2" "system2"            # 昵称2
 def "NICKNAME_3" "system3"            # 昵称3
+def "IM_ADMIN_USERID" "imAdmin"       # IM管理员ID
+def "IM_ADMIN_NAME" "imAdmin"         # IM管理员昵称
 def "MULTILOGIN_POLICY" "1"           # 多登录策略
 def "CHAT_PERSISTENCE_MYSQL" "true"   # 聊天持久化MySQL
 def "MSG_CACHE_TIMEOUT" "86400"       # 消息缓存超时

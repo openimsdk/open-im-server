@@ -1,0 +1,354 @@
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Determines if a message should be sent. If set to false, it triggers a silent sync without a message. If true, it requires triggering a conversation.
+# For rpc notification, send twice: once as a message and once as a notification.
+# The options field 'isNotification' indicates if it's a notification.
+groupCreated:
+  isSendMsg: true
+
+# Reliability level of the message sending.
+# Set to 1 to send only when online, 2 for guaranteed delivery.
+  reliabilityLevel: 1
+
+# This setting is effective only when 'isSendMsg' is true.
+# It controls whether to count unread messages.
+  unreadCount: false
+
+# Configuration for offline push notifications.
+  offlinePush:
+    # Enables or disables offline push notifications.
+    enable: false
+
+    # Title for the notification when a group is created.
+    title: "create group title"
+
+    # Description for the notification.
+    desc: "create group desc"
+
+    # Additional information for the notification.
+    ext: "create group ext"
+
+# Content type is not added here.
+# Content should use a JSON structure conforming to the protobuf format.
+
+groupInfoSet:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupInfoSet title"
+    desc: "groupInfoSet desc"
+    ext: "groupInfoSet ext"
+
+
+joinGroupApplication:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "joinGroupApplication title"
+    desc: "joinGroupApplication desc"
+    ext: "joinGroupApplication ext"
+
+memberQuit:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "memberQuit title"
+    desc: "memberQuit desc"
+    ext: "memberQuit ext"
+
+groupApplicationAccepted:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupApplicationAccepted title"
+    desc: "groupApplicationAccepted desc"
+    ext: "groupApplicationAccepted ext"
+
+groupApplicationRejected:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: " title"
+    desc: " desc"
+    ext: " ext"
+
+
+groupOwnerTransferred:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupOwnerTransferred title"
+    desc: "groupOwnerTransferred desc"
+    ext: "groupOwnerTransferred ext"
+
+memberKicked:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "memberKicked title"
+    desc: "memberKicked desc"
+    ext: "memberKicked ext"
+
+memberInvited:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "memberInvited title"
+    desc: "memberInvited desc"
+    ext: "memberInvited ext"
+
+memberEnter:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "memberEnter title"
+    desc: "memberEnter desc"
+    ext: "memberEnter ext"
+
+groupDismissed:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupDismissed title"
+    desc: "groupDismissed desc"
+    ext: "groupDismissed ext"
+
+groupMuted:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupMuted title"
+    desc: "groupMuted desc"
+    ext: "groupMuted ext"
+
+groupCancelMuted:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupCancelMuted title"
+    desc: "groupCancelMuted desc"
+    ext: "groupCancelMuted ext"
+  defaultTips:
+    tips: "group Cancel Muted"
+
+
+groupMemberMuted:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupMemberMuted title"
+    desc: "groupMemberMuted desc"
+    ext: "groupMemberMuted ext"
+
+groupMemberCancelMuted:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupMemberCancelMuted title"
+    desc: "groupMemberCancelMuted desc"
+    ext: "groupMemberCancelMuted ext"
+
+groupMemberInfoSet:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupMemberInfoSet title"
+    desc: "groupMemberInfoSet desc"
+    ext: "groupMemberInfoSet ext"
+
+groupInfoSetAnnouncement:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupInfoSetAnnouncement title"
+    desc: "groupInfoSetAnnouncement desc"
+    ext: "groupInfoSetAnnouncement ext"
+
+
+groupInfoSetName:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupInfoSetName title"
+    desc: "groupInfoSetName desc"
+    ext: "groupInfoSetName ext"
+
+
+#############################friend#################################
+friendApplicationAdded:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "Somebody applies to add you as a friend"
+    desc: "Somebody applies to add you as a friend"
+    ext: "Somebody applies to add you as a friend"
+
+friendApplicationApproved:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: true
+    title: "Someone applies to add your friend application"
+    desc: "Someone applies to add your friend application"
+    ext: "Someone applies to add your friend application"
+
+friendApplicationRejected:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: true
+    title: "Someone rejected your friend application"
+    desc: "Someone rejected your friend application"
+    ext: "Someone rejected your friend application"
+
+friendAdded:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: true
+    title: "We have become friends"
+    desc: "We have become friends"
+    ext: "We have become friends"
+
+friendDeleted:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: true
+    title: "deleted a friend"
+    desc: "deleted a friend"
+    ext: "deleted a friend"
+
+friendRemarkSet:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: true
+    title: "Your friend's profile has been changed"
+    desc: "Your friend's profile has been changed"
+    ext: "Your friend's profile has been changed"
+
+blackAdded:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: true
+    title: "blocked a user"
+    desc: "blocked a user"
+    ext: "blocked a user"
+
+blackDeleted:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: true
+    title: "Remove a blocked user"
+    desc: "Remove a blocked user"
+    ext: "Remove a blocked user"
+
+friendInfoUpdated:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: true
+    title: "friend info updated"
+    desc: "friend info updated"
+    ext: "friend info updated"
+
+#####################user#########################
+userInfoUpdated:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: true
+    title: "Remove a blocked user"
+    desc: "Remove a blocked user"
+    ext: "Remove a blocked user"
+
+userStatusChanged:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "user status changed"
+    desc: "user status changed"
+    ext: "user status changed"
+
+#####################conversation#########################
+conversationChanged:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: true
+    title: "conversation changed"
+    desc: "conversation changed"
+    ext: "conversation changed"
+
+conversationSetPrivate:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: true
+    title: "burn after reading"
+    desc: "burn after reading"
+    ext: "burn after reading"
