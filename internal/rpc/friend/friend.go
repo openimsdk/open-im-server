@@ -53,7 +53,7 @@ type friendServer struct {
 }
 
 func (s *friendServer) UpdateFriends(ctx context.Context, req *pbfriend.UpdateFriendsReq) (*pbfriend.UpdateFriendsResp, error) {
-	return nil, errs.ErrInternalServer.Wrap("implement me")
+	return nil, errs.ErrInternalServer.Wrap("not implemented")
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
