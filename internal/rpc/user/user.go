@@ -57,6 +57,10 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
+func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (*pbuser.UpdateUserInfoExResp, error) {
+	return nil, errs.ErrInternalServer.Wrap("not implemented")
+}
+
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
@@ -482,11 +486,6 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		total += 1
 	}
 	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: accounts}, nil
-}
-
-func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (*pbuser.UpdateUserInfoExResp, error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func (s *userServer) GetNotificationAccount(ctx context.Context, req *pbuser.GetNotificationAccountReq) (*pbuser.GetNotificationAccountResp, error) {
