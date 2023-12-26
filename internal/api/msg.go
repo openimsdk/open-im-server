@@ -169,9 +169,8 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 	case constant.OANotification:
 		data = apistruct.OANotificationElem{}
 		req.SessionType = constant.NotificationChatType
-		if !authverify.IsManagerUserID(req.SendID) {
-			return nil, errs.ErrNoPermission.
-				Wrap("only app manager can as sender send OANotificationElem")
+		if err = m.userRpcClient.GetNotificationByID(c, req.SendID); err != nil {
+			return nil, err
 		}
 	default:
 		return nil, errs.ErrArgs.WithDetail("not support err contentType")
