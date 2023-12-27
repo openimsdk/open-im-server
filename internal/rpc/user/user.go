@@ -346,11 +346,6 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 	return &pbuser.GetSubscribeUsersStatusResp{StatusList: onlineStatusList}, nil
 }
 
-func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (*pbuser.UpdateUserInfoExResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 // ProcessUserCommandAdd user general function add
 func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
 	// Assuming you have a method in s.UserDatabase to add a user command
