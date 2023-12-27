@@ -286,6 +286,9 @@ readonly ALERTMANAGER_SEND_RESOLVED=${ALERTMANAGER_SEND_RESOLVED:-"{SEND_RESOLVE
 def "GRAFANA_PORT" "13000"                        # Grafana的端口
 def "GRAFANA_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # Grafana的地址
 
+###################### nginx 配置信息 ######################
+readonly NGINX_LISTEN_PORT=${NGINX_LISTEN_PORT:-"80"}
+
 ###################### RPC Port Configuration Variables ######################
 # For launching multiple programs, just fill in multiple ports separated by commas
 # For example:

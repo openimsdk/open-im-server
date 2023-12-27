@@ -11,6 +11,20 @@ networks:
           gateway: '${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}'
 
 services:
+  nginx:
+    restart: always
+    container_name: nginx
+    image: nginx
+    ports:
+      - ${NGINX_LISTEN_PORT}:80
+    volumes:
+      - ./logs:/var/log/nginx
+      - ./config/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/default.conf:/etc/nginx/conf.d/default.conf
+    environment:
+      - NGINX_PORT=80
+      - TZ=Asia/Shanghai
+    privileged: true
   mongodb:
     image: mongo:${MONGODB_IMAGE_VERSION-6.0.2}
     ports:
@@ -112,12 +126,9 @@ services:
   openim-web:
     image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-web:${OPENIM_WEB_IMAGE_VERSION:-latest}
     container_name: openim-web
-    environment:
-      - OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH:-/app/dist}
-      - OPENIM_WEB_PORT=${OPENIM_WEB_PORT:-11001}
     restart: always
     ports:
-      - "${OPENIM_WEB_PORT:-11001}:11001"
+      - "${OPENIM_WEB_PORT:-11001}:80"
     networks:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS:-172.28.0.7}
@@ -167,6 +178,12 @@ services:
   #   hostname: grafana
   #   user: root
   #   restart: always
+  #     environment:
+  #       - GF_SECURITY_ALLOW_EMBEDDING=true
+  #       - GF_SESSION_COOKIE_SAMESITE=none
+  #       - GF_SESSION_COOKIE_SECURE=true
+  #       - GF_AUTH_ANONYMOUS_ENABLED=true
+  #       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
   #   ports:
   #     - "${GRAFANA_PORT:-13000}:3000"
   #   volumes:
