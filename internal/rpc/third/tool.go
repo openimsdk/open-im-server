@@ -29,6 +29,9 @@ import (
 )
 
 func toPbMapArray(m map[string][]string) []*third.KeyValues {
+	if len(m) == 0 {
+		return nil
+	}
 	res := make([]*third.KeyValues, 0, len(m))
 	for key := range m {
 		res = append(res, &third.KeyValues{
