@@ -34,7 +34,7 @@ declare -A TEMPLATES=(
   ["${OPENIM_ROOT}/deployments/templates/openim.yaml"]="${OPENIM_ROOT}/config/config.yaml"
   ["${OPENIM_ROOT}/deployments/templates/prometheus.yml"]="${OPENIM_ROOT}/config/prometheus.yml"
   ["${OPENIM_ROOT}/deployments/templates/alertmanager.yml"]="${OPENIM_ROOT}/config/alertmanager.yml"
-  ["${OPENIM_ROOT}/deployments/templates/default.conf"]="${OPENIM_ROOT}/config/default.conf"
+  ["${OPENIM_ROOT}/deployments/templates/upstream.conf"]="${OPENIM_ROOT}/config/conf.d/upstream.conf"
 )
 
 # Templates for example files
@@ -51,6 +51,7 @@ declare -A COPY_TEMPLATES=(
   ["${OPENIM_ROOT}/deployments/templates/instance-down-rules.yml"]="${OPENIM_ROOT}/config/instance-down-rules.yml"
   ["${OPENIM_ROOT}/deployments/templates/notification.yaml"]="${OPENIM_ROOT}/config/notification.yaml"
   ["${OPENIM_ROOT}/deployments/templates/nginx.conf"]="${OPENIM_ROOT}/config/nginx.conf"
+  ["${OPENIM_ROOT}/deployments/templates/default.conf"]="${OPENIM_ROOT}/config/conf.d/default.conf"
 )
 
 # Templates for config Copy file

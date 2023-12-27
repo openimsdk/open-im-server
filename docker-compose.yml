@@ -20,7 +20,7 @@ services:
     volumes:
       - ./logs:/var/log/nginx
       - ./config/nginx.conf:/etc/nginx/nginx.conf
-      - ./config/default.conf:/etc/nginx/conf.d/default.conf
+      - ./config/conf.d:/etc/nginx/conf.d
     environment:
       - NGINX_PORT=80
       - TZ=Asia/Shanghai
