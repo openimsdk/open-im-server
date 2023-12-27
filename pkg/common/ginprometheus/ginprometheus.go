@@ -432,7 +432,7 @@ func computeApproximateRequestSize(r *http.Request) int {
 	}
 	s += len(r.Host)
 
-	// r.Form and r.MultipartForm are assumed to be included in r.URL.
+	// r.FormData and r.MultipartForm are assumed to be included in r.URL.
 
 	if r.ContentLength != -1 {
 		s += int(r.ContentLength)

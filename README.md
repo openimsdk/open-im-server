@@ -97,6 +97,10 @@ It's crafted in Golang and supports cross-platform deployment, ensuring a cohere
 
 ## :rocket: Quick Start
 
+We support many platforms. Here are the addresses for quick experience on the web side：
+
+👉 **[OpenIM online web demo](https://web-enterprise.rentsoft.cn/)**
+
 You can quickly learn OpenIM engineering solutions, all it takes is one simple command:
 
 ```bash

@@ -207,6 +207,12 @@ jobs:
         sudo make check || \
         (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
 
+    - name: Restart Services and Print Logs for Ubuntu
+      if: runner.os == 'Linux'
+      run: |
+        sudo make restart
+        sudo make check
+
     # - name: Build, Start, Check Services and Print Logs for macOS
     #   if: runner.os == 'macOS'
     #   run: |
