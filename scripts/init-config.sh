@@ -34,7 +34,7 @@ declare -A TEMPLATES=(
   ["${OPENIM_ROOT}/deployments/templates/openim.yaml"]="${OPENIM_ROOT}/config/config.yaml"
   ["${OPENIM_ROOT}/deployments/templates/prometheus.yml"]="${OPENIM_ROOT}/config/prometheus.yml"
   ["${OPENIM_ROOT}/deployments/templates/alertmanager.yml"]="${OPENIM_ROOT}/config/alertmanager.yml"
-  ["${OPENIM_ROOT}/deployments/templates/default.conf"]="${OPENIM_ROOT}/config/default.yml"
+  ["${OPENIM_ROOT}/deployments/templates/default.conf"]="${OPENIM_ROOT}/config/default.conf"
 )
 
 # Templates for example files
