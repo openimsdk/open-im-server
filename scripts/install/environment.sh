@@ -353,6 +353,8 @@ def "MANAGER_USERID_3" "openIMAdmin"  # 管理员ID 3
 def "NICKNAME_1" "system1"            # 昵称1
 def "NICKNAME_2" "system2"            # 昵称2
 def "NICKNAME_3" "system3"            # 昵称3
+def "IM_ADMIN_USERID" "imAdmin"       # IM管理员ID
+def "IM_ADMIN_NAME" "imAdmin"         # IM管理员昵称
 def "MULTILOGIN_POLICY" "1"           # 多登录策略
 def "CHAT_PERSISTENCE_MYSQL" "true"   # 聊天持久化MySQL
 def "MSG_CACHE_TIMEOUT" "86400"       # 消息缓存超时
