@@ -17,7 +17,6 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
-
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 

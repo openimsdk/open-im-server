@@ -105,6 +105,9 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 	if err != nil {
 		return nil, err
 	}
+	if len(conversations) == 0 {
+		return nil, errs.ErrRecordNotFound.Wrap()
+	}
 
 	maxSeqs, err := m.msgRpcClient.GetMaxSeqs(ctx, conversationIDs)
 	if err != nil {
