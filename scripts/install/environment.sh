@@ -183,6 +183,7 @@ readonly API_URL=${API_URL:-"http://${OPENIM_IP}:${API_OPENIM_PORT}"}
 def "OBJECT_ENABLE" "minio" # 对象是否启用
 # 对象的API地址
 readonly OBJECT_APIURL=${OBJECT_APIURL:-"${API_URL}"}
+
 def "MINIO_BUCKET" "openim" # MinIO的存储桶名称
 def "MINIO_PORT" "10005"    # MinIO的端口
 # MinIO的端点URL
@@ -289,6 +290,10 @@ def "GRAFANA_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # Grafana的地址
 ###################### nginx 配置信息 ######################
 readonly NGINX_LISTEN_PORT=${NGINX_LISTEN_PORT:-"80"}
 
+# 通过nginx访问minio服务器的url
+readonly OBJECT_NGINX_APIURL=${OBJECT_NGINX_APIURL:-"http://${OPENIM_IP}:${NGINX_LISTEN_PORT}/im-minio-api"}
+# 通过nginx访问api服务器的url
+readonly API_NGINX_URL=${API_NGINX_URL:-"http://${OPENIM_IP}:${NGINX_LISTEN_PORT}/api"}
 ###################### RPC Port Configuration Variables ######################
 # For launching multiple programs, just fill in multiple ports separated by commas
 # For example:
@@ -382,7 +387,7 @@ def "CALLBACK_FAILED_CONTINUE" "true" # 失败后是否继续
 ###################### Prometheus 配置信息 ######################
 # 是否启用 Prometheus
 readonly PROMETHEUS_ENABLE=${PROMETHEUS_ENABLE:-'false'}
-def "PROMETHEUS_URL" "${GRAFANA_ADDRESS}:${GRAFANA_PORT}"
+readonly PROMETHEUS_URL=${PROMETHEUS_URL:-"http://${OPENIM_IP}:${GRAFANA_PORT}/"}
 # Api 服务的 Prometheus 端口
 readonly API_PROM_PORT=${API_PROM_PORT:-'20100'}
 # User 服务的 Prometheus 端口

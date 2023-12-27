@@ -122,14 +122,14 @@ api:
 # minio.signEndpoint is minio public network address
 object:
   enable: "${OBJECT_ENABLE}"
-  apiURL: "${OBJECT_APIURL}"
+  apiURL: "${API_NGINX_URL}"
   minio:
     bucket: "${MINIO_BUCKET}"
     endpoint: "${MINIO_ENDPOINT}"
     accessKeyID: "${MINIO_ACCESS_KEY}"
     secretAccessKey: "${MINIO_SECRET_KEY}"
     sessionToken: ${MINIO_SESSION_TOKEN}
-    signEndpoint: "${MINIO_SIGN_ENDPOINT}"
+    signEndpoint: "${OBJECT_NGINX_APIURL}"
     publicRead: ${MINIO_PUBLIC_READ}
   cos:
     bucketURL: ${COS_BUCKET_URL}
