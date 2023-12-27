@@ -247,6 +247,14 @@ manager:
   userID: [ "${MANAGER_USERID_1}", "${MANAGER_USERID_2}", "${MANAGER_USERID_3}" ]
   nickname: [ "${NICKNAME_1}", "${NICKNAME_2}", "${NICKNAME_3}" ]
 
+# chatAdmin, use for send notification
+#
+# Built-in app system notification account ID
+# Built-in app system notification account nickname
+im-admin:
+  userID: [ "${IM_ADMIN_USERID}" ]
+  nickname: [ "${IM_ADMIN_NAME}" ]
+
 # Multi-platform login policy
 # For each platform(Android, iOS, Windows, Mac, web), only one can be online at a time
 multiLoginPolicy: ${MULTILOGIN_POLICY}
