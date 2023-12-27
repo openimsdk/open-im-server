@@ -288,12 +288,13 @@ func (ws *WsServer) registerClient(client *Client) {
 	}
 
 	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		_ = ws.sendUserOnlineInfoToOtherNode(client.ctx, client)
-	}()
-
+	if config.Config.Envs.Discovery == "zookeeper" {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_ = ws.sendUserOnlineInfoToOtherNode(client.ctx, client)
+		}()
+	}
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
