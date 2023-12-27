@@ -471,5 +471,7 @@ func (s *friendServer) UpdateFriends(
 	}
 
 	resp := &pbfriend.UpdateFriendsResp{}
+
+	s.notificationSender.FriendsInfoUpdateNotification(ctx, req.OwnerUserID)
 	return resp, nil
 }
