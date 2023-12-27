@@ -53,6 +53,10 @@ type friendServer struct {
 	RegisterCenter        registry.SvcDiscoveryRegistry
 }
 
+func (s *friendServer) UpdateFriends(ctx context.Context, req *pbfriend.UpdateFriendsReq) (*pbfriend.UpdateFriendsResp, error) {
+	return nil, errs.ErrInternalServer.Wrap("not implemented")
+}
+
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	// Initialize MongoDB
 	mongo, err := unrelation.NewMongo()
@@ -436,10 +440,10 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 	}
 	return resp, nil
 }
-func (s *friendServer) UpdateFriends(
+func (s *friendServer) PinFriends(
 	ctx context.Context,
-	req *pbfriend.UpdateFriendsReq) (
-	*pbfriend.UpdateFriendsResp, error) {
+	req *pbfriend.UpdateFriendsReq,
+) (*pbfriend.UpdateFriendsResp, error) {
 	if len(req.FriendUserIDs) == 0 {
 		return nil, errs.ErrArgs.Wrap("friendIDList is empty")
 	}

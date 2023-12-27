@@ -16,8 +16,13 @@ package oss
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -44,6 +49,8 @@ const (
 	imageGif  = "gif"
 	imageWebp = "webp"
 )
+
+const successCode = http.StatusOK
 
 const (
 	videoSnapshotImagePng = "png"
@@ -326,4 +333,46 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	}
 	params := getURLParams(*o.bucket.Client.Conn, rawParams)
 	return getURL(o.um, o.bucket.BucketName, name, params).String(), nil
+}
+
+func (o *OSS) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
+	// https://help.aliyun.com/zh/oss/developer-reference/postobject?spm=a2c4g.11186623.0.0.1cb83cebkP55nn
+	expires := time.Now().Add(duration)
+	conditions := []any{
+		map[string]string{"bucket": o.bucket.BucketName},
+		map[string]string{"key": name},
+	}
+	if size > 0 {
+		conditions = append(conditions, []any{"content-length-range", 0, size})
+	}
+	policy := map[string]any{
+		"expiration": expires.Format("2006-01-02T15:04:05.000Z"),
+		"conditions": conditions,
+	}
+	policyJson, err := json.Marshal(policy)
+	if err != nil {
+		return nil, err
+	}
+	policyStr := base64.StdEncoding.EncodeToString(policyJson)
+	h := hmac.New(sha1.New, []byte(o.credentials.GetAccessKeySecret()))
+	if _, err := io.WriteString(h, policyStr); err != nil {
+		return nil, err
+	}
+	fd := &s3.FormData{
+		URL:     o.bucketURL,
+		File:    "file",
+		Expires: expires,
+		FormData: map[string]string{
+			"key":                   name,
+			"policy":                policyStr,
+			"OSSAccessKeyId":        o.credentials.GetAccessKeyID(),
+			"success_action_status": strconv.Itoa(successCode),
+			"signature":             base64.StdEncoding.EncodeToString(h.Sum(nil)),
+		},
+		SuccessCodes: []int{successCode},
+	}
+	if contentType != "" {
+		fd.FormData["x-oss-content-type"] = contentType
+	}
+	return fd, nil
 }

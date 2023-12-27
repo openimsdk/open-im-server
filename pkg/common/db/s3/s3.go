@@ -74,6 +74,15 @@ type CopyObjectInfo struct {
 	ETag string `json:"etag"`
 }
 
+type FormData struct {
+	URL          string            `json:"url"`
+	File         string            `json:"file"`
+	Header       http.Header       `json:"header"`
+	FormData     map[string]string `json:"form"`
+	Expires      time.Time         `json:"expires"`
+	SuccessCodes []int             `json:"successActionStatus"`
+}
+
 type SignPart struct {
 	PartNumber int         `json:"partNumber"`
 	URL        string      `json:"url"`
@@ -152,4 +161,6 @@ type Interface interface {
 	ListUploadedParts(ctx context.Context, uploadID string, name string, partNumberMarker int, maxParts int) (*ListUploadedPartsResult, error)
 
 	AccessURL(ctx context.Context, name string, expire time.Duration, opt *AccessURLOption) (string, error)
+
+	FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*FormData, error)
 }

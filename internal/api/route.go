@@ -171,6 +171,8 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		objectGroup.POST("/auth_sign", t.AuthSign)
 		objectGroup.POST("/complete_multipart_upload", t.CompleteMultipartUpload)
 		objectGroup.POST("/access_url", t.AccessURL)
+		objectGroup.POST("/initiate_form_data", t.InitiateFormData)
+		objectGroup.POST("/complete_form_data", t.CompleteFormData)
 		objectGroup.GET("/*name", t.ObjectRedirect)
 	}
 	// Message
