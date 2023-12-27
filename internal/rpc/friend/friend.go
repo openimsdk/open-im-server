@@ -53,10 +53,6 @@ type friendServer struct {
 	RegisterCenter        registry.SvcDiscoveryRegistry
 }
 
-func (s *friendServer) UpdateFriends(ctx context.Context, req *pbfriend.UpdateFriendsReq) (*pbfriend.UpdateFriendsResp, error) {
-	return nil, errs.ErrInternalServer.Wrap("not implemented")
-}
-
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	// Initialize MongoDB
 	mongo, err := unrelation.NewMongo()
@@ -476,6 +472,6 @@ func (s *friendServer) UpdateFriends(
 
 	resp := &pbfriend.UpdateFriendsResp{}
 
-	s.notificationSender.FriendsInfoUpdateNotification(ctx, req.OwnerUserID)
+	s.notificationSender.FriendsInfoUpdateNotification(ctx, req.OwnerUserID, req.FriendUserIDs)
 	return resp, nil
 }

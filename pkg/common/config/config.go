@@ -365,7 +365,6 @@ type notification struct {
 	BlackAdded                NotificationConf `yaml:"blackAdded"`
 	BlackDeleted              NotificationConf `yaml:"blackDeleted"`
 	FriendInfoUpdated         NotificationConf `yaml:"friendInfoUpdated"`
-	FriendsInfoUpdate         NotificationConf `yaml:"friendsInfoUpdate"`
 	//////////////////////conversation///////////////////////
 	ConversationChanged    NotificationConf `yaml:"conversationChanged"`
 	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
