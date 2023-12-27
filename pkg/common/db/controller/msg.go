@@ -1063,7 +1063,7 @@ func (db *commonMsgDatabase) FindOneByDocIDs(ctx context.Context, conversationID
 		docID := conversationID + ":" + fmt.Sprintf("%d", seq)
 		msgs, err := db.msgDocDatabase.FindOneByDocID(ctx, docID)
 		if err != nil {
-			return nil, err
+			return nil, errs.ErrRecordNotFound.Wrap(err.Error())
 		}
 		totalMsgs[conversationID] = convert.MsgDB2Pb(msgs.Msg[index].Msg)
 	}
