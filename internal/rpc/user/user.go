@@ -524,11 +524,6 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 	return resp, nil
 }
 
-func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (*pbuser.UpdateUserInfoExResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (s *userServer) GetNotificationAccount(ctx context.Context, req *pbuser.GetNotificationAccountReq) (*pbuser.GetNotificationAccountResp, error) {
 	if req.UserID == "" {
 		return nil, errs.ErrArgs.Wrap("userID is empty")
