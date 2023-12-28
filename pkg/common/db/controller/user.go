@@ -38,6 +38,8 @@ type UserDatabase interface {
 	FindWithError(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error)
 	// Find Get the information of the specified user If the userID is not found, no error will be returned
 	Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error)
+	// Find userInfo By Nickname
+	FindByNickname(ctx context.Context, nickname string) (users []*relation.UserModel, err error)
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db
 	Create(ctx context.Context, users []*relation.UserModel) (err error)
 	// Update update (non-zero value) external guarantee userID exists
@@ -131,6 +133,11 @@ func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (use
 // Find Get the information of the specified user. If the userID is not found, no error will be returned.
 func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
 	return u.cache.GetUsersInfo(ctx, userIDs)
+}
+
+// Find userInfo By Nickname
+func (u *userDatabase) FindByNickname(ctx context.Context, nickname string) (users []*relation.UserModel, err error) {
+	return u.userDB.TakeByNickname(ctx, nickname)
 }
 
 // Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db.

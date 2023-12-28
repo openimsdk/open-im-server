@@ -17,6 +17,7 @@ package user
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"math/rand"
 	"strings"
 	"time"
@@ -55,10 +56,6 @@ type userServer struct {
 	friendRpcClient          *rpcclient.FriendRpcClient
 	groupRpcClient           *rpcclient.GroupRpcClient
 	RegisterCenter           registry.SvcDiscoveryRegistry
-}
-
-func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (*pbuser.UpdateUserInfoExResp, error) {
-	return nil, errs.ErrInternalServer.Wrap("not implemented")
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -466,26 +463,36 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		return nil, err
 	}
 
+	if req.NickName != "" {
+		users, err := s.UserDatabase.FindByNickname(ctx, req.NickName)
+		if err != nil {
+			return nil, err
+		}
+		resp := s.userModelToResp(users)
+		return resp, nil
+	}
+
+	if req.UserID != "" {
+		users, err := s.UserDatabase.Find(ctx, []string{req.UserID})
+		if err != nil {
+			return nil, err
+		}
+		resp := s.userModelToResp(users)
+		return resp, nil
+	}
+
 	_, users, err := s.UserDatabase.Page(ctx, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
 
-	var total int64
-	accounts := make([]*pbuser.NotificationAccountInfo, 0, len(users))
-	for _, v := range users {
-		if v.AppMangerLevel != constant.AppNotificationAdmin {
-			continue
-		}
-		temp := &pbuser.NotificationAccountInfo{
-			UserID:   v.UserID,
-			FaceURL:  v.FaceURL,
-			NickName: v.Nickname,
-		}
-		accounts = append(accounts, temp)
-		total += 1
-	}
-	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: accounts}, nil
+	resp := s.userModelToResp(users)
+	return resp, nil
+}
+
+func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (*pbuser.UpdateUserInfoExResp, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (s *userServer) GetNotificationAccount(ctx context.Context, req *pbuser.GetNotificationAccountReq) (*pbuser.GetNotificationAccountResp, error) {
@@ -516,4 +523,21 @@ func (s *userServer) genUserID() string {
 		}
 	}
 	return string(data)
+}
+
+func (s *userServer) userModelToResp(users []*relation.UserModel) *pbuser.SearchNotificationAccountResp {
+	accounts := make([]*pbuser.NotificationAccountInfo, 0)
+	var total int64
+	for _, v := range users {
+		if v.AppMangerLevel == constant.AppNotificationAdmin || v.AppMangerLevel == constant.AppAdmin {
+			temp := &pbuser.NotificationAccountInfo{
+				UserID:   v.UserID,
+				FaceURL:  v.FaceURL,
+				NickName: v.Nickname,
+			}
+			accounts = append(accounts, temp)
+			total += 1
+		}
+	}
+	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: accounts}
 }
