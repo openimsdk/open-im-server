@@ -454,17 +454,17 @@ func (s *friendServer) UpdateFriends(
 
 	for _, friendID := range req.FriendUserIDs {
 		if req.IsPinned != nil {
-			if err := s.friendDatabase.UpdateFriendPinStatus(ctx, req.OwnerUserID, friendID, req.IsPinned.Value); err != nil {
+			if err = s.friendDatabase.UpdateFriendPinStatus(ctx, req.OwnerUserID, friendID, req.IsPinned.Value); err != nil {
 				return nil, err
 			}
 		}
 		if req.Remark != nil {
-			if err := s.friendDatabase.UpdateFriendRemark(ctx, req.OwnerUserID, friendID, req.Remark.Value); err != nil {
+			if err = s.friendDatabase.UpdateFriendRemark(ctx, req.OwnerUserID, friendID, req.Remark.Value); err != nil {
 				return nil, err
 			}
 		}
 		if req.Ex != nil {
-			if err := s.friendDatabase.UpdateFriendEx(ctx, req.OwnerUserID, friendID, req.Ex.Value); err != nil {
+			if err = s.friendDatabase.UpdateFriendEx(ctx, req.OwnerUserID, friendID, req.Ex.Value); err != nil {
 				return nil, err
 			}
 		}
