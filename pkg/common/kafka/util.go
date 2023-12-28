@@ -15,7 +15,9 @@
 package kafka
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/IBM/sarama"
 
@@ -43,4 +45,21 @@ func getEnvOrConfig(envName string, configValue string) string {
 		return value
 	}
 	return configValue
+}
+
+// getKafkaAddrFromEnv returns the Kafka addresses combined from the KAFKA_ADDRESS and KAFKA_PORT environment variables.
+// If the environment variables are not set, it returns the fallback value.
+func getKafkaAddrFromEnv(fallback []string) []string {
+	envAddr := os.Getenv("KAFKA_ADDRESS")
+	envPort := os.Getenv("KAFKA_PORT")
+
+	if envAddr != "" && envPort != "" {
+		addresses := strings.Split(envAddr, ",")
+		for i, addr := range addresses {
+			addresses[i] = fmt.Sprintf("%s:%s", addr, envPort)
+		}
+		return addresses
+	}
+
+	return fallback
 }
