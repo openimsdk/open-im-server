@@ -282,6 +282,8 @@ type configStruct struct {
 		CallbackBeforeSetFriendRemark      CallBackConfig `yaml:"callbackBeforeSetFriendRemark"`
 		CallbackAfterSetFriendRemark       CallBackConfig `yaml:"callbackAfterSetFriendRemark"`
 		CallbackBeforeUpdateUserInfo       CallBackConfig `yaml:"beforeUpdateUserInfo"`
+		CallbackBeforeUpdateUserInfoEx     CallBackConfig `yaml:"beforeUpdateUserInfoEx"`
+		CallbackAfterUpdateUserInfoEx      CallBackConfig `yaml:"afterUpdateUserInfoEx"`
 		CallbackBeforeUserRegister         CallBackConfig `yaml:"beforeUserRegister"`
 		CallbackAfterUpdateUserInfo        CallBackConfig `yaml:"updateUserInfo"`
 		CallbackAfterUserRegister          CallBackConfig `yaml:"afterUserRegister"`

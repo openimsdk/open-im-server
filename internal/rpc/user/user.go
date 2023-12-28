@@ -149,7 +149,41 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	}
 	return resp, nil
 }
+func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (resp *pbuser.UpdateUserInfoExResp, err error) {
+	resp = &pbuser.UpdateUserInfoExResp{}
+	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID)
+	if err != nil {
+		return nil, err
+	}
 
+	if err = CallbackBeforeUpdateUserInfoEx(ctx, req); err != nil {
+		return nil, err
+	}
+	data := convert.UserPb2DBMapEx(req.UserInfo)
+	if err = s.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
+		return nil, err
+	}
+	_ = s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
+	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
+	if err != nil {
+		return nil, err
+	}
+	if req.UserInfo.Nickname != "" || req.UserInfo.FaceURL != "" {
+		if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+			log.ZError(ctx, "NotificationUserInfoUpdate", err)
+		}
+	}
+	for _, friendID := range friends {
+		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
+	}
+	if err := CallbackAfterUpdateUserInfoEx(ctx, req); err != nil {
+		return nil, err
+	}
+	if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+		log.ZError(ctx, "NotificationUserInfoUpdate", err, "userID", req.UserInfo.UserID)
+	}
+	return resp, nil
+}
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.SetGlobalRecvMessageOptReq) (resp *pbuser.SetGlobalRecvMessageOptResp, err error) {
 	resp = &pbuser.SetGlobalRecvMessageOptResp{}
 	if _, err := s.FindWithError(ctx, []string{req.UserID}); err != nil {
@@ -488,11 +522,6 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 
 	resp := s.userModelToResp(users)
 	return resp, nil
-}
-
-func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (*pbuser.UpdateUserInfoExResp, error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func (s *userServer) GetNotificationAccount(ctx context.Context, req *pbuser.GetNotificationAccountReq) (*pbuser.GetNotificationAccountResp, error) {

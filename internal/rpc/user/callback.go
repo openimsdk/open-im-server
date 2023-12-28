@@ -44,7 +44,6 @@ func CallbackBeforeUpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInf
 	utils.NotNilReplace(&req.UserInfo.Nickname, resp.Nickname)
 	return nil
 }
-
 func CallbackAfterUpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) error {
 	if !config.Config.Callback.CallbackAfterUpdateUserInfo.Enable {
 		return nil
@@ -57,6 +56,41 @@ func CallbackAfterUpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfo
 	}
 	resp := &cbapi.CallbackAfterUpdateUserInfoResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfo); err != nil {
+		return err
+	}
+	return nil
+}
+func CallbackBeforeUpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) error {
+	if !config.Config.Callback.CallbackBeforeUpdateUserInfoEx.Enable {
+		return nil
+	}
+	cbReq := &cbapi.CallbackBeforeUpdateUserInfoExReq{
+		CallbackCommand: cbapi.CallbackBeforeUpdateUserInfoExCommand,
+		UserID:          req.UserInfo.UserID,
+		FaceURL:         &req.UserInfo.FaceURL,
+		Nickname:        &req.UserInfo.Nickname,
+	}
+	resp := &cbapi.CallbackBeforeUpdateUserInfoExResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfoEx); err != nil {
+		return err
+	}
+	utils.NotNilReplace(&req.UserInfo.FaceURL, resp.FaceURL)
+	utils.NotNilReplace(req.UserInfo.Ex, resp.Ex)
+	utils.NotNilReplace(&req.UserInfo.Nickname, resp.Nickname)
+	return nil
+}
+func CallbackAfterUpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) error {
+	if !config.Config.Callback.CallbackAfterUpdateUserInfoEx.Enable {
+		return nil
+	}
+	cbReq := &cbapi.CallbackAfterUpdateUserInfoExReq{
+		CallbackCommand: cbapi.CallbackAfterUpdateUserInfoExCommand,
+		UserID:          req.UserInfo.UserID,
+		FaceURL:         req.UserInfo.FaceURL,
+		Nickname:        req.UserInfo.Nickname,
+	}
+	resp := &cbapi.CallbackAfterUpdateUserInfoExResp{}
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfoEx); err != nil {
 		return err
 	}
 	return nil

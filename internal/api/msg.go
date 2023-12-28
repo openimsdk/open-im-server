@@ -172,6 +172,7 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 		if err = m.userRpcClient.GetNotificationByID(c, req.SendID); err != nil {
 			return nil, err
 		}
+
 	default:
 		return nil, errs.ErrArgs.WithDetail("not support err contentType")
 	}
@@ -185,38 +186,63 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 	return m.newUserSendMsgReq(c, &req), nil
 }
 
+// SendMessage handles the sending of a message. It's an HTTP handler function to be used with Gin framework.
 func (m *MessageApi) SendMessage(c *gin.Context) {
+	// Initialize a request struct for sending a message.
 	req := apistruct.SendMsgReq{}
+
+	// Bind the JSON request body to the request struct.
 	if err := c.BindJSON(&req); err != nil {
+		// Respond with an error if request body binding fails.
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
+
+	// Check if the user has the app manager role.
 	if !authverify.IsAppManagerUid(c) {
+		// Respond with a permission error if the user is not an app manager.
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
 	}
+
+	// Prepare the message request with additional required data.
 	sendMsgReq, err := m.getSendMsgReq(c, req.SendMsg)
 	if err != nil {
+		// Log and respond with an error if preparation fails.
 		log.ZError(c, "decodeData failed", err)
 		apiresp.GinError(c, err)
 		return
 	}
+
+	// Set the receiver ID in the message data.
 	sendMsgReq.MsgData.RecvID = req.RecvID
+
+	// Declare a variable to store the message sending status.
 	var status int
+
+	// Attempt to send the message using the client.
 	respPb, err := m.Client.SendMsg(c, sendMsgReq)
 	if err != nil {
+		// Set the status to failed and respond with an error if sending fails.
 		status = constant.MsgSendFailed
 		log.ZError(c, "send message err", err)
 		apiresp.GinError(c, err)
 		return
 	}
+
+	// Set the status to successful if the message is sent.
 	status = constant.MsgSendSuccessed
+
+	// Attempt to update the message sending status in the system.
 	_, err = m.Client.SetSendMsgStatus(c, &msg.SetSendMsgStatusReq{
 		Status: int32(status),
 	})
 	if err != nil {
+		// Log the error if updating the status fails.
 		log.ZError(c, "SetSendMsgStatus failed", err)
 	}
+
+	// Respond with a success message and the response payload.
 	apiresp.GinSuccess(c, respPb)
 }
 
