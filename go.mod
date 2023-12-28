@@ -156,3 +156,5 @@ require (
 	golang.org/x/crypto v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
+
+replace github.com/OpenIMSDK/protocol v0.0.40 => github.com/luhaoling/protocol v0.0.0-20231227040641-2f934a0d64a3

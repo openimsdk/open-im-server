@@ -53,6 +53,7 @@ type UserModelInterface interface {
 	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
 	Find(ctx context.Context, userIDs []string) (users []*UserModel, err error)
 	Take(ctx context.Context, userID string) (user *UserModel, err error)
+	TakeByNickname(ctx context.Context, nickname string) (user []*UserModel, err error)
 	Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*UserModel, err error)
 	Exist(ctx context.Context, userID string) (exist bool, err error)
 	GetAllUserID(ctx context.Context, pagination pagination.Pagination) (count int64, userIDs []string, err error)

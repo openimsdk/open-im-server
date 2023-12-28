@@ -65,6 +65,10 @@ func (u *UserMgo) Take(ctx context.Context, userID string) (user *relation.UserM
 	return mgoutil.FindOne[*relation.UserModel](ctx, u.coll, bson.M{"user_id": userID})
 }
 
+func (u *UserMgo) TakeByNickname(ctx context.Context, nickname string) (user []*relation.UserModel, err error) {
+	return mgoutil.Find[*relation.UserModel](ctx, u.coll, bson.M{"nickname": nickname})
+}
+
 func (u *UserMgo) Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
 	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, bson.M{}, pagination)
 }
