@@ -67,6 +67,7 @@ func newContentTypeConf() map[int32]config.NotificationConf {
 		constant.BlackAddedNotification:                config.Config.Notification.BlackAdded,
 		constant.BlackDeletedNotification:              config.Config.Notification.BlackDeleted,
 		constant.FriendInfoUpdatedNotification:         config.Config.Notification.FriendInfoUpdated,
+		constant.FriendsInfoUpdateNotification:         config.Config.Notification.FriendInfoUpdated, //use the same FriendInfoUpdated
 		// conversation
 		constant.ConversationChangeNotification:      config.Config.Notification.ConversationChanged,
 		constant.ConversationUnreadNotification:      config.Config.Notification.ConversationChanged,
@@ -114,6 +115,7 @@ func newSessionTypeConf() map[int32]int32 {
 		constant.BlackAddedNotification:                constant.SingleChatType,
 		constant.BlackDeletedNotification:              constant.SingleChatType,
 		constant.FriendInfoUpdatedNotification:         constant.SingleChatType,
+		constant.FriendsInfoUpdateNotification:         constant.SingleChatType,
 		// conversation
 		constant.ConversationChangeNotification:      constant.SingleChatType,
 		constant.ConversationUnreadNotification:      constant.SingleChatType,

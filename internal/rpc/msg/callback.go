@@ -100,7 +100,7 @@ func callbackAfterSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) err
 }
 
 func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) error {
-	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable {
+	if !config.Config.Callback.CallbackBeforeSendGroupMsg.Enable {
 		return nil
 	}
 	req := &cbapi.CallbackBeforeSendGroupMsgReq{

@@ -87,7 +87,15 @@ func NewRedis() (redis.UniversalClient, error) {
 // overrideConfigFromEnv overrides configuration fields with environment variables if present.
 func overrideConfigFromEnv() {
 	if envAddr := os.Getenv("REDIS_ADDRESS"); envAddr != "" {
-		config.Config.Redis.Address = strings.Split(envAddr, ",") // Assuming addresses are comma-separated
+		if envPort := os.Getenv("REDIS_PORT"); envPort != "" {
+			addresses := strings.Split(envAddr, ",")
+			for i, addr := range addresses {
+				addresses[i] = addr + ":" + envPort
+			}
+			config.Config.Redis.Address = addresses
+		} else {
+			config.Config.Redis.Address = strings.Split(envAddr, ",")
+		}
 	}
 	if envUser := os.Getenv("REDIS_USERNAME"); envUser != "" {
 		config.Config.Redis.Username = envUser
