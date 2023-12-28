@@ -476,16 +476,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbgroup.GetGro
 
 func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbgroup.GetGroupMemberListReq) (*pbgroup.GetGroupMemberListResp, error) {
 	resp := &pbgroup.GetGroupMemberListResp{}
-	var (
-		total   int64
-		members []*relationtb.GroupMemberModel
-		err     error
-	)
-	if req.GroupNickname == "" {
-		total, members, err = s.db.PageGetGroupMember(ctx, req.GroupID, req.Pagination)
-	} else {
-		total, members, err = s.db.FindGroupMemberByNickname(ctx, req.GroupID, req.GroupNickname, req.Pagination)
-	}
+	total, members, err := s.db.PageGetGroupMember(ctx, req.GroupID, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
