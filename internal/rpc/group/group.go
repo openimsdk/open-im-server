@@ -481,10 +481,10 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbgroup.GetGr
 		members []*relationtb.GroupMemberModel
 		err     error
 	)
-	if req.GroupNickname == "" {
+	if req.Keyword == "" {
 		total, members, err = s.db.PageGetGroupMember(ctx, req.GroupID, req.Pagination)
 	} else {
-		total, members, err = s.db.FindGroupMemberByNickname(ctx, req.GroupID, req.GroupNickname, req.Pagination)
+		total, members, err = s.db.FindGroupMemberByKeyword(ctx, req.GroupID, req.Keyword, req.Pagination)
 	}
 	if err != nil {
 		return nil, err
