@@ -79,7 +79,6 @@ func UserPb2DBMapEx(user *sdkws.UserInfoWithEx) map[string]any {
 	val := make(map[string]any)
 
 	// Map fields from UserInfoWithEx to val
-
 	if user.Nickname != nil {
 		val["nickname"] = user.Nickname.Value
 	}
