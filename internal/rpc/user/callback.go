@@ -66,8 +66,8 @@ func CallbackBeforeUpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserI
 	cbReq := &cbapi.CallbackBeforeUpdateUserInfoExReq{
 		CallbackCommand: cbapi.CallbackBeforeUpdateUserInfoExCommand,
 		UserID:          req.UserInfo.UserID,
-		FaceURL:         &req.UserInfo.FaceURL.Value,
-		Nickname:        &req.UserInfo.Nickname.Value,
+		FaceURL:         req.UserInfo.FaceURL,
+		Nickname:        req.UserInfo.Nickname,
 	}
 	resp := &cbapi.CallbackBeforeUpdateUserInfoExResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfoEx); err != nil {
