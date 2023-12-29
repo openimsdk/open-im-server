@@ -430,10 +430,11 @@ func (ws *WsServer) ParseWSArgs(r *http.Request) (args *WSArgs, err error) {
 	defer func() {
 		args = &v
 	}()
+	query := r.URL.Query()
+	v.MsgResp, _ = strconv.ParseBool(query.Get(MsgResp))
 	if ws.onlineUserConnNum.Load() >= ws.wsMaxConnNum {
 		return nil, errs.ErrConnOverMaxNumLimit.Wrap("over max conn num limit")
 	}
-	query := r.URL.Query()
 	if v.Token = query.Get(Token); v.Token == "" {
 		return nil, errs.ErrConnArgsErr.Wrap("token is empty")
 	}
@@ -458,7 +459,6 @@ func (ws *WsServer) ParseWSArgs(r *http.Request) (args *WSArgs, err error) {
 	if r.Header.Get(Compression) == GzipCompressionProtocol {
 		v.Compression = true
 	}
-	v.MsgResp, _ = strconv.ParseBool(query.Get(MsgResp))
 	m, err := ws.cache.GetTokensWithoutError(context.Background(), v.UserID, platformID)
 	if err != nil {
 		return nil, err
