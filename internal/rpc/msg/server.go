@@ -47,21 +47,6 @@ type (
 	}
 )
 
-func (m *msgServer) GetMaxSeqs(ctx context.Context, req *msg.GetMaxSeqsReq) (*msg.SeqsInfoResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *msgServer) GetHasReadSeqs(ctx context.Context, req *msg.GetHasReadSeqsReq) (*msg.SeqsInfoResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *msgServer) GetMsgByConversationIDs(ctx context.Context, req *msg.GetMsgByConversationIDsReq) (*msg.GetMsgByConversationIDsResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
 	m.Handlers = append(m.Handlers, interceptorFunc...)
 }
