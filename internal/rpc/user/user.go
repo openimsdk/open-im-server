@@ -168,7 +168,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	if err != nil {
 		return nil, err
 	}
-	if req.UserInfo.Nickname != "" || req.UserInfo.FaceURL != "" {
+	if req.UserInfo.Nickname != nil || req.UserInfo.FaceURL != nil {
 		if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
 			log.ZError(ctx, "NotificationUserInfoUpdate", err)
 		}
