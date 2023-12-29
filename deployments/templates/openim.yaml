@@ -506,7 +506,7 @@ callback:
 # The number of ports needs to be consistent with msg_transfer_service_num in script/path_info.sh
 prometheus:
   enable: ${PROMETHEUS_ENABLE}
-  prometheusUrl: ${PROMETHEUS_URL}
+  grafanaUrl: ${GRAFANA_URL}
   apiPrometheusPort: [${API_PROM_PORT}]
   userPrometheusPort: [ ${USER_PROM_PORT} ]
   friendPrometheusPort: [ ${FRIEND_PROM_PORT} ]
