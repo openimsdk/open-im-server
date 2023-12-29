@@ -378,7 +378,7 @@ def "CALLBACK_TIMEOUT" "5"            # 最长超时时间
 def "CALLBACK_FAILED_CONTINUE" "true" # 失败后是否继续
 ###################### Prometheus 配置信息 ######################
 # 是否启用 Prometheus
-readonly PROMETHEUS_ENABLE=${PROMETHEUS_ENABLE:-'false'}
+readonly PROMETHEUS_ENABLE=${PROMETHEUS_ENABLE:-'true'}
 def "PROMETHEUS_URL" "${GRAFANA_ADDRESS}:${GRAFANA_PORT}"
 # Api 服务的 Prometheus 端口
 readonly API_PROM_PORT=${API_PROM_PORT:-'20100'}

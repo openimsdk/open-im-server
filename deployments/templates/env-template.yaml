@@ -1,39 +1,20 @@
-# Copyright © 2023 OpenIM. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# -----------------------------------------------------------------------------
+# General Configuration
+# This section contains general configuration options for the entire environment.
+# These options can be set via environment variables. If both environment variables 
+# and settings in this .env file exist, the environment variables take precedence.
+# -----------------------------------------------------------------------------
 
-# ======================================
-# ========= Basic Configuration ========
-# ======================================
+# Local IP address for the service
+# To modify, uncomment and replace with the actual IP address
+OPENIM_IP=${OPENIM_IP}
 
-# The user for authentication or system operations.
-# Default: OPENIM_USER=root
-USER=${OPENIM_USER}
-
-# Password associated with the specified user for authentication.
-# Default: PASSWORD=openIM123
-PASSWORD=${PASSWORD}
-
-# Base URL for the application programming interface (API).
-# Default: API_URL=http://172.28.0.1:10002
-API_URL=${API_URL}
-
-# Directory path for storing data files or related information.
-# Default: DATA_DIR=./
+# Data storage directory
 DATA_DIR=${DATA_DIR}
 
-# Choose the appropriate image address, the default is GITHUB image, 
-# you can choose docker hub, for Chinese users can choose Ali Cloud
+# Choose the image address: GitHub (ghcr.io/openimsdk), Docker Hub (openim), 
+# or Ali Cloud (registry.cn-hangzhou.aliyuncs.com/openimsdk).
+# Uncomment one of the following three options. Aliyun is recommended for users in China.
 # export IMAGE_REGISTRY="ghcr.io/openimsdk"
 # export IMAGE_REGISTRY="openim"
 # export IMAGE_REGISTRY="registry.cn-hangzhou.aliyuncs.com/openimsdk"
@@ -47,10 +28,9 @@ IMAGE_REGISTRY=${IMAGE_REGISTRY}
 # Default: DOCKER_BRIDGE_SUBNET=172.28.0.0/16
 DOCKER_BRIDGE_SUBNET=${DOCKER_BRIDGE_SUBNET}
 
-# Gateway for the Docker network.
-# Default: DOCKER_BRIDGE_GATEWAY=172.28.0.1
+# Set and specify the IP addresses of some containers. Generally speaking, 
+# you do not need to modify these configurations to facilitate debugging
 DOCKER_BRIDGE_GATEWAY=${DOCKER_BRIDGE_GATEWAY}
-
 MONGO_NETWORK_ADDRESS=${MONGO_NETWORK_ADDRESS}
 REDIS_NETWORK_ADDRESS=${REDIS_NETWORK_ADDRESS}
 KAFKA_NETWORK_ADDRESS=${KAFKA_NETWORK_ADDRESS}
@@ -65,15 +45,13 @@ NODE_EXPORTER_NETWORK_ADDRESS=${NODE_EXPORTER_NETWORK_ADDRESS}
 OPENIM_ADMIN_FRONT_NETWORK_ADDRESS=${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS}
 ALERT_MANAGER_NETWORK_ADDRESS=${ALERT_MANAGER_NETWORK_ADDRESS}
 
-# ===============================================
-# = Component Extension Configuration =
-# ===============================================
+# -----------------------------------------------------------------------------
+# Database Configuration
+# This section contains environment variable settings related to databases.
+# -----------------------------------------------------------------------------
 
-# ============ Component Extension Configuration ==========
 # ----- ZooKeeper Configuration -----
 # Address or hostname for the ZooKeeper service.
-# Default: ZOOKEEPER_ADDRESS=172.28.0.1
-ZOOKEEPER_ADDRESS=${ZOOKEEPER_NETWORK_ADDRESS}
 
 # Port for ZooKeeper service.
 # Default: ZOOKEEPER_PORT=12181

@@ -122,7 +122,7 @@ services:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS:-172.28.0.7}
 
-  # Uncomment and configure the following services as needed
+  ## Uncomment and configure the following services as needed
   # openim-admin:
   #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin-front:v3.4.0
   #   container_name: openim-admin
