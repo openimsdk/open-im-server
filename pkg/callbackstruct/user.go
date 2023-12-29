@@ -53,16 +53,16 @@ type CallbackBeforeUpdateUserInfoExReq struct {
 }
 type CallbackBeforeUpdateUserInfoExResp struct {
 	CommonCallbackResp
-	Nickname *string                 `json:"nickName"`
-	FaceURL  *string                 `json:"faceURL"`
+	Nickname *wrapperspb.StringValue `json:"nickName"`
+	FaceURL  *wrapperspb.StringValue `json:"faceURL"`
 	Ex       *wrapperspb.StringValue `json:"ex"`
 }
 
 type CallbackAfterUpdateUserInfoExReq struct {
 	CallbackCommand `json:"callbackCommand"`
 	UserID          string                  `json:"userID"`
-	Nickname        string                  `json:"nickName"`
-	FaceURL         string                  `json:"faceURL"`
+	Nickname        *wrapperspb.StringValue `json:"nickName"`
+	FaceURL         *wrapperspb.StringValue `json:"faceURL"`
 	Ex              *wrapperspb.StringValue `json:"ex"`
 }
 type CallbackAfterUpdateUserInfoExResp struct {
