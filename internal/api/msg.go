@@ -250,13 +250,14 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 	req := struct {
 		Key        string `json:"key"`
 		Data       string `json:"data"`
-		SendUserID string `json:"sendUserID"`
-		RecvUserID string `json:"recvUserID"`
+		SendUserID string `json:"sendUserID" binding:"required"`
+		RecvUserID string `json:"recvUserID" binding:"required"`
 	}{}
 	if err := c.BindJSON(&req); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
+
 	if !authverify.IsAppManagerUid(c) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
