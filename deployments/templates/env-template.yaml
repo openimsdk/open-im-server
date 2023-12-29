@@ -4,20 +4,20 @@
 # These options can be set via environment variables. If both environment variables 
 # and settings in this .env file exist, the environment variables take precedence.
 # -----------------------------------------------------------------------------
+# ==========================
+# General Configuration
+# ==========================
+# These settings apply to the overall environment.
 
-# Local IP address for the service
-# To modify, uncomment and replace with the actual IP address
-OPENIM_IP=${OPENIM_IP}
-
-# Data storage directory
+# Data storage directory for persistent data.
+# Example: DATA_DIR=/path/to/data
 DATA_DIR=${DATA_DIR}
 
-# Choose the image address: GitHub (ghcr.io/openimsdk), Docker Hub (openim), 
-# or Ali Cloud (registry.cn-hangzhou.aliyuncs.com/openimsdk).
-# Uncomment one of the following three options. Aliyun is recommended for users in China.
-# export IMAGE_REGISTRY="ghcr.io/openimsdk"
-# export IMAGE_REGISTRY="openim"
-# export IMAGE_REGISTRY="registry.cn-hangzhou.aliyuncs.com/openimsdk"
+# Docker image registry. Uncomment the preferred one.
+# Options: ghcr.io/openimsdk, openim, registry.cn-hangzhou.aliyuncs.com/openimsdk
+# IMAGE_REGISTRY="ghcr.io/openimsdk"
+# IMAGE_REGISTRY="openim"
+# IMAGE_REGISTRY="registry.cn-hangzhou.aliyuncs.com/openimsdk"
 IMAGE_REGISTRY=${IMAGE_REGISTRY}
 
 # ======================================
@@ -45,22 +45,44 @@ NODE_EXPORTER_NETWORK_ADDRESS=${NODE_EXPORTER_NETWORK_ADDRESS}
 OPENIM_ADMIN_FRONT_NETWORK_ADDRESS=${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS}
 ALERT_MANAGER_NETWORK_ADDRESS=${ALERT_MANAGER_NETWORK_ADDRESS}
 
-# -----------------------------------------------------------------------------
-# Database Configuration
-# This section contains environment variable settings related to databases.
-# -----------------------------------------------------------------------------
+# ==============================================================================
+# Configuration Update Instructions
+# ==============================================================================
+# This header outlines the methods to update common variables in config.yaml and .env files.
+# These instructions are vital for maintaining the OpenIM environment's configuration.
+#
+# METHOD 1: Regenerate All Configurations
+# ----------------------------------------
+# Use this method to regenerate all configurations.
+# Steps:
+#   1. Delete existing config files:
+#      - openim-server/config/config.yaml
+#      - openim-chat/config/config.yaml
+#   2. Modify the .env file as required.
+#   3. Run 'docker compose up -d'. This will regenerate:
+#       - config/config.yaml
+#
+# METHOD 2: Modify Individual Configuration Files
+# -----------------------------------------------
+# Use this method to update specific configuration files.
+# Steps:
+#   1. Modify the .env file as necessary.
+#   2. Update the corresponding entries in:
+#      - config/config.yaml
+#   3. Restart the services with 'docker compose up -d'.
+#   4. Special Note: If you modify OPENIM_IP, API_OPENIM_PORT, or MINIO_PORT in .env,
+#      ensure to update the corresponding services and configurations accordingly.
+#
+# It is essential to follow these methods to ensure consistent and correct application behavior.
+# ==============================================================================
+# Local IP address of the service. Modify if necessary.
+# Example: OPENIM_IP=172.28.0.1，
+OPENIM_IP=${OPENIM_IP}
 
 # ----- ZooKeeper Configuration -----
-# Address or hostname for the ZooKeeper service.
-
 # Port for ZooKeeper service.
 # Default: ZOOKEEPER_PORT=12181
 ZOOKEEPER_PORT=${ZOOKEEPER_PORT}
-
-# ----- MongoDB Configuration -----
-# Address or hostname for the MongoDB service.
-# Default: MONGO_ADDRESS=172.28.0.1
-MONGO_ADDRESS=${MONGO_NETWORK_ADDRESS}
 
 # Port on which MongoDB service is running.
 # Default: MONGO_PORT=37017
@@ -79,9 +101,6 @@ MONGO_PASSWORD=${MONGO_PASSWORD}
 MONGO_DATABASE=${MONGO_DATABASE}
 
 # ----- Redis Configuration -----
-# Address or hostname for the Redis service.
-# Default: REDIS_ADDRESS=172.28.0.1
-REDIS_ADDRESS=${REDIS_NETWORK_ADDRESS}
 
 # Port on which Redis in-memory data structure store is running.
 # Default: REDIS_PORT=16379
@@ -90,11 +109,6 @@ REDIS_PORT=${REDIS_PORT}
 # Password to authenticate with the Redis service.
 # Default: REDIS_PASSWORD=openIM123
 REDIS_PASSWORD=${REDIS_PASSWORD}
-
-# ----- Kafka Configuration -----
-# Address or hostname for the Kafka service.
-# Default: KAFKA_ADDRESS=172.28.0.1
-KAFKA_ADDRESS=${KAFKA_NETWORK_ADDRESS}
 
 # Kakfa username to authenticate with the Kafka service.
 # KAFKA_USERNAME=${KAFKA_USERNAME}
@@ -107,20 +121,13 @@ KAFKA_PORT=${KAFKA_PORT}
 # Default: KAFKA_LATESTMSG_REDIS_TOPIC=latestMsgToRedis
 KAFKA_LATESTMSG_REDIS_TOPIC=${KAFKA_LATESTMSG_REDIS_TOPIC}
 
-# Topic in Kafka for pushing messages (e.g. notifications or updates).
-# Default: KAFKA_MSG_PUSH_TOPIC=msgToPush
-KAFKA_MSG_PUSH_TOPIC=${KAFKA_MSG_PUSH_TOPIC}
-
-# Topic in Kafka for storing offline messages in MongoDB.
-# Default: KAFKA_OFFLINEMSG_MONGO_TOPIC=offlineMsgToMongoMysql
-KAFKA_OFFLINEMSG_MONGO_TOPIC=${KAFKA_OFFLINEMSG_MONGO_TOPIC}
-
-# ----- MinIO Configuration ----
-# Address or hostname for the MinIO object storage service.
-# Default: MINIO_ADDRESS=172.28.0.1
-MINIO_ADDRESS=${MINIO_NETWORK_ADDRESS}
-
-# Port on which MinIO object storage service is running.
+# MINIO_PORT
+# ----------
+# MINIO_PORT sets the port for the MinIO object storage service.
+# Upon changing this port, the MinIO endpoint URLs in the `config/config.yaml` file must be updated
+# to reflect this change. The endpoints include both the 'endpoint' and 'signEndpoint' 
+# under the MinIO configuration.
+#
 # Default: MINIO_PORT=10005
 MINIO_PORT=${MINIO_PORT}
 
@@ -133,19 +140,11 @@ MINIO_PORT=${MINIO_PORT}
 MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
 
 # ----- Prometheus Configuration -----
-# Address or hostname for the Prometheus service.
-# Default: PROMETHEUS_ADDRESS=172.28.0.1
-PROMETHEUS_ADDRESS=${PROMETHEUS_NETWORK_ADDRESS}
-
 # Port on which Prometheus service is running.
 # Default: PROMETHEUS_PORT=19090
 PROMETHEUS_PORT=${PROMETHEUS_PORT}
 
 # ----- Grafana Configuration -----
-# Address or hostname for the Grafana service.
-# Default: GRAFANA_ADDRESS=172.28.0.1
-GRAFANA_ADDRESS=${GRAFANA_NETWORK_ADDRESS}
-
 # Port on which Grafana service is running.
 # Default: GRAFANA_PORT=13000
 GRAFANA_PORT=${GRAFANA_PORT}
@@ -162,23 +161,19 @@ OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH}
 # Default: OPENIM_WEB_PORT=11001
 OPENIM_WEB_PORT=${OPENIM_WEB_PORT}
 
-# Address or hostname for the OpenIM web service.
-# Default: OPENIM_WEB_ADDRESS=172.28.0.1
-OPENIM_WEB_ADDRESS=${OPENIM_WEB_NETWORK_ADDRESS}
-
 # ======================================
 # ========= OpenIM Server ==============
 # ======================================
-
-# Address or hostname for the OpenIM server.
-# Default: OPENIM_SERVER_ADDRESS=172.28.0.1
-OPENIM_SERVER_ADDRESS=${OPENIM_SERVER_NETWORK_ADDRESS}
-
 # Port for the OpenIM WebSockets.
 # Default: OPENIM_WS_PORT=10001
 OPENIM_WS_PORT=${OPENIM_WS_PORT}
 
-# Port for the OpenIM API.
+# API_OPENIM_PORT
+# ---------------
+# This variable defines the port on which the OpenIM API service will listen.
+# When changing this port, it's essential to update the apiURL in the config.yaml file
+# to ensure the API service is accessible at the new port.
+#
 # Default: API_OPENIM_PORT=10002
 API_OPENIM_PORT=${API_OPENIM_PORT}
 
@@ -191,10 +186,6 @@ API_OPENIM_PORT=${API_OPENIM_PORT}
 # Default: CHAT_IMAGE_VERSION=main
 CHAT_IMAGE_VERSION=${CHAT_IMAGE_VERSION}
 
-# Address or hostname for the OpenIM chat service.
-# Default: OPENIM_CHAT_ADDRESS=172.28.0.1
-OPENIM_CHAT_ADDRESS=${OPENIM_CHAT_NETWORK_ADDRESS}
-
 # Port for the OpenIM chat API.
 # Default: OPENIM_CHAT_API_PORT=10008
 OPENIM_CHAT_API_PORT=${OPENIM_CHAT_API_PORT}
@@ -202,7 +193,6 @@ OPENIM_CHAT_API_PORT=${OPENIM_CHAT_API_PORT}
 # Directory path for storing data files or related information for OpenIM chat.
 # Default: OPENIM_CHAT_DATA_DIR=./openim-chat/main
 OPENIM_CHAT_DATA_DIR=${OPENIM_CHAT_DATA_DIR}
-
 
 # ======================================
 # ========== OpenIM Admin ==============
