@@ -30,22 +30,24 @@ OPENIM_VERBOSE=4
 
 openim::log::info "\n# Begin to check all openim service"
 
-# OpenIM status
 # Elegant printing function
 print_services_and_ports() {
-    service_names=("$1[@]")
-    service_ports=("$2[@]")
+    local -n service_names=$1
+    local -n service_ports=$2
 
     echo "+-------------------------+----------+"
     echo "| Service Name            | Port     |"
     echo "+-------------------------+----------+"
 
-    for index in "${!service_names}"; do
-        printf "| %-23s | %-8s |\n" "${!service_names[$index]}" "${!service_ports[$index]}"
+    for index in "${!service_names[@]}"; do
+        printf "| %-23s | %-8s |\n" "${service_names[$index]}" "${service_ports[$index]}"
     done
 
     echo "+-------------------------+----------+"
 }
+
+# Assuming OPENIM_SERVER_NAME_TARGETS and OPENIM_SERVER_PORT_TARGETS are defined
+# Similarly for OPENIM_DEPENDENCY_TARGETS and OPENIM_DEPENDENCY_PORT_TARGETS
 
 # Print out services and their ports
 print_services_and_ports OPENIM_SERVER_NAME_TARGETS OPENIM_SERVER_PORT_TARGETS
