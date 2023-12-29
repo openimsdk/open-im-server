@@ -68,6 +68,7 @@ func newContentTypeConf() map[int32]config.NotificationConf {
 		constant.BlackAddedNotification:                config.Config.Notification.BlackAdded,
 		constant.BlackDeletedNotification:              config.Config.Notification.BlackDeleted,
 		constant.FriendInfoUpdatedNotification:         config.Config.Notification.FriendInfoUpdated,
+		constant.FriendsInfoUpdateNotification:         config.Config.Notification.FriendInfoUpdated, //use the same FriendInfoUpdated
 		// conversation
 		constant.ConversationChangeNotification:      config.Config.Notification.ConversationChanged,
 		constant.ConversationUnreadNotification:      config.Config.Notification.ConversationChanged,
@@ -115,6 +116,7 @@ func newSessionTypeConf() map[int32]int32 {
 		constant.BlackAddedNotification:                constant.SingleChatType,
 		constant.BlackDeletedNotification:              constant.SingleChatType,
 		constant.FriendInfoUpdatedNotification:         constant.SingleChatType,
+		constant.FriendsInfoUpdateNotification:         constant.SingleChatType,
 		// conversation
 		constant.ConversationChangeNotification:      constant.SingleChatType,
 		constant.ConversationUnreadNotification:      constant.SingleChatType,
@@ -256,6 +258,7 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 		optionsConfig.ReliabilityLevel = constant.UnreliableNotification
 	}
 	options := config.GetOptionsByNotification(optionsConfig)
+	s.SetOptionsByContentType(ctx, options, contentType)
 	msg.Options = options
 	offlineInfo.Title = title
 	offlineInfo.Desc = desc
@@ -273,4 +276,12 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 
 func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...NotificationOptions) error {
 	return s.NotificationWithSesstionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
+}
+
+func (s *NotificationSender) SetOptionsByContentType(_ context.Context, options map[string]bool, contentType int32) {
+	switch contentType {
+	case constant.UserStatusChangeNotification:
+		options[constant.IsSenderSync] = false
+	default:
+	}
 }

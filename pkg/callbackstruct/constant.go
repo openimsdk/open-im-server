@@ -37,6 +37,8 @@ const (
 	CallbackGroupMsgReadCommand             = "callbackGroupMsgReadCommand"
 	CallbackMsgModifyCommand                = "callbackMsgModifyCommand"
 	CallbackAfterUpdateUserInfoCommand      = "callbackAfterUpdateUserInfoCommand"
+	CallbackAfterUpdateUserInfoExCommand    = "callbackAfterUpdateUserInfoExCommand"
+	CallbackBeforeUpdateUserInfoExCommand   = "callbackBeforeUpdateUserInfoExCommand"
 	CallbackBeforeUserRegisterCommand       = "callbackBeforeUserRegisterCommand"
 	CallbackAfterUserRegisterCommand        = "callbackAfterUserRegisterCommand"
 	CallbackTransferGroupOwnerAfter         = "callbackTransferGroupOwnerAfter"

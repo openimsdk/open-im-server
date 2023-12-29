@@ -312,6 +312,14 @@ callback:
     enable: false
     timeout: 5
     failedContinue: true
+  beforeUpdateUserInfoEx:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  afterUpdateUserInfoEx:
+    enable: false
+    timeout: 5
+    failedContinue: true
   afterSendSingleMsg:
     enable: false
     timeout: 5
