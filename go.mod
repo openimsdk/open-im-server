@@ -156,12 +156,3 @@ require (
 	golang.org/x/crypto v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
-
-<<<<<<<<< Temporary merge branch 1
-replace github.com/OpenIMSDK/protocol v0.0.36 => github.com/AndrewZuo01/protocol v0.0.0-20231220081029-2bda660f0e88
-
-
-
-=========
-replace github.com/OpenIMSDK/protocol v0.0.40 => github.com/luhaoling/protocol v0.0.0-20231227040641-2f934a0d64a3
->>>>>>>>> Temporary merge branch 2
