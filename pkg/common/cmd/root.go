@@ -45,7 +45,7 @@ type CmdOpts struct {
 
 func WithCronTaskLogName() func(*CmdOpts) {
 	return func(opts *CmdOpts) {
-		opts.loggerPrefixName = "OpenIM.CronTask.log.all"
+		opts.loggerPrefixName = "openim.crontask.log.all"
 	}
 }
 

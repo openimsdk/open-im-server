@@ -83,6 +83,10 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		userRouterGroup.POST("/process_user_command_delete", ParseToken, u.ProcessUserCommandDelete)
 		userRouterGroup.POST("/process_user_command_update", ParseToken, u.ProcessUserCommandUpdate)
 		userRouterGroup.POST("/process_user_command_get", ParseToken, u.ProcessUserCommandGet)
+
+		userRouterGroup.POST("/add_notification_account", ParseToken, u.AddNotificationAccount)
+		userRouterGroup.POST("/update_notification_account", ParseToken, u.UpdateNotificationAccountInfo)
+		userRouterGroup.POST("/search_notification_account", ParseToken, u.SearchNotificationAccount)
 	}
 	// friend routing group
 	friendRouterGroup := r.Group("/friend", ParseToken)
@@ -168,6 +172,8 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		objectGroup.POST("/auth_sign", t.AuthSign)
 		objectGroup.POST("/complete_multipart_upload", t.CompleteMultipartUpload)
 		objectGroup.POST("/access_url", t.AccessURL)
+		objectGroup.POST("/initiate_form_data", t.InitiateFormData)
+		objectGroup.POST("/complete_form_data", t.CompleteFormData)
 		objectGroup.GET("/*name", t.ObjectRedirect)
 	}
 	// Message
@@ -198,6 +204,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	conversationGroup := r.Group("/conversation", ParseToken)
 	{
 		c := NewConversationApi(*conversationRpc)
+		conversationGroup.POST("/get_conversations_list", c.GetConversationsList)
 		conversationGroup.POST("/get_all_conversations", c.GetAllConversations)
 		conversationGroup.POST("/get_conversation", c.GetConversation)
 		conversationGroup.POST("/get_conversations", c.GetConversations)

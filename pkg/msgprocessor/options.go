@@ -30,10 +30,9 @@ func NewOptions(opts ...OptionsOpt) Options {
 	options[constant.IsOfflinePush] = false
 	options[constant.IsUnreadCount] = false
 	options[constant.IsConversationUpdate] = false
-	options[constant.IsSenderSync] = false
+	options[constant.IsSenderSync] = true
 	options[constant.IsNotPrivate] = false
 	options[constant.IsSenderConversationUpdate] = false
-	options[constant.IsSenderNotificationPush] = false
 	options[constant.IsReactionFromCache] = false
 	for _, opt := range opts {
 		opt(options)
@@ -114,12 +113,6 @@ func WithSenderConversationUpdate() OptionsOpt {
 	}
 }
 
-func WithSenderNotificationPush() OptionsOpt {
-	return func(options Options) {
-		options[constant.IsSenderNotificationPush] = true
-	}
-}
-
 func WithReactionFromCache() OptionsOpt {
 	return func(options Options) {
 		options[constant.IsReactionFromCache] = true
@@ -172,10 +165,6 @@ func (o Options) IsNotPrivate() bool {
 
 func (o Options) IsSenderConversationUpdate() bool {
 	return o.Is(constant.IsSenderConversationUpdate)
-}
-
-func (o Options) IsSenderNotificationPush() bool {
-	return o.Is(constant.IsSenderNotificationPush)
 }
 
 func (o Options) IsReactionFromCache() bool {

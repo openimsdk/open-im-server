@@ -17,7 +17,6 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
-
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 
@@ -68,6 +67,7 @@ func newContentTypeConf() map[int32]config.NotificationConf {
 		constant.BlackAddedNotification:                config.Config.Notification.BlackAdded,
 		constant.BlackDeletedNotification:              config.Config.Notification.BlackDeleted,
 		constant.FriendInfoUpdatedNotification:         config.Config.Notification.FriendInfoUpdated,
+		constant.FriendsInfoUpdateNotification:         config.Config.Notification.FriendInfoUpdated, //use the same FriendInfoUpdated
 		// conversation
 		constant.ConversationChangeNotification:      config.Config.Notification.ConversationChanged,
 		constant.ConversationUnreadNotification:      config.Config.Notification.ConversationChanged,
@@ -115,6 +115,7 @@ func newSessionTypeConf() map[int32]int32 {
 		constant.BlackAddedNotification:                constant.SingleChatType,
 		constant.BlackDeletedNotification:              constant.SingleChatType,
 		constant.FriendInfoUpdatedNotification:         constant.SingleChatType,
+		constant.FriendsInfoUpdateNotification:         constant.SingleChatType,
 		// conversation
 		constant.ConversationChangeNotification:      constant.SingleChatType,
 		constant.ConversationUnreadNotification:      constant.SingleChatType,
@@ -153,6 +154,30 @@ func (m *MessageRpcClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*m
 func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
 	resp, err := m.Client.GetMaxSeq(ctx, req)
 	return resp, err
+}
+
+func (m *MessageRpcClient) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
+	log.ZDebug(ctx, "GetMaxSeqs", "conversationIDs", conversationIDs)
+	resp, err := m.Client.GetMaxSeqs(ctx, &msg.GetMaxSeqsReq{
+		ConversationIDs: conversationIDs,
+	})
+	return resp.MaxSeqs, err
+}
+
+func (m *MessageRpcClient) GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
+	resp, err := m.Client.GetHasReadSeqs(ctx, &msg.GetHasReadSeqsReq{
+		UserID:          userID,
+		ConversationIDs: conversationIDs,
+	})
+	return resp.MaxSeqs, err
+}
+
+func (m *MessageRpcClient) GetMsgByConversationIDs(ctx context.Context, docIDs []string, seqs map[string]int64) (map[string]*sdkws.MsgData, error) {
+	resp, err := m.Client.GetMsgByConversationIDs(ctx, &msg.GetMsgByConversationIDsReq{
+		ConversationIDs: docIDs,
+		MaxSeqs:         seqs,
+	})
+	return resp.MsgDatas, err
 }
 
 func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
@@ -256,6 +281,7 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 		optionsConfig.ReliabilityLevel = constant.UnreliableNotification
 	}
 	options := config.GetOptionsByNotification(optionsConfig)
+	s.SetOptionsByContentType(ctx, options, contentType)
 	msg.Options = options
 	offlineInfo.Title = title
 	offlineInfo.Desc = desc
@@ -273,4 +299,12 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 
 func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...NotificationOptions) error {
 	return s.NotificationWithSesstionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
+}
+
+func (s *NotificationSender) SetOptionsByContentType(_ context.Context, options map[string]bool, contentType int32) {
+	switch contentType {
+	case constant.UserStatusChangeNotification:
+		options[constant.IsSenderSync] = false
+	default:
+	}
 }

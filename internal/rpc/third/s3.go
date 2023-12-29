@@ -16,6 +16,12 @@ package third
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/hex"
+	"encoding/json"
+	"github.com/google/uuid"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"path"
 	"strconv"
 	"time"
 
@@ -179,6 +185,113 @@ func (t *thirdServer) AccessURL(ctx context.Context, req *third.AccessURLReq) (*
 	}, nil
 }
 
+func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateFormDataReq) (*third.InitiateFormDataResp, error) {
+	if req.Name == "" {
+		return nil, errs.ErrArgs.Wrap("name is empty")
+	}
+	if req.Size <= 0 {
+		return nil, errs.ErrArgs.Wrap("size must be greater than 0")
+	}
+	if err := checkUploadName(ctx, req.Name); err != nil {
+		return nil, err
+	}
+	var duration time.Duration
+	opUserID := mcontext.GetOpUserID(ctx)
+	var key string
+	if authverify.IsManagerUserID(opUserID) {
+		if req.Millisecond <= 0 {
+			duration = time.Minute * 10
+		} else {
+			duration = time.Millisecond * time.Duration(req.Millisecond)
+		}
+		if req.Absolute {
+			key = req.Name
+		}
+	} else {
+		duration = time.Minute * 10
+	}
+	uid, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+	if key == "" {
+		date := time.Now().Format("20060102")
+		key = path.Join(cont.DirectPath, date, opUserID, hex.EncodeToString(uid[:])+path.Ext(req.Name))
+	}
+	mate := FormDataMate{
+		Name:        req.Name,
+		Size:        req.Size,
+		ContentType: req.ContentType,
+		Group:       req.Group,
+		Key:         key,
+	}
+	mateData, err := json.Marshal(&mate)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := t.s3dataBase.FormData(ctx, key, req.Size, req.ContentType, duration)
+	if err != nil {
+		return nil, err
+	}
+	return &third.InitiateFormDataResp{
+		Id:       base64.RawStdEncoding.EncodeToString(mateData),
+		Url:      resp.URL,
+		File:     resp.File,
+		Header:   toPbMapArray(resp.Header),
+		FormData: resp.FormData,
+		Expires:  resp.Expires.UnixMilli(),
+		SuccessCodes: utils.Slice(resp.SuccessCodes, func(code int) int32 {
+			return int32(code)
+		}),
+	}, nil
+}
+
+func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteFormDataReq) (*third.CompleteFormDataResp, error) {
+	if req.Id == "" {
+		return nil, errs.ErrArgs.Wrap("id is empty")
+	}
+	data, err := base64.RawStdEncoding.DecodeString(req.Id)
+	if err != nil {
+		return nil, errs.ErrArgs.Wrap("invalid id " + err.Error())
+	}
+	var mate FormDataMate
+	if err := json.Unmarshal(data, &mate); err != nil {
+		return nil, errs.ErrArgs.Wrap("invalid id " + err.Error())
+	}
+	if err := checkUploadName(ctx, mate.Name); err != nil {
+		return nil, err
+	}
+	info, err := t.s3dataBase.StatObject(ctx, mate.Key)
+	if err != nil {
+		return nil, err
+	}
+	if info.Size > 0 && info.Size != mate.Size {
+		return nil, errs.ErrData.Wrap("file size mismatch")
+	}
+	obj := &relation.ObjectModel{
+		Name:        mate.Name,
+		UserID:      mcontext.GetOpUserID(ctx),
+		Hash:        "etag_" + info.ETag,
+		Key:         info.Key,
+		Size:        info.Size,
+		ContentType: mate.ContentType,
+		Group:       mate.Group,
+		CreateTime:  time.Now(),
+	}
+	if err := t.s3dataBase.SetObject(ctx, obj); err != nil {
+		return nil, err
+	}
+	return &third.CompleteFormDataResp{Url: t.apiAddress(mate.Name)}, nil
+}
+
 func (t *thirdServer) apiAddress(name string) string {
 	return t.apiURL + name
+}
+
+type FormDataMate struct {
+	Name        string `json:"name"`
+	Size        int64  `json:"size"`
+	ContentType string `json:"contentType"`
+	Group       string `json:"group"`
+	Key         string `json:"key"`
 }
