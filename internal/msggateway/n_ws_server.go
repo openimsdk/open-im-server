@@ -488,6 +488,7 @@ type WSArgs struct {
 func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	connContext := newContext(w, r)
 	args, pErr := ws.ParseWSArgs(r)
+	log.ZDebug(connContext, "ws req", "MsgResp", args.MsgResp, "query", r.URL.RawQuery)
 	var wsLongConn *GWebSocket
 	if args.MsgResp {
 		wsLongConn = newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
