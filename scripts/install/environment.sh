@@ -285,7 +285,6 @@ readonly ALERTMANAGER_SEND_RESOLVED=${ALERTMANAGER_SEND_RESOLVED:-"{SEND_RESOLVE
 ###################### Grafana 配置信息 ######################
 def "GRAFANA_PORT" "13000"                        # Grafana的端口
 def "GRAFANA_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # Grafana的地址
-
 ###################### RPC Port Configuration Variables ######################
 # For launching multiple programs, just fill in multiple ports separated by commas
 # For example:
@@ -379,7 +378,7 @@ def "CALLBACK_FAILED_CONTINUE" "true" # 失败后是否继续
 ###################### Prometheus 配置信息 ######################
 # 是否启用 Prometheus
 readonly PROMETHEUS_ENABLE=${PROMETHEUS_ENABLE:-'true'}
-def "PROMETHEUS_URL" "${GRAFANA_ADDRESS}:${GRAFANA_PORT}"
+readonly GRAFANA_URL=${GRAFANA_URL:-"http://${OPENIM_IP}:${GRAFANA_PORT}/"}
 # Api 服务的 Prometheus 端口
 readonly API_PROM_PORT=${API_PROM_PORT:-'20100'}
 # User 服务的 Prometheus 端口
