@@ -1,7 +1,22 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package mgo
 
 import (
 	"context"
+	"github.com/OpenIMSDK/protocol/user"
 	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
@@ -50,6 +65,10 @@ func (u *UserMgo) Take(ctx context.Context, userID string) (user *relation.UserM
 	return mgoutil.FindOne[*relation.UserModel](ctx, u.coll, bson.M{"user_id": userID})
 }
 
+func (u *UserMgo) TakeByNickname(ctx context.Context, nickname string) (user []*relation.UserModel, err error) {
+	return mgoutil.Find[*relation.UserModel](ctx, u.coll, bson.M{"nickname": nickname})
+}
+
 func (u *UserMgo) Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
 	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, bson.M{}, pagination)
 }
@@ -71,6 +90,78 @@ func (u *UserMgo) CountTotal(ctx context.Context, before *time.Time) (count int6
 		return mgoutil.Count(ctx, u.coll, bson.M{})
 	}
 	return mgoutil.Count(ctx, u.coll, bson.M{"create_time": bson.M{"$lt": before}})
+}
+
+func (u *UserMgo) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
+	collection := u.coll.Database().Collection("userCommands")
+
+	// Create a new document instead of updating an existing one
+	doc := bson.M{
+		"userID":     userID,
+		"type":       Type,
+		"uuid":       UUID,
+		"createTime": time.Now().Unix(), // assuming you want the creation time in Unix timestamp
+		"value":      value,
+	}
+
+	_, err := collection.InsertOne(ctx, doc)
+	return err
+}
+func (u *UserMgo) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
+	collection := u.coll.Database().Collection("userCommands")
+
+	filter := bson.M{"userID": userID, "type": Type, "uuid": UUID}
+
+	_, err := collection.DeleteOne(ctx, filter)
+	return err
+}
+func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
+	collection := u.coll.Database().Collection("userCommands")
+
+	filter := bson.M{"userID": userID, "type": Type, "uuid": UUID}
+	update := bson.M{"$set": bson.M{"value": value}}
+
+	_, err := collection.UpdateOne(ctx, filter, update)
+	return err
+}
+func (u *UserMgo) GetUserCommand(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error) {
+	collection := u.coll.Database().Collection("userCommands")
+	filter := bson.M{"userID": userID, "type": Type}
+
+	cursor, err := collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	// Initialize commands as a slice of pointers
+	commands := []*user.CommandInfoResp{}
+
+	for cursor.Next(ctx) {
+		var document struct {
+			UUID       string `bson:"uuid"`
+			Value      string `bson:"value"`
+			CreateTime int64  `bson:"createTime"`
+		}
+
+		if err := cursor.Decode(&document); err != nil {
+			return nil, err
+		}
+
+		commandInfo := &user.CommandInfoResp{ // Change here: use a pointer to the struct
+			Uuid:       document.UUID,
+			Value:      document.Value,
+			CreateTime: document.CreateTime,
+		}
+
+		commands = append(commands, commandInfo)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return commands, nil
 }
 
 func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {

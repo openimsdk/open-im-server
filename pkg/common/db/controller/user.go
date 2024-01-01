@@ -38,6 +38,8 @@ type UserDatabase interface {
 	FindWithError(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error)
 	// Find Get the information of the specified user If the userID is not found, no error will be returned
 	Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error)
+	// Find userInfo By Nickname
+	FindByNickname(ctx context.Context, nickname string) (users []*relation.UserModel, err error)
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db
 	Create(ctx context.Context, users []*relation.UserModel) (err error)
 	// Update update (non-zero value) external guarantee userID exists
@@ -50,6 +52,8 @@ type UserDatabase interface {
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 	// GetAllUserID Get all user IDs
 	GetAllUserID(ctx context.Context, pagination pagination.Pagination) (int64, []string, error)
+	// Get user by userID
+	GetUserByID(ctx context.Context, userID string) (user *relation.UserModel, err error)
 	// InitOnce Inside the function, first query whether it exists in the db, if it exists, do nothing; if it does not exist, insert it
 	InitOnce(ctx context.Context, users []*relation.UserModel) (err error)
 	// CountTotal Get the total number of users
@@ -68,6 +72,12 @@ type UserDatabase interface {
 	GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error)
 	// SetUserStatus Set the user status and store the user status in redis
 	SetUserStatus(ctx context.Context, userID string, status, platformID int32) error
+
+	//CRUD user command
+	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
+	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error
+	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
+	GetUserCommands(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error)
 }
 
 type userDatabase struct {
@@ -125,6 +135,11 @@ func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*rel
 	return u.cache.GetUsersInfo(ctx, userIDs)
 }
 
+// Find userInfo By Nickname
+func (u *userDatabase) FindByNickname(ctx context.Context, nickname string) (users []*relation.UserModel, err error) {
+	return u.userDB.TakeByNickname(ctx, nickname)
+}
+
 // Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db.
 func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) (err error) {
 	return u.tx.Transaction(ctx, func(ctx context.Context) error {
@@ -177,6 +192,10 @@ func (u *userDatabase) GetAllUserID(ctx context.Context, pagination pagination.P
 	return u.userDB.GetAllUserID(ctx, pagination)
 }
 
+func (u *userDatabase) GetUserByID(ctx context.Context, userID string) (user *relation.UserModel, err error) {
+	return u.userDB.Take(ctx, userID)
+}
+
 // CountTotal Get the total number of users.
 func (u *userDatabase) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
 	return u.userDB.CountTotal(ctx, before)
@@ -226,4 +245,17 @@ func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*
 // SetUserStatus Set the user status and save it in redis.
 func (u *userDatabase) SetUserStatus(ctx context.Context, userID string, status, platformID int32) error {
 	return u.cache.SetUserStatus(ctx, userID, status, platformID)
+}
+func (u *userDatabase) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
+	return u.userDB.AddUserCommand(ctx, userID, Type, UUID, value)
+}
+func (u *userDatabase) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
+	return u.userDB.DeleteUserCommand(ctx, userID, Type, UUID)
+}
+func (u *userDatabase) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
+	return u.userDB.UpdateUserCommand(ctx, userID, Type, UUID, value)
+}
+func (u *userDatabase) GetUserCommands(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error) {
+	commands, err := u.userDB.GetUserCommand(ctx, userID, Type)
+	return commands, err
 }

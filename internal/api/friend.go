@@ -92,3 +92,6 @@ func (o *FriendApi) GetFriendIDs(c *gin.Context) {
 func (o *FriendApi) GetSpecifiedFriendsInfo(c *gin.Context) {
 	a2r.Call(friend.FriendClient.GetSpecifiedFriendsInfo, o.Client, c)
 }
+func (o *FriendApi) UpdateFriends(c *gin.Context) {
+	a2r.Call(friend.FriendClient.UpdateFriends, o.Client, c)
+}

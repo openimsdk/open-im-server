@@ -104,18 +104,18 @@ Docker deployment offers a slightly more intricate template. Within the [openim-
 Configuration file modifications can be made by specifying corresponding environment variables, for instance:
 
 ```bash
-export CHAT_BRANCH="main"   
-export SERVER_BRANCH="main" 
+export CHAT_IMAGE_VERSION="main"   
+export SERVER_IMAGE_VERSION="main" 
 ```
 
 These variables are stored within the [`environment.sh`](https://github.com/OpenIMSDK/openim-docker/blob/main/scripts/install/environment.sh) configuration:
 
 ```bash
-readonly CHAT_BRANCH=${CHAT_BRANCH:-'main'}
-readonly SERVER_BRANCH=${SERVER_BRANCH:-'main'}
+readonly CHAT_IMAGE_VERSION=${CHAT_IMAGE_VERSION:-'main'}
+readonly SERVER_IMAGE_VERSION=${SERVER_IMAGE_VERSION:-'main'}
 ```
 
-Setting a variable, e.g., `export CHAT_BRANCH="release-v1.3"`, will prioritize `CHAT_BRANCH="release-v1.3"` as the variable value. Ultimately, the chosen image version is determined, and rendering is achieved through `make init` (or `./scripts/init-config.sh`).
+Setting a variable, e.g., `export CHAT_IMAGE_VERSION="release-v1.3"`, will prioritize `CHAT_IMAGE_VERSION="release-v1.3"` as the variable value. Ultimately, the chosen image version is determined, and rendering is achieved through `make init` (or `./scripts/init-config.sh`).
 
 > Note: Direct modifications to the `config.yaml` file are also permissible without utilizing `make init`.
 
@@ -453,43 +453,45 @@ This section involves configuring the log settings, including storage location, 
 
 This section involves setting up additional configuration variables for Websocket, Push Notifications, and Chat.
 
-| Parameter               | Example Value     | Description                        |
-|-------------------------|-------------------|------------------------------------|
-| WEBSOCKET_MAX_CONN_NUM  | "100000"          | Maximum Websocket connections      |
-| WEBSOCKET_MAX_MSG_LEN   | "4096"            | Maximum Websocket message length   |
-| WEBSOCKET_TIMEOUT       | "10"              | Websocket timeout                  |
-| PUSH_ENABLE             | "getui"           | Push notification enable status    |
-| GETUI_PUSH_URL          | [Generated URL]   | GeTui Push Notification URL        |
-| GETUI_MASTER_SECRET     | [User Defined]    | GeTui Master Secret                |
-| GETUI_APP_KEY           | [User Defined]    | GeTui Application Key              |
-| GETUI_INTENT            | [User Defined]    | GeTui Push Intent                  |
-| GETUI_CHANNEL_ID        | [User Defined]    | GeTui Channel ID                   |
-| GETUI_CHANNEL_NAME      | [User Defined]    | GeTui Channel Name                 |
-| FCM_SERVICE_ACCOUNT     | "x.json"          | FCM Service Account                |
-| JPNS_APP_KEY            | [User Defined]    | JPNS Application Key               |
-| JPNS_MASTER_SECRET      | [User Defined]    | JPNS Master Secret                 |
-| JPNS_PUSH_URL           | [User Defined]    | JPNS Push Notification URL         |
-| JPNS_PUSH_INTENT        | [User Defined]    | JPNS Push Intent                   |
-| MANAGER_USERID_1        | "openIM123456"    | Administrator ID 1                 |
-| MANAGER_USERID_2        | "openIM654321"    | Administrator ID 2                 |
-| MANAGER_USERID_3        | "openIMAdmin"     | Administrator ID 3                 |
-| NICKNAME_1              | "system1"         | Nickname 1                         |
-| NICKNAME_2              | "system2"         | Nickname 2                         |
-| NICKNAME_3              | "system3"         | Nickname 3                         |
-| MULTILOGIN_POLICY       | "1"               | Multi-login Policy                 |
-| CHAT_PERSISTENCE_MYSQL  | "true"            | Chat Persistence in MySQL          |
-| MSG_CACHE_TIMEOUT       | "86400"           | Message Cache Timeout              |
-| GROUP_MSG_READ_RECEIPT  | "true"            | Group Message Read Receipt Enable  |
+| Parameter               | Example Value     | Description                      |
+|-------------------------|-------------------|----------------------------------|
+| WEBSOCKET_MAX_CONN_NUM  | "100000"          | Maximum Websocket connections    |
+| WEBSOCKET_MAX_MSG_LEN   | "4096"            | Maximum Websocket message length |
+| WEBSOCKET_TIMEOUT       | "10"              | Websocket timeout                |
+| PUSH_ENABLE             | "getui"           | Push notification enable status  |
+| GETUI_PUSH_URL          | [Generated URL]   | GeTui Push Notification URL      |
+| GETUI_MASTER_SECRET     | [User Defined]    | GeTui Master Secret              |
+| GETUI_APP_KEY           | [User Defined]    | GeTui Application Key            |
+| GETUI_INTENT            | [User Defined]    | GeTui Push Intent                |
+| GETUI_CHANNEL_ID        | [User Defined]    | GeTui Channel ID                 |
+| GETUI_CHANNEL_NAME      | [User Defined]    | GeTui Channel Name               |
+| FCM_SERVICE_ACCOUNT     | "x.json"          | FCM Service Account              |
+| JPNS_APP_KEY            | [User Defined]    | JPNS Application Key             |
+| JPNS_MASTER_SECRET      | [User Defined]    | JPNS Master Secret               |
+| JPNS_PUSH_URL           | [User Defined]    | JPNS Push Notification URL       |
+| JPNS_PUSH_INTENT        | [User Defined]    | JPNS Push Intent                 |
+| MANAGER_USERID_1        | "openIM123456"    | Administrator ID 1               |
+| MANAGER_USERID_2        | "openIM654321"    | Administrator ID 2               |
+| MANAGER_USERID_3        | "openIMAdmin"     | Administrator ID 3               |
+| NICKNAME_1              | "system1"         | Nickname 1                       |
+| NICKNAME_2              | "system2"         | Nickname 2                       |
+| NICKNAME_3              | "system3"         | Nickname 3                       |
+| IM_ADMIN_USERID         | "imAdmin"         | IM Administrator ID              |
+| IM_ADMIN_NAME           | "imAdmin"         | IM Administrator Nickname        |
+| MULTILOGIN_POLICY       | "1"               | Multi-login Policy               |
+| CHAT_PERSISTENCE_MYSQL  | "true"            | Chat Persistence in MySQL        |
+| MSG_CACHE_TIMEOUT       | "86400"           | Message Cache Timeout            |
+| GROUP_MSG_READ_RECEIPT  | "true"            | Group Message Read Receipt Enable |
 | SINGLE_MSG_READ_RECEIPT | "true"            | Single Message Read Receipt Enable |
-| RETAIN_CHAT_RECORDS     | "365"             | Retain Chat Records (in days)      |
-| CHAT_RECORDS_CLEAR_TIME | [Cron Expression] | Chat Records Clear Time            |
-| MSG_DESTRUCT_TIME       | [Cron Expression] | Message Destruct Time              |
-| SECRET                  | "${PASSWORD}"     | Secret Key                         |
-| TOKEN_EXPIRE            | "90"              | Token Expiry Time                  |
-| FRIEND_VERIFY           | "false"           | Friend Verification Enable         |
-| IOS_PUSH_SOUND          | "xxx"             | iOS                                |
-| CALLBACK_ENABLE         | "false"            | Enable callback                    | 
-| CALLBACK_TIMEOUT        | "5"               | Maximum timeout for callback call  |
+| RETAIN_CHAT_RECORDS     | "365"             | Retain Chat Records (in days)    |
+| CHAT_RECORDS_CLEAR_TIME | [Cron Expression] | Chat Records Clear Time          |
+| MSG_DESTRUCT_TIME       | [Cron Expression] | Message Destruct Time            |
+| SECRET                  | "${PASSWORD}"     | Secret Key                       |
+| TOKEN_EXPIRE            | "90"              | Token Expiry Time                |
+| FRIEND_VERIFY           | "false"           | Friend Verification Enable       |
+| IOS_PUSH_SOUND          | "xxx"             | iOS                              |
+| CALLBACK_ENABLE         | "false"            | Enable callback                  | 
+| CALLBACK_TIMEOUT        | "5"               | Maximum timeout for callback call |
 | CALLBACK_FAILED_CONTINUE| "true"            | fails to continue to the next step |
 ###  2.20. <a name='PrometheusConfiguration-1'></a>Prometheus Configuration
 

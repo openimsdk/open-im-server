@@ -407,6 +407,7 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 		}
 		var friendInfo *sdkws.FriendInfo
 		if friend := friendMap[userID]; friend != nil {
+
 			friendInfo = &sdkws.FriendInfo{
 				OwnerUserID:    friend.OwnerUserID,
 				Remark:         friend.Remark,
@@ -414,6 +415,7 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 				AddSource:      friend.AddSource,
 				OperatorUserID: friend.OperatorUserID,
 				Ex:             friend.Ex,
+				IsPinned:       friend.IsPinned,
 			}
 		}
 		var blackInfo *sdkws.BlackInfo
@@ -431,6 +433,48 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 			FriendInfo: friendInfo,
 			BlackInfo:  blackInfo,
 		})
+	}
+	return resp, nil
+}
+func (s *friendServer) UpdateFriends(
+	ctx context.Context,
+	req *pbfriend.UpdateFriendsReq,
+) (*pbfriend.UpdateFriendsResp, error) {
+	if len(req.FriendUserIDs) == 0 {
+		return nil, errs.ErrArgs.Wrap("friendIDList is empty")
+	}
+	if utils.Duplicate(req.FriendUserIDs) {
+		return nil, errs.ErrArgs.Wrap("friendIDList repeated")
+	}
+
+	_, err := s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, friendID := range req.FriendUserIDs {
+		if req.IsPinned != nil {
+			if err = s.friendDatabase.UpdateFriendPinStatus(ctx, req.OwnerUserID, friendID, req.IsPinned.Value); err != nil {
+				return nil, err
+			}
+		}
+		if req.Remark != nil {
+			if err = s.friendDatabase.UpdateFriendRemark(ctx, req.OwnerUserID, friendID, req.Remark.Value); err != nil {
+				return nil, err
+			}
+		}
+		if req.Ex != nil {
+			if err = s.friendDatabase.UpdateFriendEx(ctx, req.OwnerUserID, friendID, req.Ex.Value); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	resp := &pbfriend.UpdateFriendsResp{}
+
+	err = s.notificationSender.FriendsInfoUpdateNotification(ctx, req.OwnerUserID, req.FriendUserIDs)
+	if err != nil {
+		return nil, errs.Wrap(err, "FriendsInfoUpdateNotification Error")
 	}
 	return resp, nil
 }

@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"google.golang.org/protobuf/proto"
 
@@ -24,6 +25,7 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -98,7 +100,7 @@ func callbackAfterSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) err
 }
 
 func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) error {
-	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable {
+	if !config.Config.Callback.CallbackBeforeSendGroupMsg.Enable {
 		return nil
 	}
 	req := &cbapi.CallbackBeforeSendGroupMsgReq{
@@ -200,6 +202,5 @@ func CallbackAfterRevokeMsg(ctx context.Context, req *pbchat.RevokeMsgReq) error
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackAfterRevokeMsg); err != nil {
 		return err
 	}
-	utils.StructFieldNotNilReplace(req, resp)
 	return nil
 }

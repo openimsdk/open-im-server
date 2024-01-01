@@ -21,21 +21,9 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
-
-func TestCheckMysql(t *testing.T) {
-	err := mockInitCfg()
-	assert.NoError(t, err, "Initialization should not produce errors")
-
-	err = checkMysql()
-	if err != nil {
-		// You might expect an error if MySQL isn't running locally with the mock credentials.
-		t.Logf("Expected error due to mock configuration: %v", err)
-	}
-}
 
 // Mock for initCfg for testing purpose
 func mockInitCfg() error {

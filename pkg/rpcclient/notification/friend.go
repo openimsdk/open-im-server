@@ -196,7 +196,12 @@ func (f *FriendNotificationSender) FriendRemarkSetNotification(ctx context.Conte
 	tips.FromToUserID.ToUserID = toUserID
 	return f.Notification(ctx, fromUserID, toUserID, constant.FriendRemarkSetNotification, &tips)
 }
-
+func (f *FriendNotificationSender) FriendsInfoUpdateNotification(ctx context.Context, toUserID string, friendIDs []string) error {
+	tips := sdkws.FriendsInfoUpdateTips{}
+	tips.FromToUserID.ToUserID = toUserID
+	tips.FriendIDs = friendIDs
+	return f.Notification(ctx, toUserID, toUserID, constant.FriendsInfoUpdateNotification, &tips)
+}
 func (f *FriendNotificationSender) BlackAddedNotification(ctx context.Context, req *pbfriend.AddBlackReq) error {
 	tips := sdkws.BlackAddedTips{FromToUserID: &sdkws.FromToUserID{}}
 	tips.FromToUserID.FromUserID = req.OwnerUserID

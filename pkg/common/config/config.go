@@ -16,6 +16,7 @@ package config
 
 import (
 	"bytes"
+
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"gopkg.in/yaml.v3"
 )
@@ -235,6 +236,11 @@ type configStruct struct {
 		Nickname []string `yaml:"nickname"`
 	} `yaml:"manager"`
 
+	IMAdmin struct {
+		UserID   []string `yaml:"userID"`
+		Nickname []string `yaml:"nickname"`
+	} `yaml:"im-admin"`
+
 	MultiLoginPolicy                  int    `yaml:"multiLoginPolicy"`
 	ChatPersistenceMysql              bool   `yaml:"chatPersistenceMysql"`
 	MsgCacheTimeout                   int    `yaml:"msgCacheTimeout"`
@@ -276,6 +282,8 @@ type configStruct struct {
 		CallbackBeforeSetFriendRemark      CallBackConfig `yaml:"callbackBeforeSetFriendRemark"`
 		CallbackAfterSetFriendRemark       CallBackConfig `yaml:"callbackAfterSetFriendRemark"`
 		CallbackBeforeUpdateUserInfo       CallBackConfig `yaml:"beforeUpdateUserInfo"`
+		CallbackBeforeUpdateUserInfoEx     CallBackConfig `yaml:"beforeUpdateUserInfoEx"`
+		CallbackAfterUpdateUserInfoEx      CallBackConfig `yaml:"afterUpdateUserInfoEx"`
 		CallbackBeforeUserRegister         CallBackConfig `yaml:"beforeUserRegister"`
 		CallbackAfterUpdateUserInfo        CallBackConfig `yaml:"updateUserInfo"`
 		CallbackAfterUserRegister          CallBackConfig `yaml:"afterUserRegister"`
@@ -306,7 +314,7 @@ type configStruct struct {
 
 	Prometheus struct {
 		Enable                        bool   `yaml:"enable"`
-		PrometheusUrl                 string `yaml:"prometheusUrl"`
+		GrafanaUrl                    string `yaml:"grafanaUrl"`
 		ApiPrometheusPort             []int  `yaml:"apiPrometheusPort"`
 		UserPrometheusPort            []int  `yaml:"userPrometheusPort"`
 		FriendPrometheusPort          []int  `yaml:"friendPrometheusPort"`

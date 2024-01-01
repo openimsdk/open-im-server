@@ -11,7 +11,7 @@ OpenIM, an intricate project, requires a robust logging mechanism to diagnose is
 1. **Initialization**: The system begins by determining the verbosity level through the `OPENIM_VERBOSE` variable. If it's not set, a default value of 5 is assigned. This verbosity level dictates the depth of the log details.
 2. **Log File Setup**: Logs are stored in the directory specified by `OPENIM_OUTPUT`. If this variable isn't explicitly set, it defaults to the `_output` directory relative to the script location. Each log file is named based on the date to facilitate easy identification.
 3. **Logging Function**: The `echo_log()` function plays a pivotal role by writing messages to both the console (stdout) and the log file.
-4. **Logging to a file**: The `echo_log()` function writes to the log file by appending the message to the file. It also adds a timestamp to the message. path: `_output/logs/*`, Enable logging by default. Set to false to disable. If you wish to turn off output to log files set `ENABLE_LOGGING=flase`. 
+4. **Logging to a file**: The `echo_log()` function writes to the log file by appending the message to the file. It also adds a timestamp to the message. path: `_output/logs/*`, Enable logging by default. Set to false to disable. If you wish to turn off output to log files set `export ENABLE_LOGGING=flase`. 
 
 ### Key Functions & Their Usages
 
