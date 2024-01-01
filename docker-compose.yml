@@ -124,7 +124,7 @@ services:
 
   ## Uncomment and configure the following services as needed
   # openim-admin:
-  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin-front:v3.4.0
+  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin:toc-base-open-docker.35
   #   container_name: openim-admin
   #   restart: always
   #   ports:
