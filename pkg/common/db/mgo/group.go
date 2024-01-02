@@ -49,8 +49,8 @@ func (g *GroupMgo) Create(ctx context.Context, groups []*relation.GroupModel) (e
 	return mgoutil.InsertMany(ctx, g.coll, groups)
 }
 
-func (g *GroupMgo) UpdateState(ctx context.Context, groupID string, state int32) (err error) {
-	return g.UpdateMap(ctx, groupID, map[string]any{"state": state})
+func (g *GroupMgo) UpdateStatus(ctx context.Context, groupID string, status int32) (err error) {
+	return g.UpdateMap(ctx, groupID, map[string]any{"status": status})
 }
 
 func (g *GroupMgo) UpdateMap(ctx context.Context, groupID string, args map[string]any) (err error) {
