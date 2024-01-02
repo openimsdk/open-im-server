@@ -52,10 +52,18 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-// getZkAddrFromEnv returns the value of an environment variable if it exists, otherwise it returns the fallback value.
+// getZkAddrFromEnv returns the Zookeeper addresses combined from the ZOOKEEPER_ADDRESS and ZOOKEEPER_PORT environment variables.
+// If the environment variables are not set, it returns the fallback value.
 func getZkAddrFromEnv(fallback []string) []string {
-	if value, exists := os.LookupEnv("ZOOKEEPER_ADDRESS"); exists {
-		return strings.Split(value, ",")
+	address, addrExists := os.LookupEnv("ZOOKEEPER_ADDRESS")
+	port, portExists := os.LookupEnv("ZOOKEEPER_PORT")
+
+	if addrExists && portExists {
+		addresses := strings.Split(address, ",")
+		for i, addr := range addresses {
+			addresses[i] = addr + ":" + port
+		}
+		return addresses
 	}
 	return fallback
 }

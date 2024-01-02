@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"net"
@@ -222,8 +223,8 @@ func checkMinio() (string, error) {
 	defer cancel()
 
 	if minioClient.IsOffline() {
-		str := fmt.Sprintf("Minio server is offline;%s", str)
-		return "", ErrComponentStart.Wrap(str)
+		// str := fmt.Sprintf("Minio server is offline;%s", str)
+		// return "", ErrComponentStart.Wrap(str)
 	}
 
 	// Check for localhost in API URL and Minio SignEndpoint
@@ -285,10 +286,23 @@ func checkZookeeper() (string, error) {
 
 	// Connect to Zookeeper
 	str := "the addr is:" + address
-	c, _, err := zk.Connect(zookeeperAddresses, time.Second) // Adjust the timeout as necessary
+	c, eventChan, err := zk.Connect(zookeeperAddresses, time.Second) // Adjust the timeout as necessary
 	if err != nil {
 		return "", errs.Wrap(errStr(err, str))
 	}
+	timeout := time.After(5 * time.Second)
+	for {
+		select {
+		case event := <-eventChan:
+			if event.State == zk.StateConnected {
+				fmt.Println("Connected to Zookeeper")
+				goto Connected
+			}
+		case <-timeout:
+			return "", errs.Wrap(errors.New("timeout waiting for Zookeeper connection"), "Zookeeper Addr: "+strings.Join(config.Config.Zookeeper.ZkAddr, " "))
+		}
+	}
+Connected:
 	defer c.Close()
 
 	// Set authentication if username and password are provided
@@ -296,12 +310,6 @@ func checkZookeeper() (string, error) {
 		if err := c.AddAuth(schema, []byte(username+":"+password)); err != nil {
 			return "", errs.Wrap(errStr(err, str))
 		}
-	}
-
-	// Check if Zookeeper is reachable
-	_, _, err = c.Get("/")
-	if err != nil {
-		return "", errs.Wrap(err, str)
 	}
 
 	return str, nil

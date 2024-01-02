@@ -74,6 +74,10 @@ func buildMongoURI() string {
 		return uri
 	}
 
+	if config.Config.Mongo.Uri != "" {
+		return config.Config.Mongo.Uri
+	}
+
 	username := os.Getenv("MONGO_USERNAME")
 	password := os.Getenv("MONGO_PASSWORD")
 	address := os.Getenv("MONGO_ADDRESS")

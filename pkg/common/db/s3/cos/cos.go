@@ -16,6 +16,11 @@ package cos
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/base64"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -43,6 +48,8 @@ const (
 	imageGif  = "gif"
 	imageWebp = "webp"
 )
+
+const successCode = http.StatusOK
 
 const (
 	videoSnapshotImagePng = "png"
@@ -325,4 +332,66 @@ func (c *Cos) getPresignedURL(ctx context.Context, name string, expire time.Dura
 		return c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, opt)
 	}
 	return c.client.Object.GetObjectURL(name), nil
+}
+
+func (c *Cos) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
+	// https://cloud.tencent.com/document/product/436/14690
+	now := time.Now()
+	expiration := now.Add(duration)
+	keyTime := fmt.Sprintf("%d;%d", now.Unix(), expiration.Unix())
+	conditions := []any{
+		map[string]string{"q-sign-algorithm": "sha1"},
+		map[string]string{"q-ak": c.credential.SecretID},
+		map[string]string{"q-sign-time": keyTime},
+		map[string]string{"key": name},
+	}
+	if contentType != "" {
+		conditions = append(conditions, map[string]string{"Content-Type": contentType})
+	}
+	policy := map[string]any{
+		"expiration": expiration.Format("2006-01-02T15:04:05.000Z"),
+		"conditions": conditions,
+	}
+	policyJson, err := json.Marshal(policy)
+	if err != nil {
+		return nil, err
+	}
+	signKey := hmacSha1val(c.credential.SecretKey, keyTime)
+	strToSign := sha1val(string(policyJson))
+	signature := hmacSha1val(signKey, strToSign)
+
+	fd := &s3.FormData{
+		URL:     c.client.BaseURL.BucketURL.String(),
+		File:    "file",
+		Expires: expiration,
+		FormData: map[string]string{
+			"policy":                base64.StdEncoding.EncodeToString(policyJson),
+			"q-sign-algorithm":      "sha1",
+			"q-ak":                  c.credential.SecretID,
+			"q-key-time":            keyTime,
+			"q-signature":           signature,
+			"key":                   name,
+			"success_action_status": strconv.Itoa(successCode),
+		},
+		SuccessCodes: []int{successCode},
+	}
+	if contentType != "" {
+		fd.FormData["Content-Type"] = contentType
+	}
+	if c.credential.SessionToken != "" {
+		fd.FormData["x-cos-security-token"] = c.credential.SessionToken
+	}
+	return fd, nil
+}
+
+func hmacSha1val(key, msg string) string {
+	v := hmac.New(sha1.New, []byte(key))
+	v.Write([]byte(msg))
+	return hex.EncodeToString(v.Sum(nil))
+}
+
+func sha1val(msg string) string {
+	sha1Hash := sha1.New()
+	sha1Hash.Write([]byte(msg))
+	return hex.EncodeToString(sha1Hash.Sum(nil))
 }

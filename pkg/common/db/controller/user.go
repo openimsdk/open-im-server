@@ -38,6 +38,8 @@ type UserDatabase interface {
 	FindWithError(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error)
 	// Find Get the information of the specified user If the userID is not found, no error will be returned
 	Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error)
+	// Find userInfo By Nickname
+	FindByNickname(ctx context.Context, nickname string) (users []*relation.UserModel, err error)
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db
 	Create(ctx context.Context, users []*relation.UserModel) (err error)
 	// Update update (non-zero value) external guarantee userID exists
@@ -50,6 +52,8 @@ type UserDatabase interface {
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 	// GetAllUserID Get all user IDs
 	GetAllUserID(ctx context.Context, pagination pagination.Pagination) (int64, []string, error)
+	// Get user by userID
+	GetUserByID(ctx context.Context, userID string) (user *relation.UserModel, err error)
 	// InitOnce Inside the function, first query whether it exists in the db, if it exists, do nothing; if it does not exist, insert it
 	InitOnce(ctx context.Context, users []*relation.UserModel) (err error)
 	// CountTotal Get the total number of users
@@ -131,6 +135,11 @@ func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*rel
 	return u.cache.GetUsersInfo(ctx, userIDs)
 }
 
+// Find userInfo By Nickname
+func (u *userDatabase) FindByNickname(ctx context.Context, nickname string) (users []*relation.UserModel, err error) {
+	return u.userDB.TakeByNickname(ctx, nickname)
+}
+
 // Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db.
 func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) (err error) {
 	return u.tx.Transaction(ctx, func(ctx context.Context) error {
@@ -181,6 +190,10 @@ func (u *userDatabase) IsExist(ctx context.Context, userIDs []string) (exist boo
 // GetAllUserID Get all user IDs.
 func (u *userDatabase) GetAllUserID(ctx context.Context, pagination pagination.Pagination) (total int64, userIDs []string, err error) {
 	return u.userDB.GetAllUserID(ctx, pagination)
+}
+
+func (u *userDatabase) GetUserByID(ctx context.Context, userID string) (user *relation.UserModel, err error) {
+	return u.userDB.Take(ctx, userID)
 }
 
 // CountTotal Get the total number of users.

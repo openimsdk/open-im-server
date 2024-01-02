@@ -160,3 +160,33 @@ func (f *FriendMgo) UpdatePinStatus(ctx context.Context, ownerUserID string, fri
 
 	return nil
 }
+func (f *FriendMgo) UpdateFriendRemark(ctx context.Context, ownerUserID string, friendUserID string, remark string) (err error) {
+
+	filter := bson.M{"owner_user_id": ownerUserID, "friend_user_id": friendUserID}
+	// Create an update operation to set the "is_pinned" field to isPinned for all documents.
+	update := bson.M{"$set": bson.M{"remark": remark}}
+
+	// Perform the update operation for all documents in the collection.
+	_, err = f.coll.UpdateMany(ctx, filter, update)
+
+	if err != nil {
+		return errs.Wrap(err, "update remark error")
+	}
+
+	return nil
+}
+func (f *FriendMgo) UpdateFriendEx(ctx context.Context, ownerUserID string, friendUserID string, ex string) (err error) {
+
+	filter := bson.M{"owner_user_id": ownerUserID, "friend_user_id": friendUserID}
+	// Create an update operation to set the "is_pinned" field to isPinned for all documents.
+	update := bson.M{"$set": bson.M{"ex": ex}}
+
+	// Perform the update operation for all documents in the collection.
+	_, err = f.coll.UpdateMany(ctx, filter, update)
+
+	if err != nil {
+		return errs.Wrap(err, "update ex error")
+	}
+
+	return nil
+}
