@@ -122,9 +122,9 @@ services:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS:-172.28.0.7}
 
-  # Uncomment and configure the following services as needed
+  ## Uncomment and configure the following services as needed
   # openim-admin:
-  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin-front:v3.4.0
+  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin:toc-base-open-docker.35
   #   container_name: openim-admin
   #   restart: always
   #   ports:
@@ -167,6 +167,12 @@ services:
   #   hostname: grafana
   #   user: root
   #   restart: always
+  #   environment:
+  #     - GF_SECURITY_ALLOW_EMBEDDING=true
+  #     - GF_SESSION_COOKIE_SAMESITE=none
+  #     - GF_SESSION_COOKIE_SECURE=true
+  #     - GF_AUTH_ANONYMOUS_ENABLED=true
+  #     - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
   #   ports:
   #     - "${GRAFANA_PORT:-13000}:3000"
   #   volumes:
