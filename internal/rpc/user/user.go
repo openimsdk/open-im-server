@@ -558,7 +558,7 @@ func (s *userServer) userModelToResp(users []*relation.UserModel) *pbuser.Search
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {
-		if v.AppMangerLevel == constant.AppNotificationAdmin || v.AppMangerLevel == constant.AppAdmin {
+		if v.AppMangerLevel == constant.AppNotificationAdmin {
 			temp := &pbuser.NotificationAccountInfo{
 				UserID:   v.UserID,
 				FaceURL:  v.FaceURL,
