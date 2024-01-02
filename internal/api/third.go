@@ -130,5 +130,5 @@ func (o *ThirdApi) SearchLogs(c *gin.Context) {
 }
 
 func GetPrometheus(c *gin.Context) {
-	c.Redirect(http.StatusFound, config2.Config.Prometheus.PrometheusUrl)
+	c.Redirect(http.StatusFound, config2.Config.Prometheus.GrafanaUrl)
 }
