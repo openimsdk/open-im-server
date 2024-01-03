@@ -38,7 +38,7 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	if utils.IsContain(opUserID, config.Config.Manager.UserID) {
 		return nil
 	}
-	if utils.IsContain(opUserID, config.Config.Manager.UserID) {
+	if utils.IsContain(opUserID, config.Config.IMAdmin.UserID) {
 		return nil
 	}
 	if opUserID == ownerUserID {
