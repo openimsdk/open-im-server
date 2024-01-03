@@ -345,11 +345,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 		if !clientOK {
 			return
 		}
-
-		isDeleteUser := ws.clients.deleteClients(newClient.UserID, oldClients)
-		if isDeleteUser {
-			ws.onlineUserNum.Add(-1)
-		}
+		ws.clients.deleteClients(newClient.UserID, oldClients)
 		for _, c := range oldClients {
 			err := c.KickOnlineMessage()
 			if err != nil {
