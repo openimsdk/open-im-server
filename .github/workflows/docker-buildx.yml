@@ -100,7 +100,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-api
         id: meta1
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-api
@@ -121,7 +121,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-cmdutils
         id: meta2
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-cmdutils
@@ -142,7 +142,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-crontask
         id: meta3
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-crontask
@@ -163,7 +163,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-msggateway
         id: meta4
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-msggateway
@@ -184,7 +184,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-msgtransfer
         id: meta5
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-msgtransfer
@@ -205,7 +205,7 @@ jobs:
           
       - name: Extract metadata (tags, labels) for Docker openim-push
         id: meta6
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-push
@@ -226,7 +226,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-auth
         id: meta7
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-auth
@@ -247,7 +247,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-conversation
         id: meta8
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-conversation
@@ -268,7 +268,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-friend
         id: meta9
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-friend
@@ -289,7 +289,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-group
         id: meta10
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-group
@@ -310,7 +310,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-msg
         id: meta11
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-msg
@@ -331,7 +331,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-third
         id: meta12
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-third
@@ -352,7 +352,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-user
         id: meta13
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@v5.4.0
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-user
