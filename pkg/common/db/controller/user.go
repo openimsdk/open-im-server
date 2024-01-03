@@ -41,7 +41,7 @@ type UserDatabase interface {
 	// Find userInfo By Nickname
 	FindByNickname(ctx context.Context, nickname string) (users []*relation.UserModel, err error)
 	// Find notificationAccounts
-	FindNotification(ctx context.Context, level string) (users []*relation.UserModel, err error)
+	FindNotification(ctx context.Context, level int64) (users []*relation.UserModel, err error)
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db
 	Create(ctx context.Context, users []*relation.UserModel) (err error)
 	// Update update (non-zero value) external guarantee userID exists
@@ -143,7 +143,7 @@ func (u *userDatabase) FindByNickname(ctx context.Context, nickname string) (use
 }
 
 // Find notificationAccouts
-func (u *userDatabase) FindNotification(ctx context.Context, level string) (users []*relation.UserModel, err error) {
+func (u *userDatabase) FindNotification(ctx context.Context, level int64) (users []*relation.UserModel, err error) {
 	return u.userDB.TakeNotification(ctx, level)
 }
 
