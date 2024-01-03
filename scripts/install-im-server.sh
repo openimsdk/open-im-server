@@ -45,7 +45,18 @@ pushd "${OPENIM_ROOT}"
 ${DOCKER_COMPOSE_COMMAND} stop
 curl https://gitee.com/openimsdk/openim-docker/raw/main/example/full-openim-server-and-chat.yml -o docker-compose.yml
 ${DOCKER_COMPOSE_COMMAND} up -d
-sleep 60
+
+# Wait for a short period to allow containers to initialize
+sleep 10
+
+# Check the status of the containers
+if ! ${DOCKER_COMPOSE_COMMAND} ps | grep -q 'Up'; then
+    echo "Error: One or more docker containers failed to start."
+    ${DOCKER_COMPOSE_COMMAND} logs
+    exit 1
+fi
+
+sleep 50  # Keep the original 60-second wait, adjusted for the 10-second check above
 ${DOCKER_COMPOSE_COMMAND} logs openim-server
 ${DOCKER_COMPOSE_COMMAND} ps
 
