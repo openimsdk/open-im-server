@@ -515,7 +515,7 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		return resp, nil
 	}
 
-	_, users, err := s.UserDatabase.Page(ctx, req.Pagination)
+	users, err := s.UserDatabase.FindNotification(ctx, constant.AppNotificationAdmin)
 	if err != nil {
 		return nil, err
 	}
