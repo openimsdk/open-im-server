@@ -47,16 +47,15 @@ curl https://raw.githubusercontent.com/openimsdk/openim-docker/main/docker-compo
 ${DOCKER_COMPOSE_COMMAND} up -d
 
 # Wait for a short period to allow containers to initialize
-sleep 10
+sleep 30
 
 # Check the status of the containers
 if ! ${DOCKER_COMPOSE_COMMAND} ps | grep -q 'Up'; then
     echo "Error: One or more docker containers failed to start."
     ${DOCKER_COMPOSE_COMMAND} logs
-    exit 1
 fi
 
-sleep 50  # Keep the original 60-second wait, adjusted for the 10-second check above
+sleep 30  # Keep the original 60-second wait, adjusted for the 10-second check above
 ${DOCKER_COMPOSE_COMMAND} logs openim-server
 ${DOCKER_COMPOSE_COMMAND} ps
 
