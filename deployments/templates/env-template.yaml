@@ -177,7 +177,6 @@ OPENIM_WS_PORT=${OPENIM_WS_PORT}
 # Default: API_OPENIM_PORT=10002
 API_OPENIM_PORT=${API_OPENIM_PORT}
 
-
 # ======================================
 # ========== OpenIM Chat ===============
 # ======================================
@@ -190,9 +189,9 @@ CHAT_IMAGE_VERSION=${CHAT_IMAGE_VERSION}
 # Default: OPENIM_CHAT_API_PORT=10008
 OPENIM_CHAT_API_PORT=${OPENIM_CHAT_API_PORT}
 
-# Directory path for storing data files or related information for OpenIM chat.
-# Default: OPENIM_CHAT_DATA_DIR=./openim-chat/main
-OPENIM_CHAT_DATA_DIR=${OPENIM_CHAT_DATA_DIR}
+# Port for the OpenIM admin API.
+# Default: OPENIM_ADMIN_API_PORT=10009
+OPENIM_ADMIN_API_PORT=${OPENIM_ADMIN_API_PORT}
 
 # ======================================
 # ========== OpenIM Admin ==============
@@ -201,10 +200,6 @@ OPENIM_CHAT_DATA_DIR=${OPENIM_CHAT_DATA_DIR}
 # Branch name for OpenIM server.
 # Default: SERVER_IMAGE_VERSION=main
 SERVER_IMAGE_VERSION=${SERVER_IMAGE_VERSION}
-
-# Port for the OpenIM admin API.
-# Default: OPENIM_ADMIN_API_PORT=10009
-OPENIM_ADMIN_API_PORT=${OPENIM_ADMIN_API_PORT}
   
 # Port for the node exporter.
 # Default: NODE_EXPORTER_PORT=19100
