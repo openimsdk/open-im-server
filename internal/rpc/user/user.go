@@ -384,7 +384,11 @@ func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.Proc
 	if err != nil {
 		return nil, err
 	}
-
+	tips := &sdkws.UserCommandAddTips{
+		FromUserID: req.UserID,
+		ToUserID:   req.UserID,
+	}
+	s.userNotificationSender.UserCommandAddNotification(ctx, tips)
 	return &pbuser.ProcessUserCommandAddResp{}, nil
 }
 
@@ -395,7 +399,11 @@ func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.P
 	if err != nil {
 		return nil, err
 	}
-
+	tips := &sdkws.UserCommandDeleteTips{
+		FromUserID: req.UserID,
+		ToUserID:   req.UserID,
+	}
+	s.userNotificationSender.UserCommandDeleteNotification(ctx, tips)
 	return &pbuser.ProcessUserCommandDeleteResp{}, nil
 }
 
@@ -406,7 +414,11 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 	if err != nil {
 		return nil, err
 	}
-
+	tips := &sdkws.UserCommandUpdateTips{
+		FromUserID: req.UserID,
+		ToUserID:   req.UserID,
+	}
+	s.userNotificationSender.UserCommandUpdateNotification(ctx, tips)
 	return &pbuser.ProcessUserCommandUpdateResp{}, nil
 }
 
