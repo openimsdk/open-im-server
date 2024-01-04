@@ -12,15 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-mongo -- "$MONGO_INITDB_DATABASE" <<EOF
-db = db.getSiblingDB('admin')
+set -e
+
+mongosh <<EOF
+use admin
 db.auth('$MONGO_INITDB_ROOT_USERNAME', '$MONGO_INITDB_ROOT_PASSWORD')
+
+
 db = db.getSiblingDB('$MONGO_INITDB_DATABASE')
 db.createUser({
-  user: "$MONGO_USERNAME",
-  pwd: "$MONGO_PASSWORD",
+  user: "$MONGO_OPENIM_USERNAME",
+  pwd: "$MONGO_OPENIM_PASSWORD",
   roles: [
-  { role: 'root', db: '$MONGO_INITDB_DATABASE' }
+    // Assign appropriate roles here
+    { role: 'readWrite', db: '$MONGO_INITDB_DATABASE' }
   ]
-})
+});
 EOF
+
