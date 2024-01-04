@@ -25,6 +25,7 @@ type CallbackBeforeSendSingleMsgReq struct {
 
 type CallbackBeforeSendSingleMsgResp struct {
 	CommonCallbackResp
+	Content []byte `json:"content"`
 }
 
 type CallbackAfterSendSingleMsgReq struct {

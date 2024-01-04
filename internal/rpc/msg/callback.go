@@ -81,6 +81,9 @@ func callbackBeforeSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) er
 	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg); err != nil {
 		return err
 	}
+	if len(resp.Content) != 0 {
+		msg.MsgData.Content = resp.Content
+	}
 	return nil
 }
 
