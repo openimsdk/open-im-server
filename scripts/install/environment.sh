@@ -171,9 +171,14 @@ def "MONGO_URI"                                # MongoDB的URI
 def "MONGO_PORT" "37017"                       # MongoDB的端口
 def "MONGO_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # MongoDB的地址
 def "MONGO_DATABASE" "${DATABASE_NAME}"        # MongoDB的数据库名
-def "MONGO_USERNAME" "${OPENIM_USER}"                 # MongoDB的用户名
-# MongoDB的密码
+def "MONGO_USERNAME" "root"		       # MongoDB的管理员身份用户名
+# MongoDB的管理员身份密码
 readonly MONGO_PASSWORD=${MONGO_PASSWORD:-"${PASSWORD}"}
+# Mongo OpenIM 身份用户名
+def "MONGO_OPENIM_USERNAME" "openIM"
+# Mongo OpenIM 身份密码
+readonly MONGO_OPENIM_PASSWORD=${MONGO_OPENIM_PASSWORD:-'openIM123456'}
+
 def "MONGO_MAX_POOL_SIZE" "100"                # 最大连接池大小
 
 ###################### Object 配置信息 ######################
