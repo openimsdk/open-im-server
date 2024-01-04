@@ -21,8 +21,8 @@ db.auth('$MONGO_INITDB_ROOT_USERNAME', '$MONGO_INITDB_ROOT_PASSWORD')
 
 db = db.getSiblingDB('$MONGO_INITDB_DATABASE')
 db.createUser({
-  user: "MONGO_OPENIM_USERNAME",
-  pwd: "MONGO_OPENIM_PASSWORD",
+  user: "$MONGO_OPENIM_USERNAME",
+  pwd: "$MONGO_OPENIM_PASSWORD",
   roles: [
     // Assign appropriate roles here
     { role: 'readWrite', db: '$MONGO_INITDB_DATABASE' }
