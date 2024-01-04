@@ -41,7 +41,9 @@ func (u *UserApi) UserRegister(c *gin.Context) {
 func (u *UserApi) UpdateUserInfo(c *gin.Context) {
 	a2r.Call(user.UserClient.UpdateUserInfo, u.Client, c)
 }
-
+func (u *UserApi) UpdateUserInfoEx(c *gin.Context) {
+	a2r.Call(user.UserClient.UpdateUserInfoEx, u.Client, c)
+}
 func (u *UserApi) SetGlobalRecvMessageOpt(c *gin.Context) {
 	a2r.Call(user.UserClient.SetGlobalRecvMessageOpt, u.Client, c)
 }

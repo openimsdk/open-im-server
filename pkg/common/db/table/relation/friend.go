@@ -59,4 +59,8 @@ type FriendModelInterface interface {
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
 	// UpdatePinStatus update friend's pin status
 	UpdatePinStatus(ctx context.Context, ownerUserID string, friendUserID string, isPinned bool) (err error)
+	// UpdateFriendRemark update friend's remark
+	UpdateFriendRemark(ctx context.Context, ownerUserID string, friendUserID string, remark string) (err error)
+	// UpdateFriendEx update friend's ex
+	UpdateFriendEx(ctx context.Context, ownerUserID string, friendUserID string, ex string) (err error)
 }

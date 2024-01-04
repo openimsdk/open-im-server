@@ -201,7 +201,6 @@ jobs:
     - name: Build, Start, Check Services and Print Logs for Ubuntu
       if: runner.os == 'Linux'
       run: |
-        sudo make init && \
         sudo make build && \
         sudo make start && \
         sudo make check || \

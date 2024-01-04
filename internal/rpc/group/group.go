@@ -1051,19 +1051,27 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 func (s *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) (*pbgroup.GetGroupsResp, error) {
 	resp := &pbgroup.GetGroupsResp{}
 	var (
-		groups []*relationtb.GroupModel
-		err    error
+		group []*relationtb.GroupModel
+		err   error
 	)
 	if req.GroupID != "" {
-		groups, err = s.db.FindGroup(ctx, []string{req.GroupID})
-		resp.Total = uint32(len(groups))
+		group, err = s.db.FindGroup(ctx, []string{req.GroupID})
+		resp.Total = uint32(len(group))
 	} else {
 		var total int64
-		total, groups, err = s.db.SearchGroup(ctx, req.GroupName, req.Pagination)
+		total, group, err = s.db.SearchGroup(ctx, req.GroupName, req.Pagination)
 		resp.Total = uint32(total)
 	}
 	if err != nil {
 		return nil, err
+	}
+
+	var groups []*relationtb.GroupModel
+	for _, v := range group {
+		if v.Status == constant.GroupStatusDismissed {
+			continue
+		}
+		groups = append(groups, v)
 	}
 	groupIDs := utils.Slice(groups, func(e *relationtb.GroupModel) string {
 		return e.GroupID

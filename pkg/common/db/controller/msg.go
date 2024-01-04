@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -1056,15 +1055,13 @@ func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbmsg.Searc
 func (db *commonMsgDatabase) FindOneByDocIDs(ctx context.Context, conversationIDs []string, seqs map[string]int64) (map[string]*sdkws.MsgData, error) {
 	totalMsgs := make(map[string]*sdkws.MsgData)
 	for _, conversationID := range conversationIDs {
-		len := seqs[conversationID]
-		seq := len / 100
-		index := (len % 100) - 1
-
-		docID := conversationID + ":" + fmt.Sprintf("%d", seq)
+		seq := seqs[conversationID]
+		docID := db.msg.GetDocID(conversationID, seq)
 		msgs, err := db.msgDocDatabase.FindOneByDocID(ctx, docID)
 		if err != nil {
 			return nil, err
 		}
+		index := db.msg.GetMsgIndex(seq)
 		totalMsgs[conversationID] = convert.MsgDB2Pb(msgs.Msg[index].Msg)
 	}
 	return totalMsgs, nil
