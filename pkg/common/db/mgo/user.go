@@ -17,7 +17,6 @@ package mgo
 import (
 	"context"
 	"github.com/OpenIMSDK/protocol/user"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
@@ -71,7 +70,7 @@ func (u *UserMgo) TakeNotification(ctx context.Context, level int64) (user []*re
 }
 
 func (u *UserMgo) TakeByNickname(ctx context.Context, nickname string) (user []*relation.UserModel, err error) {
-	return mgoutil.Find[*relation.UserModel](ctx, u.coll, bson.E{Key: "nickname", Value: bson.M{"$regex": primitive.Regex{Pattern: ".*" + nickname + ".*", Options: "i"}}})
+	return mgoutil.Find[*relation.UserModel](ctx, u.coll, bson.M{"nickname": nickname})
 }
 
 func (u *UserMgo) Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {

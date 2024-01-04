@@ -45,7 +45,6 @@ type GroupDatabase interface {
 	FindGroupMemberUser(ctx context.Context, groupIDs []string, userID string) (groupMembers []*relationtb.GroupMemberModel, err error)         // *
 	FindGroupMemberRoleLevels(ctx context.Context, groupID string, roleLevels []int32) (groupMembers []*relationtb.GroupMemberModel, err error) // *
 	FindGroupMemberAll(ctx context.Context, groupID string) (groupMembers []*relationtb.GroupMemberModel, err error)                            // *
-	FindGroupMemberByKeyword(ctx context.Context, groupID string, keyword string, pagination pagination.Pagination) (int64, []*relationtb.GroupMemberModel, error)
 	FindGroupsOwner(ctx context.Context, groupIDs []string) ([]*relationtb.GroupMemberModel, error)
 	FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error)
 	FindGroupMemberNum(ctx context.Context, groupID string) (uint32, error)
@@ -118,34 +117,6 @@ func (g *groupDatabase) FindGroupMemberRoleLevels(ctx context.Context, groupID s
 
 func (g *groupDatabase) FindGroupMemberAll(ctx context.Context, groupID string) ([]*relationtb.GroupMemberModel, error) {
 	return g.cache.GetAllGroupMembersInfo(ctx, groupID)
-}
-
-func (g *groupDatabase) FindGroupMemberByKeyword(ctx context.Context, groupID string, keyword string, pagination pagination.Pagination) (int64, []*relationtb.GroupMemberModel, error) {
-	members, err := g.cache.GetAllGroupMembersInfo(ctx, groupID)
-	if err != nil {
-		return 0, nil, err
-	}
-
-	var total int64
-	groupMembers := make([]*relationtb.GroupMemberModel, 0)
-	for _, member := range members {
-		if member.Nickname == keyword {
-			groupMembers = append(groupMembers, member)
-			total++
-			continue
-		}
-		if member.UserID == keyword {
-			groupMembers = append(groupMembers, member)
-			total++
-			continue
-		}
-	}
-	GMembers := utils.Paginate(groupMembers, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
-	if len(GMembers) == 0 {
-		return int64(len(groupMembers)), nil, nil
-	}
-
-	return total, GMembers, nil
 }
 
 func (g *groupDatabase) FindGroupsOwner(ctx context.Context, groupIDs []string) ([]*relationtb.GroupMemberModel, error) {

@@ -484,13 +484,33 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbgroup.GetGr
 	if req.Keyword == "" {
 		total, members, err = s.db.PageGetGroupMember(ctx, req.GroupID, req.Pagination)
 	} else {
-		total, members, err = s.db.FindGroupMemberByKeyword(ctx, req.GroupID, req.Keyword, req.Pagination)
+		members, err = s.db.FindGroupMemberAll(ctx, req.GroupID)
 	}
 	if err != nil {
 		return nil, err
 	}
 	if err := s.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
+	}
+	if req.Keyword != "" {
+		groupMembers := make([]*relationtb.GroupMemberModel, 0)
+		for _, member := range members {
+			if member.UserID == req.Keyword {
+				groupMembers = append(groupMembers, member)
+				total++
+				continue
+			}
+			if member.Nickname == req.Keyword {
+				groupMembers = append(groupMembers, member)
+				total++
+				continue
+			}
+		}
+
+		GMembers := utils.Paginate(groupMembers, int(req.Pagination.GetPageNumber()), int(req.Pagination.GetShowNumber()))
+		resp.Members = utils.Batch(convert.Db2PbGroupMember, GMembers)
+		resp.Total = uint32(total)
+		return resp, nil
 	}
 	resp.Total = uint32(total)
 	resp.Members = utils.Batch(convert.Db2PbGroupMember, members)
@@ -1069,6 +1089,7 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) 
 	var groups []*relationtb.GroupModel
 	for _, v := range group {
 		if v.Status == constant.GroupStatusDismissed {
+			resp.Total--
 			continue
 		}
 		groups = append(groups, v)
