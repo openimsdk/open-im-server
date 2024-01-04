@@ -197,7 +197,7 @@ func (g *groupDatabase) UpdateGroup(ctx context.Context, groupID string, data ma
 func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string, deleteMember bool) error {
 	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
 		c := g.cache.NewCache()
-		if err := g.groupDB.UpdateState(ctx, groupID, constant.GroupStatusDismissed); err != nil {
+		if err := g.groupDB.UpdateStatus(ctx, groupID, constant.GroupStatusDismissed); err != nil {
 			return err
 		}
 		if deleteMember {

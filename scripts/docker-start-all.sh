@@ -21,6 +21,25 @@ set -o pipefail
 #fixme This scripts is the total startup scripts
 #fixme The full name of the shell scripts that needs to be started is placed in the need_to_start_server_shell array
 
+# Fixed ports inside the docker startup container
+export OPENIM_WS_PORT=10001
+export API_OPENIM_PORT=10002
+export API_PROM_PORT=20100
+export USER_PROM_PORT=20110
+export FRIEND_PROM_PORT=20120
+export MESSAGE_PROM_PORT=20130
+export MSG_GATEWAY_PROM_PORT=20140
+export GROUP_PROM_PORT=20150
+export AUTH_PROM_PORT=20160
+export PUSH_PROM_PORT=20170
+export CONVERSATION_PROM_PORT=20230
+export RTC_PROM_PORT=21300
+export THIRD_PROM_PORT=21301
+export MSG_TRANSFER_PROM_PORT=21400
+export MSG_TRANSFER_PROM_PORT=21401
+export MSG_TRANSFER_PROM_PORT=21402
+export MSG_TRANSFER_PROM_PORT=21403
+
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
