@@ -34,6 +34,9 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/minio/minio-go/v7"
+       "github.com/redis/go-redis/v9"
+       "gopkg.in/yaml.v3"
 )
 
 const (
