@@ -84,19 +84,27 @@ OPENIM_IP=${OPENIM_IP}
 # Default: ZOOKEEPER_PORT=12181
 ZOOKEEPER_PORT=${ZOOKEEPER_PORT}
 
-# Port on which MongoDB service is running.
+# MongoDB service port configuration.
 # Default: MONGO_PORT=37017
 # MONGO_PORT=${MONGO_PORT}
 
-# Username to authenticate with the MongoDB service.
+# Username for MongoDB admin user. Used for service authentication.
 # Default: MONGO_USERNAME=root
 # MONGO_USERNAME=${MONGO_USERNAME}
 
-# Password to authenticate with the MongoDB service.
+# Password for MongoDB admin user. Used for service authentication.
 # Default: MONGO_PASSWORD=openIM123
 MONGO_PASSWORD=${MONGO_PASSWORD}
 
-# Name of the database in MongoDB to be used.
+# Username for a regular OpenIM user in MongoDB.
+# Default: MONGO_OPENIM_USERNAME=openIM
+MONGO_OPENIM_USERNAME=${MONGO_OPENIM_USERNAME}
+
+# Password for a regular OpenIM user in MongoDB.
+# Default: MONGO_OPENIM_PASSWORD=openIM123456
+MONGO_OPENIM_PASSWORD=${MONGO_OPENIM_PASSWORD}
+
+# Specifies the database name to be used within MongoDB.
 # Default: MONGO_DATABASE=openIM_v3
 MONGO_DATABASE=${MONGO_DATABASE}
 

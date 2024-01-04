@@ -10,6 +10,8 @@ networks:
         - subnet: '${DOCKER_BRIDGE_SUBNET:-172.28.0.0/16}'
           gateway: '${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}'
 
+
+
 services:
   mongodb:
     image: mongo:${MONGODB_IMAGE_VERSION-6.0.2}
@@ -21,13 +23,15 @@ services:
       - "${DATA_DIR:-./}/components/mongodb/data/db:/data/db"
       - "${DATA_DIR:-./}/components/mongodb/data/logs:/data/logs"
       - "${DATA_DIR:-./}/components/mongodb/data/conf:/etc/mongo"
-      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
+      - "./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro"
     environment:
       - TZ=Asia/Shanghai
       - wiredTigerCacheSizeGB=1
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME:-root}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-openIM123}
       - MONGO_INITDB_DATABASE=${MONGO_DATABASE:-openIM_v3}
+      - MONGO_OPENIM_USERNAME=${MONGO_OPENIM_USERNAME:-openIM} # Non-root username
+      - MONGO_OPENIM_PASSWORD=${MONGO_OPENIM_PASSWORD:-openIM123456} # Non-root password
     restart: always
     networks:
       server:
@@ -122,9 +126,9 @@ services:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS:-172.28.0.7}
 
-  ## Uncomment and configure the following services as needed
+  # Uncomment and configure the following services as needed
   # openim-admin:
-  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin:toc-base-open-docker.35
+  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin-front:v3.4.0
   #   container_name: openim-admin
   #   restart: always
   #   ports:
@@ -167,12 +171,6 @@ services:
   #   hostname: grafana
   #   user: root
   #   restart: always
-  #   environment:
-  #     - GF_SECURITY_ALLOW_EMBEDDING=true
-  #     - GF_SESSION_COOKIE_SAMESITE=none
-  #     - GF_SESSION_COOKIE_SECURE=true
-  #     - GF_AUTH_ANONYMOUS_ENABLED=true
-  #     - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
   #   ports:
   #     - "${GRAFANA_PORT:-13000}:3000"
   #   volumes:
