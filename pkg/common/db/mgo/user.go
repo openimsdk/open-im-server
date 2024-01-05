@@ -186,17 +186,11 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 			Value      string `bson:"value"`
 			CreateTime int64  `bson:"createTime"`
 		}
-		var documents struct {
-			Type       int64  `bson:"type"`
-			UUID       string `bson:"uuid"`
-			Value      string `bson:"value"`
-			CreateTime int64  `bson:"createTime"`
-		}
-		log.ZDebug(ctx, "usercommandget", document, documents)
+
 		if err := cursor.Decode(&document); err != nil {
 			return nil, err
 		}
-
+		log.ZDebug(ctx, "usercommandget", "docuemnt", document)
 		commandInfo := &user.AllCommandInfoResp{
 			Type:       document.Type,
 			Uuid:       document.UUID,
