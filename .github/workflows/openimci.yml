@@ -128,8 +128,32 @@ jobs:
     - name: Run OpenIM make install start
       run: |
         sudo make install
-        sudo docker images
-        sudo docker ps
+
+    # - name: Check the OpenIM environment and status
+    #   run: |
+    #     sudo docker images
+    #     sudo docker ps
+
+    - name: Check the OpenIM environment and status
+      id: docker_info
+      run: |
+        IMAGES=$(sudo docker images)
+        CONTAINERS=$(sudo docker ps)
+        echo "::set-output name=images::$IMAGES"
+        echo "::set-output name=containers::$CONTAINERS"
+    - name: Comment PR
+      uses: thollander/actions-comment-pull-request@v2
+      with:
+        message: |
+          ### Docker Images:
+          ```
+          ${{ steps.docker_info.outputs.images }}
+          ```
+          ### Docker Processes:
+          ```
+          ${{ steps.docker_info.outputs.containers }}
+          ```
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   execute-scripts:
     name: Execute OpenIM Script On ${{ matrix.os }}
