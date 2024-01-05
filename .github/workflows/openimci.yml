@@ -45,12 +45,10 @@ jobs:
         contents: write
     environment:
       name: openim
-
     strategy:
       matrix:
         go_version: ["1.19","1.20","1.21"]
         os: [ubuntu-latest]
-
     steps:
     - name: Setup
       uses: actions/checkout@v4
@@ -302,4 +300,3 @@ jobs:
           ${{ readFile('docker_containers.txt') }}
           ```
         GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-    
