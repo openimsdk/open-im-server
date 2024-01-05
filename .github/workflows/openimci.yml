@@ -135,8 +135,12 @@ jobs:
     - name: Check the OpenIM environment and status
       id: docker_info
       run: |
-        sudo docker images > docker_images.txt
-        sudo docker ps > docker_containers.txt
+        sudo docker images | base64 > docker_images.txt
+        sudo docker ps | base64 > docker_containers.txt
+        IMAGES=$(cat docker_images.txt)
+        CONTAINERS=$(cat docker_containers.txt)
+        echo "::set-output name=images::$IMAGES"
+        echo "::set-output name=containers::$CONTAINERS"
 
     - name: Comment PR with message
       uses: ./
@@ -156,11 +160,11 @@ jobs:
         message: |
           ### Docker Images:
           ```
-          ${{ readFile('docker_images.txt') }}
+          ${{ steps.docker_info.outputs.images | base64decode }}
           ```
           ### Docker Processes:
           ```
-          ${{ readFile('docker_containers.txt') }}
+          ${{ steps.docker_info.outputs.containers | base64decode }}
           ```
         GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 
