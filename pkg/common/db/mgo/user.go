@@ -17,6 +17,7 @@ package mgo
 import (
 	"context"
 	"github.com/OpenIMSDK/protocol/user"
+	"github.com/OpenIMSDK/tools/log"
 	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
@@ -203,7 +204,7 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 	if err := cursor.Err(); err != nil {
 		return nil, err
 	}
-
+	log.ZDebug(ctx, "usercommandget", cursor)
 	return commands, nil
 }
 func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
