@@ -286,20 +286,17 @@ jobs:
         sudo docker images > docker_images.txt
         sudo docker ps > docker_containers.txt
     
-    - name: Comment PR
+    - name: Comment Docker Images on PR
       uses: thollander/actions-comment-pull-request@v2
       with:
         message: |
-        #   ### Docker Build Images:
-        #   ```
-        #   ${{ readFile('docker_build_images.txt') }}
-        #   ```
-        #   ### Docker Images:
-        #   ```
-        #   ${{ readFile('docker_images.txt') }}
-        #   ```
-        #   ### Docker Processes:
-        #   ```
-        #   ${{ readFile('docker_containers.txt') }}
-        #   ```
-        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          ### Docker Images:
+          ```
+          ${{ steps.read_file.outputs.docker_images }}
+          ```
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - id: read_file
+      uses: juliangruber/read-file-action@v1
+      with:
+        path: ./docker_images.txt
