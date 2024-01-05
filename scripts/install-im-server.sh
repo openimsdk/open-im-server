@@ -15,6 +15,8 @@
 
 
 # Common utilities, variables and checks for all build scripts.
+# This script works by building an IM image locally 
+# and then using the IM built image to deploy tests on openim-docker
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -31,7 +33,6 @@ openim::util::ensure_docker_daemon_connectivity
 DOCKER_COMPOSE_COMMAND=
 # Check if docker-compose command is available
 openim::util::check_docker_and_compose_versions
-
 if command -v docker compose &> /dev/null
 then
     openim::log::info "docker compose command is available"
@@ -40,8 +41,11 @@ else
     DOCKER_COMPOSE_COMMAND="docker-compose"
 fi
 
+export SERVER_IMAGE_VERSION=test
+export IMAGE_REGISTRY=openim
 "${OPENIM_ROOT}"/scripts/init-config.sh
 pushd "${OPENIM_ROOT}"
+docker build -t openim/openim-server:test .
 ${DOCKER_COMPOSE_COMMAND} stop
 curl https://raw.githubusercontent.com/openimsdk/openim-docker/main/docker-compose.yaml -o docker-compose.yml
 ${DOCKER_COMPOSE_COMMAND} up -d

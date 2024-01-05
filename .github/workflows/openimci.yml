@@ -128,6 +128,8 @@ jobs:
     - name: Run OpenIM make install start
       run: |
         sudo make install
+        sudo docker images
+        sudo docker ps
 
   execute-scripts:
     name: Execute OpenIM Script On ${{ matrix.os }}
@@ -245,3 +247,4 @@ jobs:
       run: |
         sudo make init
         sudo make image
+        sudo docker images
