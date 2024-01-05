@@ -142,18 +142,6 @@ jobs:
         sudo docker ps >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
 
-    - name: Comment PR with message
-      uses: ./
-      id: nrt_message
-      with:
-        message: |
-          Current branch is `${{ github.head_ref }}`.
-          _(execution **${{ github.run_id }}** / attempt **${{ github.run_attempt }}**)_
-        comment_tag: nrt_message
-        reactions: eyes, rocket
-        mode: recreate
-        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-
     - name: Comment PR
       uses: thollander/actions-comment-pull-request@v2
       with:
