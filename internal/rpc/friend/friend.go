@@ -452,7 +452,7 @@ func (s *friendServer) UpdateFriends(
 		return nil, err
 	}
 
-	var val map[string]any
+	val := make(map[string]any)
 
 	if req.IsPinned != nil {
 		val["is_pinned"] = req.IsPinned.Value
