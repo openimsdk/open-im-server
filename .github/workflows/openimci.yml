@@ -137,25 +137,24 @@ jobs:
     - name: Check the OpenIM environment and status
       id: docker_info
       run: |
-        IMAGES=$(sudo docker images | base64 -w 0)
-        CONTAINERS=$(sudo docker ps | base64 -w 0)
-        echo "IMAGES=${IMAGES}" >> $GITHUB_ENV
-        echo "CONTAINERS=${CONTAINERS}" >> $GITHUB_ENV
-  
+          sudo docker images > docker_images.txt
+          sudo docker ps > docker_containers.txt
+          IMAGES=$(cat docker_images.txt)
+          CONTAINERS=$(cat docker_containers.txt)
+          echo "::set-output name=images::$IMAGES"
+          echo "::set-output name=containers::$CONTAINERS"
+
     - name: Comment PR
-      uses: thollander/actions-comment-pull-request@v1
-      env:
-        IMAGES: ${{ env.IMAGES }}
-        CONTAINERS: ${{ env.CONTAINERS }}
+      uses: thollander/actions-comment-pull-request@v2
       with:
         message: |
           ### Docker Images:
           ```
-          ${{ env.IMAGES | base64 --decode }}
+          ${{ steps.docker_info.outputs.images }}
           ```
           ### Docker Processes:
           ```
-          ${{ env.CONTAINERS | base64 --decode }}
+          ${{ steps.docker_info.outputs.containers }}
           ```
         GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 
