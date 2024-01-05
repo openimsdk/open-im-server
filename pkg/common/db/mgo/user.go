@@ -190,7 +190,7 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 		if err := cursor.Decode(&document); err != nil {
 			return nil, err
 		}
-		log.ZDebug(ctx, "usercommandget", "docuemnt", document)
+
 		commandInfo := &user.AllCommandInfoResp{
 			Type:       document.Type,
 			Uuid:       document.UUID,
@@ -204,7 +204,7 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 	if err := cursor.Err(); err != nil {
 		return nil, err
 	}
-
+	log.ZDebug(ctx, "usercommandget", "commands", commands)
 	return commands, nil
 }
 func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
