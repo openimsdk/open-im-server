@@ -92,7 +92,7 @@ func (u *UserMgo) CountTotal(ctx context.Context, before *time.Time) (count int6
 	return mgoutil.Count(ctx, u.coll, bson.M{"create_time": bson.M{"$lt": before}})
 }
 
-func (u *UserMgo) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
+func (u *UserMgo) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error {
 	collection := u.coll.Database().Collection("userCommands")
 
 	// Create a new document instead of updating an existing one
@@ -102,11 +102,13 @@ func (u *UserMgo) AddUserCommand(ctx context.Context, userID string, Type int32,
 		"uuid":       UUID,
 		"createTime": time.Now().Unix(), // assuming you want the creation time in Unix timestamp
 		"value":      value,
+		"ex":         ex,
 	}
 
 	_, err := collection.InsertOne(ctx, doc)
 	return err
 }
+
 func (u *UserMgo) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
 	collection := u.coll.Database().Collection("userCommands")
 
@@ -115,11 +117,15 @@ func (u *UserMgo) DeleteUserCommand(ctx context.Context, userID string, Type int
 	_, err := collection.DeleteOne(ctx, filter)
 	return err
 }
-func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
+func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error {
+	if len(val) == 0 {
+		return nil
+	}
+
 	collection := u.coll.Database().Collection("userCommands")
 
 	filter := bson.M{"userID": userID, "type": Type, "uuid": UUID}
-	update := bson.M{"$set": bson.M{"value": value}}
+	update := bson.M{"$set": val}
 
 	_, err := collection.UpdateOne(ctx, filter, update)
 	return err
@@ -143,6 +149,7 @@ func (u *UserMgo) GetUserCommand(ctx context.Context, userID string, Type int32)
 			UUID       string `bson:"uuid"`
 			Value      string `bson:"value"`
 			CreateTime int64  `bson:"createTime"`
+			Ex         string `bson:"ex"`
 		}
 
 		if err := cursor.Decode(&document); err != nil {
@@ -154,6 +161,7 @@ func (u *UserMgo) GetUserCommand(ctx context.Context, userID string, Type int32)
 			Uuid:       document.UUID,
 			Value:      document.Value,
 			CreateTime: document.CreateTime,
+			Ex:         document.Ex,
 		}
 
 		commands = append(commands, commandInfo)
@@ -184,6 +192,7 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 			UUID       string `bson:"uuid"`
 			Value      string `bson:"value"`
 			CreateTime int64  `bson:"createTime"`
+			Ex         string `bson:"ex"`
 		}
 
 		if err := cursor.Decode(&document); err != nil {
@@ -195,6 +204,7 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 			Uuid:       document.UUID,
 			Value:      document.Value,
 			CreateTime: document.CreateTime,
+			Ex:         document.Ex,
 		}
 
 		commands = append(commands, commandInfo)

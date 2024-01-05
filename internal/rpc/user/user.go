@@ -379,8 +379,16 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 
 // ProcessUserCommandAdd user general function add
 func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
+	var value string
+	if req.Value != nil {
+		value = req.Value.Value
+	}
+	var ex string
+	if req.Ex != nil {
+		value = req.Ex.Value
+	}
 	// Assuming you have a method in s.UserDatabase to add a user command
-	err := s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
+	err := s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, value, ex)
 	if err != nil {
 		return nil, err
 	}
@@ -409,8 +417,18 @@ func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.P
 
 // ProcessUserCommandUpdate user general function update
 func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
+	val := make(map[string]any)
+
+	// Map fields from eax to val
+	if req.Value != nil {
+		val["value"] = req.Value.Value
+	}
+	if req.Ex != nil {
+		val["ex"] = req.Ex.Value
+	}
+
 	// Assuming you have a method in s.UserDatabase to update a user command
-	err := s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
+	err := s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, val)
 	if err != nil {
 		return nil, err
 	}
@@ -439,6 +457,7 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 			Uuid:       command.Uuid,
 			Value:      command.Value,
 			CreateTime: command.CreateTime,
+			Ex:         command.Ex,
 		})
 	}
 
@@ -463,6 +482,7 @@ func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.P
 			Uuid:       command.Uuid,
 			Value:      command.Value,
 			CreateTime: command.CreateTime,
+			Ex:         command.Ex,
 		})
 	}
 
