@@ -278,4 +278,28 @@ jobs:
       run: |
         sudo make init
         sudo make image
-        sudo docker images
+        sudo docker images > docker_build_images.txt
+    
+    - name: Check the OpenIM environment and status
+      run: |
+        sudo docker images > docker_images.txt
+        sudo docker ps > docker_containers.txt
+    
+    - name: Comment PR
+      uses: thollander/actions-comment-pull-request@v2
+      with:
+        message: |
+          ### Docker Build Images:
+          ```
+          ${{ readFile('docker_build_images.txt') }}
+          ```
+          ### Docker Images:
+          ```
+          ${{ readFile('docker_images.txt') }}
+          ```
+          ### Docker Processes:
+          ```
+          ${{ readFile('docker_containers.txt') }}
+          ```
+        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+    
