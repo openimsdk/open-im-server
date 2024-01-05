@@ -214,14 +214,10 @@ jobs:
         sudo make restart
         sudo make check
 
-    # - name: Build, Start, Check Services and Print Logs for macOS
-    #   if: runner.os == 'macOS'
-    #   run: |
-    #     make init && \
-    #     make build && \
-    #     make start && \
-    #     make check || \
-    #     (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
+    - name: Build, Start, Check Services and Print Logs for macOS
+      if: runner.os == 'macOS'
+      run: |
+        make multiarch
 
   openim-test-build-image:
     name: Build OpenIM Docker Image
