@@ -217,7 +217,7 @@ jobs:
     - name: Build, Start, Check Services and Print Logs for macOS
       if: runner.os == 'macOS'
       run: |
-        make multiarch
+        make build
 
   openim-test-build-image:
     name: Build OpenIM Docker Image
