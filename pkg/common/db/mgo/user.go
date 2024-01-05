@@ -186,7 +186,13 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 			Value      string `bson:"value"`
 			CreateTime int64  `bson:"createTime"`
 		}
-
+		var documents struct {
+			Type       int64  `bson:"type"`
+			UUID       string `bson:"uuid"`
+			Value      string `bson:"value"`
+			CreateTime int64  `bson:"createTime"`
+		}
+		log.ZDebug(ctx, "usercommandget", document, documents)
 		if err := cursor.Decode(&document); err != nil {
 			return nil, err
 		}
@@ -204,7 +210,7 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 	if err := cursor.Err(); err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "usercommandget", commands)
+
 	return commands, nil
 }
 func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
