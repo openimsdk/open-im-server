@@ -135,12 +135,12 @@ jobs:
     - name: Check the OpenIM environment and status
       id: docker_info
       run: |
-        sudo docker images | base64 > docker_images.txt
-        sudo docker ps | base64 > docker_containers.txt
-        IMAGES=$(cat docker_images.txt)
-        CONTAINERS=$(cat docker_containers.txt)
-        echo "::set-output name=images::$IMAGES"
-        echo "::set-output name=containers::$CONTAINERS"
+        echo "images<<EOF" >> $GITHUB_ENV
+        sudo docker images >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+        echo "containers<<EOF" >> $GITHUB_ENV
+        sudo docker ps >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
 
     - name: Comment PR with message
       uses: ./
@@ -158,7 +158,14 @@ jobs:
       uses: thollander/actions-comment-pull-request@v2
       with:
         message: |
-
+          ### Docker Images:
+          ```
+          ${{ env.images }}
+          ```
+          ### Docker Processes:
+          ```
+          ${{ env.containers }}
+          ```
         GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 
   execute-scripts:
@@ -283,16 +290,16 @@ jobs:
       uses: thollander/actions-comment-pull-request@v2
       with:
         message: |
-          ### Docker Build Images:
-          ```
-          ${{ readFile('docker_build_images.txt') }}
-          ```
-          ### Docker Images:
-          ```
-          ${{ readFile('docker_images.txt') }}
-          ```
-          ### Docker Processes:
-          ```
-          ${{ readFile('docker_containers.txt') }}
-          ```
+        #   ### Docker Build Images:
+        #   ```
+        #   ${{ readFile('docker_build_images.txt') }}
+        #   ```
+        #   ### Docker Images:
+        #   ```
+        #   ${{ readFile('docker_images.txt') }}
+        #   ```
+        #   ### Docker Processes:
+        #   ```
+        #   ${{ readFile('docker_containers.txt') }}
+        #   ```
         GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
