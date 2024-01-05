@@ -442,7 +442,30 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 	}
 
 	// Return the response with the slice
-	return &pbuser.ProcessUserCommandGetResp{KVArray: commandInfoSlice}, nil
+	return &pbuser.ProcessUserCommandGetResp{CommandResp: commandInfoSlice}, nil
+}
+
+func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.ProcessUserCommandGetAllReq) (*pbuser.ProcessUserCommandGetAllResp, error) {
+	// Fetch user commands from the database
+	commands, err := s.UserDatabase.GetAllUserCommands(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Initialize commandInfoSlice as an empty slice
+	commandInfoSlice := make([]*pbuser.AllCommandInfoResp, 0, len(commands))
+
+	for _, command := range commands {
+		// No need to use index since command is already a pointer
+		commandInfoSlice = append(commandInfoSlice, &pbuser.AllCommandInfoResp{
+			Uuid:       command.Uuid,
+			Value:      command.Value,
+			CreateTime: command.CreateTime,
+		})
+	}
+
+	// Return the response with the slice
+	return &pbuser.ProcessUserCommandGetAllResp{CommandResp: commandInfoSlice}, nil
 }
 
 func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.AddNotificationAccountReq) (*pbuser.AddNotificationAccountResp, error) {

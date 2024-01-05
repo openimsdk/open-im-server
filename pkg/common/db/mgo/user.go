@@ -163,7 +163,45 @@ func (u *UserMgo) GetUserCommand(ctx context.Context, userID string, Type int32)
 
 	return commands, nil
 }
+func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user.AllCommandInfoResp, error) {
+	collection := u.coll.Database().Collection("userCommands")
+	filter := bson.M{"userID": userID}
 
+	cursor, err := collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	// Initialize commands as a slice of pointers
+	commands := []*user.AllCommandInfoResp{}
+
+	for cursor.Next(ctx) {
+		var document struct {
+			UUID       string `bson:"uuid"`
+			Value      string `bson:"value"`
+			CreateTime int64  `bson:"createTime"`
+		}
+
+		if err := cursor.Decode(&document); err != nil {
+			return nil, err
+		}
+
+		commandInfo := &user.AllCommandInfoResp{ // Change here: use a pointer to the struct
+			Uuid:       document.UUID,
+			Value:      document.Value,
+			CreateTime: document.CreateTime,
+		}
+
+		commands = append(commands, commandInfo)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return commands, nil
+}
 func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
 	pipeline := bson.A{
 		bson.M{
