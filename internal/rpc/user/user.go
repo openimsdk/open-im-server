@@ -435,6 +435,7 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 	for _, command := range commands {
 		// No need to use index since command is already a pointer
 		commandInfoSlice = append(commandInfoSlice, &pbuser.CommandInfoResp{
+			Type:       command.Type,
 			Uuid:       command.Uuid,
 			Value:      command.Value,
 			CreateTime: command.CreateTime,
@@ -458,6 +459,7 @@ func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.P
 	for _, command := range commands {
 		// No need to use index since command is already a pointer
 		commandInfoSlice = append(commandInfoSlice, &pbuser.AllCommandInfoResp{
+			Type:       command.Type,
 			Uuid:       command.Uuid,
 			Value:      command.Value,
 			CreateTime: command.CreateTime,
