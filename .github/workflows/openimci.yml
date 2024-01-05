@@ -158,14 +158,7 @@ jobs:
       uses: thollander/actions-comment-pull-request@v2
       with:
         message: |
-          ### Docker Images:
-          ```
-          ${{ steps.docker_info.outputs.images | base64decode }}
-          ```
-          ### Docker Processes:
-          ```
-          ${{ steps.docker_info.outputs.containers | base64decode }}
-          ```
+
         GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 
   execute-scripts:
