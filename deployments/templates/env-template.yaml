@@ -88,10 +88,6 @@ ZOOKEEPER_PORT=${ZOOKEEPER_PORT}
 # Default: MONGO_PORT=37017
 # MONGO_PORT=${MONGO_PORT}
 
-# Username for MongoDB admin user. Used for service authentication.
-# Default: MONGO_USERNAME=root
-# MONGO_USERNAME=${MONGO_USERNAME}
-
 # Password for MongoDB admin user. Used for service authentication.
 # Default: MONGO_PASSWORD=openIM123
 MONGO_PASSWORD=${MONGO_PASSWORD}

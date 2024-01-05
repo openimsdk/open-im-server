@@ -104,8 +104,8 @@ Docker deployment offers a slightly more intricate template. Within the [openim-
 Configuration file modifications can be made by specifying corresponding environment variables, for instance:
 
 ```bash
-export CHAT_IMAGE_VERSION="main"   
-export SERVER_IMAGE_VERSION="main" 
+export CHAT_IMAGE_VERSION="main"
+export SERVER_IMAGE_VERSION="main"
 ```
 
 These variables are stored within the [`environment.sh`](https://github.com/OpenIMSDK/openim-docker/blob/main/scripts/install/environment.sh) configuration:
@@ -114,6 +114,9 @@ These variables are stored within the [`environment.sh`](https://github.com/Open
 readonly CHAT_IMAGE_VERSION=${CHAT_IMAGE_VERSION:-'main'}
 readonly SERVER_IMAGE_VERSION=${SERVER_IMAGE_VERSION:-'main'}
 ```
+> [!IMPORTANT]
+> Can learn to read our mirror version strategy: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/images.md
+
 
 Setting a variable, e.g., `export CHAT_IMAGE_VERSION="release-v1.3"`, will prioritize `CHAT_IMAGE_VERSION="release-v1.3"` as the variable value. Ultimately, the chosen image version is determined, and rendering is achieved through `make init` (or `./scripts/init-config.sh`).
 
@@ -127,7 +130,7 @@ For convenience, configuration through modifying environment variables is recomm
 
 + PASSWORD
 
-  + **Description**: Password for mysql, mongodb, redis, and minio.
+  + **Description**: Password for mongodb, redis, and minio.
   + **Default**: `openIM123`
   + Notes:
     + Minimum password length: 8 characters.
@@ -139,20 +142,22 @@ For convenience, configuration through modifying environment variables is recomm
 
 + OPENIM_USER
 
-  + **Description**: Username for mysql, mongodb, redis, and minio.
+  + **Description**: Username for redis, and minio.
   + **Default**: `root`
 
   ```bash
   export OPENIM_USER="root"
   ```
 
-+ API_URL
+> mongo is `openIM`, use `export MONGO_OPENIM_USERNAME="openIM"` to modify
+
++ OPENIM_IP
 
   + **Description**: API address.
   + **Note**: If the server has an external IP, it will be automatically obtained. For internal networks, set this variable to the IP serving internally.
 
   ```bash
-  export API_URL="http://ip:10002"
+  export OPENIM_IP="ip"
   ```
 
 + DATA_DIR
