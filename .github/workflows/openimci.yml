@@ -128,6 +128,8 @@ jobs:
     - name: Run OpenIM make install start
       run: |
         sudo make install
+        sudo docker images
+        sudo docker ps
 
   execute-scripts:
     name: Execute OpenIM Script On ${{ matrix.os }}
@@ -212,14 +214,10 @@ jobs:
         sudo make restart
         sudo make check
 
-    # - name: Build, Start, Check Services and Print Logs for macOS
-    #   if: runner.os == 'macOS'
-    #   run: |
-    #     make init && \
-    #     make build && \
-    #     make start && \
-    #     make check || \
-    #     (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
+    - name: Build, Start, Check Services and Print Logs for macOS
+      if: runner.os == 'macOS'
+      run: |
+        make build
 
   openim-test-build-image:
     name: Build OpenIM Docker Image
@@ -245,3 +243,4 @@ jobs:
       run: |
         sudo make init
         sudo make image
+        sudo docker images

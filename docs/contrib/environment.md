@@ -304,8 +304,10 @@ This section involves setting up MongoDB, including its port, address, and crede
 | -------------- | -------------- | ----------------------- |
 | MONGO_PORT     | "27017"        | Port used by MongoDB.   |
 | MONGO_ADDRESS  | [Generated IP] | IP address for MongoDB. |
-| MONGO_USERNAME | [User Defined] | Username for MongoDB.   |
-| MONGO_PASSWORD | [User Defined] | Password for MongoDB.   |
+| MONGO_USERNAME | [User Defined] | Admin Username for MongoDB.   |
+| MONGO_PASSWORD | [User Defined] | Admin Password for MongoDB.   |
+| MONGO_OPENIM_PASSWORD | [User Defined] | OpenIM Username for MongoDB.   |
+| MONGO_OPENIM_PASSWORD | [User Defined] | OpenIM Password for MongoDB.   |
 
 ###  2.8. <a name='TencentCloudCOSConfiguration'></a>Tencent Cloud COS Configuration
 
