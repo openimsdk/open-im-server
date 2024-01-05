@@ -228,7 +228,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 }
 
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
-	total, users, err := s.Page(ctx, req.Pagination)
+	total, users, err := s.PageFindUser(ctx, 0, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
