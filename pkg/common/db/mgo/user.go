@@ -139,6 +139,7 @@ func (u *UserMgo) GetUserCommand(ctx context.Context, userID string, Type int32)
 
 	for cursor.Next(ctx) {
 		var document struct {
+			Type       int32  `bson:"type"`
 			UUID       string `bson:"uuid"`
 			Value      string `bson:"value"`
 			CreateTime int64  `bson:"createTime"`
@@ -148,7 +149,8 @@ func (u *UserMgo) GetUserCommand(ctx context.Context, userID string, Type int32)
 			return nil, err
 		}
 
-		commandInfo := &user.CommandInfoResp{ // Change here: use a pointer to the struct
+		commandInfo := &user.CommandInfoResp{
+			Type:       document.Type,
 			Uuid:       document.UUID,
 			Value:      document.Value,
 			CreateTime: document.CreateTime,
@@ -178,6 +180,7 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 
 	for cursor.Next(ctx) {
 		var document struct {
+			Type       int32  `bson:"type"`
 			UUID       string `bson:"uuid"`
 			Value      string `bson:"value"`
 			CreateTime int64  `bson:"createTime"`
@@ -187,7 +190,8 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 			return nil, err
 		}
 
-		commandInfo := &user.AllCommandInfoResp{ // Change here: use a pointer to the struct
+		commandInfo := &user.AllCommandInfoResp{
+			Type:       document.Type,
 			Uuid:       document.UUID,
 			Value:      document.Value,
 			CreateTime: document.CreateTime,
