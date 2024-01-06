@@ -116,7 +116,7 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 	}
 
 	for _, v := range wsResults {
-		if msg.SendID == v.UserID {
+		if msg.SendID == v.UserID || msg.ContentType == constant.Typing {
 			continue // Skip if sender and receiver are the same
 		}
 
