@@ -281,6 +281,7 @@ jobs:
         sudo make init
         sudo make image
 
+    # https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
     - name: Get Docker Images and Processes
       id: docker_info
       run: |
