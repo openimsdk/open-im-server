@@ -281,19 +281,20 @@ jobs:
         sudo make init
         sudo make image
 
-    - name: Check the OpenIM environment and status
+    - name: Get Docker Images and Processes
+      id: docker_info
       run: |
-        sudo echo "### Docker Images:" >> /tmp/out.txt
-        sudo docker images >> /tmp/out.txt
-        sudo echo "### Docker Processes:" >> /tmp/out.txt
-        sudo docker ps >> /tmp/out.txt
-
-    - name: Read /tmp/out.txt
-      id: out
-      uses: juliangruber/read-file-action@v1
+        echo "::set-output name=images::$(sudo docker images)"
+        echo "::set-output name=processes::$(sudo docker ps)"
+    - name: Comment PR with Docker Info
+      uses: ./ # Replace with the appropriate action to comment on PR
       with:
-        path: /tmp/out.txt
-
-    - name: Echo /tmp/out.txt
-      run: | 
-        echo "${{ steps.out.outputs.content }}"
+        message: |
+          ### Docker Images:
+          ${{ steps.docker_info.outputs.images }}
+          ### Docker Processes:
+          ${{ steps.docker_info.outputs.processes }}
+        comment_tag: docker_info
+        reactions: eyes, rocket
+        mode: recreate
+    # Include any other steps as needed
