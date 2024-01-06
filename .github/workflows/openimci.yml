@@ -36,13 +36,13 @@ env:
   GO_VERSION: "1.19"
   GOLANGCI_VERSION: "v1.50.1"
 
-
 jobs:
   openim:
     name: Test with go ${{ matrix.go_version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
         contents: write
+        pull-requests: write
     environment:
       name: openim
     strategy:
@@ -109,6 +109,9 @@ jobs:
   openim-start:
     name: Test OpenIM install/start on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    permissions:
+        contents: write
+        pull-requests: write
     environment:
       name: openim
     strategy:
@@ -126,6 +129,7 @@ jobs:
     - name: Run OpenIM make install start
       run: |
         sudo make install
+        sleep 30
 
     # - name: Check the OpenIM environment and status
     #   run: |
@@ -146,6 +150,9 @@ jobs:
       uses: thollander/actions-comment-pull-request@v2
       with:
         message: |
+          > [!TIP]
+          > Run make install to check the status
+
           ### Docker Images:
           ```
           ${{ env.images }}
@@ -159,6 +166,9 @@ jobs:
   execute-scripts:
     name: Execute OpenIM Script On ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    permissions:
+        contents: write
+        pull-requests: write
     environment:
       name: openim
     strategy:
@@ -246,6 +256,9 @@ jobs:
   openim-test-build-image:
     name: Build OpenIM Docker Image
     runs-on: ubuntu-latest
+    permissions:
+        contents: write
+        pull-requests: write
     environment:
       name: openim
     steps:
@@ -267,7 +280,7 @@ jobs:
       run: |
         sudo make init
         sudo make image
-    
+
     - name: Check the OpenIM environment and status
       run: |
         sudo echo "### Docker Images:" >> /tmp/out.txt
@@ -280,5 +293,7 @@ jobs:
       uses: juliangruber/read-file-action@v1
       with:
         path: /tmp/out.txt
+
     - name: Echo /tmp/out.txt
-      run: echo "${{ steps.out.outputs.content }}"
+      run: | 
+        echo "${{ steps.out.outputs.content }}"
