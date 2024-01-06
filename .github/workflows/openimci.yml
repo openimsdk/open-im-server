@@ -129,7 +129,6 @@ jobs:
     - name: Run OpenIM make install start
       run: |
         sudo make install
-        sleep 30
 
     # - name: Check the OpenIM environment and status
     #   run: |
@@ -139,6 +138,7 @@ jobs:
     - name: Check the OpenIM environment and status
       id: docker_info
       run: |
+        sleep 30
         echo "images<<EOF" >> $GITHUB_ENV
         sudo docker images >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
