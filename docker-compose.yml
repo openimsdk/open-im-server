@@ -16,7 +16,7 @@ services:
     ports:
       - "${MONGO_PORT:-37017}:27017"
     container_name: mongo
-    command: ["/bin/bash", "-c", "/docker-entrypoint-initdb.d/mongo-init.sh && docker-entrypoint.sh mongod --wiredTigerCacheSizeGB 1 --auth"]
+    command: ["/bin/bash", "-c", "/docker-entrypoint-initdb.d/mongo-init.sh; docker-entrypoint.sh mongod --wiredTigerCacheSizeGB 1 --auth"]
     volumes:
       - "${DATA_DIR:-./}/components/mongodb/data/db:/data/db"
       - "${DATA_DIR:-./}/components/mongodb/data/logs:/data/logs"
