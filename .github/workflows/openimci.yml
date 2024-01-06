@@ -285,16 +285,16 @@ jobs:
     - name: Get Docker Images and Processes
       id: docker_info
       run: |
-        echo "::set-output name=images::$(sudo docker images)"
-        echo "::set-output name=processes::$(sudo docker ps)"
+        echo "images=$(sudo docker images)" >> $GITHUB_ENV
+        echo "processes=$(sudo docker ps)" >> $GITHUB_ENV
     - name: Comment PR with Docker Info
       uses: ./ # Replace with the appropriate action to comment on PR
       with:
         message: |
           ### Docker Images:
-          ${{ steps.docker_info.outputs.images }}
+          ${{ env.images }}
           ### Docker Processes:
-          ${{ steps.docker_info.outputs.processes }}
+          ${{ env.processes }}
         comment_tag: docker_info
         reactions: eyes, rocket
         mode: recreate
