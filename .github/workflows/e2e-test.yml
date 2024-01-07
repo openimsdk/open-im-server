@@ -109,10 +109,6 @@ jobs:
         echo "```" >> /tmp/test.md
         echo "</details>" >> /tmp/test.md
 
-    - name: Exec OpenIM System uninstall
-      run: |
-        sudo ./scripts/install/install.sh -u
-
     - name: Comment PR with file
       uses: thollander/actions-comment-pull-request@v2
       with:
@@ -121,12 +117,17 @@ jobs:
         reactions: eyes, rocket
         mode: recreate
         GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+      continue-on-error: true
 
     - name: Check outputs
       run: |
         echo "id : ${{ steps.nrt_message.outputs.id }}"
         echo "body : ${{ steps.nrt_message.outputs.body }}"
         echo "html_url : ${{ steps.nrt_message.outputs.html_url }}"
+
+    - name: Exec OpenIM System uninstall
+      run: |
+        sudo ./scripts/install/install.sh -u
 
     - name: gobenchdata publish
       uses: bobheadxi/gobenchdata@v1
