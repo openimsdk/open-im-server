@@ -93,17 +93,20 @@ jobs:
     - name: Exec OpenIM API test
       run: |
         echo "# OpenIM Test" > /tmp/test-api.md
-        echo "## Command Output" >> /tmp/test-api.md
-        echo "```" >> /tmp/test.md
+        echo "<details><summary>Command Output for OpenIM API Test</summary>" >> /tmp/test-api.md
+        echo "```" >> /tmp/test-api.md
         sudo make test-api | tee -a /tmp/test-api.md
-        echo "```" >> /tmp/test.md
+        echo "```" >> /tmp/test-api.md
+        echo "</details>" >> /tmp/test-api.md
 
     - name: Exec OpenIM E2E Test
       run: |
-        echo "## Command Output" >> /tmp/test-e2e.md
-        echo "```" >> /tmp/test.md
+        echo "# OpenIM E2E Test" >> /tmp/test-e2e.md
+        echo "<details><summary>Command Output for OpenIM E2E Test</summary>" >> /tmp/test-e2e.md
+        echo "```" >> /tmp/test-e2e.md
         sudo make test-e2e | tee -a /tmp/test-e2e.md
-        echo "```" >> /tmp/test.md
+        echo "```" >> /tmp/test-e2e.md
+        echo "</details>" >> /tmp/test-e2e.md
 
     - name: Exec OpenIM System uninstall
       run: |
