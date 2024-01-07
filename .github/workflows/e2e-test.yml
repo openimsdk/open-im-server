@@ -92,7 +92,7 @@ jobs:
 
     - name: Exec OpenIM API test
       run: |
-        mkdir /tmp/test.md
+        touch /tmp/test.md
         echo "# OpenIM Test" > /tmp/test.md
         echo "<details><summary>Command Output for OpenIM API Test</summary>" >> /tmp/test.md
         echo "```" >> /tmp/test.md
