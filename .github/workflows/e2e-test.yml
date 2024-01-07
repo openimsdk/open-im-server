@@ -94,11 +94,13 @@ jobs:
       run: |
         touch /tmp/test.md
         echo "# OpenIM Test" >> /tmp/test.md
+        echo "## OpenIM API Test" >> /tmp/test.md
         echo "<details><summary>Command Output for OpenIM API Test</summary>" >> /tmp/test.md
         echo "```markdown" >> /tmp/test.md
         sudo make test-api | tee -a /tmp/test.md
         echo "```" >> /tmp/test.md
         echo "</details>" >> /tmp/test.md
+        sudo make test-api >> /tmp/test.md
 
     - name: Exec OpenIM E2E Test
       run: |
