@@ -281,26 +281,8 @@ jobs:
         sudo make init
         sudo make image
 
-    - name: Get Docker Images
-      id: docker_images
-      run: |
-        echo "images<<EOF" >> $GITHUB_ENV
-        sudo docker images | awk '{print $1, $2, $3, $4, $5, $6, $7, $8}' >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
-    - name: Get Docker Processes
+    - name: Get OpenIM Docker Images Status
       id: docker_processes
       run: |
-        echo "processes<<EOF" >> $GITHUB_ENV
-        sudo docker ps | awk '{print $1, $2, $3, $4, $5, $6, $7, $8}' >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
-    - name: Comment PR with Docker Info
-      uses: ./ # Replace with the appropriate action to comment on PR
-      with:
-        message: |
-          ### Docker Images:
-          ${{ env.images }}
-          ### Docker Processes:
-          ${{ env.processes }}
-        comment_tag: docker_info
-        reactions: eyes, rocket
-        mode: recreate
+        sudo docker images
+        sudo docker ps
