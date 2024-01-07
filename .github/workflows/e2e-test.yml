@@ -96,7 +96,7 @@ jobs:
         echo "# OpenIM Test" >> /tmp/test.md
         echo "<details><summary>Command Output for OpenIM API Test</summary>" >> /tmp/test.md
         echo "```markdown" >> /tmp/test.md
-        sudo make test-api | tee /tmp/test.md
+        sudo make test-api | tee -a /tmp/test.md
         echo "```" >> /tmp/test.md
         echo "</details>" >> /tmp/test.md
 
@@ -106,7 +106,7 @@ jobs:
         echo "## OpenIM E2E Test" >> /tmp/test.md
         echo "<details><summary>Command Output for OpenIM E2E Test</summary>" >> /tmp/test.md
         echo "```markdown" >> /tmp/test.md
-        sudo make test-e2e | tee /tmp/test.md
+        sudo make test-e2e | tee -a /tmp/test.md
         echo "```" >> /tmp/test.md
         echo "</details>" >> /tmp/test.md
 
