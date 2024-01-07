@@ -46,7 +46,7 @@ jobs:
 
       - uses: actions/setup-node@v4
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
       - name: Run go modules tidy
         run: |
           sudo make tidy
@@ -79,7 +79,7 @@ jobs:
         continue-on-error: true
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
 
       - name: OpenIM verify copyright
         run: |
