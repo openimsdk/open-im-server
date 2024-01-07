@@ -92,15 +92,29 @@ jobs:
 
     - name: Exec OpenIM API test
       run: |
-        sudo make test-api
-    
+        sudo make test-api | tee /tmp/test-api.md
+
     - name: Exec OpenIM E2E test
       run: |
-        sudo make test-e2e
+        sudo make test-e2e | tee /tmp/test-api.md
 
     - name: Exec OpenIM System uninstall
       run: |
         sudo ./scripts/install/install.sh -u
+
+    - name: Comment PR with file
+      uses: thollander/actions-comment-pull-request@v2
+      with:
+        filePath: /tmp/test-api.md
+        comment_tag: nrt_file
+        reactions: eyes, rocket
+        mode: recreate
+
+    - name: Check outputs
+      run: |
+        echo "id : ${{ steps.nrt_message.outputs.id }}"
+        echo "body : ${{ steps.nrt_message.outputs.body }}"
+        echo "html_url : ${{ steps.nrt_message.outputs.html_url }}"
 
     - name: gobenchdata publish
       uses: bobheadxi/gobenchdata@v1

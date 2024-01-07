@@ -129,7 +129,7 @@ FIND := find . ! -path './utils/*' ! -path './vendor/*' ! -path './third_party/*
 XARGS := xargs -r --no-run-if-empty
 
 # Linux command settings-CODE DIRS Copyright
-CODE_DIRS := $(ROOT_DIR)/pkg $(ROOT_DIR)/cmd $(ROOT_DIR)/config $(ROOT_DIR)/.docker-compose_cfg $(ROOT_DIR)/internal $(ROOT_DIR)/scripts $(ROOT_DIR)/test $(ROOT_DIR)/.github $(ROOT_DIR)/build $(ROOT_DIR)/tools $(ROOT_DIR)/deployments
+CODE_DIRS := $(ROOT_DIR)/pkg $(ROOT_DIR)/cmd $(ROOT_DIR)/config $(ROOT_DIR)/internal $(ROOT_DIR)/scripts $(ROOT_DIR)/test $(ROOT_DIR)/.github $(ROOT_DIR)/build $(ROOT_DIR)/tools $(ROOT_DIR)/deployments
 FINDS := find $(CODE_DIRS)
 
 # Makefile settings: Select different behaviors by determining whether V option is set
