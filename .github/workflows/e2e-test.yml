@@ -116,7 +116,6 @@ jobs:
         comment_tag: nrt_file
         reactions: eyes, rocket
         mode: recreate
-      env:
         GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 
     - name: Check outputs
