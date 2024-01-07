@@ -10,15 +10,13 @@ networks:
         - subnet: '${DOCKER_BRIDGE_SUBNET:-172.28.0.0/16}'
           gateway: '${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}'
 
-
-
 services:
   mongodb:
     image: mongo:${MONGODB_IMAGE_VERSION-6.0.2}
     ports:
       - "${MONGO_PORT:-37017}:27017"
     container_name: mongo
-    command: --wiredTigerCacheSizeGB 1 --auth
+    command: ["/bin/bash", "-c", "/docker-entrypoint-initdb.d/mongo-init.sh || true; docker-entrypoint.sh mongod --wiredTigerCacheSizeGB 1 --auth"]
     volumes:
       - "${DATA_DIR:-./}/components/mongodb/data/db:/data/db"
       - "${DATA_DIR:-./}/components/mongodb/data/logs:/data/logs"

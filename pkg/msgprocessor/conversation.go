@@ -52,6 +52,7 @@ func GetChatConversationIDByMsg(msg *sdkws.MsgData) string {
 	case constant.NotificationChatType:
 		return "sn_" + msg.SendID + "_" + msg.RecvID
 	}
+
 	return ""
 }
 

@@ -29,16 +29,8 @@ if [ $# -ne 2 ];then
     exit 1
 fi
 
-openim::util::require-dig
-result=$?
-if [ $result -ne 0 ]; then
-    openim::log::info "Please install 'dig' to use this feature."
-    openim::log::info "Installation instructions:"
-    openim::log::info "  For Ubuntu/Debian: sudo apt-get install dnsutils"
-    openim::log::info "  For CentOS/RedHat: sudo yum install bind-utils"
-    openim::log::info "  For macOS: 'dig' should be preinstalled. If missing, try: brew install bind"
-    openim::log::info "  For Windows: Install BIND9 tools from https://www.isc.org/download/"
-    openim::log::error_exit "Error: 'dig' command is required but not installed."
+if [ -z "${OPENIM_IP}" ]; then
+    openim::util::require-dig
 fi
 
 source "${env_file}"
