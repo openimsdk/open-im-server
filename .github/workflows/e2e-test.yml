@@ -92,11 +92,18 @@ jobs:
 
     - name: Exec OpenIM API test
       run: |
-        sudo make test-api | tee /tmp/test-api.md
+        echo "# OpenIM Test" > /tmp/test-api.md
+        echo "## Command Output" >> /tmp/test-api.md
+        echo "```" >> /tmp/test.md
+        sudo make test-api | tee -a /tmp/test-api.md
+        echo "```" >> /tmp/test.md
 
-    - name: Exec OpenIM E2E test
+    - name: Exec OpenIM E2E Test
       run: |
-        sudo make test-e2e | tee /tmp/test-api.md
+        echo "## Command Output" >> /tmp/test-e2e.md
+        echo "```" >> /tmp/test.md
+        sudo make test-e2e | tee -a /tmp/test-e2e.md
+        echo "```" >> /tmp/test.md
 
     - name: Exec OpenIM System uninstall
       run: |
@@ -105,10 +112,12 @@ jobs:
     - name: Comment PR with file
       uses: thollander/actions-comment-pull-request@v2
       with:
-        filePath: /tmp/test-api.md
+        filePath: /tmp/test.md
         comment_tag: nrt_file
         reactions: eyes, rocket
         mode: recreate
+      env:
+        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 
     - name: Check outputs
       run: |
