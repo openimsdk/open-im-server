@@ -11,36 +11,35 @@ type Cache[V any] interface {
 	Del(key string) bool
 }
 
-func NewCache[V any](slotNum, slotSize int, successTTL, failedTTL time.Duration, target Target) Cache[V] {
-	c := &cache[V]{
+func NewCache[V any](slotNum, slotSize int, successTTL, failedTTL time.Duration, target Target, onEvict EvictCallback[string, V]) Cache[V] {
+	c := &slot[V]{
 		n:      uint64(slotNum),
 		slots:  make([]*LRU[string, V], slotNum),
 		target: target,
 	}
 	for i := 0; i < slotNum; i++ {
-		c.slots[i] = NewLRU[string, V](slotSize, successTTL, failedTTL, c.target)
+		c.slots[i] = NewLRU[string, V](slotSize, successTTL, failedTTL, c.target, onEvict)
 	}
 	return c
 }
 
-type cache[V any] struct {
+type slot[V any] struct {
 	n      uint64
 	slots  []*LRU[string, V]
 	target Target
 }
 
-func (c *cache[V]) index(s string) uint64 {
+func (c *slot[V]) index(s string) uint64 {
 	h := fnv.New64a()
 	_, _ = h.Write(*(*[]byte)(unsafe.Pointer(&s)))
-	//_, _ = h.Write([]byte(s))
 	return h.Sum64() % c.n
 }
 
-func (c *cache[V]) Get(key string, fetch func() (V, error)) (V, error) {
+func (c *slot[V]) Get(key string, fetch func() (V, error)) (V, error) {
 	return c.slots[c.index(key)].Get(key, fetch)
 }
 
-func (c *cache[V]) Del(key string) bool {
+func (c *slot[V]) Del(key string) bool {
 	if c.slots[c.index(key)].Del(key) {
 		c.target.IncrDelHit()
 		return true

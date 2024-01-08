@@ -14,8 +14,14 @@ type waitItem[V any] struct {
 	value   V
 }
 
-func NewLRU[K comparable, V any](size int, successTTL, failedTTL time.Duration, target Target) *LRU[K, V] {
-	core, err := simplelru.NewLRU[K, *waitItem[V]](size, nil)
+func NewLRU[K comparable, V any](size int, successTTL, failedTTL time.Duration, target Target, onEvict EvictCallback[K, V]) *LRU[K, V] {
+	var cb simplelru.EvictCallback[K, *waitItem[V]]
+	if onEvict != nil {
+		cb = func(key K, value *waitItem[V]) {
+			onEvict(key, value.value)
+		}
+	}
+	core, err := simplelru.NewLRU[K, *waitItem[V]](size, cb)
 	if err != nil {
 		panic(err)
 	}

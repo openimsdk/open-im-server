@@ -15,26 +15,21 @@ func New[V any](opts ...Option) Cache[V] {
 	for _, o := range opts {
 		o(opt)
 	}
-	if opt.enable {
-		lc := local.NewCache[V](opt.localSlotNum, opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target)
-		c := &cache[V]{
-			opt:   opt,
-			local: lc,
-		}
-		go func() {
-			c.opt.delCh(c.del)
-		}()
-		return c
-	} else {
-		return &cache[V]{
-			opt: opt,
-		}
-	}
+	c := &cache[V]{opt: opt}
+	c.local = local.NewCache[V](opt.localSlotNum, opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
+	go func() {
+		c.opt.delCh(c.del)
+	}()
+	return c
 }
 
 type cache[V any] struct {
 	opt   *option
 	local local.Cache[V]
+}
+
+func (c *cache[V]) onEvict(key string, value V) {
+
 }
 
 func (c *cache[V]) del(key ...string) {

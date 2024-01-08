@@ -42,7 +42,7 @@ func (r *cacheTarget) String() string {
 
 func TestName(t *testing.T) {
 	target := &cacheTarget{}
-	l := NewCache[string](100, 1000, time.Second*20, time.Second*5, target)
+	l := NewCache[string](100, 1000, time.Second*20, time.Second*5, target, nil)
 	//l := NewLRU[string, string](1000, time.Second*20, time.Second*5, target)
 
 	fn := func(key string, n int, fetch func() (string, error)) {
