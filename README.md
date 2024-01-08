@@ -66,7 +66,7 @@ It is built using Golang and supports cross-platform deployment, ensuring a cons
 + **REST API**: OpenIMServer offers REST APIs for business systems, aimed at empowering businesses with more functionalities, such as creating groups and sending push messages through backend interfaces.
 + **Webhooks**: OpenIMServer provides callback capabilities to extend more business forms. A callback means that OpenIMServer sends a request to the business server before or after a certain event, like callbacks before or after sending a message.
 
-👉 **[Learn more](https://doc.rentsoft.cn/guides/introduction/product)**
+👉 **[Learn more](https://docs.openim.io/guides/introduction/product)**
 
 ## :rocket: Quick Start
 
