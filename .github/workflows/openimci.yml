@@ -18,6 +18,7 @@ on:
   push:
     branches:
         - main
+        - release-*
     paths-ignore:
         - "docs/**"
         - "README.md"
@@ -26,6 +27,7 @@ on:
   pull_request:
     branches:
         - main
+        - release-*
     paths-ignore:
         - "README.md"
         - "README_zh-CN.md"
@@ -80,6 +82,11 @@ jobs:
 
     - name: Build Source
       run: sudo make build
+
+    - name: Build multiarch PLATFORMS
+      if: startsWith(github.ref, 'refs/heads/release-')
+      run: |
+        sudo make multiarch
 
     - name: Cleanup Build
       run: sudo make clean
