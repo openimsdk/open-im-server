@@ -48,6 +48,8 @@ type UserDatabase interface {
 	//Update(ctx context.Context, user *relation.UserModel) (err error)
 	// UpdateByMap update (zero value) external guarantee userID exists
 	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
+	// FindUser
+	PageFindUser(ctx context.Context, level int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
 	// Page If not found, no error is returned
 	Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
 	// IsExist true as long as one exists
@@ -180,6 +182,10 @@ func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[
 // Page Gets, returns no error if not found.
 func (u *userDatabase) Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
 	return u.userDB.Page(ctx, pagination)
+}
+
+func (u *userDatabase) PageFindUser(ctx context.Context, level int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+	return u.userDB.PageFindUser(ctx, level, pagination)
 }
 
 // IsExist Does userIDs exist? As long as there is one, it will be true.
