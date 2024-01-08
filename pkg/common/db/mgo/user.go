@@ -17,6 +17,7 @@ package mgo
 import (
 	"context"
 	"github.com/OpenIMSDK/protocol/user"
+	"github.com/OpenIMSDK/tools/errs"
 	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
@@ -114,7 +115,11 @@ func (u *UserMgo) DeleteUserCommand(ctx context.Context, userID string, Type int
 
 	filter := bson.M{"userID": userID, "type": Type, "uuid": UUID}
 
-	_, err := collection.DeleteOne(ctx, filter)
+	result, err := collection.DeleteOne(ctx, filter)
+	if result.DeletedCount == 0 {
+		// No records found to update
+		return errs.Wrap(errs.ErrRecordNotFound)
+	}
 	return err
 }
 func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error {
@@ -127,9 +132,19 @@ func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int
 	filter := bson.M{"userID": userID, "type": Type, "uuid": UUID}
 	update := bson.M{"$set": val}
 
-	_, err := collection.UpdateOne(ctx, filter, update)
-	return err
+	result, err := collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		// No records found to update
+		return errs.Wrap(errs.ErrRecordNotFound)
+	}
+
+	return nil
 }
+
 func (u *UserMgo) GetUserCommand(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error) {
 	collection := u.coll.Database().Collection("userCommands")
 	filter := bson.M{"userID": userID, "type": Type}

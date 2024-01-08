@@ -379,6 +379,11 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 
 // ProcessUserCommandAdd user general function add
 func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
+	err := authverify.CheckAccessV3(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+
 	var value string
 	if req.Value != nil {
 		value = req.Value.Value
@@ -388,7 +393,7 @@ func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.Proc
 		value = req.Ex.Value
 	}
 	// Assuming you have a method in s.UserDatabase to add a user command
-	err := s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, value, ex)
+	err = s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, value, ex)
 	if err != nil {
 		return nil, err
 	}
@@ -402,8 +407,12 @@ func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.Proc
 
 // ProcessUserCommandDelete user general function delete
 func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.ProcessUserCommandDeleteReq) (*pbuser.ProcessUserCommandDeleteResp, error) {
-	// Assuming you have a method in s.UserDatabase to delete a user command
-	err := s.UserDatabase.DeleteUserCommand(ctx, req.UserID, req.Type, req.Uuid)
+	err := authverify.CheckAccessV3(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.UserDatabase.DeleteUserCommand(ctx, req.UserID, req.Type, req.Uuid)
 	if err != nil {
 		return nil, err
 	}
@@ -417,6 +426,10 @@ func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.P
 
 // ProcessUserCommandUpdate user general function update
 func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
+	err := authverify.CheckAccessV3(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
 	val := make(map[string]any)
 
 	// Map fields from eax to val
@@ -428,7 +441,7 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 	}
 
 	// Assuming you have a method in s.UserDatabase to update a user command
-	err := s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, val)
+	err = s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, val)
 	if err != nil {
 		return nil, err
 	}
@@ -441,6 +454,10 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 }
 
 func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
+	err := authverify.CheckAccessV3(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
 	// Fetch user commands from the database
 	commands, err := s.UserDatabase.GetUserCommands(ctx, req.UserID, req.Type)
 	if err != nil {
