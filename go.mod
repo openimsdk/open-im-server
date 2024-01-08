@@ -37,6 +37,7 @@ require (
 	github.com/IBM/sarama v1.41.3
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/redis/go-redis/v9 v9.2.1
 	github.com/stathat/consistent v1.0.0
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.45
