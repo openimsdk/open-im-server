@@ -5,6 +5,3 @@ reviewers:
   - kubbot
 approvers:
   - cubxxw
-labels:
-  - sig/testing
-  - sig/contributor-experience
