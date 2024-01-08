@@ -58,6 +58,11 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
+func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.ProcessUserCommandGetAllReq) (*pbuser.ProcessUserCommandGetAllResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
@@ -379,11 +384,6 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 
 // ProcessUserCommandAdd user general function add
 func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
-	// Assuming you have a method in s.UserDatabase to add a user command
-	err := s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
-	if err != nil {
-		return nil, err
-	}
 
 	return &pbuser.ProcessUserCommandAddResp{}, nil
 }
@@ -401,11 +401,6 @@ func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.P
 
 // ProcessUserCommandUpdate user general function update
 func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
-	// Assuming you have a method in s.UserDatabase to update a user command
-	err := s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
-	if err != nil {
-		return nil, err
-	}
 
 	return &pbuser.ProcessUserCommandUpdateResp{}, nil
 }
@@ -430,7 +425,7 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 	}
 
 	// Return the response with the slice
-	return &pbuser.ProcessUserCommandGetResp{KVArray: commandInfoSlice}, nil
+	return &pbuser.ProcessUserCommandGetResp{}, nil
 }
 
 func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.AddNotificationAccountReq) (*pbuser.AddNotificationAccountResp, error) {
@@ -464,7 +459,11 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		return nil, err
 	}
 
-	return &pbuser.AddNotificationAccountResp{}, nil
+	return &pbuser.AddNotificationAccountResp{
+		UserID:   req.UserID,
+		NickName: req.NickName,
+		FaceURL:  req.FaceURL,
+	}, nil
 }
 
 func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbuser.UpdateNotificationAccountInfoReq) (*pbuser.UpdateNotificationAccountInfoResp, error) {

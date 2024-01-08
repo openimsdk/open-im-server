@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/OpenIMSDK/protocol v0.0.44
+	github.com/OpenIMSDK/protocol v0.0.45
 	github.com/OpenIMSDK/tools v0.0.23
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/dtm-labs/rockscache v0.1.1
@@ -157,4 +157,4 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
 
-replace github.com/OpenIMSDK/protocol v0.0.44 => github.com/luhaoling/protocol v0.0.0-20240108030109-eaab882743ff
+replace github.com/OpenIMSDK/protocol v0.0.45 => github.com/luhaoling/protocol v0.0.0-20240108040436-6ae98f0a887d
