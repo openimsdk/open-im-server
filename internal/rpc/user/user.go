@@ -438,22 +438,23 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		return nil, err
 	}
 
-	var userID string
-	for i := 0; i < 20; i++ {
-		userId := s.genUserID()
-		_, err := s.UserDatabase.FindWithError(ctx, []string{userId})
-		if err == nil {
-			continue
+	if req.UserID == "" {
+		for i := 0; i < 20; i++ {
+			userId := s.genUserID()
+			_, err := s.UserDatabase.FindWithError(ctx, []string{userId})
+			if err == nil {
+				continue
+			}
+			req.UserID = userId
+			break
 		}
-		userID = userId
-		break
-	}
-	if userID == "" {
-		return nil, errs.ErrInternalServer.Wrap("gen user id failed")
+		if req.UserID == "" {
+			return nil, errs.ErrInternalServer.Wrap("gen user id failed")
+		}
 	}
 
 	user := &tablerelation.UserModel{
-		UserID:         userID,
+		UserID:         req.UserID,
 		Nickname:       req.NickName,
 		FaceURL:        req.FaceURL,
 		CreateTime:     time.Now(),
