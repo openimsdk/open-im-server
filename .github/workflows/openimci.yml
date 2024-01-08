@@ -161,7 +161,8 @@ jobs:
           ```
           ${{ env.containers }}
           ```
-        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
 
   execute-scripts:
     name: Execute OpenIM Script On ${{ matrix.os }}

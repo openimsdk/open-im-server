@@ -17,6 +17,7 @@ package user
 import (
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"math/rand"
 	"strings"
@@ -56,6 +57,11 @@ type userServer struct {
 	friendRpcClient          *rpcclient.FriendRpcClient
 	groupRpcClient           *rpcclient.GroupRpcClient
 	RegisterCenter           registry.SvcDiscoveryRegistry
+}
+
+func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.ProcessUserCommandGetAllReq) (*pbuser.ProcessUserCommandGetAllResp, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -228,7 +234,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 }
 
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
-	total, users, err := s.Page(ctx, req.Pagination)
+	total, users, err := s.PageFindUser(ctx, constant.IMOrdinaryUser, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -379,11 +385,6 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 
 // ProcessUserCommandAdd user general function add
 func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
-	// Assuming you have a method in s.UserDatabase to add a user command
-	err := s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
-	if err != nil {
-		return nil, err
-	}
 
 	return &pbuser.ProcessUserCommandAddResp{}, nil
 }
@@ -401,11 +402,6 @@ func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.P
 
 // ProcessUserCommandUpdate user general function update
 func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
-	// Assuming you have a method in s.UserDatabase to update a user command
-	err := s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
-	if err != nil {
-		return nil, err
-	}
 
 	return &pbuser.ProcessUserCommandUpdateResp{}, nil
 }
@@ -430,7 +426,7 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 	}
 
 	// Return the response with the slice
-	return &pbuser.ProcessUserCommandGetResp{KVArray: commandInfoSlice}, nil
+	return &pbuser.ProcessUserCommandGetResp{}, nil
 }
 
 func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.AddNotificationAccountReq) (*pbuser.AddNotificationAccountResp, error) {
@@ -438,22 +434,23 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		return nil, err
 	}
 
-	var userID string
-	for i := 0; i < 20; i++ {
-		userId := s.genUserID()
-		_, err := s.UserDatabase.FindWithError(ctx, []string{userId})
-		if err == nil {
-			continue
+	if req.UserID == "" {
+		for i := 0; i < 20; i++ {
+			userId := s.genUserID()
+			_, err := s.UserDatabase.FindWithError(ctx, []string{userId})
+			if err == nil {
+				continue
+			}
+			req.UserID = userId
+			break
 		}
-		userID = userId
-		break
-	}
-	if userID == "" {
-		return nil, errs.ErrInternalServer.Wrap("gen user id failed")
+		if req.UserID == "" {
+			return nil, errs.ErrInternalServer.Wrap("gen user id failed")
+		}
 	}
 
 	user := &tablerelation.UserModel{
-		UserID:         userID,
+		UserID:         req.UserID,
 		Nickname:       req.NickName,
 		FaceURL:        req.FaceURL,
 		CreateTime:     time.Now(),
@@ -463,7 +460,11 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		return nil, err
 	}
 
-	return &pbuser.AddNotificationAccountResp{}, nil
+	return &pbuser.AddNotificationAccountResp{
+		UserID:   req.UserID,
+		NickName: req.NickName,
+		FaceURL:  req.FaceURL,
+	}, nil
 }
 
 func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbuser.UpdateNotificationAccountInfoReq) (*pbuser.UpdateNotificationAccountInfoResp, error) {
@@ -497,30 +498,33 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		return nil, err
 	}
 
-	if req.NickName != "" {
-		users, err := s.UserDatabase.FindByNickname(ctx, req.NickName)
+	var users []*relation.UserModel
+	var err error
+	if req.Keyword != "" {
+		users, err = s.UserDatabase.Find(ctx, []string{req.Keyword})
 		if err != nil {
 			return nil, err
 		}
-		resp := s.userModelToResp(users)
-		return resp, nil
-	}
-
-	if req.UserID != "" {
-		users, err := s.UserDatabase.Find(ctx, []string{req.UserID})
+		resp := s.userModelToResp(users, req.Pagination)
+		if resp.Total != 0 {
+			return resp, nil
+		}
+		users, err = s.UserDatabase.FindByNickname(ctx, req.Keyword)
 		if err != nil {
 			return nil, err
 		}
-		resp := s.userModelToResp(users)
+		resp = s.userModelToResp(users, req.Pagination)
+		return resp, nil
+
 		return resp, nil
 	}
 
-	users, err := s.UserDatabase.FindNotification(ctx, constant.AppNotificationAdmin)
+	users, err = s.UserDatabase.FindNotification(ctx, constant.AppNotificationAdmin)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := s.userModelToResp(users)
+	resp := s.userModelToResp(users, req.Pagination)
 	return resp, nil
 }
 
@@ -554,7 +558,7 @@ func (s *userServer) genUserID() string {
 	return string(data)
 }
 
-func (s *userServer) userModelToResp(users []*relation.UserModel) *pbuser.SearchNotificationAccountResp {
+func (s *userServer) userModelToResp(users []*relation.UserModel, pagination pagination.Pagination) *pbuser.SearchNotificationAccountResp {
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {
@@ -568,5 +572,8 @@ func (s *userServer) userModelToResp(users []*relation.UserModel) *pbuser.Search
 			total += 1
 		}
 	}
-	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: accounts}
+
+	notificationAccounts := utils.Paginate(accounts, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
+
+	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: notificationAccounts}
 }
