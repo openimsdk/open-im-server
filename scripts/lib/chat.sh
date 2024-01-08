@@ -27,7 +27,7 @@ openim::chat::validate() {
   # validate if in path
   command -v chat >/dev/null || {
     openim::log::usage "chat must be in your PATH"
-    openim::log::info "You can use 'hack/install-chat.sh' to install a copy in third_party/."
+    openim::log::info "You can use 'scripts/install-chat.sh' to install a copy in third_party/."
     exit 1
   }
 
@@ -61,7 +61,7 @@ openim::chat::validate() {
    version=$(chat --version | grep Version | head -n 1 | cut -d " " -f 3)
    if [[ $(openim::chat::version "${CHAT_VERSION}") -gt $(openim::chat::version "${version}") ]]; then
     openim::log::usage "chat version ${CHAT_VERSION} or greater required."
-    openim::log::info "You can use 'hack/install-chat.sh' to install a copy in third_party/."
+    openim::log::info "You can use 'scripts/install-chat.sh' to install a copy in third_party/."
     exit 1
    fi
   fi

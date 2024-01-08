@@ -25,7 +25,7 @@ unset CDPATH
 
 # Until all GOPATH references are removed from all build scripts as well,
 # explicitly disable module mode to avoid picking up user-set GO111MODULE preferences.
-# As individual scripts (like hack/update-vendor.sh) make use of go modules,
+# As individual scripts (like scripts/update-vendor.sh) make use of go modules,
 # they can explicitly set GO111MODULE=on
 export GO111MODULE=on
 

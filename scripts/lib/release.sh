@@ -471,9 +471,9 @@ Server binary tarballs are no longer included in the OpenIM final tarball.
 Run release/get-openim-binaries.sh to download client and server binaries.
 EOF
 
-  # Include hack/lib as a dependency for the cluster/ scripts
+  # Include scripts/lib as a dependency for the cluster/ scripts
   #mkdir -p "${release_stage}/hack"
-  #cp -R ""${OPENIM_ROOT}"/hack/lib" "${release_stage}/hack/"
+  #cp -R ""${OPENIM_ROOT}"/scripts/lib" "${release_stage}/scripts/"
 
   cp -R "${OPENIM_ROOT}"/{docs,configs,scripts,deployments,init,README.md,LICENSE} "${release_stage}/"
 
