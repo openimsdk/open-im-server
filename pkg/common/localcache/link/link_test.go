@@ -15,10 +15,6 @@ func TestName(t *testing.T) {
 	//v.DelKey("a:1")
 	v.Del("z:1")
 
-	t.Log(v.slots[0].data)
-
-	for k, v := range v.slots[0].data {
-		t.Log(k, v)
-	}
+	t.Log(v)
 
 }
