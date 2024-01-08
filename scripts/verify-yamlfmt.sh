@@ -36,13 +36,13 @@ openim::util::trap_add "git worktree remove -f ${_tmpdir}" EXIT
 cd "${_tmpdir}"
 
 # Format YAML files
-srcipts/update-yamlfmt.sh
+scripts/update-yamlfmt.sh
 
 # Test for diffs
 diffs=$(git status --porcelain | wc -l)
 if [[ ${diffs} -gt 0 ]]; then
   echo "YAML files need to be formatted" >&2
   git diff
-  echo "Please run 'srcipts/update-yamlfmt.sh'" >&2
+  echo "Please run 'scripts/update-yamlfmt.sh'" >&2
   exit 1
 fi
