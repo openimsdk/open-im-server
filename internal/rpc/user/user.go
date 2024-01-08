@@ -483,6 +483,10 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 }
 
 func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.ProcessUserCommandGetAllReq) (*pbuser.ProcessUserCommandGetAllResp, error) {
+	err := authverify.CheckAccessV3(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
 	// Fetch user commands from the database
 	commands, err := s.UserDatabase.GetAllUserCommands(ctx, req.UserID)
 	if err != nil {
