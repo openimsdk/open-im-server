@@ -75,7 +75,7 @@ var (
 		"pkg/kubectl/cmd/testdata/edit",
 		// Tools we use for maintaining the code base but not necessarily
 		// ship as part of the release
-		"sopenim::golang::setup_env:tools",
+		"sopenim::golang::setup_env:tools/yamlfmt/yamlfmt.go:tools",
 	}
 )
 

@@ -40,4 +40,4 @@ find_files() {
 }
 
 export GO111MODULE=on
-find_files | xargs go run tools/yamlfmt/main.go
+find_files | xargs go run tools/yamlfmt/yamlfmt.go
