@@ -17,6 +17,7 @@ package user
 import (
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"math/rand"
 	"strings"
@@ -497,30 +498,33 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		return nil, err
 	}
 
-	if req.NickName != "" {
-		users, err := s.UserDatabase.FindByNickname(ctx, req.NickName)
+	var users []*relation.UserModel
+	var err error
+	if req.Keyword != "" {
+		users, err = s.UserDatabase.Find(ctx, []string{req.Keyword})
 		if err != nil {
 			return nil, err
 		}
-		resp := s.userModelToResp(users)
-		return resp, nil
-	}
-
-	if req.UserID != "" {
-		users, err := s.UserDatabase.Find(ctx, []string{req.UserID})
+		resp := s.userModelToResp(users, req.Pagination)
+		if resp.Total != 0 {
+			return resp, nil
+		}
+		users, err = s.UserDatabase.FindByNickname(ctx, req.Keyword)
 		if err != nil {
 			return nil, err
 		}
-		resp := s.userModelToResp(users)
+		resp = s.userModelToResp(users, req.Pagination)
+		return resp, nil
+
 		return resp, nil
 	}
 
-	users, err := s.UserDatabase.FindNotification(ctx, constant.AppNotificationAdmin)
+	users, err = s.UserDatabase.FindNotification(ctx, constant.AppNotificationAdmin)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := s.userModelToResp(users)
+	resp := s.userModelToResp(users, req.Pagination)
 	return resp, nil
 }
 
@@ -554,7 +558,7 @@ func (s *userServer) genUserID() string {
 	return string(data)
 }
 
-func (s *userServer) userModelToResp(users []*relation.UserModel) *pbuser.SearchNotificationAccountResp {
+func (s *userServer) userModelToResp(users []*relation.UserModel, pagination pagination.Pagination) *pbuser.SearchNotificationAccountResp {
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {
@@ -568,5 +572,8 @@ func (s *userServer) userModelToResp(users []*relation.UserModel) *pbuser.Search
 			total += 1
 		}
 	}
-	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: accounts}
+
+	notificationAccounts := utils.Paginate(accounts, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
+
+	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: notificationAccounts}
 }
