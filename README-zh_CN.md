@@ -78,15 +78,15 @@ OpenIM 是一个专门设计用于在应用程序中集成聊天、音视频通�
 + **REST API**：OpenIMServer 提供了REST API供业务系统使用，旨在赋予业务更多功能，例如通过后台接口建立群组、发送推送消息等。
 + **Webhooks**：OpenIMServer提供了回调能力以扩展更多的业务形态，所谓回调，即OpenIMServer会在某一事件发生之前或者之后，向业务服务器发送请求，如发送消息之前或之后的回调。
 
-👉 **[了解更多](https://doc.rentsoft.cn/guides/introduction/product)**
+👉 **[了解更多](https://docs.openim.io/guides/introduction/product)**
 
 ## :rocket: 快速开始
 
 🤲 为了方便用户体验，我们提供了多种部署解决方案，您可以根据下面的列表选择自己的部署方法：
 
-+ **[源代码部署指南](https://doc.rentsoft.cn/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Docker 部署指南](https://doc.rentsoft.cn/guides/gettingStarted/dockerCompose)**
-+ **[Kubernetes 部署指南](https://github.com/openimsdk/open-im-server/tree/main/deployments)**
++ **[源代码部署指南](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
++ **[Docker 部署指南](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
++ **[Kubernetes 部署指南](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
 
 ## :hammer_and_wrench: 开始开发 OpenIM
 
