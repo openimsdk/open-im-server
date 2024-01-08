@@ -16,6 +16,7 @@ package cache
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -71,7 +72,7 @@ func (b *BlackCacheRedis) NewCache() BlackCache {
 }
 
 func (b *BlackCacheRedis) getBlackIDsKey(ownerUserID string) string {
-	return blackIDsKey + ownerUserID
+	return cachekey.GetBlackIDsKey(ownerUserID)
 }
 
 func (b *BlackCacheRedis) GetBlackIDs(ctx context.Context, userID string) (blackIDs []string, err error) {

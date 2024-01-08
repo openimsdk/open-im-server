@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"hash/crc32"
 	"strconv"
 	"time"
@@ -36,8 +37,8 @@ import (
 )
 
 const (
-	userExpireTime            = time.Second * 60 * 60 * 12
-	userInfoKey               = "USER_INFO:"
+	userExpireTime = time.Second * 60 * 60 * 12
+	//userInfoKey               = "USER_INFO:"
 	userGlobalRecvMsgOptKey   = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
 	olineStatusKey            = "ONLINE_STATUS:"
 	userOlineStatusExpireTime = time.Second * 60 * 60 * 24
@@ -93,18 +94,17 @@ func (u *UserCacheRedis) NewCache() UserCache {
 }
 
 func (u *UserCacheRedis) getUserInfoKey(userID string) string {
-	return userInfoKey + userID
+	return cachekey.GetUserInfoKey(userID)
 }
 
 func (u *UserCacheRedis) getUserGlobalRecvMsgOptKey(userID string) string {
-	return userGlobalRecvMsgOptKey + userID
+	return cachekey.GetUserGlobalRecvMsgOptKey(userID)
 }
 
 func (u *UserCacheRedis) GetUserInfo(ctx context.Context, userID string) (userInfo *relationtb.UserModel, err error) {
 	return getCache(ctx, u.rcClient, u.getUserInfoKey(userID), u.expireTime, func(ctx context.Context) (*relationtb.UserModel, error) {
 		return u.userDB.Take(ctx, userID)
-	},
-	)
+	})
 }
 
 func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationtb.UserModel, error) {

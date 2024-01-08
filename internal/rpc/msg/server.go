@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 
 	"google.golang.org/grpc"
 
@@ -34,12 +35,13 @@ import (
 type (
 	MessageInterceptorChain []MessageInterceptorFunc
 	msgServer               struct {
-		RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
-		MsgDatabase            controller.CommonMsgDatabase
-		Group                  *rpcclient.GroupRpcClient
-		User                   *rpcclient.UserRpcClient
-		Conversation           *rpcclient.ConversationRpcClient
-		friend                 *rpcclient.FriendRpcClient
+		RegisterCenter discoveryregistry.SvcDiscoveryRegistry
+		MsgDatabase    controller.CommonMsgDatabase
+		Group          *rpcclient.GroupRpcClient
+		User           *rpcclient.UserRpcClient
+		Conversation   *rpcclient.ConversationRpcClient
+		friend         *rpccache.FriendLocalCache
+		//friend                 *rpcclient.FriendRpcClient
 		GroupLocalCache        *localcache.GroupLocalCache
 		ConversationLocalCache *localcache.ConversationLocalCache
 		Handlers               MessageInterceptorChain
@@ -79,7 +81,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	conversationClient := rpcclient.NewConversationRpcClient(client)
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
-	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
 	s := &msgServer{
 		Conversation:           &conversationClient,
@@ -89,7 +90,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		RegisterCenter:         client,
 		GroupLocalCache:        localcache.NewGroupLocalCache(&groupRpcClient),
 		ConversationLocalCache: localcache.NewConversationLocalCache(&conversationClient),
-		friend:                 &friendRpcClient,
+		friend:                 rpccache.NewFriendLocalCache(rpcclient.NewFriendRpcClient(client)),
 	}
 	s.notificationSender = rpcclient.NewNotificationSender(rpcclient.WithLocalSendMsg(s.SendMsg))
 	s.addInterceptorHandler(MessageHasReadEnabled)

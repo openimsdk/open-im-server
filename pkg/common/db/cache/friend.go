@@ -16,6 +16,7 @@ package cache
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -27,10 +28,10 @@ import (
 )
 
 const (
-	friendExpireTime    = time.Second * 60 * 60 * 12
-	friendIDsKey        = "FRIEND_IDS:"
-	TwoWayFriendsIDsKey = "COMMON_FRIENDS_IDS:"
-	friendKey           = "FRIEND_INFO:"
+	friendExpireTime = time.Second * 60 * 60 * 12
+	//friendIDsKey        = "FRIEND_IDS:"
+	//TwoWayFriendsIDsKey = "COMMON_FRIENDS_IDS:"
+	//friendKey           = "FRIEND_INFO:"
 )
 
 // FriendCache is an interface for caching friend-related data.
@@ -78,17 +79,17 @@ func (f *FriendCacheRedis) NewCache() FriendCache {
 
 // getFriendIDsKey returns the key for storing friend IDs in the cache.
 func (f *FriendCacheRedis) getFriendIDsKey(ownerUserID string) string {
-	return friendIDsKey + ownerUserID
+	return cachekey.GetFriendIDsKey(ownerUserID)
 }
 
 // getTwoWayFriendsIDsKey returns the key for storing two-way friend IDs in the cache.
 func (f *FriendCacheRedis) getTwoWayFriendsIDsKey(ownerUserID string) string {
-	return TwoWayFriendsIDsKey + ownerUserID
+	return cachekey.GetTwoWayFriendsIDsKey(ownerUserID)
 }
 
 // getFriendKey returns the key for storing friend info in the cache.
 func (f *FriendCacheRedis) getFriendKey(ownerUserID, friendUserID string) string {
-	return friendKey + ownerUserID + "-" + friendUserID
+	return cachekey.GetFriendKey(ownerUserID, friendUserID)
 }
 
 // GetFriendIDs retrieves friend IDs from the cache or the database if not found.

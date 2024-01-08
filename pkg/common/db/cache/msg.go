@@ -44,12 +44,12 @@ const (
 	conversationUserMinSeq = "CON_USER_MIN_SEQ:"
 	hasReadSeq             = "HAS_READ_SEQ:"
 
-	appleDeviceToken = "DEVICE_TOKEN"
-	getuiToken       = "GETUI_TOKEN"
-	getuiTaskID      = "GETUI_TASK_ID"
-	signalCache      = "SIGNAL_CACHE:"
-	signalListCache  = "SIGNAL_LIST_CACHE:"
-	FCM_TOKEN        = "FCM_TOKEN:"
+	//appleDeviceToken = "DEVICE_TOKEN"
+	getuiToken  = "GETUI_TOKEN"
+	getuiTaskID = "GETUI_TASK_ID"
+	//signalCache      = "SIGNAL_CACHE:"
+	//signalListCache  = "SIGNAL_LIST_CACHE:"
+	FCM_TOKEN = "FCM_TOKEN:"
 
 	messageCache            = "MESSAGE_CACHE:"
 	messageDelUserList      = "MESSAGE_DEL_USER_LIST:"
@@ -148,6 +148,10 @@ func (c *msgCache) getHasReadSeqKey(conversationID string, userID string) string
 	return hasReadSeq + userID + ":" + conversationID
 }
 
+func (c *msgCache) getConversationUserMinSeqKey(conversationID, userID string) string {
+	return conversationUserMinSeq + conversationID + "u:" + userID
+}
+
 func (c *msgCache) setSeq(ctx context.Context, conversationID string, seq int64, getkey func(conversationID string) string) error {
 	return utils.Wrap1(c.rdb.Set(ctx, getkey(conversationID), seq, 0).Err())
 }
@@ -207,10 +211,6 @@ func (c *msgCache) GetMinSeqs(ctx context.Context, conversationIDs []string) (ma
 
 func (c *msgCache) GetMinSeq(ctx context.Context, conversationID string) (int64, error) {
 	return c.getSeq(ctx, conversationID, c.getMinSeqKey)
-}
-
-func (c *msgCache) getConversationUserMinSeqKey(conversationID, userID string) string {
-	return conversationUserMinSeq + conversationID + "u:" + userID
 }
 
 func (c *msgCache) GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
