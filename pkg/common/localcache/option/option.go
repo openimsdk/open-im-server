@@ -1,31 +1,32 @@
 package option
 
-var (
-	t = true
-	f = false
-)
+func NewOption() *Option {
+	return &Option{}
+}
 
 type Option struct {
-	enable *bool
-	key    []string
+	Enable *bool
+	Link   []string
 }
 
-func (o *Option) Enable() *Option {
-	o.enable = &t
+func (o *Option) WithEnable() *Option {
+	t := true
+	o.Enable = &t
 	return o
 }
 
-func (o *Option) Disable() *Option {
-	o.enable = &f
+func (o *Option) WithDisable() *Option {
+	f := false
+	o.Enable = &f
 	return o
 }
 
-func (o *Option) DelKey(key ...string) *Option {
+func (o *Option) WithLink(key ...string) *Option {
 	if len(key) > 0 {
-		if o.key == nil {
-			o.key = key
+		if len(o.Link) == 0 {
+			o.Link = key
 		} else {
-			o.key = append(o.key, key...)
+			o.Link = append(o.Link, key...)
 		}
 	}
 	return o
