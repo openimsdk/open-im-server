@@ -106,6 +106,16 @@ jobs:
             ghcr.io/openimsdk/openim-api
             openim/openim-api
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-api
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-api
         uses: docker/build-push-action@v5
@@ -127,6 +137,16 @@ jobs:
             ghcr.io/openimsdk/openim-cmdutils
             openim/openim-cmdutils
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-cmdutils
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-cmdutils
         uses: docker/build-push-action@v5
@@ -148,6 +168,16 @@ jobs:
             ghcr.io/openimsdk/openim-crontask
             openim/openim-crontask
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-crontask
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-crontask
         uses: docker/build-push-action@v5
@@ -169,6 +199,16 @@ jobs:
             ghcr.io/openimsdk/openim-msggateway
             openim/openim-msggateway
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-msggateway
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-msggateway
         uses: docker/build-push-action@v5
@@ -190,6 +230,16 @@ jobs:
             ghcr.io/openimsdk/openim-msgtransfer
             openim/openim-msgtransfer
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-msgtransfer
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-msgtransfer
         uses: docker/build-push-action@v5
@@ -211,6 +261,16 @@ jobs:
             ghcr.io/openimsdk/openim-push
             openim/openim-push
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-push
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-push
         uses: docker/build-push-action@v5
@@ -232,6 +292,16 @@ jobs:
             ghcr.io/openimsdk/openim-rpc-auth
             openim/openim-rpc-auth
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-auth
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-rpc-auth
         uses: docker/build-push-action@v5
@@ -253,6 +323,16 @@ jobs:
             ghcr.io/openimsdk/openim-rpc-conversation
             openim/openim-rpc-conversation
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-conversation
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-rpc-conversation
         uses: docker/build-push-action@v5
@@ -274,6 +354,16 @@ jobs:
             ghcr.io/openimsdk/openim-rpc-friend
             openim/openim-rpc-friend
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-friend
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-rpc-friend
         uses: docker/build-push-action@v5
@@ -295,6 +385,16 @@ jobs:
             ghcr.io/openimsdk/openim-rpc-group
             openim/openim-rpc-group
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-group
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-rpc-group
         uses: docker/build-push-action@v5
@@ -316,6 +416,16 @@ jobs:
             ghcr.io/openimsdk/openim-rpc-msg
             openim/openim-rpc-msg
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-msg
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-rpc-msg
         uses: docker/build-push-action@v5
@@ -337,6 +447,16 @@ jobs:
             ghcr.io/openimsdk/openim-rpc-third
             openim/openim-rpc-third
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-third
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-rpc-third
         uses: docker/build-push-action@v5
@@ -358,6 +478,16 @@ jobs:
             ghcr.io/openimsdk/openim-rpc-user
             openim/openim-rpc-user
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-user
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: Build and push Docker image for openim-rpc-user
         uses: docker/build-push-action@v5
