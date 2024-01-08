@@ -82,6 +82,10 @@ OpenIM 是一个专门设计用于在应用程序中集成聊天、音视频通�
 
 ## :rocket: 快速开始
 
+在线体验iOS/Android/H5/PC/Web：
+
+👉 **[OpenIM online demo](https://www.openim.io/zh/commercial)**
+
 🤲 为了方便用户体验，我们提供了多种部署解决方案，您可以根据下面的列表选择自己的部署方法：
 
 + **[源代码部署指南](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
