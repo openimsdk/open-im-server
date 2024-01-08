@@ -1,17 +1,18 @@
-go 1.19
+go 1.21.5
 
 use (
 	.
 	./test/typecheck
 	./tools/changelog
+	./tools/component
+	./tools/data-conversion
+	./tools/formitychecker
 	//./tools/imctl
 	./tools/infra
 	./tools/ncpu
 	./tools/openim-web
+	./tools/up35
+	./tools/url2im
 	./tools/versionchecker
 	./tools/yamlfmt
-	./tools/component
-	./tools/url2im
-	./tools/data-conversion
-	./tools/up35
 )
