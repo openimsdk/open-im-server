@@ -33,10 +33,10 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7"
-       "github.com/redis/go-redis/v9"
-       "gopkg.in/yaml.v3"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/redis/go-redis/v9"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -145,7 +145,7 @@ func getEnv(key, fallback string) string {
 func checkMongo() (string, error) {
 	// Use environment variables or fallback to config
 	uri := getEnv("MONGO_URI", buildMongoURI())
-
+	fmt.Println("mongo uri", uri)
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	str := "ths addr is:" + strings.Join(config.Config.Mongo.Address, ",")
 	if err != nil {
@@ -171,10 +171,10 @@ func buildMongoURI() string {
 	mongodbHosts := strings.Join(config.Config.Mongo.Address, ",")
 
 	if username != "" && password != "" {
-		return fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d",
+		return fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
 			username, password, mongodbHosts, database, maxPoolSize)
 	}
-	return fmt.Sprintf("mongodb://%s/%s?maxPoolSize=%d",
+	return fmt.Sprintf("mongodb://%s/%s?maxPoolSize=%d&authSource=admin",
 		mongodbHosts, database, maxPoolSize)
 }
 
@@ -184,7 +184,6 @@ func checkMinio() (string, error) {
 	if config.Config.Object.Enable != "minio" {
 		return "", nil
 	}
-
 	// Prioritize environment variables
 	endpoint := getEnv("MINIO_ENDPOINT", config.Config.Object.Minio.Endpoint)
 	accessKeyID := getEnv("MINIO_ACCESS_KEY_ID", config.Config.Object.Minio.AccessKeyID)
