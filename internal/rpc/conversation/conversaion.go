@@ -89,7 +89,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbconvers
 	return resp, nil
 }
 
-func (m *conversationServer) GetConversationList(ctx context.Context, req *pbconversation.GetConversationListReq) (resp *pbconversation.GetConversationListResp, err error) {
+func (m *conversationServer) GetSortedConversationList(ctx context.Context, req *pbconversation.GetSortedConversationListReq) (resp *pbconversation.GetSortedConversationListResp, err error) {
 	log.ZDebug(ctx, "GetConversationList", "seqs", req, "userID", req.UserID)
 	var conversationIDs []string
 	if len(req.ConversationIDs) == 0 {
@@ -134,25 +134,25 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 		conversation_unreadCount[conversationID] = maxSeq - hasReadSeqs[conversationID]
 	}
 
-	conversation_isPinkTime := make(map[int64]string)
-	conversation_notPinkTime := make(map[int64]string)
+	conversation_isPinTime := make(map[int64]string)
+	conversation_notPinTime := make(map[int64]string)
 	for _, v := range conversations {
 		conversationID := v.ConversationID
 		time := conversationMsg[conversationID].MsgInfo.LatestMsgRecvTime
 		conversationMsg[conversationID].RecvMsgOpt = v.RecvMsgOpt
 		if v.IsPinned {
 			conversationMsg[conversationID].IsPinned = v.IsPinned
-			conversation_isPinkTime[time] = conversationID
+			conversation_isPinTime[time] = conversationID
 			continue
 		}
-		conversation_notPinkTime[time] = conversationID
+		conversation_notPinTime[time] = conversationID
 	}
-	resp = &pbconversation.GetConversationListResp{
+	resp = &pbconversation.GetSortedConversationListResp{
 		ConversationElems: []*pbconversation.ConversationElem{},
 	}
 
-	m.conversationSort(conversation_isPinkTime, resp, conversation_unreadCount, conversationMsg)
-	m.conversationSort(conversation_notPinkTime, resp, conversation_unreadCount, conversationMsg)
+	m.conversationSort(conversation_isPinTime, resp, conversation_unreadCount, conversationMsg)
+	m.conversationSort(conversation_notPinTime, resp, conversation_unreadCount, conversationMsg)
 	return resp, nil
 }
 
@@ -425,7 +425,7 @@ func (c *conversationServer) GetConversationOfflinePushUserIDs(
 
 func (c *conversationServer) conversationSort(
 	conversations map[int64]string,
-	resp *pbconversation.GetConversationListResp,
+	resp *pbconversation.GetSortedConversationListResp,
 	conversation_unreadCount map[string]int64,
 	conversationMsg map[string]*pbconversation.ConversationElem,
 ) {
