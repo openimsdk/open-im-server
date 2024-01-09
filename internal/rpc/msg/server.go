@@ -90,7 +90,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		RegisterCenter:         client,
 		GroupLocalCache:        localcache.NewGroupLocalCache(&groupRpcClient),
 		ConversationLocalCache: localcache.NewConversationLocalCache(&conversationClient),
-		friend:                 rpccache.NewFriendLocalCache(rpcclient.NewFriendRpcClient(client)),
+		friend:                 rpccache.NewFriendLocalCache(rpcclient.NewFriendRpcClient(client), rdb),
 	}
 	s.notificationSender = rpcclient.NewNotificationSender(rpcclient.WithLocalSendMsg(s.SendMsg))
 	s.addInterceptorHandler(MessageHasReadEnabled)

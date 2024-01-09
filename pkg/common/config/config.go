@@ -258,6 +258,8 @@ type configStruct struct {
 		FriendVerify *bool `yaml:"friendVerify"`
 	} `yaml:"messageVerify"`
 
+	LocalCache localCache `yaml:"localCache"`
+
 	IOSPush struct {
 		PushSound  string `yaml:"pushSound"`
 		BadgeCount bool   `yaml:"badgeCount"`
@@ -368,6 +370,16 @@ type notification struct {
 	//////////////////////conversation///////////////////////
 	ConversationChanged    NotificationConf `yaml:"conversationChanged"`
 	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
+}
+
+type LocalCache struct {
+	Topic    string `yaml:"topic"`
+	SlotNum  int    `yaml:"slotNum"`
+	SlotSize int    `yaml:"slotSize"`
+}
+
+type localCache struct {
+	Friend LocalCache `yaml:"friend"`
 }
 
 func (c *configStruct) GetServiceNames() []string {

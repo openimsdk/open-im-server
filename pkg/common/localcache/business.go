@@ -16,6 +16,7 @@ func WithRedisDeleteSubscribe(topic string, cli redis.UniversalClient) Option {
 		}
 		msg := cli.Subscribe(context.Background(), topic).Channel()
 		for m := range msg {
+			log.ZDebug(context.Background(), "WithRedisDeleteSubscribe delete", "topic", m.Channel, "payload", m.Payload)
 			var key []string
 			if err := json.Unmarshal([]byte(m.Payload), &key); err != nil {
 				log.ZError(context.Background(), "WithRedisDeleteSubscribe json unmarshal error", err, "topic", topic, "payload", m.Payload)

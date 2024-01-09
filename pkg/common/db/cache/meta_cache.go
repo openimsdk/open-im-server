@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/redis/go-redis/v9"
 	"time"
 
 	"github.com/OpenIMSDK/tools/mw/specialerror"
@@ -44,6 +45,8 @@ type metaCache interface {
 	AddKeys(keys ...string)
 	ClearKeys()
 	GetPreDelKeys() []string
+	SetTopic(topic string)
+	SetRawRedisClient(cli redis.UniversalClient)
 }
 
 func NewMetaCacheRedis(rcClient *rockscache.Client, keys ...string) metaCache {
@@ -51,10 +54,20 @@ func NewMetaCacheRedis(rcClient *rockscache.Client, keys ...string) metaCache {
 }
 
 type metaCacheRedis struct {
+	topic         string
 	rcClient      *rockscache.Client
 	keys          []string
 	maxRetryTimes int
 	retryInterval time.Duration
+	redisClient   redis.UniversalClient
+}
+
+func (m *metaCacheRedis) SetTopic(topic string) {
+	m.topic = topic
+}
+
+func (m *metaCacheRedis) SetRawRedisClient(cli redis.UniversalClient) {
+	m.redisClient = cli
 }
 
 func (m *metaCacheRedis) ExecDel(ctx context.Context, distinct ...bool) error {
@@ -72,31 +85,18 @@ func (m *metaCacheRedis) ExecDel(ctx context.Context, distinct ...bool) error {
 				}
 				break
 			}
-
-			//retryTimes := 0
-			//for {
-			//	m.rcClient.TagAsDeleted()
-			//	if err := m.rcClient.TagAsDeletedBatch2(ctx, []string{key}); err != nil {
-			//		if retryTimes >= m.maxRetryTimes {
-			//			err = errs.ErrInternalServer.Wrap(
-			//				fmt.Sprintf(
-			//					"delete cache error: %v, keys: %v, retry times %d, please check redis server",
-			//					err,
-			//					key,
-			//					retryTimes,
-			//				),
-			//			)
-			//			log.ZWarn(ctx, "delete cache failed, please handle keys", err, "keys", key)
-			//			return err
-			//		}
-			//		retryTimes++
-			//	} else {
-			//		break
-			//	}
-			//}
+		}
+		if m.topic != "" && m.redisClient != nil {
+			data, err := json.Marshal(m.keys)
+			if err != nil {
+				log.ZError(ctx, "keys json marshal failed", err, "topic", m.topic, "keys", m.keys)
+			} else {
+				if err := m.redisClient.Publish(ctx, m.topic, string(data)).Err(); err != nil {
+					log.ZError(ctx, "redis publish cache delete error", err, "topic", m.topic, "keys", m.keys)
+				}
+			}
 		}
 	}
-
 	return nil
 }
 

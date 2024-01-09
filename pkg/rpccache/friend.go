@@ -3,14 +3,16 @@ package rpccache
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/localcache/option"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/redis/go-redis/v9"
 )
 
-func NewFriendLocalCache(client rpcclient.FriendRpcClient) *FriendLocalCache {
+func NewFriendLocalCache(client rpcclient.FriendRpcClient, cli redis.UniversalClient) *FriendLocalCache {
 	return &FriendLocalCache{
-		local:  localcache.New[any](),
+		local:  localcache.New[any](localcache.WithRedisDeleteSubscribe(config.Config.LocalCache.Friend.Topic, cli)),
 		client: client,
 	}
 }

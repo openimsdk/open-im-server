@@ -17,6 +17,7 @@ package cache
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -59,8 +60,11 @@ type FriendCacheRedis struct {
 func NewFriendCacheRedis(rdb redis.UniversalClient, friendDB relationtb.FriendModelInterface,
 	options rockscache.Options) FriendCache {
 	rcClient := rockscache.NewClient(rdb, options)
+	mc := NewMetaCacheRedis(rcClient)
+	mc.SetTopic(config.Config.LocalCache.Friend.Topic)
+	mc.SetRawRedisClient(rdb)
 	return &FriendCacheRedis{
-		metaCache:  NewMetaCacheRedis(rcClient),
+		metaCache:  mc,
 		friendDB:   friendDB,
 		expireTime: friendExpireTime,
 		rcClient:   rcClient,

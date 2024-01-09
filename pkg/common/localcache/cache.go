@@ -33,9 +33,7 @@ type cache[V any] struct {
 
 func (c *cache[V]) onEvict(key string, value V) {
 	for k := range c.link.Del(key) {
-		if key != k {
-			c.local.Del(k)
-		}
+		c.local.Del(k)
 	}
 }
 
