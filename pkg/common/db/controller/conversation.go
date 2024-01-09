@@ -279,7 +279,7 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 		for _, v := range existConversationUserIDs {
 			cache = cache.DelConversations(v, conversationID)
 		}
-		return c.cache.ExecDel(ctx)
+		return cache.ExecDel(ctx)
 	})
 }
 
