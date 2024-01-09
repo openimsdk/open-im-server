@@ -114,7 +114,7 @@ jobs:
       continue-on-error: true
 
   openim-start:
-    name: Test OpenIM install/start on ${{ matrix.os }}
+    name: Test OpenIM install/start on ${{ matrix.os }}-${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     permissions:
         contents: write
@@ -125,6 +125,7 @@ jobs:
       matrix:
         go_version: ["1.21"]
         os: ["ubuntu-latest"]
+        arch: [arm64, armv7, amd64]
     steps:
     - name: Checkout and Install OpenIM
       uses: actions/checkout@v4
@@ -143,6 +144,7 @@ jobs:
     #     sudo docker ps
 
     - name: Check the OpenIM environment and status
+      if: runner.os == 'Linux' && matrix.arch == 'amd64'
       id: docker_info
       run: |
         sleep 30
@@ -155,21 +157,26 @@ jobs:
 
     - name: Comment PR
       uses: thollander/actions-comment-pull-request@v2
+      if: runner.os == 'Linux' && matrix.arch == 'amd64'
       with:
         message: |
           > [!TIP]
           > Run make install to check the status
 
           ### Docker Images:
-          ```
+          <details><summary>Click to expand docker images</summary>
+          ```bash
           ${{ env.images }}
           ```
+          </details>
+
           ### Docker Processes:
-          ```
+          <details><summary>Click to expand docker ps</summary>
+          ```bash
           ${{ env.containers }}
           ```
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      continue-on-error: true
+          </details>
+        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 
   execute-scripts:
     name: Execute OpenIM Script On ${{ matrix.os }}

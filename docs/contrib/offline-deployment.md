@@ -124,7 +124,13 @@ You can select from the following versions:
 docker save -o <tar-file-name>.tar <image-name>
 ```
 
-1. **Fetch code**: Clone the repository:
+If you want to save all the images, use the following command:
+
+```bash
+docker save -o <tar-file-name>.tar $(docker images -q)
+```
+
+3. **Fetch code**: Clone the repository:
 
 ```bash
 git clone https://github.com/openimsdk/openim-docker.git
@@ -134,7 +140,7 @@ Or download the code from [Releases](https://github.com/openimsdk/openim-docker/
 
 > Because of the difference between win and linux newlines, please do not clone the repository with win and then synchronize scp to linux.
 
-1. **Transfer files**: Use `scp` to transfer all images and code to the intranet server.
+4. **Transfer files**: Use `scp` to transfer all images and code to the intranet server.
 
 ```bash
 scp <tar-file-name>.tar user@remote-ip:/path/on/remote/server
@@ -142,21 +148,27 @@ scp <tar-file-name>.tar user@remote-ip:/path/on/remote/server
 
 Or choose other transfer methods such as a hard drive.
 
-2. **Import images**: On the intranet server:
+5. **Import images**: On the intranet server:
 
 ```bash
 docker load -i <tar-file-name>.tar
 ```
 
-3. **Deploy**: Navigate to the `openim-docker` repository directory and follow the [README guide](https://github.com/openimsdk/openim-docker) for deployment.
-
-4. **Deploy using docker compose**:
+Import directly with shortcut commands:
 
 ```bash
-docker compose up -d
+for i in `ls ./`;do docker load -i $i;done
+```
 
-# Verify
-docker compose ps
+6. **Deploy**: Navigate to the `openim-docker` repository directory and follow the [README guide](https://github.com/openimsdk/openim-docker) for deployment.
+
+7. **Deploy using docker compose**:
+
+```bash
+export OPENIM_IP="your ip" # Set Ip
+make init # Init config
+docker compose up -d # Deployment
+docker compose ps # Verify
 ```
 
 > **Note**: If you're using a version of Docker prior to 20, make sure you've installed `docker-compose`.
