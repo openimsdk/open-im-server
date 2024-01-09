@@ -1146,7 +1146,7 @@ function openim::util::require-jq {
 # Checks whether dig is installed and provides installation instructions if it is not.
 function openim::util::require-dig {
   if ! command -v dig &>/dev/null; then
-    openim::log::error "Please install 'dig' to use this feature."
+    openim::log::error "Please install 'dig' to use this feature. OR Set the environment variable for OPENIM_IP"
     openim::log::error "Installation instructions:"
     openim::log::error "  For Ubuntu/Debian: sudo apt-get install dnsutils"
     openim::log::error "  For CentOS/RedHat: sudo yum install bind-utils"
