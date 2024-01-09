@@ -402,7 +402,10 @@ func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.Proc
 		FromUserID: req.UserID,
 		ToUserID:   req.UserID,
 	}
-	s.userNotificationSender.UserCommandAddNotification(ctx, tips)
+	err = s.userNotificationSender.UserCommandAddNotification(ctx, tips)
+	if err != nil {
+		return nil, err
+	}
 	return &pbuser.ProcessUserCommandAddResp{}, nil
 }
 
@@ -421,7 +424,10 @@ func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.P
 		FromUserID: req.UserID,
 		ToUserID:   req.UserID,
 	}
-	s.userNotificationSender.UserCommandDeleteNotification(ctx, tips)
+	err = s.userNotificationSender.UserCommandDeleteNotification(ctx, tips)
+	if err != nil {
+		return nil, err
+	}
 	return &pbuser.ProcessUserCommandDeleteResp{}, nil
 }
 
@@ -450,7 +456,10 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 		FromUserID: req.UserID,
 		ToUserID:   req.UserID,
 	}
-	s.userNotificationSender.UserCommandUpdateNotification(ctx, tips)
+	err = s.userNotificationSender.UserCommandUpdateNotification(ctx, tips)
+	if err != nil {
+		return nil, err
+	}
 	return &pbuser.ProcessUserCommandUpdateResp{}, nil
 }
 
