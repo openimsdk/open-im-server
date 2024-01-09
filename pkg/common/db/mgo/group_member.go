@@ -51,7 +51,11 @@ func (g *GroupMemberMgo) Create(ctx context.Context, groupMembers []*relation.Gr
 }
 
 func (g *GroupMemberMgo) Delete(ctx context.Context, groupID string, userIDs []string) (err error) {
-	return mgoutil.DeleteMany(ctx, g.coll, bson.M{"group_id": groupID, "user_id": bson.M{"$in": userIDs}})
+	filter := bson.M{"group_id": groupID}
+	if len(userIDs) > 0 {
+		filter["user_id"] = bson.M{"$in": userIDs}
+	}
+	return mgoutil.DeleteMany(ctx, g.coll, filter)
 }
 
 func (g *GroupMemberMgo) UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) error {
@@ -84,8 +88,8 @@ func (g *GroupMemberMgo) FindRoleLevelUserIDs(ctx context.Context, groupID strin
 }
 
 func (g *GroupMemberMgo) SearchMember(ctx context.Context, keyword string, groupID string, pagination pagination.Pagination) (total int64, groupList []*relation.GroupMemberModel, err error) {
-	//TODO implement me
-	panic("implement me")
+	filter := bson.M{"group_id": groupID, "nickname": bson.M{"$regex": keyword}}
+	return mgoutil.FindPage[*relation.GroupMemberModel](ctx, g.coll, filter, pagination)
 }
 
 func (g *GroupMemberMgo) FindUserJoinedGroupID(ctx context.Context, userID string) (groupIDs []string, err error) {

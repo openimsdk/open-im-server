@@ -476,12 +476,41 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbgroup.GetGro
 
 func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbgroup.GetGroupMemberListReq) (*pbgroup.GetGroupMemberListResp, error) {
 	resp := &pbgroup.GetGroupMemberListResp{}
-	total, members, err := s.db.PageGetGroupMember(ctx, req.GroupID, req.Pagination)
+	var (
+		total   int64
+		members []*relationtb.GroupMemberModel
+		err     error
+	)
+	if req.Keyword == "" {
+		total, members, err = s.db.PageGetGroupMember(ctx, req.GroupID, req.Pagination)
+	} else {
+		members, err = s.db.FindGroupMemberAll(ctx, req.GroupID)
+	}
 	if err != nil {
 		return nil, err
 	}
 	if err := s.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
+	}
+	if req.Keyword != "" {
+		groupMembers := make([]*relationtb.GroupMemberModel, 0)
+		for _, member := range members {
+			if member.UserID == req.Keyword {
+				groupMembers = append(groupMembers, member)
+				total++
+				continue
+			}
+			if member.Nickname == req.Keyword {
+				groupMembers = append(groupMembers, member)
+				total++
+				continue
+			}
+		}
+
+		GMembers := utils.Paginate(groupMembers, int(req.Pagination.GetPageNumber()), int(req.Pagination.GetShowNumber()))
+		resp.Members = utils.Batch(convert.Db2PbGroupMember, GMembers)
+		resp.Total = uint32(total)
+		return resp, nil
 	}
 	resp.Total = uint32(total)
 	resp.Members = utils.Batch(convert.Db2PbGroupMember, members)
@@ -1042,19 +1071,28 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 func (s *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) (*pbgroup.GetGroupsResp, error) {
 	resp := &pbgroup.GetGroupsResp{}
 	var (
-		groups []*relationtb.GroupModel
-		err    error
+		group []*relationtb.GroupModel
+		err   error
 	)
 	if req.GroupID != "" {
-		groups, err = s.db.FindGroup(ctx, []string{req.GroupID})
-		resp.Total = uint32(len(groups))
+		group, err = s.db.FindGroup(ctx, []string{req.GroupID})
+		resp.Total = uint32(len(group))
 	} else {
 		var total int64
-		total, groups, err = s.db.SearchGroup(ctx, req.GroupName, req.Pagination)
+		total, group, err = s.db.SearchGroup(ctx, req.GroupName, req.Pagination)
 		resp.Total = uint32(total)
 	}
 	if err != nil {
 		return nil, err
+	}
+
+	var groups []*relationtb.GroupModel
+	for _, v := range group {
+		if v.Status == constant.GroupStatusDismissed {
+			resp.Total--
+			continue
+		}
+		groups = append(groups, v)
 	}
 	groupIDs := utils.Slice(groups, func(e *relationtb.GroupModel) string {
 		return e.GroupID

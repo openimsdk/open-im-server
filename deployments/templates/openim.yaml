@@ -53,8 +53,8 @@ mongo:
 # Maximum connection pool size
   address: [ ${MONGO_ADDRESS}:${MONGO_PORT} ]
   database: ${MONGO_DATABASE}
-  username: ${MONGO_USERNAME}
-  password: ${MONGO_PASSWORD}
+  username: ${MONGO_OPENIM_USERNAME}
+  password: ${MONGO_OPENIM_PASSWORD}
   maxPoolSize: ${MONGO_MAX_POOL_SIZE}
 
 ###################### Redis configuration information ######################

@@ -40,6 +40,8 @@ type UserDatabase interface {
 	Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error)
 	// Find userInfo By Nickname
 	FindByNickname(ctx context.Context, nickname string) (users []*relation.UserModel, err error)
+	// Find notificationAccounts
+	FindNotification(ctx context.Context, level int64) (users []*relation.UserModel, err error)
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db
 	Create(ctx context.Context, users []*relation.UserModel) (err error)
 	// Update update (non-zero value) external guarantee userID exists
@@ -48,6 +50,8 @@ type UserDatabase interface {
 	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
 	// Page If not found, no error is returned
 	Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
+	// FindUser
+	PageFindUser(ctx context.Context, level int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
 	// IsExist true as long as one exists
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 	// GetAllUserID Get all user IDs
@@ -141,6 +145,11 @@ func (u *userDatabase) FindByNickname(ctx context.Context, nickname string) (use
 	return u.userDB.TakeByNickname(ctx, nickname)
 }
 
+// Find notificationAccouts
+func (u *userDatabase) FindNotification(ctx context.Context, level int64) (users []*relation.UserModel, err error) {
+	return u.userDB.TakeNotification(ctx, level)
+}
+
 // Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db.
 func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) (err error) {
 	return u.tx.Transaction(ctx, func(ctx context.Context) error {
@@ -174,6 +183,10 @@ func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[
 // Page Gets, returns no error if not found.
 func (u *userDatabase) Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
 	return u.userDB.Page(ctx, pagination)
+}
+
+func (u *userDatabase) PageFindUser(ctx context.Context, level int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+	return u.userDB.PageFindUser(ctx, level, pagination)
 }
 
 // IsExist Does userIDs exist? As long as there is one, it will be true.

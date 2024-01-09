@@ -3,12 +3,36 @@
 
 before:
   hooks:
+    - make clean
     # You may remove this if you don't use go modules.
     - make tidy
     - make copyright.add
     # you may remove this if you don't need go generate
     - go generate ./...
 
+git:
+  # What should be used to sort tags when gathering the current and previous
+  # tags if there are more than one tag in the same commit.
+  #
+  # Default: '-version:refname'
+  tag_sort: -version:creatordate
+
+  # What should be used to specify prerelease suffix while sorting tags when gathering
+  # the current and previous tags if there are more than one tag in the same commit.
+  #
+  # Since: v1.17
+  prerelease_suffix: "-"
+
+  # Tags to be ignored by GoReleaser.
+  # This means that GoReleaser will not pick up tags that match any of the
+  # provided values as either previous or current tags.
+  #
+  # Templates: allowed.
+  # Since: v1.21.
+  ignore_tags:
+    - nightly
+    # - "{{.Env.IGNORE_TAG}}"
+  
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
 

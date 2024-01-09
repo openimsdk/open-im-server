@@ -25,10 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/minio/minio-go/v7"
-	"github.com/redis/go-redis/v9"
-	"gopkg.in/yaml.v3"
-
 	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/go-zookeeper/zk"
@@ -38,6 +34,9 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/minio/minio-go/v7"
+       "github.com/redis/go-redis/v9"
+       "gopkg.in/yaml.v3"
 )
 
 const (
@@ -172,10 +171,10 @@ func buildMongoURI() string {
 	mongodbHosts := strings.Join(config.Config.Mongo.Address, ",")
 
 	if username != "" && password != "" {
-		return fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
+		return fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d",
 			username, password, mongodbHosts, database, maxPoolSize)
 	}
-	return fmt.Sprintf("mongodb://%s/%s?maxPoolSize=%d&authSource=admin",
+	return fmt.Sprintf("mongodb://%s/%s?maxPoolSize=%d",
 		mongodbHosts, database, maxPoolSize)
 }
 
