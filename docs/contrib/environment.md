@@ -108,7 +108,7 @@ export CHAT_IMAGE_VERSION="main"
 export SERVER_IMAGE_VERSION="main"
 ```
 
-These variables are stored within the [`environment.sh`](https://github.com/OpenIMSDK/openim-docker/blob/main/scripts/install/environment.sh) configuration:
+These variables are stored within the [`environment.sh`](https://github.com/OpenIMSDK/open-im-server/blob/main/scripts/install/environment.sh) configuration:
 
 ```bash
 readonly CHAT_IMAGE_VERSION=${CHAT_IMAGE_VERSION:-'main'}

@@ -126,8 +126,9 @@ services:
 
   # Uncomment and configure the following services as needed
   # openim-admin:
-  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin-front:v3.4.0
-  #   container_name: openim-admin
+  # # https://github.com/openimsdk/open-im-server/issues/1662
+  # image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin:${ADMIN_FRONT_VERSION:-toc-base-open-docker.35}
+  # container_name: openim-admin
   #   restart: always
   #   ports:
   #     - "${OPENIM_ADMIN_FRONT_PORT:-11002}:80"
@@ -141,8 +142,8 @@ services:
   #   hostname: prometheus
   #   restart: always
   #   volumes:
-  #     - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
-  #     - ./config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml
+  #     - "${DATA_DIR:-./}/config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml"
+  #     - "${DATA_DIR:-./}/config/prometheus.yml:/etc/prometheus/prometheus.yml"
   #   ports:
   #     - "${PROMETHEUS_PORT:-19090}:9090"
   #   networks:
@@ -155,8 +156,8 @@ services:
   #   hostname: alertmanager
   #   restart: always
   #   volumes:
-  #     - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-  #     - ./config/email.tmpl:/etc/alertmanager/email.tmpl
+  #     - ${DATA_DIR:-./}/config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+  #     - ${DATA_DIR:-./}/config/email.tmpl:/etc/alertmanager/email.tmpl
   #   ports:
   #     - "${ALERT_MANAGER_PORT:-19093}:9093"
   #   networks:
@@ -172,7 +173,7 @@ services:
   #   ports:
   #     - "${GRAFANA_PORT:-13000}:3000"
   #   volumes:
-  #     - ${DATA_DIR:-./}/components/grafana:/var/lib/grafana
+  #     - "${DATA_DIR:-./}/components/grafana:/var/lib/grafana"
   #   networks:
   #     server:
   #       ipv4_address: ${GRAFANA_NETWORK_ADDRESS:-172.28.0.11}
