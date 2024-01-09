@@ -137,18 +137,18 @@ func (m *conversationServer) GetSortedConversationList(ctx context.Context, req 
 		unreadTotal += unreadCount
 	}
 
-	conversation_isPinkTime := make(map[int64]string)
-	conversation_notPinkTime := make(map[int64]string)
+	conversation_isPinTime := make(map[int64]string)
+	conversation_notPinTime := make(map[int64]string)
 	for _, v := range conversations {
 		conversationID := v.ConversationID
 		time := conversationMsg[conversationID].MsgInfo.LatestMsgRecvTime
 		conversationMsg[conversationID].RecvMsgOpt = v.RecvMsgOpt
 		if v.IsPinned {
 			conversationMsg[conversationID].IsPinned = v.IsPinned
-			conversation_isPinkTime[time] = conversationID
+			conversation_isPinTime[time] = conversationID
 			continue
 		}
-		conversation_notPinkTime[time] = conversationID
+		conversation_notPinTime[time] = conversationID
 	}
 	resp = &pbconversation.GetSortedConversationListResp{
 		ConversationTotal: int64(len(chatLogs)),
@@ -156,8 +156,8 @@ func (m *conversationServer) GetSortedConversationList(ctx context.Context, req 
 		UnreadTotal:       unreadTotal,
 	}
 
-	m.conversationSort(conversation_isPinkTime, resp, conversation_unreadCount, conversationMsg)
-	m.conversationSort(conversation_notPinkTime, resp, conversation_unreadCount, conversationMsg)
+	m.conversationSort(conversation_isPinTime, resp, conversation_unreadCount, conversationMsg)
+	m.conversationSort(conversation_notPinTime, resp, conversation_unreadCount, conversationMsg)
 
 	resp.ConversationElems = utils.Paginate(resp.ConversationElems, int(req.Pagination.GetPageNumber()), int(req.Pagination.GetShowNumber()))
 	return resp, nil
