@@ -62,10 +62,8 @@ func (m *msgServer) sendMsgSuperGroupChat(
 		prommetrics.GroupChatMsgProcessFailedCounter.Inc()
 		return nil, err
 	}
-	if req.MsgData.ContentType != constant.Typing {
-		if err = callbackBeforeSendGroupMsg(ctx, req); err != nil {
-			return nil, err
-		}
+	if err = callbackBeforeSendGroupMsg(ctx, req); err != nil {
+		return nil, err
 	}
 
 	if err := callbackMsgModify(ctx, req); err != nil {
@@ -78,10 +76,8 @@ func (m *msgServer) sendMsgSuperGroupChat(
 	if req.MsgData.ContentType == constant.AtText {
 		go m.setConversationAtInfo(ctx, req.MsgData)
 	}
-	if req.MsgData.ContentType != constant.Typing {
-		if err = callbackAfterSendGroupMsg(ctx, req); err != nil {
-			log.ZWarn(ctx, "CallbackAfterSendGroupMsg", err)
-		}
+	if err = callbackAfterSendGroupMsg(ctx, req); err != nil {
+		log.ZWarn(ctx, "CallbackAfterSendGroupMsg", err)
 	}
 	prommetrics.GroupChatMsgProcessSuccessCounter.Inc()
 	resp = &pbmsg.SendMsgResp{}
@@ -169,10 +165,8 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 		return nil, nil
 	} else {
-		if req.MsgData.ContentType != constant.Typing {
-			if err = callbackBeforeSendSingleMsg(ctx, req); err != nil {
-				return nil, err
-			}
+		if err = callbackBeforeSendSingleMsg(ctx, req); err != nil {
+			return nil, err
 		}
 
 		if err := callbackMsgModify(ctx, req); err != nil {
@@ -182,9 +176,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 			prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 			return nil, err
 		}
-		if req.MsgData.ContentType != constant.Typing {
-			err = callbackAfterSendSingleMsg(ctx, req)
-		}
+		err = callbackAfterSendSingleMsg(ctx, req)
 		if err != nil {
 			log.ZWarn(ctx, "CallbackAfterSendSingleMsg", err, "req", req)
 		}
