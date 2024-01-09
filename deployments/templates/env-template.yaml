@@ -1,3 +1,17 @@
+# Copyright © 2024 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # -----------------------------------------------------------------------------
 # General Configuration
 # This section contains general configuration options for the entire environment.
@@ -84,19 +98,23 @@ OPENIM_IP=${OPENIM_IP}
 # Default: ZOOKEEPER_PORT=12181
 ZOOKEEPER_PORT=${ZOOKEEPER_PORT}
 
-# Port on which MongoDB service is running.
+# MongoDB service port configuration.
 # Default: MONGO_PORT=37017
 # MONGO_PORT=${MONGO_PORT}
 
-# Username to authenticate with the MongoDB service.
-# Default: MONGO_USERNAME=root
-# MONGO_USERNAME=${MONGO_USERNAME}
-
-# Password to authenticate with the MongoDB service.
+# Password for MongoDB admin user. Used for service authentication.
 # Default: MONGO_PASSWORD=openIM123
 MONGO_PASSWORD=${MONGO_PASSWORD}
 
-# Name of the database in MongoDB to be used.
+# Username for a regular OpenIM user in MongoDB.
+# Default: MONGO_OPENIM_USERNAME=openIM
+MONGO_OPENIM_USERNAME=${MONGO_OPENIM_USERNAME}
+
+# Password for a regular OpenIM user in MongoDB.
+# Default: MONGO_OPENIM_PASSWORD=openIM123456
+MONGO_OPENIM_PASSWORD=${MONGO_OPENIM_PASSWORD}
+
+# Specifies the database name to be used within MongoDB.
 # Default: MONGO_DATABASE=openIM_v3
 MONGO_DATABASE=${MONGO_DATABASE}
 
@@ -177,7 +195,6 @@ OPENIM_WS_PORT=${OPENIM_WS_PORT}
 # Default: API_OPENIM_PORT=10002
 API_OPENIM_PORT=${API_OPENIM_PORT}
 
-
 # ======================================
 # ========== OpenIM Chat ===============
 # ======================================
@@ -190,9 +207,9 @@ CHAT_IMAGE_VERSION=${CHAT_IMAGE_VERSION}
 # Default: OPENIM_CHAT_API_PORT=10008
 OPENIM_CHAT_API_PORT=${OPENIM_CHAT_API_PORT}
 
-# Directory path for storing data files or related information for OpenIM chat.
-# Default: OPENIM_CHAT_DATA_DIR=./openim-chat/main
-OPENIM_CHAT_DATA_DIR=${OPENIM_CHAT_DATA_DIR}
+# Port for the OpenIM admin API.
+# Default: OPENIM_ADMIN_API_PORT=10009
+OPENIM_ADMIN_API_PORT=${OPENIM_ADMIN_API_PORT}
 
 # ======================================
 # ========== OpenIM Admin ==============
@@ -201,10 +218,6 @@ OPENIM_CHAT_DATA_DIR=${OPENIM_CHAT_DATA_DIR}
 # Branch name for OpenIM server.
 # Default: SERVER_IMAGE_VERSION=main
 SERVER_IMAGE_VERSION=${SERVER_IMAGE_VERSION}
-
-# Port for the OpenIM admin API.
-# Default: OPENIM_ADMIN_API_PORT=10009
-OPENIM_ADMIN_API_PORT=${OPENIM_ADMIN_API_PORT}
   
 # Port for the node exporter.
 # Default: NODE_EXPORTER_PORT=19100

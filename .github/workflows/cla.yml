@@ -33,7 +33,7 @@ env:
   OPEN_IM_SERVER_CLA_DOCUMENT: https://github.com/openim-sigs/cla/blob/main/README.md
   OPEN_IM_SERVER_SIGNATURES_PATH: signatures/${{ github.event.repository.name }}/cla.json
 
-  OPEN_IM_SERVER_ALLOWLIST: kubbot,bot*,bot-*,bot/*,bot-/*,bot,*[bot]
+  OPEN_IM_SERVER_ALLOWLIST: kubbot,openimbot,bot*,dependabot,sweep-ai,*bot,bot-*,bot/*,bot-/*,bot,*[bot]
 
 jobs:
   CLAAssistant:

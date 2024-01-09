@@ -35,8 +35,8 @@ docker run -d \
     -e MONGO_INITDB_ROOT_USERNAME=${OPENIM_USER} \
     -e MONGO_INITDB_ROOT_PASSWORD=${PASSWORD} \
     -e MONGO_INITDB_DATABASE=openIM \
-    -e MONGO_USERNAME=${OPENIM_USER} \
-    -e MONGO_PASSWORD=${PASSWORD} \
+    -e MONGO_OPENIM_USERNAME=${OPENIM_USER} \
+    -e MONGO_OPENIM_PASSWORD=${PASSWORD} \
     --restart always \
     mongo:6.0.2 --wiredTigerCacheSizeGB 1 --auth
 

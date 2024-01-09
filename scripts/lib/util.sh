@@ -1146,8 +1146,13 @@ function openim::util::require-jq {
 # Checks whether dig is installed and provides installation instructions if it is not.
 function openim::util::require-dig {
   if ! command -v dig &>/dev/null; then
-    openim::log::error "dig command not found."
-    return 1
+    openim::log::error "Please install 'dig' to use this feature."
+    openim::log::error "Installation instructions:"
+    openim::log::error "  For Ubuntu/Debian: sudo apt-get install dnsutils"
+    openim::log::error "  For CentOS/RedHat: sudo yum install bind-utils"
+    openim::log::error "  For macOS: 'dig' should be preinstalled. If missing, try: brew install bind"
+    openim::log::error "  For Windows: Install BIND9 tools from https://www.isc.org/download/"
+    openim::log::error_exit "dig command not found."
   fi
   return 0
 }

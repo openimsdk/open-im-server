@@ -78,8 +78,8 @@ func buildMongoURI() string {
 		return config.Config.Mongo.Uri
 	}
 
-	username := os.Getenv("MONGO_USERNAME")
-	password := os.Getenv("MONGO_PASSWORD")
+	username := os.Getenv("MONGO_OPENIM_USERNAME")
+	password := os.Getenv("MONGO_OPENIM_PASSWORD")
 	address := os.Getenv("MONGO_ADDRESS")
 	port := os.Getenv("MONGO_PORT")
 	database := os.Getenv("MONGO_DATABASE")
@@ -103,9 +103,9 @@ func buildMongoURI() string {
 		maxPoolSize = fmt.Sprint(config.Config.Mongo.MaxPoolSize)
 	}
 
-	uriFormat := "mongodb://%s/%s?maxPoolSize=%s&authSource=admin"
+	uriFormat := "mongodb://%s/%s?maxPoolSize=%s"
 	if username != "" && password != "" {
-		uriFormat = "mongodb://%s:%s@%s/%s?maxPoolSize=%s&authSource=admin"
+		uriFormat = "mongodb://%s:%s@%s/%s?maxPoolSize=%s"
 		return fmt.Sprintf(uriFormat, username, password, address, database, maxPoolSize)
 	}
 	return fmt.Sprintf(uriFormat, address, database, maxPoolSize)

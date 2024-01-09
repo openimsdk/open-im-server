@@ -25,178 +25,56 @@
 
 </p>
 
-
 ## Ⓜ️ About OpenIM
 
-OpenIM isn't just an open-source instant messaging component, it's an integral part of your application ecosystem. Check out this diagram to understand how AppServer, AppClient, OpenIMServer, and OpenIMSDK interact.
+OpenIM is a service platform specifically designed for integrating chat, audio-video calls, notifications, and AI chatbots into applications. It provides a range of powerful APIs and Webhooks, enabling developers to easily incorporate these interactive features into their applications. OpenIM is not a standalone chat application, but rather serves as a platform to support other applications in achieving rich communication functionalities. The following diagram illustrates the interaction between AppServer, AppClient, OpenIMServer, and OpenIMSDK to explain in detail.
 
 ![App-OpenIM Relationship](./docs/images/oepnim-design.png)
 
 ## 🚀 About OpenIMSDK
 
-**OpenIMSDK** seamlessly integrates into your application, delivering a rich, real-time messaging experience without requiring intricate UI integration. It provides:
+**OpenIMSDK** is an IM SDK designed for **OpenIMServer**, created specifically for embedding in client applications. Its main features and modules are as follows:
 
-+ **Local Storage**: For quick data retrieval and message synchronization.
-+ **Listener Callbacks**: Ensuring real-time message interactivity.
-+ **API Encapsulation**: Streamlining development processes.
-+ **Connection Management**: Guaranteeing reliable message delivery.
++ 🌟 Main Features:
 
-It's crafted in Golang and supports cross-platform deployment, ensuring a coherent messaging experience across all platforms.
+  - 📦 Local storage
+  - 🔔 Listener callbacks
+  - 🛡️ API wrapping
+  - 🌐 Connection management
+
+  ## 📚 Main Modules:
+
+  1. 🚀 Initialization and Login
+  2. 👤 User Management
+  3. 👫 Friend Management
+  4. 🤖 Group Functions
+  5. 💬 Conversation Handling
+
+It is built using Golang and supports cross-platform deployment, ensuring a consistent access experience across all platforms.
 
 👉 **[Explore GO SDK](https://github.com/openimsdk/openim-sdk-core)**
 
 ## 🌐 About OpenIMServer
 
-**OpenIMServer**, meticulously developed in Golang, ensures a stellar instant messaging server capability with a multifold approach:
++ **OpenIMServer** has the following characteristics:
+  - 🌐 Microservice architecture: Supports cluster mode, including a gateway and multiple rpc services.
+  - 🚀 Diverse deployment methods: Supports deployment via source code, Kubernetes, or Docker.
+  - Support for massive user base: Super large groups with hundreds of thousands of users, tens of millions of users, and billions of messages.
 
-+ **Modular Composition**: It's comprised of several modules, such as the gateway and multiple RPC services, offering a versatile messaging environment.
-+ **Microservices Architecture**: Supporting cluster modes, it assures outstanding performance and scalability to manage communication effectively across various instances.
-+ **Diverse Deployment Options**: Adapts to your operational preferences, offering deployment via source code, Kubernetes, or Docker.
+### Enhanced Business Functionality:
 
-### Enhanced Business Functionalities:
++ **REST API**: OpenIMServer offers REST APIs for business systems, aimed at empowering businesses with more functionalities, such as creating groups and sending push messages through backend interfaces.
++ **Webhooks**: OpenIMServer provides callback capabilities to extend more business forms. A callback means that OpenIMServer sends a request to the business server before or after a certain event, like callbacks before or after sending a message.
 
-+ **REST API**: OpenIMServer provides REST API for business systems, aiming to empower your operations with additional functionalities like group creation and message push via backend interfaces.
-+ **Callbacks**: To expand its utility across varied business forms, OpenIMServer offers callback capabilities. That is, it sends a request to the business server before or after an event occurs, such as sending a message, enriching the interaction and data exchange flow in the communication processes.
-
-👉 **[Learn More](https://docs.openim.io/guides/introduction/product)**
-
-<!--
-
-## :star2: Why OpenIM
-
-**🔍 Function screenshot display**
-
-<div align="center">
-
-|            💻🔄📱 Multi Terminal Synchronization 🔄🖥️             |                  📅⚡ Efficient Meetings 🚀💼      |
-| :----------------------------------------------------------: | :---------------------------------------------------------: |
-| ![multiple-message](./assets/demo/multi-terminal-synchronization.png) | ![efficient-meetings](./assets/demo/efficient-meetings.png) |
-|             📲🔄 **One-to-one and Group Chats** 👥🗣️             |        🎁💻 **Special Features - Custom Messages** ✉️🎨|
-|         ![group-chat](./assets/demo/group-chat.png)          |   ![special-function](./assets/demo/special-function.png)      |
-
-</div>
-
-**OpenIM** offers a powerful and reliable instant messaging platform, ensuring versatile communication across multiple platforms with the following key features:
-
-✅ **Versatile Messaging:** Support for text, images, emojis, voice, video, and more, alongside one-on-one and multi-person audio/video calls.
-
-✅ **Robust Chat Capabilities:** Including roles (application administrator, group owner, etc.) and features like muting, group announcements, and dynamic message loading.
-
-✅ **Unique Interaction Features:** Offering read-and-burn private chats and a message editing function to broaden social scenarios.
-
-✅ **Open Source:** The code of OpenIM is open source and aims to build a leading global IM open source community. [GitHub Repository](https://github.com/OpenIMSDK)
-
-✅ **Extensibility:** Implemented in Golang, OpenIM introduces an "everything is a message" communication model, simplifying custom messages and feature extension.
-
-✅ **High Performance:** Supports a hierarchical governance architecture tested and abstracts the storage model of various message types.
-
-✅ **Full Platform Support:** Native support for iOS, Android, Flutter, uni-app, ReactNative, Electron, and Web.
-
--->
-
+👉 **[Learn more](https://docs.openim.io/guides/introduction/product)**
 
 ## :rocket: Quick Start
 
-We support many platforms. Here are the addresses for quick experience on the web side：
-
-👉 **[OpenIM online web demo](https://web-enterprise.rentsoft.cn/)**
-
-You can quickly learn OpenIM engineering solutions, all it takes is one simple command:
-
-```bash
-$ make demo
-```
-
-🤲 In order to facilitate the user experience, we have provided a variety of deployment solutions, you can choose your own deployment method according to the list below:
-
-<!--
-<details> <summary>Deploying with Docker Compose</summary>
-
-It is recommended to use Docker Compose for deployment, which can easily and quickly deploy the entire OpenIM service on a single node
-
-+ [https://github.com/openimsdk/openim-docker](https://github.com/openimsdk/openim-docker)
-
-
-> **Note**
->
-> If you don't know OpenIM's versioning policy, 📚Read our release policy: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/version.md
-
-
-</details> 
-
-<details>  <summary>Compile from Source</summary>
-
-
-Ur need `Go 1.20` or higher version, and `make`.
-
-
-```bash
-go version && make --version || echo "Error: One of the commands failed."
-```
-
-Version Details: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/version.md
-
-You can get the version number from the command below or from [github releases](https://github.com/openimsdk/open-im-server/tags).
-
-```bash
-$ curl --silent "https://api.github.com/repos/openimsdk/open-im-server/releases" | jq -r '.[].tag_name'
-```
-
-We have our own version management policy, if you are interested in our version management, I recommend reading [📚 OpenIM Version](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/version.md), We recommend using stable versions such as `v3.3.0` and `v3.2.0` whenever possible. `v3.1.1-alpha.3` as well as `v3.3.0-beta.0` and `v3.2.0-rc.0` are pre-release or beta versions and are not recommended.
-
-Set `OPENIM_VERSION` environment variables for the latest `OPENIM_VERSION` number, or replace the `OPENIM_VERSION` for you to install the OpenIM-Server `OPENIM_VERSION`:
-
-```bash
-$ OPENIM_VERSION=`curl -s https://api.github.com/repos/openimsdk/open-im-server/releases/latest | grep -oE '"tag_name": "[^"]+"' | head -n1 | cut -d'"' -f4`
-# OPENIM_VERSION=v3.3.0
-```
-
-Deploy basic components at the click of a command:
-
-```bash
-# install openim dependency
-$ git clone https://github.com/openimsdk/open-im-server openim/openim-server && export openim=$(pwd)/openim/openim-server && cd $openim/openim-server && git checkout $OPENIM_VERSION
-$ make init && docker compose up -d && make start && make check
-```
-
-> `make help` to help you see the instructions supported by OpenIM.
-
-
-You can use the `make help-all` see OpenIM in action.
-
-</details>
-
-<details>  <summary>Component Configuration Instructions</summary>
-
-Read: Configuration center document：https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md
-
-</details>
-
-
-<details>  <summary>Deployed with kubernetes</summary>
-
-+ https://github.com/openimsdk/open-im-server/blob/main/deployments/README.md
-
-</details> 
--->
+🤲 To facilitate user experience, we offer various deployment solutions. You can choose your deployment method from the list below:
 
 + **[Source Code Deployment Guide](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Production deployment of Linux systems](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/install-openim-linux-system.md)**
 + **[Docker Deployment Guide](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[Kubernetes Deployment Guide](https://github.com/openimsdk/open-im-server/tree/main/deployments)**
-
-<!-- 
-## :link: OpenIM and your application
-
-OpenIM isn't just an open-source instant messaging component, it's an integral part of your application ecosystem. Check out this diagram to understand how AppServer, AppClient, OpenIMServer, and OpenIMSDK interact.
-
-![App-OpenIM Relationship](./docs/images/oepnim-design.png)
-
-## :building_construction: Overall Architecture
-
-Delve into the heart of Open-IM-Server's functionality with our architecture diagram.
-
-![Overall Architecture](./docs/images/Architecture.jpg) -->
++ **[Kubernetes Deployment Guide](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
 
 ## :hammer_and_wrench: To start developing OpenIM
 
