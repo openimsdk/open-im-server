@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 
 	"google.golang.org/grpc"
@@ -65,6 +66,11 @@ func (m *msgServer) execInterceptorHandler(ctx context.Context, req *msg.SendMsg
 }
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+
+	config.Config.LocalCache.Friend.Topic = "friend"
+	config.Config.LocalCache.Friend.SlotNum = 500
+	config.Config.LocalCache.Friend.SlotSize = 20000
+
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
@@ -82,6 +88,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
+
 	s := &msgServer{
 		Conversation:           &conversationClient,
 		User:                   &userRpcClient,
