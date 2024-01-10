@@ -539,6 +539,11 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		if req.UserID == "" {
 			return nil, errs.ErrInternalServer.Wrap("gen user id failed")
 		}
+	} else {
+		_, err := s.UserDatabase.FindWithError(ctx, []string{req.UserID})
+		if err == nil {
+			return nil, errs.ErrArgs.Wrap("userID is used")
+		}
 	}
 
 	user := &tablerelation.UserModel{

@@ -18,8 +18,8 @@ firebase.google.com/go v3.13.0+incompatible/go.mod h1:xlah6XbEyW6tbfSklcfe5FHJIw
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/IBM/sarama v1.41.3 h1:MWBEJ12vHC8coMjdEXFq/6ftO6DUZnQlFYcxtOJFa7c=
 github.com/IBM/sarama v1.41.3/go.mod h1:Xxho9HkHd4K/MDUo/T/sOqwtX/17D33++E9Wib6hUdQ=
-github.com/OpenIMSDK/protocol v0.0.46 h1:LKfwcC3pUcJKSxiIyj82fc479BuDbDtsCrPxa7bHxmo=
-github.com/OpenIMSDK/protocol v0.0.46/go.mod h1:F25dFrwrIx3lkNoiuf6FkCfxuwf8L4Z8UIsdTHP/r0Y=
+github.com/OpenIMSDK/protocol v0.0.47 h1:DTJMFSONzqT0i/wa4Q1CtDT/jVATVudIRHcpY1zSWYE=
+github.com/OpenIMSDK/protocol v0.0.47/go.mod h1:F25dFrwrIx3lkNoiuf6FkCfxuwf8L4Z8UIsdTHP/r0Y=
 github.com/OpenIMSDK/tools v0.0.23 h1:xozfrGzhbpNPlDTap5DLVPk+JfgZ/ZyIj4Cuu3/bm9w=
 github.com/OpenIMSDK/tools v0.0.23/go.mod h1:eg+q4A34Qmu73xkY0mt37FHGMCMfC6CtmOnm0kFEGFI=
 github.com/QcloudApi/qcloud_sign_golang v0.0.0-20141224014652-e4130a326409/go.mod h1:1pk82RBxDY/JZnPQrtqHlUFfCctgdorsd9M06fMynOM=
