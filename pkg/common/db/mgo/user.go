@@ -16,6 +16,7 @@ package mgo
 
 import (
 	"context"
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/user"
 	"time"
 
@@ -82,7 +83,7 @@ func (u *UserMgo) PageFindUser(ctx context.Context, level int64, pagination pagi
 }
 
 func (u *UserMgo) GetAllUserID(ctx context.Context, pagination pagination.Pagination) (int64, []string, error) {
-	return mgoutil.FindPage[string](ctx, u.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"user_id": 1}))
+	return mgoutil.FindPage[string](ctx, u.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"user_id": constant.IMOrdinaryUser}))
 }
 
 func (u *UserMgo) Exist(ctx context.Context, userID string) (exist bool, err error) {
