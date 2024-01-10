@@ -171,10 +171,10 @@ func buildMongoURI() string {
 	mongodbHosts := strings.Join(config.Config.Mongo.Address, ",")
 
 	if username != "" && password != "" {
-		return fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
+		return fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d",
 			username, password, mongodbHosts, database, maxPoolSize)
 	}
-	return fmt.Sprintf("mongodb://%s/%s?maxPoolSize=%d&authSource=admin",
+	return fmt.Sprintf("mongodb://%s/%s?maxPoolSize=%d",
 		mongodbHosts, database, maxPoolSize)
 }
 
