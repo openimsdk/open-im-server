@@ -31,7 +31,7 @@ envs:
 # Zookeeper password
 zookeeper:
   schema: ${ZOOKEEPER_SCHEMA}
-  address: [ ${ ZOOKEEPER_ADDRESS }:${ ZOOKEEPER_PORT } ]
+  address: [ ${ZOOKEEPER_ADDRESS}:${ZOOKEEPER_PORT} ]
   username: ${ZOOKEEPER_USERNAME}
   password: ${ZOOKEEPER_PASSWORD}
 
@@ -44,14 +44,14 @@ zookeeper:
 mongo:
   uri: ${MONGO_URI}
 
-  # List of MongoDB server addresses.
-  # Used for constructing the MongoDB URI if 'uri' above is empty.
-  # For a standalone setup, specify the address of the single server.
-  # For a sharded cluster, specify the addresses of the Mongos servers.
-  # Example: [ '172.28.0.1:37017', '172.28.0.2:37017' ]
-  # Default MongoDB database name
-  # Maximum connection pool size
-  address: [ ${ MONGO_ADDRESS }:${ MONGO_PORT } ]
+# List of MongoDB server addresses.
+# Used for constructing the MongoDB URI if 'uri' above is empty.
+# For a standalone setup, specify the address of the single server.
+# For a sharded cluster, specify the addresses of the Mongos servers.
+# Example: [ '172.28.0.1:37017', '172.28.0.2:37017' ]
+# Default MongoDB database name
+# Maximum connection pool size
+  address: [ ${MONGO_ADDRESS}:${MONGO_PORT} ]
   database: ${MONGO_DATABASE}
   username: ${MONGO_OPENIM_USERNAME}
   password: ${MONGO_OPENIM_PASSWORD}
@@ -62,7 +62,7 @@ mongo:
 #
 # Username is required only for Redis version 6.0+
 redis:
-  address: [ ${ REDIS_ADDRESS }:${ REDIS_PORT } ]
+  address: [ ${REDIS_ADDRESS}:${REDIS_PORT} ]
   username: ${REDIS_USERNAME}
   password: ${REDIS_PASSWORD}
 
@@ -76,7 +76,7 @@ redis:
 kafka:
   username: ${KAFKA_USERNAME}
   password: ${KAFKA_PASSWORD}
-  addr: [ ${ KAFKA_ADDRESS }:${ KAFKA_PORT } ]
+  addr: [ ${KAFKA_ADDRESS}:${KAFKA_PORT} ]
   latestMsgToRedis:
     topic: "${KAFKA_LATESTMSG_REDIS_TOPIC}"
   offlineMsgToMongo:
@@ -104,7 +104,7 @@ rpc:
 # API service port
 # Default listen IP is 0.0.0.0
 api:
-  openImApiPort: [ ${ API_OPENIM_PORT } ]
+  openImApiPort: [ ${API_OPENIM_PORT} ]
   listenIP: ${API_LISTEN_IP}
 
 ###################### Object configuration information ######################
@@ -160,14 +160,14 @@ object:
 # For launching multiple programs, just fill in multiple ports separated by commas
 # For example, [10110, 10111]
 rpcPort:
-  openImUserPort: [ ${ OPENIM_USER_PORT } ]
-  openImFriendPort: [ ${ OPENIM_FRIEND_PORT } ]
-  openImMessagePort: [ ${ OPENIM_MESSAGE_PORT } ]
-  openImGroupPort: [ ${ OPENIM_GROUP_PORT } ]
-  openImAuthPort: [ ${ OPENIM_AUTH_PORT } ]
-  openImPushPort: [ ${ OPENIM_PUSH_PORT } ]
-  openImConversationPort: [ ${ OPENIM_CONVERSATION_PORT } ]
-  openImThirdPort: [ ${ OPENIM_THIRD_PORT } ]
+  openImUserPort: [ ${OPENIM_USER_PORT} ]
+  openImFriendPort: [ ${OPENIM_FRIEND_PORT} ]
+  openImMessagePort: [ ${OPENIM_MESSAGE_PORT} ]
+  openImGroupPort: [ ${OPENIM_GROUP_PORT} ]
+  openImAuthPort: [ ${OPENIM_AUTH_PORT} ]
+  openImPushPort: [ ${OPENIM_PUSH_PORT} ]
+  openImConversationPort: [ ${OPENIM_CONVERSATION_PORT} ]
+  openImThirdPort: [ ${OPENIM_THIRD_PORT} ]
 
 ###################### RPC Register Name Configuration ######################
 # RPC service names for registration, it's not recommended to modify these
@@ -209,9 +209,9 @@ log:
 # Maximum length of websocket request package
 # Websocket connection handshake timeout
 longConnSvr:
-  openImWsPort: [ ${ OPENIM_WS_PORT } ]
+  openImWsPort: [ ${OPENIM_WS_PORT} ]
   websocketMaxConnNum: ${WEBSOCKET_MAX_CONN_NUM}
-  openImMessageGatewayPort: [ ${ OPENIM_MESSAGE_GATEWAY_PORT } ]
+  openImMessageGatewayPort: [ ${OPENIM_MESSAGE_GATEWAY_PORT} ]
   websocketMaxMsgLen: ${WEBSOCKET_MAX_MSG_LEN}
   websocketTimeout: ${WEBSOCKET_TIMEOUT}
 
@@ -515,15 +515,15 @@ callback:
 prometheus:
   enable: ${PROMETHEUS_ENABLE}
   grafanaUrl: ${GRAFANA_URL}
-  apiPrometheusPort: [ ${ API_PROM_PORT } ]
-  userPrometheusPort: [ ${ USER_PROM_PORT } ]
-  friendPrometheusPort: [ ${ FRIEND_PROM_PORT } ]
-  messagePrometheusPort: [ ${ MESSAGE_PROM_PORT } ]
-  messageGatewayPrometheusPort: [ ${ MSG_GATEWAY_PROM_PORT } ]
-  groupPrometheusPort: [ ${ GROUP_PROM_PORT } ]
-  authPrometheusPort: [ ${ AUTH_PROM_PORT } ]
-  pushPrometheusPort: [ ${ PUSH_PROM_PORT } ]
-  conversationPrometheusPort: [ ${ CONVERSATION_PROM_PORT } ]
-  rtcPrometheusPort: [ ${ RTC_PROM_PORT } ]
-  thirdPrometheusPort: [ ${ THIRD_PROM_PORT } ]
-  messageTransferPrometheusPort: [ ${ MSG_TRANSFER_PROM_PORT } ] # List of ports
+  apiPrometheusPort: [${API_PROM_PORT}]
+  userPrometheusPort: [ ${USER_PROM_PORT} ]
+  friendPrometheusPort: [ ${FRIEND_PROM_PORT} ]
+  messagePrometheusPort: [ ${MESSAGE_PROM_PORT} ]
+  messageGatewayPrometheusPort: [ ${MSG_GATEWAY_PROM_PORT} ]
+  groupPrometheusPort: [ ${GROUP_PROM_PORT} ]
+  authPrometheusPort: [ ${AUTH_PROM_PORT} ]
+  pushPrometheusPort: [ ${PUSH_PROM_PORT} ]
+  conversationPrometheusPort: [ ${CONVERSATION_PROM_PORT} ]
+  rtcPrometheusPort: [ ${RTC_PROM_PORT} ]
+  thirdPrometheusPort: [ ${THIRD_PROM_PORT} ]
+  messageTransferPrometheusPort: [ ${MSG_TRANSFER_PROM_PORT} ] # List of ports
