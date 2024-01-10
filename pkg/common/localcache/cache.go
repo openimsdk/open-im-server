@@ -34,7 +34,9 @@ type cache[V any] struct {
 func (c *cache[V]) onEvict(key string, value V) {
 	lks := c.link.Del(key)
 	for k := range lks {
-		c.local.Del(k)
+		if key != k { // prevent deadlock
+			c.local.Del(k)
+		}
 	}
 }
 
@@ -42,13 +44,10 @@ func (c *cache[V]) del(key ...string) {
 	for _, k := range key {
 		lks := c.link.Del(k)
 		c.local.Del(k)
-		//fmt.Println(">>>", lks)
 		for k := range lks {
 			c.local.Del(k)
-			//fmt.Println("+++", k)
 		}
 	}
-	//fmt.Println()
 }
 
 func (c *cache[V]) Get(ctx context.Context, key string, fetch func(ctx context.Context) (V, error), opts ...*opt.Option) (V, error) {
