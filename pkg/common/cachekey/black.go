@@ -11,5 +11,5 @@ func GetBlackIDsKey(ownerUserID string) string {
 }
 
 func GetIsBlackIDsKey(possibleBlackUserID, userID string) string {
-	return isBlackKey + possibleBlackUserID + "-" + userID
+	return isBlackKey + userID + "-" + possibleBlackUserID
 }

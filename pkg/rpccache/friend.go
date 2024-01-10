@@ -50,9 +50,10 @@ func (f *FriendLocalCache) IsFriend(ctx context.Context, possibleFriendUserID, u
 	return localcache.AnyValue[bool](f.local.Get(ctx, cachekey.GetIsFriendKey(possibleFriendUserID, userID), func(ctx context.Context) (any, error) {
 		log.ZDebug(ctx, "FriendLocalCache IsFriend rpc", "possibleFriendUserID", possibleFriendUserID, "userID", userID)
 		return f.client.IsFriend(ctx, possibleFriendUserID, userID)
-	}, option.NewOption().WithLink(cachekey.GetFriendIDsKey(possibleFriendUserID), cachekey.GetFriendIDsKey(userID))))
+	}, option.NewOption().WithLink(cachekey.GetFriendIDsKey(possibleFriendUserID))))
 }
 
+// IsBlack possibleBlackUserID selfUserID
 func (f *FriendLocalCache) IsBlack(ctx context.Context, possibleBlackUserID, userID string) (val bool, err error) {
 	log.ZDebug(ctx, "FriendLocalCache IsBlack req", "possibleBlackUserID", possibleBlackUserID, "userID", userID)
 	defer func() {
@@ -65,5 +66,5 @@ func (f *FriendLocalCache) IsBlack(ctx context.Context, possibleBlackUserID, use
 	return localcache.AnyValue[bool](f.local.Get(ctx, cachekey.GetIsBlackIDsKey(possibleBlackUserID, userID), func(ctx context.Context) (any, error) {
 		log.ZDebug(ctx, "FriendLocalCache IsBlack rpc", "possibleBlackUserID", possibleBlackUserID, "userID", userID)
 		return f.client.IsBlack(ctx, possibleBlackUserID, userID)
-	}, option.NewOption().WithLink(cachekey.GetBlackIDsKey(possibleBlackUserID), cachekey.GetBlackIDsKey(userID))))
+	}, option.NewOption().WithLink(cachekey.GetBlackIDsKey(userID))))
 }

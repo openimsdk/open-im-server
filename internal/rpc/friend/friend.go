@@ -16,8 +16,6 @@ package friend
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
 	"github.com/OpenIMSDK/tools/tx"
 
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -55,11 +53,6 @@ type friendServer struct {
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
-
-	config.Config.LocalCache.Friend.Topic = "friend"
-	config.Config.LocalCache.Friend.SlotNum = 500
-	config.Config.LocalCache.Friend.SlotSize = 20000
-
 	// Initialize MongoDB
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
