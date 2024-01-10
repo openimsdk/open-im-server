@@ -58,7 +58,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			data.MsgData.ContentType >= constant.NotificationBegin {
 			return nil
 		}
-		black, err := m.friend.IsBlocked(ctx, data.MsgData.SendID, data.MsgData.RecvID)
+		black, err := m.friend.IsBlack(ctx, data.MsgData.SendID, data.MsgData.RecvID)
 		if err != nil {
 			return err
 		}
