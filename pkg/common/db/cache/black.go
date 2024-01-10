@@ -16,6 +16,7 @@ package cache
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"time"
@@ -55,6 +56,7 @@ func NewBlackCacheRedis(
 ) BlackCache {
 	rcClient := rockscache.NewClient(rdb, options)
 	mc := NewMetaCacheRedis(rcClient)
+	log.ZDebug(context.Background(), "local cache init", config.Config.LocalCache)
 	mc.SetTopic(config.Config.LocalCache.Friend.Topic)
 	mc.SetRawRedisClient(rdb)
 	return &BlackCacheRedis{
