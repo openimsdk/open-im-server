@@ -57,8 +57,8 @@ func NewBlackCacheRedis(
 	rcClient := rockscache.NewClient(rdb, options)
 	mc := NewMetaCacheRedis(rcClient)
 	f := config.Config.LocalCache.Friend
-	log.ZDebug(context.Background(), "local cache init", "Topic", f.Topic, "SlotNum", f.SlotNum, "SlotSize", f.SlotSize)
-	mc.SetTopic(config.Config.LocalCache.Friend.Topic)
+	log.ZDebug(context.Background(), "black local cache init", "Topic", f.Topic, "SlotNum", f.SlotNum, "SlotSize", f.SlotSize)
+	mc.SetTopic(f.Topic)
 	mc.SetRawRedisClient(rdb)
 	return &BlackCacheRedis{
 		expireTime: blackExpireTime,
