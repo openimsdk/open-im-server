@@ -301,29 +301,41 @@ openim::util::check_ports() {
     openim::log::info "Checking ports: $*"
     # Iterate over each given port.
     for port in "$@"; do
-        # Use the `ss` command to find process information related to the given port.
-        if command -v ss > /dev/null 2>&1; then
-            info=$(ss -ltnp | grep ":$port" || true)
-        else
-            info=$(netstat -ltnp | grep ":$port" || true)
+        # Initialize variables
+        # Check the OS and use the appropriate command
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            if command -v ss > /dev/null 2>&1; then
+                info=$(ss -ltnp | grep ":$port" || true)
+            else
+                info=$(netstat -ltnp | grep ":$port" || true)
+            fi
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            # For macOS, use netstat
+            info=$(netstat -an -p tcp | grep "\.$port " || true)
         fi
 
-        # If there's no process information, it means the process associated with the port is not running.
+        # Check if any process is using the port
         if [[ -z $info ]]; then
             not_started+=($port)
         else
-            # Extract relevant details: Process Name, PID, and FD.
-            local details=$(echo $info | sed -n 's/.*users:(("\([^"]*\)",pid=\([^,]*\),fd=\([^)]*\))).*/\1 \2 \3/p')
-            local command=$(echo $details | awk '{print $1}')
-            local pid=$(echo $details | awk '{print $2}')
-            local fd=$(echo $details | awk '{print $3}')
-            
+            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+                # Extract relevant details for Linux: Process Name, PID, and FD.
+                details=$(echo $info | sed -n 's/.*users:(("\([^"]*\)",pid=\([^,]*\),fd=\([^)]*\))).*/\1 \2 \3/p')
+                command=$(echo $details | awk '{print $1}')
+                pid=$(echo $details | awk '{print $2}')
+                fd=$(echo $details | awk '{print $3}')
+            elif [[ "$OSTYPE" == "darwin"* ]]; then
+                # Handle extraction for macOS
+                pid=$(echo $info | awk '{print $9}' | cut -d'/' -f1)
+                command=$(ps -p $pid -o comm=)
+                fd="N/A" # File Descriptor is not available in macOS netstat output
+            fi
+
             # Get the start time of the process using the PID
             if [[ -z $pid ]]; then
-                local start_time="N/A"
+                start_time="N/A"
             else
-                # Get the start time of the process using the PID
-                local start_time=$(ps -p $pid -o lstart=)
+                start_time=$(ps -p $pid -o lstart=)
             fi
             
             started+=("Port $port - Command: $command, PID: $pid, FD: $fd, Started: $start_time")
@@ -355,6 +367,7 @@ openim::util::check_ports() {
         return 0
     fi
 }
+
 # set +o errexit
 # Sample call for testing:
 # openim::util::check_ports 10002 1004 12345 13306
@@ -371,12 +384,15 @@ openim::util::check_process_names() {
     # Function to get the port of a process
     get_port() {
         local pid=$1
-        if command -v ss > /dev/null 2>&1; then
-            # used ss comment
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            # Linux
             ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            lsof -nP -iTCP -sTCP:LISTEN -a -p $pid | awk 'NR>1 {print $9}' | sed 's/.*://'
         else
-            # used netstat comment replace ss
-            netstat -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | sed 's/.*://'
+            echo "Unsupported OS"
+            return 1
         fi
     }
 
@@ -457,7 +473,7 @@ openim::util::stop_services_on_ports() {
     for port in "$@"; do
         # Use the `lsof` command to find process information related to the given port.
         info=$(lsof -i :$port -n -P | grep LISTEN || true)
-                
+
         # If there's process information, it means the process associated with the port is running.
         if [[ -n $info ]]; then
             # Extract the Process ID.
@@ -496,6 +512,7 @@ openim::util::stop_services_on_ports() {
         return 1
     else
         openim::log::success "All specified services were stopped."
+        echo ""
         return 0
     fi
 }
@@ -572,6 +589,7 @@ openim::util::stop_services_with_name() {
     fi
 
     openim::log::success "All specified services were stopped."
+    echo ""
 }
 # sleep 333333&
 # sleep 444444&
