@@ -80,7 +80,7 @@ func NewFriendCacheRedis(rdb redis.UniversalClient, friendDB relationtb.FriendMo
 func (f *FriendCacheRedis) NewCache() FriendCache {
 	return &FriendCacheRedis{
 		rcClient:   f.rcClient,
-		metaCache:  NewMetaCacheRedis(f.rcClient, f.metaCache.GetPreDelKeys()...),
+		metaCache:  f.metaCache.Copy(),
 		friendDB:   f.friendDB,
 		expireTime: f.expireTime,
 	}

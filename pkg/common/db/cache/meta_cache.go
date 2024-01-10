@@ -47,6 +47,7 @@ type metaCache interface {
 	GetPreDelKeys() []string
 	SetTopic(topic string)
 	SetRawRedisClient(cli redis.UniversalClient)
+	Copy() metaCache
 }
 
 func NewMetaCacheRedis(rcClient *rockscache.Client, keys ...string) metaCache {
@@ -60,6 +61,22 @@ type metaCacheRedis struct {
 	maxRetryTimes int
 	retryInterval time.Duration
 	redisClient   redis.UniversalClient
+}
+
+func (m *metaCacheRedis) Copy() metaCache {
+	var keys []string
+	if len(m.keys) > 0 {
+		keys = make([]string, 0, len(m.keys)*2)
+		keys = append(keys, m.keys...)
+	}
+	return &metaCacheRedis{
+		topic:         m.topic,
+		rcClient:      m.rcClient,
+		keys:          keys,
+		maxRetryTimes: m.maxRetryTimes,
+		retryInterval: m.retryInterval,
+		redisClient:   redisClient,
+	}
 }
 
 func (m *metaCacheRedis) SetTopic(topic string) {

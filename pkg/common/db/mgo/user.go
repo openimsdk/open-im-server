@@ -91,7 +91,7 @@ func (u *UserMgo) Exist(ctx context.Context, userID string) (exist bool, err err
 }
 
 func (u *UserMgo) GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error) {
-	return mgoutil.FindOne[int](ctx, u.coll, bson.M{"user_id": userID}, options.FindOne().SetProjection(bson.M{"global_recv_msg_opt": 1}))
+	return mgoutil.FindOne[int](ctx, u.coll, bson.M{"user_id": userID}, options.FindOne().SetProjection(bson.M{"_id": 0, "global_recv_msg_opt": 1}))
 }
 
 func (u *UserMgo) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
