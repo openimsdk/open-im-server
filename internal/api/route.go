@@ -83,6 +83,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		userRouterGroup.POST("/process_user_command_delete", ParseToken, u.ProcessUserCommandDelete)
 		userRouterGroup.POST("/process_user_command_update", ParseToken, u.ProcessUserCommandUpdate)
 		userRouterGroup.POST("/process_user_command_get", ParseToken, u.ProcessUserCommandGet)
+		userRouterGroup.POST("/process_user_command_get_all", ParseToken, u.ProcessUserCommandGetAll)
 
 		userRouterGroup.POST("/add_notification_account", ParseToken, u.AddNotificationAccount)
 		userRouterGroup.POST("/update_notification_account", ParseToken, u.UpdateNotificationAccountInfo)

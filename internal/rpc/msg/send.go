@@ -65,6 +65,7 @@ func (m *msgServer) sendMsgSuperGroupChat(
 	if err = callbackBeforeSendGroupMsg(ctx, req); err != nil {
 		return nil, err
 	}
+
 	if err := callbackMsgModify(ctx, req); err != nil {
 		return nil, err
 	}
@@ -167,6 +168,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		if err = callbackBeforeSendSingleMsg(ctx, req); err != nil {
 			return nil, err
 		}
+
 		if err := callbackMsgModify(ctx, req); err != nil {
 			return nil, err
 		}

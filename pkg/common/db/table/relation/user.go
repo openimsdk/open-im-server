@@ -65,8 +65,9 @@ type UserModelInterface interface {
 	// 获取范围内用户增量
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
 	//CRUD user command
-	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
+	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error
 	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error
-	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
+	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error
 	GetUserCommand(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error)
+	GetAllUserCommand(ctx context.Context, userID string) ([]*user.AllCommandInfoResp, error)
 }

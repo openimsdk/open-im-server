@@ -78,10 +78,11 @@ type UserDatabase interface {
 	SetUserStatus(ctx context.Context, userID string, status, platformID int32) error
 
 	//CRUD user command
-	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
+	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error
 	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error
-	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
+	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error
 	GetUserCommands(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error)
+	GetAllUserCommands(ctx context.Context, userID string) ([]*user.AllCommandInfoResp, error)
 }
 
 type userDatabase struct {
@@ -259,16 +260,20 @@ func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*
 func (u *userDatabase) SetUserStatus(ctx context.Context, userID string, status, platformID int32) error {
 	return u.cache.SetUserStatus(ctx, userID, status, platformID)
 }
-func (u *userDatabase) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
-	return u.userDB.AddUserCommand(ctx, userID, Type, UUID, value)
+func (u *userDatabase) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error {
+	return u.userDB.AddUserCommand(ctx, userID, Type, UUID, value, ex)
 }
 func (u *userDatabase) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
 	return u.userDB.DeleteUserCommand(ctx, userID, Type, UUID)
 }
-func (u *userDatabase) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
-	return u.userDB.UpdateUserCommand(ctx, userID, Type, UUID, value)
+func (u *userDatabase) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error {
+	return u.userDB.UpdateUserCommand(ctx, userID, Type, UUID, val)
 }
 func (u *userDatabase) GetUserCommands(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error) {
 	commands, err := u.userDB.GetUserCommand(ctx, userID, Type)
+	return commands, err
+}
+func (u *userDatabase) GetAllUserCommands(ctx context.Context, userID string) ([]*user.AllCommandInfoResp, error) {
+	commands, err := u.userDB.GetAllUserCommand(ctx, userID)
 	return commands, err
 }
