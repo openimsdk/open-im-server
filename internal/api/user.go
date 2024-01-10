@@ -221,6 +221,11 @@ func (u *UserApi) ProcessUserCommandGet(c *gin.Context) {
 	a2r.Call(user.UserClient.ProcessUserCommandGet, u.Client, c)
 }
 
+// ProcessUserCommandGet user general function get all
+func (u *UserApi) ProcessUserCommandGetAll(c *gin.Context) {
+	a2r.Call(user.UserClient.ProcessUserCommandGetAll, u.Client, c)
+}
+
 func (u *UserApi) AddNotificationAccount(c *gin.Context) {
 	a2r.Call(user.UserClient.AddNotificationAccount, u.Client, c)
 }

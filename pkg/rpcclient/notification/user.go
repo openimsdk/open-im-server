@@ -103,3 +103,21 @@ func (u *UserNotificationSender) UserStatusChangeNotification(
 ) error {
 	return u.Notification(ctx, tips.FromUserID, tips.ToUserID, constant.UserStatusChangeNotification, tips)
 }
+func (u *UserNotificationSender) UserCommandUpdateNotification(
+	ctx context.Context,
+	tips *sdkws.UserCommandUpdateTips,
+) error {
+	return u.Notification(ctx, tips.FromUserID, tips.ToUserID, constant.UserCommandUpdateNotification, tips)
+}
+func (u *UserNotificationSender) UserCommandAddNotification(
+	ctx context.Context,
+	tips *sdkws.UserCommandAddTips,
+) error {
+	return u.Notification(ctx, tips.FromUserID, tips.ToUserID, constant.UserCommandAddNotification, tips)
+}
+func (u *UserNotificationSender) UserCommandDeleteNotification(
+	ctx context.Context,
+	tips *sdkws.UserCommandDeleteTips,
+) error {
+	return u.Notification(ctx, tips.FromUserID, tips.ToUserID, constant.UserCommandDeleteNotification, tips)
+}
