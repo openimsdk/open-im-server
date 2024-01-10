@@ -75,7 +75,7 @@ func (m *metaCacheRedis) ExecDel(ctx context.Context, distinct ...bool) error {
 		m.keys = utils.Distinct(m.keys)
 	}
 	if len(m.keys) > 0 {
-		log.ZDebug(ctx, "delete cache", "keys", m.keys)
+		log.ZDebug(ctx, "delete cache", "topic", m.topic, "keys", m.keys)
 		for _, key := range m.keys {
 			for i := 0; i < m.maxRetryTimes; i++ {
 				if err := m.rcClient.TagAsDeleted(key); err != nil {
