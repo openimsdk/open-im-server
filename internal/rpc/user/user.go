@@ -17,6 +17,7 @@ package user
 import (
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"math/rand"
 	"strings"
@@ -228,7 +229,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 }
 
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
-	total, users, err := s.Page(ctx, req.Pagination)
+	total, users, err := s.PageFindUser(ctx, constant.IMOrdinaryUser, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -379,38 +380,94 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 
 // ProcessUserCommandAdd user general function add
 func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
-	// Assuming you have a method in s.UserDatabase to add a user command
-	err := s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
+	err := authverify.CheckAccessV3(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
 
+	var value string
+	if req.Value != nil {
+		value = req.Value.Value
+	}
+	var ex string
+	if req.Ex != nil {
+		value = req.Ex.Value
+	}
+	// Assuming you have a method in s.UserDatabase to add a user command
+	err = s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, value, ex)
+	if err != nil {
+		return nil, err
+	}
+	tips := &sdkws.UserCommandAddTips{
+		FromUserID: req.UserID,
+		ToUserID:   req.UserID,
+	}
+	err = s.userNotificationSender.UserCommandAddNotification(ctx, tips)
+	if err != nil {
+		return nil, err
+	}
 	return &pbuser.ProcessUserCommandAddResp{}, nil
 }
 
 // ProcessUserCommandDelete user general function delete
 func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.ProcessUserCommandDeleteReq) (*pbuser.ProcessUserCommandDeleteResp, error) {
-	// Assuming you have a method in s.UserDatabase to delete a user command
-	err := s.UserDatabase.DeleteUserCommand(ctx, req.UserID, req.Type, req.Uuid)
+	err := authverify.CheckAccessV3(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
 
+	err = s.UserDatabase.DeleteUserCommand(ctx, req.UserID, req.Type, req.Uuid)
+	if err != nil {
+		return nil, err
+	}
+	tips := &sdkws.UserCommandDeleteTips{
+		FromUserID: req.UserID,
+		ToUserID:   req.UserID,
+	}
+	err = s.userNotificationSender.UserCommandDeleteNotification(ctx, tips)
+	if err != nil {
+		return nil, err
+	}
 	return &pbuser.ProcessUserCommandDeleteResp{}, nil
 }
 
 // ProcessUserCommandUpdate user general function update
 func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
-	// Assuming you have a method in s.UserDatabase to update a user command
-	err := s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, req.Value)
+	err := authverify.CheckAccessV3(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
+	val := make(map[string]any)
 
+	// Map fields from eax to val
+	if req.Value != nil {
+		val["value"] = req.Value.Value
+	}
+	if req.Ex != nil {
+		val["ex"] = req.Ex.Value
+	}
+
+	// Assuming you have a method in s.UserDatabase to update a user command
+	err = s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, val)
+	if err != nil {
+		return nil, err
+	}
+	tips := &sdkws.UserCommandUpdateTips{
+		FromUserID: req.UserID,
+		ToUserID:   req.UserID,
+	}
+	err = s.userNotificationSender.UserCommandUpdateNotification(ctx, tips)
+	if err != nil {
+		return nil, err
+	}
 	return &pbuser.ProcessUserCommandUpdateResp{}, nil
 }
 
 func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
+	err := authverify.CheckAccessV3(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
 	// Fetch user commands from the database
 	commands, err := s.UserDatabase.GetUserCommands(ctx, req.UserID, req.Type)
 	if err != nil {
@@ -423,14 +480,45 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 	for _, command := range commands {
 		// No need to use index since command is already a pointer
 		commandInfoSlice = append(commandInfoSlice, &pbuser.CommandInfoResp{
+			Type:       command.Type,
 			Uuid:       command.Uuid,
 			Value:      command.Value,
 			CreateTime: command.CreateTime,
+			Ex:         command.Ex,
 		})
 	}
 
 	// Return the response with the slice
-	return &pbuser.ProcessUserCommandGetResp{KVArray: commandInfoSlice}, nil
+	return &pbuser.ProcessUserCommandGetResp{CommandResp: commandInfoSlice}, nil
+}
+
+func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.ProcessUserCommandGetAllReq) (*pbuser.ProcessUserCommandGetAllResp, error) {
+	err := authverify.CheckAccessV3(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	// Fetch user commands from the database
+	commands, err := s.UserDatabase.GetAllUserCommands(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Initialize commandInfoSlice as an empty slice
+	commandInfoSlice := make([]*pbuser.AllCommandInfoResp, 0, len(commands))
+
+	for _, command := range commands {
+		// No need to use index since command is already a pointer
+		commandInfoSlice = append(commandInfoSlice, &pbuser.AllCommandInfoResp{
+			Type:       command.Type,
+			Uuid:       command.Uuid,
+			Value:      command.Value,
+			CreateTime: command.CreateTime,
+			Ex:         command.Ex,
+		})
+	}
+
+	// Return the response with the slice
+	return &pbuser.ProcessUserCommandGetAllResp{CommandResp: commandInfoSlice}, nil
 }
 
 func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.AddNotificationAccountReq) (*pbuser.AddNotificationAccountResp, error) {
@@ -438,22 +526,28 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		return nil, err
 	}
 
-	var userID string
-	for i := 0; i < 20; i++ {
-		userId := s.genUserID()
-		_, err := s.UserDatabase.FindWithError(ctx, []string{userId})
-		if err == nil {
-			continue
+	if req.UserID == "" {
+		for i := 0; i < 20; i++ {
+			userId := s.genUserID()
+			_, err := s.UserDatabase.FindWithError(ctx, []string{userId})
+			if err == nil {
+				continue
+			}
+			req.UserID = userId
+			break
 		}
-		userID = userId
-		break
-	}
-	if userID == "" {
-		return nil, errs.ErrInternalServer.Wrap("gen user id failed")
+		if req.UserID == "" {
+			return nil, errs.ErrInternalServer.Wrap("gen user id failed")
+		}
+	} else {
+		_, err := s.UserDatabase.FindWithError(ctx, []string{req.UserID})
+		if err == nil {
+			return nil, errs.ErrArgs.Wrap("userID is used")
+		}
 	}
 
 	user := &tablerelation.UserModel{
-		UserID:         userID,
+		UserID:         req.UserID,
 		Nickname:       req.NickName,
 		FaceURL:        req.FaceURL,
 		CreateTime:     time.Now(),
@@ -463,7 +557,11 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		return nil, err
 	}
 
-	return &pbuser.AddNotificationAccountResp{}, nil
+	return &pbuser.AddNotificationAccountResp{
+		UserID:   req.UserID,
+		NickName: req.NickName,
+		FaceURL:  req.FaceURL,
+	}, nil
 }
 
 func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbuser.UpdateNotificationAccountInfoReq) (*pbuser.UpdateNotificationAccountInfoResp, error) {
@@ -497,30 +595,33 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		return nil, err
 	}
 
-	if req.NickName != "" {
-		users, err := s.UserDatabase.FindByNickname(ctx, req.NickName)
+	var users []*relation.UserModel
+	var err error
+	if req.Keyword != "" {
+		users, err = s.UserDatabase.Find(ctx, []string{req.Keyword})
 		if err != nil {
 			return nil, err
 		}
-		resp := s.userModelToResp(users)
-		return resp, nil
-	}
-
-	if req.UserID != "" {
-		users, err := s.UserDatabase.Find(ctx, []string{req.UserID})
+		resp := s.userModelToResp(users, req.Pagination)
+		if resp.Total != 0 {
+			return resp, nil
+		}
+		users, err = s.UserDatabase.FindByNickname(ctx, req.Keyword)
 		if err != nil {
 			return nil, err
 		}
-		resp := s.userModelToResp(users)
+		resp = s.userModelToResp(users, req.Pagination)
+		return resp, nil
+
 		return resp, nil
 	}
 
-	users, err := s.UserDatabase.FindNotification(ctx, constant.AppNotificationAdmin)
+	users, err = s.UserDatabase.FindNotification(ctx, constant.AppNotificationAdmin)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := s.userModelToResp(users)
+	resp := s.userModelToResp(users, req.Pagination)
 	return resp, nil
 }
 
@@ -554,7 +655,7 @@ func (s *userServer) genUserID() string {
 	return string(data)
 }
 
-func (s *userServer) userModelToResp(users []*relation.UserModel) *pbuser.SearchNotificationAccountResp {
+func (s *userServer) userModelToResp(users []*relation.UserModel, pagination pagination.Pagination) *pbuser.SearchNotificationAccountResp {
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {
@@ -568,5 +669,8 @@ func (s *userServer) userModelToResp(users []*relation.UserModel) *pbuser.Search
 			total += 1
 		}
 	}
-	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: accounts}
+
+	notificationAccounts := utils.Paginate(accounts, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
+
+	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: notificationAccounts}
 }

@@ -1061,7 +1061,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 		return nil, err
 	}
 
-	if err := CallbackTransferGroupOwnerAfter(ctx, req); err != nil {
+	if err := CallbackAfterTransferGroupOwner(ctx, req); err != nil {
 		return nil, err
 	}
 	s.Notification.GroupOwnerTransferredNotification(ctx, req)

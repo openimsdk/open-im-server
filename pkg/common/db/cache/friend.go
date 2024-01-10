@@ -46,6 +46,8 @@ type FriendCache interface {
 	GetFriend(ctx context.Context, ownerUserID, friendUserID string) (friend *relationtb.FriendModel, err error)
 	// Delete friend when friend info changed
 	DelFriend(ownerUserID, friendUserID string) FriendCache
+	// Delete friends when friends' info changed
+	DelFriends(ownerUserID string, friendUserIDs []string) FriendCache
 }
 
 // FriendCacheRedis is an implementation of the FriendCache interface using Redis.
@@ -154,6 +156,18 @@ func (f *FriendCacheRedis) GetFriend(ctx context.Context, ownerUserID, friendUse
 func (f *FriendCacheRedis) DelFriend(ownerUserID, friendUserID string) FriendCache {
 	newFriendCache := f.NewCache()
 	newFriendCache.AddKeys(f.getFriendKey(ownerUserID, friendUserID))
+
+	return newFriendCache
+}
+
+// DelFriends deletes multiple friend infos from the cache.
+func (f *FriendCacheRedis) DelFriends(ownerUserID string, friendUserIDs []string) FriendCache {
+	newFriendCache := f.NewCache()
+
+	for _, friendUserID := range friendUserIDs {
+		key := f.getFriendKey(ownerUserID, friendUserID)
+		newFriendCache.AddKeys(key) // Assuming AddKeys marks the keys for deletion
+	}
 
 	return newFriendCache
 }

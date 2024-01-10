@@ -101,11 +101,9 @@ func (p *Pusher) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID 
 
 func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.MsgData) error {
 	log.ZDebug(ctx, "Get msg from msg_transfer And push msg", "userIDs", userIDs, "msg", msg.String())
-	// callback
 	if err := callbackOnlinePush(ctx, userIDs, msg); err != nil {
 		return err
 	}
-
 	// push
 	wsResults, err := p.GetConnsAndOnlinePush(ctx, msg, userIDs)
 	if err != nil {
@@ -120,7 +118,7 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 	}
 
 	for _, v := range wsResults {
-		if msg.SendID != v.UserID && (!v.OnlinePush) {
+		if !v.OnlinePush && msg.SendID == v.UserID {
 			if err = callbackOfflinePush(ctx, userIDs, msg, &[]string{}); err != nil {
 				return err
 			}
@@ -130,6 +128,7 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 				return err
 			}
 		}
+
 	}
 	return nil
 }

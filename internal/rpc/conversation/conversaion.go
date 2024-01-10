@@ -89,8 +89,8 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbconvers
 	return resp, nil
 }
 
-func (m *conversationServer) GetConversationList(ctx context.Context, req *pbconversation.GetConversationListReq) (resp *pbconversation.GetConversationListResp, err error) {
-	log.ZDebug(ctx, "GetConversationList", "seqs", req, "userID", req.UserID)
+func (m *conversationServer) GetSortedConversationList(ctx context.Context, req *pbconversation.GetSortedConversationListReq) (resp *pbconversation.GetSortedConversationListResp, err error) {
+	log.ZDebug(ctx, "GetSortedConversationList", "seqs", req, "userID", req.UserID)
 	var conversationIDs []string
 	if len(req.ConversationIDs) == 0 {
 		conversationIDs, err = m.conversationDatabase.GetConversationIDs(ctx, req.UserID)
@@ -129,30 +129,37 @@ func (m *conversationServer) GetConversationList(ctx context.Context, req *pbcon
 		return nil, err
 	}
 
+	var unreadTotal int64
 	conversation_unreadCount := make(map[string]int64)
 	for conversationID, maxSeq := range maxSeqs {
-		conversation_unreadCount[conversationID] = maxSeq - hasReadSeqs[conversationID]
+		unreadCount := maxSeq - hasReadSeqs[conversationID]
+		conversation_unreadCount[conversationID] = unreadCount
+		unreadTotal += unreadCount
 	}
 
-	conversation_isPinkTime := make(map[int64]string)
-	conversation_notPinkTime := make(map[int64]string)
+	conversation_isPinTime := make(map[int64]string)
+	conversation_notPinTime := make(map[int64]string)
 	for _, v := range conversations {
 		conversationID := v.ConversationID
 		time := conversationMsg[conversationID].MsgInfo.LatestMsgRecvTime
 		conversationMsg[conversationID].RecvMsgOpt = v.RecvMsgOpt
 		if v.IsPinned {
 			conversationMsg[conversationID].IsPinned = v.IsPinned
-			conversation_isPinkTime[time] = conversationID
+			conversation_isPinTime[time] = conversationID
 			continue
 		}
-		conversation_notPinkTime[time] = conversationID
+		conversation_notPinTime[time] = conversationID
 	}
-	resp = &pbconversation.GetConversationListResp{
+	resp = &pbconversation.GetSortedConversationListResp{
+		ConversationTotal: int64(len(chatLogs)),
 		ConversationElems: []*pbconversation.ConversationElem{},
+		UnreadTotal:       unreadTotal,
 	}
 
-	m.conversationSort(conversation_isPinkTime, resp, conversation_unreadCount, conversationMsg)
-	m.conversationSort(conversation_notPinkTime, resp, conversation_unreadCount, conversationMsg)
+	m.conversationSort(conversation_isPinTime, resp, conversation_unreadCount, conversationMsg)
+	m.conversationSort(conversation_notPinTime, resp, conversation_unreadCount, conversationMsg)
+
+	resp.ConversationElems = utils.Paginate(resp.ConversationElems, int(req.Pagination.GetPageNumber()), int(req.Pagination.GetShowNumber()))
 	return resp, nil
 }
 
@@ -425,7 +432,7 @@ func (c *conversationServer) GetConversationOfflinePushUserIDs(
 
 func (c *conversationServer) conversationSort(
 	conversations map[int64]string,
-	resp *pbconversation.GetConversationListResp,
+	resp *pbconversation.GetSortedConversationListResp,
 	conversation_unreadCount map[string]int64,
 	conversationMsg map[string]*pbconversation.ConversationElem,
 ) {
