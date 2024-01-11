@@ -310,8 +310,8 @@ openim::util::check_ports() {
                 info=$(netstat -ltnp | grep ":$port" || true)
             fi
         elif [[ "$OSTYPE" == "darwin"* ]]; then
-            # For macOS, use netstat
-            info=$(netstat -an -p tcp | grep "\.$port " || true)
+            # For macOS, use lsof
+            info=$(lsof -i:"$port" | grep "\*:$port" || true)
         fi
 
         # Check if any process is using the port
@@ -326,9 +326,9 @@ openim::util::check_ports() {
                 fd=$(echo $details | awk '{print $3}')
             elif [[ "$OSTYPE" == "darwin"* ]]; then
                 # Handle extraction for macOS
-                pid=$(echo $info | awk '{print $9}' | cut -d'/' -f1)
-                command=$(ps -p $pid -o comm=)
-                fd="N/A" # File Descriptor is not available in macOS netstat output
+                pid=$(echo $info | awk '{print $2}' | cut -d'/' -f1)
+                command=$(ps -p $pid -o comm= | xargs basename)
+                fd=$(echo $info | awk '{print $4}' | cut -d'/' -f1)
             fi
 
             # Get the start time of the process using the PID
