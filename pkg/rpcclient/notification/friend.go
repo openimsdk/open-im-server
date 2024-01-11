@@ -197,7 +197,7 @@ func (f *FriendNotificationSender) FriendRemarkSetNotification(ctx context.Conte
 	return f.Notification(ctx, fromUserID, toUserID, constant.FriendRemarkSetNotification, &tips)
 }
 func (f *FriendNotificationSender) FriendsInfoUpdateNotification(ctx context.Context, toUserID string, friendIDs []string) error {
-	tips := sdkws.FriendsInfoUpdateTips{}
+	tips := sdkws.FriendsInfoUpdateTips{FromToUserID: &sdkws.FromToUserID{}}
 	tips.FromToUserID.ToUserID = toUserID
 	tips.FriendIDs = friendIDs
 	return f.Notification(ctx, toUserID, toUserID, constant.FriendsInfoUpdateNotification, &tips)
