@@ -70,7 +70,7 @@ func GetContent(msg *sdkws.MsgData) string {
 }
 
 func callbackBeforeSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) error {
-	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable {
+	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable || msg.MsgData.ContentType == constant.Typing {
 		return nil
 	}
 	req := &cbapi.CallbackBeforeSendSingleMsgReq{
@@ -85,7 +85,7 @@ func callbackBeforeSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) er
 }
 
 func callbackAfterSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) error {
-	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable {
+	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable || msg.MsgData.ContentType == constant.Typing {
 		return nil
 	}
 	req := &cbapi.CallbackAfterSendSingleMsgReq{
@@ -100,7 +100,7 @@ func callbackAfterSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) err
 }
 
 func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) error {
-	if !config.Config.Callback.CallbackBeforeSendGroupMsg.Enable {
+	if !config.Config.Callback.CallbackBeforeSendGroupMsg.Enable || msg.MsgData.ContentType == constant.Typing {
 		return nil
 	}
 	req := &cbapi.CallbackBeforeSendGroupMsgReq{
@@ -115,7 +115,7 @@ func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) err
 }
 
 func callbackAfterSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) error {
-	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
+	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable || msg.MsgData.ContentType == constant.Typing {
 		return nil
 	}
 	req := &cbapi.CallbackAfterSendGroupMsgReq{

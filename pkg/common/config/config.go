@@ -296,7 +296,7 @@ type configStruct struct {
 		CallbackKillGroupMember            CallBackConfig `yaml:"killGroupMember"`
 		CallbackDismissGroup               CallBackConfig `yaml:"dismissGroup"`
 		CallbackBeforeJoinGroup            CallBackConfig `yaml:"joinGroup"`
-		CallbackTransferGroupOwnerAfter    CallBackConfig `yaml:"transferGroupOwner"`
+		CallbackAfterTransferGroupOwner    CallBackConfig `yaml:"transferGroupOwner"`
 		CallbackBeforeInviteUserToGroup    CallBackConfig `yaml:"beforeInviteUserToGroup"`
 		CallbackAfterJoinGroup             CallBackConfig `yaml:"joinGroupAfter"`
 		CallbackAfterSetGroupInfo          CallBackConfig `yaml:"setGroupInfoAfter"`

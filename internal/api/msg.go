@@ -164,6 +164,8 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 		data = apistruct.VideoElem{}
 	case constant.File:
 		data = apistruct.FileElem{}
+	case constant.AtText:
+		data = apistruct.AtElem{}
 	case constant.Custom:
 		data = apistruct.CustomElem{}
 	case constant.OANotification:
@@ -172,7 +174,6 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 		if err = m.userRpcClient.GetNotificationByID(c, req.SendID); err != nil {
 			return nil, err
 		}
-
 	default:
 		return nil, errs.ErrArgs.WithDetail("not support err contentType")
 	}

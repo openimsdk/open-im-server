@@ -74,15 +74,8 @@ type FriendDatabase interface {
 	// FindBothFriendRequests finds friend requests sent and received
 	FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error)
 
-	// UpdateFriendPinStatus updates the pinned status of a friend
-	UpdateFriendPinStatus(ctx context.Context, ownerUserID string, friendUserID string, isPinned bool) (err error)
-
-	// UpdateFriendRemark updates the remark for a friend
-	UpdateFriendRemark(ctx context.Context, ownerUserID string, friendUserID string, remark string) (err error)
-
-	// UpdateFriendEx updates the 'ex' field for a friend
-	UpdateFriendEx(ctx context.Context, ownerUserID string, friendUserID string, ex string) (err error)
-
+	// UpdateFriends updates fields for friends
+	UpdateFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, val map[string]any) (err error)
 }
 
 type friendDatabase struct {
@@ -323,21 +316,12 @@ func (f *friendDatabase) FindFriendUserIDs(ctx context.Context, ownerUserID stri
 func (f *friendDatabase) FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error) {
 	return f.friendRequest.FindBothFriendRequests(ctx, fromUserID, toUserID)
 }
-func (f *friendDatabase) UpdateFriendPinStatus(ctx context.Context, ownerUserID string, friendUserID string, isPinned bool) (err error) {
-	if err := f.friend.UpdatePinStatus(ctx, ownerUserID, friendUserID, isPinned); err != nil {
+func (f *friendDatabase) UpdateFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, val map[string]any) (err error) {
+	if len(val) == 0 {
+		return nil
+	}
+	if err := f.friend.UpdateFriends(ctx, ownerUserID, friendUserIDs, val); err != nil {
 		return err
 	}
-	return f.cache.DelFriend(ownerUserID, friendUserID).ExecDel(ctx)
-}
-func (f *friendDatabase) UpdateFriendRemark(ctx context.Context, ownerUserID string, friendUserID string, remark string) (err error) {
-	if err := f.friend.UpdateFriendRemark(ctx, ownerUserID, friendUserID, remark); err != nil {
-		return err
-	}
-	return f.cache.DelFriend(ownerUserID, friendUserID).ExecDel(ctx)
-}
-func (f *friendDatabase) UpdateFriendEx(ctx context.Context, ownerUserID string, friendUserID string, ex string) (err error) {
-	if err := f.friend.UpdateFriendEx(ctx, ownerUserID, friendUserID, ex); err != nil {
-		return err
-	}
-	return f.cache.DelFriend(ownerUserID, friendUserID).ExecDel(ctx)
+	return f.cache.DelFriends(ownerUserID, friendUserIDs).ExecDel(ctx)
 }
