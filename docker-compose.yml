@@ -124,6 +124,7 @@ services:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS:-172.28.0.7}
 
+### TODO: Uncomment, or deploy using openim docker: https://github.com/openimsdk/openim-docker
   # Uncomment and configure the following services as needed
   # openim-admin:
   # # https://github.com/openimsdk/open-im-server/issues/1662

@@ -1,10 +1,10 @@
-# Code - OSS Development Container
+# OpenIM - OSS Development Container
 
 [![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/openimsdk/open-im-server)
 
-This repository includes configuration for a development container for working with Code - OSS in a local container or using [GitHub Codespaces](https://github.com/features/codespaces).
+This repository includes configuration for a development container for working with OpenIM - OSS in a local container or using [GitHub Codespaces](https://github.com/features/codespaces).
 
-> **Tip:** The default VNC password is `vscode`. The VNC server runs on port `5901` and a web client is available on port `6080`.
+> **Tip:** The default VNC password is `openIM123`. The VNC server runs on port `5901` and a web client is available on port `11001`, openim-admin on port `11002`.
 
 ## Quick start - local
 
@@ -20,7 +20,7 @@ If you already have VS Code and Docker installed, you can click the badge above 
 
    ![Image of Dev Containers extension](https://microsoft.github.io/vscode-remote-release/images/dev-containers-extn.png)
 
-   > **Note:** The Dev Containers extension requires the Visual Studio Code distribution of Code - OSS. See the [FAQ](https://aka.ms/vscode-remote/faq/license) for details.
+   > **Note:** The Dev Containers extension requires the Visual Studio Code distribution of OpenIM - OSS. See the [FAQ](https://aka.ms/vscode-remote/faq/license) for details.
 
 4. Press <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> or <kbd>F1</kbd> and select **Dev Containers: Clone Repository in Container Volume...**.
 
@@ -30,7 +30,7 @@ If you already have VS Code and Docker installed, you can click the badge above 
 
 6. After the container is running:
     1. If you have the `DISPLAY` or `WAYLAND_DISPLAY` environment variables set locally (or in WSL on Windows), desktop apps in the container will be shown in local windows.
-    2. If these are not set, open a web browser and go to [http://localhost:6080](http://localhost:6080), or use a [VNC Viewer][def] to connect to `localhost:5901` and enter `vscode` as the password. Anything you start in VS Code, or the integrated terminal, will appear here.
+    2. If these are not set, open a web browser and go to [http://localhost:11001](http://localhost:11001), or use a [VNC Viewer][def] to connect to `localhost:11001` and enter `vscode` as the password. Anything you start in VS Code, or the integrated terminal, will appear here.
 
 Next: **[Try it out!](#try-it)**
 
@@ -42,9 +42,9 @@ Next: **[Try it out!](#try-it)**
 
 2. After the codespace is up and running in your browser, press <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> or <kbd>F1</kbd> and select **Ports: Focus on Ports View**.
 
-3. You should see **VNC web client (6080)** under in the list of ports. Select the line and click on the globe icon to open it in a browser tab.
+3. You should see **VNC web client (11001)** under in the list of ports. Select the line and click on the globe icon to open it in a browser tab.
 
-    > **Tip:** If you do not see the port, <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> or <kbd>F1</kbd>, select **Forward a Port** and enter port `6080`.
+    > **Tip:** If you do not see the port, <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> or <kbd>F1</kbd>, select **Forward a Port** and enter port `11001`.
 
 4. In the new tab, you should see noVNC. Click **Connect** and enter `vscode` as the password.
 
@@ -58,7 +58,7 @@ You may see improved VNC responsiveness when accessing a codespace from VS Code 
 
 1. Install [Visual Studio Code Stable](https://code.visualstudio.com/) or [Insiders](https://code.visualstudio.com/insiders/) and the the [GitHub Codespaces extension](https://marketplace.visualstudio.com/items?itemName=GitHub.codespaces).
 
-    > **Note:** The GitHub Codespaces extension requires the Visual Studio Code distribution of Code - OSS.
+    > **Note:** The GitHub Codespaces extension requires the Visual Studio Code distribution of OpenIM - OSS.
 
 2. After the VS Code is up and running, press <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> or <kbd>F1</kbd>, choose **Codespaces: Create New Codespace**, and use the following settings:
 
@@ -80,7 +80,7 @@ This container uses the [Fluxbox](http://fluxbox.org/) window manager to keep th
 
    > **Note:** You can also set the resolution from the command line by typing `set-resolution`.
 
-To start working with Code - OSS, follow these steps:
+To start working with OpenIM - OSS, follow these steps:
 
 1. In your local VS Code client, open a terminal (<kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>\`</kbd>) and type the following commands:
 
@@ -91,19 +91,47 @@ To start working with Code - OSS, follow these steps:
 
 2. After the build is complete, open a web browser or a [VNC Viewer][def] to connect to the desktop environment as described in the quick start and enter `vscode` as the password.
 
-3. You should now see Code - OSS!
+3. You should now see OpenIM - OSS!
 
 Next, let's try debugging.
 
-1. Shut down Code - OSS by clicking the box in the upper right corner of the Code - OSS window through your browser or VNC viewer.
+1. Shut down OpenIM - OSS by clicking the box in the upper right corner of the OpenIM - OSS window through your browser or VNC viewer.
 
 2. Go to your local VS Code client, and use the **Run / Debug** view to launch the **VS Code** configuration. (Typically the default, so you can likely just press <kbd>F5</kbd>).
 
    > **Note:** If launching times out, you can increase the value of `timeout` in the "VS Code", "Attach Main Process", "Attach Extension Host", and "Attach to Shared Process" configurations in [launch.json](../../.vscode/launch.json). However, running `./scripts/code.sh` first will set up Electron which will usually solve timeout issues.
 
-3. After a bit, Code - OSS will appear with the debugger attached!
+3. After a bit, OpenIM - OSS will appear with the debugger attached!
 
 Enjoy!
+
+
+### Dotfiles
+
+Dotfiles are files and folders on Unix-like systems starting with `.` that control the configuration of applications and shells on your system. You can store and manage your dotfiles in a repository on GitHub. For advice and tutorials about what to include in your dotfiles repository, see [GitHub does dotfiles](https://dotfiles.github.io/).
+
+Your dotfiles repository might include your shell aliases and preferences, any tools you want to install, or any other codespace personalization you want to make.
+
+You can configure GitHub Codespaces to use dotfiles from any repository you own by selecting that repository in your [personal GitHub Codespaces settings](https://github.com/settings/codespaces).
+
+When you create a new codespace, GitHub clones your selected dotfiles repository to the codespace environment, and looks for one of the following files to set up the environment.
+
+- *install.sh*
+- *install*
+- *bootstrap.sh*
+- *bootstrap*
+- *script/bootstrap*
+- *setup.sh*
+- *setup*
+- *script/setup*
+
+If none of these files are found, then any files or folders in your selected dotfiles repository starting with `.` are symlinked to the codespace's `~` or `$HOME` directory.
+
+Any changes to your selected dotfiles repository will apply only to each new codespace, and do not affect any existing codespace.
+
+**Note:** Currently, Codespaces does not support personalizing the User-scoped settings for VS Code with your `dotfiles` repository. You can set default Workspace and Remote [Codespaces] settings for a specific project in the project's repository. For more information, see "[Introduction to dev containers](https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/introduction-to-dev-containers#creating-a-custom-dev-container-configuration)."
+
+In addition, you can also configure Codespaces secrets on your personal profile page at [github.com/settings/codespaces](https://github.com/settings/codespaces). Development environment secrets are environment variables that are encrypted, and they are accessible to any codespace you create using repositories that have access to these secrets.
 
 ### Notes
 
