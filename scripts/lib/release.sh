@@ -572,7 +572,6 @@ function openim::release::verify_prereqs(){
     fi
   fi
 
-
   if [ -z "$(which ${TOOLS_DIR}/${COSTOOL} 2>/dev/null)" ]; then
     openim::log::info "${COSTOOL} tool not installed, try to install it."
 

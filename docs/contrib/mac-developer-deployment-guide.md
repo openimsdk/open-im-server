@@ -52,6 +52,18 @@ Homebrew is an essential package manager for macOS. Install it using:
 
    ```sh
    git clone https://github.com/<your-username>/open-im-server.git
+   # The Docker bridging network mode for Mac is slightly different and needs to be set:
+   export DOCKER_BRIDGE_SUBNET=127.0.0.0/16
+   # Set OpenIM IP
+   export OPENIM_IP=<your-ip>
+   # Init Config
+   make init
+
+   # Start Components
+   docker compose up -d
+
+   # Start OpenIM Server
+   make start
    ```
 
 ### Setting Up the Devcontainer
