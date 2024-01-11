@@ -452,22 +452,19 @@ func (s *friendServer) UpdateFriends(
 		return nil, err
 	}
 
-	for _, friendID := range req.FriendUserIDs {
-		if req.IsPinned != nil {
-			if err = s.friendDatabase.UpdateFriendPinStatus(ctx, req.OwnerUserID, friendID, req.IsPinned.Value); err != nil {
-				return nil, err
-			}
-		}
-		if req.Remark != nil {
-			if err = s.friendDatabase.UpdateFriendRemark(ctx, req.OwnerUserID, friendID, req.Remark.Value); err != nil {
-				return nil, err
-			}
-		}
-		if req.Ex != nil {
-			if err = s.friendDatabase.UpdateFriendEx(ctx, req.OwnerUserID, friendID, req.Ex.Value); err != nil {
-				return nil, err
-			}
-		}
+	val := make(map[string]any)
+
+	if req.IsPinned != nil {
+		val["is_pinned"] = req.IsPinned.Value
+	}
+	if req.Remark != nil {
+		val["remark"] = req.Remark.Value
+	}
+	if req.Ex != nil {
+		val["ex"] = req.Ex.Value
+	}
+	if err = s.friendDatabase.UpdateFriends(ctx, req.OwnerUserID, req.FriendUserIDs, val); err != nil {
+		return nil, err
 	}
 
 	resp := &pbfriend.UpdateFriendsResp{}
