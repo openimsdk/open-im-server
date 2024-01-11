@@ -76,7 +76,7 @@ It is built using Golang and supports cross-platform deployment, ensuring a cons
 + **[Docker Deployment Guide](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
 + **[Kubernetes Deployment Guide](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
 
-## :hammer_and_wrench: To start developing OpenIM
+## :hammer_and_wrench: To Start Developing OpenIM
 
 [![Open in Dev Container](https://img.shields.io/static/v1?label=Dev%20Container&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/github/openimsdk/open-im-server)
 
@@ -114,6 +114,8 @@ Before you start, please make sure your changes are in demand. The best for that
 - [OpenIM Script Utilities](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/util-scripts.md)
 - [OpenIM Versioning](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/version.md)
 - [Manage backend and monitor deployment](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
+- [Mac Developer Deployment Guide for OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
+
 
 ## :busts_in_silhouette: Community
 

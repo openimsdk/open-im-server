@@ -22,7 +22,6 @@
 # example: ./coscli  cp/sync -r  /home/off-line/docker-off-line/ cos://openim-1306374445/openim/image/amd/off-line/off-line/ -e cos.ap-guangzhou.myqcloud.com
 # https://cloud.tencent.com/document/product/436/71763
 
-# Tencent cos configuration
 readonly BUCKET="openim-1306374445"
 readonly REGION="ap-guangzhou"
 readonly COS_RELEASE_DIR="openim-release"
@@ -36,8 +35,8 @@ readonly RELEASE_TARS="${LOCAL_OUTPUT_ROOT}/release-tars"
 readonly RELEASE_IMAGES="${LOCAL_OUTPUT_ROOT}/release-images"
 
 # OpenIM github account info
-readonly OPENIM_GITHUB_ORG=OpenIMSDK
-readonly OPENIM_GITHUB_REPO=Open-IM-Server
+readonly OPENIM_GITHUB_ORG=openimsdk
+readonly OPENIM_GITHUB_REPO=open-im-server
 readonly CHAT_GITHUB_REPO=chat
 
 readonly ARTIFACT=openim.tar.gz
@@ -45,6 +44,14 @@ readonly CHECKSUM=${ARTIFACT}.sha1sum
 
 OPENIM_BUILD_CONFORMANCE=${OPENIM_BUILD_CONFORMANCE:-y}
 OPENIM_BUILD_PULL_LATEST_IMAGES=${OPENIM_BUILD_PULL_LATEST_IMAGES:-y}
+
+if [ -z "${OPENIM_ROOT}" ]; then
+    OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fi
+
+if [ -z "${TOOLS_DIR}" ]; then
+    TOOLS_DIR="${OPENIM_ROOT}/_output/tools"
+fi
 
 # Validate a ci version
 #
@@ -139,6 +146,8 @@ function openim::release::package_src_tarball() {
       \( -path "${OPENIM_ROOT}"/_\* -o \
       -path "${OPENIM_ROOT}"/.git\* -o \
       -path "${OPENIM_ROOT}"/.github\* -o \
+      -path "${OPENIM_ROOT}"/components\* -o \
+      -path "${OPENIM_ROOT}"/logs\* -o \
       -path "${OPENIM_ROOT}"/.gitignore\* -o \
       -path "${OPENIM_ROOT}"/.gsemver.yml\* -o \
       -path "${OPENIM_ROOT}"/.config\* -o \
@@ -167,32 +176,44 @@ function openim::release::package_server_tarballs() {
     local platform_tag
     platform=${platform_long##${LOCAL_OUTPUT_BINPATH}/} # Strip LOCAL_OUTPUT_BINPATH
     platform_tag=${platform/\//-} # Replace a "/" for a "-"
+
+    echo "+++ platform: ${platform}"
+    echo "+++ platform_tag: ${platform_tag}"
+
     openim::log::status "Starting tarball: server $platform_tag"
 
     (
     local release_stage="${RELEASE_STAGE}/server/${platform_tag}/openim"
+    echo "+++ release_stage: ${release_stage}"
+
     rm -rf "${release_stage}"
     mkdir -p "${release_stage}/server/bin"
+    mkdir -p "${release_stage}/tools"
 
     local server_bins=("${OPENIM_SERVER_BINARIES[@]}")
+    local tools_bins=("tool1" "tool2")
 
-      # This fancy expression will expand to prepend a path
-      # (${LOCAL_OUTPUT_BINPATH}/${platform}/) to every item in the
-      # server_bins array.
-      cp "${server_bins[@]/bin/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
+    # Copy server binaries
+    cp "${server_bins[@]/bin/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
         "${release_stage}/server/bin/"
 
-      openim::release::clean_cruft
+    # Copy tools binaries - 新增：复制tools binaries
+    cp "${tools_bins[@]/bin/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}" \
+        "${release_stage}/tools/"
 
-      local package_name="${RELEASE_TARS}/openim-server-${platform_tag}.tar.gz"
-      openim::release::create_tarball "${package_name}" "${release_stage}/.."
-      ) &
-    done
+    openim::release::clean_cruft
 
-    openim::log::status "Waiting on tarballs"
-    openim::util::wait-for-jobs || { openim::log::error "server tarball creation failed"; exit 1; }
-  }
+    local package_name="${RELEASE_TARS}/openim-server-${platform_tag}.tar.gz"
+    openim::release::create_tarball "${package_name}" "${release_stage}/.."
+    ) &
+  done
 
+  openim::log::status "Waiting on tarballs"
+  openim::util::wait-for-jobs || { openim::log::error "server tarball creation failed"; exit 1; }
+}
+
+# Package up all of the cross compiled clients. Over time this should grow into
+# a full SDK
 # Package up all of the cross compiled clients. Over time this should grow into
 # a full SDK
 function openim::release::package_client_tarballs() {
@@ -207,25 +228,42 @@ function openim::release::package_client_tarballs() {
     local platform_tag
     platform=${platform_long##${LOCAL_OUTPUT_BINPATH}/} # Strip LOCAL_OUTPUT_BINPATH
     platform_tag=${platform/\//-} # Replace a "/" for a "-"
+
+    echo "++++ platform: ${platform}"
+    echo "++++ platform_tag: ${platform_tag}"
+
     openim::log::status "Starting tarball: client $platform_tag"
 
     (
     local release_stage="${RELEASE_STAGE}/client/${platform_tag}/openim"
+
+    echo "++++ release_stage: ${release_stage}"
     rm -rf "${release_stage}"
     mkdir -p "${release_stage}/client/bin"
+    mkdir -p "${release_stage}/tools"  # Added: create directory for tools
 
     local client_bins=("${OPENIM_CLIENT_BINARIES[@]}")
+    local tools_bins=("tool1" "tool2")  # Example tool names, replace with actual tools
 
-      # This fancy expression will expand to prepend a path
-      # (${LOCAL_OUTPUT_BINPATH}/${platform}/) to every item in the
-      # client_bins array.
-      cp "${client_bins[@]/bin/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
+    # Copy client binaries
+    echo "+++ cp source: ${client_bins[@]/bin/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}"
+    echo "+++ cp target: ${release_stage}/client/bin/"
+
+    cp "${client_bins[@]/bin/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
         "${release_stage}/client/bin/"
 
-      openim::release::clean_cruft
 
-      local package_name="${RELEASE_TARS}/openim-client-${platform_tag}.tar.gz"
-      openim::release::create_tarball "${package_name}" "${release_stage}/.."
+    echo "+++ BIN cp source: ${tools_bins[@]/bin/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}"
+    echo "+++ TOOLS cp target: ${release_stage}/tools/"
+
+    # Copy tools binaries - Added: copy tools binaries
+    cp "${tools_bins[@]/bin/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}" \
+        "${release_stage}/tools/"
+
+    openim::release::clean_cruft
+
+    local package_name="${RELEASE_TARS}/openim-client-${platform_tag}.tar.gz"
+    openim::release::create_tarball "${package_name}" "${release_stage}/.."
     ) &
   done
 
@@ -507,7 +545,7 @@ function openim::release::install_github_release(){
 # - git-chglog
 # - coscmd or coscli
 function openim::release::verify_prereqs(){
-  if [ -z "$(which github-release 2>/dev/null)" ]; then
+  if [ -z "$(which ${TOOLS_DIR}/github-release 2>/dev/null)" ]; then
     openim::log::info "'github-release' tool not installed, try to install it."
 
     if ! openim::release::install_github_release; then
@@ -516,7 +554,7 @@ function openim::release::verify_prereqs(){
     fi
   fi
 
-  if [ -z "$(which git-chglog 2>/dev/null)" ]; then
+  if [ -z "$(which ${TOOLS_DIR}/git-chglog 2>/dev/null)" ]; then
     openim::log::info "'git-chglog' tool not installed, try to install it."
 
     if ! go install github.com/git-chglog/git-chglog/cmd/git-chglog@latest &>/dev/null; then
@@ -525,7 +563,7 @@ function openim::release::verify_prereqs(){
     fi
   fi
 
-  if [ -z "$(which gsemver 2>/dev/null)" ]; then
+  if [ -z "$(which ${TOOLS_DIR}/gsemver 2>/dev/null)" ]; then
     openim::log::info "'gsemver' tool not installed, try to install it."
 
     if ! go install github.com/arnaud-deprez/gsemver@latest &>/dev/null; then
@@ -535,7 +573,7 @@ function openim::release::verify_prereqs(){
   fi
 
 
-  if [ -z "$(which ${COSTOOL} 2>/dev/null)" ]; then
+  if [ -z "$(which ${TOOLS_DIR}/${COSTOOL} 2>/dev/null)" ]; then
     openim::log::info "${COSTOOL} tool not installed, try to install it."
 
     if ! make -C "${OPENIM_ROOT}" tools.install.${COSTOOL}; then
@@ -545,6 +583,7 @@ function openim::release::verify_prereqs(){
   fi
 
   if [ -z "${TENCENT_SECRET_ID}" -o -z "${TENCENT_SECRET_KEY}" ];then
+      openim::log::info "You need set env: TENCENT_SECRET_ID(cos secretid) and TENCENT_SECRET_KEY(cos secretkey)"
       openim::log::error "can not find env: TENCENT_SECRET_ID and TENCENT_SECRET_KEY"
       return 1
   fi

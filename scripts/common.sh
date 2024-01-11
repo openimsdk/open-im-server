@@ -67,8 +67,9 @@ readonly OPENIM_BASE_IMAGE_REGISTRY="${OPENIM_BASE_IMAGE_REGISTRY:-us.gcr.io/k8s
 #                    back.
 # OUT_DIR can come in from the Makefile, so honor it.
 readonly LOCAL_OUTPUT_ROOT=""${OPENIM_ROOT}"/${OUT_DIR:-_output}"
-readonly LOCAL_OUTPUT_SUBPATH="${LOCAL_OUTPUT_ROOT}/platforms"
-readonly LOCAL_OUTPUT_BINPATH="${LOCAL_OUTPUT_SUBPATH}"
+readonly LOCAL_OUTPUT_SUBPATH="${LOCAL_OUTPUT_ROOT}/bin"
+readonly LOCAL_OUTPUT_BINPATH="${LOCAL_OUTPUT_SUBPATH}/platforms"
+readonly LOCAL_OUTPUT_BINTOOLSPATH="${LOCAL_OUTPUT_SUBPATH}/tools"
 readonly LOCAL_OUTPUT_GOPATH="${LOCAL_OUTPUT_SUBPATH}/go"
 readonly LOCAL_OUTPUT_IMAGE_STAGING="${LOCAL_OUTPUT_ROOT}/images"
 
