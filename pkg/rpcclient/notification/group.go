@@ -413,7 +413,7 @@ func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx conte
 	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return err
 	}
-	for _, userID := range append(userIDs, mcontext.GetOpUserID(ctx)) {
+	for _, userID := range append(userIDs, req.FromUserID) {
 		err = g.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.GroupApplicationAcceptedNotification, tips)
 		if err != nil {
 			log.ZError(ctx, "failed", err)
@@ -441,7 +441,7 @@ func (g *GroupNotificationSender) GroupApplicationRejectedNotification(ctx conte
 	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return err
 	}
-	for _, userID := range append(userIDs, mcontext.GetOpUserID(ctx)) {
+	for _, userID := range append(userIDs, req.FromUserID) {
 		err = g.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.GroupApplicationRejectedNotification, tips)
 		if err != nil {
 			log.ZError(ctx, "failed", err)
