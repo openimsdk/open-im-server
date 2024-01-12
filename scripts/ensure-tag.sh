@@ -14,9 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
 version="${VERSION}"
 if [ "${version}" == "" ];then
-  version=v`gsemver bump`
+  version=v`${OPENIM_ROOT}/_output/tools/gsemver bump`
 fi
 
 if [ -z "`git tag -l ${version}`" ];then

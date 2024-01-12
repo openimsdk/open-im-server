@@ -45,7 +45,7 @@ openim::wrk::setup() {
   cmd="wrk -t${threads} -d${duration} -T30s --latency"
 }
 
-# Print usage infomation
+# Print usage
 openim::wrk::usage() {
   cat << EOF
 

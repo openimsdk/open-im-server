@@ -35,7 +35,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-	ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
+	ginprom "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 )
 
@@ -88,7 +88,7 @@ func run(port int, proPort int) error {
 	log.ZInfo(context.Background(), "api register public config to discov success")
 	router := api.NewGinRouter(client, rdb)
 	if config.Config.Prometheus.Enable {
-		p := ginProm.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
+		p := ginprom.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
 		p.SetListenAddress(fmt.Sprintf(":%d", proPort))
 		p.Use(router)
 	}
