@@ -43,7 +43,7 @@ const (
 	// defaultCfgPath is the default path of the configuration file.
 	defaultCfgPath           = "../../../../../config/config.yaml"
 	minioHealthCheckDuration = 1
-	maxRetry                 = 100
+	maxRetry                 = 300
 	componentStartErrCode    = 6000
 	configErrCode            = 6001
 	mongoConnTimeout         = 30 * time.Second
@@ -95,7 +95,7 @@ func main() {
 
 	for i := 0; i < maxRetry; i++ {
 		if i != 0 {
-			time.Sleep(3 * time.Second)
+			time.Sleep(1 * time.Second)
 		}
 		fmt.Printf("Checking components Round %v...\n", i+1)
 
