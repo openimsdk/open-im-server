@@ -109,12 +109,9 @@ type groupServer struct {
 }
 
 func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgroup.NotificationUserInfoUpdateReq) (*pbgroup.NotificationUserInfoUpdateResp, error) {
-	defer log.ZDebug(ctx, "return")
+	defer log.ZDebug(ctx, "NotificationUserInfoUpdate return")
 	members, err := s.db.FindGroupMemberUser(ctx, nil, req.UserID)
 	if err != nil {
-		return nil, err
-	}
-	if err := s.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
 	groupIDs := make([]string, 0, len(members))
