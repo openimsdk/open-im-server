@@ -36,7 +36,7 @@ echo -e "\n++ Stop all processes in the path ${OPENIM_OUTPUT_HOSTBIN}"
 
 openim::util::stop_services_with_name "${OPENIM_OUTPUT_HOSTBIN}"
 
-echo -n "Stopping services"
+echo -n "Stopping services 15 seconds."
 for i in {1..15}; do
     echo -n "."
     sleep 1

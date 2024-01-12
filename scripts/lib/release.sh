@@ -628,6 +628,7 @@ function openim::release::github_release() {
     --repo ${OPENIM_GITHUB_REPO} \
     --tag ${OPENIM_GIT_VERSION} \
     --name ${ARTIFACT} \
+    --label "openim-${OPENIM_GIT_VERSION}" \
     --file ${RELEASE_TARS}/${ARTIFACT}
 
   for file in ${RELEASE_TARS}/*.tar.gz; do
@@ -638,6 +639,7 @@ function openim::release::github_release() {
               --user ${OPENIM_GITHUB_ORG} \
               --repo ${OPENIM_GITHUB_REPO} \
               --tag ${OPENIM_GIT_VERSION} \
+              --label "openim-${OPENIM_GIT_VERSION}" \
               --name "${filename}" \
               --file "${file}"
       fi
