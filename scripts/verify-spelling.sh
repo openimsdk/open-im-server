@@ -30,12 +30,12 @@ export GOBIN="${KUBE_OUTPUT_BINPATH}"
 PATH="${GOBIN}:${PATH}"
 
 # Install tools we need
-pushd ""${OPENIM_ROOT}"/tools" >/dev/null
+pushd "${OPENIM_ROOT}/tools" >/dev/null
   GO111MODULE=on go install github.com/client9/misspell/cmd/misspell
 popd >/dev/null
 
 # Spell checking
 # All the skipping files are defined in scripts/.spelling_failures
-skipping_file=""${OPENIM_ROOT}"/scripts/.spelling_failures"
+skipping_file="${OPENIM_ROOT}/scripts/.spelling_failures"
 failing_packages=$(sed "s| | -e |g" "${skipping_file}")
 git ls-files | grep -v -e "${failing_packages}" | xargs misspell -i "Creater,creater,ect" -error -o stderr

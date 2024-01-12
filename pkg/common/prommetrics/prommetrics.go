@@ -15,7 +15,7 @@
 package prommetrics
 
 import (
-	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	gp "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 
@@ -23,10 +23,10 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
 )
 
-func NewGrpcPromObj(cusMetrics []prometheus.Collector) (*prometheus.Registry, *grpc_prometheus.ServerMetrics, error) {
+func NewGrpcPromObj(cusMetrics []prometheus.Collector) (*prometheus.Registry, *gp.ServerMetrics, error) {
 	////////////////////////////////////////////////////////
 	reg := prometheus.NewRegistry()
-	grpcMetrics := grpc_prometheus.NewServerMetrics()
+	grpcMetrics := gp.NewServerMetrics()
 	grpcMetrics.EnableHandlingTimeHistogram()
 	cusMetrics = append(cusMetrics, grpcMetrics, collectors.NewGoCollector())
 	reg.MustRegister(cusMetrics...)

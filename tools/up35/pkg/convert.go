@@ -17,16 +17,16 @@ package pkg
 import (
 	"time"
 
-	mongoModel "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	mysqlModel "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/mysql/v3"
-	mongoModelRtc "github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mongo/table"
-	mysqlModelRtc "github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mysql"
+	mongomodel "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	mysqlmodel "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/mysql/v3"
+	mongomodelrtc "github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mongo/table"
+	mysqlmodelrtc "github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mysql"
 )
 
 type convert struct{}
 
-func (convert) User(v mysqlModel.UserModel) mongoModel.UserModel {
-	return mongoModel.UserModel{
+func (convert) User(v mysqlmodel.UserModel) mongomodel.UserModel {
+	return mongomodel.UserModel{
 		UserID:           v.UserID,
 		Nickname:         v.Nickname,
 		FaceURL:          v.FaceURL,
@@ -37,8 +37,8 @@ func (convert) User(v mysqlModel.UserModel) mongoModel.UserModel {
 	}
 }
 
-func (convert) Friend(v mysqlModel.FriendModel) mongoModel.FriendModel {
-	return mongoModel.FriendModel{
+func (convert) Friend(v mysqlmodel.FriendModel) mongomodel.FriendModel {
+	return mongomodel.FriendModel{
 		OwnerUserID:    v.OwnerUserID,
 		FriendUserID:   v.FriendUserID,
 		Remark:         v.Remark,
@@ -49,8 +49,8 @@ func (convert) Friend(v mysqlModel.FriendModel) mongoModel.FriendModel {
 	}
 }
 
-func (convert) FriendRequest(v mysqlModel.FriendRequestModel) mongoModel.FriendRequestModel {
-	return mongoModel.FriendRequestModel{
+func (convert) FriendRequest(v mysqlmodel.FriendRequestModel) mongomodel.FriendRequestModel {
+	return mongomodel.FriendRequestModel{
 		FromUserID:    v.FromUserID,
 		ToUserID:      v.ToUserID,
 		HandleResult:  v.HandleResult,
@@ -63,8 +63,8 @@ func (convert) FriendRequest(v mysqlModel.FriendRequestModel) mongoModel.FriendR
 	}
 }
 
-func (convert) Black(v mysqlModel.BlackModel) mongoModel.BlackModel {
-	return mongoModel.BlackModel{
+func (convert) Black(v mysqlmodel.BlackModel) mongomodel.BlackModel {
+	return mongomodel.BlackModel{
 		OwnerUserID:    v.OwnerUserID,
 		BlockUserID:    v.BlockUserID,
 		CreateTime:     v.CreateTime,
@@ -74,8 +74,8 @@ func (convert) Black(v mysqlModel.BlackModel) mongoModel.BlackModel {
 	}
 }
 
-func (convert) Group(v mysqlModel.GroupModel) mongoModel.GroupModel {
-	return mongoModel.GroupModel{
+func (convert) Group(v mysqlmodel.GroupModel) mongomodel.GroupModel {
+	return mongomodel.GroupModel{
 		GroupID:                v.GroupID,
 		GroupName:              v.GroupName,
 		Notification:           v.Notification,
@@ -94,8 +94,8 @@ func (convert) Group(v mysqlModel.GroupModel) mongoModel.GroupModel {
 	}
 }
 
-func (convert) GroupMember(v mysqlModel.GroupMemberModel) mongoModel.GroupMemberModel {
-	return mongoModel.GroupMemberModel{
+func (convert) GroupMember(v mysqlmodel.GroupMemberModel) mongomodel.GroupMemberModel {
+	return mongomodel.GroupMemberModel{
 		GroupID:        v.GroupID,
 		UserID:         v.UserID,
 		Nickname:       v.Nickname,
@@ -110,8 +110,8 @@ func (convert) GroupMember(v mysqlModel.GroupMemberModel) mongoModel.GroupMember
 	}
 }
 
-func (convert) GroupRequest(v mysqlModel.GroupRequestModel) mongoModel.GroupRequestModel {
-	return mongoModel.GroupRequestModel{
+func (convert) GroupRequest(v mysqlmodel.GroupRequestModel) mongomodel.GroupRequestModel {
+	return mongomodel.GroupRequestModel{
 		UserID:        v.UserID,
 		GroupID:       v.GroupID,
 		HandleResult:  v.HandleResult,
@@ -126,8 +126,8 @@ func (convert) GroupRequest(v mysqlModel.GroupRequestModel) mongoModel.GroupRequ
 	}
 }
 
-func (convert) Conversation(v mysqlModel.ConversationModel) mongoModel.ConversationModel {
-	return mongoModel.ConversationModel{
+func (convert) Conversation(v mysqlmodel.ConversationModel) mongomodel.ConversationModel {
+	return mongomodel.ConversationModel{
 		OwnerUserID:           v.OwnerUserID,
 		ConversationID:        v.ConversationID,
 		ConversationType:      v.ConversationType,
@@ -149,9 +149,9 @@ func (convert) Conversation(v mysqlModel.ConversationModel) mongoModel.Conversat
 	}
 }
 
-func (convert) Object(engine string) func(v mysqlModel.ObjectModel) mongoModel.ObjectModel {
-	return func(v mysqlModel.ObjectModel) mongoModel.ObjectModel {
-		return mongoModel.ObjectModel{
+func (convert) Object(engine string) func(v mysqlmodel.ObjectModel) mongomodel.ObjectModel {
+	return func(v mysqlmodel.ObjectModel) mongomodel.ObjectModel {
+		return mongomodel.ObjectModel{
 			Name:        v.Name,
 			UserID:      v.UserID,
 			Hash:        v.Hash,
@@ -165,8 +165,8 @@ func (convert) Object(engine string) func(v mysqlModel.ObjectModel) mongoModel.O
 	}
 }
 
-func (convert) Log(v mysqlModel.Log) mongoModel.LogModel {
-	return mongoModel.LogModel{
+func (convert) Log(v mysqlmodel.Log) mongomodel.LogModel {
+	return mongomodel.LogModel{
 		LogID:      v.LogID,
 		Platform:   v.Platform,
 		UserID:     v.UserID,
@@ -179,8 +179,8 @@ func (convert) Log(v mysqlModel.Log) mongoModel.LogModel {
 	}
 }
 
-func (convert) SignalModel(v mysqlModelRtc.SignalModel) mongoModelRtc.SignalModel {
-	return mongoModelRtc.SignalModel{
+func (convert) SignalModel(v mysqlmodelrtc.SignalModel) mongomodelrtc.SignalModel {
+	return mongomodelrtc.SignalModel{
 		SID:           v.SID,
 		InviterUserID: v.InviterUserID,
 		CustomData:    v.CustomData,
@@ -202,8 +202,8 @@ func (convert) SignalModel(v mysqlModelRtc.SignalModel) mongoModelRtc.SignalMode
 	}
 }
 
-func (convert) SignalInvitationModel(v mysqlModelRtc.SignalInvitationModel) mongoModelRtc.SignalInvitationModel {
-	return mongoModelRtc.SignalInvitationModel{
+func (convert) SignalInvitationModel(v mysqlmodelrtc.SignalInvitationModel) mongomodelrtc.SignalInvitationModel {
+	return mongomodelrtc.SignalInvitationModel{
 		SID:          v.SID,
 		UserID:       v.UserID,
 		Status:       v.Status,
@@ -212,8 +212,8 @@ func (convert) SignalInvitationModel(v mysqlModelRtc.SignalInvitationModel) mong
 	}
 }
 
-func (convert) Meeting(v mysqlModelRtc.MeetingInfo) mongoModelRtc.MeetingInfo {
-	return mongoModelRtc.MeetingInfo{
+func (convert) Meeting(v mysqlmodelrtc.MeetingInfo) mongomodelrtc.MeetingInfo {
+	return mongomodelrtc.MeetingInfo{
 		RoomID:      v.RoomID,
 		MeetingName: v.MeetingName,
 		HostUserID:  v.HostUserID,
@@ -225,16 +225,16 @@ func (convert) Meeting(v mysqlModelRtc.MeetingInfo) mongoModelRtc.MeetingInfo {
 	}
 }
 
-func (convert) MeetingInvitationInfo(v mysqlModelRtc.MeetingInvitationInfo) mongoModelRtc.MeetingInvitationInfo {
-	return mongoModelRtc.MeetingInvitationInfo{
+func (convert) MeetingInvitationInfo(v mysqlmodelrtc.MeetingInvitationInfo) mongomodelrtc.MeetingInvitationInfo {
+	return mongomodelrtc.MeetingInvitationInfo{
 		RoomID:     v.RoomID,
 		UserID:     v.UserID,
 		CreateTime: v.CreateTime,
 	}
 }
 
-func (convert) MeetingVideoRecord(v mysqlModelRtc.MeetingVideoRecord) mongoModelRtc.MeetingVideoRecord {
-	return mongoModelRtc.MeetingVideoRecord{
+func (convert) MeetingVideoRecord(v mysqlmodelrtc.MeetingVideoRecord) mongomodelrtc.MeetingVideoRecord {
+	return mongomodelrtc.MeetingVideoRecord{
 		RoomID:     v.RoomID,
 		FileURL:    v.FileURL,
 		CreateTime: v.CreateTime,
