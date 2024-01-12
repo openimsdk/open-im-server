@@ -43,12 +43,10 @@ const (
 	// defaultCfgPath is the default path of the configuration file.
 	defaultCfgPath           = "../../../../../config/config.yaml"
 	minioHealthCheckDuration = 1
-	maxRetry                 = 10
+	maxRetry                 = 100
 	componentStartErrCode    = 6000
 	configErrCode            = 6001
-	mongoConnTimeout         = 10 * time.Second
-
-	redisConnTimeout = 5 * time.Second // Connection timeout for Redis
+	mongoConnTimeout         = 30 * time.Second
 )
 
 const (
@@ -252,8 +250,9 @@ func checkMinio() (string, error) {
 	return str, nil
 }
 
-// checkRedis checks the Redis connection with retries and timeout
+// checkRedis checks the Redis connection
 func checkRedis() (string, error) {
+	// Prioritize environment variables
 	address := getEnv("REDIS_ADDRESS", strings.Join(config.Config.Redis.Address, ","))
 	username := getEnv("REDIS_USERNAME", config.Config.Redis.Username)
 	password := getEnv("REDIS_PASSWORD", config.Config.Redis.Password)
@@ -262,44 +261,30 @@ func checkRedis() (string, error) {
 	redisAddresses := strings.Split(address, ",")
 
 	var redisClient redis.UniversalClient
-	var err error
-
-	for attempt := 0; attempt <= maxRetry; attempt++ {
-		if len(redisAddresses) > 1 {
-			// Use cluster client for multiple addresses
-			redisClient = redis.NewClusterClient(&redis.ClusterOptions{
-				Addrs:    redisAddresses,
-				Username: username,
-				Password: password,
-			})
-		} else {
-			// Use regular client for single address
-			redisClient = redis.NewClient(&redis.Options{
-				Addr:     redisAddresses[0],
-				Username: username,
-				Password: password,
-			})
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), redisConnTimeout)
-		defer cancel()
-
-		// Ping Redis to check connectivity
-		_, err = redisClient.Ping(ctx).Result()
-		if err == nil {
-			break
-		}
-		if attempt < maxRetry {
-			fmt.Printf("Failed to connect to Redis, retrying: %s\n", err)
-			time.Sleep(time.Second * time.Duration(attempt+1)) // Exponential backoff
-		}
-	}
-	if err != nil {
-		return "", err // Wrap or handle the error as needed
+	if len(redisAddresses) > 1 {
+		// Use cluster client for multiple addresses
+		redisClient = redis.NewClusterClient(&redis.ClusterOptions{
+			Addrs:    redisAddresses,
+			Username: username,
+			Password: password,
+		})
+	} else {
+		// Use regular client for single address
+		redisClient = redis.NewClient(&redis.Options{
+			Addr:     redisAddresses[0],
+			Username: username,
+			Password: password,
+		})
 	}
 	defer redisClient.Close()
 
-	str := "The addr is: " + strings.Join(redisAddresses, ",")
+	// Ping Redis to check connectivity
+	_, err := redisClient.Ping(context.Background()).Result()
+	str := "the addr is:" + strings.Join(redisAddresses, ",")
+	if err != nil {
+		return "", errs.Wrap(errStr(err, str))
+	}
+
 	return str, nil
 }
 
