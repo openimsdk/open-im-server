@@ -104,7 +104,7 @@ function openim::tools::start_service() {
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
   openim::log::info "Starting ${binary_name}..."
-  ${cmd}
+  ${cmd} >> "${LOG_FILE}" 2>&1 &
 }
 
 function openim::tools::start() {
