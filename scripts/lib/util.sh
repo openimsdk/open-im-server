@@ -306,12 +306,8 @@ openim::util::check_ports() {
         if [[ "$OSTYPE" == "linux-gnu"* ]]; then
             if command -v ss > /dev/null 2>&1; then
                 info=$(ss -ltnp | grep ":$port" || true)
-                echo "!!!!!!!!!!! port=$port"
-                echo "!!!!!!!!!!! info=$info"
             else
                 info=$(netstat -ltnp | grep ":$port" || true)
-                echo "!!!!!!!!!!! port=$port"
-                echo "!!!!!!!!!!! info=$info"
             fi
         elif [[ "$OSTYPE" == "darwin"* ]]; then
             # For macOS, use lsof

@@ -609,6 +609,10 @@ EOF
 # https://github.com/github-release/github-release
 function openim::release::github_release() {
   # create a github release
+  if [ -z "${GITHUB_TOKEN}" ];then
+      openim::log::error "can not find env: GITHUB_TOKEN"
+      return 1
+  fi
   openim::log::info "create a new github release with tag ${OPENIM_GIT_VERSION}"
   ${TOOLS_DIR}/github-release release \
     --user ${OPENIM_GITHUB_ORG} \
@@ -626,13 +630,18 @@ function openim::release::github_release() {
     --name ${ARTIFACT} \
     --file ${RELEASE_TARS}/${ARTIFACT}
 
-  openim::log::info "upload openim-src.tar.gz to release ${OPENIM_GIT_VERSION}"
-  ${TOOLS_DIR}/github-release upload \
-    --user ${OPENIM_GITHUB_ORG} \
-    --repo ${OPENIM_GITHUB_REPO} \
-    --tag ${OPENIM_GIT_VERSION} \
-    --name "openim-src.tar.gz" \
-    --file ${RELEASE_TARS}/openim-src.tar.gz
+  for file in ${RELEASE_TARS}/*.tar.gz; do
+      if [[ -f "$file" ]]; then
+          filename=$(basename "$file")
+          openim::log::info "Update file ${filename} to release vertion ${OPENIM_GIT_VERSION}"  
+          ${TOOLS_DIR}/github-release upload \
+              --user ${OPENIM_GITHUB_ORG} \
+              --repo ${OPENIM_GITHUB_REPO} \
+              --tag ${OPENIM_GIT_VERSION} \
+              --name "${filename}" \
+              --file "${file}"
+      fi
+  done
 }
 
 function openim::release::generate_changelog() {

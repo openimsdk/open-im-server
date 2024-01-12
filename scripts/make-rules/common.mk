@@ -73,7 +73,8 @@ endif
 ifeq ($(origin VERSION), undefined)
 # VERSION := $(shell git describe --tags --always --match='v*')
 # git describe --tags --always --match="v*" --dirty
-VERSION := $(shell git describe --tags --always --match="v*" --dirty | sed 's/-/./g')	#v2.3.3.631.g00abdc9b.dirty
+# VERSION := $(shell git describe --tags --always --match="v*" --dirty | sed 's/-/./g')	#v2.3.3.631.g00abdc9b.dirty
+VERSION := $(shell git describe --tags --always --match='v*')
 # v2.3.3: git tag
 endif
 
