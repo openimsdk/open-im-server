@@ -243,8 +243,6 @@ def "KAFKA_CONSUMERGROUPID_PUSH" "push"                     # `Kafka` 的消费�
 
 ###################### openim-web 配置信息 ######################
 def "OPENIM_WEB_PORT" "11001"                       # openim-web的端口
-def "OPENIM_WEB_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # openim-web的地址
-def "OPENIM_WEB_DIST_PATH" "/app/dist"              # openim-web的dist路径
 
 ###################### openim-admin-front 配置信息 ######################
 def "OPENIM_ADMIN_FRONT_PORT" "11002"                       # openim-admin-front的端口
