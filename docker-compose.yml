@@ -118,7 +118,7 @@ services:
     container_name: openim-web
     environment:
       - OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH:-/app/dist}
-      - OPENIM_WEB_PORT=${OPENIM_WEB_PORT:-11001}
+      - OPENIM_WEB_PORT=${OPENIM_WEB_PORT:-80}
     restart: always
     ports:
       - "${OPENIM_WEB_PORT:-11001}:11001"
