@@ -94,7 +94,7 @@ services:
         ipv4_address: ${KAFKA_NETWORK_ADDRESS:-172.28.0.4}
 
   minio:
-    image: minio/minio:${MINIO_IMAGE_VERSION:-latest}
+    image: minio/minio:${MINIO_IMAGE_VERSION:-2024}
     ports:
       - "${MINIO_PORT:-10005}:9000"
       - "9090:9090"
@@ -128,7 +128,7 @@ services:
   # Uncomment and configure the following services as needed
 
   # openim-server:
-  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-server:${SERVER_IMAGE_VERSION:-latest}
+  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-server:${SERVER_IMAGE_VERSION:-main}
   #   container_name: openim-server
   #   ports:
   #     - "${OPENIM_WS_PORT:-10001}:${OPENIM_WS_PORT:-10001}"
