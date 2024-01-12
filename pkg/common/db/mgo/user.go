@@ -88,6 +88,29 @@ func (u *UserMgo) PageFindUser(ctx context.Context, level1 int64, level2 int64, 
 
 	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, query, pagination)
 }
+func (u *UserMgo) PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID string, userName string, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+	// Initialize the base query with level conditions
+	query := bson.M{
+		"$and": []bson.M{
+			{"app_manager_level": bson.M{"$in": []int64{level1, level2}}},
+		},
+	}
+
+	// Add userID and userName conditions to the query if they are provided
+	if userID != "" || userName != "" {
+		userConditions := []bson.M{}
+		if userID != "" {
+			userConditions = append(userConditions, bson.M{"user_id": userID})
+		}
+		if userName != "" {
+			userConditions = append(userConditions, bson.M{"nickname": userName})
+		}
+		query["$and"] = append(query["$and"].([]bson.M), bson.M{"$or": userConditions})
+	}
+
+	// Perform the paginated search
+	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, query, pagination)
+}
 
 func (u *UserMgo) GetAllUserID(ctx context.Context, pagination pagination.Pagination) (int64, []string, error) {
 	return mgoutil.FindPage[string](ctx, u.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}))
