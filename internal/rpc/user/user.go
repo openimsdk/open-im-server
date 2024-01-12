@@ -168,7 +168,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	if err != nil {
 		return nil, err
 	}
-	if req.UserInfo.Nickname != "" || req.UserInfo.FaceURL != "" {
+	if req.UserInfo.Nickname != nil || req.UserInfo.FaceURL != nil {
 		if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
 			log.ZError(ctx, "NotificationUserInfoUpdate", err)
 		}
@@ -515,7 +515,7 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		return resp, nil
 	}
 
-	_, users, err := s.UserDatabase.Page(ctx, req.Pagination)
+	users, err := s.UserDatabase.FindNotification(ctx, constant.AppNotificationAdmin)
 	if err != nil {
 		return nil, err
 	}
@@ -558,7 +558,7 @@ func (s *userServer) userModelToResp(users []*relation.UserModel) *pbuser.Search
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {
-		if v.AppMangerLevel == constant.AppNotificationAdmin || v.AppMangerLevel == constant.AppAdmin {
+		if v.AppMangerLevel == constant.AppNotificationAdmin && !utils.IsContain(v.UserID, config.Config.IMAdmin.UserID) {
 			temp := &pbuser.NotificationAccountInfo{
 				UserID:   v.UserID,
 				FaceURL:  v.FaceURL,

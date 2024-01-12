@@ -16,7 +16,6 @@ package user
 
 import (
 	"context"
-
 	pbuser "github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/utils"
 
@@ -67,16 +66,16 @@ func CallbackBeforeUpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserI
 	cbReq := &cbapi.CallbackBeforeUpdateUserInfoExReq{
 		CallbackCommand: cbapi.CallbackBeforeUpdateUserInfoExCommand,
 		UserID:          req.UserInfo.UserID,
-		FaceURL:         &req.UserInfo.FaceURL,
-		Nickname:        &req.UserInfo.Nickname,
+		FaceURL:         req.UserInfo.FaceURL,
+		Nickname:        req.UserInfo.Nickname,
 	}
 	resp := &cbapi.CallbackBeforeUpdateUserInfoExResp{}
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeUpdateUserInfoEx); err != nil {
 		return err
 	}
-	utils.NotNilReplace(&req.UserInfo.FaceURL, resp.FaceURL)
+	utils.NotNilReplace(req.UserInfo.FaceURL, resp.FaceURL)
 	utils.NotNilReplace(req.UserInfo.Ex, resp.Ex)
-	utils.NotNilReplace(&req.UserInfo.Nickname, resp.Nickname)
+	utils.NotNilReplace(req.UserInfo.Nickname, resp.Nickname)
 	return nil
 }
 func CallbackAfterUpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) error {

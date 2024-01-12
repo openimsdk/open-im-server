@@ -55,14 +55,17 @@ func (cli *K8sDR) Register(serviceName, host string, port int, opts ...grpc.Dial
 
 	return nil
 }
+
 func (cli *K8sDR) UnRegister() error {
 
 	return nil
 }
+
 func (cli *K8sDR) CreateRpcRootNodes(serviceNames []string) error {
 
 	return nil
 }
+
 func (cli *K8sDR) RegisterConf2Registry(key string, conf []byte) error {
 
 	return nil
@@ -123,6 +126,8 @@ func getMsgGatewayHost(ctx context.Context) []string {
 	log.ZInfo(ctx, "getMsgGatewayHost", "instance", instance, "selfPodName", selfPodName, "replicas", replicas, "ns", ns, "ret", ret)
 	return ret
 }
+
+// GetConns returns the gRPC client connections to the specified service.
 func (cli *K8sDR) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
 
 	if serviceName != config.Config.RpcRegisterName.OpenImMessageGatewayName {
@@ -142,6 +147,7 @@ func (cli *K8sDR) GetConns(ctx context.Context, serviceName string, opts ...grpc
 		return ret, nil
 	}
 }
+
 func (cli *K8sDR) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 
 	return grpc.DialContext(ctx, serviceName, append(cli.options, opts...)...)
@@ -151,9 +157,11 @@ func (cli *K8sDR) GetSelfConnTarget() string {
 
 	return cli.rpcRegisterAddr
 }
+
 func (cli *K8sDR) AddOption(opts ...grpc.DialOption) {
 	cli.options = append(cli.options, opts...)
 }
+
 func (cli *K8sDR) CloseConn(conn *grpc.ClientConn) {
 	conn.Close()
 }
