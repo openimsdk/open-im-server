@@ -2,9 +2,9 @@ package localcache
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/localcache/link"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/localcache/local"
-	lopt "github.com/openimsdk/open-im-server/v3/pkg/common/localcache/option"
+	"github.com/openimsdk/localcache/link"
+	"github.com/openimsdk/localcache/local"
+	lopt "github.com/openimsdk/localcache/option"
 )
 
 type Cache[V any] interface {

@@ -2,7 +2,7 @@ package localcache
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/localcache/local"
+	"github.com/openimsdk/localcache/local"
 	"time"
 )
 
