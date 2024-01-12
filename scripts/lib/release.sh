@@ -110,14 +110,14 @@ function openim::release::package_tarballs() {
   # Clean out any old releases
   rm -rf "${RELEASE_STAGE}" "${RELEASE_TARS}" "${RELEASE_IMAGES}"
   mkdir -p "${RELEASE_TARS}"
-  openim::release::package_src_tarball &
-  openim::release::package_client_tarballs &
-  openim::release::package_openim_manifests_tarball &
-  openim::release::package_server_tarballs &
-  openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
+  openim::release::package_src_tarball
+  openim::release::package_client_tarballs
+#   openim::release::package_openim_manifests_tarball &
+#   openim::release::package_server_tarballs &
+#   openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
 
-  openim::release::package_final_tarball & # _final depends on some of the previous phases
-  openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
+#   openim::release::package_final_tarball & # _final depends on some of the previous phases
+#   openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
 }
 
 function openim::release::updload_tarballs() {
@@ -125,11 +125,11 @@ function openim::release::updload_tarballs() {
   for file in $(ls ${RELEASE_TARS}/*)
   do
     if [ "${COSTOOL}" == "coscli" ];then
-      coscli cp "${file}" "cos://${BUCKET}/${COS_RELEASE_DIR}/${OPENIM_GIT_VERSION}/${file##*/}"
-      coscli cp "${file}" "cos://${BUCKET}/${COS_RELEASE_DIR}/latest/${file##*/}"
+      ${TOOLS_DIR}/coscli cp "${file}" "cos://${BUCKET}/${COS_RELEASE_DIR}/${OPENIM_GIT_VERSION}/${file##*/}"
+      ${TOOLS_DIR}/coscli cp "${file}" "cos://${BUCKET}/${COS_RELEASE_DIR}/latest/${file##*/}"
     else
-      coscmd upload  "${file}" "${COS_RELEASE_DIR}/${OPENIM_GIT_VERSION}/"
-      coscmd upload  "${file}" "${COS_RELEASE_DIR}/latest/"
+      ${TOOLS_DIR}/coscmd upload  "${file}" "${COS_RELEASE_DIR}/${OPENIM_GIT_VERSION}/"
+      ${TOOLS_DIR}/coscmd upload  "${file}" "${COS_RELEASE_DIR}/latest/"
     fi
   done
 }
@@ -195,7 +195,7 @@ function openim::release::package_server_tarballs() {
     local server_bins=("${OPENIM_SERVER_BINARIES[@]}")
 
     # Copy server binaries
-    cp "${server_bins[@]/bin/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
+    cp "${server_bins[@]/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
         "${release_stage}/server/bin/"
 
     openim::release::clean_cruft
@@ -220,7 +220,9 @@ function openim::release::package_client_tarballs() {
     read -ra long_platforms <<< "${OPENIM_BUILD_PLATFORMS}"
   fi
   echo "++++ LOCAL_OUTPUT_BINTOOLSPATH: ${LOCAL_OUTPUT_BINTOOLSPATH}"
+#   LOCAL_OUTPUT_BINTOOLSPATH: /data/workspaces/open-im-server/_output/bin/tools
   echo "++++ long_platforms: ${long_platforms[@]}"
+#   long_platforms: /data/workspaces/open-im-server/_output/bin/tools/darwin/amd64 /data/workspaces/open-im-server/_output/bin/tools/darwin/arm64 /data/workspaces/open-im-server/_output/bin/tools/linux/amd64 /data/workspaces/open-im-server/_output/bin/tools/linux/arm64 /data/workspaces/open-im-server/_output/bin/tools/linux/mips64 /data/workspaces/open-im-server/_output/bin/tools/linux/mips64le /data/workspaces/open-im-server/_output/bin/tools/linux/ppc64le /data/workspaces/open-im-server/_output/bin/tools/linux/s390x /data/workspaces/open-im-server/_output/bin/tools/windows/amd64
 
   for platform_long in "${long_platforms[@]}"; do
     local platform
@@ -229,26 +231,30 @@ function openim::release::package_client_tarballs() {
     platform_tag=${platform/\//-} # Replace a "/" for a "-"
 
     echo "++++ platform: ${platform}"
+    # ++++ platform: darwin/amd64
     echo "++++ platform_tag: ${platform_tag}"
-
-    openim::log::status "Starting tarball: client $platform_tag"
+    # ++++ platform_tag: darwin-amd64
+    openim::log::status "Starting tarball: client $platform_tag" # darwin-amd64
 
     (
     local release_stage="${RELEASE_STAGE}/client/${platform_tag}/openim"
 
     echo "++++ release_stage: ${release_stage}"
+    # ++++ release_stage: /data/workspaces/open-im-server/_output/release-stage/client/darwin-amd64/openim
     rm -rf "${release_stage}"
     mkdir -p "${release_stage}/client/bin"
 
     local client_bins=("${OPENIM_CLIENT_BINARIES[@]}")
 
     echo "++++ client_bins: ${client_bins[@]}"
-    echo "++++ tools_bins: ${tools_bins[@]}"
-    # Copy client binaries
-    echo "++++ cp source: ${client_bins[@]/bin/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}"
+    # client_bins: changelog component conversion-msg conversion-mysql formitychecker imctl infra ncpu openim-web up35 versionchecker yamlfmt
+    # Copy client binclient_bins:aries
+    echo "++++ cp source: ${client_bins[@]/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}"
+    # ++++ cp source: changelog component conversion-msg conversion-mysql formitychecker imctl infra ncpu openim-web up35 versionchecker yamlfmt
     echo "++++ cp target: ${release_stage}/client/bin/"
+    # ++++ cp target: /data/workspaces/open-im-server/_output/release-stage/client/darwin-amd64/openim/client/bin/
 
-    cp "${client_bins[@]/bin/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}" \
+    cp "${client_bins[@]/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}" \
         "${release_stage}/client/bin/"
 
     openim::release::clean_cruft
@@ -614,7 +620,7 @@ EOF
 function openim::release::github_release() {
   # create a github release
   openim::log::info "create a new github release with tag ${OPENIM_GIT_VERSION}"
-  github-release release \
+  ${TOOLS_DIR}/github-release release \
     --user ${OPENIM_GITHUB_ORG} \
     --repo ${OPENIM_GITHUB_REPO} \
     --tag ${OPENIM_GIT_VERSION} \
@@ -623,7 +629,7 @@ function openim::release::github_release() {
 
   # update openim tarballs
   openim::log::info "upload ${ARTIFACT} to release ${OPENIM_GIT_VERSION}"
-  github-release upload \
+  ${TOOLS_DIR}/github-release upload \
     --user ${OPENIM_GITHUB_ORG} \
     --repo ${OPENIM_GITHUB_REPO} \
     --tag ${OPENIM_GIT_VERSION} \
@@ -631,7 +637,7 @@ function openim::release::github_release() {
     --file ${RELEASE_TARS}/${ARTIFACT}
 
   openim::log::info "upload openim-src.tar.gz to release ${OPENIM_GIT_VERSION}"
-  github-release upload \
+  ${TOOLS_DIR}/github-release upload \
     --user ${OPENIM_GITHUB_ORG} \
     --repo ${OPENIM_GITHUB_REPO} \
     --tag ${OPENIM_GIT_VERSION} \
@@ -642,10 +648,9 @@ function openim::release::github_release() {
 function openim::release::generate_changelog() {
   openim::log::info "generate CHANGELOG-${OPENIM_GIT_VERSION#v}.md and commit it"
 
-  git-chglog ${OPENIM_GIT_VERSION} > "${OPENIM_ROOT}"/CHANGELOG/CHANGELOG-${OPENIM_GIT_VERSION#v}.md
+  ${TOOLS_DIR}/git-chglog --config ${OPENIM_ROOT}/CHANGELOG/.chglog/config.yml ${OPENIM_GIT_VERSION} > ${OPENIM_ROOT}/CHANGELOG/CHANGELOG-${OPENIM_GIT_VERSION#v}.md
 
   set +o errexit
   git add "${OPENIM_ROOT}"/CHANGELOG/CHANGELOG-${OPENIM_GIT_VERSION#v}.md
   git commit -a -m "docs(changelog): add CHANGELOG-${OPENIM_GIT_VERSION#v}.md"
-  git push -f origin main # 最后将 CHANGELOG 也 push 上去
 }
