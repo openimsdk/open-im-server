@@ -562,11 +562,6 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		NickName: req.NickName,
 		FaceURL:  req.FaceURL,
 	}, nil
-	return &pbuser.AddNotificationAccountResp{
-		UserID:   req.UserID,
-		NickName: req.NickName,
-		FaceURL:  req.FaceURL,
-	}, nil
 }
 
 func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbuser.UpdateNotificationAccountInfoReq) (*pbuser.UpdateNotificationAccountInfoResp, error) {
