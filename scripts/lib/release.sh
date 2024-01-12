@@ -167,6 +167,9 @@ function openim::release::package_src_tarball() {
 function openim::release::package_server_tarballs() {
   # Find all of the built client binaries
   local long_platforms=("${LOCAL_OUTPUT_BINPATH}"/*/*)
+  echo "+++ LOCAL_OUTPUT_BINPATH: ${LOCAL_OUTPUT_BINPATH}"
+  echo "+++ long_platforms: ${long_platforms[@]}"
+
   if [[ -n ${OPENIM_BUILD_PLATFORMS-} ]]; then
     read -ra long_platforms <<< "${OPENIM_BUILD_PLATFORMS}"
   fi
@@ -188,18 +191,12 @@ function openim::release::package_server_tarballs() {
 
     rm -rf "${release_stage}"
     mkdir -p "${release_stage}/server/bin"
-    mkdir -p "${release_stage}/tools"
 
     local server_bins=("${OPENIM_SERVER_BINARIES[@]}")
-    local tools_bins=("tool1" "tool2")
 
     # Copy server binaries
     cp "${server_bins[@]/bin/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
         "${release_stage}/server/bin/"
-
-    # Copy tools binaries - 新增：复制tools binaries
-    cp "${tools_bins[@]/bin/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}" \
-        "${release_stage}/tools/"
 
     openim::release::clean_cruft
 
@@ -207,7 +204,7 @@ function openim::release::package_server_tarballs() {
     openim::release::create_tarball "${package_name}" "${release_stage}/.."
     ) &
   done
-
+  echo "++++++++++++++++++++++++++package_server_tarballs++++++++++++++++++++++++++++"
   openim::log::status "Waiting on tarballs"
   openim::util::wait-for-jobs || { openim::log::error "server tarball creation failed"; exit 1; }
 }
@@ -218,15 +215,17 @@ function openim::release::package_server_tarballs() {
 # a full SDK
 function openim::release::package_client_tarballs() {
   # Find all of the built client binaries
-  local long_platforms=("${LOCAL_OUTPUT_BINPATH}"/*/*)
+  local long_platforms=("${LOCAL_OUTPUT_BINTOOLSPATH}"/*/*)
   if [[ -n ${OPENIM_BUILD_PLATFORMS-} ]]; then
     read -ra long_platforms <<< "${OPENIM_BUILD_PLATFORMS}"
   fi
+  echo "++++ LOCAL_OUTPUT_BINTOOLSPATH: ${LOCAL_OUTPUT_BINTOOLSPATH}"
+  echo "++++ long_platforms: ${long_platforms[@]}"
 
   for platform_long in "${long_platforms[@]}"; do
     local platform
     local platform_tag
-    platform=${platform_long##${LOCAL_OUTPUT_BINPATH}/} # Strip LOCAL_OUTPUT_BINPATH
+    platform=${platform_long##${LOCAL_OUTPUT_BINTOOLSPATH}/} # Strip LOCAL_OUTPUT_BINTOOLSPATH
     platform_tag=${platform/\//-} # Replace a "/" for a "-"
 
     echo "++++ platform: ${platform}"
@@ -240,25 +239,17 @@ function openim::release::package_client_tarballs() {
     echo "++++ release_stage: ${release_stage}"
     rm -rf "${release_stage}"
     mkdir -p "${release_stage}/client/bin"
-    mkdir -p "${release_stage}/tools"  # Added: create directory for tools
 
     local client_bins=("${OPENIM_CLIENT_BINARIES[@]}")
-    local tools_bins=("tool1" "tool2")  # Example tool names, replace with actual tools
 
+    echo "++++ client_bins: ${client_bins[@]}"
+    echo "++++ tools_bins: ${tools_bins[@]}"
     # Copy client binaries
-    echo "+++ cp source: ${client_bins[@]/bin/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}"
-    echo "+++ cp target: ${release_stage}/client/bin/"
+    echo "++++ cp source: ${client_bins[@]/bin/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}"
+    echo "++++ cp target: ${release_stage}/client/bin/"
 
-    cp "${client_bins[@]/bin/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
+    cp "${client_bins[@]/bin/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}" \
         "${release_stage}/client/bin/"
-
-
-    echo "+++ BIN cp source: ${tools_bins[@]/bin/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}"
-    echo "+++ TOOLS cp target: ${release_stage}/tools/"
-
-    # Copy tools binaries - Added: copy tools binaries
-    cp "${tools_bins[@]/bin/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}" \
-        "${release_stage}/tools/"
 
     openim::release::clean_cruft
 
@@ -266,7 +257,7 @@ function openim::release::package_client_tarballs() {
     openim::release::create_tarball "${package_name}" "${release_stage}/.."
     ) &
   done
-
+  echo "++++++++++++++++++++++++++package_client_tarballs++++++++++++++++++++++++++++"
   openim::log::status "Waiting on tarballs"
   openim::util::wait-for-jobs || { openim::log::error "client tarball creation failed"; exit 1; }
 }

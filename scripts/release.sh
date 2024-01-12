@@ -30,8 +30,8 @@ OPENIM_RELEASE_RUN_TESTS=${OPENIM_RELEASE_RUN_TESTS-y}
 openim::golang::setup_env
 openim::build::verify_prereqs
 openim::release::verify_prereqs
-openim::build::build_image
-# openim::build::build_command
+# openim::build::build_image
+openim::build::build_command
 openim::release::package_tarballs
 openim::release::updload_tarballs
 git push origin ${VERSION}

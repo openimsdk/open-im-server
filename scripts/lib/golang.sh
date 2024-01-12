@@ -261,7 +261,18 @@ openim::golang::setup_platforms
 # The set of client targets that we are building for all platforms
 # If you update this list, please also update build/BUILD.
 readonly OPENIM_CLIENT_TARGETS=(
-  imctl
+    changelog
+    component
+    conversion-msg
+    conversion-mysql
+    formitychecker
+    imctl
+    infra
+    ncpu
+    openim-web
+    up35
+    versionchecker
+    yamlfmt
 )
 readonly OPENIM_CLIENT_BINARIES=("${OPENIM_CLIENT_TARGETS[@]##*/}")
 
