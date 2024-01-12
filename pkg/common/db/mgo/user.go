@@ -18,6 +18,7 @@ import (
 	"context"
 	"github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/errs"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
@@ -100,10 +101,14 @@ func (u *UserMgo) PageFindUserWithKeyword(ctx context.Context, level1 int64, lev
 	if userID != "" || userName != "" {
 		userConditions := []bson.M{}
 		if userID != "" {
-			userConditions = append(userConditions, bson.M{"user_id": userID})
+			// Use regex for userID
+			regexPattern := primitive.Regex{Pattern: userID, Options: "i"} // 'i' for case-insensitive matching
+			userConditions = append(userConditions, bson.M{"user_id": regexPattern})
 		}
 		if userName != "" {
-			userConditions = append(userConditions, bson.M{"nickname": userName})
+			// Use regex for userName
+			regexPattern := primitive.Regex{Pattern: userName, Options: "i"} // 'i' for case-insensitive matching
+			userConditions = append(userConditions, bson.M{"nickname": regexPattern})
 		}
 		query["$and"] = append(query["$and"].([]bson.M), bson.M{"$or": userConditions})
 	}
