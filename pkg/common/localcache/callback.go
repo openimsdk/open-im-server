@@ -1,4 +1,4 @@
-package local
+package localcache
 
 import "github.com/hashicorp/golang-lru/v2/simplelru"
 
