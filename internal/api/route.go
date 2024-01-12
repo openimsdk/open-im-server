@@ -205,7 +205,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	conversationGroup := r.Group("/conversation", ParseToken)
 	{
 		c := NewConversationApi(*conversationRpc)
-		conversationGroup.POST("/get_conversations_list", c.GetConversationsList)
+		conversationGroup.POST("/get_sorted_conversation_list", c.GetSortedConversationList)
 		conversationGroup.POST("/get_all_conversations", c.GetAllConversations)
 		conversationGroup.POST("/get_conversation", c.GetConversation)
 		conversationGroup.POST("/get_conversations", c.GetConversations)

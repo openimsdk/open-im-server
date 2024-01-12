@@ -59,6 +59,11 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
+func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.ProcessUserCommandGetAllReq) (*pbuser.ProcessUserCommandGetAllResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
@@ -229,7 +234,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 }
 
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
-	total, users, err := s.PageFindUser(ctx, constant.IMOrdinaryUser, req.Pagination)
+	total, users, err := s.PageFindUser(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -543,6 +548,7 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 
 	user := &tablerelation.UserModel{
 		UserID:         req.UserID,
+		UserID:         req.UserID,
 		Nickname:       req.NickName,
 		FaceURL:        req.FaceURL,
 		CreateTime:     time.Now(),
@@ -552,6 +558,11 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		return nil, err
 	}
 
+	return &pbuser.AddNotificationAccountResp{
+		UserID:   req.UserID,
+		NickName: req.NickName,
+		FaceURL:  req.FaceURL,
+	}, nil
 	return &pbuser.AddNotificationAccountResp{
 		UserID:   req.UserID,
 		NickName: req.NickName,
@@ -594,6 +605,10 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 	var err error
 	if req.Keyword != "" {
 		users, err = s.UserDatabase.Find(ctx, []string{req.Keyword})
+	var users []*relation.UserModel
+	var err error
+	if req.Keyword != "" {
+		users, err = s.UserDatabase.Find(ctx, []string{req.Keyword})
 		if err != nil {
 			return nil, err
 		}
@@ -616,6 +631,7 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		return nil, err
 	}
 
+	resp := s.userModelToResp(users, req.Pagination)
 	resp := s.userModelToResp(users, req.Pagination)
 	return resp, nil
 }
@@ -664,6 +680,10 @@ func (s *userServer) userModelToResp(users []*relation.UserModel, pagination pag
 			total += 1
 		}
 	}
+
+	notificationAccounts := utils.Paginate(accounts, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
+
+	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: notificationAccounts}
 
 	notificationAccounts := utils.Paginate(accounts, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
 

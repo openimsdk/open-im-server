@@ -33,8 +33,8 @@ func (o *ConversationApi) GetAllConversations(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.GetAllConversations, o.Client, c)
 }
 
-func (o *ConversationApi) GetConversationsList(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.GetConversationList, o.Client, c)
+func (o *ConversationApi) GetSortedConversationList(c *gin.Context) {
+	a2r.Call(conversation.ConversationClient.GetSortedConversationList, o.Client, c)
 }
 
 func (o *ConversationApi) GetConversation(c *gin.Context) {
