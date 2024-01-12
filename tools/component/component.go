@@ -141,35 +141,24 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-// checkMongo checks the MongoDB connection with retries and timeout
+// checkMongo checks the MongoDB connection without retries
 func checkMongo() (string, error) {
 	uri := getEnv("MONGO_URI", buildMongoURI())
-	var client *mongo.Client
-	var err error
-
-	for attempt := 0; attempt <= maxRetry; attempt++ {
-		ctx, cancel := context.WithTimeout(context.Background(), mongoConnTimeout)
-		defer cancel()
-
-		client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
-		if err == nil {
-			break
-		}
-		if attempt < maxRetry {
-			fmt.Printf("Failed to connect to MongoDB, retrying: %s\n", err)
-			time.Sleep(time.Second * time.Duration(attempt+1)) // Exponential backoff
-		}
-	}
-	if err != nil {
-		return "", err // Wrap or handle the error as needed
-	}
-	defer client.Disconnect(context.Background())
 
 	ctx, cancel := context.WithTimeout(context.Background(), mongoConnTimeout)
 	defer cancel()
 
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	if err != nil {
+		return "", err // Handle the error as needed
+	}
+	defer client.Disconnect(context.Background())
+
+	ctx, cancel = context.WithTimeout(context.Background(), mongoConnTimeout)
+	defer cancel()
+
 	if err = client.Ping(ctx, nil); err != nil {
-		return "", err // Wrap or handle the error as needed
+		return "", err // Handle the error as needed
 	}
 
 	str := "The addr is: " + strings.Join(config.Config.Mongo.Address, ",")
