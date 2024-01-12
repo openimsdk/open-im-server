@@ -59,11 +59,6 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
-func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.ProcessUserCommandGetAllReq) (*pbuser.ProcessUserCommandGetAllResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
@@ -543,6 +538,11 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		}
 		if req.UserID == "" {
 			return nil, errs.ErrInternalServer.Wrap("gen user id failed")
+		}
+	} else {
+		_, err := s.UserDatabase.FindWithError(ctx, []string{req.UserID})
+		if err == nil {
+			return nil, errs.ErrArgs.Wrap("userID is used")
 		}
 	}
 
