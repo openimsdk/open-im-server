@@ -311,7 +311,7 @@ openim::util::check_ports() {
             fi
         elif [[ "$OSTYPE" == "darwin"* ]]; then
             # For macOS, use lsof
-            info=$(lsof -i:"$port" | grep "\*:$port" || true)
+            info=$(lsof -P -i:"$port" | grep "LISTEN" || true)
         fi
 
         # Check if any process is using the port
