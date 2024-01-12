@@ -548,7 +548,6 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 
 	user := &tablerelation.UserModel{
 		UserID:         req.UserID,
-		UserID:         req.UserID,
 		Nickname:       req.NickName,
 		FaceURL:        req.FaceURL,
 		CreateTime:     time.Now(),
@@ -597,41 +596,43 @@ func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbu
 }
 
 func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.SearchNotificationAccountReq) (*pbuser.SearchNotificationAccountResp, error) {
+	// Check if user is an admin
 	if err := authverify.CheckIMAdmin(ctx); err != nil {
 		return nil, err
 	}
 
 	var users []*relation.UserModel
 	var err error
+
+	// If a keyword is provided in the request
 	if req.Keyword != "" {
-		users, err = s.UserDatabase.Find(ctx, []string{req.Keyword})
-	var users []*relation.UserModel
-	var err error
-	if req.Keyword != "" {
+		// Find users by keyword
 		users, err = s.UserDatabase.Find(ctx, []string{req.Keyword})
 		if err != nil {
 			return nil, err
 		}
+
+		// Convert users to response format
 		resp := s.userModelToResp(users, req.Pagination)
 		if resp.Total != 0 {
 			return resp, nil
 		}
+
+		// Find users by nickname if no users found by keyword
 		users, err = s.UserDatabase.FindByNickname(ctx, req.Keyword)
 		if err != nil {
 			return nil, err
 		}
 		resp = s.userModelToResp(users, req.Pagination)
 		return resp, nil
-
-		return resp, nil
 	}
 
+	// If no keyword, find users with notification settings
 	users, err = s.UserDatabase.FindNotification(ctx, constant.AppNotificationAdmin)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := s.userModelToResp(users, req.Pagination)
 	resp := s.userModelToResp(users, req.Pagination)
 	return resp, nil
 }
@@ -680,10 +681,6 @@ func (s *userServer) userModelToResp(users []*relation.UserModel, pagination pag
 			total += 1
 		}
 	}
-
-	notificationAccounts := utils.Paginate(accounts, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
-
-	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: notificationAccounts}
 
 	notificationAccounts := utils.Paginate(accounts, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
 
