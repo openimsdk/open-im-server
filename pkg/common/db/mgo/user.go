@@ -102,12 +102,12 @@ func (u *UserMgo) PageFindUserWithKeyword(ctx context.Context, level1 int64, lev
 		userConditions := []bson.M{}
 		if userID != "" {
 			// Use regex for userID
-			regexPattern := primitive.Regex{Pattern: userID, Options: "i"} // 'i' for case-insensitive matching
+			regexPattern := primitive.Regex{Pattern: userID} // 'i' for case-insensitive matching
 			userConditions = append(userConditions, bson.M{"user_id": regexPattern})
 		}
 		if userName != "" {
 			// Use regex for userName
-			regexPattern := primitive.Regex{Pattern: userName, Options: "i"} // 'i' for case-insensitive matching
+			regexPattern := primitive.Regex{Pattern: userName} // 'i' for case-insensitive matching
 			userConditions = append(userConditions, bson.M{"nickname": regexPattern})
 		}
 		query["$and"] = append(query["$and"].([]bson.M), bson.M{"$or": userConditions})
