@@ -129,8 +129,8 @@ function openim::release::upload_tarballs() {
       ${TOOLS_DIR}/coscli cp "${file}" "cos://${BUCKET}/${COS_RELEASE_DIR}/${OPENIM_GIT_VERSION}/${file##*/}"
       ${TOOLS_DIR}/coscli cp "${file}" "cos://${BUCKET}/${COS_RELEASE_DIR}/latest/${file##*/}"
     else
-      ${TOOLS_DIR}/coscmd upload  "${file}" "${COS_RELEASE_DIR}/${OPENIM_GIT_VERSION}/"
-      ${TOOLS_DIR}/coscmd upload  "${file}" "${COS_RELEASE_DIR}/latest/"
+      coscmd upload  "${file}" "${COS_RELEASE_DIR}/${OPENIM_GIT_VERSION}/"
+      coscmd upload  "${file}" "${COS_RELEASE_DIR}/latest/"
     fi
   done
 }
@@ -641,7 +641,6 @@ function openim::release::github_release() {
               --user ${OPENIM_GITHUB_ORG} \
               --repo ${OPENIM_GITHUB_REPO} \
               --tag ${OPENIM_GIT_VERSION} \
-              --label "openim-${OPENIM_GIT_VERSION}" \
               --name "${filename}" \
               --file "${file}"
       fi

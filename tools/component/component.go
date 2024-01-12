@@ -33,19 +33,22 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7"
-       "github.com/redis/go-redis/v9"
-       "gopkg.in/yaml.v3"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/redis/go-redis/v9"
+	"gopkg.in/yaml.v3"
 )
 
 const (
 	// defaultCfgPath is the default path of the configuration file.
 	defaultCfgPath           = "../../../../../config/config.yaml"
 	minioHealthCheckDuration = 1
-	maxRetry                 = 100
+	maxRetry                 = 10
 	componentStartErrCode    = 6000
 	configErrCode            = 6001
+	mongoConnTimeout         = 10 * time.Second
+
+	redisConnTimeout = 5 * time.Second // Connection timeout for Redis
 )
 
 const (
@@ -55,8 +58,7 @@ const (
 )
 
 var (
-	cfgPath = flag.String("c", defaultCfgPath, "Path to the configuration file")
-
+	cfgPath           = flag.String("c", defaultCfgPath, "Path to the configuration file")
 	ErrComponentStart = errs.NewCodeError(componentStartErrCode, "ComponentStartErr")
 	ErrConfig         = errs.NewCodeError(configErrCode, "Config file is incorrect")
 )
@@ -141,22 +143,38 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-// checkMongo checks the MongoDB connection
+// checkMongo checks the MongoDB connection with retries and timeout
 func checkMongo() (string, error) {
-	// Use environment variables or fallback to config
 	uri := getEnv("MONGO_URI", buildMongoURI())
+	var client *mongo.Client
+	var err error
 
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-	str := "ths addr is:" + strings.Join(config.Config.Mongo.Address, ",")
+	for attempt := 0; attempt <= maxRetry; attempt++ {
+		ctx, cancel := context.WithTimeout(context.Background(), mongoConnTimeout)
+		defer cancel()
+
+		client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
+		if err == nil {
+			break
+		}
+		if attempt < maxRetry {
+			fmt.Printf("Failed to connect to MongoDB, retrying: %s\n", err)
+			time.Sleep(time.Second * time.Duration(attempt+1)) // Exponential backoff
+		}
+	}
 	if err != nil {
-		return "", errs.Wrap(errStr(err, str))
+		return "", err // Wrap or handle the error as needed
 	}
-	defer client.Disconnect(context.TODO())
+	defer client.Disconnect(context.Background())
 
-	if err = client.Ping(context.TODO(), nil); err != nil {
-		return "", errs.Wrap(errStr(err, str))
+	ctx, cancel := context.WithTimeout(context.Background(), mongoConnTimeout)
+	defer cancel()
+
+	if err = client.Ping(ctx, nil); err != nil {
+		return "", err // Wrap or handle the error as needed
 	}
 
+	str := "The addr is: " + strings.Join(config.Config.Mongo.Address, ",")
 	return str, nil
 }
 
@@ -222,8 +240,8 @@ func checkMinio() (string, error) {
 	defer cancel()
 
 	if minioClient.IsOffline() {
-		// str := fmt.Sprintf("Minio server is offline;%s", str)
-		// return "", ErrComponentStart.Wrap(str)
+		str := fmt.Sprintf("Minio server is offline;%s", str)
+		return "", ErrComponentStart.Wrap(str)
 	}
 
 	// Check for localhost in API URL and Minio SignEndpoint
@@ -234,9 +252,8 @@ func checkMinio() (string, error) {
 	return str, nil
 }
 
-// checkRedis checks the Redis connection
+// checkRedis checks the Redis connection with retries and timeout
 func checkRedis() (string, error) {
-	// Prioritize environment variables
 	address := getEnv("REDIS_ADDRESS", strings.Join(config.Config.Redis.Address, ","))
 	username := getEnv("REDIS_USERNAME", config.Config.Redis.Username)
 	password := getEnv("REDIS_PASSWORD", config.Config.Redis.Password)
@@ -245,30 +262,44 @@ func checkRedis() (string, error) {
 	redisAddresses := strings.Split(address, ",")
 
 	var redisClient redis.UniversalClient
-	if len(redisAddresses) > 1 {
-		// Use cluster client for multiple addresses
-		redisClient = redis.NewClusterClient(&redis.ClusterOptions{
-			Addrs:    redisAddresses,
-			Username: username,
-			Password: password,
-		})
-	} else {
-		// Use regular client for single address
-		redisClient = redis.NewClient(&redis.Options{
-			Addr:     redisAddresses[0],
-			Username: username,
-			Password: password,
-		})
+	var err error
+
+	for attempt := 0; attempt <= maxRetry; attempt++ {
+		if len(redisAddresses) > 1 {
+			// Use cluster client for multiple addresses
+			redisClient = redis.NewClusterClient(&redis.ClusterOptions{
+				Addrs:    redisAddresses,
+				Username: username,
+				Password: password,
+			})
+		} else {
+			// Use regular client for single address
+			redisClient = redis.NewClient(&redis.Options{
+				Addr:     redisAddresses[0],
+				Username: username,
+				Password: password,
+			})
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), redisConnTimeout)
+		defer cancel()
+
+		// Ping Redis to check connectivity
+		_, err = redisClient.Ping(ctx).Result()
+		if err == nil {
+			break
+		}
+		if attempt < maxRetry {
+			fmt.Printf("Failed to connect to Redis, retrying: %s\n", err)
+			time.Sleep(time.Second * time.Duration(attempt+1)) // Exponential backoff
+		}
+	}
+	if err != nil {
+		return "", err // Wrap or handle the error as needed
 	}
 	defer redisClient.Close()
 
-	// Ping Redis to check connectivity
-	_, err := redisClient.Ping(context.Background()).Result()
-	str := "the addr is:" + strings.Join(redisAddresses, ",")
-	if err != nil {
-		return "", errs.Wrap(errStr(err, str))
-	}
-
+	str := "The addr is: " + strings.Join(redisAddresses, ",")
 	return str, nil
 }
 
