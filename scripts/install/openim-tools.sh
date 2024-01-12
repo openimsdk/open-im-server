@@ -96,7 +96,7 @@ function openim::tools::start_service() {
 
   if [ -n "${service_port}" ]; then
     printf "Specifying service port: %s\n" "${service_port}"
-    cmd="${cmd} --port ${service_port}"fi
+    cmd="${cmd} --port ${service_port}"
   fi
 
   if [ -n "${prometheus_port}" ]; then
