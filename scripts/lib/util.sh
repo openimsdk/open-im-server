@@ -609,11 +609,11 @@ openim::util::find-binary-for-platform() {
   local -r lookfor="$1"
   local -r platform="$2"
   local locations=(
-    ""${OPENIM_ROOT}"/_output/bin/${lookfor}"
-    ""${OPENIM_ROOT}"/_output/${platform}/${lookfor}"
-    ""${OPENIM_ROOT}"/_output/local/bin/${platform}/${lookfor}"
-    ""${OPENIM_ROOT}"/_output/platforms/${platform}/${lookfor}"
-    ""${OPENIM_ROOT}"/_output/platforms/bin/${platform}/${lookfor}"
+    "${OPENIM_ROOT}/_output/bin/${lookfor}"
+    "${OPENIM_ROOT}/_output/${platform}/${lookfor}"
+    "${OPENIM_ROOT}/_output/local/bin/${platform}/${lookfor}"
+    "${OPENIM_ROOT}/_output/platforms/${platform}/${lookfor}"
+    "${OPENIM_ROOT}/_output/platforms/bin/${platform}/${lookfor}"
   )
 
   # List most recently-updated location.
@@ -690,11 +690,11 @@ openim::util::gen-docs() {
 # Removes previously generated docs-- we don't want to check them in. $OPENIM_ROOT
 # must be set.
 openim::util::remove-gen-docs() {
-  if [ -e ""${OPENIM_ROOT}"/docs/.generated_docs" ]; then
+  if [ -e "${OPENIM_ROOT}/docs/.generated_docs" ]; then
     # remove all of the old docs; we don't want to check them in.
     while read -r file; do
-      rm ""${OPENIM_ROOT}"/${file}" 2>/dev/null || true
-    done <""${OPENIM_ROOT}"/docs/.generated_docs"
+      rm "${OPENIM_ROOT}/${file}" 2>/dev/null || true
+    done <"${OPENIM_ROOT}/docs/.generated_docs"
     # The docs/.generated_docs file lists itself, so we don't need to explicitly
     # delete it.
   fi
@@ -1843,11 +1843,11 @@ openim::util::find-binary-for-platform() {
   local -r lookfor="$1"
   local -r platform="$2"
   local locations=(
-    ""${OPENIM_ROOT}"/_output/bin/${lookfor}"
-    ""${OPENIM_ROOT}"/_output/${platform}/${lookfor}"
-    ""${OPENIM_ROOT}"/_output/local/bin/${platform}/${lookfor}"
-    ""${OPENIM_ROOT}"/_output/platforms/${platform}/${lookfor}"
-    ""${OPENIM_ROOT}"/_output/platforms/bin/${platform}/${lookfor}"
+    "${OPENIM_ROOT}/_output/bin/${lookfor}"
+    "${OPENIM_ROOT}/_output/${platform}/${lookfor}"
+    "${OPENIM_ROOT}/_output/local/bin/${platform}/${lookfor}"
+    "${OPENIM_ROOT}/_output/platforms/${platform}/${lookfor}"
+    "${OPENIM_ROOT}/_output/platforms/bin/${platform}/${lookfor}"
   )
 
   # List most recently-updated location.
@@ -1924,11 +1924,11 @@ openim::util::gen-docs() {
 # Removes previously generated docs-- we don't want to check them in. $OPENIM_ROOT
 # must be set.
 openim::util::remove-gen-docs() {
-  if [ -e ""${OPENIM_ROOT}"/docs/.generated_docs" ]; then
+  if [ -e "${OPENIM_ROOT}/docs/.generated_docs" ]; then
     # remove all of the old docs; we don't want to check them in.
     while read -r file; do
-      rm ""${OPENIM_ROOT}"/${file}" 2>/dev/null || true
-    done <""${OPENIM_ROOT}"/docs/.generated_docs"
+      rm "${OPENIM_ROOT}/${file}" 2>/dev/null || true
+    done <"${OPENIM_ROOT}/docs/.generated_docs"
     # The docs/.generated_docs file lists itself, so we don't need to explicitly
     # delete it.
   fi

@@ -125,6 +125,7 @@ function openim::release::upload_tarballs() {
   for file in $(ls ${RELEASE_TARS}/*)
   do
     if [ "${COSTOOL}" == "coscli" ];then
+      echo "++++ ${TOOLS_DIR}/coscli cp ${file} cos://${BUCKET}/${COS_RELEASE_DIR}/${OPENIM_GIT_VERSION}/${file##*/}"
       ${TOOLS_DIR}/coscli cp "${file}" "cos://${BUCKET}/${COS_RELEASE_DIR}/${OPENIM_GIT_VERSION}/${file##*/}"
       ${TOOLS_DIR}/coscli cp "${file}" "cos://${BUCKET}/${COS_RELEASE_DIR}/latest/${file##*/}"
     else
@@ -377,7 +378,7 @@ function openim::release::create_docker_images_for_server() {
         rm -rf "${docker_build_path}"
         mkdir -p "${docker_build_path}"
         ln "${binary_file_path}" "${docker_build_path}/${binary_name}"
-        ln ""${OPENIM_ROOT}"/build/nsswitch.conf" "${docker_build_path}/nsswitch.conf"
+        ln "${OPENIM_ROOT}/build/nsswitch.conf" "${docker_build_path}/nsswitch.conf"
         chmod 0644 "${docker_build_path}/nsswitch.conf"
         cat <<EOF > "${docker_file_path}"
 FROM ${base_image}
@@ -422,7 +423,7 @@ EOF
 function openim::release::package_openim_manifests_tarball() {
   openim::log::status "Building tarball: manifests"
 
-  local src_dir=""${OPENIM_ROOT}"/deployments"
+  local src_dir="${OPENIM_ROOT}/deployments"
 
   local release_stage="${RELEASE_STAGE}/manifests/openim"
   rm -rf "${release_stage}"
@@ -443,7 +444,7 @@ function openim::release::package_openim_manifests_tarball() {
   #cp "${src_dir}/openim-rpc-msg.yaml" "${dst_dir}"
   #cp "${src_dir}/openim-rpc-third.yaml" "${dst_dir}"
   #cp "${src_dir}/openim-rpc-user.yaml" "${dst_dir}"
-  #cp ""${OPENIM_ROOT}"/cluster/gce/gci/health-monitor.sh" "${dst_dir}/health-monitor.sh"
+  #cp "${OPENIM_ROOT}/cluster/gce/gci/health-monitor.sh" "${dst_dir}/health-monitor.sh"
 
   openim::release::clean_cruft
 
@@ -498,7 +499,7 @@ EOF
 
   # Include scripts/lib as a dependency for the cluster/ scripts
   #mkdir -p "${release_stage}/hack"
-  #cp -R ""${OPENIM_ROOT}"/scripts/lib" "${release_stage}/scripts/"
+  #cp -R "${OPENIM_ROOT}/scripts/lib" "${release_stage}/scripts/"
 
   cp -R "${OPENIM_ROOT}"/{docs,config,scripts,deployments,README.md,LICENSE} "${release_stage}/"
 
@@ -619,7 +620,8 @@ function openim::release::github_release() {
     --repo ${OPENIM_GITHUB_REPO} \
     --tag ${OPENIM_GIT_VERSION} \
     --description "" \
-    --pre-release
+    --pre-release \
+    --draft
 
   # update openim tarballs
   openim::log::info "upload ${ARTIFACT} to release ${OPENIM_GIT_VERSION}"
@@ -649,15 +651,17 @@ function openim::release::github_release() {
 function openim::release::generate_changelog() {
   openim::log::info "generate CHANGELOG-${OPENIM_GIT_VERSION#v}.md and commit it"
 
-  ${TOOLS_DIR}/git-chglog --config ${OPENIM_ROOT}/CHANGELOG/.chglog/config.yml ${OPENIM_GIT_VERSION} > ${OPENIM_ROOT}/CHANGELOG/CHANGELOG-${OPENIM_GIT_VERSION#v}.md
+  local major_version=$(echo ${OPENIM_GIT_VERSION} | cut -d '+' -f 1)
+
+  ${TOOLS_DIR}/git-chglog --config ${OPENIM_ROOT}/CHANGELOG/.chglog/config.yml ${OPENIM_GIT_VERSION} > ${OPENIM_ROOT}/CHANGELOG/CHANGELOG-${major_version#v}.md
 
   set +o errexit
-  git add "${OPENIM_ROOT}"/CHANGELOG/CHANGELOG-${OPENIM_GIT_VERSION#v}.md
-  git commit -a -m "docs(changelog): add CHANGELOG-${OPENIM_GIT_VERSION#v}.md"
+  git add "${OPENIM_ROOT}"/CHANGELOG/CHANGELOG-${major_version#v}.md
+  git commit -a -m "docs(changelog): add CHANGELOG-${major_version#v}.md"
   echo ""
   echo "##########################################################################"
-  echo "git commit -a -m \"docs(changelog): add CHANGELOG-${OPENIM_GIT_VERSION#v}.md\""
-  openim::log::info "You need git push CHANGELOG-${OPENIM_GIT_VERSION#v}.md to remote"
+  echo "git commit -a -m \"docs(changelog): add CHANGELOG-${major_version#v}.md\""
+  openim::log::info "You need git push CHANGELOG-${major_version#v}.md to remote"
   echo "##########################################################################"
   echo ""
 }

@@ -126,6 +126,46 @@ services:
 
 ### TODO: Uncomment, or deploy using openim docker: https://github.com/openimsdk/openim-docker
   # Uncomment and configure the following services as needed
+
+  # openim-chat:
+  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-chat:${CHAT_IMAGE_VERSION:-latest}
+  #   container_name: openim-chat
+  #   healthcheck:
+  #     test: ["CMD", "/openim/openim-chat/scripts/check_all.sh"]
+  #     interval: 60s
+  #     timeout: 30s
+  #     retries: 5
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - ZOOKEEPER_ADDRESS=${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}
+  #     - ZOOKEEPER_PORT=${ZOOKEEPER_PORT:-12181}
+  #     - OPENIM_SERVER_ADDRESS=http://${OPENIM_SERVER_ADDRESS:-172.28.0.1}
+  #     - API_OPENIM_PORT=${API_OPENIM_PORT:-10002}
+  #     - MYSQL_ADDRESS=${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}
+  #     - MYSQL_PORT=${MYSQL_PORT:-13306}
+  #     - REDIS_ADDRESS=${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}
+  #     - REDIS_PORT=${REDIS_PORT:-16379}
+  #   ports:
+  #     - "${OPENIM_CHAT_API_PORT:-10008}:10008"
+  #     - "${OPENIM_ADMIN_API_PORT:-10009}:10009"
+  #   volumes:
+  #     - "${DATA_DIR:-./}/components/openim-chat/logs:/openim/openim-chat/logs"
+  #     - "${DATA_DIR:-./}/components/openim-chat/config:/openim/openim-chat/config"
+  #   restart: always
+  #   # user: root:root
+  #   depends_on:
+  #     openim-server:
+  #       condition: service_healthy
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: "1g"
+  #       max-file: "2"
+  #   networks:
+  #     server:
+  #       ipv4_address: ${OPENIM_CHAT_NETWORK_ADDRESS:-172.28.0.9}
+
   # openim-admin:
   # # https://github.com/openimsdk/open-im-server/issues/1662
   # image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin:${ADMIN_FRONT_VERSION:-toc-base-open-docker.35}

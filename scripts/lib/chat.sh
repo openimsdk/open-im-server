@@ -148,7 +148,7 @@ openim::chat::install() {
     os=$(openim::util::host_os)
     arch=$(openim::util::host_arch)
 
-    cd ""${OPENIM_ROOT}"/third_party" || return 1
+    cd "${OPENIM_ROOT}/third_party" || return 1
     if [[ $(readlink chat) == chat-v${CHAT_VERSION}-${os}-* ]]; then
       openim::log::info "chat v${CHAT_VERSION} already installed. To use:"
       openim::log::info "export PATH=\"$(pwd)/chat:\${PATH}\""
