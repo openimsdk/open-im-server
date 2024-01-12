@@ -530,6 +530,16 @@ prometheus:
 
 localCache:
   friend:
-    topic: friend
+    topic: delete_cache_friend
+    slotNum: 500
+    slotSize: 20000
+
+  group:
+    topic: delete_cache_group
+    slotNum: 500
+    slotSize: 20000
+
+  conversation:
+    topic: delete_cache_conversation
     slotNum: 500
     slotSize: 20000

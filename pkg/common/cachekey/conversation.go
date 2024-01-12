@@ -1,48 +1,44 @@
 package cachekey
 
-import "time"
-
 const (
-	conversationKey                          = "CONVERSATION:"
-	conversationIDsKey                       = "CONVERSATION_IDS:"
-	conversationIDsHashKey                   = "CONVERSATION_IDS_HASH:"
-	conversationHasReadSeqKey                = "CONVERSATION_HAS_READ_SEQ:"
-	recvMsgOptKey                            = "RECV_MSG_OPT:"
-	superGroupRecvMsgNotNotifyUserIDsKey     = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
-	superGroupRecvMsgNotNotifyUserIDsHashKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS_HASH:"
-	conversationNotReceiveMessageUserIDsKey  = "CONVERSATION_NOT_RECEIVE_MESSAGE_USER_IDS:"
-
-	conversationExpireTime = time.Second * 60 * 60 * 12
+	ConversationKey                          = "CONVERSATION:"
+	ConversationIDsKey                       = "CONVERSATION_IDS:"
+	ConversationIDsHashKey                   = "CONVERSATION_IDS_HASH:"
+	ConversationHasReadSeqKey                = "CONVERSATION_HAS_READ_SEQ:"
+	RecvMsgOptKey                            = "RECV_MSG_OPT:"
+	SuperGroupRecvMsgNotNotifyUserIDsKey     = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
+	SuperGroupRecvMsgNotNotifyUserIDsHashKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS_HASH:"
+	ConversationNotReceiveMessageUserIDsKey  = "CONVERSATION_NOT_RECEIVE_MESSAGE_USER_IDS:"
 )
 
 func GetConversationKey(ownerUserID, conversationID string) string {
-	return conversationKey + ownerUserID + ":" + conversationID
+	return ConversationKey + ownerUserID + ":" + conversationID
 }
 
 func GetConversationIDsKey(ownerUserID string) string {
-	return conversationIDsKey + ownerUserID
+	return ConversationIDsKey + ownerUserID
 }
 
 func GetSuperGroupRecvNotNotifyUserIDsKey(groupID string) string {
-	return superGroupRecvMsgNotNotifyUserIDsKey + groupID
+	return SuperGroupRecvMsgNotNotifyUserIDsKey + groupID
 }
 
 func GetRecvMsgOptKey(ownerUserID, conversationID string) string {
-	return recvMsgOptKey + ownerUserID + ":" + conversationID
+	return RecvMsgOptKey + ownerUserID + ":" + conversationID
 }
 
 func GetSuperGroupRecvNotNotifyUserIDsHashKey(groupID string) string {
-	return superGroupRecvMsgNotNotifyUserIDsHashKey + groupID
+	return SuperGroupRecvMsgNotNotifyUserIDsHashKey + groupID
 }
 
 func GetConversationHasReadSeqKey(ownerUserID, conversationID string) string {
-	return conversationHasReadSeqKey + ownerUserID + ":" + conversationID
+	return ConversationHasReadSeqKey + ownerUserID + ":" + conversationID
 }
 
 func GetConversationNotReceiveMessageUserIDsKey(conversationID string) string {
-	return conversationNotReceiveMessageUserIDsKey + conversationID
+	return ConversationNotReceiveMessageUserIDsKey + conversationID
 }
 
 func GetUserConversationIDsHashKey(ownerUserID string) string {
-	return conversationIDsHashKey + ownerUserID
+	return ConversationIDsHashKey + ownerUserID
 }

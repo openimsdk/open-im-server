@@ -23,20 +23,20 @@ type FriendLocalCache struct {
 	client rpcclient.FriendRpcClient
 }
 
-func (f *FriendLocalCache) GetFriendIDs(ctx context.Context, ownerUserID string) (val []string, err error) {
-	log.ZDebug(ctx, "FriendLocalCache GetFriendIDs req", "ownerUserID", ownerUserID)
-	defer func() {
-		if err == nil {
-			log.ZDebug(ctx, "FriendLocalCache GetFriendIDs return", "value", val)
-		} else {
-			log.ZError(ctx, "FriendLocalCache GetFriendIDs return", err)
-		}
-	}()
-	return localcache.AnyValue[[]string](f.local.Get(ctx, cachekey.GetFriendIDsKey(ownerUserID), func(ctx context.Context) (any, error) {
-		log.ZDebug(ctx, "FriendLocalCache GetFriendIDs call rpc", "ownerUserID", ownerUserID)
-		return f.client.GetFriendIDs(ctx, ownerUserID)
-	}))
-}
+//func (f *FriendLocalCache) GetFriendIDs(ctx context.Context, ownerUserID string) (val []string, err error) {
+//	log.ZDebug(ctx, "FriendLocalCache GetFriendIDs req", "ownerUserID", ownerUserID)
+//	defer func() {
+//		if err == nil {
+//			log.ZDebug(ctx, "FriendLocalCache GetFriendIDs return", "value", val)
+//		} else {
+//			log.ZError(ctx, "FriendLocalCache GetFriendIDs return", err)
+//		}
+//	}()
+//	return localcache.AnyValue[[]string](f.local.Get(ctx, cachekey.GetFriendIDsKey(ownerUserID), func(ctx context.Context) (any, error) {
+//		log.ZDebug(ctx, "FriendLocalCache GetFriendIDs call rpc", "ownerUserID", ownerUserID)
+//		return f.client.GetFriendIDs(ctx, ownerUserID)
+//	}))
+//}
 
 func (f *FriendLocalCache) IsFriend(ctx context.Context, possibleFriendUserID, userID string) (val bool, err error) {
 	log.ZDebug(ctx, "FriendLocalCache IsFriend req", "possibleFriendUserID", possibleFriendUserID, "userID", userID)

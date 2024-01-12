@@ -1,27 +1,24 @@
 package cachekey
 
-import "time"
-
 const (
-	friendExpireTime    = time.Second * 60 * 60 * 12
-	friendIDsKey        = "FRIEND_IDS:"
-	twoWayFriendsIDsKey = "COMMON_FRIENDS_IDS:"
-	friendKey           = "FRIEND_INFO:"
-	isFriendKey         = "IS_FRIEND:"
+	FriendIDsKey        = "FRIEND_IDS:"
+	TwoWayFriendsIDsKey = "COMMON_FRIENDS_IDS:"
+	FriendKey           = "FRIEND_INFO:"
+	IsFriendKey         = "IS_FRIEND:" // local cache key
 )
 
 func GetFriendIDsKey(ownerUserID string) string {
-	return friendIDsKey + ownerUserID
+	return FriendIDsKey + ownerUserID
 }
 
 func GetTwoWayFriendsIDsKey(ownerUserID string) string {
-	return twoWayFriendsIDsKey + ownerUserID
+	return TwoWayFriendsIDsKey + ownerUserID
 }
 
 func GetFriendKey(ownerUserID, friendUserID string) string {
-	return friendKey + ownerUserID + "-" + friendUserID
+	return FriendKey + ownerUserID + "-" + friendUserID
 }
 
 func GetIsFriendKey(possibleFriendUserID, userID string) string {
-	return isFriendKey + possibleFriendUserID + "-" + userID
+	return IsFriendKey + possibleFriendUserID + "-" + userID
 }

@@ -8,9 +8,9 @@ import (
 
 func defaultOption() *option {
 	return &option{
-		enable:          true,
 		localSlotNum:    500,
 		localSlotSize:   20000,
+		linkSlotNum:     500,
 		localSuccessTTL: time.Minute,
 		localFailedTTL:  time.Second * 5,
 		delFn:           make([]func(ctx context.Context, key ...string), 0, 2),
@@ -19,9 +19,9 @@ func defaultOption() *option {
 }
 
 type option struct {
-	enable          bool
 	localSlotNum    int
 	localSlotSize   int
+	linkSlotNum     int
 	localSuccessTTL time.Duration
 	localFailedTTL  time.Duration
 	delFn           []func(ctx context.Context, key ...string)
@@ -31,25 +31,27 @@ type option struct {
 
 type Option func(o *option)
 
-func WithDisable() Option {
+func WithLocalDisable() Option {
+	return WithLinkSlotNum(0)
+}
+
+func WithLinkDisable() Option {
+	return WithLinkSlotNum(0)
+}
+
+func WithLinkSlotNum(linkSlotNum int) Option {
 	return func(o *option) {
-		o.enable = false
+		o.linkSlotNum = linkSlotNum
 	}
 }
 
 func WithLocalSlotNum(localSlotNum int) Option {
-	if localSlotNum < 1 {
-		panic("localSlotNum should be greater than 0")
-	}
 	return func(o *option) {
 		o.localSlotNum = localSlotNum
 	}
 }
 
 func WithLocalSlotSize(localSlotSize int) Option {
-	if localSlotSize < 1 {
-		panic("localSlotSize should be greater than 0")
-	}
 	return func(o *option) {
 		o.localSlotSize = localSlotSize
 	}

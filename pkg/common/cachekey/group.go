@@ -7,39 +7,39 @@ import (
 
 const (
 	groupExpireTime            = time.Second * 60 * 60 * 12
-	groupInfoKey               = "GROUP_INFO:"
-	groupMemberIDsKey          = "GROUP_MEMBER_IDS:"
-	groupMembersHashKey        = "GROUP_MEMBERS_HASH2:"
-	groupMemberInfoKey         = "GROUP_MEMBER_INFO:"
-	joinedGroupsKey            = "JOIN_GROUPS_KEY:"
-	groupMemberNumKey          = "GROUP_MEMBER_NUM_CACHE:"
-	groupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:"
+	GroupInfoKey               = "GROUP_INFO:"
+	GroupMemberIDsKey          = "GROUP_MEMBER_IDS:"
+	GroupMembersHashKey        = "GROUP_MEMBERS_HASH2:"
+	GroupMemberInfoKey         = "GROUP_MEMBER_INFO:"
+	JoinedGroupsKey            = "JOIN_GROUPS_KEY:"
+	GroupMemberNumKey          = "GROUP_MEMBER_NUM_CACHE:"
+	GroupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:"
 )
 
 func GetGroupInfoKey(groupID string) string {
-	return groupInfoKey + groupID
+	return GroupInfoKey + groupID
 }
 
 func GetJoinedGroupsKey(userID string) string {
-	return joinedGroupsKey + userID
+	return JoinedGroupsKey + userID
 }
 
 func GetGroupMembersHashKey(groupID string) string {
-	return groupMembersHashKey + groupID
+	return GroupMembersHashKey + groupID
 }
 
 func GetGroupMemberIDsKey(groupID string) string {
-	return groupMemberIDsKey + groupID
+	return GroupMemberIDsKey + groupID
 }
 
 func GetGroupMemberInfoKey(groupID, userID string) string {
-	return groupMemberInfoKey + groupID + "-" + userID
+	return GroupMemberInfoKey + groupID + "-" + userID
 }
 
 func GetGroupMemberNumKey(groupID string) string {
-	return groupMemberNumKey + groupID
+	return GroupMemberNumKey + groupID
 }
 
 func GetGroupRoleLevelMemberIDsKey(groupID string, roleLevel int32) string {
-	return groupRoleLevelMemberIDsKey + groupID + "-" + strconv.Itoa(int(roleLevel))
+	return GroupRoleLevelMemberIDsKey + groupID + "-" + strconv.Itoa(int(roleLevel))
 }

@@ -378,8 +378,14 @@ type LocalCache struct {
 	SlotSize int    `yaml:"slotSize"`
 }
 
+func (l LocalCache) Enable() bool {
+	return l.Topic != "" && l.SlotNum > 0 && l.SlotSize > 0
+}
+
 type localCache struct {
-	Friend LocalCache `yaml:"friend"`
+	Friend       LocalCache `yaml:"friend"`
+	Group        LocalCache `yaml:"group"`
+	Conversation LocalCache `yaml:"conversation"`
 }
 
 func (c *configStruct) GetServiceNames() []string {
