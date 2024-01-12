@@ -6,10 +6,32 @@ import (
 	"time"
 )
 
+type LRU1[K comparable, V any] interface {
+	Get(key K, fetch func() (V, error)) (V, error)
+	Del(key K) bool
+	Stop()
+}
+
+//type expirableLRU[K comparable, V any] struct {
+//	core expirable.LRU[K, V]
+//}
+//
+//func (x *expirableLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
+//
+//	return x.core.Get(key, fetch)
+//}
+//
+//func (x *expirableLRU[K, V]) Del(key K) bool {
+//	return x.core.Remove(key)
+//}
+//
+//func (x *expirableLRU[K, V]) Stop() {
+//
+//}
+
 type waitItem[V any] struct {
 	lock    sync.Mutex
 	expires int64
-	active  bool
 	err     error
 	value   V
 }
@@ -79,4 +101,8 @@ func (x *LRU[K, V]) Del(key K) bool {
 	ok := x.core.Remove(key)
 	x.lock.Unlock()
 	return ok
+}
+
+func (x *LRU[K, V]) Stop() {
+
 }
