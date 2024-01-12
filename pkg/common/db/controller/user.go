@@ -50,6 +50,8 @@ type UserDatabase interface {
 	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
 	// Page If not found, no error is returned
 	Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
+	// FindUser
+	PageFindUser(ctx context.Context, level int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
 	// IsExist true as long as one exists
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 	// GetAllUserID Get all user IDs
@@ -76,10 +78,11 @@ type UserDatabase interface {
 	SetUserStatus(ctx context.Context, userID string, status, platformID int32) error
 
 	//CRUD user command
-	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
+	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error
 	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error
-	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error
+	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error
 	GetUserCommands(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error)
+	GetAllUserCommands(ctx context.Context, userID string) ([]*user.AllCommandInfoResp, error)
 }
 
 type userDatabase struct {
@@ -182,6 +185,10 @@ func (u *userDatabase) Page(ctx context.Context, pagination pagination.Paginatio
 	return u.userDB.Page(ctx, pagination)
 }
 
+func (u *userDatabase) PageFindUser(ctx context.Context, level int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+	return u.userDB.PageFindUser(ctx, level, pagination)
+}
+
 // IsExist Does userIDs exist? As long as there is one, it will be true.
 func (u *userDatabase) IsExist(ctx context.Context, userIDs []string) (exist bool, err error) {
 	users, err := u.userDB.Find(ctx, userIDs)
@@ -253,16 +260,20 @@ func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*
 func (u *userDatabase) SetUserStatus(ctx context.Context, userID string, status, platformID int32) error {
 	return u.cache.SetUserStatus(ctx, userID, status, platformID)
 }
-func (u *userDatabase) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
-	return u.userDB.AddUserCommand(ctx, userID, Type, UUID, value)
+func (u *userDatabase) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error {
+	return u.userDB.AddUserCommand(ctx, userID, Type, UUID, value, ex)
 }
 func (u *userDatabase) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
 	return u.userDB.DeleteUserCommand(ctx, userID, Type, UUID)
 }
-func (u *userDatabase) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string) error {
-	return u.userDB.UpdateUserCommand(ctx, userID, Type, UUID, value)
+func (u *userDatabase) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error {
+	return u.userDB.UpdateUserCommand(ctx, userID, Type, UUID, val)
 }
 func (u *userDatabase) GetUserCommands(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error) {
 	commands, err := u.userDB.GetUserCommand(ctx, userID, Type)
+	return commands, err
+}
+func (u *userDatabase) GetAllUserCommands(ctx context.Context, userID string) ([]*user.AllCommandInfoResp, error) {
+	commands, err := u.userDB.GetAllUserCommand(ctx, userID)
 	return commands, err
 }

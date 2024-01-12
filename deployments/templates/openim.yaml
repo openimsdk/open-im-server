@@ -53,8 +53,8 @@ mongo:
 # Maximum connection pool size
   address: [ ${MONGO_ADDRESS}:${MONGO_PORT} ]
   database: ${MONGO_DATABASE}
-  username: ${MONGO_USERNAME}
-  password: ${MONGO_PASSWORD}
+  username: ${MONGO_OPENIM_USERNAME}
+  password: ${MONGO_OPENIM_PASSWORD}
   maxPoolSize: ${MONGO_MAX_POOL_SIZE}
 
 ###################### Redis configuration information ######################
@@ -318,6 +318,14 @@ callback:
   url: ""
   beforeSendSingleMsg:
     enable: ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
+  beforeUpdateUserInfoEx:
+    enable:  ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
+  afterUpdateUserInfoEx:
+    enable:  ${CALLBACK_ENABLE}
     timeout: ${CALLBACK_TIMEOUT}
     failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterSendSingleMsg:

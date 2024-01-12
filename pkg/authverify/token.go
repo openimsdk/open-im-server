@@ -76,7 +76,6 @@ func ParseRedisInterfaceToken(redisToken any) (*tokenverify.Claims, error) {
 
 func IsManagerUserID(opUserID string) bool {
 	return utils.IsContain(opUserID, config.Config.Manager.UserID) || utils.IsContain(opUserID, config.Config.IMAdmin.UserID)
-
 }
 
 func WsVerifyToken(token, userID string, platformID int) error {
