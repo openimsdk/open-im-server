@@ -119,7 +119,7 @@ services:
       - OPENIM_WEB_PORT=${OPENIM_WEB_PORT:-11001}
     restart: always
     ports:
-      - "${OPENIM_WEB_PORT:-11001}:11001"
+      - "${OPENIM_WEB_PORT:-11001}:80"
     networks:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS:-172.28.0.7}
