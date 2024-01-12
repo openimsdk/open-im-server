@@ -148,11 +148,17 @@ func checkMongo() (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), mongoConnTimeout)
 	defer cancel()
 
+	str := "ths addr is:" + strings.Join(config.Config.Mongo.Address, ",")
+
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
-		return "", err // Handle the error as needed
+		return "", errs.Wrap(errStr(err, str))
 	}
 	defer client.Disconnect(context.Background())
+
+	if err = client.Ping(context.TODO(), nil); err != nil {
+		return "", errs.Wrap(errStr(err, str))
+	}
 
 	ctx, cancel = context.WithTimeout(context.Background(), mongoConnTimeout)
 	defer cancel()
