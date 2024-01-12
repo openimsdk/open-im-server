@@ -81,8 +81,8 @@ func (u *UserMgo) Page(ctx context.Context, pagination pagination.Pagination) (c
 func (u *UserMgo) PageFindUser(ctx context.Context, level1 int64, level2 int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
 	query := bson.M{
 		"$or": []bson.M{
-			{"app_manager_level": level1},
-			{"app_manager_level": level2},
+			{"app_manger_level": level1},
+			{"app_manger_level": level2},
 		},
 	}
 
@@ -92,7 +92,7 @@ func (u *UserMgo) PageFindUserWithKeyword(ctx context.Context, level1 int64, lev
 	// Initialize the base query with level conditions
 	query := bson.M{
 		"$and": []bson.M{
-			{"app_manager_level": bson.M{"$in": []int64{level1, level2}}},
+			{"app_manger_level": bson.M{"$in": []int64{level1, level2}}},
 		},
 	}
 
