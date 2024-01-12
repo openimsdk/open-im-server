@@ -120,7 +120,7 @@ function openim::release::package_tarballs() {
   openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
 }
 
-function openim::release::updload_tarballs() {
+function openim::release::upload_tarballs() {
   openim::log::info "upload ${RELEASE_TARS}/* to cos bucket ${BUCKET}."
   for file in $(ls ${RELEASE_TARS}/*)
   do
@@ -202,7 +202,6 @@ function openim::release::package_server_tarballs() {
     openim::release::create_tarball "${package_name}" "${release_stage}/.."
     ) &
   done
-  echo "++++++++++++++++++++++++++package_server_tarballs++++++++++++++++++++++++++++"
   openim::log::status "Waiting on tarballs"
   openim::util::wait-for-jobs || { openim::log::error "server tarball creation failed"; exit 1; }
 }
@@ -644,8 +643,10 @@ function openim::release::generate_changelog() {
   set +o errexit
   git add "${OPENIM_ROOT}"/CHANGELOG/CHANGELOG-${OPENIM_GIT_VERSION#v}.md
   git commit -a -m "docs(changelog): add CHANGELOG-${OPENIM_GIT_VERSION#v}.md"
-  echo "##################################################"
+  echo ""
+  echo "##########################################################################"
   echo "git commit -a -m \"docs(changelog): add CHANGELOG-${OPENIM_GIT_VERSION#v}.md\""
   openim::log::info "You need git push CHANGELOG-${OPENIM_GIT_VERSION#v}.md to remote"
-  echo "##################################################"
+  echo "##########################################################################"
+  echo ""
 }
