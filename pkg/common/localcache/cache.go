@@ -3,9 +3,13 @@ package localcache
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/localcache/link"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/localcache/local"
 	opt "github.com/openimsdk/open-im-server/v3/pkg/common/localcache/option"
+	"hash/fnv"
+	"time"
+	"unsafe"
 )
+
+const TimingWheelSize = 500
 
 type Cache[V any] interface {
 	Get(ctx context.Context, key string, fetch func(ctx context.Context) (V, error), opts ...*opt.Option) (V, error)
@@ -17,8 +21,15 @@ func New[V any](opts ...Option) Cache[V] {
 	for _, o := range opts {
 		o(opt)
 	}
-	c := &cache[V]{opt: opt, link: link.New(opt.localSlotNum)}
-	c.local = local.NewCache[V](opt.localSlotNum, opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
+	c := &cache[V]{
+		opt:  opt,
+		link: link.New(opt.localSlotNum),
+		n:    uint64(opt.localSlotNum),
+	}
+	c.timingWheel = NewTimeWheel[string, V](TimingWheelSize, time.Second, c.exec)
+	for i := 0; i < opt.localSlotNum; i++ {
+		c.slots[i] = NewLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
+	}
 	go func() {
 		c.opt.delCh(c.del)
 	}()
@@ -26,16 +37,24 @@ func New[V any](opts ...Option) Cache[V] {
 }
 
 type cache[V any] struct {
-	opt   *option
-	link  link.Link
-	local local.Cache[V]
+	n           uint64
+	slots       []*LRU[string, V]
+	opt         *option
+	link        link.Link
+	timingWheel *TimeWheel[string, V]
+}
+
+func (c *cache[V]) index(key string) uint64 {
+	h := fnv.New64a()
+	_, _ = h.Write(*(*[]byte)(unsafe.Pointer(&key)))
+	return h.Sum64() % c.n
 }
 
 func (c *cache[V]) onEvict(key string, value V) {
 	lks := c.link.Del(key)
 	for k := range lks {
 		if key != k { // prevent deadlock
-			c.local.Del(k)
+			c.slots[c.index(k)].Del(k)
 		}
 	}
 }
@@ -43,9 +62,9 @@ func (c *cache[V]) onEvict(key string, value V) {
 func (c *cache[V]) del(key ...string) {
 	for _, k := range key {
 		lks := c.link.Del(k)
-		c.local.Del(k)
+		c.slots[c.index(k)].Del(k)
 		for k := range lks {
-			c.local.Del(k)
+			c.slots[c.index(k)].Del(k)
 		}
 	}
 }
@@ -59,7 +78,7 @@ func (c *cache[V]) Get(ctx context.Context, key string, fetch func(ctx context.C
 		if len(opts) > 0 && len(opts[0].Link) > 0 {
 			c.link.Link(key, opts[0].Link...)
 		}
-		return c.local.Get(key, func() (V, error) {
+		return c.slots[c.index(key)].Get(key, func() (V, error) {
 			return fetch(ctx)
 		})
 	} else {
@@ -77,4 +96,7 @@ func (c *cache[V]) Del(ctx context.Context, key ...string) {
 	if c.opt.enable {
 		c.del(key...)
 	}
+}
+func (c *cache[V]) exec(key string, value V) {
+
 }

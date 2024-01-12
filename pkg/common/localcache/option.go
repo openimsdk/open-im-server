@@ -2,15 +2,14 @@ package localcache
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/localcache/local"
 	"time"
 )
 
 func defaultOption() *option {
 	return &option{
 		enable:          true,
-		localSlotNum:    500,
-		localSlotSize:   20000,
+		localSlotNum:    500,   //LRU的slot数量
+		localSlotSize:   20000, //每个LRU的大小
 		localSuccessTTL: time.Minute,
 		localFailedTTL:  time.Second * 5,
 		delFn:           make([]func(ctx context.Context, key ...string), 0, 2),
@@ -26,7 +25,7 @@ type option struct {
 	localFailedTTL  time.Duration
 	delFn           []func(ctx context.Context, key ...string)
 	delCh           func(fn func(key ...string))
-	target          local.Target
+	target          Target
 }
 
 type Option func(o *option)
@@ -73,7 +72,7 @@ func WithLocalFailedTTL(localFailedTTL time.Duration) Option {
 	}
 }
 
-func WithTarget(target local.Target) Option {
+func WithTarget(target Target) Option {
 	if target == nil {
 		panic("target should not be nil")
 	}
@@ -99,15 +98,3 @@ func WithDeleteLocal(fn func(fn func(key ...string))) Option {
 		o.delCh = fn
 	}
 }
-
-type emptyTarget struct{}
-
-func (e emptyTarget) IncrGetHit() {}
-
-func (e emptyTarget) IncrGetSuccess() {}
-
-func (e emptyTarget) IncrGetFailed() {}
-
-func (e emptyTarget) IncrDelHit() {}
-
-func (e emptyTarget) IncrDelNotFound() {}

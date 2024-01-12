@@ -1,4 +1,4 @@
-package local
+package localcache
 
 import (
 	"github.com/hashicorp/golang-lru/v2/simplelru"
@@ -30,6 +30,7 @@ func NewLRU[K comparable, V any](size int, successTTL, failedTTL time.Duration, 
 		successTTL: successTTL,
 		failedTTL:  failedTTL,
 		target:     target,
+		s:          NewSingleFlight[K, V](),
 	}
 }
 
@@ -39,6 +40,7 @@ type LRU[K comparable, V any] struct {
 	successTTL time.Duration
 	failedTTL  time.Duration
 	target     Target
+	s          *SingleFlight[K, V]
 }
 
 func (x *LRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
@@ -78,5 +80,10 @@ func (x *LRU[K, V]) Del(key K) bool {
 	x.lock.Lock()
 	ok := x.core.Remove(key)
 	x.lock.Unlock()
+	if ok {
+		x.target.IncrDelHit()
+	} else {
+		x.target.IncrDelNotFound()
+	}
 	return ok
 }
