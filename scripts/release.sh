@@ -35,5 +35,5 @@ openim::build::build_command
 openim::release::package_tarballs
 openim::release::updload_tarballs
 # git push origin ${VERSION}
-#openim::release::github_release
+# openim::release::github_release
 openim::release::generate_changelog

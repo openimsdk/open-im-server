@@ -110,14 +110,14 @@ function openim::release::package_tarballs() {
   # Clean out any old releases
   rm -rf "${RELEASE_STAGE}" "${RELEASE_TARS}" "${RELEASE_IMAGES}"
   mkdir -p "${RELEASE_TARS}"
-  openim::release::package_src_tarball
-  openim::release::package_client_tarballs
-#   openim::release::package_openim_manifests_tarball &
-#   openim::release::package_server_tarballs &
-#   openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
+  openim::release::package_src_tarball &
+  openim::release::package_client_tarballs &
+  openim::release::package_openim_manifests_tarball &
+  openim::release::package_server_tarballs &
+  openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
 
-#   openim::release::package_final_tarball & # _final depends on some of the previous phases
-#   openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
+  openim::release::package_final_tarball & # _final depends on some of the previous phases
+  openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
 }
 
 function openim::release::updload_tarballs() {
@@ -167,8 +167,6 @@ function openim::release::package_src_tarball() {
 function openim::release::package_server_tarballs() {
   # Find all of the built client binaries
   local long_platforms=("${LOCAL_OUTPUT_BINPATH}"/*/*)
-  echo "+++ LOCAL_OUTPUT_BINPATH: ${LOCAL_OUTPUT_BINPATH}"
-  echo "+++ long_platforms: ${long_platforms[@]}"
 
   if [[ -n ${OPENIM_BUILD_PLATFORMS-} ]]; then
     read -ra long_platforms <<< "${OPENIM_BUILD_PLATFORMS}"
@@ -180,19 +178,19 @@ function openim::release::package_server_tarballs() {
     platform=${platform_long##${LOCAL_OUTPUT_BINPATH}/} # Strip LOCAL_OUTPUT_BINPATH
     platform_tag=${platform/\//-} # Replace a "/" for a "-"
 
-    echo "+++ platform: ${platform}"
-    echo "+++ platform_tag: ${platform_tag}"
-
     openim::log::status "Starting tarball: server $platform_tag"
 
     (
     local release_stage="${RELEASE_STAGE}/server/${platform_tag}/openim"
-    echo "+++ release_stage: ${release_stage}"
+    openim::log::info "release_stage: ${release_stage}"
 
     rm -rf "${release_stage}"
     mkdir -p "${release_stage}/server/bin"
 
     local server_bins=("${OPENIM_SERVER_BINARIES[@]}")
+
+    openim::log::info " Copy client binaries: ${client_bins[@]/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}"
+    openim::log::info " Copy client binaries to: ${release_stage}/server/bin"
 
     # Copy server binaries
     cp "${server_bins[@]/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
@@ -219,40 +217,32 @@ function openim::release::package_client_tarballs() {
   if [[ -n ${OPENIM_BUILD_PLATFORMS-} ]]; then
     read -ra long_platforms <<< "${OPENIM_BUILD_PLATFORMS}"
   fi
-  echo "++++ LOCAL_OUTPUT_BINTOOLSPATH: ${LOCAL_OUTPUT_BINTOOLSPATH}"
-#   LOCAL_OUTPUT_BINTOOLSPATH: /data/workspaces/open-im-server/_output/bin/tools
-  echo "++++ long_platforms: ${long_platforms[@]}"
-#   long_platforms: /data/workspaces/open-im-server/_output/bin/tools/darwin/amd64 /data/workspaces/open-im-server/_output/bin/tools/darwin/arm64 /data/workspaces/open-im-server/_output/bin/tools/linux/amd64 /data/workspaces/open-im-server/_output/bin/tools/linux/arm64 /data/workspaces/open-im-server/_output/bin/tools/linux/mips64 /data/workspaces/open-im-server/_output/bin/tools/linux/mips64le /data/workspaces/open-im-server/_output/bin/tools/linux/ppc64le /data/workspaces/open-im-server/_output/bin/tools/linux/s390x /data/workspaces/open-im-server/_output/bin/tools/windows/amd64
+  # echo "++++ LOCAL_OUTPUT_BINTOOLSPATH: ${LOCAL_OUTPUT_BINTOOLSPATH}"
+  # LOCAL_OUTPUT_BINTOOLSPATH: /data/workspaces/open-im-server/_output/bin/tools
+  # echo "++++ long_platforms: ${long_platforms[@]}"
+  # long_platforms: /data/workspaces/open-im-server/_output/bin/tools/darwin/amd64 /data/workspaces/open-im-server/_output/bin/tools/darwin/arm64 /data/workspaces/open-im-server/_output/bin/tools/linux/amd64 /data/workspaces/open-im-server/_output/bin/tools/linux/arm64 /data/workspaces/open-im-server/_output/bin/tools/linux/mips64 /data/workspaces/open-im-server/_output/bin/tools/linux/mips64le /data/workspaces/open-im-server/_output/bin/tools/linux/ppc64le /data/workspaces/open-im-server/_output/bin/tools/linux/s390x /data/workspaces/open-im-server/_output/bin/tools/windows/amd64
 
   for platform_long in "${long_platforms[@]}"; do
     local platform
     local platform_tag
     platform=${platform_long##${LOCAL_OUTPUT_BINTOOLSPATH}/} # Strip LOCAL_OUTPUT_BINTOOLSPATH
     platform_tag=${platform/\//-} # Replace a "/" for a "-"
-
-    echo "++++ platform: ${platform}"
-    # ++++ platform: darwin/amd64
-    echo "++++ platform_tag: ${platform_tag}"
-    # ++++ platform_tag: darwin-amd64
     openim::log::status "Starting tarball: client $platform_tag" # darwin-amd64
 
     (
     local release_stage="${RELEASE_STAGE}/client/${platform_tag}/openim"
 
-    echo "++++ release_stage: ${release_stage}"
+    openim::log::info "release_stage: ${release_stage}"
     # ++++ release_stage: /data/workspaces/open-im-server/_output/release-stage/client/darwin-amd64/openim
     rm -rf "${release_stage}"
     mkdir -p "${release_stage}/client/bin"
 
     local client_bins=("${OPENIM_CLIENT_BINARIES[@]}")
 
-    echo "++++ client_bins: ${client_bins[@]}"
     # client_bins: changelog component conversion-msg conversion-mysql formitychecker imctl infra ncpu openim-web up35 versionchecker yamlfmt
     # Copy client binclient_bins:aries
-    echo "++++ cp source: ${client_bins[@]/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}"
-    # ++++ cp source: changelog component conversion-msg conversion-mysql formitychecker imctl infra ncpu openim-web up35 versionchecker yamlfmt
-    echo "++++ cp target: ${release_stage}/client/bin/"
-    # ++++ cp target: /data/workspaces/open-im-server/_output/release-stage/client/darwin-amd64/openim/client/bin/
+    openim::log::info " Copy client binaries: ${client_bins[@]/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}"
+    openim::log::info " Copy client binaries to: ${release_stage}/client/bin"
 
     cp "${client_bins[@]/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}" \
         "${release_stage}/client/bin/"
@@ -263,7 +253,6 @@ function openim::release::package_client_tarballs() {
     openim::release::create_tarball "${package_name}" "${release_stage}/.."
     ) &
   done
-  echo "++++++++++++++++++++++++++package_client_tarballs++++++++++++++++++++++++++++"
   openim::log::status "Waiting on tarballs"
   openim::util::wait-for-jobs || { openim::log::error "client tarball creation failed"; exit 1; }
 }
@@ -477,6 +466,7 @@ function openim::release::package_final_tarball() {
   # This isn't a "full" tarball anymore, but the release lib still expects
   # artifacts under "full/openim/"
   local release_stage="${RELEASE_STAGE}/full/openim"
+  openim::log::info "release_stage(final): ${release_stage}"
   rm -rf "${release_stage}"
   mkdir -p "${release_stage}"
 
@@ -489,7 +479,8 @@ EOF
 
   # We want everything in /scripts.
   mkdir -p "${release_stage}/release"
-  cp -R ""${OPENIM_ROOT}"/scripts/release" "${release_stage}/"
+  mkdir -p "${OPENIM_ROOT}/scripts/release"
+  cp -R "${OPENIM_ROOT}/scripts/release" "${release_stage}/"
   cat <<EOF > "${release_stage}/release/get-openim-binaries.sh"
 #!/usr/bin/env bash
 # This file download openim client and server binaries from tencent cos bucket.
@@ -510,7 +501,7 @@ EOF
   #mkdir -p "${release_stage}/hack"
   #cp -R ""${OPENIM_ROOT}"/scripts/lib" "${release_stage}/scripts/"
 
-  cp -R "${OPENIM_ROOT}"/{docs,configs,scripts,deployments,init,README.md,LICENSE} "${release_stage}/"
+  cp -R "${OPENIM_ROOT}"/{docs,config,scripts,deployments,README.md,LICENSE} "${release_stage}/"
 
   echo "${OPENIM_GIT_VERSION}" > "${release_stage}/version"
 
@@ -653,4 +644,8 @@ function openim::release::generate_changelog() {
   set +o errexit
   git add "${OPENIM_ROOT}"/CHANGELOG/CHANGELOG-${OPENIM_GIT_VERSION#v}.md
   git commit -a -m "docs(changelog): add CHANGELOG-${OPENIM_GIT_VERSION#v}.md"
+  echo "##################################################"
+  echo "git commit -a -m \"docs(changelog): add CHANGELOG-${OPENIM_GIT_VERSION#v}.md\""
+  openim::log::info "You need git push CHANGELOG-${OPENIM_GIT_VERSION#v}.md to remote"
+  echo "##################################################"
 }
