@@ -94,7 +94,7 @@ services:
         ipv4_address: ${KAFKA_NETWORK_ADDRESS:-172.28.0.4}
 
   minio:
-    image: minio/minio:${MINIO_IMAGE_VERSION:-latest}
+    image: minio/minio:${MINIO_IMAGE_VERSION:-RELEASE.2024-01-11T07-46-16Z}
     ports:
       - "${MINIO_PORT:-10005}:9000"
       - "9090:9090"
@@ -112,7 +112,7 @@ services:
         ipv4_address: ${MINIO_NETWORK_ADDRESS:-172.28.0.6}
 
   openim-web:
-    image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-web:${OPENIM_WEB_IMAGE_VERSION:-latest}
+    image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-web:${OPENIM_WEB_IMAGE_VERSION:-v3.5.0-docker}
     container_name: openim-web
     environment:
       - OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH:-/app/dist}
@@ -127,8 +127,55 @@ services:
 ### TODO: Uncomment, or deploy using openim docker: https://github.com/openimsdk/openim-docker
   # Uncomment and configure the following services as needed
 
+  # openim-server:
+  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-server:${SERVER_IMAGE_VERSION:-main}
+  #   container_name: openim-server
+  #   ports:
+  #     - "${OPENIM_WS_PORT:-10001}:${OPENIM_WS_PORT:-10001}"
+  #     - "${API_OPENIM_PORT:-10002}:${API_OPENIM_PORT:-10002}"
+  #     - "${API_PROM_PORT:-20100}:${API_PROM_PORT:-20100}"
+  #     - "${USER_PROM_PORT:-20110}:${USER_PROM_PORT:-20110}"
+  #     - "${FRIEND_PROM_PORT:-20120}:${FRIEND_PROM_PORT:-20120}"
+  #     - "${MESSAGE_PROM_PORT:-20130}:${MESSAGE_PROM_PORT:-20130}"
+  #     - "${MSG_GATEWAY_PROM_PORT:-20140}:${MSG_GATEWAY_PROM_PORT:-20140}"
+  #     - "${GROUP_PROM_PORT:-20150}:${GROUP_PROM_PORT:-20150}"
+  #     - "${AUTH_PROM_PORT:-20160}:${AUTH_PROM_PORT:-20160}"
+  #     - "${PUSH_PROM_PORT:-20170}:${PUSH_PROM_PORT:-20170}"
+  #     - "${CONVERSATION_PROM_PORT:-20230}:${CONVERSATION_PROM_PORT:-20230}"
+  #     - "${RTC_PROM_PORT:-21300}:${RTC_PROM_PORT:-21300}"
+  #     - "${THIRD_PROM_PORT:-21301}:${THIRD_PROM_PORT:-21301}"
+  #     - "21400-21403:21400-21403"
+  #   healthcheck:
+  #     test: ["CMD", "/openim/openim-server/scripts/check-all.sh"]
+  #     interval: 120s
+  #     timeout: 30s
+  #     retries: 5
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - OPENIM_IP=${OPENIM_IP:-127.0.0.1}
+  #   volumes:
+  #     - "${DATA_DIR:-./}/openim-server/logs:/openim/openim-server/logs"
+  #     - "${DATA_DIR:-./}/openim-server/_output/logs:/openim/openim-server/_output/logs"
+  #     - "${DATA_DIR:-./}/openim-server/config:/openim/openim-server/config"
+  #   restart: always
+  #   depends_on:
+  #     - kafka
+  #     - mysql
+  #     - mongodb
+  #     - redis
+  #     - minio
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: "1g"
+  #       max-file: "2"
+  #   networks:
+  #     server:
+  #       ipv4_address: ${OPENIM_SERVER_NETWORK_ADDRESS:-172.28.0.8}
+
   # openim-chat:
-  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-chat:${CHAT_IMAGE_VERSION:-latest}
+  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-chat:${CHAT_IMAGE_VERSION:-main}
   #   container_name: openim-chat
   #   healthcheck:
   #     test: ["CMD", "/openim/openim-chat/scripts/check_all.sh"]
