@@ -14,6 +14,7 @@ import (
 type ServiceAddresses map[string]string
 
 func getServiceAddresses() ServiceAddresses {
+	fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!", config2.Config.LongConnSvr.OpenImMessageGatewayPort)
 	return ServiceAddresses{
 		"OpenImUser":           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImUserName, config2.Config.RpcPort.OpenImUserPort[0]),
 		"OpenImFriend":         fmt.Sprintf(config2.Config.RpcRegisterName.OpenImFriendName, config2.Config.RpcPort.OpenImFriendPort[0]),
