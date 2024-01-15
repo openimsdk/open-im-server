@@ -27,7 +27,6 @@ type option struct {
 	localSuccessTTL time.Duration
 	localFailedTTL  time.Duration
 	delFn           []func(ctx context.Context, key ...string)
-	delCh           func(fn func(key ...string))
 	target          lru.Target
 }
 
@@ -104,15 +103,6 @@ func WithDeleteKeyBefore(fn func(ctx context.Context, key ...string)) Option {
 	}
 	return func(o *option) {
 		o.delFn = append(o.delFn, fn)
-	}
-}
-
-func WithDeleteLocal(fn func(fn func(key ...string))) Option {
-	if fn == nil {
-		panic("fn should not be nil")
-	}
-	return func(o *option) {
-		o.delCh = fn
 	}
 }
 

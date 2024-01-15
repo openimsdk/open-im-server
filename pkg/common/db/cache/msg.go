@@ -17,6 +17,7 @@ package cache
 import (
 	"context"
 	"errors"
+	"github.com/dtm-labs/rockscache"
 	"strconv"
 	"time"
 
@@ -128,7 +129,8 @@ type MsgModel interface {
 }
 
 func NewMsgCacheModel(client redis.UniversalClient) MsgModel {
-	return &msgCache{rdb: client}
+	rcClient := rockscache.NewClient(client, rockscache.NewDefaultOptions())
+	return &msgCache{metaCache: NewMetaCacheRedis(rcClient), rdb: client}
 }
 
 type msgCache struct {
