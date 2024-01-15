@@ -16,7 +16,7 @@ type Cache[V any] interface {
 	Del(ctx context.Context, key ...string)
 }
 
-func New[V any](opts ...Option) Cache[V] {
+func NewCache[V any](expire time.Duration, opts ...Option) Cache[V] {
 	opt := defaultOption()
 	for _, o := range opts {
 		o(opt)
@@ -27,6 +27,7 @@ func New[V any](opts ...Option) Cache[V] {
 		n:    uint64(opt.localSlotNum),
 	}
 	c.timingWheel = NewTimeWheel[string, V](TimingWheelSize, time.Second, c.exec)
+	go c.timingWheel.Start()
 	for i := 0; i < opt.localSlotNum; i++ {
 		c.slots[i] = NewLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
 	}
@@ -39,6 +40,7 @@ func New[V any](opts ...Option) Cache[V] {
 type cache[V any] struct {
 	n           uint64
 	slots       []*LRU[string, V]
+	expire      time.Duration
 	opt         *option
 	link        link.Link
 	timingWheel *TimeWheel[string, V]
@@ -97,6 +99,10 @@ func (c *cache[V]) Del(ctx context.Context, key ...string) {
 		c.del(key...)
 	}
 }
-func (c *cache[V]) exec(key string, value V) {
 
+func (c *cache[V]) set(key string, value V) {
+
+}
+func (c *cache[V]) exec(key string, _ V) {
+	c.del(key)
 }
