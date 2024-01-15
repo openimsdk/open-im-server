@@ -411,7 +411,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 	apiresp.GinSuccess(c, resp)
 	imAdmin := config.Config.IMAdmin.UserID[0]
-	if req.SendID == imAdmin || (req.SendID != imAdmin && req.SendID != imAdmin) {
+	if req.SendID == imAdmin {
 		return
 	}
 
