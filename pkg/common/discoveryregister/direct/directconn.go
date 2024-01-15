@@ -14,17 +14,17 @@ import (
 type ServiceAddresses map[string]string
 
 func getServiceAddresses() ServiceAddresses {
-	fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!", config2.Config.LongConnSvr.OpenImMessageGatewayPort)
+
 	return ServiceAddresses{
-		"OpenImUser":           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImUserName, config2.Config.RpcPort.OpenImUserPort[0]),
-		"OpenImFriend":         fmt.Sprintf(config2.Config.RpcRegisterName.OpenImFriendName, config2.Config.RpcPort.OpenImFriendPort[0]),
-		"OpenImMessage":        fmt.Sprintf(config2.Config.RpcRegisterName.OpenImMsgName, config2.Config.RpcPort.OpenImMessagePort[0]),
-		"OpenImMessageGateway": fmt.Sprintf(config2.Config.RpcRegisterName.OpenImMessageGatewayName, config2.Config.LongConnSvr.OpenImMessageGatewayPort[0]),
-		"OpenImGroup":          fmt.Sprintf(config2.Config.RpcRegisterName.OpenImGroupName, config2.Config.RpcPort.OpenImGroupPort[0]),
-		"OpenImAuth":           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImAuthName, config2.Config.RpcPort.OpenImAuthPort[0]),
-		"OpenImPush":           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImPushName, config2.Config.RpcPort.OpenImPushPort[0]),
-		"OpenImConversation":   fmt.Sprintf(config2.Config.RpcRegisterName.OpenImConversationName, config2.Config.RpcPort.OpenImConversationPort[0]),
-		"OpenImThird":          fmt.Sprintf(config2.Config.RpcRegisterName.OpenImThirdName, config2.Config.RpcPort.OpenImThirdPort[0]),
+		"openImUserName":           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImUserName, config2.Config.RpcPort.OpenImUserPort[0]),
+		"openImFriendName":         fmt.Sprintf(config2.Config.RpcRegisterName.OpenImFriendName, config2.Config.RpcPort.OpenImFriendPort[0]),
+		"openImMsgName":            fmt.Sprintf(config2.Config.RpcRegisterName.OpenImMsgName, config2.Config.RpcPort.OpenImMessagePort[0]),
+		"openImMessageGatewayName": fmt.Sprintf(config2.Config.RpcRegisterName.OpenImMessageGatewayName, config2.Config.LongConnSvr.OpenImMessageGatewayPort[0]),
+		"openImGroupName":          fmt.Sprintf(config2.Config.RpcRegisterName.OpenImGroupName, config2.Config.RpcPort.OpenImGroupPort[0]),
+		"openImAuthName":           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImAuthName, config2.Config.RpcPort.OpenImAuthPort[0]),
+		"openImPushName":           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImPushName, config2.Config.RpcPort.OpenImPushPort[0]),
+		"openImConversationName":   fmt.Sprintf(config2.Config.RpcRegisterName.OpenImConversationName, config2.Config.RpcPort.OpenImConversationPort[0]),
+		"openImThirdName":          fmt.Sprintf(config2.Config.RpcRegisterName.OpenImThirdName, config2.Config.RpcPort.OpenImThirdPort[0]),
 	}
 }
 
