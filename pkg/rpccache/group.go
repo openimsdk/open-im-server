@@ -2,6 +2,7 @@ package rpccache
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -46,8 +47,17 @@ func newListMap[V comparable](values []V, err error) (*listMap[V], error) {
 	return lm, nil
 }
 
-func (g *GroupLocalCache) getGroupMemberIDs(ctx context.Context, groupID string) (*listMap[string], error) {
+func (g *GroupLocalCache) getGroupMemberIDs(ctx context.Context, groupID string) (val *listMap[string], err error) {
+	log.ZDebug(ctx, "GroupLocalCache getGroupMemberIDs req", "groupID", groupID)
+	defer func() {
+		if err == nil {
+			log.ZDebug(ctx, "GroupLocalCache getGroupMemberIDs return", "value", val.List)
+		} else {
+			log.ZError(ctx, "GroupLocalCache getGroupMemberIDs return", err)
+		}
+	}()
 	return localcache.AnyValue[*listMap[string]](g.local.Get(ctx, cachekey.GetGroupMemberIDsKey(groupID), func(ctx context.Context) (any, error) {
+		log.ZDebug(ctx, "GroupLocalCache getGroupMemberIDs rpc", "groupID", groupID)
 		return newListMap(g.client.GetGroupMemberIDs(ctx, groupID))
 	}))
 }
