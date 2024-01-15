@@ -114,9 +114,6 @@ services:
   openim-web:
     image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-web:${OPENIM_WEB_IMAGE_VERSION:-v3.5.0-docker}
     container_name: openim-web
-    environment:
-      - OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH:-/app/dist}
-      - OPENIM_WEB_PORT=${OPENIM_WEB_PORT:-11001}
     restart: always
     ports:
       - "${OPENIM_WEB_PORT:-11001}:80"
