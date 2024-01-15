@@ -315,9 +315,9 @@ iosPush:
 # Timeout in seconds
 # Whether to continue execution if callback fails
 callback:
-  url: ""
+  url: "http://127.0.0.1:10002/msg"
   beforeSendSingleMsg:
-    enable: ${CALLBACK_ENABLE}
+    enable: true
     timeout: ${CALLBACK_TIMEOUT}
     failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeUpdateUserInfoEx:

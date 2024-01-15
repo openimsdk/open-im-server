@@ -27,6 +27,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
+	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -376,4 +378,66 @@ func (m *MessageApi) SearchMsg(c *gin.Context) {
 
 func (m *MessageApi) GetServerTime(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetServerTime, m.Client, c)
+}
+
+func (m *MessageApi) CallbackExample(c *gin.Context) {
+	// 1. 通过 url 获取具体信息
+	// 2. 返回继续向下执行的命令
+	// 3. 获取一个系统通知号
+	// 4. 构造一个发消息的结构体
+	// 5. 使用这个系统通知号发送消息
+
+	var req callbackstruct.CallbackBeforeSendSingleMsgReq
+
+	if err := c.BindJSON(&req); err != nil {
+		log.ZError(c, "CallbackExample BindJSON failed", err)
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	log.ZInfo(c, "CallbackExample", "req", req)
+
+	resp := &callbackstruct.CallbackBeforeSendSingleMsgResp{
+		CommonCallbackResp: callbackstruct.CommonCallbackResp{
+			ActionCode: 0,
+			ErrCode:    200,
+			ErrMsg:     "success",
+			ErrDlt:     "successful",
+			NextCode:   0,
+		},
+	}
+
+	apiresp.GinSuccess(c, resp)
+
+	user, err := m.userRpcClient.GetUserInfo(c, config.Config.IMAdmin.UserID[0])
+	if err != nil {
+		log.ZError(c, "GetUserInfo failed", err)
+		apiresp.GinError(c, errs.ErrDatabase.WithDetail(err.Error()).Wrap())
+		return
+	}
+
+	time := time.Now().Unix()
+	msgInfo := &sdkws.MsgData{
+		SendID:           user.UserID,
+		RecvID:           req.RecvID,
+		ClientMsgID:      req.ClientMsgID,
+		ServerMsgID:      req.ServerMsgID,
+		SenderPlatformID: req.SenderPlatformID,
+		SenderNickname:   user.Nickname,
+		SenderFaceURL:    user.UserID,
+		SessionType:      req.SessionType,
+		MsgFrom:          req.MsgFrom,
+		ContentType:      req.ContentType,
+		Content:          []byte(req.Content),
+		Seq:              int64(req.Seq),
+		SendTime:         time,
+		CreateTime:       time,
+		Status:           req.Status,
+	}
+	rsp, err := m.Message.Client.SendMsg(c, &msg.SendMsgReq{MsgData: msgInfo})
+	if err != nil {
+		log.ZError(c, "SendMsg failed", err)
+		apiresp.GinError(c, errs.ErrDatabase.WithDetail(err.Error()).Wrap())
+		return
+	}
+	apiresp.GinSuccess(c, rsp)
 }
