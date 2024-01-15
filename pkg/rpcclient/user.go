@@ -16,6 +16,7 @@ package rpcclient
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -40,6 +41,7 @@ type User struct {
 
 // NewUser initializes and returns a User instance based on the provided service discovery registry.
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
+	fmt.Println("user name ", config.Config.RpcRegisterName.OpenImUserName)
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
 		panic(err)
