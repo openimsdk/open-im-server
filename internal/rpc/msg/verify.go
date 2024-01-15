@@ -95,13 +95,13 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			data.MsgData.ContentType >= constant.NotificationBegin {
 			return nil
 		}
-		// memberIDs, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, data.MsgData.GroupID)
-		// if err != nil {
-		// 	return err
-		// }
-		// if !utils.IsContain(data.MsgData.SendID, memberIDs) {
-		// 	return errs.ErrNotInGroupYet.Wrap()
-		// }
+		memberIDs, err := m.GroupLocalCache.GetGroupMemberIDMap(ctx, data.MsgData.GroupID)
+		if err != nil {
+			return err
+		}
+		if _, ok := memberIDs[data.MsgData.SendID]; !ok {
+			return errs.ErrNotInGroupYet.Wrap()
+		}
 
 		groupMemberInfo, err := m.Group.GetGroupMemberCache(ctx, data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {

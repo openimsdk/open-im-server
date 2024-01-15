@@ -107,15 +107,6 @@ func WithDeleteKeyBefore(fn func(ctx context.Context, key ...string)) Option {
 	}
 }
 
-func WithDeleteLocal(fn func(fn func(key ...string))) Option {
-	if fn == nil {
-		panic("fn should not be nil")
-	}
-	return func(o *option) {
-		o.delCh = fn
-	}
-}
-
 type emptyTarget struct{}
 
 func (e emptyTarget) IncrGetHit() {}
