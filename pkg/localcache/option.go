@@ -27,7 +27,6 @@ type option struct {
 	localSuccessTTL time.Duration
 	localFailedTTL  time.Duration
 	delFn           []func(ctx context.Context, key ...string)
-	delCh           func(fn func(key ...string))
 	target          lru.Target
 }
 
