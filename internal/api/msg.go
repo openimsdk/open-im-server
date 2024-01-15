@@ -423,7 +423,8 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		PlatformID: req.SenderPlatformID,
 		UserID:     config.Config.IMAdmin.UserID[0],
 	}
-	output_token := &auth.UserTokenResp{}
+	output_token := auth.UserTokenResp{}
+	log.ZDebug(c, "CallbackExample get User Token", "token", output_token)
 
 	data, err := http.Post(c, url, header, input_token, 10)
 	if err != nil {
@@ -465,7 +466,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 	url = "http://127.0.0.1:10002/msg/send_msg"
 	header["token"] = output_token.Token
-	output := &msg.SendMsgResp{}
+	output := msg.SendMsgResp{}
 
 	log.ZDebug(c, "CallbackExample Header", "header", header)
 
