@@ -1,11 +1,13 @@
-package local
+package lru
 
 import (
 	"fmt"
+	"hash/fnv"
 	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
+	"unsafe"
 )
 
 type cacheTarget struct {
@@ -42,7 +44,13 @@ func (r *cacheTarget) String() string {
 
 func TestName(t *testing.T) {
 	target := &cacheTarget{}
-	l := NewCache[string](100, 1000, time.Second*20, time.Second*5, target, nil)
+	l := NewSlotLRU[string, string](100, func(k string) uint64 {
+		h := fnv.New64a()
+		h.Write(*(*[]byte)(unsafe.Pointer(&k)))
+		return h.Sum64()
+	}, func() LRU[string, string] {
+		return NewActivelyLRU[string, string](100, time.Second*60, time.Second, target, nil)
+	})
 	//l := NewInertiaLRU[string, string](1000, time.Second*20, time.Second*5, target)
 
 	fn := func(key string, n int, fetch func() (string, error)) {
@@ -53,8 +61,9 @@ func TestName(t *testing.T) {
 			//} else {
 			//	t.Error("key", key, err)
 			//}
-			l.Get(key, fetch)
+			v, err := l.Get(key, fetch)
 			//time.Sleep(time.Second / 100)
+			func(v ...any) {}(v, err)
 		}
 	}
 

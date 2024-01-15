@@ -11,14 +11,17 @@ import (
 
 func NewConversationLocalCache(client rpcclient.ConversationRpcClient, cli redis.UniversalClient) *ConversationLocalCache {
 	return &ConversationLocalCache{
-		local:  localcache.New[any](localcache.WithRedisDeleteSubscribe(config.Config.LocalCache.Conversation.Topic, cli)),
 		client: client,
+		local: localcache.New[any](
+			localcache.WithLocalSlotNum(config.Config.LocalCache.Conversation.SlotNum),
+			localcache.WithLocalSlotSize(config.Config.LocalCache.Conversation.SlotSize),
+		),
 	}
 }
 
 type ConversationLocalCache struct {
-	local  localcache.Cache[any]
 	client rpcclient.ConversationRpcClient
+	local  localcache.Cache[any]
 }
 
 func (c *ConversationLocalCache) GetConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {

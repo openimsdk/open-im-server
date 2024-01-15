@@ -2,7 +2,7 @@ package localcache
 
 import (
 	"context"
-	"github.com/openimsdk/localcache/local"
+	"github.com/openimsdk/localcache/lru"
 	"time"
 )
 
@@ -11,6 +11,7 @@ func defaultOption() *option {
 		localSlotNum:    500,
 		localSlotSize:   20000,
 		linkSlotNum:     500,
+		actively:        false,
 		localSuccessTTL: time.Minute,
 		localFailedTTL:  time.Second * 5,
 		delFn:           make([]func(ctx context.Context, key ...string), 0, 2),
@@ -22,14 +23,27 @@ type option struct {
 	localSlotNum    int
 	localSlotSize   int
 	linkSlotNum     int
+	actively        bool
 	localSuccessTTL time.Duration
 	localFailedTTL  time.Duration
 	delFn           []func(ctx context.Context, key ...string)
 	delCh           func(fn func(key ...string))
-	target          local.Target
+	target          lru.Target
 }
 
 type Option func(o *option)
+
+func WithActively() Option {
+	return func(o *option) {
+		o.actively = true
+	}
+}
+
+func WithInertia() Option {
+	return func(o *option) {
+		o.actively = false
+	}
+}
 
 func WithLocalDisable() Option {
 	return WithLinkSlotNum(0)
@@ -75,7 +89,7 @@ func WithLocalFailedTTL(localFailedTTL time.Duration) Option {
 	}
 }
 
-func WithTarget(target local.Target) Option {
+func WithTarget(target lru.Target) Option {
 	if target == nil {
 		panic("target should not be nil")
 	}

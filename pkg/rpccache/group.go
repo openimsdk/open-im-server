@@ -11,14 +11,17 @@ import (
 
 func NewGroupLocalCache(client rpcclient.GroupRpcClient, cli redis.UniversalClient) *GroupLocalCache {
 	return &GroupLocalCache{
-		local:  localcache.New[any](localcache.WithRedisDeleteSubscribe(config.Config.LocalCache.Group.Topic, cli)),
 		client: client,
+		local: localcache.New[any](
+			localcache.WithLocalSlotNum(config.Config.LocalCache.Group.SlotNum),
+			localcache.WithLocalSlotSize(config.Config.LocalCache.Group.SlotSize),
+		),
 	}
 }
 
 type GroupLocalCache struct {
-	local  localcache.Cache[any]
 	client rpcclient.GroupRpcClient
+	local  localcache.Cache[any]
 }
 
 func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error) {
