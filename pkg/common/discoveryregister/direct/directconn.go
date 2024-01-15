@@ -18,7 +18,7 @@ func getServiceAddresses() ServiceAddresses {
 		"OpenImUser":           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImUserName, config2.Config.RpcPort.OpenImUserPort[0]),
 		"OpenImFriend":         fmt.Sprintf(config2.Config.RpcRegisterName.OpenImFriendName, config2.Config.RpcPort.OpenImFriendPort[0]),
 		"OpenImMessage":        fmt.Sprintf(config2.Config.RpcRegisterName.OpenImMsgName, config2.Config.RpcPort.OpenImMessagePort[0]),
-		"OpenImMessageGateway": fmt.Sprintf(config2.Config.RpcRegisterName.OpenImMessageGatewayName, config2.Config.RpcPort.OpenImMessageGatewayPort[0]),
+		"OpenImMessageGateway": fmt.Sprintf(config2.Config.RpcRegisterName.OpenImMessageGatewayName, config2.Config.LongConnSvr.OpenImMessageGatewayPort[0]),
 		"OpenImGroup":          fmt.Sprintf(config2.Config.RpcRegisterName.OpenImGroupName, config2.Config.RpcPort.OpenImGroupPort[0]),
 		"OpenImAuth":           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImAuthName, config2.Config.RpcPort.OpenImAuthPort[0]),
 		"OpenImPush":           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImPushName, config2.Config.RpcPort.OpenImPushPort[0]),
