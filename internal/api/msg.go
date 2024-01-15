@@ -408,22 +408,15 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 	apiresp.GinSuccess(c, resp)
 
-	user, err := m.userRpcClient.GetUserInfo(c, config.Config.IMAdmin.UserID[0])
-	if err != nil {
-		log.ZError(c, "GetUserInfo failed", err)
-		apiresp.GinError(c, errs.ErrDatabase.WithDetail(err.Error()).Wrap())
-		return
-	}
-
 	time := time.Now().Unix()
 	msgInfo := &sdkws.MsgData{
-		SendID:           user.UserID,
+		SendID:           req.SendID,
 		RecvID:           req.RecvID,
 		ClientMsgID:      req.ClientMsgID,
 		ServerMsgID:      req.ServerMsgID,
 		SenderPlatformID: req.SenderPlatformID,
-		SenderNickname:   user.Nickname,
-		SenderFaceURL:    user.FaceURL,
+		SenderNickname:   req.SenderNickname,
+		SenderFaceURL:    req.SenderFaceURL,
 		SessionType:      req.SessionType,
 		MsgFrom:          req.MsgFrom,
 		ContentType:      req.ContentType,
