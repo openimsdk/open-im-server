@@ -10,13 +10,16 @@ import (
 )
 
 func NewConversationLocalCache(client rpcclient.ConversationRpcClient, cli redis.UniversalClient) *ConversationLocalCache {
-	return &ConversationLocalCache{
+	lc := config.Config.LocalCache.Conversation
+	x := &ConversationLocalCache{
 		client: client,
 		local: localcache.New[any](
-			localcache.WithLocalSlotNum(config.Config.LocalCache.Conversation.SlotNum),
-			localcache.WithLocalSlotSize(config.Config.LocalCache.Conversation.SlotSize),
+			localcache.WithLocalSlotNum(lc.SlotNum),
+			localcache.WithLocalSlotSize(lc.SlotSize),
 		),
 	}
+	go subscriberRedisDeleteCache(context.Background(), cli, lc.Topic, x.local.DelLocal)
+	return x
 }
 
 type ConversationLocalCache struct {

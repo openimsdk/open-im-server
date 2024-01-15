@@ -10,13 +10,16 @@ import (
 )
 
 func NewGroupLocalCache(client rpcclient.GroupRpcClient, cli redis.UniversalClient) *GroupLocalCache {
-	return &GroupLocalCache{
+	lc := config.Config.LocalCache.Group
+	x := &GroupLocalCache{
 		client: client,
 		local: localcache.New[any](
-			localcache.WithLocalSlotNum(config.Config.LocalCache.Group.SlotNum),
-			localcache.WithLocalSlotSize(config.Config.LocalCache.Group.SlotSize),
+			localcache.WithLocalSlotNum(lc.SlotNum),
+			localcache.WithLocalSlotSize(lc.SlotSize),
 		),
 	}
+	go subscriberRedisDeleteCache(context.Background(), cli, lc.Topic, x.local.DelLocal)
+	return x
 }
 
 type GroupLocalCache struct {
