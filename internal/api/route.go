@@ -224,7 +224,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 
 	callback := r.Group("/callbackExample")
 	{
-		callback.POST("/callbackBeforeSendSingleMsgCommand", m.CallbackExample)
+		callback.POST("/callbackAfterSendSingleMsgCommand", m.CallbackExample)
 	}
 	return r
 }

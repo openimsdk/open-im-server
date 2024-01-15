@@ -15,6 +15,7 @@
 package api
 
 import (
+	"github.com/OpenIMSDK/protocol/auth"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -28,6 +29,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -387,7 +389,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	// 4. 构造一个发消息的结构体
 	// 5. 使用这个系统通知号发送消息
 
-	var req callbackstruct.CallbackBeforeSendSingleMsgReq
+	var req callbackstruct.CallbackAfterSendSingleMsgReq
 
 	if err := c.BindJSON(&req); err != nil {
 		log.ZError(c, "CallbackExample BindJSON failed", err)
@@ -396,7 +398,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 	log.ZInfo(c, "CallbackExample", "req", req)
 
-	resp := &callbackstruct.CallbackBeforeSendSingleMsgResp{
+	resp := &callbackstruct.CallbackAfterSendSingleMsgResp{
 		CommonCallbackResp: callbackstruct.CommonCallbackResp{
 			ActionCode: 0,
 			ErrCode:    200,
@@ -407,30 +409,58 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 
 	apiresp.GinSuccess(c, resp)
-
-	time := time.Now().Unix()
-	msgInfo := &sdkws.MsgData{
-		SendID:           req.SendID,
-		RecvID:           req.RecvID,
-		ClientMsgID:      req.ClientMsgID,
-		ServerMsgID:      req.ServerMsgID,
-		SenderPlatformID: req.SenderPlatformID,
-		SenderNickname:   req.SenderNickname,
-		SenderFaceURL:    req.SenderFaceURL,
-		SessionType:      req.SessionType,
-		MsgFrom:          req.MsgFrom,
-		ContentType:      req.ContentType,
-		Content:          []byte(req.Content),
-		Seq:              int64(req.Seq),
-		SendTime:         time,
-		CreateTime:       time,
-		Status:           req.Status,
-	}
-	rsp, err := m.Message.Client.SendMsg(c, &msg.SendMsgReq{MsgData: msgInfo})
-	if err != nil {
-		log.ZError(c, "SendMsg failed", err)
-		apiresp.GinError(c, errs.ErrDatabase.WithDetail(err.Error()).Wrap())
+	if req.SendID == config.Config.IMAdmin.UserID[0] {
 		return
 	}
-	apiresp.GinSuccess(c, rsp)
+
+	url := "http://127.0.0.1:10002/auth/user_token"
+	header := map[string]string{}
+	header["operationID"] = req.OperationID
+	input_token := auth.UserTokenReq{
+		Secret:     config.Config.Secret,
+		PlatformID: req.SenderPlatformID,
+		UserID:     config.Config.IMAdmin.UserID[0],
+	}
+	output_token := &auth.UserTokenResp{}
+
+	if err := http.PostReturn(c, url, header, input_token, output_token, 10); err != nil {
+		log.ZError(c, "CallbackExample get Sender token failed", err)
+		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+		return
+	}
+
+	user, err := m.userRpcClient.GetUserInfo(c, req.RecvID)
+	if err != nil {
+		log.ZError(c, "CallbackExample get Sender failed", err)
+		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+		return
+	}
+
+	content := map[string]any{}
+	content["content"] = req.Content
+	input := &apistruct.SendMsgReq{
+		RecvID: req.RecvID,
+		SendMsg: apistruct.SendMsg{
+			SendID:           req.RecvID,
+			SenderNickname:   user.Nickname,
+			SenderFaceURL:    user.FaceURL,
+			SenderPlatformID: req.SenderPlatformID,
+			Content:          content,
+			ContentType:      req.ContentType,
+			SessionType:      req.SessionType,
+			SendTime:         time.Now().Unix(),
+		},
+	}
+
+	url = "http://127.0.0.1:10002/msg/send_msg"
+	header["token"] = output_token.Token
+	output := &msg.SendMsgResp{}
+
+	if err := http.PostReturn(c, url, header, input, output, 10); err != nil {
+		log.ZError(c, "CallbackExample send message failed", err)
+		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+		return
+	}
+
+	apiresp.GinSuccess(c, output)
 }

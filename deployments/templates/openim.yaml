@@ -317,7 +317,7 @@ iosPush:
 callback:
   url: "http://127.0.0.1:10002/callbackExample"
   beforeSendSingleMsg:
-    enable: true
+    enable: ${CALLBACK_ENABLE}
     timeout: ${CALLBACK_TIMEOUT}
     failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeUpdateUserInfoEx:
@@ -329,7 +329,7 @@ callback:
     timeout: ${CALLBACK_TIMEOUT}
     failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterSendSingleMsg:
-    enable: ${CALLBACK_ENABLE}
+    enable: true
     timeout: ${CALLBACK_TIMEOUT}
     failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeSendGroupMsg:
