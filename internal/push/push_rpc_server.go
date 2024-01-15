@@ -17,6 +17,7 @@ package push
 import (
 	"context"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"sync"
 
 	"google.golang.org/grpc"
@@ -28,7 +29,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -51,8 +51,8 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		client,
 		offlinePusher,
 		database,
-		localcache.NewGroupLocalCache(&groupRpcClient),
-		localcache.NewConversationLocalCache(&conversationRpcClient),
+		rpccache.NewGroupLocalCache(rpcclient.NewGroupRpcClient(client), rdb),
+		rpccache.NewConversationLocalCache(rpcclient.NewConversationRpcClient(client), rdb),
 		&conversationRpcClient,
 		&groupRpcClient,
 		&msgRpcClient,

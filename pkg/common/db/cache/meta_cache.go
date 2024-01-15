@@ -103,13 +103,13 @@ func (m *metaCacheRedis) ExecDel(ctx context.Context, distinct ...bool) error {
 				break
 			}
 		}
-		if m.topic != "" && m.redisClient != nil {
-			data, err := json.Marshal(m.keys)
+		if pk := getPublishKey(m.topic, m.keys); len(pk) > 0 {
+			data, err := json.Marshal(pk)
 			if err != nil {
-				log.ZError(ctx, "keys json marshal failed", err, "topic", m.topic, "keys", m.keys)
+				log.ZError(ctx, "keys json marshal failed", err, "topic", m.topic, "keys", pk)
 			} else {
 				if err := m.redisClient.Publish(ctx, m.topic, string(data)).Err(); err != nil {
-					log.ZError(ctx, "redis publish cache delete error", err, "topic", m.topic, "keys", m.keys)
+					log.ZError(ctx, "redis publish cache delete error", err, "topic", m.topic, "keys", pk)
 				}
 			}
 		}

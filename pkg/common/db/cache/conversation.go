@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"math/big"
 	"strings"
 	"time"
@@ -85,10 +86,12 @@ type ConversationCache interface {
 
 func NewConversationRedis(rdb redis.UniversalClient, opts rockscache.Options, db relationtb.ConversationModelInterface) ConversationCache {
 	rcClient := rockscache.NewClient(rdb, opts)
-
+	mc := NewMetaCacheRedis(rcClient)
+	mc.SetTopic(config.Config.LocalCache.Conversation.Topic)
+	mc.SetRawRedisClient(rdb)
 	return &ConversationRedisCache{
 		rcClient:       rcClient,
-		metaCache:      NewMetaCacheRedis(rcClient),
+		metaCache:      mc,
 		conversationDB: db,
 		expireTime:     conversationExpireTime,
 	}
@@ -119,7 +122,7 @@ type ConversationRedisCache struct {
 func (c *ConversationRedisCache) NewCache() ConversationCache {
 	return &ConversationRedisCache{
 		rcClient:       c.rcClient,
-		metaCache:      NewMetaCacheRedis(c.rcClient, c.metaCache.GetPreDelKeys()...),
+		metaCache:      c.Copy(),
 		conversationDB: c.conversationDB,
 		expireTime:     c.expireTime,
 	}

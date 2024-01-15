@@ -5,20 +5,7 @@ func NewOption() *Option {
 }
 
 type Option struct {
-	Enable *bool
-	Link   []string
-}
-
-func (o *Option) WithEnable() *Option {
-	t := true
-	o.Enable = &t
-	return o
-}
-
-func (o *Option) WithDisable() *Option {
-	f := false
-	o.Enable = &f
-	return o
+	Link []string
 }
 
 func (o *Option) WithLink(key ...string) *Option {

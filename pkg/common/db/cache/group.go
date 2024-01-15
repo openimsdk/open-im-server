@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -104,12 +105,14 @@ func NewGroupCacheRedis(
 	opts rockscache.Options,
 ) GroupCache {
 	rcClient := rockscache.NewClient(rdb, opts)
-
+	mc := NewMetaCacheRedis(rcClient)
+	mc.SetTopic(config.Config.LocalCache.Group.Topic)
+	mc.SetRawRedisClient(rdb)
 	return &GroupCacheRedis{
 		rcClient: rcClient, expireTime: groupExpireTime,
 		groupDB: groupDB, groupMemberDB: groupMemberDB, groupRequestDB: groupRequestDB,
 		groupHash: hashCode,
-		metaCache: NewMetaCacheRedis(rcClient),
+		metaCache: mc,
 	}
 }
 
@@ -120,7 +123,7 @@ func (g *GroupCacheRedis) NewCache() GroupCache {
 		groupDB:        g.groupDB,
 		groupMemberDB:  g.groupMemberDB,
 		groupRequestDB: g.groupRequestDB,
-		metaCache:      NewMetaCacheRedis(g.rcClient, g.metaCache.GetPreDelKeys()...),
+		metaCache:      g.Copy(),
 	}
 }
 
