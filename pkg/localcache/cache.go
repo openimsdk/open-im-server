@@ -3,13 +3,17 @@ package localcache
 import (
 	"context"
 	"github.com/openimsdk/localcache/link"
-	"github.com/openimsdk/localcache/local"
-	lopt "github.com/openimsdk/localcache/option"
+	"github.com/openimsdk/localcache/lru"
+	"hash/fnv"
+	"unsafe"
 )
 
 type Cache[V any] interface {
-	Get(ctx context.Context, key string, fetch func(ctx context.Context) (V, error), opts ...*lopt.Option) (V, error)
+	Get(ctx context.Context, key string, fetch func(ctx context.Context) (V, error)) (V, error)
+	GetLink(ctx context.Context, key string, fetch func(ctx context.Context) (V, error), link ...string) (V, error)
 	Del(ctx context.Context, key ...string)
+	DelLocal(ctx context.Context, key ...string)
+	Stop()
 }
 
 func New[V any](opts ...Option) Cache[V] {
@@ -19,10 +23,22 @@ func New[V any](opts ...Option) Cache[V] {
 	}
 	c := cache[V]{opt: opt}
 	if opt.localSlotNum > 0 && opt.localSlotSize > 0 {
-		c.local = local.NewCache[V](opt.localSlotNum, opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
-		go func() {
-			c.opt.delCh(c.del)
-		}()
+		createSimpleLRU := func() lru.LRU[string, V] {
+			if opt.actively {
+				return lru.NewActivelyLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
+			} else {
+				return lru.NewInertiaLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
+			}
+		}
+		if opt.localSlotNum == 1 {
+			c.local = createSimpleLRU()
+		} else {
+			c.local = lru.NewSlotLRU[string, V](opt.localSlotNum, func(key string) uint64 {
+				h := fnv.New64a()
+				h.Write(*(*[]byte)(unsafe.Pointer(&key)))
+				return h.Sum64()
+			}, createSimpleLRU)
+		}
 		if opt.linkSlotNum > 0 {
 			c.link = link.New(opt.linkSlotNum)
 		}
@@ -33,7 +49,7 @@ func New[V any](opts ...Option) Cache[V] {
 type cache[V any] struct {
 	opt   *option
 	link  link.Link
-	local local.Cache[V]
+	local lru.LRU[string, V]
 }
 
 func (c *cache[V]) onEvict(key string, value V) {
@@ -48,22 +64,29 @@ func (c *cache[V]) onEvict(key string, value V) {
 }
 
 func (c *cache[V]) del(key ...string) {
+	if c.local == nil {
+		return
+	}
 	for _, k := range key {
-		lks := c.link.Del(k)
 		c.local.Del(k)
-		for k := range lks {
-			c.local.Del(k)
+		if c.link != nil {
+			lks := c.link.Del(k)
+			for k := range lks {
+				c.local.Del(k)
+			}
 		}
 	}
 }
 
-func (c *cache[V]) Get(ctx context.Context, key string, fetch func(ctx context.Context) (V, error), opts ...*lopt.Option) (V, error) {
+func (c *cache[V]) Get(ctx context.Context, key string, fetch func(ctx context.Context) (V, error)) (V, error) {
+	return c.GetLink(ctx, key, fetch)
+}
+
+func (c *cache[V]) GetLink(ctx context.Context, key string, fetch func(ctx context.Context) (V, error), link ...string) (V, error) {
 	if c.local != nil {
 		return c.local.Get(key, func() (V, error) {
-			if c.link != nil {
-				for _, o := range opts {
-					c.link.Link(key, o.Link...)
-				}
+			if len(link) > 0 {
+				c.link.Link(key, link...)
 			}
 			return fetch(ctx)
 		})
@@ -73,13 +96,16 @@ func (c *cache[V]) Get(ctx context.Context, key string, fetch func(ctx context.C
 }
 
 func (c *cache[V]) Del(ctx context.Context, key ...string) {
-	if len(key) == 0 {
-		return
-	}
 	for _, fn := range c.opt.delFn {
 		fn(ctx, key...)
 	}
-	if c.local != nil {
-		c.del(key...)
-	}
+	c.del(key...)
+}
+
+func (c *cache[V]) DelLocal(ctx context.Context, key ...string) {
+	c.del(key...)
+}
+
+func (c *cache[V]) Stop() {
+	c.local.Stop()
 }

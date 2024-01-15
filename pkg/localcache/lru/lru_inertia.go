@@ -1,4 +1,4 @@
-package local
+package lru
 
 import (
 	"github.com/hashicorp/golang-lru/v2/simplelru"
@@ -77,6 +77,11 @@ func (x *InertiaLRU[K, V]) Del(key K) bool {
 	x.lock.Lock()
 	ok := x.core.Remove(key)
 	x.lock.Unlock()
+	if ok {
+		x.target.IncrDelHit()
+	} else {
+		x.target.IncrDelNotFound()
+	}
 	return ok
 }
 

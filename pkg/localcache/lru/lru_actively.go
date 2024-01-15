@@ -1,4 +1,4 @@
-package local
+package lru
 
 import (
 	"github.com/hashicorp/golang-lru/v2/expirable"
@@ -6,15 +6,15 @@ import (
 	"time"
 )
 
-func NewExpirableLRU[K comparable, V any](size int, successTTL, failedTTL time.Duration, target Target, onEvict EvictCallback[K, V]) LRU[K, V] {
-	var cb expirable.EvictCallback[K, *expirableLruItem[V]]
+func NewActivelyLRU[K comparable, V any](size int, successTTL, failedTTL time.Duration, target Target, onEvict EvictCallback[K, V]) LRU[K, V] {
+	var cb expirable.EvictCallback[K, *activelyLruItem[V]]
 	if onEvict != nil {
-		cb = func(key K, value *expirableLruItem[V]) {
+		cb = func(key K, value *activelyLruItem[V]) {
 			onEvict(key, value.value)
 		}
 	}
-	core := expirable.NewLRU[K, *expirableLruItem[V]](size, cb, successTTL)
-	return &expirableLRU[K, V]{
+	core := expirable.NewLRU[K, *activelyLruItem[V]](size, cb, successTTL)
+	return &activelyLRU[K, V]{
 		core:       core,
 		successTTL: successTTL,
 		failedTTL:  failedTTL,
@@ -22,21 +22,21 @@ func NewExpirableLRU[K comparable, V any](size int, successTTL, failedTTL time.D
 	}
 }
 
-type expirableLruItem[V any] struct {
+type activelyLruItem[V any] struct {
 	lock  sync.RWMutex
 	err   error
 	value V
 }
 
-type expirableLRU[K comparable, V any] struct {
+type activelyLRU[K comparable, V any] struct {
 	lock       sync.Mutex
-	core       *expirable.LRU[K, *expirableLruItem[V]]
+	core       *expirable.LRU[K, *activelyLruItem[V]]
 	successTTL time.Duration
 	failedTTL  time.Duration
 	target     Target
 }
 
-func (x *expirableLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
+func (x *activelyLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	x.lock.Lock()
 	v, ok := x.core.Get(key)
 	if ok {
@@ -46,7 +46,7 @@ func (x *expirableLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 		defer v.lock.RUnlock()
 		return v.value, v.err
 	} else {
-		v = &expirableLruItem[V]{}
+		v = &activelyLruItem[V]{}
 		x.core.Add(key, v)
 		v.lock.Lock()
 		x.lock.Unlock()
@@ -62,12 +62,17 @@ func (x *expirableLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	}
 }
 
-func (x *expirableLRU[K, V]) Del(key K) bool {
+func (x *activelyLRU[K, V]) Del(key K) bool {
 	x.lock.Lock()
 	ok := x.core.Remove(key)
 	x.lock.Unlock()
+	if ok {
+		x.target.IncrDelHit()
+	} else {
+		x.target.IncrDelNotFound()
+	}
 	return ok
 }
 
-func (x *expirableLRU[K, V]) Stop() {
+func (x *activelyLRU[K, V]) Stop() {
 }
