@@ -221,6 +221,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		statisticsGroup.POST("/group/create", g.GroupCreateCount)
 		statisticsGroup.POST("/group/active", m.GetActiveGroup)
 	}
+
 	callback := r.Group("/callbackExample")
 	{
 		callback.POST("/callbackBeforeSendSingleMsgCommand", m.CallbackExample)
