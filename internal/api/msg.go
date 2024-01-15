@@ -423,7 +423,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		ServerMsgID:      req.ServerMsgID,
 		SenderPlatformID: req.SenderPlatformID,
 		SenderNickname:   user.Nickname,
-		SenderFaceURL:    user.UserID,
+		SenderFaceURL:    user.FaceURL,
 		SessionType:      req.SessionType,
 		MsgFrom:          req.MsgFrom,
 		ContentType:      req.ContentType,

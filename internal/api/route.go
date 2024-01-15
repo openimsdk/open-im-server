@@ -201,7 +201,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 		msgGroup.POST("/get_server_time", m.GetServerTime)
 
-		msgGroup.POST("/callbackBeforeSendSingleMsgCommand", m.CallbackExample)
 	}
 	// Conversation
 	conversationGroup := r.Group("/conversation", ParseToken)
@@ -221,6 +220,10 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		statisticsGroup.POST("/user/active", m.GetActiveUser)
 		statisticsGroup.POST("/group/create", g.GroupCreateCount)
 		statisticsGroup.POST("/group/active", m.GetActiveGroup)
+	}
+	callback := r.Group("/callbackExample")
+	{
+		callback.POST("/callbackBeforeSendSingleMsgCommand", m.CallbackExample)
 	}
 	return r
 }
