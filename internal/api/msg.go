@@ -15,6 +15,7 @@
 package api
 
 import (
+	"encoding/json"
 	"github.com/OpenIMSDK/protocol/auth"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
@@ -409,25 +410,35 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 
 	apiresp.GinSuccess(c, resp)
-	if req.SendID == config.Config.IMAdmin.UserID[0] {
+	imAdmin := config.Config.IMAdmin.UserID[0]
+	if req.SendID == imAdmin || (req.SendID != imAdmin && req.SendID != imAdmin) {
 		return
 	}
 
 	url := "http://127.0.0.1:10002/auth/user_token"
 	header := map[string]string{}
 	header["operationID"] = req.OperationID
-	input_token := auth.UserTokenReq{
+	input_token := &auth.UserTokenReq{
 		Secret:     config.Config.Secret,
 		PlatformID: req.SenderPlatformID,
 		UserID:     config.Config.IMAdmin.UserID[0],
 	}
 	output_token := &auth.UserTokenResp{}
 
-	if err := http.PostReturn(c, url, header, input_token, output_token, 10); err != nil {
+	data, err := http.Post(c, url, header, input_token, 10)
+	if err != nil {
 		log.ZError(c, "CallbackExample get Sender token failed", err)
 		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
 		return
 	}
+
+	if err = json.Unmarshal(data, output_token); err != nil {
+		log.ZError(c, "CallbackExample unmarshal userToken failed", err)
+		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+		return
+	}
+
+	log.ZDebug(c, "CallbackExample get User Token", "token", output_token)
 
 	user, err := m.userRpcClient.GetUserInfo(c, req.RecvID)
 	if err != nil {
@@ -456,8 +467,16 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	header["token"] = output_token.Token
 	output := &msg.SendMsgResp{}
 
-	if err := http.PostReturn(c, url, header, input, output, 10); err != nil {
+	log.ZDebug(c, "CallbackExample Header", "header", header)
+
+	b, err := http.Post(c, url, header, input, 10)
+	if err != nil {
 		log.ZError(c, "CallbackExample send message failed", err)
+		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+		return
+	}
+	if err = json.Unmarshal(b, output); err != nil {
+		log.ZError(c, "CallbackExample unmarshal failed", err)
 		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
 		return
 	}
