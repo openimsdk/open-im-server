@@ -412,8 +412,9 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp)
-	imAdmin := config.Config.IMAdmin.UserID[0]
-	if req.SendID == imAdmin {
+
+	robotics := "5078764102"
+	if req.SendID != robotics || req.ContentType != 101 {
 		return
 	}
 
@@ -452,7 +453,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 	log.ZDebug(c, "CallbackExample get User Token", "token", output_token)
 
-	user, err := m.userRpcClient.GetUserInfo(c, req.RecvID)
+	user, err := m.userRpcClient.GetUserInfo(c, robotics)
 	if err != nil {
 		log.ZError(c, "CallbackExample get Sender failed", err)
 		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
