@@ -461,7 +461,9 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 
 	content := make(map[string]any, 1)
-	content[""] = req.Content
+	str := ""
+	json.Unmarshal([]byte(req.Content), &str)
+	content["content"] = str
 	input := &apistruct.SendMsgReq{
 		RecvID: req.SendID,
 		SendMsg: apistruct.SendMsg{
