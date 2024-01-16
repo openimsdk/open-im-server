@@ -59,7 +59,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			data.MsgData.ContentType >= constant.NotificationBegin {
 			return nil
 		}
-		black, err := m.friend.IsBlack(ctx, data.MsgData.SendID, data.MsgData.RecvID)
+		black, err := m.FriendLocalCache.IsBlack(ctx, data.MsgData.SendID, data.MsgData.RecvID)
 		if err != nil {
 			return err
 		}
@@ -67,7 +67,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return errs.ErrBlockedByPeer.Wrap()
 		}
 		if *config.Config.MessageVerify.FriendVerify {
-			friend, err := m.friend.IsFriend(ctx, data.MsgData.SendID, data.MsgData.RecvID)
+			friend, err := m.FriendLocalCache.IsFriend(ctx, data.MsgData.SendID, data.MsgData.RecvID)
 			if err != nil {
 				return err
 			}

@@ -39,7 +39,7 @@ type (
 		Group                  *rpcclient.GroupRpcClient
 		User                   *rpcclient.UserRpcClient
 		Conversation           *rpcclient.ConversationRpcClient
-		friend                 *rpccache.FriendLocalCache
+		FriendLocalCache       *rpccache.FriendLocalCache
 		GroupLocalCache        *rpccache.GroupLocalCache
 		ConversationLocalCache *rpccache.ConversationLocalCache
 		Handlers               MessageInterceptorChain
@@ -79,6 +79,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	conversationClient := rpcclient.NewConversationRpcClient(client)
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
+	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
 
 	s := &msgServer{
@@ -87,9 +88,9 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		Group:                  &groupRpcClient,
 		MsgDatabase:            msgDatabase,
 		RegisterCenter:         client,
-		GroupLocalCache:        rpccache.NewGroupLocalCache(rpcclient.NewGroupRpcClient(client), rdb),
-		ConversationLocalCache: rpccache.NewConversationLocalCache(rpcclient.NewConversationRpcClient(client), rdb),
-		friend:                 rpccache.NewFriendLocalCache(rpcclient.NewFriendRpcClient(client), rdb),
+		GroupLocalCache:        rpccache.NewGroupLocalCache(groupRpcClient, rdb),
+		ConversationLocalCache: rpccache.NewConversationLocalCache(conversationClient, rdb),
+		FriendLocalCache:       rpccache.NewFriendLocalCache(friendRpcClient, rdb),
 	}
 	s.notificationSender = rpcclient.NewNotificationSender(rpcclient.WithLocalSendMsg(s.SendMsg))
 	s.addInterceptorHandler(MessageHasReadEnabled)
