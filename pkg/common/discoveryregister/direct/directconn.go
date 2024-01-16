@@ -84,14 +84,19 @@ func (cm *ConnManager) GetConns(ctx context.Context,
 	}
 	ports := getServiceAddresses()[serviceName]
 	var connections []*grpc.ClientConn
+	var result string
 	for _, port := range ports {
-		conn, err := dialService(ctx, fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", port), append(cm.additionalOpts, opts...)...)
-		if err != nil {
-			fmt.Errorf("connect to port %s failed,serviceName %s, IP %s", port, serviceName, config2.Config.Rpc.ListenIP)
-			continue
+		if result != "" {
+			result = result + "," + fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", port)
+		} else {
+			result = fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", port)
 		}
-		connections = append(connections, conn)
 	}
+	conn, err := dialService(ctx, result, append(cm.additionalOpts, opts...)...)
+	if err != nil {
+		fmt.Errorf("connect to port %s failed,serviceName %s, IP %s", result, serviceName, config2.Config.Rpc.ListenIP)
+	}
+	connections = append(connections, conn)
 	if len(connections) == 0 {
 		return nil, fmt.Errorf("no connections found for service: %s", serviceName)
 	}
@@ -106,11 +111,18 @@ func (cm *ConnManager) GetConn(ctx context.Context, serviceName string, opts ...
 	if !ok {
 		return nil, errs.Wrap(errors.New("unknown service name"), "serviceName", serviceName)
 	}
-	randomIndex := rand.Intn(len(address))
+	var result string
+	for _, addr := range address {
+		if result != "" {
+			result = result + "," + fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", addr)
+		} else {
+			result = fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", addr)
+		}
+	}
 	// Try to dial a new connection
-	conn, err := dialService(ctx, fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", address[randomIndex]), append(cm.additionalOpts, opts...)...)
+	conn, err := dialService(ctx, result, append(cm.additionalOpts, opts...)...)
 	if err != nil {
-		return nil, errs.Wrap(err, "address", fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", address[randomIndex]))
+		return nil, errs.Wrap(err, "address", result)
 	}
 
 	// Store the new connection
