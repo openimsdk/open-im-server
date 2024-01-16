@@ -153,7 +153,7 @@ func checkServiceHealth(address string) bool {
 
 const (
 	slashSeparator = "/"
-	// EndpointSepChar is the separator cha in endpoints.
+	// EndpointSepChar is the separator char in endpoints.
 	EndpointSepChar = ','
 
 	subsetSize = 32
@@ -188,12 +188,14 @@ func (n nopResolver) Close() {
 
 func (cm *ConnManager) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (
 	resolver.Resolver, error) {
+
 	endpoints := strings.FieldsFunc(GetEndpoints(target), func(r rune) bool {
 		return r == EndpointSepChar
 	})
+	log.ZDebug(context.Background(), "Build", "endpoints", endpoints)
 	endpoints = subset(endpoints, subsetSize)
 	addrs := make([]resolver.Address, 0, len(endpoints))
-
+	log.ZDebug(context.Background(), "Build", "addrs", addrs)
 	for _, val := range endpoints {
 		addrs = append(addrs, resolver.Address{
 			Addr: val,
