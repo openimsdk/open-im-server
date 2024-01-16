@@ -92,29 +92,30 @@ jobs:
 
     - name: Exec OpenIM API test
       run: |
-        touch /tmp/test.md
-        echo "# OpenIM Test" >> /tmp/test.md
-        echo "## OpenIM API Test" >> /tmp/test.md
-        echo "<details><summary>Command Output for OpenIM API Test</summary>" >> /tmp/test.md
-        echo "<pre><code>" >> /tmp/test.md
-        sudo make test-api | tee -a /tmp/test.md
-        echo "</code></pre>" >> /tmp/test.md
-        echo "</details>" >> /tmp/test.md
+        mkdir -p ./tmp
+        touch ./tmp/test.md
+        echo "# OpenIM Test" >> ./tmp/test.md
+        echo "## OpenIM API Test" >> ./tmp/test.md
+        echo "<details><summary>Command Output for OpenIM API Test</summary>" >> ./tmp/test.md
+        echo "<pre><code>" >> ./tmp/test.md
+        sudo make test-api | tee -a ./tmp/test.md
+        echo "</code></pre>" >> ./tmp/test.md
+        echo "</details>" >> ./tmp/test.md
 
     - name: Exec OpenIM E2E Test
       run: |
-        echo "" >> /tmp/test.md
-        echo "## OpenIM E2E Test" >> /tmp/test.md
-        echo "<details><summary>Command Output for OpenIM E2E Test</summary>" >> /tmp/test.md
-        echo "<pre><code>" >> /tmp/test.md
-        sudo make test-e2e | tee -a /tmp/test.md
-        echo "</code></pre>" >> /tmp/test.md
-        echo "</details>" >> /tmp/test.md
+        echo "" >> ./tmp/test.md
+        echo "## OpenIM E2E Test" >> ./tmp/test.md
+        echo "<details><summary>Command Output for OpenIM E2E Test</summary>" >> ./tmp/test.md
+        echo "<pre><code>" >> ./tmp/test.md
+        sudo make test-e2e | tee -a ./tmp/test.md
+        echo "</code></pre>" >> ./tmp/test.md
+        echo "</details>" >> ./tmp/test.md
 
     - name: Comment PR with file
       uses: thollander/actions-comment-pull-request@v2
       with:
-        filePath: /tmp/test.md
+        filePath: ./tmp/test.md
         comment_tag: nrt_file
         reactions: eyes, rocket
         mode: recreate

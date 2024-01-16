@@ -37,7 +37,6 @@ Variables can be set as above, Environment variables can also be set
 example:
 
 ```bash
-$ export OPENIM_WEB_DIST_PATH="/app/dist"
 $ export OPENIM_WEB_PPRT="11001"
 ```
 

@@ -108,7 +108,7 @@ export CHAT_IMAGE_VERSION="main"
 export SERVER_IMAGE_VERSION="main"
 ```
 
-These variables are stored within the [`environment.sh`](https://github.com/OpenIMSDK/openim-docker/blob/main/scripts/install/environment.sh) configuration:
+These variables are stored within the [`environment.sh`](https://github.com/OpenIMSDK/open-im-server/blob/main/scripts/install/environment.sh) configuration:
 
 ```bash
 readonly CHAT_IMAGE_VERSION=${CHAT_IMAGE_VERSION:-'main'}
@@ -448,7 +448,7 @@ This section involves configuring the log settings, including storage location, 
 
 | Parameter                 | Example Value            | Description                       |
 | ------------------------- | ------------------------ | --------------------------------- |
-| LOG_STORAGE_LOCATION      | ""${OPENIM_ROOT}"/logs/" | Location for storing logs         |
+| LOG_STORAGE_LOCATION      | "${OPENIM_ROOT}/logs/" | Location for storing logs         |
 | LOG_ROTATION_TIME         | "24"                     | Log rotation time (in hours)      |
 | LOG_REMAIN_ROTATION_COUNT | "2"                      | Number of log rotations to retain |
 | LOG_REMAIN_LOG_LEVEL      | "6"                      | Log level to retain               |

@@ -30,7 +30,7 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 # CPU core number
-pushd ""${OPENIM_ROOT}"/tools/ncpu" >/dev/null
+pushd "${OPENIM_ROOT}/tools/ncpu" >/dev/null
   cpu_count=$(go run .)
 popd >/dev/null
 
