@@ -19,32 +19,15 @@ func NewGroupLocalCache(client rpcclient.GroupRpcClient, cli redis.UniversalClie
 			localcache.WithLocalSlotSize(lc.SlotSize),
 		),
 	}
-	go subscriberRedisDeleteCache(context.Background(), cli, lc.Topic, x.local.DelLocal)
+	if lc.Enable() {
+		go subscriberRedisDeleteCache(context.Background(), cli, lc.Topic, x.local.DelLocal)
+	}
 	return x
 }
 
 type GroupLocalCache struct {
 	client rpcclient.GroupRpcClient
 	local  localcache.Cache[any]
-}
-
-type listMap[V comparable] struct {
-	List []V
-	Map  map[V]struct{}
-}
-
-func newListMap[V comparable](values []V, err error) (*listMap[V], error) {
-	if err != nil {
-		return nil, err
-	}
-	lm := &listMap[V]{
-		List: values,
-		Map:  make(map[V]struct{}, len(values)),
-	}
-	for _, value := range values {
-		lm.Map[value] = struct{}{}
-	}
-	return lm, nil
 }
 
 func (g *GroupLocalCache) getGroupMemberIDs(ctx context.Context, groupID string) (val *listMap[string], err error) {

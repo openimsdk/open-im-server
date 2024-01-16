@@ -19,7 +19,9 @@ func NewConversationLocalCache(client rpcclient.ConversationRpcClient, cli redis
 			localcache.WithLocalSlotSize(lc.SlotSize),
 		),
 	}
-	go subscriberRedisDeleteCache(context.Background(), cli, lc.Topic, x.local.DelLocal)
+	if lc.Enable() {
+		go subscriberRedisDeleteCache(context.Background(), cli, lc.Topic, x.local.DelLocal)
+	}
 	return x
 }
 

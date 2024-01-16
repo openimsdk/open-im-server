@@ -144,6 +144,7 @@ func (m *msgServer) sendMsgNotification(
 }
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
+	log.ZDebug(ctx, "sendMsgSingleChat return")
 	if err := m.messageVerification(ctx, req); err != nil {
 		return nil, err
 	}

@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/log"
 	"math/rand"
 	"strconv"
 	"time"
@@ -186,7 +187,8 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(
 	sessionType int,
 	pb *msg.SendMsgReq,
 ) (bool, error) {
-	opt, err := m.User.GetUserGlobalMsgRecvOpt(ctx, userID)
+	defer log.ZDebug(ctx, "modifyMessageByUserMessageReceiveOpt return")
+	opt, err := m.User.GetUserGlobalMsgRecvOpt(ctx, userID) // todo local cache
 	if err != nil {
 		return false, err
 	}
@@ -202,7 +204,7 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(
 		return true, nil
 	}
 	// conversationID := utils.GetConversationIDBySessionType(conversationID, sessionType)
-	singleOpt, err := m.Conversation.GetSingleConversationRecvMsgOpt(ctx, userID, conversationID)
+	singleOpt, err := m.Conversation.GetSingleConversationRecvMsgOpt(ctx, userID, conversationID) // todo local cache
 	if errs.ErrRecordNotFound.Is(err) {
 		return true, nil
 	} else if err != nil {
