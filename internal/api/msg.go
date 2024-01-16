@@ -435,8 +435,6 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 	output_token := &token{}
 
-	log.ZDebug(c, "CallbackExample get User Token", "token", output_token)
-
 	data, err := http2.Post(c, url, header, input_token, 10)
 	if err != nil {
 		log.ZError(c, "CallbackExample get Sender token failed", err)
@@ -473,7 +471,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			Content:          content,
 			ContentType:      req.ContentType,
 			SessionType:      req.SessionType,
-			SendTime:         time.Now().Unix(),
+			SendTime:         time.Now().UnixNano() / 1e6,
 		},
 	}
 
@@ -506,6 +504,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		ClientMsgID: output.Data.ClientMsgID,
 		SendTime:    output.Data.SendTime,
 	}
+	log.ZDebug(c, "CallbackExample output", "output", res)
 
 	apiresp.GinSuccess(c, res)
 }
