@@ -460,7 +460,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		return
 	}
 
-	content := map[string]any{}
+	content := make(map[string]any, 1)
 	content["content"] = req.Content
 	input := &apistruct.SendMsgReq{
 		RecvID: req.SendID,
