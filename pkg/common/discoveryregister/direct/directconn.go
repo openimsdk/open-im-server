@@ -195,12 +195,13 @@ func (cm *ConnManager) Build(target resolver.Target, cc resolver.ClientConn, _ r
 	log.ZDebug(context.Background(), "Build", "endpoints", endpoints)
 	endpoints = subset(endpoints, subsetSize)
 	addrs := make([]resolver.Address, 0, len(endpoints))
-	log.ZDebug(context.Background(), "Build", "addrs", addrs)
+
 	for _, val := range endpoints {
 		addrs = append(addrs, resolver.Address{
 			Addr: val,
 		})
 	}
+	log.ZDebug(context.Background(), "Build", "addrs", addrs)
 	if err := cc.UpdateState(resolver.State{
 		Addresses: addrs,
 	}); err != nil {
