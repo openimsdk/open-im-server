@@ -119,6 +119,8 @@ func (cm *ConnManager) GetConn(ctx context.Context, serviceName string, opts ...
 			result = fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", addr)
 		}
 	}
+	log.ZDebug(ctx, "getConn address", "result", result)
+	log.ZDebug(ctx, "getConn address", "address", address)
 	// Try to dial a new connection
 	conn, err := dialService(ctx, result, append(cm.additionalOpts, opts...)...)
 	if err != nil {
