@@ -15,15 +15,15 @@ type ServiceAddresses map[string]string
 
 func getServiceAddresses() ServiceAddresses {
 	return ServiceAddresses{
-		config2.Config.RpcRegisterName.OpenImUserName:           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImUserName+":%d", config2.Config.RpcPort.OpenImUserPort[0]),
-		config2.Config.RpcRegisterName.OpenImFriendName:         fmt.Sprintf(config2.Config.RpcRegisterName.OpenImFriendName+":%d", config2.Config.RpcPort.OpenImFriendPort[0]),
-		config2.Config.RpcRegisterName.OpenImMsgName:            fmt.Sprintf(config2.Config.RpcRegisterName.OpenImMsgName+":%d", config2.Config.RpcPort.OpenImMessagePort[0]),
-		config2.Config.RpcRegisterName.OpenImMessageGatewayName: fmt.Sprintf(config2.Config.RpcRegisterName.OpenImMessageGatewayName+":%d", config2.Config.LongConnSvr.OpenImMessageGatewayPort[0]),
-		config2.Config.RpcRegisterName.OpenImGroupName:          fmt.Sprintf(config2.Config.RpcRegisterName.OpenImGroupName+":%d", config2.Config.RpcPort.OpenImGroupPort[0]),
-		config2.Config.RpcRegisterName.OpenImAuthName:           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImAuthName+":%d", config2.Config.RpcPort.OpenImAuthPort[0]),
-		config2.Config.RpcRegisterName.OpenImPushName:           fmt.Sprintf(config2.Config.RpcRegisterName.OpenImPushName+":%d", config2.Config.RpcPort.OpenImPushPort[0]),
-		config2.Config.RpcRegisterName.OpenImConversationName:   fmt.Sprintf(config2.Config.RpcRegisterName.OpenImConversationName+":%d", config2.Config.RpcPort.OpenImConversationPort[0]),
-		config2.Config.RpcRegisterName.OpenImThirdName:          fmt.Sprintf(config2.Config.RpcRegisterName.OpenImThirdName+":%d", config2.Config.RpcPort.OpenImThirdPort[0]),
+		config2.Config.RpcRegisterName.OpenImUserName:           fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImUserPort[0]),
+		config2.Config.RpcRegisterName.OpenImFriendName:         fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImFriendPort[0]),
+		config2.Config.RpcRegisterName.OpenImMsgName:            fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImMessagePort[0]),
+		config2.Config.RpcRegisterName.OpenImMessageGatewayName: fmt.Sprintf("localhost:"+":%d", config2.Config.LongConnSvr.OpenImMessageGatewayPort[0]),
+		config2.Config.RpcRegisterName.OpenImGroupName:          fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImGroupPort[0]),
+		config2.Config.RpcRegisterName.OpenImAuthName:           fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImAuthPort[0]),
+		config2.Config.RpcRegisterName.OpenImPushName:           fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImPushPort[0]),
+		config2.Config.RpcRegisterName.OpenImConversationName:   fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImConversationPort[0]),
+		config2.Config.RpcRegisterName.OpenImThirdName:          fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImThirdPort[0]),
 	}
 }
 
@@ -134,3 +134,8 @@ func checkServiceHealth(address string) bool {
 	conn.Close()
 	return true
 }
+
+//func (cm *ConnManager) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (
+//	resolver.Resolver, error) {
+//
+//}
