@@ -204,13 +204,7 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(
 		return true, nil
 	}
 	// conversationID := utils.GetConversationIDBySessionType(conversationID, sessionType)
-	log.ZDebug(ctx, "GetSingleConversationRecvMsgOpt req", "userID", userID, "conversationID", conversationID)
-	singleOpt, err := m.Conversation.GetSingleConversationRecvMsgOpt(ctx, userID, conversationID) // todo local cache
-	if err == nil {
-		log.ZDebug(ctx, "GetSingleConversationRecvMsgOpt resp", "userID", userID, "conversationID", conversationID, "RecvMsgOpt", singleOpt)
-	} else {
-		log.ZError(ctx, "GetSingleConversationRecvMsgOpt resp", err, "userID", userID, "conversationID", conversationID, "RecvMsgOpt", singleOpt)
-	}
+	singleOpt, err := m.ConversationLocalCache.GetSingleConversationRecvMsgOpt(ctx, userID, conversationID)
 	if errs.ErrRecordNotFound.Is(err) {
 		return true, nil
 	} else if err != nil {

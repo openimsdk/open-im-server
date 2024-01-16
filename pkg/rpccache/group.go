@@ -12,6 +12,7 @@ import (
 
 func NewGroupLocalCache(client rpcclient.GroupRpcClient, cli redis.UniversalClient) *GroupLocalCache {
 	lc := config.Config.LocalCache.Group
+	log.ZDebug(context.Background(), "GroupLocalCache", "topic", lc.Topic, "slotNum", lc.SlotNum, "slotSize", lc.SlotSize, "enable", lc.Enable())
 	x := &GroupLocalCache{
 		client: client,
 		local: localcache.New[any](
