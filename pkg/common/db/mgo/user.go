@@ -77,8 +77,15 @@ func (u *UserMgo) Page(ctx context.Context, pagination pagination.Pagination) (c
 	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, bson.M{}, pagination)
 }
 
-func (u *UserMgo) PageFindUser(ctx context.Context, level int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
-	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, bson.M{"app_manger_level": level}, pagination)
+func (u *UserMgo) PageFindUser(ctx context.Context, level1 int64, level2 int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+	query := bson.M{
+		"$or": []bson.M{
+			{"app_manger_level": level1},
+			{"app_manger_level": level2},
+		},
+	}
+
+	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, query, pagination)
 }
 
 func (u *UserMgo) GetAllUserID(ctx context.Context, pagination pagination.Pagination) (int64, []string, error) {
