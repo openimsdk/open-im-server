@@ -15,15 +15,15 @@ type ServiceAddresses map[string]string
 
 func getServiceAddresses() ServiceAddresses {
 	return ServiceAddresses{
-		config2.Config.RpcRegisterName.OpenImUserName:           fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImUserPort[0]),
-		config2.Config.RpcRegisterName.OpenImFriendName:         fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImFriendPort[0]),
-		config2.Config.RpcRegisterName.OpenImMsgName:            fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImMessagePort[0]),
-		config2.Config.RpcRegisterName.OpenImMessageGatewayName: fmt.Sprintf("localhost"+":%d", config2.Config.LongConnSvr.OpenImMessageGatewayPort[0]),
-		config2.Config.RpcRegisterName.OpenImGroupName:          fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImGroupPort[0]),
-		config2.Config.RpcRegisterName.OpenImAuthName:           fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImAuthPort[0]),
-		config2.Config.RpcRegisterName.OpenImPushName:           fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImPushPort[0]),
-		config2.Config.RpcRegisterName.OpenImConversationName:   fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImConversationPort[0]),
-		config2.Config.RpcRegisterName.OpenImThirdName:          fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImThirdPort[0]),
+		config2.Config.RpcRegisterName.OpenImUserName:           fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", config2.Config.RpcPort.OpenImUserPort[0]),
+		config2.Config.RpcRegisterName.OpenImFriendName:         fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", config2.Config.RpcPort.OpenImFriendPort[0]),
+		config2.Config.RpcRegisterName.OpenImMsgName:            fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", config2.Config.RpcPort.OpenImMessagePort[0]),
+		config2.Config.RpcRegisterName.OpenImMessageGatewayName: fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", config2.Config.LongConnSvr.OpenImMessageGatewayPort[0]),
+		config2.Config.RpcRegisterName.OpenImGroupName:          fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", config2.Config.RpcPort.OpenImGroupPort[0]),
+		config2.Config.RpcRegisterName.OpenImAuthName:           fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", config2.Config.RpcPort.OpenImAuthPort[0]),
+		config2.Config.RpcRegisterName.OpenImPushName:           fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", config2.Config.RpcPort.OpenImPushPort[0]),
+		config2.Config.RpcRegisterName.OpenImConversationName:   fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", config2.Config.RpcPort.OpenImConversationPort[0]),
+		config2.Config.RpcRegisterName.OpenImThirdName:          fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", config2.Config.RpcPort.OpenImThirdPort[0]),
 	}
 }
 
@@ -95,7 +95,7 @@ func (cm *ConnManager) GetConn(ctx context.Context, serviceName string, opts ...
 		return nil, errs.Wrap(errors.New("unknown service name"), "serviceName", serviceName)
 	}
 
-	conn, err := dialService(address, opts...)
+	conn, err := dialService(address, append(cm.additionalOpts, opts...)...)
 	if err != nil {
 		return nil, err
 	}
