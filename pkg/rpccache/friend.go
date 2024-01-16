@@ -12,6 +12,7 @@ import (
 
 func NewFriendLocalCache(client rpcclient.FriendRpcClient, cli redis.UniversalClient) *FriendLocalCache {
 	lc := config.Config.LocalCache.Friend
+	log.ZDebug(context.Background(), "FriendLocalCache", "topic", lc.Topic, "slotNum", lc.SlotNum, "slotSize", lc.SlotSize, "enable", lc.Enable())
 	x := &FriendLocalCache{
 		client: client,
 		local: localcache.New[any](

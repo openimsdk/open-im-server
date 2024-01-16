@@ -13,6 +13,7 @@ import (
 
 func NewConversationLocalCache(client rpcclient.ConversationRpcClient, cli redis.UniversalClient) *ConversationLocalCache {
 	lc := config.Config.LocalCache.Conversation
+	log.ZDebug(context.Background(), "ConversationLocalCache", "topic", lc.Topic, "slotNum", lc.SlotNum, "slotSize", lc.SlotSize, "enable", lc.Enable())
 	x := &ConversationLocalCache{
 		client: client,
 		local: localcache.New[any](
