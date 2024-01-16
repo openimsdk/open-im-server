@@ -26,9 +26,9 @@
 #   ./openim-man.sh openim::man::status       - Check installation status
 #
 # Dependencies:
-#   - Assumes there's a common.sh in ""${OPENIM_ROOT}"/scripts/install/" 
+#   - Assumes there's a common.sh in "${OPENIM_ROOT}/scripts/install/" 
 #     containing shared functions and variables.
-#   - Relies on the script ""${OPENIM_ROOT}"/scripts/update-generated-docs.sh" 
+#   - Relies on the script "${OPENIM_ROOT}/scripts/update-generated-docs.sh" 
 #     to generate the man pages.
 #
 # Notes:
@@ -58,7 +58,7 @@ function openim::man::install() {
     pushd "${OPENIM_ROOT}" > /dev/null
 
     # Generate man pages for each component
-    ""${OPENIM_ROOT}"/scripts/update-generated-docs.sh"
+    "${OPENIM_ROOT}/scripts/update-generated-docs.sh"
     openim::common::sudo "cp docs/man/man1/* /usr/share/man/man1/"
     
     # Verify installation status

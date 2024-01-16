@@ -30,6 +30,7 @@ OPENIM_VERBOSE=4
 
 openim::log::info "\n# Begin to check all openim service"
 
+openim::log::status "Check all dependent service ports"
 # Elegant printing function
 # Elegant printing function
 print_services_and_ports() {
@@ -60,7 +61,7 @@ print_services_and_ports "${OPENIM_DEPENDENCY_TARGETS[@]}" "${OPENIM_DEPENDENCY_
 # OpenIM check
 echo "++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 openim::log::info "\n## Check all dependent service ports"
-echo "+++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
+echo "++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
 
 set +e
 

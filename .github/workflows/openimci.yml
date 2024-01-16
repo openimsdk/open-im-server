@@ -18,6 +18,7 @@ on:
   push:
     branches:
         - main
+        - release-*
     paths-ignore:
         - "docs/**"
         - "README.md"
@@ -26,6 +27,7 @@ on:
   pull_request:
     branches:
         - main
+        - release-*
     paths-ignore:
         - "README.md"
         - "README_zh-CN.md"
@@ -36,21 +38,19 @@ env:
   GO_VERSION: "1.19"
   GOLANGCI_VERSION: "v1.50.1"
 
-
 jobs:
   openim:
     name: Test with go ${{ matrix.go_version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
         contents: write
+        pull-requests: write
     environment:
       name: openim
-
     strategy:
       matrix:
         go_version: ["1.19","1.20","1.21"]
         os: [ubuntu-latest]
-
     steps:
     - name: Setup
       uses: actions/checkout@v4
@@ -83,6 +83,11 @@ jobs:
     - name: Build Source
       run: sudo make build
 
+    - name: Build multiarch PLATFORMS
+      if: startsWith(github.ref, 'refs/heads/release-')
+      run: |
+        sudo make multiarch
+
     - name: Cleanup Build
       run: sudo make clean
 
@@ -109,8 +114,11 @@ jobs:
       continue-on-error: true
 
   openim-start:
-    name: Test OpenIM install/start on ${{ matrix.os }}
+    name: Test OpenIM install/start on ${{ matrix.os }}-${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
+    permissions:
+        contents: write
+        pull-requests: write
     environment:
       name: openim
     strategy:
@@ -129,15 +137,59 @@ jobs:
       run: |
         sudo make install
 
+    # - name: Check the OpenIM environment and status
+    #   run: |
+    #     sudo docker images
+    #     sudo docker ps
+
+    - name: Check the OpenIM environment and status
+      if: runner.os == 'Linux' && matrix.arch == 'amd64'
+      id: docker_info
+      run: |
+        sleep 30
+        echo "images<<EOF" >> $GITHUB_ENV
+        sudo docker images >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+        echo "containers<<EOF" >> $GITHUB_ENV
+        sudo docker ps >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    - name: Comment PR
+      uses: thollander/actions-comment-pull-request@v2
+      if: runner.os == 'Linux' && matrix.arch == 'amd64'
+      with:
+        message: |
+          > [!TIP]
+          > Run make install to check the status
+
+          ### Docker Images:
+          <details><summary>Click to expand docker images</summary>
+          ```bash
+          ${{ env.images }}
+          ```
+          </details>
+
+          ### Docker Processes:
+          <details><summary>Click to expand docker ps</summary>
+          ```bash
+          ${{ env.containers }}
+          ```
+          </details>
+        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+
   execute-scripts:
-    name: Execute OpenIM Script On ${{ matrix.os }}
+    name: Execute OpenIM Script On ${{ matrix.os }}-${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
+    permissions:
+        contents: write
+        pull-requests: write
     environment:
       name: openim
     strategy:
       matrix:
-        go_version: ["1.20"]
+        go_version: ["1.21"]
         os: ["ubuntu-latest", "macos-latest"]
+        arch: [arm64, armv7, amd64]
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -155,7 +207,7 @@ jobs:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     # - name: Install latest Bash (macOS only)
-    #   if: runner.os == 'macOS'
+    #   if: runner.os == 'macOS' && matrix.arch == 'arm64'
     #   run: |
     #     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     #     brew update
@@ -175,7 +227,7 @@ jobs:
         sudo sleep 20
 
     # - name: Set up Docker for macOS
-    #   if: runner.os == 'macOS'
+    #   if: runner.os == 'macOS' && matrix.arch == 'arm64'
     #   run: |
     #     brew install --cask docker
     #     open /Applications/Docker.app
@@ -201,29 +253,27 @@ jobs:
     - name: Build, Start, Check Services and Print Logs for Ubuntu
       if: runner.os == 'Linux'
       run: |
-        sudo make build && \
-        sudo make start && \
-        sudo make check || \
-        (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
+        sudo make build
+        sudo make start
+        sudo make check
 
     - name: Restart Services and Print Logs for Ubuntu
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && matrix.arch == 'amd64'
       run: |
         sudo make restart
         sudo make check
 
-    # - name: Build, Start, Check Services and Print Logs for macOS
-    #   if: runner.os == 'macOS'
-    #   run: |
-    #     make init && \
-    #     make build && \
-    #     make start && \
-    #     make check || \
-    #     (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
+    - name: Build, Start, Check Services and Print Logs for macOS
+      if: runner.os == 'macOS' && matrix.arch == 'arm64'
+      run: |
+        make build
 
   openim-test-build-image:
     name: Build OpenIM Docker Image
     runs-on: ubuntu-latest
+    permissions:
+        contents: write
+        pull-requests: write
     environment:
       name: openim
     steps:
@@ -245,3 +295,9 @@ jobs:
       run: |
         sudo make init
         sudo make image
+
+    - name: Get OpenIM Docker Images Status
+      id: docker_processes
+      run: |
+        sudo docker images
+        sudo docker ps

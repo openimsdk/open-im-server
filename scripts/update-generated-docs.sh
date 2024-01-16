@@ -23,7 +23,7 @@ set -o nounset
 set -o pipefail
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-source "${OPENIM_ROOT}/hack/lib/init.sh"
+source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 openim::golang::setup_env
 

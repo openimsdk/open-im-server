@@ -320,6 +320,14 @@ callback:
     enable: ${CALLBACK_ENABLE}
     timeout: ${CALLBACK_TIMEOUT}
     failedContinue: ${CALLBACK_FAILED_CONTINUE}
+  beforeUpdateUserInfoEx:
+    enable:  ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
+  afterUpdateUserInfoEx:
+    enable:  ${CALLBACK_ENABLE}
+    timeout: ${CALLBACK_TIMEOUT}
+    failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterSendSingleMsg:
     enable: ${CALLBACK_ENABLE}
     timeout: ${CALLBACK_TIMEOUT}
