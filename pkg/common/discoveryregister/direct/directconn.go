@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"google.golang.org/grpc"
 	"math/rand"
@@ -98,6 +99,7 @@ func (cm *ConnManager) GetConns(ctx context.Context,
 func (cm *ConnManager) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	// Check if there are existing connections for the service
 	if conns, exists := cm.conns[serviceName]; exists && len(conns) > 0 {
+		log.ZDebug(ctx, "getConn", "len(conns)", len(conns))
 		// Return a random connection from the existing connections
 		randomIndex := rand.Intn(len(conns))
 		return conns[randomIndex], nil
@@ -106,6 +108,7 @@ func (cm *ConnManager) GetConn(ctx context.Context, serviceName string, opts ...
 	// Get service addresses
 	addresses := getServiceAddresses()
 	address, ok := addresses[serviceName]
+	log.ZDebug(ctx, "getConn address", "address", address)
 	if !ok {
 		return nil, errs.Wrap(errors.New("unknown service name"), "serviceName", serviceName)
 	}
@@ -113,7 +116,7 @@ func (cm *ConnManager) GetConn(ctx context.Context, serviceName string, opts ...
 	// Try to dial a new connection
 	conn, err := dialService(ctx, fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", address[randomIndex]), append(cm.additionalOpts, opts...)...)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "address", fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", address[randomIndex]))
 	}
 
 	// Store the new connection
