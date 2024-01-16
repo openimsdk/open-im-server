@@ -194,7 +194,7 @@ func (n nopResolver) Close() {
 
 func (cm *ConnManager) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (
 	resolver.Resolver, error) {
-	log.ZDebug(context.Background(), "BUilder")
+	log.ZDebug(context.Background(), "Builder", "target", target)
 	endpoints := strings.FieldsFunc(GetEndpoints(target), func(r rune) bool {
 		return r == EndpointSepChar
 	})
