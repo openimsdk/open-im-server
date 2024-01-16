@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
@@ -84,19 +83,14 @@ func (cm *ConnManager) GetConns(ctx context.Context,
 	}
 	ports := getServiceAddresses()[serviceName]
 	var connections []*grpc.ClientConn
-	var result string
 	for _, port := range ports {
-		if result != "" {
-			result = result + "," + fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", port)
-		} else {
-			result = fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", port)
+		conn, err := dialService(ctx, fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", port), append(cm.additionalOpts, opts...)...)
+		if err != nil {
+			fmt.Errorf("connect to port %s failed,serviceName %s, IP %s", port, serviceName, config2.Config.Rpc.ListenIP)
 		}
+		connections = append(connections, conn)
 	}
-	conn, err := dialService(ctx, result, append(cm.additionalOpts, opts...)...)
-	if err != nil {
-		fmt.Errorf("connect to port %s failed,serviceName %s, IP %s", result, serviceName, config2.Config.Rpc.ListenIP)
-	}
-	connections = append(connections, conn)
+
 	if len(connections) == 0 {
 		return nil, fmt.Errorf("no connections found for service: %s", serviceName)
 	}
@@ -107,7 +101,6 @@ func (cm *ConnManager) GetConn(ctx context.Context, serviceName string, opts ...
 	// Get service addresses
 	addresses := getServiceAddresses()
 	address, ok := addresses[serviceName]
-	log.ZDebug(ctx, "getConn address", "address", address)
 	if !ok {
 		return nil, errs.Wrap(errors.New("unknown service name"), "serviceName", serviceName)
 	}
@@ -119,8 +112,6 @@ func (cm *ConnManager) GetConn(ctx context.Context, serviceName string, opts ...
 			result = fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", addr)
 		}
 	}
-	log.ZDebug(ctx, "getConn address", "result", result)
-	log.ZDebug(ctx, "getConn address", "address", address)
 	// Try to dial a new connection
 	conn, err := dialService(ctx, result, append(cm.additionalOpts, opts...)...)
 	if err != nil {
@@ -206,7 +197,6 @@ func (cm *ConnManager) Build(target resolver.Target, cc resolver.ClientConn, _ r
 	endpoints := strings.FieldsFunc(GetEndpoints(target), func(r rune) bool {
 		return r == EndpointSepChar
 	})
-	log.ZDebug(context.Background(), "Build", "endpoints", endpoints, "target Path", target.URL.Path)
 	endpoints = subset(endpoints, subsetSize)
 	addrs := make([]resolver.Address, 0, len(endpoints))
 
@@ -215,7 +205,6 @@ func (cm *ConnManager) Build(target resolver.Target, cc resolver.ClientConn, _ r
 			Addr: val,
 		})
 	}
-	log.ZDebug(context.Background(), "Build", "addrs", addrs)
 	if err := cc.UpdateState(resolver.State{
 		Addresses: addrs,
 	}); err != nil {
