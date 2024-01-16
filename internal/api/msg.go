@@ -31,6 +31,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
+	pbmsg "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/proto/msg"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -425,8 +426,10 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 
 	type token struct {
-		Token             string `json:"token"`
-		ExpireTimeSeconds int64  `json:"expireTimeSeconds"`
+		ErrCode int                `json:"errCode"`
+		ErrMsg  string             `json:"errMsg"`
+		ErrDlt  string             `json:"errDlt"`
+		Data    auth.UserTokenResp `json:"data,omitempty"`
 	}
 
 	output_token := &token{}
@@ -440,7 +443,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		return
 	}
 
-	log.ZDebug(c, "CallbackExample data Token", "token", output_token)
+	log.ZDebug(c, "CallbackExample data Token", "token", data)
 
 	if err = json.Unmarshal(data, output_token); err != nil {
 		log.ZError(c, "CallbackExample unmarshal userToken failed", err)
@@ -474,11 +477,12 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 
 	url = "http://127.0.0.1:10002/msg/send_msg"
-	header["token"] = output_token.Token
+	header["token"] = output_token.Data.Token
 	type sendResp struct {
-		ServerMsgID string `json:"serverMsgID"`
-		ClientMsgID string `json:"clientMsgID"`
-		SendTime    int64  `json:"sendTime"`
+		ErrCode int               `json:"errCode"`
+		ErrMsg  string            `json:"errMsg"`
+		ErrDlt  string            `json:"errDlt"`
+		Data    pbmsg.SendMsgResp `json:"data,omitempty"`
 	}
 
 	output := &sendResp{}
