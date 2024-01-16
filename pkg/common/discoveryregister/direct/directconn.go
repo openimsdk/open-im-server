@@ -99,14 +99,6 @@ func (cm *ConnManager) GetConns(ctx context.Context,
 }
 
 func (cm *ConnManager) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	// Check if there are existing connections for the service
-	if conns, exists := cm.conns[serviceName]; exists && len(conns) > 0 {
-		log.ZDebug(ctx, "getConn", "len(conns)", len(conns))
-		// Return a random connection from the existing connections
-		randomIndex := rand.Intn(len(conns))
-		return conns[randomIndex], nil
-	}
-
 	// Get service addresses
 	addresses := getServiceAddresses()
 	address, ok := addresses[serviceName]
