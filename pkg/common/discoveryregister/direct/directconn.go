@@ -8,8 +8,10 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/resolver"
 	"math/rand"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -140,7 +142,8 @@ func (cm *ConnManager) CloseConn(conn *grpc.ClientConn) {
 
 func dialService(ctx context.Context, address string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	options := append(opts, grpc.WithInsecure()) // Replace WithInsecure with proper security options
-	conn, err := grpc.DialContext(ctx, address, options...)
+	conn, err := grpc.DialContext(ctx, "mycustomscheme:///"+address, options...)
+
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +159,65 @@ func checkServiceHealth(address string) bool {
 	return true
 }
 
-//func (cm *ConnManager) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (
-//	resolver.Resolver, error) {
-//
-//}
+const (
+	slashSeparator = "/"
+	// EndpointSepChar is the separator cha in endpoints.
+	EndpointSepChar = ','
+
+	subsetSize = 32
+)
+
+// GetEndpoints returns the endpoints from the given target.
+func GetEndpoints(target resolver.Target) string {
+	return strings.Trim(target.URL.Path, slashSeparator)
+}
+func subset(set []string, sub int) []string {
+	rand.Shuffle(len(set), func(i, j int) {
+		set[i], set[j] = set[j], set[i]
+	})
+	if len(set) <= sub {
+		return set
+	}
+
+	return set[:sub]
+}
+
+type nopResolver struct {
+	cc resolver.ClientConn
+}
+
+func (n nopResolver) ResolveNow(options resolver.ResolveNowOptions) {
+
+}
+
+func (n nopResolver) Close() {
+
+}
+
+func (cm *ConnManager) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (
+	resolver.Resolver, error) {
+	endpoints := strings.FieldsFunc(GetEndpoints(target), func(r rune) bool {
+		return r == EndpointSepChar
+	})
+	endpoints = subset(endpoints, subsetSize)
+	addrs := make([]resolver.Address, 0, len(endpoints))
+
+	for _, val := range endpoints {
+		addrs = append(addrs, resolver.Address{
+			Addr: val,
+		})
+	}
+	if err := cc.UpdateState(resolver.State{
+		Addresses: addrs,
+	}); err != nil {
+		return nil, err
+	}
+
+	return &nopResolver{cc: cc}, nil
+}
+func init() {
+	resolver.Register(&ConnManager{})
+}
+func (cm *ConnManager) Scheme() string {
+	return "mycustomscheme" // return your custom scheme name
+}
