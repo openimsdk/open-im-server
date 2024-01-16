@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
@@ -193,7 +194,7 @@ func (n nopResolver) Close() {
 
 func (cm *ConnManager) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (
 	resolver.Resolver, error) {
-
+	log.ZDebug(context.Background(), "BUilder")
 	endpoints := strings.FieldsFunc(GetEndpoints(target), func(r rune) bool {
 		return r == EndpointSepChar
 	})
