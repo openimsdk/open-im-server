@@ -95,7 +95,7 @@ func (cm *ConnManager) GetConn(ctx context.Context, serviceName string, opts ...
 		return nil, errs.Wrap(errors.New("unknown service name"), "serviceName", serviceName)
 	}
 
-	conn, err := dialService(address, append(cm.additionalOpts, opts...)...)
+	conn, err := dialService(ctx, address, append(cm.additionalOpts, opts...)...)
 	if err != nil {
 		return nil, err
 	}
@@ -117,9 +117,9 @@ func (cm *ConnManager) CloseConn(conn *grpc.ClientConn) {
 	}
 }
 
-func dialService(address string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
+func dialService(ctx context.Context, address string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	options := append(opts, grpc.WithInsecure()) // Replace WithInsecure with proper security options
-	conn, err := grpc.DialContext(context.Background(), address, options...)
+	conn, err := grpc.DialContext(ctx, address, options...)
 	if err != nil {
 		return nil, err
 	}
