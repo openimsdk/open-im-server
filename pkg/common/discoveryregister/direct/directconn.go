@@ -15,15 +15,15 @@ type ServiceAddresses map[string]string
 
 func getServiceAddresses() ServiceAddresses {
 	return ServiceAddresses{
-		config2.Config.RpcRegisterName.OpenImUserName:           fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImUserPort[0]),
-		config2.Config.RpcRegisterName.OpenImFriendName:         fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImFriendPort[0]),
-		config2.Config.RpcRegisterName.OpenImMsgName:            fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImMessagePort[0]),
-		config2.Config.RpcRegisterName.OpenImMessageGatewayName: fmt.Sprintf("localhost:"+":%d", config2.Config.LongConnSvr.OpenImMessageGatewayPort[0]),
-		config2.Config.RpcRegisterName.OpenImGroupName:          fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImGroupPort[0]),
-		config2.Config.RpcRegisterName.OpenImAuthName:           fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImAuthPort[0]),
-		config2.Config.RpcRegisterName.OpenImPushName:           fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImPushPort[0]),
-		config2.Config.RpcRegisterName.OpenImConversationName:   fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImConversationPort[0]),
-		config2.Config.RpcRegisterName.OpenImThirdName:          fmt.Sprintf("localhost:"+":%d", config2.Config.RpcPort.OpenImThirdPort[0]),
+		config2.Config.RpcRegisterName.OpenImUserName:           fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImUserPort[0]),
+		config2.Config.RpcRegisterName.OpenImFriendName:         fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImFriendPort[0]),
+		config2.Config.RpcRegisterName.OpenImMsgName:            fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImMessagePort[0]),
+		config2.Config.RpcRegisterName.OpenImMessageGatewayName: fmt.Sprintf("localhost"+":%d", config2.Config.LongConnSvr.OpenImMessageGatewayPort[0]),
+		config2.Config.RpcRegisterName.OpenImGroupName:          fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImGroupPort[0]),
+		config2.Config.RpcRegisterName.OpenImAuthName:           fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImAuthPort[0]),
+		config2.Config.RpcRegisterName.OpenImPushName:           fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImPushPort[0]),
+		config2.Config.RpcRegisterName.OpenImConversationName:   fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImConversationPort[0]),
+		config2.Config.RpcRegisterName.OpenImThirdName:          fmt.Sprintf("localhost"+":%d", config2.Config.RpcPort.OpenImThirdPort[0]),
 	}
 }
 
