@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/OpenIMSDK/tools/log"
 	"google.golang.org/grpc/resolver"
+	"math/rand"
 	"strings"
 )
 
@@ -50,4 +51,31 @@ func init() {
 }
 func (rd *ResolverDirect) Scheme() string {
 	return scheme // return your custom scheme name
+}
+
+// GetEndpoints returns the endpoints from the given target.
+func GetEndpoints(target resolver.Target) string {
+	return strings.Trim(target.URL.Path, slashSeparator)
+}
+func subset(set []string, sub int) []string {
+	rand.Shuffle(len(set), func(i, j int) {
+		set[i], set[j] = set[j], set[i]
+	})
+	if len(set) <= sub {
+		return set
+	}
+
+	return set[:sub]
+}
+
+type nopResolver struct {
+	cc resolver.ClientConn
+}
+
+func (n nopResolver) ResolveNow(options resolver.ResolveNowOptions) {
+
+}
+
+func (n nopResolver) Close() {
+
 }

@@ -7,10 +7,7 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/resolver"
-	"math/rand"
 	"net"
-	"strings"
 	"time"
 )
 
@@ -31,62 +28,62 @@ func getServiceAddresses() ServiceAddresses {
 }
 
 // fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", config2.Config.RpcPort.OpenImUserPort[0])
-type ConnManager struct {
+type ConnDirect struct {
 	additionalOpts        []grpc.DialOption
 	currentServiceAddress string
 	conns                 map[string][]*grpc.ClientConn
 	resolverDirect        *ResolverDirect
 }
 
-func (cm *ConnManager) GetClientLocalConns() map[string][]*grpc.ClientConn {
+func (cd *ConnDirect) GetClientLocalConns() map[string][]*grpc.ClientConn {
 	return nil
 }
 
-func (cm *ConnManager) GetUserIdHashGatewayHost(ctx context.Context, userId string) (string, error) {
+func (cd *ConnDirect) GetUserIdHashGatewayHost(ctx context.Context, userId string) (string, error) {
 	return "", nil
 }
 
-func (cm *ConnManager) Register(serviceName, host string, port int, opts ...grpc.DialOption) error {
+func (cd *ConnDirect) Register(serviceName, host string, port int, opts ...grpc.DialOption) error {
 	return nil
 }
 
-func (cm *ConnManager) UnRegister() error {
+func (cd *ConnDirect) UnRegister() error {
 	return nil
 }
 
-func (cm *ConnManager) CreateRpcRootNodes(serviceNames []string) error {
+func (cd *ConnDirect) CreateRpcRootNodes(serviceNames []string) error {
 	return nil
 }
 
-func (cm *ConnManager) RegisterConf2Registry(key string, conf []byte) error {
+func (cd *ConnDirect) RegisterConf2Registry(key string, conf []byte) error {
 	return nil
 }
 
-func (cm *ConnManager) GetConfFromRegistry(key string) ([]byte, error) {
+func (cd *ConnDirect) GetConfFromRegistry(key string) ([]byte, error) {
 	return nil, nil
 }
 
-func (cm *ConnManager) Close() {
+func (cd *ConnDirect) Close() {
 
 }
 
-func NewConnManager() (*ConnManager, error) {
-	return &ConnManager{
+func NewConnDirect() (*ConnDirect, error) {
+	return &ConnDirect{
 		conns:          make(map[string][]*grpc.ClientConn),
 		resolverDirect: NewResolverDirect(),
 	}, nil
 }
 
-func (cm *ConnManager) GetConns(ctx context.Context,
+func (cd *ConnDirect) GetConns(ctx context.Context,
 	serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
 
-	if conns, exists := cm.conns[serviceName]; exists {
+	if conns, exists := cd.conns[serviceName]; exists {
 		return conns, nil
 	}
 	ports := getServiceAddresses()[serviceName]
 	var connections []*grpc.ClientConn
 	for _, port := range ports {
-		conn, err := cm.dialServiceWithoutResolver(ctx, fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", port), append(cm.additionalOpts, opts...)...)
+		conn, err := cd.dialServiceWithoutResolver(ctx, fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", port), append(cd.additionalOpts, opts...)...)
 		if err != nil {
 			fmt.Errorf("connect to port %s failed,serviceName %s, IP %s", port, serviceName, config2.Config.Rpc.ListenIP)
 		}
@@ -99,7 +96,7 @@ func (cm *ConnManager) GetConns(ctx context.Context,
 	return connections, nil
 }
 
-func (cm *ConnManager) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
+func (cd *ConnDirect) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	// Get service addresses
 	addresses := getServiceAddresses()
 	address, ok := addresses[serviceName]
@@ -115,40 +112,40 @@ func (cm *ConnManager) GetConn(ctx context.Context, serviceName string, opts ...
 		}
 	}
 	// Try to dial a new connection
-	conn, err := cm.dialService(ctx, result, append(cm.additionalOpts, opts...)...)
+	conn, err := cd.dialService(ctx, result, append(cd.additionalOpts, opts...)...)
 	if err != nil {
 		return nil, errs.Wrap(err, "address", result)
 	}
 
 	// Store the new connection
-	cm.conns[serviceName] = append(cm.conns[serviceName], conn)
+	cd.conns[serviceName] = append(cd.conns[serviceName], conn)
 	return conn, nil
 }
 
-func (cm *ConnManager) GetSelfConnTarget() string {
-	return cm.currentServiceAddress
+func (cd *ConnDirect) GetSelfConnTarget() string {
+	return cd.currentServiceAddress
 }
 
-func (cm *ConnManager) AddOption(opts ...grpc.DialOption) {
-	cm.additionalOpts = append(cm.additionalOpts, opts...)
+func (cd *ConnDirect) AddOption(opts ...grpc.DialOption) {
+	cd.additionalOpts = append(cd.additionalOpts, opts...)
 }
 
-func (cm *ConnManager) CloseConn(conn *grpc.ClientConn) {
+func (cd *ConnDirect) CloseConn(conn *grpc.ClientConn) {
 	if conn != nil {
 		conn.Close()
 	}
 }
 
-func (cm *ConnManager) dialService(ctx context.Context, address string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
+func (cd *ConnDirect) dialService(ctx context.Context, address string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	options := append(opts, grpc.WithInsecure()) // Replace WithInsecure with proper security options
-	conn, err := grpc.DialContext(ctx, cm.resolverDirect.Scheme()+":///"+address, options...)
+	conn, err := grpc.DialContext(ctx, cd.resolverDirect.Scheme()+":///"+address, options...)
 
 	if err != nil {
 		return nil, err
 	}
 	return conn, nil
 }
-func (cm *ConnManager) dialServiceWithoutResolver(ctx context.Context, address string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
+func (cd *ConnDirect) dialServiceWithoutResolver(ctx context.Context, address string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	options := append(opts, grpc.WithInsecure()) // Replace WithInsecure with proper security options
 	conn, err := grpc.DialContext(ctx, address, options...)
 
@@ -164,31 +161,4 @@ func checkServiceHealth(address string) bool {
 	}
 	conn.Close()
 	return true
-}
-
-// GetEndpoints returns the endpoints from the given target.
-func GetEndpoints(target resolver.Target) string {
-	return strings.Trim(target.URL.Path, slashSeparator)
-}
-func subset(set []string, sub int) []string {
-	rand.Shuffle(len(set), func(i, j int) {
-		set[i], set[j] = set[j], set[i]
-	})
-	if len(set) <= sub {
-		return set
-	}
-
-	return set[:sub]
-}
-
-type nopResolver struct {
-	cc resolver.ClientConn
-}
-
-func (n nopResolver) ResolveNow(options resolver.ResolveNowOptions) {
-
-}
-
-func (n nopResolver) Close() {
-
 }

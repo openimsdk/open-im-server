@@ -38,7 +38,7 @@ func NewDiscoveryRegister(envType string) (discoveryregistry.SvcDiscoveryRegistr
 	case "k8s":
 		return kubernetes.NewK8sDiscoveryRegister()
 	case "direct":
-		return direct.NewConnManager()
+		return direct.NewConnDirect()
 	default:
 		return nil, errors.New("envType not correct")
 	}
