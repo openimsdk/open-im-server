@@ -423,7 +423,14 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		PlatformID: req.SenderPlatformID,
 		UserID:     config.Config.IMAdmin.UserID[0],
 	}
-	output_token := auth.UserTokenResp{}
+
+	type token struct {
+		Token             string `json:"token"`
+		ExpireTimeSeconds int64  `json:"expireTimeSeconds"`
+	}
+
+	output_token := &token{}
+
 	log.ZDebug(c, "CallbackExample get User Token", "token", output_token)
 
 	data, err := http.Post(c, url, header, input_token, 10)
@@ -432,6 +439,8 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
 		return
 	}
+
+	log.ZDebug(c, "CallbackExample data Token", "token", output_token)
 
 	if err = json.Unmarshal(data, output_token); err != nil {
 		log.ZError(c, "CallbackExample unmarshal userToken failed", err)
@@ -466,7 +475,13 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 	url = "http://127.0.0.1:10002/msg/send_msg"
 	header["token"] = output_token.Token
-	output := msg.SendMsgResp{}
+	type sendResp struct {
+		ServerMsgID string `json:"serverMsgID"`
+		ClientMsgID string `json:"clientMsgID"`
+		SendTime    int64  `json:"sendTime"`
+	}
+
+	output := &sendResp{}
 
 	log.ZDebug(c, "CallbackExample Header", "header", header)
 
