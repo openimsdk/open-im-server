@@ -31,7 +31,7 @@ func getPublishKey(topic string, key []string) []string {
 			},
 			{
 				Local: config.Config.LocalCache.Conversation,
-				Keys:  []string{cachekey.ConversationIDsKey},
+				Keys:  []string{cachekey.ConversationIDsKey, cachekey.ConversationKey},
 			},
 		}
 		subscribe = make(map[string][]string)
