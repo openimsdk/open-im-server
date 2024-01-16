@@ -75,6 +75,7 @@ func NewConnManager() (*ConnManager, error) {
 
 func (cm *ConnManager) GetConns(ctx context.Context,
 	serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
+
 	if conns, exists := cm.conns[serviceName]; exists {
 		return conns, nil
 	}
