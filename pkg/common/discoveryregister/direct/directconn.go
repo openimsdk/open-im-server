@@ -7,6 +7,7 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"time"
 )
@@ -27,7 +28,6 @@ func getServiceAddresses() ServiceAddresses {
 	}
 }
 
-// fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", config2.Config.RpcPort.OpenImUserPort[0])
 type ConnDirect struct {
 	additionalOpts        []grpc.DialOption
 	currentServiceAddress string
@@ -137,7 +137,7 @@ func (cd *ConnDirect) CloseConn(conn *grpc.ClientConn) {
 }
 
 func (cd *ConnDirect) dialService(ctx context.Context, address string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	options := append(opts, grpc.WithInsecure()) // Replace WithInsecure with proper security options
+	options := append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	conn, err := grpc.DialContext(ctx, cd.resolverDirect.Scheme()+":///"+address, options...)
 
 	if err != nil {
@@ -146,7 +146,7 @@ func (cd *ConnDirect) dialService(ctx context.Context, address string, opts ...g
 	return conn, nil
 }
 func (cd *ConnDirect) dialServiceWithoutResolver(ctx context.Context, address string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	options := append(opts, grpc.WithInsecure()) // Replace WithInsecure with proper security options
+	options := append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	conn, err := grpc.DialContext(ctx, address, options...)
 
 	if err != nil {
