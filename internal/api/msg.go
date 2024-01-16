@@ -30,8 +30,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
+	http2 "github.com/openimsdk/open-im-server/v3/pkg/common/http"
 	pbmsg "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/proto/msg"
+	"net/http"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -410,7 +411,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		},
 	}
 
-	apiresp.GinSuccess(c, resp)
+	c.JSON(http.StatusOK, resp)
 	imAdmin := config.Config.IMAdmin.UserID[0]
 	if req.SendID == imAdmin {
 		return
@@ -436,7 +437,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 	log.ZDebug(c, "CallbackExample get User Token", "token", output_token)
 
-	data, err := http.Post(c, url, header, input_token, 10)
+	data, err := http2.Post(c, url, header, input_token, 10)
 	if err != nil {
 		log.ZError(c, "CallbackExample get Sender token failed", err)
 		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
@@ -489,7 +490,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 	log.ZDebug(c, "CallbackExample Header", "header", header)
 
-	b, err := http.Post(c, url, header, input, 10)
+	b, err := http2.Post(c, url, header, input, 10)
 	if err != nil {
 		log.ZError(c, "CallbackExample send message failed", err)
 		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
@@ -500,6 +501,11 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
 		return
 	}
+	res := &msg.SendMsgResp{
+		ServerMsgID: output.Data.ServerMsgID,
+		ClientMsgID: output.Data.ClientMsgID,
+		SendTime:    output.Data.SendTime,
+	}
 
-	apiresp.GinSuccess(c, output)
+	apiresp.GinSuccess(c, res)
 }
