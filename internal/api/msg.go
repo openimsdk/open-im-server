@@ -414,7 +414,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 
 	robotics := "5078764102"
-	if req.SendID != robotics || req.ContentType != 101 {
+	if req.SendID == robotics || req.ContentType != 101 {
 		return
 	}
 
