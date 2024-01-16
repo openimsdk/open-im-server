@@ -70,7 +70,7 @@ func Post(ctx context.Context, url string, header map[string]string, data any, t
 	}
 
 	log.ZInfo(ctx, "CallbackExample", "jsonStraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", jsonStr)
-	log.ZInfo(ctx, "CallbackExample", "jsonStr", jsonStr)
+	log.ZInfo(ctx, "CallbackExample", "jsonStr", string(jsonStr))
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonStr))
 	if err != nil {
