@@ -206,7 +206,7 @@ func (cm *ConnManager) Build(target resolver.Target, cc resolver.ClientConn, _ r
 	endpoints := strings.FieldsFunc(GetEndpoints(target), func(r rune) bool {
 		return r == EndpointSepChar
 	})
-	log.ZDebug(context.Background(), "Build", "endpoints", endpoints)
+	log.ZDebug(context.Background(), "Build", "endpoints", endpoints, "target Path", target.URL.Path)
 	endpoints = subset(endpoints, subsetSize)
 	addrs := make([]resolver.Address, 0, len(endpoints))
 
