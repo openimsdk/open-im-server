@@ -2,6 +2,7 @@ package rpccache
 
 import (
 	"context"
+	pbconversation "github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
@@ -43,4 +44,27 @@ func (c *ConversationLocalCache) GetConversationIDs(ctx context.Context, ownerUs
 		log.ZDebug(ctx, "ConversationLocalCache GetConversationIDs rpc", "ownerUserID", ownerUserID)
 		return c.client.GetConversationIDs(ctx, ownerUserID)
 	}))
+}
+
+func (c *ConversationLocalCache) GetConversation(ctx context.Context, userID, conversationID string) (val *pbconversation.Conversation, err error) {
+	log.ZDebug(ctx, "ConversationLocalCache GetConversation req", "userID", userID, "conversationID", conversationID)
+	defer func() {
+		if err == nil {
+			log.ZDebug(ctx, "ConversationLocalCache GetConversation return", "value", val)
+		} else {
+			log.ZError(ctx, "ConversationLocalCache GetConversation return", err)
+		}
+	}()
+	return localcache.AnyValue[*pbconversation.Conversation](c.local.Get(ctx, cachekey.GetConversationKey(userID, conversationID), func(ctx context.Context) (any, error) {
+		log.ZDebug(ctx, "ConversationLocalCache GetConversation rpc", "userID", userID, "conversationID", conversationID)
+		return c.client.GetConversation(ctx, userID, conversationID)
+	}))
+}
+
+func (c *ConversationLocalCache) GetSingleConversationRecvMsgOpt(ctx context.Context, userID, conversationID string) (int32, error) {
+	conv, err := c.GetConversation(ctx, userID, conversationID)
+	if err != nil {
+		return 0, err
+	}
+	return conv.RecvMsgOpt, nil
 }
