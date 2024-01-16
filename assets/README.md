@@ -25,7 +25,7 @@ assets/
 
 ## Copyright Notice:
 
-The OpenIM logo, including its variations and animated versions, displayed in this repository [OpenIM](https://github.com/OpenIMSDK/openim) under the `/assets/logo` and `/assets/logo-gif` directories, are protected by copyright laws.
+The OpenIM logo, including its variations and animated versions, displayed in this repository [OpenIM](https://github.com/openimsdk/open-im-server) under the `/assets/logo` and `/assets/logo-gif` directories, are protected by copyright laws.
 
 The logo design is credited to @Xx(席欣).
 

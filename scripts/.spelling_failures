@@ -3,4 +3,6 @@ go.mod
 go.sum
 third_party/
 translations/
-log
+logs
+.git
+.golangci.yml

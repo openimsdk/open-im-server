@@ -22,7 +22,7 @@
 OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 
 # 生成文件存放目录
-LOCAL_OUTPUT_ROOT=""${OPENIM_ROOT}"/${OUT_DIR:-_output}"
+LOCAL_OUTPUT_ROOT="${OPENIM_ROOT}/${OUT_DIR:-_output}"
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 #TODO: Access to the OPENIM_IP networks outside, or you want to use the OPENIM_IP network
@@ -62,7 +62,7 @@ readonly LINUX_PASSWORD=${LINUX_PASSWORD:-"${PASSWORD}"}
 def "INSTALL_DIR" "${LOCAL_OUTPUT_ROOT}/installs"
 mkdir -p ${INSTALL_DIR}
 
-def "ENV_FILE" ""${OPENIM_ROOT}"/scripts/install/environment.sh"
+def "ENV_FILE" "${OPENIM_ROOT}/scripts/install/environment.sh"
 
 ###################### Docker compose ###################
 # OPENIM AND CHAT
@@ -128,7 +128,7 @@ def "OPENIM_CONFIG_DIR" "/etc/openim/config"
 def "OPENIM_LOG_DIR" "/var/log/openim"
 def "CA_FILE" "${OPENIM_CONFIG_DIR}/cert/ca.pem"
 
-def "OPNEIM_CONFIG" ""${OPENIM_ROOT}"/config"
+def "OPNEIM_CONFIG" "${OPENIM_ROOT}/config"
 def "OPENIM_SERVER_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # OpenIM服务地址
 
 # OpenIM Websocket端口
@@ -171,13 +171,13 @@ def "MONGO_URI"                                # MongoDB的URI
 def "MONGO_PORT" "37017"                       # MongoDB的端口
 def "MONGO_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # MongoDB的地址
 def "MONGO_DATABASE" "${DATABASE_NAME}"        # MongoDB的数据库名
-def "MONGO_USERNAME" "root"		       # MongoDB的管理员身份用户名
+def "MONGO_USERNAME" "root"		               # MongoDB的管理员身份用户名
 # MongoDB的管理员身份密码
 readonly MONGO_PASSWORD=${MONGO_PASSWORD:-"${PASSWORD}"}
 # Mongo OpenIM 身份用户名
 def "MONGO_OPENIM_USERNAME" "openIM"
 # Mongo OpenIM 身份密码
-readonly MONGO_OPENIM_PASSWORD=${MONGO_OPENIM_PASSWORD:-'openIM123456'}
+readonly MONGO_OPENIM_PASSWORD=${MONGO_OPENIM_PASSWORD:-"${PASSWORD}"}
 
 def "MONGO_MAX_POOL_SIZE" "100"                # 最大连接池大小
 
@@ -243,8 +243,6 @@ def "KAFKA_CONSUMERGROUPID_PUSH" "push"                     # `Kafka` 的消费�
 
 ###################### openim-web 配置信息 ######################
 def "OPENIM_WEB_PORT" "11001"                       # openim-web的端口
-def "OPENIM_WEB_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # openim-web的地址
-def "OPENIM_WEB_DIST_PATH" "/app/dist"              # openim-web的dist路径
 
 ###################### openim-admin-front 配置信息 ######################
 def "OPENIM_ADMIN_FRONT_PORT" "11002"                       # openim-admin-front的端口
@@ -326,7 +324,7 @@ def "OPENIM_CONVERSATION_NAME" "Conversation"       # OpenIM对话服务名称
 def "OPENIM_THIRD_NAME" "Third"                     # OpenIM第三方服务名称
 
 ###################### Log Configuration Variables ######################
-def "LOG_STORAGE_LOCATION" ""${OPENIM_ROOT}"/logs/" # 日志存储位置
+def "LOG_STORAGE_LOCATION" "${OPENIM_ROOT}/logs/" # 日志存储位置
 def "LOG_ROTATION_TIME" "24"                        # 日志轮替时间
 def "LOG_REMAIN_ROTATION_COUNT" "2"                 # 保留的日志轮替数量
 def "LOG_REMAIN_LOG_LEVEL" "6"                      # 保留的日志级别
@@ -414,7 +412,7 @@ readonly MSG_TRANSFER_PROM_ADDRESS_PORT=${MSG_TRANSFER_PROM_ADDRESS_PORT:-"${DOC
 ###################### OpenIM openim-api ######################
 def "OPENIM_API_HOST" "127.0.0.1"
 def "OPENIM_API_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-api" # OpenIM openim-api 二进制文件路径
-def "OPENIM_API_CONFIG" ""${OPENIM_ROOT}"/config/"            # OpenIM openim-api 配置文件路径
+def "OPENIM_API_CONFIG" "${OPENIM_ROOT}/config/"            # OpenIM openim-api 配置文件路径
 def "OPENIM_API_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-api" # OpenIM openim-api 日志存储路径
 def "OPENIM_API_LOG_LEVEL" "info"                             # OpenIM openim-api 日志级别
 def "OPENIM_API_LOG_MAX_SIZE" "100"                           # OpenIM openim-api 日志最大大小（MB）
@@ -426,7 +424,7 @@ def "OPENIM_API_LOG_WITH_STACK" "${LOG_WITH_STACK}"           # OpenIM openim-ap
 ###################### OpenIM openim-cmdutils ######################
 def "OPENIM_CMDUTILS_HOST" "127.0.0.1"
 def "OPENIM_CMDUTILS_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-cmdutils" # OpenIM openim-cmdutils 二进制文件路径
-def "OPENIM_CMDUTILS_CONFIG" ""${OPENIM_ROOT}"/config/"                 # OpenIM openim-cmdutils 配置文件路径
+def "OPENIM_CMDUTILS_CONFIG" "${OPENIM_ROOT}/config/"                 # OpenIM openim-cmdutils 配置文件路径
 def "OPENIM_CMDUTILS_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-cmdutils" # OpenIM openim-cmdutils 日志存储路径
 def "OPENIM_CMDUTILS_LOG_LEVEL" "info"                                  # OpenIM openim-cmdutils 日志级别
 def "OPENIM_CMDUTILS_LOG_MAX_SIZE" "100"                                # OpenIM openim-cmdutils 日志最大大小（MB）
@@ -438,7 +436,7 @@ def "OPENIM_CMDUTILS_LOG_WITH_STACK" "${LOG_WITH_STACK}"                # OpenIM
 ###################### OpenIM openim-crontask ######################
 def "OPENIM_CRONTASK_HOST" "127.0.0.1"
 def "OPENIM_CRONTASK_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-crontask" # OpenIM openim-crontask 二进制文件路径
-def "OPENIM_CRONTASK_CONFIG" ""${OPENIM_ROOT}"/config/"                 # OpenIM openim-crontask 配置文件路径
+def "OPENIM_CRONTASK_CONFIG" "${OPENIM_ROOT}/config/"                 # OpenIM openim-crontask 配置文件路径
 def "OPENIM_CRONTASK_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-crontask" # OpenIM openim-crontask 日志存储路径
 def "OPENIM_CRONTASK_LOG_LEVEL" "info"                                  # OpenIM openim-crontask 日志级别
 def "OPENIM_CRONTASK_LOG_MAX_SIZE" "100"                                # OpenIM openim-crontask 日志最大大小（MB）
@@ -450,7 +448,7 @@ def "OPENIM_CRONTASK_LOG_WITH_STACK" "${LOG_WITH_STACK}"                # OpenIM
 ###################### OpenIM openim-msggateway ######################
 def "OPENIM_MSGGATEWAY_HOST" "127.0.0.1"
 def "OPENIM_MSGGATEWAY_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-msggateway"
-def "OPENIM_MSGGATEWAY_CONFIG" ""${OPENIM_ROOT}"/config/"
+def "OPENIM_MSGGATEWAY_CONFIG" "${OPENIM_ROOT}/config/"
 def "OPENIM_MSGGATEWAY_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-msggateway"
 def "OPENIM_MSGGATEWAY_LOG_LEVEL" "info"
 def "OPENIM_MSGGATEWAY_LOG_MAX_SIZE" "100"
@@ -465,7 +463,7 @@ readonly OPENIM_MSGGATEWAY_NUM=${OPENIM_MSGGATEWAY_NUM:-'4'}
 ###################### OpenIM openim-msgtransfer ######################
 def "OPENIM_MSGTRANSFER_HOST" "127.0.0.1"
 def "OPENIM_MSGTRANSFER_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer" # OpenIM openim-msgtransfer 二进制文件路径
-def "OPENIM_MSGTRANSFER_CONFIG" ""${OPENIM_ROOT}"/config/"                    # OpenIM openim-msgtransfer 配置文件路径
+def "OPENIM_MSGTRANSFER_CONFIG" "${OPENIM_ROOT}/config/"                    # OpenIM openim-msgtransfer 配置文件路径
 def "OPENIM_MSGTRANSFER_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-msgtransfer" # OpenIM openim-msgtransfer 日志存储路径
 def "OPENIM_MSGTRANSFER_LOG_LEVEL" "info"                                     # OpenIM openim-msgtransfer 日志级别
 def "OPENIM_MSGTRANSFER_LOG_MAX_SIZE" "100"                                   # OpenIM openim-msgtransfer 日志最大大小（MB）
@@ -477,7 +475,7 @@ def "OPENIM_MSGTRANSFER_LOG_WITH_STACK" "${LOG_WITH_STACK}"                   # 
 ###################### OpenIM openim-push ######################
 def "OPENIM_PUSH_HOST" "127.0.0.1"
 def "OPENIM_PUSH_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-push" # OpenIM openim-push 二进制文件路径
-def "OPENIM_PUSH_CONFIG" ""${OPENIM_ROOT}"/config/"             # OpenIM openim-push 配置文件路径
+def "OPENIM_PUSH_CONFIG" "${OPENIM_ROOT}/config/"             # OpenIM openim-push 配置文件路径
 def "OPENIM_PUSH_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-push" # OpenIM openim-push 日志存储路径
 def "OPENIM_PUSH_LOG_LEVEL" "info"                              # OpenIM openim-push 日志级别
 def "OPENIM_PUSH_LOG_MAX_SIZE" "100"                            # OpenIM openim-push 日志最大大小（MB）
@@ -489,7 +487,7 @@ def "OPENIM_PUSH_LOG_WITH_STACK" "${LOG_WITH_STACK}"            # OpenIM openim-
 ###################### OpenIM openim-rpc-auth ######################
 def "OPENIM_RPC_AUTH_HOST" "127.0.0.1"
 def "OPENIM_RPC_AUTH_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-auth" # OpenIM openim-rpc-auth 二进制文件路径
-def "OPENIM_RPC_AUTH_CONFIG" ""${OPENIM_ROOT}"/config/"                 # OpenIM openim-rpc-auth 配置文件路径
+def "OPENIM_RPC_AUTH_CONFIG" "${OPENIM_ROOT}/config/"                 # OpenIM openim-rpc-auth 配置文件路径
 def "OPENIM_RPC_AUTH_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-auth" # OpenIM openim-rpc-auth 日志存储路径
 def "OPENIM_RPC_AUTH_LOG_LEVEL" "info"                                  # OpenIM openim-rpc-auth 日志级别
 def "OPENIM_RPC_AUTH_LOG_MAX_SIZE" "100"                                # OpenIM openim-rpc-auth 日志最大大小（MB）
@@ -501,7 +499,7 @@ def "OPENIM_RPC_AUTH_LOG_WITH_STACK" "${LOG_WITH_STACK}"                # OpenIM
 ###################### OpenIM openim-rpc-conversation ######################
 def "OPENIM_RPC_CONVERSATION_HOST" "127.0.0.1"
 def "OPENIM_RPC_CONVERSATION_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-conversation" # OpenIM openim-rpc-conversation 二进制文件路径
-def "OPENIM_RPC_CONVERSATION_CONFIG" ""${OPENIM_ROOT}"/config/"                         # OpenIM openim-rpc-conversation 配置文件路径
+def "OPENIM_RPC_CONVERSATION_CONFIG" "${OPENIM_ROOT}/config/"                         # OpenIM openim-rpc-conversation 配置文件路径
 def "OPENIM_RPC_CONVERSATION_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-conversation" # OpenIM openim-rpc-conversation 日志存储路径
 def "OPENIM_RPC_CONVERSATION_LOG_LEVEL" "info"                                          # OpenIM openim-rpc-conversation 日志级别
 def "OPENIM_RPC_CONVERSATION_LOG_MAX_SIZE" "100"                                        # OpenIM openim-rpc-conversation 日志最大大小（MB）
@@ -513,7 +511,7 @@ def "OPENIM_RPC_CONVERSATION_LOG_WITH_STACK" "${LOG_WITH_STACK}"                
 ###################### OpenIM openim-rpc-friend ######################
 def "OPENIM_RPC_FRIEND_HOST" "127.0.0.1"
 def "OPENIM_RPC_FRIEND_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-friend" # OpenIM openim-rpc-friend 二进制文件路径
-def "OPENIM_RPC_FRIEND_CONFIG" ""${OPENIM_ROOT}"/config/"                   # OpenIM openim-rpc-friend 配置文件路径
+def "OPENIM_RPC_FRIEND_CONFIG" "${OPENIM_ROOT}/config/"                   # OpenIM openim-rpc-friend 配置文件路径
 def "OPENIM_RPC_FRIEND_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-friend" # OpenIM openim-rpc-friend 日志存储路径
 def "OPENIM_RPC_FRIEND_LOG_LEVEL" "info"                                    # OpenIM openim-rpc-friend 日志级别
 def "OPENIM_RPC_FRIEND_LOG_MAX_SIZE" "100"                                  # OpenIM openim-rpc-friend 日志最大大小（MB）
@@ -525,7 +523,7 @@ def "OPENIM_RPC_FRIEND_LOG_WITH_STACK" "${LOG_WITH_STACK}"                  # Op
 ###################### OpenIM openim-rpc-group ######################
 def "OPENIM_RPC_GROUP_HOST" "127.0.0.1"
 def "OPENIM_RPC_GROUP_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-group" # OpenIM openim-rpc-group 二进制文件路径
-def "OPENIM_RPC_GROUP_CONFIG" ""${OPENIM_ROOT}"/config/"                  # OpenIM openim-rpc-group 配置文件路径
+def "OPENIM_RPC_GROUP_CONFIG" "${OPENIM_ROOT}/config/"                  # OpenIM openim-rpc-group 配置文件路径
 def "OPENIM_RPC_GROUP_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-group" # OpenIM openim-rpc-group 日志存储路径
 def "OPENIM_RPC_GROUP_LOG_LEVEL" "info"                                   # OpenIM openim-rpc-group 日志级别
 def "OPENIM_RPC_GROUP_LOG_MAX_SIZE" "100"                                 # OpenIM openim-rpc-group 日志最大大小（MB）
@@ -537,7 +535,7 @@ def "OPENIM_RPC_GROUP_LOG_WITH_STACK" "${LOG_WITH_STACK}"                 # Open
 ###################### OpenIM openim-rpc-msg ######################
 def "OPENIM_RPC_MSG_HOST" "127.0.0.1"
 def "OPENIM_RPC_MSG_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-msg" # OpenIM openim-rpc-msg 二进制文件路径
-def "OPENIM_RPC_MSG_CONFIG" ""${OPENIM_ROOT}"/config/"                # OpenIM openim-rpc-msg 配置文件路径
+def "OPENIM_RPC_MSG_CONFIG" "${OPENIM_ROOT}/config/"                # OpenIM openim-rpc-msg 配置文件路径
 def "OPENIM_RPC_MSG_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-msg" # OpenIM openim-rpc-msg 日志存储路径
 def "OPENIM_RPC_MSG_LOG_LEVEL" "info"                                 # OpenIM openim-rpc-msg 日志级别
 def "OPENIM_RPC_MSG_LOG_MAX_SIZE" "100"                               # OpenIM openim-rpc-msg 日志最大大小（MB）
@@ -549,7 +547,7 @@ def "OPENIM_RPC_MSG_LOG_WITH_STACK" "${LOG_WITH_STACK}"               # OpenIM o
 ###################### OpenIM openim-rpc-third ######################
 def "OPENIM_RPC_THIRD_HOST" "127.0.0.1"
 def "OPENIM_RPC_THIRD_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-third" # OpenIM openim-rpc-third 二进制文件路径
-def "OPENIM_RPC_THIRD_CONFIG" ""${OPENIM_ROOT}"/config/"                  # OpenIM openim-rpc-third 配置文件路径
+def "OPENIM_RPC_THIRD_CONFIG" "${OPENIM_ROOT}/config/"                  # OpenIM openim-rpc-third 配置文件路径
 def "OPENIM_RPC_THIRD_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-third" # OpenIM openim-rpc-third 日志存储路径
 def "OPENIM_RPC_THIRD_LOG_LEVEL" "info"                                   # OpenIM openim-rpc-third 日志级别
 def "OPENIM_RPC_THIRD_LOG_MAX_SIZE" "100"                                 # OpenIM openim-rpc-third 日志最大大小（MB）
@@ -561,7 +559,7 @@ def "OPENIM_RPC_THIRD_LOG_WITH_STACK" "${LOG_WITH_STACK}"                 # Open
 ###################### OpenIM openim-rpc-user ######################
 def "OPENIM_RPC_USER_HOST" "127.0.0.1"
 def "OPENIM_RPC_USER_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-user" # OpenIM openim-rpc-user 二进制文件路径
-def "OPENIM_RPC_USER_CONFIG" ""${OPENIM_ROOT}"/config/"                 # OpenIM openim-rpc-user 配置文件路径
+def "OPENIM_RPC_USER_CONFIG" "${OPENIM_ROOT}/config/"                 # OpenIM openim-rpc-user 配置文件路径
 def "OPENIM_RPC_USER_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-user" # OpenIM openim-rpc-user 日志存储路径
 def "OPENIM_RPC_USER_LOG_LEVEL" "info"                                  # OpenIM openim-rpc-user 日志级别
 def "OPENIM_RPC_USER_LOG_MAX_SIZE" "100"                                # OpenIM openim-rpc-user 日志最大大小（MB）

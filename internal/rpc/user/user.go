@@ -59,10 +59,6 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
-func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.ProcessUserCommandGetAllReq) (*pbuser.ProcessUserCommandGetAllResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
@@ -234,11 +230,22 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 }
 
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
-	total, users, err := s.PageFindUser(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.Pagination)
-	if err != nil {
-		return nil, err
+
+	if req.UserID == "" && req.UserName == "" {
+		total, users, err := s.PageFindUser(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.Pagination)
+		if err != nil {
+			return nil, err
+		}
+		return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
+	} else {
+		total, users, err := s.PageFindUserWithKeyword(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.UserID, req.UserName, req.Pagination)
+		if err != nil {
+			return nil, err
+		}
+		return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
+
 	}
-	return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
+
 }
 
 func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterReq) (resp *pbuser.UserRegisterResp, err error) {
@@ -385,30 +392,147 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 
 // ProcessUserCommandAdd user general function add
 func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
+	err := authverify.CheckAccessV3(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
 
+	var value string
+	if req.Value != nil {
+		value = req.Value.Value
+	}
+	var ex string
+	if req.Ex != nil {
+		value = req.Ex.Value
+	}
+	// Assuming you have a method in s.UserDatabase to add a user command
+	err = s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, value, ex)
+	if err != nil {
+		return nil, err
+	}
+	tips := &sdkws.UserCommandAddTips{
+		FromUserID: req.UserID,
+		ToUserID:   req.UserID,
+	}
+	err = s.userNotificationSender.UserCommandAddNotification(ctx, tips)
+	if err != nil {
+		return nil, err
+	}
 	return &pbuser.ProcessUserCommandAddResp{}, nil
 }
 
 // ProcessUserCommandDelete user general function delete
 func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.ProcessUserCommandDeleteReq) (*pbuser.ProcessUserCommandDeleteResp, error) {
-	// Assuming you have a method in s.UserDatabase to delete a user command
-	err := s.UserDatabase.DeleteUserCommand(ctx, req.UserID, req.Type, req.Uuid)
+	err := authverify.CheckAccessV3(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
+
+	err = s.UserDatabase.DeleteUserCommand(ctx, req.UserID, req.Type, req.Uuid)
+	if err != nil {
+		return nil, err
+	}
+	tips := &sdkws.UserCommandDeleteTips{
+		FromUserID: req.UserID,
+		ToUserID:   req.UserID,
+	}
+	err = s.userNotificationSender.UserCommandDeleteNotification(ctx, tips)
+	if err != nil {
+		return nil, err
+	}
+
 	return &pbuser.ProcessUserCommandDeleteResp{}, nil
 }
 
 // ProcessUserCommandUpdate user general function update
 func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
+	err := authverify.CheckAccessV3(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	val := make(map[string]any)
 
+	// Map fields from eax to val
+	if req.Value != nil {
+		val["value"] = req.Value.Value
+	}
+	if req.Ex != nil {
+		val["ex"] = req.Ex.Value
+	}
+
+	// Assuming you have a method in s.UserDatabase to update a user command
+	err = s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, val)
+	if err != nil {
+		return nil, err
+	}
+	tips := &sdkws.UserCommandUpdateTips{
+		FromUserID: req.UserID,
+		ToUserID:   req.UserID,
+	}
+	err = s.userNotificationSender.UserCommandUpdateNotification(ctx, tips)
+	if err != nil {
+		return nil, err
+	}
 	return &pbuser.ProcessUserCommandUpdateResp{}, nil
 }
 
 func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
 
+	err := authverify.CheckAccessV3(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	// Fetch user commands from the database
+	commands, err := s.UserDatabase.GetUserCommands(ctx, req.UserID, req.Type)
+	if err != nil {
+		return nil, err
+	}
+
+	// Initialize commandInfoSlice as an empty slice
+	commandInfoSlice := make([]*pbuser.CommandInfoResp, 0, len(commands))
+
+	for _, command := range commands {
+		// No need to use index since command is already a pointer
+		commandInfoSlice = append(commandInfoSlice, &pbuser.CommandInfoResp{
+			Type:       command.Type,
+			Uuid:       command.Uuid,
+			Value:      command.Value,
+			CreateTime: command.CreateTime,
+			Ex:         command.Ex,
+		})
+	}
+
 	// Return the response with the slice
-	return &pbuser.ProcessUserCommandGetResp{}, nil
+	return &pbuser.ProcessUserCommandGetResp{CommandResp: commandInfoSlice}, nil
+}
+
+func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.ProcessUserCommandGetAllReq) (*pbuser.ProcessUserCommandGetAllResp, error) {
+	err := authverify.CheckAccessV3(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	// Fetch user commands from the database
+	commands, err := s.UserDatabase.GetAllUserCommands(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Initialize commandInfoSlice as an empty slice
+	commandInfoSlice := make([]*pbuser.AllCommandInfoResp, 0, len(commands))
+
+	for _, command := range commands {
+		// No need to use index since command is already a pointer
+		commandInfoSlice = append(commandInfoSlice, &pbuser.AllCommandInfoResp{
+			Type:       command.Type,
+			Uuid:       command.Uuid,
+			Value:      command.Value,
+			CreateTime: command.CreateTime,
+			Ex:         command.Ex,
+		})
+	}
+
+	// Return the response with the slice
+	return &pbuser.ProcessUserCommandGetAllResp{CommandResp: commandInfoSlice}, nil
 }
 
 func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.AddNotificationAccountReq) (*pbuser.AddNotificationAccountResp, error) {
@@ -481,31 +605,38 @@ func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbu
 }
 
 func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.SearchNotificationAccountReq) (*pbuser.SearchNotificationAccountResp, error) {
+	// Check if user is an admin
 	if err := authverify.CheckIMAdmin(ctx); err != nil {
 		return nil, err
 	}
 
 	var users []*relation.UserModel
 	var err error
+
+	// If a keyword is provided in the request
 	if req.Keyword != "" {
+		// Find users by keyword
 		users, err = s.UserDatabase.Find(ctx, []string{req.Keyword})
 		if err != nil {
 			return nil, err
 		}
+
+		// Convert users to response format
 		resp := s.userModelToResp(users, req.Pagination)
 		if resp.Total != 0 {
 			return resp, nil
 		}
+
+		// Find users by nickname if no users found by keyword
 		users, err = s.UserDatabase.FindByNickname(ctx, req.Keyword)
 		if err != nil {
 			return nil, err
 		}
 		resp = s.userModelToResp(users, req.Pagination)
 		return resp, nil
-
-		return resp, nil
 	}
 
+	// If no keyword, find users with notification settings
 	users, err = s.UserDatabase.FindNotification(ctx, constant.AppNotificationAdmin)
 	if err != nil {
 		return nil, err

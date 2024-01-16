@@ -279,20 +279,20 @@ func CallbackApplyJoinGroupBefore(ctx context.Context, req *callbackstruct.Callb
 	return nil
 }
 
-func CallbackTransferGroupOwnerAfter(ctx context.Context, req *pbgroup.TransferGroupOwnerReq) (err error) {
-	if !config.Config.Callback.CallbackTransferGroupOwnerAfter.Enable {
+func CallbackAfterTransferGroupOwner(ctx context.Context, req *pbgroup.TransferGroupOwnerReq) (err error) {
+	if !config.Config.Callback.CallbackAfterTransferGroupOwner.Enable {
 		return nil
 	}
 
 	cbReq := &callbackstruct.CallbackTransferGroupOwnerReq{
-		CallbackCommand: callbackstruct.CallbackTransferGroupOwnerAfter,
+		CallbackCommand: callbackstruct.CallbackAfterTransferGroupOwner,
 		GroupID:         req.GroupID,
 		OldOwnerUserID:  req.OldOwnerUserID,
 		NewOwnerUserID:  req.NewOwnerUserID,
 	}
 
 	resp := &callbackstruct.CallbackTransferGroupOwnerResp{}
-	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeJoinGroup); err != nil {
+	if err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackAfterTransferGroupOwner); err != nil {
 		return err
 	}
 	return nil
