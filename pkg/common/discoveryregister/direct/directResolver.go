@@ -1,6 +1,8 @@
 package direct
 
 import (
+	"context"
+	"github.com/OpenIMSDK/tools/log"
 	"google.golang.org/grpc/resolver"
 	"strings"
 )
@@ -11,7 +13,7 @@ const (
 	EndpointSepChar = ','
 
 	subsetSize = 32
-	scheme     = "Direct"
+	scheme     = "direct"
 )
 
 type ResolverDirect struct {
@@ -23,6 +25,7 @@ func NewResolverDirect() *ResolverDirect {
 
 func (rd *ResolverDirect) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (
 	resolver.Resolver, error) {
+	log.ZDebug(context.Background(), "Build", "target", target)
 	endpoints := strings.FieldsFunc(GetEndpoints(target), func(r rune) bool {
 		return r == EndpointSepChar
 	})
