@@ -16,6 +16,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -34,6 +35,7 @@ import (
 	http2 "github.com/openimsdk/open-im-server/v3/pkg/common/http"
 	pbmsg "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/proto/msg"
 	"net/http"
+	"reflect"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -440,6 +442,13 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 		log.ZDebug(c, "callback", "contextAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", content)
 
+		mapStruct, err := convertStructToMap(text)
+		if err != nil {
+			log.ZError(c, "CallbackExample struct to map failed", err)
+			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+			return
+		}
+
 		input := &apistruct.SendMsgReq{
 			RecvID: req.SendID,
 			SendMsg: apistruct.SendMsg{
@@ -447,7 +456,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 				SenderNickname:   user.Nickname,
 				SenderFaceURL:    user.FaceURL,
 				SenderPlatformID: req.SenderPlatformID,
-				Content:          content,
+				Content:          mapStruct,
 				ContentType:      req.ContentType,
 				SessionType:      req.SessionType,
 				SendTime:         utils.GetCurrentTimestampByMill(), // millisecond
@@ -486,4 +495,31 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 		apiresp.GinSuccess(c, res)
 	}
+}
+
+func convertStructToMap(input interface{}) (map[string]interface{}, error) {
+	// 使用反射创建一个空的 map
+	result := make(map[string]interface{})
+
+	// 获取结构体的类型信息
+	inputType := reflect.TypeOf(input)
+
+	// 获取结构体的值信息
+	inputValue := reflect.ValueOf(input)
+
+	// 确保输入是结构体类型
+	if inputType.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("Input is not a struct")
+	}
+
+	// 遍历结构体的字段
+	for i := 0; i < inputType.NumField(); i++ {
+		field := inputType.Field(i)
+		fieldValue := inputValue.Field(i)
+
+		// 将字段名作为 map 的键，字段值作为 map 的值
+		result[field.Name] = fieldValue.Interface()
+	}
+
+	return result, nil
 }
