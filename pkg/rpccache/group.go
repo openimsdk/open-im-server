@@ -48,6 +48,36 @@ func (g *GroupLocalCache) getGroupMemberIDs(ctx context.Context, groupID string)
 	}))
 }
 
+func (g *GroupLocalCache) GetGroupMember(ctx context.Context, groupID, userID string) (val *sdkws.GroupMemberFullInfo, err error) {
+	log.ZDebug(ctx, "GroupLocalCache GetGroupInfo req", "groupID", groupID, "userID", userID)
+	defer func() {
+		if err == nil {
+			log.ZDebug(ctx, "GroupLocalCache GetGroupInfo return", "value", val)
+		} else {
+			log.ZError(ctx, "GroupLocalCache GetGroupInfo return", err)
+		}
+	}()
+	return localcache.AnyValue[*sdkws.GroupMemberFullInfo](g.local.Get(ctx, cachekey.GetGroupMemberInfoKey(groupID, userID), func(ctx context.Context) (any, error) {
+		log.ZDebug(ctx, "GroupLocalCache GetGroupInfo rpc", "groupID", groupID, "userID", userID)
+		return g.client.GetGroupMemberCache(ctx, groupID, userID)
+	}))
+}
+
+func (g *GroupLocalCache) GetGroupInfo(ctx context.Context, groupID string) (val *sdkws.GroupInfo, err error) {
+	log.ZDebug(ctx, "GroupLocalCache GetGroupInfo req", "groupID", groupID)
+	defer func() {
+		if err == nil {
+			log.ZDebug(ctx, "GroupLocalCache GetGroupInfo return", "value", val)
+		} else {
+			log.ZError(ctx, "GroupLocalCache GetGroupInfo return", err)
+		}
+	}()
+	return localcache.AnyValue[*sdkws.GroupInfo](g.local.Get(ctx, cachekey.GetGroupInfoKey(groupID), func(ctx context.Context) (any, error) {
+		log.ZDebug(ctx, "GroupLocalCache GetGroupInfo rpc", "groupID", groupID)
+		return g.client.GetGroupInfoCache(ctx, groupID)
+	}))
+}
+
 func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error) {
 	res, err := g.getGroupMemberIDs(ctx, groupID)
 	if err != nil {
@@ -64,21 +94,6 @@ func (g *GroupLocalCache) GetGroupMemberIDMap(ctx context.Context, groupID strin
 	return res.Map, nil
 }
 
-func (g *GroupLocalCache) GetGroupInfo(ctx context.Context, groupID string) (val *sdkws.GroupInfo, err error) {
-	log.ZDebug(ctx, "GroupLocalCache GetGroupInfo req", "groupID", groupID)
-	defer func() {
-		if err == nil {
-			log.ZDebug(ctx, "GroupLocalCache GetGroupInfo return", "value", val)
-		} else {
-			log.ZError(ctx, "GroupLocalCache GetGroupInfo return", err)
-		}
-	}()
-	return localcache.AnyValue[*sdkws.GroupInfo](g.local.Get(ctx, cachekey.GetGroupMemberIDsKey(groupID), func(ctx context.Context) (any, error) {
-		log.ZDebug(ctx, "GroupLocalCache GetGroupInfo rpc", "groupID", groupID)
-		return g.client.GetGroupInfoCache(ctx, groupID)
-	}))
-}
-
 func (g *GroupLocalCache) GetGroupInfos(ctx context.Context, groupIDs []string) ([]*sdkws.GroupInfo, error) {
 	groupInfos := make([]*sdkws.GroupInfo, 0, len(groupIDs))
 	for _, groupID := range groupIDs {
@@ -92,21 +107,6 @@ func (g *GroupLocalCache) GetGroupInfos(ctx context.Context, groupIDs []string) 
 		groupInfos = append(groupInfos, groupInfo)
 	}
 	return groupInfos, nil
-}
-
-func (g *GroupLocalCache) GetGroupMember(ctx context.Context, groupID, userID string) (val *sdkws.GroupMemberFullInfo, err error) {
-	log.ZDebug(ctx, "GroupLocalCache GetGroupInfo req", "groupID", groupID, "userID", userID)
-	defer func() {
-		if err == nil {
-			log.ZDebug(ctx, "GroupLocalCache GetGroupInfo return", "value", val)
-		} else {
-			log.ZError(ctx, "GroupLocalCache GetGroupInfo return", err)
-		}
-	}()
-	return localcache.AnyValue[*sdkws.GroupMemberFullInfo](g.local.Get(ctx, cachekey.GetGroupMemberInfoKey(groupID, userID), func(ctx context.Context) (any, error) {
-		log.ZDebug(ctx, "GroupLocalCache GetGroupInfo rpc", "groupID", groupID, "userID", userID)
-		return g.client.GetGroupMemberCache(ctx, groupID, userID)
-	}))
 }
 
 func (g *GroupLocalCache) GetGroupMembers(ctx context.Context, groupID string, userIDs []string) ([]*sdkws.GroupMemberFullInfo, error) {
