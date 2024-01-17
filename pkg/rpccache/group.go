@@ -37,7 +37,7 @@ func (g *GroupLocalCache) getGroupMemberIDs(ctx context.Context, groupID string)
 	log.ZDebug(ctx, "GroupLocalCache getGroupMemberIDs req", "groupID", groupID)
 	defer func() {
 		if err == nil {
-			log.ZDebug(ctx, "GroupLocalCache getGroupMemberIDs return", "value", val.List)
+			log.ZDebug(ctx, "GroupLocalCache getGroupMemberIDs return", "value", val)
 		} else {
 			log.ZError(ctx, "GroupLocalCache getGroupMemberIDs return", err)
 		}

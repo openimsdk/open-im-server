@@ -18,8 +18,6 @@ import (
 	"context"
 	"strings"
 
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -31,9 +29,7 @@ import (
 )
 
 type Group struct {
-	conn   grpc.ClientConnInterface
 	Client group.GroupClient
-	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
 func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry) *Group {
@@ -42,7 +38,7 @@ func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry) *Group {
 		panic(err)
 	}
 	client := group.NewGroupClient(conn)
-	return &Group{discov: discov, conn: conn, Client: client}
+	return &Group{Client: client}
 }
 
 type GroupRpcClient Group
