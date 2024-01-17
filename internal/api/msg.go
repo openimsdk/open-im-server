@@ -461,6 +461,15 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 
 	content := make(map[string]any, 1)
+	log.ZDebug(c, "CallbackExample content content content content content content content content", "content", req.Content)
+	str := &apistruct.TextElem{}
+	err = json.Unmarshal([]byte(req.Content), str)
+	if err != nil {
+		log.ZError(c, "CallbackExample unmarshal failed", err)
+		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+		return
+	}
+
 	content["content"] = req.Content
 	input := &apistruct.SendMsgReq{
 		RecvID: req.SendID,
