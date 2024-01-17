@@ -411,129 +411,131 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 
 	robotics := "5078764102"
-	if req.SendID == robotics || req.ContentType != constant.Text || req.ContentType != constant.Picture {
+	if req.SendID == robotics {
 		return
 	}
+	if req.ContentType == constant.Text || req.ContentType == constant.Picture {
 
-	log.ZInfo(c, "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", "req", req)
-	log.ZInfo(c, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "req.Content", req.Content)
+		log.ZInfo(c, "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", "req", req)
+		log.ZInfo(c, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "req.Content", req.Content)
 
-	url := "http://127.0.0.1:10002/auth/user_token"
-	header := map[string]string{}
-	header["operationID"] = req.OperationID
-	input_token := &auth.UserTokenReq{
-		Secret:     config.Config.Secret,
-		PlatformID: req.SenderPlatformID,
-		UserID:     config.Config.IMAdmin.UserID[0],
-	}
+		url := "http://127.0.0.1:10002/auth/user_token"
+		header := map[string]string{}
+		header["operationID"] = req.OperationID
+		input_token := &auth.UserTokenReq{
+			Secret:     config.Config.Secret,
+			PlatformID: req.SenderPlatformID,
+			UserID:     config.Config.IMAdmin.UserID[0],
+		}
 
-	type token struct {
-		ErrCode int                `json:"errCode"`
-		ErrMsg  string             `json:"errMsg"`
-		ErrDlt  string             `json:"errDlt"`
-		Data    auth.UserTokenResp `json:"data,omitempty"`
-	}
+		type token struct {
+			ErrCode int                `json:"errCode"`
+			ErrMsg  string             `json:"errMsg"`
+			ErrDlt  string             `json:"errDlt"`
+			Data    auth.UserTokenResp `json:"data,omitempty"`
+		}
 
-	output_token := &token{}
+		output_token := &token{}
 
-	data, err := http2.Post(c, url, header, input_token, 10)
-	if err != nil {
-		log.ZError(c, "CallbackExample get Sender token failed", err)
-		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-		return
-	}
-
-	log.ZDebug(c, "CallbackExample data Token", "token", data)
-
-	if err = json.Unmarshal(data, output_token); err != nil {
-		log.ZError(c, "CallbackExample unmarshal userToken failed", err)
-		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-		return
-	}
-
-	log.ZDebug(c, "CallbackExample get User Token", "token", output_token)
-
-	user, err := m.userRpcClient.GetUserInfo(c, robotics)
-	if err != nil {
-		log.ZError(c, "CallbackExample get Sender failed", err)
-		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-		return
-	}
-
-	content := make(map[string]any, 1)
-
-	if req.ContentType == constant.Text {
-		con := apistruct.TextElem{}
-		err = json.Unmarshal([]byte(req.Content), &con)
+		data, err := http2.Post(c, url, header, input_token, 10)
 		if err != nil {
+			log.ZError(c, "CallbackExample get Sender token failed", err)
+			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+			return
+		}
+
+		log.ZDebug(c, "CallbackExample data Token", "token", data)
+
+		if err = json.Unmarshal(data, output_token); err != nil {
+			log.ZError(c, "CallbackExample unmarshal userToken failed", err)
+			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+			return
+		}
+
+		log.ZDebug(c, "CallbackExample get User Token", "token", output_token)
+
+		user, err := m.userRpcClient.GetUserInfo(c, robotics)
+		if err != nil {
+			log.ZError(c, "CallbackExample get Sender failed", err)
+			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+			return
+		}
+
+		content := make(map[string]any, 1)
+
+		if req.ContentType == constant.Text {
+			con := apistruct.TextElem{}
+			err = json.Unmarshal([]byte(req.Content), &con)
+			if err != nil {
+				log.ZError(c, "CallbackExample unmarshal failed", err)
+				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+				return
+			}
+			log.ZDebug(c, "CallbackExample TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT ", con)
+			content["content"] = con.Content
+		} else {
+			con := apistruct.PictureElem{}
+			err := json.Unmarshal([]byte(req.Content), &con)
+			content["sourcePath"] = con.SourcePath
+			content["sourcePicture"] = con.SourcePicture
+			content["bigPicture"] = con.BigPicture
+			content["snapshotPicture"] = con.SnapshotPicture
+
+			if err != nil {
+				log.ZError(c, "picktureStruct unmarshal failed", err)
+				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+				return
+			}
+			log.ZDebug(c, "CallbackExample PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE ", con)
+		}
+
+		log.ZDebug(c, "CallbackExample CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT  ", content)
+		input := &apistruct.SendMsgReq{
+			RecvID: req.SendID,
+			SendMsg: apistruct.SendMsg{
+				SendID:           user.UserID,
+				SenderNickname:   user.Nickname,
+				SenderFaceURL:    user.FaceURL,
+				SenderPlatformID: req.SenderPlatformID,
+				Content:          content,
+				ContentType:      req.ContentType,
+				SessionType:      req.SessionType,
+				SendTime:         utils.GetCurrentTimestampByMill(),
+			},
+		}
+
+		log.ZDebug(c, "CallbackExample input input input input input input input input input input input input  ", input)
+		url = "http://127.0.0.1:10002/msg/send_msg"
+		header["token"] = output_token.Data.Token
+		type sendResp struct {
+			ErrCode int               `json:"errCode"`
+			ErrMsg  string            `json:"errMsg"`
+			ErrDlt  string            `json:"errDlt"`
+			Data    pbmsg.SendMsgResp `json:"data,omitempty"`
+		}
+
+		output := &sendResp{}
+
+		log.ZDebug(c, "CallbackExample Header", "header", header)
+
+		b, err := http2.Post(c, url, header, input, 10)
+		if err != nil {
+			log.ZError(c, "CallbackExample send message failed", err)
+			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+			return
+		}
+		if err = json.Unmarshal(b, output); err != nil {
 			log.ZError(c, "CallbackExample unmarshal failed", err)
 			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
 			return
 		}
-		log.ZDebug(c, "CallbackExample TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT ", con)
-		content["content"] = con.Content
-	} else {
-		con := apistruct.PictureElem{}
-		err := json.Unmarshal([]byte(req.Content), &con)
-		content["sourcePath"] = con.SourcePath
-		content["sourcePicture"] = con.SourcePicture
-		content["bigPicture"] = con.BigPicture
-		content["snapshotPicture"] = con.SnapshotPicture
-
-		if err != nil {
-			log.ZError(c, "picktureStruct unmarshal failed", err)
-			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-			return
+		res := &msg.SendMsgResp{
+			ServerMsgID: output.Data.ServerMsgID,
+			ClientMsgID: output.Data.ClientMsgID,
+			SendTime:    output.Data.SendTime,
 		}
-		log.ZDebug(c, "CallbackExample PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE ", con)
-	}
+		log.ZDebug(c, "CallbackExample output", "output", res)
 
-	log.ZDebug(c, "CallbackExample CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT  ", content)
-	input := &apistruct.SendMsgReq{
-		RecvID: req.SendID,
-		SendMsg: apistruct.SendMsg{
-			SendID:           user.UserID,
-			SenderNickname:   user.Nickname,
-			SenderFaceURL:    user.FaceURL,
-			SenderPlatformID: req.SenderPlatformID,
-			Content:          content,
-			ContentType:      req.ContentType,
-			SessionType:      req.SessionType,
-			SendTime:         utils.GetCurrentTimestampByMill(),
-		},
+		apiresp.GinSuccess(c, res)
 	}
-
-	log.ZDebug(c, "CallbackExample input input input input input input input input input input input input  ", input)
-	url = "http://127.0.0.1:10002/msg/send_msg"
-	header["token"] = output_token.Data.Token
-	type sendResp struct {
-		ErrCode int               `json:"errCode"`
-		ErrMsg  string            `json:"errMsg"`
-		ErrDlt  string            `json:"errDlt"`
-		Data    pbmsg.SendMsgResp `json:"data,omitempty"`
-	}
-
-	output := &sendResp{}
-
-	log.ZDebug(c, "CallbackExample Header", "header", header)
-
-	b, err := http2.Post(c, url, header, input, 10)
-	if err != nil {
-		log.ZError(c, "CallbackExample send message failed", err)
-		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-		return
-	}
-	if err = json.Unmarshal(b, output); err != nil {
-		log.ZError(c, "CallbackExample unmarshal failed", err)
-		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-		return
-	}
-	res := &msg.SendMsgResp{
-		ServerMsgID: output.Data.ServerMsgID,
-		ClientMsgID: output.Data.ClientMsgID,
-		SendTime:    output.Data.SendTime,
-	}
-	log.ZDebug(c, "CallbackExample output", "output", res)
-
-	apiresp.GinSuccess(c, res)
 }
