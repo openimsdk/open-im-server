@@ -424,8 +424,6 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			return
 		}
 
-		content := make(map[string]any, 1)
-
 		// Handle message structures
 		text := apistruct.PictureElem{}
 		log.ZDebug(c, "callback", "contextCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", req.Content)
@@ -436,12 +434,21 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			return
 		}
 		log.ZDebug(c, "callback", "text%TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", text)
-		content["content"] = text.SourcePath
-		content["sourcePicture"] = text.SourcePicture
-		content["bigPicture"] = text.BigPicture
-		content["snapshotPicture"] = text.SnapshotPicture
 
-		log.ZDebug(c, "callback", "contextAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", content)
+		if strings.Contains(text.SourcePicture.Type, "/") {
+			arr := strings.Split(text.SourcePicture.Type, "/")
+			text.SourcePicture.Type = arr[1]
+		}
+
+		if strings.Contains(text.BigPicture.Type, "/") {
+			arr := strings.Split(text.BigPicture.Type, "/")
+			text.BigPicture.Type = arr[1]
+		}
+
+		if strings.Contains(text.SnapshotPicture.Type, "/") {
+			arr := strings.Split(text.SnapshotPicture.Type, "/")
+			text.SnapshotPicture.Type = arr[1]
+		}
 
 		mapStruct := make(map[string]any)
 		mapStruct1, err := convertStructToMap(text.SnapshotPicture)
@@ -469,6 +476,8 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		}
 		mapStruct["sourcePicture"] = mapStruct3
 		mapStruct["sourcePath"] = text.SourcePath
+
+		log.ZDebug(c, "callback", "contextAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", mapStruct)
 
 		input := &apistruct.SendMsgReq{
 			RecvID: req.SendID,
