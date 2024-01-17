@@ -475,15 +475,20 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			content["content"] = con.Content
 		} else {
 			//"req.Content": "{\"sourcePath\":\"/screenshot1705471793324.png\",\"sourcePicture\":{\"uuid\":\"6f9660f9-6c8b-42e2-a38b-773f67466772/screenshot1705471793324.png\",\"type\":\"image/png\",\"size\":654,\"width\":167,\"height\":196,\"url\":\"http://150.109.93.151:10002/object/3097485888/msg_picture_b09c0b7b433a050fa84a563d7b82c576.png\"},\"bigPicture\":{\"uuid\":\"6f9660f9-6c8b-42e2-a38b-773f67466772/screenshot1705471793324.png\",\"type\":\"image/png\",\"size\":654,\"width\":167,\"height\":196,\"url\":\"http://150.109.93.151:10002/object/3097485888/msg_picture_b09c0b7b433a050fa84a563d7b82c576.png\"},\"snapshotPicture\":{\"size\":0,\"width\":640,\"height\":640,\"url\":\"http://150.109.93.151:10002/object/3097485888/msg_picture_b09c0b7b433a050fa84a563d7b82c576.png?height=640\\u0026type=image\\u0026width=640\"}}"
-			//con := apistruct.PictureElem{}
+			con := apistruct.PictureElem{}
 
-			err = json.Unmarshal([]byte(req.Content), &content)
+			content["sourcePath"] = con.SourcePath
+			content["sourcePicture"] = con.SourcePicture
+			content["bigPicture"] = con.BigPicture
+			content["snapshotPicture"] = con.SnapshotPicture
+
+			err = json.Unmarshal([]byte(req.Content), &con)
 			if err != nil {
 				log.ZError(c, "picktureStruct unmarshal failed", err)
 				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
 				return
 			}
-			log.ZDebug(c, "CallbackExample PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE ", content)
+			log.ZDebug(c, "CallbackExample PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE ", con)
 		}
 
 		log.ZDebug(c, "CallbackExample CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT  ", content)
