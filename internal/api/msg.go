@@ -416,7 +416,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		return
 	}
 	// Processing text messages
-	if req.ContentType == constant.Picture {
+	if req.ContentType == constant.Picture || req.ContentType == constant.Text {
 		user, err := m.userRpcClient.GetUserInfo(c, robotics)
 		if err != nil {
 			log.ZError(c, "CallbackExample get Sender failed", err)
@@ -425,58 +425,67 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		}
 
 		// Handle message structures
-		text := apistruct.PictureElem{}
-		log.ZDebug(c, "callback", "contextCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", req.Content)
-		err = json.Unmarshal([]byte(req.Content), &text)
-		if err != nil {
-			log.ZError(c, "CallbackExample unmarshal failed", err)
-			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-			return
-		}
-		log.ZDebug(c, "callback", "text%TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", text)
-
-		if strings.Contains(text.SourcePicture.Type, "/") {
-			arr := strings.Split(text.SourcePicture.Type, "/")
-			text.SourcePicture.Type = arr[1]
-		}
-
-		if strings.Contains(text.BigPicture.Type, "/") {
-			arr := strings.Split(text.BigPicture.Type, "/")
-			text.BigPicture.Type = arr[1]
-		}
-
-		if len(text.SnapshotPicture.Type) == 0 {
-			text.SnapshotPicture.Type = text.SourcePicture.Type
-		}
-
+		text := apistruct.TextElem{}
+		picture := apistruct.PictureElem{}
 		mapStruct := make(map[string]any)
-		mapStruct1, err := convertStructToMap(text.SnapshotPicture)
+		if req.ContentType == constant.Text {
+			err = json.Unmarshal([]byte(req.Content), &text)
+			if err != nil {
+				log.ZError(c, "CallbackExample unmarshal failed", err)
+				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+				return
+			}
+			log.ZDebug(c, "callback", "text", text)
+			mapStruct["content"] = text.Content
+		} else {
+			err = json.Unmarshal([]byte(req.Content), &picture)
+			if err != nil {
+				log.ZError(c, "CallbackExample unmarshal failed", err)
+				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+				return
+			}
+			log.ZDebug(c, "callback", "text", picture)
+			if strings.Contains(picture.SourcePicture.Type, "/") {
+				arr := strings.Split(picture.SourcePicture.Type, "/")
+				picture.SourcePicture.Type = arr[1]
+			}
 
-		if err != nil {
-			log.ZError(c, "CallbackExample struct to map failed", err)
-			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-			return
+			if strings.Contains(picture.BigPicture.Type, "/") {
+				arr := strings.Split(picture.BigPicture.Type, "/")
+				picture.BigPicture.Type = arr[1]
+			}
+
+			if len(picture.SnapshotPicture.Type) == 0 {
+				picture.SnapshotPicture.Type = picture.SourcePicture.Type
+			}
+
+			mapStructSnap, err := convertStructToMap(picture.SnapshotPicture)
+			if err != nil {
+				log.ZError(c, "CallbackExample struct to map failed", err)
+				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+				return
+			}
+			mapStruct["snapshotPicture"] = mapStructSnap
+
+			mapStructBig, err := convertStructToMap(picture.BigPicture)
+			if err != nil {
+				log.ZError(c, "CallbackExample struct to map failed", err)
+				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+				return
+			}
+			mapStruct["bigPicture"] = mapStructBig
+
+			mapStructSource, err := convertStructToMap(picture.SourcePicture)
+			if err != nil {
+				log.ZError(c, "CallbackExample struct to map failed", err)
+				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+				return
+			}
+			mapStruct["sourcePicture"] = mapStructSource
+			mapStruct["sourcePath"] = picture.SourcePath
 		}
-		mapStruct["snapshotPicture"] = mapStruct1
 
-		mapStruct2, err := convertStructToMap(text.BigPicture)
-		if err != nil {
-			log.ZError(c, "CallbackExample struct to map failed", err)
-			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-			return
-		}
-		mapStruct["bigPicture"] = mapStruct2
-
-		mapStruct3, err := convertStructToMap(text.SourcePicture)
-		if err != nil {
-			log.ZError(c, "CallbackExample struct to map failed", err)
-			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-			return
-		}
-		mapStruct["sourcePicture"] = mapStruct3
-		mapStruct["sourcePath"] = text.SourcePath
-
-		log.ZDebug(c, "callback", "contextAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", mapStruct)
+		log.ZDebug(c, "callback", "mapStruct", mapStruct)
 
 		input := &apistruct.SendMsgReq{
 			RecvID: req.SendID,
@@ -526,38 +535,30 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 }
 
+// struct to map
 func convertStructToMap(input interface{}) (map[string]interface{}, error) {
-	// 使用反射创建一个空的 map
 	result := make(map[string]interface{})
-
-	// 获取结构体的类型信息
 	inputType := reflect.TypeOf(input)
 
-	// 获取结构体的值信息
 	inputValue := reflect.ValueOf(input)
 
-	// 确保输入是结构体类型
 	if inputType.Kind() != reflect.Struct {
-		return nil, fmt.Errorf("Input is not a struct")
+		return nil, errs.ErrArgs.Wrap("Input is not a struct")
 	}
 
-	// 遍历结构体的字段
 	for i := 0; i < inputType.NumField(); i++ {
 		field := inputType.Field(i)
 		fieldValue := inputValue.Field(i)
 
-		// 获取mapstructure标签的值作为map的键
 		mapKey := field.Tag.Get("mapstructure")
 		fmt.Println(mapKey)
-		// 如果没有mapstructure标签，则使用字段名作为键
+
 		if mapKey == "" {
 			mapKey = field.Name
 		}
 
-		// 转换为小写形式，以匹配JSON的命名约定
 		mapKey = strings.ToLower(mapKey)
 
-		// 将字段名作为 map 的键，字段值作为 map 的值
 		result[mapKey] = fieldValue.Interface()
 	}
 
