@@ -397,8 +397,6 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	log.ZInfo(c, "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", "req", req)
-	log.ZInfo(c, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "req.Content", req.Content)
 
 	resp := &callbackstruct.CallbackAfterSendSingleMsgResp{
 		CommonCallbackResp: callbackstruct.CommonCallbackResp{
@@ -416,6 +414,9 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	if req.SendID == robotics || req.ContentType != constant.Text || req.ContentType != constant.Picture {
 		return
 	}
+
+	log.ZInfo(c, "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", "req", req)
+	log.ZInfo(c, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "req.Content", req.Content)
 
 	url := "http://127.0.0.1:10002/auth/user_token"
 	header := map[string]string{}
@@ -461,31 +462,30 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 	content := make(map[string]any, 1)
 
-	var con any
 	if req.ContentType == constant.Text {
-		con = apistruct.TextElem{}
+		con := apistruct.TextElem{}
+		err = json.Unmarshal([]byte(req.Content), &con)
+		if err != nil {
+			log.ZError(c, "CallbackExample unmarshal failed", err)
+			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+			return
+		}
+		log.ZDebug(c, "CallbackExample TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT ", con)
+		content["content"] = con.Content
 	} else {
-		con = apistruct.PictureElem{}
-	}
+		con := apistruct.PictureElem{}
+		err := json.Unmarshal([]byte(req.Content), &con)
+		content["sourcePath"] = con.SourcePath
+		content["sourcePicture"] = con.SourcePicture
+		content["bigPicture"] = con.BigPicture
+		content["snapshotPicture"] = con.SnapshotPicture
 
-	err = json.Unmarshal([]byte(req.Content), &con)
-	if err != nil {
-		log.ZError(c, "CallbackExample unmarshal failed", err)
-		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-		return
-	}
-
-	log.ZDebug(c, "CallbackExample TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT ", con)
-
-	if req.ContentType == constant.Text {
-		content["content"] = con.(apistruct.TextElem).Content
-	} else {
-		err := json.Unmarshal([]byte(req.Content), &content)
 		if err != nil {
 			log.ZError(c, "picktureStruct unmarshal failed", err)
 			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
 			return
 		}
+		log.ZDebug(c, "CallbackExample PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE ", con)
 	}
 
 	log.ZDebug(c, "CallbackExample CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT  ", content)
