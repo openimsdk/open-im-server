@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/first-interaction@v1.2.0
+      - uses: actions/first-interaction@v1.3.0
         with:
           repo-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           pr-message: |
