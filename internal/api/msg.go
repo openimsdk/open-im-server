@@ -399,7 +399,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	log.ZInfo(c, "CallbackExample", "req", req)
+	log.ZInfo(c, "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", "req", req)
 
 	resp := &callbackstruct.CallbackAfterSendSingleMsgResp{
 		CommonCallbackResp: callbackstruct.CommonCallbackResp{
@@ -461,16 +461,23 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 
 	content := make(map[string]any, 1)
-	log.ZDebug(c, "CallbackExample content content content content content content content content", "content", req.Content)
-	str := &apistruct.TextElem{}
+	log.ZDebug(c, "CallbackExample content content content content content content content content", req.Content)
+
+	//{"operationID": "2390e1ce-7e66-4e70-b37e-4be483f22c3f", "content": "{\"content\":\"java\"}"}
+	type text struct {
+		OperationID string             `json:"operationID"`
+		Context     apistruct.TextElem `json:"context"`
+	}
+	str := &text{}
 	err = json.Unmarshal([]byte(req.Content), str)
 	if err != nil {
 		log.ZError(c, "CallbackExample unmarshal failed", err)
 		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
 		return
 	}
+	log.ZDebug(c, "CallbackExample TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT ", str)
 
-	content["content"] = str
+	content["content"] = str.Context.Content
 	input := &apistruct.SendMsgReq{
 		RecvID: req.SendID,
 		SendMsg: apistruct.SendMsg{
@@ -485,6 +492,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		},
 	}
 
+	log.ZDebug(c, "CallbackExample input input input input input input input input input input input input  ", input)
 	url = "http://127.0.0.1:10002/msg/send_msg"
 	header["token"] = output_token.Data.Token
 	type sendResp struct {
