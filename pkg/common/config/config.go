@@ -383,8 +383,9 @@ func (l LocalCache) Enable() bool {
 }
 
 type localCache struct {
-	Friend       LocalCache `yaml:"friend"`
+	User         LocalCache `yaml:"user"`
 	Group        LocalCache `yaml:"group"`
+	Friend       LocalCache `yaml:"friend"`
 	Conversation LocalCache `yaml:"conversation"`
 }
 

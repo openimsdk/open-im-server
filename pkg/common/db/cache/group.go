@@ -106,7 +106,9 @@ func NewGroupCacheRedis(
 ) GroupCache {
 	rcClient := rockscache.NewClient(rdb, opts)
 	mc := NewMetaCacheRedis(rcClient)
-	mc.SetTopic(config.Config.LocalCache.Group.Topic)
+	g := config.Config.LocalCache.Group
+	mc.SetTopic(g.Topic)
+	log.ZDebug(context.Background(), "group local cache init", "Topic", g.Topic, "SlotNum", g.SlotNum, "SlotSize", g.SlotSize, "enable", g.Enable())
 	mc.SetRawRedisClient(rdb)
 	return &GroupCacheRedis{
 		rcClient: rcClient, expireTime: groupExpireTime,

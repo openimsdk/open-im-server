@@ -98,7 +98,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 	}
 	tagAll := utils.IsContain(constant.AtAllString, msg.AtUserIDList)
 	if tagAll {
-		memberUserIDList, err := m.Group.GetGroupMemberIDs(ctx, msg.GroupID)
+		memberUserIDList, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, msg.GroupID)
 		if err != nil {
 			log.ZWarn(ctx, "GetGroupMemberIDs", err)
 			return
