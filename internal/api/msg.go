@@ -413,7 +413,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 
 	robotics := "5078764102"
-	if req.SendID == robotics || req.ContentType != 101 {
+	if req.SendID == robotics || req.ContentType != constant.Text || req.ContentType != constant.Picture {
 		return
 	}
 
@@ -462,34 +462,32 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	content := make(map[string]any, 1)
 	log.ZDebug(c, "CallbackExample Content Content Content Content Content Content Content Content Content Content", "req.Content", req.Content)
 
-	//{"operationID": "2390e1ce-7e66-4e70-b37e-4be483f22c3f", "content": "{\"content\":\"java\"}"}
-	//"content":"{\"content\":\"钱钱钱钱钱钱钱钱钱钱钱钱钱钱钱钱钱钱钱\"}"
-	type text struct {
-		OperationID string `json:"operationID"`
-		apistruct.TextElem
+	var con any
+	if req.ContentType == constant.Text {
+		con = apistruct.TextElem{}
+	} else {
+		con = apistruct.PictureElem{}
 	}
 
-	te := &apistruct.TextElem{}
-
-	err = json.Unmarshal([]byte(req.Content), te)
+	err = json.Unmarshal([]byte(req.Content), &con)
 	if err != nil {
 		log.ZError(c, "CallbackExample unmarshal failed", err)
 		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
 		return
 	}
 
-	log.ZDebug(c, "CallbackExample Te Te Te Te Te Te Te Te Te Te Te Te Te ", "te", te)
+	log.ZDebug(c, "CallbackExample TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT ", con)
 
-	str := &text{}
-	err = json.Unmarshal([]byte(req.Content), str)
-	if err != nil {
-		log.ZError(c, "CallbackExample unmarshal failed", err)
-		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-		return
+	if req.ContentType == constant.Text {
+		content["content"] = con.(apistruct.TextElem).Content
+	} else {
+		err := json.Unmarshal([]byte(req.Content), &content)
+		if err != nil {
+			log.ZError(c, "picktureStruct unmarshal failed", err)
+			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+			return
+		}
 	}
-	log.ZDebug(c, "CallbackExample TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT ", str)
-
-	content["content"] = te.Content
 	input := &apistruct.SendMsgReq{
 		RecvID: req.SendID,
 		SendMsg: apistruct.SendMsg{
