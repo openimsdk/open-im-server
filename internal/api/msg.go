@@ -392,7 +392,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		return
 	}
 
-	resp := &callbackstruct.CallbackAfterSendSingleMsgResp{
+	resp := callbackstruct.CallbackAfterSendSingleMsgResp{
 		CommonCallbackResp: callbackstruct.CommonCallbackResp{
 			ActionCode: 0,
 			ErrCode:    200,
@@ -413,7 +413,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		return
 	}
 	// Processing text messages
-	if req.ContentType == constant.Text {
+	if req.ContentType == constant.Picture {
 		user, err := m.userRpcClient.GetUserInfo(c, robotics)
 		if err != nil {
 			log.ZError(c, "CallbackExample get Sender failed", err)
@@ -424,14 +424,21 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		content := make(map[string]any, 1)
 
 		// Handle message structures
-		text := apistruct.TextElem{}
+		text := apistruct.PictureElem{}
+		log.ZDebug(c, "callback", "contextCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", req.Content)
 		err = json.Unmarshal([]byte(req.Content), &text)
 		if err != nil {
 			log.ZError(c, "CallbackExample unmarshal failed", err)
 			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
 			return
 		}
-		content["content"] = text.Content
+		log.ZDebug(c, "callback", "text%TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", text)
+		content["content"] = text.SourcePath
+		content["sourcePicture"] = text.SourcePicture
+		content["bigPicture"] = text.BigPicture
+		content["snapshotPicture"] = text.SnapshotPicture
+
+		log.ZDebug(c, "callback", "contextAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", content)
 
 		input := &apistruct.SendMsgReq{
 			RecvID: req.SendID,
