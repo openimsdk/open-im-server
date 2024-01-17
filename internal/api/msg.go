@@ -29,14 +29,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	http2 "github.com/openimsdk/open-im-server/v3/pkg/common/http"
 	pbmsg "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/proto/msg"
 	"net/http"
-	"time"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -400,6 +398,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		return
 	}
 	log.ZInfo(c, "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", "req", req)
+	log.ZInfo(c, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "req.Content", req.Content)
 
 	resp := &callbackstruct.CallbackAfterSendSingleMsgResp{
 		CommonCallbackResp: callbackstruct.CommonCallbackResp{
@@ -461,13 +460,26 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 
 	content := make(map[string]any, 1)
-	log.ZDebug(c, "CallbackExample content content content content content content content content", req.Content)
+	log.ZDebug(c, "CallbackExample Content Content Content Content Content Content Content Content Content Content", "req.Content", req.Content)
 
 	//{"operationID": "2390e1ce-7e66-4e70-b37e-4be483f22c3f", "content": "{\"content\":\"java\"}"}
+	//"content":"{\"content\":\"钱钱钱钱钱钱钱钱钱钱钱钱钱钱钱钱钱钱钱\"}"
 	type text struct {
-		OperationID string             `json:"operationID"`
-		Context     apistruct.TextElem `json:"context"`
+		OperationID string `json:"operationID"`
+		apistruct.TextElem
 	}
+
+	te := &apistruct.TextElem{}
+
+	err = json.Unmarshal([]byte(req.Content), te)
+	if err != nil {
+		log.ZError(c, "CallbackExample unmarshal failed", err)
+		apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+		return
+	}
+
+	log.ZDebug(c, "CallbackExample Te Te Te Te Te Te Te Te Te Te Te Te Te ", "te", te)
+
 	str := &text{}
 	err = json.Unmarshal([]byte(req.Content), str)
 	if err != nil {
@@ -477,7 +489,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 	log.ZDebug(c, "CallbackExample TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT ", str)
 
-	content["content"] = str.Context.Content
+	content["content"] = te.Content
 	input := &apistruct.SendMsgReq{
 		RecvID: req.SendID,
 		SendMsg: apistruct.SendMsg{
@@ -488,7 +500,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			Content:          content,
 			ContentType:      req.ContentType,
 			SessionType:      req.SessionType,
-			SendTime:         time.Now().UnixNano() / 1e6,
+			SendTime:         utils.GetCurrentTimestampByMill(),
 		},
 	}
 
