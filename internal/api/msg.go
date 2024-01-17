@@ -470,7 +470,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		return
 	}
 
-	content["content"] = req.Content
+	content["content"] = str
 	input := &apistruct.SendMsgReq{
 		RecvID: req.SendID,
 		SendMsg: apistruct.SendMsg{
