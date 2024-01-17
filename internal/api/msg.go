@@ -460,7 +460,6 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 
 	content := make(map[string]any, 1)
-	log.ZDebug(c, "CallbackExample Content Content Content Content Content Content Content Content Content Content", "req.Content", req.Content)
 
 	var con any
 	if req.ContentType == constant.Text {
@@ -488,6 +487,8 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			return
 		}
 	}
+
+	log.ZDebug(c, "CallbackExample CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT  ", content)
 	input := &apistruct.SendMsgReq{
 		RecvID: req.SendID,
 		SendMsg: apistruct.SendMsg{
