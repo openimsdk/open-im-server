@@ -36,6 +36,7 @@ import (
 	pbmsg "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/proto/msg"
 	"net/http"
 	"reflect"
+	"strings"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -537,8 +538,19 @@ func convertStructToMap(input interface{}) (map[string]interface{}, error) {
 		field := inputType.Field(i)
 		fieldValue := inputValue.Field(i)
 
+		// 获取mapstructure标签的值作为map的键
+		mapKey := field.Tag.Get("mapstructure")
+		fmt.Println(mapKey)
+		// 如果没有mapstructure标签，则使用字段名作为键
+		if mapKey == "" {
+			mapKey = field.Name
+		}
+
+		// 转换为小写形式，以匹配JSON的命名约定
+		mapKey = strings.ToLower(mapKey)
+
 		// 将字段名作为 map 的键，字段值作为 map 的值
-		result[field.Name] = fieldValue.Interface()
+		result[mapKey] = fieldValue.Interface()
 	}
 
 	return result, nil
