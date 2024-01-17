@@ -19,6 +19,7 @@
 
 ### OpenIM developer supplement ###
 logs
+.devcontainer
 components
 out-test
 Dockerfile.cross
