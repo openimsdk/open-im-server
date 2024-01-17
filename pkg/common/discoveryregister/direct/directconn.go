@@ -8,8 +8,6 @@ import (
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"net"
-	"time"
 )
 
 type ServiceAddresses map[string][]int
@@ -153,12 +151,4 @@ func (cd *ConnDirect) dialServiceWithoutResolver(ctx context.Context, address st
 		return nil, err
 	}
 	return conn, nil
-}
-func checkServiceHealth(address string) bool {
-	conn, err := net.DialTimeout("tcp", address, time.Second*3)
-	if err != nil {
-		return false
-	}
-	conn.Close()
-	return true
 }
