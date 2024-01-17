@@ -445,9 +445,8 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			text.BigPicture.Type = arr[1]
 		}
 
-		if strings.Contains(text.SnapshotPicture.Type, "/") {
-			arr := strings.Split(text.SnapshotPicture.Type, "/")
-			text.SnapshotPicture.Type = arr[1]
+		if len(text.SnapshotPicture.Type) == 0 {
+			text.SnapshotPicture.Type = text.SourcePicture.Type
 		}
 
 		mapStruct := make(map[string]any)
