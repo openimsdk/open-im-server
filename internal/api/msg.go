@@ -16,7 +16,6 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/OpenIMSDK/protocol/auth"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -384,12 +383,7 @@ func (m *MessageApi) GetServerTime(c *gin.Context) {
 }
 
 func (m *MessageApi) CallbackExample(c *gin.Context) {
-	// 1. 通过 url 获取具体信息
-	// 2. 返回继续向下执行的命令
-	// 3. 获取一个系统通知号
-	// 4. 构造一个发消息的结构体
-	// 5. 使用这个系统通知号发送消息
-
+	// 1. Callback after sending a single chat message
 	var req callbackstruct.CallbackAfterSendSingleMsgReq
 
 	if err := c.BindJSON(&req); err != nil {
@@ -407,53 +401,19 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			NextCode:   0,
 		},
 	}
-
 	c.JSON(http.StatusOK, resp)
 
+	// 2. If the user receiving the message is a customer service bot, return the message.
+
+	// UserID of the robot account
 	robotics := "5078764102"
+	// Administrator token
+	imtoken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiJpbUFkbWluIiwiUGxhdGZvcm1JRCI6MTAsImV4cCI6MTcxMzI1MjI0OSwibmJmIjoxNzA1NDc1OTQ5LCJpYXQiOjE3MDU0NzYyNDl9.Zi-uFre8zq6msT3mFOumgcfNKBJ92kTw9ewsKeRVbZ4"
 	if req.SendID == robotics {
 		return
 	}
-	if req.ContentType == constant.Text || req.ContentType == constant.Picture {
-
-		log.ZInfo(c, "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", "req", req)
-		log.ZInfo(c, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "req.Content", req.Content)
-
-		url := "http://127.0.0.1:10002/auth/user_token"
-		header := map[string]string{}
-		header["operationID"] = req.OperationID
-		input_token := &auth.UserTokenReq{
-			Secret:     config.Config.Secret,
-			PlatformID: req.SenderPlatformID,
-			UserID:     config.Config.IMAdmin.UserID[0],
-		}
-
-		type token struct {
-			ErrCode int                `json:"errCode"`
-			ErrMsg  string             `json:"errMsg"`
-			ErrDlt  string             `json:"errDlt"`
-			Data    auth.UserTokenResp `json:"data,omitempty"`
-		}
-
-		output_token := &token{}
-
-		data, err := http2.Post(c, url, header, input_token, 10)
-		if err != nil {
-			log.ZError(c, "CallbackExample get Sender token failed", err)
-			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-			return
-		}
-
-		log.ZDebug(c, "CallbackExample data Token", "token", data)
-
-		if err = json.Unmarshal(data, output_token); err != nil {
-			log.ZError(c, "CallbackExample unmarshal userToken failed", err)
-			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-			return
-		}
-
-		log.ZDebug(c, "CallbackExample get User Token", "token", output_token)
-
+	// Processing text messages
+	if req.ContentType == constant.Text {
 		user, err := m.userRpcClient.GetUserInfo(c, robotics)
 		if err != nil {
 			log.ZError(c, "CallbackExample get Sender failed", err)
@@ -461,36 +421,18 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			return
 		}
 
-		content := make(map[string]any, 10)
+		content := make(map[string]any, 1)
 
+		// Handle message structures
 		text := apistruct.TextElem{}
-		picture := apistruct.PictureElem{}
-
-		if req.ContentType == constant.Text {
-			err = json.Unmarshal([]byte(req.Content), &text)
-			if err != nil {
-				log.ZError(c, "CallbackExample unmarshal failed", err)
-				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-				return
-			}
-			log.ZDebug(c, "CallbackExample TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT ", text)
-			content["content"] = text.Content
-		} else {
-			//"req.Content": "{\"sourcePath\":\"/screenshot1705471793324.png\",\"sourcePicture\":{\"uuid\":\"6f9660f9-6c8b-42e2-a38b-773f67466772/screenshot1705471793324.png\",\"type\":\"image/png\",\"size\":654,\"width\":167,\"height\":196,\"url\":\"http://150.109.93.151:10002/object/3097485888/msg_picture_b09c0b7b433a050fa84a563d7b82c576.png\"},\"bigPicture\":{\"uuid\":\"6f9660f9-6c8b-42e2-a38b-773f67466772/screenshot1705471793324.png\",\"type\":\"image/png\",\"size\":654,\"width\":167,\"height\":196,\"url\":\"http://150.109.93.151:10002/object/3097485888/msg_picture_b09c0b7b433a050fa84a563d7b82c576.png\"},\"snapshotPicture\":{\"size\":0,\"width\":640,\"height\":640,\"url\":\"http://150.109.93.151:10002/object/3097485888/msg_picture_b09c0b7b433a050fa84a563d7b82c576.png?height=640\\u0026type=image\\u0026width=640\"}}"
-			err = json.Unmarshal([]byte(req.Content), &picture)
-			if err != nil {
-				log.ZError(c, "picktureStruct unmarshal failed", err)
-				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
-				return
-			}
-			log.ZDebug(c, "CallbackExample PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE PICKTURE ", picture)
-			content["sourcePath"] = picture.SourcePath
-			content["sourcePicture"] = picture.SourcePicture
-			content["bigPicture"] = picture.BigPicture
-			content["snapshotPicture"] = picture.SnapshotPicture
+		err = json.Unmarshal([]byte(req.Content), &text)
+		if err != nil {
+			log.ZError(c, "CallbackExample unmarshal failed", err)
+			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+			return
 		}
+		content["content"] = text.Content
 
-		log.ZDebug(c, "CallbackExample CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT CONTENT  ", content)
 		input := &apistruct.SendMsgReq{
 			RecvID: req.SendID,
 			SendMsg: apistruct.SendMsg{
@@ -501,13 +443,13 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 				Content:          content,
 				ContentType:      req.ContentType,
 				SessionType:      req.SessionType,
-				SendTime:         utils.GetCurrentTimestampByMill(),
+				SendTime:         utils.GetCurrentTimestampByMill(), // millisecond
 			},
 		}
 
-		log.ZDebug(c, "CallbackExample input input input input input input input input input input input input  ", input)
-		url = "http://127.0.0.1:10002/msg/send_msg"
-		header["token"] = output_token.Data.Token
+		url := "http://127.0.0.1:10002/msg/send_msg"
+		header := make(map[string]string, 2)
+		header["token"] = imtoken
 		type sendResp struct {
 			ErrCode int               `json:"errCode"`
 			ErrMsg  string            `json:"errMsg"`
@@ -517,8 +459,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 		output := &sendResp{}
 
-		log.ZDebug(c, "CallbackExample Header", "header", header)
-
+		// Initiate a post request that calls the interface that sends the message (the bot sends a message to user)
 		b, err := http2.Post(c, url, header, input, 10)
 		if err != nil {
 			log.ZError(c, "CallbackExample send message failed", err)
@@ -535,7 +476,6 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			ClientMsgID: output.Data.ClientMsgID,
 			SendTime:    output.Data.SendTime,
 		}
-		log.ZDebug(c, "CallbackExample output", "output", res)
 
 		apiresp.GinSuccess(c, res)
 	}
