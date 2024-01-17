@@ -442,12 +442,32 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 
 		log.ZDebug(c, "callback", "contextAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", content)
 
-		mapStruct, err := convertStructToMap(text)
+		mapStruct := make(map[string]any)
+		mapStruct1, err := convertStructToMap(text.SnapshotPicture)
+
 		if err != nil {
 			log.ZError(c, "CallbackExample struct to map failed", err)
 			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
 			return
 		}
+		mapStruct["snapshotPicture"] = mapStruct1
+
+		mapStruct2, err := convertStructToMap(text.BigPicture)
+		if err != nil {
+			log.ZError(c, "CallbackExample struct to map failed", err)
+			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+			return
+		}
+		mapStruct["bigPicture"] = mapStruct2
+
+		mapStruct3, err := convertStructToMap(text.SourcePicture)
+		if err != nil {
+			log.ZError(c, "CallbackExample struct to map failed", err)
+			apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+			return
+		}
+		mapStruct["sourcePicture"] = mapStruct3
+		mapStruct["sourcePath"] = text.SourcePath
 
 		input := &apistruct.SendMsgReq{
 			RecvID: req.SendID,
