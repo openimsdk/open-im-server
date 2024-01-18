@@ -20,6 +20,9 @@ func NewGroupLocalCache(client rpcclient.GroupRpcClient, cli redis.UniversalClie
 		local: localcache.New[any](
 			localcache.WithLocalSlotNum(lc.SlotNum),
 			localcache.WithLocalSlotSize(lc.SlotSize),
+			localcache.WithLinkSlotNum(lc.SlotNum),
+			localcache.WithLocalSuccessTTL(lc.Success()),
+			localcache.WithLocalFailedTTL(lc.Failed()),
 		),
 	}
 	if lc.Enable() {

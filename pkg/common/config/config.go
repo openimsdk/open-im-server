@@ -16,6 +16,7 @@ package config
 
 import (
 	"bytes"
+	"time"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"gopkg.in/yaml.v3"
@@ -373,9 +374,19 @@ type notification struct {
 }
 
 type LocalCache struct {
-	Topic    string `yaml:"topic"`
-	SlotNum  int    `yaml:"slotNum"`
-	SlotSize int    `yaml:"slotSize"`
+	Topic         string `yaml:"topic"`
+	SlotNum       int    `yaml:"slotNum"`
+	SlotSize      int    `yaml:"slotSize"`
+	SuccessExpire int    `yaml:"successExpire"` // second
+	FailedExpire  int    `yaml:"failedExpire"`  // second
+}
+
+func (l LocalCache) Failed() time.Duration {
+	return time.Second * time.Duration(l.FailedExpire)
+}
+
+func (l LocalCache) Success() time.Duration {
+	return time.Second * time.Duration(l.SuccessExpire)
 }
 
 func (l LocalCache) Enable() bool {
