@@ -48,10 +48,12 @@ type UserDatabase interface {
 	//Update(ctx context.Context, user *relation.UserModel) (err error)
 	// UpdateByMap update (zero value) external guarantee userID exists
 	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
+	// FindUser
+	PageFindUser(ctx context.Context, level1 int64, level2 int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
+	//FindUser with keyword
+	PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID string, userName string, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
 	// Page If not found, no error is returned
 	Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
-	// FindUser
-	PageFindUser(ctx context.Context, level int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
 	// IsExist true as long as one exists
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 	// GetAllUserID Get all user IDs
@@ -185,8 +187,11 @@ func (u *userDatabase) Page(ctx context.Context, pagination pagination.Paginatio
 	return u.userDB.Page(ctx, pagination)
 }
 
-func (u *userDatabase) PageFindUser(ctx context.Context, level int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
-	return u.userDB.PageFindUser(ctx, level, pagination)
+func (u *userDatabase) PageFindUser(ctx context.Context, level1 int64, level2 int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+	return u.userDB.PageFindUser(ctx, level1, level2, pagination)
+}
+func (u *userDatabase) PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID, userName string, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+	return u.userDB.PageFindUserWithKeyword(ctx, level1, level2, userID, userName, pagination)
 }
 
 // IsExist Does userIDs exist? As long as there is one, it will be true.

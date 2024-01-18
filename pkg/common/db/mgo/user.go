@@ -18,6 +18,7 @@ import (
 	"context"
 	"github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/errs"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
@@ -78,8 +79,42 @@ func (u *UserMgo) Page(ctx context.Context, pagination pagination.Pagination) (c
 	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, bson.M{}, pagination)
 }
 
-func (u *UserMgo) PageFindUser(ctx context.Context, level int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
-	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, bson.M{"app_manger_level": level}, pagination)
+func (u *UserMgo) PageFindUser(ctx context.Context, level1 int64, level2 int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+	query := bson.M{
+		"$or": []bson.M{
+			{"app_manger_level": level1},
+			{"app_manger_level": level2},
+		},
+	}
+
+	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, query, pagination)
+}
+func (u *UserMgo) PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID string, userName string, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+	// Initialize the base query with level conditions
+	query := bson.M{
+		"$and": []bson.M{
+			{"app_manger_level": bson.M{"$in": []int64{level1, level2}}},
+		},
+	}
+
+	// Add userID and userName conditions to the query if they are provided
+	if userID != "" || userName != "" {
+		userConditions := []bson.M{}
+		if userID != "" {
+			// Use regex for userID
+			regexPattern := primitive.Regex{Pattern: userID, Options: "i"} // 'i' for case-insensitive matching
+			userConditions = append(userConditions, bson.M{"user_id": regexPattern})
+		}
+		if userName != "" {
+			// Use regex for userName
+			regexPattern := primitive.Regex{Pattern: userName, Options: "i"} // 'i' for case-insensitive matching
+			userConditions = append(userConditions, bson.M{"nickname": regexPattern})
+		}
+		query["$and"] = append(query["$and"].([]bson.M), bson.M{"$or": userConditions})
+	}
+
+	// Perform the paginated search
+	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, query, pagination)
 }
 
 func (u *UserMgo) GetAllUserID(ctx context.Context, pagination pagination.Pagination) (int64, []string, error) {

@@ -114,9 +114,7 @@ services:
   openim-web:
     image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-web:${OPENIM_WEB_IMAGE_VERSION:-v3.5.0-docker}
     container_name: openim-web
-    environment:
-      - OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH:-/app/dist}
-      - OPENIM_WEB_PORT=${OPENIM_WEB_PORT:-11001}
+    platform: linux/amd64
     restart: always
     ports:
       - "${OPENIM_WEB_PORT:-11001}:80"
@@ -201,9 +199,6 @@ services:
   #     - "${DATA_DIR:-./}/components/openim-chat/config:/openim/openim-chat/config"
   #   restart: always
   #   # user: root:root
-  #   depends_on:
-  #     openim-server:
-  #       condition: service_healthy
   #   logging:
   #     driver: json-file
   #     options:
@@ -215,8 +210,9 @@ services:
 
   # openim-admin:
   # # https://github.com/openimsdk/open-im-server/issues/1662
-  # image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin:${ADMIN_FRONT_VERSION:-toc-base-open-docker.35}
-  # container_name: openim-admin
+  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin:${ADMIN_FRONT_VERSION:-toc-base-open-docker.35}
+  #   container_name: openim-admin
+  #   platform: linux/amd64
   #   restart: always
   #   ports:
   #     - "${OPENIM_ADMIN_FRONT_PORT:-11002}:80"
