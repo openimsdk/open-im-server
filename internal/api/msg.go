@@ -428,6 +428,9 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		text := apistruct.TextElem{}
 		picture := apistruct.PictureElem{}
 		mapStruct := make(map[string]any)
+		mapStructSnap := make(map[string]interface{})
+		mapStructBig := make(map[string]interface{})
+		mapStructSource := make(map[string]interface{})
 		if req.ContentType == constant.Text {
 			err = json.Unmarshal([]byte(req.Content), &text)
 			if err != nil {
@@ -458,7 +461,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			if len(picture.SnapshotPicture.Type) == 0 {
 				picture.SnapshotPicture.Type = picture.SourcePicture.Type
 			}
-			mapStructSnap := make(map[string]interface{})
+
 			mapStructSnap, err = convertStructToMap(picture.SnapshotPicture)
 			if err != nil {
 				log.ZError(c, "CallbackExample struct to map failed", err)
@@ -467,7 +470,6 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			}
 			mapStruct["snapshotPicture"] = mapStructSnap
 
-			mapStructBig := make(map[string]interface{})
 			mapStructBig, err = convertStructToMap(picture.BigPicture)
 			if err != nil {
 				log.ZError(c, "CallbackExample struct to map failed", err)
@@ -476,7 +478,6 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			}
 			mapStruct["bigPicture"] = mapStructBig
 
-			mapStructSource := make(map[string]interface{})
 			mapStructSource, err = convertStructToMap(picture.SourcePicture)
 			if err != nil {
 				log.ZError(c, "CallbackExample struct to map failed", err)
