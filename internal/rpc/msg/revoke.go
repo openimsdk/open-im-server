@@ -47,7 +47,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if err := authverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	user, err := m.User.GetUserInfo(ctx, req.UserID)
+	user, err := m.UserLocalCache.GetUserInfo(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -73,12 +73,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 			}
 			role = user.AppMangerLevel
 		case constant.SuperGroupChatType:
-			members, err := m.Group.GetGroupMemberInfoMap(
-				ctx,
-				msgs[0].GroupID,
-				utils.Distinct([]string{req.UserID, msgs[0].SendID}),
-				true,
-			)
+			members, err := m.GroupLocalCache.GetGroupMemberInfoMap(ctx, msgs[0].GroupID, utils.Distinct([]string{req.UserID, msgs[0].SendID}))
 			if err != nil {
 				return nil, err
 			}

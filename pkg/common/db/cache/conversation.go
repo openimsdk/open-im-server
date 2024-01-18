@@ -17,6 +17,7 @@ package cache
 import (
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"math/big"
@@ -87,7 +88,9 @@ type ConversationCache interface {
 func NewConversationRedis(rdb redis.UniversalClient, opts rockscache.Options, db relationtb.ConversationModelInterface) ConversationCache {
 	rcClient := rockscache.NewClient(rdb, opts)
 	mc := NewMetaCacheRedis(rcClient)
-	mc.SetTopic(config.Config.LocalCache.Conversation.Topic)
+	c := config.Config.LocalCache.Conversation
+	log.ZDebug(context.Background(), "black local cache init", "Topic", c.Topic, "SlotNum", c.SlotNum, "SlotSize", c.SlotSize, "enable", c.Enable())
+	mc.SetTopic(c.Topic)
 	mc.SetRawRedisClient(rdb)
 	return &ConversationRedisCache{
 		rcClient:       rcClient,

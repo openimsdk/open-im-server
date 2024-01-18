@@ -1,14 +1,14 @@
 package cachekey
 
 const (
-	userInfoKey             = "USER_INFO:"
-	userGlobalRecvMsgOptKey = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
+	UserInfoKey             = "USER_INFO:"
+	UserGlobalRecvMsgOptKey = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
 )
 
 func GetUserInfoKey(userID string) string {
-	return userInfoKey + userID
+	return UserInfoKey + userID
 }
 
 func GetUserGlobalRecvMsgOptKey(userID string) string {
-	return userGlobalRecvMsgOptKey + userID
+	return UserGlobalRecvMsgOptKey + userID
 }

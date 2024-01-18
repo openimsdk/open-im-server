@@ -529,13 +529,18 @@ prometheus:
   messageTransferPrometheusPort: [ ${MSG_TRANSFER_PROM_PORT} ] # List of ports
 
 localCache:
-  friend:
-    topic: delete_cache_friend
+  user:
+    topic: delete_cache_user
     slotNum: 500
     slotSize: 20000
 
   group:
     topic: delete_cache_group
+    slotNum: 500
+    slotSize: 20000
+
+  friend:
+    topic: delete_cache_friend
     slotNum: 500
     slotSize: 20000
 

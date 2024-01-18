@@ -78,7 +78,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		}
 		return nil
 	case constant.SuperGroupChatType:
-		groupInfo, err := m.Group.GetGroupInfoCache(ctx, data.MsgData.GroupID)
+		groupInfo, err := m.GroupLocalCache.GetGroupInfo(ctx, data.MsgData.GroupID)
 		if err != nil {
 			return err
 		}
@@ -104,9 +104,9 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return errs.ErrNotInGroupYet.Wrap()
 		}
 
-		groupMemberInfo, err := m.Group.GetGroupMemberCache(ctx, data.MsgData.GroupID, data.MsgData.SendID)
+		groupMemberInfo, err := m.GroupLocalCache.GetGroupMember(ctx, data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
-			if err == errs.ErrRecordNotFound {
+			if errs.ErrRecordNotFound.Is(err) {
 				return errs.ErrNotInGroupYet.Wrap(err.Error())
 			}
 			return err
@@ -188,7 +188,7 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(
 	pb *msg.SendMsgReq,
 ) (bool, error) {
 	defer log.ZDebug(ctx, "modifyMessageByUserMessageReceiveOpt return")
-	opt, err := m.User.GetUserGlobalMsgRecvOpt(ctx, userID) // todo local cache
+	opt, err := m.UserLocalCache.GetUserGlobalMsgRecvOpt(ctx, userID)
 	if err != nil {
 		return false, err
 	}

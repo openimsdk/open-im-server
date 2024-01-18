@@ -22,8 +22,12 @@ func getPublishKey(topic string, key []string) []string {
 			Keys  []string
 		}{
 			{
+				Local: config.Config.LocalCache.User,
+				Keys:  []string{cachekey.UserInfoKey, cachekey.UserGlobalRecvMsgOptKey},
+			},
+			{
 				Local: config.Config.LocalCache.Group,
-				Keys:  []string{cachekey.GroupMemberIDsKey},
+				Keys:  []string{cachekey.GroupMemberIDsKey, cachekey.GroupInfoKey, cachekey.GroupMemberInfoKey},
 			},
 			{
 				Local: config.Config.LocalCache.Friend,

@@ -36,9 +36,8 @@ type (
 	msgServer               struct {
 		RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
 		MsgDatabase            controller.CommonMsgDatabase
-		Group                  *rpcclient.GroupRpcClient
-		User                   *rpcclient.UserRpcClient
 		Conversation           *rpcclient.ConversationRpcClient
+		UserLocalCache         *rpccache.UserLocalCache
 		FriendLocalCache       *rpccache.FriendLocalCache
 		GroupLocalCache        *rpccache.GroupLocalCache
 		ConversationLocalCache *rpccache.ConversationLocalCache
@@ -84,10 +83,9 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 
 	s := &msgServer{
 		Conversation:           &conversationClient,
-		User:                   &userRpcClient,
-		Group:                  &groupRpcClient,
 		MsgDatabase:            msgDatabase,
 		RegisterCenter:         client,
+		UserLocalCache:         rpccache.NewUserLocalCache(userRpcClient, rdb),
 		GroupLocalCache:        rpccache.NewGroupLocalCache(groupRpcClient, rdb),
 		ConversationLocalCache: rpccache.NewConversationLocalCache(conversationClient, rdb),
 		FriendLocalCache:       rpccache.NewFriendLocalCache(friendRpcClient, rdb),

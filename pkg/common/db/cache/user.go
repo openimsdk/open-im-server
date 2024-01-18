@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"hash/crc32"
 	"strconv"
 	"time"
@@ -73,7 +74,11 @@ func NewUserCacheRedis(
 	options rockscache.Options,
 ) UserCache {
 	rcClient := rockscache.NewClient(rdb, options)
-
+	mc := NewMetaCacheRedis(rcClient)
+	u := config.Config.LocalCache.User
+	log.ZDebug(context.Background(), "user local cache init", "Topic", u.Topic, "SlotNum", u.SlotNum, "SlotSize", u.SlotSize, "enable", u.Enable())
+	mc.SetTopic(u.Topic)
+	mc.SetRawRedisClient(rdb)
 	return &UserCacheRedis{
 		rdb:        rdb,
 		metaCache:  NewMetaCacheRedis(rcClient),
@@ -86,7 +91,7 @@ func NewUserCacheRedis(
 func (u *UserCacheRedis) NewCache() UserCache {
 	return &UserCacheRedis{
 		rdb:        u.rdb,
-		metaCache:  NewMetaCacheRedis(u.rcClient, u.metaCache.GetPreDelKeys()...),
+		metaCache:  u.Copy(),
 		userDB:     u.userDB,
 		expireTime: u.expireTime,
 		rcClient:   u.rcClient,
