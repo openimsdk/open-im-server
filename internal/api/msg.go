@@ -33,7 +33,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	http2 "github.com/openimsdk/open-im-server/v3/pkg/common/http"
-	pbmsg "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/proto/msg"
 	"net/http"
 	"reflect"
 	"strings"
@@ -505,10 +504,10 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		header := make(map[string]string, 2)
 		header["token"] = imtoken
 		type sendResp struct {
-			ErrCode int               `json:"errCode"`
-			ErrMsg  string            `json:"errMsg"`
-			ErrDlt  string            `json:"errDlt"`
-			Data    pbmsg.SendMsgResp `json:"data,omitempty"`
+			ErrCode int             `json:"errCode"`
+			ErrMsg  string          `json:"errMsg"`
+			ErrDlt  string          `json:"errDlt"`
+			Data    msg.SendMsgResp `json:"data,omitempty"`
 		}
 
 		output := &sendResp{}
