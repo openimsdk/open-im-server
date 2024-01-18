@@ -16,7 +16,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
@@ -417,6 +416,7 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	}
 	// Processing text messages
 	if req.ContentType == constant.Picture || req.ContentType == constant.Text {
+		var err error
 		user, err := m.userRpcClient.GetUserInfo(c, robotics)
 		if err != nil {
 			log.ZError(c, "CallbackExample get Sender failed", err)
@@ -458,27 +458,29 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			if len(picture.SnapshotPicture.Type) == 0 {
 				picture.SnapshotPicture.Type = picture.SourcePicture.Type
 			}
-
-			mapStructSnap, err := convertStructToMap(picture.SnapshotPicture)
+			mapStructSnap := make(map[string]interface{})
+			mapStructSnap, err = convertStructToMap(picture.SnapshotPicture)
 			if err != nil {
 				log.ZError(c, "CallbackExample struct to map failed", err)
-				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+				apiresp.GinError(c, err)
 				return
 			}
 			mapStruct["snapshotPicture"] = mapStructSnap
 
-			mapStructBig, err := convertStructToMap(picture.BigPicture)
+			mapStructBig := make(map[string]interface{})
+			mapStructBig, err = convertStructToMap(picture.BigPicture)
 			if err != nil {
 				log.ZError(c, "CallbackExample struct to map failed", err)
-				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+				apiresp.GinError(c, err)
 				return
 			}
 			mapStruct["bigPicture"] = mapStructBig
 
-			mapStructSource, err := convertStructToMap(picture.SourcePicture)
+			mapStructSource := make(map[string]interface{})
+			mapStructSource, err = convertStructToMap(picture.SourcePicture)
 			if err != nil {
 				log.ZError(c, "CallbackExample struct to map failed", err)
-				apiresp.GinError(c, errs.ErrInternalServer.WithDetail(err.Error()).Wrap())
+				apiresp.GinError(c, err)
 				return
 			}
 			mapStruct["sourcePicture"] = mapStructSource
@@ -543,7 +545,7 @@ func convertStructToMap(input interface{}) (map[string]interface{}, error) {
 	inputValue := reflect.ValueOf(input)
 
 	if inputType.Kind() != reflect.Struct {
-		return nil, errors.New("input is not a struct")
+		return nil, errs.ErrArgs.Wrap("input is not a struct")
 	}
 
 	for i := 0; i < inputType.NumField(); i++ {
