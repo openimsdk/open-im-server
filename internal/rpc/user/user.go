@@ -229,11 +229,20 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 }
 
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
-	total, users, err := s.PageFindUser(ctx, constant.IMOrdinaryUser, req.Pagination)
-	if err != nil {
-		return nil, err
+	if req.UserID == "" && req.UserName == "" {
+		total, users, err := s.PageFindUser(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.Pagination)
+		if err != nil {
+			return nil, err
+		}
+		return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
+	} else {
+		total, users, err := s.PageFindUserWithKeyword(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.UserID, req.UserName, req.Pagination)
+		if err != nil {
+			return nil, err
+		}
+		return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
 	}
-	return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
+
 }
 
 func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterReq) (resp *pbuser.UserRegisterResp, err error) {
@@ -591,31 +600,38 @@ func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbu
 }
 
 func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.SearchNotificationAccountReq) (*pbuser.SearchNotificationAccountResp, error) {
+	// Check if user is an admin
 	if err := authverify.CheckIMAdmin(ctx); err != nil {
 		return nil, err
 	}
 
 	var users []*relation.UserModel
 	var err error
+
+	// If a keyword is provided in the request
 	if req.Keyword != "" {
+		// Find users by keyword
 		users, err = s.UserDatabase.Find(ctx, []string{req.Keyword})
 		if err != nil {
 			return nil, err
 		}
+
+		// Convert users to response format
 		resp := s.userModelToResp(users, req.Pagination)
 		if resp.Total != 0 {
 			return resp, nil
 		}
+
+		// Find users by nickname if no users found by keyword
 		users, err = s.UserDatabase.FindByNickname(ctx, req.Keyword)
 		if err != nil {
 			return nil, err
 		}
 		resp = s.userModelToResp(users, req.Pagination)
 		return resp, nil
-
-		return resp, nil
 	}
 
+	// If no keyword, find users with notification settings
 	users, err = s.UserDatabase.FindNotification(ctx, constant.AppNotificationAdmin)
 	if err != nil {
 		return nil, err
