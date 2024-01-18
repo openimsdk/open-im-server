@@ -414,6 +414,12 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	if req.SendID == robotics {
 		return
 	}
+	text := apistruct.TextElem{}
+	picture := apistruct.PictureElem{}
+	mapStruct := make(map[string]any)
+	mapStructSnap := make(map[string]interface{})
+	mapStructBig := make(map[string]interface{})
+	mapStructSource := make(map[string]interface{})
 	// Processing text messages
 	if req.ContentType == constant.Picture || req.ContentType == constant.Text {
 		var err error
@@ -425,12 +431,6 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 		}
 
 		// Handle message structures
-		text := apistruct.TextElem{}
-		picture := apistruct.PictureElem{}
-		mapStruct := make(map[string]any)
-		mapStructSnap := make(map[string]interface{})
-		mapStructBig := make(map[string]interface{})
-		mapStructSource := make(map[string]interface{})
 		if req.ContentType == constant.Text {
 			err = json.Unmarshal([]byte(req.Content), &text)
 			if err != nil {
