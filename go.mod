@@ -160,3 +160,5 @@ require (
 )
 
 replace github.com/openimsdk/localcache => ./pkg/localcache
+
+replace github.com/OpenIMSDK/protocol v0.0.47 => github.com/AndrewZuo01/protocol v0.0.0-20240112093520-fd9c53e27b94
