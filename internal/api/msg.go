@@ -16,6 +16,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
@@ -542,7 +543,7 @@ func convertStructToMap(input interface{}) (map[string]interface{}, error) {
 	inputValue := reflect.ValueOf(input)
 
 	if inputType.Kind() != reflect.Struct {
-		return nil, errs.ErrArgs.Wrap("Input is not a struct")
+		return nil, errors.New("input is not a struct")
 	}
 
 	for i := 0; i < inputType.NumField(); i++ {
