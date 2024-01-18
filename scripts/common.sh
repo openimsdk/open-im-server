@@ -42,7 +42,7 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd -P)
 
 # Constants
 readonly OPENIM_BUILD_IMAGE_REPO=openim-build
-#readonly OPENIM_BUILD_IMAGE_CROSS_TAG="$(cat ""${OPENIM_ROOT}"/build/build-image/cross/VERSION")"
+#readonly OPENIM_BUILD_IMAGE_CROSS_TAG="$(cat "${OPENIM_ROOT}/build/build-image/cross/VERSION")"
 
 readonly OPENIM_DOCKER_REGISTRY="${OPENIM_DOCKER_REGISTRY:-k8s.gcr.io}"
 readonly OPENIM_BASE_IMAGE_REGISTRY="${OPENIM_BASE_IMAGE_REGISTRY:-us.gcr.io/k8s-artifacts-prod/build-image}"
@@ -53,7 +53,7 @@ readonly OPENIM_BASE_IMAGE_REGISTRY="${OPENIM_BASE_IMAGE_REGISTRY:-us.gcr.io/k8s
 #
 # Increment/change this number if you change the build image (anything under
 # build/build-image) or change the set of volumes in the data container.
-#readonly OPENIM_BUILD_IMAGE_VERSION_BASE="$(cat ""${OPENIM_ROOT}"/build/build-image/VERSION")"
+#readonly OPENIM_BUILD_IMAGE_VERSION_BASE="$(cat "${OPENIM_ROOT}/build/build-image/VERSION")"
 #readonly OPENIM_BUILD_IMAGE_VERSION="${OPENIM_BUILD_IMAGE_VERSION_BASE}-${OPENIM_BUILD_IMAGE_CROSS_TAG}"
 
 # Here we map the output directories across both the local and remote _output
@@ -66,9 +66,10 @@ readonly OPENIM_BASE_IMAGE_REGISTRY="${OPENIM_BASE_IMAGE_REGISTRY:-us.gcr.io/k8s
 #                    is really remote, this is the stuff that has to be copied
 #                    back.
 # OUT_DIR can come in from the Makefile, so honor it.
-readonly LOCAL_OUTPUT_ROOT=""${OPENIM_ROOT}"/${OUT_DIR:-_output}"
-readonly LOCAL_OUTPUT_SUBPATH="${LOCAL_OUTPUT_ROOT}/platforms"
-readonly LOCAL_OUTPUT_BINPATH="${LOCAL_OUTPUT_SUBPATH}"
+readonly LOCAL_OUTPUT_ROOT="${OPENIM_ROOT}/${OUT_DIR:-_output}"
+readonly LOCAL_OUTPUT_SUBPATH="${LOCAL_OUTPUT_ROOT}/bin"
+readonly LOCAL_OUTPUT_BINPATH="${LOCAL_OUTPUT_SUBPATH}/platforms"
+readonly LOCAL_OUTPUT_BINTOOLSPATH="${LOCAL_OUTPUT_SUBPATH}/tools"
 readonly LOCAL_OUTPUT_GOPATH="${LOCAL_OUTPUT_SUBPATH}/go"
 readonly LOCAL_OUTPUT_IMAGE_STAGING="${LOCAL_OUTPUT_ROOT}/images"
 
@@ -161,7 +162,7 @@ function openim::build::verify_prereqs() {
   #LOCAL_OUTPUT_BUILD_CONTEXT="${LOCAL_OUTPUT_IMAGE_STAGING}/${OPENIM_BUILD_IMAGE}"
 
   openim::version::get_version_vars
-  #openim::version::save_version_vars ""${OPENIM_ROOT}"/.dockerized-openim-version-defs"
+  #openim::version::save_version_vars "${OPENIM_ROOT}/.dockerized-openim-version-defs"
 }
 
 # ---------------------------------------------------------------------------
@@ -416,8 +417,8 @@ function openim::build::build_image() {
 
   cp /etc/localtime "${LOCAL_OUTPUT_BUILD_CONTEXT}/"
 
-  cp ""${OPENIM_ROOT}"/build/build-image/Dockerfile" "${LOCAL_OUTPUT_BUILD_CONTEXT}/Dockerfile"
-  cp ""${OPENIM_ROOT}"/build/build-image/rsyncd.sh" "${LOCAL_OUTPUT_BUILD_CONTEXT}/"
+  cp "${OPENIM_ROOT}/build/build-image/Dockerfile" "${LOCAL_OUTPUT_BUILD_CONTEXT}/Dockerfile"
+  cp "${OPENIM_ROOT}/build/build-image/rsyncd.sh" "${LOCAL_OUTPUT_BUILD_CONTEXT}/"
   dd if=/dev/urandom bs=512 count=1 2>/dev/null | LC_ALL=C tr -dc 'A-Za-z0-9' | dd bs=32 count=1 2>/dev/null > "${LOCAL_OUTPUT_BUILD_CONTEXT}/rsyncd.password"
   chmod go= "${LOCAL_OUTPUT_BUILD_CONTEXT}/rsyncd.password"
 
