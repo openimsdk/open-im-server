@@ -417,9 +417,6 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	text := apistruct.TextElem{}
 	picture := apistruct.PictureElem{}
 	mapStruct := make(map[string]any)
-	mapStructSnap := make(map[string]interface{})
-	mapStructBig := make(map[string]interface{})
-	mapStructSource := make(map[string]interface{})
 	// Processing text messages
 	if req.ContentType == constant.Picture || req.ContentType == constant.Text {
 		var err error
@@ -441,6 +438,9 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			log.ZDebug(c, "callback", "text", text)
 			mapStruct["content"] = text.Content
 		} else {
+			mapStructSnap := make(map[string]interface{})
+			mapStructBig := make(map[string]interface{})
+			mapStructSource := make(map[string]interface{})
 			err = json.Unmarshal([]byte(req.Content), &picture)
 			if err != nil {
 				log.ZError(c, "CallbackExample unmarshal failed", err)
