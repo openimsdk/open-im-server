@@ -29,14 +29,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	gormMysql "gorm.io/driver/mysql"
+	gormmysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-	rtcMgo "github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mongo/mgo"
+	rtcmgo "github.com/openimsdk/open-im-server/v3/tools/up35/pkg/internal/rtc/mongo/mgo"
 )
 
 const (
@@ -56,7 +56,7 @@ func InitConfig(path string) error {
 func GetMysql() (*gorm.DB, error) {
 	conf := config.Config.Mysql
 	mysqlDSN := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", conf.Username, conf.Password, conf.Address[0], conf.Database)
-	return gorm.Open(gormMysql.Open(mysqlDSN), &gorm.Config{Logger: logger.Discard})
+	return gorm.Open(gormmysql.Open(mysqlDSN), &gorm.Config{Logger: logger.Discard})
 }
 
 func GetMongo() (*mongo.Database, error) {
@@ -116,11 +116,11 @@ func Main(path string) error {
 		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewS3Mongo, c.Object(config.Config.Object.Enable)) },
 		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewLogMongo, c.Log) },
 
-		func() error { return NewTask(mysqlDB, mongoDB, rtcMgo.NewSignal, c.SignalModel) },
-		func() error { return NewTask(mysqlDB, mongoDB, rtcMgo.NewSignalInvitation, c.SignalInvitationModel) },
-		func() error { return NewTask(mysqlDB, mongoDB, rtcMgo.NewMeeting, c.Meeting) },
-		func() error { return NewTask(mysqlDB, mongoDB, rtcMgo.NewMeetingInvitation, c.MeetingInvitationInfo) },
-		func() error { return NewTask(mysqlDB, mongoDB, rtcMgo.NewMeetingRecord, c.MeetingVideoRecord) },
+		func() error { return NewTask(mysqlDB, mongoDB, rtcmgo.NewSignal, c.SignalModel) },
+		func() error { return NewTask(mysqlDB, mongoDB, rtcmgo.NewSignalInvitation, c.SignalInvitationModel) },
+		func() error { return NewTask(mysqlDB, mongoDB, rtcmgo.NewMeeting, c.Meeting) },
+		func() error { return NewTask(mysqlDB, mongoDB, rtcmgo.NewMeetingInvitation, c.MeetingInvitationInfo) },
+		func() error { return NewTask(mysqlDB, mongoDB, rtcmgo.NewMeetingRecord, c.MeetingVideoRecord) },
 	)
 
 	for _, task := range tasks {

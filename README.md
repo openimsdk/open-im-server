@@ -76,7 +76,7 @@ It is built using Golang and supports cross-platform deployment, ensuring a cons
 + **[Docker Deployment Guide](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
 + **[Kubernetes Deployment Guide](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
 
-## :hammer_and_wrench: To start developing OpenIM
+## :hammer_and_wrench: To Start Developing OpenIM
 
 [![Open in Dev Container](https://img.shields.io/static/v1?label=Dev%20Container&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/github/openimsdk/open-im-server)
 
@@ -114,6 +114,8 @@ Before you start, please make sure your changes are in demand. The best for that
 - [OpenIM Script Utilities](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/util-scripts.md)
 - [OpenIM Versioning](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/version.md)
 - [Manage backend and monitor deployment](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
+- [Mac Developer Deployment Guide for OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
+
 
 ## :busts_in_silhouette: Community
 
@@ -130,7 +132,7 @@ Our conference is in the [OpenIM Slack](https://join.slack.com/t/openimsdk/share
 
 We take notes of each [biweekly meeting](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) in [GitHub discussions](https://github.com/openimsdk/open-im-server/discussions/categories/meeting), Our historical meeting notes, as well as replays of the meetings are available at [Google Docs :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing).
 
-## :eyes: Who are using OpenIM
+## :eyes: Who Are Using OpenIM
 
 Check out our [user case studies](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) page for a list of the project users. Don't hesitate to leave a [📝comment](https://github.com/openimsdk/open-im-server/issues/379) and share your use case.
 

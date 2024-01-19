@@ -73,7 +73,8 @@ endif
 ifeq ($(origin VERSION), undefined)
 # VERSION := $(shell git describe --tags --always --match='v*')
 # git describe --tags --always --match="v*" --dirty
-VERSION := $(shell git describe --tags --always --match="v*" --dirty | sed 's/-/./g')	#v2.3.3.631.g00abdc9b.dirty
+# VERSION := $(shell git describe --tags --always --match="v*" --dirty | sed 's/-/./g')	#v2.3.3.631.g00abdc9b.dirty
+VERSION := $(shell git describe --tags --always --match='v*')
 # v2.3.3: git tag
 endif
 
@@ -100,7 +101,7 @@ endif
 # The OS must be linux when building docker images
 # PLATFORMS ?= linux_amd64 linux_arm64
 # The OS can be linux/windows/darwin when building binaries
-PLATFORMS ?= linux_s390x linux_mips64 linux_mips64le darwin_amd64 windows_amd64 linux_amd64 linux_arm64 linux_ppc64le # wasip1_wasm
+PLATFORMS ?= linux_s390x linux_mips64 linux_mips64le darwin_amd64 darwin_arm64 windows_amd64 linux_amd64 linux_arm64 linux_ppc64le # wasip1_wasm
 
 # set a specific PLATFORM, defaults to the host platform
 ifeq ($(origin PLATFORM), undefined)

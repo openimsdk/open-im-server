@@ -20,6 +20,9 @@ func NewUserLocalCache(client rpcclient.UserRpcClient, cli redis.UniversalClient
 		local: localcache.New[any](
 			localcache.WithLocalSlotNum(lc.SlotNum),
 			localcache.WithLocalSlotSize(lc.SlotSize),
+			localcache.WithLinkSlotNum(lc.SlotNum),
+			localcache.WithLocalSuccessTTL(lc.Success()),
+			localcache.WithLocalFailedTTL(lc.Failed()),
 		),
 	}
 	if lc.Enable() {

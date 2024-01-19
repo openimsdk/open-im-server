@@ -20,6 +20,9 @@ func NewConversationLocalCache(client rpcclient.ConversationRpcClient, cli redis
 		local: localcache.New[any](
 			localcache.WithLocalSlotNum(lc.SlotNum),
 			localcache.WithLocalSlotSize(lc.SlotSize),
+			localcache.WithLinkSlotNum(lc.SlotNum),
+			localcache.WithLocalSuccessTTL(lc.Success()),
+			localcache.WithLocalFailedTTL(lc.Failed()),
 		),
 	}
 	if lc.Enable() {

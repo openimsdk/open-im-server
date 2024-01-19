@@ -18,6 +18,7 @@ on:
   push:
     branches:
         - main
+        - release-*
     paths-ignore:
         - "docs/**"
         - "README.md"
@@ -26,6 +27,7 @@ on:
   pull_request:
     branches:
         - main
+        - release-*
     paths-ignore:
         - "README.md"
         - "README_zh-CN.md"
@@ -81,6 +83,11 @@ jobs:
     - name: Build Source
       run: sudo make build
 
+    - name: Build multiarch PLATFORMS
+      if: startsWith(github.ref, 'refs/heads/release-')
+      run: |
+        sudo make multiarch
+
     - name: Cleanup Build
       run: sudo make clean
 
@@ -107,7 +114,7 @@ jobs:
       continue-on-error: true
 
   openim-start:
-    name: Test OpenIM install/start on ${{ matrix.os }}
+    name: Test OpenIM install/start on ${{ matrix.os }}-${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     permissions:
         contents: write
@@ -136,6 +143,7 @@ jobs:
     #     sudo docker ps
 
     - name: Check the OpenIM environment and status
+      if: runner.os == 'Linux' && matrix.arch == 'amd64'
       id: docker_info
       run: |
         sleep 30
@@ -148,24 +156,29 @@ jobs:
 
     - name: Comment PR
       uses: thollander/actions-comment-pull-request@v2
+      if: runner.os == 'Linux' && matrix.arch == 'amd64'
       with:
         message: |
           > [!TIP]
           > Run make install to check the status
 
           ### Docker Images:
-          ```
+          <details><summary>Click to expand docker images</summary>
+          ```bash
           ${{ env.images }}
           ```
+          </details>
+
           ### Docker Processes:
-          ```
+          <details><summary>Click to expand docker ps</summary>
+          ```bash
           ${{ env.containers }}
           ```
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      continue-on-error: true
+          </details>
+        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 
   execute-scripts:
-    name: Execute OpenIM Script On ${{ matrix.os }}
+    name: Execute OpenIM Script On ${{ matrix.os }}-${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     permissions:
         contents: write
@@ -174,8 +187,9 @@ jobs:
       name: openim
     strategy:
       matrix:
-        go_version: ["1.20"]
+        go_version: ["1.21"]
         os: ["ubuntu-latest", "macos-latest"]
+        arch: [arm64, armv7, amd64]
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -193,7 +207,7 @@ jobs:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     # - name: Install latest Bash (macOS only)
-    #   if: runner.os == 'macOS'
+    #   if: runner.os == 'macOS' && matrix.arch == 'arm64'
     #   run: |
     #     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     #     brew update
@@ -213,7 +227,7 @@ jobs:
         sudo sleep 20
 
     # - name: Set up Docker for macOS
-    #   if: runner.os == 'macOS'
+    #   if: runner.os == 'macOS' && matrix.arch == 'arm64'
     #   run: |
     #     brew install --cask docker
     #     open /Applications/Docker.app
@@ -244,13 +258,13 @@ jobs:
         sudo make check
 
     - name: Restart Services and Print Logs for Ubuntu
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && matrix.arch == 'amd64'
       run: |
         sudo make restart
         sudo make check
 
     - name: Build, Start, Check Services and Print Logs for macOS
-      if: runner.os == 'macOS'
+      if: runner.os == 'macOS' && matrix.arch == 'arm64'
       run: |
         make build
 
