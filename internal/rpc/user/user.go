@@ -236,7 +236,7 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPagi
 		}
 		return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
 	} else {
-		total, users, err := s.PageFindUserWithKeyword(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.UserID, req.UserName, req.Pagination)
+		total, users, err := s.PageFindUserWithKeyword(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.UserID, req.NickName, req.Pagination)
 		if err != nil {
 			return nil, err
 		}
