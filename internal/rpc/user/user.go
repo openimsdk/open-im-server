@@ -229,14 +229,14 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 }
 
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
-	if req.UserID == "" && req.UserName == "" {
+	if req.UserID == "" && req.NickName == "" {
 		total, users, err := s.PageFindUser(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.Pagination)
 		if err != nil {
 			return nil, err
 		}
 		return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
 	} else {
-		total, users, err := s.PageFindUserWithKeyword(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.UserID, req.UserName, req.Pagination)
+		total, users, err := s.PageFindUserWithKeyword(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.UserID, req.NickName, req.Pagination)
 		if err != nil {
 			return nil, err
 		}
