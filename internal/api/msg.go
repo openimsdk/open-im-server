@@ -419,7 +419,6 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 	mapStruct := make(map[string]any)
 	// Processing text messages
 	if req.ContentType == constant.Picture || req.ContentType == constant.Text {
-		var err error
 		user, err := m.userRpcClient.GetUserInfo(c, robotics)
 		if err != nil {
 			log.ZError(c, "CallbackExample get Sender failed", err)
@@ -438,9 +437,6 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 			log.ZDebug(c, "callback", "text", text)
 			mapStruct["content"] = text.Content
 		} else {
-			mapStructSnap := make(map[string]interface{})
-			mapStructBig := make(map[string]interface{})
-			mapStructSource := make(map[string]interface{})
 			err = json.Unmarshal([]byte(req.Content), &picture)
 			if err != nil {
 				log.ZError(c, "CallbackExample unmarshal failed", err)
@@ -462,24 +458,24 @@ func (m *MessageApi) CallbackExample(c *gin.Context) {
 				picture.SnapshotPicture.Type = picture.SourcePicture.Type
 			}
 
-			mapStructSnap, err = convertStructToMap(picture.SnapshotPicture)
-			if err != nil {
+			mapStructSnap := make(map[string]interface{})
+			if mapStructSnap, err = convertStructToMap(picture.SnapshotPicture); err != nil {
 				log.ZError(c, "CallbackExample struct to map failed", err)
 				apiresp.GinError(c, err)
 				return
 			}
 			mapStruct["snapshotPicture"] = mapStructSnap
 
-			mapStructBig, err = convertStructToMap(picture.BigPicture)
-			if err != nil {
+			mapStructBig := make(map[string]interface{})
+			if mapStructBig, err = convertStructToMap(picture.BigPicture); err != nil {
 				log.ZError(c, "CallbackExample struct to map failed", err)
 				apiresp.GinError(c, err)
 				return
 			}
 			mapStruct["bigPicture"] = mapStructBig
 
-			mapStructSource, err = convertStructToMap(picture.SourcePicture)
-			if err != nil {
+			mapStructSource := make(map[string]interface{})
+			if mapStructSource, err = convertStructToMap(picture.SourcePicture); err != nil {
 				log.ZError(c, "CallbackExample struct to map failed", err)
 				apiresp.GinError(c, err)
 				return
