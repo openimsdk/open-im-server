@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Use:
+# ./scripts/install/openim-msgtransfer.sh openim::msgtransfer::start
 
 # Common utilities, variables and checks for all build scripts.
 set -o errexit
@@ -64,15 +66,20 @@ function openim::msgtransfer::check() {
     PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
 
     NUM_PROCESSES=$(echo "$PIDS" | wc -l)
-    # NUM_PROCESSES=$(($NUM_PROCESSES - 1))
 
     if [ "$NUM_PROCESSES" -eq "$OPENIM_MSGGATEWAY_NUM" ]; then
-      openim::log::info "Found $OPENIM_MSGGATEWAY_NUM processes named $OPENIM_OUTPUT_HOSTBIN"
-      for PID in $PIDS; do
-        ps -p $PID -o pid,cmd
-      done
+        openim::log::info "Found $OPENIM_MSGGATEWAY_NUM processes named $OPENIM_OUTPUT_HOSTBIN"
+        for PID in $PIDS; do
+            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+                ps -p $PID -o pid,cmd
+            elif [[ "$OSTYPE" == "darwin"* ]]; then
+                ps -p $PID -o pid,comm
+            else
+                openim::log::error "Unsupported OS type: $OSTYPE"
+            fi
+        done
     else
-      openim::log::error_exit "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
+        openim::log::error_exit "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
     fi
 }
 
