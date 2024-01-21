@@ -89,7 +89,7 @@ func (u *UserMgo) PageFindUser(ctx context.Context, level1 int64, level2 int64, 
 
 	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, query, pagination)
 }
-func (u *UserMgo) PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID string, userName string, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+func (u *UserMgo) PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID string, nickName string, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
 	// Initialize the base query with level conditions
 	query := bson.M{
 		"$and": []bson.M{
@@ -98,16 +98,16 @@ func (u *UserMgo) PageFindUserWithKeyword(ctx context.Context, level1 int64, lev
 	}
 
 	// Add userID and userName conditions to the query if they are provided
-	if userID != "" || userName != "" {
+	if userID != "" || nickName != "" {
 		userConditions := []bson.M{}
 		if userID != "" {
 			// Use regex for userID
 			regexPattern := primitive.Regex{Pattern: userID, Options: "i"} // 'i' for case-insensitive matching
 			userConditions = append(userConditions, bson.M{"user_id": regexPattern})
 		}
-		if userName != "" {
+		if nickName != "" {
 			// Use regex for userName
-			regexPattern := primitive.Regex{Pattern: userName, Options: "i"} // 'i' for case-insensitive matching
+			regexPattern := primitive.Regex{Pattern: nickName, Options: "i"} // 'i' for case-insensitive matching
 			userConditions = append(userConditions, bson.M{"nickname": regexPattern})
 		}
 		query["$and"] = append(query["$and"].([]bson.M), bson.M{"$or": userConditions})
