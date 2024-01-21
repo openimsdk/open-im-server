@@ -172,125 +172,125 @@ services:
   #     server:
   #       ipv4_address: ${OPENIM_SERVER_NETWORK_ADDRESS:-172.28.0.8}
 
-### TODO: mysql is required to deploy the openim-chat component
-  # mysql:
-  #   image: mysql:${MYSQL_IMAGE_VERSION:-5.7}
-  #   platform: linux/amd64
-  #   ports:
-  #     - "${MYSQL_PORT:-13306}:3306"
-  #   container_name: mysql
-  #   volumes:
-  #     - "${DATA_DIR:-./}/components/mysql/data:/var/lib/mysql"
-  #     - "/etc/localtime:/etc/localtime"
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: "${MYSQL_PASSWORD:-openIM123}"
-  #   restart: always
-  #   networks:
-  #     server:
-  #       ipv4_address: ${MYSQL_NETWORK_ADDRESS:-172.28.0.15}
+## TODO: mysql is required to deploy the openim-chat component
+  mysql:
+    image: mysql:${MYSQL_IMAGE_VERSION:-5.7}
+    platform: linux/amd64
+    ports:
+      - "${MYSQL_PORT:-13306}:3306"
+    container_name: mysql
+    volumes:
+      - "${DATA_DIR:-./}/components/mysql/data:/var/lib/mysql"
+      - "/etc/localtime:/etc/localtime"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_PASSWORD:-openIM123}"
+    restart: always
+    networks:
+      server:
+        ipv4_address: ${MYSQL_NETWORK_ADDRESS:-172.28.0.15}
 
-  # openim-chat:
-  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-chat:${CHAT_IMAGE_VERSION:-main}
-  #   container_name: openim-chat
-  #   healthcheck:
-  #     test: ["CMD", "/openim/openim-chat/scripts/check_all.sh"]
-  #     interval: 60s
-  #     timeout: 30s
-  #     retries: 5
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - ZOOKEEPER_ADDRESS=${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}
-  #     - ZOOKEEPER_PORT=${ZOOKEEPER_PORT:-12181}
-  #     - OPENIM_SERVER_ADDRESS=http://${OPENIM_SERVER_ADDRESS:-172.28.0.1}
-  #     - API_OPENIM_PORT=${API_OPENIM_PORT:-10002}
-  #     - MYSQL_ADDRESS=${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}
-  #     - MYSQL_PORT=${MYSQL_PORT:-13306}
-  #     - REDIS_ADDRESS=${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}
-  #     - REDIS_PORT=${REDIS_PORT:-16379}
-  #   ports:
-  #     - "${OPENIM_CHAT_API_PORT:-10008}:10008"
-  #     - "${OPENIM_ADMIN_API_PORT:-10009}:10009"
-  #   volumes:
-  #     - "${DATA_DIR:-./}/components/openim-chat/logs:/openim/openim-chat/logs"
-  #     - "${DATA_DIR:-./}/components/openim-chat/config:/openim/openim-chat/config"
-  #   restart: always
-  #   # user: root:root
-  #   depends_on:
-  #     - mysql
-  #     - kafka
-  #     - redis
-  #     - zookeeper
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: "1g"
-  #       max-file: "2"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${OPENIM_CHAT_NETWORK_ADDRESS:-172.28.0.9}
+  openim-chat:
+    image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-chat:${CHAT_IMAGE_VERSION:-main}
+    container_name: openim-chat
+    healthcheck:
+      test: ["CMD", "/openim/openim-chat/scripts/check_all.sh"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+    env_file:
+      - .env
+    environment:
+      - ZOOKEEPER_ADDRESS=${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}
+      - ZOOKEEPER_PORT=${ZOOKEEPER_PORT:-12181}
+      - OPENIM_SERVER_ADDRESS=http://${OPENIM_SERVER_ADDRESS:-172.28.0.1}
+      - API_OPENIM_PORT=${API_OPENIM_PORT:-10002}
+      - MYSQL_ADDRESS=${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}
+      - MYSQL_PORT=${MYSQL_PORT:-13306}
+      - REDIS_ADDRESS=${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}
+      - REDIS_PORT=${REDIS_PORT:-16379}
+    ports:
+      - "${OPENIM_CHAT_API_PORT:-10008}:10008"
+      - "${OPENIM_ADMIN_API_PORT:-10009}:10009"
+    volumes:
+      - "${DATA_DIR:-./}/components/openim-chat/logs:/openim/openim-chat/logs"
+      - "${DATA_DIR:-./}/components/openim-chat/config:/openim/openim-chat/config"
+    restart: always
+    # user: root:root
+    depends_on:
+      - mysql
+      - kafka
+      - redis
+      - zookeeper
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
+    networks:
+      server:
+        ipv4_address: ${OPENIM_CHAT_NETWORK_ADDRESS:-172.28.0.9}
 
-  # openim-admin:
-  # # https://github.com/openimsdk/open-im-server/issues/1662
-  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin:${ADMIN_FRONT_VERSION:-toc-base-open-docker.35}
-  #   container_name: openim-admin
-  #   platform: linux/amd64
-  #   restart: always
-  #   ports:
-  #     - "${OPENIM_ADMIN_FRONT_PORT:-11002}:80"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS:-172.28.0.13}
+  openim-admin:
+  # https://github.com/openimsdk/open-im-server/issues/1662
+    image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin:${ADMIN_FRONT_VERSION:-toc-base-open-docker.35}
+    container_name: openim-admin
+    platform: linux/amd64
+    restart: always
+    ports:
+      - "${OPENIM_ADMIN_FRONT_PORT:-11002}:80"
+    networks:
+      server:
+        ipv4_address: ${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS:-172.28.0.13}
 
-  # prometheus:
-  #   image: prom/prometheus
-  #   container_name: prometheus
-  #   hostname: prometheus
-  #   restart: always
-  #   volumes:
-  #     - "${DATA_DIR:-./}/config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml"
-  #     - "${DATA_DIR:-./}/config/prometheus.yml:/etc/prometheus/prometheus.yml"
-  #   ports:
-  #     - "${PROMETHEUS_PORT:-19090}:9090"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS:-172.28.0.10}
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    hostname: prometheus
+    restart: always
+    volumes:
+      - "${DATA_DIR:-./}/config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml"
+      - "${DATA_DIR:-./}/config/prometheus.yml:/etc/prometheus/prometheus.yml"
+    ports:
+      - "${PROMETHEUS_PORT:-19090}:9090"
+    networks:
+      server:
+        ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS:-172.28.0.10}
 
-  # alertmanager:
-  #   image: prom/alertmanager
-  #   container_name: alertmanager
-  #   hostname: alertmanager
-  #   restart: always
-  #   volumes:
-  #     - ${DATA_DIR:-./}/config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-  #     - ${DATA_DIR:-./}/config/email.tmpl:/etc/alertmanager/email.tmpl
-  #   ports:
-  #     - "${ALERT_MANAGER_PORT:-19093}:9093"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${ALERT_MANAGER_NETWORK_ADDRESS:-172.28.0.14}
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    hostname: alertmanager
+    restart: always
+    volumes:
+      - ${DATA_DIR:-./}/config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ${DATA_DIR:-./}/config/email.tmpl:/etc/alertmanager/email.tmpl
+    ports:
+      - "${ALERT_MANAGER_PORT:-19093}:9093"
+    networks:
+      server:
+        ipv4_address: ${ALERT_MANAGER_NETWORK_ADDRESS:-172.28.0.14}
 
-  # grafana:
-  #   image: grafana/grafana
-  #   container_name: grafana
-  #   hostname: grafana
-  #   user: root
-  #   restart: always
-  #   ports:
-  #     - "${GRAFANA_PORT:-13000}:3000"
-  #   volumes:
-  #     - "${DATA_DIR:-./}/components/grafana:/var/lib/grafana"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${GRAFANA_NETWORK_ADDRESS:-172.28.0.11}
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    hostname: grafana
+    user: root
+    restart: always
+    ports:
+      - "${GRAFANA_PORT:-13000}:3000"
+    volumes:
+      - "${DATA_DIR:-./}/components/grafana:/var/lib/grafana"
+    networks:
+      server:
+        ipv4_address: ${GRAFANA_NETWORK_ADDRESS:-172.28.0.11}
 
-  # node-exporter:
-  #   image: quay.io/prometheus/node-exporter
-  #   container_name: node-exporter
-  #   hostname: node-exporter
-  #   restart: always
-  #   ports:
-  #     - "${NODE_EXPORTER_PORT:-19100}:9100"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${NODE_EXPORTER_NETWORK_ADDRESS:-172.28.0.12}
+  node-exporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: node-exporter
+    hostname: node-exporter
+    restart: always
+    ports:
+      - "${NODE_EXPORTER_PORT:-19100}:9100"
+    networks:
+      server:
+        ipv4_address: ${NODE_EXPORTER_NETWORK_ADDRESS:-172.28.0.12}
