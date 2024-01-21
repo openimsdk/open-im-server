@@ -16,11 +16,38 @@ package offlinepush
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/dummy"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/fcm"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/getui"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/jpush"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+)
+
+const (
+	GETUI    = "getui"
+	FIREBASE = "fcm"
+	JPUSH    = "jpush"
 )
 
 // OfflinePusher Offline Pusher.
 type OfflinePusher interface {
 	Push(ctx context.Context, userIDs []string, title, content string, opts *Opts) error
+}
+
+func NewOfflinePusher(cache cache.MsgModel) OfflinePusher {
+	var offlinePusher OfflinePusher
+	switch config.Config.Push.Enable {
+	case GETUI:
+		offlinePusher = getui.NewGeTui(cache)
+	case FIREBASE:
+		offlinePusher = fcm.NewFcm(cache)
+	case JPUSH:
+		offlinePusher = jpush.NewJPush()
+	default:
+		offlinePusher = dummy.NewDummy()
+	}
+	return offlinePusher
 }
 
 // Opts opts.

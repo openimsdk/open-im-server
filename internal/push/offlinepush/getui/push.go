@@ -55,17 +55,17 @@ const (
 	taskIDTTL       = 1000 * 60 * 60 * 24
 )
 
-type Client struct {
+type GeTui struct {
 	cache           cache.MsgModel
 	tokenExpireTime int64
 	taskIDTTL       int64
 }
 
-func NewClient(cache cache.MsgModel) *Client {
-	return &Client{cache: cache, tokenExpireTime: tokenExpireTime, taskIDTTL: taskIDTTL}
+func NewGeTui(cache cache.MsgModel) *GeTui {
+	return &GeTui{cache: cache, tokenExpireTime: tokenExpireTime, taskIDTTL: taskIDTTL}
 }
 
-func (g *Client) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
+func (g *GeTui) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
 	token, err := g.cache.GetGetuiToken(ctx)
 	if err != nil {
 		if errs.Unwrap(err) == redis.Nil {
@@ -111,7 +111,7 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 	return err
 }
 
-func (g *Client) Auth(ctx context.Context, timeStamp int64) (token string, expireTime int64, err error) {
+func (g *GeTui) Auth(ctx context.Context, timeStamp int64) (token string, expireTime int64, err error) {
 	h := sha256.New()
 	h.Write(
 		[]byte(config.Config.Push.GeTui.AppKey + strconv.Itoa(int(timeStamp)) + config.Config.Push.GeTui.MasterSecret),
@@ -131,7 +131,7 @@ func (g *Client) Auth(ctx context.Context, timeStamp int64) (token string, expir
 	return respAuth.Token, int64(expire), err
 }
 
-func (g *Client) GetTaskID(ctx context.Context, token string, pushReq PushReq) (string, error) {
+func (g *GeTui) GetTaskID(ctx context.Context, token string, pushReq PushReq) (string, error) {
 	respTask := TaskResp{}
 	ttl := int64(1000 * 60 * 5)
 	pushReq.Settings = &Settings{TTL: &ttl}
@@ -143,7 +143,7 @@ func (g *Client) GetTaskID(ctx context.Context, token string, pushReq PushReq) (
 }
 
 // max num is 999.
-func (g *Client) batchPush(ctx context.Context, token string, userIDs []string, pushReq PushReq) error {
+func (g *GeTui) batchPush(ctx context.Context, token string, userIDs []string, pushReq PushReq) error {
 	taskID, err := g.GetTaskID(ctx, token, pushReq)
 	if err != nil {
 		return err
@@ -152,21 +152,21 @@ func (g *Client) batchPush(ctx context.Context, token string, userIDs []string, 
 	return g.request(ctx, batchPushURL, pushReq, token, nil)
 }
 
-func (g *Client) singlePush(ctx context.Context, token, userID string, pushReq PushReq) error {
+func (g *GeTui) singlePush(ctx context.Context, token, userID string, pushReq PushReq) error {
 	operationID := mcontext.GetOperationID(ctx)
 	pushReq.RequestID = &operationID
 	pushReq.Audience = &Audience{Alias: []string{userID}}
 	return g.request(ctx, pushURL, pushReq, token, nil)
 }
 
-func (g *Client) request(ctx context.Context, url string, input any, token string, output any) error {
+func (g *GeTui) request(ctx context.Context, url string, input any, token string, output any) error {
 	header := map[string]string{"token": token}
 	resp := &Resp{}
 	resp.Data = output
 	return g.postReturn(ctx, config.Config.Push.GeTui.PushUrl+url, header, input, resp, 3)
 }
 
-func (g *Client) postReturn(
+func (g *GeTui) postReturn(
 	ctx context.Context,
 	url string,
 	header map[string]string,
@@ -181,7 +181,7 @@ func (g *Client) postReturn(
 	return output.parseError()
 }
 
-func (g *Client) getTokenAndSave2Redis(ctx context.Context) (token string, err error) {
+func (g *GeTui) getTokenAndSave2Redis(ctx context.Context) (token string, err error) {
 	token, _, err = g.Auth(ctx, time.Now().UnixNano()/1e6)
 	if err != nil {
 		return
@@ -193,7 +193,7 @@ func (g *Client) getTokenAndSave2Redis(ctx context.Context) (token string, err e
 	return token, nil
 }
 
-func (g *Client) GetTaskIDAndSave2Redis(ctx context.Context, token string, pushReq PushReq) (taskID string, err error) {
+func (g *GeTui) GetTaskIDAndSave2Redis(ctx context.Context, token string, pushReq PushReq) (taskID string, err error) {
 	pushReq.Settings = &Settings{TTL: &g.taskIDTTL}
 	taskID, err = g.GetTaskID(ctx, token, pushReq)
 	if err != nil {

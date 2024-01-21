@@ -27,7 +27,7 @@ import (
 
 type JPush struct{}
 
-func NewClient() *JPush {
+func NewJPush() *JPush {
 	return &JPush{}
 }
 

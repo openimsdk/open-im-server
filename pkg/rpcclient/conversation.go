@@ -114,6 +114,14 @@ func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Con
 	return resp.Conversations, nil
 }
 
+func (c *ConversationRpcClient) GetConversationOfflinePushUserIDs(ctx context.Context, conversationID string, userIDs []string) ([]string, error) {
+	resp, err := c.Client.GetConversationOfflinePushUserIDs(ctx, &pbconversation.GetConversationOfflinePushUserIDsReq{ConversationID: conversationID, UserIDs: userIDs})
+	if err != nil {
+		return nil, err
+	}
+	return resp.UserIDs, nil
+}
+
 func (c *ConversationRpcClient) GetConversations(
 	ctx context.Context,
 	ownerUserID string,

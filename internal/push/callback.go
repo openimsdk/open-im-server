@@ -16,6 +16,7 @@ package push
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -135,4 +136,15 @@ func callbackBeforeSuperGroupOnlinePush(
 		*pushToUserIDs = resp.UserIDs
 	}
 	return nil
+}
+func GetContent(msg *sdkws.MsgData) string {
+	if msg.ContentType >= constant.NotificationBegin && msg.ContentType <= constant.NotificationEnd {
+		var notification sdkws.NotificationElem
+		if err := json.Unmarshal(msg.Content, &notification); err != nil {
+			return ""
+		}
+		return notification.Detail
+	} else {
+		return string(msg.Content)
+	}
 }

@@ -20,7 +20,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 )
 
-func NewClient() *Dummy {
+func NewDummy() *Dummy {
 	return &Dummy{}
 }
 

@@ -39,7 +39,7 @@ type Fcm struct {
 	cache     cache.MsgModel
 }
 
-func NewClient(cache cache.MsgModel) *Fcm {
+func NewFcm(cache cache.MsgModel) *Fcm {
 	projectRoot := config.GetProjectRoot()
 	credentialsFilePath := filepath.Join(projectRoot, "config", config.Config.Push.Fcm.ServiceAccount)
 	opt := option.WithCredentialsFile(credentialsFilePath)
