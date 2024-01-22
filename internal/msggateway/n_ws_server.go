@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/tools/apiresp"
 	"net/http"
 	"os"
 	"os/signal"
@@ -28,6 +27,8 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+
+	"github.com/OpenIMSDK/tools/apiresp"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/redis/go-redis/v9"

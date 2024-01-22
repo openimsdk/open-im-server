@@ -19,11 +19,13 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/google/uuid"
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"path"
 	"strconv"
 	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 
