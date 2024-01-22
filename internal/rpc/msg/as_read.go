@@ -124,6 +124,17 @@ func (m *msgServer) MarkMsgsAsRead(
 			return
 		}
 	}
+
+	req_callback := &cbapi.CallbackSingleMsgReadReq{
+		ConversationID: conversation.ConversationID,
+		UserID:         req.UserID,
+		Seqs:           req.Seqs,
+		ContentType:    conversation.ConversationType,
+	}
+	if err = CallbackSingleMsgRead(ctx, req_callback); err != nil {
+		return nil, err
+	}
+
 	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID,
 		m.conversationAndGetRecvID(conversation, req.UserID), req.Seqs, hasReadSeq); err != nil {
 		return
