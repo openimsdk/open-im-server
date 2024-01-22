@@ -115,7 +115,7 @@ MONGO_OPENIM_USERNAME=${MONGO_OPENIM_USERNAME}
 MONGO_OPENIM_PASSWORD=${MONGO_OPENIM_PASSWORD}
 
 # Specifies the database name to be used within MongoDB.
-# Default: MONGO_DATABASE=openIM_v3
+# Default: MONGO_DATABASE=openim_v3
 MONGO_DATABASE=${MONGO_DATABASE}
 
 # ----- Redis Configuration -----

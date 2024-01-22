@@ -52,7 +52,7 @@ def "OPENIM_USER" "root"
 readonly PASSWORD=${PASSWORD:-'openIM123'}
 
 # 设置统一的数据库名称，方便管理
-def "DATABASE_NAME" "openIM_v3"
+def "DATABASE_NAME" "openim_v3"
 
 # Linux系统 openim 用户
 def "LINUX_USERNAME" "openim"

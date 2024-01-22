@@ -34,7 +34,7 @@ docker run -d \
     -e wiredTigerCacheSizeGB=1 \
     -e MONGO_INITDB_ROOT_USERNAME=${OPENIM_USER} \
     -e MONGO_INITDB_ROOT_PASSWORD=${PASSWORD} \
-    -e MONGO_INITDB_DATABASE=openIM \
+    -e MONGO_INITDB_DATABASE=openim_v3 \
     -e MONGO_OPENIM_USERNAME=${OPENIM_USER} \
     -e MONGO_OPENIM_PASSWORD=${PASSWORD} \
     --restart always \

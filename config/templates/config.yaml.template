@@ -52,7 +52,7 @@ mongo:
 # Default MongoDB database name
 # Maximum connection pool size
   address: [ 172.28.0.1:37017 ]
-  database: openIM_v3
+  database: openim_v3
   username: root
   password: openIM123
   maxPoolSize: 100
