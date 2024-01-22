@@ -6,15 +6,15 @@ import (
 	"time"
 )
 
-func NewActivelyLRU[K comparable, V any](size int, successTTL, failedTTL time.Duration, target Target, onEvict EvictCallback[K, V]) LRU[K, V] {
-	var cb expirable.EvictCallback[K, *activelyLruItem[V]]
+func NewExpirationLRU[K comparable, V any](size int, successTTL, failedTTL time.Duration, target Target, onEvict EvictCallback[K, V]) LRU[K, V] {
+	var cb expirable.EvictCallback[K, *expirationLruItem[V]]
 	if onEvict != nil {
-		cb = func(key K, value *activelyLruItem[V]) {
+		cb = func(key K, value *expirationLruItem[V]) {
 			onEvict(key, value.value)
 		}
 	}
-	core := expirable.NewLRU[K, *activelyLruItem[V]](size, cb, successTTL)
-	return &activelyLRU[K, V]{
+	core := expirable.NewLRU[K, *expirationLruItem[V]](size, cb, successTTL)
+	return &ExpirationLRU[K, V]{
 		core:       core,
 		successTTL: successTTL,
 		failedTTL:  failedTTL,
@@ -22,21 +22,21 @@ func NewActivelyLRU[K comparable, V any](size int, successTTL, failedTTL time.Du
 	}
 }
 
-type activelyLruItem[V any] struct {
+type expirationLruItem[V any] struct {
 	lock  sync.RWMutex
 	err   error
 	value V
 }
 
-type activelyLRU[K comparable, V any] struct {
+type ExpirationLRU[K comparable, V any] struct {
 	lock       sync.Mutex
-	core       *expirable.LRU[K, *activelyLruItem[V]]
+	core       *expirable.LRU[K, *expirationLruItem[V]]
 	successTTL time.Duration
 	failedTTL  time.Duration
 	target     Target
 }
 
-func (x *activelyLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
+func (x *ExpirationLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	x.lock.Lock()
 	v, ok := x.core.Get(key)
 	if ok {
@@ -46,7 +46,7 @@ func (x *activelyLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 		defer v.lock.RUnlock()
 		return v.value, v.err
 	} else {
-		v = &activelyLruItem[V]{}
+		v = &expirationLruItem[V]{}
 		x.core.Add(key, v)
 		v.lock.Lock()
 		x.lock.Unlock()
@@ -62,7 +62,7 @@ func (x *activelyLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	}
 }
 
-func (x *activelyLRU[K, V]) Del(key K) bool {
+func (x *ExpirationLRU[K, V]) Del(key K) bool {
 	x.lock.Lock()
 	ok := x.core.Remove(key)
 	x.lock.Unlock()
@@ -74,5 +74,5 @@ func (x *activelyLRU[K, V]) Del(key K) bool {
 	return ok
 }
 
-func (x *activelyLRU[K, V]) Stop() {
+func (x *ExpirationLRU[K, V]) Stop() {
 }

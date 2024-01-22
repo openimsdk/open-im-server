@@ -21,13 +21,14 @@ func New[V any](opts ...Option) Cache[V] {
 	for _, o := range opts {
 		o(opt)
 	}
+
 	c := cache[V]{opt: opt}
 	if opt.localSlotNum > 0 && opt.localSlotSize > 0 {
 		createSimpleLRU := func() lru.LRU[string, V] {
-			if opt.actively {
-				return lru.NewActivelyLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
+			if opt.expirationEvict {
+				return lru.NewExpirationLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
 			} else {
-				return lru.NewInertiaLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
+				return lru.NewLayLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
 			}
 		}
 		if opt.localSlotNum == 1 {

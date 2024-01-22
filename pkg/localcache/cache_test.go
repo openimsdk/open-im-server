@@ -11,7 +11,7 @@ import (
 )
 
 func TestName(t *testing.T) {
-	c := New[string](WithActively())
+	c := New[string](WithExpirationEvict())
 	//c := New[string]()
 	ctx := context.Background()
 

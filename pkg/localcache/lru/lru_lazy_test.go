@@ -49,7 +49,7 @@ func TestName(t *testing.T) {
 		h.Write(*(*[]byte)(unsafe.Pointer(&k)))
 		return h.Sum64()
 	}, func() LRU[string, string] {
-		return NewActivelyLRU[string, string](100, time.Second*60, time.Second, target, nil)
+		return NewExpirationLRU[string, string](100, time.Second*60, time.Second, target, nil)
 	})
 	//l := NewInertiaLRU[string, string](1000, time.Second*20, time.Second*5, target)
 

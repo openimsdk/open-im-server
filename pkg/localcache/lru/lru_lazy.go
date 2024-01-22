@@ -6,25 +6,25 @@ import (
 	"time"
 )
 
-type inertiaLruItem[V any] struct {
+type layLruItem[V any] struct {
 	lock    sync.Mutex
 	expires int64
 	err     error
 	value   V
 }
 
-func NewInertiaLRU[K comparable, V any](size int, successTTL, failedTTL time.Duration, target Target, onEvict EvictCallback[K, V]) *InertiaLRU[K, V] {
-	var cb simplelru.EvictCallback[K, *inertiaLruItem[V]]
+func NewLayLRU[K comparable, V any](size int, successTTL, failedTTL time.Duration, target Target, onEvict EvictCallback[K, V]) *LayLRU[K, V] {
+	var cb simplelru.EvictCallback[K, *layLruItem[V]]
 	if onEvict != nil {
-		cb = func(key K, value *inertiaLruItem[V]) {
+		cb = func(key K, value *layLruItem[V]) {
 			onEvict(key, value.value)
 		}
 	}
-	core, err := simplelru.NewLRU[K, *inertiaLruItem[V]](size, cb)
+	core, err := simplelru.NewLRU[K, *layLruItem[V]](size, cb)
 	if err != nil {
 		panic(err)
 	}
-	return &InertiaLRU[K, V]{
+	return &LayLRU[K, V]{
 		core:       core,
 		successTTL: successTTL,
 		failedTTL:  failedTTL,
@@ -32,15 +32,15 @@ func NewInertiaLRU[K comparable, V any](size int, successTTL, failedTTL time.Dur
 	}
 }
 
-type InertiaLRU[K comparable, V any] struct {
+type LayLRU[K comparable, V any] struct {
 	lock       sync.Mutex
-	core       *simplelru.LRU[K, *inertiaLruItem[V]]
+	core       *simplelru.LRU[K, *layLruItem[V]]
 	successTTL time.Duration
 	failedTTL  time.Duration
 	target     Target
 }
 
-func (x *InertiaLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
+func (x *LayLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	x.lock.Lock()
 	v, ok := x.core.Get(key)
 	if ok {
@@ -53,7 +53,7 @@ func (x *InertiaLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 			return value, err
 		}
 	} else {
-		v = &inertiaLruItem[V]{}
+		v = &layLruItem[V]{}
 		x.core.Add(key, v)
 		v.lock.Lock()
 		x.lock.Unlock()
@@ -73,7 +73,7 @@ func (x *InertiaLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	return v.value, v.err
 }
 
-func (x *InertiaLRU[K, V]) Del(key K) bool {
+func (x *LayLRU[K, V]) Del(key K) bool {
 	x.lock.Lock()
 	ok := x.core.Remove(key)
 	x.lock.Unlock()
@@ -85,6 +85,6 @@ func (x *InertiaLRU[K, V]) Del(key K) bool {
 	return ok
 }
 
-func (x *InertiaLRU[K, V]) Stop() {
+func (x *LayLRU[K, V]) Stop() {
 
 }

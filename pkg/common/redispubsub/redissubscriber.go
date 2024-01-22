@@ -16,12 +16,19 @@ func NewSubscriber(client redis.UniversalClient, channel string) *Subscriber {
 	return &Subscriber{client: client, channel: channel}
 }
 
-func (s *Subscriber) OnMessage(callback func(string)) error {
+func (s *Subscriber) OnMessage(ctx context.Context, callback func(string)) error {
 	messageChannel := s.client.Subscribe(ctx, s.channel).Channel()
+
 	go func() {
-		for msg := range messageChannel {
-			callback(msg.Payload)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case msg := <-messageChannel:
+				callback(msg.Payload)
+			}
 		}
 	}()
+
 	return nil
 }

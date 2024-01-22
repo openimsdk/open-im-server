@@ -11,7 +11,7 @@ func defaultOption() *option {
 		localSlotNum:    500,
 		localSlotSize:   20000,
 		linkSlotNum:     500,
-		actively:        false,
+		expirationEvict: false,
 		localSuccessTTL: time.Minute,
 		localFailedTTL:  time.Second * 5,
 		delFn:           make([]func(ctx context.Context, key ...string), 0, 2),
@@ -20,10 +20,12 @@ func defaultOption() *option {
 }
 
 type option struct {
-	localSlotNum    int
-	localSlotSize   int
-	linkSlotNum     int
-	actively        bool
+	localSlotNum  int
+	localSlotSize int
+	linkSlotNum   int
+	// expirationEvict: true means that the cache will be actively cleared when the timer expires,
+	// false means that the cache will be lazily deleted.
+	expirationEvict bool
 	localSuccessTTL time.Duration
 	localFailedTTL  time.Duration
 	delFn           []func(ctx context.Context, key ...string)
@@ -32,15 +34,15 @@ type option struct {
 
 type Option func(o *option)
 
-func WithActively() Option {
+func WithExpirationEvict() Option {
 	return func(o *option) {
-		o.actively = true
+		o.expirationEvict = true
 	}
 }
 
-func WithInertia() Option {
+func WithLazy() Option {
 	return func(o *option) {
-		o.actively = false
+		o.expirationEvict = false
 	}
 }
 
