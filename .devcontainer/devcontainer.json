@@ -2,7 +2,6 @@
     // Reference Doc: https://code.visualstudio.com/remote/advancedcontainers/overview
     "name": "OpenIM Dev Environment",
     // Update the container version when you publish dev-container
-    "dockerComposeFile": "docker-compose.yml",
     "build": { "dockerfile": "Dockerfile" },
     // Replace with uncommented line below to build your own local copy of the image
     // "dockerFile": "../docker/Dockerfile-dev",
