@@ -17,6 +17,7 @@ package convert
 import (
 	"context"
 	"fmt"
+
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
 

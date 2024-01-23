@@ -24,6 +24,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 //go:embed version
@@ -37,19 +38,30 @@ const (
 
 // return absolude path join ../config/, this is k8s container config path.
 func GetDefaultConfigPath() string {
-	b, err := filepath.Abs(os.Args[0])
+	executablePath, err := os.Executable()
 	if err != nil {
-		fmt.Println("filepath.Abs error,err=", err)
+		fmt.Println("GetDefaultConfigPath error:", err.Error())
 		return ""
 	}
-	return filepath.Join(filepath.Dir(b), "../config/")
+
+	configPath, err := genutil.OutDir(filepath.Join(filepath.Dir(executablePath), "../config/"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to get output directory: %v\n", err)
+		os.Exit(1)
+	}
+	return configPath
 }
 
 // getProjectRoot returns the absolute path of the project root directory.
 func GetProjectRoot() string {
-	b, _ := filepath.Abs(os.Args[0])
+	executablePath, _ := os.Executable()
 
-	return filepath.Join(filepath.Dir(b), "../../../../..")
+	projectRoot, err := genutil.OutDir(filepath.Join(filepath.Dir(executablePath), "../../../../.."))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to get output directory: %v\n", err)
+		os.Exit(1)
+	}
+	return projectRoot
 }
 
 func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
