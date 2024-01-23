@@ -185,11 +185,8 @@ make start
 To check, ensure the following four processes start successfully:
 
 ```bash
-➜  chat git:(main) ✗ ps -ef | grep chat      
-# [Output showing four running chat processes]
+make check 
 ```
-
-Access the web interface: http://ip:11001
 
 ### Docker Deployment
 
