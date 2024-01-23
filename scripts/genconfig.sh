@@ -25,7 +25,7 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 if [ $# -ne 2 ];then
-    openim::log::error "Usage: scripts/genconfig.sh scripts/environment.sh configs/openim-api.yaml"
+    openim::log::error "Usage: scripts/genconfig.sh scripts/environment.sh configs/config.yaml"
     exit 1
 fi
 

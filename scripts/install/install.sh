@@ -76,7 +76,7 @@ function openim::install::install_openim() {
     openim::log::info "check openim dependency"
     openim::common::sudo "cp -r ${OPENIM_ROOT}/config/* ${OPENIM_CONFIG_DIR}/"
 
-    ${OPENIM_ROOT}/scripts/genconfig.sh ${ENV_FILE} ${OPENIM_ROOT}/deployments/templates/openim.yaml > ${OPENIM_CONFIG_DIR}/config.yaml
+    ${OPENIM_ROOT}/scripts/genconfig.sh ${ENV_FILE} ${OPENIM_ROOT}/deployments/templates/config.yaml > ${OPENIM_CONFIG_DIR}/config.yaml
     ${OPENIM_ROOT}/scripts/genconfig.sh ${ENV_FILE} ${OPENIM_ROOT}/deployments/templates/prometheus.yml > ${OPENIM_CONFIG_DIR}/prometheus.yml
 
     openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}
