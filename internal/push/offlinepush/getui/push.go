@@ -19,6 +19,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"strconv"
 	"sync"
 	"time"
@@ -30,7 +31,6 @@ import (
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils/splitter"
 
-	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	http2 "github.com/openimsdk/open-im-server/v3/pkg/common/http"
@@ -65,7 +65,7 @@ func NewGeTui(cache cache.MsgModel) *GeTui {
 	return &GeTui{cache: cache, tokenExpireTime: tokenExpireTime, taskIDTTL: taskIDTTL}
 }
 
-func (g *GeTui) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
+func (g *GeTui) Push(ctx context.Context, userIDs []string, title, content string, opts *options.Opts) error {
 	token, err := g.cache.GetGetuiToken(ctx)
 	if err != nil {
 		if errs.Unwrap(err) == redis.Nil {

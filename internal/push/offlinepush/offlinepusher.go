@@ -20,6 +20,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/fcm"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/getui"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/jpush"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 )
@@ -32,7 +33,7 @@ const (
 
 // OfflinePusher Offline Pusher.
 type OfflinePusher interface {
-	Push(ctx context.Context, userIDs []string, title, content string, opts *Opts) error
+	Push(ctx context.Context, userIDs []string, title, content string, opts *options.Opts) error
 }
 
 func NewOfflinePusher(cache cache.MsgModel) OfflinePusher {
@@ -48,17 +49,4 @@ func NewOfflinePusher(cache cache.MsgModel) OfflinePusher {
 		offlinePusher = dummy.NewDummy()
 	}
 	return offlinePusher
-}
-
-// Opts opts.
-type Opts struct {
-	Signal        *Signal
-	IOSPushSound  string
-	IOSBadgeCount bool
-	Ex            string
-}
-
-// Signal message id.
-type Signal struct {
-	ClientMsgID string
 }

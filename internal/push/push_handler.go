@@ -21,6 +21,7 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
@@ -235,14 +236,14 @@ func (c *ConsumerHandler) filterGroupMessageOfflinePush(ctx context.Context, gro
 	return needOfflinePushUserIDs, nil
 }
 
-func (c *ConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (title, content string, opts *offlinepush.Opts, err error) {
+func (c *ConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (title, content string, opts *options.Opts, err error) {
 	type AtTextElem struct {
 		Text       string   `json:"text,omitempty"`
 		AtUserList []string `json:"atUserList,omitempty"`
 		IsAtSelf   bool     `json:"isAtSelf"`
 	}
 
-	opts = &offlinepush.Opts{Signal: &offlinepush.Signal{}}
+	opts = &options.Opts{Signal: &options.Signal{}}
 	if msg.OfflinePushInfo != nil {
 		opts.IOSBadgeCount = msg.OfflinePushInfo.IOSBadgeCount
 		opts.IOSPushSound = msg.OfflinePushInfo.IOSPushSound
