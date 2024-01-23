@@ -47,24 +47,57 @@ Homebrew is an essential package manager for macOS. Install it using:
 
 ### Forking and Cloning the Repository
 
-1. Fork the OpenIM repository on GitHub to your account.
-2. Clone your fork to your local machine:
+To optimize and add logic to your instructions, particularly regarding deploying on a Mac, you can modify them as follows:
+
+1. **Fork the OpenIM Repository**: Fork the OpenIM repository on GitHub to your account.
+
+2. **Clone Your Fork to Your Local Machine**:
+   Open your terminal and execute the following commands:
 
    ```sh
+   # Clone the repository
    git clone https://github.com/<your-username>/open-im-server.git
-   # The Docker bridging network mode for Mac is slightly different and needs to be set:
+
+   # Set Docker bridging network mode for Mac
    export DOCKER_BRIDGE_SUBNET=127.0.0.0/16
+
    # Set OpenIM IP
    export OPENIM_IP=<your-ip>
-   # Init Config
+
+   # Initialize configuration
    make init
 
-   # Start Components
+   # Start components using Docker
    docker compose up -d
 
    # Start OpenIM Server
    make start
    ```
+
+3. **Additional Steps for Mac Deployment**:
+   If you are deploying on a Mac and wish to use the chat feature, you need to modify the `docker-compose` file. Specifically, you'll need to uncomment the sections related to `openim-chat` and `mysql`. 
+
+   Here's how to do it:
+
+   - Open the `docker-compose.yml` file in a text editor.
+   - Find the sections for `openim-chat` and `mysql`.
+   - Remove the comment marks (`#`) at the beginning of the lines in these sections to enable them.
+   - Save the file after making these changes.
+
+4. **Update and Restart Services**:
+   After modifying the `docker-compose` file, you need to update and restart the services to apply these changes. Run the following command in your terminal:
+
+   ```sh
+   # Update and restart services
+   docker compose up -d
+
+   # Check openim-chat start
+   docker compose logs openim-chat
+   ```
+
+   This command will re-read the `docker-compose.yml` file, apply the new configuration, and restart the necessary containers.
+
+Remember, replacing `<your-username>` and `<your-ip>` with your actual GitHub username and desired IP address for OpenIM is crucial. These steps should streamline the setup process, particularly for Mac users wishing to use the chat feature.
 
 ### Setting Up the Devcontainer
 

@@ -6,16 +6,6 @@
     "build": { "dockerfile": "Dockerfile" },
     // Replace with uncommented line below to build your own local copy of the image
     // "dockerFile": "../docker/Dockerfile-dev",
-    "containerEnv": {
-        // Uncomment to overwrite devcontainer .kube/config and .minikube certs with the localhost versions
-        // each time the devcontainer starts, if the respective .kube-localhost/config and .minikube-localhost
-        // folders respectively are bind mounted to the devcontainer.
-        // "SYNC_LOCALHOST_KUBECONFIG": "true"
-
-        // Uncomment to disable docker-in-docker and automatically proxy default /var/run/docker.sock to
-        // the localhost bind-mount /var/run/docker-host.sock.
-        // "BIND_LOCALHOST_DOCKER": "true"
-    },
     "remoteEnv": {
         "GO111MODULE": "on",
         "GOPROXY": "https://goproxy.cn",

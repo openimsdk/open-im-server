@@ -32,6 +32,8 @@ if [[ $? -ne 0 ]]; then
 fi
 set -o errexit
 
+"${OPENIM_ROOT}"/scripts/init-config.sh --skip
+
 echo "You need to start the following scripts in order: ${OPENIM_SERVER_SCRIPTARIES[@]}"
 openim::log::install_errexit
 

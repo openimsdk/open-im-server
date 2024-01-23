@@ -16,6 +16,7 @@ package user
 
 import (
 	"context"
+
 	pbuser "github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/utils"
 

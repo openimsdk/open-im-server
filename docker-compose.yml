@@ -123,7 +123,7 @@ services:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS:-172.28.0.7}
 
 ### TODO: Uncomment, or deploy using openim docker: https://github.com/openimsdk/openim-docker
-  # Uncomment and configure the following services as needed
+### Uncomment and configure the following services as needed
 
   # openim-server:
   #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-server:${SERVER_IMAGE_VERSION:-main}
@@ -172,6 +172,23 @@ services:
   #     server:
   #       ipv4_address: ${OPENIM_SERVER_NETWORK_ADDRESS:-172.28.0.8}
 
+### TODO: mysql is required to deploy the openim-chat component
+  # mysql:
+  #   image: mysql:${MYSQL_IMAGE_VERSION:-5.7}
+  #   platform: linux/amd64
+  #   ports:
+  #     - "${MYSQL_PORT:-13306}:3306"
+  #   container_name: mysql
+  #   volumes:
+  #     - "${DATA_DIR:-./}/components/mysql/data:/var/lib/mysql"
+  #     - "/etc/localtime:/etc/localtime"
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: "${MYSQL_PASSWORD:-openIM123}"
+  #   restart: always
+  #   networks:
+  #     server:
+  #       ipv4_address: ${MYSQL_NETWORK_ADDRESS:-172.28.0.15}
+
   # openim-chat:
   #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-chat:${CHAT_IMAGE_VERSION:-main}
   #   container_name: openim-chat
@@ -199,6 +216,11 @@ services:
   #     - "${DATA_DIR:-./}/components/openim-chat/config:/openim/openim-chat/config"
   #   restart: always
   #   # user: root:root
+  #   depends_on:
+  #     - mysql
+  #     - kafka
+  #     - redis
+  #     - zookeeper
   #   logging:
   #     driver: json-file
   #     options:

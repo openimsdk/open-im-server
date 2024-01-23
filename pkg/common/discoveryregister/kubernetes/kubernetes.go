@@ -18,15 +18,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/stathat/consistent"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/stathat/consistent"
 
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 

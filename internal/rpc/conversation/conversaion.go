@@ -17,8 +17,9 @@ package conversation
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/protocol/sdkws"
 	"sort"
+
+	"github.com/OpenIMSDK/protocol/sdkws"
 
 	"github.com/OpenIMSDK/tools/tx"
 
