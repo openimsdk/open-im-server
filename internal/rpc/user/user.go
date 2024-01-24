@@ -17,11 +17,13 @@ package user
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/tools/pagination"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"math/rand"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/tools/pagination"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 
 	"github.com/OpenIMSDK/tools/tx"
 

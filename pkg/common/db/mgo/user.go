@@ -16,10 +16,11 @@ package mgo
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/errs"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"

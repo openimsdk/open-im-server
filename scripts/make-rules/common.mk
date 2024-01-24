@@ -126,7 +126,7 @@ APIROOT=$(ROOT_DIR)/pkg/proto
 
 # Linux command settings
 # TODO: Whether you need to join utils?
-FIND := find . ! -path './utils/*' ! -path './vendor/*' ! -path './third_party/*'
+FIND := find . ! -path './utils/*' ! -path './vendor/*' ! -path './third_party/*' ! -path './components/*' ! -path './logs/*'
 XARGS := xargs -r --no-run-if-empty
 
 # Linux command settings-CODE DIRS Copyright
