@@ -47,7 +47,7 @@ do
 done
 
 if [ "${missing}" ];then
-  openim::log::error 'You may run `source scripts/environment.sh` to set these environment'
+  openim::log::error "You may run 'source scripts/environment.sh' to set these environment"
   exit 1
 fi
 

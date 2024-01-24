@@ -38,7 +38,7 @@ printError() {
 
 printMessage "Running local OpenIM pre-push hook."
 
-if [[ `git status --porcelain` ]]; then
+if [[ $(git status --porcelain) ]]; then
   printError "This scripts needs to run against committed code only. Please commit or stash you changes."
   exit 1
 fi

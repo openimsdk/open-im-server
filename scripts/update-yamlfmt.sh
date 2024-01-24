@@ -27,16 +27,16 @@ cd "${OPENIM_ROOT}"
 
 find_files() {
   find . -not \( \
-  \( \
-  -wholename './output' \
-  -o -wholename './.git' \
-  -o -wholename './_output' \
-  -o -wholename './_gopath' \
-  -o -wholename './release' \
-  -o -wholename './target' \
-  -o -wholename '*/vendor/*' \
-  \) -prune \
-  \) -name 'OWNERS*'
+      \( \
+        -wholename './output' \
+        -o -wholename './.git' \
+        -o -wholename './_output' \
+        -o -wholename './_gopath' \
+        -o -wholename './release' \
+        -o -wholename './target' \
+        -o -wholename '*/vendor/*' \
+      \) -prune \
+    \) -name 'OWNERS*'
 }
 
 export GO111MODULE=on

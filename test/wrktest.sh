@@ -256,7 +256,7 @@ case $1 in
     t2=$(basename $3|sed 's/.dat//g') # 对比图中粉色线条名称
 
     join $2 $3 > /tmp/plot_diff.dat
-    openim::wrk::plot_diff `basename $2` `basename $3`
+    openim::wrk::plot_diff "$(basename "$2")" "$(basename "$3")"
     exit 0
     ;;
   *)

@@ -50,7 +50,7 @@ help_info() {
 }
 
 delete_hooks() {
-  for file in ${OPENIM_ROOT}/scripts/githooks/*.sh; do
+  for file in "${OPENIM_ROOT}"/scripts/githooks/*.sh; do
     hook_name=$(basename "$file" .sh)  # This removes the .sh extension
     rm -f "$HOOKS_DIR/$hook_name"
   done

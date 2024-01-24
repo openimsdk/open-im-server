@@ -1086,7 +1086,7 @@ function openim::util::ensure-install-nginx {
     exit 1
   fi
 
-  for port in 80
+  for port in "80"
   do
     if echo |telnet 127.0.0.1 $port 2>&1|grep refused &>/dev/null;then
       exit 1
@@ -2320,7 +2320,7 @@ function openim::util::ensure-install-nginx {
     exit 1
   fi
 
-  for port in 80
+  for port in "80"
   do
     if echo |telnet 127.0.0.1 $port 2>&1|grep refused &>/dev/null;then
       exit 1
@@ -2467,7 +2467,7 @@ function openim::util::desc() {
 }
 
 function openim::util:run::prompt() {
-    echo -n "$yellow\$ $reset"
+    echo -n "${yellow}\$ ${reset}"
 }
 
 started=""
@@ -2488,7 +2488,7 @@ function openim::util::run() {
     if [ -n "$DEMO_RUN_FAST" ]; then
       rate=1000
     fi
-    echo "$green$1$reset" | pv -qL $rate
+    echo "${green}$1${reset}" | pv -qL "$rate"
     if [ -n "$DEMO_RUN_FAST" ]; then
       sleep 0.5
     fi
