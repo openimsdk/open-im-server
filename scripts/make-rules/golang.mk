@@ -244,7 +244,7 @@ go.imports: tools.verify.goimports
 
 ## go.verify: execute all verity scripts.
 .PHONY: go.verify
-go.verify:
+go.verify: tools.verify.misspell
 	@echo "Starting verification..."
 	@scripts_list=$$(find $(ROOT_DIR)/scripts -type f -name 'verify-*' | sort); \
 	for script in $$scripts_list; do \
