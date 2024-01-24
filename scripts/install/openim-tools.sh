@@ -18,9 +18,9 @@
 #
 # Description:
 #  This script is responsible for managing the lifecycle of OpenIM tools, which include starting, stopping,
-#  and handling pre and post operations. It's designed to be modular and extensible, ensuring that the 
+#  and handling pre and post operations. It's designed to be modular and extensible, ensuring that the
 #  individual operations can be managed separately, and integrated seamlessly with Linux systemd.
-# 
+#
 # Features:
 # 1. Robust error handling using Bash built-ins like 'errexit', 'nounset', and 'pipefail'.
 # 2. The capability to source common utility functions and configurations to ensure uniform environmental settings.

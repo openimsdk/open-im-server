@@ -14,10 +14,10 @@
 # limitations under the License.
 
 # This script is check openim service is running normally
-# 
+#
 # Usage: `scripts/check-all.sh`.
 # Encapsulated as: `make check`.
-# READ: https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh 
+# READ: https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh
 
 set -o errexit
 set -o nounset
@@ -34,19 +34,19 @@ openim::log::status "Check all dependent service ports"
 # Elegant printing function
 # Elegant printing function
 print_services_and_ports() {
-    local service_names=("$@")
-    local half_length=$((${#service_names[@]} / 2))
-    local service_ports=("${service_names[@]:half_length}")
-
-    echo "+-------------------------+----------+"
-    echo "| Service Name            | Port     |"
-    echo "+-------------------------+----------+"
-
-    for ((index=0; index < half_length; index++)); do
-        printf "| %-23s | %-8s |\n" "${service_names[$index]}" "${service_ports[$index]}"
-    done
-
-    echo "+-------------------------+----------+"
+  local service_names=("$@")
+  local half_length=$((${#service_names[@]} / 2))
+  local service_ports=("${service_names[@]:half_length}")
+  
+  echo "+-------------------------+----------+"
+  echo "| Service Name            | Port     |"
+  echo "+-------------------------+----------+"
+  
+  for ((index=0; index < half_length; index++)); do
+    printf "| %-23s | %-8s |\n" "${service_names[$index]}" "${service_ports[$index]}"
+  done
+  
+  echo "+-------------------------+----------+"
 }
 
 # Assuming OPENIM_SERVER_NAME_TARGETS and OPENIM_SERVER_PORT_TARGETS are defined
@@ -67,10 +67,10 @@ set +e
 
 # Later, after discarding Docker, the Docker keyword is unreliable, and Kubepods is used
 if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
-    openim::color::echo ${COLOR_CYAN} "Environment in the interior of the container"
+  openim::color::echo ${COLOR_CYAN} "Environment in the interior of the container"
 else
-    openim::color::echo ${COLOR_CYAN} "The environment is outside the container"
-    openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]} || return 0
+  openim::color::echo ${COLOR_CYAN} "The environment is outside the container"
+  openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]} || return 0
 fi
 
 if [[ $? -ne 0 ]]; then

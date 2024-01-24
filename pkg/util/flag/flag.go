@@ -1,7 +1,7 @@
 package flag
 
 import (
-	goFlag "flag"
+	"flag"
 	"log"
 	"strings"
 
@@ -29,7 +29,7 @@ func WarnWordSepNormalizeFunc(f *pflag.FlagSet, name string) pflag.NormalizedNam
 // InitFlags normalizes, parses, then logs the command line flags.
 func InitFlags() {
 	pflag.CommandLine.SetNormalizeFunc(WordSepNormalizeFunc)
-	pflag.CommandLine.AddGoFlagSet(goFlag.CommandLine)
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 }
 
 // PrintFlags logs the flags in the flagset.

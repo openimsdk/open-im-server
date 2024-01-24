@@ -49,10 +49,10 @@ DOCKER_COMPOSE_COMMAND=
 # Check if docker-compose command is available
 openim::util::check_docker_and_compose_versions
 if command -v docker compose &> /dev/null; then
-    openim::log::info "docker compose command is available"
-    DOCKER_COMPOSE_COMMAND="docker compose"
+  openim::log::info "docker compose command is available"
+  DOCKER_COMPOSE_COMMAND="docker compose"
 else
-    DOCKER_COMPOSE_COMMAND="docker-compose"
+  DOCKER_COMPOSE_COMMAND="docker-compose"
 fi
 
 export SERVER_IMAGE_VERSION
@@ -67,12 +67,12 @@ ${DOCKER_COMPOSE_COMMAND} up -d
 
 # Function to check container status
 check_containers() {
-    if ! ${DOCKER_COMPOSE_COMMAND} ps | grep -q 'Up'; then
-        echo "Error: One or more docker containers failed to start."
-        ${DOCKER_COMPOSE_COMMAND} logs
-        return 1
-    fi
-    return 0
+  if ! ${DOCKER_COMPOSE_COMMAND} ps | grep -q 'Up'; then
+    echo "Error: One or more docker containers failed to start."
+    ${DOCKER_COMPOSE_COMMAND} logs
+    return 1
+  fi
+  return 0
 }
 
 # Wait for a short period to allow containers to initialize

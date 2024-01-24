@@ -65,14 +65,18 @@ cd "${OPENIM_ROOT}"
 #    forked should be linted and fixed.
 all_shell_scripts=()
 while IFS=$'\n' read -r script;
-  do git check-ignore -q "$script" || all_shell_scripts+=("$script");
-done < <(find . -name "*.sh" \
+do git check-ignore -q "$script" || all_shell_scripts+=("$script");
+  done < <(find . -name "*.sh" \
   -not \( \
-    -path ./_\*      -o \
-    -path ./.git\*   -o \
-    -path ./vendor\* -o \
-    \( -path ./third_party\* -a -not -path ./third_party/forked\* \) \
-  \))
+  -path ./_\*      -o \
+  -path ./.git\*   -o \
+  -path ./Godeps\* -o \
+  -path ./_output\* -o \
+  -path ./components\* -o \
+  -path ./logs\* -o \
+  -path ./vendor\* -o \
+  \( -path ./third_party\* -a -not -path ./third_party/forked\* \) \
+\))
 
 # detect if the host machine has the required shellcheck version installed
 # if so, we will use that instead.
@@ -113,8 +117,8 @@ if ${HAVE_SHELLCHECK}; then
 else
   openim::log::info "Using shellcheck ${SHELLCHECK_VERSION} docker image."
   "${DOCKER}" run \
-    --rm -v "${OPENIM_ROOT}:"${OPENIM_ROOT}"" -w "${OPENIM_ROOT}" \
-    "${SHELLCHECK_IMAGE}" \
+  --rm -v "${OPENIM_ROOT}:"${OPENIM_ROOT}"" -w "${OPENIM_ROOT}" \
+  "${SHELLCHECK_IMAGE}" \
   shellcheck "${SHELLCHECK_OPTIONS[@]}" "${all_shell_scripts[@]}" >&2 || res=$?
 fi
 

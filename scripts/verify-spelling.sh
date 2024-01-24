@@ -31,7 +31,7 @@ PATH="${GOBIN}:${PATH}"
 
 # Install tools we need
 pushd "${OPENIM_ROOT}/tools" >/dev/null
-  GO111MODULE=on go install github.com/client9/misspell/cmd/misspell
+GO111MODULE=on go install github.com/client9/misspell/cmd/misspell
 popd >/dev/null
 
 # Spell checking
