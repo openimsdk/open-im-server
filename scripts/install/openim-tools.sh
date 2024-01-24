@@ -105,11 +105,7 @@ function openim::tools::start_service() {
   fi
   openim::log::status "Starting ${binary_name}..."
   # Later, after discarding Docker, the Docker keyword is unreliable, and Kubepods is used
-  if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
-      ${cmd} >> "${LOG_FILE}" 2>&1
-  else
-      ${cmd} | tee -a "${LOG_FILE}"
-  fi
+  ${cmd} | tee -a "${LOG_FILE}"
 }
 
 function openim::tools::start() {
