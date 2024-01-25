@@ -1,0 +1,47 @@
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+###################### AlertManager Configuration ######################
+# AlertManager configuration using environment variables
+#
+# Resolve timeout
+# SMTP configuration for sending alerts
+# Templates for email notifications
+# Routing configurations for alerts
+# Receiver configurations
+global:
+  resolve_timeout: 5m
+  smtp_from: alert@openim.io
+  smtp_smarthost: smtp.163.com:465
+  smtp_auth_username: alert@openim.io
+  smtp_auth_password: YOURAUTHPASSWORD
+  smtp_require_tls: false
+  smtp_hello: xxx监控告警
+
+templates:
+  - /etc/alertmanager/email.tmpl
+
+route:
+  group_by: ['alertname']
+  group_wait: 5s
+  group_interval: 5s
+  repeat_interval: 5m
+  receiver: email
+receivers:
+  - name: email
+    email_configs:
+      - to: 'alert@example.com'
+        html: '{{ template "email.to.html" . }}'
+        headers: { Subject: "[OPENIM-SERVER]Alarm" }
+        send_resolved: true
