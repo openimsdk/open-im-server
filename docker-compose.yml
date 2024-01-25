@@ -214,6 +214,7 @@ services:
   #     - "${OPENIM_ADMIN_API_PORT:-10009}:10009"
   #   volumes:
   #     - "${DATA_DIR:-./}/components/openim-chat/logs:/openim/openim-chat/logs"
+  #     - "${DATA_DIR:-./}/components/openim-chat/_output/logs:/openim/openim-chat/_output/logs"
   #     - "${DATA_DIR:-./}/components/openim-chat/config:/openim/openim-chat/config"
   #   restart: always
   #   # user: root:root

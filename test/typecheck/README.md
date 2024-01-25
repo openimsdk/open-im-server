@@ -48,3 +48,5 @@ In CI environments, Typecheck can be integrated into the workflow as follows:
 ```
 
 This streamlined process facilitates efficient error detection and resolution, ensuring a robust and reliable build pipeline.
+
+More to learn about typecheck [share blog](https://nsddd.top/posts/concurrent-type-checking-and-cross-platform-development-in-go/)

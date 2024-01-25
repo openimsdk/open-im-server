@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// do a fast type check of kubernetes code, for all platforms.
+// do a fast type check of openim code, for all platforms.
 package main
 
 import (
@@ -47,13 +47,11 @@ var (
 	crossPlatforms = []string{
 		"linux/amd64", "windows/386",
 		"darwin/amd64", "darwin/arm64",
-		"linux/386",
+		"linux/386", "linux/arm",
 		"windows/amd64", "linux/arm64",
 		"linux/ppc64le", "linux/s390x",
 		"windows/arm64",
 	}
-
-	// "linux/arm",
 
 	// directories we always ignore
 	standardIgnoreDirs = []string{
