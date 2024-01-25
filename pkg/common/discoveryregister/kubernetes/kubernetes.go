@@ -104,7 +104,7 @@ func getSelfHost(ctx context.Context) string {
 	return host
 }
 
-// like openimserver-openim-msggateway-0.openimserver-openim-msggateway-headless.openim-lin.svc.cluster.local:88
+// like openimserver-openim-msggateway-0.openimserver-openim-msggateway-headless.openim-lin.svc.cluster.local:88.
 func getMsgGatewayHost(ctx context.Context) []string {
 	port := 88
 	instance := "openimserver"
@@ -168,7 +168,7 @@ func (cli *K8sDR) CloseConn(conn *grpc.ClientConn) {
 	conn.Close()
 }
 
-// do not use this method for call rpc
+// do not use this method for call rpc.
 func (cli *K8sDR) GetClientLocalConns() map[string][]*grpc.ClientConn {
 	fmt.Println("should not call this function!!!!!!!!!!!!!!!!!!!!!!!!!")
 	return nil

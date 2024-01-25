@@ -142,12 +142,12 @@ func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*rel
 	return u.cache.GetUsersInfo(ctx, userIDs)
 }
 
-// Find userInfo By Nickname
+// Find userInfo By Nickname.
 func (u *userDatabase) FindByNickname(ctx context.Context, nickname string) (users []*relation.UserModel, err error) {
 	return u.userDB.TakeByNickname(ctx, nickname)
 }
 
-// Find notificationAccouts
+// Find notificationAccouts.
 func (u *userDatabase) FindNotification(ctx context.Context, level int64) (users []*relation.UserModel, err error) {
 	return u.userDB.TakeNotification(ctx, level)
 }
@@ -190,7 +190,14 @@ func (u *userDatabase) Page(ctx context.Context, pagination pagination.Paginatio
 func (u *userDatabase) PageFindUser(ctx context.Context, level1 int64, level2 int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
 	return u.userDB.PageFindUser(ctx, level1, level2, pagination)
 }
-func (u *userDatabase) PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID, nickName string, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+
+func (u *userDatabase) PageFindUserWithKeyword(
+	ctx context.Context,
+	level1 int64,
+	level2 int64,
+	userID, nickName string,
+	pagination pagination.Pagination,
+) (count int64, users []*relation.UserModel, err error) {
 	return u.userDB.PageFindUserWithKeyword(ctx, level1, level2, userID, nickName, pagination)
 }
 
