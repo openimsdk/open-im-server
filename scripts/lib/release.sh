@@ -25,6 +25,7 @@
 readonly BUCKET="openim-1306374445"
 readonly REGION="ap-guangzhou"
 readonly COS_RELEASE_DIR="openim-release"
+# readonly COS_RELEASE_DIR="openim-advanced-release" # !pro 
 
 # default cos command tool coscli or coscmd
 readonly COSTOOL="coscli"
@@ -37,9 +38,11 @@ readonly RELEASE_IMAGES="${LOCAL_OUTPUT_ROOT}/release-images"
 # OpenIM github account info
 readonly OPENIM_GITHUB_ORG=openimsdk
 readonly OPENIM_GITHUB_REPO=open-im-server
-readonly CHAT_GITHUB_REPO=chat
+# readonly OPENIM_GITHUB_REPO=open-im-server-enterprise # !pro 
 
 readonly ARTIFACT=openim.tar.gz
+# readonly ARTIFACT=openim-enterprise.tar.gz # !pro
+
 readonly CHECKSUM=${ARTIFACT}.sha1sum
 
 OPENIM_BUILD_CONFORMANCE=${OPENIM_BUILD_CONFORMANCE:-y}

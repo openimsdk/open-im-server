@@ -69,7 +69,8 @@ ${DOCKER_COMPOSE_COMMAND} up -d
 check_containers() {
   if ! ${DOCKER_COMPOSE_COMMAND} ps | grep -q 'Up'; then
     echo "Error: One or more docker containers failed to start."
-    ${DOCKER_COMPOSE_COMMAND} logs
+    ${DOCKER_COMPOSE_COMMAND} logs openim-server
+    ${DOCKER_COMPOSE_COMMAND} logs openim-chat
     return 1
   fi
   return 0
@@ -77,9 +78,9 @@ check_containers() {
 
 # Wait for a short period to allow containers to initialize
 sleep 30
-check_containers
 
-${DOCKER_COMPOSE_COMMAND} logs openim-server
 ${DOCKER_COMPOSE_COMMAND} ps
+
+check_containers
 
 popd
