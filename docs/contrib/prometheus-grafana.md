@@ -111,32 +111,35 @@ Importing Grafana Dashboards is a straightforward process and is applicable to O
 
 To monitor OpenIM in Grafana, you need to focus on three categories of key metrics, each with its specific deployment and configuration steps:
 
-1. **OpenIM Metrics (`prometheus-dashboard.yaml`)**:
-   + **Configuration File Path**: Located at `config/prometheus-dashboard.yaml`.
-   + **Enabling Monitoring**: Set the environment variable `export PROMETHEUS_ENABLE=true` to enable Prometheus monitoring.
-   + **More Information**: Refer to the [OpenIM Configuration Guide](https://docs.openim.io/configurations/prometheus-integration).
-2. **Node Exporter**:
-   + **Container Deployment**: Deploy the `quay.io/prometheus/node-exporter` container for node monitoring.
-   + **Get Dashboard**: Access the [Node Exporter Full Feature Dashboard](https://grafana.com/grafana/dashboards/1860-node-exporter-full/) and import it using YAML file download or ID import.
-   + **Deployment Guide**: Refer to the [Node Exporter Deployment Documentation](https://prometheus.io/docs/guides/node-exporter/).
-3. **Middleware Metrics**: Each middleware requires specific steps and configurations to enable monitoring. Here is a list of common middleware and links to their respective setup guides:
-   + MySQL:
-     + **Configuration**: Ensure MySQL has performance monitoring enabled.
-     + **Link**: Refer to the [MySQL Monitoring Configuration Guide](https://grafana.com/docs/grafana/latest/datasources/mysql/).
-   + Redis:
-     + **Configuration**: Configure Redis to allow monitoring data export.
-     + **Link**: Refer to the [Redis Monitoring Guide](https://grafana.com/docs/grafana/latest/datasources/redis/).
-   + MongoDB:
-     + **Configuration**: Set up monitoring metrics for MongoDB.
-     + **Link**: Refer to the [MongoDB Monitoring Guide](https://grafana.com/grafana/plugins/grafana-mongodb-datasource/).
-   + Kafka:
-     + **Configuration**: Integrate Kafka with Prometheus monitoring.
-     + **Link**: Refer to the [Kafka Monitoring Guide](https://grafana.com/grafana/plugins/grafana-kafka-datasource/).
-   + Zookeeper:
-     + **Configuration**: Ensure Zookeeper can be monitored by Prometheus.
-     + **Link**: Refer to the [Zookeeper Monitoring Configuration](https://grafana.com/docs/grafana/latest/datasources/zookeeper/).
+**OpenIM Metrics (`prometheus-dashboard.yaml`)**:
 
+- **Configuration File Path**: Find this at `config/prometheus-dashboard.yaml`.
+- **Enabling Monitoring**: Activate Prometheus monitoring by setting the environment variable: `export PROMETHEUS_ENABLE=true`.
+- **More Information**: For detailed instructions, see the [OpenIM Configuration Guide](https://docs.openim.io/configurations/prometheus-integration).
 
+**Node Exporter**:
+
+- **Container Deployment**: Use the container `quay.io/prometheus/node-exporter` for effective node monitoring.
+- **Access Dashboard**: Visit the [Node Exporter Full Feature Dashboard](https://grafana.com/grafana/dashboards/1860-node-exporter-full/) for dashboard integration either through YAML file download or ID.
+- **Deployment Guide**: For deployment steps, consult the [Node Exporter Deployment Documentation](https://prometheus.io/docs/guides/node-exporter/).
+
+**Middleware Metrics**: Different middlewares require unique steps and configurations for monitoring:
+
+- MySQL:
+    - **Configuration**: Make sure MySQL is set up for performance monitoring.
+    - **Guide**: See the [MySQL Monitoring Configuration Guide](https://grafana.com/docs/grafana/latest/datasources/mysql/).
+- Redis:
+    - **Configuration**: Adjust Redis settings to enable monitoring data export.
+    - **Guide**: Consult the [Redis Monitoring Guide](https://grafana.com/docs/grafana/latest/datasources/redis/).
+- MongoDB:
+    - **Configuration**: Configure MongoDB for monitoring metrics.
+    - **Guide**: Visit the [MongoDB Monitoring Guide](https://grafana.com/grafana/plugins/grafana-mongodb-datasource/).
+- Kafka:
+    - **Configuration**: Set up Kafka for Prometheus monitoring integration.
+    - **Guide**: Refer to the [Kafka Monitoring Guide](https://grafana.com/grafana/plugins/grafana-kafka-datasource/).
+- Zookeeper:
+    - **Configuration**: Ensure Prometheus can monitor Zookeeper.
+    - **Guide**: Check out the [Zookeeper Monitoring Configuration](https://grafana.com/docs/grafana/latest/datasources/zookeeper/).
 
 **Importing Steps**:
 

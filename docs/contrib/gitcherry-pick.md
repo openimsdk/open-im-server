@@ -75,7 +75,7 @@ It is critical that our full community is actively engaged on enhancements in th
 
   - Be aware the cherry pick script assumes you have a git remote called `upstream` that points at the openim-server github org.
 
-    Please see our [recommended Git workflow](https://github.com/openimsdk/open-im-server/blob/main/docs/contributors/github-workflow.md#workflow).
+    Please see our [recommended Git workflow](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/github-workflow.md#workflow).
 
   - You will need to run the cherry pick script separately for each patch release you want to cherry pick to. Cherry picks should be applied to all [active](https://github.com/openimsdk/open-im-server/releases) release branches where the fix is applicable.
 

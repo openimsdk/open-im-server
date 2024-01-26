@@ -26,19 +26,19 @@ openim::util::set_max_fd 200000
 SERVER_NAME="openim-msggateway"
 
 function openim::msggateway::start() {
-    openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
-    openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGGATEWAY_BINARY}"
-
-    openim::util::stop_services_with_name ${OPENIM_MSGGATEWAY_BINARY}
-
-    # OpenIM message gateway service port
-    OPENIM_MESSAGE_GATEWAY_PORTS=$(openim::util::list-to-string ${OPENIM_MESSAGE_GATEWAY_PORT} )
+  openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
+  openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGGATEWAY_BINARY}"
+  
+  openim::util::stop_services_with_name ${OPENIM_MSGGATEWAY_BINARY}
+  
+  # OpenIM message gateway service port
+  OPENIM_MESSAGE_GATEWAY_PORTS=$(openim::util::list-to-string ${OPENIM_MESSAGE_GATEWAY_PORT} )
     read -a OPENIM_MSGGATEWAY_PORTS_ARRAY <<< ${OPENIM_MESSAGE_GATEWAY_PORTS}
     openim::util::stop_services_on_ports ${OPENIM_MSGGATEWAY_PORTS_ARRAY[*]}
     # OpenIM WS port
     OPENIM_WS_PORTS=$(openim::util::list-to-string ${OPENIM_WS_PORT} )
     read -a OPENIM_WS_PORTS_ARRAY <<< ${OPENIM_WS_PORTS}
-    
+
     # Message Gateway Prometheus port of the service
     MSG_GATEWAY_PROM_PORTS=$(openim::util::list-to-string ${MSG_GATEWAY_PROM_PORT} )
     read -a MSG_GATEWAY_PROM_PORTS_ARRAY <<< ${MSG_GATEWAY_PROM_PORTS}
@@ -123,7 +123,7 @@ function openim::msggateway::status() {
   # Check the running status of the ${SERVER_NAME}. If active (running) is displayed, the ${SERVER_NAME} is started successfully.
   systemctl status ${SERVER_NAME}|grep -q 'active' || {
     openim::log::error "${SERVER_NAME} failed to start, maybe not installed properly"
-    
+
     return 1
   }
 

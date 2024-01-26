@@ -25,20 +25,12 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 if [ $# -ne 2 ];then
-    openim::log::error "Usage: scripts/genconfig.sh scripts/environment.sh configs/openim-api.yaml"
-    exit 1
+  openim::log::error "Usage: scripts/genconfig.sh scripts/environment.sh configs/config.yaml"
+  exit 1
 fi
 
-openim::util::require-dig
-result=$?
-if [ $result -ne 0 ]; then
-    openim::log::info "Please install 'dig' to use this feature."
-    openim::log::info "Installation instructions:"
-    openim::log::info "  For Ubuntu/Debian: sudo apt-get install dnsutils"
-    openim::log::info "  For CentOS/RedHat: sudo yum install bind-utils"
-    openim::log::info "  For macOS: 'dig' should be preinstalled. If missing, try: brew install bind"
-    openim::log::info "  For Windows: Install BIND9 tools from https://www.isc.org/download/"
-    openim::log::error_exit "Error: 'dig' command is required but not installed."
+if [ -z "${OPENIM_IP}" ]; then
+  openim::util::require-dig
 fi
 
 source "${env_file}"
@@ -48,15 +40,15 @@ declare -A envs
 set +u
 for env in $(sed -n 's/^[^#].*${\(.*\)}.*/\1/p' ${template_file})
 do
-    if [ -z "$(eval echo \$${env})" ];then
-        openim::log::error "environment variable '${env}' not set"
-        missing=true
-    fi
+  if [ -z "$(eval echo \$${env})" ];then
+    openim::log::error "environment variable '${env}' not set"
+    missing=true
+  fi
 done
 
 if [ "${missing}" ];then
-    openim::log::error 'You may run `source scripts/environment.sh` to set these environment'
-    exit 1
+  openim::log::error "You may run 'source scripts/environment.sh' to set these environment"
+  exit 1
 fi
 
 eval "cat << EOF

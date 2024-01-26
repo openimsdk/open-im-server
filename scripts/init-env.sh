@@ -25,9 +25,9 @@ source "${OPENIM_ROOT}/scripts/install/common.sh"
 openim::log::info "\n# Begin Install OpenIM Config"
 
 for file in "${OPENIM_SERVER_TARGETS[@]}"; do
-    VARNAME="$(echo $file | tr '[:lower:]' '[:upper:]' | tr '.' '_' | tr '-' '_')"
-    VARVALUE="$OPENIM_OUTPUT_HOSTBIN/$file"
-    # /etc/profile.d/openim-env.sh
-    echo "export $VARNAME=$VARVALUE" > /etc/profile.d/openim-env.sh
-    source /etc/profile.d/openim-env.sh
+  VARNAME="$(echo $file | tr '[:lower:]' '[:upper:]' | tr '.' '_' | tr '-' '_')"
+  VARVALUE="$OPENIM_OUTPUT_HOSTBIN/$file"
+  # /etc/profile.d/openim-env.sh
+  echo "export $VARNAME=$VARVALUE" > /etc/profile.d/openim-env.sh
+  source /etc/profile.d/openim-env.sh
 done

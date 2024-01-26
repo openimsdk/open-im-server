@@ -118,7 +118,7 @@ function return_to_kansas {
     openim::log::status "Aborting in-progress git am."
     git am --abort >/dev/null 2>&1 || true
   fi
-
+  
   # return to the starting branch and delete the PR text file
   if [[ -z "${DRY_RUN}" ]]; then
     echo
@@ -137,7 +137,7 @@ function make-a-pr() {
   rel="$(basename "${BRANCH}")"
   echo
   openim::log::status "Creating a pull request on GitHub at ${GITHUB_USER}:${NEWBRANCH}"
-
+  
   local numandtitle
   numandtitle=$(printf '%s\n' "${SUBJECTS[@]}")
   prtext=$(cat <<EOF
@@ -153,7 +153,7 @@ For details on the cherry pick process, see the [cherry pick requests](https://g
 EOF
 )
 
-  gh pr create --title="Automated cherry pick of ${numandtitle}" --body="${prtext}" --head "${GITHUB_USER}:${NEWBRANCH}" --base "${rel}" --repo="${MAIN_REPO_ORG}/${MAIN_REPO_NAME}"
+gh pr create --title="Automated cherry pick of ${numandtitle}" --body="${prtext}" --head "${GITHUB_USER}:${NEWBRANCH}" --base "${rel}" --repo="${MAIN_REPO_ORG}/${MAIN_REPO_NAME}"
 }
 
 git checkout -b "${NEWBRANCHUNIQ}" "${BRANCH}"
@@ -161,84 +161,84 @@ cleanbranch="${NEWBRANCHUNIQ}"
 
 gitamcleanup=true
 for pull in "${PULLS[@]}"; do
-  openim::log::status "Downloading patch to /tmp/${pull}.patch (in case you need to do this again)"
+openim::log::status "Downloading patch to /tmp/${pull}.patch (in case you need to do this again)"
 
-  curl -o "/tmp/${pull}.patch" -sSL "https://github.com/${MAIN_REPO_ORG}/${MAIN_REPO_NAME}/pull/${pull}.patch"
-  echo
-  openim::log::status "About to attempt cherry pick of PR. To reattempt:"
-  echo "  $ git am -3 /tmp/${pull}.patch"
-  echo
-  git am -3 "/tmp/${pull}.patch" || {
-    conflicts=false
-    while unmerged=$(git status --porcelain | grep ^U) && [[ -n ${unmerged} ]] \
-      || [[ -e "${REBASEMAGIC}" ]]; do
-      conflicts=true # <-- We should have detected conflicts once
-      echo
-      openim::log::status "Conflicts detected:"
-      echo
-      (git status --porcelain | grep ^U) || echo "!!! None. Did you git am --continue?"
-      echo
-      openim::log::status "Please resolve the conflicts in another window (and remember to 'git add / git am --continue')"
-      read -p "+++ Proceed (anything other than 'y' aborts the cherry-pick)? [y/n] " -r
-      echo
-      if ! [[ "${REPLY}" =~ ^[yY]$ ]]; then
-        echo "Aborting." >&2
-        exit 1
-      fi
-    done
-
-    if [[ "${conflicts}" != "true" ]]; then
-      echo "!!! git am failed, likely because of an in-progress 'git am' or 'git rebase'"
+curl -o "/tmp/${pull}.patch" -sSL "https://github.com/${MAIN_REPO_ORG}/${MAIN_REPO_NAME}/pull/${pull}.patch"
+echo
+openim::log::status "About to attempt cherry pick of PR. To reattempt:"
+echo "  $ git am -3 /tmp/${pull}.patch"
+echo
+git am -3 "/tmp/${pull}.patch" || {
+  conflicts=false
+  while unmerged=$(git status --porcelain | grep ^U) && [[ -n ${unmerged} ]] \
+  || [[ -e "${REBASEMAGIC}" ]]; do
+    conflicts=true # <-- We should have detected conflicts once
+    echo
+    openim::log::status "Conflicts detected:"
+    echo
+    (git status --porcelain | grep ^U) || echo "!!! None. Did you git am --continue?"
+    echo
+    openim::log::status "Please resolve the conflicts in another window (and remember to 'git add / git am --continue')"
+    read -p "+++ Proceed (anything other than 'y' aborts the cherry-pick)? [y/n] " -r
+    echo
+    if ! [[ "${REPLY}" =~ ^[yY]$ ]]; then
+      echo "Aborting." >&2
       exit 1
     fi
-  }
+  done
+  
+  if [[ "${conflicts}" != "true" ]]; then
+    echo "!!! git am failed, likely because of an in-progress 'git am' or 'git rebase'"
+    exit 1
+  fi
+}
 
-  # set the subject
-  subject=$(grep -m 1 "^Subject" "/tmp/${pull}.patch" | sed -e 's/Subject: \[PATCH//g' | sed 's/.*] //')
-  SUBJECTS+=("#${pull}: ${subject}")
+# set the subject
+subject=$(grep -m 1 "^Subject" "/tmp/${pull}.patch" | sed -e 's/Subject: \[PATCH//g' | sed 's/.*] //')
+SUBJECTS+=("#${pull}: ${subject}")
 
-  # remove the patch file from /tmp
-  rm -f "/tmp/${pull}.patch"
+# remove the patch file from /tmp
+rm -f "/tmp/${pull}.patch"
 done
 gitamcleanup=false
 
 # Re-generate docs (if needed)
 if [[ -n "${REGENERATE_DOCS}" ]]; then
+echo
+echo "Regenerating docs..."
+if ! scripts/generate-docs.sh; then
   echo
-  echo "Regenerating docs..."
-  if ! scripts/generate-docs.sh; then
-    echo
-    echo "scripts/gendoc.sh FAILED to complete."
-    exit 1
-  fi
+  echo "scripts/gendoc.sh FAILED to complete."
+  exit 1
+fi
 fi
 
 if [[ -n "${DRY_RUN}" ]]; then
-  openim::log::error "!!! Skipping git push and PR creation because you set DRY_RUN."
-  echo "To return to the branch you were in when you invoked this script:"
-  echo
-  echo "  git checkout ${STARTINGBRANCH}"
-  echo
-  echo "To delete this branch:"
-  echo
-  echo "  git branch -D ${NEWBRANCHUNIQ}"
-  exit 0
+openim::log::error "!!! Skipping git push and PR creation because you set DRY_RUN."
+echo "To return to the branch you were in when you invoked this script:"
+echo
+echo "  git checkout ${STARTINGBRANCH}"
+echo
+echo "To delete this branch:"
+echo
+echo "  git branch -D ${NEWBRANCHUNIQ}"
+exit 0
 fi
 
 if git remote -v | grep ^"${FORK_REMOTE}" | grep "${MAIN_REPO_ORG}/${MAIN_REPO_NAME}.git"; then
-  echo "!!! You have ${FORK_REMOTE} configured as your ${MAIN_REPO_ORG}/${MAIN_REPO_NAME}.git"
-  echo "This isn't normal. Leaving you with push instructions:"
-  echo
-  openim::log::status "First manually push the branch this script created:"
-  echo
-  echo "  git push REMOTE ${NEWBRANCHUNIQ}:${NEWBRANCH}"
-  echo
-  echo "where REMOTE is your personal fork (maybe ${UPSTREAM_REMOTE}? Consider swapping those.)."
-  echo "OR consider setting UPSTREAM_REMOTE and FORK_REMOTE to different values."
-  echo
-  make-a-pr
-  cleanbranch=""
-  exit 0
+echo "!!! You have ${FORK_REMOTE} configured as your ${MAIN_REPO_ORG}/${MAIN_REPO_NAME}.git"
+echo "This isn't normal. Leaving you with push instructions:"
+echo
+openim::log::status "First manually push the branch this script created:"
+echo
+echo "  git push REMOTE ${NEWBRANCHUNIQ}:${NEWBRANCH}"
+echo
+echo "where REMOTE is your personal fork (maybe ${UPSTREAM_REMOTE}? Consider swapping those.)."
+echo "OR consider setting UPSTREAM_REMOTE and FORK_REMOTE to different values."
+echo
+make-a-pr
+cleanbranch=""
+exit 0
 fi
 
 echo
@@ -248,8 +248,8 @@ echo "  git push ${FORK_REMOTE} ${NEWBRANCHUNIQ}:${NEWBRANCH}"
 echo
 read -p "+++ Proceed (anything other than 'y' aborts the cherry-pick)? [y/n] " -r
 if ! [[ "${REPLY}" =~ ^[yY]$ ]]; then
-  echo "Aborting." >&2
-  exit 1
+echo "Aborting." >&2
+exit 1
 fi
 
 git push "${FORK_REMOTE}" -f "${NEWBRANCHUNIQ}:${NEWBRANCH}"
