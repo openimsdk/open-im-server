@@ -45,7 +45,8 @@ endif
 IMAGES_DIR ?= $(wildcard ${ROOT_DIR}/build/images/*)
 # Determine images names by stripping out the dir names, and filter out the undesired directories
 # IMAGES ?= $(filter-out Dockerfile,$(foreach image,${IMAGES_DIR},$(notdir ${image})))
-IMAGES ?= $(filter-out Dockerfile openim-tools openim-cmdutils,$(foreach image,${IMAGES_DIR},$(notdir ${image})))
+IMAGES ?= $(filter-out Dockerfile openim-tools openim-rpc-extend-msg openim-rpc-encryption openim-cmdutils,$(foreach image,${IMAGES_DIR},$(notdir ${image})))
+# IMAGES ?= $(filter-out Dockerfile openim-tools openim-cmdutils,$(foreach image,${IMAGES_DIR},$(notdir ${image}))) # !pro
 
 ifeq (${IMAGES},)
   $(error Could not determine IMAGES, set ROOT_DIR or run in source dir)

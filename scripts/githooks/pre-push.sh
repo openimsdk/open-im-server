@@ -25,20 +25,20 @@ local_branch="$(git rev-parse --abbrev-ref HEAD)"
 valid_branch_regex="^(main|master|develop|release(-[a-zA-Z0-9._-]+)?)$|(feature|feat|openim|hotfix|test|bug|ci|cicd|style|)\/[a-z0-9._-]+$|^HEAD$"
 
 printMessage() {
-   printf "${YELLOW}OpenIM : $1${ENDCOLOR}\n"
+  printf "${YELLOW}OpenIM : $1${ENDCOLOR}\n"
 }
 
 printSuccess() {
-   printf "${GREEN}OpenIM : $1${ENDCOLOR}\n"
+  printf "${GREEN}OpenIM : $1${ENDCOLOR}\n"
 }
 
 printError() {
-   printf "${RED}OpenIM : $1${ENDCOLOR}\n"
+  printf "${RED}OpenIM : $1${ENDCOLOR}\n"
 }
 
 printMessage "Running local OpenIM pre-push hook."
 
-if [[ `git status --porcelain` ]]; then
+if [[ $(git status --porcelain) ]]; then
   printError "This scripts needs to run against committed code only. Please commit or stash you changes."
   exit 1
 fi
@@ -101,7 +101,7 @@ print_color "Deleted Files: ${deleted_files}" "${BACKGROUND_GREEN}"
 
 if [[ ! $local_branch =~ $valid_branch_regex ]]
 then
-    printError "There is something wrong with your branch name. Branch names in this project must adhere to this contract: $valid_branch_regex. 
+    printError "There is something wrong with your branch name. Branch names in this project must adhere to this contract: $valid_branch_regex.
 Your commit will be rejected. You should rename your branch to a valid name(feat/name OR fix/name) and try again."
     printError "For more on this, read on: https://gist.github.com/cubxxw/126b72104ac0b0ca484c9db09c3e5694"
     exit 1

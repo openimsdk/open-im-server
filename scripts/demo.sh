@@ -15,16 +15,16 @@
 
 if ! command -v pv &> /dev/null
 then
-    echo "pv not found, installing..."
-    if [ -e /etc/debian_version ]; then
-        sudo apt-get update
-        sudo apt-get install -y pv
+  echo "pv not found, installing..."
+  if [ -e /etc/debian_version ]; then
+    sudo apt-get update
+    sudo apt-get install -y pv
     elif [ -e /etc/redhat-release ]; then
-        sudo yum install -y pv
-    else
-        echo "Unsupported OS, please install pv manually."
-        exit 1
-    fi
+    sudo yum install -y pv
+  else
+    echo "Unsupported OS, please install pv manually."
+    exit 1
+  fi
 fi
 
 readonly t_reset=$(tput sgr0)
@@ -42,8 +42,8 @@ openim::util::ensure-bash-version
 trap 'openim::util::onCtrlC' INT
 
 function openim::util::onCtrlC() {
-    echo -e "\n${t_reset}Ctrl+C Press it. It's exiting openim make init..."
-    exit 0
+  echo -e "\n${t_reset}Ctrl+C Press it. It's exiting openim make init..."
+  exit 0
 }
 
 openim::util::desc "========> Welcome to the OpenIM Demo"

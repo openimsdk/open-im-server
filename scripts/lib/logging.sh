@@ -21,24 +21,24 @@ ENABLE_LOGGING="${ENABLE_LOGGING:-true}"
 
 # If OPENIM_OUTPUT is not set, set it to the default value
 if [ -z "${OPENIM_OUTPUT+x}" ]; then
-    OPENIM_OUTPUT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../_output" && pwd -P)"
+  OPENIM_OUTPUT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../_output" && pwd -P)"
 fi
 
 # Set the log file path
 LOG_FILE="${OPENIM_OUTPUT}/logs/openim_$(date '+%Y%m%d').log"
 
 if [[ ! -d "${OPENIM_OUTPUT}/logs" ]]; then
-    mkdir -p "${OPENIM_OUTPUT}/logs"
-    touch "$LOG_FILE"
+  mkdir -p "${OPENIM_OUTPUT}/logs"
+  touch "$LOG_FILE"
 fi
 
 # Define the logging function
 function echo_log() {
-    if $ENABLE_LOGGING; then
-        echo -e "$@" | tee -a "${LOG_FILE}"
-    else
-        echo -e "$@"
-    fi
+  if $ENABLE_LOGGING; then
+    echo -e "$@" | tee -a "${LOG_FILE}"
+  else
+    echo -e "$@"
+  fi
 }
 
 # MAX_LOG_SIZE=10485760 # 10MB
@@ -50,11 +50,11 @@ function echo_log() {
 # Borrowed from https://gist.github.com/ahendrix/7030300
 openim::log::errexit() {
   local err="${PIPESTATUS[*]}"
-
+  
   # If the shell we are in doesn't have errexit set (common in subshells) then
   # don't dump stacks.
   set +o | grep -qe "-o errexit" || return
-
+  
   set +o xtrace
   local code="${1:-1}"
   # Print out the stack trace described by $function_stack
@@ -73,7 +73,7 @@ openim::log::install_errexit() {
   # trap ERR to provide an error handler whenever a command exits nonzero  this
   # is a more verbose version of set -o errexit
   trap 'openim::log::errexit' ERR
-
+  
   # setting errtrace allows our ERR trap handler to be propagated to functions,
   # expansions and subshells
   set -o errtrace
@@ -110,7 +110,7 @@ openim::log::error_exit() {
   local code="${2:-1}"
   local stack_skip="${3:-0}"
   stack_skip=$((stack_skip + 1))
-
+  
   if [[ ${OPENIM_VERBOSE} -ge 4 ]]; then
     local source_file=${BASH_SOURCE[${stack_skip}]}
     local source_line=${BASH_LINENO[$((stack_skip - 1))]}
@@ -118,12 +118,12 @@ openim::log::error_exit() {
     [[ -z ${1-} ]] || {
       echo_log "  ${1}" >&2
     }
-
+    
     openim::log::stack ${stack_skip}
-
+    
     echo_log "Exiting with status ${code}" >&2
   fi
-
+  
   exit "${code}"
 }
 
@@ -152,7 +152,7 @@ openim::log::usage_from_stdin() {
   while read -r line; do
     messages+=("${line}")
   done
-
+  
   openim::log::usage "${messages[@]}"
 }
 
@@ -162,7 +162,7 @@ openim::log::info() {
   if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
     return
   fi
-
+  
   for message; do
     echo_log "${message}"
   done
@@ -181,7 +181,7 @@ openim::log::info_from_stdin() {
   while read -r line; do
     messages+=("${line}")
   done
-
+  
   openim::log::info "${messages[@]}"
 }
 
@@ -191,7 +191,7 @@ openim::log::status() {
   if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
     return
   fi
-
+  
   timestamp=$(date +"[%m%d %H:%M:%S]")
   echo_log "+++ ${timestamp} ${1}"
   shift
@@ -203,20 +203,20 @@ openim::log::status() {
 openim::log::success() {
   local V="${V:-0}"
   if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
-      return
+    return
   fi
   timestamp=$(date +"%m%d %H:%M:%S")
   echo_log -e "${COLOR_GREEN}[success ${timestamp}] ${COLOR_SUFFIX}==> " "$@"
 }
 
 function openim::log::test_log() {
-    echo_log "test log"
-    openim::log::info "openim::log::info"
-    openim::log::progress "openim::log::progress"
-    openim::log::status "openim::log::status"
-    openim::log::success "openim::log::success"
-    openim::log::error "openim::log::error"
-    openim::log::error_exit "openim::log::error_exit"
+  echo_log "test log"
+  openim::log::info "openim::log::info"
+  openim::log::progress "openim::log::progress"
+  openim::log::status "openim::log::status"
+  openim::log::success "openim::log::success"
+  openim::log::error "openim::log::error"
+  openim::log::error_exit "openim::log::error_exit"
 }
 
 # openim::log::test_log

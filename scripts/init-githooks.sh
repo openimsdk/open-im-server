@@ -39,62 +39,62 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 HOOKS_DIR="${OPENIM_ROOT}/.git/hooks"
 
 help_info() {
-    echo "Usage: $0 [options]"
-    echo
-    echo "This script helps to manage git hooks."
-    echo
-    echo "Options:"
-    echo "  -h, --help       Show this help message and exit."
-    echo "  -d, --delete     Delete the hooks that have been added."
-    echo "  By default, it will prompt to enable git hooks."
+  echo "Usage: $0 [options]"
+  echo
+  echo "This script helps to manage git hooks."
+  echo
+  echo "Options:"
+  echo "  -h, --help       Show this help message and exit."
+  echo "  -d, --delete     Delete the hooks that have been added."
+  echo "  By default, it will prompt to enable git hooks."
 }
 
 delete_hooks() {
-    for file in ${OPENIM_ROOT}/scripts/githooks/*.sh; do
-        hook_name=$(basename "$file" .sh)  # This removes the .sh extension
-        rm -f "$HOOKS_DIR/$hook_name"
-    done
-    echo "Git hooks have been deleted."
+  for file in "${OPENIM_ROOT}"/scripts/githooks/*.sh; do
+    hook_name=$(basename "$file" .sh)  # This removes the .sh extension
+    rm -f "$HOOKS_DIR/$hook_name"
+  done
+  echo "Git hooks have been deleted."
 }
 
 enable_hooks() {
-    echo "Would you like to:"
-    echo "1) Enable git hooks mode"
-    echo "2) Delete existing git hooks"
-    echo "Please select a number (or any other key to exit):"
-    read -r choice
-
-    case "$choice" in
-        1)
-            for file in ${OPENIM_ROOT}/scripts/githooks/*.sh; do
-                hook_name=$(basename "$file" .sh)  # This removes the .sh extension
-                cp -f "$file" "$HOOKS_DIR/$hook_name"
-            done
-
-            chmod +x $HOOKS_DIR/*
-            
-            echo "Git hooks mode has been enabled."
-            echo "With git hooks enabled, every time you perform a git action (e.g. git commit), the corresponding hooks script will be triggered automatically."
-            echo "This means that if the size of the file you're committing exceeds the set limit (e.g. 42MB), the commit will be rejected."
-            ;;
-        2)
-            delete_hooks
-            ;;
-        *)
-            echo "Exiting without making changes."
-            ;;
-    esac
+  echo "Would you like to:"
+  echo "1) Enable git hooks mode"
+  echo "2) Delete existing git hooks"
+  echo "Please select a number (or any other key to exit):"
+  read -r choice
+  
+  case "$choice" in
+    1)
+      for file in ${OPENIM_ROOT}/scripts/githooks/*.sh; do
+        hook_name=$(basename "$file" .sh)  # This removes the .sh extension
+        cp -f "$file" "$HOOKS_DIR/$hook_name"
+      done
+      
+      chmod +x $HOOKS_DIR/*
+      
+      echo "Git hooks mode has been enabled."
+      echo "With git hooks enabled, every time you perform a git action (e.g. git commit), the corresponding hooks script will be triggered automatically."
+      echo "This means that if the size of the file you're committing exceeds the set limit (e.g. 42MB), the commit will be rejected."
+    ;;
+    2)
+      delete_hooks
+    ;;
+    *)
+      echo "Exiting without making changes."
+    ;;
+  esac
 }
 
 
 case "$1" in
-    -h|--help)
-        help_info
-        ;;
-    -d|--delete)
-        delete_hooks
-        ;;
-    *)
-        enable_hooks
-        ;;
+  -h|--help)
+    help_info
+  ;;
+  -d|--delete)
+    delete_hooks
+  ;;
+  *)
+    enable_hooks
+  ;;
 esac

@@ -31,7 +31,7 @@ var (
     usernameV3 = "root"
     passwordV3 = "openIM123"
     addrV3     = "127.0.0.1:13306"
-    databaseV3 = "openIM_v3"
+    databaseV3 = "openim_v3"
 )
 ```
 
