@@ -2,10 +2,11 @@ package direct
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/log"
-	"google.golang.org/grpc/resolver"
 	"math/rand"
 	"strings"
+
+	"github.com/OpenIMSDK/tools/log"
+	"google.golang.org/grpc/resolver"
 )
 
 const (
