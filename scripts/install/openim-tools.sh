@@ -103,8 +103,9 @@ function openim::tools::start_service() {
     printf "Specifying prometheus port: %s\n" "${prometheus_port}"
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
-  openim::log::info "Starting ${binary_name}..."
-  ${cmd}
+  openim::log::status "Starting ${binary_name}..."
+  # Later, after discarding Docker, the Docker keyword is unreliable, and Kubepods is used
+  ${cmd} | tee -a "${LOG_FILE}"
 }
 
 function openim::tools::start() {

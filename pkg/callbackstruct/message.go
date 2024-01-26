@@ -94,9 +94,10 @@ type CallbackGroupMsgReadResp struct {
 
 type CallbackSingleMsgReadReq struct {
 	CallbackCommand `json:"callbackCommand"`
-	SendID          string `json:"sendID"`
-	ReceiveID       string `json:"receiveID"`
-	ContentType     int64  `json:"contentType"`
+	UserID          string  `json:"userID"`
+	ConversationID  string  `json:"conversationID"`
+	ContentType     int32   `json:"contentType"`
+	Seqs            []int64 `json:"seqs"`
 }
 
 type CallbackSingleMsgReadResp struct {
