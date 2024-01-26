@@ -27,7 +27,7 @@ jobs:
     steps:
 
       - name: Invite user to join our group
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@v4
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
