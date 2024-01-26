@@ -129,7 +129,7 @@ openim::log::error_exit() {
 
 # Log an error but keep going.  Don't dump the stack or exit.
 openim::log::error() {
-  timestamp=$(date +"[%m%d %H:%M:%S]")
+  timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
   echo_log "!!! ${timestamp} ${1-}" >&2
   shift
   for message; do
@@ -192,7 +192,7 @@ openim::log::status() {
     return
   fi
   
-  timestamp=$(date +"[%m%d %H:%M:%S]")
+  timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
   echo_log "+++ ${timestamp} ${1}"
   shift
   for message; do
