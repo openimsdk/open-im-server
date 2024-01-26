@@ -16,6 +16,7 @@ package discoveryregister
 
 import (
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/direct"
 	"os"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
@@ -36,6 +37,8 @@ func NewDiscoveryRegister(envType string) (discoveryregistry.SvcDiscoveryRegistr
 		return zookeeper.NewZookeeperDiscoveryRegister()
 	case "k8s":
 		return kubernetes.NewK8sDiscoveryRegister()
+	case "direct":
+		return direct.NewConnDirect()
 	default:
 		return nil, errors.New("envType not correct")
 	}

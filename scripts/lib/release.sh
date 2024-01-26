@@ -46,11 +46,11 @@ OPENIM_BUILD_CONFORMANCE=${OPENIM_BUILD_CONFORMANCE:-y}
 OPENIM_BUILD_PULL_LATEST_IMAGES=${OPENIM_BUILD_PULL_LATEST_IMAGES:-y}
 
 if [ -z "${OPENIM_ROOT}" ]; then
-    OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+  OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 fi
 
 if [ -z "${TOOLS_DIR}" ]; then
-    TOOLS_DIR="${OPENIM_ROOT}/_output/tools"
+  TOOLS_DIR="${OPENIM_ROOT}/_output/tools"
 fi
 
 # Validate a ci version
@@ -77,10 +77,10 @@ function openim::release::parse_and_validate_ci_version() {
     openim::log::error "Invalid ci version: '${version}', must match regex ${version_regex}"
     return 1
   }
-
+  
   # The VERSION variables are used when this file is sourced, hence
   # the shellcheck SC2034 'appears unused' warning is to be ignored.
-
+  
   # shellcheck disable=SC2034
   VERSION_MAJOR="${BASH_REMATCH[1]}"
   # shellcheck disable=SC2034
@@ -115,7 +115,7 @@ function openim::release::package_tarballs() {
   openim::release::package_openim_manifests_tarball &
   openim::release::package_server_tarballs &
   openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
-
+  
   openim::release::package_final_tarball & # _final depends on some of the previous phases
   openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
 }
@@ -143,24 +143,24 @@ function openim::release::package_src_tarball() {
     git archive -o "${src_tarball}" HEAD
   else
     find "${OPENIM_ROOT}" -mindepth 1 -maxdepth 1 \
-      ! \( \
-      \( -path "${OPENIM_ROOT}"/_\* -o \
-      -path "${OPENIM_ROOT}"/.git\* -o \
-      -path "${OPENIM_ROOT}"/.github\* -o \
-      -path "${OPENIM_ROOT}"/components\* -o \
-      -path "${OPENIM_ROOT}"/logs\* -o \
-      -path "${OPENIM_ROOT}"/.gitignore\* -o \
-      -path "${OPENIM_ROOT}"/.gsemver.yml\* -o \
-      -path "${OPENIM_ROOT}"/.config\* -o \
-      -path "${OPENIM_ROOT}"/.chglog\* -o \
-      -path "${OPENIM_ROOT}"/.gitlint -o \
-      -path "${OPENIM_ROOT}"/.golangci.yml -o \
-      -path "${OPENIM_ROOT}"/build/goreleaser.yaml -o \
-      -path "${OPENIM_ROOT}"/.note.md -o \
-      -path "${OPENIM_ROOT}"/.todo.md \
-      \) -prune \
-      \) -print0 \
-      | "${TAR}" czf "${src_tarball}" --transform "s|${OPENIM_ROOT#/*}|openim|" --null -T -
+    ! \( \
+    \( -path "${OPENIM_ROOT}"/_\* -o \
+    -path "${OPENIM_ROOT}"/.git\* -o \
+    -path "${OPENIM_ROOT}"/.github\* -o \
+    -path "${OPENIM_ROOT}"/components\* -o \
+    -path "${OPENIM_ROOT}"/logs\* -o \
+    -path "${OPENIM_ROOT}"/.gitignore\* -o \
+    -path "${OPENIM_ROOT}"/.gsemver.yml\* -o \
+    -path "${OPENIM_ROOT}"/.config\* -o \
+    -path "${OPENIM_ROOT}"/.chglog\* -o \
+    -path "${OPENIM_ROOT}"/.gitlint -o \
+    -path "${OPENIM_ROOT}"/.golangci.yml -o \
+    -path "${OPENIM_ROOT}"/build/goreleaser.yaml -o \
+    -path "${OPENIM_ROOT}"/.note.md -o \
+    -path "${OPENIM_ROOT}"/.todo.md \
+    \) -prune \
+    \) -print0 \
+    | "${TAR}" czf "${src_tarball}" --transform "s|${OPENIM_ROOT#/*}|openim|" --null -T -
   fi
 }
 
@@ -168,7 +168,7 @@ function openim::release::package_src_tarball() {
 function openim::release::package_server_tarballs() {
   # Find all of the built client binaries
   local long_platforms=("${LOCAL_OUTPUT_BINPATH}"/*/*)
-
+  
   if [[ -n ${OPENIM_BUILD_PLATFORMS-} ]]; then
     read -ra long_platforms <<< "${OPENIM_BUILD_PLATFORMS}"
   fi
@@ -636,7 +636,7 @@ function openim::release::github_release() {
   for file in ${RELEASE_TARS}/*.tar.gz; do
       if [[ -f "$file" ]]; then
           filename=$(basename "$file")
-          openim::log::info "Update file ${filename} to release vertion ${OPENIM_GIT_VERSION}"  
+          openim::log::info "Update file ${filename} to release vertion ${OPENIM_GIT_VERSION}"
           ${TOOLS_DIR}/github-release upload \
               --user ${OPENIM_GITHUB_ORG} \
               --repo ${OPENIM_GITHUB_REPO} \

@@ -34,6 +34,7 @@ deployments/charts/generated-configs/
 ### OpenIM Config ###
 .env
 config/config.yaml
+config/openim.yaml
 config/alertmanager.yml
 config/prometheus.yml
 config/email.tmpl

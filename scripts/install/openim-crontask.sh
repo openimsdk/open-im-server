@@ -13,12 +13,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# 
+#
 # OpenIM CronTask Control Script
-# 
+#
 # Description:
 # This script provides a control interface for the OpenIM CronTask service within a Linux environment. It supports two installation methods: installation via function calls to systemctl, and direct installation through background processes.
-# 
+#
 # Features:
 # 1. Robust error handling leveraging Bash built-ins such as 'errexit', 'nounset', and 'pipefail'.
 # 2. Capability to source common utility functions and configurations, ensuring environmental consistency.
@@ -30,13 +30,13 @@
 # 1. Direct Script Execution:
 #    This will start the OpenIM CronTask directly through a background process.
 #    Example: ./openim-crontask.sh openim::crontask::start
-# 
+#
 # 2. Controlling through Functions for systemctl operations:
 #    Specific operations like installation, uninstallation, and status check can be executed by passing the respective function name as an argument to the script.
 #    Example: ./openim-crontask.sh openim::crontask::install
-# 
+#
 # Note: Ensure that the appropriate permissions and environmental variables are set prior to script execution.
-# 
+#
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
@@ -44,14 +44,14 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 SERVER_NAME="openim-crontask"
 
 function openim::crontask::start() {
-    openim::log::info "Start OpenIM Cron, binary root: ${SERVER_NAME}"
-    openim::log::status "Start OpenIM Cron, path: ${OPENIM_CRONTASK_BINARY}"
-
-    openim::util::stop_services_with_name ${OPENIM_CRONTASK_BINARY}
-
-    openim::log::status "start cron_task process, path: ${OPENIM_CRONTASK_BINARY}"
-    nohup ${OPENIM_CRONTASK_BINARY} -c ${OPENIM_PUSH_CONFIG} >> ${LOG_FILE} 2>&1 &
-    openim::util::check_process_names ${SERVER_NAME}
+  openim::log::info "Start OpenIM Cron, binary root: ${SERVER_NAME}"
+  openim::log::status "Start OpenIM Cron, path: ${OPENIM_CRONTASK_BINARY}"
+  
+  openim::util::stop_services_with_name ${OPENIM_CRONTASK_BINARY}
+  
+  openim::log::status "start cron_task process, path: ${OPENIM_CRONTASK_BINARY}"
+  nohup ${OPENIM_CRONTASK_BINARY} -c ${OPENIM_PUSH_CONFIG} >> ${LOG_FILE} 2>&1 &
+  openim::util::check_process_names ${SERVER_NAME}
 }
 
 ###################################### Linux Systemd ######################################
@@ -67,28 +67,28 @@ EOF
 # install openim-crontask
 function openim::crontask::install() {
   pushd "${OPENIM_ROOT}"
-
+  
   # 1. Build openim-crontask
   make build BINS=${SERVER_NAME}
-
+  
   openim::common::sudo "cp -r ${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME} ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
   openim::log::status "${SERVER_NAME} binary: ${OPENIM_INSTALL_DIR}/${SERVER_NAME}/${SERVER_NAME}"
-
+  
   # 2. Generate and install the openim-crontask configuration file (openim-crontask.yaml)
   openim::log::status "${SERVER_NAME} config file: ${OPENIM_CONFIG_DIR}/config.yaml"
-
+  
   # 3. Create and install the ${SERVER_NAME} systemd unit file
   echo ${LINUX_PASSWORD} | sudo -S bash -c \
-    "SERVER_NAME=${SERVER_NAME} ./scripts/genconfig.sh ${ENV_FILE} deployments/templates/openim.service > ${SYSTEM_FILE_PATH}"
+  "SERVER_NAME=${SERVER_NAME} ./scripts/genconfig.sh ${ENV_FILE} deployments/templates/openim.service > ${SYSTEM_FILE_PATH}"
   openim::log::status "${SERVER_NAME} systemd file: ${SYSTEM_FILE_PATH}"
-
+  
   # 4. Start the openim-crontask service
   openim::common::sudo "systemctl daemon-reload"
   openim::common::sudo "systemctl restart ${SERVER_NAME}"
   openim::common::sudo "systemctl enable ${SERVER_NAME}"
   openim::crontask::status || return 1
   openim::crontask::info
-
+  
   openim::log::info "install ${SERVER_NAME} successfully"
   popd
 }

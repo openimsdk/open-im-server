@@ -27,7 +27,7 @@ services:
       - wiredTigerCacheSizeGB=1
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME:-root}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-openIM123}
-      - MONGO_INITDB_DATABASE=${MONGO_DATABASE:-openIM_v3}
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE:-openim_v3}
       - MONGO_OPENIM_USERNAME=${MONGO_OPENIM_USERNAME:-openIM} # Non-root username
       - MONGO_OPENIM_PASSWORD=${MONGO_OPENIM_PASSWORD:-openIM123456} # Non-root password
     restart: always
@@ -87,6 +87,7 @@ services:
        - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@<your_host>:9093
        - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
        - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}:${KAFKA_PORT:-19094}
+      #  - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://127.0.0.1:${KAFKA_PORT:-19094} # Mac Deployment
        - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
        - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     networks:
@@ -213,6 +214,7 @@ services:
   #     - "${OPENIM_ADMIN_API_PORT:-10009}:10009"
   #   volumes:
   #     - "${DATA_DIR:-./}/components/openim-chat/logs:/openim/openim-chat/logs"
+  #     - "${DATA_DIR:-./}/components/openim-chat/_output/logs:/openim/openim-chat/_output/logs"
   #     - "${DATA_DIR:-./}/components/openim-chat/config:/openim/openim-chat/config"
   #   restart: always
   #   # user: root:root

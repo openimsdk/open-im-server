@@ -31,7 +31,7 @@ docs/guide/en-US/cmd/openim/openim-rpc-user_list.md
 docs/guide/en-US/cmd/openim/openim-rpc-user_update.md
 docs/guide/en-US/cmd/openim/openim_validate.md
 docs/guide/en-US/cmd/openim/openim_version.md
-docs/guide/en-US/yaml/openim/openim.yaml
+docs/guide/en-US/yaml/openim/config.yaml
 docs/guide/en-US/yaml/openim/openim_color.yaml
 docs/guide/en-US/yaml/openim/openim_completion.yaml
 docs/guide/en-US/yaml/openim/openim_info.yaml

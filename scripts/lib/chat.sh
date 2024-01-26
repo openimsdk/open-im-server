@@ -30,12 +30,12 @@ openim::chat::validate() {
     openim::log::info "You can use 'scripts/install-chat.sh' to install a copy in third_party/."
     exit 1
   }
-
+  
   # validate chat port is free
   local port_check_command
   if command -v ss &> /dev/null && ss -Version | grep 'iproute2' &> /dev/null; then
     port_check_command="ss"
-  elif command -v netstat &>/dev/null; then
+    elif command -v netstat &>/dev/null; then
     port_check_command="netstat"
   else
     openim::log::usage "unable to identify if chat is bound to port ${CHAT_PORT}. unable to find ss or netstat utilities."
@@ -46,24 +46,24 @@ openim::chat::validate() {
     openim::log::usage "$(${port_check_command} -nat | grep "LISTEN" | grep "[\.:]${CHAT_PORT:?}")"
     exit 1
   fi
-
+  
   # need set the env of "CHAT_UNSUPPORTED_ARCH" on unstable arch.
   arch=$(uname -m)
   if [[ $arch =~ arm* ]]; then
-	  export CHAT_UNSUPPORTED_ARCH=arm
+    export CHAT_UNSUPPORTED_ARCH=arm
   fi
   # validate installed version is at least equal to minimum
   version=$(chat --version | grep Version | head -n 1 | cut -d " " -f 3)
   if [[ $(openim::chat::version "${CHAT_VERSION}") -gt $(openim::chat::version "${version}") ]]; then
-   export PATH="${OPENIM_ROOT}"/third_party/chat:${PATH}
-   hash chat
-   echo "${PATH}"
-   version=$(chat --version | grep Version | head -n 1 | cut -d " " -f 3)
-   if [[ $(openim::chat::version "${CHAT_VERSION}") -gt $(openim::chat::version "${version}") ]]; then
-    openim::log::usage "chat version ${CHAT_VERSION} or greater required."
-    openim::log::info "You can use 'scripts/install-chat.sh' to install a copy in third_party/."
-    exit 1
-   fi
+    export PATH="${OPENIM_ROOT}"/third_party/chat:${PATH}
+    hash chat
+    echo "${PATH}"
+    version=$(chat --version | grep Version | head -n 1 | cut -d " " -f 3)
+    if [[ $(openim::chat::version "${CHAT_VERSION}") -gt $(openim::chat::version "${version}") ]]; then
+      openim::log::usage "chat version ${CHAT_VERSION} or greater required."
+      openim::log::info "You can use 'scripts/install-chat.sh' to install a copy in third_party/."
+      exit 1
+    fi
   fi
 }
 
@@ -74,7 +74,7 @@ openim::chat::version() {
 openim::chat::start() {
   # validate before running
   openim::chat::validate
-
+  
   # Start chat
   CHAT_DIR=${CHAT_DIR:-$(mktemp -d 2>/dev/null || mktemp -d -t test-chat.XXXXXX)}
   if [[ -d "${ARTIFACTS:-}" ]]; then
@@ -85,7 +85,7 @@ openim::chat::start() {
   openim::log::info "chat --advertise-client-urls ${OPENIM_INTEGRATION_CHAT_URL} --data-dir ${CHAT_DIR} --listen-client-urls http://${CHAT_HOST}:${CHAT_PORT} --log-level=${CHAT_LOGLEVEL} 2> \"${CHAT_LOGFILE}\" >/dev/null"
   chat --advertise-client-urls "${OPENIM_INTEGRATION_CHAT_URL}" --data-dir "${CHAT_DIR}" --listen-client-urls "${OPENIM_INTEGRATION_CHAT_URL}" --log-level="${CHAT_LOGLEVEL}" 2> "${CHAT_LOGFILE}" >/dev/null &
   CHAT_PID=$!
-
+  
   echo "Waiting for chat to come up."
   openim::util::wait_for_url "${OPENIM_INTEGRATION_CHAT_URL}/health" "chat: " 0.25 80
   curl -fs -X POST "${OPENIM_INTEGRATION_CHAT_URL}/v3/kv/put" -d '{"key": "X3Rlc3Q=", "value": ""}'
@@ -108,7 +108,7 @@ openim::chat::start_scraping() {
 }
 
 openim::chat::scrape() {
-    curl -s -S "${OPENIM_INTEGRATION_CHAT_URL}/metrics" > "${CHAT_SCRAPE_DIR}/next" && mv "${CHAT_SCRAPE_DIR}/next" "${CHAT_SCRAPE_DIR}/$(date +%s).scrape"
+  curl -s -S "${OPENIM_INTEGRATION_CHAT_URL}/metrics" > "${CHAT_SCRAPE_DIR}/next" && mv "${CHAT_SCRAPE_DIR}/next" "${CHAT_SCRAPE_DIR}/$(date +%s).scrape"
 }
 
 openim::chat::stop() {
@@ -144,17 +144,17 @@ openim::chat::install() {
   (
     local os
     local arch
-
+    
     os=$(openim::util::host_os)
     arch=$(openim::util::host_arch)
-
+    
     cd "${OPENIM_ROOT}/third_party" || return 1
     if [[ $(readlink chat) == chat-v${CHAT_VERSION}-${os}-* ]]; then
       openim::log::info "chat v${CHAT_VERSION} already installed. To use:"
       openim::log::info "export PATH=\"$(pwd)/chat:\${PATH}\""
       return  #already installed
     fi
-
+    
     if [[ ${os} == "darwin" ]]; then
       download_file="chat-v${CHAT_VERSION}-${os}-${arch}.zip"
       url="https://github.com/chat-io/chat/releases/download/v${CHAT_VERSION}/${download_file}"
@@ -162,7 +162,7 @@ openim::chat::install() {
       unzip -o "${download_file}"
       ln -fns "chat-v${CHAT_VERSION}-${os}-${arch}" chat
       rm "${download_file}"
-    elif [[ ${os} == "linux" ]]; then
+      elif [[ ${os} == "linux" ]]; then
       url="https://github.com/coreos/chat/releases/download/v${CHAT_VERSION}/chat-v${CHAT_VERSION}-${os}-${arch}.tar.gz"
       download_file="chat-v${CHAT_VERSION}-${os}-${arch}.tar.gz"
       openim::util::download_file "${url}" "${download_file}"

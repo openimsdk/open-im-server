@@ -38,7 +38,7 @@ func Cmd() {
 		usernameV3 = "root"
 		passwordV3 = "openIM123"
 		addrV3     = "203.56.175.233:13306"
-		databaseV3 = "openIM_v3"
+		databaseV3 = "openim_v3"
 	)
 	log.SetFlags(log.LstdFlags | log.Llongfile)
 	dsnV2 := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", usernameV2, passwordV2, addrV2, databaseV2)

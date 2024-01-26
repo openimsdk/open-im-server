@@ -61,6 +61,7 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
+
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
@@ -243,6 +244,7 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPagi
 			return nil, err
 		}
 		return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
+
 	}
 
 }
@@ -389,7 +391,7 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 	return &pbuser.GetSubscribeUsersStatusResp{StatusList: onlineStatusList}, nil
 }
 
-// ProcessUserCommandAdd user general function add
+// ProcessUserCommandAdd user general function add.
 func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
 	err := authverify.CheckAccessV3(ctx, req.UserID)
 	if err != nil {
@@ -420,7 +422,7 @@ func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.Proc
 	return &pbuser.ProcessUserCommandAddResp{}, nil
 }
 
-// ProcessUserCommandDelete user general function delete
+// ProcessUserCommandDelete user general function delete.
 func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.ProcessUserCommandDeleteReq) (*pbuser.ProcessUserCommandDeleteResp, error) {
 	err := authverify.CheckAccessV3(ctx, req.UserID)
 	if err != nil {
@@ -439,10 +441,11 @@ func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.P
 	if err != nil {
 		return nil, err
 	}
+
 	return &pbuser.ProcessUserCommandDeleteResp{}, nil
 }
 
-// ProcessUserCommandUpdate user general function update
+// ProcessUserCommandUpdate user general function update.
 func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
 	err := authverify.CheckAccessV3(ctx, req.UserID)
 	if err != nil {
@@ -475,6 +478,7 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 }
 
 func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
+
 	err := authverify.CheckAccessV3(ctx, req.UserID)
 	if err != nil {
 		return nil, err

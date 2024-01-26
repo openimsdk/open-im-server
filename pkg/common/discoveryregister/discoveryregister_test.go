@@ -40,6 +40,7 @@ func TestNewDiscoveryRegister(t *testing.T) {
 	}{
 		{"zookeeper", false, true},
 		{"k8s", false, true}, // 假设 k8s 配置也已正确设置
+		{"direct", false, true},
 		{"invalid", true, false},
 	}
 

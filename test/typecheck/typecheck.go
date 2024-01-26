@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// do a fast type check of kubernetes code, for all platforms.
+// do a fast type check of openim code, for all platforms.
 package main
 
 import (
@@ -47,13 +47,11 @@ var (
 	crossPlatforms = []string{
 		"linux/amd64", "windows/386",
 		"darwin/amd64", "darwin/arm64",
-		"linux/386",
+		"linux/386", "linux/arm",
 		"windows/amd64", "linux/arm64",
 		"linux/ppc64le", "linux/s390x",
 		"windows/arm64",
 	}
-
-	// "linux/arm",
 
 	// directories we always ignore
 	standardIgnoreDirs = []string{
@@ -62,17 +60,14 @@ var (
 		// inside of staging/, but works when typechecked as part of vendor/.
 		"staging",
 		"components",
+		"logs",
 		// OS-specific vendor code tends to be imported by OS-specific
 		// packages. We recursively typecheck imported vendored packages for
 		// each OS, but don't typecheck everything for every OS.
 		"vendor",
+		"test",
 		"_output",
-		"OpenIMSKD/tools",
-		// This is a weird one. /testdata/ is *mostly* ignored by Go,
-		// and this translates to kubernetes/vendor not working.
-		// edit/record.go doesn't compile without gopkg.in/yaml.v2
-		// in $GOSRC/$GOROOT (both typecheck and the shell script).
-		"pkg/kubectl/cmd/testdata/edit",
+		"*/mw/rpc_server_interceptor.go",
 		// Tools we use for maintaining the code base but not necessarily
 		// ship as part of the release
 		"sopenim::golang::setup_env:tools/yamlfmt/yamlfmt.go:tools",

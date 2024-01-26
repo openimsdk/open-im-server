@@ -201,27 +201,27 @@ func (u *UserApi) GetSubscribeUsersStatus(c *gin.Context) {
 	a2r.Call(user.UserClient.GetSubscribeUsersStatus, u.Client, c)
 }
 
-// ProcessUserCommandAdd user general function add
+// ProcessUserCommandAdd user general function add.
 func (u *UserApi) ProcessUserCommandAdd(c *gin.Context) {
 	a2r.Call(user.UserClient.ProcessUserCommandAdd, u.Client, c)
 }
 
-// ProcessUserCommandDelete user general function delete
+// ProcessUserCommandDelete user general function delete.
 func (u *UserApi) ProcessUserCommandDelete(c *gin.Context) {
 	a2r.Call(user.UserClient.ProcessUserCommandDelete, u.Client, c)
 }
 
-// ProcessUserCommandUpdate  user general function update
+// ProcessUserCommandUpdate  user general function update.
 func (u *UserApi) ProcessUserCommandUpdate(c *gin.Context) {
 	a2r.Call(user.UserClient.ProcessUserCommandUpdate, u.Client, c)
 }
 
-// ProcessUserCommandGet user general function get
+// ProcessUserCommandGet user general function get.
 func (u *UserApi) ProcessUserCommandGet(c *gin.Context) {
 	a2r.Call(user.UserClient.ProcessUserCommandGet, u.Client, c)
 }
 
-// ProcessUserCommandGet user general function get all
+// ProcessUserCommandGet user general function get all.
 func (u *UserApi) ProcessUserCommandGetAll(c *gin.Context) {
 	a2r.Call(user.UserClient.ProcessUserCommandGetAll, u.Client, c)
 }
