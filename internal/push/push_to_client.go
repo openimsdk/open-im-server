@@ -228,10 +228,10 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 					return err
 				}
 				log.ZInfo(ctx, "GroupDismissedNotificationInfo****", "groupID", groupID, "num", len(pushToUserIDs), "list", pushToUserIDs)
-				if len(config.Config.Manager.UserID) > 0 {
+				if config.Config.Manager.UserID[0] != "" {
 					ctx = mcontext.WithOpUserIDContext(ctx, config.Config.Manager.UserID[0])
 				}
-				if len(config.Config.Manager.UserID) == 0 && len(config.Config.IMAdmin.UserID) > 0 {
+				if config.Config.Manager.UserID[0] == "" && len(config.Config.IMAdmin.UserID) > 0 {
 					ctx = mcontext.WithOpUserIDContext(ctx, config.Config.IMAdmin.UserID[0])
 				}
 				defer func(groupID string) {
