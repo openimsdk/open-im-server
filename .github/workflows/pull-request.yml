@@ -14,13 +14,8 @@
 
 name: Github Pull Request
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      - 'README.md'
-      - 'CONTRIBUTING.md'
-      - 'docs/**'
   workflow_dispatch:
+  push:
   schedule:
     - cron: '0 2 * * *'
 
@@ -37,24 +32,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get League branch Patch
-        run: |
-          git config user.name 'openimbot'
-          git config user.email 'openimsdk@qq.com'
-          BRANCH_NAME="auto-pr-$(date +'%Y%m%d%H%M%S')"
-          git checkout -b $BRANCH_NAME
-
       - uses: actions/setup-node@v4
       - name: Setup Go
         uses: actions/setup-go@v4
       - name: Run go modules tidy
         run: |
+          sudo apt-get install jq
           sudo make tidy
           sudo make tools.verify.go-gitlint
           echo "Run go modules tidy successfully" 
         continue-on-error: true
 
-      - name: Run go format
+      - name: Run go format and lint
         run: |
           sudo make format
           echo "Run go format successfully" 
@@ -69,7 +58,14 @@ jobs:
       - name: Generate all necessary files, such as error code files
         run: |
           make generate
-          echo "Generate all necessary files successfully" 
+          ./scripts/init-config.sh --examples --force
+          echo "Generate all necessary files successfully"
+        continue-on-error: true
+
+      - name: Generate Vertions
+        run: |
+          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1` | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+          echo $latest_tag > pkg/common/config/version
         continue-on-error: true
 
       - name: Run unit test and get test coverage
@@ -90,13 +86,13 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           commit-message: "cicd: bump League Patch"
-          author: kubbot <kubbot@3293172751ysy@gmail.com>
-          signoff: false
-          draft: false
-          branch: ''
+          author: kubbot <3293172751ysy@gmail.com>
+          committer: kubbot <3293172751ysy@gmail.com>
+        #   signoff: false
+        #   draft: false
+          branch: "asf-auto-updates"
           assignees: cubxxw
           reviewers: cubxxw
-          delete-branch: true
           title: "Bump League Patch auto PR: $(date +'%Y%m%d')"
           body: |
             Review criteria:
@@ -105,7 +101,6 @@ jobs:
             
             This is an automated PR. @ $(date +'%Y%m%d')
             <sub>[workflow](https://github.com/openimsdk/open-im-server/blob/main/.github/workflows/pull-request.yml).</sub>
-          base: main
           labels: |
             kind/documentation
             enhancement
