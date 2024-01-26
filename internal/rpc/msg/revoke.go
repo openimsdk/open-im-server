@@ -51,6 +51,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if err != nil {
 		return nil, err
 	}
+	log.ZDebug(ctx, "RevokeMsg", "Length", req)
 	_, _, msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.ConversationID, []int64{req.Seq})
 	if err != nil {
 		return nil, err

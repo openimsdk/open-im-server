@@ -17,6 +17,7 @@ package authverify
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
@@ -35,12 +36,14 @@ func Secret() jwt.Keyfunc {
 
 func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	opUserID := mcontext.GetOpUserID(ctx)
+	log.ZDebug(ctx, "CheckAcessV3", "Length", len(config.Config.Manager.UserID))
 	if utils.IsContain(opUserID, config.Config.Manager.UserID) {
 		return nil
 	}
 	if utils.IsContain(opUserID, config.Config.IMAdmin.UserID) {
 		return nil
 	}
+	log.ZDebug(ctx, "CheckAcessV3CheckAcessV3CheckAcessV3", "Length", len(config.Config.IMAdmin.UserID))
 	if opUserID == ownerUserID {
 		return nil
 	}
