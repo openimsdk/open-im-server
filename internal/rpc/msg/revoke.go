@@ -52,6 +52,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		return nil, err
 	}
 	log.ZDebug(ctx, "RevokeMsg", "Length", req)
+	log.ZDebug(ctx, "RevokeMsg", "UserInfo", user)
 	_, _, msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.ConversationID, []int64{req.Seq})
 	if err != nil {
 		return nil, err
@@ -102,6 +103,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		}
 	}
 	now := time.Now().UnixMilli()
+	log.ZDebug(ctx, "RevokeMsgRevokeMsg", "role", role)
 	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &unrelationtb.RevokeModel{
 		Role:     role,
 		UserID:   req.UserID,
