@@ -14,7 +14,7 @@
 
 # -----------------------------------------------------------------
 # TODO: This config file is the template file
-# --| source: deployments/templates/openim.yaml
+# --| source: deployments/templates/config.yaml
 # --| env: scripts/install/environment
 # --| target: config/config.yaml
 # -----------------------------------------------------------------
@@ -52,8 +52,8 @@ mongo:
 # Default MongoDB database name
 # Maximum connection pool size
   address: [ 172.28.0.1:37017 ]
-  database: openIM_v3
-  username: root
+  database: openim_v3
+  username: openIM
   password: openIM123
   maxPoolSize: 100
 
@@ -122,14 +122,14 @@ api:
 # minio.signEndpoint is minio public network address
 object:
   enable: "minio"
-  apiURL: "http://14.155.64.202:10002"
+  apiURL: "http://172.28.0.1:10002"
   minio:
     bucket: "openim"
     endpoint: "http://172.28.0.1:10005"
     accessKeyID: "root"
     secretAccessKey: "openIM123"
     sessionToken: ''
-    signEndpoint: "http://14.155.64.202:10005"
+    signEndpoint: "http://172.28.0.1:10005"
     publicRead: false
   cos:
     bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
@@ -193,7 +193,7 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: /data/workspaces/open-im-server/logs/
+  storageLocation: /workspaces/open-im-server/logs/
   rotationTime: 24
   remainRotationCount: 2
   remainLogLevel: 6
@@ -246,6 +246,14 @@ push:
 manager:
   userID: [ "openIM123456", "openIM654321", "openIMAdmin" ]
   nickname: [ "system1", "system2", "system3" ]
+
+# chatAdmin, use for send notification
+#
+# Built-in app system notification account ID
+# Built-in app system notification account nickname
+im-admin:
+  userID: [ "imAdmin" ]
+  nickname: [ "imAdmin" ]
 
 # Multi-platform login policy
 # For each platform(Android, iOS, Windows, Mac, web), only one can be online at a time
@@ -307,21 +315,21 @@ iosPush:
 # Timeout in seconds
 # Whether to continue execution if callback fails
 callback:
-  url: ""
+  url: "http://127.0.0.1:10008/callbackExample"
   beforeSendSingleMsg:
     enable: false
     timeout: 5
     failedContinue: true
   beforeUpdateUserInfoEx:
-    enable: false
+    enable:  false
     timeout: 5
     failedContinue: true
   afterUpdateUserInfoEx:
-    enable: false
+    enable:  false
     timeout: 5
     failedContinue: true
   afterSendSingleMsg:
-    enable: false
+    enable: true
     timeout: 5
     failedContinue: true
   beforeSendGroupMsg:
@@ -505,8 +513,8 @@ callback:
 # The number of Prometheus ports per service needs to correspond to rpcPort
 # The number of ports needs to be consistent with msg_transfer_service_num in script/path_info.sh
 prometheus:
-  enable: false
-  grafanaUrl: 172.28.0.1:13000
+  enable: true
+  grafanaUrl: http://172.28.0.1:13000/
   apiPrometheusPort: [20100]
   userPrometheusPort: [ 20110 ]
   friendPrometheusPort: [ 20120 ]

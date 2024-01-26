@@ -28,10 +28,10 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 openim::golang::setup_env
 
 BINS=(
-	gendocs
-	genopenimdocs
-	genman
-	genyaml
+  gendocs
+  genopenimdocs
+  genman
+  genyaml
 )
 make -C "${OPENIM_ROOT}" WHAT="${BINS[*]}"
 

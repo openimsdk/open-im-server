@@ -23,6 +23,8 @@ on:
         - "docs/**"
         - "README.md"
         - "README_zh-CN.md"
+        - "**.md"
+        - "docs/**"
         - "CONTRIBUTING.md"
   pull_request:
     branches:
@@ -31,7 +33,8 @@ on:
     paths-ignore:
         - "README.md"
         - "README_zh-CN.md"
-        - "CONTRIBUTING.md"
+        - "CONTRIBUTING/**"
+        - "**.md"
         - "docs/**"
 
 env:
@@ -67,6 +70,9 @@ jobs:
         version: '3.x' # If available, use the latest major version that's compatible
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: OpenIM Scripts Verification(make verify)
+      run: sudo make verify
+
     - name: Module Operations
       run: |
         sudo make tidy
@@ -90,13 +96,6 @@ jobs:
 
     - name: Cleanup Build
       run: sudo make clean
-
-    - name: Push Changes to Main
-      uses: stefanzweifel/git-auto-commit-action@v5
-      with:
-        commit_message: "cicd: robot automated Change"
-        branch: main
-      continue-on-error: true
 
     - name: Set Current Directory
       id: set_directory

@@ -217,6 +217,11 @@ install.depth:
 install.go-callvis:
 	@$(GO) install github.com/ofabry/go-callvis@latest
 
+## install.misspell
+.PHONY: install.misspell
+install.misspell:
+	@$(GO) install github.com/client9/misspell/cmd/misspell@latest
+
 ## install.gothanks: Install gothanks, used to thank go dependencies
 .PHONY: install.gothanks
 install.gothanks:

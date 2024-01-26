@@ -89,7 +89,7 @@ While the first two methods will be our main focus, it's worth noting that the t
 
 ###  1.2. <a name='SourceCodeDeployment'></a>Source Code Deployment
 
-In the source code deployment method, the configuration generation process involves executing `make init`, which fundamentally runs the script `./scripts/init-config.sh`. This script utilizes variables defined in the [`environment.sh`](https://github.com/openimsdk/open-im-server/blob/main/scripts/install/environment.sh) script to render the [`openim.yaml`](https://github.com/openimsdk/open-im-server/blob/main/deployments/templates/openim.yaml) template file, subsequently generating the [`config.yaml`](https://github.com/openimsdk/open-im-server/blob/main/config/config.yaml) configuration file.
+In the source code deployment method, the configuration generation process involves executing `make init`, which fundamentally runs the script `./scripts/init-config.sh`. This script utilizes variables defined in the [`environment.sh`](https://github.com/openimsdk/open-im-server/blob/main/scripts/install/environment.sh) script to render the [`config.yaml`](https://github.com/openimsdk/open-im-server/blob/main/deployments/templates/config.yaml) template file, subsequently generating the [`config.yaml`](https://github.com/openimsdk/open-im-server/blob/main/config/config.yaml) configuration file.
 
 ###  1.3. <a name='DockerComposeDeployment'></a>Docker Compose Deployment
 

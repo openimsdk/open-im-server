@@ -16,10 +16,11 @@ package mgo
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/errs"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
@@ -89,7 +90,15 @@ func (u *UserMgo) PageFindUser(ctx context.Context, level1 int64, level2 int64, 
 
 	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, query, pagination)
 }
-func (u *UserMgo) PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID string, nickName string, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
+
+func (u *UserMgo) PageFindUserWithKeyword(
+	ctx context.Context,
+	level1 int64,
+	level2 int64,
+	userID string,
+	nickName string,
+	pagination pagination.Pagination,
+) (count int64, users []*relation.UserModel, err error) {
 	// Initialize the base query with level conditions
 	query := bson.M{
 		"$and": []bson.M{

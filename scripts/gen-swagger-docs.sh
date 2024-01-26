@@ -67,7 +67,7 @@ echo -e "=== any\nRepresents an untyped JSON map - see the description of the fi
 asciidoctor definitions.adoc
 asciidoctor paths.adoc
 
-cp ${OPENIM_OUTPUT_TMP}/definitions.html ${OPENIM_OUTPUT_TMP}/_output/
-cp ${OPENIM_OUTPUT_TMP}/paths.html ${OPENIM_OUTPUT_TMP}/_output/operations.html
+cp "$OPENIM_OUTPUT_TMP/definitions.html" "$OPENIM_OUTPUT_TMP/_output/"
+cp "$OPENIM_OUTPUT_TMP/paths.html" "$OPENIM_OUTPUT_TMP/_output/operations.html"
 
 success "SUCCESS"

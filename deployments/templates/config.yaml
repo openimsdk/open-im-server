@@ -14,7 +14,7 @@
 
 # -----------------------------------------------------------------
 # TODO: This config file is the template file
-# --| source: deployments/templates/openim.yaml
+# --| source: deployments/templates/config.yaml
 # --| env: scripts/install/environment
 # --| target: config/config.yaml
 # -----------------------------------------------------------------

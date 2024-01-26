@@ -15,10 +15,10 @@
 # limitations under the License.
 #
 # OpenIM RPC Service Control Script
-# 
+#
 # Description:
 # This script provides a control interface for the OpenIM RPC service within a Linux environment. It offers functionalities to start multiple RPC services, each denoted by their respective names under openim::rpc::service_name.
-# 
+#
 # Features:
 # 1. Robust error handling using Bash built-ins like 'errexit', 'nounset', and 'pipefail'.
 # 2. The capability to source common utility functions and configurations to ensure uniform environmental settings.
@@ -125,7 +125,7 @@ function openim::rpc::start() {
         openim::util::stop_services_on_ports ${OPENIM_RPC_PORT_LISTARIES[$i]}
 
         openim::log::info "OpenIM ${OPENIM_RPC_SERVICE_LISTARIES[$i]} config path: ${OPENIM_RPC_CONFIG}"
-    
+
         # Get the service and Prometheus ports.
         OPENIM_RPC_SERVICE_PORTS=( $(openim::util::list-to-string ${OPENIM_RPC_PORT_LISTARIES[$i]}) )
         read -a OPENIM_RPC_SERVICE_PORTS_ARRAY <<< ${OPENIM_RPC_SERVICE_PORTS}
@@ -139,7 +139,7 @@ function openim::rpc::start() {
         done
     done
 
-    sleep 1
+    sleep 5
 
     openim::util::check_ports ${OPENIM_RPC_PORT_TARGETS[@]}
     # openim::util::check_ports ${OPENIM_RPC_PROM_PORT_TARGETS[@]}

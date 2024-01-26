@@ -28,7 +28,7 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 #TODO: Access to the OPENIM_IP networks outside, or you want to use the OPENIM_IP network
 # OPENIM_IP=127.0.0.1
 if [ -z "${OPENIM_IP}" ]; then
-	OPENIM_IP=$(openim::util::get_server_ip)
+  OPENIM_IP=$(openim::util::get_server_ip)
 fi
 
 # config.gateway custom bridge modes
@@ -37,9 +37,9 @@ fi
 # fi
 
 function def() {
-	local var_name="$1"
-	local default_value="${2:-}"
-	eval "readonly $var_name=\"\${$var_name:-$(printf '%q' "$default_value")}\""
+  local var_name="$1"
+  local default_value="${2:-}"
+  eval "readonly $var_name=\"\${$var_name:-$(printf '%q' "$default_value")}\""
 }
 
 # OpenIM Docker Compose 数据存储的默认路径
@@ -52,7 +52,7 @@ def "OPENIM_USER" "root"
 readonly PASSWORD=${PASSWORD:-'openIM123'}
 
 # 设置统一的数据库名称，方便管理
-def "DATABASE_NAME" "openIM_v3"
+def "DATABASE_NAME" "openim_v3"
 
 # Linux系统 openim 用户
 def "LINUX_USERNAME" "openim"
@@ -89,8 +89,8 @@ SUBNET=$(echo $DOCKER_BRIDGE_SUBNET | cut -d '/' -f 2)
 LAST_OCTET=$(echo $IP_PREFIX | cut -d '.' -f 4)
 
 generate_ip() {
-	local NEW_IP="$(echo $IP_PREFIX | cut -d '.' -f 1-3).$((LAST_OCTET++))"
-	echo $NEW_IP
+  local NEW_IP="$(echo $IP_PREFIX | cut -d '.' -f 1-3).$((LAST_OCTET++))"
+  echo $NEW_IP
 }
 LAST_OCTET=$((LAST_OCTET + 1))
 DOCKER_BRIDGE_GATEWAY=$(generate_ip)

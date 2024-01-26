@@ -18,8 +18,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"google.golang.org/grpc"
 	"sync"
+
+	"google.golang.org/grpc"
 
 	"golang.org/x/sync/errgroup"
 
@@ -143,7 +144,7 @@ func (p *Pusher) UnmarshalNotificationElem(bytes []byte, t any) error {
 }
 
 /*
-k8s deployment,offline push group messages function
+k8s deployment,offline push group messages function.
 */
 func (p *Pusher) k8sOfflinePush2SuperGroup(ctx context.Context, groupID string, msg *sdkws.MsgData, wsResults []*msggateway.SingleMsgToUserResults) error {
 

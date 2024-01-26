@@ -25,17 +25,8 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 export OPENIM_ROOT
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
-# Ensure that we find the binaries we build before anything else.
-export GOBIN="${KUBE_OUTPUT_BINPATH}"
-PATH="${GOBIN}:${PATH}"
-
-# Install tools we need
-pushd "${OPENIM_ROOT}/tools" >/dev/null
-  GO111MODULE=on go install github.com/client9/misspell/cmd/misspell
-popd >/dev/null
-
 # Spell checking
 # All the skipping files are defined in scripts/.spelling_failures
 skipping_file="${OPENIM_ROOT}/scripts/.spelling_failures"
 failing_packages=$(sed "s| | -e |g" "${skipping_file}")
-git ls-files | grep -v -e "${failing_packages}" | xargs misspell -i "Creater,creater,ect" -error -o stderr
+git ls-files | grep -v -e "${failing_packages}" | xargs "$OPENIM_ROOT/_output/tools/misspell" -i "Creater,creater,ect" -error -o stderr

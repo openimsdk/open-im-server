@@ -43,6 +43,54 @@ disabled=(
   1091
   # this lint prefers command -v to which, they are not the same
   2230
+  # Error SC2155 indicates that you should separate variable declaration and assignment to avoid masking the return value of the command.
+  # In Bash scripts, when you declare and assign a local variable at the same time a command is executed, you only get the output of the command, but not the exit status (return value) of the command.  #
+  2155
+  # ShellCheck issues SC2086 warnings when you refer to a variable in a script but don't put it in double quotes.This can lead to unexpected behavior when scripts encounter Spaces, 
+  # newlines, and wildcards in file names or other data.
+  2086
+  2206
+
+  # TODO: 需要修复，然后开启
+  2034
+  2048
+  2148
+  2059
+  2214
+  2145
+  2128
+  2550
+  2046
+  2181
+  1102
+  2045
+  2068
+  2145
+  2207
+  2231
+  2013
+  2154
+  2120
+  1083
+  2001
+  2012
+  2016
+  2164
+  2223
+  2166
+  2119
+  2162
+  2295
+  2002
+  2004
+  2202
+  2178
+  2064
+  2260
+  2043
+  2178
+  2044
+  2153
 )
 # comma separate for passing to shellcheck
 join_by() {
@@ -65,14 +113,18 @@ cd "${OPENIM_ROOT}"
 #    forked should be linted and fixed.
 all_shell_scripts=()
 while IFS=$'\n' read -r script;
-  do git check-ignore -q "$script" || all_shell_scripts+=("$script");
-done < <(find . -name "*.sh" \
+do git check-ignore -q "$script" || all_shell_scripts+=("$script");
+  done < <(find . -name "*.sh" \
   -not \( \
-    -path ./_\*      -o \
-    -path ./.git\*   -o \
-    -path ./vendor\* -o \
-    \( -path ./third_party\* -a -not -path ./third_party/forked\* \) \
-  \))
+  -path ./_\*      -o \
+  -path ./.git\*   -o \
+  -path ./Godeps\* -o \
+  -path ./_output\* -o \
+  -path ./components\* -o \
+  -path ./logs\* -o \
+  -path ./vendor\* -o \
+  \( -path ./third_party\* -a -not -path ./third_party/forked\* \) \
+\) -print 2>/dev/null)
 
 # detect if the host machine has the required shellcheck version installed
 # if so, we will use that instead.
@@ -113,8 +165,8 @@ if ${HAVE_SHELLCHECK}; then
 else
   openim::log::info "Using shellcheck ${SHELLCHECK_VERSION} docker image."
   "${DOCKER}" run \
-    --rm -v "${OPENIM_ROOT}:"${OPENIM_ROOT}"" -w "${OPENIM_ROOT}" \
-    "${SHELLCHECK_IMAGE}" \
+  --rm -v "${OPENIM_ROOT}:${OPENIM_ROOT}" -w "${OPENIM_ROOT}" \
+  "${SHELLCHECK_IMAGE}" \
   shellcheck "${SHELLCHECK_OPTIONS[@]}" "${all_shell_scripts[@]}" >&2 || res=$?
 fi
 

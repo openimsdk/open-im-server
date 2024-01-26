@@ -42,7 +42,7 @@ OpenIM is a service platform specifically designed for integrating chat, audio-v
   - 🛡️ API wrapping
   - 🌐 Connection management
 
-  ## 📚 Main Modules:
++ 📚 Main Modules:
 
   1. 🚀 Initialization and Login
   2. 👤 User Management
@@ -70,11 +70,16 @@ It is built using Golang and supports cross-platform deployment, ensuring a cons
 
 ## :rocket: Quick Start
 
+We support many platforms. Here are the addresses for quick experience on the web side：
+
+👉 **[OpenIM online web demo](https://web-enterprise.rentsoft.cn/)**
+
 🤲 To facilitate user experience, we offer various deployment solutions. You can choose your deployment method from the list below:
 
 + **[Source Code Deployment Guide](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
 + **[Docker Deployment Guide](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
 + **[Kubernetes Deployment Guide](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
++ **[Mac Developer Deployment Guide](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
 
 ## :hammer_and_wrench: To Start Developing OpenIM
 

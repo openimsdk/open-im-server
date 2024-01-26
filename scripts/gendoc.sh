@@ -14,43 +14,43 @@
 # limitations under the License.
 
 DEFAULT_DIRS=(
-    "pkg"
-    "internal/pkg"
+  "pkg"
+  "internal/pkg"
 )
 BASE_URL="github.com/openimsdk/open-im-server"
 
 usage() {
-    echo "Usage: $0 [OPTIONS]"
-    echo
-    echo "This script iterates over directories and generates doc.go if necessary."
-    echo "By default, it processes 'pkg' and 'internal/pkg' directories."
-    echo
-    echo "Options:"
-    echo "  -d DIRS, --dirs DIRS    Specify the directories to be processed, separated by commas. E.g., 'pkg,internal/pkg'."
-    echo "  -u URL,  --url URL     Set the base URL for the import path. Default is '$BASE_URL'."
-    echo "  -h,      --help        Show this help message."
-    echo
+  echo "Usage: $0 [OPTIONS]"
+  echo
+  echo "This script iterates over directories and generates doc.go if necessary."
+  echo "By default, it processes 'pkg' and 'internal/pkg' directories."
+  echo
+  echo "Options:"
+  echo "  -d DIRS, --dirs DIRS    Specify the directories to be processed, separated by commas. E.g., 'pkg,internal/pkg'."
+  echo "  -u URL,  --url URL     Set the base URL for the import path. Default is '$BASE_URL'."
+  echo "  -h,      --help        Show this help message."
+  echo
 }
 
 process_dir() {
-    local dir=$1
-    local base_url=$2
-
-    for d in $(find $dir -type d); do
-        if [ ! -f $d/doc.go ]; then
-            if ls $d/*.go > /dev/null 2>&1; then
-                echo $d/doc.go
-                echo "package $(basename $d) // import \"$base_url/$d\"" > $d/doc.go
-            fi
-        fi
-    done
+  local dir=$1
+  local base_url=$2
+  
+  for d in $(find $dir -type d); do
+    if [ ! -f $d/doc.go ]; then
+      if ls $d/*.go > /dev/null 2>&1; then
+        echo $d/doc.go
+        echo "package $(basename $d) // import \"$base_url/$d\"" > $d/doc.go
+      fi
+    fi
+  done
 }
 
 while [[ $# -gt 0 ]]; do
-    key="$1"
-
-    case $key in
-        -d|--dirs)
+  key="$1"
+  
+  case $key in
+    -d|--dirs)
             IFS=',' read -ra DIRS <<< "$2"
             shift # shift past argument
             shift # shift past value

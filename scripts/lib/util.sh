@@ -30,27 +30,27 @@ function openim:util::setup_ssh_key_copy() {
   local hosts_file="$1"
   local username="${2:-root}"
   local password="${3:-123}"
-
+  
   local sshkey_file=~/.ssh/id_rsa.pub
-
-  # check sshkey file 
+  
+  # check sshkey file
   if [[ ! -e $sshkey_file ]]; then
     expect -c "
     spawn ssh-keygen -t rsa
     expect \"Enter*\" { send \"\n\"; exp_continue; }
     "
   fi
-
+  
   # get hosts list
   local hosts=$(awk '/^[^#]/ {print $1}' "${hosts_file}")
-
+  
   ssh_key_copy() {
     local target=$1
-
+    
     # delete history
     sed -i "/$target/d" ~/.ssh/known_hosts
-
-    # copy key 
+    
+    # copy key
     expect -c "
     set timeout 100
     spawn ssh-copy-id $username@$target
@@ -62,14 +62,14 @@ function openim:util::setup_ssh_key_copy() {
     expect eof
     "
   }
-
+  
   # auto sshkey pair
   for host in $hosts; do
     if ! ping -i 0.2 -c 3 -W 1 "$host" > /dev/null 2>&1; then
       echo "[ERROR]: Can't connect $host"
       continue
     fi
-
+    
     local host_entry=$(awk "/$host/"'{print $1, $2}' /etc/hosts)
     if [[ $host_entry ]]; then
       local hostaddr=$(echo "$host_entry" | awk '{print $1}')
@@ -102,7 +102,7 @@ openim::util::array_contains() {
   for element; do
     if [[ "${element}" == "${search}" ]]; then
       return 0
-     fi
+    fi
   done
   return 1
 }
@@ -113,12 +113,12 @@ openim::util::wait_for_url() {
   local wait=${3:-1}
   local times=${4:-30}
   local maxtime=${5:-1}
-
+  
   command -v curl >/dev/null || {
     openim::log::usage "curl must be installed"
     exit 1
   }
-
+  
   local i
   for i in $(seq 1 "${times}"); do
     local out
@@ -156,20 +156,20 @@ openim::util::trap_add() {
   local trap_add_cmd
   trap_add_cmd=$1
   shift
-
+  
   for trap_add_name in "$@"; do
     local existing_cmd
     local new_cmd
-
+    
     # Grab the currently defined trap commands for this trap
     existing_cmd=$(trap -p "${trap_add_name}" |  awk -F"'" '{print $2}')
-
+    
     if [[ -z "${existing_cmd}" ]]; then
       new_cmd="${trap_add_cmd}"
     else
       new_cmd="${trap_add_cmd};${existing_cmd}"
     fi
-
+    
     # Assign the test. Disable the shellcheck warning telling that trap
     # commands should be single quoted to avoid evaluating them at this
     # point instead evaluating them at run time. The logic of adding new
@@ -200,14 +200,14 @@ openim::util::host_os() {
   case "$(uname -s)" in
     Darwin)
       host_os=darwin
-      ;;
+    ;;
     Linux)
       host_os=linux
-      ;;
+    ;;
     *)
       openim::log::error "Unsupported host OS.  Must be Linux or Mac OS X."
       exit 1
-      ;;
+    ;;
   esac
   echo "${host_os}"
 }
@@ -217,70 +217,70 @@ openim::util::host_arch() {
   case "$(uname -m)" in
     x86_64*)
       host_arch=amd64
-      ;;
+    ;;
     i?86_64*)
       host_arch=amd64
-      ;;
+    ;;
     amd64*)
       host_arch=amd64
-      ;;
+    ;;
     aarch64*)
       host_arch=arm64
-      ;;
+    ;;
     arm64*)
       host_arch=arm64
-      ;;
+    ;;
     arm*)
       host_arch=arm
-      ;;
+    ;;
     i?86*)
       host_arch=x86
-      ;;
+    ;;
     s390x*)
       host_arch=s390x
-      ;;
+    ;;
     ppc64le*)
       host_arch=ppc64le
-      ;;
+    ;;
     *)
       openim::log::error "Unsupported host arch. Must be x86_64, 386, arm, arm64, s390x or ppc64le."
       exit 1
-      ;;
+    ;;
   esac
   echo "${host_arch}"
 }
 
 # Define a bash function to check the versions of Docker and Docker Compose
 openim::util::check_docker_and_compose_versions() {
-    # Define the required versions of Docker and Docker Compose
-    required_docker_version="20.10.0"
-    required_compose_version="2.0"
-
-    # Get the currently installed Docker version
-    installed_docker_version=$(docker --version | awk '{print $3}' | sed 's/,//')
-
-    # Check if the installed Docker version matches the required version
-    if [[ "$installed_docker_version" < "$required_docker_version" ]]; then
-        echo "Docker version mismatch. Installed: $installed_docker_version, Required: $required_docker_version"
-        return 1
-    fi
-
-    # Check if the docker compose sub-command is available
-    if ! docker compose version &> /dev/null; then
-        echo "Docker does not support the docker compose sub-command"
-        echo "You need to upgrade Docker to the right version"
-        return 1
-    fi
-
-    # Get the currently installed Docker Compose version
-    installed_compose_version=$(docker compose version --short)
-
-    # Check if the installed Docker Compose version matches the required version
-    if [[ "$installed_compose_version" < "$required_compose_version" ]]; then
-        echo "Docker Compose version mismatch. Installed: $installed_compose_version, Required: $required_compose_version"
-        return 1
-    fi
-
+  # Define the required versions of Docker and Docker Compose
+  required_docker_version="20.10.0"
+  required_compose_version="2.0"
+  
+  # Get the currently installed Docker version
+  installed_docker_version=$(docker --version | awk '{print $3}' | sed 's/,//')
+  
+  # Check if the installed Docker version matches the required version
+  if [[ "$installed_docker_version" < "$required_docker_version" ]]; then
+    echo "Docker version mismatch. Installed: $installed_docker_version, Required: $required_docker_version"
+    return 1
+  fi
+  
+  # Check if the docker compose sub-command is available
+  if ! docker compose version &> /dev/null; then
+    echo "Docker does not support the docker compose sub-command"
+    echo "You need to upgrade Docker to the right version"
+    return 1
+  fi
+  
+  # Get the currently installed Docker Compose version
+  installed_compose_version=$(docker compose version --short)
+  
+  # Check if the installed Docker Compose version matches the required version
+  if [[ "$installed_compose_version" < "$required_compose_version" ]]; then
+    echo "Docker Compose version mismatch. Installed: $installed_compose_version, Required: $required_compose_version"
+    return 1
+  fi
+  
 }
 
 
@@ -292,80 +292,80 @@ openim::util::check_docker_and_compose_versions() {
 # openim::util::check_ports 8080 8081 8082
 # The function returns a status of 1 if any of the processes is not running.
 openim::util::check_ports() {
-    # An array to collect ports of processes that are not running.
-    local not_started=()
-
-    # An array to collect information about processes that are running.
-    local started=()
-
-    openim::log::info "Checking ports: $*"
-    # Iterate over each given port.
-    for port in "$@"; do
-        # Initialize variables
-        # Check the OS and use the appropriate command
-        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            if command -v ss > /dev/null 2>&1; then
-                info=$(ss -ltnp | grep ":$port" || true)
-            else
-                info=$(netstat -ltnp | grep ":$port" || true)
-            fi
-        elif [[ "$OSTYPE" == "darwin"* ]]; then
-            # For macOS, use lsof
-            info=$(lsof -P -i:"$port" | grep "LISTEN" || true)
-        fi
-
-        # Check if any process is using the port
-        if [[ -z $info ]]; then
-            not_started+=($port)
-        else
-            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-                # Extract relevant details for Linux: Process Name, PID, and FD.
-                details=$(echo $info | sed -n 's/.*users:(("\([^"]*\)",pid=\([^,]*\),fd=\([^)]*\))).*/\1 \2 \3/p')
-                command=$(echo $details | awk '{print $1}')
-                pid=$(echo $details | awk '{print $2}')
-                fd=$(echo $details | awk '{print $3}')
-            elif [[ "$OSTYPE" == "darwin"* ]]; then
-                # Handle extraction for macOS
-                pid=$(echo $info | awk '{print $2}' | cut -d'/' -f1)
-                command=$(ps -p $pid -o comm= | xargs basename)
-                fd=$(echo $info | awk '{print $4}' | cut -d'/' -f1)
-            fi
-
-            # Get the start time of the process using the PID
-            if [[ -z $pid ]]; then
-                start_time="N/A"
-            else
-                start_time=$(ps -p $pid -o lstart=)
-            fi
-            
-            started+=("Port $port - Command: $command, PID: $pid, FD: $fd, Started: $start_time")
-        fi
-    done
-
-    # Print information about ports whose processes are not running.
-    if [[ ${#not_started[@]} -ne 0 ]]; then
-        openim::log::info "\n### Not started ports:"
-        for port in "${not_started[@]}"; do
-            openim::log::error "Port $port is not started."
-        done
+  # An array to collect ports of processes that are not running.
+  local not_started=()
+  
+  # An array to collect information about processes that are running.
+  local started=()
+  
+  openim::log::info "Checking ports: $*"
+  # Iterate over each given port.
+  for port in "$@"; do
+    # Initialize variables
+    # Check the OS and use the appropriate command
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+      if command -v ss > /dev/null 2>&1; then
+        info=$(ss -ltnp | grep ":$port" || true)
+      else
+        info=$(netstat -ltnp | grep ":$port" || true)
+      fi
+      elif [[ "$OSTYPE" == "darwin"* ]]; then
+      # For macOS, use lsof
+      info=$(lsof -P -i:"$port" | grep "LISTEN" || true)
     fi
-
-    # Print information about ports whose processes are running.
-    if [[ ${#started[@]} -ne 0 ]]; then
-        openim::log::info "\n### Started ports:"
-        for info in "${started[@]}"; do
-            openim::log::info "$info"
-        done
-    fi
-
-    # If any of the processes is not running, return a status of 1.
-    if [[ ${#not_started[@]} -ne 0 ]]; then
-        echo "++++ OpenIM Log >> cat ${LOG_FILE}"
-        return 1
+    
+    # Check if any process is using the port
+    if [[ -z $info ]]; then
+      not_started+=($port)
     else
-        openim::log::success "All specified processes are running."
-        return 0
+      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # Extract relevant details for Linux: Process Name, PID, and FD.
+        details=$(echo $info | sed -n 's/.*users:(("\([^"]*\)",pid=\([^,]*\),fd=\([^)]*\))).*/\1 \2 \3/p')
+        command=$(echo $details | awk '{print $1}')
+        pid=$(echo $details | awk '{print $2}')
+        fd=$(echo $details | awk '{print $3}')
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+        # Handle extraction for macOS
+        pid=$(echo $info | awk '{print $2}' | cut -d'/' -f1)
+        command=$(ps -p $pid -o comm= | xargs basename)
+        fd=$(echo $info | awk '{print $4}' | cut -d'/' -f1)
+      fi
+      
+      # Get the start time of the process using the PID
+      if [[ -z $pid ]]; then
+        start_time="N/A"
+      else
+        start_time=$(ps -p $pid -o lstart=)
+      fi
+      
+      started+=("Port $port - Command: $command, PID: $pid, FD: $fd, Started: $start_time")
     fi
+  done
+  
+  # Print information about ports whose processes are not running.
+  if [[ ${#not_started[@]} -ne 0 ]]; then
+    openim::log::info "\n### Not started ports:"
+    for port in "${not_started[@]}"; do
+      openim::log::error "Port $port is not started."
+    done
+  fi
+  
+  # Print information about ports whose processes are running.
+  if [[ ${#started[@]} -ne 0 ]]; then
+    openim::log::info "\n### Started ports:"
+    for info in "${started[@]}"; do
+      openim::log::info "$info"
+    done
+  fi
+  
+  # If any of the processes is not running, return a status of 1.
+  if [[ ${#not_started[@]} -ne 0 ]]; then
+    echo "++++ OpenIM Log >> cat ${LOG_FILE}"
+    return 1
+  else
+    openim::log::success "All specified processes are running."
+    return 0
+  fi
 }
 
 # set +o errexit
@@ -381,75 +381,75 @@ openim::util::check_ports() {
 # openim::util::check_process_names nginx mysql redis
 # The function returns a status of 1 if any of the processes is not running.
 openim::util::check_process_names() {
-    # Function to get the port of a process
-    get_port() {
-        local pid=$1
-        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            # Linux
-            ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2
-        elif [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
-            lsof -nP -iTCP -sTCP:LISTEN -a -p $pid | awk 'NR>1 {print $9}' | sed 's/.*://'
-        else
-            echo "Unsupported OS"
-            return 1
-        fi
-    }
-
-    # Arrays to collect details of processes
-    local not_started=()
-    local started=()
-
-    openim::log::info "Checking processes: $*"
-    # Iterate over each given process name
-    for process_name in "$@"; do
-        # Use `pgrep` to find process IDs related to the given process name
-        local pids=($(pgrep -f $process_name))
-        
-        # Check if any process IDs were found
-        if [[ ${#pids[@]} -eq 0 ]]; then
-            not_started+=($process_name)
-        else
-            # If there are PIDs, loop through each one
-            for pid in "${pids[@]}"; do
-                local command=$(ps -p $pid -o cmd=)
-                local start_time=$(ps -p $pid -o lstart=)
-                local port=$(get_port $pid)
-
-                # Check if port information was found for the PID
-                if [[ -z $port ]]; then
-                    port="N/A"
-                fi
-
-                started+=("Process $process_name - Command: $command, PID: $pid, Port: $port, Start time: $start_time")
-            done
-        fi
-    done
-
-    # Print information
-    if [[ ${#not_started[@]} -ne 0 ]]; then
-        openim::log::info "Not started processes:"
-        for process_name in "${not_started[@]}"; do
-            openim::log::error "Process $process_name is not started."
-        done
-    fi
-
-    if [[ ${#started[@]} -ne 0 ]]; then
-        echo
-        openim::log::info "Started processes:"
-        for info in "${started[@]}"; do
-            openim::log::info "$info"
-        done
-    fi
-
-    # Return status
-    if [[ ${#not_started[@]} -ne 0 ]]; then
-        echo "++++ OpenIM Log >> cat ${LOG_FILE}"
-        return 1
+  # Function to get the port of a process
+  get_port() {
+    local pid=$1
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+      # Linux
+      ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2
+      elif [[ "$OSTYPE" == "darwin"* ]]; then
+      # macOS
+      lsof -nP -iTCP -sTCP:LISTEN -a -p $pid | awk 'NR>1 {print $9}' | sed 's/.*://'
     else
-        openim::log::success "All processes are running."
-        return 0
+      echo "Unsupported OS"
+      return 1
     fi
+  }
+  
+  # Arrays to collect details of processes
+  local not_started=()
+  local started=()
+  
+  openim::log::info "Checking processes: $*"
+  # Iterate over each given process name
+  for process_name in "$@"; do
+    # Use `pgrep` to find process IDs related to the given process name
+    local pids=($(pgrep -f $process_name))
+    
+    # Check if any process IDs were found
+    if [[ ${#pids[@]} -eq 0 ]]; then
+      not_started+=($process_name)
+    else
+      # If there are PIDs, loop through each one
+      for pid in "${pids[@]}"; do
+        local command=$(ps -p $pid -o cmd=)
+        local start_time=$(ps -p $pid -o lstart=)
+        local port=$(get_port $pid)
+        
+        # Check if port information was found for the PID
+        if [[ -z $port ]]; then
+          port="N/A"
+        fi
+        
+        started+=("Process $process_name - Command: $command, PID: $pid, Port: $port, Start time: $start_time")
+      done
+    fi
+  done
+  
+  # Print information
+  if [[ ${#not_started[@]} -ne 0 ]]; then
+    openim::log::info "Not started processes:"
+    for process_name in "${not_started[@]}"; do
+      openim::log::error "Process $process_name is not started."
+    done
+  fi
+  
+  if [[ ${#started[@]} -ne 0 ]]; then
+    echo
+    openim::log::info "Started processes:"
+    for info in "${started[@]}"; do
+      openim::log::info "$info"
+    done
+  fi
+  
+  # Return status
+  if [[ ${#not_started[@]} -ne 0 ]]; then
+    echo "++++ OpenIM Log >> cat ${LOG_FILE}"
+    return 1
+  else
+    openim::log::success "All processes are running."
+    return 0
+  fi
 }
 
 # openim::util::check_process_names docker-pr
@@ -462,30 +462,30 @@ openim::util::check_process_names() {
 # openim::util::stop_services_on_ports 8080 8081 8082
 # The function returns a status of 1 if any service couldn't be stopped.
 openim::util::stop_services_on_ports() {
-    # An array to collect ports of processes that couldn't be stopped.
-    local not_stopped=()
-
-    # An array to collect information about processes that were stopped.
-    local stopped=()
-
-    openim::log::info "Stopping services on ports: $*"
-    # Iterate over each given port.
-    for port in "$@"; do
-        # Use the `lsof` command to find process information related to the given port.
-        info=$(lsof -i :$port -n -P | grep LISTEN || true)
-
-        # If there's process information, it means the process associated with the port is running.
-        if [[ -n $info ]]; then
-            # Extract the Process ID.
-            while read -r line; do
-                local pid=$(echo $line | awk '{print $2}')
-                    
-                # Try to stop the service by killing its process.
-                if kill -TERM $pid; then
-                    stopped+=($port)
-                else
-                    not_stopped+=($port)
-                fi
+  # An array to collect ports of processes that couldn't be stopped.
+  local not_stopped=()
+  
+  # An array to collect information about processes that were stopped.
+  local stopped=()
+  
+  openim::log::info "Stopping services on ports: $*"
+  # Iterate over each given port.
+  for port in "$@"; do
+    # Use the `lsof` command to find process information related to the given port.
+    info=$(lsof -i :$port -n -P | grep LISTEN || true)
+    
+    # If there's process information, it means the process associated with the port is running.
+    if [[ -n $info ]]; then
+      # Extract the Process ID.
+      while read -r line; do
+        local pid=$(echo $line | awk '{print $2}')
+        
+        # Try to stop the service by killing its process.
+        if kill -TERM $pid; then
+          stopped+=($port)
+        else
+          not_stopped+=($port)
+        fi
             done <<< "$info"
         fi
     done
@@ -519,7 +519,7 @@ openim::util::stop_services_on_ports() {
 # nc -l -p 12345
 # nc -l -p 123456
 # ps -ef | grep "nc -l"
-# openim::util::stop_services_on_ports 1234 12345 
+# openim::util::stop_services_on_ports 1234 12345
 
 
 # The `openim::util::stop_services_with_name` function stops services with specified names.
@@ -1086,7 +1086,7 @@ function openim::util::ensure-install-nginx {
     exit 1
   fi
 
-  for port in 80
+  for port in "80"
   do
     if echo |telnet 127.0.0.1 $port 2>&1|grep refused &>/dev/null;then
       exit 1
@@ -1263,7 +1263,7 @@ function openim:util::setup_ssh_key_copy() {
 
   local sshkey_file=~/.ssh/id_rsa.pub
 
-  # check sshkey file 
+  # check sshkey file
   if [[ ! -e $sshkey_file ]]; then
     expect -c "
     spawn ssh-keygen -t rsa
@@ -1280,7 +1280,7 @@ function openim:util::setup_ssh_key_copy() {
     # delete history
     sed -i "/$target/d" ~/.ssh/known_hosts
 
-    # copy key 
+    # copy key
     expect -c "
     set timeout 100
     spawn ssh-copy-id $username@$target
@@ -1571,7 +1571,7 @@ openim::util::check_ports() {
             else
                 start_time=$(ps -p $pid -o lstart=)
             fi
-            
+
             started+=("Port $port - Command: $command, PID: $pid, FD: $fd, Started: $start_time")
         fi
     done
@@ -1639,7 +1639,7 @@ openim::util::check_process_names() {
     for process_name in "$@"; do
         # Use `pgrep` to find process IDs related to the given process name
         local pids=($(pgrep -f $process_name))
-        
+
         # Check if any process IDs were found
         if [[ ${#pids[@]} -eq 0 ]]; then
             not_started+=($process_name)
@@ -1713,7 +1713,7 @@ openim::util::stop_services_on_ports() {
             # Extract the Process ID.
             while read -r line; do
                 local pid=$(echo $line | awk '{print $2}')
-                    
+
                 # Try to stop the service by killing its process.
                 if kill -TERM $pid; then
                     stopped+=($port)
@@ -1753,7 +1753,7 @@ openim::util::stop_services_on_ports() {
 # nc -l -p 12345
 # nc -l -p 123456
 # ps -ef | grep "nc -l"
-# openim::util::stop_services_on_ports 1234 12345 
+# openim::util::stop_services_on_ports 1234 12345
 
 
 # The `openim::util::stop_services_with_name` function stops services with specified names.
@@ -2320,7 +2320,7 @@ function openim::util::ensure-install-nginx {
     exit 1
   fi
 
-  for port in 80
+  for port in "80"
   do
     if echo |telnet 127.0.0.1 $port 2>&1|grep refused &>/dev/null;then
       exit 1
@@ -2467,7 +2467,7 @@ function openim::util::desc() {
 }
 
 function openim::util:run::prompt() {
-    echo -n "$yellow\$ $reset"
+    echo -n "${yellow}\$ ${reset}"
 }
 
 started=""
@@ -2488,7 +2488,7 @@ function openim::util::run() {
     if [ -n "$DEMO_RUN_FAST" ]; then
       rate=1000
     fi
-    echo "$green$1$reset" | pv -qL $rate
+    echo "${green}$1${reset}" | pv -qL "$rate"
     if [ -n "$DEMO_RUN_FAST" ]; then
       sleep 0.5
     fi
@@ -2516,7 +2516,7 @@ function openim::util::run::relative() {
 
 # This function retrieves the IP address of the current server.
 # It primarily uses the `curl` command to fetch the public IP address from ifconfig.me.
-# If curl or the service is not available, it falls back 
+# If curl or the service is not available, it falls back
 # to the internal IP address provided by the hostname command.
 # TODO: If a delay is found, the delay needs to be addressed
 function openim::util::get_server_ip() {
@@ -2524,7 +2524,7 @@ function openim::util::get_server_ip() {
     if command -v curl &> /dev/null; then
         # Try to retrieve the public IP address using curl and ifconfig.me
         IP=$(dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | sed 's/"//g' | tr -d '\n')
-        
+
         # Check if IP retrieval was successful
         if [[ -z "$IP" ]]; then
             # If not, get the internal IP address
@@ -2534,7 +2534,7 @@ function openim::util::get_server_ip() {
         # If curl is not available, get the internal IP address
         IP=$(ip addr show | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | cut -d'/' -f1 | head -n 1)
     fi
-    
+
     # Return the fetched IP address
     echo "$IP"
 }
@@ -2580,7 +2580,7 @@ function openim::util::set_max_fd() {
             if [ "$desired_fd" = "maximum" ] || [ "$desired_fd" = "max" ]; then
                 desired_fd="$max_fd_limit"
             fi
-            
+
             # Check if desired_fd is less than or equal to max_fd_limit.
             if [ "$desired_fd" -le "$max_fd_limit" ]; then
                 ulimit -n "$desired_fd"
@@ -2696,7 +2696,7 @@ function openim::util::run::relative() {
 
 # This function retrieves the IP address of the current server.
 # It primarily uses the `curl` command to fetch the public IP address from ifconfig.me.
-# If curl or the service is not available, it falls back 
+# If curl or the service is not available, it falls back
 # to the internal IP address provided by the hostname command.
 # TODO: If a delay is found, the delay needs to be addressed
 function openim::util::get_server_ip() {
@@ -2704,7 +2704,7 @@ function openim::util::get_server_ip() {
     if command -v curl &> /dev/null; then
         # Try to retrieve the public IP address using curl and ifconfig.me
         IP=$(dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | sed 's/"//g' | tr -d '\n')
-        
+
         # Check if IP retrieval was successful
         if [[ -z "$IP" ]]; then
             # If not, get the internal IP address
@@ -2714,7 +2714,7 @@ function openim::util::get_server_ip() {
         # If curl is not available, get the internal IP address
         IP=$(ip addr show | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | cut -d'/' -f1 | head -n 1)
     fi
-    
+
     # Return the fetched IP address
     echo "$IP"
 }
@@ -2760,7 +2760,7 @@ function openim::util::set_max_fd() {
             if [ "$desired_fd" = "maximum" ] || [ "$desired_fd" = "max" ]; then
                 desired_fd="$max_fd_limit"
             fi
-            
+
             # Check if desired_fd is less than or equal to max_fd_limit.
             if [ "$desired_fd" -le "$max_fd_limit" ]; then
                 ulimit -n "$desired_fd"

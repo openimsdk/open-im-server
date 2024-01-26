@@ -17,11 +17,13 @@ package user
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/tools/pagination"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"math/rand"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/tools/pagination"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 
 	"github.com/OpenIMSDK/tools/tx"
 
@@ -387,7 +389,7 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 	return &pbuser.GetSubscribeUsersStatusResp{StatusList: onlineStatusList}, nil
 }
 
-// ProcessUserCommandAdd user general function add
+// ProcessUserCommandAdd user general function add.
 func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
 	err := authverify.CheckAccessV3(ctx, req.UserID)
 	if err != nil {
@@ -418,7 +420,7 @@ func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.Proc
 	return &pbuser.ProcessUserCommandAddResp{}, nil
 }
 
-// ProcessUserCommandDelete user general function delete
+// ProcessUserCommandDelete user general function delete.
 func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.ProcessUserCommandDeleteReq) (*pbuser.ProcessUserCommandDeleteResp, error) {
 	err := authverify.CheckAccessV3(ctx, req.UserID)
 	if err != nil {
@@ -440,7 +442,7 @@ func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.P
 	return &pbuser.ProcessUserCommandDeleteResp{}, nil
 }
 
-// ProcessUserCommandUpdate user general function update
+// ProcessUserCommandUpdate user general function update.
 func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
 	err := authverify.CheckAccessV3(ctx, req.UserID)
 	if err != nil {

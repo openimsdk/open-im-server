@@ -16,8 +16,9 @@ package relation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/protocol/user"
 	"time"
+
+	"github.com/OpenIMSDK/protocol/user"
 
 	"github.com/OpenIMSDK/tools/pagination"
 )
