@@ -45,60 +45,6 @@ Homebrew is an essential package manager for macOS. Install it using:
    git config --global user.email "your.email@example.com"
    ```
 
-### Forking and Cloning the Repository
-
-To optimize and add logic to your instructions, particularly regarding deploying on a Mac, you can modify them as follows:
-
-1. **Fork the OpenIM Repository**: Fork the OpenIM repository on GitHub to your account.
-
-2. **Clone Your Fork to Your Local Machine**:
-   Open your terminal and execute the following commands:
-
-   ```sh
-   # Clone the repository
-   git clone https://github.com/<your-username>/open-im-server.git
-
-   # Set Docker bridging network mode for Mac
-   export DOCKER_BRIDGE_SUBNET=127.0.0.0/16
-
-   # Set OpenIM IP
-   export OPENIM_IP=<your-ip>
-
-   # Initialize configuration
-   make init
-
-   # Start components using Docker
-   docker compose up -d
-
-   # Start OpenIM Server
-   make start
-   ```
-
-3. **Additional Steps for Mac Deployment**:
-   If you are deploying on a Mac and wish to use the chat feature, you need to modify the `docker-compose` file. Specifically, you'll need to uncomment the sections related to `openim-chat` and `mysql`. 
-
-   Here's how to do it:
-
-   - Open the `docker-compose.yml` file in a text editor.
-   - Find the sections for `openim-chat` and `mysql`.
-   - Remove the comment marks (`#`) at the beginning of the lines in these sections to enable them.
-   - Save the file after making these changes.
-
-4. **Update and Restart Services**:
-   After modifying the `docker-compose` file, you need to update and restart the services to apply these changes. Run the following command in your terminal:
-
-   ```sh
-   # Update and restart services
-   docker compose up -d
-
-   # Check openim-chat start
-   docker compose logs openim-chat
-   ```
-
-   This command will re-read the `docker-compose.yml` file, apply the new configuration, and restart the necessary containers.
-
-Remember, replacing `<your-username>` and `<your-ip>` with your actual GitHub username and desired IP address for OpenIM is crucial. These steps should streamline the setup process, particularly for Mac users wishing to use the chat feature.
-
 ### Setting Up the Devcontainer
 
 `Devcontainers` provide a Docker-based isolated development environment. 
@@ -125,6 +71,136 @@ Ensure the version of Go is compatible with the version required by OpenIM (refe
 ### Additional Tools
 
 Install other required tools like Docker, Vagrant, and necessary GNU utils as described in the main documentation.
+
+## Mac Deployment openim-chat and openim-server
+
+To integrate the Chinese document into an English document for Linux deployment, we will first translate the content and then adapt it to suit the Linux environment. Here's how the translated and adapted content might look:
+
+### Ensure a Clean Environment
+
+- It's recommended to execute in a new directory.
+- Run `ps -ef | grep openim` to ensure no OpenIM processes are running.
+- Run `ps -ef | grep chat` to check for absence of chat-related processes.
+- Execute `docker ps` to verify there are no related containers running.
+
+### Source Code Deployment
+
+#### Deploying openim-server
+
+Source code deployment is slightly more complex because Docker's networking on Linux differs from Mac.
+
+```bash
+git clone https://github.com/openimsdk/open-im-server
+cd open-im-server
+
+export OPENIM_IP="Your IP" # If it's a cloud server, setting might not be needed
+make init # Generates configuration files
+```
+
+Before deploying openim-server, modify the Kafka logic in the docker-compose.yml file. Replace:
+
+```yaml
+- KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://${DOCKER_BRIDGE_GATEWAY:-172.28.0.1}:${KAFKA_PORT:-19094}
+```
+
+With:
+
+```yaml
+- KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://127.0.0.1:${KAFKA_PORT:-19094}
+```
+
+Then start the service:
+
+```bash
+docker compose up -d
+```
+
+Before starting the openim-server source, set `config/config.yaml` by replacing all instances of `172.28.0.1` with `127.0.0.1`:
+
+```bash
+vim config/config.yaml -c "%s/172\.28\.0\.1/127.0.0.1/g" -c "wq"
+```
+
+Then start openim-server:
+
+```bash
+make start
+```
+
+To check the startup:
+
+```bash
+make check
+```
+
+<aside>
+🚧 To avoid mishaps, it's best to wait five minutes before running `make check` again.
+
+</aside>
+
+#### Deploying openim-chat
+
+There are several ways to deploy openim-chat, either by source code or using Docker.
+
+Navigate back to the parent directory:
+
+```bash
+cd ..
+```
+
+First, let's look at deploying chat from source:
+
+```bash
+git clone https://github.com/openimsdk/chat
+cd chat
+make init # Generates configuration files
+```
+
+If openim-chat has not deployed MySQL, you will need to deploy it. Note that the official Docker Hub for MySQL does not support architectures like ARM, so you can use the newer version of the open-source edition:
+
+```bash
+docker run -d \
+  --name mysql \
+  -p 13306:3306 \
+  -p 3306:33060 \
+  -v "$(pwd)/components/mysql/data:/var/lib/mysql" \
+  -v "/etc/localtime:/etc/localtime" \
+  -e MYSQL_ROOT_PASSWORD="openIM123" \
+  --restart always \
+  mariadb:10.6
+```
+
+Before starting the source code of openim-chat, set `config/config.yaml` by replacing all instances of `172.28.0.1` with `127.0.0.1`:
+
+```bash
+vim config/config.yaml -c "%s/172\.28\.0\.1/127.0.0.1/g" -c "wq"
+```
+
+Then start openim-chat from source:
+
+```bash
+make start
+```
+
+To check, ensure the following four processes start successfully:
+
+```bash
+make check 
+```
+
+### Docker Deployment
+
+Refer to https://github.com/openimsdk/openim-docker for Docker deployment instructions, which can be followed similarly on Linux.
+
+```bash
+git clone https://github.com/openimsdk/openim-docker
+cd openim-docker
+export OPENIM_IP="Your IP"
+make init
+docker compose up -d 
+docker compose logs -f openim-server
+docker compose logs -f openim-chat
+```
 
 ## GitHub Development Workflow
 

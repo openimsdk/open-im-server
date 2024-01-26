@@ -31,7 +31,7 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 # CPU core number
 pushd "${OPENIM_ROOT}/tools/ncpu" >/dev/null
-  cpu_count=$(go run .)
+cpu_count=$(go run .)
 popd >/dev/null
 
 openim::color::echo ${GREEN_PREFIX} "======> cpu_count=$cpu_count"
@@ -42,7 +42,7 @@ compile_count=$((cpu_count / 2))
 # For help output
 ARGHELP=""
 if [[ "$#" -gt 0 ]]; then
-    ARGHELP="'$*'"
+  ARGHELP="'$*'"
 fi
 
 openim::color::echo $COLOR_CYAN "NOTE: $0 has been replaced by 'make multiarch' or 'make build'"
@@ -61,15 +61,15 @@ echo "    ./scripts/build-all-service.sh BINS=openim-api V=1 DEBUG=1"
 echo
 
 if [ -z "$*" ]; then
-    openim::log::info "no args, build all service"
-    make --no-print-directory -C "${OPENIM_ROOT}" -j$compile_count build
+  openim::log::info "no args, build all service"
+  make --no-print-directory -C "${OPENIM_ROOT}" -j$compile_count build
 else
-    openim::log::info "build service: $*"
-    make --no-print-directory -C "${OPENIM_ROOT}" -j$compile_count build "$*"
+  openim::log::info "build service: $*"
+  make --no-print-directory -C "${OPENIM_ROOT}" -j$compile_count build "$*"
 fi
 
 if [ $? -eq 0 ]; then
-    openim::log::success "all service build success, run 'make start' or './scripts/start-all.sh'"
+  openim::log::success "all service build success, run 'make start' or './scripts/start-all.sh'"
 else
-    openim::log::error "make build Error, script exits"
+  openim::log::error "make build Error, script exits"
 fi

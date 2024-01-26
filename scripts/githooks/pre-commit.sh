@@ -34,15 +34,15 @@ RED="\e[31m"
 ENDCOLOR="\e[0m"
 
 printMessage() {
-   printf "${YELLOW}openim : $1${ENDCOLOR}\n"
+  printf "${YELLOW}openim : $1${ENDCOLOR}\n"
 }
 
 printSuccess() {
-   printf "${GREEN}openim : $1${ENDCOLOR}\n"
+  printf "${GREEN}openim : $1${ENDCOLOR}\n"
 }
 
 printError() {
-   printf "${RED}openim : $1${ENDCOLOR}\n"
+  printf "${RED}openim : $1${ENDCOLOR}\n"
 }
 
 printMessage "Running local openim pre-commit hook."
@@ -55,9 +55,9 @@ limit=${GIT_FILE_SIZE_LIMIT:-2000000} # Default 2MB
 limitInMB=$(( $limit / 1000000 ))
 
 function file_too_large(){
-	filename=$0
-	filesize=$(( $1 / 2**20 ))
-
+  filename=$0
+  filesize=$(( $1 / 2**20 ))
+  
 	cat <<HEREDOC
 
 	File $filename is $filesize MB, which is larger than github's maximum
@@ -65,8 +65,8 @@ function file_too_large(){
 	Commit aborted
 
 HEREDOC
-    git status
-
+  git status
+  
 }
 
 # Move to the repo root so git files paths make sense
@@ -77,9 +77,9 @@ empty_tree=$( git hash-object -t tree /dev/null )
 
 if git rev-parse --verify HEAD > /dev/null 2>&1
 then
-	against=HEAD
+  against=HEAD
 else
-	against="$empty_tree"
+  against="$empty_tree"
 fi
 
 # Set split so that for loop below can handle spaces in file names by splitting on line breaks
@@ -104,7 +104,7 @@ fi
 
 if [[ ! $local_branch =~ $valid_branch_regex ]]
 then
-    printError "There is something wrong with your branch name. Branch names in this project must adhere to this contract: $valid_branch_regex. 
+    printError "There is something wrong with your branch name. Branch names in this project must adhere to this contract: $valid_branch_regex.
 Your commit will be rejected. You should rename your branch to a valid name(feat/name OR bug/name) and try again."
     printError "For more on this, read on: https://gist.github.com/cubxxw/126b72104ac0b0ca484c9db09c3e5694"
     exit 1

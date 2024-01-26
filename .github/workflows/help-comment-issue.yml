@@ -17,6 +17,7 @@ on:
   issues:
     types:
       - labeled
+
 jobs:
   add-comment:
     if: github.event.label.name == 'help wanted' || github.event.label.name == 'good first issue'

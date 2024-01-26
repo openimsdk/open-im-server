@@ -3,7 +3,7 @@
 # you may not use this file except in compliance with the License.
 
 # https://github.com/BetaHuhn/repo-file-sync-action
-name: Synchronize kubecub public code to other repositories
+name: Synchronize OpenIM Release Branch Public Code To Other Repositories
 on:
     push:
         paths:
@@ -41,3 +41,4 @@ jobs:
             automerge
           ASSIGNEES: |
             kubbot
+        continue-on-error: true

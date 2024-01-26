@@ -18,9 +18,9 @@
 #
 # Description:
 #  This script is responsible for managing the lifecycle of OpenIM tools, which include starting, stopping,
-#  and handling pre and post operations. It's designed to be modular and extensible, ensuring that the 
+#  and handling pre and post operations. It's designed to be modular and extensible, ensuring that the
 #  individual operations can be managed separately, and integrated seamlessly with Linux systemd.
-# 
+#
 # Features:
 # 1. Robust error handling using Bash built-ins like 'errexit', 'nounset', and 'pipefail'.
 # 2. The capability to source common utility functions and configurations to ensure uniform environmental settings.
@@ -104,12 +104,7 @@ function openim::tools::start_service() {
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
   openim::log::status "Starting ${binary_name}..."
-  # Later, after discarding Docker, the Docker keyword is unreliable, and Kubepods is used
-  if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
-      ${cmd} >> "${LOG_FILE}" 2>&1
-  else
-      ${cmd} | tee -a "${LOG_FILE}"
-  fi
+  ${cmd} | tee -a "${LOG_FILE}"
 }
 
 function openim::tools::start() {

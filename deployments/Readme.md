@@ -165,7 +165,7 @@ export MINIO_ENDPOINT="http://im-minio:9000"
 export MINIO_SIGN_ENDPOINT="https://openim.server.com/im-minio-api"
 
 mkdir ./charts/generated-configs
-../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/openim.yaml > ./charts/generated-configs/config.yaml
+../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/config.yaml > ./charts/generated-configs/config.yaml
 cp ../config/notification.yaml ./charts/generated-configs/notification.yaml
 ../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/helm-image.yaml > ./charts/generated-configs/helm-image.yaml
 ```

@@ -146,7 +146,7 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 func GetDB() *commonMsgDatabase {
 	config.Config.Mongo.Address = []string{"203.56.175.233:37017"}
 	// config.Config.Mongo.Timeout = 60
-	config.Config.Mongo.Database = "openIM_v3"
+	config.Config.Mongo.Database = "openim_v3"
 	// config.Config.Mongo.Source = "admin"
 	config.Config.Mongo.Username = "root"
 	config.Config.Mongo.Password = "openIM123"

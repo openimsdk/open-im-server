@@ -36,9 +36,9 @@ import (
 )
 
 const (
-	minPartSize = 1024 * 1024 * 1        // 1MB
-	maxPartSize = 1024 * 1024 * 1024 * 5 // 5GB
-	maxNumSize  = 1000
+	minPartSize int64 = 1024 * 1024 * 1        // 1MB
+	maxPartSize int64 = 1024 * 1024 * 1024 * 5 // 5GB
+	maxNumSize  int64 = 1000
 )
 
 const (
@@ -133,7 +133,7 @@ func (c *Cos) PartSize(ctx context.Context, size int64) (int64, error) {
 		return 0, errors.New("size must be greater than 0")
 	}
 	if size > maxPartSize*maxNumSize {
-		return 0, fmt.Errorf("size must be less than %db", maxPartSize*maxNumSize)
+		return 0, fmt.Errorf("COS size must be less than the maximum allowed limit")
 	}
 	if size <= minPartSize*maxNumSize {
 		return minPartSize, nil

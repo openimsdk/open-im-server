@@ -28,59 +28,59 @@ openim::util::set_max_fd 200000
 SERVER_NAME="openim-msgtransfer"
 
 function openim::msgtransfer::start() {
-    openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
-    openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGTRANSFER_BINARY}"
-
-    openim::util::stop_services_with_name ${OPENIM_MSGTRANSFER_BINARY}
-
-    # Message Transfer Prometheus port list
-    MSG_TRANSFER_PROM_PORTS=(openim::util::list-to-string ${MSG_TRANSFER_PROM_PORT} )
-
-    openim::log::status "OpenIM Prometheus ports: ${MSG_TRANSFER_PROM_PORTS[*]}"
-
-    openim::log::status "OpenIM Msggateway config path: ${OPENIM_MSGTRANSFER_CONFIG}"
-
-    openim::log::info "openim maggateway num: ${OPENIM_MSGGATEWAY_NUM}"
-
-    if [ "${OPENIM_MSGGATEWAY_NUM}" -lt 1 ]; then
+  openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
+  openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGTRANSFER_BINARY}"
+  
+  openim::util::stop_services_with_name ${OPENIM_MSGTRANSFER_BINARY}
+  
+  # Message Transfer Prometheus port list
+  MSG_TRANSFER_PROM_PORTS=(openim::util::list-to-string ${MSG_TRANSFER_PROM_PORT} )
+  
+  openim::log::status "OpenIM Prometheus ports: ${MSG_TRANSFER_PROM_PORTS[*]}"
+  
+  openim::log::status "OpenIM Msggateway config path: ${OPENIM_MSGTRANSFER_CONFIG}"
+  
+  openim::log::info "openim maggateway num: ${OPENIM_MSGGATEWAY_NUM}"
+  
+  if [ "${OPENIM_MSGGATEWAY_NUM}" -lt 1 ]; then
     opeim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be greater than 0"
-    fi
-
-    if [ ${OPENIM_MSGGATEWAY_NUM} -ne $((${#MSG_TRANSFER_PROM_PORTS[@]} - 1)) ]; then
+  fi
+  
+  if [ ${OPENIM_MSGGATEWAY_NUM} -ne $((${#MSG_TRANSFER_PROM_PORTS[@]} - 1)) ]; then
     openim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be equal to the number of MSG_TRANSFER_PROM_PORTS"
+  fi
+  
+  for (( i=0; i<$OPENIM_MSGGATEWAY_NUM; i++ )) do
+    openim::log::info "prometheus port: ${MSG_TRANSFER_PROM_PORTS[$i]}"
+    PROMETHEUS_PORT_OPTION=""
+    if [[ -n "${OPENIM_PROMETHEUS_PORTS[$i]}" ]]; then
+      PROMETHEUS_PORT_OPTION="--prometheus_port ${OPENIM_PROMETHEUS_PORTS[$i]}"
     fi
-
-    for (( i=0; i<$OPENIM_MSGGATEWAY_NUM; i++ )) do
-      openim::log::info "prometheus port: ${MSG_TRANSFER_PROM_PORTS[$i]}"
-      PROMETHEUS_PORT_OPTION=""
-      if [[ -n "${OPENIM_PROMETHEUS_PORTS[$i]}" ]]; then
-        PROMETHEUS_PORT_OPTION="--prometheus_port ${OPENIM_PROMETHEUS_PORTS[$i]}"
-      fi
-      nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} -n ${i}>> ${LOG_FILE} 2>&1 &
-    done
-
-    openim::util::check_process_names  "${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"
+    nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} -n ${i}>> ${LOG_FILE} 2>&1 &
+  done
+  
+  openim::util::check_process_names  "${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"
 }
 
 function openim::msgtransfer::check() {
-    PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
-
-    NUM_PROCESSES=$(echo "$PIDS" | wc -l)
-
-    if [ "$NUM_PROCESSES" -eq "$OPENIM_MSGGATEWAY_NUM" ]; then
-        openim::log::info "Found $OPENIM_MSGGATEWAY_NUM processes named $OPENIM_OUTPUT_HOSTBIN"
-        for PID in $PIDS; do
-            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-                ps -p $PID -o pid,cmd
-            elif [[ "$OSTYPE" == "darwin"* ]]; then
-                ps -p $PID -o pid,comm
-            else
-                openim::log::error "Unsupported OS type: $OSTYPE"
-            fi
-        done
-    else
-        openim::log::error_exit "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
-    fi
+  PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
+  
+  NUM_PROCESSES=$(echo "$PIDS" | wc -l)
+  
+  if [ "$NUM_PROCESSES" -eq "$OPENIM_MSGGATEWAY_NUM" ]; then
+    openim::log::info "Found $OPENIM_MSGGATEWAY_NUM processes named $OPENIM_OUTPUT_HOSTBIN"
+    for PID in $PIDS; do
+      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        ps -p $PID -o pid,cmd
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+        ps -p $PID -o pid,comm
+      else
+        openim::log::error "Unsupported OS type: $OSTYPE"
+      fi
+    done
+  else
+    openim::log::error_exit "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
+  fi
 }
 
 ###################################### Linux Systemd ######################################
@@ -96,30 +96,30 @@ EOF
 # install openim-msgtransfer
 function openim::msgtransfer::install() {
   pushd "${OPENIM_ROOT}"
-
+  
   # 1. Build openim-msgtransfer
   make build BINS=${SERVER_NAME}
-
+  
   openim::common::sudo "cp -r ${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME} ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
   openim::log::status "${SERVER_NAME} binary: ${OPENIM_INSTALL_DIR}/${SERVER_NAME}/${SERVER_NAME}"
-
+  
   openim::log::status "${SERVER_NAME} binary: ${OPENIM_INSTALL_DIR}/bin/${SERVER_NAME}"
-
+  
   # 2. Generate and install the openim-msgtransfer configuration file (openim-msgtransfer.yaml)
   # nono
-
+  
   # 3. Create and install the ${SERVER_NAME} systemd unit file
   echo ${LINUX_PASSWORD} | sudo -S bash -c \
-    "SERVER_NAME=${SERVER_NAME} ./scripts/genconfig.sh ${ENV_FILE} deployments/templates/openim.service > ${SYSTEM_FILE_PATH}"
+  "SERVER_NAME=${SERVER_NAME} ./scripts/genconfig.sh ${ENV_FILE} deployments/templates/openim.service > ${SYSTEM_FILE_PATH}"
   openim::log::status "${SERVER_NAME} systemd file: ${SYSTEM_FILE_PATH}"
-
+  
   # 4. Start the openim-msgtransfer service
   openim::common::sudo "systemctl daemon-reload"
   openim::common::sudo "systemctl restart ${SERVER_NAME}"
   openim::common::sudo "systemctl enable ${SERVER_NAME}"
   openim::msgtransfer::status || return 1
   openim::msgtransfer::info
-
+  
   openim::log::info "install ${SERVER_NAME} successfully"
   popd
 }

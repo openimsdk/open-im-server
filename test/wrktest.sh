@@ -34,7 +34,7 @@ openim_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 wrkdir="${openim_root}/_output/wrk"
 jobname="openim-api"
 duration="300s"
-threads=$((3 * `grep -c processor /proc/cpuinfo`))
+threads=$((3 * $(grep -c processor /proc/cpuinfo)))
 
 source "${openim_root}/scripts/lib/color.sh"
 
@@ -122,7 +122,7 @@ if (s ~ "s") {
 
 # Remove existing data file
 function openim::wrk::prepare() {
-  rm -f ${wrkdir}/${datfile}
+  rm -f "${wrkdir}"/"${datfile}"
 }
 
 # Plot according to gunplot data file
@@ -216,7 +216,7 @@ openim::wrk::start_performance_test() {
   do
     wrkcmd="${cmd} -c ${c} $1"
     echo "Running wrk command: ${wrkcmd}"
-    result=`eval ${wrkcmd}`
+    result=$(eval "${wrkcmd}")
     openim::wrk::convert_plot_data "${result}"
   done
 
@@ -241,9 +241,10 @@ while getopts "hd:n:" opt;do
   esac
 done
 
-shift $(($OPTIND-1))
+shift $((OPTIND-1))
 
-mkdir -p ${wrkdir}
+mkdir -p "${wrkdir}"
+
 case $1 in
   "diff")
     if [ "$#" -lt 3 ];then
@@ -255,7 +256,7 @@ case $1 in
     t2=$(basename $3|sed 's/.dat//g') # 对比图中粉色线条名称
 
     join $2 $3 > /tmp/plot_diff.dat
-    openim::wrk::plot_diff `basename $2` `basename $3`
+    openim::wrk::plot_diff "$(basename "$2")" "$(basename "$3")"
     exit 0
     ;;
   *)

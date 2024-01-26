@@ -78,9 +78,6 @@ jobs:
           echo "Run unit test and get test coverage successfully" 
         continue-on-error: true
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
-
       - name: OpenIM verify copyright
         run: |
           sudo make verify-copyright

@@ -142,12 +142,12 @@ func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*rel
 	return u.cache.GetUsersInfo(ctx, userIDs)
 }
 
-// Find userInfo By Nickname
+// Find userInfo By Nickname.
 func (u *userDatabase) FindByNickname(ctx context.Context, nickname string) (users []*relation.UserModel, err error) {
 	return u.userDB.TakeByNickname(ctx, nickname)
 }
 
-// Find notificationAccouts
+// Find notificationAccouts.
 func (u *userDatabase) FindNotification(ctx context.Context, level int64) (users []*relation.UserModel, err error) {
 	return u.userDB.TakeNotification(ctx, level)
 }

@@ -34,15 +34,15 @@ RED="\e[31m"
 ENDCOLOR="\e[0m"
 
 printMessage() {
-   printf "${YELLOW}OpenIM : $1${ENDCOLOR}\n"
+  printf "${YELLOW}OpenIM : $1${ENDCOLOR}\n"
 }
 
 printSuccess() {
-   printf "${GREEN}OpenIM : $1${ENDCOLOR}\n"
+  printf "${GREEN}OpenIM : $1${ENDCOLOR}\n"
 }
 
 printError() {
-   printf "${RED}OpenIM : $1${ENDCOLOR}\n"
+  printf "${RED}OpenIM : $1${ENDCOLOR}\n"
 }
 
 printMessage "Running the OpenIM commit-msg hook."
@@ -50,9 +50,9 @@ printMessage "Running the OpenIM commit-msg hook."
 # This example catches duplicate Signed-off-by lines.
 
 test "" = "$(grep '^Signed-off-by: ' "$1" |
-	 sort | uniq -c | sed -e '/^[ 	]*1[ 	]/d')" || {
-	echo >&2 Duplicate Signed-off-by lines.
-	exit 1
+sort | uniq -c | sed -e '/^[ 	]*1[ 	]/d')" || {
+echo >&2 Duplicate Signed-off-by lines.
+exit 1
 }
 
 # TODO: go-gitlint dir set
@@ -60,21 +60,21 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/../..
 GITLINT_DIR="$OPENIM_ROOT/_output/tools/go-gitlint"
 
 $GITLINT_DIR \
-    --msg-file=$1 \
-    --subject-regex="^(build|chore|ci|docs|feat|feature|fix|perf|refactor|revert|style|bot|test)(.*)?:\s?.*" \
-    --subject-maxlen=150 \
-    --subject-minlen=10 \
-    --body-regex=".*" \
-    --max-parents=1
+--msg-file=$1 \
+--subject-regex="^(build|chore|ci|docs|feat|feature|fix|perf|refactor|revert|style|bot|test)(.*)?:\s?.*" \
+--subject-maxlen=150 \
+--subject-minlen=10 \
+--body-regex=".*" \
+--max-parents=1
 
 if [ $? -ne 0 ]
 then
-    if ! command -v $GITLINT_DIR &>/dev/null; then
-        printError "$GITLINT_DIR not found. Please run 'make tools' OR 'make tools.verify.go-gitlint' make verto install it."
-    fi
-    printError "Please fix your commit message to match kubecub coding standards"
-    printError "https://gist.github.com/cubxxw/126b72104ac0b0ca484c9db09c3e5694#file-githook-md"
-    exit 1
+if ! command -v $GITLINT_DIR &>/dev/null; then
+  printError "$GITLINT_DIR not found. Please run 'make tools' OR 'make tools.verify.go-gitlint' make verto install it."
+fi
+printError "Please fix your commit message to match kubecub coding standards"
+printError "https://gist.github.com/cubxxw/126b72104ac0b0ca484c9db09c3e5694#file-githook-md"
+exit 1
 fi
 
 ### Add Sign-off-by line to the end of the commit message
@@ -88,5 +88,5 @@ SIGNED_OFF_BY_EXISTS=$?
 
 # Add "Signed-off-by" line if it doesn't exist
 if [ $SIGNED_OFF_BY_EXISTS -ne 0 ]; then
-  echo -e "\nSigned-off-by: $NAME <$EMAIL>" >> "$1"
+echo -e "\nSigned-off-by: $NAME <$EMAIL>" >> "$1"
 fi
