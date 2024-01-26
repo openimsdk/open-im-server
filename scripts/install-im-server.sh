@@ -77,7 +77,7 @@ check_containers() {
 }
 
 # Wait for a short period to allow containers to initialize
-sleep 30
+sleep 100
 
 ${DOCKER_COMPOSE_COMMAND} ps
 
