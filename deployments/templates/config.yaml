@@ -243,9 +243,10 @@ push:
 #
 # Built-in app manager user IDs
 # Built-in app manager nicknames
+# Attention, this configure is discarded. If you have used him before, configure your own
 manager:
-  userID: [ "${MANAGER_USERID_1}", "${MANAGER_USERID_2}", "${MANAGER_USERID_3}" ]
-  nickname: [ "${NICKNAME_1}", "${NICKNAME_2}", "${NICKNAME_3}" ]
+  userID:
+  nickname:
 
 # chatAdmin, use for send notification
 #
@@ -329,7 +330,7 @@ callback:
     timeout: ${CALLBACK_TIMEOUT}
     failedContinue: ${CALLBACK_FAILED_CONTINUE}
   afterSendSingleMsg:
-    enable: true
+    enable: ${CALLBACK_ENABLE}
     timeout: ${CALLBACK_TIMEOUT}
     failedContinue: ${CALLBACK_FAILED_CONTINUE}
   beforeSendGroupMsg:

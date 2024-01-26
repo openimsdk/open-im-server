@@ -477,12 +477,6 @@ This section involves setting up additional configuration variables for Websocke
 | JPNS_MASTER_SECRET      | [User Defined]    | JPNS Master Secret               |
 | JPNS_PUSH_URL           | [User Defined]    | JPNS Push Notification URL       |
 | JPNS_PUSH_INTENT        | [User Defined]    | JPNS Push Intent                 |
-| MANAGER_USERID_1        | "openIM123456"    | Administrator ID 1               |
-| MANAGER_USERID_2        | "openIM654321"    | Administrator ID 2               |
-| MANAGER_USERID_3        | "openIMAdmin"     | Administrator ID 3               |
-| NICKNAME_1              | "system1"         | Nickname 1                       |
-| NICKNAME_2              | "system2"         | Nickname 2                       |
-| NICKNAME_3              | "system3"         | Nickname 3                       |
 | IM_ADMIN_USERID         | "imAdmin"         | IM Administrator ID              |
 | IM_ADMIN_NAME           | "imAdmin"         | IM Administrator Nickname        |
 | MULTILOGIN_POLICY       | "1"               | Multi-login Policy               |

@@ -71,12 +71,6 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		return err
 	}
 	users := make([]*tablerelation.UserModel, 0)
-	if len(config.Config.Manager.UserID) != len(config.Config.Manager.Nickname) {
-		return errors.New("len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname)")
-	}
-	for k, v := range config.Config.Manager.UserID {
-		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k], AppMangerLevel: constant.AppAdmin})
-	}
 	if len(config.Config.IMAdmin.UserID) != len(config.Config.IMAdmin.Nickname) {
 		return errors.New("len(config.Config.AppNotificationAdmin.AppManagerUid) != len(config.Config.AppNotificationAdmin.Nickname)")
 	}

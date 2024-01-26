@@ -54,6 +54,9 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.UserID) {
 			return nil
 		}
+		if utils.IsContain(data.MsgData.SendID, config.Config.IMAdmin.UserID) {
+			return nil
+		}
 		if data.MsgData.ContentType <= constant.NotificationEnd &&
 			data.MsgData.ContentType >= constant.NotificationBegin {
 			return nil
@@ -89,6 +92,9 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return nil
 		}
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.UserID) {
+			return nil
+		}
+		if utils.IsContain(data.MsgData.SendID, config.Config.IMAdmin.UserID) {
 			return nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd &&
