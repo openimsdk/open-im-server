@@ -90,11 +90,11 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbconvers
 	return resp, nil
 }
 
-func (m *conversationServer) GetSortedConversationList(ctx context.Context, req *pbconversation.GetSortedConversationListReq) (resp *pbconversation.GetSortedConversationListResp, err error) {
+func (c *conversationServer) GetSortedConversationList(ctx context.Context, req *pbconversation.GetSortedConversationListReq) (resp *pbconversation.GetSortedConversationListResp, err error) {
 	log.ZDebug(ctx, "GetSortedConversationList", "seqs", req, "userID", req.UserID)
 	var conversationIDs []string
 	if len(req.ConversationIDs) == 0 {
-		conversationIDs, err = m.conversationDatabase.GetConversationIDs(ctx, req.UserID)
+		conversationIDs, err = c.conversationDatabase.GetConversationIDs(ctx, req.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +102,7 @@ func (m *conversationServer) GetSortedConversationList(ctx context.Context, req 
 		conversationIDs = req.ConversationIDs
 	}
 
-	conversations, err := m.conversationDatabase.FindConversations(ctx, req.UserID, conversationIDs)
+	conversations, err := c.conversationDatabase.FindConversations(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -110,22 +110,22 @@ func (m *conversationServer) GetSortedConversationList(ctx context.Context, req 
 		return nil, errs.ErrRecordNotFound.Wrap()
 	}
 
-	maxSeqs, err := m.msgRpcClient.GetMaxSeqs(ctx, conversationIDs)
+	maxSeqs, err := c.msgRpcClient.GetMaxSeqs(ctx, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	chatLogs, err := m.msgRpcClient.GetMsgByConversationIDs(ctx, conversationIDs, maxSeqs)
+	chatLogs, err := c.msgRpcClient.GetMsgByConversationIDs(ctx, conversationIDs, maxSeqs)
 	if err != nil {
 		return nil, err
 	}
 
-	conversationMsg, err := m.getConversationInfo(ctx, chatLogs, req.UserID)
+	conversationMsg, err := c.getConversationInfo(ctx, chatLogs, req.UserID)
 	if err != nil {
 		return nil, err
 	}
 
-	hasReadSeqs, err := m.msgRpcClient.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
+	hasReadSeqs, err := c.msgRpcClient.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -157,8 +157,8 @@ func (m *conversationServer) GetSortedConversationList(ctx context.Context, req 
 		UnreadTotal:       unreadTotal,
 	}
 
-	m.conversationSort(conversation_isPinTime, resp, conversation_unreadCount, conversationMsg)
-	m.conversationSort(conversation_notPinTime, resp, conversation_unreadCount, conversationMsg)
+	c.conversationSort(conversation_isPinTime, resp, conversation_unreadCount, conversationMsg)
+	c.conversationSort(conversation_notPinTime, resp, conversation_unreadCount, conversationMsg)
 
 	resp.ConversationElems = utils.Paginate(resp.ConversationElems, int(req.Pagination.GetPageNumber()), int(req.Pagination.GetShowNumber()))
 	return resp, nil
@@ -528,4 +528,12 @@ func (c *conversationServer) getConversationInfo(
 		conversationMsg[conversationID] = pbchatLog
 	}
 	return conversationMsg, nil
+}
+
+func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(ctx context.Context, req *pbconversation.GetConversationNotReceiveMessageUserIDsReq) (*pbconversation.GetConversationNotReceiveMessageUserIDsResp, error) {
+	userIDs, err := c.conversationDatabase.GetConversationNotReceiveMessageUserIDs(ctx, req.ConversationID)
+	if err != nil {
+		return nil, err
+	}
+	return &pbconversation.GetConversationNotReceiveMessageUserIDsResp{UserIDs: userIDs}, nil
 }

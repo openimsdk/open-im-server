@@ -88,3 +88,25 @@ func (c *ConversationLocalCache) GetConversations(ctx context.Context, ownerUser
 	}
 	return conversations, nil
 }
+
+func (c *ConversationLocalCache) getConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) (*listMap[string], error) {
+	return localcache.AnyValue[*listMap[string]](c.local.Get(ctx, cachekey.GetConversationNotReceiveMessageUserIDsKey(conversationID), func(ctx context.Context) (any, error) {
+		return newListMap(c.client.GetConversationNotReceiveMessageUserIDs(ctx, conversationID))
+	}))
+}
+
+func (c *ConversationLocalCache) GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error) {
+	res, err := c.getConversationNotReceiveMessageUserIDs(ctx, conversationID)
+	if err != nil {
+		return nil, err
+	}
+	return res.List, nil
+}
+
+func (c *ConversationLocalCache) GetConversationNotReceiveMessageUserIDMap(ctx context.Context, conversationID string) (map[string]struct{}, error) {
+	res, err := c.getConversationNotReceiveMessageUserIDs(ctx, conversationID)
+	if err != nil {
+		return nil, err
+	}
+	return res.Map, nil
+}

@@ -139,3 +139,11 @@ func (c *ConversationRpcClient) GetConversations(
 	}
 	return resp.Conversations, nil
 }
+
+func (c *ConversationRpcClient) GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error) {
+	resp, err := c.Client.GetConversationNotReceiveMessageUserIDs(ctx, &pbconversation.GetConversationNotReceiveMessageUserIDsReq{ConversationID: conversationID})
+	if err != nil {
+		return nil, err
+	}
+	return resp.UserIDs, nil
+}
