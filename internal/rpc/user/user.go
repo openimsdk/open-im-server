@@ -61,7 +61,6 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
-
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {

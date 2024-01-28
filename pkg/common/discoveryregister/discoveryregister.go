@@ -16,8 +16,9 @@ package discoveryregister
 
 import (
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/direct"
 	"os"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/direct"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/zookeeper"

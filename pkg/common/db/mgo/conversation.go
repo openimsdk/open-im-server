@@ -114,7 +114,8 @@ func (c *ConversationMgo) GetAllConversationIDs(ctx context.Context) ([]string, 
 func (c *ConversationMgo) GetAllConversationIDsNumber(ctx context.Context) (int64, error) {
 	counts, err := mgoutil.Aggregate[int64](ctx, c.coll, []bson.M{
 		{"$group": bson.M{"_id": "$conversation_id"}},
-		{"$project": bson.M{"_id": 0, "conversation_id": "$_id"}},
+		{"$group": bson.M{"_id": nil, "count": bson.M{"$sum": 1}}},
+		{"$project": bson.M{"_id": 0}},
 	})
 	if err != nil {
 		return 0, err
