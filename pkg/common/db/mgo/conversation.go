@@ -96,8 +96,8 @@ func (c *ConversationMgo) FindUserIDAllConversations(ctx context.Context, userID
 	return mgoutil.Find[*relation.ConversationModel](ctx, c.coll, bson.M{"owner_user_id": userID})
 }
 
-func (c *ConversationMgo) FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error) {
-	return mgoutil.Find[string](ctx, c.coll, bson.M{"group_id": groupID, "recv_msg_opt": constant.ReceiveNotNotifyMessage}, options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1}))
+func (c *ConversationMgo) FindRecvMsgNotNotifyUserIDs(ctx context.Context, conversationID string) ([]string, error) {
+	return mgoutil.Find[string](ctx, c.coll, bson.M{"conversation_id": conversationID, "recv_msg_opt": constant.ReceiveNotNotifyMessage}, options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1}))
 }
 
 func (c *ConversationMgo) GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) (opt int, err error) {
