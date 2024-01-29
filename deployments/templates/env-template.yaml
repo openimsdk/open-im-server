@@ -100,7 +100,7 @@ ZOOKEEPER_PORT=${ZOOKEEPER_PORT}
 
 # MongoDB service port configuration.
 # Default: MONGO_PORT=37017
-# MONGO_PORT=${MONGO_PORT}
+MONGO_PORT=${MONGO_PORT}
 
 # Password for MongoDB admin user. Used for service authentication.
 # Default: MONGO_PASSWORD=openIM123
