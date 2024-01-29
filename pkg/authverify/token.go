@@ -17,7 +17,6 @@ package authverify
 import (
 	"context"
 	"fmt"
-
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/tokenverify"
@@ -35,7 +34,7 @@ func Secret() jwt.Keyfunc {
 
 func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	opUserID := mcontext.GetOpUserID(ctx)
-	if utils.IsContain(opUserID, config.Config.Manager.UserID) {
+	if len(config.Config.Manager.UserID) > 0 && utils.IsContain(opUserID, config.Config.Manager.UserID) {
 		return nil
 	}
 	if utils.IsContain(opUserID, config.Config.IMAdmin.UserID) {
@@ -48,11 +47,11 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 }
 
 func IsAppManagerUid(ctx context.Context) bool {
-	return utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID) || utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.IMAdmin.UserID)
+	return (len(config.Config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID)) || utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.IMAdmin.UserID)
 }
 
 func CheckAdmin(ctx context.Context) error {
-	if utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID) {
+	if len(config.Config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID) {
 		return nil
 	}
 	if utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.IMAdmin.UserID) {
@@ -64,7 +63,7 @@ func CheckIMAdmin(ctx context.Context) error {
 	if utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.IMAdmin.UserID) {
 		return nil
 	}
-	if utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID) {
+	if len(config.Config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID) {
 		return nil
 	}
 	return errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s is not CheckIMAdmin userID", mcontext.GetOpUserID(ctx)))
@@ -75,7 +74,7 @@ func ParseRedisInterfaceToken(redisToken any) (*tokenverify.Claims, error) {
 }
 
 func IsManagerUserID(opUserID string) bool {
-	return utils.IsContain(opUserID, config.Config.Manager.UserID) || utils.IsContain(opUserID, config.Config.IMAdmin.UserID)
+	return (len(config.Config.Manager.UserID) > 0 && utils.IsContain(opUserID, config.Config.Manager.UserID)) || utils.IsContain(opUserID, config.Config.IMAdmin.UserID)
 }
 
 func WsVerifyToken(token, userID string, platformID int) error {
