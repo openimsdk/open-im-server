@@ -51,13 +51,10 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "RevokeMsg", "Length", req)
-	log.ZDebug(ctx, "RevokeMsg", "UserInfo", user)
 	_, _, msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.ConversationID, []int64{req.Seq})
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "RevokeMsg", "msgs", msgs)
 	if len(msgs) == 0 || msgs[0] == nil {
 		return nil, errs.ErrRecordNotFound.Wrap("msg not found")
 	}
@@ -104,7 +101,6 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		}
 	}
 	now := time.Now().UnixMilli()
-	log.ZDebug(ctx, "RevokeMsgRevokeMsg", "role", role)
 	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &unrelationtb.RevokeModel{
 		Role:     role,
 		UserID:   req.UserID,
@@ -115,7 +111,6 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		return nil, err
 	}
 	revokerUserID := mcontext.GetOpUserID(ctx)
-	log.ZDebug(ctx, "RevokeMsgRevokeMsg", "revokerUserID", revokerUserID)
 	var flag bool
 	if len(config.Config.Manager.UserID) > 0 {
 		flag = utils.Contain(revokerUserID, config.Config.Manager.UserID...)
@@ -123,7 +118,6 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if len(config.Config.Manager.UserID) == 0 && len(config.Config.IMAdmin.UserID) > 0 {
 		flag = utils.Contain(revokerUserID, config.Config.IMAdmin.UserID...)
 	}
-	log.ZDebug(ctx, "RevokeMsgRevokeMsg", "flag", flag)
 	tips := sdkws.RevokeMsgTips{
 		RevokerUserID:  revokerUserID,
 		ClientMsgID:    msgs[0].ClientMsgID,

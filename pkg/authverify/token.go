@@ -17,8 +17,6 @@ package authverify
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/tools/log"
-
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/tokenverify"
@@ -42,7 +40,6 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	if utils.IsContain(opUserID, config.Config.IMAdmin.UserID) {
 		return nil
 	}
-	log.ZDebug(ctx, "CheckAcessV3CheckAcessV3CheckAcessV3", "Length", len(config.Config.IMAdmin.UserID))
 	if opUserID == ownerUserID {
 		return nil
 	}
