@@ -132,20 +132,40 @@ func getMsgGatewayHost(ctx context.Context) []string {
 // GetConns returns the gRPC client connections to the specified service.
 func (cli *K8sDR) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
 
+	// This conditional checks if the serviceName is not the OpenImMessageGatewayName.
+	// It seems to handle a special case for the OpenImMessageGateway.
 	if serviceName != config.Config.RpcRegisterName.OpenImMessageGatewayName {
+		// DialContext creates a client connection to the given target (serviceName) using the specified context.
+		// 'cli.options' are likely default or common options for all connections in this struct.
+		// 'opts...' allows for additional gRPC dial options to be passed and used.
 		conn, err := grpc.DialContext(ctx, serviceName, append(cli.options, opts...)...)
+
+		// The function returns a slice of client connections with the new connection, or an error if occurred.
 		return []*grpc.ClientConn{conn}, err
 	} else {
+		// This block is executed if the serviceName is OpenImMessageGatewayName.
+		// 'ret' will accumulate the connections to return.
 		var ret []*grpc.ClientConn
+
+		// getMsgGatewayHost presumably retrieves hosts for the message gateway service.
+		// The context is passed, likely for cancellation and timeout control.
 		gatewayHosts := getMsgGatewayHost(ctx)
+
+		// Iterating over the retrieved gateway hosts.
 		for _, host := range gatewayHosts {
+			// Establishes a connection to each host.
+			// Again, appending cli.options with any additional opts provided.
 			conn, err := grpc.DialContext(ctx, host, append(cli.options, opts...)...)
+
+			// If there's an error while dialing any host, the function returns immediately with the error.
 			if err != nil {
 				return nil, err
 			} else {
+				// If the connection is successful, it is added to the 'ret' slice.
 				ret = append(ret, conn)
 			}
 		}
+		// After all hosts are processed, the slice of connections is returned.
 		return ret, nil
 	}
 }

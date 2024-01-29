@@ -5,7 +5,7 @@ go 1.19
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/OpenIMSDK/protocol v0.0.48
-	github.com/OpenIMSDK/tools v0.0.28
+	github.com/OpenIMSDK/tools v0.0.29
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/dtm-labs/rockscache v0.1.1
 	github.com/gin-gonic/gin v1.9.1
@@ -127,7 +127,7 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.13.0 // indirect
