@@ -59,7 +59,7 @@ func (m *MsgMongoDriver) PushMsgsToDoc(ctx context.Context, docID string, msgsTo
 
 func (m *MsgMongoDriver) Create(ctx context.Context, model *table.MsgDocModel) error {
 	_, err := m.MsgCollection.InsertOne(ctx, model)
-	return err
+	return errs.Wrap(err)
 }
 
 func (m *MsgMongoDriver) UpdateMsg(
