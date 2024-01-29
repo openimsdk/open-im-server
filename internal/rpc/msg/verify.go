@@ -51,7 +51,7 @@ type MessageRevoked struct {
 func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) error {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
-		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.UserID) {
+		if len(config.Config.Manager.UserID) > 0 && utils.IsContain(data.MsgData.SendID, config.Config.Manager.UserID) {
 			return nil
 		}
 		if utils.IsContain(data.MsgData.SendID, config.Config.IMAdmin.UserID) {
@@ -91,7 +91,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if groupInfo.GroupType == constant.SuperGroup {
 			return nil
 		}
-		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.UserID) {
+		if len(config.Config.Manager.UserID) > 0 && utils.IsContain(data.MsgData.SendID, config.Config.Manager.UserID) {
 			return nil
 		}
 		if utils.IsContain(data.MsgData.SendID, config.Config.IMAdmin.UserID) {
