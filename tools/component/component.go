@@ -138,16 +138,9 @@ func checkMinio() (string, error) {
 		return "", nil
 	}
 
-	// Prioritize environment variables
-	endpoint := getEnv("MINIO_ENDPOINT", config.Config.Object.Minio.Endpoint)
-	address, addressExist := os.LookupEnv("MINIO_ADDRESS")
-	port, portExist := os.LookupEnv("MINIO_PORT")
-	if portExist && addressExist {
-		endpoint = "http://" + address + ":" + port
-	} else if !portExist && addressExist {
-		return "", errs.Wrap(errors.New("the MINIO_ADDRESS of minio is empty"))
-	} else if portExist && !addressExist {
-		return "", errs.Wrap(errors.New("the MINIO_PORT of minio is empty"))
+	endpoint, err := getMinioAddr("MINIO_ENDPOINT", "MINIO_ADDRESS", "MINIO_PORT", config.Config.Object.Minio.Endpoint)
+	if err != nil {
+		return "", err
 	}
 
 	minio := &component.Minio{
@@ -179,20 +172,11 @@ func checkRedis() (string, error) {
 		Password: password,
 	}
 
-	addr, addrExist := os.LookupEnv("REDIS_ADDRESS")
-	port, portExist := os.LookupEnv("REDIS_PORT")
-
-	if addrExist && portExist {
-		addresses := strings.Split(addr, ",")
-		for i, address := range addresses {
-			addresses[i] = address + ":" + port
-		}
-		redis.Address = addresses
-	} else if !addrExist && portExist {
-		return "", errs.Wrap(errors.New("the REDIS_ADDRESS of minio is empty"))
-	} else if addrExist && !portExist {
-		return "", errs.Wrap(errors.New("the REDIS_PORT of minio is empty"))
+	addresses, err := getAddress("REDIS_ADDRESS", "REDIS_PORT", config.Config.Redis.Address)
+	if err != nil {
+		return "", err
 	}
+	redis.Address = addresses
 
 	str, err := component.CheckRedis(redis)
 	if err != nil {
@@ -214,19 +198,11 @@ func checkZookeeper() (string, error) {
 		Password: getEnv("ZOOKEEPER_PASSWORD", config.Config.Zookeeper.Password),
 	}
 
-	address, addrExist := os.LookupEnv("ZOOKEEPER_ADDRESS")
-	port, portExist := os.LookupEnv("ZOOKEEPER_PORT")
-	if addrExist && portExist {
-		addresses := strings.Split(address, ",")
-		for i, addr := range addresses {
-			addresses[i] = addr + ":" + port
-		}
-		zk.ZkAddr = addresses
-	} else if !addrExist && portExist {
-		return "", errs.Wrap(errors.New("the ZOOKEEPER_ADDRESS of minio is empty"))
-	} else if addrExist && !portExist {
-		return "", errs.Wrap(errors.New("the ZOOKEEPER_PORT of minio is empty"))
+	addresses, err := getAddress("ZOOKEEPER_ADDRESS", "ZOOKEEPER_PORT", config.Config.Zookeeper.ZkAddr)
+	if err != nil {
+		return "", nil
 	}
+	zk.ZkAddr = addresses
 
 	str, err := component.CheckZookeeper(zk)
 	if err != nil {
@@ -248,19 +224,11 @@ func checkKafka() (string, error) {
 		Addr:     strings.Split(address, ","),
 	}
 
-	address, addrExist := os.LookupEnv("KAFKA_ADDRESS")
-	port, portExist := os.LookupEnv("KAFKA_PORT")
-	if addrExist && portExist {
-		addresses := strings.Split(address, ",")
-		for i, addr := range addresses {
-			addresses[i] = addr + ":" + port
-		}
-		kafka.Addr = addresses
-	} else if !addrExist && portExist {
-		return "", errs.Wrap(errors.New("the KAFKA_ADDRESS of minio is empty"))
-	} else if addrExist && !portExist {
-		return "", errs.Wrap(errors.New("the KAFKA_PORT of minio is empty"))
+	addresses, err := getAddress("KAFKA_ADDRESS", "KAFKA_PORT", config.Config.Kafka.Addr)
+	if err != nil {
+		return "", nil
 	}
+	kafka.Addr = addresses
 
 	str, kafkaClient, err := component.CheckKafka(kafka)
 	if err != nil {
@@ -297,4 +265,44 @@ func isTopicPresent(topic string, topics []string) bool {
 		}
 	}
 	return false
+}
+
+func getAddress(key1, key2 string, fallback []string) ([]string, error) {
+	address, addrExist := os.LookupEnv(key1)
+	port, portExist := os.LookupEnv(key2)
+
+	if addrExist && portExist {
+		addresses := strings.Split(address, ",")
+		for i, addr := range addresses {
+			addresses[i] = addr + ":" + port
+		}
+		return addresses, nil
+	} else if !addrExist && portExist {
+		result := make([]string, len(config.Config.Redis.Address))
+		for i, addr := range config.Config.Redis.Address {
+			add := strings.Split(addr, ":")
+			result[i] = add[0] + ":" + port
+		}
+		return result, nil
+	} else if addrExist && !portExist {
+		return nil, errs.Wrap(errors.New("the ZOOKEEPER_PORT of minio is empty"))
+	}
+	return fallback, nil
+}
+
+func getMinioAddr(key1, key2, key3, fallback string) (string, error) {
+	// Prioritize environment variables
+	endpoint := getEnv(key1, fallback)
+	address, addressExist := os.LookupEnv(key2)
+	port, portExist := os.LookupEnv(key3)
+	if portExist && addressExist {
+		endpoint = "http://" + address + ":" + port
+	} else if !portExist && addressExist {
+		return "", errs.Wrap(errors.New("the MINIO_PORT of minio is empty"))
+	} else if portExist && !addressExist {
+		arr := strings.Split(config.Config.Object.Minio.Endpoint, ":")
+		arr[2] = port
+		endpoint = strings.Join(arr, ":")
+	}
+	return endpoint, nil
 }

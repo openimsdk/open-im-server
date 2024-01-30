@@ -16,10 +16,10 @@ package rpcclient
 
 import (
 	"context"
-	"net/url"
-
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"net/url"
+	"os"
 
 	"google.golang.org/grpc"
 
@@ -49,7 +49,7 @@ func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
 func minioInit() (*minio.Client, error) {
 	minioClient := &minio.Client{}
 	var initUrl string
-	initUrl = config.Config.Object.Minio.Endpoint
+	initUrl = getMinioAddr("MINIO_ENDPOINT", "MINIO_ADDRESS", "MINIO_PORT", config.Config.Object.Minio.Endpoint)
 	minioUrl, err := url.Parse(initUrl)
 	if err != nil {
 		return nil, err
@@ -68,4 +68,18 @@ func minioInit() (*minio.Client, error) {
 		return nil, err
 	}
 	return minioClient, nil
+}
+
+func getMinioAddr(key1, key2, key3, fallback string) string {
+	// Prioritize environment variables
+	endpoint, endpointExist := os.LookupEnv(key1)
+	if !endpointExist {
+		endpoint = fallback
+	}
+	address, addressExist := os.LookupEnv(key2)
+	port, portExist := os.LookupEnv(key3)
+	if portExist && addressExist {
+		endpoint = "http://" + address + ":" + port
+	}
+	return endpoint
 }

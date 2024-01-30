@@ -21,6 +21,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"reflect"
 	"strconv"
@@ -60,7 +61,8 @@ const (
 const successCode = http.StatusOK
 
 func NewMinio(cache cache.MinioCache) (s3.Interface, error) {
-	u, err := url.Parse(config.Config.Object.Minio.Endpoint)
+	initUrl := getMinioAddr("MINIO_ENDPOINT", "MINIO_ADDRESS", "MINIO_PORT", config.Config.Object.Minio.Endpoint)
+	u, err := url.Parse(initUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -490,4 +492,18 @@ func (m *Minio) FormData(ctx context.Context, name string, size int64, contentTy
 		Expires:      expires,
 		SuccessCodes: []int{successCode},
 	}, nil
+}
+
+func getMinioAddr(key1, key2, key3, fallback string) string {
+	// Prioritize environment variables
+	endpoint, endpointExist := os.LookupEnv(key1)
+	if !endpointExist {
+		endpoint = fallback
+	}
+	address, addressExist := os.LookupEnv(key2)
+	port, portExist := os.LookupEnv(key3)
+	if portExist && addressExist {
+		endpoint = "http://" + address + ":" + port
+	}
+	return endpoint
 }
