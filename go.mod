@@ -141,7 +141,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231012201019-e917dd12ba7a // indirect
 	gopkg.in/src-d/go-billy.v4 v4.3.2 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	gorm.io/gorm v1.25.2-0.20230530020048-26663ab9bf55 // indirect
+	gorm.io/gorm v1.25.4 // indirect
 	stathat.com/c/consistent v1.0.0 // indirect
 )
 
@@ -159,4 +159,4 @@ require (
 
 replace github.com/OpenIMSDK/protocol v0.0.47 => github.com/AndrewZuo01/protocol v0.0.0-20240112093520-fd9c53e27b94
 
-replace github.com/OpenIMSDK/tools v0.0.28 => github.com/luhaoling/tools v0.0.0-20240129093731-a82c07b43a68
+replace github.com/OpenIMSDK/tools v0.0.28 => github.com/luhaoling/tools v0.0.0-20240130020646-99b2c8e8e93a

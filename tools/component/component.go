@@ -266,6 +266,7 @@ func checkKafka() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer kafkaClient.Close()
 
 	// Verify if necessary topics exist
 	topics, err := kafkaClient.Topics()
