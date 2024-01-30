@@ -32,7 +32,7 @@ jobs:
       run: |
         # Add code here to create necessary labels for the project columns
         echo 'Creating project labels'
-      # Ensure proper dependencies before running the `github-project-automation-plus` action
+      # Grant necessary permissions to access and modify the project before running the `github-project-automation-plus` action
     steps:
       - uses: alex-page/github-project-automation-plus@v0.8.3
         with:
