@@ -118,18 +118,25 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 		return nil
 	}
 
-	for _, v := range wsResults {
-		if !v.OnlinePush && msg.SendID == v.UserID {
-			if err = callbackOfflinePush(ctx, userIDs, msg, &[]string{}); err != nil {
-				return err
-			}
+	if len(wsResults) == 0 {
+		return nil
+	}
+	onlinePushSuccUserIDSet := utils.SliceSet(utils.Filter(wsResults, func(e *msggateway.SingleMsgToUserResults) (string, bool) {
+		return e.UserID, e.OnlinePush && e.UserID != ""
+	}))
+	offlinePushUserIDList := utils.Filter(wsResults, func(e *msggateway.SingleMsgToUserResults) (string, bool) {
+		_, exist := onlinePushSuccUserIDSet[e.UserID]
+		return e.UserID, !exist && e.UserID != "" && e.UserID != msg.SendID
+	})
 
-			err = p.offlinePushMsg(ctx, msg.SendID, msg, []string{v.UserID})
-			if err != nil {
-				return err
-			}
+	if len(offlinePushUserIDList) > 0 {
+		if err = callbackOfflinePush(ctx, offlinePushUserIDList, msg, &[]string{}); err != nil {
+			return err
 		}
-
+		err = p.offlinePushMsg(ctx, msg.SendID, msg, offlinePushUserIDList)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

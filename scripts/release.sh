@@ -130,7 +130,7 @@ perform_action() {
   
   if [ "$flag" == true ]; then
     openim::log::info "## $message..."
-    if ! $command; then
+    if ! eval "$command"; then
       openim::log::errexit "Error in $message"
     fi
   fi
