@@ -205,7 +205,7 @@ func checkRedis() (string, error) {
 func checkZookeeper() (string, error) {
 	// Prioritize environment variables
 
-	address := getEnv("ZOOKEEPER_USERNAME", config.Config.Zookeeper.Username)
+	address := getEnv("ZOOKEEPER_ADDRESS", strings.Join(config.Config.Zookeeper.ZkAddr, ","))
 
 	zk := &component.Zookeeper{
 		Schema:   getEnv("ZOOKEEPER_SCHEMA", "digest"),
