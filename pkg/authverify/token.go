@@ -17,6 +17,7 @@ package authverify
 import (
 	"context"
 	"fmt"
+
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/tokenverify"
@@ -47,7 +48,8 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 }
 
 func IsAppManagerUid(ctx context.Context) bool {
-	return (len(config.Config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID)) || utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.IMAdmin.UserID)
+	return (len(config.Config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID)) ||
+		utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.IMAdmin.UserID)
 }
 
 func CheckAdmin(ctx context.Context) error {
