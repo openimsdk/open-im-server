@@ -305,12 +305,13 @@ Feel free to explore the MinIO documentation for more advanced configurations an
 
 This section involves setting up MongoDB, including its port, address, and credentials.
 
-| Parameter             | Example Value  | Description             |
-|-----------------------| -------------- | ----------------------- |
-| MONGO_PORT            | "27017"        | Port used by MongoDB.   |
-| MONGO_ADDRESS         | [Generated IP] | IP address for MongoDB. |
-| MONGO_USERNAME        | [User Defined] | Admin Username for MongoDB.   |
-| MONGO_PASSWORD        | [User Defined] | Admin Password for MongoDB.   |
+
+| Parameter      | Example Value  | Description             |
+| -------------- | -------------- | ----------------------- |
+| MONGO_PORT     | "27017"        | Port used by MongoDB.   |
+| MONGO_ADDRESS  | [Generated IP] | IP address for MongoDB. |
+| MONGO_USERNAME | [User Defined] | Admin Username for MongoDB.   |
+| MONGO_PASSWORD | [User Defined] | Admin Password for MongoDB.   |
 | MONGO_OPENIM_USERNAME | [User Defined] | OpenIM Username for MongoDB.   |
 | MONGO_OPENIM_PASSWORD | [User Defined] | OpenIM Password for MongoDB.   |
 
