@@ -349,12 +349,6 @@ def "JPNS_APP_KEY" ""                 # JPNS应用密钥
 def "JPNS_MASTER_SECRET" ""           # JPNS主密钥
 def "JPNS_PUSH_URL" ""                # JPNS推送URL
 def "JPNS_PUSH_INTENT" ""             # JPNS推送意图
-def "MANAGER_USERID_1" "openIM123456" # 管理员ID 1
-def "MANAGER_USERID_2" "openIM654321" # 管理员ID 2
-def "MANAGER_USERID_3" "openIMAdmin"  # 管理员ID 3
-def "NICKNAME_1" "system1"            # 昵称1
-def "NICKNAME_2" "system2"            # 昵称2
-def "NICKNAME_3" "system3"            # 昵称3
 def "IM_ADMIN_USERID" "imAdmin"       # IM管理员ID
 def "IM_ADMIN_NAME" "imAdmin"         # IM管理员昵称
 def "MULTILOGIN_POLICY" "1"           # 多登录策略
