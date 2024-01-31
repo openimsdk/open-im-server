@@ -111,6 +111,13 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		return nil, err
 	}
 	revokerUserID := mcontext.GetOpUserID(ctx)
+	var flag bool
+	if len(config.Config.Manager.UserID) > 0 {
+		flag = utils.Contain(revokerUserID, config.Config.Manager.UserID...)
+	}
+	if len(config.Config.Manager.UserID) == 0 && len(config.Config.IMAdmin.UserID) > 0 {
+		flag = utils.Contain(revokerUserID, config.Config.IMAdmin.UserID...)
+	}
 	tips := sdkws.RevokeMsgTips{
 		RevokerUserID:  revokerUserID,
 		ClientMsgID:    msgs[0].ClientMsgID,
@@ -118,7 +125,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		Seq:            req.Seq,
 		SesstionType:   msgs[0].SessionType,
 		ConversationID: req.ConversationID,
-		IsAdminRevoke:  utils.Contain(revokerUserID, config.Config.Manager.UserID...),
+		IsAdminRevoke:  flag,
 	}
 	var recvID string
 	if msgs[0].SessionType == constant.SuperGroupChatType {
