@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Existing steps...
+
+      - name: Check CLA status
+        uses: contributor-assistant/github-action@v2.3.1
+        with:
+          cla-file: 'CLA.md'
+          fail-on-cla-failure: true
+
+      # Existing steps...
