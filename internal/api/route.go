@@ -150,6 +150,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	{
 		a := NewAuthApi(*authRpc)
 		authRouterGroup.POST("/user_token", a.UserToken)
+		authRouterGroup.POST("/get_user_token", ParseToken, a.GetUserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", ParseToken, a.ForceLogout)
 	}
