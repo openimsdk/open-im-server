@@ -91,12 +91,11 @@ func main() {
 		fmt.Printf("Checking components Round %v...\n", i+1)
 
 		var (
-			allSuccess  bool
-			disruptions bool
-			err         error
-			errInfo     string
+			err     error
+			errInfo string
 		)
-		disruptions = true
+		allSuccess := true
+		disruptions := true
 		for _, check := range checks {
 			errInfo, err = check.function()
 			if err != nil {
