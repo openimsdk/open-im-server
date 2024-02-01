@@ -28,8 +28,16 @@ import (
 // This function is called on each Ginkgo node in parallel mode.
 func RunE2ETests(t *testing.T) {
 
-	// Example usage of new functions
-	token, _ := gettoken.GetUserToken("openIM123456")
+	// Set headers for operationID and token
+	operationID := "e2e-test-operation-id"
+	token, err := gettoken.GetUserToken("openIM123456")
+	if err != nil {
+		t.Fatalf("Failed to get user token: %v", err)
+	}
+	headers := map[string]string{
+		"token":       token,
+		"operationID": operationID,
+	}
 
 	// Example of getting user info
 	_ = user.GetUsersInfo(token, []string{"user1", "user2"})
@@ -37,6 +45,18 @@ func RunE2ETests(t *testing.T) {
 	// Example of updating user info
 	_ = user.UpdateUserInfo(token, "user1", "NewNickname", "https://github.com/openimsdk/open-im-server/blob/main/assets/logo/openim-logo.png")
 
+	// Example of getting users' online status
+	_ = user.GetUsersOnlineStatus(token, []string{"user1", "user2"})
+
+	// Example of forcing a logout
+	_ = user.ForceLogout(token, "4950983283", 2)
+
+	// Example of checking user account
+	_ = user.CheckUserAccount(token, []string{"openIM123456", "anotherUserID"})
+
+	// Example of getting users
+	_ = user.GetUsers(token, 1, 100)
+}
 	// Example of getting users' online status
 	_ = user.GetUsersOnlineStatus(token, []string{"user1", "user2"})
 
