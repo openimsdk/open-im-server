@@ -15,11 +15,9 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"github.com/IBM/sarama"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cos"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/minio"
@@ -100,12 +98,12 @@ func main() {
 			errInfo, err = check.function()
 			if err != nil {
 				component.ErrorPrint(fmt.Sprintf("Starting %s failed, %v, the conneted info is:%s", check.name, err, errInfo))
-				log.ZError(context.Background(), errInfo, err)
+				fmt.Fprintln(os.Stderr, errInfo, err)
 				allSuccess = false
 				break
 			} else {
 				component.SuccessPrint(fmt.Sprintf("%s connected successfully, the addr is:%s", check.name, errInfo))
-				log.ZError(context.Background(), errInfo, err)
+				fmt.Fprintln(os.Stderr, errInfo, err)
 			}
 			if check.name == "kafka" && errs.Unwrap(err) == ErrComponentStart {
 				disruptions = false
@@ -114,12 +112,12 @@ func main() {
 
 		if allSuccess {
 			component.SuccessPrint("All components started successfully!")
-			log.ZInfo(context.Background(), errInfo, err)
 			return
 		}
 
 		if disruptions {
 			component.ErrorPrint(fmt.Sprintf("component check exit,err:  %v", err))
+			fmt.Fprintln(os.Stderr, errInfo, err)
 			return
 		}
 	}
