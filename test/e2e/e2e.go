@@ -17,7 +17,7 @@ package e2e
 import (
 	"testing"
 
-	gettoken "github.com/openimsdk/open-im-server/v3/test/e2e/api/token"
+	gettoken "github.com/openimsdk/open-im-server/v3/test/e2e/api/token/token"
 	"github.com/openimsdk/open-im-server/v3/test/e2e/api/user"
 )
 
