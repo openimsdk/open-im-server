@@ -52,7 +52,7 @@ func RunE2ETests(t *testing.T) {
 		if _, ok := headers["token"]; !ok {
 			headers["token"] = token
 		}
-		"token":       token,
+	
 		"operationID": operationID,
 	}
 
@@ -62,16 +62,16 @@ func RunE2ETests(t *testing.T) {
 		t.Fatalf("Failed to get user info: %v", err)
 		return
 	}
-	_ = user.GetUsersInfo(token, []string{"user1", "user2"})
+	_ = user.GetUsersInfo(token, headers, []string{"user1", "user2"})
 
 	// Example of updating user info
-	_ = user.UpdateUserInfo(token, "user1", "NewNickname", "https://github.com/openimsdk/open-im-server/blob/main/assets/logo/openim-logo.png")
+	_ = user.UpdateUserInfo(token, headers, "user1", "NewNickname", "https://github.com/openimsdk/open-im-server/blob/main/assets/logo/openim-logo.png")
 
 	// Example of getting users' online status
-	_ = user.GetUsersOnlineStatus(token, []string{"user1", "user2"})
+	_ = user.GetUsersOnlineStatus(token, headers, []string{"user1", "user2"})
 
 	// Example of forcing a logout
-	_, err = user.ForceLogout(token, "4950983283", 2)
+	_, err = user.ForceLogout(token, headers, "4950983283", 2)
 	if err != nil {
 		t.Fatalf("Failed to force logout: %v", err)
 		return
@@ -103,8 +103,8 @@ func RunE2ETests(t *testing.T) {
 		if err != nil {
 
 	// Example of checking user account
-	_ = user.CheckUserAccount(token, []string{"openIM123456", "anotherUserID"})
+	_ = user.CheckUserAccount(token, headers, []string{"openIM123456", "anotherUserID"})
 
 	// Example of getting users
-	_ = user.GetUsers(token, 1, 100)
+	_ = user.GetUsers(token, headers, 1, 100)
 }
