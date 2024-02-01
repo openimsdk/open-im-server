@@ -164,6 +164,14 @@ type configStruct struct {
 			SessionToken    string `yaml:"sessionToken"`
 			PublicRead      bool   `yaml:"publicRead"`
 		} `yaml:"kodo"`
+		Aws struct {
+			Endpoint        string `yaml:"endpoint"`
+			Region          string `yaml:"region"`
+			Bucket          string `yaml:"bucket"`
+			AccessKeyID     string `yaml:"accessKeyID"`
+			AccessKeySecret string `yaml:"accessKeySecret"`
+			PublicRead      bool   `yaml:"publicRead"`
+		} `yaml:"aws"`
 	} `yaml:"object"`
 
 	RpcPort struct {
