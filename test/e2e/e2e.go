@@ -42,7 +42,10 @@ func RunE2ETests(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get user token: %v", err)
 	}
-			headers := make(map[string]string)
+			headers := map[string]string{
+	"operationID": operationID,
+	"token":       token,
+}
 		if err != nil {
 			headers = make(map[string]string)
 		}
@@ -53,7 +56,7 @@ func RunE2ETests(t *testing.T) {
 			headers["token"] = token
 		}
 	
-		"operationID": operationID,
+
 	}
 
 		// Example of getting user info
