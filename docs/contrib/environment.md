@@ -305,6 +305,7 @@ Feel free to explore the MinIO documentation for more advanced configurations an
 
 This section involves setting up MongoDB, including its port, address, and credentials.
 
+
 | Parameter      | Example Value  | Description             |
 | -------------- | -------------- | ----------------------- |
 | MONGO_PORT     | "27017"        | Port used by MongoDB.   |
