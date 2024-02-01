@@ -17,6 +17,7 @@ package startrpc
 import (
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"log"
 	"net"
 	"net/http"
@@ -61,20 +62,20 @@ func Start(
 		net.JoinHostPort(network.GetListenIP(config.Config.Rpc.ListenIP), strconv.Itoa(rpcPort)),
 	)
 	if err != nil {
-		return err
+		return errs.Wrap(err, network.GetListenIP(config.Config.Rpc.ListenIP), strconv.Itoa(rpcPort))
 	}
 
 	defer listener.Close()
 	client, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
-		return utils.Wrap1(err)
+		return errs.Wrap(err)
 	}
 
 	defer client.Close()
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	registerIP, err := network.GetRpcRegisterIP(config.Config.Rpc.RegisterIP)
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	}
 
 	var reg *prometheus.Registry

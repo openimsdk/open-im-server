@@ -15,8 +15,10 @@
 package msgtransfer
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"log"
 	"net/http"
 	"sync"
@@ -69,40 +71,47 @@ func StartTransfer(prometheusPort int) error {
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	msgModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
-	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel)
+	if err != nil {
+		return err
+	}
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
-	msgTransfer := NewMsgTransfer(msgDatabase, &conversationRpcClient, &groupRpcClient)
+	msgTransfer, err := NewMsgTransfer(msgDatabase, &conversationRpcClient, &groupRpcClient)
+	if err != nil {
+		return err
+	}
 	return msgTransfer.Start(prometheusPort)
 }
 
-func NewMsgTransfer(msgDatabase controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) *MsgTransfer {
-	return &MsgTransfer{
-		historyCH:      NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient),
-		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase),
+func NewMsgTransfer(msgDatabase controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*MsgTransfer, error) {
+	historyCH, err := NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient)
+	if err != nil {
+		return nil, err
 	}
+	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(msgDatabase)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MsgTransfer{
+		historyCH:      historyCH,
+		historyMongoCH: historyMongoCH,
+	}, nil
 }
 
 func (m *MsgTransfer) Start(prometheusPort int) error {
+	ctx := context.Background()
 	var wg sync.WaitGroup
 	wg.Add(1)
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
 	if prometheusPort <= 0 {
-		return errors.New("prometheusPort not correct")
+		return errs.Wrap(errors.New("prometheusPort not correct"))
 	}
-	if config.Config.ChatPersistenceMysql {
-		// go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(m.persistentCH)
-	} else {
-		fmt.Println("msg transfer not start mysql consumer")
-	}
-	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.historyCH)
-	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.historyMongoCH)
-	// go m.modifyCH.modifyMsgConsumerGroup.RegisterHandleAndConsumer(m.modifyCH)
-	/*err := prome.StartPrometheusSrv(prometheusPort)
-	if err != nil {
-		return err
-	}*/
-	////////////////////////////
+
+	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(ctx, m.historyCH)
+	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(ctx, m.historyMongoCH)
+
 	if config.Config.Prometheus.Enable {
 		reg := prometheus.NewRegistry()
 		reg.MustRegister(

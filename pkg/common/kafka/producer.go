@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/tools/errs"
 	"strings"
 	"time"
 
@@ -44,7 +45,7 @@ type Producer struct {
 }
 
 // NewKafkaProducer initializes a new Kafka producer.
-func NewKafkaProducer(addr []string, topic string) *Producer {
+func NewKafkaProducer(addr []string, topic string) (*Producer, error) {
 	p := Producer{
 		addr:   addr,
 		topic:  topic,
@@ -87,17 +88,17 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	for i := 0; i <= maxRetry; i++ {
 		p.producer, err = sarama.NewSyncProducer(p.addr, p.config)
 		if err == nil {
-			return &p
+			return &p, nil
 		}
 		time.Sleep(1 * time.Second) // Wait before retrying
 	}
 
 	// Panic if unable to create producer after retries
 	if err != nil {
-		panic("Failed to create Kafka producer: " + err.Error())
+		return nil, errs.Wrap(errors.New("failed to create Kafka producer: " + err.Error()))
 	}
 
-	return &p
+	return &p, nil
 }
 
 // configureProducerAck configures the producer's acknowledgement level.
