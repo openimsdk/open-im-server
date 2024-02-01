@@ -42,7 +42,8 @@ func RunE2ETests(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get user token: %v", err)
 	}
-			if headers == nil {
+			headers := make(map[string]string)
+		if err != nil {
 			headers = make(map[string]string)
 		}
 		if _, ok := headers["operationID"]; !ok {
@@ -98,7 +99,8 @@ func RunE2ETests(t *testing.T) {
 	}
 
 	// Example of forcing a logout
-	_ = user.ForceLogout(token, "4950983283", 2)
+	err = user.ForceLogout(token, "4950983283", 2)
+		if err != nil {
 
 	// Example of checking user account
 	_ = user.CheckUserAccount(token, []string{"openIM123456", "anotherUserID"})
