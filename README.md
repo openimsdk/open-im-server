@@ -21,6 +21,30 @@
 [**简体中文**](./README-zh_CN.md) •
 [**Docs**](https://openim.io/en)
 
+[![Українська](https://img.shields.io/badge/README-Українська-brightgreen?logo=github)](docs/readme/README-UA.md)
+[![česky](https://img.shields.io/badge/README-česky-brightgreen?logo=github)](docs/readme/README-CS.md)
+[![中文](https://img.shields.io/badge/README-中文-brightgreen?logo=github)](docs/readme/README-ZH.md)
+[![Magyar](https://img.shields.io/badge/README-Magyar-brightgreen?logo=github)](docs/readme/README-HU.md)
+[![Español](https://img.shields.io/badge/README-Español-brightgreen?logo=github)](docs/readme/README-ES.md)
+[![فارسی](https://img.shields.io/badge/README-فارسی-brightgreen?logo=github)](docs/readme/README-FA.md)
+[![Français](https://img.shields.io/badge/README-Français-brightgreen?logo=github)](docs/readme/README-FR.md)
+[![Deutsch](https://img.shields.io/badge/README-Deutsch-brightgreen?logo=github)](docs/readme/README-DE.md)
+[![Polski](https://img.shields.io/badge/README-Polski-brightgreen?logo=github)](docs/readme/README-PL.md)
+[![Indonesian](https://img.shields.io/badge/README-Indonesian-brightgreen?logo=github)](docs/readme/README-ID.md)
+[![Suomi](https://img.shields.io/badge/README-Suomi-brightgreen?logo=github)](docs/readme/README-FI.md)
+[![മലയാളം](https://img.shields.io/badge/README-മലയാളം-brightgreen?logo=github)](docs/readme/README-ML.md)
+[![日本語](https://img.shields.io/badge/README-日本語-brightgreen?logo=github)](docs/readme/README-JP.md)
+[![Nederlands](https://img.shields.io/badge/README-Nederlands-brightgreen?logo=github)](docs/readme/README-NL.md)
+[![Italiano](https://img.shields.io/badge/README-Italiano-brightgreen?logo=github)](docs/readme/README-IT.md)
+[![Русский](https://img.shields.io/badge/README-Русский-brightgreen?logo=github)](docs/readme/README-RU.md)
+[![Português (Brasil)](https://img.shields.io/badge/README-Português_(Brasil)-brightgreen?logo=github)](docs/readme/README-PTBR.md)
+[![Esperanto](https://img.shields.io/badge/README-Esperanto-brightgreen?logo=github)](docs/readme/README-EO.md)
+[![한국어](https://img.shields.io/badge/README-한국어-brightgreen?logo=github)](docs/readme/README-KR.md)
+[![العربي](https://img.shields.io/badge/README-العربي-brightgreen?logo=github)](docs/readme/README-AR.md)
+[![Tiếng Việt](https://img.shields.io/badge/README-Tiếng_Việt-brightgreen?logo=github)](docs/readme/README-VN.md)
+[![Dansk](https://img.shields.io/badge/README-Dansk-brightgreen?logo=github)](docs/readme/README-DA.md)
+
+
 </div>
 
 </p>
@@ -67,6 +91,13 @@ It is built using Golang and supports cross-platform deployment, ensuring a cons
 + **Webhooks**: OpenIMServer provides callback capabilities to extend more business forms. A callback means that OpenIMServer sends a request to the business server before or after a certain event, like callbacks before or after sending a message.
 
 👉 **[Learn more](https://docs.openim.io/guides/introduction/product)**
+
+## :building_construction: Overall Architecture
+
+Delve into the heart of Open-IM-Server's functionality with our architecture diagram.
+
+![Overall Architecture](./docs/images/architecture-layers.svg)
+
 
 ## :rocket: Quick Start
 
