@@ -33,13 +33,34 @@ func RunE2ETests(t *testing.T) {
 	token, err := gettoken.GetUserToken("openIM123456")
 	if err != nil {
 		t.Fatalf("Failed to get user token: %v", err)
+		return
 	}
-	headers := map[string]string{
+	if err != nil {
+		t.Fatalf("Failed to get user token: %v", err)
+		return
+	}
+	if err != nil {
+		t.Fatalf("Failed to get user token: %v", err)
+	}
+			if headers == nil {
+			headers = make(map[string]string)
+		}
+		if _, ok := headers["operationID"]; !ok {
+			headers["operationID"] = operationID
+		}
+		if _, ok := headers["token"]; !ok {
+			headers["token"] = token
+		}
 		"token":       token,
 		"operationID": operationID,
 	}
 
-	// Example of getting user info
+		// Example of getting user info
+	_, err = user.GetUsersInfo(token, []string{"user1", "user2"})
+	if err != nil {
+		t.Fatalf("Failed to get user info: %v", err)
+		return
+	}
 	_ = user.GetUsersInfo(token, []string{"user1", "user2"})
 
 	// Example of updating user info
@@ -49,16 +70,32 @@ func RunE2ETests(t *testing.T) {
 	_ = user.GetUsersOnlineStatus(token, []string{"user1", "user2"})
 
 	// Example of forcing a logout
-	_ = user.ForceLogout(token, "4950983283", 2)
+	_, err = user.ForceLogout(token, "4950983283", 2)
+	if err != nil {
+		t.Fatalf("Failed to force logout: %v", err)
+		return
+	}
 
 	// Example of checking user account
-	_ = user.CheckUserAccount(token, []string{"openIM123456", "anotherUserID"})
+	_, err = user.CheckUserAccount(token, []string{"openIM123456", "anotherUserID"})
+	if err != nil {
+		t.Fatalf("Failed to check user account: %v", err)
+		return
+	}
 
 	// Example of getting users
-	_ = user.GetUsers(token, 1, 100)
+	_, err = user.GetUsers(token, 1, 100)
+	if err != nil {
+		t.Fatalf("Failed to get users: %v", err)
+		return
+	}
 }
 	// Example of getting users' online status
-	_ = user.GetUsersOnlineStatus(token, []string{"user1", "user2"})
+	_, err = user.GetUsersOnlineStatus(token, []string{"user1", "user2"})
+	if err != nil {
+		t.Fatalf("Failed to get users' online status: %v", err)
+		return
+	}
 
 	// Example of forcing a logout
 	_ = user.ForceLogout(token, "4950983283", 2)
