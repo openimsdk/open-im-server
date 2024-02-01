@@ -158,4 +158,4 @@ require (
 )
 
 //replace github.com/OpenIMSDK/protocol v0.0.47 => github.com/AndrewZuo01/protocol v0.0.0-20240112093520-fd9c53e27b94
-replace github.com/OpenIMSDK/protocol v0.0.48 => github.com/luhaoling/protocol v0.0.0-20240201022232-6e6742bcefb0
+replace github.com/OpenIMSDK/protocol v0.0.48 => github.com/luhaoling/protocol v0.0.0-20240201041853-148eeddb27c6
