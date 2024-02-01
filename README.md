@@ -96,7 +96,7 @@ It is built using Golang and supports cross-platform deployment, ensuring a cons
 
 Delve into the heart of Open-IM-Server's functionality with our architecture diagram.
 
-![Overall Architecture](./docs/images/architecture-layers.svg)
+![Overall Architecture](./docs/images/architecture-layers.png)
 
 
 ## :rocket: Quick Start
