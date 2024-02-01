@@ -17,6 +17,7 @@ package authverify
 import (
 	"context"
 	"fmt"
+
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/tokenverify"

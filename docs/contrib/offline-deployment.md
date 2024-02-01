@@ -1,5 +1,3 @@
-
-
 # OpenIM Offline Deployment Design
 
 ## 1. Base Images
@@ -10,7 +8,7 @@ Below are the base images and their versions you'll need:
 - [ ] redis:7.0.0
 - [ ] mongo:6.0.2
 - [ ] bitnami/zookeeper:3.8
-- [ ] minio/minio:latest
+- [ ] minio/minio:RELEASE.2024-01-11T07-46-16Z
 
 > [!IMPORTANT]
 > It is important to note that OpenIM removed mysql components from versions v3.5.0 (release-v3.5) and above, so mysql can be deployed without this requirement or above
@@ -22,10 +20,10 @@ OpenIM:
 > [!TIP]
 > If you need to install more IM components or monitoring products [images.md](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/images.md)
 
-- [ ] ghcr.io/openimsdk/openim-web:latest
-- [ ] ghcr.io/openimsdk/openim-admin:latest
-- [ ] ghcr.io/openimsdk/openim-chat:latest
-- [ ] ghcr.io/openimsdk/openim-server:latest
+- [ ] ghcr.io/openimsdk/openim-web:<version-name>
+- [ ] ghcr.io/openimsdk/openim-admin:<version-name>
+- [ ] ghcr.io/openimsdk/openim-chat:<version-name>
+- [ ] ghcr.io/openimsdk/openim-server:<version-name>
 
 
 Monitoring:
@@ -42,9 +40,9 @@ Use the following commands to pull these base images:
 docker pull bitnami/kafka:3.5.1
 docker pull redis:7.0.0
 docker pull mongo:6.0.2
-docker pull mysql:5.7
+docker pull mariadb:10.6
 docker pull bitnami/zookeeper:3.8
-docker pull minio/minio:latest
+docker pull minio/minio:2024-01-11T07-46-16Z
 ```
 
 If you need to install more IM components or monitoring products:
