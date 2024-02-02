@@ -80,8 +80,7 @@ function openim::api::start_service() {
   local prometheus_port="$3"
   
   local cmd="${OPENIM_OUTPUT_HOSTBIN}/${binary_name} --port ${service_port} -c ${OPENIM_API_CONFIG}"
-  
-  nohup ${cmd} >> "${LOG_FILE}" 2>&1 &
+  nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE") &
   
   if [ $? -ne 0 ]; then
     openim::log::error_exit "Failed to start ${binary_name} on port ${service_port}."
