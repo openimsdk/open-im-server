@@ -17,32 +17,34 @@
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
 
-[**English**](./README.md) •
-[**简体中文**](./README-zh_CN.md) •
-[**Docs**](https://openim.io/en)
 
-[![Українська](https://img.shields.io/badge/README-Українська-brightgreen?logo=github)](docs/readme/README-UA.md)
-[![česky](https://img.shields.io/badge/README-česky-brightgreen?logo=github)](docs/readme/README-CS.md)
-[![中文](https://img.shields.io/badge/README-中文-brightgreen?logo=github)](docs/readme/README-ZH.md)
-[![Magyar](https://img.shields.io/badge/README-Magyar-brightgreen?logo=github)](docs/readme/README-HU.md)
-[![Español](https://img.shields.io/badge/README-Español-brightgreen?logo=github)](docs/readme/README-ES.md)
-[![فارسی](https://img.shields.io/badge/README-فارسی-brightgreen?logo=github)](docs/readme/README-FA.md)
-[![Français](https://img.shields.io/badge/README-Français-brightgreen?logo=github)](docs/readme/README-FR.md)
-[![Deutsch](https://img.shields.io/badge/README-Deutsch-brightgreen?logo=github)](docs/readme/README-DE.md)
-[![Polski](https://img.shields.io/badge/README-Polski-brightgreen?logo=github)](docs/readme/README-PL.md)
-[![Indonesian](https://img.shields.io/badge/README-Indonesian-brightgreen?logo=github)](docs/readme/README-ID.md)
-[![Suomi](https://img.shields.io/badge/README-Suomi-brightgreen?logo=github)](docs/readme/README-FI.md)
-[![മലയാളം](https://img.shields.io/badge/README-മലയാളം-brightgreen?logo=github)](docs/readme/README-ML.md)
-[![日本語](https://img.shields.io/badge/README-日本語-brightgreen?logo=github)](docs/readme/README-JP.md)
-[![Nederlands](https://img.shields.io/badge/README-Nederlands-brightgreen?logo=github)](docs/readme/README-NL.md)
-[![Italiano](https://img.shields.io/badge/README-Italiano-brightgreen?logo=github)](docs/readme/README-IT.md)
-[![Русский](https://img.shields.io/badge/README-Русский-brightgreen?logo=github)](docs/readme/README-RU.md)
-[![Português (Brasil)](https://img.shields.io/badge/README-Português_(Brasil)-brightgreen?logo=github)](docs/readme/README-PTBR.md)
-[![Esperanto](https://img.shields.io/badge/README-Esperanto-brightgreen?logo=github)](docs/readme/README-EO.md)
-[![한국어](https://img.shields.io/badge/README-한국어-brightgreen?logo=github)](docs/readme/README-KR.md)
-[![العربي](https://img.shields.io/badge/README-العربي-brightgreen?logo=github)](docs/readme/README-AR.md)
-[![Tiếng Việt](https://img.shields.io/badge/README-Tiếng_Việt-brightgreen?logo=github)](docs/readme/README-VN.md)
-[![Dansk](https://img.shields.io/badge/README-Dansk-brightgreen?logo=github)](docs/readme/README-DA.md)
+<p align="center">
+  <a href="./README.md">Englist</a> · 
+  <a href="./README-zh_CN.md">中文</a> · 
+  <a href="docs/readme/README-UA.md">Українська</a> · 
+  <a href="docs/readme/README-CS.md">Česky</a> · 
+  <a href="docs/readme/README-HU.md">Magyar</a> · 
+  <a href="docs/readme/README-ES.md">Español</a> · 
+  <a href="docs/readme/README-FA.md">فارسی</a> · 
+  <a href="docs/readme/README-FR.md">Français</a> · 
+  <a href="docs/readme/README-DE.md">Deutsch</a> · 
+  <a href="docs/readme/README-PL.md">Polski</a> · 
+  <a href="docs/readme/README-ID.md">Indonesian</a> · 
+  <a href="docs/readme/README-FI.md">Suomi</a> · 
+  <a href="docs/readme/README-ML.md">മലയാളം</a> · 
+  <a href="docs/readme/README-JP.md">日本語</a> · 
+  <a href="docs/readme/README-NL.md">Nederlands</a> · 
+  <a href="docs/readme/README-IT.md">Italiano</a> · 
+  <a href="docs/readme/README-RU.md">Русский</a> · 
+  <a href="docs/readme/README-PTBR.md">Português (Brasil)</a> · 
+  <a href="docs/readme/README-EO.md">Esperanto</a> · 
+  <a href="docs/readme/README-KR.md">한국어</a> · 
+  <a href="docs/readme/README-AR.md">العربي</a> · 
+  <a href="docs/readme/README-VN.md">Tiếng Việt</a> · 
+  <a href="docs/readme/README-DA.md">Dansk</a> · 
+  <a href="docs/readme/README-GR.md">Ελληνικά</a> · 
+  <a href="docs/readme/README-TR.md">Türkçe</a>
+</p>
 
 
 </div>
