@@ -90,14 +90,13 @@ func main() {
 		for _, check := range checks {
 			if !check.flag {
 				err = check.function()
-				continue
-			}
-			if err != nil {
-				component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, err))
-				allSuccess = false
-			} else {
-				check.flag = true
-				component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
+				if err != nil {
+					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, err))
+					allSuccess = false
+				} else {
+					check.flag = true
+					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
+				}
 			}
 		}
 
