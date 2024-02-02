@@ -61,9 +61,9 @@ func initCfg() error {
 }
 
 type checkFunc struct {
-	name     string
-	function func() error
-	authInfo string
+	name        string
+	function    func() error
+	authErrInfo string
 }
 
 func main() {
@@ -79,11 +79,11 @@ func main() {
 
 	checks := []checkFunc{
 		//{name: "Mysql", function: checkMysql},
-		{name: "Mongo", function: checkMongo, authInfo: MongoAuthFailed},
-		{name: "Redis", function: checkRedis, authInfo: RedisAuthFailed},
-		{name: "Minio", function: checkMinio, authInfo: MinioAuthFailed},
-		{name: "Zookeeper", function: checkZookeeper, authInfo: ZkAuthFailed},
-		{name: "Kafka", function: checkKafka, authInfo: KafkaAuthFailed},
+		{name: "Mongo", function: checkMongo, authErrInfo: MongoAuthFailed},
+		{name: "Redis", function: checkRedis, authErrInfo: RedisAuthFailed},
+		{name: "Minio", function: checkMinio, authErrInfo: MinioAuthFailed},
+		{name: "Zookeeper", function: checkZookeeper, authErrInfo: ZkAuthFailed},
+		{name: "Kafka", function: checkKafka, authErrInfo: KafkaAuthFailed},
 	}
 
 	for i := 0; i < maxRetry; i++ {
@@ -101,25 +101,25 @@ func main() {
 		for _, check := range checks {
 			err = check.function()
 			if err != nil {
-				if errorJudge(err, check.authInfo) {
+				if errorJudge(err, check.authErrInfo) {
 					disruptions = true
 				}
-				ErrorPrint(fmt.Sprintf("Starting %s failed, %v, the conneted info is:%s", check.name, err, errInfo))
+				ErrorPrint(fmt.Sprintf("Starting %s failed:%v, conneted info:%s", check.name, err, errInfo))
 				allSuccess = false
 				break
 			} else {
-				component.SuccessPrint(fmt.Sprintf("%s connected successfully, the addr is:%s", check.name, errInfo))
+				component.SuccessPrint(fmt.Sprintf("%s connected successfully, address:%s", check.name, errInfo))
 			}
 
 		}
 
-		if allSuccess {
-			component.SuccessPrint("All components started successfully!")
+		if disruptions {
+			component.ErrorPrint(fmt.Sprintf("component check exit,err:  %v", err))
 			return
 		}
 
-		if disruptions {
-			component.ErrorPrint(fmt.Sprintf("component check exit,err:  %v", err))
+		if allSuccess {
+			component.SuccessPrint("All components started successfully!")
 			return
 		}
 	}
