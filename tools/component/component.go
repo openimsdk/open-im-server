@@ -56,6 +56,7 @@ func initCfg() error {
 type checkFunc struct {
 	name     string
 	function func() error
+	flag     bool
 }
 
 func main() {
@@ -87,11 +88,15 @@ func main() {
 		var err error
 		allSuccess := true
 		for _, check := range checks {
-			err = check.function()
+			if !check.flag {
+				err = check.function()
+				continue
+			}
 			if err != nil {
 				component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, err))
 				allSuccess = false
 			} else {
+				check.flag = true
 				component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 			}
 		}

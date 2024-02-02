@@ -57,7 +57,6 @@ func NewMongo() (*Mongo, error) {
 			return &Mongo{db: mongoClient}, nil
 		}
 		if shouldRetry(err) {
-			fmt.Printf("Failed to connect to MongoDB, retrying: %s\n", err)
 			time.Sleep(time.Second) // exponential backoff could be implemented here
 			continue
 		}
