@@ -106,7 +106,6 @@ func main() {
 				}
 				ErrorPrint(fmt.Sprintf("Starting %s failed:%v, conneted info:%s", check.name, err, errInfo))
 				allSuccess = false
-				break
 			} else {
 				component.SuccessPrint(fmt.Sprintf("%s connected successfully, address:%s", check.name, errInfo))
 			}
