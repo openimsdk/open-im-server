@@ -15,6 +15,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/IBM/sarama"
@@ -125,7 +126,7 @@ func checkMinio() error {
 
 	// Check if MinIO is enabled
 	if config.Config.Object.Enable != "minio" {
-		return nil
+		return errs.Wrap(errors.New("minio.Enable is empty"))
 	}
 	minio := &component.Minio{
 		ApiURL:          config.Config.Object.ApiURL,
