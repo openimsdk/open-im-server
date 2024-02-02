@@ -54,14 +54,15 @@ func NewMongo() (*Mongo, error) {
 		defer cancel()
 		mongoClient, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 		if err == nil {
+			if err = mongoClient.Ping(ctx, nil); err != nil {
+				return nil, errs.Wrap(err, uri)
+			}
 			return &Mongo{db: mongoClient}, nil
 		}
 		if shouldRetry(err) {
-			fmt.Printf("Failed to connect to MongoDB, retrying: %s\n", err)
 			time.Sleep(time.Second) // exponential backoff could be implemented here
 			continue
 		}
-		return nil, errs.Wrap(err, uri)
 	}
 	return nil, errs.Wrap(err, uri)
 }

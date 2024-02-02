@@ -15,9 +15,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/group"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"os"
 )
 
 func main() {
@@ -28,6 +30,7 @@ func main() {
 		panic(err.Error())
 	}
 	if err := rpcCmd.StartSvr(config.Config.RpcRegisterName.OpenImGroupName, group.Start); err != nil {
-		panic(err.Error())
+		fmt.Fprintf(os.Stderr, "\n\nexit -1: \n%+v\n\n", err)
+		os.Exit(-1)
 	}
 }

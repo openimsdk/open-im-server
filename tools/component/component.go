@@ -15,6 +15,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/IBM/sarama"
@@ -56,6 +57,7 @@ func initCfg() error {
 type checkFunc struct {
 	name     string
 	function func() error
+	flag     bool
 }
 
 func main() {
@@ -86,13 +88,17 @@ func main() {
 
 		var err error
 		allSuccess := true
-		for _, check := range checks {
-			err = check.function()
-			if err != nil {
-				component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, err))
-				allSuccess = false
-			} else {
-				component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
+		for index, check := range checks {
+			if !check.flag {
+				err = check.function()
+				if err != nil {
+					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, err))
+					allSuccess = false
+
+				} else {
+					checks[index].flag = true
+					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
+				}
 			}
 		}
 
@@ -120,7 +126,7 @@ func checkMinio() error {
 
 	// Check if MinIO is enabled
 	if config.Config.Object.Enable != "minio" {
-		return nil
+		return errs.Wrap(errors.New("minio.Enable is empty"))
 	}
 	minio := &component.Minio{
 		ApiURL:          config.Config.Object.ApiURL,
@@ -130,7 +136,7 @@ func checkMinio() error {
 		SignEndpoint:    config.Config.Object.Minio.SignEndpoint,
 		UseSSL:          getEnv("MINIO_USE_SSL", "false"),
 	}
-	_, err := component.CheckMinio(minio)
+	err := component.CheckMinio(minio)
 	return err
 }
 
@@ -149,7 +155,7 @@ func checkKafka() error {
 		Addr:     config.Config.Kafka.Addr,
 	}
 
-	_, kafkaClient, err := component.CheckKafka(kafkaStu)
+	kafkaClient, err := component.CheckKafka(kafkaStu)
 	if err != nil {
 		return err
 	}

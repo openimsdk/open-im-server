@@ -97,7 +97,7 @@ func Start(
 
 	err = rpcFn(client, srv)
 	if err != nil {
-		return errs.Wrap(err)
+		return err
 	}
 	err = client.Register(
 		rpcRegisterName,
