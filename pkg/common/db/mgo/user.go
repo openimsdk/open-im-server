@@ -40,7 +40,7 @@ func NewUserMongo(db *mongo.Database) (relation.UserModelInterface, error) {
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return &UserMgo{coll: coll}, nil
 }
