@@ -44,7 +44,6 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/OpenIMSDK/tools/network"
-	"github.com/OpenIMSDK/tools/utils"
 )
 
 // Start rpc server.
@@ -97,7 +96,7 @@ func Start(
 
 	err = rpcFn(client, srv)
 	if err != nil {
-		return utils.Wrap1(err)
+		return errs.Wrap(err)
 	}
 	err = client.Register(
 		rpcRegisterName,
@@ -106,7 +105,7 @@ func Start(
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return utils.Wrap1(err)
+		return errs.Wrap(err)
 	}
 
 	var wg errgroup.Group
@@ -124,7 +123,7 @@ func Start(
 	})
 
 	wg.Go(func() error {
-		return utils.Wrap1(srv.Serve(listener))
+		return errs.Wrap(srv.Serve(listener))
 	})
 
 	sigs := make(chan os.Signal, 1)
@@ -147,7 +146,7 @@ func Start(
 		return gerr
 
 	case <-time.After(15 * time.Second):
-		return utils.Wrap1(errors.New("timeout exit"))
+		return errs.Wrap(errors.New("timeout exit"))
 	}
 
 }
