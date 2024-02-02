@@ -27,8 +27,6 @@ import (
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mw/specialerror"
-	"github.com/OpenIMSDK/tools/utils"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
@@ -63,9 +61,9 @@ func NewMongo() (*Mongo, error) {
 			time.Sleep(time.Second) // exponential backoff could be implemented here
 			continue
 		}
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
-	return nil, err
+	return nil, errs.Wrap(err)
 }
 
 func buildMongoURI() string {
@@ -150,7 +148,7 @@ func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...strin
 
 	_, err := indexView.CreateOne(context.Background(), index, opts)
 	if err != nil {
-		return utils.Wrap(err, "CreateIndex")
+		return errs.Wrap(err, "CreateIndex")
 	}
 	return nil
 }

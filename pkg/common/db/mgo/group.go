@@ -16,6 +16,7 @@ package mgo
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/errs"
 	"time"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
@@ -36,7 +37,7 @@ func NewGroupMongo(db *mongo.Database) (relation.GroupModelInterface, error) {
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return &GroupMgo{coll: coll}, nil
 }
