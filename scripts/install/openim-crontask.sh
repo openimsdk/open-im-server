@@ -53,6 +53,7 @@ function openim::crontask::start() {
   openim::util::stop_services_with_name ${OPENIM_CRONTASK_BINARY}
   
   openim::log::status "start cron_task process, path: ${OPENIM_CRONTASK_BINARY}"
+
   nohup ${OPENIM_CRONTASK_BINARY} -c ${OPENIM_PUSH_CONFIG} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE") &
   openim::util::check_process_names ${SERVER_NAME}
 

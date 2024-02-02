@@ -125,6 +125,7 @@ function openim::rpc::start() {
     for ((i = 0; i < ${#OPENIM_RPC_SERVICE_LISTARIES[*]}; i++)); do
         # openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES
         openim::util::stop_services_on_ports ${OPENIM_RPC_PORT_LISTARIES[$i]}
+        openim::util::stop_services_on_ports ${OPENIM_RPC_PROM_PORT_LISTARIES[$i]}
 
         openim::log::info "OpenIM ${OPENIM_RPC_SERVICE_LISTARIES[$i]} config path: ${OPENIM_RPC_CONFIG}"
 
