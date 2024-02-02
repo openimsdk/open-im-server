@@ -16,6 +16,7 @@ package mgo
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/errs"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -38,7 +39,7 @@ func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return &ConversationMgo{coll: coll}, nil
 }

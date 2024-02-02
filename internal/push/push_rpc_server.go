@@ -66,9 +66,12 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 			pusher: pusher,
 		})
 	}()
+	consumer, err := NewConsumer(pusher)
+	if err != nil {
+		return err
+	}
 	go func() {
 		defer wg.Done()
-		consumer := NewConsumer(pusher)
 		consumer.Start()
 	}()
 	wg.Wait()

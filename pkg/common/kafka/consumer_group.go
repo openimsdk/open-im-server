@@ -16,6 +16,8 @@ package kafka
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/errs"
+	"strings"
 
 	"github.com/OpenIMSDK/tools/log"
 
@@ -36,7 +38,7 @@ type MConsumerGroupConfig struct {
 	IsReturnErr    bool
 }
 
-func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []string, groupID string) *MConsumerGroup {
+func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []string, groupID string) (*MConsumerGroup, error) {
 	consumerGroupConfig := sarama.NewConfig()
 	consumerGroupConfig.Version = consumerConfig.KafkaVersion
 	consumerGroupConfig.Consumer.Offsets.Initial = consumerConfig.OffsetsInitial
@@ -49,26 +51,28 @@ func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []str
 	SetupTLSConfig(consumerGroupConfig)
 	consumerGroup, err := sarama.NewConsumerGroup(addrs, groupID, consumerGroupConfig)
 	if err != nil {
-		panic(err.Error())
+		return nil, errs.Wrap(err, strings.Join(topics, ","), strings.Join(addrs, ","), groupID)
 	}
 	return &MConsumerGroup{
 		consumerGroup,
 		groupID,
 		topics,
-	}
+	}, nil
 }
 
 func (mc *MConsumerGroup) GetContextFromMsg(cMsg *sarama.ConsumerMessage) context.Context {
 	return GetContextWithMQHeader(cMsg.Headers)
 }
 
-func (mc *MConsumerGroup) RegisterHandleAndConsumer(handler sarama.ConsumerGroupHandler) {
+func (mc *MConsumerGroup) RegisterHandleAndConsumer(ctx context.Context, handler sarama.ConsumerGroupHandler) {
 	log.ZDebug(context.Background(), "register consumer group", "groupID", mc.groupID)
-	ctx := context.Background()
 	for {
 		err := mc.ConsumerGroup.Consume(ctx, mc.topics, handler)
 		if err != nil {
-			panic(err.Error())
+			log.ZWarn(ctx, "consume err", err, "topic", mc.topics, "groupID", mc.groupID)
+		}
+		if ctx.Err() != nil {
+			return
 		}
 	}
 }

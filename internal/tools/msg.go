@@ -84,7 +84,10 @@ func InitMsgTool() (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
-	msgDatabase := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase())
+	msgDatabase, err := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase())
+	if err != nil {
+		return nil, err
+	}
 	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
 	ctxTx := tx.NewMongo(mongo.GetClient())
 	userDatabase := controller.NewUserDatabase(

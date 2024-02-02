@@ -49,7 +49,7 @@ func NewRedis() (redis.UniversalClient, error) {
 	overrideConfigFromEnv()
 
 	if len(config.Config.Redis.Address) == 0 {
-		return nil, errors.New("redis address is empty")
+		return nil, errs.Wrap(errors.New("redis address is empty"))
 	}
 	specialerror.AddReplace(redis.Nil, errs.ErrRecordNotFound)
 	var rdb redis.UniversalClient
@@ -77,7 +77,7 @@ func NewRedis() (redis.UniversalClient, error) {
 	defer cancel()
 	err = rdb.Ping(ctx).Err()
 	if err != nil {
-		return nil, fmt.Errorf("redis ping %w", err)
+		return nil, errs.Wrap(fmt.Errorf("redis ping %w", err))
 	}
 
 	redisClient = rdb
