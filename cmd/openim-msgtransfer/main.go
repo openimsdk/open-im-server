@@ -15,7 +15,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"os"
 )
 
 func main() {
@@ -23,6 +25,7 @@ func main() {
 	msgTransferCmd.AddPrometheusPortFlag()
 	msgTransferCmd.AddTransferProgressFlag()
 	if err := msgTransferCmd.Exec(); err != nil {
-		panic(err.Error())
+		fmt.Fprintf(os.Stderr, "\n\nexit -1: \n%+v\n\n", err)
+		os.Exit(-1)
 	}
 }
