@@ -28,6 +28,7 @@ import (
 
 	"github.com/OpenIMSDK/tools/component"
 	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"gopkg.in/yaml.v3"
@@ -141,7 +142,6 @@ func checkZookeeper() error {
 
 // checkKafka checks the Kafka connection
 func checkKafka() error {
-
 	// Prioritize environment variables
 	kafkaStu := &component.Kafka{
 		Username: config.Config.Kafka.Username,
