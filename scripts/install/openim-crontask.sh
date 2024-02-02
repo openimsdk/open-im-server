@@ -44,6 +44,9 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 SERVER_NAME="openim-crontask"
 
 function openim::crontask::start() {
+
+  rm -rf "$TMP_LOG_FILE"
+
   openim::log::info "Start OpenIM Cron, binary root: ${SERVER_NAME}"
   openim::log::status "Start OpenIM Cron, path: ${OPENIM_CRONTASK_BINARY}"
   

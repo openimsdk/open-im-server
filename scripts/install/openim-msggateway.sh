@@ -26,6 +26,9 @@ openim::util::set_max_fd 200000
 SERVER_NAME="openim-msggateway"
 
 function openim::msggateway::start() {
+
+  rm -rf "$TMP_LOG_FILE"
+
   openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
   openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGGATEWAY_BINARY}"
   

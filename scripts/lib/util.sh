@@ -360,7 +360,11 @@ openim::util::check_ports() {
   
   # If any of the processes is not running, return a status of 1.
   if [[ ${#not_started[@]} -ne 0 ]]; then
-    echo "++++ OpenIM Log >> cat ${LOG_FILE}"
+    echo ""
+    echo "!!! OpenIM Stdout Log >> cat ${LOG_FILE}"
+    echo "!!! OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+    echo ""
+    cat "$TMP_LOG_FILE"
     return 1
   else
     openim::log::success "All specified processes are running."
@@ -445,6 +449,9 @@ openim::util::check_process_names() {
   # Return status
   if [[ ${#not_started[@]} -ne 0 ]]; then
     echo "++++ OpenIM Log >> cat ${LOG_FILE}"
+    echo "!!! OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+    echo ""
+    cat "$TMP_LOG_FILE"
     return 1
   else
     openim::log::success "All processes are running."
@@ -1595,6 +1602,9 @@ openim::util::check_ports() {
     # If any of the processes is not running, return a status of 1.
     if [[ ${#not_started[@]} -ne 0 ]]; then
         echo "++++ OpenIM Log >> cat ${LOG_FILE}"
+        echo "!!! OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+        echo ""
+        cat "$TMP_LOG_FILE"
         return 1
     else
         openim::log::success "All specified processes are running."
@@ -1679,6 +1689,9 @@ openim::util::check_process_names() {
     # Return status
     if [[ ${#not_started[@]} -ne 0 ]]; then
         echo "++++ OpenIM Log >> cat ${LOG_FILE}"
+        echo "!!! OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+        echo ""
+        cat "$TMP_LOG_FILE"
         return 1
     else
         openim::log::success "All processes are running."

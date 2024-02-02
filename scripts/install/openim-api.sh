@@ -34,12 +34,15 @@ readonly OPENIM_API_SERVICE_TARGETS=(
 readonly OPENIM_API_SERVICE_LISTARIES=("${OPENIM_API_SERVICE_TARGETS[@]##*/}")
 
 function openim::api::start() {
+
+  rm -rf "$TMP_LOG_FILE"
+
   echo "++ OPENIM_API_SERVICE_LISTARIES: ${OPENIM_API_SERVICE_LISTARIES[@]}"
   echo "++ OPENIM_API_PORT_LISTARIES: ${OPENIM_API_PORT_LISTARIES[@]}"
   echo "++ OpenIM API config path: ${OPENIM_API_CONFIG}"
-  
+
   openim::log::info "Starting ${SERVER_NAME} ..."
-  
+
   printf "+------------------------+--------------+\n"
   printf "| Service Name           | Port         |\n"
   printf "+------------------------+--------------+\n"
