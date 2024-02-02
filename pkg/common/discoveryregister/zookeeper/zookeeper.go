@@ -45,7 +45,7 @@ func NewZookeeperDiscoveryRegister() (discoveryregistry.SvcDiscoveryRegistry, er
 		openkeeper.WithLogger(log.NewZkLogger()),
 	)
 	if err != nil {
-		uriFormat := "address:%s, username :%s, password :%s, schema:%s."
+		uriFormat := "address:%s, username:%s, password:%s, schema:%s."
 		errInfo := fmt.Sprintf(uriFormat,
 			config.Config.Zookeeper.ZkAddr,
 			config.Config.Zookeeper.Username,

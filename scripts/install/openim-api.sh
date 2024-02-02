@@ -34,12 +34,15 @@ readonly OPENIM_API_SERVICE_TARGETS=(
 readonly OPENIM_API_SERVICE_LISTARIES=("${OPENIM_API_SERVICE_TARGETS[@]##*/}")
 
 function openim::api::start() {
+
+  rm -rf "$TMP_LOG_FILE"
+
   echo "++ OPENIM_API_SERVICE_LISTARIES: ${OPENIM_API_SERVICE_LISTARIES[@]}"
   echo "++ OPENIM_API_PORT_LISTARIES: ${OPENIM_API_PORT_LISTARIES[@]}"
   echo "++ OpenIM API config path: ${OPENIM_API_CONFIG}"
-  
+
   openim::log::info "Starting ${SERVER_NAME} ..."
-  
+
   printf "+------------------------+--------------+\n"
   printf "| Service Name           | Port         |\n"
   printf "+------------------------+--------------+\n"
@@ -80,8 +83,7 @@ function openim::api::start_service() {
   local prometheus_port="$3"
   
   local cmd="${OPENIM_OUTPUT_HOSTBIN}/${binary_name} --port ${service_port} -c ${OPENIM_API_CONFIG}"
-  
-  nohup ${cmd} >> "${LOG_FILE}" 2>&1 &
+  nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE") &
   
   if [ $? -ne 0 ]; then
     openim::log::error_exit "Failed to start ${binary_name} on port ${service_port}."

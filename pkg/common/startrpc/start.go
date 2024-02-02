@@ -17,7 +17,6 @@ package startrpc
 import (
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/tools/errs"
 	"log"
 	"net"
 	"net/http"
@@ -27,6 +26,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -96,7 +97,7 @@ func Start(
 
 	err = rpcFn(client, srv)
 	if err != nil {
-		return errs.Wrap(err)
+		return err
 	}
 	err = client.Register(
 		rpcRegisterName,
@@ -116,7 +117,7 @@ func Start(
 			// Create a HTTP server for prometheus.
 			httpServer := &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
 			if err := httpServer.ListenAndServe(); err != nil {
-				log.Fatal("Unable to start a http server.")
+				log.Fatal("Unable to start a http server. ", err.Error(), "PrometheusPort:", prometheusPort)
 			}
 		}
 		return nil

@@ -44,14 +44,19 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 SERVER_NAME="openim-crontask"
 
 function openim::crontask::start() {
+
+  rm -rf "$TMP_LOG_FILE"
+
   openim::log::info "Start OpenIM Cron, binary root: ${SERVER_NAME}"
   openim::log::status "Start OpenIM Cron, path: ${OPENIM_CRONTASK_BINARY}"
   
   openim::util::stop_services_with_name ${OPENIM_CRONTASK_BINARY}
   
   openim::log::status "start cron_task process, path: ${OPENIM_CRONTASK_BINARY}"
-  nohup ${OPENIM_CRONTASK_BINARY} -c ${OPENIM_PUSH_CONFIG} >> ${LOG_FILE} 2>&1 &
+
+  nohup ${OPENIM_CRONTASK_BINARY} -c ${OPENIM_PUSH_CONFIG} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE") &
   openim::util::check_process_names ${SERVER_NAME}
+
 }
 
 ###################################### Linux Systemd ######################################

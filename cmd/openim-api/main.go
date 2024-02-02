@@ -43,7 +43,8 @@ func main() {
 	apiCmd.AddPortFlag()
 	apiCmd.AddApi(run)
 	if err := apiCmd.Execute(); err != nil {
-		panic(err.Error())
+		fmt.Fprintf(os.Stderr, "\n\nexit -1: \n%+v\n\n", err)
+		os.Exit(-1)
 	}
 }
 
