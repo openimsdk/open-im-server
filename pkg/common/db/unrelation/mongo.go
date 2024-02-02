@@ -63,7 +63,6 @@ func NewMongo() (*Mongo, error) {
 			time.Sleep(time.Second) // exponential backoff could be implemented here
 			continue
 		}
-		return nil, errs.Wrap(err, uri)
 	}
 	return nil, errs.Wrap(err, uri)
 }
