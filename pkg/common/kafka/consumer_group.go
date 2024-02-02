@@ -51,7 +51,7 @@ func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []str
 	SetupTLSConfig(consumerGroupConfig)
 	consumerGroup, err := sarama.NewConsumerGroup(addrs, groupID, consumerGroupConfig)
 	if err != nil {
-		return nil, errs.Wrap(err, strings.Join(topics, ","), strings.Join(addrs, ","), groupID)
+		return nil, errs.Wrap(err, strings.Join(topics, ","), strings.Join(addrs, ","), groupID, config.Config.Kafka.Username, config.Config.Kafka.Password)
 	}
 	return &MConsumerGroup{
 		consumerGroup,

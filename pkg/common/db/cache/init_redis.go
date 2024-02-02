@@ -77,9 +77,10 @@ func NewRedis() (redis.UniversalClient, error) {
 	defer cancel()
 	err = rdb.Ping(ctx).Err()
 	if err != nil {
-		return nil, errs.Wrap(fmt.Errorf("redis ping %w", err))
+		uriFormat := "address:%s, username:%s, password:%s, clusterMode:%t, enablePipeline:%t"
+		errMsg := fmt.Sprintf(uriFormat, config.Config.Redis.Address, config.Config.Redis.Username, config.Config.Redis.Password, config.Config.Redis.ClusterMode, config.Config.Redis.EnablePipeline)
+		return nil, errs.Wrap(err, errMsg)
 	}
-
 	redisClient = rdb
 	return rdb, err
 }
