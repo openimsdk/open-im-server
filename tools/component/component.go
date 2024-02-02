@@ -15,7 +15,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"github.com/IBM/sarama"
@@ -43,12 +42,7 @@ const (
 )
 
 var (
-	cfgPath         = flag.String("c", defaultCfgPath, "Path to the configuration file")
-	MongoAuthFailed = "Authentication failed."
-	RedisAuthFailed = "NOAUTH Authentication required."
-	MinioAuthFailed = "Minio Authentication failed"
-	ZkAuthFailed    = "zk Authentication failed"
-	KafkaAuthFailed = "SASL Authentication failed"
+	cfgPath = flag.String("c", defaultCfgPath, "Path to the configuration file")
 )
 
 func initCfg() error {
@@ -61,9 +55,8 @@ func initCfg() error {
 }
 
 type checkFunc struct {
-	name        string
-	function    func() error
-	authErrInfo string
+	name     string
+	function func() error
 }
 
 func main() {
@@ -79,11 +72,11 @@ func main() {
 
 	checks := []checkFunc{
 		//{name: "Mysql", function: checkMysql},
-		{name: "Mongo", function: checkMongo, authErrInfo: MongoAuthFailed},
-		{name: "Redis", function: checkRedis, authErrInfo: RedisAuthFailed},
-		{name: "Minio", function: checkMinio, authErrInfo: MinioAuthFailed},
-		{name: "Zookeeper", function: checkZookeeper, authErrInfo: ZkAuthFailed},
-		{name: "Kafka", function: checkKafka, authErrInfo: KafkaAuthFailed},
+		{name: "Mongo", function: checkMongo},
+		{name: "Redis", function: checkRedis},
+		{name: "Minio", function: checkMinio},
+		{name: "Zookeeper", function: checkZookeeper},
+		{name: "Kafka", function: checkKafka},
 	}
 
 	for i := 0; i < maxRetry; i++ {
@@ -92,29 +85,16 @@ func main() {
 		}
 		fmt.Printf("Checking components Round %v...\n", i+1)
 
-		var (
-			err         error
-			errInfo     string
-			disruptions bool
-		)
+		var err error
 		allSuccess := true
 		for _, check := range checks {
 			err = check.function()
 			if err != nil {
-				if errorJudge(err, check.authErrInfo) {
-					disruptions = true
-				}
-				ErrorPrint(fmt.Sprintf("Starting %s failed:%v, conneted info:%s", check.name, err, errInfo))
+				ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, err))
 				allSuccess = false
 			} else {
-				component.SuccessPrint(fmt.Sprintf("%s connected successfully, address:%s", check.name, errInfo))
+				component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 			}
-
-		}
-
-		if disruptions {
-			component.ErrorPrint(fmt.Sprintf("component check exit,err:  %v", err))
-			return
 		}
 
 		if allSuccess {
@@ -275,9 +255,3 @@ func colorPrint(colorCode int, format string, a ...interface{}) {
 	log.Printf("\x1b[%dm%s\x1b[0m\n", colorCode, fmt.Sprintf(format, a...))
 }
 
-func errorJudge(err error, errMsg string) bool {
-	if strings.Contains(errors.Unwrap(err).Error(), errMsg) {
-		return true
-	}
-	return false
-}
