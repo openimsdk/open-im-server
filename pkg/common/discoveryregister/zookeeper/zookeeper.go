@@ -15,6 +15,8 @@
 package zookeeper
 
 import (
+	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"os"
 	"strings"
 	"time"
@@ -33,7 +35,7 @@ func NewZookeeperDiscoveryRegister() (discoveryregistry.SvcDiscoveryRegistry, er
 	username := getEnv("ZOOKEEPER_USERNAME", config.Config.Zookeeper.Username)
 	password := getEnv("ZOOKEEPER_PASSWORD", config.Config.Zookeeper.Password)
 
-	return openkeeper.NewClient(
+	zk, err := openkeeper.NewClient(
 		zkAddr,
 		schema,
 		openkeeper.WithFreq(time.Hour),
@@ -42,6 +44,16 @@ func NewZookeeperDiscoveryRegister() (discoveryregistry.SvcDiscoveryRegistry, er
 		openkeeper.WithTimeout(10),
 		openkeeper.WithLogger(log.NewZkLogger()),
 	)
+	if err != nil {
+		uriFormat := "address:%s, username :%s, password :%s, schema:%s."
+		errInfo := fmt.Sprintf(uriFormat,
+			config.Config.Zookeeper.ZkAddr,
+			config.Config.Zookeeper.Username,
+			config.Config.Zookeeper.Password,
+			config.Config.Zookeeper.Schema)
+		return nil, errs.Wrap(err, errInfo)
+	}
+	return zk, nil
 }
 
 // getEnv returns the value of an environment variable if it exists, otherwise it returns the fallback value.
