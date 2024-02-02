@@ -87,14 +87,15 @@ func main() {
 
 		var err error
 		allSuccess := true
-		for i, check := range checks {
+		for index, check := range checks {
 			if !check.flag {
 				err = check.function()
 				if err != nil {
 					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, err))
 					allSuccess = false
+
 				} else {
-					checks[i].flag = true
+					checks[index].flag = true
 					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 				}
 			}
@@ -134,7 +135,7 @@ func checkMinio() error {
 		SignEndpoint:    config.Config.Object.Minio.SignEndpoint,
 		UseSSL:          getEnv("MINIO_USE_SSL", "false"),
 	}
-	_, err := component.CheckMinio(minio)
+	err := component.CheckMinio(minio)
 	return err
 }
 
@@ -153,7 +154,7 @@ func checkKafka() error {
 		Addr:     config.Config.Kafka.Addr,
 	}
 
-	_, kafkaClient, err := component.CheckKafka(kafkaStu)
+	kafkaClient, err := component.CheckKafka(kafkaStu)
 	if err != nil {
 		return err
 	}
