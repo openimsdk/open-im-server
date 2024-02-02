@@ -22,7 +22,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/zookeeper"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -38,7 +37,6 @@ const (
 	// defaultCfgPath is the default path of the configuration file.
 	defaultCfgPath = "../../../../../config/config.yaml"
 	maxRetry       = 300
-	colorRed       = 31
 )
 
 var (
@@ -90,7 +88,7 @@ func main() {
 		for _, check := range checks {
 			err = check.function()
 			if err != nil {
-				ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, err))
+				component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, err))
 				allSuccess = false
 			} else {
 				component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
@@ -246,12 +244,3 @@ func getEnv(key, fallback string) string {
 	}
 	return fallback
 }
-
-func ErrorPrint(s string) {
-	colorPrint(colorRed, "%v", s)
-}
-
-func colorPrint(colorCode int, format string, a ...interface{}) {
-	log.Printf("\x1b[%dm%s\x1b[0m\n", colorCode, fmt.Sprintf(format, a...))
-}
-
