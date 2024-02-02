@@ -87,14 +87,14 @@ func main() {
 
 		var err error
 		allSuccess := true
-		for _, check := range checks {
+		for i, check := range checks {
 			if !check.flag {
 				err = check.function()
 				if err != nil {
 					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, err))
 					allSuccess = false
 				} else {
-					check.flag = true
+					checks[i].flag = true
 					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 				}
 			}
