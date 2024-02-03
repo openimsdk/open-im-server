@@ -18,9 +18,10 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/tools/errs"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/protocol/constant"

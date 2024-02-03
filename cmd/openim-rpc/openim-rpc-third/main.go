@@ -16,10 +16,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/third"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"os"
 )
 
 func main() {

@@ -17,11 +17,12 @@ package tools
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/tools/errs"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"

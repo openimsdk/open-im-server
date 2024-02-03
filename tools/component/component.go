@@ -18,14 +18,16 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/IBM/sarama"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/zookeeper"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
-	"os"
-	"strings"
-	"time"
 
 	"github.com/OpenIMSDK/tools/component"
 	"github.com/OpenIMSDK/tools/errs"
