@@ -129,8 +129,11 @@ func Start(
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
+	for data := range sigs {
+		log.Println("23333333333333333333333333", data)
+	}
 	<-sigs
-	log.Println("23333333333333333333333333", sigs)
 
 	var (
 		done = make(chan struct{}, 1)
