@@ -18,6 +18,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
 	"go.mongodb.org/mongo-driver/bson"
@@ -36,7 +38,7 @@ func NewGroupMongo(db *mongo.Database) (relation.GroupModelInterface, error) {
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return &GroupMgo{coll: coll}, nil
 }

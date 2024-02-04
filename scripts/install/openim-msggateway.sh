@@ -26,6 +26,9 @@ openim::util::set_max_fd 200000
 SERVER_NAME="openim-msggateway"
 
 function openim::msggateway::start() {
+
+  rm -rf "$TMP_LOG_FILE"
+
   openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
   openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGGATEWAY_BINARY}"
   
@@ -61,7 +64,7 @@ function openim::msggateway::start() {
             PROMETHEUS_PORT_OPTION="--prometheus_port ${MSG_GATEWAY_PROM_PORTS_ARRAY[$i]}"
         fi
 
-        nohup ${OPENIM_MSGGATEWAY_BINARY} --port ${OPENIM_MSGGATEWAY_PORTS_ARRAY[$i]} --ws_port ${OPENIM_WS_PORTS_ARRAY[$i]} $PROMETHEUS_PORT_OPTION -c ${OPENIM_MSGGATEWAY_CONFIG} >> ${LOG_FILE} 2>&1 &
+        nohup ${OPENIM_MSGGATEWAY_BINARY} --port ${OPENIM_MSGGATEWAY_PORTS_ARRAY[$i]} --ws_port ${OPENIM_WS_PORTS_ARRAY[$i]} $PROMETHEUS_PORT_OPTION -c ${OPENIM_MSGGATEWAY_CONFIG} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE") &
     done
 
     openim::util::check_process_names ${SERVER_NAME}

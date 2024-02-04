@@ -49,6 +49,14 @@ print_services_and_ports() {
   echo "+-------------------------+----------+"
 }
 
+handle_error() {
+  echo "An error occurred. Printing ${STDERR_LOG_FILE} contents:"
+  cat "${STDERR_LOG_FILE}"
+  exit 1
+}
+
+trap handle_error ERR
+
 # Assuming OPENIM_SERVER_NAME_TARGETS and OPENIM_SERVER_PORT_TARGETS are defined
 # Similarly for OPENIM_DEPENDENCY_TARGETS and OPENIM_DEPENDENCY_PORT_TARGETS
 
@@ -94,3 +102,5 @@ else
 fi
 
 set -e
+
+trap - ERR

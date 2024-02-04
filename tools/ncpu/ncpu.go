@@ -1,4 +1,4 @@
-// Copyright © 2023 OpenIM. All rights reserved.
+// Copyright © 2024 OpenIM. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +22,11 @@ import (
 )
 
 func main() {
-	maxprocs.Set()
-	fmt.Print(runtime.GOMAXPROCS(0))
+	// Set maxprocs with a custom logger that does nothing to ignore logs.
+	maxprocs.Set(maxprocs.Logger(func(string, ...interface{}) {
+		// Intentionally left blank to suppress all log output from automaxprocs.
+	}))
+
+	// Now this will print the GOMAXPROCS value without printing the automaxprocs log message.
+	fmt.Println(runtime.GOMAXPROCS(0))
 }

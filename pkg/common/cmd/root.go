@@ -20,7 +20,6 @@ import (
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/spf13/cobra"
-	_ "go.uber.org/automaxprocs"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/log"

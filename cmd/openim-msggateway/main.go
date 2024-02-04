@@ -15,6 +15,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 )
 
@@ -25,6 +28,7 @@ func main() {
 	msgGatewayCmd.AddPrometheusPortFlag()
 
 	if err := msgGatewayCmd.Exec(); err != nil {
-		panic(err.Error())
+		fmt.Fprintf(os.Stderr, "\n\nexit -1: \n%+v\n\n", err)
+		os.Exit(-1)
 	}
 }

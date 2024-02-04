@@ -4,28 +4,50 @@
     </a>
 </p>
 
-<h3 align="center" style="border-bottom: none">
-    ⭐️  Open source Instant Messaging Server ⭐️ <br>
-<h3>
+<div align="center">
 
+[![Stars](https://img.shields.io/github/stars/openimsdk/open-im-server?style=for-the-badge&logo=github&colorB=ff69b4)](https://github.com/openimsdk/open-im-server/stargazers)
+[![Forks](https://img.shields.io/github/forks/openimsdk/open-im-server?style=for-the-badge&logo=github&colorB=blue)](https://github.com/openimsdk/open-im-server/network/members)
+[![Codecov](https://img.shields.io/codecov/c/github/openimsdk/open-im-server?style=for-the-badge&logo=codecov&colorB=orange)](https://app.codecov.io/gh/openimsdk/open-im-server)
+[![Go Report Card](https://goreportcard.com/badge/github.com/openimsdk/open-im-server?style=for-the-badge)](https://goreportcard.com/report/github.com/openimsdk/open-im-server)
+[![Go Reference](https://img.shields.io/badge/Go%20Reference-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/openimsdk/open-im-server/v3)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)
+[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+[![Best Practices](https://img.shields.io/badge/Best%20Practices-purple?style=for-the-badge)](https://www.bestpractices.dev/projects/8045)
+[![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
+[![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
 
-<p align=center>
-<a href="https://goreportcard.com/report/github.com/openimsdk/open-im-server"><img src="https://goreportcard.com/badge/github.com/openimsdk/open-im-server" alt="A+"></a>
-<a href="https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22"><img src="https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?logo=%22github%22" alt="good first"></a>
-<a href="https://github.com/openimsdk/open-im-server"><img src="https://img.shields.io/github/stars/openimsdk/open-im-server.svg?style=flat&logo=github&colorB=deeppink&label=stars"></a>
-<a href="https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q"><img src="https://img.shields.io/badge/Slack-300%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
-<a href="https://github.com/openimsdk/open-im-server/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green"></a>
-<a href="https://golang.org/"><img src="https://img.shields.io/badge/Language-Go-blue.svg"></a>
-</p>
-
-</p>
 
 <p align="center">
-    <a href="./README.md"><b> English </b></a> •
-    <a href="./README-zh_CN.md"><b> 简体中文 </b></a> •
-    <a href="https://openim.io/en"><b> Docs </b></a>
+  <a href="./README.md">Englist</a> · 
+  <a href="./README-zh_CN.md">中文</a> · 
+  <a href="docs/readme/README-UA.md">Українська</a> · 
+  <a href="docs/readme/README-CS.md">Česky</a> · 
+  <a href="docs/readme/README-HU.md">Magyar</a> · 
+  <a href="docs/readme/README-ES.md">Español</a> · 
+  <a href="docs/readme/README-FA.md">فارسی</a> · 
+  <a href="docs/readme/README-FR.md">Français</a> · 
+  <a href="docs/readme/README-DE.md">Deutsch</a> · 
+  <a href="docs/readme/README-PL.md">Polski</a> · 
+  <a href="docs/readme/README-ID.md">Indonesian</a> · 
+  <a href="docs/readme/README-FI.md">Suomi</a> · 
+  <a href="docs/readme/README-ML.md">മലയാളം</a> · 
+  <a href="docs/readme/README-JP.md">日本語</a> · 
+  <a href="docs/readme/README-NL.md">Nederlands</a> · 
+  <a href="docs/readme/README-IT.md">Italiano</a> · 
+  <a href="docs/readme/README-RU.md">Русский</a> · 
+  <a href="docs/readme/README-PTBR.md">Português (Brasil)</a> · 
+  <a href="docs/readme/README-EO.md">Esperanto</a> · 
+  <a href="docs/readme/README-KR.md">한국어</a> · 
+  <a href="docs/readme/README-AR.md">العربي</a> · 
+  <a href="docs/readme/README-VN.md">Tiếng Việt</a> · 
+  <a href="docs/readme/README-DA.md">Dansk</a> · 
+  <a href="docs/readme/README-GR.md">Ελληνικά</a> · 
+  <a href="docs/readme/README-TR.md">Türkçe</a>
 </p>
 
+
+</div>
 
 </p>
 
@@ -36,8 +58,6 @@
 ## Ⓜ️ 关于 OpenIM
 
 OpenIM 是一个专门设计用于在应用程序中集成聊天、音视频通话、通知以及AI聊天机器人等通信功能的服务平台。它通过提供一系列强大的API和Webhooks，使开发者可以轻松地在他们的应用中加入这些交互特性。OpenIM 本身并不是一个独立运行的聊天应用，而是作为一个平台，为其他应用提供支持，实现丰富的通信功能。下图展示 AppServer、AppClient、OpenIMServer 和 OpenIMSDK 之间的交互关系来具体说明。
-
-
 
 
 

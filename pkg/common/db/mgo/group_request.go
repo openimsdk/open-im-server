@@ -17,6 +17,8 @@ package mgo
 import (
 	"context"
 
+	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
 	"go.mongodb.org/mongo-driver/bson"
@@ -36,7 +38,7 @@ func NewGroupRequestMgo(db *mongo.Database) (relation.GroupRequestModelInterface
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return &GroupRequestMgo{coll: coll}, nil
 }

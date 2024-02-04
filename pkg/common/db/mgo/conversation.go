@@ -18,6 +18,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
@@ -38,7 +40,7 @@ func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return &ConversationMgo{coll: coll}, nil
 }

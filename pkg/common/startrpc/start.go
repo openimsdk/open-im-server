@@ -27,6 +27,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"golang.org/x/sync/errgroup"
@@ -43,7 +45,6 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/OpenIMSDK/tools/network"
-	"github.com/OpenIMSDK/tools/utils"
 )
 
 // Start rpc server.
@@ -61,20 +62,20 @@ func Start(
 		net.JoinHostPort(network.GetListenIP(config.Config.Rpc.ListenIP), strconv.Itoa(rpcPort)),
 	)
 	if err != nil {
-		return err
+		return errs.Wrap(err, network.GetListenIP(config.Config.Rpc.ListenIP), strconv.Itoa(rpcPort))
 	}
 
 	defer listener.Close()
 	client, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
-		return utils.Wrap1(err)
+		return errs.Wrap(err)
 	}
 
 	defer client.Close()
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	registerIP, err := network.GetRpcRegisterIP(config.Config.Rpc.RegisterIP)
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	}
 
 	var reg *prometheus.Registry
@@ -96,7 +97,7 @@ func Start(
 
 	err = rpcFn(client, srv)
 	if err != nil {
-		return utils.Wrap1(err)
+		return err
 	}
 	err = client.Register(
 		rpcRegisterName,
@@ -105,7 +106,7 @@ func Start(
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return utils.Wrap1(err)
+		return errs.Wrap(err)
 	}
 
 	var wg errgroup.Group
@@ -116,14 +117,14 @@ func Start(
 			// Create a HTTP server for prometheus.
 			httpServer := &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
 			if err := httpServer.ListenAndServe(); err != nil {
-				log.Fatal("Unable to start a http server.")
+				log.Fatal("Unable to start a http server. ", err.Error(), "PrometheusPort:", prometheusPort)
 			}
 		}
 		return nil
 	})
 
 	wg.Go(func() error {
-		return utils.Wrap1(srv.Serve(listener))
+		return errs.Wrap(srv.Serve(listener))
 	})
 
 	sigs := make(chan os.Signal, 1)
@@ -146,7 +147,7 @@ func Start(
 		return gerr
 
 	case <-time.After(15 * time.Second):
-		return utils.Wrap1(errors.New("timeout exit"))
+		return errs.Wrap(errors.New("timeout exit"))
 	}
 
 }

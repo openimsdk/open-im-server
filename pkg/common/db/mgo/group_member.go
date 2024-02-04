@@ -17,6 +17,8 @@ package mgo
 import (
 	"context"
 
+	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
@@ -37,7 +39,7 @@ func NewGroupMember(db *mongo.Database) (relation.GroupMemberModelInterface, err
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return &GroupMemberMgo{coll: coll}, nil
 }

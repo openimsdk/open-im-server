@@ -35,15 +35,19 @@ type ConsumerHandler struct {
 	pusher            *Pusher
 }
 
-func NewConsumerHandler(pusher *Pusher) *ConsumerHandler {
+func NewConsumerHandler(pusher *Pusher) (*ConsumerHandler, error) {
 	var consumerHandler ConsumerHandler
 	consumerHandler.pusher = pusher
-	consumerHandler.pushConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
+	var err error
+	consumerHandler.pushConsumerGroup, err = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
 	}, []string{config.Config.Kafka.MsgToPush.Topic}, config.Config.Kafka.Addr,
 		config.Config.Kafka.ConsumerGroupID.MsgToPush)
-	return &consumerHandler
+	if err != nil {
+		return nil, err
+	}
+	return &consumerHandler, nil
 }
 
 func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
