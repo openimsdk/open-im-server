@@ -486,7 +486,7 @@ openim::util::stop_services_on_ports() {
         local pid=$(echo $line | awk '{print $2}')
         
         # Try to stop the service by killing its process.
-        if kill -TERM $pid; then
+        if kill -10 $pid; then
           stopped+=($port)
         else
           not_stopped+=($port)
@@ -563,7 +563,7 @@ openim::util::stop_services_with_name() {
             # If there's a Process ID, it means the service with the name is running.
             if [[ -n $pid ]]; then
                 # Try to stop the service by killing its process.
-                if kill -TERM $pid 2>/dev/null; then
+                if kill -10 $pid 2>/dev/null; then
                     stopped_this_time=true
                 fi
             fi
@@ -1722,7 +1722,7 @@ openim::util::stop_services_on_ports() {
                 local pid=$(echo $line | awk '{print $2}')
 
                 # Try to stop the service by killing its process.
-                if kill -TERM $pid; then
+                if kill -10 $pid; then
                     stopped+=($port)
                 else
                     not_stopped+=($port)
@@ -1799,7 +1799,7 @@ openim::util::stop_services_with_name() {
             # If there's a Process ID, it means the service with the name is running.
             if [[ -n $pid ]]; then
                 # Try to stop the service by killing its process.
-                if kill -TERM $pid 2>/dev/null; then
+                if kill -10 $pid 2>/dev/null; then
                     stopped_this_time=true
                 fi
             fi
