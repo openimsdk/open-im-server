@@ -451,6 +451,7 @@ openim::util::check_process_names() {
     cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
     return 1
   else
+    echo ""
     openim::log::success "All processes are running."
     echo ""
     return 0
@@ -1691,6 +1692,7 @@ openim::util::check_process_names() {
         cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
         return 1
     else
+        echo ""
         openim::log::success "All processes are running."
         echo ""
         return 0

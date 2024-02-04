@@ -16,10 +16,11 @@ package zookeeper
 
 import (
 	"fmt"
-	"github.com/OpenIMSDK/tools/errs"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	openkeeper "github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
