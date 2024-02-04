@@ -17,7 +17,6 @@ package startrpc
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
