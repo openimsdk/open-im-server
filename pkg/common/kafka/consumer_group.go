@@ -16,8 +16,9 @@ package kafka
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/errs"
 	"strings"
+
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/OpenIMSDK/tools/log"
 

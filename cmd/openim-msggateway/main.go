@@ -16,8 +16,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"os"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 )
 
 func main() {
