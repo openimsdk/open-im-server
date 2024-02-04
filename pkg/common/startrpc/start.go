@@ -132,6 +132,8 @@ func Start(
 
 	log.Println("23333333333:", <-sigs)
 
+	<-sigs
+
 	var (
 		done = make(chan struct{}, 1)
 		gerr error
