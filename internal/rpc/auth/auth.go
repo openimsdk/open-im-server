@@ -85,6 +85,11 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 		return nil, err
 	}
 	resp := pbauth.GetUserTokenResp{}
+
+	if authverify.IsManagerUserID(req.UserID) {
+		return nil, errs.ErrNoPermission.Wrap("don't get Admin token")
+	}
+
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
