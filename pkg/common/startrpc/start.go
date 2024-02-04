@@ -17,7 +17,6 @@ package startrpc
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -117,7 +116,8 @@ func Start(
 			// Create a HTTP server for prometheus.
 			httpServer := &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
 			if err := httpServer.ListenAndServe(); err != nil {
-				log.Fatal("Unable to start a http server. ", err.Error(), "PrometheusPort:", prometheusPort)
+				fmt.Fprintf(os.Stderr, "\n\nexit -1: \n%+v PrometheusPort: %d \n\n", err, prometheusPort)
+				os.Exit(-1)
 			}
 		}
 		return nil
