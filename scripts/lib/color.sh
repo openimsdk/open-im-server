@@ -93,13 +93,13 @@ openim::color::test() {
   
   echo "Testing bold echo"
   openim::color::echo $COLOR_BOLD "This is bold text"
-  
+
   echo "Testing dim echo"
   openim::color::echo $COLOR_DIM "This is dim text"
-  
+
   echo "Testing underlined echo"
   openim::color::echo $COLOR_UNDER "This is underlined text"
-  
+
   echo "Testing italic echo"
   openim::color::echo $COLOR_ITALIC "This is italic text"
   
