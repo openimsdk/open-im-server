@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"fmt"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"net"
 	"net/http"
 	_ "net/http/pprof"
@@ -38,7 +39,6 @@ import (
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	ginprom "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 func main() {
@@ -75,12 +75,21 @@ func run(port int, proPort int) error {
 	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.Config.EncodeConfig()); err != nil {
 		return err
 	}
-
+	var (
+		netDone = make(chan struct{}, 1)
+		netErr  error
+	)
 	router := api.NewGinRouter(client, rdb)
 	if config.Config.Prometheus.Enable {
-		p := ginprom.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
-		p.SetListenAddress(fmt.Sprintf(":%d", proPort))
-		p.Use(router)
+		go func() {
+			p := ginprom.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
+			p.SetListenAddress(fmt.Sprintf(":%d", proPort))
+			if err := p.Use(router); err != nil && err != http.ErrServerClosed {
+				netErr = errs.Wrap(err, fmt.Sprintf("prometheus start err: %d", proPort))
+				netDone <- struct{}{}
+			}
+		}()
+
 	}
 
 	var address string
@@ -89,17 +98,15 @@ func run(port int, proPort int) error {
 	} else {
 		address = net.JoinHostPort("0.0.0.0", strconv.Itoa(port))
 	}
-	var (
-		netDone = make(chan struct{}, 1)
-		netErr  error
-	)
+
 	server := http.Server{Addr: address, Handler: router}
 
 	go func() {
 		err = server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
-			netErr = errs.Wrap(err, "api start err", server.Addr)
-			close(netDone)
+			netErr = errs.Wrap(err, fmt.Sprintf("api start err: %s", server.Addr))
+			netDone <- struct{}{}
+
 		}
 	}()
 
@@ -116,6 +123,7 @@ func run(port int, proPort int) error {
 			return errs.Wrap(err, "shutdown err")
 		}
 	case <-netDone:
+		close(netDone)
 		return netErr
 	}
 	return nil
