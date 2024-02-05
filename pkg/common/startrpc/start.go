@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 	"sync"
 	"syscall"
@@ -134,10 +135,10 @@ func Start(
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGUSR1)
-
 	select {
 	case <-sigs:
-		print("receive process terminal SIGUSR1 exit\n")
+		progName := filepath.Base(os.Args[0])
+		print("\n\n%s receive process terminal SIGUSR1 exit 0\n\n", progName)
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		if err := gracefulStopWithCtx(ctx, srv.GracefulStop); err != nil {

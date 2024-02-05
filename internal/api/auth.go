@@ -33,6 +33,10 @@ func (o *AuthApi) UserToken(c *gin.Context) {
 	a2r.Call(auth.AuthClient.UserToken, o.Client, c)
 }
 
+func (o *AuthApi) GetUserToken(c *gin.Context) {
+	a2r.Call(auth.AuthClient.GetUserToken, o.Client, c)
+}
+
 func (o *AuthApi) ParseToken(c *gin.Context) {
 	a2r.Call(auth.AuthClient.ParseToken, o.Client, c)
 }
