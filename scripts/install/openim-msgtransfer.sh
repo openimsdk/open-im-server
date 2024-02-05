@@ -58,6 +58,7 @@ function openim::msgtransfer::start() {
   PROMETHEUS_PORT_OPTION=""
   if [[ -n "${MSG_TRANSFER_PROM_PORTS[$i]}" ]]; then
       PROMETHEUS_MSG_TRANSFER_PORT="${MSG_TRANSFER_PROM_PORTS[$i]%,}"
+      openim::util::stop_services_on_ports ${PROMETHEUS_MSG_TRANSFER_PORT}
       PROMETHEUS_PORT_OPTION="--prometheus_port ${PROMETHEUS_MSG_TRANSFER_PORT}"
   fi
   nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} -n ${i} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
