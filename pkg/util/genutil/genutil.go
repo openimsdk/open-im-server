@@ -39,3 +39,14 @@ func OutDir(path string) (string, error) {
 	outDir += "/"
 	return outDir, nil
 }
+
+func ProcessExit(err error) {
+	progName := filepath.Base(os.Args[0])
+	fmt.Fprintf(os.Stderr, "\n\n%s exit -1: \n%+v\n\n", progName, err)
+	os.Exit(-1)
+}
+
+func SIGUSR1Exit() {
+	progName := filepath.Base(os.Args[0])
+	fmt.Printf("\n\n%s receive process terminal SIGUSR1 exit 0\n\n", progName)
+}

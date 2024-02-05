@@ -38,6 +38,7 @@ import (
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	ginprom "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 func main() {
@@ -45,8 +46,7 @@ func main() {
 	apiCmd.AddPortFlag()
 	apiCmd.AddApi(run)
 	if err := apiCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "\n\nexit -1: \n%+v\n\n", err)
-		os.Exit(-1)
+		util.ProcessExit(err)
 	}
 }
 
@@ -98,7 +98,7 @@ func run(port int, proPort int) error {
 	go func() {
 		err = server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
-			netErr = errs.Wrap(err, "api start err: ", server.Addr)
+			netErr = errs.Wrap(err, "api start err", server.Addr)
 			close(netDone)
 		}
 	}()
@@ -110,7 +110,7 @@ func run(port int, proPort int) error {
 	defer cancel()
 	select {
 	case <-sigs:
-		print("receive process terminal SIGUSR1 exit")
+		util.SIGUSR1Exit()
 		err := server.Shutdown(ctx)
 		if err != nil {
 			return errs.Wrap(err, "shutdown err")

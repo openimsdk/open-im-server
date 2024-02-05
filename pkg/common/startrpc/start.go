@@ -19,11 +19,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/OpenIMSDK/tools/errs"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"strconv"
 	"sync"
 	"syscall"
@@ -137,8 +137,7 @@ func Start(
 	signal.Notify(sigs, syscall.SIGUSR1)
 	select {
 	case <-sigs:
-		progName := filepath.Base(os.Args[0])
-		print("\n\n%s receive process terminal SIGUSR1 exit 0\n\n", progName)
+		util.SIGUSR1Exit()
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		if err := gracefulStopWithCtx(ctx, srv.GracefulStop); err != nil {
