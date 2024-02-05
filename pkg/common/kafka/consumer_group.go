@@ -16,15 +16,18 @@ package kafka
 
 import (
 	"context"
-
-	"github.com/OpenIMSDK/tools/log"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
+	"errors"
 	"github.com/IBM/sarama"
+	"strings"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type MConsumerGroup struct {
+	ctx    context.Context
+	cancel context.CancelFunc
+
 	sarama.ConsumerGroup
 	groupID string
 	topics  []string
@@ -36,7 +39,7 @@ type MConsumerGroupConfig struct {
 	IsReturnErr    bool
 }
 
-func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []string, groupID string) *MConsumerGroup {
+func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []string, groupID string) (*MConsumerGroup, error) {
 	consumerGroupConfig := sarama.NewConfig()
 	consumerGroupConfig.Version = consumerConfig.KafkaVersion
 	consumerGroupConfig.Consumer.Offsets.Initial = consumerConfig.OffsetsInitial
@@ -49,26 +52,43 @@ func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []str
 	SetupTLSConfig(consumerGroupConfig)
 	consumerGroup, err := sarama.NewConsumerGroup(addrs, groupID, consumerGroupConfig)
 	if err != nil {
-		panic(err.Error())
+		return nil, errs.Wrap(err, strings.Join(topics, ","), strings.Join(addrs, ","), groupID, config.Config.Kafka.Username, config.Config.Kafka.Password)
 	}
+
+	ctx, cancel := context.WithCancel(context.Background())
 	return &MConsumerGroup{
+		ctx, cancel,
 		consumerGroup,
 		groupID,
 		topics,
-	}
+	}, nil
 }
 
 func (mc *MConsumerGroup) GetContextFromMsg(cMsg *sarama.ConsumerMessage) context.Context {
 	return GetContextWithMQHeader(cMsg.Headers)
 }
 
-func (mc *MConsumerGroup) RegisterHandleAndConsumer(handler sarama.ConsumerGroupHandler) {
+func (mc *MConsumerGroup) RegisterHandleAndConsumer(ctx context.Context, handler sarama.ConsumerGroupHandler) {
 	log.ZDebug(context.Background(), "register consumer group", "groupID", mc.groupID)
-	ctx := context.Background()
 	for {
-		err := mc.ConsumerGroup.Consume(ctx, mc.topics, handler)
+		err := mc.ConsumerGroup.Consume(mc.ctx, mc.topics, handler)
+		if errors.Is(err, sarama.ErrClosedConsumerGroup) {
+			return
+		}
+		if mc.ctx.Err() != nil {
+			return
+		}
+
 		if err != nil {
-			panic(err.Error())
+			log.ZWarn(ctx, "consume err", err, "topic", mc.topics, "groupID", mc.groupID)
+		}
+		if ctx.Err() != nil {
+			return
 		}
 	}
+}
+
+func (mc *MConsumerGroup) Close() {
+	mc.cancel()
+	mc.ConsumerGroup.Close()
 }

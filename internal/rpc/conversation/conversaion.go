@@ -51,6 +51,11 @@ type conversationServer struct {
 	conversationNotificationSender *notification.ConversationNotificationSender
 }
 
+func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(ctx context.Context, req *pbconversation.GetConversationNotReceiveMessageUserIDsReq) (*pbconversation.GetConversationNotReceiveMessageUserIDsResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {

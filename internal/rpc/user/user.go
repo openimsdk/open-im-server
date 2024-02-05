@@ -61,6 +61,11 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
+func (s *userServer) GetGroupOnlineUser(ctx context.Context, req *pbuser.GetGroupOnlineUserReq) (*pbuser.GetGroupOnlineUserResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {

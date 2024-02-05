@@ -4,8 +4,8 @@ go 1.19
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/OpenIMSDK/protocol v0.0.48
-	github.com/OpenIMSDK/tools v0.0.29
+	github.com/OpenIMSDK/protocol v0.0.55
+	github.com/OpenIMSDK/tools v0.0.33
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/dtm-labs/rockscache v0.1.1
 	github.com/gin-gonic/gin v1.9.1
@@ -31,7 +31,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/google/uuid v1.3.1
+require github.com/google/uuid v1.5.0
 
 require (
 	github.com/IBM/sarama v1.41.3
@@ -41,7 +41,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/stathat/consistent v1.0.0
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.45
-	go.uber.org/automaxprocs v1.5.3
 	golang.org/x/sync v0.4.0
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gotest.tools v2.2.0+incompatible
@@ -94,8 +93,8 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20190725054713-01f96b0aa0cd // indirect
-	github.com/klauspost/compress v1.16.7 // indirect
-	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
+	github.com/klauspost/compress v1.17.4 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/lithammer/shortuuid v3.0.0+incompatible // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
@@ -129,7 +128,7 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/oauth2 v0.13.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
@@ -141,7 +140,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231012201019-e917dd12ba7a // indirect
 	gopkg.in/src-d/go-billy.v4 v4.3.2 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	gorm.io/gorm v1.23.8 // indirect
+	gorm.io/gorm v1.25.4 // indirect
 	stathat.com/c/consistent v1.0.0 // indirect
 )
 
@@ -156,5 +155,3 @@ require (
 	golang.org/x/crypto v0.17.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
-
-replace github.com/OpenIMSDK/protocol v0.0.47 => github.com/AndrewZuo01/protocol v0.0.0-20240112093520-fd9c53e27b94

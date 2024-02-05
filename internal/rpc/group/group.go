@@ -108,6 +108,11 @@ type groupServer struct {
 	msgRpcClient          rpcclient.MessageRpcClient
 }
 
+func (s *groupServer) GetJoinedGroupIDs(ctx context.Context, req *pbgroup.GetJoinedGroupIDsReq) (*pbgroup.GetJoinedGroupIDsResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgroup.NotificationUserInfoUpdateReq) (*pbgroup.NotificationUserInfoUpdateResp, error) {
 	defer log.ZDebug(ctx, "NotificationUserInfoUpdate return")
 	members, err := s.db.FindGroupMemberUser(ctx, nil, req.UserID)

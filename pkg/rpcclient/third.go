@@ -20,7 +20,6 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/third"

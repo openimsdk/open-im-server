@@ -34,16 +34,21 @@ type OnlineHistoryMongoConsumerHandler struct {
 	msgDatabase          controller.CommonMsgDatabase
 }
 
-func NewOnlineHistoryMongoConsumerHandler(database controller.CommonMsgDatabase) *OnlineHistoryMongoConsumerHandler {
-	mc := &OnlineHistoryMongoConsumerHandler{
-		historyConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
-			KafkaVersion:   sarama.V2_0_0_0,
-			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
-		}, []string{config.Config.Kafka.MsgToMongo.Topic},
-			config.Config.Kafka.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo),
-		msgDatabase: database,
+func NewOnlineHistoryMongoConsumerHandler(database controller.CommonMsgDatabase) (*OnlineHistoryMongoConsumerHandler, error) {
+	historyConsumerGroup, err := kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
+		KafkaVersion:   sarama.V2_0_0_0,
+		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
+	}, []string{config.Config.Kafka.MsgToMongo.Topic},
+		config.Config.Kafka.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo)
+	if err != nil {
+		return nil, err
 	}
-	return mc
+
+	mc := &OnlineHistoryMongoConsumerHandler{
+		historyConsumerGroup: historyConsumerGroup,
+		msgDatabase:          database,
+	}
+	return mc, nil
 }
 
 func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(

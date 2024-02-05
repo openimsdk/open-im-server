@@ -17,9 +17,35 @@
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
 
-[**English**](./README.md) •
-[**简体中文**](./README-zh_CN.md) •
-[**Docs**](https://openim.io/en)
+
+<p align="center">
+  <a href="./README.md">Englist</a> · 
+  <a href="./README-zh_CN.md">中文</a> · 
+  <a href="docs/readme/README-UA.md">Українська</a> · 
+  <a href="docs/readme/README-CS.md">Česky</a> · 
+  <a href="docs/readme/README-HU.md">Magyar</a> · 
+  <a href="docs/readme/README-ES.md">Español</a> · 
+  <a href="docs/readme/README-FA.md">فارسی</a> · 
+  <a href="docs/readme/README-FR.md">Français</a> · 
+  <a href="docs/readme/README-DE.md">Deutsch</a> · 
+  <a href="docs/readme/README-PL.md">Polski</a> · 
+  <a href="docs/readme/README-ID.md">Indonesian</a> · 
+  <a href="docs/readme/README-FI.md">Suomi</a> · 
+  <a href="docs/readme/README-ML.md">മലയാളം</a> · 
+  <a href="docs/readme/README-JP.md">日本語</a> · 
+  <a href="docs/readme/README-NL.md">Nederlands</a> · 
+  <a href="docs/readme/README-IT.md">Italiano</a> · 
+  <a href="docs/readme/README-RU.md">Русский</a> · 
+  <a href="docs/readme/README-PTBR.md">Português (Brasil)</a> · 
+  <a href="docs/readme/README-EO.md">Esperanto</a> · 
+  <a href="docs/readme/README-KR.md">한국어</a> · 
+  <a href="docs/readme/README-AR.md">العربي</a> · 
+  <a href="docs/readme/README-VN.md">Tiếng Việt</a> · 
+  <a href="docs/readme/README-DA.md">Dansk</a> · 
+  <a href="docs/readme/README-GR.md">Ελληνικά</a> · 
+  <a href="docs/readme/README-TR.md">Türkçe</a>
+</p>
+
 
 </div>
 
@@ -67,6 +93,13 @@ It is built using Golang and supports cross-platform deployment, ensuring a cons
 + **Webhooks**: OpenIMServer provides callback capabilities to extend more business forms. A callback means that OpenIMServer sends a request to the business server before or after a certain event, like callbacks before or after sending a message.
 
 👉 **[Learn more](https://docs.openim.io/guides/introduction/product)**
+
+## :building_construction: Overall Architecture
+
+Delve into the heart of Open-IM-Server's functionality with our architecture diagram.
+
+![Overall Architecture](./docs/images/architecture-layers.png)
+
 
 ## :rocket: Quick Start
 
