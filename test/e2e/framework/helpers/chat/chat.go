@@ -1,4 +1,4 @@
-// Copyright © 2023 OpenIM. All rights reserved.
+// Copyright ? 2023 OpenIM. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -99,22 +99,23 @@ func main() {
 }
 
 // getLatestVersion fetches the latest version number from a given URL.
-func getLatestVersion(url string) (string, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
+// 未使用函数
+// func getLatestVersion(url string) (string, error) {
+// 	resp, err := http.Get(url)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	defer resp.Body.Close()
 
-	location := resp.Header.Get("Location")
-	if location == "" {
-		return defaultTemplateVersion, nil
-	}
+// 	location := resp.Header.Get("Location")
+// 	if location == "" {
+// 		return defaultTemplateVersion, nil
+// 	}
 
-	// Extract the version number from the URL
-	latestVersion := filepath.Base(location)
-	return latestVersion, nil
-}
+// 	// Extract the version number from the URL
+// 	latestVersion := filepath.Base(location)
+// 	return latestVersion, nil
+// }
 
 // downloadAndExtract downloads a file from a URL and extracts it to a destination directory.
 func downloadAndExtract(url, destDir string) error {
@@ -164,3 +165,4 @@ func startProcess(cmdPath string) {
 		fmt.Printf("Failed to start process %s: %v\n", cmdPath, err)
 	}
 }
+
