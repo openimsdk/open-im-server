@@ -165,4 +165,3 @@ func startProcess(cmdPath string) {
 		fmt.Printf("Failed to start process %s: %v\n", cmdPath, err)
 	}
 }
-
