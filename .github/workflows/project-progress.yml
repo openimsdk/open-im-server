@@ -24,6 +24,9 @@ on:
   pull_request:
     types: 
       - assigned
+    branches-ignore:
+      - 'asf-auto-updates'
+      - 'ignore'
 
 jobs:
   move-assigned-card:
