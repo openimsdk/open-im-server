@@ -51,7 +51,10 @@ type conversationServer struct {
 	conversationNotificationSender *notification.ConversationNotificationSender
 }
 
-func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(ctx context.Context, req *pbconversation.GetConversationNotReceiveMessageUserIDsReq) (*pbconversation.GetConversationNotReceiveMessageUserIDsResp, error) {
+func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(
+	ctx context.Context,
+	req *pbconversation.GetConversationNotReceiveMessageUserIDsReq,
+) (*pbconversation.GetConversationNotReceiveMessageUserIDsResp, error) {
 	//TODO implement me
 	panic("implement me")
 }
