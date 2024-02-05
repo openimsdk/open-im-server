@@ -23,6 +23,7 @@ import (
 	"syscall"
 	"time"
 	"net/http"
+	"sync"
 
 	"github.com/OpenIMSDK/tools/errs"
 
@@ -119,7 +120,7 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	go func() {
 		defer wg.Done()
 
-		m.m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(ctx, m.historyCH)
+		m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(ctx, m.historyCH)
 	}()
 
 	wg.Add(1)
