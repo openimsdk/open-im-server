@@ -486,7 +486,7 @@ openim::util::stop_services_on_ports() {
         local pid=$(echo $line | awk '{print $2}')
         
         # Try to stop the service by killing its process.
-        if kill -9 $pid; then
+        if kill -10 $pid; then
           stopped+=($port)
         else
           not_stopped+=($port)
@@ -561,7 +561,7 @@ openim::util::stop_services_with_name() {
             # If there's a Process ID, it means the service with the name is running.
             if [[ -n $pid ]]; then
                 # Try to stop the service by killing its process.
-                if kill -9 $pid 2>/dev/null; then
+                if kill -10 $pid 2>/dev/null; then
                     stopped_this_time=true
                 fi
             fi
@@ -1720,7 +1720,7 @@ openim::util::stop_services_on_ports() {
                 local pid=$(echo $line | awk '{print $2}')
 
                 # Try to stop the service by killing its process.
-                if kill -9 $pid; then
+                if kill -10 $pid; then
                     stopped+=($port)
                 else
                     not_stopped+=($port)
@@ -1795,7 +1795,7 @@ openim::util::stop_services_with_name() {
             # If there's a Process ID, it means the service with the name is running.
             if [[ -n $pid ]]; then
                 # Try to stop the service by killing its process.
-                if kill -9 $pid 2>/dev/null; then
+                if kill -10 $pid 2>/dev/null; then
                     stopped_this_time=true
                 fi
             fi
@@ -2570,7 +2570,6 @@ function openim::util::gencpu() {
     echo $cpu_count
 }
 
-
 function openim::util::set_max_fd() {
     local desired_fd=$1
     local max_fd_limit
@@ -2750,6 +2749,38 @@ function openim::util::gencpu() {
     fi
     echo $cpu_count
 }
+
+function openim::util::set_max_fd() {
+    local desired_fd=$1
+    local max_fd_limit
+
+    # Check if we're not on cygwin or darwin.
+    if [ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "cygwin" ] && [ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "darwin" ]; then
+        # Try to get the hard limit.
+        max_fd_limit=$(ulimit -H -n)
+        if [ $? -eq 0 ]; then
+            # If desired_fd is 'maximum' or 'max', set it to the hard limit.
+            if [ "$desired_fd" = "maximum" ] || [ "$desired_fd" = "max" ]; then
+                desired_fd="$max_fd_limit"
+            fi
+
+            # Check if desired_fd is less than or equal to max_fd_limit.
+            if [ "$desired_fd" -le "$max_fd_limit" ]; then
+                ulimit -n "$desired_fd"
+                if [ $? -ne 0 ]; then
+                    echo "Warning: Could not set maximum file descriptor limit to $desired_fd"
+                fi
+            else
+                echo "Warning: Desired file descriptor limit ($desired_fd) is greater than the hard limit ($max_fd_limit)"
+            fi
+        else
+            echo "Warning: Could not query the maximum file descriptor hard limit."
+        fi
+    else
+        echo "Warning: Not attempting to modify file descriptor limit on Cygwin or Darwin."
+    fi
+}
+
 
 function openim::util::gen_os_arch() {
     # Get the current operating system and architecture
