@@ -108,7 +108,7 @@ func Start(
 	}
 
 	var (
-		netDone    = make(chan struct{}, 1)
+		netDone    = make(chan struct{}, 2)
 		netErr     error
 		httpServer *http.Server
 	)
@@ -119,7 +119,7 @@ func Start(
 			httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
 			if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 				netErr = errs.Wrap(err, "prometheus start err", httpServer.Addr)
-				close(netDone)
+				netDone <- struct{}{}
 			}
 		}
 	}()
@@ -128,7 +128,7 @@ func Start(
 		err := srv.Serve(listener)
 		if err != nil {
 			netErr = errs.Wrap(err, "rpc start err: ", rpcTcpAddr)
-			close(netDone)
+			netDone <- struct{}{}
 		}
 	}()
 
@@ -137,7 +137,7 @@ func Start(
 
 	select {
 	case <-sigs:
-		print("receive process terminal SIGUSR1 exit")
+		print("receive process terminal SIGUSR1 exit\n")
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		if err := gracefulStopWithCtx(ctx, srv.GracefulStop); err != nil {
@@ -150,6 +150,7 @@ func Start(
 			return errs.Wrap(err, "shutdown err")
 		}
 	case <-netDone:
+		close(netDone)
 		return netErr
 	}
 	return nil
