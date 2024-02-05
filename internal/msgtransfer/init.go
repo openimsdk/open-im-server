@@ -20,12 +20,9 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
-	"log"
 	"net/http"
-	"sync"
 
 	"github.com/OpenIMSDK/tools/errs"
 
@@ -111,15 +108,10 @@ func NewMsgTransfer(msgDatabase controller.CommonMsgDatabase, conversationRpcCli
 
 func (m *MsgTransfer) Start(prometheusPort int) error {
 	ctx := context.Background()
-	var wg sync.WaitGroup
-	wg.Add(1)
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
 	if prometheusPort <= 0 {
 		return errs.Wrap(errors.New("prometheusPort not correct"))
 	}
-
-
-
 
 	var wg sync.WaitGroup
 
