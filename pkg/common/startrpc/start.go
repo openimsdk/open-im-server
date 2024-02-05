@@ -60,7 +60,7 @@ func Start(
 		rpcTcpAddr,
 	)
 	if err != nil {
-		return errs.Wrap(err, rpcTcpAddr)
+		return errs.Wrap(err, "rpc start err", rpcTcpAddr)
 	}
 
 	defer listener.Close()
@@ -118,7 +118,7 @@ func Start(
 			// Create a HTTP server for prometheus.
 			httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
 			if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				netErr = errs.Wrap(err, "prometheus start err: ", httpServer.Addr)
+				netErr = errs.Wrap(err, "prometheus start err", httpServer.Addr)
 				close(netDone)
 			}
 		}
@@ -134,11 +134,12 @@ func Start(
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGUSR1)
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
+
 	select {
 	case <-sigs:
 		print("receive process terminal SIGUSR1 exit")
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
 		if err := gracefulStopWithCtx(ctx, srv.GracefulStop); err != nil {
 			return err
 		}
@@ -162,7 +163,7 @@ func gracefulStopWithCtx(ctx context.Context, f func()) error {
 	}()
 	select {
 	case <-ctx.Done():
-		return errs.Wrap(errors.New("timeout"), "ctx graceful stop")
+		return errs.Wrap(errors.New("timeout, ctx graceful stop"))
 	case <-done:
 		return nil
 	}
