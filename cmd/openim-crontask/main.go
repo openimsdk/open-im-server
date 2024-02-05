@@ -23,6 +23,6 @@ import (
 func main() {
 	cronTaskCmd := cmd.NewCronTaskCmd()
 	if err := cronTaskCmd.Exec(tools.StartTask); err != nil {
-		util.ProcessExit(err)
+		util.ExitWithError(err)
 	}
 }

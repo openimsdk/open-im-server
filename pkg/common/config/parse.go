@@ -17,6 +17,7 @@ package config
 import (
 	_ "embed"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"os"
 	"path/filepath"
 
@@ -84,24 +85,22 @@ func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
 }
 
 func initConfig(config any, configName, configFolderPath string) error {
-	configFolderPath = filepath.Join(configFolderPath, configName)
-	_, err := os.Stat(configFolderPath)
+	configFullPath := filepath.Join(configFolderPath, configName)
+	_, err := os.Stat(configFullPath)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			fmt.Println("stat config path error:", err.Error())
-			return fmt.Errorf("stat config path error: %w", err)
+			return errs.Wrap(err, "IsNotExist "+configFolderPath)
 		}
 		configFolderPath = filepath.Join(GetProjectRoot(), "config", configName)
-		fmt.Println("flag's path,enviment's path,default path all is not exist,using project path:", configFolderPath)
+		errs.Wrap(fmt.Errorf("flag's path,enviment's path,default path all is not exist,using project path:%s", configFolderPath))
 	}
 	data, err := os.ReadFile(configFolderPath)
 	if err != nil {
-		return fmt.Errorf("read file error: %w", err)
+		return errs.Wrap(err, "readFile failed, "+configFolderPath)
 	}
 	if err = yaml.Unmarshal(data, config); err != nil {
-		return fmt.Errorf("unmarshal yaml error: %w", err)
+		return errs.Wrap(err, "unmarshal yaml failed, "+configFolderPath)
 	}
-	fmt.Println("use config", configFolderPath)
 
 	return nil
 }

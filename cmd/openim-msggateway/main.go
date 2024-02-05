@@ -26,6 +26,6 @@ func main() {
 	msgGatewayCmd.AddPrometheusPortFlag()
 
 	if err := msgGatewayCmd.Exec(); err != nil {
-		util.ProcessExit(err)
+		util.ExitWithError(err)
 	}
 }

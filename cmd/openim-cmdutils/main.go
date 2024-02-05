@@ -55,6 +55,6 @@ func main() {
 	// openIM clear msg --clearAll
 	msgUtilsCmd.AddCommand(&getCmd.Command, &fixCmd.Command, &clearCmd.Command)
 	if err := msgUtilsCmd.Execute(); err != nil {
-		util.ProcessExit(err)
+		util.ExitWithError(err)
 	}
 }

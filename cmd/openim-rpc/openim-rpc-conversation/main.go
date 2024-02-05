@@ -29,6 +29,6 @@ func main() {
 		panic(err.Error())
 	}
 	if err := rpcCmd.StartSvr(config.Config.RpcRegisterName.OpenImConversationName, conversation.Start); err != nil {
-		util.ProcessExit(err)
+		util.ExitWithError(err)
 	}
 }

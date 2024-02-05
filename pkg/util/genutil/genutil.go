@@ -40,7 +40,7 @@ func OutDir(path string) (string, error) {
 	return outDir, nil
 }
 
-func ProcessExit(err error) {
+func ExitWithError(err error) {
 	progName := filepath.Base(os.Args[0])
 	fmt.Fprintf(os.Stderr, "\n\n%s exit -1: \n%+v\n\n", progName, err)
 	os.Exit(-1)

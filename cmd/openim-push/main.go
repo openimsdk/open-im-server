@@ -29,6 +29,6 @@ func main() {
 		panic(err.Error())
 	}
 	if err := pushCmd.StartSvr(config.Config.RpcRegisterName.OpenImPushName, push.Start); err != nil {
-		util.ProcessExit(err)
+		util.ExitWithError(err)
 	}
 }

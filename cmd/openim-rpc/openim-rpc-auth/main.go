@@ -29,7 +29,7 @@ func main() {
 		panic(err.Error())
 	}
 	if err := authCmd.StartSvr(config.Config.RpcRegisterName.OpenImAuthName, auth.Start); err != nil {
-		util.ProcessExit(err)
+		util.ExitWithError(err)
 	}
 
 }

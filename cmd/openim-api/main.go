@@ -46,7 +46,7 @@ func main() {
 	apiCmd.AddPortFlag()
 	apiCmd.AddApi(run)
 	if err := apiCmd.Execute(); err != nil {
-		util.ProcessExit(err)
+		util.ExitWithError(err)
 	}
 }
 
