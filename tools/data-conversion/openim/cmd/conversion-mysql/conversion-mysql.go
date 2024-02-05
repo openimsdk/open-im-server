@@ -38,7 +38,7 @@ func main() {
 		usernameV3 = "root"            // v3版本mysql用户名
 		passwordV3 = "openIM123"       // v3版本mysql密码
 		addrV3     = "127.0.0.1:13306" // v3版本mysql地址
-		databaseV3 = "openIM_v3"       // v3版本mysql数据库名字
+		databaseV3 = "openim_v3"       // v3版本mysql数据库名字
 	)
 
 	var concurrency = 1 // 并发数量

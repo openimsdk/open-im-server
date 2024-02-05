@@ -16,7 +16,9 @@ package msggateway
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,6 +27,8 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+
+	"github.com/OpenIMSDK/tools/apiresp"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/redis/go-redis/v9"
@@ -49,7 +53,7 @@ type LongConnServer interface {
 	wsHandler(w http.ResponseWriter, r *http.Request)
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
-	Validate(s interface{}) error
+	Validate(s any) error
 	SetCacheHandler(cache cache.MsgModel)
 	SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry)
 	KickUserConn(client *Client) error
@@ -58,6 +62,12 @@ type LongConnServer interface {
 	Compressor
 	Encoder
 	MessageHandler
+}
+
+var bufferPool = sync.Pool{
+	New: func() any {
+		return make([]byte, 1024)
+	},
 }
 
 type WsServer struct {
@@ -120,7 +130,8 @@ func (ws *WsServer) UnRegister(c *Client) {
 	ws.unregisterChan <- c
 }
 
-func (ws *WsServer) Validate(s interface{}) error {
+func (ws *WsServer) Validate(s any) error {
+	//?question?
 	return nil
 }
 
@@ -144,7 +155,7 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 		writeBufferSize:  config.writeBufferSize,
 		handshakeTimeout: config.handshakeTimeout,
 		clientPool: sync.Pool{
-			New: func() interface{} {
+			New: func() any {
 				return new(Client)
 			},
 		},
@@ -281,12 +292,13 @@ func (ws *WsServer) registerClient(client *Client) {
 	}
 
 	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		_ = ws.sendUserOnlineInfoToOtherNode(client.ctx, client)
-	}()
-
+	if config.Config.Envs.Discovery == "zookeeper" {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_ = ws.sendUserOnlineInfoToOtherNode(client.ctx, client)
+		}()
+	}
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -334,11 +346,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 		if !clientOK {
 			return
 		}
-
-		isDeleteUser := ws.clients.deleteClients(newClient.UserID, oldClients)
-		if isDeleteUser {
-			ws.onlineUserNum.Add(-1)
-		}
+		ws.clients.deleteClients(newClient.UserID, oldClients)
 		for _, c := range oldClients {
 			err := c.KickOnlineMessage()
 			if err != nil {
@@ -414,84 +422,102 @@ func (ws *WsServer) unregisterClient(client *Client) {
 	)
 }
 
-func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
-	connContext := newContext(w, r)
+func (ws *WsServer) ParseWSArgs(r *http.Request) (args *WSArgs, err error) {
+	var v WSArgs
+	defer func() {
+		args = &v
+	}()
+	query := r.URL.Query()
+	v.MsgResp, _ = strconv.ParseBool(query.Get(MsgResp))
 	if ws.onlineUserConnNum.Load() >= ws.wsMaxConnNum {
-		httpError(connContext, errs.ErrConnOverMaxNumLimit)
-		return
+		return nil, errs.ErrConnOverMaxNumLimit.Wrap("over max conn num limit")
 	}
-	var (
-		token         string
-		userID        string
-		platformIDStr string
-		exists        bool
-		compression   bool
-	)
-
-	token, exists = connContext.Query(Token)
-	if !exists {
-		httpError(connContext, errs.ErrConnArgsErr)
-		return
+	if v.Token = query.Get(Token); v.Token == "" {
+		return nil, errs.ErrConnArgsErr.Wrap("token is empty")
 	}
-	userID, exists = connContext.Query(WsUserID)
-	if !exists {
-		httpError(connContext, errs.ErrConnArgsErr)
-		return
+	if v.UserID = query.Get(WsUserID); v.UserID == "" {
+		return nil, errs.ErrConnArgsErr.Wrap("sendID is empty")
 	}
-	platformIDStr, exists = connContext.Query(PlatformID)
-	if !exists {
-		httpError(connContext, errs.ErrConnArgsErr)
-		return
+	platformIDStr := query.Get(PlatformID)
+	if platformIDStr == "" {
+		return nil, errs.ErrConnArgsErr.Wrap("platformID is empty")
 	}
 	platformID, err := strconv.Atoi(platformIDStr)
 	if err != nil {
-		httpError(connContext, errs.ErrConnArgsErr)
-		return
+		return nil, errs.ErrConnArgsErr.Wrap("platformID is not int")
 	}
-	if err = authverify.WsVerifyToken(token, userID, platformID); err != nil {
-		httpError(connContext, err)
-		return
+	v.PlatformID = platformID
+	if err = authverify.WsVerifyToken(v.Token, v.UserID, platformID); err != nil {
+		return nil, err
 	}
-	m, err := ws.cache.GetTokensWithoutError(context.Background(), userID, platformID)
+	if query.Get(Compression) == GzipCompressionProtocol {
+		v.Compression = true
+	}
+	if r.Header.Get(Compression) == GzipCompressionProtocol {
+		v.Compression = true
+	}
+	m, err := ws.cache.GetTokensWithoutError(context.Background(), v.UserID, platformID)
 	if err != nil {
-		httpError(connContext, err)
-		return
+		return nil, err
 	}
-	if v, ok := m[token]; ok {
+	if v, ok := m[v.Token]; ok {
 		switch v {
 		case constant.NormalToken:
 		case constant.KickedToken:
-			httpError(connContext, errs.ErrTokenKicked.Wrap())
-			return
+			return nil, errs.ErrTokenKicked.Wrap()
 		default:
-			httpError(connContext, errs.ErrTokenUnknown.Wrap())
+			return nil, errs.ErrTokenUnknown.Wrap(fmt.Sprintf("token status is %d", v))
+		}
+	} else {
+		return nil, errs.ErrTokenNotExist.Wrap()
+	}
+	return &v, nil
+}
+
+type WSArgs struct {
+	Token       string
+	UserID      string
+	PlatformID  int
+	Compression bool
+	MsgResp     bool
+}
+
+func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
+	connContext := newContext(w, r)
+	args, pErr := ws.ParseWSArgs(r)
+	var wsLongConn *GWebSocket
+	if args.MsgResp {
+		wsLongConn = newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
+		if err := wsLongConn.GenerateLongConn(w, r); err != nil {
+			httpError(connContext, err)
+			return
+		}
+		data, err := json.Marshal(apiresp.ParseError(pErr))
+		if err != nil {
+			_ = wsLongConn.Close()
+			return
+		}
+		if err := wsLongConn.WriteMessage(MessageText, data); err != nil {
+			_ = wsLongConn.Close()
+			return
+		}
+		if pErr != nil {
+			_ = wsLongConn.Close()
 			return
 		}
 	} else {
-		httpError(connContext, errs.ErrTokenNotExist.Wrap())
-		return
-	}
-
-	wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
-	err = wsLongConn.GenerateLongConn(w, r)
-	if err != nil {
-		httpError(connContext, err)
-		return
-	}
-	compressProtoc, exists := connContext.Query(Compression)
-	if exists {
-		if compressProtoc == GzipCompressionProtocol {
-			compression = true
+		if pErr != nil {
+			httpError(connContext, pErr)
+			return
 		}
-	}
-	compressProtoc, exists = connContext.GetHeader(Compression)
-	if exists {
-		if compressProtoc == GzipCompressionProtocol {
-			compression = true
+		wsLongConn = newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
+		if err := wsLongConn.GenerateLongConn(w, r); err != nil {
+			httpError(connContext, err)
+			return
 		}
 	}
 	client := ws.clientPool.Get().(*Client)
-	client.ResetClient(connContext, wsLongConn, connContext.GetBackground(), compression, ws, token)
+	client.ResetClient(connContext, wsLongConn, connContext.GetBackground(), args.Compression, ws, args.Token)
 	ws.registerChan <- client
 	go client.readMessage()
 }

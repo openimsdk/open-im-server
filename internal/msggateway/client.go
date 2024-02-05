@@ -87,6 +87,7 @@ func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
 	}
 }
 
+// ResetClient updates the client's state with new connection and context information.
 func (c *Client) ResetClient(
 	ctx *UserConnContext,
 	conn LongConn,
@@ -108,11 +109,13 @@ func (c *Client) ResetClient(
 	c.token = token
 }
 
+// pingHandler handles ping messages and sends pong responses.
 func (c *Client) pingHandler(_ string) error {
 	_ = c.conn.SetReadDeadline(pongWait)
 	return c.writePongMsg()
 }
 
+// readMessage continuously reads messages from the connection.
 func (c *Client) readMessage() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -164,6 +167,7 @@ func (c *Client) readMessage() {
 	}
 }
 
+// handleMessage processes a single message received by the client.
 func (c *Client) handleMessage(message []byte) error {
 	if c.IsCompress {
 		var err error

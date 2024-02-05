@@ -146,7 +146,7 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 func GetDB() *commonMsgDatabase {
 	config.Config.Mongo.Address = []string{"203.56.175.233:37017"}
 	// config.Config.Mongo.Timeout = 60
-	config.Config.Mongo.Database = "openIM_v3"
+	config.Config.Mongo.Database = "openim_v3"
 	// config.Config.Mongo.Source = "admin"
 	config.Config.Mongo.Username = "root"
 	config.Config.Mongo.Password = "openIM123"
@@ -235,7 +235,7 @@ func Test_FindBySeq(t *testing.T) {
 func TestName(t *testing.T) {
 	db := GetDB()
 	var seqs []int64
-	for i := int64(1); i <= 4; i++ {
+	for i := int64(1); i <= 50; i++ {
 		seqs = append(seqs, i)
 	}
 	msgs, err := db.getMsgBySeqsRange(context.Background(), "4931176757", "si_3866692501_4931176757", seqs, seqs[0], seqs[len(seqs)-1])

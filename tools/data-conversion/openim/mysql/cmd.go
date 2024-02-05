@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package mysql
 
 import (
@@ -24,7 +38,7 @@ func Cmd() {
 		usernameV3 = "root"
 		passwordV3 = "openIM123"
 		addrV3     = "203.56.175.233:13306"
-		databaseV3 = "openIM_v3"
+		databaseV3 = "openim_v3"
 	)
 	log.SetFlags(log.LstdFlags | log.Llongfile)
 	dsnV2 := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", usernameV2, passwordV2, addrV2, databaseV2)

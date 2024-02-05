@@ -45,9 +45,9 @@ const (
 )
 
 const (
-	minPartSize = 1024 * 1024 * 5        // 1MB
-	maxPartSize = 1024 * 1024 * 1024 * 5 // 5GB
-	maxNumSize  = 10000
+	minPartSize int64 = 1024 * 1024 * 5        // 1MB
+	maxPartSize int64 = 1024 * 1024 * 1024 * 5 // 5GB
+	maxNumSize  int64 = 10000
 )
 
 const (
@@ -56,6 +56,8 @@ const (
 	maxImageSize       = 1024 * 1024 * 50
 	imageThumbnailPath = "openim/thumbnail"
 )
+
+const successCode = http.StatusOK
 
 func NewMinio(cache cache.MinioCache) (s3.Interface, error) {
 	u, err := url.Parse(config.Config.Object.Minio.Endpoint)
@@ -238,7 +240,7 @@ func (m *Minio) PartSize(ctx context.Context, size int64) (int64, error) {
 		return 0, errors.New("size must be greater than 0")
 	}
 	if size > maxPartSize*maxNumSize {
-		return 0, fmt.Errorf("size must be less than %db", maxPartSize*maxNumSize)
+		return 0, fmt.Errorf("MINIO size must be less than the maximum allowed limit")
 	}
 	if size <= minPartSize*maxNumSize {
 		return minPartSize, nil
@@ -440,4 +442,52 @@ func (m *Minio) getObjectData(ctx context.Context, name string, limit int64) ([]
 		return io.ReadAll(object)
 	}
 	return io.ReadAll(io.LimitReader(object, limit))
+}
+
+func (m *Minio) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
+	if err := m.initMinio(ctx); err != nil {
+		return nil, err
+	}
+	policy := minio.NewPostPolicy()
+	if err := policy.SetKey(name); err != nil {
+		return nil, err
+	}
+	expires := time.Now().Add(duration)
+	if err := policy.SetExpires(expires); err != nil {
+		return nil, err
+	}
+	if size > 0 {
+		if err := policy.SetContentLengthRange(0, size); err != nil {
+			return nil, err
+		}
+	}
+	if err := policy.SetSuccessStatusAction(strconv.Itoa(successCode)); err != nil {
+		return nil, err
+	}
+	if contentType != "" {
+		if err := policy.SetContentType(contentType); err != nil {
+			return nil, err
+		}
+	}
+	if err := policy.SetBucket(m.bucket); err != nil {
+		return nil, err
+	}
+	u, fd, err := m.core.PresignedPostPolicy(ctx, policy)
+	if err != nil {
+		return nil, err
+	}
+	sign, err := url.Parse(m.signEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	u.Scheme = sign.Scheme
+	u.Host = sign.Host
+	return &s3.FormData{
+		URL:          u.String(),
+		File:         "file",
+		Header:       nil,
+		FormData:     fd,
+		Expires:      expires,
+		SuccessCodes: []int{successCode},
+	}, nil
 }

@@ -71,6 +71,14 @@ func (o *ThirdApi) AccessURL(c *gin.Context) {
 	a2r.Call(third.ThirdClient.AccessURL, o.Client, c)
 }
 
+func (o *ThirdApi) InitiateFormData(c *gin.Context) {
+	a2r.Call(third.ThirdClient.InitiateFormData, o.Client, c)
+}
+
+func (o *ThirdApi) CompleteFormData(c *gin.Context) {
+	a2r.Call(third.ThirdClient.CompleteFormData, o.Client, c)
+}
+
 func (o *ThirdApi) ObjectRedirect(c *gin.Context) {
 	name := c.Param("name")
 	if name == "" {
@@ -122,5 +130,5 @@ func (o *ThirdApi) SearchLogs(c *gin.Context) {
 }
 
 func GetPrometheus(c *gin.Context) {
-	c.Redirect(http.StatusFound, config2.Config.Prometheus.PrometheusUrl)
+	c.Redirect(http.StatusFound, config2.Config.Prometheus.GrafanaUrl)
 }

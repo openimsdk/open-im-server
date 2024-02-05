@@ -14,19 +14,24 @@
 
 package push
 
+import "context"
+
 type Consumer struct {
 	pushCh       ConsumerHandler
 	successCount uint64
 }
 
-func NewConsumer(pusher *Pusher) *Consumer {
-	return &Consumer{
-		pushCh: *NewConsumerHandler(pusher),
+func NewConsumer(pusher *Pusher) (*Consumer, error) {
+	c, err := NewConsumerHandler(pusher)
+	if err != nil {
+		return nil, err
 	}
+	return &Consumer{
+		pushCh: *c,
+	}, nil
 }
 
 func (c *Consumer) Start() {
-	// statistics.NewStatistics(&c.successCount, config.Config.ModuleName.PushName, fmt.Sprintf("%d second push to
-	// msg_gateway count", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
-	go c.pushCh.pushConsumerGroup.RegisterHandleAndConsumer(&c.pushCh)
+
+	go c.pushCh.pushConsumerGroup.RegisterHandleAndConsumer(context.Background(), &c.pushCh)
 }

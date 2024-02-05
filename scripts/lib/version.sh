@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
- 
+
 # -----------------------------------------------------------------------------
 # Version management helpers.  These functions help to set, save and load the
 # following variables:
@@ -35,7 +35,7 @@ openim::version::get_version_vars() {
     openim::version::load_version_vars "${OPENIM_GIT_VERSION_FILE}"
     return
   fi
-
+  
   # If the iamrnetes source was exported through git archive, then
   # we likely don't have a git tree, but these magic values may be filled in.
   # shellcheck disable=SC2016,SC2050
@@ -48,12 +48,12 @@ openim::version::get_version_vars() {
     # something like 'HEAD -> release-1.8, tag: v1.8.3' where then 'tag: '
     # can be extracted from it.
     if [[ '$Format:%D$' =~ tag:\ (v[^ ,]+) ]]; then
-     OPENIM_GIT_VERSION="${BASH_REMATCH[1]}"
+      OPENIM_GIT_VERSION="${BASH_REMATCH[1]}"
     fi
   fi
-
+  
   local git=(git --work-tree "${OPENIM_ROOT}")
-
+  
   if [[ -n ${OPENIM_GIT_COMMIT-} ]] || OPENIM_GIT_COMMIT=$("${git[@]}" rev-parse "HEAD^{commit}" 2>/dev/null); then
     if [[ -z ${OPENIM_GIT_TREE_STATE-} ]]; then
       # Check if the tree is dirty.  default to dirty
@@ -63,7 +63,7 @@ openim::version::get_version_vars() {
         OPENIM_GIT_TREE_STATE="dirty"
       fi
     fi
-
+    
     # Use git describe to find the version based on tags.
     if [[ -n ${OPENIM_GIT_VERSION-} ]] || OPENIM_GIT_VERSION=$("${git[@]}" describe --tags --always --match='v*' 2>/dev/null); then
       # This translates the "git describe" to an actual semver.org
@@ -81,7 +81,7 @@ openim::version::get_version_vars() {
         # shellcheck disable=SC2001
         # We have distance to subversion (v1.1.0-subversion-1-gCommitHash)
         OPENIM_GIT_VERSION=$(echo "${OPENIM_GIT_VERSION}" | sed "s/-\([0-9]\{1,\}\)-g\([0-9a-f]\{14\}\)$/.\1\+\2/")
-      elif [[ "${DASHES_IN_VERSION}" == "--" ]] ; then
+        elif [[ "${DASHES_IN_VERSION}" == "--" ]] ; then
         # shellcheck disable=SC2001
         # We have distance to base tag (v1.1.0-1-gCommitHash)
         OPENIM_GIT_VERSION=$(echo "${OPENIM_GIT_VERSION}" | sed "s/-g\([0-9a-f]\{14\}\)$/+\1/")
@@ -94,7 +94,7 @@ openim::version::get_version_vars() {
         #OPENIM_GIT_VERSION+="-dirty"
         :
       fi
-
+      
       # Try to match the "git describe" output to a regex to try to extract
       # the "major" and "minor" versions and whether this is the exact tagged
       # version or whether the tree is between two tagged versions.
@@ -105,12 +105,12 @@ openim::version::get_version_vars() {
           OPENIM_GIT_MINOR+="+"
         fi
       fi
-
+      
       # If OPENIM_GIT_VERSION is not a valid Semantic Version, then refuse to build.
       if ! [[ "${OPENIM_GIT_VERSION}" =~ ^v([0-9]+)\.([0-9]+)(\.[0-9]+)?(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
-          echo "OPENIM_GIT_VERSION should be a valid Semantic Version. Current value: ${OPENIM_GIT_VERSION}"
-          echo "Please see more details here: https://semver.org"
-          exit 1
+        echo "OPENIM_GIT_VERSION should be a valid Semantic Version. Current value: ${OPENIM_GIT_VERSION}"
+        echo "Please see more details here: https://semver.org"
+        exit 1
       fi
     fi
   fi
@@ -123,7 +123,7 @@ openim::version::save_version_vars() {
     echo "!!! Internal error.  No file specified in openim::version::save_version_vars"
     return 1
   }
-
+  
   cat <<EOF >"${version_file}"
 OPENIM_GIT_COMMIT='${OPENIM_GIT_COMMIT-}'
 OPENIM_GIT_TREE_STATE='${OPENIM_GIT_TREE_STATE-}'
@@ -140,6 +140,6 @@ openim::version::load_version_vars() {
     echo "!!! Internal error.  No file specified in openim::version::load_version_vars"
     return 1
   }
-
+  
   source "${version_file}"
 }

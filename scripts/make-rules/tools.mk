@@ -146,7 +146,7 @@ install.github-release:
 # amd64
 .PHONY: install.coscli
 install.coscli:
-	@wget -q https://ghproxy.com/https://github.com/tencentyun/coscli/releases/download/v0.13.0-beta/coscli-linux -O ${TOOLS_DIR}/coscli
+	@wget -q https://github.com/tencentyun/coscli/releases/download/v0.19.0-beta/coscli-linux -O ${TOOLS_DIR}/coscli
 	@chmod +x ${TOOLS_DIR}/coscli
 
 ## install.coscmd: Install coscmd, used to upload files to cos
@@ -216,6 +216,11 @@ install.depth:
 .PHONY: install.go-callvis
 install.go-callvis:
 	@$(GO) install github.com/ofabry/go-callvis@latest
+
+## install.misspell
+.PHONY: install.misspell
+install.misspell:
+	@$(GO) install github.com/client9/misspell/cmd/misspell@latest
 
 ## install.gothanks: Install gothanks, used to thank go dependencies
 .PHONY: install.gothanks

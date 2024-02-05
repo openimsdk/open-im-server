@@ -98,6 +98,7 @@ type CommonMsgDatabase interface {
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
 	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
 	SearchMessage(ctx context.Context, req *pbmsg.SearchMessageReq) (total int32, msgData []*sdkws.MsgData, err error)
+	FindOneByDocIDs(ctx context.Context, docIDs []string, seqs map[string]int64) (map[string]*sdkws.MsgData, error)
 
 	// to mq
 	MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) error
@@ -125,21 +126,32 @@ type CommonMsgDatabase interface {
 	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
 }
 
-func NewCommonMsgDatabase(msgDocModel unrelationtb.MsgDocModelInterface, cacheModel cache.MsgModel) CommonMsgDatabase {
+func NewCommonMsgDatabase(msgDocModel unrelationtb.MsgDocModelInterface, cacheModel cache.MsgModel) (CommonMsgDatabase, error) {
+	producerToRedis, err := kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.LatestMsgToRedis.Topic)
+	if err != nil {
+		return nil, err
+	}
+	producerToMongo, err := kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToMongo.Topic)
+	if err != nil {
+		return nil, err
+	}
+	producerToPush, err := kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToPush.Topic)
+	if err != nil {
+		return nil, err
+	}
 	return &commonMsgDatabase{
 		msgDocDatabase:  msgDocModel,
 		cache:           cacheModel,
-		producer:        kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.LatestMsgToRedis.Topic),
-		producerToMongo: kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToMongo.Topic),
-		producerToPush:  kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToPush.Topic),
-	}
+		producer:        producerToRedis,
+		producerToMongo: producerToMongo,
+		producerToPush:  producerToPush,
+	}, nil
 }
 
-func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database) CommonMsgDatabase {
+func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database) (CommonMsgDatabase, error) {
 	cacheModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(database)
-	CommonMsgDatabase := NewCommonMsgDatabase(msgDocModel, cacheModel)
-	return CommonMsgDatabase
+	return NewCommonMsgDatabase(msgDocModel, cacheModel)
 }
 
 type commonMsgDatabase struct {
@@ -357,9 +369,7 @@ func (db *commonMsgDatabase) DelUserDeleteMsgsList(ctx context.Context, conversa
 }
 
 func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
-	cancelCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
-	defer cancel()
-	currentMaxSeq, err := db.cache.GetMaxSeq(cancelCtx, conversationID)
+	currentMaxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		log.ZError(ctx, "db.cache.GetMaxSeq", err)
 		return 0, false, err
@@ -386,21 +396,19 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 		prommetrics.MsgInsertRedisFailedCounter.Add(float64(failedNum))
 		log.ZError(ctx, "setMessageToCache error", err, "len", len(msgs), "conversationID", conversationID)
 	} else {
-		prommetrics.MsgInsertRedisSuccessCounter.Add(float64(len(msgs)))
+		prommetrics.MsgInsertRedisSuccessCounter.Inc()
 	}
-	cancelCtx, cancel = context.WithTimeout(ctx, 1*time.Minute)
-	defer cancel()
-	err = db.cache.SetMaxSeq(cancelCtx, conversationID, currentMaxSeq)
+	err = db.cache.SetMaxSeq(ctx, conversationID, currentMaxSeq)
 	if err != nil {
 		log.ZError(ctx, "db.cache.SetMaxSeq error", err, "conversationID", conversationID)
 		prommetrics.SeqSetFailedCounter.Inc()
 	}
 	err2 := db.cache.SetHasReadSeqs(ctx, conversationID, userSeqMap)
-	if err2 != nil {
+	if err != nil {
 		log.ZError(ctx, "SetHasReadSeqs error", err2, "userSeqMap", userSeqMap, "conversationID", conversationID)
 		prommetrics.SeqSetFailedCounter.Inc()
 	}
-	return lastMaxSeq, isNew, errs.Wrap(err, "redis SetMaxSeq error")
+	return lastMaxSeq, isNew, utils.Wrap(err, "")
 }
 
 func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
@@ -658,26 +666,16 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 
 func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (int64, int64, []*sdkws.MsgData, error) {
 	userMinSeq, err := db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
-	if err != nil {
-		log.ZError(ctx, "cache.GetConversationUserMinSeq error", err)
-		if errs.Unwrap(err) != redis.Nil {
-			return 0, 0, nil, err
-		}
+	if err != nil && errs.Unwrap(err) != redis.Nil {
+		return 0, 0, nil, err
 	}
 	minSeq, err := db.cache.GetMinSeq(ctx, conversationID)
-	if err != nil {
-		log.ZError(ctx, "cache.GetMinSeq error", err)
-		if errs.Unwrap(err) != redis.Nil {
-			return 0, 0, nil, err
-		}
+	if err != nil && errs.Unwrap(err) != redis.Nil {
+		return 0, 0, nil, err
 	}
 	maxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
-	if err != nil {
-		log.ZError(ctx, "cache.GetMaxSeq error", err)
-		if errs.Unwrap(err) != redis.Nil {
-			return 0, 0, nil, err
-		}
-
+	if err != nil && errs.Unwrap(err) != redis.Nil {
+		return 0, 0, nil, err
 	}
 	if userMinSeq < minSeq {
 		minSeq = userMinSeq
@@ -690,16 +688,34 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, co
 	}
 	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, conversationID, newSeqs)
 	if err != nil {
-		log.ZError(ctx, "get message from redis exception", err, "failedSeqs", failedSeqs, "conversationID", conversationID)
+		if err != redis.Nil {
+			log.ZError(ctx, "get message from redis exception", err, "failedSeqs", failedSeqs, "conversationID", conversationID)
+		}
 	}
-	log.ZInfo(ctx, "db.cache.GetMessagesBySeq", "userID", userID, "conversationID", conversationID, "seqs", seqs, "successMsgs",
-		len(successMsgs), "failedSeqs", failedSeqs, "conversationID", conversationID)
+	log.ZInfo(
+		ctx,
+		"db.cache.GetMessagesBySeq",
+		"userID",
+		userID,
+		"conversationID",
+		conversationID,
+		"seqs",
+		seqs,
+		"successMsgs",
+		len(successMsgs),
+		"failedSeqs",
+		failedSeqs,
+		"conversationID",
+		conversationID,
+	)
 
 	if len(failedSeqs) > 0 {
 		mongoMsgs, err := db.getMsgBySeqs(ctx, userID, conversationID, failedSeqs)
 		if err != nil {
+
 			return 0, 0, nil, err
 		}
+
 		successMsgs = append(successMsgs, mongoMsgs...)
 	}
 	return minSeq, maxSeq, successMsgs, nil
@@ -1045,6 +1061,21 @@ func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbmsg.Searc
 		totalMsgs = append(totalMsgs, convert.MsgDB2Pb(msg.Msg))
 	}
 	return total, totalMsgs, nil
+}
+
+func (db *commonMsgDatabase) FindOneByDocIDs(ctx context.Context, conversationIDs []string, seqs map[string]int64) (map[string]*sdkws.MsgData, error) {
+	totalMsgs := make(map[string]*sdkws.MsgData)
+	for _, conversationID := range conversationIDs {
+		seq := seqs[conversationID]
+		docID := db.msg.GetDocID(conversationID, seq)
+		msgs, err := db.msgDocDatabase.FindOneByDocID(ctx, docID)
+		if err != nil {
+			return nil, err
+		}
+		index := db.msg.GetMsgIndex(seq)
+		totalMsgs[conversationID] = convert.MsgDB2Pb(msgs.Msg[index].Msg)
+	}
+	return totalMsgs, nil
 }
 
 func (db *commonMsgDatabase) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string) {

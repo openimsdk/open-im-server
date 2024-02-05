@@ -19,9 +19,9 @@ set -o nounset
 set -o pipefail
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-source "${OPENIM_ROOT}/hack/lib/init.sh"
+source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
-kube::golang::setup_env
+openim::golang::setup_env
 
 cd "${OPENIM_ROOT}"
 
@@ -40,4 +40,4 @@ find_files() {
 }
 
 export GO111MODULE=on
-find_files | xargs go run tools/yamlfmt/main.go
+find_files | xargs go run tools/yamlfmt/yamlfmt.go

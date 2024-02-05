@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cache
 
 import (
@@ -384,51 +398,4 @@ func testParallelDeleteMessagesMix(t *testing.T, cid string, seqs []int64, input
 
 		assert.EqualValues(t, 1, val) // exists
 	}
-}
-
-func TestCleanUpOneConversationAllMsg(t *testing.T) {
-	rdb := redis.NewClient(&redis.Options{})
-	defer rdb.Close()
-
-	cacher := msgCache{rdb: rdb}
-	count := 1000
-	prefix := fmt.Sprintf("%v", rand.Int63())
-
-	ids := []string{}
-	for i := 0; i < count; i++ {
-		id := fmt.Sprintf("%v-cid-%v", prefix, rand.Int63())
-		ids = append(ids, id)
-
-		key := cacher.allMessageCacheKey(id)
-		rdb.Set(context.Background(), key, "openim", 0)
-	}
-
-	// delete 100 keys with scan.
-	for i := 0; i < 100; i++ {
-		pickedKey := ids[i]
-		err := cacher.CleanUpOneConversationAllMsg(context.Background(), pickedKey)
-		assert.Nil(t, err)
-
-		ls, err := rdb.Keys(context.Background(), pickedKey).Result()
-		assert.Nil(t, err)
-		assert.Equal(t, 0, len(ls))
-
-		rcode, err := rdb.Exists(context.Background(), pickedKey).Result()
-		assert.Nil(t, err)
-		assert.EqualValues(t, 0, rcode) // non-exists
-	}
-
-	sid := fmt.Sprintf("%v-cid-*", prefix)
-	ls, err := rdb.Keys(context.Background(), cacher.allMessageCacheKey(sid)).Result()
-	assert.Nil(t, err)
-	assert.Equal(t, count-100, len(ls))
-
-	// delete fuzzy matching keys.
-	err = cacher.CleanUpOneConversationAllMsg(context.Background(), sid)
-	assert.Nil(t, err)
-
-	// don't contains keys matched `{prefix}-cid-{random}` on redis
-	ls, err = rdb.Keys(context.Background(), cacher.allMessageCacheKey(sid)).Result()
-	assert.Nil(t, err)
-	assert.Equal(t, 0, len(ls))
 }

@@ -36,7 +36,7 @@ type SendMsg struct {
 	SenderPlatformID int32 `json:"senderPlatformID"`
 
 	// Content is the actual content of the message, required and excluded from Swagger documentation.
-	Content map[string]interface{} `json:"content" binding:"required" swaggerignore:"true"`
+	Content map[string]any `json:"content" binding:"required" swaggerignore:"true"`
 
 	// ContentType is an integer that represents the type of the content.
 	ContentType int32 `json:"contentType" binding:"required"`
@@ -62,6 +62,30 @@ type SendMsgReq struct {
 	// RecvID uniquely identifies the receiver and is required for one-on-one or notification chat types.
 	RecvID string `json:"recvID" binding:"required_if" message:"recvID is required if sessionType is SingleChatType or NotificationChatType"`
 	SendMsg
+}
+
+type GetConversationListReq struct {
+	// userID uniquely identifies the user.
+	UserID string `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty" binding:"required"`
+
+	// ConversationIDs contains a list of unique identifiers for conversations.
+	ConversationIDs []string `protobuf:"bytes,2,rep,name=conversationIDs,proto3" json:"conversationIDs,omitempty"`
+}
+
+type GetConversationListResp struct {
+	// ConversationElems is a map that associates conversation IDs with their respective details.
+	ConversationElems map[string]*ConversationElem `protobuf:"bytes,1,rep,name=conversationElems,proto3" json:"conversationElems,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+type ConversationElem struct {
+	// MaxSeq represents the maximum sequence number within the conversation.
+	MaxSeq int64 `protobuf:"varint,1,opt,name=maxSeq,proto3" json:"maxSeq,omitempty"`
+
+	// UnreadSeq represents the number of unread messages in the conversation.
+	UnreadSeq int64 `protobuf:"varint,2,opt,name=unreadSeq,proto3" json:"unreadSeq,omitempty"`
+
+	// LastSeqTime represents the timestamp of the last sequence in the conversation.
+	LastSeqTime int64 `protobuf:"varint,3,opt,name=LastSeqTime,proto3" json:"LastSeqTime,omitempty"`
 }
 
 // BatchSendMsgReq defines the structure for sending a message to multiple recipients.

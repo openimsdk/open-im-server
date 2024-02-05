@@ -35,15 +35,19 @@ type ConsumerHandler struct {
 	pusher            *Pusher
 }
 
-func NewConsumerHandler(pusher *Pusher) *ConsumerHandler {
+func NewConsumerHandler(pusher *Pusher) (*ConsumerHandler, error) {
 	var consumerHandler ConsumerHandler
 	consumerHandler.pusher = pusher
-	consumerHandler.pushConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
+	var err error
+	consumerHandler.pushConsumerGroup, err = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
 	}, []string{config.Config.Kafka.MsgToPush.Topic}, config.Config.Kafka.Addr,
 		config.Config.Kafka.ConsumerGroupID.MsgToPush)
-	return &consumerHandler
+	if err != nil {
+		return nil, err
+	}
+	return &consumerHandler, nil
 }
 
 func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
@@ -67,13 +71,14 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 	case constant.SuperGroupChatType:
 		err = c.pusher.Push2SuperGroup(ctx, pbData.MsgData.GroupID, pbData.MsgData)
 	default:
-		var pushUserIDs []string
-		if pbData.MsgData.SendID != pbData.MsgData.RecvID {
-			pushUserIDs = []string{pbData.MsgData.SendID, pbData.MsgData.RecvID}
+		var pushUserIDList []string
+		isSenderSync := utils.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
+		if !isSenderSync || pbData.MsgData.SendID == pbData.MsgData.RecvID {
+			pushUserIDList = append(pushUserIDList, pbData.MsgData.RecvID)
 		} else {
-			pushUserIDs = []string{pbData.MsgData.SendID}
+			pushUserIDList = append(pushUserIDList, pbData.MsgData.RecvID, pbData.MsgData.SendID)
 		}
-		err = c.pusher.Push2User(ctx, pushUserIDs, pbData.MsgData)
+		err = c.pusher.Push2User(ctx, pushUserIDList, pbData.MsgData)
 	}
 	if err != nil {
 		if err == errNoOfflinePusher {

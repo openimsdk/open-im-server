@@ -27,19 +27,11 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
-func (s *friendServer) GetPaginationBlacks(
-	ctx context.Context,
-	req *pbfriend.GetPaginationBlacksReq,
-) (resp *pbfriend.GetPaginationBlacksResp, err error) {
+func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *pbfriend.GetPaginationBlacksReq) (resp *pbfriend.GetPaginationBlacksResp, err error) {
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	var pageNumber, showNumber int32
-	if req.Pagination != nil {
-		pageNumber = req.Pagination.PageNumber
-		showNumber = req.Pagination.ShowNumber
-	}
-	blacks, total, err := s.blackDatabase.FindOwnerBlacks(ctx, req.UserID, pageNumber, showNumber)
+	total, blacks, err := s.blackDatabase.FindOwnerBlacks(ctx, req.UserID, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -63,10 +55,7 @@ func (s *friendServer) IsBlack(ctx context.Context, req *pbfriend.IsBlackReq) (*
 	return resp, nil
 }
 
-func (s *friendServer) RemoveBlack(
-	ctx context.Context,
-	req *pbfriend.RemoveBlackReq,
-) (*pbfriend.RemoveBlackResp, error) {
+func (s *friendServer) RemoveBlack(ctx context.Context, req *pbfriend.RemoveBlackReq) (*pbfriend.RemoveBlackResp, error) {
 	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
@@ -90,6 +79,7 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbfriend.AddBlackReq) 
 		BlockUserID:    req.BlackUserID,
 		OperatorUserID: mcontext.GetOpUserID(ctx),
 		CreateTime:     time.Now(),
+		Ex:             req.Ex,
 	}
 	if err := s.blackDatabase.Create(ctx, []*relation.BlackModel{&black}); err != nil {
 		return nil, err

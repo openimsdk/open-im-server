@@ -44,7 +44,7 @@ const (
 	UsernameV3 = "root"
 	PasswordV3 = "openIM123"
 	IpV3       = "43.134.63.160:13306"
-	DatabaseV3 = "openIM_v3"
+	DatabaseV3 = "openim_v3"
 )
 
 // V3 chat.

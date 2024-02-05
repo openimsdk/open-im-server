@@ -17,33 +17,27 @@ package relation
 import (
 	"context"
 	"time"
-)
 
-const (
-	BlackModelTableName = "blacks"
+	"github.com/OpenIMSDK/tools/pagination"
 )
 
 type BlackModel struct {
-	OwnerUserID    string    `gorm:"column:owner_user_id;primary_key;size:64"`
-	BlockUserID    string    `gorm:"column:block_user_id;primary_key;size:64"`
-	CreateTime     time.Time `gorm:"column:create_time"`
-	AddSource      int32     `gorm:"column:add_source"`
-	OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
-	Ex             string    `gorm:"column:ex;size:1024"`
-}
-
-func (BlackModel) TableName() string {
-	return BlackModelTableName
+	OwnerUserID    string    `bson:"owner_user_id"`
+	BlockUserID    string    `bson:"block_user_id"`
+	CreateTime     time.Time `bson:"create_time"`
+	AddSource      int32     `bson:"add_source"`
+	OperatorUserID string    `bson:"operator_user_id"`
+	Ex             string    `bson:"ex"`
 }
 
 type BlackModelInterface interface {
 	Create(ctx context.Context, blacks []*BlackModel) (err error)
 	Delete(ctx context.Context, blacks []*BlackModel) (err error)
-	UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]interface{}) (err error)
-	Update(ctx context.Context, blacks []*BlackModel) (err error)
+	//UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]any) (err error)
+	//Update(ctx context.Context, blacks []*BlackModel) (err error)
 	Find(ctx context.Context, blacks []*BlackModel) (blackList []*BlackModel, err error)
 	Take(ctx context.Context, ownerUserID, blockUserID string) (black *BlackModel, err error)
-	FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*BlackModel, total int64, err error)
+	FindOwnerBlacks(ctx context.Context, ownerUserID string, pagination pagination.Pagination) (total int64, blacks []*BlackModel, err error)
 	FindOwnerBlackInfos(ctx context.Context, ownerUserID string, userIDs []string) (blacks []*BlackModel, err error)
 	FindBlackUserIDs(ctx context.Context, ownerUserID string) (blackUserIDs []string, err error)
 }

@@ -18,9 +18,9 @@
 #
 # Description:
 #  This script is responsible for managing the lifecycle of OpenIM tools, which include starting, stopping,
-#  and handling pre and post operations. It's designed to be modular and extensible, ensuring that the 
+#  and handling pre and post operations. It's designed to be modular and extensible, ensuring that the
 #  individual operations can be managed separately, and integrated seamlessly with Linux systemd.
-# 
+#
 # Features:
 # 1. Robust error handling using Bash built-ins like 'errexit', 'nounset', and 'pipefail'.
 # 2. The capability to source common utility functions and configurations to ensure uniform environmental settings.
@@ -61,6 +61,7 @@ openim::tools::pre_start_name() {
   local targets=(
     ncpu
     component
+    up35
   )
   echo "${targets[@]}"
 }
@@ -102,8 +103,8 @@ function openim::tools::start_service() {
     printf "Specifying prometheus port: %s\n" "${prometheus_port}"
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
-  openim::log::info "Starting ${binary_name}..."
-  ${cmd}
+  openim::log::status "Starting ${binary_name}..."
+  ${cmd} | tee -a "${LOG_FILE}"
 }
 
 function openim::tools::start() {

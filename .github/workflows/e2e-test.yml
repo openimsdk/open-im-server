@@ -22,6 +22,9 @@ on:
     # run e2e test every 4 hours
     - cron: 0 */4 * * *
 
+env:
+  CALLBACK_ENABLE: true
+
 jobs:
   build:
     name: Test
@@ -70,9 +73,9 @@ jobs:
 
     - name: Docker Operations
       run: |
-        curl -o docker-compose.yml https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml
+        sudo make init
         sudo docker compose up -d
-        sudo sleep 60
+        sudo sleep 20
 
     - name: Module Operations
       run: |
@@ -89,11 +92,41 @@ jobs:
 
     - name: Exec OpenIM API test
       run: |
-        sudo make test-api
-    
-    - name: Exec OpenIM E2E test
+        mkdir -p ./tmp
+        touch ./tmp/test.md
+        echo "# OpenIM Test" >> ./tmp/test.md
+        echo "## OpenIM API Test" >> ./tmp/test.md
+        echo "<details><summary>Command Output for OpenIM API Test</summary>" >> ./tmp/test.md
+        echo "<pre><code>" >> ./tmp/test.md
+        sudo make test-api | tee -a ./tmp/test.md
+        echo "</code></pre>" >> ./tmp/test.md
+        echo "</details>" >> ./tmp/test.md
+
+    - name: Exec OpenIM E2E Test
       run: |
-        sudo make test-e2e
+        echo "" >> ./tmp/test.md
+        echo "## OpenIM E2E Test" >> ./tmp/test.md
+        echo "<details><summary>Command Output for OpenIM E2E Test</summary>" >> ./tmp/test.md
+        echo "<pre><code>" >> ./tmp/test.md
+        sudo make test-e2e | tee -a ./tmp/test.md
+        echo "</code></pre>" >> ./tmp/test.md
+        echo "</details>" >> ./tmp/test.md
+
+    - name: Comment PR with file
+      uses: thollander/actions-comment-pull-request@v2
+      with:
+        filePath: ./tmp/test.md
+        comment_tag: nrt_file
+        reactions: eyes, rocket
+        mode: recreate
+        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+      continue-on-error: true
+
+    - name: Check outputs
+      run: |
+        echo "id : ${{ steps.nrt_message.outputs.id }}"
+        echo "body : ${{ steps.nrt_message.outputs.body }}"
+        echo "html_url : ${{ steps.nrt_message.outputs.html_url }}"
 
     - name: Exec OpenIM System uninstall
       run: |

@@ -4,28 +4,50 @@
     </a>
 </p>
 
-<h3 align="center" style="border-bottom: none">
-    ⭐️  Open source Instant Messaging Server ⭐️ <br>
-<h3>
+<div align="center">
 
+[![Stars](https://img.shields.io/github/stars/openimsdk/open-im-server?style=for-the-badge&logo=github&colorB=ff69b4)](https://github.com/openimsdk/open-im-server/stargazers)
+[![Forks](https://img.shields.io/github/forks/openimsdk/open-im-server?style=for-the-badge&logo=github&colorB=blue)](https://github.com/openimsdk/open-im-server/network/members)
+[![Codecov](https://img.shields.io/codecov/c/github/openimsdk/open-im-server?style=for-the-badge&logo=codecov&colorB=orange)](https://app.codecov.io/gh/openimsdk/open-im-server)
+[![Go Report Card](https://goreportcard.com/badge/github.com/openimsdk/open-im-server?style=for-the-badge)](https://goreportcard.com/report/github.com/openimsdk/open-im-server)
+[![Go Reference](https://img.shields.io/badge/Go%20Reference-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/openimsdk/open-im-server/v3)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)
+[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+[![Best Practices](https://img.shields.io/badge/Best%20Practices-purple?style=for-the-badge)](https://www.bestpractices.dev/projects/8045)
+[![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
+[![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
 
-<p align=center>
-<a href="https://goreportcard.com/report/github.com/openimsdk/open-im-server"><img src="https://goreportcard.com/badge/github.com/openimsdk/open-im-server" alt="A+"></a>
-<a href="https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22"><img src="https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?logo=%22github%22" alt="good first"></a>
-<a href="https://github.com/openimsdk/open-im-server"><img src="https://img.shields.io/github/stars/openimsdk/open-im-server.svg?style=flat&logo=github&colorB=deeppink&label=stars"></a>
-<a href="https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q"><img src="https://img.shields.io/badge/Slack-300%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
-<a href="https://github.com/openimsdk/open-im-server/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green"></a>
-<a href="https://golang.org/"><img src="https://img.shields.io/badge/Language-Go-blue.svg"></a>
-</p>
-
-</p>
 
 <p align="center">
-    <a href="./README.md"><b> English </b></a> •
-    <a href="./README-zh_CN.md"><b> 简体中文 </b></a> •
-    <a href="https://openim.io/en"><b> Docs </b></a>
+  <a href="./README.md">Englist</a> · 
+  <a href="./README-zh_CN.md">中文</a> · 
+  <a href="docs/readme/README-UA.md">Українська</a> · 
+  <a href="docs/readme/README-CS.md">Česky</a> · 
+  <a href="docs/readme/README-HU.md">Magyar</a> · 
+  <a href="docs/readme/README-ES.md">Español</a> · 
+  <a href="docs/readme/README-FA.md">فارسی</a> · 
+  <a href="docs/readme/README-FR.md">Français</a> · 
+  <a href="docs/readme/README-DE.md">Deutsch</a> · 
+  <a href="docs/readme/README-PL.md">Polski</a> · 
+  <a href="docs/readme/README-ID.md">Indonesian</a> · 
+  <a href="docs/readme/README-FI.md">Suomi</a> · 
+  <a href="docs/readme/README-ML.md">മലയാളം</a> · 
+  <a href="docs/readme/README-JP.md">日本語</a> · 
+  <a href="docs/readme/README-NL.md">Nederlands</a> · 
+  <a href="docs/readme/README-IT.md">Italiano</a> · 
+  <a href="docs/readme/README-RU.md">Русский</a> · 
+  <a href="docs/readme/README-PTBR.md">Português (Brasil)</a> · 
+  <a href="docs/readme/README-EO.md">Esperanto</a> · 
+  <a href="docs/readme/README-KR.md">한국어</a> · 
+  <a href="docs/readme/README-AR.md">العربي</a> · 
+  <a href="docs/readme/README-VN.md">Tiếng Việt</a> · 
+  <a href="docs/readme/README-DA.md">Dansk</a> · 
+  <a href="docs/readme/README-GR.md">Ελληνικά</a> · 
+  <a href="docs/readme/README-TR.md">Türkçe</a>
 </p>
 
+
+</div>
 
 </p>
 
@@ -35,52 +57,60 @@
 
 ## Ⓜ️ 关于 OpenIM
 
-OpenIM 不仅仅是一个开源的即时消息组件，它是你的应用程序生态系统的一个不可或缺的部分。查看下面的图表，了解 AppServer、AppClient、OpenIMServer 和 OpenIMSDK 是如何交互的。
+OpenIM 是一个专门设计用于在应用程序中集成聊天、音视频通话、通知以及AI聊天机器人等通信功能的服务平台。它通过提供一系列强大的API和Webhooks，使开发者可以轻松地在他们的应用中加入这些交互特性。OpenIM 本身并不是一个独立运行的聊天应用，而是作为一个平台，为其他应用提供支持，实现丰富的通信功能。下图展示 AppServer、AppClient、OpenIMServer 和 OpenIMSDK 之间的交互关系来具体说明。
+
+
 
 ![App-OpenIM 关系](./docs/images/oepnim-design.png)
 
 ## 🚀 关于 OpenIMSDK
 
-**OpenIMSDK** 无缝集成到您的应用中，提供丰富、实时的消息体验，无需复杂的 UI 集成。它提供：
+**OpenIMSDK** 是为 **OpenIMServer** 设计的IM SDK，专为嵌入客户端应用而生。其主要功能及模块如下：
 
-+ **本地存储**：用于快速数据检索和消息同步。
-+ **监听器回调**：确保实时消息交互性。
-+ **API 封装**：简化开发流程。
-+ **连接管理**：保证可靠的消息传递。
++ 🌟 主要功能：
 
-它使用 Golang 构建，并支持跨平台部署，确保在所有平台上提供一致的消息体验。
+  - 📦 本地存储
+  - 🔔 监听器回调
+  - 🛡️ API封装
+  - 🌐 连接管理
+
+  ## 📚 主要模块：
+
+  1. 🚀 初始化及登录
+  2. 👤 用户管理
+  3. 👫 好友管理
+  4. 🤖 群组功能
+  5. 💬 会话处理
+
+它使用 Golang 构建，并支持跨平台部署，确保在所有平台上提供一致的接入体验。
 
 👉 **[探索 GO SDK](https://github.com/openimsdk/openim-sdk-core)**
 
 ## 🌐 关于 OpenIMServer
 
-精心用 Golang 开发的 **OpenIMServer** 通过多重方式确保了卓越的即时消息服务器能力：
-
-+ **模块组成**：它由多个模块组成，例如网关和多个 RPC 服务，提供一个多功能的消息环境。
-+ **微服务架构**：支持集群模式，确保出色的性能和可伸缩性，以有效管理各个实例间的通信。
-+ **多样的部署选项**：适应你的操作偏好，通过源代码、Kubernetes 或 Docker 提供部署选项。
++ **OpenIMServer** 具有以下特点：
+  - 🌐 微服务架构：支持集群模式，包括网关(gateway)和多个rpc服务。
+  - 🚀 部署方式多样：支持源代码、kubernetes或docker部署。
+  - 海量用户支持：十万超级大群，千万用户，及百亿消息
 
 ### 增强的业务功能：
 
-+ **REST API**：OpenIMServer 为业务系统提供 REST API，旨在通过后端接口为您的操作提供附加功能，如群组创建和消息推送。
-+ **回调**：为了扩展其在各种业务形式中的实用性，OpenIMServer 提供了回调能力。即，在事件发生之前或之后，它向业务服务器发送请求，比如发送消息，丰富通信过程中的交互和数据交换流。
++ **REST API**：OpenIMServer 提供了REST API供业务系统使用，旨在赋予业务更多功能，例如通过后台接口建立群组、发送推送消息等。
++ **Webhooks**：OpenIMServer提供了回调能力以扩展更多的业务形态，所谓回调，即OpenIMServer会在某一事件发生之前或者之后，向业务服务器发送请求，如发送消息之前或之后的回调。
 
-👉 **[了解更多](https://doc.rentsoft.cn/guides/introduction/product)**
+👉 **[了解更多](https://docs.openim.io/guides/introduction/product)**
 
 ## :rocket: 快速开始
 
-你只需要一个简单的命令，就可以快速学习 OpenIM 的工程解决方案：
+在线体验iOS/Android/H5/PC/Web：
 
-```
-bashCopy code
-$ make demo
-```
+👉 **[OpenIM online demo](https://www.openim.io/zh/commercial)**
 
 🤲 为了方便用户体验，我们提供了多种部署解决方案，您可以根据下面的列表选择自己的部署方法：
 
-+ **[源代码部署指南](https://doc.rentsoft.cn/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Docker 部署指南](https://doc.rentsoft.cn/guides/gettingStarted/dockerCompose)**
-+ **[Kubernetes 部署指南](https://github.com/openimsdk/open-im-server/tree/main/deployments)**
++ **[源代码部署指南](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
++ **[Docker 部署指南](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
++ **[Kubernetes 部署指南](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
 
 ## :hammer_and_wrench: 开始开发 OpenIM
 

@@ -24,7 +24,7 @@ import (
 type PartLimit struct {
 	MinPartSize int64 `json:"minPartSize"`
 	MaxPartSize int64 `json:"maxPartSize"`
-	MaxNumSize  int   `json:"maxNumSize"`
+	MaxNumSize  int64 `json:"maxNumSize"`
 }
 
 type InitiateMultipartUploadResult struct {
@@ -72,6 +72,15 @@ type ObjectInfo struct {
 type CopyObjectInfo struct {
 	Key  string `json:"name"`
 	ETag string `json:"etag"`
+}
+
+type FormData struct {
+	URL          string            `json:"url"`
+	File         string            `json:"file"`
+	Header       http.Header       `json:"header"`
+	FormData     map[string]string `json:"form"`
+	Expires      time.Time         `json:"expires"`
+	SuccessCodes []int             `json:"successActionStatus"`
 }
 
 type SignPart struct {
@@ -152,4 +161,6 @@ type Interface interface {
 	ListUploadedParts(ctx context.Context, uploadID string, name string, partNumberMarker int, maxParts int) (*ListUploadedPartsResult, error)
 
 	AccessURL(ctx context.Context, name string, expire time.Duration, opt *AccessURLOption) (string, error)
+
+	FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*FormData, error)
 }

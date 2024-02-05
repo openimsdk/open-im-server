@@ -45,6 +45,18 @@ type POfflinePush struct {
 	Ext    string `yaml:"ext"`
 }
 
+type MYSQL struct {
+	Address       []string `yaml:"address"`
+	Username      string   `yaml:"username"`
+	Password      string   `yaml:"password"`
+	Database      string   `yaml:"database"`
+	MaxOpenConn   int      `yaml:"maxOpenConn"`
+	MaxIdleConn   int      `yaml:"maxIdleConn"`
+	MaxLifeTime   int      `yaml:"maxLifeTime"`
+	LogLevel      int      `yaml:"logLevel"`
+	SlowThreshold int      `yaml:"slowThreshold"`
+}
+
 type configStruct struct {
 	Envs struct {
 		Discovery string `yaml:"discovery"`
@@ -56,17 +68,7 @@ type configStruct struct {
 		Password string   `yaml:"password"`
 	} `yaml:"zookeeper"`
 
-	Mysql struct {
-		Address       []string `yaml:"address"`
-		Username      string   `yaml:"username"`
-		Password      string   `yaml:"password"`
-		Database      string   `yaml:"database"`
-		MaxOpenConn   int      `yaml:"maxOpenConn"`
-		MaxIdleConn   int      `yaml:"maxIdleConn"`
-		MaxLifeTime   int      `yaml:"maxLifeTime"`
-		LogLevel      int      `yaml:"logLevel"`
-		SlowThreshold int      `yaml:"slowThreshold"`
-	} `yaml:"mysql"`
+	Mysql *MYSQL `yaml:"mysql"`
 
 	Mongo struct {
 		Uri         string   `yaml:"uri"`
@@ -234,6 +236,11 @@ type configStruct struct {
 		Nickname []string `yaml:"nickname"`
 	} `yaml:"manager"`
 
+	IMAdmin struct {
+		UserID   []string `yaml:"userID"`
+		Nickname []string `yaml:"nickname"`
+	} `yaml:"im-admin"`
+
 	MultiLoginPolicy                  int    `yaml:"multiLoginPolicy"`
 	ChatPersistenceMysql              bool   `yaml:"chatPersistenceMysql"`
 	MsgCacheTimeout                   int    `yaml:"msgCacheTimeout"`
@@ -275,6 +282,8 @@ type configStruct struct {
 		CallbackBeforeSetFriendRemark      CallBackConfig `yaml:"callbackBeforeSetFriendRemark"`
 		CallbackAfterSetFriendRemark       CallBackConfig `yaml:"callbackAfterSetFriendRemark"`
 		CallbackBeforeUpdateUserInfo       CallBackConfig `yaml:"beforeUpdateUserInfo"`
+		CallbackBeforeUpdateUserInfoEx     CallBackConfig `yaml:"beforeUpdateUserInfoEx"`
+		CallbackAfterUpdateUserInfoEx      CallBackConfig `yaml:"afterUpdateUserInfoEx"`
 		CallbackBeforeUserRegister         CallBackConfig `yaml:"beforeUserRegister"`
 		CallbackAfterUpdateUserInfo        CallBackConfig `yaml:"updateUserInfo"`
 		CallbackAfterUserRegister          CallBackConfig `yaml:"afterUserRegister"`
@@ -282,16 +291,30 @@ type configStruct struct {
 		CallbackAfterCreateGroup           CallBackConfig `yaml:"afterCreateGroup"`
 		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
 		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
+		CallbackAfterSetGroupMemberInfo    CallBackConfig `yaml:"afterSetGroupMemberInfo"`
 		CallbackQuitGroup                  CallBackConfig `yaml:"quitGroup"`
 		CallbackKillGroupMember            CallBackConfig `yaml:"killGroupMember"`
 		CallbackDismissGroup               CallBackConfig `yaml:"dismissGroup"`
 		CallbackBeforeJoinGroup            CallBackConfig `yaml:"joinGroup"`
-		CallbackTransferGroupOwnerAfter    CallBackConfig `yaml:"transferGroupOwner"`
+		CallbackAfterTransferGroupOwner    CallBackConfig `yaml:"transferGroupOwner"`
+		CallbackBeforeInviteUserToGroup    CallBackConfig `yaml:"beforeInviteUserToGroup"`
+		CallbackAfterJoinGroup             CallBackConfig `yaml:"joinGroupAfter"`
+		CallbackAfterSetGroupInfo          CallBackConfig `yaml:"setGroupInfoAfter"`
+		CallbackBeforeSetGroupInfo         CallBackConfig `yaml:"setGroupInfoBefore"`
+		CallbackAfterRevokeMsg             CallBackConfig `yaml:"revokeMsgAfter"`
+		CallbackBeforeAddBlack             CallBackConfig `yaml:"addBlackBefore"`
+		CallbackAfterAddFriend             CallBackConfig `yaml:"addFriendAfter"`
+		CallbackBeforeAddFriendAgree       CallBackConfig `yaml:"addFriendAgreeBefore"`
+
+		CallbackAfterDeleteFriend   CallBackConfig `yaml:"deleteFriendAfter"`
+		CallbackBeforeImportFriends CallBackConfig `yaml:"importFriendsBefore"`
+		CallbackAfterImportFriends  CallBackConfig `yaml:"importFriendsAfter"`
+		CallbackAfterRemoveBlack    CallBackConfig `yaml:"removeBlackAfter"`
 	} `yaml:"callback"`
 
 	Prometheus struct {
 		Enable                        bool   `yaml:"enable"`
-		PrometheusUrl                 string `yaml:"prometheusUrl"`
+		GrafanaUrl                    string `yaml:"grafanaUrl"`
 		ApiPrometheusPort             []int  `yaml:"apiPrometheusPort"`
 		UserPrometheusPort            []int  `yaml:"userPrometheusPort"`
 		FriendPrometheusPort          []int  `yaml:"friendPrometheusPort"`

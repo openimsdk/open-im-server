@@ -26,6 +26,7 @@ We provide multiple versions of our images to meet different project requirement
 1. `main`: This image corresponds to the latest version of the main branch in OpenIM. It is updated frequently, making it perfect for users who want to stay at the cutting edge of our features.
 2. `release-v3.*`: This is the image that corresponds to the latest version of OpenIM's stable release branch. It's ideal for users who prefer a balance between new features and stability.
 3. `v3.*.*`: These images are specific to each tag in OpenIM. They are preserved in their original state and are never overwritten. These are the go-to images for users who need a specific, unchanging version of OpenIM.
+4. The image versions adhere to Semantic Versioning 2.0.0 strategy. Taking the `openim-server` image as an example, available at [openim-server container package](https://github.com/openimsdk/open-im-server/pkgs/container/openim-server): upon tagging with v3.5.0, the CI automatically releases the following tags - `openim-server:3`, `openim-server:3.5`, `openim-server:3.5.0`, `openim-server:v3.5.0`, `openim-server:latest`, and `sha-e0244d9`. It's important to note that only `sha-e0244d9` is absolutely unique, whereas `openim-server:v3.5.0` and `openim-server:3.5.0` maintain a degree of uniqueness.
 
 ### Multi-Architecture Images
 

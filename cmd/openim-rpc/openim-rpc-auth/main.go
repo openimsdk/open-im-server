@@ -15,6 +15,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/auth"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -28,6 +31,7 @@ func main() {
 		panic(err.Error())
 	}
 	if err := authCmd.StartSvr(config.Config.RpcRegisterName.OpenImAuthName, auth.Start); err != nil {
-		panic(err.Error())
+		fmt.Fprintf(os.Stderr, "\n\nexit -1: \n%+v\n\n", err)
+		os.Exit(-1)
 	}
 }

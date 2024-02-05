@@ -18,6 +18,8 @@ import (
 	"context"
 	"sync"
 
+	"github.com/OpenIMSDK/tools/utils"
+
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -64,9 +66,12 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 			pusher: pusher,
 		})
 	}()
+	consumer, err := NewConsumer(pusher)
+	if err != nil {
+		return err
+	}
 	go func() {
 		defer wg.Done()
-		consumer := NewConsumer(pusher)
 		consumer.Start()
 	}()
 	wg.Wait()
@@ -78,7 +83,14 @@ func (r *pushServer) PushMsg(ctx context.Context, pbData *pbpush.PushMsgReq) (re
 	case constant.SuperGroupChatType:
 		err = r.pusher.Push2SuperGroup(ctx, pbData.MsgData.GroupID, pbData.MsgData)
 	default:
-		err = r.pusher.Push2User(ctx, []string{pbData.MsgData.RecvID, pbData.MsgData.SendID}, pbData.MsgData)
+		var pushUserIDList []string
+		isSenderSync := utils.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
+		if !isSenderSync {
+			pushUserIDList = append(pushUserIDList, pbData.MsgData.RecvID)
+		} else {
+			pushUserIDList = append(pushUserIDList, pbData.MsgData.RecvID, pbData.MsgData.SendID)
+		}
+		err = r.pusher.Push2User(ctx, pushUserIDList, pbData.MsgData)
 	}
 	if err != nil {
 		if err != errNoOfflinePusher {

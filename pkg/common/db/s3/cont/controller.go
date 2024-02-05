@@ -46,6 +46,10 @@ type Controller struct {
 	impl  s3.Interface
 }
 
+func (c *Controller) Engine() string {
+	return c.impl.Engine()
+}
+
 func (c *Controller) HashPath(md5 string) string {
 	return path.Join(hashPath, md5)
 }
@@ -274,4 +278,8 @@ func (c *Controller) AccessURL(ctx context.Context, name string, expire time.Dur
 		opt.ContentType = ""
 	}
 	return c.impl.AccessURL(ctx, name, expire, opt)
+}
+
+func (c *Controller) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
+	return c.impl.FormData(ctx, name, size, contentType, duration)
 }

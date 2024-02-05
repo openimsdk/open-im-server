@@ -64,6 +64,9 @@ func NewUserRpcClient(client discoveryregistry.SvcDiscoveryRegistry) UserRpcClie
 
 // GetUsersInfo retrieves information for multiple users based on their user IDs.
 func (u *UserRpcClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
+	if len(userIDs) == 0 {
+		return []*sdkws.UserInfo{}, nil
+	}
 	resp, err := u.Client.GetDesignateUsers(ctx, &user.GetDesignateUsersReq{
 		UserIDs: userIDs,
 	})
@@ -176,6 +179,13 @@ func (u *UserRpcClient) SetUserStatus(ctx context.Context, userID string, status
 	_, err := u.Client.SetUserStatus(ctx, &user.SetUserStatusReq{
 		UserID: userID,
 		Status: status, PlatformID: int32(platformID),
+	})
+	return err
+}
+
+func (u *UserRpcClient) GetNotificationByID(ctx context.Context, userID string) error {
+	_, err := u.Client.GetNotificationAccount(ctx, &user.GetNotificationAccountReq{
+		UserID: userID,
 	})
 	return err
 }

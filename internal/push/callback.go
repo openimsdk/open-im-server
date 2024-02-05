@@ -37,7 +37,7 @@ func callbackOfflinePush(
 	msg *sdkws.MsgData,
 	offlinePushUserIDs *[]string,
 ) error {
-	if !config.Config.Callback.CallbackOfflinePush.Enable {
+	if !config.Config.Callback.CallbackOfflinePush.Enable || msg.ContentType == constant.Typing {
 		return nil
 	}
 	req := &callbackstruct.CallbackBeforePushReq{
@@ -73,7 +73,7 @@ func callbackOfflinePush(
 }
 
 func callbackOnlinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgData) error {
-	if !config.Config.Callback.CallbackOnlinePush.Enable || utils.Contain(msg.SendID, userIDs...) {
+	if !config.Config.Callback.CallbackOnlinePush.Enable || utils.Contain(msg.SendID, userIDs...) || msg.ContentType == constant.Typing {
 		return nil
 	}
 	req := callbackstruct.CallbackBeforePushReq{
@@ -107,7 +107,7 @@ func callbackBeforeSuperGroupOnlinePush(
 	msg *sdkws.MsgData,
 	pushToUserIDs *[]string,
 ) error {
-	if !config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable {
+	if !config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable || msg.ContentType == constant.Typing {
 		return nil
 	}
 	req := callbackstruct.CallbackBeforeSuperGroupOnlinePushReq{

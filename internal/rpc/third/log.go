@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package third
 
 import (
@@ -32,11 +46,11 @@ func genLogID() string {
 }
 
 func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) (*third.UploadLogsResp, error) {
-	var DBlogs []*relationtb.Log
+	var DBlogs []*relationtb.LogModel
 	userID := ctx.Value(constant.OpUserID).(string)
 	platform := constant.PlatformID2Name[int(req.Platform)]
 	for _, fileURL := range req.FileURLs {
-		log := relationtb.Log{
+		log := relationtb.LogModel{
 			Version:    req.Version,
 			SystemType: req.SystemType,
 			Platform:   platform,
@@ -57,7 +71,7 @@ func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) 
 			}
 		}
 		if log.LogID == "" {
-			return nil, errs.ErrData.Wrap("Log id gen error")
+			return nil, errs.ErrData.Wrap("LogModel id gen error")
 		}
 		DBlogs = append(DBlogs, &log)
 	}
@@ -92,8 +106,8 @@ func (t *thirdServer) DeleteLogs(ctx context.Context, req *third.DeleteLogsReq) 
 	return &third.DeleteLogsResp{}, nil
 }
 
-func dbToPbLogInfos(logs []*relationtb.Log) []*third.LogInfo {
-	db2pbForLogInfo := func(log *relationtb.Log) *third.LogInfo {
+func dbToPbLogInfos(logs []*relationtb.LogModel) []*third.LogInfo {
+	db2pbForLogInfo := func(log *relationtb.LogModel) *third.LogInfo {
 		return &third.LogInfo{
 			Filename:   log.FileName,
 			UserID:     log.UserID,
@@ -120,7 +134,7 @@ func (t *thirdServer) SearchLogs(ctx context.Context, req *third.SearchLogsReq) 
 	if req.StartTime > req.EndTime {
 		return nil, errs.ErrArgs.Wrap("startTime>endTime")
 	}
-	total, logs, err := t.thirdDatabase.SearchLogs(ctx, req.Keyword, time.UnixMilli(req.StartTime), time.UnixMilli(req.EndTime), req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	total, logs, err := t.thirdDatabase.SearchLogs(ctx, req.Keyword, time.UnixMilli(req.StartTime), time.UnixMilli(req.EndTime), req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -128,18 +142,16 @@ func (t *thirdServer) SearchLogs(ctx context.Context, req *third.SearchLogsReq) 
 	for _, log := range logs {
 		userIDs = append(userIDs, log.UserID)
 	}
-	users, err := t.thirdDatabase.FindUsers(ctx, userIDs)
+	userMap, err := t.userRpcClient.GetUsersInfoMap(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
-	IDtoName := make(map[string]string)
-	for _, user := range users {
-		IDtoName[user.UserID] = user.Nickname
-	}
 	for _, pbLog := range pbLogs {
-		pbLog.Nickname = IDtoName[pbLog.UserID]
+		if user, ok := userMap[pbLog.UserID]; ok {
+			pbLog.Nickname = user.Nickname
+		}
 	}
 	resp.LogsInfos = pbLogs
-	resp.Total = total
+	resp.Total = uint32(total)
 	return &resp, nil
 }

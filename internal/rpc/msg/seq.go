@@ -30,3 +30,27 @@ func (m *msgServer) GetConversationMaxSeq(
 	}
 	return &pbmsg.GetConversationMaxSeqResp{MaxSeq: maxSeq}, nil
 }
+
+func (m *msgServer) GetMaxSeqs(ctx context.Context, req *pbmsg.GetMaxSeqsReq) (*pbmsg.SeqsInfoResp, error) {
+	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, req.ConversationIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &pbmsg.SeqsInfoResp{MaxSeqs: maxSeqs}, nil
+}
+
+func (m *msgServer) GetHasReadSeqs(ctx context.Context, req *pbmsg.GetHasReadSeqsReq) (*pbmsg.SeqsInfoResp, error) {
+	hasReadSeqs, err := m.MsgDatabase.GetHasReadSeqs(ctx, req.UserID, req.ConversationIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &pbmsg.SeqsInfoResp{MaxSeqs: hasReadSeqs}, nil
+}
+
+func (m *msgServer) GetMsgByConversationIDs(ctx context.Context, req *pbmsg.GetMsgByConversationIDsReq) (*pbmsg.GetMsgByConversationIDsResp, error) {
+	Msgs, err := m.MsgDatabase.FindOneByDocIDs(ctx, req.ConversationIDs, req.MaxSeqs)
+	if err != nil {
+		return nil, err
+	}
+	return &pbmsg.GetMsgByConversationIDsResp{MsgDatas: Msgs}, nil
+}

@@ -14,10 +14,10 @@
 # limitations under the License.
 
 # This script is check openim service is running normally
-# 
+#
 # Usage: `scripts/check-all.sh`.
 # Encapsulated as: `make check`.
-# READ: https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh 
+# READ: https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh
 
 set -o errexit
 set -o nounset
@@ -30,45 +30,55 @@ OPENIM_VERBOSE=4
 
 openim::log::info "\n# Begin to check all openim service"
 
-# OpenIM status
+openim::log::status "Check all dependent service ports"
+# Elegant printing function
 # Elegant printing function
 print_services_and_ports() {
-    # 获取数组
-    declare -g service_names=("${!1}")
-    declare -g service_ports=("${!2}")
-
-    echo "+-------------------------+----------+"
-    echo "| Service Name            | Port     |"
-    echo "+-------------------------+----------+"
-
-    for index in "${!service_names[@]}"; do
-        printf "| %-23s | %-8s |\n" "${service_names[$index]}" "${service_ports[$index]}"
-    done
-
-    echo "+-------------------------+----------+"
+  local service_names=("$@")
+  local half_length=$((${#service_names[@]} / 2))
+  local service_ports=("${service_names[@]:half_length}")
+  
+  echo "+-------------------------+----------+"
+  echo "| Service Name            | Port     |"
+  echo "+-------------------------+----------+"
+  
+  for ((index=0; index < half_length; index++)); do
+    printf "| %-23s | %-8s |\n" "${service_names[$index]}" "${service_ports[$index]}"
+  done
+  
+  echo "+-------------------------+----------+"
 }
 
+handle_error() {
+  echo "An error occurred. Printing ${STDERR_LOG_FILE} contents:"
+  cat "${STDERR_LOG_FILE}"
+  exit 1
+}
+
+trap handle_error ERR
+
+# Assuming OPENIM_SERVER_NAME_TARGETS and OPENIM_SERVER_PORT_TARGETS are defined
+# Similarly for OPENIM_DEPENDENCY_TARGETS and OPENIM_DEPENDENCY_PORT_TARGETS
 
 # Print out services and their ports
-print_services_and_ports OPENIM_SERVER_NAME_TARGETS OPENIM_SERVER_PORT_TARGETS
+print_services_and_ports "${OPENIM_SERVER_NAME_TARGETS[@]}" "${OPENIM_SERVER_PORT_TARGETS[@]}"
 
 # Print out dependencies and their ports
-print_services_and_ports OPENIM_DEPENDENCY_TARGETS OPENIM_DEPENDENCY_PORT_TARGETS
-
+print_services_and_ports "${OPENIM_DEPENDENCY_TARGETS[@]}" "${OPENIM_DEPENDENCY_PORT_TARGETS[@]}"
 
 # OpenIM check
 echo "++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 openim::log::info "\n## Check all dependent service ports"
-echo "+++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
+echo "++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
 
 set +e
 
 # Later, after discarding Docker, the Docker keyword is unreliable, and Kubepods is used
 if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
-    openim::color::echo ${COLOR_CYAN} "Environment in the interior of the container"
+  openim::color::echo ${COLOR_CYAN} "Environment in the interior of the container"
 else
-    openim::color::echo ${COLOR_CYAN} "The environment is outside the container"
-    openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]} || return 0
+  openim::color::echo ${COLOR_CYAN} "The environment is outside the container"
+  openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]} || return 0
 fi
 
 if [[ $? -ne 0 ]]; then
@@ -92,3 +102,5 @@ else
 fi
 
 set -e
+
+trap - ERR
