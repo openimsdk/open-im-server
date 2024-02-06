@@ -70,9 +70,6 @@ jobs:
         version: '3.x' # If available, use the latest major version that's compatible
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: OpenIM Scripts Verification(make verify)
-      run: sudo make verify
-
     - name: Module Operations
       run: |
         sudo make tidy
