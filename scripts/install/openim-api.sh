@@ -33,8 +33,12 @@ readonly OPENIM_API_SERVICE_TARGETS=(
 )
 readonly OPENIM_API_SERVICE_LISTARIES=("${OPENIM_API_SERVICE_TARGETS[@]##*/}")
 
-function openim::api::start() {
+readonly OPENIM_API_PROMETHEUS_PORT_TARGETS=(
+    ${API_PROM_PORT}
+)
+readonly OPENIM_API_PROMETHEUS_PORT_LISTARIES=("${OPENIM_API_PROMETHEUS_PORT_TARGETS[@]##*/}")
 
+function openim::api::start() {
   rm -rf "$TMP_LOG_FILE"
 
   echo "++ OPENIM_API_SERVICE_LISTARIES: ${OPENIM_API_SERVICE_LISTARIES[@]}"
@@ -47,34 +51,20 @@ function openim::api::start() {
   printf "| Service Name           | Port         |\n"
   printf "+------------------------+--------------+\n"
   
-  length=${#OPENIM_API_SERVICE_LISTARIES[@]}
+  local length=${#OPENIM_API_SERVICE_LISTARIES[@]}
   
-  for ((i=0; i<$length; i++)); do
+  for ((i=0; i<length; i++)); do
     printf "| %-22s | %6s       |\n" "${OPENIM_API_SERVICE_LISTARIES[$i]}" "${OPENIM_API_PORT_LISTARIES[$i]}"
     printf "+------------------------+--------------+\n"
-  done
-  # start all api services
-  for ((i = 0; i < ${#OPENIM_API_SERVICE_LISTARIES[*]}; i++)); do
-    openim::util::stop_services_on_ports ${OPENIM_API_PORT_LISTARIES[$i]}
+    # Stop services on the specified ports before starting new ones
+    openim::util::stop_services_on_ports "${OPENIM_API_PORT_LISTARIES[$i]}"
+    openim::util::stop_services_on_ports "${OPENIM_API_PROMETHEUS_PORT_LISTARIES[$i]}"
     openim::log::info "OpenIM ${OPENIM_API_SERVICE_LISTARIES[$i]} config path: ${OPENIM_API_CONFIG}"
     
-    # Get the service and Prometheus ports.
-    OPENIM_API_SERVICE_PORTS=( $(openim::util::list-to-string ${OPENIM_API_PORT_LISTARIES[$i]}) )
-    
-    # TODO Only one port is supported. An error occurs on multiple ports
-    if [ ${#OPENIM_API_SERVICE_PORTS[@]} -ne 1 ]; then
-      openim::log::error_exit "Set only one port for ${OPENIM_API_SERVICE_LISTARIES[$i]} service."
-    fi
-    
-    for ((j = 0; j < ${#OPENIM_API_SERVICE_PORTS[@]}; j++)); do
-      openim::log::info "Starting ${OPENIM_API_SERVICE_LISTARIES[$i]} service, port: ${OPENIM_API_SERVICE_PORTS[j]}, binary root: ${OPENIM_OUTPUT_HOSTBIN}/${OPENIM_API_SERVICE_LISTARIES[$i]}"
-      openim::api::start_service "${OPENIM_API_SERVICE_LISTARIES[$i]}" "${OPENIM_API_PORT_LISTARIES[j]}"
-      sleep 2
-    done
+    # Start the service with Prometheus port if specified
+    openim::api::start_service "${OPENIM_API_SERVICE_LISTARIES[$i]}" "${OPENIM_API_PORT_LISTARIES[$i]}" "${OPENIM_API_PROMETHEUS_PORT_LISTARIES[$i]}"
+    sleep 2
   done
-  
-  OPENIM_API_PORT_STRINGARIES=( $(openim::util::list-to-string ${OPENIM_API_PORT_LISTARIES[@]}) )
-  openim::util::check_ports ${OPENIM_API_PORT_STRINGARIES[@]}
 }
 
 function openim::api::start_service() {
@@ -83,7 +73,15 @@ function openim::api::start_service() {
   local prometheus_port="$3"
   
   local cmd="${OPENIM_OUTPUT_HOSTBIN}/${binary_name} --port ${service_port} -c ${OPENIM_API_CONFIG}"
-  nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE") &
+  
+  # Append Prometheus port argument if specified
+  if [ -n "${prometheus_port}" ]; then
+    cmd+=" --prometheus_port ${prometheus_port}"
+  fi
+
+  echo "Starting service with command: $cmd"
+  
+  nohup $cmd >> "${LOG_FILE}" 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
   
   if [ $? -ne 0 ]; then
     openim::log::error_exit "Failed to start ${binary_name} on port ${service_port}."

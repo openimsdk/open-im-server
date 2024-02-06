@@ -18,12 +18,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
+	"time"
 
 	"github.com/OpenIMSDK/tools/errs"
 
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -51,11 +55,13 @@ func StartTransfer(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
+
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
 		return err
 	}
-	if err := mongo.CreateMsgIndex(); err != nil {
+
+	if err = mongo.CreateMsgIndex(); err != nil {
 		return err
 	}
 	client, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
@@ -66,6 +72,7 @@ func StartTransfer(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
+
 	if err := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
 		return err
 	}
@@ -103,26 +110,62 @@ func NewMsgTransfer(msgDatabase controller.CommonMsgDatabase, conversationRpcCli
 
 func (m *MsgTransfer) Start(prometheusPort int) error {
 	ctx := context.Background()
-	var wg sync.WaitGroup
-	wg.Add(1)
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
 	if prometheusPort <= 0 {
 		return errs.Wrap(errors.New("prometheusPort not correct"))
 	}
 
-	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(ctx, m.historyCH)
-	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(ctx, m.historyMongoCH)
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(ctx, m.historyCH)
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(ctx, m.historyMongoCH)
+	}()
 
 	if config.Config.Prometheus.Enable {
-		reg := prometheus.NewRegistry()
-		reg.MustRegister(
-			collectors.NewGoCollector(),
-		)
-		reg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer")...)
-		http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
-		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil))
+		go func() {
+			proreg := prometheus.NewRegistry()
+			proreg.MustRegister(
+				collectors.NewGoCollector(),
+			)
+			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer")...)
+			http.Handle("/metrics", promhttp.HandlerFor(proreg, promhttp.HandlerOpts{Registry: proreg}))
+			err := http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil)
+			if err != nil && err != http.ErrServerClosed {
+				panic(err)
+			}
+		}()
 	}
-	////////////////////////////////////////
-	wg.Wait()
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	<-sigs
+
+	// graceful close kafka client.
+	go m.historyCH.historyConsumerGroup.Close()
+	go m.historyMongoCH.historyConsumerGroup.Close()
+
+	done := make(chan struct{}, 1)
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		log.ZInfo(context.Background(), "msgtrasfer exit successfully")
+	case <-time.After(15 * time.Second):
+		log.ZError(context.Background(), "msgtransfer force to exit, timeout 15s", nil)
+	}
+
 	return nil
 }
