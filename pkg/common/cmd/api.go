@@ -15,8 +15,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/spf13/cobra"
 
@@ -41,7 +39,6 @@ func (a *ApiCmd) AddApi(f func(port int, promPort int) error) {
 }
 
 func (a *ApiCmd) GetPortFromConfig(portType string) int {
-	fmt.Println("GetPortFromConfig:", portType)
 	if portType == constant.FlagPort {
 		return config2.Config.Api.OpenImApiPort[0]
 	} else if portType == constant.FlagPrometheusPort {
