@@ -44,6 +44,7 @@ import (
 func main() {
 	apiCmd := cmd.NewApiCmd()
 	apiCmd.AddPortFlag()
+	apiCmd.AddPrometheusPortFlag()
 	apiCmd.AddApi(run)
 	if err := apiCmd.Execute(); err != nil {
 		util.ExitWithError(err)

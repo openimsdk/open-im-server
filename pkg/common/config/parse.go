@@ -102,6 +102,9 @@ func initConfig(config any, configName, configFolderPath string) error {
 		return errs.Wrap(err, "unmarshal yaml failed, "+configFolderPath)
 	}
 
+	fmt.Println("The path of the configuration file to start the process:", configFolderPath)
+
+
 	return nil
 }
 

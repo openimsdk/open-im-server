@@ -160,7 +160,7 @@ function openim::rpc::start_service() {
     printf "Specifying prometheus port: %s\n" "${prometheus_port}"
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
-  nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE") &
+  nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
 }
 
 ###################################### Linux Systemd ######################################
