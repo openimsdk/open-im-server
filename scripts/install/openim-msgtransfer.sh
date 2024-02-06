@@ -56,8 +56,8 @@ function openim::msgtransfer::start() {
   for (( i=0; i<$OPENIM_MSGGATEWAY_NUM; i++ )) do
   openim::log::info "prometheus port: ${MSG_TRANSFER_PROM_PORTS[$i]}"
   PROMETHEUS_PORT_OPTION=""
-  if [[ -n "${MSG_TRANSFER_PROM_PORTS[$i]}" ]]; then
-      PROMETHEUS_MSG_TRANSFER_PORT="${MSG_TRANSFER_PROM_PORTS[$i]%,}"
+  if [[ -n "${MSG_TRANSFER_PROM_PORTS[$i+1]}" ]]; then
+      PROMETHEUS_MSG_TRANSFER_PORT="${MSG_TRANSFER_PROM_PORTS[$i+1]%,}"
       openim::util::stop_services_on_ports ${PROMETHEUS_MSG_TRANSFER_PORT}
       PROMETHEUS_PORT_OPTION="--prometheus_port ${PROMETHEUS_MSG_TRANSFER_PORT}"
   fi
