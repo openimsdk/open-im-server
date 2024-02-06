@@ -27,6 +27,7 @@ import (
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mw/specialerror"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
@@ -54,16 +55,17 @@ func NewMongo() (*Mongo, error) {
 		defer cancel()
 		mongoClient, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 		if err == nil {
+			if err = mongoClient.Ping(ctx, nil); err != nil {
+				return nil, errs.Wrap(err, uri)
+			}
 			return &Mongo{db: mongoClient}, nil
 		}
 		if shouldRetry(err) {
-			fmt.Printf("Failed to connect to MongoDB, retrying: %s\n", err)
 			time.Sleep(time.Second) // exponential backoff could be implemented here
 			continue
 		}
-		return nil, errs.Wrap(err)
 	}
-	return nil, errs.Wrap(err)
+	return nil, errs.Wrap(err, uri)
 }
 
 func buildMongoURI() string {

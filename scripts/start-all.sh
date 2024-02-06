@@ -82,4 +82,4 @@ execute_scripts
 openim::log::info "\n## Post Starting OpenIM services"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
 
-openim::log::success "✨  All OpenIM services have been successfully started!"
+openim::color::echo $COLOR_BLUE "✨  All OpenIM services have been successfully started!"

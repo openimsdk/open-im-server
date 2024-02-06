@@ -360,7 +360,9 @@ openim::util::check_ports() {
   
   # If any of the processes is not running, return a status of 1.
   if [[ ${#not_started[@]} -ne 0 ]]; then
-    echo "++++ OpenIM Log >> cat ${LOG_FILE}"
+    openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
+    openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+    cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
     return 1
   else
     openim::log::success "All specified processes are running."
@@ -444,9 +446,12 @@ openim::util::check_process_names() {
   
   # Return status
   if [[ ${#not_started[@]} -ne 0 ]]; then
-    echo "++++ OpenIM Log >> cat ${LOG_FILE}"
+    openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
+    openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+    cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
     return 1
   else
+    echo ""
     openim::log::success "All processes are running."
     return 0
   fi
@@ -481,7 +486,7 @@ openim::util::stop_services_on_ports() {
         local pid=$(echo $line | awk '{print $2}')
         
         # Try to stop the service by killing its process.
-        if kill -TERM $pid; then
+        if kill -10 $pid; then
           stopped+=($port)
         else
           not_stopped+=($port)
@@ -558,7 +563,7 @@ openim::util::stop_services_with_name() {
             # If there's a Process ID, it means the service with the name is running.
             if [[ -n $pid ]]; then
                 # Try to stop the service by killing its process.
-                if kill -TERM $pid 2>/dev/null; then
+                if kill -10 $pid 2>/dev/null; then
                     stopped_this_time=true
                 fi
             fi
@@ -1536,12 +1541,8 @@ openim::util::check_ports() {
         if [[ "$OSTYPE" == "linux-gnu"* ]]; then
             if command -v ss > /dev/null 2>&1; then
                 info=$(ss -ltnp | grep ":$port" || true)
-                echo "!!!!!!!!!!! port=$port"
-                echo "!!!!!!!!!!! info=$info"
             else
                 info=$(netstat -ltnp | grep ":$port" || true)
-                echo "!!!!!!!!!!! port=$port"
-                echo "!!!!!!!!!!! info=$info"
             fi
         elif [[ "$OSTYPE" == "darwin"* ]]; then
             # For macOS, use lsof
@@ -1594,7 +1595,10 @@ openim::util::check_ports() {
 
     # If any of the processes is not running, return a status of 1.
     if [[ ${#not_started[@]} -ne 0 ]]; then
-        echo "++++ OpenIM Log >> cat ${LOG_FILE}"
+        openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
+        openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+        echo ""
+        cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
         return 1
     else
         openim::log::success "All specified processes are running."
@@ -1678,9 +1682,12 @@ openim::util::check_process_names() {
 
     # Return status
     if [[ ${#not_started[@]} -ne 0 ]]; then
-        echo "++++ OpenIM Log >> cat ${LOG_FILE}"
+        openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
+        openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+        cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
         return 1
     else
+        echo ""
         openim::log::success "All processes are running."
         return 0
     fi
@@ -1715,7 +1722,7 @@ openim::util::stop_services_on_ports() {
                 local pid=$(echo $line | awk '{print $2}')
 
                 # Try to stop the service by killing its process.
-                if kill -TERM $pid; then
+                if kill -10 $pid; then
                     stopped+=($port)
                 else
                     not_stopped+=($port)
@@ -1792,7 +1799,7 @@ openim::util::stop_services_with_name() {
             # If there's a Process ID, it means the service with the name is running.
             if [[ -n $pid ]]; then
                 # Try to stop the service by killing its process.
-                if kill -TERM $pid 2>/dev/null; then
+                if kill -10 $pid 2>/dev/null; then
                     stopped_this_time=true
                 fi
             fi

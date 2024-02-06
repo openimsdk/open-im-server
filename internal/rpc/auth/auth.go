@@ -80,6 +80,28 @@ func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*
 	return &resp, nil
 }
 
+func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenReq) (*pbauth.GetUserTokenResp, error) {
+	if err := authverify.CheckAdmin(ctx); err != nil {
+		return nil, err
+	}
+	resp := pbauth.GetUserTokenResp{}
+
+	if authverify.IsManagerUserID(req.UserID) {
+		return nil, errs.ErrNoPermission.Wrap("don't get Admin token")
+	}
+
+	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
+		return nil, err
+	}
+	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(req.PlatformID))
+	if err != nil {
+		return nil, err
+	}
+	resp.Token = token
+	resp.ExpireTimeSeconds = config.Config.TokenPolicy.Expire * 24 * 60 * 60
+	return &resp, nil
+}
+
 func (s *authServer) parseToken(ctx context.Context, tokensString string) (claims *tokenverify.Claims, err error) {
 	claims, err = tokenverify.GetClaimFromToken(tokensString, authverify.Secret())
 	if err != nil {

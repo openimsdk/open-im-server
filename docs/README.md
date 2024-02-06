@@ -7,7 +7,6 @@ Welcome to the OpenIM Documentation hub! This center provides a comprehensive ra
 1. [Contrib](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib) - Guidance on contributing and configurations for developers
 2. [Conversions](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib) - Coding conventions, logging policies, and other transformation tools
 
-------
 
 ## Contrib
 

@@ -28,6 +28,9 @@ openim::util::set_max_fd 200000
 SERVER_NAME="openim-msgtransfer"
 
 function openim::msgtransfer::start() {
+
+  rm -rf "$TMP_LOG_FILE"
+
   openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
   openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGTRANSFER_BINARY}"
   
@@ -56,7 +59,7 @@ function openim::msgtransfer::start() {
     if [[ -n "${OPENIM_PROMETHEUS_PORTS[$i]}" ]]; then
       PROMETHEUS_PORT_OPTION="--prometheus_port ${OPENIM_PROMETHEUS_PORTS[$i]}"
     fi
-    nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} -n ${i}>> ${LOG_FILE} 2>&1 &
+    nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} -n ${i} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE") &
   done
   
   openim::util::check_process_names  "${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"

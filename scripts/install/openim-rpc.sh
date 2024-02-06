@@ -102,6 +102,8 @@ readonly OPENIM_RPC_PROM_PORT_TARGETS
 readonly OPENIM_RPC_PROM_PORT_LISTARIES=("${OPENIM_RPC_PROM_PORT_TARGETS[@]##*/}")
 
 function openim::rpc::start() {
+    rm -rf "$TMP_LOG_FILE"
+
     echo "OPENIM_RPC_SERVICE_LISTARIES: ${OPENIM_RPC_SERVICE_LISTARIES[@]}"
     echo "OPENIM_RPC_PROM_PORT_LISTARIES: ${OPENIM_RPC_PROM_PORT_LISTARIES[@]}"
     echo "OPENIM_RPC_PORT_LISTARIES: ${OPENIM_RPC_PORT_LISTARIES[@]}"
@@ -123,6 +125,7 @@ function openim::rpc::start() {
     for ((i = 0; i < ${#OPENIM_RPC_SERVICE_LISTARIES[*]}; i++)); do
         # openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES
         openim::util::stop_services_on_ports ${OPENIM_RPC_PORT_LISTARIES[$i]}
+        openim::util::stop_services_on_ports ${OPENIM_RPC_PROM_PORT_LISTARIES[$i]}
 
         openim::log::info "OpenIM ${OPENIM_RPC_SERVICE_LISTARIES[$i]} config path: ${OPENIM_RPC_CONFIG}"
 
@@ -157,7 +160,7 @@ function openim::rpc::start_service() {
     printf "Specifying prometheus port: %s\n" "${prometheus_port}"
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
-  nohup ${cmd} >> "${LOG_FILE}" 2>&1 &
+  nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE") &
 }
 
 ###################################### Linux Systemd ######################################
