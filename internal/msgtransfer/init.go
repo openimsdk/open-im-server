@@ -26,7 +26,6 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
