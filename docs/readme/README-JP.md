@@ -19,31 +19,31 @@
 
 
 <p align="center">
-  <a href="./README.md">Englist</a> · 
-  <a href="./README-zh_CN.md">中文</a> · 
-  <a href="docs/readme/README-UA.md">Українська</a> · 
-  <a href="docs/readme/README-CS.md">Česky</a> · 
-  <a href="docs/readme/README-HU.md">Magyar</a> · 
-  <a href="docs/readme/README-ES.md">Español</a> · 
-  <a href="docs/readme/README-FA.md">فارسی</a> · 
-  <a href="docs/readme/README-FR.md">Français</a> · 
-  <a href="docs/readme/README-DE.md">Deutsch</a> · 
-  <a href="docs/readme/README-PL.md">Polski</a> · 
-  <a href="docs/readme/README-ID.md">Indonesian</a> · 
-  <a href="docs/readme/README-FI.md">Suomi</a> · 
-  <a href="docs/readme/README-ML.md">മലയാളം</a> · 
-  <a href="docs/readme/README-JP.md">日本語</a> · 
-  <a href="docs/readme/README-NL.md">Nederlands</a> · 
-  <a href="docs/readme/README-IT.md">Italiano</a> · 
-  <a href="docs/readme/README-RU.md">Русский</a> · 
-  <a href="docs/readme/README-PTBR.md">Português (Brasil)</a> · 
-  <a href="docs/readme/README-EO.md">Esperanto</a> · 
-  <a href="docs/readme/README-KR.md">한국어</a> · 
-  <a href="docs/readme/README-AR.md">العربي</a> · 
-  <a href="docs/readme/README-VN.md">Tiếng Việt</a> · 
-  <a href="docs/readme/README-DA.md">Dansk</a> · 
-  <a href="docs/readme/README-GR.md">Ελληνικά</a> · 
-  <a href="docs/readme/README-TR.md">Türkçe</a>
+  <a href="../../README.md">Englist</a> · 
+  <a href="../../README-zh_CN.md">中文</a> · 
+  <a href="./README-UA.md">Українська</a> · 
+  <a href="./README-CS.md">Česky</a> · 
+  <a href="./README-HU.md">Magyar</a> · 
+  <a href="./README-ES.md">Español</a> · 
+  <a href="./README-FA.md">فارسی</a> · 
+  <a href="./README-FR.md">Français</a> · 
+  <a href="./README-DE.md">Deutsch</a> · 
+  <a href="./README-PL.md">Polski</a> · 
+  <a href="./README-ID.md">Indonesian</a> · 
+  <a href="./README-FI.md">Suomi</a> · 
+  <a href="./README-ML.md">മലയാളം</a> · 
+  <a href="./README-JP.md">日本語</a> · 
+  <a href="./README-NL.md">Nederlands</a> · 
+  <a href="./README-IT.md">Italiano</a> · 
+  <a href="./README-RU.md">Русский</a> · 
+  <a href="./README-PTBR.md">Português (Brasil)</a> · 
+  <a href="./README-EO.md">Esperanto</a> · 
+  <a href="./README-KR.md">한국어</a> · 
+  <a href="./README-AR.md">العربي</a> · 
+  <a href="./README-VN.md">Tiếng Việt</a> · 
+  <a href="./README-DA.md">Dansk</a> · 
+  <a href="./README-GR.md">Ελληνικά</a> · 
+  <a href="./README-TR.md">Türkçe</a>
 </p>
 
 
@@ -58,7 +58,7 @@ OpenIMは、アプリケーション内でチャット、音声通話、通知�
 
 
 
-![App-OpenIM Relationship](../../docs/images/oepnim-design.png)
+![App-OpenIM Relationship](../images/oepnim-design.png)
 
 ## 🚀 OpenIMSDKについて
 
@@ -101,7 +101,7 @@ Golangを使用して構築され、クロスプラットフォームの導入�
 
 Open-IM-Serverの機能の核心に迫るために、アーキテクチャダイアグラムをご覧ください。
 
-![Overall Architecture](../../docs/images/architecture-layers.png)
+![Overall Architecture](../images/architecture-layers.png)
 
 ## :rocket: クイックスタート
 
