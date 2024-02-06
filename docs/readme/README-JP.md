@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://openim.io">
-        <img src="/assets/logo-gif/openim-logo.gif" width="60%" height="30%"/>
+        <img src="../../assets/logo-gif/openim-logo.gif" width="60%" height="30%"/>
     </a>
 </p>
 
@@ -58,7 +58,7 @@ OpenIMは、アプリケーション内でチャット、音声通話、通知�
 
 
 
-![App-OpenIM Relationship](/docs/images/oepnim-design.png)
+![App-OpenIM Relationship](../../docs/images/oepnim-design.png)
 
 ## 🚀 OpenIMSDKについて
 
@@ -101,7 +101,7 @@ Golangを使用して構築され、クロスプラットフォームの導入�
 
 Open-IM-Serverの機能の核心に迫るために、アーキテクチャダイアグラムをご覧ください。
 
-![Overall Architecture](/docs/images/architecture-layers.png)
+![Overall Architecture](../../docs/images/architecture-layers.png)
 
 ## :rocket: クイックスタート
 
