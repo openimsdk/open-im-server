@@ -24,7 +24,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
