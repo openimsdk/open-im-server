@@ -51,9 +51,6 @@
 
 </p>
 
-## 🟢 Scannez WeChat pour rejoindre le groupe de discussion
-<img src="./docs/images/Wechat.jpg" width="300">
-
 
 ## Ⓜ️ À propos de OpenIM
 
