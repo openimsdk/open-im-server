@@ -99,7 +99,7 @@ func main() {
 }
 
 // getLatestVersion fetches the latest version number from a given URL.
-// 未使用函数
+// unused fun
 // func getLatestVersion(url string) (string, error) {
 // 	resp, err := http.Get(url)
 // 	if err != nil {
