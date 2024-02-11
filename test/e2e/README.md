@@ -128,6 +128,8 @@ Open issue: https://github.com/openimsdk/open-im-server/issues/new/choose, choos
 
 The E2E test suite is integrated with CI, which runs the tests automatically on each code commit. The results are reported back to the pull request or commit to provide immediate feedback on the impact of the changes.
 
+[![OpenIM Linux System E2E Test](https://github.com/openimsdk/open-im-server/actions/workflows/e2e-test.yml/badge.svg)](https://github.com/openimsdk/open-im-server/actions/workflows/e2e-test.yml)
+
 
 ## Contact
 
