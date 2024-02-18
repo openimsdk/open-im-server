@@ -486,7 +486,7 @@ openim::util::stop_services_on_ports() {
         local pid=$(echo $line | awk '{print $2}')
         
         # Try to stop the service by killing its process.
-        if kill -10 $pid; then
+        if kill -15 $pid; then
           stopped+=($port)
         else
           not_stopped+=($port)
