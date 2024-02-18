@@ -73,7 +73,7 @@ function openim::push::start() {
   
   for (( i=0; i<${#OPENIM_PUSH_PORTS_ARRAY[@]}; i++ )); do
     openim::log::info "start push process, port: ${OPENIM_PUSH_PORTS_ARRAY[$i]}, prometheus port: ${PUSH_PROM_PORTS_ARRAY[$i]}"
-    nohup ${OPENIM_PUSH_BINARY} --port ${OPENIM_PUSH_PORTS_ARRAY[$i]} -c ${OPENIM_PUSH_CONFIG} --prometheus_port ${PUSH_PROM_PORTS_ARRAY[$i]} >${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
+    nohup ${OPENIM_PUSH_BINARY} --port ${OPENIM_PUSH_PORTS_ARRAY[$i]} -c ${OPENIM_PUSH_CONFIG} --prometheus_port ${PUSH_PROM_PORTS_ARRAY[$i]} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
   done
 
   openim::util::check_process_names ${SERVER_NAME}
