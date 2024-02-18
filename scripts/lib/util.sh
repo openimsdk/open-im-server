@@ -561,7 +561,7 @@ openim::util::stop_services_with_name() {
             # If there's a Process ID, it means the service with the name is running.
             if [[ -n $pid ]]; then
                 # Try to stop the service by killing its process.
-                if kill -10 $pid 2>/dev/null; then
+                if kill -15 $pid 2>/dev/null; then
                     stopped_this_time=true
                 fi
             fi
