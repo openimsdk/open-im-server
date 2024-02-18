@@ -154,7 +154,6 @@ func Start(
 		close(netDone)
 		return netErr
 	}
-	return nil
 }
 
 func gracefulStopWithCtx(ctx context.Context, f func()) error {
