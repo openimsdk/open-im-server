@@ -134,7 +134,7 @@ func Start(
 	}()
 
 	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGUSR1)
+	signal.Notify(sigs, syscall.SIGTERM)
 	select {
 	case <-sigs:
 		util.SIGUSR1Exit()

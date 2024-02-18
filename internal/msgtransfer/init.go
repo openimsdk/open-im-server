@@ -21,10 +21,6 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -38,6 +34,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 type MsgTransfer struct {
@@ -133,7 +133,7 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	}
 
 	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGUSR1)
+	signal.Notify(sigs, syscall.SIGTERM)
 	select {
 	case <-sigs:
 		util.SIGUSR1Exit()
