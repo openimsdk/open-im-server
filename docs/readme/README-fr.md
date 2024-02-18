@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://openim.io">
-        <img src="./assets/logo-gif/openim-logo.gif" width="60%" height="30%"/>
+        <img src="../../assets/logo-gif/openim-logo.gif" width="60%" height="30%"/>
     </a>
 </p>
 
@@ -58,7 +58,7 @@ OpenIM est une plateforme de services conçue spécifiquement pour intégrer des
 
 
 
-![Relation App-OpenIM](../images/oepnim-design.png)
+![Relation App-OpenIM](../../images/oepnim-design.png)
 
 ## 🚀 À propos de OpenIMSDK
 
@@ -101,7 +101,7 @@ Il est construit avec Golang et supporte le déploiement multiplateforme, assura
 
 Plongez dans le cœur de la fonctionnalité d'Open-IM-Server avec notre diagramme d'architecture.
 
-![Architecture globale](../images/architecture-layers.png)
+![Architecture globale](../../images/architecture-layers.png)
 
 
 ## :rocket: Démarrage rapide
@@ -169,7 +169,7 @@ Consultez notre page [ études de cas d'utilisateurs ](https://github.com/OpenIM
 
 OpenIM est sous licence Apache 2.0. Voir  [LICENSE](https://github.com/openimsdk/open-im-server/tree/main/LICENSE) pour le texte complet de la licence.
 
-Le logo OpenIM, y compris ses variations et versions animées, affiché dans ce dépôt[OpenIM](https://github.com/openimsdk/open-im-server) sous les répertoires  [assets/logo](./assets/logo) et [assets/logo-gif](assets/logo-gif) sont protégés par les lois sur le droit d'auteur.
+Le logo OpenIM, y compris ses variations et versions animées, affiché dans ce dépôt[OpenIM](https://github.com/openimsdk/open-im-server) sous les répertoires  [assets/logo](../../assets/logo) et [assets/logo-gif](assets/logo-gif) sont protégés par les lois sur le droit d'auteur.
 
 ## 🔮 Merci à nos contributeurs !
 
