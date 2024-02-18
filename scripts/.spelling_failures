@@ -6,4 +6,4 @@ translations/
 logs
 .git
 .golangci.yml
-docs/readme/*.md
+docs/readme/README_cs.md
