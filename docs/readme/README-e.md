@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://openim.io">
-        <img src="./assets/logo-gif/openim-logo.gif" width="60%" height="30%"/>
+        <img src="../../assets/logo-gif/openim-logo.gif" width="60%" height="30%"/>
     </a>
 </p>
 
@@ -19,31 +19,31 @@
 
 
 <p align="center">
-  <a href="../../">Englist</a> · 
-  <a href="../../README-zh_CN.md">中文</a> · 
-  <a href="./README-UA.md">Українська</a> · 
-  <a href="./README-CS.md">Česky</a> · 
-  <a href="./README-HU.md">Magyar</a> · 
-  <a href="./README-ES.md">Español</a> · 
-  <a href="./README-FA.md">فارسی</a> · 
-  <a href="./README-FR.md">Français</a> · 
-  <a href="./README-DE.md">Deutsch</a> · 
-  <a href="./README-PL.md">Polski</a> · 
-  <a href="./README-ID.md">Indonesian</a> · 
-  <a href="./README-FI.md">Suomi</a> · 
-  <a href="./README-ML.md">മലയാളം</a> · 
-  <a href="./README-JP.md">日本語</a> · 
-  <a href="./README-NL.md">Nederlands</a> · 
-  <a href="./README-IT.md">Italiano</a> · 
-  <a href="./README-RU.md">Русский</a> · 
-  <a href="./README-PTBR.md">Português (Brasil)</a> · 
-  <a href="./README-EO.md">Esperanto</a> · 
-  <a href="./README-KR.md">한국어</a> · 
-  <a href="./README-AR.md">العربي</a> · 
-  <a href="./README-VN.md">Tiếng Việt</a> · 
-  <a href="./README-DA.md">Dansk</a> · 
-  <a href="./README-GR.md">Ελληνικά</a> · 
-  <a href="./README-TR.md">Türkçe</a>
+  <a href="../../README.md">Englist</a> · 
+  <a href="../../README_zh_CN.md">中文</a> · 
+  <a href="./README_uk.md">Українська</a> · 
+  <a href="./README_cs.md">Česky</a> · 
+  <a href="./README_hu.md">Magyar</a> · 
+  <a href="./README_es.md">Español</a> · 
+  <a href="./README_fa.md">فارسی</a> · 
+  <a href="./README_fr.md">Français</a> · 
+  <a href="./README_de.md">Deutsch</a> · 
+  <a href="./README_pl.md">Polski</a> · 
+  <a href="./README_id.md">Indonesian</a> · 
+  <a href="./README_fi.md">Suomi</a> · 
+  <a href="./README_ml.md">മലയാളം</a> · 
+  <a href="./README_ja.md">日本語</a> · 
+  <a href="./README_nl.md">Nederlands</a> · 
+  <a href="./README_it.md">Italiano</a> · 
+  <a href="./README_ru.md">Русский</a> · 
+  <a href="./README_pt_BR.md">Português (Brasil)</a> · 
+  <a href="./README_eo.md">Esperanto</a> · 
+  <a href="./README_ko.md">한국어</a> · 
+  <a href="./README_ar.md">العربي</a> · 
+  <a href="./README_vi.md">Tiếng Việt</a> · 
+  <a href="./README_da.md">Dansk</a> · 
+  <a href="./README_el.md">Ελληνικά</a> · 
+  <a href="./README_tr.md">Türkçe</a>
 </p>
 
 
@@ -55,7 +55,7 @@
 
 OpenIM es una plataforma de servicio diseñada específicamente para integrar chat, llamadas de audio y video, notificaciones y chatbots de IA en aplicaciones. Proporciona una gama de potentes API y Webhooks, lo que permite a los desarrolladores incorporar fácilmente estas características interactivas en sus aplicaciones. OpenIM no es una aplicación de chat independiente, sino que sirve como una plataforma para apoyar a otras aplicaciones en lograr funcionalidades de comunicación enriquecidas. El siguiente diagrama ilustra la interacción entre AppServer, AppClient, OpenIMServer y OpenIMSDK para explicar en detalle.
 
-![Relación App-OpenIM](./docs/images/oepnim-design.png)
+![Relación App-OpenIM](../../docs/images/oepnim-design.png)
 
 ## 🚀 Acerca de OpenIMSDK
 
@@ -100,7 +100,7 @@ Está construido con Golang y soporta despliegue multiplataforma, asegurando una
 
 Adéntrate en el corazón de la funcionalidad de Open-IM-Server con nuestro diagrama de arquitectura.
 
-![Arquitectura General](./docs/images/architecture-layers.png)
+![Arquitectura General](../../docs/images/architecture-layers.png)
 
 
 ## :rocket: Inicio Rápido
@@ -185,7 +185,7 @@ Consulta nuestros [estudios de caso de usuarios](https://github.com/OpenIMSDK/co
 OpenIM está bajo la licencia Apache 2.0. Consulta [LICENSE](https://github.com/openimsdk/open-im-server/tree/main/LICENSE)  para ver el texto completo de la licencia.
 
 
-El logotipo de OpenIM, incluyendo sus variaciones y versiones animadas, que se muestran en este repositorio [OpenIM](https://github.com/openimsdk/open-im-server) en los directorios [assets/logo](./assets/logo) y [assets/logo-gif](assets/logo-gif) están protegidos por las leyes de derechos de autor.
+El logotipo de OpenIM, incluyendo sus variaciones y versiones animadas, que se muestran en este repositorio [OpenIM](https://github.com/openimsdk/open-im-server) en los directorios [assets/logo](../../assets/logo) y [assets/logo-gif](assets/logo-gif) están protegidos por las leyes de derechos de autor.
 ## 🔮 iGracias a nuestros colaboradores!
 
 <a href="https://github.com/openimsdk/open-im-server/graphs/contributors">
