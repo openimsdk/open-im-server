@@ -85,7 +85,7 @@ func run(port int, proPort int) error {
 		go func() {
 			p := ginprom.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
 			p.SetListenAddress(fmt.Sprintf(":%d", proPort))
-			if err := p.Use(router); err != nil && err != http.ErrServerClosed {
+			if err = p.Use(router); err != nil && err != http.ErrServerClosed {
 				netErr = errs.Wrap(err, fmt.Sprintf("prometheus start err: %d", proPort))
 				netDone <- struct{}{}
 			}

@@ -149,6 +149,7 @@ func Start(
 		if err != nil {
 			return errs.Wrap(err, "shutdown err")
 		}
+		return errors.New("SIGTERM received, shutting down")
 	case <-netDone:
 		close(netDone)
 		return netErr
