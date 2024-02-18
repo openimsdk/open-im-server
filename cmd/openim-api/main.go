@@ -43,6 +43,7 @@ import (
 func main() {
 	apiCmd := cmd.NewApiCmd()
 	apiCmd.AddPortFlag()
+	apiCmd.AddPrometheusPortFlag()
 	apiCmd.AddApi(run)
 	if err := apiCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "\n\nexit -1: \n%+v\n\n", err)

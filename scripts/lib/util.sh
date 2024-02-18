@@ -505,8 +505,6 @@ openim::util::stop_services_on_ports() {
 
     # Print information about ports whose processes were successfully stopped.
     if [[ ${#stopped[@]} -ne 0 ]]; then
-        echo
-        openim::log::info "Stopped services on ports:"
         for port in "${stopped[@]}"; do
             openim::log::info "Successfully stopped service on port $port."
         done
@@ -1741,8 +1739,6 @@ openim::util::stop_services_on_ports() {
 
     # Print information about ports whose processes were successfully stopped.
     if [[ ${#stopped[@]} -ne 0 ]]; then
-        echo
-        openim::log::info "Stopped services on ports:"
         for port in "${stopped[@]}"; do
             openim::log::info "Successfully stopped service on port $port."
         done

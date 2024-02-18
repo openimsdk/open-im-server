@@ -38,7 +38,7 @@ function openim::msgtransfer::start() {
   
   # Message Transfer Prometheus port list
   MSG_TRANSFER_PROM_PORTS=(openim::util::list-to-string ${MSG_TRANSFER_PROM_PORT} )
-  
+
   openim::log::status "OpenIM Prometheus ports: ${MSG_TRANSFER_PROM_PORTS[*]}"
   
   openim::log::status "OpenIM Msggateway config path: ${OPENIM_MSGTRANSFER_CONFIG}"
@@ -54,12 +54,14 @@ function openim::msgtransfer::start() {
   fi
   
   for (( i=0; i<$OPENIM_MSGGATEWAY_NUM; i++ )) do
-    openim::log::info "prometheus port: ${MSG_TRANSFER_PROM_PORTS[$i]}"
-    PROMETHEUS_PORT_OPTION=""
-    if [[ -n "${OPENIM_PROMETHEUS_PORTS[$i]}" ]]; then
-      PROMETHEUS_PORT_OPTION="--prometheus_port ${OPENIM_PROMETHEUS_PORTS[$i]}"
-    fi
-    nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} -n ${i} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE") &
+  openim::log::info "prometheus port: ${MSG_TRANSFER_PROM_PORTS[$i]}"
+  PROMETHEUS_PORT_OPTION=""
+  if [[ -n "${MSG_TRANSFER_PROM_PORTS[$i+1]}" ]]; then
+      PROMETHEUS_MSG_TRANSFER_PORT="${MSG_TRANSFER_PROM_PORTS[$i+1]%,}"
+      openim::util::stop_services_on_ports ${PROMETHEUS_MSG_TRANSFER_PORT}
+      PROMETHEUS_PORT_OPTION="--prometheus_port ${PROMETHEUS_MSG_TRANSFER_PORT}"
+  fi
+  nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} -n ${i} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
   done
   
   openim::util::check_process_names  "${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"
