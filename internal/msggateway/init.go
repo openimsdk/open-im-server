@@ -49,9 +49,6 @@ func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 		if err != nil {
 			netDone <- err
 		}
-		if err == nil {
-			fmt.Println("review SIGNAL but err is nil")
-		}
 	}()
 	return hubServer.LongConnServer.Run(netDone)
 }

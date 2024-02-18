@@ -145,6 +145,7 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 		m.cancel()
 		m.historyCH.historyConsumerGroup.Close()
 		m.historyMongoCH.historyConsumerGroup.Close()
+		fmt.Println("SIGTERM SIGTERM received")
 		return errors.New("SIGTERM received, shutting down")
 
 	case <-netDone:
