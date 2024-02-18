@@ -112,7 +112,7 @@ func run(port int, proPort int) error {
 	}()
 
 	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGUSR1)
+	signal.Notify(sigs, syscall.SIGTERM)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
