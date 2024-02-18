@@ -15,12 +15,10 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/msg"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 func main() {
@@ -31,7 +29,6 @@ func main() {
 		panic(err.Error())
 	}
 	if err := rpcCmd.StartSvr(config.Config.RpcRegisterName.OpenImMsgName, msg.Start); err != nil {
-		fmt.Fprintf(os.Stderr, "\n\nexit -1: \n%+v\n\n", err)
-		os.Exit(-1)
+		util.ExitWithError(err)
 	}
 }

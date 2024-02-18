@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"fmt"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"net"
 	"net/http"
 	_ "net/http/pprof"
@@ -46,8 +47,7 @@ func main() {
 	apiCmd.AddPrometheusPortFlag()
 	apiCmd.AddApi(run)
 	if err := apiCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "\n\nexit -1: \n%+v\n\n", err)
-		os.Exit(-1)
+		util.ExitWithError(err)
 	}
 }
 
@@ -76,12 +76,21 @@ func run(port int, proPort int) error {
 	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.Config.EncodeConfig()); err != nil {
 		return err
 	}
-
+	var (
+		netDone = make(chan struct{}, 1)
+		netErr  error
+	)
 	router := api.NewGinRouter(client, rdb)
 	if config.Config.Prometheus.Enable {
-		p := ginprom.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
-		p.SetListenAddress(fmt.Sprintf(":%d", proPort))
-		p.Use(router)
+		go func() {
+			p := ginprom.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
+			p.SetListenAddress(fmt.Sprintf(":%d", proPort))
+			if err = p.Use(router); err != nil && err != http.ErrServerClosed {
+				netErr = errs.Wrap(err, fmt.Sprintf("prometheus start err: %d", proPort))
+				netDone <- struct{}{}
+			}
+		}()
+
 	}
 
 	var address string
@@ -92,24 +101,31 @@ func run(port int, proPort int) error {
 	}
 
 	server := http.Server{Addr: address, Handler: router}
+
 	go func() {
 		err = server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
-			os.Exit(1)
+			netErr = errs.Wrap(err, fmt.Sprintf("api start err: %s", server.Addr))
+			netDone <- struct{}{}
+
 		}
 	}()
 
 	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	<-sigs
+	signal.Notify(sigs, syscall.SIGTERM)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-
-	// graceful shutdown operation.
-	if err := server.Shutdown(ctx); err != nil {
-		return err
+	select {
+	case <-sigs:
+		util.SIGUSR1Exit()
+		err := server.Shutdown(ctx)
+		if err != nil {
+			return errs.Wrap(err, "shutdown err")
+		}
+	case <-netDone:
+		close(netDone)
+		return netErr
 	}
-
 	return nil
 }

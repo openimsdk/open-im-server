@@ -130,7 +130,7 @@ func callbackBeforeSuperGroupOnlinePush(
 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
 		return err
 	}
-	return nil
+
 	if len(resp.UserIDs) != 0 {
 		*pushToUserIDs = resp.UserIDs
 	}
