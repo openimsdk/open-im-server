@@ -20,30 +20,30 @@
 
 <p align="center">
   <a href="../../README.md">Englist</a> · 
-  <a href="../../README-zh_CN.md">中文</a> · 
-  <a href="./README-UA.md">Українська</a> · 
-  <a href="./README-CS.md">Česky</a> · 
-  <a href="./README-HU.md">Magyar</a> · 
-  <a href="./README-ES.md">Español</a> · 
-  <a href="./README-FA.md">فارسی</a> · 
-  <a href="./README-FR.md">Français</a> · 
-  <a href="./README-DE.md">Deutsch</a> · 
-  <a href="./README-PL.md">Polski</a> · 
-  <a href="./README-ID.md">Indonesian</a> · 
-  <a href="./README-FI.md">Suomi</a> · 
-  <a href="./README-ML.md">മലയാളം</a> · 
-  <a href="./README-JP.md">日本語</a> · 
-  <a href="./README-NL.md">Nederlands</a> · 
-  <a href="./README-IT.md">Italiano</a> · 
-  <a href="./README-RU.md">Русский</a> · 
-  <a href="./README-PTBR.md">Português (Brasil)</a> · 
-  <a href="./README-EO.md">Esperanto</a> · 
-  <a href="./README-KR.md">한국어</a> · 
-  <a href="./README-AR.md">العربي</a> · 
-  <a href="./README-VN.md">Tiếng Việt</a> · 
-  <a href="./README-DA.md">Dansk</a> · 
-  <a href="./README-GR.md">Ελληνικά</a> · 
-  <a href="./README-TR.md">Türkçe</a>
+  <a href="../../README_zh_CN.md">中文</a> · 
+  <a href="./README_uk.md">Українська</a> · 
+  <a href="./README_cs.md">Česky</a> · 
+  <a href="./README_hu.md">Magyar</a> · 
+  <a href="./README_es.md">Español</a> · 
+  <a href="./README_fa.md">فارسی</a> · 
+  <a href="./README_fr.md">Français</a> · 
+  <a href="./README_de.md">Deutsch</a> · 
+  <a href="./README_pl.md">Polski</a> · 
+  <a href="./README_id.md">Indonesian</a> · 
+  <a href="./README_fi.md">Suomi</a> · 
+  <a href="./README_ml.md">മലയാളം</a> · 
+  <a href="./README_ja.md">日本語</a> · 
+  <a href="./README_nl.md">Nederlands</a> · 
+  <a href="./README_it.md">Italiano</a> · 
+  <a href="./README_ru.md">Русский</a> · 
+  <a href="./README_pt_BR.md">Português (Brasil)</a> · 
+  <a href="./README_eo.md">Esperanto</a> · 
+  <a href="./README_ko.md">한국어</a> · 
+  <a href="./README_ar.md">العربي</a> · 
+  <a href="./README_vi.md">Tiếng Việt</a> · 
+  <a href="./README_da.md">Dansk</a> · 
+  <a href="./README_el.md">Ελληνικά</a> · 
+  <a href="./README_tr.md">Türkçe</a>
 </p>
 
 
