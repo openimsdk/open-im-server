@@ -101,7 +101,7 @@ func initConfig(config any, configName, configFolderPath string) error {
 	if err = yaml.Unmarshal(data, config); err != nil {
 		return fmt.Errorf("unmarshal yaml error: %w", err)
 	}
-	fmt.Println("use config", configFolderPath)
+	fmt.Println("The path of the configuration file to start the process:", configFolderPath)
 
 	return nil
 }
