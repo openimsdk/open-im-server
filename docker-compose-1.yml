@@ -1,5 +1,5 @@
 #fixme  Clone openIM Server project before using docker-compose,project address：https://github.com/OpenIMSDK/Open-IM-Server.git
-#  The command that triggers this file to pull the image is "docker compose up -d".
+#  The command that triggers this file to pull the image is "docker compose up -f"
 version: '3'
 
 networks:
@@ -136,8 +136,60 @@ services:
       server:
         ipv4_address: ${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS:-172.28.0.13}
 
-### TODO: Uncomment, or deploy using openim docker: https://github.com/openimsdk/openim-docker
-### Uncomment and configure the following services as needed
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    hostname: prometheus
+    restart: always
+    volumes:
+      - "${DATA_DIR:-./}/config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml"
+      - "${DATA_DIR:-./}/config/prometheus.yml:/etc/prometheus/prometheus.yml"
+    ports:
+      - "${PROMETHEUS_PORT:-19090}:9090"
+    networks:
+      server:
+        ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS:-172.28.0.10}
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    hostname: alertmanager
+    restart: always
+    volumes:
+      - ${DATA_DIR:-./}/config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ${DATA_DIR:-./}/config/email.tmpl:/etc/alertmanager/email.tmpl
+    ports:
+      - "${ALERT_MANAGER_PORT:-19093}:9093"
+    networks:
+      server:
+        ipv4_address: ${ALERT_MANAGER_NETWORK_ADDRESS:-172.28.0.14}
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    hostname: grafana
+    user: root
+    restart: always
+    ports:
+      - "${GRAFANA_PORT:-13000}:3000"
+    volumes:
+      - "${DATA_DIR:-./}/components/grafana:/var/lib/grafana"
+    networks:
+      server:
+        ipv4_address: ${GRAFANA_NETWORK_ADDRESS:-172.28.0.11}
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: node-exporter
+    hostname: node-exporter
+    restart: always
+    ports:
+      - "${NODE_EXPORTER_PORT:-19100}:9100"
+    networks:
+      server:
+        ipv4_address: ${NODE_EXPORTER_NETWORK_ADDRESS:-172.28.0.12}
+
+### Source code deployment does not require pulling the following mirrors
 
   # openim-server:
   #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-server:${SERVER_IMAGE_VERSION:-main}
@@ -186,7 +238,7 @@ services:
   #     server:
   #       ipv4_address: ${OPENIM_SERVER_NETWORK_ADDRESS:-172.28.0.8}
 
-### TODO: mysql is required to deploy the openim-chat component
+  ### TODO: mysql is required to deploy the openim-chat component
   # mysql:
   #   image: mysql:${MYSQL_IMAGE_VERSION:-5.7}
   #   platform: linux/amd64
@@ -244,56 +296,3 @@ services:
   #   networks:
   #     server:
   #       ipv4_address: ${OPENIM_CHAT_NETWORK_ADDRESS:-172.28.0.9}
-
-  # prometheus:
-  #   image: prom/prometheus
-  #   container_name: prometheus
-  #   hostname: prometheus
-  #   restart: always
-  #   volumes:
-  #     - "${DATA_DIR:-./}/config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml"
-  #     - "${DATA_DIR:-./}/config/prometheus.yml:/etc/prometheus/prometheus.yml"
-  #   ports:
-  #     - "${PROMETHEUS_PORT:-19090}:9090"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS:-172.28.0.10}
-
-  # alertmanager:
-  #   image: prom/alertmanager
-  #   container_name: alertmanager
-  #   hostname: alertmanager
-  #   restart: always
-  #   volumes:
-  #     - ${DATA_DIR:-./}/config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-  #     - ${DATA_DIR:-./}/config/email.tmpl:/etc/alertmanager/email.tmpl
-  #   ports:
-  #     - "${ALERT_MANAGER_PORT:-19093}:9093"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${ALERT_MANAGER_NETWORK_ADDRESS:-172.28.0.14}
-
-  # grafana:
-  #   image: grafana/grafana
-  #   container_name: grafana
-  #   hostname: grafana
-  #   user: root
-  #   restart: always
-  #   ports:
-  #     - "${GRAFANA_PORT:-13000}:3000"
-  #   volumes:
-  #     - "${DATA_DIR:-./}/components/grafana:/var/lib/grafana"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${GRAFANA_NETWORK_ADDRESS:-172.28.0.11}
-
-  # node-exporter:
-  #   image: quay.io/prometheus/node-exporter
-  #   container_name: node-exporter
-  #   hostname: node-exporter
-  #   restart: always
-  #   ports:
-  #     - "${NODE_EXPORTER_PORT:-19100}:9100"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${NODE_EXPORTER_NETWORK_ADDRESS:-172.28.0.12}
