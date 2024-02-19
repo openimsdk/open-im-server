@@ -46,9 +46,7 @@ func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 	netDone := make(chan error)
 	go func() {
 		err = hubServer.Start()
-		if err != nil {
-			netDone <- err
-		}
+		netDone <- err
 	}()
 	return hubServer.LongConnServer.Run(netDone)
 }

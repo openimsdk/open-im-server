@@ -22,8 +22,6 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
-
 	"net/http"
 	"os"
 	"os/signal"
@@ -144,7 +142,6 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	signal.Notify(sigs, syscall.SIGTERM)
 	select {
 	case <-sigs:
-		util.SIGUSR1Exit()
 		// graceful close kafka client.
 		m.cancel()
 		m.historyCH.historyConsumerGroup.Close()

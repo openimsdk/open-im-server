@@ -29,8 +29,6 @@ import (
 
 	"github.com/OpenIMSDK/tools/errs"
 
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -140,7 +138,6 @@ func Start(
 	signal.Notify(sigs, syscall.SIGTERM)
 	select {
 	case <-sigs:
-		util.SIGUSR1Exit()
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		if err := gracefulStopWithCtx(ctx, srv.GracefulStop); err != nil {
@@ -152,11 +149,11 @@ func Start(
 		if err != nil {
 			return errs.Wrap(err, "shutdown err")
 		}
-		return errs.Wrap(errors.New("SIGTERM EXIT"))
 	case <-netDone:
 		close(netDone)
 		return netErr
 	}
+	return nil
 }
 
 func gracefulStopWithCtx(ctx context.Context, f func()) error {
