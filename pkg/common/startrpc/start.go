@@ -18,8 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/tools/errs"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"net"
 	"net/http"
 	"os"
@@ -29,10 +27,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/OpenIMSDK/tools/errs"
+
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
