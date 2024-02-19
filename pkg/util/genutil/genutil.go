@@ -51,7 +51,7 @@ func ExitWithError(err error) {
 	os.Exit(-1)
 }
 
-func SIGUSR1Exit() {
+func SIGTERMExit() {
 	progName := filepath.Base(os.Args[0])
-	fmt.Printf("\n\n%s receive process terminal SIGTERM exit 0\n\n", progName)
+	fmt.Printf("%s receive process terminal SIGTERM exit 0", progName)
 }
