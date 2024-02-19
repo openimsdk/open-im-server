@@ -40,35 +40,6 @@ handle_error() {
 
 trap handle_error ERR
 
-# Assuming OPENIM_SERVER_NAME_TARGETS and OPENIM_SERVER_PORT_TARGETS are defined
-# Similarly for OPENIM_DEPENDENCY_TARGETS and OPENIM_DEPENDENCY_PORT_TARGETS
-
-# Print out services and their ports
-
-# OpenIM check
-echo "++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
-openim::log::info "\n## Check all dependent service ports"
-echo "++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
-
-set +e
-
-# Later, after discarding Docker, the Docker keyword is unreliable, and Kubepods is used
-if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
-  openim::color::echo ${COLOR_CYAN} "Environment in the interior of the container"
-else
-  openim::color::echo ${COLOR_CYAN} "The environment is outside the container"
-  openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]} || return 0
-fi
-
-
-
-if [[ $? -ne 0 ]]; then
-  openim::log::error_exit "The service does not start properly, please check the port, query variable definition!"
-  echo "+++ https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh +++"
-else
-  echo "++++ Check all dependent service ports successfully !"
-fi
-
 openim::log::info "\n## Check OpenIM service name"
 . $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal
 
