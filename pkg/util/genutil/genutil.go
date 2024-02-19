@@ -17,6 +17,7 @@ package genutil
 import (
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"os"
 	"path/filepath"
 )
@@ -42,7 +43,7 @@ func OutDir(path string) (string, error) {
 }
 
 func ExitWithError(err error) {
-	if errors.Is(err, errors.New("SIGTERM EXIT")) {
+	if errors.Is(errs.Unwrap(err), errors.New("SIGTERM EXIT")) {
 		os.Exit(-1)
 	}
 	progName := filepath.Base(os.Args[0])
