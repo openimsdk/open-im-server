@@ -17,7 +17,6 @@ package main
 import (
 	"context"
 	"fmt"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"net"
 	"net/http"
 	_ "net/http/pprof"
@@ -26,6 +25,8 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 
 	"github.com/OpenIMSDK/tools/errs"
 
