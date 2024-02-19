@@ -28,12 +28,14 @@ source "${OPENIM_ROOT}/scripts/install/common.sh"
 
 openim::log::info "\n# Begin to stop all openim service"
 
-echo "++ Ready to stop port: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
+echo "++ Ready to stop port: ${OPNIM_SERVER_PORT_LISTARIES[@]}"
 
-openim::util::stop_services_on_ports ${OPENIM_SERVER_PORT_LISTARIES[@]}
+openim::util::stop_services_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
 
-echo -e "\n++ Stop all processes in the path ${OPENIM_OUTPUT_HOSTBIN}"
+openim::util::stop_services_by_name_signal "${OPENIM_OUTPUT_HOSTBIN}"
 
-openim::util::stop_services_with_name "${OPENIM_OUTPUT_HOSTBIN}"
+echo "++ Check if the services have been stopped"
+
+source "${OPENIM_ROOT}/scripts/check-all-by-signal.sh"
 
 openim::log::success "✨  All processes to be killed"

@@ -519,6 +519,35 @@ openim::util::stop_services_on_ports() {
         return 0
     fi
 }
+
+openim::util::stop_services_by_signal() {
+  # An array to collect ports of processes that couldn't be stopped.
+  local not_stopped=()
+
+  # An array to collect information about processes that were stopped.
+  local stopped=()
+
+  # Iterate over each given port.
+  for port in "$@"; do
+    # Use the `lsof` command to find process information related to the given port.
+    info=$(lsof -i :$port -n -P | grep LISTEN || true)
+
+    # If there's process information, it means the process associated with the port is running.
+    if [[ -n $info ]]; then
+      # Extract the Process ID.
+      while read -r line; do
+        local pid=$(echo $line | awk '{print $2}')
+
+        # Try to stop the service by killing its process.
+        if kill -15 $pid; then
+          stopped+=($port)
+        else
+          not_stopped+=($port)
+        fi
+            done <<< "$info"
+        fi
+    done
+}
 # nc -l -p 12345
 # nc -l -p 123456
 # ps -ef | grep "nc -l"
@@ -593,6 +622,48 @@ openim::util::stop_services_with_name() {
 
     openim::log::success "All specified services were stopped."
     echo ""
+}
+
+openim::util::stop_services_by_name_signal() {
+    # An array to collect names of processes that couldn't be stopped.
+    local not_stopped=()
+
+    # An array to collect information about processes that were stopped.
+    local stopped=()
+
+    # Iterate over each given service name.
+    for server_name in "$@"; do
+        # Use the `pgrep` command to find process IDs related to the given service name.
+        local pids=$(pgrep -f "$server_name")
+
+        # If no process was found with the name, add it to the not_stopped list
+        if [[ -z $pids ]]; then
+            not_stopped+=("$server_name")
+            continue
+        fi
+        local stopped_this_time=false
+        for pid in $pids; do
+
+            # Exclude the PID of the current script
+            if [[ "$pid" == "$$" ]]; then
+                continue
+            fi
+
+            # If there's a Process ID, it means the service with the name is running.
+            if [[ -n $pid ]]; then
+                # Try to stop the service by killing its process.
+                if kill -15 $pid 2>/dev/null; then
+                    stopped_this_time=true
+                fi
+            fi
+        done
+
+        if $stopped_this_time; then
+            stopped+=("$server_name")
+        else
+            not_stopped+=("$server_name")
+        fi
+    done
 }
 # sleep 333333&
 # sleep 444444&
