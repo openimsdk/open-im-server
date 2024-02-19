@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://openim.io">
-        <img src="./assets/logo-gif/openim-logo.gif" width="60%" height="30%"/>
+        <img src="../../assets/logo-gif/openim-logo.gif" width="60%" height="30%"/>
     </a>
 </p>
 
@@ -19,31 +19,31 @@
 
 
 <p align="center">
-  <a href="./README.md">Englist</a> · 
-  <a href="./README_zh_CN.md">中文</a> · 
-  <a href="./docs/readme/README_uk.md">Українська</a> · 
-  <a href="./docs/readme/README_cs.md">Česky</a> · 
-  <a href="./docs/readme/README_hu.md">Magyar</a> · 
-  <a href="./docs/readme/README_es.md">Español</a> · 
-  <a href="./docs/readme/README_fa.md">فارسی</a> · 
-  <a href="./docs/readme/README_fr.md">Français</a> · 
-  <a href="./docs/readme/README_de.md">Deutsch</a> · 
-  <a href="./docs/readme/README_pl.md">Polski</a> · 
-  <a href="./docs/readme/README_id.md">Indonesian</a> · 
-  <a href="./docs/readme/README_fi.md">Suomi</a> · 
-  <a href="./docs/readme/README_ml.md">മലയാളം</a> · 
-  <a href="./docs/readme/README_ja.md">日本語</a> · 
-  <a href="./docs/readme/README_nl.md">Nederlands</a> · 
-  <a href="./docs/readme/README_it.md">Italiano</a> · 
-  <a href="./docs/readme/README_ru.md">Русский</a> · 
-  <a href="./docs/readme/README_pt_BR.md">Português (Brasil)</a> · 
-  <a href="./docs/readme/README_eo.md">Esperanto</a> · 
-  <a href="./docs/readme/README_ko.md">한국어</a> · 
-  <a href="./docs/readme/README_ar.md">العربي</a> · 
-  <a href="./docs/readme/README_vi.md">Tiếng Việt</a> · 
-  <a href="./docs/readme/README_da.md">Dansk</a> · 
-  <a href="./docs/readme/README_el.md">Ελληνικά</a> · 
-  <a href="./docs/readme/README_tr.md">Türkçe</a>
+  <a href="../../README.md">Englist</a> · 
+  <a href="../../README_zh_CN.md">中文</a> · 
+  <a href="./README_uk.md ">Українська</a> · 
+  <a href="./README_cs.md">Česky</a> · 
+  <a href="./README_hu.md">Magyar</a> · 
+  <a href="./README_es.md">Español</a> · 
+  <a href="./README_fa.md">فارسی</a> · 
+  <a href="./README_fr.md">Français</a> · 
+  <a href="./README_de.md">Deutsch</a> · 
+  <a href="./README_pl.md">Polski</a> · 
+  <a href="./README_id.md">Indonesian</a> · 
+  <a href="./README_fi.md">Suomi</a> · 
+  <a href="./README_ml.md">മലയാളം</a> · 
+  <a href="./README_ja.md">日本語</a> · 
+  <a href="./README_nl.md">Nederlands</a> · 
+  <a href="./README_it.md">Italiano</a> · 
+  <a href="./README_ru.md">Русский</a> · 
+  <a href="./README_pt_BR.md">Português (Brasil)</a> · 
+  <a href="./README_eo.md">Esperanto</a> · 
+  <a href="./README_ko.md">한국어</a> · 
+  <a href="./README_ar.md">العربي</a> · 
+  <a href="./README_vi.md">Tiếng Việt</a> · 
+  <a href="./README_da.md">Dansk</a> · 
+  <a href="./README_el.md">Ελληνικά</a> · 
+  <a href="./README_tr.md">Türkçe</a>
 </p>
 
 
@@ -51,46 +51,46 @@
 
 </p>
 
-## Ⓜ️ About OpenIM
+## Ⓜ️ Về OpenIM
 
-OpenIM is a service platform specifically designed for integrating chat, audio-video calls, notifications, and AI chatbots into applications. It provides a range of powerful APIs and Webhooks, enabling developers to easily incorporate these interactive features into their applications. OpenIM is not a standalone chat application, but rather serves as a platform to support other applications in achieving rich communication functionalities. The following diagram illustrates the interaction between AppServer, AppClient, OpenIMServer, and OpenIMSDK to explain in detail.
+OpenIM là một nền tảng dịch vụ được thiết kế đặc biệt cho việc tích hợp chat, cuộc gọi âm thanh-video, thông báo và chatbot AI vào các ứng dụng. Nó cung cấp một loạt các API mạnh mẽ và Webhooks, giúp các nhà phát triển dễ dàng tích hợp các tính năng tương tác này vào ứng dụng của mình. OpenIM không phải là một ứng dụng chat độc lập, mà là một nền tảng hỗ trợ các ứng dụng khác để đạt được các chức năng giao tiếp phong phú. Sơ đồ sau đây minh họa sự tương tác giữa AppServer, AppClient, OpenIMServer và OpenIMSDK để giải thích chi tiết.
 
-![App-OpenIM Relationship](./docs/images/oepnim-design.png)
+![App-OpenIM Relationship](../../docs/images/oepnim-design.png)
 
-## 🚀 About OpenIMSDK
+## 🚀 Về OpenIMSDK
 
-**OpenIMSDK** is an IM SDK designed for **OpenIMServer**, created specifically for embedding in client applications. Its main features and modules are as follows:
+**OpenIMSDK** là một SDK IM được thiết kế cho **OpenIMServer**, được tạo ra đặc biệt để nhúng vào các ứng dụng khách. Các tính năng chính và các mô-đun của nó như sau:
 
-+ 🌟 Main Features:
++ 🌟 Các Tính Năng Chính:
 
-  - 📦 Local storage
-  - 🔔 Listener callbacks
-  - 🛡️ API wrapping
-  - 🌐 Connection management
+  - 📦 Lưu trữ cục bộ
+  - 🔔 Gọi lại sự kiện (Listener callbacks)
+  - 🛡️ Bọc API
+  - 🌐 Quản lý kết nối
 
-+ 📚 Main Modules:
++ 📚 Các Mô-đun Chính:
 
-  1. 🚀 Initialization and Login
-  2. 👤 User Management
-  3. 👫 Friend Management
-  4. 🤖 Group Functions
-  5. 💬 Conversation Handling
+  1. 🚀 Khởi tạo và Đăng nhập
+  2. 👤 Quản lý Người dùng
+  3. 👫 Quản lý Bạn bè
+  4. 🤖 Chức năng Nhóm
+  5. 💬 Xử lý Cuộc trò chuyện
 
-It is built using Golang and supports cross-platform deployment, ensuring a consistent access experience across all platforms.
+Nó được xây dựng bằng Golang và hỗ trợ triển khai đa nền tảng, đảm bảo trải nghiệm truy cập nhất quán trên tất cả các nền tảng
 
-👉 **[Explore GO SDK](https://github.com/openimsdk/openim-sdk-core)**
+👉 **[Khám phá GO SDK](https://github.com/openimsdk/openim-sdk-core)**
 
-## 🌐 About OpenIMServer
+## 🌐 Về OpenIMServer
 
-+ **OpenIMServer** has the following characteristics:
-  - 🌐 Microservice architecture: Supports cluster mode, including a gateway and multiple rpc services.
-  - 🚀 Diverse deployment methods: Supports deployment via source code, Kubernetes, or Docker.
-  - Support for massive user base: Super large groups with hundreds of thousands of users, tens of millions of users, and billions of messages.
++ **OpenIMServer** có những đặc điểm sau:
+  - 🌐 Kiến trúc vi dịch vụ: Hỗ trợ chế độ cluster, bao gồm một gateway và nhiều dịch vụ rpc.
+  - 🚀 Phương pháp triển khai đa dạng: Hỗ trợ triển khai qua mã nguồn, Kubernetes hoặc Docker.
+  - Hỗ trợ cho cơ sở người dùng lớn: Nhóm siêu lớn với hàng trăm nghìn người dùng, hàng chục triệu người dùng và hàng tỷ tin nhắn.
 
-### Enhanced Business Functionality:
+### Tăng cường Chức năng Kinh doanh:
 
-+ **REST API**: OpenIMServer offers REST APIs for business systems, aimed at empowering businesses with more functionalities, such as creating groups and sending push messages through backend interfaces.
-+ **Webhooks**: OpenIMServer provides callback capabilities to extend more business forms. A callback means that OpenIMServer sends a request to the business server before or after a certain event, like callbacks before or after sending a message.
++ **REST API**: OpenIMServer cung cấp REST APIs cho các hệ thống kinh doanh, nhằm tăng cường khả năng cho doanh nghiệp với nhiều chức năng hơn, như tạo nhóm và gửi tin nhắn đẩy qua giao diện backend.
++ **Webhooks**: OpenIMServer cung cấp khả năng gọi lại để mở rộng thêm hình thức kinh doanh. Một gọi lại có nghĩa là OpenIMServer gửi một yêu cầu đến máy chủ kinh doanh trước hoặc sau một sự kiện nhất định, giống như gọi lại trước hoặc sau khi gửi một tin nhắn.
 
 👉 **[Learn more](https://docs.openim.io/guides/introduction/product)**
 
@@ -98,7 +98,7 @@ It is built using Golang and supports cross-platform deployment, ensuring a cons
 
  Làm sâu sắc vào trái tim của chức năng Open-IM-Server với sơ đồ kiến trúc của chúng tôi.
 
-![Overall Architecture](./docs/images/architecture-layers.png)
+![Overall Architecture](../../docs/images/architecture-layers.png)
 
 
 ## :rocket: Bắt đầu nhanh
@@ -179,7 +179,7 @@ Xem trangr [các nghiên cứu trường hợp người dùng](https://github.co
 
 OpenIM được cấp phép theo giấy phép Apache 2.0. Xem [GIẤY PHÉP](https://github.com/openimsdk/open-im-server/tree/main/LICENSE) để biết toàn bộ nội dung giấy phép.
 
-Logo OpenIM, bao gồm các biến thể và phiên bản hoạt hình, được hiển thị trong kho lưu trữ này [OpenIM](https://github.com/openimsdk/open-im-server) dưới các thư mục [assets/logo](./assets/logo) và [assets/logo-gif](assets/logo-gif) được bảo vệ bởi luật bản quyền.
+Logo OpenIM, bao gồm các biến thể và phiên bản hoạt hình, được hiển thị trong kho lưu trữ này [OpenIM](https://github.com/openimsdk/open-im-server) dưới các thư mục [assets/logo](../../assets/logo) và [assets/logo-gif](assets/logo-gif) được bảo vệ bởi luật bản quyền.
 
 ## 🔮 Cảm ơn các đóng góp của bạn!
 
