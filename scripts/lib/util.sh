@@ -440,13 +440,13 @@ openim::util::check_ports_by_signal() {
 
   # If any of the processes is not running, return a status of 1.
   if [[ ${#not_started[@]} -ne 0 ]]; then
+     openim::log::success "All specified processes are running."
+    return 1
+  else
     openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
     openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
     cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
-    return 1
-  else
-#    openim::log::success "All specified processes are running."
-    openim::log::success "Have processes no stop."
+    openim::log::error "Have processes no stop."
     return 0
   fi
 }
