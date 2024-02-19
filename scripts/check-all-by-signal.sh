@@ -60,6 +60,8 @@ else
   openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]} || return 0
 fi
 
+
+
 if [[ $? -ne 0 ]]; then
   openim::log::error_exit "The service does not start properly, please check the port, query variable definition!"
   echo "+++ https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh +++"
@@ -72,12 +74,12 @@ openim::log::info "\n## Check OpenIM service name"
 
 openim::log::info "\n## Check all OpenIM service ports"
 echo "+++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
-openim::util::check_ports ${OPENIM_SERVER_PORT_LISTARIES[@]}
-if [[ $? -ne 0 ]]; then
+openim::util::check_ports_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
+if [[ $? -eq 0 ]]; then
+  openim::log::error_exit "The service does not stop properly, there are still processes running, please check the port, query variable definition!"
+else
   echo "+++ cat openim log file >>> ${LOG_FILE}"
   echo "++++ All openim service ports stop successfully !"
-else
-  openim::log::error_exit "The service does not stop properly, please check the port, query variable definition!"
 fi
 
 set -e
