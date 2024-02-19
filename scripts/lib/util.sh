@@ -371,85 +371,59 @@ openim::util::check_ports() {
 }
 
 
-openim::util::check_ports_by_signal() {
-  # An array to collect ports of processes that are not running.
-  local not_started=()
+openim::util::check_processes() {
+  # An array to collect information about processes that are still running.
+  local running=()
 
-  # An array to collect information about processes that are running.
-  local started=()
+  # An array to collect information about processes that have been stopped.
+  local stopped=()
 
-  openim::log::info "Checking ports: $*"
-  # Iterate over each given port.
-  for port in "$@"; do
-    # Initialize variables
-    # Check the OS and use the appropriate command
+  openim::log::info "Checking processes for: $*"
+  # Iterate over each given process name.
+  for name in "$@"; do
+    # Check the OS and use the appropriate command to find processes by name
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-      if command -v ss > /dev/null 2>&1; then
-        info=$(ss -ltnp | grep ":$port" || true)
-      else
-        info=$(netstat -ltnp | grep ":$port" || true)
-      fi
-      elif [[ "$OSTYPE" == "darwin"* ]]; then
-      # For macOS, use lsof
-      info=$(lsof -P -i:"$port" | grep "LISTEN" || true)
+      info=$(pgrep -fl "$name" || true)
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+      # For macOS, use pgrep as well, lsof for ports is not relevant here
+      info=$(pgrep -fl "$name" || true)
     fi
 
-    # Check if any process is using the port
+    # Check if the process is still running
     if [[ -z $info ]]; then
-      not_started+=($port)
+      stopped+=("$name")
     else
-      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Extract relevant details for Linux: Process Name, PID, and FD.
-        details=$(echo $info | sed -n 's/.*users:(("\([^"]*\)",pid=\([^,]*\),fd=\([^)]*\))).*/\1 \2 \3/p')
-        command=$(echo $details | awk '{print $1}')
-        pid=$(echo $details | awk '{print $2}')
-        fd=$(echo $details | awk '{print $3}')
-        elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # Handle extraction for macOS
-        pid=$(echo $info | awk '{print $2}' | cut -d'/' -f1)
-        command=$(ps -p $pid -o comm= | xargs basename)
-        fd=$(echo $info | awk '{print $4}' | cut -d'/' -f1)
-      fi
-
-      # Get the start time of the process using the PID
-      if [[ -z $pid ]]; then
-        start_time="N/A"
-      else
-        start_time=$(ps -p $pid -o lstart=)
-      fi
-
-      started+=("Port $port - Command: $command, PID: $pid, FD: $fd, Started: $start_time")
+      running+=("Running process for $name: $info")
     fi
   done
 
-#  # Print information about ports whose processes are not running.
-#  if [[ ${#not_started[@]} -ne 0 ]]; then
-#    openim::log::info "\n### Not started ports:"
-#    for port in "${not_started[@]}"; do
-#      openim::log::error "Port $port is not started."
-#    done
-#  fi
-
-  # Print information about ports whose processes are running.
-  if [[ ${#started[@]} -ne 0 ]]; then
-    openim::log::info "\n### No stop ports:"
-    for info in "${started[@]}"; do
+  # Print information about processes that are still running.
+  if [[ ${#running[@]} -ne 0 ]]; then
+    openim::log::info "\n### Running processes:"
+    for info in "${running[@]}"; do
       openim::log::info "$info"
+    done
+  else
+    # If all processes have been stopped, print a success message.
+    openim::log::success "All specified processes have been stopped."
+  fi
+
+  # Print information about processes that have been stopped, if any.
+  if [[ ${#stopped[@]} -ne 0 ]]; then
+    openim::log::info "\n### Stopped processes:"
+    for name in "${stopped[@]}"; do
+      openim::log::info "Process $name has been stopped."
     done
   fi
 
-  # If any of the processes is not running, return a status of 1.
-  if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
-    openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
-    cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
+  # If any of the processes is still running, return a status of 1.
+  if [[ ${#running[@]} -ne 0 ]]; then
     return 1
   else
-#    openim::log::success "All specified processes are running."
-    openim::log::success "Have processes no stop."
     return 0
   fi
 }
+
 
 
 # set +o errexit
