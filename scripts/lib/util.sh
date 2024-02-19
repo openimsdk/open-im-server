@@ -371,7 +371,7 @@ openim::util::check_ports() {
 }
 
 
-openim::util::check_processes() {
+openim::util::check_ports_by_signal() {
   # An array to collect information about processes that are still running.
   local running=()
 
