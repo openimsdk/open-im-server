@@ -44,10 +44,6 @@ trap handle_error ERR
 # Similarly for OPENIM_DEPENDENCY_TARGETS and OPENIM_DEPENDENCY_PORT_TARGETS
 
 # Print out services and their ports
-print_services_and_ports "${OPENIM_SERVER_NAME_TARGETS[@]}" "${OPENIM_SERVER_PORT_TARGETS[@]}"
-
-# Print out dependencies and their ports
-print_services_and_ports "${OPENIM_DEPENDENCY_TARGETS[@]}" "${OPENIM_DEPENDENCY_PORT_TARGETS[@]}"
 
 # OpenIM check
 echo "++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
