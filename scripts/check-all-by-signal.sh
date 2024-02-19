@@ -30,8 +30,6 @@ OPENIM_VERBOSE=4
 
 openim::log::info "\n# Begin to check all openim service"
 
-openim::log::status "Check all dependent service ports"
-
 handle_error() {
   echo "An error occurred. Printing ${STDERR_LOG_FILE} contents:"
   cat "${STDERR_LOG_FILE}"
@@ -40,17 +38,15 @@ handle_error() {
 
 trap handle_error ERR
 
-openim::log::info "\n## Check OpenIM service name"
 . $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal
 
-openim::log::info "\n## Check all OpenIM service ports"
-echo "+++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
-openim::util::check_ports_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
-if [[ $? -eq 0 ]]; then
+# Assuming openim::util::check_ports_by_signal function sets a proper exit status
+# based on whether services are running or not.
+if openim::util::check_ports_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}; then
+  echo "++++ All openim service ports stop successfully !"
+else
   echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error_exit "The service does not stop properly, there are still processes running, please check!"
-else
-  echo "++++ All openim service ports stop successfully !"
 fi
 
 set -e
