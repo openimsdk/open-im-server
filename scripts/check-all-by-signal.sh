@@ -70,15 +70,15 @@ else
 fi
 
 openim::log::info "\n## Check OpenIM service name"
-. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check
+. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal
 
 openim::log::info "\n## Check all OpenIM service ports"
 echo "+++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 openim::util::check_ports_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
 if [[ $? -eq 0 ]]; then
-  openim::log::error_exit "The service does not stop properly, there are still processes running, please check the port, query variable definition!"
-else
   echo "+++ cat openim log file >>> ${LOG_FILE}"
+  openim::log::error_exit "The service does not stop properly, there are still processes running, please check!"
+else
   echo "++++ All openim service ports stop successfully !"
 fi
 
