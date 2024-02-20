@@ -107,6 +107,7 @@ function openim::msgtransfer::check_by_signal() {
   else
     openim::log::success "All openim-msgtransfer processes have been stopped properly."
   fi
+  return 0
 }
 
 ###################################### Linux Systemd ######################################
