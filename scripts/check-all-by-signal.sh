@@ -29,6 +29,7 @@ source "${OPENIM_ROOT}/scripts/install/common.sh"
 OPENIM_VERBOSE=4
 
 openim::log::info "\n# Begin to check all openim service"
+. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal || ture
 
 handle_error() {
   echo "An error occurred. Printing ${STDERR_LOG_FILE} contents:"
@@ -37,7 +38,6 @@ handle_error() {
 
 trap handle_error ERR
 
-. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal
 echo "Check ports:"
 openim::util::check_ports_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
 if [[ $? -ne 0 ]]; then
