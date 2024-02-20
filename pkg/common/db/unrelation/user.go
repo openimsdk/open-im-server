@@ -18,7 +18,6 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -119,7 +118,7 @@ func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string
 			opts,
 		)
 		if err != nil {
-			return utils.Wrap(err, "transaction failed")
+			return errs.Wrap(err, "transaction failed")
 		}
 	}
 	return nil

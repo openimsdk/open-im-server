@@ -134,7 +134,7 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 		}
 		bs, err := json.Marshal(t)
 		if err != nil {
-			return "", utils.Wrap(err, "")
+			return "", errs.Wrap(err)
 		}
 		write = true
 
@@ -153,7 +153,7 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	if err != nil {
 		log.ZError(ctx, "cache json.Unmarshal failed", err, "key", key, "value", v, "expire", expire)
 
-		return t, utils.Wrap(err, "")
+		return t, errs.Wrap(err)
 	}
 
 	return t, nil

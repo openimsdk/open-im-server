@@ -34,8 +34,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	http2 "github.com/openimsdk/open-im-server/v3/pkg/common/http"
-
-	"github.com/OpenIMSDK/tools/utils"
 )
 
 var (
@@ -137,7 +135,7 @@ func (g *Client) GetTaskID(ctx context.Context, token string, pushReq PushReq) (
 	pushReq.Settings = &Settings{TTL: &ttl}
 	err := g.request(ctx, taskURL, pushReq, token, &respTask)
 	if err != nil {
-		return "", utils.Wrap(err, "")
+		return "", errs.Wrap(err)
 	}
 	return respTask.TaskID, nil
 }
