@@ -36,6 +36,11 @@ type RootCmd struct {
 	port           int
 	prometheusPort int
 	cmdItf         RootCmdPt
+	config         *config.GlobalConfig
+}
+
+func (rc *RootCmd) Port() int {
+	return rc.port
 }
 
 type CmdOpts struct {
@@ -55,7 +60,7 @@ func WithLogName(logName string) func(*CmdOpts) {
 }
 
 func NewRootCmd(name string, opts ...func(*CmdOpts)) *RootCmd {
-	rootCmd := &RootCmd{Name: name}
+	rootCmd := &RootCmd{Name: name, config: config.NewGlobalConfig()}
 	cmd := cobra.Command{
 		Use:   "Start openIM application",
 		Short: fmt.Sprintf(`Start %s `, name),
@@ -97,7 +102,7 @@ func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 }
 
 func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
-	logConfig := config.Config.Log
+	logConfig := rc.config.Log
 
 	return log.InitFromConfig(
 
@@ -164,7 +169,7 @@ func (r *RootCmd) GetPrometheusPortFlag() int {
 func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
 	fmt.Println("The directory of the configuration file to start the process:", configFolderPath)
-	return config2.InitConfig(configFolderPath)
+	return config2.InitConfig(r.config, configFolderPath)
 }
 
 func (r *RootCmd) Execute() error {

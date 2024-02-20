@@ -16,6 +16,7 @@ package friend
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/OpenIMSDK/tools/tx"
 
@@ -51,9 +52,10 @@ type friendServer struct {
 	notificationSender    *notification.FriendNotificationSender
 	conversationRpcClient rpcclient.ConversationRpcClient
 	RegisterCenter        registry.SvcDiscoveryRegistry
+	config                *config.GlobalConfig
 }
 
-func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	// Initialize MongoDB
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
@@ -106,6 +108,7 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		notificationSender:    notificationSender,
 		RegisterCenter:        client,
 		conversationRpcClient: rpcclient.NewConversationRpcClient(client),
+		config:                config,
 	})
 
 	return nil
@@ -113,13 +116,12 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 
 // ok.
 func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) (resp *pbfriend.ApplyToAddFriendResp, err error) {
-	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.ApplyToAddFriendResp{}
 	if err := authverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	if req.ToUserID == req.FromUserID {
-		return nil, errs.ErrCanNotAddYourself.Wrap()
+		return nil, errs.ErrCanNotAddYourself.Wrap("req.ToUserID", req.ToUserID)
 	}
 	if err = CallbackBeforeAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err

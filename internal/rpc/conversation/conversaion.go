@@ -17,6 +17,7 @@ package conversation
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"sort"
 
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -49,6 +50,7 @@ type conversationServer struct {
 	groupRpcClient                 *rpcclient.GroupRpcClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
+	config                         *config.GlobalConfig
 }
 
 func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(
@@ -59,7 +61,7 @@ func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(
 	panic("implement me")
 }
 
-func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
@@ -81,6 +83,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		conversationNotificationSender: notification.NewConversationNotificationSender(&msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewMongo(mongo.GetClient())),
+		config:                         config,
 	})
 	return nil
 }

@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"google.golang.org/grpc"
 
@@ -44,6 +45,7 @@ type (
 		ConversationLocalCache *localcache.ConversationLocalCache
 		Handlers               MessageInterceptorChain
 		notificationSender     *rpcclient.NotificationSender
+		config                 *config.GlobalConfig
 	}
 )
 
@@ -62,7 +64,7 @@ func (m *msgServer) execInterceptorHandler(ctx context.Context, req *msg.SendMsg
 	return nil
 }
 
-func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
@@ -93,6 +95,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		GroupLocalCache:        localcache.NewGroupLocalCache(&groupRpcClient),
 		ConversationLocalCache: localcache.NewConversationLocalCache(&conversationClient),
 		friend:                 &friendRpcClient,
+		config:                 config,
 	}
 	s.notificationSender = rpcclient.NewNotificationSender(rpcclient.WithLocalSendMsg(s.SendMsg))
 	s.addInterceptorHandler(MessageHasReadEnabled)

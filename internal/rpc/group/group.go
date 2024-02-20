@@ -17,6 +17,7 @@ package group
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -59,7 +60,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 )
 
-func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
 		return err
@@ -96,6 +97,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	})
 	gs.conversationRpcClient = conversationRpcClient
 	gs.msgRpcClient = msgRpcClient
+	gs.config = config
 	pbgroup.RegisterGroupServer(server, &gs)
 	return nil
 }
@@ -106,6 +108,7 @@ type groupServer struct {
 	Notification          *notification.GroupNotificationSender
 	conversationRpcClient rpcclient.ConversationRpcClient
 	msgRpcClient          rpcclient.MessageRpcClient
+	config                *config.GlobalConfig
 }
 
 func (s *groupServer) GetJoinedGroupIDs(ctx context.Context, req *pbgroup.GetJoinedGroupIDsReq) (*pbgroup.GetJoinedGroupIDsResp, error) {

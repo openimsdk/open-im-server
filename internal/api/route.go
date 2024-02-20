@@ -17,7 +17,17 @@ package api
 import (
 	"context"
 	"fmt"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	ginprom "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"net"
 	"net/http"
+	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
+	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/apiresp"
@@ -43,8 +53,87 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
-func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
-	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin"))) // 默认RPC中间件
+func Start(config *config.GlobalConfig, port int, proPort int) error {
+	if port == 0 || proPort == 0 {
+		err := "port or proPort is empty:" + strconv.Itoa(port) + "," + strconv.Itoa(proPort)
+		return errs.Wrap(fmt.Errorf(err))
+	}
+	rdb, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
+
+	var client discoveryregistry.SvcDiscoveryRegistry
+
+	// Determine whether zk is passed according to whether it is a clustered deployment
+	client, err = kdisc.NewDiscoveryRegister(config.Envs.Discovery)
+	if err != nil {
+		return errs.Wrap(err, "register discovery err")
+	}
+
+	if err = client.CreateRpcRootNodes(config.GetServiceNames()); err != nil {
+		return errs.Wrap(err, "create rpc root nodes error")
+	}
+
+	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.EncodeConfig()); err != nil {
+		return errs.Wrap(err)
+	}
+	var (
+		netDone = make(chan struct{}, 1)
+		netErr  error
+	)
+	router := newGinRouter(client, rdb)
+	if config.Prometheus.Enable {
+		go func() {
+			p := ginprom.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
+			p.SetListenAddress(fmt.Sprintf(":%d", proPort))
+			if err = p.Use(router); err != nil && err != http.ErrServerClosed {
+				netErr = errs.Wrap(err, fmt.Sprintf("prometheus start err: %d", proPort))
+				netDone <- struct{}{}
+			}
+		}()
+
+	}
+
+	var address string
+	if config.Api.ListenIP != "" {
+		address = net.JoinHostPort(config.Api.ListenIP, strconv.Itoa(port))
+	} else {
+		address = net.JoinHostPort("0.0.0.0", strconv.Itoa(port))
+	}
+
+	server := http.Server{Addr: address, Handler: router}
+
+	go func() {
+		err = server.ListenAndServe()
+		if err != nil && err != http.ErrServerClosed {
+			netErr = errs.Wrap(err, fmt.Sprintf("api start err: %s", server.Addr))
+			netDone <- struct{}{}
+
+		}
+	}()
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGTERM)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	select {
+	case <-sigs:
+		util.SIGUSR1Exit()
+		err := server.Shutdown(ctx)
+		if err != nil {
+			return errs.Wrap(err, "shutdown err")
+		}
+	case <-netDone:
+		close(netDone)
+		return netErr
+	}
+	return nil
+}
+
+func newGinRouter(disCov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
+	disCov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin"))) // 默认RPC中间件
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -53,13 +142,13 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	log.ZInfo(context.Background(), "load config", "config", config.Config)
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	// init rpc client here
-	userRpc := rpcclient.NewUser(discov)
-	groupRpc := rpcclient.NewGroup(discov)
-	friendRpc := rpcclient.NewFriend(discov)
-	messageRpc := rpcclient.NewMessage(discov)
-	conversationRpc := rpcclient.NewConversation(discov)
-	authRpc := rpcclient.NewAuth(discov)
-	thirdRpc := rpcclient.NewThird(discov)
+	userRpc := rpcclient.NewUser(disCov)
+	groupRpc := rpcclient.NewGroup(disCov)
+	friendRpc := rpcclient.NewFriend(disCov)
+	messageRpc := rpcclient.NewMessage(disCov)
+	conversationRpc := rpcclient.NewConversation(disCov)
+	authRpc := rpcclient.NewAuth(disCov)
+	thirdRpc := rpcclient.NewThird(disCov)
 
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc)

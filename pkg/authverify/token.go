@@ -44,7 +44,7 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	if opUserID == ownerUserID {
 		return nil
 	}
-	return errs.ErrNoPermission.Wrap(utils.GetSelfFuncName())
+	return errs.ErrNoPermission.Wrap("ownerUserID", ownerUserID)
 }
 
 func IsAppManagerUid(ctx context.Context) bool {

@@ -33,7 +33,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 )
 
-func (s *Server) InitServer(disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func (s *Server) InitServer(config *config.GlobalConfig, disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
@@ -46,11 +46,12 @@ func (s *Server) InitServer(disCov discoveryregistry.SvcDiscoveryRegistry, serve
 	return nil
 }
 
-func (s *Server) Start() error {
+func (s *Server) Start(conf *config.GlobalConfig) error {
 	return startrpc.Start(
 		s.rpcPort,
 		config.Config.RpcRegisterName.OpenImMessageGatewayName,
 		s.prometheusPort,
+		conf,
 		s.InitServer,
 	)
 }

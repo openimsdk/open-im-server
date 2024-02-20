@@ -31,8 +31,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 )
 
-func StartTask() error {
-	fmt.Println("cron task start, config", config.Config.ChatRecordsClearTime)
+func StartTask(config *config.GlobalConfig) error {
+	fmt.Println("cron task start, config", config.ChatRecordsClearTime)
 
 	msgTool, err := InitMsgTool()
 	if err != nil {
@@ -48,14 +48,14 @@ func StartTask() error {
 
 	// register cron tasks
 	var crontab = cron.New()
-	fmt.Println("start chatRecordsClearTime cron task", "cron config", config.Config.ChatRecordsClearTime)
-	_, err = crontab.AddFunc(config.Config.ChatRecordsClearTime, cronWrapFunc(rdb, "cron_clear_msg_and_fix_seq", msgTool.AllConversationClearMsgAndFixSeq))
+	fmt.Println("start chatRecordsClearTime cron task", "cron config", config.ChatRecordsClearTime)
+	_, err = crontab.AddFunc(config.ChatRecordsClearTime, cronWrapFunc(config, rdb, "cron_clear_msg_and_fix_seq", msgTool.AllConversationClearMsgAndFixSeq))
 	if err != nil {
 		return errs.Wrap(err)
 	}
 
-	fmt.Println("start msgDestruct cron task", "cron config", config.Config.MsgDestructTime)
-	_, err = crontab.AddFunc(config.Config.MsgDestructTime, cronWrapFunc(rdb, "cron_conversations_destruct_msgs", msgTool.ConversationsDestructMsgs))
+	fmt.Println("start msgDestruct cron task", "cron config", config.MsgDestructTime)
+	_, err = crontab.AddFunc(config.MsgDestructTime, cronWrapFunc(config, rdb, "cron_conversations_destruct_msgs", msgTool.ConversationsDestructMsgs))
 	if err != nil {
 		return errs.Wrap(err)
 	}
@@ -93,8 +93,8 @@ func netlock(rdb redis.UniversalClient, key string, ttl time.Duration) bool {
 	return ok
 }
 
-func cronWrapFunc(rdb redis.UniversalClient, key string, fn func()) func() {
-	enableCronLocker := config.Config.EnableCronLocker
+func cronWrapFunc(config *config.GlobalConfig, rdb redis.UniversalClient, key string, fn func()) func() {
+	enableCronLocker := config.EnableCronLocker
 	return func() {
 		// if don't enable cron-locker, call fn directly.
 		if !enableCronLocker {

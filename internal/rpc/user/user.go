@@ -59,6 +59,7 @@ type userServer struct {
 	friendRpcClient          *rpcclient.FriendRpcClient
 	groupRpcClient           *rpcclient.GroupRpcClient
 	RegisterCenter           registry.SvcDiscoveryRegistry
+	config                   *config.GlobalConfig
 }
 
 func (s *userServer) GetGroupOnlineUser(ctx context.Context, req *pbuser.GetGroupOnlineUserReq) (*pbuser.GetGroupOnlineUserResp, error) {
@@ -66,7 +67,7 @@ func (s *userServer) GetGroupOnlineUser(ctx context.Context, req *pbuser.GetGrou
 	panic("implement me")
 }
 
-func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
@@ -76,11 +77,11 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		return err
 	}
 	users := make([]*tablerelation.UserModel, 0)
-	if len(config.Config.IMAdmin.UserID) != len(config.Config.IMAdmin.Nickname) {
+	if len(config.IMAdmin.UserID) != len(config.IMAdmin.Nickname) {
 		return errors.New("len(config.Config.AppNotificationAdmin.AppManagerUid) != len(config.Config.AppNotificationAdmin.Nickname)")
 	}
-	for k, v := range config.Config.IMAdmin.UserID {
-		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.IMAdmin.Nickname[k], AppMangerLevel: constant.AppNotificationAdmin})
+	for k, v := range config.IMAdmin.UserID {
+		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.IMAdmin.Nickname[k], AppMangerLevel: constant.AppNotificationAdmin})
 	}
 	userDB, err := mgo.NewUserMongo(mongo.GetDatabase())
 	if err != nil {
@@ -99,6 +100,7 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		groupRpcClient:           &groupRpcClient,
 		friendNotificationSender: notification.NewFriendNotificationSender(&msgRpcClient, notification.WithDBFunc(database.FindWithError)),
 		userNotificationSender:   notification.NewUserNotificationSender(&msgRpcClient, notification.WithUserFunc(database.FindWithError)),
+		config:                   config,
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.UserDatabase.InitOnce(context.Background(), users)

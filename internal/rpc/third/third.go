@@ -39,7 +39,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
-func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
 		return err
@@ -52,11 +52,11 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	apiURL := config.Config.Object.ApiURL
+	apiURL := config.Object.ApiURL
 	if apiURL == "" {
 		return fmt.Errorf("api url is empty")
 	}
-	if _, err := url.Parse(config.Config.Object.ApiURL); err != nil {
+	if _, err := url.Parse(config.Object.ApiURL); err != nil {
 		return err
 	}
 	if apiURL[len(apiURL)-1] != '/' {
@@ -68,9 +68,9 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		return err
 	}
 	// 根据配置文件策略选择 oss 方式
-	enable := config.Config.Object.Enable
+	enable := config.Object.Enable
 	var o s3.Interface
-	switch config.Config.Object.Enable {
+	switch config.Object.Enable {
 	case "minio":
 		o, err = minio.NewMinio(cache.NewMinioCache(rdb))
 	case "cos":
@@ -89,6 +89,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		userRpcClient: rpcclient.NewUserRpcClient(client),
 		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
 		defaultExpire: time.Hour * 24 * 7,
+		config:        config,
 	})
 	return nil
 }
@@ -99,6 +100,7 @@ type thirdServer struct {
 	s3dataBase    controller.S3Database
 	userRpcClient rpcclient.UserRpcClient
 	defaultExpire time.Duration
+	config        *config.GlobalConfig
 }
 
 func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {

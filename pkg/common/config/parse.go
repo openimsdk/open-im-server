@@ -106,7 +106,7 @@ func initConfig(config any, configName, configFolderPath string) error {
 	return nil
 }
 
-func InitConfig(configFolderPath string) error {
+func InitConfig(config *GlobalConfig, configFolderPath string) error {
 	if configFolderPath == "" {
 		envConfigPath := os.Getenv("OPENIMCONFIG")
 		if envConfigPath != "" {
@@ -116,9 +116,9 @@ func InitConfig(configFolderPath string) error {
 		}
 	}
 
-	if err := initConfig(&Config, FileName, configFolderPath); err != nil {
+	if err := initConfig(config, FileName, configFolderPath); err != nil {
 		return err
 	}
 
-	return initConfig(&Config.Notification, NotificationFileName, configFolderPath)
+	return initConfig(config.Notification, NotificationFileName, configFolderPath)
 }

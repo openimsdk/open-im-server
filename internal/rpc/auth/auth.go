@@ -42,9 +42,10 @@ type authServer struct {
 	authDatabase   controller.AuthDatabase
 	userRpcClient  *rpcclient.UserRpcClient
 	RegisterCenter discoveryregistry.SvcDiscoveryRegistry
+	config         *config.GlobalConfig
 }
 
-func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
@@ -55,9 +56,10 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
 			cache.NewMsgCacheModel(rdb),
-			config.Config.Secret,
-			config.Config.TokenPolicy.Expire,
+			config.Secret,
+			config.TokenPolicy.Expire,
 		),
+		config: config,
 	})
 	return nil
 }

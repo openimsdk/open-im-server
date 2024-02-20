@@ -52,7 +52,7 @@ type MsgTransfer struct {
 	cancel         context.CancelFunc
 }
 
-func StartTransfer(prometheusPort int) error {
+func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
@@ -66,12 +66,12 @@ func StartTransfer(prometheusPort int) error {
 	if err = mongo.CreateMsgIndex(); err != nil {
 		return err
 	}
-	client, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
+	client, err := kdisc.NewDiscoveryRegister(config.Envs.Discovery)
 	if err != nil {
 		return err
 	}
 
-	if err := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
+	if err := client.CreateRpcRootNodes(config.GetServiceNames()); err != nil {
 		return err
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))

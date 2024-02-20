@@ -16,6 +16,7 @@ package push
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/OpenIMSDK/tools/utils"
 
@@ -34,9 +35,10 @@ import (
 
 type pushServer struct {
 	pusher *Pusher
+	config *config.GlobalConfig
 }
 
-func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
@@ -60,6 +62,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 
 	pbpush.RegisterPushMsgServiceServer(server, &pushServer{
 		pusher: pusher,
+		config: config,
 	})
 
 	consumer, err := NewConsumer(pusher)

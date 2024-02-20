@@ -22,7 +22,7 @@ import (
 )
 
 // RunWsAndServer run ws server.
-func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
+func RunWsAndServer(conf *config.GlobalConfig, rpcPort, wsPort, prometheusPort int) error {
 	fmt.Println(
 		"start rpc/msg_gateway server, port: ",
 		rpcPort,
@@ -33,10 +33,10 @@ func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 	)
 	longServer, err := NewWsServer(
 		WithPort(wsPort),
-		WithMaxConnNum(int64(config.Config.LongConnSvr.WebsocketMaxConnNum)),
-		WithHandshakeTimeout(time.Duration(config.Config.LongConnSvr.WebsocketTimeout)*time.Second),
-		WithMessageMaxMsgLength(config.Config.LongConnSvr.WebsocketMaxMsgLen),
-		WithWriteBufferSize(config.Config.LongConnSvr.WebsocketWriteBufferSize),
+		WithMaxConnNum(int64(conf.LongConnSvr.WebsocketMaxConnNum)),
+		WithHandshakeTimeout(time.Duration(conf.LongConnSvr.WebsocketTimeout)*time.Second),
+		WithMessageMaxMsgLength(conf.LongConnSvr.WebsocketMaxMsgLen),
+		WithWriteBufferSize(conf.LongConnSvr.WebsocketWriteBufferSize),
 	)
 	if err != nil {
 		return err
@@ -45,7 +45,7 @@ func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 	hubServer := NewServer(rpcPort, prometheusPort, longServer)
 	netDone := make(chan error)
 	go func() {
-		err = hubServer.Start()
+		err = hubServer.Start(conf)
 		if err != nil {
 			netDone <- err
 		}
