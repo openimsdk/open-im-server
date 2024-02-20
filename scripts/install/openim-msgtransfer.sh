@@ -95,32 +95,8 @@ function openim::msgtransfer::check_by_signal() {
     openim::log::error "Found $NUM_PROCESSES processes for $OPENIM_OUTPUT_HOSTBIN/openim-msgtransfer"
     for PID in $PIDS; do
       if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        openim::log::error "$(ps -p $PID -o pid=,cmd= | awk '{print "PID: " $1 ", CMD: " $2}')"
-      elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # 优化后的命令
-        openim::log::error "$(ps -p $PID -o pid=,cmd= | awk '{print "PID: " $1 ", CMD: " $2}')"
-      else
-        openim::log::error "Unsupported OS type: $OSTYPE"
-      fi
-    done
-    openim::log::error "Processes have not been stopped properly."
-  else
-    openim::log::success "All openim-msgtransfer processes have been stopped properly."
-  fi
-}
-
-
-function openim::msgtransfer::check_by_signal1() {
-  PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
-
-  NUM_PROCESSES=$(echo "$PIDS" | wc -l)
-
-  if [ "$NUM_PROCESSES" -eq "$OPENIM_MSGGATEWAY_NUM" ]; then
-    openim::log::info "Found $OPENIM_MSGGATEWAY_NUM processes named $OPENIM_OUTPUT_HOSTBIN"
-    for PID in $PIDS; do
-      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         ps -p $PID -o pid,cmd
-        elif [[ "$OSTYPE" == "darwin"* ]]; then
+      elif [[ "$OSTYPE" == "darwin"* ]]; then
         ps -p $PID -o pid,comm
       else
         openim::log::error "Unsupported OS type: $OSTYPE"
@@ -128,8 +104,7 @@ function openim::msgtransfer::check_by_signal1() {
     done
     openim::log::error "Processes have not been stopped properly."
   else
-#    openim::log::error_exit "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
-     openim::log::success "All openim-msgtransfer processes have been stopped properly."
+    openim::log::success "All openim-msgtransfer processes have been stopped properly."
   fi
 }
 

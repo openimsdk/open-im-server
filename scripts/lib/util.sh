@@ -447,87 +447,6 @@ openim::util::check_ports_by_signal() {
   fi
 }
 
-openim::util::check_ports_by_signal1() {
-  # An array to collect ports of processes that are not running.
-  local not_started=()
-
-  # An array to collect information about processes that are running.
-  local started=()
-
-  openim::log::info "Checking ports: $*"
-  # Iterate over each given port.
-  for port in "$@"; do
-    # Initialize variables
-    # Check the OS and use the appropriate command
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-      if command -v ss > /dev/null 2>&1; then
-        info=$(ss -ltnp | grep ":$port" || true)
-      else
-        info=$(netstat -ltnp | grep ":$port" || true)
-      fi
-      elif [[ "$OSTYPE" == "darwin"* ]]; then
-      # For macOS, use lsof
-      info=$(lsof -P -i:"$port" | grep "LISTEN" || true)
-    fi
-
-    # Check if any process is using the port
-    if [[ -z $info ]]; then
-      not_started+=($port)
-    else
-      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Extract relevant details for Linux: Process Name, PID, and FD.
-        details=$(echo $info | sed -n 's/.*users:(("\([^"]*\)",pid=\([^,]*\),fd=\([^)]*\))).*/\1 \2 \3/p')
-        command=$(echo $details | awk '{print $1}')
-        pid=$(echo $details | awk '{print $2}')
-        fd=$(echo $details | awk '{print $3}')
-        elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # Handle extraction for macOS
-        pid=$(echo $info | awk '{print $2}' | cut -d'/' -f1)
-        command=$(ps -p $pid -o comm= | xargs basename)
-        fd=$(echo $info | awk '{print $4}' | cut -d'/' -f1)
-      fi
-
-      # Get the start time of the process using the PID
-      if [[ -z $pid ]]; then
-        start_time="N/A"
-      else
-        start_time=$(ps -p $pid -o lstart=)
-      fi
-
-      started+=("Port $port - Command: $command, PID: $pid, FD: $fd, Started: $start_time")
-    fi
-  done
-
-  # Print information about ports whose processes are not running.
-  if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::log::info "\n### Not started ports:"
-    for port in "${not_started[@]}"; do
-      openim::log::error "Port $port is not started."
-    done
-  fi
-
-  # Print information about ports whose processes are running.
-  if [[ ${#started[@]} -ne 0 ]]; then
-    openim::log::info "\n### Started ports:"
-    for info in "${started[@]}"; do
-      openim::log::info "$info"
-    done
-  fi
-
-  # If any of the processes is not running, return a status of 1.
-  if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::log::success "All specified processes are stop."
-    return 1
-  else
-    openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
-    openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
-    cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
-    openim::log::error "Have processes no stop."
-    return 0
-  fi
-}
-
-
 # set +o errexit
 # Sample call for testing:
 # openim::util::check_ports 10002 1004 12345 13306
@@ -634,24 +553,22 @@ openim::util::stop_services_on_ports() {
   openim::log::info "Stopping services on ports: $*"
   # Iterate over each given port.
   for port in "$@"; do
-    # Use the `lsof` command to find process information related to the given port.
-    info=$(lsof -i :$port -n -P | grep LISTEN || true)
-    
-    # If there's process information, it means the process associated with the port is running.
+    local info=$(lsof -i :$port -n -P | grep LISTEN || true)
     if [[ -n $info ]]; then
-      # Extract the Process ID.
+      local stopped_this_port=false
       while read -r line; do
         local pid=$(echo $line | awk '{print $2}')
-        
-        # Try to stop the service by killing its process.
-        if kill -15 $pid; then
-          stopped+=($port)
-        else
-          not_stopped+=($port)
+        if kill -15 "$pid" &> /dev/null; then
+          stopped+=("$port")
+          stopped_this_port=true
+          break  # Jump out of loop after successfully sending SIGTERM
         fi
-            done <<< "$info"
-        fi
-    done
+      done <<< "$info"
+      if ! $stopped_this_port; then
+        not_stopped+=("$port")
+      fi
+    fi
+  done
 
     # Print information about ports whose processes couldn't be stopped.
     if [[ ${#not_stopped[@]} -ne 0 ]]; then

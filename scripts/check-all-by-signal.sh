@@ -38,7 +38,7 @@ handle_error() {
 trap handle_error ERR
 
 . $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal
-
+echo "Check ports:"
 openim::util::check_ports_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
 if [[ $? -ne 0 ]]; then
   openim::log::error "The service does not stop properly, there are still processes running, please check!"
