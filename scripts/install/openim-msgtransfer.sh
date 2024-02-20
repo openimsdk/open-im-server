@@ -95,9 +95,10 @@ function openim::msgtransfer::check_by_signal() {
     openim::log::error "Found $NUM_PROCESSES processes for $OPENIM_OUTPUT_HOSTBIN/openim-msgtransfer"
     for PID in $PIDS; do
       if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        echo -e "\033[31m$(ps -p $PID -o pid,cmd)\033[0m"
         ps -p $PID -o pid,cmd
       elif [[ "$OSTYPE" == "darwin"* ]]; then
-        ps -p $PID -o pid,comm
+        echo -e "\033[31m$(ps -p $PID -o pid,comm)\033[0m"
       else
         openim::log::error "Unsupported OS type: $OSTYPE"
       fi
