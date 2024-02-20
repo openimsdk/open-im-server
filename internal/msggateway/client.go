@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
@@ -173,7 +174,7 @@ func (c *Client) handleMessage(message []byte) error {
 		var err error
 		message, err = c.longConnServer.DecompressWithPool(message)
 		if err != nil {
-			return utils.Wrap(err, "")
+			return errs.Wrap(err)
 		}
 	}
 
@@ -182,15 +183,15 @@ func (c *Client) handleMessage(message []byte) error {
 
 	err := c.longConnServer.Decode(message, binaryReq)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 
 	if err := c.longConnServer.Validate(binaryReq); err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 
 	if binaryReq.SendID != c.UserID {
-		return utils.Wrap(errors.New("exception conn userID not same to req userID"), binaryReq.String())
+		return errs.Wrap(errors.New("exception conn userID not same to req userID"), binaryReq.String())
 	}
 
 	ctx := mcontext.WithMustInfoCtx(
@@ -313,7 +314,7 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 
 	encodedBuf, err := c.longConnServer.Encode(resp)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 
 	c.w.Lock()
@@ -323,7 +324,7 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 	if c.IsCompress {
 		resultBuf, compressErr := c.longConnServer.CompressWithPool(encodedBuf)
 		if compressErr != nil {
-			return utils.Wrap(compressErr, "")
+			return errs.Wrap(compressErr)
 		}
 		return c.conn.WriteMessage(MessageBinary, resultBuf)
 	}
@@ -341,7 +342,7 @@ func (c *Client) writePongMsg() error {
 
 	err := c.conn.SetWriteDeadline(writeWait)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 
 	return c.conn.WriteMessage(PongMessage, nil)

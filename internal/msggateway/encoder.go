@@ -17,8 +17,7 @@ package msggateway
 import (
 	"bytes"
 	"encoding/gob"
-
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/OpenIMSDK/tools/errs"
 )
 
 type Encoder interface {
@@ -47,7 +46,7 @@ func (g *GobEncoder) Decode(encodeData []byte, decodeData any) error {
 	dec := gob.NewDecoder(buff)
 	err := dec.Decode(decodeData)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 	return nil
 }

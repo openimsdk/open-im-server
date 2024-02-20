@@ -35,8 +35,6 @@ import (
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/utils"
-
 	table "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
@@ -79,7 +77,7 @@ func (m *MsgMongoDriver) UpdateMsg(
 	update := bson.M{"$set": bson.M{field: value}}
 	res, err := m.MsgCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return nil, utils.Wrap(err, "")
+		return nil, errs.Wrap(err)
 	}
 	return res, nil
 }
@@ -106,7 +104,7 @@ func (m *MsgMongoDriver) PushUnique(
 	}
 	res, err := m.MsgCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return nil, utils.Wrap(err, "")
+		return nil, errs.Wrap(err)
 	}
 	return res, nil
 }
@@ -118,7 +116,7 @@ func (m *MsgMongoDriver) UpdateMsgContent(ctx context.Context, docID string, ind
 		bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", index): msg}},
 	)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 	return nil
 }
@@ -133,7 +131,7 @@ func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(
 	msg.Status = status
 	bytes, err := proto.Marshal(msg)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 	_, err = m.MsgCollection.UpdateOne(
 		ctx,
@@ -141,7 +139,7 @@ func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(
 		bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", seqIndex): bytes}},
 	)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 	return nil
 }
@@ -167,12 +165,12 @@ func (m *MsgMongoDriver) GetMsgDocModelByIndex(
 		findOpts,
 	)
 	if err != nil {
-		return nil, utils.Wrap(err, "")
+		return nil, errs.Wrap(err)
 	}
 	var msgs []table.MsgDocModel
 	err = cursor.All(ctx, &msgs)
 	if err != nil {
-		return nil, utils.Wrap(err, fmt.Sprintf("cursor is %s", cursor.Current.String()))
+		return nil, errs.Wrap(err, fmt.Sprintf("cursor is %s", cursor.Current.String()))
 	}
 	if len(msgs) > 0 {
 		return &msgs[0], nil
@@ -223,7 +221,7 @@ func (m *MsgMongoDriver) DeleteMsgsInOneDocByIndex(ctx context.Context, docID st
 	}
 	_, err := m.MsgCollection.UpdateMany(ctx, bson.M{"doc_id": docID}, updates)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 	return nil
 }
