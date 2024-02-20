@@ -23,7 +23,6 @@ set -o pipefail
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
 
-openim::util::set_max_fd 200000
 
 SERVER_NAME="openim-msgtransfer"
 
@@ -93,7 +92,7 @@ function openim::msgtransfer::check_by_signal() {
   NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
 
   if [ "$NUM_PROCESSES" -gt 0 ]; then
-    openim::log::info "Found $NUM_PROCESSES processes for $OPENIM_OUTPUT_HOSTBIN/openim-msgtransfer"
+    openim::log::error "Found $NUM_PROCESSES processes for $OPENIM_OUTPUT_HOSTBIN/openim-msgtransfer"
     for PID in $PIDS; do
       if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         ps -p $PID -o pid,cmd
@@ -108,6 +107,39 @@ function openim::msgtransfer::check_by_signal() {
     openim::log::success "All openim-msgtransfer processes have been stopped properly."
   fi
 }
+
+function openim::msgtransfer::check_by_signal() {
+    PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
+    if [ -z "$PIDS" ]; then
+        openim::log::success "All openim-msgtransfer processes have been stopped properly."
+        return 0
+    fi
+
+    openim::log::error "Found processes for $OPENIM_OUTPUT_HOSTBIN/openim-msgtransfer:"
+    for PID in $PIDS; do
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            # Extract details for Linux
+            details=$(ps -p $PID -o pid,comm,lstart= | awk 'NR>1 {print $1, $2, $3, $4, $5, $6, $7}')
+            command=$(echo $details | awk '{print $2}')
+            start_time=$(echo $details | awk '{print $3, $4, $5, $6, $7}')
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            # Handle details extraction for macOS
+            details=$(ps -p $PID -o pid,comm,start= | awk 'NR>1 {print $1, $2, $3}')
+            command=$(echo $details | awk '{print $2}')
+            start_time=$(echo $details | awk '{print $3}')
+        else
+            openim::log::error "Unsupported OS type: $OSTYPE"
+            return 1
+        fi
+
+        # Assuming FD and port number are not directly retrievable for msgtransfer processes
+        openim::log::error "PID: $PID - Command: $command, Started: $start_time"
+    done
+
+    openim::log::success "Processes have not been stopped properly."
+    return 1
+}
+
 
 function openim::msgtransfer::check_by_signal1() {
   PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")

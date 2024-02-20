@@ -42,10 +42,9 @@ trap handle_error ERR
 
 openim::util::check_ports_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
 if [[ $? -ne 0 ]]; then
-  openim::log::success "++++ All openim service ports stop successfully !"
-else
-  echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "The service does not stop properly, there are still processes running, please check!"
+else
+  openim::log::success "++++ All openim service ports stop successfully !"
 fi
 
 

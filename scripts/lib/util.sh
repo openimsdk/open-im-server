@@ -378,7 +378,6 @@ openim::util::check_ports_by_signal() {
   # An array to collect information about processes that are running.
   local started=()
 
-  openim::log::info "Checking ports: $*"
   # Iterate over each given port.
   for port in "$@"; do
     # Initialize variables
@@ -432,22 +431,21 @@ openim::util::check_ports_by_signal() {
 
   # Print information about ports whose processes are running.
   if [[ ${#started[@]} -ne 0 ]]; then
-    openim::log::info "\n### No stop ports:"
+    openim::log::error "\n### No stop ports:"
     for info in "${started[@]}"; do
-      openim::log::info "$info"
+      openim::log::error "$info"
     done
   fi
 
   # If any of the processes is not running, return a status of 1.
   if [[ ${#not_started[@]} -ne 0 ]]; then
      openim::log::success "All specified processes are running."
-    return 1
+    return 0
   else
     openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
-    openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
     cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
     openim::log::error "Have processes no stop."
-    return 0
+    return 1
   fi
 }
 
