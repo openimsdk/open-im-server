@@ -88,16 +88,18 @@ function openim::msgtransfer::check() {
 }
 
 function openim::msgtransfer::check_by_signal() {
-  PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
+  PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer") || PIDS="0"
+  if [  "$PIDS" = "0" ]; then
+      return 0
+  fi
+
   NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
 
-  echo "1111111111111"
   if [ "$NUM_PROCESSES" -gt 0 ]; then
     openim::log::error "Found $NUM_PROCESSES processes for $OPENIM_OUTPUT_HOSTBIN/openim-msgtransfer"
     for PID in $PIDS; do
       if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         echo -e "\033[31m$(ps -p $PID -o pid,cmd)\033[0m"
-        ps -p $PID -o pid,cmd
       elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo -e "\033[31m$(ps -p $PID -o pid,comm)\033[0m"
       else
@@ -108,7 +110,6 @@ function openim::msgtransfer::check_by_signal() {
   else
     openim::log::success "All openim-msgtransfer processes have been stopped properly."
   fi
-  echo "2222222222222"
   return 0
 }
 

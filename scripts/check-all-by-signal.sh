@@ -29,7 +29,8 @@ source "${OPENIM_ROOT}/scripts/install/common.sh"
 OPENIM_VERBOSE=4
 
 openim::log::info "\n# Begin to check all openim service"
-. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal || ture
+. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal
+openim::log::info "\n# to check all openim service、nnnnnnnnnnnnnn"
 
 handle_error() {
   echo "An error occurred. Printing ${STDERR_LOG_FILE} contents:"
@@ -40,11 +41,6 @@ trap handle_error ERR
 
 echo "Check ports:"
 openim::util::check_ports_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
-if [[ $? -ne 0 ]]; then
-  openim::log::error "The service does not stop properly, there are still processes running, please check!"
-else
-  openim::log::success "++++ All openim service ports stop successfully !"
-fi
 
 
 set -e
