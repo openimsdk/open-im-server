@@ -30,14 +30,7 @@ OPENIM_VERBOSE=4
 
 openim::log::info "\n# Begin to check all openim service"
 . $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal
-openim::log::info "\n# to check all openim service、nnnnnnnnnnnnnn"
 
-handle_error() {
-  echo "An error occurred. Printing ${STDERR_LOG_FILE} contents:"
-  exit 1
-}
-
-trap handle_error ERR
 
 echo "Check ports:"
 openim::util::check_ports_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
