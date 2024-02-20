@@ -91,6 +91,7 @@ function openim::msgtransfer::check_by_signal() {
   PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
   NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
 
+  echo "1111111111111"
   if [ "$NUM_PROCESSES" -gt 0 ]; then
     openim::log::error "Found $NUM_PROCESSES processes for $OPENIM_OUTPUT_HOSTBIN/openim-msgtransfer"
     for PID in $PIDS; do
@@ -107,6 +108,7 @@ function openim::msgtransfer::check_by_signal() {
   else
     openim::log::success "All openim-msgtransfer processes have been stopped properly."
   fi
+  echo "2222222222222"
   return 0
 }
 
