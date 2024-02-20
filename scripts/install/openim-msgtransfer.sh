@@ -95,9 +95,10 @@ function openim::msgtransfer::check_by_signal() {
     openim::log::error "Found $NUM_PROCESSES processes for $OPENIM_OUTPUT_HOSTBIN/openim-msgtransfer"
     for PID in $PIDS; do
       if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        openim::log::error ps -p $PID -o pid,cmd
+        openim::log::error "$(ps -p $PID -o pid=,cmd= | awk '{print "PID: " $1 ", CMD: " $2}')"
       elif [[ "$OSTYPE" == "darwin"* ]]; then
-        openim::log::error ps -p $PID -o pid,comm
+        # 优化后的命令
+        openim::log::error "$(ps -p $PID -o pid=,cmd= | awk '{print "PID: " $1 ", CMD: " $2}')"
       else
         openim::log::error "Unsupported OS type: $OSTYPE"
       fi

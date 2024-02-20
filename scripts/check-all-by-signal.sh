@@ -32,7 +32,6 @@ openim::log::info "\n# Begin to check all openim service"
 
 handle_error() {
   echo "An error occurred. Printing ${STDERR_LOG_FILE} contents:"
-  cat "${STDERR_LOG_FILE}"
   exit 1
 }
 

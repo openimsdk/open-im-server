@@ -34,6 +34,4 @@ openim::util::stop_services_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
 
 openim::util::stop_services_by_name_signal "${OPENIM_OUTPUT_HOSTBIN}"
 
-echo "++ Check if the services have been stopped"
-
 openim::log::success "✨  All processes to be killed"
