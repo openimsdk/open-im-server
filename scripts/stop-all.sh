@@ -36,4 +36,6 @@ openim::util::stop_services_by_name_signal "${OPENIM_OUTPUT_HOSTBIN}"
 
 sleep 1
 
+source "${OPENIM_ROOT}/scripts/check-all-by-signal.sh"
+
 openim::log::success "✨  All processes to be killed"

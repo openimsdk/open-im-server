@@ -439,7 +439,7 @@ openim::util::check_ports_by_signal() {
 
   # If any of the processes is not running, return a status of 1.
   if [[ ${#not_started[@]} -ne 0 ]]; then
-     openim::log::success "All specified processes are running."
+     openim::log::success "All specified processes are stop."
   else
     openim::log::error "Have processes no stop."
   fi

@@ -28,7 +28,7 @@ source "${OPENIM_ROOT}/scripts/install/common.sh"
 
 OPENIM_VERBOSE=4
 
-openim::log::info "\n# Begin to check all openim service"
+openim::log::info "# Begin to check all openim service"
 . $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal
 
 
