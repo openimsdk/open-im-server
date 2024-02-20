@@ -1854,25 +1854,22 @@ openim::util::stop_services_on_ports() {
     local stopped=()
 
     openim::log::info "Stopping services on ports: $*"
-    # Iterate over each given port.
     for port in "$@"; do
-        # Use the `lsof` command to find process information related to the given port.
-        info=$(lsof -i :$port -n -P | grep LISTEN || true)
-
-        # If there's process information, it means the process associated with the port is running.
-        if [[ -n $info ]]; then
-            # Extract the Process ID.
-            while read -r line; do
-                local pid=$(echo $line | awk '{print $2}')
-
-                # Try to stop the service by killing its process.
-                if kill -10 $pid; then
-                    stopped+=($port)
-                else
-                    not_stopped+=($port)
-                fi
-            done <<< "$info"
+      local info=$(lsof -i :$port -n -P | grep LISTEN || true)
+      if [[ -n $info ]]; then
+        local stopped_this_port=false
+        while read -r line; do
+          local pid=$(echo $line | awk '{print $2}')
+          if kill -15 "$pid" &> /dev/null; then
+            stopped+=("$port")
+            stopped_this_port=true
+            break  # Jumping out of cycle m after successfully sending SIGTERM
+          fi
+        done <<< "$info"
+        if ! $stopped_this_port; then
+          not_stopped+=("$port")
         fi
+      fi
     done
 
     # Print information about ports whose processes couldn't be stopped.
