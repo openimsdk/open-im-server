@@ -16,7 +16,6 @@ package push
 
 import (
 	"context"
-	"sync"
 
 	"github.com/OpenIMSDK/tools/utils"
 
@@ -58,23 +57,18 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		&groupRpcClient,
 		&msgRpcClient,
 	)
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		pbpush.RegisterPushMsgServiceServer(server, &pushServer{
-			pusher: pusher,
-		})
-	}()
+
+	pbpush.RegisterPushMsgServiceServer(server, &pushServer{
+		pusher: pusher,
+	})
+
 	consumer, err := NewConsumer(pusher)
 	if err != nil {
 		return err
 	}
-	go func() {
-		defer wg.Done()
-		consumer.Start()
-	}()
-	wg.Wait()
+
+	consumer.Start()
+
 	return nil
 }
 

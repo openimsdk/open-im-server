@@ -64,7 +64,7 @@ func StartTask() error {
 	crontab.Start()
 
 	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	signal.Notify(sigs, syscall.SIGTERM)
 	<-sigs
 
 	// stop crontab, Wait for the running task to exit.

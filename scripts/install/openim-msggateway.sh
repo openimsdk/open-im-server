@@ -64,7 +64,7 @@ function openim::msggateway::start() {
             PROMETHEUS_PORT_OPTION="--prometheus_port ${MSG_GATEWAY_PROM_PORTS_ARRAY[$i]}"
         fi
 
-        nohup ${OPENIM_MSGGATEWAY_BINARY} --port ${OPENIM_MSGGATEWAY_PORTS_ARRAY[$i]} --ws_port ${OPENIM_WS_PORTS_ARRAY[$i]} $PROMETHEUS_PORT_OPTION -c ${OPENIM_MSGGATEWAY_CONFIG} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE") &
+        nohup ${OPENIM_MSGGATEWAY_BINARY} --port ${OPENIM_MSGGATEWAY_PORTS_ARRAY[$i]} --ws_port ${OPENIM_WS_PORTS_ARRAY[$i]} $PROMETHEUS_PORT_OPTION -c ${OPENIM_MSGGATEWAY_CONFIG} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
     done
 
     openim::util::check_process_names ${SERVER_NAME}

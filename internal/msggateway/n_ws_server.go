@@ -20,12 +20,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
-	"os/signal"
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"syscall"
 	"time"
 
 	"github.com/OpenIMSDK/tools/apiresp"
@@ -49,7 +46,7 @@ import (
 )
 
 type LongConnServer interface {
-	Run() error
+	Run(done chan error) error
 	wsHandler(w http.ResponseWriter, r *http.Request)
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
@@ -169,23 +166,20 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 	}, nil
 }
 
-func (ws *WsServer) Run() error {
+func (ws *WsServer) Run(done chan error) error {
 	var (
-		client *Client
-		wg     errgroup.Group
-
-		sigs = make(chan os.Signal, 1)
-		done = make(chan struct{}, 1)
+		client       *Client
+		netErr       error
+		shutdownDone = make(chan struct{}, 1)
 	)
 
 	server := http.Server{Addr: ":" + utils.IntToString(ws.port), Handler: nil}
 
-	wg.Go(func() error {
+	go func() {
 		for {
 			select {
-			case <-done:
-				return nil
-
+			case <-shutdownDone:
+				return
 			case client = <-ws.registerChan:
 				ws.registerClient(client)
 			case client = <-ws.unregisterChan:
@@ -194,33 +188,32 @@ func (ws *WsServer) Run() error {
 				ws.multiTerminalLoginChecker(onlineInfo.clientOK, onlineInfo.oldClients, onlineInfo.newClient)
 			}
 		}
-	})
-
-	wg.Go(func() error {
-		http.HandleFunc("/", ws.wsHandler)
-		return server.ListenAndServe()
-	})
-
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	<-sigs
-
-	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-		defer cancel()
-
-		// graceful exit operation for server
-		_ = server.Shutdown(ctx)
-		_ = wg.Wait()
-		close(done)
 	}()
-
+	netDone := make(chan struct{}, 1)
+	go func() {
+		http.HandleFunc("/", ws.wsHandler)
+		err := server.ListenAndServe()
+		if err != nil && err != http.ErrServerClosed {
+			netErr = errs.Wrap(err, "ws start err", server.Addr)
+			close(netDone)
+		}
+	}()
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	var err error
 	select {
-	case <-done:
-		return nil
-
-	case <-time.After(15 * time.Second):
-		return utils.Wrap1(errors.New("timeout exit"))
+	case err = <-done:
+		sErr := server.Shutdown(ctx)
+		if sErr != nil {
+			return errs.Wrap(sErr, "shutdown err")
+		}
+		close(shutdownDone)
+		if err != nil {
+			return err
+		}
+	case <-netDone:
 	}
+	return netErr
 
 }
 

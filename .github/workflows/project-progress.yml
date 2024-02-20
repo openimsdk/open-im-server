@@ -24,12 +24,15 @@ on:
   pull_request:
     types: 
       - assigned
+    branches-ignore:
+      - 'asf-auto-updates'
+      - 'ignore'
 
 jobs:
   move-assigned-card:
     runs-on: ubuntu-latest
     steps:
-      - uses: alex-page/github-project-automation-plus@v0.8.3
+      - uses: alex-page/github-project-automation-plus@v0.9.0
         with:
           project: openim-powerful
           column: In Progress
