@@ -163,7 +163,6 @@ Before you start, please make sure your changes are in demand. The best for that
 - [Manage backend and monitor deployment](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
 - [Mac Developer Deployment Guide for OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
 
-
 ## :calendar: Community Meetings
 
 We want anyone to get involved in our community and contributing code, we offer gifts and rewards, and we welcome you to join us every Thursday night.
