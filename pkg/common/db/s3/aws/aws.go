@@ -38,20 +38,20 @@ const (
 	maxNumSize  int64 = 10000
 )
 
-const (
-	imagePng  = "png"
-	imageJpg  = "jpg"
-	imageJpeg = "jpeg"
-	imageGif  = "gif"
-	imageWebp = "webp"
-)
+// const (
+// 	imagePng  = "png"
+// 	imageJpg  = "jpg"
+// 	imageJpeg = "jpeg"
+// 	imageGif  = "gif"
+// 	imageWebp = "webp"
+// )
 
-const successCode = http.StatusOK
+// const successCode = http.StatusOK
 
-const (
-	videoSnapshotImagePng = "png"
-	videoSnapshotImageJpg = "jpg"
-)
+// const (
+// 	videoSnapshotImagePng = "png"
+// 	videoSnapshotImageJpg = "jpg"
+// )
 
 func NewAWS() (s3.Interface, error) {
 	conf := config.Config.Object.Aws
