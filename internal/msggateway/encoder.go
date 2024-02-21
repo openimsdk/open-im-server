@@ -17,6 +17,7 @@ package msggateway
 import (
 	"bytes"
 	"encoding/gob"
+
 	"github.com/OpenIMSDK/tools/errs"
 )
 

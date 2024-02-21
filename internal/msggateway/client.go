@@ -18,10 +18,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/tools/errs"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
+
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 

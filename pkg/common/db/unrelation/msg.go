@@ -35,6 +35,7 @@ import (
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
+
 	table "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
