@@ -21,7 +21,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/OpenIMSDK/tools/errs"
 )
 
 var (
@@ -47,10 +47,10 @@ func (g *GzipCompressor) Compress(rawData []byte) ([]byte, error) {
 	gzipBuffer := bytes.Buffer{}
 	gz := gzip.NewWriter(&gzipBuffer)
 	if _, err := gz.Write(rawData); err != nil {
-		return nil, utils.Wrap(err, "")
+		return nil, errs.Wrap(err)
 	}
 	if err := gz.Close(); err != nil {
-		return nil, utils.Wrap(err, "")
+		return nil, errs.Wrap(err)
 	}
 	return gzipBuffer.Bytes(), nil
 }
@@ -63,10 +63,10 @@ func (g *GzipCompressor) CompressWithPool(rawData []byte) ([]byte, error) {
 	gz.Reset(&gzipBuffer)
 
 	if _, err := gz.Write(rawData); err != nil {
-		return nil, utils.Wrap(err, "")
+		return nil, errs.Wrap(err)
 	}
 	if err := gz.Close(); err != nil {
-		return nil, utils.Wrap(err, "")
+		return nil, errs.Wrap(err)
 	}
 	return gzipBuffer.Bytes(), nil
 }
@@ -75,11 +75,11 @@ func (g *GzipCompressor) DeCompress(compressedData []byte) ([]byte, error) {
 	buff := bytes.NewBuffer(compressedData)
 	reader, err := gzip.NewReader(buff)
 	if err != nil {
-		return nil, utils.Wrap(err, "NewReader failed")
+		return nil, errs.Wrap(err, "NewReader failed")
 	}
 	compressedData, err = io.ReadAll(reader)
 	if err != nil {
-		return nil, utils.Wrap(err, "ReadAll failed")
+		return nil, errs.Wrap(err, "ReadAll failed")
 	}
 	_ = reader.Close()
 	return compressedData, nil
@@ -88,18 +88,18 @@ func (g *GzipCompressor) DeCompress(compressedData []byte) ([]byte, error) {
 func (g *GzipCompressor) DecompressWithPool(compressedData []byte) ([]byte, error) {
 	reader := gzipReaderPool.Get().(*gzip.Reader)
 	if reader == nil {
-		return nil, errors.New("NewReader failed")
+		return nil, errs.Wrap(errors.New("NewReader failed"))
 	}
 	defer gzipReaderPool.Put(reader)
 
 	err := reader.Reset(bytes.NewReader(compressedData))
 	if err != nil {
-		return nil, utils.Wrap(err, "NewReader failed")
+		return nil, errs.Wrap(err, "NewReader failed")
 	}
 
 	compressedData, err = io.ReadAll(reader)
 	if err != nil {
-		return nil, utils.Wrap(err, "ReadAll failed")
+		return nil, errs.Wrap(err, "ReadAll failed")
 	}
 	_ = reader.Close()
 	return compressedData, nil

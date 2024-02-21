@@ -29,7 +29,7 @@ var (
 	hyphenRegex     = regexp.MustCompile(`^[a-zA-Z0-9\-]+\.[a-zA-Z0-9]+$`)
 )
 
-// CheckDirectoCheckDirectoryries initiates the checking process for the specified directories using configuration from config.Config.
+// CheckDirectory initiates the checking process for the specified directories using configuration from config.Config.
 func CheckDirectory(cfg *config.Config) error {
 	ignoreMap := make(map[string]struct{})
 	for _, dir := range cfg.IgnoreDirs {

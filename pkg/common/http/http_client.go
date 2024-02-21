@@ -106,31 +106,31 @@ func PostReturn(ctx context.Context, url string, header map[string]string, input
 }
 
 func callBackPostReturn(ctx context.Context, url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
-	defer log.ZDebug(ctx, "callback", "url", url, "command", command, "input", input, "output", output, "callbackConfig", callbackConfig)
-	//
-	//v := urllib.Values{}
-	//v.Set(constant.CallbackCommand, command)
-	//url = url + "/" + v.Encode()
 	url = url + "/" + command
+	log.ZInfo(ctx, "callback", "url", url, "input", input, "config", callbackConfig)
 	b, err := Post(ctx, url, nil, input, callbackConfig.CallbackTimeOut)
 	if err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
-			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
+			log.ZInfo(ctx, "callback failed but continue", err, "url", url)
 			return nil
 		}
+		log.ZWarn(ctx, "callback network failed", err, "url", url, "input", input)
 		return errs.ErrNetwork.Wrap(err.Error())
 	}
-	defer log.ZDebug(ctx, "callback", "data", string(b))
-
 	if err = json.Unmarshal(b, output); err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
 			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
 			return nil
 		}
+		log.ZWarn(ctx, "callback json unmarshal failed", err, "url", url, "input", input, "response", string(b))
 		return errs.ErrData.WithDetail(err.Error() + "response format error")
 	}
-
-	return output.Parse()
+	if err := output.Parse(); err != nil {
+		log.ZWarn(ctx, "callback parse failed", err, "url", url, "input", input, "response", string(b))
+		return err
+	}
+	log.ZInfo(ctx, "callback success", "url", url, "input", input, "response", string(b))
+	return nil
 }
 
 func CallBackPostReturn(ctx context.Context, url string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
