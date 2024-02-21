@@ -18,6 +18,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/push"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 func main() {
@@ -28,6 +29,6 @@ func main() {
 		panic(err.Error())
 	}
 	if err := pushCmd.StartSvr(config.Config.RpcRegisterName.OpenImPushName, push.Start); err != nil {
-		panic(err.Error())
+		util.ExitWithError(err)
 	}
 }

@@ -18,6 +18,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/auth"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
 		panic(err.Error())
 	}
 	if err := authCmd.StartSvr(config.Config.RpcRegisterName.OpenImAuthName, auth.Start); err != nil {
-		panic(err.Error())
+		util.ExitWithError(err)
 	}
+
 }

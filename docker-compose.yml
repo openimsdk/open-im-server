@@ -1,4 +1,5 @@
 #fixme  Clone openIM Server project before using docker-compose,project address：https://github.com/OpenIMSDK/Open-IM-Server.git
+#  The command that triggers this file to pull the image is "docker compose up -d".
 version: '3'
 
 networks:
@@ -123,6 +124,18 @@ services:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS:-172.28.0.7}
 
+  openim-admin:
+    # https://github.com/openimsdk/open-im-server/issues/1662
+    image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin:${ADMIN_FRONT_VERSION:-toc-base-open-docker.35}
+    container_name: openim-admin
+    platform: linux/amd64
+    restart: always
+    ports:
+      - "${OPENIM_ADMIN_FRONT_PORT:-11002}:80"
+    networks:
+      server:
+        ipv4_address: ${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS:-172.28.0.13}
+
 ### TODO: Uncomment, or deploy using openim docker: https://github.com/openimsdk/openim-docker
 ### Uncomment and configure the following services as needed
 
@@ -231,18 +244,6 @@ services:
   #   networks:
   #     server:
   #       ipv4_address: ${OPENIM_CHAT_NETWORK_ADDRESS:-172.28.0.9}
-
-  # openim-admin:
-  # # https://github.com/openimsdk/open-im-server/issues/1662
-  #   image: ${IMAGE_REGISTRY:-ghcr.io/openimsdk}/openim-admin:${ADMIN_FRONT_VERSION:-toc-base-open-docker.35}
-  #   container_name: openim-admin
-  #   platform: linux/amd64
-  #   restart: always
-  #   ports:
-  #     - "${OPENIM_ADMIN_FRONT_PORT:-11002}:80"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${OPENIM_ADMIN_FRONT_NETWORK_ADDRESS:-172.28.0.13}
 
   # prometheus:
   #   image: prom/prometheus

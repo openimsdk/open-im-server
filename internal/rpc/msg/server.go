@@ -80,7 +80,10 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
-	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
+	if err != nil {
+		return err
+	}
 	s := &msgServer{
 		Conversation:           &conversationClient,
 		User:                   &userRpcClient,

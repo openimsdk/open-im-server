@@ -33,7 +33,7 @@ jobs:
 
       - uses: actions/setup-node@v4
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
       - name: Run go modules tidy
         run: |
           sudo apt-get install jq
@@ -87,7 +87,7 @@ jobs:
         continue-on-error: true
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           commit-message: "cicd: bump League Patch"

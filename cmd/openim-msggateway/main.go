@@ -16,6 +16,7 @@ package main
 
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 func main() {
@@ -25,6 +26,6 @@ func main() {
 	msgGatewayCmd.AddPrometheusPortFlag()
 
 	if err := msgGatewayCmd.Exec(); err != nil {
-		panic(err.Error())
+		util.ExitWithError(err)
 	}
 }

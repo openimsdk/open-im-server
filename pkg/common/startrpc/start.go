@@ -15,9 +15,9 @@
 package startrpc
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -27,9 +27,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/OpenIMSDK/tools/errs"
+
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"golang.org/x/sync/errgroup"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -43,7 +46,6 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/OpenIMSDK/tools/network"
-	"github.com/OpenIMSDK/tools/utils"
 )
 
 // Start rpc server.
@@ -56,25 +58,26 @@ func Start(
 ) error {
 	fmt.Printf("start %s server, port: %d, prometheusPort: %d, OpenIM version: %s\n",
 		rpcRegisterName, rpcPort, prometheusPort, config.Version)
+	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(config.Config.Rpc.ListenIP), strconv.Itoa(rpcPort))
 	listener, err := net.Listen(
 		"tcp",
-		net.JoinHostPort(network.GetListenIP(config.Config.Rpc.ListenIP), strconv.Itoa(rpcPort)),
+		rpcTcpAddr,
 	)
 	if err != nil {
-		return err
+		return errs.Wrap(err, "rpc start err", rpcTcpAddr)
 	}
 
 	defer listener.Close()
 	client, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
-		return utils.Wrap1(err)
+		return errs.Wrap(err)
 	}
 
 	defer client.Close()
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	registerIP, err := network.GetRpcRegisterIP(config.Config.Rpc.RegisterIP)
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	}
 
 	var reg *prometheus.Registry
@@ -96,7 +99,7 @@ func Start(
 
 	err = rpcFn(client, srv)
 	if err != nil {
-		return utils.Wrap1(err)
+		return err
 	}
 	err = client.Register(
 		rpcRegisterName,
@@ -105,48 +108,67 @@ func Start(
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return utils.Wrap1(err)
+		return errs.Wrap(err)
 	}
 
-	var wg errgroup.Group
-
-	wg.Go(func() error {
+	var (
+		netDone    = make(chan struct{}, 2)
+		netErr     error
+		httpServer *http.Server
+	)
+	go func() {
 		if config.Config.Prometheus.Enable && prometheusPort != 0 {
 			metric.InitializeMetrics(srv)
 			// Create a HTTP server for prometheus.
-			httpServer := &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
-			if err := httpServer.ListenAndServe(); err != nil {
-				log.Fatal("Unable to start a http server.")
+			httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
+			if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				netErr = errs.Wrap(err, "prometheus start err", httpServer.Addr)
+				netDone <- struct{}{}
 			}
 		}
-		return nil
-	})
-
-	wg.Go(func() error {
-		return utils.Wrap1(srv.Serve(listener))
-	})
-
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	<-sigs
-
-	var (
-		done = make(chan struct{}, 1)
-		gerr error
-	)
-
-	go func() {
-		once.Do(srv.GracefulStop)
-		gerr = wg.Wait()
-		close(done)
 	}()
 
+	go func() {
+		err := srv.Serve(listener)
+		if err != nil {
+			netErr = errs.Wrap(err, "rpc start err: ", rpcTcpAddr)
+			netDone <- struct{}{}
+		}
+	}()
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGTERM)
 	select {
-	case <-done:
-		return gerr
-
-	case <-time.After(15 * time.Second):
-		return utils.Wrap1(errors.New("timeout exit"))
+	case <-sigs:
+		util.SIGUSR1Exit()
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		if err := gracefulStopWithCtx(ctx, srv.GracefulStop); err != nil {
+			return err
+		}
+		ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		err := httpServer.Shutdown(ctx)
+		if err != nil {
+			return errs.Wrap(err, "shutdown err")
+		}
+		return errors.New("SIGTERM EXIT")
+	case <-netDone:
+		close(netDone)
+		return netErr
 	}
+}
 
+func gracefulStopWithCtx(ctx context.Context, f func()) error {
+	done := make(chan struct{}, 1)
+	go func() {
+		f()
+		close(done)
+	}()
+	select {
+	case <-ctx.Done():
+		return errs.Wrap(errors.New("timeout, ctx graceful stop"))
+	case <-done:
+		return nil
+	}
 }

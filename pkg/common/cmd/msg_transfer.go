@@ -47,7 +47,6 @@ func (m *MsgTransferCmd) Exec() error {
 }
 
 func (m *MsgTransferCmd) GetPortFromConfig(portType string) int {
-	fmt.Println("GetPortFromConfig:", portType)
 	if portType == constant.FlagPort {
 		return 0
 	} else if portType == constant.FlagPrometheusPort {
@@ -56,9 +55,11 @@ func (m *MsgTransferCmd) GetPortFromConfig(portType string) int {
 	}
 	return 0
 }
+
 func (m *MsgTransferCmd) AddTransferProgressFlag() {
 	m.Command.Flags().IntP(constant.FlagTransferProgressIndex, "n", 0, "transfer progress index")
 }
+
 func (m *MsgTransferCmd) getTransferProgressFlagValue() int {
 	nindex, err := m.Command.Flags().GetInt(constant.FlagTransferProgressIndex)
 	if err != nil {

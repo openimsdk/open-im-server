@@ -20,7 +20,6 @@ import (
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/spf13/cobra"
-	_ "go.uber.org/automaxprocs"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/log"
@@ -164,7 +163,7 @@ func (r *RootCmd) GetPrometheusPortFlag() int {
 
 func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
-	fmt.Println("configFolderPath:", configFolderPath)
+	fmt.Println("The directory of the configuration file to start the process:", configFolderPath)
 	return config2.InitConfig(configFolderPath)
 }
 
@@ -177,10 +176,9 @@ func (r *RootCmd) AddCommand(cmds ...*cobra.Command) {
 }
 
 func (r *RootCmd) GetPortFromConfig(portType string) int {
-	fmt.Println("RootCmd.GetPortFromConfig:", portType)
 	return 0
 }
+
 func (r *RootCmd) PortFromConfig(portType string) int {
-	fmt.Println("PortFromConfig:", portType)
 	return r.cmdItf.GetPortFromConfig(portType)
 }

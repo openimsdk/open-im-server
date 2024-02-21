@@ -15,11 +15,19 @@
 package msgtransfer
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"log"
+
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+
 	"net/http"
-	"sync"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/prometheus/client_golang/prometheus"
@@ -40,7 +48,8 @@ import (
 type MsgTransfer struct {
 	historyCH      *OnlineHistoryRedisConsumerHandler // 这个消费者聚合消息, 订阅的topic：ws2ms_chat, 修改通知发往msg_to_modify topic, 消息存入redis后Incr Redis, 再发消息到ms2pschat topic推送， 发消息到msg_to_mongo topic持久化
 	historyMongoCH *OnlineHistoryMongoConsumerHandler // mongoDB批量插入, 成功后删除redis中消息，以及处理删除通知消息删除的 订阅的topic: msg_to_mongo
-	// modifyCH       *ModifyMsgConsumerHandler          // 负责消费修改消息通知的consumer, 订阅的topic: msg_to_modify
+	ctx            context.Context
+	cancel         context.CancelFunc
 }
 
 func StartTransfer(prometheusPort int) error {
@@ -48,71 +57,106 @@ func StartTransfer(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
+
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
 		return err
 	}
-	if err := mongo.CreateMsgIndex(); err != nil {
+
+	if err = mongo.CreateMsgIndex(); err != nil {
 		return err
 	}
 	client, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
-	/*
-		client, err := openkeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
-			openkeeper.WithFreq(time.Hour), openkeeper.WithRoundRobin(), openkeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
-				config.Config.Zookeeper.Password), openkeeper.WithTimeout(10), openkeeper.WithLogger(log.NewZkLogger()))*/
 	if err != nil {
 		return err
 	}
+
 	if err := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
 		return err
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	msgModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
-	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel)
+	if err != nil {
+		return err
+	}
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
-	msgTransfer := NewMsgTransfer(msgDatabase, &conversationRpcClient, &groupRpcClient)
+	msgTransfer, err := NewMsgTransfer(msgDatabase, &conversationRpcClient, &groupRpcClient)
+	if err != nil {
+		return err
+	}
 	return msgTransfer.Start(prometheusPort)
 }
 
-func NewMsgTransfer(msgDatabase controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) *MsgTransfer {
-	return &MsgTransfer{
-		historyCH:      NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient),
-		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase),
+func NewMsgTransfer(msgDatabase controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*MsgTransfer, error) {
+	historyCH, err := NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient)
+	if err != nil {
+		return nil, err
 	}
+	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(msgDatabase)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MsgTransfer{
+		historyCH:      historyCH,
+		historyMongoCH: historyMongoCH,
+	}, nil
 }
 
 func (m *MsgTransfer) Start(prometheusPort int) error {
-	var wg sync.WaitGroup
-	wg.Add(1)
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
 	if prometheusPort <= 0 {
-		return errors.New("prometheusPort not correct")
+		return errs.Wrap(errors.New("prometheusPort not correct"))
 	}
-	if config.Config.ChatPersistenceMysql {
-		// go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(m.persistentCH)
-	} else {
-		fmt.Println("msg transfer not start mysql consumer")
+	m.ctx, m.cancel = context.WithCancel(context.Background())
+
+	var (
+		netDone = make(chan struct{}, 1)
+		netErr  error
+	)
+
+	onError := func(ctx context.Context, err error, errInfo string) {
+		log.ZWarn(ctx, errInfo, err)
 	}
-	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.historyCH)
-	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.historyMongoCH)
-	// go m.modifyCH.modifyMsgConsumerGroup.RegisterHandleAndConsumer(m.modifyCH)
-	/*err := prome.StartPrometheusSrv(prometheusPort)
-	if err != nil {
-		return err
-	}*/
-	////////////////////////////
+	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyCH, onError)
+	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyMongoCH, onError)
+
 	if config.Config.Prometheus.Enable {
-		reg := prometheus.NewRegistry()
-		reg.MustRegister(
-			collectors.NewGoCollector(),
-		)
-		reg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer")...)
-		http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
-		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil))
+		go func() {
+			proreg := prometheus.NewRegistry()
+			proreg.MustRegister(
+				collectors.NewGoCollector(),
+			)
+			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer")...)
+			http.Handle("/metrics", promhttp.HandlerFor(proreg, promhttp.HandlerOpts{Registry: proreg}))
+			err := http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil)
+			if err != nil && err != http.ErrServerClosed {
+				netErr = errs.Wrap(err, fmt.Sprintf("prometheus start err: %d", prometheusPort))
+				netDone <- struct{}{}
+			}
+		}()
 	}
-	////////////////////////////////////////
-	wg.Wait()
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGTERM)
+	select {
+	case <-sigs:
+		util.SIGUSR1Exit()
+		// graceful close kafka client.
+		m.cancel()
+		m.historyCH.historyConsumerGroup.Close()
+		m.historyMongoCH.historyConsumerGroup.Close()
+
+	case <-netDone:
+		m.cancel()
+		m.historyCH.historyConsumerGroup.Close()
+		m.historyMongoCH.historyConsumerGroup.Close()
+		close(netDone)
+		return netErr
+	}
+
 	return nil
 }

@@ -26,10 +26,14 @@ fi
 
 # Set the log file path
 LOG_FILE="${OPENIM_OUTPUT}/logs/openim_$(date '+%Y%m%d').log"
+STDERR_LOG_FILE="${OPENIM_OUTPUT}/logs/openim_error_$(date '+%Y%m%d').log"
+TMP_LOG_FILE="${OPENIM_OUTPUT}/logs/openim_tmp_$(date '+%Y%m%d').log"
 
 if [[ ! -d "${OPENIM_OUTPUT}/logs" ]]; then
   mkdir -p "${OPENIM_OUTPUT}/logs"
   touch "$LOG_FILE"
+  touch "$STDERR_LOG_FILE"
+  touch "$TMP_LOG_FILE"
 fi
 
 # Define the logging function
@@ -127,15 +131,23 @@ openim::log::error_exit() {
   exit "${code}"
 }
 
-# Log an error but keep going.  Don't dump the stack or exit.
+# Log an error but keep going. Don't dump the stack or exit.
 openim::log::error() {
+  # Define red color
+  red='\033[0;31m'
+  # No color (reset)
+  nc='\033[0m' # No Color
+
   timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
-  echo_log "!!! ${timestamp} ${1-}" >&2
+  # Apply red color for error message
+  echo_log "${red}!!! ${timestamp} ${1-}${nc}" >&2
   shift
   for message; do
-    echo_log "    ${message}" >&2
+    # Apply red color for subsequent lines of the error message
+    echo_log "${red}    ${message}${nc}" >&2
   done
 }
+
 
 # Print an usage message to stderr.  The arguments are printed directly.
 openim::log::usage() {
