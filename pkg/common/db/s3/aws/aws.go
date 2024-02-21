@@ -33,9 +33,9 @@ import (
 )
 
 const (
-	minPartSize = 1024 * 1024 * 1        // 1MB
-	maxPartSize = 1024 * 1024 * 1024 * 5 // 5GB
-	maxNumSize  = 10000
+	minPartSize int64 = 1024 * 1024 * 1        // 1MB
+	maxPartSize int64 = 1024 * 1024 * 1024 * 5 // 5GB
+	maxNumSize  int64 = 10000
 )
 
 const (
@@ -87,7 +87,7 @@ func (a *Aws) Engine() string {
 
 func (a *Aws) InitiateMultipartUpload(ctx context.Context, name string) (*s3.InitiateMultipartUploadResult, error) {
 	input := &sdk.CreateMultipartUploadInput{
-		Bucket: aws.String(a.bucket), // 待验证是否需要
+		Bucket: aws.String(a.bucket), // TODO: To be verified whether it is required
 		Key:    aws.String(name),
 	}
 	result, err := a.client.CreateMultipartUploadWithContext(ctx, input)
@@ -110,7 +110,7 @@ func (a *Aws) CompleteMultipartUpload(ctx context.Context, uploadID string, name
 		}
 	}
 	input := &sdk.CompleteMultipartUploadInput{
-		Bucket:   aws.String(a.bucket), // 待验证是否需要
+		Bucket:   aws.String(a.bucket), // TODO: To be verified whether it is required
 		Key:      aws.String(name),
 		UploadId: aws.String(uploadID),
 		MultipartUpload: &sdk.CompletedMultipartUpload{
@@ -134,7 +134,7 @@ func (a *Aws) PartSize(ctx context.Context, size int64) (int64, error) {
 		return 0, errors.New("size must be greater than 0")
 	}
 	if size > maxPartSize*maxNumSize {
-		return 0, fmt.Errorf("size must be less than %db", maxPartSize*maxNumSize)
+		return 0, fmt.Errorf("AWS size must be less than the maximum allowed limit")
 	}
 	if size <= minPartSize*maxNumSize {
 		return minPartSize, nil
