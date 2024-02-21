@@ -16,6 +16,7 @@ package controller
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -24,6 +25,7 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/tokenverify"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 )
 
