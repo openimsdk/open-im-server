@@ -51,6 +51,15 @@
 
 </p>
 
+## :busts_in_silhouette: Community
+
++ 📚 [OpenIM Community](https://github.com/OpenIMSDK/community)
++ 💕 [OpenIM Interest Group](https://github.com/Openim-sigs)
++ 🚀 [Join our Slack community](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
++ :eyes: [Join our wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
++ 👫 [Join our Reddit](https://www.reddit.com/r/OpenIMessaging)
++ 💬 [Follow our Twitter account](https://twitter.com/openimsdk)
+
 ## Ⓜ️ About OpenIM
 
 OpenIM is a service platform specifically designed for integrating chat, audio-video calls, notifications, and AI chatbots into applications. It provides a range of powerful APIs and Webhooks, enabling developers to easily incorporate these interactive features into their applications. OpenIM is not a standalone chat application, but rather serves as a platform to support other applications in achieving rich communication functionalities. The following diagram illustrates the interaction between AppServer, AppClient, OpenIMServer, and OpenIMSDK to explain in detail.
@@ -153,16 +162,6 @@ Before you start, please make sure your changes are in demand. The best for that
 - [OpenIM Versioning](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/version.md)
 - [Manage backend and monitor deployment](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
 - [Mac Developer Deployment Guide for OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
-
-
-## :busts_in_silhouette: Community
-
-+ 📚 [OpenIM Community](https://github.com/OpenIMSDK/community)
-+ 💕 [OpenIM Interest Group](https://github.com/Openim-sigs)
-+ 🚀 [Join our Slack community](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [Join our wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
-+ 👫 [Join our Reddit](https://www.reddit.com/r/OpenIMessaging)
-+ 💬 [Follow our Twitter account](https://twitter.com/openimsdk)
 
 ## :calendar: Community Meetings
 
