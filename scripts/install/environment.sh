@@ -222,6 +222,14 @@ def "KODO_ACCESS_KEY_SECRET"                                             # 七�
 def "KODO_SESSION_TOKEN"                                                 # 七牛云OSS的会话令牌
 def "KODO_PUBLIC_READ" "false"                                           # 公有读
 
+# AWS Configuration Information
+def "AWS_ENDPOINT" ""                                  # AWS endpoint, generally not needed unless using a specific service
+def "AWS_REGION" "us-east-1"                           # AWS Region
+def "AWS_BUCKET" "demo-9999999"                        # AWS S3 Bucket Name
+def "AWS_ACCESS_KEY_ID"                                # AWS Access Key ID
+def "AWS_SECRET_ACCESS_KEY"                            # AWS Secret Access Key
+def "AWS_PUBLIC_READ" "false"                          # Public read access
+
 ###################### Redis 配置信息 ######################
 def "REDIS_PORT" "16379"                                    # Redis的端口
 def "REDIS_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}"              # Redis的地址
