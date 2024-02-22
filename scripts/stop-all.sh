@@ -33,6 +33,8 @@ echo -e "\n++ Stop all processes in the path ${OPENIM_OUTPUT_HOSTBIN}"
 openim::util::stop_services_with_name "${OPENIM_OUTPUT_HOSTBIN}"
 # todo OPENIM_ALL_SERVICE_LIBRARIES
 
+sleep 1
+
 
 max_retries=15
 attempt=0
@@ -46,7 +48,6 @@ do
    openim::log::error "stop process failed. continue waiting\n" "${result}"
   sleep 1
   ((attempt++))
-
  else
    openim::log::success "✨  All processes to be stopped"
    exit 0
