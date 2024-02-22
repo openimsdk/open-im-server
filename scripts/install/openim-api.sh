@@ -51,7 +51,7 @@ function openim::api::start() {
   printf "| Service Name           | Port         |\n"
   printf "+------------------------+--------------+\n"
 
-  readonly OPENIM_API_SERVER_LIBRARIES=("${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}")
+  readonly OPENIM_API_SERVER_LIBRARIES="${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"
   openim::util::stop_services_with_name ${OPENIM_API_SERVER_LIBRARIES}
 
   local length=${#OPENIM_API_SERVICE_LISTARIES[@]}

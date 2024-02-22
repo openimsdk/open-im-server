@@ -677,11 +677,8 @@ openim::util::stop_services_with_name() {
     done
 
 
-    timeout=15
-    start_time=$SECONDS
-
-   timeout=15 # 设置超时时间为 15 秒
-   start_time=$SECONDS
+  timeout=15
+  start_time=$SECONDS
 
    while :; do
        all_pids_empty=true
