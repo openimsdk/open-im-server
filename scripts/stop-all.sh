@@ -41,7 +41,7 @@ result=$(openim::util::check_process_names_for_stop)
 if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "stop process failed.\n" "${result}"
-  return 1
+else
+  openim::log::success "✨  All processes to be stopped"
 fi
 
-openim::log::success "✨  All processes to be stopped"
