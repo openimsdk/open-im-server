@@ -17,7 +17,7 @@
 #FIXME The full names of the shell scripts that need to be started are placed in the `need_to_start_server_shell` array.
 
 set -o nounset
-set -o pipefail
+
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
@@ -30,7 +30,7 @@ if [[ $? -ne 0 ]]; then
   openim::log::error "OpenIM binaries are not found. Please run 'make build' to build binaries."
   "${OPENIM_ROOT}"/scripts/build-all-service.sh
 fi
-set -o errexit
+
 
 "${OPENIM_ROOT}"/scripts/init-config.sh --skip
 

@@ -18,9 +18,9 @@
 # Usage: `scripts/stop.sh`.
 # Encapsulated as: `make stop`.
 
-set -o errexit
+
 set -o nounset
-set -o pipefail
+
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 

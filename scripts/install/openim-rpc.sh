@@ -38,9 +38,9 @@
 # Note: Before executing this script, ensure that the necessary permissions are granted and relevant environmental variables are set.
 #
 
-set -o errexit
-set +o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
@@ -220,7 +220,7 @@ function openim::rpc::uninstall() {
         openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${service}.yaml"
         openim::common::sudo "rm -f ${SYSTEM_FILE_PATHS[$service]}"
     done
-    set -o errexit
+
     openim::log::info "uninstall openim-rpc successfully"
 }
 

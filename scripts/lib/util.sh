@@ -373,7 +373,7 @@ openim::util::check_ports() {
 # set +o errexit
 # Sample call for testing:
 # openim::util::check_ports 10002 1004 12345 13306
-# set -o errexit
+#
 
 # The `openim::util::check_process_names` function analyzes the state of processes based on given names.
 # It accepts multiple process names as arguments and prints:
@@ -1607,7 +1607,7 @@ openim::util::check_ports() {
 # set +o errexit
 # Sample call for testing:
 # openim::util::check_ports 10002 1004 12345 13306
-# set -o errexit
+#
 
 # The `openim::util::check_process_names` function analyzes the state of processes based on given names.
 # It accepts multiple process names as arguments and prints:

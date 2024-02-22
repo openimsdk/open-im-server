@@ -14,9 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -o errexit
-set +o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
@@ -138,7 +138,7 @@ function openim::api::uninstall() {
   openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
   openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
   openim::common::sudo "rm -f /etc/systemd/system/${SERVER_NAME}.service"
-  set -o errexit
+
   openim::log::info "uninstall ${SERVER_NAME} successfully"
 }
 

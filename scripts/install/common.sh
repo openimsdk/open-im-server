@@ -15,9 +15,9 @@
 
 
 # Common utilities, variables and checks for all build scripts.
-set -o errexit
-set +o nounset
-set -o pipefail
+
+
+
 
 # Sourced flag
 COMMON_SOURCED=true

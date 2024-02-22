@@ -107,7 +107,7 @@ function openim::crontask::uninstall() {
   openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
   openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
   openim::common::sudo "rm -f /etc/systemd/system/${SERVER_NAME}.service"
-  set -o errexit
+
   openim::log::info "uninstall ${SERVER_NAME} successfully"
 }
 

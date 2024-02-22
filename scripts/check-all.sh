@@ -19,9 +19,9 @@
 # Encapsulated as: `make check`.
 # READ: https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh
 
-set -o errexit
+
 set -o nounset
-set -o pipefail
+
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"

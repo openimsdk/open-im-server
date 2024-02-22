@@ -109,7 +109,7 @@ function openim::uninstall::uninstall_openim() {
   openim::common::sudo "systemctl stop openim.target"
   openim::common::sudo "systemctl disable openim.target"
   openim::common::sudo "rm -f /etc/systemd/system/openim.target"
-  set -o errexit
+
   openim::log::success "openim uninstall success"
 }
 

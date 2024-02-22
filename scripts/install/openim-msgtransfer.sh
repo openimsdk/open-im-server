@@ -16,9 +16,9 @@
 # ./scripts/install/openim-msgtransfer.sh openim::msgtransfer::start
 
 # Common utilities, variables and checks for all build scripts.
-set -o errexit
-set +o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
@@ -138,7 +138,7 @@ function openim::msgtransfer::uninstall() {
   openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
   openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
   openim::common::sudo "rm -f /etc/systemd/system/${SERVER_NAME}.service"
-  set -o errexit
+
   openim::log::info "uninstall ${SERVER_NAME} successfully"
 }
 

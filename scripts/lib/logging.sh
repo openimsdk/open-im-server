@@ -75,7 +75,7 @@ openim::log::errexit() {
 
 openim::log::install_errexit() {
   # trap ERR to provide an error handler whenever a command exits nonzero  this
-  # is a more verbose version of set -o errexit
+  # is a more verbose version of
   trap 'openim::log::errexit' ERR
   
   # setting errtrace allows our ERR trap handler to be propagated to functions,
