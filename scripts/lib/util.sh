@@ -684,9 +684,9 @@ openim::util::stop_services_with_name() {
        all_pids_empty=true
 
        for server_name in "$@"; do
-           pids=$(pgrep -f "$server_name")
+           server_pids=$(pgrep -f "$server_name")
 
-           if [[ ! -z $pids ]]; then
+           if [[ ! -z $server_pids ]]; then
                all_pids_empty=false
                break # If at least one process corresponding to server_name is found, jump out of the for loop.
            fi

@@ -47,12 +47,14 @@ function openim::api::start() {
 
   openim::log::info "Starting ${SERVER_NAME} ..."
 
+  readonly OPENIM_API_SERVER_LIBRARIES="${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"
+  openim::util::stop_services_with_name ${OPENIM_API_SERVER_LIBRARIES}
+
+
   printf "+------------------------+--------------+\n"
   printf "| Service Name           | Port         |\n"
   printf "+------------------------+--------------+\n"
 
-  readonly OPENIM_API_SERVER_LIBRARIES="${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"
-  openim::util::stop_services_with_name ${OPENIM_API_SERVER_LIBRARIES}
 
   local length=${#OPENIM_API_SERVICE_LISTARIES[@]}
   for ((i=0; i<length; i++)); do
