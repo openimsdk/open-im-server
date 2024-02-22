@@ -2878,7 +2878,7 @@ function openim::util::check_process_names_for_stop() {
     NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
     if [ "$NUM_PROCESSES" -gt 0 ]; then
       all_stopped=false
-      openim::log::error "Found $NUM_PROCESSES processes for ${service}"
+      echo "Found $NUM_PROCESSES processes for ${service}"
       for PID in $PIDS; do
         if [[ "$OSTYPE" == "linux-gnu"* ]]; then
           echo -e "\033[31m$(ps -p $PID -o pid,cmd)\033[0m"
