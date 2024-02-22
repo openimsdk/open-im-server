@@ -45,15 +45,15 @@ function openim::api::start() {
   echo "++ OPENIM_API_PORT_LISTARIES: ${OPENIM_API_PORT_LISTARIES[@]}"
   echo "++ OpenIM API config path: ${OPENIM_API_CONFIG}"
 
-  readonly OPENIM_API_SERVER_LIBRARIES=("${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}")
-  openim::util::stop_services_with_name ${OPENIM_API_SERVER_LIBRARIES[@]}
-
   openim::log::info "Starting ${SERVER_NAME} ..."
 
   printf "+------------------------+--------------+\n"
   printf "| Service Name           | Port         |\n"
   printf "+------------------------+--------------+\n"
-  
+
+  readonly OPENIM_API_SERVER_LIBRARIES=("${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}")
+  openim::util::stop_services_with_name ${OPENIM_API_SERVER_LIBRARIES}
+
   local length=${#OPENIM_API_SERVICE_LISTARIES[@]}
   for ((i=0; i<length; i++)); do
     printf "| %-22s | %6s       |\n" "${OPENIM_API_SERVICE_LISTARIES[$i]}" "${OPENIM_API_PORT_LISTARIES[$i]}"
