@@ -676,6 +676,8 @@ openim::util::stop_services_with_name() {
         fi
     done
 
+
+
     # Print information about services whose processes couldn't be stopped.
     if [[ ${#not_stopped[@]} -ne 0 ]]; then
         openim::log::info "Services that couldn't be stopped:"
