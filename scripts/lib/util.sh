@@ -402,7 +402,6 @@ openim::util::check_process_names() {
   local not_started=()
   local started=()
   
-  echo "Checking processes: $*"
   # Iterate over each given process name
   for process_name in "$@"; do
     # Use `pgrep` to find process IDs related to the given process name
