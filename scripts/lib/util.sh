@@ -677,6 +677,45 @@ openim::util::stop_services_with_name() {
     done
 
 
+    timeout=15
+    start_time=$SECONDS
+
+   timeout=15 # 设置超时时间为 15 秒
+   start_time=$SECONDS
+
+   while :; do
+       all_pids_empty=true
+
+       for server_name in "$@"; do
+           pids=$(pgrep -f "$server_name")
+
+           if [[ ! -z $pids ]]; then
+               all_pids_empty=false
+               break # If at least one process corresponding to server_name is found, jump out of the for loop.
+           fi
+       done
+
+       if [[ $all_pids_empty = true ]]; then
+           echo "All specified server processes have exited."
+           break # If none of the processes corresponding to server_name exist, exit the while loop.
+       fi
+
+       elapsed_time=$(($SECONDS - $start_time))
+       if [[ $elapsed_time -ge $timeout ]]; then
+           echo "Timeout of ${timeout} seconds reached."
+           break # Timeout, exit while loop
+       fi
+
+       sleep 1
+   done
+
+    openim::log::info "# Begin to check all openim service"
+    . $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal
+
+
+    echo "Check ports:"
+    openim::util::check_ports_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
+
 
     # Print information about services whose processes couldn't be stopped.
     if [[ ${#not_stopped[@]} -ne 0 ]]; then
