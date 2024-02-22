@@ -37,7 +37,7 @@ function execute_start_scripts() {
 
     # Check if the script file exists and is executable.
     if [[ -x "$script_path" ]]; then
-      openim::log::status "Starting script: ${script_path##*/}"     # Log the script name.
+      openim::log::info "Starting script: ${script_path##*/}"     # Log the script name.
 
       # Execute the script with the constructed argument.
       result=$("$script_path" "$arg")
@@ -75,7 +75,7 @@ echo "You need to start the following scripts in order: ${OPENIM_SERVER_SCRIPTAR
 # TODO Prelaunch tools, simple for now, can abstract functions later
 TOOLS_START_SCRIPTS_PATH=${START_SCRIPTS_PATH}/openim-tools.sh
 
-openim::log::info "\n## Pre Starting OpenIM services"
+openim::log::status "\n## Pre Starting OpenIM services"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start
 
 
