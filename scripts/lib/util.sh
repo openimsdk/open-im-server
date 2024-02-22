@@ -445,6 +445,32 @@ openim::util::check_ports_by_signal() {
   fi
 }
 
+function openim::util::check_by_signal() {
+  PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer") || PIDS="0"
+  if [  "$PIDS" = "0" ]; then
+      return 0
+  fi
+
+  NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
+
+  if [ "$NUM_PROCESSES" -gt 0 ]; then
+    openim::log::error "Found $NUM_PROCESSES processes for $OPENIM_OUTPUT_HOSTBIN/openim-msgtransfer"
+    for PID in $PIDS; do
+      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        echo -e "\033[31m$(ps -p $PID -o pid,cmd)\033[0m"
+      elif [[ "$OSTYPE" == "darwin"* ]]; then
+        echo -e "\033[31m$(ps -p $PID -o pid,comm)\033[0m"
+      else
+        openim::log::error "Unsupported OS type: $OSTYPE"
+      fi
+    done
+    openim::log::error "Processes have not been stopped properly."
+  else
+    openim::log::success "All openim-msgtransfer processes have been stopped properly."
+  fi
+  return 0
+}
+
 # set +o errexit
 # Sample call for testing:
 # openim::util::check_ports 10002 1004 12345 13306
@@ -684,7 +710,7 @@ openim::util::stop_services_with_name() {
        all_pids_empty=true
 
        for server_name in "$@"; do
-           server_pids=$(pgrep -f "$server_name")
+           server_pids=$(pgrep -f "$server_name") || true
 
            if [[ ! -z $server_pids ]]; then
                all_pids_empty=false
@@ -707,7 +733,7 @@ openim::util::stop_services_with_name() {
    done
 
     openim::log::info "# Begin to check all openim service"
-    . $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal
+    openim::util::check_by_signal
 
 
     echo "Check ports:"

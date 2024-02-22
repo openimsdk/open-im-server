@@ -37,7 +37,7 @@ openim::util::stop_services_by_name_signal "${OPENIM_OUTPUT_HOSTBIN}"
 sleep 1
 
 openim::log::info "# Begin to check all openim service"
-. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check_by_signal
+openim::msgtransfer::check_by_signal
 
 
 echo "Check ports:"
