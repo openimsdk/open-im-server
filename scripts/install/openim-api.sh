@@ -47,8 +47,6 @@ function openim::api::start() {
 
   readonly OPENIM_API_SERVER_LIBRARIES=("${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}")
   openim::util::stop_services_with_name ${OPENIM_API_SERVER_LIBRARIES}
-  readonly OPENIM_API_SERVER_LIBRARIES
-  openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES[@]}
 
   openim::log::info "Starting ${SERVER_NAME} ..."
 
