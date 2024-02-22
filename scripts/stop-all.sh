@@ -26,7 +26,7 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
-openim::log::stat "\n# Begin to stop all openim service"
+openim::log::status "\n# Begin to stop all openim service"
 
 echo -e "\n++ Stop all processes in the path ${OPENIM_OUTPUT_HOSTBIN}"
 
