@@ -64,6 +64,16 @@ IFS=" " read -ra OPENIM_RPC_SERVICE_TARGETS <<< "$(openim::rpc::service_name)"
 readonly OPENIM_RPC_SERVICE_TARGETS
 readonly OPENIM_RPC_SERVICE_LISTARIES=("${OPENIM_RPC_SERVICE_TARGETS[@]##*/}")
 
+
+OPENIM_ALL_RPC_FULL_PATH=()
+for target in openim::rpc::service_name; do
+  OPENIM_ALL_RPC_FULL_PATH+=("${OPENIM_OUTPUT_HOSTBIN}/${target}")
+done
+readonly OPENIM_ALL_RPC_FULL_PATH
+
+
+
+
 # Make sure the environment is only called via common to avoid too much nesting
 openim::rpc::service_port() {
   local targets=(
@@ -121,11 +131,11 @@ function openim::rpc::start() {
     printf "+------------------------+-------+-----------------+\n"
     done
 
-    result=$(openim::util::stop_services_with_name ${OPENIM_API_SERVER_LIBRARIES})
+    result=$(openim::util::stop_services_with_name ${OPENIM_ALL_RPC_FULL_PATH[@]})
      if [[ $? -ne 0 ]]; then
-       openim::log::error "stop ${SERVER_NAME} failed"
+       openim::log::error "stop ${SERVER_NAME} failed" "$result"
      fi
-
+    sleep 1
     # start all rpc services
     for ((i = 0; i < ${#OPENIM_RPC_SERVICE_LISTARIES[*]}; i++)); do
 
