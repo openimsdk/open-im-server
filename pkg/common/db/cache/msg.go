@@ -149,11 +149,15 @@ func (c *msgCache) getHasReadSeqKey(conversationID string, userID string) string
 }
 
 func (c *msgCache) setSeq(ctx context.Context, conversationID string, seq int64, getkey func(conversationID string) string) error {
-	return utils.Wrap1(c.rdb.Set(ctx, getkey(conversationID), seq, 0).Err())
+	return errs.Wrap(c.rdb.Set(ctx, getkey(conversationID), seq, 0).Err())
 }
 
 func (c *msgCache) getSeq(ctx context.Context, conversationID string, getkey func(conversationID string) string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, getkey(conversationID)).Int64())
+	val, err := c.rdb.Get(ctx, getkey(conversationID)).Int64()
+	if err != nil {
+		return 0, errs.Wrap(err)
+	}
+	return val, nil
 }
 
 func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s string) string) (m map[string]int64, err error) {
@@ -214,7 +218,11 @@ func (c *msgCache) getConversationUserMinSeqKey(conversationID, userID string) s
 }
 
 func (c *msgCache) GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, c.getConversationUserMinSeqKey(conversationID, userID)).Int64())
+	val, err := c.rdb.Get(ctx, c.getConversationUserMinSeqKey(conversationID, userID)).Int64()
+	if err != nil {
+		return 0, errs.Wrap(err)
+	}
+	return val, nil
 }
 
 func (c *msgCache) GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (m map[string]int64, err error) {
@@ -224,7 +232,7 @@ func (c *msgCache) GetConversationUserMinSeqs(ctx context.Context, conversationI
 }
 
 func (c *msgCache) SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error {
-	return utils.Wrap1(c.rdb.Set(ctx, c.getConversationUserMinSeqKey(conversationID, userID), minSeq, 0).Err())
+	return errs.Wrap(c.rdb.Set(ctx, c.getConversationUserMinSeqKey(conversationID, userID), minSeq, 0).Err())
 }
 
 func (c *msgCache) SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error) {
@@ -240,7 +248,7 @@ func (c *msgCache) SetUserConversationsMinSeqs(ctx context.Context, userID strin
 }
 
 func (c *msgCache) SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error {
-	return utils.Wrap1(c.rdb.Set(ctx, c.getHasReadSeqKey(conversationID, userID), hasReadSeq, 0).Err())
+	return errs.Wrap(c.rdb.Set(ctx, c.getHasReadSeqKey(conversationID, userID), hasReadSeq, 0).Err())
 }
 
 func (c *msgCache) SetHasReadSeqs(ctx context.Context, conversationID string, hasReadSeqs map[string]int64) error {
@@ -262,12 +270,15 @@ func (c *msgCache) GetHasReadSeqs(ctx context.Context, userID string, conversati
 }
 
 func (c *msgCache) GetHasReadSeq(ctx context.Context, userID string, conversationID string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, c.getHasReadSeqKey(conversationID, userID)).Int64())
+	val, err := c.rdb.Get(ctx, c.getHasReadSeqKey(conversationID, userID)).Int64()
+	if err != nil {
+		return 0, err
+	}
+	return val, nil
 }
 
 func (c *msgCache) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
-
 	return errs.Wrap(c.rdb.HSet(ctx, key, token, flag).Err())
 }
 
@@ -694,7 +705,11 @@ func (c *msgCache) SetGetuiToken(ctx context.Context, token string, expireTime i
 }
 
 func (c *msgCache) GetGetuiToken(ctx context.Context) (string, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, getuiToken).Result())
+	val, err := c.rdb.Get(ctx, getuiToken).Result()
+	if err != nil {
+		return "", errs.Wrap(err)
+	}
+	return val, nil
 }
 
 func (c *msgCache) SetGetuiTaskID(ctx context.Context, taskID string, expireTime int64) error {
@@ -702,7 +717,11 @@ func (c *msgCache) SetGetuiTaskID(ctx context.Context, taskID string, expireTime
 }
 
 func (c *msgCache) GetGetuiTaskID(ctx context.Context) (string, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, getuiTaskID).Result())
+	val, err := c.rdb.Get(ctx, getuiTaskID).Result()
+	if err != nil {
+		return "", errs.Wrap(err)
+	}
+	return val, nil
 }
 
 func (c *msgCache) SetSendMsgStatus(ctx context.Context, id string, status int32) error {
@@ -720,7 +739,11 @@ func (c *msgCache) SetFcmToken(ctx context.Context, account string, platformID i
 }
 
 func (c *msgCache) GetFcmToken(ctx context.Context, account string, platformID int) (string, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, FCM_TOKEN+account+":"+strconv.Itoa(platformID)).Result())
+	val, err := c.rdb.Get(ctx, FCM_TOKEN+account+":"+strconv.Itoa(platformID)).Result()
+	if err != nil {
+		return "", errs.Wrap(err)
+	}
+	return val, nil
 }
 
 func (c *msgCache) DelFcmToken(ctx context.Context, account string, platformID int) error {
@@ -738,7 +761,8 @@ func (c *msgCache) SetUserBadgeUnreadCountSum(ctx context.Context, userID string
 }
 
 func (c *msgCache) GetUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, userBadgeUnreadCountSum+userID).Int())
+	val, err := c.rdb.Get(ctx, userBadgeUnreadCountSum+userID).Int()
+	return val, errs.Wrap(err)
 }
 
 func (c *msgCache) LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
@@ -771,42 +795,31 @@ func (c *msgCache) getMessageReactionExPrefix(clientMsgID string, sessionType in
 func (c *msgCache) JudgeMessageReactionExist(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
 	n, err := c.rdb.Exists(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType)).Result()
 	if err != nil {
-		return false, utils.Wrap(err, "")
+		return false, errs.Wrap(err)
 	}
 
 	return n > 0, nil
 }
 
-func (c *msgCache) SetMessageTypeKeyValue(
-	ctx context.Context,
-	clientMsgID string,
-	sessionType int32,
-	typeKey, value string,
-) error {
+func (c *msgCache) SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error {
 	return errs.Wrap(c.rdb.HSet(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), typeKey, value).Err())
 }
 
 func (c *msgCache) SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
-	return utils.Wrap2(c.rdb.Expire(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), expiration).Result())
+	val, err := c.rdb.Expire(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), expiration).Result()
+	return val, errs.Wrap(err)
 }
 
 func (c *msgCache) GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error) {
-	return utils.Wrap2(c.rdb.HGet(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), typeKey).Result())
+	val, err := c.rdb.HGet(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), typeKey).Result()
+	return val, errs.Wrap(err)
 }
 
-func (c *msgCache) GetOneMessageAllReactionList(
-	ctx context.Context,
-	clientMsgID string,
-	sessionType int32,
-) (map[string]string, error) {
-	return utils.Wrap2(c.rdb.HGetAll(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType)).Result())
+func (c *msgCache) GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error) {
+	val, err := c.rdb.HGetAll(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType)).Result()
+	return val, errs.Wrap(err)
 }
 
-func (c *msgCache) DeleteOneMessageKey(
-	ctx context.Context,
-	clientMsgID string,
-	sessionType int32,
-	subKey string,
-) error {
+func (c *msgCache) DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error {
 	return errs.Wrap(c.rdb.HDel(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), subKey).Err())
 }

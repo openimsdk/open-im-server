@@ -29,7 +29,6 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/tokenverify"
-	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -105,7 +104,7 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 func (s *authServer) parseToken(ctx context.Context, tokensString string) (claims *tokenverify.Claims, err error) {
 	claims, err = tokenverify.GetClaimFromToken(tokensString, authverify.Secret())
 	if err != nil {
-		return nil, utils.Wrap(err, "")
+		return nil, errs.Wrap(err)
 	}
 	m, err := s.authDatabase.GetTokensWithoutError(ctx, claims.UserID, claims.PlatformID)
 	if err != nil {
@@ -121,7 +120,7 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 		case constant.KickedToken:
 			return nil, errs.ErrTokenKicked.Wrap()
 		default:
-			return nil, utils.Wrap(errs.ErrTokenUnknown, "")
+			return nil, errs.Wrap(errs.ErrTokenUnknown)
 		}
 	}
 	return nil, errs.ErrTokenNotExist.Wrap()

@@ -27,7 +27,6 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -153,10 +152,10 @@ func (p *Producer) SendMessage(ctx context.Context, key string, msg proto.Messag
 	// Marshal the protobuf message
 	bMsg, err := proto.Marshal(msg)
 	if err != nil {
-		return 0, 0, utils.Wrap(err, "kafka proto Marshal err")
+		return 0, 0, errs.Wrap(err, "kafka proto Marshal err")
 	}
 	if len(bMsg) == 0 {
-		return 0, 0, utils.Wrap(errEmptyMsg, "")
+		return 0, 0, errs.Wrap(errEmptyMsg, "")
 	}
 
 	// Prepare Kafka message
@@ -168,13 +167,13 @@ func (p *Producer) SendMessage(ctx context.Context, key string, msg proto.Messag
 
 	// Validate message key and value
 	if kMsg.Key.Length() == 0 || kMsg.Value.Length() == 0 {
-		return 0, 0, utils.Wrap(errEmptyMsg, "")
+		return 0, 0, errs.Wrap(errEmptyMsg)
 	}
 
 	// Attach context metadata as headers
 	header, err := GetMQHeaderWithContext(ctx)
 	if err != nil {
-		return 0, 0, utils.Wrap(err, "")
+		return 0, 0, errs.Wrap(err)
 	}
 	kMsg.Headers = header
 
@@ -182,7 +181,7 @@ func (p *Producer) SendMessage(ctx context.Context, key string, msg proto.Messag
 	partition, offset, err := p.producer.SendMessage(kMsg)
 	if err != nil {
 		log.ZWarn(ctx, "p.producer.SendMessage error", err)
-		return 0, 0, utils.Wrap(err, "")
+		return 0, 0, errs.Wrap(err)
 	}
 
 	log.ZDebug(ctx, "ByteEncoder SendMessage end", "key", kMsg.Key, "key length", kMsg.Value.Length())
