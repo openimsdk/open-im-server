@@ -503,33 +503,18 @@ openim::util::check_process_names_for_stop() {
     fi
   done
 
-  # Print information
-  if [[ ${#not_started[@]} -ne 0 ]]; then
-    echo "Not started processes:"
-    for process_name in "${not_started[@]}"; do
-      openim::log::error "Process $process_name is not started."
-    done
-  fi
 
   if [[ ${#started[@]} -ne 0 ]]; then
     echo
-    echo "Started processes:"
+    echo "The programs that have not exited are:"
     for info in "${started[@]}"; do
-      echo "$info"
+      echo "$info "
     done
+    return 1
   fi
 
-  # Return status
-  if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
-    openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
-    cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
-    return 1
-  else
-    echo ""
-    openim::log::success "All processes are running."
-    return 0
-  fi
+  return 0
+
 }
 
 # openim::util::check_process_names docker-pr
