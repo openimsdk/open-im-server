@@ -58,7 +58,7 @@
 + 🚀 [Join our Slack community](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
 + :eyes: [Join our wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 + 👫 [Join our Reddit](https://www.reddit.com/r/OpenIMessaging)
-+ 💬 [Follow our Twitter account](https://twitter.com/openimsdk)
++ 💬 [Follow our Twitter account](https://twitter.com/founder_im63606)
 
 ## Ⓜ️ About OpenIM
 
