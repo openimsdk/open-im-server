@@ -148,15 +148,7 @@ function openim::rpc::start() {
         done
     done
 
-    sleep 5
 
-    result=$(openim::util::check_ports ${OPENIM_RPC_PORT_TARGETS[@]})
-    if [[ $? -ne 0 ]]; then
-        openim::log::error "check ${SERVER_NAME} failed"
-    else
-        openim::log::info "$result"
-    fi
-    # openim::util::check_ports ${OPENIM_RPC_PROM_PORT_TARGETS[@]}
     return 0
 }
 
