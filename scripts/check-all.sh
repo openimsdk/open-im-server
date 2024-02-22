@@ -81,7 +81,7 @@ else
 fi
 
 
-openim::log::info "\n## Check OpenIM service name: ${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer"
+openim::log::info "\n## Check OpenIM service name: \n ${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer"
 result=$(. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check)
 if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
@@ -99,6 +99,6 @@ if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "check process failed.\n $result"
 else
-  echo "Check all openim service ports successfully !"
+  openim::color::echo $COLOR_GREEN "All openim services are running normally! "
 fi
 
