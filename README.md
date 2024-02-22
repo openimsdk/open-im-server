@@ -53,12 +53,12 @@
 
 ## :busts_in_silhouette: Community
 
-+ 📚 [OpenIM Community](https://github.com/OpenIMSDK/community)
-+ 💕 [OpenIM Interest Group](https://github.com/Openim-sigs)
++ 💬 [Follow our Twitter account](https://twitter.com/founder_im63606)
++ 👫 [Join our Reddit](https://www.reddit.com/r/OpenIMessaging)
 + 🚀 [Join our Slack community](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
 + :eyes: [Join our wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
-+ 👫 [Join our Reddit](https://www.reddit.com/r/OpenIMessaging)
-+ 💬 [Follow our Twitter account](https://twitter.com/founder_im63606)
++ 📚 [OpenIM Community](https://github.com/OpenIMSDK/community)
++ 💕 [OpenIM Interest Group](https://github.com/Openim-sigs)
 
 ## Ⓜ️ About OpenIM
 
