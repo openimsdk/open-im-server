@@ -432,7 +432,7 @@ openim::util::check_process_names() {
   if [[ ${#not_started[@]} -ne 0 ]]; then
     echo "Not started processes:"
     for process_name in "${not_started[@]}"; do
-      openim::log::error "Process $process_name is not started."
+      echo "Process $process_name is not started."
     done
   fi
   
