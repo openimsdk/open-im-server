@@ -206,7 +206,7 @@ openim::log::status() {
   fi
   
   timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
-  echo_log "+++ ${timestamp} ${1}"
+  echo_log "${timestamp} ${1}"
   shift
   for message; do
     echo_log "    ${message}"
