@@ -97,7 +97,8 @@ done
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
-  openim::log::error "check process failed.\n $result"
+  openim::log::error "check process failed.\n "
+  echo "$result"
 else
   openim::color::echo $COLOR_GREEN "All openim services are running normally! "
 fi
