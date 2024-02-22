@@ -18,7 +18,7 @@
 # Usage: `scripts/verify-spelling.sh`.
 
 
-set -o nounset
+
 
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..

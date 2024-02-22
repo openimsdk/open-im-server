@@ -16,7 +16,7 @@
 # This script automatically initializes various configuration files and can generate example files.
 
 
-set -o nounset
+
 
 
 # Root directory of the OpenIM project

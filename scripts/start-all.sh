@@ -16,7 +16,7 @@
 #FIXME This script is the startup script for multiple servers.
 #FIXME The full names of the shell scripts that need to be started are placed in the `need_to_start_server_shell` array.
 
-set -o nounset
+
 
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..

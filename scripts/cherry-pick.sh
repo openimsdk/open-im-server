@@ -22,7 +22,7 @@
 #  automated-cherry-pick-of-<pr>-<target branch>-<timestamp>
 
 
-set -o nounset
+
 
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..

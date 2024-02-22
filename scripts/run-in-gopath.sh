@@ -21,7 +21,7 @@
 # Usage: `scripts/run-in-gopath.sh <command>`.
 
 
-set -o nounset
+
 
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..

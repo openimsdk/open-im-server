@@ -28,7 +28,7 @@
 #   SERVER_IMAGE_VERSION=latest IMAGE_REGISTRY=myregistry ./this_script.sh
 
 
-set -o nounset
+
 
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..

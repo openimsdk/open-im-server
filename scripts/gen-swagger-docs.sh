@@ -16,7 +16,7 @@
 # Script to generate docs from the latest swagger spec.
 
 
-set -o nounset
+
 
 
 # The root of the build/dist directory

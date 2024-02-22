@@ -19,7 +19,7 @@
 # Usage: `scripts/list-feature-tests.sh`.
 
 
-set -o nounset
+
 
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..

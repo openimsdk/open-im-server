@@ -23,7 +23,7 @@
 # Example: `scripts/build-go.sh WHAT=cmd/kubelet`.
 
 
-set -o nounset
+
 
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..

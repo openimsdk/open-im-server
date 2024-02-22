@@ -20,7 +20,7 @@
 # READ: https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh
 
 
-set -o nounset
+
 
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..

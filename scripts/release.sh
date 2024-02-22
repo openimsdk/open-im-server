@@ -48,7 +48,7 @@
 # Build a OpenIM release. This script supports various flags for flexible execution control.
 
 
-set -o nounset
+
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/common.sh"

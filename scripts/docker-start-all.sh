@@ -15,7 +15,7 @@
 # limitations under the License.
 
 
-set -o nounset
+
 
 
 #fixme This scripts is the total startup scripts
