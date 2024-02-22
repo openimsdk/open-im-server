@@ -50,11 +50,11 @@ function openim::msgtransfer::start() {
   openim::log::info "openim maggateway num: ${OPENIM_MSGGATEWAY_NUM}"
   
   if [ "${OPENIM_MSGGATEWAY_NUM}" -lt 1 ]; then
-    opeim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be greater than 0"
+    opeim::log::error "OPENIM_MSGGATEWAY_NUM must be greater than 0"
   fi
   
   if [ ${OPENIM_MSGGATEWAY_NUM} -ne $((${#MSG_TRANSFER_PROM_PORTS[@]} - 1)) ]; then
-    openim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be equal to the number of MSG_TRANSFER_PROM_PORTS"
+    openim::log::error "OPENIM_MSGGATEWAY_NUM must be equal to the number of MSG_TRANSFER_PROM_PORTS"
   fi
   
   for (( i=0; i<$OPENIM_MSGGATEWAY_NUM; i++ )) do
@@ -88,7 +88,7 @@ function openim::msgtransfer::check() {
       fi
     done
   else
-    openim::log::error_exit "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
+    openim::log::error "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
   fi
 }
 
