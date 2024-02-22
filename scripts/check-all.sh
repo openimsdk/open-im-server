@@ -100,6 +100,6 @@ if [[ $? -ne 0 ]]; then
   openim::log::error "check process failed.\n "
   echo "$result"
 else
-  openim::color::echo $COLOR_GREEN "All openim services are running normally! "
+  openim::log::success "All openim services are running normally! "
 fi
 

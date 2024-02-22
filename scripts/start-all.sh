@@ -109,7 +109,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 
-openim::log::info "\n## Post Starting OpenIM services"
+openim::log::info "\n## Post Starting openim services"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
 
-openim::color::echo $COLOR_GREEN "✨  All OpenIM services have been successfully started!"
+openim::log::success "✨  All openim services have been successfully started!"
