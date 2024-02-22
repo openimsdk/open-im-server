@@ -57,7 +57,7 @@ function execute_start_scripts() {
 
 
 
-openim::log::info "\n# Begin to start all openim service scripts"
+
 
 
 openim::golang::check_openim_binaries
@@ -88,7 +88,7 @@ fi
 
 
 
-openim::log::info "\n## Starting OpenIM services"
+openim::log::info "\n## Starting openim services"
 execute_start_scripts
 
 sleep 2
