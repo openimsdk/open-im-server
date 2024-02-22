@@ -135,7 +135,7 @@ function openim::rpc::start() {
      if [[ $? -ne 0 ]]; then
        openim::log::error "stop ${SERVER_NAME} failed" "$result"
      fi
-    sleep 1
+    sleep 5
     # start all rpc services
     for ((i = 0; i < ${#OPENIM_RPC_SERVICE_LISTARIES[*]}; i++)); do
 
