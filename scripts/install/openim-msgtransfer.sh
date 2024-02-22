@@ -33,13 +33,7 @@ function openim::msgtransfer::start() {
 
   openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
   openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGTRANSFER_BINARY}"
-  
-  result=$(openim::util::stop_services_with_name ${OPENIM_MSGTRANSFER_BINARY})
-  if [[ $? -ne 0 ]]; then
-    openim::log::error "stop ${SERVER_NAME} failed"
-    return 1
-  fi
-  
+
   # Message Transfer Prometheus port list
   MSG_TRANSFER_PROM_PORTS=(openim::util::list-to-string ${MSG_TRANSFER_PROM_PORT} )
 
