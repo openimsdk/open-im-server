@@ -30,6 +30,7 @@ import (
 type RootCmdPt interface {
 	GetPortFromConfig(portType string) int
 }
+
 type RootCmd struct {
 	Command        cobra.Command
 	Name           string

@@ -75,12 +75,14 @@ func run(port int, proPort int) error {
 	}
 
 	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.Config.EncodeConfig()); err != nil {
-		return err
+		return errs.Wrap(err, "register config to registry error")
 	}
+
 	var (
 		netDone = make(chan struct{}, 1)
 		netErr  error
 	)
+
 	router := api.NewGinRouter(client, rdb)
 	if config.Config.Prometheus.Enable {
 		go func() {
@@ -91,7 +93,6 @@ func run(port int, proPort int) error {
 				netDone <- struct{}{}
 			}
 		}()
-
 	}
 
 	var address string
@@ -108,7 +109,6 @@ func run(port int, proPort int) error {
 		if err != nil && err != http.ErrServerClosed {
 			netErr = errs.Wrap(err, fmt.Sprintf("api start err: %s", server.Addr))
 			netDone <- struct{}{}
-
 		}
 	}()
 

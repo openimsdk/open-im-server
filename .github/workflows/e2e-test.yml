@@ -92,6 +92,7 @@ jobs:
 
     - name: Exec OpenIM API test
       run: |
+        sudo make test-api
         mkdir -p ./tmp
         touch ./tmp/test.md
         echo "# OpenIM Test" >> ./tmp/test.md
