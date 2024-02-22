@@ -78,6 +78,12 @@ TOOLS_START_SCRIPTS_PATH=${START_SCRIPTS_PATH}/openim-tools.sh
 openim::log::info "\n## Pre Starting OpenIM services"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start
 
+
+"${OPENIM_ROOT}"/scripts/stop-all.sh
+
+sleep 5
+
+
 openim::log::info "\n## Starting OpenIM services"
 execute_scripts
 
