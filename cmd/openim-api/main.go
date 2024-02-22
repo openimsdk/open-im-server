@@ -119,7 +119,7 @@ func run(port int, proPort int) error {
 	defer cancel()
 	select {
 	case <-sigs:
-		util.SIGUSR1Exit()
+		util.SIGTERMExit()
 		err := server.Shutdown(ctx)
 		if err != nil {
 			return errs.Wrap(err, "shutdown err")
