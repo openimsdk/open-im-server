@@ -46,7 +46,7 @@ function openim::api::start() {
   echo "++ OpenIM API config path: ${OPENIM_API_CONFIG}"
 
   readonly OPENIM_API_SERVER_LIBRARIES=("${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}")
-  openim::util::stop_services_with_name ${OPENIM_API_SERVER_LIBRARIES}
+  openim::util::stop_services_with_name ${OPENIM_API_SERVER_LIBRARIES[@]}
 
   openim::log::info "Starting ${SERVER_NAME} ..."
 
