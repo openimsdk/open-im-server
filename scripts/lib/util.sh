@@ -298,7 +298,7 @@ openim::util::check_ports() {
   # An array to collect information about processes that are running.
   local started=()
   
-  openim::log::info "Checking ports: $*"
+  echo "Checking ports: $*"
   # Iterate over each given port.
   for port in "$@"; do
     # Initialize variables
@@ -344,7 +344,7 @@ openim::util::check_ports() {
   
   # Print information about ports whose processes are not running.
   if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::log::info "\n### Not started ports:"
+    echo "\n### Not started ports:"
     for port in "${not_started[@]}"; do
       openim::log::error "Port $port is not started."
     done
@@ -352,9 +352,9 @@ openim::util::check_ports() {
   
   # Print information about ports whose processes are running.
   if [[ ${#started[@]} -ne 0 ]]; then
-    openim::log::info "\n### Started ports:"
+    echo "\n### Started ports:"
     for info in "${started[@]}"; do
-      openim::log::info "$info"
+      echo "$info"
     done
   fi
   
@@ -430,7 +430,7 @@ openim::util::check_process_names() {
   
   # Print information
   if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::log::info "Not started processes:"
+    echo "Not started processes:"
     for process_name in "${not_started[@]}"; do
       openim::log::error "Process $process_name is not started."
     done
@@ -438,9 +438,9 @@ openim::util::check_process_names() {
   
   if [[ ${#started[@]} -ne 0 ]]; then
     echo
-    openim::log::info "Started processes:"
+    echo "Started processes:"
     for info in "${started[@]}"; do
-      openim::log::info "$info"
+      echo "$info"
     done
   fi
   
@@ -477,7 +477,7 @@ openim::util::check_process_names_for_stop() {
   local not_started=()
   local started=()
 
-  openim::log::info "Checking processes: $*"
+  echo "Checking processes: $*"
   # Iterate over each given process name
   for process_name in "$@"; do
     # Use `pgrep` to find process IDs related to the given process name
@@ -505,7 +505,7 @@ openim::util::check_process_names_for_stop() {
 
   # Print information
   if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::log::info "Not started processes:"
+    echo "Not started processes:"
     for process_name in "${not_started[@]}"; do
       openim::log::error "Process $process_name is not started."
     done
@@ -513,9 +513,9 @@ openim::util::check_process_names_for_stop() {
 
   if [[ ${#started[@]} -ne 0 ]]; then
     echo
-    openim::log::info "Started processes:"
+    echo "Started processes:"
     for info in "${started[@]}"; do
-      openim::log::info "$info"
+      echo "$info"
     done
   fi
 
@@ -548,7 +548,7 @@ openim::util::stop_services_on_ports() {
   # An array to collect information about processes that were stopped.
   local stopped=()
   
-  openim::log::info "Stopping services on ports: $*"
+  echo "Stopping services on ports: $*"
   # Iterate over each given port.
   for port in "$@"; do
     # Use the `lsof` command to find process information related to the given port.
@@ -572,7 +572,7 @@ openim::util::stop_services_on_ports() {
 
     # Print information about ports whose processes couldn't be stopped.
     if [[ ${#not_stopped[@]} -ne 0 ]]; then
-        openim::log::info "Ports that couldn't be stopped:"
+        echo "Ports that couldn't be stopped:"
         for port in "${not_stopped[@]}"; do
             openim::log::status "Failed to stop service on port $port."
         done
@@ -581,7 +581,7 @@ openim::util::stop_services_on_ports() {
     # Print information about ports whose processes were successfully stopped.
     if [[ ${#stopped[@]} -ne 0 ]]; then
         for port in "${stopped[@]}"; do
-            openim::log::info "Successfully stopped service on port $port."
+            echo "Successfully stopped service on port $port."
         done
     fi
 
@@ -614,7 +614,7 @@ openim::util::stop_services_with_name() {
     # An array to collect information about processes that were stopped.
     local stopped=()
 
-    openim::log::info "Stopping services with names: $*"
+    echo "Stopping services with names: $*"
     # Iterate over each given service name.
     for server_name in "$@"; do
         # Use the `pgrep` command to find process IDs related to the given service name.
