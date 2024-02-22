@@ -99,14 +99,17 @@ IFS=" " read -ra OPENIM_SERVER_PORT_TARGETS <<< "$(openim::common::service_port)
 readonly OPENIM_SERVER_PORT_TARGETS
 readonly OPENIM_SERVER_PORT_LISTARIES=("${OPENIM_SERVER_PORT_TARGETS[@]##*/}")
 
+
 OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER=()
-for target in openim::golang::server_targets_no_transfer; do
+for target in OPENIM_SERVER_TARGETS_NO_TRANSFER; do
   OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER+=("${OPENIM_OUTPUT_HOSTBIN}/${target}")
 done
 readonly OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER
 
+
+
 OPENIM_ALL_SERVICE_LIBRARIES=()
-for target in openim::golang::server_targets; do
+for target in OPENIM_SERVER_TARGETS; do
   OPENIM_ALL_SERVICE_LIBRARIES+=("${OPENIM_OUTPUT_HOSTBIN}/${target}")
 done
 readonly OPENIM_ALL_SERVICE_LIBRARIES

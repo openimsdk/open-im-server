@@ -102,6 +102,14 @@ openim::golang::server_targets_no_transfer() {
   echo "${targets[@]}"
 }
 
+
+IFS=" " read -ra OPENIM_SERVER_TARGETS_NO_TRANSFER <<< "$(openim::golang::server_targets_no_transfer)"
+readonly OPENIM_SERVER_TARGETS_NO_TRANSFER
+readonly OPENIM_SERVER_TARGETS_NO_TRANSFER=("${OPENIM_SERVER_TARGETS_NO_TRANSFER[@]##*/}")
+
+
+
+
 IFS=" " read -ra OPENIM_SERVER_TARGETS <<< "$(openim::golang::server_targets)"
 readonly OPENIM_SERVER_TARGETS
 readonly OPENIM_SERVER_BINARIES=("${OPENIM_SERVER_TARGETS[@]##*/}")
