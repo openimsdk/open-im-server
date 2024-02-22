@@ -81,7 +81,7 @@ else
 fi
 
 
-openim::log::info "\n## Check OpenIM service name: ${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer"
+openim::log::info "\n## Check OpenIM service name: \n ${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer"
 result=$(. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check)
 if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
