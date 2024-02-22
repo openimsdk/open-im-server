@@ -30,10 +30,10 @@
 # Usage:
 # 1. Direct Script Execution:
 #    This initiates all the RPC services declared under the function openim::rpc::service_name.
-#    Example: ./openim-rpc-{rpc-name}.sh  openim::rpc::start
+#    Example: ./openim-rpc.sh  openim::rpc::start
 # 2. Controlling through Functions for systemctl operations:
 #    Specific operations like installation, uninstallation, and status check can be executed by passing the respective function name as an argument to the script.
-#    Example: ./openim-rpc-{rpc-name}.sh openim::rpc::install
+#    Example: ./openim-rpc.sh openim::rpc::install
 #
 # Note: Before executing this script, ensure that the necessary permissions are granted and relevant environmental variables are set.
 #
@@ -63,6 +63,12 @@ openim::rpc::service_name() {
 IFS=" " read -ra OPENIM_RPC_SERVICE_TARGETS <<< "$(openim::rpc::service_name)"
 readonly OPENIM_RPC_SERVICE_TARGETS
 readonly OPENIM_RPC_SERVICE_LISTARIES=("${OPENIM_RPC_SERVICE_TARGETS[@]##*/}")
+
+OPENIM_RPC_SERVICE_LIBRARIES=()
+for target in "${OPENIM_RPC_SERVICE_TARGETS[@]}"; do
+  OPENIM_RPC_SERVICE_LIBRARIES+=("${OPENIM_OUTPUT_HOSTBIN}/${target}")
+done
+readonly OPENIM_RPC_SERVICE_LIBRARIES
 
 # Make sure the environment is only called via common to avoid too much nesting
 openim::rpc::service_port() {
@@ -121,11 +127,10 @@ function openim::rpc::start() {
     printf "+------------------------+-------+-----------------+\n"
     done
 
+    openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LIBRARIES[@]}
+
     # start all rpc services
     for ((i = 0; i < ${#OPENIM_RPC_SERVICE_LISTARIES[*]}; i++)); do
-        # openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES
-        openim::util::stop_services_on_ports ${OPENIM_RPC_PORT_LISTARIES[$i]}
-        openim::util::stop_services_on_ports ${OPENIM_RPC_PROM_PORT_LISTARIES[$i]}
 
         openim::log::info "OpenIM ${OPENIM_RPC_SERVICE_LISTARIES[$i]} config path: ${OPENIM_RPC_CONFIG}"
 

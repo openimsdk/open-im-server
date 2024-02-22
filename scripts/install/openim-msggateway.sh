@@ -21,8 +21,6 @@ set -o pipefail
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
 
-openim::util::set_max_fd 200000
-
 SERVER_NAME="openim-msggateway"
 
 function openim::msggateway::start() {
