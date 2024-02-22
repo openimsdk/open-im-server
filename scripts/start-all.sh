@@ -88,7 +88,7 @@ fi
 
 
 
-openim::log::info "\n## Starting openim services"
+openim::log::info "\n## Starting openim script "
 execute_start_scripts
 
 sleep 2
