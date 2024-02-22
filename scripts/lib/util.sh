@@ -2868,9 +2868,7 @@ function openim::util::gen_os_arch() {
 
 function openim::util::check_process_names_for_stop() {
   local all_stopped=true
-  echo "dddddddddddddddddddddddddddddddddddd"
   for service in "${OPENIM_ALL_SERVICE_LIBRARIES[@]}"; do
-      echo "dddddddddddddddddddddddddddddddddddd" ${service}
 
     PIDS=$(pgrep -f "${service}") || PIDS="0"
     if [ "$PIDS" = "0" ]; then
@@ -2879,7 +2877,6 @@ function openim::util::check_process_names_for_stop() {
 
 
     NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
-       echo "dddddddddddddddddddddddddddddddddddd" ${NUM_PROCESSES}
     if [ "$NUM_PROCESSES" -gt 0 ]; then
       all_stopped=false
       openim::log::error "Found $NUM_PROCESSES processes for ${service}"
