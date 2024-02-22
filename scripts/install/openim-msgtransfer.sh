@@ -65,6 +65,8 @@ function openim::msgtransfer::start() {
 
 function openim::msgtransfer::check() {
   PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
+  echo "transsssssssssssssssssssssss" $PIDS
+
   NUM_PROCESSES=$(echo "$PIDS" | wc -l)
   if [ "$NUM_PROCESSES" -eq "$OPENIM_MSGGATEWAY_NUM" ]; then
     for PID in $PIDS; do
