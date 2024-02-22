@@ -51,7 +51,7 @@ do
    sleep 1
   ((attempt++))
  else
-   openim::log::success "✨  All processes to be stopped"
+   openim::log::success "✨  All openim processes to be stopped"
    exit 0
  fi
 done
