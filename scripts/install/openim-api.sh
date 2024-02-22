@@ -47,24 +47,37 @@ function openim::api::start() {
 
   openim::log::info "Starting ${SERVER_NAME} ..."
 
+  readonly OPENIM_API_SERVER_LIBRARIES="${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"
+  result=$(openim::util::stop_services_with_name ${OPENIM_API_SERVER_LIBRARIES})
+  if [[ $? -ne 0 ]]; then
+    openim::log::error "stop ${SERVER_NAME} failed"
+    return 1
+  fi
+
   printf "+------------------------+--------------+\n"
   printf "| Service Name           | Port         |\n"
   printf "+------------------------+--------------+\n"
-  
+
+
   local length=${#OPENIM_API_SERVICE_LISTARIES[@]}
-  
   for ((i=0; i<length; i++)); do
     printf "| %-22s | %6s       |\n" "${OPENIM_API_SERVICE_LISTARIES[$i]}" "${OPENIM_API_PORT_LISTARIES[$i]}"
     printf "+------------------------+--------------+\n"
     # Stop services on the specified ports before starting new ones
-    openim::util::stop_services_on_ports "${OPENIM_API_PORT_LISTARIES[$i]}"
-    openim::util::stop_services_on_ports "${OPENIM_API_PROMETHEUS_PORT_LISTARIES[$i]}"
+#    openim::util::stop_services_on_ports "${OPENIM_API_PORT_LISTARIES[$i]}"
+#    openim::util::stop_services_on_ports "${OPENIM_API_PROMETHEUS_PORT_LISTARIES[$i]}"
     openim::log::info "OpenIM ${OPENIM_API_SERVICE_LISTARIES[$i]} config path: ${OPENIM_API_CONFIG}"
     
     # Start the service with Prometheus port if specified
-    openim::api::start_service "${OPENIM_API_SERVICE_LISTARIES[$i]}" "${OPENIM_API_PORT_LISTARIES[$i]}" "${OPENIM_API_PROMETHEUS_PORT_LISTARIES[$i]}"
-    sleep 2
+    result=$(openim::api::start_service "${OPENIM_API_SERVICE_LISTARIES[$i]}" "${OPENIM_API_PORT_LISTARIES[$i]}" "${OPENIM_API_PROMETHEUS_PORT_LISTARIES[$i]}")
+    if [[ $? -ne 0 ]]; then
+      openim::log::error "stop ${SERVER_NAME} failed"
+    else
+      openim::log::info "$result"
+    fi
+
   done
+  return 0
 }
 
 function openim::api::start_service() {
@@ -85,7 +98,9 @@ function openim::api::start_service() {
   
   if [ $? -ne 0 ]; then
     openim::log::error_exit "Failed to start ${binary_name} on port ${service_port}."
+    return 1
   fi
+  return 0
 }
 
 ###################################### Linux Systemd ######################################

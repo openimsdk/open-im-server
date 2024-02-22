@@ -121,11 +121,13 @@ function openim::rpc::start() {
     printf "+------------------------+-------+-----------------+\n"
     done
 
+    result=$(openim::util::stop_services_with_name ${OPENIM_API_SERVER_LIBRARIES})
+     if [[ $? -ne 0 ]]; then
+       openim::log::error "stop ${SERVER_NAME} failed"
+     fi
+
     # start all rpc services
     for ((i = 0; i < ${#OPENIM_RPC_SERVICE_LISTARIES[*]}; i++)); do
-        # openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES
-        openim::util::stop_services_on_ports ${OPENIM_RPC_PORT_LISTARIES[$i]}
-        openim::util::stop_services_on_ports ${OPENIM_RPC_PROM_PORT_LISTARIES[$i]}
 
         openim::log::info "OpenIM ${OPENIM_RPC_SERVICE_LISTARIES[$i]} config path: ${OPENIM_RPC_CONFIG}"
 
@@ -138,15 +140,25 @@ function openim::rpc::start() {
 
         for ((j = 0; j < ${#OPENIM_RPC_SERVICE_PORTS_ARRAY[@]}; j++)); do
             openim::log::info "Starting ${OPENIM_RPC_SERVICE_LISTARIES[$i]} service, port: ${OPENIM_RPC_SERVICE_PORTS[j]}, prometheus port: ${OPENIM_RPC_PROM_PORTS[j]}, binary root: ${OPENIM_OUTPUT_HOSTBIN}/${OPENIM_RPC_SERVICE_LISTARIES[$i]}"
-            openim::rpc::start_service "${OPENIM_RPC_SERVICE_LISTARIES[$i]}" "${OPENIM_RPC_SERVICE_PORTS[j]}" "${OPENIM_RPC_PROM_PORTS[j]}"
+            result=$(openim::rpc::start_service "${OPENIM_RPC_SERVICE_LISTARIES[$i]}" "${OPENIM_RPC_SERVICE_PORTS[j]}" "${OPENIM_RPC_PROM_PORTS[j]}")
+            if [[ $? -ne 0 ]]; then
+                openim::log::error "stop ${SERVER_NAME} failed"
+            else
+                openim::log::info "$result"
+            fi
         done
     done
 
     sleep 5
 
-    openim::util::check_ports ${OPENIM_RPC_PORT_TARGETS[@]}
+    result=$(openim::util::check_ports ${OPENIM_RPC_PORT_TARGETS[@]})
+    if [[ $? -ne 0 ]]; then
+        openim::log::error "check ${SERVER_NAME} failed"
+    else
+        openim::log::info "$result"
+    fi
     # openim::util::check_ports ${OPENIM_RPC_PROM_PORT_TARGETS[@]}
-
+    return 0
 }
 
 function openim::rpc::start_service() {
@@ -161,6 +173,7 @@ function openim::rpc::start_service() {
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
   nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
+  return 0
 }
 
 ###################################### Linux Systemd ######################################

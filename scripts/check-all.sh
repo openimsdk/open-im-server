@@ -49,13 +49,6 @@ print_services_and_ports() {
   echo "+-------------------------+----------+"
 }
 
-handle_error() {
-  echo "An error occurred. Printing ${STDERR_LOG_FILE} contents:"
-  cat "${STDERR_LOG_FILE}"
-  exit 1
-}
-
-trap handle_error ERR
 
 # Assuming OPENIM_SERVER_NAME_TARGETS and OPENIM_SERVER_PORT_TARGETS are defined
 # Similarly for OPENIM_DEPENDENCY_TARGETS and OPENIM_DEPENDENCY_PORT_TARGETS
@@ -71,7 +64,6 @@ echo "++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 openim::log::info "\n## Check all dependent service ports"
 echo "++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
 
-set +e
 
 # Later, after discarding Docker, the Docker keyword is unreliable, and Kubepods is used
 if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
@@ -92,15 +84,17 @@ openim::log::info "\n## Check OpenIM service name"
 . $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check
 
 openim::log::info "\n## Check all OpenIM service ports"
-echo "+++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
-openim::util::check_ports ${OPENIM_SERVER_PORT_LISTARIES[@]}
+echo "+++ The process being checked:"
+for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
+    echo "$item"
+done
+result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
-  openim::log::error_exit "The service does not start properly, please check the port, query variable definition!"
+  openim::log::error "check process failed.\n $result"
+  return 1
 else
   echo "++++ Check all openim service ports successfully !"
+  return 0
 fi
 
-set -e
-
-trap - ERR

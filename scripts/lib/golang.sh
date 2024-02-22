@@ -84,6 +84,24 @@ openim::golang::server_targets() {
   echo "${targets[@]}"
 }
 
+openim::golang::server_targets_no_transfer() {
+  local targets=(
+    openim-api
+    openim-cmdutils
+    openim-crontask
+    openim-msggateway
+    openim-push
+    openim-rpc-auth
+    openim-rpc-conversation
+    openim-rpc-friend
+    openim-rpc-group
+    openim-rpc-msg
+    openim-rpc-third
+    openim-rpc-user
+  )
+  echo "${targets[@]}"
+}
+
 IFS=" " read -ra OPENIM_SERVER_TARGETS <<< "$(openim::golang::server_targets)"
 readonly OPENIM_SERVER_TARGETS
 readonly OPENIM_SERVER_BINARIES=("${OPENIM_SERVER_TARGETS[@]##*/}")

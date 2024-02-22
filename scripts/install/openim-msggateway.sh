@@ -32,7 +32,11 @@ function openim::msggateway::start() {
   openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
   openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGGATEWAY_BINARY}"
   
-  openim::util::stop_services_with_name ${OPENIM_MSGGATEWAY_BINARY}
+  result=$(openim::util::stop_services_with_name ${OPENIM_MSGGATEWAY_BINARY})
+  if [[ $? -ne 0 ]]; then
+    openim::log::error "stop ${SERVER_NAME} failed"
+    return 1
+  fi
   
   # OpenIM message gateway service port
   OPENIM_MESSAGE_GATEWAY_PORTS=$(openim::util::list-to-string ${OPENIM_MESSAGE_GATEWAY_PORT} )
@@ -66,8 +70,7 @@ function openim::msggateway::start() {
 
         nohup ${OPENIM_MSGGATEWAY_BINARY} --port ${OPENIM_MSGGATEWAY_PORTS_ARRAY[$i]} --ws_port ${OPENIM_WS_PORTS_ARRAY[$i]} $PROMETHEUS_PORT_OPTION -c ${OPENIM_MSGGATEWAY_CONFIG} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
     done
-
-    openim::util::check_process_names ${SERVER_NAME}
+    return 0
 }
 
 ###################################### Linux Systemd ######################################

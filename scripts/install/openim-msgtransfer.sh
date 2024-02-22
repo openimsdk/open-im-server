@@ -34,7 +34,11 @@ function openim::msgtransfer::start() {
   openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
   openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGTRANSFER_BINARY}"
   
-  openim::util::stop_services_with_name ${OPENIM_MSGTRANSFER_BINARY}
+  result=$(openim::util::stop_services_with_name ${OPENIM_MSGTRANSFER_BINARY})
+  if [[ $? -ne 0 ]]; then
+    openim::log::error "stop ${SERVER_NAME} failed"
+    return 1
+  fi
   
   # Message Transfer Prometheus port list
   MSG_TRANSFER_PROM_PORTS=(openim::util::list-to-string ${MSG_TRANSFER_PROM_PORT} )
@@ -63,8 +67,8 @@ function openim::msgtransfer::start() {
   fi
   nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} -n ${i} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
   done
-  
-  openim::util::check_process_names  "${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"
+  return 0
+
 }
 
 function openim::msgtransfer::check() {
@@ -87,6 +91,33 @@ function openim::msgtransfer::check() {
     openim::log::error_exit "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
   fi
 }
+
+function openim::msgtransfer::check_for_stop() {
+  PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer") || PIDS="0"
+  if [  "$PIDS" = "0" ]; then
+      return 0
+  fi
+
+  NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
+
+  if [ "$NUM_PROCESSES" -gt 0 ]; then
+    openim::log::error "Found $NUM_PROCESSES processes for $OPENIM_OUTPUT_HOSTBIN/openim-msgtransfer"
+    for PID in $PIDS; do
+      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        echo -e "\033[31m$(ps -p $PID -o pid,cmd)\033[0m"
+      elif [[ "$OSTYPE" == "darwin"* ]]; then
+        echo -e "\033[31m$(ps -p $PID -o pid,comm)\033[0m"
+      else
+        openim::log::error "Unsupported OS type: $OSTYPE"
+      fi
+    done
+    openim::log::error "Processes have not been stopped properly."
+  else
+    openim::log::success "All openim-msgtransfer processes have been stopped properly."
+  fi
+  return 0
+}
+
 
 ###################################### Linux Systemd ######################################
 SYSTEM_FILE_PATH="/etc/systemd/system/${SERVER_NAME}.service"

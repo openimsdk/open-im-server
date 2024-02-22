@@ -54,19 +54,18 @@ function execute_scripts() {
       openim::log::status "Starting script: ${script_path##*/}"     # Log the script name.
       
       # Execute the script with the constructed argument.
-      "$script_path" "$arg"
-      
-      # Check if the script executed successfully.
-      if [[ $? -eq 0 ]]; then
-        openim::log::info "${script_path##*/} executed successfully."
-      else
-        openim::log::errexit "Error executing ${script_path##*/}."
+      result=$("$script_path" "$arg")
+     if [[ $? -ne 0 ]]; then
+        openim::log::error "Start script: ${script_path##*/} failed"
+        openim::log::error "$result"
+        return 1
       fi
+
     else
       openim::log::errexit "Script ${script_path##*/} is missing or not executable."
+      return 1
     fi
   done
-  sleep 0.5
 }
 
 
@@ -78,6 +77,18 @@ ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start
 
 openim::log::info "\n## Starting OpenIM services"
 execute_scripts
+
+sleep 2
+
+openim::log::info "\n## Check OpenIM service name"
+. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check
+
+echo "+++ The process being checked:"
+for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
+    echo "$item"
+done
+
+openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}
 
 openim::log::info "\n## Post Starting OpenIM services"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start

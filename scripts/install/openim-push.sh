@@ -62,7 +62,11 @@ function openim::push::start() {
   OPENIM_PUSH_PORTS_ARRAY=$(openim::util::list-to-string ${OPENIM_PUSH_PORT} )
   PUSH_PROM_PORTS_ARRAY=$(openim::util::list-to-string ${PUSH_PROM_PORT} )
   
-  openim::util::stop_services_with_name ${SERVER_NAME}
+  result=$(openim::util::stop_services_with_name ${SERVER_NAME})
+    if [[ $? -ne 0 ]]; then
+      openim::log::error "stop ${SERVER_NAME} failed"
+      return 1
+    fi
   
   openim::log::status "push port list: ${OPENIM_PUSH_PORTS_ARRAY[@]}"
   openim::log::status "prometheus port list: ${PUSH_PROM_PORTS_ARRAY[@]}"
@@ -75,8 +79,8 @@ function openim::push::start() {
     openim::log::info "start push process, port: ${OPENIM_PUSH_PORTS_ARRAY[$i]}, prometheus port: ${PUSH_PROM_PORTS_ARRAY[$i]}"
     nohup ${OPENIM_PUSH_BINARY} --port ${OPENIM_PUSH_PORTS_ARRAY[$i]} -c ${OPENIM_PUSH_CONFIG} --prometheus_port ${PUSH_PROM_PORTS_ARRAY[$i]} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
   done
+  return 0
 
-  openim::util::check_process_names ${SERVER_NAME}
 }
 
 ###################################### Linux Systemd ######################################

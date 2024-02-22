@@ -457,6 +457,81 @@ openim::util::check_process_names() {
   fi
 }
 
+openim::util::check_process_names_for_stop() {
+  # Function to get the port of a process
+  get_port() {
+    local pid=$1
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+      # Linux
+      ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2
+      elif [[ "$OSTYPE" == "darwin"* ]]; then
+      # macOS
+      lsof -nP -iTCP -sTCP:LISTEN -a -p $pid | awk 'NR>1 {print $9}' | sed 's/.*://'
+    else
+      echo "Unsupported OS"
+      return 1
+    fi
+  }
+
+  # Arrays to collect details of processes
+  local not_started=()
+  local started=()
+
+  openim::log::info "Checking processes: $*"
+  # Iterate over each given process name
+  for process_name in "$@"; do
+    # Use `pgrep` to find process IDs related to the given process name
+    local pids=($(pgrep -f $process_name))
+
+    # Check if any process IDs were found
+    if [[ ${#pids[@]} -eq 0 ]]; then
+      not_started+=($process_name)
+    else
+      # If there are PIDs, loop through each one
+      for pid in "${pids[@]}"; do
+        local command=$(ps -p $pid -o cmd=)
+        local start_time=$(ps -p $pid -o lstart=)
+        local port=$(get_port $pid)
+
+        # Check if port information was found for the PID
+        if [[ -z $port ]]; then
+          port="N/A"
+        fi
+
+        started+=("Process $process_name - Command: $command, PID: $pid, Port: $port, Start time: $start_time")
+      done
+    fi
+  done
+
+  # Print information
+  if [[ ${#not_started[@]} -ne 0 ]]; then
+    openim::log::info "Not started processes:"
+    for process_name in "${not_started[@]}"; do
+      openim::log::error "Process $process_name is not started."
+    done
+  fi
+
+  if [[ ${#started[@]} -ne 0 ]]; then
+    echo
+    openim::log::info "Started processes:"
+    for info in "${started[@]}"; do
+      openim::log::info "$info"
+    done
+  fi
+
+  # Return status
+  if [[ ${#not_started[@]} -ne 0 ]]; then
+    openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
+    openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+    cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
+    return 1
+  else
+    echo ""
+    openim::log::success "All processes are running."
+    return 0
+  fi
+}
+
 # openim::util::check_process_names docker-pr
 
 # The `openim::util::stop_services_on_ports` function stops services running on specified ports.
@@ -573,26 +648,8 @@ openim::util::stop_services_with_name() {
             not_stopped+=("$server_name")
         fi
     done
+    return 0
 
-    # Print information about services whose processes couldn't be stopped.
-    if [[ ${#not_stopped[@]} -ne 0 ]]; then
-        openim::log::info "Services that couldn't be stopped:"
-        for name in "${not_stopped[@]}"; do
-            openim::log::status "Failed to stop the $name service."
-        done
-    fi
-
-    # Print information about services whose processes were successfully stopped.
-    if [[ ${#stopped[@]} -ne 0 ]]; then
-        echo
-        openim::log::info "Stopped services:"
-        for name in "${stopped[@]}"; do
-            openim::log::info "Successfully stopped the $name service."
-        done
-    fi
-
-    openim::log::success "All specified services were stopped."
-    echo ""
 }
 # sleep 333333&
 # sleep 444444&
@@ -2821,6 +2878,46 @@ function openim::util::gen_os_arch() {
         exit 1
     fi
 }
+
+
+
+function openim::util::check_process_names_for_stop() {
+  local all_stopped=true
+
+  for service in "${OPENIM_ALL_SERVICE_LIBRARIES[@]}"; do
+    PIDS=$(pgrep -f "${service}") || PIDS="0"
+    if [ "$PIDS" = "0" ]; then
+      continue
+    fi
+
+    all_stopped=false
+    NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
+
+    if [ "$NUM_PROCESSES" -gt 0 ]; then
+      openim::log::error "Found $NUM_PROCESSES processes for ${service}"
+      for PID in $PIDS; do
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+          echo -e "\033[31m$(ps -p $PID -o pid,cmd)\033[0m"
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+          echo -e "\033[31m$(ps -p $PID -o pid,comm)\033[0m"
+        else
+          openim::log::error "Unsupported OS type: $OSTYPE"
+        fi
+      done
+      openim::log::error "Processes for ${service} have not been stopped properly."
+    fi
+  done
+
+  if [ "$all_stopped" = true ]; then
+    openim::log::success "All  processes have been stopped properly."
+    return 0
+  fi
+
+  return 1
+}
+
+
+
 
 if [[ "$*" =~ openim::util:: ]];then
   eval $*
