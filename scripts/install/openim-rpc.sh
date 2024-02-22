@@ -141,7 +141,7 @@ function openim::rpc::start() {
             openim::log::info "Starting ${OPENIM_RPC_SERVICE_LISTARIES[$i]} service, port: ${OPENIM_RPC_SERVICE_PORTS[j]}, prometheus port: ${OPENIM_RPC_PROM_PORTS[j]}, binary root: ${OPENIM_OUTPUT_HOSTBIN}/${OPENIM_RPC_SERVICE_LISTARIES[$i]}"
             result=$(openim::rpc::start_service "${OPENIM_RPC_SERVICE_LISTARIES[$i]}" "${OPENIM_RPC_SERVICE_PORTS[j]}" "${OPENIM_RPC_PROM_PORTS[j]}")
             if [[ $? -ne 0 ]]; then
-                openim::log::error "stop ${SERVER_NAME} failed"
+                openim::log::error "start ${SERVER_NAME} failed"
             else
                 openim::log::info "$result"
             fi
