@@ -2883,17 +2883,20 @@ function openim::util::gen_os_arch() {
 
 function openim::util::check_process_names_for_stop() {
   local all_stopped=true
-
+  echo "dddddddddddddddddddddddddddddddddddd"
   for service in "${OPENIM_ALL_SERVICE_LIBRARIES[@]}"; do
+      echo "dddddddddddddddddddddddddddddddddddd" ${server}
+
     PIDS=$(pgrep -f "${service}") || PIDS="0"
     if [ "$PIDS" = "0" ]; then
       continue
     fi
 
-    all_stopped=false
-    NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
 
+    NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
+       echo "dddddddddddddddddddddddddddddddddddd" ${NUM_PROCESSES}
     if [ "$NUM_PROCESSES" -gt 0 ]; then
+      all_stopped=false
       openim::log::error "Found $NUM_PROCESSES processes for ${service}"
       for PID in $PIDS; do
         if [[ "$OSTYPE" == "linux-gnu"* ]]; then
