@@ -45,7 +45,7 @@ do
 
  if [[ $? -ne 0 ]]; then
     if  [[ $attempt -ne 0 ]] ; then
-      echo "+++ cat openim log file >>> ${LOG_FILE}"
+      echo "+++ cat openim log file >>> ${LOG_FILE}       "  $attempt
       openim::log::error "stop process failed. continue waiting\n" "${result}"
     fi
    sleep 1
