@@ -24,7 +24,7 @@ source "${OPENIM_ROOT}/scripts/install/common.sh"
 
 
 # Function to execute the scripts.
-function execute_scripts() {
+function execute_start_scripts() {
   for script_path in "${OPENIM_SERVER_SCRIPT_START_LIST[@]}"; do
     # Extract the script name without extension for argument generation.
     script_name_with_prefix=$(basename "$script_path" .sh)
@@ -79,26 +79,36 @@ openim::log::info "\n## Pre Starting OpenIM services"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start
 
 
-"${OPENIM_ROOT}"/scripts/stop-all.sh
+result=$("${OPENIM_ROOT}"/scripts/stop-all.sh)
+if [[ $? -ne 0 ]]; then
+  echo "+++ cat openim log file >>> ${LOG_FILE}"
+  openim::log::error "Some programs have not exited; the start process is aborted .\n $result"
+  exit 1
+fi
 
-sleep 10
 
 
 openim::log::info "\n## Starting OpenIM services"
-execute_scripts
+execute_start_scripts
+
 
 sleep 2
 
-openim::log::info "\n## Check OpenIM service name"
-. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check
+result=$(. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check)
+if [[ $? -ne 0 ]]; then
+  echo "+++ cat openim log file >>> ${LOG_FILE}"
+  openim::log::error "The program may fail to start.\n $result"
+  exit 1
+fi
 
-
-echo "+++ The process being checked:"
-for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
-    echo "$item"
-done
 
 openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}
+if [[ $? -ne 0 ]]; then
+  echo "+++ cat openim log file >>> ${LOG_FILE}"
+  openim::log::error "The program may fail to start.\n $result"
+  exit 1
+fi
+
 
 openim::log::info "\n## Post Starting OpenIM services"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start

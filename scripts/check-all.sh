@@ -80,19 +80,25 @@ else
   echo "++++ Check all dependent service ports successfully !"
 fi
 
-openim::log::info "\n## Check OpenIM service name"
-. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check
 
-openim::log::info "\n## Check all OpenIM service ports"
-echo "+++ The process being checked:"
+openim::log::info "\n## Check OpenIM service name ${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer"
+result=$(. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check)
+if [[ $? -ne 0 ]]; then
+  echo "+++ cat openim log file >>> ${LOG_FILE}"
+  openim::log::error "check process failed.\n $result"
+fi
+
+
+echo "Check OpenIM service name:"
 for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
     echo "$item"
 done
+
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "check process failed.\n $result"
 else
-  echo "++++ Check all openim service ports successfully !"
+  echo "Check all openim service ports successfully !"
 fi
 

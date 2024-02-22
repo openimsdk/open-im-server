@@ -131,11 +131,7 @@ function openim::rpc::start() {
     printf "+------------------------+-------+-----------------+\n"
     done
 
-    result=$(openim::util::stop_services_with_name ${OPENIM_ALL_RPC_FULL_PATH[@]})
-     if [[ $? -ne 0 ]]; then
-       openim::log::error "stop ${SERVER_NAME} failed" "$result"
-     fi
-    sleep 5
+
     # start all rpc services
     for ((i = 0; i < ${#OPENIM_RPC_SERVICE_LISTARIES[*]}; i++)); do
 

@@ -67,11 +67,8 @@ function openim::msgtransfer::start() {
 
 function openim::msgtransfer::check() {
   PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
-  
   NUM_PROCESSES=$(echo "$PIDS" | wc -l)
-  echo "111111111111transfer check " "$NUM_PROCESSES" "$OPENIM_MSGGATEWAY_NUM"
   if [ "$NUM_PROCESSES" -eq "$OPENIM_MSGGATEWAY_NUM" ]; then
-    openim::log::info "Found $OPENIM_MSGGATEWAY_NUM processes named $OPENIM_OUTPUT_HOSTBIN"
     for PID in $PIDS; do
       if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         ps -p $PID -o pid,cmd
@@ -83,7 +80,9 @@ function openim::msgtransfer::check() {
     done
   else
     openim::log::error "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
+    return 1
   fi
+  return 0
 }
 
 function openim::msgtransfer::check_for_stop() {

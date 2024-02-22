@@ -48,11 +48,7 @@ function openim::api::start() {
   openim::log::info "Starting ${SERVER_NAME} ..."
 
   readonly OPENIM_API_SERVER_LIBRARIES="${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"
-  result=$(openim::util::stop_services_with_name ${OPENIM_API_SERVER_LIBRARIES})
-  if [[ $? -ne 0 ]]; then
-    openim::log::error "stop ${SERVER_NAME} failed"
-    return 1
-  fi
+
 
   printf "+------------------------+--------------+\n"
   printf "| Service Name           | Port         |\n"
@@ -64,8 +60,6 @@ function openim::api::start() {
     printf "| %-22s | %6s       |\n" "${OPENIM_API_SERVICE_LISTARIES[$i]}" "${OPENIM_API_PORT_LISTARIES[$i]}"
     printf "+------------------------+--------------+\n"
     # Stop services on the specified ports before starting new ones
-#    openim::util::stop_services_on_ports "${OPENIM_API_PORT_LISTARIES[$i]}"
-#    openim::util::stop_services_on_ports "${OPENIM_API_PROMETHEUS_PORT_LISTARIES[$i]}"
     openim::log::info "OpenIM ${OPENIM_API_SERVICE_LISTARIES[$i]} config path: ${OPENIM_API_CONFIG}"
     
     # Start the service with Prometheus port if specified
