@@ -90,7 +90,7 @@ fi
 
 openim::log::info "\n## Starting OpenIM services"
 execute_start_scripts
-
+openim::log::info "\n## Starting OpenIM services finish !!!!!!!!!!!!!!!!"
 
 sleep 2
 
@@ -102,7 +102,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 
-openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}
+result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "The program may fail to start.\n $result"
