@@ -99,6 +99,6 @@ if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "check process failed.\n $result"
 else
-  echo "Check all openim service ports successfully !"
+  openim::color::echo $COLOR_GREEN "All openim services are running normally! "
 fi
 
