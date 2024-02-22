@@ -92,6 +92,7 @@ sleep 2
 openim::log::info "\n## Check OpenIM service name"
 . $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check
 
+
 echo "+++ The process being checked:"
 for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
     echo "$item"

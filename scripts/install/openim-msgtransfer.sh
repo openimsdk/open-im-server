@@ -75,7 +75,7 @@ function openim::msgtransfer::check() {
   PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
   
   NUM_PROCESSES=$(echo "$PIDS" | wc -l)
-  
+  echo "111111111111transfer check " "$NUM_PROCESSES" "$OPENIM_MSGGATEWAY_NUM"
   if [ "$NUM_PROCESSES" -eq "$OPENIM_MSGGATEWAY_NUM" ]; then
     openim::log::info "Found $OPENIM_MSGGATEWAY_NUM processes named $OPENIM_OUTPUT_HOSTBIN"
     for PID in $PIDS; do
