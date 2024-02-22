@@ -92,9 +92,7 @@ result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRA
 if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "check process failed.\n $result"
-  return 1
 else
   echo "++++ Check all openim service ports successfully !"
-  return 0
 fi
 
