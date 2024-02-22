@@ -23,7 +23,6 @@
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
 
-
 SERVER_NAME="openim-msgtransfer"
 
 function openim::msgtransfer::start() {

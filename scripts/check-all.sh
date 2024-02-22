@@ -77,7 +77,7 @@ if [[ $? -ne 0 ]]; then
   openim::log::error_exit "The service does not start properly, please check the port, query variable definition!"
   echo "+++ https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh +++"
 else
-  echo "++++ Check all dependent service ports successfully !"
+  openim::color::echo $COLOR_GREEN "All components depended on by openim are running normally! "
 fi
 
 

@@ -365,7 +365,7 @@ openim::util::check_ports() {
     cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
     return 1
   else
-    openim::log::success "All specified processes are running."
+    #openim::log::success "All specified ports are running."
     return 0
   fi
 }
