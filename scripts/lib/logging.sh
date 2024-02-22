@@ -81,6 +81,7 @@ openim::log::install_errexit() {
   # setting errtrace allows our ERR trap handler to be propagated to functions,
   # expansions and subshells
   #set -o errtrace
+  return 0
 }
 
 # Print out the stack trace
