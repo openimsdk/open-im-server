@@ -87,7 +87,6 @@ openim::golang::server_targets() {
 openim::golang::server_targets_no_transfer() {
   local targets=(
     openim-api
-    openim-cmdutils
     openim-crontask
     openim-msggateway
     openim-push
@@ -101,6 +100,33 @@ openim::golang::server_targets_no_transfer() {
   )
   echo "${targets[@]}"
 }
+
+openim::golang::server_targets_no_cmdutils() {
+  local targets=(
+    openim-api
+    openim-crontask
+    openim-msggateway
+    openim-msgtransfer
+    openim-push
+    openim-rpc-auth
+    openim-rpc-conversation
+    openim-rpc-friend
+    openim-rpc-group
+    openim-rpc-msg
+    openim-rpc-third
+    openim-rpc-user
+  )
+  echo "${targets[@]}"
+}
+
+
+IFS=" " read -ra OPENIM_SERVER_TARGETS_NO_CMDUTILS <<< "$(openim::golang::server_targets_no_cmdutils)"
+readonly OPENIM_SERVER_TARGETS_NO_CMDUTILS
+readonly OPENIM_SERVER_BINARIES_NO_CMDUTILS=("${OPENIM_SERVER_TARGETS_NO_CMDUTILS[@]##*/}")
+
+
+
+
 
 IFS=" " read -ra OPENIM_SERVER_TARGETS_NO_TRANSFER <<< "$(openim::golang::server_targets_no_transfer)"
 readonly OPENIM_SERVER_TARGETS_NO_TRANSFER
