@@ -726,18 +726,17 @@ openim::util::stop_services_with_name() {
        elapsed_time=$(($SECONDS - $start_time))
        if [[ $elapsed_time -ge $timeout ]]; then
            echo "Timeout of ${timeout} seconds reached."
+           openim::log::info "# Begin to check all openim service"
+           openim::util::check_by_signal
+
+
+           echo "Check ports:"
+           openim::util::check_ports_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
            break # Timeout, exit while loop
        fi
 
        sleep 1
    done
-
-    openim::log::info "# Begin to check all openim service"
-    openim::util::check_by_signal
-
-
-    echo "Check ports:"
-    openim::util::check_ports_by_signal ${OPENIM_SERVER_PORT_LISTARIES[@]}
 
 
     # Print information about services whose processes couldn't be stopped.

@@ -37,7 +37,7 @@ openim::util::stop_services_by_name_signal "${OPENIM_OUTPUT_HOSTBIN}"
 sleep 1
 
 openim::log::info "# Begin to check all openim service"
-openim::msgtransfer::check_by_signal
+openim::util::check_by_signal
 
 
 echo "Check ports:"

@@ -87,32 +87,6 @@ function openim::msgtransfer::check() {
   fi
 }
 
-function openim::msgtransfer::check_by_signal() {
-  PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer") || PIDS="0"
-  if [  "$PIDS" = "0" ]; then
-      return 0
-  fi
-
-  NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
-
-  if [ "$NUM_PROCESSES" -gt 0 ]; then
-    openim::log::error "Found $NUM_PROCESSES processes for $OPENIM_OUTPUT_HOSTBIN/openim-msgtransfer"
-    for PID in $PIDS; do
-      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        echo -e "\033[31m$(ps -p $PID -o pid,cmd)\033[0m"
-      elif [[ "$OSTYPE" == "darwin"* ]]; then
-        echo -e "\033[31m$(ps -p $PID -o pid,comm)\033[0m"
-      else
-        openim::log::error "Unsupported OS type: $OSTYPE"
-      fi
-    done
-    openim::log::error "Processes have not been stopped properly."
-  else
-    openim::log::success "All openim-msgtransfer processes have been stopped properly."
-  fi
-  return 0
-}
-
 ###################################### Linux Systemd ######################################
 SYSTEM_FILE_PATH="/etc/systemd/system/${SERVER_NAME}.service"
 
