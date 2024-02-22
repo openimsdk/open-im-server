@@ -2888,7 +2888,7 @@ function openim::util::check_process_names_for_stop() {
           openim::log::error "Unsupported OS type: $OSTYPE"
         fi
       done
-      openim::log::error "Processes for ${service} have not been stopped properly."
+      openim::log::error "Processes for ${service} have not been stopped properly.   " "$NUM_PROCESSES"
     fi
   done
 
