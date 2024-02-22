@@ -90,7 +90,6 @@ fi
 
 openim::log::info "\n## Starting OpenIM services"
 execute_start_scripts
-openim::log::info "\n## Starting OpenIM services finish !!!!!!!!!!!!!!!!"
 
 sleep 2
 
@@ -113,4 +112,4 @@ fi
 openim::log::info "\n## Post Starting OpenIM services"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
 
-openim::color::echo $COLOR_BLUE "✨  All OpenIM services have been successfully started!"
+openim::color::echo $COLOR_GREEN "✨  All OpenIM services have been successfully started!"
