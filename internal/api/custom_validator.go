@@ -20,19 +20,16 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 )
 
+// RequiredIf validates if the specified field is required based on the session type.
 func RequiredIf(fl validator.FieldLevel) bool {
 	sessionType := fl.Parent().FieldByName("SessionType").Int()
+
 	switch sessionType {
 	case constant.SingleChatType, constant.NotificationChatType:
-		if fl.FieldName() == "RecvID" {
-			return fl.Field().String() != ""
-		}
+		return fl.FieldName() != "RecvID" || fl.Field().String() != ""
 	case constant.GroupChatType, constant.SuperGroupChatType:
-		if fl.FieldName() == "GroupID" {
-			return fl.Field().String() != ""
-		}
+		return fl.FieldName() != "GroupID" || fl.Field().String() != ""
 	default:
 		return true
 	}
-	return true
 }

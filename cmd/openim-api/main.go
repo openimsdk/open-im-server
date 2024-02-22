@@ -122,7 +122,7 @@ func run(port int, proPort int) error {
 		util.SIGTERMExit()
 		err := server.Shutdown(ctx)
 		if err != nil {
-			return errs.Wrap(err, "shutdown err")
+			return errs.Wrap(err, "api shutdown err")
 		}
 	case <-netDone:
 		close(netDone)

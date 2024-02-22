@@ -142,6 +142,7 @@ func (r *RootCmd) getPortFlag(cmd *cobra.Command) int {
 	return port
 }
 
+// GetPortFlag returns the port flag
 func (r *RootCmd) GetPortFlag() int {
 	return r.port
 }
