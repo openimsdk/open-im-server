@@ -28,7 +28,7 @@ source "${OPENIM_ROOT}/scripts/install/common.sh"
 
 openim::log::status "\n# Begin to stop all openim service"
 
-echo -e "\n++ Stop all processes in the path ${OPENIM_OUTPUT_HOSTBIN}"
+openim::log::status "\n++ Stop all processes in the path ${OPENIM_OUTPUT_HOSTBIN}"
 
 openim::util::stop_services_with_name "${OPENIM_OUTPUT_HOSTBIN}"
 # todo OPENIM_ALL_SERVICE_LIBRARIES
@@ -51,10 +51,10 @@ do
    sleep 1
   ((attempt++))
  else
-   openim::log::success "✨  All openim processes to be stopped"
+   openim::log::success " All openim processes to be stopped"
    exit 0
  fi
 done
 
-openim::log::error "✨ openim processes stopped failed"
+openim::log::error "openim processes stopped failed"
 exit 1
