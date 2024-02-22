@@ -35,7 +35,7 @@ openim::util::stop_services_with_name "${OPENIM_OUTPUT_HOSTBIN}"
 
 
 
-
+sleep 5
 
 result=$(openim::util::check_process_names_for_stop)
 if [[ $? -ne 0 ]]; then

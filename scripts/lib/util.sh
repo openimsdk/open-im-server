@@ -2885,7 +2885,7 @@ function openim::util::check_process_names_for_stop() {
   local all_stopped=true
   echo "dddddddddddddddddddddddddddddddddddd"
   for service in "${OPENIM_ALL_SERVICE_LIBRARIES[@]}"; do
-      echo "dddddddddddddddddddddddddddddddddddd" ${server}
+      echo "dddddddddddddddddddddddddddddddddddd" ${service}
 
     PIDS=$(pgrep -f "${service}") || PIDS="0"
     if [ "$PIDS" = "0" ]; then
