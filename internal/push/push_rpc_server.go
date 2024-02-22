@@ -39,17 +39,18 @@ type pushServer struct {
 }
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis()
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}
 	cacheModel := cache.NewMsgCacheModel(rdb)
-	offlinePusher := NewOfflinePusher(cacheModel)
+	offlinePusher := NewOfflinePusher(config, cacheModel)
 	database := controller.NewPushDatabase(cacheModel)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	pusher := NewPusher(
+		config,
 		client,
 		offlinePusher,
 		database,
@@ -65,7 +66,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 		config: config,
 	})
 
-	consumer, err := NewConsumer(pusher)
+	consumer, err := NewConsumer(config, pusher)
 	if err != nil {
 		return err
 	}

@@ -34,7 +34,7 @@ import (
 )
 
 func (s *Server) InitServer(config *config.GlobalConfig, disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis()
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (s *Server) InitServer(config *config.GlobalConfig, disCov discoveryregistr
 func (s *Server) Start(conf *config.GlobalConfig) error {
 	return startrpc.Start(
 		s.rpcPort,
-		config.Config.RpcRegisterName.OpenImMessageGatewayName,
+		conf.RpcRegisterName.OpenImMessageGatewayName,
 		s.prometheusPort,
 		conf,
 		s.InitServer,

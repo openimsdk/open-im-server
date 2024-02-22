@@ -39,9 +39,9 @@ type Fcm struct {
 	cache     cache.MsgModel
 }
 
-func NewClient(cache cache.MsgModel) *Fcm {
+func NewClient(globalConfig *config.GlobalConfig, cache cache.MsgModel) *Fcm {
 	projectRoot := config.GetProjectRoot()
-	credentialsFilePath := filepath.Join(projectRoot, "config", config.Config.Push.Fcm.ServiceAccount)
+	credentialsFilePath := filepath.Join(projectRoot, "config", globalConfig.Push.Fcm.ServiceAccount)
 	opt := option.WithCredentialsFile(credentialsFilePath)
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {

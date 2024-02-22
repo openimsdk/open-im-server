@@ -133,13 +133,13 @@ type Payload struct {
 	IsSignal bool `json:"isSignal"`
 }
 
-func newPushReq(title, content string) PushReq {
+func newPushReq(config *config.GlobalConfig, title, content string) PushReq {
 	pushReq := PushReq{PushMessage: &PushMessage{Notification: &Notification{
 		Title:       title,
 		Body:        content,
 		ClickType:   "startapp",
-		ChannelID:   config.Config.Push.GeTui.ChannelID,
-		ChannelName: config.Config.Push.GeTui.ChannelName,
+		ChannelID:   config.Push.GeTui.ChannelID,
+		ChannelName: config.Push.GeTui.ChannelName,
 	}}}
 	return pushReq
 }

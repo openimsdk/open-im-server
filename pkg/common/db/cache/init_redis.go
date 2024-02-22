@@ -40,7 +40,7 @@ const (
 )
 
 // NewRedis Initialize redis connection.
-func NewRedis() (redis.UniversalClient, error) {
+func NewRedis(config *config.GlobalConfig) (redis.UniversalClient, error) {
 	if redisClient != nil {
 		return redisClient, nil
 	}
@@ -48,24 +48,24 @@ func NewRedis() (redis.UniversalClient, error) {
 	// Read configuration from environment variables
 	overrideConfigFromEnv()
 
-	if len(config.Config.Redis.Address) == 0 {
+	if len(config.Redis.Address) == 0 {
 		return nil, errs.Wrap(errors.New("redis address is empty"))
 	}
 	specialerror.AddReplace(redis.Nil, errs.ErrRecordNotFound)
 	var rdb redis.UniversalClient
-	if len(config.Config.Redis.Address) > 1 || config.Config.Redis.ClusterMode {
+	if len(config.Redis.Address) > 1 || config.Redis.ClusterMode {
 		rdb = redis.NewClusterClient(&redis.ClusterOptions{
-			Addrs:      config.Config.Redis.Address,
-			Username:   config.Config.Redis.Username,
-			Password:   config.Config.Redis.Password, // no password set
+			Addrs:      config.Redis.Address,
+			Username:   config.Redis.Username,
+			Password:   config.Redis.Password, // no password set
 			PoolSize:   50,
 			MaxRetries: maxRetry,
 		})
 	} else {
 		rdb = redis.NewClient(&redis.Options{
-			Addr:       config.Config.Redis.Address[0],
-			Username:   config.Config.Redis.Username,
-			Password:   config.Config.Redis.Password,
+			Addr:       config.Redis.Address[0],
+			Username:   config.Redis.Username,
+			Password:   config.Redis.Password,
 			DB:         0,   // use default DB
 			PoolSize:   100, // connection pool size
 			MaxRetries: maxRetry,
@@ -78,7 +78,8 @@ func NewRedis() (redis.UniversalClient, error) {
 	err = rdb.Ping(ctx).Err()
 	if err != nil {
 		uriFormat := "address:%s, username:%s, password:%s, clusterMode:%t, enablePipeline:%t"
-		errMsg := fmt.Sprintf(uriFormat, config.Config.Redis.Address, config.Config.Redis.Username, config.Config.Redis.Password, config.Config.Redis.ClusterMode, config.Config.Redis.EnablePipeline)
+		errMsg := fmt.Sprintf(uriFormat, config.Redis.Address, config.Redis.Username,
+			config.Redis.Password, config.Redis.ClusterMode, config.Redis.EnablePipeline)
 		return nil, errs.Wrap(err, errMsg)
 	}
 	redisClient = rdb

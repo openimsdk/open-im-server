@@ -85,6 +85,7 @@ type OnlineHistoryRedisConsumerHandler struct {
 }
 
 func NewOnlineHistoryRedisConsumerHandler(
+	config *config.GlobalConfig,
 	database controller.CommonMsgDatabase,
 	conversationRpcClient *rpcclient.ConversationRpcClient,
 	groupRpcClient *rpcclient.GroupRpcClient,
@@ -103,8 +104,8 @@ func NewOnlineHistoryRedisConsumerHandler(
 	och.historyConsumerGroup, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
-	}, []string{config.Config.Kafka.LatestMsgToRedis.Topic},
-		config.Config.Kafka.Addr, config.Config.Kafka.ConsumerGroupID.MsgToRedis)
+	}, []string{config.Kafka.LatestMsgToRedis.Topic},
+		config.Kafka.Addr, config.Kafka.ConsumerGroupID.MsgToRedis)
 	// statistics.NewStatistics(&och.singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d
 	// second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 	return &och, err

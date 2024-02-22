@@ -16,6 +16,7 @@ package push
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/OpenIMSDK/tools/log"
 )
@@ -25,8 +26,8 @@ type Consumer struct {
 	successCount uint64
 }
 
-func NewConsumer(pusher *Pusher) (*Consumer, error) {
-	c, err := NewConsumerHandler(pusher)
+func NewConsumer(config *config.GlobalConfig, pusher *Pusher) (*Consumer, error) {
+	c, err := NewConsumerHandler(config, pusher)
 	if err != nil {
 		return nil, err
 	}

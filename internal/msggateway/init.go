@@ -32,6 +32,7 @@ func RunWsAndServer(conf *config.GlobalConfig, rpcPort, wsPort, prometheusPort i
 		config.Version,
 	)
 	longServer, err := NewWsServer(
+		conf,
 		WithPort(wsPort),
 		WithMaxConnNum(int64(conf.LongConnSvr.WebsocketMaxConnNum)),
 		WithHandshakeTimeout(time.Duration(conf.LongConnSvr.WebsocketTimeout)*time.Second),

@@ -53,7 +53,7 @@ type MsgTransfer struct {
 }
 
 func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
-	rdb, err := cache.NewRedis()
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}
@@ -83,19 +83,19 @@ func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
 	}
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
-	msgTransfer, err := NewMsgTransfer(msgDatabase, &conversationRpcClient, &groupRpcClient)
+	msgTransfer, err := NewMsgTransfer(config, msgDatabase, &conversationRpcClient, &groupRpcClient)
 	if err != nil {
 		return err
 	}
-	return msgTransfer.Start(prometheusPort)
+	return msgTransfer.Start(prometheusPort, config)
 }
 
-func NewMsgTransfer(msgDatabase controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*MsgTransfer, error) {
-	historyCH, err := NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient)
+func NewMsgTransfer(config *config.GlobalConfig, msgDatabase controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*MsgTransfer, error) {
+	historyCH, err := NewOnlineHistoryRedisConsumerHandler(config, msgDatabase, conversationRpcClient, groupRpcClient)
 	if err != nil {
 		return nil, err
 	}
-	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(msgDatabase)
+	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(config, msgDatabase)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func NewMsgTransfer(msgDatabase controller.CommonMsgDatabase, conversationRpcCli
 	}, nil
 }
 
-func (m *MsgTransfer) Start(prometheusPort int) error {
+func (m *MsgTransfer) Start(prometheusPort int, config *config.GlobalConfig) error {
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
 	if prometheusPort <= 0 {
 		return errs.Wrap(errors.New("prometheusPort not correct"))
@@ -124,7 +124,7 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyCH, onError)
 	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyMongoCH, onError)
 
-	if config.Config.Prometheus.Enable {
+	if config.Prometheus.Enable {
 		go func() {
 			proreg := prometheus.NewRegistry()
 			proreg.MustRegister(

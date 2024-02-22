@@ -68,6 +68,7 @@ var bufferPool = sync.Pool{
 }
 
 type WsServer struct {
+	globalConfig      *config.GlobalConfig
 	port              int
 	wsMaxConnNum      int64
 	registerChan      chan *Client
@@ -107,12 +108,12 @@ func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, sta
 	}
 	switch status {
 	case constant.Online:
-		err := CallbackUserOnline(ctx, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
+		err := CallbackUserOnline(ctx, ws.globalConfig, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
 		if err != nil {
 			log.ZWarn(ctx, "CallbackUserOnline err", err)
 		}
 	case constant.Offline:
-		err := CallbackUserOffline(ctx, client.UserID, client.PlatformID, client.ctx.GetConnID())
+		err := CallbackUserOffline(ctx, ws.globalConfig, client.UserID, client.PlatformID, client.ctx.GetConnID())
 		if err != nil {
 			log.ZWarn(ctx, "CallbackUserOffline err", err)
 		}
@@ -140,13 +141,14 @@ func (ws *WsServer) GetUserPlatformCons(userID string, platform int) ([]*Client,
 	return ws.clients.Get(userID, platform)
 }
 
-func NewWsServer(opts ...Option) (*WsServer, error) {
+func NewWsServer(globalConfig *config.GlobalConfig, opts ...Option) (*WsServer, error) {
 	var config configs
 	for _, o := range opts {
 		o(&config)
 	}
 	v := validator.New()
 	return &WsServer{
+		globalConfig:     globalConfig,
 		port:             config.port,
 		wsMaxConnNum:     config.maxConnNum,
 		writeBufferSize:  config.writeBufferSize,
@@ -220,7 +222,7 @@ func (ws *WsServer) Run(done chan error) error {
 var concurrentRequest = 3
 
 func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *Client) error {
-	conns, err := ws.disCov.GetConns(ctx, config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := ws.disCov.GetConns(ctx, ws.globalConfig.RpcRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		return err
 	}
@@ -285,7 +287,7 @@ func (ws *WsServer) registerClient(client *Client) {
 	}
 
 	wg := sync.WaitGroup{}
-	if config.Config.Envs.Discovery == "zookeeper" {
+	if ws.globalConfig.Envs.Discovery == "zookeeper" {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -328,7 +330,7 @@ func (ws *WsServer) KickUserConn(client *Client) error {
 }
 
 func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Client, newClient *Client) {
-	switch config.Config.MultiLoginPolicy {
+	switch ws.globalConfig.MultiLoginPolicy {
 	case constant.DefalutNotKick:
 	case constant.PCAndOther:
 		if constant.PlatformIDToClass(newClient.PlatformID) == constant.TerminalPC {

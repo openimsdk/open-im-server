@@ -35,15 +35,15 @@ type ConsumerHandler struct {
 	pusher            *Pusher
 }
 
-func NewConsumerHandler(pusher *Pusher) (*ConsumerHandler, error) {
+func NewConsumerHandler(config *config.GlobalConfig, pusher *Pusher) (*ConsumerHandler, error) {
 	var consumerHandler ConsumerHandler
 	consumerHandler.pusher = pusher
 	var err error
 	consumerHandler.pushConsumerGroup, err = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
-	}, []string{config.Config.Kafka.MsgToPush.Topic}, config.Config.Kafka.Addr,
-		config.Config.Kafka.ConsumerGroupID.MsgToPush)
+	}, []string{config.Kafka.MsgToPush.Topic}, config.Kafka.Addr,
+		config.Kafka.ConsumerGroupID.MsgToPush)
 	if err != nil {
 		return nil, err
 	}

@@ -34,12 +34,12 @@ type OnlineHistoryMongoConsumerHandler struct {
 	msgDatabase          controller.CommonMsgDatabase
 }
 
-func NewOnlineHistoryMongoConsumerHandler(database controller.CommonMsgDatabase) (*OnlineHistoryMongoConsumerHandler, error) {
+func NewOnlineHistoryMongoConsumerHandler(config *config.GlobalConfig, database controller.CommonMsgDatabase) (*OnlineHistoryMongoConsumerHandler, error) {
 	historyConsumerGroup, err := kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
-	}, []string{config.Config.Kafka.MsgToMongo.Topic},
-		config.Config.Kafka.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo)
+	}, []string{config.Kafka.MsgToMongo.Topic},
+		config.Kafka.Addr, config.Kafka.ConsumerGroupID.MsgToMongo)
 	if err != nil {
 		return nil, err
 	}
