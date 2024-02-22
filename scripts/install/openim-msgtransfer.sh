@@ -65,7 +65,7 @@ function openim::msgtransfer::start() {
 
 function openim::msgtransfer::check() {
   PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
-  echo "transsssssssssssssssssssssss" $PIDS
+  echo "transsssssssssssssssssssssss" [$PIDS]
   echo "$PIDS" | wc -l
   echo "tdddddddddddddddddranssssssssssssssssssssssss" $PIDS
   NUM_PROCESSES=$(echo "$PIDS" | wc -l)
