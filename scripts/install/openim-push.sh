@@ -64,7 +64,7 @@ function openim::push::start() {
   
   result=$(openim::util::stop_services_with_name ${SERVER_NAME})
     if [[ $? -ne 0 ]]; then
-      openim::log::error "stop ${SERVER_NAME} failed"
+      openim::log::error "stop ${SERVER_NAME} failed \n " "${result}"
       return 1
     fi
   
@@ -72,7 +72,7 @@ function openim::push::start() {
   openim::log::status "prometheus port list: ${PUSH_PROM_PORTS_ARRAY[@]}"
   
   if [ ${#OPENIM_PUSH_PORTS_ARRAY[@]} -ne ${#PUSH_PROM_PORTS_ARRAY[@]} ]; then
-    openim::log::error_exit "The length of the two port lists is different!"
+    openim::log::error "The length of the two port lists is different!"
   fi
   
   for (( i=0; i<${#OPENIM_PUSH_PORTS_ARRAY[@]}; i++ )); do
