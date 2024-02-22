@@ -664,7 +664,7 @@ openim::util::stop_services_with_name() {
             if [[ -n $pid ]]; then
                 # Try to stop the service by killing its process.
                 if kill -15 $pid 2>/dev/null; then
-                    stopped_this_time=true   jk
+                    stopped_this_time=true
                 fi
             fi
         done
