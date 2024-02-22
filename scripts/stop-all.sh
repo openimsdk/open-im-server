@@ -44,7 +44,7 @@ do
  result=$(openim::util::check_process_names_for_stop)
 
  if [[ $? -ne 0 ]]; then
-    if  [[$attempt -ne 0 ]] ; then
+    if  [[ $attempt -ne 0 ]] ; then
       echo "+++ cat openim log file >>> ${LOG_FILE}"
       openim::log::error "stop process failed. continue waiting\n" "${result}"
     fi
