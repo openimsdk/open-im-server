@@ -29,7 +29,6 @@ import (
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
@@ -112,11 +111,11 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	}
 	revokerUserID := mcontext.GetOpUserID(ctx)
 	var flag bool
-	if len(config.Config.Manager.UserID) > 0 {
-		flag = utils.Contain(revokerUserID, config.Config.Manager.UserID...)
+	if len(m.config.Manager.UserID) > 0 {
+		flag = utils.Contain(revokerUserID, m.config.Manager.UserID...)
 	}
-	if len(config.Config.Manager.UserID) == 0 && len(config.Config.IMAdmin.UserID) > 0 {
-		flag = utils.Contain(revokerUserID, config.Config.IMAdmin.UserID...)
+	if len(m.config.Manager.UserID) == 0 && len(m.config.IMAdmin.UserID) > 0 {
+		flag = utils.Contain(revokerUserID, m.config.IMAdmin.UserID...)
 	}
 	tips := sdkws.RevokeMsgTips{
 		RevokerUserID:  revokerUserID,
@@ -136,7 +135,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if err := m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips); err != nil {
 		return nil, err
 	}
-	if err = CallbackAfterRevokeMsg(ctx, req); err != nil {
+	if err = CallbackAfterRevokeMsg(ctx, m.config, req); err != nil {
 		return nil, err
 	}
 	return &msg.RevokeMsgResp{}, nil

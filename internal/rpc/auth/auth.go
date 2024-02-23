@@ -46,11 +46,11 @@ type authServer struct {
 }
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis()
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}
-	userRpcClient := rpcclient.NewUserRpcClient(client)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config)
 	pbauth.RegisterAuthServer(server, &authServer{
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
@@ -66,7 +66,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 
 func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*pbauth.UserTokenResp, error) {
 	resp := pbauth.UserTokenResp{}
-	if req.Secret != config.Config.Secret {
+	if req.Secret != s.config.Secret {
 		return nil, errs.ErrNoPermission.Wrap("secret invalid")
 	}
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
@@ -78,7 +78,7 @@ func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*
 	}
 	prommetrics.UserLoginCounter.Inc()
 	resp.Token = token
-	resp.ExpireTimeSeconds = config.Config.TokenPolicy.Expire * 24 * 60 * 60
+	resp.ExpireTimeSeconds = s.config.TokenPolicy.Expire * 24 * 60 * 60
 	return &resp, nil
 }
 
@@ -100,7 +100,7 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 		return nil, err
 	}
 	resp.Token = token
-	resp.ExpireTimeSeconds = config.Config.TokenPolicy.Expire * 24 * 60 * 60
+	resp.ExpireTimeSeconds = s.config.TokenPolicy.Expire * 24 * 60 * 60
 	return &resp, nil
 }
 
@@ -155,7 +155,7 @@ func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq
 }
 
 func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
-	conns, err := s.RegisterCenter.GetConns(ctx, config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := s.RegisterCenter.GetConns(ctx, s.config.RpcRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		return err
 	}

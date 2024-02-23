@@ -132,7 +132,7 @@ func (m *msgServer) MarkMsgsAsRead(
 		Seqs:           req.Seqs,
 		ContentType:    conversation.ConversationType,
 	}
-	if err = CallbackSingleMsgRead(ctx, req_callback); err != nil {
+	if err = CallbackSingleMsgRead(ctx, m.config, req_callback); err != nil {
 		return nil, err
 	}
 
@@ -209,7 +209,7 @@ func (m *msgServer) MarkConversationAsRead(
 		UnreadMsgNum: req.HasReadSeq,
 		ContentType:  int64(conversation.ConversationType),
 	}
-	if err := CallbackGroupMsgRead(ctx, reqCall); err != nil {
+	if err := CallbackGroupMsgRead(ctx, m.config, reqCall); err != nil {
 		return nil, err
 	}
 

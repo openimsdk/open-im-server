@@ -16,6 +16,7 @@ package msggateway
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"sync"
 
 	"github.com/OpenIMSDK/protocol/push"
@@ -107,8 +108,8 @@ type GrpcHandler struct {
 	validate     *validator.Validate
 }
 
-func NewGrpcHandler(validate *validator.Validate, client discoveryregistry.SvcDiscoveryRegistry) *GrpcHandler {
-	msgRpcClient := rpcclient.NewMessageRpcClient(client)
+func NewGrpcHandler(validate *validator.Validate, client discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *GrpcHandler {
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config)
 	pushRpcClient := rpcclient.NewPushRpcClient(client)
 	return &GrpcHandler{
 		msgRpcClient: &msgRpcClient,

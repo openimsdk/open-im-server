@@ -209,8 +209,6 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	// Prepare the message request with additional required data.
 	sendMsgReq, err := m.getSendMsgReq(c, req.SendMsg)
 	if err != nil {
-		// Log and respond with an error if preparation fails.
-		log.ZError(c, "decodeData failed", err)
 		apiresp.GinError(c, err)
 		return
 	}

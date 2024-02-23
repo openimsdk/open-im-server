@@ -244,17 +244,11 @@ func (g *GroupNotificationSender) getUsersInfoMap(ctx context.Context, userIDs [
 }
 
 func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws.GroupMemberFullInfo, groupID string) (err error) {
-	defer log.ZDebug(ctx, "return")
-	defer func() {
-		if err != nil {
-			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
-		}
-	}()
 	if opUser == nil {
 		return errs.ErrInternalServer.Wrap("**sdkws.GroupMemberFullInfo is nil")
 	}
 	if *opUser != nil {
-		return nil
+		return errs.ErrArgs.Wrap("*opUser is not nil")
 	}
 	userID := mcontext.GetOpUserID(ctx)
 	if groupID != "" {
@@ -651,12 +645,6 @@ func (g *GroupNotificationSender) GroupCancelMutedNotification(ctx context.Conte
 }
 
 func (g *GroupNotificationSender) GroupMemberInfoSetNotification(ctx context.Context, groupID, groupMemberUserID string) (err error) {
-	defer log.ZDebug(ctx, "return")
-	defer func() {
-		if err != nil {
-			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
-		}
-	}()
 	group, err := g.getGroupInfo(ctx, groupID)
 	if err != nil {
 		return err
@@ -673,12 +661,6 @@ func (g *GroupNotificationSender) GroupMemberInfoSetNotification(ctx context.Con
 }
 
 func (g *GroupNotificationSender) GroupMemberSetToAdminNotification(ctx context.Context, groupID, groupMemberUserID string) (err error) {
-	defer log.ZDebug(ctx, "return")
-	defer func() {
-		if err != nil {
-			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
-		}
-	}()
 	group, err := g.getGroupInfo(ctx, groupID)
 	if err != nil {
 		return err

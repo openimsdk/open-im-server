@@ -22,7 +22,6 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 
 	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
-	v3config "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type MsgGatewayCmd struct {
@@ -64,13 +63,13 @@ func (m *MsgGatewayCmd) Exec() error {
 func (m *MsgGatewayCmd) GetPortFromConfig(portType string) int {
 	switch portType {
 	case constant.FlagWsPort:
-		return v3config.Config.LongConnSvr.OpenImWsPort[0]
+		return m.config.LongConnSvr.OpenImWsPort[0]
 
 	case constant.FlagPort:
-		return v3config.Config.LongConnSvr.OpenImMessageGatewayPort[0]
+		return m.config.LongConnSvr.OpenImMessageGatewayPort[0]
 
 	case constant.FlagPrometheusPort:
-		return v3config.Config.Prometheus.MessageGatewayPrometheusPort[0]
+		return m.config.Prometheus.MessageGatewayPrometheusPort[0]
 
 	default:
 		return 0

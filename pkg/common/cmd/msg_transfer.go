@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/spf13/cobra"
 

@@ -68,31 +68,31 @@ func (s *userServer) GetGroupOnlineUser(ctx context.Context, req *pbuser.GetGrou
 }
 
 func Start(config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis()
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}
-	mongo, err := unrelation.NewMongo()
+	mongo, err := unrelation.NewMongo(config)
 	if err != nil {
 		return err
 	}
 	users := make([]*tablerelation.UserModel, 0)
 	if len(config.IMAdmin.UserID) != len(config.IMAdmin.Nickname) {
-		return errors.New("len(config.Config.AppNotificationAdmin.AppManagerUid) != len(config.Config.AppNotificationAdmin.Nickname)")
+		return errors.New("len(s.config.AppNotificationAdmin.AppManagerUid) != len(s.config.AppNotificationAdmin.Nickname)")
 	}
 	for k, v := range config.IMAdmin.UserID {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.IMAdmin.Nickname[k], AppMangerLevel: constant.AppNotificationAdmin})
 	}
-	userDB, err := mgo.NewUserMongo(mongo.GetDatabase())
+	userDB, err := mgo.NewUserMongo(mongo.GetDatabase(config.Mongo.Database))
 	if err != nil {
 		return err
 	}
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
-	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
+	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase(config.Mongo.Database))
 	database := controller.NewUserDatabase(userDB, cache, tx.NewMongo(mongo.GetClient()), userMongoDB)
-	friendRpcClient := rpcclient.NewFriendRpcClient(client)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client)
+	friendRpcClient := rpcclient.NewFriendRpcClient(client, config)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config)
 	u := &userServer{
 		UserDatabase:             database,
 		RegisterCenter:           client,
@@ -125,7 +125,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	if err := CallbackBeforeUpdateUserInfo(ctx, req); err != nil {
+	if err := CallbackBeforeUpdateUserInfo(ctx, s.config, req); err != nil {
 		return nil, err
 	}
 	data := convert.UserPb2DBMap(req.UserInfo)
@@ -145,7 +145,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	for _, friendID := range friends {
 		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	}
-	if err := CallbackAfterUpdateUserInfo(ctx, req); err != nil {
+	if err := CallbackAfterUpdateUserInfo(ctx, s.config, req); err != nil {
 		return nil, err
 	}
 	if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
@@ -160,7 +160,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 		return nil, err
 	}
 
-	if err = CallbackBeforeUpdateUserInfoEx(ctx, req); err != nil {
+	if err = CallbackBeforeUpdateUserInfoEx(ctx, s.config, req); err != nil {
 		return nil, err
 	}
 	data := convert.UserPb2DBMapEx(req.UserInfo)
@@ -180,7 +180,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	for _, friendID := range friends {
 		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	}
-	if err := CallbackAfterUpdateUserInfoEx(ctx, req); err != nil {
+	if err := CallbackAfterUpdateUserInfoEx(ctx, s.config, req); err != nil {
 		return nil, err
 	}
 	if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
@@ -254,8 +254,8 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	if len(req.Users) == 0 {
 		return nil, errs.ErrArgs.Wrap("users is empty")
 	}
-	if req.Secret != config.Config.Secret {
-		log.ZDebug(ctx, "UserRegister", config.Config.Secret, req.Secret)
+	if req.Secret != s.config.Secret {
+		log.ZDebug(ctx, "UserRegister", s.config.Secret, req.Secret)
 		return nil, errs.ErrNoPermission.Wrap("secret invalid")
 	}
 	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
@@ -278,7 +278,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	if exist {
 		return nil, errs.ErrRegisteredAlready.Wrap("userID registered already")
 	}
-	if err := CallbackBeforeUserRegister(ctx, req); err != nil {
+	if err := CallbackBeforeUserRegister(ctx, s.config, req); err != nil {
 		return nil, err
 	}
 	now := time.Now()
@@ -298,7 +298,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 		return nil, err
 	}
 
-	if err := CallbackAfterUserRegister(ctx, req); err != nil {
+	if err := CallbackAfterUserRegister(ctx, s.config, req); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -681,7 +681,7 @@ func (s *userServer) userModelToResp(users []*relation.UserModel, pagination pag
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {
-		if v.AppMangerLevel == constant.AppNotificationAdmin && !utils.IsContain(v.UserID, config.Config.IMAdmin.UserID) {
+		if v.AppMangerLevel == constant.AppNotificationAdmin && !utils.IsContain(v.UserID, s.config.IMAdmin.UserID) {
 			temp := &pbuser.NotificationAccountInfo{
 				UserID:   v.UserID,
 				FaceURL:  v.FaceURL,

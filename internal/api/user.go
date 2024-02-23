@@ -24,7 +24,6 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/gin-gonic/gin"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -71,7 +70,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	conns, err := u.Discov.GetConns(c, config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := u.Discov.GetConns(c, u.Config.RpcRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return
@@ -135,7 +134,7 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	conns, err := u.Discov.GetConns(c, config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := u.Discov.GetConns(c, u.Config.RpcRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return

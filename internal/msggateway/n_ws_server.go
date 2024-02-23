@@ -52,7 +52,7 @@ type LongConnServer interface {
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s any) error
 	SetCacheHandler(cache cache.MsgModel)
-	SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry)
+	SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig)
 	KickUserConn(client *Client) error
 	UnRegister(c *Client)
 	SetKickHandlerInfo(i *kickHandler)
@@ -94,9 +94,9 @@ type kickHandler struct {
 	newClient  *Client
 }
 
-func (ws *WsServer) SetDiscoveryRegistry(disCov discoveryregistry.SvcDiscoveryRegistry) {
-	ws.MessageHandler = NewGrpcHandler(ws.validate, disCov)
-	u := rpcclient.NewUserRpcClient(disCov)
+func (ws *WsServer) SetDiscoveryRegistry(disCov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) {
+	ws.MessageHandler = NewGrpcHandler(ws.validate, disCov, config)
+	u := rpcclient.NewUserRpcClient(disCov, config)
 	ws.userClient = &u
 	ws.disCov = disCov
 }
@@ -442,7 +442,7 @@ func (ws *WsServer) ParseWSArgs(r *http.Request) (args *WSArgs, err error) {
 		return nil, errs.ErrConnArgsErr.Wrap("platformID is not int")
 	}
 	v.PlatformID = platformID
-	if err = authverify.WsVerifyToken(v.Token, v.UserID, platformID); err != nil {
+	if err = authverify.WsVerifyToken(v.Token, v.UserID, ws.globalConfig.Secret, platformID); err != nil {
 		return nil, err
 	}
 	if query.Get(Compression) == GzipCompressionProtocol {

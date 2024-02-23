@@ -53,9 +53,9 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 	m.Handlers = append(m.Handlers, interceptorFunc...)
 }
 
-func (m *msgServer) execInterceptorHandler(ctx context.Context, req *msg.SendMsgReq) error {
+func (m *msgServer) execInterceptorHandler(ctx context.Context, config *config.GlobalConfig, req *msg.SendMsgReq) error {
 	for _, handler := range m.Handlers {
-		msgData, err := handler(ctx, req)
+		msgData, err := handler(ctx, config, req)
 		if err != nil {
 			return err
 		}
@@ -65,11 +65,11 @@ func (m *msgServer) execInterceptorHandler(ctx context.Context, req *msg.SendMsg
 }
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis()
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}
-	mongo, err := unrelation.NewMongo()
+	mongo, err := unrelation.NewMongo(config)
 	if err != nil {
 		return err
 	}
@@ -77,11 +77,11 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 		return err
 	}
 	cacheModel := cache.NewMsgCacheModel(rdb)
-	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
-	conversationClient := rpcclient.NewConversationRpcClient(client)
-	userRpcClient := rpcclient.NewUserRpcClient(client)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client)
-	friendRpcClient := rpcclient.NewFriendRpcClient(client)
+	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase(config.Mongo.Database))
+	conversationClient := rpcclient.NewConversationRpcClient(client, config)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
+	friendRpcClient := rpcclient.NewFriendRpcClient(client, config)
 	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
 	if err != nil {
 		return err

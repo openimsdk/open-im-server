@@ -40,15 +40,15 @@ import (
 )
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	mongo, err := unrelation.NewMongo()
+	mongo, err := unrelation.NewMongo(config)
 	if err != nil {
 		return err
 	}
-	logdb, err := mgo.NewLogMongo(mongo.GetDatabase())
+	logdb, err := mgo.NewLogMongo(mongo.GetDatabase(config.Mongo.Database))
 	if err != nil {
 		return err
 	}
-	s3db, err := mgo.NewS3Mongo(mongo.GetDatabase())
+	s3db, err := mgo.NewS3Mongo(mongo.GetDatabase(config.Mongo.Database))
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 		apiURL += "/"
 	}
 	apiURL += "object/"
-	rdb, err := cache.NewRedis()
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	third.RegisterThirdServer(server, &thirdServer{
 		apiURL:        apiURL,
 		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb), logdb),
-		userRpcClient: rpcclient.NewUserRpcClient(client),
+		userRpcClient: rpcclient.NewUserRpcClient(client, config),
 		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
 		defaultExpire: time.Hour * 24 * 7,
 		config:        config,

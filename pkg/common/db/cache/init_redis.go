@@ -46,7 +46,7 @@ func NewRedis(config *config.GlobalConfig) (redis.UniversalClient, error) {
 	}
 
 	// Read configuration from environment variables
-	overrideConfigFromEnv()
+	overrideConfigFromEnv(config)
 
 	if len(config.Redis.Address) == 0 {
 		return nil, errs.Wrap(errors.New("redis address is empty"))
@@ -87,22 +87,22 @@ func NewRedis(config *config.GlobalConfig) (redis.UniversalClient, error) {
 }
 
 // overrideConfigFromEnv overrides configuration fields with environment variables if present.
-func overrideConfigFromEnv() {
+func overrideConfigFromEnv(config *config.GlobalConfig) {
 	if envAddr := os.Getenv("REDIS_ADDRESS"); envAddr != "" {
 		if envPort := os.Getenv("REDIS_PORT"); envPort != "" {
 			addresses := strings.Split(envAddr, ",")
 			for i, addr := range addresses {
 				addresses[i] = addr + ":" + envPort
 			}
-			config.Config.Redis.Address = addresses
+			config.Redis.Address = addresses
 		} else {
-			config.Config.Redis.Address = strings.Split(envAddr, ",")
+			config.Redis.Address = strings.Split(envAddr, ",")
 		}
 	}
 	if envUser := os.Getenv("REDIS_USERNAME"); envUser != "" {
-		config.Config.Redis.Username = envUser
+		config.Redis.Username = envUser
 	}
 	if envPass := os.Getenv("REDIS_PASSWORD"); envPass != "" {
-		config.Config.Redis.Password = envPass
+		config.Redis.Password = envPass
 	}
 }

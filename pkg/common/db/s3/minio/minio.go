@@ -59,13 +59,13 @@ const (
 
 const successCode = http.StatusOK
 
-func NewMinio(cache cache.MinioCache) (s3.Interface, error) {
-	u, err := url.Parse(config.Config.Object.Minio.Endpoint)
+func NewMinio(cache cache.MinioCache, config config.GlobalConfig) (s3.Interface, error) {
+	u, err := url.Parse(config.Object.Minio.Endpoint)
 	if err != nil {
 		return nil, err
 	}
 	opts := &minio.Options{
-		Creds:  credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, config.Config.Object.Minio.SessionToken),
+		Creds:  credentials.NewStaticV4(config.Object.Minio.AccessKeyID, config.Object.Minio.SecretAccessKey, config.Object.Minio.SessionToken),
 		Secure: u.Scheme == "https",
 	}
 	client, err := minio.New(u.Host, opts)
@@ -73,26 +73,27 @@ func NewMinio(cache cache.MinioCache) (s3.Interface, error) {
 		return nil, err
 	}
 	m := &Minio{
-		bucket: config.Config.Object.Minio.Bucket,
+		bucket: config.Object.Minio.Bucket,
 		core:   &minio.Core{Client: client},
 		lock:   &sync.Mutex{},
 		init:   false,
 		cache:  cache,
+		config: config,
 	}
-	if config.Config.Object.Minio.SignEndpoint == "" || config.Config.Object.Minio.SignEndpoint == config.Config.Object.Minio.Endpoint {
+	if config.Object.Minio.SignEndpoint == "" || config.Object.Minio.SignEndpoint == config.Object.Minio.Endpoint {
 		m.opts = opts
 		m.sign = m.core.Client
 		m.prefix = u.Path
 		u.Path = ""
-		config.Config.Object.Minio.Endpoint = u.String()
-		m.signEndpoint = config.Config.Object.Minio.Endpoint
+		config.Object.Minio.Endpoint = u.String()
+		m.signEndpoint = config.Object.Minio.Endpoint
 	} else {
-		su, err := url.Parse(config.Config.Object.Minio.SignEndpoint)
+		su, err := url.Parse(config.Object.Minio.SignEndpoint)
 		if err != nil {
 			return nil, err
 		}
 		m.opts = &minio.Options{
-			Creds:  credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, config.Config.Object.Minio.SessionToken),
+			Creds:  credentials.NewStaticV4(config.Object.Minio.AccessKeyID, config.Object.Minio.SecretAccessKey, config.Object.Minio.SessionToken),
 			Secure: su.Scheme == "https",
 		}
 		m.sign, err = minio.New(su.Host, m.opts)
@@ -101,8 +102,8 @@ func NewMinio(cache cache.MinioCache) (s3.Interface, error) {
 		}
 		m.prefix = su.Path
 		su.Path = ""
-		config.Config.Object.Minio.SignEndpoint = su.String()
-		m.signEndpoint = config.Config.Object.Minio.SignEndpoint
+		config.Object.Minio.SignEndpoint = su.String()
+		m.signEndpoint = config.Object.Minio.SignEndpoint
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -123,6 +124,7 @@ type Minio struct {
 	init         bool
 	prefix       string
 	cache        cache.MinioCache
+	config       config.GlobalConfig
 }
 
 func (m *Minio) initMinio(ctx context.Context) error {
@@ -134,7 +136,7 @@ func (m *Minio) initMinio(ctx context.Context) error {
 	if m.init {
 		return nil
 	}
-	conf := config.Config.Object.Minio
+	conf := m.config.Object.Minio
 	exists, err := m.core.Client.BucketExists(ctx, conf.Bucket)
 	if err != nil {
 		return fmt.Errorf("check bucket exists error: %w", err)
@@ -399,7 +401,7 @@ func (m *Minio) PresignedGetObject(ctx context.Context, name string, expire time
 		rawURL *url.URL
 		err    error
 	)
-	if config.Config.Object.Minio.PublicRead {
+	if m.config.Object.Minio.PublicRead {
 		rawURL, err = makeTargetURL(m.sign, m.bucket, name, m.location, false, query)
 	} else {
 		rawURL, err = m.sign.PresignedGetObject(ctx, m.bucket, name, expire, query)

@@ -126,16 +126,16 @@ type CommonMsgDatabase interface {
 	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
 }
 
-func NewCommonMsgDatabase(msgDocModel unrelationtb.MsgDocModelInterface, cacheModel cache.MsgModel) (CommonMsgDatabase, error) {
-	producerToRedis, err := kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.LatestMsgToRedis.Topic)
+func NewCommonMsgDatabase(msgDocModel unrelationtb.MsgDocModelInterface, cacheModel cache.MsgModel, config *config.GlobalConfig) (CommonMsgDatabase, error) {
+	producerToRedis, err := kafka.NewKafkaProducer(config.Kafka.Addr, config.Kafka.LatestMsgToRedis.Topic)
 	if err != nil {
 		return nil, err
 	}
-	producerToMongo, err := kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToMongo.Topic)
+	producerToMongo, err := kafka.NewKafkaProducer(config.Kafka.Addr, config.Kafka.MsgToMongo.Topic)
 	if err != nil {
 		return nil, err
 	}
-	producerToPush, err := kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToPush.Topic)
+	producerToPush, err := kafka.NewKafkaProducer(config.Kafka.Addr, config.Kafka.MsgToPush.Topic)
 	if err != nil {
 		return nil, err
 	}
@@ -148,10 +148,10 @@ func NewCommonMsgDatabase(msgDocModel unrelationtb.MsgDocModelInterface, cacheMo
 	}, nil
 }
 
-func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database) (CommonMsgDatabase, error) {
-	cacheModel := cache.NewMsgCacheModel(rdb)
+func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, config *config.GlobalConfig) (CommonMsgDatabase, error) {
+	cacheModel := cache.NewMsgCacheModel(rdb, config)
 	msgDocModel := unrelation.NewMsgMongoDriver(database)
-	return NewCommonMsgDatabase(msgDocModel, cacheModel)
+	return NewCommonMsgDatabase(msgDocModel, cacheModel, config)
 }
 
 type commonMsgDatabase struct {

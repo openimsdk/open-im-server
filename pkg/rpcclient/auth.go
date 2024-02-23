@@ -25,17 +25,18 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
-func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImAuthName)
+func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Auth {
+	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImAuthName)
 	if err != nil {
 		panic(err)
 	}
 	client := auth.NewAuthClient(conn)
-	return &Auth{discov: discov, conn: conn, Client: client}
+	return &Auth{discov: discov, conn: conn, Client: client, Config: config}
 }
 
 type Auth struct {
 	conn   grpc.ClientConnInterface
 	Client auth.AuthClient
 	discov discoveryregistry.SvcDiscoveryRegistry
+	Config *config.GlobalConfig
 }

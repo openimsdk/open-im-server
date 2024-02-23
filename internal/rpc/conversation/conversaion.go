@@ -62,21 +62,21 @@ func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(
 }
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis()
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}
-	mongo, err := unrelation.NewMongo()
+	mongo, err := unrelation.NewMongo(config)
 	if err != nil {
 		return err
 	}
-	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase())
+	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase(config.Mongo.Database))
 	if err != nil {
 		return err
 	}
-	groupRpcClient := rpcclient.NewGroupRpcClient(client)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client)
-	userRpcClient := rpcclient.NewUserRpcClient(client)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config)
 	pbconversation.RegisterConversationServer(server, &conversationServer{
 		msgRpcClient:                   &msgRpcClient,
 		user:                           &userRpcClient,

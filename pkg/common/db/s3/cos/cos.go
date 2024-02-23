@@ -56,8 +56,8 @@ const (
 	videoSnapshotImageJpg = "jpg"
 )
 
-func NewCos() (s3.Interface, error) {
-	conf := config.Config.Object.Cos
+func NewCos(config *config.GlobalConfig) (s3.Interface, error) {
+	conf := config.Object.Cos
 	u, err := url.Parse(conf.BucketURL)
 	if err != nil {
 		panic(err)
@@ -73,6 +73,7 @@ func NewCos() (s3.Interface, error) {
 		copyURL:    u.Host + "/",
 		client:     client,
 		credential: client.GetCredential(),
+		config:     config,
 	}, nil
 }
 
@@ -80,6 +81,7 @@ type Cos struct {
 	copyURL    string
 	client     *cos.Client
 	credential *cos.Credential
+	config     *config.GlobalConfig
 }
 
 func (c *Cos) Engine() string {
@@ -328,7 +330,7 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 }
 
 func (c *Cos) getPresignedURL(ctx context.Context, name string, expire time.Duration, opt *cos.PresignedURLOptions) (*url.URL, error) {
-	if !config.Config.Object.Cos.PublicRead {
+	if !c.config.Object.Cos.PublicRead {
 		return c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, opt)
 	}
 	return c.client.Object.GetObjectURL(name), nil

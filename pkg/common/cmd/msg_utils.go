@@ -22,7 +22,7 @@ import (
 
 type MsgUtilsCmd struct {
 	cobra.Command
-	msgTool *tools.MsgTool
+	MsgTool *tools.MsgTool
 }
 
 func (m *MsgUtilsCmd) AddUserIDFlag() {
@@ -136,7 +136,7 @@ func NewSeqCmd() *SeqCmd {
 
 func (s *SeqCmd) GetSeqCmd() *cobra.Command {
 	s.Command.Run = func(cmdLines *cobra.Command, args []string) {
-		_, err := tools.InitMsgTool()
+		_, err := tools.InitMsgTool(s.MsgTool.Config)
 		if err != nil {
 			panic(err)
 		}

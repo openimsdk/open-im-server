@@ -58,7 +58,7 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 		err := "port or proPort is empty:" + strconv.Itoa(port) + "," + strconv.Itoa(proPort)
 		return errs.Wrap(fmt.Errorf(err))
 	}
-	rdb, err := cache.NewRedis()
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 		netDone = make(chan struct{}, 1)
 		netErr  error
 	)
-	router := newGinRouter(client, rdb)
+	router := newGinRouter(client, rdb, config)
 	if config.Prometheus.Enable {
 		go func() {
 			p := ginprom.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
@@ -132,27 +132,26 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 	return nil
 }
 
-func newGinRouter(disCov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
+func newGinRouter(disCov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient, config *config.GlobalConfig) *gin.Engine {
 	disCov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin"))) // 默认RPC中间件
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("required_if", RequiredIf)
 	}
-	log.ZInfo(context.Background(), "load config", "config", config.Config)
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	// init rpc client here
-	userRpc := rpcclient.NewUser(disCov)
-	groupRpc := rpcclient.NewGroup(disCov)
-	friendRpc := rpcclient.NewFriend(disCov)
-	messageRpc := rpcclient.NewMessage(disCov)
-	conversationRpc := rpcclient.NewConversation(disCov)
-	authRpc := rpcclient.NewAuth(disCov)
-	thirdRpc := rpcclient.NewThird(disCov)
+	userRpc := rpcclient.NewUser(disCov, config)
+	groupRpc := rpcclient.NewGroup(disCov, config)
+	friendRpc := rpcclient.NewFriend(disCov, config)
+	messageRpc := rpcclient.NewMessage(disCov, config)
+	conversationRpc := rpcclient.NewConversation(disCov, config)
+	authRpc := rpcclient.NewAuth(disCov, config)
+	thirdRpc := rpcclient.NewThird(disCov, config)
 
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc)
-	ParseToken := GinParseToken(rdb)
+	ParseToken := GinParseToken(rdb, config)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -314,11 +313,11 @@ func newGinRouter(disCov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	return r
 }
 
-func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
+func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.HandlerFunc {
 	dataBase := controller.NewAuthDatabase(
-		cache.NewMsgCacheModel(rdb),
-		config.Config.Secret,
-		config.Config.TokenPolicy.Expire,
+		cache.NewMsgCacheModel(rdb, config),
+		config.Secret,
+		config.TokenPolicy.Expire,
 	)
 	return func(c *gin.Context) {
 		switch c.Request.Method {

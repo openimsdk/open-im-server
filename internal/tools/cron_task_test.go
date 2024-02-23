@@ -61,7 +61,7 @@ func TestCronWrapFunc(t *testing.T) {
 	start := time.Now()
 	key := fmt.Sprintf("cron-%v", rand.Int31())
 	crontab := cron.New(cron.WithSeconds())
-	crontab.AddFunc("*/1 * * * * *", cronWrapFunc(rdb, key, cb))
+	crontab.AddFunc("*/1 * * * * *", cronWrapFunc(config.NewGlobalConfig(), rdb, key, cb))
 	crontab.Start()
 	<-done
 
@@ -80,10 +80,10 @@ func TestCronWrapFuncWithNetlock(t *testing.T) {
 	crontab := cron.New(cron.WithSeconds())
 
 	key := fmt.Sprintf("cron-%v", rand.Int31())
-	crontab.AddFunc("*/1 * * * * *", cronWrapFunc(rdb, key, func() {
+	crontab.AddFunc("*/1 * * * * *", cronWrapFunc(config.NewGlobalConfig(), rdb, key, func() {
 		done <- "host1"
 	}))
-	crontab.AddFunc("*/1 * * * * *", cronWrapFunc(rdb, key, func() {
+	crontab.AddFunc("*/1 * * * * *", cronWrapFunc(config.NewGlobalConfig(), rdb, key, func() {
 		done <- "host2"
 	}))
 	crontab.Start()

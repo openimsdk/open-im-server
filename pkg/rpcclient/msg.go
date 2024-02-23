@@ -17,6 +17,8 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
@@ -130,21 +132,22 @@ type Message struct {
 	conn   grpc.ClientConnInterface
 	Client msg.MsgClient
 	discov discoveryregistry.SvcDiscoveryRegistry
+	Config *config.GlobalConfig
 }
 
-func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Message {
+	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
 		panic(err)
 	}
 	client := msg.NewMsgClient(conn)
-	return &Message{discov: discov, conn: conn, Client: client}
+	return &Message{discov: discov, conn: conn, Client: client, Config: config}
 }
 
 type MessageRpcClient Message
 
-func NewMessageRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) MessageRpcClient {
-	return MessageRpcClient(*NewMessage(discov))
+func NewMessageRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) MessageRpcClient {
+	return MessageRpcClient(*NewMessage(discov, config))
 }
 
 func (m *MessageRpcClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
@@ -245,8 +248,8 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
-		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", m)
-		return err
+		errInfo := fmt.Sprintf("MsgClient Notification json.Marshal failed, sendID:%s, recvID:%s, contentType:%d, msg:%s", sendID, recvID, contentType, m)
+		return errs.Wrap(err, errInfo)
 	}
 	notificationOpt := &notificationOpt{}
 	for _, opt := range opts {
@@ -258,7 +261,8 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
 		userInfo, err = s.getUserInfo(ctx, sendID)
 		if err != nil {
-			log.ZWarn(ctx, "getUserInfo failed", err, "sendID", sendID)
+			errInfo := fmt.Sprintf("getUserInfo failed, sendID:%s", sendID)
+			return errs.Wrap(err, errInfo)
 		} else {
 			msg.SenderNickname = userInfo.Nickname
 			msg.SenderFaceURL = userInfo.FaceURL
@@ -290,10 +294,9 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
 	_, err = s.sendMsg(ctx, &req)
-	if err == nil {
-		log.ZDebug(ctx, "MsgClient Notification SendMsg success", "req", &req)
-	} else {
-		log.ZError(ctx, "MsgClient Notification SendMsg failed", err, "req", &req)
+	if err != nil {
+		errInfo := fmt.Sprintf("MsgClient Notification SendMsg failed, req:%s", &req)
+		return errs.Wrap(err, errInfo)
 	}
 	return err
 }

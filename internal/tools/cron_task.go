@@ -34,14 +34,14 @@ import (
 func StartTask(config *config.GlobalConfig) error {
 	fmt.Println("cron task start, config", config.ChatRecordsClearTime)
 
-	msgTool, err := InitMsgTool()
+	msgTool, err := InitMsgTool(config)
 	if err != nil {
 		return err
 	}
 
 	msgTool.convertTools()
 
-	rdb, err := cache.NewRedis()
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}

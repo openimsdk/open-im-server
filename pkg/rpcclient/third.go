@@ -33,16 +33,17 @@ type Third struct {
 	Client      third.ThirdClient
 	discov      discoveryregistry.SvcDiscoveryRegistry
 	MinioClient *minio.Client
+	Config      *config.GlobalConfig
 }
 
-func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImThirdName)
+func NewThird(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Third {
+	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImThirdName)
 	if err != nil {
 		panic(err)
 	}
 	client := third.NewThirdClient(conn)
 	minioClient, err := minioInit()
-	return &Third{discov: discov, Client: client, conn: conn, MinioClient: minioClient}
+	return &Third{discov: discov, Client: client, conn: conn, MinioClient: minioClient, Config: config}
 }
 
 func minioInit() (*minio.Client, error) {
