@@ -83,7 +83,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 		msgClient := msggateway.NewMsgGatewayClient(conn)
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
 		if err != nil {
-			log.ZInfo(c, "GetUsersOnlineStatus rpc error", err)
+			log.ZDebug(c, "GetUsersOnlineStatus rpc error", err)
 			if apiresp.ParseError(err).ErrCode == errs.NoPermissionError {
 				apiresp.GinError(c, errs.Wrap(err))
 				return

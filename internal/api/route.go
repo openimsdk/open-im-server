@@ -278,7 +278,6 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 // handleGinError logs and returns an error response through Gin context.
 func handleGinError(c *gin.Context, logMessage string, errType errs.CodeError, detail string) {
 	wrappedErr := errType.Wrap(detail)
-	log.ZInfo(c, logMessage, wrappedErr)
 	apiresp.GinError(c, wrappedErr)
 	c.Abort()
 }

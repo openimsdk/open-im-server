@@ -197,7 +197,8 @@ func (c *MsgTool) checkMaxSeqWithMongo(ctx context.Context, conversationID strin
 		return err
 	}
 	if math.Abs(float64(maxSeqMongo-maxSeqCache)) > 10 {
-		log.ZError(ctx, "cache max seq and mongo max seq is diff > 10", nil, "maxSeqMongo", maxSeqMongo, "minSeqMongo", minSeqMongo, "maxSeqCache", maxSeqCache, "conversationID", conversationID)
+		err = fmt.Errorf("cache max seq and mongo max seq is diff > 10,  maxSeqMongo:%d,minSeqMongo:%d,maxSeqCache:%d,conversationID:%s", maxSeqMongo, minSeqMongo, maxSeqCache, conversationID)
+		return errs.Wrap(err)
 	}
 	return nil
 }
@@ -219,7 +220,6 @@ func (c *MsgTool) checkMaxSeq(ctx context.Context, conversationID string) error 
 func (c *MsgTool) FixAllSeq(ctx context.Context) error {
 	conversationIDs, err := c.conversationDatabase.GetAllConversationIDs(ctx)
 	if err != nil {
-		log.ZError(ctx, "GetAllConversationIDs failed", err)
 		return err
 	}
 	for _, conversationID := range conversationIDs {
