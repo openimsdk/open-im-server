@@ -62,8 +62,7 @@ function openim::test::auth() {
 	openim::test::get_token
 
 	# 2. Force logout the test user from a specific platform.
-    # TODO： BUG
-	# openim::test::force_logout
+	openim::test::force_logout
 
 	# Log the completion of the auth test suite.
 	openim::log::success "Auth test suite completed successfully."
