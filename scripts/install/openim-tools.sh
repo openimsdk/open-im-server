@@ -103,14 +103,14 @@ function openim::tools::start_service() {
     printf "Specifying prometheus port: %s\n" "${prometheus_port}"
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
-  openim::log::status "Starting ${binary_name}..."
+  openim::log::status "Starting binary ${binary_name}..."
   ${cmd} | tee -a "${LOG_FILE}"
 }
 
 function openim::tools::start() {
     openim::log::info "Starting OpenIM Tools..."
     for tool in "${OPENIM_TOOLS_NAME_LISTARIES[@]}"; do
-        openim::log::info "Starting ${tool}..."
+        openim::log::info "Starting tool ${tool}..."
         # openim::tools::start_service ${tool}
         sleep 0.2
     done
@@ -120,7 +120,7 @@ function openim::tools::start() {
 function openim::tools::pre-start() {
     openim::log::info "Preparing to start OpenIM Tools..."
     for tool in "${OPENIM_TOOLS_PRE_START_NAME_LISTARIES[@]}"; do
-        openim::log::info "Starting ${tool}..."
+        openim::log::info "Starting tool ${tool}..."
         openim::tools::start_service ${tool} ${OPNEIM_CONFIG}
     done
 }
@@ -128,7 +128,7 @@ function openim::tools::pre-start() {
 function openim::tools::post-start() {
     openim::log::info "Post-start actions for OpenIM Tools..."
     for tool in "${OPENIM_TOOLS_POST_START_NAME_LISTARIES[@]}"; do
-        openim::log::info "Starting ${tool}..."
+        openim::log::info "Starting tool ${tool}..."
         openim::tools::start_service ${tool}
     done
 }
