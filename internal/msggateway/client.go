@@ -78,16 +78,17 @@ type Client struct {
 	token          string
 }
 
-func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
-	return &Client{
-		w:          new(sync.Mutex),
-		conn:       conn,
-		PlatformID: utils.StringToInt(ctx.GetPlatformID()),
-		IsCompress: isCompress,
-		UserID:     ctx.GetUserID(),
-		ctx:        ctx,
-	}
-}
+// function not used
+// func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
+// 	return &Client{
+// 		w:          new(sync.Mutex),
+// 		conn:       conn,
+// 		PlatformID: utils.StringToInt(ctx.GetPlatformID()),
+// 		IsCompress: isCompress,
+// 		UserID:     ctx.GetUserID(),
+// 		ctx:        ctx,
+// 	}
+// }
 
 // ResetClient updates the client's state with new connection and context information.
 func (c *Client) ResetClient(

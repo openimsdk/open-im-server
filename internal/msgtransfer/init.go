@@ -71,7 +71,7 @@ func StartTransfer(prometheusPort int) error {
 		return err
 	}
 
-	if err := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
+	if err2 := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err2 != nil {
 		return err
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))

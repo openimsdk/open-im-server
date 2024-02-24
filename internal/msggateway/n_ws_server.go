@@ -61,11 +61,12 @@ type LongConnServer interface {
 	MessageHandler
 }
 
-var bufferPool = sync.Pool{
-	New: func() any {
-		return make([]byte, 1024)
-	},
-}
+// bufferPool is unused
+// var bufferPool = sync.Pool{
+// 	New: func() any {
+// 		return make([]byte, 1024)
+// 	},
+// }
 
 type WsServer struct {
 	port              int

@@ -58,12 +58,12 @@ func (u *UserMap) Get(key string, platformID int) ([]*Client, bool, bool) {
 func (u *UserMap) Set(key string, v *Client) {
 	allClients, existed := u.m.Load(key)
 	if existed {
-		log.ZDebug(context.Background(), "Set existed", "user_id", key, "client", *v)
+		log.ZDebug(context.Background(), "Set existed", "user_id", key, "client_user_id", v.UserID)
 		oldClients := allClients.([]*Client)
 		oldClients = append(oldClients, v)
 		u.m.Store(key, oldClients)
 	} else {
-		log.ZDebug(context.Background(), "Set not existed", "user_id", key, "client", *v)
+		log.ZDebug(context.Background(), "Set not existed", "user_id", key, "client_user_id", v.UserID)
 		var clients []*Client
 		clients = append(clients, v)
 		u.m.Store(key, clients)
