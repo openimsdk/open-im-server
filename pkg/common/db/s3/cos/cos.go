@@ -52,8 +52,8 @@ const (
 const successCode = http.StatusOK
 
 const (
-	videoSnapshotImagePng = "png"
-	videoSnapshotImageJpg = "jpg"
+// videoSnapshotImagePng = "png"
+// videoSnapshotImageJpg = "jpg"
 )
 
 func NewCos() (s3.Interface, error) {
