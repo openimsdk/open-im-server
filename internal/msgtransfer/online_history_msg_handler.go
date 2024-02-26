@@ -101,13 +101,18 @@ func NewOnlineHistoryRedisConsumerHandler(
 	och.conversationRpcClient = conversationRpcClient
 	och.groupRpcClient = groupRpcClient
 	var err error
-	tlsConfig := &kafka.TLSConfig{
-		CACrt:              config.Kafka.TLS.CACrt,
-		ClientCrt:          config.Kafka.TLS.ClientCrt,
-		ClientKey:          config.Kafka.TLS.ClientKey,
-		ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
-		InsecureSkipVerify: false,
+
+	var tlsConfig *kafka.TLSConfig
+	if config.Kafka.TLS != nil {
+		tlsConfig = &kafka.TLSConfig{
+			CACrt:              config.Kafka.TLS.CACrt,
+			ClientCrt:          config.Kafka.TLS.ClientCrt,
+			ClientKey:          config.Kafka.TLS.ClientKey,
+			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+			InsecureSkipVerify: false,
+		}
 	}
+
 	och.historyConsumerGroup, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest,

@@ -39,12 +39,15 @@ func NewConsumerHandler(config *config.GlobalConfig, pusher *Pusher) (*ConsumerH
 	var consumerHandler ConsumerHandler
 	consumerHandler.pusher = pusher
 	var err error
-	tlsConfig := &kfk.TLSConfig{
-		CACrt:              config.Kafka.TLS.CACrt,
-		ClientCrt:          config.Kafka.TLS.ClientCrt,
-		ClientKey:          config.Kafka.TLS.ClientKey,
-		ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
-		InsecureSkipVerify: false,
+	var tlsConfig *kfk.TLSConfig
+	if config.Kafka.TLS != nil {
+		tlsConfig = &kfk.TLSConfig{
+			CACrt:              config.Kafka.TLS.CACrt,
+			ClientCrt:          config.Kafka.TLS.ClientCrt,
+			ClientKey:          config.Kafka.TLS.ClientKey,
+			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+			InsecureSkipVerify: false,
+		}
 	}
 	consumerHandler.pushConsumerGroup, err = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,

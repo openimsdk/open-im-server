@@ -40,12 +40,15 @@ func NewKafkaConsumer(addr []string, topic string, config *config.GlobalConfig) 
 		consumerConfig.Net.SASL.User = config.Kafka.Username
 		consumerConfig.Net.SASL.Password = config.Kafka.Password
 	}
-	tlsConfig := &TLSConfig{
-		CACrt:              config.Kafka.TLS.CACrt,
-		ClientCrt:          config.Kafka.TLS.ClientCrt,
-		ClientKey:          config.Kafka.TLS.ClientKey,
-		ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
-		InsecureSkipVerify: config.Kafka.TLS.InsecureSkipVerify,
+	var tlsConfig *TLSConfig
+	if config.Kafka.TLS != nil {
+		tlsConfig = &TLSConfig{
+			CACrt:              config.Kafka.TLS.CACrt,
+			ClientCrt:          config.Kafka.TLS.ClientCrt,
+			ClientKey:          config.Kafka.TLS.ClientKey,
+			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+			InsecureSkipVerify: false,
+		}
 	}
 	SetupTLSConfig(consumerConfig, tlsConfig)
 	consumer, err := sarama.NewConsumer(p.addr, consumerConfig)

@@ -120,5 +120,5 @@ func InitConfig(config *GlobalConfig, configFolderPath string) error {
 		return err
 	}
 
-	return initConfig(config.Notification, NotificationFileName, configFolderPath)
+	return initConfig(&config.Notification, NotificationFileName, configFolderPath)
 }
