@@ -67,15 +67,15 @@ func run(port int, proPort int) error {
 	// Determine whether zk is passed according to whether it is a clustered deployment
 	client, err = kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
-		return errs.Wrap(err, "register discovery err")
+		return err
 	}
 
 	if err = client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
-		return errs.Wrap(err, "create rpc root nodes error")
+		return err
 	}
 
 	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.Config.EncodeConfig()); err != nil {
-		return errs.Wrap(err, "register config to registry error")
+		return err
 	}
 
 	var (
