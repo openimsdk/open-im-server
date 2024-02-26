@@ -31,8 +31,8 @@ type Push struct {
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
-func NewPush(discov discoveryregistry.SvcDiscoveryRegistry) *Push {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImPushName)
+func NewPush(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Push {
+	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImPushName)
 	if err != nil {
 		panic(err)
 	}
@@ -45,8 +45,8 @@ func NewPush(discov discoveryregistry.SvcDiscoveryRegistry) *Push {
 
 type PushRpcClient Push
 
-func NewPushRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) PushRpcClient {
-	return PushRpcClient(*NewPush(discov))
+func NewPushRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) PushRpcClient {
+	return PushRpcClient(*NewPush(discov, config))
 }
 
 func (p *PushRpcClient) DelUserPushToken(

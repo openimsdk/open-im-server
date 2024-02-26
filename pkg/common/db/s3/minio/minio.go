@@ -59,7 +59,7 @@ const (
 
 const successCode = http.StatusOK
 
-func NewMinio(cache cache.MinioCache, config config.GlobalConfig) (s3.Interface, error) {
+func NewMinio(cache cache.MinioCache, config *config.GlobalConfig) (s3.Interface, error) {
 	u, err := url.Parse(config.Object.Minio.Endpoint)
 	if err != nil {
 		return nil, err
@@ -124,7 +124,7 @@ type Minio struct {
 	init         bool
 	prefix       string
 	cache        cache.MinioCache
-	config       config.GlobalConfig
+	config       *config.GlobalConfig
 }
 
 func (m *Minio) initMinio(ctx context.Context) error {

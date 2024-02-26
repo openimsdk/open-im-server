@@ -57,8 +57,8 @@ const (
 	videoSnapshotImageJpg = "jpg"
 )
 
-func NewOSS() (s3.Interface, error) {
-	conf := config.Config.Object.Oss
+func NewOSS(config *config.GlobalConfig) (s3.Interface, error) {
+	conf := config.Object.Oss
 	if conf.BucketURL == "" {
 		return nil, errors.New("bucket url is empty")
 	}
@@ -78,6 +78,7 @@ func NewOSS() (s3.Interface, error) {
 		bucket:      bucket,
 		credentials: client.Config.GetCredentials(),
 		um:          *(*urlMaker)(reflect.ValueOf(bucket.Client.Conn).Elem().FieldByName("url").UnsafePointer()),
+		PublicRead:  conf.PublicRead,
 	}, nil
 }
 
@@ -86,6 +87,7 @@ type OSS struct {
 	bucket      *oss.Bucket
 	credentials oss.Credentials
 	um          urlMaker
+	PublicRead  bool
 }
 
 func (o *OSS) Engine() string {
@@ -282,7 +284,7 @@ func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name strin
 }
 
 func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
-	publicRead := config.Config.Object.Oss.PublicRead
+	publicRead := o.PublicRead
 	var opts []oss.Option
 	if opt != nil {
 		if opt.Image != nil {

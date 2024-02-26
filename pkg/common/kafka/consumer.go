@@ -30,17 +30,24 @@ type Consumer struct {
 	Consumer      sarama.Consumer
 }
 
-func NewKafkaConsumer(addr []string, topic string) *Consumer {
+func NewKafkaConsumer(addr []string, topic string, config *config.GlobalConfig) *Consumer {
 	p := Consumer{}
 	p.Topic = topic
 	p.addr = addr
 	consumerConfig := sarama.NewConfig()
-	if config.Config.Kafka.Username != "" && config.Config.Kafka.Password != "" {
+	if config.Kafka.Username != "" && config.Kafka.Password != "" {
 		consumerConfig.Net.SASL.Enable = true
-		consumerConfig.Net.SASL.User = config.Config.Kafka.Username
-		consumerConfig.Net.SASL.Password = config.Config.Kafka.Password
+		consumerConfig.Net.SASL.User = config.Kafka.Username
+		consumerConfig.Net.SASL.Password = config.Kafka.Password
 	}
-	SetupTLSConfig(consumerConfig)
+	tlsConfig := &TLSConfig{
+		CACrt:              config.Kafka.TLS.CACrt,
+		ClientCrt:          config.Kafka.TLS.ClientCrt,
+		ClientKey:          config.Kafka.TLS.ClientKey,
+		ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+		InsecureSkipVerify: config.Kafka.TLS.InsecureSkipVerify,
+	}
+	SetupTLSConfig(consumerConfig, tlsConfig)
 	consumer, err := sarama.NewConsumer(p.addr, consumerConfig)
 	if err != nil {
 		panic(err.Error())

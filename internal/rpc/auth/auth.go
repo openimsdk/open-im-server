@@ -55,9 +55,10 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
-			cache.NewMsgCacheModel(rdb),
+			cache.NewMsgCacheModel(rdb, config),
 			config.Secret,
 			config.TokenPolicy.Expire,
+			config,
 		),
 		config: config,
 	})
@@ -83,12 +84,12 @@ func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*
 }
 
 func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenReq) (*pbauth.GetUserTokenResp, error) {
-	if err := authverify.CheckAdmin(ctx); err != nil {
+	if err := authverify.CheckAdmin(ctx, s.config); err != nil {
 		return nil, err
 	}
 	resp := pbauth.GetUserTokenResp{}
 
-	if authverify.IsManagerUserID(req.UserID) {
+	if authverify.IsManagerUserID(req.UserID, s.config) {
 		return nil, errs.ErrNoPermission.Wrap("don't get Admin token")
 	}
 
@@ -105,7 +106,7 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 }
 
 func (s *authServer) parseToken(ctx context.Context, tokensString string) (claims *tokenverify.Claims, err error) {
-	claims, err = tokenverify.GetClaimFromToken(tokensString, authverify.Secret())
+	claims, err = tokenverify.GetClaimFromToken(tokensString, authverify.Secret(s.config.Secret))
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -145,7 +146,7 @@ func (s *authServer) ParseToken(
 }
 
 func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq) (*pbauth.ForceLogoutResp, error) {
-	if err := authverify.CheckAdmin(ctx); err != nil {
+	if err := authverify.CheckAdmin(ctx, s.config); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {

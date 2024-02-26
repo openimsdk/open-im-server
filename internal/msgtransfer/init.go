@@ -58,7 +58,7 @@ func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
 		return err
 	}
 
-	mongo, err := unrelation.NewMongo()
+	mongo, err := unrelation.NewMongo(config)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
 	if err = mongo.CreateMsgIndex(); err != nil {
 		return err
 	}
-	client, err := kdisc.NewDiscoveryRegister(config.Envs.Discovery)
+	client, err := kdisc.NewDiscoveryRegister(config)
 	if err != nil {
 		return err
 	}
@@ -75,14 +75,14 @@ func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
 		return err
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	msgModel := cache.NewMsgCacheModel(rdb)
-	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel)
+	msgModel := cache.NewMsgCacheModel(rdb, config)
+	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase(config.Mongo.Database))
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, config)
 	if err != nil {
 		return err
 	}
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client)
+	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
 	msgTransfer, err := NewMsgTransfer(config, msgDatabase, &conversationRpcClient, &groupRpcClient)
 	if err != nil {
 		return err

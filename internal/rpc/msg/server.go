@@ -76,13 +76,13 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	if err := mongo.CreateMsgIndex(); err != nil {
 		return err
 	}
-	cacheModel := cache.NewMsgCacheModel(rdb)
+	cacheModel := cache.NewMsgCacheModel(rdb, config)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase(config.Mongo.Database))
 	conversationClient := rpcclient.NewConversationRpcClient(client, config)
 	userRpcClient := rpcclient.NewUserRpcClient(client, config)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client, config)
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, cacheModel, config)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 		friend:                 &friendRpcClient,
 		config:                 config,
 	}
-	s.notificationSender = rpcclient.NewNotificationSender(rpcclient.WithLocalSendMsg(s.SendMsg))
+	s.notificationSender = rpcclient.NewNotificationSender(config, rpcclient.WithLocalSendMsg(s.SendMsg))
 	s.addInterceptorHandler(MessageHasReadEnabled)
 	msg.RegisterMsgServer(server, s)
 	return nil

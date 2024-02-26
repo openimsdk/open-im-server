@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"strings"
 	"unicode/utf8"
 
@@ -42,7 +43,7 @@ func toPbMapArray(m map[string][]string) []*third.KeyValues {
 	return res
 }
 
-func checkUploadName(ctx context.Context, name string) error {
+func checkUploadName(ctx context.Context, name string, config *config.GlobalConfig) error {
 	if name == "" {
 		return errs.ErrArgs.Wrap("name is empty")
 	}
@@ -56,7 +57,7 @@ func checkUploadName(ctx context.Context, name string) error {
 	if opUserID == "" {
 		return errs.ErrNoPermission.Wrap("opUserID is empty")
 	}
-	if !authverify.IsManagerUserID(opUserID) {
+	if !authverify.IsManagerUserID(opUserID, config) {
 		if !strings.HasPrefix(name, opUserID+"/") {
 			return errs.ErrNoPermission.Wrap(fmt.Sprintf("name must start with `%s/`", opUserID))
 		}

@@ -17,6 +17,7 @@ package notification
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 
@@ -37,12 +38,14 @@ func NewGroupNotificationSender(
 	db controller.GroupDatabase,
 	msgRpcClient *rpcclient.MessageRpcClient,
 	userRpcClient *rpcclient.UserRpcClient,
+	config *config.GlobalConfig,
 	fn func(ctx context.Context, userIDs []string) ([]CommonUser, error),
 ) *GroupNotificationSender {
 	return &GroupNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient), rpcclient.WithUserRpcClient(userRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(config, rpcclient.WithRpcClient(msgRpcClient), rpcclient.WithUserRpcClient(userRpcClient)),
 		getUsersInfo:       fn,
 		db:                 db,
+		config:             config,
 	}
 }
 
@@ -50,6 +53,7 @@ type GroupNotificationSender struct {
 	*rpcclient.NotificationSender
 	getUsersInfo func(ctx context.Context, userIDs []string) ([]CommonUser, error)
 	db           controller.GroupDatabase
+	config       *config.GlobalConfig
 }
 
 func (g *GroupNotificationSender) PopulateGroupMember(ctx context.Context, members ...*relation.GroupMemberModel) error {
@@ -252,7 +256,7 @@ func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws
 	}
 	userID := mcontext.GetOpUserID(ctx)
 	if groupID != "" {
-		if authverify.IsManagerUserID(userID) {
+		if authverify.IsManagerUserID(userID, g.config) {
 			*opUser = &sdkws.GroupMemberFullInfo{
 				GroupID:        groupID,
 				UserID:         userID,

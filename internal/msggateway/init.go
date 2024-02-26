@@ -43,7 +43,7 @@ func RunWsAndServer(conf *config.GlobalConfig, rpcPort, wsPort, prometheusPort i
 		return err
 	}
 
-	hubServer := NewServer(rpcPort, prometheusPort, longServer)
+	hubServer := NewServer(rpcPort, prometheusPort, longServer, conf)
 	netDone := make(chan error)
 	go func() {
 		err = hubServer.Start(conf)

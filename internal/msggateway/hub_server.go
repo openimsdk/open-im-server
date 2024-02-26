@@ -39,8 +39,8 @@ func (s *Server) InitServer(config *config.GlobalConfig, disCov discoveryregistr
 		return err
 	}
 
-	msgModel := cache.NewMsgCacheModel(rdb)
-	s.LongConnServer.SetDiscoveryRegistry(disCov)
+	msgModel := cache.NewMsgCacheModel(rdb, config)
+	s.LongConnServer.SetDiscoveryRegistry(disCov, config)
 	s.LongConnServer.SetCacheHandler(msgModel)
 	msggateway.RegisterMsgGatewayServer(server, s)
 	return nil
@@ -61,18 +61,20 @@ type Server struct {
 	prometheusPort int
 	LongConnServer LongConnServer
 	pushTerminal   []int
+	config         *config.GlobalConfig
 }
 
 func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 	s.LongConnServer = LongConnServer
 }
 
-func NewServer(rpcPort int, proPort int, longConnServer LongConnServer) *Server {
+func NewServer(rpcPort int, proPort int, longConnServer LongConnServer, config *config.GlobalConfig) *Server {
 	return &Server{
 		rpcPort:        rpcPort,
 		prometheusPort: proPort,
 		LongConnServer: longConnServer,
 		pushTerminal:   []int{constant.IOSPlatformID, constant.AndroidPlatformID},
+		config:         config,
 	}
 }
 
@@ -87,7 +89,7 @@ func (s *Server) GetUsersOnlineStatus(
 	ctx context.Context,
 	req *msggateway.GetUsersOnlineStatusReq,
 ) (*msggateway.GetUsersOnlineStatusResp, error) {
-	if !authverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx, s.config) {
 		return nil, errs.ErrNoPermission.Wrap("only app manager")
 	}
 	var resp msggateway.GetUsersOnlineStatusResp

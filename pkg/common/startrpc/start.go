@@ -70,7 +70,7 @@ func Start(
 	}
 
 	defer listener.Close()
-	client, err := kdisc.NewDiscoveryRegister(config.Envs.Discovery)
+	client, err := kdisc.NewDiscoveryRegister(config)
 	if err != nil {
 		return errs.Wrap(err)
 	}

@@ -163,7 +163,7 @@ func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
 	if err != nil {
 		return err
 	}
-	return authverify.CheckAccessV3(ctx, ownerUserID)
+	return authverify.CheckAccessV3(ctx, ownerUserID, u.Config)
 }
 
 // GetAllUserIDs retrieves all user IDs with pagination options.

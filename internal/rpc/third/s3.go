@@ -58,7 +58,7 @@ func (t *thirdServer) PartSize(ctx context.Context, req *third.PartSizeReq) (*th
 
 func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.InitiateMultipartUploadReq) (*third.InitiateMultipartUploadResp, error) {
 	defer log.ZDebug(ctx, "return")
-	if err := checkUploadName(ctx, req.Name); err != nil {
+	if err := checkUploadName(ctx, req.Name, t.config); err != nil {
 		return nil, err
 	}
 	expireTime := time.Now().Add(t.defaultExpire)
@@ -137,7 +137,7 @@ func (t *thirdServer) AuthSign(ctx context.Context, req *third.AuthSignReq) (*th
 
 func (t *thirdServer) CompleteMultipartUpload(ctx context.Context, req *third.CompleteMultipartUploadReq) (*third.CompleteMultipartUploadResp, error) {
 	defer log.ZDebug(ctx, "return")
-	if err := checkUploadName(ctx, req.Name); err != nil {
+	if err := checkUploadName(ctx, req.Name, t.config); err != nil {
 		return nil, err
 	}
 	result, err := t.s3dataBase.CompleteMultipartUpload(ctx, req.UploadID, req.Parts)
@@ -194,13 +194,13 @@ func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateF
 	if req.Size <= 0 {
 		return nil, errs.ErrArgs.Wrap("size must be greater than 0")
 	}
-	if err := checkUploadName(ctx, req.Name); err != nil {
+	if err := checkUploadName(ctx, req.Name, t.config); err != nil {
 		return nil, err
 	}
 	var duration time.Duration
 	opUserID := mcontext.GetOpUserID(ctx)
 	var key string
-	if authverify.IsManagerUserID(opUserID) {
+	if authverify.IsManagerUserID(opUserID, t.config) {
 		if req.Millisecond <= 0 {
 			duration = time.Minute * 10
 		} else {
@@ -260,7 +260,7 @@ func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteF
 	if err := json.Unmarshal(data, &mate); err != nil {
 		return nil, errs.ErrArgs.Wrap("invalid id " + err.Error())
 	}
-	if err := checkUploadName(ctx, mate.Name); err != nil {
+	if err := checkUploadName(ctx, mate.Name, t.config); err != nil {
 		return nil, err
 	}
 	info, err := t.s3dataBase.StatObject(ctx, mate.Key)

@@ -72,11 +72,11 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	var o s3.Interface
 	switch config.Object.Enable {
 	case "minio":
-		o, err = minio.NewMinio(cache.NewMinioCache(rdb))
+		o, err = minio.NewMinio(cache.NewMinioCache(rdb), config)
 	case "cos":
-		o, err = cos.NewCos()
+		o, err = cos.NewCos(config)
 	case "oss":
-		o, err = oss.NewOSS()
+		o, err = oss.NewOSS(config)
 	default:
 		err = fmt.Errorf("invalid object enable: %s", enable)
 	}
@@ -85,7 +85,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	}
 	third.RegisterThirdServer(server, &thirdServer{
 		apiURL:        apiURL,
-		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb), logdb),
+		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb, config), logdb),
 		userRpcClient: rpcclient.NewUserRpcClient(client, config),
 		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
 		defaultExpire: time.Hour * 24 * 7,

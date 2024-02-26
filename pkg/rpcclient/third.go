@@ -42,21 +42,21 @@ func NewThird(discov discoveryregistry.SvcDiscoveryRegistry, config *config.Glob
 		panic(err)
 	}
 	client := third.NewThirdClient(conn)
-	minioClient, err := minioInit()
+	minioClient, err := minioInit(config)
 	return &Third{discov: discov, Client: client, conn: conn, MinioClient: minioClient, Config: config}
 }
 
-func minioInit() (*minio.Client, error) {
+func minioInit(config *config.GlobalConfig) (*minio.Client, error) {
 	minioClient := &minio.Client{}
 	var initUrl string
-	initUrl = config.Config.Object.Minio.Endpoint
+	initUrl = config.Object.Minio.Endpoint
 	minioUrl, err := url.Parse(initUrl)
 	if err != nil {
 		return nil, err
 	}
 	opts := &minio.Options{
-		Creds: credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, ""),
-		// Region: config.Config.Credential.Minio.Location,
+		Creds: credentials.NewStaticV4(config.Object.Minio.AccessKeyID, config.Object.Minio.SecretAccessKey, ""),
+		// Region: config.Credential.Minio.Location,
 	}
 	if minioUrl.Scheme == "http" {
 		opts.Secure = false

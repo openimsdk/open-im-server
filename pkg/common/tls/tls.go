@@ -20,8 +20,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"os"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 // decryptPEM decrypts a PEM block using a password.
@@ -49,7 +47,7 @@ func readEncryptablePEMBlock(path string, pwd []byte) ([]byte, error) {
 }
 
 // NewTLSConfig setup the TLS config from general config file.
-func NewTLSConfig(clientCertFile, clientKeyFile, caCertFile string, keyPwd []byte) *tls.Config {
+func NewTLSConfig(clientCertFile, clientKeyFile, caCertFile string, keyPwd []byte, insecureSkipVerify bool) *tls.Config {
 	tlsConfig := tls.Config{}
 
 	if clientCertFile != "" && clientKeyFile != "" {
@@ -79,7 +77,7 @@ func NewTLSConfig(clientCertFile, clientKeyFile, caCertFile string, keyPwd []byt
 	}
 	tlsConfig.RootCAs = caCertPool
 
-	tlsConfig.InsecureSkipVerify = config.Config.Kafka.TLS.InsecureSkipVerify
+	tlsConfig.InsecureSkipVerify = insecureSkipVerify
 
 	return &tlsConfig
 }

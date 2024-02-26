@@ -75,7 +75,7 @@ func ParseRedisInterfaceToken(redisToken any, secret string) (*tokenverify.Claim
 	return tokenverify.GetClaimFromToken(string(redisToken.([]uint8)), Secret(secret))
 }
 
-func IsManagerUserID(opUserID string, config config.GlobalConfig) bool {
+func IsManagerUserID(opUserID string, config *config.GlobalConfig) bool {
 	return (len(config.Manager.UserID) > 0 && utils.IsContain(opUserID, config.Manager.UserID)) || utils.IsContain(opUserID, config.IMAdmin.UserID)
 }
 

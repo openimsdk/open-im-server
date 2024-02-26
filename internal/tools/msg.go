@@ -78,7 +78,7 @@ func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
-	discov, err := kdisc.NewDiscoveryRegister(config.Envs.Discovery)
+	discov, err := kdisc.NewDiscoveryRegister(config)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
-	msgDatabase, err := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase(config.Mongo.Database))
+	msgDatabase, err := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase(config.Mongo.Database), config)
 	if err != nil {
 		return nil, err
 	}
@@ -185,8 +185,8 @@ func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 
 func (c *MsgTool) ClearConversationsMsg(ctx context.Context, conversationIDs []string) {
 	for _, conversationID := range conversationIDs {
-		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, int64(c.config.RetainChatRecords*24*60*60)); err != nil {
-			log.ZError(ctx, "DeleteUserSuperGroupMsgsAndSetMinSeq failed", err, "conversationID", conversationID, "DBRetainChatRecords", c.config.RetainChatRecords)
+		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, int64(c.Config.RetainChatRecords*24*60*60)); err != nil {
+			log.ZError(ctx, "DeleteUserSuperGroupMsgsAndSetMinSeq failed", err, "conversationID", conversationID, "DBRetainChatRecords", c.Config.RetainChatRecords)
 		}
 		if err := c.checkMaxSeq(ctx, conversationID); err != nil {
 			log.ZError(ctx, "fixSeq failed", err, "conversationID", conversationID)

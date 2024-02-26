@@ -66,7 +66,7 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 	var client discoveryregistry.SvcDiscoveryRegistry
 
 	// Determine whether zk is passed according to whether it is a clustered deployment
-	client, err = kdisc.NewDiscoveryRegister(config.Envs.Discovery)
+	client, err = kdisc.NewDiscoveryRegister(config)
 	if err != nil {
 		return errs.Wrap(err, "register discovery err")
 	}
@@ -318,6 +318,7 @@ func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.H
 		cache.NewMsgCacheModel(rdb, config),
 		config.Secret,
 		config.TokenPolicy.Expire,
+		config,
 	)
 	return func(c *gin.Context) {
 		switch c.Request.Method {
@@ -329,7 +330,7 @@ func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.H
 				c.Abort()
 				return
 			}
-			claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret())
+			claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret(config.Secret))
 			if err != nil {
 				log.ZWarn(c, "jwt get token error", errs.ErrTokenUnknown.Wrap())
 				apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())

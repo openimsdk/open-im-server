@@ -43,7 +43,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if req.Seq < 0 {
 		return nil, errs.ErrArgs.Wrap("seq is invalid")
 	}
-	if err := authverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config); err != nil {
 		return nil, err
 	}
 	user, err := m.User.GetUserInfo(ctx, req.UserID)
@@ -64,10 +64,10 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	data, _ := json.Marshal(msgs[0])
 	log.ZInfo(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
 	var role int32
-	if !authverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx, m.config) {
 		switch msgs[0].SessionType {
 		case constant.SingleChatType:
-			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID); err != nil {
+			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID, m.config); err != nil {
 				return nil, err
 			}
 			role = user.AppMangerLevel
