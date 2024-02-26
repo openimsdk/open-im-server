@@ -187,12 +187,15 @@ func checkKafka(config *config.GlobalConfig) error {
 		}
 	}
 
-	tlsConfig := &kafka.TLSConfig{
-		CACrt:              config.Kafka.TLS.CACrt,
-		ClientCrt:          config.Kafka.TLS.ClientCrt,
-		ClientKey:          config.Kafka.TLS.ClientKey,
-		ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
-		InsecureSkipVerify: config.Kafka.TLS.InsecureSkipVerify,
+	var tlsConfig *kafka.TLSConfig
+	if config.Kafka.TLS != nil {
+		tlsConfig = &kafka.TLSConfig{
+			CACrt:              config.Kafka.TLS.CACrt,
+			ClientCrt:          config.Kafka.TLS.ClientCrt,
+			ClientKey:          config.Kafka.TLS.ClientKey,
+			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+			InsecureSkipVerify: config.Kafka.TLS.InsecureSkipVerify,
+		}
 	}
 
 	_, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
