@@ -140,7 +140,7 @@ func (m *Minio) initMinio(ctx context.Context) error {
 		return fmt.Errorf("check bucket exists error: %w", err)
 	}
 	if !exists {
-		if err := m.core.Client.MakeBucket(ctx, conf.Bucket, minio.MakeBucketOptions{}); err != nil {
+		if err = m.core.Client.MakeBucket(ctx, conf.Bucket, minio.MakeBucketOptions{}); err != nil {
 			return fmt.Errorf("make bucket error: %w", err)
 		}
 	}

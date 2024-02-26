@@ -75,6 +75,7 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 			return "", err
 		}
 	}
+
 	claims := tokenverify.BuildClaims(userID, platformID, a.accessExpire)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(a.accessSecret))
