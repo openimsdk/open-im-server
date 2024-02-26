@@ -246,47 +246,42 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(
 		indexs = append(indexs, m.model.GetMsgIndex(seq))
 	}
 	pipeline := mongo.Pipeline{
-		{
-			{"$match", bson.D{
-				{"doc_id", docID},
-			}},
-		},
-		{
-			{"$project", bson.D{
-				{"_id", 0},
-				{"doc_id", 1},
-				{"msgs", bson.D{
-					{"$map", bson.D{
-						{"input", indexs},
-						{"as", "index"},
-						{"in", bson.D{
-							{"$let", bson.D{
-								{"vars", bson.D{
-									{"currentMsg", bson.D{
-										{"$arrayElemAt", []string{"$msgs", "$$index"}},
-									}},
+		bson.D{{Key: "$match", Value: bson.D{
+			{Key: "doc_id", Value: docID},
+		}}},
+		bson.D{{Key: "$project", Value: bson.D{
+			{Key: "_id", Value: 0},
+			{Key: "doc_id", Value: 1},
+			{Key: "msgs", Value: bson.D{
+				{Key: "$map", Value: bson.D{
+					{Key: "input", Value: indexs},
+					{Key: "as", Value: "index"},
+					{Key: "in", Value: bson.D{
+						{Key: "$let", Value: bson.D{
+							{Key: "vars", Value: bson.D{
+								{Key: "currentMsg", Value: bson.D{
+									{Key: "$arrayElemAt", Value: bson.A{"$msgs", "$$index"}},
 								}},
-								{"in", bson.D{
-									{"$cond", bson.D{
-										{"if", bson.D{
-											{"$in", []string{userID, "$$currentMsg.del_list"}},
-										}},
-										{"then", nil},
-										{"else", "$$currentMsg"},
+							}},
+							{Key: "in", Value: bson.D{
+								{Key: "$cond", Value: bson.D{
+									{Key: "if", Value: bson.D{
+										{Key: "$in", Value: bson.A{userID, "$$currentMsg.del_list"}},
 									}},
+									{Key: "then", Value: nil},
+									{Key: "else", Value: "$$currentMsg"},
 								}},
 							}},
 						}},
 					}},
 				}},
 			}},
-		},
-		{
-			{"$project", bson.D{
-				{"msgs.del_list", 0},
-			}},
-		},
+		}}},
+		bson.D{{Key: "$project", Value: bson.D{
+			{Key: "msgs.del_list", Value: 0},
+		}}},
 	}
+
 	cur, err := m.MsgCollection.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, errs.Wrap(err)
@@ -800,7 +795,7 @@ func (m *MsgMongoDriver) RangeUserSendCount(
 	}
 	defer cur.Close(ctx)
 	var result []Result
-	if err := cur.All(ctx, &result); err != nil {
+	if err = cur.All(ctx, &result); err != nil {
 		return 0, 0, nil, nil, errs.Wrap(err)
 	}
 	if len(result) == 0 {
@@ -1049,7 +1044,7 @@ func (m *MsgMongoDriver) RangeGroupSendCount(
 	}
 	defer cur.Close(ctx)
 	var result []Result
-	if err := cur.All(ctx, &result); err != nil {
+	if err = cur.All(ctx, &result); err != nil {
 		return 0, 0, nil, nil, errs.Wrap(err)
 	}
 	if len(result) == 0 {
