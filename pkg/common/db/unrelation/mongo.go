@@ -38,7 +38,8 @@ const (
 )
 
 type Mongo struct {
-	db *mongo.Client
+	db     *mongo.Client
+	config *config.GlobalConfig
 }
 
 // NewMongo Initialize MongoDB connection.
@@ -58,7 +59,7 @@ func NewMongo(config *config.GlobalConfig) (*Mongo, error) {
 			if err = mongoClient.Ping(ctx, nil); err != nil {
 				return nil, errs.Wrap(err, uri)
 			}
-			return &Mongo{db: mongoClient}, nil
+			return &Mongo{db: mongoClient, config: config}, nil
 		}
 		if shouldRetry(err) {
 			time.Sleep(time.Second) // exponential backoff could be implemented here
@@ -135,7 +136,7 @@ func (m *Mongo) CreateMsgIndex() error {
 
 // createMongoIndex creates an index in a MongoDB collection.
 func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...string) error {
-	db := m.GetDatabase().Collection(collection)
+	db := m.GetDatabase(m.config.Mongo.Database).Collection(collection)
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
 	indexView := db.Indexes()
 
