@@ -122,7 +122,7 @@ func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
 		ctxTx,
 	)
 	msgRpcClient := rpcclient.NewMessageRpcClient(discov, config)
-	msgNotificationSender := notification.NewMsgNotificationSender(rpcclient.WithRpcClient(&msgRpcClient))
+	msgNotificationSender := notification.NewMsgNotificationSender(config, rpcclient.WithRpcClient(&msgRpcClient))
 	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase, msgNotificationSender, config)
 	return msgTool, nil
 }
