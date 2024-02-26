@@ -47,8 +47,8 @@ var (
 	cfgPath = flag.String("c", defaultCfgPath, "Path to the configuration file")
 )
 
-func initCfg(path string) (*config.GlobalConfig, error) {
-	data, err := os.ReadFile(path)
+func initCfg() (*config.GlobalConfig, error) {
+	data, err := os.ReadFile(*cfgPath)
 	if err != nil {
 		return nil, errs.Wrap(err, "ReadFile unmarshal failed")
 	}
@@ -71,7 +71,7 @@ type checkFunc struct {
 func main() {
 	flag.Parse()
 
-	conf, err := initCfg(defaultCfgPath)
+	conf, err := initCfg()
 	if err != nil {
 		fmt.Printf("Read config failed: %v\n", err)
 		return
