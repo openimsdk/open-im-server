@@ -106,7 +106,7 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 		partNumber++
 	}
 	if maxParts > 0 && partNumber > 0 && partNumber < maxParts {
-		return nil, errors.New(fmt.Sprintf("too many parts: %d", partNumber))
+		return nil, fmt.Errorf("too many parts: %d", partNumber)
 	}
 	if info, err := c.StatObject(ctx, c.HashPath(hash)); err == nil {
 		return nil, &HashAlreadyExistsError{Object: info}
