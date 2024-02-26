@@ -42,13 +42,15 @@ func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
 	}
 	client := third.NewThirdClient(conn)
 	minioClient, err := minioInit()
+	if err != nil {
+		panic(err)
+	}
 	return &Third{discov: discov, Client: client, conn: conn, MinioClient: minioClient}
 }
 
 func minioInit() (*minio.Client, error) {
 	minioClient := &minio.Client{}
-	var initUrl string
-	initUrl = config.Config.Object.Minio.Endpoint
+	initUrl := config.Config.Object.Minio.Endpoint
 	minioUrl, err := url.Parse(initUrl)
 	if err != nil {
 		return nil, err

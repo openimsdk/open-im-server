@@ -52,10 +52,10 @@ const (
 
 const successCode = http.StatusOK
 
-const (
+/* const (
 	videoSnapshotImagePng = "png"
 	videoSnapshotImageJpg = "jpg"
-)
+) */
 
 func NewOSS() (s3.Interface, error) {
 	conf := config.Config.Object.Oss

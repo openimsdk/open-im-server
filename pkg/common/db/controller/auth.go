@@ -70,7 +70,7 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 		}
 	}
 	if len(deleteTokenKey) != 0 {
-		err := a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
+		err = a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
 		if err != nil {
 			return "", err
 		}
