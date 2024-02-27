@@ -61,15 +61,12 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 	if err := checkUploadName(ctx, req.Name, t.config); err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "1111111111111111111111111")
+	log.ZDebug(ctx, "req", req)
 	expireTime := time.Now().Add(t.defaultExpire)
-	log.ZDebug(ctx, "222222222222222222222222")
 	result, err := t.s3dataBase.InitiateMultipartUpload(ctx, req.Hash, req.Size, t.defaultExpire, int(req.MaxParts))
 	log.ZDebug(ctx, "33333333333333333333333", err)
 	if err != nil {
-		log.ZDebug(ctx, "4444444444444444444", err)
 		if haErr, ok := errs.Unwrap(err).(*cont.HashAlreadyExistsError); ok {
-			log.ZDebug(ctx, "55555555555555555", err)
 			obj := &relation.ObjectModel{
 				Name:        req.Name,
 				UserID:      mcontext.GetOpUserID(ctx),
@@ -80,18 +77,15 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 				Group:       req.Cause,
 				CreateTime:  time.Now(),
 			}
-			log.ZDebug(ctx, "22222222222222222222222222222222222245555555555555")
 			if err := t.s3dataBase.SetObject(ctx, obj); err != nil {
 				return nil, err
 			}
-			log.ZDebug(ctx, "333333333333333333333333333333333333788888888888888888")
 			return &third.InitiateMultipartUploadResp{
 				Url: t.apiAddress(obj.Name),
 			}, nil
 		}
 		return nil, err
 	}
-	log.ZDebug(ctx, "4444444444444444444444444444444444444444000000000000")
 	var sign *third.AuthSignParts
 	if result.Sign != nil && len(result.Sign.Parts) > 0 {
 		sign = &third.AuthSignParts{
