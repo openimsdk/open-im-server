@@ -36,6 +36,7 @@ require github.com/google/uuid v1.6.0
 require (
 	github.com/IBM/sarama v1.42.2
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
+	github.com/aws/aws-sdk-go v1.49.21
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/redis/go-redis/v9 v9.4.0
 	github.com/spf13/pflag v1.0.5
@@ -50,11 +51,10 @@ require (
 	cloud.google.com/go v0.112.0 // indirect
 	cloud.google.com/go/compute v1.23.3 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
-	cloud.google.com/go/firestore v1.13.0 // indirect
-	cloud.google.com/go/iam v1.1.2 // indirect
-	cloud.google.com/go/longrunning v0.5.1 // indirect
-	cloud.google.com/go/storage v1.30.1 // indirect
-	github.com/aws/aws-sdk-go v1.49.21 // indirect
+	cloud.google.com/go/firestore v1.14.0 // indirect
+	cloud.google.com/go/iam v1.1.5 // indirect
+	cloud.google.com/go/longrunning v0.5.4 // indirect
+	cloud.google.com/go/storage v1.36.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
