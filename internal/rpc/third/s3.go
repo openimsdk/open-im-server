@@ -257,10 +257,10 @@ func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteF
 		return nil, errs.ErrArgs.Wrap("invalid id " + err.Error())
 	}
 	var mate FormDataMate
-	if err := json.Unmarshal(data, &mate); err != nil {
+	if err = json.Unmarshal(data, &mate); err != nil {
 		return nil, errs.ErrArgs.Wrap("invalid id " + err.Error())
 	}
-	if err := checkUploadName(ctx, mate.Name, t.config); err != nil {
+	if err = checkUploadName(ctx, mate.Name, t.config); err != nil {
 		return nil, err
 	}
 	info, err := t.s3dataBase.StatObject(ctx, mate.Key)
@@ -280,7 +280,7 @@ func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteF
 		Group:       mate.Group,
 		CreateTime:  time.Now(),
 	}
-	if err := t.s3dataBase.SetObject(ctx, obj); err != nil {
+	if err = t.s3dataBase.SetObject(ctx, obj); err != nil {
 		return nil, err
 	}
 	return &third.CompleteFormDataResp{Url: t.apiAddress(mate.Name)}, nil

@@ -125,11 +125,11 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	if err := CallbackBeforeUpdateUserInfo(ctx, s.config, req); err != nil {
+	if err = CallbackBeforeUpdateUserInfo(ctx, s.config, req); err != nil {
 		return nil, err
 	}
 	data := convert.UserPb2DBMap(req.UserInfo)
-	if err := s.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
+	if err = s.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
 	_ = s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
@@ -138,17 +138,17 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 		return nil, err
 	}
 	if req.UserInfo.Nickname != "" || req.UserInfo.FaceURL != "" {
-		if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+		if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
 			log.ZError(ctx, "NotificationUserInfoUpdate", err)
 		}
 	}
 	for _, friendID := range friends {
 		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	}
-	if err := CallbackAfterUpdateUserInfo(ctx, s.config, req); err != nil {
+	if err = CallbackAfterUpdateUserInfo(ctx, s.config, req); err != nil {
 		return nil, err
 	}
-	if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+	if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
 		log.ZError(ctx, "NotificationUserInfoUpdate", err, "userID", req.UserInfo.UserID)
 	}
 	return resp, nil

@@ -15,7 +15,6 @@
 package msg
 
 import (
-	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"google.golang.org/grpc"
@@ -53,16 +52,16 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 	m.Handlers = append(m.Handlers, interceptorFunc...)
 }
 
-func (m *msgServer) execInterceptorHandler(ctx context.Context, config *config.GlobalConfig, req *msg.SendMsgReq) error {
-	for _, handler := range m.Handlers {
-		msgData, err := handler(ctx, config, req)
-		if err != nil {
-			return err
-		}
-		req.MsgData = msgData
-	}
-	return nil
-}
+//func (m *msgServer) execInterceptorHandler(ctx context.Context, config *config.GlobalConfig, req *msg.SendMsgReq) error {
+//	for _, handler := range m.Handlers {
+//		msgData, err := handler(ctx, config, req)
+//		if err != nil {
+//			return err
+//		}
+//		req.MsgData = msgData
+//	}
+//	return nil
+//}
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis(config)

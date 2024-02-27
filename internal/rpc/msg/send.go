@@ -66,7 +66,7 @@ func (m *msgServer) sendMsgSuperGroupChat(
 		return nil, err
 	}
 
-	if err := callbackMsgModify(ctx, m.config, req); err != nil {
+	if err = callbackMsgModify(ctx, m.config, req); err != nil {
 		return nil, err
 	}
 	err = m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForGroup(req.MsgData.GroupID), req.MsgData)
@@ -108,7 +108,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
 		} else { //@Everyone and @other people
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAllAtMe}
-			err := m.Conversation.SetConversations(ctx, atUserID, conversation)
+			err = m.Conversation.SetConversations(ctx, atUserID, conversation)
 			if err != nil {
 				log.ZWarn(ctx, "SetConversations", err, "userID", atUserID, "conversation", conversation)
 			}
@@ -144,7 +144,7 @@ func (m *msgServer) sendMsgNotification(
 }
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
-	if err := m.messageVerification(ctx, req); err != nil {
+	if err = m.messageVerification(ctx, req); err != nil {
 		return nil, err
 	}
 	isSend := true
@@ -169,10 +169,10 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 			return nil, err
 		}
 
-		if err := callbackMsgModify(ctx, m.config, req); err != nil {
+		if err = callbackMsgModify(ctx, m.config, req); err != nil {
 			return nil, err
 		}
-		if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
+		if err = m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
 			prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 			return nil, err
 		}

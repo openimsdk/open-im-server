@@ -118,7 +118,7 @@ func Start(config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, se
 // ok.
 func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) (resp *pbfriend.ApplyToAddFriendResp, err error) {
 	resp = &pbfriend.ApplyToAddFriendResp{}
-	if err := authverify.CheckAccessV3(ctx, req.FromUserID, s.config); err != nil {
+	if err = authverify.CheckAccessV3(ctx, req.FromUserID, s.config); err != nil {
 		return nil, err
 	}
 	if req.ToUserID == req.FromUserID {
