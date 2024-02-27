@@ -457,6 +457,7 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(
 		wg      = sync.WaitGroup{}
 		running = new(atomic.Bool)
 	)
+	running.Store(true)
 
 	wg.Add(1)
 	go func() {
