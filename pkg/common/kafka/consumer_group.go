@@ -17,8 +17,6 @@ package kafka
 import (
 	"context"
 	"errors"
-	"fmt"
-
 	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
@@ -67,17 +65,18 @@ func (mc *MConsumerGroup) GetContextFromMsg(cMsg *sarama.ConsumerMessage) contex
 	return GetContextWithMQHeader(cMsg.Headers)
 }
 
-func (mc *MConsumerGroup) RegisterHandleAndConsumer(ctx context.Context, handler sarama.ConsumerGroupHandler, onError func(context.Context, error, string)) {
+func (mc *MConsumerGroup) RegisterHandleAndConsumer(ctx context.Context, handler sarama.ConsumerGroupHandler) {
 	log.ZDebug(ctx, "register consumer group", "groupID", mc.groupID)
 	for {
 		err := mc.ConsumerGroup.Consume(ctx, mc.topics, handler)
-		if errors.Is(err, sarama.ErrClosedConsumerGroup) || errors.Is(err, context.Canceled) {
+		if errors.Is(err, sarama.ErrClosedConsumerGroup) {
+			return
+		}
+		if errors.Is(err, context.Canceled) {
 			return
 		}
 		if err != nil {
-			errInfo := fmt.Sprintf("consume err: %v, topic: %v, groupID: %s", err, strings.Join(mc.topics, ", "), mc.groupID)
-			onError(ctx, err, errInfo) // 调用回调函数处理错误
-			return
+			log.ZWarn(ctx, "consume err", err, "topic", mc.topics, "groupID", mc.groupID)
 		}
 	}
 }

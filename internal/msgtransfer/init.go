@@ -20,8 +20,6 @@ import (
 	"fmt"
 
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 
 	"net/http"
@@ -118,11 +116,8 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 		netErr  error
 	)
 
-	onError := func(ctx context.Context, err error, errInfo string) {
-		log.ZWarn(ctx, errInfo, err)
-	}
-	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyCH, onError)
-	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyMongoCH, onError)
+	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyCH)
+	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyMongoCH)
 
 	if config.Config.Prometheus.Enable {
 		go func() {
