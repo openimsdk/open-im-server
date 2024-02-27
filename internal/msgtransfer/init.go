@@ -149,7 +149,7 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 		m.cancel()
 		m.historyCH.historyConsumerGroup.Close()
 		m.historyMongoCH.historyConsumerGroup.Close()
-
+		return nil
 	case <-netDone:
 		m.cancel()
 		m.historyCH.historyConsumerGroup.Close()
@@ -157,6 +157,4 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 		close(netDone)
 		return netErr
 	}
-
-	return nil
 }

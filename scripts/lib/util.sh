@@ -1619,7 +1619,7 @@ openim::util::check_ports() {
 
     # Print information about ports whose processes are not running.
     if [[ ${#not_started[@]} -ne 0 ]]; then
-        echo "\n### Not started ports:"
+        printf "\n### Not started ports:"
         for port in "${not_started[@]}"; do
             openim::log::error "Port $port is not started."
         done
@@ -1627,7 +1627,7 @@ openim::util::check_ports() {
 
     # Print information about ports whose processes are running.
     if [[ ${#started[@]} -ne 0 ]]; then
-        echo "\n### Started ports:"
+        printf "\n### Started ports:"
         for info in "${started[@]}"; do
             echo "$info"
         done
