@@ -61,6 +61,7 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 	if err := checkUploadName(ctx, req.Name, t.config); err != nil {
 		return nil, err
 	}
+	log.ZDebug(ctx, "1111111111111111111111111", t.config)
 	expireTime := time.Now().Add(t.defaultExpire)
 	result, err := t.s3dataBase.InitiateMultipartUpload(ctx, req.Hash, req.Size, t.defaultExpire, int(req.MaxParts))
 	if err != nil {
@@ -75,15 +76,18 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 				Group:       req.Cause,
 				CreateTime:  time.Now(),
 			}
+			log.ZDebug(ctx, "222222222222222222222222222222222222")
 			if err := t.s3dataBase.SetObject(ctx, obj); err != nil {
 				return nil, err
 			}
+			log.ZDebug(ctx, "333333333333333333333333333333333333")
 			return &third.InitiateMultipartUploadResp{
 				Url: t.apiAddress(obj.Name),
 			}, nil
 		}
 		return nil, err
 	}
+	log.ZDebug(ctx, "4444444444444444444444444444444444444444")
 	var sign *third.AuthSignParts
 	if result.Sign != nil && len(result.Sign.Parts) > 0 {
 		sign = &third.AuthSignParts{
