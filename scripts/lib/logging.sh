@@ -206,21 +206,26 @@ openim::log::status() {
   fi
   
   timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
-  echo_log "+++ ${timestamp} ${1}"
+  echo_log "${timestamp} ${1}"
   shift
   for message; do
     echo_log "    ${message}"
   done
 }
 
+
 openim::log::success() {
   local V="${V:-0}"
   if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
     return
   fi
-  timestamp=$(date +"%m%d %H:%M:%S")
-  echo_log -e "${COLOR_GREEN}[success ${timestamp}] ${COLOR_SUFFIX}==> " "$@"
+  local timestamp=$(date +"%m%d %H:%M:%S")
+  local reset_color='\033[0m'
+  echo_log -e "${COLOR_GREEN}[success ${timestamp}]${COLOR_SUFFIX}==> ${COLOR_GREEN}$@${reset_color}"
 }
+
+
+
 
 function openim::log::test_log() {
   echo_log "test log"

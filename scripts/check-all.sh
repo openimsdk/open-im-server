@@ -77,11 +77,11 @@ if [[ $? -ne 0 ]]; then
   openim::log::error_exit "The service does not start properly, please check the port, query variable definition!"
   echo "+++ https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh +++"
 else
-  openim::color::echo $COLOR_GREEN "All components depended on by openim are running normally! "
+  openim::log::success "All components depended on by openim are running normally! "
 fi
 
 
-openim::log::info "\n## Check OpenIM service name: \n ${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer"
+openim::log::info "\n## Check openim service name:\n${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer"
 result=$(. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check)
 if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
@@ -89,7 +89,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 
-echo "Check OpenIM service name:"
+echo "Check openim service name:"
 for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
     echo "$item"
 done
@@ -97,8 +97,9 @@ done
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
-  openim::log::error "check process failed.\n $result"
+  openim::log::error "check process failed.\n "
+  echo "$result"
 else
-  openim::color::echo $COLOR_GREEN "All openim services are running normally! "
+  openim::log::success "All openim services are running normally! "
 fi
 

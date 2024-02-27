@@ -360,8 +360,8 @@ openim::util::check_ports() {
   
   # If any of the processes is not running, return a status of 1.
   if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
-    openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+    openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
+    openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
     cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
     return 1
   else
@@ -402,7 +402,6 @@ openim::util::check_process_names() {
   local not_started=()
   local started=()
   
-  echo "Checking processes: $*"
   # Iterate over each given process name
   for process_name in "$@"; do
     # Use `pgrep` to find process IDs related to the given process name
@@ -432,7 +431,7 @@ openim::util::check_process_names() {
   if [[ ${#not_started[@]} -ne 0 ]]; then
     echo "Not started processes:"
     for process_name in "${not_started[@]}"; do
-      openim::log::error "Process $process_name is not started."
+      echo "Process $process_name is not started."
     done
   fi
   
@@ -446,8 +445,8 @@ openim::util::check_process_names() {
   
   # Return status
   if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
-    openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+    openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
+    openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
     cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
     return 1
   else
@@ -477,7 +476,7 @@ openim::util::check_process_names_for_stop() {
   local not_started=()
   local started=()
 
-  echo "Checking processes: $*"
+
   # Iterate over each given process name
   for process_name in "$@"; do
     # Use `pgrep` to find process IDs related to the given process name
@@ -1635,8 +1634,8 @@ openim::util::check_ports() {
 
     # If any of the processes is not running, return a status of 1.
     if [[ ${#not_started[@]} -ne 0 ]]; then
-        openim::color::echo $COLOR_RED " OpenIM Stdout Log >> cat ${LOG_FILE}"
-        openim::color::echo $COLOR_RED " OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+        openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
+        openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
         echo ""
         cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
         return 1
@@ -2879,7 +2878,7 @@ function openim::util::check_process_names_for_stop() {
     NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
     if [ "$NUM_PROCESSES" -gt 0 ]; then
       all_stopped=false
-      openim::log::error "Found $NUM_PROCESSES processes for ${service}"
+      echo "Found $NUM_PROCESSES processes for ${service}"
       for PID in $PIDS; do
         if [[ "$OSTYPE" == "linux-gnu"* ]]; then
           echo -e "\033[31m$(ps -p $PID -o pid,cmd)\033[0m"
@@ -2889,7 +2888,7 @@ function openim::util::check_process_names_for_stop() {
           openim::log::error "Unsupported OS type: $OSTYPE"
         fi
       done
-      openim::log::error "Processes for ${service} have not been stopped properly."
+      echo "Processes for ${service} have not been stopped properly.   " "$NUM_PROCESSES"
     fi
   done
 

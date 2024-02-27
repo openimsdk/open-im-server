@@ -37,7 +37,7 @@ function execute_start_scripts() {
 
     # Check if the script file exists and is executable.
     if [[ -x "$script_path" ]]; then
-      openim::log::status "Starting script: ${script_path##*/}"     # Log the script name.
+      openim::log::info "Starting script: ${script_path##*/}"     # Log the script name.
 
       # Execute the script with the constructed argument.
       result=$("$script_path" "$arg")
@@ -57,7 +57,7 @@ function execute_start_scripts() {
 
 
 
-openim::log::info "\n# Begin to start all openim service scripts"
+
 
 
 openim::golang::check_openim_binaries
@@ -75,7 +75,7 @@ echo "You need to start the following scripts in order: ${OPENIM_SERVER_SCRIPTAR
 # TODO Prelaunch tools, simple for now, can abstract functions later
 TOOLS_START_SCRIPTS_PATH=${START_SCRIPTS_PATH}/openim-tools.sh
 
-openim::log::info "\n## Pre Starting OpenIM services"
+openim::log::status "\n## Pre Starting OpenIM services"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start
 
 
@@ -88,7 +88,7 @@ fi
 
 
 
-openim::log::info "\n## Starting OpenIM services"
+openim::log::status "\n## Starting openim scripts: "
 execute_start_scripts
 
 sleep 2
@@ -109,7 +109,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 
-openim::log::info "\n## Post Starting OpenIM services"
+openim::log::info "\n## Post Starting openim services"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
 
-openim::color::echo $COLOR_GREEN "✨  All OpenIM services have been successfully started!"
+openim::log::success "All openim services have been successfully started!"
