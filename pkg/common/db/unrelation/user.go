@@ -64,7 +64,7 @@ func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string
 	}
 	// iterate over aggregated results
 	for cursor.Next(ctx) {
-		err := cursor.Decode(&cnt)
+		err = cursor.Decode(&cnt)
 		if err != nil {
 			return errs.Wrap(err)
 		}

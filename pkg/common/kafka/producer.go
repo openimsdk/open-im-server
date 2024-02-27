@@ -29,6 +29,8 @@ import (
 	"github.com/OpenIMSDK/tools/mcontext"
 	"google.golang.org/protobuf/proto"
 
+	"fmt"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
@@ -118,7 +120,11 @@ func configureProducerAck(p *Producer, ackConfig string) {
 // configureCompression configures the message compression type for the producer.
 func configureCompression(p *Producer, compressType string) {
 	var compress sarama.CompressionCodec = sarama.CompressionNone
-	compress.UnmarshalText(bytes.ToLower([]byte(compressType)))
+	err := compress.UnmarshalText(bytes.ToLower([]byte(compressType)))
+	if err != nil {
+		fmt.Printf("Failed to configure compression: %v\n", err)
+		return
+	}
 	p.config.Producer.Compression = compress
 }
 
