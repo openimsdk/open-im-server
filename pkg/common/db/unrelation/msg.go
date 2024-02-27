@@ -35,7 +35,6 @@ import (
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/utils"
 
 	table "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
@@ -79,7 +78,7 @@ func (m *MsgMongoDriver) UpdateMsg(
 	update := bson.M{"$set": bson.M{field: value}}
 	res, err := m.MsgCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return nil, utils.Wrap(err, "")
+		return nil, errs.Wrap(err)
 	}
 	return res, nil
 }
@@ -106,7 +105,7 @@ func (m *MsgMongoDriver) PushUnique(
 	}
 	res, err := m.MsgCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return nil, utils.Wrap(err, "")
+		return nil, errs.Wrap(err)
 	}
 	return res, nil
 }
@@ -118,7 +117,7 @@ func (m *MsgMongoDriver) UpdateMsgContent(ctx context.Context, docID string, ind
 		bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", index): msg}},
 	)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 	return nil
 }
@@ -133,7 +132,7 @@ func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(
 	msg.Status = status
 	bytes, err := proto.Marshal(msg)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 	_, err = m.MsgCollection.UpdateOne(
 		ctx,
@@ -141,7 +140,7 @@ func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(
 		bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", seqIndex): bytes}},
 	)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 	return nil
 }
@@ -167,12 +166,12 @@ func (m *MsgMongoDriver) GetMsgDocModelByIndex(
 		findOpts,
 	)
 	if err != nil {
-		return nil, utils.Wrap(err, "")
+		return nil, errs.Wrap(err)
 	}
 	var msgs []table.MsgDocModel
 	err = cursor.All(ctx, &msgs)
 	if err != nil {
-		return nil, utils.Wrap(err, fmt.Sprintf("cursor is %s", cursor.Current.String()))
+		return nil, errs.Wrap(err, fmt.Sprintf("cursor is %s", cursor.Current.String()))
 	}
 	if len(msgs) > 0 {
 		return &msgs[0], nil
@@ -223,7 +222,7 @@ func (m *MsgMongoDriver) DeleteMsgsInOneDocByIndex(ctx context.Context, docID st
 	}
 	_, err := m.MsgCollection.UpdateMany(ctx, bson.M{"doc_id": docID}, updates)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err)
 	}
 	return nil
 }
@@ -247,47 +246,42 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(
 		indexs = append(indexs, m.model.GetMsgIndex(seq))
 	}
 	pipeline := mongo.Pipeline{
-		{
-			{"$match", bson.D{
-				{"doc_id", docID},
-			}},
-		},
-		{
-			{"$project", bson.D{
-				{"_id", 0},
-				{"doc_id", 1},
-				{"msgs", bson.D{
-					{"$map", bson.D{
-						{"input", indexs},
-						{"as", "index"},
-						{"in", bson.D{
-							{"$let", bson.D{
-								{"vars", bson.D{
-									{"currentMsg", bson.D{
-										{"$arrayElemAt", []string{"$msgs", "$$index"}},
-									}},
+		bson.D{{Key: "$match", Value: bson.D{
+			{Key: "doc_id", Value: docID},
+		}}},
+		bson.D{{Key: "$project", Value: bson.D{
+			{Key: "_id", Value: 0},
+			{Key: "doc_id", Value: 1},
+			{Key: "msgs", Value: bson.D{
+				{Key: "$map", Value: bson.D{
+					{Key: "input", Value: indexs},
+					{Key: "as", Value: "index"},
+					{Key: "in", Value: bson.D{
+						{Key: "$let", Value: bson.D{
+							{Key: "vars", Value: bson.D{
+								{Key: "currentMsg", Value: bson.D{
+									{Key: "$arrayElemAt", Value: bson.A{"$msgs", "$$index"}},
 								}},
-								{"in", bson.D{
-									{"$cond", bson.D{
-										{"if", bson.D{
-											{"$in", []string{userID, "$$currentMsg.del_list"}},
-										}},
-										{"then", nil},
-										{"else", "$$currentMsg"},
+							}},
+							{Key: "in", Value: bson.D{
+								{Key: "$cond", Value: bson.D{
+									{Key: "if", Value: bson.D{
+										{Key: "$in", Value: bson.A{userID, "$$currentMsg.del_list"}},
 									}},
+									{Key: "then", Value: nil},
+									{Key: "else", Value: "$$currentMsg"},
 								}},
 							}},
 						}},
 					}},
 				}},
 			}},
-		},
-		{
-			{"$project", bson.D{
-				{"msgs.del_list", 0},
-			}},
-		},
+		}}},
+		bson.D{{Key: "$project", Value: bson.D{
+			{Key: "msgs.del_list", Value: 0},
+		}}},
 	}
+
 	cur, err := m.MsgCollection.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, errs.Wrap(err)
@@ -801,7 +795,7 @@ func (m *MsgMongoDriver) RangeUserSendCount(
 	}
 	defer cur.Close(ctx)
 	var result []Result
-	if err := cur.All(ctx, &result); err != nil {
+	if err = cur.All(ctx, &result); err != nil {
 		return 0, 0, nil, nil, errs.Wrap(err)
 	}
 	if len(result) == 0 {
@@ -1050,7 +1044,7 @@ func (m *MsgMongoDriver) RangeGroupSendCount(
 	}
 	defer cur.Close(ctx)
 	var result []Result
-	if err := cur.All(ctx, &result); err != nil {
+	if err = cur.All(ctx, &result); err != nil {
 		return 0, 0, nil, nil, errs.Wrap(err)
 	}
 	if len(result) == 0 {

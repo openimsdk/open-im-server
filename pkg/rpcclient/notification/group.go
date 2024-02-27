@@ -408,7 +408,7 @@ func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx conte
 		return err
 	}
 	tips := &sdkws.GroupApplicationAcceptedTips{Group: group, HandleMsg: req.HandledMsg}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return err
 	}
 	for _, userID := range append(userIDs, req.FromUserID) {
@@ -441,7 +441,7 @@ func (g *GroupNotificationSender) GroupApplicationRejectedNotification(ctx conte
 		return err
 	}
 	tips := &sdkws.GroupApplicationRejectedTips{Group: group, HandleMsg: req.HandledMsg}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return err
 	}
 	for _, userID := range append(userIDs, req.FromUserID) {

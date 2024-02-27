@@ -42,7 +42,10 @@ func NewThird(discov discoveryregistry.SvcDiscoveryRegistry, config *config.Glob
 		panic(err)
 	}
 	client := third.NewThirdClient(conn)
-	minioClient, err := minioInit(config)
+	minioClient, err := minioInit()
+	if err != nil {
+		panic(err)
+	}
 	return &Third{discov: discov, Client: client, conn: conn, MinioClient: minioClient, Config: config}
 }
 

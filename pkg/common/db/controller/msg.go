@@ -425,7 +425,7 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 		log.ZError(ctx, "SetHasReadSeqs error", err2, "userSeqMap", userSeqMap, "conversationID", conversationID)
 		prommetrics.SeqSetFailedCounter.Inc()
 	}
-	return lastMaxSeq, isNew, utils.Wrap(err, "")
+	return lastMaxSeq, isNew, errs.Wrap(err)
 }
 
 func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
@@ -863,7 +863,7 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 			}
 		}
 		if len(delMsgIndexs) > 0 {
-			if err := db.msgDocDatabase.DeleteMsgsInOneDocByIndex(ctx, msgDocModel.DocID, delMsgIndexs); err != nil {
+			if err = db.msgDocDatabase.DeleteMsgsInOneDocByIndex(ctx, msgDocModel.DocID, delMsgIndexs); err != nil {
 				log.ZError(ctx, "deleteMsgRecursion DeleteMsgsInOneDocByIndex failed", err, "conversationID", conversationID, "index", index)
 			}
 			delStruct.minSeq = int64(msgDocModel.Msg[delMsgIndexs[len(delMsgIndexs)-1]].Msg.Seq)

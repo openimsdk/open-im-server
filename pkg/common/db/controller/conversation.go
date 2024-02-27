@@ -105,7 +105,7 @@ func (c *conversationDatabase) SetUsersConversationFiledTx(ctx context.Context, 
 		now := time.Now()
 		for _, v := range NotUserIDs {
 			temp := new(relationtb.ConversationModel)
-			if err := utils.CopyStructFields(temp, conversation); err != nil {
+			if err = utils.CopyStructFields(temp, conversation); err != nil {
 				return err
 			}
 			temp.OwnerUserID = v

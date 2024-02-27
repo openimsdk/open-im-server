@@ -18,13 +18,14 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
+	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 
 	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/tokenverify"
-	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 )
@@ -70,16 +71,17 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 		}
 	}
 	if len(deleteTokenKey) != 0 {
-		err := a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
+		err = a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
 		if err != nil {
 			return "", err
 		}
 	}
+
 	claims := tokenverify.BuildClaims(userID, platformID, a.accessExpire)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(a.accessSecret))
 	if err != nil {
-		return "", utils.Wrap(err, "")
+		return "", errs.Wrap(err)
 	}
 	return tokenString, a.cache.AddTokenFlag(ctx, userID, platformID, tokenString, constant.NormalToken)
 }
