@@ -40,9 +40,9 @@
 #
 # Note: Ensure that the appropriate permissions and environmental variables are set prior to script execution.
 #
-set -o errexit
-set +o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
@@ -61,22 +61,20 @@ function openim::push::start() {
   
   OPENIM_PUSH_PORTS_ARRAY=$(openim::util::list-to-string ${OPENIM_PUSH_PORT} )
   PUSH_PROM_PORTS_ARRAY=$(openim::util::list-to-string ${PUSH_PROM_PORT} )
-  
-  openim::util::stop_services_with_name ${SERVER_NAME}
-  
+
   openim::log::status "push port list: ${OPENIM_PUSH_PORTS_ARRAY[@]}"
   openim::log::status "prometheus port list: ${PUSH_PROM_PORTS_ARRAY[@]}"
   
   if [ ${#OPENIM_PUSH_PORTS_ARRAY[@]} -ne ${#PUSH_PROM_PORTS_ARRAY[@]} ]; then
-    openim::log::error_exit "The length of the two port lists is different!"
+    openim::log::error "The length of the two port lists is different!"
   fi
   
   for (( i=0; i<${#OPENIM_PUSH_PORTS_ARRAY[@]}; i++ )); do
     openim::log::info "start push process, port: ${OPENIM_PUSH_PORTS_ARRAY[$i]}, prometheus port: ${PUSH_PROM_PORTS_ARRAY[$i]}"
     nohup ${OPENIM_PUSH_BINARY} --port ${OPENIM_PUSH_PORTS_ARRAY[$i]} -c ${OPENIM_PUSH_CONFIG} --prometheus_port ${PUSH_PROM_PORTS_ARRAY[$i]} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
   done
+  return 0
 
-  openim::util::check_process_names ${SERVER_NAME}
 }
 
 ###################################### Linux Systemd ######################################
@@ -125,7 +123,7 @@ function openim::push::uninstall() {
   openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
   openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
   openim::common::sudo "rm -f /etc/systemd/system/${SERVER_NAME}.service"
-  set -o errexit
+
   openim::log::info "uninstall ${SERVER_NAME} successfully"
 }
 

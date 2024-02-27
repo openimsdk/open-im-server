@@ -139,12 +139,12 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	signal.Notify(sigs, syscall.SIGTERM)
 	select {
 	case <-sigs:
-		util.SIGUSR1Exit()
+		util.SIGTERMExit()
 		// graceful close kafka client.
 		m.cancel()
 		m.historyCH.historyConsumerGroup.Close()
 		m.historyMongoCH.historyConsumerGroup.Close()
-
+		return nil
 	case <-netDone:
 		m.cancel()
 		m.historyCH.historyConsumerGroup.Close()
@@ -152,6 +152,4 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 		close(netDone)
 		return netErr
 	}
-
-	return nil
 }

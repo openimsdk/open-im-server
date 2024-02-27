@@ -140,7 +140,7 @@ func Start(
 	signal.Notify(sigs, syscall.SIGTERM)
 	select {
 	case <-sigs:
-		util.SIGUSR1Exit()
+		util.SIGTERMExit()
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		if err := gracefulStopWithCtx(ctx, srv.GracefulStop); err != nil {
@@ -152,7 +152,7 @@ func Start(
 		if err != nil {
 			return errs.Wrap(err, "shutdown err")
 		}
-		return errors.New("SIGTERM EXIT")
+		return nil
 	case <-netDone:
 		close(netDone)
 		return netErr

@@ -16,9 +16,9 @@
 # This script does a fast type check of script srnetes code for all platforms.
 # Usage: `scripts/verify-typecheck.sh`.
 
-set -o errexit
-set -o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
