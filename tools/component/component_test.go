@@ -34,7 +34,7 @@ func mockInitCfg() error {
 }
 
 func TestRedis(t *testing.T) {
-	conf, err := initCfg(defaultCfgPath)
+	conf, err := initCfg()
 	conf.Redis.Address = []string{
 		"172.16.8.142:7000",
 		//"172.16.8.142:7000", "172.16.8.142:7001", "172.16.8.142:7002", "172.16.8.142:7003", "172.16.8.142:7004", "172.16.8.142:7005",

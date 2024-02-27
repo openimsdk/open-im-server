@@ -108,10 +108,12 @@ func (d *GWebSocket) Dial(urlStr string, requestHeader http.Header) (*http.Respo
 }
 
 func (d *GWebSocket) IsNil() bool {
-	if d.conn != nil {
-		return false
-	}
-	return true
+	return d.conn == nil
+	//
+	// if d.conn != nil {
+	// 	return false
+	// }
+	// return true
 }
 
 func (d *GWebSocket) SetConnNil() {
