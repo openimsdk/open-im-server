@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/OpenIMSDK/tools/errs"
+
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 
 	"net/http"
