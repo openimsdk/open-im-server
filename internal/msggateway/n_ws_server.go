@@ -88,6 +88,7 @@ type WsServer struct {
 	Encoder
 	MessageHandler
 }
+
 type kickHandler struct {
 	clientOK   bool
 	oldClients []*Client
@@ -129,7 +130,9 @@ func (ws *WsServer) UnRegister(c *Client) {
 }
 
 func (ws *WsServer) Validate(s any) error {
-	//?question?
+	if s == nil {
+		return errs.Wrap(errors.New("input cannot be nil"))
+	}
 	return nil
 }
 

@@ -26,7 +26,7 @@ func main() {
 	rpcCmd.AddPortFlag()
 	rpcCmd.AddPrometheusPortFlag()
 	if err := rpcCmd.Exec(); err != nil {
-		panic(err.Error())
+		util.ExitWithError(err)
 	}
 	if err := rpcCmd.StartSvr(config.Config.RpcRegisterName.OpenImConversationName, conversation.Start); err != nil {
 		util.ExitWithError(err)

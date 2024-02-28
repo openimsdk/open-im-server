@@ -26,7 +26,7 @@ func main() {
 	authCmd.AddPortFlag()
 	authCmd.AddPrometheusPortFlag()
 	if err := authCmd.Exec(); err != nil {
-		panic(err.Error())
+		util.ExitWithError(err)
 	}
 	if err := authCmd.StartSvr(config.Config.RpcRegisterName.OpenImAuthName, auth.Start); err != nil {
 		util.ExitWithError(err)
