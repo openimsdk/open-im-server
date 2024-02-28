@@ -259,7 +259,7 @@ func (a *Aws) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, erro
 	return res, nil
 }
 
-// AccessURL todo
+// AccessURL todo.
 func (a *Aws) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
 	// todo
 	return "", nil

@@ -15,7 +15,6 @@
 package genutil
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -42,15 +41,12 @@ func OutDir(path string) (string, error) {
 }
 
 func ExitWithError(err error) {
-	if errors.Is(err, errors.New("SIGTERM EXIT")) {
-		os.Exit(-1)
-	}
 	progName := filepath.Base(os.Args[0])
-	fmt.Fprintf(os.Stderr, "\n\n%s exit -1: \n%+v\n\n", progName, err)
+	fmt.Fprintf(os.Stderr, "%s exit -1: %+v\n", progName, err)
 	os.Exit(-1)
 }
 
-func SIGUSR1Exit() {
+func SIGTERMExit() {
 	progName := filepath.Base(os.Args[0])
-	fmt.Printf("\n\n%s receive process terminal SIGTERM exit 0\n\n", progName)
+	fmt.Fprintf(os.Stderr, "Warning %s receive process terminal SIGTERM exit 0\n", progName)
 }

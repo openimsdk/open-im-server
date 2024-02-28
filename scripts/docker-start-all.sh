@@ -14,9 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -o errexit
-set -o nounset
-set -o pipefail
+
+
+
 
 #fixme This scripts is the total startup scripts
 #fixme The full name of the shell scripts that needs to be started is placed in the need_to_start_server_shell array

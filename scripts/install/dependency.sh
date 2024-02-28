@@ -15,9 +15,9 @@
 
 # This script will install the dependencies required for openim
 
-set -o errexit
-set +o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh

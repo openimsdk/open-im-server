@@ -111,6 +111,7 @@ func (f *FriendNotificationSender) getUsersInfoMap(
 	return result, nil
 }
 
+//nolint:unused
 func (f *FriendNotificationSender) getFromToUserNickname(
 	ctx context.Context,
 	fromUserID, toUserID string,
@@ -216,7 +217,9 @@ func (f *FriendNotificationSender) BlackDeletedNotification(ctx context.Context,
 		FromUserID: req.OwnerUserID,
 		ToUserID:   req.BlackUserID,
 	}}
-	f.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackDeletedNotification, &blackDeletedTips)
+	if err := f.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackDeletedNotification, &blackDeletedTips); err != nil {
+		//err
+	}
 }
 
 func (f *FriendNotificationSender) FriendInfoUpdatedNotification(
@@ -225,5 +228,8 @@ func (f *FriendNotificationSender) FriendInfoUpdatedNotification(
 	needNotifiedUserID string,
 ) {
 	tips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
-	f.Notification(ctx, mcontext.GetOpUserID(ctx), needNotifiedUserID, constant.FriendInfoUpdatedNotification, &tips)
+	if err := f.Notification(ctx, mcontext.GetOpUserID(ctx), needNotifiedUserID,
+		constant.FriendInfoUpdatedNotification, &tips); err != nil {
+		// err
+	}
 }

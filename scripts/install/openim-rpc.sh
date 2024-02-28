@@ -38,9 +38,9 @@
 # Note: Before executing this script, ensure that the necessary permissions are granted and relevant environmental variables are set.
 #
 
-set -o errexit
-set +o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
@@ -63,6 +63,16 @@ openim::rpc::service_name() {
 IFS=" " read -ra OPENIM_RPC_SERVICE_TARGETS <<< "$(openim::rpc::service_name)"
 readonly OPENIM_RPC_SERVICE_TARGETS
 readonly OPENIM_RPC_SERVICE_LISTARIES=("${OPENIM_RPC_SERVICE_TARGETS[@]##*/}")
+
+
+OPENIM_ALL_RPC_FULL_PATH=()
+for target in openim::rpc::service_name; do
+  OPENIM_ALL_RPC_FULL_PATH+=("${OPENIM_OUTPUT_HOSTBIN}/${target}")
+done
+readonly OPENIM_ALL_RPC_FULL_PATH
+
+
+
 
 # Make sure the environment is only called via common to avoid too much nesting
 openim::rpc::service_port() {
@@ -121,14 +131,11 @@ function openim::rpc::start() {
     printf "+------------------------+-------+-----------------+\n"
     done
 
+
     # start all rpc services
     for ((i = 0; i < ${#OPENIM_RPC_SERVICE_LISTARIES[*]}; i++)); do
-        # openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES
-        openim::util::stop_services_on_ports ${OPENIM_RPC_PORT_LISTARIES[$i]}
-        openim::util::stop_services_on_ports ${OPENIM_RPC_PROM_PORT_LISTARIES[$i]}
 
         openim::log::info "OpenIM ${OPENIM_RPC_SERVICE_LISTARIES[$i]} config path: ${OPENIM_RPC_CONFIG}"
-
         # Get the service and Prometheus ports.
         OPENIM_RPC_SERVICE_PORTS=( $(openim::util::list-to-string ${OPENIM_RPC_PORT_LISTARIES[$i]}) )
         read -a OPENIM_RPC_SERVICE_PORTS_ARRAY <<< ${OPENIM_RPC_SERVICE_PORTS}
@@ -138,15 +145,17 @@ function openim::rpc::start() {
 
         for ((j = 0; j < ${#OPENIM_RPC_SERVICE_PORTS_ARRAY[@]}; j++)); do
             openim::log::info "Starting ${OPENIM_RPC_SERVICE_LISTARIES[$i]} service, port: ${OPENIM_RPC_SERVICE_PORTS[j]}, prometheus port: ${OPENIM_RPC_PROM_PORTS[j]}, binary root: ${OPENIM_OUTPUT_HOSTBIN}/${OPENIM_RPC_SERVICE_LISTARIES[$i]}"
-            openim::rpc::start_service "${OPENIM_RPC_SERVICE_LISTARIES[$i]}" "${OPENIM_RPC_SERVICE_PORTS[j]}" "${OPENIM_RPC_PROM_PORTS[j]}"
+            result=$(openim::rpc::start_service "${OPENIM_RPC_SERVICE_LISTARIES[$i]}" "${OPENIM_RPC_SERVICE_PORTS[j]}" "${OPENIM_RPC_PROM_PORTS[j]}")
+            if [[ $? -ne 0 ]]; then
+                openim::log::error "start ${SERVER_NAME} failed"
+            else
+                openim::log::info "$result"
+            fi
         done
     done
 
-    sleep 5
 
-    openim::util::check_ports ${OPENIM_RPC_PORT_TARGETS[@]}
-    # openim::util::check_ports ${OPENIM_RPC_PROM_PORT_TARGETS[@]}
-
+    return 0
 }
 
 function openim::rpc::start_service() {
@@ -161,6 +170,7 @@ function openim::rpc::start_service() {
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
   nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
+  return 0
 }
 
 ###################################### Linux Systemd ######################################
@@ -220,7 +230,7 @@ function openim::rpc::uninstall() {
         openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${service}.yaml"
         openim::common::sudo "rm -f ${SYSTEM_FILE_PATHS[$service]}"
     done
-    set -o errexit
+
     openim::log::info "uninstall openim-rpc successfully"
 }
 

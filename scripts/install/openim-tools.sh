@@ -38,9 +38,9 @@
 #    Example: ./openim-tools.sh openim::tools::install
 #
 
-set -o errexit
-set +o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
@@ -122,7 +122,6 @@ function openim::tools::pre-start() {
     for tool in "${OPENIM_TOOLS_PRE_START_NAME_LISTARIES[@]}"; do
         openim::log::info "Starting ${tool}..."
         openim::tools::start_service ${tool} ${OPNEIM_CONFIG}
-        sleep 0.2
     done
 }
 
@@ -131,7 +130,6 @@ function openim::tools::post-start() {
     for tool in "${OPENIM_TOOLS_POST_START_NAME_LISTARIES[@]}"; do
         openim::log::info "Starting ${tool}..."
         openim::tools::start_service ${tool}
-        sleep 0.2
     done
 }
 

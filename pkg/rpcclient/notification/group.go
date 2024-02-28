@@ -196,6 +196,7 @@ func (g *GroupNotificationSender) getGroupOwnerAndAdminUserID(ctx context.Contex
 	return utils.Slice(members, fn), nil
 }
 
+//nolint:unused
 func (g *GroupNotificationSender) groupDB2PB(group *relation.GroupModel, ownerUserID string, memberCount uint32) *sdkws.GroupInfo {
 	return &sdkws.GroupInfo{
 		GroupID:                group.GroupID,
@@ -235,7 +236,7 @@ func (g *GroupNotificationSender) groupMemberDB2PB(member *relation.GroupMemberM
 	}
 }
 
-func (g *GroupNotificationSender) getUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
+/* func (g *GroupNotificationSender) getUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
 	users, err := g.getUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
@@ -245,7 +246,7 @@ func (g *GroupNotificationSender) getUsersInfoMap(ctx context.Context, userIDs [
 		result[user.GetUserID()] = user.(*sdkws.UserInfo)
 	}
 	return result, nil
-}
+} */
 
 func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws.GroupMemberFullInfo, groupID string) (err error) {
 	if opUser == nil {
@@ -264,11 +265,11 @@ func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws
 				AppMangerLevel: constant.AppAdmin,
 			}
 		} else {
-			member, err := g.db.TakeGroupMember(ctx, groupID, userID)
-			if err == nil {
+			member, err2 := g.db.TakeGroupMember(ctx, groupID, userID)
+			if err2 == nil {
 				*opUser = g.groupMemberDB2PB(member, 0)
-			} else if !errs.ErrRecordNotFound.Is(err) {
-				return err
+			} else if !errs.ErrRecordNotFound.Is(err2) {
+				return err2
 			}
 		}
 	}

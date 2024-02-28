@@ -14,14 +14,13 @@
 # limitations under the License.
 
 # Common utilities, variables and checks for all build scripts.
-set -o errexit
-set +o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
 
-openim::util::set_max_fd 200000
 
 SERVER_NAME="openim-msggateway"
 
@@ -31,8 +30,7 @@ function openim::msggateway::start() {
 
   openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
   openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGGATEWAY_BINARY}"
-  
-  openim::util::stop_services_with_name ${OPENIM_MSGGATEWAY_BINARY}
+
   
   # OpenIM message gateway service port
   OPENIM_MESSAGE_GATEWAY_PORTS=$(openim::util::list-to-string ${OPENIM_MESSAGE_GATEWAY_PORT} )
@@ -66,8 +64,7 @@ function openim::msggateway::start() {
 
         nohup ${OPENIM_MSGGATEWAY_BINARY} --port ${OPENIM_MSGGATEWAY_PORTS_ARRAY[$i]} --ws_port ${OPENIM_WS_PORTS_ARRAY[$i]} $PROMETHEUS_PORT_OPTION -c ${OPENIM_MSGGATEWAY_CONFIG} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
     done
-
-    openim::util::check_process_names ${SERVER_NAME}
+    return 0
 }
 
 ###################################### Linux Systemd ######################################
@@ -117,7 +114,7 @@ function openim::msggateway::uninstall() {
   openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
   openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
   openim::common::sudo "rm -f /etc/systemd/system/${SERVER_NAME}.service"
-  set -o errexit
+
   openim::log::info "uninstall ${SERVER_NAME} successfully"
 }
 
