@@ -20,6 +20,7 @@ import (
 
 	"github.com/OpenIMSDK/protocol/push"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/protobuf/proto"
@@ -119,18 +120,18 @@ func NewGrpcHandler(validate *validator.Validate, client discoveryregistry.SvcDi
 func (g GrpcHandler) GetSeq(context context.Context, data *Req) ([]byte, error) {
 	req := sdkws.GetMaxSeqReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "GetSeq: error unmarshaling request")
 	}
 	if err := g.validate.Struct(&req); err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "GetSeq: validation failed")
 	}
 	resp, err := g.msgRpcClient.GetMaxSeq(context, &req)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "GetSeq: error calling GetMaxSeq on msgRpcClient")
 	}
 	c, err := proto.Marshal(resp)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "GetSeq: error marshaling response")
 	}
 	return c, nil
 }

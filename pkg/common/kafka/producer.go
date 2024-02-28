@@ -94,7 +94,6 @@ func NewKafkaProducer(addr []string, topic string) (*Producer, error) {
 		}
 		time.Sleep(1 * time.Second) // Wait before retrying
 	}
-
 	// Panic if unable to create producer after retries
 	if err != nil {
 		return nil, errs.Wrap(errors.New("failed to create Kafka producer: " + err.Error()))

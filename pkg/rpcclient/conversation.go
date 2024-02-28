@@ -23,6 +23,7 @@ import (
 	pbconversation "github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
@@ -36,7 +37,7 @@ type Conversation struct {
 func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversation {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	client := pbconversation.NewConversationClient(conn)
 	return &Conversation{discov: discov, conn: conn, Client: client}

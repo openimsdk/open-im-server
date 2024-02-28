@@ -25,7 +25,6 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
@@ -102,7 +101,10 @@ func PostReturn(ctx context.Context, url string, header map[string]string, input
 		return err
 	}
 	err = json.Unmarshal(b, output)
-	return err
+	if err != nil {
+		return errs.Wrap(err, "PostReturn: JSON unmarshal failed")
+	}
+	return nil
 }
 
 func callBackPostReturn(ctx context.Context, url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
@@ -127,7 +129,6 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 	}
 	if err := output.Parse(); err != nil {
 		log.ZWarn(ctx, "callback parse failed", err, "url", url, "input", input, "response", string(b))
-		return err
 	}
 	log.ZInfo(ctx, "callback success", "url", url, "input", input, "response", string(b))
 	return nil

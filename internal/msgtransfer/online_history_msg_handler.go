@@ -155,15 +155,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 				notStorageNotificationList,
 			)
 			if err := och.msgDatabase.MsgToModifyMQ(ctx, msgChannelValue.uniqueKey, conversationIDNotification, modifyMsgList); err != nil {
-				log.ZError(
-					ctx,
-					"msg to modify mq error",
-					err,
-					"uniqueKey",
-					msgChannelValue.uniqueKey,
-					"modifyMsgList",
-					modifyMsgList,
-				)
+				log.ZError(ctx, "msg to modify mq error", err, "uniqueKey", msgChannelValue.uniqueKey, "modifyMsgList", modifyMsgList)
 			}
 		}
 	}
