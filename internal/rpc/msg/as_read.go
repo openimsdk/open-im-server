@@ -82,7 +82,7 @@ func (m *msgServer) SetConversationHasReadSeq(
 	if req.HasReadSeq > maxSeq {
 		return nil, errs.ErrArgs.Wrap("hasReadSeq must not be bigger than maxSeq")
 	}
-	if err := m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq); err != nil {
+	if setErr := m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq); setErr != nil {
 		return nil, err
 	}
 	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, constant.SingleChatType, req.UserID,

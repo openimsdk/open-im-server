@@ -51,16 +51,17 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 	m.Handlers = append(m.Handlers, interceptorFunc...)
 }
 
-func (m *msgServer) execInterceptorHandler(ctx context.Context, req *msg.SendMsgReq) error {
-	for _, handler := range m.Handlers {
-		msgData, err := handler(ctx, req)
-		if err != nil {
-			return err
-		}
-		req.MsgData = msgData
-	}
-	return nil
-}
+// func `(*msgServer).execInterceptorHandler` is unused
+// func (m *msgServer) execInterceptorHandler(ctx context.Context, req *msg.SendMsgReq) error {
+// 	for _, handler := range m.Handlers {
+// 		msgData, err := handler(ctx, req)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		req.MsgData = msgData
+// 	}
+// 	return nil
+// }
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
@@ -71,7 +72,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	if err := mongo.CreateMsgIndex(); err != nil {
+	if indexErr := mongo.CreateMsgIndex(); indexErr != nil {
 		return err
 	}
 	cacheModel := cache.NewMsgCacheModel(rdb)
