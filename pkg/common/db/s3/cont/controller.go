@@ -89,7 +89,7 @@ func (c *Controller) GetHashObject(ctx context.Context, hash string) (*s3.Object
 
 func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int) (*InitiateUploadResult, error) {
 	defer log.ZDebug(ctx, "return")
-	log.ZInfo(ctx, "InitiateUpload", "hash", hash, "size", expire, "config")
+	log.ZInfo(ctx, "InitiateUpload", "hash", hash, "size", expire)
 	if size < 0 {
 		return nil, errors.New("invalid size")
 	}
@@ -112,11 +112,13 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 	}
 	log.ZDebug(ctx, "InitiateUpload 4444444444444444444444444444444")
 	if info, err := c.StatObject(ctx, c.HashPath(hash)); err == nil {
+		log.ZDebug(ctx, "InitiateUpload 55555555555555555555555555555555")
 		return nil, &HashAlreadyExistsError{Object: info}
 	} else if !c.impl.IsNotFound(err) {
+		log.ZDebug(ctx, "InitiateUpload 66666666666666666666666666666666", err)
 		return nil, err
 	}
-	log.ZDebug(ctx, "InitiateUpload 55555555555555555555555555555555")
+
 	if size <= partSize {
 		// 预签名上传
 		key := path.Join(tempPath, c.NowPath(), fmt.Sprintf("%s_%d_%s.presigned", hash, size, c.UUID()))
@@ -124,7 +126,6 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 		if err != nil {
 			return nil, err
 		}
-		log.ZDebug(ctx, "InitiateUpload 999999999999999999999999")
 		return &InitiateUploadResult{
 			UploadID: newMultipartUploadID(multipartUploadID{
 				Type: UploadTypePresigned,
@@ -145,7 +146,6 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 		}, nil
 	} else {
 		// 分片上传
-		log.ZDebug(ctx, "InitiateUpload 66666666666666666666666666666666")
 		upload, err := c.impl.InitiateMultipartUpload(ctx, c.HashPath(hash))
 		if err != nil {
 			return nil, err
@@ -164,7 +164,6 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 				return nil, err
 			}
 		}
-		log.ZDebug(ctx, "InitiateUpload 7777777777777777777777777")
 		return &InitiateUploadResult{
 			UploadID: newMultipartUploadID(multipartUploadID{
 				Type: UploadTypeMultipart,
