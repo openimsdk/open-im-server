@@ -15,9 +15,9 @@
 
 # This script automatically initializes various configuration files and can generate example files.
 
-set -o errexit
-set -o nounset
-set -o pipefail
+
+
+
 
 # Root directory of the OpenIM project
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..

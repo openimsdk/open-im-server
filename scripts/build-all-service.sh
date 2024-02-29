@@ -22,9 +22,9 @@
 # Usage: `scripts/build-all-service.sh`.
 # Example: `scripts/build-go.sh WHAT=cmd/kubelet`.
 
-set -o errexit
-set -o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"

@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -o errexit
-set +o nounset
-set -o pipefail
+
+
+
 
 # Short-circuit if init.sh has already been sourced
 [[ $(type -t openim::init::loaded) == function ]] && return 0

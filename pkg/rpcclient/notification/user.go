@@ -73,7 +73,7 @@ func NewUserNotificationSender(
 	return f
 }
 
-func (u *UserNotificationSender) getUsersInfoMap(
+/* func (u *UserNotificationSender) getUsersInfoMap(
 	ctx context.Context,
 	userIDs []string,
 ) (map[string]*sdkws.UserInfo, error) {
@@ -86,9 +86,9 @@ func (u *UserNotificationSender) getUsersInfoMap(
 		result[user.GetUserID()] = user.(*sdkws.UserInfo)
 	}
 	return result, nil
-}
+} */
 
-func (u *UserNotificationSender) getFromToUserNickname(
+/* func (u *UserNotificationSender) getFromToUserNickname(
 	ctx context.Context,
 	fromUserID, toUserID string,
 ) (string, string, error) {
@@ -97,7 +97,7 @@ func (u *UserNotificationSender) getFromToUserNickname(
 		return "", "", nil
 	}
 	return users[fromUserID].Nickname, users[toUserID].Nickname, nil
-}
+} */
 
 func (u *UserNotificationSender) UserStatusChangeNotification(
 	ctx context.Context,

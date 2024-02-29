@@ -76,7 +76,7 @@ function openim::man::uninstall() {
   # Turn off exit-on-error temporarily to handle non-existing files gracefully
   set +o errexit
   openim::common::sudo "rm -f /usr/share/man/man1/openim-*"
-  set -o errexit
+
   
   openim::log::info "Uninstalled openim man pages successfully"
 }
