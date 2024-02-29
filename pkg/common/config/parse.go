@@ -100,7 +100,8 @@ func initConfig(config any, configName, configFolderPath string) error {
 		if !os.IsNotExist(err) {
 			return errs.Wrap(err, fmt.Sprintf("failed to check existence of config file at path: %s", configFilePath))
 		}
-		projectRoot, err := GetProjectRoot()
+		var projectRoot string
+		projectRoot, err = GetProjectRoot()
 		if err != nil {
 			return err
 		}

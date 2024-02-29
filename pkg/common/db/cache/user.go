@@ -277,8 +277,8 @@ func (u *UserCacheRedis) refreshStatusOffline(ctx context.Context, userID string
 func (u *UserCacheRedis) refreshStatusOnline(ctx context.Context, userID string, platformID int32, isNil bool, err error, result, key string) error {
 	var onlineStatus user.OnlineStatus
 	if !isNil {
-		err := json.Unmarshal([]byte(result), &onlineStatus)
-		if err != nil {
+		err2 := json.Unmarshal([]byte(result), &onlineStatus)
+		if err2 != nil {
 			return errs.Wrap(err, "json.Unmarshal failed")
 		}
 		onlineStatus.PlatformIDs = RemoveRepeatedElementsInList(append(onlineStatus.PlatformIDs, platformID))
@@ -289,7 +289,7 @@ func (u *UserCacheRedis) refreshStatusOnline(ctx context.Context, userID string,
 	onlineStatus.UserID = userID
 	newjsonData, err := json.Marshal(&onlineStatus)
 	if err != nil {
-		return errs.Wrap(err)
+		return errs.Wrap(err, "json.Marshal failed")
 	}
 	_, err = u.rdb.HSet(ctx, key, userID, string(newjsonData)).Result()
 	if err != nil {
