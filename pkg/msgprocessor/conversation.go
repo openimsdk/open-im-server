@@ -20,6 +20,7 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/errs"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -188,7 +189,7 @@ func (s MsgBySeq) Swap(i, j int) {
 func Pb2String(pb proto.Message) (string, error) {
 	s, err := proto.Marshal(pb)
 	if err != nil {
-		return "", err
+		return "", errs.Wrap(err)
 	}
 	return string(s), nil
 }

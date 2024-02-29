@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -52,7 +51,7 @@ func (m *MsgGatewayCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		wsPort, err := m.getWsPortFlag(cmd)
 		if err != nil {
-			return errors.Wrap(err, "failed to get WS port flag")
+			return errs.Wrap(err, "failed to get WS port flag")
 		}
 		port, err := m.getPortFlag(cmd)
 		if err != nil {
@@ -62,6 +61,6 @@ func (m *MsgGatewayCmd) addRunE() {
 		if err != nil {
 			return err
 		}
-		return msggateway.RunWsAndServer(port, wsPort, prometheusPort) 
+		return msggateway.RunWsAndServer(port, wsPort, prometheusPort)
 	}
 }

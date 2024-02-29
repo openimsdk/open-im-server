@@ -18,12 +18,12 @@ import (
 	"fmt"
 
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/pkg/errors"
+
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/spf13/cobra"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -137,27 +137,27 @@ func (r *RootCmd) getPortFlag(cmd *cobra.Command) (int, error) {
 	port, err := cmd.Flags().GetInt(constant.FlagPort)
 	if err != nil {
 		// Wrapping the error with additional context
-		return 0, errors.Wrap(err, "error getting port flag")
+		return 0, errs.Wrap(err, "error getting port flag")
 	}
 	if port == 0 {
 		port, _ = r.PortFromConfig(constant.FlagPort)
 		// port, err := r.PortFromConfig(constant.FlagPort)
 		// if err != nil {
 		//     // Optionally wrap the error if it's an internal error needing context
-		//     return 0, errors.Wrap(err, "error getting port from config")
+		//     return 0, errs.Wrap(err, "error getting port from config")
 		// }
 	}
 	return port, nil
 }
 
-// GetPortFlag returns the port flag
-func (r *RootCmd) GetPortFlag() (int, error) {
+// // GetPortFlag returns the port flag
+// func (r *RootCmd) GetPortFlag() (int, error) {
 
-	if portFlag == 0 {
-		return errs.Wrap(errors.New("port is 0"), "error getting port flag")
-	}
-	return r.port, nil
-}
+// 	if portFlag == 0 {
+// 		return errs.Wrap(errs.New("port is 0"), "error getting port flag")
+// 	}
+// 	return r.port, nil
+// }
 
 func (r *RootCmd) AddPrometheusPortFlag() {
 	r.Command.Flags().IntP(constant.FlagPrometheusPort, "", 0, "server prometheus listen port")

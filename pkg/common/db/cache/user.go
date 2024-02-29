@@ -66,11 +66,7 @@ type UserCacheRedis struct {
 	rcClient   *rockscache.Client
 }
 
-func NewUserCacheRedis(
-	rdb redis.UniversalClient,
-	userDB relationtb.UserModelInterface,
-	options rockscache.Options,
-) UserCache {
+func NewUserCacheRedis(rdb redis.UniversalClient, userDB relationtb.UserModelInterface, options rockscache.Options) UserCache {
 	rcClient := rockscache.NewClient(rdb, options)
 
 	return &UserCacheRedis{

@@ -59,7 +59,7 @@ func callbackOfflinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgDa
 	if err := http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOfflinePush); err != nil {
 		return err
 	}
-	
+
 	if len(resp.UserIDs) != 0 {
 		*offlinePushUserIDs = resp.UserIDs
 	}

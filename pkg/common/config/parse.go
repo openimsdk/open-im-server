@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/errs"
 	"gopkg.in/yaml.v3"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -88,18 +89,17 @@ func initConfig(config any, configName, configFolderPath string) error {
 	_, err := os.Stat(configFolderPath)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			fmt.Println("stat config path error:", err.Error())
-			return fmt.Errorf("stat config path error: %w", err)
+			return errs.Wrap(err, "stat config path error")
 		}
 		configFolderPath = filepath.Join(GetProjectRoot(), "config", configName)
 		fmt.Println("flag's path,enviment's path,default path all is not exist,using project path:", configFolderPath)
 	}
 	data, err := os.ReadFile(configFolderPath)
 	if err != nil {
-		return fmt.Errorf("read file error: %w", err)
+		return errs.Wrap(err, "read file error")
 	}
 	if err = yaml.Unmarshal(data, config); err != nil {
-		return fmt.Errorf("unmarshal yaml error: %w", err)
+		return errs.Wrap(err, "unmarshal yaml error")
 	}
 	fmt.Println("The path of the configuration file to start the process:", configFolderPath)
 

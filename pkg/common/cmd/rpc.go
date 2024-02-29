@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -66,13 +65,7 @@ func (a *RpcCmd) StartSvr(name string, rpcFn func(discov discoveryregistry.SvcDi
 		a.port = portFlag
 	}
 
-	portFlag, err = a.GetPortFlag()
-
-	if err != nil {
-		return err
-	}
-
-	return startrpc.Start(a.GetPortFlag(), name, a.GetPrometheusPortFlag(), rpcFn)
+	return startrpc.Start(portFlag, name, a.GetPrometheusPortFlag(), rpcFn)
 }
 
 func (a *RpcCmd) GetPortFromConfig(portType string) (int, error) {
