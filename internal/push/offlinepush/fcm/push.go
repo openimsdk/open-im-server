@@ -16,7 +16,6 @@ package fcm
 
 import (
 	"context"
-	"fmt"
 	"path/filepath"
 
 	firebase "firebase.google.com/go"
@@ -42,33 +41,22 @@ type Fcm struct {
 
 // NewClient initializes a new FCM client using the Firebase Admin SDK.
 // It requires the FCM service account credentials file located within the project's configuration directory.
-// The function returns an Fcm pointer on success, or nil and an error if initialization fails.
-func NewClient(cache cache.MsgModel) (*Fcm, error) {
-    // Attempt to get the project root directory.
-    projectRoot, err := config.GetProjectRoot()
-    if err != nil {
-        return nil, fmt.Errorf("failed to get project root: %w", err)
-    }
+func NewClient(cache cache.MsgModel) *Fcm {
+	projectRoot, _ := config.GetProjectRoot()
+	credentialsFilePath := filepath.Join(projectRoot, "config", config.Config.Push.Fcm.ServiceAccount)
+	opt := option.WithCredentialsFile(credentialsFilePath)
+	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
+	if err != nil {
+		return nil
+	}
+	ctx := context.Background()
+	fcmMsgClient, err := fcmApp.Messaging(ctx)
+	if err != nil {
+		return nil
+	}
 
-    credentialsFilePath := filepath.Join(projectRoot, "config", config.Config.Push.Fcm.ServiceAccount)
-    opt := option.WithCredentialsFile(credentialsFilePath)
-
-    // Initialize the Firebase app with the specified service account credentials.
-    fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
-    if err != nil {
-        return nil, fmt.Errorf("failed to initialize Firebase app: %w", err)
-    }
-
-    // Obtain the messaging client from the Firebase app.
-    ctx := context.Background()
-    fcmMsgClient, err := fcmApp.Messaging(ctx)
-    if err != nil {
-        return nil, fmt.Errorf("failed to get Firebase messaging client: %w", err)
-    }
-
-    return &Fcm{fcmMsgCli: fcmMsgClient, cache: cache}, nil
+	return &Fcm{fcmMsgCli: fcmMsgClient, cache: cache}
 }
-
 
 func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
 	// accounts->registrationToken

@@ -126,11 +126,11 @@ func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 	})
 }
 
-// (1)先判断是否在好友表 （在不在都不返回错误） (2)对于不在好友列表的 插入即可.
+// (1) First determine whether it is in the friends list (in or out does not return an error) (2) for not in the friends list can be inserted.
 func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, addSource int32) (err error) {
 	return f.tx.Transaction(ctx, func(ctx context.Context) error {
 		cache := f.cache.NewCache()
-		// 先find 找出重复的 去掉重复的
+		// User find friends
 		fs1, err := f.friend.FindFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err

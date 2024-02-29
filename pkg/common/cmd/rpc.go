@@ -49,7 +49,7 @@ func (a *RpcCmd) Exec() error {
 		var prometheusPort, err = a.getPrometheusPortFlag(cmd)
 
 		if err != nil {
-			return errs.Wrap(err, "Failed to get Prometheus port")
+			return err
 		}
 
 		a.prometheusPort = prometheusPort

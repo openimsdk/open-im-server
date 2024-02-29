@@ -62,9 +62,9 @@ type UserModelInterface interface {
 	Exist(ctx context.Context, userID string) (exist bool, err error)
 	GetAllUserID(ctx context.Context, pagination pagination.Pagination) (count int64, userIDs []string, err error)
 	GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error)
-	// 获取用户总数
+	// Get user total quantity
 	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
-	// 获取范围内用户增量
+	// Get user total quantity every day
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
 	//CRUD user command
 	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error

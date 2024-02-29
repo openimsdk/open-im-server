@@ -85,8 +85,7 @@ func FriendsDB2Pb(ctx context.Context, friendsDB []*relation.FriendModel, getUse
 
 }
 
-func FriendRequestDB2Pb(
-	ctx context.Context,
+func FriendRequestDB2Pb(ctx context.Context,
 	friendRequests []*relation.FriendRequestModel,
 	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
 ) ([]*sdkws.FriendRequest, error) {

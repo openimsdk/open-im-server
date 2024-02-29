@@ -66,12 +66,12 @@ func Post(ctx context.Context, url string, header map[string]string, data any, t
 
 	jsonStr, err := json.Marshal(data)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "Post: JSON marshal failed")
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonStr))
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "Post: NewRequestWithContext failed")
 	}
 
 	if operationID, _ := ctx.Value(constant.OperationID).(string); operationID != "" {
@@ -84,13 +84,13 @@ func Post(ctx context.Context, url string, header map[string]string, data any, t
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "Post: client.Do failed")
 	}
 	defer resp.Body.Close()
 
 	result, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "Post: ReadAll failed")
 	}
 
 	return result, nil

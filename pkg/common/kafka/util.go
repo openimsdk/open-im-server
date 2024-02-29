@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"github.com/IBM/sarama"
-	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/tls"
@@ -37,7 +36,7 @@ func SetupTLSConfig(cfg *sarama.Config) error {
 			[]byte(config.Config.Kafka.TLS.ClientKeyPwd),
 		)
 		if err != nil {
-			return errs.Wrap(err, "SetupTLSConfig: failed to set up TLS config")
+			return err
 		}
 		cfg.Net.TLS.Config = tlsConfig
 	}

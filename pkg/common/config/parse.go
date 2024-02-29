@@ -65,7 +65,7 @@ func GetProjectRoot() (string, error) {
 	// Attempt to compute the project root by navigating up from the executable's directory
 	projectRoot, err := genutil.OutDir(filepath.Join(filepath.Dir(executablePath), "../../../../.."))
 	if err != nil {
-		return "", errs.Wrap(err, "failed to determine project root directory")
+		return "", err
 	}
 
 	return projectRoot, nil

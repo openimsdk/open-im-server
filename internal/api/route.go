@@ -233,51 +233,60 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 		config.Config.TokenPolicy.Expire,
 	)
 	return func(c *gin.Context) {
-		if c.Request.Method != http.MethodPost {
-			c.Next()
-			return
-		}
-
-		token := c.Request.Header.Get(constant.Token)
-		if token == "" {
-			handleGinError(c, "header get token error", errs.ErrArgs, "header must have token")
-			return
-		}
-
-		claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret())
-		if err != nil {
-			handleGinError(c, "jwt get token error", errs.ErrTokenUnknown, "")
-			return
-		}
-
-		m, err := dataBase.GetTokensWithoutError(c, claims.UserID, claims.PlatformID)
-		if err != nil || len(m) == 0 {
-			handleGinError(c, "cache get token error", errs.ErrTokenNotExist, "")
-			return
-		}
-
-		if v, ok := m[token]; ok {
-			if v == constant.KickedToken {
-				handleGinError(c, "cache kicked token error", errs.ErrTokenKicked, "")
-				return
-			} else if v != constant.NormalToken {
-				handleGinError(c, "cache unknown token error", errs.ErrTokenUnknown, "")
+		switch c.Request.Method {
+		case http.MethodPost:
+			token := c.Request.Header.Get(constant.Token)
+			if token == "" {
+				log.ZWarn(c, "header get token error", errs.ErrArgs.Wrap("header must have token"))
+				apiresp.GinError(c, errs.ErrArgs.Wrap("header must have token"))
+				c.Abort()
 				return
 			}
-		} else {
-			handleGinError(c, "token does not exist error", errs.ErrTokenNotExist, "")
-			return
+			claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret())
+			if err != nil {
+				log.ZWarn(c, "jwt get token error", errs.ErrTokenUnknown.Wrap())
+				apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
+				c.Abort()
+				return
+			}
+			m, err := dataBase.GetTokensWithoutError(c, claims.UserID, claims.PlatformID)
+			if err != nil {
+				log.ZWarn(c, "cache get token error", errs.ErrTokenNotExist.Wrap())
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
+			if len(m) == 0 {
+				log.ZWarn(c, "cache do not exist token error", errs.ErrTokenNotExist.Wrap())
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+			}
+			if v, ok := m[token]; ok {
+				switch v {
+				case constant.NormalToken:
+				case constant.KickedToken:
+					log.ZWarn(c, "cache kicked token error", errs.ErrTokenKicked.Wrap())
+					apiresp.GinError(c, errs.ErrTokenKicked.Wrap())
+					c.Abort()
+					return
+				default:
+					log.ZWarn(c, "cache unknown token error", errs.ErrTokenUnknown.Wrap())
+					apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
+					c.Abort()
+					return
+				}
+			} else {
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
 		}
-
-		c.Set(constant.OpUserPlatform, constant.PlatformIDToName(claims.PlatformID))
-		c.Set(constant.OpUserID, claims.UserID)
-		c.Next()
 	}
 }
 
-// handleGinError logs and returns an error response through Gin context.
-func handleGinError(c *gin.Context, logMessage string, errType errs.CodeError, detail string) {
-	wrappedErr := errType.Wrap(detail)
-	apiresp.GinError(c, wrappedErr)
-	c.Abort()
-}
+// // handleGinError logs and returns an error response through Gin context.
+// func handleGinError(c *gin.Context, logMessage string, errType errs.CodeError, detail string) {
+// 	wrappedErr := errType.Wrap(detail)
+// 	apiresp.GinError(c, wrappedErr)
+// 	c.Abort()
+// }

@@ -64,57 +64,61 @@ func (u *UserApi) GetUsers(c *gin.Context) {
 	a2r.Call(user.UserClient.GetPaginationUsers, u.Client, c)
 }
 
-// GetUsersOnlineStatus retrieves the online status of users.
+// GetUsersOnlineStatus Get user online status.
 func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 	var req msggateway.GetUsersOnlineStatusReq
 	if err := c.BindJSON(&req); err != nil {
 		apiresp.GinError(c, err)
 		return
 	}
-
 	conns, err := u.Discov.GetConns(c, config.Config.RpcRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return
 	}
 
-	wsResult := make([]*msggateway.GetUsersOnlineStatusResp_SuccessResult, 0)
-	for _, conn := range conns {
-		msgClient := msggateway.NewMsgGatewayClient(conn)
+	var wsResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult
+	var respResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult
+	flag := false
+
+	// Online push message
+	for _, v := range conns {
+		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
 		if err != nil {
 			log.ZDebug(c, "GetUsersOnlineStatus rpc error", err)
-			if apiresp.ParseError(err).ErrCode == errs.NoPermissionError {
-				apiresp.GinError(c, errs.Wrap(err))
+
+			parseError := apiresp.ParseError(err)
+			if parseError.ErrCode == errs.NoPermissionError {
+				apiresp.GinError(c, err)
 				return
 			}
-			continue
+		} else {
+			wsResult = append(wsResult, reply.SuccessResult...)
 		}
-		wsResult = append(wsResult, reply.SuccessResult...)
 	}
-
-	respResult := compileResults(req.UserIDs, wsResult)
-	apiresp.GinSuccess(c, respResult)
-}
-
-// compileResults aggregates online status results for the provided userIDs.
-func compileResults(userIDs []string, wsResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult) []*msggateway.GetUsersOnlineStatusResp_SuccessResult {
-	respResult := make([]*msggateway.GetUsersOnlineStatusResp_SuccessResult, 0, len(userIDs))
-	for _, userID := range userIDs {
-		res := &msggateway.GetUsersOnlineStatusResp_SuccessResult{
-			UserID: userID,
-			Status: constant.OfflineStatus, // Default to offline
-		}
-		for _, result := range wsResult {
-			if result.UserID == userID {
+	// Traversing the userIDs in the api request body
+	for _, v1 := range req.UserIDs {
+		flag = false
+		res := new(msggateway.GetUsersOnlineStatusResp_SuccessResult)
+		// Iterate through the online results fetched from various gateways
+		for _, v2 := range wsResult {
+			// If matches the above description on the line, and vice versa
+			if v2.UserID == v1 {
+				flag = true
+				res.UserID = v1
 				res.Status = constant.OnlineStatus
-				res.DetailPlatformStatus = append(res.DetailPlatformStatus, result.DetailPlatformStatus...)
+				res.DetailPlatformStatus = append(res.DetailPlatformStatus, v2.DetailPlatformStatus...)
 				break
 			}
 		}
+		if !flag {
+			res.UserID = v1
+			res.Status = constant.OfflineStatus
+		}
 		respResult = append(respResult, res)
 	}
-	return respResult
+	apiresp.GinSuccess(c, respResult)
 }
 
 func (u *UserApi) UserRegisterCount(c *gin.Context) {

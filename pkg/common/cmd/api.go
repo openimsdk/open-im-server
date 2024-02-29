@@ -15,6 +15,9 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/spf13/cobra"
 
@@ -50,11 +53,17 @@ func (a *ApiCmd) AddApi(f func(port int, promPort int) error) {
 	}
 }
 
-func (a *ApiCmd) GetPortFromConfig(portType string) (int,) {
+func (a *ApiCmd) GetPortFromConfig(portType string) (int, error) {
 	if portType == constant.FlagPort {
-		return config2.Config.Api.OpenImApiPort[0]
+		if len(config2.Config.Api.OpenImApiPort) > 0 {
+			return config2.Config.Api.OpenImApiPort[0], nil
+		}
+		return 0, errors.New("API port configuration is empty or missing")
 	} else if portType == constant.FlagPrometheusPort {
-		return config2.Config.Prometheus.ApiPrometheusPort[0]
+		if len(config2.Config.Prometheus.ApiPrometheusPort) > 0 {
+			return config2.Config.Prometheus.ApiPrometheusPort[0], nil
+		}
+		return 0, errors.New("Prometheus port configuration is empty or missing")
 	}
-	return 0
+	return 0, fmt.Errorf("unknown port type: %s", portType)
 }
