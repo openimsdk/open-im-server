@@ -133,7 +133,7 @@ func (r *RootCmd) AddPortFlag() {
 	r.Command.Flags().IntP(constant.FlagPort, "p", 0, "server listen port")
 }
 
-func (r *RootCmd) hubgetPortFlag(cmd *cobra.Command) (int, error) {
+func (r *RootCmd) getPortFlag(cmd *cobra.Command) (int, error) {
 	port, err := cmd.Flags().GetInt(constant.FlagPort)
 	if err != nil {
 		// Wrapping the error with additional context

@@ -35,9 +35,9 @@ type RpcCmd struct {
 }
 
 func NewRpcCmd(name string) *RpcCmd {
-	ret := &RpcCmd{NewRootCmd(name)}
-	ret.SetRootCmdPt(ret)
-	return ret
+    ret := &RpcCmd{NewRootCmd(name)}
+    ret.SetRootCmdPt(ret)
+    return ret
 }
 
 func (a *RpcCmd) Exec() error {

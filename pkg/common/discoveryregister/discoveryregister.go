@@ -15,8 +15,8 @@
 package discoveryregister
 
 import (
-	"errors"
 	"os"
+	"errors"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/direct"
 
@@ -42,6 +42,6 @@ func NewDiscoveryRegister(envType string) (discoveryregistry.SvcDiscoveryRegistr
 	case "direct":
 		return direct.NewConnDirect()
 	default:
-		return nil, errs.Wrap(erros.new("envType not correct"))
+		return nil, errs.Wrap(errors.New("envType not correct"))
 	}
 }
