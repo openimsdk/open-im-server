@@ -17,6 +17,7 @@ package third
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/tools/log"
 	"net/url"
 	"time"
 
@@ -40,6 +41,7 @@ import (
 )
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	log.ZDebug(context.Background(), "config19999999999999999999999999999999999", config)
 	mongo, err := unrelation.NewMongo(config)
 	if err != nil {
 		return err
