@@ -15,11 +15,14 @@
 package cmd
 
 import (
+	"errors"
+
 	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
 	"github.com/spf13/cobra"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/errs"
+	v3config "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type MsgGatewayCmd struct {
@@ -63,4 +66,40 @@ func (m *MsgGatewayCmd) addRunE() {
 		}
 		return msggateway.RunWsAndServer(port, wsPort, prometheusPort)
 	}
+}
+
+func (m *MsgGatewayCmd) Exec() error {
+	m.addRunE()
+	return m.Execute()
+}
+
+func (m *MsgGatewayCmd) GetPortFromConfig(portType string) (int, error) {
+	var port int
+	var exists bool
+
+	switch portType {
+	case constant.FlagWsPort:
+		if len(v3config.Config.LongConnSvr.OpenImWsPort) > 0 {
+			port = v3config.Config.LongConnSvr.OpenImWsPort[0]
+			exists = true
+		}
+
+	case constant.FlagPort:
+		if len(v3config.Config.LongConnSvr.OpenImMessageGatewayPort) > 0 {
+			port = v3config.Config.LongConnSvr.OpenImMessageGatewayPort[0]
+			exists = true
+		}
+
+	case constant.FlagPrometheusPort:
+		if len(v3config.Config.Prometheus.MessageGatewayPrometheusPort) > 0 {
+			port = v3config.Config.Prometheus.MessageGatewayPrometheusPort[0]
+			exists = true
+		}
+	}
+
+	if !exists {
+		return 0, errs.Wrap(errors.New("port type '%s' not found in configuration"), portType)
+	}
+
+	return port, nil
 }

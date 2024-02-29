@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -35,24 +36,26 @@ type RpcCmd struct {
 }
 
 func NewRpcCmd(name string) *RpcCmd {
-    ret := &RpcCmd{NewRootCmd(name)}
-    ret.SetRootCmdPt(ret)
-    return ret
+	ret := &RpcCmd{NewRootCmd(name)}
+	ret.SetRootCmdPt(ret)
+	return ret
 }
 
 func (a *RpcCmd) Exec() error {
-	a.Command.Run = func(cmd *cobra.Command, args []string) {
+	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		portFlag, err := a.getPortFlag(cmd)
 		if err != nil {
-			a.port = portFlag
+			return errs.Wrap(err, "error getting port flag")
 		}
-		var prometheusPort, err = a.getPrometheusPortFlag(cmd)
+		a.port = portFlag
 
+		prometheusPort, err := a.getPrometheusPortFlag(cmd)
 		if err != nil {
-			return err
+			return errs.Wrap(err, "error getting prometheus port flag")
 		}
-
 		a.prometheusPort = prometheusPort
+
+		return nil
 	}
 	return a.Execute()
 }
@@ -60,7 +63,7 @@ func (a *RpcCmd) Exec() error {
 func (a *RpcCmd) StartSvr(name string, rpcFn func(discov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) error {
 	portFlag, err := a.GetPortFlag()
 	if err != nil {
-		return errs.Wrap(err, "error getting port flag")
+		return err
 	} else {
 		a.port = portFlag
 	}
@@ -108,7 +111,7 @@ func (a *RpcCmd) GetPortFromConfig(portType string) (int, error) {
 		if port, ok := portMap[portType]; ok {
 			return port, nil
 		} else {
-			return 0, errs.Wrap(errs.New("port type '%s' not found", portType), fmt.Sprintf("Failed to get port for %s", a.Name))
+			return 0, errs.Wrap(errors.New("port type not found"), fmt.Sprintf("Failed to get port for %s", a.Name))
 		}
 	}
 

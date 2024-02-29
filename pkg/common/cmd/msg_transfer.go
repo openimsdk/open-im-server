@@ -22,6 +22,7 @@ import (
 
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
 )
 
@@ -37,7 +38,11 @@ func NewMsgTransferCmd() *MsgTransferCmd {
 
 func (m *MsgTransferCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msgtransfer.StartTransfer(m.getPrometheusPortFlag(cmd))
+		prometheusPort, err := m.getPrometheusPortFlag(cmd)
+		if err != nil {
+			return errs.Wrap(err, "failed to get Prometheus port")
+		}
+		return msgtransfer.StartTransfer(prometheusPort)
 	}
 }
 

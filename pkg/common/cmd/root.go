@@ -151,22 +151,21 @@ func (r *RootCmd) getPortFlag(cmd *cobra.Command) (int, error) {
 }
 
 // // GetPortFlag returns the port flag
-// func (r *RootCmd) GetPortFlag() (int, error) {
-
-// 	if portFlag == 0 {
-// 		return errs.Wrap(errs.New("port is 0"), "error getting port flag")
-// 	}
-// 	return r.port, nil
-// }
+func (r *RootCmd) GetPortFlag() (int, error) {
+	return r.port, nil
+}
 
 func (r *RootCmd) AddPrometheusPortFlag() {
 	r.Command.Flags().IntP(constant.FlagPrometheusPort, "", 0, "server prometheus listen port")
 }
 
 func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) (int, error) {
-	port, _ := cmd.Flags().GetInt(constant.FlagPrometheusPort)
-	if port == 0 {
-		port, _ = r.PortFromConfig(constant.FlagPrometheusPort)
+	port, err := cmd.Flags().GetInt(constant.FlagPrometheusPort)
+	if err != nil || port == 0 {
+		port, err = r.PortFromConfig(constant.FlagPrometheusPort)
+		if err != nil {
+			return 0, errs.Wrap(err, "error getting prometheus port from config")
+		}
 	}
 	return port, nil
 }
