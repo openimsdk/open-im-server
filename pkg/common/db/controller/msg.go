@@ -48,33 +48,32 @@ const (
 	updateKeyRevoke
 )
 
+// CommonMsgDatabase defines the interface for message database operations.
 type CommonMsgDatabase interface {
-	// 批量插入消息
+	// BatchInsertChat2DB inserts a batch of messages into the database for a specific conversation.
 	BatchInsertChat2DB(ctx context.Context, conversationID string, msgs []*sdkws.MsgData, currentMaxSeq int64) error
-	// 撤回消息
+	// RevokeMsg revokes a message in a conversation.
 	RevokeMsg(ctx context.Context, conversationID string, seq int64, revoke *unrelationtb.RevokeModel) error
-	// mark as read
+	// MarkSingleChatMsgsAsRead marks messages as read for a single chat by sequence numbers.
 	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, seqs []int64) error
-	// 刪除redis中消息缓存
+	// DeleteMessagesFromCache deletes message caches from Redis by sequence numbers.
 	DeleteMessagesFromCache(ctx context.Context, conversationID string, seqs []int64) error
+	// DelUserDeleteMsgsList deletes user's message deletion list.
 	DelUserDeleteMsgsList(ctx context.Context, conversationID string, seqs []int64)
-	// incrSeq然后批量插入缓存
+	// BatchInsertChat2Cache increments the sequence number and then batch inserts messages into the cache.
 	BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNewConversation bool, err error)
-
-	//  通过seqList获取mongo中写扩散消息
+	// GetMsgBySeqsRange retrieves messages from MongoDB by a range of sequence numbers.
 	GetMsgBySeqsRange(ctx context.Context, userID string, conversationID string, begin, end, num, userMaxSeq int64) (minSeq int64, maxSeq int64, seqMsg []*sdkws.MsgData, err error)
-	// 通过seqList获取大群在 mongo里面的消息
+	// GetMsgBySeqs retrieves messages for large groups from MongoDB by sequence numbers.
 	GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (minSeq int64, maxSeq int64, seqMsg []*sdkws.MsgData, err error)
-	// 删除会话消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
+	// DeleteConversationMsgsAndSetMinSeq deletes conversation messages and resets the minimum sequence number. If `remainTime` is 0, all messages are deleted (this method does not delete Redis cache).
 	DeleteConversationMsgsAndSetMinSeq(ctx context.Context, conversationID string, remainTime int64) error
-	// 用户标记删除过期消息返回标记删除的seq列表
+	// UserMsgsDestruct marks messages for deletion based on destruct time and returns a list of sequence numbers for marked messages.
 	UserMsgsDestruct(ctx context.Context, userID string, conversationID string, destructTime int64, lastMsgDestructTime time.Time) (seqs []int64, err error)
-
-	// 用户根据seq删除消息
+	// DeleteUserMsgsBySeqs allows a user to delete messages based on sequence numbers.
 	DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error
-	// 物理删除消息置空
+	// DeleteMsgsPhysicalBySeqs physically deletes messages by emptying them based on sequence numbers.
 	DeleteMsgsPhysicalBySeqs(ctx context.Context, conversationID string, seqs []int64) error
-
 	SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error
 	GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
 	GetMaxSeq(ctx context.Context, conversationID string) (int64, error)

@@ -39,7 +39,7 @@ func main() {
 	latestVersion := defaultTemplateVersion
 
 	// getLatestVersion
-	getLatestVersion
+	// getLatestVersion
 
 	// Construct the download URL
 	downloadURL := fmt.Sprintf("https://github.com/openimsdk/chat/releases/download/%s/chat_Linux_x86_64.tar.gz", latestVersion)

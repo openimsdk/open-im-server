@@ -80,7 +80,7 @@ func (rc *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) 
 	cmdOpts := rc.applyOptions(opts...)
 
 	if err := rc.initializeLogger(cmdOpts); err != nil {
-		return fmt.Errorf("failed to initialize from config: %w", err)
+		return errs.Wrap(err, "failed to initialize logger")
 	}
 
 	return nil
@@ -164,7 +164,7 @@ func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) (int, error) {
 	if err != nil || port == 0 {
 		port, err = r.PortFromConfig(constant.FlagPrometheusPort)
 		if err != nil {
-			return 0, errs.Wrap(err, "error getting prometheus port from config")
+			return 0, err
 		}
 	}
 	return port, nil

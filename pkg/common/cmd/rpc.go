@@ -45,13 +45,13 @@ func (a *RpcCmd) Exec() error {
 	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		portFlag, err := a.getPortFlag(cmd)
 		if err != nil {
-			return errs.Wrap(err, "error getting port flag")
+			return err
 		}
 		a.port = portFlag
 
 		prometheusPort, err := a.getPrometheusPortFlag(cmd)
 		if err != nil {
-			return errs.Wrap(err, "error getting prometheus port flag")
+			return err
 		}
 		a.prometheusPort = prometheusPort
 
