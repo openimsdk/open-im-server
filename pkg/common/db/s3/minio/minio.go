@@ -136,8 +136,9 @@ func (m *Minio) initMinio(ctx context.Context) error {
 	if m.init {
 		return nil
 	}
+	log.ZDebug(ctx, "conf!11111111111111111111111111111111111111111111111111111111111111111111111111111", m.config, "werqwerqw")
 	conf := m.config.Object.Minio
-	log.ZDebug(ctx, "conf!11111111111111111111111111111111111111111111111111111111111111111111111111111", conf.Bucket, "openopen")
+	log.ZDebug(ctx, "conf!11111111111111111111111111111111111111111111111111111111111111111111111111111", conf, "openopen")
 	exists, err := m.core.Client.BucketExists(ctx, conf.Bucket)
 	if err != nil {
 		return fmt.Errorf("check bucket exists error: %w", err)
