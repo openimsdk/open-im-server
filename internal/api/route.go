@@ -54,6 +54,7 @@ import (
 )
 
 func Start(config *config.GlobalConfig, port int, proPort int) error {
+	log.ZDebug(context.Background(), "configAPI", config)
 	if port == 0 || proPort == 0 {
 		err := "port or proPort is empty:" + strconv.Itoa(port) + "," + strconv.Itoa(proPort)
 		return errs.Wrap(fmt.Errorf(err))
