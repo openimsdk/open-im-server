@@ -24,8 +24,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
-	"github.com/OpenIMSDK/tools/errs"
-
 	"github.com/gogo/protobuf/jsonpb"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -443,7 +441,7 @@ func (c *msgCache) PipeSetMessageToCache(ctx context.Context, conversationID str
 
 	results, err := pipe.Exec(ctx)
 	if err != nil {
-		return 0, errs.Warp(err)
+		return 0, errs.Wrap(err)
 	}
 
 	for _, res := range results {

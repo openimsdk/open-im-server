@@ -23,12 +23,13 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImAuthName)
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	client := auth.NewAuthClient(conn)
 	return &Auth{discov: discov, conn: conn, Client: client}

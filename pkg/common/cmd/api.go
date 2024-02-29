@@ -32,17 +32,29 @@ func NewApiCmd() *ApiCmd {
 	return ret
 }
 
+// AddApi configures the API command to run with specified ports for the API and Prometheus monitoring.
+// It ensures error handling for port retrieval and only proceeds if both port numbers are successfully obtained.
 func (a *ApiCmd) AddApi(f func(port int, promPort int) error) {
 	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return f(a.getPortFlag(cmd), a.getPrometheusPortFlag(cmd))
+		port, err := a.getPortFlag(cmd)
+		if err != nil {
+			return err
+		}
+
+		promPort, err := a.getPrometheusPortFlag(cmd)
+		if err != nil {
+			return err
+		}
+
+		return f(port, promPort)
 	}
 }
 
-func (a *ApiCmd) GetPortFromConfig(portType string) (int, error) {
+func (a *ApiCmd) GetPortFromConfig(portType string) (int,) {
 	if portType == constant.FlagPort {
-		return config2.Config.Api.OpenImApiPort[0], nil
+		return config2.Config.Api.OpenImApiPort[0]
 	} else if portType == constant.FlagPrometheusPort {
-		return config2.Config.Prometheus.ApiPrometheusPort[0], nil
+		return config2.Config.Prometheus.ApiPrometheusPort[0]
 	}
-	return 0, nil
+	return 0
 }

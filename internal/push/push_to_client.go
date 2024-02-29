@@ -82,7 +82,7 @@ func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 	case "getui":
 		offlinePusher = getui.NewClient(cache)
 	case "fcm":
-		offlinePusher = fcm.NewClient(cache)
+		offlinePusher, _ = fcm.NewClient(cache)
 	case "jpush":
 		offlinePusher = jpush.NewClient()
 	default:

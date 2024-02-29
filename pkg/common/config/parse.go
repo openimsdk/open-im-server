@@ -54,6 +54,23 @@ func GetDefaultConfigPath() (string, error) {
 	return configPath, nil
 }
 
+// GetProjectRoot returns the absolute path of the project root directory by navigating up from the directory
+// containing the executable. It provides a detailed error if the path cannot be determined.
+func GetProjectRoot() (string, error) {
+	executablePath, err := os.Executable()
+	if err != nil {
+		return "", errs.Wrap(err, "failed to retrieve executable path")
+	}
+
+	// Attempt to compute the project root by navigating up from the executable's directory
+	projectRoot, err := genutil.OutDir(filepath.Join(filepath.Dir(executablePath), "../../../../.."))
+	if err != nil {
+		return "", errs.Wrap(err, "failed to determine project root directory")
+	}
+
+	return projectRoot, nil
+}
+
 func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
 	opts := msgprocessor.NewOptions()
 
@@ -73,25 +90,36 @@ func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
 	return opts
 }
 
+// initConfig loads configuration from a specified path into the provided config structure.
+// If the specified config file does not exist, it attempts to load from the project's default "config" directory.
+// It logs informative messages regarding the configuration path being used.
 func initConfig(config any, configName, configFolderPath string) error {
-	configFolderPath = filepath.Join(configFolderPath, configName)
-	_, err := os.Stat(configFolderPath)
+	configFilePath := filepath.Join(configFolderPath, configName)
+	_, err := os.Stat(configFilePath)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			return errs.Wrap(err, "stat config path error")
+			return errs.Wrap(err, fmt.Sprintf("failed to check existence of config file at path: %s", configFilePath))
 		}
-		configFolderPath = filepath.Join(GetProjectRoot(), "config", configName)
-		fmt.Println("flag's path,enviment's path,default path all is not exist,using project path:", configFolderPath)
+		projectRoot, err := GetProjectRoot()
+		if err != nil {
+			return err
+		}
+		configFilePath = filepath.Join(projectRoot, "config", configName)
+		fmt.Printf("Configuration file not found at specified path. Falling back to project path: %s\n", configFilePath)
 	}
-	data, err := os.ReadFile(configFolderPath)
-	if err != nil {
-		return errs.Wrap(err, "read file error")
-	}
-	if err = yaml.Unmarshal(data, config); err != nil {
-		return errs.Wrap(err, "unmarshal yaml error")
-	}
-	fmt.Println("The path of the configuration file to start the process:", configFolderPath)
 
+	data, err := os.ReadFile(configFilePath)
+	if err != nil {
+		// Wrap and return the error if reading the configuration file fails.
+		return errs.Wrap(err, fmt.Sprintf("failed to read configuration file at path: %s", configFilePath))
+	}
+
+	if err = yaml.Unmarshal(data, config); err != nil {
+		// Wrap and return the error if unmarshalling the YAML configuration fails.
+		return errs.Wrap(err, "failed to unmarshal YAML configuration")
+	}
+
+	fmt.Printf("Configuration file loaded successfully from path: %s\n", configFilePath)
 	return nil
 }
 
@@ -107,7 +135,6 @@ func InitConfig(configFolderPath string) error {
 			var err error
 			configFolderPath, err = GetDefaultConfigPath()
 			if err != nil {
-				// Wrap and return the error if getting the default config path fails
 				return err
 			}
 		}
