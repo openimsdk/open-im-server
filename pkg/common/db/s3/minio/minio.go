@@ -136,9 +136,8 @@ func (m *Minio) initMinio(ctx context.Context) error {
 	if m.init {
 		return nil
 	}
-	log.ZDebug(ctx, "conf!11111111111111111111111111111111111111111111111111111111111111111111111111111", m.config, "werqwerqw")
 	conf := m.config.Object.Minio
-	log.ZDebug(ctx, "conf!11111111111111111111111111111111111111111111111111111111111111111111111111111", m.config, "conf", conf.Bucket, "openopen")
+	log.ZDebug(ctx, "conf!11111111111111111111111111111111111111111111111111111111111111111111111111111", "conf", conf.Bucket, "openopen")
 	if conf.Bucket != "openim" {
 		log.ZError(ctx, "ppppppppppppppppppppppppppppppp", fmt.Errorf("aaa"))
 	}
