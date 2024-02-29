@@ -56,7 +56,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if apiURL == "" {
 		return fmt.Errorf("api url is empty")
 	}
-	if _, err := url.Parse(config.Config.Object.ApiURL); err != nil {
+	if _, parseErr := url.Parse(config.Config.Object.ApiURL); parseErr != nil {
 		return err
 	}
 	if apiURL[len(apiURL)-1] != '/' {
