@@ -61,7 +61,6 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 	if err := checkUploadName(ctx, req.Name, t.config); err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "req", req.Hash, req.Size, t.defaultExpire, int(req.MaxParts))
 	expireTime := time.Now().Add(t.defaultExpire)
 	result, err := t.s3dataBase.InitiateMultipartUpload(ctx, req.Hash, req.Size, t.defaultExpire, int(req.MaxParts))
 	log.ZDebug(ctx, "33333333333333333333333", err)
