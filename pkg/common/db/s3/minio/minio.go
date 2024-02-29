@@ -314,8 +314,10 @@ func (m *Minio) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, er
 		return nil, err
 	}
 	log.ZDebug(ctx, "StatObject !!!!!!1111111111111111111111111111111111")
+	log.ZInfo(ctx, "StatObject", "bucket", m.bucket, "name", name)
 	info, err := m.core.Client.StatObject(ctx, m.bucket, name, minio.StatObjectOptions{})
 	if err != nil {
+		log.ZDebug(ctx, "StatObject !!!!!!555555555555", err)
 		return nil, err
 	}
 	log.ZDebug(ctx, "StatObject !!!!!!22222222222222222222222222222222222")
