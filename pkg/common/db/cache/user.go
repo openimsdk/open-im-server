@@ -277,9 +277,9 @@ func (u *UserCacheRedis) refreshStatusOffline(ctx context.Context, userID string
 func (u *UserCacheRedis) refreshStatusOnline(ctx context.Context, userID string, platformID int32, isNil bool, err error, result, key string) error {
 	var onlineStatus user.OnlineStatus
 	if !isNil {
-		err2 := json.Unmarshal([]byte(result), &onlineStatus)
+		err := json.Unmarshal([]byte(result), &onlineStatus)
 		if err != nil {
-			return errs.Wrap(err2)
+			return errs.Wrap(err, "json.Unmarshal failed")
 		}
 		onlineStatus.PlatformIDs = RemoveRepeatedElementsInList(append(onlineStatus.PlatformIDs, platformID))
 	} else {

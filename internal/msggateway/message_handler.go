@@ -127,7 +127,7 @@ func (g GrpcHandler) GetSeq(context context.Context, data *Req) ([]byte, error) 
 	}
 	resp, err := g.msgRpcClient.GetMaxSeq(context, &req)
 	if err != nil {
-		return nil, errs.Wrap(err, "GetSeq: error calling GetMaxSeq on msgRpcClient")
+		return nil, err
 	}
 	c, err := proto.Marshal(resp)
 	if err != nil {
@@ -136,23 +136,32 @@ func (g GrpcHandler) GetSeq(context context.Context, data *Req) ([]byte, error) 
 	return c, nil
 }
 
-func (g GrpcHandler) SendMessage(context context.Context, data *Req) ([]byte, error) {
-	msgData := sdkws.MsgData{}
+// SendMessage handles the sending of messages through gRPC. It unmarshals the request data,
+// validates the message, and then sends it using the message RPC client.
+func (g GrpcHandler) SendMessage(ctx context.Context, data *Req) ([]byte, error) {
+	// Unmarshal the message data from the request.
+	var msgData sdkws.MsgData
 	if err := proto.Unmarshal(data.Data, &msgData); err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "error unmarshalling message data")
 	}
+
+	// Validate the message data structure.
 	if err := g.validate.Struct(&msgData); err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "message data validation failed")
 	}
+
 	req := msg.SendMsgReq{MsgData: &msgData}
-	resp, err := g.msgRpcClient.SendMsg(context, &req)
+
+	resp, err := g.msgRpcClient.SendMsg(ctx, &req)
 	if err != nil {
 		return nil, err
 	}
+
 	c, err := proto.Marshal(resp)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "error marshalling response")
 	}
+
 	return c, nil
 }
 
@@ -163,7 +172,7 @@ func (g GrpcHandler) SendSignalMessage(context context.Context, data *Req) ([]by
 	}
 	c, err := proto.Marshal(resp)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "error marshalling response")
 	}
 	return c, nil
 }
@@ -171,7 +180,7 @@ func (g GrpcHandler) SendSignalMessage(context context.Context, data *Req) ([]by
 func (g GrpcHandler) PullMessageBySeqList(context context.Context, data *Req) ([]byte, error) {
 	req := sdkws.PullMessageBySeqsReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "error unmarshaling request")
 	}
 	if err := g.validate.Struct(data); err != nil {
 		return nil, err

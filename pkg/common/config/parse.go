@@ -37,32 +37,21 @@ const (
 	DefaultFolderPath    = "../config/"
 )
 
-// return absolude path join ../config/, this is k8s container config path.
-func GetDefaultConfigPath() string {
+// GetDefaultConfigPath returns the absolute path to the default configuration directory
+// relative to the executable's location. It is intended for use in Kubernetes container configurations.
+// Errors are returned to the caller to allow for flexible error handling.
+func GetDefaultConfigPath() (string, error) {
 	executablePath, err := os.Executable()
 	if err != nil {
-		fmt.Println("GetDefaultConfigPath error:", err.Error())
-		return ""
+		return "", errs.Wrap(err, "failed to get executable path")
 	}
 
+	// Calculate the config path as a directory relative to the executable's location
 	configPath, err := genutil.OutDir(filepath.Join(filepath.Dir(executablePath), "../config/"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to get output directory: %v\n", err)
-		os.Exit(1)
+		return "", errs.Wrap(err, "failed to get output directory")
 	}
-	return configPath
-}
-
-// getProjectRoot returns the absolute path of the project root directory.
-func GetProjectRoot() string {
-	executablePath, _ := os.Executable()
-
-	projectRoot, err := genutil.OutDir(filepath.Join(filepath.Dir(executablePath), "../../../../.."))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to get output directory: %v\n", err)
-		os.Exit(1)
-	}
-	return projectRoot
+	return configPath, nil
 }
 
 func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
@@ -106,19 +95,33 @@ func initConfig(config any, configName, configFolderPath string) error {
 	return nil
 }
 
+// InitConfig initializes the application configuration by loading it from a specified folder path.
+// If the folder path is not provided, it attempts to use the OPENIMCONFIG environment variable,
+// and as a fallback, it uses the default configuration path. It loads both the main configuration
+// and notification configuration, wrapping errors for better context.
 func InitConfig(configFolderPath string) error {
+	// Use the provided config folder path, or fallback to environment variable or default path
 	if configFolderPath == "" {
-		envConfigPath := os.Getenv("OPENIMCONFIG")
-		if envConfigPath != "" {
-			configFolderPath = envConfigPath
-		} else {
-			configFolderPath = GetDefaultConfigPath()
+		configFolderPath = os.Getenv("OPENIMCONFIG")
+		if configFolderPath == "" {
+			var err error
+			configFolderPath, err = GetDefaultConfigPath()
+			if err != nil {
+				// Wrap and return the error if getting the default config path fails
+				return err
+			}
 		}
 	}
 
+	// Initialize the main configuration
 	if err := initConfig(&Config, FileName, configFolderPath); err != nil {
 		return err
 	}
 
-	return initConfig(&Config.Notification, NotificationFileName, configFolderPath)
+	// Initialize the notification configuration
+	if err := initConfig(&Config.Notification, NotificationFileName, configFolderPath); err != nil {
+		return err
+	}
+
+	return nil
 }
