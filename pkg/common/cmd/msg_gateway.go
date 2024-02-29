@@ -15,14 +15,12 @@
 package cmd
 
 import (
-	"log"
-
+	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/OpenIMSDK/protocol/constant"
-
-	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
-	v3config "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/OpenIMSDK/tools/errs"
 )
 
 type MsgGatewayCmd struct {
@@ -39,40 +37,31 @@ func (m *MsgGatewayCmd) AddWsPortFlag() {
 	m.Command.Flags().IntP(constant.FlagWsPort, "w", 0, "ws server listen port")
 }
 
-func (m *MsgGatewayCmd) getWsPortFlag(cmd *cobra.Command) int {
+func (m *MsgGatewayCmd) getWsPortFlag(cmd *cobra.Command) (int, error) {
 	port, err := cmd.Flags().GetInt(constant.FlagWsPort)
 	if err != nil {
-		log.Println("Error getting ws port flag:", err)
+		return 0, errs.Wrap(err, "error getting ws port flag")
 	}
 	if port == 0 {
-		port = m.PortFromConfig(constant.FlagWsPort)
+		port, _ = m.PortFromConfig(constant.FlagWsPort)
 	}
-	return port
+	return port, nil
 }
 
 func (m *MsgGatewayCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msggateway.RunWsAndServer(m.getPortFlag(cmd), m.getWsPortFlag(cmd), m.getPrometheusPortFlag(cmd))
-	}
-}
-
-func (m *MsgGatewayCmd) Exec() error {
-	m.addRunE()
-	return m.Execute()
-}
-
-func (m *MsgGatewayCmd) GetPortFromConfig(portType string) int {
-	switch portType {
-	case constant.FlagWsPort:
-		return v3config.Config.LongConnSvr.OpenImWsPort[0]
-
-	case constant.FlagPort:
-		return v3config.Config.LongConnSvr.OpenImMessageGatewayPort[0]
-
-	case constant.FlagPrometheusPort:
-		return v3config.Config.Prometheus.MessageGatewayPrometheusPort[0]
-
-	default:
-		return 0
+		wsPort, err := m.getWsPortFlag(cmd)
+		if err != nil {
+			return errors.Wrap(err, "failed to get WS port flag")
+		}
+		port, err := m.getPortFlag(cmd)
+		if err != nil {
+			return err
+		}
+		prometheusPort, err := m.getPrometheusPortFlag(cmd)
+		if err != nil {
+			return err
+		}
+		return msggateway.RunWsAndServer(port, wsPort, prometheusPort) 
 	}
 }

@@ -44,7 +44,7 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	if opUserID == ownerUserID {
 		return nil
 	}
-	return errs.ErrNoPermission.Wrap(utils.GetSelfFuncName())
+	return errs.Wrap(errs.ErrNoPermission, "CheckAccessV3: no permission for user "+opUserID)
 }
 
 func IsAppManagerUid(ctx context.Context) bool {
@@ -61,6 +61,7 @@ func CheckAdmin(ctx context.Context) error {
 	}
 	return errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
+
 func CheckIMAdmin(ctx context.Context) error {
 	if utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.IMAdmin.UserID) {
 		return nil
