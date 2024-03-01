@@ -15,7 +15,6 @@
 package msg
 
 import (
-
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/constant"
