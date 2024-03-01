@@ -71,7 +71,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	if indexErr := mongo.CreateMsgIndex(); indexErr != nil {
+	if err := mongo.CreateMsgIndex(); err != nil {
 		return err
 	}
 	cacheModel := cache.NewMsgCacheModel(rdb)
