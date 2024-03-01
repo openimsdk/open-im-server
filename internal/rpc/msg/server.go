@@ -72,7 +72,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	if err := mongo.CreateMsgIndex(); err != nil {
+	if indexErr := mongo.CreateMsgIndex(); indexErr != nil {
 		return err
 	}
 	cacheModel := cache.NewMsgCacheModel(rdb, config)
