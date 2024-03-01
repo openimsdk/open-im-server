@@ -270,8 +270,8 @@ func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws
 			member, err2 := g.db.TakeGroupMember(ctx, groupID, userID)
 			if err2 == nil {
 				*opUser = g.groupMemberDB2PB(member, 0)
-			} else if !errs.ErrRecordNotFound.Is(err2) {
-				return err2
+			} else if !errs.ErrRecordNotFound.Is(err) {
+				return err
 			}
 		}
 	}

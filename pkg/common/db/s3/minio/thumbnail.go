@@ -82,8 +82,7 @@ func (m *Minio) getImageThumbnailURL(ctx context.Context, name string, expire ti
 	}
 	key, err := m.cache.GetThumbnailKey(ctx, name, opt.Format, opt.Width, opt.Height, func(ctx context.Context) (string, error) {
 		if img == nil {
-			var reader *minio.Object
-			reader, err = m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
+			reader, err := m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
 			if err != nil {
 				return "", err
 			}
@@ -104,7 +103,7 @@ func (m *Minio) getImageThumbnailURL(ctx context.Context, name string, expire ti
 			err = gif.Encode(buf, thumbnail, nil)
 		}
 		cacheKey := filepath.Join(imageThumbnailPath, info.Etag, fmt.Sprintf("image_w%d_h%d.%s", opt.Width, opt.Height, opt.Format))
-		if _, err = m.core.Client.PutObject(ctx, m.bucket, cacheKey, buf, int64(buf.Len()), minio.PutObjectOptions{}); err != nil {
+		if _, err := m.core.Client.PutObject(ctx, m.bucket, cacheKey, buf, int64(buf.Len()), minio.PutObjectOptions{}); err != nil {
 			return "", err
 		}
 		return cacheKey, nil
