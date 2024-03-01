@@ -21,17 +21,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
-
-// Mock for initCfg for testing purpose
-func mockInitCfg() error {
-	config.Config.Mysql.Username = "root"
-	config.Config.Mysql.Password = "openIM123"
-	config.Config.Mysql.Address = []string{"127.0.0.1:13306"}
-	return nil
-}
 
 func TestRedis(t *testing.T) {
 	conf, err := initCfg()

@@ -85,7 +85,7 @@ func Start(
 	var reg *prometheus.Registry
 	var metric *grpcprometheus.ServerMetrics
 	if config.Prometheus.Enable {
-		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName)
+		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, config)
 		reg, metric, _ = prommetrics.NewGrpcPromObj(cusMetrics)
 		options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
 			grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))

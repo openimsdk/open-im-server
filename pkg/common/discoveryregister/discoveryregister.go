@@ -40,7 +40,7 @@ func NewDiscoveryRegister(config *config.GlobalConfig) (discoveryregistry.SvcDis
 	case "k8s":
 		return kubernetes.NewK8sDiscoveryRegister(config.RpcRegisterName.OpenImMessageGatewayName)
 	case "direct":
-		return direct.NewConnDirect()
+		return direct.NewConnDirect(config)
 	default:
 		return nil, errors.New("envType not correct")
 	}

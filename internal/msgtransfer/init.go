@@ -49,6 +49,7 @@ type MsgTransfer struct {
 	historyMongoCH *OnlineHistoryMongoConsumerHandler // mongoDB批量插入, 成功后删除redis中消息，以及处理删除通知消息删除的 订阅的topic: msg_to_mongo
 	ctx            context.Context
 	cancel         context.CancelFunc
+	config         *config.GlobalConfig
 }
 
 func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
@@ -102,6 +103,7 @@ func NewMsgTransfer(config *config.GlobalConfig, msgDatabase controller.CommonMs
 	return &MsgTransfer{
 		historyCH:      historyCH,
 		historyMongoCH: historyMongoCH,
+		config:         config,
 	}, nil
 }
 
@@ -126,7 +128,7 @@ func (m *MsgTransfer) Start(prometheusPort int, config *config.GlobalConfig) err
 			proreg.MustRegister(
 				collectors.NewGoCollector(),
 			)
-			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer")...)
+			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer", config)...)
 			http.Handle("/metrics", promhttp.HandlerFor(proreg, promhttp.HandlerOpts{Registry: proreg}))
 			err := http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil)
 			if err != nil && err != http.ErrServerClosed {

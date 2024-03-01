@@ -54,11 +54,15 @@ const (
 // )
 
 func NewAWS() (s3.Interface, error) {
-	conf := config.Config.Object.Aws
+	configGlobal := config.NewGlobalConfig()
+
+	config.InitConfig(configGlobal, "../../config")
+
+	conf := configGlobal.Object.Aws
 	credential := credentials.NewStaticCredentials(
 		conf.AccessKeyID,     // accessKey
 		conf.AccessKeySecret, // secretKey
-		"")                   // sts的临时凭证
+		"") // sts的临时凭证
 
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(conf.Region), // 桶所在的区域

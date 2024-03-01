@@ -79,7 +79,7 @@ func Main(path string) error {
 	if err != nil {
 		return err
 	}
-	if config.Config.Mysql == nil {
+	if conf.Mysql == nil {
 		return nil
 	}
 	mongoDB, err := GetMongo(conf)
@@ -121,7 +121,7 @@ func Main(path string) error {
 		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewGroupMember, c.GroupMember) },
 		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewGroupRequestMgo, c.GroupRequest) },
 		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewConversationMongo, c.Conversation) },
-		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewS3Mongo, c.Object(config.Config.Object.Enable)) },
+		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewS3Mongo, c.Object(conf.Object.Enable)) },
 		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewLogMongo, c.Log) },
 
 		func() error { return NewTask(mysqlDB, mongoDB, rtcmgo.NewSignal, c.SignalModel) },
