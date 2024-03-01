@@ -16,7 +16,7 @@ package user
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"math/rand"
 	"strings"
 	"time"
@@ -32,8 +32,6 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 
@@ -78,7 +76,7 @@ func Start(config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, se
 	}
 	users := make([]*tablerelation.UserModel, 0)
 	if len(config.IMAdmin.UserID) != len(config.IMAdmin.Nickname) {
-		return errors.New("len(s.config.AppNotificationAdmin.AppManagerUid) != len(s.config.AppNotificationAdmin.Nickname)")
+		return errs.Wrap(fmt.Errorf("the count of ImAdmin.UserID is not equal to the count of ImAdmin.Nickname"))
 	}
 	for k, v := range config.IMAdmin.UserID {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.IMAdmin.Nickname[k], AppMangerLevel: constant.AppNotificationAdmin})
@@ -113,9 +111,6 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 		return nil, err
 	}
 	resp.UsersInfo = convert.UsersDB2Pb(users)
-	if err != nil {
-		return nil, err
-	}
 	return resp, nil
 }
 
@@ -139,7 +134,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	}
 	if req.UserInfo.Nickname != "" || req.UserInfo.FaceURL != "" {
 		if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-			log.ZError(ctx, "NotificationUserInfoUpdate", err)
+			return nil, errs.Wrap(err)
 		}
 	}
 	for _, friendID := range friends {
@@ -149,7 +144,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 		return nil, err
 	}
 	if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-		log.ZError(ctx, "NotificationUserInfoUpdate", err, "userID", req.UserInfo.UserID)
+		return nil, err
 	}
 	return resp, nil
 }
@@ -173,29 +168,29 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 		return nil, err
 	}
 	if req.UserInfo.Nickname != nil || req.UserInfo.FaceURL != nil {
-		if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-			log.ZError(ctx, "NotificationUserInfoUpdate", err)
+		if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+			return nil, err
 		}
 	}
 	for _, friendID := range friends {
 		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	}
-	if err := CallbackAfterUpdateUserInfoEx(ctx, s.config, req); err != nil {
+	if err = CallbackAfterUpdateUserInfoEx(ctx, s.config, req); err != nil {
 		return nil, err
 	}
-	if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-		log.ZError(ctx, "NotificationUserInfoUpdate", err, "userID", req.UserInfo.UserID)
+	if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+		return nil, err
 	}
 	return resp, nil
 }
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.SetGlobalRecvMessageOptReq) (resp *pbuser.SetGlobalRecvMessageOptResp, err error) {
 	resp = &pbuser.SetGlobalRecvMessageOptResp{}
-	if _, err := s.FindWithError(ctx, []string{req.UserID}); err != nil {
+	if _, err = s.FindWithError(ctx, []string{req.UserID}); err != nil {
 		return nil, err
 	}
 	m := make(map[string]any, 1)
 	m["global_recv_msg_opt"] = req.GlobalRecvMsgOpt
-	if err := s.UpdateByMap(ctx, req.UserID, m); err != nil {
+	if err = s.UpdateByMap(ctx, req.UserID, m); err != nil {
 		return nil, err
 	}
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
@@ -244,7 +239,6 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPagi
 			return nil, err
 		}
 		return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
-
 	}
 
 }
@@ -255,7 +249,6 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 		return nil, errs.ErrArgs.Wrap("users is empty")
 	}
 	if req.Secret != s.config.Secret {
-		log.ZDebug(ctx, "UserRegister", s.config.Secret, req.Secret)
 		return nil, errs.ErrNoPermission.Wrap("secret invalid")
 	}
 	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
@@ -278,7 +271,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	if exist {
 		return nil, errs.ErrRegisteredAlready.Wrap("userID registered already")
 	}
-	if err := CallbackBeforeUserRegister(ctx, s.config, req); err != nil {
+	if err = CallbackBeforeUserRegister(ctx, s.config, req); err != nil {
 		return nil, err
 	}
 	now := time.Now()
@@ -294,11 +287,11 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 			GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
 		})
 	}
-	if err := s.Create(ctx, users); err != nil {
+	if err = s.Create(ctx, users); err != nil {
 		return nil, err
 	}
 
-	if err := CallbackAfterUserRegister(ctx, s.config, req); err != nil {
+	if err = CallbackAfterUserRegister(ctx, s.config, req); err != nil {
 		return nil, err
 	}
 	return resp, nil

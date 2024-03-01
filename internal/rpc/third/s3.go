@@ -31,7 +31,6 @@ import (
 
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
 
@@ -111,7 +110,6 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 }
 
 func (t *thirdServer) AuthSign(ctx context.Context, req *third.AuthSignReq) (*third.AuthSignResp, error) {
-	defer log.ZDebug(ctx, "return")
 	partNumbers := utils.Slice(req.PartNumbers, func(partNumber int32) int { return int(partNumber) })
 	result, err := t.s3dataBase.AuthSign(ctx, req.UploadID, partNumbers)
 	if err != nil {
@@ -135,7 +133,6 @@ func (t *thirdServer) AuthSign(ctx context.Context, req *third.AuthSignReq) (*th
 }
 
 func (t *thirdServer) CompleteMultipartUpload(ctx context.Context, req *third.CompleteMultipartUploadReq) (*third.CompleteMultipartUploadResp, error) {
-	defer log.ZDebug(ctx, "return")
 	if err := checkUploadName(ctx, req.Name, t.config); err != nil {
 		return nil, err
 	}
@@ -153,7 +150,7 @@ func (t *thirdServer) CompleteMultipartUpload(ctx context.Context, req *third.Co
 		Group:       req.Cause,
 		CreateTime:  time.Now(),
 	}
-	if err := t.s3dataBase.SetObject(ctx, obj); err != nil {
+	if err = t.s3dataBase.SetObject(ctx, obj); err != nil {
 		return nil, err
 	}
 	return &third.CompleteMultipartUploadResp{
@@ -171,7 +168,6 @@ func (t *thirdServer) AccessURL(ctx context.Context, req *third.AccessURLReq) (*
 			opt.Image.Format = req.Query["format"]
 			opt.Image.Width, _ = strconv.Atoi(req.Query["width"])
 			opt.Image.Height, _ = strconv.Atoi(req.Query["height"])
-			log.ZDebug(ctx, "AccessURL image", "name", req.Name, "option", opt.Image)
 		default:
 			return nil, errs.ErrArgs.Wrap("invalid query type")
 		}
@@ -213,7 +209,7 @@ func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateF
 	}
 	uid, err := uuid.NewRandom()
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "uuid NewRandom failed")
 	}
 	if key == "" {
 		date := time.Now().Format("20060102")
@@ -228,7 +224,7 @@ func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateF
 	}
 	mateData, err := json.Marshal(&mate)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "marshal failed")
 	}
 	resp, err := t.s3dataBase.FormData(ctx, key, req.Size, req.ContentType, duration)
 	if err != nil {

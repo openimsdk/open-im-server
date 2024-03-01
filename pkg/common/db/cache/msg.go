@@ -273,7 +273,7 @@ func (c *msgCache) GetHasReadSeqs(ctx context.Context, userID string, conversati
 func (c *msgCache) GetHasReadSeq(ctx context.Context, userID string, conversationID string) (int64, error) {
 	val, err := c.rdb.Get(ctx, c.getHasReadSeqKey(conversationID, userID)).Int64()
 	if err != nil {
-		return 0, err
+		return 0, errs.Wrap(err)
 	}
 	return val, nil
 }
@@ -477,7 +477,7 @@ func (c *msgCache) ParallelSetMessageToCache(ctx context.Context, conversationID
 
 	err := wg.Wait()
 	if err != nil {
-		return 0, err
+		return 0, errs.Wrap(err, "wg.Wait failed")
 	}
 
 	return len(msgs), nil

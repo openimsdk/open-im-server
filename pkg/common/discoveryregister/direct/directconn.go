@@ -101,13 +101,13 @@ func (cd *ConnDirect) GetConns(ctx context.Context,
 	for _, port := range ports {
 		conn, err := cd.dialServiceWithoutResolver(ctx, fmt.Sprintf(cd.config.Rpc.ListenIP+":%d", port), append(cd.additionalOpts, opts...)...)
 		if err != nil {
-			fmt.Printf("connect to port %d failed,serviceName %s, IP %s\n", port, serviceName, cd.config.Rpc.ListenIP)
+			return nil, err
 		}
 		connections = append(connections, conn)
 	}
 
 	if len(connections) == 0 {
-		return nil, fmt.Errorf("no connections found for service: %s", serviceName)
+		return nil, errs.Wrap(fmt.Errorf("no connections found for service: %s", serviceName))
 	}
 	return connections, nil
 }
@@ -130,7 +130,7 @@ func (cd *ConnDirect) GetConn(ctx context.Context, serviceName string, opts ...g
 	// Try to dial a new connection
 	conn, err := cd.dialService(ctx, result, append(cd.additionalOpts, opts...)...)
 	if err != nil {
-		return nil, errs.Wrap(err, "address", result)
+		return nil, err
 	}
 
 	// Store the new connection
@@ -157,7 +157,7 @@ func (cd *ConnDirect) dialService(ctx context.Context, address string, opts ...g
 	conn, err := grpc.DialContext(ctx, cd.resolverDirect.Scheme()+":///"+address, options...)
 
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return conn, nil
 }
@@ -166,7 +166,7 @@ func (cd *ConnDirect) dialServiceWithoutResolver(ctx context.Context, address st
 	conn, err := grpc.DialContext(ctx, address, options...)
 
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return conn, nil
 }

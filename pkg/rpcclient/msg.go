@@ -27,7 +27,6 @@ import (
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -161,7 +160,6 @@ func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqRe
 }
 
 func (m *MessageRpcClient) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
-	log.ZDebug(ctx, "GetMaxSeqs", "conversationIDs", conversationIDs)
 	resp, err := m.Client.GetMaxSeqs(ctx, &msg.GetMaxSeqsReq{
 		ConversationIDs: conversationIDs,
 	})
@@ -261,8 +259,7 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
 		userInfo, err = s.getUserInfo(ctx, sendID)
 		if err != nil {
-			errInfo := fmt.Sprintf("getUserInfo failed, sendID:%s", sendID)
-			return errs.Wrap(err, errInfo)
+			return err
 		} else {
 			msg.SenderNickname = userInfo.Nickname
 			msg.SenderFaceURL = userInfo.FaceURL
@@ -295,8 +292,7 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	req.MsgData = &msg
 	_, err = s.sendMsg(ctx, &req)
 	if err != nil {
-		errInfo := fmt.Sprintf("MsgClient Notification SendMsg failed, req:%s", &req)
-		return errs.Wrap(err, errInfo)
+		return err
 	}
 	return err
 }

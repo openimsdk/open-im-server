@@ -16,6 +16,7 @@ package mgo
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,7 +35,7 @@ func NewS3Mongo(db *mongo.Database) (relation.ObjectInfoModelInterface, error) {
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return &S3Mongo{coll: coll}, nil
 }
