@@ -31,7 +31,7 @@ import (
 
 type FriendNotificationSender struct {
 	*rpcclient.NotificationSender
-	// 找不到报错
+	// Target not found err
 	getUsersInfo func(ctx context.Context, userIDs []string) ([]CommonUser, error)
 	// db controller
 	db controller.FriendDatabase

@@ -67,7 +67,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	// 根据配置文件策略选择 oss 方式
+	// Select based on the configuration file strategy
 	enable := config.Config.Object.Enable
 	var o s3.Interface
 	switch config.Config.Object.Enable {

@@ -114,7 +114,7 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 		return nil, err
 	}
 	if size <= partSize {
-		// 预签名上传
+		// Pre-signed upload
 		key := path.Join(tempPath, c.NowPath(), fmt.Sprintf("%s_%d_%s.presigned", hash, size, c.UUID()))
 		rawURL, err := c.impl.PresignedPutObject(ctx, key, expire)
 		if err != nil {
@@ -139,7 +139,7 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 			},
 		}, nil
 	} else {
-		// 分片上传
+		// Fragment upload
 		upload, err := c.impl.InitiateMultipartUpload(ctx, c.HashPath(hash))
 		if err != nil {
 			return nil, err
@@ -206,7 +206,7 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 				ETag:       part,
 			}
 		}
-		// todo: 验证大小
+		// todo: Validation size
 		result, err := c.impl.CompleteMultipartUpload(ctx, upload.ID, upload.Key, parts)
 		if err != nil {
 			return nil, err
@@ -225,7 +225,7 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 		if md5val := hex.EncodeToString(md5Sum[:]); md5val != upload.Hash {
 			return nil, errs.ErrArgs.Wrap(fmt.Sprintf("md5 mismatching %s != %s", md5val, upload.Hash))
 		}
-		// 防止在这个时候，并发操作，导致文件被覆盖
+		// Prevents concurrent operations at this time that cause files to be overwritten
 		copyInfo, err := c.impl.CopyObject(ctx, uploadInfo.Key, upload.Key+"."+c.UUID())
 		if err != nil {
 			return nil, err

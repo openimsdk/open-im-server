@@ -38,41 +38,30 @@ func (FriendModel) TableName() string {
 }
 
 type FriendModelInterface interface {
-	// 插入多条记录
-	Create(ctx context.Context, friends []*FriendModel) (err error)
-	// 删除ownerUserID指定的好友
-	Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error)
-	// 更新ownerUserID单个好友信息 更新零值
-	UpdateByMap(ctx context.Context, ownerUserID string, friendUserID string, args map[string]interface{}) (err error)
-	// 更新好友信息的非零值
-	Update(ctx context.Context, friends []*FriendModel) (err error)
-	// 更新好友备注（也支持零值 ）
-	UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error)
-	// 获取单个好友信息，如没找到 返回错误
-	Take(ctx context.Context, ownerUserID, friendUserID string) (friend *FriendModel, err error)
-	// 查找好友关系，如果是双向关系，则都返回
-	FindUserState(ctx context.Context, userID1, userID2 string) (friends []*FriendModel, err error)
-	// 获取 owner指定的好友列表 如果有friendUserIDs不存在，也不返回错误
-	FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*FriendModel, err error)
-	// 获取哪些人添加了friendUserID 如果有ownerUserIDs不存在，也不返回错误
-	FindReversalFriends(
-		ctx context.Context,
-		friendUserID string,
-		ownerUserIDs []string,
-	) (friends []*FriendModel, err error)
-	// 获取ownerUserID好友列表 支持翻页
-	FindOwnerFriends(
-		ctx context.Context,
-		ownerUserID string,
-		pageNumber, showNumber int32,
-	) (friends []*FriendModel, total int64, err error)
-	// 获取哪些人添加了friendUserID 支持翻页
-	FindInWhoseFriends(
-		ctx context.Context,
-		friendUserID string,
-		pageNumber, showNumber int32,
-	) (friends []*FriendModel, total int64, err error)
-	// 获取好友UserID列表
-	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
+	// Create inserts multiple friend records.
+	Create(ctx context.Context, friends []*FriendModel) error
+	// Delete removes specified friends for an owner user.
+	Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) error
+	// UpdateByMap updates a single friend's information for an owner user based on a map of arguments. Zero values are updated.
+	UpdateByMap(ctx context.Context, ownerUserID string, friendUserID string, args map[string]interface{}) error
+	// Update modifies the information of friends, excluding zero values.
+	Update(ctx context.Context, friends []*FriendModel) error
+	// UpdateRemark updates the remark for a friend, supporting zero values.
+	UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) error
+	// Take retrieves a single friend's information. Returns an error if not found.
+	Take(ctx context.Context, ownerUserID, friendUserID string) (*FriendModel, error)
+	// FindUserState finds the friendship status between two users, returning both if a mutual friendship exists.
+	FindUserState(ctx context.Context, userID1, userID2 string) ([]*FriendModel, error)
+	// FindFriends retrieves a list of friends for an owner, not returning an error for non-existent friendUserIDs.
+	FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string) ([]*FriendModel, error)
+	// FindReversalFriends finds who has added the specified user as a friend, not returning an error for non-existent ownerUserIDs.
+	FindReversalFriends(ctx context.Context, friendUserID string, ownerUserIDs []string) ([]*FriendModel, error)
+	// FindOwnerFriends paginates through the friends list of an owner user.
+	FindOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) ([]*FriendModel, int64, error)
+	// FindInWhoseFriends paginates through users who have added the specified user as a friend.
+	FindInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) ([]*FriendModel, int64, error)
+	// FindFriendUserIDs retrieves a list of friend user IDs for an owner user.
+	FindFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
+	// NewTx creates a new transactional instance of the FriendModelInterface.
 	NewTx(tx any) FriendModelInterface
 }

@@ -20,7 +20,7 @@ import (
 	"github.com/fatih/color"
 )
 
-// 定义一个函数以打印重要的链接信息
+// Define a function to print important link information
 func printLinks() {
 	blue := color.New(color.FgBlue).SprintFunc()
 	fmt.Printf("OpenIM Github: %s\n", blue("https://github.com/OpenIMSDK/Open-IM-Server"))

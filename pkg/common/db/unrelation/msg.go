@@ -651,7 +651,7 @@ func (m *MsgMongoDriver) RangeUserSendCount(
 								"$dateToString": bson.M{
 									"format": "%Y-%m-%d",
 									"date": bson.M{
-										"$toDate": "$$item.msg.send_time", // 毫秒时间戳
+										"$toDate": "$$item.msg.send_time", // Millisecond timestamp
 									},
 								},
 							},
@@ -900,7 +900,7 @@ func (m *MsgMongoDriver) RangeGroupSendCount(
 								"$dateToString": bson.M{
 									"format": "%Y-%m-%d",
 									"date": bson.M{
-										"$toDate": "$$item.msg.send_time", // 毫秒时间戳
+										"$toDate": "$$item.msg.send_time", // Millisecond timestamp
 									},
 								},
 							},

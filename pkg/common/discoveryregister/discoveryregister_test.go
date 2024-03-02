@@ -39,7 +39,7 @@ func TestNewDiscoveryRegister(t *testing.T) {
 		expectedResult bool
 	}{
 		{"zookeeper", false, true},
-		{"k8s", false, true}, // 假设 k8s 配置也已正确设置
+		{"k8s", false, true}, // Assume that the k8s configuration is also set up correctly
 		{"direct", false, true},
 		{"invalid", true, false},
 	}

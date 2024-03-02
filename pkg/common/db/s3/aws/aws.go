@@ -58,10 +58,10 @@ func NewAWS() (s3.Interface, error) {
 	credential := credentials.NewStaticCredentials(
 		conf.AccessKeyID,     // accessKey
 		conf.AccessKeySecret, // secretKey
-		"")                   // sts的临时凭证
+		"")                   // stoken
 
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(conf.Region), // 桶所在的区域
+		Region:      aws.String(conf.Region), // The area where the bucket is located
 		Credentials: credential,
 	})
 
