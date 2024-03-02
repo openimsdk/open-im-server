@@ -31,17 +31,38 @@ import (
 */
 
 func main() {
-	var conf pkg.Config                                                  // 后面带*的为必填项
-	flag.StringVar(&conf.TaskPath, "task", "take.txt", "task path")      // 任务日志文件*
-	flag.StringVar(&conf.ProgressPath, "progress", "", "progress path")  // 进度日志文件
-	flag.IntVar(&conf.Concurrency, "concurrency", 1, "concurrency num")  // 并发数
-	flag.IntVar(&conf.Retry, "retry", 1, "retry num")                    // 重试次数
-	flag.StringVar(&conf.TempDir, "temp", "", "temp dir")                // 临时文件夹
-	flag.Int64Var(&conf.CacheSize, "cache", 1024*1024*100, "cache size") // 缓存大小(超过时,下载到磁盘)
-	flag.Int64Var((*int64)(&conf.Timeout), "timeout", 5000, "timeout")   // 请求超时时间(毫秒)
-	flag.StringVar(&conf.Api, "api", "http://127.0.0.1:10002", "api")    // im地址*
-	flag.StringVar(&conf.UserID, "userID", "openIM123456", "userID")     // im管理员
-	flag.StringVar(&conf.Secret, "secret", "openIM123", "secret")        // im config secret
+	var conf pkg.Config // Configuration object, '*' denotes required fields
+
+    // *Required*: Path for the task log file
+    flag.StringVar(&conf.TaskPath, "task", "take.txt", "Path for the task log file")
+    
+    // Optional: Path for the progress log file
+    flag.StringVar(&conf.ProgressPath, "progress", "", "Path for the progress log file")
+    
+    // Number of concurrent operations
+    flag.IntVar(&conf.Concurrency, "concurrency", 1, "Number of concurrent operations")
+    
+    // Number of retry attempts
+    flag.IntVar(&conf.Retry, "retry", 1, "Number of retry attempts")
+    
+    // Optional: Path for the temporary directory
+    flag.StringVar(&conf.TempDir, "temp", "", "Path for the temporary directory")
+    
+    // Cache size in bytes (downloads move to disk when exceeded)
+    flag.Int64Var(&conf.CacheSize, "cache", 1024*1024*100, "Cache size in bytes")
+    
+    // Request timeout in milliseconds
+    flag.Int64Var((*int64)(&conf.Timeout), "timeout", 5000, "Request timeout in milliseconds")
+    
+    // *Required*: API endpoint for the IM service
+    flag.StringVar(&conf.Api, "api", "http://127.0.0.1:10002", "API endpoint for the IM service")
+    
+    // IM administrator's user ID
+    flag.StringVar(&conf.UserID, "userID", "openIM123456", "IM administrator's user ID")
+
+    // Secret for the IM configuration
+    flag.StringVar(&conf.Secret, "secret", "openIM123", "Secret for the IM configuration")
+
 	flag.Parse()
 	if !filepath.IsAbs(conf.TaskPath) {
 		var err error

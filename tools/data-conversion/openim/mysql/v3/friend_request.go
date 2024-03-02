@@ -38,29 +38,33 @@ func (FriendRequestModel) TableName() string {
 }
 
 type FriendRequestModelInterface interface {
-	// 插入多条记录
+	// Insert multiple records
 	Create(ctx context.Context, friendRequests []*FriendRequestModel) (err error)
-	// 删除记录
+
+	// Delete a record
 	Delete(ctx context.Context, fromUserID, toUserID string) (err error)
-	// 更新零值
-	UpdateByMap(ctx context.Context, formUserID string, toUserID string, args map[string]interface{}) (err error)
-	// 更新多条记录 （非零值）
+
+	// Update records with zero values based on a map of changes
+	UpdateByMap(ctx context.Context, formUserID, toUserID string, args map[string]interface{}) (err error)
+
+	// Update multiple records (non-zero values)
 	Update(ctx context.Context, friendRequest *FriendRequestModel) (err error)
-	// 获取来指定用户的好友申请  未找到 不返回错误
+
+	// Find a friend request sent to a specific user; does not return an error if not found
 	Find(ctx context.Context, fromUserID, toUserID string) (friendRequest *FriendRequestModel, err error)
+
+	// Alias for Find (retrieves a friend request between two users)
 	Take(ctx context.Context, fromUserID, toUserID string) (friendRequest *FriendRequestModel, err error)
-	// 获取toUserID收到的好友申请列表
-	FindToUserID(
-		ctx context.Context,
-		toUserID string,
-		pageNumber, showNumber int32,
-	) (friendRequests []*FriendRequestModel, total int64, err error)
-	// 获取fromUserID发出去的好友申请列表
-	FindFromUserID(
-		ctx context.Context,
-		fromUserID string,
-		pageNumber, showNumber int32,
-	) (friendRequests []*FriendRequestModel, total int64, err error)
+
+	// Get a list of friend requests received by `toUserID`
+	FindToUserID(ctx context.Context, toUserID string, pageNumber, showNumber int32) (friendRequests []*FriendRequestModel, total int64, err error)
+
+	// Get a list of friend requests sent by `fromUserID`
+	FindFromUserID(ctx context.Context, fromUserID string, pageNumber, showNumber int32) (friendRequests []*FriendRequestModel, total int64, err error)
+
+	// Find all friend requests between two users (both directions)
 	FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*FriendRequestModel, err error)
+
+	// Create a new transaction
 	NewTx(tx any) FriendRequestModelInterface
 }
