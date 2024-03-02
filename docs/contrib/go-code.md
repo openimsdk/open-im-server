@@ -26,19 +26,19 @@ jwt "github.com/dgrijalva/jwt-go/v4"
 
 ```go
 import (
-// go standard package
-"fmt"
-
-// third party package
-"github.com/jinzhu/gorm"
-"github.com/spf13/cobra"
-"github.com/spf13/viper"
-
-// Anonymous packages are grouped separately, and anonymous package references are explained
-// import mysql driver
-_ "github.com/jinzhu/gorm/dialects/mysql"
-
-// inner package
+  // go standard package
+  "fmt"
+  
+  // third party package
+  "github.com/jinzhu/gorm"
+  "github.com/spf13/cobra"
+  "github.com/spf13/viper"
+  
+  // Anonymous packages are grouped separately, and anonymous package references are explained
+  // import mysql driver
+  _ "github.com/jinzhu/gorm/dialects/mysql"
+  
+  // inner package
 )
 ```
 
@@ -48,33 +48,33 @@ When multiple variables need to be used in a function, the `var` declaration can
 
 ```go
 var (
-Width int
-Height int
+  Width int
+  Height int
 )
 ```
 
 - When initializing a structure reference, please use `&T{}` instead of `new(T)` to make it consistent with structure initialization.
 
 ```go
-// bad
-sptr := new(T)
-sptr.Name = "bar"
-
-// good
-sptr := &T{Name: "bar"}
+  // bad
+  sptr := new(T)
+  sptr.Name = "bar"
+  
+  // good
+  sptr := &T{Name: "bar"}
 ```
 
 - The struct declaration and initialization format takes multiple lines and is defined as follows.
 
 ```go
-type User struct{
-     Username string
-     Email string
-}
+  type User struct{
+       Username string
+       Email string
+  }
 
-user := User{
-Username: "belm",
-Email: "nosbelm@qq.com",
+  user := User{
+  Username: "belm",
+  Email: "nosbelm@qq.com",
 }
 ```
 
@@ -217,20 +217,20 @@ if err != nil {
 // bad
 v, err := foo()
 if err != nil || v == nil {
-// error handling
-return err
+  // error handling
+  return err
 }
 
 //good
 v, err := foo()
 if err != nil {
-// error handling
-return err
+  // error handling
+  return err
 }
 
 if v == nil {
-// error handling
-return errors. New("invalid value v")
+  // error handling
+  return errors. New("invalid value v")
 }
 ```
 
@@ -239,13 +239,14 @@ return errors. New("invalid value v")
 ```go
 v, err := f()
 if err != nil {
-     // error handling
-     return // or continue.
+  // error handling
+  return // or continue.
 }
 ```
 
 - Bug description suggestions
 - Error descriptions start with a lowercase letter and do not end with punctuation, for example:
+
 ```go
 // bad
 errors.New("Redis connection failed")
@@ -254,6 +255,7 @@ errors.New("redis connection failed.")
 // good
 errors.New("redis connection failed")
 ```
+
 - Tell users what they can do, not what they can't.
 - When declaring a requirement, use must instead of should. For example, `must be greater than 0, must match regex '[a-z]+'`.
 - When declaring that a format is incorrect, use must not. For example, `must not contain`.
@@ -359,18 +361,18 @@ u := User{
 
 For example:
 
-```
+```go
 // Seeking to an offset before the start of the file is an error.
 // Seeking to any positive offset is legal, but the behavior of subsequent
 // I/O operations on the underlying object are implementation-dependent.
 type Seeker interface {
-Seek(offset int64, whence int) (int64, error)
+  Seek(offset int64, whence int) (int64, error)
 }
 
 // ReadWriter is the interface that groups the basic Read and Write methods.
 type ReadWriter interface {
-reader
-Writer
+  reader
+  Writer
 }
 ```
 
@@ -386,7 +388,7 @@ Writer
 
 Some common nouns are listed below.
 
-```
+```go
 // A GonicMapper that contains a list of common initialisms taken from golang/lint
 var LintGonicMapper = GonicMapper{
      "API": true,
@@ -523,6 +525,7 @@ package genericclioptions
 // ErrSigningMethod defines invalid signing method error.
 var ErrSigningMethod = errors. New("Invalid signing method")
 ```
+
 - When there is a large block of constant or variable definition, you can comment a general description in front, and then comment the definition of the constant in detail before or at the end of each line of constant, for example:
 ```go
 // Code must start with 1xxxxx.
@@ -567,7 +570,7 @@ Each function or method that needs to be exported must have a comment, the forma
 // BeforeUpdate run before update database record.
 func (p *Policy) BeforeUpdate() (err error) {
 // normal code
-return nil
+  return nil
 }
 ```
 
@@ -743,9 +746,9 @@ for i := 0; i < 10; i++ {
 ```go
 // bad
 for file := range files {
-fd, err := os. Open(file)
-if err != nil {
-return err
+    fd, err := os. Open(file)
+    if err != nil {
+    return err
 }
 defer fd. Close()
 // normal code
@@ -753,14 +756,14 @@ defer fd. Close()
 
 //good
 for file := range files {
-func() {
-fd, err := os. Open(file)
-if err != nil {
-return err
-}
-defer fd. Close()
-// normal code
-}()
+    func() {
+        fd, err := os. Open(file)
+        if err != nil {
+        return err
+    }
+    defer fd. Close()
+    // normal code
+    }()
 }
 ```
 
@@ -888,6 +891,7 @@ type LogHandler struct {
 }
 var_http.Handler = LogHandler{}
 ```
+
 - When the server processes a request, it should create a context, save the relevant information of the request (such as requestID), and pass it in the function call chain.
 
 ### 9.1 Performance
@@ -900,3 +904,246 @@ var_http.Handler = LogHandler{}
 - If you want to directly modify the value of the map, the value can only be a pointer, otherwise the original value must be overwritten.
 - map needs to be locked during concurrency.
 - The conversion of interface{} cannot be checked during compilation, it can only be checked at runtime, be careful to cause panic.
+
+## 10 Golang CI Lint
+
+- Golang CI Lint is a fast Go linters runner. It runs linters in parallel, uses caching, and works well with all environments, including CI.
+
+**In local development, you can use the following command to install Golang CI Lint: **
+
+```bash
+make lint
+```
+
+**In CI/CD, Check the Github Actions status code below after you submit the code directly**
+
+[![OpenIM golangci-lint](https://github.com/openimsdk/open-im-server/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/openimsdk/open-im-server/actions/workflows/golangci-lint.yml)
+
+golangci lint can select the types of tools, refer to the official documentation: [https://golangci-lint.run/usage/linters/](https://golangci-lint.run/usage/linters/)
+
+The types of comments we currently use include: [https://github.com/openimsdk/open-im-server/blob/main/.golangci.yml](https://github.com/openimsdk/open-im-server/blob/main/.golangci.yml) the `linters.enable` field in the file.
+
+e.g:
+```yaml
+linters:
+  # please, do not use `enable-all`: it's deprecated and will be removed soon.
+  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
+  # enable-all: true
+  disable-all: true
+  enable:
+    - typecheck     # Basic type checking
+    - gofmt         # Format check
+    - govet         # Go's standard linting tool
+    - gosimple      # Suggestions for simplifying code
+    - misspell      # Spelling mistakes
+    - staticcheck   # Static analysis
+    - unused        # Checks for unused code
+    - goimports     # Checks if imports are correctly sorted and formatted
+    - godot         # Checks for comment punctuation
+    - bodyclose     # Ensures HTTP response body is closed
+    - errcheck      # Checks for missed error returns
+  fast: true
+```
+
+Add that Chinese comments are not allowed in go code, please write a complete golangci lint specification on the basis of the above.
+
+
+### 10.1 Configuration Document
+
+This configuration document is designed to configure the operational parameters of OpenIM (a hypothetical or specific code analysis tool), customize output formats, and provide detailed settings for specific code checkers (linters). Below is a summary of the document drafted based on the provided configuration information.
+
+#### 10.1 Runtime Options
+
+- **Concurrency** (`concurrency`): Default to use the available CPU count, can be manually set to 4 for parallel analysis.
+- **Timeout** (`timeout`): Timeout duration for analysis operations, default is 1 minute, set here to 5 minutes.
+- **Issue Exit Code** (`issues-exit-code`): Exit code defaults to 1 if at least one issue is found.
+- **Test Files** (`tests`): Whether to include test files, defaults to true.
+- **Build Tags** (`build-tags`): Specify build tags used by all linters, defaults to an empty list. Example adds `mytag`.
+- **Skip Directories** (`skip-dirs`): Configure which directories' issues are not reported, defaults to empty, but some default directories are independently skipped.
+- **Skip Files** (`skip-files`): Specify files where issues should not be reported, supports regular expressions.
+
+#### 10.2 Output Configuration
+
+- **Format** (`format`): Set output format, default is "colored-line-number".
+- **Print Issued Lines** (`print-issued-lines`): Whether to print the lines where issues occur, defaults to true.
+- **Print Linter Name** (`print-linter-name`): Whether to print the linter name at the end of issue text, defaults to true.
+- **Uniqueness Filter** (`uniq-by-line`): Whether to make issue outputs unique per line, defaults to true.
+- **Path Prefix** (`path-prefix`): Prefix to add to output file references, defaults to no prefix.
+- **Sort Results** (`sort-results`): Sort results by file path, line number, and column number.
+
+#### 10.3 Linters Settings
+
+In the configuration file, the `linters-settings` section allows detailed configuration of individual linters. Below are examples of specific linters settings and their purposes:
+
+- **bidichk**: Used to check bidirectional text characters, ensuring correct display direction of text, especially when dealing with mixed left-to-right (LTR) and right-to-left (RTL) text.
+  
+- **dogsled**: Monitors excessive use of blank identifiers (`_`) in assignment operations, which may obscure data processing errors or unclear logic.
+  
+- **dupl**: Identifies duplicate code blocks, helping developers avoid code redundancy. The `threshold` parameter in settings allows adjustment of code similarity threshold triggering warnings.
+  
+- **errcheck**: Checks for unhandled errors. In Go, error handling is achieved by checking function return values. This linter helps ensure all errors are properly handled.
+  
+- **exhaustive**: Checks if `switch` statements include all possible values of an enum type, ensuring exhaustiveness of code. This helps avoid forgetting to handle certain cases.
+
+#### 10.4 Example: `errcheck`
+
+**Incorrect Code Example**:
+```go
+package main
+
+import (
+    "fmt"
+    "os"
+)
+
+func main() {
+    f, _ := os.Open("filename.ext")
+    defer f.Close()
+}
+```
+
+**Issue**: In the above code, the error return value of `os.Open` function is explicitly ignored. This is a common mistake as it may lead to unhandled errors and hard-to-trace bugs.
+
+**Correct Form**:
+```go
+package main
+
+import (
+    "fmt"
+    "os"
+)
+
+func main() {
+    f, err := os.Open("filename.ext")
+    if err != nil {
+        fmt.Printf("error opening file: %v\n", err)
+        return
+    }
+    defer f.Close()
+}
+```
+
+In the correct form, by checking the error (`err`) returned by `os.Open`, we gracefully handle error cases rather than simply ignoring them.
+
+#### 10.5 Example: `gofmt`
+
+**Incorrect Code Example**:
+```go
+package main
+import "fmt"
+func main() {
+fmt.Println("Hello, world!")
+}
+```
+
+**Issue**: This code snippet doesn't follow Go's standard formatting rules, for example, incorrect indentation of `fmt.Println`.
+
+**Correct Form**:
+```go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, world!")
+}
+```
+
+Using `gofmt` tool can automatically fix such formatting issues, ensuring the code adheres to the coding standards of the Go community.
+
+#### 10.6 Example: `unused`
+
+**Incorrect Code Example**:
+```go
+package main
+
+func helper() {}
+
+func main() {}
+```
+
+**Issue**: The `helper` function is defined but not called anywhere, indicating potential redundant code or missing functionality implementation.
+
+**Correct Form**:
+```go
+package main
+
+// If the helper function is indeed needed, ensure it's used properly.
+func helper() {
+    // Implement the function's functionality or ensure it's called elsewhere
+}
+
+func main() {
+    helper()
+}
+```
+
+To improve the section on Linters settings in the document, we'll expand with more detailed explanations and reinforce understanding through examples.
+
+#### 10.7 Example: `dogsled`
+
+**Incorrect Code Example**:
+```go
+func getValues() (int, int, int) {
+    return 1, 2, 3
+}
+
+func main() {
+    _, _, val := getValues()
+    fmt.Println(val) // Only interested in the third return value
+}
+```
+
+**Explanation**: In the above code, we use two blank identifiers to ignore the first two return values. Excessive use of blank identifiers can make code reading difficult.
+
+**Improved Code**:
+Consider refactoring the function or the usage of return values to reduce the need for blank identifiers or explicitly comment why ignoring certain values is safe.
+
+#### 10.8: `exhaustive`
+
+**Incorrect Code Example**:
+```go
+type Fruit int
+
+const (
+    Apple Fruit = iota
+    Banana
+    Orange
+)
+
+func getFruitName(f Fruit) string {
+    switch f {
+    case Apple:
+        return "Apple"
+    case Banana:
+        return "Banana"
+    // Missing handling for Orange
+    }
+    return "Unknown"
+}
+```
+
+**Explanation**: In this code, the `switch` statement doesn't cover all possible values of the `Fruit` type; the case for `Orange` is missing.
+
+**Improved Code**:
+```go
+func getFruitName(f Fruit) string {
+    switch f {
+    case Apple:
+        return "Apple"
+    case Banana:
+        return "Banana"
+    case Orange:
+        return "Orange"
+    }
+    return "Unknown"
+}
+```
+
+By adding the missing `case`, we ensure the `switch` statement is exhaustive, handling every possible enum value.
+
+#### 10.9 Optimization of Configuration Files and Application of Code Analysis Tools
+
+Through these examples, we demonstrate how to improve code quality by identifying and fixing common coding issues. OpenIM's configuration files allow developers to customize linters' behavior according to project requirements, ensuring code compliance with predefined quality standards and style guidelines.
+
+By employing these tools and configuration strategies, teams can reduce the number of bugs, enhance code maintainability, and facilitate efficient collaboration during code review processes.
