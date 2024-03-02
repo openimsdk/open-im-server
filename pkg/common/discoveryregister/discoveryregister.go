@@ -15,8 +15,8 @@
 package discoveryregister
 
 import (
-	"os"
 	"errors"
+	"os"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/direct"
 

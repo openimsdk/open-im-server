@@ -159,7 +159,7 @@ func (g GrpcHandler) SendMessage(ctx context.Context, data *Req) ([]byte, error)
 
 	c, err := proto.Marshal(resp)
 	if err != nil {
-		return nil, errs.Wrap(err, "error marshalling response")
+		return nil, errs.Wrap(err, "error marshaling response")
 	}
 
 	return c, nil
@@ -172,7 +172,7 @@ func (g GrpcHandler) SendSignalMessage(context context.Context, data *Req) ([]by
 	}
 	c, err := proto.Marshal(resp)
 	if err != nil {
-		return nil, errs.Wrap(err, "error marshalling response")
+		return nil, errs.Wrap(err, "error marshaling response")
 	}
 	return c, nil
 }
