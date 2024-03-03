@@ -125,6 +125,8 @@ We support many platforms. Here are the addresses for quick experience on the we
 
 ## :hammer_and_wrench: To Start Developing OpenIM
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/openimsdk/open-im-server)
+
 [![Open in Dev Container](https://img.shields.io/static/v1?label=Dev%20Container&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/github/openimsdk/open-im-server)
 
 OpenIM Our goal is to build a top-level open source community. We have a set of standards, in the [Community repository](https://github.com/OpenIMSDK/community).
