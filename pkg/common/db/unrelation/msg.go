@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OpenIMSDK/tools/log"
-
 	"github.com/OpenIMSDK/protocol/msg"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -35,6 +33,7 @@ import (
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 
 	table "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
@@ -1061,3 +1060,105 @@ func (m *MsgMongoDriver) SearchMessage(ctx context.Context, req *msg.SearchMessa
 	return total, msgs, nil
 }
 
+func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessageReq) (int32, []*table.MsgInfoModel, error) {
+	var pipe mongo.Pipeline
+	condition := bson.A{}
+	if req.SendTime != "" {
+		// Changed to keyed fields for bson.M to avoid govet errors
+		condition = append(condition, bson.M{"$eq": bson.A{bson.M{"$dateToString": bson.M{"format": "%Y-%m-%d", "date": bson.M{"$toDate": "$$item.msg.send_time"}}}, req.SendTime}})
+	}
+	if req.MsgType != 0 {
+		condition = append(condition, bson.M{"$eq": bson.A{"$$item.msg.content_type", req.MsgType}})
+	}
+	if req.SessionType != 0 {
+		condition = append(condition, bson.M{"$eq": bson.A{"$$item.msg.session_type", req.SessionType}})
+	}
+	if req.RecvID != "" {
+		condition = append(condition, bson.M{"$regexFind": bson.M{"input": "$$item.msg.recv_id", "regex": req.RecvID}})
+	}
+	if req.SendID != "" {
+		condition = append(condition, bson.M{"$regexFind": bson.M{"input": "$$item.msg.send_id", "regex": req.SendID}})
+	}
+
+	or := bson.A{
+		bson.M{"doc_id": bson.M{"$regex": "^si_", "$options": "i"}},
+		bson.M{"doc_id": bson.M{"$regex": "^g_", "$options": "i"}},
+		bson.M{"doc_id": bson.M{"$regex": "^sg_", "$options": "i"}},
+	}
+
+	// Use bson.D with keyed fields to specify the order explicitly
+	pipe = mongo.Pipeline{
+		{{"$match", bson.D{{Key: "$or", Value: or}}}},
+		{{"$project", bson.D{
+			{Key: "msgs", Value: bson.D{
+				{Key: "$filter", Value: bson.D{
+					{Key: "input", Value: "$msgs"},
+					{Key: "as", Value: "item"},
+					{Key: "cond", Value: bson.D{{Key: "$and", Value: condition}}},
+				}},
+			}},
+			{Key: "doc_id", Value: 1},
+		}}},
+		{{"$unwind", bson.M{"path": "$msgs"}}},
+		{{"$sort", bson.M{"msgs.msg.send_time": -1}}},
+	}
+	cursor, err := m.MsgCollection.Aggregate(ctx, pipe)
+	if err != nil {
+		return 0, nil, err
+	}
+	type docModel struct {
+		DocID string              `bson:"doc_id"`
+		Msg   *table.MsgInfoModel `bson:"msgs"`
+	}
+	var msgsDocs []docModel
+	err = cursor.All(ctx, &msgsDocs)
+	if err != nil {
+		return 0, nil, errs.Wrap(err, "cursor.All msgsDocs")
+	}
+	log.ZDebug(ctx, "query mongoDB", "result", msgsDocs)
+	msgs := make([]*table.MsgInfoModel, 0)
+	for _, doc := range msgsDocs {
+		msgInfo := doc.Msg
+		if msgInfo == nil || msgInfo.Msg == nil {
+			continue
+		}
+		if msgInfo.Revoke != nil {
+			revokeContent := sdkws.MessageRevokedContent{
+				RevokerID:                   msgInfo.Revoke.UserID,
+				RevokerRole:                 msgInfo.Revoke.Role,
+				ClientMsgID:                 msgInfo.Msg.ClientMsgID,
+				RevokerNickname:             msgInfo.Revoke.Nickname,
+				RevokeTime:                  msgInfo.Revoke.Time,
+				SourceMessageSendTime:       msgInfo.Msg.SendTime,
+				SourceMessageSendID:         msgInfo.Msg.SendID,
+				SourceMessageSenderNickname: msgInfo.Msg.SenderNickname,
+				SessionType:                 msgInfo.Msg.SessionType,
+				Seq:                         msgInfo.Msg.Seq,
+				Ex:                          msgInfo.Msg.Ex,
+			}
+			data, err := json.Marshal(&revokeContent)
+			if err != nil {
+				return 0, nil, errs.Wrap(err, "json.Marshal revokeContent")
+			}
+			elem := sdkws.NotificationElem{Detail: string(data)}
+			content, err := json.Marshal(&elem)
+			if err != nil {
+				return 0, nil, errs.Wrap(err, "json.Marshal elem")
+			}
+			msgInfo.Msg.ContentType = constant.MsgRevokeNotification
+			msgInfo.Msg.Content = string(content)
+		}
+		msgs = append(msgs, msgInfo)
+	}
+	start := (req.Pagination.PageNumber - 1) * req.Pagination.ShowNumber
+	n := int32(len(msgs))
+	if start >= n {
+		return n, []*table.MsgInfoModel{}, nil
+	}
+	if start+req.Pagination.ShowNumber < n {
+		msgs = msgs[start : start+req.Pagination.ShowNumber]
+	} else {
+		msgs = msgs[start:]
+	}
+	return n, msgs, nil
+}
