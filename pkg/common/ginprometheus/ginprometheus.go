@@ -194,7 +194,7 @@ func (p *Prometheus) SetListenAddressWithRouter(listenAddress string, r *gin.Eng
 	if len(p.listenAddress) > 0 {
 		p.router = r
 	}
-}
+} 
 
 // SetMetricsPath set metrics paths.
 func (p *Prometheus) SetMetricsPath(e *gin.Engine) error {
