@@ -539,7 +539,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	if err != nil {
 		return nil, err
 	}
-	if populateErr := s.PopulateGroupMember(ctx, members...); populateErr != nil {
+	if err := s.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
 	memberMap := make(map[string]*relationtb.GroupMemberModel)
@@ -765,12 +765,12 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 		return nil, errs.ErrGroupRequestHandled.Wrap("group request already processed")
 	}
 	var inGroup bool
-	if _, takeErr := s.db.TakeGroupMember(ctx, req.GroupID, req.FromUserID); takeErr == nil {
+	if _, err := s.db.TakeGroupMember(ctx, req.GroupID, req.FromUserID); err == nil {
 		inGroup = true // 已经在群里了
 	} else if !s.IsNotFound(err) {
 		return nil, err
 	}
-	if _, getInfoErr := s.User.GetPublicUserInfo(ctx, req.FromUserID); getInfoErr != nil {
+	if _, err := s.User.GetPublicUserInfo(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	var member *relationtb.GroupMemberModel
@@ -857,14 +857,14 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			JoinTime:       time.Now(),
 			MuteEndTime:    time.UnixMilli(0),
 		}
-		if callbackErr := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); callbackErr != nil {
+		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil {
 			return nil, err
 		}
-		if createErr := s.db.CreateGroup(ctx, nil, []*relationtb.GroupMemberModel{groupMember}); createErr != nil {
+		if err := s.db.CreateGroup(ctx, nil, []*relationtb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
 
-		if createErr := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); createErr != nil {
+		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
 			return nil, err
 		}
 		s.Notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID)
@@ -905,7 +905,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 	if member.RoleLevel == constant.GroupOwner {
 		return nil, errs.ErrNoPermission.Wrap("group owner can't quit")
 	}
-	if populateErr := s.PopulateGroupMember(ctx, member); populateErr != nil {
+	if err := s.PopulateGroupMember(ctx, member); err != nil {
 		return nil, err
 	}
 	err = s.db.DeleteGroupMember(ctx, req.GroupID, []string{req.UserID})
@@ -967,7 +967,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
-	if populateErr := s.PopulateGroupMember(ctx, owner); populateErr != nil {
+	if err := s.PopulateGroupMember(ctx, owner); err != nil {
 		return nil, err
 	}
 	update := UpdateGroupInfoMap(ctx, req.GroupInfoForSet)
@@ -1168,7 +1168,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbgrou
 	if err != nil {
 		return nil, err
 	}
-	if populateErr := s.PopulateGroupMember(ctx, owners...); populateErr != nil {
+	if err := s.PopulateGroupMember(ctx, owners...); err != nil {
 		return nil, err
 	}
 	ownerMap := utils.SliceToMap(owners, func(e *relationtb.GroupMemberModel) string {
@@ -1200,7 +1200,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 			return nil, errs.ErrNoPermission.Wrap("not group owner")
 		}
 	}
-	if populateErr := s.PopulateGroupMember(ctx, owner); populateErr != nil {
+	if err := s.PopulateGroupMember(ctx, owner); err != nil {
 		return nil, err
 	}
 	group, err := s.db.TakeGroup(ctx, req.GroupID)
@@ -1210,7 +1210,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 	if !req.DeleteMember && group.Status == constant.GroupStatusDismissed {
 		return nil, errs.ErrDismissedAlready.Wrap("group status is dismissed")
 	}
-	if dismissErr := s.db.DismissGroup(ctx, req.GroupID, req.DeleteMember); dismissErr != nil {
+	if err := s.db.DismissGroup(ctx, req.GroupID, req.DeleteMember); err != nil {
 		return nil, err
 	}
 	if !req.DeleteMember {
@@ -1566,7 +1566,7 @@ func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 	if err != nil {
 		return nil, err
 	}
-	if populateErr := s.PopulateGroupMember(ctx, owners...); populateErr != nil {
+	if err := s.PopulateGroupMember(ctx, owners...); err != nil {
 		return nil, err
 	}
 	ownerMap := utils.SliceToMap(owners, func(e *relationtb.GroupMemberModel) string {
