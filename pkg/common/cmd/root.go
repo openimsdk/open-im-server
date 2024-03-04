@@ -47,7 +47,7 @@ type CmdOpts struct {
 
 func WithCronTaskLogName() func(*CmdOpts) {
 	return func(opts *CmdOpts) {
-		opts.loggerPrefixName = "openim.crontask.log.all"
+		opts.loggerPrefixName = "openim-crontask"
 	}
 }
 
@@ -117,7 +117,7 @@ func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 
 func defaultCmdOpts() *CmdOpts {
 	return &CmdOpts{
-		loggerPrefixName: "OpenIM.log.all",
+		loggerPrefixName: "openim-all",
 	}
 }
 

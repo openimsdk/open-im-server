@@ -974,7 +974,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	if len(update) == 0 {
 		return resp, nil
 	}
-	if updateErr := s.db.UpdateGroup(ctx, group.GroupID, update); updateErr != nil {
+	if err := s.db.UpdateGroup(ctx, group.GroupID, update); err != nil {
 		return nil, err
 	}
 	group, err = s.db.TakeGroup(ctx, req.GroupInfoForSet.GroupID)

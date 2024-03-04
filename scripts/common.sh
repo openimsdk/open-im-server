@@ -19,9 +19,6 @@
 
 # Common utilities, variables and checks for all build scripts.
 
-
-
-
 # Unset CDPATH, having it set messes up with script import paths
 unset CDPATH
 

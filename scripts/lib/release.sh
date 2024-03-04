@@ -152,6 +152,7 @@ function openim::release::package_src_tarball() {
     -path "${OPENIM_ROOT}"/.github\* -o \
     -path "${OPENIM_ROOT}"/components\* -o \
     -path "${OPENIM_ROOT}"/logs\* -o \
+    -path "${OPENIM_ROOT}"/_output\* -o \
     -path "${OPENIM_ROOT}"/.gitignore\* -o \
     -path "${OPENIM_ROOT}"/.gsemver.yml\* -o \
     -path "${OPENIM_ROOT}"/.config\* -o \

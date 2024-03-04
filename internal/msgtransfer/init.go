@@ -121,7 +121,7 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 
 	var (
 		netDone = make(chan struct{}, 1)
-		netErr  error
+		netErr error
 	)
 
 	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyCH)

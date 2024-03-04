@@ -17,16 +17,30 @@
 # This script verifies whether codes follow golang convention.
 # Usage: `scripts/verify-pkg-names.sh`.
 
+set -o errexit
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 openim::golang::verify_go_version
 
-cd "${OPENIM_ROOT}"
-if git --no-pager grep -E $'^(import |\t)[a-z]+[A-Z_][a-zA-Z]* "[^"]+"$' -- '**/*.go' ':(exclude)vendor/*' ':(exclude)**/*.pb.go'; then
-  openim::log::error "Some package aliases break go conventions."
-  echo "To fix these errors, do not use capitalized or underlined characters"
-  echo "in pkg aliases. Refer to https://blog.golang.org/package-names for more info."
-  exit 1
+openim::golang::verify_go_version
+
+OPENIM_OUTPUT_HOSTBIN_TOOLS="${OPENIM_ROOT}/_output/bin/tools/linux/amd64"
+CODESCAN_BINARY="${OPENIM_OUTPUT_HOSTBIN_TOOLS}/codescan"
+
+if [[ ! -f "${CODESCAN_BINARY}" ]]; then
+    echo "codescan binary not found, building..."
+    pushd "${OPENIM_ROOT}" >/dev/null
+    make build BINS="codescan"
+    popd >/dev/null
 fi
+
+if [[ ! -f "${CODESCAN_BINARY}" ]]; then
+    echo "Failed to build codescan binary."
+    exit 1
+fi
+
+CONFIG_PATH="${OPENIM_ROOT}/tools/codescan/config.yaml"
+
+"${CODESCAN_BINARY}" -config "${CONFIG_PATH}"

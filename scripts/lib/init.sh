@@ -14,9 +14,6 @@
 # limitations under the License.
 
 
-
-
-
 # Short-circuit if init.sh has already been sourced
 [[ $(type -t openim::init::loaded) == function ]] && return 0
 
