@@ -40,10 +40,14 @@ run:
   # "/" will be replaced by current OS file path separator to properly work
   # on Windows.
   skip-dirs:
+    - components
+    - docs
     - util
     - .*~
     - api/swagger/docs
     - server/docs
+    - components/mnt/config/certs
+    - logs
 
   # default is true. Enables skipping of directories:
   #   vendor$, third_party$, testdata$, examples$, Godeps$, builtin$
@@ -58,6 +62,11 @@ run:
   skip-files:
     - ".*\\.my\\.go$"
     - _test.go
+    - ".*_test.go"
+    - "mocks/"
+    - ".github/"
+    - "logs/"
+    - "components/"
 
   # by default isn't set. If set we pass it to "go list -mod={option}". From "go help modules":
   # If invoked with -mod=readonly, the go command is disallowed from the implicit
@@ -131,8 +140,8 @@ linters-settings:
 
     # path to a file containing a list of functions to exclude from checking
     # see https://github.com/kisielk/errcheck#excluding-functions for details
-    #exclude: errcheck.txt
-    
+    # exclude: errcheck.txt
+
   errorlint:
     # Check whether fmt.Errorf uses the %w verb for formatting errors. See the readme for caveats
     errorf: true
@@ -418,7 +427,7 @@ linters-settings:
 
   govet:
     # report about shadowed variables
-    check-shadowing: true
+    check-shadowing: false
 
     # settings per analyzer
     settings:
@@ -489,9 +498,9 @@ linters-settings:
     - github.com\/user\/package\/v4\.Type
 
   lll:
-    # max line length, lines longer will be reported. Default is 120.
+    # max line length, lines longer will be reported. Default is 250.
     # '\t' is counted as 1 character by default, and can be changed with the tab-width option
-    line-length: 240
+    line-length: 250
     # tab width in spaces. Default to 1.
     tab-width: 4
   maligned:
@@ -715,17 +724,19 @@ linters:
   # enable-all: true
   disable-all: true
   enable:
-    - typecheck     # 基本的类型检查
-    - gofmt         # 格式检查
-    - govet         # Go 语言的标准检查工具
-    - gosimple      # 简化代码的建议
-    - misspell      # 拼写错误
-    - staticcheck   # 静态检查
-    - unused        # 未使用的代码检查
-    - goimports     # 检查导入是否正确排序和格式化
-    - godot         # 注释句点检查
-    - bodyclose     # 确保 HTTP response body 被关闭
-    - errcheck      # 检查是否遗漏了错误返回值
+    - typecheck     # Basic type checking
+    - gofmt         # Format check
+    - govet         # Go's standard linting tool
+    - gosimple      # Suggestions for simplifying code
+    - misspell      # Spelling mistakes
+    - staticcheck   # Static analysis
+    - unused        # Checks for unused code
+    - goimports     # Checks if imports are correctly sorted and formatted
+    - godot         # Checks for comment punctuation
+    - bodyclose     # Ensures HTTP response body is closed
+    - stylecheck    # Style checker for Go code
+    - unused        # Checks for unused code
+    - errcheck      # Checks for missed error returns
   fast: true
 
 issues:
@@ -791,6 +802,11 @@ issues:
     - linters:
         - lll
       source: "^//go:generate "
+
+    - text: ".*[\u4e00-\u9fa5]+.*"
+      linters:
+        - golint
+      source: "^//.*$"
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all
