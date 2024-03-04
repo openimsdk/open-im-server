@@ -251,26 +251,23 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 			}
 			m, err := dataBase.GetTokensWithoutError(c, claims.UserID, claims.PlatformID)
 			if err != nil {
-				log.ZWarn(c, "cache get token error", errs.ErrTokenNotExist.Wrap())
 				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
 				c.Abort()
 				return
 			}
 			if len(m) == 0 {
-				log.ZWarn(c, "cache do not exist token error", errs.ErrTokenNotExist.Wrap())
 				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
 				c.Abort()
+				return
 			}
 			if v, ok := m[token]; ok {
 				switch v {
 				case constant.NormalToken:
 				case constant.KickedToken:
-					log.ZWarn(c, "cache kicked token error", errs.ErrTokenKicked.Wrap())
 					apiresp.GinError(c, errs.ErrTokenKicked.Wrap())
 					c.Abort()
 					return
 				default:
-					log.ZWarn(c, "cache unknown token error", errs.ErrTokenUnknown.Wrap())
 					apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
 					c.Abort()
 					return
@@ -280,6 +277,9 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
+			c.Set(constant.OpUserPlatform, constant.PlatformIDToName(claims.PlatformID))
+			c.Set(constant.OpUserID, claims.UserID)
+			c.Next()
 		}
 	}
 }
