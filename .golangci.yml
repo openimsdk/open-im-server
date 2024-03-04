@@ -66,6 +66,7 @@ run:
     - "mocks/"
     - ".github/"
     - "logs/"
+    - "_output/"
     - "components/"
 
   # by default isn't set. If set we pass it to "go list -mod={option}". From "go help modules":
