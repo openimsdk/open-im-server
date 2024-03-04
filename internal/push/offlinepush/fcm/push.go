@@ -128,9 +128,11 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 		if err != nil {
 			Fail = Fail + messageCount
 			// log.Info(operationID, "some token push err", err.Error(), messageCount)
+			log.Info("Failed to send messages:", Fail)
 		} else {
 			Success = Success + response.SuccessCount
 			Fail = Fail + response.FailureCount
+			log.Info("Message sending summary: Success:", Success, "Fail:", Fail)
 		}
 	}
 	return nil

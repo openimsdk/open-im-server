@@ -101,23 +101,23 @@ func main() {
 	select {}
 }
 
-// // getLatestVersion fetches the latest version number from a given URL.
-// func getLatestVersion(url string) (string, error) {
-// 	resp, err := http.Get(url)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	defer resp.Body.Close()
+// getLatestVersion fetches the latest version number from a given URL.
+/* func getLatestVersion(url string) (string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
 
 // 	location := resp.Header.Get("Location")
 // 	if location == "" {
 // 		return defaultTemplateVersion, nil
 // 	}
 
-// 	// Extract the version number from the URL
-// 	latestVersion := filepath.Base(location)
-// 	return latestVersion, nil
-// }
+	// Extract the version number from the URL
+	latestVersion := filepath.Base(location)
+	return latestVersion, nil
+} */
 
 // downloadAndExtract downloads a file from a URL and extracts it to a destination directory.
 func downloadAndExtract(url, destDir string) error {
