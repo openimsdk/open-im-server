@@ -19,15 +19,13 @@ import (
 	"net/http"
 	"strconv"
 
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
-	"github.com/gin-gonic/gin"
-
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/a2r"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/gin-gonic/gin"
 
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 

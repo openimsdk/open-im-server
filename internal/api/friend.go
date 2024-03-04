@@ -17,10 +17,9 @@ package api
 import (
 	"github.com/OpenIMSDK/protocol/friend"
 	"github.com/OpenIMSDK/tools/a2r"
+	"github.com/gin-gonic/gin"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-
-	"github.com/gin-gonic/gin"
 )
 
 type FriendApi rpcclient.Friend

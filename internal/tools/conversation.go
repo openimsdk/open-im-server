@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/protocol/sdkws"
-
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"

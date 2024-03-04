@@ -27,25 +27,20 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
-
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
-
+	"github.com/OpenIMSDK/tools/mw"
+	"github.com/OpenIMSDK/tools/network"
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-
-	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/mw"
-	"github.com/OpenIMSDK/tools/network"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 // Start rpc server.

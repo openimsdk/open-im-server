@@ -118,7 +118,6 @@ linters-settings:
     right-to-left-isolate: true
     first-strong-isolate: true
     pop-directional-isolate: true
-  dogsled:
     # checks assignments with too many blank identifiers; default is 2
     max-blank-identifiers: 2
   dupl:
@@ -729,6 +728,21 @@ linters:
     - gofmt         # Format check
     - govet         # Go's standard linting tool
     - gosimple      # Suggestions for simplifying code
+    - errcheck
+    - decorder
+    - sloglint
+    - ineffassign
+    - revive
+    - reassign
+    - tparallel
+    - unconvert
+    - dupl
+    - dupword
+    - errname
+    - gci
+    - goheader
+    - goprintffuncname
+    - gosec
     - misspell      # Spelling mistakes
     - staticcheck   # Static analysis
     - unused        # Checks for unused code

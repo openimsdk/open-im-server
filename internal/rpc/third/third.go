@@ -20,22 +20,19 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cos"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/minio"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/oss"
-
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cos"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/minio"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/oss"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 

@@ -25,18 +25,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/OpenIMSDK/tools/apiresp"
-
-	"github.com/go-playground/validator/v10"
-	"github.com/redis/go-redis/v9"
-	"golang.org/x/sync/errgroup"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msggateway"
+	"github.com/OpenIMSDK/tools/apiresp"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/go-playground/validator/v10"
+	"github.com/redis/go-redis/v9"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"

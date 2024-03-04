@@ -21,35 +21,28 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/tools/pagination"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-
-	"github.com/OpenIMSDK/tools/tx"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
+	pbuser "github.com/OpenIMSDK/protocol/user"
+	registry "github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/pagination"
+	"github.com/OpenIMSDK/tools/tx"
+	"github.com/OpenIMSDK/tools/utils"
+	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-
-	registry "github.com/OpenIMSDK/tools/discoveryregistry"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
-
-	pbuser "github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/utils"
-	"google.golang.org/grpc"
 )
 
 type userServer struct {

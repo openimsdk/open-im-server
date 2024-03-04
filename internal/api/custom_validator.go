@@ -15,9 +15,8 @@
 package api
 
 import (
-	"github.com/go-playground/validator/v10"
-
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/go-playground/validator/v10"
 )
 
 // RequiredIf validates if the specified field is required based on the session type.

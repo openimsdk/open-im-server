@@ -15,10 +15,9 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-
 	"github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/tools/a2r"
+	"github.com/gin-gonic/gin"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )

@@ -22,18 +22,16 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/OpenIMSDK/tools/errs"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-
-	"google.golang.org/protobuf/proto"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/apiresp"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+	"google.golang.org/protobuf/proto"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 )
 
 var (

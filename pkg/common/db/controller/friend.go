@@ -19,12 +19,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OpenIMSDK/tools/pagination"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
 
