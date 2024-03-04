@@ -18,12 +18,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/tools/pagination"
-	"github.com/dtm-labs/rockscache"
-
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/dtm-labs/rockscache"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"

@@ -18,18 +18,16 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
-
 	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"google.golang.org/protobuf/proto"
-
-	"fmt"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )

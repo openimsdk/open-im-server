@@ -21,14 +21,12 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-
-	"github.com/redis/go-redis/v9"
-
+	pbmsg "github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-
+	"github.com/OpenIMSDK/tools/utils"
+	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -37,10 +35,7 @@ import (
 	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
-
-	pbmsg "github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 )
 
 const (

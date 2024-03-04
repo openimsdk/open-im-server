@@ -17,13 +17,11 @@ package cmd
 import (
 	"errors"
 
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/spf13/cobra"
 
 	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
-
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/errs"
-
 	v3config "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 

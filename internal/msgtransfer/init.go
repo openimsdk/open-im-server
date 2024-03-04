@@ -18,16 +18,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
-	"github.com/OpenIMSDK/tools/errs"
-
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
-
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -42,6 +38,7 @@ import (
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 type MsgTransfer struct {
@@ -121,7 +118,7 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 
 	var (
 		netDone = make(chan struct{}, 1)
-		netErr error
+		netErr  error
 	)
 
 	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyCH)

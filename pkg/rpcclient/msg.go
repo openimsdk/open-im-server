@@ -18,18 +18,16 @@ import (
 	"context"
 	"encoding/json"
 
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	// "google.golang.org/protobuf/proto".
 )
 
 func newContentTypeConf() map[int32]config.NotificationConf {

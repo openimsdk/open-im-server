@@ -18,8 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	pbgroup "github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -28,6 +26,7 @@ import (
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"

@@ -17,14 +17,14 @@ package msg
 import (
 	"context"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 )
 
 func (m *msgServer) getMinSeqs(maxSeqs map[string]int64) map[string]int64 {

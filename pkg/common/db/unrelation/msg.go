@@ -21,19 +21,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/msg"
-
 	"github.com/OpenIMSDK/protocol/constant"
-
+	"github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/protobuf/proto"
-
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
 
 	table "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )

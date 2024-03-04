@@ -22,23 +22,20 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-
-	"github.com/OpenIMSDK/tools/errs"
-
 	"github.com/IBM/sarama"
-	"github.com/go-redis/redis"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/go-redis/redis"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 

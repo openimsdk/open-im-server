@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/protocol/user"
-
 	"github.com/OpenIMSDK/tools/pagination"
 )
 

@@ -17,12 +17,11 @@ package kafka
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-
-	"strings"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )

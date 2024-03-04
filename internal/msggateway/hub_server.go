@@ -17,8 +17,6 @@ package msggateway
 import (
 	"context"
 
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msggateway"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
@@ -26,6 +24,7 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"

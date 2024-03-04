@@ -17,14 +17,12 @@ package push
 import (
 	"context"
 
-	"github.com/OpenIMSDK/tools/utils"
-
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	pbpush "github.com/OpenIMSDK/protocol/push"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/utils"
+	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"

@@ -15,12 +15,11 @@
 package msg
 
 import (
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"

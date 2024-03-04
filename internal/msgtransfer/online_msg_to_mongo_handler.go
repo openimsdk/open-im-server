@@ -18,10 +18,9 @@ import (
 	"context"
 
 	"github.com/IBM/sarama"
-	"google.golang.org/protobuf/proto"
-
 	pbmsg "github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/tools/log"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
