@@ -76,7 +76,7 @@ func TestCopyFlags(t *testing.T) {
 			}()
 			CopyFlags(tt.args.source, tt.args.target)
 
-			// 验证复制的标记
+			// Verify the replicated tag
 			if !tt.wantErr {
 				tt.args.source.VisitAll(func(f *flag.Flag) {
 					if gotFlag := tt.args.target.Lookup(f.Name); gotFlag == nil || !reflect.DeepEqual(gotFlag, f) {

@@ -21,6 +21,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/tools/formitychecker/config"
 )
 
@@ -39,7 +40,7 @@ func CheckDirectory(cfg *config.Config) error {
 	for _, targetDir := range cfg.TargetDirs {
 		err := filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				return err
+				return errs.Wrap(err, fmt.Sprintf("error walking directory '%s'", targetDir))
 			}
 
 			// Skip if the directory is in the ignore list

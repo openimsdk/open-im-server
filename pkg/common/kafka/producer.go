@@ -90,11 +90,10 @@ func NewKafkaProducer(addr []string, topic string) (*Producer, error) {
 	for i := 0; i <= maxRetry; i++ {
 		p.producer, err = sarama.NewSyncProducer(p.addr, p.config)
 		if err == nil {
-			return &p, nil
+			return &p, errs.Wrap(err)
 		}
 		time.Sleep(1 * time.Second) // Wait before retrying
 	}
-
 	// Panic if unable to create producer after retries
 	if err != nil {
 		return nil, errs.Wrap(errors.New("failed to create Kafka producer: " + err.Error()))
@@ -179,7 +178,7 @@ func (p *Producer) SendMessage(ctx context.Context, key string, msg proto.Messag
 	// Attach context metadata as headers
 	header, err := GetMQHeaderWithContext(ctx)
 	if err != nil {
-		return 0, 0, errs.Wrap(err)
+		return 0, 0, err
 	}
 	kMsg.Headers = header
 

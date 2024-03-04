@@ -45,8 +45,13 @@ import (
 )
 
 type MsgTransfer struct {
-	historyCH      *OnlineHistoryRedisConsumerHandler // 这个消费者聚合消息, 订阅的topic：ws2ms_chat, 修改通知发往msg_to_modify topic, 消息存入redis后Incr Redis, 再发消息到ms2pschat topic推送， 发消息到msg_to_mongo topic持久化
-	historyMongoCH *OnlineHistoryMongoConsumerHandler // mongoDB批量插入, 成功后删除redis中消息，以及处理删除通知消息删除的 订阅的topic: msg_to_mongo
+	// This consumer aggregated messages, subscribed to the topic:ws2ms_chat,
+	// the modification notification is sent to msg_to_modify topic, the message is stored in redis, Incr Redis,
+	// and then the message is sent to ms2pschat topic for push, and the message is sent to msg_to_mongo topic for persistence
+	historyCH *OnlineHistoryRedisConsumerHandler
+	// mongoDB batch insert, delete messages in redis after success,
+	// and handle the deletion notification message deleted subscriptions topic: msg_to_mongo
+	historyMongoCH *OnlineHistoryMongoConsumerHandler
 	ctx            context.Context
 	cancel         context.CancelFunc
 }
@@ -65,6 +70,7 @@ func StartTransfer(prometheusPort int) error {
 	if err = mongo.CreateMsgIndex(); err != nil {
 		return err
 	}
+
 	client, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
 		return err
@@ -73,6 +79,7 @@ func StartTransfer(prometheusPort int) error {
 	if err := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
 		return err
 	}
+
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	msgModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
@@ -106,7 +113,7 @@ func NewMsgTransfer(msgDatabase controller.CommonMsgDatabase, conversationRpcCli
 }
 
 func (m *MsgTransfer) Start(prometheusPort int) error {
-	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
+	fmt.Println("Start msg transfer", "prometheusPort:", prometheusPort)
 	if prometheusPort <= 0 {
 		return errs.Wrap(errors.New("prometheusPort not correct"))
 	}

@@ -26,16 +26,21 @@ import (
 )
 
 // SetupTLSConfig set up the TLS config from config file.
-func SetupTLSConfig(cfg *sarama.Config) {
+func SetupTLSConfig(cfg *sarama.Config) error {
 	if config.Config.Kafka.TLS != nil {
 		cfg.Net.TLS.Enable = true
-		cfg.Net.TLS.Config = tls.NewTLSConfig(
+		tlsConfig, err := tls.NewTLSConfig(
 			config.Config.Kafka.TLS.ClientCrt,
 			config.Config.Kafka.TLS.ClientKey,
 			config.Config.Kafka.TLS.CACrt,
 			[]byte(config.Config.Kafka.TLS.ClientKeyPwd),
 		)
+		if err != nil {
+			return err
+		}
+		cfg.Net.TLS.Config = tlsConfig
 	}
+	return nil
 }
 
 // getEnvOrConfig returns the value of the environment variable if it exists,

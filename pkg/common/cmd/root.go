@@ -19,6 +19,8 @@ import (
 
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
+	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/spf13/cobra"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -28,8 +30,9 @@ import (
 )
 
 type RootCmdPt interface {
-	GetPortFromConfig(portType string) int
+	GetPortFromConfig(portType string) (int, error)
 }
+
 type RootCmd struct {
 	Command        cobra.Command
 	Name           string
@@ -77,7 +80,7 @@ func (rc *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) 
 	cmdOpts := rc.applyOptions(opts...)
 
 	if err := rc.initializeLogger(cmdOpts); err != nil {
-		return fmt.Errorf("failed to initialize from config: %w", err)
+		return errs.Wrap(err, "failed to initialize logger")
 	}
 
 	return nil
@@ -130,31 +133,41 @@ func (r *RootCmd) AddPortFlag() {
 	r.Command.Flags().IntP(constant.FlagPort, "p", 0, "server listen port")
 }
 
-func (r *RootCmd) getPortFlag(cmd *cobra.Command) int {
+func (r *RootCmd) getPortFlag(cmd *cobra.Command) (int, error) {
 	port, err := cmd.Flags().GetInt(constant.FlagPort)
 	if err != nil {
-		fmt.Println("Error getting ws port flag:", err)
+		// Wrapping the error with additional context
+		return 0, errs.Wrap(err, "error getting port flag")
 	}
 	if port == 0 {
-		port = r.PortFromConfig(constant.FlagPort)
+		port, _ = r.PortFromConfig(constant.FlagPort)
+		// port, err := r.PortFromConfig(constant.FlagPort)
+		// if err != nil {
+		//     // Optionally wrap the error if it's an internal error needing context
+		//     return 0, errs.Wrap(err, "error getting port from config")
+		// }
 	}
-	return port
+	return port, nil
 }
 
-func (r *RootCmd) GetPortFlag() int {
-	return r.port
+// // GetPortFlag returns the port flag.
+func (r *RootCmd) GetPortFlag() (int, error) {
+	return r.port, nil
 }
 
 func (r *RootCmd) AddPrometheusPortFlag() {
 	r.Command.Flags().IntP(constant.FlagPrometheusPort, "", 0, "server prometheus listen port")
 }
 
-func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) int {
-	port, _ := cmd.Flags().GetInt(constant.FlagPrometheusPort)
-	if port == 0 {
-		port = r.PortFromConfig(constant.FlagPrometheusPort)
+func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) (int, error) {
+	port, err := cmd.Flags().GetInt(constant.FlagPrometheusPort)
+	if err != nil || port == 0 {
+		port, err = r.PortFromConfig(constant.FlagPrometheusPort)
+		if err != nil {
+			return 0, err
+		}
 	}
-	return port
+	return port, nil
 }
 
 func (r *RootCmd) GetPrometheusPortFlag() int {
@@ -175,10 +188,11 @@ func (r *RootCmd) AddCommand(cmds ...*cobra.Command) {
 	r.Command.AddCommand(cmds...)
 }
 
-func (r *RootCmd) GetPortFromConfig(portType string) int {
-	return 0
-}
-
-func (r *RootCmd) PortFromConfig(portType string) int {
-	return r.cmdItf.GetPortFromConfig(portType)
+func (r *RootCmd) PortFromConfig(portType string) (int, error) {
+	// Retrieve the port and cache it
+	port, err := r.cmdItf.GetPortFromConfig(portType)
+	if err != nil {
+		return 0, err
+	}
+	return port, nil
 }

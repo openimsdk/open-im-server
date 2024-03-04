@@ -155,21 +155,13 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 				notStorageNotificationList,
 			)
 			if err := och.msgDatabase.MsgToModifyMQ(ctx, msgChannelValue.uniqueKey, conversationIDNotification, modifyMsgList); err != nil {
-				log.ZError(
-					ctx,
-					"msg to modify mq error",
-					err,
-					"uniqueKey",
-					msgChannelValue.uniqueKey,
-					"modifyMsgList",
-					modifyMsgList,
-				)
+				log.ZError(ctx, "msg to modify mq error", err, "uniqueKey", msgChannelValue.uniqueKey, "modifyMsgList", modifyMsgList)
 			}
 		}
 	}
 }
 
-// 获取消息/通知 存储的消息列表， 不存储并且推送的消息列表，.
+// Get messages/notifications stored message list, not stored and pushed message list.
 func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 	totalMsgs []*ContextMsg,
 ) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*sdkws.MsgData) {
@@ -190,7 +182,7 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 			// clone msg from notificationMsg
 			if options.IsSendMsg() {
 				msg := proto.Clone(v.message).(*sdkws.MsgData)
-				// 消息
+				// message
 				if v.message.Options != nil {
 					msg.Options = msgprocessor.NewMsgOptions()
 				}

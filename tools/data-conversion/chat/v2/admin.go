@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// AppVersion pc端版本管理
+// AppVersion manages PC client versions
 type AppVersion struct {
 	Version     string `gorm:"column:version;size:64"  json:"version"`
 	Type        int    `gorm:"column:type;primary_key" json:"type"`
@@ -29,7 +29,7 @@ type AppVersion struct {
 	UpdateLog   string `gorm:"column:update_log"       json:"update_log"`
 }
 
-// Admin 后台管理员
+// Admin manages backend administrators
 type Admin struct {
 	Account    string    `gorm:"column:account;primary_key;type:char(64)" json:"account"`
 	Password   string    `gorm:"column:Password;type:char(64)"            json:"password"`
@@ -40,19 +40,19 @@ type Admin struct {
 	CreateTime time.Time `gorm:"column:create_time"                       json:"createTime"`
 }
 
-// RegisterAddFriend 注册时默认好友
+// RegisterAddFriend specifies default friends when registering
 type RegisterAddFriend struct {
 	UserID     string    `gorm:"column:user_id;primary_key;type:char(64)" json:"userID"`
 	CreateTime time.Time `gorm:"column:create_time"                       json:"createTime"`
 }
 
-// RegisterAddGroup 注册时默认群组
+// RegisterAddGroup specifies default groups when registering
 type RegisterAddGroup struct {
 	GroupID    string    `gorm:"column:group_id;primary_key;type:char(64)" json:"userID"`
 	CreateTime time.Time `gorm:"column:create_time"                        json:"createTime"`
 }
 
-// ClientInitConfig 系统相关配置项
+// ClientInitConfig contains system-related configuration items
 type ClientInitConfig struct {
 	DiscoverPageURL            string `gorm:"column:discover_page_url;size:128"              json:"discoverPageURL"`
 	OrdinaryUserAddFriend      int32  `gorm:"column:ordinary_user_add_friend; default:1"     json:"ordinaryUserAddFriend"`

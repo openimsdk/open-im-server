@@ -15,13 +15,15 @@
 package cmd
 
 import (
-	"log"
+	"errors"
 
 	"github.com/spf13/cobra"
 
-	"github.com/OpenIMSDK/protocol/constant"
-
 	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
+
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/errs"
+
 	v3config "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
@@ -39,20 +41,32 @@ func (m *MsgGatewayCmd) AddWsPortFlag() {
 	m.Command.Flags().IntP(constant.FlagWsPort, "w", 0, "ws server listen port")
 }
 
-func (m *MsgGatewayCmd) getWsPortFlag(cmd *cobra.Command) int {
+func (m *MsgGatewayCmd) getWsPortFlag(cmd *cobra.Command) (int, error) {
 	port, err := cmd.Flags().GetInt(constant.FlagWsPort)
 	if err != nil {
-		log.Println("Error getting ws port flag:", err)
+		return 0, errs.Wrap(err, "error getting ws port flag")
 	}
 	if port == 0 {
-		port = m.PortFromConfig(constant.FlagWsPort)
+		port, _ = m.PortFromConfig(constant.FlagWsPort)
 	}
-	return port
+	return port, nil
 }
 
 func (m *MsgGatewayCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msggateway.RunWsAndServer(m.getPortFlag(cmd), m.getWsPortFlag(cmd), m.getPrometheusPortFlag(cmd))
+		wsPort, err := m.getWsPortFlag(cmd)
+		if err != nil {
+			return errs.Wrap(err, "failed to get WS port flag")
+		}
+		port, err := m.getPortFlag(cmd)
+		if err != nil {
+			return err
+		}
+		prometheusPort, err := m.getPrometheusPortFlag(cmd)
+		if err != nil {
+			return err
+		}
+		return msggateway.RunWsAndServer(port, wsPort, prometheusPort)
 	}
 }
 
@@ -61,18 +75,33 @@ func (m *MsgGatewayCmd) Exec() error {
 	return m.Execute()
 }
 
-func (m *MsgGatewayCmd) GetPortFromConfig(portType string) int {
+func (m *MsgGatewayCmd) GetPortFromConfig(portType string) (int, error) {
+	var port int
+	var exists bool
+
 	switch portType {
 	case constant.FlagWsPort:
-		return v3config.Config.LongConnSvr.OpenImWsPort[0]
+		if len(v3config.Config.LongConnSvr.OpenImWsPort) > 0 {
+			port = v3config.Config.LongConnSvr.OpenImWsPort[0]
+			exists = true
+		}
 
 	case constant.FlagPort:
-		return v3config.Config.LongConnSvr.OpenImMessageGatewayPort[0]
+		if len(v3config.Config.LongConnSvr.OpenImMessageGatewayPort) > 0 {
+			port = v3config.Config.LongConnSvr.OpenImMessageGatewayPort[0]
+			exists = true
+		}
 
 	case constant.FlagPrometheusPort:
-		return v3config.Config.Prometheus.MessageGatewayPrometheusPort[0]
-
-	default:
-		return 0
+		if len(v3config.Config.Prometheus.MessageGatewayPrometheusPort) > 0 {
+			port = v3config.Config.Prometheus.MessageGatewayPrometheusPort[0]
+			exists = true
+		}
 	}
+
+	if !exists {
+		return 0, errs.Wrap(errors.New("port type '%s' not found in configuration"), portType)
+	}
+
+	return port, nil
 }

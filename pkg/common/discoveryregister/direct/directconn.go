@@ -105,7 +105,7 @@ func (cd *ConnDirect) GetConns(ctx context.Context,
 	}
 
 	if len(connections) == 0 {
-		return nil, fmt.Errorf("no connections found for service: %s", serviceName)
+		return nil, errs.Wrap(errors.New("no connections found for service"), "serviceName", serviceName)
 	}
 	return connections, nil
 }
@@ -155,10 +155,11 @@ func (cd *ConnDirect) dialService(ctx context.Context, address string, opts ...g
 	conn, err := grpc.DialContext(ctx, cd.resolverDirect.Scheme()+":///"+address, options...)
 
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "address", address)
 	}
 	return conn, nil
 }
+
 func (cd *ConnDirect) dialServiceWithoutResolver(ctx context.Context, address string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	options := append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	conn, err := grpc.DialContext(ctx, address, options...)

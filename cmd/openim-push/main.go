@@ -26,7 +26,7 @@ func main() {
 	pushCmd.AddPortFlag()
 	pushCmd.AddPrometheusPortFlag()
 	if err := pushCmd.Exec(); err != nil {
-		panic(err.Error())
+		util.ExitWithError(err)
 	}
 	if err := pushCmd.StartSvr(config.Config.RpcRegisterName.OpenImPushName, push.Start); err != nil {
 		util.ExitWithError(err)

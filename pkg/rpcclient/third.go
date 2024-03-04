@@ -24,8 +24,10 @@ import (
 
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 type Third struct {
@@ -38,35 +40,42 @@ type Third struct {
 func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImThirdName)
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	client := third.NewThirdClient(conn)
 	minioClient, err := minioInit()
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	return &Third{discov: discov, Client: client, conn: conn, MinioClient: minioClient}
 }
 
 func minioInit() (*minio.Client, error) {
-	minioClient := &minio.Client{}
-	initUrl := config.Config.Object.Minio.Endpoint
-	minioUrl, err := url.Parse(initUrl)
+	// Retrieve MinIO configuration details
+	endpoint := config.Config.Object.Minio.Endpoint
+	accessKeyID := config.Config.Object.Minio.AccessKeyID
+	secretAccessKey := config.Config.Object.Minio.SecretAccessKey
+
+	// Parse the MinIO URL to determine if the connection should be secure
+	minioURL, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "minioInit: failed to parse MinIO endpoint URL")
 	}
+
+	// Determine the security of the connection based on the scheme
+	secure := minioURL.Scheme == "https"
+
+	// Setup MinIO client options
 	opts := &minio.Options{
-		Creds: credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, ""),
-		// Region: config.Config.Credential.Minio.Location,
+		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+		Secure: secure,
 	}
-	if minioUrl.Scheme == "http" {
-		opts.Secure = false
-	} else if minioUrl.Scheme == "https" {
-		opts.Secure = true
-	}
-	minioClient, err = minio.New(minioUrl.Host, opts)
+
+	// Initialize MinIO client
+	minioClient, err := minio.New(minioURL.Host, opts)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "minioInit: failed to create MinIO client")
 	}
+
 	return minioClient, nil
 }

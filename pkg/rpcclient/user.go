@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 
 	"google.golang.org/grpc"
 
@@ -42,7 +43,7 @@ type User struct {
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	client := user.NewUserClient(conn)
 	return &User{Discov: discov, Client: client, conn: conn}

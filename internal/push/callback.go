@@ -31,12 +31,7 @@ func url() string {
 	return config.Config.Callback.CallbackUrl
 }
 
-func callbackOfflinePush(
-	ctx context.Context,
-	userIDs []string,
-	msg *sdkws.MsgData,
-	offlinePushUserIDs *[]string,
-) error {
+func callbackOfflinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgData, offlinePushUserIDs *[]string) error {
 	if !config.Config.Callback.CallbackOfflinePush.Enable || msg.ContentType == constant.Typing {
 		return nil
 	}
@@ -59,10 +54,12 @@ func callbackOfflinePush(
 		AtUserIDs:       msg.AtUserIDList,
 		Content:         GetContent(msg),
 	}
+
 	resp := &callbackstruct.CallbackBeforePushResp{}
 	if err := http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOfflinePush); err != nil {
 		return err
 	}
+
 	if len(resp.UserIDs) != 0 {
 		*offlinePushUserIDs = resp.UserIDs
 	}

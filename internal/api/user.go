@@ -68,7 +68,7 @@ func (u *UserApi) GetUsers(c *gin.Context) {
 func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 	var req msggateway.GetUsersOnlineStatusReq
 	if err := c.BindJSON(&req); err != nil {
-		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		apiresp.GinError(c, err)
 		return
 	}
 	conns, err := u.Discov.GetConns(c, config.Config.RpcRegisterName.OpenImMessageGatewayName)
@@ -86,7 +86,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
 		if err != nil {
-			log.ZWarn(c, "GetUsersOnlineStatus rpc err", err)
+			log.ZDebug(c, "GetUsersOnlineStatus rpc error", err)
 
 			parseError := apiresp.ParseError(err)
 			if parseError.ErrCode == errs.NoPermissionError {

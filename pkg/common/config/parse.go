@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/errs"
 	"gopkg.in/yaml.v3"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -36,32 +37,38 @@ const (
 	DefaultFolderPath    = "../config/"
 )
 
-// return absolude path join ../config/, this is k8s container config path.
-func GetDefaultConfigPath() string {
+// GetDefaultConfigPath returns the absolute path to the default configuration directory
+// relative to the executable's location. It is intended for use in Kubernetes container configurations.
+// Errors are returned to the caller to allow for flexible error handling.
+func GetDefaultConfigPath() (string, error) {
 	executablePath, err := os.Executable()
 	if err != nil {
-		fmt.Println("GetDefaultConfigPath error:", err.Error())
-		return ""
+		return "", errs.Wrap(err, "failed to get executable path")
 	}
 
+	// Calculate the config path as a directory relative to the executable's location
 	configPath, err := genutil.OutDir(filepath.Join(filepath.Dir(executablePath), "../config/"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to get output directory: %v\n", err)
-		os.Exit(1)
+		return "", errs.Wrap(err, "failed to get output directory")
 	}
-	return configPath
+	return configPath, nil
 }
 
-// getProjectRoot returns the absolute path of the project root directory.
-func GetProjectRoot() string {
-	executablePath, _ := os.Executable()
+// GetProjectRoot returns the absolute path of the project root directory by navigating up from the directory
+// containing the executable. It provides a detailed error if the path cannot be determined.
+func GetProjectRoot() (string, error) {
+	executablePath, err := os.Executable()
+	if err != nil {
+		return "", errs.Wrap(err, "failed to retrieve executable path")
+	}
 
+	// Attempt to compute the project root by navigating up from the executable's directory
 	projectRoot, err := genutil.OutDir(filepath.Join(filepath.Dir(executablePath), "../../../../.."))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to get output directory: %v\n", err)
-		os.Exit(1)
+		return "", err
 	}
-	return projectRoot
+
+	return projectRoot, nil
 }
 
 func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
@@ -83,42 +90,66 @@ func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
 	return opts
 }
 
+// initConfig loads configuration from a specified path into the provided config structure.
+// If the specified config file does not exist, it attempts to load from the project's default "config" directory.
+// It logs informative messages regarding the configuration path being used.
 func initConfig(config any, configName, configFolderPath string) error {
-	configFolderPath = filepath.Join(configFolderPath, configName)
-	_, err := os.Stat(configFolderPath)
+	configFilePath := filepath.Join(configFolderPath, configName)
+	_, err := os.Stat(configFilePath)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			fmt.Println("stat config path error:", err.Error())
-			return fmt.Errorf("stat config path error: %w", err)
+			return errs.Wrap(err, fmt.Sprintf("failed to check existence of config file at path: %s", configFilePath))
 		}
-		configFolderPath = filepath.Join(GetProjectRoot(), "config", configName)
-		fmt.Println("flag's path,enviment's path,default path all is not exist,using project path:", configFolderPath)
+		var projectRoot string
+		projectRoot, err = GetProjectRoot()
+		if err != nil {
+			return err
+		}
+		configFilePath = filepath.Join(projectRoot, "config", configName)
+		fmt.Printf("Configuration file not found at specified path. Falling back to project path: %s\n", configFilePath)
 	}
-	data, err := os.ReadFile(configFolderPath)
-	if err != nil {
-		return fmt.Errorf("read file error: %w", err)
-	}
-	if err = yaml.Unmarshal(data, config); err != nil {
-		return fmt.Errorf("unmarshal yaml error: %w", err)
-	}
-	fmt.Println("The path of the configuration file to start the process:", configFolderPath)
 
+	data, err := os.ReadFile(configFilePath)
+	if err != nil {
+		// Wrap and return the error if reading the configuration file fails.
+		return errs.Wrap(err, fmt.Sprintf("failed to read configuration file at path: %s", configFilePath))
+	}
+
+	if err = yaml.Unmarshal(data, config); err != nil {
+		// Wrap and return the error if unmarshalling the YAML configuration fails.
+		return errs.Wrap(err, "failed to unmarshal YAML configuration")
+	}
+
+	fmt.Printf("Configuration file loaded successfully from path: %s\n", configFilePath)
 	return nil
 }
 
+// InitConfig initializes the application configuration by loading it from a specified folder path.
+// If the folder path is not provided, it attempts to use the OPENIMCONFIG environment variable,
+// and as a fallback, it uses the default configuration path. It loads both the main configuration
+// and notification configuration, wrapping errors for better context.
 func InitConfig(configFolderPath string) error {
+	// Use the provided config folder path, or fallback to environment variable or default path
 	if configFolderPath == "" {
-		envConfigPath := os.Getenv("OPENIMCONFIG")
-		if envConfigPath != "" {
-			configFolderPath = envConfigPath
-		} else {
-			configFolderPath = GetDefaultConfigPath()
+		configFolderPath = os.Getenv("OPENIMCONFIG")
+		if configFolderPath == "" {
+			var err error
+			configFolderPath, err = GetDefaultConfigPath()
+			if err != nil {
+				return err
+			}
 		}
 	}
 
+	// Initialize the main configuration
 	if err := initConfig(&Config, FileName, configFolderPath); err != nil {
 		return err
 	}
 
-	return initConfig(&Config.Notification, NotificationFileName, configFolderPath)
+	// Initialize the notification configuration
+	if err := initConfig(&Config.Notification, NotificationFileName, configFolderPath); err != nil {
+		return err
+	}
+
+	return nil
 }

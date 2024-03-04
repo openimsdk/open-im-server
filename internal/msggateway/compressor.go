@@ -17,7 +17,6 @@ package msggateway
 import (
 	"bytes"
 	"compress/gzip"
-	"errors"
 	"io"
 	"sync"
 
@@ -46,12 +45,15 @@ func NewGzipCompressor() *GzipCompressor {
 func (g *GzipCompressor) Compress(rawData []byte) ([]byte, error) {
 	gzipBuffer := bytes.Buffer{}
 	gz := gzip.NewWriter(&gzipBuffer)
+
 	if _, err := gz.Write(rawData); err != nil {
-		return nil, errs.Wrap(err)
+		return nil, errs.Wrap(err, "GzipCompressor.Compress: writing to gzip writer failed")
 	}
+
 	if err := gz.Close(); err != nil {
-		return nil, errs.Wrap(err)
+		return nil, errs.Wrap(err, "GzipCompressor.Compress: closing gzip writer failed")
 	}
+
 	return gzipBuffer.Bytes(), nil
 }
 
@@ -63,10 +65,10 @@ func (g *GzipCompressor) CompressWithPool(rawData []byte) ([]byte, error) {
 	gz.Reset(&gzipBuffer)
 
 	if _, err := gz.Write(rawData); err != nil {
-		return nil, errs.Wrap(err)
+		return nil, errs.Wrap(err, "GzipCompressor.CompressWithPool: error writing data")
 	}
 	if err := gz.Close(); err != nil {
-		return nil, errs.Wrap(err)
+		return nil, errs.Wrap(err, "GzipCompressor.CompressWithPool: error closing gzip writer")
 	}
 	return gzipBuffer.Bytes(), nil
 }
@@ -75,32 +77,36 @@ func (g *GzipCompressor) DeCompress(compressedData []byte) ([]byte, error) {
 	buff := bytes.NewBuffer(compressedData)
 	reader, err := gzip.NewReader(buff)
 	if err != nil {
-		return nil, errs.Wrap(err, "NewReader failed")
+		return nil, errs.Wrap(err, "GzipCompressor.DeCompress: NewReader creation failed")
 	}
-	compressedData, err = io.ReadAll(reader)
+	decompressedData, err := io.ReadAll(reader)
 	if err != nil {
-		return nil, errs.Wrap(err, "ReadAll failed")
+		return nil, errs.Wrap(err, "GzipCompressor.DeCompress: reading from gzip reader failed")
 	}
-	_ = reader.Close()
-	return compressedData, nil
+	if err = reader.Close(); err != nil {
+		// Even if closing the reader fails, we've successfully read the data,
+		// so we return the decompressed data and an error indicating the close failure.
+		return decompressedData, errs.Wrap(err, "GzipCompressor.DeCompress: closing gzip reader failed")
+	}
+	return decompressedData, nil
 }
 
 func (g *GzipCompressor) DecompressWithPool(compressedData []byte) ([]byte, error) {
 	reader := gzipReaderPool.Get().(*gzip.Reader)
-	if reader == nil {
-		return nil, errs.Wrap(errors.New("NewReader failed"))
-	}
 	defer gzipReaderPool.Put(reader)
 
 	err := reader.Reset(bytes.NewReader(compressedData))
 	if err != nil {
-		return nil, errs.Wrap(err, "NewReader failed")
+		return nil, errs.Wrap(err, "GzipCompressor.DecompressWithPool: resetting gzip reader failed")
 	}
 
-	compressedData, err = io.ReadAll(reader)
+	decompressedData, err := io.ReadAll(reader)
 	if err != nil {
-		return nil, errs.Wrap(err, "ReadAll failed")
+		return nil, errs.Wrap(err, "GzipCompressor.DecompressWithPool: reading from pooled gzip reader failed")
 	}
-	_ = reader.Close()
-	return compressedData, nil
+	if err = reader.Close(); err != nil {
+		// Similar to DeCompress, return the data and error for close failure.
+		return decompressedData, errs.Wrap(err, "GzipCompressor.DecompressWithPool: closing pooled gzip reader failed")
+	}
+	return decompressedData, nil
 }

@@ -24,7 +24,6 @@ import (
 )
 
 func NewGrpcPromObj(cusMetrics []prometheus.Collector) (*prometheus.Registry, *gp.ServerMetrics, error) {
-	////////////////////////////////////////////////////////
 	reg := prometheus.NewRegistry()
 	grpcMetrics := gp.NewServerMetrics()
 	grpcMetrics.EnableHandlingTimeHistogram()

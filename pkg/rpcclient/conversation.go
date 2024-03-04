@@ -24,6 +24,8 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
@@ -36,7 +38,7 @@ type Conversation struct {
 func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversation {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	client := pbconversation.NewConversationClient(conn)
 	return &Conversation{discov: discov, conn: conn, Client: client}
@@ -114,11 +116,7 @@ func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Con
 	return resp.Conversations, nil
 }
 
-func (c *ConversationRpcClient) GetConversations(
-	ctx context.Context,
-	ownerUserID string,
-	conversationIDs []string,
-) ([]*pbconversation.Conversation, error) {
+func (c *ConversationRpcClient) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*pbconversation.Conversation, error) {
 	if len(conversationIDs) == 0 {
 		return nil, nil
 	}

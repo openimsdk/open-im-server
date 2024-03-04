@@ -32,7 +32,7 @@ import (
 )
 
 func StartTask() error {
-	fmt.Println("cron task start, config", config.Config.ChatRecordsClearTime)
+	fmt.Println("Cron task start, config:", config.Config.ChatRecordsClearTime)
 
 	msgTool, err := InitMsgTool()
 	if err != nil {
@@ -48,16 +48,16 @@ func StartTask() error {
 
 	// register cron tasks
 	var crontab = cron.New()
-	fmt.Println("start chatRecordsClearTime cron task", "cron config", config.Config.ChatRecordsClearTime)
+	fmt.Printf("Start chatRecordsClearTime cron task, cron config: %s\n", config.Config.ChatRecordsClearTime)
 	_, err = crontab.AddFunc(config.Config.ChatRecordsClearTime, cronWrapFunc(rdb, "cron_clear_msg_and_fix_seq", msgTool.AllConversationClearMsgAndFixSeq))
 	if err != nil {
 		return errs.Wrap(err)
 	}
 
-	fmt.Println("start msgDestruct cron task", "cron config", config.Config.MsgDestructTime)
+	fmt.Printf("Start msgDestruct cron task, cron config: %s\n", config.Config.MsgDestructTime)
 	_, err = crontab.AddFunc(config.Config.MsgDestructTime, cronWrapFunc(rdb, "cron_conversations_destruct_msgs", msgTool.ConversationsDestructMsgs))
 	if err != nil {
-		return errs.Wrap(err)
+		return errs.Wrap(err, "cron_conversations_destruct_msgs")
 	}
 
 	// start crontab

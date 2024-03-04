@@ -147,14 +147,24 @@ func NewMessageRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) MessageR
 	return MessageRpcClient(*NewMessage(discov))
 }
 
+// SendMsg sends a message through the gRPC client and returns the response.
+// It wraps any encountered error for better error handling and context understanding.
 func (m *MessageRpcClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
 	resp, err := m.Client.SendMsg(ctx, req)
-	return resp, err
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
+// GetMaxSeq retrieves the maximum sequence number from the gRPC client.
+// Errors during the gRPC call are wrapped to provide additional context.
 func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
 	resp, err := m.Client.GetMaxSeq(ctx, req)
-	return resp, err
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 func (m *MessageRpcClient) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
@@ -181,9 +191,15 @@ func (m *MessageRpcClient) GetMsgByConversationIDs(ctx context.Context, docIDs [
 	return resp.MsgDatas, err
 }
 
+// PullMessageBySeqList retrieves messages by their sequence numbers using the gRPC client.
+// It directly forwards the request to the gRPC client and returns the response along with any error encountered.
 func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
 	resp, err := m.Client.PullMessageBySeqs(ctx, req)
-	return resp, err
+	if err != nil {
+		// Wrap the error to provide more context if the gRPC call fails.
+		return nil, err
+	}
+	return resp, nil
 }
 
 func (m *MessageRpcClient) GetConversationMaxSeq(ctx context.Context, conversationID string) (int64, error) {

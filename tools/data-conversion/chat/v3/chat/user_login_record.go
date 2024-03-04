@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// 用户登录信息表.
+// User login information table.
 type UserLoginRecord struct {
 	UserID    string    `gorm:"column:user_id;size:64"`
 	LoginTime time.Time `gorm:"column:login_time"`

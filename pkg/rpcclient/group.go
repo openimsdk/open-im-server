@@ -28,6 +28,7 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 type Group struct {
@@ -39,7 +40,7 @@ type Group struct {
 func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry) *Group {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	client := group.NewGroupClient(conn)
 	return &Group{discov: discov, conn: conn, Client: client}

@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// ForbiddenAccount 封号表.
+// ForbiddenAccount forbidden account.
 type ForbiddenAccount struct {
 	UserID         string    `gorm:"column:user_id;index:userID;primary_key;type:char(64)"`
 	Reason         string    `gorm:"column:reason;type:varchar(255)" `

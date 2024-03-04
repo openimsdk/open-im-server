@@ -21,6 +21,8 @@ import (
 	"errors"
 	"os"
 
+	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
@@ -49,37 +51,41 @@ func readEncryptablePEMBlock(path string, pwd []byte) ([]byte, error) {
 }
 
 // NewTLSConfig setup the TLS config from general config file.
-func NewTLSConfig(clientCertFile, clientKeyFile, caCertFile string, keyPwd []byte) *tls.Config {
-	tlsConfig := tls.Config{}
+func NewTLSConfig(clientCertFile, clientKeyFile, caCertFile string, keyPwd []byte) (*tls.Config, error) {
+	var tlsConfig tls.Config
 
 	if clientCertFile != "" && clientKeyFile != "" {
 		certPEMBlock, err := os.ReadFile(clientCertFile)
 		if err != nil {
-			panic(err)
+			return nil, errs.Wrap(err, "NewTLSConfig: failed to read client cert file")
 		}
+
 		keyPEMBlock, err := readEncryptablePEMBlock(clientKeyFile, keyPwd)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
+
 		cert, err := tls.X509KeyPair(certPEMBlock, keyPEMBlock)
 		if err != nil {
-			panic(err)
+			return nil, errs.Wrap(err, "NewTLSConfig: failed to create X509 key pair")
 		}
 		tlsConfig.Certificates = []tls.Certificate{cert}
 	}
 
-	caCert, err := os.ReadFile(caCertFile)
-	if err != nil {
-		panic(err)
+	if caCertFile != "" {
+		caCert, err := os.ReadFile(caCertFile)
+		if err != nil {
+			return nil, errs.Wrap(err, "NewTLSConfig: failed to read CA cert file")
+		}
+
+		caCertPool := x509.NewCertPool()
+		if ok := caCertPool.AppendCertsFromPEM(caCert); !ok {
+			return nil, errors.New("NewTLSConfig: not a valid CA cert")
+		}
+		tlsConfig.RootCAs = caCertPool
 	}
-	caCertPool := x509.NewCertPool()
-	ok := caCertPool.AppendCertsFromPEM(caCert)
-	if !ok {
-		panic(errors.New("not a valid CA cert"))
-	}
-	tlsConfig.RootCAs = caCertPool
 
 	tlsConfig.InsecureSkipVerify = config.Config.Kafka.TLS.InsecureSkipVerify
 
-	return &tlsConfig
+	return &tlsConfig, nil
 }

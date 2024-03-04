@@ -49,7 +49,7 @@ func NewRedis() (redis.UniversalClient, error) {
 	overrideConfigFromEnv()
 
 	if len(config.Config.Redis.Address) == 0 {
-		return nil, errs.Wrap(errors.New("redis address is empty"))
+		return nil, errs.Wrap(errors.New("redis address is empty"), "Redis configuration error")
 	}
 	specialerror.AddReplace(redis.Nil, errs.ErrRecordNotFound)
 	var rdb redis.UniversalClient
@@ -65,9 +65,9 @@ func NewRedis() (redis.UniversalClient, error) {
 		rdb = redis.NewClient(&redis.Options{
 			Addr:       config.Config.Redis.Address[0],
 			Username:   config.Config.Redis.Username,
-			Password:   config.Config.Redis.Password,
-			DB:         0,   // use default DB
-			PoolSize:   100, // connection pool size
+			Password:   config.Config.Redis.Password, // no password set
+			DB:         0,                            // use default DB
+			PoolSize:   100,                          // connection pool size
 			MaxRetries: maxRetry,
 		})
 	}
@@ -77,9 +77,9 @@ func NewRedis() (redis.UniversalClient, error) {
 	defer cancel()
 	err = rdb.Ping(ctx).Err()
 	if err != nil {
-		uriFormat := "address:%s, username:%s, password:%s, clusterMode:%t, enablePipeline:%t"
-		errMsg := fmt.Sprintf(uriFormat, config.Config.Redis.Address, config.Config.Redis.Username, config.Config.Redis.Password, config.Config.Redis.ClusterMode, config.Config.Redis.EnablePipeline)
-		return nil, errs.Wrap(err, errMsg)
+		uriFormat := "address:%v, username:%s, clusterMode:%t, enablePipeline:%t"
+		errMsg := fmt.Sprintf(uriFormat, config.Config.Redis.Address, config.Config.Redis.Username, config.Config.Redis.ClusterMode, config.Config.Redis.EnablePipeline)
+		return nil, errs.Wrap(err, "Redis connection failed: %s", errMsg)
 	}
 	redisClient = rdb
 	return rdb, err
@@ -98,9 +98,11 @@ func overrideConfigFromEnv() {
 			config.Config.Redis.Address = strings.Split(envAddr, ",")
 		}
 	}
+
 	if envUser := os.Getenv("REDIS_USERNAME"); envUser != "" {
 		config.Config.Redis.Username = envUser
 	}
+
 	if envPass := os.Getenv("REDIS_PASSWORD"); envPass != "" {
 		config.Config.Redis.Password = envPass
 	}

@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OpenIMSDK/tools/log"
-
 	"github.com/OpenIMSDK/protocol/msg"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -35,6 +33,7 @@ import (
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 
 	table "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
@@ -122,13 +121,7 @@ func (m *MsgMongoDriver) UpdateMsgContent(ctx context.Context, docID string, ind
 	return nil
 }
 
-func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(
-	ctx context.Context,
-	docID string,
-	msg *sdkws.MsgData,
-	seqIndex int,
-	status int32,
-) error {
+func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error {
 	msg.Status = status
 	bytes, err := proto.Marshal(msg)
 	if err != nil {
@@ -140,7 +133,7 @@ func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(
 		bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", seqIndex): bytes}},
 	)
 	if err != nil {
-		return errs.Wrap(err)
+		return errs.Wrap(err, fmt.Sprintf("docID is %s, seqIndex is %d", docID, seqIndex))
 	}
 	return nil
 }
@@ -166,7 +159,7 @@ func (m *MsgMongoDriver) GetMsgDocModelByIndex(
 		findOpts,
 	)
 	if err != nil {
-		return nil, errs.Wrap(err)
+		return nil, errs.Wrap(err, fmt.Sprintf("conversationID is %s", conversationID))
 	}
 	var msgs []table.MsgDocModel
 	err = cursor.All(ctx, &msgs)
@@ -222,7 +215,7 @@ func (m *MsgMongoDriver) DeleteMsgsInOneDocByIndex(ctx context.Context, docID st
 	}
 	_, err := m.MsgCollection.UpdateMany(ctx, bson.M{"doc_id": docID}, updates)
 	if err != nil {
-		return errs.Wrap(err)
+		return errs.Wrap(err, fmt.Sprintf("docID is %s, indexes is %v", docID, indexes))
 	}
 	return nil
 }
@@ -289,7 +282,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(
 	defer cur.Close(ctx)
 	var msgDocModel []table.MsgDocModel
 	if err := cur.All(ctx, &msgDocModel); err != nil {
-		return nil, errs.Wrap(err)
+		return nil, errs.Wrap(err, fmt.Sprintf("docID is %s, seqs is %v", docID, seqs))
 	}
 	if len(msgDocModel) == 0 {
 		return nil, errs.Wrap(mongo.ErrNoDocuments)
@@ -316,14 +309,14 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(
 			}
 			data, err := json.Marshal(&revokeContent)
 			if err != nil {
-				return nil, err
+				return nil, errs.Wrap(err, fmt.Sprintf("docID is %s, seqs is %v", docID, seqs))
 			}
 			elem := sdkws.NotificationElem{
 				Detail: string(data),
 			}
 			content, err := json.Marshal(&elem)
 			if err != nil {
-				return nil, err
+				return nil, errs.Wrap(err, fmt.Sprintf("docID is %s, seqs is %v", docID, seqs))
 			}
 			msg.Msg.ContentType = constant.MsgRevokeNotification
 			msg.Msg.Content = string(content)
@@ -336,17 +329,12 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(
 func (m *MsgMongoDriver) IsExistDocID(ctx context.Context, docID string) (bool, error) {
 	count, err := m.MsgCollection.CountDocuments(ctx, bson.M{"doc_id": docID})
 	if err != nil {
-		return false, errs.Wrap(err)
+		return false, errs.Wrap(err, fmt.Sprintf("docID is %s", docID))
 	}
 	return count > 0, nil
 }
 
-func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(
-	ctx context.Context,
-	userID string,
-	docID string,
-	indexes []int64,
-) error {
+func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(ctx context.Context, userID string, docID string, indexes []int64) error {
 	updates := []mongo.WriteModel{}
 	for _, index := range indexes {
 		filter := bson.M{
@@ -366,7 +354,7 @@ func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(
 		updates = append(updates, updateModel)
 	}
 	_, err := m.MsgCollection.BulkWrite(ctx, updates)
-	return err
+	return errs.Wrap(err, fmt.Sprintf("docID is %s, indexes is %v", docID, indexes))
 }
 
 // RangeUserSendCount
@@ -662,7 +650,7 @@ func (m *MsgMongoDriver) RangeUserSendCount(
 								"$dateToString": bson.M{
 									"format": "%Y-%m-%d",
 									"date": bson.M{
-										"$toDate": "$$item.msg.send_time", // 毫秒时间戳
+										"$toDate": "$$item.msg.send_time", // Millisecond timestamp
 									},
 								},
 							},
@@ -911,7 +899,7 @@ func (m *MsgMongoDriver) RangeGroupSendCount(
 								"$dateToString": bson.M{
 									"format": "%Y-%m-%d",
 									"date": bson.M{
-										"$toDate": "$$item.msg.send_time", // 毫秒时间戳
+										"$toDate": "$$item.msg.send_time", // Millisecond timestamp
 									},
 								},
 							},
@@ -1076,6 +1064,7 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 	var pipe mongo.Pipeline
 	condition := bson.A{}
 	if req.SendTime != "" {
+		// Changed to keyed fields for bson.M to avoid govet errors
 		condition = append(condition, bson.M{"$eq": bson.A{bson.M{"$dateToString": bson.M{"format": "%Y-%m-%d", "date": bson.M{"$toDate": "$$item.msg.send_time"}}}, req.SendTime}})
 	}
 	if req.MsgType != 0 {
@@ -1092,62 +1081,26 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 	}
 
 	or := bson.A{
-		bson.M{
-			"doc_id": bson.M{
-				"$regex":   "^si_",
-				"$options": "i",
-			},
-		},
+		bson.M{"doc_id": bson.M{"$regex": "^si_", "$options": "i"}},
+		bson.M{"doc_id": bson.M{"$regex": "^g_", "$options": "i"}},
+		bson.M{"doc_id": bson.M{"$regex": "^sg_", "$options": "i"}},
 	}
-	or = append(or,
-		bson.M{
-			"doc_id": bson.M{
-				"$regex":   "^g_",
-				"$options": "i",
-			},
-		},
-		bson.M{
-			"doc_id": bson.M{
-				"$regex":   "^sg_",
-				"$options": "i",
-			},
-		},
-	)
 
+	// Use bson.D with keyed fields to specify the order explicitly
 	pipe = mongo.Pipeline{
-		{
-			{"$match", bson.D{
-				{
-					"$or", or,
-				},
+		{{"$match", bson.D{{Key: "$or", Value: or}}}},
+		{{"$project", bson.D{
+			{Key: "msgs", Value: bson.D{
+				{Key: "$filter", Value: bson.D{
+					{Key: "input", Value: "$msgs"},
+					{Key: "as", Value: "item"},
+					{Key: "cond", Value: bson.D{{Key: "$and", Value: condition}}},
+				}},
 			}},
-		},
-		{
-			{"$project", bson.D{
-				{
-					"msgs", bson.D{
-						{
-							"$filter", bson.D{
-								{"input", "$msgs"},
-								{"as", "item"},
-								{
-									"cond", bson.D{
-										{"$and", condition},
-									},
-								},
-							},
-						},
-					},
-				},
-				{"doc_id", 1},
-			}},
-		},
-		{
-			{"$unwind", bson.M{"path": "$msgs"}},
-		},
-		{
-			{"$sort", bson.M{"msgs.msg.send_time": -1}},
-		},
+			{Key: "doc_id", Value: 1},
+		}}},
+		{{"$unwind", bson.M{"path": "$msgs"}}},
+		{{"$sort", bson.M{"msgs.msg.send_time": -1}}},
 	}
 	cursor, err := m.MsgCollection.Aggregate(ctx, pipe)
 	if err != nil {
@@ -1160,12 +1113,12 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 	var msgsDocs []docModel
 	err = cursor.All(ctx, &msgsDocs)
 	if err != nil {
-		return 0, nil, err
+		return 0, nil, errs.Wrap(err, "cursor.All msgsDocs")
 	}
 	log.ZDebug(ctx, "query mongoDB", "result", msgsDocs)
 	msgs := make([]*table.MsgInfoModel, 0)
-	for index := range msgsDocs {
-		msgInfo := msgsDocs[index].Msg
+	for _, doc := range msgsDocs {
+		msgInfo := doc.Msg
 		if msgInfo == nil || msgInfo.Msg == nil {
 			continue
 		}
@@ -1185,14 +1138,12 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 			}
 			data, err := json.Marshal(&revokeContent)
 			if err != nil {
-				return 0, nil, err
+				return 0, nil, errs.Wrap(err, "json.Marshal revokeContent")
 			}
-			elem := sdkws.NotificationElem{
-				Detail: string(data),
-			}
+			elem := sdkws.NotificationElem{Detail: string(data)}
 			content, err := json.Marshal(&elem)
 			if err != nil {
-				return 0, nil, err
+				return 0, nil, errs.Wrap(err, "json.Marshal elem")
 			}
 			msgInfo.Msg.ContentType = constant.MsgRevokeNotification
 			msgInfo.Msg.Content = string(content)
@@ -1203,7 +1154,8 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 	n := int32(len(msgs))
 	if start >= n {
 		return n, []*table.MsgInfoModel{}, nil
-	} else if start+req.Pagination.ShowNumber < n {
+	}
+	if start+req.Pagination.ShowNumber < n {
 		msgs = msgs[start : start+req.Pagination.ShowNumber]
 	} else {
 		msgs = msgs[start:]

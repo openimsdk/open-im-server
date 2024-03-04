@@ -37,7 +37,11 @@ func NewMsgTransferCmd() *MsgTransferCmd {
 
 func (m *MsgTransferCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msgtransfer.StartTransfer(m.getPrometheusPortFlag(cmd))
+		prometheusPort, err := m.getPrometheusPortFlag(cmd)
+		if err != nil {
+			return err
+		}
+		return msgtransfer.StartTransfer(prometheusPort)
 	}
 }
 
@@ -46,14 +50,18 @@ func (m *MsgTransferCmd) Exec() error {
 	return m.Execute()
 }
 
-func (m *MsgTransferCmd) GetPortFromConfig(portType string) int {
+func (m *MsgTransferCmd) GetPortFromConfig(portType string) (int, error) {
 	if portType == constant.FlagPort {
-		return 0
+		return 0, nil
 	} else if portType == constant.FlagPrometheusPort {
 		n := m.getTransferProgressFlagValue()
-		return config2.Config.Prometheus.MessageTransferPrometheusPort[n]
+
+		if n < len(config2.Config.Prometheus.MessageTransferPrometheusPort) {
+			return config2.Config.Prometheus.MessageTransferPrometheusPort[n], nil
+		}
+		return 0, fmt.Errorf("index out of range for MessageTransferPrometheusPort with index %d", n)
 	}
-	return 0
+	return 0, fmt.Errorf("unknown port type: %s", portType)
 }
 
 func (m *MsgTransferCmd) AddTransferProgressFlag() {

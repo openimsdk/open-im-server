@@ -66,11 +66,7 @@ type UserCacheRedis struct {
 	rcClient   *rockscache.Client
 }
 
-func NewUserCacheRedis(
-	rdb redis.UniversalClient,
-	userDB relationtb.UserModelInterface,
-	options rockscache.Options,
-) UserCache {
+func NewUserCacheRedis(rdb redis.UniversalClient, userDB relationtb.UserModelInterface, options rockscache.Options) UserCache {
 	rcClient := rockscache.NewClient(rdb, options)
 
 	return &UserCacheRedis{
@@ -282,8 +278,8 @@ func (u *UserCacheRedis) refreshStatusOnline(ctx context.Context, userID string,
 	var onlineStatus user.OnlineStatus
 	if !isNil {
 		err2 := json.Unmarshal([]byte(result), &onlineStatus)
-		if err != nil {
-			return errs.Wrap(err2)
+		if err2 != nil {
+			return errs.Wrap(err, "json.Unmarshal failed")
 		}
 		onlineStatus.PlatformIDs = RemoveRepeatedElementsInList(append(onlineStatus.PlatformIDs, platformID))
 	} else {
@@ -293,7 +289,7 @@ func (u *UserCacheRedis) refreshStatusOnline(ctx context.Context, userID string,
 	onlineStatus.UserID = userID
 	newjsonData, err := json.Marshal(&onlineStatus)
 	if err != nil {
-		return errs.Wrap(err)
+		return errs.Wrap(err, "json.Marshal failed")
 	}
 	_, err = u.rdb.HSet(ctx, key, userID, string(newjsonData)).Result()
 	if err != nil {

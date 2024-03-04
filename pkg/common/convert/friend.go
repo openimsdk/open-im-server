@@ -53,11 +53,7 @@ func FriendDB2Pb(ctx context.Context, friendDB *relation.FriendModel,
 	}, nil
 }
 
-func FriendsDB2Pb(
-	ctx context.Context,
-	friendsDB []*relation.FriendModel,
-	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
-) (friendsPb []*sdkws.FriendInfo, err error) {
+func FriendsDB2Pb(ctx context.Context, friendsDB []*relation.FriendModel, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (friendsPb []*sdkws.FriendInfo, err error) {
 	if len(friendsDB) == 0 {
 		return nil, nil
 	}
@@ -89,8 +85,7 @@ func FriendsDB2Pb(
 
 }
 
-func FriendRequestDB2Pb(
-	ctx context.Context,
+func FriendRequestDB2Pb(ctx context.Context,
 	friendRequests []*relation.FriendRequestModel,
 	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
 ) ([]*sdkws.FriendRequest, error) {

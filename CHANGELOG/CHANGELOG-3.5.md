@@ -8,6 +8,21 @@
 ## [Unreleased]
 
 
+<a name="v3.5.1-alpha.2"></a>
+## [v3.5.1-alpha.2] - 2024-01-26
+
+<a name="v3.5.0+15.d356f7a"></a>
+## [v3.5.0+15.d356f7a] - 2024-01-26
+
+<a name="v3.5.1-rc.1"></a>
+## [v3.5.1-rc.1] - 2024-01-23
+
+<a name="v3.5.0+2.e0bd54f-3-g52f9fc209"></a>
+## [v3.5.0+2.e0bd54f-3-g52f9fc209] - 2024-01-12
+
+<a name="v3.5.0+2.e0bd54f-1-g4ce6a0fa6"></a>
+## [v3.5.0+2.e0bd54f-1-g4ce6a0fa6] - 2024-01-12
+
 <a name="v3.5.1-alpha.1"></a>
 ## [v3.5.1-alpha.1] - 2024-01-09
 
@@ -59,7 +74,12 @@
 - Merge branch 'tuoyun'
 
 
-[Unreleased]: https://github.com/openimsdk/open-im-server/compare/v3.5.1-alpha.1...HEAD
+[Unreleased]: https://github.com/openimsdk/open-im-server/compare/v3.5.1-alpha.2...HEAD
+[v3.5.1-alpha.2]: https://github.com/openimsdk/open-im-server/compare/v3.5.0+15.d356f7a...v3.5.1-alpha.2
+[v3.5.0+15.d356f7a]: https://github.com/openimsdk/open-im-server/compare/v3.5.1-rc.1...v3.5.0+15.d356f7a
+[v3.5.1-rc.1]: https://github.com/openimsdk/open-im-server/compare/v3.5.0+2.e0bd54f-3-g52f9fc209...v3.5.1-rc.1
+[v3.5.0+2.e0bd54f-3-g52f9fc209]: https://github.com/openimsdk/open-im-server/compare/v3.5.0+2.e0bd54f-1-g4ce6a0fa6...v3.5.0+2.e0bd54f-3-g52f9fc209
+[v3.5.0+2.e0bd54f-1-g4ce6a0fa6]: https://github.com/openimsdk/open-im-server/compare/v3.5.1-alpha.1...v3.5.0+2.e0bd54f-1-g4ce6a0fa6
 [v3.5.1-alpha.1]: https://github.com/openimsdk/open-im-server/compare/v3.5.0...v3.5.1-alpha.1
 [v3.5.0]: https://github.com/openimsdk/open-im-server/compare/v3.5.1...v3.5.0
 [v3.5.1]: https://github.com/openimsdk/open-im-server/compare/v3.5.1-bate.1...v3.5.1

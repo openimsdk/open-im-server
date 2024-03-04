@@ -48,33 +48,32 @@ const (
 	updateKeyRevoke
 )
 
+// CommonMsgDatabase defines the interface for message database operations.
 type CommonMsgDatabase interface {
-	// 批量插入消息
+	// BatchInsertChat2DB inserts a batch of messages into the database for a specific conversation.
 	BatchInsertChat2DB(ctx context.Context, conversationID string, msgs []*sdkws.MsgData, currentMaxSeq int64) error
-	// 撤回消息
+	// RevokeMsg revokes a message in a conversation.
 	RevokeMsg(ctx context.Context, conversationID string, seq int64, revoke *unrelationtb.RevokeModel) error
-	// mark as read
+	// MarkSingleChatMsgsAsRead marks messages as read for a single chat by sequence numbers.
 	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, seqs []int64) error
-	// 刪除redis中消息缓存
+	// DeleteMessagesFromCache deletes message caches from Redis by sequence numbers.
 	DeleteMessagesFromCache(ctx context.Context, conversationID string, seqs []int64) error
+	// DelUserDeleteMsgsList deletes user's message deletion list.
 	DelUserDeleteMsgsList(ctx context.Context, conversationID string, seqs []int64)
-	// incrSeq然后批量插入缓存
+	// BatchInsertChat2Cache increments the sequence number and then batch inserts messages into the cache.
 	BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNewConversation bool, err error)
-
-	//  通过seqList获取mongo中写扩散消息
+	// GetMsgBySeqsRange retrieves messages from MongoDB by a range of sequence numbers.
 	GetMsgBySeqsRange(ctx context.Context, userID string, conversationID string, begin, end, num, userMaxSeq int64) (minSeq int64, maxSeq int64, seqMsg []*sdkws.MsgData, err error)
-	// 通过seqList获取大群在 mongo里面的消息
+	// GetMsgBySeqs retrieves messages for large groups from MongoDB by sequence numbers.
 	GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (minSeq int64, maxSeq int64, seqMsg []*sdkws.MsgData, err error)
-	// 删除会话消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
+	// DeleteConversationMsgsAndSetMinSeq deletes conversation messages and resets the minimum sequence number. If `remainTime` is 0, all messages are deleted (this method does not delete Redis cache).
 	DeleteConversationMsgsAndSetMinSeq(ctx context.Context, conversationID string, remainTime int64) error
-	// 用户标记删除过期消息返回标记删除的seq列表
+	// UserMsgsDestruct marks messages for deletion based on destruct time and returns a list of sequence numbers for marked messages.
 	UserMsgsDestruct(ctx context.Context, userID string, conversationID string, destructTime int64, lastMsgDestructTime time.Time) (seqs []int64, err error)
-
-	// 用户根据seq删除消息
+	// DeleteUserMsgsBySeqs allows a user to delete messages based on sequence numbers.
 	DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error
-	// 物理删除消息置空
+	// DeleteMsgsPhysicalBySeqs physically deletes messages by emptying them based on sequence numbers.
 	DeleteMsgsPhysicalBySeqs(ctx context.Context, conversationID string, seqs []int64) error
-
 	SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error
 	GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
 	GetMaxSeq(ctx context.Context, conversationID string) (int64, error)
@@ -200,7 +199,7 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 	}
 	num := db.msg.GetSingleGocMsgNum()
 	// num = 100
-	for i, field := range fields { // 检查类型
+	for i, field := range fields { // Check the type of the field
 		var ok bool
 		switch key {
 		case updateKeyMsg:
@@ -218,7 +217,7 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 			return errs.ErrInternalServer.Wrap("field type is invalid")
 		}
 	}
-	// 返回值为true表示数据库存在该文档，false表示数据库不存在该文档
+	// Returns true if the document exists in the database, false if the document does not exist in the database
 	updateMsgModel := func(seq int64, i int) (bool, error) {
 		var (
 			res *mongo.UpdateResult
@@ -240,21 +239,21 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 	}
 	tryUpdate := true
 	for i := 0; i < len(fields); i++ {
-		seq := firstSeq + int64(i) // 当前seq
+		seq := firstSeq + int64(i) // Current sequence number
 		if tryUpdate {
 			matched, err := updateMsgModel(seq, i)
 			if err != nil {
 				return err
 			}
 			if matched {
-				continue // 匹配到了，继续下一个(不一定修改)
+				continue // The current data has been updated, skip the current data
 			}
 		}
 		doc := unrelationtb.MsgDocModel{
 			DocID: db.msg.GetDocID(conversationID, seq),
 			Msg:   make([]*unrelationtb.MsgInfoModel, num),
 		}
-		var insert int // 插入的数量
+		var insert int // Inserted data number
 		for j := i; j < len(fields); j++ {
 			seq = firstSeq + int64(j)
 			if db.msg.GetDocID(conversationID, seq) != doc.DocID {
@@ -283,14 +282,14 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 		}
 		if err := db.msgDocDatabase.Create(ctx, &doc); err != nil {
 			if mongo.IsDuplicateKeyError(err) {
-				i--              // 存在并发,重试当前数据
-				tryUpdate = true // 以修改模式
+				i--              // already inserted
+				tryUpdate = true // next block use update mode
 				continue
 			}
 			return err
 		}
-		tryUpdate = false // 当前以插入成功,下一块优先插入模式
-		i += insert - 1   // 跳过已插入的数据
+		tryUpdate = false // The current block is inserted successfully, and the next block is inserted preferentially
+		i += insert - 1   // Skip the inserted data
 	}
 	return nil
 }
@@ -754,7 +753,7 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 					log.ZError(ctx, "deleteMsgRecursion GetUserMsgListByIndex failed", err, "conversationID", conversationID, "index", index)
 				}
 			}
-			// 获取报错，或者获取不到了，物理删除并且返回seq delMongoMsgsPhysical(delStruct.delDocIDList), 结束递归
+			// If an error is reported, or the error cannot be obtained, it is physically deleted and seq delMongoMsgsPhysical(delStruct.delDocIDList) is returned to end the recursion
 			break
 		}
 		index++
@@ -809,7 +808,7 @@ func (d *delMsgRecursionStruct) getSetMinSeq() int64 {
 // index 0....19(del) 20...69
 // seq 70
 // set minSeq 21
-// recursion 删除list并且返回设置的最小seq.
+// recursion deletes the list and returns the set minimum seq.
 func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversationID string, index int64, delStruct *delMsgRecursionStruct, remainTime int64) (int64, error) {
 	// find from oldest list
 	msgDocModel, err := db.msgDocDatabase.GetMsgDocModelByIndex(ctx, conversationID, index, 1)
@@ -821,7 +820,7 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 				log.ZError(ctx, "deleteMsgRecursion GetUserMsgListByIndex failed", err, "conversationID", conversationID, "index", index)
 			}
 		}
-		// 获取报错，或者获取不到了，物理删除并且返回seq delMongoMsgsPhysical(delStruct.delDocIDList), 结束递归
+		// If an error is reported, or the error cannot be obtained, it is physically deleted and seq delMongoMsgsPhysical(delStruct.delDocIDList) is returned to end the recursion
 		err = db.msgDocDatabase.DeleteDocs(ctx, delStruct.delDocIDs)
 		if err != nil {
 			return 0, err

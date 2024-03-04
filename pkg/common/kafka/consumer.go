@@ -17,9 +17,8 @@ package kafka
 import (
 	"sync"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
 	"github.com/IBM/sarama"
+	"github.com/OpenIMSDK/tools/errs"
 )
 
 type Consumer struct {
@@ -30,28 +29,33 @@ type Consumer struct {
 	Consumer      sarama.Consumer
 }
 
-func NewKafkaConsumer(addr []string, topic string) *Consumer {
-	p := Consumer{}
-	p.Topic = topic
-	p.addr = addr
-	consumerConfig := sarama.NewConfig()
-	if config.Config.Kafka.Username != "" && config.Config.Kafka.Password != "" {
-		consumerConfig.Net.SASL.Enable = true
-		consumerConfig.Net.SASL.User = config.Config.Kafka.Username
-		consumerConfig.Net.SASL.Password = config.Config.Kafka.Password
+func NewKafkaConsumer(addr []string, topic string, kafkaConfig *sarama.Config) (*Consumer, error) {
+	p := Consumer{
+		Topic: topic,
+		addr:  addr,
 	}
-	SetupTLSConfig(consumerConfig)
-	consumer, err := sarama.NewConsumer(p.addr, consumerConfig)
+
+	if kafkaConfig.Net.SASL.User != "" && kafkaConfig.Net.SASL.Password != "" {
+		kafkaConfig.Net.SASL.Enable = true
+	}
+
+	err := SetupTLSConfig(kafkaConfig)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
+	}
+
+	consumer, err := sarama.NewConsumer(p.addr, kafkaConfig)
+	if err != nil {
+		return nil, errs.Wrap(err, "NewKafkaConsumer: creating consumer failed")
 	}
 	p.Consumer = consumer
 
 	partitionList, err := consumer.Partitions(p.Topic)
 	if err != nil {
-		panic(err.Error())
+		return nil, errs.Wrap(err, "NewKafkaConsumer: getting partitions failed")
 	}
 	p.PartitionList = partitionList
 
-	return &p
+	return &p, nil
+
 }

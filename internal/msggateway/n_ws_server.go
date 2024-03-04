@@ -88,6 +88,7 @@ type WsServer struct {
 	Encoder
 	MessageHandler
 }
+
 type kickHandler struct {
 	clientOK   bool
 	oldClients []*Client
@@ -129,7 +130,9 @@ func (ws *WsServer) UnRegister(c *Client) {
 }
 
 func (ws *WsServer) Validate(s any) error {
-	//?question?
+	if s == nil {
+		return errs.Wrap(errors.New("input cannot be nil"))
+	}
 	return nil
 }
 
@@ -276,7 +279,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		log.ZDebug(client.ctx, "user exist", "userID", client.UserID, "platformID", client.PlatformID)
 		if clientOK {
 			ws.clients.Set(client.UserID, client)
-			// 已经有同平台的连接存在
+			// There is already a connection to the platform
 			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID", client.PlatformID, "old remote addr", getRemoteAdders(oldClients))
 			ws.onlineUserConnNum.Add(1)
 		} else {

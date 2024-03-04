@@ -46,11 +46,7 @@ type BlackCacheRedis struct {
 	blackDB    relationtb.BlackModelInterface
 }
 
-func NewBlackCacheRedis(
-	rdb redis.UniversalClient,
-	blackDB relationtb.BlackModelInterface,
-	options rockscache.Options,
-) BlackCache {
+func NewBlackCacheRedis(rdb redis.UniversalClient, blackDB relationtb.BlackModelInterface, options rockscache.Options) BlackCache {
 	rcClient := rockscache.NewClient(rdb, options)
 
 	return &BlackCacheRedis{

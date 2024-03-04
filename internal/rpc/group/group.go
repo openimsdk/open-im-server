@@ -765,8 +765,8 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 		return nil, errs.ErrGroupRequestHandled.Wrap("group request already processed")
 	}
 	var inGroup bool
-	if _, err := s.db.TakeGroupMember(ctx, req.GroupID, req.FromUserID); err == nil {
-		inGroup = true // 已经在群里了
+	if _, takeErr := s.db.TakeGroupMember(ctx, req.GroupID, req.FromUserID); takeErr == nil {
+		inGroup = true // Already in group
 	} else if !s.IsNotFound(err) {
 		return nil, err
 	}

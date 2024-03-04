@@ -67,20 +67,22 @@ func run(port int, proPort int) error {
 	// Determine whether zk is passed according to whether it is a clustered deployment
 	client, err = kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
-		return errs.Wrap(err, "register discovery err")
+		return err
 	}
 
 	if err = client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
-		return errs.Wrap(err, "create rpc root nodes error")
+		return err
 	}
 
 	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.Config.EncodeConfig()); err != nil {
 		return err
 	}
+
 	var (
 		netDone = make(chan struct{}, 1)
 		netErr  error
 	)
+
 	router := api.NewGinRouter(client, rdb)
 	if config.Config.Prometheus.Enable {
 		go func() {
@@ -91,7 +93,6 @@ func run(port int, proPort int) error {
 				netDone <- struct{}{}
 			}
 		}()
-
 	}
 
 	var address string
@@ -108,7 +109,6 @@ func run(port int, proPort int) error {
 		if err != nil && err != http.ErrServerClosed {
 			netErr = errs.Wrap(err, fmt.Sprintf("api start err: %s", server.Addr))
 			netDone <- struct{}{}
-
 		}
 	}()
 
@@ -122,7 +122,7 @@ func run(port int, proPort int) error {
 		util.SIGTERMExit()
 		err := server.Shutdown(ctx)
 		if err != nil {
-			return errs.Wrap(err, "shutdown err")
+			return errs.Wrap(err, "api shutdown err")
 		}
 	case <-netDone:
 		close(netDone)

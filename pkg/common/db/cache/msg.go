@@ -24,12 +24,11 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
-	"github.com/OpenIMSDK/tools/errs"
-
 	"github.com/gogo/protobuf/jsonpb"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
 
@@ -433,7 +432,7 @@ func (c *msgCache) PipeSetMessageToCache(ctx context.Context, conversationID str
 	for _, msg := range msgs {
 		s, err := msgprocessor.Pb2String(msg)
 		if err != nil {
-			return 0, errs.Wrap(err, "pb.marshal")
+			return 0, err
 		}
 
 		key := c.getMessageCacheKey(conversationID, msg.Seq)
@@ -442,7 +441,7 @@ func (c *msgCache) PipeSetMessageToCache(ctx context.Context, conversationID str
 
 	results, err := pipe.Exec(ctx)
 	if err != nil {
-		return 0, errs.Wrap(err, "pipe.set")
+		return 0, errs.Wrap(err)
 	}
 
 	for _, res := range results {

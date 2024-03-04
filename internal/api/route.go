@@ -44,7 +44,7 @@ import (
 )
 
 func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
-	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin"))) // 默认RPC中间件
+	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin"))) // Default RPC middleware
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -225,6 +225,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	return r
 }
 
+// GinParseToken is a middleware that parses the token in the request header and verifies it.
 func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 	dataBase := controller.NewAuthDatabase(
 		cache.NewMsgCacheModel(rdb),
@@ -250,13 +251,11 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 			}
 			m, err := dataBase.GetTokensWithoutError(c, claims.UserID, claims.PlatformID)
 			if err != nil {
-				log.ZWarn(c, "cache get token error", errs.ErrTokenNotExist.Wrap())
 				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
 				c.Abort()
 				return
 			}
 			if len(m) == 0 {
-				log.ZWarn(c, "cache do not exist token error", errs.ErrTokenNotExist.Wrap())
 				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
 				c.Abort()
 				return
@@ -265,12 +264,10 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 				switch v {
 				case constant.NormalToken:
 				case constant.KickedToken:
-					log.ZWarn(c, "cache kicked token error", errs.ErrTokenKicked.Wrap())
 					apiresp.GinError(c, errs.ErrTokenKicked.Wrap())
 					c.Abort()
 					return
 				default:
-					log.ZWarn(c, "cache unknown token error", errs.ErrTokenUnknown.Wrap())
 					apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
 					c.Abort()
 					return
@@ -286,3 +283,10 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 		}
 	}
 }
+
+// // handleGinError logs and returns an error response through Gin context.
+// func handleGinError(c *gin.Context, logMessage string, errType errs.CodeError, detail string) {
+// 	wrappedErr := errType.Wrap(detail)
+// 	apiresp.GinError(c, wrappedErr)
+// 	c.Abort()
+// }

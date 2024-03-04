@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/openimsdk/open-im-server/v3/internal/tools"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 type MsgUtilsCmd struct {
@@ -137,7 +138,7 @@ func (s *SeqCmd) GetSeqCmd() *cobra.Command {
 	s.Command.Run = func(cmdLines *cobra.Command, args []string) {
 		_, err := tools.InitMsgTool()
 		if err != nil {
-			panic(err)
+			util.ExitWithError(err)
 		}
 		userID := s.getUserIDFlag(cmdLines)
 		superGroupID := s.getSuperGroupIDFlag(cmdLines)

@@ -24,6 +24,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/zookeeper"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
@@ -41,6 +42,6 @@ func NewDiscoveryRegister(envType string) (discoveryregistry.SvcDiscoveryRegistr
 	case "direct":
 		return direct.NewConnDirect()
 	default:
-		return nil, errors.New("envType not correct")
+		return nil, errs.Wrap(errors.New("envType not correct"))
 	}
 }

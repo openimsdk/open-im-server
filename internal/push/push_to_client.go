@@ -229,7 +229,8 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			}(groupID, kickedUsers)
 			pushToUserIDs = append(pushToUserIDs, kickedUsers...)
 		case constant.GroupDismissedNotification:
-			if msgprocessor.IsNotification(msgprocessor.GetConversationIDByMsg(msg)) { // 消息先到,通知后到
+			// Messages arrive first, notifications arrive later
+			if msgprocessor.IsNotification(msgprocessor.GetConversationIDByMsg(msg)) {
 				var tips sdkws.GroupDismissedTips
 				if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
 					return err

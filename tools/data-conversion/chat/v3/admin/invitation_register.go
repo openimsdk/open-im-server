@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// 邀请码被注册使用.
+// The invitation code is registered for use.
 type InvitationRegister struct {
 	InvitationCode string    `gorm:"column:invitation_code;primary_key;type:char(32)"`
 	UsedByUserID   string    `gorm:"column:user_id;index:userID;type:char(64)"`
