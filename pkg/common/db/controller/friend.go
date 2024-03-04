@@ -113,7 +113,7 @@ func (f *friendDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (
 	return inUser1Friends, inUser2Friends, nil
 }
 
-// AddFriendRequest adds or updates a friend request
+// AddFriendRequest adds or updates a friend request.
 func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUserID string, reqMsg string, ex string) (err error) {
 	return f.tx.Transaction(ctx, func(ctx context.Context) error {
 		_, err := f.friendRequest.Take(ctx, fromUserID, toUserID)
@@ -197,7 +197,7 @@ func (f *friendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest 
 
 	// Log the action of refusing the friend request for debugging and auditing purposes.
 	log.ZDebug(ctx, "Refusing friend request", map[string]interface{}{
-		"DB_FriendRequest": fr,
+		"DB_FriendRequest":  fr,
 		"Arg_FriendRequest": friendRequest,
 	})
 

@@ -31,7 +31,7 @@ func NewConversationNotificationSender(msgRpcClient *rpcclient.MessageRpcClient)
 	return &ConversationNotificationSender{rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient))}
 }
 
-// SetPrivate invote
+// SetPrivate invote.
 func (c *ConversationNotificationSender) ConversationSetPrivateNotification(ctx context.Context, sendID, recvID string,
 	isPrivateChat bool, conversationID string,
 ) error {

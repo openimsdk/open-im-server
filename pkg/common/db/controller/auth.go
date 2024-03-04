@@ -47,12 +47,12 @@ func NewAuthDatabase(cache cache.MsgModel, accessSecret string, accessExpire int
 	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire}
 }
 
-// If the result is empty
+// If the result is empty.
 func (a *authDatabase) GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error) {
 	return a.cache.GetTokensWithoutError(ctx, userID, platformID)
 }
 
-// Create Token
+// Create Token.
 func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformID int) (string, error) {
 	tokens, err := a.cache.GetTokensWithoutError(ctx, userID, platformID)
 	if err != nil {

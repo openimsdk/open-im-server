@@ -308,7 +308,6 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 	}
 
 	var recvIDs []string
-	var err error
 	if req.IsSendAll {
 		pageNumber := 1
 		showNumber := 500
