@@ -257,7 +257,8 @@ func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(
 	msgs []*sdkws.MsgData,
 ) {
 	for _, v := range msgs {
-		och.msgDatabase.MsgToPushMQ(ctx, key, conversationID, v)
+		och.msgDatabase.MsgToPushMQ(ctx, key, conversationID, v) // nolint: errcheck
+
 	}
 }
 
