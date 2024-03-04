@@ -22,4 +22,5 @@ import (
 
 func (s *groupServer) PopulateGroupMember(ctx context.Context, members ...*relationtb.GroupMemberModel) error {
 	return s.Notification.PopulateGroupMember(ctx, members...)
+	// 测试中文注释
 }
