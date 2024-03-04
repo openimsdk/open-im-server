@@ -117,7 +117,7 @@ func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 
 func defaultCmdOpts() *CmdOpts {
 	return &CmdOpts{
-		loggerPrefixName: "OpenIM.log.all",
+		loggerPrefixName: "openim.log.all",
 	}
 }
 
