@@ -57,6 +57,20 @@ type UserRegisterRequest struct {
 	Users  []User `json:"users"`
 }
 
+/* func main() {
+	// Example usage of functions
+	token, err := GetUserToken("openIM123456")
+	if err != nil {
+		log.Fatalf("Error getting user token: %v", err)
+	}
+	fmt.Println("Token:", token)
+
+	err = RegisterUser(token, "testUserID", "TestNickname", "https://example.com/image.jpg")
+	if err != nil {
+		log.Fatalf("Error registering user: %v", err)
+	}
+} */
+
 // GetUserToken requests a user token from the API.
 func GetUserToken(userID string) (string, error) {
 	reqBody := UserTokenRequest{

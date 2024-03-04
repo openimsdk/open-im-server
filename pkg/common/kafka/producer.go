@@ -118,7 +118,7 @@ func configureProducerAck(p *Producer, ackConfig string) {
 
 // configureCompression configures the message compression type for the producer.
 func configureCompression(p *Producer, compressType string) {
-	var compress sarama.CompressionCodec = sarama.CompressionNone
+	var compress = sarama.CompressionNone
 	err := compress.UnmarshalText(bytes.ToLower([]byte(compressType)))
 	if err != nil {
 		fmt.Printf("Failed to configure compression: %v\n", err)
