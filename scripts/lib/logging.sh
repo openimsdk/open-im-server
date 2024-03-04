@@ -25,9 +25,9 @@ if [ -z "${OPENIM_OUTPUT+x}" ]; then
 fi
 
 # Set the log file path
-LOG_FILE="${OPENIM_OUTPUT}/logs/openim_$(date '+%Y%m%d').log"
-STDERR_LOG_FILE="${OPENIM_OUTPUT}/logs/openim_error_$(date '+%Y%m%d').log"
-TMP_LOG_FILE="${OPENIM_OUTPUT}/logs/openim_tmp_$(date '+%Y%m%d').log"
+LOG_FILE="${OPENIM_OUTPUT}/logs/openim-$(date '+%Y%m%d').log"
+STDERR_LOG_FILE="${OPENIM_OUTPUT}/logs/openim-error-$(date '+%Y%m%d').log"
+TMP_LOG_FILE="${OPENIM_OUTPUT}/logs/openim-tmp-$(date '+%Y%m%d').log"
 
 if [[ ! -d "${OPENIM_OUTPUT}/logs" ]]; then
   mkdir -p "${OPENIM_OUTPUT}/logs"
