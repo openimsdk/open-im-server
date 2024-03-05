@@ -23,18 +23,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/google/uuid"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
-
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
-
+	"github.com/google/uuid"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cont"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
@@ -57,7 +52,8 @@ func (t *thirdServer) PartSize(ctx context.Context, req *third.PartSizeReq) (*th
 }
 
 func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.InitiateMultipartUploadReq) (*third.InitiateMultipartUploadResp, error) {
-	if err := checkUploadName(ctx, req.Name, t.config); err != nil {
+	defer log.ZDebug(ctx, "return")
+	if err := t.checkUploadName(ctx, req.Name); err != nil {
 		return nil, err
 	}
 	expireTime := time.Now().Add(t.defaultExpire)
@@ -136,7 +132,7 @@ func (t *thirdServer) AuthSign(ctx context.Context, req *third.AuthSignReq) (*th
 
 func (t *thirdServer) CompleteMultipartUpload(ctx context.Context, req *third.CompleteMultipartUploadReq) (*third.CompleteMultipartUploadResp, error) {
 	defer log.ZDebug(ctx, "return")
-	if err := checkUploadName(ctx, req.Name, t.config); err != nil {
+	if err := t.checkUploadName(ctx, req.Name); err != nil {
 		return nil, err
 	}
 	result, err := t.s3dataBase.CompleteMultipartUpload(ctx, req.UploadID, req.Parts)
@@ -193,13 +189,13 @@ func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateF
 	if req.Size <= 0 {
 		return nil, errs.ErrArgs.Wrap("size must be greater than 0")
 	}
-	if err := checkUploadName(ctx, req.Name, t.config); err != nil {
+	if err := t.checkUploadName(ctx, req.Name); err != nil {
 		return nil, err
 	}
 	var duration time.Duration
 	opUserID := mcontext.GetOpUserID(ctx)
 	var key string
-	if authverify.IsManagerUserID(opUserID, t.config) {
+	if t.IsManagerUserID(opUserID) {
 		if req.Millisecond <= 0 {
 			duration = time.Minute * 10
 		} else {
@@ -259,7 +255,7 @@ func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteF
 	if err := json.Unmarshal(data, &mate); err != nil {
 		return nil, errs.ErrArgs.Wrap("invalid id " + err.Error())
 	}
-	if err := checkUploadName(ctx, mate.Name, t.config); err != nil {
+	if err := t.checkUploadName(ctx, mate.Name); err != nil {
 		return nil, err
 	}
 	info, err := t.s3dataBase.StatObject(ctx, mate.Key)
@@ -279,7 +275,7 @@ func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteF
 		Group:       mate.Group,
 		CreateTime:  time.Now(),
 	}
-	if err = t.s3dataBase.SetObject(ctx, obj); err != nil {
+	if err := t.s3dataBase.SetObject(ctx, obj); err != nil {
 		return nil, err
 	}
 	return &third.CompleteFormDataResp{Url: t.apiAddress(mate.Name)}, nil

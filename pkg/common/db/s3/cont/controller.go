@@ -86,7 +86,6 @@ func (c *Controller) GetHashObject(ctx context.Context, hash string) (*s3.Object
 
 func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int) (*InitiateUploadResult, error) {
 	defer log.ZDebug(ctx, "return")
-	log.ZInfo(ctx, "InitiateUpload", "hash", hash, "size", expire)
 	if size < 0 {
 		return nil, errors.New("invalid size")
 	}
@@ -95,7 +94,6 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 	} else if len(hashBytes) != md5.Size {
 		return nil, errors.New("invalid md5")
 	}
-	log.ZDebug(ctx, "InitiateUpload 33333333333333333333333")
 	partSize, err := c.impl.PartSize(ctx, size)
 	if err != nil {
 		return nil, err
@@ -107,15 +105,11 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 	if maxParts > 0 && partNumber > 0 && partNumber < maxParts {
 		return nil, fmt.Errorf("too many parts: %d", partNumber)
 	}
-	log.ZDebug(ctx, "InitiateUpload 4444444444444444444444444444444")
 	if info, err := c.StatObject(ctx, c.HashPath(hash)); err == nil {
-		log.ZDebug(ctx, "InitiateUpload 55555555555555555555555555555555")
 		return nil, &HashAlreadyExistsError{Object: info}
 	} else if !c.impl.IsNotFound(err) {
-		log.ZDebug(ctx, "InitiateUpload 66666666666666666666666666666666", err)
 		return nil, err
 	}
-
 	if size <= partSize {
 		// Pre-signed upload
 		key := path.Join(tempPath, c.NowPath(), fmt.Sprintf("%s_%d_%s.presigned", hash, size, c.UUID()))
