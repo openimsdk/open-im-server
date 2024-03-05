@@ -74,7 +74,7 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 				Group:       req.Cause,
 				CreateTime:  time.Now(),
 			}
-			if setObjectErr := t.s3dataBase.SetObject(ctx, obj); setObjectErr != nil {
+			if err := t.s3dataBase.SetObject(ctx, obj); err != nil {
 				return nil, err
 			}
 			return &third.InitiateMultipartUploadResp{
