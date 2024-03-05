@@ -41,7 +41,7 @@ func TestNewDiscoveryRegister(t *testing.T) {
 		expectedResult bool
 	}{
 		{"zookeeper", "MessageGateway", false, true},
-		{"k8s", "MessageGateway", false, true}, // 假设 k8s 配置也已正确设置
+		{"k8s", "MessageGateway", false, true},
 		{"direct", "MessageGateway", false, true},
 		{"invalid", "MessageGateway", true, false},
 	}
