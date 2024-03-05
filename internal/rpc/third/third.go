@@ -17,7 +17,6 @@ package third
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/tools/log"
 	"net/url"
 	"time"
 
@@ -41,8 +40,6 @@ import (
 )
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	log.ZDebug(context.Background(), "config19999999999999999999999999999999999", config, "javadfdas")
-
 	mongo, err := unrelation.NewMongo(config)
 	if err != nil {
 		return err
@@ -73,7 +70,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	// 根据配置文件策略选择 oss 方式
 	enable := config.Object.Enable
 	var o s3.Interface
-	switch config.Object.Enable {
+	switch enable {
 	case "minio":
 		o, err = minio.NewMinio(cache.NewMinioCache(rdb), minio.Config(config.Object.Minio))
 	case "cos":

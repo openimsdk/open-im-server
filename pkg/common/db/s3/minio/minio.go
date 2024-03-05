@@ -67,6 +67,7 @@ type Config struct {
 }
 
 func NewMinio(cache cache.MinioCache, conf Config) (s3.Interface, error) {
+	fmt.Printf("minio config: %+v", conf)
 	u, err := url.Parse(conf.Endpoint)
 	if err != nil {
 		return nil, err
