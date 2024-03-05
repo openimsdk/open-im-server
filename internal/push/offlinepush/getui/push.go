@@ -92,9 +92,9 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 			for i, v := range s.GetSplitResult() {
 				go func(index int, userIDs []string) {
 					defer wg.Done()
-					if err2 := g.batchPush(ctx, token, userIDs, pushReq); err2 != nil {
-						log.ZError(ctx, "batchPush failed", err2, "index", index, "token", token, "req", pushReq)
-						err = err2
+					if err := g.batchPush(ctx, token, userIDs, pushReq); err != nil {
+						log.ZError(ctx, "batchPush failed", err, "index", index, "token", token, "req", pushReq)
+						err = err
 					}
 				}(i, v.Item)
 			}

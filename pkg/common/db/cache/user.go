@@ -201,13 +201,13 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, userID string, statu
 				Status:      constant.Online,
 				PlatformIDs: []int32{platformID},
 			}
-			jsonData, err2 := json.Marshal(&onlineStatus)
-			if err2 != nil {
-				return errs.Wrap(err2)
+			jsonData, err := json.Marshal(&onlineStatus)
+			if err != nil {
+				return errs.Wrap(err)
 			}
-			_, err2 = u.rdb.HSet(ctx, key, userID, string(jsonData)).Result()
-			if err2 != nil {
-				return errs.Wrap(err2)
+			_, err = u.rdb.HSet(ctx, key, userID, string(jsonData)).Result()
+			if err != nil {
+				return errs.Wrap(err)
 			}
 			u.rdb.Expire(ctx, key, userOlineStatusExpireTime)
 
@@ -281,9 +281,9 @@ func (u *UserCacheRedis) refreshStatusOffline(ctx context.Context, userID string
 func (u *UserCacheRedis) refreshStatusOnline(ctx context.Context, userID string, platformID int32, isNil bool, err error, result, key string) error {
 	var onlineStatus user.OnlineStatus
 	if !isNil {
-		err2 := json.Unmarshal([]byte(result), &onlineStatus)
+		err := json.Unmarshal([]byte(result), &onlineStatus)
 		if err != nil {
-			return errs.Wrap(err2)
+			return errs.Wrap(err)
 		}
 		onlineStatus.PlatformIDs = RemoveRepeatedElementsInList(append(onlineStatus.PlatformIDs, platformID))
 	} else {
