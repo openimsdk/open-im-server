@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -229,7 +230,7 @@ func (c *Cos) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyO
 }
 
 func (c *Cos) IsNotFound(err error) bool {
-	switch e := err.(type) {
+	switch e := errs.Unwrap(err).(type) {
 	case *cos.ErrorResponse:
 		return e.Response.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
 	default:

@@ -19,14 +19,12 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/IBM/sarama"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/zookeeper"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 
 	"github.com/OpenIMSDK/tools/component"
@@ -40,7 +38,7 @@ import (
 const (
 	// defaultCfgPath is the default path of the configuration file.
 	defaultCfgPath = "../../../../../config/config.yaml"
-	maxRetry       = 300
+	maxRetry       = 100
 )
 
 var (
@@ -77,7 +75,11 @@ func main() {
 		return
 	}
 
-	configGetEnv()
+	err = configGetEnv(conf)
+	if err != nil {
+		fmt.Printf("configGetEnv failed,err:%v", err)
+		return
+	}
 
 	checks := []checkFunc{
 		//{name: "Mysql", function: checkMysql},
@@ -100,9 +102,13 @@ func main() {
 			if !check.flag {
 				err = check.function(check.config)
 				if err != nil {
-					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, err))
 					allSuccess = false
-
+					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, errs.Unwrap(err).Error()))
+					if !strings.Contains(errs.Unwrap(err).Error(), "connection refused") &&
+						!strings.Contains(errs.Unwrap(err).Error(), "timeout waiting") {
+						component.ErrorPrint("Some components started failed!")
+						os.Exit(-1)
+					}
 				} else {
 					checks[index].flag = true
 					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
@@ -115,23 +121,38 @@ func main() {
 			return
 		}
 	}
+	component.ErrorPrint("Some components started failed!")
+	os.Exit(-1)
 }
 
 // checkMongo checks the MongoDB connection without retries
 func checkMongo(config *config.GlobalConfig) error {
-	_, err := unrelation.NewMongo(config)
+	mongoStu := &component.Mongo{
+		URL:         config.Mongo.Uri,
+		Address:     config.Mongo.Address,
+		Database:    config.Mongo.Database,
+		Username:    config.Mongo.Username,
+		Password:    config.Mongo.Password,
+		MaxPoolSize: config.Mongo.MaxPoolSize,
+	}
+	err := component.CheckMongo(mongoStu)
+
 	return err
 }
 
 // checkRedis checks the Redis connection
 func checkRedis(config *config.GlobalConfig) error {
-	_, err := cache.NewRedis(config)
+	redisStu := &component.Redis{
+		Address:  config.Redis.Address,
+		Username: config.Redis.Username,
+		Password: config.Redis.Password,
+	}
+	err := component.CheckRedis(redisStu)
 	return err
 }
 
 // checkMinio checks the MinIO connection
 func checkMinio(config *config.GlobalConfig) error {
-
 	// Check if MinIO is enabled
 	if config.Object.Enable != "minio" {
 		return errs.Wrap(errors.New("minio.Enable is empty"))
@@ -150,7 +171,13 @@ func checkMinio(config *config.GlobalConfig) error {
 
 // checkZookeeper checks the Zookeeper connection
 func checkZookeeper(config *config.GlobalConfig) error {
-	_, err := zookeeper.NewZookeeperDiscoveryRegister(config)
+	zkStu := &component.Zookeeper{
+		Schema:   config.Zookeeper.Schema,
+		ZkAddr:   config.Zookeeper.ZkAddr,
+		Username: config.Zookeeper.Username,
+		Password: config.Zookeeper.Password,
+	}
+	err := component.CheckZookeeper(zkStu)
 	return err
 }
 
@@ -241,16 +268,38 @@ func isTopicPresent(topic string, topics []string) bool {
 	return false
 }
 
-func configGetEnv() {
-	config.Config.Object.Minio.AccessKeyID = getEnv("MINIO_ACCESS_KEY_ID", config.Config.Object.Minio.AccessKeyID)
-	config.Config.Object.Minio.SecretAccessKey = getEnv("MINIO_SECRET_ACCESS_KEY", config.Config.Object.Minio.SecretAccessKey)
-	config.Config.Mongo.Uri = getEnv("MONGO_URI", config.Config.Mongo.Uri)
-	config.Config.Mongo.Username = getEnv("MONGO_OPENIM_USERNAME", config.Config.Mongo.Username)
-	config.Config.Mongo.Password = getEnv("MONGO_OPENIM_PASSWORD", config.Config.Mongo.Password)
-	config.Config.Kafka.Username = getEnv("KAFKA_USERNAME", config.Config.Kafka.Username)
-	config.Config.Kafka.Password = getEnv("KAFKA_PASSWORD", config.Config.Kafka.Password)
-	config.Config.Kafka.Addr = strings.Split(getEnv("KAFKA_ADDRESS", strings.Join(config.Config.Kafka.Addr, ",")), ",")
-	config.Config.Object.Minio.Endpoint = getMinioAddr("MINIO_ENDPOINT", "MINIO_ADDRESS", "MINIO_PORT", config.Config.Object.Minio.Endpoint)
+func configGetEnv(config *config.GlobalConfig) error {
+	config.Mongo.Uri = getEnv("MONGO_URI", config.Mongo.Uri)
+	config.Mongo.Username = getEnv("MONGO_OPENIM_USERNAME", config.Mongo.Username)
+	config.Mongo.Password = getEnv("MONGO_OPENIM_PASSWORD", config.Mongo.Password)
+	config.Mongo.Address = getArrEnv("MONGO_ADDRESS", "MONGO_PORT", config.Mongo.Address)
+	config.Mongo.Database = getEnv("MONGO_DATABASE", config.Mongo.Database)
+	maxPoolSize, err := getEnvInt("MONGO_DATABASE", config.Mongo.MaxPoolSize)
+	if err != nil {
+		return err
+	}
+	config.Mongo.MaxPoolSize = maxPoolSize
+
+	config.Redis.Username = getEnv("REDIS_USERNAME", config.Redis.Username)
+	config.Redis.Password = getEnv("REDIS_PASSWORD", config.Redis.Password)
+	config.Redis.Address = getArrEnv("REDIS_ADDRESS", "REDIS_PASSWORD", config.Redis.Address)
+
+	config.Object.ApiURL = getEnv("OBJECT_APIURL", config.Object.ApiURL)
+	config.Object.Minio.Endpoint = getEnv("MINIO_ENDPOINT", config.Object.Minio.Endpoint)
+	config.Object.Minio.AccessKeyID = getEnv("MINIO_ACCESS_KEY_ID", config.Object.Minio.AccessKeyID)
+	config.Object.Minio.SecretAccessKey = getEnv("MINIO_SECRET_ACCESS_KEY", config.Object.Minio.SecretAccessKey)
+	config.Object.Minio.SignEndpoint = getEnv("MINIO_SIGN_ENDPOINT", config.Object.Minio.SignEndpoint)
+
+	config.Zookeeper.Schema = getEnv("ZOOKEEPER_SCHEMA", config.Zookeeper.Schema)
+	config.Zookeeper.ZkAddr = getArrEnv("ZOOKEEPER_ADDRESS", "ZOOKEEPER_PORT", config.Zookeeper.ZkAddr)
+	config.Zookeeper.Username = getEnv("ZOOKEEPER_USERNAME", config.Zookeeper.Username)
+	config.Zookeeper.Password = getEnv("ZOOKEEPER_PASSWORD", config.Zookeeper.Password)
+
+	config.Kafka.Username = getEnv("KAFKA_USERNAME", config.Kafka.Username)
+	config.Kafka.Password = getEnv("KAFKA_PASSWORD", config.Kafka.Password)
+	config.Kafka.Addr = getArrEnv("KAFKA_ADDRESS", "KAFKA_PORT", config.Kafka.Addr)
+	config.Object.Minio.Endpoint = getMinioAddr("MINIO_ENDPOINT", "MINIO_ADDRESS", "MINIO_PORT", config.Object.Minio.Endpoint)
+	return nil
 }
 
 func getMinioAddr(key1, key2, key3, fallback string) string {
@@ -269,6 +318,49 @@ func getMinioAddr(key1, key2, key3, fallback string) string {
 func getEnv(key, fallback string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value
+	}
+	return fallback
+}
+
+// Helper function to get environment variable or default value
+func getEnvInt(key string, fallback int) (int, error) {
+	if value, exists := os.LookupEnv(key); exists {
+		val, err := strconv.Atoi(value)
+		if err != nil {
+			return 0, errs.Wrap(err, "string to int failed")
+		}
+		return val, nil
+	}
+	return fallback, nil
+}
+
+func getArrEnv(key1, key2 string, fallback []string) []string {
+	address, addrExists := os.LookupEnv(key1)
+	port, portExists := os.LookupEnv(key2)
+
+	if addrExists && portExists {
+		addresses := strings.Split(address, ",")
+		for i, addr := range addresses {
+			addresses[i] = addr + ":" + port
+		}
+		return addresses
+	}
+
+	if addrExists && !portExists {
+		addresses := strings.Split(address, ",")
+		for i, addr := range addresses {
+			addresses[i] = addr + ":" + "0"
+		}
+		return addresses
+	}
+
+	if !addrExists && portExists {
+		result := make([]string, len(fallback))
+		for i, addr := range fallback {
+			add := strings.Split(addr, ":")
+			result[i] = add[0] + ":" + port
+		}
+		return result
 	}
 	return fallback
 }

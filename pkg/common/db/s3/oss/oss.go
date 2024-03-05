@@ -241,7 +241,7 @@ func (o *OSS) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyO
 }
 
 func (o *OSS) IsNotFound(err error) bool {
-	switch e := err.(type) {
+	switch e := errs.Unwrap(err).(type) {
 	case oss.ServiceError:
 		return e.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
 	case *oss.ServiceError:
