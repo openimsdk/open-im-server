@@ -15,54 +15,44 @@
 package cmd
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/OpenIMSDK/protocol/constant"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/internal/api"
 	"github.com/spf13/cobra"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type ApiCmd struct {
 	*RootCmd
+	initFunc func(config *config.GlobalConfig, port int, promPort int) error
 }
 
 func NewApiCmd() *ApiCmd {
-	ret := &ApiCmd{NewRootCmd("api")}
+	ret := &ApiCmd{RootCmd: NewRootCmd("api"), initFunc: api.Start}
 	ret.SetRootCmdPt(ret)
-
+	ret.addPreRun()
+	ret.addRunE()
 	return ret
 }
 
-// AddApi configures the API command to run with specified ports for the API and Prometheus monitoring.
-// It ensures error handling for port retrieval and only proceeds if both port numbers are successfully obtained.
-func (a *ApiCmd) AddApi(f func(port int, promPort int) error) {
-	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		port, err := a.getPortFlag(cmd)
-		if err != nil {
-			return err
-		}
-
-		promPort, err := a.getPrometheusPortFlag(cmd)
-		if err != nil {
-			return err
-		}
-
-		return f(port, promPort)
+func (a *ApiCmd) addPreRun() {
+	a.Command.PreRun = func(cmd *cobra.Command, args []string) {
+		a.port = a.getPortFlag(cmd)
+		a.prometheusPort = a.getPrometheusPortFlag(cmd)
 	}
 }
 
-func (a *ApiCmd) GetPortFromConfig(portType string) (int, error) {
-	if portType == constant.FlagPort {
-		if len(config2.Config.Api.OpenImApiPort) > 0 {
-			return config2.Config.Api.OpenImApiPort[0], nil
-		}
-		return 0, errors.New("API port configuration is empty or missing")
-	} else if portType == constant.FlagPrometheusPort {
-		if len(config2.Config.Prometheus.ApiPrometheusPort) > 0 {
-			return config2.Config.Prometheus.ApiPrometheusPort[0], nil
-		}
-		return 0, errors.New("Prometheus port configuration is empty or missing")
+func (a *ApiCmd) addRunE() {
+	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		return a.initFunc(a.config, a.port, a.prometheusPort)
 	}
-	return 0, fmt.Errorf("unknown port type: %s", portType)
+}
+
+func (a *ApiCmd) GetPortFromConfig(portType string) int {
+	if portType == constant.FlagPort {
+		return a.config.Api.OpenImApiPort[0]
+	} else if portType == constant.FlagPrometheusPort {
+		return a.config.Prometheus.ApiPrometheusPort[0]
+	}
+	return 0
 }

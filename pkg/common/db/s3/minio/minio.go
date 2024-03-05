@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"io"
 	"net/http"
 	"net/url"
@@ -33,7 +34,6 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/signer"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 )
@@ -43,7 +43,7 @@ const (
 )
 
 const (
-	minPartSize int64 = 1024 * 1024 * 5        // 1MB
+	minPartSize int64 = 1024 * 1024 * 5        // 5MB
 	maxPartSize int64 = 1024 * 1024 * 1024 * 5 // 5GB
 	maxNumSize  int64 = 10000
 )
@@ -57,13 +57,23 @@ const (
 
 const successCode = http.StatusOK
 
-func NewMinio(cache cache.MinioCache) (s3.Interface, error) {
-	u, err := url.Parse(config.Config.Object.Minio.Endpoint)
+type Config struct {
+	Bucket          string
+	Endpoint        string
+	AccessKeyID     string
+	SecretAccessKey string
+	SessionToken    string
+	SignEndpoint    string
+	PublicRead      bool
+}
+
+func NewMinio(cache cache.MinioCache, conf Config) (s3.Interface, error) {
+	u, err := url.Parse(conf.Endpoint)
 	if err != nil {
 		return nil, err
 	}
 	opts := &minio.Options{
-		Creds:  credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, config.Config.Object.Minio.SessionToken),
+		Creds:  credentials.NewStaticV4(conf.AccessKeyID, conf.SecretAccessKey, conf.SessionToken),
 		Secure: u.Scheme == "https",
 	}
 	client, err := minio.New(u.Host, opts)
@@ -71,26 +81,27 @@ func NewMinio(cache cache.MinioCache) (s3.Interface, error) {
 		return nil, err
 	}
 	m := &Minio{
-		bucket: config.Config.Object.Minio.Bucket,
+		conf:   conf,
+		bucket: conf.Bucket,
 		core:   &minio.Core{Client: client},
 		lock:   &sync.Mutex{},
 		init:   false,
 		cache:  cache,
 	}
-	if config.Config.Object.Minio.SignEndpoint == "" || config.Config.Object.Minio.SignEndpoint == config.Config.Object.Minio.Endpoint {
+	if conf.SignEndpoint == "" || conf.SignEndpoint == conf.Endpoint {
 		m.opts = opts
 		m.sign = m.core.Client
 		m.prefix = u.Path
 		u.Path = ""
-		config.Config.Object.Minio.Endpoint = u.String()
-		m.signEndpoint = config.Config.Object.Minio.Endpoint
+		conf.Endpoint = u.String()
+		m.signEndpoint = conf.Endpoint
 	} else {
-		su, err := url.Parse(config.Config.Object.Minio.SignEndpoint)
+		su, err := url.Parse(conf.SignEndpoint)
 		if err != nil {
 			return nil, err
 		}
 		m.opts = &minio.Options{
-			Creds:  credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, config.Config.Object.Minio.SessionToken),
+			Creds:  credentials.NewStaticV4(conf.AccessKeyID, conf.SecretAccessKey, conf.SessionToken),
 			Secure: su.Scheme == "https",
 		}
 		m.sign, err = minio.New(su.Host, m.opts)
@@ -99,8 +110,8 @@ func NewMinio(cache cache.MinioCache) (s3.Interface, error) {
 		}
 		m.prefix = su.Path
 		su.Path = ""
-		config.Config.Object.Minio.SignEndpoint = su.String()
-		m.signEndpoint = config.Config.Object.Minio.SignEndpoint
+		conf.SignEndpoint = su.String()
+		m.signEndpoint = conf.SignEndpoint
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -111,6 +122,7 @@ func NewMinio(cache cache.MinioCache) (s3.Interface, error) {
 }
 
 type Minio struct {
+	conf         Config
 	bucket       string
 	signEndpoint string
 	location     string
@@ -132,31 +144,30 @@ func (m *Minio) initMinio(ctx context.Context) error {
 	if m.init {
 		return nil
 	}
-	conf := config.Config.Object.Minio
-	exists, err := m.core.Client.BucketExists(ctx, conf.Bucket)
+	exists, err := m.core.Client.BucketExists(ctx, m.conf.Bucket)
 	if err != nil {
 		return fmt.Errorf("check bucket exists error: %w", err)
 	}
 	if !exists {
-		if err = m.core.Client.MakeBucket(ctx, conf.Bucket, minio.MakeBucketOptions{}); err != nil {
+		if err = m.core.Client.MakeBucket(ctx, m.conf.Bucket, minio.MakeBucketOptions{}); err != nil {
 			return fmt.Errorf("make bucket error: %w", err)
 		}
 	}
-	if conf.PublicRead {
+	if m.conf.PublicRead {
 		policy := fmt.Sprintf(
 			`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`,
-			conf.Bucket,
+			m.conf.Bucket,
 		)
-		if err = m.core.Client.SetBucketPolicy(ctx, conf.Bucket, policy); err != nil {
+		if err = m.core.Client.SetBucketPolicy(ctx, m.conf.Bucket, policy); err != nil {
 			return err
 		}
 	}
-	m.location, err = m.core.Client.GetBucketLocation(ctx, conf.Bucket)
+	m.location, err = m.core.Client.GetBucketLocation(ctx, m.conf.Bucket)
 	if err != nil {
 		return err
 	}
 	func() {
-		if conf.SignEndpoint == "" || conf.SignEndpoint == conf.Endpoint {
+		if m.conf.SignEndpoint == "" || m.conf.SignEndpoint == m.conf.Endpoint {
 			return
 		}
 		defer func() {
@@ -176,7 +187,7 @@ func (m *Minio) initMinio(ctx context.Context) error {
 		blc := reflect.ValueOf(m.sign).Elem().FieldByName("bucketLocCache")
 		vblc := reflect.New(reflect.PtrTo(blc.Type()))
 		*(*unsafe.Pointer)(vblc.UnsafePointer()) = unsafe.Pointer(blc.UnsafeAddr())
-		vblc.Elem().Elem().Interface().(interface{ Set(string, string) }).Set(conf.Bucket, m.location)
+		vblc.Elem().Elem().Interface().(interface{ Set(string, string) }).Set(m.conf.Bucket, m.location)
 	}()
 	m.init = true
 	return nil
@@ -341,10 +352,7 @@ func (m *Minio) CopyObject(ctx context.Context, src string, dst string) (*s3.Cop
 }
 
 func (m *Minio) IsNotFound(err error) bool {
-	if err == nil {
-		return false
-	}
-	switch e := err.(type) {
+	switch e := errs.Unwrap(err).(type) {
 	case minio.ErrorResponse:
 		return e.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
 	case *minio.ErrorResponse:
@@ -397,7 +405,7 @@ func (m *Minio) PresignedGetObject(ctx context.Context, name string, expire time
 		rawURL *url.URL
 		err    error
 	)
-	if config.Config.Object.Minio.PublicRead {
+	if m.conf.PublicRead {
 		rawURL, err = makeTargetURL(m.sign, m.bucket, name, m.location, false, query)
 	} else {
 		rawURL, err = m.sign.PresignedGetObject(ctx, m.bucket, name, expire, query)

@@ -17,18 +17,14 @@ package main
 import (
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/msg"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 func main() {
-	rpcCmd := cmd.NewRpcCmd(cmd.RpcMsgServer)
+	rpcCmd := cmd.NewRpcCmd(cmd.RpcMsgServer, msg.Start)
 	rpcCmd.AddPortFlag()
 	rpcCmd.AddPrometheusPortFlag()
 	if err := rpcCmd.Exec(); err != nil {
-		util.ExitWithError(err)
-	}
-	if err := rpcCmd.StartSvr(config.Config.RpcRegisterName.OpenImMsgName, msg.Start); err != nil {
 		util.ExitWithError(err)
 	}
 }

@@ -20,19 +20,27 @@ import (
 	"strings"
 
 	"github.com/IBM/sarama"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/tls"
 )
 
+type TLSConfig struct {
+	CACrt              string
+	ClientCrt          string
+	ClientKey          string
+	ClientKeyPwd       string
+	InsecureSkipVerify bool
+}
+
 // SetupTLSConfig set up the TLS config from config file.
-func SetupTLSConfig(cfg *sarama.Config) error {
-	if config.Config.Kafka.TLS != nil {
+func SetupTLSConfig(cfg *sarama.Config, tlsConfig *TLSConfig) error {
+	if tlsConfig != nil {
 		cfg.Net.TLS.Enable = true
 		tlsConfig, err := tls.NewTLSConfig(
-			config.Config.Kafka.TLS.ClientCrt,
-			config.Config.Kafka.TLS.ClientKey,
-			config.Config.Kafka.TLS.CACrt,
-			[]byte(config.Config.Kafka.TLS.ClientKeyPwd),
+			tlsConfig.ClientCrt,
+			tlsConfig.ClientKey,
+			tlsConfig.CACrt,
+			[]byte(tlsConfig.ClientKeyPwd),
+			tlsConfig.InsecureSkipVerify,
 		)
 		if err != nil {
 			return err

@@ -17,12 +17,12 @@ package kafka
 import (
 	"context"
 	"errors"
-	"strings"
 
 	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+
+	"strings"
 )
 
 type MConsumerGroup struct {
@@ -35,22 +35,25 @@ type MConsumerGroupConfig struct {
 	KafkaVersion   sarama.KafkaVersion
 	OffsetsInitial int64
 	IsReturnErr    bool
+	UserName       string
+	Password       string
 }
 
-func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []string, groupID string) (*MConsumerGroup, error) {
+func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []string, groupID string, tlsConfig *TLSConfig) (*MConsumerGroup, error) {
 	consumerGroupConfig := sarama.NewConfig()
 	consumerGroupConfig.Version = consumerConfig.KafkaVersion
 	consumerGroupConfig.Consumer.Offsets.Initial = consumerConfig.OffsetsInitial
 	consumerGroupConfig.Consumer.Return.Errors = consumerConfig.IsReturnErr
-	if config.Config.Kafka.Username != "" && config.Config.Kafka.Password != "" {
+	if consumerConfig.UserName != "" && consumerConfig.Password != "" {
 		consumerGroupConfig.Net.SASL.Enable = true
-		consumerGroupConfig.Net.SASL.User = config.Config.Kafka.Username
-		consumerGroupConfig.Net.SASL.Password = config.Config.Kafka.Password
+		consumerGroupConfig.Net.SASL.User = consumerConfig.UserName
+		consumerGroupConfig.Net.SASL.Password = consumerConfig.Password
 	}
-	SetupTLSConfig(consumerGroupConfig)
+
+	SetupTLSConfig(consumerGroupConfig, tlsConfig)
 	consumerGroup, err := sarama.NewConsumerGroup(addrs, groupID, consumerGroupConfig)
 	if err != nil {
-		return nil, errs.Wrap(err, strings.Join(topics, ","), strings.Join(addrs, ","), groupID, config.Config.Kafka.Username, config.Config.Kafka.Password)
+		return nil, errs.Wrap(err, strings.Join(topics, ","), strings.Join(addrs, ","), groupID, consumerConfig.UserName, consumerConfig.Password)
 	}
 
 	return &MConsumerGroup{

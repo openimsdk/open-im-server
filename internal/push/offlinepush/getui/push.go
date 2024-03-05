@@ -55,10 +55,15 @@ type Client struct {
 	cache           cache.MsgModel
 	tokenExpireTime int64
 	taskIDTTL       int64
+	config          *config.GlobalConfig
 }
 
-func NewClient(cache cache.MsgModel) *Client {
-	return &Client{cache: cache, tokenExpireTime: tokenExpireTime, taskIDTTL: taskIDTTL}
+func NewClient(config *config.GlobalConfig, cache cache.MsgModel) *Client {
+	return &Client{cache: cache,
+		tokenExpireTime: tokenExpireTime,
+		taskIDTTL:       taskIDTTL,
+		config:          config,
+	}
 }
 
 func (g *Client) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
@@ -74,7 +79,7 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 			return err
 		}
 	}
-	pushReq := newPushReq(title, content)
+	pushReq := newPushReq(g.config, title, content)
 	pushReq.setPushChannel(title, content)
 	if len(userIDs) > 1 {
 		maxNum := 999
@@ -85,9 +90,9 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 			for i, v := range s.GetSplitResult() {
 				go func(index int, userIDs []string) {
 					defer wg.Done()
-					if err2 := g.batchPush(ctx, token, userIDs, pushReq); err2 != nil {
-						log.ZError(ctx, "batchPush failed", err2, "index", index, "token", token, "req", pushReq)
-						err = err2
+					if err := g.batchPush(ctx, token, userIDs, pushReq); err != nil {
+						log.ZError(ctx, "batchPush failed", err, "index", index, "token", token, "req", pushReq)
+						err = err
 					}
 				}(i, v.Item)
 			}
@@ -110,13 +115,13 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 func (g *Client) Auth(ctx context.Context, timeStamp int64) (token string, expireTime int64, err error) {
 	h := sha256.New()
 	h.Write(
-		[]byte(config.Config.Push.GeTui.AppKey + strconv.Itoa(int(timeStamp)) + config.Config.Push.GeTui.MasterSecret),
+		[]byte(g.config.Push.GeTui.AppKey + strconv.Itoa(int(timeStamp)) + g.config.Push.GeTui.MasterSecret),
 	)
 	sign := hex.EncodeToString(h.Sum(nil))
 	reqAuth := AuthReq{
 		Sign:      sign,
 		Timestamp: strconv.Itoa(int(timeStamp)),
-		AppKey:    config.Config.Push.GeTui.AppKey,
+		AppKey:    g.config.Push.GeTui.AppKey,
 	}
 	respAuth := AuthResp{}
 	err = g.request(ctx, authURL, reqAuth, "", &respAuth)
@@ -159,7 +164,7 @@ func (g *Client) request(ctx context.Context, url string, input any, token strin
 	header := map[string]string{"token": token}
 	resp := &Resp{}
 	resp.Data = output
-	return g.postReturn(ctx, config.Config.Push.GeTui.PushUrl+url, header, input, resp, 3)
+	return g.postReturn(ctx, g.config.Push.GeTui.PushUrl+url, header, input, resp, 3)
 }
 
 func (g *Client) postReturn(

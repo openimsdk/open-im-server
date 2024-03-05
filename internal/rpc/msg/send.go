@@ -17,6 +17,9 @@ package msg
 import (
 	"context"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	pbconversation "github.com/OpenIMSDK/protocol/conversation"
 	pbmsg "github.com/OpenIMSDK/protocol/msg"
@@ -26,14 +29,12 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 )
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, error error) {
 	resp = &pbmsg.SendMsgResp{}
 	if req.MsgData != nil {
-		flag := isMessageHasReadEnabled(req.MsgData)
+		flag := isMessageHasReadEnabled(req.MsgData, m.config)
 		if !flag {
 			return nil, errs.ErrMessageHasReadDisable.Wrap()
 		}
@@ -61,11 +62,11 @@ func (m *msgServer) sendMsgSuperGroupChat(
 		prommetrics.GroupChatMsgProcessFailedCounter.Inc()
 		return nil, err
 	}
-	if err = callbackBeforeSendGroupMsg(ctx, req); err != nil {
+	if err = callbackBeforeSendGroupMsg(ctx, m.config, req); err != nil {
 		return nil, err
 	}
 
-	if err := callbackMsgModify(ctx, req); err != nil {
+	if err := callbackMsgModify(ctx, m.config, req); err != nil {
 		return nil, err
 	}
 	err = m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForGroup(req.MsgData.GroupID), req.MsgData)
@@ -75,7 +76,7 @@ func (m *msgServer) sendMsgSuperGroupChat(
 	if req.MsgData.ContentType == constant.AtText {
 		go m.setConversationAtInfo(ctx, req.MsgData)
 	}
-	if err = callbackAfterSendGroupMsg(ctx, req); err != nil {
+	if err = callbackAfterSendGroupMsg(ctx, m.config, req); err != nil {
 		log.ZWarn(ctx, "CallbackAfterSendGroupMsg", err)
 	}
 	prommetrics.GroupChatMsgProcessSuccessCounter.Inc()
@@ -107,7 +108,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
 		} else { //@Everyone and @other people
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAllAtMe}
-			err := m.Conversation.SetConversations(ctx, atUserID, conversation)
+			err = m.Conversation.SetConversations(ctx, atUserID, conversation)
 			if err != nil {
 				log.ZWarn(ctx, "SetConversations", err, "userID", atUserID, "conversation", conversation)
 			}
@@ -164,18 +165,18 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 		return nil, nil
 	} else {
-		if err = callbackBeforeSendSingleMsg(ctx, req); err != nil {
+		if err = callbackBeforeSendSingleMsg(ctx, m.config, req); err != nil {
 			return nil, err
 		}
 
-		if err := callbackMsgModify(ctx, req); err != nil {
+		if err := callbackMsgModify(ctx, m.config, req); err != nil {
 			return nil, err
 		}
 		if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
 			prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 			return nil, err
 		}
-		err = callbackAfterSendSingleMsg(ctx, req)
+		err = callbackAfterSendSingleMsg(ctx, m.config, req)
 		if err != nil {
 			log.ZWarn(ctx, "CallbackAfterSendSingleMsg", err, "req", req)
 		}

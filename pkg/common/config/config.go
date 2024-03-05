@@ -21,7 +21,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var Config configStruct
+var Config GlobalConfig
 
 const ConfKey = "conf"
 
@@ -57,7 +57,7 @@ type MYSQL struct {
 	SlowThreshold int      `yaml:"slowThreshold"`
 }
 
-type configStruct struct {
+type GlobalConfig struct {
 	Envs struct {
 		Discovery string `yaml:"discovery"`
 	}
@@ -339,6 +339,10 @@ type configStruct struct {
 	Notification notification `yaml:"notification"`
 }
 
+func NewGlobalConfig() *GlobalConfig {
+	return &GlobalConfig{}
+}
+
 type notification struct {
 	GroupCreated             NotificationConf `yaml:"groupCreated"`
 	GroupInfoSet             NotificationConf `yaml:"groupInfoSet"`
@@ -378,7 +382,7 @@ type notification struct {
 	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
 }
 
-func (c *configStruct) GetServiceNames() []string {
+func (c *GlobalConfig) GetServiceNames() []string {
 	return []string{
 		c.RpcRegisterName.OpenImUserName,
 		c.RpcRegisterName.OpenImFriendName,
@@ -392,7 +396,7 @@ func (c *configStruct) GetServiceNames() []string {
 	}
 }
 
-func (c *configStruct) RegisterConf2Registry(registry discoveryregistry.SvcDiscoveryRegistry) error {
+func (c *GlobalConfig) RegisterConf2Registry(registry discoveryregistry.SvcDiscoveryRegistry) error {
 	data, err := yaml.Marshal(c)
 	if err != nil {
 		return err
@@ -400,11 +404,11 @@ func (c *configStruct) RegisterConf2Registry(registry discoveryregistry.SvcDisco
 	return registry.RegisterConf2Registry(ConfKey, data)
 }
 
-func (c *configStruct) GetConfFromRegistry(registry discoveryregistry.SvcDiscoveryRegistry) ([]byte, error) {
+func (c *GlobalConfig) GetConfFromRegistry(registry discoveryregistry.SvcDiscoveryRegistry) ([]byte, error) {
 	return registry.GetConfFromRegistry(ConfKey)
 }
 
-func (c *configStruct) EncodeConfig() []byte {
+func (c *GlobalConfig) EncodeConfig() []byte {
 	buf := bytes.NewBuffer(nil)
 	if err := yaml.NewEncoder(buf).Encode(c); err != nil {
 		panic(err)

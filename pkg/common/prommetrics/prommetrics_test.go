@@ -58,17 +58,20 @@ func TestNewGrpcPromObj(t *testing.T) {
 }
 
 func TestGetGrpcCusMetrics(t *testing.T) {
+	conf := config2.NewGlobalConfig()
+
+	config2.InitConfig(conf, "../../config")
 	// Test various cases based on the switch statement in the GetGrpcCusMetrics function.
 	testCases := []struct {
 		name     string
 		expected int // The expected number of metrics for each case.
 	}{
-		{config2.Config.RpcRegisterName.OpenImMessageGatewayName, 1},
+		{conf.RpcRegisterName.OpenImMessageGatewayName, 1},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			metrics := GetGrpcCusMetrics(tc.name)
+			metrics := GetGrpcCusMetrics(tc.name, conf)
 			assert.Len(t, metrics, tc.expected)
 		})
 	}

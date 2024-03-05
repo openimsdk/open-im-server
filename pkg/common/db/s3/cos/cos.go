@@ -23,13 +23,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 	"github.com/tencentyun/cos-go-sdk-v5"
 )
@@ -50,13 +50,15 @@ const (
 
 const successCode = http.StatusOK
 
-const (
-// videoSnapshotImagePng = "png"
-// videoSnapshotImageJpg = "jpg"
-)
+type Config struct {
+	BucketURL    string
+	SecretID     string
+	SecretKey    string
+	SessionToken string
+	PublicRead   bool
+}
 
-func NewCos() (s3.Interface, error) {
-	conf := config.Config.Object.Cos
+func NewCos(conf Config) (s3.Interface, error) {
 	u, err := url.Parse(conf.BucketURL)
 	if err != nil {
 		panic(err)
@@ -69,6 +71,7 @@ func NewCos() (s3.Interface, error) {
 		},
 	})
 	return &Cos{
+		publicRead: conf.PublicRead,
 		copyURL:    u.Host + "/",
 		client:     client,
 		credential: client.GetCredential(),
@@ -76,6 +79,7 @@ func NewCos() (s3.Interface, error) {
 }
 
 type Cos struct {
+	publicRead bool
 	copyURL    string
 	client     *cos.Client
 	credential *cos.Credential
@@ -226,7 +230,7 @@ func (c *Cos) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyO
 }
 
 func (c *Cos) IsNotFound(err error) bool {
-	switch e := err.(type) {
+	switch e := errs.Unwrap(err).(type) {
 	case *cos.ErrorResponse:
 		return e.Response.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
 	default:
@@ -327,7 +331,7 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 }
 
 func (c *Cos) getPresignedURL(ctx context.Context, name string, expire time.Duration, opt *cos.PresignedURLOptions) (*url.URL, error) {
-	if !config.Config.Object.Cos.PublicRead {
+	if !c.publicRead {
 		return c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, opt)
 	}
 	return c.client.Object.GetObjectURL(name), nil

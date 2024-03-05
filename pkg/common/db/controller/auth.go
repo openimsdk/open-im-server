@@ -16,6 +16,7 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/errs"
@@ -33,14 +34,14 @@ type AuthDatabase interface {
 }
 
 type authDatabase struct {
-	cache cache.MsgModel
-
+	cache        cache.MsgModel
 	accessSecret string
 	accessExpire int64
+	config       *config.GlobalConfig
 }
 
-func NewAuthDatabase(cache cache.MsgModel, accessSecret string, accessExpire int64) AuthDatabase {
-	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire}
+func NewAuthDatabase(cache cache.MsgModel, accessSecret string, accessExpire int64, config *config.GlobalConfig) AuthDatabase {
+	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire, config: config}
 }
 
 // If the result is empty.
@@ -56,7 +57,7 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 	}
 	var deleteTokenKey []string
 	for k, v := range tokens {
-		_, err = tokenverify.GetClaimFromToken(k, authverify.Secret())
+		_, err = tokenverify.GetClaimFromToken(k, authverify.Secret(a.config.Secret))
 		if err != nil || v != constant.NormalToken {
 			deleteTokenKey = append(deleteTokenKey, k)
 		}

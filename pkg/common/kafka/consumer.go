@@ -17,6 +17,8 @@ package kafka
 import (
 	"sync"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+
 	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/tools/errs"
 )
@@ -29,22 +31,31 @@ type Consumer struct {
 	Consumer      sarama.Consumer
 }
 
-func NewKafkaConsumer(addr []string, topic string, kafkaConfig *sarama.Config) (*Consumer, error) {
-	p := Consumer{
-		Topic: topic,
-		addr:  addr,
+func NewKafkaConsumer(addr []string, topic string, config *config.GlobalConfig) (*Consumer,error) {
+	p := Consumer{}
+	p.Topic = topic
+	p.addr = addr
+	consumerConfig := sarama.NewConfig()
+	if config.Kafka.Username != "" && config.Kafka.Password != "" {
+		consumerConfig.Net.SASL.Enable = true
+		consumerConfig.Net.SASL.User = config.Kafka.Username
+		consumerConfig.Net.SASL.Password = config.Kafka.Password
 	}
-
-	if kafkaConfig.Net.SASL.User != "" && kafkaConfig.Net.SASL.Password != "" {
-		kafkaConfig.Net.SASL.Enable = true
+	var tlsConfig *TLSConfig
+	if config.Kafka.TLS != nil {
+		tlsConfig = &TLSConfig{
+			CACrt:              config.Kafka.TLS.CACrt,
+			ClientCrt:          config.Kafka.TLS.ClientCrt,
+			ClientKey:          config.Kafka.TLS.ClientKey,
+			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+			InsecureSkipVerify: false,
+		}
 	}
-
-	err := SetupTLSConfig(kafkaConfig)
-	if err != nil {
-		return nil, err
+	err:=SetupTLSConfig(consumerConfig, tlsConfig)
+	if err!=nil{
+		return nil,err
 	}
-
-	consumer, err := sarama.NewConsumer(p.addr, kafkaConfig)
+	consumer, err := sarama.NewConsumer(p.addr, consumerConfig)
 	if err != nil {
 		return nil, errs.Wrap(err, "NewKafkaConsumer: creating consumer failed")
 	}

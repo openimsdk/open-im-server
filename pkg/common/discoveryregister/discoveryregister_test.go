@@ -15,6 +15,7 @@
 package discoveryregister
 
 import (
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"os"
 	"testing"
 
@@ -32,20 +33,23 @@ func setupTestEnvironment() {
 
 func TestNewDiscoveryRegister(t *testing.T) {
 	setupTestEnvironment()
-
+	conf := config.NewGlobalConfig()
 	tests := []struct {
 		envType        string
+		gatewayName    string
 		expectedError  bool
 		expectedResult bool
 	}{
-		{"zookeeper", false, true},
-		{"k8s", false, true}, // Assume that the k8s configuration is also set up correctly
-		{"direct", false, true},
-		{"invalid", true, false},
+		{"zookeeper", "MessageGateway", false, true},
+		{"k8s", "MessageGateway", false, true},
+		{"direct", "MessageGateway", false, true},
+		{"invalid", "MessageGateway", true, false},
 	}
 
 	for _, test := range tests {
-		client, err := NewDiscoveryRegister(test.envType)
+		conf.Envs.Discovery = test.envType
+		conf.RpcRegisterName.OpenImMessageGatewayName = test.gatewayName
+		client, err := NewDiscoveryRegister(conf)
 
 		if test.expectedError {
 			assert.Error(t, err)

@@ -38,29 +38,32 @@ type authServer struct {
 	authDatabase   controller.AuthDatabase
 	userRpcClient  *rpcclient.UserRpcClient
 	RegisterCenter discoveryregistry.SvcDiscoveryRegistry
+	config         *config.GlobalConfig
 }
 
-func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis()
+func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}
-	userRpcClient := rpcclient.NewUserRpcClient(client)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config)
 	pbauth.RegisterAuthServer(server, &authServer{
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
-			cache.NewMsgCacheModel(rdb),
-			config.Config.Secret,
-			config.Config.TokenPolicy.Expire,
+			cache.NewMsgCacheModel(rdb, config),
+			config.Secret,
+			config.TokenPolicy.Expire,
+			config,
 		),
+		config: config,
 	})
 	return nil
 }
 
 func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*pbauth.UserTokenResp, error) {
 	resp := pbauth.UserTokenResp{}
-	if req.Secret != config.Config.Secret {
+	if req.Secret != s.config.Secret {
 		return nil, errs.ErrNoPermission.Wrap("secret invalid")
 	}
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
@@ -72,17 +75,17 @@ func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*
 	}
 	prommetrics.UserLoginCounter.Inc()
 	resp.Token = token
-	resp.ExpireTimeSeconds = config.Config.TokenPolicy.Expire * 24 * 60 * 60
+	resp.ExpireTimeSeconds = s.config.TokenPolicy.Expire * 24 * 60 * 60
 	return &resp, nil
 }
 
 func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenReq) (*pbauth.GetUserTokenResp, error) {
-	if err := authverify.CheckAdmin(ctx); err != nil {
+	if err := authverify.CheckAdmin(ctx, s.config); err != nil {
 		return nil, err
 	}
 	resp := pbauth.GetUserTokenResp{}
 
-	if authverify.IsManagerUserID(req.UserID) {
+	if authverify.IsManagerUserID(req.UserID, s.config) {
 		return nil, errs.ErrNoPermission.Wrap("don't get Admin token")
 	}
 
@@ -94,12 +97,12 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 		return nil, err
 	}
 	resp.Token = token
-	resp.ExpireTimeSeconds = config.Config.TokenPolicy.Expire * 24 * 60 * 60
+	resp.ExpireTimeSeconds = s.config.TokenPolicy.Expire * 24 * 60 * 60
 	return &resp, nil
 }
 
 func (s *authServer) parseToken(ctx context.Context, tokensString string) (claims *tokenverify.Claims, err error) {
-	claims, err = tokenverify.GetClaimFromToken(tokensString, authverify.Secret())
+	claims, err = tokenverify.GetClaimFromToken(tokensString, authverify.Secret(s.config.Secret))
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
@@ -139,7 +142,7 @@ func (s *authServer) ParseToken(
 }
 
 func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq) (*pbauth.ForceLogoutResp, error) {
-	if err := authverify.CheckAdmin(ctx); err != nil {
+	if err := authverify.CheckAdmin(ctx, s.config); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {
@@ -149,7 +152,7 @@ func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq
 }
 
 func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
-	conns, err := s.RegisterCenter.GetConns(ctx, config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := s.RegisterCenter.GetConns(ctx, s.config.RpcRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		return err
 	}

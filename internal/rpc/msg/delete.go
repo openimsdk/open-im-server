@@ -45,7 +45,7 @@ func (m *msgServer) ClearConversationsMsg(
 	ctx context.Context,
 	req *msg.ClearConversationsMsgReq,
 ) (*msg.ClearConversationsMsgResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config); err != nil {
 		return nil, err
 	}
 	if err := m.clearConversation(ctx, req.ConversationIDs, req.UserID, req.DeleteSyncOpt); err != nil {
@@ -58,7 +58,7 @@ func (m *msgServer) UserClearAllMsg(
 	ctx context.Context,
 	req *msg.UserClearAllMsgReq,
 ) (*msg.UserClearAllMsgResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config); err != nil {
 		return nil, err
 	}
 	conversationIDs, err := m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)
@@ -73,7 +73,7 @@ func (m *msgServer) UserClearAllMsg(
 }
 
 func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*msg.DeleteMsgsResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config); err != nil {
 		return nil, err
 	}
 	isSyncSelf, isSyncOther := m.validateDeleteSyncOpt(req.DeleteSyncOpt)
@@ -121,7 +121,7 @@ func (m *msgServer) DeleteMsgPhysical(
 	ctx context.Context,
 	req *msg.DeleteMsgPhysicalReq,
 ) (*msg.DeleteMsgPhysicalResp, error) {
-	if err := authverify.CheckAdmin(ctx); err != nil {
+	if err := authverify.CheckAdmin(ctx, m.config); err != nil {
 		return nil, err
 	}
 	remainTime := utils.GetCurrentTimestampBySecond() - req.Timestamp

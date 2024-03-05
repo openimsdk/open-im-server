@@ -26,61 +26,60 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
-func Secret() jwt.Keyfunc {
+func Secret(secret string) jwt.Keyfunc {
 	return func(token *jwt.Token) (any, error) {
-		return []byte(config.Config.Secret), nil
+		return []byte(secret), nil
 	}
 }
 
-func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
+func CheckAccessV3(ctx context.Context, ownerUserID string, config *config.GlobalConfig) (err error) {
 	opUserID := mcontext.GetOpUserID(ctx)
-	if len(config.Config.Manager.UserID) > 0 && utils.IsContain(opUserID, config.Config.Manager.UserID) {
+	if len(config.Manager.UserID) > 0 && utils.IsContain(opUserID, config.Manager.UserID) {
 		return nil
 	}
-	if utils.IsContain(opUserID, config.Config.IMAdmin.UserID) {
+	if utils.IsContain(opUserID, config.IMAdmin.UserID) {
 		return nil
 	}
 	if opUserID == ownerUserID {
 		return nil
 	}
-	return errs.Wrap(errs.ErrNoPermission, "CheckAccessV3: no permission for user "+opUserID)
+	return errs.ErrNoPermission.Wrap("ownerUserID", ownerUserID)
 }
 
-func IsAppManagerUid(ctx context.Context) bool {
-	return (len(config.Config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID)) ||
-		utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.IMAdmin.UserID)
+func IsAppManagerUid(ctx context.Context, config *config.GlobalConfig) bool {
+	return (len(config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Manager.UserID)) ||
+		utils.IsContain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID)
 }
 
-func CheckAdmin(ctx context.Context) error {
-	if len(config.Config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID) {
+func CheckAdmin(ctx context.Context, config *config.GlobalConfig) error {
+	if len(config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Manager.UserID) {
 		return nil
 	}
-	if utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.IMAdmin.UserID) {
+	if utils.IsContain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID) {
 		return nil
 	}
 	return errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
-
-func CheckIMAdmin(ctx context.Context) error {
-	if utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.IMAdmin.UserID) {
+func CheckIMAdmin(ctx context.Context, config *config.GlobalConfig) error {
+	if utils.IsContain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID) {
 		return nil
 	}
-	if len(config.Config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID) {
+	if len(config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Manager.UserID) {
 		return nil
 	}
 	return errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s is not CheckIMAdmin userID", mcontext.GetOpUserID(ctx)))
 }
 
-func ParseRedisInterfaceToken(redisToken any) (*tokenverify.Claims, error) {
-	return tokenverify.GetClaimFromToken(string(redisToken.([]uint8)), Secret())
+func ParseRedisInterfaceToken(redisToken any, secret string) (*tokenverify.Claims, error) {
+	return tokenverify.GetClaimFromToken(string(redisToken.([]uint8)), Secret(secret))
 }
 
-func IsManagerUserID(opUserID string) bool {
-	return (len(config.Config.Manager.UserID) > 0 && utils.IsContain(opUserID, config.Config.Manager.UserID)) || utils.IsContain(opUserID, config.Config.IMAdmin.UserID)
+func IsManagerUserID(opUserID string, config *config.GlobalConfig) bool {
+	return (len(config.Manager.UserID) > 0 && utils.IsContain(opUserID, config.Manager.UserID)) || utils.IsContain(opUserID, config.IMAdmin.UserID)
 }
 
-func WsVerifyToken(token, userID string, platformID int) error {
-	claim, err := tokenverify.GetClaimFromToken(token, Secret())
+func WsVerifyToken(token, userID, secret string, platformID int) error {
+	claim, err := tokenverify.GetClaimFromToken(token, Secret(secret))
 	if err != nil {
 		return err
 	}

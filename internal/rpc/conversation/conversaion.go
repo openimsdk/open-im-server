@@ -17,6 +17,7 @@ package conversation
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"sort"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -44,6 +45,7 @@ type conversationServer struct {
 	groupRpcClient                 *rpcclient.GroupRpcClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
+	config                         *config.GlobalConfig
 }
 
 func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(
@@ -54,28 +56,29 @@ func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(
 	panic("implement me")
 }
 
-func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis()
+func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}
-	mongo, err := unrelation.NewMongo()
+	mongo, err := unrelation.NewMongo(config)
 	if err != nil {
 		return err
 	}
-	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase())
+	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase(config.Mongo.Database))
 	if err != nil {
 		return err
 	}
-	groupRpcClient := rpcclient.NewGroupRpcClient(client)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client)
-	userRpcClient := rpcclient.NewUserRpcClient(client)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config)
 	pbconversation.RegisterConversationServer(server, &conversationServer{
 		msgRpcClient:                   &msgRpcClient,
 		user:                           &userRpcClient,
-		conversationNotificationSender: notification.NewConversationNotificationSender(&msgRpcClient),
+		conversationNotificationSender: notification.NewConversationNotificationSender(config, &msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewMongo(mongo.GetClient())),
+		config:                         config,
 	})
 	return nil
 }

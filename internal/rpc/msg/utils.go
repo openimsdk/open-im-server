@@ -23,16 +23,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func isMessageHasReadEnabled(msgData *sdkws.MsgData) bool {
+func isMessageHasReadEnabled(msgData *sdkws.MsgData, config *config.GlobalConfig) bool {
 	switch {
 	case msgData.ContentType == constant.HasReadReceipt && msgData.SessionType == constant.SingleChatType:
-		if config.Config.SingleMessageHasReadReceiptEnable {
+		if config.SingleMessageHasReadReceiptEnable {
 			return true
 		} else {
 			return false
 		}
 	case msgData.ContentType == constant.HasReadReceipt && msgData.SessionType == constant.SuperGroupChatType:
-		if config.Config.GroupMessageHasReadReceiptEnable {
+		if config.GroupMessageHasReadReceiptEnable {
 			return true
 		} else {
 			return false

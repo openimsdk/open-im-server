@@ -19,6 +19,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -26,8 +28,7 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+
 	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
@@ -42,7 +43,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if req.Seq < 0 {
 		return nil, errs.ErrArgs.Wrap("seq is invalid")
 	}
-	if err := authverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config); err != nil {
 		return nil, err
 	}
 	user, err := m.User.GetUserInfo(ctx, req.UserID)
@@ -63,10 +64,10 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	data, _ := json.Marshal(msgs[0])
 	log.ZInfo(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
 	var role int32
-	if !authverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx, m.config) {
 		switch msgs[0].SessionType {
 		case constant.SingleChatType:
-			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID); err != nil {
+			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID, m.config); err != nil {
 				return nil, err
 			}
 			role = user.AppMangerLevel
@@ -110,11 +111,11 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	}
 	revokerUserID := mcontext.GetOpUserID(ctx)
 	var flag bool
-	if len(config.Config.Manager.UserID) > 0 {
-		flag = utils.Contain(revokerUserID, config.Config.Manager.UserID...)
+	if len(m.config.Manager.UserID) > 0 {
+		flag = utils.Contain(revokerUserID, m.config.Manager.UserID...)
 	}
-	if len(config.Config.Manager.UserID) == 0 && len(config.Config.IMAdmin.UserID) > 0 {
-		flag = utils.Contain(revokerUserID, config.Config.IMAdmin.UserID...)
+	if len(m.config.Manager.UserID) == 0 && len(m.config.IMAdmin.UserID) > 0 {
+		flag = utils.Contain(revokerUserID, m.config.IMAdmin.UserID...)
 	}
 	tips := sdkws.RevokeMsgTips{
 		RevokerUserID:  revokerUserID,
@@ -134,7 +135,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if err := m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips); err != nil {
 		return nil, err
 	}
-	if err = CallbackAfterRevokeMsg(ctx, req); err != nil {
+	if err = CallbackAfterRevokeMsg(ctx, m.config, req); err != nil {
 		return nil, err
 	}
 	return &msg.RevokeMsgResp{}, nil

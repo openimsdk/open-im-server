@@ -30,21 +30,22 @@ type Conversation struct {
 	Client pbconversation.ConversationClient
 	conn   grpc.ClientConnInterface
 	discov discoveryregistry.SvcDiscoveryRegistry
+	Config *config.GlobalConfig
 }
 
-func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversation {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
+func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Conversation {
+	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImConversationName)
 	if err != nil {
 		util.ExitWithError(err)
 	}
 	client := pbconversation.NewConversationClient(conn)
-	return &Conversation{discov: discov, conn: conn, Client: client}
+	return &Conversation{discov: discov, conn: conn, Client: client, Config: config}
 }
 
 type ConversationRpcClient Conversation
 
-func NewConversationRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) ConversationRpcClient {
-	return ConversationRpcClient(*NewConversation(discov))
+func NewConversationRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) ConversationRpcClient {
+	return ConversationRpcClient(*NewConversation(discov, config))
 }
 
 func (c *ConversationRpcClient) GetSingleConversationRecvMsgOpt(ctx context.Context, userID, conversationID string) (int32, error) {

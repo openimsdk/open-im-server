@@ -32,7 +32,6 @@ import (
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 )
 
@@ -52,13 +51,17 @@ const (
 
 const successCode = http.StatusOK
 
-/* const (
-	videoSnapshotImagePng = "png"
-	videoSnapshotImageJpg = "jpg"
-) */
+type Config struct {
+	Endpoint        string
+	Bucket          string
+	BucketURL       string
+	AccessKeyID     string
+	AccessKeySecret string
+	SessionToken    string
+	PublicRead      bool
+}
 
-func NewOSS() (s3.Interface, error) {
-	conf := config.Config.Object.Oss
+func NewOSS(conf Config) (s3.Interface, error) {
 	if conf.BucketURL == "" {
 		return nil, errs.Wrap(errors.New("bucket url is empty"))
 	}
@@ -78,6 +81,7 @@ func NewOSS() (s3.Interface, error) {
 		bucket:      bucket,
 		credentials: client.Config.GetCredentials(),
 		um:          *(*urlMaker)(reflect.ValueOf(bucket.Client.Conn).Elem().FieldByName("url").UnsafePointer()),
+		publicRead:  conf.PublicRead,
 	}, nil
 }
 
@@ -86,6 +90,7 @@ type OSS struct {
 	bucket      *oss.Bucket
 	credentials oss.Credentials
 	um          urlMaker
+	publicRead  bool
 }
 
 func (o *OSS) Engine() string {
@@ -236,7 +241,7 @@ func (o *OSS) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyO
 }
 
 func (o *OSS) IsNotFound(err error) bool {
-	switch e := err.(type) {
+	switch e := errs.Unwrap(err).(type) {
 	case oss.ServiceError:
 		return e.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
 	case *oss.ServiceError:
@@ -282,7 +287,6 @@ func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name strin
 }
 
 func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
-	publicRead := config.Config.Object.Oss.PublicRead
 	var opts []oss.Option
 	if opt != nil {
 		if opt.Image != nil {
@@ -310,7 +314,7 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			process += ",format," + format
 			opts = append(opts, oss.Process(process))
 		}
-		if !publicRead {
+		if !o.publicRead {
 			if opt.ContentType != "" {
 				opts = append(opts, oss.ResponseContentType(opt.ContentType))
 			}
@@ -324,7 +328,7 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	if !publicRead {
+	if !o.publicRead {
 		return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second), opts...)
 	}
 	rawParams, err := oss.GetRawParams(opts)

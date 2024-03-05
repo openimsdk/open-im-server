@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"log"
 	"os"
 	"reflect"
@@ -45,36 +46,43 @@ const (
 	versionValue = 35
 )
 
-func InitConfig(path string) error {
+func InitConfig(path string) (*config.GlobalConfig, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return err
+		return nil, errs.Wrap(err, "ReadFile unmarshal failed")
 	}
-	return yaml.Unmarshal(data, &config.Config)
+
+	conf := config.NewGlobalConfig()
+	err = yaml.Unmarshal(data, &conf)
+	if err != nil {
+		return nil, errs.Wrap(err, "InitConfig unmarshal failed")
+	}
+	return conf, nil
 }
 
-func GetMysql() (*gorm.DB, error) {
-	conf := config.Config.Mysql
+func GetMysql(config *config.GlobalConfig) (*gorm.DB, error) {
+	conf := config.Mysql
 	mysqlDSN := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", conf.Username, conf.Password, conf.Address[0], conf.Database)
 	return gorm.Open(gormmysql.Open(mysqlDSN), &gorm.Config{Logger: logger.Discard})
 }
 
-func GetMongo() (*mongo.Database, error) {
-	mgo, err := unrelation.NewMongo()
+func GetMongo(config *config.GlobalConfig) (*mongo.Database, error) {
+	mgo, err := unrelation.NewMongo(config)
 	if err != nil {
 		return nil, err
 	}
-	return mgo.GetDatabase(), nil
+	return mgo.GetDatabase(config.Mongo.Database), nil
 }
 
 func Main(path string) error {
-	if err := InitConfig(path); err != nil {
+	conf, err := InitConfig(path)
+	if err != nil {
 		return err
 	}
-	if config.Config.Mysql == nil {
+	if conf.Mysql == nil {
 		return nil
 	}
-	mongoDB, err := GetMongo()
+	mongoDB, err := GetMongo(conf)
 	if err != nil {
 		return err
 	}
@@ -91,7 +99,7 @@ func Main(path string) error {
 	default:
 		return err
 	}
-	mysqlDB, err := GetMysql()
+	mysqlDB, err := GetMysql(conf)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1049 {
 			if err := SetMongoDataVersion(mongoDB, version.Value); err != nil {
@@ -113,7 +121,7 @@ func Main(path string) error {
 		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewGroupMember, c.GroupMember) },
 		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewGroupRequestMgo, c.GroupRequest) },
 		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewConversationMongo, c.Conversation) },
-		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewS3Mongo, c.Object(config.Config.Object.Enable)) },
+		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewS3Mongo, c.Object(conf.Object.Enable)) },
 		func() error { return NewTask(mysqlDB, mongoDB, mgo.NewLogMongo, c.Log) },
 
 		func() error { return NewTask(mysqlDB, mongoDB, rtcmgo.NewSignal, c.SignalModel) },

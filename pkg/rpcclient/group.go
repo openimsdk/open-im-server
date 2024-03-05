@@ -33,21 +33,22 @@ type Group struct {
 	conn   grpc.ClientConnInterface
 	Client group.GroupClient
 	discov discoveryregistry.SvcDiscoveryRegistry
+	Config *config.GlobalConfig
 }
 
-func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry) *Group {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImGroupName)
+func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Group {
+	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
 		util.ExitWithError(err)
 	}
 	client := group.NewGroupClient(conn)
-	return &Group{discov: discov, conn: conn, Client: client}
+	return &Group{discov: discov, conn: conn, Client: client, Config: config}
 }
 
 type GroupRpcClient Group
 
-func NewGroupRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) GroupRpcClient {
-	return GroupRpcClient(*NewGroup(discov))
+func NewGroupRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) GroupRpcClient {
+	return GroupRpcClient(*NewGroup(discov, config))
 }
 
 func (g *GroupRpcClient) GetGroupInfos(

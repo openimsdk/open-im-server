@@ -16,6 +16,7 @@ package push
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type Consumer struct {
@@ -24,8 +25,8 @@ type Consumer struct {
 	// successCount uint64
 }
 
-func NewConsumer(pusher *Pusher) (*Consumer, error) {
-	c, err := NewConsumerHandler(pusher)
+func NewConsumer(config *config.GlobalConfig, pusher *Pusher) (*Consumer, error) {
+	c, err := NewConsumerHandler(config, pusher)
 	if err != nil {
 		return nil, err
 	}
@@ -36,5 +37,4 @@ func NewConsumer(pusher *Pusher) (*Consumer, error) {
 
 func (c *Consumer) Start() {
 	go c.pushCh.pushConsumerGroup.RegisterHandleAndConsumer(context.Background(), &c.pushCh)
-
 }

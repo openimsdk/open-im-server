@@ -16,6 +16,7 @@ package notification
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
@@ -80,11 +81,12 @@ func WithRpcFunc(
 }
 
 func NewFriendNotificationSender(
+	config *config.GlobalConfig,
 	msgRpcClient *rpcclient.MessageRpcClient,
 	opts ...friendNotificationSenderOptions,
 ) *FriendNotificationSender {
 	f := &FriendNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(config, rpcclient.WithRpcClient(msgRpcClient)),
 	}
 	for _, opt := range opts {
 		opt(f)

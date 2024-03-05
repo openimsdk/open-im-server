@@ -29,21 +29,22 @@ type Friend struct {
 	conn   grpc.ClientConnInterface
 	Client friend.FriendClient
 	discov discoveryregistry.SvcDiscoveryRegistry
+	Config *config.GlobalConfig
 }
 
-func NewFriend(discov discoveryregistry.SvcDiscoveryRegistry) *Friend {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImFriendName)
+func NewFriend(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Friend {
+	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImFriendName)
 	if err != nil {
 		util.ExitWithError(err)
 	}
 	client := friend.NewFriendClient(conn)
-	return &Friend{discov: discov, conn: conn, Client: client}
+	return &Friend{discov: discov, conn: conn, Client: client, Config: config}
 }
 
 type FriendRpcClient Friend
 
-func NewFriendRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) FriendRpcClient {
-	return FriendRpcClient(*NewFriend(discov))
+func NewFriendRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) FriendRpcClient {
+	return FriendRpcClient(*NewFriend(discov, config))
 }
 
 func (f *FriendRpcClient) GetFriendsInfo(

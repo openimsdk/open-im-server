@@ -198,7 +198,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	}
 
 	// Check if the user has the app manager role.
-	if !authverify.IsAppManagerUid(c) {
+	if !authverify.IsAppManagerUid(c, m.Config) {
 		// Respond with a permission error if the user is not an app manager.
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
@@ -256,7 +256,7 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 		return
 	}
 
-	if !authverify.IsAppManagerUid(c) {
+	if !authverify.IsAppManagerUid(c, m.Config) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
 	}
@@ -300,7 +300,7 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 		return
 	}
 	log.ZInfo(c, "BatchSendMsg", "req", req)
-	if err := authverify.CheckAdmin(c); err != nil {
+	if err := authverify.CheckAdmin(c, m.Config); err != nil {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
 	}

@@ -14,29 +14,35 @@
 
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/openimsdk/open-im-server/v3/internal/tools"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/spf13/cobra"
+)
 
 type CronTaskCmd struct {
 	*RootCmd
+	initFunc func(config *config.GlobalConfig) error
 }
 
 func NewCronTaskCmd() *CronTaskCmd {
-	ret := &CronTaskCmd{NewRootCmd("cronTask", WithCronTaskLogName())}
+	ret := &CronTaskCmd{RootCmd: NewRootCmd("cronTask", WithCronTaskLogName()),
+		initFunc: tools.StartTask}
+	ret.addRunE()
 	ret.SetRootCmdPt(ret)
 	return ret
 }
 
-func (c *CronTaskCmd) addRunE(f func() error) {
+func (c *CronTaskCmd) addRunE() {
 	c.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return f()
+		return c.initFunc(c.config)
 	}
 }
 
-func (c *CronTaskCmd) Exec(f func() error) error {
-	c.addRunE(f)
+func (c *CronTaskCmd) Exec() error {
 	return c.Execute()
 }
 
-func (c *CronTaskCmd) GetPortFromConfig(portType string) (int, error) {
-	return 0, nil
+func (c *CronTaskCmd) GetPortFromConfig(portType string) int {
+	return 0
 }

@@ -16,11 +16,10 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/spf13/cobra"
+
+	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
 )
 
 type MsgTransferCmd struct {
@@ -29,37 +28,29 @@ type MsgTransferCmd struct {
 
 func NewMsgTransferCmd() *MsgTransferCmd {
 	ret := &MsgTransferCmd{NewRootCmd("msgTransfer")}
+	ret.addRunE()
 	ret.SetRootCmdPt(ret)
 	return ret
 }
 
 func (m *MsgTransferCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		prometheusPort, err := m.getPrometheusPortFlag(cmd)
-		if err != nil {
-			return err
-		}
-		return msgtransfer.StartTransfer(prometheusPort)
+		return msgtransfer.StartTransfer(m.config, m.getPrometheusPortFlag(cmd))
 	}
 }
 
 func (m *MsgTransferCmd) Exec() error {
-	m.addRunE()
 	return m.Execute()
 }
 
-func (m *MsgTransferCmd) GetPortFromConfig(portType string) (int, error) {
+func (m *MsgTransferCmd) GetPortFromConfig(portType string) int {
 	if portType == constant.FlagPort {
-		return 0, nil
+		return 0
 	} else if portType == constant.FlagPrometheusPort {
 		n := m.getTransferProgressFlagValue()
-
-		if n < len(config2.Config.Prometheus.MessageTransferPrometheusPort) {
-			return config2.Config.Prometheus.MessageTransferPrometheusPort[n], nil
-		}
-		return 0, fmt.Errorf("index out of range for MessageTransferPrometheusPort with index %d", n)
+		return m.config.Prometheus.MessageTransferPrometheusPort[n]
 	}
-	return 0, fmt.Errorf("unknown port type: %s", portType)
+	return 0
 }
 
 func (m *MsgTransferCmd) AddTransferProgressFlag() {
@@ -67,10 +58,10 @@ func (m *MsgTransferCmd) AddTransferProgressFlag() {
 }
 
 func (m *MsgTransferCmd) getTransferProgressFlagValue() int {
-	nindex, err := m.Command.Flags().GetInt(constant.FlagTransferProgressIndex)
+	nIndex, err := m.Command.Flags().GetInt(constant.FlagTransferProgressIndex)
 	if err != nil {
-		fmt.Println("get transfercmd error,make sure it is k8s env or not")
+		fmt.Println("get transfer cmd error,make sure it is k8s env or not")
 		return 0
 	}
-	return nindex
+	return nIndex
 }

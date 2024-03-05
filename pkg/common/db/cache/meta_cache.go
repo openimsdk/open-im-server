@@ -18,13 +18,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
+
+	"github.com/OpenIMSDK/tools/mw/specialerror"
+
+	"github.com/dtm-labs/rockscache"
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mw/specialerror"
 	"github.com/OpenIMSDK/tools/utils"
-	"github.com/dtm-labs/rockscache"
 )
 
 const (
@@ -128,7 +131,7 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	v, err := rcClient.Fetch2(ctx, key, expire, func() (s string, err error) {
 		t, err = fn(ctx)
 		if err != nil {
-			return "", err
+			return "", errs.Wrap(err)
 		}
 		bs, err := json.Marshal(t)
 		if err != nil {
@@ -139,7 +142,7 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 		return string(bs), nil
 	})
 	if err != nil {
-		return t, err
+		return t, errs.Wrap(err)
 	}
 	if write {
 		return t, nil
@@ -149,8 +152,8 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	}
 	err = json.Unmarshal([]byte(v), &t)
 	if err != nil {
-		log.ZError(ctx, "cache json.Unmarshal failed", err, "key", key, "value", v, "expire", expire)
-		return t, errs.Wrap(err, "unmarshal failed")
+		errInfo := fmt.Sprintf("cache json.Unmarshal failed, key:%s, value:%s, expire:%s", key, v, expire)
+		return t, errs.Wrap(err, errInfo)
 	}
 
 	return t, nil
@@ -203,7 +206,7 @@ func batchGetCache2[T any, K comparable](
 	fns func(ctx context.Context, key K) (T, error),
 ) ([]T, error) {
 	if len(keys) == 0 {
-		return nil, nil
+		return nil, errs.ErrArgs.Wrap("groupID is empty")
 	}
 	res := make([]T, 0, len(keys))
 	for _, key := range keys {
@@ -214,7 +217,7 @@ func batchGetCache2[T any, K comparable](
 			if errs.ErrRecordNotFound.Is(specialerror.ErrCode(errs.Unwrap(err))) {
 				continue
 			}
-			return nil, err
+			return nil, errs.Wrap(err)
 		}
 		res = append(res, val)
 	}

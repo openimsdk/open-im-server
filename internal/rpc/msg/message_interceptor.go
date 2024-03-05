@@ -24,17 +24,17 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
-type MessageInterceptorFunc func(ctx context.Context, req *msg.SendMsgReq) (*sdkws.MsgData, error)
+type MessageInterceptorFunc func(ctx context.Context, globalConfig *config.GlobalConfig, req *msg.SendMsgReq) (*sdkws.MsgData, error)
 
-func MessageHasReadEnabled(_ context.Context, req *msg.SendMsgReq) (*sdkws.MsgData, error) {
+func MessageHasReadEnabled(_ context.Context, globalConfig *config.GlobalConfig, req *msg.SendMsgReq) (*sdkws.MsgData, error) {
 	switch {
 	case req.MsgData.ContentType == constant.HasReadReceipt && req.MsgData.SessionType == constant.SingleChatType:
-		if !config.Config.SingleMessageHasReadReceiptEnable {
+		if !globalConfig.SingleMessageHasReadReceiptEnable {
 			return nil, errs.ErrMessageHasReadDisable.Wrap()
 		}
 		return req.MsgData, nil
 	case req.MsgData.ContentType == constant.HasReadReceipt && req.MsgData.SessionType == constant.SuperGroupChatType:
-		if !config.Config.GroupMessageHasReadReceiptEnable {
+		if !globalConfig.GroupMessageHasReadReceiptEnable {
 			return nil, errs.ErrMessageHasReadDisable.Wrap()
 		}
 		return req.MsgData, nil

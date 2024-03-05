@@ -27,17 +27,17 @@ import (
 
 type ServiceAddresses map[string][]int
 
-func getServiceAddresses() ServiceAddresses {
+func getServiceAddresses(config *config2.GlobalConfig) ServiceAddresses {
 	return ServiceAddresses{
-		config2.Config.RpcRegisterName.OpenImUserName:           config2.Config.RpcPort.OpenImUserPort,
-		config2.Config.RpcRegisterName.OpenImFriendName:         config2.Config.RpcPort.OpenImFriendPort,
-		config2.Config.RpcRegisterName.OpenImMsgName:            config2.Config.RpcPort.OpenImMessagePort,
-		config2.Config.RpcRegisterName.OpenImMessageGatewayName: config2.Config.LongConnSvr.OpenImMessageGatewayPort,
-		config2.Config.RpcRegisterName.OpenImGroupName:          config2.Config.RpcPort.OpenImGroupPort,
-		config2.Config.RpcRegisterName.OpenImAuthName:           config2.Config.RpcPort.OpenImAuthPort,
-		config2.Config.RpcRegisterName.OpenImPushName:           config2.Config.RpcPort.OpenImPushPort,
-		config2.Config.RpcRegisterName.OpenImConversationName:   config2.Config.RpcPort.OpenImConversationPort,
-		config2.Config.RpcRegisterName.OpenImThirdName:          config2.Config.RpcPort.OpenImThirdPort,
+		config.RpcRegisterName.OpenImUserName:           config.RpcPort.OpenImUserPort,
+		config.RpcRegisterName.OpenImFriendName:         config.RpcPort.OpenImFriendPort,
+		config.RpcRegisterName.OpenImMsgName:            config.RpcPort.OpenImMessagePort,
+		config.RpcRegisterName.OpenImMessageGatewayName: config.LongConnSvr.OpenImMessageGatewayPort,
+		config.RpcRegisterName.OpenImGroupName:          config.RpcPort.OpenImGroupPort,
+		config.RpcRegisterName.OpenImAuthName:           config.RpcPort.OpenImAuthPort,
+		config.RpcRegisterName.OpenImPushName:           config.RpcPort.OpenImPushPort,
+		config.RpcRegisterName.OpenImConversationName:   config.RpcPort.OpenImConversationPort,
+		config.RpcRegisterName.OpenImThirdName:          config.RpcPort.OpenImThirdPort,
 	}
 }
 
@@ -46,6 +46,7 @@ type ConnDirect struct {
 	currentServiceAddress string
 	conns                 map[string][]*grpc.ClientConn
 	resolverDirect        *ResolverDirect
+	config                *config2.GlobalConfig
 }
 
 func (cd *ConnDirect) GetClientLocalConns() map[string][]*grpc.ClientConn {
@@ -80,10 +81,11 @@ func (cd *ConnDirect) Close() {
 
 }
 
-func NewConnDirect() (*ConnDirect, error) {
+func NewConnDirect(config *config2.GlobalConfig) (*ConnDirect, error) {
 	return &ConnDirect{
 		conns:          make(map[string][]*grpc.ClientConn),
 		resolverDirect: NewResolverDirect(),
+		config:         config,
 	}, nil
 }
 
@@ -93,12 +95,12 @@ func (cd *ConnDirect) GetConns(ctx context.Context,
 	if conns, exists := cd.conns[serviceName]; exists {
 		return conns, nil
 	}
-	ports := getServiceAddresses()[serviceName]
+	ports := getServiceAddresses(cd.config)[serviceName]
 	var connections []*grpc.ClientConn
 	for _, port := range ports {
-		conn, err := cd.dialServiceWithoutResolver(ctx, fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", port), append(cd.additionalOpts, opts...)...)
+		conn, err := cd.dialServiceWithoutResolver(ctx, fmt.Sprintf(cd.config.Rpc.ListenIP+":%d", port), append(cd.additionalOpts, opts...)...)
 		if err != nil {
-			fmt.Printf("connect to port %d failed,serviceName %s, IP %s\n", port, serviceName, config2.Config.Rpc.ListenIP)
+			fmt.Printf("connect to port %d failed,serviceName %s, IP %s\n", port, serviceName, cd.config.Rpc.ListenIP)
 		}
 		connections = append(connections, conn)
 	}
@@ -111,7 +113,7 @@ func (cd *ConnDirect) GetConns(ctx context.Context,
 
 func (cd *ConnDirect) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	// Get service addresses
-	addresses := getServiceAddresses()
+	addresses := getServiceAddresses(cd.config)
 	address, ok := addresses[serviceName]
 	if !ok {
 		return nil, errs.Wrap(errors.New("unknown service name"), "serviceName", serviceName)
@@ -119,9 +121,9 @@ func (cd *ConnDirect) GetConn(ctx context.Context, serviceName string, opts ...g
 	var result string
 	for _, addr := range address {
 		if result != "" {
-			result = result + "," + fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", addr)
+			result = result + "," + fmt.Sprintf(cd.config.Rpc.ListenIP+":%d", addr)
 		} else {
-			result = fmt.Sprintf(config2.Config.Rpc.ListenIP+":%d", addr)
+			result = fmt.Sprintf(cd.config.Rpc.ListenIP+":%d", addr)
 		}
 	}
 	// Try to dial a new connection
