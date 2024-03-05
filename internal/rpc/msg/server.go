@@ -19,13 +19,12 @@ import (
 	"github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"google.golang.org/grpc"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"google.golang.org/grpc"
 )
 
 type (

@@ -33,35 +33,35 @@ import (
 func main() {
 	var conf pkg.Config // Configuration object, '*' denotes required fields
 
-    // *Required*: Path for the task log file
-    flag.StringVar(&conf.TaskPath, "task", "take.txt", "Path for the task log file")
-    
-    // Optional: Path for the progress log file
-    flag.StringVar(&conf.ProgressPath, "progress", "", "Path for the progress log file")
-    
-    // Number of concurrent operations
-    flag.IntVar(&conf.Concurrency, "concurrency", 1, "Number of concurrent operations")
-    
-    // Number of retry attempts
-    flag.IntVar(&conf.Retry, "retry", 1, "Number of retry attempts")
-    
-    // Optional: Path for the temporary directory
-    flag.StringVar(&conf.TempDir, "temp", "", "Path for the temporary directory")
-    
-    // Cache size in bytes (downloads move to disk when exceeded)
-    flag.Int64Var(&conf.CacheSize, "cache", 1024*1024*100, "Cache size in bytes")
-    
-    // Request timeout in milliseconds
-    flag.Int64Var((*int64)(&conf.Timeout), "timeout", 5000, "Request timeout in milliseconds")
-    
-    // *Required*: API endpoint for the IM service
-    flag.StringVar(&conf.Api, "api", "http://127.0.0.1:10002", "API endpoint for the IM service")
-    
-    // IM administrator's user ID
-    flag.StringVar(&conf.UserID, "userID", "openIM123456", "IM administrator's user ID")
+	// *Required*: Path for the task log file
+	flag.StringVar(&conf.TaskPath, "task", "take.txt", "Path for the task log file")
 
-    // Secret for the IM configuration
-    flag.StringVar(&conf.Secret, "secret", "openIM123", "Secret for the IM configuration")
+	// Optional: Path for the progress log file
+	flag.StringVar(&conf.ProgressPath, "progress", "", "Path for the progress log file")
+
+	// Number of concurrent operations
+	flag.IntVar(&conf.Concurrency, "concurrency", 1, "Number of concurrent operations")
+
+	// Number of retry attempts
+	flag.IntVar(&conf.Retry, "retry", 1, "Number of retry attempts")
+
+	// Optional: Path for the temporary directory
+	flag.StringVar(&conf.TempDir, "temp", "", "Path for the temporary directory")
+
+	// Cache size in bytes (downloads move to disk when exceeded)
+	flag.Int64Var(&conf.CacheSize, "cache", 1024*1024*100, "Cache size in bytes")
+
+	// Request timeout in milliseconds
+	flag.Int64Var((*int64)(&conf.Timeout), "timeout", 5000, "Request timeout in milliseconds")
+
+	// *Required*: API endpoint for the IM service
+	flag.StringVar(&conf.Api, "api", "http://127.0.0.1:10002", "API endpoint for the IM service")
+
+	// IM administrator's user ID
+	flag.StringVar(&conf.UserID, "userID", "openIM123456", "IM administrator's user ID")
+
+	// Secret for the IM configuration
+	flag.StringVar(&conf.Secret, "secret", "openIM123", "Secret for the IM configuration")
 
 	flag.Parse()
 	if !filepath.IsAbs(conf.TaskPath) {

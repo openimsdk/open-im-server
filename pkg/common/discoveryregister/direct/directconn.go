@@ -20,10 +20,9 @@ import (
 	"fmt"
 
 	"github.com/OpenIMSDK/tools/errs"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type ServiceAddresses map[string][]int

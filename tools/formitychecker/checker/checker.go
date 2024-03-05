@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/openimsdk/open-im-server/tools/formitychecker/config"
 )
 

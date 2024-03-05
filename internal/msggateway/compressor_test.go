@@ -111,7 +111,7 @@ func BenchmarkDecompress(b *testing.B) {
 
 	compressor := NewGzipCompressor()
 	comdata, err := compressor.Compress(src)
-	
+
 	assert.Equal(b, nil, err)
 
 	for i := 0; i < b.N; i++ {

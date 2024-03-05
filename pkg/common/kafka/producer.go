@@ -27,9 +27,8 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"google.golang.org/protobuf/proto"
 )
 
 const maxRetry = 10 // number of retries

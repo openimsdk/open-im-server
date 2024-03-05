@@ -194,7 +194,14 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 //	return tArrays, nil
 //}
 
-func batchGetCache2[T any, K comparable](ctx context.Context, rcClient *rockscache.Client, expire time.Duration, keys []K, keyFn func(key K) string, fns func(ctx context.Context, key K) (T, error)) ([]T, error) {
+func batchGetCache2[T any, K comparable](
+	ctx context.Context,
+	rcClient *rockscache.Client,
+	expire time.Duration,
+	keys []K,
+	keyFn func(key K) string,
+	fns func(ctx context.Context, key K) (T, error),
+) ([]T, error) {
 	if len(keys) == 0 {
 		return nil, nil
 	}

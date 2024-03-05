@@ -18,10 +18,9 @@ import (
 	"fmt"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/spf13/cobra"
-
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/spf13/cobra"
 )
 
 type MsgTransferCmd struct {
