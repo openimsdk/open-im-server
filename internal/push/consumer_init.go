@@ -20,8 +20,9 @@ import (
 )
 
 type Consumer struct {
-	pushCh       ConsumerHandler
-	successCount uint64
+	pushCh ConsumerHandler
+	// successCount is unused
+	// successCount uint64
 }
 
 func NewConsumer(config *config.GlobalConfig, pusher *Pusher) (*Consumer, error) {

@@ -57,13 +57,11 @@ func (t *thirdServer) PartSize(ctx context.Context, req *third.PartSizeReq) (*th
 }
 
 func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.InitiateMultipartUploadReq) (*third.InitiateMultipartUploadResp, error) {
-	defer log.ZDebug(ctx, "return")
 	if err := checkUploadName(ctx, req.Name, t.config); err != nil {
 		return nil, err
 	}
 	expireTime := time.Now().Add(t.defaultExpire)
 	result, err := t.s3dataBase.InitiateMultipartUpload(ctx, req.Hash, req.Size, t.defaultExpire, int(req.MaxParts))
-	log.ZDebug(ctx, "33333333333333333333333", err)
 	if err != nil {
 		if haErr, ok := errs.Unwrap(err).(*cont.HashAlreadyExistsError); ok {
 			obj := &relation.ObjectModel{
@@ -76,7 +74,7 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 				Group:       req.Cause,
 				CreateTime:  time.Now(),
 			}
-			if err := t.s3dataBase.SetObject(ctx, obj); err != nil {
+			if setObjectErr := t.s3dataBase.SetObject(ctx, obj); setObjectErr != nil {
 				return nil, err
 			}
 			return &third.InitiateMultipartUploadResp{
@@ -258,10 +256,10 @@ func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteF
 		return nil, errs.ErrArgs.Wrap("invalid id " + err.Error())
 	}
 	var mate FormDataMate
-	if err = json.Unmarshal(data, &mate); err != nil {
+	if unmarshalErr := json.Unmarshal(data, &mate); unmarshalErr != nil {
 		return nil, errs.ErrArgs.Wrap("invalid id " + err.Error())
 	}
-	if err = checkUploadName(ctx, mate.Name, t.config); err != nil {
+	if uploadErr := checkUploadName(ctx, mate.Name, t.config); uploadErr != nil {
 		return nil, err
 	}
 	info, err := t.s3dataBase.StatObject(ctx, mate.Key)

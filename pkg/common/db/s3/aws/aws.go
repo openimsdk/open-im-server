@@ -56,7 +56,10 @@ const (
 func NewAWS() (s3.Interface, error) {
 	configGlobal := config.NewGlobalConfig()
 
-	config.InitConfig(configGlobal, "../../config")
+	err := config.InitConfig(configGlobal, "../../config")
+	if err != nil {
+		return nil, err
+	}
 
 	conf := configGlobal.Object.Aws
 	credential := credentials.NewStaticCredentials(
