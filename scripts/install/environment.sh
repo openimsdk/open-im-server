@@ -332,7 +332,7 @@ def "OPENIM_CONVERSATION_NAME" "Conversation"       # OpenIM对话服务名称
 def "OPENIM_THIRD_NAME" "Third"                     # OpenIM第三方服务名称
 
 ###################### Log Configuration Variables ######################
-def "LOG_STORAGE_LOCATION" "${OPENIM_ROOT}/logs/" # 日志存储位置
+def "LOG_STORAGE_LOCATION" "${OPENIM_ROOT}/_output/logs/" # 日志存储位置
 def "LOG_ROTATION_TIME" "24"                        # 日志轮替时间
 def "LOG_REMAIN_ROTATION_COUNT" "2"                 # 保留的日志轮替数量
 def "LOG_REMAIN_LOG_LEVEL" "6"                      # 保留的日志级别

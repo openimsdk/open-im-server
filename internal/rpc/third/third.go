@@ -17,7 +17,6 @@ package third
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/tools/log"
 	"net/url"
 	"time"
 
@@ -41,7 +40,6 @@ import (
 )
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	log.ZDebug(context.Background(), "config19999999999999999999999999999999999", config, "javadfdas")
 
 	mongo, err := unrelation.NewMongo(config)
 	if err != nil {
@@ -59,7 +57,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	if apiURL == "" {
 		return fmt.Errorf("api url is empty")
 	}
-	if _, parseErr := url.Parse(config.Object.ApiURL); parseErr != nil {
+	if _, err := url.Parse(config.Object.ApiURL); err != nil {
 		return err
 	}
 	if apiURL[len(apiURL)-1] != '/' {
@@ -70,7 +68,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	// 根据配置文件策略选择 oss 方式
+	// Select based on the configuration file strategy
 	enable := config.Object.Enable
 	var o s3.Interface
 	switch config.Object.Enable {

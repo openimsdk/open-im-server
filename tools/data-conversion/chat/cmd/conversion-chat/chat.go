@@ -28,20 +28,20 @@ import (
 
 func main() {
 	var (
-		usernameV2 = "root"            // v2版本mysql用户名
-		passwordV2 = "openIM"          // v2版本mysql密码
-		addrV2     = "127.0.0.1:13306" // v2版本mysql地址
-		databaseV2 = "admin_chat"      // v2版本mysql数据库名字
+		usernameV2 = "root"            // Username for MySQL v2 version
+		passwordV2 = "openIM"          // Password for MySQL v2 version
+		addrV2     = "127.0.0.1:13306" // Address for MySQL v2 version
+		databaseV2 = "admin_chat"      // Database name for MySQL v2 version
 	)
 
 	var (
-		usernameV3 = "root"              // v3版本mysql用户名
-		passwordV3 = "openIM123"         // v3版本mysql密码
-		addrV3     = "127.0.0.1:13306"   // v3版本mysql地址
-		databaseV3 = "openim_enterprise" // v3版本mysql数据库名字
+		usernameV3 = "root"              // Username for MySQL v3 version
+		passwordV3 = "openIM123"         // Password for MySQL v3 version
+		addrV3     = "127.0.0.1:13306"   // Address for MySQL v3 version
+		databaseV3 = "openim_enterprise" // Database name for MySQL v3 version
 	)
 
-	var concurrency = 1 // 并发数量
+	var concurrency = 1 // Concurrency quantity
 
 	log.SetFlags(log.LstdFlags | log.Llongfile)
 	dsnV2 := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", usernameV2, passwordV2, addrV2, databaseV2)

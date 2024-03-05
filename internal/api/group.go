@@ -17,10 +17,8 @@ package api
 import (
 	"github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/tools/a2r"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-
 	"github.com/gin-gonic/gin"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 type GroupApi rpcclient.Group

@@ -17,17 +17,14 @@ package msg
 import (
 	"context"
 
-	utils2 "github.com/OpenIMSDK/tools/utils"
-
-	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
-
-	"github.com/redis/go-redis/v9"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+	utils2 "github.com/OpenIMSDK/tools/utils"
+	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+	"github.com/redis/go-redis/v9"
 )
 
 func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *msg.GetConversationsHasReadAndMaxSeqReq) (resp *msg.GetConversationsHasReadAndMaxSeqResp, err error) {
@@ -82,7 +79,7 @@ func (m *msgServer) SetConversationHasReadSeq(
 	if req.HasReadSeq > maxSeq {
 		return nil, errs.ErrArgs.Wrap("hasReadSeq must not be bigger than maxSeq")
 	}
-	if setErr := m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq); setErr != nil {
+	if err := m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq); err != nil {
 		return nil, err
 	}
 	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, constant.SingleChatType, req.UserID,

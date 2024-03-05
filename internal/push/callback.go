@@ -21,7 +21,6 @@ import (
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
@@ -56,10 +55,12 @@ func callbackOfflinePush(
 		AtUserIDs:       msg.AtUserIDList,
 		Content:         GetContent(msg),
 	}
+
 	resp := &callbackstruct.CallbackBeforePushResp{}
 	if err := http.CallBackPostReturn(ctx, config.Callback.CallbackUrl, req, resp, config.Callback.CallbackOfflinePush); err != nil {
 		return err
 	}
+
 	if len(resp.UserIDs) != 0 {
 		*offlinePushUserIDs = resp.UserIDs
 	}

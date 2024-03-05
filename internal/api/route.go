@@ -134,7 +134,7 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 }
 
 func newGinRouter(disCov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient, config *config.GlobalConfig) *gin.Engine {
-	disCov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin"))) // 默认RPC中间件
+	disCov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -340,13 +340,11 @@ func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.H
 			}
 			m, err := dataBase.GetTokensWithoutError(c, claims.UserID, claims.PlatformID)
 			if err != nil {
-				log.ZWarn(c, "cache get token error", errs.ErrTokenNotExist.Wrap())
 				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
 				c.Abort()
 				return
 			}
 			if len(m) == 0 {
-				log.ZWarn(c, "cache do not exist token error", errs.ErrTokenNotExist.Wrap())
 				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
 				c.Abort()
 				return
@@ -355,12 +353,10 @@ func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.H
 				switch v {
 				case constant.NormalToken:
 				case constant.KickedToken:
-					log.ZWarn(c, "cache kicked token error", errs.ErrTokenKicked.Wrap())
 					apiresp.GinError(c, errs.ErrTokenKicked.Wrap())
 					c.Abort()
 					return
 				default:
-					log.ZWarn(c, "cache unknown token error", errs.ErrTokenUnknown.Wrap())
 					apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
 					c.Abort()
 					return
@@ -376,3 +372,10 @@ func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.H
 		}
 	}
 }
+
+// // handleGinError logs and returns an error response through Gin context.
+// func handleGinError(c *gin.Context, logMessage string, errType errs.CodeError, detail string) {
+// 	wrappedErr := errType.Wrap(detail)
+// 	apiresp.GinError(c, wrappedErr)
+// 	c.Abort()
+// }

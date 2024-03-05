@@ -193,5 +193,5 @@ func (cli *K8sDR) GetClientLocalConns() map[string][]*grpc.ClientConn {
 	return nil
 }
 func (cli *K8sDR) Close() {
-	return
+
 }

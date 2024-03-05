@@ -94,11 +94,10 @@ func NewKafkaProducer(addr []string, topic string, producerConfig *ProducerConfi
 	for i := 0; i <= maxRetry; i++ {
 		p.producer, err = sarama.NewSyncProducer(p.addr, p.config)
 		if err == nil {
-			return &p, nil
+			return &p, errs.Wrap(err)
 		}
 		time.Sleep(1 * time.Second) // Wait before retrying
 	}
-
 	// Panic if unable to create producer after retries
 	if err != nil {
 		return nil, errs.Wrap(errors.New("failed to create Kafka producer: " + err.Error()))
@@ -123,7 +122,7 @@ func configureProducerAck(p *Producer, ackConfig string) {
 
 // configureCompression configures the message compression type for the producer.
 func configureCompression(p *Producer, compressType string) {
-	var compress sarama.CompressionCodec = sarama.CompressionNone
+	var compress = sarama.CompressionNone
 	err := compress.UnmarshalText(bytes.ToLower([]byte(compressType)))
 	if err != nil {
 		fmt.Printf("Failed to configure compression: %v\n", err)
@@ -183,7 +182,7 @@ func (p *Producer) SendMessage(ctx context.Context, key string, msg proto.Messag
 	// Attach context metadata as headers
 	header, err := GetMQHeaderWithContext(ctx)
 	if err != nil {
-		return 0, 0, errs.Wrap(err)
+		return 0, 0, err
 	}
 	kMsg.Headers = header
 

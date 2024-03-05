@@ -44,7 +44,7 @@ func TestMsgGatewayCmd_GetPortFromConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.portType, func(t *testing.T) {
-			got := msgGatewayCmd.GetPortFromConfig(tt.portType)
+			got, _ := msgGatewayCmd.GetPortFromConfig(tt.portType)
 			assert.Equal(t, tt.want, got)
 		})
 	}

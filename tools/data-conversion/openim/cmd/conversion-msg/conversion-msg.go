@@ -38,11 +38,20 @@ import (
 func main() {
 
 	var (
-		topic       = "ws2ms_chat"      // v2版本配置文件kafka.topic.ws2ms_chat
-		kafkaAddr   = "127.0.0.1:9092"  // v2版本配置文件kafka.topic.addr
-		rpcAddr     = "127.0.0.1:10130" // v3版本配置文件rpcPort.openImMessagePort
-		adminUserID = "openIM123456"    // v3版本管理员userID
-		concurrency = 1                 // 并发数量
+		// The Kafka topic for ws2ms_chat in version 2 configuration
+		topic = "ws2ms_chat"
+
+		// The Kafka address in version 2 configuration
+		kafkaAddr = "127.0.0.1:9092"
+
+		// The RPC address in version 3 configuration
+		rpcAddr = "127.0.0.1:10130"
+
+		// The administrator userID in version 3
+		adminUserID = "openIM123456"
+
+		// The number of concurrent processes
+		concurrency = 1
 	)
 
 	getRpcConn := func() (*grpc.ClientConn, error) {
@@ -99,7 +108,7 @@ func main() {
 			ch := pc.Messages()
 			for {
 				select {
-				case <-time.After(time.Second * 10): // 10s读取不到就关闭
+				case <-time.After(time.Second * 10): // 10s Shuts down when the data cannot be read
 					return
 				case message, ok := <-ch:
 					if !ok {

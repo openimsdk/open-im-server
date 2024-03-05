@@ -20,7 +20,6 @@ import (
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
@@ -89,8 +88,7 @@ func FriendsDB2Pb(
 
 }
 
-func FriendRequestDB2Pb(
-	ctx context.Context,
+func FriendRequestDB2Pb(ctx context.Context,
 	friendRequests []*relation.FriendRequestModel,
 	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
 ) ([]*sdkws.FriendRequest, error) {

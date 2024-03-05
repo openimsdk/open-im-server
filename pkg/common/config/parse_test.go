@@ -31,7 +31,7 @@ func TestGetDefaultConfigPath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetDefaultConfigPath(); got != tt.want {
+			if got, _ := GetDefaultConfigPath(); got != tt.want {
 				t.Errorf("GetDefaultConfigPath() = %v, want %v", got, tt.want)
 			}
 		})
@@ -47,7 +47,7 @@ func TestGetProjectRoot(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetProjectRoot(); got != tt.want {
+			if got, _ := GetProjectRoot(); got != tt.want {
 				t.Errorf("GetProjectRoot() = %v, want %v", got, tt.want)
 			}
 		})

@@ -17,13 +17,12 @@ package rpcclient
 import (
 	"context"
 
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/protocol/friend"
 	sdkws "github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"google.golang.org/grpc"
 )
 
 type Friend struct {
@@ -36,7 +35,7 @@ type Friend struct {
 func NewFriend(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Friend {
 	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImFriendName)
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	client := friend.NewFriendClient(conn)
 	return &Friend{discov: discov, conn: conn, Client: client, Config: config}
@@ -63,7 +62,7 @@ func (f *FriendRpcClient) GetFriendsInfo(
 	return
 }
 
-// possibleFriendUserID是否在userID的好友中.
+// possibleFriendUserID Is PossibleFriendUserId's friends.
 func (f *FriendRpcClient) IsFriend(ctx context.Context, possibleFriendUserID, userID string) (bool, error) {
 	resp, err := f.Client.IsFriend(ctx, &friend.IsFriendReq{UserID1: userID, UserID2: possibleFriendUserID})
 	if err != nil {

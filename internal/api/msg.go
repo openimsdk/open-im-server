@@ -27,11 +27,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-
+	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -209,6 +207,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	// Prepare the message request with additional required data.
 	sendMsgReq, err := m.getSendMsgReq(c, req.SendMsg)
 	if err != nil {
+		// Log and respond with an error if preparation fails.
 		apiresp.GinError(c, err)
 		return
 	}
@@ -224,7 +223,6 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	if err != nil {
 		// Set the status to failed and respond with an error if sending fails.
 		status = constant.MsgSendFailed
-		log.ZError(c, "send message err", err)
 		apiresp.GinError(c, err)
 		return
 	}
@@ -238,7 +236,8 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	})
 	if err != nil {
 		// Log the error if updating the status fails.
-		log.ZError(c, "SetSendMsgStatus failed", err)
+		apiresp.GinError(c, err)
+		return
 	}
 
 	// Respond with a success message and the response payload.
@@ -297,7 +296,6 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 		resp apistruct.BatchSendMsgResp
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.ZError(c, "BatchSendMsg BindJSON failed", err)
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
@@ -308,14 +306,12 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 	}
 
 	var recvIDs []string
-	var err error
 	if req.IsSendAll {
 		pageNumber := 1
 		showNumber := 500
 		for {
 			recvIDsPart, err := m.userRpcClient.GetAllUserIDs(c, int32(pageNumber), int32(showNumber))
 			if err != nil {
-				log.ZError(c, "GetAllUserIDs failed", err)
 				apiresp.GinError(c, err)
 				return
 			}
@@ -331,7 +327,6 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 	log.ZDebug(c, "BatchSendMsg nums", "nums ", len(recvIDs))
 	sendMsgReq, err := m.getSendMsgReq(c, req.SendMsg)
 	if err != nil {
-		log.ZError(c, "decodeData failed", err)
 		apiresp.GinError(c, err)
 		return
 	}

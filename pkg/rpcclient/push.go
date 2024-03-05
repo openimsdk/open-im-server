@@ -17,12 +17,11 @@ package rpcclient
 import (
 	"context"
 
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/protocol/push"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"google.golang.org/grpc"
 )
 
 type Push struct {
@@ -34,7 +33,7 @@ type Push struct {
 func NewPush(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Push {
 	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImPushName)
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	return &Push{
 		discov: discov,
@@ -49,9 +48,6 @@ func NewPushRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, config *con
 	return PushRpcClient(*NewPush(discov, config))
 }
 
-func (p *PushRpcClient) DelUserPushToken(
-	ctx context.Context,
-	req *push.DelUserPushTokenReq,
-) (*push.DelUserPushTokenResp, error) {
+func (p *PushRpcClient) DelUserPushToken(ctx context.Context, req *push.DelUserPushTokenReq) (*push.DelUserPushTokenResp, error) {
 	return p.Client.DelUserPushToken(ctx, req)
 }

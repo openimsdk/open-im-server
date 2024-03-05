@@ -118,7 +118,7 @@ func Start(config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, se
 // ok.
 func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) (resp *pbfriend.ApplyToAddFriendResp, err error) {
 	resp = &pbfriend.ApplyToAddFriendResp{}
-	if accessErr := authverify.CheckAccessV3(ctx, req.FromUserID, s.config); accessErr != nil {
+	if err := authverify.CheckAccessV3(ctx, req.FromUserID,s.config); err != nil {
 		return nil, err
 	}
 	if req.ToUserID == req.FromUserID {
@@ -127,7 +127,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 	if err = CallbackBeforeAddFriend(ctx, s.config, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
-	if _, getUserInfoErr := s.userRpcClient.GetUsersInfoMap(ctx, []string{req.ToUserID, req.FromUserID}); getUserInfoErr != nil {
+	if _, err := s.userRpcClient.GetUsersInfoMap(ctx, []string{req.ToUserID, req.FromUserID}); err != nil {
 		return nil, err
 	}
 	in1, in2, err := s.friendDatabase.CheckIn(ctx, req.FromUserID, req.ToUserID)
@@ -141,7 +141,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 		return nil, err
 	}
 	s.notificationSender.FriendApplicationAddNotification(ctx, req)
-	if err = CallbackAfterAddFriend(ctx, s.config, req); err != nil && err != errs.ErrCallbackContinue {
+	if err = CallbackAfterAddFriend(ctx,s.config ,req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	return resp, nil
@@ -222,7 +222,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.Res
 func (s *friendServer) DeleteFriend(ctx context.Context, req *pbfriend.DeleteFriendReq) (resp *pbfriend.DeleteFriendResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.DeleteFriendResp{}
-	if accessErr := s.userRpcClient.Access(ctx, req.OwnerUserID); accessErr != nil {
+	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	_, err = s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, []string{req.FriendUserID})
@@ -247,7 +247,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbfriend.SetFri
 		return nil, err
 	}
 	resp = &pbfriend.SetFriendRemarkResp{}
-	if accessErr := s.userRpcClient.Access(ctx, req.OwnerUserID); accessErr != nil {
+	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	_, err = s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, []string{req.FriendUserID})
@@ -281,6 +281,7 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbfriend.G
 	return resp, nil
 }
 
+// Get the list of friend requests sent out proactively.
 func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context,
 	req *pbfriend.GetDesignatedFriendsApplyReq) (resp *pbfriend.GetDesignatedFriendsApplyResp, err error) {
 	friendRequests, err := s.friendDatabase.FindBothFriendRequests(ctx, req.FromUserID, req.ToUserID)
@@ -295,10 +296,10 @@ func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context,
 	return resp, nil
 }
 
-// ok 获取接收到的好友申请（即别人主动申请的）.
+// Get received friend requests (i.e., those initiated by others).
 func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *pbfriend.GetPaginationFriendsApplyToReq) (resp *pbfriend.GetPaginationFriendsApplyToResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
-	if accessErr := s.userRpcClient.Access(ctx, req.UserID); accessErr != nil {
+	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	total, friendRequests, err := s.friendDatabase.PageFriendRequestToMe(ctx, req.UserID, req.Pagination)
@@ -314,11 +315,10 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *pbf
 	return resp, nil
 }
 
-// ok 获取主动发出去的好友申请列表.
 func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *pbfriend.GetPaginationFriendsApplyFromReq) (resp *pbfriend.GetPaginationFriendsApplyFromResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.GetPaginationFriendsApplyFromResp{}
-	if accessErr := s.userRpcClient.Access(ctx, req.UserID); accessErr != nil {
+	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	total, friendRequests, err := s.friendDatabase.PageFriendRequestFromMe(ctx, req.UserID, req.Pagination)
@@ -346,7 +346,7 @@ func (s *friendServer) IsFriend(ctx context.Context, req *pbfriend.IsFriendReq) 
 
 func (s *friendServer) GetPaginationFriends(ctx context.Context, req *pbfriend.GetPaginationFriendsReq) (resp *pbfriend.GetPaginationFriendsResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
-	if accessErr := s.userRpcClient.Access(ctx, req.UserID); accessErr != nil {
+	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	total, friends, err := s.friendDatabase.PageOwnerFriends(ctx, req.UserID, req.Pagination)
@@ -364,7 +364,7 @@ func (s *friendServer) GetPaginationFriends(ctx context.Context, req *pbfriend.G
 
 func (s *friendServer) GetFriendIDs(ctx context.Context, req *pbfriend.GetFriendIDsReq) (resp *pbfriend.GetFriendIDsResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
-	if accessErr := s.userRpcClient.Access(ctx, req.UserID); accessErr != nil {
+	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	resp = &pbfriend.GetFriendIDsResp{}

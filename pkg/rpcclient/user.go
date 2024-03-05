@@ -18,17 +18,15 @@ import (
 	"context"
 	"strings"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
-
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"google.golang.org/grpc"
 )
 
 // User represents a structure holding connection details for the User RPC client.
@@ -43,7 +41,7 @@ type User struct {
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *User {
 	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImUserName)
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	client := user.NewUserClient(conn)
 	return &User{Discov: discov, Client: client, conn: conn, Config: config}

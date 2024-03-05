@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// Register 注册信息表
+// Register Registration information sheet
 type Register struct {
 	UserID      string    `gorm:"column:user_id;primary_key;type:char(64)" json:"userID"`
 	DeviceID    string    `gorm:"column:device_id;type:varchar(255)"       json:"deviceID"`
@@ -29,7 +29,7 @@ type Register struct {
 	CreateTime  time.Time `gorm:"column:create_time"                       json:"createTime"`
 }
 
-// Account 账号密码表
+// Account username and password table
 type Account struct {
 	UserID         string    `gorm:"column:user_id;primary_key;type:char(64)" json:"userID"`
 	Password       string    `gorm:"column:password;type:varchar(255)"        json:"password"`
@@ -38,7 +38,7 @@ type Account struct {
 	OperatorUserID string    `gorm:"column:operator_user_id;type:varchar(64)" json:"operatorUserID"`
 }
 
-// Attribute 用户属性表
+// Attribute user information table
 type Attribute struct {
 	UserID         string    `gorm:"column:user_id;primary_key;type:char(64)" json:"userID"`
 	Account        string    `gorm:"column:account;type:char(64)"             json:"account"`
@@ -58,7 +58,7 @@ type Attribute struct {
 	AllowAddFriend int32     `gorm:"column:allow_add_friend;default:1"        json:"allowAddFriend"`
 }
 
-// 封号表
+// User friend relationship table
 type ForbiddenAccount struct {
 	UserID         string    `gorm:"column:user_id;index:userID;primary_key;type:char(64)" json:"userID"`
 	CreateTime     time.Time `gorm:"column:create_time"                                    json:"createTime"`
@@ -66,7 +66,7 @@ type ForbiddenAccount struct {
 	OperatorUserID string    `gorm:"column:operator_user_id;type:varchar(255)"             json:"operatorUserID"`
 }
 
-// 用户登录信息表
+// user login record table
 type UserLoginRecord struct {
 	UserID    string    `gorm:"column:user_id;size:64"             json:"userID"`
 	LoginTime time.Time `gorm:"column:login_time"                  json:"loginTime"`
@@ -75,7 +75,7 @@ type UserLoginRecord struct {
 	Platform  string    `gorm:"column:platform;type:varchar(32)"   json:"platform"`
 }
 
-// 禁止ip登录 注册
+// ip login registration is prohibited
 type IPForbidden struct {
 	IP            string    `gorm:"column:ip;primary_key;type:char(32)" json:"ip"`
 	LimitRegister int32     `gorm:"column:limit_register"               json:"limitRegister"`
@@ -83,14 +83,14 @@ type IPForbidden struct {
 	CreateTime    time.Time `gorm:"column:create_time"                  json:"createTime"`
 }
 
-// 限制userID只能在某些ip登录
+// Restrict userids to certain ip addresses
 type LimitUserLoginIP struct {
 	UserID     string    `gorm:"column:user_id;primary_key;type:char(64)" json:"userID"`
 	IP         string    `gorm:"column:ip;primary_key;type:char(32)"      json:"ip"`
 	CreateTime time.Time `gorm:"column:create_time"                       json:"createTime"`
 }
 
-// 邀请码被注册使用
+// The invitation code is registered for use
 type InvitationRegister struct {
 	InvitationCode string    `gorm:"column:invitation_code;primary_key;type:char(32)" json:"invitationCode"`
 	CreateTime     time.Time `gorm:"column:create_time"                               json:"createTime"`

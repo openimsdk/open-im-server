@@ -25,24 +25,21 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/OpenIMSDK/tools/apiresp"
-
-	"github.com/go-playground/validator/v10"
-	"github.com/redis/go-redis/v9"
-	"golang.org/x/sync/errgroup"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msggateway"
+	"github.com/OpenIMSDK/tools/apiresp"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
-
+	"github.com/go-playground/validator/v10"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/redis/go-redis/v9"
+	"golang.org/x/sync/errgroup"
 )
 
 type LongConnServer interface {
@@ -89,6 +86,7 @@ type WsServer struct {
 	Encoder
 	MessageHandler
 }
+
 type kickHandler struct {
 	clientOK   bool
 	oldClients []*Client
@@ -130,7 +128,9 @@ func (ws *WsServer) UnRegister(c *Client) {
 }
 
 func (ws *WsServer) Validate(s any) error {
-	//?question?
+	if s == nil {
+		return errs.Wrap(errors.New("input cannot be nil"))
+	}
 	return nil
 }
 
@@ -278,7 +278,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		log.ZDebug(client.ctx, "user exist", "userID", client.UserID, "platformID", client.PlatformID)
 		if clientOK {
 			ws.clients.Set(client.UserID, client)
-			// 已经有同平台的连接存在
+			// There is already a connection to the platform
 			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID", client.PlatformID, "old remote addr", getRemoteAdders(oldClients))
 			ws.onlineUserConnNum.Add(1)
 		} else {

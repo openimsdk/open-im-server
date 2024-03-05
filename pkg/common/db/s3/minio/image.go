@@ -42,79 +42,51 @@ func ImageWidthHeight(img image.Image) (int, int) {
 	return bounds.X, bounds.Y
 }
 
+// resizeImage resizes an image to a specified maximum width and height, maintaining the aspect ratio.
+// If both maxWidth and maxHeight are set to 0, the original image is returned.
+// If both are non-zero, the image is scaled to fit within the constraints while maintaining aspect ratio.
+// If only one of maxWidth or maxHeight is non-zero, the image is scaled accordingly.
 func resizeImage(img image.Image, maxWidth, maxHeight int) image.Image {
 	bounds := img.Bounds()
-	imgWidth := bounds.Max.X
-	imgHeight := bounds.Max.Y
+	imgWidth, imgHeight := bounds.Dx(), bounds.Dy()
 
-	// 计算缩放比例
-	scaleWidth := float64(maxWidth) / float64(imgWidth)
-	scaleHeight := float64(maxHeight) / float64(imgHeight)
-
-	// 如果都为0，则不缩放，返回原始图片
+	// Return original image if no resizing is needed.
 	if maxWidth == 0 && maxHeight == 0 {
 		return img
 	}
 
-	// 如果宽度和高度都大于0，则选择较小的缩放比例，以保持宽高比
+	var scale float64 = 1
 	if maxWidth > 0 && maxHeight > 0 {
-		scale := scaleWidth
-		if scaleHeight < scaleWidth {
-			scale = scaleHeight
-		}
-
-		// 计算缩略图尺寸
-		thumbnailWidth := int(float64(imgWidth) * scale)
-		thumbnailHeight := int(float64(imgHeight) * scale)
-
-		// 使用"image"库的Resample方法生成缩略图
-		thumbnail := image.NewRGBA(image.Rect(0, 0, thumbnailWidth, thumbnailHeight))
-		for y := 0; y < thumbnailHeight; y++ {
-			for x := 0; x < thumbnailWidth; x++ {
-				srcX := int(float64(x) / scale)
-				srcY := int(float64(y) / scale)
-				thumbnail.Set(x, y, img.At(srcX, srcY))
-			}
-		}
-
-		return thumbnail
+		scaleWidth := float64(maxWidth) / float64(imgWidth)
+		scaleHeight := float64(maxHeight) / float64(imgHeight)
+		// Choose the smaller scale to fit both constraints.
+		scale = min(scaleWidth, scaleHeight)
+	} else if maxWidth > 0 {
+		scale = float64(maxWidth) / float64(imgWidth)
+	} else if maxHeight > 0 {
+		scale = float64(maxHeight) / float64(imgHeight)
 	}
 
-	// 如果只指定了宽度或高度，则根据最大不超过的规则生成缩略图
-	if maxWidth > 0 {
-		thumbnailWidth := maxWidth
-		thumbnailHeight := int(float64(imgHeight) * scaleWidth)
+	newWidth := int(float64(imgWidth) * scale)
+	newHeight := int(float64(imgHeight) * scale)
 
-		// 使用"image"库的Resample方法生成缩略图
-		thumbnail := image.NewRGBA(image.Rect(0, 0, thumbnailWidth, thumbnailHeight))
-		for y := 0; y < thumbnailHeight; y++ {
-			for x := 0; x < thumbnailWidth; x++ {
-				srcX := int(float64(x) / scaleWidth)
-				srcY := int(float64(y) / scaleWidth)
-				thumbnail.Set(x, y, img.At(srcX, srcY))
-			}
+	// Resize the image by creating a new image and manually copying pixels.
+	thumbnail := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
+	for y := 0; y < newHeight; y++ {
+		for x := 0; x < newWidth; x++ {
+			srcX := int(float64(x) / scale)
+			srcY := int(float64(y) / scale)
+			thumbnail.Set(x, y, img.At(srcX, srcY))
 		}
-
-		return thumbnail
 	}
 
-	if maxHeight > 0 {
-		thumbnailWidth := int(float64(imgWidth) * scaleHeight)
-		thumbnailHeight := maxHeight
+	return thumbnail
+}
 
-		// 使用"image"库的Resample方法生成缩略图
-		thumbnail := image.NewRGBA(image.Rect(0, 0, thumbnailWidth, thumbnailHeight))
-		for y := 0; y < thumbnailHeight; y++ {
-			for x := 0; x < thumbnailWidth; x++ {
-				srcX := int(float64(x) / scaleHeight)
-				srcY := int(float64(y) / scaleHeight)
-				thumbnail.Set(x, y, img.At(srcX, srcY))
-			}
-		}
-
-		return thumbnail
+// min returns the smaller of x or y.
+func min(x, y float64) float64 {
+	if x < y {
+		return x
 	}
-
-	// 默认情况下，返回原始图片
-	return img
+	return y
 }

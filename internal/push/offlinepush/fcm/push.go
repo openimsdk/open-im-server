@@ -39,6 +39,8 @@ type Fcm struct {
 	cache     cache.MsgModel
 }
 
+// NewClient initializes a new FCM client using the Firebase Admin SDK.
+// It requires the FCM service account credentials file located within the project's configuration directory.
 func NewClient(globalConfig *config.GlobalConfig, cache cache.MsgModel) *Fcm {
 	projectRoot := config.GetProjectRoot()
 	credentialsFilePath := filepath.Join(projectRoot, "config", globalConfig.Push.Fcm.ServiceAccount)
@@ -47,12 +49,12 @@ func NewClient(globalConfig *config.GlobalConfig, cache cache.MsgModel) *Fcm {
 	if err != nil {
 		return nil
 	}
-
 	ctx := context.Background()
 	fcmMsgClient, err := fcmApp.Messaging(ctx)
 	if err != nil {
 		return nil
 	}
+
 	return &Fcm{fcmMsgCli: fcmMsgClient, cache: cache}
 }
 
@@ -125,7 +127,6 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 		response, err := f.fcmMsgCli.SendAll(ctx, messages)
 		if err != nil {
 			Fail = Fail + messageCount
-			// log.Info(operationID, "some token push err", err.Error(), messageCount)
 		} else {
 			Success = Success + response.SuccessCount
 			Fail = Fail + response.FailureCount

@@ -19,14 +19,12 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/tools/errs"
-
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 func NewGroupMongo(db *mongo.Database) (relation.GroupModelInterface, error) {

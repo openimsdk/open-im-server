@@ -15,10 +15,24 @@
 package cont
 
 const (
-	hashPath            = "openim/data/hash/"
-	tempPath            = "openim/temp/"
-	DirectPath          = "openim/direct"
-	UploadTypeMultipart = 1 // 分片上传
-	UploadTypePresigned = 2 // 预签名上传
-	partSeparator       = ","
+	// hashPath defines the storage path for hash data within the 'openim' directory.
+	hashPath = "openim/data/hash/"
+
+	// tempPath specifies the directory for temporary files in the 'openim' structure.
+	tempPath = "openim/temp/"
+
+	// DirectPath indicates the directory for direct uploads or access within the 'openim' structure.
+	DirectPath = "openim/direct"
+
+	// UploadTypeMultipart represents the identifier for multipart uploads,
+	// allowing large files to be uploaded in chunks.
+	UploadTypeMultipart = 1
+
+	// UploadTypePresigned signifies the use of presigned URLs for uploads,
+	// facilitating secure, authorized file transfers without requiring direct access to the storage credentials.
+	UploadTypePresigned = 2
+
+	// partSeparator is used as a delimiter in multipart upload processes,
+	// separating individual file parts.
+	partSeparator = ","
 )

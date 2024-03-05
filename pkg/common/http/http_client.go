@@ -25,7 +25,6 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
@@ -66,12 +65,12 @@ func Post(ctx context.Context, url string, header map[string]string, data any, t
 
 	jsonStr, err := json.Marshal(data)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "Post: JSON marshal failed")
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonStr))
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "Post: NewRequestWithContext failed")
 	}
 
 	if operationID, _ := ctx.Value(constant.OperationID).(string); operationID != "" {
@@ -84,13 +83,13 @@ func Post(ctx context.Context, url string, header map[string]string, data any, t
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "Post: client.Do failed")
 	}
 	defer resp.Body.Close()
 
 	result, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "Post: ReadAll failed")
 	}
 
 	return result, nil
@@ -102,7 +101,10 @@ func PostReturn(ctx context.Context, url string, header map[string]string, input
 		return err
 	}
 	err = json.Unmarshal(b, output)
-	return err
+	if err != nil {
+		return errs.Wrap(err, "PostReturn: JSON unmarshal failed")
+	}
+	return nil
 }
 
 func callBackPostReturn(ctx context.Context, url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
@@ -127,7 +129,6 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 	}
 	if err := output.Parse(); err != nil {
 		log.ZWarn(ctx, "callback parse failed", err, "url", url, "input", input, "response", string(b))
-		return err
 	}
 	log.ZInfo(ctx, "callback success", "url", url, "input", input, "response", string(b))
 	return nil

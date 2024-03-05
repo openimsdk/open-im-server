@@ -17,19 +17,16 @@ package msg
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	pbchat "github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
-
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
+	"google.golang.org/protobuf/proto"
 )
 
 func toCommonCallback(ctx context.Context, msg *pbchat.SendMsgReq, command string) cbapi.CommonCallbackReq {

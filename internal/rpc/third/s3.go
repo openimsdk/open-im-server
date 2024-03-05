@@ -74,7 +74,7 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 				Group:       req.Cause,
 				CreateTime:  time.Now(),
 			}
-			if setObjectErr := t.s3dataBase.SetObject(ctx, obj); setObjectErr != nil {
+			if err := t.s3dataBase.SetObject(ctx, obj); err != nil {
 				return nil, err
 			}
 			return &third.InitiateMultipartUploadResp{
@@ -256,10 +256,10 @@ func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteF
 		return nil, errs.ErrArgs.Wrap("invalid id " + err.Error())
 	}
 	var mate FormDataMate
-	if unmarshalErr := json.Unmarshal(data, &mate); unmarshalErr != nil {
+	if err := json.Unmarshal(data, &mate); err != nil {
 		return nil, errs.ErrArgs.Wrap("invalid id " + err.Error())
 	}
-	if uploadErr := checkUploadName(ctx, mate.Name, t.config); uploadErr != nil {
+	if err := checkUploadName(ctx, mate.Name, t.config); err != nil {
 		return nil, err
 	}
 	info, err := t.s3dataBase.StatObject(ctx, mate.Key)

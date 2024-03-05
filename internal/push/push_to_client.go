@@ -20,10 +20,6 @@ import (
 	"errors"
 	"sync"
 
-	"google.golang.org/grpc"
-
-	"golang.org/x/sync/errgroup"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/protocol/msggateway"
@@ -32,7 +28,6 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
-
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/dummy"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/fcm"
@@ -45,6 +40,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
 )
 
 type Pusher struct {
@@ -231,7 +228,8 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			}(groupID, kickedUsers)
 			pushToUserIDs = append(pushToUserIDs, kickedUsers...)
 		case constant.GroupDismissedNotification:
-			if msgprocessor.IsNotification(msgprocessor.GetConversationIDByMsg(msg)) { // 消息先到,通知后到
+			// Messages arrive first, notifications arrive later
+			if msgprocessor.IsNotification(msgprocessor.GetConversationIDByMsg(msg)) {
 				var tips sdkws.GroupDismissedTips
 				if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
 					return err

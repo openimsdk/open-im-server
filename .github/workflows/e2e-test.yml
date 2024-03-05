@@ -92,6 +92,7 @@ jobs:
 
     - name: Exec OpenIM API test
       run: |
+        sudo make test-api
         mkdir -p ./tmp
         touch ./tmp/test.md
         echo "# OpenIM Test" >> ./tmp/test.md
@@ -104,6 +105,7 @@ jobs:
 
     - name: Exec OpenIM E2E Test
       run: |
+        sudo make test-e2e
         echo "" >> ./tmp/test.md
         echo "## OpenIM E2E Test" >> ./tmp/test.md
         echo "<details><summary>Command Output for OpenIM E2E Test</summary>" >> ./tmp/test.md

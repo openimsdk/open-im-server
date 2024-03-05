@@ -25,7 +25,6 @@ import (
 	"github.com/OpenIMSDK/tools/a2r"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 

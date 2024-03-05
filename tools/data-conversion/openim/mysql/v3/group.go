@@ -58,9 +58,10 @@ type GroupModelInterface interface {
 		keyword string,
 		pageNumber, showNumber int32,
 	) (total uint32, groups []*GroupModel, err error)
+	// GetGroupIDsByCreatorUserID retrieves a list of group IDs created by the specified user.
 	GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error)
-	// 获取群总数
+	// CountTotal retrieves the total number of groups.
 	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
-	// 获取范围内群增量
+	// CountRangeEverydayTotal retrieves the total number of groups created every day within the specified time range.
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
 }

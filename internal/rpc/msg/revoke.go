@@ -67,7 +67,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if !authverify.IsAppManagerUid(ctx, m.config) {
 		switch msgs[0].SessionType {
 		case constant.SingleChatType:
-			if accessErr := authverify.CheckAccessV3(ctx, msgs[0].SendID, m.config); accessErr != nil {
+			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID, m.config); err != nil {
 				return nil, err
 			}
 			role = user.AppMangerLevel
@@ -132,7 +132,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	} else {
 		recvID = msgs[0].RecvID
 	}
-	if notificationErr := m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips); notificationErr != nil {
+	if err := m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips); err != nil {
 		return nil, err
 	}
 	if err = CallbackAfterRevokeMsg(ctx, m.config, req); err != nil {

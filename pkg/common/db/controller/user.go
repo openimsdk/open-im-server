@@ -18,19 +18,14 @@ import (
 	"context"
 	"time"
 
+	"github.com/OpenIMSDK/protocol/user"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/OpenIMSDK/tools/tx"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-
-	"github.com/OpenIMSDK/protocol/user"
-
-	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
-
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
 type UserDatabase interface {

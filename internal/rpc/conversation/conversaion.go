@@ -20,28 +20,23 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"sort"
 
-	"github.com/OpenIMSDK/protocol/sdkws"
-
-	"github.com/OpenIMSDK/tools/tx"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	pbconversation "github.com/OpenIMSDK/protocol/conversation"
+	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"google.golang.org/grpc"
 )
 
 type conversationServer struct {
@@ -313,7 +308,7 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 			unequal++
 		}
 	}
-	if err := c.conversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDs, &conversation, m); err != nil {
+	if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, req.UserIDs, &conversation, m); err != nil {
 		return nil, err
 	}
 	if unequal > 0 {
@@ -324,7 +319,7 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 	return &pbconversation.SetConversationsResp{}, nil
 }
 
-// 获取超级大群开启免打扰的用户ID.
+// Get user IDs with "Do Not Disturb" enabled in super large groups.
 func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbconversation.GetRecvMsgNotNotifyUserIDsReq) (*pbconversation.GetRecvMsgNotNotifyUserIDsResp, error) {
 	//userIDs, err := c.conversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
 	//if err != nil {
@@ -381,7 +376,7 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 }
 
 func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbconversation.SetConversationMaxSeqReq) (*pbconversation.SetConversationMaxSeqResp, error) {
-	if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, req.OwnerUserID, req.ConversationID,
+	if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.OwnerUserID, req.ConversationID,
 		map[string]any{"max_seq": req.MaxSeq}); err != nil {
 		return nil, err
 	}

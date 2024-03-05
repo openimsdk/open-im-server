@@ -18,32 +18,26 @@ import (
 	"context"
 	"fmt"
 	"math"
-
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/tx"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-
-	"github.com/redis/go-redis/v9"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-
 	"math/rand"
 
+	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/mw"
+	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type MsgTool struct {
@@ -200,7 +194,8 @@ func (c *MsgTool) checkMaxSeqWithMongo(ctx context.Context, conversationID strin
 		return err
 	}
 	if math.Abs(float64(maxSeqMongo-maxSeqCache)) > 10 {
-		log.ZError(ctx, "cache max seq and mongo max seq is diff > 10", nil, "maxSeqMongo", maxSeqMongo, "minSeqMongo", minSeqMongo, "maxSeqCache", maxSeqCache, "conversationID", conversationID)
+		err = fmt.Errorf("cache max seq and mongo max seq is diff > 10,  maxSeqMongo:%d,minSeqMongo:%d,maxSeqCache:%d,conversationID:%s", maxSeqMongo, minSeqMongo, maxSeqCache, conversationID)
+		return errs.Wrap(err)
 	}
 	return nil
 }
@@ -222,7 +217,6 @@ func (c *MsgTool) checkMaxSeq(ctx context.Context, conversationID string) error 
 func (c *MsgTool) FixAllSeq(ctx context.Context) error {
 	conversationIDs, err := c.conversationDatabase.GetAllConversationIDs(ctx)
 	if err != nil {
-		log.ZError(ctx, "GetAllConversationIDs failed", err)
 		return err
 	}
 	for _, conversationID := range conversationIDs {

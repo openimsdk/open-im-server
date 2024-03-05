@@ -20,6 +20,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/IBM/sarama"
+	"github.com/OpenIMSDK/tools/errs"
 )
 
 type Consumer struct {
@@ -30,7 +31,7 @@ type Consumer struct {
 	Consumer      sarama.Consumer
 }
 
-func NewKafkaConsumer(addr []string, topic string, config *config.GlobalConfig) *Consumer {
+func NewKafkaConsumer(addr []string, topic string, config *config.GlobalConfig) (*Consumer,error) {
 	p := Consumer{}
 	p.Topic = topic
 	p.addr = addr
@@ -50,18 +51,22 @@ func NewKafkaConsumer(addr []string, topic string, config *config.GlobalConfig) 
 			InsecureSkipVerify: false,
 		}
 	}
-	SetupTLSConfig(consumerConfig, tlsConfig)
+	err:=SetupTLSConfig(consumerConfig, tlsConfig)
+	if err!=nil{
+		return nil,err
+	}
 	consumer, err := sarama.NewConsumer(p.addr, consumerConfig)
 	if err != nil {
-		panic(err.Error())
+		return nil, errs.Wrap(err, "NewKafkaConsumer: creating consumer failed")
 	}
 	p.Consumer = consumer
 
 	partitionList, err := consumer.Partitions(p.Topic)
 	if err != nil {
-		panic(err.Error())
+		return nil, errs.Wrap(err, "NewKafkaConsumer: getting partitions failed")
 	}
 	p.PartitionList = partitionList
 
-	return &p
+	return &p, nil
+
 }

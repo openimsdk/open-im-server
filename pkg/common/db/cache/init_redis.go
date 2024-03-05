@@ -22,12 +22,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/redis/go-redis/v9"
-
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mw/specialerror"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/redis/go-redis/v9"
 )
 
 var (
@@ -77,8 +75,7 @@ func NewRedis(config *config.GlobalConfig) (redis.UniversalClient, error) {
 	defer cancel()
 	err = rdb.Ping(ctx).Err()
 	if err != nil {
-		uriFormat := "address:%s, username:%s, password:%s, clusterMode:%t, enablePipeline:%t"
-		errMsg := fmt.Sprintf(uriFormat, config.Redis.Address, config.Redis.Username,
+		errMsg := fmt.Sprintf("address:%s, username:%s, password:%s, clusterMode:%t, enablePipeline:%t", config.Redis.Address, config.Redis.Username,
 			config.Redis.Password, config.Redis.ClusterMode, config.Redis.EnablePipeline)
 		return nil, errs.Wrap(err, errMsg)
 	}
@@ -99,9 +96,11 @@ func overrideConfigFromEnv(config *config.GlobalConfig) {
 			config.Redis.Address = strings.Split(envAddr, ",")
 		}
 	}
+
 	if envUser := os.Getenv("REDIS_USERNAME"); envUser != "" {
 		config.Redis.Username = envUser
 	}
+
 	if envPass := os.Getenv("REDIS_PASSWORD"); envPass != "" {
 		config.Redis.Password = envPass
 	}

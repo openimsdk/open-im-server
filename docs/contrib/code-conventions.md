@@ -3,7 +3,15 @@
 - [Code conventions](#code-conventions)
   - [POSIX shell](#posix-shell)
   - [Go](#go)
-  - [Directory and file conventions](#directory-and-file-conventions)
+  - [OpenIM Naming Conventions Guide](#openim-naming-conventions-guide)
+    - [1. General File Naming](#1-general-file-naming)
+    - [2. Special File Types](#2-special-file-types)
+      - [a. Script and Markdown Files](#a-script-and-markdown-files)
+      - [b. Uppercase Markdown Documentation](#b-uppercase-markdown-documentation)
+    - [3. Directory Naming](#3-directory-naming)
+    - [4. Configuration Files](#4-configuration-files)
+    - [Best Practices](#best-practices)
+  - [Directory and File Conventions](#directory-and-file-conventions)
   - [Testing conventions](#testing-conventions)
 
 ## POSIX shell
@@ -67,12 +75,13 @@ Files within the OpenIM project should adhere to the following rules:
 + Stick to lowercase naming where possible for consistency and to prevent issues with case-sensitive systems.
 + Include version numbers or dates in file names if the file is subject to updates, following the format: `project-plan-v1.2.md` or `backup-2023-03-15.sql`.
 
-## Directory and file conventions
+## Directory and File Conventions
 
-- Avoid general utility packages. Packages called "util" are suspect. Instead, derive a name that describes your desired function. For example, the utility functions dealing with waiting for operations are in the `wait` package and include functionality like `Poll`. The full name is `wait.Poll`.
-- All filenames should be lowercase.
-- All source files and directories should use underscores, not dashes.
-  - Package directories should generally avoid using separators as much as possible. When package names are multiple words, they usually should be in nested subdirectories.
+- Avoid generic utility packages. Instead of naming a package "util", choose a name that clearly describes its purpose. For instance, functions related to waiting operations are contained within the `wait` package, which includes methods like `Poll`, fully named as `wait.Poll`.
+- All filenames, script files, configuration files, and directories should be in lowercase and use dashes (`-`) as separators.
+- For Go language files, filenames should be in lowercase and use underscores (`_`).
+- Package names should match their directory names to ensure consistency. For example, within the `openim-api` directory, the Go file should be named `openim-api.go`, following the convention of using dashes for directory names and aligning package names with directory names.
+
 
 ## Testing conventions
 

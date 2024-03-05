@@ -24,40 +24,31 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
-
-	pbconversation "github.com/OpenIMSDK/protocol/conversation"
-	"github.com/OpenIMSDK/protocol/wrapperspb"
-	"github.com/OpenIMSDK/tools/tx"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
-
-	"github.com/OpenIMSDK/tools/mw/specialerror"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/protocol/constant"
+	pbconversation "github.com/OpenIMSDK/protocol/conversation"
 	pbgroup "github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/protocol/wrapperspb"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/OpenIMSDK/tools/mw/specialerror"
+	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
-
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"google.golang.org/grpc"
 )
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -540,7 +531,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	if err != nil {
 		return nil, err
 	}
-	if populateErr := s.PopulateGroupMember(ctx, members...); populateErr != nil {
+	if err := s.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
 	memberMap := make(map[string]*relationtb.GroupMemberModel)
@@ -767,11 +758,11 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 	}
 	var inGroup bool
 	if _, takeErr := s.db.TakeGroupMember(ctx, req.GroupID, req.FromUserID); takeErr == nil {
-		inGroup = true // 已经在群里了
+		inGroup = true // Already in group
 	} else if !s.IsNotFound(err) {
 		return nil, err
 	}
-	if _, getInfoErr := s.User.GetPublicUserInfo(ctx, req.FromUserID); getInfoErr != nil {
+	if _, err := s.User.GetPublicUserInfo(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	var member *relationtb.GroupMemberModel
@@ -858,14 +849,14 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			JoinTime:       time.Now(),
 			MuteEndTime:    time.UnixMilli(0),
 		}
-		if callbackErr := CallbackBeforeMemberJoinGroup(ctx, s.config, groupMember, group.Ex); callbackErr != nil {
+		if err := CallbackBeforeMemberJoinGroup(ctx, s.config, groupMember, group.Ex); err != nil {
 			return nil, err
 		}
-		if createErr := s.db.CreateGroup(ctx, nil, []*relationtb.GroupMemberModel{groupMember}); createErr != nil {
+		if err := s.db.CreateGroup(ctx, nil, []*relationtb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
 
-		if createErr := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); createErr != nil {
+		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
 			return nil, err
 		}
 		s.Notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID)
@@ -906,7 +897,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 	if member.RoleLevel == constant.GroupOwner {
 		return nil, errs.ErrNoPermission.Wrap("group owner can't quit")
 	}
-	if populateErr := s.PopulateGroupMember(ctx, member); populateErr != nil {
+	if err := s.PopulateGroupMember(ctx, member); err != nil {
 		return nil, err
 	}
 	err = s.db.DeleteGroupMember(ctx, req.GroupID, []string{req.UserID})
@@ -968,14 +959,14 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
-	if populateErr := s.PopulateGroupMember(ctx, owner); populateErr != nil {
+	if err := s.PopulateGroupMember(ctx, owner); err != nil {
 		return nil, err
 	}
 	update := UpdateGroupInfoMap(ctx, req.GroupInfoForSet)
 	if len(update) == 0 {
 		return resp, nil
 	}
-	if updateErr := s.db.UpdateGroup(ctx, group.GroupID, update); updateErr != nil {
+	if err := s.db.UpdateGroup(ctx, group.GroupID, update); err != nil {
 		return nil, err
 	}
 	group, err = s.db.TakeGroup(ctx, req.GroupInfoForSet.GroupID)
@@ -1169,7 +1160,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbgrou
 	if err != nil {
 		return nil, err
 	}
-	if populateErr := s.PopulateGroupMember(ctx, owners...); populateErr != nil {
+	if err := s.PopulateGroupMember(ctx, owners...); err != nil {
 		return nil, err
 	}
 	ownerMap := utils.SliceToMap(owners, func(e *relationtb.GroupMemberModel) string {
@@ -1201,7 +1192,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 			return nil, errs.ErrNoPermission.Wrap("not group owner")
 		}
 	}
-	if populateErr := s.PopulateGroupMember(ctx, owner); populateErr != nil {
+	if err := s.PopulateGroupMember(ctx, owner); err != nil {
 		return nil, err
 	}
 	group, err := s.db.TakeGroup(ctx, req.GroupID)
@@ -1211,7 +1202,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 	if !req.DeleteMember && group.Status == constant.GroupStatusDismissed {
 		return nil, errs.ErrDismissedAlready.Wrap("group status is dismissed")
 	}
-	if dismissErr := s.db.DismissGroup(ctx, req.GroupID, req.DeleteMember); dismissErr != nil {
+	if err := s.db.DismissGroup(ctx, req.GroupID, req.DeleteMember); err != nil {
 		return nil, err
 	}
 	if !req.DeleteMember {
@@ -1567,7 +1558,7 @@ func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 	if err != nil {
 		return nil, err
 	}
-	if populateErr := s.PopulateGroupMember(ctx, owners...); populateErr != nil {
+	if err := s.PopulateGroupMember(ctx, owners...); err != nil {
 		return nil, err
 	}
 	ownerMap := utils.SliceToMap(owners, func(e *relationtb.GroupMemberModel) string {
