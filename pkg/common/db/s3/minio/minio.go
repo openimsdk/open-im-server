@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"io"
 	"net/http"
 	"net/url"
@@ -351,10 +352,7 @@ func (m *Minio) CopyObject(ctx context.Context, src string, dst string) (*s3.Cop
 }
 
 func (m *Minio) IsNotFound(err error) bool {
-	if err == nil {
-		return false
-	}
-	switch e := err.(type) {
+	switch e := errs.Unwrap(err).(type) {
 	case minio.ErrorResponse:
 		return e.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
 	case *minio.ErrorResponse:
