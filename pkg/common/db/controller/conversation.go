@@ -23,7 +23,6 @@ import (
 	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -42,7 +41,8 @@ type ConversationDatabase interface {
 	GetUserAllConversation(ctx context.Context, ownerUserID string) ([]*relationtb.ConversationModel, error)
 	// SetUserConversations sets multiple conversation properties for a user, creates new conversations if they do not exist, or updates them otherwise. This operation is atomic.
 	SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationtb.ConversationModel) error
-	// SetUsersConversationFieldTx updates a specific field for multiple users' conversations, creating new conversations if they do not exist, or updates them otherwise. This operation is transactional.
+	// SetUsersConversationFieldTx updates a specific field for multiple users' conversations, creating new conversations if they do not exist, or updates them otherwise. This operation is
+	// transactional.
 	SetUsersConversationFieldTx(ctx context.Context, userIDs []string, conversation *relationtb.ConversationModel, fieldMap map[string]any) error
 	// CreateGroupChatConversation creates a group chat conversation for the specified group ID and user IDs.
 	CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error

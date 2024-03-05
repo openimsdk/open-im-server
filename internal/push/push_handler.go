@@ -23,10 +23,9 @@ import (
 	pbpush "github.com/OpenIMSDK/protocol/push"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kfk "github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
+	"google.golang.org/protobuf/proto"
 )
 
 type ConsumerHandler struct {

@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"github.com/IBM/sarama"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/tls"
 )

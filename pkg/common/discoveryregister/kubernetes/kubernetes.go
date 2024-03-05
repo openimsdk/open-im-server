@@ -24,10 +24,9 @@ import (
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/stathat/consistent"
 	"google.golang.org/grpc"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 // K8sDR represents the Kubernetes service discovery and registration client.

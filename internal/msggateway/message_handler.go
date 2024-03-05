@@ -25,9 +25,8 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/go-playground/validator/v10"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"google.golang.org/protobuf/proto"
 )
 
 type Req struct {

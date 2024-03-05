@@ -19,10 +19,9 @@ import (
 
 	"github.com/OpenIMSDK/protocol/auth"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"google.golang.org/grpc"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"google.golang.org/grpc"
 )
 
 func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {

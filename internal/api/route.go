@@ -29,19 +29,22 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"github.com/redis/go-redis/v9"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
-	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin"))) // Default RPC middleware
+	discov.AddOption(
+		mw.GrpcClient(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")),
+	) // Default RPC middleware
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {

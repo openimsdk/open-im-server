@@ -29,7 +29,6 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
-
 	"github.com/openimsdk/open-im-server/v3/internal/api"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"

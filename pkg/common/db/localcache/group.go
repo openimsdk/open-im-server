@@ -20,7 +20,6 @@ import (
 
 	"github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/tools/errs"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 

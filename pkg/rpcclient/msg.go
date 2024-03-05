@@ -24,10 +24,9 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 func newContentTypeConf() map[int32]config.NotificationConf {

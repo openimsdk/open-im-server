@@ -19,7 +19,6 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 

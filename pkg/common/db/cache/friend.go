@@ -20,9 +20,8 @@ import (
 
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/dtm-labs/rockscache"
-	"github.com/redis/go-redis/v9"
-
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/redis/go-redis/v9"
 )
 
 const (

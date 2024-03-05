@@ -18,10 +18,9 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 func isMessageHasReadEnabled(msgData *sdkws.MsgData) bool {

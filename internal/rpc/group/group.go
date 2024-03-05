@@ -35,8 +35,6 @@ import (
 	"github.com/OpenIMSDK/tools/mw/specialerror"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
-	"google.golang.org/grpc"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
@@ -49,6 +47,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"google.golang.org/grpc"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {

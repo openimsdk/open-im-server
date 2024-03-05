@@ -23,11 +23,10 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/redis/go-redis/v9"
-	"github.com/robfig/cron/v3"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/redis/go-redis/v9"
+	"github.com/robfig/cron/v3"
 )
 
 func StartTask() error {

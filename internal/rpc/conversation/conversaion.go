@@ -27,8 +27,6 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
-	"google.golang.org/grpc"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
@@ -37,6 +35,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"google.golang.org/grpc"
 )
 
 type conversationServer struct {
