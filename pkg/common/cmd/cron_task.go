@@ -43,6 +43,6 @@ func (c *CronTaskCmd) Exec() error {
 	return c.Execute()
 }
 
-func (c *CronTaskCmd) GetPortFromConfig(portType string) (int, error) {
-	return 0, nil
+func (c *CronTaskCmd) GetPortFromConfig(portType string) int {
+	return 0
 }
