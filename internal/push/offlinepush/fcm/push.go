@@ -20,14 +20,12 @@ import (
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
-	"github.com/redis/go-redis/v9"
-	"google.golang.org/api/option"
-
 	"github.com/OpenIMSDK/protocol/constant"
-
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/api/option"
 )
 
 const SinglePushCountLimit = 400

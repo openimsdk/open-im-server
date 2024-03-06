@@ -17,11 +17,9 @@ package cmd
 import (
 	"log"
 
-	"github.com/spf13/cobra"
-
 	"github.com/OpenIMSDK/protocol/constant"
-
 	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
+	"github.com/spf13/cobra"
 )
 
 type MsgGatewayCmd struct {

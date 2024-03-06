@@ -22,16 +22,12 @@ import (
 	"strconv"
 	"time"
 
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-
-	"github.com/OpenIMSDK/tools/log"
-
 	"github.com/OpenIMSDK/protocol/constant"
-
 	"github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/errs"
-
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/dtm-labs/rockscache"
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/redis/go-redis/v9"
 )
 

@@ -21,13 +21,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OpenIMSDK/tools/mw/specialerror"
-
-	"github.com/dtm-labs/rockscache"
-
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mw/specialerror"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/dtm-labs/rockscache"
 )
 
 const (

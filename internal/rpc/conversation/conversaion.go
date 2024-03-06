@@ -17,7 +17,6 @@ package conversation
 import (
 	"context"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"sort"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -28,6 +27,7 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"

@@ -92,7 +92,12 @@ func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
 	return msgTransfer.Start(prometheusPort, config)
 }
 
-func NewMsgTransfer(config *config.GlobalConfig, msgDatabase controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*MsgTransfer, error) {
+func NewMsgTransfer(
+	config *config.GlobalConfig,
+	msgDatabase controller.CommonMsgDatabase,
+	conversationRpcClient *rpcclient.ConversationRpcClient,
+	groupRpcClient *rpcclient.GroupRpcClient,
+) (*MsgTransfer, error) {
 	historyCH, err := NewOnlineHistoryRedisConsumerHandler(config, msgDatabase, conversationRpcClient, groupRpcClient)
 	if err != nil {
 		return nil, err

@@ -23,11 +23,10 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/redis/go-redis/v9"
-	"github.com/robfig/cron/v3"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/redis/go-redis/v9"
+	"github.com/robfig/cron/v3"
 )
 
 func StartTask(config *config.GlobalConfig) error {
@@ -48,13 +47,13 @@ func StartTask(config *config.GlobalConfig) error {
 	// register cron tasks
 	var crontab = cron.New()
 	fmt.Printf("Start chatRecordsClearTime cron task, cron config: %s\n", config.ChatRecordsClearTime)
-	_, err = crontab.AddFunc(config.ChatRecordsClearTime, cronWrapFunc(config,rdb, "cron_clear_msg_and_fix_seq", msgTool.AllConversationClearMsgAndFixSeq))
+	_, err = crontab.AddFunc(config.ChatRecordsClearTime, cronWrapFunc(config, rdb, "cron_clear_msg_and_fix_seq", msgTool.AllConversationClearMsgAndFixSeq))
 	if err != nil {
 		return errs.Wrap(err)
 	}
 
 	fmt.Printf("Start msgDestruct cron task, cron config: %s\n", config.MsgDestructTime)
-	_, err = crontab.AddFunc(config.MsgDestructTime, cronWrapFunc(config,rdb, "cron_conversations_destruct_msgs", msgTool.ConversationsDestructMsgs))
+	_, err = crontab.AddFunc(config.MsgDestructTime, cronWrapFunc(config, rdb, "cron_conversations_destruct_msgs", msgTool.ConversationsDestructMsgs))
 	if err != nil {
 		return errs.Wrap(err, "cron_conversations_destruct_msgs")
 	}

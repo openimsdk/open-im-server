@@ -16,10 +16,11 @@ package startrpc
 
 import (
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"net"
 	"testing"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"google.golang.org/grpc"
