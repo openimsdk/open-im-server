@@ -238,3 +238,8 @@ function openim::log::test_log() {
 }
 
 # openim::log::test_log
+
+function openim::log::print_blue() {
+    echo -e "\033[0;36m$1\033[0m"
+}
+
