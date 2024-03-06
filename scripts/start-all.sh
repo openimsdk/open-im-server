@@ -37,7 +37,7 @@ function execute_start_scripts() {
 
     # Check if the script file exists and is executable.
     if [[ -x "$script_path" ]]; then
-      openim::log::info "Starting script: ${script_path##*/}"     # Log the script name.
+       openim::log::print_blue "Starting script: ${script_path##*/}"     # Log the script name.
 
       # Execute the script with the constructed argument.
       result=$("$script_path" "$arg")
@@ -69,7 +69,7 @@ fi
 
 "${OPENIM_ROOT}"/scripts/init-config.sh --skip
 
-openim::log::print_blue "Execute the following script in sequence: ${OPENIM_SERVER_SCRIPTARIES[@]}"
+#openim::log::print_blue "Execute the following script in sequence: ${OPENIM_SERVER_SCRIPTARIES[@]}"
 
 
 # TODO Prelaunch tools, simple for now, can abstract functions later
