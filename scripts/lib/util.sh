@@ -409,17 +409,19 @@ for process_name in "$@"; do
 
   # Check if any process IDs were found
   if [[ ${#pids[@]} -eq 0 ]]; then
-    not_started+=($process_name)
+    not_started+=("$process_name")
   else
     # If there are PIDs, loop through each one
     for pid in "${pids[@]}"; do
       local command=$(ps -p $pid -o cmd=)
       local start_time=$(ps -p $pid -o lstart=)
-      local port=$(get_port $pid | tr -d '\n') # Use `tr` to remove newline characters
+      local port=$(get_port $pid | tr -d '\n') # Remove newline characters
 
-      # Check if port information was found for the PID
+      # Ensure port information is followed by a space for separation
       if [[ -z $port ]]; then
-        port="N/A"
+        port="N/A "
+      else
+        port="$port " # Add a trailing space for separation
       fi
 
       started+=("Process $process_name - Command: $command, PID: $pid, Port: $port, Start time: $start_time")
