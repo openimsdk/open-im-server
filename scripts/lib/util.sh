@@ -384,20 +384,19 @@ openim::util::check_ports() {
 # The function returns a status of 1 if any of the processes is not running.
 openim::util::check_process_names() {
   # Function to get the port of a process
- get_port() {
-   local pid=$1
-   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-     # Linux
-     ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2 | tr '\n' ' '
-   elif [[ "$OSTYPE" == "darwin"* ]]; then
-     # macOS
-     lsof -nP -iTCP -sTCP:LISTEN -a -p $pid | awk 'NR>1 {print $9}' | sed 's/.*://' | tr '\n' ' '
-   else
-     echo "Unsupported OS"
-     return 1
-   fi
- }
-
+  get_port() {
+    local pid=$1
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+      # Linux
+      ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2
+      elif [[ "$OSTYPE" == "darwin"* ]]; then
+      # macOS
+      lsof -nP -iTCP -sTCP:LISTEN -a -p $pid | awk 'NR>1 {print $9}' | sed 's/.*://'
+    else
+      echo "Unsupported OS"
+      return 1
+    fi
+  }
   
   # Arrays to collect details of processes
   local not_started=()
