@@ -37,7 +37,7 @@ function execute_start_scripts() {
 
     # Check if the script file exists and is executable.
     if [[ -x "$script_path" ]]; then
-      openim::log::info "Starting script: ${script_path##*/}"     # Log the script name.
+       openim::log::print_blue "Starting script: ${script_path##*/}"     # Log the script name.
 
       # Execute the script with the constructed argument.
       result=$("$script_path" "$arg")
@@ -69,7 +69,7 @@ fi
 
 "${OPENIM_ROOT}"/scripts/init-config.sh --skip
 
-echo "You need to start the following scripts in order: ${OPENIM_SERVER_SCRIPTARIES[@]}"
+#openim::log::print_blue "Execute the following script in sequence: ${OPENIM_SERVER_SCRIPTARIES[@]}"
 
 
 # TODO Prelaunch tools, simple for now, can abstract functions later
@@ -81,7 +81,7 @@ ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start
 
 result=$("${OPENIM_ROOT}"/scripts/stop-all.sh)
 if [[ $? -ne 0 ]]; then
-  echo "+++ cat openim log file >>> ${LOG_FILE}"
+  openim::log::error "View the error logs from this startup. ${LOG_FILE} \n"
   openim::log::error "Some programs have not exited; the start process is aborted .\n $result"
   exit 1
 fi
@@ -95,7 +95,6 @@ sleep 2
 
 result=$(. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check)
 if [[ $? -ne 0 ]]; then
-  echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "The program may fail to start.\n $result"
   exit 1
 fi
@@ -103,7 +102,6 @@ fi
 
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
-  echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "The program may fail to start.\n $result"
   exit 1
 fi
