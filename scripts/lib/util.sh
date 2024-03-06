@@ -427,8 +427,6 @@ openim::util::check_process_names() {
      fi
    done
 
-
-
   
   # Print information
   if [[ ${#not_started[@]} -ne 0 ]]; then
