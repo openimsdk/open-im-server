@@ -68,7 +68,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	// 根据配置文件策略选择 oss 方式
+	// Select the oss method according to the profile policy
 	enable := config.Object.Enable
 	var o s3.Interface
 	switch enable {
