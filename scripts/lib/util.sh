@@ -384,19 +384,20 @@ openim::util::check_ports() {
 # The function returns a status of 1 if any of the processes is not running.
 openim::util::check_process_names() {
   # Function to get the port of a process
-  get_port() {
-    local pid=$1
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-      # Linux
-      ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2
-      elif [[ "$OSTYPE" == "darwin"* ]]; then
-      # macOS
-      lsof -nP -iTCP -sTCP:LISTEN -a -p $pid | awk 'NR>1 {print $9}' | sed 's/.*://'
-    else
-      echo "Unsupported OS"
-      return 1
-    fi
-  }
+ get_port() {
+   local pid=$1
+   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+     # Linux
+     ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2 | tr '\n' ' '
+   elif [[ "$OSTYPE" == "darwin"* ]]; then
+     # macOS
+     lsof -nP -iTCP -sTCP:LISTEN -a -p $pid | awk 'NR>1 {print $9}' | sed 's/.*://' | tr '\n' ' '
+   else
+     echo "Unsupported OS"
+     return 1
+   fi
+ }
+
   
   # Arrays to collect details of processes
   local not_started=()
@@ -1687,29 +1688,29 @@ openim::util::check_process_names() {
 
     echo "Checking processes: $*"
     # Iterate over each given process name
-    for process_name in "$@"; do
-        # Use `pgrep` to find process IDs related to the given process name
-        local pids=($(pgrep -f $process_name))
+     for process_name in "$@"; do
+       # Use `pgrep` to find process IDs related to the given process name
+       local pids=($(pgrep -f $process_name))
 
-        # Check if any process IDs were found
-        if [[ ${#pids[@]} -eq 0 ]]; then
-            not_started+=($process_name)
-        else
-            # If there are PIDs, loop through each one
-            for pid in "${pids[@]}"; do
-                local command=$(ps -p $pid -o cmd=)
-                local start_time=$(ps -p $pid -o lstart=)
-                local port=$(get_port $pid)
+       # Check if any process IDs were found
+       if [[ ${#pids[@]} -eq 0 ]]; then
+         not_started+=($process_name)
+       else
+         # If there are PIDs, loop through each one
+         for pid in "${pids[@]}"; do
+           local command=$(ps -p $pid -o cmd=)
+           local start_time=$(ps -p $pid -o lstart=)
+           local port=$(get_port $pid)
 
-                # Check if port information was found for the PID
-                if [[ -z $port ]]; then
-                    port="N/A"
-                fi
+           # Check if port information was found for the PID
+           if [[ -z $port ]]; then
+             port="N/A"
+           fi
 
-                started+=("Process $process_name - Command: $command, PID: $pid, Port: $port, Start time: $start_time")
-            done
-        fi
-    done
+           started+=("Process $process_name - Command: $command, PID: $pid, Port: $port, Start time: $start_time")
+         done
+       fi
+     done
 
     # Print information
     if [[ ${#not_started[@]} -ne 0 ]]; then
