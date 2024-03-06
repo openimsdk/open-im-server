@@ -209,7 +209,7 @@ func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateF
 	}
 	uid, err := uuid.NewRandom()
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "uuid NewRandom failed")
 	}
 	if key == "" {
 		date := time.Now().Format("20060102")
@@ -224,7 +224,7 @@ func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateF
 	}
 	mateData, err := json.Marshal(&mate)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "marshal failed")
 	}
 	resp, err := t.s3dataBase.FormData(ctx, key, req.Size, req.ContentType, duration)
 	if err != nil {

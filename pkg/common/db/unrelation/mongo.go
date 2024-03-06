@@ -102,12 +102,11 @@ func buildMongoURI(config *config.GlobalConfig) string {
 		maxPoolSize = fmt.Sprint(config.Mongo.MaxPoolSize)
 	}
 
-	uriFormat := "mongodb://%s/%s?maxPoolSize=%s"
 	if username != "" && password != "" {
-		uriFormat = "mongodb://%s:%s@%s/%s?maxPoolSize=%s"
-		return fmt.Sprintf(uriFormat, username, password, address, database, maxPoolSize)
+
+		return fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%s", username, password, address, database, maxPoolSize)
 	}
-	return fmt.Sprintf(uriFormat, address, database, maxPoolSize)
+	return fmt.Sprintf("mongodb://%s/%s?maxPoolSize=%s", address, database, maxPoolSize)
 }
 
 func shouldRetry(err error) bool {

@@ -157,7 +157,7 @@ func (u *UserMgo) AddUserCommand(ctx context.Context, userID string, Type int32,
 	}
 
 	_, err := collection.InsertOne(ctx, doc)
-	return err
+	return errs.Wrap(err)
 }
 
 func (u *UserMgo) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
@@ -170,7 +170,7 @@ func (u *UserMgo) DeleteUserCommand(ctx context.Context, userID string, Type int
 		// No records found to update
 		return errs.Wrap(errs.ErrRecordNotFound)
 	}
-	return err
+	return errs.Wrap(err)
 }
 func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error {
 	if len(val) == 0 {
@@ -184,7 +184,7 @@ func (u *UserMgo) UpdateUserCommand(ctx context.Context, userID string, Type int
 
 	result, err := collection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	}
 
 	if result.MatchedCount == 0 {
@@ -233,7 +233,7 @@ func (u *UserMgo) GetUserCommand(ctx context.Context, userID string, Type int32)
 	}
 
 	if err := cursor.Err(); err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 
 	return commands, nil
@@ -244,7 +244,7 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 
 	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	defer cursor.Close(ctx)
 
@@ -261,7 +261,7 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 		}
 
 		if err := cursor.Decode(&document); err != nil {
-			return nil, err
+			return nil, errs.Wrap(err)
 		}
 
 		commandInfo := &user.AllCommandInfoResp{
@@ -276,7 +276,7 @@ func (u *UserMgo) GetAllUserCommand(ctx context.Context, userID string) ([]*user
 	}
 
 	if err := cursor.Err(); err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return commands, nil
 }

@@ -16,7 +16,7 @@ package user
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"math/rand"
 	"strings"
 	"time"
@@ -78,7 +78,7 @@ func Start(config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, se
 	}
 	users := make([]*tablerelation.UserModel, 0)
 	if len(config.IMAdmin.UserID) != len(config.IMAdmin.Nickname) {
-		return errors.New("len(s.config.AppNotificationAdmin.AppManagerUid) != len(s.config.AppNotificationAdmin.Nickname)")
+		return errs.Wrap(fmt.Errorf("the count of ImAdmin.UserID is not equal to the count of ImAdmin.Nickname"))
 	}
 	for k, v := range config.IMAdmin.UserID {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.IMAdmin.Nickname[k], AppMangerLevel: constant.AppNotificationAdmin})
@@ -113,9 +113,6 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 		return nil, err
 	}
 	resp.UsersInfo = convert.UsersDB2Pb(users)
-	if err != nil {
-		return nil, err
-	}
 	return resp, nil
 }
 
@@ -139,7 +136,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	}
 	if req.UserInfo.Nickname != "" || req.UserInfo.FaceURL != "" {
 		if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-			log.ZError(ctx, "NotificationUserInfoUpdate", err)
+			return nil, err
 		}
 	}
 	for _, friendID := range friends {
@@ -149,7 +146,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 		return nil, err
 	}
 	if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-		log.ZError(ctx, "NotificationUserInfoUpdate", err, "userID", req.UserInfo.UserID)
+		return nil, err
 	}
 	return resp, nil
 }
@@ -174,7 +171,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	}
 	if req.UserInfo.Nickname != nil || req.UserInfo.FaceURL != nil {
 		if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-			log.ZError(ctx, "NotificationUserInfoUpdate", err)
+			return nil, err
 		}
 	}
 	for _, friendID := range friends {
@@ -184,7 +181,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 		return nil, err
 	}
 	if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-		log.ZError(ctx, "NotificationUserInfoUpdate", err, "userID", req.UserInfo.UserID)
+		return nil, err
 	}
 	return resp, nil
 }

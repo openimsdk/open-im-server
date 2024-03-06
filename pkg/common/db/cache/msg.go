@@ -471,7 +471,7 @@ func (c *msgCache) ParallelSetMessageToCache(ctx context.Context, conversationID
 
 	err := wg.Wait()
 	if err != nil {
-		return 0, err
+		return 0, errs.Wrap(err, "wg.Wait failed")
 	}
 
 	return len(msgs), nil

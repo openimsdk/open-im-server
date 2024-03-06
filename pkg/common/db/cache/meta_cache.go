@@ -131,7 +131,7 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	v, err := rcClient.Fetch2(ctx, key, expire, func() (s string, err error) {
 		t, err = fn(ctx)
 		if err != nil {
-			return "", errs.Wrap(err)
+			return "", err
 		}
 		bs, err := json.Marshal(t)
 		if err != nil {
