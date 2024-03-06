@@ -53,7 +53,7 @@
       },
       "id": 16,
       "panels": [],
-      "title": "openim自定义指标",
+      "title": "openim Custom Metrics",
       "type": "row"
     },
     {
@@ -144,7 +144,7 @@
           "refId": "A"
         }
       ],
-      "title": "在线人数",
+      "title": "Online population",
       "type": "timeseries"
     },
     {
@@ -235,7 +235,7 @@
           "refId": "A"
         }
       ],
-      "title": "登入/注册人数",
+      "title": "Login/registration numbers",
       "type": "timeseries"
     },
     {
@@ -1345,7 +1345,7 @@
           "type": "timeseries"
         }
       ],
-      "title": "应用服务器流量指标",
+      "title": "Traffic indicators of the application server",
       "type": "row"
     }
   ],

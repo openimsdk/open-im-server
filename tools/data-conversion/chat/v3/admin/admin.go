@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// Admin 后台管理员.
+// Admin Background administrator.
 type Admin struct {
 	Account    string    `gorm:"column:account;primary_key;type:varchar(64)"`
 	Password   string    `gorm:"column:password;type:varchar(64)"`

@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// 限制userID只能在某些ip登录.
+// Restrict userids to certain ip addresses.
 type LimitUserLoginIP struct {
 	UserID     string    `gorm:"column:user_id;primary_key;type:char(64)"`
 	IP         string    `gorm:"column:ip;primary_key;type:char(32)"`

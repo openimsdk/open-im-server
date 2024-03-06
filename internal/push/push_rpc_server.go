@@ -17,37 +17,37 @@ package push
 import (
 	"context"
 
-	"github.com/OpenIMSDK/tools/utils"
-
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	pbpush "github.com/OpenIMSDK/protocol/push"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
-
+	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"google.golang.org/grpc"
 )
 
 type pushServer struct {
 	pusher *Pusher
+	config *config.GlobalConfig
 }
 
-func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis()
+func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := cache.NewRedis(config)
 	if err != nil {
 		return err
 	}
-	cacheModel := cache.NewMsgCacheModel(rdb)
-	offlinePusher := NewOfflinePusher(cacheModel)
+	cacheModel := cache.NewMsgCacheModel(rdb, config)
+	offlinePusher := NewOfflinePusher(config, cacheModel)
 	database := controller.NewPushDatabase(cacheModel)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client)
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
+	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config)
 	pusher := NewPusher(
+		config,
 		client,
 		offlinePusher,
 		database,
@@ -60,9 +60,10 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 
 	pbpush.RegisterPushMsgServiceServer(server, &pushServer{
 		pusher: pusher,
+		config: config,
 	})
 
-	consumer, err := NewConsumer(pusher)
+	consumer, err := NewConsumer(config, pusher)
 	if err != nil {
 		return err
 	}

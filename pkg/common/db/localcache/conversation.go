@@ -19,7 +19,6 @@ import (
 	"sync"
 
 	"github.com/OpenIMSDK/protocol/conversation"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 

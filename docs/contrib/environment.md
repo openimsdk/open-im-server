@@ -449,7 +449,7 @@ This section involves configuring the log settings, including storage location, 
 
 | Parameter                 | Example Value            | Description                       |
 | ------------------------- | ------------------------ | --------------------------------- |
-| LOG_STORAGE_LOCATION      | "${OPENIM_ROOT}/logs/" | Location for storing logs         |
+| LOG_STORAGE_LOCATION      | "${OPENIM_ROOT}/_output/logs/" | Location for storing logs         |
 | LOG_ROTATION_TIME         | "24"                     | Log rotation time (in hours)      |
 | LOG_REMAIN_ROTATION_COUNT | "2"                      | Number of log rotations to retain |
 | LOG_REMAIN_LOG_LEVEL      | "6"                      | Log level to retain               |

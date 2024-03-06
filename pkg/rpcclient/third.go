@@ -18,14 +18,14 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"google.golang.org/grpc"
 )
 
 type Third struct {
@@ -33,29 +33,32 @@ type Third struct {
 	Client      third.ThirdClient
 	discov      discoveryregistry.SvcDiscoveryRegistry
 	MinioClient *minio.Client
+	Config      *config.GlobalConfig
 }
 
-func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImThirdName)
+func NewThird(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Third {
+	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImThirdName)
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	client := third.NewThirdClient(conn)
-	minioClient, err := minioInit()
-	return &Third{discov: discov, Client: client, conn: conn, MinioClient: minioClient}
+	minioClient, err := minioInit(config)
+	if err != nil {
+		util.ExitWithError(err)
+	}
+	return &Third{discov: discov, Client: client, conn: conn, MinioClient: minioClient, Config: config}
 }
 
-func minioInit() (*minio.Client, error) {
+func minioInit(config *config.GlobalConfig) (*minio.Client, error) {
 	minioClient := &minio.Client{}
-	var initUrl string
-	initUrl = config.Config.Object.Minio.Endpoint
+	initUrl := config.Object.Minio.Endpoint
 	minioUrl, err := url.Parse(initUrl)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "minioInit: failed to parse MinIO endpoint URL")
 	}
 	opts := &minio.Options{
-		Creds: credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, ""),
-		// Region: config.Config.Credential.Minio.Location,
+		Creds: credentials.NewStaticV4(config.Object.Minio.AccessKeyID, config.Object.Minio.SecretAccessKey, ""),
+		// Region: config.Credential.Minio.Location,
 	}
 	if minioUrl.Scheme == "http" {
 		opts.Secure = false
@@ -64,7 +67,7 @@ func minioInit() (*minio.Client, error) {
 	}
 	minioClient, err = minio.New(minioUrl.Host, opts)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "minioInit: failed to create MinIO client")
 	}
 	return minioClient, nil
 }

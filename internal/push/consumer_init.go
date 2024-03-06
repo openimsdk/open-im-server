@@ -17,16 +17,17 @@ package push
 import (
 	"context"
 
-	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type Consumer struct {
-	pushCh       ConsumerHandler
-	successCount uint64
+	pushCh ConsumerHandler
+	// successCount is unused
+	// successCount uint64
 }
 
-func NewConsumer(pusher *Pusher) (*Consumer, error) {
-	c, err := NewConsumerHandler(pusher)
+func NewConsumer(config *config.GlobalConfig, pusher *Pusher) (*Consumer, error) {
+	c, err := NewConsumerHandler(config, pusher)
 	if err != nil {
 		return nil, err
 	}
@@ -36,9 +37,5 @@ func NewConsumer(pusher *Pusher) (*Consumer, error) {
 }
 
 func (c *Consumer) Start() {
-	onError := func(ctx context.Context, err error, errInfo string) {
-		log.ZWarn(ctx, errInfo, err)
-	}
-	go c.pushCh.pushConsumerGroup.RegisterHandleAndConsumer(context.Background(), &c.pushCh, onError)
-
+	go c.pushCh.pushConsumerGroup.RegisterHandleAndConsumer(context.Background(), &c.pushCh)
 }

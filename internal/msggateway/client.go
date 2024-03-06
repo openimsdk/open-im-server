@@ -22,16 +22,15 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-
-	"google.golang.org/protobuf/proto"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/apiresp"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -76,25 +75,20 @@ type Client struct {
 	token          string
 }
 
-func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
-	return &Client{
-		w:          new(sync.Mutex),
-		conn:       conn,
-		PlatformID: utils.StringToInt(ctx.GetPlatformID()),
-		IsCompress: isCompress,
-		UserID:     ctx.GetUserID(),
-		ctx:        ctx,
-	}
-}
+// function not used
+// func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
+// 	return &Client{
+// 		w:          new(sync.Mutex),
+// 		conn:       conn,
+// 		PlatformID: utils.StringToInt(ctx.GetPlatformID()),
+// 		IsCompress: isCompress,
+// 		UserID:     ctx.GetUserID(),
+// 		ctx:        ctx,
+// 	}
+// }
 
 // ResetClient updates the client's state with new connection and context information.
-func (c *Client) ResetClient(
-	ctx *UserConnContext,
-	conn LongConn,
-	isBackground, isCompress bool,
-	longConnServer LongConnServer,
-	token string,
-) {
+func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isBackground, isCompress bool, longConnServer LongConnServer, token string) {
 	c.w = new(sync.Mutex)
 	c.conn = conn
 	c.PlatformID = utils.StringToInt(ctx.GetPlatformID())
@@ -109,9 +103,11 @@ func (c *Client) ResetClient(
 	c.token = token
 }
 
-// pingHandler handles ping messages and sends pong responses.
 func (c *Client) pingHandler(_ string) error {
-	_ = c.conn.SetReadDeadline(pongWait)
+	if err := c.conn.SetReadDeadline(pongWait); err != nil {
+		return err
+	}
+
 	return c.writePongMsg()
 }
 
@@ -138,7 +134,8 @@ func (c *Client) readMessage() {
 		}
 
 		log.ZDebug(c.ctx, "readMessage", "messageType", messageType)
-		if c.closed.Load() { // 连接刚置位已经关闭，但是协程还没退出的场景
+		if c.closed.Load() {
+			// The scenario where the connection has just been closed, but the coroutine has not exited
 			c.closedErr = ErrConnClosed
 			return
 		}
@@ -173,7 +170,7 @@ func (c *Client) handleMessage(message []byte) error {
 		var err error
 		message, err = c.longConnServer.DecompressWithPool(message)
 		if err != nil {
-			return utils.Wrap(err, "")
+			return errs.Wrap(err)
 		}
 	}
 
@@ -182,15 +179,15 @@ func (c *Client) handleMessage(message []byte) error {
 
 	err := c.longConnServer.Decode(message, binaryReq)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return err
 	}
 
 	if err := c.longConnServer.Validate(binaryReq); err != nil {
-		return utils.Wrap(err, "")
+		return err
 	}
 
 	if binaryReq.SendID != c.UserID {
-		return utils.Wrap(errors.New("exception conn userID not same to req userID"), binaryReq.String())
+		return errs.Wrap(errors.New("exception conn userID not same to req userID"), binaryReq.String())
 	}
 
 	ctx := mcontext.WithMustInfoCtx(
@@ -236,7 +233,7 @@ func (c *Client) setAppBackgroundStatus(ctx context.Context, req *Req) ([]byte, 
 	}
 
 	c.IsBackground = isBackground
-	// todo callback
+	// TODO: callback
 	return resp, nil
 }
 
@@ -270,7 +267,7 @@ func (c *Client) replyMessage(ctx context.Context, binaryReq *Req, err error, re
 	}
 
 	if binaryReq.ReqIdentifier == WsLogoutMsg {
-		return errors.New("user logout")
+		return errs.Wrap(errors.New("user logout"))
 	}
 	return nil
 }
@@ -313,17 +310,21 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 
 	encodedBuf, err := c.longConnServer.Encode(resp)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return err
 	}
 
 	c.w.Lock()
 	defer c.w.Unlock()
 
-	_ = c.conn.SetWriteDeadline(writeWait)
+	err = c.conn.SetWriteDeadline(writeWait)
+	if err != nil {
+		return err
+	}
+
 	if c.IsCompress {
 		resultBuf, compressErr := c.longConnServer.CompressWithPool(encodedBuf)
 		if compressErr != nil {
-			return utils.Wrap(compressErr, "")
+			return compressErr
 		}
 		return c.conn.WriteMessage(MessageBinary, resultBuf)
 	}
@@ -341,7 +342,7 @@ func (c *Client) writePongMsg() error {
 
 	err := c.conn.SetWriteDeadline(writeWait)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return err
 	}
 
 	return c.conn.WriteMessage(PongMessage, nil)

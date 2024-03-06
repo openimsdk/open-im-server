@@ -18,12 +18,10 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
 // prefixes and suffixes.
@@ -65,7 +63,7 @@ func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string
 	}
 	// iterate over aggregated results
 	for cursor.Next(ctx) {
-		err := cursor.Decode(&cnt)
+		err = cursor.Decode(&cnt)
 		if err != nil {
 			return errs.Wrap(err)
 		}
@@ -119,7 +117,7 @@ func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string
 			opts,
 		)
 		if err != nil {
-			return utils.Wrap(err, "transaction failed")
+			return errs.Wrap(err, "transaction failed")
 		}
 	}
 	return nil

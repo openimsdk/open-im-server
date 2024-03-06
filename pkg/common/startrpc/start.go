@@ -27,25 +27,20 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
-
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
-
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-
-	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-
 	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/OpenIMSDK/tools/network"
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // Start rpc server.
@@ -53,37 +48,38 @@ func Start(
 	rpcPort int,
 	rpcRegisterName string,
 	prometheusPort int,
-	rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,
+	config *config2.GlobalConfig,
+	rpcFn func(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,
 	options ...grpc.ServerOption,
 ) error {
 	fmt.Printf("start %s server, port: %d, prometheusPort: %d, OpenIM version: %s\n",
-		rpcRegisterName, rpcPort, prometheusPort, config.Version)
-	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(config.Config.Rpc.ListenIP), strconv.Itoa(rpcPort))
+		rpcRegisterName, rpcPort, prometheusPort, config2.Version)
+	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(config.Rpc.ListenIP), strconv.Itoa(rpcPort))
 	listener, err := net.Listen(
 		"tcp",
 		rpcTcpAddr,
 	)
 	if err != nil {
-		return errs.Wrap(err, "rpc start err", rpcTcpAddr)
+		return errs.Wrap(err, "listen err", rpcTcpAddr)
 	}
 
 	defer listener.Close()
-	client, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
+	client, err := kdisc.NewDiscoveryRegister(config)
 	if err != nil {
-		return errs.Wrap(err)
+		return err
 	}
 
 	defer client.Close()
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	registerIP, err := network.GetRpcRegisterIP(config.Config.Rpc.RegisterIP)
+	registerIP, err := network.GetRpcRegisterIP(config.Rpc.RegisterIP)
 	if err != nil {
 		return errs.Wrap(err)
 	}
 
 	var reg *prometheus.Registry
 	var metric *grpcprometheus.ServerMetrics
-	if config.Config.Prometheus.Enable {
-		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName)
+	if config.Prometheus.Enable {
+		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, config)
 		reg, metric, _ = prommetrics.NewGrpcPromObj(cusMetrics)
 		options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
 			grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))
@@ -97,7 +93,7 @@ func Start(
 		once.Do(srv.GracefulStop)
 	}()
 
-	err = rpcFn(client, srv)
+	err = rpcFn(config, client, srv)
 	if err != nil {
 		return err
 	}
@@ -117,7 +113,7 @@ func Start(
 		httpServer *http.Server
 	)
 	go func() {
-		if config.Config.Prometheus.Enable && prometheusPort != 0 {
+		if config.Prometheus.Enable && prometheusPort != 0 {
 			metric.InitializeMetrics(srv)
 			// Create a HTTP server for prometheus.
 			httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
@@ -140,7 +136,7 @@ func Start(
 	signal.Notify(sigs, syscall.SIGTERM)
 	select {
 	case <-sigs:
-		util.SIGUSR1Exit()
+		util.SIGTERMExit()
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		if err := gracefulStopWithCtx(ctx, srv.GracefulStop); err != nil {
@@ -152,7 +148,7 @@ func Start(
 		if err != nil {
 			return errs.Wrap(err, "shutdown err")
 		}
-		return errors.New("SIGTERM EXIT")
+		return nil
 	case <-netDone:
 		close(netDone)
 		return netErr

@@ -46,7 +46,6 @@ type Extras struct {
 func (n *Notification) SetAlert(alert string) {
 	n.Alert = alert
 	n.Android.Alert = alert
-	n.SetAndroidIntent()
 	n.IOS.Alert = alert
 	n.IOS.Sound = "default"
 	n.IOS.Badge = "+1"
@@ -57,8 +56,8 @@ func (n *Notification) SetExtras(extras Extras) {
 	n.Android.Extras = extras
 }
 
-func (n *Notification) SetAndroidIntent() {
-	n.Android.Intent.URL = config.Config.Push.Jpns.PushIntent
+func (n *Notification) SetAndroidIntent(config *config.GlobalConfig) {
+	n.Android.Intent.URL = config.Push.Jpns.PushIntent
 }
 
 func (n *Notification) IOSEnableMutableContent() {

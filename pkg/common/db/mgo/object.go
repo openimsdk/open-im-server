@@ -16,13 +16,13 @@ package mgo
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/OpenIMSDK/tools/mgoutil"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 func NewS3Mongo(db *mongo.Database) (relation.ObjectInfoModelInterface, error) {
@@ -34,7 +34,7 @@ func NewS3Mongo(db *mongo.Database) (relation.ObjectInfoModelInterface, error) {
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return &S3Mongo{coll: coll}, nil
 }

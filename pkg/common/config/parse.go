@@ -83,6 +83,9 @@ func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
 	return opts
 }
 
+// initConfig loads configuration from a specified path into the provided config structure.
+// If the specified config file does not exist, it attempts to load from the project's default "config" directory.
+// It logs informative messages regarding the configuration path being used.
 func initConfig(config any, configName, configFolderPath string) error {
 	configFolderPath = filepath.Join(configFolderPath, configName)
 	_, err := os.Stat(configFolderPath)
@@ -106,7 +109,7 @@ func initConfig(config any, configName, configFolderPath string) error {
 	return nil
 }
 
-func InitConfig(configFolderPath string) error {
+func InitConfig(config *GlobalConfig, configFolderPath string) error {
 	if configFolderPath == "" {
 		envConfigPath := os.Getenv("OPENIMCONFIG")
 		if envConfigPath != "" {
@@ -116,9 +119,9 @@ func InitConfig(configFolderPath string) error {
 		}
 	}
 
-	if err := initConfig(&Config, FileName, configFolderPath); err != nil {
+	if err := initConfig(config, FileName, configFolderPath); err != nil {
 		return err
 	}
 
-	return initConfig(&Config.Notification, NotificationFileName, configFolderPath)
+	return initConfig(&config.Notification, NotificationFileName, configFolderPath)
 }

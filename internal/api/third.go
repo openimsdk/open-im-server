@@ -19,15 +19,11 @@ import (
 	"net/http"
 	"strconv"
 
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
-	"github.com/gin-gonic/gin"
-
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/a2r"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
-
+	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -129,6 +125,6 @@ func (o *ThirdApi) SearchLogs(c *gin.Context) {
 	a2r.Call(third.ThirdClient.SearchLogs, o.Client, c)
 }
 
-func GetPrometheus(c *gin.Context) {
-	c.Redirect(http.StatusFound, config2.Config.Prometheus.GrafanaUrl)
+func (o *ThirdApi) GetPrometheus(c *gin.Context) {
+	c.Redirect(http.StatusFound, o.Config.Prometheus.GrafanaUrl)
 }

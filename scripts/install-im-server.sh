@@ -27,9 +27,9 @@
 # Usage:
 #   SERVER_IMAGE_VERSION=latest IMAGE_REGISTRY=myregistry ./this_script.sh
 
-set -o errexit
-set -o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"

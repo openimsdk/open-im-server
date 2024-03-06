@@ -17,12 +17,11 @@ package notification
 import (
 	"context"
 
-	"github.com/OpenIMSDK/tools/mcontext"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
 	"github.com/OpenIMSDK/protocol/sdkws"
-
+	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
@@ -31,7 +30,7 @@ import (
 
 type FriendNotificationSender struct {
 	*rpcclient.NotificationSender
-	// 找不到报错
+	// Target not found err
 	getUsersInfo func(ctx context.Context, userIDs []string) ([]CommonUser, error)
 	// db controller
 	db controller.FriendDatabase
@@ -82,11 +81,12 @@ func WithRpcFunc(
 }
 
 func NewFriendNotificationSender(
+	config *config.GlobalConfig,
 	msgRpcClient *rpcclient.MessageRpcClient,
 	opts ...friendNotificationSenderOptions,
 ) *FriendNotificationSender {
 	f := &FriendNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(config, rpcclient.WithRpcClient(msgRpcClient)),
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -109,6 +109,7 @@ func (f *FriendNotificationSender) getUsersInfoMap(
 	return result, nil
 }
 
+//nolint:unused
 func (f *FriendNotificationSender) getFromToUserNickname(
 	ctx context.Context,
 	fromUserID, toUserID string,
@@ -214,7 +215,9 @@ func (f *FriendNotificationSender) BlackDeletedNotification(ctx context.Context,
 		FromUserID: req.OwnerUserID,
 		ToUserID:   req.BlackUserID,
 	}}
-	f.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackDeletedNotification, &blackDeletedTips)
+	if err := f.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackDeletedNotification, &blackDeletedTips); err != nil {
+		//err
+	}
 }
 
 func (f *FriendNotificationSender) FriendInfoUpdatedNotification(
@@ -223,5 +226,8 @@ func (f *FriendNotificationSender) FriendInfoUpdatedNotification(
 	needNotifiedUserID string,
 ) {
 	tips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
-	f.Notification(ctx, mcontext.GetOpUserID(ctx), needNotifiedUserID, constant.FriendInfoUpdatedNotification, &tips)
+	if err := f.Notification(ctx, mcontext.GetOpUserID(ctx), needNotifiedUserID,
+		constant.FriendInfoUpdatedNotification, &tips); err != nil {
+		// err
+	}
 }

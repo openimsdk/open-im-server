@@ -17,9 +17,6 @@
 # This script verifies whether codes follow golang convention.
 # Usage: `scripts/verify-pkg-names.sh`.
 
-set -o errexit
-set -o nounset
-set -o pipefail
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"

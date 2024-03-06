@@ -18,7 +18,7 @@ import (
 	"bytes"
 	"encoding/gob"
 
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/OpenIMSDK/tools/errs"
 )
 
 type Encoder interface {
@@ -37,7 +37,7 @@ func (g *GobEncoder) Encode(data any) ([]byte, error) {
 	enc := gob.NewEncoder(&buff)
 	err := enc.Encode(data)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "GobEncoder.Encode failed")
 	}
 	return buff.Bytes(), nil
 }
@@ -47,7 +47,7 @@ func (g *GobEncoder) Decode(encodeData []byte, decodeData any) error {
 	dec := gob.NewDecoder(buff)
 	err := dec.Decode(decodeData)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return errs.Wrap(err, "GobEncoder.Decode failed")
 	}
 	return nil
 }

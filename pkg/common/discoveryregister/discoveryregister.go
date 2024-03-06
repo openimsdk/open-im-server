@@ -18,29 +18,29 @@ import (
 	"errors"
 	"os"
 
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/direct"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/zookeeper"
-
-	"github.com/OpenIMSDK/tools/discoveryregistry"
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
-func NewDiscoveryRegister(envType string) (discoveryregistry.SvcDiscoveryRegistry, error) {
+func NewDiscoveryRegister(config *config.GlobalConfig) (discoveryregistry.SvcDiscoveryRegistry, error) {
 
 	if os.Getenv("ENVS_DISCOVERY") != "" {
-		envType = os.Getenv("ENVS_DISCOVERY")
+		config.Envs.Discovery = os.Getenv("ENVS_DISCOVERY")
 	}
 
-	switch envType {
+	switch config.Envs.Discovery {
 	case "zookeeper":
-		return zookeeper.NewZookeeperDiscoveryRegister()
+		return zookeeper.NewZookeeperDiscoveryRegister(config)
 	case "k8s":
-		return kubernetes.NewK8sDiscoveryRegister()
+		return kubernetes.NewK8sDiscoveryRegister(config.RpcRegisterName.OpenImMessageGatewayName)
 	case "direct":
-		return direct.NewConnDirect()
+		return direct.NewConnDirect(config)
 	default:
-		return nil, errors.New("envType not correct")
+		return nil, errs.Wrap(errors.New("envType not correct"))
 	}
 }

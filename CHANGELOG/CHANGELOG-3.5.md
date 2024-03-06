@@ -8,6 +8,12 @@
 ## [Unreleased]
 
 
+<a name="v3.5.1-alpha.2"></a>
+## [v3.5.1-alpha.2] - 2024-01-26
+
+<a name="v3.5.1-rc.1"></a>
+## [v3.5.1-rc.1] - 2024-01-23
+
 <a name="v3.5.1-alpha.1"></a>
 ## [v3.5.1-alpha.1] - 2024-01-09
 
@@ -59,7 +65,9 @@
 - Merge branch 'tuoyun'
 
 
-[Unreleased]: https://github.com/openimsdk/open-im-server/compare/v3.5.1-alpha.1...HEAD
+[Unreleased]: https://github.com/openimsdk/open-im-server/compare/v3.5.1-alpha.2...HEAD
+[v3.5.1-alpha.2]: https://github.com/openimsdk/open-im-server/compare/v3.5.1-rc.1...v3.5.1-alpha.2
+[v3.5.1-rc.1]: https://github.com/openimsdk/open-im-server/compare/v3.5.1-alpha.1...v3.5.1-rc.1
 [v3.5.1-alpha.1]: https://github.com/openimsdk/open-im-server/compare/v3.5.0...v3.5.1-alpha.1
 [v3.5.0]: https://github.com/openimsdk/open-im-server/compare/v3.5.1...v3.5.0
 [v3.5.1]: https://github.com/openimsdk/open-im-server/compare/v3.5.1-bate.1...v3.5.1

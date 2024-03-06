@@ -24,13 +24,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-
-	"github.com/google/uuid"
-
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-
+	"github.com/google/uuid"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 )
 
@@ -106,7 +103,7 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 		partNumber++
 	}
 	if maxParts > 0 && partNumber > 0 && partNumber < maxParts {
-		return nil, errors.New(fmt.Sprintf("too many parts: %d", partNumber))
+		return nil, fmt.Errorf("too many parts: %d", partNumber)
 	}
 	if info, err := c.StatObject(ctx, c.HashPath(hash)); err == nil {
 		return nil, &HashAlreadyExistsError{Object: info}
@@ -114,7 +111,7 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 		return nil, err
 	}
 	if size <= partSize {
-		// 预签名上传
+		// Pre-signed upload
 		key := path.Join(tempPath, c.NowPath(), fmt.Sprintf("%s_%d_%s.presigned", hash, size, c.UUID()))
 		rawURL, err := c.impl.PresignedPutObject(ctx, key, expire)
 		if err != nil {
@@ -139,7 +136,7 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 			},
 		}, nil
 	} else {
-		// 分片上传
+		// Fragment upload
 		upload, err := c.impl.InitiateMultipartUpload(ctx, c.HashPath(hash))
 		if err != nil {
 			return nil, err
@@ -206,7 +203,7 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 				ETag:       part,
 			}
 		}
-		// todo: 验证大小
+		// todo: Validation size
 		result, err := c.impl.CompleteMultipartUpload(ctx, upload.ID, upload.Key, parts)
 		if err != nil {
 			return nil, err
@@ -225,7 +222,7 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 		if md5val := hex.EncodeToString(md5Sum[:]); md5val != upload.Hash {
 			return nil, errs.ErrArgs.Wrap(fmt.Sprintf("md5 mismatching %s != %s", md5val, upload.Hash))
 		}
-		// 防止在这个时候，并发操作，导致文件被覆盖
+		// Prevents concurrent operations at this time that cause files to be overwritten
 		copyInfo, err := c.impl.CopyObject(ctx, uploadInfo.Key, upload.Key+"."+c.UUID())
 		if err != nil {
 			return nil, err

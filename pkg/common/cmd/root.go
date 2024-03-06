@@ -17,25 +17,29 @@ package cmd
 import (
 	"fmt"
 
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
-	"github.com/spf13/cobra"
-
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/spf13/cobra"
 )
 
 type RootCmdPt interface {
 	GetPortFromConfig(portType string) int
 }
+
 type RootCmd struct {
 	Command        cobra.Command
 	Name           string
 	port           int
 	prometheusPort int
 	cmdItf         RootCmdPt
+	config         *config.GlobalConfig
+}
+
+func (rc *RootCmd) Port() int {
+	return rc.port
 }
 
 type CmdOpts struct {
@@ -44,7 +48,7 @@ type CmdOpts struct {
 
 func WithCronTaskLogName() func(*CmdOpts) {
 	return func(opts *CmdOpts) {
-		opts.loggerPrefixName = "openim.crontask.log.all"
+		opts.loggerPrefixName = "openim-crontask"
 	}
 }
 
@@ -55,7 +59,7 @@ func WithLogName(logName string) func(*CmdOpts) {
 }
 
 func NewRootCmd(name string, opts ...func(*CmdOpts)) *RootCmd {
-	rootCmd := &RootCmd{Name: name}
+	rootCmd := &RootCmd{Name: name, config: config.NewGlobalConfig()}
 	cmd := cobra.Command{
 		Use:   "Start openIM application",
 		Short: fmt.Sprintf(`Start %s `, name),
@@ -77,7 +81,7 @@ func (rc *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) 
 	cmdOpts := rc.applyOptions(opts...)
 
 	if err := rc.initializeLogger(cmdOpts); err != nil {
-		return fmt.Errorf("failed to initialize from config: %w", err)
+		return errs.Wrap(err, "failed to initialize logger")
 	}
 
 	return nil
@@ -97,7 +101,7 @@ func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 }
 
 func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
-	logConfig := config.Config.Log
+	logConfig := rc.config.Log
 
 	return log.InitFromConfig(
 
@@ -114,7 +118,7 @@ func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 
 func defaultCmdOpts() *CmdOpts {
 	return &CmdOpts{
-		loggerPrefixName: "OpenIM.log.all",
+		loggerPrefixName: "openim-all",
 	}
 }
 
@@ -133,7 +137,8 @@ func (r *RootCmd) AddPortFlag() {
 func (r *RootCmd) getPortFlag(cmd *cobra.Command) int {
 	port, err := cmd.Flags().GetInt(constant.FlagPort)
 	if err != nil {
-		fmt.Println("Error getting ws port flag:", err)
+		// Wrapping the error with additional context
+		return 0
 	}
 	if port == 0 {
 		port = r.PortFromConfig(constant.FlagPort)
@@ -141,6 +146,7 @@ func (r *RootCmd) getPortFlag(cmd *cobra.Command) int {
 	return port
 }
 
+// // GetPortFlag returns the port flag.
 func (r *RootCmd) GetPortFlag() int {
 	return r.port
 }
@@ -150,9 +156,12 @@ func (r *RootCmd) AddPrometheusPortFlag() {
 }
 
 func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) int {
-	port, _ := cmd.Flags().GetInt(constant.FlagPrometheusPort)
-	if port == 0 {
+	port, err := cmd.Flags().GetInt(constant.FlagPrometheusPort)
+	if err != nil || port == 0 {
 		port = r.PortFromConfig(constant.FlagPrometheusPort)
+		if err != nil {
+			return 0
+		}
 	}
 	return port
 }
@@ -164,7 +173,7 @@ func (r *RootCmd) GetPrometheusPortFlag() int {
 func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
 	fmt.Println("The directory of the configuration file to start the process:", configFolderPath)
-	return config2.InitConfig(configFolderPath)
+	return config2.InitConfig(r.config, configFolderPath)
 }
 
 func (r *RootCmd) Execute() error {
@@ -175,10 +184,8 @@ func (r *RootCmd) AddCommand(cmds ...*cobra.Command) {
 	r.Command.AddCommand(cmds...)
 }
 
-func (r *RootCmd) GetPortFromConfig(portType string) int {
-	return 0
-}
-
 func (r *RootCmd) PortFromConfig(portType string) int {
-	return r.cmdItf.GetPortFromConfig(portType)
+	// Retrieve the port and cache it
+	port := r.cmdItf.GetPortFromConfig(portType)
+	return port
 }

@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// Register 注册信息表.
+// Register Indicates the registration information.
 type Register struct {
 	UserID      string    `gorm:"column:user_id;primary_key;type:char(64)"`
 	DeviceID    string    `gorm:"column:device_id;type:varchar(255)"`

@@ -21,15 +21,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/mw/specialerror"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mw/specialerror"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
 const (
@@ -38,13 +36,14 @@ const (
 )
 
 type Mongo struct {
-	db *mongo.Client
+	db     *mongo.Client
+	config *config.GlobalConfig
 }
 
 // NewMongo Initialize MongoDB connection.
-func NewMongo() (*Mongo, error) {
+func NewMongo(config *config.GlobalConfig) (*Mongo, error) {
 	specialerror.AddReplace(mongo.ErrNoDocuments, errs.ErrRecordNotFound)
-	uri := buildMongoURI()
+	uri := buildMongoURI(config)
 
 	var mongoClient *mongo.Client
 	var err error
@@ -58,7 +57,7 @@ func NewMongo() (*Mongo, error) {
 			if err = mongoClient.Ping(ctx, nil); err != nil {
 				return nil, errs.Wrap(err, uri)
 			}
-			return &Mongo{db: mongoClient}, nil
+			return &Mongo{db: mongoClient, config: config}, nil
 		}
 		if shouldRetry(err) {
 			time.Sleep(time.Second) // exponential backoff could be implemented here
@@ -68,14 +67,14 @@ func NewMongo() (*Mongo, error) {
 	return nil, errs.Wrap(err, uri)
 }
 
-func buildMongoURI() string {
+func buildMongoURI(config *config.GlobalConfig) string {
 	uri := os.Getenv("MONGO_URI")
 	if uri != "" {
 		return uri
 	}
 
-	if config.Config.Mongo.Uri != "" {
-		return config.Config.Mongo.Uri
+	if config.Mongo.Uri != "" {
+		return config.Mongo.Uri
 	}
 
 	username := os.Getenv("MONGO_OPENIM_USERNAME")
@@ -86,29 +85,28 @@ func buildMongoURI() string {
 	maxPoolSize := os.Getenv("MONGO_MAX_POOL_SIZE")
 
 	if username == "" {
-		username = config.Config.Mongo.Username
+		username = config.Mongo.Username
 	}
 	if password == "" {
-		password = config.Config.Mongo.Password
+		password = config.Mongo.Password
 	}
 	if address == "" {
-		address = strings.Join(config.Config.Mongo.Address, ",")
+		address = strings.Join(config.Mongo.Address, ",")
 	} else if port != "" {
 		address = fmt.Sprintf("%s:%s", address, port)
 	}
 	if database == "" {
-		database = config.Config.Mongo.Database
+		database = config.Mongo.Database
 	}
 	if maxPoolSize == "" {
-		maxPoolSize = fmt.Sprint(config.Config.Mongo.MaxPoolSize)
+		maxPoolSize = fmt.Sprint(config.Mongo.MaxPoolSize)
 	}
 
-	uriFormat := "mongodb://%s/%s?maxPoolSize=%s"
 	if username != "" && password != "" {
-		uriFormat = "mongodb://%s:%s@%s/%s?maxPoolSize=%s"
-		return fmt.Sprintf(uriFormat, username, password, address, database, maxPoolSize)
+
+		return fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%s", username, password, address, database, maxPoolSize)
 	}
-	return fmt.Sprintf(uriFormat, address, database, maxPoolSize)
+	return fmt.Sprintf("mongodb://%s/%s?maxPoolSize=%s", address, database, maxPoolSize)
 }
 
 func shouldRetry(err error) bool {
@@ -124,8 +122,8 @@ func (m *Mongo) GetClient() *mongo.Client {
 }
 
 // GetDatabase returns the specific database from MongoDB.
-func (m *Mongo) GetDatabase() *mongo.Database {
-	return m.db.Database(config.Config.Mongo.Database)
+func (m *Mongo) GetDatabase(database string) *mongo.Database {
+	return m.db.Database(database)
 }
 
 // CreateMsgIndex creates an index for messages in MongoDB.
@@ -135,7 +133,7 @@ func (m *Mongo) CreateMsgIndex() error {
 
 // createMongoIndex creates an index in a MongoDB collection.
 func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...string) error {
-	db := m.GetDatabase().Collection(collection)
+	db := m.GetDatabase(m.config.Mongo.Database).Collection(collection)
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
 	indexView := db.Indexes()
 

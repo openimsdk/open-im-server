@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/tools/pagination"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
@@ -63,13 +62,7 @@ func NewThirdDatabase(cache cache.MsgModel, logdb relation.LogInterface) ThirdDa
 	return &thirdDatabase{cache: cache, logdb: logdb}
 }
 
-func (t *thirdDatabase) FcmUpdateToken(
-	ctx context.Context,
-	account string,
-	platformID int,
-	fcmToken string,
-	expireTime int64,
-) error {
+func (t *thirdDatabase) FcmUpdateToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) error {
 	return t.cache.SetFcmToken(ctx, account, platformID, fcmToken, expireTime)
 }
 

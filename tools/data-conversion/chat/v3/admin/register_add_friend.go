@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// RegisterAddFriend 注册时默认好友.
+// RegisterAddFriend Indicates the default friend when registering.
 type RegisterAddFriend struct {
 	UserID     string    `gorm:"column:user_id;primary_key;type:char(64)"`
 	CreateTime time.Time `gorm:"column:create_time"`

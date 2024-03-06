@@ -17,15 +17,11 @@ package kafka
 import (
 	"context"
 	"errors"
-	"fmt"
+	"strings"
 
 	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-
-	"strings"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type MConsumerGroup struct {
@@ -38,22 +34,25 @@ type MConsumerGroupConfig struct {
 	KafkaVersion   sarama.KafkaVersion
 	OffsetsInitial int64
 	IsReturnErr    bool
+	UserName       string
+	Password       string
 }
 
-func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []string, groupID string) (*MConsumerGroup, error) {
+func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []string, groupID string, tlsConfig *TLSConfig) (*MConsumerGroup, error) {
 	consumerGroupConfig := sarama.NewConfig()
 	consumerGroupConfig.Version = consumerConfig.KafkaVersion
 	consumerGroupConfig.Consumer.Offsets.Initial = consumerConfig.OffsetsInitial
 	consumerGroupConfig.Consumer.Return.Errors = consumerConfig.IsReturnErr
-	if config.Config.Kafka.Username != "" && config.Config.Kafka.Password != "" {
+	if consumerConfig.UserName != "" && consumerConfig.Password != "" {
 		consumerGroupConfig.Net.SASL.Enable = true
-		consumerGroupConfig.Net.SASL.User = config.Config.Kafka.Username
-		consumerGroupConfig.Net.SASL.Password = config.Config.Kafka.Password
+		consumerGroupConfig.Net.SASL.User = consumerConfig.UserName
+		consumerGroupConfig.Net.SASL.Password = consumerConfig.Password
 	}
-	SetupTLSConfig(consumerGroupConfig)
+
+	SetupTLSConfig(consumerGroupConfig, tlsConfig)
 	consumerGroup, err := sarama.NewConsumerGroup(addrs, groupID, consumerGroupConfig)
 	if err != nil {
-		return nil, errs.Wrap(err, strings.Join(topics, ","), strings.Join(addrs, ","), groupID, config.Config.Kafka.Username, config.Config.Kafka.Password)
+		return nil, errs.Wrap(err, strings.Join(topics, ","), strings.Join(addrs, ","), groupID, consumerConfig.UserName, consumerConfig.Password)
 	}
 
 	return &MConsumerGroup{
@@ -67,17 +66,18 @@ func (mc *MConsumerGroup) GetContextFromMsg(cMsg *sarama.ConsumerMessage) contex
 	return GetContextWithMQHeader(cMsg.Headers)
 }
 
-func (mc *MConsumerGroup) RegisterHandleAndConsumer(ctx context.Context, handler sarama.ConsumerGroupHandler, onError func(context.Context, error, string)) {
+func (mc *MConsumerGroup) RegisterHandleAndConsumer(ctx context.Context, handler sarama.ConsumerGroupHandler) {
 	log.ZDebug(ctx, "register consumer group", "groupID", mc.groupID)
 	for {
 		err := mc.ConsumerGroup.Consume(ctx, mc.topics, handler)
-		if errors.Is(err, sarama.ErrClosedConsumerGroup) || errors.Is(err, context.Canceled) {
+		if errors.Is(err, sarama.ErrClosedConsumerGroup) {
+			return
+		}
+		if errors.Is(err, context.Canceled) {
 			return
 		}
 		if err != nil {
-			errInfo := fmt.Sprintf("consume err: %v, topic: %v, groupID: %s", err, strings.Join(mc.topics, ", "), mc.groupID)
-			onError(ctx, err, errInfo) // 调用回调函数处理错误
-			return
+			log.ZWarn(ctx, "consume err", err, "topic", mc.topics, "groupID", mc.groupID)
 		}
 	}
 }

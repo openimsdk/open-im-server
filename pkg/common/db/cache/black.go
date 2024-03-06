@@ -19,9 +19,8 @@ import (
 	"time"
 
 	"github.com/dtm-labs/rockscache"
-	"github.com/redis/go-redis/v9"
-
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/redis/go-redis/v9"
 )
 
 const (
@@ -46,11 +45,7 @@ type BlackCacheRedis struct {
 	blackDB    relationtb.BlackModelInterface
 }
 
-func NewBlackCacheRedis(
-	rdb redis.UniversalClient,
-	blackDB relationtb.BlackModelInterface,
-	options rockscache.Options,
-) BlackCache {
+func NewBlackCacheRedis(rdb redis.UniversalClient, blackDB relationtb.BlackModelInterface, options rockscache.Options) BlackCache {
 	rcClient := rockscache.NewClient(rdb, options)
 
 	return &BlackCacheRedis{

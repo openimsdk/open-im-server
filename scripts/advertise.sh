@@ -14,7 +14,7 @@
 # limitations under the License.
 
 set -e
-set -o pipefail
+
 
 . $(dirname ${BASH_SOURCE})/lib/init.sh
 

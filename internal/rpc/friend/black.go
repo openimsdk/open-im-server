@@ -18,11 +18,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
 	"github.com/OpenIMSDK/tools/mcontext"
-
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
@@ -67,7 +65,7 @@ func (s *friendServer) RemoveBlack(ctx context.Context, req *pbfriend.RemoveBlac
 }
 
 func (s *friendServer) AddBlack(ctx context.Context, req *pbfriend.AddBlackReq) (*pbfriend.AddBlackResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config); err != nil {
 		return nil, err
 	}
 	_, err := s.userRpcClient.GetUsersInfo(ctx, []string{req.OwnerUserID, req.BlackUserID})
