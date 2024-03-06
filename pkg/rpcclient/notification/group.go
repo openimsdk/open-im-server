@@ -250,9 +250,6 @@ func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws
 	if opUser == nil {
 		return errs.ErrInternalServer.Wrap("**sdkws.GroupMemberFullInfo is nil")
 	}
-	if *opUser != nil {
-		return errs.ErrArgs.Wrap("*opUser is not nil")
-	}
 	userID := mcontext.GetOpUserID(ctx)
 	if groupID != "" {
 		if authverify.IsManagerUserID(userID, g.config) {
