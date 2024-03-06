@@ -206,7 +206,7 @@ func batchGetCache2[T any, K comparable](
 	fns func(ctx context.Context, key K) (T, error),
 ) ([]T, error) {
 	if len(keys) == 0 {
-		return nil, errs.ErrArgs.Wrap("groupID is empty")
+		return nil, nil
 	}
 	res := make([]T, 0, len(keys))
 	for _, key := range keys {
