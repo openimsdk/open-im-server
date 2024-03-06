@@ -161,7 +161,7 @@ func NewTask[A interface{ TableName() string }, B any, C any](gormDB *gorm.DB, m
 	tableName := zero.TableName()
 	coll, err := getColl(obj)
 	if err != nil {
-		return fmt.Errorf("get mongo collection %s failed, err: %w", tableName, err)
+		return errs.Wrap(fmt.Errorf("get mongo collection %s failed, err: %w", tableName, err))
 	}
 	var count int
 	defer func() {
@@ -174,7 +174,7 @@ func NewTask[A interface{ TableName() string }, B any, C any](gormDB *gorm.DB, m
 			if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1146 {
 				return nil // table not exist
 			}
-			return fmt.Errorf("find mysql table %s failed, err: %w", tableName, err)
+			return errs.Wrap(fmt.Errorf("find mysql table %s failed, err: %w", tableName, err))
 		}
 		if len(res) == 0 {
 			return nil
@@ -184,7 +184,7 @@ func NewTask[A interface{ TableName() string }, B any, C any](gormDB *gorm.DB, m
 			temp[i] = convert(res[i])
 		}
 		if err := insertMany(coll, temp); err != nil {
-			return fmt.Errorf("insert mongo table %s failed, err: %w", tableName, err)
+			return errs.Wrap(fmt.Errorf("insert mongo table %s failed, err: %w", tableName, err))
 		}
 		count += len(res)
 		if len(res) < batch {
@@ -197,7 +197,7 @@ func NewTask[A interface{ TableName() string }, B any, C any](gormDB *gorm.DB, m
 func insertMany(coll *mongo.Collection, objs []any) error {
 	if _, err := coll.InsertMany(context.Background(), objs); err != nil {
 		if !mongo.IsDuplicateKeyError(err) {
-			return err
+			return errs.Wrap(err)
 		}
 	}
 	for i := range objs {

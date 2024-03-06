@@ -18,12 +18,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -135,7 +136,7 @@ type Message struct {
 func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Message {
 	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	client := msg.NewMsgClient(conn)
 	return &Message{discov: discov, conn: conn, Client: client, Config: config}

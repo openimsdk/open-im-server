@@ -129,7 +129,7 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	v, err := rcClient.Fetch2(ctx, key, expire, func() (s string, err error) {
 		t, err = fn(ctx)
 		if err != nil {
-			return "", errs.Wrap(err)
+			return "", err
 		}
 		bs, err := json.Marshal(t)
 		if err != nil {
@@ -204,7 +204,7 @@ func batchGetCache2[T any, K comparable](
 	fns func(ctx context.Context, key K) (T, error),
 ) ([]T, error) {
 	if len(keys) == 0 {
-		return nil, errs.ErrArgs.Wrap("groupID is empty")
+		return nil, nil
 	}
 	res := make([]T, 0, len(keys))
 	for _, key := range keys {

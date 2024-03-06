@@ -17,6 +17,7 @@ package third
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"net/url"
 	"time"
 
@@ -50,9 +51,9 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	}
 	apiURL := config.Object.ApiURL
 	if apiURL == "" {
-		return fmt.Errorf("api url is empty")
+		return errs.Wrap(fmt.Errorf("api is empty"))
 	}
-	if _, parseErr := url.Parse(config.Object.ApiURL); parseErr != nil {
+	if _, err := url.Parse(config.Object.ApiURL); err != nil {
 		return err
 	}
 	if apiURL[len(apiURL)-1] != '/' {
@@ -63,7 +64,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	// 根据配置文件策略选择 oss 方式
+	// Select the oss method according to the profile policy
 	enable := config.Object.Enable
 	var o s3.Interface
 	switch enable {
