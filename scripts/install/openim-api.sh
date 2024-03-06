@@ -88,8 +88,8 @@ function openim::api::start_service() {
 
   echo "Starting service with command: $cmd"
   
-  nohup $cmd >> "${LOG_FILE}" 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
-  
+  #nohup $cmd >> "${LOG_FILE}" 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
+  nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a  "$TMP_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) >/dev/null &
   if [ $? -ne 0 ]; then
     openim::log::error_exit "Failed to start ${binary_name} on port ${service_port}."
     return 1
