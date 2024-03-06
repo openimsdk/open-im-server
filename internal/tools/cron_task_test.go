@@ -17,13 +17,14 @@ package tools
 import (
 	"flag"
 	"fmt"
-	"github.com/OpenIMSDK/tools/errs"
-	"gopkg.in/yaml.v3"
 	"math/rand"
 	"os"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/OpenIMSDK/tools/errs"
+	"gopkg.in/yaml.v3"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"

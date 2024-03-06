@@ -16,15 +16,13 @@ package rpcclient
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/errs"
 	"net/url"
-
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"google.golang.org/grpc"

@@ -19,8 +19,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -28,7 +26,7 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
-
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
