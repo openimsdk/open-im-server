@@ -16,10 +16,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/spf13/cobra"
 
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
+	"github.com/spf13/cobra"
 )
 
 type MsgTransferCmd struct {

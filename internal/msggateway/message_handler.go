@@ -16,7 +16,6 @@ package msggateway
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"sync"
 
 	"github.com/OpenIMSDK/protocol/msg"
@@ -26,6 +25,7 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/go-playground/validator/v10"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"google.golang.org/protobuf/proto"
 )

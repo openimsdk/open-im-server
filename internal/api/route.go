@@ -17,10 +17,6 @@ package api
 import (
 	"context"
 	"fmt"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-	ginprom "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"net"
 	"net/http"
 	"os"
@@ -31,26 +27,26 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/apiresp"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mw"
 	"github.com/OpenIMSDK/tools/tokenverify"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	ginprom "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mw"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 func Start(config *config.GlobalConfig, port int, proPort int) error {

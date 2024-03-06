@@ -17,10 +17,9 @@ package kafka
 import (
 	"sync"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
 	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type Consumer struct {
@@ -31,7 +30,7 @@ type Consumer struct {
 	Consumer      sarama.Consumer
 }
 
-func NewKafkaConsumer(addr []string, topic string, config *config.GlobalConfig) (*Consumer,error) {
+func NewKafkaConsumer(addr []string, topic string, config *config.GlobalConfig) (*Consumer, error) {
 	p := Consumer{}
 	p.Topic = topic
 	p.addr = addr
@@ -51,9 +50,9 @@ func NewKafkaConsumer(addr []string, topic string, config *config.GlobalConfig) 
 			InsecureSkipVerify: false,
 		}
 	}
-	err:=SetupTLSConfig(consumerConfig, tlsConfig)
-	if err!=nil{
-		return nil,err
+	err := SetupTLSConfig(consumerConfig, tlsConfig)
+	if err != nil {
+		return nil, err
 	}
 	consumer, err := sarama.NewConsumer(p.addr, consumerConfig)
 	if err != nil {

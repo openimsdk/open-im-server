@@ -22,12 +22,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/stathat/consistent"
-
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/stathat/consistent"
+	"google.golang.org/grpc"
 )
 
 // K8sDR represents the Kubernetes service discovery and registration client.

@@ -49,7 +49,7 @@ func readEncryptablePEMBlock(path string, pwd []byte) ([]byte, error) {
 }
 
 // NewTLSConfig setup the TLS config from general config file.
-func NewTLSConfig(clientCertFile, clientKeyFile, caCertFile string, keyPwd []byte, insecureSkipVerify bool) (*tls.Config,error) {
+func NewTLSConfig(clientCertFile, clientKeyFile, caCertFile string, keyPwd []byte, insecureSkipVerify bool) (*tls.Config, error) {
 	tlsConfig := tls.Config{}
 
 	if clientCertFile != "" && clientKeyFile != "" {
