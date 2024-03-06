@@ -95,7 +95,6 @@ sleep 2
 
 result=$(. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check)
 if [[ $? -ne 0 ]]; then
-  echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "The program may fail to start.\n $result"
   exit 1
 fi
@@ -103,7 +102,6 @@ fi
 
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
-  echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "The program may fail to start.\n $result"
   exit 1
 fi
