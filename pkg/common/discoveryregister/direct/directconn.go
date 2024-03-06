@@ -100,7 +100,7 @@ func (cd *ConnDirect) GetConns(ctx context.Context,
 	for _, port := range ports {
 		conn, err := cd.dialServiceWithoutResolver(ctx, fmt.Sprintf(cd.config.Rpc.ListenIP+":%d", port), append(cd.additionalOpts, opts...)...)
 		if err != nil {
-			return nil, errs.Wrap(fmt.Errorf("connect to port %d failed,serviceName %s, IP %s\n", port, serviceName, cd.config.Rpc.ListenIP))
+			return nil, errs.Wrap(fmt.Errorf("connect to port %d failed,serviceName %s, IP %s", port, serviceName, cd.config.Rpc.ListenIP))
 		}
 		connections = append(connections, conn)
 	}
