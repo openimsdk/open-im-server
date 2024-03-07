@@ -28,15 +28,19 @@ fi
 LOG_FILE="${OPENIM_OUTPUT}/logs/openim-$(date '+%Y%m%d').log"
 STDERR_LOG_FILE="${OPENIM_OUTPUT}/logs/openim-error-$(date '+%Y%m%d').log"
 TMP_LOG_FILE="${OPENIM_OUTPUT}/logs/openim-tmp-$(date '+%Y%m%d').log"
-DOCKER_LOG_FILE="${OPENIM_OUTPUT}/logs/openim-docker-$(date '+%Y%m%d').log"
 
 if [[ ! -d "${OPENIM_OUTPUT}/logs" ]]; then
   mkdir -p "${OPENIM_OUTPUT}/logs"
   touch "$LOG_FILE"
   touch "$STDERR_LOG_FILE"
   touch "$TMP_LOG_FILE"
+fi
+
+if [[ ! -f "$DOCKER_LOG_FILE" ]]; then
   touch "$DOCKER_LOG_FILE"
 fi
+
+
 
 # Define the logging function
 function echo_log() {
