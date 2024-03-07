@@ -12,30 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package push
+package offlinepush
 
 import (
 	"context"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
-type Consumer struct {
-	pushCh ConsumerHandler
-	// successCount is unused
-	// successCount uint64
+// OfflinePusher Offline Pusher.
+type OfflinePusher interface {
+	Push(ctx context.Context, userIDs []string, title, content string, opts *Opts) error
 }
 
-func NewConsumer(config *config.GlobalConfig, pusher *Pusher) (*Consumer, error) {
-	c, err := NewConsumerHandler(config, pusher)
-	if err != nil {
-		return nil, err
-	}
-	return &Consumer{
-		pushCh: *c,
-	}, nil
+// Opts opts.
+type Opts struct {
+	Signal        *Signal
+	IOSPushSound  string
+	IOSBadgeCount bool
+	Ex            string
 }
 
-func (c *Consumer) Start() {
-	go c.pushCh.pushConsumerGroup.RegisterHandleAndConsumer(context.Background(), &c.pushCh)
+// Signal message id.
+type Signal struct {
+	ClientMsgID string
 }

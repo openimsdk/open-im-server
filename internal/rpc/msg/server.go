@@ -15,10 +15,7 @@
 package msg
 
 import (
-	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
-
-	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/conversation"

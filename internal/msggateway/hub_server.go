@@ -23,7 +23,6 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -66,15 +65,13 @@ func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 	s.LongConnServer = LongConnServer
 }
 
-func NewServer(rpcPort int, proPort int, longConnServer LongConnServer) *Server {
+func NewServer(rpcPort int, proPort int, longConnServer LongConnServer, conf *config.GlobalConfig) *Server {
 	s := &Server{
-func NewServer(rpcPort int, proPort int, longConnServer LongConnServer, config *config.GlobalConfig) *Server {
-	return &Server{
 		rpcPort:        rpcPort,
 		prometheusPort: proPort,
 		LongConnServer: longConnServer,
 		pushTerminal:   make(map[int]struct{}),
-		config:         config,
+		config:         conf,
 	}
 	s.pushTerminal[constant.IOSPlatformID] = struct{}{}
 	s.pushTerminal[constant.AndroidPlatformID] = struct{}{}
@@ -155,7 +152,7 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 			}
 
 			userPlatform := &msggateway.SingleMsgToUserPlatform{
-				PlatFormID: int32(client.PlatformID),
+				RecvPlatFormID: int32(client.PlatformID),
 			}
 			if !client.IsBackground ||
 				(client.IsBackground && client.PlatformID != constant.IOSPlatformID) {

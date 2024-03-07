@@ -19,7 +19,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"strconv"
 	"sync"
 	"time"
@@ -29,7 +28,6 @@ import (
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils/splitter"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	http2 "github.com/openimsdk/open-im-server/v3/pkg/common/http"
@@ -53,7 +51,7 @@ const (
 	taskIDTTL       = 1000 * 60 * 60 * 24
 )
 
-type GeTui struct {
+type Client struct {
 	cache           cache.MsgModel
 	tokenExpireTime int64
 	taskIDTTL       int64

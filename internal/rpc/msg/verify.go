@@ -67,7 +67,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if black {
 			return errs.ErrBlockedByPeer.Wrap()
 		}
-		if *config.Config.MessageVerify.FriendVerify {
+		if m.config.MessageVerify.FriendVerify != nil && *m.config.MessageVerify.FriendVerify {
 			friend, err := m.FriendLocalCache.IsFriend(ctx, data.MsgData.SendID, data.MsgData.RecvID)
 			if err != nil {
 				return err

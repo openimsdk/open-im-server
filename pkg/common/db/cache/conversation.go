@@ -16,7 +16,6 @@ package cache
 
 import (
 	"context"
-	"errors"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"

@@ -15,27 +15,18 @@
 package push
 
 import (
-	"context"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"google.golang.org/protobuf/proto"
 )
 
-type Consumer struct {
-	pushCh ConsumerHandler
-	// successCount is unused
-	// successCount uint64
-}
-
-func NewConsumer(config *config.GlobalConfig, pusher *Pusher) (*Consumer, error) {
-	c, err := NewConsumerHandler(config, pusher)
-	if err != nil {
-		return nil, err
+func GetContent(msg *sdkws.MsgData) string {
+	if msg.ContentType >= constant.NotificationBegin && msg.ContentType <= constant.NotificationEnd {
+		var tips sdkws.TipsComm
+		_ = proto.Unmarshal(msg.Content, &tips)
+		content := tips.JsonDetail
+		return content
+	} else {
+		return string(msg.Content)
 	}
-	return &Consumer{
-		pushCh: *c,
-	}, nil
-}
-
-func (c *Consumer) Start() {
-	go c.pushCh.pushConsumerGroup.RegisterHandleAndConsumer(context.Background(), &c.pushCh)
 }
