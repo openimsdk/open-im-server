@@ -30,8 +30,4 @@ trap 'openim::util::onCtrlC' INT
 
 "${OPENIM_ROOT}"/scripts/start-all.sh
 
-sleep 5
-
-"${OPENIM_ROOT}"/scripts/check-all.sh
-
-tail -f ${LOG_FILE}
+tail -f ${DOCKER_LOG_FILE}
