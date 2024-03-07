@@ -36,6 +36,12 @@ if [[ ! -d "${OPENIM_OUTPUT}/logs" ]]; then
   touch "$TMP_LOG_FILE"
 fi
 
+if [[ ! -f "$DOCKER_LOG_FILE" ]]; then
+  touch "$DOCKER_LOG_FILE"
+fi
+
+
+
 # Define the logging function
 function echo_log() {
   if $ENABLE_LOGGING; then

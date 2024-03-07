@@ -17,10 +17,15 @@
 #FIXME The full names of the shell scripts that need to be started are placed in the `need_to_start_server_shell` array.
 
 
+#!/bin/bash
+
+
+
 
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
+
 
 
 # Function to execute the scripts.
@@ -57,6 +62,9 @@ function execute_start_scripts() {
 
 
 
+if grep -q docker /proc/1/cgroup; then
+  exec > ${DOCKER_LOG_FILE} 2>&1
+fi
 
 
 
