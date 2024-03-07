@@ -15,11 +15,9 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-
 	"github.com/OpenIMSDK/protocol/auth"
 	"github.com/OpenIMSDK/tools/a2r"
-
+	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -31,6 +29,10 @@ func NewAuthApi(client rpcclient.Auth) AuthApi {
 
 func (o *AuthApi) UserToken(c *gin.Context) {
 	a2r.Call(auth.AuthClient.UserToken, o.Client, c)
+}
+
+func (o *AuthApi) GetUserToken(c *gin.Context) {
+	a2r.Call(auth.AuthClient.GetUserToken, o.Client, c)
 }
 
 func (o *AuthApi) ParseToken(c *gin.Context) {

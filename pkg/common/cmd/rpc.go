@@ -18,99 +18,139 @@ import (
 	"errors"
 
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
-
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 )
+
+type rpcInitFuc func(config *config2.GlobalConfig, disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error
 
 type RpcCmd struct {
 	*RootCmd
+	RpcRegisterName string
+	initFunc        rpcInitFuc
 }
 
-func NewRpcCmd(name string) *RpcCmd {
-	ret := &RpcCmd{NewRootCmd(name)}
+func NewRpcCmd(name string, initFunc rpcInitFuc) *RpcCmd {
+	ret := &RpcCmd{RootCmd: NewRootCmd(name), initFunc: initFunc}
+	ret.addPreRun()
+	ret.addRunE()
 	ret.SetRootCmdPt(ret)
 	return ret
 }
 
-func (a *RpcCmd) Exec() error {
-	a.Command.Run = func(cmd *cobra.Command, args []string) {
+func (a *RpcCmd) addPreRun() {
+	a.Command.PreRun = func(cmd *cobra.Command, args []string) {
 		a.port = a.getPortFlag(cmd)
 		a.prometheusPort = a.getPrometheusPortFlag(cmd)
 	}
+}
+
+func (a *RpcCmd) addRunE() {
+	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		rpcRegisterName, err := a.GetRpcRegisterNameFromConfig()
+		if err != nil {
+			return err
+		} else {
+			return a.StartSvr(rpcRegisterName, a.initFunc)
+		}
+	}
+}
+
+func (a *RpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *RpcCmd) StartSvr(name string, rpcFn func(discov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) error {
+func (a *RpcCmd) StartSvr(name string, rpcFn func(config *config2.GlobalConfig, disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) error {
 	if a.GetPortFlag() == 0 {
-		return errors.New("port is required")
+		return errs.Wrap(errors.New("port is required"))
 	}
-	return startrpc.Start(a.GetPortFlag(), name, a.GetPrometheusPortFlag(), rpcFn)
+	return startrpc.Start(a.GetPortFlag(), name, a.GetPrometheusPortFlag(), a.config, rpcFn)
 }
 
 func (a *RpcCmd) GetPortFromConfig(portType string) int {
 	switch a.Name {
 	case RpcPushServer:
 		if portType == constant.FlagPort {
-			return config2.Config.RpcPort.OpenImPushPort[0]
+			return a.config.RpcPort.OpenImPushPort[0]
 		}
 		if portType == constant.FlagPrometheusPort {
-			return config2.Config.Prometheus.PushPrometheusPort[0]
+			return a.config.Prometheus.PushPrometheusPort[0]
 		}
 	case RpcAuthServer:
 		if portType == constant.FlagPort {
-			return config2.Config.RpcPort.OpenImAuthPort[0]
+			return a.config.RpcPort.OpenImAuthPort[0]
 		}
 		if portType == constant.FlagPrometheusPort {
-			return config2.Config.Prometheus.AuthPrometheusPort[0]
+			return a.config.Prometheus.AuthPrometheusPort[0]
 		}
 	case RpcConversationServer:
 		if portType == constant.FlagPort {
-			return config2.Config.RpcPort.OpenImConversationPort[0]
+			return a.config.RpcPort.OpenImConversationPort[0]
 		}
 		if portType == constant.FlagPrometheusPort {
-			return config2.Config.Prometheus.ConversationPrometheusPort[0]
+			return a.config.Prometheus.ConversationPrometheusPort[0]
 		}
 	case RpcFriendServer:
 		if portType == constant.FlagPort {
-			return config2.Config.RpcPort.OpenImFriendPort[0]
+			return a.config.RpcPort.OpenImFriendPort[0]
 		}
 		if portType == constant.FlagPrometheusPort {
-			return config2.Config.Prometheus.FriendPrometheusPort[0]
+			return a.config.Prometheus.FriendPrometheusPort[0]
 		}
 	case RpcGroupServer:
 		if portType == constant.FlagPort {
-			return config2.Config.RpcPort.OpenImGroupPort[0]
+			return a.config.RpcPort.OpenImGroupPort[0]
 		}
 		if portType == constant.FlagPrometheusPort {
-			return config2.Config.Prometheus.GroupPrometheusPort[0]
+			return a.config.Prometheus.GroupPrometheusPort[0]
 		}
 	case RpcMsgServer:
 		if portType == constant.FlagPort {
-			return config2.Config.RpcPort.OpenImMessagePort[0]
+			return a.config.RpcPort.OpenImMessagePort[0]
 		}
 		if portType == constant.FlagPrometheusPort {
-			return config2.Config.Prometheus.MessagePrometheusPort[0]
+			return a.config.Prometheus.MessagePrometheusPort[0]
 		}
 	case RpcThirdServer:
 		if portType == constant.FlagPort {
-			return config2.Config.RpcPort.OpenImThirdPort[0]
+			return a.config.RpcPort.OpenImThirdPort[0]
 		}
 		if portType == constant.FlagPrometheusPort {
-			return config2.Config.Prometheus.ThirdPrometheusPort[0]
+			return a.config.Prometheus.ThirdPrometheusPort[0]
 		}
 	case RpcUserServer:
 		if portType == constant.FlagPort {
-			return config2.Config.RpcPort.OpenImUserPort[0]
+			return a.config.RpcPort.OpenImUserPort[0]
 		}
 		if portType == constant.FlagPrometheusPort {
-			return config2.Config.Prometheus.UserPrometheusPort[0]
+			return a.config.Prometheus.UserPrometheusPort[0]
 		}
 	}
 	return 0
+}
+
+func (a *RpcCmd) GetRpcRegisterNameFromConfig() (string, error) {
+	switch a.Name {
+	case RpcPushServer:
+		return a.config.RpcRegisterName.OpenImPushName, nil
+	case RpcAuthServer:
+		return a.config.RpcRegisterName.OpenImAuthName, nil
+	case RpcConversationServer:
+		return a.config.RpcRegisterName.OpenImConversationName, nil
+	case RpcFriendServer:
+		return a.config.RpcRegisterName.OpenImFriendName, nil
+	case RpcGroupServer:
+		return a.config.RpcRegisterName.OpenImGroupName, nil
+	case RpcMsgServer:
+		return a.config.RpcRegisterName.OpenImMsgName, nil
+	case RpcThirdServer:
+		return a.config.RpcRegisterName.OpenImThirdName, nil
+	case RpcUserServer:
+		return a.config.RpcRegisterName.OpenImUserName, nil
+	}
+	return "", errs.Wrap(errors.New("can not get rpc register name"), a.Name)
 }

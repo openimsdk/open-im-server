@@ -222,6 +222,14 @@ def "KODO_ACCESS_KEY_SECRET"                                             # 七�
 def "KODO_SESSION_TOKEN"                                                 # 七牛云OSS的会话令牌
 def "KODO_PUBLIC_READ" "false"                                           # 公有读
 
+# AWS Configuration Information
+def "AWS_ENDPOINT" ""                                  # AWS endpoint, generally not needed unless using a specific service
+def "AWS_REGION" "us-east-1"                           # AWS Region
+def "AWS_BUCKET" "demo-9999999"                        # AWS S3 Bucket Name
+def "AWS_ACCESS_KEY_ID"                                # AWS Access Key ID
+def "AWS_SECRET_ACCESS_KEY"                            # AWS Secret Access Key
+def "AWS_PUBLIC_READ" "false"                          # Public read access
+
 ###################### Redis 配置信息 ######################
 def "REDIS_PORT" "16379"                                    # Redis的端口
 def "REDIS_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}"              # Redis的地址
@@ -324,7 +332,7 @@ def "OPENIM_CONVERSATION_NAME" "Conversation"       # OpenIM对话服务名称
 def "OPENIM_THIRD_NAME" "Third"                     # OpenIM第三方服务名称
 
 ###################### Log Configuration Variables ######################
-def "LOG_STORAGE_LOCATION" "${OPENIM_ROOT}/logs/" # 日志存储位置
+def "LOG_STORAGE_LOCATION" "${OPENIM_ROOT}/_output/logs/" # 日志存储位置
 def "LOG_ROTATION_TIME" "24"                        # 日志轮替时间
 def "LOG_REMAIN_ROTATION_COUNT" "2"                 # 保留的日志轮替数量
 def "LOG_REMAIN_LOG_LEVEL" "6"                      # 保留的日志级别

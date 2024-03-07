@@ -15,11 +15,16 @@
 package tools
 
 import (
+	"flag"
 	"fmt"
 	"math/rand"
+	"os"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/OpenIMSDK/tools/errs"
+	"gopkg.in/yaml.v3"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"
@@ -61,7 +66,7 @@ func TestCronWrapFunc(t *testing.T) {
 	start := time.Now()
 	key := fmt.Sprintf("cron-%v", rand.Int31())
 	crontab := cron.New(cron.WithSeconds())
-	crontab.AddFunc("*/1 * * * * *", cronWrapFunc(rdb, key, cb))
+	crontab.AddFunc("*/1 * * * * *", cronWrapFunc(config.NewGlobalConfig(), rdb, key, cb))
 	crontab.Start()
 	<-done
 
@@ -71,7 +76,11 @@ func TestCronWrapFunc(t *testing.T) {
 }
 
 func TestCronWrapFuncWithNetlock(t *testing.T) {
-	config.Config.EnableCronLocker = true
+	conf, err := initCfg()
+	if err != nil {
+		panic(err)
+	}
+	conf.EnableCronLocker = true
 	rdb := redis.NewClient(&redis.Options{})
 	defer rdb.Close()
 
@@ -80,10 +89,10 @@ func TestCronWrapFuncWithNetlock(t *testing.T) {
 	crontab := cron.New(cron.WithSeconds())
 
 	key := fmt.Sprintf("cron-%v", rand.Int31())
-	crontab.AddFunc("*/1 * * * * *", cronWrapFunc(rdb, key, func() {
+	crontab.AddFunc("*/1 * * * * *", cronWrapFunc(conf, rdb, key, func() {
 		done <- "host1"
 	}))
-	crontab.AddFunc("*/1 * * * * *", cronWrapFunc(rdb, key, func() {
+	crontab.AddFunc("*/1 * * * * *", cronWrapFunc(conf, rdb, key, func() {
 		done <- "host2"
 	}))
 	crontab.Start()
@@ -93,4 +102,23 @@ func TestCronWrapFuncWithNetlock(t *testing.T) {
 	assert.Equal(t, len(done), 2)
 
 	crontab.Stop()
+}
+
+func initCfg() (*config.GlobalConfig, error) {
+	const (
+		defaultCfgPath = "../../../../../config/config.yaml"
+	)
+
+	cfgPath := flag.String("c", defaultCfgPath, "Path to the configuration file")
+	data, err := os.ReadFile(*cfgPath)
+	if err != nil {
+		return nil, errs.Wrap(err, "ReadFile unmarshal failed")
+	}
+
+	conf := config.NewGlobalConfig()
+	err = yaml.Unmarshal(data, &conf)
+	if err != nil {
+		return nil, errs.Wrap(err, "InitConfig unmarshal failed")
+	}
+	return conf, nil
 }

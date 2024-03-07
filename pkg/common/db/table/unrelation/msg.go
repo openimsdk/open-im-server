@@ -20,10 +20,8 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/protocol/msg"
-
-	"go.mongodb.org/mongo-driver/mongo"
-
 	"github.com/OpenIMSDK/protocol/sdkws"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (

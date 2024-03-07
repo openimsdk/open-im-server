@@ -15,82 +15,79 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"flag"
 	"fmt"
-	"net"
-	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/IBM/sarama"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
+
+	"github.com/OpenIMSDK/tools/component"
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/go-zookeeper/zk"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/redis/go-redis/v9"
 	"gopkg.in/yaml.v3"
 )
 
 const (
 	// defaultCfgPath is the default path of the configuration file.
-	defaultCfgPath           = "../../../../../config/config.yaml"
-	minioHealthCheckDuration = 1
-	maxRetry                 = 300
-	componentStartErrCode    = 6000
-	configErrCode            = 6001
-	mongoConnTimeout         = 30 * time.Second
-)
-
-const (
-	colorRed    = 31
-	colorGreen  = 32
-	colorYellow = 33
+	defaultCfgPath = "../../../../../config/config.yaml"
+	maxRetry       = 100
 )
 
 var (
-	cfgPath           = flag.String("c", defaultCfgPath, "Path to the configuration file")
-	ErrComponentStart = errs.NewCodeError(componentStartErrCode, "ComponentStartErr")
-	ErrConfig         = errs.NewCodeError(configErrCode, "Config file is incorrect")
+	cfgPath = flag.String("c", defaultCfgPath, "Path to the configuration file")
 )
 
-func initCfg() error {
+func initCfg() (*config.GlobalConfig, error) {
 	data, err := os.ReadFile(*cfgPath)
 	if err != nil {
-		return err
+		return nil, errs.Wrap(err, "ReadFile unmarshal failed")
 	}
 
-	return yaml.Unmarshal(data, &config.Config)
+	conf := config.NewGlobalConfig()
+	err = yaml.Unmarshal(data, &conf)
+	if err != nil {
+		return nil, errs.Wrap(err, "InitConfig unmarshal failed")
+	}
+	return conf, nil
 }
 
 type checkFunc struct {
 	name     string
-	function func() (string, error)
+	function func(*config.GlobalConfig) error
+	flag     bool
+	config   *config.GlobalConfig
 }
 
 func main() {
 	flag.Parse()
 
-	if err := initCfg(); err != nil {
+	conf, err := initCfg()
+	if err != nil {
 		fmt.Printf("Read config failed: %v\n", err)
+		return
+	}
 
+	err = configGetEnv(conf)
+	if err != nil {
+		fmt.Printf("configGetEnv failed,err:%v", err)
 		return
 	}
 
 	checks := []checkFunc{
 		//{name: "Mysql", function: checkMysql},
-		{name: "Mongo", function: checkMongo},
-		{name: "Minio", function: checkMinio},
-		{name: "Redis", function: checkRedis},
-		{name: "Zookeeper", function: checkZookeeper},
-		{name: "Kafka", function: checkKafka},
+		{name: "Mongo", function: checkMongo, config: conf},
+		{name: "Redis", function: checkRedis, config: conf},
+		{name: "Minio", function: checkMinio, config: conf},
+		{name: "Zookeeper", function: checkZookeeper, config: conf},
+		{name: "Kafka", function: checkKafka, config: conf},
 	}
 
 	for i := 0; i < maxRetry; i++ {
@@ -99,274 +96,166 @@ func main() {
 		}
 		fmt.Printf("Checking components Round %v...\n", i+1)
 
+		var err error
 		allSuccess := true
-		for _, check := range checks {
-			str, err := check.function()
-			if err != nil {
-				errorPrint(fmt.Sprintf("Starting %s failed, %v", check.name, err))
-				allSuccess = false
-				break
-			} else {
-				successPrint(fmt.Sprintf("%s connected successfully, %s", check.name, str))
+		for index, check := range checks {
+			if !check.flag {
+				err = check.function(check.config)
+				if err != nil {
+					allSuccess = false
+					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, errs.Unwrap(err).Error()))
+					if !strings.Contains(errs.Unwrap(err).Error(), "connection refused") &&
+						!strings.Contains(errs.Unwrap(err).Error(), "timeout waiting") {
+						component.ErrorPrint("Some components started failed!")
+						os.Exit(-1)
+					}
+				} else {
+					checks[index].flag = true
+					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
+				}
 			}
 		}
 
 		if allSuccess {
-			successPrint("All components started successfully!")
-
+			component.SuccessPrint("All components started successfully!")
 			return
 		}
 	}
-	os.Exit(1)
-}
-
-func exactIP(urll string) string {
-	u, _ := url.Parse(urll)
-	host, _, err := net.SplitHostPort(u.Host)
-	if err != nil {
-		host = u.Host
-	}
-	if strings.HasSuffix(host, ":") {
-		host = host[0 : len(host)-1]
-	}
-
-	return host
-}
-
-// Helper function to get environment variable or default value
-func getEnv(key, fallback string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
-	}
-	return fallback
+	component.ErrorPrint("Some components started failed!")
+	os.Exit(-1)
 }
 
 // checkMongo checks the MongoDB connection without retries
-func checkMongo() (string, error) {
-	uri := getEnv("MONGO_URI", buildMongoURI())
-
-	ctx, cancel := context.WithTimeout(context.Background(), mongoConnTimeout)
-	defer cancel()
-
-	str := "ths addr is:" + strings.Join(config.Config.Mongo.Address, ",")
-
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
-	if err != nil {
-		return "", errs.Wrap(errStr(err, str))
+func checkMongo(config *config.GlobalConfig) error {
+	mongoStu := &component.Mongo{
+		URL:         config.Mongo.Uri,
+		Address:     config.Mongo.Address,
+		Database:    config.Mongo.Database,
+		Username:    config.Mongo.Username,
+		Password:    config.Mongo.Password,
+		MaxPoolSize: config.Mongo.MaxPoolSize,
 	}
-	defer client.Disconnect(context.Background())
+	err := component.CheckMongo(mongoStu)
 
-	ctx, cancel = context.WithTimeout(context.Background(), mongoConnTimeout)
-	defer cancel()
-
-	if err = client.Ping(ctx, nil); err != nil {
-		return "", errs.Wrap(errStr(err, str))
-	}
-
-	return str, nil
-}
-
-// buildMongoURI constructs the MongoDB URI using configuration settings
-func buildMongoURI() string {
-	// Fallback to config if environment variables are not set
-	username := config.Config.Mongo.Username
-	password := config.Config.Mongo.Password
-	database := config.Config.Mongo.Database
-	maxPoolSize := config.Config.Mongo.MaxPoolSize
-
-	mongodbHosts := strings.Join(config.Config.Mongo.Address, ",")
-
-	if username != "" && password != "" {
-		return fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d",
-			username, password, mongodbHosts, database, maxPoolSize)
-	}
-	return fmt.Sprintf("mongodb://%s/%s?maxPoolSize=%d",
-		mongodbHosts, database, maxPoolSize)
-}
-
-// checkMinio checks the MinIO connection
-func checkMinio() (string, error) {
-	// Check if MinIO is enabled
-	if config.Config.Object.Enable != "minio" {
-		return "", nil
-	}
-
-	// Prioritize environment variables
-	endpoint := getEnv("MINIO_ENDPOINT", config.Config.Object.Minio.Endpoint)
-	accessKeyID := getEnv("MINIO_ACCESS_KEY_ID", config.Config.Object.Minio.AccessKeyID)
-	secretAccessKey := getEnv("MINIO_SECRET_ACCESS_KEY", config.Config.Object.Minio.SecretAccessKey)
-	useSSL := getEnv("MINIO_USE_SSL", "false") // Assuming SSL is not used by default
-
-	if endpoint == "" || accessKeyID == "" || secretAccessKey == "" {
-		return "", ErrConfig.Wrap("MinIO configuration missing")
-	}
-
-	// Parse endpoint URL to determine if SSL is enabled
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		str := "the endpoint is:" + endpoint
-		return "", errs.Wrap(errStr(err, str))
-	}
-	secure := u.Scheme == "https" || useSSL == "true"
-
-	// Initialize MinIO client
-	minioClient, err := minio.New(u.Host, &minio.Options{
-		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
-		Secure: secure,
-	})
-	str := "ths addr is:" + u.Host
-	if err != nil {
-		strs := fmt.Sprintf("%v;host:%s,accessKeyID:%s,secretAccessKey:%s,Secure:%v", err, u.Host, accessKeyID, secretAccessKey, secure)
-		return "", errs.Wrap(err, strs)
-	}
-
-	// Perform health check
-	cancel, err := minioClient.HealthCheck(time.Duration(minioHealthCheckDuration) * time.Second)
-	if err != nil {
-		return "", errs.Wrap(errStr(err, str))
-	}
-	defer cancel()
-
-	if minioClient.IsOffline() {
-		str := fmt.Sprintf("Minio server is offline;%s", str)
-		return "", ErrComponentStart.Wrap(str)
-	}
-
-	// Check for localhost in API URL and Minio SignEndpoint
-	if exactIP(config.Config.Object.ApiURL) == "127.0.0.1" || exactIP(config.Config.Object.Minio.SignEndpoint) == "127.0.0.1" {
-		return "", ErrConfig.Wrap("apiURL or Minio SignEndpoint endpoint contain 127.0.0.1")
-	}
-
-	return str, nil
+	return err
 }
 
 // checkRedis checks the Redis connection
-func checkRedis() (string, error) {
-	// Prioritize environment variables
-	address := getEnv("REDIS_ADDRESS", strings.Join(config.Config.Redis.Address, ","))
-	username := getEnv("REDIS_USERNAME", config.Config.Redis.Username)
-	password := getEnv("REDIS_PASSWORD", config.Config.Redis.Password)
-
-	// Split address to handle multiple addresses for cluster setup
-	redisAddresses := strings.Split(address, ",")
-
-	var redisClient redis.UniversalClient
-	if len(redisAddresses) > 1 {
-		// Use cluster client for multiple addresses
-		redisClient = redis.NewClusterClient(&redis.ClusterOptions{
-			Addrs:    redisAddresses,
-			Username: username,
-			Password: password,
-		})
-	} else {
-		// Use regular client for single address
-		redisClient = redis.NewClient(&redis.Options{
-			Addr:     redisAddresses[0],
-			Username: username,
-			Password: password,
-		})
+func checkRedis(config *config.GlobalConfig) error {
+	redisStu := &component.Redis{
+		Address:  config.Redis.Address,
+		Username: config.Redis.Username,
+		Password: config.Redis.Password,
 	}
-	defer redisClient.Close()
+	err := component.CheckRedis(redisStu)
+	return err
+}
 
-	// Ping Redis to check connectivity
-	_, err := redisClient.Ping(context.Background()).Result()
-	str := "the addr is:" + strings.Join(redisAddresses, ",")
-	if err != nil {
-		return "", errs.Wrap(errStr(err, str))
+// checkMinio checks the MinIO connection
+func checkMinio(config *config.GlobalConfig) error {
+	// Check if MinIO is enabled
+	if config.Object.Enable != "minio" {
+		return errs.Wrap(errors.New("minio.Enable is empty"))
 	}
-
-	return str, nil
+	minio := &component.Minio{
+		ApiURL:          config.Object.ApiURL,
+		Endpoint:        config.Object.Minio.Endpoint,
+		AccessKeyID:     config.Object.Minio.AccessKeyID,
+		SecretAccessKey: config.Object.Minio.SecretAccessKey,
+		SignEndpoint:    config.Object.Minio.SignEndpoint,
+		UseSSL:          getEnv("MINIO_USE_SSL", "false"),
+	}
+	err := component.CheckMinio(minio)
+	return err
 }
 
 // checkZookeeper checks the Zookeeper connection
-func checkZookeeper() (string, error) {
-	// Prioritize environment variables
-	schema := getEnv("ZOOKEEPER_SCHEMA", "digest")
-	address := getEnv("ZOOKEEPER_ADDRESS", strings.Join(config.Config.Zookeeper.ZkAddr, ","))
-	username := getEnv("ZOOKEEPER_USERNAME", config.Config.Zookeeper.Username)
-	password := getEnv("ZOOKEEPER_PASSWORD", config.Config.Zookeeper.Password)
-
-	// Split addresses to handle multiple Zookeeper nodes
-	zookeeperAddresses := strings.Split(address, ",")
-
-	// Connect to Zookeeper
-	str := "the addr is:" + address
-	c, eventChan, err := zk.Connect(zookeeperAddresses, time.Second) // Adjust the timeout as necessary
-	if err != nil {
-		return "", errs.Wrap(errStr(err, str))
+func checkZookeeper(config *config.GlobalConfig) error {
+	zkStu := &component.Zookeeper{
+		Schema:   config.Zookeeper.Schema,
+		ZkAddr:   config.Zookeeper.ZkAddr,
+		Username: config.Zookeeper.Username,
+		Password: config.Zookeeper.Password,
 	}
-	timeout := time.After(5 * time.Second)
-	for {
-		select {
-		case event := <-eventChan:
-			if event.State == zk.StateConnected {
-				fmt.Println("Connected to Zookeeper")
-				goto Connected
-			}
-		case <-timeout:
-			return "", errs.Wrap(errors.New("timeout waiting for Zookeeper connection"), "Zookeeper Addr: "+strings.Join(config.Config.Zookeeper.ZkAddr, " "))
-		}
-	}
-Connected:
-	defer c.Close()
-
-	// Set authentication if username and password are provided
-	if username != "" && password != "" {
-		if err := c.AddAuth(schema, []byte(username+":"+password)); err != nil {
-			return "", errs.Wrap(errStr(err, str))
-		}
-	}
-
-	return str, nil
+	err := component.CheckZookeeper(zkStu)
+	return err
 }
 
 // checkKafka checks the Kafka connection
-func checkKafka() (string, error) {
+func checkKafka(config *config.GlobalConfig) error {
 	// Prioritize environment variables
-	username := getEnv("KAFKA_USERNAME", config.Config.Kafka.Username)
-	password := getEnv("KAFKA_PASSWORD", config.Config.Kafka.Password)
-	address := getEnv("KAFKA_ADDRESS", strings.Join(config.Config.Kafka.Addr, ","))
-
-	// Split addresses to handle multiple Kafka brokers
-	kafkaAddresses := strings.Split(address, ",")
-
-	// Configure Kafka client
-	cfg := sarama.NewConfig()
-	if username != "" && password != "" {
-		cfg.Net.SASL.Enable = true
-		cfg.Net.SASL.User = username
-		cfg.Net.SASL.Password = password
+	kafkaStu := &component.Kafka{
+		Username: config.Kafka.Username,
+		Password: config.Kafka.Password,
+		Addr:     config.Kafka.Addr,
 	}
-	// Additional Kafka setup (e.g., TLS configuration) can be added here
-	// kafka.SetupTLSConfig(cfg)
 
-	// Create Kafka client
-	str := "the addr is:" + address
-	kafkaClient, err := sarama.NewClient(kafkaAddresses, cfg)
+	kafkaClient, err := component.CheckKafka(kafkaStu)
 	if err != nil {
-		return "", errs.Wrap(errStr(err, str))
+		return err
 	}
 	defer kafkaClient.Close()
 
 	// Verify if necessary topics exist
 	topics, err := kafkaClient.Topics()
 	if err != nil {
-		return "", errs.Wrap(err)
+		return errs.Wrap(err)
 	}
 
 	requiredTopics := []string{
-		config.Config.Kafka.MsgToMongo.Topic,
-		config.Config.Kafka.MsgToPush.Topic,
-		config.Config.Kafka.LatestMsgToRedis.Topic,
+		config.Kafka.MsgToMongo.Topic,
+		config.Kafka.MsgToPush.Topic,
+		config.Kafka.LatestMsgToRedis.Topic,
 	}
 
 	for _, requiredTopic := range requiredTopics {
 		if !isTopicPresent(requiredTopic, topics) {
-			return "", ErrComponentStart.Wrap(fmt.Sprintf("Kafka doesn't contain topic: %v", requiredTopic))
+			return errs.Wrap(err, fmt.Sprintf("Kafka doesn't contain topic: %v", requiredTopic))
 		}
 	}
 
-	return str, nil
+	var tlsConfig *kafka.TLSConfig
+	if config.Kafka.TLS != nil {
+		tlsConfig = &kafka.TLSConfig{
+			CACrt:              config.Kafka.TLS.CACrt,
+			ClientCrt:          config.Kafka.TLS.ClientCrt,
+			ClientKey:          config.Kafka.TLS.ClientKey,
+			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+			InsecureSkipVerify: config.Kafka.TLS.InsecureSkipVerify,
+		}
+	}
+
+	_, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
+		KafkaVersion:   sarama.V2_0_0_0,
+		OffsetsInitial: sarama.OffsetNewest,
+		IsReturnErr:    false,
+		UserName:       config.Kafka.Username,
+		Password:       config.Kafka.Password,
+	}, []string{config.Kafka.LatestMsgToRedis.Topic},
+		config.Kafka.Addr, config.Kafka.ConsumerGroupID.MsgToRedis, tlsConfig)
+	if err != nil {
+		return err
+	}
+
+	_, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
+		KafkaVersion:   sarama.V2_0_0_0,
+		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
+	}, []string{config.Kafka.MsgToPush.Topic},
+		config.Kafka.Addr, config.Kafka.ConsumerGroupID.MsgToMongo, tlsConfig)
+	if err != nil {
+		return err
+	}
+
+	kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
+		KafkaVersion:   sarama.V2_0_0_0,
+		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
+	}, []string{config.Kafka.MsgToPush.Topic}, config.Kafka.Addr,
+		config.Kafka.ConsumerGroupID.MsgToPush, tlsConfig)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // isTopicPresent checks if a topic is present in the list of topics
@@ -379,22 +268,99 @@ func isTopicPresent(topic string, topics []string) bool {
 	return false
 }
 
-func colorPrint(colorCode int, format string, a ...interface{}) {
-	fmt.Printf("\x1b[%dm%s\x1b[0m\n", colorCode, fmt.Sprintf(format, a...))
+func configGetEnv(config *config.GlobalConfig) error {
+	config.Mongo.Uri = getEnv("MONGO_URI", config.Mongo.Uri)
+	config.Mongo.Username = getEnv("MONGO_OPENIM_USERNAME", config.Mongo.Username)
+	config.Mongo.Password = getEnv("MONGO_OPENIM_PASSWORD", config.Mongo.Password)
+	config.Mongo.Address = getArrEnv("MONGO_ADDRESS", "MONGO_PORT", config.Mongo.Address)
+	config.Mongo.Database = getEnv("MONGO_DATABASE", config.Mongo.Database)
+	maxPoolSize, err := getEnvInt("MONGO_DATABASE", config.Mongo.MaxPoolSize)
+	if err != nil {
+		return err
+	}
+	config.Mongo.MaxPoolSize = maxPoolSize
+
+	config.Redis.Username = getEnv("REDIS_USERNAME", config.Redis.Username)
+	config.Redis.Password = getEnv("REDIS_PASSWORD", config.Redis.Password)
+	config.Redis.Address = getArrEnv("REDIS_ADDRESS", "REDIS_PASSWORD", config.Redis.Address)
+
+	config.Object.ApiURL = getEnv("OBJECT_APIURL", config.Object.ApiURL)
+	config.Object.Minio.Endpoint = getEnv("MINIO_ENDPOINT", config.Object.Minio.Endpoint)
+	config.Object.Minio.AccessKeyID = getEnv("MINIO_ACCESS_KEY_ID", config.Object.Minio.AccessKeyID)
+	config.Object.Minio.SecretAccessKey = getEnv("MINIO_SECRET_ACCESS_KEY", config.Object.Minio.SecretAccessKey)
+	config.Object.Minio.SignEndpoint = getEnv("MINIO_SIGN_ENDPOINT", config.Object.Minio.SignEndpoint)
+
+	config.Zookeeper.Schema = getEnv("ZOOKEEPER_SCHEMA", config.Zookeeper.Schema)
+	config.Zookeeper.ZkAddr = getArrEnv("ZOOKEEPER_ADDRESS", "ZOOKEEPER_PORT", config.Zookeeper.ZkAddr)
+	config.Zookeeper.Username = getEnv("ZOOKEEPER_USERNAME", config.Zookeeper.Username)
+	config.Zookeeper.Password = getEnv("ZOOKEEPER_PASSWORD", config.Zookeeper.Password)
+
+	config.Kafka.Username = getEnv("KAFKA_USERNAME", config.Kafka.Username)
+	config.Kafka.Password = getEnv("KAFKA_PASSWORD", config.Kafka.Password)
+	config.Kafka.Addr = getArrEnv("KAFKA_ADDRESS", "KAFKA_PORT", config.Kafka.Addr)
+	config.Object.Minio.Endpoint = getMinioAddr("MINIO_ENDPOINT", "MINIO_ADDRESS", "MINIO_PORT", config.Object.Minio.Endpoint)
+	return nil
 }
 
-func errorPrint(s string) {
-	colorPrint(colorRed, "%v", s)
+func getMinioAddr(key1, key2, key3, fallback string) string {
+	// Prioritize environment variables
+	endpoint := getEnv(key1, fallback)
+	address, addressExist := os.LookupEnv(key2)
+	port, portExist := os.LookupEnv(key3)
+	if portExist && addressExist {
+		endpoint = "http://" + address + ":" + port
+		return endpoint
+	}
+	return endpoint
 }
 
-func successPrint(s string) {
-	colorPrint(colorGreen, "%v", s)
+// Helper function to get environment variable or default value
+func getEnv(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return fallback
 }
 
-func warningPrint(s string) {
-	colorPrint(colorYellow, "Warning: But %v", s)
+// Helper function to get environment variable or default value
+func getEnvInt(key string, fallback int) (int, error) {
+	if value, exists := os.LookupEnv(key); exists {
+		val, err := strconv.Atoi(value)
+		if err != nil {
+			return 0, errs.Wrap(err, "string to int failed")
+		}
+		return val, nil
+	}
+	return fallback, nil
 }
 
-func errStr(err error, str string) error {
-	return fmt.Errorf("%v;%s", err, str)
+func getArrEnv(key1, key2 string, fallback []string) []string {
+	address, addrExists := os.LookupEnv(key1)
+	port, portExists := os.LookupEnv(key2)
+
+	if addrExists && portExists {
+		addresses := strings.Split(address, ",")
+		for i, addr := range addresses {
+			addresses[i] = addr + ":" + port
+		}
+		return addresses
+	}
+
+	if addrExists && !portExists {
+		addresses := strings.Split(address, ",")
+		for i, addr := range addresses {
+			addresses[i] = addr + ":" + "0"
+		}
+		return addresses
+	}
+
+	if !addrExists && portExists {
+		result := make([]string, len(fallback))
+		for i, addr := range fallback {
+			add := strings.Split(addr, ":")
+			result[i] = add[0] + ":" + port
+		}
+		return result
+	}
+	return fallback
 }

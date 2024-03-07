@@ -18,8 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	pbgroup "github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -27,7 +25,8 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
-
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -37,12 +36,14 @@ func NewGroupNotificationSender(
 	db controller.GroupDatabase,
 	msgRpcClient *rpcclient.MessageRpcClient,
 	userRpcClient *rpcclient.UserRpcClient,
+	config *config.GlobalConfig,
 	fn func(ctx context.Context, userIDs []string) ([]CommonUser, error),
 ) *GroupNotificationSender {
 	return &GroupNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient), rpcclient.WithUserRpcClient(userRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(config, rpcclient.WithRpcClient(msgRpcClient), rpcclient.WithUserRpcClient(userRpcClient)),
 		getUsersInfo:       fn,
 		db:                 db,
+		config:             config,
 	}
 }
 
@@ -50,6 +51,7 @@ type GroupNotificationSender struct {
 	*rpcclient.NotificationSender
 	getUsersInfo func(ctx context.Context, userIDs []string) ([]CommonUser, error)
 	db           controller.GroupDatabase
+	config       *config.GlobalConfig
 }
 
 func (g *GroupNotificationSender) PopulateGroupMember(ctx context.Context, members ...*relation.GroupMemberModel) error {
@@ -192,6 +194,7 @@ func (g *GroupNotificationSender) getGroupOwnerAndAdminUserID(ctx context.Contex
 	return utils.Slice(members, fn), nil
 }
 
+//nolint:unused
 func (g *GroupNotificationSender) groupDB2PB(group *relation.GroupModel, ownerUserID string, memberCount uint32) *sdkws.GroupInfo {
 	return &sdkws.GroupInfo{
 		GroupID:                group.GroupID,
@@ -231,7 +234,7 @@ func (g *GroupNotificationSender) groupMemberDB2PB(member *relation.GroupMemberM
 	}
 }
 
-func (g *GroupNotificationSender) getUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
+/* func (g *GroupNotificationSender) getUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
 	users, err := g.getUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
@@ -241,24 +244,15 @@ func (g *GroupNotificationSender) getUsersInfoMap(ctx context.Context, userIDs [
 		result[user.GetUserID()] = user.(*sdkws.UserInfo)
 	}
 	return result, nil
-}
+} */
 
 func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws.GroupMemberFullInfo, groupID string) (err error) {
-	defer log.ZDebug(ctx, "return")
-	defer func() {
-		if err != nil {
-			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
-		}
-	}()
 	if opUser == nil {
 		return errs.ErrInternalServer.Wrap("**sdkws.GroupMemberFullInfo is nil")
 	}
-	if *opUser != nil {
-		return nil
-	}
 	userID := mcontext.GetOpUserID(ctx)
 	if groupID != "" {
-		if authverify.IsManagerUserID(userID) {
+		if authverify.IsManagerUserID(userID, g.config) {
 			*opUser = &sdkws.GroupMemberFullInfo{
 				GroupID:        groupID,
 				UserID:         userID,
@@ -410,7 +404,7 @@ func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx conte
 		return err
 	}
 	tips := &sdkws.GroupApplicationAcceptedTips{Group: group, HandleMsg: req.HandledMsg}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return err
 	}
 	for _, userID := range append(userIDs, req.FromUserID) {
@@ -443,7 +437,7 @@ func (g *GroupNotificationSender) GroupApplicationRejectedNotification(ctx conte
 		return err
 	}
 	tips := &sdkws.GroupApplicationRejectedTips{Group: group, HandleMsg: req.HandledMsg}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return err
 	}
 	for _, userID := range append(userIDs, req.FromUserID) {
@@ -651,12 +645,6 @@ func (g *GroupNotificationSender) GroupCancelMutedNotification(ctx context.Conte
 }
 
 func (g *GroupNotificationSender) GroupMemberInfoSetNotification(ctx context.Context, groupID, groupMemberUserID string) (err error) {
-	defer log.ZDebug(ctx, "return")
-	defer func() {
-		if err != nil {
-			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
-		}
-	}()
 	group, err := g.getGroupInfo(ctx, groupID)
 	if err != nil {
 		return err
@@ -673,12 +661,6 @@ func (g *GroupNotificationSender) GroupMemberInfoSetNotification(ctx context.Con
 }
 
 func (g *GroupNotificationSender) GroupMemberSetToAdminNotification(ctx context.Context, groupID, groupMemberUserID string) (err error) {
-	defer log.ZDebug(ctx, "return")
-	defer func() {
-		if err != nil {
-			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
-		}
-	}()
 	group, err := g.getGroupInfo(ctx, groupID)
 	if err != nil {
 		return err

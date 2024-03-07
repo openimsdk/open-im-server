@@ -17,9 +17,9 @@
 # working directory by client9/misspell package.
 # Usage: `scripts/verify-spelling.sh`.
 
-set -o errexit
-set -o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 export OPENIM_ROOT

@@ -18,11 +18,8 @@ import (
 	"fmt"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/spf13/cobra"
-
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
+	"github.com/spf13/cobra"
 )
 
 type MsgTransferCmd struct {
@@ -31,39 +28,40 @@ type MsgTransferCmd struct {
 
 func NewMsgTransferCmd() *MsgTransferCmd {
 	ret := &MsgTransferCmd{NewRootCmd("msgTransfer")}
+	ret.addRunE()
 	ret.SetRootCmdPt(ret)
 	return ret
 }
 
 func (m *MsgTransferCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msgtransfer.StartTransfer(m.getPrometheusPortFlag(cmd))
+		return msgtransfer.StartTransfer(m.config, m.getPrometheusPortFlag(cmd))
 	}
 }
 
 func (m *MsgTransferCmd) Exec() error {
-	m.addRunE()
 	return m.Execute()
 }
 
 func (m *MsgTransferCmd) GetPortFromConfig(portType string) int {
-	fmt.Println("GetPortFromConfig:", portType)
 	if portType == constant.FlagPort {
 		return 0
 	} else if portType == constant.FlagPrometheusPort {
 		n := m.getTransferProgressFlagValue()
-		return config2.Config.Prometheus.MessageTransferPrometheusPort[n]
+		return m.config.Prometheus.MessageTransferPrometheusPort[n]
 	}
 	return 0
 }
+
 func (m *MsgTransferCmd) AddTransferProgressFlag() {
 	m.Command.Flags().IntP(constant.FlagTransferProgressIndex, "n", 0, "transfer progress index")
 }
+
 func (m *MsgTransferCmd) getTransferProgressFlagValue() int {
-	nindex, err := m.Command.Flags().GetInt(constant.FlagTransferProgressIndex)
+	nIndex, err := m.Command.Flags().GetInt(constant.FlagTransferProgressIndex)
 	if err != nil {
-		fmt.Println("get transfercmd error,make sure it is k8s env or not")
+		fmt.Println("get transfer cmd error,make sure it is k8s env or not")
 		return 0
 	}
-	return nindex
+	return nIndex
 }

@@ -3,6 +3,7 @@ go 1.19
 use (
 	.
 	./test/typecheck
+    ./tools/codescan
 	./tools/changelog
 	./tools/component
 	./tools/data-conversion

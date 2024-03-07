@@ -305,13 +305,14 @@ Feel free to explore the MinIO documentation for more advanced configurations an
 
 This section involves setting up MongoDB, including its port, address, and credentials.
 
+
 | Parameter      | Example Value  | Description             |
 | -------------- | -------------- | ----------------------- |
 | MONGO_PORT     | "27017"        | Port used by MongoDB.   |
 | MONGO_ADDRESS  | [Generated IP] | IP address for MongoDB. |
 | MONGO_USERNAME | [User Defined] | Admin Username for MongoDB.   |
 | MONGO_PASSWORD | [User Defined] | Admin Password for MongoDB.   |
-| MONGO_OPENIM_PASSWORD | [User Defined] | OpenIM Username for MongoDB.   |
+| MONGO_OPENIM_USERNAME | [User Defined] | OpenIM Username for MongoDB.   |
 | MONGO_OPENIM_PASSWORD | [User Defined] | OpenIM Password for MongoDB.   |
 
 ###  2.8. <a name='TencentCloudCOSConfiguration'></a>Tencent Cloud COS Configuration
@@ -448,7 +449,7 @@ This section involves configuring the log settings, including storage location, 
 
 | Parameter                 | Example Value            | Description                       |
 | ------------------------- | ------------------------ | --------------------------------- |
-| LOG_STORAGE_LOCATION      | "${OPENIM_ROOT}/logs/" | Location for storing logs         |
+| LOG_STORAGE_LOCATION      | "${OPENIM_ROOT}/_output/logs/" | Location for storing logs         |
 | LOG_ROTATION_TIME         | "24"                     | Log rotation time (in hours)      |
 | LOG_REMAIN_ROTATION_COUNT | "2"                      | Number of log rotations to retain |
 | LOG_REMAIN_LOG_LEVEL      | "6"                      | Log level to retain               |

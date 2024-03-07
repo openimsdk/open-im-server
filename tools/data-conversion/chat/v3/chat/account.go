@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// Account 账号密码表.
+// Account Account password table.
 type Account struct {
 	UserID         string    `gorm:"column:user_id;primary_key;type:char(64)"`
 	Password       string    `gorm:"column:password;type:varchar(32)"`

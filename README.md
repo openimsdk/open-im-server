@@ -17,13 +17,48 @@
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
 
-[**English**](./README.md) •
-[**简体中文**](./README-zh_CN.md) •
-[**Docs**](https://openim.io/en)
+
+<p align="center">
+  <a href="./README.md">Englist</a> · 
+  <a href="./README_zh_CN.md">中文</a> · 
+  <a href="./docs/readme/README_uk.md">Українська</a> · 
+  <a href="./docs/readme/README_cs.md">Česky</a> · 
+  <a href="./docs/readme/README_hu.md">Magyar</a> · 
+  <a href="./docs/readme/README_es.md">Español</a> · 
+  <a href="./docs/readme/README_fa.md">فارسی</a> · 
+  <a href="./docs/readme/README_fr.md">Français</a> · 
+  <a href="./docs/readme/README_de.md">Deutsch</a> · 
+  <a href="./docs/readme/README_pl.md">Polski</a> · 
+  <a href="./docs/readme/README_id.md">Indonesian</a> · 
+  <a href="./docs/readme/README_fi.md">Suomi</a> · 
+  <a href="./docs/readme/README_ml.md">മലയാളം</a> · 
+  <a href="./docs/readme/README_ja.md">日本語</a> · 
+  <a href="./docs/readme/README_nl.md">Nederlands</a> · 
+  <a href="./docs/readme/README_it.md">Italiano</a> · 
+  <a href="./docs/readme/README_ru.md">Русский</a> · 
+  <a href="./docs/readme/README_pt_BR.md">Português (Brasil)</a> · 
+  <a href="./docs/readme/README_eo.md">Esperanto</a> · 
+  <a href="./docs/readme/README_ko.md">한국어</a> · 
+  <a href="./docs/readme/README_ar.md">العربي</a> · 
+  <a href="./docs/readme/README_vi.md">Tiếng Việt</a> · 
+  <a href="./docs/readme/README_da.md">Dansk</a> · 
+  <a href="./docs/readme/README_el.md">Ελληνικά</a> · 
+  <a href="./docs/readme/README_tr.md">Türkçe</a>
+</p>
+
 
 </div>
 
 </p>
+
+## :busts_in_silhouette: Community
+
++ 💬 [Follow our Twitter account](https://twitter.com/founder_im63606)
++ 👫 [Join our Reddit](https://www.reddit.com/r/OpenIMessaging)
++ 🚀 [Join our Slack community](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
++ :eyes: [Join our wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
++ 📚 [OpenIM Community](https://github.com/OpenIMSDK/community)
++ 💕 [OpenIM Interest Group](https://github.com/Openim-sigs)
 
 ## Ⓜ️ About OpenIM
 
@@ -68,6 +103,13 @@ It is built using Golang and supports cross-platform deployment, ensuring a cons
 
 👉 **[Learn more](https://docs.openim.io/guides/introduction/product)**
 
+## :building_construction: Overall Architecture
+
+Delve into the heart of Open-IM-Server's functionality with our architecture diagram.
+
+![Overall Architecture](./docs/images/architecture-layers.png)
+
+
 ## :rocket: Quick Start
 
 We support many platforms. Here are the addresses for quick experience on the web side：
@@ -84,6 +126,8 @@ We support many platforms. Here are the addresses for quick experience on the we
 ## :hammer_and_wrench: To Start Developing OpenIM
 
 [![Open in Dev Container](https://img.shields.io/static/v1?label=Dev%20Container&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/github/openimsdk/open-im-server)
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/openimsdk/open-im-server)
 
 OpenIM Our goal is to build a top-level open source community. We have a set of standards, in the [Community repository](https://github.com/OpenIMSDK/community).
 
@@ -120,14 +164,6 @@ Before you start, please make sure your changes are in demand. The best for that
 - [OpenIM Versioning](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/version.md)
 - [Manage backend and monitor deployment](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
 - [Mac Developer Deployment Guide for OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
-
-
-## :busts_in_silhouette: Community
-
-+ 📚 [OpenIM Community](https://github.com/OpenIMSDK/community)
-+ 💕 [OpenIM Interest Group](https://github.com/Openim-sigs)
-+ 🚀 [Join our Slack community](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [Join our wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: Community Meetings
 

@@ -21,20 +21,11 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
-// Mock for initCfg for testing purpose
-func mockInitCfg() error {
-	config.Config.Mysql.Username = "root"
-	config.Config.Mysql.Password = "openIM123"
-	config.Config.Mysql.Address = []string{"127.0.0.1:13306"}
-	return nil
-}
-
 func TestRedis(t *testing.T) {
-	config.Config.Redis.Address = []string{
+	conf, err := initCfg()
+	conf.Redis.Address = []string{
 		"172.16.8.142:7000",
 		//"172.16.8.142:7000", "172.16.8.142:7001", "172.16.8.142:7002", "172.16.8.142:7003", "172.16.8.142:7004", "172.16.8.142:7005",
 	}
@@ -45,20 +36,20 @@ func TestRedis(t *testing.T) {
 			redisClient.Close()
 		}
 	}()
-	if len(config.Config.Redis.Address) > 1 {
+	if len(conf.Redis.Address) > 1 {
 		redisClient = redis.NewClusterClient(&redis.ClusterOptions{
-			Addrs:    config.Config.Redis.Address,
-			Username: config.Config.Redis.Username,
-			Password: config.Config.Redis.Password,
+			Addrs:    conf.Redis.Address,
+			Username: conf.Redis.Username,
+			Password: conf.Redis.Password,
 		})
 	} else {
 		redisClient = redis.NewClient(&redis.Options{
-			Addr:     config.Config.Redis.Address[0],
-			Username: config.Config.Redis.Username,
-			Password: config.Config.Redis.Password,
+			Addr:     conf.Redis.Address[0],
+			Username: conf.Redis.Username,
+			Password: conf.Redis.Password,
 		})
 	}
-	_, err := redisClient.Ping(context.Background()).Result()
+	_, err = redisClient.Ping(context.Background()).Result()
 	if err != nil {
 		t.Fatal(err)
 	}

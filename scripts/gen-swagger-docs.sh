@@ -15,9 +15,9 @@
 
 # Script to generate docs from the latest swagger spec.
 
-set -o errexit
-set -o nounset
-set -o pipefail
+
+
+
 
 # The root of the build/dist directory
 OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"

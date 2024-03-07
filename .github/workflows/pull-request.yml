@@ -33,7 +33,7 @@ jobs:
 
       - uses: actions/setup-node@v4
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
       - name: Run go modules tidy
         run: |
           sudo apt-get install jq
@@ -74,6 +74,17 @@ jobs:
           echo $latest_tag > pkg/common/config/version
         continue-on-error: true
 
+      - name: Gen CHANGELOG file
+        run: |
+          current_tag=$(git describe --tags --abbrev=0)
+          version=$(echo "$current_tag" | sed -E 's/^v?([0-9]+)\.([0-9]+)\..*$/\1.\2/')
+          echo "OpenIM Version: $version"
+          make tools.install.git-chglog
+          cd CHANGELOG
+          git-chglog --tag-filter-pattern "v${version}.*" -o CHANGELOG-${version}.md
+          cd ..
+        continue-on-error: true
+
       - name: Run unit test and get test coverage
         run: |
           make cover
@@ -87,7 +98,7 @@ jobs:
         continue-on-error: true
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           commit-message: "cicd: bump League Patch"

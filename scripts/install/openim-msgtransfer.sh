@@ -16,26 +16,25 @@
 # ./scripts/install/openim-msgtransfer.sh openim::msgtransfer::start
 
 # Common utilities, variables and checks for all build scripts.
-set -o errexit
-set +o nounset
-set -o pipefail
+
+
+
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
 
-openim::util::set_max_fd 200000
-
 SERVER_NAME="openim-msgtransfer"
 
 function openim::msgtransfer::start() {
+
+  rm -rf "$TMP_LOG_FILE"
+
   openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
   openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGTRANSFER_BINARY}"
-  
-  openim::util::stop_services_with_name ${OPENIM_MSGTRANSFER_BINARY}
-  
+
   # Message Transfer Prometheus port list
   MSG_TRANSFER_PROM_PORTS=(openim::util::list-to-string ${MSG_TRANSFER_PROM_PORT} )
-  
+
   openim::log::status "OpenIM Prometheus ports: ${MSG_TRANSFER_PROM_PORTS[*]}"
   
   openim::log::status "OpenIM Msggateway config path: ${OPENIM_MSGTRANSFER_CONFIG}"
@@ -43,32 +42,36 @@ function openim::msgtransfer::start() {
   openim::log::info "openim maggateway num: ${OPENIM_MSGGATEWAY_NUM}"
   
   if [ "${OPENIM_MSGGATEWAY_NUM}" -lt 1 ]; then
-    opeim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be greater than 0"
+    opeim::log::error "OPENIM_MSGGATEWAY_NUM must be greater than 0"
   fi
   
   if [ ${OPENIM_MSGGATEWAY_NUM} -ne $((${#MSG_TRANSFER_PROM_PORTS[@]} - 1)) ]; then
-    openim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be equal to the number of MSG_TRANSFER_PROM_PORTS"
+    openim::log::error "OPENIM_MSGGATEWAY_NUM must be equal to the number of MSG_TRANSFER_PROM_PORTS"
   fi
   
   for (( i=0; i<$OPENIM_MSGGATEWAY_NUM; i++ )) do
-    openim::log::info "prometheus port: ${MSG_TRANSFER_PROM_PORTS[$i]}"
-    PROMETHEUS_PORT_OPTION=""
-    if [[ -n "${OPENIM_PROMETHEUS_PORTS[$i]}" ]]; then
-      PROMETHEUS_PORT_OPTION="--prometheus_port ${OPENIM_PROMETHEUS_PORTS[$i]}"
-    fi
-    nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} -n ${i}>> ${LOG_FILE} 2>&1 &
+  openim::log::info "prometheus port: ${MSG_TRANSFER_PROM_PORTS[$i]}"
+  PROMETHEUS_PORT_OPTION=""
+  if [[ -n "${MSG_TRANSFER_PROM_PORTS[$i+1]}" ]]; then
+      PROMETHEUS_MSG_TRANSFER_PORT="${MSG_TRANSFER_PROM_PORTS[$i+1]%,}"
+      openim::util::stop_services_on_ports ${PROMETHEUS_MSG_TRANSFER_PORT}
+      PROMETHEUS_PORT_OPTION="--prometheus_port ${PROMETHEUS_MSG_TRANSFER_PORT}"
+  fi
+  cmd="${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} -n ${i}"
+  nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a  "$TMP_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) >/dev/null &
+  #nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} -n ${i} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
   done
-  
-  openim::util::check_process_names  "${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"
+  return 0
 }
 
 function openim::msgtransfer::check() {
   PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
-  
-  NUM_PROCESSES=$(echo "$PIDS" | wc -l)
-  
+  if [ -z "$PIDS" ]; then
+      NUM_PROCESSES=0
+  else
+      NUM_PROCESSES=$(echo "$PIDS" | wc -l)
+  fi
   if [ "$NUM_PROCESSES" -eq "$OPENIM_MSGGATEWAY_NUM" ]; then
-    openim::log::info "Found $OPENIM_MSGGATEWAY_NUM processes named $OPENIM_OUTPUT_HOSTBIN"
     for PID in $PIDS; do
       if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         ps -p $PID -o pid,cmd
@@ -79,9 +82,38 @@ function openim::msgtransfer::check() {
       fi
     done
   else
-    openim::log::error_exit "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
+    openim::log::error "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
+    return 1
   fi
+  return 0
 }
+
+function openim::msgtransfer::check_for_stop() {
+  PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer") || PIDS="0"
+  if [  "$PIDS" = "0" ]; then
+      return 0
+  fi
+
+  NUM_PROCESSES=$(echo "$PIDS" | wc -l | xargs)
+
+  if [ "$NUM_PROCESSES" -gt 0 ]; then
+    openim::log::error "Found $NUM_PROCESSES processes for $OPENIM_OUTPUT_HOSTBIN/openim-msgtransfer"
+    for PID in $PIDS; do
+      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        echo -e "\033[31m$(ps -p $PID -o pid,cmd)\033[0m"
+      elif [[ "$OSTYPE" == "darwin"* ]]; then
+        echo -e "\033[31m$(ps -p $PID -o pid,comm)\033[0m"
+      else
+        openim::log::error "Unsupported OS type: $OSTYPE"
+      fi
+    done
+    openim::log::error "Processes have not been stopped properly."
+  else
+    openim::log::success "All openim-msgtransfer processes have been stopped properly."
+  fi
+  return 0
+}
+
 
 ###################################### Linux Systemd ######################################
 SYSTEM_FILE_PATH="/etc/systemd/system/${SERVER_NAME}.service"
@@ -133,7 +165,7 @@ function openim::msgtransfer::uninstall() {
   openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
   openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
   openim::common::sudo "rm -f /etc/systemd/system/${SERVER_NAME}.service"
-  set -o errexit
+
   openim::log::info "uninstall ${SERVER_NAME} successfully"
 }
 

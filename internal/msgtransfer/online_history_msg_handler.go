@@ -19,26 +19,23 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-
-	"github.com/OpenIMSDK/tools/errs"
-
 	"github.com/IBM/sarama"
-	"github.com/go-redis/redis"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
-
+	"github.com/go-redis/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -73,10 +70,10 @@ type OnlineHistoryRedisConsumerHandler struct {
 	chArrays             [ChannelNum]chan Cmd2Value
 	msgDistributionCh    chan Cmd2Value
 
-	singleMsgSuccessCount      uint64
-	singleMsgFailedCount       uint64
-	singleMsgSuccessCountMutex sync.Mutex
-	singleMsgFailedCountMutex  sync.Mutex
+	// singleMsgSuccessCount      uint64
+	// singleMsgFailedCount       uint64
+	// singleMsgSuccessCountMutex sync.Mutex
+	// singleMsgFailedCountMutex  sync.Mutex
 
 	msgDatabase           controller.CommonMsgDatabase
 	conversationRpcClient *rpcclient.ConversationRpcClient
@@ -84,10 +81,11 @@ type OnlineHistoryRedisConsumerHandler struct {
 }
 
 func NewOnlineHistoryRedisConsumerHandler(
+	config *config.GlobalConfig,
 	database controller.CommonMsgDatabase,
 	conversationRpcClient *rpcclient.ConversationRpcClient,
 	groupRpcClient *rpcclient.GroupRpcClient,
-) *OnlineHistoryRedisConsumerHandler {
+) (*OnlineHistoryRedisConsumerHandler, error) {
 	var och OnlineHistoryRedisConsumerHandler
 	och.msgDatabase = database
 	och.msgDistributionCh = make(chan Cmd2Value) // no buffer channel
@@ -98,79 +96,87 @@ func NewOnlineHistoryRedisConsumerHandler(
 	}
 	och.conversationRpcClient = conversationRpcClient
 	och.groupRpcClient = groupRpcClient
-	och.historyConsumerGroup = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
+	var err error
+
+	var tlsConfig *kafka.TLSConfig
+	if config.Kafka.TLS != nil {
+		tlsConfig = &kafka.TLSConfig{
+			CACrt:              config.Kafka.TLS.CACrt,
+			ClientCrt:          config.Kafka.TLS.ClientCrt,
+			ClientKey:          config.Kafka.TLS.ClientKey,
+			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+			InsecureSkipVerify: false,
+		}
+	}
+
+	och.historyConsumerGroup, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
-	}, []string{config.Config.Kafka.LatestMsgToRedis.Topic},
-		config.Config.Kafka.Addr, config.Config.Kafka.ConsumerGroupID.MsgToRedis)
+		OffsetsInitial: sarama.OffsetNewest,
+		IsReturnErr:    false,
+		UserName:       config.Kafka.Username,
+		Password:       config.Kafka.Password,
+	}, []string{config.Kafka.LatestMsgToRedis.Topic},
+		config.Kafka.Addr,
+		config.Kafka.ConsumerGroupID.MsgToRedis,
+		tlsConfig,
+	)
 	// statistics.NewStatistics(&och.singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d
 	// second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
-	return &och
+	return &och, err
 }
 
 func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
-	for {
-		select {
-		case cmd := <-och.chArrays[channelID]:
-			switch cmd.Cmd {
-			case SourceMessages:
-				msgChannelValue := cmd.Value.(MsgChannelValue)
-				ctxMsgList := msgChannelValue.ctxMsgList
-				ctx := msgChannelValue.ctx
-				log.ZDebug(
-					ctx,
-					"msg arrived channel",
-					"channel id",
-					channelID,
-					"msgList length",
-					len(ctxMsgList),
-					"uniqueKey",
-					msgChannelValue.uniqueKey,
-				)
-				storageMsgList, notStorageMsgList, storageNotificationList, notStorageNotificationList, modifyMsgList := och.getPushStorageMsgList(
-					ctxMsgList,
-				)
-				log.ZDebug(
-					ctx,
-					"msg lens",
-					"storageMsgList",
-					len(storageMsgList),
-					"notStorageMsgList",
-					len(notStorageMsgList),
-					"storageNotificationList",
-					len(storageNotificationList),
-					"notStorageNotificationList",
-					len(notStorageNotificationList),
-					"modifyMsgList",
-					len(modifyMsgList),
-				)
-				conversationIDMsg := msgprocessor.GetChatConversationIDByMsg(ctxMsgList[0].message)
-				conversationIDNotification := msgprocessor.GetNotificationConversationIDByMsg(ctxMsgList[0].message)
-				och.handleMsg(ctx, msgChannelValue.uniqueKey, conversationIDMsg, storageMsgList, notStorageMsgList)
-				och.handleNotification(
-					ctx,
-					msgChannelValue.uniqueKey,
-					conversationIDNotification,
-					storageNotificationList,
-					notStorageNotificationList,
-				)
-				if err := och.msgDatabase.MsgToModifyMQ(ctx, msgChannelValue.uniqueKey, conversationIDNotification, modifyMsgList); err != nil {
-					log.ZError(
-						ctx,
-						"msg to modify mq error",
-						err,
-						"uniqueKey",
-						msgChannelValue.uniqueKey,
-						"modifyMsgList",
-						modifyMsgList,
-					)
-				}
+	for cmd := range och.chArrays[channelID] {
+		switch cmd.Cmd {
+		case SourceMessages:
+			msgChannelValue := cmd.Value.(MsgChannelValue)
+			ctxMsgList := msgChannelValue.ctxMsgList
+			ctx := msgChannelValue.ctx
+			log.ZDebug(
+				ctx,
+				"msg arrived channel",
+				"channel id",
+				channelID,
+				"msgList length",
+				len(ctxMsgList),
+				"uniqueKey",
+				msgChannelValue.uniqueKey,
+			)
+			storageMsgList, notStorageMsgList, storageNotificationList, notStorageNotificationList, modifyMsgList := och.getPushStorageMsgList(
+				ctxMsgList,
+			)
+			log.ZDebug(
+				ctx,
+				"msg lens",
+				"storageMsgList",
+				len(storageMsgList),
+				"notStorageMsgList",
+				len(notStorageMsgList),
+				"storageNotificationList",
+				len(storageNotificationList),
+				"notStorageNotificationList",
+				len(notStorageNotificationList),
+				"modifyMsgList",
+				len(modifyMsgList),
+			)
+			conversationIDMsg := msgprocessor.GetChatConversationIDByMsg(ctxMsgList[0].message)
+			conversationIDNotification := msgprocessor.GetNotificationConversationIDByMsg(ctxMsgList[0].message)
+			och.handleMsg(ctx, msgChannelValue.uniqueKey, conversationIDMsg, storageMsgList, notStorageMsgList)
+			och.handleNotification(
+				ctx,
+				msgChannelValue.uniqueKey,
+				conversationIDNotification,
+				storageNotificationList,
+				notStorageNotificationList,
+			)
+			if err := och.msgDatabase.MsgToModifyMQ(ctx, msgChannelValue.uniqueKey, conversationIDNotification, modifyMsgList); err != nil {
+				log.ZError(ctx, "msg to modify mq error", err, "uniqueKey", msgChannelValue.uniqueKey, "modifyMsgList", modifyMsgList)
 			}
 		}
 	}
 }
 
-// 获取消息/通知 存储的消息列表， 不存储并且推送的消息列表，.
+// Get messages/notifications stored message list, not stored and pushed message list.
 func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 	totalMsgs []*ContextMsg,
 ) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*sdkws.MsgData) {
@@ -191,7 +197,7 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 			// clone msg from notificationMsg
 			if options.IsSendMsg() {
 				msg := proto.Clone(v.message).(*sdkws.MsgData)
-				// 消息
+				// message
 				if v.message.Options != nil {
 					msg.Options = msgprocessor.NewMsgOptions()
 				}
@@ -266,7 +272,8 @@ func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(
 	msgs []*sdkws.MsgData,
 ) {
 	for _, v := range msgs {
-		och.msgDatabase.MsgToPushMQ(ctx, key, conversationID, v)
+		och.msgDatabase.MsgToPushMQ(ctx, key, conversationID, v) // nolint: errcheck
+
 	}
 }
 
@@ -430,16 +437,30 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(
 	log.ZDebug(context.Background(), "online new session msg come", "highWaterMarkOffset",
 		claim.HighWaterMarkOffset(), "topic", claim.Topic(), "partition", claim.Partition())
 
-	split := 1000
-	rwLock := new(sync.RWMutex)
-	messages := make([]*sarama.ConsumerMessage, 0, 1000)
-	ticker := time.NewTicker(time.Millisecond * 100)
+	var (
+		split    = 1000
+		rwLock   = new(sync.RWMutex)
+		messages = make([]*sarama.ConsumerMessage, 0, 1000)
+		ticker   = time.NewTicker(time.Millisecond * 100)
 
+		wg      = sync.WaitGroup{}
+		running = new(atomic.Bool)
+	)
+	running.Store(true)
+
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
+
 		for {
 			select {
 			case <-ticker.C:
+				// if the buffer is empty and running is false, return loop.
 				if len(messages) == 0 {
+					if !running.Load() {
+						return
+					}
+
 					continue
 				}
 
@@ -472,17 +493,35 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(
 		}
 	}()
 
-	for msg := range claim.Messages() {
-		if len(msg.Value) == 0 {
-			continue
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		for running.Load() {
+			select {
+			case msg, ok := <-claim.Messages():
+				if !ok {
+					running.Store(false)
+					return
+				}
+
+				if len(msg.Value) == 0 {
+					continue
+				}
+
+				rwLock.Lock()
+				messages = append(messages, msg)
+				rwLock.Unlock()
+
+				sess.MarkMessage(msg, "")
+
+			case <-sess.Context().Done():
+				running.Store(false)
+				return
+			}
 		}
+	}()
 
-		rwLock.Lock()
-		messages = append(messages, msg)
-		rwLock.Unlock()
-
-		sess.MarkMessage(msg, "")
-	}
-
+	wg.Wait()
 	return nil
 }

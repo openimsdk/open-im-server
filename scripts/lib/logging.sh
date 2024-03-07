@@ -25,11 +25,15 @@ if [ -z "${OPENIM_OUTPUT+x}" ]; then
 fi
 
 # Set the log file path
-LOG_FILE="${OPENIM_OUTPUT}/logs/openim_$(date '+%Y%m%d').log"
+LOG_FILE="${OPENIM_OUTPUT}/logs/openim-$(date '+%Y%m%d').log"
+STDERR_LOG_FILE="${OPENIM_OUTPUT}/logs/openim-error-$(date '+%Y%m%d').log"
+TMP_LOG_FILE="${OPENIM_OUTPUT}/logs/openim-tmp-$(date '+%Y%m%d').log"
 
 if [[ ! -d "${OPENIM_OUTPUT}/logs" ]]; then
   mkdir -p "${OPENIM_OUTPUT}/logs"
   touch "$LOG_FILE"
+  touch "$STDERR_LOG_FILE"
+  touch "$TMP_LOG_FILE"
 fi
 
 # Define the logging function
@@ -71,12 +75,13 @@ openim::log::errexit() {
 
 openim::log::install_errexit() {
   # trap ERR to provide an error handler whenever a command exits nonzero  this
-  # is a more verbose version of set -o errexit
-  trap 'openim::log::errexit' ERR
+  # is a more verbose version of
+ # trap 'openim::log::errexit' ERR
   
   # setting errtrace allows our ERR trap handler to be propagated to functions,
   # expansions and subshells
-  set -o errtrace
+  #set -o errtrace
+  return 0
 }
 
 # Print out the stack trace
@@ -127,15 +132,23 @@ openim::log::error_exit() {
   exit "${code}"
 }
 
-# Log an error but keep going.  Don't dump the stack or exit.
+# Log an error but keep going. Don't dump the stack or exit.
 openim::log::error() {
+  # Define red color
+  red='\033[0;31m'
+  # No color (reset)
+  nc='\033[0m' # No Color
+
   timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
-  echo_log "!!! ${timestamp} ${1-}" >&2
+  # Apply red color for error message
+  echo_log "${red}!!! ${timestamp} ${1-}${nc}" >&2
   shift
   for message; do
-    echo_log "    ${message}" >&2
+    # Apply red color for subsequent lines of the error message
+    echo_log "${red}    ${message}${nc}" >&2
   done
 }
+
 
 # Print an usage message to stderr.  The arguments are printed directly.
 openim::log::usage() {
@@ -193,21 +206,26 @@ openim::log::status() {
   fi
   
   timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
-  echo_log "+++ ${timestamp} ${1}"
+  echo_log "${timestamp} ${1}"
   shift
   for message; do
     echo_log "    ${message}"
   done
 }
 
+
 openim::log::success() {
   local V="${V:-0}"
   if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
     return
   fi
-  timestamp=$(date +"%m%d %H:%M:%S")
-  echo_log -e "${COLOR_GREEN}[success ${timestamp}] ${COLOR_SUFFIX}==> " "$@"
+  local timestamp=$(date +"%m%d %H:%M:%S")
+  local reset_color='\033[0m'
+  echo_log -e "${COLOR_GREEN}[success ${timestamp}]${COLOR_SUFFIX}==> ${COLOR_GREEN}$@${reset_color}"
 }
+
+
+
 
 function openim::log::test_log() {
   echo_log "test log"
@@ -220,3 +238,8 @@ function openim::log::test_log() {
 }
 
 # openim::log::test_log
+
+function openim::log::print_blue() {
+    echo -e "\033[0;36m$1\033[0m"
+}
+

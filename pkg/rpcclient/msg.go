@@ -17,9 +17,9 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
-
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
+	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
@@ -27,52 +27,52 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	// "google.golang.org/protobuf/proto".
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 )
 
-func newContentTypeConf() map[int32]config.NotificationConf {
+func newContentTypeConf(conf *config.GlobalConfig) map[int32]config.NotificationConf {
 	return map[int32]config.NotificationConf{
 		// group
-		constant.GroupCreatedNotification:                 config.Config.Notification.GroupCreated,
-		constant.GroupInfoSetNotification:                 config.Config.Notification.GroupInfoSet,
-		constant.JoinGroupApplicationNotification:         config.Config.Notification.JoinGroupApplication,
-		constant.MemberQuitNotification:                   config.Config.Notification.MemberQuit,
-		constant.GroupApplicationAcceptedNotification:     config.Config.Notification.GroupApplicationAccepted,
-		constant.GroupApplicationRejectedNotification:     config.Config.Notification.GroupApplicationRejected,
-		constant.GroupOwnerTransferredNotification:        config.Config.Notification.GroupOwnerTransferred,
-		constant.MemberKickedNotification:                 config.Config.Notification.MemberKicked,
-		constant.MemberInvitedNotification:                config.Config.Notification.MemberInvited,
-		constant.MemberEnterNotification:                  config.Config.Notification.MemberEnter,
-		constant.GroupDismissedNotification:               config.Config.Notification.GroupDismissed,
-		constant.GroupMutedNotification:                   config.Config.Notification.GroupMuted,
-		constant.GroupCancelMutedNotification:             config.Config.Notification.GroupCancelMuted,
-		constant.GroupMemberMutedNotification:             config.Config.Notification.GroupMemberMuted,
-		constant.GroupMemberCancelMutedNotification:       config.Config.Notification.GroupMemberCancelMuted,
-		constant.GroupMemberInfoSetNotification:           config.Config.Notification.GroupMemberInfoSet,
-		constant.GroupMemberSetToAdminNotification:        config.Config.Notification.GroupMemberSetToAdmin,
-		constant.GroupMemberSetToOrdinaryUserNotification: config.Config.Notification.GroupMemberSetToOrdinary,
-		constant.GroupInfoSetAnnouncementNotification:     config.Config.Notification.GroupInfoSetAnnouncement,
-		constant.GroupInfoSetNameNotification:             config.Config.Notification.GroupInfoSetName,
+		constant.GroupCreatedNotification:                 conf.Notification.GroupCreated,
+		constant.GroupInfoSetNotification:                 conf.Notification.GroupInfoSet,
+		constant.JoinGroupApplicationNotification:         conf.Notification.JoinGroupApplication,
+		constant.MemberQuitNotification:                   conf.Notification.MemberQuit,
+		constant.GroupApplicationAcceptedNotification:     conf.Notification.GroupApplicationAccepted,
+		constant.GroupApplicationRejectedNotification:     conf.Notification.GroupApplicationRejected,
+		constant.GroupOwnerTransferredNotification:        conf.Notification.GroupOwnerTransferred,
+		constant.MemberKickedNotification:                 conf.Notification.MemberKicked,
+		constant.MemberInvitedNotification:                conf.Notification.MemberInvited,
+		constant.MemberEnterNotification:                  conf.Notification.MemberEnter,
+		constant.GroupDismissedNotification:               conf.Notification.GroupDismissed,
+		constant.GroupMutedNotification:                   conf.Notification.GroupMuted,
+		constant.GroupCancelMutedNotification:             conf.Notification.GroupCancelMuted,
+		constant.GroupMemberMutedNotification:             conf.Notification.GroupMemberMuted,
+		constant.GroupMemberCancelMutedNotification:       conf.Notification.GroupMemberCancelMuted,
+		constant.GroupMemberInfoSetNotification:           conf.Notification.GroupMemberInfoSet,
+		constant.GroupMemberSetToAdminNotification:        conf.Notification.GroupMemberSetToAdmin,
+		constant.GroupMemberSetToOrdinaryUserNotification: conf.Notification.GroupMemberSetToOrdinary,
+		constant.GroupInfoSetAnnouncementNotification:     conf.Notification.GroupInfoSetAnnouncement,
+		constant.GroupInfoSetNameNotification:             conf.Notification.GroupInfoSetName,
 		// user
-		constant.UserInfoUpdatedNotification:  config.Config.Notification.UserInfoUpdated,
-		constant.UserStatusChangeNotification: config.Config.Notification.UserStatusChanged,
+		constant.UserInfoUpdatedNotification:  conf.Notification.UserInfoUpdated,
+		constant.UserStatusChangeNotification: conf.Notification.UserStatusChanged,
 		// friend
-		constant.FriendApplicationNotification:         config.Config.Notification.FriendApplicationAdded,
-		constant.FriendApplicationApprovedNotification: config.Config.Notification.FriendApplicationApproved,
-		constant.FriendApplicationRejectedNotification: config.Config.Notification.FriendApplicationRejected,
-		constant.FriendAddedNotification:               config.Config.Notification.FriendAdded,
-		constant.FriendDeletedNotification:             config.Config.Notification.FriendDeleted,
-		constant.FriendRemarkSetNotification:           config.Config.Notification.FriendRemarkSet,
-		constant.BlackAddedNotification:                config.Config.Notification.BlackAdded,
-		constant.BlackDeletedNotification:              config.Config.Notification.BlackDeleted,
-		constant.FriendInfoUpdatedNotification:         config.Config.Notification.FriendInfoUpdated,
-		constant.FriendsInfoUpdateNotification:         config.Config.Notification.FriendInfoUpdated, //use the same FriendInfoUpdated
+		constant.FriendApplicationNotification:         conf.Notification.FriendApplicationAdded,
+		constant.FriendApplicationApprovedNotification: conf.Notification.FriendApplicationApproved,
+		constant.FriendApplicationRejectedNotification: conf.Notification.FriendApplicationRejected,
+		constant.FriendAddedNotification:               conf.Notification.FriendAdded,
+		constant.FriendDeletedNotification:             conf.Notification.FriendDeleted,
+		constant.FriendRemarkSetNotification:           conf.Notification.FriendRemarkSet,
+		constant.BlackAddedNotification:                conf.Notification.BlackAdded,
+		constant.BlackDeletedNotification:              conf.Notification.BlackDeleted,
+		constant.FriendInfoUpdatedNotification:         conf.Notification.FriendInfoUpdated,
+		constant.FriendsInfoUpdateNotification:         conf.Notification.FriendInfoUpdated, //use the same FriendInfoUpdated
 		// conversation
-		constant.ConversationChangeNotification:      config.Config.Notification.ConversationChanged,
-		constant.ConversationUnreadNotification:      config.Config.Notification.ConversationChanged,
-		constant.ConversationPrivateChatNotification: config.Config.Notification.ConversationSetPrivate,
+		constant.ConversationChangeNotification:      conf.Notification.ConversationChanged,
+		constant.ConversationUnreadNotification:      conf.Notification.ConversationChanged,
+		constant.ConversationPrivateChatNotification: conf.Notification.ConversationSetPrivate,
 		// msg
 		constant.MsgRevokeNotification:  {IsSendMsg: false, ReliabilityLevel: constant.ReliableNotificationNoMsg},
 		constant.HasReadReceipt:         {IsSendMsg: false, ReliabilityLevel: constant.ReliableNotificationNoMsg},
@@ -130,31 +130,42 @@ type Message struct {
 	conn   grpc.ClientConnInterface
 	Client msg.MsgClient
 	discov discoveryregistry.SvcDiscoveryRegistry
+	Config *config.GlobalConfig
 }
 
-func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Message {
+	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	client := msg.NewMsgClient(conn)
-	return &Message{discov: discov, conn: conn, Client: client}
+	return &Message{discov: discov, conn: conn, Client: client, Config: config}
 }
 
 type MessageRpcClient Message
 
-func NewMessageRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) MessageRpcClient {
-	return MessageRpcClient(*NewMessage(discov))
+func NewMessageRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) MessageRpcClient {
+	return MessageRpcClient(*NewMessage(discov, config))
 }
 
+// SendMsg sends a message through the gRPC client and returns the response.
+// It wraps any encountered error for better error handling and context understanding.
 func (m *MessageRpcClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
 	resp, err := m.Client.SendMsg(ctx, req)
-	return resp, err
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
+// GetMaxSeq retrieves the maximum sequence number from the gRPC client.
+// Errors during the gRPC call are wrapped to provide additional context.
 func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
 	resp, err := m.Client.GetMaxSeq(ctx, req)
-	return resp, err
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 func (m *MessageRpcClient) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
@@ -181,9 +192,15 @@ func (m *MessageRpcClient) GetMsgByConversationIDs(ctx context.Context, docIDs [
 	return resp.MsgDatas, err
 }
 
+// PullMessageBySeqList retrieves messages by their sequence numbers using the gRPC client.
+// It directly forwards the request to the gRPC client and returns the response along with any error encountered.
 func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
 	resp, err := m.Client.PullMessageBySeqs(ctx, req)
-	return resp, err
+	if err != nil {
+		// Wrap the error to provide more context if the gRPC call fails.
+		return nil, err
+	}
+	return resp, nil
 }
 
 func (m *MessageRpcClient) GetConversationMaxSeq(ctx context.Context, conversationID string) (int64, error) {
@@ -221,8 +238,8 @@ func WithUserRpcClient(userRpcClient *UserRpcClient) NotificationSenderOptions {
 	}
 }
 
-func NewNotificationSender(opts ...NotificationSenderOptions) *NotificationSender {
-	notificationSender := &NotificationSender{contentTypeConf: newContentTypeConf(), sessionTypeConf: newSessionTypeConf()}
+func NewNotificationSender(config *config.GlobalConfig, opts ...NotificationSenderOptions) *NotificationSender {
+	notificationSender := &NotificationSender{contentTypeConf: newContentTypeConf(config), sessionTypeConf: newSessionTypeConf()}
 	for _, opt := range opts {
 		opt(notificationSender)
 	}
@@ -245,8 +262,8 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
-		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", m)
-		return err
+		errInfo := fmt.Sprintf("MsgClient Notification json.Marshal failed, sendID:%s, recvID:%s, contentType:%d, msg:%s", sendID, recvID, contentType, m)
+		return errs.Wrap(err, errInfo)
 	}
 	notificationOpt := &notificationOpt{}
 	for _, opt := range opts {
@@ -258,7 +275,8 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
 		userInfo, err = s.getUserInfo(ctx, sendID)
 		if err != nil {
-			log.ZWarn(ctx, "getUserInfo failed", err, "sendID", sendID)
+			errInfo := fmt.Sprintf("getUserInfo failed, sendID:%s", sendID)
+			return errs.Wrap(err, errInfo)
 		} else {
 			msg.SenderNickname = userInfo.Nickname
 			msg.SenderFaceURL = userInfo.FaceURL
@@ -290,10 +308,9 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
 	_, err = s.sendMsg(ctx, &req)
-	if err == nil {
-		log.ZDebug(ctx, "MsgClient Notification SendMsg success", "req", &req)
-	} else {
-		log.ZError(ctx, "MsgClient Notification SendMsg failed", err, "req", &req)
+	if err != nil {
+		errInfo := fmt.Sprintf("MsgClient Notification SendMsg failed, req:%s", &req)
+		return errs.Wrap(err, errInfo)
 	}
 	return err
 }

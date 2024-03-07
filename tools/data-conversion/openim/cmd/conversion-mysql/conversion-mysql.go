@@ -27,21 +27,37 @@ import (
 )
 
 func main() {
+
 	var (
-		usernameV2 = "root"            // v2版本mysql用户名
-		passwordV2 = "openIM"          // v2版本mysql密码
-		addrV2     = "127.0.0.1:13306" // v2版本mysql地址
-		databaseV2 = "openIM_v2"       // v2版本mysql数据库名字
+		// MySQL username for version 2
+		usernameV2 = "root"
+
+		// MySQL password for version 2
+		passwordV2 = "openIM"
+
+		// MySQL address for version 2
+		addrV2 = "127.0.0.1:13306"
+
+		// MySQL database name for version 2
+		databaseV2 = "openIM_v2"
 	)
 
 	var (
-		usernameV3 = "root"            // v3版本mysql用户名
-		passwordV3 = "openIM123"       // v3版本mysql密码
-		addrV3     = "127.0.0.1:13306" // v3版本mysql地址
-		databaseV3 = "openim_v3"       // v3版本mysql数据库名字
+		// MySQL username for version 3
+		usernameV3 = "root"
+
+		// MySQL password for version 3
+		passwordV3 = "openIM123"
+
+		// MySQL address for version 3
+		addrV3 = "127.0.0.1:13306"
+
+		// MySQL database name for version 3
+		databaseV3 = "openim_v3"
 	)
 
-	var concurrency = 1 // 并发数量
+	// The number of concurrent processes
+	var concurrency = 1
 
 	log.SetFlags(log.LstdFlags | log.Llongfile)
 	dsnV2 := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", usernameV2, passwordV2, addrV2, databaseV2)

@@ -153,6 +153,13 @@ object:
     accessKeySecret: ${KODO_ACCESS_KEY_SECRET}
     sessionToken: ${KODO_SESSION_TOKEN}
     publicRead: ${KODO_PUBLIC_READ}
+  aws:
+    endpoint: "${AWS_ENDPOINT}" # This might not be necessary unless you're using a custom endpoint
+    region: "${AWS_REGION}"
+    bucket: "${AWS_BUCKET}"
+    accessKeyID: ${AWS_ACCESS_KEY_ID}
+    accessKeySecret: ${AWS_SECRET_ACCESS_KEY}
+    publicRead: ${AWS_PUBLIC_READ}
 
 ###################### RPC Port Configuration ######################
 # RPC service ports

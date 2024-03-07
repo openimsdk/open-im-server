@@ -26,8 +26,6 @@ import (
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 var ExcludeContentType = []int{constant.HasReadReceipt}
@@ -52,10 +50,10 @@ type MessageRevoked struct {
 func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) error {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
-		if len(config.Config.Manager.UserID) > 0 && utils.IsContain(data.MsgData.SendID, config.Config.Manager.UserID) {
+		if len(m.config.Manager.UserID) > 0 && utils.IsContain(data.MsgData.SendID, m.config.Manager.UserID) {
 			return nil
 		}
-		if utils.IsContain(data.MsgData.SendID, config.Config.IMAdmin.UserID) {
+		if utils.IsContain(data.MsgData.SendID, m.config.IMAdmin.UserID) {
 			return nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd &&
@@ -92,10 +90,10 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if groupInfo.GroupType == constant.SuperGroup {
 			return nil
 		}
-		if len(config.Config.Manager.UserID) > 0 && utils.IsContain(data.MsgData.SendID, config.Config.Manager.UserID) {
+		if len(m.config.Manager.UserID) > 0 && utils.IsContain(data.MsgData.SendID, m.config.Manager.UserID) {
 			return nil
 		}
-		if utils.IsContain(data.MsgData.SendID, config.Config.IMAdmin.UserID) {
+		if utils.IsContain(data.MsgData.SendID, m.config.IMAdmin.UserID) {
 			return nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd &&

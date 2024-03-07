@@ -30,9 +30,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 )
 
@@ -52,15 +51,19 @@ const (
 
 const successCode = http.StatusOK
 
-const (
-	videoSnapshotImagePng = "png"
-	videoSnapshotImageJpg = "jpg"
-)
+type Config struct {
+	Endpoint        string
+	Bucket          string
+	BucketURL       string
+	AccessKeyID     string
+	AccessKeySecret string
+	SessionToken    string
+	PublicRead      bool
+}
 
-func NewOSS() (s3.Interface, error) {
-	conf := config.Config.Object.Oss
+func NewOSS(conf Config) (s3.Interface, error) {
 	if conf.BucketURL == "" {
-		return nil, errors.New("bucket url is empty")
+		return nil, errs.Wrap(errors.New("bucket url is empty"))
 	}
 	client, err := oss.New(conf.Endpoint, conf.AccessKeyID, conf.AccessKeySecret)
 	if err != nil {
@@ -68,7 +71,7 @@ func NewOSS() (s3.Interface, error) {
 	}
 	bucket, err := client.Bucket(conf.Bucket)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "ali-oss bucket error")
 	}
 	if conf.BucketURL[len(conf.BucketURL)-1] != '/' {
 		conf.BucketURL += "/"
@@ -78,6 +81,7 @@ func NewOSS() (s3.Interface, error) {
 		bucket:      bucket,
 		credentials: client.Config.GetCredentials(),
 		um:          *(*urlMaker)(reflect.ValueOf(bucket.Client.Conn).Elem().FieldByName("url").UnsafePointer()),
+		publicRead:  conf.PublicRead,
 	}, nil
 }
 
@@ -86,6 +90,7 @@ type OSS struct {
 	bucket      *oss.Bucket
 	credentials oss.Credentials
 	um          urlMaker
+	publicRead  bool
 }
 
 func (o *OSS) Engine() string {
@@ -138,10 +143,10 @@ func (o *OSS) CompleteMultipartUpload(ctx context.Context, uploadID string, name
 
 func (o *OSS) PartSize(ctx context.Context, size int64) (int64, error) {
 	if size <= 0 {
-		return 0, errors.New("size must be greater than 0")
+		return 0, errs.Wrap(errors.New("size must be greater than 0"))
 	}
 	if size > maxPartSize*maxNumSize {
-		return 0, fmt.Errorf("OSS size must be less than the maximum allowed limit")
+		return 0, errs.Wrap(errors.New("size must be less than the maximum allowed limit"))
 	}
 	if size <= minPartSize*maxNumSize {
 		return minPartSize, nil
@@ -196,25 +201,25 @@ func (o *OSS) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, erro
 	}
 	res := &s3.ObjectInfo{Key: name}
 	if res.ETag = strings.ToLower(strings.ReplaceAll(header.Get("ETag"), `"`, ``)); res.ETag == "" {
-		return nil, errors.New("StatObject etag not found")
+		return nil, errs.Wrap(errors.New("StatObject etag not found"))
 	}
 	if contentLengthStr := header.Get("Content-Length"); contentLengthStr == "" {
 		return nil, errors.New("StatObject content-length not found")
 	} else {
 		res.Size, err = strconv.ParseInt(contentLengthStr, 10, 64)
 		if err != nil {
-			return nil, fmt.Errorf("StatObject content-length parse error: %w", err)
+			return nil, errs.Wrap(err, "StatObject content-length parse error")
 		}
 		if res.Size < 0 {
-			return nil, errors.New("StatObject content-length must be greater than 0")
+			return nil, errs.Wrap(errors.New("StatObject content-length must be greater than 0"))
 		}
 	}
 	if lastModified := header.Get("Last-Modified"); lastModified == "" {
-		return nil, errors.New("StatObject last-modified not found")
+		return nil, errs.Wrap(errors.New("StatObject last-modified not found"))
 	} else {
 		res.LastModified, err = time.Parse(http.TimeFormat, lastModified)
 		if err != nil {
-			return nil, fmt.Errorf("StatObject last-modified parse error: %w", err)
+			return nil, errs.Wrap(err, "StatObject last-modified parse error")
 		}
 	}
 	return res, nil
@@ -227,7 +232,7 @@ func (o *OSS) DeleteObject(ctx context.Context, name string) error {
 func (o *OSS) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyObjectInfo, error) {
 	result, err := o.bucket.CopyObject(src, dst)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "CopyObject error")
 	}
 	return &s3.CopyObjectInfo{
 		Key:  dst,
@@ -236,7 +241,7 @@ func (o *OSS) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyO
 }
 
 func (o *OSS) IsNotFound(err error) bool {
-	switch e := err.(type) {
+	switch e := errs.Unwrap(err).(type) {
 	case oss.ServiceError:
 		return e.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
 	case *oss.ServiceError:
@@ -261,7 +266,7 @@ func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name strin
 		Bucket:   o.bucket.BucketName,
 	}, oss.MaxUploads(100), oss.MaxParts(maxParts), oss.PartNumberMarker(partNumberMarker))
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "ListUploadedParts error")
 	}
 	res := &s3.ListUploadedPartsResult{
 		Key:           result.Key,
@@ -282,11 +287,10 @@ func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name strin
 }
 
 func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
-	publicRead := config.Config.Object.Oss.PublicRead
 	var opts []oss.Option
 	if opt != nil {
 		if opt.Image != nil {
-			// 文档地址: https://help.aliyun.com/zh/oss/user-guide/resize-images-4?spm=a2c4g.11186623.0.0.4b3b1e4fWW6yji
+			// Docs Address: https://help.aliyun.com/zh/oss/user-guide/resize-images-4?spm=a2c4g.11186623.0.0.4b3b1e4fWW6yji
 			var format string
 			switch opt.Image.Format {
 			case
@@ -310,7 +314,7 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			process += ",format," + format
 			opts = append(opts, oss.Process(process))
 		}
-		if !publicRead {
+		if !o.publicRead {
 			if opt.ContentType != "" {
 				opts = append(opts, oss.ResponseContentType(opt.ContentType))
 			}
@@ -324,12 +328,12 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	if !publicRead {
+	if !o.publicRead {
 		return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second), opts...)
 	}
 	rawParams, err := oss.GetRawParams(opts)
 	if err != nil {
-		return "", err
+		return "", errs.Wrap(err, "AccessURL error")
 	}
 	params := getURLParams(*o.bucket.Client.Conn, rawParams)
 	return getURL(o.um, o.bucket.BucketName, name, params).String(), nil
@@ -351,12 +355,12 @@ func (o *OSS) FormData(ctx context.Context, name string, size int64, contentType
 	}
 	policyJson, err := json.Marshal(policy)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "Marshal json error")
 	}
 	policyStr := base64.StdEncoding.EncodeToString(policyJson)
 	h := hmac.New(sha1.New, []byte(o.credentials.GetAccessKeySecret()))
 	if _, err := io.WriteString(h, policyStr); err != nil {
-		return nil, err
+		return nil, errs.Wrap(err, "WriteString error")
 	}
 	fd := &s3.FormData{
 		URL:     o.bucketURL,

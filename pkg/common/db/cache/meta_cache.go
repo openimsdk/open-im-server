@@ -19,15 +19,14 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/redis/go-redis/v9"
+	"fmt"
 	"time"
-
-	"github.com/OpenIMSDK/tools/mw/specialerror"
-
-	"github.com/dtm-labs/rockscache"
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mw/specialerror"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/dtm-labs/rockscache"
 )
 
 const (
@@ -151,14 +150,14 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 		}
 		bs, err := json.Marshal(t)
 		if err != nil {
-			return "", utils.Wrap(err, "")
+			return "", errs.Wrap(err, "marshal failed")
 		}
 		write = true
 
 		return string(bs), nil
 	})
 	if err != nil {
-		return t, err
+		return t, errs.Wrap(err)
 	}
 	if write {
 		return t, nil
@@ -168,9 +167,8 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	}
 	err = json.Unmarshal([]byte(v), &t)
 	if err != nil {
-		log.ZError(ctx, "cache json.Unmarshal failed", err, "key", key, "value", v, "expire", expire)
-
-		return t, utils.Wrap(err, "")
+		errInfo := fmt.Sprintf("cache json.Unmarshal failed, key:%s, value:%s, expire:%s", key, v, expire)
+		return t, errs.Wrap(err, errInfo)
 	}
 
 	return t, nil
@@ -234,7 +232,7 @@ func batchGetCache2[T any, K comparable](
 			if errs.ErrRecordNotFound.Is(specialerror.ErrCode(errs.Unwrap(err))) {
 				continue
 			}
-			return nil, err
+			return nil, errs.Wrap(err)
 		}
 		res = append(res, val)
 	}

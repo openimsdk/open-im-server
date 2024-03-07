@@ -44,14 +44,18 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 SERVER_NAME="openim-crontask"
 
 function openim::crontask::start() {
+
+  rm -rf "$TMP_LOG_FILE"
+
   openim::log::info "Start OpenIM Cron, binary root: ${SERVER_NAME}"
   openim::log::status "Start OpenIM Cron, path: ${OPENIM_CRONTASK_BINARY}"
-  
-  openim::util::stop_services_with_name ${OPENIM_CRONTASK_BINARY}
-  
+
   openim::log::status "start cron_task process, path: ${OPENIM_CRONTASK_BINARY}"
-  nohup ${OPENIM_CRONTASK_BINARY} -c ${OPENIM_PUSH_CONFIG} >> ${LOG_FILE} 2>&1 &
-  openim::util::check_process_names ${SERVER_NAME}
+  #nohup ${OPENIM_CRONTASK_BINARY} -c ${OPENIM_PUSH_CONFIG} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
+  cmd="${OPENIM_CRONTASK_BINARY} -c ${OPENIM_PUSH_CONFIG}"
+  nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a  "$TMP_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) >/dev/null &
+  return 0
+
 }
 
 ###################################### Linux Systemd ######################################
@@ -102,7 +106,7 @@ function openim::crontask::uninstall() {
   openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
   openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
   openim::common::sudo "rm -f /etc/systemd/system/${SERVER_NAME}.service"
-  set -o errexit
+
   openim::log::info "uninstall ${SERVER_NAME} successfully"
 }
 

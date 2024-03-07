@@ -18,13 +18,13 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 func NewGroupMember(db *mongo.Database) (relation.GroupMemberModelInterface, error) {
@@ -37,7 +37,7 @@ func NewGroupMember(db *mongo.Database) (relation.GroupMemberModelInterface, err
 		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return &GroupMemberMgo{coll: coll}, nil
 }

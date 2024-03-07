@@ -15,25 +15,26 @@
 package zookeeper
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	openkeeper "github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 // NewZookeeperDiscoveryRegister creates a new instance of ZookeeperDR for Zookeeper service discovery and registration.
-func NewZookeeperDiscoveryRegister() (discoveryregistry.SvcDiscoveryRegistry, error) {
-	schema := getEnv("ZOOKEEPER_SCHEMA", config.Config.Zookeeper.Schema)
-	zkAddr := getZkAddrFromEnv(config.Config.Zookeeper.ZkAddr)
-	username := getEnv("ZOOKEEPER_USERNAME", config.Config.Zookeeper.Username)
-	password := getEnv("ZOOKEEPER_PASSWORD", config.Config.Zookeeper.Password)
+func NewZookeeperDiscoveryRegister(config *config.GlobalConfig) (discoveryregistry.SvcDiscoveryRegistry, error) {
+	schema := getEnv("ZOOKEEPER_SCHEMA", config.Zookeeper.Schema)
+	zkAddr := getZkAddrFromEnv(config.Zookeeper.ZkAddr)
+	username := getEnv("ZOOKEEPER_USERNAME", config.Zookeeper.Username)
+	password := getEnv("ZOOKEEPER_PASSWORD", config.Zookeeper.Password)
 
-	return openkeeper.NewClient(
+	zk, err := openkeeper.NewClient(
 		zkAddr,
 		schema,
 		openkeeper.WithFreq(time.Hour),
@@ -42,6 +43,16 @@ func NewZookeeperDiscoveryRegister() (discoveryregistry.SvcDiscoveryRegistry, er
 		openkeeper.WithTimeout(10),
 		openkeeper.WithLogger(log.NewZkLogger()),
 	)
+	if err != nil {
+		uriFormat := "address:%s, username:%s, password:%s, schema:%s."
+		errInfo := fmt.Sprintf(uriFormat,
+			config.Zookeeper.ZkAddr,
+			config.Zookeeper.Username,
+			config.Zookeeper.Password,
+			config.Zookeeper.Schema)
+		return nil, errs.Wrap(err, errInfo)
+	}
+	return zk, nil
 }
 
 // getEnv returns the value of an environment variable if it exists, otherwise it returns the fallback value.

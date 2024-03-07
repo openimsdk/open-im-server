@@ -21,6 +21,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/openimsdk/open-im-server/tools/formitychecker/config"
 )
 
@@ -29,7 +31,7 @@ var (
 	hyphenRegex     = regexp.MustCompile(`^[a-zA-Z0-9\-]+\.[a-zA-Z0-9]+$`)
 )
 
-// CheckDirectoCheckDirectoryries initiates the checking process for the specified directories using configuration from config.Config.
+// CheckDirectory initiates the checking process for the specified directories using configuration from config.Config.
 func CheckDirectory(cfg *config.Config) error {
 	ignoreMap := make(map[string]struct{})
 	for _, dir := range cfg.IgnoreDirs {
@@ -39,7 +41,7 @@ func CheckDirectory(cfg *config.Config) error {
 	for _, targetDir := range cfg.TargetDirs {
 		err := filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				return err
+				return errs.Wrap(err, fmt.Sprintf("error walking directory '%s'", targetDir))
 			}
 
 			// Skip if the directory is in the ignore list

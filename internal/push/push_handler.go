@@ -29,16 +29,14 @@ import (
 	"github.com/redis/go-redis/v9"
 
 	"github.com/IBM/sarama"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	pbchat "github.com/OpenIMSDK/protocol/msg"
 	pbpush "github.com/OpenIMSDK/protocol/push"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kfk "github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
+	"google.golang.org/protobuf/proto"
 )
 
 type ConsumerHandler struct {
@@ -52,22 +50,33 @@ type ConsumerHandler struct {
 	groupRpcClient         rpcclient.GroupRpcClient
 }
 
-func NewConsumerHandler(offlinePusher offlinepush.OfflinePusher,
-	rdb redis.UniversalClient, disCov discoveryregistry.SvcDiscoveryRegistry) *ConsumerHandler {
+func NewConsumerHandler(config *config.GlobalConfig, pusher *Pusher) (*ConsumerHandler, error) {
 	var consumerHandler ConsumerHandler
-	consumerHandler.pushConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
+	consumerHandler.pusher = pusher
+	var err error
+	var tlsConfig *kfk.TLSConfig
+	if config.Kafka.TLS != nil {
+		tlsConfig = &kfk.TLSConfig{
+			CACrt:              config.Kafka.TLS.CACrt,
+			ClientCrt:          config.Kafka.TLS.ClientCrt,
+			ClientKey:          config.Kafka.TLS.ClientKey,
+			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+			InsecureSkipVerify: false,
+		}
+	}
+	consumerHandler.pushConsumerGroup, err = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
-	}, []string{config.Config.Kafka.MsgToPush.Topic}, config.Config.Kafka.Addr,
-		config.Config.Kafka.ConsumerGroupID.MsgToPush)
-	consumerHandler.offlinePusher = offlinePusher
-	consumerHandler.onlinePusher = NewOnlinePusher(disCov)
-	consumerHandler.groupRpcClient = rpcclient.NewGroupRpcClient(disCov)
-	consumerHandler.groupLocalCache = rpccache.NewGroupLocalCache(consumerHandler.groupRpcClient, rdb)
-	consumerHandler.msgRpcClient = rpcclient.NewMessageRpcClient(disCov)
-	consumerHandler.conversationRpcClient = rpcclient.NewConversationRpcClient(disCov)
-	consumerHandler.conversationLocalCache = rpccache.NewConversationLocalCache(consumerHandler.conversationRpcClient, rdb)
-	return &consumerHandler
+		OffsetsInitial: sarama.OffsetNewest,
+		IsReturnErr:    false,
+		UserName:       config.Kafka.Username,
+		Password:       config.Kafka.Password,
+	}, []string{config.Kafka.MsgToPush.Topic}, config.Kafka.Addr,
+		config.Kafka.ConsumerGroupID.MsgToPush,
+		tlsConfig)
+	if err != nil {
+		return nil, err
+	}
+	return &consumerHandler, nil
 }
 
 func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {

@@ -15,13 +15,13 @@
 package main
 
 import (
-	"github.com/openimsdk/open-im-server/v3/internal/tools"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 func main() {
 	cronTaskCmd := cmd.NewCronTaskCmd()
-	if err := cronTaskCmd.Exec(tools.StartTask); err != nil {
-		panic(err.Error())
+	if err := cronTaskCmd.Exec(); err != nil {
+		util.ExitWithError(err)
 	}
 }

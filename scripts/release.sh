@@ -47,9 +47,9 @@
 # images and other build artifacts.
 # Build a OpenIM release. This script supports various flags for flexible execution control.
 
-set -o errexit
-set -o nounset
-set -o pipefail
+
+
+
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/common.sh"
 source "${OPENIM_ROOT}/scripts/lib/release.sh"
