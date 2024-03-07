@@ -26,8 +26,8 @@
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
-if grep -q docker /proc/1/cgroup; then
-  exec > ${DOCKER_LOG_FILE} 2>&1
+if openim::util::is_running_in_container; then
+  exec >> ${DOCKER_LOG_FILE} 2>&1
 fi
 
 
@@ -75,7 +75,7 @@ if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
   openim::color::echo ${COLOR_CYAN} "Environment in the interior of the container"
 else
   openim::color::echo ${COLOR_CYAN} "The environment is outside the container"
-  openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]} || return 0
+  openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}
 fi
 
 if [[ $? -ne 0 ]]; then
