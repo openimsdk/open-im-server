@@ -62,7 +62,7 @@ function execute_start_scripts() {
 
 
 
-if is_running_in_container; then
+if openim::util::is_running_in_container; then
   exec > ${DOCKER_LOG_FILE} 2>&1
 fi
 
