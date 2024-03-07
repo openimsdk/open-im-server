@@ -31,7 +31,6 @@ if openim::util::is_running_in_container; then
 fi
 
 
-
 OPENIM_VERBOSE=4
 
 openim::log::info "\n# Begin to check all openim service"
