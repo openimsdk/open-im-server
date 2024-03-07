@@ -26,7 +26,7 @@
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
-if is_running_in_container; then
+if openim::util::is_running_in_container; then
   exec > ${DOCKER_LOG_FILE} 2>&1
 fi
 
