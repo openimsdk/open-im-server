@@ -63,11 +63,12 @@ function execute_start_scripts() {
 
 
 if openim::util::is_running_in_container; then
+  echo "container!!!!11111111111"
   exec > ${DOCKER_LOG_FILE} 2>&1
-else
-  echo "host!!!!"
-fi
 
+else
+  echo "host!!!!11111111111"
+fi
 
 
 openim::golang::check_openim_binaries

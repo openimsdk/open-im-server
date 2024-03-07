@@ -27,9 +27,11 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
 if openim::util::is_running_in_container; then
+  echo "container!!!!11111111111"
   exec > ${DOCKER_LOG_FILE} 2>&1
+
 else
-  echo "host!!!!"
+  echo "host!!!!11111111111"
 fi
 
 
