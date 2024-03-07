@@ -62,8 +62,10 @@ function execute_start_scripts() {
 
 
 
-if grep -q docker /proc/1/cgroup; then
+if openim::util::is_running_in_container; then
   exec > ${DOCKER_LOG_FILE} 2>&1
+else
+  echo "host!!!!"
 fi
 
 

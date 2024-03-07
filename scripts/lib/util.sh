@@ -2866,6 +2866,15 @@ function openim::util::gen_os_arch() {
 
 
 
+function openim::util::is_running_in_container() {
+  if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+
 function openim::util::check_process_names_for_stop() {
   local all_stopped=true
   for service in "${OPENIM_ALL_SERVICE_LIBRARIES[@]}"; do
