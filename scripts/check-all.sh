@@ -26,9 +26,9 @@
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
-if grep -q docker /proc/1/cgroup; then
+#if grep -q docker /proc/1/cgroup; then
   exec > ${DOCKER_LOG_FILE} 2>&1
-fi
+#fi
 
 
 OPENIM_VERBOSE=4
