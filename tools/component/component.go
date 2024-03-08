@@ -102,19 +102,24 @@ func main() {
 			if !check.flag {
 				err = check.function(check.config)
 				if err != nil {
-					if errors.Is(err, errMinioNotEnabled) {
-						fmt.Println(err.Error())
-						checks[index].flag = true
+					if check.name == "Minio" {
+						if errors.Is(err, errMinioNotEnabled) {
+							fmt.Println(err.Error(), " check ", check.name)
+							checks[index].flag = true
+						}
+						if errors.Is(err, errSignEndPoint) {
+							fmt.Fprintf(os.Stderr, err.Error(), " check ", check.name)
+							checks[index].flag = true
+						}
 					}
-					if errors.Is(err, errSignEndPoint) {
-						fmt.Fprintf(os.Stderr, err.Error())
-						checks[index].flag = true
-					}
+
 					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, errs.Unwrap(err).Error()))
-					if !strings.Contains(errs.Unwrap(err).Error(), "connection refused") &&
-						!strings.Contains(errs.Unwrap(err).Error(), "timeout waiting") {
-						component.ErrorPrint("Some components started failed!")
-						os.Exit(-1)
+					if strings.Contains(errs.Unwrap(err).Error(), "connection refused") ||
+						strings.Contains(errs.Unwrap(err).Error(), "timeout") ||
+						strings.Contains(errs.Unwrap(err).Error(), "context deadline exceeded") {
+						component.ErrorPrint(fmt.Sprintf("try check connection %s", check.name))
+						allSuccess = false
+						break
 					}
 				} else {
 					checks[index].flag = true
@@ -258,13 +263,13 @@ func checkKafka(config *config.GlobalConfig) error {
 	_, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
-	}, []string{config.Kafka.MsgToPush.Topic},
+	}, []string{config.Kafka.MsgToMongo.Topic},
 		config.Kafka.Addr, config.Kafka.ConsumerGroupID.MsgToMongo, tlsConfig)
 	if err != nil {
 		return err
 	}
 
-	kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
+	_, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
 	}, []string{config.Kafka.MsgToPush.Topic}, config.Kafka.Addr,
