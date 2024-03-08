@@ -102,7 +102,14 @@ func main() {
 			if !check.flag {
 				err = check.function(check.config)
 				if err != nil {
-					allSuccess = false
+					if errors.Is(err, errMinioNotEnabled) {
+						fmt.Println(err.Error())
+						checks[index].flag = true
+					}
+					if errors.Is(err, errSignEndPoint) {
+						fmt.Fprintf(os.Stderr, err.Error())
+						checks[index].flag = true
+					}
 					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, errs.Unwrap(err).Error()))
 					if !strings.Contains(errs.Unwrap(err).Error(), "connection refused") &&
 						!strings.Contains(errs.Unwrap(err).Error(), "timeout waiting") {
@@ -124,6 +131,11 @@ func main() {
 	component.ErrorPrint("Some components started failed!")
 	os.Exit(-1)
 }
+
+var errMinioNotEnabled = errors.New("minio.Enable is not configured to use MinIO")
+
+var errSignEndPoint = errors.New("minio.signEndPoint contains 127.0.0.1, causing issues with image sending")
+var errApiURL = errors.New("object.apiURL contains 127.0.0.1, causing issues with image sending")
 
 // checkMongo checks the MongoDB connection without retries
 func checkMongo(config *config.GlobalConfig) error {
@@ -153,10 +165,16 @@ func checkRedis(config *config.GlobalConfig) error {
 
 // checkMinio checks the MinIO connection
 func checkMinio(config *config.GlobalConfig) error {
-	// Check if MinIO is enabled
-	if config.Object.Enable != "minio" {
-		return errs.Wrap(errors.New("minio.Enable is empty"))
+	if strings.Contains(config.Object.ApiURL, "127.0.0.1") {
+		return errs.Wrap(errApiURL, "config.Object.ApiURL: "+config.Object.ApiURL)
 	}
+	if config.Object.Enable != "minio" {
+		return errs.Wrap(errMinioNotEnabled, "config.Object.Enable: "+config.Object.Enable)
+	}
+	if strings.Contains(config.Object.Minio.Endpoint, "127.0.0.1") {
+		return errs.Wrap(errSignEndPoint, "config.Object.Minio.Endpoint: "+config.Object.Minio.Endpoint)
+	}
+
 	minio := &component.Minio{
 		ApiURL:          config.Object.ApiURL,
 		Endpoint:        config.Object.Minio.Endpoint,
