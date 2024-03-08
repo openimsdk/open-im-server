@@ -31,8 +31,6 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
-	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -112,7 +110,7 @@ func main() {
 						}
 					}
 					allSuccess = false
-					component.ErrorPrint(fmt.Sprintf("Check component: %s failed:%v.", check.name, errs.Error()))
+					component.ErrorPrint(fmt.Sprintf("Check component: %s failed:%v.", check.name, err.Error()))
 					break
 				}
 				checks[index].flag = true
