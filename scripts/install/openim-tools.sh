@@ -101,7 +101,16 @@ function openim::tools::start_service() {
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
   openim::log::status "Starting binary ${binary_name}..."
-  ${cmd} | tee -a "${LOG_FILE}"
+ ${cmd} >>"${LOG_FILE}" 2> >(tee -a "${LOG_FILE}" >&2)
+ local status=$?
+
+    if [ $status -eq 0 ]; then
+        openim::log::info "Service ${binary_name} started successfully."
+        return 0
+    else
+        openim::log::error "Failed to start service ${binary_name}."
+        return 1
+    fi
 }
 
 function openim::tools::start() {
@@ -115,11 +124,15 @@ function openim::tools::start() {
 
 
 function openim::tools::pre-start() {
-    openim::log::info "Preparing to start OpenIM Tools..."
-    for tool in "${OPENIM_TOOLS_PRE_START_NAME_LISTARIES[@]}"; do
-        openim::log::info "Starting tool ${tool}..."
-        openim::tools::start_service ${tool} ${OPNEIM_CONFIG}
-    done
+   openim::log::info "Preparing to start OpenIM Tools..."
+      for tool in "${OPENIM_TOOLS_PRE_START_NAME_LISTARIES[@]}"; do
+          openim::log::info "Starting tool ${tool}..."
+          if ! openim::tools::start_service ${tool} ${OPNEIM_CONFIG}; then
+              openim::log::error "Failed to start ${tool}, aborting..."
+              return 1
+          fi
+      done
+      openim::log::info "All tools started successfully."
 }
 
 function openim::tools::post-start() {
