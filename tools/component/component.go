@@ -111,10 +111,11 @@ func main() {
 						checks[index].flag = true
 					}
 					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, errs.Unwrap(err).Error()))
-					if !strings.Contains(errs.Unwrap(err).Error(), "connection refused") &&
-						!strings.Contains(errs.Unwrap(err).Error(), "timeout waiting") {
-						component.ErrorPrint("Some components started failed!")
-						os.Exit(-1)
+					if strings.Contains(errs.Unwrap(err).Error(), "connection refused") ||
+						strings.Contains(errs.Unwrap(err).Error(), "timeout") ||
+						strings.Contains(errs.Unwrap(err).Error(), "context deadline exceeded") {
+						component.ErrorPrint("try check connection")
+						continue
 					}
 				} else {
 					checks[index].flag = true
