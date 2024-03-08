@@ -535,3 +535,39 @@ prometheus:
   rtcPrometheusPort: [ ${RTC_PROM_PORT} ]
   thirdPrometheusPort: [ ${THIRD_PROM_PORT} ]
   messageTransferPrometheusPort: [ ${MSG_TRANSFER_PROM_PORT} ] # List of ports
+
+###################### LocalCache configuration information ######################
+# topic: redis subscriber channel
+# slotNum: number of slots, multiple slots can prevent too many keys from competing for a lock
+# slotSize: number of slots, the number of cached keys per slot, the overall cache quantity is slotNum * slotSize
+# successExpire: successful cache time seconds
+# failedExpire: failed cache time seconds
+# disable local caching and annotate topic, slotNum, and slotSize
+localCache:
+  user:
+    topic: DELETE_CACHE_USER
+    slotNum: 100
+    slotSize: 2000
+    successExpire: 300
+    failedExpire: 5
+
+  group:
+    topic: DELETE_CACHE_GROUP
+    slotNum: 100
+    slotSize: 2000
+    successExpire: 300
+    failedExpire: 5
+
+  friend:
+    topic: DELETE_CACHE_FRIEND
+    slotNum: 100
+    slotSize: 2000
+    successExpire: 300
+    failedExpire: 5
+
+  conversation:
+    topic: DELETE_CACHE_CONVERSATION
+    slotNum: 100
+    slotSize: 2000
+    successExpire: 300
+    failedExpire: 5

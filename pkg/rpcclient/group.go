@@ -26,11 +26,9 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
-	"google.golang.org/grpc"
 )
 
 type Group struct {
-	conn   grpc.ClientConnInterface
 	Client group.GroupClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 	Config *config.GlobalConfig
@@ -42,7 +40,7 @@ func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry, config *config.Glob
 		util.ExitWithError(err)
 	}
 	client := group.NewGroupClient(conn)
-	return &Group{discov: discov, conn: conn, Client: client, Config: config}
+	return &Group{discov: discov, Client: client, Config: config}
 }
 
 type GroupRpcClient Group

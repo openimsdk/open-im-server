@@ -80,7 +80,7 @@ func (f *FriendRpcClient) GetFriendIDs(ctx context.Context, ownerUserID string) 
 	return resp.FriendIDs, nil
 }
 
-func (b *FriendRpcClient) IsBlocked(ctx context.Context, possibleBlackUserID, userID string) (bool, error) {
+func (b *FriendRpcClient) IsBlack(ctx context.Context, possibleBlackUserID, userID string) (bool, error) {
 	r, err := b.Client.IsBlack(ctx, &friend.IsBlackReq{UserID1: possibleBlackUserID, UserID2: userID})
 	if err != nil {
 		return false, err

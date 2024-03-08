@@ -16,6 +16,7 @@ package config
 
 import (
 	"bytes"
+	"time"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"gopkg.in/yaml.v3"
@@ -266,6 +267,8 @@ type GlobalConfig struct {
 		FriendVerify *bool `yaml:"friendVerify"`
 	} `yaml:"messageVerify"`
 
+	LocalCache localCache `yaml:"localCache"`
+
 	IOSPush struct {
 		PushSound  string `yaml:"pushSound"`
 		BadgeCount bool   `yaml:"badgeCount"`
@@ -380,6 +383,33 @@ type notification struct {
 	//////////////////////conversation///////////////////////
 	ConversationChanged    NotificationConf `yaml:"conversationChanged"`
 	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
+}
+
+type LocalCache struct {
+	Topic         string `yaml:"topic"`
+	SlotNum       int    `yaml:"slotNum"`
+	SlotSize      int    `yaml:"slotSize"`
+	SuccessExpire int    `yaml:"successExpire"` // second
+	FailedExpire  int    `yaml:"failedExpire"`  // second
+}
+
+func (l LocalCache) Failed() time.Duration {
+	return time.Second * time.Duration(l.FailedExpire)
+}
+
+func (l LocalCache) Success() time.Duration {
+	return time.Second * time.Duration(l.SuccessExpire)
+}
+
+func (l LocalCache) Enable() bool {
+	return l.Topic != "" && l.SlotNum > 0 && l.SlotSize > 0
+}
+
+type localCache struct {
+	User         LocalCache `yaml:"user"`
+	Group        LocalCache `yaml:"group"`
+	Friend       LocalCache `yaml:"friend"`
+	Conversation LocalCache `yaml:"conversation"`
 }
 
 func (c *GlobalConfig) GetServiceNames() []string {

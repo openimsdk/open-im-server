@@ -16,6 +16,8 @@ package config
 
 import (
 	_ "embed"
+	"fmt"
+	"gopkg.in/yaml.v3"
 	"reflect"
 	"testing"
 
@@ -115,4 +117,14 @@ func TestInitConfig(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestName(t *testing.T) {
+	Config.LocalCache.Friend.Topic = "friend"
+	Config.LocalCache.Friend.SlotNum = 500
+	Config.LocalCache.Friend.SlotSize = 20000
+
+	data, _ := yaml.Marshal(&Config)
+
+	fmt.Println(string(data))
 }
