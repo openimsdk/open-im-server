@@ -259,13 +259,13 @@ func checkKafka(config *config.GlobalConfig) error {
 	_, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
-	}, []string{config.Kafka.MsgToPush.Topic},
+	}, []string{config.Kafka.MsgToMongo.Topic},
 		config.Kafka.Addr, config.Kafka.ConsumerGroupID.MsgToMongo, tlsConfig)
 	if err != nil {
 		return err
 	}
 
-	kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
+	_, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
 	}, []string{config.Kafka.MsgToPush.Topic}, config.Kafka.Addr,
