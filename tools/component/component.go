@@ -101,6 +101,8 @@ func main() {
 			if !check.flag {
 				err = check.function(check.config)
 				if err != nil {
+					allSuccess = false
+					component.ErrorPrint(fmt.Sprintf("Check component: %s, failed: %s", check.name, err.Error()))
 					if check.name == "Minio" {
 						if errors.Is(err, errMinioNotEnabled) ||
 							errors.Is(err, errSignEndPoint) ||
@@ -109,16 +111,14 @@ func main() {
 							checks[index].flag = true
 							continue
 						}
+            break
 					}
-					allSuccess = false
-					component.ErrorPrint(fmt.Sprintf("Check component: %s failed:%v.", check.name, err.Error()))
-					break
+				} else {
+					checks[index].flag = true
+					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 				}
-				checks[index].flag = true
-				component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 			}
 		}
-
 		if allSuccess {
 			component.SuccessPrint("All components started successfully!")
 			return
@@ -162,13 +162,13 @@ func checkRedis(config *config.GlobalConfig) error {
 // checkMinio checks the MinIO connection
 func checkMinio(config *config.GlobalConfig) error {
 	if strings.Contains(config.Object.ApiURL, "127.0.0.1") {
-		return errs.Wrap(errApiURL, "config.Object.ApiURL: "+config.Object.ApiURL)
+		return errs.Wrap(errApiURL)
 	}
 	if config.Object.Enable != "minio" {
-		return errs.Wrap(errMinioNotEnabled, "config.Object.Enable: "+config.Object.Enable)
+		return errs.Wrap(errMinioNotEnabled)
 	}
 	if strings.Contains(config.Object.Minio.Endpoint, "127.0.0.1") {
-		return errs.Wrap(errSignEndPoint, "config.Object.Minio.Endpoint: "+config.Object.Minio.Endpoint)
+		return errs.Wrap(errSignEndPoint)
 	}
 
 	minio := &component.Minio{
