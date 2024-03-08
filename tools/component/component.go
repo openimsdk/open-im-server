@@ -103,10 +103,13 @@ func main() {
 				err = check.function(check.config)
 				if err != nil {
 					if errors.Is(err, errMinioNotEnabled) {
-						fmt.Println("minio.Enable is not configured to use MinIO, therefore the image server is not checked")
+						fmt.Println(err.Error())
 						checks[index].flag = true
 					}
-					allSuccess = false
+					if errors.Is(err, errSignEndPoint) {
+						fmt.Fprintf(os.Stderr, err.Error())
+						checks[index].flag = true
+					}
 					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, errs.Unwrap(err).Error()))
 					if !strings.Contains(errs.Unwrap(err).Error(), "connection refused") &&
 						!strings.Contains(errs.Unwrap(err).Error(), "timeout waiting") {
@@ -163,13 +166,13 @@ func checkRedis(config *config.GlobalConfig) error {
 // checkMinio checks the MinIO connection
 func checkMinio(config *config.GlobalConfig) error {
 	if strings.Contains(config.Object.ApiURL, "127.0.0.1") {
-		return errs.Wrap(errApiURL)
+		return errs.Wrap(errApiURL, "config.Object.ApiURL: "+config.Object.ApiURL)
 	}
 	if config.Object.Enable != "minio" {
-		return errs.Wrap(errMinioNotEnabled)
+		return errs.Wrap(errMinioNotEnabled, "config.Object.Enable: "+config.Object.Enable)
 	}
 	if strings.Contains(config.Object.Minio.Endpoint, "127.0.0.1") {
-		return errs.Wrap(errSignEndPoint)
+		return errs.Wrap(errSignEndPoint, "config.Object.Minio.Endpoint: "+config.Object.Minio.Endpoint)
 	}
 
 	minio := &component.Minio{
