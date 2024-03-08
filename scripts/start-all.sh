@@ -92,7 +92,7 @@ if ! ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start; then
   exit 1
 fi
 
-
+openim::log::print_blue "Pre Starting OpenIM services processed successfully"
 
 result=$("${OPENIM_ROOT}"/scripts/stop-all.sh)
 if [[ $? -ne 0 ]]; then
