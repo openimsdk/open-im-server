@@ -83,7 +83,7 @@ fi
 # TODO Prelaunch tools, simple for now, can abstract functions later
 TOOLS_START_SCRIPTS_PATH=${START_SCRIPTS_PATH}/openim-tools.sh
 
-openim::log::status "\n## Pre Starting OpenIM services"
+openim::log::print_blue "\n## Pre Starting OpenIM services"
 
 
 
