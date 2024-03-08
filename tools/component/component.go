@@ -77,9 +77,10 @@ func main() {
 
 	err = configGetEnv(conf)
 	if err != nil {
-		fmt.Printf("configGetEnv failed,err:%v", err)
+		fmt.Printf("configGetEnv failed, err:%v", err)
 		return
 	}
+	
 
 	checks := []checkFunc{
 		//{name: "Mysql", function: checkMysql},
