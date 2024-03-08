@@ -16,6 +16,9 @@ package cache
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -47,11 +50,15 @@ type BlackCacheRedis struct {
 
 func NewBlackCacheRedis(rdb redis.UniversalClient, blackDB relationtb.BlackModelInterface, options rockscache.Options) BlackCache {
 	rcClient := rockscache.NewClient(rdb, options)
-
+	mc := NewMetaCacheRedis(rcClient)
+	b := config.Config.LocalCache.Friend
+	log.ZDebug(context.Background(), "black local cache init", "Topic", b.Topic, "SlotNum", b.SlotNum, "SlotSize", b.SlotSize, "enable", b.Enable())
+	mc.SetTopic(b.Topic)
+	mc.SetRawRedisClient(rdb)
 	return &BlackCacheRedis{
 		expireTime: blackExpireTime,
 		rcClient:   rcClient,
-		metaCache:  NewMetaCacheRedis(rcClient),
+		metaCache:  mc,
 		blackDB:    blackDB,
 	}
 }
@@ -61,12 +68,12 @@ func (b *BlackCacheRedis) NewCache() BlackCache {
 		expireTime: b.expireTime,
 		rcClient:   b.rcClient,
 		blackDB:    b.blackDB,
-		metaCache:  NewMetaCacheRedis(b.rcClient, b.metaCache.GetPreDelKeys()...),
+		metaCache:  b.Copy(),
 	}
 }
 
 func (b *BlackCacheRedis) getBlackIDsKey(ownerUserID string) string {
-	return blackIDsKey + ownerUserID
+	return cachekey.GetBlackIDsKey(ownerUserID)
 }
 
 func (b *BlackCacheRedis) GetBlackIDs(ctx context.Context, userID string) (blackIDs []string, err error) {

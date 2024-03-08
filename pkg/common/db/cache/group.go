@@ -17,7 +17,8 @@ package cache
 import (
 	"context"
 	"fmt"
-	"strconv"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -30,15 +31,14 @@ import (
 )
 
 const (
-	groupExpireTime     = time.Second * 60 * 60 * 12
-	groupInfoKey        = "GROUP_INFO:"
-	groupMemberIDsKey   = "GROUP_MEMBER_IDS:"
-	groupMembersHashKey = "GROUP_MEMBERS_HASH2:"
-	groupMemberInfoKey  = "GROUP_MEMBER_INFO:"
-	//groupOwnerInfoKey   = "GROUP_OWNER_INFO:".
-	joinedGroupsKey            = "JOIN_GROUPS_KEY:"
-	groupMemberNumKey          = "GROUP_MEMBER_NUM_CACHE:"
-	groupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:"
+	groupExpireTime = time.Second * 60 * 60 * 12
+	//groupInfoKey        = "GROUP_INFO:"
+	//groupMemberIDsKey   = "GROUP_MEMBER_IDS:"
+	//groupMembersHashKey = "GROUP_MEMBERS_HASH2:"
+	//groupMemberInfoKey  = "GROUP_MEMBER_INFO:"
+	//joinedGroupsKey            = "JOIN_GROUPS_KEY:"
+	//groupMemberNumKey          = "GROUP_MEMBER_NUM_CACHE:"
+	//groupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:"
 )
 
 type GroupHash interface {
@@ -101,12 +101,16 @@ func NewGroupCacheRedis(
 	opts rockscache.Options,
 ) GroupCache {
 	rcClient := rockscache.NewClient(rdb, opts)
-
+	mc := NewMetaCacheRedis(rcClient)
+	g := config.Config.LocalCache.Group
+	mc.SetTopic(g.Topic)
+	log.ZDebug(context.Background(), "group local cache init", "Topic", g.Topic, "SlotNum", g.SlotNum, "SlotSize", g.SlotSize, "enable", g.Enable())
+	mc.SetRawRedisClient(rdb)
 	return &GroupCacheRedis{
 		rcClient: rcClient, expireTime: groupExpireTime,
 		groupDB: groupDB, groupMemberDB: groupMemberDB, groupRequestDB: groupRequestDB,
 		groupHash: hashCode,
-		metaCache: NewMetaCacheRedis(rcClient),
+		metaCache: mc,
 	}
 }
 
@@ -117,36 +121,36 @@ func (g *GroupCacheRedis) NewCache() GroupCache {
 		groupDB:        g.groupDB,
 		groupMemberDB:  g.groupMemberDB,
 		groupRequestDB: g.groupRequestDB,
-		metaCache:      NewMetaCacheRedis(g.rcClient, g.metaCache.GetPreDelKeys()...),
+		metaCache:      g.Copy(),
 	}
 }
 
 func (g *GroupCacheRedis) getGroupInfoKey(groupID string) string {
-	return groupInfoKey + groupID
+	return cachekey.GetGroupInfoKey(groupID)
 }
 
 func (g *GroupCacheRedis) getJoinedGroupsKey(userID string) string {
-	return joinedGroupsKey + userID
+	return cachekey.GetJoinedGroupsKey(userID)
 }
 
 func (g *GroupCacheRedis) getGroupMembersHashKey(groupID string) string {
-	return groupMembersHashKey + groupID
+	return cachekey.GetGroupMembersHashKey(groupID)
 }
 
 func (g *GroupCacheRedis) getGroupMemberIDsKey(groupID string) string {
-	return groupMemberIDsKey + groupID
+	return cachekey.GetGroupMemberIDsKey(groupID)
 }
 
 func (g *GroupCacheRedis) getGroupMemberInfoKey(groupID, userID string) string {
-	return groupMemberInfoKey + groupID + "-" + userID
+	return cachekey.GetGroupMemberInfoKey(groupID, userID)
 }
 
 func (g *GroupCacheRedis) getGroupMemberNumKey(groupID string) string {
-	return groupMemberNumKey + groupID
+	return cachekey.GetGroupMemberNumKey(groupID)
 }
 
 func (g *GroupCacheRedis) getGroupRoleLevelMemberIDsKey(groupID string, roleLevel int32) string {
-	return groupRoleLevelMemberIDsKey + groupID + "-" + strconv.Itoa(int(roleLevel))
+	return cachekey.GetGroupRoleLevelMemberIDsKey(groupID, roleLevel)
 }
 
 func (g *GroupCacheRedis) GetGroupIndex(group *relationtb.GroupModel, keys []string) (int, error) {
