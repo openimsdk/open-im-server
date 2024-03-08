@@ -69,7 +69,7 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 	}
 
 	if err = client.CreateRpcRootNodes(config.GetServiceNames()); err != nil {
-		return errs.Wrap(err, "create rpc root nodes error")
+		return errs.Wrap(err, "create rpc root nodes error1111)
 	}
 
 	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.EncodeConfig()); err != nil {
