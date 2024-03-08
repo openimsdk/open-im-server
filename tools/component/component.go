@@ -117,7 +117,7 @@ func main() {
 					if strings.Contains(errs.Unwrap(err).Error(), "connection refused") ||
 						strings.Contains(errs.Unwrap(err).Error(), "timeout") ||
 						strings.Contains(errs.Unwrap(err).Error(), "context deadline exceeded") {
-						component.ErrorPrint("try check connection")
+						component.ErrorPrint(fmt.Sprintf("try check connection %s", check.name))
 						continue
 					}
 				} else {
