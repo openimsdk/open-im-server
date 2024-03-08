@@ -101,13 +101,13 @@ func main() {
 			if !check.flag {
 				err = check.function(check.config)
 				if err != nil {
-
 					if check.name == "Minio" {
 						if errors.Is(err, errMinioNotEnabled) ||
 							errors.Is(err, errSignEndPoint) ||
 							errors.Is(err, errApiURL) {
 							fmt.Fprintf(os.Stderr, err.Error(), " check ", check.name)
 							checks[index].flag = true
+							allSuccess = false
 							continue
 						}
 
