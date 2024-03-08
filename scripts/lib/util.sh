@@ -1808,68 +1808,7 @@ openim::util::stop_services_on_ports() {
 # Usage:
 # openim::util::stop_services_with_name nginx apache
 # The function returns a status of 1 if any service couldn't be stopped.
-openim::util::stop_services_with_name() {
-    # An array to collect names of processes that couldn't be stopped.
-    local not_stopped=()
 
-    # An array to collect information about processes that were stopped.
-    local stopped=()
-
-    echo "Stopping services with names: $*"
-    # Iterate over each given service name.
-    for server_name in "$@"; do
-        # Use the `pgrep` command to find process IDs related to the given service name.
-        local pids=$(pgrep -f "$server_name")
-
-        # If no process was found with the name, add it to the not_stopped list
-        if [[ -z $pids ]]; then
-            not_stopped+=("$server_name")
-            continue
-        fi
-        local stopped_this_time=false
-        for pid in $pids; do
-
-            # Exclude the PID of the current script
-            if [[ "$pid" == "$$" ]]; then
-                continue
-            fi
-
-            # If there's a Process ID, it means the service with the name is running.
-            if [[ -n $pid ]]; then
-                # Try to stop the service by killing its process.
-                if kill -10 $pid 2>/dev/null; then
-                    stopped_this_time=true
-                fi
-            fi
-        done
-
-        if $stopped_this_time; then
-            stopped+=("$server_name")
-        else
-            not_stopped+=("$server_name")
-        fi
-    done
-
-    # Print information about services whose processes couldn't be stopped.
-    if [[ ${#not_stopped[@]} -ne 0 ]]; then
-        echo "Services that couldn't be stopped:"
-        for name in "${not_stopped[@]}"; do
-            openim::log::status "Failed to stop the $name service."
-        done
-    fi
-
-    # Print information about services whose processes were successfully stopped.
-    if [[ ${#stopped[@]} -ne 0 ]]; then
-        echo
-        echo "Stopped services:"
-        for name in "${stopped[@]}"; do
-            echo "Successfully stopped the $name service."
-        done
-    fi
-
-    openim::log::success "All specified services were stopped."
-    echo ""
-}
 # sleep 333333&
 # sleep 444444&
 # ps -ef | grep "sleep"
