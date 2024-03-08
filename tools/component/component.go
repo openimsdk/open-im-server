@@ -163,13 +163,13 @@ func checkRedis(config *config.GlobalConfig) error {
 // checkMinio checks the MinIO connection
 func checkMinio(config *config.GlobalConfig) error {
 	if strings.Contains(config.Object.ApiURL, "127.0.0.1") {
-		return errs.Wrap(errApiURL, "config.Object.ApiURL: "+config.Object.ApiURL)
+		return errApiURL
 	}
 	if config.Object.Enable != "minio" {
-		return errs.Wrap(errMinioNotEnabled, "config.Object.Enable: "+config.Object.Enable)
+		return errMinioNotEnabled
 	}
 	if strings.Contains(config.Object.Minio.Endpoint, "127.0.0.1") {
-		return errs.Wrap(errSignEndPoint, "config.Object.Minio.Endpoint: "+config.Object.Minio.Endpoint)
+		return errSignEndPoint
 	}
 
 	minio := &component.Minio{
