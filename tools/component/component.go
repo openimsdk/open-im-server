@@ -31,6 +31,7 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"gopkg.in/yaml.v3"
 )
 
 const (
