@@ -104,11 +104,11 @@ func main() {
 				if err != nil {
 					if check.name == "Minio" {
 						if errors.Is(err, errMinioNotEnabled) {
-							fmt.Println(err.Error())
+							fmt.Println(err.Error(), " check ", check.name)
 							checks[index].flag = true
 						}
 						if errors.Is(err, errSignEndPoint) {
-							fmt.Fprintf(os.Stderr, err.Error())
+							fmt.Fprintf(os.Stderr, err.Error(), " check ", check.name)
 							checks[index].flag = true
 						}
 					}
@@ -118,7 +118,8 @@ func main() {
 						strings.Contains(errs.Unwrap(err).Error(), "timeout") ||
 						strings.Contains(errs.Unwrap(err).Error(), "context deadline exceeded") {
 						component.ErrorPrint(fmt.Sprintf("try check connection %s", check.name))
-						continue
+						allSuccess = false
+						break
 					}
 				} else {
 					checks[index].flag = true
