@@ -102,14 +102,17 @@ func main() {
 			if !check.flag {
 				err = check.function(check.config)
 				if err != nil {
-					if errors.Is(err, errMinioNotEnabled) {
-						fmt.Println(err.Error())
-						checks[index].flag = true
+					if check.name == "Minio" {
+						if errors.Is(err, errMinioNotEnabled) {
+							fmt.Println(err.Error())
+							checks[index].flag = true
+						}
+						if errors.Is(err, errSignEndPoint) {
+							fmt.Fprintf(os.Stderr, err.Error())
+							checks[index].flag = true
+						}
 					}
-					if errors.Is(err, errSignEndPoint) {
-						fmt.Fprintf(os.Stderr, err.Error())
-						checks[index].flag = true
-					}
+
 					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, errs.Unwrap(err).Error()))
 					if strings.Contains(errs.Unwrap(err).Error(), "connection refused") ||
 						strings.Contains(errs.Unwrap(err).Error(), "timeout") ||
