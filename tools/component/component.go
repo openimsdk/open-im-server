@@ -102,6 +102,12 @@ func main() {
 			if !check.flag {
 				err = check.function(check.config)
 				if err != nil {
+					if check.name == "Minio" {
+						if errors.Is(err, errMinioNotEnabled) {
+							fmt.Println("minio.Enable is not configured to use MinIO, therefore the image server is not checked")
+							checks[index].flag = true
+						}
+					}
 					allSuccess = false
 					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, errs.Unwrap(err).Error()))
 					if !strings.Contains(errs.Unwrap(err).Error(), "connection refused") &&
@@ -124,6 +130,8 @@ func main() {
 	component.ErrorPrint("Some components started failed!")
 	os.Exit(-1)
 }
+
+var errMinioNotEnabled = errors.New("minio.Enable is not configured to use MinIO")
 
 // checkMongo checks the MongoDB connection without retries
 func checkMongo(config *config.GlobalConfig) error {
@@ -155,7 +163,7 @@ func checkRedis(config *config.GlobalConfig) error {
 func checkMinio(config *config.GlobalConfig) error {
 	// Check if MinIO is enabled
 	if config.Object.Enable != "minio" {
-		return errs.Wrap(errors.New("minio.Enable is empty"))
+		return errs.Wrap(errMinioNotEnabled)
 	}
 	minio := &component.Minio{
 		ApiURL:          config.Object.ApiURL,
