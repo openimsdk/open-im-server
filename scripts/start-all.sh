@@ -17,10 +17,15 @@
 #FIXME The full names of the shell scripts that need to be started are placed in the `need_to_start_server_shell` array.
 
 
+#!/bin/bash
+
+
+
 
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
+
 
 
 # Function to execute the scripts.
@@ -57,6 +62,9 @@ function execute_start_scripts() {
 
 
 
+if openim::util::is_running_in_container; then
+  exec > ${DOCKER_LOG_FILE} 2>&1
+fi
 
 
 
@@ -75,9 +83,17 @@ fi
 # TODO Prelaunch tools, simple for now, can abstract functions later
 TOOLS_START_SCRIPTS_PATH=${START_SCRIPTS_PATH}/openim-tools.sh
 
-openim::log::status "\n## Pre Starting OpenIM services"
-${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start
+openim::log::print_blue "\n## Pre Starting OpenIM services"
 
+
+
+if ! ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start; then
+  openim::log::error "Pre Starting OpenIM services failed, aborting..."
+  exit 1
+fi
+
+
+openim::log::print_blue "Pre Starting OpenIM services processed successfully"
 
 result=$("${OPENIM_ROOT}"/scripts/stop-all.sh)
 if [[ $? -ne 0 ]]; then
