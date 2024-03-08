@@ -53,7 +53,7 @@ type ConversationModelInterface interface {
 	Take(ctx context.Context, userID, conversationID string) (conversation *ConversationModel, err error)
 	FindConversationID(ctx context.Context, userID string, conversationIDs []string) (existConversationID []string, err error)
 	FindUserIDAllConversations(ctx context.Context, userID string) (conversations []*ConversationModel, err error)
-	FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
+	FindRecvMsgUserIDs(ctx context.Context, conversationID string, recvOpts []int) ([]string, error)
 	GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) (opt int, err error)
 	GetAllConversationIDs(ctx context.Context) ([]string, error)
 	GetAllConversationIDsNumber(ctx context.Context) (int64, error)

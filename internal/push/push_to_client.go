@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"sync"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -36,7 +37,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -49,8 +49,8 @@ type Pusher struct {
 	database               controller.PushDatabase
 	discov                 discoveryregistry.SvcDiscoveryRegistry
 	offlinePusher          offlinepush.OfflinePusher
-	groupLocalCache        *localcache.GroupLocalCache
-	conversationLocalCache *localcache.ConversationLocalCache
+	groupLocalCache        *rpccache.GroupLocalCache
+	conversationLocalCache *rpccache.ConversationLocalCache
 	msgRpcClient           *rpcclient.MessageRpcClient
 	conversationRpcClient  *rpcclient.ConversationRpcClient
 	groupRpcClient         *rpcclient.GroupRpcClient
@@ -59,7 +59,7 @@ type Pusher struct {
 var errNoOfflinePusher = errors.New("no offlinePusher is configured")
 
 func NewPusher(config *config.GlobalConfig, discov discoveryregistry.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
-	groupLocalCache *localcache.GroupLocalCache, conversationLocalCache *localcache.ConversationLocalCache,
+	groupLocalCache *rpccache.GroupLocalCache, conversationLocalCache *rpccache.ConversationLocalCache,
 	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient, msgRpcClient *rpcclient.MessageRpcClient,
 ) *Pusher {
 	return &Pusher{

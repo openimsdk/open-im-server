@@ -35,7 +35,7 @@ func (m *msgServer) PullMessageBySeqs(
 	resp.NotificationMsgs = make(map[string]*sdkws.PullMsgs)
 	for _, seq := range req.SeqRanges {
 		if !msgprocessor.IsNotification(seq.ConversationID) {
-			conversation, err := m.Conversation.GetConversation(ctx, req.UserID, seq.ConversationID)
+			conversation, err := m.ConversationLocalCache.GetConversation(ctx, req.UserID, seq.ConversationID)
 			if err != nil {
 				log.ZError(ctx, "GetConversation error", err, "conversationID", seq.ConversationID)
 				continue
@@ -138,7 +138,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 		}
 	}
 	if len(sendIDs) != 0 {
-		sendInfos, err := m.User.GetUsersInfo(ctx, sendIDs)
+		sendInfos, err := m.UserLocalCache.GetUsersInfo(ctx, sendIDs)
 		if err != nil {
 			return nil, err
 		}
@@ -147,7 +147,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 		}
 	}
 	if len(recvIDs) != 0 {
-		recvInfos, err := m.User.GetUsersInfo(ctx, recvIDs)
+		recvInfos, err := m.UserLocalCache.GetUsersInfo(ctx, recvIDs)
 		if err != nil {
 			return nil, err
 		}
@@ -156,7 +156,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 		}
 	}
 	if len(groupIDs) != 0 {
-		groupInfos, err := m.Group.GetGroupInfos(ctx, groupIDs, true)
+		groupInfos, err := m.GroupLocalCache.GetGroupInfos(ctx, groupIDs)
 		if err != nil {
 			return nil, err
 		}

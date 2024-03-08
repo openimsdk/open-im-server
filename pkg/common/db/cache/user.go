@@ -18,6 +18,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"hash/crc32"
 	"strconv"
 	"time"
@@ -32,8 +34,8 @@ import (
 )
 
 const (
-	userExpireTime            = time.Second * 60 * 60 * 12
-	userInfoKey               = "USER_INFO:"
+	userExpireTime = time.Second * 60 * 60 * 12
+	//userInfoKey               = "USER_INFO:"
 	userGlobalRecvMsgOptKey   = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
 	olineStatusKey            = "ONLINE_STATUS:"
 	userOlineStatusExpireTime = time.Second * 60 * 60 * 24
@@ -68,7 +70,11 @@ func NewUserCacheRedis(
 	options rockscache.Options,
 ) UserCache {
 	rcClient := rockscache.NewClient(rdb, options)
-
+	mc := NewMetaCacheRedis(rcClient)
+	u := config.Config.LocalCache.User
+	log.ZDebug(context.Background(), "user local cache init", "Topic", u.Topic, "SlotNum", u.SlotNum, "SlotSize", u.SlotSize, "enable", u.Enable())
+	mc.SetTopic(u.Topic)
+	mc.SetRawRedisClient(rdb)
 	return &UserCacheRedis{
 		rdb:        rdb,
 		metaCache:  NewMetaCacheRedis(rcClient),
@@ -81,7 +87,7 @@ func NewUserCacheRedis(
 func (u *UserCacheRedis) NewCache() UserCache {
 	return &UserCacheRedis{
 		rdb:        u.rdb,
-		metaCache:  NewMetaCacheRedis(u.rcClient, u.metaCache.GetPreDelKeys()...),
+		metaCache:  u.Copy(),
 		userDB:     u.userDB,
 		expireTime: u.expireTime,
 		rcClient:   u.rcClient,
@@ -89,18 +95,17 @@ func (u *UserCacheRedis) NewCache() UserCache {
 }
 
 func (u *UserCacheRedis) getUserInfoKey(userID string) string {
-	return userInfoKey + userID
+	return cachekey.GetUserInfoKey(userID)
 }
 
 func (u *UserCacheRedis) getUserGlobalRecvMsgOptKey(userID string) string {
-	return userGlobalRecvMsgOptKey + userID
+	return cachekey.GetUserGlobalRecvMsgOptKey(userID)
 }
 
 func (u *UserCacheRedis) GetUserInfo(ctx context.Context, userID string) (userInfo *relationtb.UserModel, err error) {
 	return getCache(ctx, u.rcClient, u.getUserInfoKey(userID), u.expireTime, func(ctx context.Context) (*relationtb.UserModel, error) {
 		return u.userDB.Take(ctx, userID)
-	},
-	)
+	})
 }
 
 func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationtb.UserModel, error) {

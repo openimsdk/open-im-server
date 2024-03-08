@@ -103,7 +103,9 @@ function openim::tools::start_service() {
   openim::log::status "Starting binary ${binary_name}..."
 
 
+
  ${cmd} 
+
 
 
  local status=$?

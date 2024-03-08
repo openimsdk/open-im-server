@@ -23,7 +23,6 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -58,22 +57,25 @@ type Server struct {
 	rpcPort        int
 	prometheusPort int
 	LongConnServer LongConnServer
-	pushTerminal   []int
 	config         *config.GlobalConfig
+	pushTerminal   map[int]struct{}
 }
 
 func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 	s.LongConnServer = LongConnServer
 }
 
-func NewServer(rpcPort int, proPort int, longConnServer LongConnServer, config *config.GlobalConfig) *Server {
-	return &Server{
+func NewServer(rpcPort int, proPort int, longConnServer LongConnServer, conf *config.GlobalConfig) *Server {
+	s := &Server{
 		rpcPort:        rpcPort,
 		prometheusPort: proPort,
 		LongConnServer: longConnServer,
-		pushTerminal:   []int{constant.IOSPlatformID, constant.AndroidPlatformID},
-		config:         config,
+		pushTerminal:   make(map[int]struct{}),
+		config:         conf,
 	}
+	s.pushTerminal[constant.IOSPlatformID] = struct{}{}
+	s.pushTerminal[constant.AndroidPlatformID] = struct{}{}
+	return s
 }
 
 func (s *Server) OnlinePushMsg(
@@ -127,13 +129,9 @@ func (s *Server) OnlineBatchPushOneMsg(
 	panic("implement me")
 }
 
-func (s *Server) SuperGroupOnlineBatchPushOneMsg(
-	ctx context.Context,
-	req *msggateway.OnlineBatchPushOneMsgReq,
+func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq,
 ) (*msggateway.OnlineBatchPushOneMsgResp, error) {
-
 	var singleUserResults []*msggateway.SingleMsgToUserResults
-
 	for _, v := range req.PushToUserIDs {
 		var resp []*msggateway.SingleMsgToUserPlatform
 		results := &msggateway.SingleMsgToUserResults{
@@ -154,23 +152,22 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(
 			}
 
 			userPlatform := &msggateway.SingleMsgToUserPlatform{
-				RecvID:         v,
 				RecvPlatFormID: int32(client.PlatformID),
 			}
 			if !client.IsBackground ||
 				(client.IsBackground && client.PlatformID != constant.IOSPlatformID) {
 				err := client.PushMessage(ctx, req.MsgData)
 				if err != nil {
-					userPlatform.ResultCode = -2
+					userPlatform.ResultCode = int64(errs.ErrPushMsgErr.Code())
 					resp = append(resp, userPlatform)
 				} else {
-					if utils.IsContainInt(client.PlatformID, s.pushTerminal) {
+					if _, ok := s.pushTerminal[client.PlatformID]; ok {
 						results.OnlinePush = true
 						resp = append(resp, userPlatform)
 					}
 				}
 			} else {
-				userPlatform.ResultCode = -3
+				userPlatform.ResultCode = int64(errs.ErrIOSBackgroundPushErr.Code())
 				resp = append(resp, userPlatform)
 			}
 		}
