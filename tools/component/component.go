@@ -128,12 +128,12 @@ func main() {
 		component.ErrorPrint("Some components checked failed!")
 		os.Exit(-1)
 	}
-
-	var errMinioNotEnabled = errors.New("minio.Enable is not configured to use MinIO")
-
-	var errSignEndPoint = errors.New("minio.signEndPoint contains 127.0.0.1, causing issues with image sending")
-	var errApiURL = errors.New("object.apiURL contains 127.0.0.1, causing issues with image sending")
 }
+
+var errMinioNotEnabled = errors.New("minio.Enable is not configured to use MinIO")
+
+var errSignEndPoint = errors.New("minio.signEndPoint contains 127.0.0.1, causing issues with image sending")
+var errApiURL = errors.New("object.apiURL contains 127.0.0.1, causing issues with image sending")
 
 // checkMongo checks the MongoDB connection without retries
 func checkMongo(config *config.GlobalConfig) error {
