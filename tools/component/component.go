@@ -79,7 +79,6 @@ func main() {
 		fmt.Printf("configGetEnv failed, err:%v", err)
 		return
 	}
-	
 
 	checks := []checkFunc{
 		//{name: "Mysql", function: checkMysql},
@@ -112,28 +111,29 @@ func main() {
 							continue
 						}
 
-					allSuccess = false
-					component.ErrorPrint(fmt.Sprintf("Check component: %s, failed: %+v", check.name, err))
-					break
+						allSuccess = false
+						component.ErrorPrint(fmt.Sprintf("Check component: %s, failed: %+v", check.name, err))
+						break
+					}
+					checks[index].flag = true
+					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 				}
-				checks[index].flag = true
-				component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
+			}
+
+			if allSuccess {
+				component.SuccessPrint("All components started successfully!")
+				return
 			}
 		}
-
-		if allSuccess {
-			component.SuccessPrint("All components started successfully!")
-			return
-		}
+		component.ErrorPrint("Some components checked failed!")
+		os.Exit(-1)
 	}
-	component.ErrorPrint("Some components checked failed!")
-	os.Exit(-1)
+
+	var errMinioNotEnabled = errors.New("minio.Enable is not configured to use MinIO")
+
+	var errSignEndPoint = errors.New("minio.signEndPoint contains 127.0.0.1, causing issues with image sending")
+	var errApiURL = errors.New("object.apiURL contains 127.0.0.1, causing issues with image sending")
 }
-
-var errMinioNotEnabled = errors.New("minio.Enable is not configured to use MinIO")
-
-var errSignEndPoint = errors.New("minio.signEndPoint contains 127.0.0.1, causing issues with image sending")
-var errApiURL = errors.New("object.apiURL contains 127.0.0.1, causing issues with image sending")
 
 // checkMongo checks the MongoDB connection without retries
 func checkMongo(config *config.GlobalConfig) error {
