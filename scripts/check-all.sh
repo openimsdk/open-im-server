@@ -31,7 +31,6 @@ if openim::util::is_running_in_container; then
 fi
 
 
-
 OPENIM_VERBOSE=4
 
 openim::log::info "\n# Begin to check all openim service"
@@ -105,6 +104,7 @@ if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "check process failed.\n "
   echo "$result"
+  exit 1
 else
   openim::log::success "All openim services are running normally! "
 fi

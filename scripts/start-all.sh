@@ -67,6 +67,7 @@ if openim::util::is_running_in_container; then
 fi
 
 
+
 openim::golang::check_openim_binaries
 if [[ $? -ne 0 ]]; then
   openim::log::error "OpenIM binaries are not found. Please run 'make build' to build binaries."
