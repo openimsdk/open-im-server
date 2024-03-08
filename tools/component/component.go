@@ -113,7 +113,7 @@ func main() {
 						}
 
 					allSuccess = false
-					component.ErrorPrint(fmt.Sprintf("Check component: %s failed:%v.", check.name, err.Error()))
+					component.ErrorPrint(fmt.Sprintf("Check component: %s, failed: %s", check.name, err.Error()))
 					break
 				}
 				checks[index].flag = true
