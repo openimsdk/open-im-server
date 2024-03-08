@@ -17,12 +17,12 @@ package third
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/tools/errs"
 	"net/url"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
