@@ -101,7 +101,7 @@ function openim::tools::start_service() {
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
   openim::log::status "Starting binary ${binary_name}..."
- ${cmd} >>"${LOG_FILE}" 2> >(tee -a "${LOG_FILE}" >&2)
+ ${cmd} 
  local status=$?
 
     if [ $status -eq 0 ]; then
