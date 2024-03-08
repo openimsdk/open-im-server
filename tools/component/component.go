@@ -102,6 +102,7 @@ func main() {
 			if !check.flag {
 				err = check.function(check.config)
 				if err != nil {
+
 					if check.name == "Minio" {
 						if errors.Is(err, errMinioNotEnabled) {
 							fmt.Println(err.Error(), " check ", check.name)
@@ -112,6 +113,7 @@ func main() {
 							checks[index].flag = true
 						}
 					}
+
 
 					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, errs.Unwrap(err).Error()))
 					if strings.Contains(errs.Unwrap(err).Error(), "connection refused") ||
