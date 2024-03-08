@@ -119,14 +119,14 @@ func main() {
 				}
 			}
 
-			if allSuccess {
-				component.SuccessPrint("All components started successfully!")
-				return
-			}
 		}
-		component.ErrorPrint("Some components checked failed!")
-		os.Exit(-1)
+		if allSuccess {
+			component.SuccessPrint("All components started successfully!")
+			return
+		}
 	}
+	component.ErrorPrint("Some components checked failed!")
+	os.Exit(-1)
 }
 
 var errMinioNotEnabled = errors.New("minio.Enable is not configured to use MinIO")
