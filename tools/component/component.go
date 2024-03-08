@@ -93,7 +93,7 @@ func main() {
 		if i != 0 {
 			time.Sleep(1 * time.Second)
 		}
-		fmt.Printf("Checking components Round %v...\n", i+1)
+		fmt.Printf("Checking components round %v...\n", i+1)
 
 		var err error
 		allSuccess := true
