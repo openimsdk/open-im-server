@@ -102,7 +102,7 @@ func main() {
 				err = check.function(check.config)
 				if err != nil {
 					allSuccess = false
-					component.ErrorPrint(fmt.Sprintf("Check component: %s, failed: %s", check.name, errs.Unwrap(err).Error()))
+					component.ErrorPrint(fmt.Sprintf("Check component: %s, failed: %v", check.name, errs.Unwrap(err).Error()))
 					if check.name == "Minio" {
 						if errors.Is(err, errMinioNotEnabled) ||
 							errors.Is(err, errSignEndPoint) ||
