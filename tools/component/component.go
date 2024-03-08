@@ -79,6 +79,7 @@ func main() {
 		fmt.Printf("configGetEnv failed, err:%v", err)
 		return
 	}
+	
 
 	checks := []checkFunc{
 		//{name: "Mysql", function: checkMysql},
@@ -101,6 +102,7 @@ func main() {
 			if !check.flag {
 				err = check.function(check.config)
 				if err != nil {
+
 					if check.name == "Minio" {
 						if errors.Is(err, errMinioNotEnabled) ||
 							errors.Is(err, errSignEndPoint) ||
@@ -109,7 +111,7 @@ func main() {
 							checks[index].flag = true
 							continue
 						}
-					}
+
 					allSuccess = false
 					component.ErrorPrint(fmt.Sprintf("Check component: %s failed:%v.", check.name, err.Error()))
 					break
