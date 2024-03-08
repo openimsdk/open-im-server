@@ -80,6 +80,7 @@ func main() {
 		fmt.Printf("configGetEnv failed, err:%v", err)
 		return
 	}
+	
 
 	checks := []checkFunc{
 		//{name: "Mysql", function: checkMysql},
