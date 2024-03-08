@@ -103,28 +103,20 @@ func main() {
 				err = check.function(check.config)
 				if err != nil {
 					if check.name == "Minio" {
-						if errors.Is(err, errMinioNotEnabled) {
-							fmt.Println(err.Error(), " check ", check.name)
-							checks[index].flag = true
-						}
-						if errors.Is(err, errSignEndPoint) {
+						if errors.Is(err, errMinioNotEnabled) ||
+							errors.Is(err, errSignEndPoint) ||
+							errors.Is(err, errApiURL) {
 							fmt.Fprintf(os.Stderr, err.Error(), " check ", check.name)
 							checks[index].flag = true
+							continue
 						}
 					}
-
-					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, errs.Unwrap(err).Error()))
-					if strings.Contains(errs.Unwrap(err).Error(), "connection refused") ||
-						strings.Contains(errs.Unwrap(err).Error(), "timeout") ||
-						strings.Contains(errs.Unwrap(err).Error(), "context deadline exceeded") {
-						component.ErrorPrint(fmt.Sprintf("try check connection %s", check.name))
-						allSuccess = false
-						break
-					}
-				} else {
-					checks[index].flag = true
-					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
+					allSuccess = false
+					component.ErrorPrint(fmt.Sprintf("Check component: %s failed:%v.", check.name, errs.Error()))
+					break
 				}
+				checks[index].flag = true
+				component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 			}
 		}
 
@@ -133,7 +125,7 @@ func main() {
 			return
 		}
 	}
-	component.ErrorPrint("Some components started failed!")
+	component.ErrorPrint("Some components checked failed!")
 	os.Exit(-1)
 }
 

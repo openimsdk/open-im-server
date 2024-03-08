@@ -1,4 +1,4 @@
-\Users\17191\GolandProjects\awesomeProject>#!/usr/bin/env bash
+#!/usr/bin/env bash
 
 # Copyright © 2023 OpenIM. All rights reserved.
 #
@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 
 # shellcheck disable=SC2034 # Variables sourced in other scripts.
 
