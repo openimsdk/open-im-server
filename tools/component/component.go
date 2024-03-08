@@ -111,14 +111,13 @@ func main() {
 							checks[index].flag = true
 							continue
 						}
-						break
+            break
 					}
 				} else {
 					checks[index].flag = true
 					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 				}
 			}
-
 		}
 		if allSuccess {
 			component.SuccessPrint("All components started successfully!")
