@@ -297,9 +297,9 @@ func configGetEnv(config *config.GlobalConfig) error {
 	config.Mongo.Password = getEnv("MONGO_OPENIM_PASSWORD", config.Mongo.Password)
 	config.Mongo.Address = getArrEnv("MONGO_ADDRESS", "MONGO_PORT", config.Mongo.Address)
 	config.Mongo.Database = getEnv("MONGO_DATABASE", config.Mongo.Database)
-	maxPoolSize, err := getEnvInt("MONGO_DATABASE", config.Mongo.MaxPoolSize)
+	maxPoolSize, err := getEnvInt("MONGO_MAX_POOL_SIZE", config.Mongo.MaxPoolSize)
 	if err != nil {
-		return err
+		return errs.Wrap(err, "MONGO_MAX_POOL_SIZE")
 	}
 	config.Mongo.MaxPoolSize = maxPoolSize
 
