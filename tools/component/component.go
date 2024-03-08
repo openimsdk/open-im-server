@@ -31,7 +31,6 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
 	"gopkg.in/yaml.v3"
 )
 
@@ -80,7 +79,6 @@ func main() {
 		fmt.Printf("configGetEnv failed, err:%v", err)
 		return
 	}
-	
 
 	checks := []checkFunc{
 		//{name: "Mysql", function: checkMysql},
@@ -95,7 +93,7 @@ func main() {
 		if i != 0 {
 			time.Sleep(1 * time.Second)
 		}
-		fmt.Printf("Checking components Round %v...\n", i+1)
+		fmt.Printf("Checking components round %v...\n", i+1)
 
 		var err error
 		allSuccess := true
@@ -103,25 +101,16 @@ func main() {
 			if !check.flag {
 				err = check.function(check.config)
 				if err != nil {
-
+					allSuccess = false
+					component.ErrorPrint(fmt.Sprintf("Check component: %s, failed: %s", check.name, err.Error()))
 					if check.name == "Minio" {
-						if errors.Is(err, errMinioNotEnabled) {
-							fmt.Println(err.Error(), " check ", check.name)
-							checks[index].flag = true
-						}
-						if errors.Is(err, errSignEndPoint) {
+						if errors.Is(err, errMinioNotEnabled) ||
+							errors.Is(err, errSignEndPoint) ||
+							errors.Is(err, errApiURL) {
 							fmt.Fprintf(os.Stderr, err.Error(), " check ", check.name)
 							checks[index].flag = true
+							continue
 						}
-					}
-
-
-					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, errs.Unwrap(err).Error()))
-					if strings.Contains(errs.Unwrap(err).Error(), "connection refused") ||
-						strings.Contains(errs.Unwrap(err).Error(), "timeout") ||
-						strings.Contains(errs.Unwrap(err).Error(), "context deadline exceeded") {
-						component.ErrorPrint(fmt.Sprintf("try check connection %s", check.name))
-						allSuccess = false
 						break
 					}
 				} else {
@@ -129,14 +118,14 @@ func main() {
 					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 				}
 			}
-		}
 
+		}
 		if allSuccess {
 			component.SuccessPrint("All components started successfully!")
 			return
 		}
 	}
-	component.ErrorPrint("Some components started failed!")
+	component.ErrorPrint("Some components checked failed!")
 	os.Exit(-1)
 }
 
@@ -174,13 +163,13 @@ func checkRedis(config *config.GlobalConfig) error {
 // checkMinio checks the MinIO connection
 func checkMinio(config *config.GlobalConfig) error {
 	if strings.Contains(config.Object.ApiURL, "127.0.0.1") {
-		return errs.Wrap(errApiURL, "config.Object.ApiURL: "+config.Object.ApiURL)
+		return errs.Wrap(errApiURL)
 	}
 	if config.Object.Enable != "minio" {
-		return errs.Wrap(errMinioNotEnabled, "config.Object.Enable: "+config.Object.Enable)
+		return errs.Wrap(errMinioNotEnabled)
 	}
 	if strings.Contains(config.Object.Minio.Endpoint, "127.0.0.1") {
-		return errs.Wrap(errSignEndPoint, "config.Object.Minio.Endpoint: "+config.Object.Minio.Endpoint)
+		return errs.Wrap(errSignEndPoint)
 	}
 
 	minio := &component.Minio{
