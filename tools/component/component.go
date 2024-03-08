@@ -113,6 +113,7 @@ func main() {
 						component.ErrorPrint(fmt.Sprintf("Check component: %s, failed: %+v", check.name, err))
 						break
 					}
+				} else {
 					checks[index].flag = true
 					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 				}
