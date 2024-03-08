@@ -102,7 +102,6 @@ function openim::tools::start_service() {
   fi
   openim::log::status "Starting binary ${binary_name}..."
   ${cmd} | tee -a "${LOG_FILE}"
-  echo "11111111111111file: " ${LOG_FILE} $TMP_LOG_FILE
   ${cmd} >> "${LOG_FILE}" 2>&1
     local status=$?
 
