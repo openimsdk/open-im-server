@@ -66,15 +66,14 @@ type checkFunc struct {
 }
 
 // colorErrPrint prints formatted string in red to stderr
-func colorErrPrint(format string, a ...interface{}) {
+func colorErrPrint(msg string) {
 	// ANSI escape code for red text
 	const redColor = "\033[31m"
 	// ANSI escape code to reset color
 	const resetColor = "\033[0m"
 	// Format the string as per provided format and arguments
-	errMsg := fmt.Sprintf(format, a...)
 	// Print to stderr in red
-	fmt.Fprintf(os.Stderr, redColor+errMsg+resetColor)
+	fmt.Fprintf(os.Stderr, "%s", msg)
 }
 
 func colorSuccessPrint(format string, a ...interface{}) {
@@ -125,7 +124,7 @@ func main() {
 						if errors.Is(err, errMinioNotEnabled) ||
 							errors.Is(err, errSignEndPoint) ||
 							errors.Is(err, errApiURL) {
-							colorErrPrint("Check ", check.name, err.Error())
+							colorErrPrint(fmt.Sprintf("Check: %s, failed: %s", check.name, err.Error()))
 							checks[index].flag = true
 							continue
 						}
