@@ -6,7 +6,6 @@ use (
     ./tools/codescan
 	./tools/changelog
 	./tools/component
-	./tools/data-conversion
 	./tools/formitychecker
 	./tools/imctl
 	./tools/infra
