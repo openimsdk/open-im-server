@@ -25,5 +25,5 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 openim::log::info "\n# Use Docker to start all openim service"
 trap 'openim::util::onCtrlC' INT
-"${OPENIM_ROOT}"/scripts/start-all.sh
+"${OPENIM_ROOT}"/scripts/start-all.sh 2>&1 &
 tail -f ${DOCKER_LOG_FILE}
