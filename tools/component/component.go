@@ -314,7 +314,7 @@ func configGetEnv(config *config.GlobalConfig) error {
 
 	config.Redis.Username = getEnv("REDIS_USERNAME", config.Redis.Username)
 	config.Redis.Password = getEnv("REDIS_PASSWORD", config.Redis.Password)
-	config.Redis.Address = getArrEnv("REDIS_ADDRESS", "REDIS_PASSWORD", config.Redis.Address)
+	config.Redis.Address = getArrEnv("REDIS_ADDRESS", "REDIS_PORT", config.Redis.Address)
 
 	config.Object.ApiURL = getEnv("OBJECT_APIURL", config.Object.ApiURL)
 	config.Object.Minio.Endpoint = getEnv("MINIO_ENDPOINT", config.Object.Minio.Endpoint)
