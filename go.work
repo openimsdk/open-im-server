@@ -11,7 +11,6 @@ use (
 	./tools/infra
 	./tools/ncpu
 	./tools/openim-web
-	./tools/up35
 	./tools/url2im
 	./tools/versionchecker
 	./tools/yamlfmt
