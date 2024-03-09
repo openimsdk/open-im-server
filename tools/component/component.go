@@ -71,8 +71,7 @@ func colorErrPrint(msg string) {
 	const redColor = "\033[31m"
 	// ANSI escape code to reset color
 	const resetColor = "\033[0m"
-	msg = resetColor + msg + resetColor
-	// Format the string as per provided format and arguments
+	msg = redColor + msg + resetColor
 	// Print to stderr in red
 	fmt.Fprintf(os.Stderr, "%s\n", msg)
 }
