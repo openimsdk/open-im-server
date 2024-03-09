@@ -1795,10 +1795,6 @@ openim::util::stop_services_on_ports() {
         return 0
     fi
 }
-# nc -l -p 12345
-# nc -l -p 123456
-# ps -ef | grep "nc -l"
-# openim::util::stop_services_on_ports 1234 12345
 
 
 # The `openim::util::stop_services_with_name` function stops services with specified names.
