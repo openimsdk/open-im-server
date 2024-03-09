@@ -124,7 +124,6 @@ func main() {
 						if errors.Is(err, errMinioNotEnabled) ||
 							errors.Is(err, errSignEndPoint) ||
 							errors.Is(err, errApiURL) {
-							colorErrPrint(fmt.Sprintf("Check: %s, failed: %s", check.name, err.Error()))
 							checks[index].flag = true
 							continue
 						}
