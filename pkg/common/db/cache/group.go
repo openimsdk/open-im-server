@@ -17,8 +17,6 @@ package cache
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -26,6 +24,8 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/dtm-labs/rockscache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/redis/go-redis/v9"
 )
@@ -38,7 +38,7 @@ const (
 	//groupMemberInfoKey  = "GROUP_MEMBER_INFO:"
 	//joinedGroupsKey            = "JOIN_GROUPS_KEY:"
 	//groupMemberNumKey          = "GROUP_MEMBER_NUM_CACHE:"
-	//groupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:"
+	//groupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:".
 )
 
 type GroupHash interface {

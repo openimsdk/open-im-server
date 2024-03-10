@@ -1,7 +1,22 @@
+// Copyright © 2024 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package rpccache
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
@@ -49,7 +64,7 @@ func (f *FriendLocalCache) IsFriend(ctx context.Context, possibleFriendUserID, u
 	}, cachekey.GetFriendIDsKey(possibleFriendUserID)))
 }
 
-// IsBlack possibleBlackUserID selfUserID
+// IsBlack possibleBlackUserID selfUserID.
 func (f *FriendLocalCache) IsBlack(ctx context.Context, possibleBlackUserID, userID string) (val bool, err error) {
 	log.ZDebug(ctx, "FriendLocalCache IsBlack req", "possibleBlackUserID", possibleBlackUserID, "userID", userID)
 	defer func() {

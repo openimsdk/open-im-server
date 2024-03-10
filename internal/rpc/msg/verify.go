@@ -16,7 +16,6 @@ package msg
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/log"
 	"math/rand"
 	"strconv"
 	"time"
@@ -25,6 +24,7 @@ import (
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
 )
 

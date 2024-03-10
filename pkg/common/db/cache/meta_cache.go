@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/redis/go-redis/v9"
 	"fmt"
 	"time"
 
@@ -27,6 +26,7 @@ import (
 	"github.com/OpenIMSDK/tools/mw/specialerror"
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/dtm-labs/rockscache"
+	"github.com/redis/go-redis/v9"
 )
 
 const (

@@ -16,15 +16,15 @@ package cache
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"math/big"
 	"strings"
 	"time"
 
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/dtm-labs/rockscache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/redis/go-redis/v9"
 )
@@ -37,7 +37,7 @@ const (
 	//recvMsgOptKey                            = "RECV_MSG_OPT:"
 	//superGroupRecvMsgNotNotifyUserIDsKey     = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
 	//superGroupRecvMsgNotNotifyUserIDsHashKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS_HASH:"
-	//conversationNotReceiveMessageUserIDsKey  = "CONVERSATION_NOT_RECEIVE_MESSAGE_USER_IDS:"
+	//conversationNotReceiveMessageUserIDsKey  = "CONVERSATION_NOT_RECEIVE_MESSAGE_USER_IDS:".
 
 	conversationExpireTime = time.Second * 60 * 60 * 12
 )

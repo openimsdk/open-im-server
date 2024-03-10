@@ -18,8 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"hash/crc32"
 	"strconv"
 	"time"
@@ -29,13 +27,15 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/dtm-labs/rockscache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/redis/go-redis/v9"
 )
 
 const (
 	userExpireTime = time.Second * 60 * 60 * 12
-	//userInfoKey               = "USER_INFO:"
+	//userInfoKey               = "USER_INFO:".
 	userGlobalRecvMsgOptKey   = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
 	olineStatusKey            = "ONLINE_STATUS:"
 	userOlineStatusExpireTime = time.Second * 60 * 60 * 24
