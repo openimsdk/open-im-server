@@ -17,9 +17,10 @@ package config
 import (
 	_ "embed"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"reflect"
 	"testing"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 )

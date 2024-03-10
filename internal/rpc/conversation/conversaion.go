@@ -528,7 +528,10 @@ func (c *conversationServer) getConversationInfo(
 	return conversationMsg, nil
 }
 
-func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(ctx context.Context, req *pbconversation.GetConversationNotReceiveMessageUserIDsReq) (*pbconversation.GetConversationNotReceiveMessageUserIDsResp, error) {
+func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(
+	ctx context.Context,
+	req *pbconversation.GetConversationNotReceiveMessageUserIDsReq,
+) (*pbconversation.GetConversationNotReceiveMessageUserIDsResp, error) {
 	userIDs, err := c.conversationDatabase.GetConversationNotReceiveMessageUserIDs(ctx, req.ConversationID)
 	if err != nil {
 		return nil, err
