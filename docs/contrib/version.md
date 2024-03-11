@@ -234,5 +234,5 @@ More on multi-branch version management design and version management design at 
 
 About Helm's version management strategy for Multiple Apps and multiple Services:
 
-+ [中文版本管理文档](https://github.com/openimsdk/helm-charts/blob/feat/support-openim-v3.6/docs/contrib/version-zh.md)
-+ [English version management documents](https://github.com/openimsdk/helm-charts/blob/feat/support-openim-v3.6/docs/contrib/version.md)
++ [中文版本管理文档](https://github.com/openimsdk/helm-charts/blob/main/docs/contrib/version-zh.md)
++ [English version management documents](https://github.com/openimsdk/helm-charts/blob/main/docs/contrib/version.md)
