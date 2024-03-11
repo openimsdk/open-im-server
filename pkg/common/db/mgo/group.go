@@ -16,6 +16,7 @@ package mgo
 
 import (
 	"context"
+	"github.com/OpenIMSDK/protocol/constant"
 	"time"
 
 	"github.com/OpenIMSDK/tools/errs"
@@ -69,7 +70,8 @@ func (g *GroupMgo) Take(ctx context.Context, groupID string) (group *relation.Gr
 }
 
 func (g *GroupMgo) Search(ctx context.Context, keyword string, pagination pagination.Pagination) (total int64, groups []*relation.GroupModel, err error) {
-	return mgoutil.FindPage[*relation.GroupModel](ctx, g.coll, bson.M{"group_name": bson.M{"$regex": keyword}}, pagination)
+	return mgoutil.FindPage[*relation.GroupModel](ctx, g.coll, bson.M{"group_name": bson.M{"$regex": keyword},
+		"status": bson.M{"$ne": constant.GroupStatusDismissed}}, pagination)
 }
 
 func (g *GroupMgo) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
