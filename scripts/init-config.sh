@@ -150,6 +150,12 @@ process_file() {
       exit 1
     fi
     if [[ -n "${env_cmd}" ]]; then
+
+    {
+        printf "debugggggggggggggggggggg file: %s template: %s\n" "${ENV_FILE}" "${template}"
+    } | tee /tmp/debug.log
+
+
       eval "$env_cmd ${OPENIM_ROOT}/scripts/genconfig.sh '${ENV_FILE}' '${template}' > '${output_file}'" || {
         openim::log::error "Error processing template file ${template}"
         exit 1

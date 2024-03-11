@@ -22,8 +22,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"google.golang.org/grpc"
 )
@@ -33,12 +33,11 @@ type (
 	msgServer               struct {
 		RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
 		MsgDatabase            controller.CommonMsgDatabase
-		Group                  *rpcclient.GroupRpcClient
-		User                   *rpcclient.UserRpcClient
 		Conversation           *rpcclient.ConversationRpcClient
-		friend                 *rpcclient.FriendRpcClient
-		GroupLocalCache        *localcache.GroupLocalCache
-		ConversationLocalCache *localcache.ConversationLocalCache
+		UserLocalCache         *rpccache.UserLocalCache
+		FriendLocalCache       *rpccache.FriendLocalCache
+		GroupLocalCache        *rpccache.GroupLocalCache
+		ConversationLocalCache *rpccache.ConversationLocalCache
 		Handlers               MessageInterceptorChain
 		notificationSender     *rpcclient.NotificationSender
 		config                 *config.GlobalConfig
@@ -84,13 +83,12 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	}
 	s := &msgServer{
 		Conversation:           &conversationClient,
-		User:                   &userRpcClient,
-		Group:                  &groupRpcClient,
 		MsgDatabase:            msgDatabase,
 		RegisterCenter:         client,
-		GroupLocalCache:        localcache.NewGroupLocalCache(&groupRpcClient),
-		ConversationLocalCache: localcache.NewConversationLocalCache(&conversationClient),
-		friend:                 &friendRpcClient,
+		UserLocalCache:         rpccache.NewUserLocalCache(userRpcClient, rdb),
+		GroupLocalCache:        rpccache.NewGroupLocalCache(groupRpcClient, rdb),
+		ConversationLocalCache: rpccache.NewConversationLocalCache(conversationClient, rdb),
+		FriendLocalCache:       rpccache.NewFriendLocalCache(friendRpcClient, rdb),
 		config:                 config,
 	}
 	s.notificationSender = rpcclient.NewNotificationSender(config, rpcclient.WithLocalSendMsg(s.SendMsg))

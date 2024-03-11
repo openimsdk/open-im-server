@@ -104,6 +104,7 @@ if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error "check process failed.\n "
   echo "$result"
+  exit 1
 else
   openim::log::success "All openim services are running normally! "
 fi

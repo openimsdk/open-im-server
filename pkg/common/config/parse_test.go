@@ -16,8 +16,11 @@ package config
 
 import (
 	_ "embed"
+	"fmt"
 	"reflect"
 	"testing"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 )
@@ -115,4 +118,14 @@ func TestInitConfig(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestName(t *testing.T) {
+	Config.LocalCache.Friend.Topic = "friend"
+	Config.LocalCache.Friend.SlotNum = 500
+	Config.LocalCache.Friend.SlotSize = 20000
+
+	data, _ := yaml.Marshal(&Config)
+
+	fmt.Println(string(data))
 }
