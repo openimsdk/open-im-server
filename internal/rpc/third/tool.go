@@ -24,7 +24,6 @@ import (
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 )
 

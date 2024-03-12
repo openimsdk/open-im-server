@@ -24,7 +24,6 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/gin-gonic/gin"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
