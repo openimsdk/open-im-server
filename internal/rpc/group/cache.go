@@ -18,6 +18,7 @@ import (
 	"context"
 
 	pbgroup "github.com/OpenIMSDK/protocol/group"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 )
 

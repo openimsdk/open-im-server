@@ -26,12 +26,13 @@ import (
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-	table "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/protobuf/proto"
+
+	table "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
 var ErrMsgListNotExist = errors.New("user not have msg in mongoDB")

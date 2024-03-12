@@ -19,10 +19,11 @@ import (
 
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/localcache"
+	"github.com/redis/go-redis/v9"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	"github.com/redis/go-redis/v9"
 )
 
 func NewFriendLocalCache(client rpcclient.FriendRpcClient, cli redis.UniversalClient) *FriendLocalCache {

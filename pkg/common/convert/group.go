@@ -19,6 +19,7 @@ import (
 
 	pbgroup "github.com/OpenIMSDK/protocol/group"
 	sdkws "github.com/OpenIMSDK/protocol/sdkws"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 

@@ -21,6 +21,7 @@ import (
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 

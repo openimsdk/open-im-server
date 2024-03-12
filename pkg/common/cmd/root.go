@@ -20,9 +20,10 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/spf13/cobra"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/spf13/cobra"
 )
 
 type RootCmdPt interface {
