@@ -215,25 +215,22 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	// Set the receiver ID in the message data.
 	sendMsgReq.MsgData.RecvID = req.RecvID
 
-	// Declare a variable to store the message sending status.
-	var status int
-
 	// Attempt to send the message using the client.
 	respPb, err := m.Client.SendMsg(c, sendMsgReq)
 	if err != nil {
 		// Set the status to failed and respond with an error if sending fails.
-		status = constant.MsgSendFailed
 		apiresp.GinError(c, err)
 		return
 	}
 
 	// Set the status to successful if the message is sent.
-	status = constant.MsgSendSuccessed
+	var status int = constant.MsgSendSuccessed
 
 	// Attempt to update the message sending status in the system.
 	_, err = m.Client.SetSendMsgStatus(c, &msg.SetSendMsgStatusReq{
 		Status: int32(status),
 	})
+
 	if err != nil {
 		// Log the error if updating the status fails.
 		apiresp.GinError(c, err)

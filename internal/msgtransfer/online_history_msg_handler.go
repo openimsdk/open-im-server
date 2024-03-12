@@ -184,12 +184,11 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 		options2 := msgprocessor.Options(msg.Options)
 		if options2.IsHistory() {
 			return true
-		} else {
-			// if !(!options2.IsSenderSync() && conversationID == msg.MsgData.SendID) {
-			// 	return false
-			// }
-			return false
 		}
+		// if !(!options2.IsSenderSync() && conversationID == msg.MsgData.SendID) {
+		// 	return false
+		// }
+		return false
 	}
 	for _, v := range totalMsgs {
 		options := msgprocessor.Options(v.message.Options)
