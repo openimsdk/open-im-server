@@ -126,10 +126,7 @@ func (f *FriendNotificationSender) UserInfoUpdatedNotification(ctx context.Conte
 	return f.Notification(ctx, mcontext.GetOpUserID(ctx), changedUserID, constant.UserInfoUpdatedNotification, &tips)
 }
 
-func (f *FriendNotificationSender) FriendApplicationAddNotification(
-	ctx context.Context,
-	req *pbfriend.ApplyToAddFriendReq,
-) error {
+func (f *FriendNotificationSender) FriendApplicationAddNotification(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) error {
 	tips := sdkws.FriendApplicationTips{FromToUserID: &sdkws.FromToUserID{
 		FromUserID: req.FromUserID,
 		ToUserID:   req.ToUserID,

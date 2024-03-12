@@ -26,7 +26,6 @@ func GetContent(msg *sdkws.MsgData) string {
 		_ = proto.Unmarshal(msg.Content, &tips)
 		content := tips.JsonDetail
 		return content
-	} else {
-		return string(msg.Content)
 	}
+	return string(msg.Content)
 }

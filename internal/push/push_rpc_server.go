@@ -90,9 +90,8 @@ func (r *pushServer) PushMsg(ctx context.Context, pbData *pbpush.PushMsgReq) (re
 	if err != nil {
 		if err != errNoOfflinePusher {
 			return nil, err
-		} else {
-			log.ZWarn(ctx, "offline push failed", err, "msg", pbData.String())
 		}
+		log.ZWarn(ctx, "offline push failed", err, "msg", pbData.String())
 	}
 	return &pbpush.PushMsgResp{}, nil
 }
