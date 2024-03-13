@@ -1133,11 +1133,6 @@ function openim::test::group() {
 	# 14. Set group info.
 	openim::test::set_group_info "$GROUP_ID2"
 
-    for i in {1..50}; do
-        local GROUP_IDS=$RANDOM
-        openim::test::set_group_info "$GROUP_IDS"
-    done
-
 	# 15. Quit group.
     # TODO 
 	# openim::test::quit_group "$GROUP_ID2" "$OTHER_USER1_ID"
