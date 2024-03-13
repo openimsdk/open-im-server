@@ -18,13 +18,12 @@ import (
 	"context"
 
 	pbgroup "github.com/OpenIMSDK/protocol/group"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 )
 
-func (s *groupServer) GetGroupInfoCache(
-	ctx context.Context,
-	req *pbgroup.GetGroupInfoCacheReq,
-) (resp *pbgroup.GetGroupInfoCacheResp, err error) {
+// GetGroupInfoCache get group info from cache
+func (s *groupServer) GetGroupInfoCache(ctx context.Context, req *pbgroup.GetGroupInfoCacheReq) (resp *pbgroup.GetGroupInfoCacheResp, err error) {
 	group, err := s.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
@@ -33,10 +32,7 @@ func (s *groupServer) GetGroupInfoCache(
 	return resp, nil
 }
 
-func (s *groupServer) GetGroupMemberCache(
-	ctx context.Context,
-	req *pbgroup.GetGroupMemberCacheReq,
-) (resp *pbgroup.GetGroupMemberCacheResp, err error) {
+func (s *groupServer) GetGroupMemberCache(ctx context.Context, req *pbgroup.GetGroupMemberCacheReq) (resp *pbgroup.GetGroupMemberCacheResp, err error) {
 	members, err := s.db.TakeGroupMember(ctx, req.GroupID, req.GroupMemberID)
 	if err != nil {
 		return nil, err

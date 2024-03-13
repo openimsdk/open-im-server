@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"gopkg.in/yaml.v3"
 )
 
@@ -150,6 +151,7 @@ type Aws struct {
 	AccessKeySecret string `yaml:"accessKeySecret"`
 	PublicRead      bool   `yaml:"publicRead"`
 }
+
 type Object struct {
 	Enable string `yaml:"enable"`
 	ApiURL string `yaml:"apiURL"`
@@ -159,10 +161,12 @@ type Object struct {
 	Kodo   Kodo   `yaml:"kodo"`
 	Aws    Aws    `yaml:"aws"`
 }
+
 type Api struct {
 	OpenImApiPort []int  `yaml:"openImApiPort"`
 	ListenIP      string `yaml:"listenIP"`
 }
+
 type RpcPort struct {
 	OpenImUserPort           []int `yaml:"openImUserPort"`
 	OpenImFriendPort         []int `yaml:"openImFriendPort"`
@@ -175,6 +179,7 @@ type RpcPort struct {
 	OpenImRtcPort            []int `yaml:"openImRtcPort"`
 	OpenImThirdPort          []int `yaml:"openImThirdPort"`
 }
+
 type LongConnSvr struct {
 	OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
 	OpenImWsPort             []int `yaml:"openImWsPort"`
@@ -183,6 +188,7 @@ type LongConnSvr struct {
 	WebsocketTimeout         int   `yaml:"websocketTimeout"`
 	WebsocketWriteBufferSize int   `yaml:"websocketWriteBufferSize"`
 }
+
 type RpcRegisterName struct {
 	OpenImUserName           string `yaml:"openImUserName"`
 	OpenImFriendName         string `yaml:"openImFriendName"`
@@ -194,6 +200,7 @@ type RpcRegisterName struct {
 	OpenImConversationName   string `yaml:"openImConversationName"`
 	OpenImThirdName          string `yaml:"openImThirdName"`
 }
+
 type Log struct {
 	StorageLocation     string `yaml:"storageLocation"`
 	RotationTime        uint   `yaml:"rotationTime"`
@@ -203,6 +210,7 @@ type Log struct {
 	IsJson              bool   `yaml:"isJson"`
 	WithStack           bool   `yaml:"withStack"`
 }
+
 type GeTui struct {
 	PushUrl      string `yaml:"pushUrl"`
 	AppKey       string `yaml:"appKey"`
@@ -211,20 +219,24 @@ type GeTui struct {
 	ChannelID    string `yaml:"channelID"`
 	ChannelName  string `yaml:"channelName"`
 }
+
 type Fcm struct {
 	ServiceAccount string `yaml:"serviceAccount"`
 }
+
 type Jpns struct {
 	AppKey       string `yaml:"appKey"`
 	MasterSecret string `yaml:"masterSecret"`
 	PushUrl      string `yaml:"pushUrl"`
 	PushIntent   string `yaml:"pushIntent"`
 }
+
 type IOSPush struct {
 	PushSound  string `yaml:"pushSound"`
 	BadgeCount bool   `yaml:"badgeCount"`
 	Production bool   `yaml:"production"`
 }
+
 type Push struct {
 	MaxConcurrentWorkers int    `yaml:"maxConcurrentWorkers"`
 	Enable               string `yaml:"enable"`
@@ -465,7 +477,7 @@ func (c *GlobalConfig) GetConfFromRegistry(registry discoveryregistry.SvcDiscove
 func (c *GlobalConfig) EncodeConfig() []byte {
 	buf := bytes.NewBuffer(nil)
 	if err := yaml.NewEncoder(buf).Encode(c); err != nil {
-		panic(err)
+		util.ExitWithError(err)
 	}
 	return buf.Bytes()
 }

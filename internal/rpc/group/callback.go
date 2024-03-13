@@ -25,6 +25,7 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -32,6 +33,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
 )
 
+// CallbackBeforeCreateGroup callback before create group
 func CallbackBeforeCreateGroup(ctx context.Context, globalConfig *config.GlobalConfig, req *group.CreateGroupReq) (err error) {
 	if !globalConfig.Callback.CallbackBeforeCreateGroup.Enable {
 		return nil

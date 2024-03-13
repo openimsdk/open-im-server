@@ -28,6 +28,9 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/dummy"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/fcm"
@@ -40,8 +43,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	"golang.org/x/sync/errgroup"
-	"google.golang.org/grpc"
 )
 
 type Pusher struct {

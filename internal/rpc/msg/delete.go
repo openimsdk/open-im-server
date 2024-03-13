@@ -23,6 +23,7 @@ import (
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 )
 
