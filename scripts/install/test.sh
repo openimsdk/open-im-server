@@ -1272,7 +1272,7 @@ openim::test::search_msg() {
 {
   "sendID": "${sendID}",
   "recvID": "${recvID}",
-  "msgType": ${msgType},
+  "contentType": ${msgType},
   "sendTime": "${sendTime}",
   "sessionType": ${sessionType},
   "pagination": {
