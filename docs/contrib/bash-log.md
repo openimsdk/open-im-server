@@ -2,6 +2,8 @@
 
 **PATH:** `scripts/lib/logging.sh`
 
+
+
 ### Introduction
 
 OpenIM, an intricate project, requires a robust logging mechanism to diagnose issues, maintain system health, and provide insights. A custom-built logging system embedded within OpenIM ensures consistent and structured logs. Let's delve into the design of this logging system and understand its various functions and their usage scenarios.

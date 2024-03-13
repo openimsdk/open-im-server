@@ -3,15 +3,13 @@ FROM golang:1.20 AS builder
 
 # Set go mod installation source and proxy
 ARG GO111MODULE=on
-ARG GOPROXY=https://goproxy.cn,direct
+ARG GOPROXY=https://goproxy.io,direct
+
 ENV GO111MODULE=$GO111MODULE
 ENV GOPROXY=$GOPROXY
 
 # Set up the working directory
 WORKDIR /openim/openim-server
-
-COPY go.mod go.sum ./
-RUN go mod download
 
 # Copy all files to the container
 ADD . .

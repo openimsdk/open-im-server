@@ -114,6 +114,14 @@ func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Con
 	return resp.Conversations, nil
 }
 
+func (c *ConversationRpcClient) GetConversationOfflinePushUserIDs(ctx context.Context, conversationID string, userIDs []string) ([]string, error) {
+	resp, err := c.Client.GetConversationOfflinePushUserIDs(ctx, &pbconversation.GetConversationOfflinePushUserIDsReq{ConversationID: conversationID, UserIDs: userIDs})
+	if err != nil {
+		return nil, err
+	}
+	return resp.UserIDs, nil
+}
+
 func (c *ConversationRpcClient) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*pbconversation.Conversation, error) {
 	if len(conversationIDs) == 0 {
 		return nil, nil
@@ -126,4 +134,12 @@ func (c *ConversationRpcClient) GetConversations(ctx context.Context, ownerUserI
 		return nil, err
 	}
 	return resp.Conversations, nil
+}
+
+func (c *ConversationRpcClient) GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error) {
+	resp, err := c.Client.GetConversationNotReceiveMessageUserIDs(ctx, &pbconversation.GetConversationNotReceiveMessageUserIDsReq{ConversationID: conversationID})
+	if err != nil {
+		return nil, err
+	}
+	return resp.UserIDs, nil
 }

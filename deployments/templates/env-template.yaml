@@ -118,6 +118,7 @@ MONGO_OPENIM_PASSWORD=${MONGO_OPENIM_PASSWORD}
 # Default: MONGO_DATABASE=openim_v3
 MONGO_DATABASE=${MONGO_DATABASE}
 
+MONGO_MAX_POOL_SIZE=${MONGO_MAX_POOL_SIZE}
 # ----- Redis Configuration -----
 
 # Port on which Redis in-memory data structure store is running.

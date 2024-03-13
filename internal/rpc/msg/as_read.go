@@ -41,7 +41,7 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	if err != nil {
 		return nil, err
 	}
-	conversations, err := m.Conversation.GetConversations(ctx, req.UserID, conversationIDs)
+	conversations, err := m.ConversationLocalCache.GetConversations(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (m *msgServer) MarkMsgsAsRead(
 	if hasReadSeq > maxSeq {
 		return nil, errs.ErrArgs.Wrap("hasReadSeq must not be bigger than maxSeq")
 	}
-	conversation, err := m.Conversation.GetConversation(ctx, req.UserID, req.ConversationID)
+	conversation, err := m.ConversationLocalCache.GetConversation(ctx, req.UserID, req.ConversationID)
 	if err != nil {
 		return
 	}
@@ -144,7 +144,7 @@ func (m *msgServer) MarkConversationAsRead(
 	ctx context.Context,
 	req *msg.MarkConversationAsReadReq,
 ) (resp *msg.MarkConversationAsReadResp, err error) {
-	conversation, err := m.Conversation.GetConversation(ctx, req.UserID, req.ConversationID)
+	conversation, err := m.ConversationLocalCache.GetConversation(ctx, req.UserID, req.ConversationID)
 	if err != nil {
 		return nil, err
 	}

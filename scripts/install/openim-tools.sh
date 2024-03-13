@@ -58,7 +58,6 @@ openim::tools::pre_start_name() {
   local targets=(
     ncpu
     component
-    up35
   )
   echo "${targets[@]}"
 }
@@ -101,7 +100,13 @@ function openim::tools::start_service() {
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
   openim::log::status "Starting binary ${binary_name}..."
+
+
+
  ${cmd} 
+
+
+
  local status=$?
 
     if [ $status -eq 0 ]; then

@@ -30,9 +30,9 @@ import (
 	"github.com/OpenIMSDK/tools/component"
 	"github.com/OpenIMSDK/tools/errs"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
 	"gopkg.in/yaml.v3"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 const (
@@ -66,6 +66,23 @@ type checkFunc struct {
 	config   *config.GlobalConfig
 }
 
+// colorErrPrint prints formatted string in red to stderr
+func colorErrPrint(msg string) {
+	// ANSI escape code for red text
+	const redColor = "\033[31m"
+	// ANSI escape code to reset color
+	const resetColor = "\033[0m"
+	msg = redColor + msg + resetColor
+	// Print to stderr in red
+	fmt.Fprintf(os.Stderr, "%s\n", msg)
+}
+
+func colorSuccessPrint(format string, a ...interface{}) {
+	// ANSI escape code for green text is \033[32m
+	// \033[0m resets the color
+	fmt.Printf("\033[32m"+format+"\033[0m", a...)
+}
+
 func main() {
 	flag.Parse()
 
@@ -77,7 +94,7 @@ func main() {
 
 	err = configGetEnv(conf)
 	if err != nil {
-		fmt.Printf("configGetEnv failed,err:%v", err)
+		fmt.Printf("configGetEnv failed, err:%v", err)
 		return
 	}
 
@@ -94,7 +111,7 @@ func main() {
 		if i != 0 {
 			time.Sleep(1 * time.Second)
 		}
-		fmt.Printf("Checking components Round %v...\n", i+1)
+		fmt.Printf("Checking components round %v...\n", i+1)
 
 		var err error
 		allSuccess := true
@@ -102,33 +119,31 @@ func main() {
 			if !check.flag {
 				err = check.function(check.config)
 				if err != nil {
-					if errors.Is(err, errMinioNotEnabled) {
-						fmt.Println(err.Error())
-						checks[index].flag = true
-					}
-					if errors.Is(err, errSignEndPoint) {
-						fmt.Fprintf(os.Stderr, err.Error())
-						checks[index].flag = true
-					}
-					component.ErrorPrint(fmt.Sprintf("Starting %s failed:%v.", check.name, errs.Unwrap(err).Error()))
-					if !strings.Contains(errs.Unwrap(err).Error(), "connection refused") &&
-						!strings.Contains(errs.Unwrap(err).Error(), "timeout waiting") {
-						component.ErrorPrint("Some components started failed!")
-						os.Exit(-1)
+					allSuccess = false
+					colorErrPrint(fmt.Sprintf("Check component: %s, failed: %v", check.name, err.Error()))
+
+					if check.name == "Minio" {
+						if errors.Is(err, errMinioNotEnabled) ||
+							errors.Is(err, errSignEndPoint) ||
+							errors.Is(err, errApiURL) {
+							checks[index].flag = true
+							continue
+						}
+						break
 					}
 				} else {
 					checks[index].flag = true
 					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 				}
 			}
-		}
 
+		}
 		if allSuccess {
 			component.SuccessPrint("All components started successfully!")
 			return
 		}
 	}
-	component.ErrorPrint("Some components started failed!")
+	component.ErrorPrint("Some components checked failed!")
 	os.Exit(-1)
 }
 
@@ -166,13 +181,13 @@ func checkRedis(config *config.GlobalConfig) error {
 // checkMinio checks the MinIO connection
 func checkMinio(config *config.GlobalConfig) error {
 	if strings.Contains(config.Object.ApiURL, "127.0.0.1") {
-		return errs.Wrap(errApiURL, "config.Object.ApiURL: "+config.Object.ApiURL)
+		return errs.Wrap(errApiURL)
 	}
 	if config.Object.Enable != "minio" {
-		return errs.Wrap(errMinioNotEnabled, "config.Object.Enable: "+config.Object.Enable)
+		return errs.Wrap(errMinioNotEnabled)
 	}
 	if strings.Contains(config.Object.Minio.Endpoint, "127.0.0.1") {
-		return errs.Wrap(errSignEndPoint, "config.Object.Minio.Endpoint: "+config.Object.Minio.Endpoint)
+		return errs.Wrap(errSignEndPoint)
 	}
 
 	minio := &component.Minio{
@@ -258,13 +273,13 @@ func checkKafka(config *config.GlobalConfig) error {
 	_, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
-	}, []string{config.Kafka.MsgToPush.Topic},
+	}, []string{config.Kafka.MsgToMongo.Topic},
 		config.Kafka.Addr, config.Kafka.ConsumerGroupID.MsgToMongo, tlsConfig)
 	if err != nil {
 		return err
 	}
 
-	kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
+	_, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
 	}, []string{config.Kafka.MsgToPush.Topic}, config.Kafka.Addr,
@@ -292,15 +307,15 @@ func configGetEnv(config *config.GlobalConfig) error {
 	config.Mongo.Password = getEnv("MONGO_OPENIM_PASSWORD", config.Mongo.Password)
 	config.Mongo.Address = getArrEnv("MONGO_ADDRESS", "MONGO_PORT", config.Mongo.Address)
 	config.Mongo.Database = getEnv("MONGO_DATABASE", config.Mongo.Database)
-	maxPoolSize, err := getEnvInt("MONGO_DATABASE", config.Mongo.MaxPoolSize)
+	maxPoolSize, err := getEnvInt("MONGO_MAX_POOL_SIZE", config.Mongo.MaxPoolSize)
 	if err != nil {
-		return err
+		return errs.Wrap(err, "MONGO_MAX_POOL_SIZE")
 	}
 	config.Mongo.MaxPoolSize = maxPoolSize
 
 	config.Redis.Username = getEnv("REDIS_USERNAME", config.Redis.Username)
 	config.Redis.Password = getEnv("REDIS_PASSWORD", config.Redis.Password)
-	config.Redis.Address = getArrEnv("REDIS_ADDRESS", "REDIS_PASSWORD", config.Redis.Address)
+	config.Redis.Address = getArrEnv("REDIS_ADDRESS", "REDIS_PORT", config.Redis.Address)
 
 	config.Object.ApiURL = getEnv("OBJECT_APIURL", config.Object.ApiURL)
 	config.Object.Minio.Endpoint = getEnv("MINIO_ENDPOINT", config.Object.Minio.Endpoint)
