@@ -58,188 +58,279 @@ type MYSQL struct {
 	SlowThreshold int      `yaml:"slowThreshold"`
 }
 
+type Zookeeper struct {
+	Schema   string   `yaml:"schema"`
+	ZkAddr   []string `yaml:"address"`
+	Username string   `yaml:"username"`
+	Password string   `yaml:"password"`
+}
+type Mongo struct {
+	Uri         string   `yaml:"uri"`
+	Address     []string `yaml:"address"`
+	Database    string   `yaml:"database"`
+	Username    string   `yaml:"username"`
+	Password    string   `yaml:"password"`
+	MaxPoolSize int      `yaml:"maxPoolSize"`
+}
+type Redis struct {
+	ClusterMode    bool     `yaml:"clusterMode"`
+	Address        []string `yaml:"address"`
+	Username       string   `yaml:"username"`
+	Password       string   `yaml:"password"`
+	EnablePipeline bool     `yaml:"enablePipeline"`
+}
+type Kafka struct {
+	Username     string   `yaml:"username"`
+	Password     string   `yaml:"password"`
+	ProducerAck  string   `yaml:"producerAck"`
+	CompressType string   `yaml:"compressType"`
+	Addr         []string `yaml:"addr"`
+	TLS          *struct {
+		CACrt              string `yaml:"caCrt"`
+		ClientCrt          string `yaml:"clientCrt"`
+		ClientKey          string `yaml:"clientKey"`
+		ClientKeyPwd       string `yaml:"clientKeyPwd"`
+		InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
+	} `yaml:"tls"`
+	LatestMsgToRedis struct {
+		Topic string `yaml:"topic"`
+	} `yaml:"latestMsgToRedis"`
+	MsgToMongo struct {
+		Topic string `yaml:"topic"`
+	} `yaml:"offlineMsgToMongo"`
+	MsgToPush struct {
+		Topic string `yaml:"topic"`
+	} `yaml:"msgToPush"`
+	ConsumerGroupID struct {
+		MsgToRedis string `yaml:"msgToRedis"`
+		MsgToMongo string `yaml:"msgToMongo"`
+		MsgToMySql string `yaml:"msgToMySql"`
+		MsgToPush  string `yaml:"msgToPush"`
+	} `yaml:"consumerGroupID"`
+}
+type Minio struct {
+	Bucket          string `yaml:"bucket"`
+	Endpoint        string `yaml:"endpoint"`
+	AccessKeyID     string `yaml:"accessKeyID"`
+	SecretAccessKey string `yaml:"secretAccessKey"`
+	SessionToken    string `yaml:"sessionToken"`
+	SignEndpoint    string `yaml:"signEndpoint"`
+	PublicRead      bool   `yaml:"publicRead"`
+}
+type Cos struct {
+	BucketURL    string `yaml:"bucketURL"`
+	SecretID     string `yaml:"secretID"`
+	SecretKey    string `yaml:"secretKey"`
+	SessionToken string `yaml:"sessionToken"`
+	PublicRead   bool   `yaml:"publicRead"`
+}
+type Oss struct {
+	Endpoint        string `yaml:"endpoint"`
+	Bucket          string `yaml:"bucket"`
+	BucketURL       string `yaml:"bucketURL"`
+	AccessKeyID     string `yaml:"accessKeyID"`
+	AccessKeySecret string `yaml:"accessKeySecret"`
+	SessionToken    string `yaml:"sessionToken"`
+	PublicRead      bool   `yaml:"publicRead"`
+}
+type Kodo struct {
+	Endpoint        string `yaml:"endpoint"`
+	Bucket          string `yaml:"bucket"`
+	BucketURL       string `yaml:"bucketURL"`
+	AccessKeyID     string `yaml:"accessKeyID"`
+	AccessKeySecret string `yaml:"accessKeySecret"`
+	SessionToken    string `yaml:"sessionToken"`
+	PublicRead      bool   `yaml:"publicRead"`
+}
+type Aws struct {
+	Endpoint        string `yaml:"endpoint"`
+	Region          string `yaml:"region"`
+	Bucket          string `yaml:"bucket"`
+	AccessKeyID     string `yaml:"accessKeyID"`
+	AccessKeySecret string `yaml:"accessKeySecret"`
+	PublicRead      bool   `yaml:"publicRead"`
+}
+type Object struct {
+	Enable string `yaml:"enable"`
+	ApiURL string `yaml:"apiURL"`
+	Minio  Minio  `yaml:"minio"`
+	Cos    Cos    `yaml:"cos"`
+	Oss    Oss    `yaml:"oss"`
+	Kodo   Kodo   `yaml:"kodo"`
+	Aws    Aws    `yaml:"aws"`
+}
+type Api struct {
+	OpenImApiPort []int  `yaml:"openImApiPort"`
+	ListenIP      string `yaml:"listenIP"`
+}
+type RpcPort struct {
+	OpenImUserPort           []int `yaml:"openImUserPort"`
+	OpenImFriendPort         []int `yaml:"openImFriendPort"`
+	OpenImMessagePort        []int `yaml:"openImMessagePort"`
+	OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
+	OpenImGroupPort          []int `yaml:"openImGroupPort"`
+	OpenImAuthPort           []int `yaml:"openImAuthPort"`
+	OpenImPushPort           []int `yaml:"openImPushPort"`
+	OpenImConversationPort   []int `yaml:"openImConversationPort"`
+	OpenImRtcPort            []int `yaml:"openImRtcPort"`
+	OpenImThirdPort          []int `yaml:"openImThirdPort"`
+}
+type LongConnSvr struct {
+	OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
+	OpenImWsPort             []int `yaml:"openImWsPort"`
+	WebsocketMaxConnNum      int   `yaml:"websocketMaxConnNum"`
+	WebsocketMaxMsgLen       int   `yaml:"websocketMaxMsgLen"`
+	WebsocketTimeout         int   `yaml:"websocketTimeout"`
+	WebsocketWriteBufferSize int   `yaml:"websocketWriteBufferSize"`
+}
+type RpcRegisterName struct {
+	OpenImUserName           string `yaml:"openImUserName"`
+	OpenImFriendName         string `yaml:"openImFriendName"`
+	OpenImMsgName            string `yaml:"openImMsgName"`
+	OpenImPushName           string `yaml:"openImPushName"`
+	OpenImMessageGatewayName string `yaml:"openImMessageGatewayName"`
+	OpenImGroupName          string `yaml:"openImGroupName"`
+	OpenImAuthName           string `yaml:"openImAuthName"`
+	OpenImConversationName   string `yaml:"openImConversationName"`
+	OpenImThirdName          string `yaml:"openImThirdName"`
+}
+type Log struct {
+	StorageLocation     string `yaml:"storageLocation"`
+	RotationTime        uint   `yaml:"rotationTime"`
+	RemainRotationCount uint   `yaml:"remainRotationCount"`
+	RemainLogLevel      int    `yaml:"remainLogLevel"`
+	IsStdout            bool   `yaml:"isStdout"`
+	IsJson              bool   `yaml:"isJson"`
+	WithStack           bool   `yaml:"withStack"`
+}
+type GeTui struct {
+	PushUrl      string `yaml:"pushUrl"`
+	AppKey       string `yaml:"appKey"`
+	Intent       string `yaml:"intent"`
+	MasterSecret string `yaml:"masterSecret"`
+	ChannelID    string `yaml:"channelID"`
+	ChannelName  string `yaml:"channelName"`
+}
+type Fcm struct {
+	ServiceAccount string `yaml:"serviceAccount"`
+}
+type Jpns struct {
+	AppKey       string `yaml:"appKey"`
+	MasterSecret string `yaml:"masterSecret"`
+	PushUrl      string `yaml:"pushUrl"`
+	PushIntent   string `yaml:"pushIntent"`
+}
+type IOSPush struct {
+	PushSound  string `yaml:"pushSound"`
+	BadgeCount bool   `yaml:"badgeCount"`
+	Production bool   `yaml:"production"`
+}
+type Push struct {
+	MaxConcurrentWorkers int    `yaml:"maxConcurrentWorkers"`
+	Enable               string `yaml:"enable"`
+	GeTui                GeTui  `yaml:"geTui"`
+	Fcm                  Fcm    `yaml:"fcm"`
+	Jpns                 Jpns   `yaml:"jpns"`
+}
+
+type Prometheus struct {
+	Enable                        bool   `yaml:"enable"`
+	GrafanaUrl                    string `yaml:"grafanaUrl"`
+	ApiPrometheusPort             []int  `yaml:"apiPrometheusPort"`
+	UserPrometheusPort            []int  `yaml:"userPrometheusPort"`
+	FriendPrometheusPort          []int  `yaml:"friendPrometheusPort"`
+	MessagePrometheusPort         []int  `yaml:"messagePrometheusPort"`
+	MessageGatewayPrometheusPort  []int  `yaml:"messageGatewayPrometheusPort"`
+	GroupPrometheusPort           []int  `yaml:"groupPrometheusPort"`
+	AuthPrometheusPort            []int  `yaml:"authPrometheusPort"`
+	PushPrometheusPort            []int  `yaml:"pushPrometheusPort"`
+	ConversationPrometheusPort    []int  `yaml:"conversationPrometheusPort"`
+	RtcPrometheusPort             []int  `yaml:"rtcPrometheusPort"`
+	MessageTransferPrometheusPort []int  `yaml:"messageTransferPrometheusPort"`
+	ThirdPrometheusPort           []int  `yaml:"thirdPrometheusPort"`
+}
+
+type Callback struct {
+	CallbackUrl                        string         `yaml:"url"`
+	CallbackBeforeSendSingleMsg        CallBackConfig `yaml:"beforeSendSingleMsg"`
+	CallbackAfterSendSingleMsg         CallBackConfig `yaml:"afterSendSingleMsg"`
+	CallbackBeforeSendGroupMsg         CallBackConfig `yaml:"beforeSendGroupMsg"`
+	CallbackAfterSendGroupMsg          CallBackConfig `yaml:"afterSendGroupMsg"`
+	CallbackMsgModify                  CallBackConfig `yaml:"msgModify"`
+	CallbackSingleMsgRead              CallBackConfig `yaml:"singleMsgRead"`
+	CallbackGroupMsgRead               CallBackConfig `yaml:"groupMsgRead"`
+	CallbackUserOnline                 CallBackConfig `yaml:"userOnline"`
+	CallbackUserOffline                CallBackConfig `yaml:"userOffline"`
+	CallbackUserKickOff                CallBackConfig `yaml:"userKickOff"`
+	CallbackOfflinePush                CallBackConfig `yaml:"offlinePush"`
+	CallbackOnlinePush                 CallBackConfig `yaml:"onlinePush"`
+	CallbackBeforeSuperGroupOnlinePush CallBackConfig `yaml:"superGroupOnlinePush"`
+	CallbackBeforeAddFriend            CallBackConfig `yaml:"beforeAddFriend"`
+	CallbackBeforeSetFriendRemark      CallBackConfig `yaml:"callbackBeforeSetFriendRemark"`
+	CallbackAfterSetFriendRemark       CallBackConfig `yaml:"callbackAfterSetFriendRemark"`
+	CallbackBeforeUpdateUserInfo       CallBackConfig `yaml:"beforeUpdateUserInfo"`
+	CallbackBeforeUpdateUserInfoEx     CallBackConfig `yaml:"beforeUpdateUserInfoEx"`
+	CallbackAfterUpdateUserInfoEx      CallBackConfig `yaml:"afterUpdateUserInfoEx"`
+	CallbackBeforeUserRegister         CallBackConfig `yaml:"beforeUserRegister"`
+	CallbackAfterUpdateUserInfo        CallBackConfig `yaml:"updateUserInfo"`
+	CallbackAfterUserRegister          CallBackConfig `yaml:"afterUserRegister"`
+	CallbackBeforeCreateGroup          CallBackConfig `yaml:"beforeCreateGroup"`
+	CallbackAfterCreateGroup           CallBackConfig `yaml:"afterCreateGroup"`
+	CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
+	CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
+	CallbackAfterSetGroupMemberInfo    CallBackConfig `yaml:"afterSetGroupMemberInfo"`
+	CallbackQuitGroup                  CallBackConfig `yaml:"quitGroup"`
+	CallbackKillGroupMember            CallBackConfig `yaml:"killGroupMember"`
+	CallbackDismissGroup               CallBackConfig `yaml:"dismissGroup"`
+	CallbackBeforeJoinGroup            CallBackConfig `yaml:"joinGroup"`
+	CallbackAfterTransferGroupOwner    CallBackConfig `yaml:"transferGroupOwner"`
+	CallbackBeforeInviteUserToGroup    CallBackConfig `yaml:"beforeInviteUserToGroup"`
+	CallbackAfterJoinGroup             CallBackConfig `yaml:"joinGroupAfter"`
+	CallbackAfterSetGroupInfo          CallBackConfig `yaml:"setGroupInfoAfter"`
+	CallbackBeforeSetGroupInfo         CallBackConfig `yaml:"setGroupInfoBefore"`
+	CallbackAfterRevokeMsg             CallBackConfig `yaml:"revokeMsgAfter"`
+	CallbackBeforeAddBlack             CallBackConfig `yaml:"addBlackBefore"`
+	CallbackAfterAddFriend             CallBackConfig `yaml:"addFriendAfter"`
+	CallbackBeforeAddFriendAgree       CallBackConfig `yaml:"addFriendAgreeBefore"`
+
+	CallbackAfterDeleteFriend   CallBackConfig `yaml:"deleteFriendAfter"`
+	CallbackBeforeImportFriends CallBackConfig `yaml:"importFriendsBefore"`
+	CallbackAfterImportFriends  CallBackConfig `yaml:"importFriendsAfter"`
+	CallbackAfterRemoveBlack    CallBackConfig `yaml:"removeBlackAfter"`
+}
+
 type GlobalConfig struct {
 	Envs struct {
 		Discovery string `yaml:"discovery"`
 	}
-	Zookeeper struct {
-		Schema   string   `yaml:"schema"`
-		ZkAddr   []string `yaml:"address"`
-		Username string   `yaml:"username"`
-		Password string   `yaml:"password"`
-	} `yaml:"zookeeper"`
+	Zookeeper Zookeeper `yaml:"zookeeper"`
 
 	Mysql *MYSQL `yaml:"mysql"`
 
-	Mongo struct {
-		Uri         string   `yaml:"uri"`
-		Address     []string `yaml:"address"`
-		Database    string   `yaml:"database"`
-		Username    string   `yaml:"username"`
-		Password    string   `yaml:"password"`
-		MaxPoolSize int      `yaml:"maxPoolSize"`
-	} `yaml:"mongo"`
+	Mongo Mongo `yaml:"mongo"`
 
-	Redis struct {
-		ClusterMode    bool     `yaml:"clusterMode"`
-		Address        []string `yaml:"address"`
-		Username       string   `yaml:"username"`
-		Password       string   `yaml:"password"`
-		EnablePipeline bool     `yaml:"enablePipeline"`
-	} `yaml:"redis"`
+	Redis Redis `yaml:"redis"`
 
-	Kafka struct {
-		Username     string   `yaml:"username"`
-		Password     string   `yaml:"password"`
-		ProducerAck  string   `yaml:"producerAck"`
-		CompressType string   `yaml:"compressType"`
-		Addr         []string `yaml:"addr"`
-		TLS          *struct {
-			CACrt              string `yaml:"caCrt"`
-			ClientCrt          string `yaml:"clientCrt"`
-			ClientKey          string `yaml:"clientKey"`
-			ClientKeyPwd       string `yaml:"clientKeyPwd"`
-			InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
-		} `yaml:"tls"`
-		LatestMsgToRedis struct {
-			Topic string `yaml:"topic"`
-		} `yaml:"latestMsgToRedis"`
-		MsgToMongo struct {
-			Topic string `yaml:"topic"`
-		} `yaml:"offlineMsgToMongo"`
-		MsgToPush struct {
-			Topic string `yaml:"topic"`
-		} `yaml:"msgToPush"`
-		ConsumerGroupID struct {
-			MsgToRedis string `yaml:"msgToRedis"`
-			MsgToMongo string `yaml:"msgToMongo"`
-			MsgToMySql string `yaml:"msgToMySql"`
-			MsgToPush  string `yaml:"msgToPush"`
-		} `yaml:"consumerGroupID"`
-	} `yaml:"kafka"`
+	Kafka Kafka `yaml:"kafka"`
 
 	Rpc struct {
 		RegisterIP string `yaml:"registerIP"`
 		ListenIP   string `yaml:"listenIP"`
 	} `yaml:"rpc"`
 
-	Api struct {
-		OpenImApiPort []int  `yaml:"openImApiPort"`
-		ListenIP      string `yaml:"listenIP"`
-	} `yaml:"api"`
+	Api Api `yaml:"api"`
 
-	Object struct {
-		Enable string `yaml:"enable"`
-		ApiURL string `yaml:"apiURL"`
-		Minio  struct {
-			Bucket          string `yaml:"bucket"`
-			Endpoint        string `yaml:"endpoint"`
-			AccessKeyID     string `yaml:"accessKeyID"`
-			SecretAccessKey string `yaml:"secretAccessKey"`
-			SessionToken    string `yaml:"sessionToken"`
-			SignEndpoint    string `yaml:"signEndpoint"`
-			PublicRead      bool   `yaml:"publicRead"`
-		} `yaml:"minio"`
-		Cos struct {
-			BucketURL    string `yaml:"bucketURL"`
-			SecretID     string `yaml:"secretID"`
-			SecretKey    string `yaml:"secretKey"`
-			SessionToken string `yaml:"sessionToken"`
-			PublicRead   bool   `yaml:"publicRead"`
-		} `yaml:"cos"`
-		Oss struct {
-			Endpoint        string `yaml:"endpoint"`
-			Bucket          string `yaml:"bucket"`
-			BucketURL       string `yaml:"bucketURL"`
-			AccessKeyID     string `yaml:"accessKeyID"`
-			AccessKeySecret string `yaml:"accessKeySecret"`
-			SessionToken    string `yaml:"sessionToken"`
-			PublicRead      bool   `yaml:"publicRead"`
-		} `yaml:"oss"`
-		Kodo struct {
-			Endpoint        string `yaml:"endpoint"`
-			Bucket          string `yaml:"bucket"`
-			BucketURL       string `yaml:"bucketURL"`
-			AccessKeyID     string `yaml:"accessKeyID"`
-			AccessKeySecret string `yaml:"accessKeySecret"`
-			SessionToken    string `yaml:"sessionToken"`
-			PublicRead      bool   `yaml:"publicRead"`
-		} `yaml:"kodo"`
-		Aws struct {
-			Endpoint        string `yaml:"endpoint"`
-			Region          string `yaml:"region"`
-			Bucket          string `yaml:"bucket"`
-			AccessKeyID     string `yaml:"accessKeyID"`
-			AccessKeySecret string `yaml:"accessKeySecret"`
-			PublicRead      bool   `yaml:"publicRead"`
-		} `yaml:"aws"`
-	} `yaml:"object"`
+	Object Object `yaml:"object"`
 
-	RpcPort struct {
-		OpenImUserPort           []int `yaml:"openImUserPort"`
-		OpenImFriendPort         []int `yaml:"openImFriendPort"`
-		OpenImMessagePort        []int `yaml:"openImMessagePort"`
-		OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
-		OpenImGroupPort          []int `yaml:"openImGroupPort"`
-		OpenImAuthPort           []int `yaml:"openImAuthPort"`
-		OpenImPushPort           []int `yaml:"openImPushPort"`
-		OpenImConversationPort   []int `yaml:"openImConversationPort"`
-		OpenImRtcPort            []int `yaml:"openImRtcPort"`
-		OpenImThirdPort          []int `yaml:"openImThirdPort"`
-	} `yaml:"rpcPort"`
+	RpcPort RpcPort `yaml:"rpcPort"`
 
-	RpcRegisterName struct {
-		OpenImUserName           string `yaml:"openImUserName"`
-		OpenImFriendName         string `yaml:"openImFriendName"`
-		OpenImMsgName            string `yaml:"openImMsgName"`
-		OpenImPushName           string `yaml:"openImPushName"`
-		OpenImMessageGatewayName string `yaml:"openImMessageGatewayName"`
-		OpenImGroupName          string `yaml:"openImGroupName"`
-		OpenImAuthName           string `yaml:"openImAuthName"`
-		OpenImConversationName   string `yaml:"openImConversationName"`
-		OpenImThirdName          string `yaml:"openImThirdName"`
-	} `yaml:"rpcRegisterName"`
+	RpcRegisterName RpcRegisterName `yaml:"rpcRegisterName"`
 
-	Log struct {
-		StorageLocation     string `yaml:"storageLocation"`
-		RotationTime        uint   `yaml:"rotationTime"`
-		RemainRotationCount uint   `yaml:"remainRotationCount"`
-		RemainLogLevel      int    `yaml:"remainLogLevel"`
-		IsStdout            bool   `yaml:"isStdout"`
-		IsJson              bool   `yaml:"isJson"`
-		WithStack           bool   `yaml:"withStack"`
-	} `yaml:"log"`
+	Log Log `yaml:"log"`
 
-	LongConnSvr struct {
-		OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
-		OpenImWsPort             []int `yaml:"openImWsPort"`
-		WebsocketMaxConnNum      int   `yaml:"websocketMaxConnNum"`
-		WebsocketMaxMsgLen       int   `yaml:"websocketMaxMsgLen"`
-		WebsocketTimeout         int   `yaml:"websocketTimeout"`
-		WebsocketWriteBufferSize int   `yaml:"websocketWriteBufferSize"`
-	} `yaml:"longConnSvr"`
+	LongConnSvr LongConnSvr `yaml:"longConnSvr"`
 
-	Push struct {
-		MaxConcurrentWorkers int    `yaml:"maxConcurrentWorkers"`
-		Enable               string `yaml:"enable"`
-		GeTui                struct {
-			PushUrl      string `yaml:"pushUrl"`
-			AppKey       string `yaml:"appKey"`
-			Intent       string `yaml:"intent"`
-			MasterSecret string `yaml:"masterSecret"`
-			ChannelID    string `yaml:"channelID"`
-			ChannelName  string `yaml:"channelName"`
-		} `yaml:"geTui"`
-		Fcm struct {
-			ServiceAccount string `yaml:"serviceAccount"`
-		} `yaml:"fcm"`
-		Jpns struct {
-			AppKey       string `yaml:"appKey"`
-			MasterSecret string `yaml:"masterSecret"`
-			PushUrl      string `yaml:"pushUrl"`
-			PushIntent   string `yaml:"pushIntent"`
-		} `yaml:"jpns"`
-	}
+	Push    Push `yaml:"push"`
 	Manager struct {
 		UserID   []string `yaml:"userID"`
 		Nickname []string `yaml:"nickname"`
@@ -251,7 +342,6 @@ type GlobalConfig struct {
 	} `yaml:"im-admin"`
 
 	MultiLoginPolicy                  int    `yaml:"multiLoginPolicy"`
-	ChatPersistenceMysql              bool   `yaml:"chatPersistenceMysql"`
 	MsgCacheTimeout                   int    `yaml:"msgCacheTimeout"`
 	GroupMessageHasReadReceiptEnable  bool   `yaml:"groupMessageHasReadReceiptEnable"`
 	SingleMessageHasReadReceiptEnable bool   `yaml:"singleMessageHasReadReceiptEnable"`
@@ -269,76 +359,10 @@ type GlobalConfig struct {
 
 	LocalCache localCache `yaml:"localCache"`
 
-	IOSPush struct {
-		PushSound  string `yaml:"pushSound"`
-		BadgeCount bool   `yaml:"badgeCount"`
-		Production bool   `yaml:"production"`
-	} `yaml:"iosPush"`
-	Callback struct {
-		CallbackUrl                        string         `yaml:"url"`
-		CallbackBeforeSendSingleMsg        CallBackConfig `yaml:"beforeSendSingleMsg"`
-		CallbackAfterSendSingleMsg         CallBackConfig `yaml:"afterSendSingleMsg"`
-		CallbackBeforeSendGroupMsg         CallBackConfig `yaml:"beforeSendGroupMsg"`
-		CallbackAfterSendGroupMsg          CallBackConfig `yaml:"afterSendGroupMsg"`
-		CallbackMsgModify                  CallBackConfig `yaml:"msgModify"`
-		CallbackSingleMsgRead              CallBackConfig `yaml:"singleMsgRead"`
-		CallbackGroupMsgRead               CallBackConfig `yaml:"groupMsgRead"`
-		CallbackUserOnline                 CallBackConfig `yaml:"userOnline"`
-		CallbackUserOffline                CallBackConfig `yaml:"userOffline"`
-		CallbackUserKickOff                CallBackConfig `yaml:"userKickOff"`
-		CallbackOfflinePush                CallBackConfig `yaml:"offlinePush"`
-		CallbackOnlinePush                 CallBackConfig `yaml:"onlinePush"`
-		CallbackBeforeSuperGroupOnlinePush CallBackConfig `yaml:"superGroupOnlinePush"`
-		CallbackBeforeAddFriend            CallBackConfig `yaml:"beforeAddFriend"`
-		CallbackBeforeSetFriendRemark      CallBackConfig `yaml:"callbackBeforeSetFriendRemark"`
-		CallbackAfterSetFriendRemark       CallBackConfig `yaml:"callbackAfterSetFriendRemark"`
-		CallbackBeforeUpdateUserInfo       CallBackConfig `yaml:"beforeUpdateUserInfo"`
-		CallbackBeforeUpdateUserInfoEx     CallBackConfig `yaml:"beforeUpdateUserInfoEx"`
-		CallbackAfterUpdateUserInfoEx      CallBackConfig `yaml:"afterUpdateUserInfoEx"`
-		CallbackBeforeUserRegister         CallBackConfig `yaml:"beforeUserRegister"`
-		CallbackAfterUpdateUserInfo        CallBackConfig `yaml:"updateUserInfo"`
-		CallbackAfterUserRegister          CallBackConfig `yaml:"afterUserRegister"`
-		CallbackBeforeCreateGroup          CallBackConfig `yaml:"beforeCreateGroup"`
-		CallbackAfterCreateGroup           CallBackConfig `yaml:"afterCreateGroup"`
-		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
-		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
-		CallbackAfterSetGroupMemberInfo    CallBackConfig `yaml:"afterSetGroupMemberInfo"`
-		CallbackQuitGroup                  CallBackConfig `yaml:"quitGroup"`
-		CallbackKillGroupMember            CallBackConfig `yaml:"killGroupMember"`
-		CallbackDismissGroup               CallBackConfig `yaml:"dismissGroup"`
-		CallbackBeforeJoinGroup            CallBackConfig `yaml:"joinGroup"`
-		CallbackAfterTransferGroupOwner    CallBackConfig `yaml:"transferGroupOwner"`
-		CallbackBeforeInviteUserToGroup    CallBackConfig `yaml:"beforeInviteUserToGroup"`
-		CallbackAfterJoinGroup             CallBackConfig `yaml:"joinGroupAfter"`
-		CallbackAfterSetGroupInfo          CallBackConfig `yaml:"setGroupInfoAfter"`
-		CallbackBeforeSetGroupInfo         CallBackConfig `yaml:"setGroupInfoBefore"`
-		CallbackAfterRevokeMsg             CallBackConfig `yaml:"revokeMsgAfter"`
-		CallbackBeforeAddBlack             CallBackConfig `yaml:"addBlackBefore"`
-		CallbackAfterAddFriend             CallBackConfig `yaml:"addFriendAfter"`
-		CallbackBeforeAddFriendAgree       CallBackConfig `yaml:"addFriendAgreeBefore"`
+	IOSPush  IOSPush  `yaml:"iosPush"`
+	Callback Callback `yaml:"callback"`
 
-		CallbackAfterDeleteFriend   CallBackConfig `yaml:"deleteFriendAfter"`
-		CallbackBeforeImportFriends CallBackConfig `yaml:"importFriendsBefore"`
-		CallbackAfterImportFriends  CallBackConfig `yaml:"importFriendsAfter"`
-		CallbackAfterRemoveBlack    CallBackConfig `yaml:"removeBlackAfter"`
-	} `yaml:"callback"`
-
-	Prometheus struct {
-		Enable                        bool   `yaml:"enable"`
-		GrafanaUrl                    string `yaml:"grafanaUrl"`
-		ApiPrometheusPort             []int  `yaml:"apiPrometheusPort"`
-		UserPrometheusPort            []int  `yaml:"userPrometheusPort"`
-		FriendPrometheusPort          []int  `yaml:"friendPrometheusPort"`
-		MessagePrometheusPort         []int  `yaml:"messagePrometheusPort"`
-		MessageGatewayPrometheusPort  []int  `yaml:"messageGatewayPrometheusPort"`
-		GroupPrometheusPort           []int  `yaml:"groupPrometheusPort"`
-		AuthPrometheusPort            []int  `yaml:"authPrometheusPort"`
-		PushPrometheusPort            []int  `yaml:"pushPrometheusPort"`
-		ConversationPrometheusPort    []int  `yaml:"conversationPrometheusPort"`
-		RtcPrometheusPort             []int  `yaml:"rtcPrometheusPort"`
-		MessageTransferPrometheusPort []int  `yaml:"messageTransferPrometheusPort"`
-		ThirdPrometheusPort           []int  `yaml:"thirdPrometheusPort"`
-	} `yaml:"prometheus"`
+	Prometheus   Prometheus   `yaml:"prometheus"`
 	Notification notification `yaml:"notification"`
 }
 
