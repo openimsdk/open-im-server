@@ -158,9 +158,6 @@ func (m *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 	case constant.Custom:
 		fallthrough
 	case constant.Quote:
-		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, true)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, true)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderSync, true)
 	case constant.Revoke:
 		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
