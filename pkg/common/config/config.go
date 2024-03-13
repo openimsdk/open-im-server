@@ -118,6 +118,7 @@ type Minio struct {
 	SignEndpoint    string `yaml:"signEndpoint"`
 	PublicRead      bool   `yaml:"publicRead"`
 }
+
 type Cos struct {
 	BucketURL    string `yaml:"bucketURL"`
 	SecretID     string `yaml:"secretID"`
@@ -125,6 +126,7 @@ type Cos struct {
 	SessionToken string `yaml:"sessionToken"`
 	PublicRead   bool   `yaml:"publicRead"`
 }
+
 type Oss struct {
 	Endpoint        string `yaml:"endpoint"`
 	Bucket          string `yaml:"bucket"`
@@ -134,6 +136,7 @@ type Oss struct {
 	SessionToken    string `yaml:"sessionToken"`
 	PublicRead      bool   `yaml:"publicRead"`
 }
+
 type Kodo struct {
 	Endpoint        string `yaml:"endpoint"`
 	Bucket          string `yaml:"bucket"`

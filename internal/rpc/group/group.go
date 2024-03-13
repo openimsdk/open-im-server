@@ -216,15 +216,28 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	if len(userMap) != len(userIDs) {
 		return nil, errs.ErrUserIDNotFound.Wrap("user not found")
 	}
+
+	config := &EventCallbackConfig{
+		CallbackUrl:       s.config.Callback.CallbackUrl,
+		BeforeCreateGroup: s.config.Callback.CallbackBeforeCreateGroup,
+	}
+
 	// Callback Before create Group
-	if err := CallbackBeforeCreateGroup(ctx, s.config, req); err != nil {
+	if err := CallbackBeforeCreateGroup(ctx, config, req); err != nil {
 		return nil, err
 	}
+
 	var groupMembers []*relationtb.GroupMemberModel
 	group := convert.Pb2DBGroupInfo(req.GroupInfo)
 	if err := s.GenGroupID(ctx, &group.GroupID); err != nil {
 		return nil, err
 	}
+
+	beforeCreateGroupConfig := &EventCallbackConfig{
+		CallbackUrl:       s.config.Callback.CallbackUrl,
+		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+	}
+
 	joinGroup := func(userID string, roleLevel int32) error {
 		groupMember := &relationtb.GroupMemberModel{
 			GroupID:        group.GroupID,
@@ -236,7 +249,8 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 			JoinTime:       time.Now(),
 			MuteEndTime:    time.UnixMilli(0),
 		}
-		if err := CallbackBeforeMemberJoinGroup(ctx, s.config, groupMember, group.Ex); err != nil {
+
+		if err := CallbackBeforeMemberJoinGroup(ctx, beforeCreateGroupConfig, groupMember, group.Ex); err != nil {
 			return err
 		}
 		groupMembers = append(groupMembers, groupMember)
@@ -259,6 +273,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		return nil, err
 	}
 	resp := &pbgroup.CreateGroupResp{GroupInfo: &sdkws.GroupInfo{}}
+
 	resp.GroupInfo = convert.Db2PbGroupInfo(group, req.OwnerUserID, uint32(len(userIDs)))
 	resp.GroupInfo.MemberCount = uint32(len(userIDs))
 	tips := &sdkws.GroupCreatedTips{
@@ -297,6 +312,9 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		}
 		s.Notification.GroupCreatedNotification(ctx, tips)
 	}
+
+	afterCreateGroupConfig := beforeCreateGroupConfig
+
 	reqCallBackAfter := &pbgroup.CreateGroupReq{
 		MemberUserIDs: userIDs,
 		GroupInfo:     resp.GroupInfo,
@@ -304,7 +322,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		AdminUserIDs:  req.AdminUserIDs,
 	}
 
-	if err := CallbackAfterCreateGroup(ctx, s.config, reqCallBackAfter); err != nil {
+	if err := CallbackAfterCreateGroup(ctx, afterCreateGroupConfig, reqCallBackAfter); err != nil {
 		return nil, err
 	}
 
@@ -395,9 +413,15 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		}
 	}
 
-	if err := CallbackBeforeInviteUserToGroup(ctx, s.config, req); err != nil {
+	beforeInviteUserToGroupConfig := &EventCallbackConfig{
+		CallbackUrl:       s.config.Callback.CallbackUrl,
+		BeforeCreateGroup: s.config.Callback.CallbackBeforeInviteUserToGroup,
+	}
+
+	if err := CallbackBeforeInviteUserToGroup(ctx, beforeInviteUserToGroupConfig, req); err != nil {
 		return nil, err
 	}
+
 	if group.NeedVerification == constant.AllNeedVerification {
 		if !authverify.IsAppManagerUid(ctx, s.config) {
 			if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
@@ -439,7 +463,10 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 			JoinTime:       time.Now(),
 			MuteEndTime:    time.UnixMilli(0),
 		}
-		if err := CallbackBeforeMemberJoinGroup(ctx, s.config, member, group.Ex); err != nil {
+
+		beforeMemberJoinGroupConfig := beforeInviteUserToGroupConfig
+
+		if err := CallbackBeforeMemberJoinGroup(ctx, beforeMemberJoinGroupConfig, member, group.Ex); err != nil {
 			return nil, err
 		}
 		groupMembers = append(groupMembers, member)
@@ -611,7 +638,12 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 		return nil, err
 	}
 
-	if err := CallbackKillGroupMember(ctx, s.config, req); err != nil {
+	killGroupMemberConfig := &EventCallbackConfig{
+		CallbackUrl:       s.config.Callback.CallbackUrl,
+		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+	}
+
+	if err := CallbackKillGroupMember(ctx, killGroupMemberConfig, req); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -781,7 +813,13 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 			OperatorUserID: mcontext.GetOpUserID(ctx),
 			Ex:             groupRequest.Ex,
 		}
-		if err = CallbackBeforeMemberJoinGroup(ctx, s.config, member, group.Ex); err != nil {
+
+		beforeMemberJoinGroupConfig := &EventCallbackConfig{
+			CallbackUrl:       s.config.Callback.CallbackUrl,
+			BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+		}
+
+		if err = CallbackBeforeMemberJoinGroup(ctx, beforeMemberJoinGroupConfig, member, group.Ex); err != nil {
 			return nil, err
 		}
 	}
@@ -829,7 +867,12 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		Ex:         req.Ex,
 	}
 
-	if err = CallbackApplyJoinGroupBefore(ctx, s.config, reqCall); err != nil {
+	applyJoinGroupBeforeConfig := &EventCallbackConfig{
+		CallbackUrl:       s.config.Callback.CallbackUrl,
+		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+	}
+
+	if err = CallbackApplyJoinGroupBefore(ctx, applyJoinGroupBeforeConfig, reqCall); err != nil {
 		return nil, err
 	}
 	_, err = s.db.TakeGroupMember(ctx, req.GroupID, req.InviterUserID)
@@ -850,7 +893,8 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			JoinTime:       time.Now(),
 			MuteEndTime:    time.UnixMilli(0),
 		}
-		if err := CallbackBeforeMemberJoinGroup(ctx, s.config, groupMember, group.Ex); err != nil {
+		MemberJoinGroupConfig := applyJoinGroupBeforeConfig
+		if err := CallbackBeforeMemberJoinGroup(ctx, MemberJoinGroupConfig, groupMember, group.Ex); err != nil {
 			return nil, err
 		}
 		if err := s.db.CreateGroup(ctx, nil, []*relationtb.GroupMemberModel{groupMember}); err != nil {
@@ -861,7 +905,8 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			return nil, err
 		}
 		s.Notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID)
-		if err = CallbackAfterJoinGroup(ctx, s.config, req); err != nil {
+		afterJoinGroupConfig := applyJoinGroupBeforeConfig
+		if err = CallbackAfterJoinGroup(ctx, afterJoinGroupConfig, req); err != nil {
 			return nil, err
 		}
 		return resp, nil
@@ -910,8 +955,12 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 		return nil, err
 	}
 
-	// callback
-	if err := CallbackQuitGroup(ctx, s.config, req); err != nil {
+	quitGroupConfig := &EventCallbackConfig{
+		CallbackUrl:       s.config.Callback.CallbackUrl,
+		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+	}
+
+	if err := CallbackQuitGroup(ctx, quitGroupConfig, req); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -941,7 +990,13 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 			return nil, err
 		}
 	}
-	if err := CallbackBeforeSetGroupInfo(ctx, s.config, req); err != nil {
+
+	beforeSetGroupInfoConfig := &EventCallbackConfig{
+		CallbackUrl:       s.config.Callback.CallbackUrl,
+		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+	}
+
+	if err := CallbackBeforeSetGroupInfo(ctx, beforeSetGroupInfoConfig, req); err != nil {
 		return nil, err
 	}
 	group, err := s.db.TakeGroup(ctx, req.GroupInfoForSet.GroupID)
@@ -1010,7 +1065,9 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	if num > 0 {
 		_ = s.Notification.GroupInfoSetNotification(ctx, tips)
 	}
-	if err := CallbackAfterSetGroupInfo(ctx, s.config, req); err != nil {
+
+	afterSetGroupInfoConfig := beforeSetGroupInfoConfig
+	if err := CallbackAfterSetGroupInfo(ctx, afterSetGroupInfoConfig, req); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -1056,7 +1113,12 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 		return nil, err
 	}
 
-	if err := CallbackAfterTransferGroupOwner(ctx, s.config, req); err != nil {
+	afterTransferGroupOwnerConfig := &EventCallbackConfig{
+		CallbackUrl:       s.config.Callback.CallbackUrl,
+		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+	}
+
+	if err := CallbackAfterTransferGroupOwner(ctx, afterTransferGroupOwnerConfig, req); err != nil {
 		return nil, err
 	}
 	s.Notification.GroupOwnerTransferredNotification(ctx, req)
@@ -1223,7 +1285,13 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 		MembersID: membersID,
 		GroupType: string(group.GroupType),
 	}
-	if err := CallbackDismissGroup(ctx, s.config, reqCall); err != nil {
+
+	dismissGroupConfig := &EventCallbackConfig{
+		CallbackUrl:       s.config.Callback.CallbackUrl,
+		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+	}
+
+	if err := CallbackDismissGroup(ctx, dismissGroupConfig, reqCall); err != nil {
 		return nil, err
 	}
 
@@ -1414,8 +1482,14 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 			return nil, errs.ErrArgs.Wrap("user not in group")
 		}
 	}
+
+	beforeSetGroupMemberInfoConfig := &EventCallbackConfig{
+		CallbackUrl:       s.config.Callback.CallbackUrl,
+		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+	}
+
 	for i := 0; i < len(req.Members); i++ {
-		if err := CallbackBeforeSetGroupMemberInfo(ctx, s.config, req.Members[i]); err != nil {
+		if err := CallbackBeforeSetGroupMemberInfo(ctx, beforeSetGroupMemberInfoConfig, req.Members[i]); err != nil {
 			return nil, err
 		}
 	}
@@ -1441,8 +1515,9 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 			s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
 		}
 	}
+	afterSetGroupMemberInfoConfig := beforeSetGroupMemberInfoConfig
 	for i := 0; i < len(req.Members); i++ {
-		if err := CallbackAfterSetGroupMemberInfo(ctx, s.config, req.Members[i]); err != nil {
+		if err := CallbackAfterSetGroupMemberInfo(ctx, afterSetGroupMemberInfoConfig, req.Members[i]); err != nil {
 			return nil, err
 		}
 	}
