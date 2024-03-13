@@ -131,7 +131,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			sendIDs = append(sendIDs, chatLog.SendID)
 		}
 		switch chatLog.SessionType {
-		case constant.SingleChatType:
+		case constant.SingleChatType, constant.NotificationChatType:
 			recvIDs = append(recvIDs, chatLog.RecvID)
 		case constant.GroupChatType, constant.SuperGroupChatType:
 			groupIDs = append(groupIDs, chatLog.GroupID)
@@ -173,7 +173,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			pbchatLog.SenderNickname = sendMap[chatLog.SendID]
 		}
 		switch chatLog.SessionType {
-		case constant.SingleChatType:
+		case constant.SingleChatType, constant.NotificationChatType:
 			pbchatLog.RecvNickname = recvMap[chatLog.RecvID]
 
 		case constant.GroupChatType, constant.SuperGroupChatType:

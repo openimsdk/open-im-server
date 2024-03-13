@@ -133,6 +133,13 @@ func (t *thirdServer) SearchLogs(ctx context.Context, req *third.SearchLogsReq) 
 	if req.StartTime > req.EndTime {
 		return nil, errs.ErrArgs.Wrap("startTime>endTime")
 	}
+	if req.StartTime == 0 && req.EndTime == 0 {
+		t := time.Date(2019, time.January, 1, 0, 0, 0, 0, time.UTC)
+		timestampMills := t.UnixNano() / int64(time.Millisecond)
+		req.StartTime = timestampMills
+		req.EndTime = time.Now().UnixNano() / int64(time.Millisecond)
+	}
+
 	total, logs, err := t.thirdDatabase.SearchLogs(ctx, req.Keyword, time.UnixMilli(req.StartTime), time.UnixMilli(req.EndTime), req.Pagination)
 	if err != nil {
 		return nil, err
