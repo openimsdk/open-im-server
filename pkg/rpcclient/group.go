@@ -25,29 +25,27 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 type Group struct {
 	Client group.GroupClient
 	discov discoveryregistry.SvcDiscoveryRegistry
-	Config *config.GlobalConfig
 }
 
-func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Group {
-	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImGroupName)
+func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) *Group {
+	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
 		util.ExitWithError(err)
 	}
 	client := group.NewGroupClient(conn)
-	return &Group{discov: discov, Client: client, Config: config}
+	return &Group{discov: discov, Client: client}
 }
 
 type GroupRpcClient Group
 
-func NewGroupRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) GroupRpcClient {
-	return GroupRpcClient(*NewGroup(discov, config))
+func NewGroupRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) GroupRpcClient {
+	return GroupRpcClient(*NewGroup(discov, rpcRegisterName))
 }
 
 func (g *GroupRpcClient) GetGroupInfos(

@@ -29,11 +29,11 @@ import (
 )
 
 // NewZookeeperDiscoveryRegister creates a new instance of ZookeeperDR for Zookeeper service discovery and registration.
-func NewZookeeperDiscoveryRegister(config *config.GlobalConfig) (discoveryregistry.SvcDiscoveryRegistry, error) {
-	schema := getEnv("ZOOKEEPER_SCHEMA", config.Zookeeper.Schema)
-	zkAddr := getZkAddrFromEnv(config.Zookeeper.ZkAddr)
-	username := getEnv("ZOOKEEPER_USERNAME", config.Zookeeper.Username)
-	password := getEnv("ZOOKEEPER_PASSWORD", config.Zookeeper.Password)
+func NewZookeeperDiscoveryRegister(zkConf *config.Zookeeper) (discoveryregistry.SvcDiscoveryRegistry, error) {
+	schema := getEnv("ZOOKEEPER_SCHEMA", zkConf.Schema)
+	zkAddr := getZkAddrFromEnv(zkConf.ZkAddr)
+	username := getEnv("ZOOKEEPER_USERNAME", zkConf.Username)
+	password := getEnv("ZOOKEEPER_PASSWORD", zkConf.Password)
 
 	zk, err := openkeeper.NewClient(
 		zkAddr,
@@ -47,10 +47,10 @@ func NewZookeeperDiscoveryRegister(config *config.GlobalConfig) (discoveryregist
 	if err != nil {
 		uriFormat := "address:%s, username:%s, password:%s, schema:%s."
 		errInfo := fmt.Sprintf(uriFormat,
-			config.Zookeeper.ZkAddr,
-			config.Zookeeper.Username,
-			config.Zookeeper.Password,
-			config.Zookeeper.Schema)
+			zkConf.ZkAddr,
+			zkConf.Username,
+			zkConf.Password,
+			zkConf.Schema)
 		return nil, errs.Wrap(err, errInfo)
 	}
 	return zk, nil

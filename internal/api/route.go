@@ -56,7 +56,7 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 		err := "port or proPort is empty:" + strconv.Itoa(port) + "," + strconv.Itoa(proPort)
 		return errs.Wrap(fmt.Errorf(err))
 	}
-	rdb, err := cache.NewRedis(config)
+	rdb, err := cache.NewRedis(&config.Redis)
 	if err != nil {
 		return err
 	}
@@ -139,13 +139,13 @@ func newGinRouter(disCov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	}
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	// init rpc client here
-	userRpc := rpcclient.NewUser(disCov, config)
-	groupRpc := rpcclient.NewGroup(disCov, config)
-	friendRpc := rpcclient.NewFriend(disCov, config)
-	messageRpc := rpcclient.NewMessage(disCov, config)
-	conversationRpc := rpcclient.NewConversation(disCov, config)
-	authRpc := rpcclient.NewAuth(disCov, config)
-	thirdRpc := rpcclient.NewThird(disCov, config)
+	userRpc := rpcclient.NewUser(disCov, config.RpcRegisterName.OpenImUserName, config.RpcRegisterName.OpenImMessageGatewayName)
+	groupRpc := rpcclient.NewGroup(disCov, config.RpcRegisterName.OpenImGroupName)
+	friendRpc := rpcclient.NewFriend(disCov, config.RpcRegisterName.OpenImFriendName)
+	messageRpc := rpcclient.NewMessage(disCov, config.RpcRegisterName.OpenImMsgName)
+	conversationRpc := rpcclient.NewConversation(disCov, config.RpcRegisterName.OpenImConversationName)
+	authRpc := rpcclient.NewAuth(disCov, config.RpcRegisterName.OpenImAuthName)
+	thirdRpc := rpcclient.NewThird(disCov, config.RpcRegisterName.OpenImThirdName, config.Prometheus.GrafanaUrl)
 
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc)
@@ -313,10 +313,9 @@ func newGinRouter(disCov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 
 func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.HandlerFunc {
 	dataBase := controller.NewAuthDatabase(
-		cache.NewMsgCacheModel(rdb, config),
+		cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis),
 		config.Secret,
 		config.TokenPolicy.Expire,
-		config,
 	)
 	return func(c *gin.Context) {
 		switch c.Request.Method {

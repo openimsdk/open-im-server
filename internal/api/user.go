@@ -70,7 +70,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 		apiresp.GinError(c, err)
 		return
 	}
-	conns, err := u.Discov.GetConns(c, u.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := u.Discov.GetConns(c, u.MessageGateWayRpcName)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return
@@ -134,7 +134,7 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	conns, err := u.Discov.GetConns(c, u.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := u.Discov.GetConns(c, u.MessageGateWayRpcName)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return

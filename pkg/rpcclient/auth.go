@@ -21,22 +21,20 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"google.golang.org/grpc"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
-func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Auth {
-	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImAuthName)
+func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) *Auth {
+	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
 		util.ExitWithError(err)
 	}
 	client := auth.NewAuthClient(conn)
-	return &Auth{discov: discov, conn: conn, Client: client, Config: config}
+	return &Auth{discov: discov, conn: conn, Client: client}
 }
 
 type Auth struct {
 	conn   grpc.ClientConnInterface
 	Client auth.AuthClient
 	discov discoveryregistry.SvcDiscoveryRegistry
-	Config *config.GlobalConfig
 }

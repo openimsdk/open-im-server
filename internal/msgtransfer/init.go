@@ -55,7 +55,7 @@ type MsgTransfer struct {
 }
 
 func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
-	rdb, err := cache.NewRedis(config)
+	rdb, err := cache.NewRedis(&config.Redis)
 	if err != nil {
 		return err
 	}

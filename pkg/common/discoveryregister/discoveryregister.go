@@ -36,7 +36,7 @@ func NewDiscoveryRegister(config *config.GlobalConfig) (discoveryregistry.SvcDis
 
 	switch config.Envs.Discovery {
 	case "zookeeper":
-		return zookeeper.NewZookeeperDiscoveryRegister(config)
+		return zookeeper.NewZookeeperDiscoveryRegister(&config.Zookeeper)
 	case "k8s":
 		return kubernetes.NewK8sDiscoveryRegister(config.RpcRegisterName.OpenImMessageGatewayName)
 	case "direct":

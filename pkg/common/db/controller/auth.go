@@ -23,7 +23,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 )
 
@@ -38,11 +37,10 @@ type authDatabase struct {
 	cache        cache.MsgModel
 	accessSecret string
 	accessExpire int64
-	config       *config.GlobalConfig
 }
 
-func NewAuthDatabase(cache cache.MsgModel, accessSecret string, accessExpire int64, config *config.GlobalConfig) AuthDatabase {
-	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire, config: config}
+func NewAuthDatabase(cache cache.MsgModel, accessSecret string, accessExpire int64) AuthDatabase {
+	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire}
 }
 
 // If the result is empty.
@@ -58,7 +56,7 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 	}
 	var deleteTokenKey []string
 	for k, v := range tokens {
-		_, err = tokenverify.GetClaimFromToken(k, authverify.Secret(a.config.Secret))
+		_, err = tokenverify.GetClaimFromToken(k, authverify.Secret(a.accessSecret))
 		if err != nil || v != constant.NormalToken {
 			deleteTokenKey = append(deleteTokenKey, k)
 		}

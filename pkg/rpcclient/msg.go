@@ -131,22 +131,21 @@ type Message struct {
 	conn   grpc.ClientConnInterface
 	Client msg.MsgClient
 	discov discoveryregistry.SvcDiscoveryRegistry
-	Config *config.GlobalConfig
 }
 
-func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Message {
-	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImMsgName)
+func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) *Message {
+	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
 		util.ExitWithError(err)
 	}
 	client := msg.NewMsgClient(conn)
-	return &Message{discov: discov, conn: conn, Client: client, Config: config}
+	return &Message{discov: discov, conn: conn, Client: client}
 }
 
 type MessageRpcClient Message
 
-func NewMessageRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) MessageRpcClient {
-	return MessageRpcClient(*NewMessage(discov, config))
+func NewMessageRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) MessageRpcClient {
+	return MessageRpcClient(*NewMessage(discov, rpcRegisterName))
 }
 
 // SendMsg sends a message through the gRPC client and returns the response.

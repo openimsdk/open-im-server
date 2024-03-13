@@ -39,32 +39,32 @@ const (
 )
 
 // NewRedis Initialize redis connection.
-func NewRedis(config *config.GlobalConfig) (redis.UniversalClient, error) {
+func NewRedis(redisConf *config.Redis) (redis.UniversalClient, error) {
 	if redisClient != nil {
 		return redisClient, nil
 	}
 
 	// Read configuration from environment variables
-	overrideConfigFromEnv(config)
+	overrideConfigFromEnv(redisConf)
 
-	if len(config.Redis.Address) == 0 {
+	if len(redisConf.Address) == 0 {
 		return nil, errs.Wrap(errors.New("redis address is empty"))
 	}
 	specialerror.AddReplace(redis.Nil, errs.ErrRecordNotFound)
 	var rdb redis.UniversalClient
-	if len(config.Redis.Address) > 1 || config.Redis.ClusterMode {
+	if len(redisConf.Address) > 1 || redisConf.ClusterMode {
 		rdb = redis.NewClusterClient(&redis.ClusterOptions{
-			Addrs:      config.Redis.Address,
-			Username:   config.Redis.Username,
-			Password:   config.Redis.Password, // no password set
+			Addrs:      redisConf.Address,
+			Username:   redisConf.Username,
+			Password:   redisConf.Password, // no password set
 			PoolSize:   50,
 			MaxRetries: maxRetry,
 		})
 	} else {
 		rdb = redis.NewClient(&redis.Options{
-			Addr:       config.Redis.Address[0],
-			Username:   config.Redis.Username,
-			Password:   config.Redis.Password,
+			Addr:       redisConf.Address[0],
+			Username:   redisConf.Username,
+			Password:   redisConf.Password,
 			DB:         0,   // use default DB
 			PoolSize:   100, // connection pool size
 			MaxRetries: maxRetry,
@@ -76,8 +76,8 @@ func NewRedis(config *config.GlobalConfig) (redis.UniversalClient, error) {
 	defer cancel()
 	err = rdb.Ping(ctx).Err()
 	if err != nil {
-		errMsg := fmt.Sprintf("address:%s, username:%s, password:%s, clusterMode:%t, enablePipeline:%t", config.Redis.Address, config.Redis.Username,
-			config.Redis.Password, config.Redis.ClusterMode, config.Redis.EnablePipeline)
+		errMsg := fmt.Sprintf("address:%s, username:%s, password:%s, clusterMode:%t, enablePipeline:%t", redisConf.Address, redisConf.Username,
+			redisConf.Password, redisConf.ClusterMode, redisConf.EnablePipeline)
 		return nil, errs.Wrap(err, errMsg)
 	}
 	redisClient = rdb
@@ -85,24 +85,24 @@ func NewRedis(config *config.GlobalConfig) (redis.UniversalClient, error) {
 }
 
 // overrideConfigFromEnv overrides configuration fields with environment variables if present.
-func overrideConfigFromEnv(config *config.GlobalConfig) {
+func overrideConfigFromEnv(redis *config.Redis) {
 	if envAddr := os.Getenv("REDIS_ADDRESS"); envAddr != "" {
 		if envPort := os.Getenv("REDIS_PORT"); envPort != "" {
 			addresses := strings.Split(envAddr, ",")
 			for i, addr := range addresses {
 				addresses[i] = addr + ":" + envPort
 			}
-			config.Redis.Address = addresses
+			redis.Address = addresses
 		} else {
-			config.Redis.Address = strings.Split(envAddr, ",")
+			redis.Address = strings.Split(envAddr, ",")
 		}
 	}
 
 	if envUser := os.Getenv("REDIS_USERNAME"); envUser != "" {
-		config.Redis.Username = envUser
+		redis.Username = envUser
 	}
 
 	if envPass := os.Getenv("REDIS_PASSWORD"); envPass != "" {
-		config.Redis.Password = envPass
+		redis.Password = envPass
 	}
 }

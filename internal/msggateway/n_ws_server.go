@@ -95,8 +95,8 @@ type kickHandler struct {
 }
 
 func (ws *WsServer) SetDiscoveryRegistry(disCov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) {
-	ws.MessageHandler = NewGrpcHandler(ws.validate, disCov, config)
-	u := rpcclient.NewUserRpcClient(disCov, config)
+	ws.MessageHandler = NewGrpcHandler(ws.validate, disCov, &config.RpcRegisterName)
+	u := rpcclient.NewUserRpcClient(disCov, config.RpcRegisterName.OpenImUserName)
 	ws.userClient = &u
 	ws.disCov = disCov
 }
