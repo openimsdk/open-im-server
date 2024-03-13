@@ -97,7 +97,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 	}
 	tagAll := utils.IsContain(constant.AtAllString, msg.AtUserIDList)
 	if tagAll {
-		memberUserIDList, err := m.Group.GetGroupMemberIDs(ctx, msg.GroupID)
+		memberUserIDList, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, msg.GroupID)
 		if err != nil {
 			log.ZWarn(ctx, "GetGroupMemberIDs", err)
 			return
@@ -143,6 +143,7 @@ func (m *msgServer) sendMsgNotification(
 }
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
+	log.ZDebug(ctx, "sendMsgSingleChat return")
 	if err := m.messageVerification(ctx, req); err != nil {
 		return nil, err
 	}

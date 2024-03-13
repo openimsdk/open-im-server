@@ -100,7 +100,7 @@ func CallbackUserKickOff(ctx context.Context, globalConfig *config.GlobalConfig,
 // func callbackUserOnline(operationID, userID string, platformID int, token string, isAppBackground bool, connID
 // string) cbApi.CommonCallbackResp {
 //	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
-//	if !config.Config.Callback.CallbackUserOnline.Enable {
+//	if !config.Config.Callback.CallbackUserOnline.WithEnable {
 //		return callbackResp
 //	}
 //	callbackUserOnlineReq := cbApi.CallbackUserOnlineReq{
@@ -129,7 +129,7 @@ func CallbackUserKickOff(ctx context.Context, globalConfig *config.GlobalConfig,
 //}
 //func callbackUserOffline(operationID, userID string, platformID int, connID string) cbApi.CommonCallbackResp {
 //	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
-//	if !config.Config.Callback.CallbackUserOffline.Enable {
+//	if !config.Config.Callback.CallbackUserOffline.WithEnable {
 //		return callbackResp
 //	}
 //	callbackOfflineReq := cbApi.CallbackUserOfflineReq{
@@ -156,7 +156,7 @@ func CallbackUserKickOff(ctx context.Context, globalConfig *config.GlobalConfig,
 //}
 //func callbackUserKickOff(operationID string, userID string, platformID int) cbApi.CommonCallbackResp {
 //	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
-//	if !config.Config.Callback.CallbackUserKickOff.Enable {
+//	if !config.Config.Callback.CallbackUserKickOff.WithEnable {
 //		return callbackResp
 //	}
 //	callbackUserKickOffReq := cbApi.CallbackUserKickOffReq{

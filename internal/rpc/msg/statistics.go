@@ -40,7 +40,7 @@ func (m *msgServer) GetActiveUser(ctx context.Context, req *msg.GetActiveUserReq
 	var pbUsers []*msg.ActiveUser
 	if len(users) > 0 {
 		userIDs := utils.Slice(users, func(e *unrelation.UserCount) string { return e.UserID })
-		userMap, err := m.User.GetUsersInfoMap(ctx, userIDs)
+		userMap, err := m.UserLocalCache.GetUsersInfoMap(ctx, userIDs)
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +82,7 @@ func (m *msgServer) GetActiveGroup(ctx context.Context, req *msg.GetActiveGroupR
 	var pbgroups []*msg.ActiveGroup
 	if len(groups) > 0 {
 		groupIDs := utils.Slice(groups, func(e *unrelation.GroupCount) string { return e.GroupID })
-		resp, err := m.Group.GetGroupInfos(ctx, groupIDs, false)
+		resp, err := m.GroupLocalCache.GetGroupInfos(ctx, groupIDs)
 		if err != nil {
 			return nil, err
 		}

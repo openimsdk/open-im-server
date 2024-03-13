@@ -21,10 +21,6 @@
 # checks them out to a branch named:
 #  automated-cherry-pick-of-<pr>-<target branch>-<timestamp>
 
-
-
-
-
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
