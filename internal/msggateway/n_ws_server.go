@@ -107,12 +107,12 @@ func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, sta
 	}
 	switch status {
 	case constant.Online:
-		err := CallbackUserOnline(ctx, ws.globalConfig, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
+		err := CallbackUserOnline(ctx, &ws.globalConfig.Callback, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
 		if err != nil {
 			log.ZWarn(ctx, "CallbackUserOnline err", err)
 		}
 	case constant.Offline:
-		err := CallbackUserOffline(ctx, ws.globalConfig, client.UserID, client.PlatformID, client.ctx.GetConnID())
+		err := CallbackUserOffline(ctx, &ws.globalConfig.Callback, client.UserID, client.PlatformID, client.ctx.GetConnID())
 		if err != nil {
 			log.ZWarn(ctx, "CallbackUserOffline err", err)
 		}
