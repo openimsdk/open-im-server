@@ -1006,7 +1006,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		return nil, err
 	}
 	if group.Status == constant.GroupStatusDismissed {
-		return nil, errs.Wrap(errors.New("group dismissed"))
+		return nil, errs.ErrDismissedAlready.Wrap("group dismissed")
 	}
 	resp := &pbgroup.SetGroupInfoResp{}
 	count, err := s.db.FindGroupMemberNum(ctx, group.GroupID)
