@@ -43,19 +43,18 @@ type authServer struct {
 }
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis(config)
+	rdb, err := cache.NewRedis(&config.Redis)
 	if err != nil {
 		return err
 	}
-	userRpcClient := rpcclient.NewUserRpcClient(client, config)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName)
 	pbauth.RegisterAuthServer(server, &authServer{
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
-			cache.NewMsgCacheModel(rdb, config),
+			cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis),
 			config.Secret,
 			config.TokenPolicy.Expire,
-			config,
 		),
 		config: config,
 	})
@@ -81,12 +80,12 @@ func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*
 }
 
 func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenReq) (*pbauth.GetUserTokenResp, error) {
-	if err := authverify.CheckAdmin(ctx, s.config); err != nil {
+	if err := authverify.CheckAdmin(ctx, &s.config.Manager, &s.config.IMAdmin); err != nil {
 		return nil, err
 	}
 	resp := pbauth.GetUserTokenResp{}
 
-	if authverify.IsManagerUserID(req.UserID, s.config) {
+	if authverify.IsManagerUserID(req.UserID, &s.config.Manager, &s.config.IMAdmin) {
 		return nil, errs.ErrNoPermission.Wrap("don't get Admin token")
 	}
 
@@ -143,7 +142,7 @@ func (s *authServer) ParseToken(
 }
 
 func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq) (*pbauth.ForceLogoutResp, error) {
-	if err := authverify.CheckAdmin(ctx, s.config); err != nil {
+	if err := authverify.CheckAdmin(ctx, &s.config.Manager, &s.config.IMAdmin); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {

@@ -382,14 +382,14 @@ type GlobalConfig struct {
 	Callback Callback `yaml:"callback"`
 
 	Prometheus   Prometheus   `yaml:"prometheus"`
-	Notification notification `yaml:"notification"`
+	Notification Notification `yaml:"notification"`
 }
 
 func NewGlobalConfig() *GlobalConfig {
 	return &GlobalConfig{}
 }
 
-type notification struct {
+type Notification struct {
 	GroupCreated             NotificationConf `yaml:"groupCreated"`
 	GroupInfoSet             NotificationConf `yaml:"groupInfoSet"`
 	JoinGroupApplication     NotificationConf `yaml:"joinGroupApplication"`

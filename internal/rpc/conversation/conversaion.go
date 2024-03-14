@@ -46,15 +46,14 @@ type conversationServer struct {
 	groupRpcClient                 *rpcclient.GroupRpcClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
-	config                         *config.GlobalConfig
 }
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis(config)
+	rdb, err := cache.NewRedis(&config.Redis)
 	if err != nil {
 		return err
 	}
-	mongo, err := unrelation.NewMongo(config)
+	mongo, err := unrelation.NewMongo(&config.Mongo)
 	if err != nil {
 		return err
 	}
@@ -62,16 +61,15 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client, config)
-	userRpcClient := rpcclient.NewUserRpcClient(client, config)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.RpcRegisterName.OpenImMsgName)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName)
 	pbconversation.RegisterConversationServer(server, &conversationServer{
 		msgRpcClient:                   &msgRpcClient,
 		user:                           &userRpcClient,
-		conversationNotificationSender: notification.NewConversationNotificationSender(config, &msgRpcClient),
+		conversationNotificationSender: notification.NewConversationNotificationSender(&config.Notification, &msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewMongo(mongo.GetClient())),
-		config:                         config,
 	})
 	return nil
 }

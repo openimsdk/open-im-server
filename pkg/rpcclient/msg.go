@@ -33,47 +33,47 @@ import (
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
-func newContentTypeConf(conf *config.GlobalConfig) map[int32]config.NotificationConf {
+func newContentTypeConf(conf *config.Notification) map[int32]config.NotificationConf {
 	return map[int32]config.NotificationConf{
 		// group
-		constant.GroupCreatedNotification:                 conf.Notification.GroupCreated,
-		constant.GroupInfoSetNotification:                 conf.Notification.GroupInfoSet,
-		constant.JoinGroupApplicationNotification:         conf.Notification.JoinGroupApplication,
-		constant.MemberQuitNotification:                   conf.Notification.MemberQuit,
-		constant.GroupApplicationAcceptedNotification:     conf.Notification.GroupApplicationAccepted,
-		constant.GroupApplicationRejectedNotification:     conf.Notification.GroupApplicationRejected,
-		constant.GroupOwnerTransferredNotification:        conf.Notification.GroupOwnerTransferred,
-		constant.MemberKickedNotification:                 conf.Notification.MemberKicked,
-		constant.MemberInvitedNotification:                conf.Notification.MemberInvited,
-		constant.MemberEnterNotification:                  conf.Notification.MemberEnter,
-		constant.GroupDismissedNotification:               conf.Notification.GroupDismissed,
-		constant.GroupMutedNotification:                   conf.Notification.GroupMuted,
-		constant.GroupCancelMutedNotification:             conf.Notification.GroupCancelMuted,
-		constant.GroupMemberMutedNotification:             conf.Notification.GroupMemberMuted,
-		constant.GroupMemberCancelMutedNotification:       conf.Notification.GroupMemberCancelMuted,
-		constant.GroupMemberInfoSetNotification:           conf.Notification.GroupMemberInfoSet,
-		constant.GroupMemberSetToAdminNotification:        conf.Notification.GroupMemberSetToAdmin,
-		constant.GroupMemberSetToOrdinaryUserNotification: conf.Notification.GroupMemberSetToOrdinary,
-		constant.GroupInfoSetAnnouncementNotification:     conf.Notification.GroupInfoSetAnnouncement,
-		constant.GroupInfoSetNameNotification:             conf.Notification.GroupInfoSetName,
+		constant.GroupCreatedNotification:                 conf.GroupCreated,
+		constant.GroupInfoSetNotification:                 conf.GroupInfoSet,
+		constant.JoinGroupApplicationNotification:         conf.JoinGroupApplication,
+		constant.MemberQuitNotification:                   conf.MemberQuit,
+		constant.GroupApplicationAcceptedNotification:     conf.GroupApplicationAccepted,
+		constant.GroupApplicationRejectedNotification:     conf.GroupApplicationRejected,
+		constant.GroupOwnerTransferredNotification:        conf.GroupOwnerTransferred,
+		constant.MemberKickedNotification:                 conf.MemberKicked,
+		constant.MemberInvitedNotification:                conf.MemberInvited,
+		constant.MemberEnterNotification:                  conf.MemberEnter,
+		constant.GroupDismissedNotification:               conf.GroupDismissed,
+		constant.GroupMutedNotification:                   conf.GroupMuted,
+		constant.GroupCancelMutedNotification:             conf.GroupCancelMuted,
+		constant.GroupMemberMutedNotification:             conf.GroupMemberMuted,
+		constant.GroupMemberCancelMutedNotification:       conf.GroupMemberCancelMuted,
+		constant.GroupMemberInfoSetNotification:           conf.GroupMemberInfoSet,
+		constant.GroupMemberSetToAdminNotification:        conf.GroupMemberSetToAdmin,
+		constant.GroupMemberSetToOrdinaryUserNotification: conf.GroupMemberSetToOrdinary,
+		constant.GroupInfoSetAnnouncementNotification:     conf.GroupInfoSetAnnouncement,
+		constant.GroupInfoSetNameNotification:             conf.GroupInfoSetName,
 		// user
-		constant.UserInfoUpdatedNotification:  conf.Notification.UserInfoUpdated,
-		constant.UserStatusChangeNotification: conf.Notification.UserStatusChanged,
+		constant.UserInfoUpdatedNotification:  conf.UserInfoUpdated,
+		constant.UserStatusChangeNotification: conf.UserStatusChanged,
 		// friend
-		constant.FriendApplicationNotification:         conf.Notification.FriendApplicationAdded,
-		constant.FriendApplicationApprovedNotification: conf.Notification.FriendApplicationApproved,
-		constant.FriendApplicationRejectedNotification: conf.Notification.FriendApplicationRejected,
-		constant.FriendAddedNotification:               conf.Notification.FriendAdded,
-		constant.FriendDeletedNotification:             conf.Notification.FriendDeleted,
-		constant.FriendRemarkSetNotification:           conf.Notification.FriendRemarkSet,
-		constant.BlackAddedNotification:                conf.Notification.BlackAdded,
-		constant.BlackDeletedNotification:              conf.Notification.BlackDeleted,
-		constant.FriendInfoUpdatedNotification:         conf.Notification.FriendInfoUpdated,
-		constant.FriendsInfoUpdateNotification:         conf.Notification.FriendInfoUpdated, //use the same FriendInfoUpdated
+		constant.FriendApplicationNotification:         conf.FriendApplicationAdded,
+		constant.FriendApplicationApprovedNotification: conf.FriendApplicationApproved,
+		constant.FriendApplicationRejectedNotification: conf.FriendApplicationRejected,
+		constant.FriendAddedNotification:               conf.FriendAdded,
+		constant.FriendDeletedNotification:             conf.FriendDeleted,
+		constant.FriendRemarkSetNotification:           conf.FriendRemarkSet,
+		constant.BlackAddedNotification:                conf.BlackAdded,
+		constant.BlackDeletedNotification:              conf.BlackDeleted,
+		constant.FriendInfoUpdatedNotification:         conf.FriendInfoUpdated,
+		constant.FriendsInfoUpdateNotification:         conf.FriendInfoUpdated, //use the same FriendInfoUpdated
 		// conversation
-		constant.ConversationChangeNotification:      conf.Notification.ConversationChanged,
-		constant.ConversationUnreadNotification:      conf.Notification.ConversationChanged,
-		constant.ConversationPrivateChatNotification: conf.Notification.ConversationSetPrivate,
+		constant.ConversationChangeNotification:      conf.ConversationChanged,
+		constant.ConversationUnreadNotification:      conf.ConversationChanged,
+		constant.ConversationPrivateChatNotification: conf.ConversationSetPrivate,
 		// msg
 		constant.MsgRevokeNotification:  {IsSendMsg: false, ReliabilityLevel: constant.ReliableNotificationNoMsg},
 		constant.HasReadReceipt:         {IsSendMsg: false, ReliabilityLevel: constant.ReliableNotificationNoMsg},
@@ -238,8 +238,8 @@ func WithUserRpcClient(userRpcClient *UserRpcClient) NotificationSenderOptions {
 	}
 }
 
-func NewNotificationSender(config *config.GlobalConfig, opts ...NotificationSenderOptions) *NotificationSender {
-	notificationSender := &NotificationSender{contentTypeConf: newContentTypeConf(config), sessionTypeConf: newSessionTypeConf()}
+func NewNotificationSender(conf *config.Notification, opts ...NotificationSenderOptions) *NotificationSender {
+	notificationSender := &NotificationSender{contentTypeConf: newContentTypeConf(conf), sessionTypeConf: newSessionTypeConf()}
 	for _, opt := range opts {
 		opt(notificationSender)
 	}
