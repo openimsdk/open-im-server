@@ -33,13 +33,13 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
 )
 
-type EventCallbackConfig struct {
+type GroupEventCallbackConfig struct {
 	CallbackUrl       string
 	BeforeCreateGroup config.CallBackConfig
 }
 
 // CallbackBeforeCreateGroup callback before create group
-func CallbackBeforeCreateGroup(ctx context.Context, cfg *EventCallbackConfig, req *group.CreateGroupReq) (err error) {
+func CallbackBeforeCreateGroup(ctx context.Context, cfg *GroupEventCallbackConfig, req *group.CreateGroupReq) (err error) {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -85,7 +85,7 @@ func CallbackBeforeCreateGroup(ctx context.Context, cfg *EventCallbackConfig, re
 	return nil
 }
 
-func CallbackAfterCreateGroup(ctx context.Context, cfg *EventCallbackConfig, req *group.CreateGroupReq) (err error) {
+func CallbackAfterCreateGroup(ctx context.Context, cfg *GroupEventCallbackConfig, req *group.CreateGroupReq) (err error) {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -117,7 +117,7 @@ func CallbackAfterCreateGroup(ctx context.Context, cfg *EventCallbackConfig, req
 	return nil
 }
 
-func CallbackBeforeMemberJoinGroup(ctx context.Context, cfg *EventCallbackConfig, groupMember *relation.GroupMemberModel, groupEx string) (err error) {
+func CallbackBeforeMemberJoinGroup(ctx context.Context, cfg *GroupEventCallbackConfig, groupMember *relation.GroupMemberModel, groupEx string) (err error) {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -145,7 +145,7 @@ func CallbackBeforeMemberJoinGroup(ctx context.Context, cfg *EventCallbackConfig
 	return nil
 }
 
-func CallbackBeforeSetGroupMemberInfo(ctx context.Context, cfg *EventCallbackConfig, req *group.SetGroupMemberInfo) (err error) {
+func CallbackBeforeSetGroupMemberInfo(ctx context.Context, cfg *GroupEventCallbackConfig, req *group.SetGroupMemberInfo) (err error) {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -193,7 +193,7 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, cfg *EventCallbackCon
 	return nil
 }
 
-func CallbackAfterSetGroupMemberInfo(ctx context.Context, cfg *EventCallbackConfig, req *group.SetGroupMemberInfo) (err error) {
+func CallbackAfterSetGroupMemberInfo(ctx context.Context, cfg *GroupEventCallbackConfig, req *group.SetGroupMemberInfo) (err error) {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -221,7 +221,7 @@ func CallbackAfterSetGroupMemberInfo(ctx context.Context, cfg *EventCallbackConf
 	return nil
 }
 
-func CallbackQuitGroup(ctx context.Context, cfg *EventCallbackConfig, req *group.QuitGroupReq) (err error) {
+func CallbackQuitGroup(ctx context.Context, cfg *GroupEventCallbackConfig, req *group.QuitGroupReq) (err error) {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -237,7 +237,7 @@ func CallbackQuitGroup(ctx context.Context, cfg *EventCallbackConfig, req *group
 	return nil
 }
 
-func CallbackKillGroupMember(ctx context.Context, cfg *EventCallbackConfig, req *pbgroup.KickGroupMemberReq) (err error) {
+func CallbackKillGroupMember(ctx context.Context, cfg *GroupEventCallbackConfig, req *pbgroup.KickGroupMemberReq) (err error) {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -253,7 +253,7 @@ func CallbackKillGroupMember(ctx context.Context, cfg *EventCallbackConfig, req 
 	return nil
 }
 
-func CallbackDismissGroup(ctx context.Context, cfg *EventCallbackConfig, req *callbackstruct.CallbackDisMissGroupReq) (err error) {
+func CallbackDismissGroup(ctx context.Context, cfg *GroupEventCallbackConfig, req *callbackstruct.CallbackDisMissGroupReq) (err error) {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -265,7 +265,7 @@ func CallbackDismissGroup(ctx context.Context, cfg *EventCallbackConfig, req *ca
 	return nil
 }
 
-func CallbackApplyJoinGroupBefore(ctx context.Context, cfg *EventCallbackConfig, req *callbackstruct.CallbackJoinGroupReq) (err error) {
+func CallbackApplyJoinGroupBefore(ctx context.Context, cfg *GroupEventCallbackConfig, req *callbackstruct.CallbackJoinGroupReq) (err error) {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -280,7 +280,7 @@ func CallbackApplyJoinGroupBefore(ctx context.Context, cfg *EventCallbackConfig,
 	return nil
 }
 
-func CallbackAfterTransferGroupOwner(ctx context.Context, cfg *EventCallbackConfig, req *pbgroup.TransferGroupOwnerReq) (err error) {
+func CallbackAfterTransferGroupOwner(ctx context.Context, cfg *GroupEventCallbackConfig, req *pbgroup.TransferGroupOwnerReq) (err error) {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -298,7 +298,7 @@ func CallbackAfterTransferGroupOwner(ctx context.Context, cfg *EventCallbackConf
 	}
 	return nil
 }
-func CallbackBeforeInviteUserToGroup(ctx context.Context, cfg *EventCallbackConfig, req *group.InviteUserToGroupReq) (err error) {
+func CallbackBeforeInviteUserToGroup(ctx context.Context, cfg *GroupEventCallbackConfig, req *group.InviteUserToGroupReq) (err error) {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -331,7 +331,7 @@ func CallbackBeforeInviteUserToGroup(ctx context.Context, cfg *EventCallbackConf
 	return nil
 }
 
-func CallbackAfterJoinGroup(ctx context.Context, cfg *EventCallbackConfig, req *group.JoinGroupReq) error {
+func CallbackAfterJoinGroup(ctx context.Context, cfg *GroupEventCallbackConfig, req *group.JoinGroupReq) error {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -350,7 +350,7 @@ func CallbackAfterJoinGroup(ctx context.Context, cfg *EventCallbackConfig, req *
 	return nil
 }
 
-func CallbackBeforeSetGroupInfo(ctx context.Context, cfg *EventCallbackConfig, req *group.SetGroupInfoReq) error {
+func CallbackBeforeSetGroupInfo(ctx context.Context, cfg *GroupEventCallbackConfig, req *group.SetGroupInfoReq) error {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}
@@ -401,7 +401,7 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, cfg *EventCallbackConfig, r
 	return nil
 }
 
-func CallbackAfterSetGroupInfo(ctx context.Context, cfg *EventCallbackConfig, req *group.SetGroupInfoReq) error {
+func CallbackAfterSetGroupInfo(ctx context.Context, cfg *GroupEventCallbackConfig, req *group.SetGroupInfoReq) error {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil
 	}

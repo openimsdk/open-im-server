@@ -156,6 +156,7 @@ func callbackMsgModify(ctx context.Context, globalConfig *config.GlobalConfig, m
 	log.ZDebug(ctx, "callbackMsgModify", "msg", msg.MsgData)
 	return nil
 }
+
 func CallbackGroupMsgRead(ctx context.Context, globalConfig *config.GlobalConfig, req *cbapi.CallbackGroupMsgReadReq) error {
 	if !globalConfig.Callback.CallbackGroupMsgRead.Enable || req.ContentType != constant.Text {
 		return nil

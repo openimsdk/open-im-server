@@ -218,7 +218,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		return nil, errs.ErrUserIDNotFound.Wrap("user not found")
 	}
 
-	config := &EventCallbackConfig{
+	config := &GroupEventCallbackConfig{
 		CallbackUrl:       s.config.Callback.CallbackUrl,
 		BeforeCreateGroup: s.config.Callback.CallbackBeforeCreateGroup,
 	}
@@ -234,7 +234,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		return nil, err
 	}
 
-	beforeCreateGroupConfig := &EventCallbackConfig{
+	beforeCreateGroupConfig := &GroupEventCallbackConfig{
 		CallbackUrl:       s.config.Callback.CallbackUrl,
 		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
 	}
@@ -391,8 +391,9 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	}
 
 	if group.Status == constant.GroupStatusDismissed {
-		return nil, errs.Wrap(errors.New("group dismissed"))
+		return nil, errs.Wrap(errors.New("group dismissed"), "checking group status found it dismissed")
 	}
+
 	userMap, err := s.User.GetUsersInfoMap(ctx, req.InvitedUserIDs)
 	if err != nil {
 		return nil, err
@@ -414,7 +415,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		}
 	}
 
-	beforeInviteUserToGroupConfig := &EventCallbackConfig{
+	beforeInviteUserToGroupConfig := &GroupEventCallbackConfig{
 		CallbackUrl:       s.config.Callback.CallbackUrl,
 		BeforeCreateGroup: s.config.Callback.CallbackBeforeInviteUserToGroup,
 	}
@@ -639,7 +640,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 		return nil, err
 	}
 
-	killGroupMemberConfig := &EventCallbackConfig{
+	killGroupMemberConfig := &GroupEventCallbackConfig{
 		CallbackUrl:       s.config.Callback.CallbackUrl,
 		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
 	}
@@ -815,7 +816,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 			Ex:             groupRequest.Ex,
 		}
 
-		beforeMemberJoinGroupConfig := &EventCallbackConfig{
+		beforeMemberJoinGroupConfig := &GroupEventCallbackConfig{
 			CallbackUrl:       s.config.Callback.CallbackUrl,
 			BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
 		}
@@ -868,7 +869,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		Ex:         req.Ex,
 	}
 
-	applyJoinGroupBeforeConfig := &EventCallbackConfig{
+	applyJoinGroupBeforeConfig := &GroupEventCallbackConfig{
 		CallbackUrl:       s.config.Callback.CallbackUrl,
 		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
 	}
@@ -956,7 +957,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 		return nil, err
 	}
 
-	quitGroupConfig := &EventCallbackConfig{
+	quitGroupConfig := &GroupEventCallbackConfig{
 		CallbackUrl:       s.config.Callback.CallbackUrl,
 		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
 	}
@@ -992,7 +993,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		}
 	}
 
-	beforeSetGroupInfoConfig := &EventCallbackConfig{
+	beforeSetGroupInfoConfig := &GroupEventCallbackConfig{
 		CallbackUrl:       s.config.Callback.CallbackUrl,
 		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
 	}
@@ -1114,7 +1115,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 		return nil, err
 	}
 
-	afterTransferGroupOwnerConfig := &EventCallbackConfig{
+	afterTransferGroupOwnerConfig := &GroupEventCallbackConfig{
 		CallbackUrl:       s.config.Callback.CallbackUrl,
 		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
 	}
@@ -1287,7 +1288,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 		GroupType: string(group.GroupType),
 	}
 
-	dismissGroupConfig := &EventCallbackConfig{
+	dismissGroupConfig := &GroupEventCallbackConfig{
 		CallbackUrl:       s.config.Callback.CallbackUrl,
 		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
 	}
@@ -1484,7 +1485,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 		}
 	}
 
-	beforeSetGroupMemberInfoConfig := &EventCallbackConfig{
+	beforeSetGroupMemberInfoConfig := &GroupEventCallbackConfig{
 		CallbackUrl:       s.config.Callback.CallbackUrl,
 		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
 	}

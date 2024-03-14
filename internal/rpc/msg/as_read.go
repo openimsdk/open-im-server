@@ -69,10 +69,7 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	return resp, nil
 }
 
-func (m *msgServer) SetConversationHasReadSeq(
-	ctx context.Context,
-	req *msg.SetConversationHasReadSeqReq,
-) (resp *msg.SetConversationHasReadSeqResp, err error) {
+func (m *msgServer) SetConversationHasReadSeq(ctx context.Context, req *msg.SetConversationHasReadSeqReq) (resp *msg.SetConversationHasReadSeqResp, err error) {
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
 	if err != nil {
 		return
@@ -90,10 +87,7 @@ func (m *msgServer) SetConversationHasReadSeq(
 	return &msg.SetConversationHasReadSeqResp{}, nil
 }
 
-func (m *msgServer) MarkMsgsAsRead(
-	ctx context.Context,
-	req *msg.MarkMsgsAsReadReq,
-) (resp *msg.MarkMsgsAsReadResp, err error) {
+func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadReq) (resp *msg.MarkMsgsAsReadResp, err error) {
 	if len(req.Seqs) < 1 {
 		return nil, errs.ErrArgs.Wrap("seqs must not be empty")
 	}
@@ -124,13 +118,13 @@ func (m *msgServer) MarkMsgsAsRead(
 		}
 	}
 
-	req_callback := &cbapi.CallbackSingleMsgReadReq{
+	reqCallback := &cbapi.CallbackSingleMsgReadReq{
 		ConversationID: conversation.ConversationID,
 		UserID:         req.UserID,
 		Seqs:           req.Seqs,
 		ContentType:    conversation.ConversationType,
 	}
-	if err = CallbackSingleMsgRead(ctx, m.config, req_callback); err != nil {
+	if err = CallbackSingleMsgRead(ctx, m.config, reqCallback); err != nil {
 		return nil, err
 	}
 
@@ -141,10 +135,7 @@ func (m *msgServer) MarkMsgsAsRead(
 	return &msg.MarkMsgsAsReadResp{}, nil
 }
 
-func (m *msgServer) MarkConversationAsRead(
-	ctx context.Context,
-	req *msg.MarkConversationAsReadReq,
-) (resp *msg.MarkConversationAsReadResp, err error) {
+func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkConversationAsReadReq) (resp *msg.MarkConversationAsReadResp, err error) {
 	conversation, err := m.ConversationLocalCache.GetConversation(ctx, req.UserID, req.ConversationID)
 	if err != nil {
 		return nil, err

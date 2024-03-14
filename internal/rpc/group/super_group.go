@@ -19,12 +19,13 @@ import (
 	"errors"
 
 	pbgroup "github.com/OpenIMSDK/protocol/group"
+	"github.com/OpenIMSDK/tools/errs"
 )
 
 func (s *groupServer) GetJoinedSuperGroupList(context.Context, *pbgroup.GetJoinedSuperGroupListReq) (*pbgroup.GetJoinedSuperGroupListResp, error) {
-	return nil, errors.New("deprecated")
+	return nil, errs.Wrap(errors.New("GetJoinedSuperGroupList is deprecated"), "This feature is deprecated and no longer supported.")
 }
 
 func (s *groupServer) GetSuperGroupsInfo(context.Context, *pbgroup.GetSuperGroupsInfoReq) (resp *pbgroup.GetSuperGroupsInfoResp, err error) {
-	return nil, errors.New("deprecated")
+	return nil, errs.Wrap(errors.New("GetSuperGroupsInfo is deprecated"), "This feature is deprecated and no longer supported.")
 }
