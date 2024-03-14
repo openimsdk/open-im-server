@@ -248,6 +248,16 @@ type Push struct {
 	Jpns                 Jpns   `yaml:"jpns"`
 }
 
+type Manager struct {
+	UserID   []string `yaml:"userID"`
+	Nickname []string `yaml:"nickname"`
+}
+
+type IMAdmin struct {
+	UserID   []string `yaml:"userID"`
+	Nickname []string `yaml:"nickname"`
+}
+
 type Prometheus struct {
 	Enable                        bool   `yaml:"enable"`
 	GrafanaUrl                    string `yaml:"grafanaUrl"`
@@ -345,16 +355,10 @@ type GlobalConfig struct {
 
 	LongConnSvr LongConnSvr `yaml:"longConnSvr"`
 
-	Push    Push `yaml:"push"`
-	Manager struct {
-		UserID   []string `yaml:"userID"`
-		Nickname []string `yaml:"nickname"`
-	} `yaml:"manager"`
+	Push    Push    `yaml:"push"`
+	Manager Manager `yaml:"manager"`
 
-	IMAdmin struct {
-		UserID   []string `yaml:"userID"`
-		Nickname []string `yaml:"nickname"`
-	} `yaml:"im-admin"`
+	IMAdmin IMAdmin `yaml:"im-admin"`
 
 	MultiLoginPolicy                  int    `yaml:"multiLoginPolicy"`
 	MsgCacheTimeout                   int    `yaml:"msgCacheTimeout"`

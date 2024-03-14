@@ -147,7 +147,7 @@ func newGinRouter(disCov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	thirdRpc := rpcclient.NewThird(disCov, config.RpcRegisterName.OpenImThirdName, config.Prometheus.GrafanaUrl)
 
 	u := NewUserApi(*userRpc)
-	m := NewMessageApi(messageRpc, userRpc)
+	m := NewMessageApi(messageRpc, userRpc, &config.Manager, &config.IMAdmin)
 	ParseToken := GinParseToken(rdb, config)
 	userRouterGroup := r.Group("/user")
 	{

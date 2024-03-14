@@ -47,16 +47,16 @@ func CheckAccessV3(ctx context.Context, ownerUserID string, config *config.Globa
 	return errs.ErrNoPermission.Wrap("ownerUserID", ownerUserID)
 }
 
-func IsAppManagerUid(ctx context.Context, config *config.GlobalConfig) bool {
-	return (len(config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Manager.UserID)) ||
-		utils.IsContain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID)
+func IsAppManagerUid(ctx context.Context, manager *config.Manager, imAdmin *config.IMAdmin) bool {
+	return (len(manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), manager.UserID)) ||
+		utils.IsContain(mcontext.GetOpUserID(ctx), imAdmin.UserID)
 }
 
-func CheckAdmin(ctx context.Context, config *config.GlobalConfig) error {
-	if len(config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Manager.UserID) {
+func CheckAdmin(ctx context.Context, manager *config.Manager, imAdmin *config.IMAdmin) error {
+	if len(manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), manager.UserID) {
 		return nil
 	}
-	if utils.IsContain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID) {
+	if utils.IsContain(mcontext.GetOpUserID(ctx), imAdmin.UserID) {
 		return nil
 	}
 	return errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))

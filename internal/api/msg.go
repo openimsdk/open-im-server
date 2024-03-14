@@ -38,10 +38,15 @@ type MessageApi struct {
 	*rpcclient.Message
 	validate      *validator.Validate
 	userRpcClient *rpcclient.UserRpcClient
+	manager       *config.Manager
+	imAdmin       *config.IMAdmin
 }
 
-func NewMessageApi(msgRpcClient *rpcclient.Message, userRpcClient *rpcclient.User) MessageApi {
-	return MessageApi{Message: msgRpcClient, validate: validator.New(), userRpcClient: rpcclient.NewUserRpcClientByUser(userRpcClient)}
+func NewMessageApi(msgRpcClient *rpcclient.Message, userRpcClient *rpcclient.User, manager *config.Manager,
+	imAdmin *config.IMAdmin) MessageApi {
+	return MessageApi{Message: msgRpcClient, validate: validator.New(),
+		userRpcClient: rpcclient.NewUserRpcClientByUser(userRpcClient),
+		manager:       manager, imAdmin: imAdmin}
 }
 
 func (MessageApi) SetOptions(options map[string]bool, value bool) {
@@ -199,7 +204,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	}
 
 	// Check if the user has the app manager role.
-	if !authverify.IsAppManagerUid(c, m.Config) {
+	if !authverify.IsAppManagerUid(c, m.manager, m.imAdmin) {
 		// Respond with a permission error if the user is not an app manager.
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
@@ -257,7 +262,7 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 		return
 	}
 
-	if !authverify.IsAppManagerUid(c, m.Config) {
+	if !authverify.IsAppManagerUid(c, m.manager, m.imAdmin) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
 	}
@@ -301,7 +306,7 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 		return
 	}
 	log.ZInfo(c, "BatchSendMsg", "req", req)
-	if err := authverify.CheckAdmin(c, m.Config); err != nil {
+	if err := authverify.CheckAdmin(c, m.manager, m.imAdmin); err != nil {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
 	}
