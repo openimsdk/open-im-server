@@ -75,7 +75,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	cacheModel := cache.NewMsgCacheModel(rdb, config)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase(config.Mongo.Database))
 	conversationClient := rpcclient.NewConversationRpcClient(client, config)
-	userRpcClient := rpcclient.NewUserRpcClient(client, config)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client, config)
 	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, cacheModel, config)

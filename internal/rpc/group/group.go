@@ -73,7 +73,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	userRpcClient := rpcclient.NewUserRpcClient(client, config)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, config)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config)
 	var gs groupServer

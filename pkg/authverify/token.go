@@ -33,12 +33,12 @@ func Secret(secret string) jwt.Keyfunc {
 	}
 }
 
-func CheckAccessV3(ctx context.Context, ownerUserID string, config *config.GlobalConfig) (err error) {
+func CheckAccessV3(ctx context.Context, ownerUserID string, manager *config.Manager, imAdmin *config.IMAdmin) (err error) {
 	opUserID := mcontext.GetOpUserID(ctx)
-	if len(config.Manager.UserID) > 0 && utils.IsContain(opUserID, config.Manager.UserID) {
+	if len(manager.UserID) > 0 && utils.Contain(opUserID, manager.UserID...) {
 		return nil
 	}
-	if utils.IsContain(opUserID, config.IMAdmin.UserID) {
+	if utils.Contain(opUserID, imAdmin.UserID...) {
 		return nil
 	}
 	if opUserID == ownerUserID {
@@ -48,24 +48,24 @@ func CheckAccessV3(ctx context.Context, ownerUserID string, config *config.Globa
 }
 
 func IsAppManagerUid(ctx context.Context, manager *config.Manager, imAdmin *config.IMAdmin) bool {
-	return (len(manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), manager.UserID)) ||
-		utils.IsContain(mcontext.GetOpUserID(ctx), imAdmin.UserID)
+	return (len(manager.UserID) > 0 && utils.Contain(mcontext.GetOpUserID(ctx), manager.UserID...)) ||
+		utils.Contain(mcontext.GetOpUserID(ctx), imAdmin.UserID...)
 }
 
 func CheckAdmin(ctx context.Context, manager *config.Manager, imAdmin *config.IMAdmin) error {
-	if len(manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), manager.UserID) {
+	if len(manager.UserID) > 0 && utils.Contain(mcontext.GetOpUserID(ctx), manager.UserID...) {
 		return nil
 	}
-	if utils.IsContain(mcontext.GetOpUserID(ctx), imAdmin.UserID) {
+	if utils.Contain(mcontext.GetOpUserID(ctx), imAdmin.UserID...) {
 		return nil
 	}
 	return errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
 func CheckIMAdmin(ctx context.Context, config *config.GlobalConfig) error {
-	if utils.IsContain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID) {
+	if utils.Contain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID...) {
 		return nil
 	}
-	if len(config.Manager.UserID) > 0 && utils.IsContain(mcontext.GetOpUserID(ctx), config.Manager.UserID) {
+	if len(config.Manager.UserID) > 0 && utils.Contain(mcontext.GetOpUserID(ctx), config.Manager.UserID...) {
 		return nil
 	}
 	return errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s is not CheckIMAdmin userID", mcontext.GetOpUserID(ctx)))
@@ -76,7 +76,7 @@ func ParseRedisInterfaceToken(redisToken any, secret string) (*tokenverify.Claim
 }
 
 func IsManagerUserID(opUserID string, manager *config.Manager, imAdmin *config.IMAdmin) bool {
-	return (len(manager.UserID) > 0 && utils.IsContain(opUserID, manager.UserID)) || utils.IsContain(opUserID, imAdmin.UserID)
+	return (len(manager.UserID) > 0 && utils.Contain(opUserID, manager.UserID...)) || utils.Contain(opUserID, imAdmin.UserID...)
 }
 
 func WsVerifyToken(token, userID, secret string, platformID int) error {

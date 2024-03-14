@@ -16,6 +16,8 @@ package rpcclient
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"strings"
 
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -34,16 +36,23 @@ type User struct {
 	Client                user.UserClient
 	Discov                discoveryregistry.SvcDiscoveryRegistry
 	MessageGateWayRpcName string
+	manager               *config.Manager
+	imAdmin               *config.IMAdmin
 }
 
 // NewUser initializes and returns a User instance based on the provided service discovery registry.
-func NewUser(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName, messageGateWayRpcName string) *User {
+func NewUser(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName, messageGateWayRpcName string,
+	manager *config.Manager, imAdmin *config.IMAdmin) *User {
 	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
 		util.ExitWithError(err)
 	}
 	client := user.NewUserClient(conn)
-	return &User{Discov: discov, Client: client, conn: conn, MessageGateWayRpcName: messageGateWayRpcName}
+	return &User{Discov: discov, Client: client,
+		conn:                  conn,
+		MessageGateWayRpcName: messageGateWayRpcName,
+		manager:               manager,
+		imAdmin:               imAdmin}
 }
 
 // UserRpcClient represents the structure for a User RPC client.
@@ -56,8 +65,9 @@ func NewUserRpcClientByUser(user *User) *UserRpcClient {
 }
 
 // NewUserRpcClient initializes a UserRpcClient based on the provided service discovery registry.
-func NewUserRpcClient(client discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) UserRpcClient {
-	return UserRpcClient(*NewUser(client, rpcRegisterName, ""))
+func NewUserRpcClient(client discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string,
+	manager *config.Manager, imAdmin *config.IMAdmin) UserRpcClient {
+	return UserRpcClient(*NewUser(client, rpcRegisterName, "", manager, imAdmin))
 }
 
 // GetUsersInfo retrieves information for multiple users based on their user IDs.
@@ -152,6 +162,15 @@ func (u *UserRpcClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID stri
 		return 0, err
 	}
 	return resp.GlobalRecvMsgOpt, nil
+}
+
+// Access verifies the access rights for the provided user ID.
+func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
+	_, err := u.GetUserInfo(ctx, ownerUserID)
+	if err != nil {
+		return err
+	}
+	return authverify.CheckAccessV3(ctx, ownerUserID, u.manager, u.imAdmin)
 }
 
 // GetAllUserIDs retrieves all user IDs with pagination options.

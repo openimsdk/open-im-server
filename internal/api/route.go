@@ -138,7 +138,8 @@ func newGinRouter(disCov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	}
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	// init rpc client here
-	userRpc := rpcclient.NewUser(disCov, config.RpcRegisterName.OpenImUserName, config.RpcRegisterName.OpenImMessageGatewayName)
+	userRpc := rpcclient.NewUser(disCov, config.RpcRegisterName.OpenImUserName, config.RpcRegisterName.OpenImMessageGatewayName,
+		&config.Manager, &config.IMAdmin)
 	groupRpc := rpcclient.NewGroup(disCov, config.RpcRegisterName.OpenImGroupName)
 	friendRpc := rpcclient.NewFriend(disCov, config.RpcRegisterName.OpenImFriendName)
 	messageRpc := rpcclient.NewMessage(disCov, config.RpcRegisterName.OpenImMsgName)
