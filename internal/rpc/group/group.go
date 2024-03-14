@@ -391,7 +391,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	}
 
 	if group.Status == constant.GroupStatusDismissed {
-		return nil, errs.Wrap(errors.New("group dismissed"), "checking group status found it dismissed")
+		return nil, errs.ErrDismissedAlready.Wrap("group dismissed checking group status found it dismissed")
 	}
 
 	userMap, err := s.User.GetUsersInfoMap(ctx, req.InvitedUserIDs)
