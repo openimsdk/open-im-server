@@ -16,6 +16,7 @@ package group
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 	"math/rand"
@@ -390,7 +391,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	}
 
 	if group.Status == constant.GroupStatusDismissed {
-		return nil, errs.ErrDismissedAlready.Wrap()
+		return nil, errs.Wrap(errors.New("group dismissed"))
 	}
 	userMap, err := s.User.GetUsersInfoMap(ctx, req.InvitedUserIDs)
 	if err != nil {
@@ -566,7 +567,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	for i, member := range members {
 		memberMap[member.UserID] = members[i]
 	}
-	isAppManagerUid := authverify.IsAppManagerUid(ctx, s.config)
+	isAppManagerUid := authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin)
 	opMember := memberMap[opUserID]
 	for _, userID := range req.KickedUserIDs {
 		member, ok := memberMap[userID]
@@ -769,7 +770,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 	if !utils.Contain(req.HandleResult, constant.GroupResponseAgree, constant.GroupResponseRefuse) {
 		return nil, errs.ErrArgs.Wrap("HandleResult unknown")
 	}
-	if !authverify.IsAppManagerUid(ctx, s.config) {
+	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
 		groupMember, err := s.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
@@ -977,7 +978,7 @@ func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInfoReq) (*pbgroup.SetGroupInfoResp, error) {
 	var opMember *relationtb.GroupMemberModel
-	if !authverify.IsAppManagerUid(ctx, s.config) {
+	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
 		var err error
 		opMember, err = s.db.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
@@ -1004,7 +1005,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		return nil, err
 	}
 	if group.Status == constant.GroupStatusDismissed {
-		return nil, errs.Wrap(errs.ErrDismissedAlready)
+		return nil, errs.Wrap(errors.New("group dismissed"))
 	}
 	resp := &pbgroup.SetGroupInfoResp{}
 	count, err := s.db.FindGroupMemberNum(ctx, group.GroupID)
