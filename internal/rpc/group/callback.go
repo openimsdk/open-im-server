@@ -129,19 +129,15 @@ func CallbackBeforeMemberJoinGroup(ctx context.Context, cfg *EventCallbackConfig
 		GroupEx:         groupEx,
 	}
 	resp := &callbackstruct.CallbackBeforeMemberJoinGroupResp{}
-	err = http.CallBackPostReturn(
-		ctx,
-		cfg.CallbackUrl,
-		callbackReq,
-		resp,
-		cfg.BeforeCreateGroup,
-	)
-	if err != nil {
+
+	if err = http.CallBackPostReturn(ctx, cfg.CallbackUrl, callbackReq, resp, cfg.BeforeCreateGroup); err != nil {
 		return err
 	}
+
 	if resp.MuteEndTime != nil {
 		groupMember.MuteEndTime = time.UnixMilli(*resp.MuteEndTime)
 	}
+
 	utils.NotNilReplace(&groupMember.FaceURL, resp.FaceURL)
 	utils.NotNilReplace(&groupMember.Ex, resp.Ex)
 	utils.NotNilReplace(&groupMember.Nickname, resp.Nickname)
