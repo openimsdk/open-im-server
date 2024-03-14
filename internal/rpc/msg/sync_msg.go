@@ -137,6 +137,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			groupIDs = append(groupIDs, chatLog.GroupID)
 		}
 	}
+	// Retrieve sender and receiver information
 	if len(sendIDs) != 0 {
 		sendInfos, err := m.UserLocalCache.GetUsersInfo(ctx, sendIDs)
 		if err != nil {
@@ -155,6 +156,8 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			recvMap[recvInfo.UserID] = recvInfo.Nickname
 		}
 	}
+
+	// Retrieve group information including member counts
 	if len(groupIDs) != 0 {
 		groupInfos, err := m.GroupLocalCache.GetGroupInfos(ctx, groupIDs)
 		if err != nil {
@@ -162,8 +165,14 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 		}
 		for _, groupInfo := range groupInfos {
 			groupMap[groupInfo.GroupID] = groupInfo
+			// Get actual member count
+			memberIDs, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, groupInfo.GroupID)
+			if err == nil {
+				groupInfo.MemberCount = uint32(len(memberIDs)) // Update the member count with actual number
+			}
 		}
 	}
+	// Construct response with updated information
 	for _, chatLog := range chatLogs {
 		pbchatLog := &msg.ChatLog{}
 		utils.CopyStructFields(pbchatLog, chatLog)
@@ -175,14 +184,14 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 		switch chatLog.SessionType {
 		case constant.SingleChatType, constant.NotificationChatType:
 			pbchatLog.RecvNickname = recvMap[chatLog.RecvID]
-
 		case constant.GroupChatType, constant.SuperGroupChatType:
-			pbchatLog.SenderFaceURL = groupMap[chatLog.GroupID].FaceURL
-			pbchatLog.GroupMemberCount = groupMap[chatLog.GroupID].MemberCount
-			pbchatLog.RecvID = groupMap[chatLog.GroupID].GroupID
-			pbchatLog.GroupName = groupMap[chatLog.GroupID].GroupName
-			pbchatLog.GroupOwner = groupMap[chatLog.GroupID].OwnerUserID
-			pbchatLog.GroupType = groupMap[chatLog.GroupID].GroupType
+			groupInfo := groupMap[chatLog.GroupID]
+			pbchatLog.SenderFaceURL = groupInfo.FaceURL
+			pbchatLog.GroupMemberCount = groupInfo.MemberCount // Reflects actual member count
+			pbchatLog.RecvID = groupInfo.GroupID
+			pbchatLog.GroupName = groupInfo.GroupName
+			pbchatLog.GroupOwner = groupInfo.OwnerUserID
+			pbchatLog.GroupType = groupInfo.GroupType
 		}
 		resp.ChatLogs = append(resp.ChatLogs, pbchatLog)
 	}
