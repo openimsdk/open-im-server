@@ -33,20 +33,19 @@ import (
 
 type pushServer struct {
 	pusher *Pusher
-	config *config.GlobalConfig
 }
 
 func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis(config)
+	rdb, err := cache.NewRedis(&config.Redis)
 	if err != nil {
 		return err
 	}
-	cacheModel := cache.NewMsgCacheModel(rdb, config)
-	offlinePusher := NewOfflinePusher(config, cacheModel)
+	cacheModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
+	offlinePusher := NewOfflinePusher(&config.Push, &config.IOSPush, cacheModel)
 	database := controller.NewPushDatabase(cacheModel)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client, config)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)
+	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.RpcRegisterName.OpenImConversationName)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.RpcRegisterName.OpenImMsgName)
 	pusher := NewPusher(
 		config,
 		client,
@@ -61,10 +60,9 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 
 	pbpush.RegisterPushMsgServiceServer(server, &pushServer{
 		pusher: pusher,
-		config: config,
 	})
 
-	consumer, err := NewConsumer(config, pusher)
+	consumer, err := NewConsumer(&config.Kafka, pusher)
 	if err != nil {
 		return err
 	}

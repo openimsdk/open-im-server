@@ -121,33 +121,33 @@ type CommonMsgDatabase interface {
 	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
 }
 
-func NewCommonMsgDatabase(msgDocModel unrelationtb.MsgDocModelInterface, cacheModel cache.MsgModel, config *config.GlobalConfig) (CommonMsgDatabase, error) {
+func NewCommonMsgDatabase(msgDocModel unrelationtb.MsgDocModelInterface, cacheModel cache.MsgModel, kafkaConf *config.Kafka) (CommonMsgDatabase, error) {
 	producerConfig := &kafka.ProducerConfig{
-		ProducerAck:  config.Kafka.ProducerAck,
-		CompressType: config.Kafka.CompressType,
-		Username:     config.Kafka.Username,
-		Password:     config.Kafka.Password,
+		ProducerAck:  kafkaConf.ProducerAck,
+		CompressType: kafkaConf.CompressType,
+		Username:     kafkaConf.Username,
+		Password:     kafkaConf.Password,
 	}
 
 	var tlsConfig *kafka.TLSConfig
-	if config.Kafka.TLS != nil {
+	if kafkaConf.TLS != nil {
 		tlsConfig = &kafka.TLSConfig{
-			CACrt:              config.Kafka.TLS.CACrt,
-			ClientCrt:          config.Kafka.TLS.ClientCrt,
-			ClientKey:          config.Kafka.TLS.ClientKey,
-			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+			CACrt:              kafkaConf.TLS.CACrt,
+			ClientCrt:          kafkaConf.TLS.ClientCrt,
+			ClientKey:          kafkaConf.TLS.ClientKey,
+			ClientKeyPwd:       kafkaConf.TLS.ClientKeyPwd,
 			InsecureSkipVerify: false,
 		}
 	}
-	producerToRedis, err := kafka.NewKafkaProducer(config.Kafka.Addr, config.Kafka.LatestMsgToRedis.Topic, producerConfig, tlsConfig)
+	producerToRedis, err := kafka.NewKafkaProducer(kafkaConf.Addr, kafkaConf.LatestMsgToRedis.Topic, producerConfig, tlsConfig)
 	if err != nil {
 		return nil, err
 	}
-	producerToMongo, err := kafka.NewKafkaProducer(config.Kafka.Addr, config.Kafka.MsgToMongo.Topic, producerConfig, tlsConfig)
+	producerToMongo, err := kafka.NewKafkaProducer(kafkaConf.Addr, kafkaConf.MsgToMongo.Topic, producerConfig, tlsConfig)
 	if err != nil {
 		return nil, err
 	}
-	producerToPush, err := kafka.NewKafkaProducer(config.Kafka.Addr, config.Kafka.MsgToPush.Topic, producerConfig, tlsConfig)
+	producerToPush, err := kafka.NewKafkaProducer(kafkaConf.Addr, kafkaConf.MsgToPush.Topic, producerConfig, tlsConfig)
 	if err != nil {
 		return nil, err
 	}

@@ -33,14 +33,14 @@ type OnlineHistoryMongoConsumerHandler struct {
 	msgDatabase          controller.CommonMsgDatabase
 }
 
-func NewOnlineHistoryMongoConsumerHandler(config *config.GlobalConfig, database controller.CommonMsgDatabase) (*OnlineHistoryMongoConsumerHandler, error) {
+func NewOnlineHistoryMongoConsumerHandler(kafkaConf *config.Kafka, database controller.CommonMsgDatabase) (*OnlineHistoryMongoConsumerHandler, error) {
 	var tlsConfig *kfk.TLSConfig
-	if config.Kafka.TLS != nil {
+	if kafkaConf.TLS != nil {
 		tlsConfig = &kfk.TLSConfig{
-			CACrt:              config.Kafka.TLS.CACrt,
-			ClientCrt:          config.Kafka.TLS.ClientCrt,
-			ClientKey:          config.Kafka.TLS.ClientKey,
-			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+			CACrt:              kafkaConf.TLS.CACrt,
+			ClientCrt:          kafkaConf.TLS.ClientCrt,
+			ClientKey:          kafkaConf.TLS.ClientKey,
+			ClientKeyPwd:       kafkaConf.TLS.ClientKeyPwd,
 			InsecureSkipVerify: false,
 		}
 	}
@@ -48,11 +48,11 @@ func NewOnlineHistoryMongoConsumerHandler(config *config.GlobalConfig, database 
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest,
 		IsReturnErr:    false,
-		UserName:       config.Kafka.Username,
-		Password:       config.Kafka.Password,
-	}, []string{config.Kafka.MsgToMongo.Topic},
-		config.Kafka.Addr,
-		config.Kafka.ConsumerGroupID.MsgToMongo,
+		UserName:       kafkaConf.Username,
+		Password:       kafkaConf.Password,
+	}, []string{kafkaConf.MsgToMongo.Topic},
+		kafkaConf.Addr,
+		kafkaConf.ConsumerGroupID.MsgToMongo,
 		tlsConfig,
 	)
 	if err != nil {

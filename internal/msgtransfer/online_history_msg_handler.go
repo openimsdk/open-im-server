@@ -82,7 +82,7 @@ type OnlineHistoryRedisConsumerHandler struct {
 }
 
 func NewOnlineHistoryRedisConsumerHandler(
-	config *config.GlobalConfig,
+	kafkaConf *config.Kafka,
 	database controller.CommonMsgDatabase,
 	conversationRpcClient *rpcclient.ConversationRpcClient,
 	groupRpcClient *rpcclient.GroupRpcClient,
@@ -100,12 +100,12 @@ func NewOnlineHistoryRedisConsumerHandler(
 	var err error
 
 	var tlsConfig *kafka.TLSConfig
-	if config.Kafka.TLS != nil {
+	if kafkaConf.TLS != nil {
 		tlsConfig = &kafka.TLSConfig{
-			CACrt:              config.Kafka.TLS.CACrt,
-			ClientCrt:          config.Kafka.TLS.ClientCrt,
-			ClientKey:          config.Kafka.TLS.ClientKey,
-			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+			CACrt:              kafkaConf.TLS.CACrt,
+			ClientCrt:          kafkaConf.TLS.ClientCrt,
+			ClientKey:          kafkaConf.TLS.ClientKey,
+			ClientKeyPwd:       kafkaConf.TLS.ClientKeyPwd,
 			InsecureSkipVerify: false,
 		}
 	}
@@ -114,11 +114,11 @@ func NewOnlineHistoryRedisConsumerHandler(
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest,
 		IsReturnErr:    false,
-		UserName:       config.Kafka.Username,
-		Password:       config.Kafka.Password,
-	}, []string{config.Kafka.LatestMsgToRedis.Topic},
-		config.Kafka.Addr,
-		config.Kafka.ConsumerGroupID.MsgToRedis,
+		UserName:       kafkaConf.Username,
+		Password:       kafkaConf.Password,
+	}, []string{kafkaConf.LatestMsgToRedis.Topic},
+		kafkaConf.Addr,
+		kafkaConf.ConsumerGroupID.MsgToRedis,
 		tlsConfig,
 	)
 	// statistics.NewStatistics(&och.singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d

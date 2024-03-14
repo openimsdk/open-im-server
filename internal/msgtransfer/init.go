@@ -51,7 +51,6 @@ type MsgTransfer struct {
 	// and handle the deletion notification message deleted subscriptions topic: msg_to_mongo
 	ctx    context.Context
 	cancel context.CancelFunc
-	config *config.GlobalConfig
 }
 
 func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
@@ -60,7 +59,7 @@ func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
 		return err
 	}
 
-	mongo, err := unrelation.NewMongo(config)
+	mongo, err := unrelation.NewMongo(&config.Mongo)
 	if err != nil {
 		return err
 	}
@@ -78,15 +77,15 @@ func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
 	}
 
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	msgModel := cache.NewMsgCacheModel(rdb, config)
+	msgModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase(config.Mongo.Database))
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, config)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, &config.Kafka)
 	if err != nil {
 		return err
 	}
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
-	msgTransfer, err := NewMsgTransfer(config, msgDatabase, &conversationRpcClient, &groupRpcClient)
+	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.RpcRegisterName.OpenImConversationName)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)
+	msgTransfer, err := NewMsgTransfer(&config.Kafka, msgDatabase, &conversationRpcClient, &groupRpcClient)
 	if err != nil {
 		return err
 	}
@@ -94,16 +93,16 @@ func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
 }
 
 func NewMsgTransfer(
-	config *config.GlobalConfig,
+	kafkaConf *config.Kafka,
 	msgDatabase controller.CommonMsgDatabase,
 	conversationRpcClient *rpcclient.ConversationRpcClient,
 	groupRpcClient *rpcclient.GroupRpcClient,
 ) (*MsgTransfer, error) {
-	historyCH, err := NewOnlineHistoryRedisConsumerHandler(config, msgDatabase, conversationRpcClient, groupRpcClient)
+	historyCH, err := NewOnlineHistoryRedisConsumerHandler(kafkaConf, msgDatabase, conversationRpcClient, groupRpcClient)
 	if err != nil {
 		return nil, err
 	}
-	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(config, msgDatabase)
+	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(kafkaConf, msgDatabase)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +110,6 @@ func NewMsgTransfer(
 	return &MsgTransfer{
 		historyCH:      historyCH,
 		historyMongoCH: historyMongoCH,
-		config:         config,
 	}, nil
 }
 
@@ -136,7 +134,7 @@ func (m *MsgTransfer) Start(prometheusPort int, config *config.GlobalConfig) err
 			proreg.MustRegister(
 				collectors.NewGoCollector(),
 			)
-			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer", config)...)
+			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer", &config.RpcRegisterName)...)
 			http.Handle("/metrics", promhttp.HandlerFor(proreg, promhttp.HandlerOpts{Registry: proreg}))
 			err := http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil)
 			if err != nil && err != http.ErrServerClosed {

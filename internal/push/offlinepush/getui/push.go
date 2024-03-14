@@ -56,14 +56,14 @@ type Client struct {
 	cache           cache.MsgModel
 	tokenExpireTime int64
 	taskIDTTL       int64
-	config          *config.GlobalConfig
+	pushConf        *config.Push
 }
 
-func NewClient(config *config.GlobalConfig, cache cache.MsgModel) *Client {
+func NewClient(pushConf *config.Push, cache cache.MsgModel) *Client {
 	return &Client{cache: cache,
 		tokenExpireTime: tokenExpireTime,
 		taskIDTTL:       taskIDTTL,
-		config:          config,
+		pushConf:        pushConf,
 	}
 }
 
@@ -80,7 +80,7 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 			return err
 		}
 	}
-	pushReq := newPushReq(g.config, title, content)
+	pushReq := newPushReq(g.pushConf, title, content)
 	pushReq.setPushChannel(title, content)
 	if len(userIDs) > 1 {
 		maxNum := 999
@@ -116,13 +116,13 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 func (g *Client) Auth(ctx context.Context, timeStamp int64) (token string, expireTime int64, err error) {
 	h := sha256.New()
 	h.Write(
-		[]byte(g.config.Push.GeTui.AppKey + strconv.Itoa(int(timeStamp)) + g.config.Push.GeTui.MasterSecret),
+		[]byte(g.pushConf.GeTui.AppKey + strconv.Itoa(int(timeStamp)) + g.pushConf.GeTui.MasterSecret),
 	)
 	sign := hex.EncodeToString(h.Sum(nil))
 	reqAuth := AuthReq{
 		Sign:      sign,
 		Timestamp: strconv.Itoa(int(timeStamp)),
-		AppKey:    g.config.Push.GeTui.AppKey,
+		AppKey:    g.pushConf.GeTui.AppKey,
 	}
 	respAuth := AuthResp{}
 	err = g.request(ctx, authURL, reqAuth, "", &respAuth)
@@ -165,7 +165,7 @@ func (g *Client) request(ctx context.Context, url string, input any, token strin
 	header := map[string]string{"token": token}
 	resp := &Resp{}
 	resp.Data = output
-	return g.postReturn(ctx, g.config.Push.GeTui.PushUrl+url, header, input, resp, 3)
+	return g.postReturn(ctx, g.pushConf.GeTui.PushUrl+url, header, input, resp, 3)
 }
 
 func (g *Client) postReturn(

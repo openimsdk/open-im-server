@@ -34,17 +34,17 @@ type ConsumerHandler struct {
 	pusher            *Pusher
 }
 
-func NewConsumerHandler(config *config.GlobalConfig, pusher *Pusher) (*ConsumerHandler, error) {
+func NewConsumerHandler(kafkaConf *config.Kafka, pusher *Pusher) (*ConsumerHandler, error) {
 	var consumerHandler ConsumerHandler
 	consumerHandler.pusher = pusher
 	var err error
 	var tlsConfig *kfk.TLSConfig
-	if config.Kafka.TLS != nil {
+	if kafkaConf.TLS != nil {
 		tlsConfig = &kfk.TLSConfig{
-			CACrt:              config.Kafka.TLS.CACrt,
-			ClientCrt:          config.Kafka.TLS.ClientCrt,
-			ClientKey:          config.Kafka.TLS.ClientKey,
-			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
+			CACrt:              kafkaConf.TLS.CACrt,
+			ClientCrt:          kafkaConf.TLS.ClientCrt,
+			ClientKey:          kafkaConf.TLS.ClientKey,
+			ClientKeyPwd:       kafkaConf.TLS.ClientKeyPwd,
 			InsecureSkipVerify: false,
 		}
 	}
@@ -52,10 +52,10 @@ func NewConsumerHandler(config *config.GlobalConfig, pusher *Pusher) (*ConsumerH
 		KafkaVersion:   sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest,
 		IsReturnErr:    false,
-		UserName:       config.Kafka.Username,
-		Password:       config.Kafka.Password,
-	}, []string{config.Kafka.MsgToPush.Topic}, config.Kafka.Addr,
-		config.Kafka.ConsumerGroupID.MsgToPush,
+		UserName:       kafkaConf.Username,
+		Password:       kafkaConf.Password,
+	}, []string{kafkaConf.MsgToPush.Topic}, kafkaConf.Addr,
+		kafkaConf.ConsumerGroupID.MsgToPush,
 		tlsConfig)
 	if err != nil {
 		return nil, err
