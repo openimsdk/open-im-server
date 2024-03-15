@@ -50,15 +50,15 @@ func (t *thirdServer) checkUploadName(ctx context.Context, name string) error {
 		return errs.ErrArgs.WrapMsg("name cannot start with `/`")
 	}
 	if err := checkValidObjectName(name); err != nil {
-		return errs.ErrArgs.Wrap(err.Error())
+		return errs.ErrArgs.WrapMsg(err.Error())
 	}
 	opUserID := mcontext.GetOpUserID(ctx)
 	if opUserID == "" {
 		return errs.ErrNoPermission.WrapMsg("opUserID is empty")
 	}
-	if !authverify.IsManagerUserID(opUserID, t.config) {
+	if !authverify.IsManagerUserID(opUserID, &t.config.Manager, &t.config.IMAdmin) {
 		if !strings.HasPrefix(name, opUserID+"/") {
-			return errs.ErrNoPermission.Wrap(fmt.Sprintf("name must start with `%s/`", opUserID))
+			return errs.ErrNoPermission.WrapMsg(fmt.Sprintf("name must start with `%s/`", opUserID))
 		}
 	}
 	return nil
@@ -82,5 +82,5 @@ func checkValidObjectName(objectName string) error {
 }
 
 func (t *thirdServer) IsManagerUserID(opUserID string) bool {
-	return authverify.IsManagerUserID(opUserID, t.config)
+	return authverify.IsManagerUserID(opUserID, &t.config.Manager, &t.config.IMAdmin)
 }

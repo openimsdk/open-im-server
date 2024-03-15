@@ -59,13 +59,9 @@ func WithUserFunc(
 	}
 }
 
-func NewUserNotificationSender(
-	config *config.GlobalConfig,
-	msgRpcClient *rpcclient.MessageRpcClient,
-	opts ...userNotificationSenderOptions,
-) *UserNotificationSender {
+func NewUserNotificationSender(config *config.GlobalConfig, msgRpcClient *rpcclient.MessageRpcClient, opts ...userNotificationSenderOptions) *UserNotificationSender {
 	f := &UserNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(config, rpcclient.WithRpcClient(msgRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(&config.Notification, rpcclient.WithRpcClient(msgRpcClient)),
 	}
 	for _, opt := range opts {
 		opt(f)
