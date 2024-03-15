@@ -5,7 +5,7 @@ go 1.19
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/OpenIMSDK/protocol v0.0.56
-	github.com/OpenIMSDK/tools v0.0.42
+	github.com/OpenIMSDK/tools v0.0.43
 	github.com/dtm-labs/rockscache v0.1.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.18.0
