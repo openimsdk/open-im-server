@@ -71,7 +71,7 @@ func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) 
 			}
 		}
 		if log.LogID == "" {
-			return nil, errs.ErrData.Wrap("LogModel id gen error")
+			return nil, errs.ErrData.WrapMsg("LogModel id gen error")
 		}
 		DBlogs = append(DBlogs, &log)
 	}
@@ -132,7 +132,7 @@ func (t *thirdServer) SearchLogs(ctx context.Context, req *third.SearchLogsReq) 
 		userIDs []string
 	)
 	if req.StartTime > req.EndTime {
-		return nil, errs.ErrArgs.Wrap("startTime>endTime")
+		return nil, errs.ErrArgs.WrapMsg("startTime>endTime")
 	}
 	if req.StartTime == 0 && req.EndTime == 0 {
 		t := time.Date(2019, time.January, 1, 0, 0, 0, 0, time.UTC)

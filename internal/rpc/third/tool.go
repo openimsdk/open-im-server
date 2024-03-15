@@ -44,10 +44,10 @@ func toPbMapArray(m map[string][]string) []*third.KeyValues {
 
 func (t *thirdServer) checkUploadName(ctx context.Context, name string) error {
 	if name == "" {
-		return errs.ErrArgs.Wrap("name is empty")
+		return errs.ErrArgs.WrapMsg("name is empty")
 	}
 	if name[0] == '/' {
-		return errs.ErrArgs.Wrap("name cannot start with `/`")
+		return errs.ErrArgs.WrapMsg("name cannot start with `/`")
 	}
 	if err := checkValidObjectName(name); err != nil {
 		return errs.ErrArgs.Wrap(err.Error())

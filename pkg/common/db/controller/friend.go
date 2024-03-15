@@ -220,7 +220,7 @@ func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 			return err
 		}
 		if fr.HandleResult != 0 {
-			return errs.ErrArgs.Wrap("the friend request has been processed")
+			return errs.ErrArgs.WrapMsg("the friend request has been processed")
 		}
 		friendRequest.HandlerUserID = mcontext.GetOpUserID(ctx)
 		friendRequest.HandleResult = constant.FriendResponseAgree

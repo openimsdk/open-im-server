@@ -166,7 +166,7 @@ func (s *groupServer) GenGroupID(ctx context.Context, groupID *string) error {
 	if *groupID != "" {
 		_, err := s.db.TakeGroup(ctx, *groupID)
 		if err == nil {
-			return errs.ErrGroupIDExisted.Wrap("group id existed " + *groupID)
+			return errs.ErrGroupIDExisted.WrapMsg("group id existed " + *groupID)
 		} else if s.IsNotFound(err) {
 			return nil
 		} else {
@@ -214,7 +214,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		return nil, err
 	}
 	if len(userMap) != len(userIDs) {
-		return nil, errs.ErrUserIDNotFound.Wrap("user not found")
+		return nil, errs.ErrUserIDNotFound.WrapMsg("user not found")
 	}
 
 	config := &GroupEventCallbackConfig{

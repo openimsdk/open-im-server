@@ -46,7 +46,7 @@ func (m *Minio) getImageThumbnailURL(ctx context.Context, name string, expire ti
 		return "", err
 	}
 	if !info.IsImg {
-		return "", errs.ErrData.Wrap("object not image")
+		return "", errs.ErrData.WrapMsg("object not image")
 	}
 	if opt.Width > info.Width || opt.Width <= 0 {
 		opt.Width = info.Width

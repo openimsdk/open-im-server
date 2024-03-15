@@ -34,13 +34,13 @@ import (
 func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.RevokeMsgResp, error) {
 	defer log.ZDebug(ctx, "RevokeMsg return line")
 	if req.UserID == "" {
-		return nil, errs.ErrArgs.Wrap("user_id is empty")
+		return nil, errs.ErrArgs.WrapMsg("user_id is empty")
 	}
 	if req.ConversationID == "" {
-		return nil, errs.ErrArgs.Wrap("conversation_id is empty")
+		return nil, errs.ErrArgs.WrapMsg("conversation_id is empty")
 	}
 	if req.Seq < 0 {
-		return nil, errs.ErrArgs.Wrap("seq is invalid")
+		return nil, errs.ErrArgs.WrapMsg("seq is invalid")
 	}
 	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config); err != nil {
 		return nil, err
@@ -54,10 +54,10 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		return nil, err
 	}
 	if len(msgs) == 0 || msgs[0] == nil {
-		return nil, errs.ErrRecordNotFound.Wrap("msg not found")
+		return nil, errs.ErrRecordNotFound.WrapMsg("msg not found")
 	}
 	if msgs[0].ContentType == constant.MsgRevokeNotification {
-		return nil, errs.ErrMsgAlreadyRevoke.Wrap("msg already revoke")
+		return nil, errs.ErrMsgAlreadyRevoke.WrapMsg("msg already revoke")
 	}
 
 	data, _ := json.Marshal(msgs[0])
@@ -90,7 +90,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 				role = member.RoleLevel
 			}
 		default:
-			return nil, errs.ErrInternalServer.Wrap("msg sessionType not supported")
+			return nil, errs.ErrInternalServer.WrapMsg("msg sessionType not supported")
 		}
 	}
 	now := time.Now().UnixMilli()

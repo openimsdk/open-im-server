@@ -427,21 +427,21 @@ func (ws *WsServer) ParseWSArgs(r *http.Request) (args *WSArgs, err error) {
 	query := r.URL.Query()
 	v.MsgResp, _ = strconv.ParseBool(query.Get(MsgResp))
 	if ws.onlineUserConnNum.Load() >= ws.wsMaxConnNum {
-		return nil, errs.ErrConnOverMaxNumLimit.Wrap("over max conn num limit")
+		return nil, errs.ErrConnOverMaxNumLimit.WrapMsg("over max conn num limit")
 	}
 	if v.Token = query.Get(Token); v.Token == "" {
-		return nil, errs.ErrConnArgsErr.Wrap("token is empty")
+		return nil, errs.ErrConnArgsErr.WrapMsg("token is empty")
 	}
 	if v.UserID = query.Get(WsUserID); v.UserID == "" {
-		return nil, errs.ErrConnArgsErr.Wrap("sendID is empty")
+		return nil, errs.ErrConnArgsErr.WrapMsg("sendID is empty")
 	}
 	platformIDStr := query.Get(PlatformID)
 	if platformIDStr == "" {
-		return nil, errs.ErrConnArgsErr.Wrap("platformID is empty")
+		return nil, errs.ErrConnArgsErr.WrapMsg("platformID is empty")
 	}
 	platformID, err := strconv.Atoi(platformIDStr)
 	if err != nil {
-		return nil, errs.ErrConnArgsErr.Wrap("platformID is not int")
+		return nil, errs.ErrConnArgsErr.WrapMsg("platformID is not int")
 	}
 	v.PlatformID = platformID
 	if err = authverify.WsVerifyToken(v.Token, v.UserID, ws.globalConfig.Secret, platformID); err != nil {

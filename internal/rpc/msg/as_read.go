@@ -75,7 +75,7 @@ func (m *msgServer) SetConversationHasReadSeq(ctx context.Context, req *msg.SetC
 		return
 	}
 	if req.HasReadSeq > maxSeq {
-		return nil, errs.ErrArgs.Wrap("hasReadSeq must not be bigger than maxSeq")
+		return nil, errs.ErrArgs.WrapMsg("hasReadSeq must not be bigger than maxSeq")
 	}
 	if err := m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq); err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func (m *msgServer) SetConversationHasReadSeq(ctx context.Context, req *msg.SetC
 
 func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadReq) (resp *msg.MarkMsgsAsReadResp, err error) {
 	if len(req.Seqs) < 1 {
-		return nil, errs.ErrArgs.Wrap("seqs must not be empty")
+		return nil, errs.ErrArgs.WrapMsg("seqs must not be empty")
 	}
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
 	if err != nil {
@@ -97,7 +97,7 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 	}
 	hasReadSeq := req.Seqs[len(req.Seqs)-1]
 	if hasReadSeq > maxSeq {
-		return nil, errs.ErrArgs.Wrap("hasReadSeq must not be bigger than maxSeq")
+		return nil, errs.ErrArgs.WrapMsg("hasReadSeq must not be bigger than maxSeq")
 	}
 	conversation, err := m.ConversationLocalCache.GetConversation(ctx, req.UserID, req.ConversationID)
 	if err != nil {

@@ -115,7 +115,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 		return nil, err
 	}
 	if req.ToUserID == req.FromUserID {
-		return nil, errs.ErrCanNotAddYourself.Wrap("req.ToUserID", req.ToUserID)
+		return nil, errs.ErrCanNotAddYourself.WrapMsg("req.ToUserID", req.ToUserID)
 	}
 	if err = CallbackBeforeAddFriend(ctx, &s.config.Callback, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
@@ -128,7 +128,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 		return nil, err
 	}
 	if in1 && in2 {
-		return nil, errs.ErrRelationshipAlready.Wrap("has f")
+		return nil, errs.ErrRelationshipAlready.WrapMsg("has f")
 	}
 	if err = s.friendDatabase.AddFriendRequest(ctx, req.FromUserID, req.ToUserID, req.ReqMsg, req.Ex); err != nil {
 		return nil, err
@@ -149,10 +149,10 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 		return nil, err
 	}
 	if utils.Contain(req.OwnerUserID, req.FriendUserIDs...) {
-		return nil, errs.ErrCanNotAddYourself.Wrap("can not add yourself")
+		return nil, errs.ErrCanNotAddYourself.WrapMsg("can not add yourself")
 	}
 	if utils.Duplicate(req.FriendUserIDs) {
-		return nil, errs.ErrArgs.Wrap("friend userID repeated")
+		return nil, errs.ErrArgs.WrapMsg("friend userID repeated")
 	}
 	if err := CallbackBeforeImportFriends(ctx, &s.config.Callback, req); err != nil {
 		return nil, err
@@ -206,7 +206,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.Res
 		s.notificationSender.FriendApplicationRefusedNotification(ctx, req)
 		return resp, nil
 	}
-	return nil, errs.ErrArgs.Wrap("req.HandleResult != -1/1")
+	return nil, errs.ErrArgs.WrapMsg("req.HandleResult != -1/1")
 }
 
 // ok.
@@ -257,7 +257,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbfriend.SetFri
 func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbfriend.GetDesignatedFriendsReq) (resp *pbfriend.GetDesignatedFriendsResp, err error) {
 	resp = &pbfriend.GetDesignatedFriendsResp{}
 	if utils.Duplicate(req.FriendUserIDs) {
-		return nil, errs.ErrArgs.Wrap("friend userID repeated")
+		return nil, errs.ErrArgs.WrapMsg("friend userID repeated")
 	}
 	friends, err := s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
@@ -360,10 +360,10 @@ func (s *friendServer) GetFriendIDs(ctx context.Context, req *pbfriend.GetFriend
 
 func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfriend.GetSpecifiedFriendsInfoReq) (*pbfriend.GetSpecifiedFriendsInfoResp, error) {
 	if len(req.UserIDList) == 0 {
-		return nil, errs.ErrArgs.Wrap("userIDList is empty")
+		return nil, errs.ErrArgs.WrapMsg("userIDList is empty")
 	}
 	if utils.Duplicate(req.UserIDList) {
-		return nil, errs.ErrArgs.Wrap("userIDList repeated")
+		return nil, errs.ErrArgs.WrapMsg("userIDList repeated")
 	}
 	userMap, err := s.userRpcClient.GetUsersInfoMap(ctx, req.UserIDList)
 	if err != nil {
@@ -427,10 +427,10 @@ func (s *friendServer) UpdateFriends(
 	req *pbfriend.UpdateFriendsReq,
 ) (*pbfriend.UpdateFriendsResp, error) {
 	if len(req.FriendUserIDs) == 0 {
-		return nil, errs.ErrArgs.Wrap("friendIDList is empty")
+		return nil, errs.ErrArgs.WrapMsg("friendIDList is empty")
 	}
 	if utils.Duplicate(req.FriendUserIDs) {
-		return nil, errs.ErrArgs.Wrap("friendIDList repeated")
+		return nil, errs.ErrArgs.WrapMsg("friendIDList repeated")
 	}
 
 	_, err := s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)

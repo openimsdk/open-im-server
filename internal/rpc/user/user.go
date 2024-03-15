@@ -195,7 +195,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckReq) (resp *pbuser.AccountCheckResp, err error) {
 	resp = &pbuser.AccountCheckResp{}
 	if utils.Duplicate(req.CheckUserIDs) {
-		return nil, errs.ErrArgs.Wrap("userID repeated")
+		return nil, errs.ErrArgs.WrapMsg("userID repeated")
 	}
 	err = authverify.CheckAdmin(ctx, s.config)
 	if err != nil {
@@ -242,22 +242,22 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPagi
 func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterReq) (resp *pbuser.UserRegisterResp, err error) {
 	resp = &pbuser.UserRegisterResp{}
 	if len(req.Users) == 0 {
-		return nil, errs.ErrArgs.Wrap("users is empty")
+		return nil, errs.ErrArgs.WrapMsg("users is empty")
 	}
 	if req.Secret != s.config.Secret {
 		log.ZDebug(ctx, "UserRegister", s.config.Secret, req.Secret)
 		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
 	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
-		return nil, errs.ErrArgs.Wrap("userID repeated")
+		return nil, errs.ErrArgs.WrapMsg("userID repeated")
 	}
 	userIDs := make([]string, 0)
 	for _, user := range req.Users {
 		if user.UserID == "" {
-			return nil, errs.ErrArgs.Wrap("userID is empty")
+			return nil, errs.ErrArgs.WrapMsg("userID is empty")
 		}
 		if strings.Contains(user.UserID, ":") {
-			return nil, errs.ErrArgs.Wrap("userID contains ':' is invalid userID")
+			return nil, errs.ErrArgs.WrapMsg("userID contains ':' is invalid userID")
 		}
 		userIDs = append(userIDs, user.UserID)
 	}
@@ -266,7 +266,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 		return nil, err
 	}
 	if exist {
-		return nil, errs.ErrRegisteredAlready.Wrap("userID registered already")
+		return nil, errs.ErrRegisteredAlready.WrapMsg("userID registered already")
 	}
 	if err := CallbackBeforeUserRegister(ctx, s.config, req); err != nil {
 		return nil, err
@@ -542,12 +542,12 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 			break
 		}
 		if req.UserID == "" {
-			return nil, errs.ErrInternalServer.Wrap("gen user id failed")
+			return nil, errs.ErrInternalServer.WrapMsg("gen user id failed")
 		}
 	} else {
 		_, err := s.UserDatabase.FindWithError(ctx, []string{req.UserID})
 		if err == nil {
-			return nil, errs.ErrArgs.Wrap("userID is used")
+			return nil, errs.ErrArgs.WrapMsg("userID is used")
 		}
 	}
 
@@ -639,7 +639,7 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 
 func (s *userServer) GetNotificationAccount(ctx context.Context, req *pbuser.GetNotificationAccountReq) (*pbuser.GetNotificationAccountResp, error) {
 	if req.UserID == "" {
-		return nil, errs.ErrArgs.Wrap("userID is empty")
+		return nil, errs.ErrArgs.WrapMsg("userID is empty")
 	}
 	user, err := s.UserDatabase.GetUserByID(ctx, req.UserID)
 	if err != nil {

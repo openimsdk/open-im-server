@@ -27,7 +27,7 @@ func (s *userServer) UserRegisterCount(
 	req *pbuser.UserRegisterCountReq,
 ) (*pbuser.UserRegisterCountResp, error) {
 	if req.Start > req.End {
-		return nil, errs.ErrArgs.Wrap("start > end")
+		return nil, errs.ErrArgs.WrapMsg("start > end")
 	}
 	total, err := s.CountTotal(ctx, nil)
 	if err != nil {

@@ -24,7 +24,7 @@ import (
 
 func (s *groupServer) GroupCreateCount(ctx context.Context, req *group.GroupCreateCountReq) (*group.GroupCreateCountResp, error) {
 	if req.Start > req.End {
-		return nil, errs.ErrArgs.Wrap("start > end: %d > %d", req.Start, req.End)
+		return nil, errs.ErrArgs.WrapMsg("start > end: %d > %d", req.Start, req.End)
 	}
 	total, err := s.db.CountTotal(ctx, nil)
 	if err != nil {

@@ -128,7 +128,7 @@ func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (use
 		return
 	}
 	if len(users) != len(userIDs) {
-		err = errs.ErrRecordNotFound.Wrap("userID not found")
+		err = errs.ErrRecordNotFound.WrapMsg("userID not found")
 	}
 	return
 }

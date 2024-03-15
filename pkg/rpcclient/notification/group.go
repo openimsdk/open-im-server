@@ -249,7 +249,7 @@ func (g *GroupNotificationSender) groupMemberDB2PB(member *relation.GroupMemberM
 
 func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws.GroupMemberFullInfo, groupID string) (err error) {
 	if opUser == nil {
-		return errs.ErrInternalServer.Wrap("**sdkws.GroupMemberFullInfo is nil")
+		return errs.ErrInternalServer.WrapMsg("**sdkws.GroupMemberFullInfo is nil")
 	}
 	userID := mcontext.GetOpUserID(ctx)
 	if groupID != "" {

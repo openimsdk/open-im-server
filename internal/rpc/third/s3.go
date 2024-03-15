@@ -170,7 +170,7 @@ func (t *thirdServer) AccessURL(ctx context.Context, req *third.AccessURLReq) (*
 			opt.Image.Height, _ = strconv.Atoi(req.Query["height"])
 			log.ZDebug(ctx, "AccessURL image", "name", req.Name, "option", opt.Image)
 		default:
-			return nil, errs.ErrArgs.Wrap("invalid query type")
+			return nil, errs.ErrArgs.WrapMsg("invalid query type")
 		}
 	}
 	expireTime, rawURL, err := t.s3dataBase.AccessURL(ctx, req.Name, t.defaultExpire, opt)
@@ -185,10 +185,10 @@ func (t *thirdServer) AccessURL(ctx context.Context, req *third.AccessURLReq) (*
 
 func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateFormDataReq) (*third.InitiateFormDataResp, error) {
 	if req.Name == "" {
-		return nil, errs.ErrArgs.Wrap("name is empty")
+		return nil, errs.ErrArgs.WrapMsg("name is empty")
 	}
 	if req.Size <= 0 {
-		return nil, errs.ErrArgs.Wrap("size must be greater than 0")
+		return nil, errs.ErrArgs.WrapMsg("size must be greater than 0")
 	}
 	if err := t.checkUploadName(ctx, req.Name); err != nil {
 		return nil, err
@@ -246,15 +246,15 @@ func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateF
 
 func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteFormDataReq) (*third.CompleteFormDataResp, error) {
 	if req.Id == "" {
-		return nil, errs.ErrArgs.Wrap("id is empty")
+		return nil, errs.ErrArgs.WrapMsg("id is empty")
 	}
 	data, err := base64.RawStdEncoding.DecodeString(req.Id)
 	if err != nil {
-		return nil, errs.ErrArgs.Wrap("invalid id " + err.Error())
+		return nil, errs.ErrArgs.WrapMsg("invalid id " + err.Error())
 	}
 	var mate FormDataMate
 	if err := json.Unmarshal(data, &mate); err != nil {
-		return nil, errs.ErrArgs.Wrap("invalid id " + err.Error())
+		return nil, errs.ErrArgs.WrapMsg("invalid id " + err.Error())
 	}
 	if err := t.checkUploadName(ctx, mate.Name); err != nil {
 		return nil, err
@@ -264,7 +264,7 @@ func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteF
 		return nil, err
 	}
 	if info.Size > 0 && info.Size != mate.Size {
-		return nil, errs.ErrData.Wrap("file size mismatch")
+		return nil, errs.ErrData.WrapMsg("file size mismatch")
 	}
 	obj := &relation.ObjectModel{
 		Name:        mate.Name,

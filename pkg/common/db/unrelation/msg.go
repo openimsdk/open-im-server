@@ -147,7 +147,7 @@ func (m *MsgMongoDriver) GetMsgDocModelByIndex(
 	index, sort int64,
 ) (*table.MsgDocModel, error) {
 	if sort != 1 && sort != -1 {
-		return nil, errs.ErrArgs.Wrap("mongo sort must be 1 or -1")
+		return nil, errs.ErrArgs.WrapMsg("mongo sort must be 1 or -1")
 	}
 	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"doc_id": sort})
 	cursor, err := m.MsgCollection.Find(

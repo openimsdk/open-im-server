@@ -322,8 +322,8 @@ func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.H
 		case http.MethodPost:
 			token := c.Request.Header.Get(constant.Token)
 			if token == "" {
-				log.ZWarn(c, "header get token error", errs.ErrArgs.Wrap("header must have token"))
-				apiresp.GinError(c, errs.ErrArgs.Wrap("header must have token"))
+				log.ZWarn(c, "header get token error", errs.ErrArgs.WrapMsg("header must have token"))
+				apiresp.GinError(c, errs.ErrArgs.WrapMsg("header must have token"))
 				c.Abort()
 				return
 			}

@@ -80,7 +80,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbconvers
 		return nil, err
 	}
 	if len(conversations) < 1 {
-		return nil, errs.ErrRecordNotFound.Wrap("conversation not found")
+		return nil, errs.ErrRecordNotFound.WrapMsg("conversation not found")
 	}
 	resp := &pbconversation.GetConversationResp{Conversation: &pbconversation.Conversation{}}
 	resp.Conversation = convert.ConversationDB2Pb(conversations[0])
@@ -200,7 +200,7 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 	req *pbconversation.SetConversationsReq,
 ) (*pbconversation.SetConversationsResp, error) {
 	if req.Conversation == nil {
-		return nil, errs.ErrArgs.Wrap("conversation must not be nil")
+		return nil, errs.ErrArgs.WrapMsg("conversation must not be nil")
 	}
 	if req.Conversation.ConversationType == constant.GroupChatType {
 		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
@@ -208,7 +208,7 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 			return nil, err
 		}
 		if groupInfo.Status == constant.GroupStatusDismissed {
-			return nil, errs.ErrDismissedAlready.Wrap("group dismissed")
+			return nil, errs.ErrDismissedAlready.WrapMsg("group dismissed")
 		}
 	}
 	var unequal int
@@ -219,7 +219,7 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 			return nil, err
 		}
 		if len(cs) == 0 {
-			return nil, errs.ErrRecordNotFound.Wrap("conversation not found")
+			return nil, errs.ErrRecordNotFound.WrapMsg("conversation not found")
 		}
 		conv = *cs[0]
 	}
@@ -406,7 +406,7 @@ func (c *conversationServer) GetConversationOfflinePushUserIDs(
 	req *pbconversation.GetConversationOfflinePushUserIDsReq,
 ) (*pbconversation.GetConversationOfflinePushUserIDsResp, error) {
 	if req.ConversationID == "" {
-		return nil, errs.ErrArgs.Wrap("conversationID is empty")
+		return nil, errs.ErrArgs.WrapMsg("conversationID is empty")
 	}
 	if len(req.UserIDs) == 0 {
 		return &pbconversation.GetConversationOfflinePushUserIDsResp{}, nil

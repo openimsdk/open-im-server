@@ -219,15 +219,15 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 			var msg *unrelationtb.MsgDataModel
 			msg, ok = field.(*unrelationtb.MsgDataModel)
 			if msg != nil && msg.Seq != firstSeq+int64(i) {
-				return errs.ErrInternalServer.Wrap("seq is invalid")
+				return errs.ErrInternalServer.WrapMsg("seq is invalid")
 			}
 		case updateKeyRevoke:
 			_, ok = field.(*unrelationtb.RevokeModel)
 		default:
-			return errs.ErrInternalServer.Wrap("key is invalid")
+			return errs.ErrInternalServer.WrapMsg("key is invalid")
 		}
 		if !ok {
-			return errs.ErrInternalServer.Wrap("field type is invalid")
+			return errs.ErrInternalServer.WrapMsg("field type is invalid")
 		}
 	}
 	// Returns true if the document exists in the database, false if the document does not exist in the database
@@ -309,7 +309,7 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 
 func (db *commonMsgDatabase) BatchInsertChat2DB(ctx context.Context, conversationID string, msgList []*sdkws.MsgData, currentMaxSeq int64) error {
 	if len(msgList) == 0 {
-		return errs.ErrArgs.Wrap("msgList is empty")
+		return errs.ErrArgs.WrapMsg("msgList is empty")
 	}
 	msgs := make([]any, len(msgList))
 	for i, msg := range msgList {
@@ -579,7 +579,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 	}
 	//"begin" and "end" represent the actual startSeq and endSeq values that the user can retrieve.
 	if end < begin {
-		return 0, 0, nil, errs.ErrArgs.Wrap("seq end < begin")
+		return 0, 0, nil, errs.ErrArgs.WrapMsg("seq end < begin")
 	}
 	var seqs []int64
 	if end-begin+1 <= num {

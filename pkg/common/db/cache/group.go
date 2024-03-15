@@ -228,7 +228,7 @@ func (g *GroupCacheRedis) DelGroupAllRoleLevel(groupID string) GroupCache {
 
 func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID string) (hashCode uint64, err error) {
 	if g.groupHash == nil {
-		return 0, errs.ErrInternalServer.Wrap("group hash is nil")
+		return 0, errs.ErrInternalServer.WrapMsg("group hash is nil")
 	}
 	return getCache(ctx, g.rcClient, g.getGroupMembersHashKey(groupID), g.expireTime, func(ctx context.Context) (uint64, error) {
 		return g.groupHash.GetGroupHash(ctx, groupID)
@@ -237,7 +237,7 @@ func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID strin
 
 func (g *GroupCacheRedis) GetGroupMemberHashMap(ctx context.Context, groupIDs []string) (map[string]*relationtb.GroupSimpleUserID, error) {
 	if g.groupHash == nil {
-		return nil, errs.ErrInternalServer.Wrap("group hash is nil")
+		return nil, errs.ErrInternalServer.WrapMsg("group hash is nil")
 	}
 	res := make(map[string]*relationtb.GroupSimpleUserID)
 	for _, groupID := range groupIDs {
