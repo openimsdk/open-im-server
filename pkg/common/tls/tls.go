@@ -55,7 +55,7 @@ func NewTLSConfig(clientCertFile, clientKeyFile, caCertFile string, keyPwd []byt
 	if clientCertFile != "" && clientKeyFile != "" {
 		certPEMBlock, err := os.ReadFile(clientCertFile)
 		if err != nil {
-			return nil, errs.Wrap(err, "NewTLSConfig: failed to read client cert file")
+			return nil, errs.WrapMsg(err, "NewTLSConfig: failed to read client cert file")
 		}
 		keyPEMBlock, err := readEncryptablePEMBlock(clientKeyFile, keyPwd)
 		if err != nil {
@@ -64,7 +64,7 @@ func NewTLSConfig(clientCertFile, clientKeyFile, caCertFile string, keyPwd []byt
 
 		cert, err := tls.X509KeyPair(certPEMBlock, keyPEMBlock)
 		if err != nil {
-			return nil, errs.Wrap(err, "NewTLSConfig: failed to create X509 key pair")
+			return nil, errs.WrapMsg(err, "NewTLSConfig: failed to create X509 key pair")
 		}
 		tlsConfig.Certificates = []tls.Certificate{cert}
 	}
@@ -72,7 +72,7 @@ func NewTLSConfig(clientCertFile, clientKeyFile, caCertFile string, keyPwd []byt
 	if caCertFile != "" {
 		caCert, err := os.ReadFile(caCertFile)
 		if err != nil {
-			return nil, errs.Wrap(err, "NewTLSConfig: failed to read CA cert file")
+			return nil, errs.WrapMsg(err, "NewTLSConfig: failed to read CA cert file")
 		}
 
 		caCertPool := x509.NewCertPool()

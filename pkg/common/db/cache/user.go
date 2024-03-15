@@ -295,7 +295,7 @@ func (u *UserCacheRedis) refreshStatusOnline(ctx context.Context, userID string,
 	onlineStatus.UserID = userID
 	newjsonData, err := json.Marshal(&onlineStatus)
 	if err != nil {
-		return errs.Wrap(err, "json.Marshal failed")
+		return errs.WrapMsg(err, "json.Marshal failed")
 	}
 	_, err = u.rdb.HSet(ctx, key, userID, string(newjsonData)).Result()
 	if err != nil {

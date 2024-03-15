@@ -61,7 +61,7 @@ func Start(
 		rpcTcpAddr,
 	)
 	if err != nil {
-		return errs.Wrap(err, "listen err", rpcTcpAddr)
+		return errs.WrapMsg(err, "listen err", rpcTcpAddr)
 	}
 
 	defer listener.Close()
@@ -119,7 +119,7 @@ func Start(
 			// Create a HTTP server for prometheus.
 			httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
 			if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				netErr = errs.Wrap(err, "prometheus start err", httpServer.Addr)
+				netErr = errs.WrapMsg(err, "prometheus start err", httpServer.Addr)
 				netDone <- struct{}{}
 			}
 		}
@@ -128,7 +128,7 @@ func Start(
 	go func() {
 		err := srv.Serve(listener)
 		if err != nil {
-			netErr = errs.Wrap(err, "rpc start err: ", rpcTcpAddr)
+			netErr = errs.WrapMsg(err, "rpc start err: ", rpcTcpAddr)
 			netDone <- struct{}{}
 		}
 	}()
@@ -147,7 +147,7 @@ func Start(
 		defer cancel()
 		err := httpServer.Shutdown(ctx)
 		if err != nil {
-			return errs.Wrap(err, "shutdown err")
+			return errs.WrapMsg(err, "shutdown err")
 		}
 		return nil
 	case <-netDone:

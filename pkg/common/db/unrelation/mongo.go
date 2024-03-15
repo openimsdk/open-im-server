@@ -149,7 +149,7 @@ func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...strin
 
 	_, err := indexView.CreateOne(context.Background(), index, opts)
 	if err != nil {
-		return errs.Wrap(err, "CreateIndex")
+		return errs.WrapMsg(err, "CreateIndex")
 	}
 	return nil
 }

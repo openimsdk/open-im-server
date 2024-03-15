@@ -1110,7 +1110,7 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 	var msgsDocs []docModel
 	err = cursor.All(ctx, &msgsDocs)
 	if err != nil {
-		return 0, nil, errs.Wrap(err, "cursor.All msgsDocs")
+		return 0, nil, errs.WrapMsg(err, "cursor.All msgsDocs")
 	}
 	log.ZDebug(ctx, "query mongoDB", "result", msgsDocs)
 	msgs := make([]*table.MsgInfoModel, 0)
@@ -1135,12 +1135,12 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 			}
 			data, err := json.Marshal(&revokeContent)
 			if err != nil {
-				return 0, nil, errs.Wrap(err, "json.Marshal revokeContent")
+				return 0, nil, errs.WrapMsg(err, "json.Marshal revokeContent")
 			}
 			elem := sdkws.NotificationElem{Detail: string(data)}
 			content, err := json.Marshal(&elem)
 			if err != nil {
-				return 0, nil, errs.Wrap(err, "json.Marshal elem")
+				return 0, nil, errs.WrapMsg(err, "json.Marshal elem")
 			}
 			msgInfo.Msg.ContentType = constant.MsgRevokeNotification
 			msgInfo.Msg.Content = string(content)

@@ -335,7 +335,7 @@ func (c *msgCache) PipeGetMessagesBySeq(ctx context.Context, conversationID stri
 
 	_, err = pipe.Exec(ctx)
 	if err != nil && err != redis.Nil {
-		return seqMsgs, failedSeqs, errs.Wrap(err, "pipe.get")
+		return seqMsgs, failedSeqs, errs.WrapMsg(err, "pipe.get")
 	}
 
 	for idx, res := range results {
@@ -473,7 +473,7 @@ func (c *msgCache) ParallelSetMessageToCache(ctx context.Context, conversationID
 
 	err := wg.Wait()
 	if err != nil {
-		return 0, errs.Wrap(err, "wg.Wait failed")
+		return 0, errs.WrapMsg(err, "wg.Wait failed")
 	}
 
 	return len(msgs), nil
@@ -640,7 +640,7 @@ func (c *msgCache) PipeDeleteMessages(ctx context.Context, conversationID string
 
 	results, err := pipe.Exec(ctx)
 	if err != nil {
-		return errs.Wrap(err, "pipe.del")
+		return errs.WrapMsg(err, "pipe.del")
 	}
 
 	for _, res := range results {

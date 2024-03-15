@@ -337,7 +337,19 @@ More details")
        // Suppose an error occurs here
        err, _ := someFunc()
        if err != nil {
-         return errs.Wrap(err, "doSomething failed")
+         return errs.WrapMsg(err, "doSomething failed")
+       }
+   }
+   ```
+
+   It just works if the package is wrong:
+
+   ```go
+      func doSomething() error {
+       // Suppose an error occurs here
+       err, _ := someFunc()
+       if err != nil {
+         return errs.Wrap(err)
        }
    }
    ```

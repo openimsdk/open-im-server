@@ -57,13 +57,13 @@ func NewKafkaConsumer(addr []string, topic string, config *config.GlobalConfig) 
 	}
 	consumer, err := sarama.NewConsumer(p.addr, consumerConfig)
 	if err != nil {
-		return nil, errs.Wrap(err, "NewKafkaConsumer: creating consumer failed")
+		return nil, errs.WrapMsg(err, "NewKafkaConsumer: creating consumer failed")
 	}
 	p.Consumer = consumer
 
 	partitionList, err := consumer.Partitions(p.Topic)
 	if err != nil {
-		return nil, errs.Wrap(err, "NewKafkaConsumer: getting partitions failed")
+		return nil, errs.WrapMsg(err, "NewKafkaConsumer: getting partitions failed")
 	}
 	p.PartitionList = partitionList
 

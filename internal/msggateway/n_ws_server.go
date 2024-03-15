@@ -198,7 +198,7 @@ func (ws *WsServer) Run(done chan error) error {
 		http.HandleFunc("/", ws.wsHandler)
 		err := server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
-			netErr = errs.Wrap(err, "ws start err", server.Addr)
+			netErr = errs.WrapMsg(err, "ws start err", server.Addr)
 			close(netDone)
 		}
 	}()

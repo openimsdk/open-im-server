@@ -75,7 +75,7 @@ func (d *GWebSocket) GenerateLongConn(w http.ResponseWriter, r *http.Request) er
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		// The upgrader.Upgrade method usually returns enough error messages to diagnose problems that may occur during the upgrade
-		return errs.Wrap(err, "GenerateLongConn: WebSocket upgrade failed")
+		return errs.WrapMsg(err, "GenerateLongConn: WebSocket upgrade failed")
 	}
 	d.conn = conn
 	return nil
@@ -106,7 +106,7 @@ func (d *GWebSocket) SetWriteDeadline(timeout time.Duration) error {
 
 	// TODO SetWriteDeadline Future add error handling
 	if err := d.conn.SetWriteDeadline(time.Now().Add(timeout)); err != nil {
-		return errs.Wrap(err, "GWebSocket.SetWriteDeadline failed")
+		return errs.WrapMsg(err, "GWebSocket.SetWriteDeadline failed")
 	}
 	return nil
 }

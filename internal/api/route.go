@@ -65,11 +65,11 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 	// Determine whether zk is passed according to whether it is a clustered deployment
 	client, err = kdisc.NewDiscoveryRegister(config)
 	if err != nil {
-		return errs.Wrap(err, "register discovery err")
+		return errs.WrapMsg(err, "register discovery err")
 	}
 
 	if err = client.CreateRpcRootNodes(config.GetServiceNames()); err != nil {
-		return errs.Wrap(err, "create rpc root nodes error")
+		return errs.WrapMsg(err, "create rpc root nodes error")
 	}
 
 	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.EncodeConfig()); err != nil {
@@ -120,7 +120,7 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 		util.SIGTERMExit()
 		err := server.Shutdown(ctx)
 		if err != nil {
-			return errs.Wrap(err, "shutdown err")
+			return errs.WrapMsg(err, "shutdown err")
 		}
 	case <-netDone:
 		close(netDone)

@@ -82,7 +82,7 @@ func (rc *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) 
 	cmdOpts := rc.applyOptions(opts...)
 
 	if err := rc.initializeLogger(cmdOpts); err != nil {
-		return errs.Wrap(err, "failed to initialize logger")
+		return errs.WrapMsg(err, "failed to initialize logger")
 	}
 
 	return nil

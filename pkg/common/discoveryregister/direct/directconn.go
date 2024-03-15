@@ -133,7 +133,7 @@ func (cd *ConnDirect) GetConn(ctx context.Context, serviceName string, opts ...g
 	// Try to dial a new connection
 	conn, err := cd.dialService(ctx, result, append(cd.additionalOpts, opts...)...)
 	if err != nil {
-		return nil, errs.Wrap(err, "address", result)
+		return nil, errs.WrapMsg(err, "address", result)
 	}
 
 	// Store the new connection
@@ -160,7 +160,7 @@ func (cd *ConnDirect) dialService(ctx context.Context, address string, opts ...g
 	conn, err := grpc.DialContext(ctx, cd.resolverDirect.Scheme()+":///"+address, options...)
 
 	if err != nil {
-		return nil, errs.Wrap(err, "address", address)
+		return nil, errs.WrapMsg(err, "address", address)
 	}
 	return conn, nil
 }

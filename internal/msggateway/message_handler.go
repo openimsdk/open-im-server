@@ -119,10 +119,10 @@ func NewGrpcHandler(validate *validator.Validate, client discoveryregistry.SvcDi
 func (g GrpcHandler) GetSeq(context context.Context, data *Req) ([]byte, error) {
 	req := sdkws.GetMaxSeqReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
-		return nil, errs.Wrap(err, "GetSeq: error unmarshaling request")
+		return nil, errs.WrapMsg(err, "GetSeq: error unmarshaling request")
 	}
 	if err := g.validate.Struct(&req); err != nil {
-		return nil, errs.Wrap(err, "GetSeq: validation failed")
+		return nil, errs.WrapMsg(err, "GetSeq: validation failed")
 	}
 	resp, err := g.msgRpcClient.GetMaxSeq(context, &req)
 	if err != nil {
@@ -130,7 +130,7 @@ func (g GrpcHandler) GetSeq(context context.Context, data *Req) ([]byte, error) 
 	}
 	c, err := proto.Marshal(resp)
 	if err != nil {
-		return nil, errs.Wrap(err, "GetSeq: error marshaling response")
+		return nil, errs.WrapMsg(err, "GetSeq: error marshaling response")
 	}
 	return c, nil
 }
@@ -141,12 +141,12 @@ func (g GrpcHandler) SendMessage(ctx context.Context, data *Req) ([]byte, error)
 	// Unmarshal the message data from the request.
 	var msgData sdkws.MsgData
 	if err := proto.Unmarshal(data.Data, &msgData); err != nil {
-		return nil, errs.Wrap(err, "error unmarshalling message data")
+		return nil, errs.WrapMsg(err, "error unmarshalling message data")
 	}
 
 	// Validate the message data structure.
 	if err := g.validate.Struct(&msgData); err != nil {
-		return nil, errs.Wrap(err, "message data validation failed")
+		return nil, errs.WrapMsg(err, "message data validation failed")
 	}
 
 	req := msg.SendMsgReq{MsgData: &msgData}
@@ -158,7 +158,7 @@ func (g GrpcHandler) SendMessage(ctx context.Context, data *Req) ([]byte, error)
 
 	c, err := proto.Marshal(resp)
 	if err != nil {
-		return nil, errs.Wrap(err, "error marshaling response")
+		return nil, errs.WrapMsg(err, "error marshaling response")
 	}
 
 	return c, nil
@@ -171,7 +171,7 @@ func (g GrpcHandler) SendSignalMessage(context context.Context, data *Req) ([]by
 	}
 	c, err := proto.Marshal(resp)
 	if err != nil {
-		return nil, errs.Wrap(err, "error marshaling response")
+		return nil, errs.WrapMsg(err, "error marshaling response")
 	}
 	return c, nil
 }
@@ -179,10 +179,10 @@ func (g GrpcHandler) SendSignalMessage(context context.Context, data *Req) ([]by
 func (g GrpcHandler) PullMessageBySeqList(context context.Context, data *Req) ([]byte, error) {
 	req := sdkws.PullMessageBySeqsReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
-		return nil, errs.Wrap(err, "error unmarshaling request")
+		return nil, errs.WrapMsg(err, "error unmarshaling request")
 	}
 	if err := g.validate.Struct(data); err != nil {
-		return nil, errs.Wrap(err, "validation failed")
+		return nil, errs.WrapMsg(err, "validation failed")
 	}
 	resp, err := g.msgRpcClient.PullMessageBySeqList(context, &req)
 	if err != nil {
@@ -190,7 +190,7 @@ func (g GrpcHandler) PullMessageBySeqList(context context.Context, data *Req) ([
 	}
 	c, err := proto.Marshal(resp)
 	if err != nil {
-		return nil, errs.Wrap(err, "error marshaling response")
+		return nil, errs.WrapMsg(err, "error marshaling response")
 	}
 	return c, nil
 }
@@ -198,7 +198,7 @@ func (g GrpcHandler) PullMessageBySeqList(context context.Context, data *Req) ([
 func (g GrpcHandler) UserLogout(context context.Context, data *Req) ([]byte, error) {
 	req := push.DelUserPushTokenReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
-		return nil, errs.Wrap(err, "error unmarshaling request")
+		return nil, errs.WrapMsg(err, "error unmarshaling request")
 	}
 	resp, err := g.pushClient.DelUserPushToken(context, &req)
 	if err != nil {
@@ -206,7 +206,7 @@ func (g GrpcHandler) UserLogout(context context.Context, data *Req) ([]byte, err
 	}
 	c, err := proto.Marshal(resp)
 	if err != nil {
-		return nil, errs.Wrap(err, "error marshaling response")
+		return nil, errs.WrapMsg(err, "error marshaling response")
 	}
 	return c, nil
 }
@@ -214,10 +214,10 @@ func (g GrpcHandler) UserLogout(context context.Context, data *Req) ([]byte, err
 func (g GrpcHandler) SetUserDeviceBackground(_ context.Context, data *Req) ([]byte, bool, error) {
 	req := sdkws.SetAppBackgroundStatusReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
-		return nil, false, errs.Wrap(err, "error unmarshaling request")
+		return nil, false, errs.WrapMsg(err, "error unmarshaling request")
 	}
 	if err := g.validate.Struct(data); err != nil {
-		return nil, false, errs.Wrap(err, "validation failed")
+		return nil, false, errs.WrapMsg(err, "validation failed")
 	}
 	return nil, req.IsBackground, nil
 }

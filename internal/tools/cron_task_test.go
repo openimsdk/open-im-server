@@ -112,13 +112,13 @@ func initCfg() (*config.GlobalConfig, error) {
 	cfgPath := flag.String("c", defaultCfgPath, "Path to the configuration file")
 	data, err := os.ReadFile(*cfgPath)
 	if err != nil {
-		return nil, errs.Wrap(err, "ReadFile unmarshal failed")
+		return nil, errs.WrapMsg(err, "ReadFile unmarshal failed")
 	}
 
 	conf := config.NewGlobalConfig()
 	err = yaml.Unmarshal(data, &conf)
 	if err != nil {
-		return nil, errs.Wrap(err, "InitConfig unmarshal failed")
+		return nil, errs.WrapMsg(err, "InitConfig unmarshal failed")
 	}
 	return conf, nil
 }

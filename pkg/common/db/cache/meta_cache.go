@@ -150,7 +150,7 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 		}
 		bs, err := json.Marshal(t)
 		if err != nil {
-			return "", errs.Wrap(err, "marshal failed")
+			return "", errs.WrapMsg(err, "marshal failed")
 		}
 		write = true
 

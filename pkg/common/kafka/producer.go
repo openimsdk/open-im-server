@@ -160,10 +160,10 @@ func (p *Producer) SendMessage(ctx context.Context, key string, msg proto.Messag
 	// Marshal the protobuf message
 	bMsg, err := proto.Marshal(msg)
 	if err != nil {
-		return 0, 0, errs.Wrap(err, "kafka proto Marshal err")
+		return 0, 0, errs.WrapMsg(err, "kafka proto Marshal err")
 	}
 	if len(bMsg) == 0 {
-		return 0, 0, errs.Wrap(errEmptyMsg, "")
+		return 0, 0, errs.WrapMsg(errEmptyMsg, "kafka proto Marshal err")
 	}
 
 	// Prepare Kafka message

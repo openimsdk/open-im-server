@@ -118,7 +118,7 @@ func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string
 			opts,
 		)
 		if err != nil {
-			return errs.Wrap(err, "transaction failed")
+			return errs.WrapMsg(err, "transaction failed")
 		}
 	}
 	return nil

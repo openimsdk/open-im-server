@@ -72,7 +72,7 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(a.accessSecret))
 	if err != nil {
-		return "", errs.Wrap(err, "token.SignedString")
+		return "", errs.WrapMsg(err, "token.SignedString")
 	}
 	return tokenString, a.cache.AddTokenFlag(ctx, userID, platformID, tokenString, constant.NormalToken)
 }

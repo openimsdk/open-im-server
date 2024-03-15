@@ -48,13 +48,13 @@ var (
 func initCfg() (*config.GlobalConfig, error) {
 	data, err := os.ReadFile(*cfgPath)
 	if err != nil {
-		return nil, errs.Wrap(err, "ReadFile unmarshal failed")
+		return nil, errs.WrapMsg(err, "ReadFile unmarshal failed")
 	}
 
 	conf := config.NewGlobalConfig()
 	err = yaml.Unmarshal(data, &conf)
 	if err != nil {
-		return nil, errs.Wrap(err, "InitConfig unmarshal failed")
+		return nil, errs.WrapMsg(err, "InitConfig unmarshal failed")
 	}
 	return conf, nil
 }
@@ -309,7 +309,7 @@ func configGetEnv(config *config.GlobalConfig) error {
 	config.Mongo.Database = getEnv("MONGO_DATABASE", config.Mongo.Database)
 	maxPoolSize, err := getEnvInt("MONGO_MAX_POOL_SIZE", config.Mongo.MaxPoolSize)
 	if err != nil {
-		return errs.Wrap(err, "MONGO_MAX_POOL_SIZE")
+		return errs.WrapMsg(err, "MONGO_MAX_POOL_SIZE")
 	}
 	config.Mongo.MaxPoolSize = maxPoolSize
 
@@ -360,7 +360,7 @@ func getEnvInt(key string, fallback int) (int, error) {
 	if value, exists := os.LookupEnv(key); exists {
 		val, err := strconv.Atoi(value)
 		if err != nil {
-			return 0, errs.Wrap(err, "string to int failed")
+			return 0, errs.WrapMsg(err, "string to int failed")
 		}
 		return val, nil
 	}

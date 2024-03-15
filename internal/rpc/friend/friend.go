@@ -457,7 +457,7 @@ func (s *friendServer) UpdateFriends(
 
 	err = s.notificationSender.FriendsInfoUpdateNotification(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
-		return nil, errs.Wrap(err, "FriendsInfoUpdateNotification Error")
+		return nil, errs.WrapMsg(err, "FriendsInfoUpdateNotification Error")
 	}
 	return resp, nil
 }
