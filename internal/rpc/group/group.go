@@ -766,7 +766,6 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbgroup.GetGroupsI
 }
 
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup.GroupApplicationResponseReq) (*pbgroup.GroupApplicationResponseResp, error) {
-	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	if !utils.Contain(req.HandleResult, constant.GroupResponseAgree, constant.GroupResponseRefuse) {
 		return nil, errs.ErrArgs.WrapMsg("HandleResult unknown")
 	}
@@ -847,7 +846,6 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 }
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) (resp *pbgroup.JoinGroupResp, err error) {
-	defer log.ZInfo(ctx, "JoinGroup.Return")
 	user, err := s.User.GetUserInfo(ctx, req.InviterUserID)
 	if err != nil {
 		return nil, err
@@ -1238,7 +1236,6 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbgrou
 }
 
 func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGroupReq) (*pbgroup.DismissGroupResp, error) {
-	defer log.ZInfo(ctx, "DismissGroup.return")
 	resp := &pbgroup.DismissGroupResp{}
 	owner, err := s.db.TakeGroupOwner(ctx, req.GroupID)
 	if err != nil {
