@@ -26,6 +26,7 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 var ExcludeContentType = []int{constant.HasReadReceipt}
@@ -111,7 +112,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		groupMemberInfo, err := m.GroupLocalCache.GetGroupMember(ctx, data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
 			if errs.ErrRecordNotFound.Is(err) {
-				return errs.ErrNotInGroupYet.Wrap(err.Error())
+				return errs.ErrNotInGroupYet.WrapMsg(err.Error())
 			}
 			return err
 		}
@@ -178,16 +179,11 @@ func (m *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 }
 
 func GetMsgID(sendID string) string {
-	t := time.Now().Format("2006-01-02 15:04:05")
+	t := genutil.GetCurrentTimeFormatted()
 	return utils.Md5(t + "-" + sendID + "-" + strconv.Itoa(rand.Int()))
 }
 
-func (m *msgServer) modifyMessageByUserMessageReceiveOpt(
-	ctx context.Context,
-	userID, conversationID string,
-	sessionType int,
-	pb *msg.SendMsgReq,
-) (bool, error) {
+func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, userID, conversationID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
 	defer log.ZDebug(ctx, "modifyMessageByUserMessageReceiveOpt return")
 	opt, err := m.UserLocalCache.GetUserGlobalMsgRecvOpt(ctx, userID)
 	if err != nil {

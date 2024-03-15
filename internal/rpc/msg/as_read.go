@@ -38,6 +38,7 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	} else {
 		conversationIDs = req.ConversationIDs
 	}
+
 	hasReadSeqs, err := m.MsgDatabase.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
@@ -207,14 +208,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 	return &msg.MarkConversationAsReadResp{}, nil
 }
 
-func (m *msgServer) sendMarkAsReadNotification(
-	ctx context.Context,
-	conversationID string,
-	sessionType int32,
-	sendID, recvID string,
-	seqs []int64,
-	hasReadSeq int64,
-) error {
+func (m *msgServer) sendMarkAsReadNotification(ctx context.Context, conversationID string, sessionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) error {
 	tips := &sdkws.MarkAsReadTips{
 		MarkAsReadUserID: sendID,
 		ConversationID:   conversationID,

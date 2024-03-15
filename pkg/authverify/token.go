@@ -59,7 +59,7 @@ func CheckAdmin(ctx context.Context, manager *config.Manager, imAdmin *config.IM
 	if utils.Contain(mcontext.GetOpUserID(ctx), imAdmin.UserID...) {
 		return nil
 	}
-	return errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
+	return errs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
 func CheckIMAdmin(ctx context.Context, config *config.GlobalConfig) error {
 	if utils.Contain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID...) {
@@ -68,7 +68,7 @@ func CheckIMAdmin(ctx context.Context, config *config.GlobalConfig) error {
 	if len(config.Manager.UserID) > 0 && utils.Contain(mcontext.GetOpUserID(ctx), config.Manager.UserID...) {
 		return nil
 	}
-	return errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s is not CheckIMAdmin userID", mcontext.GetOpUserID(ctx)))
+	return errs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not CheckIMAdmin userID", mcontext.GetOpUserID(ctx)))
 }
 
 func ParseRedisInterfaceToken(redisToken any, secret string) (*tokenverify.Claims, error) {
@@ -85,10 +85,10 @@ func WsVerifyToken(token, userID, secret string, platformID int) error {
 		return err
 	}
 	if claim.UserID != userID {
-		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token uid %s != userID %s", claim.UserID, userID))
+		return errs.ErrTokenInvalid.WrapMsg(fmt.Sprintf("token uid %s != userID %s", claim.UserID, userID))
 	}
 	if claim.PlatformID != platformID {
-		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token platform %d != %d", claim.PlatformID, platformID))
+		return errs.ErrTokenInvalid.WrapMsg(fmt.Sprintf("token platform %d != %d", claim.PlatformID, platformID))
 	}
 	return nil
 }

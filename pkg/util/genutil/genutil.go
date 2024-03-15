@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/OpenIMSDK/tools/errs"
 )
@@ -27,19 +28,23 @@ import (
 func OutDir(path string) (string, error) {
 	outDir, err := filepath.Abs(path)
 	if err != nil {
-		return "", errs.Wrap(err, "output directory %s does not exist", path)
+		return "", errs.WrapMsg(err, "output directory %s does not exist", path)
 	}
 
 	stat, err := os.Stat(outDir)
 	if err != nil {
-		return "", errs.Wrap(err, "output directory %s does not exist", outDir)
+		return "", errs.WrapMsg(err, "output directory %s does not exist", outDir)
 	}
 
 	if !stat.IsDir() {
-		return "", errs.Wrap(err, "output directory %s is not a directory", outDir)
+		return "", errs.WrapMsg(err, "output directory %s is not a directory", outDir)
 	}
 	outDir += "/"
 	return outDir, nil
+}
+
+func GetCurrentTimeFormatted() string {
+	return time.Now().Format("2006-01-02 15:04:05")
 }
 
 func ExitWithError(err error) {

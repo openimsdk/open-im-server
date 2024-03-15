@@ -83,7 +83,7 @@ func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) 
 }
 
 func (t *thirdServer) DeleteLogs(ctx context.Context, req *third.DeleteLogsReq) (*third.DeleteLogsResp, error) {
-	if err := authverify.CheckAdmin(ctx, t.config); err != nil {
+	if err := authverify.CheckAdmin(ctx, &t.config.Manager, &t.config.IMAdmin); err != nil {
 		return nil, err
 	}
 	userID := ""
@@ -96,7 +96,7 @@ func (t *thirdServer) DeleteLogs(ctx context.Context, req *third.DeleteLogsReq) 
 		logIDs = append(logIDs, log.LogID)
 	}
 	if ids := utils2.Single(req.LogIDs, logIDs); len(ids) > 0 {
-		return nil, errs.ErrRecordNotFound.Wrap(fmt.Sprintf("logIDs not found%#v", ids))
+		return nil, errs.ErrRecordNotFound.WrapMsg(fmt.Sprintf("logIDs not found%#v", ids))
 	}
 	err = t.thirdDatabase.DeleteLogs(ctx, req.LogIDs, userID)
 	if err != nil {
@@ -124,7 +124,7 @@ func dbToPbLogInfos(logs []*relationtb.LogModel) []*third.LogInfo {
 }
 
 func (t *thirdServer) SearchLogs(ctx context.Context, req *third.SearchLogsReq) (*third.SearchLogsResp, error) {
-	if err := authverify.CheckAdmin(ctx, t.config); err != nil {
+	if err := authverify.CheckAdmin(ctx, &t.config.Manager, &t.config.IMAdmin); err != nil {
 		return nil, err
 	}
 	var (
