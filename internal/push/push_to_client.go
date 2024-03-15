@@ -505,7 +505,7 @@ func (p *Pusher) getOfflinePushInfos(conversationID string, msg *sdkws.MsgData) 
 		case constant.AtText:
 			ac := atContent{}
 			_ = utils.JsonStringToStruct(string(msg.Content), &ac)
-			if utils.IsContain(conversationID, ac.AtUserList) {
+			if utils.Contain(conversationID, ac.AtUserList...) {
 				title = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
 			} else {
 				title = constant.ContentType2PushContent[constant.GroupMsg]

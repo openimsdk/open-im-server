@@ -47,10 +47,10 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (resp *p
 		case constant.SuperGroupChatType:
 			return m.sendMsgSuperGroupChat(ctx, req)
 		default:
-			return nil, errs.ErrArgs.Wrap("unknown sessionType")
+			return nil, errs.ErrArgs.WrapMsg("unknown sessionType")
 		}
 	} else {
-		return nil, errs.ErrArgs.Wrap("msgData is nil")
+		return nil, errs.ErrArgs.WrapMsg("msgData is nil")
 	}
 }
 
@@ -96,7 +96,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 		ConversationType: msg.SessionType,
 		GroupID:          msg.GroupID,
 	}
-	tagAll := utils.IsContain(constant.AtAllString, msg.AtUserIDList)
+	tagAll := utils.Contain(constant.AtAllString, msg.AtUserIDList...)
 	if tagAll {
 		memberUserIDList, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, msg.GroupID)
 		if err != nil {
