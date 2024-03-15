@@ -16,6 +16,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -52,8 +53,8 @@ import (
 
 func Start(config *config.GlobalConfig, port int, proPort int) error {
 	if port == 0 || proPort == 0 {
-		err := "port or proPort is empty:" + strconv.Itoa(port) + "," + strconv.Itoa(proPort)
-		return errs.Wrap(fmt.Errorf(err))
+		err := errors.New("port or proPort is empty:" + strconv.Itoa(port) + "," + strconv.Itoa(proPort))
+		return errs.Wrap(err)
 	}
 	rdb, err := cache.NewRedis(&config.Redis)
 	if err != nil {
@@ -85,7 +86,7 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 			p := ginprom.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
 			p.SetListenAddress(fmt.Sprintf(":%d", proPort))
 			if err = p.Use(router); err != nil && err != http.ErrServerClosed {
-				netErr = errs.Wrap(err, fmt.Sprintf("prometheus start err: %d", proPort))
+				netErr = errs.WrapMsg(err, fmt.Sprintf("prometheus start err: %d", proPort))
 				netDone <- struct{}{}
 			}
 		}()
@@ -104,7 +105,7 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 	go func() {
 		err = server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
-			netErr = errs.Wrap(err, fmt.Sprintf("api start err: %s", server.Addr))
+			netErr = errs.WrapMsg(err, fmt.Sprintf("api start err: %s", server.Addr))
 			netDone <- struct{}{}
 
 		}

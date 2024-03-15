@@ -188,7 +188,7 @@ func (c *Client) handleMessage(message []byte) error {
 	}
 
 	if binaryReq.SendID != c.UserID {
-		return errs.Wrap(errors.New("exception conn userID not same to req userID"), binaryReq.String())
+		return errs.WrapMsg(errors.New("exception conn userID not same to req userID"), binaryReq.String())
 	}
 
 	ctx := mcontext.WithMustInfoCtx(

@@ -209,7 +209,7 @@ func (ws *WsServer) Run(done chan error) error {
 	case err = <-done:
 		sErr := server.Shutdown(ctx)
 		if sErr != nil {
-			return errs.Wrap(sErr, "shutdown err")
+			return errs.WrapMsg(sErr, "shutdown err")
 		}
 		close(shutdownDone)
 		if err != nil {
@@ -463,7 +463,7 @@ func (ws *WsServer) ParseWSArgs(r *http.Request) (args *WSArgs, err error) {
 		case constant.KickedToken:
 			return nil, errs.ErrTokenKicked.Wrap()
 		default:
-			return nil, errs.ErrTokenUnknown.Wrap(fmt.Sprintf("token status is %d", v))
+			return nil, errs.ErrTokenUnknown.WrapMsg(fmt.Sprintf("token status is %d", v))
 		}
 	} else {
 		return nil, errs.ErrTokenNotExist.Wrap()
