@@ -64,7 +64,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*pbauth.UserTokenResp, error) {
 	resp := pbauth.UserTokenResp{}
 	if req.Secret != s.config.Secret {
-		return nil, errs.ErrNoPermission.Wrap("secret invalid")
+		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 	resp := pbauth.GetUserTokenResp{}
 
 	if authverify.IsManagerUserID(req.UserID, &s.config.Manager, &s.config.IMAdmin) {
-		return nil, errs.ErrNoPermission.Wrap("don't get Admin token")
+		return nil, errs.ErrNoPermission.WrapMsg("don't get Admin token")
 	}
 
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {

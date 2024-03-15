@@ -54,7 +54,7 @@ func (t *thirdServer) checkUploadName(ctx context.Context, name string) error {
 	}
 	opUserID := mcontext.GetOpUserID(ctx)
 	if opUserID == "" {
-		return errs.ErrNoPermission.Wrap("opUserID is empty")
+		return errs.ErrNoPermission.WrapMsg("opUserID is empty")
 	}
 	if !authverify.IsManagerUserID(opUserID, t.config) {
 		if !strings.HasPrefix(name, opUserID+"/") {

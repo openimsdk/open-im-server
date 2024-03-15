@@ -139,7 +139,7 @@ func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error
 			return err
 		}
 		if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
-			return errs.ErrNoPermission.Wrap("no group owner or admin")
+			return errs.ErrNoPermission.WrapMsg("no group owner or admin")
 		}
 	}
 	return nil
@@ -572,22 +572,22 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	for _, userID := range req.KickedUserIDs {
 		member, ok := memberMap[userID]
 		if !ok {
-			return nil, errs.ErrUserIDNotFound.Wrap(userID)
+			return nil, errs.ErrUserIDNotFound.WrapMsg(userID)
 		}
 		if !isAppManagerUid {
 			if opMember == nil {
-				return nil, errs.ErrNoPermission.Wrap("opUserID no in group")
+				return nil, errs.ErrNoPermission.WrapMsg("opUserID no in group")
 			}
 			switch opMember.RoleLevel {
 			case constant.GroupOwner:
 			case constant.GroupAdmin:
 				if member.RoleLevel == constant.GroupOwner || member.RoleLevel == constant.GroupAdmin {
-					return nil, errs.ErrNoPermission.Wrap("group admins cannot remove the group owner and other admins")
+					return nil, errs.ErrNoPermission.WrapMsg("group admins cannot remove the group owner and other admins")
 				}
 			case constant.GroupOrdinaryUsers:
-				return nil, errs.ErrNoPermission.Wrap("opUserID no permission")
+				return nil, errs.ErrNoPermission.WrapMsg("opUserID no permission")
 			default:
-				return nil, errs.ErrNoPermission.Wrap("opUserID roleLevel unknown")
+				return nil, errs.ErrNoPermission.WrapMsg("opUserID roleLevel unknown")
 			}
 		}
 	}
@@ -706,7 +706,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbgroup.
 		return e.GroupID
 	})
 	if ids := utils.Single(utils.Keys(groupMap), groupIDs); len(ids) > 0 {
-		return nil, errs.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
+		return nil, errs.ErrGroupIDNotFound.WrapMsg(strings.Join(ids, ","))
 	}
 	groupMemberNumMap, err := s.db.MapGroupMemberNum(ctx, groupIDs)
 	if err != nil {
@@ -776,7 +776,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 			return nil, err
 		}
 		if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
-			return nil, errs.ErrNoPermission.Wrap("no group owner or admin")
+			return nil, errs.ErrNoPermission.WrapMsg("no group owner or admin")
 		}
 	}
 	group, err := s.db.TakeGroup(ctx, req.GroupID)
@@ -788,7 +788,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 		return nil, err
 	}
 	if groupRequest.HandleResult != 0 {
-		return nil, errs.ErrGroupRequestHandled.Wrap("group request already processed")
+		return nil, errs.ErrGroupRequestHandled.WrapMsg("group request already processed")
 	}
 	var inGroup bool
 	if _, err := s.db.TakeGroupMember(ctx, req.GroupID, req.FromUserID); err == nil {

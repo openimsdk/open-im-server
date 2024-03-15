@@ -246,7 +246,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	}
 	if req.Secret != s.config.Secret {
 		log.ZDebug(ctx, "UserRegister", s.config.Secret, req.Secret)
-		return nil, errs.ErrNoPermission.Wrap("secret invalid")
+		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
 	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
 		return nil, errs.ErrArgs.Wrap("userID repeated")
@@ -649,7 +649,7 @@ func (s *userServer) GetNotificationAccount(ctx context.Context, req *pbuser.Get
 		return &pbuser.GetNotificationAccountResp{}, nil
 	}
 
-	return nil, errs.ErrNoPermission.Wrap("notification messages cannot be sent for this ID")
+	return nil, errs.ErrNoPermission.WrapMsg("notification messages cannot be sent for this ID")
 }
 
 func (s *userServer) genUserID() string {

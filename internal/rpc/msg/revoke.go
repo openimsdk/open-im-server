@@ -80,10 +80,10 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 				case constant.GroupOwner:
 				case constant.GroupAdmin:
 					if members[msgs[0].SendID].RoleLevel != constant.GroupOrdinaryUsers {
-						return nil, errs.ErrNoPermission.Wrap("no permission")
+						return nil, errs.ErrNoPermission.WrapMsg("no permission")
 					}
 				default:
-					return nil, errs.ErrNoPermission.Wrap("no permission")
+					return nil, errs.ErrNoPermission.WrapMsg("no permission")
 				}
 			}
 			if member := members[req.UserID]; member != nil {
