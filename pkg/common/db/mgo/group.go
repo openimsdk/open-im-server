@@ -20,7 +20,7 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 
-	"github.com/OpenIMSDK/tools/errs"
+  "github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
