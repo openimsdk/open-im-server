@@ -42,6 +42,7 @@ func NewDiscoveryRegister(config *config.GlobalConfig) (discoveryregistry.SvcDis
 	case "direct":
 		return direct.NewConnDirect(config)
 	default:
-		return nil, errs.Wrap(errors.New("envType not correct"))
+		errMsg := "unsupported discovery type"
+		return nil, errs.WrapMsg(errors.New(errMsg), errMsg, "type", config.Envs.Discovery)
 	}
 }

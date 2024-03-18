@@ -179,17 +179,18 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 			return nil, err
 		}
 	default:
-		return nil, errs.ErrArgs.WithDetail("not support err contentType")
+		return nil, errs.WrapMsg(errs.ErrArgs, "unsupported content type", "contentType", req.ContentType)
 	}
 	if err := mapstructure.WeakDecode(req.Content, &data); err != nil {
-		return nil, err
+		return nil, errs.WrapMsg(err, "failed to decode message content")
 	}
-	log.ZDebug(c, "getSendMsgReq", "req", req.Content)
+	log.ZDebug(c, "getSendMsgReq", "decodedContent", data)
 	if err := m.validate.Struct(data); err != nil {
-		return nil, err
+		return nil, errs.WrapMsg(err, "validation error")
 	}
 	return m.newUserSendMsgReq(c, &req), nil
 }
+
 
 // SendMessage handles the sending of a message. It's an HTTP handler function to be used with Gin framework.
 func (m *MessageApi) SendMessage(c *gin.Context) {

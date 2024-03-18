@@ -53,9 +53,11 @@ import (
 
 func Start(config *config.GlobalConfig, port int, proPort int) error {
 	if port == 0 || proPort == 0 {
-		err := errors.New("port or proPort is empty:" + strconv.Itoa(port) + "," + strconv.Itoa(proPort))
-		return errs.Wrap(err)
+		err := errors.New("port or proPort is empty")
+		wrappedErr := errs.WrapMsg(err, "validation error", "port", port, "proPort", proPort)
+		return wrappedErr
 	}
+	
 	rdb, err := cache.NewRedis(&config.Redis)
 	if err != nil {
 		return err
@@ -66,20 +68,22 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 	// Determine whether zk is passed according to whether it is a clustered deployment
 	client, err = kdisc.NewDiscoveryRegister(config)
 	if err != nil {
-		return errs.WrapMsg(err, "register discovery err")
+		return errs.WrapMsg(err, "failed to register discovery service")
 	}
-
+	
 	if err = client.CreateRpcRootNodes(config.GetServiceNames()); err != nil {
-		return errs.WrapMsg(err, "create rpc root nodes error")
+		return errs.WrapMsg(err, "failed to create RPC root nodes")
 	}
-
+	
 	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.EncodeConfig()); err != nil {
-		return errs.Wrap(err)
+		return errs.WrapMsg(err, "failed to register configuration to registry")
 	}
+	
 	var (
 		netDone = make(chan struct{}, 1)
 		netErr  error
 	)
+
 	router := newGinRouter(client, rdb, config)
 	if config.Prometheus.Enable {
 		go func() {
