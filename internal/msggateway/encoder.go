@@ -35,9 +35,8 @@ func NewGobEncoder() *GobEncoder {
 func (g *GobEncoder) Encode(data any) ([]byte, error) {
 	buff := bytes.Buffer{}
 	enc := gob.NewEncoder(&buff)
-	err := enc.Encode(data)
-	if err != nil {
-		return nil, errs.WrapMsg(err, "GobEncoder.Encode failed")
+	if err := enc.Encode(data); err != nil {
+		return nil, errs.WrapMsg(err, "GobEncoder.Encode failed", "action", "encode")
 	}
 	return buff.Bytes(), nil
 }
@@ -45,9 +44,8 @@ func (g *GobEncoder) Encode(data any) ([]byte, error) {
 func (g *GobEncoder) Decode(encodeData []byte, decodeData any) error {
 	buff := bytes.NewBuffer(encodeData)
 	dec := gob.NewDecoder(buff)
-	err := dec.Decode(decodeData)
-	if err != nil {
-		return errs.WrapMsg(err, "GobEncoder.Decode failed")
+	if err := dec.Decode(decodeData); err != nil {
+		return errs.WrapMsg(err, "GobEncoder.Decode failed", "action", "decode")
 	}
 	return nil
 }

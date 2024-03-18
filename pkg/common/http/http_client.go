@@ -52,7 +52,7 @@ func Get(url string) (response []byte, err error) {
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, errs.WrapMsg(err, "failed to read response body", "url", url)
 	}
 	return body, nil
 }

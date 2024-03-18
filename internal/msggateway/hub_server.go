@@ -123,10 +123,7 @@ func (s *Server) GetUsersOnlineStatus(
 	return &resp, nil
 }
 
-func (s *Server) OnlineBatchPushOneMsg(
-	ctx context.Context,
-	req *msggateway.OnlineBatchPushOneMsgReq,
-) (*msggateway.OnlineBatchPushOneMsgResp, error) {
+func (s *Server) OnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq) (*msggateway.OnlineBatchPushOneMsgResp, error) {
 	panic("implement me")
 }
 
@@ -204,10 +201,7 @@ func (s *Server) KickUserOffline(
 	return &msggateway.KickUserOfflineResp{}, nil
 }
 
-func (s *Server) MultiTerminalLoginCheck(
-	ctx context.Context,
-	req *msggateway.MultiTerminalLoginCheckReq,
-) (*msggateway.MultiTerminalLoginCheckResp, error) {
+func (s *Server) MultiTerminalLoginCheck(ctx context.Context, req *msggateway.MultiTerminalLoginCheckReq) (*msggateway.MultiTerminalLoginCheckResp, error) {
 	if oldClients, userOK, clientOK := s.LongConnServer.GetUserPlatformCons(req.UserID, int(req.PlatformID)); userOK {
 		tempUserCtx := newTempContext()
 		tempUserCtx.SetToken(req.Token)

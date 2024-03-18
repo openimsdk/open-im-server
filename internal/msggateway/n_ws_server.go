@@ -130,7 +130,7 @@ func (ws *WsServer) UnRegister(c *Client) {
 
 func (ws *WsServer) Validate(s any) error {
 	if s == nil {
-		return errs.Wrap(errors.New("input cannot be nil"))
+		return errs.WrapMsg(errors.New("input cannot be nil"), "Validate: input is nil", "action", "validate", "dataType", "any")
 	}
 	return nil
 }
@@ -197,9 +197,9 @@ func (ws *WsServer) Run(done chan error) error {
 	go func() {
 		http.HandleFunc("/", ws.wsHandler)
 		err := server.ListenAndServe()
+		defer close(netDone)
 		if err != nil && err != http.ErrServerClosed {
 			netErr = errs.WrapMsg(err, "ws start err", server.Addr)
-			close(netDone)
 		}
 	}()
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -296,6 +296,7 @@ func (ws *WsServer) registerClient(client *Client) {
 			_ = ws.sendUserOnlineInfoToOtherNode(client.ctx, client)
 		}()
 	}
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()

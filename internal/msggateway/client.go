@@ -268,7 +268,7 @@ func (c *Client) replyMessage(ctx context.Context, binaryReq *Req, err error, re
 	}
 
 	if binaryReq.ReqIdentifier == WsLogoutMsg {
-		return errs.Wrap(errors.New("user logout"))
+		return errs.WrapMsg(errors.New("user logout"), "user requested logout", "operationID", binaryReq.OperationID)
 	}
 	return nil
 }

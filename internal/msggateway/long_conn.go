@@ -113,11 +113,13 @@ func (d *GWebSocket) SetWriteDeadline(timeout time.Duration) error {
 
 func (d *GWebSocket) Dial(urlStr string, requestHeader http.Header) (*http.Response, error) {
 	conn, httpResp, err := websocket.DefaultDialer.Dial(urlStr, requestHeader)
-	if err == nil {
-		d.conn = conn
+	if err != nil {
+		return httpResp, errs.WrapMsg(err, "GWebSocket.Dial failed", "url", urlStr)
 	}
-	return httpResp, err
+	d.conn = conn
+	return httpResp, nil
 }
+
 
 func (d *GWebSocket) IsNil() bool {
 	return d.conn == nil
