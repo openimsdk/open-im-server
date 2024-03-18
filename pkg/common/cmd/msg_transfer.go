@@ -27,8 +27,8 @@ type MsgTransferCmd struct {
 	*RootCmd
 }
 
-func NewMsgTransferCmd() *MsgTransferCmd {
-	ret := &MsgTransferCmd{NewRootCmd("msgTransfer")}
+func NewMsgTransferCmd(name string) *MsgTransferCmd {
+	ret := &MsgTransferCmd{NewRootCmd(name)}
 	ret.addRunE()
 	ret.SetRootCmdPt(ret)
 	return ret
@@ -36,7 +36,7 @@ func NewMsgTransferCmd() *MsgTransferCmd {
 
 func (m *MsgTransferCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msgtransfer.StartTransfer(m.config, m.getPrometheusPortFlag(cmd))
+		return msgtransfer.Start(m.config, m.getPrometheusPortFlag(cmd))
 	}
 }
 

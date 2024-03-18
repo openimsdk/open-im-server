@@ -21,8 +21,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
-// RunWsAndServer run ws server.
-func RunWsAndServer(conf *config.GlobalConfig, rpcPort, wsPort, prometheusPort int) error {
+// Start run ws server.
+func Start(conf *config.GlobalConfig, rpcPort, wsPort, prometheusPort int) error {
 	fmt.Println("start rpc/msg_gateway server, port: ", rpcPort, wsPort, prometheusPort, ", OpenIM version: ", config.Version)
 	longServer, err := NewWsServer(
 		conf,

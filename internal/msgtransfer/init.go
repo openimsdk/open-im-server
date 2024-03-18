@@ -53,7 +53,7 @@ type MsgTransfer struct {
 	cancel context.CancelFunc
 }
 
-func StartTransfer(config *config.GlobalConfig, prometheusPort int) error {
+func Start(config *config.GlobalConfig, prometheusPort int) error {
 	rdb, err := cache.NewRedis(&config.Redis)
 	if err != nil {
 		return err

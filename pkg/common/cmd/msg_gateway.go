@@ -27,8 +27,8 @@ type MsgGatewayCmd struct {
 	*RootCmd
 }
 
-func NewMsgGatewayCmd() *MsgGatewayCmd {
-	ret := &MsgGatewayCmd{NewRootCmd("msgGateway")}
+func NewMsgGatewayCmd(name string) *MsgGatewayCmd {
+	ret := &MsgGatewayCmd{NewRootCmd(name)}
 	ret.addRunE()
 	ret.SetRootCmdPt(ret)
 	return ret
@@ -51,7 +51,7 @@ func (m *MsgGatewayCmd) getWsPortFlag(cmd *cobra.Command) int {
 
 func (m *MsgGatewayCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msggateway.RunWsAndServer(m.config, m.getPortFlag(cmd), m.getWsPortFlag(cmd), m.getPrometheusPortFlag(cmd))
+		return msggateway.Start(m.config, m.getPortFlag(cmd), m.getWsPortFlag(cmd), m.getPrometheusPortFlag(cmd))
 	}
 }
 

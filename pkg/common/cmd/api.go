@@ -19,16 +19,14 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/openimsdk/open-im-server/v3/internal/api"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type ApiCmd struct {
 	*RootCmd
-	initFunc func(config *config.GlobalConfig, port int, promPort int) error
 }
 
-func NewApiCmd() *ApiCmd {
-	ret := &ApiCmd{RootCmd: NewRootCmd("api"), initFunc: api.Start}
+func NewApiCmd(name string) *ApiCmd {
+	ret := &ApiCmd{RootCmd: NewRootCmd(name)}
 	ret.SetRootCmdPt(ret)
 	ret.addPreRun()
 	ret.addRunE()
@@ -44,7 +42,7 @@ func (a *ApiCmd) addPreRun() {
 
 func (a *ApiCmd) addRunE() {
 	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return a.initFunc(a.config, a.port, a.prometheusPort)
+		return api.Start(a.config, a.port, a.prometheusPort)
 	}
 }
 

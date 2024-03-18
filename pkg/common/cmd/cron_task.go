@@ -26,8 +26,8 @@ type CronTaskCmd struct {
 	initFunc func(config *config.GlobalConfig) error
 }
 
-func NewCronTaskCmd() *CronTaskCmd {
-	ret := &CronTaskCmd{RootCmd: NewRootCmd("cronTask", WithCronTaskLogName()),
+func NewCronTaskCmd(name string) *CronTaskCmd {
+	ret := &CronTaskCmd{RootCmd: NewRootCmd(name, WithCronTaskLogName()),
 		initFunc: tools.StartTask}
 	ret.addRunE()
 	ret.SetRootCmdPt(ret)

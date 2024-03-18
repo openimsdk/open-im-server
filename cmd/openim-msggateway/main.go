@@ -20,7 +20,7 @@ import (
 )
 
 func main() {
-	msgGatewayCmd := cmd.NewMsgGatewayCmd()
+	msgGatewayCmd := cmd.NewMsgGatewayCmd(cmd.MsgGatewayServer)
 	msgGatewayCmd.AddWsPortFlag()
 	msgGatewayCmd.AddPortFlag()
 	msgGatewayCmd.AddPrometheusPortFlag()
