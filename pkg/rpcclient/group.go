@@ -49,11 +49,7 @@ func NewGroupRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, config *co
 	return GroupRpcClient(*NewGroup(discov, config))
 }
 
-func (g *GroupRpcClient) GetGroupInfos(
-	ctx context.Context,
-	groupIDs []string,
-	complete bool,
-) ([]*sdkws.GroupInfo, error) {
+func (g *GroupRpcClient) GetGroupInfos(ctx context.Context, groupIDs []string, complete bool) ([]*sdkws.GroupInfo, error) {
 	resp, err := g.Client.GetGroupsInfo(ctx, &group.GetGroupsInfoReq{
 		GroupIDs: groupIDs,
 	})
@@ -184,11 +180,7 @@ func (g *GroupRpcClient) GetGroupInfoCache(ctx context.Context, groupID string) 
 	return resp.GroupInfo, nil
 }
 
-func (g *GroupRpcClient) GetGroupMemberCache(
-	ctx context.Context,
-	groupID string,
-	groupMemberID string,
-) (*sdkws.GroupMemberFullInfo, error) {
+func (g *GroupRpcClient) GetGroupMemberCache(ctx context.Context, groupID string, groupMemberID string) (*sdkws.GroupMemberFullInfo, error) {
 	resp, err := g.Client.GetGroupMemberCache(ctx, &group.GetGroupMemberCacheReq{
 		GroupID:       groupID,
 		GroupMemberID: groupMemberID,

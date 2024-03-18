@@ -952,6 +952,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		return nil, errs.Wrap(errs.ErrDismissedAlready)
 	}
 	resp := &pbgroup.SetGroupInfoResp{}
+
 	count, err := s.db.FindGroupMemberNum(ctx, group.GroupID)
 	if err != nil {
 		return nil, err
@@ -1078,6 +1079,7 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) 
 		total, group, err = s.db.SearchGroup(ctx, req.GroupName, req.Pagination)
 		resp.Total = uint32(total)
 	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -1085,10 +1087,12 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) 
 	groupIDs := utils.Slice(group, func(e *relationtb.GroupModel) string {
 		return e.GroupID
 	})
+
 	ownerMembers, err := s.db.FindGroupsOwner(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	ownerMemberMap := utils.SliceToMap(ownerMembers, func(e *relationtb.GroupMemberModel) string {
 		return e.GroupID
 	})
