@@ -99,12 +99,13 @@ func main() {
 	}
 
 	checks := []checkFunc{
-		//{name: "Mysql", function: checkMysql},
 		{name: "Mongo", function: checkMongo, config: conf},
 		{name: "Redis", function: checkRedis, config: conf},
-		{name: "Minio", function: checkMinio, config: conf},
 		{name: "Zookeeper", function: checkZookeeper, config: conf},
 		{name: "Kafka", function: checkKafka, config: conf},
+	}
+	if conf.Object.Enable == "minio" {
+		checks = append(checks, checkFunc{name: "Minio", function: checkMinio, config: conf})
 	}
 
 	for i := 0; i < maxRetry; i++ {
