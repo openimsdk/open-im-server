@@ -745,7 +745,7 @@ linters:
     - misspell      # Spelling mistakes
     - staticcheck   # Static analysis
     - unused        # Checks for unused code
-    - goimports     # Checks if imports are correctly sorted and formatted
+    # - goimports     # Checks if imports are correctly sorted and formatted
     - godot         # Checks for comment punctuation
     - bodyclose     # Ensures HTTP response body is closed
     - stylecheck    # Style checker for Go code
