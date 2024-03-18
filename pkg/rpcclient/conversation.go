@@ -110,7 +110,7 @@ func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Con
 		return nil, err
 	}
 	if len(resp.Conversations) == 0 {
-		return nil, errs.ErrRecordNotFound.Wrap(fmt.Sprintf("conversationIDs: %v not found", conversationIDs))
+		return nil, errs.ErrRecordNotFound.WrapMsg(fmt.Sprintf("conversationIDs: %v not found", conversationIDs))
 	}
 	return resp.Conversations, nil
 }

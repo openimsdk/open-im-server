@@ -58,10 +58,13 @@ func (s *friendServer) RemoveBlack(ctx context.Context, req *pbfriend.RemoveBlac
 	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
+
 	if err := s.blackDatabase.Delete(ctx, []*relation.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
 		return nil, err
 	}
+
 	s.notificationSender.BlackDeletedNotification(ctx, req)
+
 	return &pbfriend.RemoveBlackResp{}, nil
 }
 

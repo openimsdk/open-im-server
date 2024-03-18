@@ -77,6 +77,7 @@ func CallbackAfterSetFriendRemark(ctx context.Context, callback *config.Callback
 	}
 	return nil
 }
+
 func CallbackBeforeAddBlack(ctx context.Context, callback *config.Callback, req *pbfriend.AddBlackReq) error {
 	if !callback.CallbackBeforeAddBlack.Enable {
 		return nil
@@ -92,6 +93,7 @@ func CallbackBeforeAddBlack(ctx context.Context, callback *config.Callback, req 
 	}
 	return nil
 }
+
 func CallbackAfterAddFriend(ctx context.Context, callback *config.Callback, req *pbfriend.ApplyToAddFriendReq) error {
 	if !callback.CallbackAfterAddFriend.Enable {
 		return nil
@@ -109,6 +111,7 @@ func CallbackAfterAddFriend(ctx context.Context, callback *config.Callback, req 
 
 	return nil
 }
+
 func CallbackBeforeAddFriendAgree(ctx context.Context, callback *config.Callback, req *pbfriend.RespondFriendApplyReq) error {
 	if !callback.CallbackBeforeAddFriendAgree.Enable {
 		return nil
@@ -126,6 +129,7 @@ func CallbackBeforeAddFriendAgree(ctx context.Context, callback *config.Callback
 	}
 	return nil
 }
+
 func CallbackAfterDeleteFriend(ctx context.Context, callback *config.Callback, req *pbfriend.DeleteFriendReq) error {
 	if !callback.CallbackAfterDeleteFriend.Enable {
 		return nil
@@ -141,6 +145,7 @@ func CallbackAfterDeleteFriend(ctx context.Context, callback *config.Callback, r
 	}
 	return nil
 }
+
 func CallbackBeforeImportFriends(ctx context.Context, callback *config.Callback, req *pbfriend.ImportFriendReq) error {
 	if !callback.CallbackBeforeImportFriends.Enable {
 		return nil
@@ -159,6 +164,7 @@ func CallbackBeforeImportFriends(ctx context.Context, callback *config.Callback,
 	}
 	return nil
 }
+
 func CallbackAfterImportFriends(ctx context.Context, callback *config.Callback, req *pbfriend.ImportFriendReq) error {
 	if !callback.CallbackAfterImportFriends.Enable {
 		return nil

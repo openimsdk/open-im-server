@@ -85,7 +85,7 @@ func (u *UserRpcClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*
 	if ids := utils.Single(userIDs, utils.Slice(resp.UsersInfo, func(e *sdkws.UserInfo) string {
 		return e.UserID
 	})); len(ids) > 0 {
-		return nil, errs.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
+		return nil, errs.ErrUserIDNotFound.WrapMsg(strings.Join(ids, ","))
 	}
 	return resp.UsersInfo, nil
 }

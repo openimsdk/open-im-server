@@ -62,12 +62,13 @@ func (u *UserMap) Set(key string, v *Client) {
 		oldClients := allClients.([]*Client)
 		oldClients = append(oldClients, v)
 		u.m.Store(key, oldClients)
-	} else {
-		log.ZDebug(context.Background(), "Set not existed", "user_id", key, "client_user_id", v.UserID)
-		var clients []*Client
-		clients = append(clients, v)
-		u.m.Store(key, clients)
 	}
+
+	log.ZDebug(context.Background(), "Set not existed", "user_id", key, "client_user_id", v.UserID)
+
+	var clients []*Client
+	clients = append(clients, v)
+	u.m.Store(key, clients)
 }
 
 func (u *UserMap) delete(key string, connRemoteAddr string) (isDeleteUser bool) {

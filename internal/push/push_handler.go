@@ -101,6 +101,7 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		}
 	}
 }
+
 func (ConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (ConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,

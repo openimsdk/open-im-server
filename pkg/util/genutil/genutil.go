@@ -23,21 +23,24 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 )
 
-// OutDir creates the absolute path name from path and checks path exists.
-// Returns absolute path including trailing '/' or error if path does not exist.
+// OutDir creates the absolute path name from path and checks if the path exists and is a directory.
+// Returns absolute path including trailing '/' or error if the path does not exist or is not a directory.
 func OutDir(path string) (string, error) {
 	outDir, err := filepath.Abs(path)
 	if err != nil {
-		return "", errs.WrapMsg(err, "output directory %s does not exist", path)
+		return "", errs.WrapMsg(err, "failed to resolve absolute path", "path", path)
 	}
 
 	stat, err := os.Stat(outDir)
 	if err != nil {
-		return "", errs.WrapMsg(err, "output directory %s does not exist", outDir)
+		if os.IsNotExist(err) {
+			return "", errs.WrapMsg(err, "output directory does not exist", "path", outDir)
+		}
+		return "", errs.WrapMsg(err, "failed to stat output directory", "path", outDir)
 	}
 
 	if !stat.IsDir() {
-		return "", errs.WrapMsg(err, "output directory %s is not a directory", outDir)
+		return "", errs.Wrap(fmt.Errorf("specified path %s is not a directory", outDir)) // Correctly constructs a new error as 'err' would be nil here
 	}
 	outDir += "/"
 	return outDir, nil

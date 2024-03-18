@@ -262,8 +262,7 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
-		errInfo := fmt.Sprintf("MsgClient Notification json.Marshal failed, sendID:%s, recvID:%s, contentType:%d, msg:%s", sendID, recvID, contentType, m)
-		return errs.Wrap(err, errInfo)
+		return errs.WrapMsg(err, "json.Marshal failed", "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", utils.StructToJsonString(m))
 	}
 	notificationOpt := &notificationOpt{}
 	for _, opt := range opts {
@@ -275,15 +274,12 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
 		userInfo, err = s.getUserInfo(ctx, sendID)
 		if err != nil {
-			errInfo := fmt.Sprintf("getUserInfo failed, sendID:%s", sendID)
-			return errs.Wrap(err, errInfo)
-		} else {
-			msg.SenderNickname = userInfo.Nickname
-			msg.SenderFaceURL = userInfo.FaceURL
+			return errs.WrapMsg(err, "getUserInfo failed", "sendID", sendID)
 		}
+		msg.SenderNickname = userInfo.Nickname
+		msg.SenderFaceURL = userInfo.FaceURL
 	}
 	var offlineInfo sdkws.OfflinePushInfo
-	var title, desc, ex string
 	msg.SendID = sendID
 	msg.RecvID = recvID
 	msg.Content = content
@@ -302,15 +298,11 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	options := config.GetOptionsByNotification(optionsConfig)
 	s.SetOptionsByContentType(ctx, options, contentType)
 	msg.Options = options
-	offlineInfo.Title = title
-	offlineInfo.Desc = desc
-	offlineInfo.Ex = ex
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
 	_, err = s.sendMsg(ctx, &req)
 	if err != nil {
-		errInfo := fmt.Sprintf("MsgClient Notification SendMsg failed, req:%s", &req)
-		return errs.Wrap(err, errInfo)
+		return errs.WrapMsg(err, "SendMsg failed", "req", fmt.Sprintf("%+v", req))
 	}
 	return err
 }

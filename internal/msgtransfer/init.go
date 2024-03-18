@@ -92,12 +92,7 @@ func Start(config *config.GlobalConfig, prometheusPort int) error {
 	return msgTransfer.Start(prometheusPort, config)
 }
 
-func NewMsgTransfer(
-	kafkaConf *config.Kafka,
-	msgDatabase controller.CommonMsgDatabase,
-	conversationRpcClient *rpcclient.ConversationRpcClient,
-	groupRpcClient *rpcclient.GroupRpcClient,
-) (*MsgTransfer, error) {
+func NewMsgTransfer(kafkaConf *config.Kafka,msgDatabase controller.CommonMsgDatabase,conversationRpcClient *rpcclient.ConversationRpcClient,groupRpcClient *rpcclient.GroupRpcClient) (*MsgTransfer, error) {
 	historyCH, err := NewOnlineHistoryRedisConsumerHandler(kafkaConf, msgDatabase, conversationRpcClient, groupRpcClient)
 	if err != nil {
 		return nil, err
@@ -116,8 +111,9 @@ func NewMsgTransfer(
 func (m *MsgTransfer) Start(prometheusPort int, config *config.GlobalConfig) error {
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
 	if prometheusPort <= 0 {
-		return errs.Wrap(errors.New("prometheusPort not correct"))
+		return errs.WrapMsg(errors.New("invalid prometheus port"), "prometheusPort validation failed", "providedPort", prometheusPort)
 	}
+
 	m.ctx, m.cancel = context.WithCancel(context.Background())
 
 	var (
@@ -138,7 +134,7 @@ func (m *MsgTransfer) Start(prometheusPort int, config *config.GlobalConfig) err
 			http.Handle("/metrics", promhttp.HandlerFor(proreg, promhttp.HandlerOpts{Registry: proreg}))
 			err := http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil)
 			if err != nil && err != http.ErrServerClosed {
-				netErr = errs.WrapMsg(err, fmt.Sprintf("prometheus start err: %d", prometheusPort))
+				netErr = errs.WrapMsg(err, "prometheus start error", "prometheusPort", prometheusPort)
 				netDone <- struct{}{}
 			}
 		}()

@@ -61,6 +61,7 @@ func CheckAdmin(ctx context.Context, manager *config.Manager, imAdmin *config.IM
 	}
 	return errs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
+
 func CheckIMAdmin(ctx context.Context, config *config.GlobalConfig) error {
 	if utils.Contain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID...) {
 		return nil

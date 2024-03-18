@@ -154,6 +154,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 	if utils.Duplicate(req.FriendUserIDs) {
 		return nil, errs.ErrArgs.WrapMsg("friend userID repeated")
 	}
+
 	if err := CallbackBeforeImportFriends(ctx, &s.config.Callback, req); err != nil {
 		return nil, err
 	}

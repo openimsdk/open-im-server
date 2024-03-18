@@ -196,9 +196,7 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbconvers
 }
 
 // nolint
-func (c *conversationServer) SetConversations(ctx context.Context,
-	req *pbconversation.SetConversationsReq,
-) (*pbconversation.SetConversationsResp, error) {
+func (c *conversationServer) SetConversations(ctx context.Context, req *pbconversation.SetConversationsReq) (*pbconversation.SetConversationsResp, error) {
 	if req.Conversation == nil {
 		return nil, errs.ErrArgs.WrapMsg("conversation must not be nil")
 	}
@@ -279,6 +277,7 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 			conversation2.IsPrivateChat = req.Conversation.IsPrivateChat.Value
 			conversations = append(conversations, &conversation2)
 		}
+
 		if err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, conversations); err != nil {
 			return nil, err
 		}
@@ -293,20 +292,24 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 			}
 		}
 	}
+
 	if req.Conversation.BurnDuration != nil {
 		m["burn_duration"] = req.Conversation.BurnDuration.Value
 		if req.Conversation.BurnDuration.Value != conv.BurnDuration {
 			unequal++
 		}
 	}
+
 	if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, req.UserIDs, &conversation, m); err != nil {
 		return nil, err
 	}
+
 	if unequal > 0 {
 		for _, v := range req.UserIDs {
 			c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
 		}
 	}
+
 	return &pbconversation.SetConversationsResp{}, nil
 }
 
@@ -401,10 +404,7 @@ func (c *conversationServer) GetConversationsByConversationID(
 	return &pbconversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
 }
 
-func (c *conversationServer) GetConversationOfflinePushUserIDs(
-	ctx context.Context,
-	req *pbconversation.GetConversationOfflinePushUserIDsReq,
-) (*pbconversation.GetConversationOfflinePushUserIDsResp, error) {
+func (c *conversationServer) GetConversationOfflinePushUserIDs(ctx context.Context, req *pbconversation.GetConversationOfflinePushUserIDsReq) (*pbconversation.GetConversationOfflinePushUserIDsResp, error) {
 	if req.ConversationID == "" {
 		return nil, errs.ErrArgs.WrapMsg("conversationID is empty")
 	}
@@ -428,12 +428,7 @@ func (c *conversationServer) GetConversationOfflinePushUserIDs(
 	return &pbconversation.GetConversationOfflinePushUserIDsResp{UserIDs: utils.Keys(userIDSet)}, nil
 }
 
-func (c *conversationServer) conversationSort(
-	conversations map[int64]string,
-	resp *pbconversation.GetSortedConversationListResp,
-	conversation_unreadCount map[string]int64,
-	conversationMsg map[string]*pbconversation.ConversationElem,
-) {
+func (c *conversationServer) conversationSort(conversations map[int64]string, resp *pbconversation.GetSortedConversationListResp, conversation_unreadCount map[string]int64, conversationMsg map[string]*pbconversation.ConversationElem) {
 	keys := []int64{}
 	for key := range conversations {
 		keys = append(keys, key)
@@ -527,10 +522,7 @@ func (c *conversationServer) getConversationInfo(
 	return conversationMsg, nil
 }
 
-func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(
-	ctx context.Context,
-	req *pbconversation.GetConversationNotReceiveMessageUserIDsReq,
-) (*pbconversation.GetConversationNotReceiveMessageUserIDsResp, error) {
+func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(ctx context.Context, req *pbconversation.GetConversationNotReceiveMessageUserIDsReq) (*pbconversation.GetConversationNotReceiveMessageUserIDsResp, error) {
 	userIDs, err := c.conversationDatabase.GetConversationNotReceiveMessageUserIDs(ctx, req.ConversationID)
 	if err != nil {
 		return nil, err

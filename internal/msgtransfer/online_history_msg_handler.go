@@ -81,12 +81,7 @@ type OnlineHistoryRedisConsumerHandler struct {
 	groupRpcClient        *rpcclient.GroupRpcClient
 }
 
-func NewOnlineHistoryRedisConsumerHandler(
-	kafkaConf *config.Kafka,
-	database controller.CommonMsgDatabase,
-	conversationRpcClient *rpcclient.ConversationRpcClient,
-	groupRpcClient *rpcclient.GroupRpcClient,
-) (*OnlineHistoryRedisConsumerHandler, error) {
+func NewOnlineHistoryRedisConsumerHandler(kafkaConf *config.Kafka, database controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*OnlineHistoryRedisConsumerHandler, error) {
 	var och OnlineHistoryRedisConsumerHandler
 	och.msgDatabase = database
 	och.msgDistributionCh = make(chan Cmd2Value) // no buffer channel
@@ -95,6 +90,7 @@ func NewOnlineHistoryRedisConsumerHandler(
 		och.chArrays[i] = make(chan Cmd2Value, 50)
 		go och.Run(i)
 	}
+
 	och.conversationRpcClient = conversationRpcClient
 	och.groupRpcClient = groupRpcClient
 	var err error
@@ -267,22 +263,13 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(
 	}
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(
-	ctx context.Context,
-	key, conversationID string,
-	msgs []*sdkws.MsgData,
-) {
+func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(ctx context.Context, key, conversationID string, msgs []*sdkws.MsgData) {
 	for _, v := range msgs {
 		och.msgDatabase.MsgToPushMQ(ctx, key, conversationID, v) // nolint: errcheck
-
 	}
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) handleMsg(
-	ctx context.Context,
-	key, conversationID string,
-	storageList, notStorageList []*sdkws.MsgData,
-) {
+func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key, conversationID string, storageList, notStorageList []*sdkws.MsgData) {
 	och.toPushTopic(ctx, key, conversationID, notStorageList)
 	if len(storageList) > 0 {
 		lastSeq, isNewConversation, err := och.msgDatabase.BatchInsertChat2Cache(ctx, conversationID, storageList)

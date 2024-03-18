@@ -27,13 +27,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
 )
 
-func callbackOfflinePush(
-	ctx context.Context,
-	callback *config.Callback,
-	userIDs []string,
-	msg *sdkws.MsgData,
-	offlinePushUserIDs *[]string,
-) error {
+func callbackOfflinePush(ctx context.Context, callback *config.Callback, userIDs []string, msg *sdkws.MsgData, offlinePushUserIDs *[]string) error {
 	if !callback.CallbackOfflinePush.Enable || msg.ContentType == constant.Typing {
 		return nil
 	}

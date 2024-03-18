@@ -63,7 +63,7 @@ func (g *GroupRpcClient) GetGroupInfos(
 		if ids := utils.Single(groupIDs, utils.Slice(resp.GroupInfos, func(e *sdkws.GroupInfo) string {
 			return e.GroupID
 		})); len(ids) > 0 {
-			return nil, errs.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
+			return nil, errs.ErrGroupIDNotFound.WrapMsg(strings.Join(ids, ","))
 		}
 	}
 	return resp.GroupInfos, nil
@@ -108,7 +108,7 @@ func (g *GroupRpcClient) GetGroupMemberInfos(
 		if ids := utils.Single(userIDs, utils.Slice(resp.Members, func(e *sdkws.GroupMemberFullInfo) string {
 			return e.UserID
 		})); len(ids) > 0 {
-			return nil, errs.ErrNotInGroupYet.Wrap(strings.Join(ids, ","))
+			return nil, errs.ErrNotInGroupYet.WrapMsg(strings.Join(ids, ","))
 		}
 	}
 	return resp.Members, nil

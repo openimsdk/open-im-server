@@ -452,7 +452,7 @@ Next, let's demonstrate several ways to use the `WrapMsg` function:
 ```go
 // "github.com/OpenIMSDK/tools/errs"
 err := errors.New("original error")
-wrappedErr := WrapMsg(err, "")
+wrappedErr := errs.WrapMsg(err, "")
 // wrappedErr will contain the original error and its call stack
 ```
 
@@ -461,7 +461,7 @@ wrappedErr := WrapMsg(err, "")
 ```go
 // "github.com/OpenIMSDK/tools/errs"
 err := errors.New("original error")
-wrappedErr := WrapMsg(err, "additional error information")
+wrappedErr := errs.WrapMsg(err, "additional error information")
 // wrappedErr will contain the original error, call stack, and "additional error information"
 ```
 
@@ -470,7 +470,7 @@ wrappedErr := WrapMsg(err, "additional error information")
 ```go
 // "github.com/OpenIMSDK/tools/errs"
 err := errors.New("original error")
-wrappedErr := WrapMsg(err, "problem occurred", "code", 404, "url", "http://example.com")
+wrappedErr := errs.WrapMsg(err, "problem occurred", "code", 404, "url", "http://example.com")
 // wrappedErr will contain the original error, call stack, and "problem occurred code=404, url=http://example.com"
 ```
 
@@ -479,8 +479,29 @@ wrappedErr := WrapMsg(err, "problem occurred", "code", 404, "url", "http://examp
 ```go
 // "github.com/OpenIMSDK/tools/errs"
 err := errors.New("original error")
-wrappedErr := WrapMsg(err, "", "user", "john_doe", "action", "login")
+wrappedErr := errs.WrapMsg(err, "", "user", "john_doe", "action", "login")
 // wrappedErr will contain the original error, call stack, and "user=john_doe, action=login"
 ```
 
-These examples demonstrate how the `WrapMsg` function can flexibly handle error messages and context data, helping developers to more effectively track and debug their programs.
+> [!TIP] WThese examples demonstrate how the `errs.WrapMsg` function can flexibly handle error messages and context data, helping developers to more effectively track and debug their programs.
+
+
+### Example 5: Dynamic Key-Value Pairs from Context
+Suppose we have some runtime context variables, such as a user ID and the type of operation being performed, and we want to include these variables in the error message. This can help with later debugging and identifying the specific environment of the issue.
+
+```go
+// Define some context variables
+userID := "user123"
+operation := "update profile"
+errorCode := 500
+requestURL := "http://example.com/updateProfile"
+
+// Create a new error
+err := errors.New("original error")
+
+// Wrap the error, including dynamic key-value pairs from the context
+wrappedErr := errs.WrapMsg(err, "operation failed", "user", userID, "action", operation, "code", errorCode, "url", requestURL)
+// wrappedErr will contain the original error, call stack, and "operation failed user=user123, action=update profile, code=500, url=http://example.com/updateProfile"
+```
+
+> [!TIP]In this example, the `WrapMsg` function accepts not just a static error message and additional information, but also dynamic key-value pairs generated from the code's execution context, such as the user ID, operation type, error code, and the URL of the request. Including this contextual information in the error message makes it easier for developers to understand and resolve the issue.
