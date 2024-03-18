@@ -396,3 +396,91 @@ More details")
        return nil
    }
    ```
+
+
+### About WrapMsg Use
+
+```go
+// 	"github.com/OpenIMSDK/tools/errs"
+func WrapMsg(err error, msg string, kv ...any) error {
+	if len(kv) == 0 {
+		if len(msg) == 0 {
+			return errors.WithStack(err)
+		} else {
+			return errors.WithMessage(err, msg)
+		}
+	}
+	var buf bytes.Buffer
+	if len(msg) > 0 {
+		buf.WriteString(msg)
+		buf.WriteString(" ")
+	}
+	for i := 0; i < len(kv); i += 2 {
+		if i > 0 {
+			buf.WriteString(", ")
+		}
+		buf.WriteString(toString(kv[i]))
+		buf.WriteString("=")
+		buf.WriteString(toString(kv[i+1]))
+	}
+	return errors.WithMessage(err, buf.String())
+}
+```
+
+1. **Function Signature**:
+   - `err error`: The original error object.
+   - `msg string`: The message text to append to the error.
+   - `kv ...any`: A variable number of parameters used to pass key-value pairs. `any` was introduced in Go 1.18 and is equivalent to `interface{}`, meaning any type.
+
+2. **Logic**:
+   - If there are no key-value pairs (`kv` is empty):
+     - If `msg` is also empty, use `errors.WithStack(err)` to return the original error with the call stack appended.
+     - If `msg` is not empty, use `errors.WithMessage(err, msg)` to append the message text to the original error.
+   - If there are key-value pairs, the function constructs a string containing the message text and all key-value pairs. The key-value pairs are added in the format `"key=value"`, separated by commas. If a message text is provided, it is added first, followed by a space.
+
+3. **Key-Value Pair Formatting**:
+   - A loop iterates over all the key-value pairs, processing one pair at a time.
+   - The `toString` function (although not provided in the code, we can assume it converts any type to a string) is used to convert both keys and values to strings, and they are added to a `bytes.Buffer` in the format `"key=value"`.
+
+4. **Result**:
+   - Use `errors.WithMessage(err, buf.String())` to append the constructed message text to the original error, and return this new error object.
+
+Next, let's demonstrate several ways to use the `WrapMsg` function:
+
+**Example 1: No Additional Information**
+
+```go
+// "github.com/OpenIMSDK/tools/errs"
+err := errors.New("original error")
+wrappedErr := WrapMsg(err, "")
+// wrappedErr will contain the original error and its call stack
+```
+
+**Example 2: Message Text Only**
+
+```go
+// "github.com/OpenIMSDK/tools/errs"
+err := errors.New("original error")
+wrappedErr := WrapMsg(err, "additional error information")
+// wrappedErr will contain the original error, call stack, and "additional error information"
+```
+
+**Example 3: Message Text and Key-Value Pairs**
+
+```go
+// "github.com/OpenIMSDK/tools/errs"
+err := errors.New("original error")
+wrappedErr := WrapMsg(err, "problem occurred", "code", 404, "url", "http://example.com")
+// wrappedErr will contain the original error, call stack, and "problem occurred code=404, url=http://example.com"
+```
+
+**Example 4: Key-Value Pairs Only**
+
+```go
+// "github.com/OpenIMSDK/tools/errs"
+err := errors.New("original error")
+wrappedErr := WrapMsg(err, "", "user", "john_doe", "action", "login")
+// wrappedErr will contain the original error, call stack, and "user=john_doe, action=login"
+```
+
+These examples demonstrate how the `WrapMsg` function can flexibly handle error messages and context data, helping developers to more effectively track and debug their programs.
