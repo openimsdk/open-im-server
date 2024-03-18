@@ -169,12 +169,12 @@ linters-settings:
       - '*.Embedded'
       - '*.External'
 
-  # forbidigo:
+  forbidigo:
   #   # Forbid the following identifiers (identifiers are written using regexp):
-  #   forbid:
-  #     - ^print.*$
-  #     - 'fmt\.Print.*'
-  #     - fmt.Println.* # too much log noise
+    forbid:
+      # - ^print.*$
+      - 'fmt\.Print.*'
+      - fmt.Println.* # too much log noise
   #     - ginkgo\\.F.* # these are used just for local development
   #   # Exclude godoc examples from forbidigo checks.  Default is true.
   #   exclude_godoc_examples: false
@@ -454,7 +454,6 @@ linters-settings:
   #     # specify an error message to output when a blacklisted package is used
   #     - github.com/Sirupsen/logrus: "logging is allowed only by logutils.Log"
 
-
   importas:
     # if set to `true`, force to use alias.
     no-unaliased: true
@@ -672,6 +671,7 @@ linters-settings:
       - errors.New(
       - errors.Unwrap(
       - .Wrap(
+      - .WrapMsg(
       - .Wrapf(
       - .WithMessage(
       - .WithMessagef(
@@ -679,6 +679,7 @@ linters-settings:
     ignorePackageGlobs:
         - encoding/*
         - github.com/pkg/*
+        - github.com/openimsdk/*
 
   wsl:
     # If true append is only allowed to be cuddled if appending value is
@@ -705,7 +706,6 @@ linters-settings:
     # Allow only slices initialized with a length of zero. Default is false.
     always: false
 
-
   # The custom section can be used to define linter plugins to be loaded at runtime. See README doc
   #  for more info.
   #custom:
@@ -731,6 +731,7 @@ linters:
     - errcheck
     - decorder
     - ineffassign
+    - forbidigo
     - revive
     - reassign
     - tparallel

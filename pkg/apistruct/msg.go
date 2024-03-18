@@ -29,6 +29,7 @@ type PictureElem struct {
 	BigPicture      PictureBaseInfo `mapstructure:"bigPicture"      validate:"required"`
 	SnapshotPicture PictureBaseInfo `mapstructure:"snapshotPicture" validate:"required"`
 }
+
 type SoundElem struct {
 	UUID      string `mapstructure:"uuid"`
 	SoundPath string `mapstructure:"soundPath"`
@@ -36,6 +37,7 @@ type SoundElem struct {
 	DataSize  int64  `mapstructure:"dataSize"`
 	Duration  int64  `mapstructure:"duration"  validate:"required,min=1"`
 }
+
 type VideoElem struct {
 	VideoPath      string `mapstructure:"videoPath"`
 	VideoUUID      string `mapstructure:"videoUUID"`
@@ -50,6 +52,7 @@ type VideoElem struct {
 	SnapshotWidth  int32  `mapstructure:"snapshotWidth"  validate:"required"`
 	SnapshotHeight int32  `mapstructure:"snapshotHeight" validate:"required"`
 }
+
 type FileElem struct {
 	FilePath  string `mapstructure:"filePath"`
 	UUID      string `mapstructure:"uuid"`

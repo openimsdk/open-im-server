@@ -23,9 +23,9 @@ import (
 )
 
 func (s *groupServer) GetJoinedSuperGroupList(context.Context, *pbgroup.GetJoinedSuperGroupListReq) (*pbgroup.GetJoinedSuperGroupListResp, error) {
-	return nil, errs.Wrap(errors.New("GetJoinedSuperGroupList is deprecated"), "This feature is deprecated and no longer supported.")
+	return nil, errs.WrapMsg(errors.New("GetJoinedSuperGroupList is deprecated"), "This feature is deprecated and no longer supported.")
 }
 
 func (s *groupServer) GetSuperGroupsInfo(context.Context, *pbgroup.GetSuperGroupsInfoReq) (resp *pbgroup.GetSuperGroupsInfoResp, err error) {
-	return nil, errs.Wrap(errors.New("GetSuperGroupsInfo is deprecated"), "This feature is deprecated and no longer supported.")
+	return nil, errs.WrapMsg(errors.New("GetSuperGroupsInfo is deprecated"), "This feature is deprecated and no longer supported.")
 }

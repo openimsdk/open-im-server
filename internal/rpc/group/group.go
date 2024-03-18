@@ -70,18 +70,22 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+
 	groupDB, err := mgo.NewGroupMongo(mongo.GetDatabase(config.Mongo.Database))
 	if err != nil {
 		return err
 	}
+
 	groupMemberDB, err := mgo.NewGroupMember(mongo.GetDatabase(config.Mongo.Database))
 	if err != nil {
 		return err
 	}
+
 	groupRequestDB, err := mgo.NewGroupRequestMgo(mongo.GetDatabase(config.Mongo.Database))
 	if err != nil {
 		return err
 	}
+
 	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.RpcRegisterName.OpenImMsgName)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.RpcRegisterName.OpenImConversationName)
@@ -206,13 +210,16 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	if !utils.Contain(opUserID, userIDs...) {
 		userIDs = append(userIDs, opUserID)
 	}
+
 	if utils.Duplicate(userIDs) {
 		return nil, errs.ErrArgs.WrapMsg("group member repeated")
 	}
+
 	userMap, err := s.User.GetUsersInfoMap(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	if len(userMap) != len(userIDs) {
 		return nil, errs.ErrUserIDNotFound.WrapMsg("user not found")
 	}
@@ -397,9 +404,11 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	if err != nil {
 		return nil, err
 	}
+
 	if len(userMap) != len(req.InvitedUserIDs) {
 		return nil, errs.ErrRecordNotFound.WrapMsg("user not found")
 	}
+
 	var groupMember *relationtb.GroupMemberModel
 	var opUserID string
 	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {

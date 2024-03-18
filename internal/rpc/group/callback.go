@@ -298,6 +298,7 @@ func CallbackAfterTransferGroupOwner(ctx context.Context, cfg *GroupEventCallbac
 	}
 	return nil
 }
+
 func CallbackBeforeInviteUserToGroup(ctx context.Context, cfg *GroupEventCallbackConfig, req *group.InviteUserToGroupReq) (err error) {
 	if !cfg.BeforeCreateGroup.Enable {
 		return nil

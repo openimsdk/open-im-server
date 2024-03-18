@@ -86,6 +86,7 @@ func Start(config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, se
 		&msgRpcClient,
 		notification.WithRpcFunc(userRpcClient.GetUsersInfo),
 	)
+
 	// Register Friend server with refactored MongoDB and Redis integrations
 	pbfriend.RegisterFriendServer(server, &friendServer{
 		friendDatabase: controller.NewFriendDatabase(
@@ -128,7 +129,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 		return nil, err
 	}
 	if in1 && in2 {
-		return nil, errs.ErrRelationshipAlready.WrapMsg("has f")
+		return nil, errs.ErrRelationshipAlready.WrapMsg("already friends has f")
 	}
 	if err = s.friendDatabase.AddFriendRequest(ctx, req.FromUserID, req.ToUserID, req.ReqMsg, req.Ex); err != nil {
 		return nil, err

@@ -114,6 +114,7 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return
 	}
+
 	if hasReadSeq > currentHasReadSeq {
 		err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, hasReadSeq)
 		if err != nil {

@@ -101,23 +101,8 @@ type CommonMsgDatabase interface {
 	MsgToPushMQ(ctx context.Context, key, conversarionID string, msg2mq *sdkws.MsgData) (int32, int64, error)
 	MsgToMongoMQ(ctx context.Context, key, conversarionID string, msgs []*sdkws.MsgData, lastSeq int64) error
 
-	RangeUserSendCount(
-		ctx context.Context,
-		start time.Time,
-		end time.Time,
-		group bool,
-		ase bool,
-		pageNumber int32,
-		showNumber int32,
-	) (msgCount int64, userCount int64, users []*unrelationtb.UserCount, dateCount map[string]int64, err error)
-	RangeGroupSendCount(
-		ctx context.Context,
-		start time.Time,
-		end time.Time,
-		ase bool,
-		pageNumber int32,
-		showNumber int32,
-	) (msgCount int64, userCount int64, groups []*unrelationtb.GroupCount, dateCount map[string]int64, err error)
+	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*unrelationtb.UserCount, dateCount map[string]int64, err error)
+	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*unrelationtb.GroupCount, dateCount map[string]int64, err error)
 	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
 }
 
@@ -388,10 +373,10 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	}
 	lenList := len(msgs)
 	if int64(lenList) > db.msg.GetSingleGocMsgNum() {
-		return 0, false, errors.New("too large")
+		return 0, false, errs.WrapMsg(errors.New("message count exceeds limit"), "limit", db.msg.GetSingleGocMsgNum())
 	}
 	if lenList < 1 {
-		return 0, false, errors.New("too short as 0")
+		return 0, false, errs.WrapMsg(errors.New("no messages to insert"), "minCount", 1)
 	}
 	if errs.Unwrap(err) == redis.Nil {
 		isNew = true
@@ -403,6 +388,7 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 		m.Seq = currentMaxSeq
 		userSeqMap[m.SendID] = m.Seq
 	}
+
 	failedNum, err := db.cache.SetMessageToCache(ctx, conversationID, msgs)
 	if err != nil {
 		prommetrics.MsgInsertRedisFailedCounter.Add(float64(failedNum))
@@ -410,11 +396,13 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	} else {
 		prommetrics.MsgInsertRedisSuccessCounter.Inc()
 	}
+
 	err = db.cache.SetMaxSeq(ctx, conversationID, currentMaxSeq)
 	if err != nil {
 		log.ZError(ctx, "db.cache.SetMaxSeq error", err, "conversationID", conversationID)
 		prommetrics.SeqSetFailedCounter.Inc()
 	}
+
 	err = db.cache.SetHasReadSeqs(ctx, conversationID, userSeqMap)
 	if err != nil {
 		log.ZError(ctx, "SetHasReadSeqs error", err, "userSeqMap", userSeqMap, "conversationID", conversationID)

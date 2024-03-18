@@ -49,15 +49,11 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (resp *p
 		default:
 			return nil, errs.ErrArgs.WrapMsg("unknown sessionType")
 		}
-	} else {
-		return nil, errs.ErrArgs.WrapMsg("msgData is nil")
 	}
+	return nil, errs.ErrArgs.WrapMsg("msgData is nil")
 }
 
-func (m *msgServer) sendMsgSuperGroupChat(
-	ctx context.Context,
-	req *pbmsg.SendMsgReq,
-) (resp *pbmsg.SendMsgResp, err error) {
+func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
 	if err = m.messageVerification(ctx, req); err != nil {
 		prommetrics.GroupChatMsgProcessFailedCounter.Inc()
 		return nil, err
@@ -119,19 +115,15 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 		if err != nil {
 			log.ZWarn(ctx, "SetConversations", err, "userID", memberUserIDList, "conversation", conversation)
 		}
-	} else {
-		conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtMe}
-		err := m.Conversation.SetConversations(ctx, msg.AtUserIDList, conversation)
-		if err != nil {
-			log.ZWarn(ctx, "SetConversations", err, msg.AtUserIDList, conversation)
-		}
+	}
+	conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtMe}
+	err := m.Conversation.SetConversations(ctx, msg.AtUserIDList, conversation)
+	if err != nil {
+		log.ZWarn(ctx, "SetConversations", err, msg.AtUserIDList, conversation)
 	}
 }
 
-func (m *msgServer) sendMsgNotification(
-	ctx context.Context,
-	req *pbmsg.SendMsgReq,
-) (resp *pbmsg.SendMsgResp, err error) {
+func (m *msgServer) sendMsgNotification(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
 	if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
 		return nil, err
 	}

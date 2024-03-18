@@ -26,6 +26,7 @@ type CallbackBeforeUpdateUserInfoReq struct {
 	FaceURL         *string `json:"faceURL"`
 	Ex              *string `json:"ex"`
 }
+
 type CallbackBeforeUpdateUserInfoResp struct {
 	CommonCallbackResp
 	Nickname *string `json:"nickName"`

@@ -153,5 +153,5 @@ func (a *RpcCmd) GetRpcRegisterNameFromConfig() (string, error) {
 	case RpcUserServer:
 		return a.config.RpcRegisterName.OpenImUserName, nil
 	}
-	return "", errs.Wrap(errors.New("can not get rpc register name"), a.Name)
+	return "", errs.WrapMsg(errors.New("unrecognized RPC server name"), "providedName", a.Name, "hint", "Check if the server name is correctly configured")
 }
