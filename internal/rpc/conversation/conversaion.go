@@ -314,7 +314,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 
 // Get user IDs with "Do Not Disturb" enabled in super large groups.
 func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbconversation.GetRecvMsgNotNotifyUserIDsReq) (*pbconversation.GetRecvMsgNotNotifyUserIDsResp, error) {
-	//userIDs, err := c.conversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
+	// userIDs, err := c.conversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
 	//if err != nil {
 	//	return nil, err
 	//}
@@ -433,7 +433,7 @@ func (c *conversationServer) conversationSort(conversations map[int64]string, re
 		keys = append(keys, key)
 	}
 
-	sort.Slice(keys[:], func(i, j int) bool {
+	sort.Slice(keys, func(i, j int) bool {
 		return keys[i] > keys[j]
 	})
 	index := 0

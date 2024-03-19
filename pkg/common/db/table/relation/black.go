@@ -33,7 +33,7 @@ type BlackModel struct {
 type BlackModelInterface interface {
 	Create(ctx context.Context, blacks []*BlackModel) (err error)
 	Delete(ctx context.Context, blacks []*BlackModel) (err error)
-	//UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]any) (err error)
+	// UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]any) (err error)
 	//Update(ctx context.Context, blacks []*BlackModel) (err error)
 	Find(ctx context.Context, blacks []*BlackModel) (blackList []*BlackModel, err error)
 	Take(ctx context.Context, ownerUserID, blockUserID string) (black *BlackModel, err error)

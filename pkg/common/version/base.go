@@ -39,7 +39,7 @@ var (
 	gitMajor string = "" // major version, always numeric
 	gitMinor string = "" // minor version, numeric possibly followed by "+"
 
-	// semantic version, derived by build scripts (see
+	// Semantic version, derived by build scripts (see
 	// https://github.com/kubernetes/sig-release/blob/master/release-engineering/versioning.md#kubernetes-release-versioning
 	// https://kubernetes.io/releases/version-skew-policy/
 	// for a detailed discussion of this field)

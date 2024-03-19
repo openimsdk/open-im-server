@@ -86,7 +86,7 @@ func (d *GWebSocket) WriteMessage(messageType int, message []byte) error {
 	return d.conn.WriteMessage(messageType, message)
 }
 
-//func (d *GWebSocket) setSendConn(sendConn *websocket.Conn) {
+// func (d *GWebSocket) setSendConn(sendConn *websocket.Conn) {
 //	d.sendConn = sendConn
 //}
 
@@ -145,6 +145,6 @@ func (d *GWebSocket) SetPingHandler(handler PingPongHandler) {
 	d.conn.SetPingHandler(handler)
 }
 
-//func (d *GWebSocket) CheckSendConnDiffNow() bool {
+// func (d *GWebSocket) CheckSendConnDiffNow() bool {
 //	return d.conn == d.sendConn
 //}

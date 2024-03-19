@@ -22,11 +22,10 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mgoutil"
 	"github.com/OpenIMSDK/tools/pagination"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
@@ -142,7 +141,7 @@ func (c *ConversationMgo) GetConversationsByConversationID(ctx context.Context, 
 }
 
 func (c *ConversationMgo) GetConversationIDsNeedDestruct(ctx context.Context) ([]*relation.ConversationModel, error) {
-	//"is_msg_destruct = 1 && msg_destruct_time != 0 && (UNIX_TIMESTAMP(NOW()) > (msg_destruct_time + UNIX_TIMESTAMP(latest_msg_destruct_time)) || latest_msg_destruct_time is NULL)"
+	// "is_msg_destruct = 1 && msg_destruct_time != 0 && (UNIX_TIMESTAMP(NOW()) > (msg_destruct_time + UNIX_TIMESTAMP(latest_msg_destruct_time)) || latest_msg_destruct_time is NULL)"
 	return mgoutil.Find[*relation.ConversationModel](ctx, c.coll, bson.M{
 		"is_msg_destruct":   1,
 		"msg_destruct_time": bson.M{"$ne": 0},

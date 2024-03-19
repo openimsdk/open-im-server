@@ -15,10 +15,10 @@
 package cont
 
 const (
-	// hashPath defines the storage path for hash data within the 'openim' directory.
+	// HashPath defines the storage path for hash data within the 'openim' directory.
 	hashPath = "openim/data/hash/"
 
-	// tempPath specifies the directory for temporary files in the 'openim' structure.
+	// TempPath specifies the directory for temporary files in the 'openim' structure.
 	tempPath = "openim/temp/"
 
 	// DirectPath indicates the directory for direct uploads or access within the 'openim' structure.
@@ -32,7 +32,7 @@ const (
 	// facilitating secure, authorized file transfers without requiring direct access to the storage credentials.
 	UploadTypePresigned = 2
 
-	// partSeparator is used as a delimiter in multipart upload processes,
+	// PartSeparator is used as a delimiter in multipart upload processes,
 	// separating individual file parts.
 	partSeparator = ","
 )

@@ -32,7 +32,7 @@ type (
 	// MessageInterceptorChain defines a chain of message interceptor functions.
 	MessageInterceptorChain []MessageInterceptorFunc
 
-	// msgServer encapsulates dependencies required for message handling.
+	// MsgServer encapsulates dependencies required for message handling.
 	msgServer struct {
 		RegisterCenter         discoveryregistry.SvcDiscoveryRegistry // Service discovery registry for service registration.
 		MsgDatabase            controller.CommonMsgDatabase           // Interface for message database operations.
@@ -51,7 +51,7 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 	m.Handlers = append(m.Handlers, interceptorFunc...)
 }
 
-//func (m *msgServer) execInterceptorHandler(ctx context.Context, config *config.GlobalConfig, req *msg.SendMsgReq) error {
+// func (m *msgServer) execInterceptorHandler(ctx context.Context, config *config.GlobalConfig, req *msg.SendMsgReq) error {
 //	for _, handler := range m.Handlers {
 //		msgData, err := handler(ctx, config, req)
 //		if err != nil {

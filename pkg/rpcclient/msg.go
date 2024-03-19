@@ -26,11 +26,10 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 )
 
 func newContentTypeConf(conf *config.Notification) map[int32]config.NotificationConf {
@@ -69,7 +68,7 @@ func newContentTypeConf(conf *config.Notification) map[int32]config.Notification
 		constant.BlackAddedNotification:                conf.BlackAdded,
 		constant.BlackDeletedNotification:              conf.BlackDeleted,
 		constant.FriendInfoUpdatedNotification:         conf.FriendInfoUpdated,
-		constant.FriendsInfoUpdateNotification:         conf.FriendInfoUpdated, //use the same FriendInfoUpdated
+		constant.FriendsInfoUpdateNotification:         conf.FriendInfoUpdated, // use the same FriendInfoUpdated
 		// conversation
 		constant.ConversationChangeNotification:      conf.ConversationChanged,
 		constant.ConversationUnreadNotification:      conf.ConversationChanged,

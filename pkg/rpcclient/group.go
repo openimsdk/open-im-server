@@ -24,7 +24,6 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
-
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 

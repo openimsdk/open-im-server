@@ -128,7 +128,7 @@ func Pb2DBGroupInfo(m *sdkws.GroupInfo) *relation.GroupModel {
 	}
 }
 
-//func Pb2DbGroupMember(m *sdkws.UserInfo) *relation.GroupMemberModel {
+// func Pb2DbGroupMember(m *sdkws.UserInfo) *relation.GroupMemberModel {
 //	return &relation.GroupMemberModel{
 //		UserID:   m.UserID,
 //		Nickname: m.Nickname,

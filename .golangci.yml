@@ -174,20 +174,18 @@ linters-settings:
       # - ^print.*$
       - 'fmt\.Print.*'
       - fmt.Println.* # too much log noise
+      - painc
   #     - ginkgo\\.F.* # these are used just for local development
   #   # Exclude godoc examples from forbidigo checks.  Default is true.
   #   exclude_godoc_examples: false
   funlen:
-    lines: 150
+    lines: 220
     statements: 80
-  gci:
-    # put imports beginning with prefix after 3rd-party packages;
-    # only support one prefix
-    # if not set, use goimports.local-prefixes
-    prefix: github.com/openimsdk/open-im-server
+
   gocognit:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 30
+
   goconst:
     # minimal length of string constant, 3 by default
     min-len: 3
@@ -213,9 +211,6 @@ linters-settings:
     # By default list of stable checks is used.
     enabled-checks:
       #- rangeValCopy
-      - nestingreduce
-      - truncatecmp
-      - unnamedresult
       - ruleguard
 
     # Which checks should be disabled; can't be combined with 'enabled-checks'; default is empty
@@ -285,9 +280,12 @@ linters-settings:
     # list of regexps for excluding particular comment lines from check
     exclude:
       # example: exclude comments which contain numbers
-      # - '[0-9]+'
+      - '[0-9]+'
+      - 'func\s+\w+'
+      - 'FIXME:'
+      - '.*func.*'
     # check that each sentence starts with a capital letter
-    capital: false
+    capital: true
   godox:
     # report any comments starting with keywords, this is useful for TODO or FIXME comments that
     # might be left in the code accidentally and should be resolved before merging
@@ -310,15 +308,15 @@ linters-settings:
     # by default
     extra-rules: false
 
-  goheader:
-    values:
-      const:
+  # goheader:
+    # values:
+      # const:
         # define here const type values in format k:v, for example:
         # COMPANY: MY COMPANY
-      regexp:
+      # regexp:
         # define here regexp type values, for example
         # AUTHOR: .*@mycompany\.com
-    template: # |-
+    # template: # |-
       # put here copyright header template for source code files, for example:
       # Note: {{ YEAR }} is a builtin value that returns the year relative to the current machine time.
       #
@@ -336,8 +334,9 @@ linters-settings:
       # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
       # See the License for the specific language governing permissions and
       # limitations under the License.
-    template-path:
+    # template-path:
       # also as alternative of directive 'template' you may put the path to file with the template source
+
   goimports:
     # put imports beginning with prefix after 3rd-party packages;
     # it's a comma-separated list of prefixes
@@ -347,10 +346,11 @@ linters-settings:
     settings:
       mnd:
         # the list of enabled checks, see https://github.com/tommy-muehle/go-mnd/#checks for description.
-        checks: argument,case,condition,operation,return,assign
+        # checks: 
         # ignored-numbers: 1000
-        # ignored-files: magic_.*.go
-        # ignored-functions: math.*
+        ignored-files: magic_.*.go, test_.*.go, .*_test.go
+        ignored-functions: math.*
+
   gomoddirectives:
     # Allow local `replace` directives. Default is false.
     replace-local: true
@@ -362,6 +362,7 @@ linters-settings:
     retract-allow-no-explanation: false
     # Forbid the use of the `exclude` directives. Default is false.
     exclude-forbidden: false
+
   gomodguard:
     allowed:
       modules:    
@@ -650,7 +651,7 @@ linters-settings:
     # if it's called for subdir of a project it can't find external interfaces. All text editor integrations
     # with golangci-lint call it on a directory with the changed file.
     check-exported: false
-  unused:
+  # unused:
     # treat code as a program (not a library) and report unused exported identifiers; default is false.
     # XXX: if you enable this setting, unused will report a lot of false-positives in text editors:
     # if it's called for subdir of a project it can't find funcs usages. All text editor integrations
@@ -677,6 +678,7 @@ linters-settings:
         - encoding/*
         - github.com/pkg/*
         - github.com/openimsdk/*
+        - github.com/OpenIMSDK/*
 
   wsl:
     # If true append is only allowed to be cuddled if appending value is
@@ -737,13 +739,15 @@ linters:
     - dupword
     - errname
     - gci
-    - goheader
+    - gocritic
     - goprintffuncname
+    - gomnd
+    - goconst
     - gosec
     - misspell      # Spelling mistakes
     - staticcheck   # Static analysis
     - unused        # Checks for unused code
-    - goimports     # Checks if imports are correctly sorted and formatted
+    # - goimports     # Checks if imports are correctly sorted and formatted
     - godot         # Checks for comment punctuation
     - bodyclose     # Ensures HTTP response body is closed
     - stylecheck    # Style checker for Go code

@@ -218,7 +218,7 @@ func (f *FriendNotificationSender) BlackDeletedNotification(ctx context.Context,
 		ToUserID:   req.BlackUserID,
 	}}
 	if err := f.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackDeletedNotification, &blackDeletedTips); err != nil {
-		//err
+		// err
 	}
 }
 

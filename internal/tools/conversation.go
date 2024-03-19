@@ -26,7 +26,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
-//func (c *MsgTool) ConversationsDestructMsgs() {
+// func (c *MsgTool) ConversationsDestructMsgs() {
 //	log.ZInfo(context.Background(), "start msg destruct cron task")
 //	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
 //	conversations, err := c.conversationDatabase.GetConversationIDsNeedDestruct(ctx)
