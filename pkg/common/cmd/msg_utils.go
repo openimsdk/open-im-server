@@ -15,10 +15,9 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-
 	"github.com/openimsdk/open-im-server/v3/internal/tools"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/spf13/cobra"
 )
 
 type MsgUtilsCmd struct {

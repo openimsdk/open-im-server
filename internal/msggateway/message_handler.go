@@ -25,10 +25,9 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/go-playground/validator/v10"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"google.golang.org/protobuf/proto"
 )
 
 type Req struct {
@@ -160,7 +159,6 @@ func (g GrpcHandler) SendMessage(ctx context.Context, data *Req) ([]byte, error)
 
 	return c, nil
 }
-
 
 func (g GrpcHandler) SendSignalMessage(context context.Context, data *Req) ([]byte, error) {
 	resp, err := g.msgRpcClient.SendMsg(context, nil)

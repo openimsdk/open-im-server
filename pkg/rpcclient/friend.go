@@ -20,8 +20,9 @@ import (
 	"github.com/OpenIMSDK/protocol/friend"
 	sdkws "github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"google.golang.org/grpc"
+
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 type Friend struct {

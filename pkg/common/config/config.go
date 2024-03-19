@@ -19,8 +19,9 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"gopkg.in/yaml.v3"
+
+	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 )
 
 var Config GlobalConfig

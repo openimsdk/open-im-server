@@ -118,8 +118,7 @@ linters-settings:
     right-to-left-isolate: true
     first-strong-isolate: true
     pop-directional-isolate: true
-    # checks assignments with too many blank identifiers; default is 2
-    max-blank-identifiers: 2
+
   dupl:
     # tokens count to trigger issue, 150 by default
     threshold: 200
@@ -462,6 +461,8 @@ linters-settings:
       # using `servingv1` alias for `knative.dev/serving/pkg/apis/serving/v1` package
       - pkg: knative.dev/serving/pkg/apis/serving/v1
         alias: servingv1
+      - pkg: gopkg.in/yaml.v2
+        alias: yaml
       # using `autoscalingv1alpha1` alias for `knative.dev/serving/pkg/apis/autoscaling/v1alpha1` package
       - pkg: knative.dev/serving/pkg/apis/autoscaling/v1alpha1
         alias: autoscalingv1alpha1
@@ -470,8 +471,6 @@ linters-settings:
       # see https://github.com/julz/importas#use-regular-expression for details
       - pkg: knative.dev/serving/pkg/apis/(\w+)/(v[\w\d]+)
         alias: $1$2
-    # using `jwt` alias for `github.com/appleboy/gin-jwt/v2` package
-    jwt: github.com/appleboy/gin-jwt/v2
 
   ireturn:
     # ireturn allows using `allow` and `reject` settings at the same time.
@@ -537,8 +536,6 @@ linters-settings:
   nolintlint:
     # Disable to ensure that all nolint directives actually have an effect. Default is true.
     allow-unused: false
-    # Disable to ensure that nolint directives don't have a leading space. Default is true.
-    allow-leading-space: true
     # Exclude following linters from requiring an explanation.  Default is [].
     allow-no-explanation: [ ]
     # Enable to require an explanation of nonzero length after each nolint directive. Default is false.
@@ -562,14 +559,13 @@ linters-settings:
     strict: false
     # Please refer to https://github.com/yeya24/promlinter#usage for detailed usage.
     disabled-linters:
-    #  - "Help"
-    #  - "MetricUnits"
-    #  - "Counter"
-    #  - "HistogramSummaryReserved"
-    #  - "MetricTypeInName"
-    #  - "ReservedChars"
-    #  - "CamelCase"
-    #  - "lintUnitAbbreviations"
+     - "Help"
+     - "MetricUnits"
+     - "Counter"
+     - "HistogramSummaryReserved"
+     - "MetricTypeInName"
+     - "ReservedChars"
+     - "CamelCase"
     
   predeclared:
     # comma-separated list of predeclared identifiers to not report on
@@ -659,7 +655,6 @@ linters-settings:
     # XXX: if you enable this setting, unused will report a lot of false-positives in text editors:
     # if it's called for subdir of a project it can't find funcs usages. All text editor integrations
     # with golangci-lint call it on a directory with the changed file.
-    check-exported: false
   whitespace:
     multi-if: false   # Enforces newlines (or comments) after every multi-line if statement
     multi-func: false # Enforces newlines (or comments) after every multi-line function signature
@@ -764,6 +759,7 @@ issues:
   exclude:
     - tools/.*
     - test/.*
+    - components/*
     - third_party/.*
 
   # Excluding configuration per-path, per-linter, per-text and per-source

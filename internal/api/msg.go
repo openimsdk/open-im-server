@@ -27,7 +27,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -190,7 +189,6 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 	}
 	return m.newUserSendMsgReq(c, &req), nil
 }
-
 
 // SendMessage handles the sending of a message. It's an HTTP handler function to be used with Gin framework.
 func (m *MessageApi) SendMessage(c *gin.Context) {

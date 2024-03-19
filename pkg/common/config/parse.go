@@ -22,9 +22,10 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/errs"
+	"gopkg.in/yaml.v3"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
-	"gopkg.in/yaml.v3"
 )
 
 //go:embed version

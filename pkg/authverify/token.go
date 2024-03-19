@@ -23,6 +23,7 @@ import (
 	"github.com/OpenIMSDK/tools/tokenverify"
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/golang-jwt/jwt/v4"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
