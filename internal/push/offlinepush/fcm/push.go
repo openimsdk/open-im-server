@@ -16,12 +16,12 @@ package fcm
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/errs"
 	"path/filepath"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"

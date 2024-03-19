@@ -17,7 +17,7 @@ DEFAULT_DIRS=(
   "pkg"
   "internal/pkg"
 )
-BASE_URL="github.com/openimsdk/open-im-server"
+BASE_URL="github.com/openimsdk/open-im-server/v3"
 
 usage() {
   echo "Usage: $0 [OPTIONS]"
@@ -35,7 +35,7 @@ usage() {
 process_dir() {
   local dir=$1
   local base_url=$2
-  
+
   for d in $(find $dir -type d); do
     if [ ! -f $d/doc.go ]; then
       if ls $d/*.go > /dev/null 2>&1; then
