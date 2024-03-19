@@ -99,6 +99,7 @@ for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
     echo "$item"
 done
 
+echo "11111111111111111111111:"
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
