@@ -16,7 +16,6 @@ package config
 
 import (
 	_ "embed"
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -41,28 +40,27 @@ const (
 func GetDefaultConfigPath() (string, error) {
 	executablePath, err := os.Executable()
 	if err != nil {
-		fmt.Println("GetDefaultConfigPath error:", err.Error())
-		return "", nil
+		return "", errs.WrapMsg(err, "failed to get executable path")
 	}
 
 	configPath, err := genutil.OutDir(filepath.Join(filepath.Dir(executablePath), "../config/"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to get output directory: %v\n", err)
-		os.Exit(1)
+		return "", errs.WrapMsg(err, "failed to get output directory", "outDir", filepath.Join(filepath.Dir(executablePath), "../config/"))
 	}
 	return configPath, nil
 }
 
 // getProjectRoot returns the absolute path of the project root directory.
-func GetProjectRoot() string {
-	executablePath, _ := os.Executable()
-
+func GetProjectRoot() (string, error) {
+	executablePath, err := os.Executable()
+	if err != nil {
+		return "", errs.Wrap(err)
+	}
 	projectRoot, err := genutil.OutDir(filepath.Join(filepath.Dir(executablePath), "../../../../.."))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to get output directory: %v\n", err)
-		os.Exit(1)
+		return "", errs.Wrap(err)
 	}
-	return projectRoot
+	return projectRoot, nil
 }
 
 func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
@@ -94,7 +92,11 @@ func initConfig(config any, configName, configFolderPath string) error {
 		if !os.IsNotExist(err) {
 			return errs.WrapMsg(err, "stat config path error", "config Folder Path", configFolderPath)
 		}
-		configFolderPath = filepath.Join(GetProjectRoot(), "config", configName)
+		path, err := GetProjectRoot()
+		if err != nil {
+			return err
+		}
+		configFolderPath = filepath.Join(path, "config", configName)
 	}
 	data, err := os.ReadFile(configFolderPath)
 	if err != nil {

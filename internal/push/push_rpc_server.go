@@ -40,7 +40,10 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 		return err
 	}
 	cacheModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
-	offlinePusher := NewOfflinePusher(&config.Push, &config.IOSPush, cacheModel)
+	offlinePusher, err := NewOfflinePusher(&config.Push, &config.IOSPush, cacheModel)
+	if err != nil {
+		return err
+	}
 	database := controller.NewPushDatabase(cacheModel)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.RpcRegisterName.OpenImConversationName)

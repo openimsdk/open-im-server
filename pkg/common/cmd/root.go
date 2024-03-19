@@ -62,7 +62,6 @@ func WithLogName(logName string) func(*CmdOpts) {
 func NewRootCmd(processName, name string, opts ...func(*CmdOpts)) *RootCmd {
 	rootCmd := &RootCmd{processName: processName, Name: name, config: config.NewGlobalConfig()}
 	cmd := cobra.Command{
-		Use:   "Start openIM application",
 		Short: fmt.Sprintf(`Start %s `, name),
 		Long:  fmt.Sprintf(`Start %s `, name),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -76,7 +75,7 @@ func NewRootCmd(processName, name string, opts ...func(*CmdOpts)) *RootCmd {
 
 func (rc *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) error {
 	if err := rc.initializeConfiguration(cmd); err != nil {
-		return fmt.Errorf("failed to get configuration from command: %w", err)
+		return err
 	}
 
 	cmdOpts := rc.applyOptions(opts...)
@@ -178,7 +177,6 @@ func (r *RootCmd) GetPrometheusPortFlag() int {
 
 func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
-	fmt.Println("The directory of the configuration file to start the process:", configFolderPath)
 	return config2.InitConfig(r.config, configFolderPath)
 }
 

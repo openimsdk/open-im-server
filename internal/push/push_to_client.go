@@ -75,19 +75,19 @@ func NewPusher(config *config.GlobalConfig, discov discoveryregistry.SvcDiscover
 	}
 }
 
-func NewOfflinePusher(pushConf *config.Push, iOSPushConf *config.IOSPush, cache cache.MsgModel) offlinepush.OfflinePusher {
+func NewOfflinePusher(pushConf *config.Push, iOSPushConf *config.IOSPush, cache cache.MsgModel) (offlinepush.OfflinePusher, error) {
 	var offlinePusher offlinepush.OfflinePusher
 	switch pushConf.Enable {
 	case "getui":
 		offlinePusher = getui.NewClient(pushConf, cache)
 	case "fcm":
-		offlinePusher = fcm.NewClient(pushConf, cache)
+		return fcm.NewClient(pushConf, cache)
 	case "jpush":
 		offlinePusher = jpush.NewClient(pushConf, iOSPushConf)
 	default:
 		offlinePusher = dummy.NewClient()
 	}
-	return offlinePusher
+	return offlinePusher, nil
 }
 
 func (p *Pusher) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {

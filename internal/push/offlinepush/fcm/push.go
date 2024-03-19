@@ -16,6 +16,7 @@ package fcm
 
 import (
 	"context"
+	"github.com/OpenIMSDK/tools/errs"
 	"path/filepath"
 
 	firebase "firebase.google.com/go"
@@ -39,21 +40,24 @@ type Fcm struct {
 
 // NewClient initializes a new FCM client using the Firebase Admin SDK.
 // It requires the FCM service account credentials file located within the project's configuration directory.
-func NewClient(pushConf *config.Push, cache cache.MsgModel) *Fcm {
-	projectRoot := config.GetProjectRoot()
+func NewClient(pushConf *config.Push, cache cache.MsgModel) (*Fcm, error) {
+	projectRoot, err := config.GetProjectRoot()
+	if err != nil {
+		return nil, err
+	}
 	credentialsFilePath := filepath.Join(projectRoot, "config", pushConf.Fcm.ServiceAccount)
 	opt := option.WithCredentialsFile(credentialsFilePath)
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
-		return nil
+		return nil, errs.Wrap(err)
 	}
 	ctx := context.Background()
 	fcmMsgClient, err := fcmApp.Messaging(ctx)
 	if err != nil {
-		return nil
+		return nil, errs.Wrap(err)
 	}
 
-	return &Fcm{fcmMsgCli: fcmMsgClient, cache: cache}
+	return &Fcm{fcmMsgCli: fcmMsgClient, cache: cache}, nil
 }
 
 func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
