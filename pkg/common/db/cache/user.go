@@ -35,7 +35,7 @@ import (
 
 const (
 	userExpireTime = time.Second * 60 * 60 * 12
-	//UserInfoKey               = "USER_INFO:".
+	// UserInfoKey               = "USER_INFO:".
 	userGlobalRecvMsgOptKey   = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
 	olineStatusKey            = "ONLINE_STATUS:"
 	userOlineStatusExpireTime = time.Second * 60 * 60 * 24
@@ -58,7 +58,7 @@ type UserCache interface {
 type UserCacheRedis struct {
 	metaCache
 	rdb redis.UniversalClient
-	//userDB     relationtb.UserModelInterface
+	// userDB     relationtb.UserModelInterface
 	userDB     relationtb.UserModelInterface
 	expireTime time.Duration
 	rcClient   *rockscache.Client

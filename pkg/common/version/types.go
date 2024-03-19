@@ -35,7 +35,7 @@ type Output struct {
 }
 
 type OpenIMClientVersion struct {
-	ClientVersion string `json:"clientVersion,omitempty" yaml:"clientVersion,omitempty"` //sdk core version
+	ClientVersion string `json:"clientVersion,omitempty" yaml:"clientVersion,omitempty"` // sdk core version
 }
 
 // String returns info as a human-friendly version string.

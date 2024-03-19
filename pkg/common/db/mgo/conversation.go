@@ -141,7 +141,7 @@ func (c *ConversationMgo) GetConversationsByConversationID(ctx context.Context, 
 }
 
 func (c *ConversationMgo) GetConversationIDsNeedDestruct(ctx context.Context) ([]*relation.ConversationModel, error) {
-	//"is_msg_destruct = 1 && msg_destruct_time != 0 && (UNIX_TIMESTAMP(NOW()) > (msg_destruct_time + UNIX_TIMESTAMP(latest_msg_destruct_time)) || latest_msg_destruct_time is NULL)"
+	// "is_msg_destruct = 1 && msg_destruct_time != 0 && (UNIX_TIMESTAMP(NOW()) > (msg_destruct_time + UNIX_TIMESTAMP(latest_msg_destruct_time)) || latest_msg_destruct_time is NULL)"
 	return mgoutil.Find[*relation.ConversationModel](ctx, c.coll, bson.M{
 		"is_msg_destruct":   1,
 		"msg_destruct_time": bson.M{"$ne": 0},

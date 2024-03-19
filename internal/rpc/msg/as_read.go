@@ -155,7 +155,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		for i := hasReadSeq + 1; i <= req.HasReadSeq; i++ {
 			seqs = append(seqs, i)
 		}
-		//avoid client missed call MarkConversationMessageAsRead by order
+		// avoid client missed call MarkConversationMessageAsRead by order
 		for _, val := range req.Seqs {
 			if !utils2.Contain(val, seqs...) {
 				seqs = append(seqs, val)

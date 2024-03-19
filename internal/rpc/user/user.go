@@ -55,7 +55,7 @@ type userServer struct {
 }
 
 func (s *userServer) GetGroupOnlineUser(ctx context.Context, req *pbuser.GetGroupOnlineUserReq) (*pbuser.GetGroupOnlineUserResp, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 

@@ -107,7 +107,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 }
 
 func (s *groupServer) GetJoinedGroupIDs(ctx context.Context, req *pbgroup.GetJoinedGroupIDsReq) (*pbgroup.GetJoinedGroupIDsResp, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 

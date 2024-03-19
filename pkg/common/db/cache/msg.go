@@ -38,10 +38,10 @@ const (
 	conversationUserMinSeq = "CON_USER_MIN_SEQ:"
 	hasReadSeq             = "HAS_READ_SEQ:"
 
-	//AppleDeviceToken = "DEVICE_TOKEN".
+	// AppleDeviceToken = "DEVICE_TOKEN".
 	getuiToken  = "GETUI_TOKEN"
 	getuiTaskID = "GETUI_TASK_ID"
-	//SignalCache      = "SIGNAL_CACHE:"
+	// SignalCache      = "SIGNAL_CACHE:"
 	//signalListCache  = "SIGNAL_LIST_CACHE:".
 	FCM_TOKEN = "FCM_TOKEN:"
 
@@ -507,7 +507,7 @@ func (c *msgCache) UserDeleteMsgs(ctx context.Context, conversationID string, se
 	}
 
 	return nil
-	//pipe := c.rdb.Pipeline()
+	// pipe := c.rdb.Pipeline()
 	//for _, seq := range seqs {
 	//	delUserListKey := c.getMessageDelUserListKey(conversationID, seq)
 	//	userDelListKey := c.getUserDelList(conversationID, userID)
@@ -567,7 +567,7 @@ func (c *msgCache) DelUserDeleteMsgsList(ctx context.Context, conversationID str
 			}
 		}
 	}
-	//for _, seq := range seqs {
+	// for _, seq := range seqs {
 	//	delUsers, err := c.rdb.SMembers(ctx, c.getMessageDelUserListKey(conversationID, seq)).Result()
 	//	if err != nil {
 	//		log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq)

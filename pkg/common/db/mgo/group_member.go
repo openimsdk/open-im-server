@@ -67,7 +67,7 @@ func (g *GroupMemberMgo) Update(ctx context.Context, groupID string, userID stri
 }
 
 func (g *GroupMemberMgo) Find(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) (groupMembers []*relation.GroupMemberModel, err error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 

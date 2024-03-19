@@ -174,20 +174,18 @@ linters-settings:
       # - ^print.*$
       - 'fmt\.Print.*'
       - fmt.Println.* # too much log noise
+      - painc
   #     - ginkgo\\.F.* # these are used just for local development
   #   # Exclude godoc examples from forbidigo checks.  Default is true.
   #   exclude_godoc_examples: false
   funlen:
-    lines: 150
+    lines: 220
     statements: 80
-  gci:
-    # put imports beginning with prefix after 3rd-party packages;
-    # only support one prefix
-    # if not set, use goimports.local-prefixes
-    prefix: github.com/openimsdk/open-im-server
+
   gocognit:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 30
+
   goconst:
     # minimal length of string constant, 3 by default
     min-len: 3
@@ -213,9 +211,6 @@ linters-settings:
     # By default list of stable checks is used.
     enabled-checks:
       #- rangeValCopy
-      - nestingreduce
-      - truncatecmp
-      - unnamedresult
       - ruleguard
 
     # Which checks should be disabled; can't be combined with 'enabled-checks'; default is empty
@@ -286,6 +281,9 @@ linters-settings:
     exclude:
       # example: exclude comments which contain numbers
       - '[0-9]+'
+      - 'func\s+\w+'
+      - 'FIXME:'
+      - '.*func.*'
     # check that each sentence starts with a capital letter
     capital: true
   godox:
@@ -364,6 +362,7 @@ linters-settings:
     retract-allow-no-explanation: false
     # Forbid the use of the `exclude` directives. Default is false.
     exclude-forbidden: false
+
   gomodguard:
     allowed:
       modules:    
@@ -740,8 +739,10 @@ linters:
     - dupword
     - errname
     - gci
+    - gocritic
     - goprintffuncname
     - gomnd
+    - goconst
     - gosec
     - misspell      # Spelling mistakes
     - staticcheck   # Static analysis

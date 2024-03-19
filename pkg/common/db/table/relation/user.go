@@ -65,7 +65,7 @@ type UserModelInterface interface {
 	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
 	// Get user total quantity every day
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
-	//CRUD user command
+	// CRUD user command
 	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error
 	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error
 	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error

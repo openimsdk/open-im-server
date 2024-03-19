@@ -240,7 +240,7 @@ func batchGetCache2[T any, K comparable](
 	return res, nil
 }
 
-//func batchGetCacheMap[T any](
+// func batchGetCacheMap[T any](
 //	ctx context.Context,
 //	rcClient *rockscache.Client,
 //	keys, originKeys []string,

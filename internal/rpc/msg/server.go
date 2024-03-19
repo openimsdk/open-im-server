@@ -51,7 +51,7 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 	m.Handlers = append(m.Handlers, interceptorFunc...)
 }
 
-//func (m *msgServer) execInterceptorHandler(ctx context.Context, config *config.GlobalConfig, req *msg.SendMsgReq) error {
+// func (m *msgServer) execInterceptorHandler(ctx context.Context, config *config.GlobalConfig, req *msg.SendMsgReq) error {
 //	for _, handler := range m.Handlers {
 //		msgData, err := handler(ctx, config, req)
 //		if err != nil {

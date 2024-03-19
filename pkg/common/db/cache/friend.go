@@ -29,7 +29,7 @@ import (
 
 const (
 	friendExpireTime = time.Second * 60 * 60 * 12
-	//FriendIDsKey        = "FRIEND_IDS:"
+	// FriendIDsKey        = "FRIEND_IDS:"
 	//TwoWayFriendsIDsKey = "COMMON_FRIENDS_IDS:"
 	//friendKey           = "FRIEND_INFO:".
 )

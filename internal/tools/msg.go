@@ -121,7 +121,7 @@ func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
 	return msgTool, nil
 }
 
-//func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
+// func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 //	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
 //	log.ZInfo(ctx, "============================ start del cron task ============================")
 //	conversationIDs, err := c.conversationDatabase.GetAllConversationIDs(ctx)

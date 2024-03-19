@@ -68,7 +68,7 @@ func newContentTypeConf(conf *config.Notification) map[int32]config.Notification
 		constant.BlackAddedNotification:                conf.BlackAdded,
 		constant.BlackDeletedNotification:              conf.BlackDeleted,
 		constant.FriendInfoUpdatedNotification:         conf.FriendInfoUpdated,
-		constant.FriendsInfoUpdateNotification:         conf.FriendInfoUpdated, //use the same FriendInfoUpdated
+		constant.FriendsInfoUpdateNotification:         conf.FriendInfoUpdated, // use the same FriendInfoUpdated
 		// conversation
 		constant.ConversationChangeNotification:      conf.ConversationChanged,
 		constant.ConversationUnreadNotification:      conf.ConversationChanged,
