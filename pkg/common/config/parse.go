@@ -24,7 +24,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/tools/errs"
-	"gopkg.in/yaml.v2"
 )
 
 //go:embed version

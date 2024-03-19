@@ -21,7 +21,6 @@ import (
 
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/tools/discoveryregistry"
-	"gopkg.in/yaml.v2"
 )
 
 var Config GlobalConfig
