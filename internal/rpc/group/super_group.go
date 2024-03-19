@@ -19,7 +19,7 @@ import (
 	"errors"
 
 	pbgroup "github.com/OpenIMSDK/protocol/group"
-	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/tools/errs"
 )
 
 func (s *groupServer) GetJoinedSuperGroupList(context.Context, *pbgroup.GetJoinedSuperGroupListReq) (*pbgroup.GetJoinedSuperGroupListResp, error) {

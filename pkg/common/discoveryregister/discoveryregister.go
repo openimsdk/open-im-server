@@ -18,12 +18,12 @@ import (
 	"errors"
 	"os"
 
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/direct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/zookeeper"
+	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/errs"
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.

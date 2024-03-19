@@ -16,7 +16,7 @@ package msggateway
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/tools/log"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"

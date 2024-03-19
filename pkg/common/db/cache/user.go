@@ -24,13 +24,12 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	"github.com/redis/go-redis/v9"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 )
 
 const (

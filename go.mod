@@ -5,7 +5,6 @@ go 1.19
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/OpenIMSDK/protocol v0.0.56
-	github.com/OpenIMSDK/tools v0.0.46-alpha.6
 	github.com/dtm-labs/rockscache v0.1.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.18.0
@@ -17,9 +16,9 @@ require (
 	github.com/minio/minio-go/v7 v7.0.67
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/localcache v0.0.1
+	github.com/openimsdk/tools v0.0.46-alpha.7
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
-	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.14.0
@@ -27,7 +26,7 @@ require (
 	google.golang.org/api v0.165.0
 	google.golang.org/grpc v1.61.0
 	google.golang.org/protobuf v1.33.0
-	gopkg.in/yaml.v3 v3.0.1
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require github.com/google/uuid v1.6.0

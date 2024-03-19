@@ -18,8 +18,8 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/protocol/push"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/tools/discoveryregistry"
 	"google.golang.org/grpc"
 )
 

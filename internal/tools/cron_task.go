@@ -16,17 +16,15 @@ package tools
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/tools/log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/redis/go-redis/v9"
-	"github.com/robfig/cron/v3"
+	"github.com/openimsdk/tools/errs"
 )
 
 func StartTask(ctx context.Context, config *config.GlobalConfig) error {

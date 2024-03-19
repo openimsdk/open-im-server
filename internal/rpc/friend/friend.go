@@ -20,10 +20,6 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	registry "github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/tx"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
@@ -34,6 +30,10 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	registry "github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/tx"
+	"github.com/openimsdk/tools/utils"
 	"google.golang.org/grpc"
 )
 

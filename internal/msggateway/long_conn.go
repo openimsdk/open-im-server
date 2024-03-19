@@ -19,8 +19,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/gorilla/websocket"
+	"github.com/openimsdk/tools/errs"
 )
 
 type LongConn interface {

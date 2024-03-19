@@ -22,14 +22,14 @@ import (
 	"github.com/OpenIMSDK/protocol/group"
 	pbgroup "github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/wrapperspb"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils"
 )
 
 type GroupEventCallbackConfig struct {

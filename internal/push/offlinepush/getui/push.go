@@ -23,15 +23,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils/splitter"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	http2 "github.com/openimsdk/open-im-server/v3/pkg/common/http"
-	"github.com/redis/go-redis/v9"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/splitter"
 )
 
 var (

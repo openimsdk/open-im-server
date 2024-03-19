@@ -21,9 +21,9 @@ import (
 	"github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils"
 )
 
 func (m *msgServer) getMinSeqs(maxSeqs map[string]int64) map[string]int64 {

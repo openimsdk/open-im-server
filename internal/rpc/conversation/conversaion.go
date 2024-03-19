@@ -22,11 +22,6 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	pbconversation "github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/tx"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -36,6 +31,11 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/tx"
+	"github.com/openimsdk/tools/utils"
 	"google.golang.org/grpc"
 )
 

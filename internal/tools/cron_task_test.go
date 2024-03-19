@@ -23,11 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
-	"gopkg.in/yaml.v3"
-
-	"github.com/redis/go-redis/v9"
-	"github.com/robfig/cron/v3"
+	"github.com/openimsdk/tools/errs"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"

@@ -21,10 +21,10 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	pbchat "github.com/OpenIMSDK/protocol/msg"
 	pbpush "github.com/OpenIMSDK/protocol/push"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kfk "github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils"
 	"google.golang.org/protobuf/proto"
 )
 

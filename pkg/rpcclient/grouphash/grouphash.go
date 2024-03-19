@@ -22,7 +22,7 @@ import (
 
 	"github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/tools/utils"
 )
 
 func NewGroupHashFromGroupClient(x group.GroupClient) *GroupHash {

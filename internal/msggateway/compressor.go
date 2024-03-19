@@ -20,7 +20,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/tools/errs"
 )
 
 var (

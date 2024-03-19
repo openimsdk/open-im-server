@@ -18,7 +18,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/tools/pagination"
+	"github.com/openimsdk/tools/pagination"
 )
 
 type FriendRequestModel struct {

@@ -66,7 +66,7 @@ The `CodeError` interface is designed to provide a unified mechanism for error h
 
 ## Logging Standards and Code Examples
 
-In the OpenIM project, we use the unified logging package `github.com/OpenIMSDK/tools/log` for logging to achieve efficient log management and analysis. This logging package supports structured logging formats, making it easier for developers to handle log information.
+In the OpenIM project, we use the unified logging package `github.com/openimsdk/tools/log` for logging to achieve efficient log management and analysis. This logging package supports structured logging formats, making it easier for developers to handle log information.
 
 ### Logger Interface and Implementation
 
@@ -96,7 +96,7 @@ func main() {
 
 ## Error Handling and Code Examples
 
-We use the `github.com/OpenIMSDK/tools/errs` package for unified error handling and wrapping.
+We use the `github.com/openimsdk/tools/errs` package for unified error handling and wrapping.
 
 ### CodeError Interface and Implementation
 
@@ -121,7 +121,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/tools/errs"
 )
 
 func main() {
@@ -164,7 +164,7 @@ More details")
 
    import (
        "context"
-       "github.com/OpenIMSDK/tools/log"
+       "github.com/openimsdk/tools/log"
    )
 
    func main() {
@@ -226,7 +226,7 @@ More details")
    package main
 
    import (
-       "github.com/OpenIMSDK/tools/log"
+       "github.com/openimsdk/tools/log"
        "context"
    )
 
@@ -401,7 +401,7 @@ More details")
 ### About WrapMsg Use
 
 ```go
-// 	"github.com/OpenIMSDK/tools/errs"
+// 	"github.com/openimsdk/tools/errs"
 func WrapMsg(err error, msg string, kv ...any) error {
 	if len(kv) == 0 {
 		if len(msg) == 0 {
@@ -450,7 +450,7 @@ Next, let's demonstrate several ways to use the `WrapMsg` function:
 **Example 1: No Additional Information**
 
 ```go
-// "github.com/OpenIMSDK/tools/errs"
+// "github.com/openimsdk/tools/errs"
 err := errors.New("original error")
 wrappedErr := errs.WrapMsg(err, "")
 // wrappedErr will contain the original error and its call stack
@@ -459,7 +459,7 @@ wrappedErr := errs.WrapMsg(err, "")
 **Example 2: Message Text Only**
 
 ```go
-// "github.com/OpenIMSDK/tools/errs"
+// "github.com/openimsdk/tools/errs"
 err := errors.New("original error")
 wrappedErr := errs.WrapMsg(err, "additional error information")
 // wrappedErr will contain the original error, call stack, and "additional error information"
@@ -468,7 +468,7 @@ wrappedErr := errs.WrapMsg(err, "additional error information")
 **Example 3: Message Text and Key-Value Pairs**
 
 ```go
-// "github.com/OpenIMSDK/tools/errs"
+// "github.com/openimsdk/tools/errs"
 err := errors.New("original error")
 wrappedErr := errs.WrapMsg(err, "problem occurred", "code", 404, "url", "http://example.com")
 // wrappedErr will contain the original error, call stack, and "problem occurred code=404, url=http://example.com"
@@ -477,7 +477,7 @@ wrappedErr := errs.WrapMsg(err, "problem occurred", "code", 404, "url", "http://
 **Example 4: Key-Value Pairs Only**
 
 ```go
-// "github.com/OpenIMSDK/tools/errs"
+// "github.com/openimsdk/tools/errs"
 err := errors.New("original error")
 wrappedErr := errs.WrapMsg(err, "", "user", "john_doe", "action", "login")
 // wrappedErr will contain the original error, call stack, and "user=john_doe, action=login"

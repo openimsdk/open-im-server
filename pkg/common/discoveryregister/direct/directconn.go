@@ -19,8 +19,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/OpenIMSDK/tools/errs"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/errs"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

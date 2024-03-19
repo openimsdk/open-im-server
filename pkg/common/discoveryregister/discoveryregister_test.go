@@ -20,7 +20,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
-	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/stretchr/testify/assert"
 )
 

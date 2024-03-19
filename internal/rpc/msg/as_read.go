@@ -20,11 +20,10 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	utils2 "github.com/OpenIMSDK/tools/utils"
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
-	"github.com/redis/go-redis/v9"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	utils2 "github.com/openimsdk/tools/utils"
 )
 
 func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *msg.GetConversationsHasReadAndMaxSeqReq) (resp *msg.GetConversationsHasReadAndMaxSeqResp, err error) {

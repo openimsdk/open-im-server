@@ -19,10 +19,10 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/mcontext"
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
+	"github.com/openimsdk/tools/mcontext"
 )
 
 func CallbackUserOnline(ctx context.Context, callback *config.Callback, userID string, platformID int, isAppBackground bool, connID string) error {

@@ -17,8 +17,8 @@ package unrelation
 import (
 	"context"
 
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
+	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

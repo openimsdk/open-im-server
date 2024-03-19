@@ -24,9 +24,9 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
 	"google.golang.org/protobuf/proto"
 )
 

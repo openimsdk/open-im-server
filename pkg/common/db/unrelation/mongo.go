@@ -17,15 +17,15 @@ package unrelation
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/tools/log"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mw/specialerror"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/mw/specialerror"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

@@ -15,14 +15,15 @@
 package zookeeper
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	openkeeper "github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/discoveryregistry"
+	openkeeper "github.com/openimsdk/tools/discoveryregistry/zookeeper"
+	"github.com/openimsdk/tools/errs"
 )
 
 // NewZookeeperDiscoveryRegister creates a new instance of ZookeeperDR for Zookeeper service discovery and registration.
@@ -42,13 +43,13 @@ func NewZookeeperDiscoveryRegister(zkConf *config.Zookeeper) (discoveryregistry.
 		// openkeeper.WithLogger(log.NewZkLogger()),
 	)
 	if err != nil {
-		//uriFormat := "address:%s, username:%s, password:%s, schema:%s."
-		//errInfo := fmt.Sprintf(uriFormat,
-		//	zkConf.ZkAddr,
-		//	zkConf.Username,
-		//	zkConf.Password,
-		//	zkConf.Schema)
-		return nil, errs.Wrap(err)
+		uriFormat := "address:%s, username:%s, password:%s, schema:%s."
+		errInfo := fmt.Sprintf(uriFormat,
+			zkConf.ZkAddr,
+			zkConf.Username,
+			zkConf.Password,
+			zkConf.Schema)
+		return nil, errs.WrapMsg(err, errInfo)
 	}
 	return zk, nil
 }

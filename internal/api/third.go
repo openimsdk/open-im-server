@@ -20,11 +20,11 @@ import (
 	"strconv"
 
 	"github.com/OpenIMSDK/protocol/third"
-	"github.com/OpenIMSDK/tools/a2r"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/tools/a2r"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/mcontext"
 )
 
 type ThirdApi rpcclient.Third

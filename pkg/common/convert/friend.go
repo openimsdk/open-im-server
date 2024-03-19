@@ -19,8 +19,8 @@ import (
 	"fmt"
 
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/tools/utils"
 )
 
 func FriendPb2DB(friend *sdkws.FriendInfo) *relation.FriendModel {

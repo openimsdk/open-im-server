@@ -21,12 +21,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mw/specialerror"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/dtm-labs/rockscache"
-	"github.com/redis/go-redis/v9"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mw/specialerror"
+	"github.com/openimsdk/tools/utils"
 )
 
 const (

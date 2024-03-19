@@ -19,11 +19,11 @@ import (
 
 	"github.com/IBM/sarama"
 	pbmsg "github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	kfk "github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/tools/log"
 	"google.golang.org/protobuf/proto"
 )
 

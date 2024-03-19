@@ -18,8 +18,8 @@ import (
 	"sync"
 
 	"github.com/IBM/sarama"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/errs"
 )
 
 type Consumer struct {

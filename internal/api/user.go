@@ -18,12 +18,12 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msggateway"
 	"github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/a2r"
-	"github.com/OpenIMSDK/tools/apiresp"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/tools/a2r"
+	"github.com/openimsdk/tools/apiresp"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 )
 
 type UserApi rpcclient.User

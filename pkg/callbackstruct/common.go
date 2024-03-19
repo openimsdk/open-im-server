@@ -14,7 +14,7 @@
 
 package callbackstruct
 
-import "github.com/OpenIMSDK/tools/errs"
+import "github.com/openimsdk/tools/errs"
 
 const (
 	Next = 1

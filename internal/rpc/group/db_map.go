@@ -20,7 +20,7 @@ import (
 
 	pbgroup "github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/openimsdk/tools/mcontext"
 )
 
 func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[string]any {

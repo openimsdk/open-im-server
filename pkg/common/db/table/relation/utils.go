@@ -15,7 +15,7 @@
 package relation
 
 import (
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/tools/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

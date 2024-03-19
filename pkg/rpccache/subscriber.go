@@ -18,8 +18,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/redis/go-redis/v9"
+	"github.com/openimsdk/tools/log"
 )
 
 func subscriberRedisDeleteCache(ctx context.Context, client redis.UniversalClient, channel string, del func(ctx context.Context, key ...string)) {

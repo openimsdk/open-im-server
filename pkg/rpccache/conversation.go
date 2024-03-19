@@ -18,13 +18,12 @@ import (
 	"context"
 
 	pbconversation "github.com/OpenIMSDK/protocol/conversation"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	"github.com/redis/go-redis/v9"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 )
 
 func NewConversationLocalCache(client rpcclient.ConversationRpcClient, cli redis.UniversalClient) *ConversationLocalCache {

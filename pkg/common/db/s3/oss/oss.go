@@ -30,9 +30,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
+	"github.com/openimsdk/tools/errs"
 )
 
 const (

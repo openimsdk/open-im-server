@@ -22,7 +22,7 @@ package unrelation
 //	"go.mongodb.org/mongo-driver/mongo"
 //	"go.mongodb.org/mongo-driver/mongo/options"
 //
-//	"github.com/OpenIMSDK/tools/utils"
+//	"github.com/openimsdk/tools/utils"
 //
 //	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 //)

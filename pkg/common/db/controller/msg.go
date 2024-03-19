@@ -23,10 +23,9 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	pbmsg "github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/utils"
-	"github.com/redis/go-redis/v9"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"

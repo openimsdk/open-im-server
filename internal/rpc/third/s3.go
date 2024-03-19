@@ -24,14 +24,14 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/protocol/third"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/google/uuid"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cont"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils"
 )
 
 func (t *thirdServer) PartLimit(ctx context.Context, req *third.PartLimitReq) (*third.PartLimitResp, error) {

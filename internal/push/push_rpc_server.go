@@ -19,14 +19,14 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 	pbpush "github.com/OpenIMSDK/protocol/push"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils"
 	"google.golang.org/grpc"
 )
 

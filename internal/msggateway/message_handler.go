@@ -21,12 +21,11 @@ import (
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/push"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/utils"
-	"github.com/go-playground/validator/v10"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils"
 	"google.golang.org/protobuf/proto"
 )
 

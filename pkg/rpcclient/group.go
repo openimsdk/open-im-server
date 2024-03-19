@@ -21,10 +21,10 @@ import (
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/utils"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils"
 )
 
 type Group struct {

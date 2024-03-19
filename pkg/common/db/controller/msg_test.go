@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/tools/log"
 
 	"go.mongodb.org/mongo-driver/bson"
 

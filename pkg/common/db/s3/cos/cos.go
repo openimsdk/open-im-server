@@ -29,9 +29,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
-	"github.com/tencentyun/cos-go-sdk-v5"
+	"github.com/openimsdk/tools/errs"
 )
 
 const (

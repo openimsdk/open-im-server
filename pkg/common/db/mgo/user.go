@@ -19,10 +19,10 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mgoutil"
-	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/mgoutil"
+	"github.com/openimsdk/tools/pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

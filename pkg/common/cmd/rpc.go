@@ -19,11 +19,11 @@ import (
 	"errors"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/errs"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )

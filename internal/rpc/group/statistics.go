@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/protocol/group"
-	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/tools/errs"
 )
 
 func (s *groupServer) GroupCreateCount(ctx context.Context, req *group.GroupCreateCountReq) (*group.GroupCreateCountResp, error) {

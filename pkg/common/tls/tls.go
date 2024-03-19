@@ -21,7 +21,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/tools/errs"
 )
 
 // decryptPEM decrypts a PEM block using a password.

@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/pagination"
+	"github.com/openimsdk/tools/pagination"
 )
 
 type UserModel struct {

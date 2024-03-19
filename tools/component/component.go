@@ -24,12 +24,10 @@ import (
 	"time"
 
 	"github.com/IBM/sarama"
-	"gopkg.in/yaml.v2"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 
-	"github.com/OpenIMSDK/tools/component"
-	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/tools/component"
+	"github.com/openimsdk/tools/errs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )

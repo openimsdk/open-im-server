@@ -22,8 +22,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/log"
 	"github.com/stathat/consistent"
 	"google.golang.org/grpc"
 )

@@ -18,8 +18,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OpenIMSDK/tools/log"
 	table "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
+	"github.com/openimsdk/tools/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

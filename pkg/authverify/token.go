@@ -18,12 +18,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/tokenverify"
-	"github.com/OpenIMSDK/tools/utils"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/tokenverify"
+	"github.com/openimsdk/tools/utils"
 )
 
 func Secret(secret string) jwt.Keyfunc {
