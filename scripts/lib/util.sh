@@ -426,7 +426,7 @@ openim::util::check_process_names() {
          fi
 
          started+=("Process $process_name - Command: $command, PID: $pid, Port: $port, Start time: $start_time")
-         echo bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+         echo bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb $started
        done
      fi
    done
