@@ -1,0 +1,47 @@
+# config.yaml 示例配置
+
+# 基础配置
+baseConfig:
+  searchDirectory: "./" # 检索的根目录，"./" 代表当前目录
+  ignoreCase: false # 是否忽略大小写，true 为忽略，false 为区分大小写
+
+# 目录命名风格配置
+directoryNaming:
+  allowHyphens: true # 是否允许目录名中含有中划线
+  allowUnderscores: false # 是否允许目录名中含有下划线
+  mustBeLowercase: true # 目录名是否必须为小写
+
+# 文件命名风格配置
+fileNaming:
+  allowHyphens: true # 是否允许文件名中含有中划线
+  allowUnderscores: true # 是否允许文件名中含有下划线
+  mustBeLowercase: true # 文件名是否必须为小写
+
+# 忽略的文件格式列表
+ignoreFormats:
+  - ".log"
+  - ".env"
+  - "_test.go"
+
+# 忽略的目录列表
+ignoreDirectories:
+  - "vendor"
+  - ".git"
+  - "node_modules"
+  - "logs"
+  - "components"
+  - "_output"
+  - "README.md"
+  - "tools/openim-web"
+  - "CHANGELOG"
+  - "docs/readme"
+
+fileTypeSpecificNaming:
+  ".yaml":
+    allowHyphens: true
+    allowUnderscores: false
+    mustBeLowercase: true
+  ".go":
+    allowHyphens: false
+    allowUnderscores: true
+    mustBeLowercase: true

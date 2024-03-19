@@ -15,27 +15,66 @@
 package config
 
 import (
-	"strings"
+	"os"
+
+	"github.com/openimsdk/open-im-server/tools/codescan/config"
+	"gopkg.in/yaml.v2"
 )
 
-// Config holds all the configuration parameters for the checker.
 type Config struct {
-	TargetDirs []string // Directories to check
-	IgnoreDirs []string // Directories to ignore
+	BaseConfig struct {
+		SearchDirectory string `yaml:"searchDirectory"`
+		IgnoreCase      bool   `yaml:"ignoreCase"`
+	} `yaml:"baseConfig"`
+	DirectoryNaming struct {
+		AllowHyphens     bool `yaml:"allowHyphens"`
+		AllowUnderscores bool `yaml:"allowUnderscores"`
+		MustBeLowercase  bool `yaml:"mustBeLowercase"`
+	} `yaml:"directoryNaming"`
+	FileNaming struct {
+		AllowHyphens     bool `yaml:"allowHyphens"`
+		AllowUnderscores bool `yaml:"allowUnderscores"`
+		MustBeLowercase  bool `yaml:"mustBeLowercase"`
+	} `yaml:"fileNaming"`
+	IgnoreFormats          []string                          `yaml:"ignoreFormats"`
+	IgnoreDirectories      []string                          `yaml:"ignoreDirectories"`
+	FileTypeSpecificNaming map[string]FileTypeSpecificNaming `yaml:"fileTypeSpecificNaming"`
 }
 
-// NewConfig creates and returns a new Config instance.
-func NewConfig(targetDirs, ignoreDirs string) *Config {
-	return &Config{
-		TargetDirs: parseDirs(targetDirs),
-		IgnoreDirs: parseDirs(ignoreDirs),
-	}
+type FileTypeSpecificNaming struct {
+	AllowHyphens     bool `yaml:"allowHyphens"`
+	AllowUnderscores bool `yaml:"allowUnderscores"`
+	MustBeLowercase  bool `yaml:"mustBeLowercase"`
 }
 
-// parseDirs splits a comma-separated string into a slice of directory names.
-func parseDirs(dirs string) []string {
-	if dirs == "" {
-		return nil
+type Issue struct {
+	Type    string
+	Path    string
+	Message string
+}
+
+type Checker struct {
+	Config  *config.Config
+	Summary struct {
+		CheckedDirectories int
+		CheckedFiles       int
+		Issues             []Issue
 	}
-	return strings.Split(dirs, ",")
+	Errors []string
+}
+
+func LoadConfig(configPath string) (*Config, error) {
+	var config Config
+
+	file, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, err
+	}
+
+	err = yaml.Unmarshal(file, &config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &config, nil
 }
