@@ -24,7 +24,7 @@ import (
 
 // Start run ws server.
 func Start(ctx context.Context, conf *config.GlobalConfig, rpcPort, wsPort, prometheusPort int) error {
-	log.CInfo(ctx, "msg_gateway server starting", "rpcPort", rpcPort, "wsPort", wsPort,
+	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "rpcPort", rpcPort, "wsPort", wsPort,
 		"prometheusPort", prometheusPort)
 	longServer, err := NewWsServer(
 		conf,

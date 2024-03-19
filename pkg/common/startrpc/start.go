@@ -48,7 +48,7 @@ import (
 
 // Start rpc server.
 func Start(ctx context.Context, rpcPort int, rpcRegisterName string, prometheusPort int, config *config2.GlobalConfig, rpcFn func(ctx context.Context, config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
-	log.CInfo(ctx, "rpc server starting", "rpcRegisterName", rpcRegisterName, "rpcPort", rpcPort,
+	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcPort", rpcPort,
 		"prometheusPort", prometheusPort)
 	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(config.Rpc.ListenIP), strconv.Itoa(rpcPort))
 	listener, err := net.Listen(

@@ -31,7 +31,7 @@ import (
 
 func StartTask(ctx context.Context, config *config.GlobalConfig) error {
 
-	log.CInfo(ctx, "cron task server starting", "chatRecordsClearTime", config.ChatRecordsClearTime, "msgDestructTime", config.MsgDestructTime)
+	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime", config.ChatRecordsClearTime, "msgDestructTime", config.MsgDestructTime)
 
 	msgTool, err := InitMsgTool(ctx, config)
 	if err != nil {

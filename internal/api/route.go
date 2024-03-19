@@ -104,7 +104,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, port int, proPort i
 	}
 
 	server := http.Server{Addr: address, Handler: router}
-	log.CInfo(ctx, "api server starting", "address", address, "apiPort", port,
+	log.CInfo(ctx, "API server is initializing", "address", address, "apiPort", port,
 		"prometheusPort", proPort)
 	go func() {
 		err = server.ListenAndServe()
