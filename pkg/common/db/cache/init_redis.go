@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/openimsdk/tools/log"
+	"github.com/redis/go-redis/v9"
 	"os"
 	"strings"
 	"time"
