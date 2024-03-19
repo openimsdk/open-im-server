@@ -15,13 +15,13 @@
 package cmd
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"log"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/spf13/cobra"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
+	"github.com/spf13/cobra"
 )
 
 type MsgGatewayCmd struct {

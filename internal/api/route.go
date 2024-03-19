@@ -36,10 +36,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"github.com/redis/go-redis/v9"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -49,6 +45,9 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func Start(config *config.GlobalConfig, port int, proPort int) error {
@@ -57,7 +56,7 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 		wrappedErr := errs.WrapMsg(err, "validation error", "port", port, "proPort", proPort)
 		return wrappedErr
 	}
-	
+
 	rdb, err := cache.NewRedis(&config.Redis)
 	if err != nil {
 		return err
@@ -70,15 +69,15 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
-	
+
 	if err = client.CreateRpcRootNodes(config.GetServiceNames()); err != nil {
 		return errs.WrapMsg(err, "failed to create RPC root nodes")
 	}
-	
+
 	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.EncodeConfig()); err != nil {
 		return errs.WrapMsg(err, "failed to register configuration to registry")
 	}
-	
+
 	var (
 		netDone = make(chan struct{}, 1)
 		netErr  error

@@ -24,13 +24,12 @@ import (
 	"time"
 
 	"github.com/IBM/sarama"
+	"gopkg.in/yaml.v2"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 
 	"github.com/OpenIMSDK/tools/component"
 	"github.com/OpenIMSDK/tools/errs"
-
-	"gopkg.in/yaml.v3"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
@@ -243,7 +242,7 @@ func checkKafka(config *config.GlobalConfig) error {
 
 	for _, requiredTopic := range requiredTopics {
 		if !isTopicPresent(requiredTopic, topics) {
-            return errs.WrapMsg(nil, "Kafka missing required topic", "topic", requiredTopic, "availableTopics", strings.Join(topics, ", "))
+			return errs.WrapMsg(nil, "Kafka missing required topic", "topic", requiredTopic, "availableTopics", strings.Join(topics, ", "))
 		}
 	}
 
