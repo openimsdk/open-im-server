@@ -637,7 +637,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbgroup.GetG
 	return resp, nil
 }
 
-// GetGroupApplicationList handles functions that get a list of group requests
+// GetGroupApplicationList handles functions that get a list of group requests.
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbgroup.GetGroupApplicationListReq) (*pbgroup.GetGroupApplicationListResp, error) {
 	groupIDs, err := s.db.FindUserManagedGroupID(ctx, req.FromUserID)
 	if err != nil {
