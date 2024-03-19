@@ -58,7 +58,7 @@ func NewMongoDB(ctx context.Context, mongoConf *config.Mongo) (*Mongo, error) {
 			if err = mongoClient.Ping(ctx, nil); err != nil {
 				return nil, errs.WrapMsg(err, uri)
 			}
-			log.CInfo(ctx, "MongoDB connected", "uri", uri)
+			log.CInfo(ctx, "MONGODB connected successfully", "uri", uri)
 			return &Mongo{db: mongoClient, mongoConf: mongoConf}, nil
 		}
 		if shouldRetry(err) {

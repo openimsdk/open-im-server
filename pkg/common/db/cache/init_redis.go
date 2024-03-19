@@ -81,7 +81,7 @@ func NewRedis(ctx context.Context, redisConf *config.Redis) (redis.UniversalClie
 		return nil, errs.WrapMsg(err, errMsg)
 	}
 	redisClient = rdb
-	log.CInfo(ctx, "redis connected successfully", "address", redisConf.Address, "username", redisConf.Username, "password", redisConf.Password, "clusterMode", redisConf.ClusterMode, "enablePipeline", redisConf.EnablePipeline)
+	log.CInfo(ctx, "REDIS connected successfully", "address", redisConf.Address, "username", redisConf.Username, "password", redisConf.Password, "clusterMode", redisConf.ClusterMode, "enablePipeline", redisConf.EnablePipeline)
 	return rdb, err
 }
 
