@@ -205,7 +205,7 @@ func Test_Revoke(t *testing.T) {
 }
 
 func Test_FindBySeq(t *testing.T) {
-	if err := log.InitFromConfig("", "", 6, true, false, "", 2, 1); err != nil {
+	if err := log.InitFromConfig("", "", 6, true, false, "", 2, 1, "1,0"); err != nil {
 		t.Fatal(err)
 	}
 	db := GetDB()
