@@ -15,11 +15,11 @@
 package api
 
 import (
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/msggateway"
-	"github.com/OpenIMSDK/protocol/user"
 	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/msggateway"
+	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/a2r"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/errs"

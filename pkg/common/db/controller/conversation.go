@@ -18,7 +18,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/pagination"
 	"github.com/openimsdk/tools/tx"

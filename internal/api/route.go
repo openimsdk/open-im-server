@@ -28,7 +28,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -40,6 +39,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/errs"

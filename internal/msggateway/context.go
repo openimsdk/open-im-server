@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/utils"
 )
 

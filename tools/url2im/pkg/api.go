@@ -23,9 +23,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/OpenIMSDK/protocol/auth"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/third"
+	"github.com/openimsdk/protocol/auth"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/third"
 )
 
 type Api struct {

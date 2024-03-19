@@ -18,7 +18,7 @@ import (
 	"context"
 	"errors"
 
-	pbgroup "github.com/OpenIMSDK/protocol/group"
+	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/tools/errs"
 )
 

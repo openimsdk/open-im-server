@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/third"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils"
 	utils2 "github.com/openimsdk/tools/utils"

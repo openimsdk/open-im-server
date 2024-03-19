@@ -17,8 +17,8 @@ package mgo
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/mgoutil"
 	"github.com/openimsdk/tools/pagination"

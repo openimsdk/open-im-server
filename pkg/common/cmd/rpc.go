@@ -18,10 +18,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/OpenIMSDK/protocol/constant"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/errs"
 	"github.com/spf13/cobra"

@@ -17,11 +17,11 @@ package rpccache
 import (
 	"context"
 
-	pbconversation "github.com/OpenIMSDK/protocol/conversation"
 	"github.com/openimsdk/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"

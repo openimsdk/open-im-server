@@ -18,8 +18,8 @@ import (
 	"context"
 	"time"
 
-	pbgroup "github.com/OpenIMSDK/protocol/group"
-	"github.com/OpenIMSDK/protocol/sdkws"
+	pbgroup "github.com/openimsdk/protocol/group"
+	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/mcontext"
 )
 

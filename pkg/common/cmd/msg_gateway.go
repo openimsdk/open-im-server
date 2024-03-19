@@ -19,9 +19,9 @@ import (
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"log"
 
-	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/spf13/cobra"
 )
 

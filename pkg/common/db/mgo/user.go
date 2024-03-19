@@ -18,8 +18,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/user"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/mgoutil"
 	"github.com/openimsdk/tools/pagination"

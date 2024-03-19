@@ -15,8 +15,8 @@
 package convert
 
 import (
-	"github.com/OpenIMSDK/protocol/conversation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/utils"
 )
 

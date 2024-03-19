@@ -18,7 +18,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/group"
+	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/tools/errs"
 )
 

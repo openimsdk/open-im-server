@@ -17,13 +17,13 @@ package push
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	pbpush "github.com/OpenIMSDK/protocol/push"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/constant"
+	pbpush "github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils"

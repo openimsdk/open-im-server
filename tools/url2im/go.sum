@@ -1,5 +1,5 @@
-github.com/OpenIMSDK/protocol v0.0.21 h1:5H6H+hJ9d/VgRqttvxD/zfK9Asd+4M8Eknk5swSbUVY=
-github.com/OpenIMSDK/protocol v0.0.21/go.mod h1:F25dFrwrIx3lkNoiuf6FkCfxuwf8L4Z8UIsdTHP/r0Y=
+github.com/openimsdk/protocol v0.0.21 h1:5H6H+hJ9d/VgRqttvxD/zfK9Asd+4M8Eknk5swSbUVY=
+github.com/openimsdk/protocol v0.0.21/go.mod h1:F25dFrwrIx3lkNoiuf6FkCfxuwf8L4Z8UIsdTHP/r0Y=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.3 h1:KhyjKVUg7Usr/dYsdSqoFveMYd5ko72D+zANwlG1mmg=

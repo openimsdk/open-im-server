@@ -17,7 +17,7 @@ package msg
 import (
 	"context"
 
-	pbmsg "github.com/OpenIMSDK/protocol/msg"
+	pbmsg "github.com/openimsdk/protocol/msg"
 )
 
 func (m *msgServer) GetConversationMaxSeq(ctx context.Context, req *pbmsg.GetConversationMaxSeqReq) (resp *pbmsg.GetConversationMaxSeqResp, err error) {

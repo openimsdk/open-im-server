@@ -18,7 +18,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/user"
+	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/pagination"
 )
 

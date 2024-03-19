@@ -19,8 +19,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/sdkws"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

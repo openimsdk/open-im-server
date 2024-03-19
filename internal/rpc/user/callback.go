@@ -17,10 +17,10 @@ package user
 import (
 	"context"
 
-	pbuser "github.com/OpenIMSDK/protocol/user"
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
+	pbuser "github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/utils"
 )
 

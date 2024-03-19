@@ -23,11 +23,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	pbconversation "github.com/OpenIMSDK/protocol/conversation"
-	pbgroup "github.com/OpenIMSDK/protocol/group"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/protocol/wrapperspb"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -41,6 +36,10 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"github.com/openimsdk/protocol/constant"
+	pbconversation "github.com/openimsdk/protocol/conversation"
+	pbgroup "github.com/openimsdk/protocol/group"
+	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -49,6 +48,7 @@ import (
 	"github.com/openimsdk/tools/tx"
 	"github.com/openimsdk/tools/utils"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type groupServer struct {

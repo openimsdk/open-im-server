@@ -17,9 +17,6 @@ package friend
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	pbfriend "github.com/OpenIMSDK/protocol/friend"
-	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
@@ -30,6 +27,9 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"github.com/openimsdk/protocol/constant"
+	pbfriend "github.com/openimsdk/protocol/friend"
+	"github.com/openimsdk/protocol/sdkws"
 	registry "github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/tx"

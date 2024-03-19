@@ -23,11 +23,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/third"
 	"github.com/google/uuid"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cont"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"

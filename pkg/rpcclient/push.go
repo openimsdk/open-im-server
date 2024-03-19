@@ -17,8 +17,8 @@ package rpcclient
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/push"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/tools/discoveryregistry"
 	"google.golang.org/grpc"
 )

@@ -18,9 +18,9 @@ import (
 	"context"
 	"fmt"
 
-	pbconversation "github.com/OpenIMSDK/protocol/conversation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/errs"
 	"google.golang.org/grpc"

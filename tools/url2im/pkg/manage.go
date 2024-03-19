@@ -34,7 +34,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/third"
+	"github.com/openimsdk/protocol/third"
 )
 
 type Upload struct {

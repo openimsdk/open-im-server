@@ -17,17 +17,17 @@ package msg
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	pbconversation "github.com/OpenIMSDK/protocol/conversation"
-	pbmsg "github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/protocol/wrapperspb"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"github.com/openimsdk/protocol/constant"
+	pbconversation "github.com/openimsdk/protocol/conversation"
+	pbmsg "github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, error error) {

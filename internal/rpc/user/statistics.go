@@ -18,7 +18,7 @@ import (
 	"context"
 	"time"
 
-	pbuser "github.com/OpenIMSDK/protocol/user"
+	pbuser "github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/errs"
 )
 

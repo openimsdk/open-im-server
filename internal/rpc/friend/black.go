@@ -18,10 +18,10 @@ import (
 	"context"
 	"time"
 
-	pbfriend "github.com/OpenIMSDK/protocol/friend"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	pbfriend "github.com/openimsdk/protocol/friend"
 	"github.com/openimsdk/tools/mcontext"
 )
 

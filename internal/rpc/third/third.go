@@ -20,7 +20,6 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/third"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
@@ -31,6 +30,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/oss"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/errs"
 	"google.golang.org/grpc"
