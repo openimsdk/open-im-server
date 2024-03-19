@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package genutil // import "internal/pkg/pkg/util/genutil"
+package genutil // import "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"

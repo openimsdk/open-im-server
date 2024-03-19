@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rpccache // import "internal/pkg/pkg/rpccache"
+package rpccache // import "github.com/openimsdk/open-im-server/v3/pkg/rpccache"

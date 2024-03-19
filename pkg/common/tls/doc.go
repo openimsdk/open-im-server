@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tls // import "internal/pkg/pkg/common/tls"
+package tls // import "github.com/openimsdk/open-im-server/v3/pkg/common/tls"

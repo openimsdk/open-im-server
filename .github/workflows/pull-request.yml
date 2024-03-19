@@ -56,7 +56,8 @@ jobs:
 
       - name: Generate all necessary files, such as error code files
         run: |
-          make generate
+          make gen.docgo.doc
+          make gen
           echo "Generate all necessary files successfully"
         continue-on-error: true
 

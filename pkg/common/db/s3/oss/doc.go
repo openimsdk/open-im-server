@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package oss // import "internal/pkg/pkg/common/db/s3/oss"
+package oss // import "github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/oss"

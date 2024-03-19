@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package authverify // import "github.com/openimsdk/open-im-server/v3/pkg/authverify"
+package mgo // import "github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"

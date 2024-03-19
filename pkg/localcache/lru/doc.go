@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package lru // import "internal/pkg/pkg/localcache/lru"
+package lru // import "github.com/openimsdk/open-im-server/v3/pkg/localcache/lru"

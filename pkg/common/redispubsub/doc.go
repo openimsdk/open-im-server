@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package redispubsub // import "internal/pkg/pkg/common/redispubsub"
+package redispubsub // import "github.com/openimsdk/open-im-server/v3/pkg/common/redispubsub"

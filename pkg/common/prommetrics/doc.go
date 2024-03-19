@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package prommetrics // import "internal/pkg/pkg/common/prommetrics"
+package prommetrics // import "github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
