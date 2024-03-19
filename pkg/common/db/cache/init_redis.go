@@ -72,7 +72,7 @@ func NewRedis(ctx context.Context, redisConf *config.Redis) (redis.UniversalClie
 	}
 
 	var err error
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	err = rdb.Ping(ctx).Err()
 	if err != nil {
