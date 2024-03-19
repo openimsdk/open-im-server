@@ -42,7 +42,7 @@ const (
 	getuiToken  = "GETUI_TOKEN"
 	getuiTaskID = "GETUI_TASK_ID"
 	// SignalCache      = "SIGNAL_CACHE:"
-	//signalListCache  = "SIGNAL_LIST_CACHE:".
+	// signalListCache  = "SIGNAL_LIST_CACHE:".
 	FCM_TOKEN = "FCM_TOKEN:"
 
 	messageCache            = "MESSAGE_CACHE:"
@@ -508,7 +508,7 @@ func (c *msgCache) UserDeleteMsgs(ctx context.Context, conversationID string, se
 
 	return nil
 	// pipe := c.rdb.Pipeline()
-	//for _, seq := range seqs {
+	// for _, seq := range seqs {
 	//	delUserListKey := c.getMessageDelUserListKey(conversationID, seq)
 	//	userDelListKey := c.getUserDelList(conversationID, userID)
 	//	err := pipe.SAdd(ctx, delUserListKey, userID).Err()
@@ -526,8 +526,8 @@ func (c *msgCache) UserDeleteMsgs(ctx context.Context, conversationID string, se
 	//		return errs.Wrap(err)
 	//	}
 	//}
-	//_, err := pipe.Exec(ctx)
-	//return errs.Wrap(err)
+	// _, err := pipe.Exec(ctx)
+	// return errs.Wrap(err)
 }
 
 func (c *msgCache) GetUserDelList(ctx context.Context, userID, conversationID string) (seqs []int64, err error) {

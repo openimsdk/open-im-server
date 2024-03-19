@@ -315,10 +315,10 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 // Get user IDs with "Do Not Disturb" enabled in super large groups.
 func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbconversation.GetRecvMsgNotNotifyUserIDsReq) (*pbconversation.GetRecvMsgNotNotifyUserIDsResp, error) {
 	// userIDs, err := c.conversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
-	//if err != nil {
+	// if err != nil {
 	//	return nil, err
 	//}
-	//return &pbconversation.GetRecvMsgNotNotifyUserIDsResp{UserIDs: userIDs}, nil
+	// return &pbconversation.GetRecvMsgNotNotifyUserIDsResp{UserIDs: userIDs}, nil
 	return nil, errors.New("deprecated")
 }
 

@@ -44,7 +44,7 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 	conf.RetainChatRecords = 3650
 	conf.ChatRecordsClearTime = "0 2 * * 3"
 
-	mongo, err := unrelation.NewMongo(conf)
+	mongo, err := unrelation.NewMongo(&conf.Mongo)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,7 +156,7 @@ func GetDB() *commonMsgDatabase {
 	conf.RetainChatRecords = 3650
 	conf.ChatRecordsClearTime = "0 2 * * 3"
 
-	mongo, err := unrelation.NewMongo(conf)
+	mongo, err := unrelation.NewMongo(&conf.Mongo)
 	if err != nil {
 		panic(err)
 	}

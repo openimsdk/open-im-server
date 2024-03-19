@@ -33,7 +33,7 @@ func (a *Audience) set(key string, v []string) {
 		a.Object = a.audience
 	}
 	// v, ok = this.audience[key]
-	//if ok {
+	// if ok {
 	//	return
 	//}
 	a.audience[key] = v

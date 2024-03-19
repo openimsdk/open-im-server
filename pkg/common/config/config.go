@@ -25,8 +25,6 @@ import (
 
 var Config GlobalConfig
 
-const ConfKey = "conf"
-
 type CallBackConfig struct {
 	Enable                 bool  `yaml:"enable"`
 	CallbackTimeOut        int   `yaml:"timeout"`

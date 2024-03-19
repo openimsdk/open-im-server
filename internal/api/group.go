@@ -119,7 +119,7 @@ func (o *GroupApi) GetGroupAbstractInfo(c *gin.Context) {
 //	a2r.Call(group.GroupClient.SetGroupMemberNickname, g.userClient, c)
 //}
 //
-//func (g *Group) GetGroupAllMemberList(c *gin.Context) {
+// func (g *Group) GetGroupAllMemberList(c *gin.Context) {
 //	a2r.Call(group.GroupClient.GetGroupAllMember, g.userClient, c)
 //}
 

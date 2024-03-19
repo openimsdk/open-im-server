@@ -27,19 +27,19 @@ package unrelation
 //	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 //)
 //
-//func NewSuperGroupMongoDriver(database *mongo.Database) unrelation.SuperGroupModelInterface {
+// func NewSuperGroupMongoDriver(database *mongo.Database) unrelation.SuperGroupModelInterface {
 //	return &SuperGroupMongoDriver{
 //		superGroupCollection:       database.Collection(unrelation.CSuperGroup),
 //		userToSuperGroupCollection: database.Collection(unrelation.CUserToSuperGroup),
 //	}
 //}
 //
-//type SuperGroupMongoDriver struct {
+// type SuperGroupMongoDriver struct {
 //	superGroupCollection       *mongo.Collection
 //	userToSuperGroupCollection *mongo.Collection
 //}
 //
-//func (s *SuperGroupMongoDriver) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDs []string) error {
+// func (s *SuperGroupMongoDriver) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDs []string) error {
 //	_, err := s.superGroupCollection.InsertOne(ctx, &unrelation.SuperGroupModel{
 //		GroupID:   groupID,
 //		MemberIDs: initMemberIDs,

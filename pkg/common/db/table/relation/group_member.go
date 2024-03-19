@@ -48,7 +48,7 @@ type GroupMemberModelInterface interface {
 	SearchMember(ctx context.Context, keyword string, groupID string, pagination pagination.Pagination) (total int64, groupList []*GroupMemberModel, err error)
 	FindRoleLevelUserIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error)
 	// MapGroupMemberNum(ctx context.Context, groupIDs []string) (count map[string]uint32, err error)
-	//FindJoinUserID(ctx context.Context, groupIDs []string) (groupUsers map[string][]string, err error)
+	// FindJoinUserID(ctx context.Context, groupIDs []string) (groupUsers map[string][]string, err error)
 	FindUserJoinedGroupID(ctx context.Context, userID string) (groupIDs []string, err error)
 	TakeGroupMemberNum(ctx context.Context, groupID string) (count int64, err error)
 	// FindUsersJoinedGroupID(ctx context.Context, userIDs []string) (map[string][]string, error)

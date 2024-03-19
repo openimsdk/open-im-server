@@ -31,9 +31,9 @@ import (
 
 const (
 	// ConversationKey                          = "CONVERSATION:"
-	//conversationIDsKey                       = "CONVERSATION_IDS:"
-	//conversationIDsHashKey                   = "CONVERSATION_IDS_HASH:"
-	//conversationHasReadSeqKey                = "CONVERSATION_HAS_READ_SEQ:"
+	// conversationIDsKey                       = "CONVERSATION_IDS:"
+	// conversationIDsHashKey                   = "CONVERSATION_IDS_HASH:"
+	// conversationHasReadSeqKey                = "CONVERSATION_HAS_READ_SEQ:"
 	//recvMsgOptKey                            = "RECV_MSG_OPT:"
 	//superGroupRecvMsgNotNotifyUserIDsKey     = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
 	//superGroupRecvMsgNotNotifyUserIDsHashKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS_HASH:"
@@ -108,7 +108,7 @@ type ConversationRedisCache struct {
 //	rdb redis.UniversalClient,
 //	conversationDB *relation.ConversationGorm,
 //	options rockscache.Options,
-//) ConversationCache {
+// ) ConversationCache {
 //	rcClient := rockscache.NewClient(rdb, options)
 //
 //	return &ConversationRedisCache{
@@ -237,10 +237,10 @@ func (c *ConversationRedisCache) DelConversations(ownerUserID string, conversati
 
 func (c *ConversationRedisCache) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationtb.ConversationModel, error) {
 	// var keys []string
-	//for _, conversarionID := range conversationIDs {
+	// for _, conversarionID := range conversationIDs {
 	//	keys = append(keys, c.getConversationKey(ownerUserID, conversarionID))
 	//}
-	//return batchGetCache(
+	// return batchGetCache(
 	//	ctx,
 	//	c.rcClient,
 	//	keys,
@@ -263,10 +263,10 @@ func (c *ConversationRedisCache) GetUserAllConversations(ctx context.Context, ow
 		return nil, err
 	}
 	// var keys []string
-	//for _, conversarionID := range conversationIDs {
+	// for _, conversarionID := range conversationIDs {
 	//	keys = append(keys, c.getConversationKey(ownerUserID, conversarionID))
 	//}
-	//return batchGetCache(
+	// return batchGetCache(
 	//	ctx,
 	//	c.rcClient,
 	//	keys,

@@ -247,7 +247,7 @@ func batchGetCache2[T any, K comparable](
 //	expire time.Duration,
 //	keyIndexFn func(s string, keys []string) (int, error),
 //	fn func(ctx context.Context) (map[string]T, error),
-//) (map[string]T, error) {
+// ) (map[string]T, error) {
 //	batchMap, err := rcClient.FetchBatch2(ctx, keys, expire, func(idxs []int) (m map[int]string, err error) {
 //		tArrays, err := fn(ctx)
 //		if err != nil {
