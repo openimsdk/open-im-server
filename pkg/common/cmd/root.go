@@ -119,7 +119,7 @@ func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 	if err != nil {
 		return errs.Wrap(err)
 	}
-	return errs.Wrap(log.InitConsoleLogger(rc.Name, logConfig.RemainLogLevel, logConfig.IsJson))
+	return errs.Wrap(log.InitConsoleLogger(rc.processName, logConfig.RemainLogLevel, logConfig.IsJson))
 
 }
 
