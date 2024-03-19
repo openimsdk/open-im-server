@@ -60,12 +60,12 @@ type groupServer struct {
 	config                *config.GlobalConfig
 }
 
-func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	mongo, err := unrelation.NewMongo(&config.Mongo)
+func Start(ctx context.Context, config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	mongo, err := unrelation.NewMongoDB(ctx, &config.Mongo)
 	if err != nil {
 		return err
 	}
-	rdb, err := cache.NewRedis(&config.Redis)
+	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
 	}

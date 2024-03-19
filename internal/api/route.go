@@ -50,14 +50,14 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func Start(config *config.GlobalConfig, port int, proPort int) error {
+func Start(ctx context.Context, config *config.GlobalConfig, port int, proPort int) error {
 	if port == 0 || proPort == 0 {
 		err := errors.New("port or proPort is empty")
 		wrappedErr := errs.WrapMsg(err, "validation error", "port", port, "proPort", proPort)
 		return wrappedErr
 	}
 
-	rdb, err := cache.NewRedis(&config.Redis)
+	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,8 @@ func Start(config *config.GlobalConfig, port int, proPort int) error {
 	}
 
 	server := http.Server{Addr: address, Handler: router}
-
+	log.CInfo(ctx, "api server starting", "address", address, "apiPort", port,
+		"prometheusPort", proPort)
 	go func() {
 		err = server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {

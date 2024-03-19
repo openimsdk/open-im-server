@@ -16,7 +16,7 @@ package tools
 
 import (
 	"context"
-	"fmt"
+	"github.com/OpenIMSDK/tools/log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -29,8 +29,9 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-func StartTask(config *config.GlobalConfig) error {
-	fmt.Println("cron task start, config", config.ChatRecordsClearTime)
+func StartTask(ctx context.Context, config *config.GlobalConfig) error {
+
+	log.CInfo(ctx, "cron task server starting", "chatRecordsClearTime", config.ChatRecordsClearTime, "msgDestructTime", config.MsgDestructTime)
 
 	msgTool, err := InitMsgTool(config)
 	if err != nil {
@@ -39,20 +40,19 @@ func StartTask(config *config.GlobalConfig) error {
 
 	msgTool.convertTools()
 
-	rdb, err := cache.NewRedis(&config.Redis)
+	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
 	}
 
 	// register cron tasks
 	var crontab = cron.New()
-	fmt.Printf("Start chatRecordsClearTime cron task, cron config: %s\n", config.ChatRecordsClearTime)
+
 	_, err = crontab.AddFunc(config.ChatRecordsClearTime, cronWrapFunc(config, rdb, "cron_clear_msg_and_fix_seq", msgTool.AllConversationClearMsgAndFixSeq))
 	if err != nil {
 		return errs.Wrap(err)
 	}
 
-	fmt.Printf("Start msgDestruct cron task, cron config: %s\n", config.MsgDestructTime)
 	_, err = crontab.AddFunc(config.MsgDestructTime, cronWrapFunc(config, rdb, "cron_conversations_destruct_msgs", msgTool.ConversationsDestructMsgs))
 	if err != nil {
 		return errs.WrapMsg(err, "cron_conversations_destruct_msgs")
@@ -66,10 +66,10 @@ func StartTask(config *config.GlobalConfig) error {
 	<-sigs
 
 	// stop crontab, Wait for the running task to exit.
-	ctx := crontab.Stop()
+	cronCtx := crontab.Stop()
 
 	select {
-	case <-ctx.Done():
+	case <-cronCtx.Done():
 		// graceful exit
 
 	case <-time.After(15 * time.Second):

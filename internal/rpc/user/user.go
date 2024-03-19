@@ -59,12 +59,12 @@ func (s *userServer) GetGroupOnlineUser(ctx context.Context, req *pbuser.GetGrou
 	panic("implement me")
 }
 
-func Start(config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis(&config.Redis)
+func Start(ctx context.Context, config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
 	}
-	mongo, err := unrelation.NewMongo(&config.Mongo)
+	mongo, err := unrelation.NewMongoDB(ctx, &config.Mongo)
 	if err != nil {
 		return err
 	}

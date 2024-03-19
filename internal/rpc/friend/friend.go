@@ -47,15 +47,15 @@ type friendServer struct {
 	config                *config.GlobalConfig
 }
 
-func Start(config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	// Initialize MongoDB
-	mongo, err := unrelation.NewMongo(&config.Mongo)
+	mongo, err := unrelation.NewMongoDB(ctx, &config.Mongo)
 	if err != nil {
 		return err
 	}
 
 	// Initialize Redis
-	rdb, err := cache.NewRedis(&config.Redis)
+	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
 	}

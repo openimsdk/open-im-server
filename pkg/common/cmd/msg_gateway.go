@@ -15,6 +15,8 @@
 package cmd
 
 import (
+	"context"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"log"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -25,10 +27,12 @@ import (
 
 type MsgGatewayCmd struct {
 	*RootCmd
+	ctx context.Context
 }
 
 func NewMsgGatewayCmd(name string) *MsgGatewayCmd {
-	ret := &MsgGatewayCmd{NewRootCmd(genutil.GetProcessName(), name)}
+	ret := &MsgGatewayCmd{RootCmd: NewRootCmd(genutil.GetProcessName(), name)}
+	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
 	ret.addRunE()
 	ret.SetRootCmdPt(ret)
 	return ret
@@ -51,7 +55,7 @@ func (m *MsgGatewayCmd) getWsPortFlag(cmd *cobra.Command) int {
 
 func (m *MsgGatewayCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msggateway.Start(m.config, m.getPortFlag(cmd), m.getWsPortFlag(cmd), m.getPrometheusPortFlag(cmd))
+		return msggateway.Start(m.ctx, m.config, m.getPortFlag(cmd), m.getWsPortFlag(cmd), m.getPrometheusPortFlag(cmd))
 	}
 }
 

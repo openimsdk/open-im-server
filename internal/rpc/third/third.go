@@ -36,8 +36,12 @@ import (
 	"google.golang.org/grpc"
 )
 
-func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	mongo, err := unrelation.NewMongo(&config.Mongo)
+func Start(ctx context.Context, config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := cache.NewRedis(ctx, &config.Redis)
+	if err != nil {
+		return err
+	}
+	mongo, err := unrelation.NewMongoDB(ctx, &config.Mongo)
 	if err != nil {
 		return err
 	}
@@ -60,10 +64,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 		apiURL += "/"
 	}
 	apiURL += "object/"
-	rdb, err := cache.NewRedis(&config.Redis)
-	if err != nil {
-		return err
-	}
+
 	// Select the oss method according to the profile policy
 	enable := config.Object.Enable
 	var o s3.Interface

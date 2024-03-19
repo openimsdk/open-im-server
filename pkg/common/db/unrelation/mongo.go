@@ -17,6 +17,7 @@ package unrelation
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/tools/log"
 	"os"
 	"strings"
 	"time"
@@ -40,8 +41,8 @@ type Mongo struct {
 	mongoConf *config.Mongo
 }
 
-// NewMongo Initialize MongoDB connection.
-func NewMongo(mongoConf *config.Mongo) (*Mongo, error) {
+// NewMongoDB Initialize MongoDB connection.
+func NewMongoDB(ctx context.Context, mongoConf *config.Mongo) (*Mongo, error) {
 	specialerror.AddReplace(mongo.ErrNoDocuments, errs.ErrRecordNotFound)
 	uri := buildMongoURI(mongoConf)
 
@@ -50,13 +51,14 @@ func NewMongo(mongoConf *config.Mongo) (*Mongo, error) {
 
 	// Retry connecting to MongoDB
 	for i := 0; i <= maxRetry; i++ {
-		ctx, cancel := context.WithTimeout(context.Background(), mongoConnTimeout)
+		ctx, cancel := context.WithTimeout(ctx, mongoConnTimeout)
 		defer cancel()
 		mongoClient, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 		if err == nil {
 			if err = mongoClient.Ping(ctx, nil); err != nil {
 				return nil, errs.WrapMsg(err, uri)
 			}
+			log.CInfo(ctx, "MongoDB connected", "uri", uri)
 			return &Mongo{db: mongoClient, mongoConf: mongoConf}, nil
 		}
 		if shouldRetry(err) {

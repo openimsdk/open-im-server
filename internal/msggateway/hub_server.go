@@ -30,8 +30,8 @@ import (
 	"google.golang.org/grpc"
 )
 
-func (s *Server) InitServer(config *config.GlobalConfig, disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis(&config.Redis)
+func (s *Server) InitServer(ctx context.Context, config *config.GlobalConfig, disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
 	}
@@ -43,8 +43,8 @@ func (s *Server) InitServer(config *config.GlobalConfig, disCov discoveryregistr
 	return nil
 }
 
-func (s *Server) Start(conf *config.GlobalConfig) error {
-	return startrpc.Start(context.Background(),
+func (s *Server) Start(ctx context.Context, conf *config.GlobalConfig) error {
+	return startrpc.Start(ctx,
 		s.rpcPort,
 		conf.RpcRegisterName.OpenImMessageGatewayName,
 		s.prometheusPort,
@@ -123,7 +123,8 @@ func (s *Server) GetUsersOnlineStatus(
 }
 
 func (s *Server) OnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq) (*msggateway.OnlineBatchPushOneMsgResp, error) {
-	panic("implement me")
+	//todo implement
+	return nil, nil
 }
 
 func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq,

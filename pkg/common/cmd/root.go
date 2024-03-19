@@ -62,11 +62,14 @@ func WithLogName(logName string) func(*CmdOpts) {
 func NewRootCmd(processName, name string, opts ...func(*CmdOpts)) *RootCmd {
 	rootCmd := &RootCmd{processName: processName, Name: name, config: config.NewGlobalConfig()}
 	cmd := cobra.Command{
+		Use:   "Start openIM application",
 		Short: fmt.Sprintf(`Start %s `, name),
 		Long:  fmt.Sprintf(`Start %s `, name),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return rootCmd.persistentPreRun(cmd, opts...)
 		},
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
 	rootCmd.Command = cmd
 	rootCmd.addConfFlag()

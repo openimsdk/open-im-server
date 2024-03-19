@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -52,13 +53,13 @@ type MsgTransfer struct {
 	cancel context.CancelFunc
 }
 
-func Start(config *config.GlobalConfig, prometheusPort int) error {
-	rdb, err := cache.NewRedis(&config.Redis)
+func Start(ctx context.Context, config *config.GlobalConfig, prometheusPort, index int) error {
+	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
 	}
 
-	mongo, err := unrelation.NewMongo(&config.Mongo)
+	mongo, err := unrelation.NewMongoDB(ctx, &config.Mongo)
 	if err != nil {
 		return err
 	}
@@ -88,7 +89,7 @@ func Start(config *config.GlobalConfig, prometheusPort int) error {
 	if err != nil {
 		return err
 	}
-	return msgTransfer.Start(prometheusPort, config)
+	return msgTransfer.Start(ctx, prometheusPort, config, index)
 }
 
 func NewMsgTransfer(kafkaConf *config.Kafka, msgDatabase controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*MsgTransfer, error) {
@@ -107,8 +108,9 @@ func NewMsgTransfer(kafkaConf *config.Kafka, msgDatabase controller.CommonMsgDat
 	}, nil
 }
 
-func (m *MsgTransfer) Start(prometheusPort int, config *config.GlobalConfig) error {
-	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
+func (m *MsgTransfer) Start(ctx context.Context, prometheusPort int, config *config.GlobalConfig, index int) error {
+	log.CInfo(ctx, "msg_transfer server starting",
+		"prometheusPort", prometheusPort, "index", index)
 	if prometheusPort <= 0 {
 		return errs.WrapMsg(errors.New("invalid prometheus port"), "prometheusPort validation failed", "providedPort", prometheusPort)
 	}

@@ -68,7 +68,7 @@ func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
-	mongo, err := unrelation.NewMongo(&config.Mongo)
+	mongo, err := unrelation.NewMongoDB(&config.Mongo)
 	if err != nil {
 		return nil, err
 	}

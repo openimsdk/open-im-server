@@ -52,7 +52,7 @@ func Start(
 	rpcRegisterName string,
 	prometheusPort int,
 	config *config2.GlobalConfig,
-	rpcFn func(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,
+	rpcFn func(ctx context.Context, config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,
 	options ...grpc.ServerOption,
 ) error {
 	log.CInfo(ctx, "rpc server starting", "rpcRegisterName", rpcRegisterName, "rpcPort", rpcPort,
@@ -96,7 +96,7 @@ func Start(
 		once.Do(srv.GracefulStop)
 	}()
 
-	err = rpcFn(config, client, srv)
+	err = rpcFn(ctx, config, client, srv)
 	if err != nil {
 		return err
 	}

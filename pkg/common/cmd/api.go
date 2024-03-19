@@ -15,18 +15,22 @@
 package cmd
 
 import (
+	"context"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/openimsdk/open-im-server/v3/internal/api"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/spf13/cobra"
 )
 
 type ApiCmd struct {
 	*RootCmd
+	ctx context.Context
 }
 
 func NewApiCmd(name string) *ApiCmd {
 	ret := &ApiCmd{RootCmd: NewRootCmd(genutil.GetProcessName(), name)}
+	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
 	ret.SetRootCmdPt(ret)
 	ret.addPreRun()
 	ret.addRunE()
@@ -42,7 +46,7 @@ func (a *ApiCmd) addPreRun() {
 
 func (a *ApiCmd) addRunE() {
 	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return api.Start(a.config, a.port, a.prometheusPort)
+		return api.Start(a.ctx, a.config, a.port, a.prometheusPort)
 	}
 }
 

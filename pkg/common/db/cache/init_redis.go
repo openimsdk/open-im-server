@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/log"
 	"os"
 	"strings"
 	"time"
@@ -38,7 +39,7 @@ const (
 )
 
 // NewRedis Initialize redis connection.
-func NewRedis(redisConf *config.Redis) (redis.UniversalClient, error) {
+func NewRedis(ctx context.Context, redisConf *config.Redis) (redis.UniversalClient, error) {
 	if redisClient != nil {
 		return redisClient, nil
 	}
@@ -80,6 +81,7 @@ func NewRedis(redisConf *config.Redis) (redis.UniversalClient, error) {
 		return nil, errs.WrapMsg(err, errMsg)
 	}
 	redisClient = rdb
+	log.CInfo(ctx, "redis connected successfully", "address", redisConf.Address, "username", redisConf.Username, "password", redisConf.Password, "clusterMode", redisConf.ClusterMode, "enablePipeline", redisConf.EnablePipeline)
 	return rdb, err
 }
 
