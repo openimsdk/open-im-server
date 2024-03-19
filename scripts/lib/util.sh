@@ -397,7 +397,7 @@ openim::util::check_process_names() {
       return 1
     fi
   }
-
+  
   # Arrays to collect details of processes
   local not_started=()
   local started=()
@@ -413,11 +413,7 @@ openim::util::check_process_names() {
      else
        # If there are PIDs, loop through each one
        for pid in "${pids[@]}"; do
-         echo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
          local command=$(ps -p $pid -o comm=)
-
-          echo "ps -p $pid -o comm="
-
          local start_time=$(ps -p $pid -o lstart=)
          local port=$(get_port $pid)
 
@@ -427,12 +423,11 @@ openim::util::check_process_names() {
          fi
 
          started+=("Process $process_name - Command: $command, PID: $pid, Port: $port, Start time: $start_time")
-         echo bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb $started
        done
      fi
    done
 
-
+  
   # Print information
   if [[ ${#not_started[@]} -ne 0 ]]; then
     echo "Not started processes:"
@@ -440,7 +435,7 @@ openim::util::check_process_names() {
       echo "Process $process_name is not started."
     done
   fi
-
+  
   if [[ ${#started[@]} -ne 0 ]]; then
     echo
     echo "Started processes:"
@@ -448,7 +443,7 @@ openim::util::check_process_names() {
       echo "$info"
     done
   fi
-
+  
   # Return status
   if [[ ${#not_started[@]} -ne 0 ]]; then
     openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
@@ -494,7 +489,7 @@ openim::util::check_process_names_for_stop() {
     else
       # If there are PIDs, loop through each one
       for pid in "${pids[@]}"; do
-        local command=$(ps -p $pid -o cmd=)
+        local command=$(ps -p $pid -o comm=)
         local start_time=$(ps -p $pid -o lstart=)
         local port=$(get_port $pid)
 
