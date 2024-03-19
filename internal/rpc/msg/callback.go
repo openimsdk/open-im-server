@@ -156,27 +156,27 @@ func callbackMsgModify(ctx context.Context, globalConfig *config.GlobalConfig, m
 	return nil
 }
 func CallbackGroupMsgRead(ctx context.Context, globalConfig *config.GlobalConfig, req *cbapi.CallbackGroupMsgReadReq) error {
-	if !globalConfig.Callback.CallbackGroupMsgRead.Enable || req.ContentType != constant.Text {
+	if !globalConfig.Callback.CallbackGroupMsgRead.Enable {
 		return nil
 	}
 	req.CallbackCommand = cbapi.CallbackGroupMsgReadCommand
 
 	resp := &cbapi.CallbackGroupMsgReadResp{}
-	if err := http.CallBackPostReturn(ctx, globalConfig.Callback.CallbackUrl, req, resp, globalConfig.Callback.CallbackMsgModify); err != nil {
+	if err := http.CallBackPostReturn(ctx, globalConfig.Callback.CallbackUrl, req, resp, globalConfig.Callback.CallbackGroupMsgRead); err != nil {
 		return err
 	}
 	return nil
 }
 
 func CallbackSingleMsgRead(ctx context.Context, globalConfig *config.GlobalConfig, req *cbapi.CallbackSingleMsgReadReq) error {
-	if !globalConfig.Callback.CallbackSingleMsgRead.Enable || req.ContentType != constant.Text {
+	if !globalConfig.Callback.CallbackSingleMsgRead.Enable {
 		return nil
 	}
 	req.CallbackCommand = cbapi.CallbackSingleMsgRead
 
 	resp := &cbapi.CallbackSingleMsgReadResp{}
 
-	if err := http.CallBackPostReturn(ctx, globalConfig.Callback.CallbackUrl, req, resp, globalConfig.Callback.CallbackMsgModify); err != nil {
+	if err := http.CallBackPostReturn(ctx, globalConfig.Callback.CallbackUrl, req, resp, globalConfig.Callback.CallbackSingleMsgRead); err != nil {
 		return err
 	}
 	return nil
