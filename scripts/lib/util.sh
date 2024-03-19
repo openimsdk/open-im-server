@@ -415,6 +415,8 @@ openim::util::check_process_names() {
        for pid in "${pids[@]}"; do
          echo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
          local command=$(ps -p $pid -o cmd=)
+
+         echo "ps -p $pid -o cmd="
          local start_time=$(ps -p $pid -o lstart=)
          local port=$(get_port $pid)
 
