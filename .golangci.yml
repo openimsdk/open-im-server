@@ -579,6 +579,7 @@ linters-settings:
   rowserrcheck:
     packages:
       - github.com/jmoiron/sqlx
+
   revive:
     # see https://github.com/mgechev/revive#available-rules for details.
     ignore-generated-header: true
@@ -586,15 +587,16 @@ linters-settings:
     rules:
       - name: indent-error-flow
         severity: warning
+
   staticcheck:
     # Select the Go version to target. The default is '1.13'.
-    go: "1.16"
+    go: "1.20"
     # https://staticcheck.io/docs/options#checks
     checks: [ "all" ]
 
   stylecheck:
     # Select the Go version to target. The default is '1.13'.
-    go: "1.16"
+    go: "1.20"
 
     # https://staticcheck.io/docs/options#checks
     checks: [ "all", "-ST1000", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022" ]

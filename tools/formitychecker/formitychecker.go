@@ -15,27 +15,57 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/openimsdk/open-im-server/tools/formitychecker/checker"
 	"github.com/openimsdk/open-im-server/tools/formitychecker/config"
 )
 
 func main() {
-	defaultTargetDirs := "."
-	defaultIgnoreDirs := "components,.git"
-
-	var targetDirs string
-	var ignoreDirs string
-	flag.StringVar(&targetDirs, "target", defaultTargetDirs, "Directories to check (default: current directory)")
-	flag.StringVar(&ignoreDirs, "ignore", defaultIgnoreDirs, "Directories to ignore (default: A/, B/)")
+	var configPath string
+	flag.StringVar(&configPath, "config", "", "Path to the configuration file")
 	flag.Parse()
 
-	conf := config.NewConfig(targetDirs, ignoreDirs)
-
-	err := checker.CheckDirectory(conf)
-	if err != nil {
-		fmt.Println("Error:", err)
+	if configPath == "" {
+		configPath = os.Getenv("CONFIG_PATH")
 	}
+
+	if configPath == "" {
+		configPath = "config.yaml"
+		if _, err := os.Stat(".github/formitychecker.yaml"); err == nil {
+			configPath = ".github/formitychecker.yaml"
+		}
+	}
+
+	cfg, err := config.LoadConfig(configPath)
+	if err != nil {
+		fmt.Println("Error loading config:", err)
+		return
+	}
+
+	c := &checker.Checker{Config: cfg}
+	err = c.Check()
+	if err != nil {
+		fmt.Println("Error during check:", err)
+		os.Exit(1)
+	}
+
+	// if len(c.Errors) > 0 {
+	// 	fmt.Println("Found errors:")
+	// 	for _, errMsg := range c.Errors {
+	// 		fmt.Println("-", errMsg)
+	// 	}
+	// 	os.Exit(1)
+	// }
+
+	summaryJSON, err := json.MarshalIndent(c.Summary, "", "  ")
+	if err != nil {
+		fmt.Println("Error marshalling summary:", err)
+		return
+	}
+
+	fmt.Println(string(summaryJSON))
 }
