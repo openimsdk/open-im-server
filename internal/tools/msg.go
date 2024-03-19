@@ -63,12 +63,12 @@ func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controlle
 	}
 }
 
-func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
-	rdb, err := cache.NewRedis(&config.Redis)
+func InitMsgTool(ctx context.Context, config *config.GlobalConfig) (*MsgTool, error) {
+	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return nil, err
 	}
-	mongo, err := unrelation.NewMongoDB(&config.Mongo)
+	mongo, err := unrelation.NewMongoDB(ctx, &config.Mongo)
 	if err != nil {
 		return nil, err
 	}
