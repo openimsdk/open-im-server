@@ -45,7 +45,7 @@ const (
 	taskURL      = "/push/list/message"
 	batchPushURL = "/push/list/alias"
 
-	// codes.
+	// Codes.
 	tokenExpireCode = 10001
 	tokenExpireTime = 60 * 60 * 23
 	taskIDTTL       = 1000 * 60 * 60 * 24

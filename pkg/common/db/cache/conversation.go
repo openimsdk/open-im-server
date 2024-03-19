@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	//conversationKey                          = "CONVERSATION:"
+	//ConversationKey                          = "CONVERSATION:"
 	//conversationIDsKey                       = "CONVERSATION_IDS:"
 	//conversationIDsHashKey                   = "CONVERSATION_IDS_HASH:"
 	//conversationHasReadSeqKey                = "CONVERSATION_HAS_READ_SEQ:"

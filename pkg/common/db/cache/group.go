@@ -32,7 +32,7 @@ import (
 
 const (
 	groupExpireTime = time.Second * 60 * 60 * 12
-	//groupInfoKey        = "GROUP_INFO:"
+	//GroupInfoKey        = "GROUP_INFO:"
 	//groupMemberIDsKey   = "GROUP_MEMBER_IDS:"
 	//groupMembersHashKey = "GROUP_MEMBERS_HASH2:"
 	//groupMemberInfoKey  = "GROUP_MEMBER_INFO:"

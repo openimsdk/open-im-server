@@ -29,7 +29,7 @@ import (
 )
 
 var (
-	// singleton pattern.
+	// Singleton pattern.
 	redisClient redis.UniversalClient
 )
 

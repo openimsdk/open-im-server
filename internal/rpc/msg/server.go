@@ -32,7 +32,7 @@ type (
 	// MessageInterceptorChain defines a chain of message interceptor functions.
 	MessageInterceptorChain []MessageInterceptorFunc
 
-	// msgServer encapsulates dependencies required for message handling.
+	// MsgServer encapsulates dependencies required for message handling.
 	msgServer struct {
 		RegisterCenter         discoveryregistry.SvcDiscoveryRegistry // Service discovery registry for service registration.
 		MsgDatabase            controller.CommonMsgDatabase           // Interface for message database operations.

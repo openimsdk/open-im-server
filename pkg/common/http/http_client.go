@@ -30,7 +30,7 @@ import (
 )
 
 var (
-	// define http client.
+	// Define http client.
 	client = &http.Client{
 		Timeout: 15 * time.Second, // max timeout is 15s
 	}

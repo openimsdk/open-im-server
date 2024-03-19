@@ -35,7 +35,7 @@ import (
 
 const (
 	userExpireTime = time.Second * 60 * 60 * 12
-	//userInfoKey               = "USER_INFO:".
+	//UserInfoKey               = "USER_INFO:".
 	userGlobalRecvMsgOptKey   = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
 	olineStatusKey            = "ONLINE_STATUS:"
 	userOlineStatusExpireTime = time.Second * 60 * 60 * 24

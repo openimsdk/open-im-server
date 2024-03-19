@@ -30,9 +30,8 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/tencentyun/cos-go-sdk-v5"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
+	"github.com/tencentyun/cos-go-sdk-v5"
 )
 
 const (
