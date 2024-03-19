@@ -96,7 +96,6 @@ We reinforce our approach to branch management and versioning with stringent tes
 
 This document describes the maximum version skew supported between various openim components. Specific cluster deployment tools may place additional restrictions on version skew.
 
-
 ### Supported version skew
 
 In highly-available (HA) clusters, the newest and oldest `openim-api` instances must be within one minor version.
@@ -210,6 +209,7 @@ git merge release-v3.1
 # Push the updates to the main branch
 git push origin main
 ```
+
 ##  Release Process
 
 ```
@@ -232,5 +232,7 @@ For more details on managing Docker image versions, visit [OpenIM Docker Images 
 
 More on multi-branch version management design and version management design at helm charts：
 
-+ https://github.com/openimsdk/open-im-server/issues/1695
-+ https://github.com/openimsdk/open-im-server/issues/1662
+About Helm's version management strategy for Multiple Apps and multiple Services:
+
++ [中文版本管理文档](https://github.com/openimsdk/helm-charts/blob/main/docs/contrib/version-zh.md)
++ [English version management documents](https://github.com/openimsdk/helm-charts/blob/main/docs/contrib/version.md)

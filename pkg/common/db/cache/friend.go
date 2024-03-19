@@ -16,13 +16,13 @@ package cache
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"time"
 
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/dtm-labs/rockscache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/redis/go-redis/v9"
 )
@@ -31,7 +31,7 @@ const (
 	friendExpireTime = time.Second * 60 * 60 * 12
 	//friendIDsKey        = "FRIEND_IDS:"
 	//TwoWayFriendsIDsKey = "COMMON_FRIENDS_IDS:"
-	//friendKey           = "FRIEND_INFO:"
+	//friendKey           = "FRIEND_INFO:".
 )
 
 // FriendCache is an interface for caching friend-related data.

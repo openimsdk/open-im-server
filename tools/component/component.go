@@ -30,8 +30,9 @@ import (
 	"github.com/OpenIMSDK/tools/component"
 	"github.com/OpenIMSDK/tools/errs"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"gopkg.in/yaml.v3"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 const (
@@ -65,6 +66,23 @@ type checkFunc struct {
 	config   *config.GlobalConfig
 }
 
+// colorErrPrint prints formatted string in red to stderr
+func colorErrPrint(msg string) {
+	// ANSI escape code for red text
+	const redColor = "\033[31m"
+	// ANSI escape code to reset color
+	const resetColor = "\033[0m"
+	msg = redColor + msg + resetColor
+	// Print to stderr in red
+	fmt.Fprintf(os.Stderr, "%s\n", msg)
+}
+
+func colorSuccessPrint(format string, a ...interface{}) {
+	// ANSI escape code for green text is \033[32m
+	// \033[0m resets the color
+	fmt.Printf("\033[32m"+format+"\033[0m", a...)
+}
+
 func main() {
 	flag.Parse()
 
@@ -81,12 +99,13 @@ func main() {
 	}
 
 	checks := []checkFunc{
-		//{name: "Mysql", function: checkMysql},
 		{name: "Mongo", function: checkMongo, config: conf},
 		{name: "Redis", function: checkRedis, config: conf},
-		{name: "Minio", function: checkMinio, config: conf},
 		{name: "Zookeeper", function: checkZookeeper, config: conf},
 		{name: "Kafka", function: checkKafka, config: conf},
+	}
+	if conf.Object.Enable == "minio" {
+		checks = append(checks, checkFunc{name: "Minio", function: checkMinio, config: conf})
 	}
 
 	for i := 0; i < maxRetry; i++ {
@@ -102,22 +121,23 @@ func main() {
 				err = check.function(check.config)
 				if err != nil {
 					allSuccess = false
-					component.ErrorPrint(fmt.Sprintf("Check component: %s, failed: %s", check.name, err.Error()))
+					colorErrPrint(fmt.Sprintf("Check component: %s, failed: %v", check.name, err.Error()))
+
 					if check.name == "Minio" {
 						if errors.Is(err, errMinioNotEnabled) ||
 							errors.Is(err, errSignEndPoint) ||
 							errors.Is(err, errApiURL) {
-							fmt.Fprintf(os.Stderr, err.Error(), " check ", check.name)
 							checks[index].flag = true
 							continue
 						}
-            break
+						break
 					}
 				} else {
 					checks[index].flag = true
 					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 				}
 			}
+
 		}
 		if allSuccess {
 			component.SuccessPrint("All components started successfully!")
@@ -296,7 +316,7 @@ func configGetEnv(config *config.GlobalConfig) error {
 
 	config.Redis.Username = getEnv("REDIS_USERNAME", config.Redis.Username)
 	config.Redis.Password = getEnv("REDIS_PASSWORD", config.Redis.Password)
-	config.Redis.Address = getArrEnv("REDIS_ADDRESS", "REDIS_PASSWORD", config.Redis.Address)
+	config.Redis.Address = getArrEnv("REDIS_ADDRESS", "REDIS_PORT", config.Redis.Address)
 
 	config.Object.ApiURL = getEnv("OBJECT_APIURL", config.Object.ApiURL)
 	config.Object.Minio.Endpoint = getEnv("MINIO_ENDPOINT", config.Object.Minio.Endpoint)

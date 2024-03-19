@@ -38,11 +38,11 @@ const (
 	conversationUserMinSeq = "CON_USER_MIN_SEQ:"
 	hasReadSeq             = "HAS_READ_SEQ:"
 
-	//appleDeviceToken = "DEVICE_TOKEN"
+	//appleDeviceToken = "DEVICE_TOKEN".
 	getuiToken  = "GETUI_TOKEN"
 	getuiTaskID = "GETUI_TASK_ID"
 	//signalCache      = "SIGNAL_CACHE:"
-	//signalListCache  = "SIGNAL_LIST_CACHE:"
+	//signalListCache  = "SIGNAL_LIST_CACHE:".
 	FCM_TOKEN = "FCM_TOKEN:"
 
 	messageCache            = "MESSAGE_CACHE:"

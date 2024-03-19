@@ -1,6 +1,4 @@
-#!/usr/bin/env bash
-
-# Copyright © 2023 OpenIM. All rights reserved.
+# Copyright © 2024 OpenIM. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+name: Language Check Workflow Test
 
+on: [pull_request]
 
+jobs:
+  comment-language-detector:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-
-#fixme This scripts is the total startup scripts
-#fixme The full name of the shell scripts that needs to be started is placed in the need_to_start_server_shell array
-
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-source "${OPENIM_ROOT}/scripts/install/common.sh"
-openim::log::info "\n# Use Docker to start all openim service"
-trap 'openim::util::onCtrlC' INT
-"${OPENIM_ROOT}"/scripts/start-all.sh 2>&1 &
-tail -f ${DOCKER_LOG_FILE}
+      - name: Code Language Detector
+        uses: kubecub/comment-lang-detector@v1.0.0

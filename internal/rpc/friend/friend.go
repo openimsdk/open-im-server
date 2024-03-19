@@ -16,31 +16,26 @@ package friend
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/tx"
-
-	"github.com/OpenIMSDK/protocol/sdkws"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-
-	"github.com/OpenIMSDK/tools/log"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-
-	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
+	"github.com/OpenIMSDK/protocol/sdkws"
 	registry "github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"google.golang.org/grpc"
 )
 
 type friendServer struct {
@@ -119,26 +114,36 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 	if err := authverify.CheckAccessV3(ctx, req.FromUserID, s.config); err != nil {
 		return nil, err
 	}
+
 	if req.ToUserID == req.FromUserID {
 		return nil, errs.ErrCanNotAddYourself.Wrap("req.ToUserID", req.ToUserID)
 	}
+
 	if err = CallbackBeforeAddFriend(ctx, s.config, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
+
 	if _, err := s.userRpcClient.GetUsersInfoMap(ctx, []string{req.ToUserID, req.FromUserID}); err != nil {
 		return nil, err
 	}
+
 	in1, in2, err := s.friendDatabase.CheckIn(ctx, req.FromUserID, req.ToUserID)
 	if err != nil {
 		return nil, err
 	}
+
 	if in1 && in2 {
 		return nil, errs.ErrRelationshipAlready.Wrap()
 	}
+
 	if err = s.friendDatabase.AddFriendRequest(ctx, req.FromUserID, req.ToUserID, req.ReqMsg, req.Ex); err != nil {
 		return nil, err
 	}
-	s.notificationSender.FriendApplicationAddNotification(ctx, req)
+
+	if err = s.notificationSender.FriendApplicationAddNotification(ctx, req); err != nil {
+		return nil, err
+	}
+
 	if err = CallbackAfterAddFriend(ctx, s.config, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
@@ -202,7 +207,9 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.Res
 		if err != nil {
 			return nil, err
 		}
-		s.notificationSender.FriendApplicationAgreedNotification(ctx, req)
+		if err := s.notificationSender.FriendApplicationAgreedNotification(ctx, req); err != nil {
+			return nil, err
+		}
 		return resp, nil
 	}
 	if req.HandleResult == constant.FriendResponseRefuse {

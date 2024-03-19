@@ -15,8 +15,6 @@
 package msg
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/protocol/msg"
@@ -25,6 +23,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"google.golang.org/grpc"
 )

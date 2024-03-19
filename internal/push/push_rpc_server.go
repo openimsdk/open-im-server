@@ -16,7 +16,6 @@ package push
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	pbpush "github.com/OpenIMSDK/protocol/push"
@@ -26,6 +25,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"google.golang.org/grpc"
 )
@@ -90,9 +90,8 @@ func (r *pushServer) PushMsg(ctx context.Context, pbData *pbpush.PushMsgReq) (re
 	if err != nil {
 		if err != errNoOfflinePusher {
 			return nil, err
-		} else {
-			log.ZWarn(ctx, "offline push failed", err, "msg", pbData.String())
 		}
+		log.ZWarn(ctx, "offline push failed", err, "msg", pbData.String())
 	}
 	return &pbpush.PushMsgResp{}, nil
 }

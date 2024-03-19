@@ -637,6 +637,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbgroup.GetG
 	return resp, nil
 }
 
+// GetGroupApplicationList handles functions that get a list of group requests.
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbgroup.GetGroupApplicationListReq) (*pbgroup.GetGroupApplicationListResp, error) {
 	groupIDs, err := s.db.FindUserManagedGroupID(ctx, req.FromUserID)
 	if err != nil {
@@ -951,6 +952,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		return nil, errs.Wrap(errs.ErrDismissedAlready)
 	}
 	resp := &pbgroup.SetGroupInfoResp{}
+
 	count, err := s.db.FindGroupMemberNum(ctx, group.GroupID)
 	if err != nil {
 		return nil, err
@@ -1068,6 +1070,7 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) 
 		group []*relationtb.GroupModel
 		err   error
 	)
+
 	if req.GroupID != "" {
 		group, err = s.db.FindGroup(ctx, []string{req.GroupID})
 		resp.Total = uint32(len(group))
@@ -1076,25 +1079,20 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) 
 		total, group, err = s.db.SearchGroup(ctx, req.GroupName, req.Pagination)
 		resp.Total = uint32(total)
 	}
+
 	if err != nil {
 		return nil, err
 	}
 
-	var groups []*relationtb.GroupModel
-	for _, v := range group {
-		if v.Status == constant.GroupStatusDismissed {
-			resp.Total--
-			continue
-		}
-		groups = append(groups, v)
-	}
-	groupIDs := utils.Slice(groups, func(e *relationtb.GroupModel) string {
+	groupIDs := utils.Slice(group, func(e *relationtb.GroupModel) string {
 		return e.GroupID
 	})
+
 	ownerMembers, err := s.db.FindGroupsOwner(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	ownerMemberMap := utils.SliceToMap(ownerMembers, func(e *relationtb.GroupMemberModel) string {
 		return e.GroupID
 	})
@@ -1102,7 +1100,7 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) 
 	if err != nil {
 		return nil, err
 	}
-	resp.Groups = utils.Slice(groups, func(group *relationtb.GroupModel) *pbgroup.CMSGroup {
+	resp.Groups = utils.Slice(group, func(group *relationtb.GroupModel) *pbgroup.CMSGroup {
 		var (
 			userID   string
 			username string

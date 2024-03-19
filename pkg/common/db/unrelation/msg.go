@@ -1063,8 +1063,8 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 		// Changed to keyed fields for bson.M to avoid govet errors
 		condition = append(condition, bson.M{"$eq": bson.A{bson.M{"$dateToString": bson.M{"format": "%Y-%m-%d", "date": bson.M{"$toDate": "$$item.msg.send_time"}}}, req.SendTime}})
 	}
-	if req.MsgType != 0 {
-		condition = append(condition, bson.M{"$eq": bson.A{"$$item.msg.content_type", req.MsgType}})
+	if req.ContentType != 0 {
+		condition = append(condition, bson.M{"$eq": bson.A{"$$item.msg.content_type", req.ContentType}})
 	}
 	if req.SessionType != 0 {
 		condition = append(condition, bson.M{"$eq": bson.A{"$$item.msg.session_type", req.SessionType}})

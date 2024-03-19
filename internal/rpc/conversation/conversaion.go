@@ -506,19 +506,27 @@ func (c *conversationServer) getConversationInfo(
 		switch chatLog.SessionType {
 		case constant.SingleChatType:
 			if chatLog.SendID == userID {
-				msgInfo.FaceURL = sendMap[chatLog.RecvID].FaceURL
-				msgInfo.SenderName = sendMap[chatLog.RecvID].Nickname
+				if recv, ok := sendMap[chatLog.RecvID]; ok {
+					msgInfo.FaceURL = recv.FaceURL
+					msgInfo.SenderName = recv.Nickname
+				}
 				break
 			}
-			msgInfo.FaceURL = sendMap[chatLog.SendID].FaceURL
-			msgInfo.SenderName = sendMap[chatLog.SendID].Nickname
+			if send, ok := sendMap[chatLog.SendID]; ok {
+				msgInfo.FaceURL = send.FaceURL
+				msgInfo.SenderName = send.Nickname
+			}
 		case constant.GroupChatType, constant.SuperGroupChatType:
-			msgInfo.GroupName = groupMap[chatLog.GroupID].GroupName
-			msgInfo.GroupFaceURL = groupMap[chatLog.GroupID].FaceURL
-			msgInfo.GroupMemberCount = groupMap[chatLog.GroupID].MemberCount
 			msgInfo.GroupID = chatLog.GroupID
-			msgInfo.GroupType = groupMap[chatLog.GroupID].GroupType
-			msgInfo.SenderName = sendMap[chatLog.SendID].Nickname
+			if group, ok := groupMap[chatLog.GroupID]; ok {
+				msgInfo.GroupName = group.GroupName
+				msgInfo.GroupFaceURL = group.FaceURL
+				msgInfo.GroupMemberCount = group.MemberCount
+				msgInfo.GroupType = group.GroupType
+			}
+			if send, ok := sendMap[chatLog.SendID]; ok {
+				msgInfo.SenderName = send.Nickname
+			}
 		}
 		pbchatLog.ConversationID = conversationID
 		msgInfo.LatestMsgRecvTime = chatLog.SendTime
@@ -528,7 +536,10 @@ func (c *conversationServer) getConversationInfo(
 	return conversationMsg, nil
 }
 
-func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(ctx context.Context, req *pbconversation.GetConversationNotReceiveMessageUserIDsReq) (*pbconversation.GetConversationNotReceiveMessageUserIDsResp, error) {
+func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(
+	ctx context.Context,
+	req *pbconversation.GetConversationNotReceiveMessageUserIDsReq,
+) (*pbconversation.GetConversationNotReceiveMessageUserIDsResp, error) {
 	userIDs, err := c.conversationDatabase.GetConversationNotReceiveMessageUserIDs(ctx, req.ConversationID)
 	if err != nil {
 		return nil, err
