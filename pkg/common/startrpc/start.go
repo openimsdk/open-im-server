@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/openimsdk/tools/log"
 	"net"
 	"net/http"
 	"os"
@@ -27,6 +26,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/openimsdk/tools/log"
 
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/openimsdk/tools/discoveryregistry"
@@ -46,15 +47,7 @@ import (
 )
 
 // Start rpc server.
-func Start(
-	ctx context.Context,
-	rpcPort int,
-	rpcRegisterName string,
-	prometheusPort int,
-	config *config2.GlobalConfig,
-	rpcFn func(ctx context.Context, config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,
-	options ...grpc.ServerOption,
-) error {
+func Start(ctx context.Context, rpcPort int, rpcRegisterName string, prometheusPort int, config *config2.GlobalConfig, rpcFn func(ctx context.Context, config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 	log.CInfo(ctx, "rpc server starting", "rpcRegisterName", rpcRegisterName, "rpcPort", rpcPort,
 		"prometheusPort", prometheusPort)
 	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(config.Rpc.ListenIP), strconv.Itoa(rpcPort))
@@ -63,7 +56,7 @@ func Start(
 		rpcTcpAddr,
 	)
 	if err != nil {
-		return errs.WrapMsg(err, "listen err", rpcTcpAddr)
+		return errs.WrapMsg(err, "listen err", "rpcTcpAddr", rpcTcpAddr)
 	}
 
 	defer listener.Close()
@@ -76,7 +69,7 @@ func Start(
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	registerIP, err := network.GetRpcRegisterIP(config.Rpc.RegisterIP)
 	if err != nil {
-		return errs.Wrap(err)
+		return err
 	}
 
 	var reg *prometheus.Registry
@@ -100,6 +93,7 @@ func Start(
 	if err != nil {
 		return err
 	}
+
 	err = client.Register(
 		rpcRegisterName,
 		registerIP,
@@ -107,7 +101,7 @@ func Start(
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return errs.Wrap(err)
+		return err
 	}
 
 	var (
@@ -115,6 +109,7 @@ func Start(
 		netErr     error
 		httpServer *http.Server
 	)
+
 	go func() {
 		if config.Prometheus.Enable && prometheusPort != 0 {
 			metric.InitializeMetrics(srv)
