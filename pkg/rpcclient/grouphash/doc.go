@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package grouphash // import "internal/pkg/pkg/rpcclient/grouphash"
+package grouphash // import "github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"

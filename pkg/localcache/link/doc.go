@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package link // import "internal/pkg/pkg/localcache/link"
+package link // import "github.com/openimsdk/open-im-server/v3/pkg/localcache/link"

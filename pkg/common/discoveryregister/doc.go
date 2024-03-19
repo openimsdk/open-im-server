@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package discoveryregister // import "internal/pkg/pkg/common/discoveryregister"
+package discoveryregister // import "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
