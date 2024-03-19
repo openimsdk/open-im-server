@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/mcontext"

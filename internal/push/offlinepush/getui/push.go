@@ -31,6 +31,7 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/splitter"
+	"github.com/redis/go-redis/v9"
 )
 
 var (

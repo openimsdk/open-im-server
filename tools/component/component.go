@@ -18,13 +18,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/IBM/sarama"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
+	"gopkg.in/yaml.v2"
 	"os"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/IBM/sarama"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 
 	"github.com/openimsdk/tools/component"
 	"github.com/openimsdk/tools/errs"

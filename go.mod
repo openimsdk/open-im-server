@@ -26,7 +26,7 @@ require (
 	google.golang.org/api v0.165.0
 	google.golang.org/grpc v1.61.0
 	google.golang.org/protobuf v1.33.0
-	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require github.com/google/uuid v1.6.0
@@ -36,6 +36,7 @@ require (
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/redis/go-redis/v9 v9.4.0
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stathat/consistent v1.0.0
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.46

@@ -17,9 +17,6 @@ package tools
 import (
 	"context"
 	"fmt"
-	"math"
-	"math/rand"
-
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -35,8 +32,11 @@ import (
 	"github.com/openimsdk/tools/mw"
 	"github.com/openimsdk/tools/tx"
 	"github.com/openimsdk/tools/utils"
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"math"
+	"math/rand"
 )
 
 type MsgTool struct {

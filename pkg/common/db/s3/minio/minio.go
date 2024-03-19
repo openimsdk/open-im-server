@@ -29,6 +29,7 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/signer"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"

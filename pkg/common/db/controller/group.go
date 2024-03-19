@@ -25,6 +25,7 @@ import (
 	"github.com/openimsdk/tools/pagination"
 	"github.com/openimsdk/tools/tx"
 	"github.com/openimsdk/tools/utils"
+	"github.com/redis/go-redis/v9"
 )
 
 type GroupDatabase interface {

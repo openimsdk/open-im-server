@@ -24,6 +24,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/redis/go-redis/v9"
 )
 
 func NewUserLocalCache(client rpcclient.UserRpcClient, cli redis.UniversalClient) *UserLocalCache {

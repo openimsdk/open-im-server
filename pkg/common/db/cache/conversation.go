@@ -26,6 +26,7 @@ import (
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils"
+	"github.com/redis/go-redis/v9"
 )
 
 const (

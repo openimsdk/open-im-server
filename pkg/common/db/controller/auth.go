@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/tools/errs"
