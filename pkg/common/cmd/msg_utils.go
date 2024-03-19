@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"context"
 	"github.com/openimsdk/open-im-server/v3/internal/tools"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/spf13/cobra"
@@ -136,7 +137,7 @@ func NewSeqCmd() *SeqCmd {
 
 func (s *SeqCmd) GetSeqCmd() *cobra.Command {
 	s.Command.Run = func(cmdLines *cobra.Command, args []string) {
-		_, err := tools.InitMsgTool(s.MsgTool.Config)
+		_, err := tools.InitMsgTool(context.Background(), s.MsgTool.Config)
 		if err != nil {
 			util.ExitWithError(err)
 		}
