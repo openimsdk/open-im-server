@@ -178,6 +178,7 @@ linters-settings:
       - ^init$
       - ^os.Exit$
       - ^fmt.Print.*$
+      - ^fmt.Println.*$
       - ^panic$
       - painc
   #     - ginkgo\\.F.* # these are used just for local development
