@@ -61,7 +61,7 @@ func (c *Checker) checkPath(path string, info os.FileInfo, err error) error {
 			c.Summary.Issues = append(c.Summary.Issues, Issue{
 				Type:    "ignoredDirectory",
 				Path:    path,
-				Message: "此目录已被忽略",
+				Message: "This directory has been ignored",
 			})
 			return filepath.SkipDir
 		}
@@ -69,7 +69,7 @@ func (c *Checker) checkPath(path string, info os.FileInfo, err error) error {
 			c.Summary.Issues = append(c.Summary.Issues, Issue{
 				Type:    "directoryNaming",
 				Path:    path,
-				Message: "目录名称不符合规范",
+				Message: "The directory name is invalid",
 			})
 		}
 	} else {
@@ -81,7 +81,7 @@ func (c *Checker) checkPath(path string, info os.FileInfo, err error) error {
 			c.Summary.Issues = append(c.Summary.Issues, Issue{
 				Type:    "fileNaming",
 				Path:    path,
-				Message: "文件名称不符合规范",
+				Message: "The file name does not comply with the specification",
 			})
 		}
 	}
