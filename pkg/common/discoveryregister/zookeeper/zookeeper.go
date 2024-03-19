@@ -15,7 +15,6 @@
 package zookeeper
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -43,13 +42,13 @@ func NewZookeeperDiscoveryRegister(zkConf *config.Zookeeper) (discoveryregistry.
 		// openkeeper.WithLogger(log.NewZkLogger()),
 	)
 	if err != nil {
-		uriFormat := "address:%s, username:%s, password:%s, schema:%s."
-		errInfo := fmt.Sprintf(uriFormat,
-			zkConf.ZkAddr,
-			zkConf.Username,
-			zkConf.Password,
-			zkConf.Schema)
-		return nil, errs.WrapMsg(err, errInfo)
+		//uriFormat := "address:%s, username:%s, password:%s, schema:%s."
+		//errInfo := fmt.Sprintf(uriFormat,
+		//	zkConf.ZkAddr,
+		//	zkConf.Username,
+		//	zkConf.Password,
+		//	zkConf.Schema)
+		return nil, errs.Wrap(err)
 	}
 	return zk, nil
 }
