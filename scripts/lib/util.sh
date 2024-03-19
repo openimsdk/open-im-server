@@ -413,7 +413,7 @@ openim::util::check_process_names() {
      else
        # If there are PIDs, loop through each one
        for pid in "${pids[@]}"; do
-         local command=$(ps -p $pid -o cmd=)
+         local command=$(ps -p $pid -o comm=)
          local start_time=$(ps -p $pid -o lstart=)
          local port=$(get_port $pid)
 
@@ -489,7 +489,7 @@ openim::util::check_process_names_for_stop() {
     else
       # If there are PIDs, loop through each one
       for pid in "${pids[@]}"; do
-        local command=$(ps -p $pid -o cmd=)
+        local command=$(ps -p $pid -o comm=)
         local start_time=$(ps -p $pid -o lstart=)
         local port=$(get_port $pid)
 
