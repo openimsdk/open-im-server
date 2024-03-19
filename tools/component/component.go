@@ -243,7 +243,7 @@ func checkKafka(config *config.GlobalConfig) error {
 
 	for _, requiredTopic := range requiredTopics {
 		if !isTopicPresent(requiredTopic, topics) {
-			return errs.Wrap(err, fmt.Sprintf("Kafka doesn't contain topic: %v", requiredTopic))
+			return errs.WrapMsg(err, fmt.Sprintf("Kafka doesn't contain topic: %v", requiredTopic))
 		}
 	}
 

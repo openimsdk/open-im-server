@@ -41,7 +41,7 @@ func CheckDirectory(cfg *config.Config) error {
 	for _, targetDir := range cfg.TargetDirs {
 		err := filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				return errs.Wrap(err, fmt.Sprintf("error walking directory '%s'", targetDir))
+				return errs.WrapMsg(err, fmt.Sprintf("error walking directory '%s'", targetDir))
 			}
 
 			// Skip if the directory is in the ignore list
