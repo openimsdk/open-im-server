@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"log"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -28,7 +29,7 @@ type MsgGatewayCmd struct {
 }
 
 func NewMsgGatewayCmd(name string) *MsgGatewayCmd {
-	ret := &MsgGatewayCmd{NewRootCmd(name)}
+	ret := &MsgGatewayCmd{NewRootCmd(genutil.GetProcessName(), name)}
 	ret.addRunE()
 	ret.SetRootCmdPt(ret)
 	return ret

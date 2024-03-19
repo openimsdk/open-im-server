@@ -146,9 +146,9 @@ func NewCommonMsgDatabase(msgDocModel unrelationtb.MsgDocModelInterface, cacheMo
 }
 
 func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, config *config.GlobalConfig) (CommonMsgDatabase, error) {
-	cacheModel := cache.NewMsgCacheModel(rdb, config)
+	cacheModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
 	msgDocModel := unrelation.NewMsgMongoDriver(database)
-	return NewCommonMsgDatabase(msgDocModel, cacheModel, config)
+	return NewCommonMsgDatabase(msgDocModel, cacheModel, &config.Kafka)
 }
 
 type commonMsgDatabase struct {

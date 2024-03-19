@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/spf13/cobra"
 
 	"github.com/openimsdk/open-im-server/v3/internal/tools"
@@ -27,7 +28,7 @@ type CronTaskCmd struct {
 }
 
 func NewCronTaskCmd(name string) *CronTaskCmd {
-	ret := &CronTaskCmd{RootCmd: NewRootCmd(name, WithCronTaskLogName()),
+	ret := &CronTaskCmd{RootCmd: NewRootCmd(genutil.GetProcessName(), name, WithCronTaskLogName()),
 		initFunc: tools.StartTask}
 	ret.addRunE()
 	ret.SetRootCmdPt(ret)

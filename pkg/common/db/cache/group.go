@@ -391,7 +391,7 @@ func (g *GroupCacheRedis) GetGroupOwner(ctx context.Context, groupID string) (*r
 		return nil, err
 	}
 	if len(members) == 0 {
-		return nil, errs.ErrRecordNotFound.Wrap(fmt.Sprintf("group %s owner not found", groupID))
+		return nil, errs.ErrRecordNotFound.WrapMsg(fmt.Sprintf("group %s owner not found", groupID))
 	}
 	return members[0], nil
 }

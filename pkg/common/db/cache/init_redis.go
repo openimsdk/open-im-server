@@ -78,7 +78,7 @@ func NewRedis(redisConf *config.Redis) (redis.UniversalClient, error) {
 	if err != nil {
 		errMsg := fmt.Sprintf("address:%s, username:%s, password:%s, clusterMode:%t, enablePipeline:%t", redisConf.Address, redisConf.Username,
 			redisConf.Password, redisConf.ClusterMode, redisConf.EnablePipeline)
-		return nil, errs.Wrap(err, errMsg)
+		return nil, errs.WrapMsg(err, errMsg)
 	}
 	redisClient = rdb
 	return rdb, err

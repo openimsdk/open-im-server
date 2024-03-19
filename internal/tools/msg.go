@@ -65,11 +65,11 @@ func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controlle
 }
 
 func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
-	rdb, err := cache.NewRedis(config)
+	rdb, err := cache.NewRedis(&config.Redis)
 	if err != nil {
 		return nil, err
 	}
-	mongo, err := unrelation.NewMongo(config)
+	mongo, err := unrelation.NewMongo(&config.Mongo)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
 		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
 		ctxTx,
 	)
-	msgRpcClient := rpcclient.NewMessageRpcClient(discov, config)
+	msgRpcClient := rpcclient.NewMessageRpcClient(discov, config.RpcRegisterName.OpenImMsgName)
 	msgNotificationSender := notification.NewMsgNotificationSender(config, rpcclient.WithRpcClient(&msgRpcClient))
 	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase, msgNotificationSender, config)
 	return msgTool, nil

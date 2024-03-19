@@ -33,6 +33,7 @@ type RootCmdPt interface {
 type RootCmd struct {
 	Command        cobra.Command
 	Name           string
+	processName    string
 	port           int
 	prometheusPort int
 	cmdItf         RootCmdPt
@@ -59,8 +60,8 @@ func WithLogName(logName string) func(*CmdOpts) {
 	}
 }
 
-func NewRootCmd(name string, opts ...func(*CmdOpts)) *RootCmd {
-	rootCmd := &RootCmd{Name: name, config: config.NewGlobalConfig()}
+func NewRootCmd(processName, name string, opts ...func(*CmdOpts)) *RootCmd {
+	rootCmd := &RootCmd{processName: processName, Name: name, config: config.NewGlobalConfig()}
 	cmd := cobra.Command{
 		Use:   "Start openIM application",
 		Short: fmt.Sprintf(`Start %s `, name),
@@ -104,7 +105,7 @@ func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 	logConfig := rc.config.Log
 
-	return log.InitFromConfig(
+	err := log.InitFromConfig(
 
 		cmdOpts.loggerPrefixName,
 		rc.Name,
@@ -115,6 +116,11 @@ func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 		logConfig.RemainRotationCount,
 		logConfig.RotationTime,
 	)
+	if err != nil {
+		return errs.Wrap(err)
+	}
+	return errs.Wrap(log.InitConsoleLogger(rc.Name, logConfig.RemainLogLevel, logConfig.IsJson))
+
 }
 
 func defaultCmdOpts() *CmdOpts {

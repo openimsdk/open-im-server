@@ -221,7 +221,7 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 		}
 		md5Sum := md5.Sum([]byte(strings.Join([]string{uploadInfo.ETag}, partSeparator)))
 		if md5val := hex.EncodeToString(md5Sum[:]); md5val != upload.Hash {
-			return nil, errs.ErrArgs.Wrap(fmt.Sprintf("md5 mismatching %s != %s", md5val, upload.Hash))
+			return nil, errs.ErrArgs.WrapMsg(fmt.Sprintf("md5 mismatching %s != %s", md5val, upload.Hash))
 		}
 		// Prevents concurrent operations at this time that cause files to be overwritten
 		copyInfo, err := c.impl.CopyObject(ctx, uploadInfo.Key, upload.Key+"."+c.UUID())

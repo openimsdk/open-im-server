@@ -56,7 +56,7 @@ func NewMongo(mongoConf *config.Mongo) (*Mongo, error) {
 		mongoClient, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 		if err == nil {
 			if err = mongoClient.Ping(ctx, nil); err != nil {
-				return nil, errs.Wrap(err, uri)
+				return nil, errs.WrapMsg(err, uri)
 			}
 			return &Mongo{db: mongoClient, mongoConf: mongoConf}, nil
 		}
@@ -65,7 +65,7 @@ func NewMongo(mongoConf *config.Mongo) (*Mongo, error) {
 			continue
 		}
 	}
-	return nil, errs.Wrap(err, uri)
+	return nil, errs.WrapMsg(err, uri)
 }
 
 func buildMongoURI(mongoConf *config.Mongo) string {

@@ -23,8 +23,6 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	openkeeper "github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
@@ -42,7 +40,7 @@ func NewZookeeperDiscoveryRegister(zkConf *config.Zookeeper) (discoveryregistry.
 		openkeeper.WithUserNameAndPassword(username, password),
 		openkeeper.WithRoundRobin(),
 		openkeeper.WithTimeout(10),
-		openkeeper.WithLogger(log.NewZkLogger()),
+		//openkeeper.WithLogger(log.NewZkLogger()),
 	)
 	if err != nil {
 		uriFormat := "address:%s, username:%s, password:%s, schema:%s."
@@ -51,7 +49,7 @@ func NewZookeeperDiscoveryRegister(zkConf *config.Zookeeper) (discoveryregistry.
 			zkConf.Username,
 			zkConf.Password,
 			zkConf.Schema)
-		return nil, errs.Wrap(err, errInfo)
+		return nil, errs.WrapMsg(err, errInfo)
 	}
 	return zk, nil
 }

@@ -45,7 +45,7 @@ func (s *Server) InitServer(config *config.GlobalConfig, disCov discoveryregistr
 }
 
 func (s *Server) Start(conf *config.GlobalConfig) error {
-	return startrpc.Start(
+	return startrpc.Start(context.Background(),
 		s.rpcPort,
 		conf.RpcRegisterName.OpenImMessageGatewayName,
 		s.prometheusPort,

@@ -118,7 +118,7 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 			return nil
 		}
 		log.ZWarn(ctx, "callback network failed", err, "url", url, "input", input)
-		return errs.ErrNetwork.Wrap(err.Error())
+		return errs.ErrNetwork.WrapMsg(err.Error())
 	}
 	if err = json.Unmarshal(b, output); err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {

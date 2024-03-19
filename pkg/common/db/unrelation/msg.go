@@ -130,7 +130,7 @@ func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(ctx context.Context, doc
 		bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", seqIndex): bytes}},
 	)
 	if err != nil {
-		return errs.Wrap(err, fmt.Sprintf("docID is %s, seqIndex is %d", docID, seqIndex))
+		return errs.WrapMsg(err, fmt.Sprintf("docID is %s, seqIndex is %d", docID, seqIndex))
 	}
 	return nil
 }
@@ -156,12 +156,12 @@ func (m *MsgMongoDriver) GetMsgDocModelByIndex(
 		findOpts,
 	)
 	if err != nil {
-		return nil, errs.Wrap(err, fmt.Sprintf("conversationID is %s", conversationID))
+		return nil, errs.WrapMsg(err, fmt.Sprintf("conversationID is %s", conversationID))
 	}
 	var msgs []table.MsgDocModel
 	err = cursor.All(ctx, &msgs)
 	if err != nil {
-		return nil, errs.Wrap(err, fmt.Sprintf("cursor is %s", cursor.Current.String()))
+		return nil, errs.WrapMsg(err, fmt.Sprintf("cursor is %s", cursor.Current.String()))
 	}
 	if len(msgs) > 0 {
 		return &msgs[0], nil
@@ -212,7 +212,7 @@ func (m *MsgMongoDriver) DeleteMsgsInOneDocByIndex(ctx context.Context, docID st
 	}
 	_, err := m.MsgCollection.UpdateMany(ctx, bson.M{"doc_id": docID}, updates)
 	if err != nil {
-		return errs.Wrap(err, fmt.Sprintf("docID is %s, indexes is %v", docID, indexes))
+		return errs.WrapMsg(err, fmt.Sprintf("docID is %s, indexes is %v", docID, indexes))
 	}
 	return nil
 }
@@ -279,7 +279,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(
 	defer cur.Close(ctx)
 	var msgDocModel []table.MsgDocModel
 	if err := cur.All(ctx, &msgDocModel); err != nil {
-		return nil, errs.Wrap(err, fmt.Sprintf("docID is %s, seqs is %v", docID, seqs))
+		return nil, errs.WrapMsg(err, fmt.Sprintf("docID is %s, seqs is %v", docID, seqs))
 	}
 	if len(msgDocModel) == 0 {
 		return nil, errs.Wrap(mongo.ErrNoDocuments)
@@ -306,14 +306,14 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(
 			}
 			data, err := json.Marshal(&revokeContent)
 			if err != nil {
-				return nil, errs.Wrap(err, fmt.Sprintf("docID is %s, seqs is %v", docID, seqs))
+				return nil, errs.WrapMsg(err, fmt.Sprintf("docID is %s, seqs is %v", docID, seqs))
 			}
 			elem := sdkws.NotificationElem{
 				Detail: string(data),
 			}
 			content, err := json.Marshal(&elem)
 			if err != nil {
-				return nil, errs.Wrap(err, fmt.Sprintf("docID is %s, seqs is %v", docID, seqs))
+				return nil, errs.WrapMsg(err, fmt.Sprintf("docID is %s, seqs is %v", docID, seqs))
 			}
 			msg.Msg.ContentType = constant.MsgRevokeNotification
 			msg.Msg.Content = string(content)
@@ -326,7 +326,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(
 func (m *MsgMongoDriver) IsExistDocID(ctx context.Context, docID string) (bool, error) {
 	count, err := m.MsgCollection.CountDocuments(ctx, bson.M{"doc_id": docID})
 	if err != nil {
-		return false, errs.Wrap(err, fmt.Sprintf("docID is %s", docID))
+		return false, errs.WrapMsg(err, fmt.Sprintf("docID is %s", docID))
 	}
 	return count > 0, nil
 }
@@ -351,7 +351,7 @@ func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(ctx context.Context, userID st
 		updates = append(updates, updateModel)
 	}
 	_, err := m.MsgCollection.BulkWrite(ctx, updates)
-	return errs.Wrap(err, fmt.Sprintf("docID is %s, indexes is %v", docID, indexes))
+	return errs.WrapMsg(err, fmt.Sprintf("docID is %s, indexes is %v", docID, indexes))
 }
 
 // RangeUserSendCount

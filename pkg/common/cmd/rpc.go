@@ -15,11 +15,12 @@
 package cmd
 
 import (
+	"context"
 	"errors"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
@@ -33,10 +34,12 @@ type RpcCmd struct {
 	*RootCmd
 	RpcRegisterName string
 	initFunc        rpcInitFuc
+	ctx             context.Context
 }
 
 func NewRpcCmd(name string, initFunc rpcInitFuc) *RpcCmd {
-	ret := &RpcCmd{RootCmd: NewRootCmd(name), initFunc: initFunc}
+	ret := &RpcCmd{RootCmd: NewRootCmd(genutil.GetProcessName(), name), initFunc: initFunc}
+	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
 	ret.addPreRun()
 	ret.addRunE()
 	ret.SetRootCmdPt(ret)
@@ -69,7 +72,7 @@ func (a *RpcCmd) StartSvr(name string, rpcFn func(config *config2.GlobalConfig, 
 	if a.GetPortFlag() == 0 {
 		return errs.Wrap(errors.New("port is required"))
 	}
-	return startrpc.Start(a.GetPortFlag(), name, a.GetPrometheusPortFlag(), a.config, rpcFn)
+	return startrpc.Start(a.ctx, a.GetPortFlag(), name, a.GetPrometheusPortFlag(), a.config, rpcFn)
 }
 
 func (a *RpcCmd) GetPortFromConfig(portType string) int {

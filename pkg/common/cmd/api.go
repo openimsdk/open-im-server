@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/spf13/cobra"
 
 	"github.com/openimsdk/open-im-server/v3/internal/api"
@@ -26,7 +27,7 @@ type ApiCmd struct {
 }
 
 func NewApiCmd(name string) *ApiCmd {
-	ret := &ApiCmd{RootCmd: NewRootCmd(name)}
+	ret := &ApiCmd{RootCmd: NewRootCmd(genutil.GetProcessName(), name)}
 	ret.SetRootCmdPt(ret)
 	ret.addPreRun()
 	ret.addRunE()

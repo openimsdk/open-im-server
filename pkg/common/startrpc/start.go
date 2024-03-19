@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/log"
 	"net"
 	"net/http"
 	"os"
@@ -46,6 +47,7 @@ import (
 
 // Start rpc server.
 func Start(
+	ctx context.Context,
 	rpcPort int,
 	rpcRegisterName string,
 	prometheusPort int,
@@ -53,8 +55,8 @@ func Start(
 	rpcFn func(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,
 	options ...grpc.ServerOption,
 ) error {
-	fmt.Printf("start %s server, port: %d, prometheusPort: %d, OpenIM version: %s\n",
-		rpcRegisterName, rpcPort, prometheusPort, config2.Version)
+	log.CInfo(ctx, "rpc server starting", "rpcRegisterName", rpcRegisterName, "rpcPort", rpcPort,
+		"prometheusPort", prometheusPort)
 	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(config.Rpc.ListenIP), strconv.Itoa(rpcPort))
 	listener, err := net.Listen(
 		"tcp",
@@ -80,7 +82,7 @@ func Start(
 	var reg *prometheus.Registry
 	var metric *grpcprometheus.ServerMetrics
 	if config.Prometheus.Enable {
-		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, config)
+		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, &config.RpcRegisterName)
 		reg, metric, _ = prommetrics.NewGrpcPromObj(cusMetrics)
 		options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
 			grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))

@@ -109,7 +109,7 @@ func (cd *ConnDirect) GetConns(ctx context.Context,
 	}
 
 	if len(connections) == 0 {
-		return nil, errs.Wrap(errors.New("no connections found for service"), "serviceName", serviceName)
+		return nil, errs.WrapMsg(errors.New("no connections found for service"), "serviceName", serviceName)
 	}
 	return connections, nil
 }
@@ -120,7 +120,7 @@ func (cd *ConnDirect) GetConn(ctx context.Context, serviceName string, opts ...g
 		&cd.config.RpcPort, cd.config.LongConnSvr.OpenImMessageGatewayPort)
 	address, ok := addresses[serviceName]
 	if !ok {
-		return nil, errs.Wrap(errors.New("unknown service name"), "serviceName", serviceName)
+		return nil, errs.WrapMsg(errors.New("unknown service name"), "serviceName", serviceName)
 	}
 	var result string
 	for _, addr := range address {

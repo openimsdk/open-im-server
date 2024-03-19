@@ -40,7 +40,7 @@ func StartTask(config *config.GlobalConfig) error {
 
 	msgTool.convertTools()
 
-	rdb, err := cache.NewRedis(config)
+	rdb, err := cache.NewRedis(&config.Redis)
 	if err != nil {
 		return err
 	}

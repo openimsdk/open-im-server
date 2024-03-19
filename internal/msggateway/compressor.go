@@ -48,21 +48,7 @@ func (g *GzipCompressor) Compress(rawData []byte) ([]byte, error) {
 	gz := gzip.NewWriter(&gzipBuffer)
 
 	if _, err := gz.Write(rawData); err != nil {
-		return nil, errs.WrapMsg(err, func (g *GzipCompressor) CompressWithPool(rawData []byte) ([]byte, error) {
-			gz := gzipWriterPool.Get().(*gzip.Writer)
-			defer gzipWriterPool.Put(gz)
-		
-			gzipBuffer := bytes.Buffer{}
-			gz.Reset(&gzipBuffer)
-		
-			if _, err := gz.Write(rawData); err != nil {
-				return nil, errs.WrapMsg(err, "GzipCompressor.CompressWithPool: error writing data")
-			}
-			if err := gz.Close(); err != nil {
-				return nil, errs.WrapMsg(err, "GzipCompressor.CompressWithPool: error closing gzip writer")
-			}
-			return gzipBuffer.Bytes(), nil
-		}"GzipCompressor.Compress: writing to gzip writer failed")
+		return nil, errs.WrapMsg(err, "GzipCompressor.Compress: writing to gzip writer failed")
 	}
 
 	if err := gz.Close(); err != nil {

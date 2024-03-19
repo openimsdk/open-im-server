@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/spf13/cobra"
@@ -28,7 +29,7 @@ type MsgTransferCmd struct {
 }
 
 func NewMsgTransferCmd(name string) *MsgTransferCmd {
-	ret := &MsgTransferCmd{NewRootCmd(name)}
+	ret := &MsgTransferCmd{NewRootCmd(genutil.GetProcessName(), name)}
 	ret.addRunE()
 	ret.SetRootCmdPt(ret)
 	return ret
