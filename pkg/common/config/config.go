@@ -16,6 +16,7 @@ package config
 
 import (
 	"bytes"
+	"gopkg.in/yaml.v3"
 	"time"
 
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
