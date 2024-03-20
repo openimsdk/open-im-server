@@ -932,7 +932,7 @@ openim::test::set_group_info() {
 {
   "groupInfoForSet": {
     "groupID": "${1}",
-    "groupName": "new-name",
+    "groupName": "new group name",
     "notification": "new notification",
     "introduction": "new introduction",
     "faceURL": "www.newfaceURL.com",
@@ -1076,6 +1076,7 @@ function openim::test::group() {
 
 	local GROUP_ID=$RANDOM
 	local GROUP_ID2=$RANDOM
+
 	# Assumes that TEST_GROUP_ID, USER_ID, and other necessary IDs are set as environment variables before running this suite.
 	# 0. Register a friend user.
 	openim::test::user_register "${USER_ID}" "group00" "new_face_url"

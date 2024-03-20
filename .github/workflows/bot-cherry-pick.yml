@@ -12,23 +12,57 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Github Rebot for Cherry Pick On Comment
+name: Github Robot for Cherry Pick On Comment
+
 on:
   issue_comment:
     types: [created]
+
 jobs:
   cherry-pick:
     name: Cherry Pick
-    # && github.event.comment.user.login=='kubbot'
     if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/cherry-pick')
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout the latest code
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-          fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
+          fetch-depth: 0 # To ensure all history is available for cherry-picking
+
       - name: Automatic Cherry Pick
         uses: vendoo/gha-cherry-pick@v1
+        with:
+          # Assuming the cherry-pick commit SHA is passed in the comment like '/cherry-pick sha'
+          commit-sha: ${{ github.event.comment.body }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      - name: Create a new branch for PR
+        run: |
+          PR_BRANCH="cherry-pick-${GITHUB_SHA}-to-${{ github.base_ref }}"
+          git checkout -b $PR_BRANCH
+          git push origin $PR_BRANCH
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      - name: Create Pull Request
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const prTitle = "Cherry-pick to ${{ github.base_ref }}"
+            const prBody = "Automated cherry-pick of ${{ github.event.comment.body }}\n\n/cc @kubbot"
+            const base = "${{ github.base_ref }}"
+            const head = "cherry-pick-${{ github.sha }}-to-${{ github.base_ref }}"
+            const createPr = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: prTitle,
+              body: prBody,
+              head: head,
+              base: base,
+              maintainer_can_modify: true, // Allows maintainers to edit the PR
+            })
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
