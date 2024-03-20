@@ -143,7 +143,7 @@ KAFKA_LATESTMSG_REDIS_TOPIC=${KAFKA_LATESTMSG_REDIS_TOPIC}
 # MINIO_PORT
 # ----------
 # MINIO_PORT sets the port for the MinIO object storage service.
-# Upon changing this port, the MinIO endpoint URLs in the `config/config.yaml` file must be updated
+# Upon changing this port, the MinIO endpoint URLs in the config/config.yaml file must be updated
 # to reflect this change. The endpoints include both the 'endpoint' and 'signEndpoint' 
 # under the MinIO configuration.
 #
