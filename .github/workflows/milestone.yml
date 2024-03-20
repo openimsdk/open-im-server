@@ -41,6 +41,7 @@ jobs:
     steps:
       - uses: actions/github-script@v7 # v6
         with:
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           script: |
             if (!context.payload.pull_request.merged) {
               console.log('PR was not merged, skipping.');
@@ -56,9 +57,10 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
-              sort: 'due_on',
-              direction: 'asc'
+              sort: 'title',
+              direction: 'desc'
             })
+
             if (milestones.data.length === 0) {
               console.log('There are no milestones, skipping.');
               return;
