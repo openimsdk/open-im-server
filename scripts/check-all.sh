@@ -101,6 +101,8 @@ for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
     openim::log::colorless "$item"
 done
 
+openim::log::status "List the ports listened to by the OpenIM service:"
+
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
   #echo "+++ cat OpenIM log file >>> ${LOG_FILE}"
