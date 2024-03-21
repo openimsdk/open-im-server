@@ -53,15 +53,7 @@ func getGoVersion() string {
 func getDockerVersion() string {
 	version, err := ExecuteCommand("docker", "--version")
 	if err != nil {
-		return "Docker is not installed. Please install it to get the version." + err.Error()
-	}
-	return version
-}
-
-func getDockerComposeVersion() string {
-	version, err := ExecuteCommand("docker-compose", "--version")
-	if err != nil {
-		return "Docker Compose is not installed. Please install it to get the version."
+		return "Docker is not installed. Please install it to get the version."
 	}
 	return version
 }
@@ -112,7 +104,6 @@ func main() {
 	fmt.Println(blue("## Docker Version"))
 	fmt.Println(getDockerVersion())
 	fmt.Println(blue("## Docker Compose Version"))
-	fmt.Println(getDockerComposeVersion())
 	fmt.Println(blue("## Kubernetes Version"))
 	fmt.Println(getKubernetesVersion())
 	// fmt.Println(blue("## OpenIM Versions"))
