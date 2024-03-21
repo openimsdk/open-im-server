@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
@@ -65,7 +64,6 @@ func (m *MsgTransferCmd) AddTransferProgressFlag() {
 func (m *MsgTransferCmd) getTransferProgressFlagValue() int {
 	nIndex, err := m.Command.Flags().GetInt(constant.FlagTransferProgressIndex)
 	if err != nil {
-		fmt.Println("get transfer cmd error,make sure it is k8s env or not")
 		return 0
 	}
 	return nIndex
