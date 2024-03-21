@@ -103,11 +103,12 @@ function openim::tools::start_service() {
 
 
   openim::log::info "cmd: $cmd"
-  ${cmd}
+  ${cmd} > /dev/null 2>&1
+
 
  local status=$?
  if [ $status -eq 0 ]; then
-    openim::log::info "Service ${binary_name} started successfully."
+    openim::log::success "Service ${binary_name} started successfully."
     return 0
  else
     openim::log::error "Failed to start service ${binary_name}."
@@ -120,7 +121,7 @@ function openim::tools::start() {
     for tool in "${OPENIM_TOOLS_NAME_LISTARIES[@]}"; do
         openim::log::info "Starting tool ${tool}..."
         # openim::tools::start_service ${tool}
-        sleep 0.2
+        #sleep 0.2
     done
 }
 
@@ -128,7 +129,7 @@ function openim::tools::start() {
 function openim::tools::pre-start() {
    #openim::log::info "Preparing to start OpenIM Tools..."
       for tool in "${OPENIM_TOOLS_PRE_START_NAME_LISTARIES[@]}"; do
-          openim::log::colorless "Starting tool: ${tool}"
+          #openim::log::colorless "Starting tool: ${tool}"
           if ! openim::tools::start_service ${tool} ${OPNEIM_CONFIG}; then
               openim::log::error "Failed to start ${tool}, aborting..."
               return 1
