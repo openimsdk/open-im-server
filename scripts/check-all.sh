@@ -74,7 +74,7 @@ openim::log::info "\n## Check all dependent components service ports"
 if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
   openim::color::echo ${COLOR_CYAN} "Environment in the interior of the container"
 else
-  openim::color::echo ${COLOR_CYAN} "The environment is outside the container"
+  openim::color::echo ${COLOR_CYAN}"The environment is outside the container"
   openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}
 fi
 
