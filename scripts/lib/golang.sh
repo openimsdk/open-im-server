@@ -149,7 +149,7 @@ openim::golang::start_script_list() {
       openim-msgtransfer.sh
       openim-msggateway.sh
       openim-crontask.sh
-      openim-tools.sh
+      #openim-tools.sh
   )
   local result=()
   for target in "${targets[@]}"; do
