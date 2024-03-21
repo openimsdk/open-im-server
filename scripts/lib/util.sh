@@ -360,8 +360,8 @@ openim::util::check_ports() {
   
   # If any of the processes is not running, return a status of 1.
   if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
-    openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+    #openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
+    #openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
     cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
     return 1
   else
@@ -446,8 +446,8 @@ openim::util::check_process_names() {
   
   # Return status
   if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
-    openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+    #openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
+    #openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
     cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
     return 1
   else
