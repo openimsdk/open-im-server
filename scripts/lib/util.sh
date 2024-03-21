@@ -603,8 +603,6 @@ openim::util::stop_services_with_name() {
     for server_name in "$@"; do
         # Use the `pgrep` command to find process IDs related to the given service name.
         local pids=$(pgrep -f "$server_name")
-        echo "Stopping services with name: $server_name "$pids
-
         # If no process was found with the name, add it to the not_stopped list
         if [[ -z $pids ]]; then
             not_stopped+=("$server_name")
@@ -622,7 +620,7 @@ openim::util::stop_services_with_name() {
            if [[ -n $pid ]]; then
                # Print the binary path for the PID
                binary_path=$(readlink -f /proc/$pid/exe)
-               openim::log::colorless "stop PID $pid path: $binary_path"
+               openim::log::colorless "stop PID $pid full path: $binary_path"
 
                # Try to stop the service by killing its process.
                if kill -15 $pid 2>/dev/null; then
