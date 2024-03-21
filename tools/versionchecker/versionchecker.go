@@ -91,11 +91,9 @@ func getGitVersion() string {
 
 func main() {
 	// red := color.New(color.FgRed).SprintFunc()
-	green := color.New(color.FgGreen).SprintFunc()
+	//	green := color.New(color.FgGreen).SprintFunc()
 	blue := color.New(color.FgBlue).SprintFunc()
-	yellow := color.New(color.FgYellow).SprintFunc()
-
-	fmt.Println(yellow("# Diagnostic Tool Result"))
+	//	yellow := color.New(color.FgYellow).SprintFunc()
 	fmt.Println(blue("## Go Version"))
 	fmt.Println(getGoVersion())
 	fmt.Println(blue("## Branch Type"))
