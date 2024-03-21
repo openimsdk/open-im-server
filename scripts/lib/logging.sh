@@ -218,7 +218,7 @@ openim::log::status() {
     echo_log -e "${COLOR_GREEN} ${message} ==> ${COLOR_GREEN}$@${reset_color}"
   done
 }
-COLOR_BLUE
+
 
 openim::log::success() {
   local V="${V:-0}"
@@ -227,7 +227,7 @@ openim::log::success() {
   fi
   local timestamp=$(date +"%m%d %H:%M:%S")
   local reset_color='\033[0m'
-  echo_log -e "${COLOR_GREEN}[success ${timestamp}]${COLOR_SUFFIX}==> ${COLOR_GREEN}$@${reset_color}"
+  echo_log -e "${COLOR_BLUE}[success ${timestamp}]${COLOR_SUFFIX}==> ${COLOR_BLUE}$@${reset_color}"
 }
 
 
