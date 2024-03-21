@@ -86,7 +86,7 @@ else
 fi
 
 
-openim::log::info "\n## Check openim service:\n${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer"
+openim::log::status "Check OpenIM service:\n${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer"
 result=$(. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check)
 if [[ $? -ne 0 ]]; then
   #echo "+++ cat openim log file >>> ${LOG_FILE}"
@@ -96,7 +96,7 @@ fi
 
 
 
-echo "Check OpenIM service:"
+openim::log::status "Check OpenIM service:"
 for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
     echo "$item"
 done
