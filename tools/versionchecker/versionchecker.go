@@ -95,8 +95,7 @@ func main() {
 	blue := color.New(color.FgBlue).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
 
-	fmt.Println(green(printTime()))
-	fmt.Println(yellow("# Diagnostic Tool Result\n"))
+	fmt.Println(yellow("# Diagnostic Tool Result"))
 	fmt.Println(blue("## Go Version"))
 	fmt.Println(getGoVersion())
 	fmt.Println(blue("## Branch Type"))
