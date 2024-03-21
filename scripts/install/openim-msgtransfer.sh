@@ -83,7 +83,7 @@ function openim::msgtransfer::check() {
       fi
     done
   else
-    openim::log::error "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
+    openim::log::error "Expected $OPENIM_MSGGATEWAY_NUM OpenIM msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes running"
     return 1
   fi
   return 0
