@@ -53,7 +53,7 @@ function openim::crontask::start() {
   openim::log::status "start cron_task process, path: ${OPENIM_CRONTASK_BINARY}"
   #nohup ${OPENIM_CRONTASK_BINARY} -c ${OPENIM_PUSH_CONFIG} >> ${LOG_FILE} 2> >(tee -a "${STDERR_LOG_FILE}" "$TMP_LOG_FILE" >&2) &
   cmd="${OPENIM_CRONTASK_BINARY} -c ${OPENIM_PUSH_CONFIG}"
-  nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a  "$TMP_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) >/dev/null &
+  nohup ${cmd} >> "${LOG_FILE}" 2> >(tee -a  "$TMP_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) >> "${LOG_FILE}"  2>&1 &
   return 0
 
 }

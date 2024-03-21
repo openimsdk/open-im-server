@@ -15,10 +15,9 @@
 package main
 
 import (
-	_ "net/http/pprof"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	_ "net/http/pprof"
 )
 
 func main() {

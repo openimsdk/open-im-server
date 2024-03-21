@@ -149,7 +149,7 @@ openim::golang::start_script_list() {
       openim-msgtransfer.sh
       openim-msggateway.sh
       openim-crontask.sh
-      openim-tools.sh
+      #openim-tools.sh
   )
   local result=()
   for target in "${targets[@]}"; do
@@ -181,7 +181,7 @@ openim::golang::check_openim_binaries() {
         done
         return 1
     else
-        echo "All binaries have been installed in ${OPENIM_OUTPUT_HOSTBIN}。"
+        echo -e "All binaries have been installed in: \n${OPENIM_OUTPUT_HOSTBIN}\n${OPENIM_OUTPUT_HOSTBIN_TOOLS}"
         return 0
     fi
 }

@@ -25,13 +25,14 @@ func printLinks() {
 	blue := color.New(color.FgBlue).SprintFunc()
 	fmt.Printf("OpenIM Github: %s\n", blue("https://github.com/OpenIMSDK/Open-IM-Server"))
 	fmt.Printf("Slack Invitation: %s\n", blue("https://openimsdk.slack.com"))
+	fmt.Printf("Follow Twitter: %s\n", blue("https://twitter.com/founder_im63606"))
 }
 
 func main() {
 	yellow := color.New(color.FgYellow)
 	blue := color.New(color.FgBlue, color.Bold)
 
-	yellow.Println("Current module is still under development.")
+	yellow.Println("Please use the release branch or tag for production environments!")
 
 	message := `
 ____                       _____  __  __ 
