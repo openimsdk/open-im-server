@@ -43,7 +43,6 @@ function execute_start_scripts() {
     # Check if the script file exists and is executable.
     if [[ -x "$script_path" ]]; then
        openim::log::colorless "Starting script: ${script_path##*/}"     # Log the script name.
-
       # Execute the script with the constructed argument.
       result=$("$script_path" "$arg")
      if [[ $? -ne 0 ]]; then
