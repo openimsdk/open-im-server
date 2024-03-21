@@ -2867,9 +2867,9 @@ function openim::util::find_process_ports() {
    protocol_ports=${protocol_ports%, }
 
   if [[ -z "$protocol_ports" ]]; then
-        echo "Process $process_path is not listening on any ports"
+        openim::log::colorless "$process_path is not listening on any ports"
     else
-        echo "Process $process_path is listening on protocol & port: $protocol_ports"
+        openim::log::colorless "$process_path is listening on protocol & port: $protocol_ports"
     fi
 }
 
