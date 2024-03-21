@@ -603,7 +603,7 @@ openim::util::stop_services_with_name() {
     # Iterate over each given service name.
     for server_name in "$@"; do
         # Use the `pgrep` command to find process IDs related to the given service name.
-        echo "Stopping services with names: $server_name"
+        echo "Stopping services with name: $server_name"
         local pids=$(pgrep -f "$server_name")
 
         # If no process was found with the name, add it to the not_stopped list
