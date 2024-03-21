@@ -92,7 +92,7 @@ if ! ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start; then
 fi
 
 
-openim::log::success "Preprocessing has been successfully completed!"
+openim::log::colorless "Preprocessing has been successfully completed!"
 
 result=$("${OPENIM_ROOT}"/scripts/stop-all.sh)
 if [[ $? -ne 0 ]]; then
