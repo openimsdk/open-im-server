@@ -613,21 +613,26 @@ openim::util::stop_services_with_name() {
             continue
         fi
         local stopped_this_time=false
-        for pid in $pids; do
+       for pid in $pids; do
 
-            # Exclude the PID of the current script
-            if [[ "$pid" == "$$" ]]; then
-                continue
-            fi
+           # Exclude the PID of the current script
+           if [[ "$pid" == "$$" ]]; then
+               continue
+           fi
 
-            # If there's a Process ID, it means the service with the name is running.
-            if [[ -n $pid ]]; then
-                # Try to stop the service by killing its process.
-                if kill -15 $pid 2>/dev/null; then
-                    stopped_this_time=true
-                fi
-            fi
-        done
+           # If there's a Process ID, it means the service with the name is running.
+           if [[ -n $pid ]]; then
+               # Print the binary path for the PID
+               binary_path=$(readlink -f /proc/$pid/exe)
+               echo "PID $pid corresponds to binary path: $binary_path"
+
+               # Try to stop the service by killing its process.
+               if kill -15 $pid 2>/dev/null; then
+                   stopped_this_time=true
+               fi
+           fi
+       done
+
 
         if $stopped_this_time; then
             stopped+=("$server_name")
