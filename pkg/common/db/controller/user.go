@@ -87,10 +87,10 @@ type userDatabase struct {
 	tx      tx.CtxTx
 	userDB  relation.UserModelInterface
 	cache   cache.UserCache
-	mongoDB unrelationtb.UserModelInterface
+	mongoDB unrelationtb.SubscribeUserModelInterface
 }
 
-func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx tx.CtxTx, mongoDB unrelationtb.UserModelInterface) UserDatabase {
+func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx tx.CtxTx, mongoDB unrelationtb.SubscribeUserModelInterface) UserDatabase {
 	return &userDatabase{userDB: userDB, cache: cache, tx: tx, mongoDB: mongoDB}
 }
 
@@ -161,7 +161,7 @@ func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) 
 }
 
 //// Update (non-zero value) externally guarantees that userID exists.
-//func (u *userDatabase) Update(ctx context.Context, user *relation.UserModel) (err error) {
+//func (u *userDatabase) Update(ctx context.Context, user *relation.SubscribeUserModel) (err error) {
 //	if err := u.userDB.Update(ctx, user); err != nil {
 //		return err
 //	}

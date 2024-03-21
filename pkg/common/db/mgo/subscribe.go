@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package unrelation
+package mgo
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -35,9 +35,9 @@ const (
 	MaximumSubscription = 3000
 )
 
-func NewUserMongoDriver(database *mongo.Database) unrelation.UserModelInterface {
+func NewUserMongoDriver(database *mongo.Database) relation.SubscribeUserModelInterface {
 	return &UserMongoDriver{
-		userCollection: database.Collection(unrelation.SubscribeUser),
+		userCollection: database.Collection(relation.SubscribeUser),
 	}
 }
 
@@ -155,7 +155,7 @@ func (u *UserMongoDriver) RemoveSubscribedListFromUser(ctx context.Context, user
 
 // GetAllSubscribeList Get all users subscribed by this user.
 func (u *UserMongoDriver) GetAllSubscribeList(ctx context.Context, userID string) (userIDList []string, err error) {
-	var user unrelation.UserModel
+	var user relation.SubscribeUserModel
 	cursor := u.userCollection.FindOne(
 		ctx,
 		bson.M{"user_id": SubscriptionPrefix + userID})
@@ -172,7 +172,7 @@ func (u *UserMongoDriver) GetAllSubscribeList(ctx context.Context, userID string
 
 // GetSubscribedList Get the user subscribed by those users.
 func (u *UserMongoDriver) GetSubscribedList(ctx context.Context, userID string) (userIDList []string, err error) {
-	var user unrelation.UserModel
+	var user relation.SubscribeUserModel
 	cursor := u.userCollection.FindOne(
 		ctx,
 		bson.M{"user_id": SubscribedPrefix + userID})

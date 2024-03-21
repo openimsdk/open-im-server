@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package unrelation
+package relation
 
 import "context"
 
@@ -21,18 +21,18 @@ const (
 	SubscribeUser = "subscribe_user"
 )
 
-// UserModel collection structure.
-type UserModel struct {
+// SubscribeUserModel collection structure.
+type SubscribeUserModel struct {
 	UserID     string   `bson:"user_id"      json:"userID"`
 	UserIDList []string `bson:"user_id_list" json:"userIDList"`
 }
 
-func (UserModel) TableName() string {
+func (SubscribeUserModel) TableName() string {
 	return SubscribeUser
 }
 
-// UserModelInterface Operation interface of user mongodb.
-type UserModelInterface interface {
+// SubscribeUserModelInterface Operation interface of user mongodb.
+type SubscribeUserModelInterface interface {
 	// AddSubscriptionList Subscriber's handling of thresholds.
 	AddSubscriptionList(ctx context.Context, userID string, userIDList []string) error
 	// UnsubscriptionList Handling of unsubscribe.

@@ -19,6 +19,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -72,11 +73,11 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discoveryreg
 	if err != nil {
 		return err
 	}
-	if err := mongo.CreateMsgIndex(); err != nil {
+	cacheModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
+	msgDocModel, err := mgo.NewMsgMongo(mongo.GetDatabase(config.Mongo.Database))
+	if err != nil {
 		return err
 	}
-	cacheModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
-	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase(config.Mongo.Database))
 	conversationClient := rpcclient.NewConversationRpcClient(client, config.RpcRegisterName.OpenImConversationName)
 	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)

@@ -84,7 +84,7 @@ func InitMsgTool(ctx context.Context, config *config.GlobalConfig) (*MsgTool, er
 	if err != nil {
 		return nil, err
 	}
-	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase(config.Mongo.Database))
+	userMongoDB := mgo.NewUserMongoDriver(mongo.GetDatabase(config.Mongo.Database))
 	ctxTx := tx.NewMongo(mongo.GetClient())
 	userDatabase := controller.NewUserDatabase(
 		userDB,

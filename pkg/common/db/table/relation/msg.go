@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package unrelation
+package relation
 
 import (
 	"context"
@@ -110,23 +110,8 @@ type MsgDocModelInterface interface {
 	DeleteMsgsInOneDocByIndex(ctx context.Context, docID string, indexes []int) error
 	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, docID string, indexes []int64) error
 	SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (int32, []*MsgInfoModel, error)
-	RangeUserSendCount(
-		ctx context.Context,
-		start time.Time,
-		end time.Time,
-		group bool,
-		ase bool,
-		pageNumber int32,
-		showNumber int32,
-	) (msgCount int64, userCount int64, users []*UserCount, dateCount map[string]int64, err error)
-	RangeGroupSendCount(
-		ctx context.Context,
-		start time.Time,
-		end time.Time,
-		ase bool,
-		pageNumber int32,
-		showNumber int32,
-	) (msgCount int64, userCount int64, groups []*GroupCount, dateCount map[string]int64, err error)
+	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*UserCount, dateCount map[string]int64, err error)
+	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*GroupCount, dateCount map[string]int64, err error)
 	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
 }
 
@@ -165,11 +150,11 @@ func (m MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[st
 	return t
 }
 
-func (m MsgDocModel) GetMsgIndex(seq int64) int64 {
+func (MsgDocModel) GetMsgIndex(seq int64) int64 {
 	return (seq - 1) % singleGocMsgNum
 }
 
-func (m MsgDocModel) indexGen(conversationID string, seqSuffix int64) string {
+func (MsgDocModel) indexGen(conversationID string, seqSuffix int64) string {
 	return conversationID + ":" + strconv.FormatInt(seqSuffix, 10)
 }
 

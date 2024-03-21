@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	"github.com/openimsdk/tools/log"
 	"net/http"
 	"os"
@@ -65,10 +66,6 @@ func Start(ctx context.Context, config *config.GlobalConfig, prometheusPort, ind
 	if err != nil {
 		return err
 	}
-
-	if err = mongo.CreateMsgIndex(); err != nil {
-		return err
-	}
 	client, err := kdisc.NewDiscoveryRegister(config)
 	if err != nil {
 		return err
@@ -80,7 +77,10 @@ func Start(ctx context.Context, config *config.GlobalConfig, prometheusPort, ind
 
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	msgModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
-	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase(config.Mongo.Database))
+	msgDocModel, err := mgo.NewMsgMongo(mongo.GetDatabase(config.Mongo.Database))
+	if err != nil {
+		return err
+	}
 	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, &config.Kafka)
 	if err != nil {
 		return err

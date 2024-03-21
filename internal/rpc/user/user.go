@@ -80,7 +80,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, client registry.Svc
 		return err
 	}
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
-	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase(config.Mongo.Database))
+	userMongoDB := mgo.NewUserMongoDriver(mongo.GetDatabase(config.Mongo.Database))
 	database := controller.NewUserDatabase(userDB, cache, tx.NewMongo(mongo.GetClient()), userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.RpcRegisterName.OpenImFriendName)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)

@@ -23,10 +23,8 @@ import (
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/mw/specialerror"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -126,45 +124,4 @@ func (m *Mongo) GetClient() *mongo.Client {
 // GetDatabase returns the specific database from MongoDB.
 func (m *Mongo) GetDatabase(database string) *mongo.Database {
 	return m.db.Database(database)
-}
-
-// CreateMsgIndex creates an index for messages in MongoDB.
-func (m *Mongo) CreateMsgIndex() error {
-	return m.createMongoIndex(unrelation.Msg, true, "doc_id")
-}
-
-// createMongoIndex creates an index in a MongoDB collection.
-func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...string) error {
-	db := m.GetDatabase(m.mongoConf.Database).Collection(collection)
-	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
-	indexView := db.Indexes()
-
-	keysDoc := buildIndexKeys(keys)
-
-	index := mongo.IndexModel{
-		Keys: keysDoc,
-	}
-	if isUnique {
-		index.Options = options.Index().SetUnique(true)
-	}
-
-	_, err := indexView.CreateOne(context.Background(), index, opts)
-	if err != nil {
-		return errs.WrapMsg(err, "CreateIndex")
-	}
-	return nil
-}
-
-// buildIndexKeys builds the BSON document for index keys.
-func buildIndexKeys(keys []string) bson.D {
-	keysDoc := bson.D{}
-	for _, key := range keys {
-		direction := 1 // default direction is ascending
-		if strings.HasPrefix(key, "-") {
-			direction = -1 // descending order for prefixed with "-"
-			key = strings.TrimLeft(key, "-")
-		}
-		keysDoc = append(keysDoc, bson.E{Key: key, Value: direction})
-	}
-	return keysDoc
 }

@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -146,7 +147,10 @@ func NewCommonMsgDatabase(msgDocModel unrelationtb.MsgDocModelInterface, cacheMo
 
 func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, config *config.GlobalConfig) (CommonMsgDatabase, error) {
 	cacheModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
-	msgDocModel := unrelation.NewMsgMongoDriver(database)
+	msgDocModel, err := mgo.NewMsgMongo(database)
+	if err != nil {
+		return nil, err
+	}
 	return NewCommonMsgDatabase(msgDocModel, cacheModel, &config.Kafka)
 }
 
