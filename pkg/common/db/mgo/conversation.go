@@ -79,7 +79,6 @@ func (c *ConversationMgo) FindUserID(ctx context.Context, userIDs []string, conv
 		options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1}),
 	)
 }
-
 func (c *ConversationMgo) FindUserIDAllConversationID(ctx context.Context, userID string) ([]string, error) {
 	return mgoutil.Find[string](ctx, c.coll, bson.M{"owner_user_id": userID}, options.Find().SetProjection(bson.M{"_id": 0, "conversation_id": 1}))
 }

@@ -42,8 +42,7 @@ function execute_start_scripts() {
 
     # Check if the script file exists and is executable.
     if [[ -x "$script_path" ]]; then
-       openim::log::print_blue "Starting script: ${script_path##*/}"     # Log the script name.
-
+       openim::log::colorless "Starting script: ${script_path##*/}"     # Log the script name.
       # Execute the script with the constructed argument.
       result=$("$script_path" "$arg")
      if [[ $? -ne 0 ]]; then
@@ -83,17 +82,16 @@ fi
 # TODO Prelaunch tools, simple for now, can abstract functions later
 TOOLS_START_SCRIPTS_PATH=${START_SCRIPTS_PATH}/openim-tools.sh
 
-openim::log::print_blue "\n## Pre Starting OpenIM services"
-
+openim::log::status "Start the pre-start tools:"
 
 
 if ! ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start; then
-  openim::log::error "Pre Starting OpenIM services failed, aborting..."
+  openim::log::error "Start the pre-start tools, aborting!"
   exit 1
 fi
 
 
-openim::log::print_blue "Pre Starting OpenIM services processed successfully"
+openim::log::colorless "pre-start has been successfully completed!"
 
 result=$("${OPENIM_ROOT}"/scripts/stop-all.sh)
 if [[ $? -ne 0 ]]; then
@@ -102,28 +100,32 @@ if [[ $? -ne 0 ]]; then
   exit 1
 fi
 
-
-
-openim::log::status "\n## Starting openim scripts: "
+openim::log::status "Start the OpenIM startup scripts: "
 execute_start_scripts
+openim::log::status "OpenIM startup scripts have been successfully completed!"
 
 sleep 2
 
 result=$(. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check)
 if [[ $? -ne 0 ]]; then
-  openim::log::error "The program may fail to start.\n $result"
+  openim::log::error "The OpenIM services may fail to start.\n $result"
   exit 1
 fi
 
 
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
-  openim::log::error "The program may fail to start.\n $result"
+  openim::log::error "The OpenIM services may fail to start.\n $result"
   exit 1
 fi
 
 
-openim::log::info "\n## Post Starting openim services"
-${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
 
-openim::log::success "All openim services have been successfully started!"
+
+openim::log::status "Start the post-start tools:"
+${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
+openim::log::status "post-start has been successfully completed!"
+openim::util::find_ports_for_all_services ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}
+openim::util::find_ports_for_all_services ${OPENIM_MSGTRANSFER_BINARY[@]}
+
+openim::log::success "All OpenIM services have been successfully started!"
