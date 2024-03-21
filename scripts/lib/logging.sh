@@ -244,3 +244,14 @@ function openim::log::print_blue() {
     echo -e "\033[0;36m$1\033[0m"
 }
 
+
+openim::log::colorless() {
+  local V="${V:-0}"
+  if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
+    return
+  fi
+  timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
+  echo_log -e "${timestamp} ${1} "
+}
+
+
