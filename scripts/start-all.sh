@@ -106,23 +106,26 @@ fi
 openim::log::status "Start the OpenIM startup scripts: "
 execute_start_scripts
 
+openim::log::colorless "OpenIM startup scripts have been successfully completed!"
+
 sleep 2
 
 result=$(. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check)
 if [[ $? -ne 0 ]]; then
-  openim::log::error "The program may fail to start.\n $result"
+  openim::log::error "The OpenIM services may fail to start.\n $result"
   exit 1
 fi
 
 
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
-  openim::log::error "The program may fail to start.\n $result"
+  openim::log::error "The OpenIM services may fail to start.\n $result"
   exit 1
 fi
 
 
 openim::log::status "Start the post-start tools:"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
+openim::log::colorless "post-start has been successfully completed!"
 
-openim::log::success "All openim services have been successfully started!"
+openim::log::success "All OpenIM services have been successfully started!"
