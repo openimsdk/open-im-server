@@ -103,7 +103,6 @@ func main() {
 	fmt.Println(getGitVersion())
 	fmt.Println(blue("## Docker Version"))
 	fmt.Println(getDockerVersion())
-	fmt.Println(blue("## Docker Compose Version"))
 	fmt.Println(blue("## Kubernetes Version"))
 	fmt.Println(getKubernetesVersion())
 	// fmt.Println(blue("## OpenIM Versions"))
