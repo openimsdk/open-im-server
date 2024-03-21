@@ -181,7 +181,7 @@ openim::golang::check_openim_binaries() {
         done
         return 1
     else
-        echo "All binaries have been installed in: ${OPENIM_OUTPUT_HOSTBIN}"
+        echo "All binaries have been installed in: ${OPENIM_OUTPUT_HOSTBIN} ${OPENIM_OUTPUT_HOSTBIN_TOOLS}"
         return 0
     fi
 }
