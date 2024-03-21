@@ -2866,7 +2866,7 @@ function openim::util::find_process_ports() {
 function openim::util::find_ports_for_all_services() {
     local services=("$@")
     for service in "${services[@]}"; do
-        find_process_ports "$service"
+        openim::util::find_process_ports "$service"
     done
 }
 
