@@ -2867,6 +2867,21 @@ function openim::util::find_process_ports() {
 
 }
 
+function openim::util::find_process_ports3(){
+  local protocol_ports=""
+  while read -r line; do
+      local port_protocol=($line)
+      local port=${port_protocol[0]##*:}
+      local protocol=${port_protocol[1]}
+      protocol_ports="${protocol_ports}${protocol} ${port}, "
+      echo "Process $process_path is listening on port $port with protocol $protocol"
+  done < <(lsof -nP -iTCP -iUDP | grep LISTEN | grep "$(pgrep -f "$process_path")" | awk '{print $9, $8}')
+
+  protocol_ports=${protocol_ports%, }
+  echo "Process $process_path is listening on protocol & port $protocol_ports "
+
+}
+
 function openim::util::find_process_ports2() {
     local process_path="$1"
     if [[ -z "$process_path" ]]; then
