@@ -2846,26 +2846,7 @@ function openim::util::check_process_names_for_stop() {
 }
 
 
-function openim::util::find_process_ports1() {
-    local process_path="$1"
-    if [[ -z "$process_path" ]]; then
-        echo "Usage: find_process_ports /path/to/process"
-        return 1
-    fi
 
-    local protocol_ports=""
-    lsof -nP -iTCP -iUDP | grep LISTEN | grep "$(pgrep -f $process_path)" | awk '{print $9, $8}' | while read line; do
-        local port_protocol=($line)
-        local port=${port_protocol[0]##*:}
-        local protocol=${port_protocol[1]}
-        protocol_ports="${protocol_ports}${protocol} ${port}, "
-        echo "Process $process_path is listening on port $port with protocol $protocol"
-    done
-
-    protocol_ports=${protocol_ports%, }
-    echo echo "Process $process_path is listening on protocol & port $protocol_ports "
-
-}
 
 function openim::util::find_process_ports() {
     local process_path="$1"
@@ -2880,17 +2861,13 @@ function openim::util::find_process_ports() {
        local port=${port_protocol[0]##*:}
        local protocol=${port_protocol[1]}
        protocol_ports="${protocol_ports}${protocol} ${port}, "
-       echo "Process $process_path is listening on port $port with protocol $protocol"
+
    done < <(lsof -nP -iTCP -iUDP | grep LISTEN | grep "$(pgrep -f "$process_path")" | awk '{print $9, $8}')
 
    protocol_ports=${protocol_ports%, }
-   echo "Process $process_path is listening on protocol & port $protocol_ports "
-
+   echo "Process $process_path is listening on protocol & port: $protocol_ports "
 
 }
-
-
-
 
 
 
@@ -2902,8 +2879,6 @@ function openim::util::find_ports_for_all_services() {
         openim::util::find_process_ports "$service"
     done
 }
-
-
 
 
 
