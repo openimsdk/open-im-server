@@ -33,7 +33,7 @@ fi
 
 OPENIM_VERBOSE=4
 
-openim::log::info "\n# Begin to check all openim service"
+openim::log::info "\n# Begin to check all OpenIM service"
 
 openim::log::status "Check all dependent service ports"
 # Elegant printing function
@@ -65,9 +65,9 @@ print_services_and_ports "${OPENIM_SERVER_NAME_TARGETS[@]}" "${OPENIM_SERVER_POR
 print_services_and_ports "${OPENIM_DEPENDENCY_TARGETS[@]}" "${OPENIM_DEPENDENCY_PORT_TARGETS[@]}"
 
 # OpenIM check
-echo "++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
-openim::log::info "\n## Check all dependent service ports"
-echo "++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
+#echo "++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
+openim::log::info "\n## Check all dependent components service ports"
+#echo "++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
 
 
 # Later, after discarding Docker, the Docker keyword is unreliable, and Kubepods is used
