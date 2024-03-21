@@ -63,6 +63,7 @@ type Zookeeper struct {
 	Username string   `yaml:"username"`
 	Password string   `yaml:"password"`
 }
+
 type Mongo struct {
 	Uri         string   `yaml:"uri"`
 	Address     []string `yaml:"address"`
@@ -71,6 +72,7 @@ type Mongo struct {
 	Password    string   `yaml:"password"`
 	MaxPoolSize int      `yaml:"maxPoolSize"`
 }
+
 type Redis struct {
 	ClusterMode    bool     `yaml:"clusterMode"`
 	Address        []string `yaml:"address"`
@@ -78,6 +80,7 @@ type Redis struct {
 	Password       string   `yaml:"password"`
 	EnablePipeline bool     `yaml:"enablePipeline"`
 }
+
 type Kafka struct {
 	Username     string   `yaml:"username"`
 	Password     string   `yaml:"password"`

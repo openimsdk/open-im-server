@@ -74,6 +74,7 @@ func (cli *K8sDR) GetConfFromRegistry(key string) ([]byte, error) {
 
 	return nil, nil
 }
+
 func (cli *K8sDR) GetUserIdHashGatewayHost(ctx context.Context, userId string) (string, error) {
 	host, err := cli.gatewayHostConsistent.Get(userId)
 	if err != nil {

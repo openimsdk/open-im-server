@@ -161,12 +161,6 @@ linters-settings:
     ignore-enum-members: ""
     # consider enums only in package scopes, not in inner scopes
     package-scope-only: false
-  exhaustivestruct:
-    struct-patterns:
-      - '*.Test'
-      - '*.Test2'
-      - '*.Embedded'
-      - '*.External'
 
   forbidigo:
   #   # Forbid the following identifiers (identifiers are written using regexp):
