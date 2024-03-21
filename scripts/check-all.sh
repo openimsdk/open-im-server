@@ -107,9 +107,10 @@ if [[ $? -ne 0 ]]; then
   echo "$result"
   exit 1
 else
+  openim::util::find_ports_for_all_services ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}
   openim::log::success "All OpenIM services are running normally! "
 fi
 
 
 
-openim::util::find_ports_for_all_services ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}
+

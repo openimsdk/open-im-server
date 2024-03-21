@@ -15,18 +15,12 @@
 package main
 
 import (
-	_ "net/http/pprof"
-	"time"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	_ "net/http/pprof"
 )
 
 func main() {
-	go func() {
-		time.Sleep(30 * time.Second)
-		panic("Panic after one minute!")
-	}()
 	apiCmd := cmd.NewApiCmd(cmd.ApiServer)
 	apiCmd.AddPortFlag()
 	apiCmd.AddPrometheusPortFlag()
