@@ -126,4 +126,6 @@ openim::log::status "Start the post-start tools:"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
 openim::log::status "post-start has been successfully completed!"
 openim::util::find_ports_for_all_services ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}
+openim::util::find_ports_for_all_services ${OPENIM_MSGTRANSFER_BINARY[@]}
+
 openim::log::success "All OpenIM services have been successfully started!"
