@@ -94,6 +94,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 
+
 echo "Check OpenIM service name:"
 for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
     echo "$item"
@@ -109,3 +110,5 @@ else
   openim::log::success "All OpenIM services are running normally! "
 fi
 
+
+openim::util::find_process_ports ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}
