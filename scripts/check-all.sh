@@ -82,7 +82,7 @@ if [[ $? -ne 0 ]]; then
   openim::log::error_exit "The service does not start properly, please check the port, query variable definition!"
   echo "+++ https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh +++"
 else
-  openim::log::success "All components depended on by openim are running normally! "
+  openim::log::success "All components depended on by OpenIM are running normally! "
 fi
 
 
