@@ -106,32 +106,19 @@ type CommonMsgDatabase interface {
 }
 
 func NewCommonMsgDatabase(msgDocModel relation.MsgDocModelInterface, cacheModel cache.MsgModel, kafkaConf *config.Kafka) (CommonMsgDatabase, error) {
-	producerConfig := &kafka.ProducerConfig{
-		ProducerAck:  kafkaConf.ProducerAck,
-		CompressType: kafkaConf.CompressType,
-		Username:     kafkaConf.Username,
-		Password:     kafkaConf.Password,
-	}
-
-	var tlsConfig *kafka.TLSConfig
-	if kafkaConf.TLS != nil {
-		tlsConfig = &kafka.TLSConfig{
-			CACrt:              kafkaConf.TLS.CACrt,
-			ClientCrt:          kafkaConf.TLS.ClientCrt,
-			ClientKey:          kafkaConf.TLS.ClientKey,
-			ClientKeyPwd:       kafkaConf.TLS.ClientKeyPwd,
-			InsecureSkipVerify: false,
-		}
-	}
-	producerToRedis, err := kafka.NewKafkaProducer(kafkaConf.Addr, kafkaConf.LatestMsgToRedis.Topic, producerConfig, tlsConfig)
+	conf, err := kafka.BuildProducerConfig(kafkaConf.Config)
 	if err != nil {
 		return nil, err
 	}
-	producerToMongo, err := kafka.NewKafkaProducer(kafkaConf.Addr, kafkaConf.MsgToMongo.Topic, producerConfig, tlsConfig)
+	producerToRedis, err := kafka.NewKafkaProducer(conf, kafkaConf.Config.Addr, kafkaConf.LatestMsgToRedis.Topic)
 	if err != nil {
 		return nil, err
 	}
-	producerToPush, err := kafka.NewKafkaProducer(kafkaConf.Addr, kafkaConf.MsgToPush.Topic, producerConfig, tlsConfig)
+	producerToMongo, err := kafka.NewKafkaProducer(conf, kafkaConf.Config.Addr, kafkaConf.MsgToMongo.Topic)
+	if err != nil {
+		return nil, err
+	}
+	producerToPush, err := kafka.NewKafkaProducer(conf, kafkaConf.Config.Addr, kafkaConf.MsgToPush.Topic)
 	if err != nil {
 		return nil, err
 	}

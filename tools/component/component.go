@@ -18,7 +18,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/IBM/sarama"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 	"gopkg.in/yaml.v2"
 	"os"
@@ -244,45 +243,36 @@ func checkKafka(config *config.GlobalConfig) error {
 		}
 	}
 
-	var tlsConfig *kafka.TLSConfig
-	if config.Kafka.TLS != nil {
-		tlsConfig = &kafka.TLSConfig{
-			CACrt:              config.Kafka.TLS.CACrt,
-			ClientCrt:          config.Kafka.TLS.ClientCrt,
-			ClientKey:          config.Kafka.TLS.ClientKey,
-			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
-			InsecureSkipVerify: config.Kafka.TLS.InsecureSkipVerify,
+	type Item struct {
+		Topic   string
+		GroupID string
+	}
+
+	items := []Item{
+		{
+			Topic:   config.Kafka.LatestMsgToRedis.Topic,
+			GroupID: config.Kafka.ConsumerGroupID.MsgToRedis,
+		},
+
+		{
+			Topic:   config.Kafka.MsgToMongo.Topic,
+			GroupID: config.Kafka.ConsumerGroupID.MsgToMongo,
+		},
+
+		{
+			Topic:   config.Kafka.MsgToPush.Topic,
+			GroupID: config.Kafka.ConsumerGroupID.MsgToPush,
+		},
+	}
+
+	for _, item := range items {
+		cg, err := kafka.NewMConsumerGroup(config.Kafka.Config, item.GroupID, []string{item.Topic})
+		if err != nil {
+			return err
 		}
-	}
-
-	_, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
-		KafkaVersion:   sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest,
-		IsReturnErr:    false,
-		UserName:       config.Kafka.Username,
-		Password:       config.Kafka.Password,
-	}, []string{config.Kafka.LatestMsgToRedis.Topic},
-		config.Kafka.Addr, config.Kafka.ConsumerGroupID.MsgToRedis, tlsConfig)
-	if err != nil {
-		return err
-	}
-
-	_, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
-		KafkaVersion:   sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
-	}, []string{config.Kafka.MsgToMongo.Topic},
-		config.Kafka.Addr, config.Kafka.ConsumerGroupID.MsgToMongo, tlsConfig)
-	if err != nil {
-		return err
-	}
-
-	_, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
-		KafkaVersion:   sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
-	}, []string{config.Kafka.MsgToPush.Topic}, config.Kafka.Addr,
-		config.Kafka.ConsumerGroupID.MsgToPush, tlsConfig)
-	if err != nil {
-		return err
+		if err := cg.Close(); err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -33,27 +33,7 @@ type OnlineHistoryMongoConsumerHandler struct {
 }
 
 func NewOnlineHistoryMongoConsumerHandler(kafkaConf *config.Kafka, database controller.CommonMsgDatabase) (*OnlineHistoryMongoConsumerHandler, error) {
-	var tlsConfig *kfk.TLSConfig
-	if kafkaConf.TLS != nil {
-		tlsConfig = &kfk.TLSConfig{
-			CACrt:              kafkaConf.TLS.CACrt,
-			ClientCrt:          kafkaConf.TLS.ClientCrt,
-			ClientKey:          kafkaConf.TLS.ClientKey,
-			ClientKeyPwd:       kafkaConf.TLS.ClientKeyPwd,
-			InsecureSkipVerify: false,
-		}
-	}
-	historyConsumerGroup, err := kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
-		KafkaVersion:   sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest,
-		IsReturnErr:    false,
-		UserName:       kafkaConf.Username,
-		Password:       kafkaConf.Password,
-	}, []string{kafkaConf.MsgToMongo.Topic},
-		kafkaConf.Addr,
-		kafkaConf.ConsumerGroupID.MsgToMongo,
-		tlsConfig,
-	)
+	historyConsumerGroup, err := kfk.NewMConsumerGroup(kafkaConf.Config, kafkaConf.ConsumerGroupID.MsgToMongo, []string{kafkaConf.MsgToMongo.Topic})
 	if err != nil {
 		return nil, err
 	}

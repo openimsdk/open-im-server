@@ -81,6 +81,10 @@ type OnlineHistoryRedisConsumerHandler struct {
 }
 
 func NewOnlineHistoryRedisConsumerHandler(kafkaConf *config.Kafka, database controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*OnlineHistoryRedisConsumerHandler, error) {
+	historyConsumerGroup, err := kafka.NewMConsumerGroup(kafkaConf.Config, kafkaConf.ConsumerGroupID.MsgToRedis, []string{kafkaConf.LatestMsgToRedis.Topic})
+	if err != nil {
+		return nil, err
+	}
 	var och OnlineHistoryRedisConsumerHandler
 	och.msgDatabase = database
 	och.msgDistributionCh = make(chan Cmd2Value) // no buffer channel
@@ -89,35 +93,9 @@ func NewOnlineHistoryRedisConsumerHandler(kafkaConf *config.Kafka, database cont
 		och.chArrays[i] = make(chan Cmd2Value, 50)
 		go och.Run(i)
 	}
-
 	och.conversationRpcClient = conversationRpcClient
 	och.groupRpcClient = groupRpcClient
-	var err error
-
-	var tlsConfig *kafka.TLSConfig
-	if kafkaConf.TLS != nil {
-		tlsConfig = &kafka.TLSConfig{
-			CACrt:              kafkaConf.TLS.CACrt,
-			ClientCrt:          kafkaConf.TLS.ClientCrt,
-			ClientKey:          kafkaConf.TLS.ClientKey,
-			ClientKeyPwd:       kafkaConf.TLS.ClientKeyPwd,
-			InsecureSkipVerify: false,
-		}
-	}
-
-	och.historyConsumerGroup, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
-		KafkaVersion:   sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest,
-		IsReturnErr:    false,
-		UserName:       kafkaConf.Username,
-		Password:       kafkaConf.Password,
-	}, []string{kafkaConf.LatestMsgToRedis.Topic},
-		kafkaConf.Addr,
-		kafkaConf.ConsumerGroupID.MsgToRedis,
-		tlsConfig,
-	)
-	// statistics.NewStatistics(&och.singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d
-	// second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
+	och.historyConsumerGroup = historyConsumerGroup
 	return &och, err
 }
 

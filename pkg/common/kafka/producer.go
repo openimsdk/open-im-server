@@ -15,14 +15,11 @@
 package kafka
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"strings"
-	"time"
-
 	"github.com/IBM/sarama"
 	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/db/kafka"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
@@ -48,91 +45,21 @@ type ProducerConfig struct {
 	Password     string
 }
 
-// NewKafkaProducer initializes a new Kafka producer.
-func NewKafkaProducer(addr []string, topic string, producerConfig *ProducerConfig, tlsConfig *TLSConfig) (*Producer, error) {
-	p := Producer{
-		addr:   addr,
-		topic:  topic,
-		config: sarama.NewConfig(),
-	}
+func BuildProducerConfig(conf kafka.Config) (*sarama.Config, error) {
+	return kafka.BuildProducerConfig(conf)
+}
 
-	// Set producer return flags
-	p.config.Producer.Return.Successes = true
-	p.config.Producer.Return.Errors = true
-
-	// Set partitioner strategy
-	p.config.Producer.Partitioner = sarama.NewHashPartitioner
-
-	// Configure producer acknowledgement level
-	configureProducerAck(&p, producerConfig.ProducerAck)
-
-	// Configure message compression
-	err := configureCompression(&p, producerConfig.CompressType)
+func NewKafkaProducer(kfk *sarama.Config, addr []string, topic string) (*Producer, error) {
+	producer, err := kafka.NewProducer(kfk, addr)
 	if err != nil {
 		return nil, err
 	}
-
-	// Get Kafka configuration from environment variables or fallback to config file
-	kafkaUsername := getEnvOrConfig("KAFKA_USERNAME", producerConfig.Username)
-	kafkaPassword := getEnvOrConfig("KAFKA_PASSWORD", producerConfig.Password)
-	kafkaAddr := getKafkaAddrFromEnv(addr) // Updated to use the new function
-
-	// Configure SASL authentication if credentials are provided
-	if kafkaUsername != "" && kafkaPassword != "" {
-		p.config.Net.SASL.Enable = true
-		p.config.Net.SASL.User = kafkaUsername
-		p.config.Net.SASL.Password = kafkaPassword
-	}
-
-	// Set the Kafka address
-	p.addr = kafkaAddr
-
-	// Set up TLS configuration (if required)
-	SetupTLSConfig(p.config, tlsConfig)
-
-	// Create the producer with retries
-	for i := 0; i <= maxRetry; i++ {
-		p.producer, err = sarama.NewSyncProducer(p.addr, p.config)
-		if err == nil {
-			return &p, errs.Wrap(err)
-		}
-		time.Sleep(1 * time.Second) // Wait before retrying
-	}
-	// Panic if unable to create producer after retries
-	if err != nil {
-		return nil, errs.Wrap(errors.New("failed to create Kafka producer: " + err.Error()))
-	}
-
-	return &p, nil
-}
-
-// configureProducerAck configures the producer's acknowledgement level.
-func configureProducerAck(p *Producer, ackConfig string) {
-	switch strings.ToLower(ackConfig) {
-	case "no_response":
-		p.config.Producer.RequiredAcks = sarama.NoResponse
-	case "wait_for_local":
-		p.config.Producer.RequiredAcks = sarama.WaitForLocal
-	case "wait_for_all":
-		p.config.Producer.RequiredAcks = sarama.WaitForAll
-	default:
-		p.config.Producer.RequiredAcks = sarama.WaitForAll
-	}
-}
-
-// configureCompression configures the message compression type for the producer.
-func configureCompression(p *Producer, compressType string) error {
-	var compress sarama.CompressionCodec
-	if compressType == "" {
-		compress = sarama.CompressionNone
-	} else {
-		err := compress.UnmarshalText(bytes.ToLower([]byte(compressType)))
-		if err != nil {
-			return errs.Wrap(err)
-		}
-	}
-	p.config.Producer.Compression = compress
-	return nil
+	return &Producer{
+		addr:     addr,
+		topic:    topic,
+		config:   kfk,
+		producer: producer,
+	}, nil
 }
 
 // GetMQHeaderWithContext extracts message queue headers from the context.

@@ -34,32 +34,14 @@ type ConsumerHandler struct {
 }
 
 func NewConsumerHandler(kafkaConf *config.Kafka, pusher *Pusher) (*ConsumerHandler, error) {
-	var consumerHandler ConsumerHandler
-	consumerHandler.pusher = pusher
-	var err error
-	var tlsConfig *kfk.TLSConfig
-	if kafkaConf.TLS != nil {
-		tlsConfig = &kfk.TLSConfig{
-			CACrt:              kafkaConf.TLS.CACrt,
-			ClientCrt:          kafkaConf.TLS.ClientCrt,
-			ClientKey:          kafkaConf.TLS.ClientKey,
-			ClientKeyPwd:       kafkaConf.TLS.ClientKeyPwd,
-			InsecureSkipVerify: false,
-		}
-	}
-	consumerHandler.pushConsumerGroup, err = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
-		KafkaVersion:   sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest,
-		IsReturnErr:    false,
-		UserName:       kafkaConf.Username,
-		Password:       kafkaConf.Password,
-	}, []string{kafkaConf.MsgToPush.Topic}, kafkaConf.Addr,
-		kafkaConf.ConsumerGroupID.MsgToPush,
-		tlsConfig)
+	pushConsumerGroup, err := kfk.NewMConsumerGroup(kafkaConf.Config, kafkaConf.ConsumerGroupID.MsgToPush, []string{kafkaConf.MsgToPush.Topic})
 	if err != nil {
 		return nil, err
 	}
-	return &consumerHandler, nil
+	return &ConsumerHandler{
+		pushConsumerGroup: pushConsumerGroup,
+		pusher:            pusher,
+	}, nil
 }
 
 func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {

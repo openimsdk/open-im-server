@@ -16,6 +16,7 @@ package config
 
 import (
 	"bytes"
+	"github.com/openimsdk/tools/db/kafka"
 	"gopkg.in/yaml.v3"
 	"time"
 
@@ -82,18 +83,7 @@ type Redis struct {
 }
 
 type Kafka struct {
-	Username     string   `yaml:"username"`
-	Password     string   `yaml:"password"`
-	ProducerAck  string   `yaml:"producerAck"`
-	CompressType string   `yaml:"compressType"`
-	Addr         []string `yaml:"addr"`
-	TLS          *struct {
-		CACrt              string `yaml:"caCrt"`
-		ClientCrt          string `yaml:"clientCrt"`
-		ClientKey          string `yaml:"clientKey"`
-		ClientKeyPwd       string `yaml:"clientKeyPwd"`
-		InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
-	} `yaml:"tls"`
+	kafka.Config
 	LatestMsgToRedis struct {
 		Topic string `yaml:"topic"`
 	} `yaml:"latestMsgToRedis"`
