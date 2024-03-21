@@ -95,8 +95,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 
-
-openim::log::status "Check OpenIM service:"
+openim::log::info "Check OpenIM service:"
 for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
     echo "$item"
 done
