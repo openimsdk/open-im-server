@@ -2846,32 +2846,31 @@ function openim::util::check_process_names_for_stop() {
 }
 
 
-function openim::util::find_process_ports() {
+function openim::util::find_process_ports2() {
     local process_path="$1"
     if [[ -z "$process_path" ]]; then
         echo "Usage: find_process_ports /path/to/process"
         return 1
     fi
 
-    local pids=$(pgrep -f "$process_path")
-    if [[ -z "$pids" ]]; then
-        echo "No running process found for $process_path."
-        return 1
-    fi
 
-    local ports_info=""
-
-    while read -r line; do
+    lsof -nP -iTCP -iUDP | grep LISTEN | grep "$(pgrep -f $process_path)" | awk '{print $9, $8}' | while read line; do
         local port_protocol=($line)
         local port=${port_protocol[0]##*:}
         local protocol=${port_protocol[1]}
-        ports_info+="$port($protocol) "
-    done < <(lsof -nP -iTCP -iUDP | grep LISTEN | grep -E "$(echo $pids | sed 's/ /\\|/g')")
+        echo "Process $process_path is listening on port $port with protocol $protocol"
+    done
+}
 
-    if [[ -n "$ports_info" ]]; then
-        echo "Process $process_path is listening on ports: $ports_info"
+function openim::util::find_process_ports() {
+    local process_path="$1"
+
+    local ports=$(lsof -Fn -iTCP -iUDP | grep -i listen | grep "$process_path" | awk -F'[>:]' '{print $(NF-1) " " $NF}' | sort -u | tr '\n' ' ')
+
+    if [ -z "$ports" ]; then
+        echo "No listening ports found for the process."
     else
-        echo "No ports found for process $process_path."
+        echo "Listening on ports: $ports"
     fi
 }
 
