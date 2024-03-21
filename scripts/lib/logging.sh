@@ -215,6 +215,7 @@ openim::log::status() {
   echo_log "${timestamp} ${1}"
   shift
   for message; do
+    local reset_color='\033[0m'
     echo_log -e "${COLOR_GREEN} ${message} ==> ${COLOR_GREEN}$@${reset_color}"
   done
 }
