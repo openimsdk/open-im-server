@@ -141,7 +141,7 @@ function openim::tools::pre-start() {
 function openim::tools::post-start() {
     #openim::log::info "Post-start actions for OpenIM Tools..."
     for tool in "${OPENIM_TOOLS_POST_START_NAME_LISTARIES[@]}"; do
-        openim::log::info "Starting tool: ${tool}"
+        openim::log::colorless "Starting tool: ${tool}"
         openim::tools::start_service ${tool}
     done
 }
