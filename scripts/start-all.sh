@@ -42,7 +42,7 @@ function execute_start_scripts() {
 
     # Check if the script file exists and is executable.
     if [[ -x "$script_path" ]]; then
-       openim::log::print_blue "Starting script: ${script_path##*/}"     # Log the script name.
+       openim::log::colorless "Starting script: ${script_path##*/}"     # Log the script name.
 
       # Execute the script with the constructed argument.
       result=$("$script_path" "$arg")
@@ -83,7 +83,7 @@ fi
 # TODO Prelaunch tools, simple for now, can abstract functions later
 TOOLS_START_SCRIPTS_PATH=${START_SCRIPTS_PATH}/openim-tools.sh
 
-openim::log::status "Start the preprocessing tools"
+openim::log::status "Start the preprocessing tools:"
 
 
 if ! ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start; then
