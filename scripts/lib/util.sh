@@ -2846,7 +2846,7 @@ function openim::util::check_process_names_for_stop() {
 }
 
 
-function openim::util::find_process_ports() {
+function openim::util::find_process_ports1() {
     local process_path="$1"
     if [[ -z "$process_path" ]]; then
         echo "Usage: find_process_ports /path/to/process"
@@ -2867,49 +2867,29 @@ function openim::util::find_process_ports() {
 
 }
 
-function openim::util::find_process_ports3(){
-  local protocol_ports=""
-  while read -r line; do
-      local port_protocol=($line)
-      local port=${port_protocol[0]##*:}
-      local protocol=${port_protocol[1]}
-      protocol_ports="${protocol_ports}${protocol} ${port}, "
-      echo "Process $process_path is listening on port $port with protocol $protocol"
-  done < <(lsof -nP -iTCP -iUDP | grep LISTEN | grep "$(pgrep -f "$process_path")" | awk '{print $9, $8}')
-
-  protocol_ports=${protocol_ports%, }
-  echo "Process $process_path is listening on protocol & port $protocol_ports "
-
-}
-
-function openim::util::find_process_ports2() {
+function openim::util::find_process_ports() {
     local process_path="$1"
     if [[ -z "$process_path" ]]; then
         echo "Usage: find_process_ports /path/to/process"
         return 1
     fi
 
-    local protocol_ports=""
-    local pids=$(pgrep -f "$process_path")
-    if [[ -z "$pids" ]]; then
-        echo "No process found for $process_path"
-        return 1
-    fi
+   local protocol_ports=""
+   while read -r line; do
+       local port_protocol=($line)
+       local port=${port_protocol[0]##*:}
+       local protocol=${port_protocol[1]}
+       protocol_ports="${protocol_ports}${protocol} ${port}, "
+       echo "Process $process_path is listening on port $port with protocol $protocol"
+   done < <(lsof -nP -iTCP -iUDP | grep LISTEN | grep "$(pgrep -f "$process_path")" | awk '{print $9, $8}')
 
-    lsof -nP -iTCP -iUDP | grep LISTEN | grep -E "$(echo $pids | sed 's/ /|/g')" | awk '{print $9, $8}' | while read -r port protocol; do
-        protocol_ports+="$protocol $port, "
-        echo "Process $process_path is listening on port ${port##*:} with protocol $protocol"
-    done
+   protocol_ports=${protocol_ports%, }
+   echo "Process $process_path is listening on protocol & port $protocol_ports "
 
 
-    protocol_ports=${protocol_ports%, }
-
-    if [[ -n "$protocol_ports" ]]; then
-        echo "Process $process_path is listening on protocol & port: $protocol_ports"
-    else
-        echo "Process $process_path is not listening on any port"
-    fi
 }
+
+
 
 
 
