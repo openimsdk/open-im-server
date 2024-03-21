@@ -2858,7 +2858,7 @@ function openim::util::find_process_ports() {
         local port_protocol=($line)
         local port=${port_protocol[0]##*:}
         local protocol=${port_protocol[1]}
-        protocol_ports= protocol_ports + $protocol + " "+$ports
+        protocol_ports=$protocol_ports+$protocol+" "+$ports
         echo "Process $process_path is listening on port $port with protocol $protocol"
     done
 
