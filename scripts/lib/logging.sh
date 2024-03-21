@@ -211,7 +211,7 @@ openim::log::status() {
     return
   fi
   timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
-  echo_log -e "${COLOR_BLUE} ${timestamp} ${1} ==> ${COLOR_BLUE}$@${reset_color}"
+  echo_log -e "${COLOR_BLUE}${timestamp} ${1} ${COLOR_BLUE}$@${reset_color}"
 }
 
 
