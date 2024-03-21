@@ -109,7 +109,7 @@ func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 	err := log.InitFromConfig(
 
 		cmdOpts.loggerPrefixName,
-		rc.Name,
+		rc.processName,
 		logConfig.RemainLogLevel,
 		logConfig.IsStdout,
 		logConfig.IsJson,
