@@ -210,14 +210,9 @@ openim::log::status() {
   if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
     return
   fi
-  
   timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
   echo_log "${timestamp} ${1}"
-  shift
-  for message; do
-    local reset_color='\033[0m'
-    echo_log -e "${COLOR_BLUE} ${message} ==> ${COLOR_BLUE}$@${reset_color}"
-  done
+  echo_log -e "${COLOR_BLUE} ${1} ==> ${COLOR_BLUE}$@${reset_color}"
 }
 
 
