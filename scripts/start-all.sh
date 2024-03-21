@@ -101,12 +101,9 @@ if [[ $? -ne 0 ]]; then
   exit 1
 fi
 
-
-
 openim::log::status "Start the OpenIM startup scripts: "
 execute_start_scripts
-
-openim::log::colorless "OpenIM startup scripts have been successfully completed!"
+openim::log::status "OpenIM startup scripts have been successfully completed!"
 
 sleep 2
 
@@ -126,6 +123,6 @@ fi
 
 openim::log::status "Start the post-start tools:"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
-openim::log::colorless "post-start has been successfully completed!"
+openim::log::status "post-start has been successfully completed!"
 
 openim::log::success "All OpenIM services have been successfully started!"
