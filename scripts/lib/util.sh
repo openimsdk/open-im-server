@@ -2854,13 +2854,22 @@ function openim::util::find_process_ports() {
         return 1
     fi
 
+    local ports_info=""
 
     lsof -nP -iTCP -iUDP | grep LISTEN | grep "$(pgrep -f $process_path)" | awk '{print $9, $8}' | while read line; do
         local port_protocol=($line)
         local port=${port_protocol[0]##*:}
         local protocol=${port_protocol[1]}
-        echo "Process $process_path is listening on port $port with protocol $protocol"
+        ports_info+="$port($protocol) "
     done
+
+
+    if [[ -z "$ports_info" ]]; then
+        echo "No ports found for process $process_path."
+    else
+
+        echo "Process $process_path is listening on ports: $ports_info"
+    fi
 }
 
 function openim::util::find_ports_for_all_services() {
