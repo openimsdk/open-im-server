@@ -18,8 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-playground/validator/v10"
-	"github.com/redis/go-redis/v9"
 	"net"
 	"net/http"
 	"os"
@@ -27,6 +25,9 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -52,10 +53,13 @@ import (
 
 func Start(ctx context.Context, config *config.GlobalConfig, port int, proPort int) error {
 	if port == 0 || proPort == 0 {
-		err := errors.New("port or proPort is empty")
-		wrappedErr := errs.WrapMsg(err, "validation error", "port", port, "proPort", proPort)
+		wrappedErr := errs.WrapMsg(errors.New("port or proPort is empty"), "validation error", "port", port, "proPort", proPort)
 		return wrappedErr
 	}
+
+	// redisConfig := &config.Redis{
+
+    // }
 
 	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
