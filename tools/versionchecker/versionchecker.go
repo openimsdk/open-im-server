@@ -53,7 +53,7 @@ func getGoVersion() string {
 func getDockerVersion() string {
 	version, err := ExecuteCommand("docker", "--version")
 	if err != nil {
-		return "Docker is not installed. Please install it to get the version."
+		return "Docker is not installed. Please install it to get the version." + err.Error()
 	}
 	return version
 }
