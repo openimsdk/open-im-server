@@ -104,7 +104,6 @@ go.build: go.build.verify $(addprefix go.build., $(addprefix $(PLATFORM)., $(BIN
 ## go.start: Start openim
 .PHONY: go.start
 go.start:
-			[2024-03-21 16:07:36 CST] Service component started successfully
 	@echo "=========================> Starting OpenIM <========================="
 	@$(ROOT_DIR)/scripts/start-all.sh
 
