@@ -33,12 +33,12 @@ type AuthDatabase interface {
 }
 
 type authDatabase struct {
-	cache        cache.MsgModel
+	cache        cache.TokenModel
 	accessSecret string
 	accessExpire int64
 }
 
-func NewAuthDatabase(cache cache.MsgModel, accessSecret string, accessExpire int64) AuthDatabase {
+func NewAuthDatabase(cache cache.TokenModel, accessSecret string, accessExpire int64) AuthDatabase {
 	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire}
 }
 

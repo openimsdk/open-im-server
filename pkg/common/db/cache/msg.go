@@ -51,7 +51,6 @@ const (
 	sendMsgFailedFlag       = "SEND_MSG_FAILED_FLAG:"
 	userBadgeUnreadCountSum = "USER_BADGE_UNREAD_COUNT_SUM:"
 	exTypeKeyLocker         = "EX_LOCK:"
-	uidPidToken             = "UID_PID_TOKEN_STATUS:"
 )
 
 var concurrentLimit = 3
@@ -97,10 +96,6 @@ type thirdCache interface {
 type MsgModel interface {
 	SeqCache
 	thirdCache
-	AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error
-	GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error)
-	SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error
-	DeleteTokenByUidPid(ctx context.Context, userID string, platformID int, fields []string) error
 	GetMessagesBySeq(ctx context.Context, conversationID string, seqs []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
 	SetMessageToCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int, error)
 	UserDeleteMsgs(ctx context.Context, conversationID string, seqs []int64, userID string) error
@@ -271,41 +266,6 @@ func (c *msgCache) GetHasReadSeq(ctx context.Context, userID string, conversatio
 		return 0, err
 	}
 	return val, nil
-}
-
-func (c *msgCache) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
-	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
-	return errs.Wrap(c.rdb.HSet(ctx, key, token, flag).Err())
-}
-
-func (c *msgCache) GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error) {
-	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
-	m, err := c.rdb.HGetAll(ctx, key).Result()
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
-	mm := make(map[string]int)
-	for k, v := range m {
-		mm[k] = utils.StringToInt(v)
-	}
-
-	return mm, nil
-}
-
-func (c *msgCache) SetTokenMapByUidPid(ctx context.Context, userID string, platform int, m map[string]int) error {
-	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platform)
-	mm := make(map[string]any)
-	for k, v := range m {
-		mm[k] = v
-	}
-
-	return errs.Wrap(c.rdb.HSet(ctx, key, mm).Err())
-}
-
-func (c *msgCache) DeleteTokenByUidPid(ctx context.Context, userID string, platform int, fields []string) error {
-	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platform)
-
-	return errs.Wrap(c.rdb.HDel(ctx, key, fields...).Err())
 }
 
 func (c *msgCache) getMessageCacheKey(conversationID string, seq int64) string {

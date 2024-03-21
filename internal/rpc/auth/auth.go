@@ -51,7 +51,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discoveryreg
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
-			cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis),
+			cache.NewTokenCacheModel(rdb),
 			config.Secret,
 			config.TokenPolicy.Expire,
 		),

@@ -56,11 +56,6 @@ func Start(ctx context.Context, config *config.GlobalConfig, port int, proPort i
 		wrappedErr := errs.WrapMsg(errors.New("port or proPort is empty"), "validation error", "port", port, "proPort", proPort)
 		return wrappedErr
 	}
-
-	// redisConfig := &config.Redis{
-
-    // }
-
 	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
@@ -322,7 +317,7 @@ func newGinRouter(disCov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 
 func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.HandlerFunc {
 	dataBase := controller.NewAuthDatabase(
-		cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis),
+		cache.NewTokenCacheModel(rdb),
 		config.Secret,
 		config.TokenPolicy.Expire,
 	)
