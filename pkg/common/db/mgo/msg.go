@@ -2,7 +2,6 @@ package mgo
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/protocol/constant"
@@ -18,8 +17,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
-
-var ErrMsgListNotExist = errors.New("user not have msg in mongoDB")
 
 func NewMsgMongo(db *mongo.Database) (relation.MsgDocModelInterface, error) {
 	coll := db.Collection(new(relation.MsgDocModel).TableName())
@@ -227,7 +224,7 @@ func (m *MsgMgo) GetMsgDocModelByIndex(ctx context.Context, conversationID strin
 	if len(msgs) > 0 {
 		return msgs[0], nil
 	}
-	return nil, errs.Wrap(ErrMsgListNotExist)
+	return nil, errs.Wrap(relation.ErrMsgListNotExist)
 }
 
 func (m *MsgMgo) DeleteMsgsInOneDocByIndex(ctx context.Context, docID string, indexes []int) error {

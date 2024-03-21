@@ -16,6 +16,7 @@ package relation
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"time"
 
@@ -31,6 +32,8 @@ const (
 	OldestList          = 0
 	NewestList          = -1
 )
+
+var ErrMsgListNotExist = errors.New("user not have msg in mongoDB")
 
 type MsgDocModel struct {
 	DocID string          `bson:"doc_id"`

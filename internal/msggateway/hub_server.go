@@ -36,9 +36,9 @@ func (s *Server) InitServer(ctx context.Context, config *config.GlobalConfig, di
 		return err
 	}
 
-	msgModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
+	tokenCacheModel := cache.NewTokenCacheModel(rdb)
 	s.LongConnServer.SetDiscoveryRegistry(disCov, config)
-	s.LongConnServer.SetCacheHandler(msgModel)
+	s.LongConnServer.SetCacheHandler(tokenCacheModel)
 	msggateway.RegisterMsgGatewayServer(server, s)
 	return nil
 }

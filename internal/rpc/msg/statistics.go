@@ -16,12 +16,11 @@ package msg
 
 import (
 	"context"
-	"time"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/utils"
+	"time"
 )
 
 func (m *msgServer) GetActiveUser(ctx context.Context, req *msg.GetActiveUserReq) (*msg.GetActiveUserResp, error) {
@@ -39,7 +38,7 @@ func (m *msgServer) GetActiveUser(ctx context.Context, req *msg.GetActiveUserReq
 	}
 	var pbUsers []*msg.ActiveUser
 	if len(users) > 0 {
-		userIDs := utils.Slice(users, func(e *unrelation.UserCount) string { return e.UserID })
+		userIDs := utils.Slice(users, func(e *relation.UserCount) string { return e.UserID })
 		userMap, err := m.UserLocalCache.GetUsersInfoMap(ctx, userIDs)
 		if err != nil {
 			return nil, err
@@ -81,7 +80,7 @@ func (m *msgServer) GetActiveGroup(ctx context.Context, req *msg.GetActiveGroupR
 	}
 	var pbgroups []*msg.ActiveGroup
 	if len(groups) > 0 {
-		groupIDs := utils.Slice(groups, func(e *unrelation.GroupCount) string { return e.GroupID })
+		groupIDs := utils.Slice(groups, func(e *relation.GroupCount) string { return e.GroupID })
 		resp, err := m.GroupLocalCache.GetGroupInfos(ctx, groupIDs)
 		if err != nil {
 			return nil, err

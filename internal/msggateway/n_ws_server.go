@@ -48,7 +48,7 @@ type LongConnServer interface {
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s any) error
-	SetCacheHandler(cache cache.MsgModel)
+	SetCacheHandler(cache cache.TokenModel)
 	SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig)
 	KickUserConn(client *Client) error
 	UnRegister(c *Client)
@@ -79,7 +79,7 @@ type WsServer struct {
 	handshakeTimeout  time.Duration
 	writeBufferSize   int
 	validate          *validator.Validate
-	cache             cache.MsgModel
+	cache             cache.TokenModel
 	userClient        *rpcclient.UserRpcClient
 	disCov            discoveryregistry.SvcDiscoveryRegistry
 	Compressor
@@ -119,7 +119,7 @@ func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, sta
 	}
 }
 
-func (ws *WsServer) SetCacheHandler(cache cache.MsgModel) {
+func (ws *WsServer) SetCacheHandler(cache cache.TokenModel) {
 	ws.cache = cache
 }
 
