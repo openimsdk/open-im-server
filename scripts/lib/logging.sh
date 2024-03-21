@@ -215,10 +215,10 @@ openim::log::status() {
   echo_log "${timestamp} ${1}"
   shift
   for message; do
-    echo_log "    ${message}"
+    echo_log -e "${COLOR_GREEN} ${message} ==> ${COLOR_GREEN}$@${reset_color}"
   done
 }
-
+COLOR_BLUE
 
 openim::log::success() {
   local V="${V:-0}"
