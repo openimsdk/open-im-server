@@ -2846,7 +2846,7 @@ function openim::util::check_process_names_for_stop() {
 }
 
 
-function openim::util::find_process_ports2() {
+function openim::util::find_process_ports() {
     local process_path="$1"
     if [[ -z "$process_path" ]]; then
         echo "Usage: find_process_ports /path/to/process"
@@ -2862,17 +2862,6 @@ function openim::util::find_process_ports2() {
     done
 }
 
-function openim::util::find_process_ports() {
-    local process_path="$1"
-
-    local ports=$(lsof -Fn -iTCP -iUDP | grep -i listen | grep "$process_path" | awk -F'[>:]' '{print $(NF-1) " " $NF}' | sort -u | tr '\n' ' ')
-
-    if [ -z "$ports" ]; then
-        echo "No listening ports found for the process."
-    else
-        echo "Listening on ports: $ports"
-    fi
-}
 
 
 function openim::util::find_ports_for_all_services() {
