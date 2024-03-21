@@ -26,5 +26,6 @@ func main() {
 	authCmd.AddPrometheusPortFlag()
 	if err := authCmd.Exec(); err != nil {
 		util.ExitWithError(err)
+
 	}
 }
