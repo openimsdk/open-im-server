@@ -24,7 +24,7 @@ import (
 
 func main() {
 	go func() {
-		<-time.After(1 * time.Minute)
+		time.Sleep(30 * time.Second)
 		panic("Panic after one minute!")
 	}()
 	apiCmd := cmd.NewApiCmd(cmd.ApiServer)
