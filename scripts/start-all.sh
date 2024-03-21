@@ -83,16 +83,16 @@ fi
 # TODO Prelaunch tools, simple for now, can abstract functions later
 TOOLS_START_SCRIPTS_PATH=${START_SCRIPTS_PATH}/openim-tools.sh
 
-openim::log::status "Start the preprocessing tools:"
+openim::log::status "Start the pre-start tools:"
 
 
 if ! ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start; then
-  openim::log::error "Start the preprocessing tools, aborting!"
+  openim::log::error "Start the pre-start tools, aborting!"
   exit 1
 fi
 
 
-openim::log::colorless "Preprocessing has been successfully completed!"
+openim::log::colorless "pre-start has been successfully completed!"
 
 result=$("${OPENIM_ROOT}"/scripts/stop-all.sh)
 if [[ $? -ne 0 ]]; then
@@ -122,7 +122,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 
-openim::log::info "Post Starting openim services"
+openim::log::status "Start the post-start tools:"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
 
 openim::log::success "All openim services have been successfully started!"

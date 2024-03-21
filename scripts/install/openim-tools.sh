@@ -119,7 +119,7 @@ function openim::tools::start_service() {
 function openim::tools::start() {
     openim::log::info "Starting OpenIM Tools..."
     for tool in "${OPENIM_TOOLS_NAME_LISTARIES[@]}"; do
-        openim::log::info "Starting tool ${tool}..."
+        openim::log::colorless "Starting tool ${tool}..."
         # openim::tools::start_service ${tool}
         #sleep 0.2
     done
