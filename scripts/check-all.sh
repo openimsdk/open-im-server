@@ -89,8 +89,9 @@ fi
 openim::log::info "\n## Check openim service:\n${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer"
 result=$(. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check)
 if [[ $? -ne 0 ]]; then
-  echo "+++ cat openim log file >>> ${LOG_FILE}"
-  openim::log::error "check process failed.\n $result"
+  #echo "+++ cat openim log file >>> ${LOG_FILE}"
+
+  openim::log::error "The service is not running properly, please check the logs\n $result"
 fi
 
 
@@ -103,7 +104,7 @@ done
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
   echo "+++ cat OpenIM log file >>> ${LOG_FILE}"
-  openim::log::error "check process failed.\n "
+  openim::log::error "The service is not running properly, please check the logs.\n "
   echo "$result"
   exit 1
 else
