@@ -120,6 +120,9 @@ if [[ $? -ne 0 ]]; then
   exit 1
 fi
 
+openim::util::find_ports_for_all_services ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}
+
+
 
 openim::log::status "Start the post-start tools:"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start

@@ -94,18 +94,18 @@ if [[ $? -ne 0 ]]; then
 fi
 
 
-echo "Check openim service name:"
+echo "Check OpenIM service name:"
 for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
     echo "$item"
 done
 
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
-  echo "+++ cat openim log file >>> ${LOG_FILE}"
+  echo "+++ cat OpenIM log file >>> ${LOG_FILE}"
   openim::log::error "check process failed.\n "
   echo "$result"
   exit 1
 else
-  openim::log::success "All openim services are running normally! "
+  openim::log::success "All OpenIM services are running normally! "
 fi
 
