@@ -108,7 +108,7 @@ function openim::tools::start_service() {
 
  local status=$?
  if [ $status -eq 0 ]; then
-    openim::log::success "Service ${binary_name} started successfully."
+    openim::log::colorless "Service ${binary_name} started successfully."
     return 0
  else
     openim::log::error "Failed to start service ${binary_name}."
@@ -141,7 +141,7 @@ function openim::tools::pre-start() {
 function openim::tools::post-start() {
     #openim::log::info "Post-start actions for OpenIM Tools..."
     for tool in "${OPENIM_TOOLS_POST_START_NAME_LISTARIES[@]}"; do
-        openim::log::info "Starting tool ${tool}..."
+        openim::log::info "Starting tool: ${tool}"
         openim::tools::start_service ${tool}
     done
 }
