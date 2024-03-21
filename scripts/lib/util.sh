@@ -2865,8 +2865,12 @@ function openim::util::find_process_ports() {
    done < <(lsof -nP -iTCP -iUDP | grep LISTEN | grep "$(pgrep -f "$process_path")" | awk '{print $9, $8}')
 
    protocol_ports=${protocol_ports%, }
-   echo "Process $process_path is listening on protocol & port: $protocol_ports "
 
+  if [[ -z "$protocol_ports" ]]; then
+        echo "Process $process_path is not listening on any ports"
+    else
+        echo "Process $process_path is listening on protocol & port: $protocol_ports"
+    fi
 }
 
 
