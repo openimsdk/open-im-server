@@ -172,6 +172,7 @@ linters-settings:
       - ^init$
       - ^os.Exit$
       - ^fmt.Print.*$
+      - errors.New.*$
       - ^fmt.Println.*$
       - ^panic$
       - painc
