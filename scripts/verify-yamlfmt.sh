@@ -19,10 +19,6 @@
 #
 # Usage: `scripts/verify-yamlfmt.sh`.
 
-
-
-
-
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 

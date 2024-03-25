@@ -57,7 +57,7 @@ jobs:
     steps:
     - name: Setup
       uses: actions/checkout@v4
-      
+
     - name: Set up Go ${{ matrix.go_version }}
       uses: actions/setup-go@v5
       with:
@@ -69,6 +69,9 @@ jobs:
       with:
         version: '3.x' # If available, use the latest major version that's compatible
         repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Code Typecheck Detector
+      uses: kubecub/typecheck@main
 
     - name: Module Operations
       run: |

@@ -20,10 +20,6 @@
 # the project.
 # Usage: `scripts/run-in-gopath.sh <command>`.
 
-
-
-
-
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 

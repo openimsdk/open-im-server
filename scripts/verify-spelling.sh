@@ -17,10 +17,6 @@
 # working directory by client9/misspell package.
 # Usage: `scripts/verify-spelling.sh`.
 
-
-
-
-
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 export OPENIM_ROOT
 source "${OPENIM_ROOT}/scripts/lib/init.sh"

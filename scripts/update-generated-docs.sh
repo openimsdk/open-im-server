@@ -18,10 +18,6 @@
 # immediately before exporting docs. We do not want to check these documents in
 # by default.
 
-
-
-
-
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
@@ -33,7 +29,7 @@ BINS=(
   genman
   genyaml
 )
-make -C "${OPENIM_ROOT}" WHAT="${BINS[*]}"
+make -C "${OPENIM_ROOT}" BINS="${BINS[*]}"
 
 openim::util::ensure-temp-dir
 

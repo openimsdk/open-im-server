@@ -237,6 +237,17 @@ install.richgo:
 install.rts:
 	@$(GO) install github.com/galeone/rts/cmd/rts@latest
 
+# ================= kubecub openim tools =========================================
+## install.typecheck: install kubecub typecheck check for go code
+.PHONY: install.typecheck
+install.typecheck:
+	@$(GO) install github.com/kubecub/typecheck@latest
+
+## install.comment-lang-detector: install kubecub comment-lang-detector check for go code comment language
+.PHONY: install.comment-lang-detector
+install.comment-lang-detector:
+	@$(GO) install github.com/kubecub/comment-lang-detector/cmd/cld@latest
+
 ## tools.help: Display help information about the tools package
 .PHONY: tools.help
 tools.help: scripts/make-rules/tools.mk

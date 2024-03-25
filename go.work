@@ -2,7 +2,6 @@ go 1.19
 
 use (
 	.
-	./test/typecheck
 	./tools/changelog
 	./tools/component
 	./tools/formitychecker
