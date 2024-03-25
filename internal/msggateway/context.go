@@ -15,13 +15,15 @@
 package msggateway
 
 import (
+	"github.com/openimsdk/tools/utils/encrypt"
+	"github.com/openimsdk/tools/utils/stringutil"
+	"github.com/openimsdk/tools/utils/timeutil"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
 
 	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/tools/utils"
 )
 
 type UserConnContext struct {
@@ -54,7 +56,7 @@ func (c *UserConnContext) Value(key any) any {
 	case constant.ConnID:
 		return c.GetConnID()
 	case constant.OpUserPlatform:
-		return constant.PlatformIDToName(utils.StringToInt(c.GetPlatformID()))
+		return constant.PlatformIDToName(stringutil.StringToInt(c.GetPlatformID()))
 	case constant.RemoteAddr:
 		return c.RemoteAddr
 	default:
@@ -69,7 +71,7 @@ func newContext(respWriter http.ResponseWriter, req *http.Request) *UserConnCont
 		Path:       req.URL.Path,
 		Method:     req.Method,
 		RemoteAddr: req.RemoteAddr,
-		ConnID:     utils.Md5(req.RemoteAddr + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill()))),
+		ConnID:     encrypt.Md5(req.RemoteAddr + "_" + strconv.Itoa(int(timeutil.GetCurrentTimestampByMill()))),
 	}
 }
 

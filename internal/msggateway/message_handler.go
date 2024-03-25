@@ -16,6 +16,8 @@ package msggateway
 
 import (
 	"context"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/utils/goassist"
 	"sync"
 
 	"github.com/go-playground/validator/v10"
@@ -24,9 +26,7 @@ import (
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -46,7 +46,7 @@ func (r *Req) String() string {
 	tReq.SendID = r.SendID
 	tReq.OperationID = r.OperationID
 	tReq.MsgIncr = r.MsgIncr
-	return utils.StructToJsonString(tReq)
+	return goassist.StructToJsonString(tReq)
 }
 
 var reqPool = sync.Pool{
@@ -86,7 +86,7 @@ func (r *Resp) String() string {
 	tResp.OperationID = r.OperationID
 	tResp.ErrCode = r.ErrCode
 	tResp.ErrMsg = r.ErrMsg
-	return utils.StructToJsonString(tResp)
+	return goassist.StructToJsonString(tResp)
 }
 
 type MessageHandler interface {
@@ -106,7 +106,7 @@ type GrpcHandler struct {
 	validate     *validator.Validate
 }
 
-func NewGrpcHandler(validate *validator.Validate, client discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName *config.RpcRegisterName) *GrpcHandler {
+func NewGrpcHandler(validate *validator.Validate, client discovery.SvcDiscoveryRegistry, rpcRegisterName *config.RpcRegisterName) *GrpcHandler {
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, rpcRegisterName.OpenImMsgName)
 	pushRpcClient := rpcclient.NewPushRpcClient(client, rpcRegisterName.OpenImPushName)
 	return &GrpcHandler{

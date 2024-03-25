@@ -16,7 +16,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/localcache v0.0.1
 	github.com/openimsdk/protocol v0.0.58-google
-	github.com/openimsdk/tools v0.0.46-alpha.16.0.20240322040503-5ee151e04e7d
+	github.com/openimsdk/tools v0.0.46
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/sirupsen/logrus v1.9.3 // indirect
