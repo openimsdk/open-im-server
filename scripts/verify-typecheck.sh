@@ -21,14 +21,7 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 openim::golang::verify_go_version
 
-BINS=(
-  typecheck
-)
-
 cd "${OPENIM_ROOT}"
-# As of June, 2020 the typecheck tool is written in terms of go/packages, but
-# that library doesn't work well with multiple modules.  Until that is done,
-# force this tooling to run in a fake GOPATH.
 ret=0
 TYPECHECK_SERIAL="${TYPECHECK_SERIAL:-false}"
 scripts/run-in-gopath.sh \
@@ -36,6 +29,6 @@ make tools.verify.typecheck
 ${OPENIM_ROOT}/_output/tools/typecheck "$@" "--serial=$TYPECHECK_SERIAL" || ret=$?
 if [[ $ret -ne 0 ]]; then
   openim::log::error "Type Check has failed. This may cause cross platform build failures." >&2
-  openim::log::error "Please see https://github.com/openimsdk/open-im-server/tree/main/test/typecheck for more information." >&2
+  openim::log::error "Please see https://github.com/kubecub/typecheck for more information." >&2
   exit 1
 fi
