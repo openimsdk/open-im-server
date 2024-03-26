@@ -16,12 +16,12 @@ package config
 
 import (
 	"bytes"
-	"github.com/openimsdk/tools/db/kafka"
+	"github.com/openimsdk/tools/mq/kafka"
 	"gopkg.in/yaml.v3"
 	"time"
 
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
-	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/discovery"
 )
 
 var Config GlobalConfig
@@ -460,7 +460,7 @@ func (c *GlobalConfig) GetServiceNames() []string {
 	}
 }
 
-func (c *GlobalConfig) RegisterConf2Registry(registry discoveryregistry.SvcDiscoveryRegistry) error {
+func (c *GlobalConfig) RegisterConf2Registry(registry discovery.SvcDiscoveryRegistry) error {
 	data, err := yaml.Marshal(c)
 	if err != nil {
 		return err
@@ -468,7 +468,7 @@ func (c *GlobalConfig) RegisterConf2Registry(registry discoveryregistry.SvcDisco
 	return registry.RegisterConf2Registry(ConfKey, data)
 }
 
-func (c *GlobalConfig) GetConfFromRegistry(registry discoveryregistry.SvcDiscoveryRegistry) ([]byte, error) {
+func (c *GlobalConfig) GetConfFromRegistry(registry discovery.SvcDiscoveryRegistry) ([]byte, error) {
 	return registry.GetConfFromRegistry(ConfKey)
 }
 

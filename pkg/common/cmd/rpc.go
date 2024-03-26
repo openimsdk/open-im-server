@@ -22,13 +22,13 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )
 
-type rpcInitFuc func(ctx context.Context, config *config2.GlobalConfig, disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error
+type rpcInitFuc func(ctx context.Context, config *config2.GlobalConfig, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error
 
 type RpcCmd struct {
 	*RootCmd
@@ -68,7 +68,7 @@ func (a *RpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *RpcCmd) StartSvr(name string, rpcFn func(ctx context.Context, config *config2.GlobalConfig, disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) error {
+func (a *RpcCmd) StartSvr(name string, rpcFn func(ctx context.Context, config *config2.GlobalConfig, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error) error {
 	if a.GetPortFlag() == 0 {
 		return errs.Wrap(errors.New("port is required"))
 	}

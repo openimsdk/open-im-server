@@ -17,13 +17,13 @@ package authverify
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/tools/utils/datautil"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/tokenverify"
-	"github.com/openimsdk/tools/utils"
 )
 
 func Secret(secret string) jwt.Keyfunc {
@@ -34,41 +34,41 @@ func Secret(secret string) jwt.Keyfunc {
 
 func CheckAccessV3(ctx context.Context, ownerUserID string, manager *config.Manager, imAdmin *config.IMAdmin) (err error) {
 	opUserID := mcontext.GetOpUserID(ctx)
-	if len(manager.UserID) > 0 && utils.Contain(opUserID, manager.UserID...) {
+	if len(manager.UserID) > 0 && datautil.Contain(opUserID, manager.UserID...) {
 		return nil
 	}
-	if utils.Contain(opUserID, imAdmin.UserID...) {
+	if datautil.Contain(opUserID, imAdmin.UserID...) {
 		return nil
 	}
 	if opUserID == ownerUserID {
 		return nil
 	}
-	return errs.ErrNoPermission.WrapMsg("ownerUserID", ownerUserID)
+	return servererrs.ErrNoPermission.WrapMsg("ownerUserID", ownerUserID)
 }
 
 func IsAppManagerUid(ctx context.Context, manager *config.Manager, imAdmin *config.IMAdmin) bool {
-	return (len(manager.UserID) > 0 && utils.Contain(mcontext.GetOpUserID(ctx), manager.UserID...)) ||
-		utils.Contain(mcontext.GetOpUserID(ctx), imAdmin.UserID...)
+	return (len(manager.UserID) > 0 && datautil.Contain(mcontext.GetOpUserID(ctx), manager.UserID...)) ||
+		datautil.Contain(mcontext.GetOpUserID(ctx), imAdmin.UserID...)
 }
 
 func CheckAdmin(ctx context.Context, manager *config.Manager, imAdmin *config.IMAdmin) error {
-	if len(manager.UserID) > 0 && utils.Contain(mcontext.GetOpUserID(ctx), manager.UserID...) {
+	if len(manager.UserID) > 0 && datautil.Contain(mcontext.GetOpUserID(ctx), manager.UserID...) {
 		return nil
 	}
-	if utils.Contain(mcontext.GetOpUserID(ctx), imAdmin.UserID...) {
+	if datautil.Contain(mcontext.GetOpUserID(ctx), imAdmin.UserID...) {
 		return nil
 	}
-	return errs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
+	return servererrs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
 
 func CheckIMAdmin(ctx context.Context, config *config.GlobalConfig) error {
-	if utils.Contain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID...) {
+	if datautil.Contain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID...) {
 		return nil
 	}
-	if len(config.Manager.UserID) > 0 && utils.Contain(mcontext.GetOpUserID(ctx), config.Manager.UserID...) {
+	if len(config.Manager.UserID) > 0 && datautil.Contain(mcontext.GetOpUserID(ctx), config.Manager.UserID...) {
 		return nil
 	}
-	return errs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not CheckIMAdmin userID", mcontext.GetOpUserID(ctx)))
+	return servererrs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not CheckIMAdmin userID", mcontext.GetOpUserID(ctx)))
 }
 
 func ParseRedisInterfaceToken(redisToken any, secret string) (*tokenverify.Claims, error) {
@@ -76,7 +76,7 @@ func ParseRedisInterfaceToken(redisToken any, secret string) (*tokenverify.Claim
 }
 
 func IsManagerUserID(opUserID string, manager *config.Manager, imAdmin *config.IMAdmin) bool {
-	return (len(manager.UserID) > 0 && utils.Contain(opUserID, manager.UserID...)) || utils.Contain(opUserID, imAdmin.UserID...)
+	return (len(manager.UserID) > 0 && datautil.Contain(opUserID, manager.UserID...)) || datautil.Contain(opUserID, imAdmin.UserID...)
 }
 
 func WsVerifyToken(token, userID, secret string, platformID int) error {
@@ -85,10 +85,10 @@ func WsVerifyToken(token, userID, secret string, platformID int) error {
 		return err
 	}
 	if claim.UserID != userID {
-		return errs.ErrTokenInvalid.WrapMsg(fmt.Sprintf("token uid %s != userID %s", claim.UserID, userID))
+		return servererrs.ErrTokenInvalid.WrapMsg(fmt.Sprintf("token uid %s != userID %s", claim.UserID, userID))
 	}
 	if claim.PlatformID != platformID {
-		return errs.ErrTokenInvalid.WrapMsg(fmt.Sprintf("token platform %d != %d", claim.PlatformID, platformID))
+		return servererrs.ErrTokenInvalid.WrapMsg(fmt.Sprintf("token platform %d != %d", claim.PlatformID, platformID))
 	}
 	return nil
 }
