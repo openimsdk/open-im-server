@@ -16,6 +16,7 @@ package msggateway
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -156,7 +157,7 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 				(client.IsBackground && client.PlatformID != constant.IOSPlatformID) {
 				err := client.PushMessage(ctx, req.MsgData)
 				if err != nil {
-					userPlatform.ResultCode = int64(errs.ErrPushMsgErr.Code())
+					userPlatform.ResultCode = int64(servererrs.ErrPushMsgErr.Code())
 					resp = append(resp, userPlatform)
 				} else {
 					if _, ok := s.pushTerminal[client.PlatformID]; ok {
@@ -165,7 +166,7 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 					}
 				}
 			} else {
-				userPlatform.ResultCode = int64(errs.ErrIOSBackgroundPushErr.Code())
+				userPlatform.ResultCode = int64(servererrs.ErrIOSBackgroundPushErr.Code())
 				resp = append(resp, userPlatform)
 			}
 		}

@@ -22,6 +22,12 @@ var (
 	ErrCallback         = errs.NewCodeError(CallbackError, "CallbackError")
 	ErrCallbackContinue = errs.NewCodeError(CallbackError, "ErrCallbackContinue")
 
+	ErrInternalServer = errs.NewCodeError(ServerInternalError, "ServerInternalError")
+	ErrArgs           = errs.NewCodeError(ArgsError, "ArgsError")
+	ErrNoPermission   = errs.NewCodeError(NoPermissionError, "NoPermissionError")
+	ErrDuplicateKey   = errs.NewCodeError(DuplicateKeyError, "DuplicateKeyError")
+	ErrRecordNotFound = errs.NewCodeError(RecordNotFoundError, "RecordNotFoundError")
+
 	ErrUserIDNotFound  = errs.NewCodeError(UserIDNotFoundError, "UserIDNotFoundError")
 	ErrGroupIDNotFound = errs.NewCodeError(GroupIDNotFoundError, "GroupIDNotFoundError")
 	ErrGroupIDExisted  = errs.NewCodeError(GroupIDExisted, "GroupIDExisted")

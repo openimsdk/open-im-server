@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"net/http"
@@ -427,21 +428,21 @@ func (ws *WsServer) ParseWSArgs(r *http.Request) (args *WSArgs, err error) {
 	query := r.URL.Query()
 	v.MsgResp, _ = strconv.ParseBool(query.Get(MsgResp))
 	if ws.onlineUserConnNum.Load() >= ws.wsMaxConnNum {
-		return nil, errs.ErrConnOverMaxNumLimit.WrapMsg("over max conn num limit")
+		return nil, servererrs.ErrConnOverMaxNumLimit.WrapMsg("over max conn num limit")
 	}
 	if v.Token = query.Get(Token); v.Token == "" {
-		return nil, errs.ErrConnArgsErr.WrapMsg("token is empty")
+		return nil, servererrs.ErrConnArgsErr.WrapMsg("token is empty")
 	}
 	if v.UserID = query.Get(WsUserID); v.UserID == "" {
-		return nil, errs.ErrConnArgsErr.WrapMsg("sendID is empty")
+		return nil, servererrs.ErrConnArgsErr.WrapMsg("sendID is empty")
 	}
 	platformIDStr := query.Get(PlatformID)
 	if platformIDStr == "" {
-		return nil, errs.ErrConnArgsErr.WrapMsg("platformID is empty")
+		return nil, servererrs.ErrConnArgsErr.WrapMsg("platformID is empty")
 	}
 	platformID, err := strconv.Atoi(platformIDStr)
 	if err != nil {
-		return nil, errs.ErrConnArgsErr.WrapMsg("platformID is not int")
+		return nil, servererrs.ErrConnArgsErr.WrapMsg("platformID is not int")
 	}
 	v.PlatformID = platformID
 	if err = authverify.WsVerifyToken(v.Token, v.UserID, ws.globalConfig.Secret, platformID); err != nil {
@@ -461,12 +462,12 @@ func (ws *WsServer) ParseWSArgs(r *http.Request) (args *WSArgs, err error) {
 		switch v {
 		case constant.NormalToken:
 		case constant.KickedToken:
-			return nil, errs.ErrTokenKicked.Wrap()
+			return nil, servererrs.ErrTokenKicked.Wrap()
 		default:
-			return nil, errs.ErrTokenUnknown.WrapMsg(fmt.Sprintf("token status is %d", v))
+			return nil, servererrs.ErrTokenUnknown.WrapMsg(fmt.Sprintf("token status is %d", v))
 		}
 	} else {
-		return nil, errs.ErrTokenNotExist.Wrap()
+		return nil, servererrs.ErrTokenNotExist.Wrap()
 	}
 	return &v, nil
 }

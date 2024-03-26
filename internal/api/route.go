@@ -18,6 +18,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/tools/discovery"
 	"net"
 	"net/http"
 	"os"
@@ -42,7 +44,6 @@ import (
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/apiresp"
-	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
@@ -61,7 +62,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, port int, proPort i
 		return err
 	}
 
-	var client discoveryregistry.SvcDiscoveryRegistry
+	var client discovery.SvcDiscoveryRegistry
 
 	// Determine whether zk is passed according to whether it is a clustered deployment
 	client, err = kdisc.NewDiscoveryRegister(config)
@@ -133,7 +134,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, port int, proPort i
 	return nil
 }
 
-func newGinRouter(disCov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient, config *config.GlobalConfig) *gin.Engine {
+func newGinRouter(disCov discovery.SvcDiscoveryRegistry, rdb redis.UniversalClient, config *config.GlobalConfig) *gin.Engine {
 	disCov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
@@ -326,26 +327,26 @@ func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.H
 		case http.MethodPost:
 			token := c.Request.Header.Get(constant.Token)
 			if token == "" {
-				log.ZWarn(c, "header get token error", errs.ErrArgs.WrapMsg("header must have token"))
-				apiresp.GinError(c, errs.ErrArgs.WrapMsg("header must have token"))
+				log.ZWarn(c, "header get token error", servererrs.ErrArgs.WrapMsg("header must have token"))
+				apiresp.GinError(c, servererrs.ErrArgs.WrapMsg("header must have token"))
 				c.Abort()
 				return
 			}
 			claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret(config.Secret))
 			if err != nil {
 				log.ZWarn(c, "jwt get token error", errs.ErrTokenUnknown.Wrap())
-				apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
+				apiresp.GinError(c, servererrs.ErrTokenUnknown.Wrap())
 				c.Abort()
 				return
 			}
 			m, err := dataBase.GetTokensWithoutError(c, claims.UserID, claims.PlatformID)
 			if err != nil {
-				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				apiresp.GinError(c, servererrs.ErrTokenNotExist.Wrap())
 				c.Abort()
 				return
 			}
 			if len(m) == 0 {
-				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				apiresp.GinError(c, servererrs.ErrTokenNotExist.Wrap())
 				c.Abort()
 				return
 			}
@@ -353,16 +354,16 @@ func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.H
 				switch v {
 				case constant.NormalToken:
 				case constant.KickedToken:
-					apiresp.GinError(c, errs.ErrTokenKicked.Wrap())
+					apiresp.GinError(c, servererrs.ErrTokenKicked.Wrap())
 					c.Abort()
 					return
 				default:
-					apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
+					apiresp.GinError(c, servererrs.ErrTokenUnknown.Wrap())
 					c.Abort()
 					return
 				}
 			} else {
-				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				apiresp.GinError(c, servererrs.ErrTokenNotExist.Wrap())
 				c.Abort()
 				return
 			}

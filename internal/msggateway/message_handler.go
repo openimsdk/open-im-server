@@ -17,7 +17,7 @@ package msggateway
 import (
 	"context"
 	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/utils/goassist"
+	"github.com/openimsdk/tools/utils/jsonutil"
 	"sync"
 
 	"github.com/go-playground/validator/v10"
@@ -46,7 +46,7 @@ func (r *Req) String() string {
 	tReq.SendID = r.SendID
 	tReq.OperationID = r.OperationID
 	tReq.MsgIncr = r.MsgIncr
-	return goassist.StructToJsonString(tReq)
+	return jsonutil.StructToJsonString(tReq)
 }
 
 var reqPool = sync.Pool{
@@ -86,7 +86,7 @@ func (r *Resp) String() string {
 	tResp.OperationID = r.OperationID
 	tResp.ErrCode = r.ErrCode
 	tResp.ErrMsg = r.ErrMsg
-	return goassist.StructToJsonString(tResp)
+	return jsonutil.StructToJsonString(tResp)
 }
 
 type MessageHandler interface {

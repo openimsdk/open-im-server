@@ -16,6 +16,8 @@ package rpcclient
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/tools/utils/datautil"
 	"strings"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -23,9 +25,7 @@ import (
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/protocol/user"
-	"github.com/openimsdk/tools/discoveryregistry"
-	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils"
+	"github.com/openimsdk/tools/discovery"
 	"google.golang.org/grpc"
 )
 
@@ -33,14 +33,14 @@ import (
 type User struct {
 	conn                  grpc.ClientConnInterface
 	Client                user.UserClient
-	Discov                discoveryregistry.SvcDiscoveryRegistry
+	Discov                discovery.SvcDiscoveryRegistry
 	MessageGateWayRpcName string
 	manager               *config.Manager
 	imAdmin               *config.IMAdmin
 }
 
 // NewUser initializes and returns a User instance based on the provided service discovery registry.
-func NewUser(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName, messageGateWayRpcName string,
+func NewUser(discov discovery.SvcDiscoveryRegistry, rpcRegisterName, messageGateWayRpcName string,
 	manager *config.Manager, imAdmin *config.IMAdmin) *User {
 	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
@@ -64,7 +64,7 @@ func NewUserRpcClientByUser(user *User) *UserRpcClient {
 }
 
 // NewUserRpcClient initializes a UserRpcClient based on the provided service discovery registry.
-func NewUserRpcClient(client discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string,
+func NewUserRpcClient(client discovery.SvcDiscoveryRegistry, rpcRegisterName string,
 	manager *config.Manager, imAdmin *config.IMAdmin) UserRpcClient {
 	return UserRpcClient(*NewUser(client, rpcRegisterName, "", manager, imAdmin))
 }
@@ -80,10 +80,10 @@ func (u *UserRpcClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*
 	if err != nil {
 		return nil, err
 	}
-	if ids := utils.Single(userIDs, utils.Slice(resp.UsersInfo, func(e *sdkws.UserInfo) string {
+	if ids := datautil.Single(userIDs, datautil.Slice(resp.UsersInfo, func(e *sdkws.UserInfo) string {
 		return e.UserID
 	})); len(ids) > 0 {
-		return nil, errs.ErrUserIDNotFound.WrapMsg(strings.Join(ids, ","))
+		return nil, servererrs.ErrUserIDNotFound.WrapMsg(strings.Join(ids, ","))
 	}
 	return resp.UsersInfo, nil
 }
@@ -103,7 +103,7 @@ func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (
 	if err != nil {
 		return nil, err
 	}
-	return utils.SliceToMap(users, func(e *sdkws.UserInfo) string {
+	return datautil.SliceToMap(users, func(e *sdkws.UserInfo) string {
 		return e.UserID
 	}), nil
 }
@@ -118,7 +118,7 @@ func (u *UserRpcClient) GetPublicUserInfos(
 	if err != nil {
 		return nil, err
 	}
-	return utils.Slice(users, func(e *sdkws.UserInfo) *sdkws.PublicUserInfo {
+	return datautil.Slice(users, func(e *sdkws.UserInfo) *sdkws.PublicUserInfo {
 		return &sdkws.PublicUserInfo{
 			UserID:   e.UserID,
 			Nickname: e.Nickname,
@@ -147,7 +147,7 @@ func (u *UserRpcClient) GetPublicUserInfoMap(
 	if err != nil {
 		return nil, err
 	}
-	return utils.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
+	return datautil.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
 		return e.UserID
 	}), nil
 }

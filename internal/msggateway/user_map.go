@@ -16,7 +16,7 @@ package msggateway
 
 import (
 	"context"
-	"github.com/openimsdk/tools/utils/goassist"
+	"github.com/openimsdk/tools/utils/datautil"
 	"sync"
 
 	"github.com/openimsdk/tools/log"
@@ -93,7 +93,7 @@ func (u *UserMap) delete(key string, connRemoteAddr string) (isDeleteUser bool) 
 }
 
 func (u *UserMap) deleteClients(key string, clients []*Client) (isDeleteUser bool) {
-	m := goassist.SliceToMapAny(clients, func(c *Client) (string, struct{}) {
+	m := datautil.SliceToMapAny(clients, func(c *Client) (string, struct{}) {
 		return c.ctx.GetRemoteAddr(), struct{}{}
 	})
 	allClients, existed := u.m.Load(key)

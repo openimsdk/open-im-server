@@ -30,7 +30,10 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/idutil"
+	"github.com/openimsdk/tools/utils/jsonutil"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 type MessageApi struct {
@@ -49,10 +52,10 @@ func NewMessageApi(msgRpcClient *rpcclient.Message, userRpcClient *rpcclient.Use
 }
 
 func (MessageApi) SetOptions(options map[string]bool, value bool) {
-	utils.SetSwitchFromOptions(options, constant.IsHistory, value)
-	utils.SetSwitchFromOptions(options, constant.IsPersistent, value)
-	utils.SetSwitchFromOptions(options, constant.IsSenderSync, value)
-	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, value)
+	datautil.SetSwitchFromOptions(options, constant.IsHistory, value)
+	datautil.SetSwitchFromOptions(options, constant.IsPersistent, value)
+	datautil.SetSwitchFromOptions(options, constant.IsSenderSync, value)
+	datautil.SetSwitchFromOptions(options, constant.IsConversationUpdate, value)
 }
 
 func (m MessageApi) newUserSendMsgReq(_ *gin.Context, params *apistruct.SendMsg) *msg.SendMsgReq {
@@ -61,8 +64,8 @@ func (m MessageApi) newUserSendMsgReq(_ *gin.Context, params *apistruct.SendMsg)
 	switch params.ContentType {
 	case constant.OANotification:
 		notification := sdkws.NotificationElem{}
-		notification.Detail = utils.StructToJsonString(params.Content)
-		newContent = utils.StructToJsonString(&notification)
+		notification.Detail = jsonutil.StructToJsonString(params.Content)
+		newContent = jsonutil.StructToJsonString(&notification)
 	case constant.Text:
 		fallthrough
 	case constant.Picture:
@@ -76,19 +79,19 @@ func (m MessageApi) newUserSendMsgReq(_ *gin.Context, params *apistruct.SendMsg)
 	case constant.File:
 		fallthrough
 	default:
-		newContent = utils.StructToJsonString(params.Content)
+		newContent = jsonutil.StructToJsonString(params.Content)
 	}
 	if params.IsOnlineOnly {
 		m.SetOptions(options, false)
 	}
 	if params.NotOfflinePush {
-		utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
+		datautil.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
 	}
 	pbData := msg.SendMsgReq{
 		MsgData: &sdkws.MsgData{
 			SendID:           params.SendID,
 			GroupID:          params.GroupID,
-			ClientMsgID:      utils.GetMsgID(params.SendID),
+			ClientMsgID:      idutil.GetMsgIDByMD5(params.SendID),
 			SenderPlatformID: params.SenderPlatformID,
 			SenderNickname:   params.SenderNickname,
 			SenderFaceURL:    params.SenderFaceURL,
@@ -96,7 +99,7 @@ func (m MessageApi) newUserSendMsgReq(_ *gin.Context, params *apistruct.SendMsg)
 			MsgFrom:          constant.SysMsgType,
 			ContentType:      params.ContentType,
 			Content:          []byte(newContent),
-			CreateTime:       utils.GetCurrentTimestampByMill(),
+			CreateTime:       timeutil.GetCurrentTimestampByMill(),
 			SendTime:         params.SendTime,
 			Options:          options,
 			OfflinePushInfo:  params.OfflinePushInfo,
@@ -269,8 +272,8 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 		MsgData: &sdkws.MsgData{
 			SendID: req.SendUserID,
 			RecvID: req.RecvUserID,
-			Content: []byte(utils.StructToJsonString(&sdkws.NotificationElem{
-				Detail: utils.StructToJsonString(&struct {
+			Content: []byte(jsonutil.StructToJsonString(&sdkws.NotificationElem{
+				Detail: jsonutil.StructToJsonString(&struct {
 					Key  string `json:"key"`
 					Data string `json:"data"`
 				}{Key: req.Key, Data: req.Data}),
@@ -278,8 +281,8 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 			MsgFrom:     constant.SysMsgType,
 			ContentType: constant.BusinessNotification,
 			SessionType: constant.SingleChatType,
-			CreateTime:  utils.GetCurrentTimestampByMill(),
-			ClientMsgID: utils.GetMsgID(mcontext.GetOpUserID(c)),
+			CreateTime:  timeutil.GetCurrentTimestampByMill(),
+			ClientMsgID: idutil.GetMsgIDByMD5(mcontext.GetOpUserID(c)),
 			Options: config.GetOptionsByNotification(config.NotificationConf{
 				IsSendMsg:        false,
 				ReliabilityLevel: 1,
