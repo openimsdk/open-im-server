@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/tools/utils/goassist"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/protocol/constant"
@@ -23,7 +24,6 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	utils2 "github.com/openimsdk/tools/utils"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -59,13 +59,13 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 		return nil, err
 	}
 	resp = &msg.GetConversationsHasReadAndMaxSeqResp{Seqs: make(map[string]*msg.Seqs)}
-	for conversarionID, maxSeq := range maxSeqs {
-		resp.Seqs[conversarionID] = &msg.Seqs{
-			HasReadSeq: hasReadSeqs[conversarionID],
+	for conversationID, maxSeq := range maxSeqs {
+		resp.Seqs[conversationID] = &msg.Seqs{
+			HasReadSeq: hasReadSeqs[conversationID],
 			MaxSeq:     maxSeq,
 		}
-		if v, ok := conversationMaxSeqMap[conversarionID]; ok {
-			resp.Seqs[conversarionID].MaxSeq = v
+		if v, ok := conversationMaxSeqMap[conversationID]; ok {
+			resp.Seqs[conversationID].MaxSeq = v
 		}
 	}
 	return resp, nil
@@ -157,7 +157,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		}
 		// avoid client missed call MarkConversationMessageAsRead by order
 		for _, val := range req.Seqs {
-			if !utils2.Contain(val, seqs...) {
+			if !goassist.Contain(val, seqs...) {
 				seqs = append(seqs, val)
 			}
 		}

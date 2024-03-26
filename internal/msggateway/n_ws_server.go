@@ -19,6 +19,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"net/http"
 	"strconv"
 	"sync"
@@ -34,10 +36,8 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/tools/apiresp"
-	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
 )
@@ -49,7 +49,7 @@ type LongConnServer interface {
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s any) error
 	SetCacheHandler(cache cache.TokenModel)
-	SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig)
+	SetDiscoveryRegistry(client discovery.SvcDiscoveryRegistry, config *config.GlobalConfig)
 	KickUserConn(client *Client) error
 	UnRegister(c *Client)
 	SetKickHandlerInfo(i *kickHandler)
@@ -81,7 +81,7 @@ type WsServer struct {
 	validate          *validator.Validate
 	cache             cache.TokenModel
 	userClient        *rpcclient.UserRpcClient
-	disCov            discoveryregistry.SvcDiscoveryRegistry
+	disCov            discovery.SvcDiscoveryRegistry
 	Compressor
 	Encoder
 	MessageHandler
@@ -93,7 +93,7 @@ type kickHandler struct {
 	newClient  *Client
 }
 
-func (ws *WsServer) SetDiscoveryRegistry(disCov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) {
+func (ws *WsServer) SetDiscoveryRegistry(disCov discovery.SvcDiscoveryRegistry, config *config.GlobalConfig) {
 	ws.MessageHandler = NewGrpcHandler(ws.validate, disCov, &config.RpcRegisterName)
 	u := rpcclient.NewUserRpcClient(disCov, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
 	ws.userClient = &u
@@ -176,7 +176,7 @@ func (ws *WsServer) Run(done chan error) error {
 		shutdownDone = make(chan struct{}, 1)
 	)
 
-	server := http.Server{Addr: ":" + utils.IntToString(ws.port), Handler: nil}
+	server := http.Server{Addr: ":" + stringutil.IntToString(ws.port), Handler: nil}
 
 	go func() {
 		for {

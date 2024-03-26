@@ -16,7 +16,6 @@ package startrpc
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -161,7 +160,7 @@ func gracefulStopWithCtx(ctx context.Context, f func()) error {
 	}()
 	select {
 	case <-ctx.Done():
-		return errs.Wrap(errors.New("timeout, ctx graceful stop"))
+		return errs.New("timeout, ctx graceful stop")
 	case <-done:
 		return nil
 	}

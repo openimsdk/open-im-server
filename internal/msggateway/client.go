@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
@@ -29,7 +30,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -91,7 +91,7 @@ type Client struct {
 func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isBackground, isCompress bool, longConnServer LongConnServer, token string) {
 	c.w = new(sync.Mutex)
 	c.conn = conn
-	c.PlatformID = utils.StringToInt(ctx.GetPlatformID())
+	c.PlatformID = stringutil.StringToInt(ctx.GetPlatformID())
 	c.IsCompress = isCompress
 	c.IsBackground = isBackground
 	c.UserID = ctx.GetUserID()

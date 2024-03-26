@@ -20,8 +20,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/openimsdk/tools/errs"
 	"io"
 	"log"
 	"net/http"
@@ -256,10 +256,10 @@ func (m *Manage) RunTask(ctx context.Context, task Task) (string, error) {
 
 func (m *Manage) partSize(size int64) (int64, error) {
 	if size <= 0 {
-		return 0, errors.New("size must be greater than 0")
+		return 0, errs.New("size must be greater than 0")
 	}
 	if size > m.partLimit.MaxPartSize*int64(m.partLimit.MaxNumSize) {
-		return 0, fmt.Errorf("size must be less than %db", m.partLimit.MaxPartSize*int64(m.partLimit.MaxNumSize))
+		return 0, errs.New("size must be less than", "size", m.partLimit.MaxPartSize*int64(m.partLimit.MaxNumSize))
 	}
 	if size <= m.partLimit.MinPartSize*int64(m.partLimit.MaxNumSize) {
 		return m.partLimit.MinPartSize, nil
