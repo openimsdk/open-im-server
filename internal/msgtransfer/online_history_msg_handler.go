@@ -16,6 +16,8 @@ package msgtransfer
 
 import (
 	"context"
+	"github.com/openimsdk/tools/utils/idutil"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"strconv"
 	"strings"
 	"sync"
@@ -34,7 +36,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -347,7 +348,7 @@ func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 				log.ZDebug(ctx, "generate map list users len", "length", len(aggregationMsgs))
 				for uniqueKey, v := range aggregationMsgs {
 					if len(v) >= 0 {
-						hashCode := utils.GetHashCode(uniqueKey)
+						hashCode := stringutil.GetHashCode(uniqueKey)
 						channelID := hashCode % ChannelNum
 						newCtx := withAggregationCtx(ctx, v)
 						log.ZDebug(
@@ -438,7 +439,7 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(
 				rwLock.Unlock()
 
 				start := time.Now()
-				ctx := mcontext.WithTriggerIDContext(context.Background(), utils.OperationIDGenerator())
+				ctx := mcontext.WithTriggerIDContext(context.Background(), idutil.OperationIDGenerator())
 				log.ZDebug(ctx, "timer trigger msg consumer start", "length", len(buffer))
 				for i := 0; i < len(buffer)/split; i++ {
 					och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{

@@ -16,6 +16,8 @@ package push
 
 import (
 	"context"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/utils/datautil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -24,9 +26,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	pbpush "github.com/openimsdk/protocol/push"
-	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils"
 	"google.golang.org/grpc"
 )
 
@@ -34,7 +34,7 @@ type pushServer struct {
 	pusher *Pusher
 }
 
-func Start(ctx context.Context, config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
@@ -80,7 +80,7 @@ func (r *pushServer) PushMsg(ctx context.Context, pbData *pbpush.PushMsgReq) (re
 		err = r.pusher.Push2SuperGroup(ctx, pbData.MsgData.GroupID, pbData.MsgData)
 	default:
 		var pushUserIDList []string
-		isSenderSync := utils.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
+		isSenderSync := datautil.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
 		if !isSenderSync {
 			pushUserIDList = append(pushUserIDList, pbData.MsgData.RecvID)
 		} else {

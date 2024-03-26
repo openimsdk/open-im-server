@@ -16,6 +16,8 @@ package push
 
 import (
 	"context"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/timeutil"
 
 	"github.com/IBM/sarama"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -24,7 +26,6 @@ import (
 	pbchat "github.com/openimsdk/protocol/msg"
 	pbpush "github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -55,7 +56,7 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		ConversationID: msgFromMQ.ConversationID,
 	}
 	sec := msgFromMQ.MsgData.SendTime / 1000
-	nowSec := utils.GetCurrentTimestampBySecond()
+	nowSec := timeutil.GetCurrentTimestampBySecond()
 	log.ZDebug(ctx, "push msg", "msg", pbData.String(), "sec", sec, "nowSec", nowSec)
 	if nowSec-sec > 10 {
 		return
@@ -66,7 +67,7 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		err = c.pusher.Push2SuperGroup(ctx, pbData.MsgData.GroupID, pbData.MsgData)
 	default:
 		var pushUserIDList []string
-		isSenderSync := utils.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
+		isSenderSync := datautil.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
 		if !isSenderSync || pbData.MsgData.SendID == pbData.MsgData.RecvID {
 			pushUserIDList = append(pushUserIDList, pbData.MsgData.RecvID)
 		} else {
