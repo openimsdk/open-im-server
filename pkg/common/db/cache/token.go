@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -36,7 +36,7 @@ func (c *tokenCache) GetTokensWithoutError(ctx context.Context, userID string, p
 	}
 	mm := make(map[string]int)
 	for k, v := range m {
-		mm[k] = utils.StringToInt(v)
+		mm[k] = stringutil.StringToInt(v)
 	}
 
 	return mm, nil

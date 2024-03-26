@@ -16,17 +16,17 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"time"
-
-	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/pagination"
-	"github.com/openimsdk/tools/tx"
-	"github.com/openimsdk/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/db"
+	"github.com/openimsdk/tools/log"
 )
 
 type ConversationDatabase interface {
@@ -67,7 +67,7 @@ type ConversationDatabase interface {
 	//FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 }
 
-func NewConversationDatabase(conversation relationtb.ConversationModelInterface, cache cache.ConversationCache, tx tx.CtxTx) ConversationDatabase {
+func NewConversationDatabase(conversation relationtb.ConversationModelInterface, cache cache.ConversationCache, tx db.CtxTx) ConversationDatabase {
 	return &conversationDatabase{
 		conversationDB: conversation,
 		cache:          cache,
@@ -78,7 +78,7 @@ func NewConversationDatabase(conversation relationtb.ConversationModelInterface,
 type conversationDatabase struct {
 	conversationDB relationtb.ConversationModelInterface
 	cache          cache.ConversationCache
-	tx             tx.CtxTx
+	tx             db.CtxTx
 }
 
 func (c *conversationDatabase) SetUsersConversationFieldTx(ctx context.Context, userIDs []string, conversation *relationtb.ConversationModel, fieldMap map[string]any) (err error) {
@@ -106,13 +106,13 @@ func (c *conversationDatabase) SetUsersConversationFieldTx(ctx context.Context, 
 				cache = cache.DelConversationNotReceiveMessageUserIDs(conversation.ConversationID)
 			}
 		}
-		NotUserIDs := utils.DifferenceString(haveUserIDs, userIDs)
+		NotUserIDs := stringutil.DifferenceString(haveUserIDs, userIDs)
 		log.ZDebug(ctx, "SetUsersConversationFieldTx", "NotUserIDs", NotUserIDs, "haveUserIDs", haveUserIDs, "userIDs", userIDs)
 		var conversations []*relationtb.ConversationModel
 		now := time.Now()
 		for _, v := range NotUserIDs {
 			temp := new(relationtb.ConversationModel)
-			if err = utils.CopyStructFields(temp, conversation); err != nil {
+			if err = datautil.CopyStructFields(temp, conversation); err != nil {
 				return err
 			}
 			temp.OwnerUserID = v
@@ -206,7 +206,7 @@ func (c *conversationDatabase) GetUserAllConversation(ctx context.Context, owner
 func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationtb.ConversationModel) error {
 	return c.tx.Transaction(ctx, func(ctx context.Context) error {
 		cache := c.cache.NewCache()
-		groupIDs := utils.Distinct(utils.Filter(conversations, func(e *relationtb.ConversationModel) (string, bool) {
+		groupIDs := datautil.Distinct(datautil.Filter(conversations, func(e *relationtb.ConversationModel) (string, bool) {
 			return e.GroupID, e.GroupID != ""
 		}))
 		for _, groupID := range groupIDs {
@@ -236,7 +236,7 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 
 		var notExistConversations []*relationtb.ConversationModel
 		for _, conversation := range conversations {
-			if !utils.IsContain(conversation.ConversationID, existConversationIDs) {
+			if !datautil.Contain(conversation.ConversationID, existConversationIDs...) {
 				notExistConversations = append(notExistConversations, conversation)
 			}
 		}
@@ -247,7 +247,7 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 			}
 			cache = cache.DelConversationIDs(ownerUserID).
 				DelUserConversationIDsHash(ownerUserID).
-				DelConversationNotReceiveMessageUserIDs(utils.Slice(notExistConversations, func(e *relationtb.ConversationModel) string { return e.ConversationID })...)
+				DelConversationNotReceiveMessageUserIDs(datautil.Slice(notExistConversations, func(e *relationtb.ConversationModel) string { return e.ConversationID })...)
 		}
 		return cache.ExecDel(ctx)
 	})
@@ -265,7 +265,7 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 		if err != nil {
 			return err
 		}
-		notExistUserIDs := utils.DifferenceString(userIDs, existConversationUserIDs)
+		notExistUserIDs := stringutil.DifferenceString(userIDs, existConversationUserIDs)
 		var conversations []*relationtb.ConversationModel
 		for _, v := range notExistUserIDs {
 			conversation := relationtb.ConversationModel{ConversationType: constant.SuperGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID}

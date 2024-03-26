@@ -16,9 +16,8 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/tools/db/pagination"
 	"time"
-
-	"github.com/openimsdk/tools/pagination"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"

@@ -17,6 +17,7 @@ package cache
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"strconv"
 	"time"
 
@@ -27,7 +28,6 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
 )
@@ -162,7 +162,7 @@ func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s st
 		if err != nil && err != redis.Nil {
 			return nil, errs.Wrap(err)
 		}
-		val := utils.StringToInt64(res)
+		val := stringutil.StringToInt64(res)
 		if val != 0 {
 			m[items[i]] = val
 		}
@@ -497,7 +497,7 @@ func (c *msgCache) GetUserDelList(ctx context.Context, userID, conversationID st
 	}
 	seqs = make([]int64, len(result))
 	for i, v := range result {
-		seqs[i] = utils.StringToInt64(v)
+		seqs[i] = stringutil.StringToInt64(v)
 	}
 
 	return seqs, nil

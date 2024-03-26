@@ -17,6 +17,7 @@ package cache
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -26,7 +27,6 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -330,11 +330,11 @@ func (g *GroupCacheRedis) GetGroupMembersPage(
 		return 0, nil, err
 	}
 	if userIDs != nil {
-		userIDs = utils.BothExist(userIDs, groupMemberIDs)
+		userIDs = datautil.BothExist(userIDs, groupMemberIDs)
 	} else {
 		userIDs = groupMemberIDs
 	}
-	groupMembers, err = g.GetGroupMembersInfo(ctx, groupID, utils.Paginate(userIDs, int(showNumber), int(showNumber)))
+	groupMembers, err = g.GetGroupMembersInfo(ctx, groupID, datautil.Paginate(userIDs, int(showNumber), int(showNumber)))
 
 	return uint32(len(userIDs)), groupMembers, err
 }

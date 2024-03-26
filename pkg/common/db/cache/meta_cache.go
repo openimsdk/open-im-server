@@ -19,13 +19,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw/specialerror"
-	"github.com/openimsdk/tools/utils"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -88,7 +88,7 @@ func (m *metaCacheRedis) SetRawRedisClient(cli redis.UniversalClient) {
 
 func (m *metaCacheRedis) ExecDel(ctx context.Context, distinct ...bool) error {
 	if len(distinct) > 0 && distinct[0] {
-		m.keys = utils.Distinct(m.keys)
+		m.keys = datautil.Distinct(m.keys)
 	}
 	if len(m.keys) > 0 {
 		log.ZDebug(ctx, "delete cache", "topic", m.topic, "keys", m.keys)

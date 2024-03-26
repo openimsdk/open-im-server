@@ -16,6 +16,8 @@ package cache
 
 import (
 	"context"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/encrypt"
 	"math/big"
 	"strings"
 	"time"
@@ -25,7 +27,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -188,9 +189,9 @@ func (c *ConversationRedisCache) GetUserConversationIDsHash(ctx context.Context,
 			if err != nil {
 				return 0, err
 			}
-			utils.Sort(conversationIDs, true)
+			datautil.Sort(conversationIDs, true)
 			bi := big.NewInt(0)
-			bi.SetString(utils.Md5(strings.Join(conversationIDs, ";"))[0:8], 16)
+			bi.SetString(encrypt.Md5(strings.Join(conversationIDs, ";"))[0:8], 16)
 			return bi.Uint64(), nil
 		},
 	)

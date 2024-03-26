@@ -17,15 +17,15 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/db"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/pagination"
-	"github.com/openimsdk/tools/tx"
-	"github.com/openimsdk/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
@@ -81,11 +81,11 @@ type FriendDatabase interface {
 type friendDatabase struct {
 	friend        relation.FriendModelInterface
 	friendRequest relation.FriendRequestModelInterface
-	tx            tx.CtxTx
+	tx            db.CtxTx
 	cache         cache.FriendCache
 }
 
-func NewFriendDatabase(friend relation.FriendModelInterface, friendRequest relation.FriendRequestModelInterface, cache cache.FriendCache, tx tx.CtxTx) FriendDatabase {
+func NewFriendDatabase(friend relation.FriendModelInterface, friendRequest relation.FriendRequestModelInterface, cache cache.FriendCache, tx db.CtxTx) FriendDatabase {
 	return &friendDatabase{friend: friend, friendRequest: friendRequest, cache: cache, tx: tx}
 }
 
@@ -107,8 +107,8 @@ func (f *friendDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (
 	}
 
 	// Check if userID2 is in userID1's friend list and vice versa
-	inUser1Friends = utils.IsContain(userID2, userID1FriendIDs)
-	inUser2Friends = utils.IsContain(userID1, userID2FriendIDs)
+	inUser1Friends = datautil.Contain(userID2, userID1FriendIDs...)
+	inUser2Friends = datautil.Contain(userID1, userID2FriendIDs...)
 	return inUser1Friends, inUser2Friends, nil
 }
 
@@ -149,7 +149,7 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 		for _, v := range friendUserIDs {
 			fs1 = append(fs1, &relation.FriendModel{OwnerUserID: ownerUserID, FriendUserID: v, AddSource: addSource, OperatorUserID: opUserID})
 		}
-		fs11 := utils.DistinctAny(fs1, func(e *relation.FriendModel) string {
+		fs11 := datautil.DistinctAny(fs1, func(e *relation.FriendModel) string {
 			return e.FriendUserID
 		})
 
@@ -166,7 +166,7 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 			fs2 = append(fs2, &relation.FriendModel{OwnerUserID: v, FriendUserID: ownerUserID, AddSource: addSource, OperatorUserID: opUserID})
 			newFriendIDs = append(newFriendIDs, v)
 		}
-		fs22 := utils.DistinctAny(fs2, func(e *relation.FriendModel) string {
+		fs22 := datautil.DistinctAny(fs2, func(e *relation.FriendModel) string {
 			return e.OwnerUserID
 		})
 		err = f.friend.Create(ctx, fs22)
@@ -247,7 +247,7 @@ func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 		if err != nil {
 			return err
 		}
-		existsMap := utils.SliceSet(utils.Slice(exists, func(friend *relation.FriendModel) [2]string {
+		existsMap := datautil.SliceSet(datautil.Slice(exists, func(friend *relation.FriendModel) [2]string {
 			return [...]string{friend.OwnerUserID, friend.FriendUserID} // My - Friend
 		}))
 		var adds []*relation.FriendModel

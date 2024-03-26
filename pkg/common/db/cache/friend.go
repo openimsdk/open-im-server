@@ -16,6 +16,7 @@ package cache
 
 import (
 	"context"
+	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -23,7 +24,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -129,7 +129,7 @@ func (f *FriendCacheRedis) GetTwoWayFriendIDs(ctx context.Context, ownerUserID s
 		if err != nil {
 			return nil, err
 		}
-		if utils.IsContain(ownerUserID, friendFriendID) {
+		if datautil.Contain(ownerUserID, friendFriendID...) {
 			twoWayFriendIDs = append(twoWayFriendIDs, ownerUserID)
 		}
 	}

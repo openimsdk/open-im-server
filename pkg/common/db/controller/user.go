@@ -16,13 +16,13 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/db"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/pagination"
-	"github.com/openimsdk/tools/tx"
-	"github.com/openimsdk/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
@@ -83,19 +83,19 @@ type UserDatabase interface {
 }
 
 type userDatabase struct {
-	tx      tx.CtxTx
+	tx      db.CtxTx
 	userDB  relation.UserModelInterface
 	cache   cache.UserCache
 	mongoDB relation.SubscribeUserModelInterface
 }
 
-func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx tx.CtxTx, mongoDB relation.SubscribeUserModelInterface) UserDatabase {
+func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx db.CtxTx, mongoDB relation.SubscribeUserModelInterface) UserDatabase {
 	return &userDatabase{userDB: userDB, cache: cache, tx: tx, mongoDB: mongoDB}
 }
 
 func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel) error {
 	// Extract user IDs from the given user models.
-	userIDs := utils.Slice(users, func(e *relation.UserModel) string {
+	userIDs := datautil.Slice(users, func(e *relation.UserModel) string {
 		return e.UserID
 	})
 
@@ -106,7 +106,7 @@ func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel
 	}
 
 	// Determine which users are missing from the database.
-	missingUsers := utils.SliceAnySub(users, existingUsers, func(e *relation.UserModel) string {
+	missingUsers := datautil.SliceAnySub(users, existingUsers, func(e *relation.UserModel) string {
 		return e.UserID
 	})
 
@@ -153,7 +153,7 @@ func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) 
 		if err = u.userDB.Create(ctx, users); err != nil {
 			return err
 		}
-		return u.cache.DelUsersInfo(utils.Slice(users, func(e *relation.UserModel) string {
+		return u.cache.DelUsersInfo(datautil.Slice(users, func(e *relation.UserModel) string {
 			return e.UserID
 		})...).ExecDel(ctx)
 	})
