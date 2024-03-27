@@ -17,6 +17,9 @@ package user
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/utils/datautil"
 	"math/rand"
 	"strings"
 	"time"
@@ -35,12 +38,10 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
 	pbuser "github.com/openimsdk/protocol/user"
-	registry "github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/db/pagination"
+	registry "github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/pagination"
-	"github.com/openimsdk/tools/tx"
-	"github.com/openimsdk/tools/utils"
 	"google.golang.org/grpc"
 )
 
@@ -81,7 +82,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, client registry.Svc
 	}
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
 	userMongoDB := mgo.NewUserMongoDriver(mongo.GetDatabase(config.Mongo.Database))
-	database := controller.NewUserDatabase(userDB, cache, tx.NewMongo(mongo.GetClient()), userMongoDB)
+	database := controller.NewUserDatabase(userDB, cache, mongoutil.NewMongo(mongo.GetClient()), userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.RpcRegisterName.OpenImFriendName)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.RpcRegisterName.OpenImMsgName)
@@ -193,7 +194,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 
 func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckReq) (resp *pbuser.AccountCheckResp, err error) {
 	resp = &pbuser.AccountCheckResp{}
-	if utils.Duplicate(req.CheckUserIDs) {
+	if datautil.Duplicate(req.CheckUserIDs) {
 		return nil, errs.ErrArgs.WrapMsg("userID repeated")
 	}
 	err = authverify.CheckAdmin(ctx, &s.config.Manager, &s.config.IMAdmin)
@@ -247,7 +248,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 		log.ZDebug(ctx, "UserRegister", s.config.Secret, req.Secret)
 		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
-	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
+	if datautil.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
 		return nil, errs.ErrArgs.WrapMsg("userID repeated")
 	}
 	userIDs := make([]string, 0)
@@ -265,7 +266,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 		return nil, err
 	}
 	if exist {
-		return nil, errs.ErrRegisteredAlready.WrapMsg("userID registered already")
+		return nil, servererrs.ErrRegisteredAlready.WrapMsg("userID registered already")
 	}
 	if err := CallbackBeforeUserRegister(ctx, s.config, req); err != nil {
 		return nil, err
@@ -642,7 +643,7 @@ func (s *userServer) GetNotificationAccount(ctx context.Context, req *pbuser.Get
 	}
 	user, err := s.UserDatabase.GetUserByID(ctx, req.UserID)
 	if err != nil {
-		return nil, errs.ErrUserIDNotFound.Wrap()
+		return nil, servererrs.ErrUserIDNotFound.Wrap()
 	}
 	if user.AppMangerLevel == constant.AppAdmin || user.AppMangerLevel == constant.AppNotificationAdmin {
 		return &pbuser.GetNotificationAccountResp{}, nil
@@ -670,7 +671,7 @@ func (s *userServer) userModelToResp(users []*relation.UserModel, pagination pag
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {
-		if v.AppMangerLevel == constant.AppNotificationAdmin && !utils.IsContain(v.UserID, s.config.IMAdmin.UserID) {
+		if v.AppMangerLevel == constant.AppNotificationAdmin && !datautil.Contain(v.UserID, s.config.IMAdmin.UserID...) {
 			temp := &pbuser.NotificationAccountInfo{
 				UserID:   v.UserID,
 				FaceURL:  v.FaceURL,
@@ -681,7 +682,7 @@ func (s *userServer) userModelToResp(users []*relation.UserModel, pagination pag
 		}
 	}
 
-	notificationAccounts := utils.Paginate(accounts, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
+	notificationAccounts := datautil.Paginate(accounts, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
 
 	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: notificationAccounts}
 }
