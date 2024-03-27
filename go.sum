@@ -18,6 +18,7 @@ firebase.google.com/go v3.13.0+incompatible/go.mod h1:xlah6XbEyW6tbfSklcfe5FHJIw
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/IBM/sarama v1.42.2 h1:VoY4hVIZ+WQJ8G9KNY/SQlWguBQXQ9uvFPOnrcu8hEw=
 github.com/IBM/sarama v1.42.2/go.mod h1:FLPGUGwYqEs62hq2bVG6Io2+5n+pS6s/WOXVKWSLFtE=
+github.com/IBM/sarama v1.43.0/go.mod h1:zlE6HEbC/SMQ9mhEYaF7nNLYOUyrs0obySKCckWP9BM=
 github.com/OpenIMSDK/protocol v0.0.56 h1:mbVFyDBachEsmJLfYW5AU1z2KL8AUEpoHG8RPCIxjgg=
 github.com/OpenIMSDK/protocol v0.0.56/go.mod h1:F25dFrwrIx3lkNoiuf6FkCfxuwf8L4Z8UIsdTHP/r0Y=
 github.com/OpenIMSDK/tools v0.0.37 h1:qvDqmA4RbEJtPjZouWCkVuf/pjm6Y8nUrG5iH2gcnOg=
@@ -282,6 +283,8 @@ github.com/openimsdk/tools v0.0.47-alpha.4 h1:18BJ3A7G5gN4DxtVSWuiNH1ZgaTd8blyts
 github.com/openimsdk/tools v0.0.47-alpha.4/go.mod h1:7LNWVXlqHUhTXeETk2ZcBPVzUFIjafHpP5SHh9E+9AY=
 github.com/openimsdk/tools v0.0.47-alpha.5 h1:CcLnq0Ne30f9aachsN/LpW1p+C0bzIoIcwen5eCA6to=
 github.com/openimsdk/tools v0.0.47-alpha.5/go.mod h1:7LNWVXlqHUhTXeETk2ZcBPVzUFIjafHpP5SHh9E+9AY=
+github.com/openimsdk/tools v0.0.47-alpha.6 h1:GwV026servNNisB5MjlLr3G497+4z7hy6Rc+E14IElc=
+github.com/openimsdk/tools v0.0.47-alpha.6/go.mod h1:7LNWVXlqHUhTXeETk2ZcBPVzUFIjafHpP5SHh9E+9AY=
 github.com/pelletier/go-buffruneio v0.2.0/go.mod h1:JkE26KsDizTr40EUHkXVtNPvgGtbSNq5BcowyYOWdKo=
 github.com/pelletier/go-toml/v2 v2.0.8 h1:0ctb6s9mE31h0/lhu+J6OPmVeDxJn+kYnJc2jZR9tGQ=
 github.com/pelletier/go-toml/v2 v2.0.8/go.mod h1:vuYfssBdrU2XDZ9bYydBu6t+6a6PYNcZljzZR9VXg+4=

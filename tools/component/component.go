@@ -23,10 +23,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
+	"github.com/OpenIMSDK/tools/component"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/util"
 	"gopkg.in/yaml.v2"
 
-	"github.com/openimsdk/tools/component"
 	"github.com/openimsdk/tools/errs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -131,10 +131,9 @@ func main() {
 					}
 				} else {
 					checks[index].flag = true
-					component.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
+					util.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
 				}
 			}
-
 		}
 		if allSuccess {
 			component.SuccessPrint("All components started successfully!")
@@ -149,146 +148,6 @@ var errMinioNotEnabled = errors.New("minio.Enable is not configured to use MinIO
 
 var errSignEndPoint = errors.New("minio.signEndPoint contains 127.0.0.1, causing issues with image sending")
 var errApiURL = errors.New("object.apiURL contains 127.0.0.1, causing issues with image sending")
-
-// checkMongo checks the MongoDB connection without retries
-func checkMongo(config *config.GlobalConfig) error {
-	mongoStu := &component.Mongo{
-		URL:         config.Mongo.Uri,
-		Address:     config.Mongo.Address,
-		Database:    config.Mongo.Database,
-		Username:    config.Mongo.Username,
-		Password:    config.Mongo.Password,
-		MaxPoolSize: config.Mongo.MaxPoolSize,
-	}
-	err := component.CheckMongo(mongoStu)
-
-	return err
-}
-
-// checkRedis checks the Redis connection
-func checkRedis(config *config.GlobalConfig) error {
-	redisStu := &component.Redis{
-		Address:  config.Redis.Address,
-		Username: config.Redis.Username,
-		Password: config.Redis.Password,
-	}
-	err := component.CheckRedis(redisStu)
-	return err
-}
-
-// checkMinio checks the MinIO connection
-func checkMinio(config *config.GlobalConfig) error {
-	if strings.Contains(config.Object.ApiURL, "127.0.0.1") {
-		return errs.Wrap(errApiURL)
-	}
-	if config.Object.Enable != "minio" {
-		return errs.Wrap(errMinioNotEnabled)
-	}
-	if strings.Contains(config.Object.Minio.Endpoint, "127.0.0.1") {
-		return errs.Wrap(errSignEndPoint)
-	}
-
-	minio := &component.Minio{
-		ApiURL:          config.Object.ApiURL,
-		Endpoint:        config.Object.Minio.Endpoint,
-		AccessKeyID:     config.Object.Minio.AccessKeyID,
-		SecretAccessKey: config.Object.Minio.SecretAccessKey,
-		SignEndpoint:    config.Object.Minio.SignEndpoint,
-		UseSSL:          getEnv("MINIO_USE_SSL", "false"),
-	}
-	err := component.CheckMinio(minio)
-	return err
-}
-
-// checkZookeeper checks the Zookeeper connection
-func checkZookeeper(config *config.GlobalConfig) error {
-	zkStu := &component.Zookeeper{
-		Schema:   config.Zookeeper.Schema,
-		ZkAddr:   config.Zookeeper.ZkAddr,
-		Username: config.Zookeeper.Username,
-		Password: config.Zookeeper.Password,
-	}
-	err := component.CheckZookeeper(zkStu)
-	return err
-}
-
-// checkKafka checks the Kafka connection
-func checkKafka(config *config.GlobalConfig) error {
-	// Prioritize environment variables
-	kafkaStu := &component.Kafka{
-		Username: config.Kafka.Username,
-		Password: config.Kafka.Password,
-		Addr:     config.Kafka.Addr,
-	}
-
-	kafkaClient, err := component.CheckKafka(kafkaStu)
-	if err != nil {
-		return err
-	}
-	defer kafkaClient.Close()
-
-	// Verify if necessary topics exist
-	topics, err := kafkaClient.Topics()
-	if err != nil {
-		return errs.Wrap(err)
-	}
-
-	requiredTopics := []string{
-		config.Kafka.MsgToMongo.Topic,
-		config.Kafka.MsgToPush.Topic,
-		config.Kafka.LatestMsgToRedis.Topic,
-	}
-
-	for _, requiredTopic := range requiredTopics {
-		if !isTopicPresent(requiredTopic, topics) {
-			return errs.WrapMsg(nil, "Kafka missing required topic", "topic", requiredTopic, "availableTopics", strings.Join(topics, ", "))
-		}
-	}
-
-	type Item struct {
-		Topic   string
-		GroupID string
-	}
-
-	items := []Item{
-		{
-			Topic:   config.Kafka.LatestMsgToRedis.Topic,
-			GroupID: config.Kafka.ConsumerGroupID.MsgToRedis,
-		},
-
-		{
-			Topic:   config.Kafka.MsgToMongo.Topic,
-			GroupID: config.Kafka.ConsumerGroupID.MsgToMongo,
-		},
-
-		{
-			Topic:   config.Kafka.MsgToPush.Topic,
-			GroupID: config.Kafka.ConsumerGroupID.MsgToPush,
-		},
-	}
-
-	for _, item := range items {
-		cg, err := kafka.NewMConsumerGroup(config.Kafka.Config, item.GroupID, []string{item.Topic})
-		if err != nil {
-			return err
-		}
-		if err := cg.Close(); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// isTopicPresent checks if a topic is present in the list of topics
-func isTopicPresent(topic string, topics []string) bool {
-	for _, t := range topics {
-		if t == topic {
-			return true
-		}
-	}
-	return false
-}
 
 func configGetEnv(config *config.GlobalConfig) error {
 	config.Mongo.Uri = getEnv("MONGO_URI", config.Mongo.Uri)
