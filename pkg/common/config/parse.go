@@ -16,12 +16,12 @@ package config
 
 import (
 	_ "embed"
+	"github.com/openimsdk/tools/field"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 )
@@ -42,7 +42,7 @@ func GetDefaultConfigPath() (string, error) {
 		return "", errs.WrapMsg(err, "failed to get executable path")
 	}
 
-	configPath, err := genutil.OutDir(filepath.Join(filepath.Dir(executablePath), "../config/"))
+	configPath, err := field.OutDir(filepath.Join(filepath.Dir(executablePath), "../config/"))
 	if err != nil {
 		return "", errs.WrapMsg(err, "failed to get output directory", "outDir", filepath.Join(filepath.Dir(executablePath), "../config/"))
 	}
@@ -55,7 +55,7 @@ func GetProjectRoot() (string, error) {
 	if err != nil {
 		return "", errs.Wrap(err)
 	}
-	projectRoot, err := genutil.OutDir(filepath.Join(filepath.Dir(executablePath), "../../../../.."))
+	projectRoot, err := field.OutDir(filepath.Join(filepath.Dir(executablePath), "../../../../.."))
 	if err != nil {
 		return "", errs.Wrap(err)
 	}

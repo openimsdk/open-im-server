@@ -16,17 +16,16 @@ package rpcclient
 
 import (
 	"context"
-
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/protocol/auth"
-	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/system/program"
 	"google.golang.org/grpc"
 )
 
-func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) *Auth {
+func NewAuth(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) *Auth {
 	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 	client := auth.NewAuthClient(conn)
 	return &Auth{discov: discov, conn: conn, Client: client}
@@ -35,5 +34,5 @@ func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName stri
 type Auth struct {
 	conn   grpc.ClientConnInterface
 	Client auth.AuthClient
-	discov discoveryregistry.SvcDiscoveryRegistry
+	discov discovery.SvcDiscoveryRegistry
 }
