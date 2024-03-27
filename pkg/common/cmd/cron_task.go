@@ -18,7 +18,7 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/internal/tools"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +29,7 @@ type CronTaskCmd struct {
 }
 
 func NewCronTaskCmd(name string) *CronTaskCmd {
-	ret := &CronTaskCmd{RootCmd: NewRootCmd(genutil.GetProcessName(), name, WithCronTaskLogName()),
+	ret := &CronTaskCmd{RootCmd: NewRootCmd(program.GetProcessName(), name, WithCronTaskLogName()),
 		initFunc: tools.StartTask}
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
 	ret.addRunE()

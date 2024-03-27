@@ -17,11 +17,11 @@ package rpcclient
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/tools/system/program"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	pbconversation "github.com/openimsdk/protocol/conversation"
-	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"google.golang.org/grpc"
 )
@@ -29,14 +29,14 @@ import (
 type Conversation struct {
 	Client pbconversation.ConversationClient
 	conn   grpc.ClientConnInterface
-	discov discoveryregistry.SvcDiscoveryRegistry
+	discov discovery.SvcDiscoveryRegistry
 	Config *config.GlobalConfig
 }
 
-func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) *Conversation {
+func NewConversation(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) *Conversation {
 	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 	client := pbconversation.NewConversationClient(conn)
 	return &Conversation{discov: discov, conn: conn, Client: client}
@@ -44,7 +44,7 @@ func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterN
 
 type ConversationRpcClient Conversation
 
-func NewConversationRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) ConversationRpcClient {
+func NewConversationRpcClient(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) ConversationRpcClient {
 	return ConversationRpcClient(*NewConversation(discov, rpcRegisterName))
 }
 

@@ -17,10 +17,10 @@ package cmd
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/tools/system/program"
 
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
@@ -38,7 +38,7 @@ type RpcCmd struct {
 }
 
 func NewRpcCmd(name string, initFunc rpcInitFuc) *RpcCmd {
-	ret := &RpcCmd{RootCmd: NewRootCmd(genutil.GetProcessName(), name), initFunc: initFunc}
+	ret := &RpcCmd{RootCmd: NewRootCmd(program.GetProcessName(), name), initFunc: initFunc}
 	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
 	ret.addPreRun()
 	ret.addRunE()
