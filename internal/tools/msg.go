@@ -25,13 +25,14 @@ import (
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mw"
-	"github.com/openimsdk/tools/tx"
-	"github.com/openimsdk/tools/utils"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -85,7 +86,7 @@ func InitMsgTool(ctx context.Context, config *config.GlobalConfig) (*MsgTool, er
 		return nil, err
 	}
 	userMongoDB := mgo.NewUserMongoDriver(mongo.GetDatabase(config.Mongo.Database))
-	ctxTx := tx.NewMongo(mongo.GetClient())
+	ctxTx := mongoutil.NewMongo(mongo.GetClient())
 	userDatabase := controller.NewUserDatabase(
 		userDB,
 		cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt()),
@@ -136,7 +137,7 @@ func InitMsgTool(ctx context.Context, config *config.GlobalConfig) (*MsgTool, er
 //}
 
 func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
-	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
+	ctx := mcontext.NewCtx(stringutil.GetSelfFuncName())
 	log.ZInfo(ctx, "============================ start del cron task ============================")
 	num, err := c.conversationDatabase.GetAllConversationIDsNumber(ctx)
 	if err != nil {
@@ -219,7 +220,7 @@ func (c *MsgTool) FixAllSeq(ctx context.Context) error {
 		return err
 	}
 	for _, conversationID := range conversationIDs {
-		conversationIDs = append(conversationIDs, utils.GetNotificationConversationIDByConversationID(conversationID))
+		conversationIDs = append(conversationIDs, conversationutil.GetNotificationConversationIDByConversationID(conversationID))
 	}
 	for _, conversationID := range conversationIDs {
 		if err := c.checkMaxSeq(ctx, conversationID); err != nil {
