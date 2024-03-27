@@ -16,16 +16,16 @@ package rpcclient
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/tools/system/program"
-	"github.com/openimsdk/tools/utils/datautil"
 	"strings"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/system/program"
+	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
 )
 

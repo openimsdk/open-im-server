@@ -16,8 +16,6 @@ package msggateway
 
 import (
 	"context"
-	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/utils/jsonutil"
 	"sync"
 
 	"github.com/go-playground/validator/v10"
@@ -26,7 +24,9 @@ import (
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils/jsonutil"
 	"google.golang.org/protobuf/proto"
 )
 

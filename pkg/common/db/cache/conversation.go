@@ -16,8 +16,6 @@ package cache
 
 import (
 	"context"
-	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/encrypt"
 	"math/big"
 	"strings"
 	"time"
@@ -27,6 +25,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/encrypt"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -35,9 +35,9 @@ const (
 	// conversationIDsKey                       = "CONVERSATION_IDS:"
 	// conversationIDsHashKey                   = "CONVERSATION_IDS_HASH:"
 	// conversationHasReadSeqKey                = "CONVERSATION_HAS_READ_SEQ:"
-	//recvMsgOptKey                            = "RECV_MSG_OPT:"
-	//superGroupRecvMsgNotNotifyUserIDsKey     = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
-	//superGroupRecvMsgNotNotifyUserIDsHashKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS_HASH:"
+	// recvMsgOptKey                            = "RECV_MSG_OPT:"
+	// superGroupRecvMsgNotNotifyUserIDsKey     = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
+	// superGroupRecvMsgNotNotifyUserIDsHashKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS_HASH:"
 	//conversationNotReceiveMessageUserIDsKey  = "CONVERSATION_NOT_RECEIVE_MESSAGE_USER_IDS:".
 
 	conversationExpireTime = time.Second * 60 * 60 * 12

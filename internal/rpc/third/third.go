@@ -17,9 +17,6 @@ package third
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/tools/db/mongoutil"
-	"github.com/openimsdk/tools/db/redisutil"
-	"github.com/openimsdk/tools/discovery"
 	"net/url"
 	"time"
 
@@ -33,6 +30,9 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/oss"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/third"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"google.golang.org/grpc"
 )

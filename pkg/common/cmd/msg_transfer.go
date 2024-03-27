@@ -16,11 +16,11 @@ package cmd
 
 import (
 	"context"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/tools/system/program"
 
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 

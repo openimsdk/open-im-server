@@ -16,12 +16,12 @@ package mgo
 
 import (
 	"context"
-	"github.com/openimsdk/tools/db/pagination"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/pagination"
 	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -70,16 +70,15 @@ func (g *GroupMgo) Take(ctx context.Context, groupID string) (group *relation.Gr
 }
 
 func (g *GroupMgo) Search(ctx context.Context, keyword string, pagination pagination.Pagination) (total int64, groups []*relation.GroupModel, err error) {
-    // Define the sorting options
-    opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
-    
-    // Perform the search with pagination and sorting
-    return mongoutil.FindPage[*relation.GroupModel](ctx, g.coll, bson.M{
-        "group_name": bson.M{"$regex": keyword},
-        "status":     bson.M{"$ne": constant.GroupStatusDismissed},
-    }, pagination, opts)
-}
+	// Define the sorting options
+	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
 
+	// Perform the search with pagination and sorting
+	return mongoutil.FindPage[*relation.GroupModel](ctx, g.coll, bson.M{
+		"group_name": bson.M{"$regex": keyword},
+		"status":     bson.M{"$ne": constant.GroupStatusDismissed},
+	}, pagination, opts)
+}
 
 func (g *GroupMgo) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
 	if before == nil {

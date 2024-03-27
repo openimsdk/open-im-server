@@ -21,7 +21,7 @@ import (
 	"runtime"
 
 	"github.com/fatih/color"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func ExecuteCommand(cmdName string, args ...string) (string, error) {
@@ -39,7 +39,7 @@ func ExecuteCommand(cmdName string, args ...string) (string, error) {
 }
 
 func printTime() string {
-	formattedTime := genutil.GetCurrentTimeFormatted()
+	formattedTime := timeutil.GetCurrentTimeFormatted()
 	return fmt.Sprintf("Current Date & Time: %s", formattedTime)
 }
 

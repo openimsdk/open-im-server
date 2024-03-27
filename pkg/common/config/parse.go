@@ -16,14 +16,14 @@ package config
 
 import (
 	_ "embed"
-	"github.com/openimsdk/tools/field"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/field"
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed version

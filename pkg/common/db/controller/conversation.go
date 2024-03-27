@@ -16,17 +16,17 @@ package controller
 
 import (
 	"context"
-	"github.com/openimsdk/tools/db/pagination"
-	"github.com/openimsdk/tools/db/tx"
-	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/stringutil"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/db/tx"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/stringutil"
 )
 
 type ConversationDatabase interface {
@@ -63,8 +63,8 @@ type ConversationDatabase interface {
 	GetConversationIDsNeedDestruct(ctx context.Context) ([]*relationtb.ConversationModel, error)
 	// GetConversationNotReceiveMessageUserIDs gets user IDs for users in a conversation who have not received messages.
 	GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error)
-	//GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
-	//FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
+	// GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
+	// FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 }
 
 func NewConversationDatabase(conversation relationtb.ConversationModelInterface, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -253,7 +253,7 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 	})
 }
 
-//func (c *conversationDatabase) FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error) {
+// func (c *conversationDatabase) FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error) {
 //	return c.cache.GetSuperGroupRecvMsgNotNotifyUserIDs(ctx, groupID)
 //}
 

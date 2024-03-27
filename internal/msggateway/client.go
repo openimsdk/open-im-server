@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/openimsdk/tools/utils/stringutil"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
@@ -30,6 +29,7 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"google.golang.org/protobuf/proto"
 )
 

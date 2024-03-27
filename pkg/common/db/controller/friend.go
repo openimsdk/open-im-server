@@ -17,18 +17,17 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/tools/db/pagination"
-	"github.com/openimsdk/tools/db/tx"
-	"github.com/openimsdk/tools/utils/datautil"
 	"time"
-
-	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mcontext"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/db/tx"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 type FriendDatabase interface {

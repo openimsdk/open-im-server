@@ -16,9 +16,6 @@ package friend
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/tools/db/mongoutil"
-	"github.com/openimsdk/tools/utils/datautil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -28,13 +25,16 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 	"github.com/openimsdk/protocol/constant"
 	pbfriend "github.com/openimsdk/protocol/friend"
 	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
 )
 

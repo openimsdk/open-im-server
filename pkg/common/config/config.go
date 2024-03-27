@@ -16,14 +16,14 @@ package config
 
 import (
 	"bytes"
+	"time"
+
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/system/program"
 	"gopkg.in/yaml.v3"
-	"time"
-
-	"github.com/openimsdk/tools/discovery"
 )
 
 var Config GlobalConfig

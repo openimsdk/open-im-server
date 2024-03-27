@@ -162,6 +162,7 @@ linters-settings:
     # consider enums only in package scopes, not in inner scopes
     package-scope-only: false
 
+
   forbidigo:
   #   # Forbid the following identifiers (identifiers are written using regexp):
     forbid:
@@ -179,6 +180,7 @@ linters-settings:
   #     - ginkgo\\.F.* # these are used just for local development
   #   # Exclude godoc examples from forbidigo checks.  Default is true.
   #   exclude_godoc_examples: false
+
   funlen:
     lines: 220
     statements: 80
@@ -438,14 +440,25 @@ linters-settings:
     disable:
       - shadow
     disable-all: false
-  # depguard:
-  #   list-type: blacklist
-  #   include-go-root: false
-  #   packages:
-  #     - github.com/Sirupsen/logrus
-  #   packages-with-error-message:
-  #     # specify an error message to output when a blacklisted package is used
-  #     - github.com/Sirupsen/logrus: "logging is allowed only by logutils.Log"
+
+  depguard:
+    rules:
+      prevent_unmaintained_packages:
+        list-mode: lax # allow unless explicitely denied
+        files:
+          - $all
+          - "!$test"
+        allow:
+          - $gostd
+        deny:
+          - pkg: io/ioutil
+            desc: "replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil"
+          - pkg: github.com/OpenIMSDK
+            desc: "The OpenIM organization has been replaced with lowercase, please do not use uppercase organization name, you will use openimsdk"
+          - pkg: log
+            desc: "We have a wrapped log package at openim, we recommend you to use our wrapped log package, https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/logging.md"
+          - pkg: errors
+            desc: "We have a wrapped errors package at openim, we recommend you to use our wrapped errors package, https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/error-code.md"
 
   importas:
     # if set to `true`, force to use alias.
@@ -577,6 +590,16 @@ linters-settings:
     rules:
       - name: indent-error-flow
         severity: warning
+      - name: exported
+        severity: warning
+      - name: var-naming
+        arguments: [ ["ID", "HTTP", "URL", "URI", "URL", "URI", "API", "APIKey", "Token", "TokenID", "TokenSecret", "TokenKey", "TokenSecret", "JWT", "JWTToken", "JWTTokenID", "JWTTokenSecret", "JWTTokenKey", "JWTTokenSecret", "OAuth", "OAuthToken", "OAuth" ] ]
+      - name: atomic
+      - name: line-length-limit
+        severity: error
+        arguments: [80]
+      - name: unhandled-error
+        arguments : ["fmt.Printf", "myFunction"]
 
   staticcheck:
     # Select the Go version to target. The default is '1.13'.
@@ -597,7 +620,6 @@ linters-settings:
     initialisms: [ "ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "QPS", "RAM", "RPC", "SLA", "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "GID", "UID", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS" ]
     # https://staticcheck.io/docs/options#http_status_code_whitelist
     http-status-code-whitelist: [ "200", "400", "404", "500" ]
-
 
   tagliatelle:
     # check the struck tag name case

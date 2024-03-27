@@ -17,6 +17,7 @@ package kafka
 import (
 	"context"
 	"errors"
+
 	"github.com/IBM/sarama"
 	"github.com/openimsdk/tools/log"
 	kfk "github.com/openimsdk/tools/mq/kafka"

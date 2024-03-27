@@ -16,8 +16,8 @@ package mgo
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

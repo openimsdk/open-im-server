@@ -17,7 +17,6 @@ package cache
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -27,6 +26,7 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -36,9 +36,9 @@ const (
 	// groupMemberIDsKey   = "GROUP_MEMBER_IDS:"
 	// groupMembersHashKey = "GROUP_MEMBERS_HASH2:"
 	// groupMemberInfoKey  = "GROUP_MEMBER_INFO:"
-	//joinedGroupsKey            = "JOIN_GROUPS_KEY:"
-	//groupMemberNumKey          = "GROUP_MEMBER_NUM_CACHE:"
-	//groupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:".
+	// joinedGroupsKey            = "JOIN_GROUPS_KEY:"
+	// groupMemberNumKey          = "GROUP_MEMBER_NUM_CACHE:"
+	// groupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:".
 )
 
 type GroupHash interface {

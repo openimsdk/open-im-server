@@ -18,10 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
-	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/jsonutil"
-	"github.com/openimsdk/tools/utils/stringutil"
 	"sync"
 
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
@@ -36,6 +32,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msggateway"
@@ -43,6 +40,9 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/jsonutil"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 )

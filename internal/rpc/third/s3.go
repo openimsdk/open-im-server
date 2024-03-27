@@ -19,8 +19,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/tools/utils/datautil"
 	"path"
 	"strconv"
 	"time"
@@ -29,10 +27,12 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cont"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 func (t *thirdServer) PartLimit(ctx context.Context, req *third.PartLimitReq) (*third.PartLimitResp, error) {

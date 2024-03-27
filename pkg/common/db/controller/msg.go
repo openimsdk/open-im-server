@@ -18,15 +18,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/timeutil"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/protocol/constant"
@@ -34,6 +32,8 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/timeutil"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -532,7 +532,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 	if userMinSeq > minSeq {
 		minSeq = userMinSeq
 	}
-	//"minSeq" represents the startSeq value that the user can retrieve.
+	// "minSeq" represents the startSeq value that the user can retrieve.
 	if minSeq > end {
 		log.ZInfo(ctx, "minSeq > end", "minSeq", minSeq, "end", end)
 		return 0, 0, nil, nil
@@ -547,7 +547,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 			maxSeq = userMaxSeq
 		}
 	}
-	//"maxSeq" represents the endSeq value that the user can retrieve.
+	// "maxSeq" represents the endSeq value that the user can retrieve.
 
 	if begin < minSeq {
 		begin = minSeq
@@ -555,7 +555,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 	if end > maxSeq {
 		end = maxSeq
 	}
-	//"begin" and "end" represent the actual startSeq and endSeq values that the user can retrieve.
+	// "begin" and "end" represent the actual startSeq and endSeq values that the user can retrieve.
 	if end < begin {
 		return 0, 0, nil, errs.ErrArgs.WrapMsg("seq end < begin")
 	}
@@ -570,11 +570,11 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 		}
 	}
 
-	//167 178 10
-	//if end-num <  {
+	// 167 178 10
+	// if end-num <  {
 	//
 	//}
-	//var seqs []int64
+	// var seqs []int64
 	//for i := end; i > end-num; i-- {
 	//	if i >= begin {
 	//		seqs = append([]int64{i}, seqs...)
@@ -748,7 +748,7 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 			break
 		}
 		index++
-		//&& msgDocModel.Msg[0].Msg.SendTime > lastMsgDestructTime.UnixMilli()
+		// && msgDocModel.Msg[0].Msg.SendTime > lastMsgDestructTime.UnixMilli()
 		if len(msgDocModel.Msg) > 0 {
 			i := 0
 			var over bool

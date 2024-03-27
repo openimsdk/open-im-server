@@ -17,12 +17,13 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/httputil"
-	"net/http"
 )
 
 var (

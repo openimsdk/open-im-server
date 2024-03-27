@@ -16,10 +16,10 @@ package msggateway
 
 import (
 	"context"
-	"github.com/openimsdk/tools/log"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/log"
 )
 
 // Start run ws server.

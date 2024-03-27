@@ -3,6 +3,8 @@ package mgo
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
@@ -15,7 +17,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"time"
 )
 
 func NewMsgMongo(db *mongo.Database) (relation.MsgDocModelInterface, error) {

@@ -17,9 +17,6 @@ package user
 import (
 	"context"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/tools/db/mongoutil"
-	"github.com/openimsdk/tools/utils/datautil"
 	"math/rand"
 	"strings"
 	"time"
@@ -33,15 +30,18 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
 	pbuser "github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/pagination"
 	registry "github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
 )
 

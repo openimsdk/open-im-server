@@ -17,7 +17,6 @@ package cache
 import (
 	"context"
 	"errors"
-	"github.com/openimsdk/tools/utils/stringutil"
 	"strconv"
 	"time"
 
@@ -28,6 +27,7 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
 )

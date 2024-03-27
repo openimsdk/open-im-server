@@ -17,13 +17,13 @@ package cmd
 import (
 	"context"
 	"errors"
-	"github.com/openimsdk/tools/system/program"
 
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )

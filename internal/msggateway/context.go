@@ -15,15 +15,15 @@
 package msggateway
 
 import (
-	"github.com/openimsdk/tools/utils/encrypt"
-	"github.com/openimsdk/tools/utils/stringutil"
-	"github.com/openimsdk/tools/utils/timeutil"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
 
 	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/utils/encrypt"
+	"github.com/openimsdk/tools/utils/stringutil"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 type UserConnContext struct {

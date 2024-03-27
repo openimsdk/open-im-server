@@ -18,15 +18,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/openimsdk/tools/log"
-	"github.com/redis/go-redis/v9"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw/specialerror"
+	"github.com/redis/go-redis/v9"
 )
 
 var (

@@ -16,8 +16,6 @@ package push
 
 import (
 	"context"
-	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/timeutil"
 
 	"github.com/IBM/sarama"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -26,6 +24,8 @@ import (
 	pbchat "github.com/openimsdk/protocol/msg"
 	pbpush "github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/timeutil"
 	"google.golang.org/protobuf/proto"
 )
 

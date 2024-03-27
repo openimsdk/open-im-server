@@ -16,16 +16,15 @@ package controller
 
 import (
 	"context"
-	"github.com/openimsdk/tools/db/pagination"
-	"github.com/openimsdk/tools/db/tx"
-	"github.com/openimsdk/tools/utils/datautil"
 	"time"
-
-	"github.com/openimsdk/protocol/user"
-	"github.com/openimsdk/tools/errs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/db/tx"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 type UserDatabase interface {
@@ -40,12 +39,12 @@ type UserDatabase interface {
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db
 	Create(ctx context.Context, users []*relation.UserModel) (err error)
 	// Update update (non-zero value) external guarantee userID exists
-	//Update(ctx context.Context, user *relation.UserModel) (err error)
+	// Update(ctx context.Context, user *relation.UserModel) (err error)
 	// UpdateByMap update (zero value) external guarantee userID exists
 	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
 	// FindUser
 	PageFindUser(ctx context.Context, level1 int64, level2 int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
-	//FindUser with keyword
+	// FindUser with keyword
 	PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID string, nickName string, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
 	// Page If not found, no error is returned
 	Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
@@ -74,7 +73,7 @@ type UserDatabase interface {
 	// SetUserStatus Set the user status and store the user status in redis
 	SetUserStatus(ctx context.Context, userID string, status, platformID int32) error
 
-	//CRUD user command
+	// CRUD user command
 	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error
 	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error
 	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error
@@ -160,7 +159,7 @@ func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) 
 }
 
 //// Update (non-zero value) externally guarantees that userID exists.
-//func (u *userDatabase) Update(ctx context.Context, user *relation.SubscribeUserModel) (err error) {
+// func (u *userDatabase) Update(ctx context.Context, user *relation.SubscribeUserModel) (err error) {
 //	if err := u.userDB.Update(ctx, user); err != nil {
 //		return err
 //	}

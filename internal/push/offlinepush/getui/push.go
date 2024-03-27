@@ -19,7 +19,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"github.com/openimsdk/tools/utils/httputil"
 	"strconv"
 	"sync"
 	"time"
@@ -30,6 +29,7 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/httputil"
 	"github.com/openimsdk/tools/utils/splitter"
 	"github.com/redis/go-redis/v9"
 )

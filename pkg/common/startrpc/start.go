@@ -17,8 +17,6 @@ package startrpc
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/system/program"
 	"net"
 	"net/http"
 	"os"
@@ -28,21 +26,21 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/openimsdk/tools/log"
-
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
+	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/network"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 )
 
 // Start rpc server.

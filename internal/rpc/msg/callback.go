@@ -16,7 +16,6 @@ package msg
 
 import (
 	"context"
-	"github.com/openimsdk/tools/utils/datautil"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -26,6 +25,7 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/protobuf/proto"
 )
 

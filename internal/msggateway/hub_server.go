@@ -16,11 +16,11 @@ package msggateway
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
@@ -124,7 +124,7 @@ func (s *Server) GetUsersOnlineStatus(
 }
 
 func (s *Server) OnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq) (*msggateway.OnlineBatchPushOneMsgResp, error) {
-	//todo implement
+	// todo implement
 	return nil, nil
 }
 

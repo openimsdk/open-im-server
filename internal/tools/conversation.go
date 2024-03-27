@@ -16,8 +16,6 @@ package tools
 
 import (
 	"context"
-	"github.com/openimsdk/tools/utils/idutil"
-	"github.com/openimsdk/tools/utils/stringutil"
 	"math/rand"
 	"time"
 
@@ -25,6 +23,8 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/idutil"
+	"github.com/openimsdk/tools/utils/stringutil"
 )
 
 // func (c *MsgTool) ConversationsDestructMsgs() {

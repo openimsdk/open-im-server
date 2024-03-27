@@ -15,12 +15,12 @@
 package zookeeper
 
 import (
-	"github.com/openimsdk/tools/discovery"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/zookeeper"
 )
 

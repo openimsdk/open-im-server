@@ -18,10 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/openimsdk/tools/system/program"
-	"github.com/openimsdk/tools/utils/idutil"
-	"github.com/openimsdk/tools/utils/jsonutil"
-	"github.com/openimsdk/tools/utils/timeutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/protocol/constant"
@@ -30,6 +26,10 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/system/program"
+	"github.com/openimsdk/tools/utils/idutil"
+	"github.com/openimsdk/tools/utils/jsonutil"
+	"github.com/openimsdk/tools/utils/timeutil"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )

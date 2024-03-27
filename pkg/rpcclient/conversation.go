@@ -17,12 +17,12 @@ package rpcclient
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/tools/system/program"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/system/program"
 	"google.golang.org/grpc"
 )
 

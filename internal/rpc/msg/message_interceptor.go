@@ -16,9 +16,9 @@ package msg
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"

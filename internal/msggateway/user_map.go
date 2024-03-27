@@ -16,10 +16,10 @@ package msggateway
 
 import (
 	"context"
-	"github.com/openimsdk/tools/utils/datautil"
 	"sync"
 
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 type UserMap struct {

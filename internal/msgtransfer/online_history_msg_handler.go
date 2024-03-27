@@ -16,8 +16,6 @@ package msgtransfer
 
 import (
 	"context"
-	"github.com/openimsdk/tools/utils/idutil"
-	"github.com/openimsdk/tools/utils/stringutil"
 	"strconv"
 	"strings"
 	"sync"
@@ -36,6 +34,8 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/idutil"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"google.golang.org/protobuf/proto"
 )
 

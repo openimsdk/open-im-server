@@ -16,7 +16,6 @@ package msg
 
 import (
 	"context"
-	"github.com/openimsdk/tools/utils/timeutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/protocol/constant"
@@ -24,6 +23,7 @@ import (
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func (m *msgServer) getMinSeqs(maxSeqs map[string]int64) map[string]int64 {

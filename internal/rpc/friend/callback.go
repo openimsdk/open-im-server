@@ -16,12 +16,12 @@ package friend
 
 import (
 	"context"
-	"github.com/openimsdk/tools/utils/datautil"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
 	pbfriend "github.com/openimsdk/protocol/friend"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 func CallbackBeforeAddFriend(ctx context.Context, callback *config.Callback, req *pbfriend.ApplyToAddFriendReq) error {
