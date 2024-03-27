@@ -19,10 +19,10 @@ import (
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/tools/system/program"
 	"gopkg.in/yaml.v3"
 	"time"
 
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/tools/discovery"
 )
 
@@ -504,7 +504,7 @@ func (c *GlobalConfig) GetConfFromRegistry(registry discovery.SvcDiscoveryRegist
 func (c *GlobalConfig) EncodeConfig() []byte {
 	buf := bytes.NewBuffer(nil)
 	if err := yaml.NewEncoder(buf).Encode(c); err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 	return buf.Bytes()
 }

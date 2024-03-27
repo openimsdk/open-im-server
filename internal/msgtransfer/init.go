@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/system/program"
 	"net/http"
 	"os"
 	"os/signal"
@@ -32,7 +33,6 @@ import (
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/mw"
 	"github.com/prometheus/client_golang/prometheus"
@@ -145,7 +145,7 @@ func (m *MsgTransfer) Start(prometheusPort int, config *config.GlobalConfig, ind
 	signal.Notify(sigs, syscall.SIGTERM)
 	select {
 	case <-sigs:
-		util.SIGTERMExit()
+		program.SIGTERMExit()
 		// graceful close kafka client.
 		m.cancel()
 		m.historyCH.historyConsumerGroup.Close()

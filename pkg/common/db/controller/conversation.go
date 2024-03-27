@@ -17,6 +17,7 @@ package controller
 import (
 	"context"
 	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/db/tx"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"time"
@@ -25,7 +26,6 @@ import (
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/tools/db"
 	"github.com/openimsdk/tools/log"
 )
 
@@ -67,7 +67,7 @@ type ConversationDatabase interface {
 	//FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 }
 
-func NewConversationDatabase(conversation relationtb.ConversationModelInterface, cache cache.ConversationCache, tx db.CtxTx) ConversationDatabase {
+func NewConversationDatabase(conversation relationtb.ConversationModelInterface, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
 	return &conversationDatabase{
 		conversationDB: conversation,
 		cache:          cache,
@@ -78,7 +78,7 @@ func NewConversationDatabase(conversation relationtb.ConversationModelInterface,
 type conversationDatabase struct {
 	conversationDB relationtb.ConversationModelInterface
 	cache          cache.ConversationCache
-	tx             db.CtxTx
+	tx             tx.Tx
 }
 
 func (c *conversationDatabase) SetUsersConversationFieldTx(ctx context.Context, userIDs []string, conversation *relationtb.ConversationModel, fieldMap map[string]any) (err error) {
