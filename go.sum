@@ -274,6 +274,10 @@ github.com/openimsdk/tools v0.0.46-alpha.16 h1:4ouPoTrCuyREF1UPBaka+Oge4x0XsICfN
 github.com/openimsdk/tools v0.0.46-alpha.16/go.mod h1:hMH6pHDVhOXjA8NQ25P7mOtfRXb5lsPAv/uUDR8342Y=
 github.com/openimsdk/tools v0.0.46-alpha.16.0.20240322040503-5ee151e04e7d h1:XqhSyp3iHMSzUVRFWpoentayDfteybGHW7wT8WuvVEg=
 github.com/openimsdk/tools v0.0.46-alpha.16.0.20240322040503-5ee151e04e7d/go.mod h1:Czxh+12vxUMypTIDZBHcTHwYL6o+DGMrC1ZmHqAk/tc=
+github.com/openimsdk/tools v0.0.47-alpha.4 h1:18BJ3A7G5gN4DxtVSWuiNH1ZgaTd8blytsBwYOTUGwE=
+github.com/openimsdk/tools v0.0.47-alpha.4/go.mod h1:7LNWVXlqHUhTXeETk2ZcBPVzUFIjafHpP5SHh9E+9AY=
+github.com/openimsdk/tools v0.0.47-alpha.5 h1:CcLnq0Ne30f9aachsN/LpW1p+C0bzIoIcwen5eCA6to=
+github.com/openimsdk/tools v0.0.47-alpha.5/go.mod h1:7LNWVXlqHUhTXeETk2ZcBPVzUFIjafHpP5SHh9E+9AY=
 github.com/pelletier/go-buffruneio v0.2.0/go.mod h1:JkE26KsDizTr40EUHkXVtNPvgGtbSNq5BcowyYOWdKo=
 github.com/pelletier/go-toml/v2 v2.0.8 h1:0ctb6s9mE31h0/lhu+J6OPmVeDxJn+kYnJc2jZR9tGQ=
 github.com/pelletier/go-toml/v2 v2.0.8/go.mod h1:vuYfssBdrU2XDZ9bYydBu6t+6a6PYNcZljzZR9VXg+4=
