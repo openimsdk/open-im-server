@@ -15,15 +15,16 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
+	kfk "github.com/openimsdk/tools/mq/kafka"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 	"gopkg.in/yaml.v2"
 
 	"github.com/openimsdk/tools/component"
@@ -214,70 +215,14 @@ func checkZookeeper(config *config.GlobalConfig) error {
 
 // checkKafka checks the Kafka connection
 func checkKafka(config *config.GlobalConfig) error {
-	// Prioritize environment variables
-	kafkaStu := &component.Kafka{
-		Username: config.Kafka.Username,
-		Password: config.Kafka.Password,
-		Addr:     config.Kafka.Addr,
-	}
-
-	kafkaClient, err := component.CheckKafka(kafkaStu)
-	if err != nil {
-		return err
-	}
-	defer kafkaClient.Close()
-
-	// Verify if necessary topics exist
-	topics, err := kafkaClient.Topics()
-	if err != nil {
-		return errs.Wrap(err)
-	}
-
-	requiredTopics := []string{
+	topics := []string{
 		config.Kafka.MsgToMongo.Topic,
 		config.Kafka.MsgToPush.Topic,
 		config.Kafka.LatestMsgToRedis.Topic,
 	}
-
-	for _, requiredTopic := range requiredTopics {
-		if !isTopicPresent(requiredTopic, topics) {
-			return errs.WrapMsg(nil, "Kafka missing required topic", "topic", requiredTopic, "availableTopics", strings.Join(topics, ", "))
-		}
-	}
-
-	type Item struct {
-		Topic   string
-		GroupID string
-	}
-
-	items := []Item{
-		{
-			Topic:   config.Kafka.LatestMsgToRedis.Topic,
-			GroupID: config.Kafka.ConsumerGroupID.MsgToRedis,
-		},
-
-		{
-			Topic:   config.Kafka.MsgToMongo.Topic,
-			GroupID: config.Kafka.ConsumerGroupID.MsgToMongo,
-		},
-
-		{
-			Topic:   config.Kafka.MsgToPush.Topic,
-			GroupID: config.Kafka.ConsumerGroupID.MsgToPush,
-		},
-	}
-
-	for _, item := range items {
-		cg, err := kafka.NewMConsumerGroup(config.Kafka.Config, item.GroupID, []string{item.Topic})
-		if err != nil {
-			return err
-		}
-		if err := cg.Close(); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	defer cancel()
+	return kfk.CheckKafka(ctx, &config.Kafka.Config, topics)
 }
 
 // isTopicPresent checks if a topic is present in the list of topics

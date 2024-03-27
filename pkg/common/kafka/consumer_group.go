@@ -18,8 +18,8 @@ import (
 	"context"
 	"errors"
 	"github.com/IBM/sarama"
-	"github.com/openimsdk/tools/db/kafka"
 	"github.com/openimsdk/tools/log"
+	kfk "github.com/openimsdk/tools/mq/kafka"
 )
 
 type MConsumerGroup struct {
@@ -36,12 +36,12 @@ type MConsumerGroupConfig struct {
 	Password       string
 }
 
-func NewMConsumerGroup(conf kafka.Config, groupID string, topics []string) (*MConsumerGroup, error) {
-	kfk, err := kafka.BuildConsumerGroupConfig(conf, sarama.OffsetNewest)
+func NewMConsumerGroup(conf *kfk.Config, groupID string, topics []string) (*MConsumerGroup, error) {
+	config, err := kfk.BuildConsumerGroupConfig(conf, sarama.OffsetNewest)
 	if err != nil {
 		return nil, err
 	}
-	group, err := kafka.NewConsumerGroup(kfk, conf.Addr, groupID)
+	group, err := kfk.NewConsumerGroup(config, conf.Addr, groupID)
 	if err != nil {
 		return nil, err
 	}

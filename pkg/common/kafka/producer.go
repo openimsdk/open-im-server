@@ -19,14 +19,12 @@ import (
 	"errors"
 	"github.com/IBM/sarama"
 	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/tools/db/kafka"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	kfk "github.com/openimsdk/tools/mq/kafka"
 	"google.golang.org/protobuf/proto"
 )
-
-const maxRetry = 10 // number of retries
 
 var errEmptyMsg = errors.New("kafka binary msg is empty")
 
@@ -45,19 +43,19 @@ type ProducerConfig struct {
 	Password     string
 }
 
-func BuildProducerConfig(conf kafka.Config) (*sarama.Config, error) {
-	return kafka.BuildProducerConfig(conf)
+func BuildProducerConfig(conf kfk.Config) (*sarama.Config, error) {
+	return kfk.BuildProducerConfig(conf)
 }
 
-func NewKafkaProducer(kfk *sarama.Config, addr []string, topic string) (*Producer, error) {
-	producer, err := kafka.NewProducer(kfk, addr)
+func NewKafkaProducer(config *sarama.Config, addr []string, topic string) (*Producer, error) {
+	producer, err := kfk.NewProducer(config, addr)
 	if err != nil {
 		return nil, err
 	}
 	return &Producer{
 		addr:     addr,
 		topic:    topic,
-		config:   kfk,
+		config:   config,
 		producer: producer,
 	}, nil
 }

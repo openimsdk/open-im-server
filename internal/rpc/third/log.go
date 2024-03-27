@@ -18,6 +18,9 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -25,8 +28,6 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils"
-	utils2 "github.com/openimsdk/tools/utils"
 )
 
 func genLogID() string {
@@ -70,7 +71,7 @@ func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) 
 			}
 		}
 		if log.LogID == "" {
-			return nil, errs.ErrData.WrapMsg("LogModel id gen error")
+			return nil, servererrs.ErrData.WrapMsg("LogModel id gen error")
 		}
 		DBlogs = append(DBlogs, &log)
 	}
@@ -94,7 +95,7 @@ func (t *thirdServer) DeleteLogs(ctx context.Context, req *third.DeleteLogsReq) 
 	for _, log := range logs {
 		logIDs = append(logIDs, log.LogID)
 	}
-	if ids := utils2.Single(req.LogIDs, logIDs); len(ids) > 0 {
+	if ids := datautil.Single(req.LogIDs, logIDs); len(ids) > 0 {
 		return nil, errs.ErrRecordNotFound.WrapMsg(fmt.Sprintf("logIDs not found%#v", ids))
 	}
 	err = t.thirdDatabase.DeleteLogs(ctx, req.LogIDs, userID)
@@ -110,7 +111,7 @@ func dbToPbLogInfos(logs []*relationtb.LogModel) []*third.LogInfo {
 		return &third.LogInfo{
 			Filename:   log.FileName,
 			UserID:     log.UserID,
-			Platform:   utils.StringToInt32(log.Platform),
+			Platform:   stringutil.StringToInt32(log.Platform),
 			Url:        log.Url,
 			CreateTime: log.CreateTime.UnixMilli(),
 			LogID:      log.LogID,
@@ -119,7 +120,7 @@ func dbToPbLogInfos(logs []*relationtb.LogModel) []*third.LogInfo {
 			Ex:         log.Ex,
 		}
 	}
-	return utils.Slice(logs, db2pbForLogInfo)
+	return datautil.Slice(logs, db2pbForLogInfo)
 }
 
 func (t *thirdServer) SearchLogs(ctx context.Context, req *third.SearchLogsReq) (*third.SearchLogsResp, error) {
