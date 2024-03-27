@@ -16,6 +16,9 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/timeutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -23,7 +26,6 @@ import (
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils"
 )
 
 func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
@@ -93,9 +95,9 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 		return nil, err
 	}
 	for _, conversationID := range conversationIDs {
-		conversationIDs = append(conversationIDs, utils.GetNotificationConversationIDByConversationID(conversationID))
+		conversationIDs = append(conversationIDs, conversationutil.GetNotificationConversationIDByConversationID(conversationID))
 	}
-	conversationIDs = append(conversationIDs, utils.GetSelfNotificationConversationID(req.UserID))
+	conversationIDs = append(conversationIDs, conversationutil.GetSelfNotificationConversationID(req.UserID))
 	log.ZDebug(ctx, "GetMaxSeq", "conversationIDs", conversationIDs)
 	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
 	if err != nil {
@@ -172,7 +174,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 	// Construct response with updated information
 	for _, chatLog := range chatLogs {
 		pbchatLog := &msg.ChatLog{}
-		utils.CopyStructFields(pbchatLog, chatLog)
+		datautil.CopyStructFields(pbchatLog, chatLog)
 		pbchatLog.SendTime = chatLog.SendTime
 		pbchatLog.CreateTime = chatLog.CreateTime
 		if chatLog.SenderNickname == "" {
@@ -197,5 +199,5 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 }
 
 func (m *msgServer) GetServerTime(ctx context.Context, _ *msg.GetServerTimeReq) (*msg.GetServerTimeResp, error) {
-	return &msg.GetServerTimeResp{ServerTime: utils.GetCurrentTimestampByMill()}, nil
+	return &msg.GetServerTimeResp{ServerTime: timeutil.GetCurrentTimestampByMill()}, nil
 }

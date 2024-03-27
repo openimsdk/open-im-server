@@ -19,6 +19,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"github.com/openimsdk/tools/utils/httputil"
 	"strconv"
 	"sync"
 	"time"
@@ -26,7 +27,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	http2 "github.com/openimsdk/open-im-server/v3/pkg/common/http"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
@@ -56,6 +56,7 @@ type Client struct {
 	tokenExpireTime int64
 	taskIDTTL       int64
 	pushConf        *config.Push
+	httpClient      *httputil.HTTPClient
 }
 
 func NewClient(pushConf *config.Push, cache cache.MsgModel) *Client {
@@ -63,6 +64,7 @@ func NewClient(pushConf *config.Push, cache cache.MsgModel) *Client {
 		tokenExpireTime: tokenExpireTime,
 		taskIDTTL:       taskIDTTL,
 		pushConf:        pushConf,
+		httpClient:      httputil.NewHTTPClient(httputil.NewClientConfig()),
 	}
 }
 
@@ -174,7 +176,7 @@ func (g *Client) postReturn(
 	output RespI,
 	timeout int,
 ) error {
-	err := http2.PostReturn(ctx, url, header, input, output, timeout)
+	err := g.httpClient.PostReturn(ctx, url, header, input, output, timeout)
 	if err != nil {
 		return err
 	}

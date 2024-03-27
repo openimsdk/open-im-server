@@ -16,9 +16,8 @@ package msggateway
 
 import (
 	"context"
-	"sync"
-
 	"github.com/openimsdk/tools/utils/datautil"
+	"sync"
 
 	"github.com/openimsdk/tools/log"
 )
@@ -66,6 +65,7 @@ func (u *UserMap) Set(key string, v *Client) {
 		u.m.Store(key, oldClients)
 	} else {
 		log.ZDebug(context.Background(), "Set not existed", "user_id", key, "client_user_id", v.UserID)
+
 		var clients []*Client
 		clients = append(clients, v)
 		u.m.Store(key, clients)
@@ -115,7 +115,7 @@ func (u *UserMap) deleteClients(key string, clients []*Client) (isDeleteUser boo
 	oldClients := allClients.([]*Client)
 	var remainingClients []*Client
 	for _, client := range oldClients {
-		if _, shouldBeDeleted := deleteMap[client.ctx.GetRemoteAddr()]; !shouldBeDeleted {
+		if _, shouldBeDeleted := m[client.ctx.GetRemoteAddr()]; !shouldBeDeleted {
 			remainingClients = append(remainingClients, client)
 		}
 	}

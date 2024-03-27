@@ -17,6 +17,9 @@ package third
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/discovery"
 	"net/url"
 	"time"
 
@@ -28,28 +31,26 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cos"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/minio"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/oss"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/third"
-	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/errs"
 	"google.golang.org/grpc"
 )
 
-func Start(ctx context.Context, config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis(ctx, &config.Redis)
+func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
 	if err != nil {
 		return err
 	}
-	mongo, err := unrelation.NewMongoDB(ctx, &config.Mongo)
+	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
 	if err != nil {
 		return err
 	}
-	logdb, err := mgo.NewLogMongo(mongo.GetDatabase(config.Mongo.Database))
+	logdb, err := mgo.NewLogMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
-	s3db, err := mgo.NewS3Mongo(mongo.GetDatabase(config.Mongo.Database))
+	s3db, err := mgo.NewS3Mongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}

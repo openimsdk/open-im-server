@@ -22,7 +22,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
 	"github.com/stathat/consistent"
 	"google.golang.org/grpc"
@@ -36,7 +36,7 @@ type K8sDR struct {
 	gatewayName           string
 }
 
-func NewK8sDiscoveryRegister(gatewayName string) (discoveryregistry.SvcDiscoveryRegistry, error) {
+func NewK8sDiscoveryRegister(gatewayName string) (discovery.SvcDiscoveryRegistry, error) {
 	gatewayConsistent := consistent.New()
 	gatewayHosts := getMsgGatewayHost(context.Background(), gatewayName)
 	for _, v := range gatewayHosts {

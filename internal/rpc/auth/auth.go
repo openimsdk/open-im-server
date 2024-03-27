@@ -16,6 +16,8 @@ package auth
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/tools/discovery"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -26,7 +28,6 @@ import (
 	pbauth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
-	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
@@ -37,11 +38,11 @@ import (
 type authServer struct {
 	authDatabase   controller.AuthDatabase
 	userRpcClient  *rpcclient.UserRpcClient
-	RegisterCenter discoveryregistry.SvcDiscoveryRegistry
+	RegisterCenter discovery.SvcDiscoveryRegistry
 	config         *config.GlobalConfig
 }
 
-func Start(ctx context.Context, config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
@@ -109,19 +110,19 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 		return nil, err
 	}
 	if len(m) == 0 {
-		return nil, errs.ErrTokenNotExist.Wrap()
+		return nil, servererrs.ErrTokenNotExist.Wrap()
 	}
 	if v, ok := m[tokensString]; ok {
 		switch v {
 		case constant.NormalToken:
 			return claims, nil
 		case constant.KickedToken:
-			return nil, errs.ErrTokenKicked.Wrap()
+			return nil, servererrs.ErrTokenKicked.Wrap()
 		default:
 			return nil, errs.Wrap(errs.ErrTokenUnknown)
 		}
 	}
-	return nil, errs.ErrTokenNotExist.Wrap()
+	return nil, servererrs.ErrTokenNotExist.Wrap()
 }
 
 func (s *authServer) ParseToken(

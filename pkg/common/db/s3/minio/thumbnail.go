@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"image"
 	"image/gif"
 	"image/jpeg"
@@ -31,7 +32,6 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
-	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 )
 
@@ -45,7 +45,7 @@ func (m *Minio) getImageThumbnailURL(ctx context.Context, name string, expire ti
 		return "", err
 	}
 	if !info.IsImg {
-		return "", errs.ErrData.WrapMsg("object not image")
+		return "", servererrs.ErrData.WrapMsg("object not image")
 	}
 	if opt.Width > info.Width || opt.Width <= 0 {
 		opt.Width = info.Width

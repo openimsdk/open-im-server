@@ -15,12 +15,12 @@
 package discoveryregister
 
 import (
+	"github.com/openimsdk/tools/discovery"
 	"os"
 	"testing"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
-	"github.com/openimsdk/tools/discoveryregistry"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -57,7 +57,7 @@ func TestNewDiscoveryRegister(t *testing.T) {
 		} else {
 			assert.NoError(t, err)
 			if test.expectedResult {
-				assert.Implements(t, (*discoveryregistry.SvcDiscoveryRegistry)(nil), client)
+				assert.Implements(t, (*discovery.SvcDiscoveryRegistry)(nil), client)
 			} else {
 				assert.Nil(t, client)
 			}

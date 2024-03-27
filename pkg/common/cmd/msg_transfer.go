@@ -17,9 +17,9 @@ package cmd
 import (
 	"context"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/system/program"
 
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/spf13/cobra"
 )
@@ -30,7 +30,7 @@ type MsgTransferCmd struct {
 }
 
 func NewMsgTransferCmd(name string) *MsgTransferCmd {
-	ret := &MsgTransferCmd{RootCmd: NewRootCmd(genutil.GetProcessName(), name)}
+	ret := &MsgTransferCmd{RootCmd: NewRootCmd(program.GetProcessName(), name)}
 	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
 	ret.addRunE()
 	ret.SetRootCmdPt(ret)

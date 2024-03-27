@@ -19,6 +19,8 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/tools/utils/datautil"
 	"path"
 	"strconv"
 	"time"
@@ -31,7 +33,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils"
 )
 
 func (t *thirdServer) PartLimit(ctx context.Context, req *third.PartLimitReq) (*third.PartLimitResp, error) {
@@ -108,7 +109,7 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 
 func (t *thirdServer) AuthSign(ctx context.Context, req *third.AuthSignReq) (*third.AuthSignResp, error) {
 	defer log.ZDebug(ctx, "return")
-	partNumbers := utils.Slice(req.PartNumbers, func(partNumber int32) int { return int(partNumber) })
+	partNumbers := datautil.Slice(req.PartNumbers, func(partNumber int32) int { return int(partNumber) })
 	result, err := t.s3dataBase.AuthSign(ctx, req.UploadID, partNumbers)
 	if err != nil {
 		return nil, err
@@ -237,7 +238,7 @@ func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateF
 		Header:   toPbMapArray(resp.Header),
 		FormData: resp.FormData,
 		Expires:  resp.Expires.UnixMilli(),
-		SuccessCodes: utils.Slice(resp.SuccessCodes, func(code int) int32 {
+		SuccessCodes: datautil.Slice(resp.SuccessCodes, func(code int) int32 {
 			return int32(code)
 		}),
 	}, nil
@@ -263,7 +264,7 @@ func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteF
 		return nil, err
 	}
 	if info.Size > 0 && info.Size != mate.Size {
-		return nil, errs.ErrData.WrapMsg("file size mismatch")
+		return nil, servererrs.ErrData.WrapMsg("file size mismatch")
 	}
 	obj := &relation.ObjectModel{
 		Name:        mate.Name,

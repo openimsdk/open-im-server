@@ -17,6 +17,7 @@ package controller
 import (
 	"context"
 	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/db/tx"
 	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
@@ -24,7 +25,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/tools/db"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -110,7 +110,7 @@ func NewGroupDatabase(
 	groupDB relationtb.GroupModelInterface,
 	groupMemberDB relationtb.GroupMemberModelInterface,
 	groupRequestDB relationtb.GroupRequestModelInterface,
-	ctxTx db.CtxTx,
+	ctxTx tx.Tx,
 	groupHash cache.GroupHash,
 ) GroupDatabase {
 	rcOptions := rockscache.NewDefaultOptions()
@@ -129,7 +129,7 @@ type groupDatabase struct {
 	groupDB        relationtb.GroupModelInterface
 	groupMemberDB  relationtb.GroupMemberModelInterface
 	groupRequestDB relationtb.GroupRequestModelInterface
-	ctxTx          db.CtxTx
+	ctxTx          tx.Tx
 	cache          cache.GroupCache
 }
 

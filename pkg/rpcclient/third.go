@@ -17,27 +17,28 @@ package rpcclient
 import (
 	"context"
 
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/tools/system/program"
+
 	"github.com/openimsdk/protocol/third"
-	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/discovery"
 	"google.golang.org/grpc"
 )
 
 type Third struct {
 	conn       grpc.ClientConnInterface
 	Client     third.ThirdClient
-	discov     discoveryregistry.SvcDiscoveryRegistry
+	discov     discovery.SvcDiscoveryRegistry
 	GrafanaUrl string
 }
 
-func NewThird(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName, grafanaUrl string) *Third {
+func NewThird(discov discovery.SvcDiscoveryRegistry, rpcRegisterName, grafanaUrl string) *Third {
 	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 	client := third.NewThirdClient(conn)
 	if err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 	return &Third{discov: discov, Client: client, conn: conn, GrafanaUrl: grafanaUrl}
 }

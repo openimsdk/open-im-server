@@ -17,11 +17,11 @@ package controller
 import (
 	"context"
 	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/db/tx"
 	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/openimsdk/protocol/user"
-	"github.com/openimsdk/tools/db"
 	"github.com/openimsdk/tools/errs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -83,13 +83,13 @@ type UserDatabase interface {
 }
 
 type userDatabase struct {
-	tx      db.CtxTx
+	tx      tx.Tx
 	userDB  relation.UserModelInterface
 	cache   cache.UserCache
 	mongoDB relation.SubscribeUserModelInterface
 }
 
-func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx db.CtxTx, mongoDB relation.SubscribeUserModelInterface) UserDatabase {
+func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx tx.Tx, mongoDB relation.SubscribeUserModelInterface) UserDatabase {
 	return &userDatabase{userDB: userDB, cache: cache, tx: tx, mongoDB: mongoDB}
 }
 

@@ -16,7 +16,7 @@ package main
 
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/tools/system/program"
 	_ "net/http/pprof"
 )
 
@@ -25,6 +25,6 @@ func main() {
 	apiCmd.AddPortFlag()
 	apiCmd.AddPrometheusPortFlag()
 	if err := apiCmd.Execute(); err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 }

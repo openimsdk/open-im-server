@@ -16,11 +16,13 @@ package config
 
 import (
 	"bytes"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/tools/system/program"
 	"gopkg.in/yaml.v3"
 	"time"
 
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/tools/discovery"
 )
 
@@ -76,6 +78,18 @@ type Mongo struct {
 	MaxRetry    int      `yaml:"maxRetry"`
 }
 
+func (m *Mongo) Build() *mongoutil.Config {
+	return &mongoutil.Config{
+		Uri:         m.Uri,
+		Address:     m.Address,
+		Database:    m.Database,
+		Username:    m.Username,
+		Password:    m.Password,
+		MaxPoolSize: m.MaxPoolSize,
+		MaxRetry:    m.MaxRetry,
+	}
+}
+
 type Redis struct {
 	ClusterMode    bool     `yaml:"clusterMode"`
 	Address        []string `yaml:"address"`
@@ -84,6 +98,17 @@ type Redis struct {
 	EnablePipeline bool     `yaml:"enablePipeline"`
 	DB             int      `yaml:"db"`
 	MaxRetry       int      `yaml:"maxRetry"`
+}
+
+func (r *Redis) Build() *redisutil.Config {
+	return &redisutil.Config{
+		ClusterMode: r.ClusterMode,
+		Address:     r.Address,
+		Username:    r.Username,
+		Password:    r.Password,
+		DB:          r.DB,
+		MaxRetry:    r.MaxRetry,
+	}
 }
 
 type Kafka struct {
@@ -479,7 +504,7 @@ func (c *GlobalConfig) GetConfFromRegistry(registry discovery.SvcDiscoveryRegist
 func (c *GlobalConfig) EncodeConfig() []byte {
 	buf := bytes.NewBuffer(nil)
 	if err := yaml.NewEncoder(buf).Encode(c); err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 	return buf.Bytes()
 }

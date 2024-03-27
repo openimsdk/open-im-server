@@ -15,16 +15,16 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
+	kfk "github.com/openimsdk/tools/mq/kafka"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/tools/component"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/util"
 	"gopkg.in/yaml.v2"
 
 	"github.com/openimsdk/tools/errs"
@@ -148,6 +148,90 @@ var errMinioNotEnabled = errors.New("minio.Enable is not configured to use MinIO
 
 var errSignEndPoint = errors.New("minio.signEndPoint contains 127.0.0.1, causing issues with image sending")
 var errApiURL = errors.New("object.apiURL contains 127.0.0.1, causing issues with image sending")
+
+// checkMongo checks the MongoDB connection without retries
+func checkMongo(config *config.GlobalConfig) error {
+	mongoStu := &component.Mongo{
+		URL:         config.Mongo.Uri,
+		Address:     config.Mongo.Address,
+		Database:    config.Mongo.Database,
+		Username:    config.Mongo.Username,
+		Password:    config.Mongo.Password,
+		MaxPoolSize: config.Mongo.MaxPoolSize,
+	}
+	err := component.CheckMongo(mongoStu)
+
+	return err
+}
+
+// checkRedis checks the Redis connection
+func checkRedis(config *config.GlobalConfig) error {
+	redisStu := &component.Redis{
+		Address:  config.Redis.Address,
+		Username: config.Redis.Username,
+		Password: config.Redis.Password,
+	}
+	err := component.CheckRedis(redisStu)
+	return err
+}
+
+// checkMinio checks the MinIO connection
+func checkMinio(config *config.GlobalConfig) error {
+	if strings.Contains(config.Object.ApiURL, "127.0.0.1") {
+		return errs.Wrap(errApiURL)
+	}
+	if config.Object.Enable != "minio" {
+		return errs.Wrap(errMinioNotEnabled)
+	}
+	if strings.Contains(config.Object.Minio.Endpoint, "127.0.0.1") {
+		return errs.Wrap(errSignEndPoint)
+	}
+
+	minio := &component.Minio{
+		ApiURL:          config.Object.ApiURL,
+		Endpoint:        config.Object.Minio.Endpoint,
+		AccessKeyID:     config.Object.Minio.AccessKeyID,
+		SecretAccessKey: config.Object.Minio.SecretAccessKey,
+		SignEndpoint:    config.Object.Minio.SignEndpoint,
+		UseSSL:          getEnv("MINIO_USE_SSL", "false"),
+	}
+	err := component.CheckMinio(minio)
+	return err
+}
+
+// checkZookeeper checks the Zookeeper connection
+func checkZookeeper(config *config.GlobalConfig) error {
+	zkStu := &component.Zookeeper{
+		Schema:   config.Zookeeper.Schema,
+		ZkAddr:   config.Zookeeper.ZkAddr,
+		Username: config.Zookeeper.Username,
+		Password: config.Zookeeper.Password,
+	}
+	err := component.CheckZookeeper(zkStu)
+	return err
+}
+
+// checkKafka checks the Kafka connection
+func checkKafka(config *config.GlobalConfig) error {
+	topics := []string{
+		config.Kafka.MsgToMongo.Topic,
+		config.Kafka.MsgToPush.Topic,
+		config.Kafka.LatestMsgToRedis.Topic,
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	defer cancel()
+	return kfk.CheckKafka(ctx, &config.Kafka.Config, topics)
+}
+
+// isTopicPresent checks if a topic is present in the list of topics
+func isTopicPresent(topic string, topics []string) bool {
+	for _, t := range topics {
+		if t == topic {
+			return true
+		}
+	}
+	return false
+}
 
 func configGetEnv(config *config.GlobalConfig) error {
 	config.Mongo.Uri = getEnv("MONGO_URI", config.Mongo.Uri)

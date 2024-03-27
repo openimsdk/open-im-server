@@ -16,6 +16,8 @@ package tools
 
 import (
 	"context"
+	"github.com/openimsdk/tools/utils/idutil"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"math/rand"
 	"time"
 
@@ -23,7 +25,6 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils"
 )
 
 // func (c *MsgTool) ConversationsDestructMsgs() {
@@ -70,7 +71,7 @@ import (
 
 func (c *MsgTool) ConversationsDestructMsgs() {
 	log.ZInfo(context.Background(), "start msg destruct cron task")
-	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
+	ctx := mcontext.NewCtx(stringutil.GetSelfFuncName())
 	num, err := c.conversationDatabase.GetAllConversationIDsNumber(ctx)
 	if err != nil {
 		log.ZError(ctx, "GetAllConversationIDsNumber failed", err)
@@ -117,7 +118,7 @@ func (c *MsgTool) ConversationsDestructMsgs() {
 			}
 		}
 		for _, conversation := range temp {
-			ctx = mcontext.NewCtx(utils.GetSelfFuncName() + "-" + utils.OperationIDGenerator() + "-" + conversation.ConversationID + "-" + conversation.OwnerUserID)
+			ctx = mcontext.NewCtx(stringutil.GetSelfFuncName() + "-" + idutil.OperationIDGenerator() + "-" + conversation.ConversationID + "-" + conversation.OwnerUserID)
 			log.ZDebug(
 				ctx,
 				"UserMsgsDestruct",

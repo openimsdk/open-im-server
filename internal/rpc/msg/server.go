@@ -26,7 +26,7 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
-	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/discovery"
 	"google.golang.org/grpc"
 )
 
@@ -36,16 +36,16 @@ type (
 
 	// MsgServer encapsulates dependencies required for message handling.
 	msgServer struct {
-		RegisterCenter         discoveryregistry.SvcDiscoveryRegistry // Service discovery registry for service registration.
-		MsgDatabase            controller.CommonMsgDatabase           // Interface for message database operations.
-		Conversation           *rpcclient.ConversationRpcClient       // RPC client for conversation service.
-		UserLocalCache         *rpccache.UserLocalCache               // Local cache for user data.
-		FriendLocalCache       *rpccache.FriendLocalCache             // Local cache for friend data.
-		GroupLocalCache        *rpccache.GroupLocalCache              // Local cache for group data.
-		ConversationLocalCache *rpccache.ConversationLocalCache       // Local cache for conversation data.
-		Handlers               MessageInterceptorChain                // Chain of handlers for processing messages.
-		notificationSender     *rpcclient.NotificationSender          // RPC client for sending notifications.
-		config                 *config.GlobalConfig                   // Global configuration settings.
+		RegisterCenter         discovery.SvcDiscoveryRegistry   // Service discovery registry for service registration.
+		MsgDatabase            controller.CommonMsgDatabase     // Interface for message database operations.
+		Conversation           *rpcclient.ConversationRpcClient // RPC client for conversation service.
+		UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
+		FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
+		GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
+		ConversationLocalCache *rpccache.ConversationLocalCache // Local cache for conversation data.
+		Handlers               MessageInterceptorChain          // Chain of handlers for processing messages.
+		notificationSender     *rpcclient.NotificationSender    // RPC client for sending notifications.
+		config                 *config.GlobalConfig             // Global configuration settings.
 	}
 )
 
@@ -64,7 +64,7 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 //	return nil
 //}
 
-func Start(ctx context.Context, config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err

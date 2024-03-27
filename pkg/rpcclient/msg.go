@@ -18,16 +18,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/openimsdk/tools/system/program"
+	"github.com/openimsdk/tools/utils/idutil"
+	"github.com/openimsdk/tools/utils/jsonutil"
+	"github.com/openimsdk/tools/utils/timeutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )
@@ -129,13 +131,13 @@ func newSessionTypeConf() map[int32]int32 {
 type Message struct {
 	conn   grpc.ClientConnInterface
 	Client msg.MsgClient
-	discov discoveryregistry.SvcDiscoveryRegistry
+	discov discovery.SvcDiscoveryRegistry
 }
 
-func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) *Message {
+func NewMessage(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) *Message {
 	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 	client := msg.NewMsgClient(conn)
 	return &Message{discov: discov, conn: conn, Client: client}
@@ -143,7 +145,7 @@ func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName s
 
 type MessageRpcClient Message
 
-func NewMessageRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) MessageRpcClient {
+func NewMessageRpcClient(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) MessageRpcClient {
 	return MessageRpcClient(*NewMessage(discov, rpcRegisterName))
 }
 
@@ -258,10 +260,10 @@ func WithRpcGetUserName() NotificationOptions {
 }
 
 func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
-	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
+	n := sdkws.NotificationElem{Detail: jsonutil.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
-		return errs.WrapMsg(err, "json.Marshal failed", "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", utils.StructToJsonString(m))
+		return errs.WrapMsg(err, "json.Marshal failed", "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", jsonutil.StructToJsonString(m))
 	}
 	notificationOpt := &notificationOpt{}
 	for _, opt := range opts {
@@ -288,8 +290,8 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	if msg.SessionType == constant.SuperGroupChatType {
 		msg.GroupID = recvID
 	}
-	msg.CreateTime = utils.GetCurrentTimestampByMill()
-	msg.ClientMsgID = utils.GetMsgID(sendID)
+	msg.CreateTime = timeutil.GetCurrentTimestampByMill()
+	msg.ClientMsgID = idutil.GetMsgIDByMD5(sendID)
 	optionsConfig := s.contentTypeConf[contentType]
 	if sendID == recvID && contentType == constant.HasReadReceipt {
 		optionsConfig.ReliabilityLevel = constant.UnreliableNotification

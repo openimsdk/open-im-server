@@ -18,8 +18,8 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/internal/api"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +29,7 @@ type ApiCmd struct {
 }
 
 func NewApiCmd(name string) *ApiCmd {
-	ret := &ApiCmd{RootCmd: NewRootCmd(genutil.GetProcessName(), name)}
+	ret := &ApiCmd{RootCmd: NewRootCmd(program.GetProcessName(), name)}
 	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
 	ret.SetRootCmdPt(ret)
 	ret.addPreRun()

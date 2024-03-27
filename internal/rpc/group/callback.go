@@ -16,6 +16,7 @@ package group
 
 import (
 	"context"
+	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
@@ -28,7 +29,6 @@ import (
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -69,18 +69,18 @@ func CallbackBeforeCreateGroup(ctx context.Context, cfg *GroupEventCallbackConfi
 		return err
 	}
 
-	utils.NotNilReplace(&req.GroupInfo.GroupID, resp.GroupID)
-	utils.NotNilReplace(&req.GroupInfo.GroupName, resp.GroupName)
-	utils.NotNilReplace(&req.GroupInfo.Notification, resp.Notification)
-	utils.NotNilReplace(&req.GroupInfo.Introduction, resp.Introduction)
-	utils.NotNilReplace(&req.GroupInfo.FaceURL, resp.FaceURL)
-	utils.NotNilReplace(&req.GroupInfo.OwnerUserID, resp.OwnerUserID)
-	utils.NotNilReplace(&req.GroupInfo.Ex, resp.Ex)
-	utils.NotNilReplace(&req.GroupInfo.Status, resp.Status)
-	utils.NotNilReplace(&req.GroupInfo.CreatorUserID, resp.CreatorUserID)
-	utils.NotNilReplace(&req.GroupInfo.GroupType, resp.GroupType)
-	utils.NotNilReplace(&req.GroupInfo.NeedVerification, resp.NeedVerification)
-	utils.NotNilReplace(&req.GroupInfo.LookMemberInfo, resp.LookMemberInfo)
+	datautil.NotNilReplace(&req.GroupInfo.GroupID, resp.GroupID)
+	datautil.NotNilReplace(&req.GroupInfo.GroupName, resp.GroupName)
+	datautil.NotNilReplace(&req.GroupInfo.Notification, resp.Notification)
+	datautil.NotNilReplace(&req.GroupInfo.Introduction, resp.Introduction)
+	datautil.NotNilReplace(&req.GroupInfo.FaceURL, resp.FaceURL)
+	datautil.NotNilReplace(&req.GroupInfo.OwnerUserID, resp.OwnerUserID)
+	datautil.NotNilReplace(&req.GroupInfo.Ex, resp.Ex)
+	datautil.NotNilReplace(&req.GroupInfo.Status, resp.Status)
+	datautil.NotNilReplace(&req.GroupInfo.CreatorUserID, resp.CreatorUserID)
+	datautil.NotNilReplace(&req.GroupInfo.GroupType, resp.GroupType)
+	datautil.NotNilReplace(&req.GroupInfo.NeedVerification, resp.NeedVerification)
+	datautil.NotNilReplace(&req.GroupInfo.LookMemberInfo, resp.LookMemberInfo)
 	return nil
 }
 
@@ -137,10 +137,10 @@ func CallbackBeforeMemberJoinGroup(ctx context.Context, cfg *GroupEventCallbackC
 		groupMember.MuteEndTime = time.UnixMilli(*resp.MuteEndTime)
 	}
 
-	utils.NotNilReplace(&groupMember.FaceURL, resp.FaceURL)
-	utils.NotNilReplace(&groupMember.Ex, resp.Ex)
-	utils.NotNilReplace(&groupMember.Nickname, resp.Nickname)
-	utils.NotNilReplace(&groupMember.RoleLevel, resp.RoleLevel)
+	datautil.NotNilReplace(&groupMember.FaceURL, resp.FaceURL)
+	datautil.NotNilReplace(&groupMember.Ex, resp.Ex)
+	datautil.NotNilReplace(&groupMember.Nickname, resp.Nickname)
+	datautil.NotNilReplace(&groupMember.RoleLevel, resp.RoleLevel)
 	return nil
 }
 
@@ -394,10 +394,10 @@ func CallbackBeforeSetGroupInfo(ctx context.Context, cfg *GroupEventCallbackConf
 	if resp.ApplyMemberFriend != nil {
 		req.GroupInfoForSet.ApplyMemberFriend = wrapperspb.Int32(*resp.ApplyMemberFriend)
 	}
-	utils.NotNilReplace(&req.GroupInfoForSet.GroupID, &resp.GroupID)
-	utils.NotNilReplace(&req.GroupInfoForSet.GroupName, &resp.GroupName)
-	utils.NotNilReplace(&req.GroupInfoForSet.FaceURL, &resp.FaceURL)
-	utils.NotNilReplace(&req.GroupInfoForSet.Introduction, &resp.Introduction)
+	datautil.NotNilReplace(&req.GroupInfoForSet.GroupID, &resp.GroupID)
+	datautil.NotNilReplace(&req.GroupInfoForSet.GroupName, &resp.GroupName)
+	datautil.NotNilReplace(&req.GroupInfoForSet.FaceURL, &resp.FaceURL)
+	datautil.NotNilReplace(&req.GroupInfoForSet.Introduction, &resp.Introduction)
 	return nil
 }
 

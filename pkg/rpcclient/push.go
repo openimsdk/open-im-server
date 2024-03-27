@@ -16,23 +16,23 @@ package rpcclient
 
 import (
 	"context"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/system/program"
 
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/protocol/push"
-	"github.com/openimsdk/tools/discoveryregistry"
 	"google.golang.org/grpc"
 )
 
 type Push struct {
 	conn   grpc.ClientConnInterface
 	Client push.PushMsgServiceClient
-	discov discoveryregistry.SvcDiscoveryRegistry
+	discov discovery.SvcDiscoveryRegistry
 }
 
-func NewPush(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) *Push {
+func NewPush(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) *Push {
 	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 	return &Push{
 		discov: discov,
@@ -43,7 +43,7 @@ func NewPush(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName stri
 
 type PushRpcClient Push
 
-func NewPushRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) PushRpcClient {
+func NewPushRpcClient(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) PushRpcClient {
 	return PushRpcClient(*NewPush(discov, rpcRegisterName))
 }
 

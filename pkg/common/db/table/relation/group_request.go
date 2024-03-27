@@ -18,7 +18,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/openimsdk/tools/pagination"
+	"github.com/openimsdk/tools/db/pagination"
 )
 
 type GroupRequestModel struct {

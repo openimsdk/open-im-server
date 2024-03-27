@@ -18,6 +18,8 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -27,7 +29,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils"
 )
 
 func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.RevokeMsgResp, error) {
@@ -56,7 +57,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		return nil, errs.ErrRecordNotFound.WrapMsg("msg not found")
 	}
 	if msgs[0].ContentType == constant.MsgRevokeNotification {
-		return nil, errs.ErrMsgAlreadyRevoke.WrapMsg("msg already revoke")
+		return nil, servererrs.ErrMsgAlreadyRevoke.WrapMsg("msg already revoke")
 	}
 
 	data, _ := json.Marshal(msgs[0])
@@ -70,7 +71,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 			}
 			role = user.AppMangerLevel
 		case constant.SuperGroupChatType:
-			members, err := m.GroupLocalCache.GetGroupMemberInfoMap(ctx, msgs[0].GroupID, utils.Distinct([]string{req.UserID, msgs[0].SendID}))
+			members, err := m.GroupLocalCache.GetGroupMemberInfoMap(ctx, msgs[0].GroupID, datautil.Distinct([]string{req.UserID, msgs[0].SendID}))
 			if err != nil {
 				return nil, err
 			}
@@ -105,10 +106,10 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	revokerUserID := mcontext.GetOpUserID(ctx)
 	var flag bool
 	if len(m.config.Manager.UserID) > 0 {
-		flag = utils.Contain(revokerUserID, m.config.Manager.UserID...)
+		flag = datautil.Contain(revokerUserID, m.config.Manager.UserID...)
 	}
 	if len(m.config.Manager.UserID) == 0 && len(m.config.IMAdmin.UserID) > 0 {
-		flag = utils.Contain(revokerUserID, m.config.IMAdmin.UserID...)
+		flag = datautil.Contain(revokerUserID, m.config.IMAdmin.UserID...)
 	}
 	tips := sdkws.RevokeMsgTips{
 		RevokerUserID:  revokerUserID,

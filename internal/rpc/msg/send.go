@@ -16,6 +16,10 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/stringutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -26,7 +30,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -35,7 +38,7 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (resp *p
 	if req.MsgData != nil {
 		flag := isMessageHasReadEnabled(req.MsgData, m.config)
 		if !flag {
-			return nil, errs.ErrMessageHasReadDisable.Wrap()
+			return nil, servererrs.ErrMessageHasReadDisable.Wrap()
 		}
 		m.encapsulateMsgData(req.MsgData)
 		switch req.MsgData.SessionType {
@@ -64,7 +67,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbmsg.SendMs
 	if err := callbackMsgModify(ctx, m.config, req); err != nil {
 		return nil, err
 	}
-	err = m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForGroup(req.MsgData.GroupID), req.MsgData)
+	err = m.MsgDatabase.MsgToMQ(ctx, conversationutil.GenConversationUniqueKeyForGroup(req.MsgData.GroupID), req.MsgData)
 	if err != nil {
 		return nil, err
 	}
@@ -91,14 +94,14 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 		ConversationType: msg.SessionType,
 		GroupID:          msg.GroupID,
 	}
-	tagAll := utils.Contain(constant.AtAllString, msg.AtUserIDList...)
+	tagAll := datautil.Contain(constant.AtAllString, msg.AtUserIDList...)
 	if tagAll {
 		memberUserIDList, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, msg.GroupID)
 		if err != nil {
 			log.ZWarn(ctx, "GetGroupMemberIDs", err)
 			return
 		}
-		atUserID = utils.DifferenceString([]string{constant.AtAllString}, msg.AtUserIDList)
+		atUserID = stringutil.DifferenceString([]string{constant.AtAllString}, msg.AtUserIDList)
 		if len(atUserID) == 0 { // just @everyone
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
 		} else { // @Everyone and @other people
@@ -107,7 +110,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			if err != nil {
 				log.ZWarn(ctx, "SetConversations", err, "userID", atUserID, "conversation", conversation)
 			}
-			memberUserIDList = utils.DifferenceString(atUserID, memberUserIDList)
+			memberUserIDList = stringutil.DifferenceString(atUserID, memberUserIDList)
 		}
 		conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
 		err = m.Conversation.SetConversations(ctx, memberUserIDList, conversation)
@@ -123,7 +126,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 }
 
 func (m *msgServer) sendMsgNotification(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
-	if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
+	if err := m.MsgDatabase.MsgToMQ(ctx, conversationutil.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
 		return nil, err
 	}
 	resp = &pbmsg.SendMsgResp{
@@ -145,7 +148,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		isSend, err = m.modifyMessageByUserMessageReceiveOpt(
 			ctx,
 			req.MsgData.RecvID,
-			utils.GenConversationIDForSingle(req.MsgData.SendID, req.MsgData.RecvID),
+			conversationutil.GenConversationIDForSingle(req.MsgData.SendID, req.MsgData.RecvID),
 			constant.SingleChatType,
 			req,
 		)
@@ -164,7 +167,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		if err := callbackMsgModify(ctx, m.config, req); err != nil {
 			return nil, err
 		}
-		if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
+		if err := m.MsgDatabase.MsgToMQ(ctx, conversationutil.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
 			prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 			return nil, err
 		}

@@ -18,11 +18,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/db/tx"
 	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/tools/db"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
@@ -81,11 +81,11 @@ type FriendDatabase interface {
 type friendDatabase struct {
 	friend        relation.FriendModelInterface
 	friendRequest relation.FriendRequestModelInterface
-	tx            db.CtxTx
+	tx            tx.Tx
 	cache         cache.FriendCache
 }
 
-func NewFriendDatabase(friend relation.FriendModelInterface, friendRequest relation.FriendRequestModelInterface, cache cache.FriendCache, tx db.CtxTx) FriendDatabase {
+func NewFriendDatabase(friend relation.FriendModelInterface, friendRequest relation.FriendRequestModelInterface, cache cache.FriendCache, tx tx.Tx) FriendDatabase {
 	return &friendDatabase{friend: friend, friendRequest: friendRequest, cache: cache, tx: tx}
 }
 
