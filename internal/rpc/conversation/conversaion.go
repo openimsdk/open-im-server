@@ -17,6 +17,9 @@ package conversation
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/utils/datautil"
 	"sort"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -31,11 +34,9 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/discoveryregistry"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/tx"
-	"github.com/openimsdk/tools/utils"
 	"google.golang.org/grpc"
 )
 
@@ -47,7 +48,7 @@ type conversationServer struct {
 	conversationNotificationSender *notification.ConversationNotificationSender
 }
 
-func Start(ctx context.Context, config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
@@ -68,7 +69,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discoveryreg
 		user:                           &userRpcClient,
 		conversationNotificationSender: notification.NewConversationNotificationSender(&config.Notification, &msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
-		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewMongo(mongo.GetClient())),
+		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), mongoutil.NewMongo(mongo.GetClient())),
 	})
 	return nil
 }
@@ -156,7 +157,7 @@ func (c *conversationServer) GetSortedConversationList(ctx context.Context, req 
 	c.conversationSort(conversation_isPinTime, resp, conversation_unreadCount, conversationMsg)
 	c.conversationSort(conversation_notPinTime, resp, conversation_unreadCount, conversationMsg)
 
-	resp.ConversationElems = utils.Paginate(resp.ConversationElems, int(req.Pagination.GetPageNumber()), int(req.Pagination.GetShowNumber()))
+	resp.ConversationElems = datautil.Paginate(resp.ConversationElems, int(req.Pagination.GetPageNumber()), int(req.Pagination.GetShowNumber()))
 	return resp, nil
 }
 
@@ -182,7 +183,7 @@ func (c *conversationServer) GetConversations(ctx context.Context, req *pbconver
 
 func (c *conversationServer) SetConversation(ctx context.Context, req *pbconversation.SetConversationReq) (*pbconversation.SetConversationResp, error) {
 	var conversation tablerelation.ConversationModel
-	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
+	if err := datautil.CopyStructFields(&conversation, req.Conversation); err != nil {
 		return nil, err
 	}
 	err := c.conversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tablerelation.ConversationModel{&conversation})
@@ -205,7 +206,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			return nil, err
 		}
 		if groupInfo.Status == constant.GroupStatusDismissed {
-			return nil, errs.ErrDismissedAlready.WrapMsg("group dismissed")
+			return nil, servererrs.ErrDismissedAlready.WrapMsg("group dismissed")
 		}
 	}
 	var unequal int
@@ -424,7 +425,7 @@ func (c *conversationServer) GetConversationOfflinePushUserIDs(ctx context.Conte
 	for _, userID := range userIDs {
 		delete(userIDSet, userID)
 	}
-	return &pbconversation.GetConversationOfflinePushUserIDsResp{UserIDs: utils.Keys(userIDSet)}, nil
+	return &pbconversation.GetConversationOfflinePushUserIDsResp{UserIDs: datautil.Keys(userIDSet)}, nil
 }
 
 func (c *conversationServer) conversationSort(conversations map[int64]string, resp *pbconversation.GetSortedConversationListResp, conversation_unreadCount map[string]int64, conversationMsg map[string]*pbconversation.ConversationElem) {
@@ -493,7 +494,7 @@ func (c *conversationServer) getConversationInfo(
 	for conversationID, chatLog := range chatLogs {
 		pbchatLog := &pbconversation.ConversationElem{}
 		msgInfo := &pbconversation.MsgInfo{}
-		if err := utils.CopyStructFields(msgInfo, chatLog); err != nil {
+		if err := datautil.CopyStructFields(msgInfo, chatLog); err != nil {
 			return nil, err
 		}
 		switch chatLog.SessionType {

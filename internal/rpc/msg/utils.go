@@ -18,7 +18,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/utils"
+	"github.com/openimsdk/tools/errs"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -42,7 +42,7 @@ func isMessageHasReadEnabled(msgData *sdkws.MsgData, config *config.GlobalConfig
 }
 
 func IsNotFound(err error) bool {
-	switch utils.Unwrap(err) {
+	switch errs.Unwrap(err) {
 	case redis.Nil, mongo.ErrNoDocuments:
 		return true
 	default:

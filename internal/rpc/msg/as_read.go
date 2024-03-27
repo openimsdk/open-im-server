@@ -16,7 +16,7 @@ package msg
 
 import (
 	"context"
-	"github.com/openimsdk/tools/utils/goassist"
+	"github.com/openimsdk/tools/utils/datautil"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/protocol/constant"
@@ -157,7 +157,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		}
 		// avoid client missed call MarkConversationMessageAsRead by order
 		for _, val := range req.Seqs {
-			if !goassist.Contain(val, seqs...) {
+			if !datautil.Contain(val, seqs...) {
 				seqs = append(seqs, val)
 			}
 		}

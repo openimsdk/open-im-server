@@ -17,20 +17,17 @@ package http
 import (
 	"context"
 	"encoding/json"
-	"net/http"
-	"time"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/httputil"
+	"net/http"
 )
 
 var (
 	// Define http client.
-	client = &http.Client{
-		Timeout: 15 * time.Second, // max timeout is 15s
-	}
+	client = httputil.NewHTTPClient(httputil.NewClientConfig())
 )
 
 func init() {
@@ -41,14 +38,14 @@ func init() {
 func callBackPostReturn(ctx context.Context, url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
 	url = url + "/" + command
 	log.ZInfo(ctx, "callback", "url", url, "input", input, "config", callbackConfig)
-	b, err := Post(ctx, url, nil, input, callbackConfig.CallbackTimeOut)
+	b, err := client.Post(ctx, url, nil, input, callbackConfig.CallbackTimeOut)
 	if err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
 			log.ZInfo(ctx, "callback failed but continue", err, "url", url)
 			return nil
 		}
 		log.ZWarn(ctx, "callback network failed", err, "url", url, "input", input)
-		return errs.ErrNetwork.WrapMsg(err.Error())
+		return servererrs.ErrNetwork.WrapMsg(err.Error())
 	}
 	if err = json.Unmarshal(b, output); err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
@@ -56,7 +53,7 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 			return nil
 		}
 		log.ZWarn(ctx, "callback json unmarshal failed", err, "url", url, "input", input, "response", string(b))
-		return errs.ErrData.WithDetail(err.Error() + "response format error")
+		return servererrs.ErrData.WithDetail(err.Error() + "response format error")
 	}
 	if err := output.Parse(); err != nil {
 		log.ZWarn(ctx, "callback parse failed", err, "url", url, "input", input, "response", string(b))

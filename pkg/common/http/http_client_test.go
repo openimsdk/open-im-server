@@ -16,93 +16,92 @@ package http
 
 import (
 	"context"
-	"reflect"
 	"testing"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
-func TestGet(t *testing.T) {
-	type args struct {
-		url string
-	}
-	tests := []struct {
-		name         string
-		args         args
-		wantResponse []byte
-		wantErr      bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotResponse, err := Get(tt.args.url)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(gotResponse, tt.wantResponse) {
-				t.Errorf("Get() = %v, want %v", gotResponse, tt.wantResponse)
-			}
-		})
-	}
-}
+//func TestGet(t *testing.T) {
+//	type args struct {
+//		url string
+//	}
+//	tests := []struct {
+//		name         string
+//		args         args
+//		wantResponse []byte
+//		wantErr      bool
+//	}{
+//		// TODO: Add test cases.
+//	}
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			gotResponse, err := Get(tt.args.url)
+//			if (err != nil) != tt.wantErr {
+//				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantErr)
+//				return
+//			}
+//			if !reflect.DeepEqual(gotResponse, tt.wantResponse) {
+//				t.Errorf("Get() = %v, want %v", gotResponse, tt.wantResponse)
+//			}
+//		})
+//	}
+//}
 
-func TestPost(t *testing.T) {
-	type args struct {
-		ctx     context.Context
-		url     string
-		header  map[string]string
-		data    any
-		timeout int
-	}
-	tests := []struct {
-		name        string
-		args        args
-		wantContent []byte
-		wantErr     bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotContent, err := Post(tt.args.ctx, tt.args.url, tt.args.header, tt.args.data, tt.args.timeout)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Post() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(gotContent, tt.wantContent) {
-				t.Errorf("Post() = %v, want %v", gotContent, tt.wantContent)
-			}
-		})
-	}
-}
+//func TestPost(t *testing.T) {
+//	type args struct {
+//		ctx     context.Context
+//		url     string
+//		header  map[string]string
+//		data    any
+//		timeout int
+//	}
+//	tests := []struct {
+//		name        string
+//		args        args
+//		wantContent []byte
+//		wantErr     bool
+//	}{
+//		// TODO: Add test cases.
+//	}
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			gotContent, err := Post(tt.args.ctx, tt.args.url, tt.args.header, tt.args.data, tt.args.timeout)
+//			if (err != nil) != tt.wantErr {
+//				t.Errorf("Post() error = %v, wantErr %v", err, tt.wantErr)
+//				return
+//			}
+//			if !reflect.DeepEqual(gotContent, tt.wantContent) {
+//				t.Errorf("Post() = %v, want %v", gotContent, tt.wantContent)
+//			}
+//		})
+//	}
+//}
 
-func TestPostReturn(t *testing.T) {
-	type args struct {
-		ctx           context.Context
-		url           string
-		header        map[string]string
-		input         any
-		output        any
-		timeOutSecond int
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := PostReturn(tt.args.ctx, tt.args.url, tt.args.header, tt.args.input, tt.args.output, tt.args.timeOutSecond); (err != nil) != tt.wantErr {
-				t.Errorf("PostReturn() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
+//func TestPostReturn(t *testing.T) {
+//	type args struct {
+//		ctx           context.Context
+//		url           string
+//		header        map[string]string
+//		input         any
+//		output        any
+//		timeOutSecond int
+//	}
+//	tests := []struct {
+//		name    string
+//		args    args
+//		wantErr bool
+//	}{
+//		// TODO: Add test cases.
+//	}
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			if err := PostReturn(tt.args.ctx, tt.args.url, tt.args.header, tt.args.input, tt.args.output, tt.args.timeOutSecond); (err != nil) != tt.wantErr {
+//				t.Errorf("PostReturn() error = %v, wantErr %v", err, tt.wantErr)
+//			}
+//		})
+//	}
+//}
 
 func Test_callBackPostReturn(t *testing.T) {
 	type args struct {

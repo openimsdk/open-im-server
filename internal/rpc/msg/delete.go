@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/tools/utils/timeutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/protocol/constant"
@@ -23,7 +24,6 @@ import (
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils"
 )
 
 func (m *msgServer) getMinSeqs(maxSeqs map[string]int64) map[string]int64 {
@@ -112,7 +112,7 @@ func (m *msgServer) DeleteMsgPhysical(ctx context.Context, req *msg.DeleteMsgPhy
 	if err := authverify.CheckAdmin(ctx, &m.config.Manager, &m.config.IMAdmin); err != nil {
 		return nil, err
 	}
-	remainTime := utils.GetCurrentTimestampBySecond() - req.Timestamp
+	remainTime := timeutil.GetCurrentTimestampBySecond() - req.Timestamp
 	for _, conversationID := range req.ConversationIDs {
 		if err := m.MsgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, remainTime); err != nil {
 			log.ZWarn(
