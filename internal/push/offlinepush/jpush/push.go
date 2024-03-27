@@ -18,20 +18,24 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/openimsdk/tools/utils/httputil"
 
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/jpush/body"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	http2 "github.com/openimsdk/open-im-server/v3/pkg/common/http"
 )
 
 type JPush struct {
 	pushConf    *config.Push
 	iOSPushConf *config.IOSPush
+	httpClient  *httputil.HTTPClient
 }
 
 func NewClient(pushConf *config.Push, iOSPushConf *config.IOSPush) *JPush {
-	return &JPush{pushConf: pushConf, iOSPushConf: iOSPushConf}
+	return &JPush{pushConf: pushConf,
+		iOSPushConf: iOSPushConf,
+		httpClient:  httputil.NewHTTPClient(httputil.NewClientConfig()),
+	}
 }
 
 func (j *JPush) Auth(apiKey, secretKey string, timeStamp int64) (token string, err error) {
@@ -79,7 +83,7 @@ func (j *JPush) Push(ctx context.Context, userIDs []string, title, content strin
 }
 
 func (j *JPush) request(ctx context.Context, po body.PushObj, resp any, timeout int) error {
-	return http2.PostReturn(
+	return j.httpClient.PostReturn(
 		ctx,
 		j.pushConf.Jpns.PushUrl,
 		map[string]string{
