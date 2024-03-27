@@ -115,21 +115,82 @@ var s = F()
 func F() string { return "A" }
 ```
 
-- Use `_` as a prefix for unexported top-level constants and variables.
+- This example emphasizes using PascalCase for exported constants and camelCase for unexported ones, avoiding all caps and underscores.
 
 ```go
 // bad
 const (
-   defaultHost = "127.0.0.1"
-   defaultPort = 8080
+    MAX_COUNT = 100
+    timeout = 30
 )
 
 // good
 const (
-   _defaultHost = "127.0.0.1"
-   _defaultPort = 8080
+    MaxCount = 100  // Exported constants should use PascalCase.
+    defaultTimeout = 30  // Unexported constants should use camelCase.
 )
 ```
+
+- Grouping related constants enhances organization and readability, especially when there are multiple constants related to a particular feature or configuration.
+
+```go
+// bad
+const apiVersion = "v1"
+const retryInterval = 5
+
+// good
+const (
+    ApiVersion    = "v1"  // Group related constants together for better organization.
+    RetryInterval = 5
+)
+```
+
+- The "good" practice utilizes iota for a clear, concise, and auto-incrementing way to define enumerations, reducing the potential for errors and improving maintainability.
+
+```go
+// bad
+const (
+    StatusActive   = 0
+    StatusInactive = 1
+    StatusUnknown  = 2
+)
+
+// good
+const (
+    StatusActive = iota  // Use iota for simple and efficient constant enumerations.
+    StatusInactive
+    StatusUnknown
+)
+```
+
+- Specifying types explicitly improves clarity, especially when the purpose or type of a constant might not be immediately obvious. Additionally, adding comments to exported constants or those whose purpose isn't clear from the name alone can greatly aid in understanding the code.
+
+```go
+// bad
+const serverAddress = "localhost:8080"
+const debugMode = 1  // Is this supposed to be a boolean or an int?
+
+// good
+const ServerAddress string = "localhost:8080"  // Specify type for clarity.
+// DebugMode indicates if the application should run in debug mode (true for debug mode).
+const DebugMode bool = true
+```
+
+- By defining a contextKey type and making userIDKey of this type, you avoid potential collisions with other context keys. This approach leverages Go's type system to provide compile-time checks against misuse.
+
+```go
+// bad
+const userIDKey = "userID"
+
+// In this example, userIDKey is a string type, which can lead to conflicts or accidental misuse because string keys are prone to typos and collisions in a global namespace.
+
+
+// good
+type contextKey string
+
+const userIDKey contextKey = "userID"
+```
+
 
 - Embedded types (such as mutexes) should be at the top of the field list within the struct, and there must be a blank line separating embedded fields from regular fields.
 
