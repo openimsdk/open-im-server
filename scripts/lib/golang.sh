@@ -314,14 +314,9 @@ openim::golang::setup_platforms
 readonly OPENIM_CLIENT_TARGETS=(
     changelog
     component
-    conversion-msg
-    conversion-mysql
-    formitychecker
     imctl
     infra
     ncpu
-    openim-web
-    up35
     versionchecker
     yamlfmt
 )
