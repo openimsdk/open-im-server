@@ -12,6 +12,7 @@ type KafkaCheck struct {
 	Kafka *config.Kafka
 }
 
+
 func CheckKafka(ctx context.Context, config *KafkaCheck) error {
 	kafkaConfig := &kafka.Config{
 		Addr:     config.Kafka.Addr,

@@ -1,107 +1,79 @@
 package checks
 
 import (
-	"errors"
+	"context"
 	"net"
 	"net/url"
-	"strings"
 	"time"
-
-	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils/jsonutil"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 
 	s3minio "github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/minio"
 )
 
 const (
-	minioHealthCheckDuration = 1
-	mongoConnTimeout         = 5 * time.Second
-	MaxRetry                 = 300
+	minioHealthCheckDuration = 1 * time.Second
 )
 
-type MinioConfig struct {
+type MinioCheck struct {
 	s3minio.Config
-	UseSSL string
-	ApiURL string
+	UseSSL bool   `yaml:"useSSL"`
+	ApiURL string `yaml:"apiURL"`
 }
 
-// CheckMinio checks the MinIO connection.
-func CheckMinio(minioStu MinioConfig) error {
-	if minioStu.Endpoint == "" || minioStu.AccessKeyID == "" || minioStu.SecretAccessKey == "" {
-		log.CInfo(nil, "Missing configuration for MinIO", "endpoint", minioStu.Endpoint, "accessKeyID", minioStu.AccessKeyID, "secretAccessKey", minioStu.SecretAccessKey)
-		return errs.New("missing configuration for endpoint, accessKeyID, or secretAccessKey").Wrap()
+func CheckMinio(ctx context.Context, config MinioCheck) error {
+
+	if config.Endpoint == "" || config.AccessKeyID == "" || config.SecretAccessKey == "" {
+		logMsg := "Missing configuration for MinIO: endpoint, accessKeyID, or secretAccessKey"
+		log.CInfo(ctx, logMsg, "Config", config)
+		return errs.New(logMsg)
 	}
 
-	minioInfo, err := jsonutil.JsonMarshal(minioStu)
+	endpointURL, err := url.Parse(config.Endpoint)
 	if err != nil {
-		log.CInfo(nil, "MinioStu Marshal failed", "error", err)
-		return errs.WrapMsg(err, "minioStu Marshal failed")
+		return errs.WrapMsg(err, "Failed to parse MinIO endpoint URL")
 	}
-	logJsonInfo := string(minioInfo)
+	secure := endpointURL.Scheme == "https" || config.UseSSL
 
-	u, err := url.Parse(minioStu.Endpoint)
-	if err != nil {
-		log.CInfo(nil, "URL parse failed", "error", err, "minioInfo", logJsonInfo)
-		return errs.WrapMsg(err, "url parse failed")
-	}
-
-	secure := u.Scheme == "https" || minioStu.UseSSL == "true"
-
-	minioClient, err := minio.New(u.Host, &minio.Options{
-		Creds:  credentials.NewStaticV4(minioStu.AccessKeyID, minioStu.SecretAccessKey, ""),
+	minioClient, err := minio.New(endpointURL.Host, &minio.Options{
+		Creds:  credentials.NewStaticV4(config.AccessKeyID, config.SecretAccessKey, ""),
 		Secure: secure,
 	})
 	if err != nil {
-		log.CInfo(nil, "Initialize MinIO client failed", "error", err, "minioInfo", logJsonInfo)
-		return errs.WrapMsg(err, "initialize minio client failed")
+		return errs.WrapMsg(err, "Failed to initialize MinIO client", "Endpoint", config.Endpoint)
 	}
 
-	cancel, err := minioClient.HealthCheck(time.Duration(minioHealthCheckDuration) * time.Second)
+	cancel, err := minioClient.HealthCheck(minioHealthCheckDuration)
 	if err != nil {
-		log.CInfo(nil, "MinIO client health check failed", "error", err, "minioInfo", logJsonInfo)
-		return errs.WrapMsg(err, "minio client health check failed")
+		return errs.WrapMsg(err, "MinIO client health check failed")
 	}
 	defer cancel()
 
 	if minioClient.IsOffline() {
-		log.CInfo(nil, "MinIO client is offline", "minioInfo", logJsonInfo)
-		return errors.New("minio client is offline")
+		return errs.New("minio client is offline").Wrap()
 	}
 
-	apiURL, err := exactIP(minioStu.ApiURL)
-	if err != nil {
-		return err
-	}
-	signEndPoint, err := exactIP(minioStu.SignEndpoint)
-	if err != nil {
-		return err
+	apiURLHost, _ := exactIP(config.ApiURL)
+	signEndpointHost, _ := exactIP(config.SignEndpoint)
+	if apiURLHost == "127.0.0.1" || signEndpointHost == "127.0.0.1" {
+		logMsg := "Warning: MinIO ApiURL or SignEndpoint contains localhost"
+		log.CInfo(ctx, logMsg, "ApiURL", config.ApiURL, "SignEndpoint", config.SignEndpoint)
 	}
 
-	if apiURL == "127.0.0.1" {
-		log.CInfo(nil, "Warning, MinIOStu.apiURL contains localhost", "apiURL", minioStu.ApiURL)
-	}
-	if signEndPoint == "127.0.0.1" {
-		log.CInfo(nil, "Warning, MinIOStu.signEndPoint contains localhost", "signEndPoint", minioStu.SignEndpoint)
-	}
 	return nil
 }
 
 func exactIP(urlStr string) (string, error) {
 	u, err := url.Parse(urlStr)
 	if err != nil {
-		log.CInfo(nil, "URL parse error", "error", err, "url", urlStr)
-		return "", errs.WrapMsg(err, "url parse error")
+		return "", errs.WrapMsg(err, "URL parse error")
 	}
 	host, _, err := net.SplitHostPort(u.Host)
 	if err != nil {
-		host = u.Host // Assume the entire host part is the host name if split fails
-	}
-	if strings.HasSuffix(host, ":") {
-		host = host[:len(host)-1]
+		host = u.Host
 	}
 	return host, nil
 }

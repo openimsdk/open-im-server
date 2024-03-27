@@ -12,7 +12,7 @@ type ZookeeperCheck struct {
 	Zookeeper *config.Zookeeper
 }
 
-func checkZookeeper(ctx context.Context, config *ZookeeperCheck) error {
+func CheckZookeeper(ctx context.Context, config *ZookeeperCheck) error {
 	zkServers := config.Zookeeper.ZkAddr
 	schema := config.Zookeeper.Schema
 

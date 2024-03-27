@@ -16,21 +16,22 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"os"
-	"strings"
+	"strconv"
 	"time"
 
-	"github.com/OpenIMSDK/tools/component"
-	kfk "github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/open-im-server/v3/tools/component/checks"
+	"github.com/openimsdk/open-im-server/v3/tools/component/util"
+	"github.com/openimsdk/tools/log"
 
 	"gopkg.in/yaml.v2"
 
 	"github.com/openimsdk/tools/errs"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/minio"
 )
 
 const (
@@ -57,191 +58,88 @@ func initCfg() (*config.GlobalConfig, error) {
 	return conf, nil
 }
 
-type checkFunc struct {
-	name     string
-	function func(*config.GlobalConfig) error
-	flag     bool
-	config   *config.GlobalConfig
-}
-
-// colorErrPrint prints formatted string in red to stderr
-func colorErrPrint(msg string) {
-	// ANSI escape code for red text
-	const redColor = "\033[31m"
-	// ANSI escape code to reset color
-	const resetColor = "\033[0m"
-	msg = redColor + msg + resetColor
-	// Print to stderr in red
-	fmt.Fprintf(os.Stderr, "%s\n", msg)
-}
-
-func colorSuccessPrint(format string, a ...interface{}) {
-	// ANSI escape code for green text is \033[32m
-	// \033[0m resets the color
-	fmt.Printf("\033[32m"+format+"\033[0m", a...)
-}
-
 func main() {
 	flag.Parse()
 
+	ctx := context.Background()
 	conf, err := initCfg()
 	if err != nil {
-		fmt.Printf("Read config failed: %v\n", err)
-		return
+		fmt.Fprintf(os.Stderr, "Initialization failed: %v\n", err)
+		os.Exit(1)
 	}
 
-	err = configGetEnv(conf)
-	if err != nil {
-		fmt.Printf("configGetEnv failed, err:%v", err)
-		return
+	if err := util.ConfigGetEnv(conf); err != nil {
+		fmt.Fprintf(os.Stderr, "Environment variable override failed: %v\n", err)
+		os.Exit(1)
 	}
 
-	checks := []checkFunc{
-		{name: "Mongo", function: checkMongo, config: conf},
-		{name: "Redis", function: checkRedis, config: conf},
-		{name: "Zookeeper", function: checkZookeeper, config: conf},
-		{name: "Kafka", function: checkKafka, config: conf},
+	// Define a slice of functions to perform each service check
+	serviceChecks := []func(context.Context, *config.GlobalConfig) error{
+		func(ctx context.Context, cfg *config.GlobalConfig) error {
+			return checks.CheckMongo(ctx, &checks.MongoCheck{Mongo: &cfg.Mongo})
+		},
+		func(ctx context.Context, cfg *config.GlobalConfig) error {
+			return checks.CheckRedis(ctx, &checks.RedisCheck{Redis: &cfg.Redis})
+		},
+		func(ctx context.Context, cfg *config.GlobalConfig) error {
+			return checks.CheckZookeeper(ctx, &checks.ZookeeperCheck{Zookeeper: &cfg.Zookeeper})
+		},
+		func(ctx context.Context, cfg *config.GlobalConfig) error {
+			return checks.CheckKafka(ctx, &checks.KafkaCheck{Kafka: &cfg.Kafka})
+		},
 	}
+
 	if conf.Object.Enable == "minio" {
-		checks = append(checks, checkFunc{name: "Minio", function: checkMinio, config: conf})
+		minioConfig := checks.MinioCheck{
+			Config: minio.Config(conf.Object.Minio),
+			// UseSSL: conf.Minio.UseSSL,
+			ApiURL: conf.Object.ApiURL,
+		}
+
+		adjustUseSSL(&minioConfig)
+
+		minioCheck := func(ctx context.Context, cfg *config.GlobalConfig) error {
+			return checks.CheckMinio(ctx, minioConfig)
+		}
+		serviceChecks = append(serviceChecks, minioCheck)
 	}
 
+	// Execute checks with retry logic
 	for i := 0; i < maxRetry; i++ {
-		if i != 0 {
-			time.Sleep(1 * time.Second)
+		if i > 0 {
+			time.Sleep(time.Second)
 		}
-		fmt.Printf("Checking components round %v...\n", i+1)
+		fmt.Printf("Checking components, attempt %d/%d\n", i+1, maxRetry)
 
-		var err error
 		allSuccess := true
-		for index, check := range checks {
-			if !check.flag {
-				err = check.function(check.config)
-				if err != nil {
-					allSuccess = false
-					colorErrPrint(fmt.Sprintf("Check component: %s, failed: %v", check.name, err.Error()))
-
-					if check.name == "Minio" {
-						if errors.Is(err, errMinioNotEnabled) ||
-							errors.Is(err, errSignEndPoint) ||
-							errors.Is(err, errApiURL) {
-							checks[index].flag = true
-							continue
-						}
-						break
-					}
-				} else {
-					checks[index].flag = true
-					util.SuccessPrint(fmt.Sprintf("%s connected successfully", check.name))
-				}
+		for _, check := range serviceChecks {
+			if err := check(ctx, conf); err != nil {
+				util.ColorErrPrint(fmt.Sprintf("Check failed: %v", err))
+				allSuccess = false
+				break
 			}
 		}
+
 		if allSuccess {
-			component.SuccessPrint("All components started successfully!")
+			util.SuccessPrint("All components started successfully!")
 			return
 		}
 	}
-	component.ErrorPrint("Some components checked failed!")
+
+	util.ErrorPrint("Some components failed to start correctly.")
 	os.Exit(-1)
 }
 
-var errMinioNotEnabled = errors.New("minio.Enable is not configured to use MinIO")
-
-var errSignEndPoint = errors.New("minio.signEndPoint contains 127.0.0.1, causing issues with image sending")
-var errApiURL = errors.New("object.apiURL contains 127.0.0.1, causing issues with image sending")
-
-// checkMongo checks the MongoDB connection without retries
-func checkMongo(config *config.GlobalConfig) error {
-	mongoStu := &component.Mongo{
-		URL:         config.Mongo.Uri,
-		Address:     config.Mongo.Address,
-		Database:    config.Mongo.Database,
-		Username:    config.Mongo.Username,
-		Password:    config.Mongo.Password,
-		MaxPoolSize: config.Mongo.MaxPoolSize,
-	}
-	err := component.CheckMongo(mongoStu)
-
-	return err
-}
-
-// checkRedis checks the Redis connection
-func checkRedis(config *config.GlobalConfig) error {
-	redisStu := &component.Redis{
-		Address:  config.Redis.Address,
-		Username: config.Redis.Username,
-		Password: config.Redis.Password,
-	}
-	err := component.CheckRedis(redisStu)
-	return err
-}
-
-// checkMinio checks the MinIO connection
-func checkMinio(config *config.GlobalConfig) error {
-	if strings.Contains(config.Object.ApiURL, "127.0.0.1") {
-		return errs.Wrap(errApiURL)
-	}
-	if config.Object.Enable != "minio" {
-		return errs.Wrap(errMinioNotEnabled)
-	}
-	if strings.Contains(config.Object.Minio.Endpoint, "127.0.0.1") {
-		return errs.Wrap(errSignEndPoint)
-	}
-
-	minio := &component.Minio{
-		ApiURL:          config.Object.ApiURL,
-		Endpoint:        config.Object.Minio.Endpoint,
-		AccessKeyID:     config.Object.Minio.AccessKeyID,
-		SecretAccessKey: config.Object.Minio.SecretAccessKey,
-		SignEndpoint:    config.Object.Minio.SignEndpoint,
-		UseSSL:          getEnv("MINIO_USE_SSL", "false"),
-	}
-	err := component.CheckMinio(minio)
-	return err
-}
-
-// checkZookeeper checks the Zookeeper connection
-func checkZookeeper(config *config.GlobalConfig) error {
-	zkStu := &component.Zookeeper{
-		Schema:   config.Zookeeper.Schema,
-		ZkAddr:   config.Zookeeper.ZkAddr,
-		Username: config.Zookeeper.Username,
-		Password: config.Zookeeper.Password,
-	}
-	err := component.CheckZookeeper(zkStu)
-	return err
-}
-
-// checkKafka checks the Kafka connection
-func checkKafka(config *config.GlobalConfig) error {
-	topics := []string{
-		config.Kafka.MsgToMongo.Topic,
-		config.Kafka.MsgToPush.Topic,
-		config.Kafka.LatestMsgToRedis.Topic,
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
-	defer cancel()
-	return kfk.CheckKafka(ctx, &config.Kafka.Config, topics)
-}
-
-// isTopicPresent checks if a topic is present in the list of topics
-func isTopicPresent(topic string, topics []string) bool {
-	for _, t := range topics {
-		if t == topic {
-			return true
+// adjustUseSSL updates the UseSSL setting based on the MINIO_USE_SSL environment variable.
+func adjustUseSSL(config *checks.MinioCheck) {
+	useSSL := config.UseSSL
+	if envSSL, exists := os.LookupEnv("MINIO_USE_SSL"); exists {
+		parsedSSL, err := strconv.ParseBool(envSSL)
+		if err == nil {
+			useSSL = parsedSSL
+		} else {
+			log.CInfo(context.Background(), "Invalid MINIO_USE_SSL value; using config file setting.", "MINIO_USE_SSL", envSSL)
 		}
 	}
-	return false
-}
-
-func getMinioAddr(key1, key2, key3, fallback string) string {
-	// Prioritize environment variables
-	endpoint := getEnv(key1, fallback)
-	address, addressExist := os.LookupEnv(key2)
-	port, portExist := os.LookupEnv(key3)
-	if portExist && addressExist {
-		endpoint = "http://" + address + ":" + port
-		return endpoint
-	}
-	return endpoint
+	config.UseSSL = useSSL
 }

@@ -1,4 +1,4 @@
-package env
+package util
 
 import (
 	"os"
@@ -9,7 +9,7 @@ import (
 	"github.com/openimsdk/tools/errs"
 )
 
-func configGetEnv(config *config.GlobalConfig) error {
+func ConfigGetEnv(config *config.GlobalConfig) error {
 	config.Mongo.Uri = getEnv("MONGO_URI", config.Mongo.Uri)
 	config.Mongo.Username = getEnv("MONGO_OPENIM_USERNAME", config.Mongo.Username)
 	config.Mongo.Password = getEnv("MONGO_OPENIM_PASSWORD", config.Mongo.Password)
@@ -92,4 +92,16 @@ func getArrEnv(key1, key2 string, fallback []string) []string {
 		return result
 	}
 	return fallback
+}
+
+func getMinioAddr(key1, key2, key3, fallback string) string {
+	// Prioritize environment variables
+	endpoint := getEnv(key1, fallback)
+	address, addressExist := os.LookupEnv(key2)
+	port, portExist := os.LookupEnv(key3)
+	if portExist && addressExist {
+		endpoint = "http://" + address + ":" + port
+		return endpoint
+	}
+	return endpoint
 }
