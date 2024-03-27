@@ -15,16 +15,13 @@
 package http
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"io"
 	"net/http"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 )
@@ -39,72 +36,6 @@ var (
 func init() {
 	// reset http default transport
 	http.DefaultTransport.(*http.Transport).MaxConnsPerHost = 100 // default: 2
-}
-
-func Get(url string) (response []byte, err error) {
-	hclient := http.Client{Timeout: 5 * time.Second}
-	resp, err := hclient.Get(url)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, errs.WrapMsg(err, "failed to read response body", "url", url)
-	}
-	return body, nil
-}
-
-func Post(ctx context.Context, url string, header map[string]string, data any, timeout int) (content []byte, err error) {
-	if timeout > 0 {
-		var cancel func()
-		ctx, cancel = context.WithTimeout(ctx, time.Second*time.Duration(timeout))
-		defer cancel()
-	}
-
-	jsonStr, err := json.Marshal(data)
-	if err != nil {
-		return nil, errs.WrapMsg(err, "Post: JSON marshal failed")
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonStr))
-	if err != nil {
-		return nil, errs.WrapMsg(err, "Post: NewRequestWithContext failed")
-	}
-
-	if operationID, _ := ctx.Value(constant.OperationID).(string); operationID != "" {
-		req.Header.Set(constant.OperationID, operationID)
-	}
-	for k, v := range header {
-		req.Header.Set(k, v)
-	}
-	req.Header.Add("content-type", "application/json; charset=utf-8")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, errs.WrapMsg(err, "Post: client.Do failed")
-	}
-	defer resp.Body.Close()
-
-	result, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, errs.WrapMsg(err, "Post: ReadAll failed")
-	}
-
-	return result, nil
-}
-
-func PostReturn(ctx context.Context, url string, header map[string]string, input, output any, timeOutSecond int) error {
-	b, err := Post(ctx, url, header, input, timeOutSecond)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(b, output)
-	if err != nil {
-		return errs.WrapMsg(err, "PostReturn: JSON unmarshal failed")
-	}
-	return nil
 }
 
 func callBackPostReturn(ctx context.Context, url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
