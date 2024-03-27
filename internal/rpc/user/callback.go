@@ -16,12 +16,12 @@ package user
 
 import (
 	"context"
+	"github.com/openimsdk/tools/utils/datautil"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
 	pbuser "github.com/openimsdk/protocol/user"
-	"github.com/openimsdk/tools/utils"
 )
 
 func CallbackBeforeUpdateUserInfo(ctx context.Context, globalConfig *config.GlobalConfig, req *pbuser.UpdateUserInfoReq) error {
@@ -38,9 +38,9 @@ func CallbackBeforeUpdateUserInfo(ctx context.Context, globalConfig *config.Glob
 	if err := http.CallBackPostReturn(ctx, globalConfig.Callback.CallbackUrl, cbReq, resp, globalConfig.Callback.CallbackBeforeUpdateUserInfo); err != nil {
 		return err
 	}
-	utils.NotNilReplace(&req.UserInfo.FaceURL, resp.FaceURL)
-	utils.NotNilReplace(&req.UserInfo.Ex, resp.Ex)
-	utils.NotNilReplace(&req.UserInfo.Nickname, resp.Nickname)
+	datautil.NotNilReplace(&req.UserInfo.FaceURL, resp.FaceURL)
+	datautil.NotNilReplace(&req.UserInfo.Ex, resp.Ex)
+	datautil.NotNilReplace(&req.UserInfo.Nickname, resp.Nickname)
 	return nil
 }
 func CallbackAfterUpdateUserInfo(ctx context.Context, globalConfig *config.GlobalConfig, req *pbuser.UpdateUserInfoReq) error {
@@ -73,9 +73,9 @@ func CallbackBeforeUpdateUserInfoEx(ctx context.Context, globalConfig *config.Gl
 	if err := http.CallBackPostReturn(ctx, globalConfig.Callback.CallbackUrl, cbReq, resp, globalConfig.Callback.CallbackBeforeUpdateUserInfoEx); err != nil {
 		return err
 	}
-	utils.NotNilReplace(req.UserInfo.FaceURL, resp.FaceURL)
-	utils.NotNilReplace(req.UserInfo.Ex, resp.Ex)
-	utils.NotNilReplace(req.UserInfo.Nickname, resp.Nickname)
+	datautil.NotNilReplace(req.UserInfo.FaceURL, resp.FaceURL)
+	datautil.NotNilReplace(req.UserInfo.Ex, resp.Ex)
+	datautil.NotNilReplace(req.UserInfo.Nickname, resp.Nickname)
 	return nil
 }
 func CallbackAfterUpdateUserInfoEx(ctx context.Context, globalConfig *config.GlobalConfig, req *pbuser.UpdateUserInfoExReq) error {
