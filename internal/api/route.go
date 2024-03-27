@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/system/program"
 	"net"
 	"net/http"
 	"os"
@@ -41,7 +42,6 @@ import (
 	ginprom "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/errs"
@@ -122,7 +122,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, port int, proPort i
 	defer cancel()
 	select {
 	case <-sigs:
-		util.SIGTERMExit()
+		program.SIGTERMExit()
 		err := server.Shutdown(ctx)
 		if err != nil {
 			return errs.WrapMsg(err, "shutdown err")
