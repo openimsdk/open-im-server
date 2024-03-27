@@ -70,9 +70,16 @@ func (g *GroupMgo) Take(ctx context.Context, groupID string) (group *relation.Gr
 }
 
 func (g *GroupMgo) Search(ctx context.Context, keyword string, pagination pagination.Pagination) (total int64, groups []*relation.GroupModel, err error) {
-	return mongoutil.FindPage[*relation.GroupModel](ctx, g.coll, bson.M{"group_name": bson.M{"$regex": keyword},
-		"status": bson.M{"$ne": constant.GroupStatusDismissed}}, pagination)
+    // Define the sorting options
+    opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
+    
+    // Perform the search with pagination and sorting
+    return mongoutil.FindPage[*relation.GroupModel](ctx, g.coll, bson.M{
+        "group_name": bson.M{"$regex": keyword},
+        "status":     bson.M{"$ne": constant.GroupStatusDismissed},
+    }, pagination, opts)
 }
+
 
 func (g *GroupMgo) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
 	if before == nil {

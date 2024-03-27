@@ -679,6 +679,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbgroup.GetG
 	return resp, nil
 }
 
+// GetGroupApplicationList handles functions that get a list of group requests.
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbgroup.GetGroupApplicationListReq) (*pbgroup.GetGroupApplicationListResp, error) {
 	groupIDs, err := s.db.FindUserManagedGroupID(ctx, req.FromUserID)
 	if err != nil {
@@ -1014,6 +1015,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		return nil, errs.ErrDismissedAlready.Wrap()
 	}
 	resp := &pbgroup.SetGroupInfoResp{}
+
 	count, err := s.db.FindGroupMemberNum(ctx, group.GroupID)
 	if err != nil {
 		return nil, err
@@ -1147,6 +1149,7 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) 
 		total, group, err = s.db.SearchGroup(ctx, req.GroupName, req.Pagination)
 		resp.Total = uint32(total)
 	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -1154,10 +1157,12 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) 
 	groupIDs := utils.Slice(group, func(e *relationtb.GroupModel) string {
 		return e.GroupID
 	})
+
 	ownerMembers, err := s.db.FindGroupsOwner(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	ownerMemberMap := utils.SliceToMap(ownerMembers, func(e *relationtb.GroupMemberModel) string {
 		return e.GroupID
 	})

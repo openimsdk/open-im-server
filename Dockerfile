@@ -10,6 +10,7 @@ ENV GOPROXY=$GOPROXY
 # Set up the working directory
 WORKDIR /openim/openim-server
 
+
 # Copy all files to the container
 ADD . .
 
