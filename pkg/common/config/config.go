@@ -16,6 +16,8 @@ package config
 
 import (
 	"bytes"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
 	"gopkg.in/yaml.v3"
 	"time"
@@ -76,6 +78,18 @@ type Mongo struct {
 	MaxRetry    int      `yaml:"maxRetry"`
 }
 
+func (m *Mongo) Build() *mongoutil.Config {
+	return &mongoutil.Config{
+		Uri:         m.Uri,
+		Address:     m.Address,
+		Database:    m.Database,
+		Username:    m.Username,
+		Password:    m.Password,
+		MaxPoolSize: m.MaxPoolSize,
+		MaxRetry:    m.MaxRetry,
+	}
+}
+
 type Redis struct {
 	ClusterMode    bool     `yaml:"clusterMode"`
 	Address        []string `yaml:"address"`
@@ -84,6 +98,17 @@ type Redis struct {
 	EnablePipeline bool     `yaml:"enablePipeline"`
 	DB             int      `yaml:"db"`
 	MaxRetry       int      `yaml:"maxRetry"`
+}
+
+func (r *Redis) Build() *redisutil.Config {
+	return &redisutil.Config{
+		ClusterMode: r.ClusterMode,
+		Address:     r.Address,
+		Username:    r.Username,
+		Password:    r.Password,
+		DB:          r.DB,
+		MaxRetry:    r.MaxRetry,
+	}
 }
 
 type Kafka struct {

@@ -55,6 +55,7 @@ func (u *UserMap) Get(key string, platformID int) ([]*Client, bool, bool) {
 	return nil, userExisted, false
 }
 
+// Set adds a client to the map.
 func (u *UserMap) Set(key string, v *Client) {
 	allClients, existed := u.m.Load(key)
 	if existed {
