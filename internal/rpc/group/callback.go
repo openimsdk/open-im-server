@@ -16,6 +16,7 @@ package group
 
 import (
 	"context"
+	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
@@ -28,7 +29,6 @@ import (
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -68,7 +68,6 @@ func CallbackBeforeCreateGroup(ctx context.Context, cfg *GroupEventCallbackConfi
 	if err = http.CallBackPostReturn(ctx, cfg.CallbackUrl, cbReq, resp, cfg.BeforeCreateGroup); err != nil {
 		return err
 	}
-
 	datautil.NotNilReplace(&req.GroupInfo.GroupID, resp.GroupID)
 	datautil.NotNilReplace(&req.GroupInfo.GroupName, resp.GroupName)
 	datautil.NotNilReplace(&req.GroupInfo.Notification, resp.Notification)

@@ -22,10 +22,7 @@ import (
 	"github.com/openimsdk/tools/mcontext"
 )
 
-func (m *msgServer) SetSendMsgStatus(
-	ctx context.Context,
-	req *pbmsg.SetSendMsgStatusReq,
-) (*pbmsg.SetSendMsgStatusResp, error) {
+func (m *msgServer) SetSendMsgStatus(ctx context.Context, req *pbmsg.SetSendMsgStatusReq) (*pbmsg.SetSendMsgStatusResp, error) {
 	resp := &pbmsg.SetSendMsgStatusResp{}
 	if err := m.MsgDatabase.SetSendMsgStatus(ctx, mcontext.GetOperationID(ctx), req.Status); err != nil {
 		return nil, err
@@ -33,10 +30,7 @@ func (m *msgServer) SetSendMsgStatus(
 	return resp, nil
 }
 
-func (m *msgServer) GetSendMsgStatus(
-	ctx context.Context,
-	req *pbmsg.GetSendMsgStatusReq,
-) (*pbmsg.GetSendMsgStatusResp, error) {
+func (m *msgServer) GetSendMsgStatus(ctx context.Context, req *pbmsg.GetSendMsgStatusReq) (*pbmsg.GetSendMsgStatusResp, error) {
 	resp := &pbmsg.GetSendMsgStatusResp{}
 	status, err := m.MsgDatabase.GetSendMsgStatus(ctx, mcontext.GetOperationID(ctx))
 	if IsNotFound(err) {

@@ -22,10 +22,7 @@ import (
 	"github.com/openimsdk/tools/errs"
 )
 
-func (s *userServer) UserRegisterCount(
-	ctx context.Context,
-	req *pbuser.UserRegisterCountReq,
-) (*pbuser.UserRegisterCountResp, error) {
+func (s *userServer) UserRegisterCount(ctx context.Context, req *pbuser.UserRegisterCountReq) (*pbuser.UserRegisterCountResp, error) {
 	if req.Start > req.End {
 		return nil, errs.ErrArgs.WrapMsg("start > end")
 	}
