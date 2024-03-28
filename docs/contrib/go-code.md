@@ -541,9 +541,9 @@ var LintGonicMapper = GonicMapper{
 - If the variable type is bool, the name should start with Has, Is, Can or Allow, for example:
 
 ```go
-var has Conflict bool
+var hasConflict bool
 var isExist bool
-var can Manage bool
+var canManage bool
 var allowGitHook bool
 ```
 
