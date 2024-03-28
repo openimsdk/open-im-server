@@ -82,6 +82,7 @@ func (cli *K8sDR) GetUserIdHashGatewayHost(ctx context.Context, userId string) (
 	}
 	return host, err
 }
+
 func getSelfHost(ctx context.Context, gatewayName string) string {
 	port := 88
 	instance := "openimserver"

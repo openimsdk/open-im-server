@@ -16,17 +16,8 @@
 #FIXME This script is the startup script for multiple servers.
 #FIXME The full names of the shell scripts that need to be started are placed in the `need_to_start_server_shell` array.
 
-
-#!/bin/bash
-
-
-
-
-
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
-
-
 
 # Function to execute the scripts.
 function execute_start_scripts() {
@@ -58,14 +49,9 @@ function execute_start_scripts() {
   done
 }
 
-
-
-
 if openim::util::is_running_in_container; then
   exec >> ${DOCKER_LOG_FILE} 2>&1
 fi
-
-
 
 openim::golang::check_openim_binaries
 if [[ $? -ne 0 ]]; then
@@ -73,22 +59,19 @@ if [[ $? -ne 0 ]]; then
   "${OPENIM_ROOT}"/scripts/build-all-service.sh
 fi
 
-
 "${OPENIM_ROOT}"/scripts/init-config.sh --skip
 
 #openim::log::print_blue "Execute the following script in sequence: ${OPENIM_SERVER_SCRIPTARIES[@]}"
-
 
 # TODO Prelaunch tools, simple for now, can abstract functions later
 TOOLS_START_SCRIPTS_PATH=${START_SCRIPTS_PATH}/openim-tools.sh
 
 openim::log::status "Start the pre-start tools:"
 
-
-if ! ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start; then
-  openim::log::error "Start the pre-start tools, aborting!"
-  exit 1
-fi
+# if ! ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start; then
+#   openim::log::error "Start the pre-start tools, aborting!"
+#   exit 1
+# fi
 
 
 openim::log::colorless "pre-start has been successfully completed!"
@@ -119,11 +102,8 @@ if [[ $? -ne 0 ]]; then
   exit 1
 fi
 
-
-
-
 openim::log::status "Start the post-start tools:"
-${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
+# ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
 openim::log::status "post-start has been successfully completed!"
 openim::util::find_ports_for_all_services ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}
 openim::util::find_ports_for_all_services ${OPENIM_MSGTRANSFER_BINARY[@]}
