@@ -18,6 +18,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
 	"net/http"
 	"os"
 	"os/signal"
@@ -27,7 +29,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -55,14 +56,15 @@ type MsgTransfer struct {
 }
 
 func Start(ctx context.Context, config *config.GlobalConfig, prometheusPort, index int) error {
-	log.CInfo(ctx, "MSG-TRANSFER server is initializing",
-		"prometheusPort", prometheusPort, "index", index)
-	rdb, err := cache.NewRedis(ctx, &config.Redis)
+	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "prometheusPort", prometheusPort, "index", index)
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
 	if err != nil {
 		return err
 	}
-
-	mongo, err := unrelation.NewMongoDB(ctx, &config.Mongo)
+	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
+	if err != nil {
+		return err
+	}
 	if err != nil {
 		return err
 	}
@@ -77,7 +79,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, prometheusPort, ind
 
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	msgModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
-	msgDocModel, err := mgo.NewMsgMongo(mongo.GetDatabase(config.Mongo.Database))
+	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}

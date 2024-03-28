@@ -74,7 +74,7 @@ func (m *metaCacheRedis) Copy() metaCache {
 		keys:          keys,
 		maxRetryTimes: m.maxRetryTimes,
 		retryInterval: m.retryInterval,
-		redisClient:   redisClient,
+		redisClient:   m.redisClient,
 	}
 }
 
