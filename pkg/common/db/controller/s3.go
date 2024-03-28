@@ -20,9 +20,9 @@ import (
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cont"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/tools/s3"
+	"github.com/openimsdk/tools/s3/cont"
 	"github.com/redis/go-redis/v9"
 )
 

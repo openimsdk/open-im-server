@@ -17,18 +17,18 @@ package notification
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/sdkws"
 )
 
 type ConversationNotificationSender struct {
 	*rpcclient.NotificationSender
 }
 
-func NewConversationNotificationSender(config *config.GlobalConfig, msgRpcClient *rpcclient.MessageRpcClient) *ConversationNotificationSender {
-	return &ConversationNotificationSender{rpcclient.NewNotificationSender(config, rpcclient.WithRpcClient(msgRpcClient))}
+func NewConversationNotificationSender(conf *config.Notification, msgRpcClient *rpcclient.MessageRpcClient) *ConversationNotificationSender {
+	return &ConversationNotificationSender{rpcclient.NewNotificationSender(conf, rpcclient.WithRpcClient(msgRpcClient))}
 }
 
 // SetPrivate invote.

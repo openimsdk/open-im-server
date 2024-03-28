@@ -15,8 +15,8 @@
 package push
 
 import (
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/sdkws"
 	"google.golang.org/protobuf/proto"
 )
 

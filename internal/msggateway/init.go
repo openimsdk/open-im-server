@@ -15,15 +15,17 @@
 package msggateway
 
 import (
-	"fmt"
+	"context"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/log"
 )
 
-// RunWsAndServer run ws server.
-func RunWsAndServer(conf *config.GlobalConfig, rpcPort, wsPort, prometheusPort int) error {
-	fmt.Println("start rpc/msg_gateway server, port: ", rpcPort, wsPort, prometheusPort, ", OpenIM version: ", config.Version)
+// Start run ws server.
+func Start(ctx context.Context, conf *config.GlobalConfig, rpcPort, wsPort, prometheusPort int) error {
+	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "rpcPort", rpcPort, "wsPort", wsPort,
+		"prometheusPort", prometheusPort)
 	longServer, err := NewWsServer(
 		conf,
 		WithPort(wsPort),
@@ -39,7 +41,7 @@ func RunWsAndServer(conf *config.GlobalConfig, rpcPort, wsPort, prometheusPort i
 	hubServer := NewServer(rpcPort, prometheusPort, longServer, conf)
 	netDone := make(chan error)
 	go func() {
-		err = hubServer.Start(conf)
+		err = hubServer.Start(ctx, conf)
 		netDone <- err
 	}()
 	return hubServer.LongConnServer.Run(netDone)

@@ -22,14 +22,14 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/apiresp"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/apiresp"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -91,7 +91,7 @@ type Client struct {
 func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isBackground, isCompress bool, longConnServer LongConnServer, token string) {
 	c.w = new(sync.Mutex)
 	c.conn = conn
-	c.PlatformID = utils.StringToInt(ctx.GetPlatformID())
+	c.PlatformID = stringutil.StringToInt(ctx.GetPlatformID())
 	c.IsCompress = isCompress
 	c.IsBackground = isBackground
 	c.UserID = ctx.GetUserID()
@@ -187,7 +187,7 @@ func (c *Client) handleMessage(message []byte) error {
 	}
 
 	if binaryReq.SendID != c.UserID {
-		return errs.Wrap(errors.New("exception conn userID not same to req userID"), binaryReq.String())
+		return errs.WrapMsg(errors.New("exception conn userID not same to req userID"), binaryReq.String())
 	}
 
 	ctx := mcontext.WithMustInfoCtx(
@@ -267,7 +267,7 @@ func (c *Client) replyMessage(ctx context.Context, binaryReq *Req, err error, re
 	}
 
 	if binaryReq.ReqIdentifier == WsLogoutMsg {
-		return errs.Wrap(errors.New("user logout"))
+		return errs.WrapMsg(errors.New("user logout"), "user requested logout", "operationID", binaryReq.OperationID)
 	}
 	return nil
 }

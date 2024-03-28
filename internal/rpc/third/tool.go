@@ -21,10 +21,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/OpenIMSDK/protocol/third"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/protocol/third"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/mcontext"
 )
 
 func toPbMapArray(m map[string][]string) []*third.KeyValues {
@@ -43,21 +43,21 @@ func toPbMapArray(m map[string][]string) []*third.KeyValues {
 
 func (t *thirdServer) checkUploadName(ctx context.Context, name string) error {
 	if name == "" {
-		return errs.ErrArgs.Wrap("name is empty")
+		return errs.ErrArgs.WrapMsg("name is empty")
 	}
 	if name[0] == '/' {
-		return errs.ErrArgs.Wrap("name cannot start with `/`")
+		return errs.ErrArgs.WrapMsg("name cannot start with `/`")
 	}
 	if err := checkValidObjectName(name); err != nil {
-		return errs.ErrArgs.Wrap(err.Error())
+		return errs.ErrArgs.WrapMsg(err.Error())
 	}
 	opUserID := mcontext.GetOpUserID(ctx)
 	if opUserID == "" {
-		return errs.ErrNoPermission.Wrap("opUserID is empty")
+		return errs.ErrNoPermission.WrapMsg("opUserID is empty")
 	}
-	if !authverify.IsManagerUserID(opUserID, t.config) {
+	if !authverify.IsManagerUserID(opUserID, &t.config.Manager, &t.config.IMAdmin) {
 		if !strings.HasPrefix(name, opUserID+"/") {
-			return errs.ErrNoPermission.Wrap(fmt.Sprintf("name must start with `%s/`", opUserID))
+			return errs.ErrNoPermission.WrapMsg(fmt.Sprintf("name must start with `%s/`", opUserID))
 		}
 	}
 	return nil
@@ -81,5 +81,5 @@ func checkValidObjectName(objectName string) error {
 }
 
 func (t *thirdServer) IsManagerUserID(opUserID string) bool {
-	return authverify.IsManagerUserID(opUserID, t.config)
+	return authverify.IsManagerUserID(opUserID, &t.config.Manager, &t.config.IMAdmin)
 }

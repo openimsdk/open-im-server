@@ -19,10 +19,9 @@ import (
 	"fmt"
 	"os/exec"
 	"runtime"
-	"time"
 
 	"github.com/fatih/color"
-	//"github.com/openimsdk/open-im-server/v3/pkg/common/version"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func ExecuteCommand(cmdName string, args ...string) (string, error) {
@@ -40,8 +39,7 @@ func ExecuteCommand(cmdName string, args ...string) (string, error) {
 }
 
 func printTime() string {
-	currentTime := time.Now()
-	formattedTime := currentTime.Format("2006-01-02 15:04:05")
+	formattedTime := timeutil.GetCurrentTimeFormatted()
 	return fmt.Sprintf("Current Date & Time: %s", formattedTime)
 }
 
@@ -56,14 +54,6 @@ func getDockerVersion() string {
 	version, err := ExecuteCommand("docker", "--version")
 	if err != nil {
 		return "Docker is not installed. Please install it to get the version."
-	}
-	return version
-}
-
-func getDockerComposeVersion() string {
-	version, err := ExecuteCommand("docker-compose", "--version")
-	if err != nil {
-		return "Docker Compose is not installed. Please install it to get the version."
 	}
 	return version
 }
@@ -101,20 +91,15 @@ func getGitVersion() string {
 
 func main() {
 	// red := color.New(color.FgRed).SprintFunc()
-	green := color.New(color.FgGreen).SprintFunc()
+	//	green := color.New(color.FgGreen).SprintFunc()
 	blue := color.New(color.FgBlue).SprintFunc()
-	yellow := color.New(color.FgYellow).SprintFunc()
-
-	fmt.Println(green(printTime()))
-	fmt.Println(yellow("# Diagnostic Tool Result\n"))
+	//	yellow := color.New(color.FgYellow).SprintFunc()
 	fmt.Println(blue("## Go Version"))
 	fmt.Println(getGoVersion())
 	fmt.Println(blue("## Branch Type"))
 	fmt.Println(getGitVersion())
 	fmt.Println(blue("## Docker Version"))
 	fmt.Println(getDockerVersion())
-	fmt.Println(blue("## Docker Compose Version"))
-	fmt.Println(getDockerComposeVersion())
 	fmt.Println(blue("## Kubernetes Version"))
 	fmt.Println(getKubernetesVersion())
 	// fmt.Println(blue("## OpenIM Versions"))

@@ -17,14 +17,12 @@ package group
 import (
 	"context"
 
-	pbgroup "github.com/OpenIMSDK/protocol/group"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
+	pbgroup "github.com/openimsdk/protocol/group"
 )
 
-func (s *groupServer) GetGroupInfoCache(
-	ctx context.Context,
-	req *pbgroup.GetGroupInfoCacheReq,
-) (resp *pbgroup.GetGroupInfoCacheResp, err error) {
+// GetGroupInfoCache get group info from cache.
+func (s *groupServer) GetGroupInfoCache(ctx context.Context, req *pbgroup.GetGroupInfoCacheReq) (resp *pbgroup.GetGroupInfoCacheResp, err error) {
 	group, err := s.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err

@@ -16,14 +16,14 @@ package main
 
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/tools/system/program"
 )
 
 func main() {
-	msgTransferCmd := cmd.NewMsgTransferCmd()
+	msgTransferCmd := cmd.NewMsgTransferCmd(cmd.MsgTransferServer)
 	msgTransferCmd.AddPrometheusPortFlag()
 	msgTransferCmd.AddTransferProgressFlag()
 	if err := msgTransferCmd.Exec(); err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 }

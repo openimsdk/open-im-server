@@ -15,22 +15,17 @@
 package kafka
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"fmt"
-	"strings"
-	"time"
 
 	"github.com/IBM/sarama"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	kfk "github.com/openimsdk/tools/mq/kafka"
 	"google.golang.org/protobuf/proto"
 )
-
-const maxRetry = 10 // number of retries
 
 var errEmptyMsg = errors.New("kafka binary msg is empty")
 
@@ -49,85 +44,21 @@ type ProducerConfig struct {
 	Password     string
 }
 
-// NewKafkaProducer initializes a new Kafka producer.
-func NewKafkaProducer(addr []string, topic string, producerConfig *ProducerConfig, tlsConfig *TLSConfig) (*Producer, error) {
-	p := Producer{
-		addr:   addr,
-		topic:  topic,
-		config: sarama.NewConfig(),
-	}
-
-	// Set producer return flags
-	p.config.Producer.Return.Successes = true
-	p.config.Producer.Return.Errors = true
-
-	// Set partitioner strategy
-	p.config.Producer.Partitioner = sarama.NewHashPartitioner
-
-	// Configure producer acknowledgement level
-	configureProducerAck(&p, producerConfig.ProducerAck)
-
-	// Configure message compression
-	configureCompression(&p, producerConfig.CompressType)
-
-	// Get Kafka configuration from environment variables or fallback to config file
-	kafkaUsername := getEnvOrConfig("KAFKA_USERNAME", producerConfig.Username)
-	kafkaPassword := getEnvOrConfig("KAFKA_PASSWORD", producerConfig.Password)
-	kafkaAddr := getKafkaAddrFromEnv(addr) // Updated to use the new function
-
-	// Configure SASL authentication if credentials are provided
-	if kafkaUsername != "" && kafkaPassword != "" {
-		p.config.Net.SASL.Enable = true
-		p.config.Net.SASL.User = kafkaUsername
-		p.config.Net.SASL.Password = kafkaPassword
-	}
-
-	// Set the Kafka address
-	p.addr = kafkaAddr
-
-	// Set up TLS configuration (if required)
-	SetupTLSConfig(p.config, tlsConfig)
-
-	// Create the producer with retries
-	var err error
-	for i := 0; i <= maxRetry; i++ {
-		p.producer, err = sarama.NewSyncProducer(p.addr, p.config)
-		if err == nil {
-			return &p, errs.Wrap(err)
-		}
-		time.Sleep(1 * time.Second) // Wait before retrying
-	}
-	// Panic if unable to create producer after retries
-	if err != nil {
-		return nil, errs.Wrap(errors.New("failed to create Kafka producer: " + err.Error()))
-	}
-
-	return &p, nil
+func BuildProducerConfig(conf kfk.Config) (*sarama.Config, error) {
+	return kfk.BuildProducerConfig(conf)
 }
 
-// configureProducerAck configures the producer's acknowledgement level.
-func configureProducerAck(p *Producer, ackConfig string) {
-	switch strings.ToLower(ackConfig) {
-	case "no_response":
-		p.config.Producer.RequiredAcks = sarama.NoResponse
-	case "wait_for_local":
-		p.config.Producer.RequiredAcks = sarama.WaitForLocal
-	case "wait_for_all":
-		p.config.Producer.RequiredAcks = sarama.WaitForAll
-	default:
-		p.config.Producer.RequiredAcks = sarama.WaitForAll
-	}
-}
-
-// configureCompression configures the message compression type for the producer.
-func configureCompression(p *Producer, compressType string) {
-	var compress = sarama.CompressionNone
-	err := compress.UnmarshalText(bytes.ToLower([]byte(compressType)))
+func NewKafkaProducer(config *sarama.Config, addr []string, topic string) (*Producer, error) {
+	producer, err := kfk.NewProducer(config, addr)
 	if err != nil {
-		fmt.Printf("Failed to configure compression: %v\n", err)
-		return
+		return nil, err
 	}
-	p.config.Producer.Compression = compress
+	return &Producer{
+		addr:     addr,
+		topic:    topic,
+		config:   config,
+		producer: producer,
+	}, nil
 }
 
 // GetMQHeaderWithContext extracts message queue headers from the context.
@@ -160,10 +91,10 @@ func (p *Producer) SendMessage(ctx context.Context, key string, msg proto.Messag
 	// Marshal the protobuf message
 	bMsg, err := proto.Marshal(msg)
 	if err != nil {
-		return 0, 0, errs.Wrap(err, "kafka proto Marshal err")
+		return 0, 0, errs.WrapMsg(err, "kafka proto Marshal err")
 	}
 	if len(bMsg) == 0 {
-		return 0, 0, errs.Wrap(errEmptyMsg, "")
+		return 0, 0, errs.WrapMsg(errEmptyMsg, "kafka proto Marshal err")
 	}
 
 	// Prepare Kafka message

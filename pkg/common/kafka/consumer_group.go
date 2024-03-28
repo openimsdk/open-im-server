@@ -17,11 +17,10 @@ package kafka
 import (
 	"context"
 	"errors"
-	"strings"
 
 	"github.com/IBM/sarama"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/tools/log"
+	kfk "github.com/openimsdk/tools/mq/kafka"
 )
 
 type MConsumerGroup struct {
@@ -38,27 +37,19 @@ type MConsumerGroupConfig struct {
 	Password       string
 }
 
-func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []string, groupID string, tlsConfig *TLSConfig) (*MConsumerGroup, error) {
-	consumerGroupConfig := sarama.NewConfig()
-	consumerGroupConfig.Version = consumerConfig.KafkaVersion
-	consumerGroupConfig.Consumer.Offsets.Initial = consumerConfig.OffsetsInitial
-	consumerGroupConfig.Consumer.Return.Errors = consumerConfig.IsReturnErr
-	if consumerConfig.UserName != "" && consumerConfig.Password != "" {
-		consumerGroupConfig.Net.SASL.Enable = true
-		consumerGroupConfig.Net.SASL.User = consumerConfig.UserName
-		consumerGroupConfig.Net.SASL.Password = consumerConfig.Password
-	}
-
-	SetupTLSConfig(consumerGroupConfig, tlsConfig)
-	consumerGroup, err := sarama.NewConsumerGroup(addrs, groupID, consumerGroupConfig)
+func NewMConsumerGroup(conf *kfk.Config, groupID string, topics []string) (*MConsumerGroup, error) {
+	config, err := kfk.BuildConsumerGroupConfig(conf, sarama.OffsetNewest)
 	if err != nil {
-		return nil, errs.Wrap(err, strings.Join(topics, ","), strings.Join(addrs, ","), groupID, consumerConfig.UserName, consumerConfig.Password)
+		return nil, err
 	}
-
+	group, err := kfk.NewConsumerGroup(config, conf.Addr, groupID)
+	if err != nil {
+		return nil, err
+	}
 	return &MConsumerGroup{
-		consumerGroup,
-		groupID,
-		topics,
+		ConsumerGroup: group,
+		groupID:       groupID,
+		topics:        topics,
 	}, nil
 }
 

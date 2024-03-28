@@ -17,34 +17,32 @@ package rpcclient
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/friend"
-	sdkws "github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/protocol/friend"
+	sdkws "github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/system/program"
 	"google.golang.org/grpc"
 )
 
 type Friend struct {
 	conn   grpc.ClientConnInterface
 	Client friend.FriendClient
-	discov discoveryregistry.SvcDiscoveryRegistry
-	Config *config.GlobalConfig
+	discov discovery.SvcDiscoveryRegistry
 }
 
-func NewFriend(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Friend {
-	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImFriendName)
+func NewFriend(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) *Friend {
+	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 	client := friend.NewFriendClient(conn)
-	return &Friend{discov: discov, conn: conn, Client: client, Config: config}
+	return &Friend{discov: discov, conn: conn, Client: client}
 }
 
 type FriendRpcClient Friend
 
-func NewFriendRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) FriendRpcClient {
-	return FriendRpcClient(*NewFriend(discov, config))
+func NewFriendRpcClient(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) FriendRpcClient {
+	return FriendRpcClient(*NewFriend(discov, rpcRegisterName))
 }
 
 func (f *FriendRpcClient) GetFriendsInfo(

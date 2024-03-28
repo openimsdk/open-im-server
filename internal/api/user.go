@@ -15,15 +15,15 @@
 package api
 
 import (
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/msggateway"
-	"github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/a2r"
-	"github.com/OpenIMSDK/tools/apiresp"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/msggateway"
+	"github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/a2r"
+	"github.com/openimsdk/tools/apiresp"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 )
 
 type UserApi rpcclient.User
@@ -69,7 +69,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 		apiresp.GinError(c, err)
 		return
 	}
-	conns, err := u.Discov.GetConns(c, u.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := u.Discov.GetConns(c, u.MessageGateWayRpcName)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return
@@ -133,7 +133,7 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	conns, err := u.Discov.GetConns(c, u.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := u.Discov.GetConns(c, u.MessageGateWayRpcName)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return

@@ -15,19 +15,24 @@
 package cmd
 
 import (
+	"context"
 	"log"
 
-	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
 type MsgGatewayCmd struct {
 	*RootCmd
+	ctx context.Context
 }
 
-func NewMsgGatewayCmd() *MsgGatewayCmd {
-	ret := &MsgGatewayCmd{NewRootCmd("msgGateway")}
+func NewMsgGatewayCmd(name string) *MsgGatewayCmd {
+	ret := &MsgGatewayCmd{RootCmd: NewRootCmd(program.GetProcessName(), name)}
+	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
 	ret.addRunE()
 	ret.SetRootCmdPt(ret)
 	return ret
@@ -50,7 +55,7 @@ func (m *MsgGatewayCmd) getWsPortFlag(cmd *cobra.Command) int {
 
 func (m *MsgGatewayCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msggateway.RunWsAndServer(m.config, m.getPortFlag(cmd), m.getWsPortFlag(cmd), m.getPrometheusPortFlag(cmd))
+		return msggateway.Start(m.ctx, m.config, m.getPortFlag(cmd), m.getWsPortFlag(cmd), m.getPrometheusPortFlag(cmd))
 	}
 }
 

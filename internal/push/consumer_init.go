@@ -26,8 +26,8 @@ type Consumer struct {
 	// successCount uint64
 }
 
-func NewConsumer(config *config.GlobalConfig, pusher *Pusher) (*Consumer, error) {
-	c, err := NewConsumerHandler(config, pusher)
+func NewConsumer(kafkaConf *config.Kafka, pusher *Pusher) (*Consumer, error) {
+	c, err := NewConsumerHandler(kafkaConf, pusher)
 	if err != nil {
 		return nil, err
 	}

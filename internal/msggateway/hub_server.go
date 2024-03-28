@@ -17,34 +17,35 @@ package msggateway
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/msggateway"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/msggateway"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
 	"google.golang.org/grpc"
 )
 
-func (s *Server) InitServer(config *config.GlobalConfig, disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis(config)
+func (s *Server) InitServer(ctx context.Context, config *config.GlobalConfig, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
 	}
 
-	msgModel := cache.NewMsgCacheModel(rdb, config)
+	tokenCacheModel := cache.NewTokenCacheModel(rdb)
 	s.LongConnServer.SetDiscoveryRegistry(disCov, config)
-	s.LongConnServer.SetCacheHandler(msgModel)
+	s.LongConnServer.SetCacheHandler(tokenCacheModel)
 	msggateway.RegisterMsgGatewayServer(server, s)
 	return nil
 }
 
-func (s *Server) Start(conf *config.GlobalConfig) error {
-	return startrpc.Start(
+func (s *Server) Start(ctx context.Context, conf *config.GlobalConfig) error {
+	return startrpc.Start(ctx,
 		s.rpcPort,
 		conf.RpcRegisterName.OpenImMessageGatewayName,
 		s.prometheusPort,
@@ -89,8 +90,8 @@ func (s *Server) GetUsersOnlineStatus(
 	ctx context.Context,
 	req *msggateway.GetUsersOnlineStatusReq,
 ) (*msggateway.GetUsersOnlineStatusResp, error) {
-	if !authverify.IsAppManagerUid(ctx, s.config) {
-		return nil, errs.ErrNoPermission.Wrap("only app manager")
+	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
+		return nil, errs.ErrNoPermission.WrapMsg("only app manager")
 	}
 	var resp msggateway.GetUsersOnlineStatusResp
 	for _, userID := range req.UserIDs {
@@ -122,11 +123,9 @@ func (s *Server) GetUsersOnlineStatus(
 	return &resp, nil
 }
 
-func (s *Server) OnlineBatchPushOneMsg(
-	ctx context.Context,
-	req *msggateway.OnlineBatchPushOneMsgReq,
-) (*msggateway.OnlineBatchPushOneMsgResp, error) {
-	panic("implement me")
+func (s *Server) OnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq) (*msggateway.OnlineBatchPushOneMsgResp, error) {
+	// todo implement
+	return nil, nil
 }
 
 func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq,
@@ -158,7 +157,7 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 				(client.IsBackground && client.PlatformID != constant.IOSPlatformID) {
 				err := client.PushMessage(ctx, req.MsgData)
 				if err != nil {
-					userPlatform.ResultCode = int64(errs.ErrPushMsgErr.Code())
+					userPlatform.ResultCode = int64(servererrs.ErrPushMsgErr.Code())
 					resp = append(resp, userPlatform)
 				} else {
 					if _, ok := s.pushTerminal[client.PlatformID]; ok {
@@ -167,7 +166,7 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 					}
 				}
 			} else {
-				userPlatform.ResultCode = int64(errs.ErrIOSBackgroundPushErr.Code())
+				userPlatform.ResultCode = int64(servererrs.ErrIOSBackgroundPushErr.Code())
 				resp = append(resp, userPlatform)
 			}
 		}
@@ -203,10 +202,7 @@ func (s *Server) KickUserOffline(
 	return &msggateway.KickUserOfflineResp{}, nil
 }
 
-func (s *Server) MultiTerminalLoginCheck(
-	ctx context.Context,
-	req *msggateway.MultiTerminalLoginCheckReq,
-) (*msggateway.MultiTerminalLoginCheckResp, error) {
+func (s *Server) MultiTerminalLoginCheck(ctx context.Context, req *msggateway.MultiTerminalLoginCheckReq) (*msggateway.MultiTerminalLoginCheckResp, error) {
 	if oldClients, userOK, clientOK := s.LongConnServer.GetUserPlatformCons(req.UserID, int(req.PlatformID)); userOK {
 		tempUserCtx := newTempContext()
 		tempUserCtx.SetToken(req.Token)

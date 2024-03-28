@@ -19,25 +19,26 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/OpenIMSDK/tools/errs"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/errs"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type ServiceAddresses map[string][]int
 
-func getServiceAddresses(config *config2.GlobalConfig) ServiceAddresses {
+func getServiceAddresses(rpcRegisterName *config2.RpcRegisterName,
+	rpcPort *config2.RpcPort, longConnSvrPort []int) ServiceAddresses {
 	return ServiceAddresses{
-		config.RpcRegisterName.OpenImUserName:           config.RpcPort.OpenImUserPort,
-		config.RpcRegisterName.OpenImFriendName:         config.RpcPort.OpenImFriendPort,
-		config.RpcRegisterName.OpenImMsgName:            config.RpcPort.OpenImMessagePort,
-		config.RpcRegisterName.OpenImMessageGatewayName: config.LongConnSvr.OpenImMessageGatewayPort,
-		config.RpcRegisterName.OpenImGroupName:          config.RpcPort.OpenImGroupPort,
-		config.RpcRegisterName.OpenImAuthName:           config.RpcPort.OpenImAuthPort,
-		config.RpcRegisterName.OpenImPushName:           config.RpcPort.OpenImPushPort,
-		config.RpcRegisterName.OpenImConversationName:   config.RpcPort.OpenImConversationPort,
-		config.RpcRegisterName.OpenImThirdName:          config.RpcPort.OpenImThirdPort,
+		rpcRegisterName.OpenImUserName:           rpcPort.OpenImUserPort,
+		rpcRegisterName.OpenImFriendName:         rpcPort.OpenImFriendPort,
+		rpcRegisterName.OpenImMsgName:            rpcPort.OpenImMessagePort,
+		rpcRegisterName.OpenImMessageGatewayName: longConnSvrPort,
+		rpcRegisterName.OpenImGroupName:          rpcPort.OpenImGroupPort,
+		rpcRegisterName.OpenImAuthName:           rpcPort.OpenImAuthPort,
+		rpcRegisterName.OpenImPushName:           rpcPort.OpenImPushPort,
+		rpcRegisterName.OpenImConversationName:   rpcPort.OpenImConversationPort,
+		rpcRegisterName.OpenImThirdName:          rpcPort.OpenImThirdPort,
 	}
 }
 
@@ -95,7 +96,8 @@ func (cd *ConnDirect) GetConns(ctx context.Context,
 	if conns, exists := cd.conns[serviceName]; exists {
 		return conns, nil
 	}
-	ports := getServiceAddresses(cd.config)[serviceName]
+	ports := getServiceAddresses(&cd.config.RpcRegisterName,
+		&cd.config.RpcPort, cd.config.LongConnSvr.OpenImMessageGatewayPort)[serviceName]
 	var connections []*grpc.ClientConn
 	for _, port := range ports {
 		conn, err := cd.dialServiceWithoutResolver(ctx, fmt.Sprintf(cd.config.Rpc.ListenIP+":%d", port), append(cd.additionalOpts, opts...)...)
@@ -106,17 +108,18 @@ func (cd *ConnDirect) GetConns(ctx context.Context,
 	}
 
 	if len(connections) == 0 {
-		return nil, errs.Wrap(errors.New("no connections found for service"), "serviceName", serviceName)
+		return nil, errs.WrapMsg(errors.New("no connections found for service"), "serviceName", serviceName)
 	}
 	return connections, nil
 }
 
 func (cd *ConnDirect) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	// Get service addresses
-	addresses := getServiceAddresses(cd.config)
+	addresses := getServiceAddresses(&cd.config.RpcRegisterName,
+		&cd.config.RpcPort, cd.config.LongConnSvr.OpenImMessageGatewayPort)
 	address, ok := addresses[serviceName]
 	if !ok {
-		return nil, errs.Wrap(errors.New("unknown service name"), "serviceName", serviceName)
+		return nil, errs.WrapMsg(errors.New("unknown service name"), "serviceName", serviceName)
 	}
 	var result string
 	for _, addr := range address {
@@ -129,7 +132,7 @@ func (cd *ConnDirect) GetConn(ctx context.Context, serviceName string, opts ...g
 	// Try to dial a new connection
 	conn, err := cd.dialService(ctx, result, append(cd.additionalOpts, opts...)...)
 	if err != nil {
-		return nil, errs.Wrap(err, "address", result)
+		return nil, errs.WrapMsg(err, "address", result)
 	}
 
 	// Store the new connection
@@ -156,7 +159,7 @@ func (cd *ConnDirect) dialService(ctx context.Context, address string, opts ...g
 	conn, err := grpc.DialContext(ctx, cd.resolverDirect.Scheme()+":///"+address, options...)
 
 	if err != nil {
-		return nil, errs.Wrap(err, "address", address)
+		return nil, errs.WrapMsg(err, "address", address)
 	}
 	return conn, nil
 }

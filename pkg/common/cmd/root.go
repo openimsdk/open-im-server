@@ -17,11 +17,11 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/spf13/cobra"
 )
 
@@ -32,6 +32,7 @@ type RootCmdPt interface {
 type RootCmd struct {
 	Command        cobra.Command
 	Name           string
+	processName    string
 	port           int
 	prometheusPort int
 	cmdItf         RootCmdPt
@@ -58,8 +59,8 @@ func WithLogName(logName string) func(*CmdOpts) {
 	}
 }
 
-func NewRootCmd(name string, opts ...func(*CmdOpts)) *RootCmd {
-	rootCmd := &RootCmd{Name: name, config: config.NewGlobalConfig()}
+func NewRootCmd(processName, name string, opts ...func(*CmdOpts)) *RootCmd {
+	rootCmd := &RootCmd{processName: processName, Name: name, config: config.NewGlobalConfig()}
 	cmd := cobra.Command{
 		Use:   "Start openIM application",
 		Short: fmt.Sprintf(`Start %s `, name),
@@ -67,6 +68,8 @@ func NewRootCmd(name string, opts ...func(*CmdOpts)) *RootCmd {
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return rootCmd.persistentPreRun(cmd, opts...)
 		},
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
 	rootCmd.Command = cmd
 	rootCmd.addConfFlag()
@@ -75,13 +78,13 @@ func NewRootCmd(name string, opts ...func(*CmdOpts)) *RootCmd {
 
 func (rc *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) error {
 	if err := rc.initializeConfiguration(cmd); err != nil {
-		return fmt.Errorf("failed to get configuration from command: %w", err)
+		return err
 	}
 
 	cmdOpts := rc.applyOptions(opts...)
 
 	if err := rc.initializeLogger(cmdOpts); err != nil {
-		return errs.Wrap(err, "failed to initialize logger")
+		return errs.WrapMsg(err, "failed to initialize logger")
 	}
 
 	return nil
@@ -103,22 +106,28 @@ func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 	logConfig := rc.config.Log
 
-	return log.InitFromConfig(
+	err := log.InitFromConfig(
 
 		cmdOpts.loggerPrefixName,
-		rc.Name,
+		rc.processName,
 		logConfig.RemainLogLevel,
 		logConfig.IsStdout,
 		logConfig.IsJson,
 		logConfig.StorageLocation,
 		logConfig.RemainRotationCount,
 		logConfig.RotationTime,
+		config2.Version,
 	)
+	if err != nil {
+		return errs.Wrap(err)
+	}
+	return errs.Wrap(log.InitConsoleLogger(rc.processName, logConfig.RemainLogLevel, logConfig.IsJson, config2.Version))
+
 }
 
 func defaultCmdOpts() *CmdOpts {
 	return &CmdOpts{
-		loggerPrefixName: "openim-all",
+		loggerPrefixName: "openim-service-log",
 	}
 }
 
@@ -172,7 +181,6 @@ func (r *RootCmd) GetPrometheusPortFlag() int {
 
 func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
-	fmt.Println("The directory of the configuration file to start the process:", configFolderPath)
 	return config2.InitConfig(r.config, configFolderPath)
 }
 

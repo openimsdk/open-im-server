@@ -15,7 +15,7 @@
 package callbackstruct
 
 import (
-	sdkws "github.com/OpenIMSDK/protocol/sdkws"
+	sdkws "github.com/openimsdk/protocol/sdkws"
 )
 
 type CallbackBeforeSendSingleMsgReq struct {

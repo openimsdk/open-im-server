@@ -3,7 +3,6 @@ FROM golang:1.20 AS builder
 
 # Set go mod installation source and proxy
 ARG GO111MODULE=on
-ARG GOPROXY=https://goproxy.io,direct
 
 ENV GO111MODULE=$GO111MODULE
 ENV GOPROXY=$GOPROXY

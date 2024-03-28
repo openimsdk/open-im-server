@@ -17,15 +17,15 @@ package notification
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	pbfriend "github.com/OpenIMSDK/protocol/friend"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/constant"
+	pbfriend "github.com/openimsdk/protocol/friend"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/mcontext"
 )
 
 type FriendNotificationSender struct {
@@ -81,12 +81,12 @@ func WithRpcFunc(
 }
 
 func NewFriendNotificationSender(
-	config *config.GlobalConfig,
+	conf *config.Notification,
 	msgRpcClient *rpcclient.MessageRpcClient,
 	opts ...friendNotificationSenderOptions,
 ) *FriendNotificationSender {
 	f := &FriendNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(config, rpcclient.WithRpcClient(msgRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(conf, rpcclient.WithRpcClient(msgRpcClient)),
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -194,12 +194,14 @@ func (f *FriendNotificationSender) FriendRemarkSetNotification(ctx context.Conte
 	tips.FromToUserID.ToUserID = toUserID
 	return f.Notification(ctx, fromUserID, toUserID, constant.FriendRemarkSetNotification, &tips)
 }
+
 func (f *FriendNotificationSender) FriendsInfoUpdateNotification(ctx context.Context, toUserID string, friendIDs []string) error {
 	tips := sdkws.FriendsInfoUpdateTips{FromToUserID: &sdkws.FromToUserID{}}
 	tips.FromToUserID.ToUserID = toUserID
 	tips.FriendIDs = friendIDs
 	return f.Notification(ctx, toUserID, toUserID, constant.FriendsInfoUpdateNotification, &tips)
 }
+
 func (f *FriendNotificationSender) BlackAddedNotification(ctx context.Context, req *pbfriend.AddBlackReq) error {
 	tips := sdkws.BlackAddedTips{FromToUserID: &sdkws.FromToUserID{}}
 	tips.FromToUserID.FromUserID = req.OwnerUserID
@@ -213,15 +215,11 @@ func (f *FriendNotificationSender) BlackDeletedNotification(ctx context.Context,
 		ToUserID:   req.BlackUserID,
 	}}
 	if err := f.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackDeletedNotification, &blackDeletedTips); err != nil {
-		//err
+		// err
 	}
 }
 
-func (f *FriendNotificationSender) FriendInfoUpdatedNotification(
-	ctx context.Context,
-	changedUserID string,
-	needNotifiedUserID string,
-) {
+func (f *FriendNotificationSender) FriendInfoUpdatedNotification(ctx context.Context, changedUserID string, needNotifiedUserID string) {
 	tips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
 	if err := f.Notification(ctx, mcontext.GetOpUserID(ctx), needNotifiedUserID,
 		constant.FriendInfoUpdatedNotification, &tips); err != nil {

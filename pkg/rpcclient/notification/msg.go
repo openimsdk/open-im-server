@@ -17,10 +17,10 @@ package notification
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/sdkws"
 )
 
 type MsgNotificationSender struct {
@@ -28,7 +28,7 @@ type MsgNotificationSender struct {
 }
 
 func NewMsgNotificationSender(config *config.GlobalConfig, opts ...rpcclient.NotificationSenderOptions) *MsgNotificationSender {
-	return &MsgNotificationSender{rpcclient.NewNotificationSender(config, opts...)}
+	return &MsgNotificationSender{rpcclient.NewNotificationSender(&config.Notification, opts...)}
 }
 
 func (m *MsgNotificationSender) UserDeleteMsgsNotification(ctx context.Context, userID, conversationID string, seqs []int64) error {

@@ -65,6 +65,8 @@ GENERATE_EXAMPLES=false
 CLEAN_CONFIG=false
 CLEAN_EXAMPLES=false
 
+FILES_PROCESSED=false
+
 # Function to display help information
 show_help() {
   echo "Usage: $(basename "$0") [options]"
@@ -126,7 +128,7 @@ process_file() {
     if [[ "${FORCE_OVERWRITE}" == true ]]; then
       openim::log::info "Force overwriting ${output_file}."
       elif [[ "${SKIP_EXISTING}" == true ]]; then
-      openim::log::info "Skipping generation of ${output_file} as it already exists."
+      #openim::log::info "Skipping generation of ${output_file} as it already exists."
       return
     else
       echo -n "File ${output_file} already exists. Overwrite? (Y/N): "
@@ -173,8 +175,7 @@ process_file() {
       exit 1
     }
   fi
-  
-  sleep 0.5
+  FILES_PROCESSED=true
 }
 
 clean_config_files() {
@@ -259,4 +260,6 @@ if [[ "${GENERATE_EXAMPLES}" == true ]] && [[ "${CLEAN_EXAMPLES}" == false ]]; t
   generate_example_files
 fi
 
-openim::log::success "Configuration and example files operation complete!"
+if [[ "${FILES_PROCESSED}" == true ]]; then
+  openim::log::success "Configuration and example files operation complete!"
+fi

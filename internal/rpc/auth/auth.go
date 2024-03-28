@@ -16,45 +16,46 @@ package auth
 
 import (
 	"context"
+	"github.com/openimsdk/tools/db/redisutil"
 
-	pbauth "github.com/OpenIMSDK/protocol/auth"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/msggateway"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/tokenverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	pbauth "github.com/openimsdk/protocol/auth"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/msggateway"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/tokenverify"
 	"google.golang.org/grpc"
 )
 
 type authServer struct {
 	authDatabase   controller.AuthDatabase
 	userRpcClient  *rpcclient.UserRpcClient
-	RegisterCenter discoveryregistry.SvcDiscoveryRegistry
+	RegisterCenter discovery.SvcDiscoveryRegistry
 	config         *config.GlobalConfig
 }
 
-func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis(config)
+func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
 	if err != nil {
 		return err
 	}
-	userRpcClient := rpcclient.NewUserRpcClient(client, config)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
 	pbauth.RegisterAuthServer(server, &authServer{
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
-			cache.NewMsgCacheModel(rdb, config),
+			cache.NewTokenCacheModel(rdb),
 			config.Secret,
 			config.TokenPolicy.Expire,
-			config,
 		),
 		config: config,
 	})
@@ -64,7 +65,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*pbauth.UserTokenResp, error) {
 	resp := pbauth.UserTokenResp{}
 	if req.Secret != s.config.Secret {
-		return nil, errs.ErrNoPermission.Wrap("secret invalid")
+		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
@@ -80,15 +81,14 @@ func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*
 }
 
 func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenReq) (*pbauth.GetUserTokenResp, error) {
-	if err := authverify.CheckAdmin(ctx, s.config); err != nil {
+	if err := authverify.CheckAdmin(ctx, &s.config.Manager, &s.config.IMAdmin); err != nil {
 		return nil, err
 	}
 	resp := pbauth.GetUserTokenResp{}
 
-	if authverify.IsManagerUserID(req.UserID, s.config) {
-		return nil, errs.ErrNoPermission.Wrap("don't get Admin token")
+	if authverify.IsManagerUserID(req.UserID, &s.config.Manager, &s.config.IMAdmin) {
+		return nil, errs.ErrNoPermission.WrapMsg("don't get Admin token")
 	}
-
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -111,19 +111,19 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 		return nil, err
 	}
 	if len(m) == 0 {
-		return nil, errs.ErrTokenNotExist.Wrap()
+		return nil, servererrs.ErrTokenNotExist.Wrap()
 	}
 	if v, ok := m[tokensString]; ok {
 		switch v {
 		case constant.NormalToken:
 			return claims, nil
 		case constant.KickedToken:
-			return nil, errs.ErrTokenKicked.Wrap()
+			return nil, servererrs.ErrTokenKicked.Wrap()
 		default:
 			return nil, errs.Wrap(errs.ErrTokenUnknown)
 		}
 	}
-	return nil, errs.ErrTokenNotExist.Wrap()
+	return nil, servererrs.ErrTokenNotExist.Wrap()
 }
 
 func (s *authServer) ParseToken(
@@ -142,7 +142,7 @@ func (s *authServer) ParseToken(
 }
 
 func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq) (*pbauth.ForceLogoutResp, error) {
-	if err := authverify.CheckAdmin(ctx, s.config); err != nil {
+	if err := authverify.CheckAdmin(ctx, &s.config.Manager, &s.config.IMAdmin); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {

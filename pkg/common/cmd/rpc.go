@@ -15,27 +15,31 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )
 
-type rpcInitFuc func(config *config2.GlobalConfig, disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error
+type rpcInitFuc func(ctx context.Context, config *config2.GlobalConfig, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error
 
 type RpcCmd struct {
 	*RootCmd
 	RpcRegisterName string
 	initFunc        rpcInitFuc
+	ctx             context.Context
 }
 
 func NewRpcCmd(name string, initFunc rpcInitFuc) *RpcCmd {
-	ret := &RpcCmd{RootCmd: NewRootCmd(name), initFunc: initFunc}
+	ret := &RpcCmd{RootCmd: NewRootCmd(program.GetProcessName(), name), initFunc: initFunc}
+	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
 	ret.addPreRun()
 	ret.addRunE()
 	ret.SetRootCmdPt(ret)
@@ -64,11 +68,11 @@ func (a *RpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *RpcCmd) StartSvr(name string, rpcFn func(config *config2.GlobalConfig, disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) error {
+func (a *RpcCmd) StartSvr(name string, rpcFn func(ctx context.Context, config *config2.GlobalConfig, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error) error {
 	if a.GetPortFlag() == 0 {
 		return errs.Wrap(errors.New("port is required"))
 	}
-	return startrpc.Start(a.GetPortFlag(), name, a.GetPrometheusPortFlag(), a.config, rpcFn)
+	return startrpc.Start(a.ctx, a.GetPortFlag(), name, a.GetPrometheusPortFlag(), a.config, rpcFn)
 }
 
 func (a *RpcCmd) GetPortFromConfig(portType string) int {
@@ -152,5 +156,5 @@ func (a *RpcCmd) GetRpcRegisterNameFromConfig() (string, error) {
 	case RpcUserServer:
 		return a.config.RpcRegisterName.OpenImUserName, nil
 	}
-	return "", errs.Wrap(errors.New("can not get rpc register name"), a.Name)
+	return "", errs.WrapMsg(errors.New("unrecognized RPC server name"), "providedName", a.Name, "hint", "Check if the server name is correctly configured")
 }

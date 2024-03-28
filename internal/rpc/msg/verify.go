@@ -16,16 +16,19 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/encrypt"
+	"github.com/openimsdk/tools/utils/timeutil"
 	"math/rand"
 	"strconv"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 )
 
 var ExcludeContentType = []int{constant.HasReadReceipt}
@@ -50,10 +53,10 @@ type MessageRevoked struct {
 func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) error {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
-		if len(m.config.Manager.UserID) > 0 && utils.IsContain(data.MsgData.SendID, m.config.Manager.UserID) {
+		if len(m.config.Manager.UserID) > 0 && datautil.Contain(data.MsgData.SendID, m.config.Manager.UserID...) {
 			return nil
 		}
-		if utils.IsContain(data.MsgData.SendID, m.config.IMAdmin.UserID) {
+		if datautil.Contain(data.MsgData.SendID, m.config.IMAdmin.UserID...) {
 			return nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd &&
@@ -65,7 +68,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return err
 		}
 		if black {
-			return errs.ErrBlockedByPeer.Wrap()
+			return servererrs.ErrBlockedByPeer.Wrap()
 		}
 		if m.config.MessageVerify.FriendVerify != nil && *m.config.MessageVerify.FriendVerify {
 			friend, err := m.FriendLocalCache.IsFriend(ctx, data.MsgData.SendID, data.MsgData.RecvID)
@@ -73,7 +76,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 				return err
 			}
 			if !friend {
-				return errs.ErrNotPeersFriend.Wrap()
+				return servererrs.ErrNotPeersFriend.Wrap()
 			}
 			return nil
 		}
@@ -85,15 +88,15 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		}
 		if groupInfo.Status == constant.GroupStatusDismissed &&
 			data.MsgData.ContentType != constant.GroupDismissedNotification {
-			return errs.ErrDismissedAlready.Wrap()
+			return servererrs.ErrDismissedAlready.Wrap()
 		}
 		if groupInfo.GroupType == constant.SuperGroup {
 			return nil
 		}
-		if len(m.config.Manager.UserID) > 0 && utils.IsContain(data.MsgData.SendID, m.config.Manager.UserID) {
+		if len(m.config.Manager.UserID) > 0 && datautil.Contain(data.MsgData.SendID, m.config.Manager.UserID...) {
 			return nil
 		}
-		if utils.IsContain(data.MsgData.SendID, m.config.IMAdmin.UserID) {
+		if datautil.Contain(data.MsgData.SendID, m.config.IMAdmin.UserID...) {
 			return nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd &&
@@ -105,13 +108,13 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return err
 		}
 		if _, ok := memberIDs[data.MsgData.SendID]; !ok {
-			return errs.ErrNotInGroupYet.Wrap()
+			return servererrs.ErrNotInGroupYet.Wrap()
 		}
 
 		groupMemberInfo, err := m.GroupLocalCache.GetGroupMember(ctx, data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
 			if errs.ErrRecordNotFound.Is(err) {
-				return errs.ErrNotInGroupYet.Wrap(err.Error())
+				return servererrs.ErrNotInGroupYet.WrapMsg(err.Error())
 			}
 			return err
 		}
@@ -119,10 +122,10 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return nil
 		} else {
 			if groupMemberInfo.MuteEndTime >= time.Now().UnixMilli() {
-				return errs.ErrMutedInGroup.Wrap()
+				return servererrs.ErrMutedInGroup.Wrap()
 			}
 			if groupInfo.Status == constant.GroupStatusMuted && groupMemberInfo.RoleLevel != constant.GroupAdmin {
-				return errs.ErrMutedGroup.Wrap()
+				return servererrs.ErrMutedGroup.Wrap()
 			}
 		}
 		return nil
@@ -134,7 +137,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 func (m *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
 	if msg.SendTime == 0 {
-		msg.SendTime = utils.GetCurrentTimestampByMill()
+		msg.SendTime = timeutil.GetCurrentTimestampByMill()
 	}
 	switch msg.ContentType {
 	case constant.Text:
@@ -159,35 +162,30 @@ func (m *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 		fallthrough
 	case constant.Quote:
 	case constant.Revoke:
-		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
 	case constant.HasReadReceipt:
-		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
 	case constant.Typing:
-		utils.SetSwitchFromOptions(msg.Options, constant.IsHistory, false)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsPersistent, false)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderSync, false)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsHistory, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsPersistent, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsSenderSync, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
+		datautil.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
 	}
 }
 
 func GetMsgID(sendID string) string {
-	t := time.Now().Format("2006-01-02 15:04:05")
-	return utils.Md5(t + "-" + sendID + "-" + strconv.Itoa(rand.Int()))
+	t := timeutil.GetCurrentTimeFormatted()
+	return encrypt.Md5(t + "-" + sendID + "-" + strconv.Itoa(rand.Int()))
 }
 
-func (m *msgServer) modifyMessageByUserMessageReceiveOpt(
-	ctx context.Context,
-	userID, conversationID string,
-	sessionType int,
-	pb *msg.SendMsgReq,
-) (bool, error) {
+func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, userID, conversationID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
 	defer log.ZDebug(ctx, "modifyMessageByUserMessageReceiveOpt return")
 	opt, err := m.UserLocalCache.GetUserGlobalMsgRecvOpt(ctx, userID)
 	if err != nil {
@@ -201,7 +199,7 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(
 		if pb.MsgData.Options == nil {
 			pb.MsgData.Options = make(map[string]bool, 10)
 		}
-		utils.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
+		datautil.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
 		return true, nil
 	}
 	// conversationID := utils.GetConversationIDBySessionType(conversationID, sessionType)
@@ -215,7 +213,7 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(
 	case constant.ReceiveMessage:
 		return true, nil
 	case constant.NotReceiveMessage:
-		if utils.IsContainInt(int(pb.MsgData.ContentType), ExcludeContentType) {
+		if datautil.Contain(int(pb.MsgData.ContentType), ExcludeContentType...) {
 			return true, nil
 		}
 		return false, nil
@@ -223,7 +221,7 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(
 		if pb.MsgData.Options == nil {
 			pb.MsgData.Options = make(map[string]bool, 10)
 		}
-		utils.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
+		datautil.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
 		return true, nil
 	}
 	return true, nil

@@ -20,32 +20,37 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/third"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cos"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/minio"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/oss"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/third"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/s3"
+	"github.com/openimsdk/tools/s3/cos"
+	"github.com/openimsdk/tools/s3/minio"
+	"github.com/openimsdk/tools/s3/oss"
 	"google.golang.org/grpc"
 )
 
-func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	mongo, err := unrelation.NewMongo(config)
+func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
 	if err != nil {
 		return err
 	}
-	logdb, err := mgo.NewLogMongo(mongo.GetDatabase(config.Mongo.Database))
+	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
 	if err != nil {
 		return err
 	}
-	s3db, err := mgo.NewS3Mongo(mongo.GetDatabase(config.Mongo.Database))
+	logdb, err := mgo.NewLogMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	s3db, err := mgo.NewS3Mongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
@@ -60,10 +65,7 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 		apiURL += "/"
 	}
 	apiURL += "object/"
-	rdb, err := cache.NewRedis(config)
-	if err != nil {
-		return err
-	}
+
 	// Select the oss method according to the profile policy
 	enable := config.Object.Enable
 	var o s3.Interface
@@ -82,8 +84,8 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 	}
 	third.RegisterThirdServer(server, &thirdServer{
 		apiURL:        apiURL,
-		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb, config), logdb),
-		userRpcClient: rpcclient.NewUserRpcClient(client, config),
+		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis), logdb),
+		userRpcClient: rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin),
 		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
 		defaultExpire: time.Hour * 24 * 7,
 		config:        config,

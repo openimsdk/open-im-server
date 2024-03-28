@@ -16,12 +16,12 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/sdkws"
 )
 
 type MessageInterceptorFunc func(ctx context.Context, globalConfig *config.GlobalConfig, req *msg.SendMsgReq) (*sdkws.MsgData, error)
@@ -30,12 +30,12 @@ func MessageHasReadEnabled(_ context.Context, globalConfig *config.GlobalConfig,
 	switch {
 	case req.MsgData.ContentType == constant.HasReadReceipt && req.MsgData.SessionType == constant.SingleChatType:
 		if !globalConfig.SingleMessageHasReadReceiptEnable {
-			return nil, errs.ErrMessageHasReadDisable.Wrap()
+			return nil, servererrs.ErrMessageHasReadDisable.Wrap()
 		}
 		return req.MsgData, nil
 	case req.MsgData.ContentType == constant.HasReadReceipt && req.MsgData.SessionType == constant.SuperGroupChatType:
 		if !globalConfig.GroupMessageHasReadReceiptEnable {
-			return nil, errs.ErrMessageHasReadDisable.Wrap()
+			return nil, servererrs.ErrMessageHasReadDisable.Wrap()
 		}
 		return req.MsgData, nil
 	}

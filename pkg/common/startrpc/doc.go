@@ -1,4 +1,4 @@
-// Copyright © 2023 OpenIM. All rights reserved.
+// Copyright © 2024 OpenIM. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,5 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package startrpc start rpc server.
-package startrpc
+package startrpc // import "github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"

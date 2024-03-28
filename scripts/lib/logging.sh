@@ -210,14 +210,24 @@ openim::log::status() {
   if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
     return
   fi
-  
-  timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
-  echo_log "${timestamp} ${1}"
+
+  local COLOR_BLUE="\033[0;34m"
+  local COLOR_RESET="\033[0m"
+
+  local timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
+
+  echo_log() {
+    echo -e "$@"
+  }
+
+
+  echo_log "${COLOR_BLUE}${timestamp} ${1}${COLOR_RESET}"
   shift
   for message; do
-    echo_log "    ${message}"
+    echo_log "${COLOR_BLUE}${message}${COLOR_RESET}"
   done
 }
+
 
 
 openim::log::success() {
@@ -229,7 +239,6 @@ openim::log::success() {
   local reset_color='\033[0m'
   echo_log -e "${COLOR_GREEN}[success ${timestamp}]${COLOR_SUFFIX}==> ${COLOR_GREEN}$@${reset_color}"
 }
-
 
 
 
@@ -248,4 +257,15 @@ function openim::log::test_log() {
 function openim::log::print_blue() {
     echo -e "\033[0;36m$1\033[0m"
 }
+
+
+openim::log::colorless() {
+  local V="${V:-0}"
+  if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
+    return
+  fi
+  timestamp=$(date +"[%Y-%m-%d %H:%M:%S %Z]")
+  echo_log -e "${timestamp} ${1} "
+}
+
 

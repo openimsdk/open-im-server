@@ -17,9 +17,9 @@ package mgo
 import (
 	"context"
 
-	"github.com/OpenIMSDK/tools/mgoutil"
-	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -48,7 +48,7 @@ func NewFriendMongo(db *mongo.Database) (relation.FriendModelInterface, error) {
 
 // Create inserts multiple friend records.
 func (f *FriendMgo) Create(ctx context.Context, friends []*relation.FriendModel) error {
-	return mgoutil.InsertMany(ctx, f.coll, friends)
+	return mongoutil.InsertMany(ctx, f.coll, friends)
 }
 
 // Delete removes specified friends of the owner user.
@@ -57,7 +57,7 @@ func (f *FriendMgo) Delete(ctx context.Context, ownerUserID string, friendUserID
 		"owner_user_id":  ownerUserID,
 		"friend_user_id": bson.M{"$in": friendUserIDs},
 	}
-	return mgoutil.DeleteOne(ctx, f.coll, filter)
+	return mongoutil.DeleteOne(ctx, f.coll, filter)
 }
 
 // UpdateByMap updates specific fields of a friend document using a map.
@@ -69,7 +69,7 @@ func (f *FriendMgo) UpdateByMap(ctx context.Context, ownerUserID string, friendU
 		"owner_user_id":  ownerUserID,
 		"friend_user_id": friendUserID,
 	}
-	return mgoutil.UpdateOne(ctx, f.coll, filter, bson.M{"$set": args}, true)
+	return mongoutil.UpdateOne(ctx, f.coll, filter, bson.M{"$set": args}, true)
 }
 
 // Update modifies multiple friend documents.
@@ -92,7 +92,7 @@ func (f *FriendMgo) Take(ctx context.Context, ownerUserID, friendUserID string) 
 		"owner_user_id":  ownerUserID,
 		"friend_user_id": friendUserID,
 	}
-	return mgoutil.FindOne[*relation.FriendModel](ctx, f.coll, filter)
+	return mongoutil.FindOne[*relation.FriendModel](ctx, f.coll, filter)
 }
 
 // FindUserState finds the friendship status between two users.
@@ -103,7 +103,7 @@ func (f *FriendMgo) FindUserState(ctx context.Context, userID1, userID2 string) 
 			{"owner_user_id": userID2, "friend_user_id": userID1},
 		},
 	}
-	return mgoutil.Find[*relation.FriendModel](ctx, f.coll, filter)
+	return mongoutil.Find[*relation.FriendModel](ctx, f.coll, filter)
 }
 
 // FindFriends retrieves a list of friends for a given owner. Missing friends do not cause an error.
@@ -112,7 +112,7 @@ func (f *FriendMgo) FindFriends(ctx context.Context, ownerUserID string, friendU
 		"owner_user_id":  ownerUserID,
 		"friend_user_id": bson.M{"$in": friendUserIDs},
 	}
-	return mgoutil.Find[*relation.FriendModel](ctx, f.coll, filter)
+	return mongoutil.Find[*relation.FriendModel](ctx, f.coll, filter)
 }
 
 // FindReversalFriends finds users who have added the specified user as a friend.
@@ -121,25 +121,25 @@ func (f *FriendMgo) FindReversalFriends(ctx context.Context, friendUserID string
 		"owner_user_id":  bson.M{"$in": ownerUserIDs},
 		"friend_user_id": friendUserID,
 	}
-	return mgoutil.Find[*relation.FriendModel](ctx, f.coll, filter)
+	return mongoutil.Find[*relation.FriendModel](ctx, f.coll, filter)
 }
 
 // FindOwnerFriends retrieves a paginated list of friends for a given owner.
 func (f *FriendMgo) FindOwnerFriends(ctx context.Context, ownerUserID string, pagination pagination.Pagination) (int64, []*relation.FriendModel, error) {
 	filter := bson.M{"owner_user_id": ownerUserID}
-	return mgoutil.FindPage[*relation.FriendModel](ctx, f.coll, filter, pagination)
+	return mongoutil.FindPage[*relation.FriendModel](ctx, f.coll, filter, pagination)
 }
 
 // FindInWhoseFriends finds users who have added the specified user as a friend, with pagination.
 func (f *FriendMgo) FindInWhoseFriends(ctx context.Context, friendUserID string, pagination pagination.Pagination) (int64, []*relation.FriendModel, error) {
 	filter := bson.M{"friend_user_id": friendUserID}
-	return mgoutil.FindPage[*relation.FriendModel](ctx, f.coll, filter, pagination)
+	return mongoutil.FindPage[*relation.FriendModel](ctx, f.coll, filter, pagination)
 }
 
 // FindFriendUserIDs retrieves a list of friend user IDs for a given owner.
 func (f *FriendMgo) FindFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error) {
 	filter := bson.M{"owner_user_id": ownerUserID}
-	return mgoutil.Find[string](ctx, f.coll, filter, options.Find().SetProjection(bson.M{"_id": 0, "friend_user_id": 1}))
+	return mongoutil.Find[string](ctx, f.coll, filter, options.Find().SetProjection(bson.M{"_id": 0, "friend_user_id": 1}))
 }
 
 func (f *FriendMgo) UpdateFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, val map[string]any) error {
@@ -158,6 +158,6 @@ func (f *FriendMgo) UpdateFriends(ctx context.Context, ownerUserID string, frien
 	update := bson.M{"$set": val}
 
 	// Perform the update operation for all matching documents
-	_, err := mgoutil.UpdateMany(ctx, f.coll, filter, update)
+	_, err := mongoutil.UpdateMany(ctx, f.coll, filter, update)
 	return err
 }

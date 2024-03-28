@@ -16,15 +16,15 @@ package main
 
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/tools/system/program"
 )
 
 func main() {
-	msgGatewayCmd := cmd.NewMsgGatewayCmd()
+	msgGatewayCmd := cmd.NewMsgGatewayCmd(cmd.MsgGatewayServer)
 	msgGatewayCmd.AddWsPortFlag()
 	msgGatewayCmd.AddPortFlag()
 	msgGatewayCmd.AddPrometheusPortFlag()
 	if err := msgGatewayCmd.Exec(); err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 }

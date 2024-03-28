@@ -17,35 +17,37 @@ package push
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	pbpush "github.com/OpenIMSDK/protocol/push"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/constant"
+	pbpush "github.com/openimsdk/protocol/push"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
 )
 
 type pushServer struct {
 	pusher *Pusher
-	config *config.GlobalConfig
 }
 
-func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis(config)
+func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := cache.NewRedis(ctx, &config.Redis)
 	if err != nil {
 		return err
 	}
-	cacheModel := cache.NewMsgCacheModel(rdb, config)
-	offlinePusher := NewOfflinePusher(config, cacheModel)
+	cacheModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
+	offlinePusher, err := NewOfflinePusher(&config.Push, &config.IOSPush, cacheModel)
+	if err != nil {
+		return err
+	}
 	database := controller.NewPushDatabase(cacheModel)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client, config)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)
+	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.RpcRegisterName.OpenImConversationName)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.RpcRegisterName.OpenImMsgName)
 	pusher := NewPusher(
 		config,
 		client,
@@ -60,10 +62,9 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 
 	pbpush.RegisterPushMsgServiceServer(server, &pushServer{
 		pusher: pusher,
-		config: config,
 	})
 
-	consumer, err := NewConsumer(config, pusher)
+	consumer, err := NewConsumer(&config.Kafka, pusher)
 	if err != nil {
 		return err
 	}
@@ -79,7 +80,7 @@ func (r *pushServer) PushMsg(ctx context.Context, pbData *pbpush.PushMsgReq) (re
 		err = r.pusher.Push2SuperGroup(ctx, pbData.MsgData.GroupID, pbData.MsgData)
 	default:
 		var pushUserIDList []string
-		isSenderSync := utils.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
+		isSenderSync := datautil.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
 		if !isSenderSync {
 			pushUserIDList = append(pushUserIDList, pbData.MsgData.RecvID)
 		} else {

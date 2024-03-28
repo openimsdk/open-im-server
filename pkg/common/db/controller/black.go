@@ -17,11 +17,11 @@ package controller
 import (
 	"context"
 
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/pagination"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 type BlackDatabase interface {
@@ -86,7 +86,7 @@ func (b *blackDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (i
 		return
 	}
 	log.ZDebug(ctx, "blackIDs", "user1BlackIDs", userID1BlackIDs, "user2BlackIDs", userID2BlackIDs)
-	return utils.IsContain(userID2, userID1BlackIDs), utils.IsContain(userID1, userID2BlackIDs), nil
+	return datautil.Contain(userID2, userID1BlackIDs...), datautil.Contain(userID1, userID2BlackIDs...), nil
 }
 
 // FindBlackIDs Get Blacklist List.

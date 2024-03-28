@@ -23,14 +23,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/tools/errs"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"
-	"github.com/stretchr/testify/assert"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 func TestDisLock(t *testing.T) {
@@ -112,13 +111,13 @@ func initCfg() (*config.GlobalConfig, error) {
 	cfgPath := flag.String("c", defaultCfgPath, "Path to the configuration file")
 	data, err := os.ReadFile(*cfgPath)
 	if err != nil {
-		return nil, errs.Wrap(err, "ReadFile unmarshal failed")
+		return nil, errs.WrapMsg(err, "ReadFile unmarshal failed")
 	}
 
 	conf := config.NewGlobalConfig()
 	err = yaml.Unmarshal(data, &conf)
 	if err != nil {
-		return nil, errs.Wrap(err, "InitConfig unmarshal failed")
+		return nil, errs.WrapMsg(err, "InitConfig unmarshal failed")
 	}
 	return conf, nil
 }

@@ -22,20 +22,20 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
 )
 
 const (
 	userExpireTime = time.Second * 60 * 60 * 12
-	//userInfoKey               = "USER_INFO:".
+	// UserInfoKey               = "USER_INFO:".
 	userGlobalRecvMsgOptKey   = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
 	olineStatusKey            = "ONLINE_STATUS:"
 	userOlineStatusExpireTime = time.Second * 60 * 60 * 24
@@ -58,7 +58,7 @@ type UserCache interface {
 type UserCacheRedis struct {
 	metaCache
 	rdb redis.UniversalClient
-	//userDB     relationtb.UserModelInterface
+	// userDB     relationtb.UserModelInterface
 	userDB     relationtb.UserModelInterface
 	expireTime time.Duration
 	rcClient   *rockscache.Client
@@ -294,7 +294,7 @@ func (u *UserCacheRedis) refreshStatusOnline(ctx context.Context, userID string,
 	onlineStatus.UserID = userID
 	newjsonData, err := json.Marshal(&onlineStatus)
 	if err != nil {
-		return errs.Wrap(err, "json.Marshal failed")
+		return errs.WrapMsg(err, "json.Marshal failed")
 	}
 	_, err = u.rdb.HSet(ctx, key, userID, string(newjsonData)).Result()
 	if err != nil {

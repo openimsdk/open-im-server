@@ -18,13 +18,13 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/group"
-	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/protocol/group"
+	"github.com/openimsdk/tools/errs"
 )
 
 func (s *groupServer) GroupCreateCount(ctx context.Context, req *group.GroupCreateCountReq) (*group.GroupCreateCountResp, error) {
 	if req.Start > req.End {
-		return nil, errs.ErrArgs.Wrap("start > end")
+		return nil, errs.ErrArgs.WrapMsg("start > end: %d > %d", req.Start, req.End)
 	}
 	total, err := s.db.CountTotal(ctx, nil)
 	if err != nil {

@@ -83,67 +83,65 @@ function openim::tools::start_service() {
   local prometheus_port="$4"
 
   local cmd="${OPENIM_OUTPUT_HOSTBIN_TOOLS}/${binary_name}"
-  openim::log::info "Starting PATH: ${OPENIM_OUTPUT_HOSTBIN_TOOLS}/${binary_name}..."
+  #openim::log::info "Starting PATH: ${OPENIM_OUTPUT_HOSTBIN_TOOLS}/${binary_name}..."
 
   if [ -n "${config}" ]; then
-    printf "Specifying config: %s\n" "${config}"
+   # printf "Specifying config: %s\n" "${config}"
     cmd="${cmd} -c ${config}/config.yaml"
   fi
 
   if [ -n "${service_port}" ]; then
-    printf "Specifying service port: %s\n" "${service_port}"
+    #printf "Specifying service port: %s\n" "${service_port}"
     cmd="${cmd} --port ${service_port}"
   fi
 
   if [ -n "${prometheus_port}" ]; then
-    printf "Specifying prometheus port: %s\n" "${prometheus_port}"
+    #printf "Specifying prometheus port: %s\n" "${prometheus_port}"
     cmd="${cmd} --prometheus_port ${prometheus_port}"
   fi
-  openim::log::status "Starting binary ${binary_name}..."
+  #openim::log::status "Starting binary ${binary_name}..."
 
 
-
- ${cmd} 
-
+ # openim::log::info "cmd: $cmd"
+  ${cmd}
 
 
  local status=$?
-
-    if [ $status -eq 0 ]; then
-        openim::log::info "Service ${binary_name} started successfully."
-        return 0
-    else
-        openim::log::error "Failed to start service ${binary_name}."
-        return 1
-    fi
+ if [ $status -eq 0 ]; then
+    openim::log::colorless "Service ${binary_name} started successfully."
+    return 0
+ else
+    openim::log::error "Failed to start service ${binary_name}."
+    return 1
+  fi
 }
 
 function openim::tools::start() {
     openim::log::info "Starting OpenIM Tools..."
     for tool in "${OPENIM_TOOLS_NAME_LISTARIES[@]}"; do
-        openim::log::info "Starting tool ${tool}..."
+        openim::log::colorless "Starting tool ${tool}..."
         # openim::tools::start_service ${tool}
-        sleep 0.2
+        #sleep 0.2
     done
 }
 
 
 function openim::tools::pre-start() {
-   openim::log::info "Preparing to start OpenIM Tools..."
+   #openim::log::info "Preparing to start OpenIM Tools..."
       for tool in "${OPENIM_TOOLS_PRE_START_NAME_LISTARIES[@]}"; do
-          openim::log::info "Starting tool ${tool}..."
+          openim::log::colorless "Starting tool: ${tool}"
           if ! openim::tools::start_service ${tool} ${OPNEIM_CONFIG}; then
               openim::log::error "Failed to start ${tool}, aborting..."
               return 1
           fi
       done
-      openim::log::info "All tools started successfully."
+      #openim::log::info "All tools started successfully."
 }
 
 function openim::tools::post-start() {
-    openim::log::info "Post-start actions for OpenIM Tools..."
+    #openim::log::info "Post-start actions for OpenIM Tools..."
     for tool in "${OPENIM_TOOLS_POST_START_NAME_LISTARIES[@]}"; do
-        openim::log::info "Starting tool ${tool}..."
+        openim::log::colorless "Starting tool: ${tool}"
         openim::tools::start_service ${tool}
     done
 }

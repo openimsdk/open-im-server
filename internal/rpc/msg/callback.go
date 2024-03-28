@@ -17,15 +17,15 @@ package msg
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	pbchat "github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils"
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
+	"github.com/openimsdk/protocol/constant"
+	pbchat "github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -136,25 +136,26 @@ func callbackMsgModify(ctx context.Context, globalConfig *config.GlobalConfig, m
 	if resp.Content != nil {
 		msg.MsgData.Content = []byte(*resp.Content)
 	}
-	utils.NotNilReplace(msg.MsgData.OfflinePushInfo, resp.OfflinePushInfo)
-	utils.NotNilReplace(&msg.MsgData.RecvID, resp.RecvID)
-	utils.NotNilReplace(&msg.MsgData.GroupID, resp.GroupID)
-	utils.NotNilReplace(&msg.MsgData.ClientMsgID, resp.ClientMsgID)
-	utils.NotNilReplace(&msg.MsgData.ServerMsgID, resp.ServerMsgID)
-	utils.NotNilReplace(&msg.MsgData.SenderPlatformID, resp.SenderPlatformID)
-	utils.NotNilReplace(&msg.MsgData.SenderNickname, resp.SenderNickname)
-	utils.NotNilReplace(&msg.MsgData.SenderFaceURL, resp.SenderFaceURL)
-	utils.NotNilReplace(&msg.MsgData.SessionType, resp.SessionType)
-	utils.NotNilReplace(&msg.MsgData.MsgFrom, resp.MsgFrom)
-	utils.NotNilReplace(&msg.MsgData.ContentType, resp.ContentType)
-	utils.NotNilReplace(&msg.MsgData.Status, resp.Status)
-	utils.NotNilReplace(&msg.MsgData.Options, resp.Options)
-	utils.NotNilReplace(&msg.MsgData.AtUserIDList, resp.AtUserIDList)
-	utils.NotNilReplace(&msg.MsgData.AttachedInfo, resp.AttachedInfo)
-	utils.NotNilReplace(&msg.MsgData.Ex, resp.Ex)
+	datautil.NotNilReplace(msg.MsgData.OfflinePushInfo, resp.OfflinePushInfo)
+	datautil.NotNilReplace(&msg.MsgData.RecvID, resp.RecvID)
+	datautil.NotNilReplace(&msg.MsgData.GroupID, resp.GroupID)
+	datautil.NotNilReplace(&msg.MsgData.ClientMsgID, resp.ClientMsgID)
+	datautil.NotNilReplace(&msg.MsgData.ServerMsgID, resp.ServerMsgID)
+	datautil.NotNilReplace(&msg.MsgData.SenderPlatformID, resp.SenderPlatformID)
+	datautil.NotNilReplace(&msg.MsgData.SenderNickname, resp.SenderNickname)
+	datautil.NotNilReplace(&msg.MsgData.SenderFaceURL, resp.SenderFaceURL)
+	datautil.NotNilReplace(&msg.MsgData.SessionType, resp.SessionType)
+	datautil.NotNilReplace(&msg.MsgData.MsgFrom, resp.MsgFrom)
+	datautil.NotNilReplace(&msg.MsgData.ContentType, resp.ContentType)
+	datautil.NotNilReplace(&msg.MsgData.Status, resp.Status)
+	datautil.NotNilReplace(&msg.MsgData.Options, resp.Options)
+	datautil.NotNilReplace(&msg.MsgData.AtUserIDList, resp.AtUserIDList)
+	datautil.NotNilReplace(&msg.MsgData.AttachedInfo, resp.AttachedInfo)
+	datautil.NotNilReplace(&msg.MsgData.Ex, resp.Ex)
 	log.ZDebug(ctx, "callbackMsgModify", "msg", msg.MsgData)
 	return nil
 }
+
 func CallbackGroupMsgRead(ctx context.Context, globalConfig *config.GlobalConfig, req *cbapi.CallbackGroupMsgReadReq) error {
 	if !globalConfig.Callback.CallbackGroupMsgRead.Enable {
 		return nil

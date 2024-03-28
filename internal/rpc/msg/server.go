@@ -15,32 +15,39 @@
 package msg
 
 import (
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/conversation"
-	"github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"context"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/conversation"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/tools/discovery"
 	"google.golang.org/grpc"
 )
 
 type (
+	// MessageInterceptorChain defines a chain of message interceptor functions.
 	MessageInterceptorChain []MessageInterceptorFunc
-	msgServer               struct {
-		RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
-		MsgDatabase            controller.CommonMsgDatabase
-		Conversation           *rpcclient.ConversationRpcClient
-		UserLocalCache         *rpccache.UserLocalCache
-		FriendLocalCache       *rpccache.FriendLocalCache
-		GroupLocalCache        *rpccache.GroupLocalCache
-		ConversationLocalCache *rpccache.ConversationLocalCache
-		Handlers               MessageInterceptorChain
-		notificationSender     *rpcclient.NotificationSender
-		config                 *config.GlobalConfig
+
+	// MsgServer encapsulates dependencies required for message handling.
+	msgServer struct {
+		RegisterCenter         discovery.SvcDiscoveryRegistry   // Service discovery registry for service registration.
+		MsgDatabase            controller.CommonMsgDatabase     // Interface for message database operations.
+		Conversation           *rpcclient.ConversationRpcClient // RPC client for conversation service.
+		UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
+		FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
+		GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
+		ConversationLocalCache *rpccache.ConversationLocalCache // Local cache for conversation data.
+		Handlers               MessageInterceptorChain          // Chain of handlers for processing messages.
+		notificationSender     *rpcclient.NotificationSender    // RPC client for sending notifications.
+		config                 *config.GlobalConfig             // Global configuration settings.
 	}
 )
 
@@ -48,7 +55,7 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 	m.Handlers = append(m.Handlers, interceptorFunc...)
 }
 
-//func (m *msgServer) execInterceptorHandler(ctx context.Context, config *config.GlobalConfig, req *msg.SendMsgReq) error {
+// func (m *msgServer) execInterceptorHandler(ctx context.Context, config *config.GlobalConfig, req *msg.SendMsgReq) error {
 //	for _, handler := range m.Handlers {
 //		msgData, err := handler(ctx, config, req)
 //		if err != nil {
@@ -59,25 +66,25 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 //	return nil
 //}
 
-func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis(config)
+func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
 	if err != nil {
 		return err
 	}
-	mongo, err := unrelation.NewMongo(config)
+	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
 	if err != nil {
 		return err
 	}
-	if err := mongo.CreateMsgIndex(); err != nil {
+	cacheModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
+	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
+	if err != nil {
 		return err
 	}
-	cacheModel := cache.NewMsgCacheModel(rdb, config)
-	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase(config.Mongo.Database))
-	conversationClient := rpcclient.NewConversationRpcClient(client, config)
-	userRpcClient := rpcclient.NewUserRpcClient(client, config)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
-	friendRpcClient := rpcclient.NewFriendRpcClient(client, config)
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, cacheModel, config)
+	conversationClient := rpcclient.NewConversationRpcClient(client, config.RpcRegisterName.OpenImConversationName)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)
+	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.RpcRegisterName.OpenImFriendName)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, cacheModel, &config.Kafka)
 	if err != nil {
 		return err
 	}
@@ -91,7 +98,8 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 		FriendLocalCache:       rpccache.NewFriendLocalCache(friendRpcClient, rdb),
 		config:                 config,
 	}
-	s.notificationSender = rpcclient.NewNotificationSender(config, rpcclient.WithLocalSendMsg(s.SendMsg))
+
+	s.notificationSender = rpcclient.NewNotificationSender(&config.Notification, rpcclient.WithLocalSendMsg(s.SendMsg))
 	s.addInterceptorHandler(MessageHasReadEnabled)
 	msg.RegisterMsgServer(server, s)
 	return nil

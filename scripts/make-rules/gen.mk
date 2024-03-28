@@ -89,11 +89,6 @@ gen.docgo.add:
 	@git ls-files --others '*/doc.go' | $(XARGS) -- git add
 
 ## gen.docgo: Generate missing doc.go for go packages ✨
-.PHONY: gen.defaultconfigs
-gen.defaultconfigs:
-	@${ROOT_DIR}/scripts/gen_default_config.sh
-
-## gen.docgo: Generate missing doc.go for go packages ✨
 .PHONY: gen.clean
 gen.clean:
 	@rm -rf ./api/client/{clientset,informers,listers}
@@ -101,5 +96,5 @@ gen.clean:
 
 ## gen.help: show help for gen
 .PHONY: gen.help
-gen.help: scripts/make-rules/gen.mk
+gen.help: scripts/make-rules/gen.m
 	$(call smallhelp)

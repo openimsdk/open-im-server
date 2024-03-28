@@ -18,13 +18,14 @@ import (
 	"context"
 
 	"github.com/IBM/sarama"
-	"github.com/OpenIMSDK/protocol/constant"
-	pbchat "github.com/OpenIMSDK/protocol/msg"
-	pbpush "github.com/OpenIMSDK/protocol/push"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kfk "github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
+	"github.com/openimsdk/protocol/constant"
+	pbchat "github.com/openimsdk/protocol/msg"
+	pbpush "github.com/openimsdk/protocol/push"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/timeutil"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -33,33 +34,15 @@ type ConsumerHandler struct {
 	pusher            *Pusher
 }
 
-func NewConsumerHandler(config *config.GlobalConfig, pusher *Pusher) (*ConsumerHandler, error) {
-	var consumerHandler ConsumerHandler
-	consumerHandler.pusher = pusher
-	var err error
-	var tlsConfig *kfk.TLSConfig
-	if config.Kafka.TLS != nil {
-		tlsConfig = &kfk.TLSConfig{
-			CACrt:              config.Kafka.TLS.CACrt,
-			ClientCrt:          config.Kafka.TLS.ClientCrt,
-			ClientKey:          config.Kafka.TLS.ClientKey,
-			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
-			InsecureSkipVerify: false,
-		}
-	}
-	consumerHandler.pushConsumerGroup, err = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
-		KafkaVersion:   sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest,
-		IsReturnErr:    false,
-		UserName:       config.Kafka.Username,
-		Password:       config.Kafka.Password,
-	}, []string{config.Kafka.MsgToPush.Topic}, config.Kafka.Addr,
-		config.Kafka.ConsumerGroupID.MsgToPush,
-		tlsConfig)
+func NewConsumerHandler(kafkaConf *config.Kafka, pusher *Pusher) (*ConsumerHandler, error) {
+	pushConsumerGroup, err := kfk.NewMConsumerGroup(&kafkaConf.Config, kafkaConf.ConsumerGroupID.MsgToPush, []string{kafkaConf.MsgToPush.Topic})
 	if err != nil {
 		return nil, err
 	}
-	return &consumerHandler, nil
+	return &ConsumerHandler{
+		pushConsumerGroup: pushConsumerGroup,
+		pusher:            pusher,
+	}, nil
 }
 
 func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
@@ -73,7 +56,7 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		ConversationID: msgFromMQ.ConversationID,
 	}
 	sec := msgFromMQ.MsgData.SendTime / 1000
-	nowSec := utils.GetCurrentTimestampBySecond()
+	nowSec := timeutil.GetCurrentTimestampBySecond()
 	log.ZDebug(ctx, "push msg", "msg", pbData.String(), "sec", sec, "nowSec", nowSec)
 	if nowSec-sec > 10 {
 		return
@@ -84,7 +67,7 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		err = c.pusher.Push2SuperGroup(ctx, pbData.MsgData.GroupID, pbData.MsgData)
 	default:
 		var pushUserIDList []string
-		isSenderSync := utils.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
+		isSenderSync := datautil.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
 		if !isSenderSync || pbData.MsgData.SendID == pbData.MsgData.RecvID {
 			pushUserIDList = append(pushUserIDList, pbData.MsgData.RecvID)
 		} else {
@@ -100,6 +83,7 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		}
 	}
 }
+
 func (ConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (ConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,

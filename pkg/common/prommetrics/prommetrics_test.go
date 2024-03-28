@@ -71,7 +71,7 @@ func TestGetGrpcCusMetrics(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			metrics := GetGrpcCusMetrics(tc.name, conf)
+			metrics := GetGrpcCusMetrics(tc.name, &conf.RpcRegisterName)
 			assert.Len(t, metrics, tc.expected)
 		})
 	}

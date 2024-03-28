@@ -23,4 +23,8 @@ const (
 	RpcMsgServer          = "msg"
 	RpcThirdServer        = "third"
 	RpcUserServer         = "user"
+	ApiServer             = "api"
+	CronTaskServer        = "cronTask"
+	MsgGatewayServer      = "msgGateway"
+	MsgTransferServer     = "msgTransfer"
 )

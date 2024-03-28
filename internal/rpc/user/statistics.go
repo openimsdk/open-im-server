@@ -18,16 +18,13 @@ import (
 	"context"
 	"time"
 
-	pbuser "github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/errs"
+	pbuser "github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/errs"
 )
 
-func (s *userServer) UserRegisterCount(
-	ctx context.Context,
-	req *pbuser.UserRegisterCountReq,
-) (*pbuser.UserRegisterCountResp, error) {
+func (s *userServer) UserRegisterCount(ctx context.Context, req *pbuser.UserRegisterCountReq) (*pbuser.UserRegisterCountResp, error) {
 	if req.Start > req.End {
-		return nil, errs.ErrArgs.Wrap("start > end")
+		return nil, errs.ErrArgs.WrapMsg("start > end")
 	}
 	total, err := s.CountTotal(ctx, nil)
 	if err != nil {

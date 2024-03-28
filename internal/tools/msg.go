@@ -17,24 +17,25 @@ package tools
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/tools/db/redisutil"
 	"math"
 	"math/rand"
 
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/mw"
-	"github.com/OpenIMSDK/tools/tx"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/mw"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -63,12 +64,12 @@ func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controlle
 	}
 }
 
-func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
-	rdb, err := cache.NewRedis(config)
+func InitMsgTool(ctx context.Context, config *config.GlobalConfig) (*MsgTool, error) {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
 	if err != nil {
 		return nil, err
 	}
-	mongo, err := unrelation.NewMongo(config)
+	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
 	if err != nil {
 		return nil, err
 	}
@@ -77,51 +78,50 @@ func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
 		return nil, err
 	}
 	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	userDB, err := mgo.NewUserMongo(mongo.GetDatabase(config.Mongo.Database))
+	userDB, err := mgo.NewUserMongo(mgocli.GetDB())
 	if err != nil {
 		return nil, err
 	}
-	msgDatabase, err := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase(config.Mongo.Database), config)
+	msgDatabase, err := controller.InitCommonMsgDatabase(rdb, mgocli.GetDB(), config)
 	if err != nil {
 		return nil, err
 	}
-	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase(config.Mongo.Database))
-	ctxTx := tx.NewMongo(mongo.GetClient())
+	userMongoDB := mgo.NewUserMongoDriver(mgocli.GetDB())
 	userDatabase := controller.NewUserDatabase(
 		userDB,
 		cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt()),
-		ctxTx,
+		mgocli.GetTx(),
 		userMongoDB,
 	)
-	groupDB, err := mgo.NewGroupMongo(mongo.GetDatabase(config.Mongo.Database))
+	groupDB, err := mgo.NewGroupMongo(mgocli.GetDB())
 	if err != nil {
 		return nil, err
 	}
-	groupMemberDB, err := mgo.NewGroupMember(mongo.GetDatabase(config.Mongo.Database))
+	groupMemberDB, err := mgo.NewGroupMember(mgocli.GetDB())
 	if err != nil {
 		return nil, err
 	}
-	groupRequestDB, err := mgo.NewGroupRequestMgo(mongo.GetDatabase(config.Mongo.Database))
+	groupRequestDB, err := mgo.NewGroupRequestMgo(mgocli.GetDB())
 	if err != nil {
 		return nil, err
 	}
-	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase(config.Mongo.Database))
+	conversationDB, err := mgo.NewConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return nil, err
 	}
-	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, ctxTx, nil)
+	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), nil)
 	conversationDatabase := controller.NewConversationDatabase(
 		conversationDB,
 		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
-		ctxTx,
+		mgocli.GetTx(),
 	)
-	msgRpcClient := rpcclient.NewMessageRpcClient(discov, config)
+	msgRpcClient := rpcclient.NewMessageRpcClient(discov, config.RpcRegisterName.OpenImMsgName)
 	msgNotificationSender := notification.NewMsgNotificationSender(config, rpcclient.WithRpcClient(&msgRpcClient))
 	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase, msgNotificationSender, config)
 	return msgTool, nil
 }
 
-//func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
+// func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 //	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
 //	log.ZInfo(ctx, "============================ start del cron task ============================")
 //	conversationIDs, err := c.conversationDatabase.GetAllConversationIDs(ctx)
@@ -137,7 +137,7 @@ func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
 //}
 
 func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
-	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
+	ctx := mcontext.NewCtx(stringutil.GetSelfFuncName())
 	log.ZInfo(ctx, "============================ start del cron task ============================")
 	num, err := c.conversationDatabase.GetAllConversationIDsNumber(ctx)
 	if err != nil {
@@ -220,7 +220,7 @@ func (c *MsgTool) FixAllSeq(ctx context.Context) error {
 		return err
 	}
 	for _, conversationID := range conversationIDs {
-		conversationIDs = append(conversationIDs, utils.GetNotificationConversationIDByConversationID(conversationID))
+		conversationIDs = append(conversationIDs, conversationutil.GetNotificationConversationIDByConversationID(conversationID))
 	}
 	for _, conversationID := range conversationIDs {
 		if err := c.checkMaxSeq(ctx, conversationID); err != nil {

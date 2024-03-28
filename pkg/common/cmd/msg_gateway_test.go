@@ -17,7 +17,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/stretchr/testify/mock"
 	"gotest.tools/assert"
 )

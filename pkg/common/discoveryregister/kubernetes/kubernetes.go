@@ -22,8 +22,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/log"
 	"github.com/stathat/consistent"
 	"google.golang.org/grpc"
 )
@@ -36,7 +36,7 @@ type K8sDR struct {
 	gatewayName           string
 }
 
-func NewK8sDiscoveryRegister(gatewayName string) (discoveryregistry.SvcDiscoveryRegistry, error) {
+func NewK8sDiscoveryRegister(gatewayName string) (discovery.SvcDiscoveryRegistry, error) {
 	gatewayConsistent := consistent.New()
 	gatewayHosts := getMsgGatewayHost(context.Background(), gatewayName)
 	for _, v := range gatewayHosts {
@@ -74,6 +74,7 @@ func (cli *K8sDR) GetConfFromRegistry(key string) ([]byte, error) {
 
 	return nil, nil
 }
+
 func (cli *K8sDR) GetUserIdHashGatewayHost(ctx context.Context, userId string) (string, error) {
 	host, err := cli.gatewayHostConsistent.Get(userId)
 	if err != nil {
@@ -81,6 +82,7 @@ func (cli *K8sDR) GetUserIdHashGatewayHost(ctx context.Context, userId string) (
 	}
 	return host, err
 }
+
 func getSelfHost(ctx context.Context, gatewayName string) string {
 	port := 88
 	instance := "openimserver"

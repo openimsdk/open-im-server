@@ -3,7 +3,7 @@ module github.com/openimsdk/open-im-server/v3/tools/url2im
 go 1.20
 
 require (
-	github.com/OpenIMSDK/protocol v0.0.21
+	github.com/openimsdk/protocol v0.0.58-google
 	github.com/kelindar/bitmap v1.5.1
 )
 

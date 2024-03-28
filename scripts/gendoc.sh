@@ -13,66 +13,72 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-DEFAULT_DIRS=(
-  "pkg"
-  "internal/pkg"
-)
-BASE_URL="github.com/openimsdk/open-im-server"
+#!/bin/bash
+
+DEFAULT_DIRS=("pkg")
+BASE_URL="github.com/openimsdk/open-im-server/v3"
+REMOVE_DOC=false
 
 usage() {
   echo "Usage: $0 [OPTIONS]"
   echo
-  echo "This script iterates over directories and generates doc.go if necessary."
-  echo "By default, it processes 'pkg' and 'internal/pkg' directories."
+  echo "This script iterates over directories. By default, it generates doc.go files for 'pkg' and 'internal/pkg'."
   echo
   echo "Options:"
-  echo "  -d DIRS, --dirs DIRS    Specify the directories to be processed, separated by commas. E.g., 'pkg,internal/pkg'."
-  echo "  -u URL,  --url URL     Set the base URL for the import path. Default is '$BASE_URL'."
-  echo "  -h,      --help        Show this help message."
+  echo "  -d DIRS, --dirs DIRS    Specify directories to process, separated by commas (e.g., 'pkg,internal/pkg')."
+  echo "  -u URL, --url URL       Set the base URL for the import path. Default is '$BASE_URL'."
+  echo "  -r, --remove            Remove all doc.go files in the specified directories."
+  echo "  -h, --help              Show this help message."
   echo
 }
 
 process_dir() {
-  local dir=$1
-  local base_url=$2
-  
-  for d in $(find $dir -type d); do
-    if [ ! -f $d/doc.go ]; then
-      if ls $d/*.go > /dev/null 2>&1; then
-        echo $d/doc.go
-        echo "package $(basename $d) // import \"$base_url/$d\"" > $d/doc.go
+  local dir="$1"
+  local base_url="$2"
+  local remove_doc="$3"
+
+  find "$dir" -type d | while read -r d; do
+    if [ "$remove_doc" = true ]; then
+      if [ -f "$d/doc.go" ]; then
+        echo "Removing $d/doc.go"
+        rm -f "$d/doc.go"
+      fi
+    else
+      if [ ! -f "$d/doc.go" ] && ls "$d/"*.go &>/dev/null; then
+        echo "Creating $d/doc.go"
+        echo "package $(basename "$d") // import \"$base_url/$(echo "$d" | sed "s|^\./||")\"" >"$d/doc.go"
       fi
     fi
   done
 }
 
 while [[ $# -gt 0 ]]; do
-  key="$1"
-  
-  case $key in
+  case "$1" in
     -d|--dirs)
-            IFS=',' read -ra DIRS <<< "$2"
-            shift # shift past argument
-            shift # shift past value
-            ;;
-        -u|--url)
-            BASE_URL="$2"
-            shift # shift past argument
-            shift # shift past value
-            ;;
-        -h|--help)
-            usage
-            exit 0
-            ;;
-        *)
-            usage
-            exit 1
-            ;;
-    esac
+      IFS=',' read -ra DIRS <<< "$2"
+      shift 2
+      ;;
+    -u|--url)
+      BASE_URL="$2"
+      shift 2
+      ;;
+    -r|--remove)
+      REMOVE_DOC=true
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
 done
 
-DIRS=${DIRS:-${DEFAULT_DIRS[@]}}
+DIRS=(${DIRS:-"${DEFAULT_DIRS[@]}"})
 
 for dir in "${DIRS[@]}"; do
-    process_dir $dir $BASE_URL
+  process_dir "$dir" "$BASE_URL" "$REMOVE_DOC"
 done

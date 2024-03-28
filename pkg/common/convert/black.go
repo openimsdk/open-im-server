@@ -17,9 +17,9 @@ package convert
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/sdkws"
-	sdk "github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/sdkws"
+	sdk "github.com/openimsdk/protocol/sdkws"
 )
 
 func BlackDB2Pb(ctx context.Context, blackDBs []*relation.BlackModel, f func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (blackPbs []*sdk.BlackInfo, err error) {

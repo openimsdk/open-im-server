@@ -18,7 +18,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/tools/pagination"
+	"github.com/openimsdk/tools/db/pagination"
 )
 
 type GroupMemberModel struct {
@@ -36,10 +36,10 @@ type GroupMemberModel struct {
 }
 
 type GroupMemberModelInterface interface {
-	//NewTx(tx any) GroupMemberModelInterface
+	// NewTx(tx any) GroupMemberModelInterface
 	Create(ctx context.Context, groupMembers []*GroupMemberModel) (err error)
 	Delete(ctx context.Context, groupID string, userIDs []string) (err error)
-	//DeleteGroup(ctx context.Context, groupIDs []string) (err error)
+	// DeleteGroup(ctx context.Context, groupIDs []string) (err error)
 	Update(ctx context.Context, groupID string, userID string, data map[string]any) (err error)
 	UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) error
 	FindMemberUserID(ctx context.Context, groupID string) (userIDs []string, err error)
@@ -47,11 +47,11 @@ type GroupMemberModelInterface interface {
 	TakeOwner(ctx context.Context, groupID string) (groupMember *GroupMemberModel, err error)
 	SearchMember(ctx context.Context, keyword string, groupID string, pagination pagination.Pagination) (total int64, groupList []*GroupMemberModel, err error)
 	FindRoleLevelUserIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error)
-	//MapGroupMemberNum(ctx context.Context, groupIDs []string) (count map[string]uint32, err error)
-	//FindJoinUserID(ctx context.Context, groupIDs []string) (groupUsers map[string][]string, err error)
+	// MapGroupMemberNum(ctx context.Context, groupIDs []string) (count map[string]uint32, err error)
+	// FindJoinUserID(ctx context.Context, groupIDs []string) (groupUsers map[string][]string, err error)
 	FindUserJoinedGroupID(ctx context.Context, userID string) (groupIDs []string, err error)
 	TakeGroupMemberNum(ctx context.Context, groupID string) (count int64, err error)
-	//FindUsersJoinedGroupID(ctx context.Context, userIDs []string) (map[string][]string, error)
+	// FindUsersJoinedGroupID(ctx context.Context, userIDs []string) (map[string][]string, error)
 	FindUserManagedGroupID(ctx context.Context, userID string) (groupIDs []string, err error)
 	IsUpdateRoleLevel(data map[string]any) bool
 }

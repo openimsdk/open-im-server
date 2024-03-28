@@ -17,13 +17,13 @@ package msg
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	utils2 "github.com/OpenIMSDK/tools/utils"
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -37,14 +37,17 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	} else {
 		conversationIDs = req.ConversationIDs
 	}
+
 	hasReadSeqs, err := m.MsgDatabase.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	conversations, err := m.ConversationLocalCache.GetConversations(ctx, req.UserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	conversationMaxSeqMap := make(map[string]int64)
 	for _, conversation := range conversations {
 		if conversation.MaxSeq != 0 {
@@ -56,28 +59,25 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 		return nil, err
 	}
 	resp = &msg.GetConversationsHasReadAndMaxSeqResp{Seqs: make(map[string]*msg.Seqs)}
-	for conversarionID, maxSeq := range maxSeqs {
-		resp.Seqs[conversarionID] = &msg.Seqs{
-			HasReadSeq: hasReadSeqs[conversarionID],
+	for conversationID, maxSeq := range maxSeqs {
+		resp.Seqs[conversationID] = &msg.Seqs{
+			HasReadSeq: hasReadSeqs[conversationID],
 			MaxSeq:     maxSeq,
 		}
-		if v, ok := conversationMaxSeqMap[conversarionID]; ok {
-			resp.Seqs[conversarionID].MaxSeq = v
+		if v, ok := conversationMaxSeqMap[conversationID]; ok {
+			resp.Seqs[conversationID].MaxSeq = v
 		}
 	}
 	return resp, nil
 }
 
-func (m *msgServer) SetConversationHasReadSeq(
-	ctx context.Context,
-	req *msg.SetConversationHasReadSeqReq,
-) (resp *msg.SetConversationHasReadSeqResp, err error) {
+func (m *msgServer) SetConversationHasReadSeq(ctx context.Context, req *msg.SetConversationHasReadSeqReq) (resp *msg.SetConversationHasReadSeqResp, err error) {
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
 	if err != nil {
 		return
 	}
 	if req.HasReadSeq > maxSeq {
-		return nil, errs.ErrArgs.Wrap("hasReadSeq must not be bigger than maxSeq")
+		return nil, errs.ErrArgs.WrapMsg("hasReadSeq must not be bigger than maxSeq")
 	}
 	if err := m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq); err != nil {
 		return nil, err
@@ -89,12 +89,9 @@ func (m *msgServer) SetConversationHasReadSeq(
 	return &msg.SetConversationHasReadSeqResp{}, nil
 }
 
-func (m *msgServer) MarkMsgsAsRead(
-	ctx context.Context,
-	req *msg.MarkMsgsAsReadReq,
-) (resp *msg.MarkMsgsAsReadResp, err error) {
+func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadReq) (resp *msg.MarkMsgsAsReadResp, err error) {
 	if len(req.Seqs) < 1 {
-		return nil, errs.ErrArgs.Wrap("seqs must not be empty")
+		return nil, errs.ErrArgs.WrapMsg("seqs must not be empty")
 	}
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
 	if err != nil {
@@ -102,7 +99,7 @@ func (m *msgServer) MarkMsgsAsRead(
 	}
 	hasReadSeq := req.Seqs[len(req.Seqs)-1]
 	if hasReadSeq > maxSeq {
-		return nil, errs.ErrArgs.Wrap("hasReadSeq must not be bigger than maxSeq")
+		return nil, errs.ErrArgs.WrapMsg("hasReadSeq must not be bigger than maxSeq")
 	}
 	conversation, err := m.ConversationLocalCache.GetConversation(ctx, req.UserID, req.ConversationID)
 	if err != nil {
@@ -116,6 +113,7 @@ func (m *msgServer) MarkMsgsAsRead(
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return
 	}
+
 	if hasReadSeq > currentHasReadSeq {
 		err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, hasReadSeq)
 		if err != nil {
@@ -123,13 +121,13 @@ func (m *msgServer) MarkMsgsAsRead(
 		}
 	}
 
-	req_callback := &cbapi.CallbackSingleMsgReadReq{
+	reqCallback := &cbapi.CallbackSingleMsgReadReq{
 		ConversationID: conversation.ConversationID,
 		UserID:         req.UserID,
 		Seqs:           req.Seqs,
 		ContentType:    conversation.ConversationType,
 	}
-	if err = CallbackSingleMsgRead(ctx, m.config, req_callback); err != nil {
+	if err = CallbackSingleMsgRead(ctx, m.config, reqCallback); err != nil {
 		return nil, err
 	}
 
@@ -140,10 +138,7 @@ func (m *msgServer) MarkMsgsAsRead(
 	return &msg.MarkMsgsAsReadResp{}, nil
 }
 
-func (m *msgServer) MarkConversationAsRead(
-	ctx context.Context,
-	req *msg.MarkConversationAsReadReq,
-) (resp *msg.MarkConversationAsReadResp, err error) {
+func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkConversationAsReadReq) (resp *msg.MarkConversationAsReadResp, err error) {
 	conversation, err := m.ConversationLocalCache.GetConversation(ctx, req.UserID, req.ConversationID)
 	if err != nil {
 		return nil, err
@@ -160,9 +155,9 @@ func (m *msgServer) MarkConversationAsRead(
 		for i := hasReadSeq + 1; i <= req.HasReadSeq; i++ {
 			seqs = append(seqs, i)
 		}
-		//avoid client missed call MarkConversationMessageAsRead by order
+		// avoid client missed call MarkConversationMessageAsRead by order
 		for _, val := range req.Seqs {
-			if !utils2.Contain(val, seqs...) {
+			if !datautil.Contain(val, seqs...) {
 				seqs = append(seqs, val)
 			}
 		}
@@ -213,14 +208,7 @@ func (m *msgServer) MarkConversationAsRead(
 	return &msg.MarkConversationAsReadResp{}, nil
 }
 
-func (m *msgServer) sendMarkAsReadNotification(
-	ctx context.Context,
-	conversationID string,
-	sessionType int32,
-	sendID, recvID string,
-	seqs []int64,
-	hasReadSeq int64,
-) error {
+func (m *msgServer) sendMarkAsReadNotification(ctx context.Context, conversationID string, sessionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) error {
 	tips := &sdkws.MarkAsReadTips{
 		MarkAsReadUserID: sendID,
 		ConversationID:   conversationID,

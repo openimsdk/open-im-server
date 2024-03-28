@@ -20,9 +20,9 @@ import (
 	"encoding/binary"
 	"encoding/json"
 
-	"github.com/OpenIMSDK/protocol/group"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/protocol/group"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 func NewGroupHashFromGroupClient(x group.GroupClient) *GroupHash {
@@ -79,9 +79,9 @@ func (gh *GroupHash) GetGroupHash(ctx context.Context, groupID string) (uint64, 
 		if err != nil {
 			return 0, err
 		}
-		utils.Sort(userIDs, true)
+		datautil.Sort(userIDs, true)
 	}
-	memberMap := utils.SliceToMap(members, func(e *sdkws.GroupMemberFullInfo) string {
+	memberMap := datautil.SliceToMap(members, func(e *sdkws.GroupMemberFullInfo) string {
 		return e.UserID
 	})
 	res := make([]*sdkws.GroupMemberFullInfo, 0, len(members))

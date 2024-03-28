@@ -15,19 +15,23 @@
 package cmd
 
 import (
-	"fmt"
+	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
 type MsgTransferCmd struct {
 	*RootCmd
+	ctx context.Context
 }
 
-func NewMsgTransferCmd() *MsgTransferCmd {
-	ret := &MsgTransferCmd{NewRootCmd("msgTransfer")}
+func NewMsgTransferCmd(name string) *MsgTransferCmd {
+	ret := &MsgTransferCmd{RootCmd: NewRootCmd(program.GetProcessName(), name)}
+	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
 	ret.addRunE()
 	ret.SetRootCmdPt(ret)
 	return ret
@@ -35,7 +39,7 @@ func NewMsgTransferCmd() *MsgTransferCmd {
 
 func (m *MsgTransferCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msgtransfer.StartTransfer(m.config, m.getPrometheusPortFlag(cmd))
+		return msgtransfer.Start(m.ctx, m.config, m.getPrometheusPortFlag(cmd), m.getTransferProgressFlagValue())
 	}
 }
 
@@ -60,7 +64,6 @@ func (m *MsgTransferCmd) AddTransferProgressFlag() {
 func (m *MsgTransferCmd) getTransferProgressFlagValue() int {
 	nIndex, err := m.Command.Flags().GetInt(constant.FlagTransferProgressIndex)
 	if err != nil {
-		fmt.Println("get transfer cmd error,make sure it is k8s env or not")
 		return 0
 	}
 	return nIndex

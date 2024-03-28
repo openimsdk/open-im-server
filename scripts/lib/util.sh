@@ -360,8 +360,8 @@ openim::util::check_ports() {
   
   # If any of the processes is not running, return a status of 1.
   if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
-    openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+    #openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
+    #openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
     cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
     return 1
   else
@@ -446,8 +446,8 @@ openim::util::check_process_names() {
   
   # Return status
   if [[ ${#not_started[@]} -ne 0 ]]; then
-    openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
-    openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
+    #openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
+    #openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
     cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
     return 1
   else
@@ -599,33 +599,36 @@ openim::util::stop_services_with_name() {
     # An array to collect information about processes that were stopped.
     local stopped=()
 
-    echo "Stopping services with names: $*"
     # Iterate over each given service name.
     for server_name in "$@"; do
         # Use the `pgrep` command to find process IDs related to the given service name.
         local pids=$(pgrep -f "$server_name")
-
         # If no process was found with the name, add it to the not_stopped list
         if [[ -z $pids ]]; then
             not_stopped+=("$server_name")
             continue
         fi
         local stopped_this_time=false
-        for pid in $pids; do
+       for pid in $pids; do
 
-            # Exclude the PID of the current script
-            if [[ "$pid" == "$$" ]]; then
-                continue
-            fi
+           # Exclude the PID of the current script
+           if [[ "$pid" == "$$" ]]; then
+               continue
+           fi
 
-            # If there's a Process ID, it means the service with the name is running.
-            if [[ -n $pid ]]; then
-                # Try to stop the service by killing its process.
-                if kill -15 $pid 2>/dev/null; then
-                    stopped_this_time=true
-                fi
-            fi
-        done
+           # If there's a Process ID, it means the service with the name is running.
+           if [[ -n $pid ]]; then
+               # Print the binary path for the PID
+               binary_path=$(readlink -f /proc/$pid/exe)
+               openim::log::colorless "stop PID $pid full path: $binary_path"
+
+               # Try to stop the service by killing its process.
+               if kill -15 $pid 2>/dev/null; then
+                   stopped_this_time=true
+               fi
+           fi
+       done
+
 
         if $stopped_this_time; then
             stopped+=("$server_name")
@@ -2844,6 +2847,46 @@ function openim::util::check_process_names_for_stop() {
 
   return 1
 }
+
+
+
+
+function openim::util::find_process_ports() {
+    local process_path="$1"
+    if [[ -z "$process_path" ]]; then
+        echo "Usage: find_process_ports /path/to/process"
+        return 1
+    fi
+
+   local protocol_ports=""
+   while read -r line; do
+       local port_protocol=($line)
+       local port=${port_protocol[0]##*:}
+       local protocol=${port_protocol[1]}
+       protocol_ports="${protocol_ports}${protocol} ${port}, "
+
+   done < <(lsof -nP -iTCP -iUDP | grep LISTEN | grep "$(pgrep -f "$process_path")" | awk '{print $9, $8}')
+
+   protocol_ports=${protocol_ports%, }
+
+  if [[ -z "$protocol_ports" ]]; then
+        openim::log::colorless "$process_path is not listening on any ports"
+    else
+        openim::log::colorless "$process_path is listening on protocol & port: $protocol_ports"
+    fi
+}
+
+
+
+
+
+function openim::util::find_ports_for_all_services() {
+    local services=("$@")
+    for service in "${services[@]}"; do
+        openim::util::find_process_ports "$service"
+    done
+}
+
 
 
 

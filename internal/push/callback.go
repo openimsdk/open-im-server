@@ -17,23 +17,17 @@ package push
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
-func callbackOfflinePush(
-	ctx context.Context,
-	config *config.GlobalConfig,
-	userIDs []string,
-	msg *sdkws.MsgData,
-	offlinePushUserIDs *[]string,
-) error {
-	if !config.Callback.CallbackOfflinePush.Enable || msg.ContentType == constant.Typing {
+func callbackOfflinePush(ctx context.Context, callback *config.Callback, userIDs []string, msg *sdkws.MsgData, offlinePushUserIDs *[]string) error {
+	if !callback.CallbackOfflinePush.Enable || msg.ContentType == constant.Typing {
 		return nil
 	}
 	req := &callbackstruct.CallbackBeforePushReq{
@@ -57,7 +51,7 @@ func callbackOfflinePush(
 	}
 
 	resp := &callbackstruct.CallbackBeforePushResp{}
-	if err := http.CallBackPostReturn(ctx, config.Callback.CallbackUrl, req, resp, config.Callback.CallbackOfflinePush); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, req, resp, callback.CallbackOfflinePush); err != nil {
 		return err
 	}
 
@@ -70,8 +64,8 @@ func callbackOfflinePush(
 	return nil
 }
 
-func callbackOnlinePush(ctx context.Context, config *config.GlobalConfig, userIDs []string, msg *sdkws.MsgData) error {
-	if !config.Callback.CallbackOnlinePush.Enable || utils.Contain(msg.SendID, userIDs...) || msg.ContentType == constant.Typing {
+func callbackOnlinePush(ctx context.Context, callback *config.Callback, userIDs []string, msg *sdkws.MsgData) error {
+	if !callback.CallbackOnlinePush.Enable || datautil.Contain(msg.SendID, userIDs...) || msg.ContentType == constant.Typing {
 		return nil
 	}
 	req := callbackstruct.CallbackBeforePushReq{
@@ -93,7 +87,7 @@ func callbackOnlinePush(ctx context.Context, config *config.GlobalConfig, userID
 		Content:     GetContent(msg),
 	}
 	resp := &callbackstruct.CallbackBeforePushResp{}
-	if err := http.CallBackPostReturn(ctx, config.Callback.CallbackUrl, req, resp, config.Callback.CallbackOnlinePush); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, req, resp, callback.CallbackOnlinePush); err != nil {
 		return err
 	}
 	return nil
@@ -101,12 +95,12 @@ func callbackOnlinePush(ctx context.Context, config *config.GlobalConfig, userID
 
 func callbackBeforeSuperGroupOnlinePush(
 	ctx context.Context,
-	config *config.GlobalConfig,
+	callback *config.Callback,
 	groupID string,
 	msg *sdkws.MsgData,
 	pushToUserIDs *[]string,
 ) error {
-	if !config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable || msg.ContentType == constant.Typing {
+	if !callback.CallbackBeforeSuperGroupOnlinePush.Enable || msg.ContentType == constant.Typing {
 		return nil
 	}
 	req := callbackstruct.CallbackBeforeSuperGroupOnlinePushReq{
@@ -126,7 +120,7 @@ func callbackBeforeSuperGroupOnlinePush(
 		Seq:         msg.Seq,
 	}
 	resp := &callbackstruct.CallbackBeforeSuperGroupOnlinePushResp{}
-	if err := http.CallBackPostReturn(ctx, config.Callback.CallbackUrl, req, resp, config.Callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, req, resp, callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
 		return err
 	}
 
