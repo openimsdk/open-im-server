@@ -16,7 +16,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"os"
 	"strconv"
@@ -25,53 +24,56 @@ import (
 	"github.com/openimsdk/open-im-server/v3/tools/component/checks"
 	"github.com/openimsdk/open-im-server/v3/tools/component/util"
 	"github.com/openimsdk/tools/log"
-
-	"gopkg.in/yaml.v2"
-
-	"github.com/openimsdk/tools/errs"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/minio"
 )
 
-const (
-	// defaultCfgPath is the default path of the configuration file.
-	defaultCfgPath = "../../../../../config/config.yaml"
-	maxRetry       = 100
-)
+const defaultCfgPath = "./config.yaml"
+const maxRetry = 100
 
-var (
-	cfgPath = flag.String("c", defaultCfgPath, "Path to the configuration file")
-)
+func initConfig(cfgPath string) error {
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
 
-func initCfg() (*config.GlobalConfig, error) {
-	data, err := os.ReadFile(*cfgPath)
-	if err != nil {
-		return nil, errs.WrapMsg(err, "ReadFile unmarshal failed")
+	viper.SetConfigName("config")
+	viper.AddConfigPath("../../../../../config")
+
+	viper.SetEnvPrefix("openim")
+	viper.AutomaticEnv()
+
+	if cfgPath != "" {
+		viper.SetConfigFile(cfgPath)
+	} else if envPath, ok := os.LookupEnv("OPENIM_CONFIG"); ok && envPath != "" {
+		viper.SetConfigFile(envPath)
 	}
 
-	conf := config.NewGlobalConfig()
-	err = yaml.Unmarshal(data, &conf)
-	if err != nil {
-		return nil, errs.WrapMsg(err, "InitConfig unmarshal failed")
+	if err := viper.ReadInConfig(); err != nil {
+		return err
 	}
-	return conf, nil
+
+	fmt.Println("Using config file:", viper.ConfigFileUsed())
+	return nil
 }
 
 func main() {
-	flag.Parse()
+	var cfgFile string
+	pflag.StringVarP(&cfgFile, "config", "c", "", "config file (default is ./config.yaml)")
+	pflag.Parse()
 
 	ctx := context.Background()
-	conf, err := initCfg()
-	if err != nil {
+
+	if err := initConfig(cfgFile); err != nil {
 		fmt.Fprintf(os.Stderr, "Initialization failed: %v\n", err)
 		os.Exit(1)
 	}
 
-	if err := util.ConfigGetEnv(conf); err != nil {
-		fmt.Fprintf(os.Stderr, "Environment variable override failed: %v\n", err)
-		os.Exit(1)
-	}
+	// if err := util.ConfigGetEnv(conf); err != nil {
+	// 	fmt.Fprintf(os.Stderr, "Environment variable override failed: %v\n", err)
+	// 	os.Exit(1)
+	// }
 
 	// Define a slice of functions to perform each service check
 	serviceChecks := []func(context.Context, *config.GlobalConfig) error{
@@ -89,11 +91,11 @@ func main() {
 		},
 	}
 
-	if conf.Object.Enable == "minio" {
+	if viper.GetString("object.enable") == "minio" {
 		minioConfig := checks.MinioCheck{
-			Config: minio.Config(conf.Object.Minio),
+			Config: minio.Config(viper.GetString("object.minio")),
 			// UseSSL: conf.Minio.UseSSL,
-			ApiURL: conf.Object.ApiURL,
+			ApiURL: viper.GetString("object.apiURL"),
 		}
 
 		adjustUseSSL(&minioConfig)

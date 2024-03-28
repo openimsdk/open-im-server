@@ -593,11 +593,12 @@ linters-settings:
       - name: exported
         severity: warning
       - name: var-naming
-        arguments: [ ["ID", "HTTP", "URL", "URI", "URL", "URI", "API", "APIKey", "Token", "TokenID", "TokenSecret", "TokenKey", "TokenSecret", "JWT", "JWTToken", "JWTTokenID", "JWTTokenSecret", "JWTTokenKey", "JWTTokenSecret", "OAuth", "OAuthToken", "OAuth" ] ]
+        arguments: [ [ "OpenIM"] ]
+        # arguments: [ ["ID", "HTTP", "URL", "URI", "API", "APIKey", "Token", "TokenID", "TokenSecret", "TokenKey", "TokenSecret", "JWT", "JWTToken", "JWTTokenID", "JWTTokenSecret", "JWTTokenKey", "JWTTokenSecret", "OAuth", "OAuthToken", "RPC" ] ]
       - name: atomic
       - name: line-length-limit
         severity: error
-        arguments: [80]
+        arguments: [200]
       - name: unhandled-error
         arguments : ["fmt.Printf", "myFunction"]
 

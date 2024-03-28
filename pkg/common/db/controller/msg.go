@@ -575,7 +575,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 	//
 	//}
 	// var seqs []int64
-	//for i := end; i > end-num; i-- {
+	// for i := end; i > end-num; i-- {
 	//	if i >= begin {
 	//		seqs = append([]int64{i}, seqs...)
 	//	} else {
