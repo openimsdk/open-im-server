@@ -16,6 +16,7 @@ package friend
 
 import (
 	"context"
+	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -24,7 +25,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
@@ -49,29 +49,26 @@ type friendServer struct {
 }
 
 func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	// Initialize MongoDB
-	mongo, err := unrelation.NewMongoDB(ctx, &config.Mongo)
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
+	if err != nil {
+		return err
+	}
+	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
 	if err != nil {
 		return err
 	}
 
-	// Initialize Redis
-	rdb, err := cache.NewRedis(ctx, &config.Redis)
+	friendMongoDB, err := mgo.NewFriendMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
 
-	friendMongoDB, err := mgo.NewFriendMongo(mongo.GetDatabase(config.Mongo.Database))
+	friendRequestMongoDB, err := mgo.NewFriendRequestMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
 
-	friendRequestMongoDB, err := mgo.NewFriendRequestMongo(mongo.GetDatabase(config.Mongo.Database))
-	if err != nil {
-		return err
-	}
-
-	blackMongoDB, err := mgo.NewBlackMongo(mongo.GetDatabase(config.Mongo.Database))
+	blackMongoDB, err := mgo.NewBlackMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
@@ -93,7 +90,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 			friendMongoDB,
 			friendRequestMongoDB,
 			cache.NewFriendCacheRedis(rdb, friendMongoDB, cache.GetDefaultOpt()),
-			mongoutil.NewMongo(mongo.GetClient()),
+			mgocli.GetTx(),
 		),
 		blackDatabase: controller.NewBlackDatabase(
 			blackMongoDB,

@@ -17,6 +17,7 @@ package tools
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/tools/db/redisutil"
 	"math"
 	"math/rand"
 
@@ -24,7 +25,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
@@ -65,11 +65,11 @@ func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controlle
 }
 
 func InitMsgTool(ctx context.Context, config *config.GlobalConfig) (*MsgTool, error) {
-	rdb, err := cache.NewRedis(ctx, &config.Redis)
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
 	if err != nil {
 		return nil, err
 	}
-	mongo, err := unrelation.NewMongoDB(ctx, &config.Mongo)
+	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
 	if err != nil {
 		return nil, err
 	}
@@ -78,43 +78,42 @@ func InitMsgTool(ctx context.Context, config *config.GlobalConfig) (*MsgTool, er
 		return nil, err
 	}
 	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	userDB, err := mgo.NewUserMongo(mongo.GetDatabase(config.Mongo.Database))
+	userDB, err := mgo.NewUserMongo(mgocli.GetDB())
 	if err != nil {
 		return nil, err
 	}
-	msgDatabase, err := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase(config.Mongo.Database), config)
+	msgDatabase, err := controller.InitCommonMsgDatabase(rdb, mgocli.GetDB(), config)
 	if err != nil {
 		return nil, err
 	}
-	userMongoDB := mgo.NewUserMongoDriver(mongo.GetDatabase(config.Mongo.Database))
-	ctxTx := mongoutil.NewMongo(mongo.GetClient())
+	userMongoDB := mgo.NewUserMongoDriver(mgocli.GetDB())
 	userDatabase := controller.NewUserDatabase(
 		userDB,
 		cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt()),
-		ctxTx,
+		mgocli.GetTx(),
 		userMongoDB,
 	)
-	groupDB, err := mgo.NewGroupMongo(mongo.GetDatabase(config.Mongo.Database))
+	groupDB, err := mgo.NewGroupMongo(mgocli.GetDB())
 	if err != nil {
 		return nil, err
 	}
-	groupMemberDB, err := mgo.NewGroupMember(mongo.GetDatabase(config.Mongo.Database))
+	groupMemberDB, err := mgo.NewGroupMember(mgocli.GetDB())
 	if err != nil {
 		return nil, err
 	}
-	groupRequestDB, err := mgo.NewGroupRequestMgo(mongo.GetDatabase(config.Mongo.Database))
+	groupRequestDB, err := mgo.NewGroupRequestMgo(mgocli.GetDB())
 	if err != nil {
 		return nil, err
 	}
-	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase(config.Mongo.Database))
+	conversationDB, err := mgo.NewConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return nil, err
 	}
-	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, ctxTx, nil)
+	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), nil)
 	conversationDatabase := controller.NewConversationDatabase(
 		conversationDB,
 		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
-		ctxTx,
+		mgocli.GetTx(),
 	)
 	msgRpcClient := rpcclient.NewMessageRpcClient(discov, config.RpcRegisterName.OpenImMsgName)
 	msgNotificationSender := notification.NewMsgNotificationSender(config, rpcclient.WithRpcClient(&msgRpcClient))

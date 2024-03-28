@@ -17,6 +17,7 @@ package conversation
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/tools/db/redisutil"
 	"sort"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -25,7 +26,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
@@ -49,15 +49,15 @@ type conversationServer struct {
 }
 
 func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis(ctx, &config.Redis)
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
 	if err != nil {
 		return err
 	}
-	mongo, err := unrelation.NewMongoDB(ctx, &config.Mongo)
+	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
 	if err != nil {
 		return err
 	}
-	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase(config.Mongo.Database))
+	conversationDB, err := mgo.NewConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 		user:                           &userRpcClient,
 		conversationNotificationSender: notification.NewConversationNotificationSender(&config.Notification, &msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
-		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), mongoutil.NewMongo(mongo.GetClient())),
+		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), mgocli.GetTx()),
 	})
 	return nil
 }
