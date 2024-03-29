@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/openimsdk/tools/db/redisutil"
 	"net"
 	"net/http"
 	"os"
@@ -56,7 +57,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, port int, proPort i
 		wrappedErr := errs.WrapMsg(errors.New("port or proPort is empty"), "validation error", "port", port, "proPort", proPort)
 		return wrappedErr
 	}
-	rdb, err := cache.NewRedis(ctx, &config.Redis)
+	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
 	if err != nil {
 		return err
 	}

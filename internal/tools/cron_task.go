@@ -16,13 +16,13 @@ package tools
 
 import (
 	"context"
+	"github.com/openimsdk/tools/db/redisutil"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
@@ -40,7 +40,7 @@ func StartTask(ctx context.Context, config *config.GlobalConfig) error {
 
 	msgTool.convertTools()
 
-	rdb, err := cache.NewRedis(ctx, &config.Redis)
+	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
 	if err != nil {
 		return err
 	}

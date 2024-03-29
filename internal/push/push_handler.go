@@ -19,23 +19,23 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	kfk "github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 	"github.com/openimsdk/protocol/constant"
 	pbchat "github.com/openimsdk/protocol/msg"
 	pbpush "github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/timeutil"
 	"google.golang.org/protobuf/proto"
 )
 
 type ConsumerHandler struct {
-	pushConsumerGroup *kfk.MConsumerGroup
+	pushConsumerGroup *kafka.MConsumerGroup
 	pusher            *Pusher
 }
 
 func NewConsumerHandler(kafkaConf *config.Kafka, pusher *Pusher) (*ConsumerHandler, error) {
-	pushConsumerGroup, err := kfk.NewMConsumerGroup(&kafkaConf.Config, kafkaConf.ConsumerGroupID.MsgToPush, []string{kafkaConf.MsgToPush.Topic})
+	pushConsumerGroup, err := kafka.NewMConsumerGroup(&kafkaConf.Config, kafkaConf.ConsumerGroupID.MsgToPush, []string{kafkaConf.MsgToPush.Topic})
 	if err != nil {
 		return nil, err
 	}
@@ -84,11 +84,11 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 	}
 }
 
-func (ConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
-func (ConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
-	claim sarama.ConsumerGroupClaim,
-) error {
+func (*ConsumerHandler) Setup(sarama.ConsumerGroupSession) error { return nil }
+
+func (*ConsumerHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil }
+
+func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		ctx := c.pushConsumerGroup.GetContextFromMsg(msg)
 		c.handleMs2PsChat(ctx, msg.Value)

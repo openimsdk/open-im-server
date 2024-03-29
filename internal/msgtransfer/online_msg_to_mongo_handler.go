@@ -20,20 +20,20 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	kfk "github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mq/kafka"
 	"google.golang.org/protobuf/proto"
 )
 
 type OnlineHistoryMongoConsumerHandler struct {
-	historyConsumerGroup *kfk.MConsumerGroup
+	historyConsumerGroup *kafka.MConsumerGroup
 	msgDatabase          controller.CommonMsgDatabase
 }
 
 func NewOnlineHistoryMongoConsumerHandler(kafkaConf *config.Kafka, database controller.CommonMsgDatabase) (*OnlineHistoryMongoConsumerHandler, error) {
-	historyConsumerGroup, err := kfk.NewMConsumerGroup(&kafkaConf.Config, kafkaConf.ConsumerGroupID.MsgToMongo, []string{kafkaConf.MsgToMongo.Topic})
+	historyConsumerGroup, err := kafka.NewMConsumerGroup(&kafkaConf.Config, kafkaConf.ConsumerGroupID.MsgToMongo, []string{kafkaConf.MsgToMongo.Topic})
 	if err != nil {
 		return nil, err
 	}
