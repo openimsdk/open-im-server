@@ -24,7 +24,6 @@ start_binaries() {
       echo "Starting $binary instance $i: $bin_full_path -i $i -c $OPENIM_OUTPUT_CONFIG"
       nohup "$bin_full_path" -i "$i" -c "$conf_dir" > "${conf_dir}/nohup_${binary}_${i}.log" 2>&1 &
       done
-    done
   done
 }
 
