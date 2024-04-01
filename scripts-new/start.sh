@@ -19,11 +19,10 @@ start_binaries() {
   for binary in "${!binaries[@]}"; do
     local count=${binaries[$binary]}
     local bin_full_path=$(get_bin_full_path "$project_dir" "$binary")
-    local conf_dir=$(get_conf_dir "$project_dir")
-
+    echo "$project_dir" "$binary" 444444444444444444
     # Loop to start binary the specified number of times
     for ((i=0; i<count; i++)); do
-      echo "Starting $binary instance $i: $bin_full_path -i $i -c $conf_dir"
+      echo "Starting $binary instance $i: $bin_full_path -i $i -c $OPENIM_OUTPUT_CONFIG"
       "$bin_full_path" -i "$i" -c "$conf_dir"
     done
   done
