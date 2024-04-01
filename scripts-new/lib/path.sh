@@ -27,7 +27,7 @@ get_bin_full_path() {
 
   local host_platform=$(openim::util::host_platform)
   local bin_full_path="${project_path}/get_bin_path/${host_platform}/${bin_name}"
-  echo "${bin_full_path}"
+  echo "${bin_full_path}" 1111111111111
 }
 
 
