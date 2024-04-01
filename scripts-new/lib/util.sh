@@ -391,9 +391,9 @@ openim::util::check_process_names() {
     local running_count=$(ps -ef | grep "$process_path" | grep -v grep | wc -l)
 
     if [ "$running_count" -eq "$expected_count" ]; then
-        return 0
+        echo 0
     else
-        return $(($expected_count - $running_count))
+        echo $(($expected_count - $running_count))
     fi
 }
 
