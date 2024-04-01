@@ -49,6 +49,7 @@ COMMENT_LANG_DETECTOR_VERSION ?= latest
 STANDARDIZER_VERSION ?= latest
 GO_TESTS_VERSION ?= v1.6.0
 GO_APIDIFF_VERSION ?= v0.8.2
+KAFKACTL_VERSION ?= v4.0.0
 
 WIRE_VERSION ?= latest
 # WIRE_VERSION ?= $(call get_go_version,github.com/google/wire)

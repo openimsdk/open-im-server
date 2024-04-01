@@ -91,7 +91,7 @@ install.conversion-gen:
 install.ginkgo:
 	@$(GO) install github.com/onsi/ginkgo/ginkgo@$(GINKGO_VERSION)
 
-## Install go-gitlint: Install go-gitlint, used to check git commit message
+## install.go-gitlint: Install go-gitlint, used to check git commit message
 .PHONY: install.go-gitlint
 install.go-gitlint:
 	@$(GO) install github.com/marmotedu/go-gitlint/cmd/go-gitlint@$(GO_GITLINT_VERSION)
@@ -102,8 +102,14 @@ install.go-junit-report:
 	@$(GO) install github.com/jstemmer/go-junit-report@$(GO_JUNIT_REPORT_VERSION)
 
 ## install.gotests: Install gotests, used to generate go tests
+.PHONY: install.gotests
 install.gotests:
 	@$(GO) install github.com/cweill/gotests/gotests@$(GO_TESTS_VERSION)
+
+## install.kafkactl: Install kafkactl command line tool.
+.PHONY: install.kafkactl
+install.kafkactl:
+	@$(GO) install github.com/deviceinsight/kafkactl@$(KAFKACTL_VERSION)
 
 ## install.go-apidiff: Install go-apidiff, used to check api changes
 .PHONY: install.go-apidiff
