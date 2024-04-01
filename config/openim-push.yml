@@ -1,0 +1,16 @@
+push:
+  enable: getui
+  geTui:
+    pushUrl: "https://restapi.getui.com/v2/$appId"
+    masterSecret: ''
+    appKey: ''
+    intent: ''
+    channelID: ''
+    channelName: ''
+  fcm:
+    serviceAccount: "x.json"
+  jpns:
+    appKey: ''
+    masterSecret: ''
+    pushUrl: ''
+    pushIntent: ''

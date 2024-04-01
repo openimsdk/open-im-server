@@ -1,0 +1,7 @@
+rpc:
+  registerIP: ''
+  listenIP: 0.0.0.0
+rpcPort:
+  openImMessagePort: [ 10130 ]
+rpcRegisterName:
+  openImMsgName: Msg

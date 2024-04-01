@@ -1,0 +1,7 @@
+rpc:
+  registerIP: ''
+  listenIP: 0.0.0.0
+rpcPort:
+  openImThirdPort: [ 10190 ]
+rpcRegisterName:
+  openImThirdName: Third
