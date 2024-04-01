@@ -125,6 +125,11 @@ install.swagger:
 # Tools that might be used include go gvm
 #
 
+## install.gotestsum: Install gotestsum, used to run go tests
+.PHONY: install.gotestsum
+install.gotestsum:
+	@$(GO) install gotest.tools/gotestsum@$(GOTESTSUM_VERSION)
+
 ## install.kube-score: Install kube-score, used to check kubernetes yaml files
 .PHONY: install.kube-score
 install.kube-score:
