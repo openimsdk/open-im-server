@@ -14,5 +14,5 @@ func main() {
 	flag.Parse()
 
 	// Print the values of the flags
-	fmt.Printf("-i %d -c %s\n", *index, *config)
+	fmt.Printf("args: -i %d -c %s\n", *index, *config)
 }
