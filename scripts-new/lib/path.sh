@@ -30,6 +30,7 @@ get_bin_full_path() {
   local bin_dir=$(get_bin_dir "$project_path")
 
   local bin_full_path="${OPENIM_OUTPUT_BINPATH}/${bin_name}"
+  echo ${bin_full_path}
 }
 
 
