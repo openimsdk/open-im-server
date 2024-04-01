@@ -2,27 +2,6 @@
 #!/usr/bin/env bash
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-
-
-start_binaries() {
-  for bin in "${!binaries[@]}"; do
-    local count=${binaries[$bin]}
-    local bin_path=$(get_bin_full_path "$OPENIM_ROOT" "$bin")
-    local conf_dir=$(get_conf_dir)
-
-    for ((i=0; i<count; i++)); do
-      echo "Starting $bin instance $i: $bin_path -i $i -c $conf_dir"
-      "$bin_path" -i "$i" -c "$conf_dir"
-    done
-  done
-}
-
-start_binaries
-
-#!/bin/bash
-
-# Assuming the current script is located in the 'scripts' directory,
-# adjust these paths according to your actual directory structure.
 source "$(dirname "$0")/define/binariesgit.sh"
 source "$(dirname "$0")/lib/path.sh"
 
