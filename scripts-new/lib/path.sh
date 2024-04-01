@@ -2,6 +2,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/util.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/init.sh"
 
 
 get_conf_dir() {
@@ -28,8 +29,7 @@ get_bin_full_path() {
 
   local bin_dir=$(get_bin_dir "$project_path")
 
-  local bin_full_path="$bin_dir/${host_platform}/${bin_name}"
-  echo "${bin_full_path}" 111111111111111111111
+  local bin_full_path="${OPENIM_OUTPUT_BINPATH}/${bin_name}"
 }
 
 
