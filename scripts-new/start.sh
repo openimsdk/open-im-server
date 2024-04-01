@@ -23,7 +23,7 @@ start_binaries
 
 # Assuming the current script is located in the 'scripts' directory,
 # adjust these paths according to your actual directory structure.
-source "$(dirname "$0")/define/binaries.sh"
+source "$(dirname "$0")/define/binariesgit.sh"
 source "$(dirname "$0")/lib/path.sh"
 
 # Assuming 'openim::util::host_platform' is defined in one of the sourced scripts or elsewhere.
