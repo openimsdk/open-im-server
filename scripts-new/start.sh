@@ -22,7 +22,8 @@ start_binaries() {
     # Loop to start binary the specified number of times
     for ((i=0; i<count; i++)); do
       echo "Starting $binary instance $i: $bin_full_path -i $i -c $OPENIM_OUTPUT_CONFIG"
-      "$bin_full_path" -i "$i" -c "$conf_dir"
+      nohup "$bin_full_path" -i "$i" -c "$conf_dir" > "${conf_dir}/nohup_${binary}_${i}.log" 2>&1 &
+      done
     done
   done
 }
