@@ -32,11 +32,13 @@ OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 OPENIM_OUTPUT_SUBPATH="${OPENIM_OUTPUT_SUBPATH:-_output}"
 OPENIM_OUTPUT="${OPENIM_ROOT}/${OPENIM_OUTPUT_SUBPATH}"
 
-OPENIM_OUTPUT_BINPATH="${OPENIM_OUTPUT}/bin/platforms"
-OPENIM_OUTPUT_BINTOOLPATH="${OPENIM_OUTPUT}/bin/tools"
-OPENIM_OUTPUT_TOOLS="${OPENIM_OUTPUT}/tools"
-OPENIM_OUTPUT_TMP="${OPENIM_OUTPUT}/tmp"
-OPENIM_OUTPUT_LOGS="${OPENIM_OUTPUT}/logs"
+OPENIM_OUTPUT_BINPATH="${OPENIM_OUTPUT}/bin/platforms/"
+OPENIM_OUTPUT_BINTOOLPATH="${OPENIM_OUTPUT}/bin/tools/"
+OPENIM_OUTPUT_TOOLS="${OPENIM_OUTPUT}/tools/"
+OPENIM_OUTPUT_TMP="${OPENIM_OUTPUT}/tmp/"
+OPENIM_OUTPUT_LOGS="${OPENIM_OUTPUT}/logs/"
+OPENIM_OUTPUT_CONFIG="${OPENIM_ROOT}/config/"
+
 
 # This controls rsync compression. Set to a value > 0 to enable rsync
 # compression for build container
@@ -61,8 +63,10 @@ openim::util::ensure-bash-version
 . $(dirname ${BASH_SOURCE})/golang.sh
 . $(dirname ${BASH_SOURCE})/chat.sh
 
+
 OPENIM_OUTPUT_HOSTBIN="${OPENIM_OUTPUT_BINPATH}/$(openim::util::host_platform)"
 export OPENIM_OUTPUT_HOSTBIN
+
 OPENIM_OUTPUT_HOSTBIN_TOOLS="${OPENIM_OUTPUT_BINTOOLPATH}/$(openim::util::host_platform)"
 export OPENIM_OUTPUT_HOSTBIN_TOOLS
 

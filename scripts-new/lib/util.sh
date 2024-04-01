@@ -382,80 +382,23 @@ openim::util::check_ports() {
 # User:
 # openim::util::check_process_names nginx mysql redis
 # The function returns a status of 1 if any of the processes is not running.
+
 openim::util::check_process_names() {
-  # Function to get the port of a process
-  get_port() {
-    local pid=$1
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-      # Linux
-      ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2
-      elif [[ "$OSTYPE" == "darwin"* ]]; then
-      # macOS
-      lsof -nP -iTCP -sTCP:LISTEN -a -p $pid | awk 'NR>1 {print $9}' | sed 's/.*://'
+    local process_path="$1"
+    local expected_count="$2"
+
+
+    local running_count=$(ps -ef | grep "$process_path" | grep -v grep | wc -l)
+
+    if [ "$running_count" -eq "$expected_count" ]; then
+        return 0
     else
-      echo "Unsupported OS"
-      return 1
+        return $(($expected_count - $running_count))
     fi
-  }
-  
-  # Arrays to collect details of processes
-  local not_started=()
-  local started=()
-
- # Iterate over each given process name
-  for process_name in "$@"; do
-     # Use `pgrep` to find process IDs related to the given process name
-     local pids=($(pgrep -f $process_name))
-
-     # Check if any process IDs were found
-     if [[ ${#pids[@]} -eq 0 ]]; then
-       not_started+=($process_name)
-     else
-       # If there are PIDs, loop through each one
-       for pid in "${pids[@]}"; do
-         local command=$(ps -p $pid -o comm=)
-         local start_time=$(ps -p $pid -o lstart=)
-         local port=$(get_port $pid)
-
-         # Check if port information was found for the PID
-         if [[ -z $port ]]; then
-           port="N/A"
-         fi
-
-         started+=("Process $process_name - Command: $command, PID: $pid, Port: $port, Start time: $start_time")
-       done
-     fi
-   done
-
-  
-  # Print information
-  if [[ ${#not_started[@]} -ne 0 ]]; then
-    echo "Not started processes:"
-    for process_name in "${not_started[@]}"; do
-      echo "Process $process_name is not started."
-    done
-  fi
-  
-  if [[ ${#started[@]} -ne 0 ]]; then
-    echo
-    echo "Started processes:"
-    for info in "${started[@]}"; do
-      echo "$info"
-    done
-  fi
-  
-  # Return status
-  if [[ ${#not_started[@]} -ne 0 ]]; then
-    #openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
-    #openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
-    cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
-    return 1
-  else
-    echo ""
-    openim::log::success "All processes are running."
-    return 0
-  fi
 }
+
+
+
 
 openim::util::check_process_names_for_stop() {
   # Function to get the port of a process
