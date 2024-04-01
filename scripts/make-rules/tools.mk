@@ -238,6 +238,7 @@ install.rts:
 	@$(GO) install github.com/galeone/rts/cmd/rts@latest
 
 # ================= kubecub openim tools =========================================
+# https://github.com/kubecub
 ## install.typecheck: install kubecub typecheck check for go code
 .PHONY: install.typecheck
 install.typecheck:
@@ -247,6 +248,11 @@ install.typecheck:
 .PHONY: install.comment-lang-detector
 install.comment-lang-detector:
 	@$(GO) install github.com/kubecub/comment-lang-detector/cmd/cld@latest
+
+## install.standardizer: install kubecub standardizer check for go code standardize
+.PHONY: install.standardizer
+install.standardizer:
+	@$(GO) install github.com/kubecub/standardizer@latest
 
 ## tools.help: Display help information about the tools package
 .PHONY: tools.help

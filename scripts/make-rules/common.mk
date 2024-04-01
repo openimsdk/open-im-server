@@ -78,6 +78,13 @@ VERSION := $(shell git describe --tags --always --match='v*')
 # v2.3.3: git tag
 endif
 
+# Helper function to get dependency version from go.mod
+get_gomod_version = $(shell go list -m $1 | awk '{print $$2}')
+define go_install
+$(info ===========> Installing $(1)@$(2))
+$(GO) install $(1)@$(2)
+endef
+
 # Check if the tree is dirty. default to dirty(maybe u should commit?)
 GIT_TREE_STATE:="dirty"
 ifeq (, $(shell git status --porcelain 2>/dev/null))

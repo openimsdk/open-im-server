@@ -1,4 +1,4 @@
-# Copyright © 2024 OpenIM. All rights reserved.
+# Copyright © 2023 OpenIMSDK.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# https://github.com/marketplace/actions/code-language-detector
-directory: ./
-file_types:
-  - .go
-  - .yaml
-  - .yml
-languages:
-  - Chinese
+# ==============================================================================
+# OpenIM Makefile Versions used
+#
