@@ -102,6 +102,15 @@ install.go-junit-report:
 	@$(GO) install github.com/jstemmer/go-junit-report@$(GO_JUNIT_REPORT_VERSION)
 
 ## install.gotests: Install gotests, used to generate go tests
+install.gotests:
+	@$(GO) install github.com/cweill/gotests/gotests@$(GO_TESTS_VERSION)
+
+## install.go-apidiff: Install go-apidiff, used to check api changes
+.PHONY: install.go-apidiff
+install.go-apidiff:
+	@$(GO) install github.com/joelanford/go-apidiff@$(GO_APIDIFF_VERSION)
+
+## install.swagger: Install swagger, used to generate swagger documentation
 .PHONY: install.swagger
 install.swagger:
 	@$(GO) install github.com/go-swagger/go-swagger/cmd/swagger@$(SWAGGER_VERSION)
@@ -190,6 +199,12 @@ install.go-mod-outdated:
 .PHONY: install.mockgen
 install.mockgen:
 	@$(GO) install github.com/golang/mock/mockgen@$(MOCKGEN_VERSION)
+
+## install.wire: Install wire, used to generate wire files
+.PHONY: install.wire
+install.wire:
+	@$(GO) install github.com/google/wire/cmd/wire@$(WIRE_VERSION)
+
 
 ## install.protoc-gen-go: Install protoc-gen-go, used to generate go source files from protobuf files
 .PHONY: install.protoc-gen-go
