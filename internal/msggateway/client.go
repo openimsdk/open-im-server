@@ -16,7 +16,6 @@ package msggateway
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"runtime/debug"
 	"sync"
@@ -34,10 +33,10 @@ import (
 )
 
 var (
-	ErrConnClosed                = errors.New("conn has closed")
-	ErrNotSupportMessageProtocol = errors.New("not support message protocol")
-	ErrClientClosed              = errors.New("client actively close the connection")
-	ErrPanic                     = errors.New("panic error")
+	ErrConnClosed                = errs.New("conn has closed")
+	ErrNotSupportMessageProtocol = errs.New("not support message protocol")
+	ErrClientClosed              = errs.New("client actively close the connection")
+	ErrPanic                     = errs.New("panic error")
 )
 
 const (
@@ -187,7 +186,7 @@ func (c *Client) handleMessage(message []byte) error {
 	}
 
 	if binaryReq.SendID != c.UserID {
-		return errs.WrapMsg(errors.New("exception conn userID not same to req userID"), binaryReq.String())
+		return errs.New("exception conn userID not same to req userID", "binaryReq", binaryReq.String())
 	}
 
 	ctx := mcontext.WithMustInfoCtx(
@@ -267,7 +266,7 @@ func (c *Client) replyMessage(ctx context.Context, binaryReq *Req, err error, re
 	}
 
 	if binaryReq.ReqIdentifier == WsLogoutMsg {
-		return errs.WrapMsg(errors.New("user logout"), "user requested logout", "operationID", binaryReq.OperationID)
+		return errs.New("user logout", "operationID", binaryReq.OperationID).Wrap()
 	}
 	return nil
 }

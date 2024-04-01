@@ -16,7 +16,6 @@ package third
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"unicode/utf8"
@@ -65,17 +64,17 @@ func (t *thirdServer) checkUploadName(ctx context.Context, name string) error {
 
 func checkValidObjectNamePrefix(objectName string) error {
 	if len(objectName) > 1024 {
-		return errors.New("object name cannot be longer than 1024 characters")
+		return errs.New("object name cannot be longer than 1024 characters")
 	}
 	if !utf8.ValidString(objectName) {
-		return errors.New("object name with non UTF-8 strings are not supported")
+		return errs.New("object name with non UTF-8 strings are not supported")
 	}
 	return nil
 }
 
 func checkValidObjectName(objectName string) error {
 	if strings.TrimSpace(objectName) == "" {
-		return errors.New("object name cannot be empty")
+		return errs.New("object name cannot be empty")
 	}
 	return checkValidObjectNamePrefix(objectName)
 }

@@ -15,7 +15,6 @@
 package discoveryregister
 
 import (
-	"errors"
 	"os"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -41,7 +40,6 @@ func NewDiscoveryRegister(config *config.GlobalConfig) (discovery.SvcDiscoveryRe
 	case "direct":
 		return direct.NewConnDirect(config)
 	default:
-		errMsg := "unsupported discovery type"
-		return nil, errs.WrapMsg(errors.New(errMsg), errMsg, "type", config.Envs.Discovery)
+		return nil, errs.New("unsupported discovery type", "type", config.Envs.Discovery).Wrap()
 	}
 }

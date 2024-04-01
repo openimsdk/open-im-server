@@ -17,7 +17,6 @@ package msggateway
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -58,13 +57,6 @@ type LongConnServer interface {
 	Encoder
 	MessageHandler
 }
-
-// bufferPool is unused
-// var bufferPool = sync.Pool{
-// 	New: func() any {
-// 		return make([]byte, 1024)
-// 	},
-// }
 
 type WsServer struct {
 	globalConfig      *config.GlobalConfig
@@ -128,10 +120,7 @@ func (ws *WsServer) UnRegister(c *Client) {
 	ws.unregisterChan <- c
 }
 
-func (ws *WsServer) Validate(s any) error {
-	if s == nil {
-		return errs.WrapMsg(errors.New("input cannot be nil"), "Validate: input is nil", "action", "validate", "dataType", "any")
-	}
+func (ws *WsServer) Validate(_ any) error {
 	return nil
 }
 
@@ -372,7 +361,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			log.ZWarn(
 				newClient.ctx,
 				"m is nil",
-				errors.New("m is nil"),
+				errs.New("m is nil"),
 				"userID",
 				newClient.UserID,
 				"platformID",

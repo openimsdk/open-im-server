@@ -17,7 +17,7 @@ package push
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	"github.com/openimsdk/tools/errs"
 	"sync"
 
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
@@ -59,7 +59,7 @@ type Pusher struct {
 	groupRpcClient         *rpcclient.GroupRpcClient
 }
 
-var errNoOfflinePusher = errors.New("no offlinePusher is configured")
+var errNoOfflinePusher = errs.New("no offlinePusher is configured")
 
 func NewPusher(config *config.GlobalConfig, discov discovery.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
 	groupLocalCache *rpccache.GroupLocalCache, conversationLocalCache *rpccache.ConversationLocalCache,

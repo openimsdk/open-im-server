@@ -15,7 +15,6 @@
 package msggateway
 
 import (
-	"errors"
 	"net/http"
 	"time"
 
@@ -99,9 +98,8 @@ func (d *GWebSocket) SetReadDeadline(timeout time.Duration) error {
 }
 
 func (d *GWebSocket) SetWriteDeadline(timeout time.Duration) error {
-	// TODO add error
 	if timeout <= 0 {
-		return errs.Wrap(errors.New("timeout must be greater than 0"))
+		return errs.New("timeout must be greater than 0")
 	}
 
 	// TODO SetWriteDeadline Future add error handling

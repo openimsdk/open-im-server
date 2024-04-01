@@ -17,7 +17,6 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -363,10 +362,10 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	}
 	lenList := len(msgs)
 	if int64(lenList) > db.msg.GetSingleGocMsgNum() {
-		return 0, false, errs.WrapMsg(errors.New("message count exceeds limit"), "limit", db.msg.GetSingleGocMsgNum())
+		return 0, false, errs.New("message count exceeds limit", "limit", db.msg.GetSingleGocMsgNum()).Wrap()
 	}
 	if lenList < 1 {
-		return 0, false, errs.WrapMsg(errors.New("no messages to insert"), "minCount", 1)
+		return 0, false, errs.New("no messages to insert", "minCount", 1).Wrap()
 	}
 	if errs.Unwrap(err) == redis.Nil {
 		isNew = true

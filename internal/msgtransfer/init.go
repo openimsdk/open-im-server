@@ -16,7 +16,6 @@ package msgtransfer
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
@@ -114,7 +113,7 @@ func NewMsgTransfer(kafkaConf *config.Kafka, msgDatabase controller.CommonMsgDat
 
 func (m *MsgTransfer) Start(prometheusPort int, config *config.GlobalConfig, index int) error {
 	if prometheusPort <= 0 {
-		return errs.WrapMsg(errors.New("invalid prometheus port"), "prometheusPort validation failed", "providedPort", prometheusPort)
+		return errs.New("invalid prometheus port", "prometheusPort", prometheusPort)
 	}
 
 	m.ctx, m.cancel = context.WithCancel(context.Background())

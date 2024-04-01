@@ -233,7 +233,7 @@ func (c *ConversationRedisCache) DelConversations(ownerUserID string, conversati
 // 		}
 // 	}
 
-// 	return 0, errors.New("not found key:" + key + " in keys")
+// 	return 0, errs.New("not found key:" + key + " in keys")
 // }
 
 func (c *ConversationRedisCache) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationtb.ConversationModel, error) {
@@ -337,30 +337,6 @@ func (c *ConversationRedisCache) DelSuperGroupRecvMsgNotNotifyUserIDsHash(groupI
 
 	return cache
 }
-
-/* func (c *ConversationRedisCache) getUserAllHasReadSeqsIndex(conversationID string, conversationIDs []string) (int, error) {
-	for _i, _conversationID := range conversationIDs {
-		if _conversationID == conversationID {
-			return _i, nil
-		}
-	}
-
-	return 0, errors.New("not found key:" + conversationID + " in keys")
-} */
-
-/* func (c *ConversationRedisCache) GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error) {
-	conversationIDs, err := c.GetUserConversationIDs(ctx, ownerUserID)
-	if err != nil {
-		return nil, err
-	}
-	var keys []string
-	for _, conversarionID := range conversationIDs {
-		keys = append(keys, c.getConversationHasReadSeqKey(ownerUserID, conversarionID))
-	}
-	return batchGetCacheMap(ctx, c.rcClient, keys, conversationIDs, c.expireTime, c.getUserAllHasReadSeqsIndex, func(ctx context.Context) (map[string]int64, error) {
-		return c.conversationDB.GetUserAllHasReadSeqs(ctx, ownerUserID)
-	})
-} */
 
 func (c *ConversationRedisCache) DelUserAllHasReadSeqs(ownerUserID string, conversationIDs ...string) ConversationCache {
 	cache := c.NewCache()

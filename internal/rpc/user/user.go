@@ -16,7 +16,6 @@ package user
 
 import (
 	"context"
-	"errors"
 	"github.com/openimsdk/tools/db/redisutil"
 	"math/rand"
 	"strings"
@@ -71,7 +70,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, client registry.Svc
 	}
 	users := make([]*tablerelation.UserModel, 0)
 	if len(config.IMAdmin.UserID) != len(config.IMAdmin.Nickname) {
-		return errs.Wrap(errors.New("the count of ImAdmin.UserID is not equal to the count of ImAdmin.Nickname"))
+		return errs.New("the count of ImAdmin.UserID is not equal to the count of ImAdmin.Nickname").Wrap()
 	}
 	for k, v := range config.IMAdmin.UserID {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.IMAdmin.Nickname[k], AppMangerLevel: constant.AppNotificationAdmin})

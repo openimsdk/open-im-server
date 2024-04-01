@@ -17,7 +17,6 @@ package cache
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
@@ -35,7 +34,7 @@ const (
 	retryInterval = time.Millisecond * 100
 )
 
-var errIndex = errors.New("err index")
+var errIndex = errs.New("err index")
 
 type metaCache interface {
 	ExecDel(ctx context.Context, distinct ...bool) error

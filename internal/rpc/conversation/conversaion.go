@@ -16,7 +16,6 @@ package conversation
 
 import (
 	"context"
-	"errors"
 	"github.com/openimsdk/tools/db/redisutil"
 	"sort"
 
@@ -315,12 +314,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 
 // Get user IDs with "Do Not Disturb" enabled in super large groups.
 func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbconversation.GetRecvMsgNotNotifyUserIDsReq) (*pbconversation.GetRecvMsgNotNotifyUserIDsResp, error) {
-	// userIDs, err := c.conversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
-	// if err != nil {
-	//	return nil, err
-	//}
-	// return &pbconversation.GetRecvMsgNotNotifyUserIDsResp{UserIDs: userIDs}, nil
-	return nil, errors.New("deprecated")
+	return nil, errs.New("deprecated")
 }
 
 // create conversation without notification for msg redis transfer.
