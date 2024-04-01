@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"time"
 )
 
 func main() {
@@ -15,4 +16,6 @@ func main() {
 
 	// Print the values of the flags
 	fmt.Printf("args: -i %d -c %s\n", *index, *config)
+
+	time.Sleep(600 * time.Second)
 }
