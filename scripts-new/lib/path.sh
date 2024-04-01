@@ -1,7 +1,7 @@
 
 #!/usr/bin/env bash
 
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+local OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/lib/util.sh"
 
 
