@@ -92,12 +92,7 @@ func TestName(t *testing.T) {
 			defer wg.Done()
 			//t.Log(key)
 			fn(key, 10000, func() (string, error) {
-				//time.Sleep(time.Second * 3)
-				//t.Log(time.Now(), "key", key, "fetch")
-				//if rand.Uint32()%5 == 0 {
-				//	return "value_" + key, nil
-				//}
-				//return "", errors.New("rand error")
+
 				return "value_" + key, nil
 			})
 		}()

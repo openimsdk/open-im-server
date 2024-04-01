@@ -2,8 +2,6 @@ module github.com/openimsdk/open-im-server/v3
 
 go 1.21
 
-toolchain go1.21.8
-
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/dtm-labs/rockscache v0.1.1

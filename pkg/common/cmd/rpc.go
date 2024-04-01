@@ -16,8 +16,6 @@ package cmd
 
 import (
 	"context"
-	"errors"
-
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/protocol/constant"
@@ -70,7 +68,7 @@ func (a *RpcCmd) Exec() error {
 
 func (a *RpcCmd) StartSvr(name string, rpcFn func(ctx context.Context, config *config2.GlobalConfig, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error) error {
 	if a.GetPortFlag() == 0 {
-		return errs.Wrap(errors.New("port is required"))
+		return errs.New("port is required").Wrap()
 	}
 	return startrpc.Start(a.ctx, a.GetPortFlag(), name, a.GetPrometheusPortFlag(), a.config, rpcFn)
 }
@@ -156,5 +154,5 @@ func (a *RpcCmd) GetRpcRegisterNameFromConfig() (string, error) {
 	case RpcUserServer:
 		return a.config.RpcRegisterName.OpenImUserName, nil
 	}
-	return "", errs.WrapMsg(errors.New("unrecognized RPC server name"), "providedName", a.Name, "hint", "Check if the server name is correctly configured")
+	return "", errs.New("unrecognized RPC server name", "rpcName", a.Name).Wrap()
 }

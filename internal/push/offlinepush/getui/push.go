@@ -18,7 +18,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"strconv"
 	"sync"
 	"time"
@@ -35,8 +34,8 @@ import (
 )
 
 var (
-	ErrTokenExpire = errors.New("token expire")
-	ErrUserIDEmpty = errors.New("userIDs is empty")
+	ErrTokenExpire = errs.New("token expire")
+	ErrUserIDEmpty = errs.New("userIDs is empty")
 )
 
 const (
