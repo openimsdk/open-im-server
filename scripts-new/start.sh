@@ -2,7 +2,7 @@
 #!/usr/bin/env bash
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-source "$(dirname "$0")/define/binariesgit.sh"
+source "$(dirname "$0")/define/binaries.sh"
 source "$(dirname "$0")/lib/path.sh"
 
 # Assuming 'openim::util::host_platform' is defined in one of the sourced scripts or elsewhere.
