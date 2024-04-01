@@ -36,6 +36,7 @@ for binary in "${!binaries[@]}"; do
 
   result=$(openim::util::check_process_names "$full_path" "$expected_count")
 
+echo $result 1111111111111111112222
   if [ "$result" -eq 0 ]; then
     echo "ok $binary"
   else
