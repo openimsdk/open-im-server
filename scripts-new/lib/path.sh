@@ -1,8 +1,6 @@
 
 #!/usr/bin/env bash
 
-local OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-source "${OPENIM_ROOT}/lib/util.sh"
 
 
 get_conf_dir() {
