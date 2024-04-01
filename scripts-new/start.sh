@@ -18,8 +18,7 @@ start_binaries() {
   # Iterate over binaries defined in binary_path.sh
   for binary in "${!binaries[@]}"; do
     local count=${binaries[$binary]}
-    local bin_full_path=$(get_bin_full_path "$project_dir" "$binary")
-    echo "$project_dir" "$binary" 444444444444444444
+    local bin_full_path=$(get_bin_full_path "$binary")
     # Loop to start binary the specified number of times
     for ((i=0; i<count; i++)); do
       echo "Starting $binary instance $i: $bin_full_path -i $i -c $OPENIM_OUTPUT_CONFIG"
