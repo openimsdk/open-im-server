@@ -76,9 +76,7 @@ check_binaries_running(){
 
     result=$(openim::util::check_process_names "$full_path" "$expected_count")
     ret_val=$?
-    if [ "$ret_val" -eq 0 ]; then
-      echo "$binary is running normally."
-    else
+    if [ "$ret_val" -ne 0 ]; then
       no_running_binaries=$((no_running_binaries + 1))
       echo $result
     fi
