@@ -44,3 +44,11 @@ for binary in "${!binaries[@]}"; do
 done
 
 
+for binary in "${!binaries[@]}"; do
+  expected_count=${binaries[$binary]}
+  full_path=$(get_bin_full_path "$binary")
+  check_binary "$full_path"
+done
+
+
+

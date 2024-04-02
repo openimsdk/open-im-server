@@ -2831,9 +2831,53 @@ function openim::util::find_ports_for_all_services() {
 }
 
 
+check_binary_ports() {
+    binary_path="$1"
+    binary_name=$(basename "$binary_path")
+
+    # Check if the binary is running
+    if pgrep -f "$binary_path" > /dev/null; then
+        echo "$binary_name is running."
+
+        # Find the PID(s) of the running binary
+        pids=$(pgrep -f "$binary_path")
+
+        # Initialize an empty string to store ports
+        ports=""
+
+        # Loop through each PID
+        for pid in $pids; do
+            # Check for listening ports using lsof
+            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+                # Linux
+                ports+=$(lsof -i -n | grep LISTEN | grep "$pid" | awk '{print $9}' | cut -d':' -f2 | uniq)
+            elif [[ "$OSTYPE" == "darwin"* ]]; then
+                # macOS
+                ports+=$(lsof -i -n | grep LISTEN | grep "$pid" | awk '{print $9}' | awk -F'[:\.]+' '{print $(NF-1)}' | uniq)
+            fi
+        done
+
+        # Remove duplicate ports if any
+        ports=$(echo "$ports" | uniq)
+
+        if [ -z "$ports" ]; then
+            echo "$binary_name is not listening on any ports."
+        else
+            echo "$binary_name is listening on the following ports: $ports"
+        fi
+    else
+        echo "$binary_name is not running."
+    fi
+}
+
+
+
 
 
 
 if [[ "$*" =~ openim::util:: ]];then
   eval $*
 fi
+
+
+

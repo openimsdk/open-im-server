@@ -14,7 +14,6 @@ source "$OPENIM_SCRIPTS/define/binaries.sh"
 # Main function to start binaries
 start_binaries() {
   local project_dir="$OPENIM_ROOT"  # You should adjust this path as necessary
-  echo $OPENIM_ROOT 12322222222222222222222222222222
   # Iterate over binaries defined in binary_path.sh
   for binary in "${!binaries[@]}"; do
     local count=${binaries[$binary]}
@@ -26,6 +25,8 @@ start_binaries() {
       done
   done
 }
+
+
 
 # Call the main function
 start_binaries
