@@ -35,6 +35,8 @@ if [ $ret_val -eq 0 ]; then
     echo "All binaries are running."
 else
     echo "$result"
+    echo "abort..."
+    exit 1
 fi
 
 
