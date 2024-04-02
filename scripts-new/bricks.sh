@@ -1,10 +1,8 @@
 
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/
-echo $OPENIM_ROOT 1111111111111111111111
-source "${OPENIM_ROOT}/lib/util.sh"
-source "${OPENIM_ROOT}/define/binaries.sh"
-source "${OPENIM_ROOT}/lib/path.sh"
-source "${OPENIM_ROOT}/lib/logging.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/util.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/define/binaries.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/path.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/logging.sh"
 
 
 #停止所有的二进制对应的进程
@@ -20,7 +18,7 @@ ERR_LOG_FILE=err.log.file
 
 #启动所有的二进制
 start_binaries() {
-  local project_dir="$OPENIM_ROOT"  # You should adjust this path as necessary
+  echo $
   # Iterate over binaries defined in binary_path.sh
   for binary in "${!binaries[@]}"; do
     local count=${binaries[$binary]}
