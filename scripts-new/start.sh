@@ -18,12 +18,10 @@ kill_exist_binaries
 result=$(check_binaries_stop)
 ret_val=$?
 
-if [ $ret_val -eq 0 ]; then
-    echo "All binaries are stopped."
-else
-    echo "$result"
-    echo "abort..."
-    exit 1
+if [ $ret_val -ne 0 ]; then
+  echo "$result"
+  echo "abort..."
+  exit 1
 fi
 
 
