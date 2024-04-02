@@ -21,7 +21,7 @@ if [ $ret_val -ne 0 ]; then
 fi
 
 openim::log::print_green "All tools executed successfully, details are as follows:"
-openim::log::print_green_no_time_stamp "$result"
+echo "$result"
 
 kill_exist_binaries
 
@@ -29,8 +29,8 @@ result=$(check_binaries_stop)
 ret_val=$?
 
 if [ $ret_val -ne 0 ]; then
-  echo "$result"
-  echo "Some services running, abort start"
+  openim::log::print_red "Some services running,  details are as follows, abort start"
+  openim::log::print_red_no_time_stamp "$result"
   exit 1
 fi
 
