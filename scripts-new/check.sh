@@ -32,10 +32,10 @@ source "$OPENIM_SCRIPTS/bricks.sh"
 result=$(check_binaries_running)
 ret_val=$?
 if [ $ret_val -eq 0 ]; then
-    echo "All binaries are running."
+     echo "All services are running normally."
 else
-    echo "$result"
-    echo "abort..."
+    openim::log::error "Some services are not running as expected. Details are as follows:"
+    openim::log::error "$result"
     exit 1
 fi
 

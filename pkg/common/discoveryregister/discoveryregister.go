@@ -15,8 +15,6 @@
 package discoveryregister
 
 import (
-	"os"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/direct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
@@ -27,10 +25,6 @@ import (
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
 func NewDiscoveryRegister(config *config.GlobalConfig) (discovery.SvcDiscoveryRegistry, error) {
-
-	if os.Getenv("ENVS_DISCOVERY") != "" {
-		config.Envs.Discovery = os.Getenv("ENVS_DISCOVERY")
-	}
 
 	switch config.Envs.Discovery {
 	case "zookeeper":

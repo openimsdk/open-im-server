@@ -1,4 +1,4 @@
-#fixme  Clone openIM Server project before using docker-compose,project address：https://github.com/OpenIMSDK/Open-IM-Server.git
+#fixme  Clone openIM Server project before using docker-compose,project address：https://github.com/openimsdk/open-im-server.git
 #  The command that triggers this file to pull the image is "docker compose up -f"
 version: '3'
 

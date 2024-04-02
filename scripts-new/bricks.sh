@@ -1,9 +1,8 @@
 
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/
-source "${OPENIM_ROOT}/lib/util.sh"
-source "${OPENIM_ROOT}/define/binaries.sh"
-source "${OPENIM_ROOT}/lib/path.sh"
-
+source "$(dirname "${BASH_SOURCE[0]}")/lib/util.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/define/binaries.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/path.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/logging.sh"
 
 
 #停止所有的二进制对应的进程
@@ -19,17 +18,14 @@ ERR_LOG_FILE=err.log.file
 
 #启动所有的二进制
 start_binaries() {
-  local project_dir="$OPENIM_ROOT"  # You should adjust this path as necessary
+  echo $
   # Iterate over binaries defined in binary_path.sh
   for binary in "${!binaries[@]}"; do
     local count=${binaries[$binary]}
     local bin_full_path=$(get_bin_full_path "$binary")
     # Loop to start binary the specified number of times
     for ((i=0; i<count; i++)); do
-      echo "Starting $binary instance $i: $bin_full_path -i $i -c $OPENIM_OUTPUT_CONFIG"
-      #nohup "$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG" > "test.log" 2>&1 &
-      #nohup sh -c '"$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG" 2>&1 | tee test.log' &
-      #nohup ./run_my_command.sh "$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG" > test.log 2>&1 &
+      echo  "Starting $binary instance $i: $bin_full_path -i $i -c $OPENIM_OUTPUT_CONFIG"
       cmd=("$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG")
       nohup "${cmd[@]}" >> "${LOG_FILE}" 2> >(tee -a "$ERR_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) &
       done
@@ -80,9 +76,7 @@ check_binaries_running(){
 
     result=$(openim::util::check_process_names "$full_path" "$expected_count")
     ret_val=$?
-    if [ "$ret_val" -eq 0 ]; then
-      echo "$binary is running normally."
-    else
+    if [ "$ret_val" -ne 0 ]; then
       no_running_binaries=$((no_running_binaries + 1))
       echo $result
     fi

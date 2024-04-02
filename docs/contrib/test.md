@@ -2,14 +2,94 @@
 
 This document serves as a comprehensive guide to understanding and utilizing the `test.sh` script for testing OpenIM RPC services. The `test.sh` script is a collection of bash functions designed to test various aspects of the OpenIM RPC services, ensuring that each part of the API is functioning as expected.
 
-+ Scripts：https://github.com/OpenIMSDK/Open-IM-Server/tree/main/scripts/install/test.sh
++ Scripts：https://github.com/openimsdk/open-im-server/tree/main/scripts/install/test.sh
 
-For some complex, bulky functional tests, performance tests, and various e2e tests, We are all in the current warehouse to https://github.com/OpenIMSDK/Open-IM-Server/tree/main/test or https://github.com/openim-sigs/test-infra directory In the.
+For some complex, bulky functional tests, performance tests, and various e2e tests, We are all in the current warehouse to https://github.com/openimsdk/open-im-server/tree/main/test or https://github.com/openim-sigs/test-infra directory In the.
 
 + About OpenIM Feature [Test Docs](https://docs.google.com/spreadsheets/d/1zELWkwxgOOZ7u5pmYCqqaFnvZy2SVajv/edit?usp=sharing&ouid=103266350914914783293&rtpof=true&sd=true)
 
+## Util Test
 
-## Usage
+Let's restructure and enhance the document under a unified second-level heading, adding clarity and details for better comprehension and visual appeal.
+
+---
+
+## Development Guide
+
+### Comprehensive Testing Instructions
+
+#### Running Unit Tests
+
+- **Command**: To execute unit tests, input the following in your terminal:
+  ```
+  make test
+  ```
+
+#### Evaluating Test Coverage
+
+- **Overview**: It's crucial to assess how much of your code is covered by tests.
+- **Command**:
+  ```bash
+  make cover
+  ```
+  This command generates a report detailing the percentage of your code tested, ensuring adherence to quality standards.
+
+#### Conducting API Tests
+
+- **Purpose**: API tests validate the interaction and functionality of your application's interfaces.
+- **How to Run**:
+  ```
+  make test-api
+  ```
+  Use this to check the integrity and reliability of your API endpoints.
+
+#### End-to-End (E2E) Testing
+
+- **Scope**: E2E tests simulate real-user scenarios from start to finish.
+- **Execution**:
+  ```
+  make test-e2e
+  ```
+  This comprehensive testing ensures your application performs as expected in real-world situations.
+
+### Crafting Unit Test Cases
+
+#### Setup for Test Case Generation
+
+- **Installation**: Install the `gotests` tool to generate test cases automatically.
+  ```bash
+  make install.gotests
+  ```
+  This command installs the `gotests` tool for test case generation.
+
+- **Environment Preparation**: Define your test template environment variable and generate test cases as shown below:
+  ```bash
+  export GOTESTS_TEMPLATE=testify
+  gotests -i -w -only keyFunc .
+  ```
+  This prepares your environment for test case generation using the `testify` template.
+
+#### Isolating Function Tests
+
+- **Single Function Testing**: When you need to focus on testing a single function for detailed examination.
+- **Method**:
+  ```bash
+  go test -v -run TestKeyFunc
+  ```
+  This command specifically runs tests for `TestKeyFunc`, allowing targeted debugging and validation.
+
+### Important Note
+
+- **Quality Assurance**: Throughout your development process, it is imperative to ensure that the unit test coverage meets or surpasses the standards set by OpenIM.
+- **Maintaining Standards**: Regularly running your tests with
+  ```make test```
+  supports maintaining high code quality and adherence to OpenIM's rigorous testing benchmarks.
+
+## E2E Test
+
+TODO
+
+## Api Test
 
 The `test.sh` script is located within the `./scripts/install/` directory of the OpenIM service's codebase. To use the script, navigate to this directory from your terminal:
 

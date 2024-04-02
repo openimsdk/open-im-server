@@ -387,7 +387,7 @@ openim::util::check_process_names() {
     if [ "$running_count" -eq "$expected_count" ]; then
         return 0
     else
-        echo "$process_path Expected $expected_count processes, but $running_count are present"
+        echo "$process_path Expected $expected_count processes, but $running_count running"
         return 1
     fi
 }

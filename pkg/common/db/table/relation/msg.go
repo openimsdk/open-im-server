@@ -21,6 +21,7 @@ import (
 
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
