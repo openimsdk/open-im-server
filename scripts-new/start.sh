@@ -27,7 +27,38 @@ start_binaries() {
   done
 }
 
+kill_exist_binaries(){
+  for binary in "${!binaries[@]}"; do
+    full_path=$(get_bin_full_path "$binary")
+    result=$(openim::util::kill_exist_binary "$full_path")
+   if [ "$result" -eq 0 ]; then
+       echo "$binary no exist"
+     else
+       echo "$binary running. waiting stop"
+     fi
+  done
+}
 
+
+check_all_stop() {
+  for binary in "${!binaries[@]}"; do
+    expected_count=${binaries[$binary]}
+    full_path=$(get_bin_full_path "$binary")
+
+    result=$(openim::util::check_process_names_exist "$full_path")
+    if [ "$result" -ne 0 ]; then
+          echo "Process for $binary is still running. Aborting..."
+          exit 1
+        fi
+      done
+      echo "All processes have been stopped."
+}
+
+
+
+kill_exist_binaries
+
+check_all_stop
 
 # Call the main function
 start_binaries

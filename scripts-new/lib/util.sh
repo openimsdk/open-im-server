@@ -398,6 +398,20 @@ openim::util::check_process_names() {
 }
 
 
+openim::util::check_process_names_exist() {
+    local process_path="$1"
+    local running_count=$(ps -ef | grep "$process_path" | grep -v grep | wc -l)
+
+    if [ "$running_count" -gt 0 ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+
+
+
 
 
 openim::util::check_process_names_for_stop() {
@@ -2885,6 +2899,23 @@ kill_binary() {
             kill -9 "$pid"
         done
     fi
+}
+
+
+kill_exist_binary() {
+    local binary_path="$1"
+       local pids=$(pgrep -f "$binary_path")
+
+       if [ -z "$pids" ]; then
+           echo 0
+           return
+       else
+           for pid in $pids; do
+               echo "Killing process $pid associated with $binary_path"
+               kill -9 "$pid"
+           done
+           echo 1
+       fi
 }
 
 
