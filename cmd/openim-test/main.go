@@ -1,23 +1,46 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"math/rand"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
 func main() {
-	// Define flags
-	index := flag.Int("i", 0, "Index number")
-	config := flag.String("c", "", "Configuration path")
+	// (Your flag definitions and random port selection logic here)
 
-	// Parse the flags
-	flag.Parse()
+	// Initialize a channel to listen for interrupt signals
+	sigs := make(chan os.Signal, 1)
+	// Register the channel to receive SIGINT and SIGTERM
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
-	// Print the values of the flags
-	fmt.Printf("args: -i %d -c %s\n", *index, *config)
+	// Function to start a TCP listener on a specified port
+	startListener := func(port int) {
+		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+		if err != nil {
+			fmt.Printf("Error starting TCP listener on port %d: %v\n", port, err)
+			return
+		}
+		defer listener.Close()
+		fmt.Printf("Listening on port %d...\n", port)
+
+		// Accept connections in a loop
+		go func() {
+			for {
+				_, err := listener.Accept()
+				if err != nil {
+					fmt.Printf("Error accepting connection on port %d: %v\n", port, err)
+					break
+				}
+				// Handle connection (e.g., close immediately for this example)
+				// conn.Close()
+			}
+		}()
+	}
 
 	// Initialize the random number generator
 	rand.Seed(time.Now().UnixNano())
@@ -31,27 +54,12 @@ func main() {
 		port2 = rand.Intn(10001) + 10000
 	}
 
-	// Print the selected ports
-	fmt.Printf("Randomly selected TCP ports to listen on: %d, %d\n", port1, port2)
-
-	// Function to start a TCP listener on a specified port
-	startListener := func(port int) {
-		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-		if err != nil {
-			fmt.Printf("Error starting TCP listener on port %d: %v\n", port, err)
-			return
-		}
-		defer listener.Close()
-		fmt.Printf("Listening on port %d...\n", port)
-
-		// Here we simply keep the listener running. In a real application, you would accept connections.
-		select {} // Block forever
-	}
-
 	// Start TCP listeners on the selected ports
+	// (Assuming port1 and port2 are defined as per your logic)
 	go startListener(port1)
 	go startListener(port2)
 
-	// Block forever
-	select {}
+	// Wait for an interrupt signal
+	<-sigs
+	fmt.Println("Shutting down...")
 }
