@@ -315,14 +315,8 @@ func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 					for i, header := range consumerMessages[i].Headers {
 						arr = append(arr, strconv.Itoa(i), string(header.Key), string(header.Value))
 					}
-					log.ZInfo(
-						ctx,
-						"consumer.kafka.GetContextWithMQHeader",
-						"len",
-						len(consumerMessages[i].Headers),
-						"header",
-						strings.Join(arr, ", "),
-					)
+					log.ZInfo(ctx, "consumer.kafka.GetContextWithMQHeader", "len", len(consumerMessages[i].Headers),
+						"header", strings.Join(arr, ", "))
 					ctxMsg.ctx = kafka.GetContextWithMQHeader(consumerMessages[i].Headers)
 					ctxMsg.message = msgFromMQ
 					log.ZDebug(

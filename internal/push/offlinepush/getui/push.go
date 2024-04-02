@@ -71,7 +71,7 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 	token, err := g.cache.GetGetuiToken(ctx)
 	if err != nil {
 		if errs.Unwrap(err) == redis.Nil {
-			log.ZInfo(ctx, "getui token not exist in redis")
+			log.ZDebug(ctx, "getui token not exist in redis")
 			token, err = g.getTokenAndSave2Redis(ctx)
 			if err != nil {
 				return err

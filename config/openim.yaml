@@ -1,0 +1,260 @@
+# openim.yaml 作为存放一些通用配置或特殊配置的文件，我们将包含日志、消息缓存、多登录策略、消息验证策略等配置。
+# 这些配置是跨多个服务的共享配置，它们对于整个系统的运行至关重要。
+log:
+  storageLocation: /data/workspaces/open-im-server/_output/logs/
+  rotationTime: 24
+  remainRotationCount: 2
+  remainLogLevel: 6
+  isStdout: false
+  isJson: false
+  withStack: false
+
+msgCacheTimeout: 86400
+
+multiLoginPolicy: 1
+
+messageVerify:
+  friendVerify: false
+
+tokenPolicy:
+  expire: 90
+
+groupMessageHasReadReceiptEnable: true
+
+singleMessageHasReadReceiptEnable: true
+
+retainChatRecords: 365
+
+chatRecordsClearTime: "0 2 * * 3"
+
+msgDestructTime: "0 2 * * *"
+
+secret: openIM123
+
+iosPush:
+  pushSound: "xxx"
+  badgeCount: true
+  production: false
+
+
+###################### Third-party service configuration ######################
+# Callback configuration
+#
+# Callback URL
+# Whether to enable this callback event
+# Timeout in seconds
+# Whether to continue execution if callback fails
+callback:
+  url: "http://127.0.0.1:10008/callbackExample"
+  beforeSendSingleMsg:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeUpdateUserInfoEx:
+    enable:  false
+    timeout: 5
+    failedContinue: true
+  afterUpdateUserInfoEx:
+    enable:  false
+    timeout: 5
+    failedContinue: true
+  afterSendSingleMsg:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeSendGroupMsg:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  afterSendGroupMsg:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  msgModify:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  userOnline:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  userOffline:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  userKickOff:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  offlinePush:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  onlinePush:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  superGroupOnlinePush:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeAddFriend:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeUpdateUserInfo:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeCreateGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  afterCreateGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeMemberJoinGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeSetGroupMemberInfo:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  afterSetGroupMemberInfo:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  setMessageReactionExtensions:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  quitGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  killGroupMember:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  dismissGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  joinGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  groupMsgRead:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  singleMsgRead:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  updateUserInfo:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeUserRegister:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  afterUserRegister:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  transferGroupOwner:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeSetFriendRemark:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  afterSetFriendRemark:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  afterGroupMsgRead:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  afterGroupMsgRevoke:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  afterJoinGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeInviteUserToGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  joinGroupAfter:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  setGroupInfoAfter:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  setGroupInfoBefore:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  revokeMsgAfter:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  addBlackBefore:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  addFriendAfter:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  addFriendAgreeBefore:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  deleteFriendAfter:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  importFriendsBefore:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  importFriendsAfter:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  removeBlackAfter:
+    enable: false
+    timeout: 5
+    failedContinue: true
+
+###################### Prometheus ######################
+# Prometheus configuration for various services
+# The number of Prometheus ports per service needs to correspond to rpcPort
+# The number of ports needs to be consistent with msg_transfer_service_num in script/path_info.sh
+prometheus:
+  enable: true
+  grafanaUrl: http://127.0.0.1:13000/
+  apiPrometheusPort: [20100]
+  userPrometheusPort: [ 20110 ]
+  friendPrometheusPort: [ 20120 ]
+  messagePrometheusPort: [ 20130 ]
+  messageGatewayPrometheusPort: [ 20140 ]
+  groupPrometheusPort: [ 20150 ]
+  authPrometheusPort: [ 20160 ]
+  pushPrometheusPort: [ 20170 ]
+  conversationPrometheusPort: [ 20230 ]
+  rtcPrometheusPort: [ 21300 ]
+  thirdPrometheusPort: [ 21301 ]
+  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] # List of ports

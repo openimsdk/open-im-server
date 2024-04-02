@@ -4,5 +4,8 @@
 # The count for openim-msgtransfer is set to 4, all others are set to 1.
 declare -A binaries=(
   [openim-test]=2
+  [openim-no-port]=2
   )
 
+
+tool_binaries=("ncpu" "infra")

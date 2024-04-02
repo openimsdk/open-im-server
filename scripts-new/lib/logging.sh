@@ -254,9 +254,44 @@ function openim::log::test_log() {
 
 # openim::log::test_log
 
-function openim::log::print_blue() {
-    echo -e "\033[0;36m$1\033[0m"
+
+function openim::log::print_blue_two_line() {
+    local current_time=$(date "+%Y-%m-%d %H:%M:%S %Z")
+    echo -e "[$current_time]"
+    echo -e "\033[0;34m$1\033[0m"
 }
+
+function openim::log::print_blue() {
+    local current_time=$(date "+%Y-%m-%d %H:%M:%S %Z")
+    echo -e "[$current_time] \033[0;34m$1\033[0m"
+}
+
+
+function openim::log::print_green_two_line() {
+    local current_time=$(date "+%Y-%m-%d %H:%M:%S %Z")
+    echo -e "[$current_time]"
+    echo -e "\033[0;32m$1\033[0m"
+}
+
+function openim::log::print_green() {
+    local current_time=$(date "+%Y-%m-%d %H:%M:%S %Z")
+    echo -e "[$current_time] \033[0;32m$1\033[0m"
+}
+
+
+function openim::log::print_red() {
+    local current_time=$(date "+%Y-%m-%d %H:%M:%S %Z")
+    echo -e "[$current_time] \033[0;31m$1\033[0m"
+}
+
+function openim::log::print_red_no_time_stamp() {
+    echo -e "\033[0;31m$1\033[0m"
+}
+
+function openim::log::print_green_no_time_stamp() {
+    echo -e "\033[0;32m$1\033[0m"
+}
+
 
 
 openim::log::colorless() {

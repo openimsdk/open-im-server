@@ -24,20 +24,23 @@
 
 
 
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/
-source "${OPENIM_ROOT}/lib/util.sh"
-source "${OPENIM_ROOT}/define/binaries.sh"
-source "${OPENIM_ROOT}/lib/path.sh"
-
+OPENIM_SCRIPTS=$(dirname "${BASH_SOURCE[0]}")/
+source "$OPENIM_SCRIPTS/bricks.sh"
 
 
 
 result=$(check_binaries_running)
 ret_val=$?
-
 if [ $ret_val -eq 0 ]; then
-    echo "All binaries are running."
+     openim::log::print_green "All services are running normally."
 else
-    echo "$result"
+    openim::log::print_red "Some services are not running as expected. Details are as follows:"
+    openim::log::print_red_no_time_stamp "$result"
+    exit 1
 fi
+
+
+result=$(print_listened_ports_by_binaries)
+openim::log::print_green_two_line "$result"
+
 

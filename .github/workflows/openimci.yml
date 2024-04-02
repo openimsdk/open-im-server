@@ -73,6 +73,9 @@ jobs:
     - name: Code Typecheck Detector
       uses: kubecub/typecheck@main
 
+    - name: Conformity Checker for Project
+      uses: kubecub/standardizer@main
+
     - name: Module Operations
       run: |
         sudo make tidy

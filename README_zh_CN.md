@@ -52,7 +52,7 @@
 </p>
 
 ## 🟢 扫描微信进群交流
-<img src="./docs/images/Wechat.jpg" width="300">
+<img src="./docs/images/wechat.jpg" width="300">
 
 
 ## Ⓜ️ 关于 OpenIM
