@@ -24,7 +24,7 @@ start_binaries() {
     local bin_full_path=$(get_bin_full_path "$binary")
     # Loop to start binary the specified number of times
     for ((i=0; i<count; i++)); do
-      echo "$bin_full_path -i $i -c $OPENIM_OUTPUT_CONFIG"
+      echo "Starting $bin_full_path -i $i -c $OPENIM_OUTPUT_CONFIG"
       cmd=("$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG")
       nohup "${cmd[@]}" >> "${LOG_FILE}" 2> >(tee -a "$ERR_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) &
       done
