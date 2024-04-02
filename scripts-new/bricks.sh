@@ -56,10 +56,8 @@ check_binaries_stop() {
   done
 
   if [ "$running_binaries" -ne 0 ]; then
-    echo "There are $running_binaries binaries still running. Aborting..."
     return 1
   else
-    echo "All processes have been stopped."
     return 0
   fi
 }

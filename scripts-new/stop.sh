@@ -14,11 +14,10 @@ kill_exist_binaries
 
 result=$(check_binaries_stop)
 ret_val=$?
-
 if [ $ret_val -ne 0 ]; then
-  echo "$result"
-  echo "no stop..."
+  openim::log::print_red "Some services have not been stopped, details are as follows:"
+  openim::log::print_red_two_lines "$result"
   exit 1
 fi
 
-echo "all stop"
+openim::log::print_green "All services have been stopped"
