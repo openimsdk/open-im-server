@@ -59,7 +59,6 @@ func (m *msgServer) UserClearAllMsg(ctx context.Context, req *msg.UserClearAllMs
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "GetMaxSeq", "conversationIDs", conversationIDs)
 	if err := m.clearConversation(ctx, conversationIDs, req.UserID, req.DeleteSyncOpt); err != nil {
 		return nil, err
 	}
@@ -115,27 +114,13 @@ func (m *msgServer) DeleteMsgPhysical(ctx context.Context, req *msg.DeleteMsgPhy
 	remainTime := timeutil.GetCurrentTimestampBySecond() - req.Timestamp
 	for _, conversationID := range req.ConversationIDs {
 		if err := m.MsgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, remainTime); err != nil {
-			log.ZWarn(
-				ctx,
-				"DeleteConversationMsgsAndSetMinSeq error",
-				err,
-				"conversationID",
-				conversationID,
-				"err",
-				err,
-			)
+			log.ZWarn(ctx, "DeleteConversationMsgsAndSetMinSeq error", err, "conversationID", conversationID, "err", err)
 		}
 	}
 	return &msg.DeleteMsgPhysicalResp{}, nil
 }
 
-func (m *msgServer) clearConversation(
-	ctx context.Context,
-	conversationIDs []string,
-	userID string,
-	deleteSyncOpt *msg.DeleteSyncOpt,
-) error {
-	defer log.ZDebug(ctx, "clearConversation return line")
+func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []string, userID string, deleteSyncOpt *msg.DeleteSyncOpt) error {
 	conversations, err := m.Conversation.GetConversationsByConversationID(ctx, conversationIDs)
 	if err != nil {
 		return err
@@ -159,14 +144,7 @@ func (m *msgServer) clearConversation(
 		// notification 2 self
 		if isSyncSelf {
 			tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: existConversationIDs}
-			m.notificationSender.NotificationWithSesstionType(
-				ctx,
-				userID,
-				userID,
-				constant.ClearConversationNotification,
-				constant.SingleChatType,
-				tips,
-			)
+			m.notificationSender.NotificationWithSesstionType(ctx, userID, userID, constant.ClearConversationNotification, constant.SingleChatType, tips)
 		}
 	} else {
 		if err := m.MsgDatabase.SetMinSeqs(ctx, m.getMinSeqs(maxSeqs)); err != nil {

@@ -32,13 +32,6 @@ import (
 
 const (
 	groupExpireTime = time.Second * 60 * 60 * 12
-	// GroupInfoKey        = "GROUP_INFO:"
-	// groupMemberIDsKey   = "GROUP_MEMBER_IDS:"
-	// groupMembersHashKey = "GROUP_MEMBERS_HASH2:"
-	// groupMemberInfoKey  = "GROUP_MEMBER_INFO:"
-	// joinedGroupsKey            = "JOIN_GROUPS_KEY:"
-	// groupMemberNumKey          = "GROUP_MEMBER_NUM_CACHE:"
-	// groupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:".
 )
 
 type GroupHash interface {

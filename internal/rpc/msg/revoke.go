@@ -32,7 +32,6 @@ import (
 )
 
 func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.RevokeMsgResp, error) {
-	defer log.ZDebug(ctx, "RevokeMsg return line")
 	if req.UserID == "" {
 		return nil, errs.ErrArgs.WrapMsg("user_id is empty")
 	}

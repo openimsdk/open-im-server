@@ -20,7 +20,7 @@ import (
 	pbmsg "github.com/openimsdk/protocol/msg"
 )
 
-func (m *msgServer) GetConversationMaxSeq(ctx context.Context, req *pbmsg.GetConversationMaxSeqReq) (resp *pbmsg.GetConversationMaxSeqResp, err error) {
+func (m *msgServer) GetConversationMaxSeq(ctx context.Context, req *pbmsg.GetConversationMaxSeqReq) (*pbmsg.GetConversationMaxSeqResp, error) {
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
 	if err != nil {
 		return nil, err

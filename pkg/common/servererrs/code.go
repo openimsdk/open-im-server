@@ -20,8 +20,8 @@ const UnknownCode = 1000
 // Error codes for various error scenarios.
 const (
 	FormattingError      = 10001 // Error in formatting
-	HasRegistered        = 10002 // User has already registered
-	NotRegistered        = 10003 // User is not registered
+	HasRegistered        = 10002 // user has already registered
+	NotRegistered        = 10003 // user is not registered
 	PasswordErr          = 10004 // Password error
 	GetIMTokenErr        = 10005 // Error in getting IM token
 	RepeatSendCode       = 10006 // Repeat sending code
@@ -53,7 +53,7 @@ const (
 
 	// Account error codes.
 	UserIDNotFoundError    = 1101 // UserID does not exist or is not registered
-	RegisteredAlreadyError = 1102 // User is already registered
+	RegisteredAlreadyError = 1102 // user is already registered
 
 	// Group error codes.
 	GroupIDNotFoundError  = 1201 // GroupID does not exist

@@ -34,13 +34,10 @@ import (
 )
 
 const (
-	userExpireTime = time.Second * 60 * 60 * 12
-	// UserInfoKey               = "USER_INFO:".
-	userGlobalRecvMsgOptKey   = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
+	userExpireTime            = time.Second * 60 * 60 * 12
 	olineStatusKey            = "ONLINE_STATUS:"
 	userOlineStatusExpireTime = time.Second * 60 * 60 * 24
 	statusMod                 = 501
-	platformID                = "_PlatformIDSuffix"
 )
 
 type UserCache interface {
@@ -64,11 +61,7 @@ type UserCacheRedis struct {
 	rcClient   *rockscache.Client
 }
 
-func NewUserCacheRedis(
-	rdb redis.UniversalClient,
-	userDB relationtb.UserModelInterface,
-	options rockscache.Options,
-) UserCache {
+func NewUserCacheRedis(rdb redis.UniversalClient, userDB relationtb.UserModelInterface, options rockscache.Options) UserCache {
 	rcClient := rockscache.NewClient(rdb, options)
 	mc := NewMetaCacheRedis(rcClient)
 	u := config.Config.LocalCache.User

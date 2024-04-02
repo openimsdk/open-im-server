@@ -39,8 +39,6 @@ type UserDatabase interface {
 	FindNotification(ctx context.Context, level int64) (users []*relation.UserModel, err error)
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db
 	Create(ctx context.Context, users []*relation.UserModel) (err error)
-	// Update update (non-zero value) external guarantee userID exists
-	// Update(ctx context.Context, user *relation.UserModel) (err error)
 	// UpdateByMap update (zero value) external guarantee userID exists
 	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
 	// FindUser
@@ -137,12 +135,10 @@ func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*rel
 	return u.cache.GetUsersInfo(ctx, userIDs)
 }
 
-// Find userInfo By Nickname.
 func (u *userDatabase) FindByNickname(ctx context.Context, nickname string) (users []*relation.UserModel, err error) {
 	return u.userDB.TakeByNickname(ctx, nickname)
 }
 
-// Find notificationAccouts.
 func (u *userDatabase) FindNotification(ctx context.Context, level int64) (users []*relation.UserModel, err error) {
 	return u.userDB.TakeNotification(ctx, level)
 }
@@ -158,14 +154,6 @@ func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) 
 		})...).ExecDel(ctx)
 	})
 }
-
-//// Update (non-zero value) externally guarantees that userID exists.
-// func (u *userDatabase) Update(ctx context.Context, user *relation.SubscribeUserModel) (err error) {
-//	if err := u.userDB.Update(ctx, user); err != nil {
-//		return err
-//	}
-//	return u.cache.DelUsersInfo(user.UserID).ExecDel(ctx)
-//}
 
 // UpdateByMap update (zero value) externally guarantees that userID exists.
 func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error) {
@@ -186,13 +174,7 @@ func (u *userDatabase) PageFindUser(ctx context.Context, level1 int64, level2 in
 	return u.userDB.PageFindUser(ctx, level1, level2, pagination)
 }
 
-func (u *userDatabase) PageFindUserWithKeyword(
-	ctx context.Context,
-	level1 int64,
-	level2 int64,
-	userID, nickName string,
-	pagination pagination.Pagination,
-) (count int64, users []*relation.UserModel, err error) {
+func (u *userDatabase) PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID, nickName string, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
 	return u.userDB.PageFindUserWithKeyword(ctx, level1, level2, userID, nickName, pagination)
 }
 
@@ -267,19 +249,24 @@ func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*
 func (u *userDatabase) SetUserStatus(ctx context.Context, userID string, status, platformID int32) error {
 	return u.cache.SetUserStatus(ctx, userID, status, platformID)
 }
+
 func (u *userDatabase) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error {
 	return u.userDB.AddUserCommand(ctx, userID, Type, UUID, value, ex)
 }
+
 func (u *userDatabase) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
 	return u.userDB.DeleteUserCommand(ctx, userID, Type, UUID)
 }
+
 func (u *userDatabase) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error {
 	return u.userDB.UpdateUserCommand(ctx, userID, Type, UUID, val)
 }
+
 func (u *userDatabase) GetUserCommands(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error) {
 	commands, err := u.userDB.GetUserCommand(ctx, userID, Type)
 	return commands, err
 }
+
 func (u *userDatabase) GetAllUserCommands(ctx context.Context, userID string) ([]*user.AllCommandInfoResp, error) {
 	commands, err := u.userDB.GetAllUserCommand(ctx, userID)
 	return commands, err
