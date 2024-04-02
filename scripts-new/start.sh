@@ -14,16 +14,14 @@ source "$OPENIM_SCRIPTS/bricks.sh"
 
 result=$(start_tools)
 ret_val=$?
-
-
 if [ $ret_val -ne 0 ]; then
-  echo "tools start failed, abort start"
-  echo "$result"
+  openim::log::print_red "Some tools failed to start, details are as follows, abort start"
+  openim::log::print_red_no_time_stamp "$result"
   exit 1
 fi
 
-echo "all tools ok"
-echo "$result"
+openim::log::print_green "All tools executed successfully, details are as follows:"
+openim::log::print_green_no_time_stamp "$result"
 
 kill_exist_binaries
 

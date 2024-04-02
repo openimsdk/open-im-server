@@ -288,6 +288,9 @@ function openim::log::print_red_no_time_stamp() {
     echo -e "\033[0;31m$1\033[0m"
 }
 
+function openim::log::print_green_no_time_stamp() {
+    echo -e "\033[0;32m$1\033[0m"
+}
 
 
 
