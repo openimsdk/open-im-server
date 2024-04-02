@@ -2833,11 +2833,10 @@ function openim::util::find_ports_for_all_services() {
 
 check_binary_ports() {
    binary_path="$1"
-   binary_name=$(basename "$binary_path")
 
    # Check if the binary is running
    if pgrep -f "$binary_path" > /dev/null; then
-       echo "$binary_name is running."  "arg $1"
+     #  echo "$binary_name is running."  "arg $1"
 
        # Find the PID(s) of the running binary
        pids=$(pgrep -f "$binary_path")
@@ -2863,12 +2862,12 @@ check_binary_ports() {
        ports=$(echo "$ports" | xargs | tr ' ' '\n' | uniq | tr '\n' ' ')
 
        if [ -z "$ports" ]; then
-           echo "$binary_name is not listening on any ports."
+           echo "$binary_path is not listening on any ports."
        else
-           echo "$binary_name is listening on the following ports: $ports"
+           echo "$binary_path is listening on the following ports: $ports"
        fi
    else
-       echo "$binary_name is not running."
+       echo "$binary_path is not running."
    fi
 }
 
