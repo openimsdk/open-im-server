@@ -11,7 +11,9 @@ source "$OPENIM_SCRIPTS/bricks.sh"
 
 # Main function to start binaries
 
-openim::log::print_blue "Starting tools: Please wait as we initiate the necessary tools required for the operation. This process may take a few moments depending on the number and the complexity of the tools being started. You will be notified upon successful completion of each tool startup, or informed of any issues should they arise. Thank you for your patience."
+openim::log::print_blue "Starting tools primarily involves component verification and other preparatory tasks."
+
+
 
 result=$(start_tools)
 ret_val=$?
@@ -25,7 +27,7 @@ echo "$result"
 
 
 openim::log::print_green "All tools executed successfully"
-openim::log::print_blue "Starting services. Please wait as we initiate the necessary system services. This process may take a few moments"
+openim::log::print_blue "Starting services involves multiple RPCs and API and may take some time. Please be patient"
 
 kill_exist_binaries
 
