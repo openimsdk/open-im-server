@@ -20,14 +20,14 @@ ret_val=$?
 
 if [ $ret_val -ne 0 ]; then
   echo "$result"
-  echo "abort..."
+  echo "Some services running, abort start"
   exit 1
 fi
 
 
 # Call the main function
 result=$(start_binaries)
-
+openim::log::status $result
 
 $OPENIM_SCRIPTS/check.sh
 
