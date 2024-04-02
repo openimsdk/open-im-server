@@ -28,9 +28,9 @@ fi
 
 
 # Call the main function
-start_binaries
+result=$(start_binaries)
 
-check_binaries_running
+return=$(check_binaries_running)
 
 print_listened_ports_by_binaries
 
