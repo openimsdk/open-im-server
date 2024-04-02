@@ -2902,7 +2902,7 @@ kill_binary() {
 }
 
 
-kill_exist_binary() {
+function openim::util::kill_exist_binary() {
     local binary_path="$1"
        local pids=$(pgrep -f "$binary_path")
 
