@@ -23,7 +23,6 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	pbchat "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/protobuf/proto"
@@ -152,7 +151,6 @@ func callbackMsgModify(ctx context.Context, globalConfig *config.GlobalConfig, m
 	datautil.NotNilReplace(&msg.MsgData.AtUserIDList, resp.AtUserIDList)
 	datautil.NotNilReplace(&msg.MsgData.AttachedInfo, resp.AttachedInfo)
 	datautil.NotNilReplace(&msg.MsgData.Ex, resp.Ex)
-	log.ZDebug(ctx, "callbackMsgModify", "msg", msg.MsgData)
 	return nil
 }
 

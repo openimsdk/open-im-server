@@ -45,18 +45,13 @@ import (
 )
 
 type userServer struct {
-	controller.UserDatabase
+	db                       controller.UserDatabase
 	friendNotificationSender *notification.FriendNotificationSender
 	userNotificationSender   *notification.UserNotificationSender
 	friendRpcClient          *rpcclient.FriendRpcClient
 	groupRpcClient           *rpcclient.GroupRpcClient
 	RegisterCenter           registry.SvcDiscoveryRegistry
 	config                   *config.GlobalConfig
-}
-
-func (s *userServer) GetGroupOnlineUser(ctx context.Context, req *pbuser.GetGroupOnlineUserReq) (*pbuser.GetGroupOnlineUserResp, error) {
-	// TODO implement me
-	panic("implement me")
 }
 
 func Start(ctx context.Context, config *config.GlobalConfig, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -86,7 +81,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, client registry.Svc
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.RpcRegisterName.OpenImMsgName)
 	u := &userServer{
-		UserDatabase:             database,
+		db:                       database,
 		RegisterCenter:           client,
 		friendRpcClient:          &friendRpcClient,
 		groupRpcClient:           &groupRpcClient,
@@ -95,12 +90,12 @@ func Start(ctx context.Context, config *config.GlobalConfig, client registry.Svc
 		config:                   config,
 	}
 	pbuser.RegisterUserServer(server, u)
-	return u.UserDatabase.InitOnce(context.Background(), users)
+	return u.db.InitOnce(context.Background(), users)
 }
 
 func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesignateUsersReq) (resp *pbuser.GetDesignateUsersResp, err error) {
 	resp = &pbuser.GetDesignateUsersResp{}
-	users, err := s.FindWithError(ctx, req.UserIDs)
+	users, err := s.db.FindWithError(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +113,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 		return nil, err
 	}
 	data := convert.UserPb2DBMap(req.UserInfo)
-	if err := s.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
+	if err := s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
 	_ = s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
@@ -153,7 +148,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 		return nil, err
 	}
 	data := convert.UserPb2DBMapEx(req.UserInfo)
-	if err = s.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
+	if err = s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
 	_ = s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
@@ -179,12 +174,12 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 }
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.SetGlobalRecvMessageOptReq) (resp *pbuser.SetGlobalRecvMessageOptResp, err error) {
 	resp = &pbuser.SetGlobalRecvMessageOptResp{}
-	if _, err := s.FindWithError(ctx, []string{req.UserID}); err != nil {
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
 		return nil, err
 	}
 	m := make(map[string]any, 1)
 	m["global_recv_msg_opt"] = req.GlobalRecvMsgOpt
-	if err := s.UpdateByMap(ctx, req.UserID, m); err != nil {
+	if err := s.db.UpdateByMap(ctx, req.UserID, m); err != nil {
 		return nil, err
 	}
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
@@ -200,7 +195,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 	if err != nil {
 		return nil, err
 	}
-	users, err := s.Find(ctx, req.CheckUserIDs)
+	users, err := s.db.Find(ctx, req.CheckUserIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -222,13 +217,13 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
 	if req.UserID == "" && req.NickName == "" {
-		total, users, err := s.PageFindUser(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.Pagination)
+		total, users, err := s.db.PageFindUser(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.Pagination)
 		if err != nil {
 			return nil, err
 		}
 		return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
 	} else {
-		total, users, err := s.PageFindUserWithKeyword(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.UserID, req.NickName, req.Pagination)
+		total, users, err := s.db.PageFindUserWithKeyword(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, req.UserID, req.NickName, req.Pagination)
 		if err != nil {
 			return nil, err
 		}
@@ -260,7 +255,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 		}
 		userIDs = append(userIDs, user.UserID)
 	}
-	exist, err := s.IsExist(ctx, userIDs)
+	exist, err := s.db.IsExist(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +278,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 			GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
 		})
 	}
-	if err := s.Create(ctx, users); err != nil {
+	if err := s.db.Create(ctx, users); err != nil {
 		return nil, err
 	}
 
@@ -294,7 +289,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 }
 
 func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.GetGlobalRecvMessageOptReq) (resp *pbuser.GetGlobalRecvMessageOptResp, err error) {
-	user, err := s.FindWithError(ctx, []string{req.UserID})
+	user, err := s.db.FindWithError(ctx, []string{req.UserID})
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +298,7 @@ func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Ge
 
 // GetAllUserID Get user account by page.
 func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDReq) (resp *pbuser.GetAllUserIDResp, err error) {
-	total, userIDs, err := s.UserDatabase.GetAllUserID(ctx, req.Pagination)
+	total, userIDs, err := s.db.GetAllUserID(ctx, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -313,18 +308,18 @@ func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDR
 // SubscribeOrCancelUsersStatus Subscribe online or cancel online users.
 func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbuser.SubscribeOrCancelUsersStatusReq) (resp *pbuser.SubscribeOrCancelUsersStatusResp, err error) {
 	if req.Genre == constant.SubscriberUser {
-		err = s.UserDatabase.SubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
+		err = s.db.SubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
 		if err != nil {
 			return nil, err
 		}
 		var status []*pbuser.OnlineStatus
-		status, err = s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
+		status, err = s.db.GetUserStatus(ctx, req.UserIDs)
 		if err != nil {
 			return nil, err
 		}
 		return &pbuser.SubscribeOrCancelUsersStatusResp{StatusList: status}, nil
 	} else if req.Genre == constant.Unsubscribe {
-		err = s.UserDatabase.UnsubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
+		err = s.db.UnsubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
 		if err != nil {
 			return nil, err
 		}
@@ -335,7 +330,7 @@ func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbus
 // GetUserStatus Get the online status of the user.
 func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatusReq) (resp *pbuser.GetUserStatusResp,
 	err error) {
-	onlineStatusList, err := s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
+	onlineStatusList, err := s.db.GetUserStatus(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -345,11 +340,11 @@ func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatu
 // SetUserStatus Synchronize user's online status.
 func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatusReq) (resp *pbuser.SetUserStatusResp,
 	err error) {
-	err = s.UserDatabase.SetUserStatus(ctx, req.UserID, req.Status, req.PlatformID)
+	err = s.db.SetUserStatus(ctx, req.UserID, req.Status, req.PlatformID)
 	if err != nil {
 		return nil, err
 	}
-	list, err := s.UserDatabase.GetSubscribedList(ctx, req.UserID)
+	list, err := s.db.GetSubscribedList(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -369,11 +364,11 @@ func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatu
 // GetSubscribeUsersStatus Get the online status of subscribers.
 func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 	req *pbuser.GetSubscribeUsersStatusReq) (*pbuser.GetSubscribeUsersStatusResp, error) {
-	userList, err := s.UserDatabase.GetAllSubscribeList(ctx, req.UserID)
+	userList, err := s.db.GetAllSubscribeList(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	onlineStatusList, err := s.UserDatabase.GetUserStatus(ctx, userList)
+	onlineStatusList, err := s.db.GetUserStatus(ctx, userList)
 	if err != nil {
 		return nil, err
 	}
@@ -395,8 +390,8 @@ func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.Proc
 	if req.Ex != nil {
 		value = req.Ex.Value
 	}
-	// Assuming you have a method in s.UserDatabase to add a user command
-	err = s.UserDatabase.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, value, ex)
+	// Assuming you have a method in s.db to add a user command
+	err = s.db.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, value, ex)
 	if err != nil {
 		return nil, err
 	}
@@ -418,7 +413,7 @@ func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.P
 		return nil, err
 	}
 
-	err = s.UserDatabase.DeleteUserCommand(ctx, req.UserID, req.Type, req.Uuid)
+	err = s.db.DeleteUserCommand(ctx, req.UserID, req.Type, req.Uuid)
 	if err != nil {
 		return nil, err
 	}
@@ -450,8 +445,8 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 		val["ex"] = req.Ex.Value
 	}
 
-	// Assuming you have a method in s.UserDatabase to update a user command
-	err = s.UserDatabase.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, val)
+	// Assuming you have a method in s.db to update a user command
+	err = s.db.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, val)
 	if err != nil {
 		return nil, err
 	}
@@ -473,7 +468,7 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 		return nil, err
 	}
 	// Fetch user commands from the database
-	commands, err := s.UserDatabase.GetUserCommands(ctx, req.UserID, req.Type)
+	commands, err := s.db.GetUserCommands(ctx, req.UserID, req.Type)
 	if err != nil {
 		return nil, err
 	}
@@ -502,7 +497,7 @@ func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.P
 		return nil, err
 	}
 	// Fetch user commands from the database
-	commands, err := s.UserDatabase.GetAllUserCommands(ctx, req.UserID)
+	commands, err := s.db.GetAllUserCommands(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -533,7 +528,7 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 	if req.UserID == "" {
 		for i := 0; i < 20; i++ {
 			userId := s.genUserID()
-			_, err := s.UserDatabase.FindWithError(ctx, []string{userId})
+			_, err := s.db.FindWithError(ctx, []string{userId})
 			if err == nil {
 				continue
 			}
@@ -544,7 +539,7 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 			return nil, errs.ErrInternalServer.WrapMsg("gen user id failed")
 		}
 	} else {
-		_, err := s.UserDatabase.FindWithError(ctx, []string{req.UserID})
+		_, err := s.db.FindWithError(ctx, []string{req.UserID})
 		if err == nil {
 			return nil, errs.ErrArgs.WrapMsg("userID is used")
 		}
@@ -557,7 +552,7 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		CreateTime:     time.Now(),
 		AppMangerLevel: constant.AppNotificationAdmin,
 	}
-	if err := s.UserDatabase.Create(ctx, []*tablerelation.UserModel{user}); err != nil {
+	if err := s.db.Create(ctx, []*tablerelation.UserModel{user}); err != nil {
 		return nil, err
 	}
 
@@ -573,7 +568,7 @@ func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbu
 		return nil, err
 	}
 
-	if _, err := s.UserDatabase.FindWithError(ctx, []string{req.UserID}); err != nil {
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
 		return nil, errs.ErrArgs.Wrap()
 	}
 
@@ -587,7 +582,7 @@ func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbu
 		user["face_url"] = req.FaceURL
 	}
 
-	if err := s.UserDatabase.UpdateByMap(ctx, req.UserID, user); err != nil {
+	if err := s.db.UpdateByMap(ctx, req.UserID, user); err != nil {
 		return nil, err
 	}
 
@@ -606,7 +601,7 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 	// If a keyword is provided in the request
 	if req.Keyword != "" {
 		// Find users by keyword
-		users, err = s.UserDatabase.Find(ctx, []string{req.Keyword})
+		users, err = s.db.Find(ctx, []string{req.Keyword})
 		if err != nil {
 			return nil, err
 		}
@@ -618,7 +613,7 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		}
 
 		// Find users by nickname if no users found by keyword
-		users, err = s.UserDatabase.FindByNickname(ctx, req.Keyword)
+		users, err = s.db.FindByNickname(ctx, req.Keyword)
 		if err != nil {
 			return nil, err
 		}
@@ -627,7 +622,7 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 	}
 
 	// If no keyword, find users with notification settings
-	users, err = s.UserDatabase.FindNotification(ctx, constant.AppNotificationAdmin)
+	users, err = s.db.FindNotification(ctx, constant.AppNotificationAdmin)
 	if err != nil {
 		return nil, err
 	}
@@ -640,7 +635,7 @@ func (s *userServer) GetNotificationAccount(ctx context.Context, req *pbuser.Get
 	if req.UserID == "" {
 		return nil, errs.ErrArgs.WrapMsg("userID is empty")
 	}
-	user, err := s.UserDatabase.GetUserByID(ctx, req.UserID)
+	user, err := s.db.GetUserByID(ctx, req.UserID)
 	if err != nil {
 		return nil, servererrs.ErrUserIDNotFound.Wrap()
 	}

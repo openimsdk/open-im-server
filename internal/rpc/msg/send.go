@@ -33,8 +33,7 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, error error) {
-	resp = &pbmsg.SendMsgResp{}
+func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.SendMsgResp, error) {
 	if req.MsgData != nil {
 		flag := isMessageHasReadEnabled(req.MsgData, m.config)
 		if !flag {
@@ -63,7 +62,6 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbmsg.SendMs
 	if err = callbackBeforeSendGroupMsg(ctx, m.config, req); err != nil {
 		return nil, err
 	}
-
 	if err := callbackMsgModify(ctx, m.config, req); err != nil {
 		return nil, err
 	}
@@ -138,7 +136,6 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *pbmsg.SendMsgR
 }
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
-	log.ZDebug(ctx, "sendMsgSingleChat return")
 	if err := m.messageVerification(ctx, req); err != nil {
 		return nil, err
 	}
@@ -175,16 +172,11 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		if err != nil {
 			log.ZWarn(ctx, "CallbackAfterSendSingleMsg", err, "req", req)
 		}
-		resp = &pbmsg.SendMsgResp{
+		prommetrics.SingleChatMsgProcessSuccessCounter.Inc()
+		return &pbmsg.SendMsgResp{
 			ServerMsgID: req.MsgData.ServerMsgID,
 			ClientMsgID: req.MsgData.ClientMsgID,
 			SendTime:    req.MsgData.SendTime,
-		}
-		prommetrics.SingleChatMsgProcessSuccessCounter.Inc()
-		return resp, nil
+		}, nil
 	}
-}
-
-func (m *msgServer) BatchSendMsg(ctx context.Context, in *pbmsg.BatchSendMessageReq) (*pbmsg.BatchSendMessageResp, error) {
-	return nil, nil
 }

@@ -22,20 +22,22 @@ import (
 )
 
 // GetGroupInfoCache get group info from cache.
-func (s *groupServer) GetGroupInfoCache(ctx context.Context, req *pbgroup.GetGroupInfoCacheReq) (resp *pbgroup.GetGroupInfoCacheResp, err error) {
+func (s *groupServer) GetGroupInfoCache(ctx context.Context, req *pbgroup.GetGroupInfoCacheReq) (*pbgroup.GetGroupInfoCacheResp, error) {
 	group, err := s.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
-	resp = &pbgroup.GetGroupInfoCacheResp{GroupInfo: convert.Db2PbGroupInfo(group, "", 0)}
-	return resp, nil
+	return &pbgroup.GetGroupInfoCacheResp{
+		GroupInfo: convert.Db2PbGroupInfo(group, "", 0),
+	}, nil
 }
 
-func (s *groupServer) GetGroupMemberCache(ctx context.Context, req *pbgroup.GetGroupMemberCacheReq) (resp *pbgroup.GetGroupMemberCacheResp, err error) {
+func (s *groupServer) GetGroupMemberCache(ctx context.Context, req *pbgroup.GetGroupMemberCacheReq) (*pbgroup.GetGroupMemberCacheResp, error) {
 	members, err := s.db.TakeGroupMember(ctx, req.GroupID, req.GroupMemberID)
 	if err != nil {
 		return nil, err
 	}
-	resp = &pbgroup.GetGroupMemberCacheResp{Member: convert.Db2PbGroupMember(members)}
-	return resp, nil
+	return &pbgroup.GetGroupMemberCacheResp{
+		Member: convert.Db2PbGroupMember(members),
+	}, nil
 }

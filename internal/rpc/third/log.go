@@ -17,7 +17,6 @@ package third
 import (
 	"context"
 	"crypto/rand"
-	"fmt"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -46,7 +45,7 @@ func genLogID() string {
 }
 
 func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) (*third.UploadLogsResp, error) {
-	var DBlogs []*relationtb.LogModel
+	var dbLogs []*relationtb.LogModel
 	userID := ctx.Value(constant.OpUserID).(string)
 	platform := constant.PlatformID2Name[int(req.Platform)]
 	for _, fileURL := range req.FileURLs {
@@ -73,9 +72,9 @@ func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) 
 		if log.LogID == "" {
 			return nil, servererrs.ErrData.WrapMsg("LogModel id gen error")
 		}
-		DBlogs = append(DBlogs, &log)
+		dbLogs = append(dbLogs, &log)
 	}
-	err := t.thirdDatabase.UploadLogs(ctx, DBlogs)
+	err := t.thirdDatabase.UploadLogs(ctx, dbLogs)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +95,7 @@ func (t *thirdServer) DeleteLogs(ctx context.Context, req *third.DeleteLogsReq) 
 		logIDs = append(logIDs, log.LogID)
 	}
 	if ids := datautil.Single(req.LogIDs, logIDs); len(ids) > 0 {
-		return nil, errs.ErrRecordNotFound.WrapMsg(fmt.Sprintf("logIDs not found%#v", ids))
+		return nil, errs.ErrRecordNotFound.WrapMsg("logIDs not found", "logIDs", ids)
 	}
 	err = t.thirdDatabase.DeleteLogs(ctx, req.LogIDs, userID)
 	if err != nil {

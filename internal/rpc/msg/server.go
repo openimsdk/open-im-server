@@ -55,17 +55,6 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 	m.Handlers = append(m.Handlers, interceptorFunc...)
 }
 
-// func (m *msgServer) execInterceptorHandler(ctx context.Context, config *config.GlobalConfig, req *msg.SendMsgReq) error {
-//	for _, handler := range m.Handlers {
-//		msgData, err := handler(ctx, config, req)
-//		if err != nil {
-//			return err
-//		}
-//		req.MsgData = msgData
-//	}
-//	return nil
-//}
-
 func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
 	if err != nil {
@@ -105,16 +94,16 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 	return nil
 }
 
-func (m *msgServer) conversationAndGetRecvID(conversation *conversation.Conversation, userID string) (recvID string) {
+func (m *msgServer) conversationAndGetRecvID(conversation *conversation.Conversation, userID string) string {
 	if conversation.ConversationType == constant.SingleChatType ||
 		conversation.ConversationType == constant.NotificationChatType {
 		if userID == conversation.OwnerUserID {
-			recvID = conversation.UserID
+			return conversation.UserID
 		} else {
-			recvID = conversation.OwnerUserID
+			return conversation.OwnerUserID
 		}
 	} else if conversation.ConversationType == constant.SuperGroupChatType {
-		recvID = conversation.GroupID
+		return conversation.GroupID
 	}
-	return
+	return ""
 }

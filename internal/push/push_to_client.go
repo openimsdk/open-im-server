@@ -246,7 +246,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 				}
 				defer func(groupID string) {
 					if err = p.groupRpcClient.DismissGroup(ctx, groupID); err != nil {
-						log.ZError(ctx, "DismissGroup Notification clear members", err, "groupID", groupID)
+						log.ZError(ctx, "DismissGroup notification clear members", err, "groupID", groupID)
 					}
 				}(groupID)
 			}
