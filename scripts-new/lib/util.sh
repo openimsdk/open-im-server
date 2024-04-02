@@ -2455,8 +2455,6 @@ function openim::util::print_binary_ports() {
 
    # Check if the binary is running
    if pgrep -f "$binary_path" > /dev/null; then
-     #  echo "$binary_name is running."  "arg $1"
-
        # Find the PID(s) of the running binary
        pids=$(pgrep -f "$binary_path")
 
@@ -2468,11 +2466,9 @@ function openim::util::print_binary_ports() {
            # Check for listening ports using lsof
            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
                # Linux
-               # Append found ports to the ports variable, followed by a space
                ports+=$(lsof -i -n | grep LISTEN | grep "$pid" | awk '{print $9}' | cut -d':' -f2 | uniq | tr '\n' ' ')
            elif [[ "$OSTYPE" == "darwin"* ]]; then
                # macOS
-               # Append found ports to the ports variable, followed by a space
                ports+=$(lsof -i -n | grep LISTEN | grep "$pid" | awk '{print $9}' | awk -F'[:\.]+' '{print $(NF-1)}' | uniq | tr '\n' ' ')
            fi
        done
@@ -2489,6 +2485,7 @@ function openim::util::print_binary_ports() {
        echo "$binary_path is not running."
    fi
 }
+
 
 
 
