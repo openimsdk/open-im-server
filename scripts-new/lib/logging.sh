@@ -262,8 +262,17 @@ function openim::log::print_blue() {
 
 function openim::log::print_red() {
     local current_time=$(date "+%Y-%m-%d %H:%M:%S %Z")
-    echo -e "[$current_time]"
-    echo -e "\033[0;31m$1\033[0m"
+    local msg_length=${#1}
+    local time_length=${#current_time}
+    local term_width=$(tput cols)
+
+    local total_length=$((time_length + msg_length + 2))
+
+    if [ $total_length -gt $term_width ]; then
+        echo -e "[$current_time]\n\033[0;31m$1\033[0m"
+    else
+        echo -e "[$current_time] \033[0;31m$1\033[0m"
+    fi
 }
 
 
