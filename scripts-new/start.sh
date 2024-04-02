@@ -30,7 +30,15 @@ fi
 # Call the main function
 result=$(start_binaries)
 
-return=$(check_binaries_running)
+
+result=$(check_binaries_running)
+ret_val=$?
+if [ $ret_val -eq 0 ]; then
+    echo "All binaries are running."
+else
+    echo "$result"
+fi
+
 
 print_listened_ports_by_binaries
 
