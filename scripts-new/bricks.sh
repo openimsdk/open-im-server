@@ -38,12 +38,12 @@ start_tools() {
     local bin_full_path=$(get_tool_full_path "$binary")
     cmd=("$bin_full_path" -c "$OPENIM_OUTPUT_CONFIG")
     echo "Starting ${cmd[@]}"
-    result=$( "${cmd[@]}" 2>&1 )
+    "${cmd[@]}"
     ret_val=$?
     if [ $ret_val -eq 0 ]; then
-        echo "Started $bin_full_path successfully." $result
+        echo "Started $bin_full_path successfully."
     else
-        echo "Failed to start $bin_full_path with exit code $ret_val." $result
+        echo "Failed to start $bin_full_path with exit code $ret_val."
         return 1
     fi
   done
