@@ -19,6 +19,7 @@ VERSION_PACKAGE=github.com/openimsdk/open-im-server/v3/pkg/version
 # Includes
 
 include scripts/make-rules/common.mk	# make sure include common.mk at the first include line
+include scripts/make-rules/common-versions.mk
 include scripts/make-rules/golang.mk
 include scripts/make-rules/image.mk
 include scripts/make-rules/copyright.mk

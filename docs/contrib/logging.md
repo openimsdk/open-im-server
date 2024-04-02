@@ -2,7 +2,7 @@
 
 ## Script Logging Documentation Link
 
-If you wish to view the script's logging documentation, you can click on this link: [Logging Documentation](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/contrib/bash-log.md).
+If you wish to view the script's logging documentation, you can click on this link: [Logging Documentation](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/bash-log.md).
 
 Below is the documentation for logging and error handling in the OpenIM Go project.
 
