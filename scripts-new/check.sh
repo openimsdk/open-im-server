@@ -41,6 +41,6 @@ fi
 
 
 result=$(print_listened_ports_by_binaries)
-print_green_two_line "$result"
+openim::log::print_green_two_line "$result"
 
 
