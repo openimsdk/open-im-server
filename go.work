@@ -4,7 +4,6 @@ use (
 	.
 	./tools/changelog
 	./tools/component
-	./tools/formitychecker
 	./tools/imctl
 	./tools/infra
 	./tools/ncpu

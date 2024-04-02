@@ -1,0 +1,50 @@
+# https://github.com/marketplace/actions/conformity-checker-for-project
+baseConfig:
+  searchDirectory: "./"
+  ignoreCase: false
+
+directoryNaming:
+  allowHyphens: true
+  allowUnderscores: false
+  mustBeLowercase: true
+
+fileNaming:
+  allowHyphens: true
+  allowUnderscores: true
+  mustBeLowercase: true
+
+ignoreFormats:
+  - "\\.log$"
+  - "\\.env$"
+  - "README\\.md$"
+  - "_test\\.go$"
+  - "\\.md$"
+  - _test\\.txt$
+  - LICENSE
+  - Dockerfile
+  - CODEOWNERS
+  - Makefile
+
+ignoreDirectories:
+  - "vendor"
+  - ".git"
+  - "deployments"
+  - "node_modules"
+  - "logs"
+  - "CHANGELOG"
+  - "components"
+  - "_output"
+  - "tools/openim-web"
+  - "CHANGELOG"
+  - "examples/Test_directory"
+  - test/testdata
+
+fileTypeSpecificNaming:
+  ".yaml":
+    allowHyphens: true
+    allowUnderscores: false
+    mustBeLowercase: true
+  ".go":
+    allowHyphens: false
+    allowUnderscores: true
+    mustBeLowercase: true

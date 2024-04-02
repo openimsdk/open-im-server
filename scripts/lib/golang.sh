@@ -314,9 +314,6 @@ openim::golang::setup_platforms
 readonly OPENIM_CLIENT_TARGETS=(
     changelog
     component
-    conversion-msg
-    conversion-mysql
-    formitychecker
     imctl
     infra
     ncpu
