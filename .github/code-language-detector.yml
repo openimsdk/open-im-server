@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# https://github.com/marketplace/actions/code-language-detector
 directory: ./
 file_types:
   - .go

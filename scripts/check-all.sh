@@ -20,9 +20,6 @@
 # READ: https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh
 
 
-
-
-
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
@@ -114,7 +111,3 @@ else
   openim::util::find_ports_for_all_services ${OPENIM_MSGTRANSFER_BINARY[@]}
   openim::log::success "All OpenIM services are running normally! "
 fi
-
-
-
-
