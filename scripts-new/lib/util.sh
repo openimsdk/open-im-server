@@ -2837,7 +2837,7 @@ check_binary_ports() {
 
    # Check if the binary is running
    if pgrep -f "$binary_path" > /dev/null; then
-       echo "$binary_name is running."
+       echo "$binary_name is running."  "arg $1"
 
        # Find the PID(s) of the running binary
        pids=$(pgrep -f "$binary_path")
