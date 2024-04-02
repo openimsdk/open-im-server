@@ -31,7 +31,8 @@ start_binaries() {
       #nohup sh -c '"$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG" 2>&1 | tee test.log' &
       #nohup ./run_my_command.sh "$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG" > test.log 2>&1 &
       cmd=("$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG")
-      nohup "${cmd[@]}" >> "${LOG_FILE}" 2> >(tee -a "$TMP_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) &
+      #nohup "${cmd[@]}" >> "${LOG_FILE}" 2> >(tee -a "$TMP_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) &
+      nohup "${cmd[@]}" > >(tee -a "$TMP_LOG_FILE") 2> >(tee -a "$TMP_LOG_FILE" >&2) &
 
 
       done
