@@ -29,18 +29,5 @@ fi
 result=$(start_binaries)
 
 
-result=$(check_binaries_running)
-ret_val=$?
-if [ $ret_val -eq 0 ]; then
-    echo "All binaries are running."
-else
-    echo "$result"
-    echo "abort..."
-    exit 1
-fi
-
-
-print_listened_ports_by_binaries
-
-
+$OPENIM_SCRIPTS/check.sh
 
