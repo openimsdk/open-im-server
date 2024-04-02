@@ -27,7 +27,8 @@ start_binaries() {
       echo "Starting $binary instance $i: $bin_full_path -i $i -c $OPENIM_OUTPUT_CONFIG"
       #nohup "$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG" > "test.log" 2>&1 &
       #nohup sh -c '"$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG" 2>&1 | tee test.log' &
-      nohup ./run_my_command.sh "$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG" > test.log 2>&1 &
+      #nohup ./run_my_command.sh "$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG" > test.log 2>&1 &
+      nohup "$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG" &
 
 
       done
