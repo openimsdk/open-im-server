@@ -22,7 +22,7 @@ if [ $ret_val -ne 0 ]; then
   exit 1
 fi
 
-
+ echo "$result"
 
 kill_exist_binaries
 
