@@ -2477,9 +2477,9 @@ function openim::util::print_binary_ports() {
        ports=$(echo "$ports" | xargs | tr ' ' '\n' | uniq | tr '\n' ' ')
 
        if [[ ${#ports} -eq 1 ]]; then
-           echo "$binary_path is not listening on any ports."  ["$ports"]
+           echo "$binary_path is not listening on any ports."
        else
-           echo "$binary_path is listening on the following ports: $ports" ["$ports"]
+           echo "$binary_path is listening on the following ports: $ports"
        fi
    else
        echo "$binary_path is not running."
