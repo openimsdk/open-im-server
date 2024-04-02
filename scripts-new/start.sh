@@ -11,6 +11,7 @@ source "$OPENIM_SCRIPTS/bricks.sh"
 
 # Main function to start binaries
 
+openim::log::print_blue "Starting tools"
 
 result=$(start_tools)
 ret_val=$?
@@ -20,8 +21,11 @@ if [ $ret_val -ne 0 ]; then
   exit 1
 fi
 
-openim::log::print_green "All tools executed successfully, details are as follows:"
 echo "$result"
+
+
+openim::log::print_green "All tools executed successfully"
+openim::log::print_blue "Starting services"
 
 kill_exist_binaries
 
@@ -29,7 +33,7 @@ result=$(check_binaries_stop)
 ret_val=$?
 
 if [ $ret_val -ne 0 ]; then
-  openim::log::print_red "Some services running,  details are as follows, abort start"
+  openim::log::print_red "Some services running, details are as follows, abort start"
   openim::log::print_red_no_time_stamp "$result"
   exit 1
 fi
