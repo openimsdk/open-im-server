@@ -16,6 +16,6 @@ get_bin_full_path() {
 
 get_tool_full_path() {
   local tool_name="$1"
-  local tool_full_path="${OPENIM_OUTPUT_HOSTBIN_TOOLS}/${bin_name}"
+  local tool_full_path="${OPENIM_OUTPUT_HOSTBIN_TOOLS}/${tool_name}"
   echo ${tool_full_path}
 }
