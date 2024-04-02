@@ -7,7 +7,7 @@ source "${OPENIM_ROOT}/lib/path.sh"
 
 
 #停止所有的二进制对应的进程
-stop_binaries{
+stop_binaries() {
   for binary in "${!binaries[@]}"; do
     full_path=$(get_bin_full_path "$binary")
     openim::util::kill_exist_binary "$full_path"
