@@ -22,7 +22,8 @@ if [ $ret_val -ne 0 ]; then
   exit 1
 fi
 
- echo "$result"
+echo "all tools ok"
+echo "$result"
 
 kill_exist_binaries
 
