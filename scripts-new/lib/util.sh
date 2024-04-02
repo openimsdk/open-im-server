@@ -2873,6 +2873,20 @@ check_binary_ports() {
 }
 
 
+kill_binary() {
+    binary_path="$1"
+
+    pids=$(pgrep -f "$binary_path")
+
+    if [ -z "$pids" ]; then
+        echo "No process found for $binary_path"
+    else
+        for pid in $pids; do
+            echo "Killing process $pid associated with $binary_path"
+            kill -9 "$pid"
+        done
+    fi
+}
 
 
 
