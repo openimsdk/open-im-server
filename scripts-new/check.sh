@@ -34,8 +34,8 @@ ret_val=$?
 if [ $ret_val -eq 0 ]; then
      echo "All services are running normally."
 else
-    echo "Some services are not running as expected. Details are as follows:"
-    echo "$result"
+    openim::log::error "Some services are not running as expected. Details are as follows:"
+    openim::log::error "$result"
     exit 1
 fi
 
