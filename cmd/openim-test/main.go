@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"math/rand"
 	"net"
 	"os"
@@ -11,42 +13,51 @@ import (
 )
 
 func main() {
-	// (Your flag definitions and random port selection logic here)
+	// Define flags
+	index := flag.Int("i", 0, "Index number")
+	config := flag.String("c", "", "Configuration path")
 
-	// Initialize a channel to listen for interrupt signals
-	sigs := make(chan os.Signal, 1)
-	// Register the channel to receive SIGINT and SIGTERM
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	// Parse the flags
+	flag.Parse()
 
-	// Function to start a TCP listener on a specified port
-	startListener := func(port int) {
-		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-		if err != nil {
-			fmt.Printf("Error starting TCP listener on port %d: %v\n", port, err)
-			return
-		}
-		defer listener.Close()
-		fmt.Printf("Listening on port %d...\n", port)
-	}
+	// Print the values of the flags
+	fmt.Printf("args: -i %d -c %s\n", *index, *config)
 
-	// Initialize the random number generator
+	// Initialize the random seed
 	rand.Seed(time.Now().UnixNano())
 
 	// Randomly select two ports between 10000 and 20000
-	port1 := rand.Intn(10001) + 10000 // This generates a number between 0-10000, then adds 10000
+	port1 := rand.Intn(10001) + 10000
 	port2 := rand.Intn(10001) + 10000
-
 	// Ensure port2 is different from port1
 	for port2 == port1 {
 		port2 = rand.Intn(10001) + 10000
 	}
 
-	// Start TCP listeners on the selected ports
-	// (Assuming port1 and port2 are defined as per your logic)
-	go startListener(port1)
-	go startListener(port2)
+	fmt.Printf("Randomly selected TCP ports to listen on: %d, %d\n", port1, port2)
 
-	// Wait for an interrupt signal
-	<-sigs
+	// Listen on the selected ports
+	go listenOnPort(port1)
+	go listenOnPort(port2)
+
+	// Wait for a termination signal to gracefully shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
 	fmt.Println("Shutting down...")
+}
+
+func listenOnPort(port int) {
+	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		log.Fatalf("Error listening on port %d: %v", port, err)
+	}
+	defer l.Close()
+
+	fmt.Printf("Listening on port %d...\n", port)
+
+	// Normally, you would accept connections with l.Accept() in a loop here.
+	// For this example, just sleep indefinitely to simulate a service.
+	select {}
 }
