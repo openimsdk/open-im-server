@@ -31,6 +31,7 @@ kill_exist_binaries(){
   for binary in "${!binaries[@]}"; do
     full_path=$(get_bin_full_path "$binary")
     result=$(openim::util::kill_exist_binary "$full_path")
+    echo "result     $result"
    if [ "$result" -eq 0 ]; then
        echo "$binary no exist"
      else
