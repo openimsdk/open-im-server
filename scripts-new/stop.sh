@@ -16,7 +16,7 @@ result=$(check_binaries_stop)
 ret_val=$?
 if [ $ret_val -ne 0 ]; then
   openim::log::print_red "Some services have not been stopped, details are as follows:"
-  openim::log::print_red_two_lines "$result"
+  openim::log::print_red_no_time_stamp "$result"
   exit 1
 fi
 
