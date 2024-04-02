@@ -38,7 +38,8 @@ OPENIM_OUTPUT_TOOLS="${OPENIM_OUTPUT}/tools/"
 OPENIM_OUTPUT_TMP="${OPENIM_OUTPUT}/tmp/"
 OPENIM_OUTPUT_LOGS="${OPENIM_OUTPUT}/logs/"
 OPENIM_OUTPUT_CONFIG="${OPENIM_ROOT}/config/"
-
+OPENIM_INIT_ERR_LOG_FILE="$OPENIM_OUTPUT_LOGS/openim-init-err.log"
+OPENIM_INIT_LOG_FILE="$OPENIM_OUTPUT_LOGS/openim-init.log"
 
 # This controls rsync compression. Set to a value > 0 to enable rsync
 # compression for build container

@@ -13,8 +13,7 @@ stop_binaries() {
   done
 }
 
-LOG_FILE=log.file
-ERR_LOG_FILE=err.log.file
+
 
 #启动所有的二进制
 start_binaries() {
@@ -26,7 +25,7 @@ start_binaries() {
     for ((i=0; i<count; i++)); do
       echo "Starting $bin_full_path -i $i -c $OPENIM_OUTPUT_CONFIG"
       cmd=("$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG")
-      nohup "${cmd[@]}" >> "${LOG_FILE}" 2> >(tee -a "$ERR_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) &
+      nohup "${cmd[@]}" >> "${OPENIM_INIT_LOG_FILE}" 2> >(tee -a "$OPENIM_INIT_ERR_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) &
       done
   done
 }

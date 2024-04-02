@@ -22,8 +22,7 @@
 # OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 # source "${OPENIM_ROOT}/scripts/lib/logging.sh"
 
-#1、将IP写在一个文件里，比如文件名为hosts_file，一行一个IP地址。
-#2、修改ssh-mutual-trust.sh里面的用户名及密码，默认为root用户及密码123。
+
 # hosts_file_path="path/to/your/hosts/file"
 # openim:util::setup_ssh_key_copy "$hosts_file_path" "root" "123"
 function openim:util::setup_ssh_key_copy() {
@@ -283,104 +282,9 @@ openim::util::check_docker_and_compose_versions() {
   
 }
 
-
-# The `openim::util::check_ports` function analyzes the state of processes based on given ports.
-# It accepts multiple ports as arguments and prints:
-# 1. The state of the process (whether it's running or not).
-# 2. The start time of the process if it's running.
-# User:
-# openim::util::check_ports 8080 8081 8082
-# The function returns a status of 1 if any of the processes is not running.
-openim::util::check_ports() {
-  # An array to collect ports of processes that are not running.
-  local not_started=()
-  
-  # An array to collect information about processes that are running.
-  local started=()
-  
-  echo "Checking ports: $*"
-  # Iterate over each given port.
-  for port in "$@"; do
-    # Initialize variables
-    # Check the OS and use the appropriate command
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-      if command -v ss > /dev/null 2>&1; then
-        info=$(ss -ltnp | grep ":$port" || true)
-      else
-        info=$(netstat -ltnp | grep ":$port" || true)
-      fi
-      elif [[ "$OSTYPE" == "darwin"* ]]; then
-      # For macOS, use lsof
-      info=$(lsof -P -i:"$port" | grep "LISTEN" || true)
-    fi
-    
-    # Check if any process is using the port
-    if [[ -z $info ]]; then
-      not_started+=($port)
-    else
-      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Extract relevant details for Linux: Process Name, PID, and FD.
-        details=$(echo $info | sed -n 's/.*users:(("\([^"]*\)",pid=\([^,]*\),fd=\([^)]*\))).*/\1 \2 \3/p')
-        command=$(echo $details | awk '{print $1}')
-        pid=$(echo $details | awk '{print $2}')
-        fd=$(echo $details | awk '{print $3}')
-        elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # Handle extraction for macOS
-        pid=$(echo $info | awk '{print $2}' | cut -d'/' -f1)
-        command=$(ps -p $pid -o comm= | xargs basename)
-        fd=$(echo $info | awk '{print $4}' | cut -d'/' -f1)
-      fi
-      
-      # Get the start time of the process using the PID
-      if [[ -z $pid ]]; then
-        start_time="N/A"
-      else
-        start_time=$(ps -p $pid -o lstart=)
-      fi
-      
-      started+=("Port $port - Command: $command, PID: $pid, FD: $fd, Started: $start_time")
-    fi
-  done
-  
-  # Print information about ports whose processes are not running.
-  if [[ ${#not_started[@]} -ne 0 ]]; then
-    echo "### Not started ports:"
-    for port in "${not_started[@]}"; do
-      openim::log::error "Port $port is not started."
-    done
-  fi
-  
-  # Print information about ports whose processes are running.
-  if [[ ${#started[@]} -ne 0 ]]; then
-    echo "### Started ports:"
-    for info in "${started[@]}"; do
-      echo "$info"
-    done
-  fi
-  
-  # If any of the processes is not running, return a status of 1.
-  if [[ ${#not_started[@]} -ne 0 ]]; then
-    #openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
-    #openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
-    cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
-    return 1
-  else
-    #openim::log::success "All specified ports are running."
-    return 0
-  fi
-}
-
-# set +o errexit
-# Sample call for testing:
-# openim::util::check_ports 10002 1004 12345 13306
-#
-
-
-
 openim::util::check_process_names() {
     local process_path="$1"
     local expected_count="$2"
-
 
     local running_count=$(ps -ef | grep "$process_path" | grep -v grep | wc -l)
 
@@ -392,7 +296,6 @@ openim::util::check_process_names() {
     fi
 }
 
-
 openim::util::check_process_names_exist() {
     local process_path="$1"
     local running_count=$(ps -ef | grep "$process_path" | grep -v grep | wc -l)
@@ -403,13 +306,6 @@ openim::util::check_process_names_exist() {
         echo 0
     fi
 }
-
-
-
-
-
-
-
 
 # This figures out the host platform without relying on golang.  We need this as
 # we don't want a golang install to be a prerequisite to building yet we need
@@ -1329,111 +1225,7 @@ openim::util::check_docker_and_compose_versions() {
 }
 
 
-# The `openim::util::check_ports` function analyzes the state of processes based on given ports.
-# It accepts multiple ports as arguments and prints:
-# 1. The state of the process (whether it's running or not).
-# 2. The start time of the process if it's running.
-# User:
-# openim::util::check_ports 8080 8081 8082
-# The function returns a status of 1 if any of the processes is not running.
-openim::util::check_ports() {
-    # An array to collect ports of processes that are not running.
-    local not_started=()
 
-    # An array to collect information about processes that are running.
-    local started=()
-
-    echo "Checking ports: $*"
-    # Iterate over each given port.
-    for port in "$@"; do
-        # Initialize variables
-        # Check the OS and use the appropriate command
-        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            if command -v ss > /dev/null 2>&1; then
-                info=$(ss -ltnp | grep ":$port" || true)
-            else
-                info=$(netstat -ltnp | grep ":$port" || true)
-            fi
-        elif [[ "$OSTYPE" == "darwin"* ]]; then
-            # For macOS, use lsof
-            info=$(lsof -i:"$port" | grep "\*:$port" || true)
-        fi
-
-        # Check if any process is using the port
-        if [[ -z $info ]]; then
-            not_started+=($port)
-        else
-            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-                # Extract relevant details for Linux: Process Name, PID, and FD.
-                details=$(echo $info | sed -n 's/.*users:(("\([^"]*\)",pid=\([^,]*\),fd=\([^)]*\))).*/\1 \2 \3/p')
-                command=$(echo $details | awk '{print $1}')
-                pid=$(echo $details | awk '{print $2}')
-                fd=$(echo $details | awk '{print $3}')
-            elif [[ "$OSTYPE" == "darwin"* ]]; then
-                # Handle extraction for macOS
-                pid=$(echo $info | awk '{print $2}' | cut -d'/' -f1)
-                command=$(ps -p $pid -o comm= | xargs basename)
-                fd=$(echo $info | awk '{print $4}' | cut -d'/' -f1)
-            fi
-
-            # Get the start time of the process using the PID
-            if [[ -z $pid ]]; then
-                start_time="N/A"
-            else
-                start_time=$(ps -p $pid -o lstart=)
-            fi
-
-            started+=("Port $port - Command: $command, PID: $pid, FD: $fd, Started: $start_time")
-        fi
-    done
-
-    # Print information about ports whose processes are not running.
-    if [[ ${#not_started[@]} -ne 0 ]]; then
-        printf "\n### Not started ports:"
-        for port in "${not_started[@]}"; do
-            openim::log::error "Port $port is not started."
-        done
-    fi
-
-    # Print information about ports whose processes are running.
-    if [[ ${#started[@]} -ne 0 ]]; then
-        printf "\n### Started ports:"
-        for info in "${started[@]}"; do
-            echo "$info"
-        done
-    fi
-
-    # If any of the processes is not running, return a status of 1.
-    if [[ ${#not_started[@]} -ne 0 ]]; then
-        openim::color::echo $COLOR_RED "OpenIM Stdout Log >> cat ${LOG_FILE}"
-        openim::color::echo $COLOR_RED "OpenIM Stderr Log >> cat ${STDERR_LOG_FILE}"
-        echo ""
-        cat "$TMP_LOG_FILE" | awk '{print "\033[31m" $0 "\033[0m"}'
-        return 1
-    else
-        openim::log::success "All specified processes are running."
-        return 0
-    fi
-}
-
-# set +o errexit
-# Sample call for testing:
-# openim::util::check_ports 10002 1004 12345 13306
-#
-
-
-# The `openim::util::stop_services_with_name` function stops services with specified names.
-# It accepts multiple service names as arguments and performs the following:
-# 1. Attempts to stop any services with the specified names.
-# 2. Prints details of services successfully stopped and those that failed to stop.
-# Usage:
-# openim::util::stop_services_with_name nginx apache
-# The function returns a status of 1 if any service couldn't be stopped.
-
-# sleep 333333&
-# sleep 444444&
-# ps -ef | grep "sleep"
-# openim::util::stop_services_with_name "sleep 333333" "sleep 444444"
 
 # This figures out the host platform without relying on golang.  We need this as
 # we don't want a golang install to be a prerequisite to building yet we need
@@ -2435,19 +2227,12 @@ function openim::util::is_running_in_container() {
 }
 
 
-
-
-
-
-
-
 function openim::util::find_ports_for_all_services() {
     local services=("$@")
     for service in "${services[@]}"; do
         openim::util::find_process_ports "$service"
     done
 }
-
 
 
 function openim::util::print_binary_ports() {
@@ -2486,9 +2271,6 @@ function openim::util::print_binary_ports() {
    fi
 }
 
-
-
-
 function openim::util::kill_exist_binary() {
     local binary_path="$1"
        local pids=$(pgrep -f "$binary_path")
@@ -2506,11 +2288,8 @@ function openim::util::kill_exist_binary() {
 }
 
 
-
-
 if [[ "$*" =~ openim::util:: ]];then
   eval $*
 fi
-
 
 
