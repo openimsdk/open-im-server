@@ -1,5 +1,6 @@
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/
+echo $OPENIM_ROOT 1111111111111111111111
 source "${OPENIM_ROOT}/lib/util.sh"
 source "${OPENIM_ROOT}/define/binaries.sh"
 source "${OPENIM_ROOT}/lib/path.sh"
