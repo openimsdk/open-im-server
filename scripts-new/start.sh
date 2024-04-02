@@ -2,10 +2,8 @@
 #!/usr/bin/env bash
 
 
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 OPENIM_SCRIPTS=$(dirname "${BASH_SOURCE[0]}")/
-source "$OPENIM_SCRIPTS/lib/path.sh"
-source "$OPENIM_SCRIPTS/define/binaries.sh"
+source "$OPENIM_SCRIPTS/bricks.sh"
 
 
 # Assuming 'openim::util::host_platform' is defined in one of the sourced scripts or elsewhere.
