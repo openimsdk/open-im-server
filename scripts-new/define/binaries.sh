@@ -8,4 +8,4 @@ declare -A binaries=(
   )
 
 
-tool_binaries=("ncpu" "infra")
+tool_binaries=("ncpu" "infra" "check-free-memory")
