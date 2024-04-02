@@ -29,10 +29,6 @@ source "$OPENIM_SCRIPTS/bricks.sh"
 
 
 
-# Call the main function
-result=$(start_binaries)
-
-
 result=$(check_binaries_running)
 ret_val=$?
 if [ $ret_val -eq 0 ]; then

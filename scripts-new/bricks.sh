@@ -68,19 +68,26 @@ check_binaries_stop() {
 
 #检查所有的二进制是否运行
 check_binaries_running(){
+  local no_running_binaries=0
   for binary in "${!binaries[@]}"; do
     expected_count=${binaries[$binary]}
     full_path=$(get_bin_full_path "$binary")
 
     result=$(openim::util::check_process_names "$full_path" "$expected_count")
-    if [ "$result" -eq 0 ]; then
-        echo "$binary is running normally."
-        return 0
+    ret_val=$?
+    if [ "$ret_val" -eq 0 ]; then
+      echo "$binary is running normally."
     else
-        echo "$binary is not running normally, $result processes missing."
-        return 1
+      no_running_binaries=$((no_running_binaries + 1))
+      echo $result
     fi
   done
+
+  if [ "$no_running_binaries" -ne 0 ]; then
+      return 1
+    else
+      return 0
+    fi
 }
 
 
