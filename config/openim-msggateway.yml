@@ -1,0 +1,6 @@
+longConnSvr:
+  openImWsPort: [ 10001 ]
+  websocketMaxConnNum: 100000
+  openImMessageGatewayPort: [ 10140 ]
+  websocketMaxMsgLen: 4096
+  websocketTimeout: 10

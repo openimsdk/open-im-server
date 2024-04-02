@@ -101,14 +101,14 @@ api:
 # minio.signEndpoint is minio public network address
 object:
   enable: "minio"
-  apiURL: "http://240e:47e:3060:8cc:f664:1fee:9c86:9455:10002"
+  apiURL: "http://127.0.0.1:10002"
   minio:
     bucket: "openim"
     endpoint: "http://172.28.0.1:10005"
     accessKeyID: "root"
     secretAccessKey: "openIM123"
     sessionToken: ''
-    signEndpoint: "http://240e:47e:3060:8cc:f664:1fee:9c86:9455:10005"
+    signEndpoint: "http://127.0.0.1:10005"
     publicRead: false
   cos:
     bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
@@ -501,7 +501,7 @@ callback:
 # The number of ports needs to be consistent with msg_transfer_service_num in script/path_info.sh
 prometheus:
   enable: true
-  grafanaUrl: http://240e:47e:3060:8cc:f664:1fee:9c86:9455:13000/
+  grafanaUrl: http://127.0.0.1:13000/
   apiPrometheusPort: [20100]
   userPrometheusPort: [ 20110 ]
   friendPrometheusPort: [ 20120 ]
