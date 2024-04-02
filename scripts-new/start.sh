@@ -27,7 +27,7 @@ fi
 
 # Call the main function
 result=$(start_binaries)
-openim::log::print_blue $result
+echo $result
 
 $OPENIM_SCRIPTS/check.sh
 
