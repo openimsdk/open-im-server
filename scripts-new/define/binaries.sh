@@ -7,3 +7,5 @@ declare -A binaries=(
   [openim-no-port]=2
   )
 
+
+tool_binaries=("ncpu" "infra")

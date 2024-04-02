@@ -12,6 +12,17 @@ source "$OPENIM_SCRIPTS/bricks.sh"
 # Main function to start binaries
 
 
+result=$(start_tools)
+ret_val=$?
+
+
+if [ $ret_val -ne 0 ]; then
+  echo "tools start failed, abort start"
+  echo "$result"
+  exit 1
+fi
+
+
 
 kill_exist_binaries
 
