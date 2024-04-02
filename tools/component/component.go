@@ -115,7 +115,7 @@ func main() {
 
 		allSuccess := true
 		for _, check := range serviceChecks {
-			if err := check(ctx, conf); err != nil {
+			if err := check(ctx, &config.Config); err != nil {
 				util.ColorErrPrint(fmt.Sprintf("Check failed: %v", err))
 				allSuccess = false
 				break
