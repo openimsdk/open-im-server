@@ -1,0 +1,3 @@
+cronTasks:
+  chatRecordsClearTime: "0 2 * * 3"
+  msgDestructTime: "0 2 * * *"

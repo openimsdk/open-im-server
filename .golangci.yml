@@ -338,14 +338,36 @@ linters-settings:
     local-prefixes: github.com/openimsdk/open-im-server
 
   gomnd:
-    settings:
-      mnd:
-        # the list of enabled checks, see https://github.com/tommy-muehle/go-mnd/#checks for description.
-        # checks: 
-        # ignored-numbers: 1000
-        ignored-files: magic_.*.go, test_.*.go, .*_test.go
-        ignored-functions: math.*
-
+    # List of enabled checks, see https://github.com/tommy-muehle/go-mnd/#checks for description.
+    # Default: ["argument", "case", "condition", "operation", "return", "assign"]
+    checks:
+      - argument
+      - case
+      - condition
+      - operation
+      - return
+      - assign
+    # List of numbers to exclude from analysis.
+    # The numbers should be written as string.
+    # Values always ignored: "1", "1.0", "0" and "0.0"
+    # Default: []
+    ignored-numbers:
+      - '0666'
+      - '0755'
+      - '42'
+    # List of file patterns to exclude from analysis.
+    # Values always ignored: `.+_test.go`
+    # Default: []
+    ignored-files:
+      - 'magic1_.+\.go$'
+    # List of function patterns to exclude from analysis.
+    # Following functions are always ignored: `time.Date`,
+    # `strconv.FormatInt`, `strconv.FormatUint`, `strconv.FormatFloat`,
+    # `strconv.ParseInt`, `strconv.ParseUint`, `strconv.ParseFloat`.
+    # Default: []
+    ignored-functions:
+      - '^math\.'
+      - '^http\.StatusText$'
   gomoddirectives:
     # Allow local `replace` directives. Default is false.
     replace-local: true
@@ -421,9 +443,6 @@ linters-settings:
     checks: [ "all" ]
 
   govet:
-    # report about shadowed variables
-    check-shadowing: false
-
     # settings per analyzer
     settings:
       printf: # analyzer name, run `go tool vet help` to see all analyzers
@@ -508,9 +527,6 @@ linters-settings:
     line-length: 250
     # tab width in spaces. Default to 1.
     tab-width: 4
-  maligned:
-    # print struct with more effective memory layout or not, false by default
-    suggest-new: true
   misspell:
     # Correct spellings using locale preferences for US or UK.
     # Default is to use a neutral variety of English.
@@ -751,6 +767,7 @@ linters:
     - reassign
     - tparallel
     - unconvert
+    - fieldalignment
     - dupl
     - dupword
     - errname

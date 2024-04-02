@@ -1,0 +1,7 @@
+mongo:
+  uri: ''
+  address: [ 172.28.0.1:37017 ]
+  database: openim_v3
+  username: openIM
+  password: openIM123
+  maxPoolSize: 100

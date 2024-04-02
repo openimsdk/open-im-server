@@ -1,0 +1,5 @@
+zookeeper:
+  schema: openim
+  address: [ 172.28.0.1:12181 ]
+  username: ''
+  password: ''

@@ -73,7 +73,6 @@ openim::log::status "Start the pre-start tools:"
 #   exit 1
 # fi
 
-
 openim::log::colorless "pre-start has been successfully completed!"
 
 result=$("${OPENIM_ROOT}"/scripts/stop-all.sh)

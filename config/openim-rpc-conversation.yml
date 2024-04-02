@@ -1,0 +1,7 @@
+rpc:
+  registerIP: ''
+  listenIP: 0.0.0.0
+rpcPort:
+  openImConversationPort: [ 10180 ]
+rpcRegisterName:
+  openImConversationName: Conversation
