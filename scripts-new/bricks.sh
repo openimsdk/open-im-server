@@ -35,17 +35,15 @@ start_binaries() {
 start_tools() {
   # Assume tool_binaries=("ncpu" "infra")
   for binary in "${tool_binaries[@]}"; do
-    echo $binary  bbbbbbbbbbbbbb
     local bin_full_path=$(get_tool_full_path "$binary")
-    # Assuming get_tool_full_path defines full path for each tool
     cmd=("$bin_full_path" -c "$OPENIM_OUTPUT_CONFIG")
     echo "Starting ${cmd[@]}"
-    "${cmd[@]}"
+    result="${cmd[@]}"
     ret_val=$?
     if [ $ret_val -eq 0 ]; then
-        echo "Started $bin_full_path successfully."
+        echo "Started $bin_full_path successfully." $result
     else
-        echo "Failed to start $bin_full_path with exit code $ret_val."
+        echo "Failed to start $bin_full_path with exit code $ret_val." $result
         return 1
     fi
   done
