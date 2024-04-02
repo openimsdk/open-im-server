@@ -273,6 +273,11 @@ function openim::log::print_green_two_line() {
     echo -e "\033[0;32m$1\033[0m"
 }
 
+function openim::log::print_green() {
+    local current_time=$(date "+%Y-%m-%d %H:%M:%S %Z")
+    echo -e "[$current_time] \033[0;32m$1\033[0m"
+}
+
 
 function openim::log::print_red() {
     local current_time=$(date "+%Y-%m-%d %H:%M:%S %Z")

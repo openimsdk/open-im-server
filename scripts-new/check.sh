@@ -32,7 +32,7 @@ source "$OPENIM_SCRIPTS/bricks.sh"
 result=$(check_binaries_running)
 ret_val=$?
 if [ $ret_val -eq 0 ]; then
-     echo "All services are running normally."
+     openim::log::print_green "All services are running normally."
 else
     openim::log::print_red "Some services are not running as expected. Details are as follows:"
     openim::log::print_red "$result"
