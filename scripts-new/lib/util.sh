@@ -483,59 +483,7 @@ openim::util::check_process_names_for_stop() {
 # Usage:
 # openim::util::stop_services_on_ports 8080 8081 8082
 # The function returns a status of 1 if any service couldn't be stopped.
-openim::util::stop_services_on_ports() {
-  # An array to collect ports of processes that couldn't be stopped.
-  local not_stopped=()
-  
-  # An array to collect information about processes that were stopped.
-  local stopped=()
-  
-  echo "Stopping services on ports: $*"
-  # Iterate over each given port.
-  for port in "$@"; do
-    # Use the `lsof` command to find process information related to the given port.
-    info=$(lsof -i :$port -n -P | grep LISTEN || true)
-    
-    # If there's process information, it means the process associated with the port is running.
-    if [[ -n $info ]]; then
-      # Extract the Process ID.
-      while read -r line; do
-        local pid=$(echo $line | awk '{print $2}')
-        
-        # Try to stop the service by killing its process.
-        if kill -15 $pid; then
-          stopped+=($port)
-        else
-          not_stopped+=($port)
-        fi
-            done <<< "$info"
-        fi
-    done
 
-    # Print information about ports whose processes couldn't be stopped.
-    if [[ ${#not_stopped[@]} -ne 0 ]]; then
-        echo "Ports that couldn't be stopped:"
-        for port in "${not_stopped[@]}"; do
-            openim::log::status "Failed to stop service on port $port."
-        done
-    fi
-
-    # Print information about ports whose processes were successfully stopped.
-    if [[ ${#stopped[@]} -ne 0 ]]; then
-        for port in "${stopped[@]}"; do
-            echo "Successfully stopped service on port $port."
-        done
-    fi
-
-    # If any of the processes couldn't be stopped, return a status of 1.
-    if [[ ${#not_stopped[@]} -ne 0 ]]; then
-        return 1
-    else
-        openim::log::success "All specified services were stopped."
-        echo ""
-        return 0
-    fi
-}
 # nc -l -p 12345
 # nc -l -p 123456
 # ps -ef | grep "nc -l"
@@ -549,53 +497,7 @@ openim::util::stop_services_on_ports() {
 # Usage:
 # openim::util::stop_services_with_name nginx apache
 # The function returns a status of 1 if any service couldn't be stopped.
-openim::util::stop_services_with_name() {
-    # An array to collect names of processes that couldn't be stopped.
-    local not_stopped=()
 
-    # An array to collect information about processes that were stopped.
-    local stopped=()
-
-    # Iterate over each given service name.
-    for server_name in "$@"; do
-        # Use the `pgrep` command to find process IDs related to the given service name.
-        local pids=$(pgrep -f "$server_name")
-        # If no process was found with the name, add it to the not_stopped list
-        if [[ -z $pids ]]; then
-            not_stopped+=("$server_name")
-            continue
-        fi
-        local stopped_this_time=false
-       for pid in $pids; do
-
-           # Exclude the PID of the current script
-           if [[ "$pid" == "$$" ]]; then
-               continue
-           fi
-
-           # If there's a Process ID, it means the service with the name is running.
-           if [[ -n $pid ]]; then
-               # Print the binary path for the PID
-               binary_path=$(readlink -f /proc/$pid/exe)
-               openim::log::colorless "stop PID $pid full path: $binary_path"
-
-               # Try to stop the service by killing its process.
-               if kill -15 $pid 2>/dev/null; then
-                   stopped_this_time=true
-               fi
-           fi
-       done
-
-
-        if $stopped_this_time; then
-            stopped+=("$server_name")
-        else
-            not_stopped+=("$server_name")
-        fi
-    done
-    return 0
-
-}
 # sleep 333333&
 # sleep 444444&
 # ps -ef | grep "sleep"
@@ -2845,7 +2747,8 @@ function openim::util::find_ports_for_all_services() {
 }
 
 
-check_binary_ports() {
+
+function openim::util::print_binary_ports() {
    binary_path="$1"
 
    # Check if the binary is running
@@ -2885,21 +2788,6 @@ check_binary_ports() {
    fi
 }
 
-
-kill_binary() {
-    binary_path="$1"
-
-    pids=$(pgrep -f "$binary_path")
-
-    if [ -z "$pids" ]; then
-        echo "No process found for $binary_path"
-    else
-        for pid in $pids; do
-            echo "Killing process $pid associated with $binary_path"
-            kill -9 "$pid"
-        done
-    fi
-}
 
 
 function openim::util::kill_exist_binary() {

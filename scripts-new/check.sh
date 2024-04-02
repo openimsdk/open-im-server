@@ -30,31 +30,14 @@ source "${OPENIM_ROOT}/define/binaries.sh"
 source "${OPENIM_ROOT}/lib/path.sh"
 
 
-for binary in "${!binaries[@]}"; do
-  expected_count=${binaries[$binary]}
-  full_path=$(get_bin_full_path "$binary")
-
-  result=$(openim::util::check_process_names "$full_path" "$expected_count")
-
- if [ "$result" -eq 0 ]; then
-     echo "Startup successful for $binary"
-   else
-     echo "Startup failed for $binary, $result processes missing."
-   fi
-done
 
 
+result=$(check_binaries_running)
+ret_val=$?
 
-for binary in "${!binaries[@]}"; do
-  expected_count=${binaries[$binary]}
-  base_path=$(get_bin_full_path "$binary")
-  for ((i=0; i<expected_count; i++)); do
-    full_path="${base_path} -i ${i} -c $OPENIM_OUTPUT_CONFIG"
-    check_binary_ports "$full_path"
-  done
-done
-
-
-
-
+if [ $ret_val -eq 0 ]; then
+    echo "All binaries are running."
+else
+    echo "$result"
+fi
 

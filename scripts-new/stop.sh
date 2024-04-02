@@ -10,10 +10,5 @@ source "${OPENIM_ROOT}/lib/path.sh"
 
 
 
-for binary in "${!binaries[@]}"; do
-  expected_count=${binaries[$binary]}
-  full_path=$(get_bin_full_path "$binary")
-  kill_binary "$full_path"
-done
 
 
