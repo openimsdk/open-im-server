@@ -38,7 +38,9 @@ start_tools() {
     local bin_full_path=$(get_tool_full_path "$binary")
     cmd=("$bin_full_path" -c "$OPENIM_OUTPUT_CONFIG")
     echo "Starting ${cmd[@]}"
-    "${cmd[@]}"
+    #"${cmd[@]}"
+    "${cmd[@]}" >> "${LOG_FILE}" 2> >(tee -a "$ERR_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) &
+
     ret_val=$?
     if [ $ret_val -eq 0 ]; then
         echo "Started $bin_full_path successfully."
