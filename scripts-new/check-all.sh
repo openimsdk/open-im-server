@@ -43,12 +43,17 @@ for binary in "${!binaries[@]}"; do
    fi
 done
 
-
 for binary in "${!binaries[@]}"; do
   expected_count=${binaries[$binary]}
-  full_path=$(get_bin_full_path "$binary")
-  check_binary_ports "$full_path"
+  base_path=$(get_bin_full_path "$binary")
+
+  for ((i=0; i<expected_count; i++)); do
+    full_path="${base_path} -i ${i} -c $OPENIM_OUTPUT_CONFIG"
+    check_binary_ports "$full_path"
+  done
 done
+
+
 
 
 
