@@ -38,6 +38,7 @@ kill_exist_binaries(){
     full_path=$(get_bin_full_path "$binary")
     result=$(openim::util::kill_exist_binary "$full_path" | tail -n1)
    if [ "$result" -eq 0 ]; then
+     ehco "ttttttttttttt"
      else
        echo "$full_path running. waiting stop"
      fi
