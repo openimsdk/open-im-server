@@ -2476,7 +2476,7 @@ function openim::util::print_binary_ports() {
        # Remove trailing spaces and duplicate ports if any
        ports=$(echo "$ports" | xargs | tr ' ' '\n' | uniq | tr '\n' ' ')
 
-       if [[ ! -n "$ports" ]]; then
+       if [[ ${#ports} -eq 1 ]]; then
            echo "$binary_path is not listening on any ports."  ["$ports"]
        else
            echo "$binary_path is listening on the following ports: $ports" ["$ports"]
