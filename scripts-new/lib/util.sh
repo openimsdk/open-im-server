@@ -2832,42 +2832,44 @@ function openim::util::find_ports_for_all_services() {
 
 
 check_binary_ports() {
-    binary_path="$1"
-    binary_name=$(basename "$binary_path")
+   binary_path="$1"
+   binary_name=$(basename "$binary_path")
 
-    # Check if the binary is running
-    if pgrep -f "$binary_path" > /dev/null; then
-        echo "$binary_name is running."
+   # Check if the binary is running
+   if pgrep -f "$binary_path" > /dev/null; then
+       echo "$binary_name is running."
 
-        # Find the PID(s) of the running binary
-        pids=$(pgrep -f "$binary_path")
+       # Find the PID(s) of the running binary
+       pids=$(pgrep -f "$binary_path")
 
-        # Initialize an empty string to store ports
-        ports=""
+       # Initialize an empty string to store ports
+       ports=""
 
-        # Loop through each PID
-        for pid in $pids; do
-            # Check for listening ports using lsof
-            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-                # Linux
-                ports+=$(lsof -i -n | grep LISTEN | grep "$pid" | awk '{print $9}' | cut -d':' -f2 | uniq)
-            elif [[ "$OSTYPE" == "darwin"* ]]; then
-                # macOS
-                ports+=$(lsof -i -n | grep LISTEN | grep "$pid" | awk '{print $9}' | awk -F'[:\.]+' '{print $(NF-1)}' | uniq)
-            fi
-        done
+       # Loop through each PID
+       for pid in $pids; do
+           # Check for listening ports using lsof
+           if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+               # Linux
+               # Append found ports to the ports variable, followed by a space
+               ports+=$(lsof -i -n | grep LISTEN | grep "$pid" | awk '{print $9}' | cut -d':' -f2 | uniq | tr '\n' ' ')
+           elif [[ "$OSTYPE" == "darwin"* ]]; then
+               # macOS
+               # Append found ports to the ports variable, followed by a space
+               ports+=$(lsof -i -n | grep LISTEN | grep "$pid" | awk '{print $9}' | awk -F'[:\.]+' '{print $(NF-1)}' | uniq | tr '\n' ' ')
+           fi
+       done
 
-        # Remove duplicate ports if any
-        ports=$(echo "$ports" | uniq)
+       # Remove trailing spaces and duplicate ports if any
+       ports=$(echo "$ports" | xargs | tr ' ' '\n' | uniq | tr '\n' ' ')
 
-        if [ -z "$ports" ]; then
-            echo "$binary_name is not listening on any ports."
-        else
-            echo "$binary_name is listening on the following ports: $ports"
-        fi
-    else
-        echo "$binary_name is not running."
-    fi
+       if [ -z "$ports" ]; then
+           echo "$binary_name is not listening on any ports."
+       else
+           echo "$binary_name is listening on the following ports: $ports"
+       fi
+   else
+       echo "$binary_name is not running."
+   fi
 }
 
 
