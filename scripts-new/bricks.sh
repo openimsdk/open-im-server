@@ -18,7 +18,6 @@ ERR_LOG_FILE=err.log.file
 
 #启动所有的二进制
 start_binaries() {
-  echo $
   # Iterate over binaries defined in binary_path.sh
   for binary in "${!binaries[@]}"; do
     local count=${binaries[$binary]}
