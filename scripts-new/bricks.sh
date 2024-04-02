@@ -14,6 +14,8 @@ stop_binaries() {
   done
 }
 
+LOG_FILE=log.file
+TMP_LOG_FILE=tmp.log.file
 
 #启动所有的二进制
 start_binaries() {
