@@ -94,7 +94,6 @@ if [[ $? -ne 0 ]]; then
   exit 1
 fi
 
-
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
   openim::log::error "The OpenIM services may fail to start.\n $result"

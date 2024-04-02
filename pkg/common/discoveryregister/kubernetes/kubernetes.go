@@ -104,6 +104,7 @@ func getSelfHost(ctx context.Context, gatewayName string) string {
 }
 
 // like openimserver-openim-msggateway-0.openimserver-openim-msggateway-headless.openim-lin.svc.cluster.local:88.
+// Replica set in kubernetes environment
 func getMsgGatewayHost(ctx context.Context, gatewayName string) []string {
 	port := 88
 	instance := "openimserver"
@@ -189,9 +190,10 @@ func (cli *K8sDR) CloseConn(conn *grpc.ClientConn) {
 
 // do not use this method for call rpc.
 func (cli *K8sDR) GetClientLocalConns() map[string][]*grpc.ClientConn {
-	fmt.Println("should not call this function!!!!!!!!!!!!!!!!!!!!!!!!!")
+	log.ZError(context.Background(), "should not call this function!", nil)
 	return nil
 }
+
 func (cli *K8sDR) Close() {
 
 }
