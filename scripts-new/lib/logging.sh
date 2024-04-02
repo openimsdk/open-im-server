@@ -255,7 +255,8 @@ function openim::log::test_log() {
 # openim::log::test_log
 
 function openim::log::print_blue() {
-    echo -e "\033[0;36m$1\033[0m"
+    local current_time=$(date "+%Y-%m-%d %H:%M:%S %Z")
+    echo -e "\033[0;36m[$current_time] $1\033[0m"
 }
 
 
