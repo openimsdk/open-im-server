@@ -32,7 +32,6 @@ import (
 )
 
 func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.RevokeMsgResp, error) {
-	defer log.ZDebug(ctx, "RevokeMsg return line")
 	if req.UserID == "" {
 		return nil, errs.ErrArgs.WrapMsg("user_id is empty")
 	}
@@ -61,7 +60,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	}
 
 	data, _ := json.Marshal(msgs[0])
-	log.ZInfo(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
+	log.ZDebug(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
 	var role int32
 	if !authverify.IsAppManagerUid(ctx, &m.config.Manager, &m.config.IMAdmin) {
 		switch msgs[0].SessionType {

@@ -533,7 +533,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 	}
 	// "minSeq" represents the startSeq value that the user can retrieve.
 	if minSeq > end {
-		log.ZInfo(ctx, "minSeq > end", "minSeq", minSeq, "end", end)
+		log.ZWarn(ctx, "minSeq > end", errs.New("minSeq>end"), "minSeq", minSeq, "end", end)
 		return 0, 0, nil, nil
 	}
 	maxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
@@ -681,22 +681,8 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, co
 			log.ZError(ctx, "get message from redis exception", err, "failedSeqs", failedSeqs, "conversationID", conversationID)
 		}
 	}
-	log.ZInfo(
-		ctx,
-		"db.cache.GetMessagesBySeq",
-		"userID",
-		userID,
-		"conversationID",
-		conversationID,
-		"seqs",
-		seqs,
-		"successMsgs",
-		len(successMsgs),
-		"failedSeqs",
-		failedSeqs,
-		"conversationID",
-		conversationID,
-	)
+	log.ZDebug(ctx, "db.cache.GetMessagesBySeq", "userID", userID, "conversationID", conversationID, "seqs",
+		seqs, "len(successMsgs)", len(successMsgs), "failedSeqs", failedSeqs)
 
 	if len(failedSeqs) > 0 {
 		mongoMsgs, err := db.getMsgBySeqs(ctx, userID, conversationID, failedSeqs)
@@ -717,7 +703,7 @@ func (db *commonMsgDatabase) DeleteConversationMsgsAndSetMinSeq(ctx context.Cont
 	if err != nil {
 		return err
 	}
-	log.ZInfo(ctx, "DeleteConversationMsgsAndSetMinSeq", "conversationID", conversationID, "minSeq", minSeq)
+	log.ZDebug(ctx, "DeleteConversationMsgsAndSetMinSeq", "conversationID", conversationID, "minSeq", minSeq)
 	if minSeq == 0 {
 		return nil
 	}
@@ -896,7 +882,7 @@ func (db *commonMsgDatabase) CleanUpUserConversationsMsgs(ctx context.Context, u
 		maxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
 		if err != nil {
 			if err == redis.Nil {
-				log.ZInfo(ctx, "max seq is nil", "conversationID", conversationID)
+				log.ZDebug(ctx, "max seq is nil", "conversationID", conversationID)
 			} else {
 				log.ZError(ctx, "get max seq failed", err, "conversationID", conversationID)
 			}
