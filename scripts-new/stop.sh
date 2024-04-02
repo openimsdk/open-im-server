@@ -20,3 +20,5 @@ if [ $ret_val -ne 0 ]; then
   echo "no stop..."
   exit 1
 fi
+
+echo "all stop"
