@@ -304,7 +304,6 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	log.ZInfo(c, "BatchSendMsg", "req", req)
 	if err := authverify.CheckAdmin(c, m.manager, m.imAdmin); err != nil {
 		apiresp.GinError(c, errs.ErrNoPermission.WrapMsg("only app manager can send message"))
 		return

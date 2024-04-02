@@ -859,7 +859,7 @@ func (m *MsgMgo) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string
 		if len(msgDocs) < 1 {
 			continue
 		}
-		log.ZInfo(ctx, "msg doc convert", "conversationID", conversationID, "len(msgDocs)", len(msgDocs))
+		log.ZDebug(ctx, "msg doc convert", "conversationID", conversationID, "len(msgDocs)", len(msgDocs))
 		if len(msgDocs[0].Msg) == int(m.model.GetSingleGocMsgNum5000()) {
 			if err := mongoutil.DeleteMany(ctx, m.coll, bson.M{"doc_id": regex}); err != nil {
 				log.ZError(ctx, "convertAll delete many failed", err, "conversationID", conversationID)
@@ -891,7 +891,7 @@ func (m *MsgMgo) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string
 			if err = mongoutil.InsertMany(ctx, m.coll, newMsgDocs); err != nil {
 				log.ZError(ctx, "convertAll insert many failed", err, "conversationID", conversationID, "len(newMsgDocs)", len(newMsgDocs))
 			} else {
-				log.ZInfo(ctx, "msg doc convert", "conversationID", conversationID, "len(newMsgDocs)", len(newMsgDocs))
+				log.ZDebug(ctx, "msg doc convert", "conversationID", conversationID, "len(newMsgDocs)", len(newMsgDocs))
 			}
 		}
 	}

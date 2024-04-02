@@ -187,7 +187,7 @@ func (s *Server) KickUserOffline(
 	for _, v := range req.KickUserIDList {
 		clients, _, ok := s.LongConnServer.GetUserPlatformCons(v, int(req.PlatformID))
 		if !ok {
-			log.ZInfo(ctx, "conn not exist", "userID", v, "platformID", req.PlatformID)
+			log.ZDebug(ctx, "conn not exist", "userID", v, "platformID", req.PlatformID)
 			continue
 		}
 

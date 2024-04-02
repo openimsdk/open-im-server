@@ -883,7 +883,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 	} else if !s.IsNotFound(err) && errs.Unwrap(err) != errs.ErrRecordNotFound {
 		return nil, err
 	}
-	log.ZInfo(ctx, "JoinGroup.groupInfo", "group", group, "eq", group.NeedVerification == constant.Directly)
+	log.ZDebug(ctx, "JoinGroup.groupInfo", "group", group, "eq", group.NeedVerification == constant.Directly)
 	if group.NeedVerification == constant.Directly {
 		groupMember := &relationtb.GroupMemberModel{
 			GroupID:        group.GroupID,

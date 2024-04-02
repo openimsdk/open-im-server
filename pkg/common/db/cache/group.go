@@ -244,7 +244,7 @@ func (g *GroupCacheRedis) GetGroupMemberHashMap(ctx context.Context, groupIDs []
 		if err != nil {
 			return nil, err
 		}
-		log.ZInfo(ctx, "GetGroupMemberHashMap", "groupID", groupID, "hash", hash)
+		log.ZDebug(ctx, "GetGroupMemberHashMap", "groupID", groupID, "hash", hash)
 		num, err := g.GetGroupMemberNum(ctx, groupID)
 		if err != nil {
 			return nil, err
