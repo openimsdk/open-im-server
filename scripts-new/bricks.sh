@@ -67,7 +67,7 @@ check_binaries_stop() {
 
 
 #检查所有的二进制是否运行
-check_binaries_running{
+check_binaries_running(){
   for binary in "${!binaries[@]}"; do
     expected_count=${binaries[$binary]}
     full_path=$(get_bin_full_path "$binary")
@@ -87,7 +87,7 @@ check_binaries_running{
 
 
 #打印所有的二进制对应的进程所所监听的端口
-print_listened_ports_by_binaries{
+print_listened_ports_by_binaries(){
   for binary in "${!binaries[@]}"; do
     expected_count=${binaries[$binary]}
     base_path=$(get_bin_full_path "$binary")
