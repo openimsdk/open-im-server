@@ -14,3 +14,18 @@ push:
     masterSecret: ''
     pushUrl: ''
     pushIntent: ''
+prometheus:
+  enable: true
+  grafanaUrl: http://127.0.0.1:13000/
+  apiPrometheusPort: [20100]
+  userPrometheusPort: [ 20110 ]
+  friendPrometheusPort: [ 20120 ]
+  messagePrometheusPort: [ 20130 ]
+  messageGatewayPrometheusPort: [ 20140 ]
+  groupPrometheusPort: [ 20150 ]
+  authPrometheusPort: [ 20160 ]
+  pushPrometheusPort: [ 20170 ]
+  conversationPrometheusPort: [ 20230 ]
+  rtcPrometheusPort: [ 21300 ]
+  thirdPrometheusPort: [ 21301 ]
+  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] # List of ports
