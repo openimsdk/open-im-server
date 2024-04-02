@@ -27,19 +27,6 @@ func main() {
 		}
 		defer listener.Close()
 		fmt.Printf("Listening on port %d...\n", port)
-
-		// Accept connections in a loop
-		go func() {
-			for {
-				_, err := listener.Accept()
-				if err != nil {
-					fmt.Printf("Error accepting connection on port %d: %v\n", port, err)
-					break
-				}
-				// Handle connection (e.g., close immediately for this example)
-				// conn.Close()
-			}
-		}()
 	}
 
 	// Initialize the random number generator
