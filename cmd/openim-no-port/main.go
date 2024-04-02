@@ -8,16 +8,6 @@ import (
 	"time"
 )
 
-package main
-
-import (
-"flag"
-"fmt"
-"math/rand"
-"os"
-"time"
-)
-
 func main() {
 	// Initialize the random seed
 	rand.Seed(time.Now().UnixNano())
