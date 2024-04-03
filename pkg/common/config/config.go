@@ -84,355 +84,53 @@ type CronTask struct {
 	MsgDestructTime      string `mapstructure:"msgDestructTime"`
 	RetainChatRecords    int    `mapstructure:"retainChatRecords"`
 }
+
+type OfflinePushConfig struct {
+	Enable bool   `mapstructure:"enable"`
+	Title  string `mapstructure:"title"`
+	Desc   string `mapstructure:"desc"`
+	Ext    string `mapstructure:"ext"`
+}
+
+type NotificationConfig struct {
+	IsSendMsg        bool              `mapstructure:"isSendMsg"`
+	ReliabilityLevel int               `mapstructure:"reliabilityLevel"`
+	UnreadCount      bool              `mapstructure:"unreadCount"`
+	OfflinePush      OfflinePushConfig `mapstructure:"offlinePush"`
+}
+
 type Notification struct {
-	GroupCreated struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"groupCreated"`
-	GroupInfoSet struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"groupInfoSet"`
-	JoinGroupApplication struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"joinGroupApplication"`
-	MemberQuit struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"memberQuit"`
-	GroupApplicationAccepted struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"groupApplicationAccepted"`
-	GroupApplicationRejected struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"groupApplicationRejected"`
-	GroupOwnerTransferred struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"groupOwnerTransferred"`
-	MemberKicked struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"memberKicked"`
-	MemberInvited struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"memberInvited"`
-	MemberEnter struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"memberEnter"`
-	GroupDismissed struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"groupDismissed"`
-	GroupMuted struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"groupMuted"`
-	GroupCancelMuted struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-		DefaultTips struct {
-			Tips string `mapstructure:"tips"`
-		} `mapstructure:"defaultTips"`
-	} `mapstructure:"
-
-groupCancelMuted"`
-	GroupMemberMuted struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"groupMemberMuted"`
-	GroupMemberCancelMuted struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"groupMemberCancelMuted"`
-	GroupMemberInfoSet struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"groupMemberInfoSet"`
-	GroupInfoSetAnnouncement struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"groupInfoSetAnnouncement"`
-	GroupInfoSetName struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"groupInfoSetName"`
-	FriendApplicationAdded struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"friendApplicationAdded"`
-	FriendApplicationApproved struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"friendApplicationApproved"`
-	FriendApplicationRejected struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"friendApplicationRejected"`
-	FriendAdded struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"friendAdded"`
-	FriendDeleted struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"friendDeleted"`
-	FriendRemarkSet struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"friendRemarkSet"`
-	BlackAdded struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"blackAdded"`
-	BlackDeleted struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"blackDeleted"`
-	FriendInfoUpdated struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"re
-
-liabilityLevel"`
-		UnreadCount bool `mapstructure:"unreadCount"`
-		OfflinePush struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"friendInfoUpdated"`
-	UserInfoUpdated struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"userInfoUpdated"`
-	UserStatusChanged struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"userStatusChanged"`
-	ConversationChanged struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"conversationChanged"`
-	ConversationSetPrivate struct {
-		IsSendMsg        bool `mapstructure:"isSendMsg"`
-		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
-		UnreadCount      bool `mapstructure:"unreadCount"`
-		OfflinePush      struct {
-			Enable bool   `mapstructure:"enable"`
-			Title  string `mapstructure:"title"`
-			Desc   string `mapstructure:"desc"`
-			Ext    string `mapstructure:"ext"`
-		} `mapstructure:"offlinePush"`
-	} `mapstructure:"conversationSetPrivate"`
+	GroupCreated              NotificationConfig `mapstructure:"groupCreated"`
+	GroupInfoSet              NotificationConfig `mapstructure:"groupInfoSet"`
+	JoinGroupApplication      NotificationConfig `mapstructure:"joinGroupApplication"`
+	MemberQuit                NotificationConfig `mapstructure:"memberQuit"`
+	GroupApplicationAccepted  NotificationConfig `mapstructure:"groupApplicationAccepted"`
+	GroupApplicationRejected  NotificationConfig `mapstructure:"groupApplicationRejected"`
+	GroupOwnerTransferred     NotificationConfig `mapstructure:"groupOwnerTransferred"`
+	MemberKicked              NotificationConfig `mapstructure:"memberKicked"`
+	MemberInvited             NotificationConfig `mapstructure:"memberInvited"`
+	MemberEnter               NotificationConfig `mapstructure:"memberEnter"`
+	GroupDismissed            NotificationConfig `mapstructure:"groupDismissed"`
+	GroupMuted                NotificationConfig `mapstructure:"groupMuted"`
+	GroupCancelMuted          NotificationConfig `mapstructure:"groupCancelMuted"`
+	GroupMemberMuted          NotificationConfig `mapstructure:"groupMemberMuted"`
+	GroupMemberCancelMuted    NotificationConfig `mapstructure:"groupMemberCancelMuted"`
+	GroupMemberInfoSet        NotificationConfig `mapstructure:"groupMemberInfoSet"`
+	GroupInfoSetAnnouncement  NotificationConfig `mapstructure:"groupInfoSetAnnouncement"`
+	GroupInfoSetName          NotificationConfig `mapstructure:"groupInfoSetName"`
+	FriendApplicationAdded    NotificationConfig `mapstructure:"friendApplicationAdded"`
+	FriendApplicationApproved NotificationConfig `mapstructure:"friendApplicationApproved"`
+	FriendApplicationRejected NotificationConfig `mapstructure:"friendApplicationRejected"`
+	FriendAdded               NotificationConfig `mapstructure:"friendAdded"`
+	FriendDeleted             NotificationConfig `mapstructure:"friendDeleted"`
+	FriendRemarkSet           NotificationConfig `mapstructure:"friendRemarkSet"`
+	BlackAdded                NotificationConfig `mapstructure:"blackAdded"`
+	BlackDeleted              NotificationConfig `mapstructure:"blackDeleted"`
+	FriendInfoUpdated         NotificationConfig `mapstructure:"friendInfoUpdated"`
+	UserInfoUpdated           NotificationConfig `mapstructure:"userInfoUpdated"`
+	UserStatusChanged         NotificationConfig `mapstructure:"userStatusChanged"`
+	ConversationChanged       NotificationConfig `mapstructure:"conversationChanged"`
+	ConversationSetPrivate    NotificationConfig `mapstructure:"conversationSetPrivate"`
 }
 
 type MsgGateway struct {
@@ -633,26 +331,62 @@ type Redis struct {
 	MaxRetry    int      `mapstructure:"MaxRetry"`
 }
 
-type Hook struct {
+type WebhookConfig struct {
 	Enable         bool `mapstructure:"enable"`
 	Timeout        int  `mapstructure:"timeout"`
 	FailedContinue bool `mapstructure:"failedContinue"`
 }
 
 type Webhooks struct {
-	URL                    string `mapstructure:"url"`
-	BeforeSendSingleMsg    Hook   `mapstructure:"beforeSendSingleMsg"`
-	BeforeUpdateUserInfoEx Hook   `mapstructure:"beforeUpdateUserInfoEx"`
-	AfterUpdateUserInfoEx  Hook   `mapstructure:"afterUpdateUserInfoEx"`
-	AfterSendSingleMsg     Hook   `mapstructure:"afterSendSingleMsg"`
-	BeforeSendGroupMsg     Hook   `mapstructure:"beforeSendGroupMsg"`
-	AfterSendGroupMsg      Hook   `mapstructure:"afterSendGroupMsg"`
-	MsgModify              Hook   `mapstructure:"msgModify"`
-	UserOnline             Hook   `mapstructure:"userOnline"`
-	UserOffline            Hook   `mapstructure:"userOffline"`
-	UserKickOff            Hook   `mapstructure:"userKickOff"`
-	OfflinePush            Hook   `mapstructure:"offlinePush"`
-	OnlinePush             Hook   `mapstructure:"onlinePush"`
+	URL                          string        `mapstructure:"url"`
+	BeforeSendSingleMsg          WebhookConfig `mapstructure:"beforeSendSingleMsg"`
+	BeforeUpdateUserInfoEx       WebhookConfig `mapstructure:"beforeUpdateUserInfoEx"`
+	AfterUpdateUserInfoEx        WebhookConfig `mapstructure:"afterUpdateUserInfoEx"`
+	AfterSendSingleMsg           WebhookConfig `mapstructure:"afterSendSingleMsg"`
+	BeforeSendGroupMsg           WebhookConfig `mapstructure:"beforeSendGroupMsg"`
+	AfterSendGroupMsg            WebhookConfig `mapstructure:"afterSendGroupMsg"`
+	MsgModify                    WebhookConfig `mapstructure:"msgModify"`
+	UserOnline                   WebhookConfig `mapstructure:"userOnline"`
+	UserOffline                  WebhookConfig `mapstructure:"userOffline"`
+	UserKickOff                  WebhookConfig `mapstructure:"userKickOff"`
+	OfflinePush                  WebhookConfig `mapstructure:"offlinePush"`
+	OnlinePush                   WebhookConfig `mapstructure:"onlinePush"`
+	GroupOnlinePush              WebhookConfig `mapstructure:"groupOnlinePush"`
+	BeforeAddFriend              WebhookConfig `mapstructure:"beforeAddFriend"`
+	BeforeUpdateUserInfo         WebhookConfig `mapstructure:"beforeUpdateUserInfo"`
+	BeforeCreateGroup            WebhookConfig `mapstructure:"beforeCreateGroup"`
+	AfterCreateGroup             WebhookConfig `mapstructure:"afterCreateGroup"`
+	BeforeMemberJoinGroup        WebhookConfig `mapstructure:"beforeMemberJoinGroup"`
+	BeforeSetGroupMemberInfo     WebhookConfig `mapstructure:"beforeSetGroupMemberInfo"`
+	AfterSetGroupMemberInfo      WebhookConfig `mapstructure:"afterSetGroupMemberInfo"`
+	SetMessageReactionExtensions WebhookConfig `mapstructure:"setMessageReactionExtensions"`
+	QuitGroup                    WebhookConfig `mapstructure:"quitGroup"`
+	KillGroupMember              WebhookConfig `mapstructure:"killGroupMember"`
+	DismissGroup                 WebhookConfig `mapstructure:"dismissGroup"`
+	JoinGroup                    WebhookConfig `mapstructure:"joinGroup"`
+	GroupMsgRead                 WebhookConfig `mapstructure:"groupMsgRead"`
+	SingleMsgRead                WebhookConfig `mapstructure:"singleMsgRead"`
+	UpdateUserInfo               WebhookConfig `mapstructure:"updateUserInfo"`
+	BeforeUserRegister           WebhookConfig `mapstructure:"beforeUserRegister"`
+	AfterUserRegister            WebhookConfig `mapstructure:"afterUserRegister"`
+	TransferGroupOwner           WebhookConfig `mapstructure:"transferGroupOwner"`
+	BeforeSetFriendRemark        WebhookConfig `mapstructure:"beforeSetFriendRemark"`
+	AfterSetFriendRemark         WebhookConfig `mapstructure:"afterSetFriendRemark"`
+	AfterGroupMsgRead            WebhookConfig `mapstructure:"afterGroupMsgRead"`
+	AfterGroupMsgRevoke          WebhookConfig `mapstructure:"afterGroupMsgRevoke"`
+	AfterJoinGroup               WebhookConfig `mapstructure:"afterJoinGroup"`
+	BeforeInviteUserToGroup      WebhookConfig `mapstructure:"beforeInviteUserToGroup"`
+	JoinGroupAfter               WebhookConfig `mapstructure:"joinGroupAfter"`
+	SetGroupInfoAfter            WebhookConfig `mapstructure:"setGroupInfoAfter"`
+	SetGroupInfoBefore           WebhookConfig `mapstructure:"setGroupInfoBefore"`
+	RevokeMsgAfter               WebhookConfig `mapstructure:"revokeMsgAfter"`
+	AddBlackBefore               WebhookConfig `mapstructure:"addBlackBefore"`
+	AddFriendAfter               WebhookConfig `mapstructure:"addFriendAfter"`
+	AddFriendAgreeBefore         WebhookConfig `mapstructure:"addFriendAgreeBefore"`
+	DeleteFriendAfter            WebhookConfig `mapstructure:"deleteFriendAfter"`
+	ImportFriendsBefore          WebhookConfig `mapstructure:"importFriendsBefore"`
+	ImportFriendsAfter           WebhookConfig `mapstructure:"importFriendsAfter"`
+	RemoveBlackAfter             WebhookConfig `mapstructure:"removeBlackAfter"`
 }
 
 type ZooKeeper struct {
