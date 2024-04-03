@@ -7,12 +7,7 @@ prometheus:
   enable: true
   ports: [20130]
 
-
-
-messageVerify:
-  friendVerify: false
-
-  groupMessageHasReadReceiptEnable: true
-
-  singleMessageHasReadReceiptEnable: true
+friendVerify: false
+groupMessageHasReadReceiptEnable: true
+singleMessageHasReadReceiptEnable: true
 
