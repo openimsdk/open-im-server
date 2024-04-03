@@ -16,17 +16,43 @@ package config
 
 import (
 	"bytes"
-	"time"
-
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/system/program"
-	"gopkg.in/yaml.v3"
+	"time"
 )
 
-var Config GlobalConfig
+type LocalCache struct {
+	User struct {
+		Topic         string `mapstructure:"topic"`
+		SlotNum       int    `mapstructure:"slotNum"`
+		SlotSize      int    `mapstructure:"slotSize"`
+		SuccessExpire int    `mapstructure:"successExpire"`
+		FailedExpire  int    `mapstructure:"failedExpire"`
+	} `mapstructure:"user"`
+	Group struct {
+		Topic         string `mapstructure:"topic"`
+		SlotNum       int    `mapstructure:"slotNum"`
+		SlotSize      int    `mapstructure:"slotSize"`
+		SuccessExpire int    `mapstructure:"successExpire"`
+		FailedExpire  int    `mapstructure:"failedExpire"`
+	} `mapstructure:"group"`
+	Friend struct {
+		Topic         string `mapstructure:"topic"`
+		SlotNum       int    `mapstructure:"slotNum"`
+		SlotSize      int    `mapstructure:"slotSize"`
+		SuccessExpire int    `mapstructure:"successExpire"`
+		FailedExpire  int    `mapstructure:"failedExpire"`
+	} `mapstructure:"friend"`
+	Conversation struct {
+		Topic         string `mapstructure:"topic"`
+		SlotNum       int    `mapstructure:"slotNum"`
+		SlotSize      int    `mapstructure:"slotSize"`
+		SuccessExpire int    `mapstructure:"successExpire"`
+		FailedExpire  int    `mapstructure:"failedExpire"`
+	} `mapstructure:"conversation"`
+}
 
 type Log struct {
 	StorageLocation     string `mapstructure:"storageLocation"`
@@ -50,59 +76,670 @@ type Minio struct {
 	PublicRead      bool   `mapstructure:"publicRead"`
 }
 
-type CallBackConfig struct {
-	Enable                 bool  `yaml:"enable"`
-	CallbackTimeOut        int   `yaml:"timeout"`
-	CallbackFailedContinue *bool `yaml:"failedContinue"`
-}
-
-type NotificationConf struct {
-	IsSendMsg        bool         `yaml:"isSendMsg"`
-	ReliabilityLevel int          `yaml:"reliabilityLevel"` // 1 online 2 persistent
-	UnreadCount      bool         `yaml:"unreadCount"`
-	OfflinePush      POfflinePush `yaml:"offlinePush"`
-}
-
-type POfflinePush struct {
-	Enable bool   `yaml:"enable"`
-	Title  string `yaml:"title"`
-	Desc   string `yaml:"desc"`
-	Ext    string `yaml:"ext"`
-}
-
-type MYSQL struct {
-	Address       []string `yaml:"address"`
-	Username      string   `yaml:"username"`
-	Password      string   `yaml:"password"`
-	Database      string   `yaml:"database"`
-	MaxOpenConn   int      `yaml:"maxOpenConn"`
-	MaxIdleConn   int      `yaml:"maxIdleConn"`
-	MaxLifeTime   int      `yaml:"maxLifeTime"`
-	LogLevel      int      `yaml:"logLevel"`
-	SlowThreshold int      `yaml:"slowThreshold"`
-}
-
-type Zookeeper struct {
-	Schema   string   `yaml:"schema"`
-	ZkAddr   []string `yaml:"address"`
-	Username string   `yaml:"username"`
-	Password string   `yaml:"password"`
-	MaxRetry int      `yaml:"maxRetry"`
-}
-
 type Mongo struct {
-	Uri         string   `yaml:"uri"`
-	Address     []string `yaml:"address"`
-	Database    string   `yaml:"database"`
-	Username    string   `yaml:"username"`
-	Password    string   `yaml:"password"`
-	MaxPoolSize int      `yaml:"maxPoolSize"`
-	MaxRetry    int      `yaml:"maxRetry"`
+	URI         string   `mapstructure:"uri"`
+	Address     []string `mapstructure:"address"`
+	Database    string   `mapstructure:"database"`
+	Username    string   `mapstructure:"username"`
+	Password    string   `mapstructure:"password"`
+	MaxPoolSize int      `mapstructure:"maxPoolSize"`
+	MaxRetry    int      `mapstructure:"maxRetry"`
+}
+
+type API struct {
+	Api struct {
+		ListenIP string `mapstructure:"listenIP"`
+		Ports    []int  `mapstructure:"ports"`
+	} `mapstructure:"api"`
+	Prometheus struct {
+		Enable     bool   `mapstructure:"enable"`
+		Ports      []int  `mapstructure:"ports"`
+		GrafanaURL string `mapstructure:"grafanaURL"`
+	} `mapstructure:"prometheus"`
+}
+
+type CronTask struct {
+	ChatRecordsClearTime string `mapstructure:"chatRecordsClearTime"`
+	MsgDestructTime      string `mapstructure:"msgDestructTime"`
+	RetainChatRecords    int    `mapstructure:"retainChatRecords"`
+}
+type Notification struct {
+	GroupCreated struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"groupCreated"`
+	GroupInfoSet struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"groupInfoSet"`
+	JoinGroupApplication struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"joinGroupApplication"`
+	MemberQuit struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"memberQuit"`
+	GroupApplicationAccepted struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"groupApplicationAccepted"`
+	GroupApplicationRejected struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"groupApplicationRejected"`
+	GroupOwnerTransferred struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"groupOwnerTransferred"`
+	MemberKicked struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"memberKicked"`
+	MemberInvited struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"memberInvited"`
+	MemberEnter struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"memberEnter"`
+	GroupDismissed struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"groupDismissed"`
+	GroupMuted struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"groupMuted"`
+	GroupCancelMuted struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+		DefaultTips struct {
+			Tips string `mapstructure:"tips"`
+		} `mapstructure:"defaultTips"`
+	} `mapstructure:"
+
+groupCancelMuted"`
+	GroupMemberMuted struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"groupMemberMuted"`
+	GroupMemberCancelMuted struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"groupMemberCancelMuted"`
+	GroupMemberInfoSet struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"groupMemberInfoSet"`
+	GroupInfoSetAnnouncement struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"groupInfoSetAnnouncement"`
+	GroupInfoSetName struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"groupInfoSetName"`
+	FriendApplicationAdded struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"friendApplicationAdded"`
+	FriendApplicationApproved struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"friendApplicationApproved"`
+	FriendApplicationRejected struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"friendApplicationRejected"`
+	FriendAdded struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"friendAdded"`
+	FriendDeleted struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"friendDeleted"`
+	FriendRemarkSet struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"friendRemarkSet"`
+	BlackAdded struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"blackAdded"`
+	BlackDeleted struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"blackDeleted"`
+	FriendInfoUpdated struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"re
+
+liabilityLevel"`
+		UnreadCount bool `mapstructure:"unreadCount"`
+		OfflinePush struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"friendInfoUpdated"`
+	UserInfoUpdated struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"userInfoUpdated"`
+	UserStatusChanged struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"userStatusChanged"`
+	ConversationChanged struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"conversationChanged"`
+	ConversationSetPrivate struct {
+		IsSendMsg        bool `mapstructure:"isSendMsg"`
+		ReliabilityLevel int  `mapstructure:"reliabilityLevel"`
+		UnreadCount      bool `mapstructure:"unreadCount"`
+		OfflinePush      struct {
+			Enable bool   `mapstructure:"enable"`
+			Title  string `mapstructure:"title"`
+			Desc   string `mapstructure:"desc"`
+			Ext    string `mapstructure:"ext"`
+		} `mapstructure:"offlinePush"`
+	} `mapstructure:"conversationSetPrivate"`
+}
+
+type MsgGateway struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus struct {
+		Enable bool  `mapstructure:"enable"`
+		Ports  []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
+	ListenIP    string `mapstructure:"listenIP"`
+	LongConnSvr struct {
+		Ports               []int `mapstructure:"ports"`
+		WebsocketMaxConnNum int   `mapstructure:"websocketMaxConnNum"`
+		WebsocketMaxMsgLen  int   `mapstructure:"websocketMaxMsgLen"`
+		WebsocketTimeout    int   `mapstructure:"websocketTimeout"`
+	} `mapstructure:"longConnSvr"`
+	MultiLoginPolicy int `mapstructure:"multiLoginPolicy"`
+}
+
+type MsgTransfer struct {
+	Prometheus struct {
+		Enable bool  `mapstructure:"enable"`
+		Ports  []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
+	MsgCacheTimeout int `mapstructure:"msgCacheTimeout"`
+}
+
+type Push struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus struct {
+		Enable bool  `mapstructure:"enable"`
+		Ports  []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
+	Enable string `mapstructure:"enable"`
+	GeTui  struct {
+		PushUrl      string `mapstructure:"pushUrl"`
+		MasterSecret string `mapstructure:"masterSecret"`
+		AppKey       string `mapstructure:"appKey"`
+		Intent       string `mapstructure:"intent"`
+		ChannelID    string `mapstructure:"channelID"`
+		ChannelName  string `mapstructure:"channelName"`
+	} `mapstructure:"geTui"`
+	FCM struct {
+		ServiceAccount string `mapstructure:"serviceAccount"`
+	} `mapstructure:"fcm"`
+	JPNS struct {
+		AppKey       string `mapstructure:"appKey"`
+		MasterSecret string `mapstructure:"masterSecret"`
+		PushURL      string `mapstructure:"pushURL"`
+		PushIntent   string `mapstructure:"pushIntent"`
+	} `mapstructure:"jpns"`
+	IOSPush struct {
+		PushSound  string `mapstructure:"pushSound"`
+		BadgeCount bool   `mapstructure:"badgeCount"`
+		Production bool   `mapstructure:"production"`
+	} `mapstructure:"iosPush"`
+}
+
+type Auth struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus struct {
+		Enable bool  `mapstructure:"enable"`
+		Ports  []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
+	TokenPolicy struct {
+		Expire int `mapstructure:"expire"`
+	} `mapstructure:"tokenPolicy"`
+	Secret string `mapstructure:"secret"`
+}
+
+type Conversation struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus struct {
+		Enable bool  `mapstructure:"enable"`
+		Ports  []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
+}
+
+type Friend struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus struct {
+		Enable bool  `mapstructure:"enable"`
+		Ports  []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
+}
+
+type Group struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus struct {
+		Enable bool  `mapstructure:"enable"`
+		Ports  []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
+}
+
+type Msg struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus struct {
+		Enable bool  `mapstructure:"enable"`
+		Ports  []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
+	FriendVerify                      bool `mapstructure:"friendVerify"`
+	GroupMessageHasReadReceiptEnable  bool `mapstructure:"groupMessageHasReadReceiptEnable"`
+	SingleMessageHasReadReceiptEnable bool `mapstructure:"singleMessageHasReadReceiptEnable"`
+}
+
+type Third struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus struct {
+		Enable bool  `mapstructure:"enable"`
+		Ports  []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
+	Object struct {
+		Enable string `mapstructure:"enable"`
+		Cos    struct {
+			BucketURL    string `mapstructure:"bucketURL"`
+			SecretID     string `mapstructure:"secretID"`
+			SecretKey    string `mapstructure:"secretKey"`
+			SessionToken string `mapstructure:"sessionToken"`
+			PublicRead   bool   `mapstructure:"publicRead"`
+		} `mapstructure:"cos"`
+		Oss struct {
+			Endpoint        string `mapstructure:"endpoint"`
+			Bucket          string `mapstructure:"bucket"`
+			BucketURL       string `mapstructure:"bucketURL"`
+			AccessKeyID     string `mapstructure:"accessKeyID"`
+			AccessKeySecret string `mapstructure:"accessKeySecret"`
+			SessionToken    string `mapstructure:"sessionToken"`
+			PublicRead      bool   `mapstructure:"publicRead"`
+		} `mapstructure:"oss"`
+		Kodo struct {
+			Endpoint        string `mapstructure:"endpoint"`
+			Bucket          string `mapstructure:"bucket"`
+			BucketURL       string `mapstructure:"bucketURL"`
+			AccessKeyID     string `mapstructure:"accessKeyID"`
+			AccessKeySecret string `mapstructure:"accessKeySecret"`
+			SessionToken    string `mapstructure:"sessionToken"`
+			PublicRead      bool   `mapstructure:"publicRead"`
+		} `mapstructure:"kodo"`
+		Aws struct {
+			Endpoint        string `mapstructure:"endpoint"`
+			Region          string `mapstructure:"region"`
+			Bucket          string `mapstructure:"bucket"`
+			AccessKeyID     string `mapstructure:"accessKeyID"`
+			AccessKeySecret string `mapstructure:"accessKeySecret"`
+			PublicRead      bool   `mapstructure:"publicRead"`
+		} `mapstructure:"aws"`
+	} `mapstructure:"object"`
+}
+
+type User struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus struct {
+		Enable bool  `mapstructure:"enable"`
+		Ports  []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
+}
+
+type Redis struct {
+	Address  []string `mapstructure:"address"`
+	Username string   `mapstructure:"username"`
+	Password string   `mapstructure:"password"`
+}
+
+type Webhooks struct {
+	URL                 string `mapstructure:"url"`
+	BeforeSendSingleMsg struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"beforeSendSingleMsg"`
+	BeforeUpdateUserInfoEx struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"beforeUpdateUserInfoEx"`
+	AfterUpdateUserInfoEx struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"afterUpdateUserInfoEx"`
+	AfterSendSingleMsg struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"afterSendSingleMsg"`
+	BeforeSendGroupMsg struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"beforeSendGroupMsg"`
+	AfterSendGroupMsg struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"afterSendGroupMsg"`
+	MsgModify struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"msgModify"`
+	UserOnline struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"userOnline"`
+	UserOffline struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"userOffline"`
+	UserKickOff struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"userKickOff"`
+	OfflinePush struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"offlinePush"`
+	OnlinePush struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"onlinePush"`
+	SuperGroupOnlinePush struct {
+		Enable         bool `mapstructure:"enable"`
+		Timeout        int  `mapstructure:"timeout"`
+		FailedContinue bool `mapstructure:"failedContinue"`
+	} `mapstructure:"superGroupOnlinePush"`
+	// Add additional fields here following the same pattern for other hooks
+}
+
+type ZooKeeper struct {
+	Schema          string   `mapstructure:"schema"`
+	Address         []string `mapstructure:"address"`
+	Username        string   `mapstructure:"username"`
+	Password        string   `mapstructure:"password"`
+	RpcRegisterName struct {
+		User           string `mapstructure:"User"`
+		Friend         string `mapstructure:"Friend"`
+		Msg            string `mapstructure:"Msg"`
+		Push           string `mapstructure:"Push"`
+		MessageGateway string `mapstructure:"MessageGateway"`
+		Group          string `mapstructure:"Group"`
+		Auth           string `mapstructure:"Auth"`
+		Conversation   string `mapstructure:"Conversation"`
+		Third          string `mapstructure:"Third"`
+	} `mapstructure:"rpcRegisterName"`
 }
 
 func (m *Mongo) Build() *mongoutil.Config {
 	return &mongoutil.Config{
-		Uri:         m.Uri,
+		Uri:         m.URI,
 		Address:     m.Address,
 		Database:    m.Database,
 		Username:    m.Username,
@@ -110,16 +747,6 @@ func (m *Mongo) Build() *mongoutil.Config {
 		MaxPoolSize: m.MaxPoolSize,
 		MaxRetry:    m.MaxRetry,
 	}
-}
-
-type Redis struct {
-	ClusterMode    bool     `yaml:"clusterMode"`
-	Address        []string `yaml:"address"`
-	Username       string   `yaml:"username"`
-	Password       string   `yaml:"password"`
-	EnablePipeline bool     `yaml:"enablePipeline"`
-	DB             int      `yaml:"db"`
-	MaxRetry       int      `yaml:"maxRetry"`
 }
 
 func (r *Redis) Build() *redisutil.Config {
@@ -131,324 +758,6 @@ func (r *Redis) Build() *redisutil.Config {
 		DB:          r.DB,
 		MaxRetry:    r.MaxRetry,
 	}
-}
-
-type Kafka struct {
-	kafka.Config
-	LatestMsgToRedis struct {
-		Topic string `yaml:"topic"`
-	} `yaml:"latestMsgToRedis"`
-	MsgToMongo struct {
-		Topic string `yaml:"topic"`
-	} `yaml:"offlineMsgToMongo"`
-	MsgToPush struct {
-		Topic string `yaml:"topic"`
-	} `yaml:"msgToPush"`
-	ConsumerGroupID struct {
-		MsgToRedis string `yaml:"msgToRedis"`
-		MsgToMongo string `yaml:"msgToMongo"`
-		MsgToMySql string `yaml:"msgToMySql"`
-		MsgToPush  string `yaml:"msgToPush"`
-	} `yaml:"consumerGroupID"`
-}
-
-type Cos struct {
-	BucketURL    string `yaml:"bucketURL"`
-	SecretID     string `yaml:"secretID"`
-	SecretKey    string `yaml:"secretKey"`
-	SessionToken string `yaml:"sessionToken"`
-	PublicRead   bool   `yaml:"publicRead"`
-}
-
-type Oss struct {
-	Endpoint        string `yaml:"endpoint"`
-	Bucket          string `yaml:"bucket"`
-	BucketURL       string `yaml:"bucketURL"`
-	AccessKeyID     string `yaml:"accessKeyID"`
-	AccessKeySecret string `yaml:"accessKeySecret"`
-	SessionToken    string `yaml:"sessionToken"`
-	PublicRead      bool   `yaml:"publicRead"`
-}
-
-type Kodo struct {
-	Endpoint        string `yaml:"endpoint"`
-	Bucket          string `yaml:"bucket"`
-	BucketURL       string `yaml:"bucketURL"`
-	AccessKeyID     string `yaml:"accessKeyID"`
-	AccessKeySecret string `yaml:"accessKeySecret"`
-	SessionToken    string `yaml:"sessionToken"`
-	PublicRead      bool   `yaml:"publicRead"`
-}
-type Aws struct {
-	Endpoint        string `yaml:"endpoint"`
-	Region          string `yaml:"region"`
-	Bucket          string `yaml:"bucket"`
-	AccessKeyID     string `yaml:"accessKeyID"`
-	AccessKeySecret string `yaml:"accessKeySecret"`
-	PublicRead      bool   `yaml:"publicRead"`
-}
-
-type Object struct {
-	Enable string `yaml:"enable"`
-	ApiURL string `yaml:"apiURL"`
-	Minio  Minio  `yaml:"minio"`
-	Cos    Cos    `yaml:"cos"`
-	Oss    Oss    `yaml:"oss"`
-	Kodo   Kodo   `yaml:"kodo"`
-	Aws    Aws    `yaml:"aws"`
-}
-
-type Api struct {
-	OpenImApiPort []int  `yaml:"openImApiPort"`
-	ListenIP      string `yaml:"listenIP"`
-}
-
-type RpcPort struct {
-	OpenImUserPort           []int `yaml:"openImUserPort"`
-	OpenImFriendPort         []int `yaml:"openImFriendPort"`
-	OpenImMessagePort        []int `yaml:"openImMessagePort"`
-	OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
-	OpenImGroupPort          []int `yaml:"openImGroupPort"`
-	OpenImAuthPort           []int `yaml:"openImAuthPort"`
-	OpenImPushPort           []int `yaml:"openImPushPort"`
-	OpenImConversationPort   []int `yaml:"openImConversationPort"`
-	OpenImRtcPort            []int `yaml:"openImRtcPort"`
-	OpenImThirdPort          []int `yaml:"openImThirdPort"`
-}
-
-type LongConnSvr struct {
-	OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
-	OpenImWsPort             []int `yaml:"openImWsPort"`
-	WebsocketMaxConnNum      int   `yaml:"websocketMaxConnNum"`
-	WebsocketMaxMsgLen       int   `yaml:"websocketMaxMsgLen"`
-	WebsocketTimeout         int   `yaml:"websocketTimeout"`
-	WebsocketWriteBufferSize int   `yaml:"websocketWriteBufferSize"`
-}
-
-type RpcRegisterName struct {
-	OpenImUserName           string `yaml:"openImUserName"`
-	OpenImFriendName         string `yaml:"openImFriendName"`
-	OpenImMsgName            string `yaml:"openImMsgName"`
-	OpenImPushName           string `yaml:"openImPushName"`
-	OpenImMessageGatewayName string `yaml:"openImMessageGatewayName"`
-	OpenImGroupName          string `yaml:"openImGroupName"`
-	OpenImAuthName           string `yaml:"openImAuthName"`
-	OpenImConversationName   string `yaml:"openImConversationName"`
-	OpenImThirdName          string `yaml:"openImThirdName"`
-}
-
-type GeTui struct {
-	PushUrl      string `yaml:"pushUrl"`
-	AppKey       string `yaml:"appKey"`
-	Intent       string `yaml:"intent"`
-	MasterSecret string `yaml:"masterSecret"`
-	ChannelID    string `yaml:"channelID"`
-	ChannelName  string `yaml:"channelName"`
-}
-
-type Fcm struct {
-	ServiceAccount string `yaml:"serviceAccount"`
-}
-
-type Jpns struct {
-	AppKey       string `yaml:"appKey"`
-	MasterSecret string `yaml:"masterSecret"`
-	PushUrl      string `yaml:"pushUrl"`
-	PushIntent   string `yaml:"pushIntent"`
-}
-
-type IOSPush struct {
-	PushSound  string `yaml:"pushSound"`
-	BadgeCount bool   `yaml:"badgeCount"`
-	Production bool   `yaml:"production"`
-}
-
-type Push struct {
-	MaxConcurrentWorkers int    `yaml:"maxConcurrentWorkers"`
-	Enable               string `yaml:"enable"`
-	GeTui                GeTui  `yaml:"geTui"`
-	Fcm                  Fcm    `yaml:"fcm"`
-	Jpns                 Jpns   `yaml:"jpns"`
-}
-
-type Manager struct {
-	UserID   []string `yaml:"userID"`
-	Nickname []string `yaml:"nickname"`
-}
-
-type IMAdmin struct {
-	UserID   []string `yaml:"userID"`
-	Nickname []string `yaml:"nickname"`
-}
-
-type Prometheus struct {
-	Enable                        bool   `yaml:"enable"`
-	GrafanaUrl                    string `yaml:"grafanaUrl"`
-	ApiPrometheusPort             []int  `yaml:"apiPrometheusPort"`
-	UserPrometheusPort            []int  `yaml:"userPrometheusPort"`
-	FriendPrometheusPort          []int  `yaml:"friendPrometheusPort"`
-	MessagePrometheusPort         []int  `yaml:"messagePrometheusPort"`
-	MessageGatewayPrometheusPort  []int  `yaml:"messageGatewayPrometheusPort"`
-	GroupPrometheusPort           []int  `yaml:"groupPrometheusPort"`
-	AuthPrometheusPort            []int  `yaml:"authPrometheusPort"`
-	PushPrometheusPort            []int  `yaml:"pushPrometheusPort"`
-	ConversationPrometheusPort    []int  `yaml:"conversationPrometheusPort"`
-	RtcPrometheusPort             []int  `yaml:"rtcPrometheusPort"`
-	MessageTransferPrometheusPort []int  `yaml:"messageTransferPrometheusPort"`
-	ThirdPrometheusPort           []int  `yaml:"thirdPrometheusPort"`
-}
-
-type Callback struct {
-	CallbackUrl                        string         `yaml:"url"`
-	CallbackBeforeSendSingleMsg        CallBackConfig `yaml:"beforeSendSingleMsg"`
-	CallbackAfterSendSingleMsg         CallBackConfig `yaml:"afterSendSingleMsg"`
-	CallbackBeforeSendGroupMsg         CallBackConfig `yaml:"beforeSendGroupMsg"`
-	CallbackAfterSendGroupMsg          CallBackConfig `yaml:"afterSendGroupMsg"`
-	CallbackMsgModify                  CallBackConfig `yaml:"msgModify"`
-	CallbackSingleMsgRead              CallBackConfig `yaml:"singleMsgRead"`
-	CallbackGroupMsgRead               CallBackConfig `yaml:"groupMsgRead"`
-	CallbackUserOnline                 CallBackConfig `yaml:"userOnline"`
-	CallbackUserOffline                CallBackConfig `yaml:"userOffline"`
-	CallbackUserKickOff                CallBackConfig `yaml:"userKickOff"`
-	CallbackOfflinePush                CallBackConfig `yaml:"offlinePush"`
-	CallbackOnlinePush                 CallBackConfig `yaml:"onlinePush"`
-	CallbackBeforeSuperGroupOnlinePush CallBackConfig `yaml:"superGroupOnlinePush"`
-	CallbackBeforeAddFriend            CallBackConfig `yaml:"beforeAddFriend"`
-	CallbackBeforeSetFriendRemark      CallBackConfig `yaml:"callbackBeforeSetFriendRemark"`
-	CallbackAfterSetFriendRemark       CallBackConfig `yaml:"callbackAfterSetFriendRemark"`
-	CallbackBeforeUpdateUserInfo       CallBackConfig `yaml:"beforeUpdateUserInfo"`
-	CallbackBeforeUpdateUserInfoEx     CallBackConfig `yaml:"beforeUpdateUserInfoEx"`
-	CallbackAfterUpdateUserInfoEx      CallBackConfig `yaml:"afterUpdateUserInfoEx"`
-	CallbackBeforeUserRegister         CallBackConfig `yaml:"beforeUserRegister"`
-	CallbackAfterUpdateUserInfo        CallBackConfig `yaml:"updateUserInfo"`
-	CallbackAfterUserRegister          CallBackConfig `yaml:"afterUserRegister"`
-	CallbackBeforeCreateGroup          CallBackConfig `yaml:"beforeCreateGroup"`
-	CallbackAfterCreateGroup           CallBackConfig `yaml:"afterCreateGroup"`
-	CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
-	CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
-	CallbackAfterSetGroupMemberInfo    CallBackConfig `yaml:"afterSetGroupMemberInfo"`
-	CallbackQuitGroup                  CallBackConfig `yaml:"quitGroup"`
-	CallbackKillGroupMember            CallBackConfig `yaml:"killGroupMember"`
-	CallbackDismissGroup               CallBackConfig `yaml:"dismissGroup"`
-	CallbackBeforeJoinGroup            CallBackConfig `yaml:"joinGroup"`
-	CallbackAfterTransferGroupOwner    CallBackConfig `yaml:"transferGroupOwner"`
-	CallbackBeforeInviteUserToGroup    CallBackConfig `yaml:"beforeInviteUserToGroup"`
-	CallbackAfterJoinGroup             CallBackConfig `yaml:"joinGroupAfter"`
-	CallbackAfterSetGroupInfo          CallBackConfig `yaml:"setGroupInfoAfter"`
-	CallbackBeforeSetGroupInfo         CallBackConfig `yaml:"setGroupInfoBefore"`
-	CallbackAfterRevokeMsg             CallBackConfig `yaml:"revokeMsgAfter"`
-	CallbackBeforeAddBlack             CallBackConfig `yaml:"addBlackBefore"`
-	CallbackAfterAddFriend             CallBackConfig `yaml:"addFriendAfter"`
-	CallbackBeforeAddFriendAgree       CallBackConfig `yaml:"addFriendAgreeBefore"`
-
-	CallbackAfterDeleteFriend   CallBackConfig `yaml:"deleteFriendAfter"`
-	CallbackBeforeImportFriends CallBackConfig `yaml:"importFriendsBefore"`
-	CallbackAfterImportFriends  CallBackConfig `yaml:"importFriendsAfter"`
-	CallbackAfterRemoveBlack    CallBackConfig `yaml:"removeBlackAfter"`
-}
-
-type GlobalConfig struct {
-	Envs struct {
-		Discovery string `yaml:"discovery"`
-	}
-	Zookeeper Zookeeper `yaml:"zookeeper"`
-
-	Mysql *MYSQL `yaml:"mysql"`
-
-	Mongo Mongo `yaml:"mongo"`
-
-	Redis Redis `yaml:"redis"`
-
-	Kafka Kafka `yaml:"kafka"`
-
-	Rpc struct {
-		RegisterIP string `yaml:"registerIP"`
-		ListenIP   string `yaml:"listenIP"`
-	} `yaml:"rpc"`
-
-	Api Api `yaml:"api"`
-
-	Object Object `yaml:"object"`
-
-	RpcPort RpcPort `yaml:"rpcPort"`
-
-	RpcRegisterName RpcRegisterName `yaml:"rpcRegisterName"`
-
-	Log Log `yaml:"log"`
-
-	LongConnSvr LongConnSvr `yaml:"longConnSvr"`
-
-	Push    Push    `yaml:"push"`
-	Manager Manager `yaml:"manager"`
-
-	IMAdmin IMAdmin `yaml:"im-admin"`
-
-	MultiLoginPolicy                  int    `yaml:"multiLoginPolicy"`
-	MsgCacheTimeout                   int    `yaml:"msgCacheTimeout"`
-	GroupMessageHasReadReceiptEnable  bool   `yaml:"groupMessageHasReadReceiptEnable"`
-	SingleMessageHasReadReceiptEnable bool   `yaml:"singleMessageHasReadReceiptEnable"`
-	RetainChatRecords                 int    `yaml:"retainChatRecords"`
-	ChatRecordsClearTime              string `yaml:"chatRecordsClearTime"`
-	MsgDestructTime                   string `yaml:"msgDestructTime"`
-	Secret                            string `yaml:"secret"`
-	EnableCronLocker                  bool   `yaml:"enableCronLocker"`
-	TokenPolicy                       struct {
-		Expire int64 `yaml:"expire"`
-	} `yaml:"tokenPolicy"`
-	MessageVerify struct {
-		FriendVerify *bool `yaml:"friendVerify"`
-	} `yaml:"messageVerify"`
-
-	LocalCache localCache `yaml:"localCache"`
-
-	IOSPush  IOSPush  `yaml:"iosPush"`
-	Callback Callback `yaml:"callback"`
-
-	Prometheus   Prometheus   `yaml:"prometheus"`
-	Notification Notification `yaml:"notification"`
-}
-
-func NewGlobalConfig() *GlobalConfig {
-	return &GlobalConfig{}
-}
-
-type Notification struct {
-	GroupCreated             NotificationConf `yaml:"groupCreated"`
-	GroupInfoSet             NotificationConf `yaml:"groupInfoSet"`
-	JoinGroupApplication     NotificationConf `yaml:"joinGroupApplication"`
-	MemberQuit               NotificationConf `yaml:"memberQuit"`
-	GroupApplicationAccepted NotificationConf `yaml:"groupApplicationAccepted"`
-	GroupApplicationRejected NotificationConf `yaml:"groupApplicationRejected"`
-	GroupOwnerTransferred    NotificationConf `yaml:"groupOwnerTransferred"`
-	MemberKicked             NotificationConf `yaml:"memberKicked"`
-	MemberInvited            NotificationConf `yaml:"memberInvited"`
-	MemberEnter              NotificationConf `yaml:"memberEnter"`
-	GroupDismissed           NotificationConf `yaml:"groupDismissed"`
-	GroupMuted               NotificationConf `yaml:"groupMuted"`
-	GroupCancelMuted         NotificationConf `yaml:"groupCancelMuted"`
-	GroupMemberMuted         NotificationConf `yaml:"groupMemberMuted"`
-	GroupMemberCancelMuted   NotificationConf `yaml:"groupMemberCancelMuted"`
-	GroupMemberInfoSet       NotificationConf `yaml:"groupMemberInfoSet"`
-	GroupMemberSetToAdmin    NotificationConf `yaml:"groupMemberSetToAdmin"`
-	GroupMemberSetToOrdinary NotificationConf `yaml:"groupMemberSetToOrdinaryUser"`
-	GroupInfoSetAnnouncement NotificationConf `yaml:"groupInfoSetAnnouncement"`
-	GroupInfoSetName         NotificationConf `yaml:"groupInfoSetName"`
-	////////////////////////user///////////////////////
-	UserInfoUpdated   NotificationConf `yaml:"userInfoUpdated"`
-	UserStatusChanged NotificationConf `yaml:"userStatusChanged"`
-	//////////////////////friend///////////////////////
-	FriendApplicationAdded    NotificationConf `yaml:"friendApplicationAdded"`
-	FriendApplicationApproved NotificationConf `yaml:"friendApplicationApproved"`
-	FriendApplicationRejected NotificationConf `yaml:"friendApplicationRejected"`
-	FriendAdded               NotificationConf `yaml:"friendAdded"`
-	FriendDeleted             NotificationConf `yaml:"friendDeleted"`
-	FriendRemarkSet           NotificationConf `yaml:"friendRemarkSet"`
-	BlackAdded                NotificationConf `yaml:"blackAdded"`
-	BlackDeleted              NotificationConf `yaml:"blackDeleted"`
-	FriendInfoUpdated         NotificationConf `yaml:"friendInfoUpdated"`
-	//////////////////////conversation///////////////////////
-	ConversationChanged    NotificationConf `yaml:"conversationChanged"`
-	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
 }
 
 type LocalCache struct {
