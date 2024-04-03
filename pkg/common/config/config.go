@@ -28,6 +28,28 @@ import (
 
 var Config GlobalConfig
 
+type Log struct {
+	StorageLocation     string `mapstructure:"storageLocation"`
+	RotationTime        int    `mapstructure:"rotationTime"`
+	RemainRotationCount int    `mapstructure:"remainRotationCount"`
+	RemainLogLevel      int    `mapstructure:"remainLogLevel"`
+	IsStdout            bool   `mapstructure:"isStdout"`
+	IsJson              bool   `mapstructure:"isJson"`
+	WithStack           bool   `mapstructure:"withStack"`
+}
+
+type Minio struct {
+	Bucket          string `mapstructure:"bucket"`
+	Port            int    `mapstructure:"port"`
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	SecretAccessKey string `mapstructure:"secretAccessKey"`
+	SessionToken    string `mapstructure:"sessionToken"`
+	InternalIP      string `mapstructure:"internalIP"`
+	ExternalIP      string `mapstructure:"externalIP"`
+	URL             string `mapstructure:"url"`
+	PublicRead      bool   `mapstructure:"publicRead"`
+}
+
 type CallBackConfig struct {
 	Enable                 bool  `yaml:"enable"`
 	CallbackTimeOut        int   `yaml:"timeout"`
@@ -129,15 +151,6 @@ type Kafka struct {
 		MsgToPush  string `yaml:"msgToPush"`
 	} `yaml:"consumerGroupID"`
 }
-type Minio struct {
-	Bucket          string `yaml:"bucket"`
-	Endpoint        string `yaml:"endpoint"`
-	AccessKeyID     string `yaml:"accessKeyID"`
-	SecretAccessKey string `yaml:"secretAccessKey"`
-	SessionToken    string `yaml:"sessionToken"`
-	SignEndpoint    string `yaml:"signEndpoint"`
-	PublicRead      bool   `yaml:"publicRead"`
-}
 
 type Cos struct {
 	BucketURL    string `yaml:"bucketURL"`
@@ -222,16 +235,6 @@ type RpcRegisterName struct {
 	OpenImAuthName           string `yaml:"openImAuthName"`
 	OpenImConversationName   string `yaml:"openImConversationName"`
 	OpenImThirdName          string `yaml:"openImThirdName"`
-}
-
-type Log struct {
-	StorageLocation     string `yaml:"storageLocation"`
-	RotationTime        uint   `yaml:"rotationTime"`
-	RemainRotationCount uint   `yaml:"remainRotationCount"`
-	RemainLogLevel      int    `yaml:"remainLogLevel"`
-	IsStdout            bool   `yaml:"isStdout"`
-	IsJson              bool   `yaml:"isJson"`
-	WithStack           bool   `yaml:"withStack"`
 }
 
 type GeTui struct {
