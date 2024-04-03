@@ -1,6 +1,8 @@
 api:
   openImApiPort: [ 10002 ]
   listenIP: 0.0.0.0
+  externalIP: 150.109.93.151
+  url:
 prometheus:
   enable: true
   grafanaUrl: http://127.0.0.1:13000/
