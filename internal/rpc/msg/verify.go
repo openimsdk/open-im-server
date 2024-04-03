@@ -28,7 +28,6 @@ import (
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/log"
 )
 
 var ExcludeContentType = []int{constant.HasReadReceipt}
@@ -186,7 +185,6 @@ func GetMsgID(sendID string) string {
 }
 
 func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, userID, conversationID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
-	defer log.ZDebug(ctx, "modifyMessageByUserMessageReceiveOpt return")
 	opt, err := m.UserLocalCache.GetUserGlobalMsgRecvOpt(ctx, userID)
 	if err != nil {
 		return false, err
