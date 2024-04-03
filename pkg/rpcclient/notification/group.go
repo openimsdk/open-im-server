@@ -288,7 +288,6 @@ func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws
 }
 
 func (g *GroupNotificationSender) GroupCreatedNotification(ctx context.Context, tips *sdkws.GroupCreatedTips) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -301,7 +300,6 @@ func (g *GroupNotificationSender) GroupCreatedNotification(ctx context.Context, 
 }
 
 func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, tips *sdkws.GroupInfoSetTips) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -314,7 +312,6 @@ func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, 
 }
 
 func (g *GroupNotificationSender) GroupInfoSetNameNotification(ctx context.Context, tips *sdkws.GroupInfoSetNameTips) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -327,7 +324,6 @@ func (g *GroupNotificationSender) GroupInfoSetNameNotification(ctx context.Conte
 }
 
 func (g *GroupNotificationSender) GroupInfoSetAnnouncementNotification(ctx context.Context, tips *sdkws.GroupInfoSetAnnouncementTips) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -340,7 +336,6 @@ func (g *GroupNotificationSender) GroupInfoSetAnnouncementNotification(ctx conte
 }
 
 func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbgroup.JoinGroupReq) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -370,7 +365,6 @@ func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.C
 }
 
 func (g *GroupNotificationSender) MemberQuitNotification(ctx context.Context, member *sdkws.GroupMemberFullInfo) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -385,7 +379,6 @@ func (g *GroupNotificationSender) MemberQuitNotification(ctx context.Context, me
 }
 
 func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx context.Context, req *pbgroup.GroupApplicationResponseReq) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -418,7 +411,6 @@ func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx conte
 }
 
 func (g *GroupNotificationSender) GroupApplicationRejectedNotification(ctx context.Context, req *pbgroup.GroupApplicationResponseReq) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -451,7 +443,6 @@ func (g *GroupNotificationSender) GroupApplicationRejectedNotification(ctx conte
 }
 
 func (g *GroupNotificationSender) GroupOwnerTransferredNotification(ctx context.Context, req *pbgroup.TransferGroupOwnerReq) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -474,7 +465,6 @@ func (g *GroupNotificationSender) GroupOwnerTransferredNotification(ctx context.
 }
 
 func (g *GroupNotificationSender) MemberKickedNotification(ctx context.Context, tips *sdkws.MemberKickedTips) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -487,7 +477,6 @@ func (g *GroupNotificationSender) MemberKickedNotification(ctx context.Context, 
 }
 
 func (g *GroupNotificationSender) MemberInvitedNotification(ctx context.Context, groupID, reason string, invitedUserIDList []string) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -512,7 +501,6 @@ func (g *GroupNotificationSender) MemberInvitedNotification(ctx context.Context,
 }
 
 func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, groupID string, entrantUserID string) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -531,7 +519,6 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, g
 }
 
 func (g *GroupNotificationSender) GroupDismissedNotification(ctx context.Context, tips *sdkws.GroupDismissedTips) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -544,7 +531,6 @@ func (g *GroupNotificationSender) GroupDismissedNotification(ctx context.Context
 }
 
 func (g *GroupNotificationSender) GroupMemberMutedNotification(ctx context.Context, groupID, groupMemberUserID string, mutedSeconds uint32) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -569,7 +555,6 @@ func (g *GroupNotificationSender) GroupMemberMutedNotification(ctx context.Conte
 }
 
 func (g *GroupNotificationSender) GroupMemberCancelMutedNotification(ctx context.Context, groupID, groupMemberUserID string) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -591,7 +576,6 @@ func (g *GroupNotificationSender) GroupMemberCancelMutedNotification(ctx context
 }
 
 func (g *GroupNotificationSender) GroupMutedNotification(ctx context.Context, groupID string) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -616,7 +600,6 @@ func (g *GroupNotificationSender) GroupMutedNotification(ctx context.Context, gr
 }
 
 func (g *GroupNotificationSender) GroupCancelMutedNotification(ctx context.Context, groupID string) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -673,7 +656,6 @@ func (g *GroupNotificationSender) GroupMemberSetToAdminNotification(ctx context.
 }
 
 func (g *GroupNotificationSender) GroupMemberSetToOrdinaryUserNotification(ctx context.Context, groupID, groupMemberUserID string) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
@@ -695,7 +677,6 @@ func (g *GroupNotificationSender) GroupMemberSetToOrdinaryUserNotification(ctx c
 }
 
 func (g *GroupNotificationSender) SuperGroupNotification(ctx context.Context, sendID, recvID string) (err error) {
-	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)

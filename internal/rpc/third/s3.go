@@ -53,7 +53,6 @@ func (t *thirdServer) PartSize(ctx context.Context, req *third.PartSizeReq) (*th
 }
 
 func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.InitiateMultipartUploadReq) (*third.InitiateMultipartUploadResp, error) {
-	defer log.ZDebug(ctx, "return")
 	if err := t.checkUploadName(ctx, req.Name); err != nil {
 		return nil, err
 	}
@@ -75,7 +74,7 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 				return nil, err
 			}
 			return &third.InitiateMultipartUploadResp{
-				Url: t.apiAddress(obj.Name),
+				Url: t.apiAddress(req.UrlPrefix, obj.Name),
 			}, nil
 		}
 		return nil, err
@@ -108,7 +107,6 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 }
 
 func (t *thirdServer) AuthSign(ctx context.Context, req *third.AuthSignReq) (*third.AuthSignResp, error) {
-	defer log.ZDebug(ctx, "return")
 	partNumbers := datautil.Slice(req.PartNumbers, func(partNumber int32) int { return int(partNumber) })
 	result, err := t.s3dataBase.AuthSign(ctx, req.UploadID, partNumbers)
 	if err != nil {
@@ -132,7 +130,6 @@ func (t *thirdServer) AuthSign(ctx context.Context, req *third.AuthSignReq) (*th
 }
 
 func (t *thirdServer) CompleteMultipartUpload(ctx context.Context, req *third.CompleteMultipartUploadReq) (*third.CompleteMultipartUploadResp, error) {
-	defer log.ZDebug(ctx, "return")
 	if err := t.checkUploadName(ctx, req.Name); err != nil {
 		return nil, err
 	}
@@ -154,7 +151,7 @@ func (t *thirdServer) CompleteMultipartUpload(ctx context.Context, req *third.Co
 		return nil, err
 	}
 	return &third.CompleteMultipartUploadResp{
-		Url: t.apiAddress(obj.Name),
+		Url: t.apiAddress(req.UrlPrefix, obj.Name),
 	}, nil
 }
 
@@ -279,11 +276,11 @@ func (t *thirdServer) CompleteFormData(ctx context.Context, req *third.CompleteF
 	if err := t.s3dataBase.SetObject(ctx, obj); err != nil {
 		return nil, err
 	}
-	return &third.CompleteFormDataResp{Url: t.apiAddress(mate.Name)}, nil
+	return &third.CompleteFormDataResp{Url: t.apiAddress(req.UrlPrefix, mate.Name)}, nil
 }
 
-func (t *thirdServer) apiAddress(name string) string {
-	return t.apiURL + name
+func (t *thirdServer) apiAddress(prefix, name string) string {
+	return prefix + name
 }
 
 type FormDataMate struct {

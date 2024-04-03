@@ -212,7 +212,6 @@ func (f *friendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest 
 // AgreeFriendRequest accepts a friend request. It first checks for an existing, unprocessed request.
 func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
 	return f.tx.Transaction(ctx, func(ctx context.Context) error {
-		defer log.ZDebug(ctx, "return line")
 		now := time.Now()
 		fr, err := f.friendRequest.Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 		if err != nil {

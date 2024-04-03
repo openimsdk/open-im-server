@@ -257,10 +257,10 @@ github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1y
 github.com/onsi/gomega v1.17.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAlGdZY=
 github.com/onsi/gomega v1.18.1 h1:M1GfJqGRrBrrGGsbxzV5dqM2U2ApXefZCQpkukxYRLE=
 github.com/onsi/gomega v1.18.1/go.mod h1:0q+aL8jAiMXy9hbwj2mr5GziHiwhAIQpFmmtT5hitRs=
-github.com/openimsdk/protocol v0.0.59 h1:eINLjWs4pnBl33JccwHV5qUYCRm3UWk+1ED4HbDENC8=
-github.com/openimsdk/protocol v0.0.59/go.mod h1:OZQA9FR55lseYoN2Ql1XAHYKHJGu7OMNkUbuekrKCM8=
-github.com/openimsdk/tools v0.0.47-alpha.10 h1:bel44PB4xcC1uO+1y/LYhgsPmAGpxrlNd8JaFL4yc50=
-github.com/openimsdk/tools v0.0.47-alpha.10/go.mod h1:mUsH+ANKbdmhUih43ijJHvuYcU8owm7X3kdFH7FsIec=
+github.com/openimsdk/protocol v0.0.60 h1:iz5ORGpGupkaygLTdODogUb3E4jJzSixIXMJiRkc1qs=
+github.com/openimsdk/protocol v0.0.60/go.mod h1:OZQA9FR55lseYoN2Ql1XAHYKHJGu7OMNkUbuekrKCM8=
+github.com/openimsdk/tools v0.0.47-alpha.11 h1:VioqYz2zPjoOalvdy63Ryjqnp9cwpP1p2oOoej+pbdI=
+github.com/openimsdk/tools v0.0.47-alpha.11/go.mod h1:aTh3aPbr4bibBGf0qnC3nTWC947xFOrvHsW6WZ1oV3E=
 github.com/pelletier/go-toml/v2 v2.0.8 h1:0ctb6s9mE31h0/lhu+J6OPmVeDxJn+kYnJc2jZR9tGQ=
 github.com/pelletier/go-toml/v2 v2.0.8/go.mod h1:vuYfssBdrU2XDZ9bYydBu6t+6a6PYNcZljzZR9VXg+4=
 github.com/pierrec/lz4/v4 v4.1.21 h1:yOVMLb6qSIDP67pl/5F7RepeKYu/VmTyEXvuMI5d9mQ=
