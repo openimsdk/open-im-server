@@ -62,7 +62,7 @@ func GetProjectRoot() (string, error) {
 	return projectRoot, nil
 }
 
-func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
+func GetOptionsByNotification(cfg NotificationConfig) msgprocessor.Options {
 	opts := msgprocessor.NewOptions()
 
 	if cfg.UnreadCount {
@@ -106,24 +106,4 @@ func initConfig(config any, configName, configFolderPath string) error {
 	}
 
 	return nil
-}
-
-func InitConfig(config *GlobalConfig, configFolderPath string) (err error) {
-	if configFolderPath == "" {
-		envConfigPath := os.Getenv("OPENIMCONFIG")
-		if envConfigPath != "" {
-			configFolderPath = envConfigPath
-		} else {
-			configFolderPath, err = GetDefaultConfigPath()
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	if err := initConfig(config, FileName, configFolderPath); err != nil {
-		return err
-	}
-
-	return initConfig(&config.Notification, NotificationFileName, configFolderPath)
 }
