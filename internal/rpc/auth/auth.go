@@ -16,10 +16,10 @@ package auth
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -40,22 +40,22 @@ type authServer struct {
 	authDatabase   controller.AuthDatabase
 	userRpcClient  *rpcclient.UserRpcClient
 	RegisterCenter discovery.SvcDiscoveryRegistry
-	config         *config.GlobalConfig
+	config         *cmd.AuthConfig
 }
 
-func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
+func Start(ctx context.Context, config *cmd.AuthConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
 	}
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.ZookeeperConfig.RpcRegisterName.User, &config.Manager, &config.IMAdmin)
 	pbauth.RegisterAuthServer(server, &authServer{
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
 			cache.NewTokenCacheModel(rdb),
-			config.Secret,
-			config.TokenPolicy.Expire,
+			config.RpcConfig.Secret,
+			config.RpcConfig.TokenPolicy.Expire,
 		),
 		config: config,
 	})

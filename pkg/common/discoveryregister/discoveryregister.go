@@ -21,14 +21,26 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/zookeeper"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
+	"time"
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
-func NewDiscoveryRegister(config *config.GlobalConfig) (discovery.SvcDiscoveryRegistry, error) {
+func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper) (discovery.SvcDiscoveryRegistry, error) {
 
-	switch config.Envs.Discovery {
+	switch zookeeperConfig.Env {
 	case "zookeeper":
 		return zookeeper.NewZookeeperDiscoveryRegister(&config.Zookeeper)
+		zk, err := zookeeper.NewZkClient(
+			zookeeperConfig.zkAddr,
+			schema,
+			zookeeper.WithFreq(time.Hour),
+			zookeeper.WithUserNameAndPassword(username, password),
+			zookeeper.WithRoundRobin(),
+			zookeeper.WithTimeout(10),
+		)
+		if err != nil {
+			return nil, err
+		}
 	case "k8s":
 		return kubernetes.NewK8sDiscoveryRegister(config.RpcRegisterName.OpenImMessageGatewayName)
 	case "direct":

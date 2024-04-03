@@ -17,6 +17,8 @@ package startrpc
 import (
 	"context"
 	"fmt"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/prometheus/client_golang/prometheus"
 	"net"
 	"net/http"
 	"os"
@@ -27,8 +29,6 @@ import (
 	"time"
 
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
@@ -37,17 +37,27 @@ import (
 	"github.com/openimsdk/tools/mw"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/network"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 // Start rpc server.
-func Start(ctx context.Context, rpcPort int, rpcRegisterName string, prometheusPort int, config *config2.GlobalConfig, rpcFn func(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
+func Start[T any](ctx context.Context, zookeeperConfig *config2.ZooKeeper, prometheusConfig *config2.Prometheus, listenIP,
+	registerIP string, rpcPorts []int, index int, rpcRegisterName string, config T, rpcFn func(ctx context.Context,
+	config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
+
+	rpcPort, err := getElemByIndex(rpcPorts, index)
+	if err != nil {
+		return err
+	}
+	prometheusPort, err := getElemByIndex(prometheusConfig.Ports, index)
+	if err != nil {
+		return err
+	}
 	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcPort", rpcPort,
 		"prometheusPort", prometheusPort)
-	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(config.Rpc.ListenIP), strconv.Itoa(rpcPort))
+	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(listenIP), strconv.Itoa(rpcPort))
 	listener, err := net.Listen(
 		"tcp",
 		rpcTcpAddr,
@@ -57,22 +67,22 @@ func Start(ctx context.Context, rpcPort int, rpcRegisterName string, prometheusP
 	}
 
 	defer listener.Close()
-	client, err := kdisc.NewDiscoveryRegister(config)
+	client, err := kdisc.NewDiscoveryRegister(zookeeperConfig)
 	if err != nil {
 		return err
 	}
 
 	defer client.Close()
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	registerIP, err := network.GetRpcRegisterIP(config.Rpc.RegisterIP)
+	registerIP, err = network.GetRpcRegisterIP(registerIP)
 	if err != nil {
 		return err
 	}
 
 	var reg *prometheus.Registry
 	var metric *grpcprometheus.ServerMetrics
-	if config.Prometheus.Enable {
-		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, &config.RpcRegisterName)
+	if prometheusConfig.Enable {
+		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, zookeeperConfig)
 		reg, metric, _ = prommetrics.NewGrpcPromObj(cusMetrics)
 		options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
 			grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))
@@ -108,7 +118,7 @@ func Start(ctx context.Context, rpcPort int, rpcRegisterName string, prometheusP
 	)
 
 	go func() {
-		if config.Prometheus.Enable && prometheusPort != 0 {
+		if prometheusConfig.Enable && prometheusPort != 0 {
 			metric.InitializeMetrics(srv)
 			// Create a HTTP server for prometheus.
 			httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
@@ -162,4 +172,12 @@ func gracefulStopWithCtx(ctx context.Context, f func()) error {
 	case <-done:
 		return nil
 	}
+}
+
+func getElemByIndex(array []int, index int) (int, error) {
+	if index < 0 || index >= len(array) {
+		return 0, errs.New("index out of range", "index", index, "array", array).Wrap()
+	}
+
+	return array[index], nil
 }

@@ -37,8 +37,8 @@ type LocalCache struct {
 
 type Log struct {
 	StorageLocation     string `mapstructure:"storageLocation"`
-	RotationTime        int    `mapstructure:"rotationTime"`
-	RemainRotationCount int    `mapstructure:"remainRotationCount"`
+	RotationTime        uint   `mapstructure:"rotationTime"`
+	RemainRotationCount uint   `mapstructure:"remainRotationCount"`
 	RemainLogLevel      int    `mapstructure:"remainLogLevel"`
 	IsStdout            bool   `mapstructure:"isStdout"`
 	IsJson              bool   `mapstructure:"isJson"`
@@ -133,16 +133,18 @@ type Notification struct {
 	ConversationSetPrivate    NotificationConfig `mapstructure:"conversationSetPrivate"`
 }
 
+type Prometheus struct {
+	Enable bool  `mapstructure:"enable"`
+	Ports  []int `mapstructure:"ports"`
+}
+
 type MsgGateway struct {
 	RPC struct {
 		RegisterIP string `mapstructure:"registerIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus struct {
-		Enable bool  `mapstructure:"enable"`
-		Ports  []int `mapstructure:"ports"`
-	} `mapstructure:"prometheus"`
-	ListenIP    string `mapstructure:"listenIP"`
+	Prometheus  Prometheus `mapstructure:"prometheus"`
+	ListenIP    string     `mapstructure:"listenIP"`
 	LongConnSvr struct {
 		Ports               []int `mapstructure:"ports"`
 		WebsocketMaxConnNum int   `mapstructure:"websocketMaxConnNum"`
@@ -153,11 +155,8 @@ type MsgGateway struct {
 }
 
 type MsgTransfer struct {
-	Prometheus struct {
-		Enable bool  `mapstructure:"enable"`
-		Ports  []int `mapstructure:"ports"`
-	} `mapstructure:"prometheus"`
-	MsgCacheTimeout int `mapstructure:"msgCacheTimeout"`
+	Prometheus      Prometheus `mapstructure:"prometheus"`
+	MsgCacheTimeout int        `mapstructure:"msgCacheTimeout"`
 }
 
 type Push struct {
@@ -166,12 +165,9 @@ type Push struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus struct {
-		Enable bool  `mapstructure:"enable"`
-		Ports  []int `mapstructure:"ports"`
-	} `mapstructure:"prometheus"`
-	Enable string `mapstructure:"enable"`
-	GeTui  struct {
+	Prometheus Prometheus `mapstructure:"prometheus"`
+	Enable     string     `mapstructure:"enable"`
+	GeTui      struct {
 		PushUrl      string `mapstructure:"pushUrl"`
 		MasterSecret string `mapstructure:"masterSecret"`
 		AppKey       string `mapstructure:"appKey"`
@@ -201,12 +197,9 @@ type Auth struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus struct {
-		Enable bool  `mapstructure:"enable"`
-		Ports  []int `mapstructure:"ports"`
-	} `mapstructure:"prometheus"`
+	Prometheus  Prometheus `mapstructure:"prometheus"`
 	TokenPolicy struct {
-		Expire int `mapstructure:"expire"`
+		Expire int64 `mapstructure:"expire"`
 	} `mapstructure:"tokenPolicy"`
 	Secret string `mapstructure:"secret"`
 }
@@ -217,10 +210,7 @@ type Conversation struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus struct {
-		Enable bool  `mapstructure:"enable"`
-		Ports  []int `mapstructure:"ports"`
-	} `mapstructure:"prometheus"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type Friend struct {
@@ -229,10 +219,7 @@ type Friend struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus struct {
-		Enable bool  `mapstructure:"enable"`
-		Ports  []int `mapstructure:"ports"`
-	} `mapstructure:"prometheus"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type Group struct {
@@ -241,10 +228,7 @@ type Group struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus struct {
-		Enable bool  `mapstructure:"enable"`
-		Ports  []int `mapstructure:"ports"`
-	} `mapstructure:"prometheus"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type Msg struct {
@@ -253,13 +237,10 @@ type Msg struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus struct {
-		Enable bool  `mapstructure:"enable"`
-		Ports  []int `mapstructure:"ports"`
-	} `mapstructure:"prometheus"`
-	FriendVerify                      bool `mapstructure:"friendVerify"`
-	GroupMessageHasReadReceiptEnable  bool `mapstructure:"groupMessageHasReadReceiptEnable"`
-	SingleMessageHasReadReceiptEnable bool `mapstructure:"singleMessageHasReadReceiptEnable"`
+	Prometheus                        Prometheus `mapstructure:"prometheus"`
+	FriendVerify                      bool       `mapstructure:"friendVerify"`
+	GroupMessageHasReadReceiptEnable  bool       `mapstructure:"groupMessageHasReadReceiptEnable"`
+	SingleMessageHasReadReceiptEnable bool       `mapstructure:"singleMessageHasReadReceiptEnable"`
 }
 
 type Third struct {
@@ -268,11 +249,8 @@ type Third struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus struct {
-		Enable bool  `mapstructure:"enable"`
-		Ports  []int `mapstructure:"ports"`
-	} `mapstructure:"prometheus"`
-	Object struct {
+	Prometheus Prometheus `mapstructure:"prometheus"`
+	Object     struct {
 		Enable string `mapstructure:"enable"`
 		Cos    struct {
 			BucketURL    string `mapstructure:"bucketURL"`
@@ -316,10 +294,7 @@ type User struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus struct {
-		Enable bool  `mapstructure:"enable"`
-		Ports  []int `mapstructure:"ports"`
-	} `mapstructure:"prometheus"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type Redis struct {
@@ -394,6 +369,7 @@ type ZooKeeper struct {
 	Address         []string `mapstructure:"address"`
 	Username        string   `mapstructure:"username"`
 	Password        string   `mapstructure:"password"`
+	Env             string   `mapstructure:"env"`
 	RpcRegisterName struct {
 		User           string `mapstructure:"User"`
 		Friend         string `mapstructure:"Friend"`

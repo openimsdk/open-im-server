@@ -4,6 +4,7 @@ address: [ 172.28.0.1:12181 ]
 username: ''
 password: ''
 
+env: zookeeper
 rpcRegisterName:
   User: User
   Friend: Friend

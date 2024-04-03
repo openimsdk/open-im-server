@@ -21,11 +21,7 @@ import (
 )
 
 func main() {
-	authCmd := cmd.NewRpcCmd(cmd.RpcAuthServer, auth.Start)
-	authCmd.AddPortFlag()
-	authCmd.AddPrometheusPortFlag()
-	if err := authCmd.Exec(); err != nil {
+	if err := cmd.NewAuthRpcCmd(auth.Start).Exec(); err != nil {
 		program.ExitWithError(err)
-
 	}
 }

@@ -28,3 +28,40 @@ const (
 	MsgGatewayServer      = "msgGateway"
 	MsgTransferServer     = "msgTransfer"
 )
+const (
+	FileName                         = "config.yaml"
+	NotificationFileName             = "notification.yaml"
+	KafkaConfigFileName              = "kafka.yml"
+	RedisConfigFileName              = "redis.yml"
+	WebhooksConfigFileName           = "webhooks.yml"
+	ZookeeperConfigFileName          = "zookeeper.yml"
+	MongodbConfigFileName            = "mongodb.yml"
+	MinioConfigFileName              = "minio.yml"
+	LogConfigFileName                = "log.yml"
+	OpenIMAPICfgFileName             = "openim-api.yml"
+	OpenIMCronTaskCfgFileName        = "openim-crontask.yml"
+	OpenIMMsgGatewayCfgFileName      = "openim-msg-gateway.yml"
+	OpenIMMsgTransferCfgFileName     = "openim-msg-transfer.yml"
+	OpenIMPushCfgFileName            = "openim-push.yml"
+	OpenIMRPCAuthCfgFileName         = "openim-rpc-auth.yml"
+	OpenIMRPCConversationCfgFileName = "openim-rpc-conversation.yml"
+	OpenIMRPCFriendCfgFileName       = "openim-rpc-friend.yml"
+	OpenIMRPCGroupCfgFileName        = "openim-rpc-group.yml"
+	OpenIMRPCMsgCfgFileName          = "openim-rpc-msg.yml"
+	OpenIMRPCThirdCfgFileName        = "openim-rpc-third.yml"
+	OpenIMRPCUserCfgFileName         = "openim-rpc-user.yml"
+)
+
+const (
+	logEnvPrefix        = "openim-log"
+	redisEnvPrefix      = "openim-redis"
+	mongodbEnvPrefix    = "openim-mongodb"
+	zoopkeeperEnvPrefix = "openim-zookeeper"
+	authEnvPrefix       = "openim-auth"
+)
+
+const (
+	FlagConf = "config_folder_path"
+
+	FlagTransferIndex = "index"
+)
