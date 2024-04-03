@@ -18,3 +18,10 @@ func TestLoadMinioConfig(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "openim", storageConfig.Bucket)
 }
+
+func TestLoadWebhooksConfig(t *testing.T) {
+	var webhooks Webhooks
+	err := LoadConfig("../../../config/webhooks.yml", "OPENIM_WEBHOOKS", &webhooks)
+	assert.Nil(t, err)
+	assert.Equal(t, 5, webhooks.AddBlackBefore.Timeout)
+}
