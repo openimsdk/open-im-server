@@ -14,6 +14,12 @@ push:
     masterSecret: ''
     pushUrl: ''
     pushIntent: ''
+
+iosPush:
+      pushSound: "xxx"
+      badgeCount: true
+      production: false
+
 prometheus:
   enable: true
   grafanaUrl: http://127.0.0.1:13000/

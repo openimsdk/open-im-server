@@ -11,57 +11,21 @@ log:
 
 msgCacheTimeout: 86400
 
-multiLoginPolicy: 1
 
-messageVerify:
-  friendVerify: false
+
+
 
 tokenPolicy:
   expire: 90
 
-groupMessageHasReadReceiptEnable: true
 
-singleMessageHasReadReceiptEnable: true
 
-retainChatRecords: 365
 
-chatRecordsClearTime: "0 2 * * 3"
 
-msgDestructTime: "0 2 * * *"
+
 
 secret: openIM123
 
-iosPush:
-  pushSound: "xxx"
-  badgeCount: true
-  production: false
 
 
-###################### Third-party service configuration ######################
-# Callback configuration
-#
-# Callback URL
-# Whether to enable this callback event
-# Timeout in seconds
-# Whether to continue execution if callback fails
 
-
-###################### Prometheus ######################
-# Prometheus configuration for various services
-# The number of Prometheus ports per service needs to correspond to rpcPort
-# The number of ports needs to be consistent with msg_transfer_service_num in script/path_info.sh
-prometheus:
-  enable: true
-  grafanaUrl: http://127.0.0.1:13000/
-  apiPrometheusPort: [20100]
-  userPrometheusPort: [ 20110 ]
-  friendPrometheusPort: [ 20120 ]
-  messagePrometheusPort: [ 20130 ]
-  messageGatewayPrometheusPort: [ 20140 ]
-  groupPrometheusPort: [ 20150 ]
-  authPrometheusPort: [ 20160 ]
-  pushPrometheusPort: [ 20170 ]
-  conversationPrometheusPort: [ 20230 ]
-  rtcPrometheusPort: [ 21300 ]
-  thirdPrometheusPort: [ 21301 ]
-  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] # List of ports
