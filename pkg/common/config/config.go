@@ -15,11 +15,8 @@
 package config
 
 import (
-	"bytes"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
-	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/system/program"
 	"time"
 )
 
@@ -628,79 +625,34 @@ type User struct {
 }
 
 type Redis struct {
-	Address  []string `mapstructure:"address"`
-	Username string   `mapstructure:"username"`
-	Password string   `mapstructure:"password"`
+	Address     []string `mapstructure:"address"`
+	Username    string   `mapstructure:"username"`
+	Password    string   `mapstructure:"password"`
+	ClusterMode bool     `mapstructure:"clusterMode"`
+	DB          int      `mapstructure:"db"`
+	MaxRetry    int      `mapstructure:"MaxRetry"`
+}
+
+type Hook struct {
+	Enable         bool `mapstructure:"enable"`
+	Timeout        int  `mapstructure:"timeout"`
+	FailedContinue bool `mapstructure:"failedContinue"`
 }
 
 type Webhooks struct {
-	URL                 string `mapstructure:"url"`
-	BeforeSendSingleMsg struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"beforeSendSingleMsg"`
-	BeforeUpdateUserInfoEx struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"beforeUpdateUserInfoEx"`
-	AfterUpdateUserInfoEx struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"afterUpdateUserInfoEx"`
-	AfterSendSingleMsg struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"afterSendSingleMsg"`
-	BeforeSendGroupMsg struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"beforeSendGroupMsg"`
-	AfterSendGroupMsg struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"afterSendGroupMsg"`
-	MsgModify struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"msgModify"`
-	UserOnline struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"userOnline"`
-	UserOffline struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"userOffline"`
-	UserKickOff struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"userKickOff"`
-	OfflinePush struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"offlinePush"`
-	OnlinePush struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"onlinePush"`
-	SuperGroupOnlinePush struct {
-		Enable         bool `mapstructure:"enable"`
-		Timeout        int  `mapstructure:"timeout"`
-		FailedContinue bool `mapstructure:"failedContinue"`
-	} `mapstructure:"superGroupOnlinePush"`
-	// Add additional fields here following the same pattern for other hooks
+	URL                    string `mapstructure:"url"`
+	BeforeSendSingleMsg    Hook   `mapstructure:"beforeSendSingleMsg"`
+	BeforeUpdateUserInfoEx Hook   `mapstructure:"beforeUpdateUserInfoEx"`
+	AfterUpdateUserInfoEx  Hook   `mapstructure:"afterUpdateUserInfoEx"`
+	AfterSendSingleMsg     Hook   `mapstructure:"afterSendSingleMsg"`
+	BeforeSendGroupMsg     Hook   `mapstructure:"beforeSendGroupMsg"`
+	AfterSendGroupMsg      Hook   `mapstructure:"afterSendGroupMsg"`
+	MsgModify              Hook   `mapstructure:"msgModify"`
+	UserOnline             Hook   `mapstructure:"userOnline"`
+	UserOffline            Hook   `mapstructure:"userOffline"`
+	UserKickOff            Hook   `mapstructure:"userKickOff"`
+	OfflinePush            Hook   `mapstructure:"offlinePush"`
+	OnlinePush             Hook   `mapstructure:"onlinePush"`
 }
 
 type ZooKeeper struct {
@@ -744,55 +696,14 @@ func (r *Redis) Build() *redisutil.Config {
 	}
 }
 
-func (l LocalCache) Failed() time.Duration {
+func (l *CacheConfig) Failed() time.Duration {
 	return time.Second * time.Duration(l.FailedExpire)
 }
 
-func (l LocalCache) Success() time.Duration {
+func (l *CacheConfig) Success() time.Duration {
 	return time.Second * time.Duration(l.SuccessExpire)
 }
 
-func (l LocalCache) Enable() bool {
+func (l *CacheConfig) Enable() bool {
 	return l.Topic != "" && l.SlotNum > 0 && l.SlotSize > 0
-}
-
-type localCache struct {
-	User         LocalCache `yaml:"user"`
-	Group        LocalCache `yaml:"group"`
-	Friend       LocalCache `yaml:"friend"`
-	Conversation LocalCache `yaml:"conversation"`
-}
-
-func (c *GlobalConfig) GetServiceNames() []string {
-	return []string{
-		c.RpcRegisterName.OpenImUserName,
-		c.RpcRegisterName.OpenImFriendName,
-		c.RpcRegisterName.OpenImMsgName,
-		c.RpcRegisterName.OpenImPushName,
-		c.RpcRegisterName.OpenImMessageGatewayName,
-		c.RpcRegisterName.OpenImGroupName,
-		c.RpcRegisterName.OpenImAuthName,
-		c.RpcRegisterName.OpenImConversationName,
-		c.RpcRegisterName.OpenImThirdName,
-	}
-}
-
-func (c *GlobalConfig) RegisterConf2Registry(registry discovery.SvcDiscoveryRegistry) error {
-	data, err := yaml.Marshal(c)
-	if err != nil {
-		return err
-	}
-	return registry.RegisterConf2Registry(ConfKey, data)
-}
-
-func (c *GlobalConfig) GetConfFromRegistry(registry discovery.SvcDiscoveryRegistry) ([]byte, error) {
-	return registry.GetConfFromRegistry(ConfKey)
-}
-
-func (c *GlobalConfig) EncodeConfig() []byte {
-	buf := bytes.NewBuffer(nil)
-	if err := yaml.NewEncoder(buf).Encode(c); err != nil {
-		program.ExitWithError(err)
-	}
-	return buf.Bytes()
 }
