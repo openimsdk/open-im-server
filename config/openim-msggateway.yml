@@ -4,7 +4,7 @@ rpc:
 
 prometheus:
   enable: true
-  ports: [ 20140 ]
+  ports: [ 20112 ]
 
 listenIP: 0.0.0.0
 

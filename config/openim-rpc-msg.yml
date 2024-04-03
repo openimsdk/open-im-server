@@ -5,7 +5,7 @@ rpc:
 
 prometheus:
   enable: true
-  ports: [20130]
+  ports: [ 20102 ]
 
 friendVerify: false
 groupMessageHasReadReceiptEnable: true

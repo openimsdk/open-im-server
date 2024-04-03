@@ -5,7 +5,7 @@ rpc:
 
 prometheus:
   enable: true
-  ports: [20160]
+  ports: [ 20106 ]
 
 tokenPolicy:
   expire: 90

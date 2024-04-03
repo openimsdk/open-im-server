@@ -4,5 +4,5 @@ api:
 
 prometheus:
   enable: true
-  ports: [20100]
+  ports: [ 20113 ]
   grafanaURL: http://127.0.0.1:13000/

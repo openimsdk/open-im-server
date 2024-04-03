@@ -5,4 +5,4 @@ rpc:
 
 prometheus:
   enable: true
-  ports: [ 20120 ]
+  ports: [ 20104 ]

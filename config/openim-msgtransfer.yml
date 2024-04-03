@@ -1,7 +1,7 @@
 # msgtransfer
 prometheus:
   enable: true
-  ports: [ 21400, 21401, 21402, 21403 ] # List of ports
+  ports: [ 20108, 20109, 20110, 20111 ] # List of ports
 
 
 msgCacheTimeout: 86400

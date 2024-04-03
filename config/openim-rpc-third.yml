@@ -5,7 +5,7 @@ rpc:
 
 prometheus:
   enable: true
-  ports: [21301]
+  ports: [ 20101 ]
 
 object:
   enable: "minio"

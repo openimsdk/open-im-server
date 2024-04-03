@@ -5,7 +5,7 @@ rpc:
 
 prometheus:
   enable: true
-  ports: [ 20170 ]
+  ports: [ 20107 ]
 
 
 enable: getui
