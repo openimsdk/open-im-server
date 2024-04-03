@@ -23,35 +23,19 @@ import (
 	"time"
 )
 
+type CacheConfig struct {
+	Topic         string `mapstructure:"topic"`
+	SlotNum       int    `mapstructure:"slotNum"`
+	SlotSize      int    `mapstructure:"slotSize"`
+	SuccessExpire int    `mapstructure:"successExpire"`
+	FailedExpire  int    `mapstructure:"failedExpire"`
+}
+
 type LocalCache struct {
-	User struct {
-		Topic         string `mapstructure:"topic"`
-		SlotNum       int    `mapstructure:"slotNum"`
-		SlotSize      int    `mapstructure:"slotSize"`
-		SuccessExpire int    `mapstructure:"successExpire"`
-		FailedExpire  int    `mapstructure:"failedExpire"`
-	} `mapstructure:"user"`
-	Group struct {
-		Topic         string `mapstructure:"topic"`
-		SlotNum       int    `mapstructure:"slotNum"`
-		SlotSize      int    `mapstructure:"slotSize"`
-		SuccessExpire int    `mapstructure:"successExpire"`
-		FailedExpire  int    `mapstructure:"failedExpire"`
-	} `mapstructure:"group"`
-	Friend struct {
-		Topic         string `mapstructure:"topic"`
-		SlotNum       int    `mapstructure:"slotNum"`
-		SlotSize      int    `mapstructure:"slotSize"`
-		SuccessExpire int    `mapstructure:"successExpire"`
-		FailedExpire  int    `mapstructure:"failedExpire"`
-	} `mapstructure:"friend"`
-	Conversation struct {
-		Topic         string `mapstructure:"topic"`
-		SlotNum       int    `mapstructure:"slotNum"`
-		SlotSize      int    `mapstructure:"slotSize"`
-		SuccessExpire int    `mapstructure:"successExpire"`
-		FailedExpire  int    `mapstructure:"failedExpire"`
-	} `mapstructure:"conversation"`
+	User         CacheConfig `mapstructure:"user"`
+	Group        CacheConfig `mapstructure:"group"`
+	Friend       CacheConfig `mapstructure:"friend"`
+	Conversation CacheConfig `mapstructure:"conversation"`
 }
 
 type Log struct {
@@ -758,14 +742,6 @@ func (r *Redis) Build() *redisutil.Config {
 		DB:          r.DB,
 		MaxRetry:    r.MaxRetry,
 	}
-}
-
-type LocalCache struct {
-	Topic         string `yaml:"topic"`
-	SlotNum       int    `yaml:"slotNum"`
-	SlotSize      int    `yaml:"slotSize"`
-	SuccessExpire int    `yaml:"successExpire"` // second
-	FailedExpire  int    `yaml:"failedExpire"`  // second
 }
 
 func (l LocalCache) Failed() time.Duration {
