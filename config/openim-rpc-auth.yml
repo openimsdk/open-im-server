@@ -1,11 +1,11 @@
 rpc:
   registerIP: ''
   listenIP: 0.0.0.0
-rpcPort:
-  openImAuthPort: [ 10160 ]
-rpcRegisterName:
-  openImAuthName: Auth
+  ports: [ 10160 ]
+
 prometheus:
   enable: true
-  grafanaUrl: http://127.0.0.1:13000/
-  prometheusPort: [20160]
+  ports: [20160]
+
+tokenPolicy:
+  expire: 90

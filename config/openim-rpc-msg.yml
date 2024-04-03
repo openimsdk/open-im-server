@@ -1,14 +1,13 @@
 rpc:
   registerIP: ''
   listenIP: 0.0.0.0
-rpcPort:
-  openImMessagePort: [ 10130 ]
-rpcRegisterName:
-  openImMsgName: Msg
+  ports: [ 10130 ]
+
 prometheus:
   enable: true
-  grafanaUrl: http://127.0.0.1:13000/
-  prometheusPort: [ 20130 ]
+  ports: [20130]
+
+
 
 messageVerify:
   friendVerify: false

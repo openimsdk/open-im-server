@@ -1,14 +1,40 @@
 rpc:
   registerIP: ''
   listenIP: 0.0.0.0
-rpcPort:
-  openImThirdPort: [ 10190 ]
-rpcRegisterName:
-  openImThirdName: Third
+  ports: [ 10190 ]
 
 prometheus:
   enable: true
-  grafanaUrl: http://127.0.0.1:13000/
-  prometheusPort: [ 21301 ]
+  ports: [21301]
 
-
+object:
+  enable: "minio"
+  cos:
+    bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
+    secretID: ''
+    secretKey: ''
+    sessionToken: ''
+    publicRead: false
+  oss:
+    endpoint: "https://oss-cn-chengdu.aliyuncs.com"
+    bucket: "demo-9999999"
+    bucketURL: "https://demo-9999999.oss-cn-chengdu.aliyuncs.com"
+    accessKeyID: ''
+    accessKeySecret: ''
+    sessionToken: ''
+    publicRead: false
+  kodo:
+    endpoint: "http://s3.cn-east-1.qiniucs.com"
+    bucket: "demo-9999999"
+    bucketURL: "http://your.domain.com"
+    accessKeyID: ''
+    accessKeySecret: ''
+    sessionToken: ''
+    publicRead: false
+  aws:
+    endpoint: "''"
+    region: "us-east-1"
+    bucket: "demo-9999999"
+    accessKeyID: ''
+    accessKeySecret: ''
+    publicRead: false

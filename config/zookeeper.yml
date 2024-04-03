@@ -1,0 +1,16 @@
+
+schema: openim
+address: [ 172.28.0.1:12181 ]
+username: ''
+password: ''
+
+rpcRegisterName:
+  User: User
+  Friend: Friend
+  Msg: Msg
+  Push: Push
+  MessageGateway: MessageGateway
+  Group: Group
+  Auth: Auth
+  Conversation: Conversation
+  Third: Third

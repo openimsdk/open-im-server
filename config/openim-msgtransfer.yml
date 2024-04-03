@@ -1,5 +1,7 @@
 # msgtransfer
 prometheus:
   enable: true
-  grafanaUrl: http://127.0.0.1:13000/
-  prometheusPort: [ 21400, 21401, 21402, 21403 ] # List of ports
+  ports: [ 21400, 21401, 21402, 21403 ] # List of ports
+
+
+msgCacheTimeout: 86400

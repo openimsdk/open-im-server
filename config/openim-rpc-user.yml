@@ -1,13 +1,10 @@
 rpc:
   registerIP: ''
   listenIP: 0.0.0.0
-rpcPort:
-  openImUserPort: [ 10110 ]
-rpcRegisterName:
-  openImUserName: User
+  ports: [ 10110 ]
 
 prometheus:
   enable: true
-  grafanaUrl: http://127.0.0.1:13000/
-  prometheusPort: [ 20110 ]
+  ports: [20110]
+
 

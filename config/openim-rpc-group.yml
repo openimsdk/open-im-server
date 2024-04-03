@@ -1,12 +1,9 @@
 rpc:
   registerIP: ''
   listenIP: 0.0.0.0
-rpcPort:
-  openImGroupPort: [ 10150 ]
-rpcRegisterName:
-  openImGroupName: Group
+  ports: [ 10150 ]
+
 prometheus:
   enable: true
-  grafanaUrl: http://127.0.0.1:13000/
-  prometheusPort: [ 20150 ]
+  ports: [20150]
 

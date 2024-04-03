@@ -1,0 +1,15 @@
+
+
+
+
+
+
+
+
+secret: openIM123
+
+
+
+im-admin:
+  userID: [ "imAdmin" ]
+  nickname: [ "imAdmin" ]

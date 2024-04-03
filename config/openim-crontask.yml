@@ -1,8 +1,3 @@
-cronTasks:
-  chatRecordsClearTime: "0 2 * * 3"
-  msgDestructTime: "0 2 * * *"
-
-
-  retainChatRecords: 365
-
-
+chatRecordsClearTime: "0 2 * * 3"
+msgDestructTime: "0 2 * * *"
+retainChatRecords: 365

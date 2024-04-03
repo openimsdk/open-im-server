@@ -1,12 +1,11 @@
 rpc:
   registerIP: ''
   listenIP: 0.0.0.0
-rpcPort:
-  openImConversationPort: [ 10180 ]
-rpcRegisterName:
-  openImConversationName: Conversation
+  ports: [ 10180 ]
+
 prometheus:
   enable: true
-  grafanaUrl: http://127.0.0.1:13000/
-  prometheusPort: [ 20230 ]
+  ports: [20230]
+
+
 
