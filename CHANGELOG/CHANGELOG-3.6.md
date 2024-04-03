@@ -8,6 +8,9 @@
 ## [Unreleased]
 
 
+<a name="v3.6.1-beta.0"></a>
+## [v3.6.1-beta.0] - 2024-03-26
+
 <a name="v3.6.0"></a>
 ## v3.6.0 - 2024-03-07
 ### Reverts
@@ -17,4 +20,5 @@
 - Merge branch 'tuoyun'
 
 
-[Unreleased]: https://github.com/openimsdk/open-im-server/compare/v3.6.0...HEAD
+[Unreleased]: https://github.com/openimsdk/open-im-server/compare/v3.6.1-beta.0...HEAD
+[v3.6.1-beta.0]: https://github.com/openimsdk/open-im-server/compare/v3.6.0...v3.6.1-beta.0
