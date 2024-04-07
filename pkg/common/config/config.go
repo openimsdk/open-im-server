@@ -17,6 +17,7 @@ package config
 import (
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/mq/kafka"
 	"time"
 )
 
@@ -418,6 +419,10 @@ func (r *Redis) Build() *redisutil.Config {
 		DB:          r.DB,
 		MaxRetry:    r.MaxRetry,
 	}
+}
+
+func (k *Kafka) Build() *kafka.Config {
+	return &kafka.Config{}
 }
 
 func (l *CacheConfig) Failed() time.Duration {

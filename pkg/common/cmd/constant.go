@@ -60,11 +60,15 @@ const (
 	logEnvPrefix          = "openim-log"
 	redisEnvPrefix        = "openim-redis"
 	mongodbEnvPrefix      = "openim-mongodb"
+	minioEnvPrefix        = "openim-minio"
+	kafkaEnvPrefix        = "openim-kafka"
 	zoopkeeperEnvPrefix   = "openim-zookeeper"
 	authEnvPrefix         = "openim-auth"
 	conversationEnvPrefix = "openim-conversation"
 	friendEnvPrefix       = "openim-friend"
 	groupEnvPrefix        = "openim-group"
+	msgEnvPrefix          = "openim-msg"
+	thridEnvPrefix        = "openim-third"
 )
 
 const (

@@ -17,10 +17,10 @@ package third
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"net/url"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
@@ -37,12 +37,21 @@ import (
 	"google.golang.org/grpc"
 )
 
-func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
+type thirdServer struct {
+	apiURL        string
+	thirdDatabase controller.ThirdDatabase
+	s3dataBase    controller.S3Database
+	userRpcClient rpcclient.UserRpcClient
+	defaultExpire time.Duration
+	config        *cmd.ThirdConfig
+}
+
+func Start(ctx context.Context, config *cmd.ThirdConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err
 	}
-	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
+	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
 	}
@@ -54,11 +63,11 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 	if err != nil {
 		return err
 	}
-	apiURL := config.Object.ApiURL
+	apiURL := config.MinioConfig.URL
 	if apiURL == "" {
 		return errs.Wrap(fmt.Errorf("api is empty"))
 	}
-	if _, err := url.Parse(config.Object.ApiURL); err != nil {
+	if _, err := url.Parse(config.MinioConfig.URL); err != nil {
 		return err
 	}
 	if apiURL[len(apiURL)-1] != '/' {
@@ -67,7 +76,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 	apiURL += "object/"
 
 	// Select the oss method according to the profile policy
-	enable := config.Object.Enable
+	enable := config.RpcConfig.Object.Enable
 	var o s3.Interface
 	switch enable {
 	case "minio":
@@ -91,15 +100,6 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 		config:        config,
 	})
 	return nil
-}
-
-type thirdServer struct {
-	apiURL        string
-	thirdDatabase controller.ThirdDatabase
-	s3dataBase    controller.S3Database
-	userRpcClient rpcclient.UserRpcClient
-	defaultExpire time.Duration
-	config        *config.GlobalConfig
 }
 
 func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {

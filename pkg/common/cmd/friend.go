@@ -30,7 +30,7 @@ type FriendRpcCmd struct {
 	friendConfig FriendConfig
 }
 type FriendConfig struct {
-	RpcConfig          config.Conversation
+	RpcConfig          config.Friend
 	RedisConfig        config.Redis
 	MongodbConfig      config.Mongo
 	ZookeeperConfig    config.ZooKeeper
