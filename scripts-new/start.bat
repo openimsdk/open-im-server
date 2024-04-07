@@ -9,8 +9,7 @@ cd "%BIN_DIR%"
 
 FOR %%f IN ("%BIN_DIR%\*.exe") DO (
     echo Starting %%~nf...
-    echo Command: start "" "%%~nf.exe" -i 0 -c "%CONFIG_DIR%"
-    start "" "%%~nf.exe" -i 0 -c "%CONFIG_DIR%"
+    start cmd /k "%%~f -i 0 -c "%CONFIG_DIR%" & echo Press any key to close this window... & pause>nul"
     echo %%~nf started.
 )
 
