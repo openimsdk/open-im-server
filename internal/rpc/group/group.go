@@ -17,6 +17,7 @@ package group
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -25,7 +26,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
@@ -58,15 +58,15 @@ type groupServer struct {
 	notification          *notification.GroupNotificationSender
 	conversationRpcClient rpcclient.ConversationRpcClient
 	msgRpcClient          rpcclient.MessageRpcClient
-	config                *config.GlobalConfig
+	config                *cmd.GroupConfig
 }
 
-func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
+func Start(ctx context.Context, config *cmd.GroupConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err
 	}
-	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
+	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
 	}
@@ -82,9 +82,9 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 	if err != nil {
 		return err
 	}
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.RpcRegisterName.OpenImMsgName)
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.RpcRegisterName.OpenImConversationName)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, &config.Share.IMAdmin)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
+	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
 	var gs groupServer
 	database := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.db = database
@@ -128,7 +128,7 @@ func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 }
 
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
-	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
+	if !authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin) {
 		groupMember, err := s.db.TakeGroupMember(ctx, groupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return err
@@ -193,7 +193,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	if req.OwnerUserID == "" {
 		return nil, errs.ErrArgs.WrapMsg("no group owner")
 	}
-	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, &s.config.Manager, &s.config.IMAdmin); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, &s.config.Share.IMAdmin); err != nil {
 		return nil, err
 	}
 	userIDs := append(append(req.MemberUserIDs, req.AdminUserIDs...), req.OwnerUserID)
@@ -216,8 +216,8 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	}
 
 	config := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.Callback.CallbackUrl,
-		BeforeCreateGroup: s.config.Callback.CallbackBeforeCreateGroup,
+		CallbackUrl:       s.config.WebhooksConfig.URL,
+		BeforeCreateGroup: s.config.WebhooksConfig.BeforeCreateGroup,
 	}
 
 	// Callback Before create Group
@@ -232,8 +232,8 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	}
 
 	beforeCreateGroupConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.Callback.CallbackUrl,
-		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+		CallbackUrl:       s.config.WebhooksConfig.URL,
+		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
 	}
 
 	joinGroup := func(userID string, roleLevel int32) error {
@@ -325,7 +325,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 }
 
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbgroup.GetJoinedGroupListReq) (*pbgroup.GetJoinedGroupListResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.FromUserID, &s.config.Manager, &s.config.IMAdmin); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.FromUserID, &s.config.Share.IMAdmin); err != nil {
 		return nil, err
 	}
 	total, members, err := s.db.PageGetJoinGroup(ctx, req.FromUserID, req.Pagination)
@@ -397,7 +397,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 
 	var groupMember *relationtb.GroupMemberModel
 	var opUserID string
-	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
+	if !authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin) {
 		opUserID = mcontext.GetOpUserID(ctx)
 		var err error
 		groupMember, err = s.db.TakeGroupMember(ctx, req.GroupID, opUserID)
@@ -410,8 +410,8 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	}
 
 	beforeInviteUserToGroupConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.Callback.CallbackUrl,
-		BeforeCreateGroup: s.config.Callback.CallbackBeforeInviteUserToGroup,
+		CallbackUrl:       s.config.WebhooksConfig.URL,
+		BeforeCreateGroup: s.config.WebhooksConfig.BeforeInviteUserToGroup,
 	}
 
 	if err := CallbackBeforeInviteUserToGroup(ctx, beforeInviteUserToGroupConfig, req); err != nil {
@@ -419,7 +419,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	}
 
 	if group.NeedVerification == constant.AllNeedVerification {
-		if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
+		if !authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin) {
 			if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
 				var requests []*relationtb.GroupRequestModel
 				for _, userID := range req.InvitedUserIDs {
@@ -562,7 +562,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	for i, member := range members {
 		memberMap[member.UserID] = members[i]
 	}
-	isAppManagerUid := authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin)
+	isAppManagerUid := authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin)
 	opMember := memberMap[opUserID]
 	for _, userID := range req.KickedUserIDs {
 		member, ok := memberMap[userID]
@@ -635,8 +635,8 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	}
 
 	killGroupMemberConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.Callback.CallbackUrl,
-		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+		CallbackUrl:       s.config.WebhooksConfig.URL,
+		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
 	}
 
 	if err := CallbackKillGroupMember(ctx, killGroupMemberConfig, req); err != nil {
@@ -765,7 +765,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 	if !datautil.Contain(req.HandleResult, constant.GroupResponseAgree, constant.GroupResponseRefuse) {
 		return nil, errs.ErrArgs.WrapMsg("HandleResult unknown")
 	}
-	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
+	if !authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin) {
 		groupMember, err := s.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
@@ -811,8 +811,8 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 		}
 
 		beforeMemberJoinGroupConfig := &GroupEventCallbackConfig{
-			CallbackUrl:       s.config.Callback.CallbackUrl,
-			BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+			CallbackUrl:       s.config.WebhooksConfig.URL,
+			BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
 		}
 
 		if err = CallbackBeforeMemberJoinGroup(ctx, beforeMemberJoinGroupConfig, member, group.Ex); err != nil {
@@ -863,8 +863,8 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 	}
 
 	applyJoinGroupBeforeConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.Callback.CallbackUrl,
-		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+		CallbackUrl:       s.config.WebhooksConfig.URL,
+		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
 	}
 
 	if err = CallbackApplyJoinGroupBefore(ctx, applyJoinGroupBeforeConfig, reqCall); err != nil {
@@ -925,7 +925,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 	if req.UserID == "" {
 		req.UserID = mcontext.GetOpUserID(ctx)
 	} else {
-		if err := authverify.CheckAccessV3(ctx, req.UserID, &s.config.Manager, &s.config.IMAdmin); err != nil {
+		if err := authverify.CheckAccessV3(ctx, req.UserID, &s.config.Share.IMAdmin); err != nil {
 			return nil, err
 		}
 	}
@@ -949,8 +949,8 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 	}
 
 	quitGroupConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.Callback.CallbackUrl,
-		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+		CallbackUrl:       s.config.WebhooksConfig.URL,
+		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
 	}
 
 	if err := CallbackQuitGroup(ctx, quitGroupConfig, req); err != nil {
@@ -970,7 +970,7 @@ func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInfoReq) (*pbgroup.SetGroupInfoResp, error) {
 	var opMember *relationtb.GroupMemberModel
-	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
+	if !authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin) {
 		var err error
 		opMember, err = s.db.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
@@ -985,8 +985,8 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	}
 
 	beforeSetGroupInfoConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.Callback.CallbackUrl,
-		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+		CallbackUrl:       s.config.WebhooksConfig.URL,
+		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
 	}
 
 	if err := CallbackBeforeSetGroupInfo(ctx, beforeSetGroupInfoConfig, req); err != nil {
@@ -1096,7 +1096,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 	if newOwner == nil {
 		return nil, errs.ErrArgs.WrapMsg("NewOwnerUser not in group " + req.NewOwnerUserID)
 	}
-	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
+	if !authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin) {
 		if !(mcontext.GetOpUserID(ctx) == oldOwner.UserID && oldOwner.RoleLevel == constant.GroupOwner) {
 			return nil, errs.ErrNoPermission.WrapMsg("no permission transfer group owner")
 		}
@@ -1106,8 +1106,8 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 	}
 
 	afterTransferGroupOwnerConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.Callback.CallbackUrl,
-		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+		CallbackUrl:       s.config.WebhooksConfig.URL,
+		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
 	}
 
 	if err := CallbackAfterTransferGroupOwner(ctx, afterTransferGroupOwnerConfig, req); err != nil {
@@ -1235,7 +1235,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 	if err != nil {
 		return nil, err
 	}
-	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
+	if !authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin) {
 		if owner.UserID != mcontext.GetOpUserID(ctx) {
 			return nil, errs.ErrNoPermission.WrapMsg("not group owner")
 		}
@@ -1279,8 +1279,8 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 	}
 
 	dismissGroupConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.Callback.CallbackUrl,
-		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+		CallbackUrl:       s.config.WebhooksConfig.URL,
+		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
 	}
 
 	if err := CallbackDismissGroup(ctx, dismissGroupConfig, reqCall); err != nil {
@@ -1298,7 +1298,7 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbgroup.MuteGrou
 	if err := s.PopulateGroupMember(ctx, member); err != nil {
 		return nil, err
 	}
-	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
+	if !authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin) {
 		opMember, err := s.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
@@ -1332,7 +1332,7 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbgroup.Ca
 	if err := s.PopulateGroupMember(ctx, member); err != nil {
 		return nil, err
 	}
-	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
+	if !authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin) {
 		opMember, err := s.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
@@ -1388,7 +1388,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 	if opUserID == "" {
 		return nil, errs.ErrNoPermission.WrapMsg("no op user id")
 	}
-	isAppManagerUid := authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin)
+	isAppManagerUid := authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin)
 	for i := range req.Members {
 		req.Members[i].FaceURL = nil
 	}
@@ -1472,8 +1472,8 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 	}
 
 	beforeSetGroupMemberInfoConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.Callback.CallbackUrl,
-		BeforeCreateGroup: s.config.Callback.CallbackBeforeMemberJoinGroup,
+		CallbackUrl:       s.config.WebhooksConfig.URL,
+		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
 	}
 
 	for i := 0; i < len(req.Members); i++ {

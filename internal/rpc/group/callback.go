@@ -34,7 +34,7 @@ import (
 
 type GroupEventCallbackConfig struct {
 	CallbackUrl       string
-	BeforeCreateGroup config.CallBackConfig
+	BeforeCreateGroup config.WebhookConfig
 }
 
 // CallbackBeforeCreateGroup callback before create group.

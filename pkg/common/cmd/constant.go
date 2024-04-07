@@ -63,6 +63,8 @@ const (
 	zoopkeeperEnvPrefix   = "openim-zookeeper"
 	authEnvPrefix         = "openim-auth"
 	conversationEnvPrefix = "openim-conversation"
+	friendEnvPrefix       = "openim-friend"
+	groupEnvPrefix        = "openim-group"
 )
 
 const (

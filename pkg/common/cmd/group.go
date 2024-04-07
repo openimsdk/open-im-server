@@ -16,20 +16,20 @@ package cmd
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/internal/rpc/friend"
+	"github.com/openimsdk/open-im-server/v3/internal/rpc/group"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
-type FriendRpcCmd struct {
+type GroupRpcCmd struct {
 	*RootCmd
-	ctx          context.Context
-	configMap    map[string]StructEnvPrefix
-	friendConfig FriendConfig
+	ctx         context.Context
+	configMap   map[string]StructEnvPrefix
+	groupConfig GroupConfig
 }
-type FriendConfig struct {
+type GroupConfig struct {
 	RpcConfig          config.Conversation
 	RedisConfig        config.Redis
 	MongodbConfig      config.Mongo
@@ -39,17 +39,17 @@ type FriendConfig struct {
 	WebhooksConfig     config.Webhooks
 }
 
-func NewFriendRpcCmd() *FriendRpcCmd {
-	var friendConfig FriendConfig
-	ret := &FriendRpcCmd{friendConfig: friendConfig}
+func NewGroupRpcCmd() *GroupRpcCmd {
+	var groupConfig GroupConfig
+	ret := &GroupRpcCmd{groupConfig: groupConfig}
 	ret.configMap = map[string]StructEnvPrefix{
-		OpenIMRPCFriendCfgFileName: {EnvPrefix: friendEnvPrefix, ConfigStruct: &friendConfig.RpcConfig},
-		RedisConfigFileName:        {EnvPrefix: redisEnvPrefix, ConfigStruct: &friendConfig.RedisConfig},
-		ZookeeperConfigFileName:    {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &friendConfig.ZookeeperConfig},
-		MongodbConfigFileName:      {EnvPrefix: mongodbEnvPrefix, ConfigStruct: &friendConfig.MongodbConfig},
-		ShareFileName:              {EnvPrefix: shareEnvPrefix, ConfigStruct: &friendConfig.Share},
-		NotificationFileName:       {EnvPrefix: notificationEnvPrefix, ConfigStruct: &friendConfig.NotificationConfig},
-		WebhooksConfigFileName:     {EnvPrefix: webhooksEnvPrefix, ConfigStruct: &friendConfig.WebhooksConfig},
+		OpenIMRPCGroupCfgFileName: {EnvPrefix: groupEnvPrefix, ConfigStruct: &groupConfig.RpcConfig},
+		RedisConfigFileName:       {EnvPrefix: redisEnvPrefix, ConfigStruct: &groupConfig.RedisConfig},
+		ZookeeperConfigFileName:   {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &groupConfig.ZookeeperConfig},
+		MongodbConfigFileName:     {EnvPrefix: mongodbEnvPrefix, ConfigStruct: &groupConfig.MongodbConfig},
+		ShareFileName:             {EnvPrefix: shareEnvPrefix, ConfigStruct: &groupConfig.Share},
+		NotificationFileName:      {EnvPrefix: notificationEnvPrefix, ConfigStruct: &groupConfig.NotificationConfig},
+		WebhooksConfigFileName:    {EnvPrefix: webhooksEnvPrefix, ConfigStruct: &groupConfig.WebhooksConfig},
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -59,12 +59,12 @@ func NewFriendRpcCmd() *FriendRpcCmd {
 	return ret
 }
 
-func (a *FriendRpcCmd) Exec() error {
+func (a *GroupRpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *FriendRpcCmd) preRunE() error {
-	return startrpc.Start(a.ctx, &a.friendConfig.ZookeeperConfig, &a.friendConfig.RpcConfig.Prometheus, a.friendConfig.RpcConfig.RPC.ListenIP,
-		a.friendConfig.RpcConfig.RPC.RegisterIP, a.friendConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.friendConfig.Share.RpcRegisterName.Auth, &a.friendConfig, friend.Start)
+func (a *GroupRpcCmd) preRunE() error {
+	return startrpc.Start(a.ctx, &a.groupConfig.ZookeeperConfig, &a.groupConfig.RpcConfig.Prometheus, a.groupConfig.RpcConfig.RPC.ListenIP,
+		a.groupConfig.RpcConfig.RPC.RegisterIP, a.groupConfig.RpcConfig.RPC.Ports,
+		a.Index(), a.groupConfig.Share.RpcRegisterName.Auth, &a.groupConfig, group.Start)
 }
