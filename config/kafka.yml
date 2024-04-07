@@ -1,6 +1,6 @@
 username: ''
 password: ''
-addr: [ 172.28.0.1:19094 ]
+addr: [ localhost:19094 ]
 toRedis:
   topic: "toRedis"
 toMongo:

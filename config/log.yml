@@ -1,4 +1,4 @@
-storageLocation: /data/workspaces/open-im-server/_output/logs/
+storageLocation: ./_output/logs/
 rotationTime: 24
 remainRotationCount: 2
 remainLogLevel: 6
