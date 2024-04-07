@@ -66,6 +66,17 @@ type Mongo struct {
 	MaxPoolSize int      `mapstructure:"maxPoolSize"`
 	MaxRetry    int      `mapstructure:"maxRetry"`
 }
+type Kafka struct {
+	Username       string   `mapstructure:"username"`
+	Password       string   `mapstructure:"password"`
+	Address        []string `mapstructure:"address"`
+	ToRedisTopic   string   `mapstructure:"toRedisTopic"`
+	ToMongoTopic   string   `mapstructure:"toMongoTopic"`
+	ToPushTopic    string   `mapstructure:"toPushTopic"`
+	ToRedisGroupID string   `mapstructure:"toRedisGroupID"`
+	ToMongoGroupID string   `mapstructure:"toMongoGroupID"`
+	ToPushGroupID  string   `mapstructure:"toPushGroupID"`
+}
 
 type API struct {
 	Api struct {
