@@ -78,7 +78,7 @@ func NewPusher(config *config.GlobalConfig, discov discovery.SvcDiscoveryRegistr
 	}
 }
 
-func NewOfflinePusher(pushConf *config.Push, iOSPushConf *config.IOSPush, cache cache.MsgModel) (offlinepush.OfflinePusher, error) {
+func NewOfflinePusher(pushConf *config.Push, iOSPushConf *config.IOSPush, cache cache.ThirdCache) (offlinepush.OfflinePusher, error) {
 	var offlinePusher offlinepush.OfflinePusher
 	switch pushConf.Enable {
 	case "getui":

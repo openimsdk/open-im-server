@@ -40,7 +40,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 	if err != nil {
 		return err
 	}
-	cacheModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
+	cacheModel := cache.NewThirdCache(rdb)
 	offlinePusher, err := NewOfflinePusher(&config.Push, &config.IOSPush, cacheModel)
 	if err != nil {
 		return err
