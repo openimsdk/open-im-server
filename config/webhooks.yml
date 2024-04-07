@@ -75,31 +75,27 @@ afterSetGroupMemberInfo:
   enable: false
   timeout: 5
   failedContinue: true
-quitGroup:
+afterQuitGroup:
   enable: false
   timeout: 5
   failedContinue: true
-killGroupMember:
+afterKickGroupMember:
   enable: false
   timeout: 5
   failedContinue: true
-dismissGroup:
+afterDismissGroup:
   enable: false
   timeout: 5
   failedContinue: true
-joinGroup:
+beforeApplyJoinGroup:
   enable: false
   timeout: 5
   failedContinue: true
-groupMsgRead:
+afterGroupMsgRead:
   enable: false
   timeout: 5
   failedContinue: true
-singleMsgRead:
-  enable: false
-  timeout: 5
-  failedContinue: true
-updateUserInfo:
+afterSingleMsgRead:
   enable: false
   timeout: 5
   failedContinue: true
@@ -111,7 +107,7 @@ afterUserRegister:
   enable: false
   timeout: 5
   failedContinue: true
-transferGroupOwner:
+afterTransferGroupOwner:
   enable: false
   timeout: 5
   failedContinue: true
@@ -120,10 +116,6 @@ beforeSetFriendRemark:
   timeout: 5
   failedContinue: true
 afterSetFriendRemark:
-  enable: false
-  timeout: 5
-  failedContinue: true
-afterGroupMsgRead:
   enable: false
   timeout: 5
   failedContinue: true
