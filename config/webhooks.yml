@@ -23,31 +23,27 @@ afterSendGroupMsg:
   enable: false
   timeout: 5
   failedContinue: true
-msgModify:
+afterUserOnline:
   enable: false
   timeout: 5
   failedContinue: true
-userOnline:
+afterUserOffline:
   enable: false
   timeout: 5
   failedContinue: true
-userOffline:
+afterUserKickOff:
   enable: false
   timeout: 5
   failedContinue: true
-userKickOff:
+beforeOfflinePush:
   enable: false
   timeout: 5
   failedContinue: true
-offlinePush:
+beforeOnlinePush:
   enable: false
   timeout: 5
   failedContinue: true
-onlinePush:
-  enable: false
-  timeout: 5
-  failedContinue: true
-groupOnlinePush:
+beforeGroupOnlinePush:
   enable: false
   timeout: 5
   failedContinue: true
@@ -76,10 +72,6 @@ beforeSetGroupMemberInfo:
   timeout: 5
   failedContinue: true
 afterSetGroupMemberInfo:
-  enable: false
-  timeout: 5
-  failedContinue: true
-setMessageReactionExtensions:
   enable: false
   timeout: 5
   failedContinue: true
@@ -147,47 +139,43 @@ beforeInviteUserToGroup:
   enable: false
   timeout: 5
   failedContinue: true
-joinGroupAfter:
+afterSetGroupInfo:
   enable: false
   timeout: 5
   failedContinue: true
-setGroupInfoAfter:
+beforeSetGroupInfo:
   enable: false
   timeout: 5
   failedContinue: true
-setGroupInfoBefore:
+afterRevokeMsg:
   enable: false
   timeout: 5
   failedContinue: true
-revokeMsgAfter:
+beforeAddBlack:
   enable: false
   timeout: 5
   failedContinue: true
-addBlackBefore:
+afterAddFriend:
   enable: false
   timeout: 5
   failedContinue: true
-addFriendAfter:
+beforeAddFriendAgree:
   enable: false
   timeout: 5
   failedContinue: true
-addFriendAgreeBefore:
+afterDeleteFriend:
   enable: false
   timeout: 5
   failedContinue: true
-deleteFriendAfter:
+beforeImportFriends:
   enable: false
   timeout: 5
   failedContinue: true
-importFriendsBefore:
+afterImportFriends:
   enable: false
   timeout: 5
   failedContinue: true
-importFriendsAfter:
-  enable: false
-  timeout: 5
-  failedContinue: true
-removeBlackAfter:
+afterRemoveBlack:
   enable: false
   timeout: 5
   failedContinue: true
