@@ -336,6 +336,11 @@ type Share struct {
 		Conversation   string `mapstructure:"conversation"`
 		Third          string `mapstructure:"third"`
 	} `mapstructure:"rpcRegisterName"`
+	IMAdmin IMAdmin `mapstructure:"imAdmin"`
+}
+type IMAdmin struct {
+	UserID   []string `mapstructure:"userID"`
+	Nickname []string `mapstructure:"nickname"`
 }
 
 type Webhooks struct {

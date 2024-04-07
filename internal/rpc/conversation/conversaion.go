@@ -16,10 +16,10 @@ package conversation
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/db/redisutil"
 	"sort"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
@@ -45,14 +45,15 @@ type conversationServer struct {
 	groupRpcClient                 *rpcclient.GroupRpcClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
+	config                         *cmd.ConversationConfig
 }
 
-func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
+func Start(ctx context.Context, config *cmd.ConversationConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err
 	}
-	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
+	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
 	}
@@ -60,13 +61,13 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 	if err != nil {
 		return err
 	}
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.RpcRegisterName.OpenImMsgName)
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, &config.Share.IMAdmin)
 	pbconversation.RegisterConversationServer(server, &conversationServer{
 		msgRpcClient:                   &msgRpcClient,
 		user:                           &userRpcClient,
-		conversationNotificationSender: notification.NewConversationNotificationSender(&config.Notification, &msgRpcClient),
+		conversationNotificationSender: notification.NewConversationNotificationSender(&config.NotificationConfig, &msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), mgocli.GetTx()),
 	})

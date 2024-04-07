@@ -9,5 +9,8 @@ rpcRegisterName:
   auth: Auth
   conversation: Conversation
   third: Third
+imAdmin:
+  userID: [ "imAdmin" ]
+  nickname: [ "imAdmin" ]
 
 

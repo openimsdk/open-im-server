@@ -35,13 +35,12 @@ type User struct {
 	Client                user.UserClient
 	Discov                discovery.SvcDiscoveryRegistry
 	MessageGateWayRpcName string
-	manager               *config.Manager
 	imAdmin               *config.IMAdmin
 }
 
 // NewUser initializes and returns a User instance based on the provided service discovery registry.
 func NewUser(discov discovery.SvcDiscoveryRegistry, rpcRegisterName, messageGateWayRpcName string,
-	manager *config.Manager, imAdmin *config.IMAdmin) *User {
+	imAdmin *config.IMAdmin) *User {
 	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
 		program.ExitWithError(err)
@@ -50,7 +49,6 @@ func NewUser(discov discovery.SvcDiscoveryRegistry, rpcRegisterName, messageGate
 	return &User{Discov: discov, Client: client,
 		conn:                  conn,
 		MessageGateWayRpcName: messageGateWayRpcName,
-		manager:               manager,
 		imAdmin:               imAdmin}
 }
 
@@ -65,8 +63,8 @@ func NewUserRpcClientByUser(user *User) *UserRpcClient {
 
 // NewUserRpcClient initializes a UserRpcClient based on the provided service discovery registry.
 func NewUserRpcClient(client discovery.SvcDiscoveryRegistry, rpcRegisterName string,
-	manager *config.Manager, imAdmin *config.IMAdmin) UserRpcClient {
-	return UserRpcClient(*NewUser(client, rpcRegisterName, "", manager, imAdmin))
+	imAdmin *config.IMAdmin) UserRpcClient {
+	return UserRpcClient(*NewUser(client, rpcRegisterName, "", imAdmin))
 }
 
 // GetUsersInfo retrieves information for multiple users based on their user IDs.
@@ -169,7 +167,7 @@ func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
 	if err != nil {
 		return err
 	}
-	return authverify.CheckAccessV3(ctx, ownerUserID, u.manager, u.imAdmin)
+	return authverify.CheckAccessV3(ctx, ownerUserID, u.imAdmin)
 }
 
 // GetAllUserIDs retrieves all user IDs with pagination options.

@@ -29,7 +29,7 @@ type RootCmd struct {
 	processName    string
 	port           int
 	prometheusPort int
-	log            *config2.Log
+	log            config2.Log
 	index          int
 }
 
@@ -100,6 +100,8 @@ func (r *RootCmd) initializeConfiguration(cmd *cobra.Command, opts *CmdOpts) err
 	if err != nil {
 		return err
 	}
+	// Load common configuration file
+	//opts.configMap[ShareFileName] = StructEnvPrefix{EnvPrefix: shareEnvPrefix, ConfigStruct: &r.share}
 	for configFileName, structEnvPrefix := range opts.configMap {
 		err := config2.LoadConfig(filepath.Join(configDirectory, configFileName),
 			structEnvPrefix.EnvPrefix, structEnvPrefix.ConfigStruct)
@@ -107,8 +109,9 @@ func (r *RootCmd) initializeConfiguration(cmd *cobra.Command, opts *CmdOpts) err
 			return err
 		}
 	}
+	// Load common log configuration file
 	return config2.LoadConfig(filepath.Join(configDirectory, LogConfigFileName),
-		logEnvPrefix, r.log)
+		logEnvPrefix, &r.log)
 }
 
 func (r *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {

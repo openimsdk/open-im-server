@@ -32,11 +32,8 @@ func Secret(secret string) jwt.Keyfunc {
 	}
 }
 
-func CheckAccessV3(ctx context.Context, ownerUserID string, manager *config.Manager, imAdmin *config.IMAdmin) (err error) {
+func CheckAccessV3(ctx context.Context, ownerUserID string, imAdmin *config.IMAdmin) (err error) {
 	opUserID := mcontext.GetOpUserID(ctx)
-	if len(manager.UserID) > 0 && datautil.Contain(opUserID, manager.UserID...) {
-		return nil
-	}
 	if datautil.Contain(opUserID, imAdmin.UserID...) {
 		return nil
 	}
@@ -46,15 +43,12 @@ func CheckAccessV3(ctx context.Context, ownerUserID string, manager *config.Mana
 	return servererrs.ErrNoPermission.WrapMsg("ownerUserID", ownerUserID)
 }
 
-func IsAppManagerUid(ctx context.Context, manager *config.Manager, imAdmin *config.IMAdmin) bool {
-	return (len(manager.UserID) > 0 && datautil.Contain(mcontext.GetOpUserID(ctx), manager.UserID...)) ||
-		datautil.Contain(mcontext.GetOpUserID(ctx), imAdmin.UserID...)
+func IsAppManagerUid(ctx context.Context, imAdmin *config.IMAdmin) bool {
+	return datautil.Contain(mcontext.GetOpUserID(ctx), imAdmin.UserID...)
 }
 
-func CheckAdmin(ctx context.Context, manager *config.Manager, imAdmin *config.IMAdmin) error {
-	if len(manager.UserID) > 0 && datautil.Contain(mcontext.GetOpUserID(ctx), manager.UserID...) {
-		return nil
-	}
+func CheckAdmin(ctx context.Context, imAdmin *config.IMAdmin) error {
+
 	if datautil.Contain(mcontext.GetOpUserID(ctx), imAdmin.UserID...) {
 		return nil
 	}
@@ -65,9 +59,6 @@ func CheckIMAdmin(ctx context.Context, config *config.GlobalConfig) error {
 	if datautil.Contain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID...) {
 		return nil
 	}
-	if len(config.Manager.UserID) > 0 && datautil.Contain(mcontext.GetOpUserID(ctx), config.Manager.UserID...) {
-		return nil
-	}
 	return servererrs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not CheckIMAdmin userID", mcontext.GetOpUserID(ctx)))
 }
 
@@ -75,8 +66,8 @@ func ParseRedisInterfaceToken(redisToken any, secret string) (*tokenverify.Claim
 	return tokenverify.GetClaimFromToken(string(redisToken.([]uint8)), Secret(secret))
 }
 
-func IsManagerUserID(opUserID string, manager *config.Manager, imAdmin *config.IMAdmin) bool {
-	return (len(manager.UserID) > 0 && datautil.Contain(opUserID, manager.UserID...)) || datautil.Contain(opUserID, imAdmin.UserID...)
+func IsManagerUserID(opUserID string, imAdmin *config.IMAdmin) bool {
+	return datautil.Contain(opUserID, imAdmin.UserID...)
 }
 
 func WsVerifyToken(token, userID, secret string, platformID int) error {

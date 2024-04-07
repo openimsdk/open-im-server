@@ -31,6 +31,7 @@ const (
 const (
 	FileName                         = "config.yaml"
 	NotificationFileName             = "notification.yaml"
+	ShareFileName                    = "share.yaml"
 	KafkaConfigFileName              = "kafka.yml"
 	RedisConfigFileName              = "redis.yml"
 	WebhooksConfigFileName           = "webhooks.yml"
@@ -53,11 +54,14 @@ const (
 )
 
 const (
-	logEnvPrefix        = "openim-log"
-	redisEnvPrefix      = "openim-redis"
-	mongodbEnvPrefix    = "openim-mongodb"
-	zoopkeeperEnvPrefix = "openim-zookeeper"
-	authEnvPrefix       = "openim-auth"
+	notificationEnvPrefix = "openim-notification"
+	shareEnvPrefix        = "openim-share"
+	logEnvPrefix          = "openim-log"
+	redisEnvPrefix        = "openim-redis"
+	mongodbEnvPrefix      = "openim-mongodb"
+	zoopkeeperEnvPrefix   = "openim-zookeeper"
+	authEnvPrefix         = "openim-auth"
+	conversationEnvPrefix = "openim-conversation"
 )
 
 const (

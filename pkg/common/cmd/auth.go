@@ -16,18 +16,15 @@ package cmd
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/internal/rpc/auth"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
-	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/system/program"
-	"google.golang.org/grpc"
+	"github.com/spf13/cobra"
 )
-
-type rpcInitFuc func(ctx context.Context, config *AuthConfig, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error
 
 type AuthRpcCmd struct {
 	*RootCmd
-	initFunc   rpcInitFuc
 	ctx        context.Context
 	configMap  map[string]StructEnvPrefix
 	authConfig AuthConfig
@@ -36,19 +33,24 @@ type AuthConfig struct {
 	RpcConfig       config2.Auth
 	RedisConfig     config2.Redis
 	ZookeeperConfig config2.ZooKeeper
+	Share           config2.Share
 }
 
-func NewAuthRpcCmd(initFunc rpcInitFuc) *AuthRpcCmd {
+func NewAuthRpcCmd() *AuthRpcCmd {
 	var authConfig AuthConfig
-	ret := &AuthRpcCmd{initFunc: initFunc, authConfig: authConfig}
+	ret := &AuthRpcCmd{authConfig: authConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMRPCAuthCfgFileName: {EnvPrefix: authEnvPrefix, ConfigStruct: &authConfig.RpcConfig},
 		RedisConfigFileName:      {EnvPrefix: redisEnvPrefix, ConfigStruct: &authConfig.RedisConfig},
 		ZookeeperConfigFileName:  {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &authConfig.ZookeeperConfig},
+		ShareFileName:            {EnvPrefix: shareEnvPrefix, ConfigStruct: &authConfig.Share},
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
-	ret.RunE()
+	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
+		return ret.preRunE()
+	}
+
 	return ret
 }
 
@@ -56,8 +58,8 @@ func (a *AuthRpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *AuthRpcCmd) RunE() error {
+func (a *AuthRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.authConfig.ZookeeperConfig, &a.authConfig.RpcConfig.Prometheus, a.authConfig.RpcConfig.RPC.ListenIP,
 		a.authConfig.RpcConfig.RPC.RegisterIP, a.authConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.authConfig.ZookeeperConfig.RpcRegisterName.Auth, &a.authConfig, a.initFunc)
+		a.Index(), a.authConfig.Share.RpcRegisterName.Auth, &a.authConfig, auth.Start)
 }
