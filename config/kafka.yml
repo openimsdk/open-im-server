@@ -1,14 +1,13 @@
 username: ''
 password: ''
 addr: [ 172.28.0.1:19094 ]
-latestMsgToRedis:
-  topic: "latestMsgToRedis"
-offlineMsgToMongo:
-  topic: "offlineMsgToMongoMysql"
-msgToPush:
-  topic: "msgToPush"
+toRedis:
+  topic: "toRedis"
+toMongo:
+  topic: "toMongo"
+toPush:
+  topic: "toPush"
 consumerGroupID:
   msgToRedis: redis
   msgToMongo: mongo
-  msgToMySql: mysql
   msgToPush: push
