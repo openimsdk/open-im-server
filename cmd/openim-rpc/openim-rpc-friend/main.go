@@ -15,16 +15,12 @@
 package main
 
 import (
-	"github.com/openimsdk/open-im-server/v3/internal/rpc/friend"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/system/program"
 )
 
 func main() {
-	rpcCmd := cmd.NewRpcCmd(cmd.RpcFriendServer, friend.Start)
-	rpcCmd.AddPortFlag()
-	rpcCmd.AddPrometheusPortFlag()
-	if err := rpcCmd.Exec(); err != nil {
+	if err := cmd.NewFriendRpcCmd().Exec(); err != nil {
 		program.ExitWithError(err)
 	}
 }

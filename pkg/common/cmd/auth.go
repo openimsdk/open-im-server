@@ -17,7 +17,7 @@ package cmd
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/auth"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
@@ -30,10 +30,10 @@ type AuthRpcCmd struct {
 	authConfig AuthConfig
 }
 type AuthConfig struct {
-	RpcConfig       config2.Auth
-	RedisConfig     config2.Redis
-	ZookeeperConfig config2.ZooKeeper
-	Share           config2.Share
+	RpcConfig       config.Auth
+	RedisConfig     config.Redis
+	ZookeeperConfig config.ZooKeeper
+	Share           config.Share
 }
 
 func NewAuthRpcCmd() *AuthRpcCmd {
@@ -46,7 +46,7 @@ func NewAuthRpcCmd() *AuthRpcCmd {
 		ShareFileName:            {EnvPrefix: shareEnvPrefix, ConfigStruct: &authConfig.Share},
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
-	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
+	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
 	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
 		return ret.preRunE()
 	}

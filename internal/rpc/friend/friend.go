@@ -16,10 +16,10 @@ package friend
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
@@ -45,15 +45,15 @@ type friendServer struct {
 	notificationSender    *notification.FriendNotificationSender
 	conversationRpcClient rpcclient.ConversationRpcClient
 	RegisterCenter        discovery.SvcDiscoveryRegistry
-	config                *config.GlobalConfig
+	config                *cmd.FriendConfig
 }
 
-func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
+func Start(ctx context.Context, config *cmd.FriendConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err
 	}
-	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
+	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
 	}
@@ -74,12 +74,12 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 	}
 
 	// Initialize RPC clients
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.RpcRegisterName.OpenImMsgName)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, &config.Share.IMAdmin)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
 
 	// Initialize notification sender
 	notificationSender := notification.NewFriendNotificationSender(
-		&config.Notification,
+		&config.NotificationConfig,
 		&msgRpcClient,
 		notification.WithRpcFunc(userRpcClient.GetUsersInfo),
 	)
@@ -99,7 +99,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 		userRpcClient:         &userRpcClient,
 		notificationSender:    notificationSender,
 		RegisterCenter:        client,
-		conversationRpcClient: rpcclient.NewConversationRpcClient(client, config.RpcRegisterName.OpenImConversationName),
+		conversationRpcClient: rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation),
 		config:                config,
 	})
 
@@ -109,14 +109,14 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 // ok.
 func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) (resp *pbfriend.ApplyToAddFriendResp, err error) {
 	resp = &pbfriend.ApplyToAddFriendResp{}
-	if err := authverify.CheckAccessV3(ctx, req.FromUserID, &s.config.Manager, &s.config.IMAdmin); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.FromUserID, &s.config.Share.IMAdmin); err != nil {
 		return nil, err
 	}
 
 	if req.ToUserID == req.FromUserID {
 		return nil, servererrs.ErrCanNotAddYourself.WrapMsg("req.ToUserID", req.ToUserID)
 	}
-	if err = CallbackBeforeAddFriend(ctx, &s.config.Callback, req); err != nil && err != servererrs.ErrCallbackContinue {
+	if err = CallbackBeforeAddFriend(ctx, &s.config.WebhooksConfig, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -141,7 +141,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 		return nil, err
 	}
 
-	if err = CallbackAfterAddFriend(ctx, &s.config.Callback, req); err != nil && err != servererrs.ErrCallbackContinue {
+	if err = CallbackAfterAddFriend(ctx, &s.config.WebhooksConfig, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
 	return resp, nil
@@ -149,7 +149,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 
 // ok.
 func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFriendReq) (resp *pbfriend.ImportFriendResp, err error) {
-	if err := authverify.CheckAdmin(ctx, &s.config.Manager, &s.config.IMAdmin); err != nil {
+	if err := authverify.CheckAdmin(ctx, &s.config.Share.IMAdmin); err != nil {
 		return nil, err
 	}
 	if _, err := s.userRpcClient.GetUsersInfo(ctx, append([]string{req.OwnerUserID}, req.FriendUserIDs...)); err != nil {
@@ -162,7 +162,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 		return nil, errs.ErrArgs.WrapMsg("friend userID repeated")
 	}
 
-	if err := CallbackBeforeImportFriends(ctx, &s.config.Callback, req); err != nil {
+	if err := CallbackBeforeImportFriends(ctx, &s.config.WebhooksConfig, req); err != nil {
 		return nil, err
 	}
 
@@ -176,7 +176,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 			HandleResult: constant.FriendResponseAgree,
 		})
 	}
-	if err := CallbackAfterImportFriends(ctx, &s.config.Callback, req); err != nil {
+	if err := CallbackAfterImportFriends(ctx, &s.config.WebhooksConfig, req); err != nil {
 		return nil, err
 	}
 	return &pbfriend.ImportFriendResp{}, nil
@@ -185,7 +185,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 // ok.
 func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.RespondFriendApplyReq) (resp *pbfriend.RespondFriendApplyResp, err error) {
 	resp = &pbfriend.RespondFriendApplyResp{}
-	if err := authverify.CheckAccessV3(ctx, req.ToUserID, &s.config.Manager, &s.config.IMAdmin); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.ToUserID, &s.config.Share.IMAdmin); err != nil {
 		return nil, err
 	}
 
@@ -196,7 +196,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.Res
 		HandleResult: req.HandleResult,
 	}
 	if req.HandleResult == constant.FriendResponseAgree {
-		if err := CallbackBeforeAddFriendAgree(ctx, &s.config.Callback, req); err != nil && err != servererrs.ErrCallbackContinue {
+		if err := CallbackBeforeAddFriendAgree(ctx, &s.config.WebhooksConfig, req); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
 		err := s.friendDatabase.AgreeFriendRequest(ctx, &friendRequest)
@@ -233,7 +233,7 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbfriend.DeleteFri
 		return nil, err
 	}
 	s.notificationSender.FriendDeletedNotification(ctx, req)
-	if err := CallbackAfterDeleteFriend(ctx, &s.config.Callback, req); err != nil {
+	if err := CallbackAfterDeleteFriend(ctx, &s.config.WebhooksConfig, req); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -242,7 +242,7 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbfriend.DeleteFri
 // ok.
 func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbfriend.SetFriendRemarkReq) (resp *pbfriend.SetFriendRemarkResp, err error) {
 
-	if err = CallbackBeforeSetFriendRemark(ctx, &s.config.Callback, req); err != nil && err != servererrs.ErrCallbackContinue {
+	if err = CallbackBeforeSetFriendRemark(ctx, &s.config.WebhooksConfig, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
 	resp = &pbfriend.SetFriendRemarkResp{}
@@ -256,7 +256,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbfriend.SetFri
 	if err := s.friendDatabase.UpdateRemark(ctx, req.OwnerUserID, req.FriendUserID, req.Remark); err != nil {
 		return nil, err
 	}
-	if err := CallbackAfterSetFriendRemark(ctx, &s.config.Callback, req); err != nil && err != servererrs.ErrCallbackContinue {
+	if err := CallbackAfterSetFriendRemark(ctx, &s.config.WebhooksConfig, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
 	s.notificationSender.FriendRemarkSetNotification(ctx, req.OwnerUserID, req.FriendUserID)

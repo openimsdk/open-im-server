@@ -17,7 +17,7 @@ package cmd
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/conversation"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
@@ -30,12 +30,12 @@ type ConversationRpcCmd struct {
 	conversationConfig ConversationConfig
 }
 type ConversationConfig struct {
-	RpcConfig          config2.Conversation
-	RedisConfig        config2.Redis
-	MongodbConfig      config2.Mongo
-	ZookeeperConfig    config2.ZooKeeper
-	NotificationConfig config2.Notification
-	Share              config2.Share
+	RpcConfig          config.Conversation
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
+	ZookeeperConfig    config.ZooKeeper
+	NotificationConfig config.Notification
+	Share              config.Share
 }
 
 func NewConversationRpcCmd() *ConversationRpcCmd {
@@ -50,7 +50,7 @@ func NewConversationRpcCmd() *ConversationRpcCmd {
 		NotificationFileName:             {EnvPrefix: notificationEnvPrefix, ConfigStruct: &conversationConfig.NotificationConfig},
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
-	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
+	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
 	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
 		return ret.preRunE()
 	}

@@ -24,8 +24,8 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 )
 
-func CallbackBeforeAddFriend(ctx context.Context, callback *config.Callback, req *pbfriend.ApplyToAddFriendReq) error {
-	if !callback.CallbackBeforeAddFriend.Enable {
+func CallbackBeforeAddFriend(ctx context.Context, callback *config.Webhooks, req *pbfriend.ApplyToAddFriendReq) error {
+	if !callback.BeforeAddFriend.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackBeforeAddFriendReq{
@@ -36,14 +36,14 @@ func CallbackBeforeAddFriend(ctx context.Context, callback *config.Callback, req
 		Ex:              req.Ex,
 	}
 	resp := &cbapi.CallbackBeforeAddFriendResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, cbReq, resp, callback.CallbackBeforeAddFriend); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.BeforeAddFriend); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CallbackBeforeSetFriendRemark(ctx context.Context, callback *config.Callback, req *pbfriend.SetFriendRemarkReq) error {
-	if !callback.CallbackBeforeSetFriendRemark.Enable {
+func CallbackBeforeSetFriendRemark(ctx context.Context, callback *config.Webhooks, req *pbfriend.SetFriendRemarkReq) error {
+	if !callback.BeforeSetFriendRemark.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackBeforeSetFriendRemarkReq{
@@ -53,15 +53,15 @@ func CallbackBeforeSetFriendRemark(ctx context.Context, callback *config.Callbac
 		Remark:          req.Remark,
 	}
 	resp := &cbapi.CallbackBeforeSetFriendRemarkResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, cbReq, resp, callback.CallbackBeforeAddFriend); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.BeforeAddFriend); err != nil {
 		return err
 	}
 	datautil.NotNilReplace(&req.Remark, &resp.Remark)
 	return nil
 }
 
-func CallbackAfterSetFriendRemark(ctx context.Context, callback *config.Callback, req *pbfriend.SetFriendRemarkReq) error {
-	if !callback.CallbackAfterSetFriendRemark.Enable {
+func CallbackAfterSetFriendRemark(ctx context.Context, callback *config.Webhooks, req *pbfriend.SetFriendRemarkReq) error {
+	if !callback.AfterSetFriendRemark.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackAfterSetFriendRemarkReq{
@@ -71,14 +71,14 @@ func CallbackAfterSetFriendRemark(ctx context.Context, callback *config.Callback
 		Remark:          req.Remark,
 	}
 	resp := &cbapi.CallbackAfterSetFriendRemarkResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, cbReq, resp, callback.CallbackBeforeAddFriend); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.BeforeAddFriend); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CallbackBeforeAddBlack(ctx context.Context, callback *config.Callback, req *pbfriend.AddBlackReq) error {
-	if !callback.CallbackBeforeAddBlack.Enable {
+func CallbackBeforeAddBlack(ctx context.Context, callback *config.Webhooks, req *pbfriend.AddBlackReq) error {
+	if !callback.BeforeAddBlack.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackBeforeAddBlackReq{
@@ -87,14 +87,14 @@ func CallbackBeforeAddBlack(ctx context.Context, callback *config.Callback, req 
 		BlackUserID:     req.BlackUserID,
 	}
 	resp := &cbapi.CallbackBeforeAddBlackResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, cbReq, resp, callback.CallbackBeforeAddBlack); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.BeforeAddBlack); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CallbackAfterAddFriend(ctx context.Context, callback *config.Callback, req *pbfriend.ApplyToAddFriendReq) error {
-	if !callback.CallbackAfterAddFriend.Enable {
+func CallbackAfterAddFriend(ctx context.Context, callback *config.Webhooks, req *pbfriend.ApplyToAddFriendReq) error {
+	if !callback.AfterAddFriend.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackAfterAddFriendReq{
@@ -104,15 +104,15 @@ func CallbackAfterAddFriend(ctx context.Context, callback *config.Callback, req 
 		ReqMsg:          req.ReqMsg,
 	}
 	resp := &cbapi.CallbackAfterAddFriendResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, cbReq, resp, callback.CallbackAfterAddFriend); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.AfterAddFriend); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func CallbackBeforeAddFriendAgree(ctx context.Context, callback *config.Callback, req *pbfriend.RespondFriendApplyReq) error {
-	if !callback.CallbackBeforeAddFriendAgree.Enable {
+func CallbackBeforeAddFriendAgree(ctx context.Context, callback *config.Webhooks, req *pbfriend.RespondFriendApplyReq) error {
+	if !callback.BeforeAddFriendAgree.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackBeforeAddFriendAgreeReq{
@@ -123,14 +123,14 @@ func CallbackBeforeAddFriendAgree(ctx context.Context, callback *config.Callback
 		HandleResult:    req.HandleResult,
 	}
 	resp := &cbapi.CallbackBeforeAddFriendAgreeResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, cbReq, resp, callback.CallbackBeforeAddFriendAgree); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.BeforeAddFriendAgree); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CallbackAfterDeleteFriend(ctx context.Context, callback *config.Callback, req *pbfriend.DeleteFriendReq) error {
-	if !callback.CallbackAfterDeleteFriend.Enable {
+func CallbackAfterDeleteFriend(ctx context.Context, callback *config.Webhooks, req *pbfriend.DeleteFriendReq) error {
+	if !callback.AfterDeleteFriend.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackAfterDeleteFriendReq{
@@ -139,14 +139,14 @@ func CallbackAfterDeleteFriend(ctx context.Context, callback *config.Callback, r
 		FriendUserID:    req.FriendUserID,
 	}
 	resp := &cbapi.CallbackAfterDeleteFriendResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, cbReq, resp, callback.CallbackAfterDeleteFriend); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.AfterDeleteFriend); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CallbackBeforeImportFriends(ctx context.Context, callback *config.Callback, req *pbfriend.ImportFriendReq) error {
-	if !callback.CallbackBeforeImportFriends.Enable {
+func CallbackBeforeImportFriends(ctx context.Context, callback *config.Webhooks, req *pbfriend.ImportFriendReq) error {
+	if !callback.BeforeImportFriends.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackBeforeImportFriendsReq{
@@ -155,7 +155,7 @@ func CallbackBeforeImportFriends(ctx context.Context, callback *config.Callback,
 		FriendUserIDs:   req.FriendUserIDs,
 	}
 	resp := &cbapi.CallbackBeforeImportFriendsResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, cbReq, resp, callback.CallbackBeforeImportFriends); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.BeforeImportFriends); err != nil {
 		return err
 	}
 	if len(resp.FriendUserIDs) != 0 {
@@ -164,8 +164,8 @@ func CallbackBeforeImportFriends(ctx context.Context, callback *config.Callback,
 	return nil
 }
 
-func CallbackAfterImportFriends(ctx context.Context, callback *config.Callback, req *pbfriend.ImportFriendReq) error {
-	if !callback.CallbackAfterImportFriends.Enable {
+func CallbackAfterImportFriends(ctx context.Context, callback *config.Webhooks, req *pbfriend.ImportFriendReq) error {
+	if !callback.AfterImportFriends.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackAfterImportFriendsReq{
@@ -174,14 +174,14 @@ func CallbackAfterImportFriends(ctx context.Context, callback *config.Callback, 
 		FriendUserIDs:   req.FriendUserIDs,
 	}
 	resp := &cbapi.CallbackAfterImportFriendsResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, cbReq, resp, callback.CallbackAfterImportFriends); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.AfterImportFriends); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CallbackAfterRemoveBlack(ctx context.Context, callback *config.Callback, req *pbfriend.RemoveBlackReq) error {
-	if !callback.CallbackAfterRemoveBlack.Enable {
+func CallbackAfterRemoveBlack(ctx context.Context, callback *config.Webhooks, req *pbfriend.RemoveBlackReq) error {
+	if !callback.AfterRemoveBlack.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackAfterRemoveBlackReq{
@@ -190,7 +190,7 @@ func CallbackAfterRemoveBlack(ctx context.Context, callback *config.Callback, re
 		BlackUserID:     req.BlackUserID,
 	}
 	resp := &cbapi.CallbackAfterRemoveBlackResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, cbReq, resp, callback.CallbackAfterRemoveBlack); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.AfterRemoveBlack); err != nil {
 		return err
 	}
 	return nil

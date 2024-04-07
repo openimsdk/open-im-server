@@ -36,12 +36,12 @@ func init() {
 	http.DefaultTransport.(*http.Transport).MaxConnsPerHost = 100 // default: 2
 }
 
-func callBackPostReturn(ctx context.Context, url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
+func callBackPostReturn(ctx context.Context, url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.WebhookConfig) error {
 	url = url + "/" + command
 	log.ZInfo(ctx, "callback", "url", url, "input", input, "config", callbackConfig)
-	b, err := client.Post(ctx, url, nil, input, callbackConfig.CallbackTimeOut)
+	b, err := client.Post(ctx, url, nil, input, callbackConfig.Timeout)
 	if err != nil {
-		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
+		if callbackConfig.FailedContinue {
 			log.ZInfo(ctx, "callback failed but continue", err, "url", url)
 			return nil
 		}
@@ -49,7 +49,7 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 		return servererrs.ErrNetwork.WrapMsg(err.Error())
 	}
 	if err = json.Unmarshal(b, output); err != nil {
-		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
+		if callbackConfig.FailedContinue {
 			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
 			return nil
 		}
@@ -63,6 +63,6 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 	return nil
 }
 
-func CallBackPostReturn(ctx context.Context, url string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
+func CallBackPostReturn(ctx context.Context, url string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, callbackConfig config.WebhookConfig) error {
 	return callBackPostReturn(ctx, url, req.GetCallbackCommand(), req, resp, callbackConfig)
 }
