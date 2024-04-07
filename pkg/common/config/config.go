@@ -323,6 +323,21 @@ type WebhookConfig struct {
 	FailedContinue bool `mapstructure:"failedContinue"`
 }
 
+type Share struct {
+	Env             string `mapstructure:"env"`
+	RpcRegisterName struct {
+		User           string `mapstructure:"user"`
+		Friend         string `mapstructure:"friend"`
+		Msg            string `mapstructure:"msg"`
+		Push           string `mapstructure:"push"`
+		MessageGateway string `mapstructure:"messageGateway"`
+		Group          string `mapstructure:"group"`
+		Auth           string `mapstructure:"auth"`
+		Conversation   string `mapstructure:"conversation"`
+		Third          string `mapstructure:"third"`
+	} `mapstructure:"rpcRegisterName"`
+}
+
 type Webhooks struct {
 	URL                          string        `mapstructure:"url"`
 	BeforeSendSingleMsg          WebhookConfig `mapstructure:"beforeSendSingleMsg"`
@@ -376,22 +391,10 @@ type Webhooks struct {
 }
 
 type ZooKeeper struct {
-	Schema          string   `mapstructure:"schema"`
-	Address         []string `mapstructure:"address"`
-	Username        string   `mapstructure:"username"`
-	Password        string   `mapstructure:"password"`
-	Env             string   `mapstructure:"env"`
-	RpcRegisterName struct {
-		User           string `mapstructure:"User"`
-		Friend         string `mapstructure:"Friend"`
-		Msg            string `mapstructure:"Msg"`
-		Push           string `mapstructure:"Push"`
-		MessageGateway string `mapstructure:"MessageGateway"`
-		Group          string `mapstructure:"Group"`
-		Auth           string `mapstructure:"Auth"`
-		Conversation   string `mapstructure:"Conversation"`
-		Third          string `mapstructure:"Third"`
-	} `mapstructure:"rpcRegisterName"`
+	Schema   string   `mapstructure:"schema"`
+	Address  []string `mapstructure:"address"`
+	Username string   `mapstructure:"username"`
+	Password string   `mapstructure:"password"`
 }
 
 func (m *Mongo) Build() *mongoutil.Config {

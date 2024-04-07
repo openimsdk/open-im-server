@@ -1,13 +1,13 @@
 env: zookeeper
 rpcRegisterName:
-  User: User
-  Friend: Friend
-  Msg: Msg
-  Push: Push
-  MessageGateway: MessageGateway
-  Group: Group
-  Auth: Auth
-  Conversation: Conversation
-  Third: Third
+  user: User
+  friend: Friend
+  msg: Msg
+  push: Push
+  messageGateway: MessageGateway
+  group: Group
+  auth: Auth
+  conversation: Conversation
+  third: Third
 
 
