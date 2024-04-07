@@ -1,4 +1,4 @@
-storageLocation: ./_output/logs/
+storageLocation: ../../../../logs/
 rotationTime: 24
 remainRotationCount: 2
 remainLogLevel: 6

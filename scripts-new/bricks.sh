@@ -24,6 +24,7 @@ start_binaries() {
     # Loop to start binary the specified number of times
     for ((i=0; i<count; i++)); do
       echo "Starting $bin_full_path -i $i -c $OPENIM_OUTPUT_CONFIG"
+      cd OPENIM_OUTPUT_HOSTBIN
       cmd=("$bin_full_path" -i "$i" -c "$OPENIM_OUTPUT_CONFIG")
       nohup "${cmd[@]}" >> "${OPENIM_INIT_LOG_FILE}" 2> >(tee -a "$OPENIM_INIT_ERR_LOG_FILE" | while read line; do echo -e "\e[31m${line}\e[0m"; done >&2) &
       done
@@ -37,6 +38,7 @@ start_tools() {
     local bin_full_path=$(get_tool_full_path "$binary")
     cmd=("$bin_full_path" -c "$OPENIM_OUTPUT_CONFIG")
     echo "Starting ${cmd[@]}"
+    cd OPENIM_OUTPUT_HOSTBIN_TOOLS
     "${cmd[@]}"
     ret_val=$?
     if [ $ret_val -eq 0 ]; then

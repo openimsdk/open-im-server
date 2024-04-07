@@ -29,7 +29,7 @@ services:
       - openim
 
   redis:
-    image: redis:7.0.0
+    image: "${REDIS_IMAGE}"
     container_name: redis
     ports:
       - "16379:6379"
@@ -46,7 +46,7 @@ services:
       - openim
 
   zookeeper:
-    image: bitnami/zookeeper:3.8
+    image: "${ZOOKEEPER_IMAGE}"
     container_name: zookeeper
     ports:
       - "12181:2181"
@@ -58,7 +58,7 @@ services:
       - openim
 
   kafka:
-    image: 'bitnami/kafka:3.5.1'
+    image: "${KAFKA_IMAGE}"
     container_name: kafka
     restart: always
     user: root
@@ -83,7 +83,7 @@ services:
 
 
   minio:
-    image: minio/minio:RELEASE.2024-01-11T07-46-16Z
+    image: "${MINIO_IMAGE}"
     ports:
       - "10005:9000"
       - "19090:9090"
