@@ -28,7 +28,7 @@ type pushDataBase struct {
 	cache cache.MsgModel
 }
 
-func NewPushDatabase(cache cache.MsgModel) PushDatabase {
+func NewPushDatabase(cache cache.ThirdCache) PushDatabase {
 	return &pushDataBase{cache: cache}
 }
 

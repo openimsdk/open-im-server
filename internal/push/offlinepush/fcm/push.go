@@ -35,12 +35,12 @@ var Terminal = []int{constant.IOSPlatformID, constant.AndroidPlatformID, constan
 
 type Fcm struct {
 	fcmMsgCli *messaging.Client
-	cache     cache.MsgModel
+	cache     cache.ThirdCache
 }
 
 // NewClient initializes a new FCM client using the Firebase Admin SDK.
 // It requires the FCM service account credentials file located within the project's configuration directory.
-func NewClient(pushConf *config.Push, cache cache.MsgModel) (*Fcm, error) {
+func NewClient(pushConf *config.Push, cache cache.ThirdCache) (*Fcm, error) {
 	projectRoot, err := config.GetProjectRoot()
 	if err != nil {
 		return nil, err

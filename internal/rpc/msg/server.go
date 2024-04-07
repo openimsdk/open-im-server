@@ -69,11 +69,13 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 	if err != nil {
 		return err
 	}
+	msgModel := cache.NewMsgCache(rdb, config.MsgCacheTimeout, &config.Redis)
+	seqModel := cache.NewSeqCache(rdb)
 	conversationClient := rpcclient.NewConversationRpcClient(client, config.RpcRegisterName.OpenImConversationName)
 	userRpcClient := rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.RpcRegisterName.OpenImFriendName)
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, cacheModel, &config.Kafka)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqModel, &config.Kafka)
 	if err != nil {
 		return err
 	}

@@ -77,12 +77,13 @@ func Start(ctx context.Context, config *config.GlobalConfig, prometheusPort, ind
 	}
 
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	msgModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
+	msgModel := cache.NewMsgCache(rdb, config.MsgCacheTimeout, &config.Redis)
+	seqModel := cache.NewSeqCache(rdb)
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, &config.Kafka)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqModel, &config.Kafka)
 	if err != nil {
 		return err
 	}
