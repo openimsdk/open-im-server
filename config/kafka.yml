@@ -1,13 +1,9 @@
 username: ''
 password: ''
 addr: [ 172.28.0.1:19094 ]
-toRedis:
-  topic: "toRedis"
-toMongo:
-  topic: "toMongo"
-toPush:
-  topic: "toPush"
-consumerGroupID:
-  msgToRedis: redis
-  msgToMongo: mongo
-  msgToPush: push
+toRedisTopic: "toRedis"
+toMongoTopic: "toMongo"
+toPushTopic: "toPush"
+toRedisGroupID: redis
+toMongoGroupID: mongo
+toPushGroupID: push
