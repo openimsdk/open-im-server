@@ -95,6 +95,7 @@ type CronTask struct {
 	ChatRecordsClearTime string `mapstructure:"chatRecordsClearTime"`
 	MsgDestructTime      string `mapstructure:"msgDestructTime"`
 	RetainChatRecords    int    `mapstructure:"retainChatRecords"`
+	EnableCronLocker     bool   `yaml:"enableCronLocker"`
 }
 
 type OfflinePushConfig struct {

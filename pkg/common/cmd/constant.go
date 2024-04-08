@@ -64,6 +64,7 @@ const (
 	kafkaEnvPrefix        = "openim-kafka"
 	zoopkeeperEnvPrefix   = "openim-zookeeper"
 	apiEnvPrefix          = "openim-api"
+	cornTaskEnvPrefix     = "openim-crontask"
 	authEnvPrefix         = "openim-auth"
 	conversationEnvPrefix = "openim-conversation"
 	friendEnvPrefix       = "openim-friend"

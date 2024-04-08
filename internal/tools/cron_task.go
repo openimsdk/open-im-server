@@ -16,22 +16,23 @@ package tools
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/db/redisutil"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"
 )
 
-func StartTask(ctx context.Context, config *config.GlobalConfig) error {
+func Start(ctx context.Context, config *cmd.CronTaskConfig) error {
 
-	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime", config.ChatRecordsClearTime, "msgDestructTime", config.MsgDestructTime)
+	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime",
+		config.CronTask.ChatRecordsClearTime, "msgDestructTime", config.CronTask.MsgDestructTime)
 
 	msgTool, err := InitMsgTool(ctx, config)
 	if err != nil {
@@ -40,7 +41,7 @@ func StartTask(ctx context.Context, config *config.GlobalConfig) error {
 
 	msgTool.convertTools()
 
-	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
+	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
 	}
@@ -48,12 +49,14 @@ func StartTask(ctx context.Context, config *config.GlobalConfig) error {
 	// register cron tasks
 	var crontab = cron.New()
 
-	_, err = crontab.AddFunc(config.ChatRecordsClearTime, cronWrapFunc(config, rdb, "cron_clear_msg_and_fix_seq", msgTool.AllConversationClearMsgAndFixSeq))
+	_, err = crontab.AddFunc(config.CronTask.ChatRecordsClearTime,
+		cronWrapFunc(config, rdb, "cron_clear_msg_and_fix_seq", msgTool.AllConversationClearMsgAndFixSeq))
 	if err != nil {
 		return errs.Wrap(err)
 	}
 
-	_, err = crontab.AddFunc(config.MsgDestructTime, cronWrapFunc(config, rdb, "cron_conversations_destruct_msgs", msgTool.ConversationsDestructMsgs))
+	_, err = crontab.AddFunc(config.CronTask.MsgDestructTime,
+		cronWrapFunc(config, rdb, "cron_conversations_destruct_msgs", msgTool.ConversationsDestructMsgs))
 	if err != nil {
 		return errs.WrapMsg(err, "cron_conversations_destruct_msgs")
 	}
@@ -91,8 +94,8 @@ func netlock(rdb redis.UniversalClient, key string, ttl time.Duration) bool {
 	return ok
 }
 
-func cronWrapFunc(config *config.GlobalConfig, rdb redis.UniversalClient, key string, fn func()) func() {
-	enableCronLocker := config.EnableCronLocker
+func cronWrapFunc(config *cmd.CronTaskConfig, rdb redis.UniversalClient, key string, fn func()) func() {
+	enableCronLocker := config.CronTask.EnableCronLocker
 	return func() {
 		// if don't enable cron-locker, call fn directly.
 		if !enableCronLocker {

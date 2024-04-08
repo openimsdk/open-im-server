@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"context"
-
 	"github.com/openimsdk/open-im-server/v3/internal/tools"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/system/program"
@@ -25,29 +24,34 @@ import (
 
 type CronTaskCmd struct {
 	*RootCmd
-	initFunc func(ctx context.Context, config *config.GlobalConfig) error
-	ctx      context.Context
+	ctx            context.Context
+	configMap      map[string]StructEnvPrefix
+	cronTaskConfig CronTaskConfig
+}
+type CronTaskConfig struct {
+	CronTask    config.CronTask
+	RedisConfig config.Redis
 }
 
-func NewCronTaskCmd(name string) *CronTaskCmd {
-	ret := &CronTaskCmd{RootCmd: NewRootCmd(program.GetProcessName(), name, WithCronTaskLogName()),
-		initFunc: tools.StartTask}
+func NewCronTaskCmd() *CronTaskCmd {
+	var cronTaskConfig CronTaskConfig
+	ret := &CronTaskCmd{cronTaskConfig: cronTaskConfig}
+	ret.configMap = map[string]StructEnvPrefix{
+		OpenIMCronTaskCfgFileName: {EnvPrefix: cornTaskEnvPrefix, ConfigStruct: &cronTaskConfig.CronTask},
+		RedisConfigFileName:       {EnvPrefix: redisEnvPrefix, ConfigStruct: &cronTaskConfig.RedisConfig},
+	}
+	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
-	ret.addRunE()
-	ret.SetRootCmdPt(ret)
+	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
+		return ret.preRunE()
+	}
 	return ret
 }
 
-func (c *CronTaskCmd) addRunE() {
-	c.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return c.initFunc(c.ctx, c.config)
-	}
+func (a *CronTaskCmd) Exec() error {
+	return a.Execute()
 }
 
-func (c *CronTaskCmd) Exec() error {
-	return c.Execute()
-}
-
-func (c *CronTaskCmd) GetPortFromConfig(portType string) int {
-	return 0
+func (a *CronTaskCmd) preRunE() error {
+	return tools.Start(a.ctx, &a.cronTaskConfig)
 }
