@@ -20,8 +20,7 @@ import (
 )
 
 func main() {
-	cronTaskCmd := cmd.NewCronTaskCmd(cmd.CronTaskServer)
-	if err := cronTaskCmd.Exec(); err != nil {
+	if err := cmd.NewCronTaskCmd().Exec(); err != nil {
 		program.ExitWithError(err)
 	}
 }

@@ -325,20 +325,36 @@ type WebhookConfig struct {
 }
 
 type Share struct {
-	Env             string `mapstructure:"env"`
-	RpcRegisterName struct {
-		User           string `mapstructure:"user"`
-		Friend         string `mapstructure:"friend"`
-		Msg            string `mapstructure:"msg"`
-		Push           string `mapstructure:"push"`
-		MessageGateway string `mapstructure:"messageGateway"`
-		Group          string `mapstructure:"group"`
-		Auth           string `mapstructure:"auth"`
-		Conversation   string `mapstructure:"conversation"`
-		Third          string `mapstructure:"third"`
-	} `mapstructure:"rpcRegisterName"`
-	IMAdmin IMAdmin `mapstructure:"imAdmin"`
+	Env             string          `mapstructure:"env"`
+	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
+	IMAdmin         IMAdmin         `mapstructure:"imAdmin"`
 }
+type RpcRegisterName struct {
+	User           string `mapstructure:"user"`
+	Friend         string `mapstructure:"friend"`
+	Msg            string `mapstructure:"msg"`
+	Push           string `mapstructure:"push"`
+	MessageGateway string `mapstructure:"messageGateway"`
+	Group          string `mapstructure:"group"`
+	Auth           string `mapstructure:"auth"`
+	Conversation   string `mapstructure:"conversation"`
+	Third          string `mapstructure:"third"`
+}
+
+func (r *RpcRegisterName) GetServiceNames() []string {
+	return []string{
+		r.User,
+		r.Friend,
+		r.Msg,
+		r.Push,
+		r.MessageGateway,
+		r.Group,
+		r.Auth,
+		r.Conversation,
+		r.Third,
+	}
+}
+
 type IMAdmin struct {
 	UserID   []string `mapstructure:"userID"`
 	Nickname []string `mapstructure:"nickname"`

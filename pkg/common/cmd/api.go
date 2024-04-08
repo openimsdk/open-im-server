@@ -16,46 +16,49 @@ package cmd
 
 import (
 	"context"
-
 	"github.com/openimsdk/open-im-server/v3/internal/api"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
 type ApiCmd struct {
 	*RootCmd
-	ctx context.Context
+	ctx       context.Context
+	configMap map[string]StructEnvPrefix
+	apiConfig ApiConfig
+}
+type ApiConfig struct {
+	RpcConfig          config.API
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
+	ZookeeperConfig    config.ZooKeeper
+	NotificationConfig config.Notification
+	Share              config.Share
+	MinioConfig        config.Minio
 }
 
-func NewApiCmd(name string) *ApiCmd {
-	ret := &ApiCmd{RootCmd: NewRootCmd(program.GetProcessName(), name)}
-	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
-	ret.SetRootCmdPt(ret)
-	ret.addPreRun()
-	ret.addRunE()
+func NewApiCmd() *ApiCmd {
+	var apiConfig ApiConfig
+	ret := &ApiCmd{apiConfig: apiConfig}
+	ret.configMap = map[string]StructEnvPrefix{
+		OpenIMAPICfgFileName:    {EnvPrefix: apiEnvPrefix, ConfigStruct: &apiConfig.RpcConfig},
+		RedisConfigFileName:     {EnvPrefix: redisEnvPrefix, ConfigStruct: &apiConfig.RedisConfig},
+		ZookeeperConfigFileName: {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &apiConfig.ZookeeperConfig},
+		ShareFileName:           {EnvPrefix: shareEnvPrefix, ConfigStruct: &apiConfig.Share},
+	}
+	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
+	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
+	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
+		return ret.preRunE()
+	}
 	return ret
 }
 
-func (a *ApiCmd) addPreRun() {
-	a.Command.PreRun = func(cmd *cobra.Command, args []string) {
-		a.port = a.getPortFlag(cmd)
-		a.prometheusPort = a.getPrometheusPortFlag(cmd)
-	}
+func (a *ApiCmd) Exec() error {
+	return a.Execute()
 }
 
-func (a *ApiCmd) addRunE() {
-	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return api.Start(a.ctx, a.config, a.port, a.prometheusPort)
-	}
-}
-
-func (a *ApiCmd) GetPortFromConfig(portType string) int {
-	if portType == constant.FlagPort {
-		return a.config.Api.OpenImApiPort[0]
-	} else if portType == constant.FlagPrometheusPort {
-		return a.config.Prometheus.ApiPrometheusPort[0]
-	}
-	return 0
+func (a *ApiCmd) preRunE() error {
+	return api.Start(a.ctx, a.Index(), &a.apiConfig)
 }

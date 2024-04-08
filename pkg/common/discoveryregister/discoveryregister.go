@@ -16,12 +16,17 @@ package discoveryregister
 
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/direct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/zookeeper"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"time"
+)
+
+const (
+	zookeeper = "zoopkeeper"
+	kubenetes = "k8s"
+
+	direct = "direct"
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.

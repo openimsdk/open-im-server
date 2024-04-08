@@ -63,6 +63,7 @@ const (
 	minioEnvPrefix        = "openim-minio"
 	kafkaEnvPrefix        = "openim-kafka"
 	zoopkeeperEnvPrefix   = "openim-zookeeper"
+	apiEnvPrefix          = "openim-api"
 	authEnvPrefix         = "openim-auth"
 	conversationEnvPrefix = "openim-conversation"
 	friendEnvPrefix       = "openim-friend"

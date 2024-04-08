@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/prometheus/client_golang/prometheus"
 	"net"
 	"net/http"
@@ -47,11 +48,11 @@ func Start[T any](ctx context.Context, zookeeperConfig *config2.ZooKeeper, prome
 	registerIP string, rpcPorts []int, index int, rpcRegisterName string, config T, rpcFn func(ctx context.Context,
 	config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 
-	rpcPort, err := getElemByIndex(rpcPorts, index)
+	rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
 	if err != nil {
 		return err
 	}
-	prometheusPort, err := getElemByIndex(prometheusConfig.Ports, index)
+	prometheusPort, err := datautil.GetElemByIndex(prometheusConfig.Ports, index)
 	if err != nil {
 		return err
 	}
@@ -172,12 +173,4 @@ func gracefulStopWithCtx(ctx context.Context, f func()) error {
 	case <-done:
 		return nil
 	}
-}
-
-func getElemByIndex(array []int, index int) (int, error) {
-	if index < 0 || index >= len(array) {
-		return 0, errs.New("index out of range", "index", index, "array", array).Wrap()
-	}
-
-	return array[index], nil
 }

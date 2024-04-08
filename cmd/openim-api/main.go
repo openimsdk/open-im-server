@@ -22,10 +22,7 @@ import (
 )
 
 func main() {
-	apiCmd := cmd.NewApiCmd(cmd.ApiServer)
-	//apiCmd.AddPortFlag()
-	//apiCmd.AddPrometheusPortFlag()
-	if err := apiCmd.Execute(); err != nil {
+	if err := cmd.NewApiCmd().Exec(); err != nil {
 		program.ExitWithError(err)
 	}
 }
