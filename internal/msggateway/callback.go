@@ -25,8 +25,8 @@ import (
 	"github.com/openimsdk/tools/mcontext"
 )
 
-func CallbackUserOnline(ctx context.Context, callback *config.Callback, userID string, platformID int, isAppBackground bool, connID string) error {
-	if !callback.CallbackUserOnline.Enable {
+func CallbackUserOnline(ctx context.Context, callback *config.Webhooks, userID string, platformID int, isAppBackground bool, connID string) error {
+	if !callback.AfterUserOnline.Enable {
 		return nil
 	}
 	req := cbapi.CallbackUserOnlineReq{
@@ -44,14 +44,14 @@ func CallbackUserOnline(ctx context.Context, callback *config.Callback, userID s
 		ConnID:          connID,
 	}
 	resp := cbapi.CommonCallbackResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, &req, &resp, callback.CallbackUserOnline); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, &req, &resp, callback.AfterUserOnline); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CallbackUserOffline(ctx context.Context, callback *config.Callback, userID string, platformID int, connID string) error {
-	if !callback.CallbackUserOffline.Enable {
+func CallbackUserOffline(ctx context.Context, callback *config.Webhooks, userID string, platformID int, connID string) error {
+	if !callback.AfterUserOffline.Enable {
 		return nil
 	}
 	req := &cbapi.CallbackUserOfflineReq{
@@ -68,14 +68,14 @@ func CallbackUserOffline(ctx context.Context, callback *config.Callback, userID 
 		ConnID: connID,
 	}
 	resp := &cbapi.CallbackUserOfflineResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, req, resp, callback.CallbackUserOffline); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, req, resp, callback.AfterUserOffline); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CallbackUserKickOff(ctx context.Context, callback *config.Callback, userID string, platformID int) error {
-	if !callback.CallbackUserKickOff.Enable {
+func CallbackUserKickOff(ctx context.Context, callback *config.Webhooks, userID string, platformID int) error {
+	if !callback.AfterUserKickOff.Enable {
 		return nil
 	}
 	req := &cbapi.CallbackUserKickOffReq{
@@ -91,7 +91,7 @@ func CallbackUserKickOff(ctx context.Context, callback *config.Callback, userID 
 		Seq: time.Now().UnixMilli(),
 	}
 	resp := &cbapi.CommonCallbackResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, req, resp, callback.CallbackUserOffline); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, req, resp, callback.AfterUserOffline); err != nil {
 		return err
 	}
 	return nil

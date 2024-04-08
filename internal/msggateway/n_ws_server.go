@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"net/http"
 	"strconv"
 	"sync"
@@ -26,7 +27,6 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -49,7 +49,7 @@ type LongConnServer interface {
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s any) error
 	SetCacheHandler(cache cache.TokenModel)
-	SetDiscoveryRegistry(client discovery.SvcDiscoveryRegistry, config *config.GlobalConfig)
+	SetDiscoveryRegistry(client discovery.SvcDiscoveryRegistry, config *cmd.MsgGatewayConfig)
 	KickUserConn(client *Client) error
 	UnRegister(c *Client)
 	SetKickHandlerInfo(i *kickHandler)
@@ -59,7 +59,7 @@ type LongConnServer interface {
 }
 
 type WsServer struct {
-	globalConfig      *config.GlobalConfig
+	msgGatewayConfig  *cmd.MsgGatewayConfig
 	port              int
 	wsMaxConnNum      int64
 	registerChan      chan *Client
@@ -86,9 +86,9 @@ type kickHandler struct {
 	newClient  *Client
 }
 
-func (ws *WsServer) SetDiscoveryRegistry(disCov discovery.SvcDiscoveryRegistry, config *config.GlobalConfig) {
-	ws.MessageHandler = NewGrpcHandler(ws.validate, disCov, &config.RpcRegisterName)
-	u := rpcclient.NewUserRpcClient(disCov, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin)
+func (ws *WsServer) SetDiscoveryRegistry(disCov discovery.SvcDiscoveryRegistry, config *cmd.MsgGatewayConfig) {
+	ws.MessageHandler = NewGrpcHandler(ws.validate, disCov, &config.Share.RpcRegisterName)
+	u := rpcclient.NewUserRpcClient(disCov, config.Share.RpcRegisterName.User, &config.Share.IMAdmin)
 	ws.userClient = &u
 	ws.disCov = disCov
 }
@@ -100,12 +100,12 @@ func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, sta
 	}
 	switch status {
 	case constant.Online:
-		err := CallbackUserOnline(ctx, &ws.globalConfig.Callback, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
+		err := CallbackUserOnline(ctx, &ws.msgGatewayConfig.WebhooksConfig, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
 		if err != nil {
 			log.ZWarn(ctx, "CallbackUserOnline err", err)
 		}
 	case constant.Offline:
-		err := CallbackUserOffline(ctx, &ws.globalConfig.Callback, client.UserID, client.PlatformID, client.ctx.GetConnID())
+		err := CallbackUserOffline(ctx, &ws.msgGatewayConfig.WebhooksConfig, client.UserID, client.PlatformID, client.ctx.GetConnID())
 		if err != nil {
 			log.ZWarn(ctx, "CallbackUserOffline err", err)
 		}
@@ -132,14 +132,14 @@ func (ws *WsServer) GetUserPlatformCons(userID string, platform int) ([]*Client,
 	return ws.clients.Get(userID, platform)
 }
 
-func NewWsServer(globalConfig *config.GlobalConfig, opts ...Option) (*WsServer, error) {
+func NewWsServer(msgGatewayConfig *cmd.MsgGatewayConfig, opts ...Option) (*WsServer, error) {
 	var config configs
 	for _, o := range opts {
 		o(&config)
 	}
 	v := validator.New()
 	return &WsServer{
-		globalConfig:     globalConfig,
+		msgGatewayConfig: msgGatewayConfig,
 		port:             config.port,
 		wsMaxConnNum:     config.maxConnNum,
 		writeBufferSize:  config.writeBufferSize,
@@ -213,7 +213,7 @@ func (ws *WsServer) Run(done chan error) error {
 var concurrentRequest = 3
 
 func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *Client) error {
-	conns, err := ws.disCov.GetConns(ctx, ws.globalConfig.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := ws.disCov.GetConns(ctx, ws.msgGatewayConfig.Share.RpcRegisterName.MessageGateway)
 	if err != nil {
 		return err
 	}
@@ -278,7 +278,7 @@ func (ws *WsServer) registerClient(client *Client) {
 	}
 
 	wg := sync.WaitGroup{}
-	if ws.globalConfig.Envs.Discovery == "zookeeper" {
+	if ws.msgGatewayConfig.Share.Env == "zookeeper" {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -322,7 +322,7 @@ func (ws *WsServer) KickUserConn(client *Client) error {
 }
 
 func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Client, newClient *Client) {
-	switch ws.globalConfig.MultiLoginPolicy {
+	switch ws.msgGatewayConfig.MsgGateway.MultiLoginPolicy {
 	case constant.DefalutNotKick:
 	case constant.PCAndOther:
 		if constant.PlatformIDToClass(newClient.PlatformID) == constant.TerminalPC {
@@ -434,7 +434,7 @@ func (ws *WsServer) ParseWSArgs(r *http.Request) (args *WSArgs, err error) {
 		return nil, servererrs.ErrConnArgsErr.WrapMsg("platformID is not int")
 	}
 	v.PlatformID = platformID
-	if err = authverify.WsVerifyToken(v.Token, v.UserID, ws.globalConfig.Secret, platformID); err != nil {
+	if err = authverify.WsVerifyToken(v.Token, v.UserID, ws.msgGatewayConfig.Share.Secret, platformID); err != nil {
 		return nil, err
 	}
 	if query.Get(Compression) == GzipCompressionProtocol {

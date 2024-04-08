@@ -20,11 +20,7 @@ import (
 )
 
 func main() {
-	msgGatewayCmd := cmd.NewMsgGatewayCmd(cmd.MsgGatewayServer)
-	msgGatewayCmd.AddWsPortFlag()
-	msgGatewayCmd.AddPortFlag()
-	msgGatewayCmd.AddPrometheusPortFlag()
-	if err := msgGatewayCmd.Exec(); err != nil {
+	if err := cmd.NewMsgGatewayCmd().Exec(); err != nil {
 		program.ExitWithError(err)
 	}
 }

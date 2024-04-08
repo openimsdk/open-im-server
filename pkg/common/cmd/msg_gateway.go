@@ -16,65 +16,50 @@ package cmd
 
 import (
 	"context"
-	"log"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/protocol/constant"
+
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
 type MsgGatewayCmd struct {
 	*RootCmd
-	ctx context.Context
+	ctx              context.Context
+	configMap        map[string]StructEnvPrefix
+	msgGatewayConfig MsgGatewayConfig
+}
+type MsgGatewayConfig struct {
+	MsgGateway      config.MsgGateway
+	RedisConfig     config.Redis
+	ZookeeperConfig config.ZooKeeper
+	Share           config.Share
+	WebhooksConfig  config.Webhooks
 }
 
-func NewMsgGatewayCmd(name string) *MsgGatewayCmd {
-	ret := &MsgGatewayCmd{RootCmd: NewRootCmd(program.GetProcessName(), name)}
-	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
-	ret.addRunE()
-	ret.SetRootCmdPt(ret)
+func NewMsgGatewayCmd() *MsgGatewayCmd {
+	var msgGatewayConfig MsgGatewayConfig
+	ret := &MsgGatewayCmd{msgGatewayConfig: msgGatewayConfig}
+	ret.configMap = map[string]StructEnvPrefix{
+		OpenIMAPICfgFileName:    {EnvPrefix: apiEnvPrefix, ConfigStruct: &msgGatewayConfig.MsgGateway},
+		RedisConfigFileName:     {EnvPrefix: redisEnvPrefix, ConfigStruct: &msgGatewayConfig.RedisConfig},
+		ZookeeperConfigFileName: {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &msgGatewayConfig.ZookeeperConfig},
+		ShareFileName:           {EnvPrefix: shareEnvPrefix, ConfigStruct: &msgGatewayConfig.Share},
+		WebhooksConfigFileName:  {EnvPrefix: webhooksEnvPrefix, ConfigStruct: &msgGatewayConfig.WebhooksConfig},
+	}
+	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
+	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
+	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
+		return ret.preRunE()
+	}
 	return ret
-}
-
-func (m *MsgGatewayCmd) AddWsPortFlag() {
-	m.Command.Flags().IntP(constant.FlagWsPort, "w", 0, "ws server listen port")
-}
-
-func (m *MsgGatewayCmd) getWsPortFlag(cmd *cobra.Command) int {
-	port, err := cmd.Flags().GetInt(constant.FlagWsPort)
-	if err != nil {
-		log.Println("Error getting ws port flag:", err)
-	}
-	if port == 0 {
-		port = m.PortFromConfig(constant.FlagWsPort)
-	}
-	return port
-}
-
-func (m *MsgGatewayCmd) addRunE() {
-	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msggateway.Start(m.ctx, m.config, m.getPortFlag(cmd), m.getWsPortFlag(cmd), m.getPrometheusPortFlag(cmd))
-	}
 }
 
 func (m *MsgGatewayCmd) Exec() error {
 	return m.Execute()
 }
 
-func (m *MsgGatewayCmd) GetPortFromConfig(portType string) int {
-	switch portType {
-	case constant.FlagWsPort:
-		return m.config.LongConnSvr.OpenImWsPort[0]
-
-	case constant.FlagPort:
-		return m.config.LongConnSvr.OpenImMessageGatewayPort[0]
-
-	case constant.FlagPrometheusPort:
-		return m.config.Prometheus.MessageGatewayPrometheusPort[0]
-
-	default:
-		return 0
-	}
+func (m *MsgGatewayCmd) preRunE() error {
+	return msggateway.Start(m.ctx, m.Index(), &m.msgGatewayConfig)
 }

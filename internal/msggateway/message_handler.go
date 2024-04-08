@@ -107,8 +107,8 @@ type GrpcHandler struct {
 }
 
 func NewGrpcHandler(validate *validator.Validate, client discovery.SvcDiscoveryRegistry, rpcRegisterName *config.RpcRegisterName) *GrpcHandler {
-	msgRpcClient := rpcclient.NewMessageRpcClient(client, rpcRegisterName.OpenImMsgName)
-	pushRpcClient := rpcclient.NewPushRpcClient(client, rpcRegisterName.OpenImPushName)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, rpcRegisterName.Msg)
+	pushRpcClient := rpcclient.NewPushRpcClient(client, rpcRegisterName.Push)
 	return &GrpcHandler{
 		msgRpcClient: &msgRpcClient,
 		pushClient:   &pushRpcClient, validate: validate,

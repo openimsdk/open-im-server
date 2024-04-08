@@ -16,10 +16,10 @@ package msggateway
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
@@ -32,8 +32,8 @@ import (
 	"google.golang.org/grpc"
 )
 
-func (s *Server) InitServer(ctx context.Context, config *config.GlobalConfig, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
+func (s *Server) InitServer(ctx context.Context, config *cmd.MsgGatewayConfig, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
 	}
@@ -45,11 +45,11 @@ func (s *Server) InitServer(ctx context.Context, config *config.GlobalConfig, di
 	return nil
 }
 
-func (s *Server) Start(ctx context.Context, conf *config.GlobalConfig) error {
-	return startrpc.Start(ctx,
-		s.rpcPort,
-		conf.RpcRegisterName.OpenImMessageGatewayName,
-		s.prometheusPort,
+func (s *Server) Start(ctx context.Context, index int, conf *cmd.MsgGatewayConfig) error {
+	return startrpc.Start(ctx, &conf.ZookeeperConfig, &conf.MsgGateway.Prometheus, conf.MsgGateway.ListenIP,
+		conf.MsgGateway.RPC.RegisterIP,
+		conf.MsgGateway.RPC.Ports, index,
+		conf.Share.RpcRegisterName.MessageGateway,
 		conf,
 		s.InitServer,
 	)
@@ -59,7 +59,7 @@ type Server struct {
 	rpcPort        int
 	prometheusPort int
 	LongConnServer LongConnServer
-	config         *config.GlobalConfig
+	config         *cmd.MsgGatewayConfig
 	pushTerminal   map[int]struct{}
 }
 
@@ -67,7 +67,7 @@ func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 	s.LongConnServer = LongConnServer
 }
 
-func NewServer(rpcPort int, proPort int, longConnServer LongConnServer, conf *config.GlobalConfig) *Server {
+func NewServer(rpcPort int, proPort int, longConnServer LongConnServer, conf *cmd.MsgGatewayConfig) *Server {
 	s := &Server{
 		rpcPort:        rpcPort,
 		prometheusPort: proPort,
@@ -91,7 +91,7 @@ func (s *Server) GetUsersOnlineStatus(
 	ctx context.Context,
 	req *msggateway.GetUsersOnlineStatusReq,
 ) (*msggateway.GetUsersOnlineStatusResp, error) {
-	if !authverify.IsAppManagerUid(ctx, &s.config.Manager, &s.config.IMAdmin) {
+	if !authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin) {
 		return nil, errs.ErrNoPermission.WrapMsg("only app manager")
 	}
 	var resp msggateway.GetUsersOnlineStatusResp
