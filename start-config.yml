@@ -1,0 +1,8 @@
+binaries:
+  openim-no-port: 1
+  openim-test: 1
+
+toolBinaries:
+  - check-free-memory
+
+maxFileDescriptors: 100000
