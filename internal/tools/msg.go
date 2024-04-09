@@ -17,11 +17,11 @@ package tools
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/db/redisutil"
 	"math"
 	"math/rand"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
@@ -47,12 +47,12 @@ type MsgTool struct {
 	userDatabase          controller.UserDatabase
 	groupDatabase         controller.GroupDatabase
 	msgNotificationSender *notification.MsgNotificationSender
-	Config                *config.GlobalConfig
+	config                *cmd.CronTaskConfig
 }
 
 func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controller.UserDatabase,
 	groupDatabase controller.GroupDatabase, conversationDatabase controller.ConversationDatabase,
-	msgNotificationSender *notification.MsgNotificationSender, config *config.GlobalConfig,
+	msgNotificationSender *notification.MsgNotificationSender, config *cmd.CronTaskConfig,
 ) *MsgTool {
 	return &MsgTool{
 		msgDatabase:           msgDatabase,
@@ -60,20 +60,20 @@ func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controlle
 		groupDatabase:         groupDatabase,
 		conversationDatabase:  conversationDatabase,
 		msgNotificationSender: msgNotificationSender,
-		Config:                config,
+		config:                config,
 	}
 }
 
-func InitMsgTool(ctx context.Context, config *config.GlobalConfig) (*MsgTool, error) {
-	mgocli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
+func InitMsgTool(ctx context.Context, config *cmd.CronTaskConfig) (*MsgTool, error) {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return nil, err
 	}
-	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
+	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return nil, err
 	}
-	discov, err := kdisc.NewDiscoveryRegister(config)
+	discov, err := kdisc.NewDiscoveryRegister(&config.ZookeeperConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func InitMsgTool(ctx context.Context, config *config.GlobalConfig) (*MsgTool, er
 		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
 		mgocli.GetTx(),
 	)
-	msgRpcClient := rpcclient.NewMessageRpcClient(discov, config.RpcRegisterName.OpenImMsgName)
+	msgRpcClient := rpcclient.NewMessageRpcClient(discov, config.Share.RpcRegisterName.Msg)
 	msgNotificationSender := notification.NewMsgNotificationSender(config, rpcclient.WithRpcClient(&msgRpcClient))
 	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase, msgNotificationSender, config)
 	return msgTool, nil
@@ -179,8 +179,9 @@ func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 
 func (c *MsgTool) ClearConversationsMsg(ctx context.Context, conversationIDs []string) {
 	for _, conversationID := range conversationIDs {
-		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, int64(c.Config.RetainChatRecords*24*60*60)); err != nil {
-			log.ZError(ctx, "DeleteUserSuperGroupMsgsAndSetMinSeq failed", err, "conversationID", conversationID, "DBRetainChatRecords", c.Config.RetainChatRecords)
+		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, int64(c.config.CronTask.RetainChatRecords*24*60*60)); err != nil {
+			log.ZError(ctx, "DeleteUserSuperGroupMsgsAndSetMinSeq failed", err, "conversationID",
+				conversationID, "DBRetainChatRecords", c.config.CronTask.RetainChatRecords)
 		}
 		if err := c.checkMaxSeq(ctx, conversationID); err != nil {
 			log.ZError(ctx, "fixSeq failed", err, "conversationID", conversationID)

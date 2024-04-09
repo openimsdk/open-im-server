@@ -24,8 +24,8 @@ import (
 	pbuser "github.com/openimsdk/protocol/user"
 )
 
-func CallbackBeforeUpdateUserInfo(ctx context.Context, globalConfig *config.GlobalConfig, req *pbuser.UpdateUserInfoReq) error {
-	if !globalConfig.Callback.CallbackBeforeUpdateUserInfo.Enable {
+func CallbackBeforeUpdateUserInfo(ctx context.Context, callback *config.Webhooks, req *pbuser.UpdateUserInfoReq) error {
+	if !callback.BeforeUpdateUserInfo.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackBeforeUpdateUserInfoReq{
@@ -35,7 +35,7 @@ func CallbackBeforeUpdateUserInfo(ctx context.Context, globalConfig *config.Glob
 		Nickname:        &req.UserInfo.Nickname,
 	}
 	resp := &cbapi.CallbackBeforeUpdateUserInfoResp{}
-	if err := http.CallBackPostReturn(ctx, globalConfig.Callback.CallbackUrl, cbReq, resp, globalConfig.Callback.CallbackBeforeUpdateUserInfo); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.BeforeUpdateUserInfo); err != nil {
 		return err
 	}
 	datautil.NotNilReplace(&req.UserInfo.FaceURL, resp.FaceURL)
@@ -43,8 +43,8 @@ func CallbackBeforeUpdateUserInfo(ctx context.Context, globalConfig *config.Glob
 	datautil.NotNilReplace(&req.UserInfo.Nickname, resp.Nickname)
 	return nil
 }
-func CallbackAfterUpdateUserInfo(ctx context.Context, globalConfig *config.GlobalConfig, req *pbuser.UpdateUserInfoReq) error {
-	if !globalConfig.Callback.CallbackAfterUpdateUserInfo.Enable {
+func CallbackAfterUpdateUserInfo(ctx context.Context, callback *config.Webhooks, req *pbuser.UpdateUserInfoReq) error {
+	if !callback.AfterUpdateUserInfo.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackAfterUpdateUserInfoReq{
@@ -54,13 +54,13 @@ func CallbackAfterUpdateUserInfo(ctx context.Context, globalConfig *config.Globa
 		Nickname:        req.UserInfo.Nickname,
 	}
 	resp := &cbapi.CallbackAfterUpdateUserInfoResp{}
-	if err := http.CallBackPostReturn(ctx, globalConfig.Callback.CallbackUrl, cbReq, resp, globalConfig.Callback.CallbackBeforeUpdateUserInfo); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.AfterUpdateUserInfo); err != nil {
 		return err
 	}
 	return nil
 }
-func CallbackBeforeUpdateUserInfoEx(ctx context.Context, globalConfig *config.GlobalConfig, req *pbuser.UpdateUserInfoExReq) error {
-	if !globalConfig.Callback.CallbackBeforeUpdateUserInfoEx.Enable {
+func CallbackBeforeUpdateUserInfoEx(ctx context.Context, callback *config.Webhooks, req *pbuser.UpdateUserInfoExReq) error {
+	if !callback.BeforeUpdateUserInfoEx.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackBeforeUpdateUserInfoExReq{
@@ -70,7 +70,7 @@ func CallbackBeforeUpdateUserInfoEx(ctx context.Context, globalConfig *config.Gl
 		Nickname:        req.UserInfo.Nickname,
 	}
 	resp := &cbapi.CallbackBeforeUpdateUserInfoExResp{}
-	if err := http.CallBackPostReturn(ctx, globalConfig.Callback.CallbackUrl, cbReq, resp, globalConfig.Callback.CallbackBeforeUpdateUserInfoEx); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.BeforeUpdateUserInfoEx); err != nil {
 		return err
 	}
 	datautil.NotNilReplace(req.UserInfo.FaceURL, resp.FaceURL)
@@ -78,8 +78,8 @@ func CallbackBeforeUpdateUserInfoEx(ctx context.Context, globalConfig *config.Gl
 	datautil.NotNilReplace(req.UserInfo.Nickname, resp.Nickname)
 	return nil
 }
-func CallbackAfterUpdateUserInfoEx(ctx context.Context, globalConfig *config.GlobalConfig, req *pbuser.UpdateUserInfoExReq) error {
-	if !globalConfig.Callback.CallbackAfterUpdateUserInfoEx.Enable {
+func CallbackAfterUpdateUserInfoEx(ctx context.Context, callback *config.Webhooks, req *pbuser.UpdateUserInfoExReq) error {
+	if !callback.AfterUpdateUserInfoEx.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackAfterUpdateUserInfoExReq{
@@ -89,14 +89,14 @@ func CallbackAfterUpdateUserInfoEx(ctx context.Context, globalConfig *config.Glo
 		Nickname:        req.UserInfo.Nickname,
 	}
 	resp := &cbapi.CallbackAfterUpdateUserInfoExResp{}
-	if err := http.CallBackPostReturn(ctx, globalConfig.Callback.CallbackUrl, cbReq, resp, globalConfig.Callback.CallbackBeforeUpdateUserInfoEx); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.AfterUpdateUserInfoEx); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CallbackBeforeUserRegister(ctx context.Context, globalConfig *config.GlobalConfig, req *pbuser.UserRegisterReq) error {
-	if !globalConfig.Callback.CallbackBeforeUserRegister.Enable {
+func CallbackBeforeUserRegister(ctx context.Context, callback *config.Webhooks, req *pbuser.UserRegisterReq) error {
+	if !callback.BeforeUserRegister.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackBeforeUserRegisterReq{
@@ -106,7 +106,7 @@ func CallbackBeforeUserRegister(ctx context.Context, globalConfig *config.Global
 	}
 
 	resp := &cbapi.CallbackBeforeUserRegisterResp{}
-	if err := http.CallBackPostReturn(ctx, globalConfig.Callback.CallbackUrl, cbReq, resp, globalConfig.Callback.CallbackBeforeUpdateUserInfo); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.BeforeUserRegister); err != nil {
 		return err
 	}
 	if len(resp.Users) != 0 {
@@ -115,8 +115,8 @@ func CallbackBeforeUserRegister(ctx context.Context, globalConfig *config.Global
 	return nil
 }
 
-func CallbackAfterUserRegister(ctx context.Context, globalConfig *config.GlobalConfig, req *pbuser.UserRegisterReq) error {
-	if !globalConfig.Callback.CallbackAfterUserRegister.Enable {
+func CallbackAfterUserRegister(ctx context.Context, callback *config.Webhooks, req *pbuser.UserRegisterReq) error {
+	if !callback.AfterUserRegister.Enable {
 		return nil
 	}
 	cbReq := &cbapi.CallbackAfterUserRegisterReq{
@@ -126,7 +126,7 @@ func CallbackAfterUserRegister(ctx context.Context, globalConfig *config.GlobalC
 	}
 
 	resp := &cbapi.CallbackAfterUserRegisterResp{}
-	if err := http.CallBackPostReturn(ctx, globalConfig.Callback.CallbackUrl, cbReq, resp, globalConfig.Callback.CallbackAfterUpdateUserInfo); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, cbReq, resp, callback.AfterUserRegister); err != nil {
 		return err
 	}
 	return nil

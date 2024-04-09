@@ -18,6 +18,7 @@ import (
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/tools/s3/minio"
 	"time"
 )
 
@@ -68,15 +69,26 @@ type Mongo struct {
 	MaxRetry    int      `mapstructure:"maxRetry"`
 }
 type Kafka struct {
-	Username       string   `mapstructure:"username"`
-	Password       string   `mapstructure:"password"`
-	Address        []string `mapstructure:"address"`
-	ToRedisTopic   string   `mapstructure:"toRedisTopic"`
-	ToMongoTopic   string   `mapstructure:"toMongoTopic"`
-	ToPushTopic    string   `mapstructure:"toPushTopic"`
-	ToRedisGroupID string   `mapstructure:"toRedisGroupID"`
-	ToMongoGroupID string   `mapstructure:"toMongoGroupID"`
-	ToPushGroupID  string   `mapstructure:"toPushGroupID"`
+	Username       string    `mapstructure:"username"`
+	Password       string    `mapstructure:"password"`
+	ProducerAck    string    `mapstructure:"producerAck"`
+	CompressType   string    `mapstructure:"compressType"`
+	Address        []string  `mapstructure:"address"`
+	ToRedisTopic   string    `mapstructure:"toRedisTopic"`
+	ToMongoTopic   string    `mapstructure:"toMongoTopic"`
+	ToPushTopic    string    `mapstructure:"toPushTopic"`
+	ToRedisGroupID string    `mapstructure:"toRedisGroupID"`
+	ToMongoGroupID string    `mapstructure:"toMongoGroupID"`
+	ToPushGroupID  string    `mapstructure:"toPushGroupID"`
+	Tls            TLSConfig `mapstructure:"tls"`
+}
+type TLSConfig struct {
+	EnableTLS          bool   `mapstructure:"enableTLS"`
+	CACrt              string `mapstructure:"caCrt"`
+	ClientCrt          string `mapstructure:"clientCrt"`
+	ClientKey          string `mapstructure:"clientKey"`
+	ClientKeyPwd       string `mapstructure:"clientKeyPwd"`
+	InsecureSkipVerify bool   `mapstructure:"insecureSkipVerify"`
 }
 
 type API struct {
@@ -178,9 +190,10 @@ type Push struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus Prometheus `mapstructure:"prometheus"`
-	Enable     string     `mapstructure:"enable"`
-	GeTui      struct {
+	Prometheus           Prometheus `mapstructure:"prometheus"`
+	MaxConcurrentWorkers int        `mapstructure:"maxConcurrentWorkers"`
+	Enable               string     `mapstructure:"enable"`
+	GeTui                struct {
 		PushUrl      string `mapstructure:"pushUrl"`
 		MasterSecret string `mapstructure:"masterSecret"`
 		AppKey       string `mapstructure:"appKey"`
@@ -214,7 +227,6 @@ type Auth struct {
 	TokenPolicy struct {
 		Expire int64 `mapstructure:"expire"`
 	} `mapstructure:"tokenPolicy"`
-	Secret string `mapstructure:"secret"`
 }
 
 type Conversation struct {
@@ -311,12 +323,13 @@ type User struct {
 }
 
 type Redis struct {
-	Address     []string `mapstructure:"address"`
-	Username    string   `mapstructure:"username"`
-	Password    string   `mapstructure:"password"`
-	ClusterMode bool     `mapstructure:"clusterMode"`
-	DB          int      `mapstructure:"db"`
-	MaxRetry    int      `mapstructure:"MaxRetry"`
+	Address        []string `mapstructure:"address"`
+	Username       string   `mapstructure:"username"`
+	Password       string   `mapstructure:"password"`
+	EnablePipeline bool     `mapstructure:"enablePipeline"`
+	ClusterMode    bool     `mapstructure:"clusterMode"`
+	DB             int      `mapstructure:"db"`
+	MaxRetry       int      `mapstructure:"MaxRetry"`
 }
 
 type WebhookConfig struct {
@@ -326,6 +339,7 @@ type WebhookConfig struct {
 }
 
 type Share struct {
+	Secret          string          `mapstructure:"secret"`
 	Env             string          `mapstructure:"env"`
 	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
 	IMAdmin         IMAdmin         `mapstructure:"imAdmin"`
@@ -369,6 +383,7 @@ type Webhooks struct {
 	AfterSendSingleMsg       WebhookConfig `mapstructure:"afterSendSingleMsg"`
 	BeforeSendGroupMsg       WebhookConfig `mapstructure:"beforeSendGroupMsg"`
 	AfterSendGroupMsg        WebhookConfig `mapstructure:"afterSendGroupMsg"`
+	BeforeMsgModify          WebhookConfig `mapstructure:"beforeMsgModify"`
 	AfterUserOnline          WebhookConfig `mapstructure:"afterUserOnline"`
 	AfterUserOffline         WebhookConfig `mapstructure:"afterUserOffline"`
 	AfterUserKickOff         WebhookConfig `mapstructure:"afterUserKickOff"`
@@ -377,6 +392,7 @@ type Webhooks struct {
 	BeforeGroupOnlinePush    WebhookConfig `mapstructure:"beforeGroupOnlinePush"`
 	BeforeAddFriend          WebhookConfig `mapstructure:"beforeAddFriend"`
 	BeforeUpdateUserInfo     WebhookConfig `mapstructure:"beforeUpdateUserInfo"`
+	AfterUpdateUserInfo      WebhookConfig `mapstructure:"afterUpdateUserInfo"`
 	BeforeCreateGroup        WebhookConfig `mapstructure:"beforeCreateGroup"`
 	AfterCreateGroup         WebhookConfig `mapstructure:"afterCreateGroup"`
 	BeforeMemberJoinGroup    WebhookConfig `mapstructure:"beforeMemberJoinGroup"`
@@ -439,7 +455,33 @@ func (r *Redis) Build() *redisutil.Config {
 }
 
 func (k *Kafka) Build() *kafka.Config {
-	return &kafka.Config{}
+	return &kafka.Config{
+		Username:     k.Username,
+		Password:     k.Password,
+		ProducerAck:  k.ProducerAck,
+		CompressType: k.CompressType,
+		Addr:         k.Address,
+		TLS: kafka.TLSConfig{
+			EnableTLS:          k.Tls.EnableTLS,
+			CACrt:              k.Tls.CACrt,
+			ClientCrt:          k.Tls.ClientCrt,
+			ClientKey:          k.Tls.ClientKey,
+			ClientKeyPwd:       k.Tls.ClientKeyPwd,
+			InsecureSkipVerify: k.Tls.InsecureSkipVerify,
+		},
+	}
+}
+func (m *Minio) Build() *minio.Config {
+	return &minio.Config{
+		Bucket:          m.Bucket,
+		Endpoint:        "",
+		AccessKeyID:     m.AccessKeyID,
+		SecretAccessKey: m.SecretAccessKey,
+		SessionToken:    m.SessionToken,
+		SignEndpoint:    "",
+		PublicRead:      m.PublicRead,
+	}
+
 }
 
 func (l *CacheConfig) Failed() time.Duration {

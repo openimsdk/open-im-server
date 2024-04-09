@@ -45,7 +45,7 @@ func NewClient(pushConf *config.Push, cache cache.ThirdCache) (*Fcm, error) {
 	if err != nil {
 		return nil, err
 	}
-	credentialsFilePath := filepath.Join(projectRoot, "config", pushConf.Fcm.ServiceAccount)
+	credentialsFilePath := filepath.Join(projectRoot, "config", pushConf.FCM.ServiceAccount)
 	opt := option.WithCredentialsFile(credentialsFilePath)
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {

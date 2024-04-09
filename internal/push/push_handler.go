@@ -35,7 +35,7 @@ type ConsumerHandler struct {
 }
 
 func NewConsumerHandler(kafkaConf *config.Kafka, pusher *Pusher) (*ConsumerHandler, error) {
-	pushConsumerGroup, err := kafka.NewMConsumerGroup(&kafkaConf.Config, kafkaConf.ConsumerGroupID.MsgToPush, []string{kafkaConf.MsgToPush.Topic})
+	pushConsumerGroup, err := kafka.NewMConsumerGroup(kafkaConf.Build(), kafkaConf.ToPushGroupID, []string{kafkaConf.ToPushTopic})
 	if err != nil {
 		return nil, err
 	}

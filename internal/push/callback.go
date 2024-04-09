@@ -26,8 +26,8 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 )
 
-func callbackOfflinePush(ctx context.Context, callback *config.Callback, userIDs []string, msg *sdkws.MsgData, offlinePushUserIDs *[]string) error {
-	if !callback.CallbackOfflinePush.Enable || msg.ContentType == constant.Typing {
+func callbackOfflinePush(ctx context.Context, callback *config.Webhooks, userIDs []string, msg *sdkws.MsgData, offlinePushUserIDs *[]string) error {
+	if !callback.BeforeOfflinePush.Enable || msg.ContentType == constant.Typing {
 		return nil
 	}
 	req := &callbackstruct.CallbackBeforePushReq{
@@ -51,7 +51,7 @@ func callbackOfflinePush(ctx context.Context, callback *config.Callback, userIDs
 	}
 
 	resp := &callbackstruct.CallbackBeforePushResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, req, resp, callback.CallbackOfflinePush); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, req, resp, callback.BeforeOfflinePush); err != nil {
 		return err
 	}
 
@@ -64,8 +64,8 @@ func callbackOfflinePush(ctx context.Context, callback *config.Callback, userIDs
 	return nil
 }
 
-func callbackOnlinePush(ctx context.Context, callback *config.Callback, userIDs []string, msg *sdkws.MsgData) error {
-	if !callback.CallbackOnlinePush.Enable || datautil.Contain(msg.SendID, userIDs...) || msg.ContentType == constant.Typing {
+func callbackOnlinePush(ctx context.Context, callback *config.Webhooks, userIDs []string, msg *sdkws.MsgData) error {
+	if !callback.BeforeOnlinePush.Enable || datautil.Contain(msg.SendID, userIDs...) || msg.ContentType == constant.Typing {
 		return nil
 	}
 	req := callbackstruct.CallbackBeforePushReq{
@@ -87,7 +87,7 @@ func callbackOnlinePush(ctx context.Context, callback *config.Callback, userIDs 
 		Content:     GetContent(msg),
 	}
 	resp := &callbackstruct.CallbackBeforePushResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, req, resp, callback.CallbackOnlinePush); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, req, resp, callback.BeforeOnlinePush); err != nil {
 		return err
 	}
 	return nil
@@ -95,12 +95,12 @@ func callbackOnlinePush(ctx context.Context, callback *config.Callback, userIDs 
 
 func callbackBeforeSuperGroupOnlinePush(
 	ctx context.Context,
-	callback *config.Callback,
+	callback *config.Webhooks,
 	groupID string,
 	msg *sdkws.MsgData,
 	pushToUserIDs *[]string,
 ) error {
-	if !callback.CallbackBeforeSuperGroupOnlinePush.Enable || msg.ContentType == constant.Typing {
+	if !callback.BeforeGroupOnlinePush.Enable || msg.ContentType == constant.Typing {
 		return nil
 	}
 	req := callbackstruct.CallbackBeforeSuperGroupOnlinePushReq{
@@ -120,7 +120,7 @@ func callbackBeforeSuperGroupOnlinePush(
 		Seq:         msg.Seq,
 	}
 	resp := &callbackstruct.CallbackBeforeSuperGroupOnlinePushResp{}
-	if err := http.CallBackPostReturn(ctx, callback.CallbackUrl, req, resp, callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
+	if err := http.CallBackPostReturn(ctx, callback.URL, req, resp, callback.BeforeGroupOnlinePush); err != nil {
 		return err
 	}
 

@@ -29,8 +29,12 @@ type CronTaskCmd struct {
 	cronTaskConfig CronTaskConfig
 }
 type CronTaskConfig struct {
-	CronTask    config.CronTask
-	RedisConfig config.Redis
+	CronTask        config.CronTask
+	RedisConfig     config.Redis
+	MongodbConfig   config.Mongo
+	ZookeeperConfig config.ZooKeeper
+	Share           config.Share
+	KafkaConfig     config.Kafka
 }
 
 func NewCronTaskCmd() *CronTaskCmd {
@@ -39,6 +43,10 @@ func NewCronTaskCmd() *CronTaskCmd {
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMCronTaskCfgFileName: {EnvPrefix: cornTaskEnvPrefix, ConfigStruct: &cronTaskConfig.CronTask},
 		RedisConfigFileName:       {EnvPrefix: redisEnvPrefix, ConfigStruct: &cronTaskConfig.RedisConfig},
+		MongodbConfigFileName:     {EnvPrefix: mongodbEnvPrefix, ConfigStruct: &cronTaskConfig.MongodbConfig},
+		ZookeeperConfigFileName:   {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &cronTaskConfig.ZookeeperConfig},
+		ShareFileName:             {EnvPrefix: shareEnvPrefix, ConfigStruct: &cronTaskConfig.Share},
+		KafkaConfigFileName:       {EnvPrefix: kafkaEnvPrefix, ConfigStruct: &cronTaskConfig.KafkaConfig},
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)

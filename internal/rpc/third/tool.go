@@ -54,7 +54,7 @@ func (t *thirdServer) checkUploadName(ctx context.Context, name string) error {
 	if opUserID == "" {
 		return errs.ErrNoPermission.WrapMsg("opUserID is empty")
 	}
-	if !authverify.IsManagerUserID(opUserID, &t.config.Manager, &t.config.IMAdmin) {
+	if !authverify.IsManagerUserID(opUserID, &t.config.Share.IMAdmin) {
 		if !strings.HasPrefix(name, opUserID+"/") {
 			return errs.ErrNoPermission.WrapMsg(fmt.Sprintf("name must start with `%s/`", opUserID))
 		}
@@ -80,5 +80,5 @@ func checkValidObjectName(objectName string) error {
 }
 
 func (t *thirdServer) IsManagerUserID(opUserID string) bool {
-	return authverify.IsManagerUserID(opUserID, &t.config.Manager, &t.config.IMAdmin)
+	return authverify.IsManagerUserID(opUserID, &t.config.Share.IMAdmin)
 }

@@ -17,6 +17,7 @@ package push
 import (
 	"context"
 	"encoding/json"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/errs"
 	"sync"
 
@@ -48,7 +49,7 @@ import (
 )
 
 type Pusher struct {
-	config                 *config.GlobalConfig
+	config                 *cmd.PushConfig
 	database               controller.PushDatabase
 	discov                 discovery.SvcDiscoveryRegistry
 	offlinePusher          offlinepush.OfflinePusher
@@ -61,7 +62,7 @@ type Pusher struct {
 
 var errNoOfflinePusher = errs.New("no offlinePusher is configured")
 
-func NewPusher(config *config.GlobalConfig, discov discovery.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
+func NewPusher(config *cmd.PushConfig, discov discovery.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
 	groupLocalCache *rpccache.GroupLocalCache, conversationLocalCache *rpccache.ConversationLocalCache,
 	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient, msgRpcClient *rpcclient.MessageRpcClient,
 ) *Pusher {
@@ -78,7 +79,7 @@ func NewPusher(config *config.GlobalConfig, discov discovery.SvcDiscoveryRegistr
 	}
 }
 
-func NewOfflinePusher(pushConf *config.Push, iOSPushConf *config.IOSPush, cache cache.ThirdCache) (offlinepush.OfflinePusher, error) {
+func NewOfflinePusher(pushConf *config.Push, cache cache.ThirdCache) (offlinepush.OfflinePusher, error) {
 	var offlinePusher offlinepush.OfflinePusher
 	switch pushConf.Enable {
 	case "getui":
@@ -86,7 +87,7 @@ func NewOfflinePusher(pushConf *config.Push, iOSPushConf *config.IOSPush, cache 
 	case "fcm":
 		return fcm.NewClient(pushConf, cache)
 	case "jpush":
-		offlinePusher = jpush.NewClient(pushConf, iOSPushConf)
+		offlinePusher = jpush.NewClient(pushConf)
 	default:
 		offlinePusher = dummy.NewClient()
 	}
@@ -104,7 +105,7 @@ func (p *Pusher) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID 
 
 func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.MsgData) error {
 	log.ZDebug(ctx, "Get msg from msg_transfer And push msg", "userIDs", userIDs, "msg", msg.String())
-	if err := callbackOnlinePush(ctx, &p.config.Callback, userIDs, msg); err != nil {
+	if err := callbackOnlinePush(ctx, &p.config.WebhooksConfig, userIDs, msg); err != nil {
 		return err
 	}
 	// push
@@ -132,7 +133,7 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 	})
 
 	if len(offlinePushUserIDList) > 0 {
-		if err = callbackOfflinePush(ctx, &p.config.Callback, offlinePushUserIDList, msg, &[]string{}); err != nil {
+		if err = callbackOfflinePush(ctx, &p.config.WebhooksConfig, offlinePushUserIDList, msg, &[]string{}); err != nil {
 			return err
 		}
 		err = p.offlinePushMsg(ctx, msg.SendID, msg, offlinePushUserIDList)
@@ -165,7 +166,7 @@ func (p *Pusher) k8sOfflinePush2SuperGroup(ctx context.Context, groupID string, 
 	}
 	if len(needOfflinePushUserIDs) > 0 {
 		var offlinePushUserIDs []string
-		err := callbackOfflinePush(ctx, &p.config.Callback, needOfflinePushUserIDs, msg, &offlinePushUserIDs)
+		err := callbackOfflinePush(ctx, &p.config.WebhooksConfig, needOfflinePushUserIDs, msg, &offlinePushUserIDs)
 		if err != nil {
 			return err
 		}
@@ -196,7 +197,7 @@ func (p *Pusher) k8sOfflinePush2SuperGroup(ctx context.Context, groupID string, 
 func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
 	log.ZDebug(ctx, "Get super group msg from msg_transfer and push msg", "msg", msg.String(), "groupID", groupID)
 	var pushToUserIDs []string
-	if err = callbackBeforeSuperGroupOnlinePush(ctx, &p.config.Callback, groupID, msg, &pushToUserIDs); err != nil {
+	if err = callbackBeforeSuperGroupOnlinePush(ctx, &p.config.WebhooksConfig, groupID, msg, &pushToUserIDs); err != nil {
 		return err
 	}
 
@@ -238,11 +239,8 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 					return err
 				}
 				log.ZDebug(ctx, "GroupDismissedNotificationInfo****", "groupID", groupID, "num", len(pushToUserIDs), "list", pushToUserIDs)
-				if len(p.config.Manager.UserID) > 0 {
-					ctx = mcontext.WithOpUserIDContext(ctx, p.config.Manager.UserID[0])
-				}
-				if len(p.config.Manager.UserID) == 0 && len(p.config.IMAdmin.UserID) > 0 {
-					ctx = mcontext.WithOpUserIDContext(ctx, p.config.IMAdmin.UserID[0])
+				if len(p.config.Share.IMAdmin.UserID) > 0 {
+					ctx = mcontext.WithOpUserIDContext(ctx, p.config.Share.IMAdmin.UserID[0])
 				}
 				defer func(groupID string) {
 					if err = p.groupRpcClient.DismissGroup(ctx, groupID); err != nil {
@@ -260,10 +258,10 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 
 	log.ZDebug(ctx, "get conn and online push success", "result", wsResults, "msg", msg)
 	isOfflinePush := datautil.GetSwitchFromOptions(msg.Options, constant.IsOfflinePush)
-	if isOfflinePush && p.config.Envs.Discovery == "k8s" {
+	if isOfflinePush && p.config.Share.Env == "k8s" {
 		return p.k8sOfflinePush2SuperGroup(ctx, groupID, msg, wsResults)
 	}
-	if isOfflinePush && p.config.Envs.Discovery == "zookeeper" {
+	if isOfflinePush && p.config.Share.Env == "zookeeper" {
 		var (
 			onlineSuccessUserIDs      = []string{msg.SendID}
 			webAndPcBackgroundUserIDs []string
@@ -301,7 +299,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 		// Use offline push messaging
 		if len(needOfflinePushUserIDs) > 0 {
 			var offlinePushUserIDs []string
-			err = callbackOfflinePush(ctx, &p.config.Callback, needOfflinePushUserIDs, msg, &offlinePushUserIDs)
+			err = callbackOfflinePush(ctx, &p.config.WebhooksConfig, needOfflinePushUserIDs, msg, &offlinePushUserIDs)
 			if err != nil {
 				return err
 			}
@@ -360,7 +358,7 @@ func (p *Pusher) k8sOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUs
 	var (
 		mu         sync.Mutex
 		wg         = errgroup.Group{}
-		maxWorkers = p.config.Push.MaxConcurrentWorkers
+		maxWorkers = p.config.RpcConfig.MaxConcurrentWorkers
 	)
 	if maxWorkers < 3 {
 		maxWorkers = 3
@@ -389,10 +387,10 @@ func (p *Pusher) k8sOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUs
 	return wsResults, nil
 }
 func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
-	if p.config.Envs.Discovery == "k8s" {
+	if p.config.Share.Env == "k8s" {
 		return p.k8sOnlinePush(ctx, msg, pushToUserIDs)
 	}
-	conns, err := p.discov.GetConns(ctx, p.config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := p.discov.GetConns(ctx, p.config.Share.RpcRegisterName.MessageGateway)
 	log.ZDebug(ctx, "get gateway conn", "conn length", len(conns))
 	if err != nil {
 		return nil, err
@@ -402,7 +400,7 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 		mu         sync.Mutex
 		wg         = errgroup.Group{}
 		input      = &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: pushToUserIDs}
-		maxWorkers = p.config.Push.MaxConcurrentWorkers
+		maxWorkers = p.config.RpcConfig.MaxConcurrentWorkers
 	)
 
 	if maxWorkers < 3 {

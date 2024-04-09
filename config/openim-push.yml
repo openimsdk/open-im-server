@@ -7,7 +7,7 @@ prometheus:
   enable: true
   ports: [ 20107 ]
 
-
+maxConcurrentWorkers: 3
 enable: getui
 geTui:
   pushUrl: "https://restapi.getui.com/v2/$appId"

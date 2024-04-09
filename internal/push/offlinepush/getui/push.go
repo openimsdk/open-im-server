@@ -51,14 +51,14 @@ const (
 )
 
 type Client struct {
-	cache           cache.MsgModel
+	cache           cache.ThirdCache
 	tokenExpireTime int64
 	taskIDTTL       int64
 	pushConf        *config.Push
 	httpClient      *httputil.HTTPClient
 }
 
-func NewClient(pushConf *config.Push, cache cache.MsgModel) *Client {
+func NewClient(pushConf *config.Push, cache cache.ThirdCache) *Client {
 	return &Client{cache: cache,
 		tokenExpireTime: tokenExpireTime,
 		taskIDTTL:       taskIDTTL,

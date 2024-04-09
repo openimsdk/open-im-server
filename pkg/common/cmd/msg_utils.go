@@ -138,7 +138,7 @@ func NewSeqCmd() *SeqCmd {
 
 func (s *SeqCmd) GetSeqCmd() *cobra.Command {
 	s.Command.Run = func(cmdLines *cobra.Command, args []string) {
-		_, err := tools.InitMsgTool(context.Background(), s.MsgTool.Config)
+		_, err := tools.InitMsgTool(context.Background(), s.MsgTool.config)
 		if err != nil {
 			program.ExitWithError(err)
 		}

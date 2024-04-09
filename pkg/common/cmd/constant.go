@@ -41,8 +41,8 @@ const (
 	LogConfigFileName                = "log.yml"
 	OpenIMAPICfgFileName             = "openim-api.yml"
 	OpenIMCronTaskCfgFileName        = "openim-crontask.yml"
-	OpenIMMsgGatewayCfgFileName      = "openim-msg-gateway.yml"
-	OpenIMMsgTransferCfgFileName     = "openim-msg-transfer.yml"
+	OpenIMMsgGatewayCfgFileName      = "openim-msggateway.yml"
+	OpenIMMsgTransferCfgFileName     = "openim-msgtransfer.yml"
 	OpenIMPushCfgFileName            = "openim-push.yml"
 	OpenIMRPCAuthCfgFileName         = "openim-rpc-auth.yml"
 	OpenIMRPCConversationCfgFileName = "openim-rpc-conversation.yml"
@@ -65,12 +65,16 @@ const (
 	zoopkeeperEnvPrefix   = "openim-zookeeper"
 	apiEnvPrefix          = "openim-api"
 	cornTaskEnvPrefix     = "openim-crontask"
+	msgGatewayEnvPrefix   = "openim-msggateway"
+	msgTransferEnvPrefix  = "openim-msgtransfer"
+	pushEnvPrefix         = "openim-push"
 	authEnvPrefix         = "openim-auth"
 	conversationEnvPrefix = "openim-conversation"
 	friendEnvPrefix       = "openim-friend"
 	groupEnvPrefix        = "openim-group"
 	msgEnvPrefix          = "openim-msg"
 	thridEnvPrefix        = "openim-third"
+	userEnvPrefix         = "openim-user"
 )
 
 const (

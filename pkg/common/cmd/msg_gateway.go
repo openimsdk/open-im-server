@@ -42,11 +42,11 @@ func NewMsgGatewayCmd() *MsgGatewayCmd {
 	var msgGatewayConfig MsgGatewayConfig
 	ret := &MsgGatewayCmd{msgGatewayConfig: msgGatewayConfig}
 	ret.configMap = map[string]StructEnvPrefix{
-		OpenIMAPICfgFileName:    {EnvPrefix: apiEnvPrefix, ConfigStruct: &msgGatewayConfig.MsgGateway},
-		RedisConfigFileName:     {EnvPrefix: redisEnvPrefix, ConfigStruct: &msgGatewayConfig.RedisConfig},
-		ZookeeperConfigFileName: {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &msgGatewayConfig.ZookeeperConfig},
-		ShareFileName:           {EnvPrefix: shareEnvPrefix, ConfigStruct: &msgGatewayConfig.Share},
-		WebhooksConfigFileName:  {EnvPrefix: webhooksEnvPrefix, ConfigStruct: &msgGatewayConfig.WebhooksConfig},
+		OpenIMMsgGatewayCfgFileName: {EnvPrefix: msgGatewayEnvPrefix, ConfigStruct: &msgGatewayConfig.MsgGateway},
+		RedisConfigFileName:         {EnvPrefix: redisEnvPrefix, ConfigStruct: &msgGatewayConfig.RedisConfig},
+		ZookeeperConfigFileName:     {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &msgGatewayConfig.ZookeeperConfig},
+		ShareFileName:               {EnvPrefix: shareEnvPrefix, ConfigStruct: &msgGatewayConfig.Share},
+		WebhooksConfigFileName:      {EnvPrefix: webhooksEnvPrefix, ConfigStruct: &msgGatewayConfig.WebhooksConfig},
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)

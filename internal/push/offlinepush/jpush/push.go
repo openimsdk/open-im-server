@@ -26,15 +26,13 @@ import (
 )
 
 type JPush struct {
-	pushConf    *config.Push
-	iOSPushConf *config.IOSPush
-	httpClient  *httputil.HTTPClient
+	pushConf   *config.Push
+	httpClient *httputil.HTTPClient
 }
 
-func NewClient(pushConf *config.Push, iOSPushConf *config.IOSPush) *JPush {
+func NewClient(pushConf *config.Push) *JPush {
 	return &JPush{pushConf: pushConf,
-		iOSPushConf: iOSPushConf,
-		httpClient:  httputil.NewHTTPClient(httputil.NewClientConfig()),
+		httpClient: httputil.NewHTTPClient(httputil.NewClientConfig()),
 	}
 }
 
@@ -71,7 +69,7 @@ func (j *JPush) Push(ctx context.Context, userIDs []string, title, content strin
 	var msg body.Message
 	msg.SetMsgContent(content)
 	var opt body.Options
-	opt.SetApnsProduction(j.iOSPushConf.Production)
+	opt.SetApnsProduction(j.pushConf.IOSPush.Production)
 	var pushObj body.PushObj
 	pushObj.SetPlatform(&pf)
 	pushObj.SetAudience(&au)
@@ -85,9 +83,9 @@ func (j *JPush) Push(ctx context.Context, userIDs []string, title, content strin
 func (j *JPush) request(ctx context.Context, po body.PushObj, resp any, timeout int) error {
 	return j.httpClient.PostReturn(
 		ctx,
-		j.pushConf.Jpns.PushUrl,
+		j.pushConf.JPNS.PushURL,
 		map[string]string{
-			"Authorization": j.getAuthorization(j.pushConf.Jpns.AppKey, j.pushConf.Jpns.MasterSecret),
+			"Authorization": j.getAuthorization(j.pushConf.JPNS.AppKey, j.pushConf.JPNS.MasterSecret),
 		},
 		po,
 		resp,

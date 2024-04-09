@@ -16,9 +16,9 @@ package push
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/db/redisutil"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
@@ -35,20 +35,20 @@ type pushServer struct {
 	pusher *Pusher
 }
 
-func Start(ctx context.Context, config *config.GlobalConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := redisutil.NewRedisClient(ctx, config.Redis.Build())
+func Start(ctx context.Context, config *cmd.PushConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
 	}
 	cacheModel := cache.NewThirdCache(rdb)
-	offlinePusher, err := NewOfflinePusher(&config.Push, &config.IOSPush, cacheModel)
+	offlinePusher, err := NewOfflinePusher(&config.RpcConfig, cacheModel)
 	if err != nil {
 		return err
 	}
 	database := controller.NewPushDatabase(cacheModel)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.RpcRegisterName.OpenImGroupName)
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.RpcRegisterName.OpenImConversationName)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.RpcRegisterName.OpenImMsgName)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
+	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
 	pusher := NewPusher(
 		config,
 		client,
@@ -65,7 +65,7 @@ func Start(ctx context.Context, config *config.GlobalConfig, client discovery.Sv
 		pusher: pusher,
 	})
 
-	consumer, err := NewConsumer(&config.Kafka, pusher)
+	consumer, err := NewConsumer(&config.KafkaConfig, pusher)
 	if err != nil {
 		return err
 	}

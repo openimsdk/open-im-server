@@ -15,11 +15,7 @@
 package cmd
 
 import (
-	"testing"
-
-	"github.com/openimsdk/protocol/constant"
 	"github.com/stretchr/testify/mock"
-	"gotest.tools/assert"
 )
 
 // MockRootCmd is a mock type for the RootCmd type
@@ -30,22 +26,4 @@ type MockRootCmd struct {
 func (m *MockRootCmd) Execute() error {
 	args := m.Called()
 	return args.Error(0)
-}
-
-func TestMsgGatewayCmd_GetPortFromConfig(t *testing.T) {
-	msgGatewayCmd := &MsgGatewayCmd{RootCmd: &RootCmd{}}
-	tests := []struct {
-		portType string
-		want     int
-	}{
-		{constant.FlagWsPort, 8080}, // Replace 8080 with the expected port from the config
-		{constant.FlagPort, 8081},   // Replace 8081 with the expected port from the config
-		{"invalid", 0},
-	}
-	for _, tt := range tests {
-		t.Run(tt.portType, func(t *testing.T) {
-			got := msgGatewayCmd.GetPortFromConfig(tt.portType)
-			assert.Equal(t, tt.want, got)
-		})
-	}
 }
