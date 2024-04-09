@@ -52,7 +52,7 @@ type (
 )
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
-	m.Handlers = append(m.Handlers, interceptorFunc...
+	m.Handlers = append(m.Handlers, interceptorFunc...)
 
 }
 
@@ -65,12 +65,12 @@ func Start(ctx context.Context, config *cmd.MsgConfig, client discovery.SvcDisco
 	if err != nil {
 		return err
 	}
-	cacheModel := cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis)
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
-	msgModel := cache.NewMsgCache(rdb, config.MsgCacheTimeout, &config.Redis)
+	//todo MsgCacheTimeout
+	msgModel := cache.NewMsgCache(rdb, 86400, config.RedisConfig.EnablePipeline)
 	seqModel := cache.NewSeqCache(rdb)
 	conversationClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
 	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, &config.Share.IMAdmin)

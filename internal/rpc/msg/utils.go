@@ -15,7 +15,7 @@
 package msg
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
@@ -23,16 +23,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func isMessageHasReadEnabled(msgData *sdkws.MsgData, config *config.GlobalConfig) bool {
+func isMessageHasReadEnabled(msgData *sdkws.MsgData, config *cmd.MsgConfig) bool {
 	switch {
 	case msgData.ContentType == constant.HasReadReceipt && msgData.SessionType == constant.SingleChatType:
-		if config.SingleMessageHasReadReceiptEnable {
+		if config.RpcConfig.SingleMessageHasReadReceiptEnable {
 			return true
 		} else {
 			return false
 		}
 	case msgData.ContentType == constant.HasReadReceipt && msgData.SessionType == constant.SuperGroupChatType:
-		if config.GroupMessageHasReadReceiptEnable {
+		if config.RpcConfig.GroupMessageHasReadReceiptEnable {
 			return true
 		} else {
 			return false

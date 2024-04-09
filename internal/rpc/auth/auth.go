@@ -54,7 +54,7 @@ func Start(ctx context.Context, config *cmd.AuthConfig, client discovery.SvcDisc
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
 			cache.NewTokenCacheModel(rdb),
-			config.RpcConfig.Secret,
+			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
 		),
 		config: config,
@@ -64,7 +64,7 @@ func Start(ctx context.Context, config *cmd.AuthConfig, client discovery.SvcDisc
 
 func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*pbauth.UserTokenResp, error) {
 	resp := pbauth.UserTokenResp{}
-	if req.Secret != s.config.RpcConfig.Secret {
+	if req.Secret != s.config.Share.Secret {
 		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
@@ -102,7 +102,7 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 }
 
 func (s *authServer) parseToken(ctx context.Context, tokensString string) (claims *tokenverify.Claims, err error) {
-	claims, err = tokenverify.GetClaimFromToken(tokensString, authverify.Secret(s.config.RpcConfig.Secret))
+	claims, err = tokenverify.GetClaimFromToken(tokensString, authverify.Secret(s.config.Share.Secret))
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}

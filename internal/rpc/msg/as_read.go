@@ -125,7 +125,7 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 		Seqs:           req.Seqs,
 		ContentType:    conversation.ConversationType,
 	}
-	if err := CallbackSingleMsgRead(ctx, m.config, reqCallback); err != nil {
+	if err := CallbackSingleMsgRead(ctx, &m.config.WebhooksConfig, reqCallback); err != nil {
 		return nil, err
 	}
 
@@ -198,7 +198,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		UnreadMsgNum: req.HasReadSeq,
 		ContentType:  int64(conversation.ConversationType),
 	}
-	if err := CallbackGroupMsgRead(ctx, m.config, reqCall); err != nil {
+	if err := CallbackGroupMsgRead(ctx, &m.config.WebhooksConfig, reqCall); err != nil {
 		return nil, err
 	}
 

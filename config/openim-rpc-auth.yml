@@ -10,4 +10,3 @@ prometheus:
 tokenPolicy:
   expire: 90
 
-secret: openIM123

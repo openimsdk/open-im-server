@@ -1,13 +1,18 @@
 username: ''
 password: ''
+producerAck: ""
+compressType: "none"
 addr: [ localhost:19094 ]
-toRedis:
-  topic: "toRedis"
-toMongo:
-  topic: "toMongo"
-toPush:
-  topic: "toPush"
-consumerGroupID:
-  msgToRedis: redis
-  msgToMongo: mongo
-  msgToPush: push
+toRedisTopic: "toRedis"
+toMongoTopic: "toMongo"
+toPushTopic: "toPush"
+toRedisGroupID: redis
+toMongoGroupID: mongo
+toPushGroupID: push
+tls:
+  enableTLS: false
+  caCrt: ""
+  clientCrt: ""
+  clientKey: ""
+  clientKeyPwd: ""
+  insecureSkipVerify: false

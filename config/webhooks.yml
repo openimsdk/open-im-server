@@ -19,6 +19,10 @@ beforeSendGroupMsg:
   enable: false
   timeout: 5
   failedContinue: true
+beforeMsgModify:
+  enable: false
+  timeout: 5
+  failedContinue: true
 afterSendGroupMsg:
   enable: false
   timeout: 5
@@ -52,6 +56,10 @@ beforeAddFriend:
   timeout: 5
   failedContinue: true
 beforeUpdateUserInfo:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterUpdateUserInfo:
   enable: false
   timeout: 5
   failedContinue: true

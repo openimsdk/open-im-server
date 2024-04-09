@@ -17,6 +17,7 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -106,19 +107,19 @@ type CommonMsgDatabase interface {
 }
 
 func NewCommonMsgDatabase(msgDocModel relation.MsgDocModelInterface, msg cache.MsgCache, seq cache.SeqCache, kafkaConf *config.Kafka) (CommonMsgDatabase, error) {
-	conf, err := kafka.BuildProducerConfig(kafkaConf.Config)
+	conf, err := kafka.BuildProducerConfig(*kafkaConf.Build())
 	if err != nil {
 		return nil, err
 	}
-	producerToRedis, err := kafka.NewKafkaProducer(conf, kafkaConf.Config.Addr, kafkaConf.LatestMsgToRedis.Topic)
+	producerToRedis, err := kafka.NewKafkaProducer(conf, kafkaConf.Address, kafkaConf.ToRedisTopic)
 	if err != nil {
 		return nil, err
 	}
-	producerToMongo, err := kafka.NewKafkaProducer(conf, kafkaConf.Config.Addr, kafkaConf.MsgToMongo.Topic)
+	producerToMongo, err := kafka.NewKafkaProducer(conf, kafkaConf.Address, kafkaConf.ToMongoTopic)
 	if err != nil {
 		return nil, err
 	}
-	producerToPush, err := kafka.NewKafkaProducer(conf, kafkaConf.Config.Addr, kafkaConf.MsgToPush.Topic)
+	producerToPush, err := kafka.NewKafkaProducer(conf, kafkaConf.Address, kafkaConf.ToPushTopic)
 	if err != nil {
 		return nil, err
 	}
@@ -132,14 +133,15 @@ func NewCommonMsgDatabase(msgDocModel relation.MsgDocModelInterface, msg cache.M
 	}, nil
 }
 
-func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, config *config.GlobalConfig) (CommonMsgDatabase, error) {
+func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, config *cmd.CronTaskConfig) (CommonMsgDatabase, error) {
 	msgDocModel, err := mgo.NewMsgMongo(database)
 	if err != nil {
 		return nil, err
 	}
-	msg := cache.NewMsgCache(rdb, config.MsgCacheTimeout, config.Redis.EnablePipeline)
+	//todo MsgCacheTimeout
+	msg := cache.NewMsgCache(rdb, 86400, config.RedisConfig.EnablePipeline)
 	seq := cache.NewSeqCache(rdb)
-	return NewCommonMsgDatabase(msgDocModel, msg, seq, config.Kafka)
+	return NewCommonMsgDatabase(msgDocModel, msg, seq, &config.KafkaConfig)
 }
 
 type commonMsgDatabase struct {

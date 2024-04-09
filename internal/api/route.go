@@ -33,7 +33,6 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
@@ -312,11 +311,12 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, rdb redis.UniversalClie
 	return r
 }
 
-func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.HandlerFunc {
+func GinParseToken(rdb redis.UniversalClient, config *cmd.ApiConfig) gin.HandlerFunc {
+	//todo TokenPolicy
 	dataBase := controller.NewAuthDatabase(
 		cache.NewTokenCacheModel(rdb),
-		config.Secret,
-		config.TokenPolicy.Expire,
+		config.Share.Secret,
+		0,
 	)
 	return func(c *gin.Context) {
 		switch c.Request.Method {
@@ -328,7 +328,7 @@ func GinParseToken(rdb redis.UniversalClient, config *config.GlobalConfig) gin.H
 				c.Abort()
 				return
 			}
-			claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret(config.Secret))
+			claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret(config.Share.Secret))
 			if err != nil {
 				log.ZWarn(c, "jwt get token error", errs.ErrTokenUnknown.Wrap())
 				apiresp.GinError(c, servererrs.ErrTokenUnknown.Wrap())

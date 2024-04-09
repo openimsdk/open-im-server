@@ -20,10 +20,7 @@ import (
 )
 
 func main() {
-	msgTransferCmd := cmd.NewMsgTransferCmd(cmd.MsgTransferServer)
-	msgTransferCmd.AddPrometheusPortFlag()
-	msgTransferCmd.AddTransferProgressFlag()
-	if err := msgTransferCmd.Exec(); err != nil {
+	if err := cmd.NewMsgTransferCmd().Exec(); err != nil {
 		program.ExitWithError(err)
 	}
 }

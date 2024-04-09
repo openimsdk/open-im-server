@@ -16,25 +16,25 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 )
 
-type MessageInterceptorFunc func(ctx context.Context, globalConfig *config.GlobalConfig, req *msg.SendMsgReq) (*sdkws.MsgData, error)
+type MessageInterceptorFunc func(ctx context.Context, globalConfig *cmd.MsgConfig, req *msg.SendMsgReq) (*sdkws.MsgData, error)
 
-func MessageHasReadEnabled(ctx context.Context, globalConfig *config.GlobalConfig, req *msg.SendMsgReq) (*sdkws.MsgData, error) {
+func MessageHasReadEnabled(ctx context.Context, config *cmd.MsgConfig, req *msg.SendMsgReq) (*sdkws.MsgData, error) {
 	switch {
 	case req.MsgData.ContentType == constant.HasReadReceipt && req.MsgData.SessionType == constant.SingleChatType:
-		if !globalConfig.SingleMessageHasReadReceiptEnable {
+		if !config.RpcConfig.SingleMessageHasReadReceiptEnable {
 			return nil, servererrs.ErrMessageHasReadDisable.Wrap()
 		}
 		return req.MsgData, nil
 	case req.MsgData.ContentType == constant.HasReadReceipt && req.MsgData.SessionType == constant.SuperGroupChatType:
-		if !globalConfig.GroupMessageHasReadReceiptEnable {
+		if !config.RpcConfig.GroupMessageHasReadReceiptEnable {
 			return nil, servererrs.ErrMessageHasReadDisable.Wrap()
 		}
 		return req.MsgData, nil

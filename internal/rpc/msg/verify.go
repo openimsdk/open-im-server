@@ -52,10 +52,7 @@ type MessageRevoked struct {
 func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) error {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
-		if len(m.config.Manager.UserID) > 0 && datautil.Contain(data.MsgData.SendID, m.config.Manager.UserID...) {
-			return nil
-		}
-		if datautil.Contain(data.MsgData.SendID, m.config.IMAdmin.UserID...) {
+		if datautil.Contain(data.MsgData.SendID, m.config.Share.IMAdmin.UserID...) {
 			return nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd &&
@@ -69,7 +66,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if black {
 			return servererrs.ErrBlockedByPeer.Wrap()
 		}
-		if m.config.MessageVerify.FriendVerify != nil && *m.config.MessageVerify.FriendVerify {
+		if m.config.RpcConfig.FriendVerify {
 			friend, err := m.FriendLocalCache.IsFriend(ctx, data.MsgData.SendID, data.MsgData.RecvID)
 			if err != nil {
 				return err
@@ -92,10 +89,8 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if groupInfo.GroupType == constant.SuperGroup {
 			return nil
 		}
-		if len(m.config.Manager.UserID) > 0 && datautil.Contain(data.MsgData.SendID, m.config.Manager.UserID...) {
-			return nil
-		}
-		if datautil.Contain(data.MsgData.SendID, m.config.IMAdmin.UserID...) {
+
+		if datautil.Contain(data.MsgData.SendID, m.config.Share.IMAdmin.UserID...) {
 			return nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd &&

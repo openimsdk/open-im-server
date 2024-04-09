@@ -16,55 +16,52 @@ package cmd
 
 import (
 	"context"
-
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
 type MsgTransferCmd struct {
 	*RootCmd
-	ctx context.Context
+	ctx               context.Context
+	configMap         map[string]StructEnvPrefix
+	msgTransferConfig MsgTransferConfig
+}
+type MsgTransferConfig struct {
+	MsgTransfer     config.MsgTransfer
+	RedisConfig     config.Redis
+	MongodbConfig   config.Mongo
+	KafkaConfig     config.Kafka
+	ZookeeperConfig config.ZooKeeper
+	Share           config.Share
+	WebhooksConfig  config.Webhooks
 }
 
-func NewMsgTransferCmd(name string) *MsgTransferCmd {
-	ret := &MsgTransferCmd{RootCmd: NewRootCmd(program.GetProcessName(), name)}
-	ret.ctx = context.WithValue(context.Background(), "version", config2.Version)
-	ret.addRunE()
-	ret.SetRootCmdPt(ret)
-	return ret
-}
-
-func (m *MsgTransferCmd) addRunE() {
-	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return msgtransfer.Start(m.ctx, m.config, m.getPrometheusPortFlag(cmd), m.getTransferProgressFlagValue())
+func NewMsgTransferCmd() *MsgTransferCmd {
+	var msgTransferConfig MsgTransferConfig
+	ret := &MsgTransferCmd{msgTransferConfig: msgTransferConfig}
+	ret.configMap = map[string]StructEnvPrefix{
+		OpenIMMsgTransferCfgFileName: {EnvPrefix: msgTransferEnvPrefix, ConfigStruct: &msgTransferConfig.MsgTransfer},
+		RedisConfigFileName:          {EnvPrefix: redisEnvPrefix, ConfigStruct: &msgTransferConfig.RedisConfig},
+		MongodbConfigFileName:        {EnvPrefix: mongodbEnvPrefix, ConfigStruct: &msgTransferConfig.MongodbConfig},
+		KafkaConfigFileName:          {EnvPrefix: kafkaEnvPrefix, ConfigStruct: &msgTransferConfig.KafkaConfig},
+		ZookeeperConfigFileName:      {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &msgTransferConfig.ZookeeperConfig},
+		ShareFileName:                {EnvPrefix: shareEnvPrefix, ConfigStruct: &msgTransferConfig.Share},
+		WebhooksConfigFileName:       {EnvPrefix: webhooksEnvPrefix, ConfigStruct: &msgTransferConfig.WebhooksConfig},
 	}
+	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
+	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
+	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
+		return ret.preRunE()
+	}
+	return ret
 }
 
 func (m *MsgTransferCmd) Exec() error {
 	return m.Execute()
 }
 
-func (m *MsgTransferCmd) GetPortFromConfig(portType string) int {
-	if portType == constant.FlagPort {
-		return 0
-	} else if portType == constant.FlagPrometheusPort {
-		n := m.getTransferProgressFlagValue()
-		return m.config.Prometheus.MessageTransferPrometheusPort[n]
-	}
-	return 0
-}
-
-func (m *MsgTransferCmd) AddTransferProgressFlag() {
-	m.Command.Flags().IntP(constant.FlagTransferProgressIndex, "n", 0, "transfer progress index")
-}
-
-func (m *MsgTransferCmd) getTransferProgressFlagValue() int {
-	nIndex, err := m.Command.Flags().GetInt(constant.FlagTransferProgressIndex)
-	if err != nil {
-		return 0
-	}
-	return nIndex
+func (m *MsgTransferCmd) preRunE() error {
+	return msgtransfer.Start(m.ctx, m.Index(), &m.msgTransferConfig)
 }

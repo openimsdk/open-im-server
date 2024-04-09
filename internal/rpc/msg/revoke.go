@@ -41,7 +41,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if req.Seq < 0 {
 		return nil, errs.ErrArgs.WrapMsg("seq is invalid")
 	}
-	if err := authverify.CheckAccessV3(ctx, req.UserID, &m.config.Manager, &m.config.IMAdmin); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, &m.config.Share.IMAdmin); err != nil {
 		return nil, err
 	}
 	user, err := m.UserLocalCache.GetUserInfo(ctx, req.UserID)
@@ -62,10 +62,10 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	data, _ := json.Marshal(msgs[0])
 	log.ZDebug(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
 	var role int32
-	if !authverify.IsAppManagerUid(ctx, &m.config.Manager, &m.config.IMAdmin) {
+	if !authverify.IsAppManagerUid(ctx, &m.config.Share.IMAdmin) {
 		switch msgs[0].SessionType {
 		case constant.SingleChatType:
-			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID, &m.config.Manager, &m.config.IMAdmin); err != nil {
+			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID, &m.config.Share.IMAdmin); err != nil {
 				return nil, err
 			}
 			role = user.AppMangerLevel
@@ -104,11 +104,8 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	}
 	revokerUserID := mcontext.GetOpUserID(ctx)
 	var flag bool
-	if len(m.config.Manager.UserID) > 0 {
-		flag = datautil.Contain(revokerUserID, m.config.Manager.UserID...)
-	}
-	if len(m.config.Manager.UserID) == 0 && len(m.config.IMAdmin.UserID) > 0 {
-		flag = datautil.Contain(revokerUserID, m.config.IMAdmin.UserID...)
+	if len(m.config.Share.IMAdmin.UserID) > 0 {
+		flag = datautil.Contain(revokerUserID, m.config.Share.IMAdmin.UserID...)
 	}
 	tips := sdkws.RevokeMsgTips{
 		RevokerUserID:  revokerUserID,
@@ -128,7 +125,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if err := m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips); err != nil {
 		return nil, err
 	}
-	if err = CallbackAfterRevokeMsg(ctx, m.config, req); err != nil {
+	if err = CallbackAfterRevokeMsg(ctx, &m.config.WebhooksConfig, req); err != nil {
 		return nil, err
 	}
 	return &msg.RevokeMsgResp{}, nil
