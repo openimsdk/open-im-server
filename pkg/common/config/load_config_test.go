@@ -29,7 +29,7 @@ func TestLoadWebhooksConfig(t *testing.T) {
 
 func TestLoadOpenIMRpcUserConfig(t *testing.T) {
 	var user User
-	err := LoadConfig("../../../config/openim-rpc-user.yml", "IMENV_OPENIM-RPC-USER", &user)
+	err := LoadConfig("../../../config/openim-rpc-user.yml", "IMENV_OPENIM_RPC_USER", &user)
 	assert.Nil(t, err)
 	assert.Equal(t, "0.0.0.0", user.RPC.ListenIP)
 	assert.Equal(t, []int{10110}, user.RPC.Ports)
