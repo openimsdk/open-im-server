@@ -27,19 +27,11 @@ type ConversationRpcCmd struct {
 	*RootCmd
 	ctx                context.Context
 	configMap          map[string]StructEnvPrefix
-	conversationConfig ConversationConfig
-}
-type ConversationConfig struct {
-	RpcConfig          config.Conversation
-	RedisConfig        config.Redis
-	MongodbConfig      config.Mongo
-	ZookeeperConfig    config.ZooKeeper
-	NotificationConfig config.Notification
-	Share              config.Share
+	conversationConfig conversation.Config
 }
 
 func NewConversationRpcCmd() *ConversationRpcCmd {
-	var conversationConfig ConversationConfig
+	var conversationConfig conversation.Config
 	ret := &ConversationRpcCmd{conversationConfig: conversationConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMRPCConversationCfgFileName: {EnvPrefix: conversationEnvPrefix, ConfigStruct: &conversationConfig.RpcConfig},

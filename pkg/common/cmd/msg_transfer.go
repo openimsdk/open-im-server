@@ -26,20 +26,11 @@ type MsgTransferCmd struct {
 	*RootCmd
 	ctx               context.Context
 	configMap         map[string]StructEnvPrefix
-	msgTransferConfig MsgTransferConfig
-}
-type MsgTransferConfig struct {
-	MsgTransfer     config.MsgTransfer
-	RedisConfig     config.Redis
-	MongodbConfig   config.Mongo
-	KafkaConfig     config.Kafka
-	ZookeeperConfig config.ZooKeeper
-	Share           config.Share
-	WebhooksConfig  config.Webhooks
+	msgTransferConfig msgtransfer.Config
 }
 
 func NewMsgTransferCmd() *MsgTransferCmd {
-	var msgTransferConfig MsgTransferConfig
+	var msgTransferConfig msgtransfer.Config
 	ret := &MsgTransferCmd{msgTransferConfig: msgTransferConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMMsgTransferCfgFileName: {EnvPrefix: msgTransferEnvPrefix, ConfigStruct: &msgTransferConfig.MsgTransfer},

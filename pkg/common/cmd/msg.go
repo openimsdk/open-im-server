@@ -27,21 +27,11 @@ type MsgRpcCmd struct {
 	*RootCmd
 	ctx       context.Context
 	configMap map[string]StructEnvPrefix
-	msgConfig MsgConfig
-}
-type MsgConfig struct {
-	RpcConfig          config.Msg
-	RedisConfig        config.Redis
-	MongodbConfig      config.Mongo
-	KafkaConfig        config.Kafka
-	ZookeeperConfig    config.ZooKeeper
-	NotificationConfig config.Notification
-	Share              config.Share
-	WebhooksConfig     config.Webhooks
+	msgConfig msg.Config
 }
 
 func NewMsgRpcCmd() *MsgRpcCmd {
-	var msgConfig MsgConfig
+	var msgConfig msg.Config
 	ret := &MsgRpcCmd{msgConfig: msgConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMRPCMsgCfgFileName: {EnvPrefix: msgEnvPrefix, ConfigStruct: &msgConfig.RpcConfig},

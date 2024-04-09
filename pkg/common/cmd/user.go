@@ -27,21 +27,11 @@ type UserRpcCmd struct {
 	*RootCmd
 	ctx        context.Context
 	configMap  map[string]StructEnvPrefix
-	userConfig UserConfig
-}
-type UserConfig struct {
-	RpcConfig          config.User
-	RedisConfig        config.Redis
-	MongodbConfig      config.Mongo
-	KafkaConfig        config.Kafka
-	ZookeeperConfig    config.ZooKeeper
-	NotificationConfig config.Notification
-	Share              config.Share
-	WebhooksConfig     config.Webhooks
+	userConfig user.Config
 }
 
 func NewUserRpcCmd() *UserRpcCmd {
-	var userConfig UserConfig
+	var userConfig user.Config
 	ret := &UserRpcCmd{userConfig: userConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMRPCUserCfgFileName: {EnvPrefix: userEnvPrefix, ConfigStruct: &userConfig.RpcConfig},

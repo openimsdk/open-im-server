@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"net/http"
 	"strconv"
 	"sync"
@@ -49,7 +48,7 @@ type LongConnServer interface {
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s any) error
 	SetCacheHandler(cache cache.TokenModel)
-	SetDiscoveryRegistry(client discovery.SvcDiscoveryRegistry, config *cmd.MsgGatewayConfig)
+	SetDiscoveryRegistry(client discovery.SvcDiscoveryRegistry, config *Config)
 	KickUserConn(client *Client) error
 	UnRegister(c *Client)
 	SetKickHandlerInfo(i *kickHandler)
@@ -59,7 +58,7 @@ type LongConnServer interface {
 }
 
 type WsServer struct {
-	msgGatewayConfig  *cmd.MsgGatewayConfig
+	msgGatewayConfig  *Config
 	port              int
 	wsMaxConnNum      int64
 	registerChan      chan *Client
@@ -86,7 +85,7 @@ type kickHandler struct {
 	newClient  *Client
 }
 
-func (ws *WsServer) SetDiscoveryRegistry(disCov discovery.SvcDiscoveryRegistry, config *cmd.MsgGatewayConfig) {
+func (ws *WsServer) SetDiscoveryRegistry(disCov discovery.SvcDiscoveryRegistry, config *Config) {
 	ws.MessageHandler = NewGrpcHandler(ws.validate, disCov, &config.Share.RpcRegisterName)
 	u := rpcclient.NewUserRpcClient(disCov, config.Share.RpcRegisterName.User, &config.Share.IMAdmin)
 	ws.userClient = &u
@@ -132,7 +131,7 @@ func (ws *WsServer) GetUserPlatformCons(userID string, platform int) ([]*Client,
 	return ws.clients.Get(userID, platform)
 }
 
-func NewWsServer(msgGatewayConfig *cmd.MsgGatewayConfig, opts ...Option) (*WsServer, error) {
+func NewWsServer(msgGatewayConfig *Config, opts ...Option) (*WsServer, error) {
 	var config configs
 	for _, o := range opts {
 		o(&config)

@@ -16,7 +16,6 @@ package msg
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 
 	"github.com/openimsdk/protocol/constant"
@@ -24,9 +23,9 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 )
 
-type MessageInterceptorFunc func(ctx context.Context, globalConfig *cmd.MsgConfig, req *msg.SendMsgReq) (*sdkws.MsgData, error)
+type MessageInterceptorFunc func(ctx context.Context, globalConfig *Config, req *msg.SendMsgReq) (*sdkws.MsgData, error)
 
-func MessageHasReadEnabled(ctx context.Context, config *cmd.MsgConfig, req *msg.SendMsgReq) (*sdkws.MsgData, error) {
+func MessageHasReadEnabled(ctx context.Context, config *Config, req *msg.SendMsgReq) (*sdkws.MsgData, error) {
 	switch {
 	case req.MsgData.ContentType == constant.HasReadReceipt && req.MsgData.SessionType == constant.SingleChatType:
 		if !config.RpcConfig.SingleMessageHasReadReceiptEnable {

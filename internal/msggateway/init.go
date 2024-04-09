@@ -16,15 +16,23 @@ package msggateway
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/openimsdk/tools/log"
 )
 
+type Config struct {
+	MsgGateway      config.MsgGateway
+	RedisConfig     config.Redis
+	ZookeeperConfig config.ZooKeeper
+	Share           config.Share
+	WebhooksConfig  config.Webhooks
+}
+
 // Start run ws server.
-func Start(ctx context.Context, index int, conf *cmd.MsgGatewayConfig) error {
+func Start(ctx context.Context, index int, conf *Config) error {
 	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "rpcPorts", conf.MsgGateway.RPC.Ports,
 		"wsPort", conf.MsgGateway.LongConnSvr.Ports, "prometheusPorts", conf.MsgGateway.Prometheus.Ports)
 	wsPort, err := datautil.GetElemByIndex(conf.MsgGateway.LongConnSvr.Ports, index)

@@ -16,7 +16,7 @@ package push
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -35,7 +35,18 @@ type pushServer struct {
 	pusher *Pusher
 }
 
-func Start(ctx context.Context, config *cmd.PushConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+type Config struct {
+	RpcConfig          config.Push
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
+	KafkaConfig        config.Kafka
+	ZookeeperConfig    config.ZooKeeper
+	NotificationConfig config.Notification
+	Share              config.Share
+	WebhooksConfig     config.Webhooks
+}
+
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err

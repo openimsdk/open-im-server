@@ -27,17 +27,11 @@ type AuthRpcCmd struct {
 	*RootCmd
 	ctx        context.Context
 	configMap  map[string]StructEnvPrefix
-	authConfig AuthConfig
-}
-type AuthConfig struct {
-	RpcConfig       config.Auth
-	RedisConfig     config.Redis
-	ZookeeperConfig config.ZooKeeper
-	Share           config.Share
+	authConfig auth.Config
 }
 
 func NewAuthRpcCmd() *AuthRpcCmd {
-	var authConfig AuthConfig
+	var authConfig auth.Config
 	ret := &AuthRpcCmd{authConfig: authConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMRPCAuthCfgFileName: {EnvPrefix: authEnvPrefix, ConfigStruct: &authConfig.RpcConfig},

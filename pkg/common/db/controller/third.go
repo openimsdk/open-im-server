@@ -34,7 +34,7 @@ type ThirdDatabase interface {
 }
 
 type thirdDatabase struct {
-	cache cache.MsgModel
+	cache cache.ThirdCache
 	logdb relation.LogInterface
 }
 
@@ -58,7 +58,7 @@ func (t *thirdDatabase) UploadLogs(ctx context.Context, logs []*relation.LogMode
 	return t.logdb.Create(ctx, logs)
 }
 
-func NewThirdDatabase(cache cache.MsgModel, logdb relation.LogInterface) ThirdDatabase {
+func NewThirdDatabase(cache cache.ThirdCache, logdb relation.LogInterface) ThirdDatabase {
 	return &thirdDatabase{cache: cache, logdb: logdb}
 }
 

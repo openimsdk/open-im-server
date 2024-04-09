@@ -16,7 +16,7 @@ package tools
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/db/redisutil"
 	"os"
 	"os/signal"
@@ -29,7 +29,16 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-func Start(ctx context.Context, config *cmd.CronTaskConfig) error {
+type CronTaskConfig struct {
+	CronTask        config.CronTask
+	RedisConfig     config.Redis
+	MongodbConfig   config.Mongo
+	ZookeeperConfig config.ZooKeeper
+	Share           config.Share
+	KafkaConfig     config.Kafka
+}
+
+func Start(ctx context.Context, config *CronTaskConfig) error {
 
 	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime",
 		config.CronTask.ChatRecordsClearTime, "msgDestructTime", config.CronTask.MsgDestructTime)
@@ -94,7 +103,7 @@ func netlock(rdb redis.UniversalClient, key string, ttl time.Duration) bool {
 	return ok
 }
 
-func cronWrapFunc(config *cmd.CronTaskConfig, rdb redis.UniversalClient, key string, fn func()) func() {
+func cronWrapFunc(config *CronTaskConfig, rdb redis.UniversalClient, key string, fn func()) func() {
 	enableCronLocker := config.CronTask.EnableCronLocker
 	return func() {
 		// if don't enable cron-locker, call fn directly.

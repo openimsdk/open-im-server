@@ -26,20 +26,11 @@ type ApiCmd struct {
 	*RootCmd
 	ctx       context.Context
 	configMap map[string]StructEnvPrefix
-	apiConfig ApiConfig
-}
-type ApiConfig struct {
-	RpcConfig          config.API
-	RedisConfig        config.Redis
-	MongodbConfig      config.Mongo
-	ZookeeperConfig    config.ZooKeeper
-	NotificationConfig config.Notification
-	Share              config.Share
-	MinioConfig        config.Minio
+	apiConfig api.Config
 }
 
 func NewApiCmd() *ApiCmd {
-	var apiConfig ApiConfig
+	var apiConfig api.Config
 	ret := &ApiCmd{apiConfig: apiConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMAPICfgFileName:    {EnvPrefix: apiEnvPrefix, ConfigStruct: &apiConfig.RpcConfig},

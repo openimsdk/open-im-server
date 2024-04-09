@@ -16,7 +16,7 @@ package auth
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -40,10 +40,17 @@ type authServer struct {
 	authDatabase   controller.AuthDatabase
 	userRpcClient  *rpcclient.UserRpcClient
 	RegisterCenter discovery.SvcDiscoveryRegistry
-	config         *cmd.AuthConfig
+	config         *Config
 }
 
-func Start(ctx context.Context, config *cmd.AuthConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+type Config struct {
+	RpcConfig       config.Auth
+	RedisConfig     config.Redis
+	ZookeeperConfig config.ZooKeeper
+	Share           config.Share
+}
+
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err

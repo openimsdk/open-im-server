@@ -15,10 +15,13 @@
 package config
 
 import (
+	"fmt"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/minio"
+	"github.com/openimsdk/tools/s3/oss"
 	"time"
 )
 
@@ -277,23 +280,9 @@ type Third struct {
 	Prometheus Prometheus `mapstructure:"prometheus"`
 	Object     struct {
 		Enable string `mapstructure:"enable"`
-		Cos    struct {
-			BucketURL    string `mapstructure:"bucketURL"`
-			SecretID     string `mapstructure:"secretID"`
-			SecretKey    string `mapstructure:"secretKey"`
-			SessionToken string `mapstructure:"sessionToken"`
-			PublicRead   bool   `mapstructure:"publicRead"`
-		} `mapstructure:"cos"`
-		Oss struct {
-			Endpoint        string `mapstructure:"endpoint"`
-			Bucket          string `mapstructure:"bucket"`
-			BucketURL       string `mapstructure:"bucketURL"`
-			AccessKeyID     string `mapstructure:"accessKeyID"`
-			AccessKeySecret string `mapstructure:"accessKeySecret"`
-			SessionToken    string `mapstructure:"sessionToken"`
-			PublicRead      bool   `mapstructure:"publicRead"`
-		} `mapstructure:"oss"`
-		Kodo struct {
+		Cos    Cos    `mapstructure:"cos"`
+		Oss    Oss    `mapstructure:"oss"`
+		Kodo   struct {
 			Endpoint        string `mapstructure:"endpoint"`
 			Bucket          string `mapstructure:"bucket"`
 			BucketURL       string `mapstructure:"bucketURL"`
@@ -311,6 +300,22 @@ type Third struct {
 			PublicRead      bool   `mapstructure:"publicRead"`
 		} `mapstructure:"aws"`
 	} `mapstructure:"object"`
+}
+type Cos struct {
+	BucketURL    string `mapstructure:"bucketURL"`
+	SecretID     string `mapstructure:"secretID"`
+	SecretKey    string `mapstructure:"secretKey"`
+	SessionToken string `mapstructure:"sessionToken"`
+	PublicRead   bool   `mapstructure:"publicRead"`
+}
+type Oss struct {
+	Endpoint        string `mapstructure:"endpoint"`
+	Bucket          string `mapstructure:"bucket"`
+	BucketURL       string `mapstructure:"bucketURL"`
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	AccessKeySecret string `mapstructure:"accessKeySecret"`
+	SessionToken    string `mapstructure:"sessionToken"`
+	PublicRead      bool   `mapstructure:"publicRead"`
 }
 
 type User struct {
@@ -474,14 +479,35 @@ func (k *Kafka) Build() *kafka.Config {
 func (m *Minio) Build() *minio.Config {
 	return &minio.Config{
 		Bucket:          m.Bucket,
-		Endpoint:        "",
+		Endpoint:        fmt.Sprintf("http://%s:%d", m.InternalIP, m.Port),
 		AccessKeyID:     m.AccessKeyID,
 		SecretAccessKey: m.SecretAccessKey,
 		SessionToken:    m.SessionToken,
-		SignEndpoint:    "",
+		SignEndpoint:    fmt.Sprintf("http://%s:%d", m.ExternalIP, m.Port),
 		PublicRead:      m.PublicRead,
 	}
 
+}
+func (c *Cos) Build() *cos.Config {
+	return &cos.Config{
+		BucketURL:    c.BucketURL,
+		SecretID:     c.SecretID,
+		SecretKey:    c.SecretKey,
+		SessionToken: c.SessionToken,
+		PublicRead:   c.PublicRead,
+	}
+}
+
+func (o *Oss) Build() *oss.Config {
+	return &oss.Config{
+		Endpoint:        o.Endpoint,
+		Bucket:          o.Bucket,
+		BucketURL:       o.BucketURL,
+		AccessKeyID:     o.AccessKeyID,
+		AccessKeySecret: o.AccessKeySecret,
+		SessionToken:    o.SessionToken,
+		PublicRead:      o.PublicRead,
+	}
 }
 
 func (l *CacheConfig) Failed() time.Duration {

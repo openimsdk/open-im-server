@@ -16,7 +16,7 @@ package user
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/db/redisutil"
 	"math/rand"
 	"strings"
@@ -51,10 +51,21 @@ type userServer struct {
 	friendRpcClient          *rpcclient.FriendRpcClient
 	groupRpcClient           *rpcclient.GroupRpcClient
 	RegisterCenter           registry.SvcDiscoveryRegistry
-	config                   *cmd.UserConfig
+	config                   *Config
 }
 
-func Start(ctx context.Context, config *cmd.UserConfig, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
+type Config struct {
+	RpcConfig          config.User
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
+	KafkaConfig        config.Kafka
+	ZookeeperConfig    config.ZooKeeper
+	NotificationConfig config.Notification
+	Share              config.Share
+	WebhooksConfig     config.Webhooks
+}
+
+func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err

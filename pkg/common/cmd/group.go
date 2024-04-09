@@ -27,20 +27,11 @@ type GroupRpcCmd struct {
 	*RootCmd
 	ctx         context.Context
 	configMap   map[string]StructEnvPrefix
-	groupConfig GroupConfig
-}
-type GroupConfig struct {
-	RpcConfig          config.Group
-	RedisConfig        config.Redis
-	MongodbConfig      config.Mongo
-	ZookeeperConfig    config.ZooKeeper
-	NotificationConfig config.Notification
-	Share              config.Share
-	WebhooksConfig     config.Webhooks
+	groupConfig group.Config
 }
 
 func NewGroupRpcCmd() *GroupRpcCmd {
-	var groupConfig GroupConfig
+	var groupConfig group.Config
 	ret := &GroupRpcCmd{groupConfig: groupConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMRPCGroupCfgFileName: {EnvPrefix: groupEnvPrefix, ConfigStruct: &groupConfig.RpcConfig},

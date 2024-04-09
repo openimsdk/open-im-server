@@ -28,18 +28,11 @@ type MsgGatewayCmd struct {
 	*RootCmd
 	ctx              context.Context
 	configMap        map[string]StructEnvPrefix
-	msgGatewayConfig MsgGatewayConfig
-}
-type MsgGatewayConfig struct {
-	MsgGateway      config.MsgGateway
-	RedisConfig     config.Redis
-	ZookeeperConfig config.ZooKeeper
-	Share           config.Share
-	WebhooksConfig  config.Webhooks
+	msgGatewayConfig msggateway.Config
 }
 
 func NewMsgGatewayCmd() *MsgGatewayCmd {
-	var msgGatewayConfig MsgGatewayConfig
+	var msgGatewayConfig msggateway.Config
 	ret := &MsgGatewayCmd{msgGatewayConfig: msgGatewayConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMMsgGatewayCfgFileName: {EnvPrefix: msgGatewayEnvPrefix, ConfigStruct: &msgGatewayConfig.MsgGateway},

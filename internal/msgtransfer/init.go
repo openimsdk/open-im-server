@@ -17,7 +17,6 @@ package msgtransfer
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
@@ -56,7 +55,17 @@ type MsgTransfer struct {
 	cancel context.CancelFunc
 }
 
-func Start(ctx context.Context, index int, config *cmd.MsgTransferConfig) error {
+type Config struct {
+	MsgTransfer     config.MsgTransfer
+	RedisConfig     config.Redis
+	MongodbConfig   config.Mongo
+	KafkaConfig     config.Kafka
+	ZookeeperConfig config.ZooKeeper
+	Share           config.Share
+	WebhooksConfig  config.Webhooks
+}
+
+func Start(ctx context.Context, index int, config *Config) error {
 	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "prometheusPorts", config.MsgTransfer.Prometheus.Ports, "index", index)
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
@@ -112,7 +121,7 @@ func NewMsgTransfer(kafkaConf *config.Kafka, msgDatabase controller.CommonMsgDat
 	}, nil
 }
 
-func (m *MsgTransfer) Start(index int, config *cmd.MsgTransferConfig) error {
+func (m *MsgTransfer) Start(index int, config *Config) error {
 	prometheusPort, err := datautil.GetElemByIndex(config.MsgTransfer.Prometheus.Ports, index)
 	if err != nil {
 		return err

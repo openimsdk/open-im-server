@@ -17,7 +17,7 @@ package group
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -58,10 +58,20 @@ type groupServer struct {
 	notification          *notification.GroupNotificationSender
 	conversationRpcClient rpcclient.ConversationRpcClient
 	msgRpcClient          rpcclient.MessageRpcClient
-	config                *cmd.GroupConfig
+	config                *Config
 }
 
-func Start(ctx context.Context, config *cmd.GroupConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+type Config struct {
+	RpcConfig          config.Group
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
+	ZookeeperConfig    config.ZooKeeper
+	NotificationConfig config.Notification
+	Share              config.Share
+	WebhooksConfig     config.Webhooks
+}
+
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err

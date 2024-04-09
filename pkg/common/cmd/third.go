@@ -27,20 +27,11 @@ type ThirdRpcCmd struct {
 	*RootCmd
 	ctx         context.Context
 	configMap   map[string]StructEnvPrefix
-	thirdConfig ThirdConfig
-}
-type ThirdConfig struct {
-	RpcConfig          config.Third
-	RedisConfig        config.Redis
-	MongodbConfig      config.Mongo
-	ZookeeperConfig    config.ZooKeeper
-	NotificationConfig config.Notification
-	Share              config.Share
-	MinioConfig        config.Minio
+	thirdConfig third.Config
 }
 
 func NewThirdRpcCmd() *ThirdRpcCmd {
-	var thirdConfig ThirdConfig
+	var thirdConfig third.Config
 	ret := &ThirdRpcCmd{thirdConfig: thirdConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMRPCThirdCfgFileName: {EnvPrefix: thridEnvPrefix, ConfigStruct: &thirdConfig.RpcConfig},

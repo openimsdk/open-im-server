@@ -16,7 +16,7 @@ package conversation
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/db/redisutil"
 	"sort"
 
@@ -45,10 +45,19 @@ type conversationServer struct {
 	groupRpcClient                 *rpcclient.GroupRpcClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
-	config                         *cmd.ConversationConfig
+	config                         *Config
 }
 
-func Start(ctx context.Context, config *cmd.ConversationConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+type Config struct {
+	RpcConfig          config.Conversation
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
+	ZookeeperConfig    config.ZooKeeper
+	NotificationConfig config.Notification
+	Share              config.Share
+}
+
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err

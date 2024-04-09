@@ -19,39 +19,35 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/direct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
 	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/discovery/zookeeper"
 	"github.com/openimsdk/tools/errs"
 	"time"
 )
 
 const (
-	zookeeper = "zoopkeeper"
-	kubenetes = "k8s"
-
-	directT = "direct"
+	zookeeperConst = "zoopkeeper"
+	kubenetesConst = "k8s"
+	directConst    = "direct"
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
-func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper) (discovery.SvcDiscoveryRegistry, error) {
+func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, env string) (discovery.SvcDiscoveryRegistry, error) {
 
-	switch zookeeperConfig.Env {
-	case "zookeeper":
-		return zookeeper.NewZookeeperDiscoveryRegister(&config.Zookeeper)
-		zk, err := zookeeper.NewZkClient(
-			zookeeperConfig.zkAddr,
-			schema,
+	switch env {
+	case zookeeperConst:
+		return zookeeper.NewZkClient(
+			zookeeperConfig.Address,
+			zookeeperConfig.Schema,
 			zookeeper.WithFreq(time.Hour),
-			zookeeper.WithUserNameAndPassword(username, password),
+			zookeeper.WithUserNameAndPassword(zookeeperConfig.Username, zookeeperConfig.Password),
 			zookeeper.WithRoundRobin(),
 			zookeeper.WithTimeout(10),
 		)
-		if err != nil {
-			return nil, err
-		}
-	case "k8s":
+	case kubenetesConst:
 		return kubernetes.NewK8sDiscoveryRegister(config.RpcRegisterName.OpenImMessageGatewayName)
-	case "direct":
+	case directConst:
 		return direct.NewConnDirect(config)
 	default:
-		return nil, errs.New("unsupported discovery type", "type", config.Envs.Discovery).Wrap()
+		return nil, errs.New("unsupported discovery type", "type", env).Wrap()
 	}
 }

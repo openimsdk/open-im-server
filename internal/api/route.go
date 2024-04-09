@@ -17,7 +17,7 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/network"
@@ -53,7 +53,17 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func Start(ctx context.Context, index int, config *cmd.ApiConfig) error {
+type Config struct {
+	RpcConfig          config.API
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
+	ZookeeperConfig    config.ZooKeeper
+	NotificationConfig config.Notification
+	Share              config.Share
+	MinioConfig        config.Minio
+}
+
+func Start(ctx context.Context, index int, config *Config) error {
 	apiPort, err := datautil.GetElemByIndex(config.RpcConfig.Api.Ports, index)
 	if err != nil {
 		return err
@@ -128,7 +138,7 @@ func Start(ctx context.Context, index int, config *cmd.ApiConfig) error {
 	return nil
 }
 
-func newGinRouter(disCov discovery.SvcDiscoveryRegistry, rdb redis.UniversalClient, config *cmd.ApiConfig) *gin.Engine {
+func newGinRouter(disCov discovery.SvcDiscoveryRegistry, rdb redis.UniversalClient, config *Config) *gin.Engine {
 	disCov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	gin.SetMode(gin.ReleaseMode)
@@ -311,7 +321,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, rdb redis.UniversalClie
 	return r
 }
 
-func GinParseToken(rdb redis.UniversalClient, config *cmd.ApiConfig) gin.HandlerFunc {
+func GinParseToken(rdb redis.UniversalClient, config *Config) gin.HandlerFunc {
 	//todo TokenPolicy
 	dataBase := controller.NewAuthDatabase(
 		cache.NewTokenCacheModel(rdb),
@@ -371,8 +381,9 @@ func GinParseToken(rdb redis.UniversalClient, config *cmd.ApiConfig) gin.Handler
 }
 
 // // handleGinError logs and returns an error response through Gin context.
-// func handleGinError(c *gin.Context, logMessage string, errType errs.CodeError, detail string) {
-// 	wrappedErr := errType.Wrap(detail)
-// 	apiresp.GinError(c, wrappedErr)
-// 	c.Abort()
-// }
+//
+//	func handleGinError(c *gin.Context, logMessage string, errType errs.CodeError, detail string) {
+//		wrappedErr := errType.Wrap(detail)
+//		apiresp.GinError(c, wrappedErr)
+//		c.Abort()
+//	}

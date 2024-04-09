@@ -16,7 +16,7 @@ package friend
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -45,10 +45,20 @@ type friendServer struct {
 	notificationSender    *notification.FriendNotificationSender
 	conversationRpcClient rpcclient.ConversationRpcClient
 	RegisterCenter        discovery.SvcDiscoveryRegistry
-	config                *cmd.FriendConfig
+	config                *Config
 }
 
-func Start(ctx context.Context, config *cmd.FriendConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+type Config struct {
+	RpcConfig          config.Friend
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
+	ZookeeperConfig    config.ZooKeeper
+	NotificationConfig config.Notification
+	Share              config.Share
+	WebhooksConfig     config.Webhooks
+}
+
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err

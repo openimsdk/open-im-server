@@ -17,7 +17,7 @@ package third
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"net/url"
 	"time"
 
@@ -43,10 +43,19 @@ type thirdServer struct {
 	s3dataBase    controller.S3Database
 	userRpcClient rpcclient.UserRpcClient
 	defaultExpire time.Duration
-	config        *cmd.ThirdConfig
+	config        *Config
+}
+type Config struct {
+	RpcConfig          config.Third
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
+	ZookeeperConfig    config.ZooKeeper
+	NotificationConfig config.Notification
+	Share              config.Share
+	MinioConfig        config.Minio
 }
 
-func Start(ctx context.Context, config *cmd.ThirdConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err
@@ -80,11 +89,11 @@ func Start(ctx context.Context, config *cmd.ThirdConfig, client discovery.SvcDis
 	var o s3.Interface
 	switch enable {
 	case "minio":
-		o, err = minio.NewMinio(cache.NewMinioCache(rdb), minio.Config(config.Object.Minio))
+		o, err = minio.NewMinio(cache.NewMinioCache(rdb), *config.MinioConfig.Build())
 	case "cos":
-		o, err = cos.NewCos(cos.Config(config.Object.Cos))
+		o, err = cos.NewCos(*config.RpcConfig.Object.Cos.Build())
 	case "oss":
-		o, err = oss.NewOSS(oss.Config(config.Object.Oss))
+		o, err = oss.NewOSS(*config.RpcConfig.Object.Oss.Build())
 	default:
 		err = fmt.Errorf("invalid object enable: %s", enable)
 	}
@@ -93,8 +102,8 @@ func Start(ctx context.Context, config *cmd.ThirdConfig, client discovery.SvcDis
 	}
 	third.RegisterThirdServer(server, &thirdServer{
 		apiURL:        apiURL,
-		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb, config.MsgCacheTimeout, &config.Redis), logdb),
-		userRpcClient: rpcclient.NewUserRpcClient(client, config.RpcRegisterName.OpenImUserName, &config.Manager, &config.IMAdmin),
+		thirdDatabase: controller.NewThirdDatabase(cache.NewThirdCache(rdb), logdb),
+		userRpcClient: rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, &config.Share.IMAdmin),
 		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
 		defaultExpire: time.Hour * 24 * 7,
 		config:        config,

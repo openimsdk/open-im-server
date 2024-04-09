@@ -16,7 +16,6 @@ package msggateway
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -32,7 +31,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func (s *Server) InitServer(ctx context.Context, config *cmd.MsgGatewayConfig, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+func (s *Server) InitServer(ctx context.Context, config *Config, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
@@ -45,7 +44,7 @@ func (s *Server) InitServer(ctx context.Context, config *cmd.MsgGatewayConfig, d
 	return nil
 }
 
-func (s *Server) Start(ctx context.Context, index int, conf *cmd.MsgGatewayConfig) error {
+func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 	return startrpc.Start(ctx, &conf.ZookeeperConfig, &conf.MsgGateway.Prometheus, conf.MsgGateway.ListenIP,
 		conf.MsgGateway.RPC.RegisterIP,
 		conf.MsgGateway.RPC.Ports, index,
@@ -59,7 +58,7 @@ type Server struct {
 	rpcPort        int
 	prometheusPort int
 	LongConnServer LongConnServer
-	config         *cmd.MsgGatewayConfig
+	config         *Config
 	pushTerminal   map[int]struct{}
 }
 
@@ -67,7 +66,7 @@ func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 	s.LongConnServer = LongConnServer
 }
 
-func NewServer(rpcPort int, proPort int, longConnServer LongConnServer, conf *cmd.MsgGatewayConfig) *Server {
+func NewServer(rpcPort int, proPort int, longConnServer LongConnServer, conf *Config) *Server {
 	s := &Server{
 		rpcPort:        rpcPort,
 		prometheusPort: proPort,

@@ -27,20 +27,11 @@ type FriendRpcCmd struct {
 	*RootCmd
 	ctx          context.Context
 	configMap    map[string]StructEnvPrefix
-	friendConfig FriendConfig
-}
-type FriendConfig struct {
-	RpcConfig          config.Friend
-	RedisConfig        config.Redis
-	MongodbConfig      config.Mongo
-	ZookeeperConfig    config.ZooKeeper
-	NotificationConfig config.Notification
-	Share              config.Share
-	WebhooksConfig     config.Webhooks
+	friendConfig friend.Config
 }
 
 func NewFriendRpcCmd() *FriendRpcCmd {
-	var friendConfig FriendConfig
+	var friendConfig friend.Config
 	ret := &FriendRpcCmd{friendConfig: friendConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMRPCFriendCfgFileName: {EnvPrefix: friendEnvPrefix, ConfigStruct: &friendConfig.RpcConfig},

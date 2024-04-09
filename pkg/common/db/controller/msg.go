@@ -17,7 +17,7 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/internal/tools"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -133,7 +133,7 @@ func NewCommonMsgDatabase(msgDocModel relation.MsgDocModelInterface, msg cache.M
 	}, nil
 }
 
-func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, config *cmd.CronTaskConfig) (CommonMsgDatabase, error) {
+func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, config *tools.CronTaskConfig) (CommonMsgDatabase, error) {
 	msgDocModel, err := mgo.NewMsgMongo(database)
 	if err != nil {
 		return nil, err

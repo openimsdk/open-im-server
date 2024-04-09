@@ -27,21 +27,11 @@ type PushRpcCmd struct {
 	*RootCmd
 	ctx        context.Context
 	configMap  map[string]StructEnvPrefix
-	pushConfig PushConfig
-}
-type PushConfig struct {
-	RpcConfig          config.Push
-	RedisConfig        config.Redis
-	MongodbConfig      config.Mongo
-	KafkaConfig        config.Kafka
-	ZookeeperConfig    config.ZooKeeper
-	NotificationConfig config.Notification
-	Share              config.Share
-	WebhooksConfig     config.Webhooks
+	pushConfig push.Config
 }
 
 func NewPushRpcCmd() *PushRpcCmd {
-	var pushConfig PushConfig
+	var pushConfig push.Config
 	ret := &PushRpcCmd{pushConfig: pushConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMPushCfgFileName:   {EnvPrefix: pushEnvPrefix, ConfigStruct: &pushConfig.RpcConfig},

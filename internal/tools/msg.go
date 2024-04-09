@@ -17,7 +17,6 @@ package tools
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/db/redisutil"
 	"math"
 	"math/rand"
@@ -47,12 +46,12 @@ type MsgTool struct {
 	userDatabase          controller.UserDatabase
 	groupDatabase         controller.GroupDatabase
 	msgNotificationSender *notification.MsgNotificationSender
-	config                *cmd.CronTaskConfig
+	config                *CronTaskConfig
 }
 
 func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controller.UserDatabase,
 	groupDatabase controller.GroupDatabase, conversationDatabase controller.ConversationDatabase,
-	msgNotificationSender *notification.MsgNotificationSender, config *cmd.CronTaskConfig,
+	msgNotificationSender *notification.MsgNotificationSender, config *CronTaskConfig,
 ) *MsgTool {
 	return &MsgTool{
 		msgDatabase:           msgDatabase,
@@ -64,7 +63,7 @@ func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controlle
 	}
 }
 
-func InitMsgTool(ctx context.Context, config *cmd.CronTaskConfig) (*MsgTool, error) {
+func InitMsgTool(ctx context.Context, config *CronTaskConfig) (*MsgTool, error) {
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return nil, err

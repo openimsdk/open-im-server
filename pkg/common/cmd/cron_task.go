@@ -26,19 +26,11 @@ type CronTaskCmd struct {
 	*RootCmd
 	ctx            context.Context
 	configMap      map[string]StructEnvPrefix
-	cronTaskConfig CronTaskConfig
-}
-type CronTaskConfig struct {
-	CronTask        config.CronTask
-	RedisConfig     config.Redis
-	MongodbConfig   config.Mongo
-	ZookeeperConfig config.ZooKeeper
-	Share           config.Share
-	KafkaConfig     config.Kafka
+	cronTaskConfig tools.CronTaskConfig
 }
 
 func NewCronTaskCmd() *CronTaskCmd {
-	var cronTaskConfig CronTaskConfig
+	var cronTaskConfig tools.CronTaskConfig
 	ret := &CronTaskCmd{cronTaskConfig: cronTaskConfig}
 	ret.configMap = map[string]StructEnvPrefix{
 		OpenIMCronTaskCfgFileName: {EnvPrefix: cornTaskEnvPrefix, ConfigStruct: &cronTaskConfig.CronTask},

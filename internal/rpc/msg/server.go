@@ -16,7 +16,7 @@ package msg
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 
@@ -47,7 +47,18 @@ type (
 		ConversationLocalCache *rpccache.ConversationLocalCache // Local cache for conversation data.
 		Handlers               MessageInterceptorChain          // Chain of handlers for processing messages.
 		notificationSender     *rpcclient.NotificationSender    // RPC client for sending notifications.
-		config                 *cmd.MsgConfig                   // Global configuration settings.
+		config                 *Config                          // Global configuration settings.
+	}
+
+	Config struct {
+		RpcConfig          config.Msg
+		RedisConfig        config.Redis
+		MongodbConfig      config.Mongo
+		KafkaConfig        config.Kafka
+		ZookeeperConfig    config.ZooKeeper
+		NotificationConfig config.Notification
+		Share              config.Share
+		WebhooksConfig     config.Webhooks
 	}
 )
 
@@ -56,7 +67,7 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 
 }
 
-func Start(ctx context.Context, config *cmd.MsgConfig, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err

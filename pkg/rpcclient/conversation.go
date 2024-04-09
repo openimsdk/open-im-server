@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
@@ -30,7 +29,6 @@ type Conversation struct {
 	Client pbconversation.ConversationClient
 	conn   grpc.ClientConnInterface
 	discov discovery.SvcDiscoveryRegistry
-	Config *config.GlobalConfig
 }
 
 func NewConversation(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) *Conversation {
