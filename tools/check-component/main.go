@@ -16,24 +16,31 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"os"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/discovery/zookeeper"
+	"github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/tools/system/program"
+	"path/filepath"
 	"time"
 )
 
 const maxRetry = 180
 
-func CheckZookeeper(ctx context.Context, ZkServers []string, scheme string, options ...ZkOption) error {
-	return nil
+func CheckZookeeper(ctx context.Context, config *config.ZooKeeper) error {
+	return zookeeper.CheckZookeeper(ctx, config.Address, config.Schema, zookeeper.WithUserNameAndPassword(config.Username, config.Password))
 }
 
 func CheckMongo(ctx context.Context, config *config.Mongo) error {
-	return nil
+	return mongoutil.CheckMongo(ctx, config.Build())
 }
 
 func CheckRedis(ctx context.Context, config *config.Redis) error {
-	return nil
+	return redisutil.CheckRedis(ctx, config.Build())
 }
 
 func CheckMinIO(ctx context.Context, config *config.Minio) error {
@@ -41,24 +48,75 @@ func CheckMinIO(ctx context.Context, config *config.Minio) error {
 
 }
 
-func CheckKafka(ctx context.Context, conf *config.Kafka, topics []string) error {
-	return nil
+func CheckKafka(ctx context.Context, conf *config.Kafka) error {
+	return kafka.CheckKafka(ctx, conf.Build(), []string{conf.ToMongoTopic, conf.ToRedisTopic, conf.ToPushTopic})
+}
+
+func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, *config.Minio, *config.ZooKeeper, error) {
+	var (
+		mongoConfig     = &config.Mongo{}
+		redisConfig     = &config.Redis{}
+		kafkaConfig     = &config.Kafka{}
+		minioConfig     = &config.Minio{}
+		zookeeperConfig = &config.ZooKeeper{}
+	)
+	err := config.LoadConfig(filepath.Join(configDir, cmd.MongodbConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MongodbConfigFileName], mongoConfig)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+
+	err = config.LoadConfig(filepath.Join(configDir, cmd.RedisConfigFileName), cmd.ConfigEnvPrefixMap[cmd.RedisConfigFileName], redisConfig)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+
+	err = config.LoadConfig(filepath.Join(configDir, cmd.KafkaConfigFileName), cmd.ConfigEnvPrefixMap[cmd.KafkaConfigFileName], kafkaConfig)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+
+	err = config.LoadConfig(filepath.Join(configDir, cmd.MinioConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MinioConfigFileName], minioConfig)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+
+	err = config.LoadConfig(filepath.Join(configDir, cmd.ZookeeperConfigFileName), cmd.ConfigEnvPrefixMap[cmd.ZookeeperConfigFileName], zookeeperConfig)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+	return mongoConfig, redisConfig, kafkaConfig, minioConfig, zookeeperConfig, nil
 }
 
 func main() {
-	ctx := context.Background()
-	zkServers := []string{"localhost:2181"}
-	scheme := "digest"
-	mongoConfig := &MongoConfig{}
-	redisConfig := &RedisConfig{}
-	minioConfig := &MinIOConfig{}
-	kafkaConfig := &KafkaConfig{}
-	topics := []string{"topic1", "topic2"}
+	var index int
+	var configDir string
+	flag.IntVar(&index, "i", 0, "Index number")
+	defaultConfigDir := filepath.Join("..", "..", "..", "..", "..", "config")
+	flag.StringVar(&configDir, "c", defaultConfigDir, "Configuration dir")
+	flag.Parse()
 
+	fmt.Printf("Index: %d, Config Path: %s\n", index, configDir)
+
+	mongoConfig, redisConfig, kafkaConfig, minioConfig, zookeeperConfig, err := initConfig(configDir)
+	if err != nil {
+		program.ExitWithError(err)
+	}
+
+	ctx := context.Background()
+	err = performChecks(ctx, mongoConfig, redisConfig, kafkaConfig, minioConfig, zookeeperConfig, maxRetry)
+	if err != nil {
+		// Assume program.ExitWithError logs the error and exits.
+		// Replace with your error handling logic as necessary.
+		program.ExitWithError(err)
+	}
+}
+
+func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *config.Redis, kafkaConfig *config.Kafka, minioConfig *config.Minio, zookeeperConfig *config.ZooKeeper, maxRetry int) error {
 	checksDone := make(map[string]bool)
+
 	checks := map[string]func() error{
 		"Zookeeper": func() error {
-			return CheckZookeeper(ctx, zkServers, scheme)
+			return CheckZookeeper(ctx, zookeeperConfig)
 		},
 		"Mongo": func() error {
 			return CheckMongo(ctx, mongoConfig)
@@ -70,7 +128,7 @@ func main() {
 			return CheckMinIO(ctx, minioConfig)
 		},
 		"Kafka": func() error {
-			return CheckKafka(ctx, kafkaConfig, topics)
+			return CheckKafka(ctx, kafkaConfig)
 		},
 	}
 
@@ -87,12 +145,14 @@ func main() {
 				}
 			}
 		}
+
 		if allSuccess {
 			fmt.Println("All checks passed successfully.")
-			return
+			return nil
 		}
+
 		time.Sleep(1 * time.Second)
 	}
-	fmt.Println("Not all checks passed successfully after 180 attempts.")
-	os.Exit(-1)
+
+	return fmt.Errorf("not all checks passed successfully after %d attempts", maxRetry)
 }

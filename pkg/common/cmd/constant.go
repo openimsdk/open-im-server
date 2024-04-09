@@ -14,57 +14,81 @@
 
 package cmd
 
-const (
-	FileName                         = "config.yaml"
-	NotificationFileName             = "notification.yaml"
-	ShareFileName                    = "share.yaml"
-	WebhooksConfigFileName           = "webhooks.yml"
-	KafkaConfigFileName              = "kafka.yml"
-	RedisConfigFileName              = "redis.yml"
-	ZookeeperConfigFileName          = "zookeeper.yml"
-	MongodbConfigFileName            = "mongodb.yml"
-	MinioConfigFileName              = "minio.yml"
-	LogConfigFileName                = "log.yml"
-	OpenIMAPICfgFileName             = "openim-api.yml"
-	OpenIMCronTaskCfgFileName        = "openim-crontask.yml"
-	OpenIMMsgGatewayCfgFileName      = "openim-msggateway.yml"
-	OpenIMMsgTransferCfgFileName     = "openim-msgtransfer.yml"
-	OpenIMPushCfgFileName            = "openim-push.yml"
-	OpenIMRPCAuthCfgFileName         = "openim-rpc-auth.yml"
+import (
+	"strings"
+)
+
+var (
+	FileName                         string
+	NotificationFileName             string
+	ShareFileName                    string
+	WebhooksConfigFileName           string
+	KafkaConfigFileName              string
+	RedisConfigFileName              string
+	ZookeeperConfigFileName          string
+	MongodbConfigFileName            string
+	MinioConfigFileName              string
+	LogConfigFileName                string
+	OpenIMAPICfgFileName             string
+	OpenIMCronTaskCfgFileName        string
+	OpenIMMsgGatewayCfgFileName      string
+	OpenIMMsgTransferCfgFileName     string
+	OpenIMPushCfgFileName            string
+	OpenIMRPCAuthCfgFileName         string
+	OpenIMRPCConversationCfgFileName string
+	OpenIMRPCFriendCfgFileName       string
+	OpenIMRPCGroupCfgFileName        string
+	OpenIMRPCMsgCfgFileName          string
+	OpenIMRPCThirdCfgFileName        string
+	OpenIMRPCUserCfgFileName         string
+)
+
+var ConfigEnvPrefixMap map[string]string
+
+func init() {
+	FileName = "config.yaml"
+	NotificationFileName = "notification.yaml"
+	ShareFileName = "share.yaml"
+	WebhooksConfigFileName = "webhooks.yml"
+	KafkaConfigFileName = "kafka.yml"
+	RedisConfigFileName = "redis.yml"
+	ZookeeperConfigFileName = "zookeeper.yml"
+	MongodbConfigFileName = "mongodb.yml"
+	MinioConfigFileName = "minio.yml"
+	LogConfigFileName = "log.yml"
+	OpenIMAPICfgFileName = "openim-api.yml"
+	OpenIMCronTaskCfgFileName = "openim-crontask.yml"
+	OpenIMMsgGatewayCfgFileName = "openim-msggateway.yml"
+	OpenIMMsgTransferCfgFileName = "openim-msgtransfer.yml"
+	OpenIMPushCfgFileName = "openim-push.yml"
+	OpenIMRPCAuthCfgFileName = "openim-rpc-auth.yml"
 	OpenIMRPCConversationCfgFileName = "openim-rpc-conversation.yml"
-	OpenIMRPCFriendCfgFileName       = "openim-rpc-friend.yml"
-	OpenIMRPCGroupCfgFileName        = "openim-rpc-group.yml"
-	OpenIMRPCMsgCfgFileName          = "openim-rpc-msg.yml"
-	OpenIMRPCThirdCfgFileName        = "openim-rpc-third.yml"
-	OpenIMRPCUserCfgFileName         = "openim-rpc-user.yml"
-)
+	OpenIMRPCFriendCfgFileName = "openim-rpc-friend.yml"
+	OpenIMRPCGroupCfgFileName = "openim-rpc-group.yml"
+	OpenIMRPCMsgCfgFileName = "openim-rpc-msg.yml"
+	OpenIMRPCThirdCfgFileName = "openim-rpc-third.yml"
+	OpenIMRPCUserCfgFileName = "openim-rpc-user.yml"
+
+	ConfigEnvPrefixMap = make(map[string]string)
+	fileNames := []string{
+		FileName, NotificationFileName, ShareFileName, WebhooksConfigFileName,
+		KafkaConfigFileName, RedisConfigFileName, ZookeeperConfigFileName,
+		MongodbConfigFileName, MinioConfigFileName, LogConfigFileName,
+		OpenIMAPICfgFileName, OpenIMCronTaskCfgFileName, OpenIMMsgGatewayCfgFileName,
+		OpenIMMsgTransferCfgFileName, OpenIMPushCfgFileName, OpenIMRPCAuthCfgFileName,
+		OpenIMRPCConversationCfgFileName, OpenIMRPCFriendCfgFileName, OpenIMRPCGroupCfgFileName,
+		OpenIMRPCMsgCfgFileName, OpenIMRPCThirdCfgFileName, OpenIMRPCUserCfgFileName,
+	}
+
+	for _, fileName := range fileNames {
+		envKey := strings.TrimSuffix(strings.TrimSuffix(fileName, ".yml"), ".yaml")
+		envKey = "IMENV_" + envKey
+		envKey = strings.ToUpper(strings.ReplaceAll(envKey, "-", "_"))
+		ConfigEnvPrefixMap[fileName] = envKey
+	}
+}
 
 const (
-	notificationEnvPrefix = "IMENV_NOTIFICATION"
-	shareEnvPrefix        = "IMENV_SHARE"
-	webhooksEnvPrefix     = "IMENV_WEBHOOKS"
-	kafkaEnvPrefix        = "IMENV_KAFKA"
-	redisEnvPrefix        = "IMENV_REDIS"
-	zookeeperEnvPrefix    = "IMENV_ZOOKEEPER"
-	mongodbEnvPrefix      = "IMENV_MONGODB"
-	minioEnvPrefix        = "IMENV_MINIO"
-	logEnvPrefix          = "IMENV_LOG"
-	apiEnvPrefix          = "IMENV_OPENIM_API"
-	cronTaskEnvPrefix     = "IMENV_OPENIM_CRONTASK"
-	msgGatewayEnvPrefix   = "IMENV_OPENIM_MSGGATEWAY"
-	msgTransferEnvPrefix  = "IMENV_OPENIM_MSGTRANSFER"
-	pushEnvPrefix         = "IMENV_OPENIM_PUSH"
-	authEnvPrefix         = "IMENV_OPENIM_RPC_AUTH"
-	conversationEnvPrefix = "IMENV_OPENIM_RPC_CONVERSATION"
-	friendEnvPrefix       = "IMENV_OPENIM_RPC_FRIEND"
-	groupEnvPrefix        = "IMENV_OPENIM_RPC_GROUP"
-	msgEnvPrefix          = "IMENV_OPENIM_RPC_MSG"
-	thirdEnvPrefix        = "IMENV_OPENIM_RPC_THIRD"
-	userEnvPrefix         = "IMENV_OPENIM_RPC_USER"
-)
-
-const (
-	FlagConf = "config_folder_path"
-
+	FlagConf          = "config_folder_path"
 	FlagTransferIndex = "index"
 )
