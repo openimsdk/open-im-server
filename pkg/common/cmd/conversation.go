@@ -26,20 +26,21 @@ import (
 type ConversationRpcCmd struct {
 	*RootCmd
 	ctx                context.Context
-	configMap          map[string]StructEnvPrefix
+	configMap          map[string]any
 	conversationConfig conversation.Config
 }
 
 func NewConversationRpcCmd() *ConversationRpcCmd {
 	var conversationConfig conversation.Config
 	ret := &ConversationRpcCmd{conversationConfig: conversationConfig}
-	ret.configMap = map[string]StructEnvPrefix{
-		OpenIMRPCConversationCfgFileName: {EnvPrefix: conversationEnvPrefix, ConfigStruct: &conversationConfig.RpcConfig},
-		RedisConfigFileName:              {EnvPrefix: redisEnvPrefix, ConfigStruct: &conversationConfig.RedisConfig},
-		ZookeeperConfigFileName:          {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &conversationConfig.ZookeeperConfig},
-		MongodbConfigFileName:            {EnvPrefix: mongodbEnvPrefix, ConfigStruct: &conversationConfig.MongodbConfig},
-		ShareFileName:                    {EnvPrefix: shareEnvPrefix, ConfigStruct: &conversationConfig.Share},
-		NotificationFileName:             {EnvPrefix: notificationEnvPrefix, ConfigStruct: &conversationConfig.NotificationConfig},
+	ret.configMap = map[string]any{
+		OpenIMRPCConversationCfgFileName: &conversationConfig.RpcConfig,
+		RedisConfigFileName:              &conversationConfig.RedisConfig,
+		ZookeeperConfigFileName:          &conversationConfig.ZookeeperConfig,
+		MongodbConfigFileName:            &conversationConfig.MongodbConfig,
+		ShareFileName:                    &conversationConfig.Share,
+		NotificationFileName:             &conversationConfig.NotificationConfig,
+		LocalCacheConfigFileName:         &conversationConfig.LocalCacheConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -56,5 +57,5 @@ func (a *ConversationRpcCmd) Exec() error {
 func (a *ConversationRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.conversationConfig.ZookeeperConfig, &a.conversationConfig.RpcConfig.Prometheus, a.conversationConfig.RpcConfig.RPC.ListenIP,
 		a.conversationConfig.RpcConfig.RPC.RegisterIP, a.conversationConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.conversationConfig.Share.RpcRegisterName.Auth, &a.conversationConfig, conversation.Start)
+		a.Index(), a.conversationConfig.Share.RpcRegisterName.Auth, &a.conversationConfig.Share, &a.conversationConfig, conversation.Start)
 }

@@ -55,6 +55,7 @@ type Config struct {
 	ZookeeperConfig    config.ZooKeeper
 	NotificationConfig config.Notification
 	Share              config.Share
+	LocalCacheConfig   config.LocalCache
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -78,7 +79,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		user:                           &userRpcClient,
 		conversationNotificationSender: notification.NewConversationNotificationSender(&config.NotificationConfig, &msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
-		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), mgocli.GetTx()),
+		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, &config.LocalCacheConfig, cache.GetDefaultOpt(), conversationDB), mgocli.GetTx()),
 	})
 	return nil
 }

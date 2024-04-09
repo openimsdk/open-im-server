@@ -44,6 +44,7 @@ type Config struct {
 	NotificationConfig config.Notification
 	Share              config.Share
 	WebhooksConfig     config.Webhooks
+	LocalCacheConfig   config.LocalCache
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -65,8 +66,8 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		client,
 		offlinePusher,
 		database,
-		rpccache.NewGroupLocalCache(groupRpcClient, rdb),
-		rpccache.NewConversationLocalCache(conversationRpcClient, rdb),
+		rpccache.NewGroupLocalCache(groupRpcClient, &config.LocalCacheConfig, rdb),
+		rpccache.NewConversationLocalCache(conversationRpcClient, &config.LocalCacheConfig, rdb),
 		&conversationRpcClient,
 		&groupRpcClient,
 		&msgRpcClient,

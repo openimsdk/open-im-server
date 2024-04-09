@@ -25,21 +25,21 @@ import (
 type MsgTransferCmd struct {
 	*RootCmd
 	ctx               context.Context
-	configMap         map[string]StructEnvPrefix
+	configMap         map[string]any
 	msgTransferConfig msgtransfer.Config
 }
 
 func NewMsgTransferCmd() *MsgTransferCmd {
 	var msgTransferConfig msgtransfer.Config
 	ret := &MsgTransferCmd{msgTransferConfig: msgTransferConfig}
-	ret.configMap = map[string]StructEnvPrefix{
-		OpenIMMsgTransferCfgFileName: {EnvPrefix: msgTransferEnvPrefix, ConfigStruct: &msgTransferConfig.MsgTransfer},
-		RedisConfigFileName:          {EnvPrefix: redisEnvPrefix, ConfigStruct: &msgTransferConfig.RedisConfig},
-		MongodbConfigFileName:        {EnvPrefix: mongodbEnvPrefix, ConfigStruct: &msgTransferConfig.MongodbConfig},
-		KafkaConfigFileName:          {EnvPrefix: kafkaEnvPrefix, ConfigStruct: &msgTransferConfig.KafkaConfig},
-		ZookeeperConfigFileName:      {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &msgTransferConfig.ZookeeperConfig},
-		ShareFileName:                {EnvPrefix: shareEnvPrefix, ConfigStruct: &msgTransferConfig.Share},
-		WebhooksConfigFileName:       {EnvPrefix: webhooksEnvPrefix, ConfigStruct: &msgTransferConfig.WebhooksConfig},
+	ret.configMap = map[string]any{
+		OpenIMMsgTransferCfgFileName: &msgTransferConfig.MsgTransfer,
+		RedisConfigFileName:          &msgTransferConfig.RedisConfig,
+		MongodbConfigFileName:        &msgTransferConfig.MongodbConfig,
+		KafkaConfigFileName:          &msgTransferConfig.KafkaConfig,
+		ZookeeperConfigFileName:      &msgTransferConfig.ZookeeperConfig,
+		ShareFileName:                &msgTransferConfig.Share,
+		WebhooksConfigFileName:       &msgTransferConfig.WebhooksConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)

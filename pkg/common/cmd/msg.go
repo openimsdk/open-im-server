@@ -26,22 +26,23 @@ import (
 type MsgRpcCmd struct {
 	*RootCmd
 	ctx       context.Context
-	configMap map[string]StructEnvPrefix
+	configMap map[string]any
 	msgConfig msg.Config
 }
 
 func NewMsgRpcCmd() *MsgRpcCmd {
 	var msgConfig msg.Config
 	ret := &MsgRpcCmd{msgConfig: msgConfig}
-	ret.configMap = map[string]StructEnvPrefix{
-		OpenIMRPCMsgCfgFileName: {EnvPrefix: msgEnvPrefix, ConfigStruct: &msgConfig.RpcConfig},
-		RedisConfigFileName:     {EnvPrefix: redisEnvPrefix, ConfigStruct: &msgConfig.RedisConfig},
-		ZookeeperConfigFileName: {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &msgConfig.ZookeeperConfig},
-		MongodbConfigFileName:   {EnvPrefix: mongodbEnvPrefix, ConfigStruct: &msgConfig.MongodbConfig},
-		KafkaConfigFileName:     {EnvPrefix: kafkaEnvPrefix, ConfigStruct: &msgConfig.KafkaConfig},
-		ShareFileName:           {EnvPrefix: shareEnvPrefix, ConfigStruct: &msgConfig.Share},
-		NotificationFileName:    {EnvPrefix: notificationEnvPrefix, ConfigStruct: &msgConfig.NotificationConfig},
-		WebhooksConfigFileName:  {EnvPrefix: webhooksEnvPrefix, ConfigStruct: &msgConfig.WebhooksConfig},
+	ret.configMap = map[string]any{
+		OpenIMRPCMsgCfgFileName:  &msgConfig.RpcConfig,
+		RedisConfigFileName:      &msgConfig.RedisConfig,
+		ZookeeperConfigFileName:  &msgConfig.ZookeeperConfig,
+		MongodbConfigFileName:    &msgConfig.MongodbConfig,
+		KafkaConfigFileName:      &msgConfig.KafkaConfig,
+		ShareFileName:            &msgConfig.Share,
+		NotificationFileName:     &msgConfig.NotificationConfig,
+		WebhooksConfigFileName:   &msgConfig.WebhooksConfig,
+		LocalCacheConfigFileName: &msgConfig.LocalCacheConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -58,5 +59,5 @@ func (a *MsgRpcCmd) Exec() error {
 func (a *MsgRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.msgConfig.ZookeeperConfig, &a.msgConfig.RpcConfig.Prometheus, a.msgConfig.RpcConfig.RPC.ListenIP,
 		a.msgConfig.RpcConfig.RPC.RegisterIP, a.msgConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.msgConfig.Share.RpcRegisterName.Auth, &a.msgConfig, msg.Start)
+		a.Index(), a.msgConfig.Share.RpcRegisterName.Auth, &a.msgConfig.Share, &a.msgConfig, msg.Start)
 }

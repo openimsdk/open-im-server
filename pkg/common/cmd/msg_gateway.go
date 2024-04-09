@@ -27,19 +27,19 @@ import (
 type MsgGatewayCmd struct {
 	*RootCmd
 	ctx              context.Context
-	configMap        map[string]StructEnvPrefix
+	configMap        map[string]any
 	msgGatewayConfig msggateway.Config
 }
 
 func NewMsgGatewayCmd() *MsgGatewayCmd {
 	var msgGatewayConfig msggateway.Config
 	ret := &MsgGatewayCmd{msgGatewayConfig: msgGatewayConfig}
-	ret.configMap = map[string]StructEnvPrefix{
-		OpenIMMsgGatewayCfgFileName: {EnvPrefix: msgGatewayEnvPrefix, ConfigStruct: &msgGatewayConfig.MsgGateway},
-		RedisConfigFileName:         {EnvPrefix: redisEnvPrefix, ConfigStruct: &msgGatewayConfig.RedisConfig},
-		ZookeeperConfigFileName:     {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &msgGatewayConfig.ZookeeperConfig},
-		ShareFileName:               {EnvPrefix: shareEnvPrefix, ConfigStruct: &msgGatewayConfig.Share},
-		WebhooksConfigFileName:      {EnvPrefix: webhooksEnvPrefix, ConfigStruct: &msgGatewayConfig.WebhooksConfig},
+	ret.configMap = map[string]any{
+		OpenIMMsgGatewayCfgFileName: &msgGatewayConfig.MsgGateway,
+		RedisConfigFileName:         &msgGatewayConfig.RedisConfig,
+		ZookeeperConfigFileName:     &msgGatewayConfig.ZookeeperConfig,
+		ShareFileName:               &msgGatewayConfig.Share,
+		WebhooksConfigFileName:      &msgGatewayConfig.WebhooksConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)

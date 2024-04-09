@@ -27,8 +27,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func NewGroupLocalCache(client rpcclient.GroupRpcClient, cli redis.UniversalClient) *GroupLocalCache {
-	lc := config.Config.LocalCache.Group
+func NewGroupLocalCache(client rpcclient.GroupRpcClient, localCache *config.LocalCache, cli redis.UniversalClient) *GroupLocalCache {
+	lc := localCache.Group
 	log.ZDebug(context.Background(), "GroupLocalCache", "topic", lc.Topic, "slotNum", lc.SlotNum, "slotSize", lc.SlotSize, "enable", lc.Enable())
 	x := &GroupLocalCache{
 		client: client,

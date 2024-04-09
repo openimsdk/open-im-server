@@ -83,10 +83,10 @@ type ConversationCache interface {
 	DelConversationNotReceiveMessageUserIDs(conversationIDs ...string) ConversationCache
 }
 
-func NewConversationRedis(rdb redis.UniversalClient, opts rockscache.Options, db relationtb.ConversationModelInterface) ConversationCache {
+func NewConversationRedis(rdb redis.UniversalClient, localCache *config.LocalCache, opts rockscache.Options, db relationtb.ConversationModelInterface) ConversationCache {
 	rcClient := rockscache.NewClient(rdb, opts)
 	mc := NewMetaCacheRedis(rcClient)
-	c := config.Config.LocalCache.Conversation
+	c := localCache.Conversation
 	log.ZDebug(context.Background(), "black local cache init", "Topic", c.Topic, "SlotNum", c.SlotNum, "SlotSize", c.SlotSize, "enable", c.Enable())
 	mc.SetTopic(c.Topic)
 	mc.SetRawRedisClient(rdb)

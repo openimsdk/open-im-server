@@ -63,6 +63,7 @@ type Config struct {
 	NotificationConfig config.Notification
 	Share              config.Share
 	WebhooksConfig     config.Webhooks
+	LocalCacheConfig   config.LocalCache
 }
 
 func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -85,7 +86,7 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	if err != nil {
 		return err
 	}
-	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
+	cache := cache.NewUserCacheRedis(rdb, &config.LocalCacheConfig, userDB, cache.GetDefaultOpt())
 	userMongoDB := mgo.NewUserMongoDriver(mgocli.GetDB())
 	database := controller.NewUserDatabase(userDB, cache, mgocli.GetTx(), userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.Share.RpcRegisterName.Friend)

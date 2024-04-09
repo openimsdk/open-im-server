@@ -26,21 +26,21 @@ import (
 type ThirdRpcCmd struct {
 	*RootCmd
 	ctx         context.Context
-	configMap   map[string]StructEnvPrefix
+	configMap   map[string]any
 	thirdConfig third.Config
 }
 
 func NewThirdRpcCmd() *ThirdRpcCmd {
 	var thirdConfig third.Config
 	ret := &ThirdRpcCmd{thirdConfig: thirdConfig}
-	ret.configMap = map[string]StructEnvPrefix{
-		OpenIMRPCThirdCfgFileName: {EnvPrefix: thridEnvPrefix, ConfigStruct: &thirdConfig.RpcConfig},
-		RedisConfigFileName:       {EnvPrefix: redisEnvPrefix, ConfigStruct: &thirdConfig.RedisConfig},
-		ZookeeperConfigFileName:   {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &thirdConfig.ZookeeperConfig},
-		MongodbConfigFileName:     {EnvPrefix: mongodbEnvPrefix, ConfigStruct: &thirdConfig.MongodbConfig},
-		ShareFileName:             {EnvPrefix: shareEnvPrefix, ConfigStruct: &thirdConfig.Share},
-		NotificationFileName:      {EnvPrefix: notificationEnvPrefix, ConfigStruct: &thirdConfig.NotificationConfig},
-		MinioConfigFileName:       {EnvPrefix: minioEnvPrefix, ConfigStruct: &thirdConfig.MinioConfig},
+	ret.configMap = map[string]any{
+		OpenIMRPCThirdCfgFileName: &thirdConfig.RpcConfig,
+		RedisConfigFileName:       &thirdConfig.RedisConfig,
+		ZookeeperConfigFileName:   &thirdConfig.ZookeeperConfig,
+		MongodbConfigFileName:     &thirdConfig.MongodbConfig,
+		ShareFileName:             &thirdConfig.Share,
+		NotificationFileName:      &thirdConfig.NotificationConfig,
+		MinioConfigFileName:       &thirdConfig.MinioConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -57,5 +57,5 @@ func (a *ThirdRpcCmd) Exec() error {
 func (a *ThirdRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.thirdConfig.ZookeeperConfig, &a.thirdConfig.RpcConfig.Prometheus, a.thirdConfig.RpcConfig.RPC.ListenIP,
 		a.thirdConfig.RpcConfig.RPC.RegisterIP, a.thirdConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.thirdConfig.Share.RpcRegisterName.Auth, &a.thirdConfig, third.Start)
+		a.Index(), a.thirdConfig.Share.RpcRegisterName.Auth, &a.thirdConfig.Share, &a.thirdConfig, third.Start)
 }

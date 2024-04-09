@@ -48,10 +48,10 @@ type BlackCacheRedis struct {
 	blackDB    relationtb.BlackModelInterface
 }
 
-func NewBlackCacheRedis(rdb redis.UniversalClient, blackDB relationtb.BlackModelInterface, options rockscache.Options) BlackCache {
+func NewBlackCacheRedis(rdb redis.UniversalClient, localCache *config.LocalCache, blackDB relationtb.BlackModelInterface, options rockscache.Options) BlackCache {
 	rcClient := rockscache.NewClient(rdb, options)
 	mc := NewMetaCacheRedis(rcClient)
-	b := config.Config.LocalCache.Friend
+	b := localCache.Friend
 	log.ZDebug(context.Background(), "black local cache init", "Topic", b.Topic, "SlotNum", b.SlotNum, "SlotSize", b.SlotSize, "enable", b.Enable())
 	mc.SetTopic(b.Topic)
 	mc.SetRawRedisClient(rdb)

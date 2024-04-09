@@ -26,21 +26,22 @@ import (
 type FriendRpcCmd struct {
 	*RootCmd
 	ctx          context.Context
-	configMap    map[string]StructEnvPrefix
+	configMap    map[string]any
 	friendConfig friend.Config
 }
 
 func NewFriendRpcCmd() *FriendRpcCmd {
 	var friendConfig friend.Config
 	ret := &FriendRpcCmd{friendConfig: friendConfig}
-	ret.configMap = map[string]StructEnvPrefix{
-		OpenIMRPCFriendCfgFileName: {EnvPrefix: friendEnvPrefix, ConfigStruct: &friendConfig.RpcConfig},
-		RedisConfigFileName:        {EnvPrefix: redisEnvPrefix, ConfigStruct: &friendConfig.RedisConfig},
-		ZookeeperConfigFileName:    {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &friendConfig.ZookeeperConfig},
-		MongodbConfigFileName:      {EnvPrefix: mongodbEnvPrefix, ConfigStruct: &friendConfig.MongodbConfig},
-		ShareFileName:              {EnvPrefix: shareEnvPrefix, ConfigStruct: &friendConfig.Share},
-		NotificationFileName:       {EnvPrefix: notificationEnvPrefix, ConfigStruct: &friendConfig.NotificationConfig},
-		WebhooksConfigFileName:     {EnvPrefix: webhooksEnvPrefix, ConfigStruct: &friendConfig.WebhooksConfig},
+	ret.configMap = map[string]any{
+		OpenIMRPCFriendCfgFileName: &friendConfig.RpcConfig,
+		RedisConfigFileName:        &friendConfig.RedisConfig,
+		ZookeeperConfigFileName:    &friendConfig.ZookeeperConfig,
+		MongodbConfigFileName:      &friendConfig.MongodbConfig,
+		ShareFileName:              &friendConfig.Share,
+		NotificationFileName:       &friendConfig.NotificationConfig,
+		WebhooksConfigFileName:     &friendConfig.WebhooksConfig,
+		LocalCacheConfigFileName:   &friendConfig.LocalCacheConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -57,5 +58,5 @@ func (a *FriendRpcCmd) Exec() error {
 func (a *FriendRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.friendConfig.ZookeeperConfig, &a.friendConfig.RpcConfig.Prometheus, a.friendConfig.RpcConfig.RPC.ListenIP,
 		a.friendConfig.RpcConfig.RPC.RegisterIP, a.friendConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.friendConfig.Share.RpcRegisterName.Auth, &a.friendConfig, friend.Start)
+		a.Index(), a.friendConfig.Share.RpcRegisterName.Auth, &a.friendConfig.Share, &a.friendConfig, friend.Start)
 }

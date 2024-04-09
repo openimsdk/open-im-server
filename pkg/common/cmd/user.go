@@ -26,22 +26,23 @@ import (
 type UserRpcCmd struct {
 	*RootCmd
 	ctx        context.Context
-	configMap  map[string]StructEnvPrefix
+	configMap  map[string]any
 	userConfig user.Config
 }
 
 func NewUserRpcCmd() *UserRpcCmd {
 	var userConfig user.Config
 	ret := &UserRpcCmd{userConfig: userConfig}
-	ret.configMap = map[string]StructEnvPrefix{
-		OpenIMRPCUserCfgFileName: {EnvPrefix: userEnvPrefix, ConfigStruct: &userConfig.RpcConfig},
-		RedisConfigFileName:      {EnvPrefix: redisEnvPrefix, ConfigStruct: &userConfig.RedisConfig},
-		ZookeeperConfigFileName:  {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &userConfig.ZookeeperConfig},
-		MongodbConfigFileName:    {EnvPrefix: mongodbEnvPrefix, ConfigStruct: &userConfig.MongodbConfig},
-		KafkaConfigFileName:      {EnvPrefix: kafkaEnvPrefix, ConfigStruct: &userConfig.KafkaConfig},
-		ShareFileName:            {EnvPrefix: shareEnvPrefix, ConfigStruct: &userConfig.Share},
-		NotificationFileName:     {EnvPrefix: notificationEnvPrefix, ConfigStruct: &userConfig.NotificationConfig},
-		WebhooksConfigFileName:   {EnvPrefix: webhooksEnvPrefix, ConfigStruct: &userConfig.WebhooksConfig},
+	ret.configMap = map[string]any{
+		OpenIMRPCUserCfgFileName: &userConfig.RpcConfig,
+		RedisConfigFileName:      &userConfig.RedisConfig,
+		ZookeeperConfigFileName:  &userConfig.ZookeeperConfig,
+		MongodbConfigFileName:    &userConfig.MongodbConfig,
+		KafkaConfigFileName:      &userConfig.KafkaConfig,
+		ShareFileName:            &userConfig.Share,
+		NotificationFileName:     &userConfig.NotificationConfig,
+		WebhooksConfigFileName:   &userConfig.WebhooksConfig,
+		LocalCacheConfigFileName: &userConfig.LocalCacheConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -58,5 +59,5 @@ func (a *UserRpcCmd) Exec() error {
 func (a *UserRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.userConfig.ZookeeperConfig, &a.userConfig.RpcConfig.Prometheus, a.userConfig.RpcConfig.RPC.ListenIP,
 		a.userConfig.RpcConfig.RPC.RegisterIP, a.userConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.userConfig.Share.RpcRegisterName.Auth, &a.userConfig, user.Start)
+		a.Index(), a.userConfig.Share.RpcRegisterName.Auth, &a.userConfig.Share, &a.userConfig, user.Start)
 }

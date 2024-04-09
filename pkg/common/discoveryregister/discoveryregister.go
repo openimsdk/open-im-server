@@ -16,7 +16,6 @@ package discoveryregister
 
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/direct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/zookeeper"
@@ -31,9 +30,8 @@ const (
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
-func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, env string) (discovery.SvcDiscoveryRegistry, error) {
-
-	switch env {
+func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share) (discovery.SvcDiscoveryRegistry, error) {
+	switch share.Env {
 	case zookeeperConst:
 		return zookeeper.NewZkClient(
 			zookeeperConfig.Address,
@@ -44,10 +42,11 @@ func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, env string) (discov
 			zookeeper.WithTimeout(10),
 		)
 	case kubenetesConst:
-		return kubernetes.NewK8sDiscoveryRegister(config.RpcRegisterName.OpenImMessageGatewayName)
+		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
 	case directConst:
-		return direct.NewConnDirect(config)
+		//return direct.NewConnDirect(config)
 	default:
-		return nil, errs.New("unsupported discovery type", "type", env).Wrap()
+		return nil, errs.New("unsupported discovery type", "type", share.Env).Wrap()
 	}
+	return nil, nil
 }

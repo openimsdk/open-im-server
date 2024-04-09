@@ -25,8 +25,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func NewFriendLocalCache(client rpcclient.FriendRpcClient, cli redis.UniversalClient) *FriendLocalCache {
-	lc := config.Config.LocalCache.Friend
+func NewFriendLocalCache(client rpcclient.FriendRpcClient, localCache *config.LocalCache, cli redis.UniversalClient) *FriendLocalCache {
+	lc := localCache.Friend
 	log.ZDebug(context.Background(), "FriendLocalCache", "topic", lc.Topic, "slotNum", lc.SlotNum, "slotSize", lc.SlotSize, "enable", lc.Enable())
 	x := &FriendLocalCache{
 		client: client,

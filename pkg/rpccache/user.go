@@ -27,8 +27,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func NewUserLocalCache(client rpcclient.UserRpcClient, cli redis.UniversalClient) *UserLocalCache {
-	lc := config.Config.LocalCache.User
+func NewUserLocalCache(client rpcclient.UserRpcClient, localCache *config.LocalCache, cli redis.UniversalClient) *UserLocalCache {
+	lc := localCache.User
 	log.ZDebug(context.Background(), "UserLocalCache", "topic", lc.Topic, "slotNum", lc.SlotNum, "slotSize", lc.SlotSize, "enable", lc.Enable())
 	x := &UserLocalCache{
 		client: client,

@@ -59,6 +59,7 @@ type (
 		NotificationConfig config.Notification
 		Share              config.Share
 		WebhooksConfig     config.Webhooks
+		LocalCacheConfig   config.LocalCache
 	}
 )
 
@@ -95,10 +96,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		Conversation:           &conversationClient,
 		MsgDatabase:            msgDatabase,
 		RegisterCenter:         client,
-		UserLocalCache:         rpccache.NewUserLocalCache(userRpcClient, rdb),
-		GroupLocalCache:        rpccache.NewGroupLocalCache(groupRpcClient, rdb),
-		ConversationLocalCache: rpccache.NewConversationLocalCache(conversationClient, rdb),
-		FriendLocalCache:       rpccache.NewFriendLocalCache(friendRpcClient, rdb),
+		UserLocalCache:         rpccache.NewUserLocalCache(userRpcClient, &config.LocalCacheConfig, rdb),
+		GroupLocalCache:        rpccache.NewGroupLocalCache(groupRpcClient, &config.LocalCacheConfig, rdb),
+		ConversationLocalCache: rpccache.NewConversationLocalCache(conversationClient, &config.LocalCacheConfig, rdb),
+		FriendLocalCache:       rpccache.NewFriendLocalCache(friendRpcClient, &config.LocalCacheConfig, rdb),
 		config:                 config,
 	}
 

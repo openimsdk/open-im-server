@@ -69,6 +69,9 @@ type Config struct {
 	NotificationConfig config.Notification
 	Share              config.Share
 	WebhooksConfig     config.Webhooks
+	LocalCacheConfig   config.LocalCache
+
+
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -96,7 +99,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
 	var gs groupServer
-	database := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
+	database := controller.NewGroupDatabase(rdb,&config.LocalCacheConfig groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.db = database
 	gs.user = userRpcClient
 	gs.notification = notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, config, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {

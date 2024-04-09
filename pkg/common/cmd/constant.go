@@ -23,6 +23,7 @@ var (
 	NotificationFileName             string
 	ShareFileName                    string
 	WebhooksConfigFileName           string
+	LocalCacheConfigFileName         string
 	KafkaConfigFileName              string
 	RedisConfigFileName              string
 	ZookeeperConfigFileName          string
@@ -50,6 +51,7 @@ func init() {
 	NotificationFileName = "notification.yaml"
 	ShareFileName = "share.yaml"
 	WebhooksConfigFileName = "webhooks.yml"
+	LocalCacheConfigFileName = "local-cache.yml"
 	KafkaConfigFileName = "kafka.yml"
 	RedisConfigFileName = "redis.yml"
 	ZookeeperConfigFileName = "zookeeper.yml"

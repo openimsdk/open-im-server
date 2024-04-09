@@ -61,10 +61,10 @@ type UserCacheRedis struct {
 	rcClient   *rockscache.Client
 }
 
-func NewUserCacheRedis(rdb redis.UniversalClient, userDB relationtb.UserModelInterface, options rockscache.Options) UserCache {
+func NewUserCacheRedis(rdb redis.UniversalClient, localCache *config.LocalCache, userDB relationtb.UserModelInterface, options rockscache.Options) UserCache {
 	rcClient := rockscache.NewClient(rdb, options)
 	mc := NewMetaCacheRedis(rcClient)
-	u := config.Config.LocalCache.User
+	u := localCache.User
 	log.ZDebug(context.Background(), "user local cache init", "Topic", u.Topic, "SlotNum", u.SlotNum, "SlotSize", u.SlotSize, "enable", u.Enable())
 	mc.SetTopic(u.Topic)
 	mc.SetRawRedisClient(rdb)

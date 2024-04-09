@@ -43,11 +43,10 @@ func (r *RootCmd) Port() int {
 
 type CmdOpts struct {
 	loggerPrefixName string
-	configMap        map[string]StructEnvPrefix
+	configMap        map[string]any
 }
 type StructEnvPrefix struct {
-	EnvPrefix    string
-	ConfigStruct any
+	EnvPrefix string
 }
 
 func WithCronTaskLogName() func(*CmdOpts) {
@@ -61,7 +60,7 @@ func WithLogName(logName string) func(*CmdOpts) {
 		opts.loggerPrefixName = logName
 	}
 }
-func WithConfigMap(configMap map[string]StructEnvPrefix) func(*CmdOpts) {
+func WithConfigMap(configMap map[string]any) func(*CmdOpts) {
 	return func(opts *CmdOpts) {
 		opts.configMap = configMap
 	}
@@ -102,16 +101,16 @@ func (r *RootCmd) initializeConfiguration(cmd *cobra.Command, opts *CmdOpts) err
 	}
 	// Load common configuration file
 	//opts.configMap[ShareFileName] = StructEnvPrefix{EnvPrefix: shareEnvPrefix, ConfigStruct: &r.share}
-	for configFileName, structEnvPrefix := range opts.configMap {
+	for configFileName, configStruct := range opts.configMap {
 		err := config2.LoadConfig(filepath.Join(configDirectory, configFileName),
-			structEnvPrefix.EnvPrefix, structEnvPrefix.ConfigStruct)
+			ConfigEnvPrefixMap[configFileName], configStruct)
 		if err != nil {
 			return err
 		}
 	}
 	// Load common log configuration file
 	return config2.LoadConfig(filepath.Join(configDirectory, LogConfigFileName),
-		logEnvPrefix, &r.log)
+		ConfigEnvPrefixMap[LogConfigFileName], &r.log)
 }
 
 func (r *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {

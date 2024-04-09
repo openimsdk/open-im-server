@@ -49,6 +49,7 @@ func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 		conf.MsgGateway.RPC.RegisterIP,
 		conf.MsgGateway.RPC.Ports, index,
 		conf.Share.RpcRegisterName.MessageGateway,
+		&conf.Share,
 		conf,
 		s.InitServer,
 	)

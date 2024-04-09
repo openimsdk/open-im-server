@@ -75,7 +75,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	client, err := kdisc.NewDiscoveryRegister(&config.ZookeeperConfig)
+	client, err := kdisc.NewDiscoveryRegister(&config.ZookeeperConfig, &config.Share)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 			proreg.MustRegister(
 				collectors.NewGoCollector(),
 			)
-			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer", &config.ZookeeperConfig)...)
+			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer", &config.Share)...)
 			http.Handle("/metrics", promhttp.HandlerFor(proreg, promhttp.HandlerOpts{Registry: proreg}))
 			err := http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil)
 			if err != nil && err != http.ErrServerClosed {

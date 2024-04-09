@@ -16,6 +16,7 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -107,6 +108,7 @@ type GroupDatabase interface {
 
 func NewGroupDatabase(
 	rdb redis.UniversalClient,
+	localCache *config.LocalCache,
 	groupDB relationtb.GroupModelInterface,
 	groupMemberDB relationtb.GroupMemberModelInterface,
 	groupRequestDB relationtb.GroupRequestModelInterface,
@@ -121,7 +123,7 @@ func NewGroupDatabase(
 		groupMemberDB:  groupMemberDB,
 		groupRequestDB: groupRequestDB,
 		ctxTx:          ctxTx,
-		cache:          cache.NewGroupCacheRedis(rdb, groupDB, groupMemberDB, groupRequestDB, groupHash, rcOptions),
+		cache:          cache.NewGroupCacheRedis(rdb, localCache, groupDB, groupMemberDB, groupRequestDB, groupHash, rcOptions),
 	}
 }
 

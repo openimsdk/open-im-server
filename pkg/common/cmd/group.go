@@ -26,21 +26,22 @@ import (
 type GroupRpcCmd struct {
 	*RootCmd
 	ctx         context.Context
-	configMap   map[string]StructEnvPrefix
+	configMap   map[string]any
 	groupConfig group.Config
 }
 
 func NewGroupRpcCmd() *GroupRpcCmd {
 	var groupConfig group.Config
 	ret := &GroupRpcCmd{groupConfig: groupConfig}
-	ret.configMap = map[string]StructEnvPrefix{
-		OpenIMRPCGroupCfgFileName: {EnvPrefix: groupEnvPrefix, ConfigStruct: &groupConfig.RpcConfig},
-		RedisConfigFileName:       {EnvPrefix: redisEnvPrefix, ConfigStruct: &groupConfig.RedisConfig},
-		ZookeeperConfigFileName:   {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &groupConfig.ZookeeperConfig},
-		MongodbConfigFileName:     {EnvPrefix: mongodbEnvPrefix, ConfigStruct: &groupConfig.MongodbConfig},
-		ShareFileName:             {EnvPrefix: shareEnvPrefix, ConfigStruct: &groupConfig.Share},
-		NotificationFileName:      {EnvPrefix: notificationEnvPrefix, ConfigStruct: &groupConfig.NotificationConfig},
-		WebhooksConfigFileName:    {EnvPrefix: webhooksEnvPrefix, ConfigStruct: &groupConfig.WebhooksConfig},
+	ret.configMap = map[string]any{
+		OpenIMRPCGroupCfgFileName: &groupConfig.RpcConfig,
+		RedisConfigFileName:       &groupConfig.RedisConfig,
+		ZookeeperConfigFileName:   &groupConfig.ZookeeperConfig,
+		MongodbConfigFileName:     &groupConfig.MongodbConfig,
+		ShareFileName:             &groupConfig.Share,
+		NotificationFileName:      &groupConfig.NotificationConfig,
+		WebhooksConfigFileName:    &groupConfig.WebhooksConfig,
+		LocalCacheConfigFileName:  &groupConfig.LocalCacheConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -57,5 +58,5 @@ func (a *GroupRpcCmd) Exec() error {
 func (a *GroupRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.groupConfig.ZookeeperConfig, &a.groupConfig.RpcConfig.Prometheus, a.groupConfig.RpcConfig.RPC.ListenIP,
 		a.groupConfig.RpcConfig.RPC.RegisterIP, a.groupConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.groupConfig.Share.RpcRegisterName.Auth, &a.groupConfig, group.Start)
+		a.Index(), a.groupConfig.Share.RpcRegisterName.Auth, &a.groupConfig.Share, &a.groupConfig, group.Start)
 }

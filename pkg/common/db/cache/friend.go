@@ -58,11 +58,11 @@ type FriendCacheRedis struct {
 }
 
 // NewFriendCacheRedis creates a new instance of FriendCacheRedis.
-func NewFriendCacheRedis(rdb redis.UniversalClient, friendDB relationtb.FriendModelInterface,
+func NewFriendCacheRedis(rdb redis.UniversalClient, localCache *config.LocalCache, friendDB relationtb.FriendModelInterface,
 	options rockscache.Options) FriendCache {
 	rcClient := rockscache.NewClient(rdb, options)
 	mc := NewMetaCacheRedis(rcClient)
-	f := config.Config.LocalCache.Friend
+	f := localCache.Friend
 	log.ZDebug(context.Background(), "friend local cache init", "Topic", f.Topic, "SlotNum", f.SlotNum, "SlotSize", f.SlotSize, "enable", f.Enable())
 	mc.SetTopic(f.Topic)
 	mc.SetRawRedisClient(rdb)

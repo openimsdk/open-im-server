@@ -87,6 +87,7 @@ type GroupCacheRedis struct {
 
 func NewGroupCacheRedis(
 	rdb redis.UniversalClient,
+	localCache *config.LocalCache,
 	groupDB relationtb.GroupModelInterface,
 	groupMemberDB relationtb.GroupMemberModelInterface,
 	groupRequestDB relationtb.GroupRequestModelInterface,
@@ -95,7 +96,7 @@ func NewGroupCacheRedis(
 ) GroupCache {
 	rcClient := rockscache.NewClient(rdb, opts)
 	mc := NewMetaCacheRedis(rcClient)
-	g := config.Config.LocalCache.Group
+	g := localCache.Group
 	mc.SetTopic(g.Topic)
 	log.ZDebug(context.Background(), "group local cache init", "Topic", g.Topic, "SlotNum", g.SlotNum, "SlotSize", g.SlotSize, "enable", g.Enable())
 	mc.SetRawRedisClient(rdb)

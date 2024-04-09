@@ -26,18 +26,18 @@ import (
 type AuthRpcCmd struct {
 	*RootCmd
 	ctx        context.Context
-	configMap  map[string]StructEnvPrefix
+	configMap  map[string]any
 	authConfig auth.Config
 }
 
 func NewAuthRpcCmd() *AuthRpcCmd {
 	var authConfig auth.Config
 	ret := &AuthRpcCmd{authConfig: authConfig}
-	ret.configMap = map[string]StructEnvPrefix{
-		OpenIMRPCAuthCfgFileName: {EnvPrefix: authEnvPrefix, ConfigStruct: &authConfig.RpcConfig},
-		RedisConfigFileName:      {EnvPrefix: redisEnvPrefix, ConfigStruct: &authConfig.RedisConfig},
-		ZookeeperConfigFileName:  {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &authConfig.ZookeeperConfig},
-		ShareFileName:            {EnvPrefix: shareEnvPrefix, ConfigStruct: &authConfig.Share},
+	ret.configMap = map[string]any{
+		OpenIMRPCAuthCfgFileName: &authConfig.RpcConfig,
+		RedisConfigFileName:      &authConfig.RedisConfig,
+		ZookeeperConfigFileName:  &authConfig.ZookeeperConfig,
+		ShareFileName:            &authConfig.Share,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -55,5 +55,5 @@ func (a *AuthRpcCmd) Exec() error {
 func (a *AuthRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.authConfig.ZookeeperConfig, &a.authConfig.RpcConfig.Prometheus, a.authConfig.RpcConfig.RPC.ListenIP,
 		a.authConfig.RpcConfig.RPC.RegisterIP, a.authConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.authConfig.Share.RpcRegisterName.Auth, &a.authConfig, auth.Start)
+		a.Index(), a.authConfig.Share.RpcRegisterName.Auth, &a.authConfig.Share, &a.authConfig, auth.Start)
 }

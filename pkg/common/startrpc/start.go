@@ -45,7 +45,7 @@ import (
 
 // Start rpc server.
 func Start[T any](ctx context.Context, zookeeperConfig *config2.ZooKeeper, prometheusConfig *config2.Prometheus, listenIP,
-	registerIP string, rpcPorts []int, index int, rpcRegisterName string, config T, rpcFn func(ctx context.Context,
+	registerIP string, rpcPorts []int, index int, rpcRegisterName string, share *config2.Share, config T, rpcFn func(ctx context.Context,
 	config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 
 	rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
@@ -68,7 +68,7 @@ func Start[T any](ctx context.Context, zookeeperConfig *config2.ZooKeeper, prome
 	}
 
 	defer listener.Close()
-	client, err := kdisc.NewDiscoveryRegister(zookeeperConfig)
+	client, err := kdisc.NewDiscoveryRegister(zookeeperConfig, share)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func Start[T any](ctx context.Context, zookeeperConfig *config2.ZooKeeper, prome
 	var reg *prometheus.Registry
 	var metric *grpcprometheus.ServerMetrics
 	if prometheusConfig.Enable {
-		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, zookeeperConfig)
+		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, share)
 		reg, metric, _ = prommetrics.NewGrpcPromObj(cusMetrics)
 		options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
 			grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))

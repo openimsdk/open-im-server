@@ -72,7 +72,7 @@ func InitMsgTool(ctx context.Context, config *CronTaskConfig) (*MsgTool, error) 
 	if err != nil {
 		return nil, err
 	}
-	discov, err := kdisc.NewDiscoveryRegister(&config.ZookeeperConfig)
+	discov, err := kdisc.NewDiscoveryRegister(&config.ZookeeperConfig, &config.Share)
 	if err != nil {
 		return nil, err
 	}

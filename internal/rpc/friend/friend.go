@@ -56,6 +56,7 @@ type Config struct {
 	NotificationConfig config.Notification
 	Share              config.Share
 	WebhooksConfig     config.Webhooks
+	LocalCacheConfig   config.LocalCache
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -99,12 +100,12 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		friendDatabase: controller.NewFriendDatabase(
 			friendMongoDB,
 			friendRequestMongoDB,
-			cache.NewFriendCacheRedis(rdb, friendMongoDB, cache.GetDefaultOpt()),
+			cache.NewFriendCacheRedis(rdb, &config.LocalCacheConfig, friendMongoDB, cache.GetDefaultOpt()),
 			mgocli.GetTx(),
 		),
 		blackDatabase: controller.NewBlackDatabase(
 			blackMongoDB,
-			cache.NewBlackCacheRedis(rdb, blackMongoDB, cache.GetDefaultOpt()),
+			cache.NewBlackCacheRedis(rdb, &config.LocalCacheConfig, blackMongoDB, cache.GetDefaultOpt()),
 		),
 		userRpcClient:         &userRpcClient,
 		notificationSender:    notificationSender,
