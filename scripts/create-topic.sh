@@ -15,8 +15,6 @@
 
 # Wait for Kafka to be ready
 
-#!/bin/bash
-
 KAFKA_SERVER=localhost:9092
 
 MAX_ATTEMPTS=300
