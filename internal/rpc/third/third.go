@@ -90,7 +90,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	var o s3.Interface
 	switch enable {
 	case "minio":
-		o, err = minio.NewMinio(cache.NewMinioCache(rdb), *config.MinioConfig.Build())
+		o, err = minio.NewMinio(ctx, cache.NewMinioCache(rdb), *config.MinioConfig.Build())
 	case "cos":
 		o, err = cos.NewCos(*config.RpcConfig.Object.Cos.Build())
 	case "oss":
