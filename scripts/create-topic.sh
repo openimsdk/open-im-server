@@ -24,7 +24,6 @@ attempt_num=1
 
 echo "Waiting for Kafka to be ready..."
 
-# 尝试连接Kafka服务，最多重试MAX_ATTEMPTS次
 until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server $KAFKA_SERVER; do
   echo "Attempt $attempt_num of $MAX_ATTEMPTS: Kafka not ready yet..."
   if [ $attempt_num -eq $MAX_ATTEMPTS ]; then
