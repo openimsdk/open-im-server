@@ -101,7 +101,7 @@ services:
       - openim
 
   openim-web:
-    image: ${OPENIM_IMAGE_REGISTRY}/${OPENIM_WEB_IMAGE_VERSION}
+    image: ${OPENIM_WEB_IMAGE}
     container_name: openim-web
     restart: always
     ports:
@@ -110,7 +110,7 @@ services:
       - openim
 
   openim-admin:
-    image: ${OPENIM_IMAGE_REGISTRY}/${ADMIN_FRONT_VERSION}
+    image: ${OPENIM_ADMIN_FRONT_IMAGE}
     container_name: openim-admin
     restart: always
     ports:
