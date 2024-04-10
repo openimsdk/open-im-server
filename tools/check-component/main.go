@@ -24,6 +24,7 @@ import (
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery/zookeeper"
 	"github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/system/program"
 	"path/filepath"
 	"time"
@@ -32,24 +33,23 @@ import (
 const maxRetry = 180
 
 func CheckZookeeper(ctx context.Context, config *config.ZooKeeper) error {
-	return zookeeper.CheckZookeeper(ctx, config.Address, config.Schema, zookeeper.WithUserNameAndPassword(config.Username, config.Password))
+	return zookeeper.Check(ctx, config.Address, config.Schema, zookeeper.WithUserNameAndPassword(config.Username, config.Password))
 }
 
 func CheckMongo(ctx context.Context, config *config.Mongo) error {
-	return mongoutil.CheckMongo(ctx, config.Build())
+	return mongoutil.Check(ctx, config.Build())
 }
 
 func CheckRedis(ctx context.Context, config *config.Redis) error {
-	return redisutil.CheckRedis(ctx, config.Build())
+	return redisutil.Check(ctx, config.Build())
 }
 
 func CheckMinIO(ctx context.Context, config *config.Minio) error {
-	//return minio.Check()
-	return nil
+	return minio.Check(ctx, config.Build())
 }
 
 func CheckKafka(ctx context.Context, conf *config.Kafka) error {
-	return kafka.CheckKafka(ctx, conf.Build(), []string{conf.ToMongoTopic, conf.ToRedisTopic, conf.ToPushTopic})
+	return kafka.Check(ctx, conf.Build(), []string{conf.ToMongoTopic, conf.ToRedisTopic, conf.ToPushTopic})
 }
 
 func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, *config.Minio, *config.ZooKeeper, error) {
