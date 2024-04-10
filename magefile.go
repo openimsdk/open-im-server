@@ -34,6 +34,5 @@ func Stop() {
 }
 
 func Check() {
-	mageutil.InitNoBuild()
 	mageutil.CheckAndReportBinariesStatus()
 }
