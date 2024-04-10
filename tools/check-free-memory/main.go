@@ -7,14 +7,12 @@ import (
 )
 
 func main() {
-	// 使用gopsutil获取虚拟内存信息
 	vMem, err := mem.VirtualMemory()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to get virtual memory info: %v\n", err)
 		os.Exit(1)
 	}
 
-	// 将可用内存从字节转换为GB
 	freeMemoryGB := float64(vMem.Free) / float64(1024*1024*1024)
 
 	if freeMemoryGB < 4.0 {
