@@ -87,7 +87,6 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 	return mongoConfig, redisConfig, kafkaConfig, minioConfig, zookeeperConfig, nil
 }
 
-// fmt.Fprintf(os.Stderr, "%s exit -1: %+v\n", progName, err)
 func main() {
 	var index int
 	var configDir string

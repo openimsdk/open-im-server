@@ -19,13 +19,12 @@ type Config struct {
 	MaxFileDescriptors int            `yaml:"maxFileDescriptors"`
 }
 
-func init() {
+func InitForSSC() {
 	yamlFile, err := ioutil.ReadFile("start-config.yml")
 	if err != nil {
 		log.Fatalf("error reading YAML file: %v", err)
 	}
 
-	// 解析YAML
 	var config Config
 	err = yaml.Unmarshal(yamlFile, &config)
 	if err != nil {

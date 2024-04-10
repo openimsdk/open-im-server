@@ -3,6 +3,7 @@ package mageutil
 import (
 	"fmt"
 	"github.com/magefile/mage/sh"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,8 +12,8 @@ import (
 
 // CheckAndReportBinariesStatus checks the running status of all binary files and reports it.
 func CheckAndReportBinariesStatus() {
+	InitForSSC()
 	err := CheckBinariesRunning()
-
 	if err != nil {
 		PrintRed("Some programs are not running properly:")
 		PrintRedNoTimeStamp(err.Error())
@@ -25,6 +26,7 @@ func CheckAndReportBinariesStatus() {
 
 // StopAndCheckBinaries stops all binary processes and checks if they have all stopped.
 func StopAndCheckBinaries() {
+	InitForSSC()
 	KillExistBinaries()
 	err := CheckBinariesStop()
 	if err != nil {
@@ -36,6 +38,7 @@ func StopAndCheckBinaries() {
 
 // StartToolsAndServices starts the process for tools and services.
 func StartToolsAndServices() {
+	InitForSSC()
 	PrintBlue("Starting tools primarily involves component verification and other preparatory tasks.")
 	if err := StartTools(); err != nil {
 		PrintRed("Some tools failed to start, details are as follows, abort start")
@@ -65,14 +68,44 @@ func CompileForPlatform(platform string) {
 
 	PrintBlue(fmt.Sprintf("Compiling cmd for %s...", platform))
 
-	compileDir(filepath.Join(rootDirPath, "cmd"), platformsOutputBase, platform)
+	cmdCompiledDirs := compileDir(filepath.Join(rootDirPath, "cmd"), platformsOutputBase, platform)
 
 	PrintBlue(fmt.Sprintf("Compiling tools for %s...", platform))
-	compileDir(filepath.Join(rootDirPath, "tools"), toolsOutputBase, platform)
+	toolsCompiledDirs := compileDir(filepath.Join(rootDirPath, "tools"), toolsOutputBase, platform)
+	createStartConfigYML(cmdCompiledDirs, toolsCompiledDirs)
 
 }
 
-func compileDir(sourceDir, outputBase, platform string) {
+func createStartConfigYML(cmdDirs, toolsDirs []string) {
+	configPath := filepath.Join(rootDirPath, "start-config.yml")
+
+	if _, err := os.Stat(configPath); !os.IsNotExist(err) {
+		PrintBlue("start-config.yml already exists, skipping creation.")
+		return
+	}
+
+	var content strings.Builder
+	content.WriteString("serviceBinaries:\n")
+	for _, dir := range cmdDirs {
+		content.WriteString(fmt.Sprintf("  %s: 1\n", dir))
+	}
+	content.WriteString("toolBinaries:\n")
+	for _, dir := range toolsDirs {
+		content.WriteString(fmt.Sprintf("  - %s\n", dir))
+	}
+	content.WriteString("maxFileDescriptors: 10000\n")
+
+	err := ioutil.WriteFile(configPath, []byte(content.String()), 0644)
+	if err != nil {
+		PrintRed("Failed to create start-config.yml: " + err.Error())
+		return
+	}
+	PrintGreen("start-config.yml created successfully.")
+}
+
+func compileDir(sourceDir, outputBase, platform string) []string {
+	var compiledDirs []string
+	var mu sync.Mutex
 	targetOS, targetArch := strings.Split(platform, "_")[0], strings.Split(platform, "_")[1]
 	outputDir := filepath.Join(outputBase, targetOS, targetArch)
 
@@ -115,6 +148,9 @@ func compileDir(sourceDir, outputBase, platform string) {
 				return
 			}
 			PrintGreen(fmt.Sprintf("Successfully compiled. dir: %s for platform: %s binary: %s", dirName, platform, outputFileName))
+			mu.Lock()
+			compiledDirs = append(compiledDirs, dirName)
+			mu.Unlock()
 		}()
 
 		return nil
@@ -133,6 +169,7 @@ func compileDir(sourceDir, outputBase, platform string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	return compiledDirs
 }
 
 // compileDir compiles Go programs in a specified directory, appending .exe extension for output files on Windows platform
