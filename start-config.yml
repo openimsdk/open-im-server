@@ -3,7 +3,6 @@ serviceBinaries:
   openim-test: 1
 
 toolBinaries:
-  - check-free-memory
   - check-component
 
 maxFileDescriptors: 10000
