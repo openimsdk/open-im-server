@@ -45,9 +45,6 @@ type CmdOpts struct {
 	loggerPrefixName string
 	configMap        map[string]any
 }
-type StructEnvPrefix struct {
-	EnvPrefix string
-}
 
 func WithCronTaskLogName() func(*CmdOpts) {
 	return func(opts *CmdOpts) {
