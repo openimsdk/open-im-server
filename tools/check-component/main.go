@@ -69,7 +69,7 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
-	fmt.Println("redis1: ", redisConfig, "redis2: " redisConfig.Build())
+	fmt.Println("redis1: ", redisConfig, "redis2: ", redisConfig.Build())
 
 	err = config.LoadConfig(filepath.Join(configDir, cmd.KafkaConfigFileName), cmd.ConfigEnvPrefixMap[cmd.KafkaConfigFileName], kafkaConfig)
 	if err != nil {
