@@ -68,7 +68,7 @@ services:
       - ./scripts/create-topic.sh:/opt/bitnami/kafka/create-topic.sh
       - "${DATA_DIR}/components/kafka:/bitnami/kafka"
     command: >
-      bash -c "/opt/bitnami/scripts/kafka/run.sh ; /opt/bitnami/kafka/create-topic.sh; wait"
+      bash -c "/opt/bitnami/scripts/kafka/run.sh & /opt/bitnami/kafka/create-topic.sh; wait"
     environment:
       TZ: Asia/Shanghai
       KAFKA_CFG_NODE_ID: 0
