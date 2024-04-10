@@ -52,4 +52,4 @@ for topic in "${topics[@]}"; do
   fi
 done
 
-echo "All topics created or attempted."
+echo "All topics created."
