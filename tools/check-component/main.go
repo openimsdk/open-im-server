@@ -87,6 +87,7 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 	return mongoConfig, redisConfig, kafkaConfig, minioConfig, zookeeperConfig, nil
 }
 
+// fmt.Fprintf(os.Stderr, "%s exit -1: %+v\n", progName, err)
 func main() {
 	var index int
 	var configDir string
@@ -137,7 +138,7 @@ func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *
 		for name, check := range checks {
 			if !checksDone[name] {
 				if err := check(); err != nil {
-					fmt.Printf("%s check failed: %v\n", name, err)
+					fmt.Printf("%s check failed: %+v\n", name, err)
 					allSuccess = false
 				} else {
 					fmt.Printf("%s check succeeded.\n", name)
