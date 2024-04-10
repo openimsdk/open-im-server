@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package notification
+package msg
 
 import (
 	"context"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
@@ -27,8 +26,8 @@ type MsgNotificationSender struct {
 	*rpcclient.NotificationSender
 }
 
-func NewMsgNotificationSender(config *config.GlobalConfig, opts ...rpcclient.NotificationSenderOptions) *MsgNotificationSender {
-	return &MsgNotificationSender{rpcclient.NewNotificationSender(&config.Notification, opts...)}
+func NewMsgNotificationSender(config *Config, opts ...rpcclient.NotificationSenderOptions) *MsgNotificationSender {
+	return &MsgNotificationSender{rpcclient.NewNotificationSender(&config.NotificationConfig, opts...)}
 }
 
 func (m *MsgNotificationSender) UserDeleteMsgsNotification(ctx context.Context, userID, conversationID string, seqs []int64) error {

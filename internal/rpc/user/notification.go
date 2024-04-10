@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package notification
+package user
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -27,7 +27,7 @@ import (
 
 type UserNotificationSender struct {
 	*rpcclient.NotificationSender
-	getUsersInfo func(ctx context.Context, userIDs []string) ([]CommonUser, error)
+	getUsersInfo func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error)
 	// db controller
 	db controller.UserDatabase
 }
@@ -44,7 +44,7 @@ func WithUserFunc(
 	fn func(ctx context.Context, userIDs []string) (users []*relationtb.UserModel, err error),
 ) userNotificationSenderOptions {
 	return func(u *UserNotificationSender) {
-		f := func(ctx context.Context, userIDs []string) (result []CommonUser, err error) {
+		f := func(ctx context.Context, userIDs []string) (result []notification.CommonUser, err error) {
 			users, err := fn(ctx, userIDs)
 			if err != nil {
 				return nil, err
@@ -58,9 +58,9 @@ func WithUserFunc(
 	}
 }
 
-func NewUserNotificationSender(config *config.GlobalConfig, msgRpcClient *rpcclient.MessageRpcClient, opts ...userNotificationSenderOptions) *UserNotificationSender {
+func NewUserNotificationSender(config *Config, msgRpcClient *rpcclient.MessageRpcClient, opts ...userNotificationSenderOptions) *UserNotificationSender {
 	f := &UserNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(&config.Notification, rpcclient.WithRpcClient(msgRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithRpcClient(msgRpcClient)),
 	}
 	for _, opt := range opts {
 		opt(f)

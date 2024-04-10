@@ -17,11 +17,11 @@ package tools
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/internal/rpc/msg"
 	"math"
 	"math/rand"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
@@ -36,13 +36,13 @@ type MsgTool struct {
 	conversationDatabase  controller.ConversationDatabase
 	userDatabase          controller.UserDatabase
 	groupDatabase         controller.GroupDatabase
-	msgNotificationSender *notification.MsgNotificationSender
+	msgNotificationSender *msg.MsgNotificationSender
 	config                *CronTaskConfig
 }
 
 func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controller.UserDatabase,
 	groupDatabase controller.GroupDatabase, conversationDatabase controller.ConversationDatabase,
-	msgNotificationSender *notification.MsgNotificationSender, config *CronTaskConfig,
+	msgNotificationSender *msg.MsgNotificationSender, config *CronTaskConfig,
 ) *MsgTool {
 	return &MsgTool{
 		msgDatabase:           msgDatabase,

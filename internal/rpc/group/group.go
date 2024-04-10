@@ -56,7 +56,7 @@ import (
 type groupServer struct {
 	db                    controller.GroupDatabase
 	user                  rpcclient.UserRpcClient
-	notification          *notification.GroupNotificationSender
+	notification          *GroupNotificationSender
 	conversationRpcClient rpcclient.ConversationRpcClient
 	msgRpcClient          rpcclient.MessageRpcClient
 	config                *Config
@@ -101,7 +101,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	database := controller.NewGroupDatabase(rdb, &config.LocalCacheConfig, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.db = database
 	gs.user = userRpcClient
-	gs.notification = notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, config, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
+	gs.notification = NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, config, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
 		users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
 		if err != nil {
 			return nil, err

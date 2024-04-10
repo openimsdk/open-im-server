@@ -123,14 +123,6 @@ func (o *GroupApi) GetGroupAbstractInfo(c *gin.Context) {
 //	a2r.Call(group.GroupClient.GetGroupAllMember, g.userClient, c)
 //}
 
-func (o *GroupApi) GetJoinedSuperGroupList(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetJoinedSuperGroupList, o.Client, c)
-}
-
-func (o *GroupApi) GetSuperGroupsInfo(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetSuperGroupsInfo, o.Client, c)
-}
-
 func (o *GroupApi) GroupCreateCount(c *gin.Context) {
 	a2r.Call(group.GroupClient.GroupCreateCount, o.Client, c)
 }

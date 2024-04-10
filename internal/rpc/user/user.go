@@ -47,7 +47,7 @@ import (
 type userServer struct {
 	db                       controller.UserDatabase
 	friendNotificationSender *notification.FriendNotificationSender
-	userNotificationSender   *notification.UserNotificationSender
+	userNotificationSender   *UserNotificationSender
 	friendRpcClient          *rpcclient.FriendRpcClient
 	groupRpcClient           *rpcclient.GroupRpcClient
 	RegisterCenter           registry.SvcDiscoveryRegistry
@@ -99,7 +99,7 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 		friendRpcClient:          &friendRpcClient,
 		groupRpcClient:           &groupRpcClient,
 		friendNotificationSender: notification.NewFriendNotificationSender(&config.NotificationConfig, &msgRpcClient, notification.WithDBFunc(database.FindWithError)),
-		userNotificationSender:   notification.NewUserNotificationSender(config, &msgRpcClient, notification.WithUserFunc(database.FindWithError)),
+		userNotificationSender:   NewUserNotificationSender(config, &msgRpcClient, WithUserFunc(database.FindWithError)),
 		config:                   config,
 	}
 	pbuser.RegisterUserServer(server, u)
