@@ -236,11 +236,6 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, rdb redis.UniversalClie
 		groupRouterGroup.POST("/get_groups", g.GetGroups)
 		groupRouterGroup.POST("/get_group_member_user_id", g.GetGroupMemberUserIDs)
 	}
-	superGroupRouterGroup := r.Group("/super_group", ParseToken)
-	{
-		superGroupRouterGroup.POST("/get_joined_group_list", g.GetJoinedSuperGroupList)
-		superGroupRouterGroup.POST("/get_groups_info", g.GetSuperGroupsInfo)
-	}
 	// certificate
 	authRouterGroup := r.Group("/auth")
 	{

@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package notification
+package group
 
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -34,9 +34,9 @@ import (
 	"github.com/openimsdk/tools/utils/stringutil"
 )
 
-func NewGroupNotificationSender(db controller.GroupDatabase, msgRpcClient *rpcclient.MessageRpcClient, userRpcClient *rpcclient.UserRpcClient, config *config.GlobalConfig, fn func(ctx context.Context, userIDs []string) ([]CommonUser, error)) *GroupNotificationSender {
+func NewGroupNotificationSender(db controller.GroupDatabase, msgRpcClient *rpcclient.MessageRpcClient, userRpcClient *rpcclient.UserRpcClient, config *Config, fn func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error)) *GroupNotificationSender {
 	return &GroupNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(&config.Notification, rpcclient.WithRpcClient(msgRpcClient), rpcclient.WithUserRpcClient(userRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithRpcClient(msgRpcClient), rpcclient.WithUserRpcClient(userRpcClient)),
 		getUsersInfo:       fn,
 		db:                 db,
 		config:             config,
@@ -45,9 +45,9 @@ func NewGroupNotificationSender(db controller.GroupDatabase, msgRpcClient *rpccl
 
 type GroupNotificationSender struct {
 	*rpcclient.NotificationSender
-	getUsersInfo func(ctx context.Context, userIDs []string) ([]CommonUser, error)
+	getUsersInfo func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error)
 	db           controller.GroupDatabase
-	config       *config.GlobalConfig
+	config       *Config
 }
 
 func (g *GroupNotificationSender) PopulateGroupMember(ctx context.Context, members ...*relation.GroupMemberModel) error {
@@ -65,7 +65,7 @@ func (g *GroupNotificationSender) PopulateGroupMember(ctx context.Context, membe
 		if err != nil {
 			return err
 		}
-		userMap := make(map[string]CommonUser)
+		userMap := make(map[string]notification.CommonUser)
 		for i, user := range users {
 			userMap[user.GetUserID()] = users[i]
 		}
@@ -248,7 +248,7 @@ func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws
 	}
 	userID := mcontext.GetOpUserID(ctx)
 	if groupID != "" {
-		if authverify.IsManagerUserID(userID, &g.config.Manager, &g.config.IMAdmin) {
+		if authverify.IsManagerUserID(userID, &g.config.Share.IMAdmin) {
 			*opUser = &sdkws.GroupMemberFullInfo{
 				GroupID:        groupID,
 				UserID:         userID,
