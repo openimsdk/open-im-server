@@ -534,7 +534,7 @@ func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.P
 }
 
 func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.AddNotificationAccountReq) (*pbuser.AddNotificationAccountResp, error) {
-	if err := authverify.CheckIMAdmin(ctx, s.config); err != nil {
+	if err := authverify.CheckAdmin(ctx, &s.config.Share.IMAdmin); err != nil {
 		return nil, err
 	}
 
@@ -577,7 +577,7 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 }
 
 func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbuser.UpdateNotificationAccountInfoReq) (*pbuser.UpdateNotificationAccountInfoResp, error) {
-	if err := authverify.CheckIMAdmin(ctx, s.config); err != nil {
+	if err := authverify.CheckAdmin(ctx, &s.config.Share.IMAdmin); err != nil {
 		return nil, err
 	}
 
@@ -604,7 +604,7 @@ func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbu
 
 func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.SearchNotificationAccountReq) (*pbuser.SearchNotificationAccountResp, error) {
 	// Check if user is an admin
-	if err := authverify.CheckIMAdmin(ctx, s.config); err != nil {
+	if err := authverify.CheckAdmin(ctx, &s.config.Share.IMAdmin); err != nil {
 		return nil, err
 	}
 

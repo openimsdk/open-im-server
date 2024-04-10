@@ -55,17 +55,6 @@ func CheckAdmin(ctx context.Context, imAdmin *config.IMAdmin) error {
 	return servererrs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
 
-func CheckIMAdmin(ctx context.Context, config *config.GlobalConfig) error {
-	if datautil.Contain(mcontext.GetOpUserID(ctx), config.IMAdmin.UserID...) {
-		return nil
-	}
-	return servererrs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not CheckIMAdmin userID", mcontext.GetOpUserID(ctx)))
-}
-
-func ParseRedisInterfaceToken(redisToken any, secret string) (*tokenverify.Claims, error) {
-	return tokenverify.GetClaimFromToken(string(redisToken.([]uint8)), Secret(secret))
-}
-
 func IsManagerUserID(opUserID string, imAdmin *config.IMAdmin) bool {
 	return datautil.Contain(opUserID, imAdmin.UserID...)
 }
