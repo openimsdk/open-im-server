@@ -2,7 +2,7 @@ username: ''
 password: ''
 producerAck: ""
 compressType: "none"
-addr: [ localhost:19094 ]
+address: [ localhost:19094 ]
 toRedisTopic: "toRedis"
 toMongoTopic: "toMongo"
 toPushTopic: "toPush"
