@@ -29,6 +29,7 @@
 
 </p>
 
+
 ## ✨ About OpenIM
 
 Open-IM-Server, crafted meticulously using pure Golang, stands as a robust instant messaging server. Its unique approach to communication, via JSON over WebSocket, treats every interaction as a message. This simplifies customization and eliminates the need for tinkering with server code. Harnessing the power of microservice architecture, the server can be deployed via clusters, promising impressive performance and scalability.
