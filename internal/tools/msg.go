@@ -17,27 +17,18 @@ package tools
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/tools/db/redisutil"
 	"math"
 	"math/rand"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/mw"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"github.com/redis/go-redis/v9"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type MsgTool struct {
@@ -64,60 +55,61 @@ func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controlle
 }
 
 func InitMsgTool(ctx context.Context, config *CronTaskConfig) (*MsgTool, error) {
-	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
-	if err != nil {
-		return nil, err
-	}
-	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
-	if err != nil {
-		return nil, err
-	}
-	discov, err := kdisc.NewDiscoveryRegister(&config.ZookeeperConfig, &config.Share)
-	if err != nil {
-		return nil, err
-	}
-	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	userDB, err := mgo.NewUserMongo(mgocli.GetDB())
-	if err != nil {
-		return nil, err
-	}
-	msgDatabase, err := controller.InitCommonMsgDatabase(rdb, mgocli.GetDB(), config)
-	if err != nil {
-		return nil, err
-	}
-	userMongoDB := mgo.NewUserMongoDriver(mgocli.GetDB())
-	userDatabase := controller.NewUserDatabase(
-		userDB,
-		cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt()),
-		mgocli.GetTx(),
-		userMongoDB,
-	)
-	groupDB, err := mgo.NewGroupMongo(mgocli.GetDB())
-	if err != nil {
-		return nil, err
-	}
-	groupMemberDB, err := mgo.NewGroupMember(mgocli.GetDB())
-	if err != nil {
-		return nil, err
-	}
-	groupRequestDB, err := mgo.NewGroupRequestMgo(mgocli.GetDB())
-	if err != nil {
-		return nil, err
-	}
-	conversationDB, err := mgo.NewConversationMongo(mgocli.GetDB())
-	if err != nil {
-		return nil, err
-	}
-	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), nil)
-	conversationDatabase := controller.NewConversationDatabase(
-		conversationDB,
-		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
-		mgocli.GetTx(),
-	)
-	msgRpcClient := rpcclient.NewMessageRpcClient(discov, config.Share.RpcRegisterName.Msg)
-	msgNotificationSender := notification.NewMsgNotificationSender(config, rpcclient.WithRpcClient(&msgRpcClient))
-	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase, msgNotificationSender, config)
-	return msgTool, nil
+	//mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//discov, err := kdisc.NewDiscoveryRegister(&config.ZookeeperConfig, &config.Share)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
+	//userDB, err := mgo.NewUserMongo(mgocli.GetDB())
+	//if err != nil {
+	//	return nil, err
+	//}
+	////msgDatabase, err := controller.InitCommonMsgDatabase(rdb, mgocli.GetDB(), config)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//userMongoDB := mgo.NewUserMongoDriver(mgocli.GetDB())
+	//userDatabase := controller.NewUserDatabase(
+	//	userDB,
+	//	cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt()),
+	//	mgocli.GetTx(),
+	//	userMongoDB,
+	//)
+	//groupDB, err := mgo.NewGroupMongo(mgocli.GetDB())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//groupMemberDB, err := mgo.NewGroupMember(mgocli.GetDB())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//groupRequestDB, err := mgo.NewGroupRequestMgo(mgocli.GetDB())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//conversationDB, err := mgo.NewConversationMongo(mgocli.GetDB())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), nil)
+	//conversationDatabase := controller.NewConversationDatabase(
+	//	conversationDB,
+	//	cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
+	//	mgocli.GetTx(),
+	//)
+	//msgRpcClient := rpcclient.NewMessageRpcClient(discov, config.Share.RpcRegisterName.Msg)
+	//msgNotificationSender := notification.NewMsgNotificationSender(config, rpcclient.WithRpcClient(&msgRpcClient))
+	//msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase, msgNotificationSender, config)
+	//return msgTool, nil
+	return nil, nil
 }
 
 // func (c *MsgTool) AllConversationClearMsgAndFixSeq() {

@@ -17,13 +17,11 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"github.com/openimsdk/open-im-server/v3/internal/tools"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/protocol/constant"
@@ -133,16 +131,16 @@ func NewCommonMsgDatabase(msgDocModel relation.MsgDocModelInterface, msg cache.M
 	}, nil
 }
 
-func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, config *tools.CronTaskConfig) (CommonMsgDatabase, error) {
-	msgDocModel, err := mgo.NewMsgMongo(database)
-	if err != nil {
-		return nil, err
-	}
-	//todo MsgCacheTimeout
-	msg := cache.NewMsgCache(rdb, 86400, config.RedisConfig.EnablePipeline)
-	seq := cache.NewSeqCache(rdb)
-	return NewCommonMsgDatabase(msgDocModel, msg, seq, &config.KafkaConfig)
-}
+//func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, config *tools.CronTaskConfig) (CommonMsgDatabase, error) {
+//	msgDocModel, err := mgo.NewMsgMongo(database)
+//	if err != nil {
+//		return nil, err
+//	}
+//	//todo MsgCacheTimeout
+//	msg := cache.NewMsgCache(rdb, 86400, config.RedisConfig.EnablePipeline)
+//	seq := cache.NewSeqCache(rdb)
+//	return NewCommonMsgDatabase(msgDocModel, msg, seq, &config.KafkaConfig)
+//}
 
 type commonMsgDatabase struct {
 	msgDocDatabase   relation.MsgDocModelInterface
