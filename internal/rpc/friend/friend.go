@@ -94,6 +94,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		&msgRpcClient,
 		notification.WithRpcFunc(userRpcClient.GetUsersInfo),
 	)
+	cache.InitLocalCache(&config.LocalCacheConfig)
 
 	// Register Friend server with refactored MongoDB and Redis integrations
 	pbfriend.RegisterFriendServer(server, &friendServer{

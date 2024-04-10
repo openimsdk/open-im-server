@@ -86,12 +86,13 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	if err != nil {
 		return err
 	}
-	cache := cache.NewUserCacheRedis(rdb, &config.LocalCacheConfig, userDB, cache.GetDefaultOpt())
+	userCache := cache.NewUserCacheRedis(rdb, &config.LocalCacheConfig, userDB, cache.GetDefaultOpt())
 	userMongoDB := mgo.NewUserMongoDriver(mgocli.GetDB())
-	database := controller.NewUserDatabase(userDB, cache, mgocli.GetTx(), userMongoDB)
+	database := controller.NewUserDatabase(userDB, userCache, mgocli.GetTx(), userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.Share.RpcRegisterName.Friend)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
+	cache.InitLocalCache(&config.LocalCacheConfig)
 	u := &userServer{
 		db:                       database,
 		RegisterCenter:           client,

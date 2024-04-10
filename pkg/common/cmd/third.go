@@ -41,6 +41,7 @@ func NewThirdRpcCmd() *ThirdRpcCmd {
 		ShareFileName:             &thirdConfig.Share,
 		NotificationFileName:      &thirdConfig.NotificationConfig,
 		MinioConfigFileName:       &thirdConfig.MinioConfig,
+		LocalCacheConfigFileName:  &thirdConfig.LocalCacheConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)

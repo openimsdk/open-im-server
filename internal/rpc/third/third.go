@@ -53,6 +53,7 @@ type Config struct {
 	NotificationConfig config.Notification
 	Share              config.Share
 	MinioConfig        config.Minio
+	LocalCacheConfig   config.LocalCache
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -100,6 +101,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	cache.InitLocalCache(&config.LocalCacheConfig)
 	third.RegisterThirdServer(server, &thirdServer{
 		apiURL:        apiURL,
 		thirdDatabase: controller.NewThirdDatabase(cache.NewThirdCache(rdb), logdb),
