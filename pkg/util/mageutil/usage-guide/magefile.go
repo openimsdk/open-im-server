@@ -4,7 +4,7 @@
 package main
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/util/mageutil"
+	"github.com/openimsdk/tools/utils/mageutil"
 	"os"
 	"strings"
 )
@@ -21,7 +21,7 @@ func Build() {
 		mageutil.CompileForPlatform(platform)
 	}
 
-	mageutil.PrintGreen("All binaries under cmd and tools were successfully compiled.")
+	mageutil.PrintGreen("Compilation complete.")
 }
 
 func Start() {

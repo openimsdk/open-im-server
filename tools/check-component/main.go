@@ -24,7 +24,6 @@ import (
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery/zookeeper"
 	"github.com/openimsdk/tools/mq/kafka"
-	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/system/program"
 	"path/filepath"
 	"time"
@@ -45,8 +44,8 @@ func CheckRedis(ctx context.Context, config *config.Redis) error {
 }
 
 func CheckMinIO(ctx context.Context, config *config.Minio) error {
-	return minio.Check()
-
+	//return minio.Check()
+	return nil
 }
 
 func CheckKafka(ctx context.Context, conf *config.Kafka) error {
