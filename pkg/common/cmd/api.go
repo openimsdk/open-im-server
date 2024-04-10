@@ -25,18 +25,18 @@ import (
 type ApiCmd struct {
 	*RootCmd
 	ctx       context.Context
-	configMap map[string]StructEnvPrefix
+	configMap map[string]any
 	apiConfig api.Config
 }
 
 func NewApiCmd() *ApiCmd {
 	var apiConfig api.Config
 	ret := &ApiCmd{apiConfig: apiConfig}
-	ret.configMap = map[string]StructEnvPrefix{
-		OpenIMAPICfgFileName:    {EnvPrefix: apiEnvPrefix, ConfigStruct: &apiConfig.RpcConfig},
-		RedisConfigFileName:     {EnvPrefix: redisEnvPrefix, ConfigStruct: &apiConfig.RedisConfig},
-		ZookeeperConfigFileName: {EnvPrefix: zoopkeeperEnvPrefix, ConfigStruct: &apiConfig.ZookeeperConfig},
-		ShareFileName:           {EnvPrefix: shareEnvPrefix, ConfigStruct: &apiConfig.Share},
+	ret.configMap = map[string]any{
+		OpenIMAPICfgFileName:    &apiConfig.RpcConfig,
+		RedisConfigFileName:     &apiConfig.RedisConfig,
+		ZookeeperConfigFileName: &apiConfig.ZookeeperConfig,
+		ShareFileName:           &apiConfig.Share,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
