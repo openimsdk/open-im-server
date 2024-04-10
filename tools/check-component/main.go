@@ -69,7 +69,6 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
-	fmt.Println("redis1: ", redisConfig, "redis2: ", redisConfig.Build())
 
 	err = config.LoadConfig(filepath.Join(configDir, cmd.KafkaConfigFileName), cmd.ConfigEnvPrefixMap[cmd.KafkaConfigFileName], kafkaConfig)
 	if err != nil {
@@ -149,12 +148,12 @@ func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *
 		}
 
 		if allSuccess {
-			fmt.Println("All checks passed successfully.")
+			fmt.Println("All components checks passed successfully.")
 			return nil
 		}
 
 		time.Sleep(1 * time.Second)
 	}
 
-	return fmt.Errorf("not all checks passed successfully after %d attempts", maxRetry)
+	return fmt.Errorf("not all components checks passed successfully after %d attempts", maxRetry)
 }
