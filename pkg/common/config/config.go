@@ -144,6 +144,8 @@ type Notification struct {
 	GroupMemberMuted          NotificationConfig `mapstructure:"groupMemberMuted"`
 	GroupMemberCancelMuted    NotificationConfig `mapstructure:"groupMemberCancelMuted"`
 	GroupMemberInfoSet        NotificationConfig `mapstructure:"groupMemberInfoSet"`
+	GroupMemberSetToAdmin     NotificationConfig `yaml:"groupMemberSetToAdmin"`
+	GroupMemberSetToOrdinary  NotificationConfig `yaml:"groupMemberSetToOrdinaryUser"`
 	GroupInfoSetAnnouncement  NotificationConfig `mapstructure:"groupInfoSetAnnouncement"`
 	GroupInfoSetName          NotificationConfig `mapstructure:"groupInfoSetName"`
 	FriendApplicationAdded    NotificationConfig `mapstructure:"friendApplicationAdded"`

@@ -34,8 +34,8 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func newContentTypeConf(conf *config.Notification) map[int32]config.NotificationConf {
-	return map[int32]config.NotificationConf{
+func newContentTypeConf(conf *config.Notification) map[int32]config.NotificationConfig {
+	return map[int32]config.NotificationConfig{
 		// group
 		constant.GroupCreatedNotification:                 conf.GroupCreated,
 		constant.GroupInfoSetNotification:                 conf.GroupInfoSet,
@@ -213,7 +213,7 @@ func (m *MessageRpcClient) GetConversationMaxSeq(ctx context.Context, conversati
 }
 
 type NotificationSender struct {
-	contentTypeConf map[int32]config.NotificationConf
+	contentTypeConf map[int32]config.NotificationConfig
 	sessionTypeConf map[int32]int32
 	sendMsg         func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)
 	getUserInfo     func(ctx context.Context, userID string) (*sdkws.UserInfo, error)
