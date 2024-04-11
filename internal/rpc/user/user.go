@@ -76,11 +76,9 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 		return err
 	}
 	users := make([]*tablerelation.UserModel, 0)
-	if len(config.Share.IMAdmin.UserID) != len(config.Share.IMAdmin.Nickname) {
-		return errs.New("the count of ImAdmin.UserID is not equal to the count of ImAdmin.Nickname").Wrap()
-	}
-	for k, v := range config.Share.IMAdmin.UserID {
-		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Share.IMAdmin.Nickname[k], AppMangerLevel: constant.AppNotificationAdmin})
+
+	for _, v := range config.Share.IMAdminUserID {
+		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: v, AppMangerLevel: constant.AppNotificationAdmin})
 	}
 	userDB, err := mgo.NewUserMongo(mgocli.GetDB())
 	if err != nil {
@@ -118,7 +116,7 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) (resp *pbuser.UpdateUserInfoResp, err error) {
 	resp = &pbuser.UpdateUserInfoResp{}
-	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID, &s.config.Share.IMAdmin)
+	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID, s.config.Share.IMAdminUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +150,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 }
 func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (resp *pbuser.UpdateUserInfoExResp, err error) {
 	resp = &pbuser.UpdateUserInfoExResp{}
-	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID, &s.config.Share.IMAdmin)
+	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID, s.config.Share.IMAdminUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +202,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 	if datautil.Duplicate(req.CheckUserIDs) {
 		return nil, errs.ErrArgs.WrapMsg("userID repeated")
 	}
-	err = authverify.CheckAdmin(ctx, &s.config.Share.IMAdmin)
+	err = authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -390,7 +388,7 @@ func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
 
 // ProcessUserCommandAdd user general function add.
 func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
-	err := authverify.CheckAccessV3(ctx, req.UserID, &s.config.Share.IMAdmin)
+	err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -421,7 +419,7 @@ func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.Proc
 
 // ProcessUserCommandDelete user general function delete.
 func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.ProcessUserCommandDeleteReq) (*pbuser.ProcessUserCommandDeleteResp, error) {
-	err := authverify.CheckAccessV3(ctx, req.UserID, &s.config.Share.IMAdmin)
+	err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -444,7 +442,7 @@ func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.P
 
 // ProcessUserCommandUpdate user general function update.
 func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
-	err := authverify.CheckAccessV3(ctx, req.UserID, &s.config.Share.IMAdmin)
+	err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -476,7 +474,7 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 
 func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
 
-	err := authverify.CheckAccessV3(ctx, req.UserID, &s.config.Share.IMAdmin)
+	err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -505,7 +503,7 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 }
 
 func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.ProcessUserCommandGetAllReq) (*pbuser.ProcessUserCommandGetAllResp, error) {
-	err := authverify.CheckAccessV3(ctx, req.UserID, &s.config.Share.IMAdmin)
+	err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -534,7 +532,7 @@ func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.P
 }
 
 func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.AddNotificationAccountReq) (*pbuser.AddNotificationAccountResp, error) {
-	if err := authverify.CheckAdmin(ctx, &s.config.Share.IMAdmin); err != nil {
+	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 
@@ -577,7 +575,7 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 }
 
 func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbuser.UpdateNotificationAccountInfoReq) (*pbuser.UpdateNotificationAccountInfoResp, error) {
-	if err := authverify.CheckAdmin(ctx, &s.config.Share.IMAdmin); err != nil {
+	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 
@@ -604,7 +602,7 @@ func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbu
 
 func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.SearchNotificationAccountReq) (*pbuser.SearchNotificationAccountResp, error) {
 	// Check if user is an admin
-	if err := authverify.CheckAdmin(ctx, &s.config.Share.IMAdmin); err != nil {
+	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 
@@ -678,7 +676,7 @@ func (s *userServer) userModelToResp(users []*relation.UserModel, pagination pag
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {
-		if v.AppMangerLevel == constant.AppNotificationAdmin && !datautil.Contain(v.UserID, s.config.Share.IMAdmin.UserID...) {
+		if v.AppMangerLevel == constant.AppNotificationAdmin && !datautil.Contain(v.UserID, s.config.Share.IMAdminUserID...) {
 			temp := &pbuser.NotificationAccountInfo{
 				UserID:   v.UserID,
 				FaceURL:  v.FaceURL,

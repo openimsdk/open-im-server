@@ -55,7 +55,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, &config.Share.IMAdmin)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
 	pbauth.RegisterAuthServer(server, &authServer{
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
@@ -88,12 +88,12 @@ func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*
 }
 
 func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenReq) (*pbauth.GetUserTokenResp, error) {
-	if err := authverify.CheckAdmin(ctx, &s.config.Share.IMAdmin); err != nil {
+	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	resp := pbauth.GetUserTokenResp{}
 
-	if authverify.IsManagerUserID(req.UserID, &s.config.Share.IMAdmin) {
+	if authverify.IsManagerUserID(req.UserID, s.config.Share.IMAdminUserID) {
 		return nil, errs.ErrNoPermission.WrapMsg("don't get Admin token")
 	}
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
@@ -149,7 +149,7 @@ func (s *authServer) ParseToken(
 }
 
 func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq) (*pbauth.ForceLogoutResp, error) {
-	if err := authverify.CheckAdmin(ctx, &s.config.Share.IMAdmin); err != nil {
+	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {

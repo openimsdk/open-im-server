@@ -73,7 +73,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	}
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, &config.Share.IMAdmin)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
 	cache.InitLocalCache(&config.LocalCacheConfig)
 	pbconversation.RegisterConversationServer(server, &conversationServer{
 		msgRpcClient:                   &msgRpcClient,

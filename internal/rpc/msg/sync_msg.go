@@ -87,7 +87,7 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 }
 
 func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, &m.config.Share.IMAdmin); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	conversationIDs, err := m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)

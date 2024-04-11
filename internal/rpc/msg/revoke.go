@@ -41,7 +41,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if req.Seq < 0 {
 		return nil, errs.ErrArgs.WrapMsg("seq is invalid")
 	}
-	if err := authverify.CheckAccessV3(ctx, req.UserID, &m.config.Share.IMAdmin); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	user, err := m.UserLocalCache.GetUserInfo(ctx, req.UserID)
@@ -62,10 +62,10 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	data, _ := json.Marshal(msgs[0])
 	log.ZDebug(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
 	var role int32
-	if !authverify.IsAppManagerUid(ctx, &m.config.Share.IMAdmin) {
+	if !authverify.IsAppManagerUid(ctx, m.config.Share.IMAdminUserID) {
 		switch msgs[0].SessionType {
 		case constant.SingleChatType:
-			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID, &m.config.Share.IMAdmin); err != nil {
+			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID, m.config.Share.IMAdminUserID); err != nil {
 				return nil, err
 			}
 			role = user.AppMangerLevel
@@ -104,8 +104,9 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	}
 	revokerUserID := mcontext.GetOpUserID(ctx)
 	var flag bool
-	if len(m.config.Share.IMAdmin.UserID) > 0 {
-		flag = datautil.Contain(revokerUserID, m.config.Share.IMAdmin.UserID...)
+
+	if len(m.config.Share.IMAdminUserID) > 0 {
+		flag = datautil.Contain(revokerUserID, m.config.Share.IMAdminUserID...)
 	}
 	tips := sdkws.RevokeMsgTips{
 		RevokerUserID:  revokerUserID,

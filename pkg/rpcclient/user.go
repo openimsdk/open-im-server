@@ -19,7 +19,6 @@ import (
 	"strings"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/protocol/user"
@@ -35,12 +34,12 @@ type User struct {
 	Client                user.UserClient
 	Discov                discovery.SvcDiscoveryRegistry
 	MessageGateWayRpcName string
-	imAdmin               *config.IMAdmin
+	imAdminUserID         []string
 }
 
 // NewUser initializes and returns a User instance based on the provided service discovery registry.
 func NewUser(discov discovery.SvcDiscoveryRegistry, rpcRegisterName, messageGateWayRpcName string,
-	imAdmin *config.IMAdmin) *User {
+	imAdminUserID []string) *User {
 	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
 		program.ExitWithError(err)
@@ -49,7 +48,7 @@ func NewUser(discov discovery.SvcDiscoveryRegistry, rpcRegisterName, messageGate
 	return &User{Discov: discov, Client: client,
 		conn:                  conn,
 		MessageGateWayRpcName: messageGateWayRpcName,
-		imAdmin:               imAdmin}
+		imAdminUserID:         imAdminUserID}
 }
 
 // UserRpcClient represents the structure for a User RPC client.
@@ -63,8 +62,8 @@ func NewUserRpcClientByUser(user *User) *UserRpcClient {
 
 // NewUserRpcClient initializes a UserRpcClient based on the provided service discovery registry.
 func NewUserRpcClient(client discovery.SvcDiscoveryRegistry, rpcRegisterName string,
-	imAdmin *config.IMAdmin) UserRpcClient {
-	return UserRpcClient(*NewUser(client, rpcRegisterName, "", imAdmin))
+	imAdminUserID []string) UserRpcClient {
+	return UserRpcClient(*NewUser(client, rpcRegisterName, "", imAdminUserID))
 }
 
 // GetUsersInfo retrieves information for multiple users based on their user IDs.
@@ -167,7 +166,7 @@ func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
 	if err != nil {
 		return err
 	}
-	return authverify.CheckAccessV3(ctx, ownerUserID, u.imAdmin)
+	return authverify.CheckAccessV3(ctx, ownerUserID, u.imAdminUserID)
 }
 
 // GetAllUserIDs retrieves all user IDs with pagination options.

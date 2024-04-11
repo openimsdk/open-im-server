@@ -238,8 +238,8 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 					return err
 				}
 				log.ZDebug(ctx, "GroupDismissedNotificationInfo****", "groupID", groupID, "num", len(pushToUserIDs), "list", pushToUserIDs)
-				if len(p.config.Share.IMAdmin.UserID) > 0 {
-					ctx = mcontext.WithOpUserIDContext(ctx, p.config.Share.IMAdmin.UserID[0])
+				if len(p.config.Share.IMAdminUserID) > 0 {
+					ctx = mcontext.WithOpUserIDContext(ctx, p.config.Share.IMAdminUserID[0])
 				}
 				defer func(groupID string) {
 					if err = p.groupRpcClient.DismissGroup(ctx, groupID); err != nil {

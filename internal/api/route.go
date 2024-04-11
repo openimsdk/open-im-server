@@ -145,7 +145,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, rdb redis.UniversalClie
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	// init rpc client here
 	userRpc := rpcclient.NewUser(disCov, config.Share.RpcRegisterName.User, config.Share.RpcRegisterName.MessageGateway,
-		&config.Share.IMAdmin)
+		config.Share.IMAdminUserID)
 	groupRpc := rpcclient.NewGroup(disCov, config.Share.RpcRegisterName.Group)
 	friendRpc := rpcclient.NewFriend(disCov, config.Share.RpcRegisterName.Friend)
 	messageRpc := rpcclient.NewMessage(disCov, config.Share.RpcRegisterName.Msg)
@@ -154,7 +154,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, rdb redis.UniversalClie
 	thirdRpc := rpcclient.NewThird(disCov, config.Share.RpcRegisterName.Third, config.RpcConfig.Prometheus.GrafanaURL)
 
 	u := NewUserApi(*userRpc)
-	m := NewMessageApi(messageRpc, userRpc, &config.Share.IMAdmin)
+	m := NewMessageApi(messageRpc, userRpc, config.Share.IMAdminUserID)
 	ParseToken := GinParseToken(authRpc)
 	userRouterGroup := r.Group("/user")
 	{

@@ -105,7 +105,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	third.RegisterThirdServer(server, &thirdServer{
 		apiURL:        apiURL,
 		thirdDatabase: controller.NewThirdDatabase(cache.NewThirdCache(rdb), logdb),
-		userRpcClient: rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, &config.Share.IMAdmin),
+		userRpcClient: rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID),
 		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
 		defaultExpire: time.Hour * 24 * 7,
 		config:        config,

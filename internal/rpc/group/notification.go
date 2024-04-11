@@ -248,7 +248,7 @@ func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws
 	}
 	userID := mcontext.GetOpUserID(ctx)
 	if groupID != "" {
-		if authverify.IsManagerUserID(userID, &g.config.Share.IMAdmin) {
+		if authverify.IsManagerUserID(userID, g.config.Share.IMAdminUserID) {
 			*opUser = &sdkws.GroupMemberFullInfo{
 				GroupID:        groupID,
 				UserID:         userID,

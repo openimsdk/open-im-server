@@ -91,7 +91,7 @@ func (s *Server) GetUsersOnlineStatus(
 	ctx context.Context,
 	req *msggateway.GetUsersOnlineStatusReq,
 ) (*msggateway.GetUsersOnlineStatusResp, error) {
-	if !authverify.IsAppManagerUid(ctx, &s.config.Share.IMAdmin) {
+	if !authverify.IsAppManagerUid(ctx, s.config.Share.IMAdminUserID) {
 		return nil, errs.ErrNoPermission.WrapMsg("only app manager")
 	}
 	var resp msggateway.GetUsersOnlineStatusResp

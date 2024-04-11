@@ -377,11 +377,6 @@ func (r *RpcRegisterName) GetServiceNames() []string {
 	}
 }
 
-type IMAdmin struct {
-	UserID   []string `mapstructure:"userID"`
-	Nickname []string `mapstructure:"nickname"`
-}
-
 type Webhooks struct {
 	URL                      string        `mapstructure:"url"`
 	BeforeSendSingleMsg      WebhookConfig `mapstructure:"beforeSendSingleMsg"`

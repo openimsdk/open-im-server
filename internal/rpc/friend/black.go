@@ -68,7 +68,7 @@ func (s *friendServer) RemoveBlack(ctx context.Context, req *pbfriend.RemoveBlac
 }
 
 func (s *friendServer) AddBlack(ctx context.Context, req *pbfriend.AddBlackReq) (*pbfriend.AddBlackResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, &s.config.Share.IMAdmin); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	_, err := s.userRpcClient.GetUsersInfo(ctx, []string{req.OwnerUserID, req.BlackUserID})

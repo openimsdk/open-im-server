@@ -19,7 +19,6 @@ import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/tokenverify"
@@ -32,9 +31,9 @@ func Secret(secret string) jwt.Keyfunc {
 	}
 }
 
-func CheckAccessV3(ctx context.Context, ownerUserID string, imAdmin *config.IMAdmin) (err error) {
+func CheckAccessV3(ctx context.Context, ownerUserID string, imAdminUserID []string) (err error) {
 	opUserID := mcontext.GetOpUserID(ctx)
-	if datautil.Contain(opUserID, imAdmin.UserID...) {
+	if datautil.Contain(opUserID, imAdminUserID...) {
 		return nil
 	}
 	if opUserID == ownerUserID {
@@ -43,20 +42,20 @@ func CheckAccessV3(ctx context.Context, ownerUserID string, imAdmin *config.IMAd
 	return servererrs.ErrNoPermission.WrapMsg("ownerUserID", ownerUserID)
 }
 
-func IsAppManagerUid(ctx context.Context, imAdmin *config.IMAdmin) bool {
-	return datautil.Contain(mcontext.GetOpUserID(ctx), imAdmin.UserID...)
+func IsAppManagerUid(ctx context.Context, imAdminUserID []string) bool {
+	return datautil.Contain(mcontext.GetOpUserID(ctx), imAdminUserID...)
 }
 
-func CheckAdmin(ctx context.Context, imAdmin *config.IMAdmin) error {
+func CheckAdmin(ctx context.Context, imAdminUserID []string) error {
 
-	if datautil.Contain(mcontext.GetOpUserID(ctx), imAdmin.UserID...) {
+	if datautil.Contain(mcontext.GetOpUserID(ctx), imAdminUserID...) {
 		return nil
 	}
 	return servererrs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
 
-func IsManagerUserID(opUserID string, imAdmin *config.IMAdmin) bool {
-	return datautil.Contain(opUserID, imAdmin.UserID...)
+func IsManagerUserID(opUserID string, imAdminUserID []string) bool {
+	return datautil.Contain(opUserID, imAdminUserID...)
 }
 
 func WsVerifyToken(token, userID, secret string, platformID int) error {

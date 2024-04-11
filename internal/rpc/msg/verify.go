@@ -52,7 +52,7 @@ type MessageRevoked struct {
 func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) error {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
-		if datautil.Contain(data.MsgData.SendID, m.config.Share.IMAdmin.UserID...) {
+		if datautil.Contain(data.MsgData.SendID, m.config.Share.IMAdminUserID...) {
 			return nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd &&
@@ -90,7 +90,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return nil
 		}
 
-		if datautil.Contain(data.MsgData.SendID, m.config.Share.IMAdmin.UserID...) {
+		if datautil.Contain(data.MsgData.SendID, m.config.Share.IMAdminUserID...) {
 			return nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd &&
