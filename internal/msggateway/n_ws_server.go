@@ -16,23 +16,20 @@ package msggateway
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	pbAuth "github.com/openimsdk/protocol/auth"
 	"net/http"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
-	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -73,6 +70,7 @@ type WsServer struct {
 	validate          *validator.Validate
 	cache             cache.TokenModel
 	userClient        *rpcclient.UserRpcClient
+	authClient        *rpcclient.Auth
 	disCov            discovery.SvcDiscoveryRegistry
 	Compressor
 	Encoder
@@ -88,6 +86,7 @@ type kickHandler struct {
 func (ws *WsServer) SetDiscoveryRegistry(disCov discovery.SvcDiscoveryRegistry, config *Config) {
 	ws.MessageHandler = NewGrpcHandler(ws.validate, disCov, &config.Share.RpcRegisterName)
 	u := rpcclient.NewUserRpcClient(disCov, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
+	ws.authClient = rpcclient.NewAuth(disCov, config.Share.RpcRegisterName.Auth)
 	ws.userClient = &u
 	ws.disCov = disCov
 }
@@ -408,102 +407,54 @@ func (ws *WsServer) unregisterClient(client *Client) {
 	)
 }
 
-func (ws *WsServer) ParseWSArgs(r *http.Request) (args *WSArgs, err error) {
-	var v WSArgs
-	defer func() {
-		args = &v
-	}()
-	query := r.URL.Query()
-	v.MsgResp, _ = strconv.ParseBool(query.Get(MsgResp))
-	if ws.onlineUserConnNum.Load() >= ws.wsMaxConnNum {
-		return nil, servererrs.ErrConnOverMaxNumLimit.WrapMsg("over max conn num limit")
+// validateRespWithRequest checks if the response matches the expected userID and platformID.
+func (ws *WsServer) validateRespWithRequest(ctx *UserConnContext, resp *pbAuth.ParseTokenResp) error {
+	userID := ctx.GetUserID()
+	platformID := stringutil.StringToInt32(ctx.GetPlatformID())
+	if resp.UserID != userID {
+		return servererrs.ErrTokenInvalid.WrapMsg(fmt.Sprintf("token uid %s != userID %s", resp.UserID, userID))
 	}
-	if v.Token = query.Get(Token); v.Token == "" {
-		return nil, servererrs.ErrConnArgsErr.WrapMsg("token is empty")
+	if resp.PlatformID != platformID {
+		return servererrs.ErrTokenInvalid.WrapMsg(fmt.Sprintf("token platform %d != platformID %d", resp.PlatformID, platformID))
 	}
-	if v.UserID = query.Get(WsUserID); v.UserID == "" {
-		return nil, servererrs.ErrConnArgsErr.WrapMsg("sendID is empty")
-	}
-	platformIDStr := query.Get(PlatformID)
-	if platformIDStr == "" {
-		return nil, servererrs.ErrConnArgsErr.WrapMsg("platformID is empty")
-	}
-	platformID, err := strconv.Atoi(platformIDStr)
-	if err != nil {
-		return nil, servererrs.ErrConnArgsErr.WrapMsg("platformID is not int")
-	}
-	v.PlatformID = platformID
-	if err = authverify.WsVerifyToken(v.Token, v.UserID, ws.msgGatewayConfig.Share.Secret, platformID); err != nil {
-		return nil, err
-	}
-	if query.Get(Compression) == GzipCompressionProtocol {
-		v.Compression = true
-	}
-	if r.Header.Get(Compression) == GzipCompressionProtocol {
-		v.Compression = true
-	}
-	m, err := ws.cache.GetTokensWithoutError(context.Background(), v.UserID, platformID)
-	if err != nil {
-		return nil, err
-	}
-	if v, ok := m[v.Token]; ok {
-		switch v {
-		case constant.NormalToken:
-		case constant.KickedToken:
-			return nil, servererrs.ErrTokenKicked.Wrap()
-		default:
-			return nil, servererrs.ErrTokenUnknown.WrapMsg(fmt.Sprintf("token status is %d", v))
-		}
-	} else {
-		return nil, servererrs.ErrTokenNotExist.Wrap()
-	}
-	return &v, nil
-}
-
-type WSArgs struct {
-	Token       string
-	UserID      string
-	PlatformID  int
-	Compression bool
-	MsgResp     bool
+	return nil
 }
 
 func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	connContext := newContext(w, r)
-	args, pErr := ws.ParseWSArgs(r)
-	var wsLongConn *GWebSocket
-	if args.MsgResp {
-		wsLongConn = newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
-		if err := wsLongConn.GenerateLongConn(w, r); err != nil {
-			httpError(connContext, err)
-			return
+	if ws.onlineUserConnNum.Load() >= ws.wsMaxConnNum {
+		httpError(connContext, servererrs.ErrConnOverMaxNumLimit.WrapMsg("over max conn num limit"))
+		return
+	}
+	err := connContext.ParseEssentialArgs()
+	if err != nil {
+		httpError(connContext, err)
+		return
+	}
+	resp, err := ws.authClient.ParseToken(connContext, connContext.GetToken())
+	if err != nil {
+		shouldSendError := connContext.ShouldSendError()
+		if shouldSendError {
+			wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
+			if err := wsLongConn.RespErrInfo(err, w, r); err == nil {
+				return
+			}
 		}
-		data, err := json.Marshal(apiresp.ParseError(pErr))
-		if err != nil {
-			_ = wsLongConn.Close()
-			return
-		}
-		if err := wsLongConn.WriteMessage(MessageText, data); err != nil {
-			_ = wsLongConn.Close()
-			return
-		}
-		if pErr != nil {
-			_ = wsLongConn.Close()
-			return
-		}
-	} else {
-		if pErr != nil {
-			httpError(connContext, pErr)
-			return
-		}
-		wsLongConn = newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
-		if err := wsLongConn.GenerateLongConn(w, r); err != nil {
-			httpError(connContext, err)
-			return
-		}
+		httpError(connContext, err)
+		return
+	}
+	err = ws.validateRespWithRequest(connContext, resp)
+	if err != nil {
+		httpError(connContext, err)
+		return
+	}
+	wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
+	if err := wsLongConn.GenerateLongConn(w, r); err != nil {
+		httpError(connContext, err)
+		return
 	}
 	client := ws.clientPool.Get().(*Client)
-	client.ResetClient(connContext, wsLongConn, connContext.GetBackground(), args.Compression, ws, args.Token)
+	client.ResetClient(connContext, wsLongConn, ws)
 	ws.registerChan <- client
 	go client.readMessage()
 }

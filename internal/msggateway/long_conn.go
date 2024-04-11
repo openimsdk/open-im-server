@@ -15,6 +15,8 @@
 package msggateway
 
 import (
+	"encoding/json"
+	"github.com/openimsdk/tools/apiresp"
 	"net/http"
 	"time"
 
@@ -141,6 +143,24 @@ func (d *GWebSocket) SetPongHandler(handler PingPongHandler) {
 
 func (d *GWebSocket) SetPingHandler(handler PingPongHandler) {
 	d.conn.SetPingHandler(handler)
+}
+
+func (d *GWebSocket) RespErrInfo(err error, w http.ResponseWriter, r *http.Request) error {
+	if err := d.GenerateLongConn(w, r); err != nil {
+		return err
+	}
+	data, err := json.Marshal(apiresp.ParseError(err))
+	if err != nil {
+		_ = d.Close()
+		return errs.WrapMsg(err, "json marshal failed")
+	}
+
+	if err := d.WriteMessage(MessageText, data); err != nil {
+		_ = d.Close()
+		return errs.WrapMsg(err, "WriteMessage failed")
+	}
+	_ = d.Close()
+	return nil
 }
 
 // func (d *GWebSocket) CheckSendConnDiffNow() bool {

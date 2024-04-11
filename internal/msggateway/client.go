@@ -87,19 +87,19 @@ type Client struct {
 // }
 
 // ResetClient updates the client's state with new connection and context information.
-func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isBackground, isCompress bool, longConnServer LongConnServer, token string) {
+func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer LongConnServer) {
 	c.w = new(sync.Mutex)
 	c.conn = conn
 	c.PlatformID = stringutil.StringToInt(ctx.GetPlatformID())
-	c.IsCompress = isCompress
-	c.IsBackground = isBackground
+	c.IsCompress = ctx.GetCompression()
+	c.IsBackground = ctx.GetBackground()
 	c.UserID = ctx.GetUserID()
 	c.ctx = ctx
 	c.longConnServer = longConnServer
 	c.IsBackground = false
 	c.closed.Store(false)
 	c.closedErr = nil
-	c.token = token
+	c.token = ctx.GetToken()
 }
 
 func (c *Client) pingHandler(_ string) error {
