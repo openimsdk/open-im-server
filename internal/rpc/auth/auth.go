@@ -143,7 +143,7 @@ func (s *authServer) ParseToken(
 		return nil, err
 	}
 	resp.UserID = claims.UserID
-	resp.Platform = constant.PlatformIDToName(claims.PlatformID)
+	resp.PlatformID = int32(claims.PlatformID)
 	resp.ExpireTimeSeconds = claims.ExpiresAt.Unix()
 	return resp, nil
 }
