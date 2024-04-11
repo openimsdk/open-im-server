@@ -279,6 +279,8 @@ github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1y
 github.com/onsi/gomega v1.17.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAlGdZY=
 github.com/onsi/gomega v1.18.1 h1:M1GfJqGRrBrrGGsbxzV5dqM2U2ApXefZCQpkukxYRLE=
 github.com/onsi/gomega v1.18.1/go.mod h1:0q+aL8jAiMXy9hbwj2mr5GziHiwhAIQpFmmtT5hitRs=
+github.com/openimsdk/gomake v0.0.1 h1:ll33pk6kOj1qrPIwjhN//mmoSFIQKtwhCbHMZ6ZgBIU=
+github.com/openimsdk/gomake v0.0.1/go.mod h1:1vue3qXSfnlEToEtmERuO5KnWhD4+fMzuZSqyzddCLo=
 github.com/openimsdk/protocol v0.0.61 h1:l8B93YQfUyPBOrAwhdD4QNLY65ON6H0ydJi1S+hG+t8=
 github.com/openimsdk/protocol v0.0.61/go.mod h1:OZQA9FR55lseYoN2Ql1XAHYKHJGu7OMNkUbuekrKCM8=
 github.com/openimsdk/tools v0.0.47-alpha.17 h1:ZexqUpIXd0JzGm7rCOJ95XXWQWhUoZoCm8uwZixDsoQ=
