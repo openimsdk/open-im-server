@@ -349,7 +349,7 @@ type Share struct {
 	Secret          string          `mapstructure:"secret"`
 	Env             string          `mapstructure:"env"`
 	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
-	IMAdmin         IMAdmin         `mapstructure:"imAdmin"`
+	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
 }
 type RpcRegisterName struct {
 	User           string `mapstructure:"user"`
