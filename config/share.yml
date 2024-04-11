@@ -1,15 +1,15 @@
 secret: openIM123
 env: zookeeper
 rpcRegisterName:
-  user: User
-  friend: Friend
-  msg: Msg
-  push: Push
-  messageGateway: MessageGateway
-  group: Group
-  auth: Auth
-  conversation: Conversation
-  third: Third
+  user: user
+  friend: friend
+  msg: msg
+  push: push
+  messageGateway: messageGateway
+  group: group
+  auth: auth
+  conversation: conversation
+  third: third
 imAdmin:
   userID: [ "imAdmin" ]
   nickname: [ "imAdmin" ]

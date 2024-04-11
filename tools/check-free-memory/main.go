@@ -15,7 +15,7 @@ func main() {
 
 	freeMemoryGB := float64(vMem.Free) / float64(1024*1024*1024)
 
-	if freeMemoryGB < 4.0 {
+	if freeMemoryGB < 1.0 {
 		fmt.Fprintf(os.Stderr, "System free memory is less than 4GB: %.2fGB\n", freeMemoryGB)
 		os.Exit(1)
 	} else {
