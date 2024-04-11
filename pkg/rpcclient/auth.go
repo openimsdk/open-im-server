@@ -16,8 +16,8 @@ package rpcclient
 
 import (
 	"context"
-
 	"github.com/openimsdk/protocol/auth"
+	pbAuth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/system/program"
 	"google.golang.org/grpc"
@@ -36,4 +36,15 @@ type Auth struct {
 	conn   grpc.ClientConnInterface
 	Client auth.AuthClient
 	discov discovery.SvcDiscoveryRegistry
+}
+
+func (a *Auth) ParseToken(ctx context.Context, token string) (*pbAuth.ParseTokenResp, error) {
+	req := pbAuth.ParseTokenReq{
+		Token: token,
+	}
+	resp, err := a.Client.ParseToken(ctx, &req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
 }

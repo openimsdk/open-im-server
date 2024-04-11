@@ -32,9 +32,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	ginprom "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -47,7 +44,6 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
 	"github.com/openimsdk/tools/system/program"
-	"github.com/openimsdk/tools/tokenverify"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -159,7 +155,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, rdb redis.UniversalClie
 
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc, &config.Share.IMAdmin)
-	ParseToken := GinParseToken(rdb, config)
+	ParseToken := GinParseToken(authRpc)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -316,13 +312,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, rdb redis.UniversalClie
 	return r
 }
 
-func GinParseToken(rdb redis.UniversalClient, config *Config) gin.HandlerFunc {
-	//todo TokenPolicy
-	dataBase := controller.NewAuthDatabase(
-		cache.NewTokenCacheModel(rdb),
-		config.Share.Secret,
-		0,
-	)
+func GinParseToken(authRPC *rpcclient.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		switch c.Request.Method {
 		case http.MethodPost:
@@ -333,52 +323,15 @@ func GinParseToken(rdb redis.UniversalClient, config *Config) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret(config.Share.Secret))
+			resp, err := authRPC.ParseToken(c, token)
 			if err != nil {
-				log.ZWarn(c, "jwt get token error", errs.ErrTokenUnknown.Wrap())
-				apiresp.GinError(c, servererrs.ErrTokenUnknown.Wrap())
+				apiresp.GinError(c, err)
 				c.Abort()
 				return
 			}
-			m, err := dataBase.GetTokensWithoutError(c, claims.UserID, claims.PlatformID)
-			if err != nil {
-				apiresp.GinError(c, servererrs.ErrTokenNotExist.Wrap())
-				c.Abort()
-				return
-			}
-			if len(m) == 0 {
-				apiresp.GinError(c, servererrs.ErrTokenNotExist.Wrap())
-				c.Abort()
-				return
-			}
-			if v, ok := m[token]; ok {
-				switch v {
-				case constant.NormalToken:
-				case constant.KickedToken:
-					apiresp.GinError(c, servererrs.ErrTokenKicked.Wrap())
-					c.Abort()
-					return
-				default:
-					apiresp.GinError(c, servererrs.ErrTokenUnknown.Wrap())
-					c.Abort()
-					return
-				}
-			} else {
-				apiresp.GinError(c, servererrs.ErrTokenNotExist.Wrap())
-				c.Abort()
-				return
-			}
-			c.Set(constant.OpUserPlatform, constant.PlatformIDToName(claims.PlatformID))
-			c.Set(constant.OpUserID, claims.UserID)
+			c.Set(constant.OpUserPlatform, constant.PlatformIDToName(int(resp.PlatformID)))
+			c.Set(constant.OpUserID, resp.UserID)
 			c.Next()
 		}
 	}
 }
-
-// // handleGinError logs and returns an error response through Gin context.
-//
-//	func handleGinError(c *gin.Context, logMessage string, errType errs.CodeError, detail string) {
-//		wrappedErr := errType.Wrap(detail)
-//		apiresp.GinError(c, wrappedErr)
-//		c.Abort()
-//	}
