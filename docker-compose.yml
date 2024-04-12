@@ -36,7 +36,7 @@ services:
       - "${DATA_DIR}/components/mongodb/data/db:/data/db"
       - "${DATA_DIR}/components/mongodb/data/logs:/data/logs"
       - "${DATA_DIR}/components/mongodb/data/conf:/etc/mongo"
-      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro"
+      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh"
     environment:
       - TZ=Asia/Shanghai
       - wiredTigerCacheSizeGB=1
@@ -127,9 +127,9 @@ services:
         ipv4_address: ${MINIO_NETWORK_ADDRESS}
 
   openim-web:
-    image: ghcr.io/openimsdk/openim-web:latest
-    # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-web:latest
-    # image: openim/openim-web:latest
+    image: ghcr.io/openimsdk/openim-web:v3.5.0-docker
+    # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-web:v3.5.0-docker
+    # image: openim/openim-web:v3.5.0-docker
     container_name: openim-web
     environment:
       - OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH}
