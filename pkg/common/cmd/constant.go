@@ -48,8 +48,8 @@ var ConfigEnvPrefixMap map[string]string
 
 func init() {
 	FileName = "config.yaml"
-	NotificationFileName = "notification.yaml"
-	ShareFileName = "share.yaml"
+	NotificationFileName = "notification.yml"
+	ShareFileName = "share.yml"
 	WebhooksConfigFileName = "webhooks.yml"
 	LocalCacheConfigFileName = "local-cache.yml"
 	KafkaConfigFileName = "kafka.yml"
