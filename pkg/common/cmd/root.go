@@ -66,8 +66,9 @@ func WithConfigMap(configMap map[string]any) func(*CmdOpts) {
 func NewRootCmd(processName string, opts ...func(*CmdOpts)) *RootCmd {
 	rootCmd := &RootCmd{processName: processName}
 	cmd := cobra.Command{
-		Use:  "Start openIM application",
-		Long: fmt.Sprintf(`Start %s `, processName),
+		Use:   "Start openIM application",
+		Short: fmt.Sprintf(`Start %s `, processName),
+		Long:  fmt.Sprintf(`Start %s `, processName),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return rootCmd.persistentPreRun(cmd, opts...)
 		},
