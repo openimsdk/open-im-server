@@ -120,6 +120,8 @@ $ make demo
 
 🤲 In order to facilitate the user experience, we have provided a variety of deployment solutions, you can choose your own deployment method according to the list below:
 
+> [ !TIP ] Due to some issues with the release-v3.3 deployment, linux deployment requires the root user to deploy the entire deployment
+
 <details> <summary>Deploying with Docker Compose</summary>
 
 It is recommended to use Docker Compose for deployment, which can easily and quickly deploy the entire OpenIM service on a single node
