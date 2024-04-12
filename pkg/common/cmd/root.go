@@ -75,6 +75,9 @@ func NewRootCmd(processName string, opts ...func(*CmdOpts)) *RootCmd {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
+	cmd.Flags().StringP(FlagConf, "c", "", "path of config directory")
+	cmd.Flags().IntP(FlagTransferIndex, "i", 0, "process startup sequence number")
+
 	rootCmd.Command = cmd
 	return rootCmd
 }
@@ -147,12 +150,10 @@ func defaultCmdOpts() *CmdOpts {
 }
 
 func (r *RootCmd) getFlag(cmd *cobra.Command) (string, int, error) {
-	r.Command.Flags().StringP(FlagConf, "c", "", "path of config directory")
 	configDirectory, err := cmd.Flags().GetString(FlagConf)
 	if err != nil {
 		return "", 0, errs.Wrap(err)
 	}
-	r.Command.Flags().IntP(FlagTransferIndex, "i", 0, "process startup sequence number")
 	index, err := cmd.Flags().GetInt(FlagTransferIndex)
 	if err != nil {
 		return "", 0, errs.Wrap(err)
