@@ -36,7 +36,6 @@ func NewMsgGatewayCmd() *MsgGatewayCmd {
 	ret := &MsgGatewayCmd{msgGatewayConfig: msgGatewayConfig}
 	ret.configMap = map[string]any{
 		OpenIMMsgGatewayCfgFileName: &msgGatewayConfig.MsgGateway,
-		RedisConfigFileName:         &msgGatewayConfig.RedisConfig,
 		ZookeeperConfigFileName:     &msgGatewayConfig.ZookeeperConfig,
 		ShareFileName:               &msgGatewayConfig.Share,
 		WebhooksConfigFileName:      &msgGatewayConfig.WebhooksConfig,

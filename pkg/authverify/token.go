@@ -21,7 +21,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/tokenverify"
 	"github.com/openimsdk/tools/utils/datautil"
 )
 
@@ -56,18 +55,4 @@ func CheckAdmin(ctx context.Context, imAdminUserID []string) error {
 
 func IsManagerUserID(opUserID string, imAdminUserID []string) bool {
 	return datautil.Contain(opUserID, imAdminUserID...)
-}
-
-func WsVerifyToken(token, userID, secret string, platformID int) error {
-	claim, err := tokenverify.GetClaimFromToken(token, Secret(secret))
-	if err != nil {
-		return err
-	}
-	if claim.UserID != userID {
-		return servererrs.ErrTokenInvalid.WrapMsg(fmt.Sprintf("token uid %s != userID %s", claim.UserID, userID))
-	}
-	if claim.PlatformID != platformID {
-		return servererrs.ErrTokenInvalid.WrapMsg(fmt.Sprintf("token platform %d != %d", claim.PlatformID, platformID))
-	}
-	return nil
 }

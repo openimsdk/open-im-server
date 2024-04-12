@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -44,7 +43,6 @@ type LongConnServer interface {
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s any) error
-	SetCacheHandler(cache cache.TokenModel)
 	SetDiscoveryRegistry(client discovery.SvcDiscoveryRegistry, config *Config)
 	KickUserConn(client *Client) error
 	UnRegister(c *Client)
@@ -68,7 +66,6 @@ type WsServer struct {
 	handshakeTimeout  time.Duration
 	writeBufferSize   int
 	validate          *validator.Validate
-	cache             cache.TokenModel
 	userClient        *rpcclient.UserRpcClient
 	authClient        *rpcclient.Auth
 	disCov            discovery.SvcDiscoveryRegistry
@@ -108,10 +105,6 @@ func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, sta
 			log.ZWarn(ctx, "CallbackUserOffline err", err)
 		}
 	}
-}
-
-func (ws *WsServer) SetCacheHandler(cache cache.TokenModel) {
-	ws.cache = cache
 }
 
 func (ws *WsServer) UnRegister(c *Client) {

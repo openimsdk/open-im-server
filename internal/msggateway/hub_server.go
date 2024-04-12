@@ -16,10 +16,7 @@ package msggateway
 
 import (
 	"context"
-	"github.com/openimsdk/tools/db/redisutil"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/protocol/constant"
@@ -32,14 +29,7 @@ import (
 )
 
 func (s *Server) InitServer(ctx context.Context, config *Config, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
-	if err != nil {
-		return err
-	}
-
-	tokenCacheModel := cache.NewTokenCacheModel(rdb)
 	s.LongConnServer.SetDiscoveryRegistry(disCov, config)
-	s.LongConnServer.SetCacheHandler(tokenCacheModel)
 	msggateway.RegisterMsgGatewayServer(server, s)
 	return nil
 }

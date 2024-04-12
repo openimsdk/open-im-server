@@ -25,7 +25,6 @@ import (
 
 type Config struct {
 	MsgGateway      config.MsgGateway
-	RedisConfig     config.Redis
 	ZookeeperConfig config.ZooKeeper
 	Share           config.Share
 	WebhooksConfig  config.Webhooks
