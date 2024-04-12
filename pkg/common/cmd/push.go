@@ -46,7 +46,7 @@ func NewPushRpcCmd() *PushRpcCmd {
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
-	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
+	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
 		return ret.preRunE()
 	}
 	return ret

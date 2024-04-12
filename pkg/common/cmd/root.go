@@ -152,12 +152,10 @@ func defaultCmdOpts() *CmdOpts {
 func (r *RootCmd) getFlag(cmd *cobra.Command) (string, int, error) {
 	configDirectory, err := cmd.Flags().GetString(FlagConf)
 	if err != nil {
-		fmt.Println("err info ", err)
 		return "", 0, errs.Wrap(err)
 	}
 	index, err := cmd.Flags().GetInt(FlagTransferIndex)
 	if err != nil {
-		fmt.Println("err info ", err)
 		return "", 0, errs.Wrap(err)
 	}
 	r.index = index
