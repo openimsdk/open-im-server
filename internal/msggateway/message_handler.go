@@ -217,24 +217,3 @@ func (g GrpcHandler) SetUserDeviceBackground(_ context.Context, data *Req) ([]by
 	}
 	return nil, req.IsBackground, nil
 }
-
-// func (g GrpcHandler) call[T any](ctx context.Context, data Req, m proto.Message, rpc func(ctx context.Context, req
-// proto.Message)) ([]byte, error) {
-//	if err := proto.Unmarshal(data.Data, m); err != nil {
-//		return nil, err
-//	}
-//	if err := g.validate.Struct(m); err != nil {
-//		return nil, err
-//	}
-//	rpc(ctx, m)
-//	req := msg.SendMsgReq{MsgData: &msgData}
-//	resp, err := g.notification.Msg.SendMsg(context, &req)
-//	if err != nil {
-//		return nil, err
-//	}
-//	c, err := proto.Marshal(resp)
-//	if err != nil {
-//		return nil, err
-//	}
-//	return c, nil
-//}

@@ -18,6 +18,7 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -175,4 +176,28 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 		}
 	}
 	return nil
+}
+func (s *authServer) InvalidateToken(ctx context.Context, req *pbauth.InvalidateTokenReq) (*pbauth.InvalidateTokenResp, error) {
+	m, err := s.authDatabase.GetTokensWithoutError(ctx, req.UserID, int(req.PlatformID))
+	if err != nil && err != redis.Nil {
+		return nil, err
+	}
+	if m == nil {
+		return nil, errs.New("token map is empty").Wrap()
+	}
+	log.ZDebug(ctx, "get token from redis", "userID", req.UserID, "platformID",
+		req.PlatformID, "tokenMap", m)
+
+	for k := range m {
+		if k != req.GetPreservedToken() {
+			m[k] = constant.KickedToken
+		}
+	}
+	log.ZDebug(ctx, "set token map is ", "token map", m, "userID",
+		req.UserID, "token", req.GetPreservedToken())
+	err = s.authDatabase.SetTokenMapByUidPid(ctx, req.UserID, int(req.PlatformID), m)
+	if err != nil {
+		return nil, err
+	}
+	return &pbauth.InvalidateTokenResp{}, nil
 }

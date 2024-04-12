@@ -48,3 +48,16 @@ func (a *Auth) ParseToken(ctx context.Context, token string) (*pbAuth.ParseToken
 	}
 	return resp, err
 }
+
+func (a *Auth) InvalidateToken(ctx context.Context, preservedToken, userID string, platformID int) (*pbAuth.InvalidateTokenResp, error) {
+	req := pbAuth.InvalidateTokenReq{
+		PreservedToken: preservedToken,
+		UserID:         userID,
+		PlatformID:     int32(platformID),
+	}
+	resp, err := a.Client.InvalidateToken(ctx, &req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
