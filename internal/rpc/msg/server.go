@@ -39,7 +39,7 @@ type (
 	// MsgServer encapsulates dependencies required for message handling.
 	msgServer struct {
 		RegisterCenter         discovery.SvcDiscoveryRegistry   // Service discovery registry for service registration.
-		MsgDatabase            controller.CommonMsgDatabase     // Interface for message database operations.
+		MsgDatabase            controller.MsgDatabase           // Interface for message database operations.
 		Conversation           *rpcclient.ConversationRpcClient // RPC client for conversation service.
 		UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
 		FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
@@ -88,7 +88,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.Share.RpcRegisterName.Friend)
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqModel, &config.KafkaConfig)
+	msgDatabase, err := controller.NewMsgDatabase(msgDocModel, msgModel, seqModel, &config.KafkaConfig)
 	if err != nil {
 		return err
 	}

@@ -59,5 +59,5 @@ func (a *UserRpcCmd) Exec() error {
 func (a *UserRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.userConfig.ZookeeperConfig, &a.userConfig.RpcConfig.Prometheus, a.userConfig.RpcConfig.RPC.ListenIP,
 		a.userConfig.RpcConfig.RPC.RegisterIP, a.userConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.userConfig.Share.RpcRegisterName.Auth, &a.userConfig.Share, a.userConfig, user.Start)
+		a.Index(), a.userConfig.Share.RpcRegisterName.User, &a.userConfig.Share, a.userConfig, user.Start)
 }

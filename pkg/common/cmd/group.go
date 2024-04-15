@@ -60,5 +60,5 @@ func (a *GroupRpcCmd) preRunE() error {
 	log.CInfo(a.ctx, "GroupRpcCmd preRunE", "rpc config", a.groupConfig.RpcConfig)
 	return startrpc.Start(a.ctx, &a.groupConfig.ZookeeperConfig, &a.groupConfig.RpcConfig.Prometheus, a.groupConfig.RpcConfig.RPC.ListenIP,
 		a.groupConfig.RpcConfig.RPC.RegisterIP, a.groupConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.groupConfig.Share.RpcRegisterName.Auth, &a.groupConfig.Share, a.groupConfig, group.Start)
+		a.Index(), a.groupConfig.Share.RpcRegisterName.Group, &a.groupConfig.Share, a.groupConfig, group.Start)
 }

@@ -57,5 +57,5 @@ func (a *ConversationRpcCmd) Exec() error {
 func (a *ConversationRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.conversationConfig.ZookeeperConfig, &a.conversationConfig.RpcConfig.Prometheus, a.conversationConfig.RpcConfig.RPC.ListenIP,
 		a.conversationConfig.RpcConfig.RPC.RegisterIP, a.conversationConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.conversationConfig.Share.RpcRegisterName.Auth, &a.conversationConfig.Share, a.conversationConfig, conversation.Start)
+		a.Index(), a.conversationConfig.Share.RpcRegisterName.Conversation, &a.conversationConfig.Share, a.conversationConfig, conversation.Start)
 }

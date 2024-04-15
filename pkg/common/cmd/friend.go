@@ -58,5 +58,5 @@ func (a *FriendRpcCmd) Exec() error {
 func (a *FriendRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.friendConfig.ZookeeperConfig, &a.friendConfig.RpcConfig.Prometheus, a.friendConfig.RpcConfig.RPC.ListenIP,
 		a.friendConfig.RpcConfig.RPC.RegisterIP, a.friendConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.friendConfig.Share.RpcRegisterName.Auth, &a.friendConfig.Share, a.friendConfig, friend.Start)
+		a.Index(), a.friendConfig.Share.RpcRegisterName.Friend, &a.friendConfig.Share, a.friendConfig, friend.Start)
 }
