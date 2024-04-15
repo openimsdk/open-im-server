@@ -29,6 +29,8 @@ func main() {
 	getCmd.AddCommand(seqCmd.GetSeqCmd(), msgCmd.GetMsgCmd())
 	getCmd.AddSuperGroupIDFlag()
 	getCmd.AddUserIDFlag()
+	getCmd.AddConfigDirFlag()
+	getCmd.AddIndexFlag()
 	getCmd.AddBeginSeqFlag()
 	getCmd.AddLimitFlag()
 	// openIM get seq --userID=xxx
