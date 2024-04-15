@@ -126,8 +126,6 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if err := m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips); err != nil {
 		return nil, err
 	}
-	if err = CallbackAfterRevokeMsg(ctx, &m.config.WebhooksConfig, req); err != nil {
-		return nil, err
-	}
+	m.webhookAfterRevokeMsg(ctx, &m.config.WebhooksConfig.AfterRevokeMsg, req)
 	return &msg.RevokeMsgResp{}, nil
 }

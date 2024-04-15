@@ -17,6 +17,8 @@ package msggateway
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	pbAuth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/tools/mcontext"
 	"net/http"
@@ -52,6 +54,11 @@ type LongConnServer interface {
 	MessageHandler
 }
 
+const (
+	webhookWorkerCount = 2
+	webhookBufferSize  = 100
+)
+
 type WsServer struct {
 	msgGatewayConfig  *Config
 	port              int
@@ -72,6 +79,7 @@ type WsServer struct {
 	Compressor
 	Encoder
 	MessageHandler
+	webhookClient *webhook.Client
 }
 
 type kickHandler struct {
@@ -95,15 +103,9 @@ func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, sta
 	}
 	switch status {
 	case constant.Online:
-		err := CallbackUserOnline(ctx, &ws.msgGatewayConfig.WebhooksConfig, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
-		if err != nil {
-			log.ZWarn(ctx, "CallbackUserOnline err", err)
-		}
+		ws.webhookAfterUserOnline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOnline, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
 	case constant.Offline:
-		err := CallbackUserOffline(ctx, &ws.msgGatewayConfig.WebhooksConfig, client.UserID, client.PlatformID, client.ctx.GetConnID())
-		if err != nil {
-			log.ZWarn(ctx, "CallbackUserOffline err", err)
-		}
+		ws.webhookAfterUserOffline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOffline, client.UserID, client.PlatformID, client.ctx.GetConnID())
 	}
 }
 
@@ -147,6 +149,7 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) (*WsServer, error) {
 		clients:         newUserMap(),
 		Compressor:      NewGzipCompressor(),
 		Encoder:         NewGobEncoder(),
+		webhookClient:   webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL, memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize)),
 	}, nil
 }
 

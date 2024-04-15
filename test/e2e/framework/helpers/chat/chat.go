@@ -101,7 +101,7 @@ func main() {
 }
 
 /* func getLatestVersion(url string) (string, error) {
-	resp, err := http.Get(url)
+	resp, err := webhook.Get(url)
 	if err != nil {
 		return "", err
 	}

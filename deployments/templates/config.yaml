@@ -323,7 +323,7 @@ iosPush:
 # Timeout in seconds
 # Whether to continue execution if callback fails
 callback:
-  url: "http://127.0.0.1:10008/callbackExample"
+  url: "webhook://127.0.0.1:10008/callbackExample"
   beforeSendSingleMsg:
     enable: ${CALLBACK_ENABLE}
     timeout: ${CALLBACK_TIMEOUT}

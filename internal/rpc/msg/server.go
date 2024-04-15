@@ -17,6 +17,8 @@ package msg
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 
@@ -30,6 +32,11 @@ import (
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/tools/discovery"
 	"google.golang.org/grpc"
+)
+
+const (
+	webhookWorkerCount = 2
+	webhookBufferSize  = 100
 )
 
 type (
@@ -48,6 +55,7 @@ type (
 		Handlers               MessageInterceptorChain          // Chain of handlers for processing messages.
 		notificationSender     *rpcclient.NotificationSender    // RPC client for sending notifications.
 		config                 *Config                          // Global configuration settings.
+		webhookClient          *webhook.Client
 	}
 
 	Config struct {
@@ -101,6 +109,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		ConversationLocalCache: rpccache.NewConversationLocalCache(conversationClient, &config.LocalCacheConfig, rdb),
 		FriendLocalCache:       rpccache.NewFriendLocalCache(friendRpcClient, &config.LocalCacheConfig, rdb),
 		config:                 config,
+		webhookClient:          webhook.NewWebhookClient(config.WebhooksConfig.URL, memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize)),
 	}
 
 	s.notificationSender = rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithLocalSendMsg(s.SendMsg))

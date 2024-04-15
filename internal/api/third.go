@@ -65,7 +65,7 @@ func setURLPrefix(c *gin.Context, urlPrefix *string) error {
 		}
 	}
 	u := url.URL{
-		Scheme: "http",
+		Scheme: "webhook",
 		Host:   c.Request.Host,
 		Path:   "/object/",
 	}

@@ -17,6 +17,8 @@ package friend
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -38,6 +40,11 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	webhookWorkerCount = 2
+	webhookBufferSize  = 100
+)
+
 type friendServer struct {
 	friendDatabase        controller.FriendDatabase
 	blackDatabase         controller.BlackDatabase
@@ -46,6 +53,7 @@ type friendServer struct {
 	conversationRpcClient rpcclient.ConversationRpcClient
 	RegisterCenter        discovery.SvcDiscoveryRegistry
 	config                *Config
+	webhookClient         *webhook.Client
 }
 
 type Config struct {
@@ -113,6 +121,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		RegisterCenter:        client,
 		conversationRpcClient: rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation),
 		config:                config,
+		webhookClient:         webhook.NewWebhookClient(config.WebhooksConfig.URL, memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize)),
 	})
 
 	return nil
@@ -124,14 +133,12 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 	if err := authverify.CheckAccessV3(ctx, req.FromUserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
-
 	if req.ToUserID == req.FromUserID {
 		return nil, servererrs.ErrCanNotAddYourself.WrapMsg("req.ToUserID", req.ToUserID)
 	}
-	if err = CallbackBeforeAddFriend(ctx, &s.config.WebhooksConfig, req); err != nil && err != servererrs.ErrCallbackContinue {
+	if err = s.webhookBeforeAddFriend(ctx, &s.config.WebhooksConfig.BeforeAddFriend, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
-
 	if _, err := s.userRpcClient.GetUsersInfoMap(ctx, []string{req.ToUserID, req.FromUserID}); err != nil {
 		return nil, err
 	}
@@ -140,22 +147,17 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 	if err != nil {
 		return nil, err
 	}
-
 	if in1 && in2 {
 		return nil, servererrs.ErrRelationshipAlready.WrapMsg("already friends has f")
 	}
-
 	if err = s.friendDatabase.AddFriendRequest(ctx, req.FromUserID, req.ToUserID, req.ReqMsg, req.Ex); err != nil {
 		return nil, err
 	}
-
 	if err = s.notificationSender.FriendApplicationAddNotification(ctx, req); err != nil {
 		return nil, err
 	}
 
-	if err = CallbackAfterAddFriend(ctx, &s.config.WebhooksConfig, req); err != nil && err != servererrs.ErrCallbackContinue {
-		return nil, err
-	}
+	s.webhookAfterAddFriend(ctx, &s.config.WebhooksConfig.AfterAddFriend, req)
 	return resp, nil
 }
 
@@ -174,7 +176,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 		return nil, errs.ErrArgs.WrapMsg("friend userID repeated")
 	}
 
-	if err := CallbackBeforeImportFriends(ctx, &s.config.WebhooksConfig, req); err != nil {
+	if err := s.webhookBeforeImportFriends(ctx, &s.config.WebhooksConfig.BeforeImportFriends, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -188,9 +190,8 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 			HandleResult: constant.FriendResponseAgree,
 		})
 	}
-	if err := CallbackAfterImportFriends(ctx, &s.config.WebhooksConfig, req); err != nil {
-		return nil, err
-	}
+
+	s.webhookAfterImportFriends(ctx, &s.config.WebhooksConfig.AfterImportFriends, req)
 	return &pbfriend.ImportFriendResp{}, nil
 }
 
@@ -208,7 +209,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.Res
 		HandleResult: req.HandleResult,
 	}
 	if req.HandleResult == constant.FriendResponseAgree {
-		if err := CallbackBeforeAddFriendAgree(ctx, &s.config.WebhooksConfig, req); err != nil && err != servererrs.ErrCallbackContinue {
+		if err := s.webhookBeforeAddFriendAgree(ctx, &s.config.WebhooksConfig.BeforeAddFriendAgree, req); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
 		err := s.friendDatabase.AgreeFriendRequest(ctx, &friendRequest)
@@ -245,16 +246,13 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbfriend.DeleteFri
 		return nil, err
 	}
 	s.notificationSender.FriendDeletedNotification(ctx, req)
-	if err := CallbackAfterDeleteFriend(ctx, &s.config.WebhooksConfig, req); err != nil {
-		return nil, err
-	}
+	s.webhookAfterDeleteFriend(ctx, &s.config.WebhooksConfig.AfterDeleteFriend, req)
 	return resp, nil
 }
 
 // ok.
 func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbfriend.SetFriendRemarkReq) (resp *pbfriend.SetFriendRemarkResp, err error) {
-
-	if err = CallbackBeforeSetFriendRemark(ctx, &s.config.WebhooksConfig, req); err != nil && err != servererrs.ErrCallbackContinue {
+	if err = s.webhookBeforeSetFriendRemark(ctx, &s.config.WebhooksConfig.BeforeSetFriendRemark, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
 	resp = &pbfriend.SetFriendRemarkResp{}
@@ -268,9 +266,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbfriend.SetFri
 	if err := s.friendDatabase.UpdateRemark(ctx, req.OwnerUserID, req.FriendUserID, req.Remark); err != nil {
 		return nil, err
 	}
-	if err := CallbackAfterSetFriendRemark(ctx, &s.config.WebhooksConfig, req); err != nil && err != servererrs.ErrCallbackContinue {
-		return nil, err
-	}
+	s.webhookAfterSetFriendRemark(ctx, &s.config.WebhooksConfig.AfterSetFriendRemark, req)
 	s.notificationSender.FriendRemarkSetNotification(ctx, req.OwnerUserID, req.FriendUserID)
 	return resp, nil
 }

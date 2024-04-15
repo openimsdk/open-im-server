@@ -5,4 +5,4 @@ api:
 prometheus:
   enable: true
   ports: [ 20113 ]
-  grafanaURL: http://127.0.0.1:13000/
+  grafanaURL: webhook://127.0.0.1:13000/

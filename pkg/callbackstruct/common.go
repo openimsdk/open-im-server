@@ -64,7 +64,7 @@ type CommonCallbackResp struct {
 }
 
 func (c CommonCallbackResp) Parse() error {
-	if c.ActionCode != servererrs.NoError || c.NextCode == Next {
+	if c.ActionCode == servererrs.NoError && c.NextCode == Next {
 		return errs.NewCodeError(int(c.ErrCode), c.ErrMsg).WithDetail(c.ErrDlt)
 	}
 	return nil

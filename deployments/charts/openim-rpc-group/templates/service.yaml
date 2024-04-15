@@ -22,8 +22,8 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: http
+      targetPort: webhook
       protocol: TCP
-      name: http
+      name: webhook
   selector:
     {{- include "openim-rpc-group.selectorLabels" . | nindent 4 }}

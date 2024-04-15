@@ -59,10 +59,11 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbmsg.SendMs
 		prommetrics.GroupChatMsgProcessFailedCounter.Inc()
 		return nil, err
 	}
-	if err = callbackBeforeSendGroupMsg(ctx, &m.config.WebhooksConfig, req); err != nil {
+
+	if err = m.webhookBeforeSendGroupMsg(ctx, &m.config.WebhooksConfig.BeforeSendGroupMsg, req); err != nil {
 		return nil, err
 	}
-	if err := callbackMsgModify(ctx, &m.config.WebhooksConfig, req); err != nil {
+	if err := m.webhookBeforeMsgModify(ctx, &m.config.WebhooksConfig.BeforeMsgModify, req); err != nil {
 		return nil, err
 	}
 	err = m.MsgDatabase.MsgToMQ(ctx, conversationutil.GenConversationUniqueKeyForGroup(req.MsgData.GroupID), req.MsgData)
@@ -72,9 +73,8 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbmsg.SendMs
 	if req.MsgData.ContentType == constant.AtText {
 		go m.setConversationAtInfo(ctx, req.MsgData)
 	}
-	if err = callbackAfterSendGroupMsg(ctx, &m.config.WebhooksConfig, req); err != nil {
-		log.ZWarn(ctx, "CallbackAfterSendGroupMsg", err)
-	}
+
+	m.webhookAfterSendGroupMsg(ctx, &m.config.WebhooksConfig.AfterSendGroupMsg, req)
 	prommetrics.GroupChatMsgProcessSuccessCounter.Inc()
 	resp = &pbmsg.SendMsgResp{}
 	resp.SendTime = req.MsgData.SendTime
@@ -157,21 +157,18 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 		return nil, nil
 	} else {
-		if err = callbackBeforeSendSingleMsg(ctx, &m.config.WebhooksConfig, req); err != nil {
+		if err = m.webhookBeforeSendSingleMsg(ctx, &m.config.WebhooksConfig.BeforeSendSingleMsg, req); err != nil {
+			return nil, err
+		}
+		if err := m.webhookBeforeMsgModify(ctx, &m.config.WebhooksConfig.BeforeMsgModify, req); err != nil {
 			return nil, err
 		}
 
-		if err := callbackMsgModify(ctx, &m.config.WebhooksConfig, req); err != nil {
-			return nil, err
-		}
 		if err := m.MsgDatabase.MsgToMQ(ctx, conversationutil.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
 			prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 			return nil, err
 		}
-		err = callbackAfterSendSingleMsg(ctx, &m.config.WebhooksConfig, req)
-		if err != nil {
-			log.ZWarn(ctx, "CallbackAfterSendSingleMsg", err, "req", req)
-		}
+		m.webhookAfterSendSingleMsg(ctx, &m.config.WebhooksConfig.AfterSendSingleMsg, req)
 		prommetrics.SingleChatMsgProcessSuccessCounter.Inc()
 		return &pbmsg.SendMsgResp{
 			ServerMsgID: req.MsgData.ServerMsgID,

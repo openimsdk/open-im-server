@@ -24,9 +24,9 @@ object:
     sessionToken: ''
     publicRead: false
   kodo:
-    endpoint: "http://s3.cn-east-1.qiniucs.com"
+    endpoint: "webhook://s3.cn-east-1.qiniucs.com"
     bucket: "demo-9999999"
-    bucketURL: "http://your.domain.com"
+    bucketURL: "webhook://your.domain.com"
     accessKeyID: ''
     accessKeySecret: ''
     sessionToken: ''

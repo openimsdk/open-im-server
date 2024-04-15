@@ -1213,7 +1213,7 @@
               "editorMode": "code",
               "expr": "sum(rate(app_requests_total{job=~\"^($job)$\"}[$interval])) by (job)",
               "instant": false,
-              "legendFormat": "{{job}}-http",
+              "legendFormat": "{{job}}-webhook",
               "range": true,
               "refId": "A"
             },

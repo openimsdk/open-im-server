@@ -372,7 +372,7 @@ linters-settings:
     # Default: []
     ignored-functions:
       - '^math\.'
-      - '^http\.StatusText$'
+      - '^webhook\.StatusText$'
   gomoddirectives:
     # Allow local `replace` directives. Default is false.
     replace-local: true
