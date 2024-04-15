@@ -90,9 +90,9 @@ groupApplicationRejected:
   unreadCount: false
   offlinePush:
     enable: false
-    title: " title"
-    desc: " desc"
-    ext: " ext"
+    title: "groupApplicationRejected title"
+    desc: "groupApplicationRejected desc"
+    ext: "groupApplicationRejected ext"
 
 
 groupOwnerTransferred:

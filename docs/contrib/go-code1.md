@@ -581,7 +581,7 @@ func SIGTERMExit() {
 
 ```go
 import (
-	_ "net/http/pprof"
+	_ "net/webhook/pprof"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"

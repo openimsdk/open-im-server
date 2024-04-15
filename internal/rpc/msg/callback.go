@@ -19,7 +19,6 @@ import (
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/http"
 	"github.com/openimsdk/protocol/constant"
 	pbchat "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
@@ -61,77 +60,71 @@ func GetContent(msg *sdkws.MsgData) string {
 	}
 }
 
-func callbackBeforeSendSingleMsg(ctx context.Context, callback *config.Webhooks, msg *pbchat.SendMsgReq) error {
-	if !callback.BeforeSendSingleMsg.Enable || msg.MsgData.ContentType == constant.Typing {
+func (m *msgServer) webhookBeforeSendSingleMsg(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
+	if msg.MsgData.ContentType == constant.Typing {
 		return nil
 	}
-	req := &cbapi.CallbackBeforeSendSingleMsgReq{
+	cbReq := &cbapi.CallbackBeforeSendSingleMsgReq{
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeSendSingleMsgCommand),
 		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbapi.CallbackBeforeSendSingleMsgResp{}
-	if err := http.CallBackPostReturn(ctx, callback.URL, req, resp, callback.BeforeSendSingleMsg); err != nil {
+	if err := m.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func callbackAfterSendSingleMsg(ctx context.Context, callback *config.Webhooks, msg *pbchat.SendMsgReq) error {
-	if !callback.AfterSendSingleMsg.Enable || msg.MsgData.ContentType == constant.Typing {
-		return nil
+func (m *msgServer) webhookAfterSendSingleMsg(ctx context.Context, after *config.AfterConfig, msg *pbchat.SendMsgReq) {
+	if msg.MsgData.ContentType == constant.Typing {
+		return
 	}
-	req := &cbapi.CallbackAfterSendSingleMsgReq{
+	cbReq := &cbapi.CallbackAfterSendSingleMsgReq{
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendSingleMsgCommand),
 		RecvID:            msg.MsgData.RecvID,
 	}
-	resp := &cbapi.CallbackAfterSendSingleMsgResp{}
-	if err := http.CallBackPostReturn(ctx, callback.URL, req, resp, callback.AfterSendSingleMsg); err != nil {
-		return err
-	}
-	return nil
+	m.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendSingleMsgResp{}, after)
 }
 
-func callbackBeforeSendGroupMsg(ctx context.Context, callback *config.Webhooks, msg *pbchat.SendMsgReq) error {
-	if !callback.BeforeSendGroupMsg.Enable || msg.MsgData.ContentType == constant.Typing {
+func (m *msgServer) webhookBeforeSendGroupMsg(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
+	if msg.MsgData.ContentType == constant.Typing {
 		return nil
 	}
-	req := &cbapi.CallbackBeforeSendGroupMsgReq{
+	cbReq := &cbapi.CallbackBeforeSendGroupMsgReq{
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeSendGroupMsgCommand),
 		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbapi.CallbackBeforeSendGroupMsgResp{}
-	if err := http.CallBackPostReturn(ctx, callback.URL, req, resp, callback.BeforeSendGroupMsg); err != nil {
+	if err := m.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
 		return err
 	}
 	return nil
 }
 
-func callbackAfterSendGroupMsg(ctx context.Context, callback *config.Webhooks, msg *pbchat.SendMsgReq) error {
-	if !callback.AfterSendGroupMsg.Enable || msg.MsgData.ContentType == constant.Typing {
-		return nil
+func (m *msgServer) webhookAfterSendGroupMsg(ctx context.Context, after *config.AfterConfig, msg *pbchat.SendMsgReq) {
+	if msg.MsgData.ContentType == constant.Typing {
+		return
 	}
-	req := &cbapi.CallbackAfterSendGroupMsgReq{
+	cbReq := &cbapi.CallbackAfterSendGroupMsgReq{
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendGroupMsgCommand),
 		GroupID:           msg.MsgData.GroupID,
 	}
-	resp := &cbapi.CallbackAfterSendGroupMsgResp{}
-	if err := http.CallBackPostReturn(ctx, callback.URL, req, resp, callback.AfterSendGroupMsg); err != nil {
-		return err
-	}
-	return nil
+	m.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendGroupMsgResp{}, after)
 }
 
-func callbackMsgModify(ctx context.Context, callback *config.Webhooks, msg *pbchat.SendMsgReq) error {
-	if !callback.BeforeMsgModify.Enable || msg.MsgData.ContentType != constant.Text {
+func (m *msgServer) webhookBeforeMsgModify(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
+	if msg.MsgData.ContentType != constant.Text {
 		return nil
 	}
-	req := &cbapi.CallbackMsgModifyCommandReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackMsgModifyCommand),
+	cbReq := &cbapi.CallbackMsgModifyCommandReq{
+		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeMsgModifyCommand),
 	}
 	resp := &cbapi.CallbackMsgModifyCommandResp{}
-	if err := http.CallBackPostReturn(ctx, callback.URL, req, resp, callback.BeforeMsgModify); err != nil {
+	if err := m.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
 		return err
 	}
+
 	if resp.Content != nil {
 		msg.MsgData.Content = []byte(*resp.Content)
 	}
@@ -154,45 +147,25 @@ func callbackMsgModify(ctx context.Context, callback *config.Webhooks, msg *pbch
 	return nil
 }
 
-func CallbackGroupMsgRead(ctx context.Context, callback *config.Webhooks, req *cbapi.CallbackGroupMsgReadReq) error {
-	if !callback.AfterGroupMsgRead.Enable {
-		return nil
-	}
-	req.CallbackCommand = cbapi.CallbackGroupMsgReadCommand
-
-	resp := &cbapi.CallbackGroupMsgReadResp{}
-	if err := http.CallBackPostReturn(ctx, callback.URL, req, resp, callback.AfterGroupMsgRead); err != nil {
-		return err
-	}
-	return nil
+func (m *msgServer) webhookAfterGroupMsgRead(ctx context.Context, after *config.AfterConfig, req *cbapi.CallbackGroupMsgReadReq) {
+	req.CallbackCommand = cbapi.CallbackAfterGroupMsgReadCommand
+	m.webhookClient.AsyncPost(ctx, req.GetCallbackCommand(), req, &cbapi.CallbackGroupMsgReadResp{}, after)
 }
 
-func CallbackSingleMsgRead(ctx context.Context, callback *config.Webhooks, req *cbapi.CallbackSingleMsgReadReq) error {
-	if !callback.AfterSingleMsgRead.Enable {
-		return nil
-	}
-	req.CallbackCommand = cbapi.CallbackSingleMsgRead
+func (m *msgServer) webhookAfterSingleMsgRead(ctx context.Context, after *config.AfterConfig, req *cbapi.CallbackSingleMsgReadReq) {
 
-	resp := &cbapi.CallbackSingleMsgReadResp{}
+	req.CallbackCommand = cbapi.CallbackAfterSingleMsgReadCommand
 
-	if err := http.CallBackPostReturn(ctx, callback.URL, req, resp, callback.AfterSingleMsgRead); err != nil {
-		return err
-	}
-	return nil
+	m.webhookClient.AsyncPost(ctx, req.GetCallbackCommand(), req, &cbapi.CallbackSingleMsgReadResp{}, after)
+
 }
-func CallbackAfterRevokeMsg(ctx context.Context, callback *config.Webhooks, req *pbchat.RevokeMsgReq) error {
-	if !callback.AfterRevokeMsg.Enable {
-		return nil
-	}
+
+func (m *msgServer) webhookAfterRevokeMsg(ctx context.Context, after *config.AfterConfig, req *pbchat.RevokeMsgReq) {
 	callbackReq := &cbapi.CallbackAfterRevokeMsgReq{
 		CallbackCommand: cbapi.CallbackAfterRevokeMsgCommand,
 		ConversationID:  req.ConversationID,
 		Seq:             req.Seq,
 		UserID:          req.UserID,
 	}
-	resp := &cbapi.CallbackAfterRevokeMsgResp{}
-	if err := http.CallBackPostReturn(ctx, callback.URL, callbackReq, resp, callback.AfterRevokeMsg); err != nil {
-		return err
-	}
-	return nil
+	m.webhookClient.AsyncPost(ctx, callbackReq.GetCallbackCommand(), callbackReq, &cbapi.CallbackAfterRevokeMsgResp{}, after)
 }

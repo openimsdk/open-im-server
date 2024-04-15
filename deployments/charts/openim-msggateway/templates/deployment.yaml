@@ -48,7 +48,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: http
+            - name: webhook
               containerPort: 80
               protocol: TCP
             - name: rpc
@@ -57,11 +57,11 @@ spec:
           #livenessProbe:
           #  httpGet:
           #    path: /
-          #    port: http
+          #    port: webhook
           #readinessProbe:
           #  httpGet:
           #    path: /
-          #    port: http
+          #    port: webhook
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

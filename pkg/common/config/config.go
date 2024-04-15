@@ -339,10 +339,15 @@ type Redis struct {
 	MaxRetry       int      `mapstructure:"MaxRetry"`
 }
 
-type WebhookConfig struct {
+type BeforeConfig struct {
 	Enable         bool `mapstructure:"enable"`
 	Timeout        int  `mapstructure:"timeout"`
 	FailedContinue bool `mapstructure:"failedContinue"`
+}
+
+type AfterConfig struct {
+	Enable  bool `mapstructure:"enable"`
+	Timeout int  `mapstructure:"timeout"`
 }
 
 type Share struct {
@@ -377,53 +382,54 @@ func (r *RpcRegisterName) GetServiceNames() []string {
 	}
 }
 
+// FullConfig stores all configurations for before and after events
 type Webhooks struct {
-	URL                      string        `mapstructure:"url"`
-	BeforeSendSingleMsg      WebhookConfig `mapstructure:"beforeSendSingleMsg"`
-	BeforeUpdateUserInfoEx   WebhookConfig `mapstructure:"beforeUpdateUserInfoEx"`
-	AfterUpdateUserInfoEx    WebhookConfig `mapstructure:"afterUpdateUserInfoEx"`
-	AfterSendSingleMsg       WebhookConfig `mapstructure:"afterSendSingleMsg"`
-	BeforeSendGroupMsg       WebhookConfig `mapstructure:"beforeSendGroupMsg"`
-	AfterSendGroupMsg        WebhookConfig `mapstructure:"afterSendGroupMsg"`
-	BeforeMsgModify          WebhookConfig `mapstructure:"beforeMsgModify"`
-	AfterUserOnline          WebhookConfig `mapstructure:"afterUserOnline"`
-	AfterUserOffline         WebhookConfig `mapstructure:"afterUserOffline"`
-	AfterUserKickOff         WebhookConfig `mapstructure:"afterUserKickOff"`
-	BeforeOfflinePush        WebhookConfig `mapstructure:"beforeOfflinePush"`
-	BeforeOnlinePush         WebhookConfig `mapstructure:"beforeOnlinePush"`
-	BeforeGroupOnlinePush    WebhookConfig `mapstructure:"beforeGroupOnlinePush"`
-	BeforeAddFriend          WebhookConfig `mapstructure:"beforeAddFriend"`
-	BeforeUpdateUserInfo     WebhookConfig `mapstructure:"beforeUpdateUserInfo"`
-	AfterUpdateUserInfo      WebhookConfig `mapstructure:"afterUpdateUserInfo"`
-	BeforeCreateGroup        WebhookConfig `mapstructure:"beforeCreateGroup"`
-	AfterCreateGroup         WebhookConfig `mapstructure:"afterCreateGroup"`
-	BeforeMemberJoinGroup    WebhookConfig `mapstructure:"beforeMemberJoinGroup"`
-	BeforeSetGroupMemberInfo WebhookConfig `mapstructure:"beforeSetGroupMemberInfo"`
-	AfterSetGroupMemberInfo  WebhookConfig `mapstructure:"afterSetGroupMemberInfo"`
-	AfterQuitGroup           WebhookConfig `mapstructure:"afterQuitGroup"`
-	AfterKickGroupMember     WebhookConfig `mapstructure:"afterKickGroupMember"`
-	AfterDismissGroup        WebhookConfig `mapstructure:"afterDismissGroup"`
-	BeforeApplyJoinGroup     WebhookConfig `mapstructure:"beforeApplyJoinGroup"`
-	AfterGroupMsgRead        WebhookConfig `mapstructure:"afterGroupMsgRead"`
-	AfterSingleMsgRead       WebhookConfig `mapstructure:"afterSingleMsgRead"`
-	BeforeUserRegister       WebhookConfig `mapstructure:"beforeUserRegister"`
-	AfterUserRegister        WebhookConfig `mapstructure:"afterUserRegister"`
-	AfterTransferGroupOwner  WebhookConfig `mapstructure:"afterTransferGroupOwner"`
-	BeforeSetFriendRemark    WebhookConfig `mapstructure:"beforeSetFriendRemark"`
-	AfterSetFriendRemark     WebhookConfig `mapstructure:"afterSetFriendRemark"`
-	AfterGroupMsgRevoke      WebhookConfig `mapstructure:"afterGroupMsgRevoke"`
-	AfterJoinGroup           WebhookConfig `mapstructure:"afterJoinGroup"`
-	BeforeInviteUserToGroup  WebhookConfig `mapstructure:"beforeInviteUserToGroup"`
-	AfterSetGroupInfo        WebhookConfig `mapstructure:"afterSetGroupInfo"`
-	BeforeSetGroupInfo       WebhookConfig `mapstructure:"beforeSetGroupInfo"`
-	AfterRevokeMsg           WebhookConfig `mapstructure:"afterRevokeMsg"`
-	BeforeAddBlack           WebhookConfig `mapstructure:"beforeAddBlack"`
-	AfterAddFriend           WebhookConfig `mapstructure:"afterAddFriend"`
-	BeforeAddFriendAgree     WebhookConfig `mapstructure:"beforeAddFriendAgree"`
-	AfterDeleteFriend        WebhookConfig `mapstructure:"afterDeleteFriend"`
-	BeforeImportFriends      WebhookConfig `mapstructure:"beforeImportFriends"`
-	AfterImportFriends       WebhookConfig `mapstructure:"afterImportFriends"`
-	AfterRemoveBlack         WebhookConfig `mapstructure:"afterRemoveBlack"`
+	URL                      string       `mapstructure:"url"`
+	BeforeSendSingleMsg      BeforeConfig `mapstructure:"beforeSendSingleMsg"`
+	BeforeUpdateUserInfoEx   BeforeConfig `mapstructure:"beforeUpdateUserInfoEx"`
+	AfterUpdateUserInfoEx    AfterConfig  `mapstructure:"afterUpdateUserInfoEx"`
+	AfterSendSingleMsg       AfterConfig  `mapstructure:"afterSendSingleMsg"`
+	BeforeSendGroupMsg       BeforeConfig `mapstructure:"beforeSendGroupMsg"`
+	BeforeMsgModify          BeforeConfig `mapstructure:"beforeMsgModify"`
+	AfterSendGroupMsg        AfterConfig  `mapstructure:"afterSendGroupMsg"`
+	AfterUserOnline          AfterConfig  `mapstructure:"afterUserOnline"`
+	AfterUserOffline         AfterConfig  `mapstructure:"afterUserOffline"`
+	AfterUserKickOff         AfterConfig  `mapstructure:"afterUserKickOff"`
+	BeforeOfflinePush        BeforeConfig `mapstructure:"beforeOfflinePush"`
+	BeforeOnlinePush         BeforeConfig `mapstructure:"beforeOnlinePush"`
+	BeforeGroupOnlinePush    BeforeConfig `mapstructure:"beforeGroupOnlinePush"`
+	BeforeAddFriend          BeforeConfig `mapstructure:"beforeAddFriend"`
+	BeforeUpdateUserInfo     BeforeConfig `mapstructure:"beforeUpdateUserInfo"`
+	AfterUpdateUserInfo      AfterConfig  `mapstructure:"afterUpdateUserInfo"`
+	BeforeCreateGroup        BeforeConfig `mapstructure:"beforeCreateGroup"`
+	AfterCreateGroup         AfterConfig  `mapstructure:"afterCreateGroup"`
+	BeforeMemberJoinGroup    BeforeConfig `mapstructure:"beforeMemberJoinGroup"`
+	BeforeSetGroupMemberInfo BeforeConfig `mapstructure:"beforeSetGroupMemberInfo"`
+	AfterSetGroupMemberInfo  AfterConfig  `mapstructure:"afterSetGroupMemberInfo"`
+	AfterQuitGroup           AfterConfig  `mapstructure:"afterQuitGroup"`
+	AfterKickGroupMember     AfterConfig  `mapstructure:"afterKickGroupMember"`
+	AfterDismissGroup        AfterConfig  `mapstructure:"afterDismissGroup"`
+	BeforeApplyJoinGroup     BeforeConfig `mapstructure:"beforeApplyJoinGroup"`
+	AfterGroupMsgRead        AfterConfig  `mapstructure:"afterGroupMsgRead"`
+	AfterSingleMsgRead       AfterConfig  `mapstructure:"afterSingleMsgRead"`
+	BeforeUserRegister       BeforeConfig `mapstructure:"beforeUserRegister"`
+	AfterUserRegister        AfterConfig  `mapstructure:"afterUserRegister"`
+	AfterTransferGroupOwner  AfterConfig  `mapstructure:"afterTransferGroupOwner"`
+	BeforeSetFriendRemark    BeforeConfig `mapstructure:"beforeSetFriendRemark"`
+	AfterSetFriendRemark     AfterConfig  `mapstructure:"afterSetFriendRemark"`
+	AfterGroupMsgRevoke      AfterConfig  `mapstructure:"afterGroupMsgRevoke"`
+	AfterJoinGroup           AfterConfig  `mapstructure:"afterJoinGroup"`
+	BeforeInviteUserToGroup  BeforeConfig `mapstructure:"beforeInviteUserToGroup"`
+	AfterSetGroupInfo        AfterConfig  `mapstructure:"afterSetGroupInfo"`
+	BeforeSetGroupInfo       BeforeConfig `mapstructure:"beforeSetGroupInfo"`
+	AfterRevokeMsg           AfterConfig  `mapstructure:"afterRevokeMsg"`
+	BeforeAddBlack           BeforeConfig `mapstructure:"beforeAddBlack"`
+	AfterAddFriend           AfterConfig  `mapstructure:"afterAddFriend"`
+	BeforeAddFriendAgree     BeforeConfig `mapstructure:"beforeAddFriendAgree"`
+	AfterDeleteFriend        AfterConfig  `mapstructure:"afterDeleteFriend"`
+	BeforeImportFriends      BeforeConfig `mapstructure:"beforeImportFriends"`
+	AfterImportFriends       AfterConfig  `mapstructure:"afterImportFriends"`
+	AfterRemoveBlack         AfterConfig  `mapstructure:"afterRemoveBlack"`
 }
 
 type ZooKeeper struct {

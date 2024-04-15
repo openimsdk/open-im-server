@@ -17,6 +17,8 @@ package user
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	"github.com/openimsdk/tools/db/redisutil"
 	"math/rand"
 	"strings"
@@ -44,6 +46,11 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	webhookWorkerCount = 2
+	webhookBufferSize  = 100
+)
+
 type userServer struct {
 	db                       controller.UserDatabase
 	friendNotificationSender *notification.FriendNotificationSender
@@ -52,6 +59,7 @@ type userServer struct {
 	groupRpcClient           *rpcclient.GroupRpcClient
 	RegisterCenter           registry.SvcDiscoveryRegistry
 	config                   *Config
+	webhookClient            *webhook.Client
 }
 
 type Config struct {
@@ -99,6 +107,7 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 		friendNotificationSender: notification.NewFriendNotificationSender(&config.NotificationConfig, &msgRpcClient, notification.WithDBFunc(database.FindWithError)),
 		userNotificationSender:   NewUserNotificationSender(config, &msgRpcClient, WithUserFunc(database.FindWithError)),
 		config:                   config,
+		webhookClient:            webhook.NewWebhookClient(config.WebhooksConfig.URL, memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize)),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.db.InitOnce(context.Background(), users)
@@ -114,15 +123,21 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 	return resp, nil
 }
 
+// deprecated:
+
+//UpdateUserInfo
+
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) (resp *pbuser.UpdateUserInfoResp, err error) {
 	resp = &pbuser.UpdateUserInfoResp{}
 	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID, s.config.Share.IMAdminUserID)
 	if err != nil {
 		return nil, err
 	}
-	if err := CallbackBeforeUpdateUserInfo(ctx, &s.config.WebhooksConfig, req); err != nil {
+
+	if err := s.webhookBeforeUpdateUserInfo(ctx, &s.config.WebhooksConfig.BeforeUpdateUserInfo, req); err != nil {
 		return nil, err
 	}
+
 	data := convert.UserPb2DBMap(req.UserInfo)
 	if err := s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
@@ -140,9 +155,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	for _, friendID := range friends {
 		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	}
-	if err = CallbackAfterUpdateUserInfo(ctx, &s.config.WebhooksConfig, req); err != nil {
-		return nil, err
-	}
+	s.webhookAfterUpdateUserInfo(ctx, &s.config.WebhooksConfig.AfterUpdateUserInfo, req)
 	if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
 		return nil, err
 	}
@@ -154,8 +167,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	if err != nil {
 		return nil, err
 	}
-
-	if err = CallbackBeforeUpdateUserInfoEx(ctx, &s.config.WebhooksConfig, req); err != nil {
+	if err = s.webhookBeforeUpdateUserInfoEx(ctx, &s.config.WebhooksConfig.BeforeUpdateUserInfoEx, req); err != nil {
 		return nil, err
 	}
 	data := convert.UserPb2DBMapEx(req.UserInfo)
@@ -175,9 +187,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	for _, friendID := range friends {
 		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	}
-	if err := CallbackAfterUpdateUserInfoEx(ctx, &s.config.WebhooksConfig, req); err != nil {
-		return nil, err
-	}
+	s.webhookAfterUpdateUserInfoEx(ctx, &s.config.WebhooksConfig.AfterUpdateUserInfoEx, req)
 	if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
 		return nil, err
 	}
@@ -273,7 +283,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	if exist {
 		return nil, servererrs.ErrRegisteredAlready.WrapMsg("userID registered already")
 	}
-	if err := CallbackBeforeUserRegister(ctx, &s.config.WebhooksConfig, req); err != nil {
+	if err := s.webhookBeforeUserRegister(ctx, &s.config.WebhooksConfig.BeforeUserRegister, req); err != nil {
 		return nil, err
 	}
 	now := time.Now()
@@ -293,9 +303,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 		return nil, err
 	}
 
-	if err := CallbackAfterUserRegister(ctx, &s.config.WebhooksConfig, req); err != nil {
-		return nil, err
-	}
+	s.webhookAfterUserRegister(ctx, &s.config.WebhooksConfig.AfterUserRegister, req)
 	return resp, nil
 }
 

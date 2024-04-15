@@ -470,7 +470,7 @@ wrappedErr := errs.WrapMsg(err, "additional error information")
 ```go
 // "github.com/openimsdk/tools/errs"
 err := errors.New("original error")
-wrappedErr := errs.WrapMsg(err, "problem occurred", "code", 404, "url", "http://example.com")
+wrappedErr := errs.WrapMsg(err, "problem occurred", "code", 404, "url", "webhook://example.com")
 // wrappedErr will contain the original error, call stack, and "problem occurred code=404, url=http://example.com"
 ```
 
@@ -494,7 +494,7 @@ Suppose we have some runtime context variables, such as a user ID and the type o
 userID := "user123"
 operation := "update profile"
 errorCode := 500
-requestURL := "http://example.com/updateProfile"
+requestURL := "webhook://example.com/updateProfile"
 
 // Create a new error
 err := errors.New("original error")

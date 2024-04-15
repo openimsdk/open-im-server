@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -53,6 +55,11 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
+const (
+	webhookWorkerCount = 2
+	webhookBufferSize  = 100
+)
+
 type groupServer struct {
 	db                    controller.GroupDatabase
 	user                  rpcclient.UserRpcClient
@@ -60,6 +67,7 @@ type groupServer struct {
 	conversationRpcClient rpcclient.ConversationRpcClient
 	msgRpcClient          rpcclient.MessageRpcClient
 	config                *Config
+	webhookClient         *webhook.Client
 }
 
 type Config struct {
@@ -112,6 +120,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	gs.conversationRpcClient = conversationRpcClient
 	gs.msgRpcClient = msgRpcClient
 	gs.config = config
+	gs.webhookClient = webhook.NewWebhookClient(config.WebhooksConfig.URL, memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize))
 	pbgroup.RegisterGroupServer(server, &gs)
 	return nil
 }
@@ -229,13 +238,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		return nil, servererrs.ErrUserIDNotFound.WrapMsg("user not found")
 	}
 
-	config := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.WebhooksConfig.URL,
-		BeforeCreateGroup: s.config.WebhooksConfig.BeforeCreateGroup,
-	}
-
-	// Callback Before create Group
-	if err := CallbackBeforeCreateGroup(ctx, config, req); err != nil {
+	if err := s.webhookBeforeCreateGroup(ctx, &s.config.WebhooksConfig.BeforeCreateGroup, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -243,11 +246,6 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	group := convert.Pb2DBGroupInfo(req.GroupInfo)
 	if err := s.GenGroupID(ctx, &group.GroupID); err != nil {
 		return nil, err
-	}
-
-	beforeCreateGroupConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.WebhooksConfig.URL,
-		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
 	}
 
 	joinGroup := func(userID string, roleLevel int32) error {
@@ -262,7 +260,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 			MuteEndTime:    time.UnixMilli(0),
 		}
 
-		if err := CallbackBeforeMemberJoinGroup(ctx, beforeCreateGroupConfig, groupMember, group.Ex); err != nil {
+		if err := s.webhookBeforeMemberJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, groupMember, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
 			return err
 		}
 		groupMembers = append(groupMembers, groupMember)
@@ -331,9 +329,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		AdminUserIDs:  req.AdminUserIDs,
 	}
 
-	if err := CallbackAfterCreateGroup(ctx, beforeCreateGroupConfig, reqCallBackAfter); err != nil {
-		return nil, err
-	}
+	s.webhookAfterCreateGroup(ctx, &s.config.WebhooksConfig.AfterCreateGroup, reqCallBackAfter)
 
 	return resp, nil
 }
@@ -423,12 +419,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		}
 	}
 
-	beforeInviteUserToGroupConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.WebhooksConfig.URL,
-		BeforeCreateGroup: s.config.WebhooksConfig.BeforeInviteUserToGroup,
-	}
-
-	if err := CallbackBeforeInviteUserToGroup(ctx, beforeInviteUserToGroupConfig, req); err != nil {
+	if err := s.webhookBeforeInviteUserToGroup(ctx, &s.config.WebhooksConfig.BeforeInviteUserToGroup, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -474,12 +465,11 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 			MuteEndTime:    time.UnixMilli(0),
 		}
 
-		beforeMemberJoinGroupConfig := beforeInviteUserToGroupConfig
-
-		if err := CallbackBeforeMemberJoinGroup(ctx, beforeMemberJoinGroupConfig, member, group.Ex); err != nil {
+		if err := s.webhookBeforeMemberJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, groupMember, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
 		groupMembers = append(groupMembers, member)
+
 	}
 	if err := s.db.CreateGroup(ctx, nil, groupMembers); err != nil {
 		return nil, err
@@ -647,15 +637,8 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, req.KickedUserIDs); err != nil {
 		return nil, err
 	}
+	s.webhookAfterKickGroupMember(ctx, &s.config.WebhooksConfig.AfterKickGroupMember, req)
 
-	killGroupMemberConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.WebhooksConfig.URL,
-		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
-	}
-
-	if err := CallbackKillGroupMember(ctx, killGroupMemberConfig, req); err != nil {
-		return nil, err
-	}
 	return &pbgroup.KickGroupMemberResp{}, nil
 }
 
@@ -823,13 +806,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 			OperatorUserID: mcontext.GetOpUserID(ctx),
 			Ex:             groupRequest.Ex,
 		}
-
-		beforeMemberJoinGroupConfig := &GroupEventCallbackConfig{
-			CallbackUrl:       s.config.WebhooksConfig.URL,
-			BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
-		}
-
-		if err = CallbackBeforeMemberJoinGroup(ctx, beforeMemberJoinGroupConfig, member, group.Ex); err != nil {
+		if err := s.webhookBeforeMemberJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, member, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
 	}
@@ -876,14 +853,10 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		Ex:         req.Ex,
 	}
 
-	applyJoinGroupBeforeConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.WebhooksConfig.URL,
-		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
-	}
-
-	if err = CallbackApplyJoinGroupBefore(ctx, applyJoinGroupBeforeConfig, reqCall); err != nil {
+	if err := s.webhookBeforeApplyJoinGroup(ctx, &s.config.WebhooksConfig.BeforeApplyJoinGroup, reqCall); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
+
 	_, err = s.db.TakeGroupMember(ctx, req.GroupID, req.InviterUserID)
 	if err == nil {
 		return nil, errs.ErrArgs.Wrap()
@@ -901,10 +874,11 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			JoinTime:       time.Now(),
 			MuteEndTime:    time.UnixMilli(0),
 		}
-		MemberJoinGroupConfig := applyJoinGroupBeforeConfig
-		if err := CallbackBeforeMemberJoinGroup(ctx, MemberJoinGroupConfig, groupMember, group.Ex); err != nil {
+
+		if err := s.webhookBeforeMemberJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, groupMember, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
+
 		if err := s.db.CreateGroup(ctx, nil, []*relationtb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
@@ -913,10 +887,8 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			return nil, err
 		}
 		s.notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID)
-		afterJoinGroupConfig := applyJoinGroupBeforeConfig
-		if err = CallbackAfterJoinGroup(ctx, afterJoinGroupConfig, req); err != nil {
-			return nil, err
-		}
+		s.webhookAfterJoinGroup(ctx, &s.config.WebhooksConfig.AfterJoinGroup, req)
+
 		return &pbgroup.JoinGroupResp{}, nil
 	}
 	groupRequest := relationtb.GroupRequestModel{
@@ -961,15 +933,8 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, []string{req.UserID}); err != nil {
 		return nil, err
 	}
+	s.webhookAfterQuitGroup(ctx, &s.config.WebhooksConfig.AfterQuitGroup, req)
 
-	quitGroupConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.WebhooksConfig.URL,
-		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
-	}
-
-	if err := CallbackQuitGroup(ctx, quitGroupConfig, req); err != nil {
-		return nil, err
-	}
 	return &pbgroup.QuitGroupResp{}, nil
 }
 
@@ -998,14 +963,10 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		}
 	}
 
-	beforeSetGroupInfoConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.WebhooksConfig.URL,
-		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
-	}
-
-	if err := CallbackBeforeSetGroupInfo(ctx, beforeSetGroupInfoConfig, req); err != nil {
+	if err := s.webhookBeforeSetGroupInfo(ctx, &s.config.WebhooksConfig.BeforeSetGroupInfo, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
+
 	group, err := s.db.TakeGroup(ctx, req.GroupInfoForSet.GroupID)
 	if err != nil {
 		return nil, err
@@ -1073,10 +1034,8 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		_ = s.notification.GroupInfoSetNotification(ctx, tips)
 	}
 
-	afterSetGroupInfoConfig := beforeSetGroupInfoConfig
-	if err := CallbackAfterSetGroupInfo(ctx, afterSetGroupInfoConfig, req); err != nil {
-		return nil, err
-	}
+	s.webhookAfterSetGroupInfo(ctx, &s.config.WebhooksConfig.AfterSetGroupInfo, req)
+
 	return &pbgroup.SetGroupInfoResp{}, nil
 }
 
@@ -1119,14 +1078,8 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 		return nil, err
 	}
 
-	afterTransferGroupOwnerConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.WebhooksConfig.URL,
-		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
-	}
+	s.webhookAfterTransferGroupOwner(ctx, &s.config.WebhooksConfig.AfterTransferGroupOwner, req)
 
-	if err := CallbackAfterTransferGroupOwner(ctx, afterTransferGroupOwnerConfig, req); err != nil {
-		return nil, err
-	}
 	s.notification.GroupOwnerTransferredNotification(ctx, req)
 	return &pbgroup.TransferGroupOwnerResp{}, nil
 }
@@ -1285,21 +1238,14 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 	if err != nil {
 		return nil, err
 	}
-	reqCall := &callbackstruct.CallbackDisMissGroupReq{
+	cbReq := &callbackstruct.CallbackDisMissGroupReq{
 		GroupID:   req.GroupID,
 		OwnerID:   owner.UserID,
 		MembersID: membersID,
 		GroupType: string(group.GroupType),
 	}
 
-	dismissGroupConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.WebhooksConfig.URL,
-		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
-	}
-
-	if err := CallbackDismissGroup(ctx, dismissGroupConfig, reqCall); err != nil {
-		return nil, err
-	}
+	s.webhookAfterDismissGroup(ctx, &s.config.WebhooksConfig.AfterDismissGroup, cbReq)
 
 	return &pbgroup.DismissGroupResp{}, nil
 }
@@ -1485,15 +1431,12 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 		}
 	}
 
-	beforeSetGroupMemberInfoConfig := &GroupEventCallbackConfig{
-		CallbackUrl:       s.config.WebhooksConfig.URL,
-		BeforeCreateGroup: s.config.WebhooksConfig.BeforeMemberJoinGroup,
-	}
-
 	for i := 0; i < len(req.Members); i++ {
-		if err := CallbackBeforeSetGroupMemberInfo(ctx, beforeSetGroupMemberInfoConfig, req.Members[i]); err != nil {
+
+		if err := s.webhookBeforeSetGroupMemberInfo(ctx, &s.config.WebhooksConfig.BeforeSetGroupMemberInfo, req.Members[i]); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
+
 	}
 	if err := s.db.UpdateGroupMembers(ctx, datautil.Slice(req.Members, func(e *pbgroup.SetGroupMemberInfo) *relationtb.BatchUpdateGroupMember {
 		return &relationtb.BatchUpdateGroupMember{
@@ -1517,11 +1460,8 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 			s.notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
 		}
 	}
-	afterSetGroupMemberInfoConfig := beforeSetGroupMemberInfoConfig
 	for i := 0; i < len(req.Members); i++ {
-		if err := CallbackAfterSetGroupMemberInfo(ctx, afterSetGroupMemberInfoConfig, req.Members[i]); err != nil {
-			return nil, err
-		}
+		s.webhookAfterSetGroupMemberInfo(ctx, &s.config.WebhooksConfig.AfterSetGroupMemberInfo, req.Members[i])
 	}
 
 	return &pbgroup.SetGroupMemberInfoResp{}, nil

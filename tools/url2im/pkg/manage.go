@@ -392,7 +392,7 @@ func (m *Manage) HttpGet(ctx context.Context, url string) (*http.Response, error
 		}
 		if response.StatusCode != http.StatusOK {
 			_ = response.Body.Close()
-			return nil, fmt.Errorf("http get %s status %s", url, response.Status)
+			return nil, fmt.Errorf("webhook get %s status %s", url, response.Status)
 		}
 		return response, nil
 	}

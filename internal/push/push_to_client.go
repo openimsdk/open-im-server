@@ -17,6 +17,8 @@ package push
 import (
 	"context"
 	"encoding/json"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	"github.com/openimsdk/tools/errs"
 	"sync"
 
@@ -47,6 +49,11 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	webhookWorkerCount = 2
+	webhookBufferSize  = 100
+)
+
 type Pusher struct {
 	config                 *Config
 	database               controller.PushDatabase
@@ -57,6 +64,7 @@ type Pusher struct {
 	msgRpcClient           *rpcclient.MessageRpcClient
 	conversationRpcClient  *rpcclient.ConversationRpcClient
 	groupRpcClient         *rpcclient.GroupRpcClient
+	webhookClient          *webhook.Client
 }
 
 var errNoOfflinePusher = errs.New("no offlinePusher is configured")
@@ -75,6 +83,7 @@ func NewPusher(config *Config, discov discovery.SvcDiscoveryRegistry, offlinePus
 		msgRpcClient:           msgRpcClient,
 		conversationRpcClient:  conversationRpcClient,
 		groupRpcClient:         groupRpcClient,
+		webhookClient:          webhook.NewWebhookClient(config.WebhooksConfig.URL, memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize)),
 	}
 }
 
@@ -104,9 +113,11 @@ func (p *Pusher) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID 
 
 func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.MsgData) error {
 	log.ZDebug(ctx, "Get msg from msg_transfer And push msg", "userIDs", userIDs, "msg", msg.String())
-	if err := callbackOnlinePush(ctx, &p.config.WebhooksConfig, userIDs, msg); err != nil {
+
+	if err := p.webhookBeforeOnlinePush(ctx, &p.config.WebhooksConfig.BeforeOnlinePush, userIDs, msg); err != nil {
 		return err
 	}
+
 	// push
 	wsResults, err := p.GetConnsAndOnlinePush(ctx, msg, userIDs)
 	if err != nil {
@@ -132,7 +143,7 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 	})
 
 	if len(offlinePushUserIDList) > 0 {
-		if err = callbackOfflinePush(ctx, &p.config.WebhooksConfig, offlinePushUserIDList, msg, &[]string{}); err != nil {
+		if err = p.webhookBeforeOfflinePush(ctx, &p.config.WebhooksConfig.BeforeOfflinePush, offlinePushUserIDList, msg, &[]string{}); err != nil {
 			return err
 		}
 		err = p.offlinePushMsg(ctx, msg.SendID, msg, offlinePushUserIDList)
@@ -165,7 +176,7 @@ func (p *Pusher) k8sOfflinePush2SuperGroup(ctx context.Context, groupID string, 
 	}
 	if len(needOfflinePushUserIDs) > 0 {
 		var offlinePushUserIDs []string
-		err := callbackOfflinePush(ctx, &p.config.WebhooksConfig, needOfflinePushUserIDs, msg, &offlinePushUserIDs)
+		err := p.webhookBeforeOfflinePush(ctx, &p.config.WebhooksConfig.BeforeOfflinePush, needOfflinePushUserIDs, msg, &offlinePushUserIDs)
 		if err != nil {
 			return err
 		}
@@ -196,7 +207,8 @@ func (p *Pusher) k8sOfflinePush2SuperGroup(ctx context.Context, groupID string, 
 func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
 	log.ZDebug(ctx, "Get super group msg from msg_transfer and push msg", "msg", msg.String(), "groupID", groupID)
 	var pushToUserIDs []string
-	if err = callbackBeforeSuperGroupOnlinePush(ctx, &p.config.WebhooksConfig, groupID, msg, &pushToUserIDs); err != nil {
+
+	if err = p.webhookBeforeGroupOnlinePush(ctx, &p.config.WebhooksConfig.BeforeGroupOnlinePush, groupID, msg, &pushToUserIDs); err != nil {
 		return err
 	}
 
@@ -298,7 +310,8 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 		// Use offline push messaging
 		if len(needOfflinePushUserIDs) > 0 {
 			var offlinePushUserIDs []string
-			err = callbackOfflinePush(ctx, &p.config.WebhooksConfig, needOfflinePushUserIDs, msg, &offlinePushUserIDs)
+
+			err = p.webhookBeforeOfflinePush(ctx, &p.config.WebhooksConfig.BeforeOfflinePush, needOfflinePushUserIDs, msg, &offlinePushUserIDs)
 			if err != nil {
 				return err
 			}
