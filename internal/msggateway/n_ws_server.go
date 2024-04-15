@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	pbAuth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/tools/mcontext"
 	"net/http"
@@ -53,11 +52,6 @@ type LongConnServer interface {
 	Encoder
 	MessageHandler
 }
-
-const (
-	webhookWorkerCount = 2
-	webhookBufferSize  = 100
-)
 
 type WsServer struct {
 	msgGatewayConfig  *Config
@@ -149,7 +143,7 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) (*WsServer, error) {
 		clients:         newUserMap(),
 		Compressor:      NewGzipCompressor(),
 		Encoder:         NewGobEncoder(),
-		webhookClient:   webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL, memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize)),
+		webhookClient:   webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL),
 	}, nil
 }
 

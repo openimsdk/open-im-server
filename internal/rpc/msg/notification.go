@@ -30,21 +30,21 @@ func NewMsgNotificationSender(config *Config, opts ...rpcclient.NotificationSend
 	return &MsgNotificationSender{rpcclient.NewNotificationSender(&config.NotificationConfig, opts...)}
 }
 
-func (m *MsgNotificationSender) UserDeleteMsgsNotification(ctx context.Context, userID, conversationID string, seqs []int64) error {
+func (m *MsgNotificationSender) UserDeleteMsgsNotification(ctx context.Context, userID, conversationID string, seqs []int64) {
 	tips := sdkws.DeleteMsgsTips{
 		UserID:         userID,
 		ConversationID: conversationID,
 		Seqs:           seqs,
 	}
-	return m.Notification(ctx, userID, userID, constant.DeleteMsgsNotification, &tips)
+	m.Notification(ctx, userID, userID, constant.DeleteMsgsNotification, &tips)
 }
 
-func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conversationID string, sesstionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) error {
+func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conversationID string, sesstionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) {
 	tips := &sdkws.MarkAsReadTips{
 		MarkAsReadUserID: sendID,
 		ConversationID:   conversationID,
 		Seqs:             seqs,
 		HasReadSeq:       hasReadSeq,
 	}
-	return m.NotificationWithSessionType(ctx, sendID, recvID, constant.HasReadReceipt, sesstionType, tips)
+	m.NotificationWithSessionType(ctx, sendID, recvID, constant.HasReadReceipt, sesstionType, tips)
 }

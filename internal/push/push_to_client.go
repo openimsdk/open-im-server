@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	"github.com/openimsdk/tools/errs"
 	"sync"
 
@@ -47,11 +46,6 @@ import (
 	"github.com/openimsdk/tools/utils/stringutil"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
-)
-
-const (
-	webhookWorkerCount = 2
-	webhookBufferSize  = 100
 )
 
 type Pusher struct {
@@ -83,7 +77,7 @@ func NewPusher(config *Config, discov discovery.SvcDiscoveryRegistry, offlinePus
 		msgRpcClient:           msgRpcClient,
 		conversationRpcClient:  conversationRpcClient,
 		groupRpcClient:         groupRpcClient,
-		webhookClient:          webhook.NewWebhookClient(config.WebhooksConfig.URL, memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize)),
+		webhookClient:          webhook.NewWebhookClient(config.WebhooksConfig.URL),
 	}
 }
 

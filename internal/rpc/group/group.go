@@ -20,7 +20,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -53,11 +52,6 @@ import (
 	"github.com/openimsdk/tools/utils/encrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/wrapperspb"
-)
-
-const (
-	webhookWorkerCount = 2
-	webhookBufferSize  = 100
 )
 
 type groupServer struct {
@@ -120,7 +114,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	gs.conversationRpcClient = conversationRpcClient
 	gs.msgRpcClient = msgRpcClient
 	gs.config = config
-	gs.webhookClient = webhook.NewWebhookClient(config.WebhooksConfig.URL, memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize))
+	gs.webhookClient = webhook.NewWebhookClient(config.WebhooksConfig.URL)
 	pbgroup.RegisterGroupServer(server, &gs)
 	return nil
 }
@@ -138,9 +132,7 @@ func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 		groupIDs = append(groupIDs, member.GroupID)
 	}
 	for _, groupID := range groupIDs {
-		if err = s.notification.GroupMemberInfoSetNotification(ctx, groupID, req.UserID); err != nil {
-			return nil, err
-		}
+		s.notification.GroupMemberInfoSetNotification(ctx, groupID, req.UserID)
 	}
 	if err = s.db.DeleteGroupMemberHash(ctx, groupIDs); err != nil {
 		return nil, err
@@ -929,7 +921,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 	if err != nil {
 		return nil, err
 	}
-	_ = s.notification.MemberQuitNotification(ctx, s.groupMemberDB2PB(member, 0))
+	s.notification.MemberQuitNotification(ctx, s.groupMemberDB2PB(member, 0))
 	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, []string{req.UserID}); err != nil {
 		return nil, err
 	}
@@ -1024,14 +1016,14 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 				log.ZWarn(ctx, "SetConversations", err, resp.UserIDs, conversation)
 			}
 		}()
-		_ = s.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
+		s.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
 	}
 	if req.GroupInfoForSet.GroupName != "" {
 		num--
-		_ = s.notification.GroupInfoSetNameNotification(ctx, &sdkws.GroupInfoSetNameTips{Group: tips.Group, OpUser: tips.OpUser})
+		s.notification.GroupInfoSetNameNotification(ctx, &sdkws.GroupInfoSetNameTips{Group: tips.Group, OpUser: tips.OpUser})
 	}
 	if num > 0 {
-		_ = s.notification.GroupInfoSetNotification(ctx, tips)
+		s.notification.GroupInfoSetNotification(ctx, tips)
 	}
 
 	s.webhookAfterSetGroupInfo(ctx, &s.config.WebhooksConfig.AfterSetGroupInfo, req)

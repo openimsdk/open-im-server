@@ -200,7 +200,7 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbconvers
 	if err != nil {
 		return nil, err
 	}
-	_ = c.conversationNotificationSender.ConversationChangeNotification(ctx, req.Conversation.OwnerUserID, []string{req.Conversation.ConversationID})
+	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.Conversation.OwnerUserID, []string{req.Conversation.ConversationID})
 	resp := &pbconversation.SetConversationResp{}
 	return resp, nil
 }
@@ -292,14 +292,8 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			return nil, err
 		}
 		for _, userID := range req.UserIDs {
-			err := c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
+			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
 				req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
-			if err != nil {
-				log.ZWarn(ctx, "send conversation set private notification failed", err,
-					"userID", userID, "conversationID", req.Conversation.ConversationID)
-
-				continue
-			}
 		}
 	}
 

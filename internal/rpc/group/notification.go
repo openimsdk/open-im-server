@@ -287,114 +287,122 @@ func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws
 	return nil
 }
 
-func (g *GroupNotificationSender) GroupCreatedNotification(ctx context.Context, tips *sdkws.GroupCreatedTips) (err error) {
+func (g *GroupNotificationSender) GroupCreatedNotification(ctx context.Context, tips *sdkws.GroupCreatedTips) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupCreatedNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupCreatedNotification, tips)
 }
 
-func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, tips *sdkws.GroupInfoSetTips) (err error) {
+func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, tips *sdkws.GroupInfoSetTips) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips, rpcclient.WithRpcGetUserName())
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips, rpcclient.WithRpcGetUserName())
 }
 
-func (g *GroupNotificationSender) GroupInfoSetNameNotification(ctx context.Context, tips *sdkws.GroupInfoSetNameTips) (err error) {
+func (g *GroupNotificationSender) GroupInfoSetNameNotification(ctx context.Context, tips *sdkws.GroupInfoSetNameTips) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNameNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNameNotification, tips)
 }
 
-func (g *GroupNotificationSender) GroupInfoSetAnnouncementNotification(ctx context.Context, tips *sdkws.GroupInfoSetAnnouncementTips) (err error) {
+func (g *GroupNotificationSender) GroupInfoSetAnnouncementNotification(ctx context.Context, tips *sdkws.GroupInfoSetAnnouncementTips) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips, rpcclient.WithRpcGetUserName())
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips, rpcclient.WithRpcGetUserName())
 }
 
-func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbgroup.JoinGroupReq) (err error) {
+func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbgroup.JoinGroupReq) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, req.GroupID)
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, req.GroupID)
 	if err != nil {
-		return err
+		return
 	}
-	user, err := g.getUser(ctx, req.InviterUserID)
+	var user *sdkws.PublicUserInfo
+	user, err = g.getUser(ctx, req.InviterUserID)
 	if err != nil {
-		return err
+		return
 	}
 	userIDs, err := g.getGroupOwnerAndAdminUserID(ctx, req.GroupID)
 	if err != nil {
-		return err
+		return
 	}
 	userIDs = append(userIDs, req.InviterUserID, mcontext.GetOpUserID(ctx))
 	tips := &sdkws.JoinGroupApplicationTips{Group: group, Applicant: user, ReqMsg: req.ReqMessage}
 	for _, userID := range datautil.Distinct(userIDs) {
-		err = g.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.JoinGroupApplicationNotification, tips)
-		if err != nil {
-			log.ZError(ctx, "JoinGroupApplicationNotification failed", err, "group", req.GroupID, "userID", userID)
-		}
+		g.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.JoinGroupApplicationNotification, tips)
 	}
-	return nil
 }
 
-func (g *GroupNotificationSender) MemberQuitNotification(ctx context.Context, member *sdkws.GroupMemberFullInfo) (err error) {
+func (g *GroupNotificationSender) MemberQuitNotification(ctx context.Context, member *sdkws.GroupMemberFullInfo) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, member.GroupID)
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, member.GroupID)
 	if err != nil {
-		return err
+		return
 	}
 	tips := &sdkws.MemberQuitTips{Group: group, QuitUser: member}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), member.GroupID, constant.MemberQuitNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), member.GroupID, constant.MemberQuitNotification, tips)
 }
 
-func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx context.Context, req *pbgroup.GroupApplicationResponseReq) (err error) {
+func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx context.Context, req *pbgroup.GroupApplicationResponseReq) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, req.GroupID)
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, req.GroupID)
 	if err != nil {
-		return err
+		return
 	}
-	userIDs, err := g.getGroupOwnerAndAdminUserID(ctx, req.GroupID)
+	var userIDs []string
+	userIDs, err = g.getGroupOwnerAndAdminUserID(ctx, req.GroupID)
 	if err != nil {
-		return err
+		return
 	}
 	tips := &sdkws.GroupApplicationAcceptedTips{Group: group, HandleMsg: req.HandledMsg}
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+		return
 	}
 	for _, userID := range append(userIDs, req.FromUserID) {
 		if userID == req.FromUserID {
@@ -402,31 +410,30 @@ func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx conte
 		} else {
 			tips.ReceiverAs = 1
 		}
-		err = g.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.GroupApplicationAcceptedNotification, tips)
-		if err != nil {
-			log.ZError(ctx, "failed", err)
-		}
+		g.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.GroupApplicationAcceptedNotification, tips)
 	}
-	return nil
 }
 
-func (g *GroupNotificationSender) GroupApplicationRejectedNotification(ctx context.Context, req *pbgroup.GroupApplicationResponseReq) (err error) {
+func (g *GroupNotificationSender) GroupApplicationRejectedNotification(ctx context.Context, req *pbgroup.GroupApplicationResponseReq) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, req.GroupID)
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, req.GroupID)
 	if err != nil {
-		return err
+		return
 	}
-	userIDs, err := g.getGroupOwnerAndAdminUserID(ctx, req.GroupID)
+	var userIDs []string
+	userIDs, err = g.getGroupOwnerAndAdminUserID(ctx, req.GroupID)
 	if err != nil {
-		return err
+		return
 	}
 	tips := &sdkws.GroupApplicationRejectedTips{Group: group, HandleMsg: req.HandledMsg}
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+		return
 	}
 	for _, userID := range append(userIDs, req.FromUserID) {
 		if userID == req.FromUserID {
@@ -434,254 +441,281 @@ func (g *GroupNotificationSender) GroupApplicationRejectedNotification(ctx conte
 		} else {
 			tips.ReceiverAs = 1
 		}
-		err = g.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.GroupApplicationRejectedNotification, tips)
-		if err != nil {
-			log.ZError(ctx, "failed", err)
-		}
+		g.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.GroupApplicationRejectedNotification, tips)
 	}
-	return nil
 }
 
-func (g *GroupNotificationSender) GroupOwnerTransferredNotification(ctx context.Context, req *pbgroup.TransferGroupOwnerReq) (err error) {
+func (g *GroupNotificationSender) GroupOwnerTransferredNotification(ctx context.Context, req *pbgroup.TransferGroupOwnerReq) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, req.GroupID)
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, req.GroupID)
 	if err != nil {
-		return err
+		return
 	}
 	opUserID := mcontext.GetOpUserID(ctx)
-	member, err := g.getGroupMemberMap(ctx, req.GroupID, []string{opUserID, req.NewOwnerUserID})
+	var member map[string]*sdkws.GroupMemberFullInfo
+	member, err = g.getGroupMemberMap(ctx, req.GroupID, []string{opUserID, req.NewOwnerUserID})
 	if err != nil {
-		return err
+		return
 	}
 	tips := &sdkws.GroupOwnerTransferredTips{Group: group, OpUser: member[opUserID], NewGroupOwner: member[req.NewOwnerUserID]}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupOwnerTransferredNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupOwnerTransferredNotification, tips)
 }
 
-func (g *GroupNotificationSender) MemberKickedNotification(ctx context.Context, tips *sdkws.MemberKickedTips) (err error) {
+func (g *GroupNotificationSender) MemberKickedNotification(ctx context.Context, tips *sdkws.MemberKickedTips) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.MemberKickedNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.MemberKickedNotification, tips)
 }
 
-func (g *GroupNotificationSender) MemberInvitedNotification(ctx context.Context, groupID, reason string, invitedUserIDList []string) (err error) {
+func (g *GroupNotificationSender) MemberInvitedNotification(ctx context.Context, groupID, reason string, invitedUserIDList []string) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, groupID)
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, groupID)
 	if err != nil {
-		return err
+		return
 	}
+
+	var users []*sdkws.GroupMemberFullInfo
+	users, err = g.getGroupMembers(ctx, groupID, invitedUserIDList)
 	if err != nil {
-		return err
-	}
-	users, err := g.getGroupMembers(ctx, groupID, invitedUserIDList)
-	if err != nil {
-		return err
+		return
 	}
 	tips := &sdkws.MemberInvitedTips{Group: group, InvitedUserList: users}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
-	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberInvitedNotification, tips)
+	err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberInvitedNotification, tips)
 }
 
-func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, groupID string, entrantUserID string) (err error) {
+func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, groupID string, entrantUserID string) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, groupID)
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, groupID)
 	if err != nil {
-		return err
+		return
 	}
-	user, err := g.getGroupMember(ctx, groupID, entrantUserID)
+	var user *sdkws.GroupMemberFullInfo
+	user, err = g.getGroupMember(ctx, groupID, entrantUserID)
 	if err != nil {
-		return err
+		return
 	}
 	tips := &sdkws.MemberEnterTips{Group: group, EntrantUser: user}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberEnterNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberEnterNotification, tips)
 }
 
-func (g *GroupNotificationSender) GroupDismissedNotification(ctx context.Context, tips *sdkws.GroupDismissedTips) (err error) {
+func (g *GroupNotificationSender) GroupDismissedNotification(ctx context.Context, tips *sdkws.GroupDismissedTips) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupDismissedNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupDismissedNotification, tips)
 }
 
-func (g *GroupNotificationSender) GroupMemberMutedNotification(ctx context.Context, groupID, groupMemberUserID string, mutedSeconds uint32) (err error) {
+func (g *GroupNotificationSender) GroupMemberMutedNotification(ctx context.Context, groupID, groupMemberUserID string, mutedSeconds uint32) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, groupID)
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, groupID)
 	if err != nil {
-		return err
+		return
 	}
-	user, err := g.getGroupMemberMap(ctx, groupID, []string{mcontext.GetOpUserID(ctx), groupMemberUserID})
+	var user map[string]*sdkws.GroupMemberFullInfo
+	user, err = g.getGroupMemberMap(ctx, groupID, []string{mcontext.GetOpUserID(ctx), groupMemberUserID})
 	if err != nil {
-		return err
+		return
 	}
 	tips := &sdkws.GroupMemberMutedTips{
 		Group: group, MutedSeconds: mutedSeconds,
 		OpUser: user[mcontext.GetOpUserID(ctx)], MutedUser: user[groupMemberUserID],
 	}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberMutedNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberMutedNotification, tips)
 }
 
-func (g *GroupNotificationSender) GroupMemberCancelMutedNotification(ctx context.Context, groupID, groupMemberUserID string) (err error) {
+func (g *GroupNotificationSender) GroupMemberCancelMutedNotification(ctx context.Context, groupID, groupMemberUserID string) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, groupID)
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, groupID)
 	if err != nil {
-		return err
+		return
 	}
-	user, err := g.getGroupMemberMap(ctx, groupID, []string{mcontext.GetOpUserID(ctx), groupMemberUserID})
+	var user map[string]*sdkws.GroupMemberFullInfo
+	user, err = g.getGroupMemberMap(ctx, groupID, []string{mcontext.GetOpUserID(ctx), groupMemberUserID})
 	if err != nil {
-		return err
+		return
 	}
 	tips := &sdkws.GroupMemberCancelMutedTips{Group: group, OpUser: user[mcontext.GetOpUserID(ctx)], MutedUser: user[groupMemberUserID]}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberCancelMutedNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberCancelMutedNotification, tips)
 }
 
-func (g *GroupNotificationSender) GroupMutedNotification(ctx context.Context, groupID string) (err error) {
+func (g *GroupNotificationSender) GroupMutedNotification(ctx context.Context, groupID string) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, groupID)
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, groupID)
 	if err != nil {
-		return err
+		return
 	}
-	users, err := g.getGroupMembers(ctx, groupID, []string{mcontext.GetOpUserID(ctx)})
+	var users []*sdkws.GroupMemberFullInfo
+	users, err = g.getGroupMembers(ctx, groupID, []string{mcontext.GetOpUserID(ctx)})
 	if err != nil {
-		return err
+		return
 	}
 	tips := &sdkws.GroupMutedTips{Group: group}
 	if len(users) > 0 {
 		tips.OpUser = users[0]
 	}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMutedNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMutedNotification, tips)
 }
 
-func (g *GroupNotificationSender) GroupCancelMutedNotification(ctx context.Context, groupID string) (err error) {
+func (g *GroupNotificationSender) GroupCancelMutedNotification(ctx context.Context, groupID string) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, groupID)
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, groupID)
 	if err != nil {
-		return err
+		return
 	}
-	users, err := g.getGroupMembers(ctx, groupID, []string{mcontext.GetOpUserID(ctx)})
+	var users []*sdkws.GroupMemberFullInfo
+	users, err = g.getGroupMembers(ctx, groupID, []string{mcontext.GetOpUserID(ctx)})
 	if err != nil {
-		return err
+		return
 	}
 	tips := &sdkws.GroupCancelMutedTips{Group: group}
 	if len(users) > 0 {
 		tips.OpUser = users[0]
 	}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupCancelMutedNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupCancelMutedNotification, tips)
 }
 
-func (g *GroupNotificationSender) GroupMemberInfoSetNotification(ctx context.Context, groupID, groupMemberUserID string) (err error) {
-	group, err := g.getGroupInfo(ctx, groupID)
-	if err != nil {
-		return err
-	}
-	user, err := g.getGroupMemberMap(ctx, groupID, []string{groupMemberUserID})
-	if err != nil {
-		return err
-	}
-	tips := &sdkws.GroupMemberInfoSetTips{Group: group, OpUser: user[mcontext.GetOpUserID(ctx)], ChangedUser: user[groupMemberUserID]}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
-	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberInfoSetNotification, tips)
-}
-
-func (g *GroupNotificationSender) GroupMemberSetToAdminNotification(ctx context.Context, groupID, groupMemberUserID string) (err error) {
-	group, err := g.getGroupInfo(ctx, groupID)
-	if err != nil {
-		return err
-	}
-	user, err := g.getGroupMemberMap(ctx, groupID, []string{mcontext.GetOpUserID(ctx), groupMemberUserID})
-	if err != nil {
-		return err
-	}
-	tips := &sdkws.GroupMemberInfoSetTips{Group: group, OpUser: user[mcontext.GetOpUserID(ctx)], ChangedUser: user[groupMemberUserID]}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
-	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberSetToAdminNotification, tips)
-}
-
-func (g *GroupNotificationSender) GroupMemberSetToOrdinaryUserNotification(ctx context.Context, groupID, groupMemberUserID string) (err error) {
+func (g *GroupNotificationSender) GroupMemberInfoSetNotification(ctx context.Context, groupID, groupMemberUserID string) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, groupID)
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, groupID)
 	if err != nil {
-		return err
+		return
 	}
-	user, err := g.getGroupMemberMap(ctx, groupID, []string{mcontext.GetOpUserID(ctx), groupMemberUserID})
+	var user map[string]*sdkws.GroupMemberFullInfo
+	user, err = g.getGroupMemberMap(ctx, groupID, []string{groupMemberUserID})
 	if err != nil {
-		return err
+		return
 	}
 	tips := &sdkws.GroupMemberInfoSetTips{Group: group, OpUser: user[mcontext.GetOpUserID(ctx)], ChangedUser: user[groupMemberUserID]}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberSetToOrdinaryUserNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberInfoSetNotification, tips)
 }
 
-func (g *GroupNotificationSender) SuperGroupNotification(ctx context.Context, sendID, recvID string) (err error) {
+func (g *GroupNotificationSender) GroupMemberSetToAdminNotification(ctx context.Context, groupID, groupMemberUserID string) {
+	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	err = g.Notification(ctx, sendID, recvID, constant.SuperGroupUpdateNotification, nil)
-	return err
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, groupID)
+	if err != nil {
+		return
+	}
+	user, err := g.getGroupMemberMap(ctx, groupID, []string{mcontext.GetOpUserID(ctx), groupMemberUserID})
+	if err != nil {
+		return
+	}
+	tips := &sdkws.GroupMemberInfoSetTips{Group: group, OpUser: user[mcontext.GetOpUserID(ctx)], ChangedUser: user[groupMemberUserID]}
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
+	}
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberSetToAdminNotification, tips)
+}
+
+func (g *GroupNotificationSender) GroupMemberSetToOrdinaryUserNotification(ctx context.Context, groupID, groupMemberUserID string) {
+	var err error
+	defer func() {
+		if err != nil {
+			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
+		}
+	}()
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, groupID)
+	if err != nil {
+		return
+	}
+	var user map[string]*sdkws.GroupMemberFullInfo
+	user, err = g.getGroupMemberMap(ctx, groupID, []string{mcontext.GetOpUserID(ctx), groupMemberUserID})
+	if err != nil {
+		return
+	}
+	tips := &sdkws.GroupMemberInfoSetTips{Group: group, OpUser: user[mcontext.GetOpUserID(ctx)], ChangedUser: user[groupMemberUserID]}
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return
+	}
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberSetToOrdinaryUserNotification, tips)
+}
+
+func (g *GroupNotificationSender) SuperGroupNotification(ctx context.Context, sendID, recvID string) {
+	g.Notification(ctx, sendID, recvID, constant.SuperGroupUpdateNotification, nil)
 }

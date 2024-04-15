@@ -17,14 +17,12 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/idutil"
@@ -217,6 +215,13 @@ type NotificationSender struct {
 	sessionTypeConf map[int32]int32
 	sendMsg         func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)
 	getUserInfo     func(ctx context.Context, userID string) (*sdkws.UserInfo, error)
+	queue           *memAsyncQueue.MemoryQueue
+}
+
+func WithQueue(queue *memAsyncQueue.MemoryQueue) NotificationSenderOptions {
+	return func(s *NotificationSender) {
+		s.queue = queue
+	}
 }
 
 type NotificationSenderOptions func(*NotificationSender)
@@ -239,10 +244,18 @@ func WithUserRpcClient(userRpcClient *UserRpcClient) NotificationSenderOptions {
 	}
 }
 
+const (
+	notificationWorkerCount = 2
+	notificationBufferSize  = 200
+)
+
 func NewNotificationSender(conf *config.Notification, opts ...NotificationSenderOptions) *NotificationSender {
 	notificationSender := &NotificationSender{contentTypeConf: newContentTypeConf(conf), sessionTypeConf: newSessionTypeConf()}
 	for _, opt := range opts {
 		opt(notificationSender)
+	}
+	if notificationSender.queue == nil {
+		notificationSender.queue = memAsyncQueue.NewMemoryQueue(notificationWorkerCount, notificationBufferSize)
 	}
 	return notificationSender
 }
@@ -259,11 +272,12 @@ func WithRpcGetUserName() NotificationOptions {
 	}
 }
 
-func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
+func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) {
 	n := sdkws.NotificationElem{Detail: jsonutil.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
-		return errs.WrapMsg(err, "json.Marshal failed", "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", jsonutil.StructToJsonString(m))
+		log.ZError(ctx, "json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", jsonutil.StructToJsonString(m))
+		return
 	}
 	notificationOpt := &notificationOpt{}
 	for _, opt := range opts {
@@ -275,7 +289,8 @@ func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, se
 	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
 		userInfo, err = s.getUserInfo(ctx, sendID)
 		if err != nil {
-			return errs.WrapMsg(err, "getUserInfo failed", "sendID", sendID)
+			log.ZError(ctx, "getUserInfo failed", err, "sendID", sendID)
+			return
 		}
 		msg.SenderNickname = userInfo.Nickname
 		msg.SenderFaceURL = userInfo.FaceURL
@@ -303,13 +318,16 @@ func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, se
 	req.MsgData = &msg
 	_, err = s.sendMsg(ctx, &req)
 	if err != nil {
-		return errs.WrapMsg(err, "SendMsg failed", "req", fmt.Sprintf("%+v", req))
+		log.ZError(ctx, "SendMsg failed", err, "req", req.String())
 	}
-	return err
 }
 
-func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...NotificationOptions) error {
-	return s.NotificationWithSessionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
+func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) {
+	s.queue.Push(func() { s.send(ctx, sendID, recvID, contentType, sesstionType, m, opts...) })
+}
+
+func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...NotificationOptions) {
+	s.NotificationWithSessionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
 }
 
 func (s *NotificationSender) SetOptionsByContentType(_ context.Context, options map[string]bool, contentType int32) {

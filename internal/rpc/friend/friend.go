@@ -18,7 +18,6 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -37,11 +36,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
-)
-
-const (
-	webhookWorkerCount = 2
-	webhookBufferSize  = 100
 )
 
 type friendServer struct {
@@ -120,7 +114,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		RegisterCenter:        client,
 		conversationRpcClient: rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation),
 		config:                config,
-		webhookClient:         webhook.NewWebhookClient(config.WebhooksConfig.URL, memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize)),
+		webhookClient:         webhook.NewWebhookClient(config.WebhooksConfig.URL),
 	})
 
 	return nil
@@ -152,10 +146,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 	if err = s.friendDatabase.AddFriendRequest(ctx, req.FromUserID, req.ToUserID, req.ReqMsg, req.Ex); err != nil {
 		return nil, err
 	}
-	if err = s.notificationSender.FriendApplicationAddNotification(ctx, req); err != nil {
-		return nil, err
-	}
-
+	s.notificationSender.FriendApplicationAddNotification(ctx, req)
 	s.webhookAfterAddFriend(ctx, &s.config.WebhooksConfig.AfterAddFriend, req)
 	return resp, nil
 }
@@ -215,9 +206,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.Res
 		if err != nil {
 			return nil, err
 		}
-		if err := s.notificationSender.FriendApplicationAgreedNotification(ctx, req); err != nil {
-			return nil, err
-		}
+		s.notificationSender.FriendApplicationAgreedNotification(ctx, req)
 		return resp, nil
 	}
 	if req.HandleResult == constant.FriendResponseRefuse {
@@ -472,9 +461,6 @@ func (s *friendServer) UpdateFriends(
 
 	resp := &pbfriend.UpdateFriendsResp{}
 
-	err = s.notificationSender.FriendsInfoUpdateNotification(ctx, req.OwnerUserID, req.FriendUserIDs)
-	if err != nil {
-		return nil, errs.WrapMsg(err, "FriendsInfoUpdateNotification Error")
-	}
+	s.notificationSender.FriendsInfoUpdateNotification(ctx, req.OwnerUserID, req.FriendUserIDs)
 	return resp, nil
 }

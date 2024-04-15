@@ -86,10 +86,6 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbfriend.AddBlackReq) 
 	if err := s.blackDatabase.Create(ctx, []*relation.BlackModel{&black}); err != nil {
 		return nil, err
 	}
-
-	if err := s.notificationSender.BlackAddedNotification(ctx, req); err != nil {
-		return nil, err
-	}
-
+	s.notificationSender.BlackAddedNotification(ctx, req)
 	return &pbfriend.AddBlackResp{}, nil
 }

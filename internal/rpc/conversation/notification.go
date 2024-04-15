@@ -34,7 +34,7 @@ func NewConversationNotificationSender(conf *config.Notification, msgRpcClient *
 // SetPrivate invote.
 func (c *ConversationNotificationSender) ConversationSetPrivateNotification(ctx context.Context, sendID, recvID string,
 	isPrivateChat bool, conversationID string,
-) error {
+) {
 	tips := &sdkws.ConversationSetPrivateTips{
 		RecvID:         recvID,
 		SendID:         sendID,
@@ -42,23 +42,23 @@ func (c *ConversationNotificationSender) ConversationSetPrivateNotification(ctx 
 		ConversationID: conversationID,
 	}
 
-	return c.Notification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, tips)
+	c.Notification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, tips)
 }
 
-func (c *ConversationNotificationSender) ConversationChangeNotification(ctx context.Context, userID string, conversationIDs []string) error {
+func (c *ConversationNotificationSender) ConversationChangeNotification(ctx context.Context, userID string, conversationIDs []string) {
 	tips := &sdkws.ConversationUpdateTips{
 		UserID:             userID,
 		ConversationIDList: conversationIDs,
 	}
 
-	return c.Notification(ctx, userID, userID, constant.ConversationChangeNotification, tips)
+	c.Notification(ctx, userID, userID, constant.ConversationChangeNotification, tips)
 }
 
 func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(
 	ctx context.Context,
 	userID, conversationID string,
 	unreadCountTime, hasReadSeq int64,
-) error {
+) {
 	tips := &sdkws.ConversationHasReadTips{
 		UserID:          userID,
 		ConversationID:  conversationID,
@@ -66,5 +66,5 @@ func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(
 		UnreadCountTime: unreadCountTime,
 	}
 
-	return c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, tips)
+	c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, tips)
 }

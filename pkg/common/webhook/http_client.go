@@ -33,8 +33,21 @@ type Client struct {
 	queue  *memAsyncQueue.MemoryQueue
 }
 
-func NewWebhookClient(url string, queue *memAsyncQueue.MemoryQueue) *Client {
+const (
+	webhookWorkerCount = 2
+	webhookBufferSize  = 100
+)
+
+func NewWebhookClient(url string, options ...*memAsyncQueue.MemoryQueue) *Client {
+	var queue *memAsyncQueue.MemoryQueue
+	if len(options) > 0 && options[0] != nil {
+		queue = options[0]
+	} else {
+		queue = memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize)
+	}
+
 	http.DefaultTransport.(*http.Transport).MaxConnsPerHost = 100 // Enhance the default number of max connections per host
+
 	return &Client{
 		client: httputil.NewHTTPClient(httputil.NewClientConfig()),
 		url:    url,

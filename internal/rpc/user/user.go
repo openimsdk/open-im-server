@@ -19,7 +19,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/friend"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	"github.com/openimsdk/tools/db/redisutil"
 	"math/rand"
 	"strings"
@@ -44,11 +43,6 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
-)
-
-const (
-	webhookWorkerCount = 2
-	webhookBufferSize  = 100
 )
 
 type userServer struct {
@@ -107,7 +101,7 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 		friendNotificationSender: friend.NewFriendNotificationSender(&config.NotificationConfig, &msgRpcClient, friend.WithDBFunc(database.FindWithError)),
 		userNotificationSender:   NewUserNotificationSender(config, &msgRpcClient, WithUserFunc(database.FindWithError)),
 		config:                   config,
-		webhookClient:            webhook.NewWebhookClient(config.WebhooksConfig.URL, memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize)),
+		webhookClient:            webhook.NewWebhookClient(config.WebhooksConfig.URL),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.db.InitOnce(context.Background(), users)
@@ -142,7 +136,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err := s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
-	_ = s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
 	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
@@ -174,7 +168,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	if err = s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
-	_ = s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
 	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
@@ -418,10 +412,7 @@ func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.Proc
 		FromUserID: req.UserID,
 		ToUserID:   req.UserID,
 	}
-	err = s.userNotificationSender.UserCommandAddNotification(ctx, tips)
-	if err != nil {
-		return nil, err
-	}
+	s.userNotificationSender.UserCommandAddNotification(ctx, tips)
 	return &pbuser.ProcessUserCommandAddResp{}, nil
 }
 
@@ -440,11 +431,7 @@ func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.P
 		FromUserID: req.UserID,
 		ToUserID:   req.UserID,
 	}
-	err = s.userNotificationSender.UserCommandDeleteNotification(ctx, tips)
-	if err != nil {
-		return nil, err
-	}
-
+	s.userNotificationSender.UserCommandDeleteNotification(ctx, tips)
 	return &pbuser.ProcessUserCommandDeleteResp{}, nil
 }
 
@@ -473,10 +460,7 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 		FromUserID: req.UserID,
 		ToUserID:   req.UserID,
 	}
-	err = s.userNotificationSender.UserCommandUpdateNotification(ctx, tips)
-	if err != nil {
-		return nil, err
-	}
+	s.userNotificationSender.UserCommandUpdateNotification(ctx, tips)
 	return &pbuser.ProcessUserCommandUpdateResp{}, nil
 }
 
