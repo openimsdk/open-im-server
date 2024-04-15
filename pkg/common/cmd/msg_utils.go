@@ -30,6 +30,14 @@ type MsgUtilsCmd struct {
 func (m *MsgUtilsCmd) AddUserIDFlag() {
 	m.Command.PersistentFlags().StringP("userID", "u", "", "openIM userID")
 }
+func (m *MsgUtilsCmd) AddIndexFlag() {
+	m.Command.PersistentFlags().IntP(FlagTransferIndex, "i", 0, "process startup sequence number")
+}
+
+func (m *MsgUtilsCmd) AddConfigDirFlag() {
+	m.Command.PersistentFlags().StringP(FlagConf, "c", "", "path of config directory")
+
+}
 
 func (m *MsgUtilsCmd) getUserIDFlag(cmdLines *cobra.Command) string {
 	userID, _ := cmdLines.Flags().GetString("userID")
@@ -46,7 +54,7 @@ func (m *MsgUtilsCmd) AddFixAllFlag() {
 } */
 
 func (m *MsgUtilsCmd) AddClearAllFlag() {
-	m.Command.PersistentFlags().BoolP("clearAll", "c", false, "openIM clear all seqs")
+	m.Command.PersistentFlags().BoolP("clearAll", "cl", false, "openIM clear all seqs")
 }
 
 /* func (m *MsgUtilsCmd) getClearAllFlag(cmdLines *cobra.Command) bool {
