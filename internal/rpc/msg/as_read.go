@@ -208,7 +208,7 @@ func (m *msgServer) sendMarkAsReadNotification(ctx context.Context, conversation
 		Seqs:             seqs,
 		HasReadSeq:       hasReadSeq,
 	}
-	err := m.notificationSender.NotificationWithSesstionType(ctx, sendID, recvID, constant.HasReadReceipt, sessionType, tips)
+	err := m.notificationSender.NotificationWithSessionType(ctx, sendID, recvID, constant.HasReadReceipt, sessionType, tips)
 	if err != nil {
 		log.ZWarn(ctx, "send has read Receipt err", err)
 	}
