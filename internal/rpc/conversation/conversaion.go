@@ -27,7 +27,6 @@ import (
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 	"github.com/openimsdk/protocol/constant"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/sdkws"
@@ -44,7 +43,7 @@ type conversationServer struct {
 	user                           *rpcclient.UserRpcClient
 	groupRpcClient                 *rpcclient.GroupRpcClient
 	conversationDatabase           controller.ConversationDatabase
-	conversationNotificationSender *notification.ConversationNotificationSender
+	conversationNotificationSender *ConversationNotificationSender
 	config                         *Config
 }
 
@@ -78,7 +77,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	pbconversation.RegisterConversationServer(server, &conversationServer{
 		msgRpcClient:                   &msgRpcClient,
 		user:                           &userRpcClient,
-		conversationNotificationSender: notification.NewConversationNotificationSender(&config.NotificationConfig, &msgRpcClient),
+		conversationNotificationSender: NewConversationNotificationSender(&config.NotificationConfig, &msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, &config.LocalCacheConfig, cache.GetDefaultOpt(), conversationDB), mgocli.GetTx()),
 	})

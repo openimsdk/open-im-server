@@ -46,5 +46,5 @@ func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conv
 		Seqs:             seqs,
 		HasReadSeq:       hasReadSeq,
 	}
-	return m.NotificationWithSesstionType(ctx, sendID, recvID, constant.HasReadReceipt, sesstionType, tips)
+	return m.NotificationWithSessionType(ctx, sendID, recvID, constant.HasReadReceipt, sesstionType, tips)
 }

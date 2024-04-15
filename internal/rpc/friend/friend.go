@@ -29,7 +29,6 @@ import (
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 	"github.com/openimsdk/protocol/constant"
 	pbfriend "github.com/openimsdk/protocol/friend"
 	"github.com/openimsdk/protocol/sdkws"
@@ -49,7 +48,7 @@ type friendServer struct {
 	friendDatabase        controller.FriendDatabase
 	blackDatabase         controller.BlackDatabase
 	userRpcClient         *rpcclient.UserRpcClient
-	notificationSender    *notification.FriendNotificationSender
+	notificationSender    *FriendNotificationSender
 	conversationRpcClient rpcclient.ConversationRpcClient
 	RegisterCenter        discovery.SvcDiscoveryRegistry
 	config                *Config
@@ -97,10 +96,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
 
 	// Initialize notification sender
-	notificationSender := notification.NewFriendNotificationSender(
+	notificationSender := NewFriendNotificationSender(
 		&config.NotificationConfig,
 		&msgRpcClient,
-		notification.WithRpcFunc(userRpcClient.GetUsersInfo),
+		WithRpcFunc(userRpcClient.GetUsersInfo),
 	)
 	cache.InitLocalCache(&config.LocalCacheConfig)
 

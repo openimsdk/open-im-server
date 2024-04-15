@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package notification
+package friend
 
 import (
 	"context"
@@ -22,6 +22,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 	"github.com/openimsdk/protocol/constant"
 	pbfriend "github.com/openimsdk/protocol/friend"
 	"github.com/openimsdk/protocol/sdkws"
@@ -31,7 +32,7 @@ import (
 type FriendNotificationSender struct {
 	*rpcclient.NotificationSender
 	// Target not found err
-	getUsersInfo func(ctx context.Context, userIDs []string) ([]CommonUser, error)
+	getUsersInfo func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error)
 	// db controller
 	db controller.FriendDatabase
 }
@@ -48,7 +49,7 @@ func WithDBFunc(
 	fn func(ctx context.Context, userIDs []string) (users []*relationtb.UserModel, err error),
 ) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
-		f := func(ctx context.Context, userIDs []string) (result []CommonUser, err error) {
+		f := func(ctx context.Context, userIDs []string) (result []notification.CommonUser, err error) {
 			users, err := fn(ctx, userIDs)
 			if err != nil {
 				return nil, err
@@ -66,7 +67,7 @@ func WithRpcFunc(
 	fn func(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error),
 ) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
-		f := func(ctx context.Context, userIDs []string) (result []CommonUser, err error) {
+		f := func(ctx context.Context, userIDs []string) (result []notification.CommonUser, err error) {
 			users, err := fn(ctx, userIDs)
 			if err != nil {
 				return nil, err
