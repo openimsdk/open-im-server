@@ -272,7 +272,7 @@ func WithRpcGetUserName() NotificationOptions {
 	}
 }
 
-func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) {
+func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, contentType, sessionType int32, m proto.Message, opts ...NotificationOptions) {
 	n := sdkws.NotificationElem{Detail: jsonutil.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
@@ -301,7 +301,7 @@ func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, co
 	msg.Content = content
 	msg.MsgFrom = constant.SysMsgType
 	msg.ContentType = contentType
-	msg.SessionType = sesstionType
+	msg.SessionType = sessionType
 	if msg.SessionType == constant.SuperGroupChatType {
 		msg.GroupID = recvID
 	}
@@ -322,8 +322,8 @@ func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, co
 	}
 }
 
-func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) {
-	s.queue.Push(func() { s.send(ctx, sendID, recvID, contentType, sesstionType, m, opts...) })
+func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, sendID, recvID string, contentType, sessionType int32, m proto.Message, opts ...NotificationOptions) {
+	s.queue.Push(func() { s.send(ctx, sendID, recvID, contentType, sessionType, m, opts...) })
 }
 
 func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...NotificationOptions) {

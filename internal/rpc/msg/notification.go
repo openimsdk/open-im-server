@@ -39,12 +39,12 @@ func (m *MsgNotificationSender) UserDeleteMsgsNotification(ctx context.Context, 
 	m.Notification(ctx, userID, userID, constant.DeleteMsgsNotification, &tips)
 }
 
-func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conversationID string, sesstionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) {
+func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conversationID string, sessionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) {
 	tips := &sdkws.MarkAsReadTips{
 		MarkAsReadUserID: sendID,
 		ConversationID:   conversationID,
 		Seqs:             seqs,
 		HasReadSeq:       hasReadSeq,
 	}
-	m.NotificationWithSessionType(ctx, sendID, recvID, constant.HasReadReceipt, sesstionType, tips)
+	m.NotificationWithSessionType(ctx, sendID, recvID, constant.HasReadReceipt, sessionType, tips)
 }
