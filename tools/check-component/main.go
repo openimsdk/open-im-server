@@ -26,6 +26,8 @@ import (
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/system/program"
+	"io/ioutil"
+	"log"
 	"path/filepath"
 	"time"
 )
@@ -33,6 +35,10 @@ import (
 const maxRetry = 180
 
 func CheckZookeeper(ctx context.Context, config *config.ZooKeeper) error {
+	// Temporary disable logging
+	originalLogger := log.Default().Writer()
+	log.SetOutput(ioutil.Discard)
+	defer log.SetOutput(originalLogger) // Ensure logging is restored
 	return zookeeper.Check(ctx, config.Address, config.Schema, zookeeper.WithUserNameAndPassword(config.Username, config.Password))
 }
 
