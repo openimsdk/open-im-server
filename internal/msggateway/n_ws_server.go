@@ -20,13 +20,13 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	pbAuth "github.com/openimsdk/protocol/auth"
+	"github.com/openimsdk/tools/mcontext"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -36,7 +36,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/stringutil"
-	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -46,7 +45,6 @@ type LongConnServer interface {
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s any) error
-	SetCacheHandler(cache cache.TokenModel)
 	SetDiscoveryRegistry(client discovery.SvcDiscoveryRegistry, config *Config)
 	KickUserConn(client *Client) error
 	UnRegister(c *Client)
@@ -75,7 +73,6 @@ type WsServer struct {
 	handshakeTimeout  time.Duration
 	writeBufferSize   int
 	validate          *validator.Validate
-	cache             cache.TokenModel
 	userClient        *rpcclient.UserRpcClient
 	authClient        *rpcclient.Auth
 	disCov            discovery.SvcDiscoveryRegistry
@@ -110,10 +107,6 @@ func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, sta
 	case constant.Offline:
 		ws.webhookAfterUserOffline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOffline, client.UserID, client.PlatformID, client.ctx.GetConnID())
 	}
-}
-
-func (ws *WsServer) SetCacheHandler(cache cache.TokenModel) {
-	ws.cache = cache
 }
 
 func (ws *WsServer) UnRegister(c *Client) {
@@ -341,57 +334,13 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 				log.ZWarn(c.ctx, "KickOnlineMessage", err)
 			}
 		}
-		m, err := ws.cache.GetTokensWithoutError(
-			newClient.ctx,
-			newClient.UserID,
-			newClient.PlatformID,
+		ctx := mcontext.WithMustInfoCtx(
+			[]string{newClient.ctx.GetOperationID(), newClient.ctx.GetUserID(),
+				constant.PlatformIDToName(newClient.PlatformID), newClient.ctx.GetConnID()},
 		)
-		if err != nil && err != redis.Nil {
-			log.ZWarn(
-				newClient.ctx,
-				"get token from redis err",
-				err,
-				"userID",
-				newClient.UserID,
-				"platformID",
-				newClient.PlatformID,
-			)
-			return
-		}
-		if m == nil {
-			log.ZWarn(
-				newClient.ctx,
-				"m is nil",
-				errs.New("m is nil"),
-				"userID",
-				newClient.UserID,
-				"platformID",
-				newClient.PlatformID,
-			)
-			return
-		}
-		log.ZDebug(
-			newClient.ctx,
-			"get token from redis",
-			"userID",
-			newClient.UserID,
-			"platformID",
-			newClient.PlatformID,
-			"tokenMap",
-			m,
-		)
-
-		for k := range m {
-			if k != newClient.ctx.GetToken() {
-				m[k] = constant.KickedToken
-			}
-		}
-		log.ZDebug(newClient.ctx, "set token map is ", "token map", m, "userID",
-			newClient.UserID, "token", newClient.ctx.GetToken())
-		err = ws.cache.SetTokenMapByUidPid(newClient.ctx, newClient.UserID, newClient.PlatformID, m)
-		if err != nil {
-			log.ZWarn(newClient.ctx, "SetTokenMapByUidPid err", err, "userID", newClient.UserID, "platformID", newClient.PlatformID)
-			return
+		if _, err := ws.authClient.InvalidateToken(ctx, newClient.token, newClient.UserID, newClient.PlatformID); err != nil {
+			log.ZWarn(newClient.ctx, "InvalidateToken err", err, "userID", newClient.UserID,
+				"platformID", newClient.PlatformID)
 		}
 	}
 }
@@ -405,7 +354,8 @@ func (ws *WsServer) unregisterClient(client *Client) {
 	}
 	ws.onlineUserConnNum.Add(-1)
 	ws.SetUserOnlineStatus(client.ctx, client, constant.Offline)
-	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num", ws.onlineUserNum.Load(), "online user conn Num",
+	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num",
+		ws.onlineUserNum.Load(), "online user conn Num",
 		ws.onlineUserConnNum.Load(),
 	)
 }
@@ -424,40 +374,64 @@ func (ws *WsServer) validateRespWithRequest(ctx *UserConnContext, resp *pbAuth.P
 }
 
 func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
+	// Create a new connection context
 	connContext := newContext(w, r)
+
+	// Check if the current number of online user connections exceeds the maximum limit
 	if ws.onlineUserConnNum.Load() >= ws.wsMaxConnNum {
+		// If it exceeds the maximum connection number, return an error via HTTP and stop processing
 		httpError(connContext, servererrs.ErrConnOverMaxNumLimit.WrapMsg("over max conn num limit"))
 		return
 	}
+
+	// Parse essential arguments (e.g., user ID, Token)
 	err := connContext.ParseEssentialArgs()
 	if err != nil {
+		// If there's an error during parsing, return an error via HTTP and stop processing
+
 		httpError(connContext, err)
 		return
 	}
+
+	// Call the authentication client to parse the Token obtained from the context
 	resp, err := ws.authClient.ParseToken(connContext, connContext.GetToken())
 	if err != nil {
+		// If there's an error parsing the Token, decide whether to send the error message via WebSocket based on the context flag
 		shouldSendError := connContext.ShouldSendError()
 		if shouldSendError {
+			// Create a WebSocket connection object and attempt to send the error message via WebSocket
 			wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
 			if err := wsLongConn.RespErrInfo(err, w, r); err == nil {
+				// If the error message is successfully sent via WebSocket, stop processing
 				return
 			}
 		}
+		// If sending via WebSocket is not required or fails, return the error via HTTP and stop processing
 		httpError(connContext, err)
 		return
 	}
+
+	// Validate the authentication response matches the request (e.g., user ID and platform ID)
 	err = ws.validateRespWithRequest(connContext, resp)
 	if err != nil {
+		// If validation fails, return an error via HTTP and stop processing
 		httpError(connContext, err)
 		return
 	}
+
+	// Create a WebSocket long connection object
 	wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
 	if err := wsLongConn.GenerateLongConn(w, r); err != nil {
+		// If creating the long connection fails, return an error via HTTP and stop processing
 		httpError(connContext, err)
 		return
 	}
+
+	// Retrieve a client object from the client pool, reset its state, and associate it with the current WebSocket long connection
 	client := ws.clientPool.Get().(*Client)
 	client.ResetClient(connContext, wsLongConn, ws)
+
+	// Register the client with the server and start message processing
 	ws.registerChan <- client
 	go client.readMessage()
 }

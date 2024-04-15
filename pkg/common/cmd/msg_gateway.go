@@ -28,23 +28,22 @@ type MsgGatewayCmd struct {
 	*RootCmd
 	ctx              context.Context
 	configMap        map[string]any
-	msgGatewayConfig msggateway.Config
+	msgGatewayConfig *msggateway.Config
 }
 
 func NewMsgGatewayCmd() *MsgGatewayCmd {
 	var msgGatewayConfig msggateway.Config
-	ret := &MsgGatewayCmd{msgGatewayConfig: msgGatewayConfig}
+	ret := &MsgGatewayCmd{msgGatewayConfig: &msgGatewayConfig}
 	ret.configMap = map[string]any{
 		OpenIMMsgGatewayCfgFileName: &msgGatewayConfig.MsgGateway,
-		RedisConfigFileName:         &msgGatewayConfig.RedisConfig,
 		ZookeeperConfigFileName:     &msgGatewayConfig.ZookeeperConfig,
 		ShareFileName:               &msgGatewayConfig.Share,
 		WebhooksConfigFileName:      &msgGatewayConfig.WebhooksConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
-	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
-		return ret.preRunE()
+	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		return ret.runE()
 	}
 	return ret
 }
@@ -53,6 +52,6 @@ func (m *MsgGatewayCmd) Exec() error {
 	return m.Execute()
 }
 
-func (m *MsgGatewayCmd) preRunE() error {
-	return msggateway.Start(m.ctx, m.Index(), &m.msgGatewayConfig)
+func (m *MsgGatewayCmd) runE() error {
+	return msggateway.Start(m.ctx, m.Index(), m.msgGatewayConfig)
 }

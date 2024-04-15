@@ -27,12 +27,12 @@ type MsgRpcCmd struct {
 	*RootCmd
 	ctx       context.Context
 	configMap map[string]any
-	msgConfig msg.Config
+	msgConfig *msg.Config
 }
 
 func NewMsgRpcCmd() *MsgRpcCmd {
 	var msgConfig msg.Config
-	ret := &MsgRpcCmd{msgConfig: msgConfig}
+	ret := &MsgRpcCmd{msgConfig: &msgConfig}
 	ret.configMap = map[string]any{
 		OpenIMRPCMsgCfgFileName:  &msgConfig.RpcConfig,
 		RedisConfigFileName:      &msgConfig.RedisConfig,
@@ -46,8 +46,8 @@ func NewMsgRpcCmd() *MsgRpcCmd {
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
-	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
-		return ret.preRunE()
+	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		return ret.runE()
 	}
 	return ret
 }
@@ -56,8 +56,8 @@ func (a *MsgRpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *MsgRpcCmd) preRunE() error {
+func (a *MsgRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.msgConfig.ZookeeperConfig, &a.msgConfig.RpcConfig.Prometheus, a.msgConfig.RpcConfig.RPC.ListenIP,
 		a.msgConfig.RpcConfig.RPC.RegisterIP, a.msgConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.msgConfig.Share.RpcRegisterName.Auth, &a.msgConfig.Share, &a.msgConfig, msg.Start)
+		a.Index(), a.msgConfig.Share.RpcRegisterName.Msg, &a.msgConfig.Share, a.msgConfig, msg.Start)
 }

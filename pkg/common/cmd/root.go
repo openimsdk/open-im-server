@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/spf13/cobra"
@@ -29,7 +29,7 @@ type RootCmd struct {
 	processName    string
 	port           int
 	prometheusPort int
-	log            config2.Log
+	log            config.Log
 	index          int
 }
 
@@ -72,8 +72,11 @@ func NewRootCmd(processName string, opts ...func(*CmdOpts)) *RootCmd {
 			return rootCmd.persistentPreRun(cmd, opts...)
 		},
 		SilenceUsage:  true,
-		SilenceErrors: true,
+		SilenceErrors: false,
 	}
+	cmd.Flags().StringP(FlagConf, "c", "", "path of config directory")
+	cmd.Flags().IntP(FlagTransferIndex, "i", 0, "process startup sequence number")
+
 	rootCmd.Command = cmd
 	return rootCmd
 }
@@ -99,14 +102,14 @@ func (r *RootCmd) initializeConfiguration(cmd *cobra.Command, opts *CmdOpts) err
 	// Load common configuration file
 	//opts.configMap[ShareFileName] = StructEnvPrefix{EnvPrefix: shareEnvPrefix, ConfigStruct: &r.share}
 	for configFileName, configStruct := range opts.configMap {
-		err := config2.LoadConfig(filepath.Join(configDirectory, configFileName),
+		err := config.LoadConfig(filepath.Join(configDirectory, configFileName),
 			ConfigEnvPrefixMap[configFileName], configStruct)
 		if err != nil {
 			return err
 		}
 	}
 	// Load common log configuration file
-	return config2.LoadConfig(filepath.Join(configDirectory, LogConfigFileName),
+	return config.LoadConfig(filepath.Join(configDirectory, LogConfigFileName),
 		ConfigEnvPrefixMap[LogConfigFileName], &r.log)
 }
 
@@ -130,12 +133,12 @@ func (r *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 		r.log.StorageLocation,
 		r.log.RemainRotationCount,
 		r.log.RotationTime,
-		config2.Version,
+		config.Version,
 	)
 	if err != nil {
 		return errs.Wrap(err)
 	}
-	return errs.Wrap(log.InitConsoleLogger(r.processName, r.log.RemainLogLevel, r.log.IsJson, config2.Version))
+	return errs.Wrap(log.InitConsoleLogger(r.processName, r.log.RemainLogLevel, r.log.IsJson, config.Version))
 
 }
 
@@ -146,12 +149,10 @@ func defaultCmdOpts() *CmdOpts {
 }
 
 func (r *RootCmd) getFlag(cmd *cobra.Command) (string, int, error) {
-	r.Command.Flags().StringP(FlagConf, "c", "", "path of config directory")
 	configDirectory, err := cmd.Flags().GetString(FlagConf)
 	if err != nil {
 		return "", 0, errs.Wrap(err)
 	}
-	r.Command.Flags().IntP(FlagTransferIndex, "i", 0, "process startup sequence number")
 	index, err := cmd.Flags().GetInt(FlagTransferIndex)
 	if err != nil {
 		return "", 0, errs.Wrap(err)

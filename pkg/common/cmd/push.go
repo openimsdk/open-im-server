@@ -27,12 +27,12 @@ type PushRpcCmd struct {
 	*RootCmd
 	ctx        context.Context
 	configMap  map[string]any
-	pushConfig push.Config
+	pushConfig *push.Config
 }
 
 func NewPushRpcCmd() *PushRpcCmd {
 	var pushConfig push.Config
-	ret := &PushRpcCmd{pushConfig: pushConfig}
+	ret := &PushRpcCmd{pushConfig: &pushConfig}
 	ret.configMap = map[string]any{
 		OpenIMPushCfgFileName:    &pushConfig.RpcConfig,
 		RedisConfigFileName:      &pushConfig.RedisConfig,
@@ -46,8 +46,8 @@ func NewPushRpcCmd() *PushRpcCmd {
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
-	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
-		return ret.preRunE()
+	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		return ret.runE()
 	}
 	return ret
 }
@@ -56,8 +56,8 @@ func (a *PushRpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *PushRpcCmd) preRunE() error {
+func (a *PushRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.pushConfig.ZookeeperConfig, &a.pushConfig.RpcConfig.Prometheus, a.pushConfig.RpcConfig.RPC.ListenIP,
 		a.pushConfig.RpcConfig.RPC.RegisterIP, a.pushConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.pushConfig.Share.RpcRegisterName.Auth, &a.pushConfig.Share, &a.pushConfig, push.Start)
+		a.Index(), a.pushConfig.Share.RpcRegisterName.Push, &a.pushConfig.Share, a.pushConfig, push.Start)
 }

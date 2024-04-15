@@ -27,12 +27,12 @@ type FriendRpcCmd struct {
 	*RootCmd
 	ctx          context.Context
 	configMap    map[string]any
-	friendConfig friend.Config
+	friendConfig *friend.Config
 }
 
 func NewFriendRpcCmd() *FriendRpcCmd {
 	var friendConfig friend.Config
-	ret := &FriendRpcCmd{friendConfig: friendConfig}
+	ret := &FriendRpcCmd{friendConfig: &friendConfig}
 	ret.configMap = map[string]any{
 		OpenIMRPCFriendCfgFileName: &friendConfig.RpcConfig,
 		RedisConfigFileName:        &friendConfig.RedisConfig,
@@ -45,8 +45,8 @@ func NewFriendRpcCmd() *FriendRpcCmd {
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
-	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
-		return ret.preRunE()
+	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		return ret.runE()
 	}
 	return ret
 }
@@ -55,8 +55,8 @@ func (a *FriendRpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *FriendRpcCmd) preRunE() error {
+func (a *FriendRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.friendConfig.ZookeeperConfig, &a.friendConfig.RpcConfig.Prometheus, a.friendConfig.RpcConfig.RPC.ListenIP,
 		a.friendConfig.RpcConfig.RPC.RegisterIP, a.friendConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.friendConfig.Share.RpcRegisterName.Auth, &a.friendConfig.Share, &a.friendConfig, friend.Start)
+		a.Index(), a.friendConfig.Share.RpcRegisterName.Friend, &a.friendConfig.Share, a.friendConfig, friend.Start)
 }

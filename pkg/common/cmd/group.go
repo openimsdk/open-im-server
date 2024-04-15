@@ -19,6 +19,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/group"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
@@ -27,12 +28,12 @@ type GroupRpcCmd struct {
 	*RootCmd
 	ctx         context.Context
 	configMap   map[string]any
-	groupConfig group.Config
+	groupConfig *group.Config
 }
 
 func NewGroupRpcCmd() *GroupRpcCmd {
 	var groupConfig group.Config
-	ret := &GroupRpcCmd{groupConfig: groupConfig}
+	ret := &GroupRpcCmd{groupConfig: &groupConfig}
 	ret.configMap = map[string]any{
 		OpenIMRPCGroupCfgFileName: &groupConfig.RpcConfig,
 		RedisConfigFileName:       &groupConfig.RedisConfig,
@@ -45,8 +46,8 @@ func NewGroupRpcCmd() *GroupRpcCmd {
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
-	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
-		return ret.preRunE()
+	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		return ret.runE()
 	}
 	return ret
 }
@@ -55,8 +56,9 @@ func (a *GroupRpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *GroupRpcCmd) preRunE() error {
+func (a *GroupRpcCmd) runE() error {
+	log.CInfo(a.ctx, "GroupRpcCmd preRunE", "rpc config", a.groupConfig.RpcConfig)
 	return startrpc.Start(a.ctx, &a.groupConfig.ZookeeperConfig, &a.groupConfig.RpcConfig.Prometheus, a.groupConfig.RpcConfig.RPC.ListenIP,
 		a.groupConfig.RpcConfig.RPC.RegisterIP, a.groupConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.groupConfig.Share.RpcRegisterName.Auth, &a.groupConfig.Share, &a.groupConfig, group.Start)
+		a.Index(), a.groupConfig.Share.RpcRegisterName.Group, &a.groupConfig.Share, a.groupConfig, group.Start)
 }

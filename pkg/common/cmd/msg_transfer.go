@@ -26,12 +26,12 @@ type MsgTransferCmd struct {
 	*RootCmd
 	ctx               context.Context
 	configMap         map[string]any
-	msgTransferConfig msgtransfer.Config
+	msgTransferConfig *msgtransfer.Config
 }
 
 func NewMsgTransferCmd() *MsgTransferCmd {
 	var msgTransferConfig msgtransfer.Config
-	ret := &MsgTransferCmd{msgTransferConfig: msgTransferConfig}
+	ret := &MsgTransferCmd{msgTransferConfig: &msgTransferConfig}
 	ret.configMap = map[string]any{
 		OpenIMMsgTransferCfgFileName: &msgTransferConfig.MsgTransfer,
 		RedisConfigFileName:          &msgTransferConfig.RedisConfig,
@@ -43,8 +43,8 @@ func NewMsgTransferCmd() *MsgTransferCmd {
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
-	ret.Command.PreRunE = func(cmd *cobra.Command, args []string) error {
-		return ret.preRunE()
+	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		return ret.runE()
 	}
 	return ret
 }
@@ -53,6 +53,6 @@ func (m *MsgTransferCmd) Exec() error {
 	return m.Execute()
 }
 
-func (m *MsgTransferCmd) preRunE() error {
-	return msgtransfer.Start(m.ctx, m.Index(), &m.msgTransferConfig)
+func (m *MsgTransferCmd) runE() error {
+	return msgtransfer.Start(m.ctx, m.Index(), m.msgTransferConfig)
 }

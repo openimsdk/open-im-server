@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	zookeeperConst = "zoopkeeper"
+	zookeeperConst = "zookeeper"
 	kubenetesConst = "k8s"
 	directConst    = "direct"
 )

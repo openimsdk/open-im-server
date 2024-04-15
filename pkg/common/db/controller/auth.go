@@ -30,6 +30,8 @@ type AuthDatabase interface {
 	GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error)
 	// Create token
 	CreateToken(ctx context.Context, userID string, platformID int) (string, error)
+
+	SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error
 }
 
 type authDatabase struct {
@@ -45,6 +47,10 @@ func NewAuthDatabase(cache cache.TokenModel, accessSecret string, accessExpire i
 // If the result is empty.
 func (a *authDatabase) GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error) {
 	return a.cache.GetTokensWithoutError(ctx, userID, platformID)
+}
+
+func (a *authDatabase) SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error {
+	return a.cache.SetTokenMapByUidPid(ctx, userID, platformID, m)
 }
 
 // Create Token.
