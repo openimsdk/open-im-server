@@ -54,7 +54,7 @@ func (m *MsgUtilsCmd) AddFixAllFlag() {
 } */
 
 func (m *MsgUtilsCmd) AddClearAllFlag() {
-	m.Command.PersistentFlags().BoolP("clearAll", "cl", false, "openIM clear all seqs")
+	m.Command.PersistentFlags().BoolP("clearAll", "", false, "openIM clear all seqs")
 }
 
 /* func (m *MsgUtilsCmd) getClearAllFlag(cmdLines *cobra.Command) bool {
