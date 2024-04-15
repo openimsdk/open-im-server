@@ -33,7 +33,7 @@ type GroupRpcCmd struct {
 
 func NewGroupRpcCmd() *GroupRpcCmd {
 	var groupConfig group.Config
-	ret := &GroupRpcCmd{groupConfig: groupConfig}
+	ret := &GroupRpcCmd{}
 	ret.configMap = map[string]any{
 		OpenIMRPCGroupCfgFileName: &groupConfig.RpcConfig,
 		RedisConfigFileName:       &groupConfig.RedisConfig,
@@ -45,6 +45,7 @@ func NewGroupRpcCmd() *GroupRpcCmd {
 		LocalCacheConfigFileName:  &groupConfig.LocalCacheConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
+	ret.groupConfig = groupConfig
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		return ret.preRunE()
