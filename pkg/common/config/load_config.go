@@ -24,6 +24,6 @@ func LoadConfig(path string, envPrefix string, config any) error {
 	}); err != nil {
 		return errs.WrapMsg(err, "failed to unmarshal config", "path", path, "envPrefix", envPrefix)
 	}
-	fmt.Print("Load config success", "path", path, "envPrefix", envPrefix, "config", config)
+	fmt.Println("Load config success", "path", path, "envPrefix", envPrefix, "config", config)
 	return nil
 }
