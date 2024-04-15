@@ -47,7 +47,7 @@ func NewPushRpcCmd() *PushRpcCmd {
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return ret.preRunE()
+		return ret.runE()
 	}
 	return ret
 }
@@ -56,7 +56,7 @@ func (a *PushRpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *PushRpcCmd) preRunE() error {
+func (a *PushRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.pushConfig.ZookeeperConfig, &a.pushConfig.RpcConfig.Prometheus, a.pushConfig.RpcConfig.RPC.ListenIP,
 		a.pushConfig.RpcConfig.RPC.RegisterIP, a.pushConfig.RpcConfig.RPC.Ports,
 		a.Index(), a.pushConfig.Share.RpcRegisterName.Push, &a.pushConfig.Share, a.pushConfig, push.Start)

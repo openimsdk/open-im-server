@@ -41,7 +41,7 @@ func NewApiCmd() *ApiCmd {
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return ret.preRunE()
+		return ret.runE()
 	}
 	return ret
 }
@@ -50,6 +50,6 @@ func (a *ApiCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *ApiCmd) preRunE() error {
+func (a *ApiCmd) runE() error {
 	return api.Start(a.ctx, a.Index(), a.apiConfig)
 }

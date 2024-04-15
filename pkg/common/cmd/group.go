@@ -47,7 +47,7 @@ func NewGroupRpcCmd() *GroupRpcCmd {
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return ret.preRunE()
+		return ret.runE()
 	}
 	return ret
 }
@@ -56,7 +56,7 @@ func (a *GroupRpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *GroupRpcCmd) preRunE() error {
+func (a *GroupRpcCmd) runE() error {
 	log.CInfo(a.ctx, "GroupRpcCmd preRunE", "rpc config", a.groupConfig.RpcConfig)
 	return startrpc.Start(a.ctx, &a.groupConfig.ZookeeperConfig, &a.groupConfig.RpcConfig.Prometheus, a.groupConfig.RpcConfig.RPC.ListenIP,
 		a.groupConfig.RpcConfig.RPC.RegisterIP, a.groupConfig.RpcConfig.RPC.Ports,

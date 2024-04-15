@@ -44,7 +44,7 @@ func NewMsgTransferCmd() *MsgTransferCmd {
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return ret.preRunE()
+		return ret.runE()
 	}
 	return ret
 }
@@ -53,6 +53,6 @@ func (m *MsgTransferCmd) Exec() error {
 	return m.Execute()
 }
 
-func (m *MsgTransferCmd) preRunE() error {
+func (m *MsgTransferCmd) runE() error {
 	return msgtransfer.Start(m.ctx, m.Index(), m.msgTransferConfig)
 }
