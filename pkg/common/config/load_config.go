@@ -1,8 +1,10 @@
 package config
 
 import (
+	"context"
 	"github.com/mitchellh/mapstructure"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/spf13/viper"
 	"strings"
 )
@@ -23,6 +25,6 @@ func LoadConfig(path string, envPrefix string, config any) error {
 	}); err != nil {
 		return errs.WrapMsg(err, "failed to unmarshal config", "path", path, "envPrefix", envPrefix)
 	}
-
+	log.CInfo(context.Background(), "Load config success", "path", path, "envPrefix", envPrefix, "config", config)
 	return nil
 }
