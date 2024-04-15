@@ -28,12 +28,12 @@ type GroupRpcCmd struct {
 	*RootCmd
 	ctx         context.Context
 	configMap   map[string]any
-	groupConfig group.Config
+	groupConfig *group.Config
 }
 
 func NewGroupRpcCmd() *GroupRpcCmd {
 	var groupConfig group.Config
-	ret := &GroupRpcCmd{}
+	ret := &GroupRpcCmd{groupConfig: &groupConfig}
 	ret.configMap = map[string]any{
 		OpenIMRPCGroupCfgFileName: &groupConfig.RpcConfig,
 		RedisConfigFileName:       &groupConfig.RedisConfig,
@@ -45,7 +45,6 @@ func NewGroupRpcCmd() *GroupRpcCmd {
 		LocalCacheConfigFileName:  &groupConfig.LocalCacheConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
-	ret.groupConfig = groupConfig
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		return ret.preRunE()
@@ -61,5 +60,5 @@ func (a *GroupRpcCmd) preRunE() error {
 	log.CInfo(a.ctx, "GroupRpcCmd preRunE", "rpc config", a.groupConfig.RpcConfig)
 	return startrpc.Start(a.ctx, &a.groupConfig.ZookeeperConfig, &a.groupConfig.RpcConfig.Prometheus, a.groupConfig.RpcConfig.RPC.ListenIP,
 		a.groupConfig.RpcConfig.RPC.RegisterIP, a.groupConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.groupConfig.Share.RpcRegisterName.Auth, &a.groupConfig.Share, &a.groupConfig, group.Start)
+		a.Index(), a.groupConfig.Share.RpcRegisterName.Auth, &a.groupConfig.Share, a.groupConfig, group.Start)
 }
