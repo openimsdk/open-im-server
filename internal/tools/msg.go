@@ -55,6 +55,8 @@ func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controlle
 }
 
 func InitMsgTool(ctx context.Context, config *CronTaskConfig) (*MsgTool, error) {
+	ch := make(chan int)
+	<-ch
 	//mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	//if err != nil {
 	//	return nil, err
