@@ -27,12 +27,12 @@ type MsgRpcCmd struct {
 	*RootCmd
 	ctx       context.Context
 	configMap map[string]any
-	msgConfig msg.Config
+	msgConfig *msg.Config
 }
 
 func NewMsgRpcCmd() *MsgRpcCmd {
 	var msgConfig msg.Config
-	ret := &MsgRpcCmd{msgConfig: msgConfig}
+	ret := &MsgRpcCmd{msgConfig: &msgConfig}
 	ret.configMap = map[string]any{
 		OpenIMRPCMsgCfgFileName:  &msgConfig.RpcConfig,
 		RedisConfigFileName:      &msgConfig.RedisConfig,
@@ -59,5 +59,5 @@ func (a *MsgRpcCmd) Exec() error {
 func (a *MsgRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.msgConfig.ZookeeperConfig, &a.msgConfig.RpcConfig.Prometheus, a.msgConfig.RpcConfig.RPC.ListenIP,
 		a.msgConfig.RpcConfig.RPC.RegisterIP, a.msgConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.msgConfig.Share.RpcRegisterName.Auth, &a.msgConfig.Share, &a.msgConfig, msg.Start)
+		a.Index(), a.msgConfig.Share.RpcRegisterName.Auth, &a.msgConfig.Share, a.msgConfig, msg.Start)
 }

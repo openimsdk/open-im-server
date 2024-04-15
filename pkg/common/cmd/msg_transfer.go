@@ -26,12 +26,12 @@ type MsgTransferCmd struct {
 	*RootCmd
 	ctx               context.Context
 	configMap         map[string]any
-	msgTransferConfig msgtransfer.Config
+	msgTransferConfig *msgtransfer.Config
 }
 
 func NewMsgTransferCmd() *MsgTransferCmd {
 	var msgTransferConfig msgtransfer.Config
-	ret := &MsgTransferCmd{msgTransferConfig: msgTransferConfig}
+	ret := &MsgTransferCmd{msgTransferConfig: &msgTransferConfig}
 	ret.configMap = map[string]any{
 		OpenIMMsgTransferCfgFileName: &msgTransferConfig.MsgTransfer,
 		RedisConfigFileName:          &msgTransferConfig.RedisConfig,
@@ -54,5 +54,5 @@ func (m *MsgTransferCmd) Exec() error {
 }
 
 func (m *MsgTransferCmd) preRunE() error {
-	return msgtransfer.Start(m.ctx, m.Index(), &m.msgTransferConfig)
+	return msgtransfer.Start(m.ctx, m.Index(), m.msgTransferConfig)
 }

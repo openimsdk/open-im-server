@@ -27,12 +27,12 @@ type FriendRpcCmd struct {
 	*RootCmd
 	ctx          context.Context
 	configMap    map[string]any
-	friendConfig friend.Config
+	friendConfig *friend.Config
 }
 
 func NewFriendRpcCmd() *FriendRpcCmd {
 	var friendConfig friend.Config
-	ret := &FriendRpcCmd{friendConfig: friendConfig}
+	ret := &FriendRpcCmd{friendConfig: &friendConfig}
 	ret.configMap = map[string]any{
 		OpenIMRPCFriendCfgFileName: &friendConfig.RpcConfig,
 		RedisConfigFileName:        &friendConfig.RedisConfig,
@@ -58,5 +58,5 @@ func (a *FriendRpcCmd) Exec() error {
 func (a *FriendRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.friendConfig.ZookeeperConfig, &a.friendConfig.RpcConfig.Prometheus, a.friendConfig.RpcConfig.RPC.ListenIP,
 		a.friendConfig.RpcConfig.RPC.RegisterIP, a.friendConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.friendConfig.Share.RpcRegisterName.Auth, &a.friendConfig.Share, &a.friendConfig, friend.Start)
+		a.Index(), a.friendConfig.Share.RpcRegisterName.Auth, &a.friendConfig.Share, a.friendConfig, friend.Start)
 }

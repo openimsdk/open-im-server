@@ -26,12 +26,12 @@ type ApiCmd struct {
 	*RootCmd
 	ctx       context.Context
 	configMap map[string]any
-	apiConfig api.Config
+	apiConfig *api.Config
 }
 
 func NewApiCmd() *ApiCmd {
 	var apiConfig api.Config
-	ret := &ApiCmd{apiConfig: apiConfig}
+	ret := &ApiCmd{apiConfig: &apiConfig}
 	ret.configMap = map[string]any{
 		OpenIMAPICfgFileName:    &apiConfig.RpcConfig,
 		RedisConfigFileName:     &apiConfig.RedisConfig,
@@ -51,5 +51,5 @@ func (a *ApiCmd) Exec() error {
 }
 
 func (a *ApiCmd) preRunE() error {
-	return api.Start(a.ctx, a.Index(), &a.apiConfig)
+	return api.Start(a.ctx, a.Index(), a.apiConfig)
 }

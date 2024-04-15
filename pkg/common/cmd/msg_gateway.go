@@ -28,12 +28,12 @@ type MsgGatewayCmd struct {
 	*RootCmd
 	ctx              context.Context
 	configMap        map[string]any
-	msgGatewayConfig msggateway.Config
+	msgGatewayConfig *msggateway.Config
 }
 
 func NewMsgGatewayCmd() *MsgGatewayCmd {
 	var msgGatewayConfig msggateway.Config
-	ret := &MsgGatewayCmd{msgGatewayConfig: msgGatewayConfig}
+	ret := &MsgGatewayCmd{msgGatewayConfig: &msgGatewayConfig}
 	ret.configMap = map[string]any{
 		OpenIMMsgGatewayCfgFileName: &msgGatewayConfig.MsgGateway,
 		ZookeeperConfigFileName:     &msgGatewayConfig.ZookeeperConfig,
@@ -53,5 +53,5 @@ func (m *MsgGatewayCmd) Exec() error {
 }
 
 func (m *MsgGatewayCmd) preRunE() error {
-	return msggateway.Start(m.ctx, m.Index(), &m.msgGatewayConfig)
+	return msggateway.Start(m.ctx, m.Index(), m.msgGatewayConfig)
 }

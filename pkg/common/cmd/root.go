@@ -83,7 +83,6 @@ func NewRootCmd(processName string, opts ...func(*CmdOpts)) *RootCmd {
 
 func (r *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) error {
 	cmdOpts := r.applyOptions(opts...)
-	fmt.Println("config", cmdOpts.configMap)
 	if err := r.initializeConfiguration(cmd, cmdOpts); err != nil {
 		return err
 	}

@@ -27,12 +27,12 @@ type AuthRpcCmd struct {
 	*RootCmd
 	ctx        context.Context
 	configMap  map[string]any
-	authConfig auth.Config
+	authConfig *auth.Config
 }
 
 func NewAuthRpcCmd() *AuthRpcCmd {
 	var authConfig auth.Config
-	ret := &AuthRpcCmd{authConfig: authConfig}
+	ret := &AuthRpcCmd{authConfig: &authConfig}
 	ret.configMap = map[string]any{
 		OpenIMRPCAuthCfgFileName: &authConfig.RpcConfig,
 		RedisConfigFileName:      &authConfig.RedisConfig,
@@ -55,5 +55,5 @@ func (a *AuthRpcCmd) Exec() error {
 func (a *AuthRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.authConfig.ZookeeperConfig, &a.authConfig.RpcConfig.Prometheus, a.authConfig.RpcConfig.RPC.ListenIP,
 		a.authConfig.RpcConfig.RPC.RegisterIP, a.authConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.authConfig.Share.RpcRegisterName.Auth, &a.authConfig.Share, &a.authConfig, auth.Start)
+		a.Index(), a.authConfig.Share.RpcRegisterName.Auth, &a.authConfig.Share, a.authConfig, auth.Start)
 }

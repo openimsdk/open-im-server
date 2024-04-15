@@ -27,12 +27,12 @@ type ConversationRpcCmd struct {
 	*RootCmd
 	ctx                context.Context
 	configMap          map[string]any
-	conversationConfig conversation.Config
+	conversationConfig *conversation.Config
 }
 
 func NewConversationRpcCmd() *ConversationRpcCmd {
 	var conversationConfig conversation.Config
-	ret := &ConversationRpcCmd{conversationConfig: conversationConfig}
+	ret := &ConversationRpcCmd{conversationConfig: &conversationConfig}
 	ret.configMap = map[string]any{
 		OpenIMRPCConversationCfgFileName: &conversationConfig.RpcConfig,
 		RedisConfigFileName:              &conversationConfig.RedisConfig,
@@ -57,5 +57,5 @@ func (a *ConversationRpcCmd) Exec() error {
 func (a *ConversationRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.conversationConfig.ZookeeperConfig, &a.conversationConfig.RpcConfig.Prometheus, a.conversationConfig.RpcConfig.RPC.ListenIP,
 		a.conversationConfig.RpcConfig.RPC.RegisterIP, a.conversationConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.conversationConfig.Share.RpcRegisterName.Auth, &a.conversationConfig.Share, &a.conversationConfig, conversation.Start)
+		a.Index(), a.conversationConfig.Share.RpcRegisterName.Auth, &a.conversationConfig.Share, a.conversationConfig, conversation.Start)
 }

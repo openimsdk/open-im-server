@@ -26,12 +26,12 @@ type CronTaskCmd struct {
 	*RootCmd
 	ctx            context.Context
 	configMap      map[string]any
-	cronTaskConfig tools.CronTaskConfig
+	cronTaskConfig *tools.CronTaskConfig
 }
 
 func NewCronTaskCmd() *CronTaskCmd {
 	var cronTaskConfig tools.CronTaskConfig
-	ret := &CronTaskCmd{cronTaskConfig: cronTaskConfig}
+	ret := &CronTaskCmd{cronTaskConfig: &cronTaskConfig}
 	ret.configMap = map[string]any{
 		OpenIMCronTaskCfgFileName: &cronTaskConfig.CronTask,
 		RedisConfigFileName:       &cronTaskConfig.RedisConfig,
@@ -53,5 +53,5 @@ func (a *CronTaskCmd) Exec() error {
 }
 
 func (a *CronTaskCmd) preRunE() error {
-	return tools.Start(a.ctx, &a.cronTaskConfig)
+	return tools.Start(a.ctx, a.cronTaskConfig)
 }

@@ -27,12 +27,12 @@ type ThirdRpcCmd struct {
 	*RootCmd
 	ctx         context.Context
 	configMap   map[string]any
-	thirdConfig third.Config
+	thirdConfig *third.Config
 }
 
 func NewThirdRpcCmd() *ThirdRpcCmd {
 	var thirdConfig third.Config
-	ret := &ThirdRpcCmd{thirdConfig: thirdConfig}
+	ret := &ThirdRpcCmd{thirdConfig: &thirdConfig}
 	ret.configMap = map[string]any{
 		OpenIMRPCThirdCfgFileName: &thirdConfig.RpcConfig,
 		RedisConfigFileName:       &thirdConfig.RedisConfig,
@@ -58,5 +58,5 @@ func (a *ThirdRpcCmd) Exec() error {
 func (a *ThirdRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.thirdConfig.ZookeeperConfig, &a.thirdConfig.RpcConfig.Prometheus, a.thirdConfig.RpcConfig.RPC.ListenIP,
 		a.thirdConfig.RpcConfig.RPC.RegisterIP, a.thirdConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.thirdConfig.Share.RpcRegisterName.Auth, &a.thirdConfig.Share, &a.thirdConfig, third.Start)
+		a.Index(), a.thirdConfig.Share.RpcRegisterName.Auth, &a.thirdConfig.Share, a.thirdConfig, third.Start)
 }

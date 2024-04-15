@@ -27,12 +27,12 @@ type PushRpcCmd struct {
 	*RootCmd
 	ctx        context.Context
 	configMap  map[string]any
-	pushConfig push.Config
+	pushConfig *push.Config
 }
 
 func NewPushRpcCmd() *PushRpcCmd {
 	var pushConfig push.Config
-	ret := &PushRpcCmd{pushConfig: pushConfig}
+	ret := &PushRpcCmd{pushConfig: &pushConfig}
 	ret.configMap = map[string]any{
 		OpenIMPushCfgFileName:    &pushConfig.RpcConfig,
 		RedisConfigFileName:      &pushConfig.RedisConfig,
@@ -59,5 +59,5 @@ func (a *PushRpcCmd) Exec() error {
 func (a *PushRpcCmd) preRunE() error {
 	return startrpc.Start(a.ctx, &a.pushConfig.ZookeeperConfig, &a.pushConfig.RpcConfig.Prometheus, a.pushConfig.RpcConfig.RPC.ListenIP,
 		a.pushConfig.RpcConfig.RPC.RegisterIP, a.pushConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.pushConfig.Share.RpcRegisterName.Auth, &a.pushConfig.Share, &a.pushConfig, push.Start)
+		a.Index(), a.pushConfig.Share.RpcRegisterName.Auth, &a.pushConfig.Share, a.pushConfig, push.Start)
 }
