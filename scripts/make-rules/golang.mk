@@ -17,7 +17,7 @@
 #
 
 GO := go
-GO_SUPPORTED_VERSIONS ?= 1.19|1.20|1.21|1.22|1.23
+GO_MINIMUM_VERSION ?= 1.19
 
 GO_LDFLAGS += -X $(VERSION_PACKAGE).gitVersion=$(GIT_TAG) \
 	-X $(VERSION_PACKAGE).gitCommit=$(GIT_COMMIT) \
@@ -132,8 +132,8 @@ go.versionchecker:
 ## go.build.verify: Verify that a suitable version of Go exists
 .PHONY: go.build.verify
 go.build.verify:
-ifneq ($(shell $(GO) version | grep -q -E '\bgo($(GO_SUPPORTED_VERSIONS))\b' && echo 0 || echo 1), 0)
-	$(error unsupported go version. Please make install one of the following supported version: '$(GO_SUPPORTED_VERSIONS)')
+ifneq ($(shell $(GO) version|awk -v min=$(GO_MINIMUM_VERSION) '{gsub(/go/,"",$$3);if($$3 >= min){print 0}else{print 1}}'), 0)
+	$(error unsupported go version. Please install a go version which is greater than or equal to '$(GO_MINIMUM_VERSION)')
 endif
 
 ## go.build.%: Build binaries for a specific platform
