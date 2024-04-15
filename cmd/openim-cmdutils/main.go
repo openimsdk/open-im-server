@@ -15,6 +15,8 @@
 package main
 
 func main() {
+	ch := make(chan int)
+	<-ch
 	//msgUtilsCmd := cmd.NewMsgUtilsCmd("openIMCmdUtils", "openIM cmd utils", nil)
 	//getCmd := cmd.NewGetCmd()
 	//fixCmd := cmd.NewFixCmd()

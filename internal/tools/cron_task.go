@@ -39,7 +39,8 @@ type CronTaskConfig struct {
 }
 
 func Start(ctx context.Context, config *CronTaskConfig) error {
-
+	ch := make(chan int)
+	<-ch
 	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime",
 		config.CronTask.ChatRecordsClearTime, "msgDestructTime", config.CronTask.MsgDestructTime)
 
