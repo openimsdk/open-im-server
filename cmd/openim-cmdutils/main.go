@@ -41,6 +41,8 @@ func main() {
 	fixCmd.AddCommand(seqCmd.FixSeqCmd())
 	fixCmd.AddSuperGroupIDFlag()
 	fixCmd.AddUserIDFlag()
+	fixCmd.AddConfigDirFlag()
+	fixCmd.AddIndexFlag()
 	fixCmd.AddFixAllFlag()
 	// openIM fix seq --userID=xxx
 	// openIM fix seq --superGroupID=xxx
@@ -49,6 +51,8 @@ func main() {
 	clearCmd.AddCommand(msgCmd.ClearMsgCmd())
 	clearCmd.AddSuperGroupIDFlag()
 	clearCmd.AddUserIDFlag()
+	clearCmd.AddConfigDirFlag()
+	clearCmd.AddIndexFlag()
 	clearCmd.AddClearAllFlag()
 	clearCmd.AddBeginSeqFlag()
 	clearCmd.AddLimitFlag()
