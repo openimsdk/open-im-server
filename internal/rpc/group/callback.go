@@ -22,10 +22,10 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/group"
+	"github.com/openimsdk/protocol/wrapperspb"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 	"time"
 )
 

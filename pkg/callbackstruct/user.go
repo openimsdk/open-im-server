@@ -16,7 +16,7 @@ package callbackstruct
 
 import (
 	"github.com/openimsdk/protocol/sdkws"
-	"google.golang.org/protobuf/types/known/wrapperspb"
+	"github.com/openimsdk/protocol/wrapperspb"
 )
 
 type CallbackBeforeUpdateUserInfoReq struct {
