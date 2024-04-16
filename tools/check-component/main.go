@@ -28,6 +28,7 @@ import (
 	"github.com/openimsdk/tools/system/program"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"time"
 )
@@ -101,7 +102,7 @@ func main() {
 	flag.StringVar(&configDir, "c", defaultConfigDir, "Configuration dir")
 	flag.Parse()
 
-	fmt.Printf("Index: %d, Config Path: %s\n", index, configDir)
+	fmt.Printf("%s Index: %d, Config Path: %s\n", filepath.Base(os.Args[0]), index, configDir)
 
 	mongoConfig, redisConfig, kafkaConfig, minioConfig, zookeeperConfig, err := initConfig(configDir)
 	if err != nil {

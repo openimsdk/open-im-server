@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/shirou/gopsutil/mem"
 	"os"
+
+	"github.com/shirou/gopsutil/mem"
 )
 
 func main() {
@@ -13,12 +14,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	freeMemoryGB := float64(vMem.Free) / float64(1024*1024*1024)
+	// Use the Available field to get the available memory
+	availableMemoryGB := float64(vMem.Available) / float64(1024*1024*1024)
 
-	if freeMemoryGB < 1.0 {
-		fmt.Fprintf(os.Stderr, "System free memory is less than 4GB: %.2fGB\n", freeMemoryGB)
+	if availableMemoryGB < 1.0 {
+		fmt.Fprintf(os.Stderr, "System available memory is less than 1GB: %.2fGB\n", availableMemoryGB)
 		os.Exit(1)
 	} else {
-		fmt.Printf("System free memory is sufficient: %.2fGB\n", freeMemoryGB)
+		fmt.Printf("System available memory is sufficient: %.2fGB\n", availableMemoryGB)
 	}
 }
