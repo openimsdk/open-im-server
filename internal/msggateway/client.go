@@ -113,6 +113,7 @@ func (c *Client) readMessage() {
 	c.conn.SetPingHandler(c.pingHandler)
 
 	for {
+		log.ZDebug(c.ctx, "readMessage")
 		messageType, message, returnErr := c.conn.ReadMessage()
 		if returnErr != nil {
 			log.ZWarn(c.ctx, "readMessage", returnErr, "messageType", messageType)
