@@ -257,7 +257,8 @@ func (ws *WsServer) registerClient(client *Client) {
 		if clientOK {
 			ws.clients.Set(client.UserID, client)
 			// There is already a connection to the platform
-			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID", client.PlatformID, "old remote addr", getRemoteAdders(oldClients))
+			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID",
+				client.PlatformID, "old remote addr", getRemoteAdders(oldClients))
 			ws.onlineUserConnNum.Add(1)
 		} else {
 			ws.clients.Set(client.UserID, client)
