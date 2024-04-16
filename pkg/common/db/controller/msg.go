@@ -841,7 +841,7 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 	}
 	log.ZDebug(ctx, "doc info", "conversationID", conversationID, "index", index, "docID", msgDocModel.DocID, "len", len(msgDocModel.Msg))
 	if int64(len(msgDocModel.Msg)) > db.msg.GetSingleGocMsgNum() {
-		log.ZWarn(ctx, "msgs too large", nil, "lenth", len(msgDocModel.Msg), "docID:", msgDocModel.DocID)
+		log.ZWarn(ctx, "msgs too large", nil, "length", len(msgDocModel.Msg), "docID:", msgDocModel.DocID)
 	}
 	if msgDocModel.IsFull() && msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.SendTime+(remainTime*1000) < utils.GetCurrentTimestampByMill() {
 		log.ZDebug(ctx, "doc is full and all msg is expired", "docID", msgDocModel.DocID)
