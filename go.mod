@@ -15,7 +15,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/localcache v0.0.1
 	github.com/openimsdk/protocol v0.0.63
-	github.com/openimsdk/tools v0.0.47-alpha.29
+	github.com/openimsdk/tools v0.0.47-alpha.32
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
