@@ -424,7 +424,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		shouldSendSuccessResp := connContext.ShouldSendResp()
 		if shouldSendSuccessResp {
 			// Attempt to send a success message through WebSocket
-			if err := wsLongConn.RespondWithSuccess(); err == nil {
+			if err := wsLongConn.RespondWithSuccess(); err != nil {
 				// If the success message is successfully sent, end further processing
 				return
 			}
