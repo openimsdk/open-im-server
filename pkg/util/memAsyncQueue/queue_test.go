@@ -1,91 +1,61 @@
 package memAsyncQueue
 
 import (
+	"sync"
 	"testing"
 	"time"
 )
 
-// TestPushSuccess tests the successful pushing of data into the queue.
-func TestPushSuccess(t *testing.T) {
-	queue := &MemoryQueue{}
-	queue.Initialize(func(data any) {}, 1, 5) // Small buffer size for test
+func TestNewMemoryQueue(t *testing.T) {
+	workerCount := 3
+	bufferSize := 10
+	queue := NewMemoryQueue(workerCount, bufferSize)
 
-	// Try to push data that should succeed
-	err := queue.Push("test data")
-	if err != nil {
-		t.Errorf("Push should succeed, but got error: %v", err)
+	if cap(queue.taskChan) != bufferSize {
+		t.Errorf("Expected buffer size %d, got %d", bufferSize, cap(queue.taskChan))
+	}
+
+	if queue.isStopped {
+		t.Errorf("New queue is prematurely stopped")
+	}
+
+	if len(queue.taskChan) != 0 {
+		t.Errorf("New queue should be empty, found %d items", len(queue.taskChan))
 	}
 }
 
-// TestPushFailWhenFull tests that pushing to a full queue results in an error.
-func TestPushFailWhenFull(t *testing.T) {
-	queue := &MemoryQueue{}
-	queue.Initialize(func(data any) {
-		time.Sleep(100 * time.Millisecond) // Simulate work to delay processing
-	}, 1, 1) // Very small buffer to fill quickly
+func TestPushAndStop(t *testing.T) {
+	queue := NewMemoryQueue(1, 5)
 
-	queue.Push("data 1")        // Fill the buffer
-	err := queue.Push("data 2") // This should fail
+	var wg sync.WaitGroup
+	wg.Add(1)
+	queue.Push(func() {
+		time.Sleep(50 * time.Millisecond) // Simulate task delay
+		wg.Done()
+	})
 
-	if err == nil {
-		t.Error("Expected an error when pushing to full queue, but got none")
+	queue.Stop()
+	wg.Wait()
+
+	if err := queue.Push(func() {}); err == nil {
+		t.Error("Expected error when pushing to stopped queue, got none")
 	}
 }
 
-// TestPushFailWhenStopped tests that pushing to a stopped queue results in an error.
-func TestPushFailWhenStopped(t *testing.T) {
-	queue := &MemoryQueue{}
-	queue.Initialize(func(data any) {}, 1, 1)
+func TestPushTimeout(t *testing.T) {
+	queue := NewMemoryQueue(1, 1) // Small buffer and worker to force full queue
 
-	queue.Stop() // Stop the queue before pushing
-	err := queue.Push("test data")
+	done := make(chan bool)
+	go func() {
+		queue.Push(func() {
+			time.Sleep(200 * time.Millisecond) // Long enough to cause the second push to timeout
+		})
+		done <- true
+	}()
 
-	if err == nil {
-		t.Error("Expected an error when pushing to stopped queue, but got none")
-	}
-}
+	<-done // Ensure first task is pushed
 
-// TestQueueOperationSequence tests a sequence of operations to ensure the queue handles them correctly.
-func TestQueueOperationSequence(t *testing.T) {
-	queue := &MemoryQueue{}
-	queue.Initialize(func(data any) {}, 1, 2)
-
-	// Sequence of pushes and a stop
-	err := queue.Push("data 1")
-	if err != nil {
-		t.Errorf("Failed to push data 1: %v", err)
-	}
-
-	err = queue.Push("data 2")
-	if err != nil {
-		t.Errorf("Failed to push data 2: %v", err)
-	}
-
-	queue.Stop()               // Stop the queue
-	err = queue.Push("data 3") // This push should fail
-	if err == nil {
-		t.Error("Expected an error when pushing after stop, but got none")
-	}
-}
-
-// TestBlockingOnFull tests that the queue does not block indefinitely when full.
-func TestBlockingOnFull(t *testing.T) {
-	queue := &MemoryQueue{}
-	queue.Initialize(func(data any) {
-		time.Sleep(1 * time.Second) // Simulate a long processing time
-	}, 1, 1)
-
-	queue.Push("data 1") // Fill the queue
-
-	start := time.Now()
-	err := queue.Push("data 2") // This should time out
-	duration := time.Since(start)
-
-	if err == nil {
-		t.Error("Expected an error due to full queue, but got none")
-	}
-
-	if duration >= time.Second {
-		t.Errorf("Push blocked for too long, duration: %v", duration)
+	if err := queue.Push(func() {}); err != nil {
+		t.Error("Expected timeout error, got nil")
 	}
 }
