@@ -24,12 +24,14 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/idutil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/timeutil"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
+	"time"
 )
 
 func newContentTypeConf(conf *config.Notification) map[int32]config.NotificationConfig {
@@ -273,10 +275,13 @@ func WithRpcGetUserName() NotificationOptions {
 }
 
 func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, contentType, sessionType int32, m proto.Message, opts ...NotificationOptions) {
+	ctx = mcontext.WithMustInfoCtx([]string{mcontext.GetOperationID(ctx), mcontext.GetOpUserID(ctx), mcontext.GetOpUserPlatform(ctx), mcontext.GetConnID(ctx)})
+	ctx, cancel := context.WithTimeout(ctx, time.Second*time.Duration(5))
+	defer cancel()
 	n := sdkws.NotificationElem{Detail: jsonutil.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
-		log.ZError(ctx, "json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", jsonutil.StructToJsonString(m))
+		log.ZWarn(ctx, "json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", jsonutil.StructToJsonString(m))
 		return
 	}
 	notificationOpt := &notificationOpt{}
@@ -289,7 +294,7 @@ func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, co
 	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
 		userInfo, err = s.getUserInfo(ctx, sendID)
 		if err != nil {
-			log.ZError(ctx, "getUserInfo failed", err, "sendID", sendID)
+			log.ZWarn(ctx, "getUserInfo failed", err, "sendID", sendID)
 			return
 		}
 		msg.SenderNickname = userInfo.Nickname
@@ -318,7 +323,7 @@ func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, co
 	req.MsgData = &msg
 	_, err = s.sendMsg(ctx, &req)
 	if err != nil {
-		log.ZError(ctx, "SendMsg failed", err, "req", req.String())
+		log.ZWarn(ctx, "SendMsg failed", err, "req", req.String())
 	}
 }
 
