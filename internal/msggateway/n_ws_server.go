@@ -391,11 +391,11 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := ws.authClient.ParseToken(connContext, connContext.GetToken())
 	if err != nil {
 		// If there's an error parsing the Token, decide whether to send the error message via WebSocket based on the context flag
-		shouldSendError := connContext.ShouldSendError()
+		shouldSendError := connContext.ShouldSendResp()
 		if shouldSendError {
 			// Create a WebSocket connection object and attempt to send the error message via WebSocket
 			wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
-			if err := wsLongConn.RespErrInfo(err, w, r); err == nil {
+			if err := wsLongConn.RespondWithError(err, w, r); err == nil {
 				// If the error message is successfully sent via WebSocket, stop processing
 				return
 			}
@@ -419,6 +419,16 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		// If creating the long connection fails, return an error via HTTP and stop processing
 		httpError(connContext, err)
 		return
+	} else {
+		// Check if a normal response should be sent via WebSocket
+		shouldSendSuccessResp := connContext.ShouldSendResp()
+		if shouldSendSuccessResp {
+			// Attempt to send a success message through WebSocket
+			if err := wsLongConn.RespondWithSuccess(); err == nil {
+				// If the success message is successfully sent, end further processing
+				return
+			}
+		}
 	}
 
 	// Retrieve a client object from the client pool, reset its state, and associate it with the current WebSocket long connection

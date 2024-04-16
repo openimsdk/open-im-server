@@ -26,7 +26,7 @@ const (
 	Compression             = "compression"
 	GzipCompressionProtocol = "gzip"
 	BackgroundStatus        = "isBackground"
-	ErrResp                 = "errResp"
+	SendResponse            = "isMsgResp"
 )
 
 const (

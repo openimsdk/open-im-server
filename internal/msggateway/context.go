@@ -149,8 +149,8 @@ func (c *UserConnContext) GetCompression() bool {
 	return false
 }
 
-func (c *UserConnContext) ShouldSendError() bool {
-	errResp, exists := c.Query(ErrResp)
+func (c *UserConnContext) ShouldSendResp() bool {
+	errResp, exists := c.Query(SendResponse)
 	if exists {
 		b, err := strconv.ParseBool(errResp)
 		if err != nil {

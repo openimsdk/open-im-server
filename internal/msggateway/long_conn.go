@@ -145,7 +145,7 @@ func (d *GWebSocket) SetPingHandler(handler PingPongHandler) {
 	d.conn.SetPingHandler(handler)
 }
 
-func (d *GWebSocket) RespErrInfo(err error, w http.ResponseWriter, r *http.Request) error {
+func (d *GWebSocket) RespondWithError(err error, w http.ResponseWriter, r *http.Request) error {
 	if err := d.GenerateLongConn(w, r); err != nil {
 		return err
 	}
@@ -163,6 +163,16 @@ func (d *GWebSocket) RespErrInfo(err error, w http.ResponseWriter, r *http.Reque
 	return nil
 }
 
-// func (d *GWebSocket) CheckSendConnDiffNow() bool {
-//	return d.conn == d.sendConn
-//}
+func (d *GWebSocket) RespondWithSuccess() error {
+	data, err := json.Marshal(apiresp.ParseError(nil))
+	if err != nil {
+		_ = d.Close()
+		return errs.WrapMsg(err, "json marshal failed")
+	}
+
+	if err := d.WriteMessage(MessageText, data); err != nil {
+		_ = d.Close()
+		return errs.WrapMsg(err, "WriteMessage failed")
+	}
+	return nil
+}
