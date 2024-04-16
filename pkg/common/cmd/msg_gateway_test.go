@@ -15,7 +15,12 @@
 package cmd
 
 import (
+	"github.com/openimsdk/protocol/auth"
+	"github.com/openimsdk/tools/apiresp"
+	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/stretchr/testify/mock"
+	"math"
+	"testing"
 )
 
 // MockRootCmd is a mock type for the RootCmd type
@@ -26,4 +31,31 @@ type MockRootCmd struct {
 func (m *MockRootCmd) Execute() error {
 	args := m.Called()
 	return args.Error(0)
+}
+
+func TestName(t *testing.T) {
+	resp := &apiresp.ApiResponse{
+		ErrCode: 1234,
+		ErrMsg:  "test",
+		ErrDlt:  "4567",
+		Data: &auth.UserTokenResp{
+			Token:             "1234567",
+			ExpireTimeSeconds: math.MaxInt64,
+		},
+	}
+	data, err := resp.MarshalJSON()
+	if err != nil {
+		panic(err)
+	}
+	t.Log(string(data))
+
+	var rReso apiresp.ApiResponse
+	rReso.Data = &auth.UserTokenResp{}
+
+	if err := jsonutil.JsonUnmarshal(data, &rReso); err != nil {
+		panic(err)
+	}
+
+	t.Logf("%+v\n", rReso)
+
 }
