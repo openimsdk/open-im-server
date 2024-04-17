@@ -415,7 +415,6 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(
 		for {
 			select {
 			case <-ticker.C:
-				log.ZDebug(context.Background(), "ticker update", "length", len(messages))
 				// if the buffer is empty and running is false, return loop.
 				if len(messages) == 0 {
 					if !running.Load() {
