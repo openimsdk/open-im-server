@@ -66,7 +66,8 @@ type Config struct {
 }
 
 func Start(ctx context.Context, index int, config *Config) error {
-	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "prometheusPorts", config.MsgTransfer.Prometheus.Ports, "index", index)
+	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "prometheusPorts",
+		config.MsgTransfer.Prometheus.Ports, "index", index)
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err
@@ -84,7 +85,8 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return err
 	}
 
-	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
+	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	//todo MsgCacheTimeout
 	msgModel := cache.NewMsgCache(rdb, 86400, config.RedisConfig.EnablePipeline)
 	seqModel := cache.NewSeqCache(rdb)
@@ -105,7 +107,8 @@ func Start(ctx context.Context, index int, config *Config) error {
 	return msgTransfer.Start(index, config)
 }
 
-func NewMsgTransfer(kafkaConf *config.Kafka, msgDatabase controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*MsgTransfer, error) {
+func NewMsgTransfer(kafkaConf *config.Kafka, msgDatabase controller.CommonMsgDatabase,
+	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*MsgTransfer, error) {
 	historyCH, err := NewOnlineHistoryRedisConsumerHandler(kafkaConf, msgDatabase, conversationRpcClient, groupRpcClient)
 	if err != nil {
 		return nil, err
