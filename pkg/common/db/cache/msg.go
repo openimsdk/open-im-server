@@ -31,7 +31,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-const msgCacheTimeout = 86400
+const msgCacheTimeout = 86400 * time.Second
 
 const (
 	maxSeq                 = "MAX_SEQ:"
