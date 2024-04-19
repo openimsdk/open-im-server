@@ -15,9 +15,9 @@
 package body
 
 import (
-	"errors"
+	"github.com/openimsdk/tools/errs"
 
-	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/openimsdk/protocol/constant"
 )
 
 const (
@@ -39,7 +39,7 @@ func (p *Platform) Set(os string) error {
 	} else {
 		switch p.Os.(type) {
 		case string:
-			return errors.New("platform is all")
+			return errs.New("platform is all")
 		default:
 		}
 	}
@@ -61,7 +61,7 @@ func (p *Platform) Set(os string) error {
 		p.osArry = append(p.osArry, os)
 		p.Os = p.osArry
 	default:
-		return errors.New("unknow platform")
+		return errs.New("unknow platform")
 	}
 
 	return nil
@@ -74,7 +74,7 @@ func (p *Platform) SetPlatform(platform string) error {
 	case constant.IOSPlatformStr:
 		return p.SetIOS()
 	default:
-		return errors.New("platform err")
+		return errs.New("platform err")
 	}
 }
 

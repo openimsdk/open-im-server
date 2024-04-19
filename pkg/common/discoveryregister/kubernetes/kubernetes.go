@@ -22,8 +22,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/log"
 	"github.com/stathat/consistent"
 	"google.golang.org/grpc"
 )
@@ -36,7 +36,7 @@ type K8sDR struct {
 	gatewayName           string
 }
 
-func NewK8sDiscoveryRegister(gatewayName string) (discoveryregistry.SvcDiscoveryRegistry, error) {
+func NewK8sDiscoveryRegister(gatewayName string) (discovery.SvcDiscoveryRegistry, error) {
 	gatewayConsistent := consistent.New()
 	gatewayHosts := getMsgGatewayHost(context.Background(), gatewayName)
 	for _, v := range gatewayHosts {
@@ -74,6 +74,7 @@ func (cli *K8sDR) GetConfFromRegistry(key string) ([]byte, error) {
 
 	return nil, nil
 }
+
 func (cli *K8sDR) GetUserIdHashGatewayHost(ctx context.Context, userId string) (string, error) {
 	host, err := cli.gatewayHostConsistent.Get(userId)
 	if err != nil {
@@ -81,6 +82,7 @@ func (cli *K8sDR) GetUserIdHashGatewayHost(ctx context.Context, userId string) (
 	}
 	return host, err
 }
+
 func getSelfHost(ctx context.Context, gatewayName string) string {
 	port := 88
 	instance := "openimserver"
@@ -102,6 +104,7 @@ func getSelfHost(ctx context.Context, gatewayName string) string {
 }
 
 // like openimserver-openim-msggateway-0.openimserver-openim-msggateway-headless.openim-lin.svc.cluster.local:88.
+// Replica set in kubernetes environment
 func getMsgGatewayHost(ctx context.Context, gatewayName string) []string {
 	port := 88
 	instance := "openimserver"
@@ -122,7 +125,7 @@ func getMsgGatewayHost(ctx context.Context, gatewayName string) []string {
 		host := fmt.Sprintf("%s-openim-msggateway-%d.%s-openim-msggateway-headless.%s.svc.cluster.local:%d", instance, i, instance, ns, port)
 		ret = append(ret, host)
 	}
-	log.ZInfo(ctx, "getMsgGatewayHost", "instance", instance, "selfPodName", selfPodName, "replicas", replicas, "ns", ns, "ret", ret)
+	log.ZDebug(ctx, "getMsgGatewayHost", "instance", instance, "selfPodName", selfPodName, "replicas", replicas, "ns", ns, "ret", ret)
 	return ret
 }
 
@@ -187,9 +190,10 @@ func (cli *K8sDR) CloseConn(conn *grpc.ClientConn) {
 
 // do not use this method for call rpc.
 func (cli *K8sDR) GetClientLocalConns() map[string][]*grpc.ClientConn {
-	fmt.Println("should not call this function!!!!!!!!!!!!!!!!!!!!!!!!!")
+	log.ZError(context.Background(), "should not call this function!", nil)
 	return nil
 }
+
 func (cli *K8sDR) Close() {
 
 }

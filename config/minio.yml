@@ -1,0 +1,9 @@
+bucket: "openim"
+port: 10005
+accessKeyID: "root"
+secretAccessKey: "openIM123"
+sessionToken: ''
+internalIP: localhost
+externalIP: 150.109.93.151
+url: https://image.rentsoft.cn/
+publicRead: false

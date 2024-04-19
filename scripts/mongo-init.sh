@@ -12,19 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-
 mongosh <<EOF
 use admin
-db.auth('$MONGO_INITDB_ROOT_USERNAME', '$MONGO_INITDB_ROOT_PASSWORD')
+var rootUsername = '$MONGO_INITDB_ROOT_USERNAME';
+var rootPassword = '$MONGO_INITDB_ROOT_PASSWORD';
+var authResult = db.auth(rootUsername, rootPassword);
+if (authResult) {
+  print('Authentication successful for root user: ' + rootUsername);
+} else {
+  print('Authentication failed for root user: ' + rootUsername + ' with password: ' + rootPassword);
+  quit(1);
+}
 
-db = db.getSiblingDB('$MONGO_INITDB_DATABASE')
-db.createUser({
-  user: "$MONGO_OPENIM_USERNAME",
-  pwd: "$MONGO_OPENIM_PASSWORD",
+var dbName = '$MONGO_INITDB_DATABASE';
+db = db.getSiblingDB(dbName);
+var openimUsername = '$MONGO_OPENIM_USERNAME';
+var openimPassword = '$MONGO_OPENIM_PASSWORD';
+var createUserResult = db.createUser({
+  user: openimUsername,
+  pwd: openimPassword,
   roles: [
-    // Assign appropriate roles here
-    { role: 'readWrite', db: '$MONGO_INITDB_DATABASE' }
+    { role: 'readWrite', db: dbName }
   ]
 });
+
+if (createUserResult.ok == 1) {
+  print('User creation successful. User: ' + openimUsername + ', Database: ' + dbName);
+} else {
+  print('User creation failed for user: ' + openimUsername + ' in database: ' + dbName);
+  quit(1);
+}
 EOF
+
+
+

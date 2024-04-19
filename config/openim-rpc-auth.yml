@@ -1,0 +1,13 @@
+rpc:
+  registerIP: ''
+  listenIP: 0.0.0.0
+  ports: [ 10160 ]
+
+prometheus:
+  enable: true
+  ports: [ 20106 ]
+
+tokenPolicy:
+  #token有效期，单位（天）
+  expire: 90
+

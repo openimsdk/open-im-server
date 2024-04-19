@@ -19,15 +19,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/pagination"
-	"github.com/OpenIMSDK/tools/tx"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/db/tx"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 type FriendDatabase interface {
@@ -80,11 +80,11 @@ type FriendDatabase interface {
 type friendDatabase struct {
 	friend        relation.FriendModelInterface
 	friendRequest relation.FriendRequestModelInterface
-	tx            tx.CtxTx
+	tx            tx.Tx
 	cache         cache.FriendCache
 }
 
-func NewFriendDatabase(friend relation.FriendModelInterface, friendRequest relation.FriendRequestModelInterface, cache cache.FriendCache, tx tx.CtxTx) FriendDatabase {
+func NewFriendDatabase(friend relation.FriendModelInterface, friendRequest relation.FriendRequestModelInterface, cache cache.FriendCache, tx tx.Tx) FriendDatabase {
 	return &friendDatabase{friend: friend, friendRequest: friendRequest, cache: cache, tx: tx}
 }
 
@@ -106,8 +106,8 @@ func (f *friendDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (
 	}
 
 	// Check if userID2 is in userID1's friend list and vice versa
-	inUser1Friends = utils.IsContain(userID2, userID1FriendIDs)
-	inUser2Friends = utils.IsContain(userID1, userID2FriendIDs)
+	inUser1Friends = datautil.Contain(userID2, userID1FriendIDs...)
+	inUser2Friends = datautil.Contain(userID1, userID2FriendIDs...)
 	return inUser1Friends, inUser2Friends, nil
 }
 
@@ -139,7 +139,7 @@ func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, addSource int32) (err error) {
 	return f.tx.Transaction(ctx, func(ctx context.Context) error {
 		cache := f.cache.NewCache()
-		// User find friends
+		// user find friends
 		fs1, err := f.friend.FindFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
@@ -148,7 +148,7 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 		for _, v := range friendUserIDs {
 			fs1 = append(fs1, &relation.FriendModel{OwnerUserID: ownerUserID, FriendUserID: v, AddSource: addSource, OperatorUserID: opUserID})
 		}
-		fs11 := utils.DistinctAny(fs1, func(e *relation.FriendModel) string {
+		fs11 := datautil.DistinctAny(fs1, func(e *relation.FriendModel) string {
 			return e.FriendUserID
 		})
 
@@ -165,7 +165,7 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 			fs2 = append(fs2, &relation.FriendModel{OwnerUserID: v, FriendUserID: ownerUserID, AddSource: addSource, OperatorUserID: opUserID})
 			newFriendIDs = append(newFriendIDs, v)
 		}
-		fs22 := utils.DistinctAny(fs2, func(e *relation.FriendModel) string {
+		fs22 := datautil.DistinctAny(fs2, func(e *relation.FriendModel) string {
 			return e.OwnerUserID
 		})
 		err = f.friend.Create(ctx, fs22)
@@ -212,14 +212,13 @@ func (f *friendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest 
 // AgreeFriendRequest accepts a friend request. It first checks for an existing, unprocessed request.
 func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
 	return f.tx.Transaction(ctx, func(ctx context.Context) error {
-		defer log.ZDebug(ctx, "return line")
 		now := time.Now()
 		fr, err := f.friendRequest.Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 		if err != nil {
 			return err
 		}
 		if fr.HandleResult != 0 {
-			return errs.ErrArgs.Wrap("the friend request has been processed")
+			return errs.ErrArgs.WrapMsg("the friend request has been processed")
 		}
 		friendRequest.HandlerUserID = mcontext.GetOpUserID(ctx)
 		friendRequest.HandleResult = constant.FriendResponseAgree
@@ -246,7 +245,7 @@ func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 		if err != nil {
 			return err
 		}
-		existsMap := utils.SliceSet(utils.Slice(exists, func(friend *relation.FriendModel) [2]string {
+		existsMap := datautil.SliceSet(datautil.Slice(exists, func(friend *relation.FriendModel) [2]string {
 			return [...]string{friend.OwnerUserID, friend.FriendUserID} // My - Friend
 		}))
 		var adds []*relation.FriendModel

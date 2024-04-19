@@ -15,10 +15,10 @@
 package api
 
 import (
-	"github.com/OpenIMSDK/protocol/group"
-	"github.com/OpenIMSDK/tools/a2r"
 	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/group"
+	"github.com/openimsdk/tools/a2r"
 )
 
 type GroupApi rpcclient.Group
@@ -115,21 +115,13 @@ func (o *GroupApi) GetGroupAbstractInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupAbstractInfo, o.Client, c)
 }
 
-//func (g *Group) SetGroupMemberNickname(c *gin.Context) {
+// func (g *Group) SetGroupMemberNickname(c *gin.Context) {
 //	a2r.Call(group.GroupClient.SetGroupMemberNickname, g.userClient, c)
 //}
 //
-//func (g *Group) GetGroupAllMemberList(c *gin.Context) {
+// func (g *Group) GetGroupAllMemberList(c *gin.Context) {
 //	a2r.Call(group.GroupClient.GetGroupAllMember, g.userClient, c)
 //}
-
-func (o *GroupApi) GetJoinedSuperGroupList(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetJoinedSuperGroupList, o.Client, c)
-}
-
-func (o *GroupApi) GetSuperGroupsInfo(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetSuperGroupsInfo, o.Client, c)
-}
 
 func (o *GroupApi) GroupCreateCount(c *gin.Context) {
 	a2r.Call(group.GroupClient.GroupCreateCount, o.Client, c)

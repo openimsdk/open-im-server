@@ -18,28 +18,20 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/utils"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 func (m *msgServer) GetActiveUser(ctx context.Context, req *msg.GetActiveUserReq) (*msg.GetActiveUserResp, error) {
-	msgCount, userCount, users, dateCount, err := m.MsgDatabase.RangeUserSendCount(
-		ctx,
-		time.UnixMilli(req.Start),
-		time.UnixMilli(req.End),
-		req.Group,
-		req.Ase,
-		req.Pagination.PageNumber,
-		req.Pagination.ShowNumber,
-	)
+	msgCount, userCount, users, dateCount, err := m.MsgDatabase.RangeUserSendCount(ctx, time.UnixMilli(req.Start), time.UnixMilli(req.End), req.Group, req.Ase, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
 	var pbUsers []*msg.ActiveUser
 	if len(users) > 0 {
-		userIDs := utils.Slice(users, func(e *unrelation.UserCount) string { return e.UserID })
+		userIDs := datautil.Slice(users, func(e *relation.UserCount) string { return e.UserID })
 		userMap, err := m.UserLocalCache.GetUsersInfoMap(ctx, userIDs)
 		if err != nil {
 			return nil, err
@@ -68,20 +60,13 @@ func (m *msgServer) GetActiveUser(ctx context.Context, req *msg.GetActiveUserReq
 }
 
 func (m *msgServer) GetActiveGroup(ctx context.Context, req *msg.GetActiveGroupReq) (*msg.GetActiveGroupResp, error) {
-	msgCount, groupCount, groups, dateCount, err := m.MsgDatabase.RangeGroupSendCount(
-		ctx,
-		time.UnixMilli(req.Start),
-		time.UnixMilli(req.End),
-		req.Ase,
-		req.Pagination.PageNumber,
-		req.Pagination.ShowNumber,
-	)
+	msgCount, groupCount, groups, dateCount, err := m.MsgDatabase.RangeGroupSendCount(ctx, time.UnixMilli(req.Start), time.UnixMilli(req.End), req.Ase, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
 	var pbgroups []*msg.ActiveGroup
 	if len(groups) > 0 {
-		groupIDs := utils.Slice(groups, func(e *unrelation.GroupCount) string { return e.GroupID })
+		groupIDs := datautil.Slice(groups, func(e *relation.GroupCount) string { return e.GroupID })
 		resp, err := m.GroupLocalCache.GetGroupInfos(ctx, groupIDs)
 		if err != nil {
 			return nil, err

@@ -17,13 +17,12 @@ package controller
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/tokenverify"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/tokenverify"
 )
 
 type AuthDatabase interface {
@@ -31,22 +30,27 @@ type AuthDatabase interface {
 	GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error)
 	// Create token
 	CreateToken(ctx context.Context, userID string, platformID int) (string, error)
+
+	SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error
 }
 
 type authDatabase struct {
-	cache        cache.MsgModel
+	cache        cache.TokenModel
 	accessSecret string
 	accessExpire int64
-	config       *config.GlobalConfig
 }
 
-func NewAuthDatabase(cache cache.MsgModel, accessSecret string, accessExpire int64, config *config.GlobalConfig) AuthDatabase {
-	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire, config: config}
+func NewAuthDatabase(cache cache.TokenModel, accessSecret string, accessExpire int64) AuthDatabase {
+	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire}
 }
 
 // If the result is empty.
 func (a *authDatabase) GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error) {
 	return a.cache.GetTokensWithoutError(ctx, userID, platformID)
+}
+
+func (a *authDatabase) SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error {
+	return a.cache.SetTokenMapByUidPid(ctx, userID, platformID, m)
 }
 
 // Create Token.
@@ -57,7 +61,7 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 	}
 	var deleteTokenKey []string
 	for k, v := range tokens {
-		_, err = tokenverify.GetClaimFromToken(k, authverify.Secret(a.config.Secret))
+		_, err = tokenverify.GetClaimFromToken(k, authverify.Secret(a.accessSecret))
 		if err != nil || v != constant.NormalToken {
 			deleteTokenKey = append(deleteTokenKey, k)
 		}
@@ -73,7 +77,7 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(a.accessSecret))
 	if err != nil {
-		return "", errs.Wrap(err, "token.SignedString")
+		return "", errs.WrapMsg(err, "token.SignedString")
 	}
 	return tokenString, a.cache.AddTokenFlag(ctx, userID, platformID, tokenString, constant.NormalToken)
 }

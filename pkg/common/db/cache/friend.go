@@ -18,20 +18,20 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 )
 
 const (
 	friendExpireTime = time.Second * 60 * 60 * 12
-	//friendIDsKey        = "FRIEND_IDS:"
-	//TwoWayFriendsIDsKey = "COMMON_FRIENDS_IDS:"
-	//friendKey           = "FRIEND_INFO:".
+	// FriendIDsKey        = "FRIEND_IDS:"
+	// TwoWayFriendsIDsKey = "COMMON_FRIENDS_IDS:"
+	// friendKey           = "FRIEND_INFO:".
 )
 
 // FriendCache is an interface for caching friend-related data.
@@ -58,11 +58,11 @@ type FriendCacheRedis struct {
 }
 
 // NewFriendCacheRedis creates a new instance of FriendCacheRedis.
-func NewFriendCacheRedis(rdb redis.UniversalClient, friendDB relationtb.FriendModelInterface,
+func NewFriendCacheRedis(rdb redis.UniversalClient, localCache *config.LocalCache, friendDB relationtb.FriendModelInterface,
 	options rockscache.Options) FriendCache {
 	rcClient := rockscache.NewClient(rdb, options)
 	mc := NewMetaCacheRedis(rcClient)
-	f := config.Config.LocalCache.Friend
+	f := localCache.Friend
 	log.ZDebug(context.Background(), "friend local cache init", "Topic", f.Topic, "SlotNum", f.SlotNum, "SlotSize", f.SlotSize, "enable", f.Enable())
 	mc.SetTopic(f.Topic)
 	mc.SetRawRedisClient(rdb)
@@ -129,7 +129,7 @@ func (f *FriendCacheRedis) GetTwoWayFriendIDs(ctx context.Context, ownerUserID s
 		if err != nil {
 			return nil, err
 		}
-		if utils.IsContain(ownerUserID, friendFriendID) {
+		if datautil.Contain(ownerUserID, friendFriendID...) {
 			twoWayFriendIDs = append(twoWayFriendIDs, ownerUserID)
 		}
 	}

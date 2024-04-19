@@ -32,8 +32,8 @@ func (a *Audience) set(key string, v []string) {
 		a.audience = make(map[string][]string)
 		a.Object = a.audience
 	}
-	//v, ok = this.audience[key]
-	//if ok {
+	// v, ok = this.audience[key]
+	// if ok {
 	//	return
 	//}
 	a.audience[key] = v

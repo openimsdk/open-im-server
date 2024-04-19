@@ -18,11 +18,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mgoutil"
-	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -47,7 +47,7 @@ type GroupMgo struct {
 }
 
 func (g *GroupMgo) Create(ctx context.Context, groups []*relation.GroupModel) (err error) {
-	return mgoutil.InsertMany(ctx, g.coll, groups)
+	return mongoutil.InsertMany(ctx, g.coll, groups)
 }
 
 func (g *GroupMgo) UpdateStatus(ctx context.Context, groupID string, status int32) (err error) {
@@ -58,21 +58,23 @@ func (g *GroupMgo) UpdateMap(ctx context.Context, groupID string, args map[strin
 	if len(args) == 0 {
 		return nil
 	}
-	return mgoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID}, bson.M{"$set": args}, true)
+	return mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID}, bson.M{"$set": args}, true)
 }
 
 func (g *GroupMgo) Find(ctx context.Context, groupIDs []string) (groups []*relation.GroupModel, err error) {
-	return mgoutil.Find[*relation.GroupModel](ctx, g.coll, bson.M{"group_id": bson.M{"$in": groupIDs}})
+	return mongoutil.Find[*relation.GroupModel](ctx, g.coll, bson.M{"group_id": bson.M{"$in": groupIDs}})
 }
 
 func (g *GroupMgo) Take(ctx context.Context, groupID string) (group *relation.GroupModel, err error) {
-	return mgoutil.FindOne[*relation.GroupModel](ctx, g.coll, bson.M{"group_id": groupID})
+	return mongoutil.FindOne[*relation.GroupModel](ctx, g.coll, bson.M{"group_id": groupID})
 }
 
 func (g *GroupMgo) Search(ctx context.Context, keyword string, pagination pagination.Pagination) (total int64, groups []*relation.GroupModel, err error) {
+	// Define the sorting options
 	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
 
-	return mgoutil.FindPage[*relation.GroupModel](ctx, g.coll, bson.M{
+	// Perform the search with pagination and sorting
+	return mongoutil.FindPage[*relation.GroupModel](ctx, g.coll, bson.M{
 		"group_name": bson.M{"$regex": keyword},
 		"status":     bson.M{"$ne": constant.GroupStatusDismissed},
 	}, pagination, opts)
@@ -80,9 +82,9 @@ func (g *GroupMgo) Search(ctx context.Context, keyword string, pagination pagina
 
 func (g *GroupMgo) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
 	if before == nil {
-		return mgoutil.Count(ctx, g.coll, bson.M{})
+		return mongoutil.Count(ctx, g.coll, bson.M{})
 	}
-	return mgoutil.Count(ctx, g.coll, bson.M{"create_time": bson.M{"$lt": before}})
+	return mongoutil.Count(ctx, g.coll, bson.M{"create_time": bson.M{"$lt": before}})
 }
 
 func (g *GroupMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
@@ -113,7 +115,7 @@ func (g *GroupMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time,
 		Date  string `bson:"_id"`
 		Count int64  `bson:"count"`
 	}
-	items, err := mgoutil.Aggregate[Item](ctx, g.coll, pipeline)
+	items, err := mongoutil.Aggregate[Item](ctx, g.coll, pipeline)
 	if err != nil {
 		return nil, err
 	}

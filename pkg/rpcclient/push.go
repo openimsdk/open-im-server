@@ -17,23 +17,22 @@ package rpcclient
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/push"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/protocol/push"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/system/program"
 	"google.golang.org/grpc"
 )
 
 type Push struct {
 	conn   grpc.ClientConnInterface
 	Client push.PushMsgServiceClient
-	discov discoveryregistry.SvcDiscoveryRegistry
+	discov discovery.SvcDiscoveryRegistry
 }
 
-func NewPush(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Push {
-	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImPushName)
+func NewPush(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) *Push {
+	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 	return &Push{
 		discov: discov,
@@ -44,8 +43,8 @@ func NewPush(discov discoveryregistry.SvcDiscoveryRegistry, config *config.Globa
 
 type PushRpcClient Push
 
-func NewPushRpcClient(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) PushRpcClient {
-	return PushRpcClient(*NewPush(discov, config))
+func NewPushRpcClient(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) PushRpcClient {
+	return PushRpcClient(*NewPush(discov, rpcRegisterName))
 }
 
 func (p *PushRpcClient) DelUserPushToken(ctx context.Context, req *push.DelUserPushTokenReq) (*push.DelUserPushTokenResp, error) {

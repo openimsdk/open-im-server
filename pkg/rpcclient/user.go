@@ -18,33 +18,37 @@ import (
 	"context"
 	"strings"
 
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/system/program"
+	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
 )
 
 // User represents a structure holding connection details for the User RPC client.
 type User struct {
-	conn   grpc.ClientConnInterface
-	Client user.UserClient
-	Discov discoveryregistry.SvcDiscoveryRegistry
-	Config *config.GlobalConfig
+	conn                  grpc.ClientConnInterface
+	Client                user.UserClient
+	Discov                discovery.SvcDiscoveryRegistry
+	MessageGateWayRpcName string
+	imAdminUserID         []string
 }
 
 // NewUser initializes and returns a User instance based on the provided service discovery registry.
-func NewUser(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *User {
-	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImUserName)
+func NewUser(discov discovery.SvcDiscoveryRegistry, rpcRegisterName, messageGateWayRpcName string,
+	imAdminUserID []string) *User {
+	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 	client := user.NewUserClient(conn)
-	return &User{Discov: discov, Client: client, conn: conn, Config: config}
+	return &User{Discov: discov, Client: client,
+		conn:                  conn,
+		MessageGateWayRpcName: messageGateWayRpcName,
+		imAdminUserID:         imAdminUserID}
 }
 
 // UserRpcClient represents the structure for a User RPC client.
@@ -57,8 +61,9 @@ func NewUserRpcClientByUser(user *User) *UserRpcClient {
 }
 
 // NewUserRpcClient initializes a UserRpcClient based on the provided service discovery registry.
-func NewUserRpcClient(client discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) UserRpcClient {
-	return UserRpcClient(*NewUser(client, config))
+func NewUserRpcClient(client discovery.SvcDiscoveryRegistry, rpcRegisterName string,
+	imAdminUserID []string) UserRpcClient {
+	return UserRpcClient(*NewUser(client, rpcRegisterName, "", imAdminUserID))
 }
 
 // GetUsersInfo retrieves information for multiple users based on their user IDs.
@@ -72,10 +77,10 @@ func (u *UserRpcClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*
 	if err != nil {
 		return nil, err
 	}
-	if ids := utils.Single(userIDs, utils.Slice(resp.UsersInfo, func(e *sdkws.UserInfo) string {
+	if ids := datautil.Single(userIDs, datautil.Slice(resp.UsersInfo, func(e *sdkws.UserInfo) string {
 		return e.UserID
 	})); len(ids) > 0 {
-		return nil, errs.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
+		return nil, servererrs.ErrUserIDNotFound.WrapMsg(strings.Join(ids, ","))
 	}
 	return resp.UsersInfo, nil
 }
@@ -95,7 +100,7 @@ func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (
 	if err != nil {
 		return nil, err
 	}
-	return utils.SliceToMap(users, func(e *sdkws.UserInfo) string {
+	return datautil.SliceToMap(users, func(e *sdkws.UserInfo) string {
 		return e.UserID
 	}), nil
 }
@@ -110,7 +115,7 @@ func (u *UserRpcClient) GetPublicUserInfos(
 	if err != nil {
 		return nil, err
 	}
-	return utils.Slice(users, func(e *sdkws.UserInfo) *sdkws.PublicUserInfo {
+	return datautil.Slice(users, func(e *sdkws.UserInfo) *sdkws.PublicUserInfo {
 		return &sdkws.PublicUserInfo{
 			UserID:   e.UserID,
 			Nickname: e.Nickname,
@@ -139,7 +144,7 @@ func (u *UserRpcClient) GetPublicUserInfoMap(
 	if err != nil {
 		return nil, err
 	}
-	return utils.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
+	return datautil.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
 		return e.UserID
 	}), nil
 }
@@ -161,7 +166,7 @@ func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
 	if err != nil {
 		return err
 	}
-	return authverify.CheckAccessV3(ctx, ownerUserID, u.Config)
+	return authverify.CheckAccessV3(ctx, ownerUserID, u.imAdminUserID)
 }
 
 // GetAllUserIDs retrieves all user IDs with pagination options.

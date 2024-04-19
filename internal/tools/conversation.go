@@ -19,14 +19,15 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/idutil"
+	"github.com/openimsdk/tools/utils/stringutil"
 )
 
-//func (c *MsgTool) ConversationsDestructMsgs() {
+// func (c *MsgTool) ConversationsDestructMsgs() {
 //	log.ZInfo(context.Background(), "start msg destruct cron task")
 //	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
 //	conversations, err := c.conversationDatabase.GetConversationIDsNeedDestruct(ctx)
@@ -70,7 +71,7 @@ import (
 
 func (c *MsgTool) ConversationsDestructMsgs() {
 	log.ZInfo(context.Background(), "start msg destruct cron task")
-	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
+	ctx := mcontext.NewCtx(stringutil.GetSelfFuncName())
 	num, err := c.conversationDatabase.GetAllConversationIDsNumber(ctx)
 	if err != nil {
 		log.ZError(ctx, "GetAllConversationIDsNumber failed", err)
@@ -117,7 +118,7 @@ func (c *MsgTool) ConversationsDestructMsgs() {
 			}
 		}
 		for _, conversation := range temp {
-			ctx = mcontext.NewCtx(utils.GetSelfFuncName() + "-" + utils.OperationIDGenerator() + "-" + conversation.ConversationID + "-" + conversation.OwnerUserID)
+			ctx = mcontext.NewCtx(stringutil.GetSelfFuncName() + "-" + idutil.OperationIDGenerator() + "-" + conversation.ConversationID + "-" + conversation.OwnerUserID)
 			log.ZDebug(
 				ctx,
 				"UserMsgsDestruct",
@@ -141,9 +142,7 @@ func (c *MsgTool) ConversationsDestructMsgs() {
 					log.ZError(ctx, "updateUsersConversationField failed", err, "conversationID", conversation.ConversationID, "ownerUserID", conversation.OwnerUserID)
 					continue
 				}
-				if err := c.msgNotificationSender.UserDeleteMsgsNotification(ctx, conversation.OwnerUserID, conversation.ConversationID, seqs); err != nil {
-					log.ZError(ctx, "userDeleteMsgsNotification failed", err, "conversationID", conversation.ConversationID, "ownerUserID", conversation.OwnerUserID)
-				}
+				c.msgNotificationSender.UserDeleteMsgsNotification(ctx, conversation.OwnerUserID, conversation.ConversationID, seqs)
 			}
 		}
 	}

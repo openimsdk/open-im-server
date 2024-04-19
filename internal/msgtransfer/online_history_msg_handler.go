@@ -23,18 +23,19 @@ import (
 	"time"
 
 	"github.com/IBM/sarama"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/go-redis/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/tools/utils/idutil"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -80,12 +81,12 @@ type OnlineHistoryRedisConsumerHandler struct {
 	groupRpcClient        *rpcclient.GroupRpcClient
 }
 
-func NewOnlineHistoryRedisConsumerHandler(
-	config *config.GlobalConfig,
-	database controller.CommonMsgDatabase,
-	conversationRpcClient *rpcclient.ConversationRpcClient,
-	groupRpcClient *rpcclient.GroupRpcClient,
-) (*OnlineHistoryRedisConsumerHandler, error) {
+func NewOnlineHistoryRedisConsumerHandler(kafkaConf *config.Kafka, database controller.CommonMsgDatabase,
+	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*OnlineHistoryRedisConsumerHandler, error) {
+	historyConsumerGroup, err := kafka.NewMConsumerGroup(kafkaConf.Build(), kafkaConf.ToRedisGroupID, []string{kafkaConf.ToRedisTopic})
+	if err != nil {
+		return nil, err
+	}
 	var och OnlineHistoryRedisConsumerHandler
 	och.msgDatabase = database
 	och.msgDistributionCh = make(chan Cmd2Value) // no buffer channel
@@ -96,32 +97,7 @@ func NewOnlineHistoryRedisConsumerHandler(
 	}
 	och.conversationRpcClient = conversationRpcClient
 	och.groupRpcClient = groupRpcClient
-	var err error
-
-	var tlsConfig *kafka.TLSConfig
-	if config.Kafka.TLS != nil {
-		tlsConfig = &kafka.TLSConfig{
-			CACrt:              config.Kafka.TLS.CACrt,
-			ClientCrt:          config.Kafka.TLS.ClientCrt,
-			ClientKey:          config.Kafka.TLS.ClientKey,
-			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
-			InsecureSkipVerify: false,
-		}
-	}
-
-	och.historyConsumerGroup, err = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
-		KafkaVersion:   sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest,
-		IsReturnErr:    false,
-		UserName:       config.Kafka.Username,
-		Password:       config.Kafka.Password,
-	}, []string{config.Kafka.LatestMsgToRedis.Topic},
-		config.Kafka.Addr,
-		config.Kafka.ConsumerGroupID.MsgToRedis,
-		tlsConfig,
-	)
-	// statistics.NewStatistics(&och.singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d
-	// second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
+	och.historyConsumerGroup = historyConsumerGroup
 	return &och, err
 }
 
@@ -265,22 +241,13 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(
 	}
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(
-	ctx context.Context,
-	key, conversationID string,
-	msgs []*sdkws.MsgData,
-) {
+func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(ctx context.Context, key, conversationID string, msgs []*sdkws.MsgData) {
 	for _, v := range msgs {
 		och.msgDatabase.MsgToPushMQ(ctx, key, conversationID, v) // nolint: errcheck
-
 	}
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) handleMsg(
-	ctx context.Context,
-	key, conversationID string,
-	storageList, notStorageList []*sdkws.MsgData,
-) {
+func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key, conversationID string, storageList, notStorageList []*sdkws.MsgData) {
 	och.toPushTopic(ctx, key, conversationID, notStorageList)
 	if len(storageList) > 0 {
 		lastSeq, isNewConversation, err := och.msgDatabase.BatchInsertChat2Cache(ctx, conversationID, storageList)
@@ -290,7 +257,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(
 		}
 		if isNewConversation {
 			switch storageList[0].SessionType {
-			case constant.SuperGroupChatType:
+			case constant.ReadGroupChatType:
 				log.ZInfo(ctx, "group chat first create conversation", "conversationID",
 					conversationID)
 				userIDs, err := och.groupRpcClient.GetGroupMemberIDs(ctx, storageList[0].GroupID)
@@ -349,14 +316,8 @@ func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 					for i, header := range consumerMessages[i].Headers {
 						arr = append(arr, strconv.Itoa(i), string(header.Key), string(header.Value))
 					}
-					log.ZInfo(
-						ctx,
-						"consumer.kafka.GetContextWithMQHeader",
-						"len",
-						len(consumerMessages[i].Headers),
-						"header",
-						strings.Join(arr, ", "),
-					)
+					log.ZInfo(ctx, "consumer.kafka.GetContextWithMQHeader", "len", len(consumerMessages[i].Headers),
+						"header", strings.Join(arr, ", "))
 					ctxMsg.ctx = kafka.GetContextWithMQHeader(consumerMessages[i].Headers)
 					ctxMsg.message = msgFromMQ
 					log.ZDebug(
@@ -381,7 +342,7 @@ func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 				log.ZDebug(ctx, "generate map list users len", "length", len(aggregationMsgs))
 				for uniqueKey, v := range aggregationMsgs {
 					if len(v) >= 0 {
-						hashCode := utils.GetHashCode(uniqueKey)
+						hashCode := stringutil.GetHashCode(uniqueKey)
 						channelID := hashCode % ChannelNum
 						newCtx := withAggregationCtx(ctx, v)
 						log.ZDebug(
@@ -472,7 +433,7 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(
 				rwLock.Unlock()
 
 				start := time.Now()
-				ctx := mcontext.WithTriggerIDContext(context.Background(), utils.OperationIDGenerator())
+				ctx := mcontext.WithTriggerIDContext(context.Background(), idutil.OperationIDGenerator())
 				log.ZDebug(ctx, "timer trigger msg consumer start", "length", len(buffer))
 				for i := 0; i < len(buffer)/split; i++ {
 					och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{

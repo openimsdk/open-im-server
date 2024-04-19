@@ -18,42 +18,22 @@ import (
 	"context"
 
 	"github.com/IBM/sarama"
-	pbmsg "github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	kfk "github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	pbmsg "github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mq/kafka"
 	"google.golang.org/protobuf/proto"
 )
 
 type OnlineHistoryMongoConsumerHandler struct {
-	historyConsumerGroup *kfk.MConsumerGroup
+	historyConsumerGroup *kafka.MConsumerGroup
 	msgDatabase          controller.CommonMsgDatabase
 }
 
-func NewOnlineHistoryMongoConsumerHandler(config *config.GlobalConfig, database controller.CommonMsgDatabase) (*OnlineHistoryMongoConsumerHandler, error) {
-	var tlsConfig *kfk.TLSConfig
-	if config.Kafka.TLS != nil {
-		tlsConfig = &kfk.TLSConfig{
-			CACrt:              config.Kafka.TLS.CACrt,
-			ClientCrt:          config.Kafka.TLS.ClientCrt,
-			ClientKey:          config.Kafka.TLS.ClientKey,
-			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
-			InsecureSkipVerify: false,
-		}
-	}
-	historyConsumerGroup, err := kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
-		KafkaVersion:   sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest,
-		IsReturnErr:    false,
-		UserName:       config.Kafka.Username,
-		Password:       config.Kafka.Password,
-	}, []string{config.Kafka.MsgToMongo.Topic},
-		config.Kafka.Addr,
-		config.Kafka.ConsumerGroupID.MsgToMongo,
-		tlsConfig,
-	)
+func NewOnlineHistoryMongoConsumerHandler(kafkaConf *config.Kafka, database controller.CommonMsgDatabase) (*OnlineHistoryMongoConsumerHandler, error) {
+	historyConsumerGroup, err := kafka.NewMConsumerGroup(kafkaConf.Build(), kafkaConf.ToMongoGroupID, []string{kafkaConf.ToMongoTopic})
 	if err != nil {
 		return nil, err
 	}
@@ -65,12 +45,7 @@ func NewOnlineHistoryMongoConsumerHandler(config *config.GlobalConfig, database 
 	return mc, nil
 }
 
-func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(
-	ctx context.Context,
-	cMsg *sarama.ConsumerMessage,
-	key string,
-	session sarama.ConsumerGroupSession,
-) {
+func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Context, cMsg *sarama.ConsumerMessage, key string, session sarama.ConsumerGroupSession) {
 	msg := cMsg.Value
 	msgFromMQ := pbmsg.MsgDataToMongoByMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)

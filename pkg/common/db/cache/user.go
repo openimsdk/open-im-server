@@ -22,25 +22,22 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
 )
 
 const (
-	userExpireTime = time.Second * 60 * 60 * 12
-	//userInfoKey               = "USER_INFO:".
-	userGlobalRecvMsgOptKey   = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
+	userExpireTime            = time.Second * 60 * 60 * 12
 	olineStatusKey            = "ONLINE_STATUS:"
 	userOlineStatusExpireTime = time.Second * 60 * 60 * 24
 	statusMod                 = 501
-	platformID                = "_PlatformIDSuffix"
 )
 
 type UserCache interface {
@@ -58,20 +55,16 @@ type UserCache interface {
 type UserCacheRedis struct {
 	metaCache
 	rdb redis.UniversalClient
-	//userDB     relationtb.UserModelInterface
+	// userDB     relationtb.UserModelInterface
 	userDB     relationtb.UserModelInterface
 	expireTime time.Duration
 	rcClient   *rockscache.Client
 }
 
-func NewUserCacheRedis(
-	rdb redis.UniversalClient,
-	userDB relationtb.UserModelInterface,
-	options rockscache.Options,
-) UserCache {
+func NewUserCacheRedis(rdb redis.UniversalClient, localCache *config.LocalCache, userDB relationtb.UserModelInterface, options rockscache.Options) UserCache {
 	rcClient := rockscache.NewClient(rdb, options)
 	mc := NewMetaCacheRedis(rcClient)
-	u := config.Config.LocalCache.User
+	u := localCache.User
 	log.ZDebug(context.Background(), "user local cache init", "Topic", u.Topic, "SlotNum", u.SlotNum, "SlotSize", u.SlotSize, "enable", u.Enable())
 	mc.SetTopic(u.Topic)
 	mc.SetRawRedisClient(rdb)
@@ -294,7 +287,7 @@ func (u *UserCacheRedis) refreshStatusOnline(ctx context.Context, userID string,
 	onlineStatus.UserID = userID
 	newjsonData, err := json.Marshal(&onlineStatus)
 	if err != nil {
-		return errs.Wrap(err, "json.Marshal failed")
+		return errs.WrapMsg(err, "json.Marshal failed")
 	}
 	_, err = u.rdb.HSet(ctx, key, userID, string(newjsonData)).Result()
 	if err != nil {

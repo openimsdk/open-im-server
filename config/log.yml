@@ -1,0 +1,13 @@
+# Log storage path, default is acceptable, change to a full path if modification is needed
+storageLocation: ../../../../logs/
+# Log rotation period (in hours), default is acceptable
+rotationTime: 24
+# Number of log files to retain, default is acceptable
+remainRotationCount: 2
+# Log level settings: 3 for production environment; 6 for more verbose logging in debugging environments
+remainLogLevel: 6
+# Whether to output to standard output, default is acceptable
+isStdout: false
+# Whether to log in JSON format, default is acceptable
+isJson: false
+

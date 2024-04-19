@@ -17,27 +17,18 @@ package tools
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/internal/rpc/msg"
 	"math"
 	"math/rand"
 
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/mw"
-	"github.com/OpenIMSDK/tools/tx"
-	"github.com/OpenIMSDK/tools/utils"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"github.com/redis/go-redis/v9"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type MsgTool struct {
@@ -45,13 +36,13 @@ type MsgTool struct {
 	conversationDatabase  controller.ConversationDatabase
 	userDatabase          controller.UserDatabase
 	groupDatabase         controller.GroupDatabase
-	msgNotificationSender *notification.MsgNotificationSender
-	Config                *config.GlobalConfig
+	msgNotificationSender *msg.MsgNotificationSender
+	config                *CronTaskConfig
 }
 
 func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controller.UserDatabase,
 	groupDatabase controller.GroupDatabase, conversationDatabase controller.ConversationDatabase,
-	msgNotificationSender *notification.MsgNotificationSender, config *config.GlobalConfig,
+	msgNotificationSender *msg.MsgNotificationSender, config *CronTaskConfig,
 ) *MsgTool {
 	return &MsgTool{
 		msgDatabase:           msgDatabase,
@@ -59,69 +50,71 @@ func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controlle
 		groupDatabase:         groupDatabase,
 		conversationDatabase:  conversationDatabase,
 		msgNotificationSender: msgNotificationSender,
-		Config:                config,
+		config:                config,
 	}
 }
 
-func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
-	rdb, err := cache.NewRedis(config)
-	if err != nil {
-		return nil, err
-	}
-	mongo, err := unrelation.NewMongo(config)
-	if err != nil {
-		return nil, err
-	}
-	discov, err := kdisc.NewDiscoveryRegister(config)
-	if err != nil {
-		return nil, err
-	}
-	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	userDB, err := mgo.NewUserMongo(mongo.GetDatabase(config.Mongo.Database))
-	if err != nil {
-		return nil, err
-	}
-	msgDatabase, err := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase(config.Mongo.Database), config)
-	if err != nil {
-		return nil, err
-	}
-	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase(config.Mongo.Database))
-	ctxTx := tx.NewMongo(mongo.GetClient())
-	userDatabase := controller.NewUserDatabase(
-		userDB,
-		cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt()),
-		ctxTx,
-		userMongoDB,
-	)
-	groupDB, err := mgo.NewGroupMongo(mongo.GetDatabase(config.Mongo.Database))
-	if err != nil {
-		return nil, err
-	}
-	groupMemberDB, err := mgo.NewGroupMember(mongo.GetDatabase(config.Mongo.Database))
-	if err != nil {
-		return nil, err
-	}
-	groupRequestDB, err := mgo.NewGroupRequestMgo(mongo.GetDatabase(config.Mongo.Database))
-	if err != nil {
-		return nil, err
-	}
-	conversationDB, err := mgo.NewConversationMongo(mongo.GetDatabase(config.Mongo.Database))
-	if err != nil {
-		return nil, err
-	}
-	groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, ctxTx, nil)
-	conversationDatabase := controller.NewConversationDatabase(
-		conversationDB,
-		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
-		ctxTx,
-	)
-	msgRpcClient := rpcclient.NewMessageRpcClient(discov, config)
-	msgNotificationSender := notification.NewMsgNotificationSender(config, rpcclient.WithRpcClient(&msgRpcClient))
-	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase, msgNotificationSender, config)
-	return msgTool, nil
+func InitMsgTool(ctx context.Context, config *CronTaskConfig) (*MsgTool, error) {
+	ch := make(chan int)
+	<-ch
+	//mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//discov, err := kdisc.NewDiscoveryRegister(&config.ZookeeperConfig, &config.Share)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
+	//userDB, err := mgo.NewUserMongo(mgocli.GetDB())
+	//if err != nil {
+	//	return nil, err
+	//}
+	////msgDatabase, err := controller.InitCommonMsgDatabase(rdb, mgocli.GetDB(), config)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//userMongoDB := mgo.NewUserMongoDriver(mgocli.GetDB())
+	//userDatabase := controller.NewUserDatabase(
+	//	userDB,
+	//	cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt()),
+	//	mgocli.GetTx(),
+	//	userMongoDB,
+	//)
+	//groupDB, err := mgo.NewGroupMongo(mgocli.GetDB())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//groupMemberDB, err := mgo.NewGroupMember(mgocli.GetDB())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//groupRequestDB, err := mgo.NewGroupRequestMgo(mgocli.GetDB())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//conversationDB, err := mgo.NewConversationMongo(mgocli.GetDB())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//groupDatabase := controller.NewGroupDatabase(rdb, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), nil)
+	//conversationDatabase := controller.NewConversationDatabase(
+	//	conversationDB,
+	//	cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
+	//	mgocli.GetTx(),
+	//)
+	//msgRpcClient := rpcclient.NewMessageRpcClient(discov, config.Share.RpcRegisterName.Msg)
+	//msgNotificationSender := notification.NewMsgNotificationSender(config, rpcclient.WithRpcClient(&msgRpcClient))
+	//msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase, msgNotificationSender, config)
+	//return msgTool, nil
+	return nil, nil
 }
 
-//func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
+// func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 //	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
 //	log.ZInfo(ctx, "============================ start del cron task ============================")
 //	conversationIDs, err := c.conversationDatabase.GetAllConversationIDs(ctx)
@@ -137,7 +130,7 @@ func InitMsgTool(config *config.GlobalConfig) (*MsgTool, error) {
 //}
 
 func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
-	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
+	ctx := mcontext.NewCtx(stringutil.GetSelfFuncName())
 	log.ZInfo(ctx, "============================ start del cron task ============================")
 	num, err := c.conversationDatabase.GetAllConversationIDsNumber(ctx)
 	if err != nil {
@@ -179,8 +172,9 @@ func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 
 func (c *MsgTool) ClearConversationsMsg(ctx context.Context, conversationIDs []string) {
 	for _, conversationID := range conversationIDs {
-		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, int64(c.Config.RetainChatRecords*24*60*60)); err != nil {
-			log.ZError(ctx, "DeleteUserSuperGroupMsgsAndSetMinSeq failed", err, "conversationID", conversationID, "DBRetainChatRecords", c.Config.RetainChatRecords)
+		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, int64(c.config.CronTask.RetainChatRecords*24*60*60)); err != nil {
+			log.ZError(ctx, "DeleteUserSuperGroupMsgsAndSetMinSeq failed", err, "conversationID",
+				conversationID, "DBRetainChatRecords", c.config.CronTask.RetainChatRecords)
 		}
 		if err := c.checkMaxSeq(ctx, conversationID); err != nil {
 			log.ZError(ctx, "fixSeq failed", err, "conversationID", conversationID)
@@ -220,7 +214,7 @@ func (c *MsgTool) FixAllSeq(ctx context.Context) error {
 		return err
 	}
 	for _, conversationID := range conversationIDs {
-		conversationIDs = append(conversationIDs, utils.GetNotificationConversationIDByConversationID(conversationID))
+		conversationIDs = append(conversationIDs, conversationutil.GetNotificationConversationIDByConversationID(conversationID))
 	}
 	for _, conversationID := range conversationIDs {
 		if err := c.checkMaxSeq(ctx, conversationID); err != nil {

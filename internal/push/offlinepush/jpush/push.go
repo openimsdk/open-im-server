@@ -18,19 +18,22 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 
-	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/jpush/body"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	http2 "github.com/openimsdk/open-im-server/v3/pkg/common/http"
+	"github.com/openimsdk/tools/utils/httputil"
 )
 
 type JPush struct {
-	config *config.GlobalConfig
+	pushConf   *config.Push
+	httpClient *httputil.HTTPClient
 }
 
-func NewClient(config *config.GlobalConfig) *JPush {
-	return &JPush{config: config}
+func NewClient(pushConf *config.Push) *JPush {
+	return &JPush{pushConf: pushConf,
+		httpClient: httputil.NewHTTPClient(httputil.NewClientConfig()),
+	}
 }
 
 func (j *JPush) Auth(apiKey, secretKey string, timeStamp int64) (token string, err error) {
@@ -48,7 +51,7 @@ func (j *JPush) getAuthorization(appKey string, masterSecret string) string {
 	return Authorization
 }
 
-func (j *JPush) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
+func (j *JPush) Push(ctx context.Context, userIDs []string, title, content string, opts *options.Opts) error {
 	var pf body.Platform
 	pf.SetAll()
 	var au body.Audience
@@ -61,12 +64,12 @@ func (j *JPush) Push(ctx context.Context, userIDs []string, title, content strin
 	no.IOSEnableMutableContent()
 	no.SetExtras(extras)
 	no.SetAlert(title)
-	no.SetAndroidIntent(j.config)
+	no.SetAndroidIntent(j.pushConf)
 
 	var msg body.Message
 	msg.SetMsgContent(content)
 	var opt body.Options
-	opt.SetApnsProduction(j.config.IOSPush.Production)
+	opt.SetApnsProduction(j.pushConf.IOSPush.Production)
 	var pushObj body.PushObj
 	pushObj.SetPlatform(&pf)
 	pushObj.SetAudience(&au)
@@ -78,11 +81,11 @@ func (j *JPush) Push(ctx context.Context, userIDs []string, title, content strin
 }
 
 func (j *JPush) request(ctx context.Context, po body.PushObj, resp any, timeout int) error {
-	return http2.PostReturn(
+	return j.httpClient.PostReturn(
 		ctx,
-		j.config.Push.Jpns.PushUrl,
+		j.pushConf.JPNS.PushURL,
 		map[string]string{
-			"Authorization": j.getAuthorization(j.config.Push.Jpns.AppKey, j.config.Push.Jpns.MasterSecret),
+			"Authorization": j.getAuthorization(j.pushConf.JPNS.AppKey, j.pushConf.JPNS.MasterSecret),
 		},
 		po,
 		resp,

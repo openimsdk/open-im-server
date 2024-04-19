@@ -15,32 +15,38 @@
 package discoveryregister
 
 import (
-	"errors"
-	"os"
-
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/direct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/zookeeper"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/discovery/zookeeper"
+	"github.com/openimsdk/tools/errs"
+	"time"
+)
+
+const (
+	zookeeperConst = "zookeeper"
+	kubenetesConst = "k8s"
+	directConst    = "direct"
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
-func NewDiscoveryRegister(config *config.GlobalConfig) (discoveryregistry.SvcDiscoveryRegistry, error) {
-
-	if os.Getenv("ENVS_DISCOVERY") != "" {
-		config.Envs.Discovery = os.Getenv("ENVS_DISCOVERY")
-	}
-
-	switch config.Envs.Discovery {
-	case "zookeeper":
-		return zookeeper.NewZookeeperDiscoveryRegister(config)
-	case "k8s":
-		return kubernetes.NewK8sDiscoveryRegister(config.RpcRegisterName.OpenImMessageGatewayName)
-	case "direct":
-		return direct.NewConnDirect(config)
+func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share) (discovery.SvcDiscoveryRegistry, error) {
+	switch share.Env {
+	case zookeeperConst:
+		return zookeeper.NewZkClient(
+			zookeeperConfig.Address,
+			zookeeperConfig.Schema,
+			zookeeper.WithFreq(time.Hour),
+			zookeeper.WithUserNameAndPassword(zookeeperConfig.Username, zookeeperConfig.Password),
+			zookeeper.WithRoundRobin(),
+			zookeeper.WithTimeout(10),
+		)
+	case kubenetesConst:
+		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
+	case directConst:
+		//return direct.NewConnDirect(config)
 	default:
-		return nil, errs.Wrap(errors.New("envType not correct"))
+		return nil, errs.New("unsupported discovery type", "type", share.Env).Wrap()
 	}
+	return nil, nil
 }

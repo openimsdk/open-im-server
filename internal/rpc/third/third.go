@@ -17,79 +17,25 @@ package third
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"net/url"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/third"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cos"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/minio"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/oss"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/third"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/s3"
+	"github.com/openimsdk/tools/s3/cos"
+	"github.com/openimsdk/tools/s3/minio"
+	"github.com/openimsdk/tools/s3/oss"
 	"google.golang.org/grpc"
 )
-
-func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	mongo, err := unrelation.NewMongo(config)
-	if err != nil {
-		return err
-	}
-	logdb, err := mgo.NewLogMongo(mongo.GetDatabase(config.Mongo.Database))
-	if err != nil {
-		return err
-	}
-	s3db, err := mgo.NewS3Mongo(mongo.GetDatabase(config.Mongo.Database))
-	if err != nil {
-		return err
-	}
-	apiURL := config.Object.ApiURL
-	if apiURL == "" {
-		return errs.Wrap(fmt.Errorf("api is empty"))
-	}
-	if _, err := url.Parse(config.Object.ApiURL); err != nil {
-		return err
-	}
-	if apiURL[len(apiURL)-1] != '/' {
-		apiURL += "/"
-	}
-	apiURL += "object/"
-	rdb, err := cache.NewRedis(config)
-	if err != nil {
-		return err
-	}
-	// Select the oss method according to the profile policy
-	enable := config.Object.Enable
-	var o s3.Interface
-	switch enable {
-	case "minio":
-		o, err = minio.NewMinio(cache.NewMinioCache(rdb), minio.Config(config.Object.Minio))
-	case "cos":
-		o, err = cos.NewCos(cos.Config(config.Object.Cos))
-	case "oss":
-		o, err = oss.NewOSS(oss.Config(config.Object.Oss))
-	default:
-		err = fmt.Errorf("invalid object enable: %s", enable)
-	}
-	if err != nil {
-		return err
-	}
-	third.RegisterThirdServer(server, &thirdServer{
-		apiURL:        apiURL,
-		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb, config), logdb),
-		userRpcClient: rpcclient.NewUserRpcClient(client, config),
-		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
-		defaultExpire: time.Hour * 24 * 7,
-		config:        config,
-	})
-	return nil
-}
 
 type thirdServer struct {
 	apiURL        string
@@ -97,7 +43,74 @@ type thirdServer struct {
 	s3dataBase    controller.S3Database
 	userRpcClient rpcclient.UserRpcClient
 	defaultExpire time.Duration
-	config        *config.GlobalConfig
+	config        *Config
+}
+type Config struct {
+	RpcConfig          config.Third
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
+	ZookeeperConfig    config.ZooKeeper
+	NotificationConfig config.Notification
+	Share              config.Share
+	MinioConfig        config.Minio
+	LocalCacheConfig   config.LocalCache
+}
+
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
+	if err != nil {
+		return err
+	}
+	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
+	if err != nil {
+		return err
+	}
+	logdb, err := mgo.NewLogMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	s3db, err := mgo.NewS3Mongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	apiURL := config.MinioConfig.URL
+	if apiURL == "" {
+		return errs.Wrap(fmt.Errorf("api is empty"))
+	}
+	if _, err := url.Parse(config.MinioConfig.URL); err != nil {
+		return err
+	}
+	if apiURL[len(apiURL)-1] != '/' {
+		apiURL += "/"
+	}
+	apiURL += "object/"
+
+	// Select the oss method according to the profile policy
+	enable := config.RpcConfig.Object.Enable
+	var o s3.Interface
+	switch enable {
+	case "minio":
+		o, err = minio.NewMinio(ctx, cache.NewMinioCache(rdb), *config.MinioConfig.Build())
+	case "cos":
+		o, err = cos.NewCos(*config.RpcConfig.Object.Cos.Build())
+	case "oss":
+		o, err = oss.NewOSS(*config.RpcConfig.Object.Oss.Build())
+	default:
+		err = fmt.Errorf("invalid object enable: %s", enable)
+	}
+	if err != nil {
+		return err
+	}
+	cache.InitLocalCache(&config.LocalCacheConfig)
+	third.RegisterThirdServer(server, &thirdServer{
+		apiURL:        apiURL,
+		thirdDatabase: controller.NewThirdDatabase(cache.NewThirdCache(rdb), logdb),
+		userRpcClient: rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID),
+		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
+		defaultExpire: time.Hour * 24 * 7,
+		config:        config,
+	})
+	return nil
 }
 
 func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {

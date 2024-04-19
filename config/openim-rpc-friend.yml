@@ -1,0 +1,8 @@
+rpc:
+  registerIP: ''
+  listenIP: 0.0.0.0
+  ports: [ 10120 ]
+
+prometheus:
+  enable: true
+  ports: [ 20104 ]

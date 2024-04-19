@@ -15,15 +15,15 @@
 package convert
 
 import (
-	"github.com/OpenIMSDK/protocol/conversation"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/conversation"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 func ConversationDB2Pb(conversationDB *relation.ConversationModel) *conversation.Conversation {
 	conversationPB := &conversation.Conversation{}
 	conversationPB.LatestMsgDestructTime = conversationDB.LatestMsgDestructTime.Unix()
-	if err := utils.CopyStructFields(conversationPB, conversationDB); err != nil {
+	if err := datautil.CopyStructFields(conversationPB, conversationDB); err != nil {
 		return nil
 	}
 	return conversationPB
@@ -32,7 +32,7 @@ func ConversationDB2Pb(conversationDB *relation.ConversationModel) *conversation
 func ConversationsDB2Pb(conversationsDB []*relation.ConversationModel) (conversationsPB []*conversation.Conversation) {
 	for _, conversationDB := range conversationsDB {
 		conversationPB := &conversation.Conversation{}
-		if err := utils.CopyStructFields(conversationPB, conversationDB); err != nil {
+		if err := datautil.CopyStructFields(conversationPB, conversationDB); err != nil {
 			continue
 		}
 		conversationPB.LatestMsgDestructTime = conversationDB.LatestMsgDestructTime.Unix()
@@ -43,7 +43,7 @@ func ConversationsDB2Pb(conversationsDB []*relation.ConversationModel) (conversa
 
 func ConversationPb2DB(conversationPB *conversation.Conversation) *relation.ConversationModel {
 	conversationDB := &relation.ConversationModel{}
-	if err := utils.CopyStructFields(conversationDB, conversationPB); err != nil {
+	if err := datautil.CopyStructFields(conversationDB, conversationPB); err != nil {
 		return nil
 	}
 	return conversationDB
@@ -52,7 +52,7 @@ func ConversationPb2DB(conversationPB *conversation.Conversation) *relation.Conv
 func ConversationsPb2DB(conversationsPB []*conversation.Conversation) (conversationsDB []*relation.ConversationModel) {
 	for _, conversationPB := range conversationsPB {
 		conversationDB := &relation.ConversationModel{}
-		if err := utils.CopyStructFields(conversationDB, conversationPB); err != nil {
+		if err := datautil.CopyStructFields(conversationDB, conversationPB); err != nil {
 			continue
 		}
 		conversationsDB = append(conversationsDB, conversationDB)

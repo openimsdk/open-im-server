@@ -243,7 +243,7 @@ function openim::release::package_client_tarballs() {
 
     local client_bins=("${OPENIM_CLIENT_BINARIES[@]}")
 
-    # client_bins: changelog component imctl infra ncpu openim-web up35 versionchecker yamlfmt
+    # client_bins: changelog component imctl infra ncpu versionchecker yamlfmt
     # Copy client binclient_bins:aries
     openim::log::info " Copy client binaries: ${client_bins[@]/#/${LOCAL_OUTPUT_BINTOOLSPATH}/${platform}/}"
     openim::log::info " Copy client binaries to: ${release_stage}/client/bin"

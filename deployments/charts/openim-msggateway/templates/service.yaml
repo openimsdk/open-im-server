@@ -22,9 +22,9 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: http
+      targetPort: webhook
       protocol: TCP
-      name: http
+      name: webhook
     - port: 88
       targetPort: rpc
       protocol: TCP

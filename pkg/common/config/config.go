@@ -15,433 +15,509 @@
 package config
 
 import (
-	"bytes"
+	"fmt"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/tools/s3/cos"
+	"github.com/openimsdk/tools/s3/minio"
+	"github.com/openimsdk/tools/s3/oss"
 	"time"
-
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"gopkg.in/yaml.v3"
 )
 
-var Config GlobalConfig
-
-const ConfKey = "conf"
-
-type CallBackConfig struct {
-	Enable                 bool  `yaml:"enable"`
-	CallbackTimeOut        int   `yaml:"timeout"`
-	CallbackFailedContinue *bool `yaml:"failedContinue"`
-}
-
-type NotificationConf struct {
-	IsSendMsg        bool         `yaml:"isSendMsg"`
-	ReliabilityLevel int          `yaml:"reliabilityLevel"` // 1 online 2 persistent
-	UnreadCount      bool         `yaml:"unreadCount"`
-	OfflinePush      POfflinePush `yaml:"offlinePush"`
-}
-
-type POfflinePush struct {
-	Enable bool   `yaml:"enable"`
-	Title  string `yaml:"title"`
-	Desc   string `yaml:"desc"`
-	Ext    string `yaml:"ext"`
-}
-
-type MYSQL struct {
-	Address       []string `yaml:"address"`
-	Username      string   `yaml:"username"`
-	Password      string   `yaml:"password"`
-	Database      string   `yaml:"database"`
-	MaxOpenConn   int      `yaml:"maxOpenConn"`
-	MaxIdleConn   int      `yaml:"maxIdleConn"`
-	MaxLifeTime   int      `yaml:"maxLifeTime"`
-	LogLevel      int      `yaml:"logLevel"`
-	SlowThreshold int      `yaml:"slowThreshold"`
-}
-
-type GlobalConfig struct {
-	Envs struct {
-		Discovery string `yaml:"discovery"`
-	}
-	Zookeeper struct {
-		Schema   string   `yaml:"schema"`
-		ZkAddr   []string `yaml:"address"`
-		Username string   `yaml:"username"`
-		Password string   `yaml:"password"`
-	} `yaml:"zookeeper"`
-
-	Mysql *MYSQL `yaml:"mysql"`
-
-	Mongo struct {
-		Uri         string   `yaml:"uri"`
-		Address     []string `yaml:"address"`
-		Database    string   `yaml:"database"`
-		Username    string   `yaml:"username"`
-		Password    string   `yaml:"password"`
-		MaxPoolSize int      `yaml:"maxPoolSize"`
-	} `yaml:"mongo"`
-
-	Redis struct {
-		ClusterMode    bool     `yaml:"clusterMode"`
-		Address        []string `yaml:"address"`
-		Username       string   `yaml:"username"`
-		Password       string   `yaml:"password"`
-		EnablePipeline bool     `yaml:"enablePipeline"`
-	} `yaml:"redis"`
-
-	Kafka struct {
-		Username     string   `yaml:"username"`
-		Password     string   `yaml:"password"`
-		ProducerAck  string   `yaml:"producerAck"`
-		CompressType string   `yaml:"compressType"`
-		Addr         []string `yaml:"addr"`
-		TLS          *struct {
-			CACrt              string `yaml:"caCrt"`
-			ClientCrt          string `yaml:"clientCrt"`
-			ClientKey          string `yaml:"clientKey"`
-			ClientKeyPwd       string `yaml:"clientKeyPwd"`
-			InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
-		} `yaml:"tls"`
-		LatestMsgToRedis struct {
-			Topic string `yaml:"topic"`
-		} `yaml:"latestMsgToRedis"`
-		MsgToMongo struct {
-			Topic string `yaml:"topic"`
-		} `yaml:"offlineMsgToMongo"`
-		MsgToPush struct {
-			Topic string `yaml:"topic"`
-		} `yaml:"msgToPush"`
-		ConsumerGroupID struct {
-			MsgToRedis string `yaml:"msgToRedis"`
-			MsgToMongo string `yaml:"msgToMongo"`
-			MsgToMySql string `yaml:"msgToMySql"`
-			MsgToPush  string `yaml:"msgToPush"`
-		} `yaml:"consumerGroupID"`
-	} `yaml:"kafka"`
-
-	Rpc struct {
-		RegisterIP string `yaml:"registerIP"`
-		ListenIP   string `yaml:"listenIP"`
-	} `yaml:"rpc"`
-
-	Api struct {
-		OpenImApiPort []int  `yaml:"openImApiPort"`
-		ListenIP      string `yaml:"listenIP"`
-	} `yaml:"api"`
-
-	Object struct {
-		Enable string `yaml:"enable"`
-		ApiURL string `yaml:"apiURL"`
-		Minio  struct {
-			Bucket          string `yaml:"bucket"`
-			Endpoint        string `yaml:"endpoint"`
-			AccessKeyID     string `yaml:"accessKeyID"`
-			SecretAccessKey string `yaml:"secretAccessKey"`
-			SessionToken    string `yaml:"sessionToken"`
-			SignEndpoint    string `yaml:"signEndpoint"`
-			PublicRead      bool   `yaml:"publicRead"`
-		} `yaml:"minio"`
-		Cos struct {
-			BucketURL    string `yaml:"bucketURL"`
-			SecretID     string `yaml:"secretID"`
-			SecretKey    string `yaml:"secretKey"`
-			SessionToken string `yaml:"sessionToken"`
-			PublicRead   bool   `yaml:"publicRead"`
-		} `yaml:"cos"`
-		Oss struct {
-			Endpoint        string `yaml:"endpoint"`
-			Bucket          string `yaml:"bucket"`
-			BucketURL       string `yaml:"bucketURL"`
-			AccessKeyID     string `yaml:"accessKeyID"`
-			AccessKeySecret string `yaml:"accessKeySecret"`
-			SessionToken    string `yaml:"sessionToken"`
-			PublicRead      bool   `yaml:"publicRead"`
-		} `yaml:"oss"`
-		Kodo struct {
-			Endpoint        string `yaml:"endpoint"`
-			Bucket          string `yaml:"bucket"`
-			BucketURL       string `yaml:"bucketURL"`
-			AccessKeyID     string `yaml:"accessKeyID"`
-			AccessKeySecret string `yaml:"accessKeySecret"`
-			SessionToken    string `yaml:"sessionToken"`
-			PublicRead      bool   `yaml:"publicRead"`
-		} `yaml:"kodo"`
-		Aws struct {
-			Endpoint        string `yaml:"endpoint"`
-			Region          string `yaml:"region"`
-			Bucket          string `yaml:"bucket"`
-			AccessKeyID     string `yaml:"accessKeyID"`
-			AccessKeySecret string `yaml:"accessKeySecret"`
-			PublicRead      bool   `yaml:"publicRead"`
-		} `yaml:"aws"`
-	} `yaml:"object"`
-
-	RpcPort struct {
-		OpenImUserPort           []int `yaml:"openImUserPort"`
-		OpenImFriendPort         []int `yaml:"openImFriendPort"`
-		OpenImMessagePort        []int `yaml:"openImMessagePort"`
-		OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
-		OpenImGroupPort          []int `yaml:"openImGroupPort"`
-		OpenImAuthPort           []int `yaml:"openImAuthPort"`
-		OpenImPushPort           []int `yaml:"openImPushPort"`
-		OpenImConversationPort   []int `yaml:"openImConversationPort"`
-		OpenImRtcPort            []int `yaml:"openImRtcPort"`
-		OpenImThirdPort          []int `yaml:"openImThirdPort"`
-	} `yaml:"rpcPort"`
-
-	RpcRegisterName struct {
-		OpenImUserName           string `yaml:"openImUserName"`
-		OpenImFriendName         string `yaml:"openImFriendName"`
-		OpenImMsgName            string `yaml:"openImMsgName"`
-		OpenImPushName           string `yaml:"openImPushName"`
-		OpenImMessageGatewayName string `yaml:"openImMessageGatewayName"`
-		OpenImGroupName          string `yaml:"openImGroupName"`
-		OpenImAuthName           string `yaml:"openImAuthName"`
-		OpenImConversationName   string `yaml:"openImConversationName"`
-		OpenImThirdName          string `yaml:"openImThirdName"`
-	} `yaml:"rpcRegisterName"`
-
-	Log struct {
-		StorageLocation     string `yaml:"storageLocation"`
-		RotationTime        uint   `yaml:"rotationTime"`
-		RemainRotationCount uint   `yaml:"remainRotationCount"`
-		RemainLogLevel      int    `yaml:"remainLogLevel"`
-		IsStdout            bool   `yaml:"isStdout"`
-		IsJson              bool   `yaml:"isJson"`
-		WithStack           bool   `yaml:"withStack"`
-	} `yaml:"log"`
-
-	LongConnSvr struct {
-		OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
-		OpenImWsPort             []int `yaml:"openImWsPort"`
-		WebsocketMaxConnNum      int   `yaml:"websocketMaxConnNum"`
-		WebsocketMaxMsgLen       int   `yaml:"websocketMaxMsgLen"`
-		WebsocketTimeout         int   `yaml:"websocketTimeout"`
-		WebsocketWriteBufferSize int   `yaml:"websocketWriteBufferSize"`
-	} `yaml:"longConnSvr"`
-
-	Push struct {
-		MaxConcurrentWorkers int    `yaml:"maxConcurrentWorkers"`
-		Enable               string `yaml:"enable"`
-		GeTui                struct {
-			PushUrl      string `yaml:"pushUrl"`
-			AppKey       string `yaml:"appKey"`
-			Intent       string `yaml:"intent"`
-			MasterSecret string `yaml:"masterSecret"`
-			ChannelID    string `yaml:"channelID"`
-			ChannelName  string `yaml:"channelName"`
-		} `yaml:"geTui"`
-		Fcm struct {
-			ServiceAccount string `yaml:"serviceAccount"`
-		} `yaml:"fcm"`
-		Jpns struct {
-			AppKey       string `yaml:"appKey"`
-			MasterSecret string `yaml:"masterSecret"`
-			PushUrl      string `yaml:"pushUrl"`
-			PushIntent   string `yaml:"pushIntent"`
-		} `yaml:"jpns"`
-	}
-	Manager struct {
-		UserID   []string `yaml:"userID"`
-		Nickname []string `yaml:"nickname"`
-	} `yaml:"manager"`
-
-	IMAdmin struct {
-		UserID   []string `yaml:"userID"`
-		Nickname []string `yaml:"nickname"`
-	} `yaml:"im-admin"`
-
-	MultiLoginPolicy                  int    `yaml:"multiLoginPolicy"`
-	ChatPersistenceMysql              bool   `yaml:"chatPersistenceMysql"`
-	MsgCacheTimeout                   int    `yaml:"msgCacheTimeout"`
-	GroupMessageHasReadReceiptEnable  bool   `yaml:"groupMessageHasReadReceiptEnable"`
-	SingleMessageHasReadReceiptEnable bool   `yaml:"singleMessageHasReadReceiptEnable"`
-	RetainChatRecords                 int    `yaml:"retainChatRecords"`
-	ChatRecordsClearTime              string `yaml:"chatRecordsClearTime"`
-	MsgDestructTime                   string `yaml:"msgDestructTime"`
-	Secret                            string `yaml:"secret"`
-	EnableCronLocker                  bool   `yaml:"enableCronLocker"`
-	TokenPolicy                       struct {
-		Expire int64 `yaml:"expire"`
-	} `yaml:"tokenPolicy"`
-	MessageVerify struct {
-		FriendVerify *bool `yaml:"friendVerify"`
-	} `yaml:"messageVerify"`
-
-	LocalCache localCache `yaml:"localCache"`
-
-	IOSPush struct {
-		PushSound  string `yaml:"pushSound"`
-		BadgeCount bool   `yaml:"badgeCount"`
-		Production bool   `yaml:"production"`
-	} `yaml:"iosPush"`
-	Callback struct {
-		CallbackUrl                        string         `yaml:"url"`
-		CallbackBeforeSendSingleMsg        CallBackConfig `yaml:"beforeSendSingleMsg"`
-		CallbackAfterSendSingleMsg         CallBackConfig `yaml:"afterSendSingleMsg"`
-		CallbackBeforeSendGroupMsg         CallBackConfig `yaml:"beforeSendGroupMsg"`
-		CallbackAfterSendGroupMsg          CallBackConfig `yaml:"afterSendGroupMsg"`
-		CallbackMsgModify                  CallBackConfig `yaml:"msgModify"`
-		CallbackSingleMsgRead              CallBackConfig `yaml:"singleMsgRead"`
-		CallbackGroupMsgRead               CallBackConfig `yaml:"groupMsgRead"`
-		CallbackUserOnline                 CallBackConfig `yaml:"userOnline"`
-		CallbackUserOffline                CallBackConfig `yaml:"userOffline"`
-		CallbackUserKickOff                CallBackConfig `yaml:"userKickOff"`
-		CallbackOfflinePush                CallBackConfig `yaml:"offlinePush"`
-		CallbackOnlinePush                 CallBackConfig `yaml:"onlinePush"`
-		CallbackBeforeSuperGroupOnlinePush CallBackConfig `yaml:"superGroupOnlinePush"`
-		CallbackBeforeAddFriend            CallBackConfig `yaml:"beforeAddFriend"`
-		CallbackBeforeSetFriendRemark      CallBackConfig `yaml:"callbackBeforeSetFriendRemark"`
-		CallbackAfterSetFriendRemark       CallBackConfig `yaml:"callbackAfterSetFriendRemark"`
-		CallbackBeforeUpdateUserInfo       CallBackConfig `yaml:"beforeUpdateUserInfo"`
-		CallbackBeforeUpdateUserInfoEx     CallBackConfig `yaml:"beforeUpdateUserInfoEx"`
-		CallbackAfterUpdateUserInfoEx      CallBackConfig `yaml:"afterUpdateUserInfoEx"`
-		CallbackBeforeUserRegister         CallBackConfig `yaml:"beforeUserRegister"`
-		CallbackAfterUpdateUserInfo        CallBackConfig `yaml:"updateUserInfo"`
-		CallbackAfterUserRegister          CallBackConfig `yaml:"afterUserRegister"`
-		CallbackBeforeCreateGroup          CallBackConfig `yaml:"beforeCreateGroup"`
-		CallbackAfterCreateGroup           CallBackConfig `yaml:"afterCreateGroup"`
-		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
-		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
-		CallbackAfterSetGroupMemberInfo    CallBackConfig `yaml:"afterSetGroupMemberInfo"`
-		CallbackQuitGroup                  CallBackConfig `yaml:"quitGroup"`
-		CallbackKillGroupMember            CallBackConfig `yaml:"killGroupMember"`
-		CallbackDismissGroup               CallBackConfig `yaml:"dismissGroup"`
-		CallbackBeforeJoinGroup            CallBackConfig `yaml:"joinGroup"`
-		CallbackAfterTransferGroupOwner    CallBackConfig `yaml:"transferGroupOwner"`
-		CallbackBeforeInviteUserToGroup    CallBackConfig `yaml:"beforeInviteUserToGroup"`
-		CallbackAfterJoinGroup             CallBackConfig `yaml:"joinGroupAfter"`
-		CallbackAfterSetGroupInfo          CallBackConfig `yaml:"setGroupInfoAfter"`
-		CallbackBeforeSetGroupInfo         CallBackConfig `yaml:"setGroupInfoBefore"`
-		CallbackAfterRevokeMsg             CallBackConfig `yaml:"revokeMsgAfter"`
-		CallbackBeforeAddBlack             CallBackConfig `yaml:"addBlackBefore"`
-		CallbackAfterAddFriend             CallBackConfig `yaml:"addFriendAfter"`
-		CallbackBeforeAddFriendAgree       CallBackConfig `yaml:"addFriendAgreeBefore"`
-
-		CallbackAfterDeleteFriend   CallBackConfig `yaml:"deleteFriendAfter"`
-		CallbackBeforeImportFriends CallBackConfig `yaml:"importFriendsBefore"`
-		CallbackAfterImportFriends  CallBackConfig `yaml:"importFriendsAfter"`
-		CallbackAfterRemoveBlack    CallBackConfig `yaml:"removeBlackAfter"`
-	} `yaml:"callback"`
-
-	Prometheus struct {
-		Enable                        bool   `yaml:"enable"`
-		GrafanaUrl                    string `yaml:"grafanaUrl"`
-		ApiPrometheusPort             []int  `yaml:"apiPrometheusPort"`
-		UserPrometheusPort            []int  `yaml:"userPrometheusPort"`
-		FriendPrometheusPort          []int  `yaml:"friendPrometheusPort"`
-		MessagePrometheusPort         []int  `yaml:"messagePrometheusPort"`
-		MessageGatewayPrometheusPort  []int  `yaml:"messageGatewayPrometheusPort"`
-		GroupPrometheusPort           []int  `yaml:"groupPrometheusPort"`
-		AuthPrometheusPort            []int  `yaml:"authPrometheusPort"`
-		PushPrometheusPort            []int  `yaml:"pushPrometheusPort"`
-		ConversationPrometheusPort    []int  `yaml:"conversationPrometheusPort"`
-		RtcPrometheusPort             []int  `yaml:"rtcPrometheusPort"`
-		MessageTransferPrometheusPort []int  `yaml:"messageTransferPrometheusPort"`
-		ThirdPrometheusPort           []int  `yaml:"thirdPrometheusPort"`
-	} `yaml:"prometheus"`
-	Notification notification `yaml:"notification"`
-}
-
-func NewGlobalConfig() *GlobalConfig {
-	return &GlobalConfig{}
-}
-
-type notification struct {
-	GroupCreated             NotificationConf `yaml:"groupCreated"`
-	GroupInfoSet             NotificationConf `yaml:"groupInfoSet"`
-	JoinGroupApplication     NotificationConf `yaml:"joinGroupApplication"`
-	MemberQuit               NotificationConf `yaml:"memberQuit"`
-	GroupApplicationAccepted NotificationConf `yaml:"groupApplicationAccepted"`
-	GroupApplicationRejected NotificationConf `yaml:"groupApplicationRejected"`
-	GroupOwnerTransferred    NotificationConf `yaml:"groupOwnerTransferred"`
-	MemberKicked             NotificationConf `yaml:"memberKicked"`
-	MemberInvited            NotificationConf `yaml:"memberInvited"`
-	MemberEnter              NotificationConf `yaml:"memberEnter"`
-	GroupDismissed           NotificationConf `yaml:"groupDismissed"`
-	GroupMuted               NotificationConf `yaml:"groupMuted"`
-	GroupCancelMuted         NotificationConf `yaml:"groupCancelMuted"`
-	GroupMemberMuted         NotificationConf `yaml:"groupMemberMuted"`
-	GroupMemberCancelMuted   NotificationConf `yaml:"groupMemberCancelMuted"`
-	GroupMemberInfoSet       NotificationConf `yaml:"groupMemberInfoSet"`
-	GroupMemberSetToAdmin    NotificationConf `yaml:"groupMemberSetToAdmin"`
-	GroupMemberSetToOrdinary NotificationConf `yaml:"groupMemberSetToOrdinaryUser"`
-	GroupInfoSetAnnouncement NotificationConf `yaml:"groupInfoSetAnnouncement"`
-	GroupInfoSetName         NotificationConf `yaml:"groupInfoSetName"`
-	////////////////////////user///////////////////////
-	UserInfoUpdated   NotificationConf `yaml:"userInfoUpdated"`
-	UserStatusChanged NotificationConf `yaml:"userStatusChanged"`
-	//////////////////////friend///////////////////////
-	FriendApplicationAdded    NotificationConf `yaml:"friendApplicationAdded"`
-	FriendApplicationApproved NotificationConf `yaml:"friendApplicationApproved"`
-	FriendApplicationRejected NotificationConf `yaml:"friendApplicationRejected"`
-	FriendAdded               NotificationConf `yaml:"friendAdded"`
-	FriendDeleted             NotificationConf `yaml:"friendDeleted"`
-	FriendRemarkSet           NotificationConf `yaml:"friendRemarkSet"`
-	BlackAdded                NotificationConf `yaml:"blackAdded"`
-	BlackDeleted              NotificationConf `yaml:"blackDeleted"`
-	FriendInfoUpdated         NotificationConf `yaml:"friendInfoUpdated"`
-	//////////////////////conversation///////////////////////
-	ConversationChanged    NotificationConf `yaml:"conversationChanged"`
-	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
+type CacheConfig struct {
+	Topic         string `mapstructure:"topic"`
+	SlotNum       int    `mapstructure:"slotNum"`
+	SlotSize      int    `mapstructure:"slotSize"`
+	SuccessExpire int    `mapstructure:"successExpire"`
+	FailedExpire  int    `mapstructure:"failedExpire"`
 }
 
 type LocalCache struct {
-	Topic         string `yaml:"topic"`
-	SlotNum       int    `yaml:"slotNum"`
-	SlotSize      int    `yaml:"slotSize"`
-	SuccessExpire int    `yaml:"successExpire"` // second
-	FailedExpire  int    `yaml:"failedExpire"`  // second
+	User         CacheConfig `mapstructure:"user"`
+	Group        CacheConfig `mapstructure:"group"`
+	Friend       CacheConfig `mapstructure:"friend"`
+	Conversation CacheConfig `mapstructure:"conversation"`
 }
 
-func (l LocalCache) Failed() time.Duration {
+type Log struct {
+	StorageLocation     string `mapstructure:"storageLocation"`
+	RotationTime        uint   `mapstructure:"rotationTime"`
+	RemainRotationCount uint   `mapstructure:"remainRotationCount"`
+	RemainLogLevel      int    `mapstructure:"remainLogLevel"`
+	IsStdout            bool   `mapstructure:"isStdout"`
+	IsJson              bool   `mapstructure:"isJson"`
+	WithStack           bool   `mapstructure:"withStack"`
+}
+
+type Minio struct {
+	Bucket          string `mapstructure:"bucket"`
+	Port            int    `mapstructure:"port"`
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	SecretAccessKey string `mapstructure:"secretAccessKey"`
+	SessionToken    string `mapstructure:"sessionToken"`
+	InternalIP      string `mapstructure:"internalIP"`
+	ExternalIP      string `mapstructure:"externalIP"`
+	URL             string `mapstructure:"url"`
+	PublicRead      bool   `mapstructure:"publicRead"`
+}
+
+type Mongo struct {
+	URI         string   `mapstructure:"uri"`
+	Address     []string `mapstructure:"address"`
+	Database    string   `mapstructure:"database"`
+	Username    string   `mapstructure:"username"`
+	Password    string   `mapstructure:"password"`
+	MaxPoolSize int      `mapstructure:"maxPoolSize"`
+	MaxRetry    int      `mapstructure:"maxRetry"`
+}
+type Kafka struct {
+	Username       string    `mapstructure:"username"`
+	Password       string    `mapstructure:"password"`
+	ProducerAck    string    `mapstructure:"producerAck"`
+	CompressType   string    `mapstructure:"compressType"`
+	Address        []string  `mapstructure:"address"`
+	ToRedisTopic   string    `mapstructure:"toRedisTopic"`
+	ToMongoTopic   string    `mapstructure:"toMongoTopic"`
+	ToPushTopic    string    `mapstructure:"toPushTopic"`
+	ToRedisGroupID string    `mapstructure:"toRedisGroupID"`
+	ToMongoGroupID string    `mapstructure:"toMongoGroupID"`
+	ToPushGroupID  string    `mapstructure:"toPushGroupID"`
+	Tls            TLSConfig `mapstructure:"tls"`
+}
+type TLSConfig struct {
+	EnableTLS          bool   `mapstructure:"enableTLS"`
+	CACrt              string `mapstructure:"caCrt"`
+	ClientCrt          string `mapstructure:"clientCrt"`
+	ClientKey          string `mapstructure:"clientKey"`
+	ClientKeyPwd       string `mapstructure:"clientKeyPwd"`
+	InsecureSkipVerify bool   `mapstructure:"insecureSkipVerify"`
+}
+
+type API struct {
+	Api struct {
+		ListenIP string `mapstructure:"listenIP"`
+		Ports    []int  `mapstructure:"ports"`
+	} `mapstructure:"api"`
+	Prometheus struct {
+		Enable     bool   `mapstructure:"enable"`
+		Ports      []int  `mapstructure:"ports"`
+		GrafanaURL string `mapstructure:"grafanaURL"`
+	} `mapstructure:"prometheus"`
+}
+
+type CronTask struct {
+	ChatRecordsClearTime string `mapstructure:"chatRecordsClearTime"`
+	MsgDestructTime      string `mapstructure:"msgDestructTime"`
+	RetainChatRecords    int    `mapstructure:"retainChatRecords"`
+	EnableCronLocker     bool   `yaml:"enableCronLocker"`
+}
+
+type OfflinePushConfig struct {
+	Enable bool   `mapstructure:"enable"`
+	Title  string `mapstructure:"title"`
+	Desc   string `mapstructure:"desc"`
+	Ext    string `mapstructure:"ext"`
+}
+
+type NotificationConfig struct {
+	IsSendMsg        bool              `mapstructure:"isSendMsg"`
+	ReliabilityLevel int               `mapstructure:"reliabilityLevel"`
+	UnreadCount      bool              `mapstructure:"unreadCount"`
+	OfflinePush      OfflinePushConfig `mapstructure:"offlinePush"`
+}
+
+type Notification struct {
+	GroupCreated              NotificationConfig `mapstructure:"groupCreated"`
+	GroupInfoSet              NotificationConfig `mapstructure:"groupInfoSet"`
+	JoinGroupApplication      NotificationConfig `mapstructure:"joinGroupApplication"`
+	MemberQuit                NotificationConfig `mapstructure:"memberQuit"`
+	GroupApplicationAccepted  NotificationConfig `mapstructure:"groupApplicationAccepted"`
+	GroupApplicationRejected  NotificationConfig `mapstructure:"groupApplicationRejected"`
+	GroupOwnerTransferred     NotificationConfig `mapstructure:"groupOwnerTransferred"`
+	MemberKicked              NotificationConfig `mapstructure:"memberKicked"`
+	MemberInvited             NotificationConfig `mapstructure:"memberInvited"`
+	MemberEnter               NotificationConfig `mapstructure:"memberEnter"`
+	GroupDismissed            NotificationConfig `mapstructure:"groupDismissed"`
+	GroupMuted                NotificationConfig `mapstructure:"groupMuted"`
+	GroupCancelMuted          NotificationConfig `mapstructure:"groupCancelMuted"`
+	GroupMemberMuted          NotificationConfig `mapstructure:"groupMemberMuted"`
+	GroupMemberCancelMuted    NotificationConfig `mapstructure:"groupMemberCancelMuted"`
+	GroupMemberInfoSet        NotificationConfig `mapstructure:"groupMemberInfoSet"`
+	GroupMemberSetToAdmin     NotificationConfig `yaml:"groupMemberSetToAdmin"`
+	GroupMemberSetToOrdinary  NotificationConfig `yaml:"groupMemberSetToOrdinaryUser"`
+	GroupInfoSetAnnouncement  NotificationConfig `mapstructure:"groupInfoSetAnnouncement"`
+	GroupInfoSetName          NotificationConfig `mapstructure:"groupInfoSetName"`
+	FriendApplicationAdded    NotificationConfig `mapstructure:"friendApplicationAdded"`
+	FriendApplicationApproved NotificationConfig `mapstructure:"friendApplicationApproved"`
+	FriendApplicationRejected NotificationConfig `mapstructure:"friendApplicationRejected"`
+	FriendAdded               NotificationConfig `mapstructure:"friendAdded"`
+	FriendDeleted             NotificationConfig `mapstructure:"friendDeleted"`
+	FriendRemarkSet           NotificationConfig `mapstructure:"friendRemarkSet"`
+	BlackAdded                NotificationConfig `mapstructure:"blackAdded"`
+	BlackDeleted              NotificationConfig `mapstructure:"blackDeleted"`
+	FriendInfoUpdated         NotificationConfig `mapstructure:"friendInfoUpdated"`
+	UserInfoUpdated           NotificationConfig `mapstructure:"userInfoUpdated"`
+	UserStatusChanged         NotificationConfig `mapstructure:"userStatusChanged"`
+	ConversationChanged       NotificationConfig `mapstructure:"conversationChanged"`
+	ConversationSetPrivate    NotificationConfig `mapstructure:"conversationSetPrivate"`
+}
+
+type Prometheus struct {
+	Enable bool  `mapstructure:"enable"`
+	Ports  []int `mapstructure:"ports"`
+}
+
+type MsgGateway struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus  Prometheus `mapstructure:"prometheus"`
+	ListenIP    string     `mapstructure:"listenIP"`
+	LongConnSvr struct {
+		Ports               []int `mapstructure:"ports"`
+		WebsocketMaxConnNum int   `mapstructure:"websocketMaxConnNum"`
+		WebsocketMaxMsgLen  int   `mapstructure:"websocketMaxMsgLen"`
+		WebsocketTimeout    int   `mapstructure:"websocketTimeout"`
+	} `mapstructure:"longConnSvr"`
+	MultiLoginPolicy int `mapstructure:"multiLoginPolicy"`
+}
+
+type MsgTransfer struct {
+	Prometheus Prometheus `mapstructure:"prometheus"`
+}
+
+type Push struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus           Prometheus `mapstructure:"prometheus"`
+	MaxConcurrentWorkers int        `mapstructure:"maxConcurrentWorkers"`
+	Enable               string     `mapstructure:"enable"`
+	GeTui                struct {
+		PushUrl      string `mapstructure:"pushUrl"`
+		MasterSecret string `mapstructure:"masterSecret"`
+		AppKey       string `mapstructure:"appKey"`
+		Intent       string `mapstructure:"intent"`
+		ChannelID    string `mapstructure:"channelID"`
+		ChannelName  string `mapstructure:"channelName"`
+	} `mapstructure:"geTui"`
+	FCM struct {
+		ServiceAccount string `mapstructure:"serviceAccount"`
+	} `mapstructure:"fcm"`
+	JPNS struct {
+		AppKey       string `mapstructure:"appKey"`
+		MasterSecret string `mapstructure:"masterSecret"`
+		PushURL      string `mapstructure:"pushURL"`
+		PushIntent   string `mapstructure:"pushIntent"`
+	} `mapstructure:"jpns"`
+	IOSPush struct {
+		PushSound  string `mapstructure:"pushSound"`
+		BadgeCount bool   `mapstructure:"badgeCount"`
+		Production bool   `mapstructure:"production"`
+	} `mapstructure:"iosPush"`
+}
+
+type Auth struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus  Prometheus `mapstructure:"prometheus"`
+	TokenPolicy struct {
+		Expire int64 `mapstructure:"expire"`
+	} `mapstructure:"tokenPolicy"`
+}
+
+type Conversation struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
+}
+
+type Friend struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
+}
+
+type Group struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
+}
+
+type Msg struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus   Prometheus `mapstructure:"prometheus"`
+	FriendVerify bool       `mapstructure:"friendVerify"`
+}
+
+type Third struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
+	Object     struct {
+		Enable string `mapstructure:"enable"`
+		Cos    Cos    `mapstructure:"cos"`
+		Oss    Oss    `mapstructure:"oss"`
+		Kodo   struct {
+			Endpoint        string `mapstructure:"endpoint"`
+			Bucket          string `mapstructure:"bucket"`
+			BucketURL       string `mapstructure:"bucketURL"`
+			AccessKeyID     string `mapstructure:"accessKeyID"`
+			AccessKeySecret string `mapstructure:"accessKeySecret"`
+			SessionToken    string `mapstructure:"sessionToken"`
+			PublicRead      bool   `mapstructure:"publicRead"`
+		} `mapstructure:"kodo"`
+		Aws struct {
+			Endpoint        string `mapstructure:"endpoint"`
+			Region          string `mapstructure:"region"`
+			Bucket          string `mapstructure:"bucket"`
+			AccessKeyID     string `mapstructure:"accessKeyID"`
+			AccessKeySecret string `mapstructure:"accessKeySecret"`
+			PublicRead      bool   `mapstructure:"publicRead"`
+		} `mapstructure:"aws"`
+	} `mapstructure:"object"`
+}
+type Cos struct {
+	BucketURL    string `mapstructure:"bucketURL"`
+	SecretID     string `mapstructure:"secretID"`
+	SecretKey    string `mapstructure:"secretKey"`
+	SessionToken string `mapstructure:"sessionToken"`
+	PublicRead   bool   `mapstructure:"publicRead"`
+}
+type Oss struct {
+	Endpoint        string `mapstructure:"endpoint"`
+	Bucket          string `mapstructure:"bucket"`
+	BucketURL       string `mapstructure:"bucketURL"`
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	AccessKeySecret string `mapstructure:"accessKeySecret"`
+	SessionToken    string `mapstructure:"sessionToken"`
+	PublicRead      bool   `mapstructure:"publicRead"`
+}
+
+type User struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
+}
+
+type Redis struct {
+	Address        []string `mapstructure:"address"`
+	Username       string   `mapstructure:"username"`
+	Password       string   `mapstructure:"password"`
+	EnablePipeline bool     `mapstructure:"enablePipeline"`
+	ClusterMode    bool     `mapstructure:"clusterMode"`
+	DB             int      `mapstructure:"db"`
+	MaxRetry       int      `mapstructure:"MaxRetry"`
+}
+
+type BeforeConfig struct {
+	Enable         bool `mapstructure:"enable"`
+	Timeout        int  `mapstructure:"timeout"`
+	FailedContinue bool `mapstructure:"failedContinue"`
+}
+
+type AfterConfig struct {
+	Enable  bool `mapstructure:"enable"`
+	Timeout int  `mapstructure:"timeout"`
+}
+
+type Share struct {
+	Secret          string          `mapstructure:"secret"`
+	Env             string          `mapstructure:"env"`
+	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
+	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
+}
+type RpcRegisterName struct {
+	User           string `mapstructure:"user"`
+	Friend         string `mapstructure:"friend"`
+	Msg            string `mapstructure:"msg"`
+	Push           string `mapstructure:"push"`
+	MessageGateway string `mapstructure:"messageGateway"`
+	Group          string `mapstructure:"group"`
+	Auth           string `mapstructure:"auth"`
+	Conversation   string `mapstructure:"conversation"`
+	Third          string `mapstructure:"third"`
+}
+
+func (r *RpcRegisterName) GetServiceNames() []string {
+	return []string{
+		r.User,
+		r.Friend,
+		r.Msg,
+		r.Push,
+		r.MessageGateway,
+		r.Group,
+		r.Auth,
+		r.Conversation,
+		r.Third,
+	}
+}
+
+// FullConfig stores all configurations for before and after events
+type Webhooks struct {
+	URL                      string       `mapstructure:"url"`
+	BeforeSendSingleMsg      BeforeConfig `mapstructure:"beforeSendSingleMsg"`
+	BeforeUpdateUserInfoEx   BeforeConfig `mapstructure:"beforeUpdateUserInfoEx"`
+	AfterUpdateUserInfoEx    AfterConfig  `mapstructure:"afterUpdateUserInfoEx"`
+	AfterSendSingleMsg       AfterConfig  `mapstructure:"afterSendSingleMsg"`
+	BeforeSendGroupMsg       BeforeConfig `mapstructure:"beforeSendGroupMsg"`
+	BeforeMsgModify          BeforeConfig `mapstructure:"beforeMsgModify"`
+	AfterSendGroupMsg        AfterConfig  `mapstructure:"afterSendGroupMsg"`
+	AfterUserOnline          AfterConfig  `mapstructure:"afterUserOnline"`
+	AfterUserOffline         AfterConfig  `mapstructure:"afterUserOffline"`
+	AfterUserKickOff         AfterConfig  `mapstructure:"afterUserKickOff"`
+	BeforeOfflinePush        BeforeConfig `mapstructure:"beforeOfflinePush"`
+	BeforeOnlinePush         BeforeConfig `mapstructure:"beforeOnlinePush"`
+	BeforeGroupOnlinePush    BeforeConfig `mapstructure:"beforeGroupOnlinePush"`
+	BeforeAddFriend          BeforeConfig `mapstructure:"beforeAddFriend"`
+	BeforeUpdateUserInfo     BeforeConfig `mapstructure:"beforeUpdateUserInfo"`
+	AfterUpdateUserInfo      AfterConfig  `mapstructure:"afterUpdateUserInfo"`
+	BeforeCreateGroup        BeforeConfig `mapstructure:"beforeCreateGroup"`
+	AfterCreateGroup         AfterConfig  `mapstructure:"afterCreateGroup"`
+	BeforeMemberJoinGroup    BeforeConfig `mapstructure:"beforeMemberJoinGroup"`
+	BeforeSetGroupMemberInfo BeforeConfig `mapstructure:"beforeSetGroupMemberInfo"`
+	AfterSetGroupMemberInfo  AfterConfig  `mapstructure:"afterSetGroupMemberInfo"`
+	AfterQuitGroup           AfterConfig  `mapstructure:"afterQuitGroup"`
+	AfterKickGroupMember     AfterConfig  `mapstructure:"afterKickGroupMember"`
+	AfterDismissGroup        AfterConfig  `mapstructure:"afterDismissGroup"`
+	BeforeApplyJoinGroup     BeforeConfig `mapstructure:"beforeApplyJoinGroup"`
+	AfterGroupMsgRead        AfterConfig  `mapstructure:"afterGroupMsgRead"`
+	AfterSingleMsgRead       AfterConfig  `mapstructure:"afterSingleMsgRead"`
+	BeforeUserRegister       BeforeConfig `mapstructure:"beforeUserRegister"`
+	AfterUserRegister        AfterConfig  `mapstructure:"afterUserRegister"`
+	AfterTransferGroupOwner  AfterConfig  `mapstructure:"afterTransferGroupOwner"`
+	BeforeSetFriendRemark    BeforeConfig `mapstructure:"beforeSetFriendRemark"`
+	AfterSetFriendRemark     AfterConfig  `mapstructure:"afterSetFriendRemark"`
+	AfterGroupMsgRevoke      AfterConfig  `mapstructure:"afterGroupMsgRevoke"`
+	AfterJoinGroup           AfterConfig  `mapstructure:"afterJoinGroup"`
+	BeforeInviteUserToGroup  BeforeConfig `mapstructure:"beforeInviteUserToGroup"`
+	AfterSetGroupInfo        AfterConfig  `mapstructure:"afterSetGroupInfo"`
+	BeforeSetGroupInfo       BeforeConfig `mapstructure:"beforeSetGroupInfo"`
+	AfterRevokeMsg           AfterConfig  `mapstructure:"afterRevokeMsg"`
+	BeforeAddBlack           BeforeConfig `mapstructure:"beforeAddBlack"`
+	AfterAddFriend           AfterConfig  `mapstructure:"afterAddFriend"`
+	BeforeAddFriendAgree     BeforeConfig `mapstructure:"beforeAddFriendAgree"`
+	AfterDeleteFriend        AfterConfig  `mapstructure:"afterDeleteFriend"`
+	BeforeImportFriends      BeforeConfig `mapstructure:"beforeImportFriends"`
+	AfterImportFriends       AfterConfig  `mapstructure:"afterImportFriends"`
+	AfterRemoveBlack         AfterConfig  `mapstructure:"afterRemoveBlack"`
+}
+
+type ZooKeeper struct {
+	Schema   string   `mapstructure:"schema"`
+	Address  []string `mapstructure:"address"`
+	Username string   `mapstructure:"username"`
+	Password string   `mapstructure:"password"`
+}
+
+func (m *Mongo) Build() *mongoutil.Config {
+	return &mongoutil.Config{
+		Uri:         m.URI,
+		Address:     m.Address,
+		Database:    m.Database,
+		Username:    m.Username,
+		Password:    m.Password,
+		MaxPoolSize: m.MaxPoolSize,
+		MaxRetry:    m.MaxRetry,
+	}
+}
+
+func (r *Redis) Build() *redisutil.Config {
+	return &redisutil.Config{
+		ClusterMode: r.ClusterMode,
+		Address:     r.Address,
+		Username:    r.Username,
+		Password:    r.Password,
+		DB:          r.DB,
+		MaxRetry:    r.MaxRetry,
+	}
+}
+
+func (k *Kafka) Build() *kafka.Config {
+	return &kafka.Config{
+		Username:     k.Username,
+		Password:     k.Password,
+		ProducerAck:  k.ProducerAck,
+		CompressType: k.CompressType,
+		Addr:         k.Address,
+		TLS: kafka.TLSConfig{
+			EnableTLS:          k.Tls.EnableTLS,
+			CACrt:              k.Tls.CACrt,
+			ClientCrt:          k.Tls.ClientCrt,
+			ClientKey:          k.Tls.ClientKey,
+			ClientKeyPwd:       k.Tls.ClientKeyPwd,
+			InsecureSkipVerify: k.Tls.InsecureSkipVerify,
+		},
+	}
+}
+func (m *Minio) Build() *minio.Config {
+	return &minio.Config{
+		Bucket:          m.Bucket,
+		Endpoint:        fmt.Sprintf("http://%s:%d", m.InternalIP, m.Port),
+		AccessKeyID:     m.AccessKeyID,
+		SecretAccessKey: m.SecretAccessKey,
+		SessionToken:    m.SessionToken,
+		SignEndpoint:    fmt.Sprintf("http://%s:%d", m.ExternalIP, m.Port),
+		PublicRead:      m.PublicRead,
+	}
+
+}
+func (c *Cos) Build() *cos.Config {
+	return &cos.Config{
+		BucketURL:    c.BucketURL,
+		SecretID:     c.SecretID,
+		SecretKey:    c.SecretKey,
+		SessionToken: c.SessionToken,
+		PublicRead:   c.PublicRead,
+	}
+}
+
+func (o *Oss) Build() *oss.Config {
+	return &oss.Config{
+		Endpoint:        o.Endpoint,
+		Bucket:          o.Bucket,
+		BucketURL:       o.BucketURL,
+		AccessKeyID:     o.AccessKeyID,
+		AccessKeySecret: o.AccessKeySecret,
+		SessionToken:    o.SessionToken,
+		PublicRead:      o.PublicRead,
+	}
+}
+
+func (l *CacheConfig) Failed() time.Duration {
 	return time.Second * time.Duration(l.FailedExpire)
 }
 
-func (l LocalCache) Success() time.Duration {
+func (l *CacheConfig) Success() time.Duration {
 	return time.Second * time.Duration(l.SuccessExpire)
 }
 
-func (l LocalCache) Enable() bool {
+func (l *CacheConfig) Enable() bool {
 	return l.Topic != "" && l.SlotNum > 0 && l.SlotSize > 0
-}
-
-type localCache struct {
-	User         LocalCache `yaml:"user"`
-	Group        LocalCache `yaml:"group"`
-	Friend       LocalCache `yaml:"friend"`
-	Conversation LocalCache `yaml:"conversation"`
-}
-
-func (c *GlobalConfig) GetServiceNames() []string {
-	return []string{
-		c.RpcRegisterName.OpenImUserName,
-		c.RpcRegisterName.OpenImFriendName,
-		c.RpcRegisterName.OpenImMsgName,
-		c.RpcRegisterName.OpenImPushName,
-		c.RpcRegisterName.OpenImMessageGatewayName,
-		c.RpcRegisterName.OpenImGroupName,
-		c.RpcRegisterName.OpenImAuthName,
-		c.RpcRegisterName.OpenImConversationName,
-		c.RpcRegisterName.OpenImThirdName,
-	}
-}
-
-func (c *GlobalConfig) RegisterConf2Registry(registry discoveryregistry.SvcDiscoveryRegistry) error {
-	data, err := yaml.Marshal(c)
-	if err != nil {
-		return err
-	}
-	return registry.RegisterConf2Registry(ConfKey, data)
-}
-
-func (c *GlobalConfig) GetConfFromRegistry(registry discoveryregistry.SvcDiscoveryRegistry) ([]byte, error) {
-	return registry.GetConfFromRegistry(ConfKey)
-}
-
-func (c *GlobalConfig) EncodeConfig() []byte {
-	buf := bytes.NewBuffer(nil)
-	if err := yaml.NewEncoder(buf).Encode(c); err != nil {
-		panic(err)
-	}
-	return buf.Bytes()
 }

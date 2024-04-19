@@ -1,0 +1,7 @@
+address: [ localhost:16379 ]
+username: ''
+password: openIM123
+enablePipeline: false
+clusterMode: false
+db: 0
+maxRetry: 10

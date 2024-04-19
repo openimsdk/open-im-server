@@ -1,0 +1,18 @@
+username: ''
+password: ''
+producerAck: ""
+compressType: "none"
+address: [ localhost:19094 ]
+toRedisTopic: "toRedis"
+toMongoTopic: "toMongo"
+toPushTopic: "toPush"
+toRedisGroupID: redis
+toMongoGroupID: mongo
+toPushGroupID: push
+tls:
+  enableTLS: false
+  caCrt: ""
+  clientCrt: ""
+  clientKey: ""
+  clientKeyPwd: ""
+  insecureSkipVerify: false

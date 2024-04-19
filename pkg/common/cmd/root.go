@@ -16,34 +16,34 @@ package cmd
 
 import (
 	"fmt"
+	"path/filepath"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/spf13/cobra"
 )
 
-type RootCmdPt interface {
-	GetPortFromConfig(portType string) int
-}
-
 type RootCmd struct {
 	Command        cobra.Command
-	Name           string
+	processName    string
 	port           int
 	prometheusPort int
-	cmdItf         RootCmdPt
-	config         *config.GlobalConfig
+	log            config.Log
+	index          int
 }
 
-func (rc *RootCmd) Port() int {
-	return rc.port
+func (r *RootCmd) Index() int {
+	return r.index
+}
+
+func (r *RootCmd) Port() int {
+	return r.port
 }
 
 type CmdOpts struct {
 	loggerPrefixName string
+	configMap        map[string]any
 }
 
 func WithCronTaskLogName() func(*CmdOpts) {
@@ -57,41 +57,63 @@ func WithLogName(logName string) func(*CmdOpts) {
 		opts.loggerPrefixName = logName
 	}
 }
+func WithConfigMap(configMap map[string]any) func(*CmdOpts) {
+	return func(opts *CmdOpts) {
+		opts.configMap = configMap
+	}
+}
 
-func NewRootCmd(name string, opts ...func(*CmdOpts)) *RootCmd {
-	rootCmd := &RootCmd{Name: name, config: config.NewGlobalConfig()}
+func NewRootCmd(processName string, opts ...func(*CmdOpts)) *RootCmd {
+	rootCmd := &RootCmd{processName: processName}
 	cmd := cobra.Command{
-		Use:   "Start openIM application",
-		Short: fmt.Sprintf(`Start %s `, name),
-		Long:  fmt.Sprintf(`Start %s `, name),
+		Use:  "Start openIM application",
+		Long: fmt.Sprintf(`Start %s `, processName),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return rootCmd.persistentPreRun(cmd, opts...)
 		},
+		SilenceUsage:  true,
+		SilenceErrors: false,
 	}
+	cmd.Flags().StringP(FlagConf, "c", "", "path of config directory")
+	cmd.Flags().IntP(FlagTransferIndex, "i", 0, "process startup sequence number")
+
 	rootCmd.Command = cmd
-	rootCmd.addConfFlag()
 	return rootCmd
 }
 
-func (rc *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) error {
-	if err := rc.initializeConfiguration(cmd); err != nil {
-		return fmt.Errorf("failed to get configuration from command: %w", err)
+func (r *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) error {
+	cmdOpts := r.applyOptions(opts...)
+	if err := r.initializeConfiguration(cmd, cmdOpts); err != nil {
+		return err
 	}
 
-	cmdOpts := rc.applyOptions(opts...)
-
-	if err := rc.initializeLogger(cmdOpts); err != nil {
-		return errs.Wrap(err, "failed to initialize logger")
+	if err := r.initializeLogger(cmdOpts); err != nil {
+		return errs.WrapMsg(err, "failed to initialize logger")
 	}
 
 	return nil
 }
 
-func (rc *RootCmd) initializeConfiguration(cmd *cobra.Command) error {
-	return rc.getConfFromCmdAndInit(cmd)
+func (r *RootCmd) initializeConfiguration(cmd *cobra.Command, opts *CmdOpts) error {
+	configDirectory, _, err := r.getFlag(cmd)
+	if err != nil {
+		return err
+	}
+	// Load common configuration file
+	//opts.configMap[ShareFileName] = StructEnvPrefix{EnvPrefix: shareEnvPrefix, ConfigStruct: &r.share}
+	for configFileName, configStruct := range opts.configMap {
+		err := config.LoadConfig(filepath.Join(configDirectory, configFileName),
+			ConfigEnvPrefixMap[configFileName], configStruct)
+		if err != nil {
+			return err
+		}
+	}
+	// Load common log configuration file
+	return config.LoadConfig(filepath.Join(configDirectory, LogConfigFileName),
+		ConfigEnvPrefixMap[LogConfigFileName], &r.log)
 }
 
-func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
+func (r *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 	cmdOpts := defaultCmdOpts()
 	for _, opt := range opts {
 		opt(cmdOpts)
@@ -100,92 +122,45 @@ func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 	return cmdOpts
 }
 
-func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
-	logConfig := rc.config.Log
-
-	return log.InitFromConfig(
+func (r *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
+	err := log.InitFromConfig(
 
 		cmdOpts.loggerPrefixName,
-		rc.Name,
-		logConfig.RemainLogLevel,
-		logConfig.IsStdout,
-		logConfig.IsJson,
-		logConfig.StorageLocation,
-		logConfig.RemainRotationCount,
-		logConfig.RotationTime,
+		r.processName,
+		r.log.RemainLogLevel,
+		r.log.IsStdout,
+		r.log.IsJson,
+		r.log.StorageLocation,
+		r.log.RemainRotationCount,
+		r.log.RotationTime,
+		config.Version,
 	)
+	if err != nil {
+		return errs.Wrap(err)
+	}
+	return errs.Wrap(log.InitConsoleLogger(r.processName, r.log.RemainLogLevel, r.log.IsJson, config.Version))
+
 }
 
 func defaultCmdOpts() *CmdOpts {
 	return &CmdOpts{
-		loggerPrefixName: "openim-all",
+		loggerPrefixName: "openim-service-log",
 	}
 }
 
-func (r *RootCmd) SetRootCmdPt(cmdItf RootCmdPt) {
-	r.cmdItf = cmdItf
-}
-
-func (r *RootCmd) addConfFlag() {
-	r.Command.Flags().StringP(constant.FlagConf, "c", "", "path to config file folder")
-}
-
-func (r *RootCmd) AddPortFlag() {
-	r.Command.Flags().IntP(constant.FlagPort, "p", 0, "server listen port")
-}
-
-func (r *RootCmd) getPortFlag(cmd *cobra.Command) int {
-	port, err := cmd.Flags().GetInt(constant.FlagPort)
+func (r *RootCmd) getFlag(cmd *cobra.Command) (string, int, error) {
+	configDirectory, err := cmd.Flags().GetString(FlagConf)
 	if err != nil {
-		// Wrapping the error with additional context
-		return 0
+		return "", 0, errs.Wrap(err)
 	}
-	if port == 0 {
-		port = r.PortFromConfig(constant.FlagPort)
+	index, err := cmd.Flags().GetInt(FlagTransferIndex)
+	if err != nil {
+		return "", 0, errs.Wrap(err)
 	}
-	return port
-}
-
-// // GetPortFlag returns the port flag.
-func (r *RootCmd) GetPortFlag() int {
-	return r.port
-}
-
-func (r *RootCmd) AddPrometheusPortFlag() {
-	r.Command.Flags().IntP(constant.FlagPrometheusPort, "", 0, "server prometheus listen port")
-}
-
-func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) int {
-	port, err := cmd.Flags().GetInt(constant.FlagPrometheusPort)
-	if err != nil || port == 0 {
-		port = r.PortFromConfig(constant.FlagPrometheusPort)
-		if err != nil {
-			return 0
-		}
-	}
-	return port
-}
-
-func (r *RootCmd) GetPrometheusPortFlag() int {
-	return r.prometheusPort
-}
-
-func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
-	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
-	fmt.Println("The directory of the configuration file to start the process:", configFolderPath)
-	return config2.InitConfig(r.config, configFolderPath)
+	r.index = index
+	return configDirectory, index, nil
 }
 
 func (r *RootCmd) Execute() error {
 	return r.Command.Execute()
-}
-
-func (r *RootCmd) AddCommand(cmds ...*cobra.Command) {
-	r.Command.AddCommand(cmds...)
-}
-
-func (r *RootCmd) PortFromConfig(portType string) int {
-	// Retrieve the port and cache it
-	port := r.cmdItf.GetPortFromConfig(portType)
-	return port
 }

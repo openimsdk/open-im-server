@@ -104,25 +104,25 @@ go.build: go.build.verify $(addprefix go.build., $(addprefix $(PLATFORM)., $(BIN
 ## go.start: Start openim
 .PHONY: go.start
 go.start:
-	@echo "===========> Starting openim"
+	@echo "=========================> Starting OpenIM <========================="
 	@$(ROOT_DIR)/scripts/start-all.sh
 
 ## go.stop: Stop openim
 .PHONY: go.stop
 go.stop:
-	@echo "===========> Stopping openim"
+	@echo "=========================> Stopping OpenIM <========================="
 	@$(ROOT_DIR)/scripts/stop-all.sh
 
 ## go.check: Check openim
 .PHONY: go.check
 go.check:
-	@echo "===========> Checking openim"
+	@echo "=========================> Checking OpenIM <========================="
 	@$(ROOT_DIR)/scripts/check-all.sh
 
 ## go.check-component: Check openim component
 .PHONY: go.check-component
 go.check-component:
-	@echo "===========> Checking openim component"
+	@echo "=========================> Checking OpenIM component <========================="
 	@$(ROOT_DIR)/scripts/install/openim-tools.sh openim::tools::pre-start
 
 ## go.versionchecker: Design, detect some environment variables and versions

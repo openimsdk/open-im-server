@@ -19,29 +19,29 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.RevokeMsgResp, error) {
-	defer log.ZDebug(ctx, "RevokeMsg return line")
 	if req.UserID == "" {
-		return nil, errs.ErrArgs.Wrap("user_id is empty")
+		return nil, errs.ErrArgs.WrapMsg("user_id is empty")
 	}
 	if req.ConversationID == "" {
-		return nil, errs.ErrArgs.Wrap("conversation_id is empty")
+		return nil, errs.ErrArgs.WrapMsg("conversation_id is empty")
 	}
 	if req.Seq < 0 {
-		return nil, errs.ErrArgs.Wrap("seq is invalid")
+		return nil, errs.ErrArgs.WrapMsg("seq is invalid")
 	}
-	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	user, err := m.UserLocalCache.GetUserInfo(ctx, req.UserID)
@@ -53,24 +53,24 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		return nil, err
 	}
 	if len(msgs) == 0 || msgs[0] == nil {
-		return nil, errs.ErrRecordNotFound.Wrap("msg not found")
+		return nil, errs.ErrRecordNotFound.WrapMsg("msg not found")
 	}
 	if msgs[0].ContentType == constant.MsgRevokeNotification {
-		return nil, errs.ErrMsgAlreadyRevoke.Wrap("msg already revoke")
+		return nil, servererrs.ErrMsgAlreadyRevoke.WrapMsg("msg already revoke")
 	}
 
 	data, _ := json.Marshal(msgs[0])
-	log.ZInfo(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
+	log.ZDebug(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
 	var role int32
-	if !authverify.IsAppManagerUid(ctx, m.config) {
+	if !authverify.IsAppManagerUid(ctx, m.config.Share.IMAdminUserID) {
 		switch msgs[0].SessionType {
 		case constant.SingleChatType:
-			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID, m.config); err != nil {
+			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID, m.config.Share.IMAdminUserID); err != nil {
 				return nil, err
 			}
 			role = user.AppMangerLevel
-		case constant.SuperGroupChatType:
-			members, err := m.GroupLocalCache.GetGroupMemberInfoMap(ctx, msgs[0].GroupID, utils.Distinct([]string{req.UserID, msgs[0].SendID}))
+		case constant.ReadGroupChatType:
+			members, err := m.GroupLocalCache.GetGroupMemberInfoMap(ctx, msgs[0].GroupID, datautil.Distinct([]string{req.UserID, msgs[0].SendID}))
 			if err != nil {
 				return nil, err
 			}
@@ -79,21 +79,21 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 				case constant.GroupOwner:
 				case constant.GroupAdmin:
 					if members[msgs[0].SendID].RoleLevel != constant.GroupOrdinaryUsers {
-						return nil, errs.ErrNoPermission.Wrap("no permission")
+						return nil, errs.ErrNoPermission.WrapMsg("no permission")
 					}
 				default:
-					return nil, errs.ErrNoPermission.Wrap("no permission")
+					return nil, errs.ErrNoPermission.WrapMsg("no permission")
 				}
 			}
 			if member := members[req.UserID]; member != nil {
 				role = member.RoleLevel
 			}
 		default:
-			return nil, errs.ErrInternalServer.Wrap("msg sessionType not supported")
+			return nil, errs.ErrInternalServer.WrapMsg("msg sessionType not supported")
 		}
 	}
 	now := time.Now().UnixMilli()
-	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &unrelationtb.RevokeModel{
+	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &relation.RevokeModel{
 		Role:     role,
 		UserID:   req.UserID,
 		Nickname: user.Nickname,
@@ -104,11 +104,9 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	}
 	revokerUserID := mcontext.GetOpUserID(ctx)
 	var flag bool
-	if len(m.config.Manager.UserID) > 0 {
-		flag = utils.Contain(revokerUserID, m.config.Manager.UserID...)
-	}
-	if len(m.config.Manager.UserID) == 0 && len(m.config.IMAdmin.UserID) > 0 {
-		flag = utils.Contain(revokerUserID, m.config.IMAdmin.UserID...)
+
+	if len(m.config.Share.IMAdminUserID) > 0 {
+		flag = datautil.Contain(revokerUserID, m.config.Share.IMAdminUserID...)
 	}
 	tips := sdkws.RevokeMsgTips{
 		RevokerUserID:  revokerUserID,
@@ -120,16 +118,12 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		IsAdminRevoke:  flag,
 	}
 	var recvID string
-	if msgs[0].SessionType == constant.SuperGroupChatType {
+	if msgs[0].SessionType == constant.ReadGroupChatType {
 		recvID = msgs[0].GroupID
 	} else {
 		recvID = msgs[0].RecvID
 	}
-	if err := m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips); err != nil {
-		return nil, err
-	}
-	if err = CallbackAfterRevokeMsg(ctx, m.config, req); err != nil {
-		return nil, err
-	}
+	m.notificationSender.NotificationWithSessionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips)
+	m.webhookAfterRevokeMsg(ctx, &m.config.WebhooksConfig.AfterRevokeMsg, req)
 	return &msg.RevokeMsgResp{}, nil
 }

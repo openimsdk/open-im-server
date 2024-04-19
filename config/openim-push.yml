@@ -1,0 +1,37 @@
+rpc:
+  registerIP: ''
+  listenIP: 0.0.0.0
+  ports: [ 10170 ]
+
+prometheus:
+  enable: true
+  ports: [ 20107 ]
+
+maxConcurrentWorkers: 3
+enable: getui
+geTui:
+  pushUrl: "https://restapi.getui.com/v2/$appId"
+  masterSecret: ''
+  appKey: ''
+  intent: ''
+  channelID: ''
+  channelName: ''
+fcm:
+  serviceAccount: "x.json"
+jpns:
+  appKey: ''
+  masterSecret: ''
+  pushURL: ''
+  pushIntent: ''
+
+iosPush:
+      pushSound: "xxx"
+      badgeCount: true
+      production: false
+
+
+
+
+
+
+

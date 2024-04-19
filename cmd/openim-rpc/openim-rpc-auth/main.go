@@ -15,16 +15,12 @@
 package main
 
 import (
-	"github.com/openimsdk/open-im-server/v3/internal/rpc/auth"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/tools/system/program"
 )
 
 func main() {
-	authCmd := cmd.NewRpcCmd(cmd.RpcAuthServer, auth.Start)
-	authCmd.AddPortFlag()
-	authCmd.AddPrometheusPortFlag()
-	if err := authCmd.Exec(); err != nil {
-		util.ExitWithError(err)
+	if err := cmd.NewAuthRpcCmd().Exec(); err != nil {
+		program.ExitWithError(err)
 	}
 }

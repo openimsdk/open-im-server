@@ -16,15 +16,16 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/pagination"
-	"github.com/OpenIMSDK/tools/tx"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/db/tx"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -107,10 +108,11 @@ type GroupDatabase interface {
 
 func NewGroupDatabase(
 	rdb redis.UniversalClient,
+	localCache *config.LocalCache,
 	groupDB relationtb.GroupModelInterface,
 	groupMemberDB relationtb.GroupMemberModelInterface,
 	groupRequestDB relationtb.GroupRequestModelInterface,
-	ctxTx tx.CtxTx,
+	ctxTx tx.Tx,
 	groupHash cache.GroupHash,
 ) GroupDatabase {
 	rcOptions := rockscache.NewDefaultOptions()
@@ -121,7 +123,7 @@ func NewGroupDatabase(
 		groupMemberDB:  groupMemberDB,
 		groupRequestDB: groupRequestDB,
 		ctxTx:          ctxTx,
-		cache:          cache.NewGroupCacheRedis(rdb, groupDB, groupMemberDB, groupRequestDB, groupHash, rcOptions),
+		cache:          cache.NewGroupCacheRedis(rdb, localCache, groupDB, groupMemberDB, groupRequestDB, groupHash, rcOptions),
 	}
 }
 
@@ -129,7 +131,7 @@ type groupDatabase struct {
 	groupDB        relationtb.GroupModelInterface
 	groupMemberDB  relationtb.GroupMemberModelInterface
 	groupRequestDB relationtb.GroupRequestModelInterface
-	ctxTx          tx.CtxTx
+	ctxTx          tx.Tx
 	cache          cache.GroupCache
 }
 
@@ -270,7 +272,7 @@ func (g *groupDatabase) PageGetJoinGroup(ctx context.Context, userID string, pag
 	if err != nil {
 		return 0, nil, err
 	}
-	for _, groupID := range utils.Paginate(groupIDs, int(pagination.GetPageNumber()), int(pagination.GetShowNumber())) {
+	for _, groupID := range datautil.Paginate(groupIDs, int(pagination.GetPageNumber()), int(pagination.GetShowNumber())) {
 		groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, []string{userID})
 		if err != nil {
 			return 0, nil, err
@@ -285,7 +287,7 @@ func (g *groupDatabase) PageGetGroupMember(ctx context.Context, groupID string, 
 	if err != nil {
 		return 0, nil, err
 	}
-	pageIDs := utils.Paginate(groupMemberIDs, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
+	pageIDs := datautil.Paginate(groupMemberIDs, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
 	if len(pageIDs) == 0 {
 		return int64(len(groupMemberIDs)), nil, nil
 	}

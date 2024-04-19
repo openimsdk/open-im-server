@@ -27,29 +27,26 @@ var (
 	subscribe map[string][]string
 )
 
-func getPublishKey(topic string, key []string) []string {
-	if topic == "" || len(key) == 0 {
-		return nil
-	}
+func InitLocalCache(localCache *config.LocalCache) {
 	once.Do(func() {
 		list := []struct {
-			Local config.LocalCache
+			Local config.CacheConfig
 			Keys  []string
 		}{
 			{
-				Local: config.Config.LocalCache.User,
+				Local: localCache.User,
 				Keys:  []string{cachekey.UserInfoKey, cachekey.UserGlobalRecvMsgOptKey},
 			},
 			{
-				Local: config.Config.LocalCache.Group,
+				Local: localCache.Group,
 				Keys:  []string{cachekey.GroupMemberIDsKey, cachekey.GroupInfoKey, cachekey.GroupMemberInfoKey},
 			},
 			{
-				Local: config.Config.LocalCache.Friend,
+				Local: localCache.Friend,
 				Keys:  []string{cachekey.FriendIDsKey, cachekey.BlackIDsKey},
 			},
 			{
-				Local: config.Config.LocalCache.Conversation,
+				Local: localCache.Conversation,
 				Keys:  []string{cachekey.ConversationKey, cachekey.ConversationIDsKey, cachekey.ConversationNotReceiveMessageUserIDsKey},
 			},
 		}
@@ -60,6 +57,12 @@ func getPublishKey(topic string, key []string) []string {
 			}
 		}
 	})
+}
+
+func getPublishKey(topic string, key []string) []string {
+	if topic == "" || len(key) == 0 {
+		return nil
+	}
 	prefix, ok := subscribe[topic]
 	if !ok {
 		return nil
