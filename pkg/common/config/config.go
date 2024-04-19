@@ -185,8 +185,7 @@ type MsgGateway struct {
 }
 
 type MsgTransfer struct {
-	Prometheus      Prometheus `mapstructure:"prometheus"`
-	MsgCacheTimeout int        `mapstructure:"msgCacheTimeout"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type Push struct {

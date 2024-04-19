@@ -31,6 +31,8 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const msgCacheTimeout = 86400
+
 const (
 	maxSeq                 = "MAX_SEQ:"
 	minSeq                 = "MIN_SEQ:"
@@ -82,7 +84,7 @@ type MsgCache interface {
 //	return &msgCache{rdb: client, msgCacheTimeout: msgCacheTimeout, redisConf: redisConf}
 //}
 
-func NewMsgCache(client redis.UniversalClient, msgCacheTimeout time.Duration, redisEnablePipeline bool) MsgCache {
+func NewMsgCache(client redis.UniversalClient, redisEnablePipeline bool) MsgCache {
 	return &msgCache{rdb: client, msgCacheTimeout: msgCacheTimeout, redisEnablePipeline: redisEnablePipeline}
 }
 

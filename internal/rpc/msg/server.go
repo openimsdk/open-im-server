@@ -86,7 +86,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	//todo MsgCacheTimeout
-	msgModel := cache.NewMsgCache(rdb, 86400, config.RedisConfig.EnablePipeline)
+	msgModel := cache.NewMsgCache(rdb, config.RedisConfig.EnablePipeline)
 	seqModel := cache.NewSeqCache(rdb)
 	conversationClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
 	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
