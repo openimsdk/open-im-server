@@ -417,8 +417,8 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a WebSocket long connection object
 	wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
 	if err := wsLongConn.GenerateLongConn(w, r); err != nil {
-		// If creating the long connection fails, return an error via HTTP and stop processing
-		httpError(connContext, err)
+		//If the creation of the long connection fails, the error is handled internally during the handshake process.
+		log.ZWarn(connContext, "long connection fails", err)
 		return
 	} else {
 		// Check if a normal response should be sent via WebSocket
