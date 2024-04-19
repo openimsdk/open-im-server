@@ -18,13 +18,13 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/mq/memamq"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/idutil"
 	"github.com/openimsdk/tools/utils/jsonutil"
@@ -217,10 +217,10 @@ type NotificationSender struct {
 	sessionTypeConf map[int32]int32
 	sendMsg         func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)
 	getUserInfo     func(ctx context.Context, userID string) (*sdkws.UserInfo, error)
-	queue           *memAsyncQueue.MemoryQueue
+	queue           *memamq.MemoryQueue
 }
 
-func WithQueue(queue *memAsyncQueue.MemoryQueue) NotificationSenderOptions {
+func WithQueue(queue *memamq.MemoryQueue) NotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.queue = queue
 	}
@@ -257,7 +257,7 @@ func NewNotificationSender(conf *config.Notification, opts ...NotificationSender
 		opt(notificationSender)
 	}
 	if notificationSender.queue == nil {
-		notificationSender.queue = memAsyncQueue.NewMemoryQueue(notificationWorkerCount, notificationBufferSize)
+		notificationSender.queue = memamq.NewMemoryQueue(notificationWorkerCount, notificationBufferSize)
 	}
 	return notificationSender
 }

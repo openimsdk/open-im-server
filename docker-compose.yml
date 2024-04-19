@@ -61,7 +61,6 @@ services:
     image: "${KAFKA_IMAGE}"
     container_name: kafka
     restart: always
-    user: root
     ports:
       - "19094:9094"
     volumes:
@@ -100,18 +99,18 @@ services:
     networks:
       - openim
 
-  openim-web:
-    image: ${OPENIM_WEB_IMAGE}
-    container_name: openim-web
+  openim-web-front:
+    image: ${OPENIM_WEB_FRONT_IMAGE}
+    container_name: openim-web-front
     restart: always
     ports:
       - "11001:80"
     networks:
       - openim
 
-  openim-admin:
+  openim-admin-front:
     image: ${OPENIM_ADMIN_FRONT_IMAGE}
-    container_name: openim-admin
+    container_name: openim-admin-front
     restart: always
     ports:
       - "11002:80"
@@ -119,56 +118,3 @@ services:
       - openim
 
 
-
-  # prometheus:
-  #   image: prom/prometheus
-  #   container_name: prometheus
-  #   hostname: prometheus
-  #   restart: always
-  #   volumes:
-  #     - "${DATA_DIR:-./}/config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml"
-  #     - "${DATA_DIR:-./}/config/prometheus.yml:/etc/prometheus/prometheus.yml"
-  #   ports:
-  #     - "${PROMETHEUS_PORT:-19090}:9090"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS:-172.28.0.10}
-
-  # alertmanager:
-  #   image: prom/alertmanager
-  #   container_name: alertmanager
-  #   hostname: alertmanager
-  #   restart: always
-  #   volumes:
-  #     - ${DATA_DIR:-./}/config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-  #     - ${DATA_DIR:-./}/config/email.tmpl:/etc/alertmanager/email.tmpl
-  #   ports:
-  #     - "${ALERT_MANAGER_PORT:-19093}:9093"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${ALERT_MANAGER_NETWORK_ADDRESS:-172.28.0.14}
-
-  # grafana:
-  #   image: grafana/grafana
-  #   container_name: grafana
-  #   hostname: grafana
-  #   user: root
-  #   restart: always
-  #   ports:
-  #     - "${GRAFANA_PORT:-13000}:3000"
-  #   volumes:
-  #     - "${DATA_DIR:-./}/components/grafana:/var/lib/grafana"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${GRAFANA_NETWORK_ADDRESS:-172.28.0.11}
-
-  # node-exporter:
-  #   image: quay.io/prometheus/node-exporter
-  #   container_name: node-exporter
-  #   hostname: node-exporter
-  #   restart: always
-  #   ports:
-  #     - "${NODE_EXPORTER_PORT:-19100}:9100"
-  #   networks:
-  #     server:
-  #       ipv4_address: ${NODE_EXPORTER_NETWORK_ADDRESS:-172.28.0.12}

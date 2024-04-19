@@ -1,6 +1,6 @@
 module github.com/openimsdk/open-im-server/v3
 
-go 1.20
+go 1.21.2
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
@@ -15,7 +15,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/localcache v0.0.1
 	github.com/openimsdk/protocol v0.0.63
-	github.com/openimsdk/tools v0.0.47-alpha.40
+	github.com/openimsdk/tools v0.0.47-alpha.42
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
@@ -34,7 +34,6 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/kelindar/bitmap v1.5.2
 	github.com/likexian/gokit v0.25.13
-	github.com/magefile/mage v1.15.0
 	github.com/openimsdk/gomake v0.0.6
 	github.com/redis/go-redis/v9 v9.4.0
 	github.com/robfig/cron/v3 v3.0.1
@@ -101,6 +100,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lithammer/shortuuid v3.0.0+incompatible // indirect
+	github.com/magefile/mage v1.15.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect

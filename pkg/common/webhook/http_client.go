@@ -20,10 +20,10 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/memAsyncQueue"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/mq/memamq"
 	"github.com/openimsdk/tools/utils/httputil"
 	"net/http"
 )
@@ -31,7 +31,7 @@ import (
 type Client struct {
 	client *httputil.HTTPClient
 	url    string
-	queue  *memAsyncQueue.MemoryQueue
+	queue  *memamq.MemoryQueue
 }
 
 const (
@@ -39,12 +39,12 @@ const (
 	webhookBufferSize  = 100
 )
 
-func NewWebhookClient(url string, options ...*memAsyncQueue.MemoryQueue) *Client {
-	var queue *memAsyncQueue.MemoryQueue
+func NewWebhookClient(url string, options ...*memamq.MemoryQueue) *Client {
+	var queue *memamq.MemoryQueue
 	if len(options) > 0 && options[0] != nil {
 		queue = options[0]
 	} else {
-		queue = memAsyncQueue.NewMemoryQueue(webhookWorkerCount, webhookBufferSize)
+		queue = memamq.NewMemoryQueue(webhookWorkerCount, webhookBufferSize)
 	}
 
 	http.DefaultTransport.(*http.Transport).MaxConnsPerHost = 100 // Enhance the default number of max connections per host
