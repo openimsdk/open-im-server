@@ -185,8 +185,7 @@ type MsgGateway struct {
 }
 
 type MsgTransfer struct {
-	Prometheus      Prometheus `mapstructure:"prometheus"`
-	MsgCacheTimeout int        `mapstructure:"msgCacheTimeout"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type Push struct {
@@ -267,10 +266,8 @@ type Msg struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus                        Prometheus `mapstructure:"prometheus"`
-	FriendVerify                      bool       `mapstructure:"friendVerify"`
-	GroupMessageHasReadReceiptEnable  bool       `mapstructure:"groupMessageHasReadReceiptEnable"`
-	SingleMessageHasReadReceiptEnable bool       `mapstructure:"singleMessageHasReadReceiptEnable"`
+	Prometheus   Prometheus `mapstructure:"prometheus"`
+	FriendVerify bool       `mapstructure:"friendVerify"`
 }
 
 type Third struct {

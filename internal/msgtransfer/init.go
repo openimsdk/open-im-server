@@ -88,7 +88,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	//todo MsgCacheTimeout
-	msgModel := cache.NewMsgCache(rdb, 86400, config.RedisConfig.EnablePipeline)
+	msgModel := cache.NewMsgCache(rdb, config.RedisConfig.EnablePipeline)
 	seqModel := cache.NewSeqCache(rdb)
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {

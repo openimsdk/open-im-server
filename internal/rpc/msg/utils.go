@@ -15,30 +15,10 @@
 package msg
 
 import (
-	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-func isMessageHasReadEnabled(msgData *sdkws.MsgData, config *Config) bool {
-	switch {
-	case msgData.ContentType == constant.HasReadReceipt && msgData.SessionType == constant.SingleChatType:
-		if config.RpcConfig.SingleMessageHasReadReceiptEnable {
-			return true
-		} else {
-			return false
-		}
-	case msgData.ContentType == constant.HasReadReceipt && msgData.SessionType == constant.SuperGroupChatType:
-		if config.RpcConfig.GroupMessageHasReadReceiptEnable {
-			return true
-		} else {
-			return false
-		}
-	}
-	return true
-}
 
 func IsNotFound(err error) bool {
 	switch errs.Unwrap(err) {
