@@ -16,11 +16,11 @@ package fcm
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"path/filepath"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
-	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/protocol/constant"
@@ -60,7 +60,7 @@ func NewClient(pushConf *config.Push, cache cache.ThirdCache) (*Fcm, error) {
 	return &Fcm{fcmMsgCli: fcmMsgClient, cache: cache}, nil
 }
 
-func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
+func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string, opts *options.Opts) error {
 	// accounts->registrationToken
 	allTokens := make(map[string][]string, 0)
 	for _, account := range userIDs {

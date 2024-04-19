@@ -18,8 +18,8 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 
-	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/jpush/body"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/utils/httputil"
@@ -51,7 +51,7 @@ func (j *JPush) getAuthorization(appKey string, masterSecret string) string {
 	return Authorization
 }
 
-func (j *JPush) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
+func (j *JPush) Push(ctx context.Context, userIDs []string, title, content string, opts *options.Opts) error {
 	var pf body.Platform
 	pf.SetAll()
 	var au body.Audience
