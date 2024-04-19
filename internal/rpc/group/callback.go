@@ -254,7 +254,9 @@ func (s *groupServer) webhookAfterJoinGroup(ctx context.Context, after *config.A
 }
 
 func (s *groupServer) webhookBeforeSetGroupInfo(ctx context.Context, before *config.BeforeConfig, req *group.SetGroupInfoReq) error {
-
+	if before.Enable {
+		return nil
+	}
 	cbReq := &callbackstruct.CallbackBeforeSetGroupInfoReq{
 		CallbackCommand: callbackstruct.CallbackBeforeSetGroupInfoCommand,
 		GroupID:         req.GroupInfoForSet.GroupID,
