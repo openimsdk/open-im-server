@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -61,19 +62,21 @@ func GetContent(msg *sdkws.MsgData) string {
 }
 
 func (m *msgServer) webhookBeforeSendSingleMsg(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
-	if msg.MsgData.ContentType == constant.Typing {
-		return nil
-	}
-	cbReq := &cbapi.CallbackBeforeSendSingleMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeSendSingleMsgCommand),
-		RecvID:            msg.MsgData.RecvID,
-	}
-	resp := &cbapi.CallbackBeforeSendSingleMsgResp{}
-	if err := m.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
-		return err
-	}
+	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		if msg.MsgData.ContentType == constant.Typing {
+			return nil
+		}
+		cbReq := &cbapi.CallbackBeforeSendSingleMsgReq{
+			CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeSendSingleMsgCommand),
+			RecvID:            msg.MsgData.RecvID,
+		}
+		resp := &cbapi.CallbackBeforeSendSingleMsgResp{}
+		if err := m.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
+			return err
+		}
 
-	return nil
+		return nil
+	})
 }
 
 func (m *msgServer) webhookAfterSendSingleMsg(ctx context.Context, after *config.AfterConfig, msg *pbchat.SendMsgReq) {
@@ -88,18 +91,20 @@ func (m *msgServer) webhookAfterSendSingleMsg(ctx context.Context, after *config
 }
 
 func (m *msgServer) webhookBeforeSendGroupMsg(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
-	if msg.MsgData.ContentType == constant.Typing {
+	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		if msg.MsgData.ContentType == constant.Typing {
+			return nil
+		}
+		cbReq := &cbapi.CallbackBeforeSendGroupMsgReq{
+			CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeSendGroupMsgCommand),
+			GroupID:           msg.MsgData.GroupID,
+		}
+		resp := &cbapi.CallbackBeforeSendGroupMsgResp{}
+		if err := m.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
+			return err
+		}
 		return nil
-	}
-	cbReq := &cbapi.CallbackBeforeSendGroupMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeSendGroupMsgCommand),
-		GroupID:           msg.MsgData.GroupID,
-	}
-	resp := &cbapi.CallbackBeforeSendGroupMsgResp{}
-	if err := m.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
-		return err
-	}
-	return nil
+	})
 }
 
 func (m *msgServer) webhookAfterSendGroupMsg(ctx context.Context, after *config.AfterConfig, msg *pbchat.SendMsgReq) {
@@ -114,37 +119,39 @@ func (m *msgServer) webhookAfterSendGroupMsg(ctx context.Context, after *config.
 }
 
 func (m *msgServer) webhookBeforeMsgModify(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
-	if msg.MsgData.ContentType != constant.Text {
-		return nil
-	}
-	cbReq := &cbapi.CallbackMsgModifyCommandReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeMsgModifyCommand),
-	}
-	resp := &cbapi.CallbackMsgModifyCommandResp{}
-	if err := m.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
-		return err
-	}
+	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		if msg.MsgData.ContentType != constant.Text {
+			return nil
+		}
+		cbReq := &cbapi.CallbackMsgModifyCommandReq{
+			CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeMsgModifyCommand),
+		}
+		resp := &cbapi.CallbackMsgModifyCommandResp{}
+		if err := m.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
+			return err
+		}
 
-	if resp.Content != nil {
-		msg.MsgData.Content = []byte(*resp.Content)
-	}
-	datautil.NotNilReplace(msg.MsgData.OfflinePushInfo, resp.OfflinePushInfo)
-	datautil.NotNilReplace(&msg.MsgData.RecvID, resp.RecvID)
-	datautil.NotNilReplace(&msg.MsgData.GroupID, resp.GroupID)
-	datautil.NotNilReplace(&msg.MsgData.ClientMsgID, resp.ClientMsgID)
-	datautil.NotNilReplace(&msg.MsgData.ServerMsgID, resp.ServerMsgID)
-	datautil.NotNilReplace(&msg.MsgData.SenderPlatformID, resp.SenderPlatformID)
-	datautil.NotNilReplace(&msg.MsgData.SenderNickname, resp.SenderNickname)
-	datautil.NotNilReplace(&msg.MsgData.SenderFaceURL, resp.SenderFaceURL)
-	datautil.NotNilReplace(&msg.MsgData.SessionType, resp.SessionType)
-	datautil.NotNilReplace(&msg.MsgData.MsgFrom, resp.MsgFrom)
-	datautil.NotNilReplace(&msg.MsgData.ContentType, resp.ContentType)
-	datautil.NotNilReplace(&msg.MsgData.Status, resp.Status)
-	datautil.NotNilReplace(&msg.MsgData.Options, resp.Options)
-	datautil.NotNilReplace(&msg.MsgData.AtUserIDList, resp.AtUserIDList)
-	datautil.NotNilReplace(&msg.MsgData.AttachedInfo, resp.AttachedInfo)
-	datautil.NotNilReplace(&msg.MsgData.Ex, resp.Ex)
-	return nil
+		if resp.Content != nil {
+			msg.MsgData.Content = []byte(*resp.Content)
+		}
+		datautil.NotNilReplace(msg.MsgData.OfflinePushInfo, resp.OfflinePushInfo)
+		datautil.NotNilReplace(&msg.MsgData.RecvID, resp.RecvID)
+		datautil.NotNilReplace(&msg.MsgData.GroupID, resp.GroupID)
+		datautil.NotNilReplace(&msg.MsgData.ClientMsgID, resp.ClientMsgID)
+		datautil.NotNilReplace(&msg.MsgData.ServerMsgID, resp.ServerMsgID)
+		datautil.NotNilReplace(&msg.MsgData.SenderPlatformID, resp.SenderPlatformID)
+		datautil.NotNilReplace(&msg.MsgData.SenderNickname, resp.SenderNickname)
+		datautil.NotNilReplace(&msg.MsgData.SenderFaceURL, resp.SenderFaceURL)
+		datautil.NotNilReplace(&msg.MsgData.SessionType, resp.SessionType)
+		datautil.NotNilReplace(&msg.MsgData.MsgFrom, resp.MsgFrom)
+		datautil.NotNilReplace(&msg.MsgData.ContentType, resp.ContentType)
+		datautil.NotNilReplace(&msg.MsgData.Status, resp.Status)
+		datautil.NotNilReplace(&msg.MsgData.Options, resp.Options)
+		datautil.NotNilReplace(&msg.MsgData.AtUserIDList, resp.AtUserIDList)
+		datautil.NotNilReplace(&msg.MsgData.AttachedInfo, resp.AttachedInfo)
+		datautil.NotNilReplace(&msg.MsgData.Ex, resp.Ex)
+		return nil
+	})
 }
 
 func (m *msgServer) webhookAfterGroupMsgRead(ctx context.Context, after *config.AfterConfig, req *cbapi.CallbackGroupMsgReadReq) {
