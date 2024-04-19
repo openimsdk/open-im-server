@@ -2,7 +2,6 @@ package memAsyncQueue
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -39,7 +38,6 @@ func (mq *MemoryQueue) Initialize(workerCount int, bufferSize int) {
 		go func(workerID int) {
 			defer mq.wg.Done()
 			for task := range mq.taskChan {
-				fmt.Printf("Worker %d: Executing task\n", workerID)
 				task() // Execute the function
 			}
 		}(i)

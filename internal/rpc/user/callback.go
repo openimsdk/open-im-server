@@ -16,6 +16,7 @@ package user
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/tools/utils/datautil"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
@@ -24,21 +25,23 @@ import (
 )
 
 func (s *userServer) webhookBeforeUpdateUserInfo(ctx context.Context, before *config.BeforeConfig, req *pbuser.UpdateUserInfoReq) error {
-	cbReq := &cbapi.CallbackBeforeUpdateUserInfoReq{
-		CallbackCommand: cbapi.CallbackBeforeUpdateUserInfoCommand,
-		UserID:          req.UserInfo.UserID,
-		FaceURL:         &req.UserInfo.FaceURL,
-		Nickname:        &req.UserInfo.Nickname,
-	}
-	resp := &cbapi.CallbackBeforeUpdateUserInfoResp{}
-	if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
-		return err
-	}
+	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		cbReq := &cbapi.CallbackBeforeUpdateUserInfoReq{
+			CallbackCommand: cbapi.CallbackBeforeUpdateUserInfoCommand,
+			UserID:          req.UserInfo.UserID,
+			FaceURL:         &req.UserInfo.FaceURL,
+			Nickname:        &req.UserInfo.Nickname,
+		}
+		resp := &cbapi.CallbackBeforeUpdateUserInfoResp{}
+		if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
+			return err
+		}
 
-	datautil.NotNilReplace(&req.UserInfo.FaceURL, resp.FaceURL)
-	datautil.NotNilReplace(&req.UserInfo.Ex, resp.Ex)
-	datautil.NotNilReplace(&req.UserInfo.Nickname, resp.Nickname)
-	return nil
+		datautil.NotNilReplace(&req.UserInfo.FaceURL, resp.FaceURL)
+		datautil.NotNilReplace(&req.UserInfo.Ex, resp.Ex)
+		datautil.NotNilReplace(&req.UserInfo.Nickname, resp.Nickname)
+		return nil
+	})
 }
 
 func (s *userServer) webhookAfterUpdateUserInfo(ctx context.Context, after *config.AfterConfig, req *pbuser.UpdateUserInfoReq) {
@@ -52,21 +55,23 @@ func (s *userServer) webhookAfterUpdateUserInfo(ctx context.Context, after *conf
 }
 
 func (s *userServer) webhookBeforeUpdateUserInfoEx(ctx context.Context, before *config.BeforeConfig, req *pbuser.UpdateUserInfoExReq) error {
-	cbReq := &cbapi.CallbackBeforeUpdateUserInfoExReq{
-		CallbackCommand: cbapi.CallbackBeforeUpdateUserInfoExCommand,
-		UserID:          req.UserInfo.UserID,
-		FaceURL:         req.UserInfo.FaceURL,
-		Nickname:        req.UserInfo.Nickname,
-	}
-	resp := &cbapi.CallbackBeforeUpdateUserInfoExResp{}
-	if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
-		return err
-	}
+	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		cbReq := &cbapi.CallbackBeforeUpdateUserInfoExReq{
+			CallbackCommand: cbapi.CallbackBeforeUpdateUserInfoExCommand,
+			UserID:          req.UserInfo.UserID,
+			FaceURL:         req.UserInfo.FaceURL,
+			Nickname:        req.UserInfo.Nickname,
+		}
+		resp := &cbapi.CallbackBeforeUpdateUserInfoExResp{}
+		if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
+			return err
+		}
 
-	datautil.NotNilReplace(req.UserInfo.FaceURL, resp.FaceURL)
-	datautil.NotNilReplace(req.UserInfo.Ex, resp.Ex)
-	datautil.NotNilReplace(req.UserInfo.Nickname, resp.Nickname)
-	return nil
+		datautil.NotNilReplace(req.UserInfo.FaceURL, resp.FaceURL)
+		datautil.NotNilReplace(req.UserInfo.Ex, resp.Ex)
+		datautil.NotNilReplace(req.UserInfo.Nickname, resp.Nickname)
+		return nil
+	})
 }
 
 func (s *userServer) webhookAfterUpdateUserInfoEx(ctx context.Context, after *config.AfterConfig, req *pbuser.UpdateUserInfoExReq) {
@@ -80,22 +85,24 @@ func (s *userServer) webhookAfterUpdateUserInfoEx(ctx context.Context, after *co
 }
 
 func (s *userServer) webhookBeforeUserRegister(ctx context.Context, before *config.BeforeConfig, req *pbuser.UserRegisterReq) error {
-	cbReq := &cbapi.CallbackBeforeUserRegisterReq{
-		CallbackCommand: cbapi.CallbackBeforeUserRegisterCommand,
-		Secret:          req.Secret,
-		Users:           req.Users,
-	}
+	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		cbReq := &cbapi.CallbackBeforeUserRegisterReq{
+			CallbackCommand: cbapi.CallbackBeforeUserRegisterCommand,
+			Secret:          req.Secret,
+			Users:           req.Users,
+		}
 
-	resp := &cbapi.CallbackBeforeUserRegisterResp{}
+		resp := &cbapi.CallbackBeforeUserRegisterResp{}
 
-	if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
-		return err
-	}
+		if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
+			return err
+		}
 
-	if len(resp.Users) != 0 {
-		req.Users = resp.Users
-	}
-	return nil
+		if len(resp.Users) != 0 {
+			req.Users = resp.Users
+		}
+		return nil
+	})
 }
 
 func (s *userServer) webhookAfterUserRegister(ctx context.Context, after *config.AfterConfig, req *pbuser.UserRegisterReq) {

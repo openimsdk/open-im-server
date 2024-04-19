@@ -16,6 +16,7 @@ package friend
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -32,19 +33,21 @@ func (s *friendServer) webhookAfterDeleteFriend(ctx context.Context, after *conf
 }
 
 func (s *friendServer) webhookBeforeAddFriend(ctx context.Context, before *config.BeforeConfig, req *pbfriend.ApplyToAddFriendReq) error {
-	cbReq := &cbapi.CallbackBeforeAddFriendReq{
-		CallbackCommand: cbapi.CallbackBeforeAddFriendCommand,
-		FromUserID:      req.FromUserID,
-		ToUserID:        req.ToUserID,
-		ReqMsg:          req.ReqMsg,
-		Ex:              req.Ex,
-	}
-	resp := &cbapi.CallbackBeforeAddFriendResp{}
+	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		cbReq := &cbapi.CallbackBeforeAddFriendReq{
+			CallbackCommand: cbapi.CallbackBeforeAddFriendCommand,
+			FromUserID:      req.FromUserID,
+			ToUserID:        req.ToUserID,
+			ReqMsg:          req.ReqMsg,
+			Ex:              req.Ex,
+		}
+		resp := &cbapi.CallbackBeforeAddFriendResp{}
 
-	if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
-		return err
-	}
-	return nil
+		if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func (s *friendServer) webhookAfterAddFriend(ctx context.Context, after *config.AfterConfig, req *pbfriend.ApplyToAddFriendReq) {
@@ -91,65 +94,64 @@ func (s *friendServer) webhookAfterRemoveBlack(ctx context.Context, after *confi
 }
 
 func (s *friendServer) webhookBeforeSetFriendRemark(ctx context.Context, before *config.BeforeConfig, req *pbfriend.SetFriendRemarkReq) error {
-	cbReq := &cbapi.CallbackBeforeSetFriendRemarkReq{
-		CallbackCommand: cbapi.CallbackBeforeSetFriendRemarkCommand,
-		OwnerUserID:     req.OwnerUserID,
-		FriendUserID:    req.FriendUserID,
-		Remark:          req.Remark,
-	}
-	resp := &cbapi.CallbackBeforeSetFriendRemarkResp{}
-	if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
-		return err
-	}
-	if resp.Remark != "" {
-		req.Remark = resp.Remark
-	}
-	return nil
+	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		cbReq := &cbapi.CallbackBeforeSetFriendRemarkReq{
+			CallbackCommand: cbapi.CallbackBeforeSetFriendRemarkCommand,
+			OwnerUserID:     req.OwnerUserID,
+			FriendUserID:    req.FriendUserID,
+			Remark:          req.Remark,
+		}
+		resp := &cbapi.CallbackBeforeSetFriendRemarkResp{}
+		if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
+			return err
+		}
+		if resp.Remark != "" {
+			req.Remark = resp.Remark
+		}
+		return nil
+	})
 }
 
 func (s *friendServer) webhookBeforeAddBlack(ctx context.Context, before *config.BeforeConfig, req *pbfriend.AddBlackReq) error {
-	if !before.Enable {
-		return nil
-	}
-	cbReq := &cbapi.CallbackBeforeAddBlackReq{
-		CallbackCommand: cbapi.CallbackBeforeAddBlackCommand,
-		OwnerUserID:     req.OwnerUserID,
-		BlackUserID:     req.BlackUserID,
-	}
-	resp := &cbapi.CallbackBeforeAddBlackResp{}
-	return s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before)
+	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		cbReq := &cbapi.CallbackBeforeAddBlackReq{
+			CallbackCommand: cbapi.CallbackBeforeAddBlackCommand,
+			OwnerUserID:     req.OwnerUserID,
+			BlackUserID:     req.BlackUserID,
+		}
+		resp := &cbapi.CallbackBeforeAddBlackResp{}
+		return s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before)
+	})
 }
 
 func (s *friendServer) webhookBeforeAddFriendAgree(ctx context.Context, before *config.BeforeConfig, req *pbfriend.RespondFriendApplyReq) error {
-	if !before.Enable {
-		return nil
-	}
-	cbReq := &cbapi.CallbackBeforeAddFriendAgreeReq{
-		CallbackCommand: cbapi.CallbackBeforeAddFriendAgreeCommand,
-		FromUserID:      req.FromUserID,
-		ToUserID:        req.ToUserID,
-		HandleMsg:       req.HandleMsg,
-		HandleResult:    req.HandleResult,
-	}
-	resp := &cbapi.CallbackBeforeAddFriendAgreeResp{}
-	return s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before)
+	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		cbReq := &cbapi.CallbackBeforeAddFriendAgreeReq{
+			CallbackCommand: cbapi.CallbackBeforeAddFriendAgreeCommand,
+			FromUserID:      req.FromUserID,
+			ToUserID:        req.ToUserID,
+			HandleMsg:       req.HandleMsg,
+			HandleResult:    req.HandleResult,
+		}
+		resp := &cbapi.CallbackBeforeAddFriendAgreeResp{}
+		return s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before)
+	})
 }
 
 func (s *friendServer) webhookBeforeImportFriends(ctx context.Context, before *config.BeforeConfig, req *pbfriend.ImportFriendReq) error {
-	if !before.Enable {
+	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		cbReq := &cbapi.CallbackBeforeImportFriendsReq{
+			CallbackCommand: cbapi.CallbackBeforeImportFriendsCommand,
+			OwnerUserID:     req.OwnerUserID,
+			FriendUserIDs:   req.FriendUserIDs,
+		}
+		resp := &cbapi.CallbackBeforeImportFriendsResp{}
+		if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
+			return err
+		}
+		if len(resp.FriendUserIDs) > 0 {
+			req.FriendUserIDs = resp.FriendUserIDs
+		}
 		return nil
-	}
-	cbReq := &cbapi.CallbackBeforeImportFriendsReq{
-		CallbackCommand: cbapi.CallbackBeforeImportFriendsCommand,
-		OwnerUserID:     req.OwnerUserID,
-		FriendUserIDs:   req.FriendUserIDs,
-	}
-	resp := &cbapi.CallbackBeforeImportFriendsResp{}
-	if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
-		return err
-	}
-	if len(resp.FriendUserIDs) > 0 {
-		req.FriendUserIDs = resp.FriendUserIDs
-	}
-	return nil
+	})
 }

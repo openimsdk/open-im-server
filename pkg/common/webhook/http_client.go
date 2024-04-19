@@ -57,10 +57,7 @@ func NewWebhookClient(url string, options ...*memAsyncQueue.MemoryQueue) *Client
 }
 
 func (c *Client) SyncPost(ctx context.Context, command string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, before *config.BeforeConfig) error {
-	if before.Enable {
-		return c.post(ctx, command, req, resp, before.Timeout)
-	}
-	return nil
+	return c.post(ctx, command, req, resp, before.Timeout)
 }
 
 func (c *Client) AsyncPost(ctx context.Context, command string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, after *config.AfterConfig) {
