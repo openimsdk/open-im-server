@@ -18,6 +18,7 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 
@@ -33,6 +34,7 @@ import (
 	"google.golang.org/grpc"
 )
 
+type MessageInterceptorFunc func(ctx context.Context, globalConfig *Config, req *msg.SendMsgReq) (*sdkws.MsgData, error)
 type (
 	// MessageInterceptorChain defines a chain of message interceptor functions.
 	MessageInterceptorChain []MessageInterceptorFunc
@@ -107,7 +109,6 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	}
 
 	s.notificationSender = rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithLocalSendMsg(s.SendMsg))
-	s.addInterceptorHandler(MessageHasReadEnabled)
 	msg.RegisterMsgServer(server, s)
 	return nil
 }

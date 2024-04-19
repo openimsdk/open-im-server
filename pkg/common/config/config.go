@@ -267,10 +267,8 @@ type Msg struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus                        Prometheus `mapstructure:"prometheus"`
-	FriendVerify                      bool       `mapstructure:"friendVerify"`
-	GroupMessageHasReadReceiptEnable  bool       `mapstructure:"groupMessageHasReadReceiptEnable"`
-	SingleMessageHasReadReceiptEnable bool       `mapstructure:"singleMessageHasReadReceiptEnable"`
+	Prometheus   Prometheus `mapstructure:"prometheus"`
+	FriendVerify bool       `mapstructure:"friendVerify"`
 }
 
 type Third struct {

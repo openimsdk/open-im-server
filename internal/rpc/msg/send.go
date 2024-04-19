@@ -18,7 +18,6 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/constant"
@@ -35,10 +34,6 @@ import (
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.SendMsgResp, error) {
 	if req.MsgData != nil {
-		flag := isMessageHasReadEnabled(req.MsgData, m.config)
-		if !flag {
-			return nil, servererrs.ErrMessageHasReadDisable.Wrap()
-		}
 		m.encapsulateMsgData(req.MsgData)
 		switch req.MsgData.SessionType {
 		case constant.SingleChatType:
