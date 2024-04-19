@@ -257,7 +257,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 		}
 		if isNewConversation {
 			switch storageList[0].SessionType {
-			case constant.SuperGroupChatType:
+			case constant.ReadGroupChatType:
 				log.ZInfo(ctx, "group chat first create conversation", "conversationID",
 					conversationID)
 				userIDs, err := och.groupRpcClient.GetGroupMemberIDs(ctx, storageList[0].GroupID)

@@ -260,7 +260,7 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error {
 	return c.tx.Transaction(ctx, func(ctx context.Context) error {
 		cache := c.cache.NewCache()
-		conversationID := msgprocessor.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
+		conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
 		existConversationUserIDs, err := c.conversationDB.FindUserID(ctx, userIDs, []string{conversationID})
 		if err != nil {
 			return err
@@ -268,7 +268,7 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 		notExistUserIDs := stringutil.DifferenceString(userIDs, existConversationUserIDs)
 		var conversations []*relationtb.ConversationModel
 		for _, v := range notExistUserIDs {
-			conversation := relationtb.ConversationModel{ConversationType: constant.SuperGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID}
+			conversation := relationtb.ConversationModel{ConversationType: constant.ReadGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID}
 			conversations = append(conversations, &conversation)
 			cache = cache.DelConversations(v, conversationID).DelConversationNotReceiveMessageUserIDs(conversationID)
 		}

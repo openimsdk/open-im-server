@@ -77,7 +77,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return nil
 		}
 		return nil
-	case constant.SuperGroupChatType:
+	case constant.ReadGroupChatType:
 		groupInfo, err := m.GroupLocalCache.GetGroupInfo(ctx, data.MsgData.GroupID)
 		if err != nil {
 			return err

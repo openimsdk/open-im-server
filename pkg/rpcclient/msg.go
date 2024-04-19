@@ -85,26 +85,26 @@ func newContentTypeConf(conf *config.Notification) map[int32]config.Notification
 func newSessionTypeConf() map[int32]int32 {
 	return map[int32]int32{
 		// group
-		constant.GroupCreatedNotification:                 constant.SuperGroupChatType,
-		constant.GroupInfoSetNotification:                 constant.SuperGroupChatType,
+		constant.GroupCreatedNotification:                 constant.ReadGroupChatType,
+		constant.GroupInfoSetNotification:                 constant.ReadGroupChatType,
 		constant.JoinGroupApplicationNotification:         constant.SingleChatType,
-		constant.MemberQuitNotification:                   constant.SuperGroupChatType,
+		constant.MemberQuitNotification:                   constant.ReadGroupChatType,
 		constant.GroupApplicationAcceptedNotification:     constant.SingleChatType,
 		constant.GroupApplicationRejectedNotification:     constant.SingleChatType,
-		constant.GroupOwnerTransferredNotification:        constant.SuperGroupChatType,
-		constant.MemberKickedNotification:                 constant.SuperGroupChatType,
-		constant.MemberInvitedNotification:                constant.SuperGroupChatType,
-		constant.MemberEnterNotification:                  constant.SuperGroupChatType,
-		constant.GroupDismissedNotification:               constant.SuperGroupChatType,
-		constant.GroupMutedNotification:                   constant.SuperGroupChatType,
-		constant.GroupCancelMutedNotification:             constant.SuperGroupChatType,
-		constant.GroupMemberMutedNotification:             constant.SuperGroupChatType,
-		constant.GroupMemberCancelMutedNotification:       constant.SuperGroupChatType,
-		constant.GroupMemberInfoSetNotification:           constant.SuperGroupChatType,
-		constant.GroupMemberSetToAdminNotification:        constant.SuperGroupChatType,
-		constant.GroupMemberSetToOrdinaryUserNotification: constant.SuperGroupChatType,
-		constant.GroupInfoSetAnnouncementNotification:     constant.SuperGroupChatType,
-		constant.GroupInfoSetNameNotification:             constant.SuperGroupChatType,
+		constant.GroupOwnerTransferredNotification:        constant.ReadGroupChatType,
+		constant.MemberKickedNotification:                 constant.ReadGroupChatType,
+		constant.MemberInvitedNotification:                constant.ReadGroupChatType,
+		constant.MemberEnterNotification:                  constant.ReadGroupChatType,
+		constant.GroupDismissedNotification:               constant.ReadGroupChatType,
+		constant.GroupMutedNotification:                   constant.ReadGroupChatType,
+		constant.GroupCancelMutedNotification:             constant.ReadGroupChatType,
+		constant.GroupMemberMutedNotification:             constant.ReadGroupChatType,
+		constant.GroupMemberCancelMutedNotification:       constant.ReadGroupChatType,
+		constant.GroupMemberInfoSetNotification:           constant.ReadGroupChatType,
+		constant.GroupMemberSetToAdminNotification:        constant.ReadGroupChatType,
+		constant.GroupMemberSetToOrdinaryUserNotification: constant.ReadGroupChatType,
+		constant.GroupInfoSetAnnouncementNotification:     constant.ReadGroupChatType,
+		constant.GroupInfoSetNameNotification:             constant.ReadGroupChatType,
 		// user
 		constant.UserInfoUpdatedNotification:  constant.SingleChatType,
 		constant.UserStatusChangeNotification: constant.SingleChatType,
@@ -307,7 +307,7 @@ func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, co
 	msg.MsgFrom = constant.SysMsgType
 	msg.ContentType = contentType
 	msg.SessionType = sessionType
-	if msg.SessionType == constant.SuperGroupChatType {
+	if msg.SessionType == constant.ReadGroupChatType {
 		msg.GroupID = recvID
 	}
 	msg.CreateTime = timeutil.GetCurrentTimestampByMill()

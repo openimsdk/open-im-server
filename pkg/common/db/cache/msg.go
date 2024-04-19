@@ -408,9 +408,9 @@ func (c *msgCache) getMessageReactionExPrefix(clientMsgID string, sessionType in
 	switch sessionType {
 	case constant.SingleChatType:
 		return "EX_SINGLE_" + clientMsgID
-	case constant.GroupChatType:
+	case constant.WriteGroupChatType:
 		return "EX_GROUP_" + clientMsgID
-	case constant.SuperGroupChatType:
+	case constant.ReadGroupChatType:
 		return "EX_SUPER_GROUP_" + clientMsgID
 	case constant.NotificationChatType:
 		return "EX_NOTIFICATION" + clientMsgID
