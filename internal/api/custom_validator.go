@@ -26,7 +26,7 @@ func RequiredIf(fl validator.FieldLevel) bool {
 	switch sessionType {
 	case constant.SingleChatType, constant.NotificationChatType:
 		return fl.FieldName() != "RecvID" || fl.Field().String() != ""
-	case constant.GroupChatType, constant.SuperGroupChatType:
+	case constant.WriteGroupChatType, constant.ReadGroupChatType:
 		return fl.FieldName() != "GroupID" || fl.Field().String() != ""
 	default:
 		return true

@@ -121,7 +121,7 @@ func (m *msgServer) conversationAndGetRecvID(conversation *conversation.Conversa
 		} else {
 			return conversation.OwnerUserID
 		}
-	} else if conversation.ConversationType == constant.SuperGroupChatType {
+	} else if conversation.ConversationType == constant.ReadGroupChatType {
 		return conversation.GroupID
 	}
 	return ""

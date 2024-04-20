@@ -16,6 +16,7 @@ package push
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
@@ -26,7 +27,7 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 )
 
-func (p *Pusher) webhookBeforeOfflinePush(ctx context.Context, before *config.BeforeConfig, userIDs []string, msg *sdkws.MsgData, offlinePushUserIDs *[]string) error {
+func (c *ConsumerHandler) webhookBeforeOfflinePush(ctx context.Context, before *config.BeforeConfig, userIDs []string, msg *sdkws.MsgData, offlinePushUserIDs *[]string) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		if msg.ContentType == constant.Typing {
 			return nil
@@ -53,7 +54,7 @@ func (p *Pusher) webhookBeforeOfflinePush(ctx context.Context, before *config.Be
 
 		resp := &callbackstruct.CallbackBeforePushResp{}
 
-		if err := p.webhookClient.SyncPost(ctx, req.GetCallbackCommand(), req, resp, before); err != nil {
+		if err := c.webhookClient.SyncPost(ctx, req.GetCallbackCommand(), req, resp, before); err != nil {
 			return err
 		}
 
@@ -67,7 +68,7 @@ func (p *Pusher) webhookBeforeOfflinePush(ctx context.Context, before *config.Be
 	})
 }
 
-func (p *Pusher) webhookBeforeOnlinePush(ctx context.Context, before *config.BeforeConfig, userIDs []string, msg *sdkws.MsgData) error {
+func (c *ConsumerHandler) webhookBeforeOnlinePush(ctx context.Context, before *config.BeforeConfig, userIDs []string, msg *sdkws.MsgData) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		if datautil.Contain(msg.SendID, userIDs...) || msg.ContentType == constant.Typing {
 			return nil
@@ -91,14 +92,14 @@ func (p *Pusher) webhookBeforeOnlinePush(ctx context.Context, before *config.Bef
 			Content:     GetContent(msg),
 		}
 		resp := &callbackstruct.CallbackBeforePushResp{}
-		if err := p.webhookClient.SyncPost(ctx, req.GetCallbackCommand(), req, resp, before); err != nil {
+		if err := c.webhookClient.SyncPost(ctx, req.GetCallbackCommand(), req, resp, before); err != nil {
 			return err
 		}
 		return nil
 	})
 }
 
-func (p *Pusher) webhookBeforeGroupOnlinePush(
+func (c *ConsumerHandler) webhookBeforeGroupOnlinePush(
 	ctx context.Context,
 	before *config.BeforeConfig,
 	groupID string,
@@ -126,7 +127,7 @@ func (p *Pusher) webhookBeforeGroupOnlinePush(
 			Seq:         msg.Seq,
 		}
 		resp := &callbackstruct.CallbackBeforeSuperGroupOnlinePushResp{}
-		if err := p.webhookClient.SyncPost(ctx, req.GetCallbackCommand(), req, resp, before); err != nil {
+		if err := c.webhookClient.SyncPost(ctx, req.GetCallbackCommand(), req, resp, before); err != nil {
 			return err
 		}
 		if len(resp.UserIDs) != 0 {
@@ -134,4 +135,16 @@ func (p *Pusher) webhookBeforeGroupOnlinePush(
 		}
 		return nil
 	})
+}
+
+func GetContent(msg *sdkws.MsgData) string {
+	if msg.ContentType >= constant.NotificationBegin && msg.ContentType <= constant.NotificationEnd {
+		var notification sdkws.NotificationElem
+		if err := json.Unmarshal(msg.Content, &notification); err != nil {
+			return ""
+		}
+		return notification.Detail
+	} else {
+		return string(msg.Content)
+	}
 }

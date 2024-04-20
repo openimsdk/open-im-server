@@ -69,7 +69,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 				return nil, err
 			}
 			role = user.AppMangerLevel
-		case constant.SuperGroupChatType:
+		case constant.ReadGroupChatType:
 			members, err := m.GroupLocalCache.GetGroupMemberInfoMap(ctx, msgs[0].GroupID, datautil.Distinct([]string{req.UserID, msgs[0].SendID}))
 			if err != nil {
 				return nil, err
@@ -118,7 +118,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		IsAdminRevoke:  flag,
 	}
 	var recvID string
-	if msgs[0].SessionType == constant.SuperGroupChatType {
+	if msgs[0].SessionType == constant.ReadGroupChatType {
 		recvID = msgs[0].GroupID
 	} else {
 		recvID = msgs[0].RecvID

@@ -210,7 +210,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 	if req.Conversation == nil {
 		return nil, errs.ErrArgs.WrapMsg("conversation must not be nil")
 	}
-	if req.Conversation.ConversationType == constant.GroupChatType {
+	if req.Conversation.ConversationType == constant.WriteGroupChatType {
 		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
 		if err != nil {
 			return nil, err
@@ -279,7 +279,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			unequal++
 		}
 	}
-	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.SuperGroupChatType {
+	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.ReadGroupChatType {
 		var conversations []*tablerelation.ConversationModel
 		for _, ownerUserID := range req.UserIDs {
 			conversation2 := conversation
@@ -467,7 +467,7 @@ func (c *conversationServer) getConversationInfo(
 				sendIDs = append(sendIDs, chatLog.RecvID)
 			}
 			sendIDs = append(sendIDs, chatLog.SendID)
-		case constant.GroupChatType, constant.SuperGroupChatType:
+		case constant.WriteGroupChatType, constant.ReadGroupChatType:
 			groupIDs = append(groupIDs, chatLog.GroupID)
 			sendIDs = append(sendIDs, chatLog.SendID)
 		}
@@ -509,7 +509,7 @@ func (c *conversationServer) getConversationInfo(
 				msgInfo.FaceURL = send.FaceURL
 				msgInfo.SenderName = send.Nickname
 			}
-		case constant.GroupChatType, constant.SuperGroupChatType:
+		case constant.WriteGroupChatType, constant.ReadGroupChatType:
 			msgInfo.GroupID = chatLog.GroupID
 			if group, ok := groupMap[chatLog.GroupID]; ok {
 				msgInfo.GroupName = group.GroupName

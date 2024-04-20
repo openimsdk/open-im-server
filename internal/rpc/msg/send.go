@@ -40,7 +40,7 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.
 			return m.sendMsgSingleChat(ctx, req)
 		case constant.NotificationChatType:
 			return m.sendMsgNotification(ctx, req)
-		case constant.SuperGroupChatType:
+		case constant.ReadGroupChatType:
 			return m.sendMsgSuperGroupChat(ctx, req)
 		default:
 			return nil, errs.ErrArgs.WrapMsg("unknown sessionType")
