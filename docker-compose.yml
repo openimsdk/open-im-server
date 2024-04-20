@@ -60,6 +60,7 @@ services:
   kafka:
     image: "${KAFKA_IMAGE}"
     container_name: kafka
+    user: root
     restart: always
     ports:
       - "19094:9094"
