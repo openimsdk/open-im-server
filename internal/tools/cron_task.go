@@ -103,6 +103,15 @@ func netlock(rdb redis.UniversalClient, key string, ttl time.Duration) bool {
 	return ok
 }
 
+// netUnlock release redis lock.
+func netUnlock(rdb redis.UniversalClient, key string) error {
+	_, err := rdb.Del(context.Background(), key).Result()
+	if err != nil {
+		return errs.Wrap(err)
+	}
+	return nil
+}
+
 func cronWrapFunc(config *CronTaskConfig, rdb redis.UniversalClient, key string, fn func()) func() {
 	enableCronLocker := config.CronTask.EnableCronLocker
 	return func() {
@@ -114,6 +123,9 @@ func cronWrapFunc(config *CronTaskConfig, rdb redis.UniversalClient, key string,
 
 		// when acquire redis lock, call fn().
 		if netlock(rdb, key, 5*time.Second) {
+			defer func() {
+				_ = netUnlock(rdb, key)
+			}()
 			fn()
 		}
 	}

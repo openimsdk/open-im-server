@@ -38,6 +38,12 @@ func TestDisLock(t *testing.T) {
 
 	// set different key
 	assert.Equal(t, true, netlock(rdb, "cron-2", 2*time.Second))
+
+	// set key and release
+	assert.Equal(t, true, netlock(rdb, "cron-3", 5*time.Second))
+	assert.Equal(t, nil, netUnlock(rdb, "cron-3"))
+	//retrieve set key
+	assert.Equal(t, true, netlock(rdb, "cron-3", 5*time.Second))
 }
 
 //func TestCronWrapFunc(t *testing.T) {
