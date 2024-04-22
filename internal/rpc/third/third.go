@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"net/url"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -29,7 +28,6 @@ import (
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/s3"
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/minio"
@@ -38,7 +36,6 @@ import (
 )
 
 type thirdServer struct {
-	apiURL        string
 	thirdDatabase controller.ThirdDatabase
 	s3dataBase    controller.S3Database
 	userRpcClient rpcclient.UserRpcClient
@@ -73,18 +70,6 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	apiURL := config.MinioConfig.URL
-	if apiURL == "" {
-		return errs.Wrap(fmt.Errorf("api is empty"))
-	}
-	if _, err := url.Parse(config.MinioConfig.URL); err != nil {
-		return err
-	}
-	if apiURL[len(apiURL)-1] != '/' {
-		apiURL += "/"
-	}
-	apiURL += "object/"
-
 	// Select the oss method according to the profile policy
 	enable := config.RpcConfig.Object.Enable
 	var o s3.Interface
@@ -103,7 +88,6 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	}
 	cache.InitLocalCache(&config.LocalCacheConfig)
 	third.RegisterThirdServer(server, &thirdServer{
-		apiURL:        apiURL,
 		thirdDatabase: controller.NewThirdDatabase(cache.NewThirdCache(rdb), logdb),
 		userRpcClient: rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID),
 		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
