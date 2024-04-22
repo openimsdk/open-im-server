@@ -10,10 +10,9 @@ ENV GOPROXY=https://goproxy.cn,direct
 # Copy all files from the current directory into the container
 COPY . .
 
-# Execute the script and build command, including downloading mage
-RUN chmod +x ./bootstrap.sh && \
-    ./bootstrap.sh && \
-    mage build
+RUN go install github.com/magefile/mage@latest
+
+RUN mage -v && mage build
 
 # Use Alpine Linux as the final base image due to its small size and included utilities
 FROM alpine:latest
