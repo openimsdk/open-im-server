@@ -21,7 +21,7 @@ COPY . .
 RUN go install github.com/magefile/mage@latest
 
 # Execute the build command using Mage
-RUN mage build
+#RUN mage build
 
 # Use Alpine Linux as the final base image due to its small size and included utilities
 FROM alpine:latest
