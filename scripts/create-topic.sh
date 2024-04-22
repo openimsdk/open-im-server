@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Copyright © 2023 OpenIM. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,32 +12,44 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-mongosh <<EOF
-use admin
-var rootUsername = '$MONGO_INITDB_ROOT_USERNAME';
-var rootPassword = '$MONGO_INITDB_ROOT_PASSWORD';
-var authResult = db.auth(rootUsername, rootPassword);
-if (authResult) {
-  print('Authentication successful for root user: ' + rootUsername);
-} else {
-  print('Authentication failed for root user: ' + rootUsername + ' with password: ' + rootPassword);
-  quit(1);
-}
-var dbName = '$MONGO_INITDB_DATABASE';
-db = db.getSiblingDB(dbName);
-var openimUsername = '$MONGO_OPENIM_USERNAME';
-var openimPassword = '$MONGO_OPENIM_PASSWORD';
-var createUserResult = db.createUser({
-  user: openimUsername,
-  pwd: openimPassword,
-  roles: [
-    { role: 'readWrite', db: dbName }
-  ]
-});
-if (createUserResult.ok == 1) {
-  print('User creation successful. User: ' + openimUsername + ', Database: ' + dbName);
-} else {
-  print('User creation failed for user: ' + openimUsername + ' in database: ' + dbName);
-  quit(1);
-}
-EOF
+
+# Wait for Kafka to be ready
+
+KAFKA_SERVER=localhost:9092
+
+MAX_ATTEMPTS=300
+attempt_num=1
+
+echo "Waiting for Kafka to be ready..."
+
+until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server $KAFKA_SERVER; do
+  echo "Attempt $attempt_num of $MAX_ATTEMPTS: Kafka not ready yet..."
+  if [ $attempt_num -eq $MAX_ATTEMPTS ]; then
+    echo "Kafka not ready after $MAX_ATTEMPTS attempts, exiting"
+    exit 1
+  fi
+  attempt_num=$((attempt_num+1))
+  sleep 1
+done
+
+echo "Kafka is ready. Creating topics..."
+
+
+topics=("toRedis" "toMongo" "toPush")
+partitions=8
+replicationFactor=1
+
+for topic in "${topics[@]}"; do
+  if /opt/bitnami/kafka/bin/kafka-topics.sh --create \
+    --bootstrap-server $KAFKA_SERVER \
+    --replication-factor $replicationFactor \
+    --partitions $partitions \
+    --topic $topic
+  then
+    echo "Topic $topic created."
+  else
+    echo "Failed to create topic $topic."
+  fi
+done
+
+echo "All topics created."
