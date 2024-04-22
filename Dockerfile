@@ -26,6 +26,9 @@ RUN mage build
 # Use Alpine Linux as the final base image due to its small size and included utilities
 FROM alpine:latest
 
+# Define the base directory for the application as an environment variable again
+ENV OPENIM_SERVER_DIR=/openim-server
+
 # Install necessary packages, such as bash, to ensure compatibility and functionality
 RUN apk add --no-cache bash
 
