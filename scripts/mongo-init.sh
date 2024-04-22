@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 mongosh <<EOF
 use admin
 var rootUsername = '$MONGO_INITDB_ROOT_USERNAME';
@@ -23,7 +22,6 @@ if (authResult) {
   print('Authentication failed for root user: ' + rootUsername + ' with password: ' + rootPassword);
   quit(1);
 }
-
 var dbName = '$MONGO_INITDB_DATABASE';
 db = db.getSiblingDB(dbName);
 var openimUsername = '$MONGO_OPENIM_USERNAME';
@@ -35,7 +33,6 @@ var createUserResult = db.createUser({
     { role: 'readWrite', db: dbName }
   ]
 });
-
 if (createUserResult.ok == 1) {
   print('User creation successful. User: ' + openimUsername + ', Database: ' + dbName);
 } else {
@@ -43,6 +40,3 @@ if (createUserResult.ok == 1) {
   quit(1);
 }
 EOF
-
-
-
