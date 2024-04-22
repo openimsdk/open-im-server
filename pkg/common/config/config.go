@@ -477,16 +477,20 @@ func (k *Kafka) Build() *kafka.Config {
 	}
 }
 func (m *Minio) Build() *minio.Config {
-	return &minio.Config{
+	conf := minio.Config{
 		Bucket:          m.Bucket,
 		Endpoint:        fmt.Sprintf("http://%s:%d", m.InternalIP, m.Port),
 		AccessKeyID:     m.AccessKeyID,
 		SecretAccessKey: m.SecretAccessKey,
 		SessionToken:    m.SessionToken,
-		SignEndpoint:    fmt.Sprintf("http://%s:%d", m.ExternalIP, m.Port),
 		PublicRead:      m.PublicRead,
 	}
-
+	if m.URL == "" {
+		conf.SignEndpoint = fmt.Sprintf("http://%s:%d", m.ExternalIP, m.Port)
+	} else {
+		conf.SignEndpoint = m.URL
+	}
+	return &conf
 }
 func (c *Cos) Build() *cos.Config {
 	return &cos.Config{
