@@ -1,30 +1,26 @@
-# Build Stage
-FROM golang:1.20 AS builder
+# Use Go 1.21 as the base image
+FROM golang:1.21 as builder
 
-# Set go mod installation source and proxy
-ARG GO111MODULE=on
+# Set the working directory
+WORKDIR /openim-server
 
-ENV GO111MODULE=$GO111MODULE
-ENV GOPROXY=$GOPROXY
+# Copy all files from the current directory to the image
+COPY . .
 
-# Set up the working directory
-WORKDIR /openim/openim-server
+# Execute the script and build command
+RUN chmod +x ./bootstrap.sh && \
+    ./bootstrap.sh && \
+    mage build
 
+# Use scratch as the base image for the minimal production image
+FROM scratch
 
-# Copy all files to the container
-ADD . .
+# Copy the compiled binaries from the builder image to the production image
+COPY --from=builder /openim-server/_output /openim-server/_output
 
-RUN Bash bootstrap.sh
-RUN mage
+# Set the working directory
+WORKDIR /openim-server
 
-FROM ghcr.io/openim-sigs/openim-ubuntu-image:latest
+# Set up volume mounts for the config directory and logs directory
+VOLUME ["/openim-server/config", "/openim-server/_output/logs"]
 
-WORKDIR ${`SERVER_WORKDIR`}
-
-# Copy scripts and binary files to the production image
-COPY --from=builder ${OPENIM_SERVER_BINDIR} /openim/openim-server/_output/bin
-COPY --from=builder ${OPENIM_SERVER_CMDDIR} /openim/openim-server/scripts
-COPY --from=builder ${SERVER_WORKDIR}/config /openim/openim-server/config
-COPY --from=builder ${SERVER_WORKDIR}/deployments /openim/openim-server/deployments
-
-CMD ["cd /openim/openim-server/scripts/docker-start-all.sh"]
