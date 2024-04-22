@@ -4,6 +4,8 @@ FROM golang:1.21 as builder
 # Set the working directory
 WORKDIR /openim-server
 
+ENV GOPROXY=https://goproxy.cn,direct
+
 # Copy all files from the current directory to the image
 COPY . .
 
