@@ -54,3 +54,4 @@ done
 
 echo "All topics created."
 
+
