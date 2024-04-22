@@ -7,12 +7,15 @@ WORKDIR /openim-server
 # Set the Go proxy to improve dependency resolution speed
 ENV GOPROXY=https://goproxy.cn,direct
 
+COPY go.mod go.sum ./
+RUN go mod download
 # Copy all files from the current directory into the container
 COPY . .
 
+
 RUN go install github.com/magefile/mage@latest
 
-RUN mage -v && mage build
+RUN mage build
 
 # Use Alpine Linux as the final base image due to its small size and included utilities
 FROM alpine:latest
