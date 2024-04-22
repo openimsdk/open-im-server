@@ -22,7 +22,7 @@ RUN apk add --no-cache bash
 
 # Copy the compiled binaries and mage from the builder image to the final image
 COPY --from=builder /openim-server/_output /openim-server/_output
-COPY --from=builder /root/go/bin/mage /usr/local/bin/mage
+COPY --from=builder /go/bin/mage /usr/local/bin/mage
 
 # Set the working directory to /openim-server within the container
 WORKDIR /openim-server
