@@ -21,7 +21,7 @@ COPY . .
 RUN go install github.com/magefile/mage@latest
 
 # Execute the build command using Mage
-#RUN mage build
+RUN mage build
 
 # Use Alpine Linux as the final base image due to its small size and included utilities
 FROM alpine:latest
@@ -33,7 +33,7 @@ ENV OPENIM_SERVER_DIR=/openim-server
 RUN apk add --no-cache bash
 
 # Copy the compiled binaries and mage from the builder image to the final image
-#COPY --from=builder $OPENIM_SERVER_DIR/_output $OPENIM_SERVER_DIR/_output
+COPY --from=builder $OPENIM_SERVER_DIR/_output $OPENIM_SERVER_DIR/_output
 COPY --from=builder /go/bin/mage /usr/local/bin/mage
 COPY --from=builder $OPENIM_SERVER_DIR/magefile_windows.go $OPENIM_SERVER_DIR/
 COPY --from=builder $OPENIM_SERVER_DIR/magefile_unix.go $OPENIM_SERVER_DIR/
