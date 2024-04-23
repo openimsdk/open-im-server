@@ -85,7 +85,7 @@ jobs:
         if [ ! -f ./_output/tools/go-gitlint ]; then
           export GOBIN=$(pwd)/_output/tools
           echo "===========> Installing The default installation path is /home/ubuntu/DF/open-im-server/_output/tools/go-gitlint"
-          go install github.com/marmotedu/go-gitlint/cmd/go-gitlint@latest
+          sudo go install github.com/marmotedu/go-gitlint/cmd/go-gitlint@latest
           echo "===========> go-gitlint is installed in /home/ubuntu/DF/open-im-server/_output/tools/go-gitlint"
         fi
 
