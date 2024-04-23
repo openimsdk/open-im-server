@@ -96,7 +96,7 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 	var err error
 	switch msgFromMQ.MsgData.SessionType {
 	case constant.ReadGroupChatType:
-		err = c.Push2SuperGroup(ctx, pbData.MsgData.GroupID, pbData.MsgData)
+		err = c.Push2Group(ctx, pbData.MsgData.GroupID, pbData.MsgData)
 	default:
 		var pushUserIDList []string
 		isSenderSync := datautil.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
@@ -108,7 +108,7 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		err = c.Push2User(ctx, pushUserIDList, pbData.MsgData)
 	}
 	if err != nil {
-		log.ZError(ctx, "push failed", err, "msg", pbData.String())
+		log.ZWarn(ctx, "push failed", err, "msg", pbData.String())
 	}
 }
 
@@ -179,7 +179,7 @@ func (c *ConsumerHandler) shouldPushOffline(_ context.Context, msg *sdkws.MsgDat
 	return true
 }
 
-func (c *ConsumerHandler) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
+func (c *ConsumerHandler) Push2Group(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
 	log.ZDebug(ctx, "Get super group msg from msg_transfer and push msg", "msg", msg.String(), "groupID", groupID)
 	var pushToUserIDs []string
 	if err = c.webhookBeforeGroupOnlinePush(ctx, &c.config.WebhooksConfig.BeforeGroupOnlinePush, groupID, msg,
