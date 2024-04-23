@@ -1,5 +1,5 @@
-# Use Go 1.21 as the base image for building the application
-FROM golang:1.21 as builder
+# Use Go 1.21 Alpine as the base image for building the application
+FROM golang:1.21-alpine as builder
 
 # Define the base directory for the application as an environment variable
 ENV SERVER_DIR=/openim-server
@@ -15,37 +15,32 @@ COPY . .
 
 RUN go mod download
 
-
 # Install Mage to use for building the application
 RUN go install github.com/magefile/mage@latest
 
-# Uncomment and ensure your build command is correctly specified
-#RUN mage build
+# Optionally build your application if needed
+RUN mage build
 
+# Using Alpine Linux with Go environment for the final image
+FROM golang:1.21-alpine
 
-# Use Alpine Linux as the final base image due to its small size and included utilities
-FROM alpine:latest
-
-# Install necessary packages, such as bash, to ensure compatibility and functionality
+# Install necessary packages, such as bash
 RUN apk add --no-cache bash
 
+# Set the environment and work directory
 ENV SERVER_DIR=/openim-server
-
-# Set the working directory inside the container based on the environment variable
 WORKDIR $SERVER_DIR
 
-
-
 # Copy the compiled binaries and mage from the builder image to the final image
-
-COPY --from=builder $SERVER_DIR/_output $SERVER_DIR/
-COPY --from=builder $SERVER_DIR/config $SERVER_DIR/
+COPY --from=builder $SERVER_DIR/_output $SERVER_DIR/_output
+COPY --from=builder $SERVER_DIR/config $SERVER_DIR/config
 COPY --from=builder /go/bin/mage /usr/local/bin/mage
 COPY --from=builder $SERVER_DIR/magefile_windows.go $SERVER_DIR/
 COPY --from=builder $SERVER_DIR/magefile_unix.go $SERVER_DIR/
 COPY --from=builder $SERVER_DIR/magefile.go $SERVER_DIR/
 COPY --from=builder $SERVER_DIR/start-config.yml $SERVER_DIR/
-
+COPY --from=builder $SERVER_DIR/go.mod $SERVER_DIR/
+COPY --from=builder $SERVER_DIR/go.sum $SERVER_DIR/
 
 # Set up volume mounts for the configuration directory and logs directory
 VOLUME ["$SERVER_DIR/config", "$SERVER_DIR/_output/logs"]
