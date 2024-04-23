@@ -16,7 +16,7 @@ COPY . .
 RUN go mod download
 
 # Install Mage to use for building the application
-RUN go install github.com/magefile/mage@latest
+RUN go install github.com/magefile/mage@v1.15.0
 
 # Optionally build your application if needed
 RUN mage build
@@ -31,6 +31,7 @@ RUN apk add --no-cache bash
 ENV SERVER_DIR=/openim-server
 WORKDIR $SERVER_DIR
 
+
 # Copy the compiled binaries and mage from the builder image to the final image
 COPY --from=builder $SERVER_DIR/_output $SERVER_DIR/_output
 COPY --from=builder $SERVER_DIR/config $SERVER_DIR/config
@@ -42,8 +43,7 @@ COPY --from=builder $SERVER_DIR/start-config.yml $SERVER_DIR/
 COPY --from=builder $SERVER_DIR/go.mod $SERVER_DIR/
 COPY --from=builder $SERVER_DIR/go.sum $SERVER_DIR/
 
-# Set up volume mounts for the configuration directory and logs directory
-VOLUME ["$SERVER_DIR/config", "$SERVER_DIR/_output/logs"]
+RUN go get github.com/openimsdk/gomake@v0.0.9-alpha.3
 
 # Set the command to run when the container starts
-ENTRYPOINT ["sh", "-c", "mage start"]
+ENTRYPOINT ["sh", "-c", "mage start && tail -f /dev/null"]
