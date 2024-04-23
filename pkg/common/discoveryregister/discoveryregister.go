@@ -20,6 +20,8 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/zookeeper"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"os"
 	"time"
 )
 
@@ -33,6 +35,10 @@ const (
 func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share) (discovery.SvcDiscoveryRegistry, error) {
 	switch share.Env {
 	case zookeeperConst:
+		zklogger, err := log.NewConsoleZapLogger("", 6, false, config.Version, os.Stdout)
+		if err != nil {
+			return nil, errs.Wrap(err)
+		}
 		return zookeeper.NewZkClient(
 			zookeeperConfig.Address,
 			zookeeperConfig.Schema,
@@ -40,6 +46,7 @@ func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share
 			zookeeper.WithUserNameAndPassword(zookeeperConfig.Username, zookeeperConfig.Password),
 			zookeeper.WithRoundRobin(),
 			zookeeper.WithTimeout(10),
+			zookeeper.WithLogger(zklogger),
 		)
 	case kubenetesConst:
 		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
