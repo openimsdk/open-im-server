@@ -270,8 +270,8 @@ github.com/openimsdk/gomake v0.0.6 h1:bJmQWDHBj8PQ7oGJ2SL3Gsx0k5CdI/BPfGzlGcV105
 github.com/openimsdk/gomake v0.0.6/go.mod h1:PndCozNc2IsQIciyn9mvEblYWZwJmAI+06z94EY+csI=
 github.com/openimsdk/protocol v0.0.64 h1:OrjSs4CgKN9VLvJvrAsc37O7Ru0E0VllXZQSmG/ab7U=
 github.com/openimsdk/protocol v0.0.64/go.mod h1:OZQA9FR55lseYoN2Ql1XAHYKHJGu7OMNkUbuekrKCM8=
-github.com/openimsdk/tools v0.0.49-alpha.0 h1:pSTWimcrcOrxVUyQO0/nd0ReKjkerj4/gJWXmbsYax0=
-github.com/openimsdk/tools v0.0.49-alpha.0/go.mod h1:P4oGP1Pd+d4ctbLD5U/XQTgl8yu8Hd3skx640Fr69ko=
+github.com/openimsdk/tools v0.0.49-alpha.2 h1:8IfV6o2ySU7C54sh/MG7ctEp1h3lSNe03OCUDWSk5Ws=
+github.com/openimsdk/tools v0.0.49-alpha.2/go.mod h1:P4oGP1Pd+d4ctbLD5U/XQTgl8yu8Hd3skx640Fr69ko=
 github.com/pelletier/go-toml/v2 v2.1.0 h1:FnwAJ4oYMvbT/34k9zzHuZNrhlz48GB3/s6at6/MHO4=
 github.com/pelletier/go-toml/v2 v2.1.0/go.mod h1:tJU2Z3ZkXwnxa4DPO899bsyIoywizdUvyaeZurnPPDc=
 github.com/pierrec/lz4/v4 v4.1.21 h1:yOVMLb6qSIDP67pl/5F7RepeKYu/VmTyEXvuMI5d9mQ=
