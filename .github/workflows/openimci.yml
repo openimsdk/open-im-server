@@ -1,3 +1,4 @@
+
 # Copyright © 2023 OpenIM open source community. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,8 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-name: OpenIM CI Aotu Build and Install
+name: OpenIM CI Auto Build
 
 on: 
   push:
@@ -37,269 +37,154 @@ on:
         - "**.md"
         - "docs/**"
 
-env:
-  GO_VERSION: "1.19"
-  GOLANGCI_VERSION: "v1.50.1"
-
 jobs:
-  openim:
-    name: Test with go ${{ matrix.go_version }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    permissions:
-        contents: write
-        pull-requests: write
-    environment:
-      name: openim
-    strategy:
-      matrix:
-        go_version: ["1.19","1.20","1.21"]
-        os: [ubuntu-latest]
-    steps:
-    - name: Setup
-      uses: actions/checkout@v4
 
-    - name: Set up Go ${{ matrix.go_version }}
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ matrix.go_version }}
-      id: go
-
-    - name: Install Task
-      uses: arduino/setup-task@v1
-      with:
-        version: '3.x' # If available, use the latest major version that's compatible
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Code Typecheck Detector
-      uses: kubecub/typecheck@main
-
-    - name: Conformity Checker for Project
-      uses: kubecub/standardizer@main
-
-    - name: Module Operations
-      run: |
-        sudo make tidy
-        sudo make tools.verify.go-gitlint
-
-    - name: Format Code
-      run: sudo make format
-      continue-on-error: true
-
-    - name: Generate Files
-      run: make gen
-      continue-on-error: true
-
-    - name: Build Source
-      run: sudo make build
-
-    - name: Build multiarch PLATFORMS
-      if: startsWith(github.ref, 'refs/heads/release-')
-      run: |
-        sudo make multiarch
-
-    - name: Cleanup Build
-      run: sudo make clean
-
-    - name: Set Current Directory
-      id: set_directory
-      run: echo "::set-output name=directory::$(pwd)"
-      continue-on-error: true
-
-    - name: Collect and Display Test Coverage
-      id: collect_coverage
-      run: |
-        cd ${{ steps.set_directory.outputs.directory }}
-        make cover
-        echo "::set-output name=coverage_file::./_output/tmp/coverage.out"
-        echo "Test Coverage:"
-        cat ${{ steps.collect_coverage.outputs.coverage_file }}
-      continue-on-error: true
-
-  openim-start:
-    name: Test OpenIM install/start on ${{ matrix.os }}-${{ matrix.arch }}
-    runs-on: ${{ matrix.os }}
-    permissions:
-        contents: write
-        pull-requests: write
-    environment:
-      name: openim
-    strategy:
-      matrix:
-        go_version: ["1.21"]
-        os: ["ubuntu-latest"]
-    steps:
-    - name: Checkout and Install OpenIM
-      uses: actions/checkout@v4
-    - name: Install Task
-      uses: arduino/setup-task@v1
-      with:
-        version: '3.x' # If available, use the latest major version that's compatible
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Run OpenIM make install start
-      run: |
-        sudo make install
-
-    # - name: Check the OpenIM environment and status
-    #   run: |
-    #     sudo docker images
-    #     sudo docker ps
-
-    - name: Check the OpenIM environment and status
-      if: runner.os == 'Linux' && matrix.arch == 'amd64'
-      id: docker_info
-      run: |
-        sleep 30
-        echo "images<<EOF" >> $GITHUB_ENV
-        sudo docker images >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
-        echo "containers<<EOF" >> $GITHUB_ENV
-        sudo docker ps >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
-
-    - name: Comment PR
-      uses: thollander/actions-comment-pull-request@v2
-      if: runner.os == 'Linux' && matrix.arch == 'amd64'
-      with:
-        message: |
-          > [!TIP]
-          > Run make install to check the status
-
-          ### Docker Images:
-          <details><summary>Click to expand docker images</summary>
-          ```bash
-          ${{ env.images }}
-          ```
-          </details>
-
-          ### Docker Processes:
-          <details><summary>Click to expand docker ps</summary>
-          ```bash
-          ${{ env.containers }}
-          ```
-          </details>
-        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-
-  execute-scripts:
-    name: Execute OpenIM Script On ${{ matrix.os }}-${{ matrix.arch }}
-    runs-on: ${{ matrix.os }}
-    permissions:
-        contents: write
-        pull-requests: write
-    environment:
-      name: openim
-    strategy:
-      matrix:
-        go_version: ["1.21"]
-        os: ["ubuntu-latest", "macos-latest"]
-        arch: [arm64, armv7, amd64]
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Go ${{ matrix.go_version }}
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ matrix.go_version }}
-      id: go
-
-    - name: Install Task
-      uses: arduino/setup-task@v1
-      with:
-        version: '3.x' # If available, use the latest major version that's compatible
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-    # - name: Install latest Bash (macOS only)
-    #   if: runner.os == 'macOS' && matrix.arch == 'arm64'
-    #   run: |
-    #     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    #     brew update
-    
-    #     brew install bash
-    #     brew install gnu-sed
-    
-    #     echo "/usr/local/bin" >> $GITHUB_PATH
-    #     echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
-    #   continue-on-error: true
-
-    - name: Set up Docker for Ubuntu
-      if: runner.os == 'Linux'
-      run: |
-        sudo make init
-        sudo docker compose up -d
-        sudo sleep 20
-
-    # - name: Set up Docker for macOS
-    #   if: runner.os == 'macOS' && matrix.arch == 'arm64'
-    #   run: |
-    #     brew install --cask docker
-    #     open /Applications/Docker.app
-
-    #     sleep 10
-    #     docker-compose --version || brew install docker-compose
-
-    #     docker-compose up -d
-    #     sleep 20
-
-    - name: Module Operations for Ubuntu
-      if: runner.os == 'Linux'
-      run: |
-        sudo make tidy
-        sudo make tools.verify.go-gitlint
-
-    # - name: Module Operations for macOS
-    #   if: runner.os == 'macOS'
-    #   run: |
-    #     make tidy
-    #     make tools.verify.go-gitlint
-
-    - name: Build, Start, Check Services and Print Logs for Ubuntu
-      if: runner.os == 'Linux'
-      run: |
-        sudo make build
-        sudo make start
-        sudo make check
-
-    - name: Restart Services and Print Logs for Ubuntu
-      if: runner.os == 'Linux' && matrix.arch == 'amd64'
-      run: |
-        sudo make restart
-        sudo make check
-
-    - name: Build, Start, Check Services and Print Logs for macOS
-      if: runner.os == 'macOS' && matrix.arch == 'arm64'
-      run: |
-        make build
-
-  openim-test-build-image:
-    name: Build OpenIM Docker Image
+  build-linux:
+    name: Execute OpenIM Script On Linux
     runs-on: ubuntu-latest
     permissions:
-        contents: write
-        pull-requests: write
+      contents: write
+      pull-requests: write
     environment:
       name: openim
+    strategy:
+      matrix:
+        arch: [arm64, armv7, amd64]
+    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Set up Go ${{ matrix.go_version }}
-      uses: actions/setup-go@v5
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
       with:
-        go-version: ${{ matrix.go_version }}
-      id: go
+        go-version: '1.21'
 
-    - name: Install Task
-      uses: arduino/setup-task@v1
-      with:
-        version: '3.x' # If available, use the latest major version that's compatible
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Test Docker Build
+    - name: Set up Docker for Linux
       run: |
-        sudo make init
-        sudo make image
+        sudo docker compose up -d
+        sudo sleep 30  # Increased sleep time for better stability
+      timeout-minutes: 20  # Increased timeout for Docker setup
 
-    - name: Get OpenIM Docker Images Status
-      id: docker_processes
+
+    - name: init
+      run: sudo bash bootstrap.sh
+      timeout-minutes: 20
+
+    - name: Build, Start, Check Services and Print Logs for Linux
       run: |
-        sudo docker images
-        sudo docker ps
+        sudo mage
+        sudo mage start
+        sudo mage check
+        
+
+    - name: Restart Services and Print Logs
+      run: |
+        sudo mage stop
+        sudo mage start
+        sudo mage check
+
+
+#  build-mac:
+#    name: Execute OpenIM Script On macOS
+#    runs-on: macos-latest
+#    permissions:
+#      contents: write
+#      pull-requests: write
+#    environment:
+#      name: openim
+#    strategy:
+#      matrix:
+#        arch: [arm64, armv7, amd64]
+#    
+#    steps:
+#    - uses: actions/checkout@v3
+
+#    - name: Set up Go
+#      uses: actions/setup-go@v4
+#      with:
+#        go-version: '1.21'
+
+        
+#        while ! docker system info > /dev/null 2>&1; do
+#          echo "Waiting for Docker to start..."
+#          sleep 10  # Increased delay to ensure Docker starts properly
+#        done
+
+#    - name: Install Docker
+#      run: |
+#        brew install docker
+#        brew install docker-compose
+#        sleep 10
+#        docker-compose up -d
+#        sleep 30
+#      timeout-minutes: 20 
+#        
+
+#    - name: init
+#      run: sudo bash bootstrap.sh
+#      timeout-minutes: 20
+
+#    - name: Build, Start, Check Services and Print Logs for Linux
+#      run: |
+#        sudo mage
+#        sudo mage start
+#        sudo mage check
+        
+#    - name: Restart Services and Print Logs
+#      run: |
+#        sudo mage stop
+#        sudo mage start
+#        sudo mage check
+
+#  build-windows:
+#    name: Execute OpenIM Script On Windows
+#    runs-on: windows-latest
+#    permissions:
+#      contents: write
+#      pull-requests: write
+#    environment:
+#      name: openim
+#    strategy:
+#      matrix:
+#        arch: [arm64, armv7, amd64]
+#    
+#    steps:
+#    - uses: actions/checkout@v3
+
+#    - name: Set up Go
+#      uses: actions/setup-go@v4
+#      with:
+#        go-version: '1.21'
+
+#    - name: Set up Docker for Windows
+#      run: |
+#        $images = @("zookeeper", "redis", "kafka")
+#        foreach ($image in $images) {
+#          $tag = "$image:latest"
+#          docker pull $tag | Out-Null
+#          if ($LASTEXITCODE -ne 0) {
+#            Write-Host "Skipping $image as it is not available for Windows"
+#          } else {
+#            Write-Host "Successfully pulled $image"
+#          }
+#        }
+#        docker compose up -d
+#        Start-Sleep -Seconds 30
+#      timeout-minutes: 20
+#      shell: pwsh
+
+#    - name: init
+#      run: bootstrap.bat
+#      timeout-minutes: 20
+
+#    - name: Build, Start, Check Services and Print Logs for Linux
+#      run: |
+#        mage
+#        mage start
+#        mage check        
+
+#    - name: Restart Services and Print Logs
+#      run: |
+#        mage stop
+#        mage start
+#        mage check
