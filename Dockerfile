@@ -46,4 +46,4 @@ COPY --from=builder $SERVER_DIR/go.sum $SERVER_DIR/
 VOLUME ["$SERVER_DIR/config", "$SERVER_DIR/_output/logs"]
 
 # Set the command to run when the container starts
-ENTRYPOINT ["sh", "-c", "mage start && tail -f /dev/null"]
+ENTRYPOINT ["sh", "-c", "mage start"]
