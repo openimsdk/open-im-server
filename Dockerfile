@@ -2,7 +2,7 @@
 FROM golang:1.21 as builder
 
 # Define the base directory for the application as an environment variable
-ENV SERVER_DIR=/openim-chat
+ENV SERVER_DIR=/openim-server
 
 # Set the working directory inside the container based on the environment variable
 WORKDIR $SERVER_DIR
@@ -29,7 +29,7 @@ FROM alpine:latest
 # Install necessary packages, such as bash, to ensure compatibility and functionality
 RUN apk add --no-cache bash
 
-ENV SERVER_DIR=/openim-chat
+ENV SERVER_DIR=/openim-server
 
 # Set the working directory inside the container based on the environment variable
 WORKDIR $SERVER_DIR
