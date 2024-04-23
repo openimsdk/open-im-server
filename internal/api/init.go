@@ -64,10 +64,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
 
-	if err = client.CreateRpcRootNodes(config.Share.RpcRegisterName.GetServiceNames()); err != nil {
-		return errs.WrapMsg(err, "failed to create RPC root nodes")
-	}
-
 	var (
 		netDone = make(chan struct{}, 1)
 		netErr  error
