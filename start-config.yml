@@ -12,8 +12,6 @@ serviceBinaries:
   openim-rpc-msg: 1
   openim-rpc-third: 1
 toolBinaries:
-  - ncpu
   - check-free-memory
-  - versionchecker
   - check-component
 maxFileDescriptors: 10000
