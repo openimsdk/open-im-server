@@ -1,0 +1,156 @@
+url: "webhook://127.0.0.1:10008/callbackExample"
+beforeSendSingleMsg:
+  enable: false
+  timeout: 5
+  failedContinue: true
+beforeUpdateUserInfoEx:
+  enable:  false
+  timeout: 5
+  failedContinue: true
+afterUpdateUserInfoEx:
+  enable:  false
+  timeout: 5
+afterSendSingleMsg:
+  enable: false
+  timeout: 5
+beforeSendGroupMsg:
+  enable: false
+  timeout: 5
+  failedContinue: true
+beforeMsgModify:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterSendGroupMsg:
+  enable: false
+  timeout: 5
+afterUserOnline:
+  enable: false
+  timeout: 5
+afterUserOffline:
+  enable: false
+  timeout: 5
+afterUserKickOff:
+  enable: false
+  timeout: 5
+beforeOfflinePush:
+  enable: false
+  timeout: 5
+  failedContinue: true
+beforeOnlinePush:
+  enable: false
+  timeout: 5
+  failedContinue: true
+beforeGroupOnlinePush:
+  enable: false
+  timeout: 5
+  failedContinue: true
+beforeAddFriend:
+  enable: false
+  timeout: 5
+  failedContinue: true
+beforeUpdateUserInfo:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterUpdateUserInfo:
+  enable: false
+  timeout: 5
+beforeCreateGroup:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterCreateGroup:
+  enable: false
+  timeout: 5
+beforeMemberJoinGroup:
+  enable: false
+  timeout: 5
+  failedContinue: true
+beforeSetGroupMemberInfo:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterSetGroupMemberInfo:
+  enable: false
+  timeout: 5
+afterQuitGroup:
+  enable: false
+  timeout: 5
+afterKickGroupMember:
+  enable: false
+  timeout: 5
+afterDismissGroup:
+  enable: false
+  timeout: 5
+beforeApplyJoinGroup:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterGroupMsgRead:
+  enable: false
+  timeout: 5
+afterSingleMsgRead:
+  enable: false
+  timeout: 5
+beforeUserRegister:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterUserRegister:
+  enable: false
+  timeout: 5
+afterTransferGroupOwner:
+  enable: false
+  timeout: 5
+beforeSetFriendRemark:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterSetFriendRemark:
+  enable: false
+  timeout: 5
+afterGroupMsgRevoke:
+  enable: false
+  timeout: 5
+afterJoinGroup:
+  enable: false
+  timeout: 5
+beforeInviteUserToGroup:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterSetGroupInfo:
+  enable: false
+  timeout: 5
+beforeSetGroupInfo:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterRevokeMsg:
+  enable: false
+  timeout: 5
+beforeAddBlack:
+  enable: false
+  timeout: 5
+  failedContinue:
+afterAddFriend:
+  enable: false
+  timeout: 5
+beforeAddFriendAgree:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterDeleteFriend:
+  enable: false
+  timeout: 5
+beforeImportFriends:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterImportFriends:
+  enable: false
+  timeout: 5
+afterRemoveBlack:
+  enable: false
+  timeout: 5

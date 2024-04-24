@@ -18,11 +18,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mgoutil"
-	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -48,34 +48,34 @@ type UserMgo struct {
 }
 
 func (u *UserMgo) Create(ctx context.Context, users []*relation.UserModel) error {
-	return mgoutil.InsertMany(ctx, u.coll, users)
+	return mongoutil.InsertMany(ctx, u.coll, users)
 }
 
 func (u *UserMgo) UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error) {
 	if len(args) == 0 {
 		return nil
 	}
-	return mgoutil.UpdateOne(ctx, u.coll, bson.M{"user_id": userID}, bson.M{"$set": args}, true)
+	return mongoutil.UpdateOne(ctx, u.coll, bson.M{"user_id": userID}, bson.M{"$set": args}, true)
 }
 
 func (u *UserMgo) Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
-	return mgoutil.Find[*relation.UserModel](ctx, u.coll, bson.M{"user_id": bson.M{"$in": userIDs}})
+	return mongoutil.Find[*relation.UserModel](ctx, u.coll, bson.M{"user_id": bson.M{"$in": userIDs}})
 }
 
 func (u *UserMgo) Take(ctx context.Context, userID string) (user *relation.UserModel, err error) {
-	return mgoutil.FindOne[*relation.UserModel](ctx, u.coll, bson.M{"user_id": userID})
+	return mongoutil.FindOne[*relation.UserModel](ctx, u.coll, bson.M{"user_id": userID})
 }
 
 func (u *UserMgo) TakeNotification(ctx context.Context, level int64) (user []*relation.UserModel, err error) {
-	return mgoutil.Find[*relation.UserModel](ctx, u.coll, bson.M{"app_manger_level": level})
+	return mongoutil.Find[*relation.UserModel](ctx, u.coll, bson.M{"app_manger_level": level})
 }
 
 func (u *UserMgo) TakeByNickname(ctx context.Context, nickname string) (user []*relation.UserModel, err error) {
-	return mgoutil.Find[*relation.UserModel](ctx, u.coll, bson.M{"nickname": nickname})
+	return mongoutil.Find[*relation.UserModel](ctx, u.coll, bson.M{"nickname": nickname})
 }
 
 func (u *UserMgo) Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
-	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, bson.M{}, pagination)
+	return mongoutil.FindPage[*relation.UserModel](ctx, u.coll, bson.M{}, pagination)
 }
 
 func (u *UserMgo) PageFindUser(ctx context.Context, level1 int64, level2 int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
@@ -86,7 +86,7 @@ func (u *UserMgo) PageFindUser(ctx context.Context, level1 int64, level2 int64, 
 		},
 	}
 
-	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, query, pagination)
+	return mongoutil.FindPage[*relation.UserModel](ctx, u.coll, query, pagination)
 }
 
 func (u *UserMgo) PageFindUserWithKeyword(
@@ -121,26 +121,26 @@ func (u *UserMgo) PageFindUserWithKeyword(
 	}
 
 	// Perform the paginated search
-	return mgoutil.FindPage[*relation.UserModel](ctx, u.coll, query, pagination)
+	return mongoutil.FindPage[*relation.UserModel](ctx, u.coll, query, pagination)
 }
 
 func (u *UserMgo) GetAllUserID(ctx context.Context, pagination pagination.Pagination) (int64, []string, error) {
-	return mgoutil.FindPage[string](ctx, u.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}))
+	return mongoutil.FindPage[string](ctx, u.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}))
 }
 
 func (u *UserMgo) Exist(ctx context.Context, userID string) (exist bool, err error) {
-	return mgoutil.Exist(ctx, u.coll, bson.M{"user_id": userID})
+	return mongoutil.Exist(ctx, u.coll, bson.M{"user_id": userID})
 }
 
 func (u *UserMgo) GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error) {
-	return mgoutil.FindOne[int](ctx, u.coll, bson.M{"user_id": userID}, options.FindOne().SetProjection(bson.M{"_id": 0, "global_recv_msg_opt": 1}))
+	return mongoutil.FindOne[int](ctx, u.coll, bson.M{"user_id": userID}, options.FindOne().SetProjection(bson.M{"_id": 0, "global_recv_msg_opt": 1}))
 }
 
 func (u *UserMgo) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
 	if before == nil {
-		return mgoutil.Count(ctx, u.coll, bson.M{})
+		return mongoutil.Count(ctx, u.coll, bson.M{})
 	}
-	return mgoutil.Count(ctx, u.coll, bson.M{"create_time": bson.M{"$lt": before}})
+	return mongoutil.Count(ctx, u.coll, bson.M{"create_time": bson.M{"$lt": before}})
 }
 
 func (u *UserMgo) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error {
@@ -308,7 +308,7 @@ func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, 
 		Date  string `bson:"_id"`
 		Count int64  `bson:"count"`
 	}
-	items, err := mgoutil.Aggregate[Item](ctx, u.coll, pipeline)
+	items, err := mongoutil.Aggregate[Item](ctx, u.coll, pipeline)
 	if err != nil {
 		return nil, err
 	}

@@ -1,0 +1,13 @@
+api:
+  # Listening IP; 0.0.0.0 means both internal and external IPs are listened to, default is recommended
+  listenIP: 0.0.0.0
+  # Listening ports; if multiple are configured, multiple instances will be launched, must be consistent with the number of prometheus.ports
+  ports: [ 10002 ]
+
+prometheus:
+  # Whether to enable prometheus
+  enable: true
+  # Prometheus listening ports, must match the number of api.ports
+  ports: [ 20113 ]
+  # This address can be accessed via a browser
+  grafanaURL: http://127.0.0.1:13000/

@@ -1,0 +1,14 @@
+rpc:
+  registerIP: ''
+  listenIP: 0.0.0.0
+  ports: [ 10130 ]
+
+prometheus:
+  enable: true
+  ports: [ 20102 ]
+
+#发消息是否需要好友验证
+friendVerify: false
+
+
+

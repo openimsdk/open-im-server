@@ -15,13 +15,16 @@
 package msggateway
 
 import (
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/utils/encrypt"
+	"github.com/openimsdk/tools/utils/stringutil"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 type UserConnContext struct {
@@ -54,7 +57,7 @@ func (c *UserConnContext) Value(key any) any {
 	case constant.ConnID:
 		return c.GetConnID()
 	case constant.OpUserPlatform:
-		return constant.PlatformIDToName(utils.StringToInt(c.GetPlatformID()))
+		return constant.PlatformIDToName(stringutil.StringToInt(c.GetPlatformID()))
 	case constant.RemoteAddr:
 		return c.RemoteAddr
 	default:
@@ -69,7 +72,7 @@ func newContext(respWriter http.ResponseWriter, req *http.Request) *UserConnCont
 		Path:       req.URL.Path,
 		Method:     req.Method,
 		RemoteAddr: req.RemoteAddr,
-		ConnID:     utils.Md5(req.RemoteAddr + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill()))),
+		ConnID:     encrypt.Md5(req.RemoteAddr + "_" + strconv.Itoa(int(timeutil.GetCurrentTimestampByMill()))),
 	}
 }
 
@@ -133,6 +136,32 @@ func (c *UserConnContext) GetToken() string {
 	return c.Req.URL.Query().Get(Token)
 }
 
+func (c *UserConnContext) GetCompression() bool {
+	compression, exists := c.Query(Compression)
+	if exists && compression == GzipCompressionProtocol {
+		return true
+	} else {
+		compression, exists := c.GetHeader(Compression)
+		if exists && compression == GzipCompressionProtocol {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *UserConnContext) ShouldSendResp() bool {
+	errResp, exists := c.Query(SendResponse)
+	if exists {
+		b, err := strconv.ParseBool(errResp)
+		if err != nil {
+			return false
+		} else {
+			return b
+		}
+	}
+	return false
+}
+
 func (c *UserConnContext) SetToken(token string) {
 	c.Req.URL.RawQuery = Token + "=" + token
 }
@@ -143,4 +172,24 @@ func (c *UserConnContext) GetBackground() bool {
 		return false
 	}
 	return b
+}
+func (c *UserConnContext) ParseEssentialArgs() error {
+	_, exists := c.Query(Token)
+	if !exists {
+		return servererrs.ErrConnArgsErr.WrapMsg("token is empty")
+	}
+	_, exists = c.Query(WsUserID)
+	if !exists {
+		return servererrs.ErrConnArgsErr.WrapMsg("sendID is empty")
+	}
+	platformIDStr, exists := c.Query(PlatformID)
+	if !exists {
+		return servererrs.ErrConnArgsErr.WrapMsg("platformID is empty")
+	}
+	_, err := strconv.Atoi(platformIDStr)
+	if err != nil {
+		return servererrs.ErrConnArgsErr.WrapMsg("platformID is not int")
+
+	}
+	return nil
 }

@@ -1,0 +1,7 @@
+bucket: "openim"
+accessKeyID: "root"
+secretAccessKey: "openIM123"
+sessionToken: ''
+internalAddress: "minio:9000"
+externalAddress: "http://external_ip:10005"
+publicRead: false

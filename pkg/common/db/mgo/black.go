@@ -17,9 +17,9 @@ package mgo
 import (
 	"context"
 
-	"github.com/OpenIMSDK/tools/mgoutil"
-	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -63,42 +63,42 @@ func (b *BlackMgo) blacksFilter(blacks []*relation.BlackModel) bson.M {
 }
 
 func (b *BlackMgo) Create(ctx context.Context, blacks []*relation.BlackModel) (err error) {
-	return mgoutil.InsertMany(ctx, b.coll, blacks)
+	return mongoutil.InsertMany(ctx, b.coll, blacks)
 }
 
 func (b *BlackMgo) Delete(ctx context.Context, blacks []*relation.BlackModel) (err error) {
 	if len(blacks) == 0 {
 		return nil
 	}
-	return mgoutil.DeleteMany(ctx, b.coll, b.blacksFilter(blacks))
+	return mongoutil.DeleteMany(ctx, b.coll, b.blacksFilter(blacks))
 }
 
 func (b *BlackMgo) UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]any) (err error) {
 	if len(args) == 0 {
 		return nil
 	}
-	return mgoutil.UpdateOne(ctx, b.coll, b.blackFilter(ownerUserID, blockUserID), bson.M{"$set": args}, false)
+	return mongoutil.UpdateOne(ctx, b.coll, b.blackFilter(ownerUserID, blockUserID), bson.M{"$set": args}, false)
 }
 
 func (b *BlackMgo) Find(ctx context.Context, blacks []*relation.BlackModel) (blackList []*relation.BlackModel, err error) {
-	return mgoutil.Find[*relation.BlackModel](ctx, b.coll, b.blacksFilter(blacks))
+	return mongoutil.Find[*relation.BlackModel](ctx, b.coll, b.blacksFilter(blacks))
 }
 
 func (b *BlackMgo) Take(ctx context.Context, ownerUserID, blockUserID string) (black *relation.BlackModel, err error) {
-	return mgoutil.FindOne[*relation.BlackModel](ctx, b.coll, b.blackFilter(ownerUserID, blockUserID))
+	return mongoutil.FindOne[*relation.BlackModel](ctx, b.coll, b.blackFilter(ownerUserID, blockUserID))
 }
 
 func (b *BlackMgo) FindOwnerBlacks(ctx context.Context, ownerUserID string, pagination pagination.Pagination) (total int64, blacks []*relation.BlackModel, err error) {
-	return mgoutil.FindPage[*relation.BlackModel](ctx, b.coll, bson.M{"owner_user_id": ownerUserID}, pagination)
+	return mongoutil.FindPage[*relation.BlackModel](ctx, b.coll, bson.M{"owner_user_id": ownerUserID}, pagination)
 }
 
 func (b *BlackMgo) FindOwnerBlackInfos(ctx context.Context, ownerUserID string, userIDs []string) (blacks []*relation.BlackModel, err error) {
 	if len(userIDs) == 0 {
-		return mgoutil.Find[*relation.BlackModel](ctx, b.coll, bson.M{"owner_user_id": ownerUserID})
+		return mongoutil.Find[*relation.BlackModel](ctx, b.coll, bson.M{"owner_user_id": ownerUserID})
 	}
-	return mgoutil.Find[*relation.BlackModel](ctx, b.coll, bson.M{"owner_user_id": ownerUserID, "block_user_id": bson.M{"$in": userIDs}})
+	return mongoutil.Find[*relation.BlackModel](ctx, b.coll, bson.M{"owner_user_id": ownerUserID, "block_user_id": bson.M{"$in": userIDs}})
 }
 
 func (b *BlackMgo) FindBlackUserIDs(ctx context.Context, ownerUserID string) (blackUserIDs []string, err error) {
-	return mgoutil.Find[string](ctx, b.coll, bson.M{"owner_user_id": ownerUserID}, options.Find().SetProjection(bson.M{"_id": 0, "block_user_id": 1}))
+	return mongoutil.Find[string](ctx, b.coll, bson.M{"owner_user_id": ownerUserID}, options.Find().SetProjection(bson.M{"_id": 0, "block_user_id": 1}))
 }

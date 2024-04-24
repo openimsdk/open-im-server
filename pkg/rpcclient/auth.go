@@ -16,26 +16,48 @@ package rpcclient
 
 import (
 	"context"
-
-	"github.com/OpenIMSDK/protocol/auth"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/protocol/auth"
+	pbAuth "github.com/openimsdk/protocol/auth"
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/system/program"
 	"google.golang.org/grpc"
 )
 
-func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry, config *config.GlobalConfig) *Auth {
-	conn, err := discov.GetConn(context.Background(), config.RpcRegisterName.OpenImAuthName)
+func NewAuth(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) *Auth {
+	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
 	if err != nil {
-		util.ExitWithError(err)
+		program.ExitWithError(err)
 	}
 	client := auth.NewAuthClient(conn)
-	return &Auth{discov: discov, conn: conn, Client: client, Config: config}
+	return &Auth{discov: discov, conn: conn, Client: client}
 }
 
 type Auth struct {
 	conn   grpc.ClientConnInterface
 	Client auth.AuthClient
-	discov discoveryregistry.SvcDiscoveryRegistry
-	Config *config.GlobalConfig
+	discov discovery.SvcDiscoveryRegistry
+}
+
+func (a *Auth) ParseToken(ctx context.Context, token string) (*pbAuth.ParseTokenResp, error) {
+	req := pbAuth.ParseTokenReq{
+		Token: token,
+	}
+	resp, err := a.Client.ParseToken(ctx, &req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
+
+func (a *Auth) InvalidateToken(ctx context.Context, preservedToken, userID string, platformID int) (*pbAuth.InvalidateTokenResp, error) {
+	req := pbAuth.InvalidateTokenReq{
+		PreservedToken: preservedToken,
+		UserID:         userID,
+		PlatformID:     int32(platformID),
+	}
+	resp, err := a.Client.InvalidateToken(ctx, &req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
 }

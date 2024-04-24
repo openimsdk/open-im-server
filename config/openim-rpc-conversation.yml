@@ -1,0 +1,11 @@
+rpc:
+  registerIP: ''
+  listenIP: 0.0.0.0
+  ports: [ 10180 ]
+
+prometheus:
+  enable: true
+  ports: [ 20105 ]
+
+
+

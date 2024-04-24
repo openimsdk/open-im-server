@@ -1,0 +1,17 @@
+rpc:
+  # API or other RPCs can access this RPC through this IP; if left blank, the internal network IP is obtained by default
+  registerIP: ''
+  # Listening IP; 0.0.0.0 means both internal and external IPs are listened to, if blank, the internal network IP is automatically obtained by default
+  listenIP: 0.0.0.0
+  # Listening ports; if multiple are configured, multiple instances will be launched, and must be consistent with the number of prometheus.ports
+  ports: [ 10110 ]
+
+prometheus:
+  # Whether to enable prometheus
+  enable: true
+  # Prometheus listening ports, must be consistent with the number of rpc.ports
+  ports: [ 20100 ]
+
+
+
+

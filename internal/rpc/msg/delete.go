@@ -17,13 +17,13 @@ package msg
 import (
 	"context"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/conversation"
-	"github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/conversation"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func (m *msgServer) getMinSeqs(maxSeqs map[string]int64) map[string]int64 {
@@ -41,11 +41,8 @@ func (m *msgServer) validateDeleteSyncOpt(opt *msg.DeleteSyncOpt) (isSyncSelf, i
 	return opt.IsSyncSelf, opt.IsSyncOther
 }
 
-func (m *msgServer) ClearConversationsMsg(
-	ctx context.Context,
-	req *msg.ClearConversationsMsgReq,
-) (*msg.ClearConversationsMsgResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config); err != nil {
+func (m *msgServer) ClearConversationsMsg(ctx context.Context, req *msg.ClearConversationsMsgReq) (*msg.ClearConversationsMsgResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	if err := m.clearConversation(ctx, req.ConversationIDs, req.UserID, req.DeleteSyncOpt); err != nil {
@@ -54,18 +51,14 @@ func (m *msgServer) ClearConversationsMsg(
 	return &msg.ClearConversationsMsgResp{}, nil
 }
 
-func (m *msgServer) UserClearAllMsg(
-	ctx context.Context,
-	req *msg.UserClearAllMsgReq,
-) (*msg.UserClearAllMsgResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config); err != nil {
+func (m *msgServer) UserClearAllMsg(ctx context.Context, req *msg.UserClearAllMsgReq) (*msg.UserClearAllMsgResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	conversationIDs, err := m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "GetMaxSeq", "conversationIDs", conversationIDs)
 	if err := m.clearConversation(ctx, conversationIDs, req.UserID, req.DeleteSyncOpt); err != nil {
 		return nil, err
 	}
@@ -73,7 +66,7 @@ func (m *msgServer) UserClearAllMsg(
 }
 
 func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*msg.DeleteMsgsResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	isSyncSelf, isSyncOther := m.validateDeleteSyncOpt(req.DeleteSyncOpt)
@@ -86,7 +79,7 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 			return nil, err
 		}
 		tips := &sdkws.DeleteMsgsTips{UserID: req.UserID, ConversationID: req.ConversationID, Seqs: req.Seqs}
-		m.notificationSender.NotificationWithSesstionType(
+		m.notificationSender.NotificationWithSessionType(
 			ctx,
 			req.UserID,
 			m.conversationAndGetRecvID(conversations[0], req.UserID),
@@ -100,16 +93,13 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 		}
 		if isSyncSelf {
 			tips := &sdkws.DeleteMsgsTips{UserID: req.UserID, ConversationID: req.ConversationID, Seqs: req.Seqs}
-			m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, req.UserID, constant.DeleteMsgsNotification, constant.SingleChatType, tips)
+			m.notificationSender.NotificationWithSessionType(ctx, req.UserID, req.UserID, constant.DeleteMsgsNotification, constant.SingleChatType, tips)
 		}
 	}
 	return &msg.DeleteMsgsResp{}, nil
 }
 
-func (m *msgServer) DeleteMsgPhysicalBySeq(
-	ctx context.Context,
-	req *msg.DeleteMsgPhysicalBySeqReq,
-) (*msg.DeleteMsgPhysicalBySeqResp, error) {
+func (m *msgServer) DeleteMsgPhysicalBySeq(ctx context.Context, req *msg.DeleteMsgPhysicalBySeqReq) (*msg.DeleteMsgPhysicalBySeqResp, error) {
 	err := m.MsgDatabase.DeleteMsgsPhysicalBySeqs(ctx, req.ConversationID, req.Seqs)
 	if err != nil {
 		return nil, err
@@ -117,37 +107,20 @@ func (m *msgServer) DeleteMsgPhysicalBySeq(
 	return &msg.DeleteMsgPhysicalBySeqResp{}, nil
 }
 
-func (m *msgServer) DeleteMsgPhysical(
-	ctx context.Context,
-	req *msg.DeleteMsgPhysicalReq,
-) (*msg.DeleteMsgPhysicalResp, error) {
-	if err := authverify.CheckAdmin(ctx, m.config); err != nil {
+func (m *msgServer) DeleteMsgPhysical(ctx context.Context, req *msg.DeleteMsgPhysicalReq) (*msg.DeleteMsgPhysicalResp, error) {
+	if err := authverify.CheckAdmin(ctx, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
-	remainTime := utils.GetCurrentTimestampBySecond() - req.Timestamp
+	remainTime := timeutil.GetCurrentTimestampBySecond() - req.Timestamp
 	for _, conversationID := range req.ConversationIDs {
 		if err := m.MsgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, remainTime); err != nil {
-			log.ZWarn(
-				ctx,
-				"DeleteConversationMsgsAndSetMinSeq error",
-				err,
-				"conversationID",
-				conversationID,
-				"err",
-				err,
-			)
+			log.ZWarn(ctx, "DeleteConversationMsgsAndSetMinSeq error", err, "conversationID", conversationID, "err", err)
 		}
 	}
 	return &msg.DeleteMsgPhysicalResp{}, nil
 }
 
-func (m *msgServer) clearConversation(
-	ctx context.Context,
-	conversationIDs []string,
-	userID string,
-	deleteSyncOpt *msg.DeleteSyncOpt,
-) error {
-	defer log.ZDebug(ctx, "clearConversation return line")
+func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []string, userID string, deleteSyncOpt *msg.DeleteSyncOpt) error {
 	conversations, err := m.Conversation.GetConversationsByConversationID(ctx, conversationIDs)
 	if err != nil {
 		return err
@@ -171,14 +144,7 @@ func (m *msgServer) clearConversation(
 		// notification 2 self
 		if isSyncSelf {
 			tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: existConversationIDs}
-			m.notificationSender.NotificationWithSesstionType(
-				ctx,
-				userID,
-				userID,
-				constant.ClearConversationNotification,
-				constant.SingleChatType,
-				tips,
-			)
+			m.notificationSender.NotificationWithSessionType(ctx, userID, userID, constant.ClearConversationNotification, constant.SingleChatType, tips)
 		}
 	} else {
 		if err := m.MsgDatabase.SetMinSeqs(ctx, m.getMinSeqs(maxSeqs)); err != nil {
@@ -186,7 +152,7 @@ func (m *msgServer) clearConversation(
 		}
 		for _, conversation := range existConversations {
 			tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: []string{conversation.ConversationID}}
-			m.notificationSender.NotificationWithSesstionType(ctx, userID, m.conversationAndGetRecvID(conversation, userID), constant.ClearConversationNotification, conversation.ConversationType, tips)
+			m.notificationSender.NotificationWithSessionType(ctx, userID, m.conversationAndGetRecvID(conversation, userID), constant.ClearConversationNotification, conversation.ConversationType, tips)
 		}
 	}
 	if err := m.MsgDatabase.UserSetHasReadSeqs(ctx, userID, maxSeqs); err != nil {

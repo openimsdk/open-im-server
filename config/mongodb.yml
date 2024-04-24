@@ -1,0 +1,7 @@
+uri: ''
+address: [ localhost:37017 ]
+database: openim_v3
+username: openIM
+password: openIM123
+maxPoolSize: 100
+maxRetry: 10

@@ -1,0 +1,19 @@
+rpc:
+  registerIP: ''
+  ports: [ 10140 ]
+
+prometheus:
+  enable: true
+  ports: [ 20112 ]
+
+listenIP: 0.0.0.0
+
+longConnSvr:
+  ports: [ 10001 ]
+  websocketMaxConnNum: 100000
+  websocketMaxMsgLen: 4096
+  websocketTimeout: 10
+
+multiLoginPolicy: 1
+
+

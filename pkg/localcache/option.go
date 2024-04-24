@@ -18,7 +18,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/openimsdk/localcache/lru"
+	"github.com/openimsdk/open-im-server/v3/pkg/localcache/lru"
 )
 
 func defaultOption() *option {

@@ -1,0 +1,27 @@
+user:
+  topic: DELETE_CACHE_USER
+  slotNum: 100
+  slotSize: 2000
+  successExpire: 300
+  failedExpire: 5
+
+group:
+  topic: DELETE_CACHE_GROUP
+  slotNum: 100
+  slotSize: 2000
+  successExpire: 300
+  failedExpire: 5
+
+friend:
+  topic: DELETE_CACHE_FRIEND
+  slotNum: 100
+  slotSize: 2000
+  successExpire: 300
+  failedExpire: 5
+
+conversation:
+  topic: DELETE_CACHE_CONVERSATION
+  slotNum: 100
+  slotSize: 2000
+  successExpire: 300
+  failedExpire: 5

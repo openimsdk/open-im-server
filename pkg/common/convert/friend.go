@@ -18,19 +18,20 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func FriendPb2DB(friend *sdkws.FriendInfo) *relation.FriendModel {
 	dbFriend := &relation.FriendModel{}
-	err := utils.CopyStructFields(dbFriend, friend)
+	err := datautil.CopyStructFields(dbFriend, friend)
 	if err != nil {
 		return nil
 	}
 	dbFriend.FriendUserID = friend.FriendUser.UserID
-	dbFriend.CreateTime = utils.UnixSecondToTime(friend.CreateTime)
+	dbFriend.CreateTime = timeutil.UnixSecondToTime(friend.CreateTime)
 	return dbFriend
 }
 
@@ -71,7 +72,7 @@ func FriendsDB2Pb(
 	}
 	for _, friend := range friendsDB {
 		friendPb := &sdkws.FriendInfo{FriendUser: &sdkws.UserInfo{}}
-		err := utils.CopyStructFields(friendPb, friend)
+		err := datautil.CopyStructFields(friendPb, friend)
 		if err != nil {
 			return nil, err
 		}
@@ -88,10 +89,7 @@ func FriendsDB2Pb(
 
 }
 
-func FriendRequestDB2Pb(ctx context.Context,
-	friendRequests []*relation.FriendRequestModel,
-	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
-) ([]*sdkws.FriendRequest, error) {
+func FriendRequestDB2Pb(ctx context.Context, friendRequests []*relation.FriendRequestModel, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) ([]*sdkws.FriendRequest, error) {
 	if len(friendRequests) == 0 {
 		return nil, nil
 	}
@@ -100,7 +98,7 @@ func FriendRequestDB2Pb(ctx context.Context,
 		userIDMap[friendRequest.ToUserID] = struct{}{}
 		userIDMap[friendRequest.FromUserID] = struct{}{}
 	}
-	users, err := getUsers(ctx, utils.Keys(userIDMap))
+	users, err := getUsers(ctx, datautil.Keys(userIDMap))
 	if err != nil {
 		return nil, err
 	}

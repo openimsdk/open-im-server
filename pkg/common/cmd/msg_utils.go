@@ -15,8 +15,10 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/openimsdk/open-im-server/v3/internal/tools"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +29,14 @@ type MsgUtilsCmd struct {
 
 func (m *MsgUtilsCmd) AddUserIDFlag() {
 	m.Command.PersistentFlags().StringP("userID", "u", "", "openIM userID")
+}
+func (m *MsgUtilsCmd) AddIndexFlag() {
+	m.Command.PersistentFlags().IntP(FlagTransferIndex, "i", 0, "process startup sequence number")
+}
+
+func (m *MsgUtilsCmd) AddConfigDirFlag() {
+	m.Command.PersistentFlags().StringP(FlagConf, "c", "", "path of config directory")
+
 }
 
 func (m *MsgUtilsCmd) getUserIDFlag(cmdLines *cobra.Command) string {
@@ -44,7 +54,7 @@ func (m *MsgUtilsCmd) AddFixAllFlag() {
 } */
 
 func (m *MsgUtilsCmd) AddClearAllFlag() {
-	m.Command.PersistentFlags().BoolP("clearAll", "c", false, "openIM clear all seqs")
+	m.Command.PersistentFlags().BoolP("clearAll", "", false, "openIM clear all seqs")
 }
 
 /* func (m *MsgUtilsCmd) getClearAllFlag(cmdLines *cobra.Command) bool {
@@ -136,9 +146,9 @@ func NewSeqCmd() *SeqCmd {
 
 func (s *SeqCmd) GetSeqCmd() *cobra.Command {
 	s.Command.Run = func(cmdLines *cobra.Command, args []string) {
-		_, err := tools.InitMsgTool(s.MsgTool.Config)
+		_, err := tools.InitMsgTool(context.Background(), nil)
 		if err != nil {
-			util.ExitWithError(err)
+			program.ExitWithError(err)
 		}
 		userID := s.getUserIDFlag(cmdLines)
 		superGroupID := s.getSuperGroupIDFlag(cmdLines)

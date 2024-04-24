@@ -18,11 +18,11 @@ import (
 	"context"
 	"time"
 
-	pbfriend "github.com/OpenIMSDK/protocol/friend"
-	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	pbfriend "github.com/openimsdk/protocol/friend"
+	"github.com/openimsdk/tools/mcontext"
 )
 
 func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *pbfriend.GetPaginationBlacksReq) (resp *pbfriend.GetPaginationBlacksResp, err error) {
@@ -57,15 +57,18 @@ func (s *friendServer) RemoveBlack(ctx context.Context, req *pbfriend.RemoveBlac
 	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
+
 	if err := s.blackDatabase.Delete(ctx, []*relation.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
 		return nil, err
 	}
+
 	s.notificationSender.BlackDeletedNotification(ctx, req)
+
 	return &pbfriend.RemoveBlackResp{}, nil
 }
 
 func (s *friendServer) AddBlack(ctx context.Context, req *pbfriend.AddBlackReq) (*pbfriend.AddBlackResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	_, err := s.userRpcClient.GetUsersInfo(ctx, []string{req.OwnerUserID, req.BlackUserID})
@@ -83,10 +86,6 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbfriend.AddBlackReq) 
 	if err := s.blackDatabase.Create(ctx, []*relation.BlackModel{&black}); err != nil {
 		return nil, err
 	}
-
-	if err := s.notificationSender.BlackAddedNotification(ctx, req); err != nil {
-		return nil, err
-	}
-
+	s.notificationSender.BlackAddedNotification(ctx, req)
 	return &pbfriend.AddBlackResp{}, nil
 }

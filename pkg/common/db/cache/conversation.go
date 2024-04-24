@@ -20,24 +20,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/encrypt"
 	"github.com/redis/go-redis/v9"
 )
 
 const (
-	//conversationKey                          = "CONVERSATION:"
-	//conversationIDsKey                       = "CONVERSATION_IDS:"
-	//conversationIDsHashKey                   = "CONVERSATION_IDS_HASH:"
-	//conversationHasReadSeqKey                = "CONVERSATION_HAS_READ_SEQ:"
-	//recvMsgOptKey                            = "RECV_MSG_OPT:"
-	//superGroupRecvMsgNotNotifyUserIDsKey     = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
-	//superGroupRecvMsgNotNotifyUserIDsHashKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS_HASH:"
-	//conversationNotReceiveMessageUserIDsKey  = "CONVERSATION_NOT_RECEIVE_MESSAGE_USER_IDS:".
+	// ConversationKey                          = "CONVERSATION:"
+	// conversationIDsKey                       = "CONVERSATION_IDS:"
+	// conversationIDsHashKey                   = "CONVERSATION_IDS_HASH:"
+	// conversationHasReadSeqKey                = "CONVERSATION_HAS_READ_SEQ:"
+	// recvMsgOptKey                            = "RECV_MSG_OPT:"
+	// superGroupRecvMsgNotNotifyUserIDsKey     = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
+	// superGroupRecvMsgNotNotifyUserIDsHashKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS_HASH:"
+	// conversationNotReceiveMessageUserIDsKey  = "CONVERSATION_NOT_RECEIVE_MESSAGE_USER_IDS:".
 
 	conversationExpireTime = time.Second * 60 * 60 * 12
 )
@@ -66,13 +67,13 @@ type ConversationCache interface {
 	GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) (opt int, err error)
 	DelUserRecvMsgOpt(ownerUserID, conversationID string) ConversationCache
 	// get one super group recv msg but do not notification userID list
-	//GetSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) (userIDs []string, err error)
+	// GetSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) (userIDs []string, err error)
 	DelSuperGroupRecvMsgNotNotifyUserIDs(groupID string) ConversationCache
 	// get one super group recv msg but do not notification userID list hash
-	//GetSuperGroupRecvMsgNotNotifyUserIDsHash(ctx context.Context, groupID string) (hash uint64, err error)
+	// GetSuperGroupRecvMsgNotNotifyUserIDsHash(ctx context.Context, groupID string) (hash uint64, err error)
 	DelSuperGroupRecvMsgNotNotifyUserIDsHash(groupID string) ConversationCache
 
-	//GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
+	// GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
 	DelUserAllHasReadSeqs(ownerUserID string, conversationIDs ...string) ConversationCache
 
 	GetConversationsByConversationID(ctx context.Context,
@@ -82,10 +83,10 @@ type ConversationCache interface {
 	DelConversationNotReceiveMessageUserIDs(conversationIDs ...string) ConversationCache
 }
 
-func NewConversationRedis(rdb redis.UniversalClient, opts rockscache.Options, db relationtb.ConversationModelInterface) ConversationCache {
+func NewConversationRedis(rdb redis.UniversalClient, localCache *config.LocalCache, opts rockscache.Options, db relationtb.ConversationModelInterface) ConversationCache {
 	rcClient := rockscache.NewClient(rdb, opts)
 	mc := NewMetaCacheRedis(rcClient)
-	c := config.Config.LocalCache.Conversation
+	c := localCache.Conversation
 	log.ZDebug(context.Background(), "black local cache init", "Topic", c.Topic, "SlotNum", c.SlotNum, "SlotSize", c.SlotSize, "enable", c.Enable())
 	mc.SetTopic(c.Topic)
 	mc.SetRawRedisClient(rdb)
@@ -104,11 +105,11 @@ type ConversationRedisCache struct {
 	expireTime     time.Duration
 }
 
-//func NewNewConversationRedis(
+// func NewNewConversationRedis(
 //	rdb redis.UniversalClient,
 //	conversationDB *relation.ConversationGorm,
 //	options rockscache.Options,
-//) ConversationCache {
+// ) ConversationCache {
 //	rcClient := rockscache.NewClient(rdb, options)
 //
 //	return &ConversationRedisCache{
@@ -188,9 +189,9 @@ func (c *ConversationRedisCache) GetUserConversationIDsHash(ctx context.Context,
 			if err != nil {
 				return 0, err
 			}
-			utils.Sort(conversationIDs, true)
+			datautil.Sort(conversationIDs, true)
 			bi := big.NewInt(0)
-			bi.SetString(utils.Md5(strings.Join(conversationIDs, ";"))[0:8], 16)
+			bi.SetString(encrypt.Md5(strings.Join(conversationIDs, ";"))[0:8], 16)
 			return bi.Uint64(), nil
 		},
 	)
@@ -232,15 +233,15 @@ func (c *ConversationRedisCache) DelConversations(ownerUserID string, conversati
 // 		}
 // 	}
 
-// 	return 0, errors.New("not found key:" + key + " in keys")
+// 	return 0, errs.New("not found key:" + key + " in keys")
 // }
 
 func (c *ConversationRedisCache) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationtb.ConversationModel, error) {
-	//var keys []string
-	//for _, conversarionID := range conversationIDs {
+	// var keys []string
+	// for _, conversarionID := range conversationIDs {
 	//	keys = append(keys, c.getConversationKey(ownerUserID, conversarionID))
 	//}
-	//return batchGetCache(
+	// return batchGetCache(
 	//	ctx,
 	//	c.rcClient,
 	//	keys,
@@ -262,11 +263,11 @@ func (c *ConversationRedisCache) GetUserAllConversations(ctx context.Context, ow
 	if err != nil {
 		return nil, err
 	}
-	//var keys []string
-	//for _, conversarionID := range conversationIDs {
+	// var keys []string
+	// for _, conversarionID := range conversationIDs {
 	//	keys = append(keys, c.getConversationKey(ownerUserID, conversarionID))
 	//}
-	//return batchGetCache(
+	// return batchGetCache(
 	//	ctx,
 	//	c.rcClient,
 	//	keys,
@@ -285,7 +286,7 @@ func (c *ConversationRedisCache) GetUserRecvMsgOpt(ctx context.Context, ownerUse
 	})
 }
 
-//func (c *ConversationRedisCache) GetSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) (userIDs []string, err error) {
+// func (c *ConversationRedisCache) GetSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) (userIDs []string, err error) {
 //	return getCache(ctx, c.rcClient, c.getSuperGroupRecvNotNotifyUserIDsKey(groupID), c.expireTime, func(ctx context.Context) (userIDs []string, err error) {
 //		return c.conversationDB.FindSuperGroupRecvMsgNotNotifyUserIDs(ctx, groupID)
 //	})
@@ -316,7 +317,7 @@ func (c *ConversationRedisCache) DelSuperGroupRecvMsgNotNotifyUserIDs(groupID st
 	return cache
 }
 
-//func (c *ConversationRedisCache) GetSuperGroupRecvMsgNotNotifyUserIDsHash(ctx context.Context, groupID string) (hash uint64, err error) {
+// func (c *ConversationRedisCache) GetSuperGroupRecvMsgNotNotifyUserIDsHash(ctx context.Context, groupID string) (hash uint64, err error) {
 //	return getCache(ctx, c.rcClient, c.getSuperGroupRecvNotNotifyUserIDsHashKey(groupID), c.expireTime, func(ctx context.Context) (hash uint64, err error) {
 //		userIDs, err := c.GetSuperGroupRecvMsgNotNotifyUserIDs(ctx, groupID)
 //		if err != nil {
@@ -336,30 +337,6 @@ func (c *ConversationRedisCache) DelSuperGroupRecvMsgNotNotifyUserIDsHash(groupI
 
 	return cache
 }
-
-/* func (c *ConversationRedisCache) getUserAllHasReadSeqsIndex(conversationID string, conversationIDs []string) (int, error) {
-	for _i, _conversationID := range conversationIDs {
-		if _conversationID == conversationID {
-			return _i, nil
-		}
-	}
-
-	return 0, errors.New("not found key:" + conversationID + " in keys")
-} */
-
-/* func (c *ConversationRedisCache) GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error) {
-	conversationIDs, err := c.GetUserConversationIDs(ctx, ownerUserID)
-	if err != nil {
-		return nil, err
-	}
-	var keys []string
-	for _, conversarionID := range conversationIDs {
-		keys = append(keys, c.getConversationHasReadSeqKey(ownerUserID, conversarionID))
-	}
-	return batchGetCacheMap(ctx, c.rcClient, keys, conversationIDs, c.expireTime, c.getUserAllHasReadSeqsIndex, func(ctx context.Context) (map[string]int64, error) {
-		return c.conversationDB.GetUserAllHasReadSeqs(ctx, ownerUserID)
-	})
-} */
 
 func (c *ConversationRedisCache) DelUserAllHasReadSeqs(ownerUserID string, conversationIDs ...string) ConversationCache {
 	cache := c.NewCache()

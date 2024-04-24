@@ -39,7 +39,6 @@ func main() {
 	latestVersion := defaultTemplateVersion
 
 	// getLatestVersion
-	// getLatestVersion
 
 	// Construct the download URL
 	downloadURL := fmt.Sprintf("https://github.com/openimsdk/chat/releases/download/%s/chat_Linux_x86_64.tar.gz", latestVersion)
@@ -101,9 +100,8 @@ func main() {
 	select {}
 }
 
-// getLatestVersion fetches the latest version number from a given URL.
 /* func getLatestVersion(url string) (string, error) {
-	resp, err := http.Get(url)
+	resp, err := webhook.Get(url)
 	if err != nil {
 		return "", err
 	}

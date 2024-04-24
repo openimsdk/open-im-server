@@ -16,46 +16,58 @@ package tools
 
 import (
 	"context"
-	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/db/redisutil"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"
 )
 
-func StartTask(config *config.GlobalConfig) error {
-	fmt.Println("cron task start, config", config.ChatRecordsClearTime)
+type CronTaskConfig struct {
+	CronTask        config.CronTask
+	RedisConfig     config.Redis
+	MongodbConfig   config.Mongo
+	ZookeeperConfig config.ZooKeeper
+	Share           config.Share
+	KafkaConfig     config.Kafka
+}
 
-	msgTool, err := InitMsgTool(config)
+func Start(ctx context.Context, config *CronTaskConfig) error {
+
+	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime",
+		config.CronTask.ChatRecordsClearTime, "msgDestructTime", config.CronTask.MsgDestructTime)
+
+	msgTool, err := InitMsgTool(ctx, config)
 	if err != nil {
 		return err
 	}
 
 	msgTool.convertTools()
 
-	rdb, err := cache.NewRedis(config)
+	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
 	}
 
 	// register cron tasks
 	var crontab = cron.New()
-	fmt.Printf("Start chatRecordsClearTime cron task, cron config: %s\n", config.ChatRecordsClearTime)
-	_, err = crontab.AddFunc(config.ChatRecordsClearTime, cronWrapFunc(config, rdb, "cron_clear_msg_and_fix_seq", msgTool.AllConversationClearMsgAndFixSeq))
+
+	_, err = crontab.AddFunc(config.CronTask.ChatRecordsClearTime,
+		cronWrapFunc(config, rdb, "cron_clear_msg_and_fix_seq", msgTool.AllConversationClearMsgAndFixSeq))
 	if err != nil {
 		return errs.Wrap(err)
 	}
 
-	fmt.Printf("Start msgDestruct cron task, cron config: %s\n", config.MsgDestructTime)
-	_, err = crontab.AddFunc(config.MsgDestructTime, cronWrapFunc(config, rdb, "cron_conversations_destruct_msgs", msgTool.ConversationsDestructMsgs))
+	_, err = crontab.AddFunc(config.CronTask.MsgDestructTime,
+		cronWrapFunc(config, rdb, "cron_conversations_destruct_msgs", msgTool.ConversationsDestructMsgs))
 	if err != nil {
-		return errs.Wrap(err, "cron_conversations_destruct_msgs")
+		return errs.WrapMsg(err, "cron_conversations_destruct_msgs")
 	}
 
 	// start crontab
@@ -66,10 +78,10 @@ func StartTask(config *config.GlobalConfig) error {
 	<-sigs
 
 	// stop crontab, Wait for the running task to exit.
-	ctx := crontab.Stop()
+	cronCtx := crontab.Stop()
 
 	select {
-	case <-ctx.Done():
+	case <-cronCtx.Done():
 		// graceful exit
 
 	case <-time.After(15 * time.Second):
@@ -91,8 +103,8 @@ func netlock(rdb redis.UniversalClient, key string, ttl time.Duration) bool {
 	return ok
 }
 
-func cronWrapFunc(config *config.GlobalConfig, rdb redis.UniversalClient, key string, fn func()) func() {
-	enableCronLocker := config.EnableCronLocker
+func cronWrapFunc(config *CronTaskConfig, rdb redis.UniversalClient, key string, fn func()) func() {
+	enableCronLocker := config.CronTask.EnableCronLocker
 	return func() {
 		// if don't enable cron-locker, call fn directly.
 		if !enableCronLocker {

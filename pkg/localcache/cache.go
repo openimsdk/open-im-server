@@ -19,8 +19,8 @@ import (
 	"hash/fnv"
 	"unsafe"
 
-	"github.com/openimsdk/localcache/link"
-	"github.com/openimsdk/localcache/lru"
+	"github.com/openimsdk/open-im-server/v3/pkg/localcache/link"
+	"github.com/openimsdk/open-im-server/v3/pkg/localcache/lru"
 )
 
 type Cache[V any] interface {

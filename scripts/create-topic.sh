@@ -14,14 +14,42 @@
 # limitations under the License.
 
 # Wait for Kafka to be ready
-until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server localhost:9092; do
-  echo "Waiting for Kafka to be ready..."
-  sleep 2
+
+KAFKA_SERVER=localhost:9092
+
+MAX_ATTEMPTS=300
+attempt_num=1
+
+echo "Waiting for Kafka to be ready..."
+
+until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server $KAFKA_SERVER; do
+  echo "Attempt $attempt_num of $MAX_ATTEMPTS: Kafka not ready yet..."
+  if [ $attempt_num -eq $MAX_ATTEMPTS ]; then
+    echo "Kafka not ready after $MAX_ATTEMPTS attempts, exiting"
+    exit 1
+  fi
+  attempt_num=$((attempt_num+1))
+  sleep 1
 done
 
-# Create topics
-/opt/bitnami/kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 8 --topic latestMsgToRedis
-/opt/bitnami/kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 8 --topic msgToPush
-/opt/bitnami/kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 8 --topic offlineMsgToMongoMysql
+echo "Kafka is ready. Creating topics..."
 
-echo "Topics created."
+
+topics=("toRedis" "toMongo" "toPush")
+partitions=8
+replicationFactor=1
+
+for topic in "${topics[@]}"; do
+  if /opt/bitnami/kafka/bin/kafka-topics.sh --create \
+    --bootstrap-server $KAFKA_SERVER \
+    --replication-factor $replicationFactor \
+    --partitions $partitions \
+    --topic $topic
+  then
+    echo "Topic $topic created."
+  else
+    echo "Failed to create topic $topic."
+  fi
+done
+
+echo "All topics created."

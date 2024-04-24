@@ -31,17 +31,17 @@ func NewGrpcPromObj(cusMetrics []prometheus.Collector) (*prometheus.Registry, *g
 	return reg, grpcMetrics, nil
 }
 
-func GetGrpcCusMetrics(registerName string, config *config2.GlobalConfig) []prometheus.Collector {
+func GetGrpcCusMetrics(registerName string, share *config2.Share) []prometheus.Collector {
 	switch registerName {
-	case config.RpcRegisterName.OpenImMessageGatewayName:
+	case share.RpcRegisterName.MessageGateway:
 		return []prometheus.Collector{OnlineUserGauge}
-	case config.RpcRegisterName.OpenImMsgName:
+	case share.RpcRegisterName.Msg:
 		return []prometheus.Collector{SingleChatMsgProcessSuccessCounter, SingleChatMsgProcessFailedCounter, GroupChatMsgProcessSuccessCounter, GroupChatMsgProcessFailedCounter}
 	case "Transfer":
 		return []prometheus.Collector{MsgInsertRedisSuccessCounter, MsgInsertRedisFailedCounter, MsgInsertMongoSuccessCounter, MsgInsertMongoFailedCounter, SeqSetFailedCounter}
-	case config.RpcRegisterName.OpenImPushName:
+	case share.RpcRegisterName.Push:
 		return []prometheus.Collector{MsgOfflinePushFailedCounter}
-	case config.RpcRegisterName.OpenImAuthName:
+	case share.RpcRegisterName.Auth:
 		return []prometheus.Collector{UserLoginCounter}
 	default:
 		return nil
