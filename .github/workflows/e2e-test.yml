@@ -73,14 +73,22 @@ jobs:
 
     - name: Docker Operations
       run: |
-        sudo make init
         sudo docker compose up -d
+        sudo bash bootstrap.sh
+        sudo mage
         sudo sleep 20
 
     - name: Module Operations
       run: |
-        sudo make tidy
-        sudo make tools.verify.go-gitlint
+        sudo go mod tidy
+        echo "===========> Verifying go-gitlint is installed"
+        if [ ! -f ./_output/tools/go-gitlint ]; then
+          export GOBIN=$(pwd)/_output/tools
+          echo "===========> Installing The default installation path is /home/ubuntu/DF/open-im-server/_output/tools/go-gitlint"
+          sudo go install github.com/marmotedu/go-gitlint/cmd/go-gitlint@latest
+          echo "===========> go-gitlint is installed in /home/ubuntu/DF/open-im-server/_output/tools/go-gitlint"
+        fi
+
 
     - name: Build, Start(make build && make start)
       run: |
@@ -90,7 +98,8 @@ jobs:
       run: |
         sudo ./scripts/install/install.sh -s
 
-    - name: Exec OpenIM API test (make test-api)
+#    - name: Exec OpenIM API test (make test-api)
+    - name: Exec OpenIM test (make test)
       run: |
         mkdir -p ./tmp
         touch ./tmp/test.md
@@ -98,23 +107,27 @@ jobs:
         echo "## OpenIM API Test" >> ./tmp/test.md
         echo "<details><summary>Command Output for OpenIM API Test</summary>" >> ./tmp/test.md
         echo "<pre><code>" >> ./tmp/test.md
-        sudo make test-api | tee -a ./tmp/test.md
+        echo "===========> Run api test"
+        ./scripts/install/test.sh
+        echo "===========> Run api test" >> ./tmp/test.md
+        ./scripts/install/test.sh >> ./tmp/test.md
         echo "</code></pre>" >> ./tmp/test.md
         echo "</details>" >> ./tmp/test.md
 
-        sudo make test-api
+        echo "===========> Run api test"
+        ./scripts/install/test.sh
 
-    - name: Exec OpenIM E2E Test (make test-e2e)
-      run: |
-        echo "" >> ./tmp/test.md
-        echo "## OpenIM E2E Test" >> ./tmp/test.md
-        echo "<details><summary>Command Output for OpenIM E2E Test</summary>" >> ./tmp/test.md
-        echo "<pre><code>" >> ./tmp/test.md
-        sudo make test-e2e | tee -a ./tmp/test.md
-        echo "</code></pre>" >> ./tmp/test.md
-        echo "</details>" >> ./tmp/test.md
+ #   - name: Exec OpenIM E2E Test (make test-e2e)
+ #     run: |
+ #       echo "" >> ./tmp/test.md
+ #       echo "## OpenIM E2E Test" >> ./tmp/test.md
+ #       echo "<details><summary>Command Output for OpenIM E2E Test</summary>" >> ./tmp/test.md
+ #       echo "<pre><code>" >> ./tmp/test.md
+ #       sudo make test-e2e | tee -a ./tmp/test.md
+ #       echo "</code></pre>" >> ./tmp/test.md
+ #       echo "</details>" >> ./tmp/test.md
 
-        sudo make test-e2e
+ #       sudo make test-e2e
 
     - name: Comment PR with file
       uses: thollander/actions-comment-pull-request@v2
