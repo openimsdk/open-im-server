@@ -394,7 +394,7 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(
 			break
 		}
 	}
-	log.ZDebug(context.Background(), "online new session msg come", "highWaterMarkOffset",
+	log.ZInfo(context.Background(), "online new session msg come", "highWaterMarkOffset",
 		claim.HighWaterMarkOffset(), "topic", claim.Topic(), "partition", claim.Partition())
 
 	var (

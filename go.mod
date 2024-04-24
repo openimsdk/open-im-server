@@ -1,6 +1,6 @@
 module github.com/openimsdk/open-im-server/v3
 
-go 1.21.2
+go 1.20
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
@@ -13,9 +13,8 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/openimsdk/localcache v0.0.1
 	github.com/openimsdk/protocol v0.0.64
-	github.com/openimsdk/tools v0.0.47-alpha.43
+	github.com/openimsdk/tools v0.0.49-alpha.2
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
@@ -32,9 +31,10 @@ require (
 	github.com/IBM/sarama v1.43.0
 	github.com/fatih/color v1.14.1
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/kelindar/bitmap v1.5.2
 	github.com/likexian/gokit v0.25.13
-	github.com/openimsdk/gomake v0.0.6
+	github.com/openimsdk/gomake v0.0.9
 	github.com/redis/go-redis/v9 v9.4.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
@@ -83,7 +83,6 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
-	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
@@ -173,5 +172,3 @@ require (
 	golang.org/x/crypto v0.21.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
-
-replace github.com/openimsdk/localcache => ./pkg/localcache

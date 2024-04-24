@@ -53,5 +53,3 @@ for topic in "${topics[@]}"; do
 done
 
 echo "All topics created."
-
-
