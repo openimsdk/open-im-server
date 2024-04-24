@@ -36,6 +36,7 @@ on:
         - "CONTRIBUTING/**"
         - "**.md"
         - "docs/**"
+  workflow_dispatch:
 
 jobs:
 
