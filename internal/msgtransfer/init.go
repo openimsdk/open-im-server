@@ -80,11 +80,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-
-	if err := client.CreateRpcRootNodes(config.Share.RpcRegisterName.GetServiceNames()); err != nil {
-		return err
-	}
-
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	//todo MsgCacheTimeout

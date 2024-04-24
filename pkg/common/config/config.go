@@ -22,6 +22,7 @@ import (
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
+	"net"
 	"time"
 )
 
@@ -52,13 +53,11 @@ type Log struct {
 
 type Minio struct {
 	Bucket          string `mapstructure:"bucket"`
-	Port            int    `mapstructure:"port"`
 	AccessKeyID     string `mapstructure:"accessKeyID"`
 	SecretAccessKey string `mapstructure:"secretAccessKey"`
 	SessionToken    string `mapstructure:"sessionToken"`
-	InternalIP      string `mapstructure:"internalIP"`
-	ExternalIP      string `mapstructure:"externalIP"`
-	URL             string `mapstructure:"url"`
+	InternalAddress string `mapstructure:"internalAddress"`
+	ExternalAddress string `mapstructure:"externalAddress"`
 	PublicRead      bool   `mapstructure:"publicRead"`
 }
 
@@ -477,16 +476,24 @@ func (k *Kafka) Build() *kafka.Config {
 	}
 }
 func (m *Minio) Build() *minio.Config {
-	return &minio.Config{
+	conf := minio.Config{
 		Bucket:          m.Bucket,
-		Endpoint:        fmt.Sprintf("http://%s:%d", m.InternalIP, m.Port),
 		AccessKeyID:     m.AccessKeyID,
 		SecretAccessKey: m.SecretAccessKey,
 		SessionToken:    m.SessionToken,
-		SignEndpoint:    fmt.Sprintf("http://%s:%d", m.ExternalIP, m.Port),
 		PublicRead:      m.PublicRead,
 	}
-
+	if _, _, err := net.SplitHostPort(m.InternalAddress); err == nil {
+		conf.Endpoint = fmt.Sprintf("http://%s", m.InternalAddress)
+	} else {
+		conf.Endpoint = m.InternalAddress
+	}
+	if _, _, err := net.SplitHostPort(m.ExternalAddress); err == nil {
+		conf.SignEndpoint = fmt.Sprintf("http://%s", m.ExternalAddress)
+	} else {
+		conf.SignEndpoint = m.ExternalAddress
+	}
+	return &conf
 }
 func (c *Cos) Build() *cos.Config {
 	return &cos.Config{

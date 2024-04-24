@@ -33,6 +33,7 @@ const (
 func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share) (discovery.SvcDiscoveryRegistry, error) {
 	switch share.Env {
 	case zookeeperConst:
+
 		return zookeeper.NewZkClient(
 			zookeeperConfig.Address,
 			zookeeperConfig.Schema,

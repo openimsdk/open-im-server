@@ -31,6 +31,8 @@ func TestLoadOpenIMRpcUserConfig(t *testing.T) {
 	var user User
 	err := LoadConfig("../../../config/openim-rpc-user.yml", "IMENV_OPENIM_RPC_USER", &user)
 	assert.Nil(t, err)
+	//export IMENV_OPENIM_RPC_USER_RPC_LISTENIP="0.0.0.0"
 	assert.Equal(t, "0.0.0.0", user.RPC.ListenIP)
-	assert.Equal(t, []int{10110}, user.RPC.Ports)
+	//export IMENV_OPENIM_RPC_USER_RPC_PORTS="10110,10111,10112"
+	assert.Equal(t, []int{10110, 10111, 10112}, user.RPC.Ports)
 }
