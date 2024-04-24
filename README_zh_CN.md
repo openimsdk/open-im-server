@@ -51,7 +51,7 @@
 
 </p>
 
-## 🟢 扫描微信进群交流
+## 🟢 微信扫码进群交流
 <img src="./docs/images/wechat.jpg" width="300">
 
 
