@@ -1,3 +1,4 @@
+# Secret key used for verifying administrator identity, and for generating and validating tokens
 secret: openIM123
 env: zookeeper
 rpcRegisterName:
@@ -10,6 +11,6 @@ rpcRegisterName:
   auth: auth
   conversation: conversation
   third: third
-
+# Built-in administrator userID
 imAdminUserID: [ "imAdmin" ]
 

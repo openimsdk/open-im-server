@@ -1,7 +1,14 @@
+# List of Redis server addresses
 address: [ localhost:16379 ]
+# Username for Redis authentication (leave blank if not used)
 username: ''
+# Password for Redis authentication
 password: openIM123
+# Enable or disable pipeline processing
 enablePipeline: false
+# Enable or disable cluster mode
 clusterMode: false
+# Database index to be used
 db: 0
+# Maximum number of retry attempts for a failed connection
 maxRetry: 10

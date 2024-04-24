@@ -1,7 +1,11 @@
 url: "webhook://127.0.0.1:10008/callbackExample"
+# Webhook before sending a message
 beforeSendSingleMsg:
+  # Whether to enable
   enable: false
+  # Timeout duration in seconds
   timeout: 5
+  # Whether to continue on error
   failedContinue: true
 beforeUpdateUserInfoEx:
   enable:  false
