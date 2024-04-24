@@ -13,7 +13,8 @@ prometheus:
   ports: [ 20107 ]
 
 maxConcurrentWorkers: 3
-enable: getui
+#"Use geTui for offline push notifications, or choose fcm or jpns; corresponding configuration settings must be specified."
+enable: "geTui"
 geTui:
   pushUrl: "https://restapi.getui.com/v2/$appId"
   masterSecret: ''
@@ -29,6 +30,7 @@ jpns:
   pushURL: ''
   pushIntent: ''
 
+# iOS system push sound and badge count
 iosPush:
       pushSound: "xxx"
       badgeCount: true
