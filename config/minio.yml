@@ -2,6 +2,6 @@ bucket: "openim"
 accessKeyID: "root"
 secretAccessKey: "openIM123"
 sessionToken: ''
-internalAddress: "localhost:9000"
+internalAddress: "localhost:10005"
 externalAddress: "http://external_ip:10005"
 publicRead: false
