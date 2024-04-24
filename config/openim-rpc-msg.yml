@@ -7,7 +7,7 @@ prometheus:
   enable: true
   ports: [ 20102 ]
 
-#发消息是否需要好友验证
+# Does sending messages require friend verification
 friendVerify: false
 
 
