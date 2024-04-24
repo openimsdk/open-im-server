@@ -259,7 +259,7 @@ func (c *ConsumerHandler) groupMessagesHandler(ctx context.Context, groupID stri
 
 			*pushToUserIDs = append(*pushToUserIDs, kickedUsers...)
 		case constant.GroupDismissedNotification:
-			if msgprocessor.IsNotification(msgprocessor.GetConversationIDByMsg(msg)) { // 消息先到,通知后到
+			if msgprocessor.IsNotification(msgprocessor.GetConversationIDByMsg(msg)) {
 				var tips sdkws.GroupDismissedTips
 				if unmarshalNotificationElem(msg.Content, &tips) != nil {
 					return err
