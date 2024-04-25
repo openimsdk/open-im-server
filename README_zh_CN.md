@@ -51,31 +51,29 @@
 
 </p>
 
-## 🟢 扫描微信进群交流
-<img src="./docs/images/wechat.jpg" width="300">
+## :busts_in_silhouette: 加入我们的社区
 
++ 💬 [关注我们的 Twitter](https://twitter.com/founder_im63606)
++ 🚀 [加入我们的 Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
++ :eyes: [加入我们的微信群](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## Ⓜ️ 关于 OpenIM
 
-OpenIM 是一个专门设计用于在应用程序中集成聊天、音视频通话、通知以及AI聊天机器人等通信功能的服务平台。它通过提供一系列强大的API和Webhooks，使开发者可以轻松地在他们的应用中加入这些交互特性。OpenIM 本身并不是一个独立运行的聊天应用，而是作为一个平台，为其他应用提供支持，实现丰富的通信功能。下图展示 AppServer、AppClient、OpenIMServer 和 OpenIMSDK 之间的交互关系来具体说明。
-
-
+与Telegram、Signal、Rocket.Chat等独立聊天应用不同，OpenIM提供了专为开发者设计的开源即时通讯解决方案，而不是直接安装使用的独立聊天应用。OpenIM由OpenIM SDK和OpenIM Server两大部分组成，为开发者提供了一整套集成即时通讯功能的工具和服务，包括消息发送接收、用户管理和群组管理等。总体来说，OpenIM旨在为开发者提供必要的工具和框架，帮助他们在自己的应用中实现高效的即时通讯解决方案。
 
 ![App-OpenIM 关系](./docs/images/oepnim-design.png)
 
-## 🚀 关于 OpenIMSDK
+## 🚀 OpenIMSDK 介绍
 
-**OpenIMSDK** 是为 **OpenIMServer** 设计的IM SDK，专为嵌入客户端应用而生。其主要功能及模块如下：
+**OpenIMSDK** 是为 **OpenIMServer** 设计的IM SDK，专为集成到客户端应用而生。它支持多种功能和模块：
 
 + 🌟 主要功能：
-
   - 📦 本地存储
   - 🔔 监听器回调
   - 🛡️ API封装
   - 🌐 连接管理
 
-  ## 📚 主要模块：
-
++ 📚 主要模块：
   1. 🚀 初始化及登录
   2. 👤 用户管理
   3. 👫 好友管理
@@ -86,81 +84,52 @@ OpenIM 是一个专门设计用于在应用程序中集成聊天、音视频通�
 
 👉 **[探索 GO SDK](https://github.com/openimsdk/openim-sdk-core)**
 
-## 🌐 关于 OpenIMServer
+## 🌐 OpenIMServer 介绍
 
-+ **OpenIMServer** 具有以下特点：
++ **OpenIMServer** 的特点包括：
   - 🌐 微服务架构：支持集群模式，包括网关(gateway)和多个rpc服务。
-  - 🚀 部署方式多样：支持源代码、kubernetes或docker部署。
-  - 海量用户支持：十万超级大群，千万用户，及百亿消息
+  - 🚀 多样的部署方式：支持源代码、Kubernetes或Docker部署。
+  - 海量用户支持：支持十万级超大群组，千万级用户和百亿级消息。
 
 ### 增强的业务功能：
 
-+ **REST API**：OpenIMServer 提供了REST API供业务系统使用，旨在赋予业务更多功能，例如通过后台接口建立群组、发送推送消息等。
-+ **Webhooks**：OpenIMServer提供了回调能力以扩展更多的业务形态，所谓回调，即OpenIMServer会在某一事件发生之前或者之后，向业务服务器发送请求，如发送消息之前或之后的回调。
++ **REST API**：为业务系统提供REST API，增加群组创建、消息推送等后台接口功能。
 
-👉 **[了解更多](https://docs.openim.io/guides/introduction/product)**
++ **Webhooks**：通过事件前后的回调，向业务服务器发送请求，扩展更多的业务形态。
 
-## :rocket: 快速开始
+  ![整体架构](./docs/images/architecture-layers.png)
+
+  
+
+## :rocket: 快速入门
 
 在线体验iOS/Android/H5/PC/Web：
 
-👉 **[OpenIM online demo](https://www.openim.io/zh/commercial)**
+👉 **[OpenIM在线演示](https://www.openim.io/en/commercial)**
 
-🤲 为了方便用户体验，我们提供了多种部署解决方案，您可以根据下面的列表选择自己的部署方法：
+为了便于用户体验，我们提供了多种部署解决方案，您可以根据以下列表选择适合您的部署方式：
 
 + **[源代码部署指南](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
 + **[Docker 部署指南](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[Kubernetes 部署指南](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
 
-## :hammer_and_wrench: 开始开发 OpenIM
+## 系统支持
 
-OpenIM 我们的目标是建立一个顶级的开源社区。我们有一套标准，在[社区仓库](https://github.com/OpenIMSDK/community)中。
+支持 Linux、Windows、Mac 系统以及 ARM 和 AMD CPU 架构。
 
-如果你想为这个 Open-IM-Server 仓库做贡献，请阅读我们的[贡献者文档](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md)。
+## :link: 相关链接
 
-在开始之前，请确保你的更改是有需求的。最好的方法是创建一个[新的讨论](https://github.com/openimsdk/open-im-server/discussions/new/choose) 或 [Slack 通信](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)，或者如果你发现一个问题，首先[报告它](https://github.com/openimsdk/open-im-server/issues/new/choose)。
-
-+ [代码标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/go-code.md)
-
-+ [Docker 镜像标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/images.md)
-
-+ [目录标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/directory.md)
-
-+ [提交标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/commit.md)
-
-+ [版本控制标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/version.md)
-
-+ [接口标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/interface.md)
-
-+ [OpenIM配置和环境变量设置](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md)
-
-> **Note**
-> 针对中国的用户，阅读我们的 [Docker 镜像标准](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/images.md) 以便使用国内 aliyun 的镜像地址。OpenIM 也有针对中国的 gitee 同步仓库，你可以在 [gitee.com](https://gitee.com/openimsdk) 上找到它。
-
-## :link: 链接
-
-  + **[完整文档](https://doc.rentsoft.cn/)**
+  + **[开发手册](https://docs.openim.io/)**
   + **[更新日志](https://github.com/openimsdk/open-im-server/blob/main/CHANGELOG.md)**
-  + **[FAQ](https://github.com/openimsdk/open-im-server/blob/main/FAQ.md)**
-  + **[代码示例](https://github.com/openimsdk/open-im-server/blob/main/examples)**
 
-## :handshake: 社区
+## :writing_hand: 如何贡献
 
-  + **[GitHub Discussions](https://github.com/openimsdk/open-im-server/discussions)**
-  + **[Slack 通信](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)**
-  + **[GitHub Issues](https://github.com/openimsdk/open-im-server/issues)**
-
-  您可以加入这些平台，讨论问题，提出建议，或分享您的成功故事！
-
-## :writing_hand: 贡献
-
-  我们欢迎任何形式的贡献！请确保在提交 Pull Request 之前阅读我们的[贡献者文档](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md)。
+我们欢迎任何形式的贡献！在提交 Pull Request 之前，请确保阅读我们的[贡献者文档](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md)
 
   + **[报告 Bug](https://github.com/openimsdk/open-im-server/issues/new?assignees=&labels=bug&template=bug_report.md&title=)**
   + **[提出新特性](https://github.com/openimsdk/open-im-server/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=)**
   + **[提交 Pull Request](https://github.com/openimsdk/open-im-server/pulls)**
 
-  感谢您的贡献，我们一起打造一个强大的即时通信解决方案！
+感谢您的贡献，一起来打造强大的即时通讯解决方案！
 
 ## :closed_book: 许可证
 
