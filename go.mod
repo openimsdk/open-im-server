@@ -1,6 +1,8 @@
 module github.com/openimsdk/open-im-server/v3
 
-go 1.20
+go 1.21.2
+
+toolchain go1.21.9
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
@@ -171,4 +173,9 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+)
+
+
+replace (
+	github.com/openimsdk/protocol => /Users/chao/Desktop/withchao/protocol
 )

@@ -82,6 +82,11 @@ func (c *ConversationRpcClient) SetConversations(ctx context.Context, userIDs []
 	return err
 }
 
+func (c *ConversationRpcClient) UpdateConversations(ctx context.Context, conversation *pbconversation.UpdateConversationReq) error {
+	_, err := c.Client.UpdateConversation(ctx, conversation)
+	return err
+}
+
 func (c *ConversationRpcClient) GetConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
 	resp, err := c.Client.GetConversationIDs(ctx, &pbconversation.GetConversationIDsReq{UserID: ownerUserID})
 	if err != nil {

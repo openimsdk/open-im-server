@@ -212,6 +212,11 @@ func (m *MessageRpcClient) GetConversationMaxSeq(ctx context.Context, conversati
 	return resp.MaxSeq, nil
 }
 
+func (m *MessageRpcClient) ClearMsg(ctx context.Context, ts int64) error {
+	_, err := m.Client.ClearMsg(ctx, &msg.ClearMsgReq{Timestamp: ts})
+	return err
+}
+
 type NotificationSender struct {
 	contentTypeConf map[int32]config.NotificationConfig
 	sessionTypeConf map[int32]int32
