@@ -15,7 +15,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/openimsdk/protocol v0.0.64
+	github.com/openimsdk/protocol v0.0.65
 	github.com/openimsdk/tools v0.0.49-alpha.2
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
@@ -173,9 +173,4 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-)
-
-
-replace (
-	github.com/openimsdk/protocol => /Users/chao/Desktop/withchao/protocol
 )
