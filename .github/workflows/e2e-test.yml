@@ -80,7 +80,6 @@ jobs:
 
     - name: Module Operations
       run: |
-        sudo go mod tidy
         echo "===========> Verifying go-gitlint is installed"
         if [ ! -f ./_output/tools/go-gitlint ]; then
           export GOBIN=$(pwd)/_output/tools
@@ -88,7 +87,6 @@ jobs:
           sudo go install github.com/marmotedu/go-gitlint/cmd/go-gitlint@latest
           echo "===========> go-gitlint is installed in /home/ubuntu/DF/open-im-server/_output/tools/go-gitlint"
         fi
-
 
     - name: Build, Start(make build && make start)
       run: |
