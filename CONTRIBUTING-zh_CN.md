@@ -1,4 +1,4 @@
-# How do I contribute code to OpenIM
+# 如何给OpenIM贡献代码（提交pull request）
 
 <p align="center">
   <a href="./CONTRIBUTING.md">Englist</a> · 
@@ -28,6 +28,70 @@
   <a href="docs/contributing/CONTRIBUTING-TR.md">Türkçe</a>
 </p>
 
-</div>
 
-</p>
+以下是整理后的 Markdown 格式文档，用于描述如何为 [openimsdk/open-im-server](https://github.com/openimsdk/open-im-server) 项目贡献代码：
+
+```markdown
+# GitHub 贡献指南
+
+本指南提供了如何为 [openimsdk/open-im-server](https://github.com/openimsdk/open-im-server) 项目贡献代码的详细步骤。
+
+## 步骤概览
+
+1. **Fork 仓库**
+2. **克隆仓库**
+3. **设置远程上游**
+4. **创建 Issue**
+5. **创建新分支**
+6. **提交更改**
+7. **推送分支**
+8. **创建 Pull Request**
+9. **签署 CLA**
+
+## 详细步骤
+
+### 1. Fork 仓库
+前往 [openimsdk/open-im-server](https://github.com/openimsdk/open-im-server) GitHub 页面，点击右上角的 "Fork" 按钮，将仓库 Fork 到你的 GitHub 账户下。
+
+### 2. 克隆仓库
+将你 Fork 的仓库克隆到本地：
+```bash
+git clone https://github.com/your-username/open-im-server.git
+```
+
+### 3. 设置远程上游
+添加原始仓库为远程上游以便跟踪其更新：
+```bash
+git remote add upstream https://github.com/openimsdk/open-im-server.git
+```
+
+### 4. 创建 Issue
+在原始仓库中创建一个新的 Issue，详细描述你遇到的问题或希望添加的新功能。
+
+### 5. 创建新分支
+基于主分支创建一个新分支，并使用描述性的名称与 Issue ID：
+```bash
+git checkout -b fix-bug-123
+```
+
+### 6. 提交更改
+在你的本地分支上进行更改后，提交这些更改：
+```bash
+git add .
+git commit -m "详细描述你的更改"
+```
+
+### 7. 推送分支
+将你的分支推送回你的 GitHub Fork：
+```bash
+git push origin fix-bug-123
+```
+
+### 8. 创建 Pull Request
+在 GitHub 上转到你的 Fork 仓库，点击 "Pull Request" 按钮。确保 PR 描述清楚，并链接到相关的 Issue。
+
+### 9. 签署 CLA
+如果这是你第一次提交 PR，你需要在 PR 的评论中回复：
+```
+I have read the CLA Document and I hereby sign the CLA
+```
