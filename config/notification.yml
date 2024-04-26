@@ -17,31 +17,22 @@
 # The options field 'isNotification' indicates if it's a notification.
 groupCreated:
   isSendMsg: true
-
 # Reliability level of the message sending.
 # Set to 1 to send only when online, 2 for guaranteed delivery.
   reliabilityLevel: 1
-
 # This setting is effective only when 'isSendMsg' is true.
 # It controls whether to count unread messages.
   unreadCount: false
-
 # Configuration for offline push notifications.
   offlinePush:
     # Enables or disables offline push notifications.
     enable: false
-
     # Title for the notification when a group is created.
     title: "create group title"
-
     # Description for the notification.
     desc: "create group desc"
-
     # Additional information for the notification.
     ext: "create group ext"
-
-# Content type is not added here.
-# Content should use a JSON structure conforming to the protobuf format.
 
 groupInfoSet:
   isSendMsg: false
