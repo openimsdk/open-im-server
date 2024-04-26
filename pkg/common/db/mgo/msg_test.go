@@ -1,46 +1,34 @@
 package mgo
 
 import (
-	"strings"
+	"context"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/mw"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"testing"
+	"time"
 )
 
 func TestName(t *testing.T) {
-	//conf := config.Mongo{
-	//	Address:  []string{"localhost:37017"},
-	//	Username: "openIM",
-	//	Password: "openIM123",
-	//	Database: "demo",
-	//}
-	//conf.URI = `mongodb://openIM:openIM123@localhost:37017/demo?maxPoolSize=100&authSource=admin`
-	//cli, err := mongoutil.NewMongoDB(context.Background(), conf.Build())
-	//if err != nil {
-	//	panic(err)
-	//}
-	//msg, _ := NewMsgMongo(cli.GetDB())
-	//count, err := msg.ClearMsg(context.Background(), time.Now().Add(-time.Hour*24*61))
-	//if err != nil {
-	//	t.Log("error", err)
-	//	return
-	//}
-	//t.Log("count", count)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	ctx = mcontext.SetOpUserID(ctx, "imAdmin")
+	ctx = mcontext.SetOperationID(ctx, "test123456")
 
-	s := `si_5300327160_9129042887:0123`
-
-	t.Log(s[:strings.LastIndex(s, ":")])
-
-}
-
-func TestName2(t *testing.T) {
-	m := map[string]string{
-		"1": "1",
-		"2": "2",
+	conn, err := grpc.DialContext(ctx, "172.16.8.48:10130", grpc.WithTransportCredentials(insecure.NewCredentials()), mw.GrpcClient())
+	if err != nil {
+		panic(err)
 	}
-	t.Log(m)
-	clear(m)
-	t.Log(m)
-	a := []string{"1", "2"}
-	t.Log(a)
-	clear(a)
-	t.Log(a)
+	defer conn.Close()
+	cli := msg.NewMsgClient(conn)
+	var ts int64
+
+	ts = time.Now().UnixMilli()
+
+	if _, err := cli.ClearMsg(ctx, &msg.ClearMsgReq{Timestamp: ts}); err != nil {
+		panic(err)
+	}
+	t.Log("success!")
 }

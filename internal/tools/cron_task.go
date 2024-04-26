@@ -19,8 +19,11 @@ import (
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/mw"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"os"
 	"os/signal"
 	"syscall"
@@ -33,11 +36,8 @@ import (
 
 type CronTaskConfig struct {
 	CronTask        config.CronTask
-	RedisConfig     config.Redis
-	MongodbConfig   config.Mongo
 	ZookeeperConfig config.ZooKeeper
 	Share           config.Share
-	KafkaConfig     config.Kafka
 }
 
 func Start(ctx context.Context, config *CronTaskConfig) error {
@@ -49,9 +49,14 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
-	cli := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
+	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	ctx, exitBy := context.WithCancelCause(context.Background())
 	ctx = mcontext.SetOpUserID(ctx, config.Share.IMAdminUserID[0])
+	conn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
+	if err != nil {
+		return err
+	}
+	cli := msg.NewMsgClient(conn)
 	go func() {
 		sigs := make(chan os.Signal, 1)
 		signal.Notify(sigs, syscall.SIGTERM)
@@ -67,7 +72,7 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		deltime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.RetainChatRecords))
 		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deltime.UnixMilli()))
 		log.ZInfo(ctx, "clear chat records", "deltime", deltime, "timestamp", deltime.UnixMilli())
-		if err := cli.ClearMsg(ctx, deltime.UnixMilli()); err != nil {
+		if _, err := cli.ClearMsg(ctx, &msg.ClearMsgReq{Timestamp: deltime.UnixMilli()}); err != nil {
 			log.ZError(ctx, "cron clear chat records failed", err, "deltime", deltime, "cont", time.Since(now))
 			return
 		}
