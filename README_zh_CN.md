@@ -54,7 +54,7 @@
 ## :busts_in_silhouette: 加入我们的社区
 
 + 💬 [关注我们的 Twitter](https://twitter.com/founder_im63606)
-+ 🚀 [加入我们的 Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
++ 🚀 [加入我们的 Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2hljfom5u-9ZuzP3NfEKW~BJKbpLm0Hw)
 + :eyes: [加入我们的微信群](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## Ⓜ️ 关于 OpenIM
