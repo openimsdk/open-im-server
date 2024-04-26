@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	geTUI    = "getui"
+	geTUI    = "geTui"
 	firebase = "fcm"
 	jPush    = "jpush"
 )
