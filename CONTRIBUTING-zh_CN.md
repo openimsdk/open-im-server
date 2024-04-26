@@ -27,11 +27,6 @@
   <a href="docs/contributing/CONTRIBUTING-GR.md">Ελληνικά</a> · 
   <a href="docs/contributing/CONTRIBUTING-TR.md">Türkçe</a>
 </p>
-
-
-以下是整理后的 Markdown 格式文档，用于描述如何为 [openimsdk/open-im-server](https://github.com/openimsdk/open-im-server) 项目贡献代码：
-
-```markdown
 # GitHub 贡献指南
 
 本指南提供了如何为 [openimsdk/open-im-server](https://github.com/openimsdk/open-im-server) 项目贡献代码的详细步骤。
@@ -58,6 +53,8 @@
 ```bash
 git clone https://github.com/your-username/open-im-server.git
 ```
+
+
 
 ### 3. 设置远程上游
 添加原始仓库为远程上游以便跟踪其更新：
