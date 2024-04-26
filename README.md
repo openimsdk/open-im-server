@@ -84,7 +84,7 @@ Built with Golang and supports cross-platform deployment to ensure a consistent 
 
 👉 **[Explore the GO SDK](https://github.com/openimsdk/openim-sdk-core)**
 
-## 🌐 Introduction to OpenIMServer
+## 🌐 Introduction to OpenIMServer 
 
 + **OpenIMServer** features include:
   - 🌐 Microservices Architecture: Supports cluster mode, including a gateway and multiple rpc services.
