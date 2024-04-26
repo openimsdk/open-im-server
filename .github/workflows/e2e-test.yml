@@ -90,7 +90,7 @@ jobs:
 
     - name: Build, Start(make build && make start)
       run: |
-        sudo ./scripts/install/install.sh -i
+        sudo ./scripts/install/install.sh -i   
 
     - name: Exec OpenIM System Status Chack
       run: |
