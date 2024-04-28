@@ -34,11 +34,8 @@ func NewCronTaskCmd() *CronTaskCmd {
 	ret := &CronTaskCmd{cronTaskConfig: &cronTaskConfig}
 	ret.configMap = map[string]any{
 		OpenIMCronTaskCfgFileName: &cronTaskConfig.CronTask,
-		RedisConfigFileName:       &cronTaskConfig.RedisConfig,
-		MongodbConfigFileName:     &cronTaskConfig.MongodbConfig,
 		ZookeeperConfigFileName:   &cronTaskConfig.ZookeeperConfig,
 		ShareFileName:             &cronTaskConfig.Share,
-		KafkaConfigFileName:       &cronTaskConfig.KafkaConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)

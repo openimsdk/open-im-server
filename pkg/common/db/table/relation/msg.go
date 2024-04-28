@@ -116,6 +116,12 @@ type MsgDocModelInterface interface {
 	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*UserCount, dateCount map[string]int64, err error)
 	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*GroupCount, dateCount map[string]int64, err error)
 	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
+
+	DeleteDoc(ctx context.Context, docID string) error
+	DeleteMsgByIndex(ctx context.Context, docID string, index []int) error
+	GetBeforeMsg(ctx context.Context, ts int64, limit int) ([]*MsgDocModel, error)
+
+	//ClearMsg(ctx context.Context, t time.Time) (int64, error)
 }
 
 func (MsgDocModel) TableName() string {
