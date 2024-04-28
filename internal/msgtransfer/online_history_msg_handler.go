@@ -16,52 +16,34 @@ package msgtransfer
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/batcher"
-	"strconv"
-	"strings"
-	"sync"
-	"sync/atomic"
-	"time"
-
 	"github.com/IBM/sarama"
 	"github.com/go-redis/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/tools/batcher"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mq/kafka"
-	"github.com/openimsdk/tools/utils/idutil"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"google.golang.org/protobuf/proto"
+	"strconv"
+	"strings"
+	"time"
 )
 
 const (
-	ConsumerMsgs   = 3
-	SourceMessages = 4
-	MongoMessages  = 5
-	ChannelNum     = 100
+	size           = 500
+	mainDataBuffer = 500
+	subChanBuffer  = 50
+	worker         = 50
+	interval       = 100 * time.Millisecond
 )
 
-type MsgChannelValue struct {
-	uniqueKey  string
-	ctx        context.Context
-	ctxMsgList []*ContextMsg
-}
-
-type TriggerChannelValue struct {
-	ctx      context.Context
-	cMsgList []*sarama.ConsumerMessage
-}
-
-type Cmd2Value struct {
-	Cmd   int
-	Value any
-}
 type ContextMsg struct {
 	message *sdkws.MsgData
 	ctx     context.Context
@@ -69,8 +51,6 @@ type ContextMsg struct {
 
 type OnlineHistoryRedisConsumerHandler struct {
 	historyConsumerGroup *kafka.MConsumerGroup
-	chArrays             [ChannelNum]chan Cmd2Value
-	msgDistributionCh    chan Cmd2Value
 
 	redisMessageBatches *batcher.Batcher[sarama.ConsumerMessage]
 
@@ -81,14 +61,21 @@ type OnlineHistoryRedisConsumerHandler struct {
 
 func NewOnlineHistoryRedisConsumerHandler(kafkaConf *config.Kafka, database controller.CommonMsgDatabase,
 	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*OnlineHistoryRedisConsumerHandler, error) {
-	historyConsumerGroup, err := kafka.NewMConsumerGroup(kafkaConf.Build(), kafkaConf.ToRedisGroupID, []string{kafkaConf.ToRedisTopic})
+	historyConsumerGroup, err := kafka.NewMConsumerGroup(kafkaConf.Build(), kafkaConf.ToRedisGroupID, []string{kafkaConf.ToRedisTopic}, false)
 	if err != nil {
 		return nil, err
 	}
 	var och OnlineHistoryRedisConsumerHandler
 	och.msgDatabase = database
 
-	b := batcher.New[sarama.ConsumerMessage]()
+	b := batcher.New[sarama.ConsumerMessage](
+		batcher.WithSize(size),
+		batcher.WithWorker(worker),
+		batcher.WithInterval(interval),
+		batcher.WithDataBuffer(mainDataBuffer),
+		batcher.WithSyncWait(true),
+		batcher.WithBuffer(subChanBuffer),
+	)
 	b.Sharding = func(key string) int {
 		hashCode := stringutil.GetHashCode(key)
 		return int(hashCode) % och.redisMessageBatches.Worker()
@@ -96,18 +83,8 @@ func NewOnlineHistoryRedisConsumerHandler(kafkaConf *config.Kafka, database cont
 	b.Key = func(consumerMessage *sarama.ConsumerMessage) string {
 		return string(consumerMessage.Key)
 	}
+	b.Do = och.do
 	och.redisMessageBatches = b
-
-	err = b.Start()
-	if err != nil {
-		return nil, err
-	}
-	//och.msgDistributionCh = make(chan Cmd2Value) // no buffer channel
-	//go och.MessagesDistributionHandle()
-	//for i := 0; i < ChannelNum; i++ {
-	//	och.chArrays[i] = make(chan Cmd2Value, 50)
-	//	go och.Run(i)
-	//}
 	och.conversationRpcClient = conversationRpcClient
 	och.groupRpcClient = groupRpcClient
 	och.historyConsumerGroup = historyConsumerGroup
@@ -250,7 +227,8 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 		log.ZDebug(ctx, "success incr to next topic")
 		err = och.msgDatabase.MsgToMongoMQ(ctx, key, conversationID, storageMessageList, lastSeq)
 		if err != nil {
-			log.ZError(ctx, "MsgToMongoMQ error", err)
+			log.ZError(ctx, "Msg To MongoDB MQ error", err, "conversationID",
+				conversationID, "storageList", storageMessageList, "lastSeq", lastSeq)
 		}
 		och.toPushTopic(ctx, key, conversationID, storageList)
 	}
@@ -273,7 +251,8 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Con
 		log.ZDebug(ctx, "success to next topic", "conversationID", conversationID)
 		err = och.msgDatabase.MsgToMongoMQ(ctx, key, conversationID, storageMessageList, lastSeq)
 		if err != nil {
-			log.ZError(ctx, "MsgToMongoMQ error", err)
+			log.ZError(ctx, "Msg To MongoDB MQ error", err, "conversationID",
+				conversationID, "storageList", storageMessageList, "lastSeq", lastSeq)
 		}
 		och.toPushTopic(ctx, key, conversationID, storageList)
 	}
@@ -310,6 +289,7 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(session sarama.Consum
 		claim.HighWaterMarkOffset(), "topic", claim.Topic(), "partition", claim.Partition())
 	och.redisMessageBatches.OnComplete = func(lastMessage *sarama.ConsumerMessage, totalCount int) {
 		session.MarkMessage(lastMessage, "")
+		session.Commit()
 	}
 	for {
 		select {
@@ -325,99 +305,8 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(session sarama.Consum
 			if err != nil {
 				log.ZWarn(context.Background(), "put msg to  error", err, "msg", msg)
 			}
-
-			session.MarkMessage(msg, "")
-
 		case <-session.Context().Done():
 			return nil
 		}
 	}
-
-	var (
-		split    = 1000
-		rwLock   = new(sync.RWMutex)
-		messages = make([]*sarama.ConsumerMessage, 0, 1000)
-		ticker   = time.NewTicker(time.Millisecond * 100)
-
-		wg      = sync.WaitGroup{}
-		running = new(atomic.Bool)
-	)
-	running.Store(true)
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		for {
-			select {
-			case <-ticker.C:
-				// if the buffer is empty and running is false, return loop.
-				if len(messages) == 0 {
-					if !running.Load() {
-						return
-					}
-
-					continue
-				}
-
-				rwLock.Lock()
-				buffer := make([]*sarama.ConsumerMessage, 0, len(messages))
-				buffer = append(buffer, messages...)
-
-				// reuse slice, set cap to 0
-				messages = messages[:0]
-				rwLock.Unlock()
-
-				start := time.Now()
-				ctx := mcontext.WithTriggerIDContext(context.Background(), idutil.OperationIDGenerator())
-				log.ZDebug(ctx, "timer trigger msg consumer start", "length", len(buffer))
-				for i := 0; i < len(buffer)/split; i++ {
-					och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{
-						ctx: ctx, cMsgList: buffer[i*split : (i+1)*split],
-					}}
-				}
-				if (len(buffer) % split) > 0 {
-					och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{
-						ctx: ctx, cMsgList: buffer[split*(len(buffer)/split):],
-					}}
-				}
-
-				log.ZDebug(ctx, "timer trigger msg consumer end",
-					"length", len(buffer), "time_cost", time.Since(start),
-				)
-			}
-		}
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		for running.Load() {
-			select {
-			case msg, ok := <-claim.Messages():
-				if !ok {
-					running.Store(false)
-					return
-				}
-
-				if len(msg.Value) == 0 {
-					continue
-				}
-
-				rwLock.Lock()
-				messages = append(messages, msg)
-				rwLock.Unlock()
-
-				session.MarkMessage(msg, "")
-
-			case <-session.Context().Done():
-				running.Store(false)
-				return
-			}
-		}
-	}()
-
-	wg.Wait()
-	return nil
 }

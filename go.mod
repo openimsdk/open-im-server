@@ -1,6 +1,6 @@
 module github.com/openimsdk/open-im-server/v3
 
-go 1.21.2
+go 1.20
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
@@ -14,7 +14,7 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/protocol v0.0.65
-	github.com/openimsdk/tools v0.0.49-alpha.2
+	github.com/openimsdk/tools v0.0.49-alpha.
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0

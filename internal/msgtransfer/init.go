@@ -20,7 +20,6 @@ import (
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -96,28 +95,19 @@ func Start(ctx context.Context, index int, config *Config) error {
 	}
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
-	msgTransfer, err := NewMsgTransfer(&config.KafkaConfig, msgDatabase, &conversationRpcClient, &groupRpcClient)
+	historyCH, err := NewOnlineHistoryRedisConsumerHandler(&config.KafkaConfig, msgDatabase, &conversationRpcClient, &groupRpcClient)
 	if err != nil {
 		return err
 	}
-	return msgTransfer.Start(index, config)
-}
-
-func NewMsgTransfer(kafkaConf *config.Kafka, msgDatabase controller.CommonMsgDatabase,
-	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*MsgTransfer, error) {
-	historyCH, err := NewOnlineHistoryRedisConsumerHandler(kafkaConf, msgDatabase, conversationRpcClient, groupRpcClient)
+	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(&config.KafkaConfig, msgDatabase)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(kafkaConf, msgDatabase)
-	if err != nil {
-		return nil, err
-	}
-
-	return &MsgTransfer{
+	msgTransfer := &MsgTransfer{
 		historyCH:      historyCH,
 		historyMongoCH: historyMongoCH,
-	}, nil
+	}
+	return msgTransfer.Start(index, config)
 }
 
 func (m *MsgTransfer) Start(index int, config *Config) error {
@@ -134,6 +124,10 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 
 	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyCH)
 	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyMongoCH)
+	err = m.historyCH.redisMessageBatches.Start()
+	if err != nil {
+		return err
+	}
 
 	if config.MsgTransfer.Prometheus.Enable {
 		go func() {
@@ -158,50 +152,16 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 		program.SIGTERMExit()
 		// graceful close kafka client.
 		m.cancel()
+		m.historyCH.redisMessageBatches.Close()
 		m.historyCH.historyConsumerGroup.Close()
 		m.historyMongoCH.historyConsumerGroup.Close()
 		return nil
 	case <-netDone:
 		m.cancel()
+		m.historyCH.redisMessageBatches.Close()
 		m.historyCH.historyConsumerGroup.Close()
 		m.historyMongoCH.historyConsumerGroup.Close()
 		close(netDone)
 		return netErr
-	}
-
-	if config.MsgTransfer.Prometheus.Enable {
-		go func() {
-			proreg := prometheus.NewRegistry()
-			proreg.MustRegister(
-				collectors.NewGoCollector(),
-			)
-			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer", &config.Share)...)
-
-			http.Handle("/metrics", promhttp.HandlerFor(proreg, promhttp.HandlerOpts{Registry: proreg}))
-
-			lc := net.ListenConfig{
-				Control: func(network, address string, c syscall.RawConn) error {
-					return c.Control(func(fd uintptr) {
-						err := syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
-						if err != nil {
-							return fmt.Errorf("setsockopt failed: %w", err)
-						}
-					})
-				},
-			}
-
-			listener, err := lc.Listen(context.Background(), "tcp", fmt.Sprintf(":%d", prometheusPort))
-			if err != nil {
-				netErr = errs.WrapMsg(err, "prometheus start error", "prometheusPort", prometheusPort)
-				netDone <- struct{}{}
-				return
-			}
-
-			err = http.Serve(listener, nil)
-			if err != nil && err != http.ErrServerClosed {
-				netErr = errs.WrapMsg(err, "HTTP server start error", "prometheusPort", prometheusPort)
-				netDone <- struct{}{}
-			}
-		}()
 	}
 }

@@ -37,6 +37,7 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/timeutil"
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -58,7 +59,7 @@ func NewConsumerHandler(config *Config, offlinePusher offlinepush.OfflinePusher,
 	var consumerHandler ConsumerHandler
 	var err error
 	consumerHandler.pushConsumerGroup, err = kafka.NewMConsumerGroup(config.KafkaConfig.Build(), config.KafkaConfig.ToPushGroupID,
-		[]string{config.KafkaConfig.ToPushTopic})
+		[]string{config.KafkaConfig.ToPushTopic}, true)
 	if err != nil {
 		return nil, err
 	}

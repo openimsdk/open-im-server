@@ -19,11 +19,12 @@ var (
 )
 
 type Config struct {
-	size     int           // Number of message aggregations
-	buffer   int           // The number of caches running in a single coroutine
-	worker   int           // Number of coroutines processed in parallel
-	interval time.Duration // Time of message aggregations
-	syncWait bool          // Whether to wait synchronously after distributing messages
+	size       int           // Number of message aggregations
+	buffer     int           // The number of caches running in a single coroutine
+	dataBuffer int           // The size of the main data channel
+	worker     int           // Number of coroutines processed in parallel
+	interval   time.Duration // Time of message aggregations
+	syncWait   bool          // Whether to wait synchronously after distributing messages
 }
 
 type Option func(c *Config)
@@ -55,6 +56,12 @@ func WithInterval(i time.Duration) Option {
 func WithSyncWait(wait bool) Option {
 	return func(c *Config) {
 		c.syncWait = wait
+	}
+}
+
+func WithDataBuffer(size int) Option {
+	return func(c *Config) {
+		c.dataBuffer = size
 	}
 }
 
@@ -145,7 +152,7 @@ func (b *Batcher[T]) scheduler() {
 	defer func() {
 		ticker.Stop()
 		for _, ch := range b.chArrays {
-			close(ch) // 发送关闭信号到每个worker
+			close(ch)
 		}
 		close(b.data)
 		b.wait.Done()
@@ -163,15 +170,12 @@ func (b *Batcher[T]) scheduler() {
 				return
 			}
 			if data == nil {
-				// 接收到nil作为结束信号
-				fmt.Println("Batcher Closing1", count)
 				if count > 0 {
-					fmt.Println("Batcher Closing2", count)
 					b.distributeMessage(vals, count, lastAny)
 				}
 				return
 			}
-			// 正常数据处理
+
 			key := b.Key(data)
 			vals[key] = append(vals[key], data)
 			lastAny = data
@@ -179,7 +183,6 @@ func (b *Batcher[T]) scheduler() {
 			count++
 			if count >= b.config.size {
 
-				fmt.Printf("counter to %d, %v\n", count, lastAny)
 				b.distributeMessage(vals, count, lastAny)
 				vals = make(map[string][]*T)
 				count = 0
@@ -187,7 +190,7 @@ func (b *Batcher[T]) scheduler() {
 
 		case <-ticker.C:
 			if count > 0 {
-				fmt.Printf("ticker to %v , %d, %v\n", b.config.interval, count, lastAny)
+
 				b.distributeMessage(vals, count, lastAny)
 				vals = make(map[string][]*T)
 				count = 0
