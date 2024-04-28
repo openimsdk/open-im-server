@@ -17,7 +17,7 @@
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
 
-
+     
 <p align="center">
   <a href="./README.md">Englist</a> · 
   <a href="./README_zh_CN.md">中文</a> · 
@@ -84,7 +84,7 @@ Built with Golang and supports cross-platform deployment to ensure a consistent 
 
 👉 **[Explore the GO SDK](https://github.com/openimsdk/openim-sdk-core)**
 
-## 🌐 Introduction to OpenIMServer
+## 🌐 Introduction to OpenIMServer 
 
 + **OpenIMServer** features include:
   - 🌐 Microservices Architecture: Supports cluster mode, including a gateway and multiple rpc services.
@@ -131,7 +131,7 @@ Thank you for contributing to building a powerful instant messaging solution!
 
 ## :closed_book: License
 
-OpenIMSDK is available under the Apache License 2.0. See the [LICENSE file](https://github.com/openimsdk/open-im-server/blob/main/LICENSE) for more information.
+OpenIMSDK is available under the Apache License 2.0. See the [LICENSE file](https://github.com/openimsdk/open-im-server/blob/main/LICENSE) for more information. 
 
 
 
