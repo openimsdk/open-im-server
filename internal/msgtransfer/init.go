@@ -20,6 +20,7 @@ import (
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -166,5 +167,41 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 		m.historyMongoCH.historyConsumerGroup.Close()
 		close(netDone)
 		return netErr
+	}
+
+	if config.MsgTransfer.Prometheus.Enable {
+		go func() {
+			proreg := prometheus.NewRegistry()
+			proreg.MustRegister(
+				collectors.NewGoCollector(),
+			)
+			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer", &config.Share)...)
+
+			http.Handle("/metrics", promhttp.HandlerFor(proreg, promhttp.HandlerOpts{Registry: proreg}))
+
+			lc := net.ListenConfig{
+				Control: func(network, address string, c syscall.RawConn) error {
+					return c.Control(func(fd uintptr) {
+						err := syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
+						if err != nil {
+							return fmt.Errorf("setsockopt failed: %w", err)
+						}
+					})
+				},
+			}
+
+			listener, err := lc.Listen(context.Background(), "tcp", fmt.Sprintf(":%d", prometheusPort))
+			if err != nil {
+				netErr = errs.WrapMsg(err, "prometheus start error", "prometheusPort", prometheusPort)
+				netDone <- struct{}{}
+				return
+			}
+
+			err = http.Serve(listener, nil)
+			if err != nil && err != http.ErrServerClosed {
+				netErr = errs.WrapMsg(err, "HTTP server start error", "prometheusPort", prometheusPort)
+				netDone <- struct{}{}
+			}
+		}()
 	}
 }
