@@ -46,7 +46,6 @@ func IsAppManagerUid(ctx context.Context, imAdminUserID []string) bool {
 }
 
 func CheckAdmin(ctx context.Context, imAdminUserID []string) error {
-
 	if datautil.Contain(mcontext.GetOpUserID(ctx), imAdminUserID...) {
 		return nil
 	}
