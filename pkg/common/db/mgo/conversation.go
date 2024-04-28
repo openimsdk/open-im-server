@@ -56,7 +56,16 @@ func (c *ConversationMgo) Delete(ctx context.Context, groupIDs []string) (err er
 }
 
 func (c *ConversationMgo) UpdateByMap(ctx context.Context, userIDs []string, conversationID string, args map[string]any) (rows int64, err error) {
-	res, err := mongoutil.UpdateMany(ctx, c.coll, bson.M{"owner_user_id": bson.M{"$in": userIDs}, "conversation_id": conversationID}, bson.M{"$set": args})
+	if len(args) == 0 {
+		return 0, nil
+	}
+	filter := bson.M{
+		"conversation_id": conversationID,
+	}
+	if len(userIDs) > 0 {
+		filter["owner_user_id"] = bson.M{"$in": userIDs}
+	}
+	res, err := mongoutil.UpdateMany(ctx, c.coll, filter, bson.M{"$set": args})
 	if err != nil {
 		return 0, err
 	}
