@@ -5,9 +5,8 @@
 .git
 
 # Ignore build artifacts
-_output/
 logs/
-
+_output/
 # Ignore non-essential documentation
 README.md
 README-zh_CN.md
@@ -18,8 +17,6 @@ CHANGELOG/
 # Ignore testing and linting configuration
 .golangci.yml
 
-# Ignore deployment-related files
-docker-compose.yaml
 
 # Ignore assets
 assets/

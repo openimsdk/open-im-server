@@ -20,9 +20,6 @@
 # READ: https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh
 
 
-
-
-
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
@@ -33,7 +30,7 @@ fi
 
 OPENIM_VERBOSE=4
 
-openim::log::info "\n# Begin to check all openim service"
+openim::log::info "\n# Begin to check all OpenIM service"
 
 openim::log::status "Check all dependent service ports"
 # Elegant printing function
@@ -65,16 +62,16 @@ print_services_and_ports "${OPENIM_SERVER_NAME_TARGETS[@]}" "${OPENIM_SERVER_POR
 print_services_and_ports "${OPENIM_DEPENDENCY_TARGETS[@]}" "${OPENIM_DEPENDENCY_PORT_TARGETS[@]}"
 
 # OpenIM check
-echo "++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
-openim::log::info "\n## Check all dependent service ports"
-echo "++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
+#echo "++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
+openim::log::info "\n## Check all dependent components service ports"
+#echo "++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
 
 
 # Later, after discarding Docker, the Docker keyword is unreliable, and Kubepods is used
 if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
   openim::color::echo ${COLOR_CYAN} "Environment in the interior of the container"
 else
-  openim::color::echo ${COLOR_CYAN} "The environment is outside the container"
+  openim::color::echo ${COLOR_CYAN}"The environment is outside the container"
   openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}
 fi
 
@@ -82,30 +79,35 @@ if [[ $? -ne 0 ]]; then
   openim::log::error_exit "The service does not start properly, please check the port, query variable definition!"
   echo "+++ https://github.com/openimsdk/open-im-server/tree/main/scripts/install/environment.sh +++"
 else
-  openim::log::success "All components depended on by openim are running normally! "
+  openim::log::success "All components depended on by OpenIM are running normally! "
 fi
 
 
-openim::log::info "\n## Check openim service name:\n${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer"
+openim::log::status "Check OpenIM service:"
+openim::log::colorless "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer"
 result=$(. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check)
 if [[ $? -ne 0 ]]; then
-  echo "+++ cat openim log file >>> ${LOG_FILE}"
-  openim::log::error "check process failed.\n $result"
+  #echo "+++ cat openim log file >>> ${LOG_FILE}"
+
+  openim::log::error "The service is not running properly, please check the logs $result"
 fi
 
 
-echo "Check openim service name:"
+openim::log::status "Check OpenIM service:"
 for item in "${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}"; do
-    echo "$item"
+    openim::log::colorless "$item"
 done
+
 
 result=$(openim::util::check_process_names ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]})
 if [[ $? -ne 0 ]]; then
-  echo "+++ cat openim log file >>> ${LOG_FILE}"
-  openim::log::error "check process failed.\n "
+  #echo "+++ cat OpenIM log file >>> ${LOG_FILE}"
+  openim::log::error "The service is not running properly, please check the logs "
   echo "$result"
   exit 1
 else
-  openim::log::success "All openim services are running normally! "
+  openim::log::status "List the ports listened to by the OpenIM service:"
+  openim::util::find_ports_for_all_services ${OPENIM_ALL_SERVICE_LIBRARIES_NO_TRANSFER[@]}
+  openim::util::find_ports_for_all_services ${OPENIM_MSGTRANSFER_BINARY[@]}
+  openim::log::success "All OpenIM services are running normally! "
 fi
-

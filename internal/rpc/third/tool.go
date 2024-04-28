@@ -16,15 +16,14 @@ package third
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"unicode/utf8"
 
-	"github.com/OpenIMSDK/protocol/third"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/protocol/third"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/mcontext"
 )
 
 func toPbMapArray(m map[string][]string) []*third.KeyValues {
@@ -43,21 +42,21 @@ func toPbMapArray(m map[string][]string) []*third.KeyValues {
 
 func (t *thirdServer) checkUploadName(ctx context.Context, name string) error {
 	if name == "" {
-		return errs.ErrArgs.Wrap("name is empty")
+		return errs.ErrArgs.WrapMsg("name is empty")
 	}
 	if name[0] == '/' {
-		return errs.ErrArgs.Wrap("name cannot start with `/`")
+		return errs.ErrArgs.WrapMsg("name cannot start with `/`")
 	}
 	if err := checkValidObjectName(name); err != nil {
-		return errs.ErrArgs.Wrap(err.Error())
+		return errs.ErrArgs.WrapMsg(err.Error())
 	}
 	opUserID := mcontext.GetOpUserID(ctx)
 	if opUserID == "" {
-		return errs.ErrNoPermission.Wrap("opUserID is empty")
+		return errs.ErrNoPermission.WrapMsg("opUserID is empty")
 	}
-	if !authverify.IsManagerUserID(opUserID, t.config) {
+	if !authverify.IsManagerUserID(opUserID, t.config.Share.IMAdminUserID) {
 		if !strings.HasPrefix(name, opUserID+"/") {
-			return errs.ErrNoPermission.Wrap(fmt.Sprintf("name must start with `%s/`", opUserID))
+			return errs.ErrNoPermission.WrapMsg(fmt.Sprintf("name must start with `%s/`", opUserID))
 		}
 	}
 	return nil
@@ -65,21 +64,21 @@ func (t *thirdServer) checkUploadName(ctx context.Context, name string) error {
 
 func checkValidObjectNamePrefix(objectName string) error {
 	if len(objectName) > 1024 {
-		return errors.New("object name cannot be longer than 1024 characters")
+		return errs.New("object name cannot be longer than 1024 characters")
 	}
 	if !utf8.ValidString(objectName) {
-		return errors.New("object name with non UTF-8 strings are not supported")
+		return errs.New("object name with non UTF-8 strings are not supported")
 	}
 	return nil
 }
 
 func checkValidObjectName(objectName string) error {
 	if strings.TrimSpace(objectName) == "" {
-		return errors.New("object name cannot be empty")
+		return errs.New("object name cannot be empty")
 	}
 	return checkValidObjectNamePrefix(objectName)
 }
 
 func (t *thirdServer) IsManagerUserID(opUserID string) bool {
-	return authverify.IsManagerUserID(opUserID, t.config)
+	return authverify.IsManagerUserID(opUserID, t.config.Share.IMAdminUserID)
 }

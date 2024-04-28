@@ -18,7 +18,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/tools/pagination"
+	"github.com/openimsdk/tools/db/pagination"
 )
 
 // FriendModel represents the data structure for a friend relationship in MongoDB.

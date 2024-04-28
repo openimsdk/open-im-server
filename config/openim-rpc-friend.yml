@@ -1,0 +1,13 @@
+rpc:
+  # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
+  registerIP: ''
+  # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
+  listenIP: 0.0.0.0
+  # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+  ports: [ 10120 ]
+
+prometheus:
+  # Enable or disable Prometheus monitoring
+  enable: true
+  # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
+  ports: [ 20104 ]

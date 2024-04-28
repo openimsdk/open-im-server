@@ -21,9 +21,6 @@
 #fixme This scripts is the total startup scripts
 #fixme The full name of the shell scripts that needs to be started is placed in the need_to_start_server_shell array
 
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-source "${OPENIM_ROOT}/scripts/install/common.sh"
-openim::log::info "\n# Use Docker to start all openim service"
-trap 'openim::util::onCtrlC' INT
-"${OPENIM_ROOT}"/scripts/start-all.sh 2>&1 &
-tail -f ${DOCKER_LOG_FILE}
+cd /openim/openim-server
+mage start
+tail -f /dev/null

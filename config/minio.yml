@@ -1,0 +1,16 @@
+# Name of the bucket in MinIO
+bucket: "openim"
+# Access key ID for MinIO authentication
+accessKeyID: "root"
+# Secret access key for MinIO authentication
+secretAccessKey: "openIM123"
+# Session token for MinIO authentication (optional)
+sessionToken: ''
+# Internal address of the MinIO server
+internalAddress: "localhost:10005"
+# External address of the MinIO server, accessible from outside. Supports both HTTP and HTTPS using a domain name
+externalAddress: "http://external_ip:10005"
+# Flag to enable or disable public read access to the bucket
+publicRead: false
+
+

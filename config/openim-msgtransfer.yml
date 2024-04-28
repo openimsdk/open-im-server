@@ -1,0 +1,6 @@
+prometheus:
+  # Enable or disable Prometheus monitoring
+  enable: true
+  # List of ports that Prometheus listens on; each port corresponds to an instance of monitoring. Ensure these are managed accordingly
+  # Because four instances have been launched, four ports need to be specified
+  ports: [ 20108, 20109, 20110, 20111 ]

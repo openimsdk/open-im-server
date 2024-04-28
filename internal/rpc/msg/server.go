@@ -15,69 +15,84 @@
 package msg
 
 import (
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/conversation"
-	"github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/conversation"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/tools/discovery"
 	"google.golang.org/grpc"
 )
 
+type MessageInterceptorFunc func(ctx context.Context, globalConfig *Config, req *msg.SendMsgReq) (*sdkws.MsgData, error)
 type (
+	// MessageInterceptorChain defines a chain of message interceptor functions.
 	MessageInterceptorChain []MessageInterceptorFunc
-	msgServer               struct {
-		RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
-		MsgDatabase            controller.CommonMsgDatabase
-		Conversation           *rpcclient.ConversationRpcClient
-		UserLocalCache         *rpccache.UserLocalCache
-		FriendLocalCache       *rpccache.FriendLocalCache
-		GroupLocalCache        *rpccache.GroupLocalCache
-		ConversationLocalCache *rpccache.ConversationLocalCache
-		Handlers               MessageInterceptorChain
-		notificationSender     *rpcclient.NotificationSender
-		config                 *config.GlobalConfig
+
+	// MsgServer encapsulates dependencies required for message handling.
+	msgServer struct {
+		RegisterCenter         discovery.SvcDiscoveryRegistry   // Service discovery registry for service registration.
+		MsgDatabase            controller.CommonMsgDatabase     // Interface for message database operations.
+		Conversation           *rpcclient.ConversationRpcClient // RPC client for conversation service.
+		UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
+		FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
+		GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
+		ConversationLocalCache *rpccache.ConversationLocalCache // Local cache for conversation data.
+		Handlers               MessageInterceptorChain          // Chain of handlers for processing messages.
+		notificationSender     *rpcclient.NotificationSender    // RPC client for sending notifications.
+		config                 *Config                          // Global configuration settings.
+		webhookClient          *webhook.Client
+	}
+
+	Config struct {
+		RpcConfig          config.Msg
+		RedisConfig        config.Redis
+		MongodbConfig      config.Mongo
+		KafkaConfig        config.Kafka
+		ZookeeperConfig    config.ZooKeeper
+		NotificationConfig config.Notification
+		Share              config.Share
+		WebhooksConfig     config.Webhooks
+		LocalCacheConfig   config.LocalCache
 	}
 )
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
 	m.Handlers = append(m.Handlers, interceptorFunc...)
+
 }
 
-//func (m *msgServer) execInterceptorHandler(ctx context.Context, config *config.GlobalConfig, req *msg.SendMsgReq) error {
-//	for _, handler := range m.Handlers {
-//		msgData, err := handler(ctx, config, req)
-//		if err != nil {
-//			return err
-//		}
-//		req.MsgData = msgData
-//	}
-//	return nil
-//}
-
-func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	rdb, err := cache.NewRedis(config)
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err
 	}
-	mongo, err := unrelation.NewMongo(config)
+	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
 	}
-	if err := mongo.CreateMsgIndex(); err != nil {
+	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
+	if err != nil {
 		return err
 	}
-	cacheModel := cache.NewMsgCacheModel(rdb, config)
-	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase(config.Mongo.Database))
-	conversationClient := rpcclient.NewConversationRpcClient(client, config)
-	userRpcClient := rpcclient.NewUserRpcClient(client, config)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config)
-	friendRpcClient := rpcclient.NewFriendRpcClient(client, config)
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, cacheModel, config)
+	//todo MsgCacheTimeout
+	msgModel := cache.NewMsgCache(rdb, config.RedisConfig.EnablePipeline)
+	seqModel := cache.NewSeqCache(rdb)
+	conversationClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
+	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.Share.RpcRegisterName.Friend)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqModel, &config.KafkaConfig)
 	if err != nil {
 		return err
 	}
@@ -85,28 +100,29 @@ func Start(config *config.GlobalConfig, client discoveryregistry.SvcDiscoveryReg
 		Conversation:           &conversationClient,
 		MsgDatabase:            msgDatabase,
 		RegisterCenter:         client,
-		UserLocalCache:         rpccache.NewUserLocalCache(userRpcClient, rdb),
-		GroupLocalCache:        rpccache.NewGroupLocalCache(groupRpcClient, rdb),
-		ConversationLocalCache: rpccache.NewConversationLocalCache(conversationClient, rdb),
-		FriendLocalCache:       rpccache.NewFriendLocalCache(friendRpcClient, rdb),
+		UserLocalCache:         rpccache.NewUserLocalCache(userRpcClient, &config.LocalCacheConfig, rdb),
+		GroupLocalCache:        rpccache.NewGroupLocalCache(groupRpcClient, &config.LocalCacheConfig, rdb),
+		ConversationLocalCache: rpccache.NewConversationLocalCache(conversationClient, &config.LocalCacheConfig, rdb),
+		FriendLocalCache:       rpccache.NewFriendLocalCache(friendRpcClient, &config.LocalCacheConfig, rdb),
 		config:                 config,
+		webhookClient:          webhook.NewWebhookClient(config.WebhooksConfig.URL),
 	}
-	s.notificationSender = rpcclient.NewNotificationSender(config, rpcclient.WithLocalSendMsg(s.SendMsg))
-	s.addInterceptorHandler(MessageHasReadEnabled)
+
+	s.notificationSender = rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithLocalSendMsg(s.SendMsg))
 	msg.RegisterMsgServer(server, s)
 	return nil
 }
 
-func (m *msgServer) conversationAndGetRecvID(conversation *conversation.Conversation, userID string) (recvID string) {
+func (m *msgServer) conversationAndGetRecvID(conversation *conversation.Conversation, userID string) string {
 	if conversation.ConversationType == constant.SingleChatType ||
 		conversation.ConversationType == constant.NotificationChatType {
 		if userID == conversation.OwnerUserID {
-			recvID = conversation.UserID
+			return conversation.UserID
 		} else {
-			recvID = conversation.OwnerUserID
+			return conversation.OwnerUserID
 		}
-	} else if conversation.ConversationType == constant.SuperGroupChatType {
-		recvID = conversation.GroupID
+	} else if conversation.ConversationType == constant.ReadGroupChatType {
+		return conversation.GroupID
 	}
-	return
+	return ""
 }

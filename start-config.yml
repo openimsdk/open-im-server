@@ -1,0 +1,17 @@
+serviceBinaries:
+  openim-api: 1
+  openim-crontask: 1
+  openim-rpc-user: 1
+  openim-msggateway: 1
+  openim-push: 1
+  openim-msgtransfer: 4
+  openim-rpc-conversation: 1
+  openim-rpc-auth: 1
+  openim-rpc-group: 1
+  openim-rpc-friend: 1
+  openim-rpc-msg: 1
+  openim-rpc-third: 1
+toolBinaries:
+  - check-free-memory
+  - check-component
+maxFileDescriptors: 10000

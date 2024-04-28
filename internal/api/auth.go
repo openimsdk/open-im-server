@@ -15,10 +15,10 @@
 package api
 
 import (
-	"github.com/OpenIMSDK/protocol/auth"
-	"github.com/OpenIMSDK/tools/a2r"
 	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/protocol/auth"
+	"github.com/openimsdk/tools/a2r"
 )
 
 type AuthApi rpcclient.Auth

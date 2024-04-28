@@ -18,14 +18,12 @@ import (
 	_ "net/http/pprof"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
-	util "github.com/openimsdk/open-im-server/v3/pkg/util/genutil"
+	"github.com/openimsdk/tools/system/program"
 )
 
 func main() {
-	apiCmd := cmd.NewApiCmd()
-	apiCmd.AddPortFlag()
-	apiCmd.AddPrometheusPortFlag()
-	if err := apiCmd.Execute(); err != nil {
-		util.ExitWithError(err)
+	if err := cmd.NewApiCmd().Exec(); err != nil {
+		program.ExitWithError(err)
 	}
+
 }

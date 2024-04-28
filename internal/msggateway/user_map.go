@@ -18,7 +18,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 type UserMap struct {
@@ -54,6 +55,7 @@ func (u *UserMap) Get(key string, platformID int) ([]*Client, bool, bool) {
 	return nil, userExisted, false
 }
 
+// Set adds a client to the map.
 func (u *UserMap) Set(key string, v *Client) {
 	allClients, existed := u.m.Load(key)
 	if existed {
@@ -63,6 +65,7 @@ func (u *UserMap) Set(key string, v *Client) {
 		u.m.Store(key, oldClients)
 	} else {
 		log.ZDebug(context.Background(), "Set not existed", "user_id", key, "client_user_id", v.UserID)
+
 		var clients []*Client
 		clients = append(clients, v)
 		u.m.Store(key, clients)
@@ -98,14 +101,10 @@ func (u *UserMap) delete(key string, connRemoteAddr string) (isDeleteUser bool) 
 	return false
 }
 
-func (u *UserMap) deleteClients(key string, clientsToDelete []*Client) (isDeleteUser bool) {
-	// Convert the slice of clients to delete into a map for efficient lookup.
-	deleteMap := make(map[string]struct{})
-	for _, client := range clientsToDelete {
-		deleteMap[client.ctx.GetRemoteAddr()] = struct{}{}
-	}
-
-	// Load the current clients associated with the key.
+func (u *UserMap) deleteClients(key string, clients []*Client) (isDeleteUser bool) {
+	m := datautil.SliceToMapAny(clients, func(c *Client) (string, struct{}) {
+		return c.ctx.GetRemoteAddr(), struct{}{}
+	})
 	allClients, existed := u.m.Load(key)
 	if !existed {
 		// If the key doesn't exist, return false.
@@ -116,7 +115,7 @@ func (u *UserMap) deleteClients(key string, clientsToDelete []*Client) (isDelete
 	oldClients := allClients.([]*Client)
 	var remainingClients []*Client
 	for _, client := range oldClients {
-		if _, shouldBeDeleted := deleteMap[client.ctx.GetRemoteAddr()]; !shouldBeDeleted {
+		if _, shouldBeDeleted := m[client.ctx.GetRemoteAddr()]; !shouldBeDeleted {
 			remainingClients = append(remainingClients, client)
 		}
 	}

@@ -15,43 +15,40 @@
 package cmd
 
 import (
-	"github.com/OpenIMSDK/protocol/constant"
+	"context"
 	"github.com/openimsdk/open-im-server/v3/internal/api"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
 type ApiCmd struct {
 	*RootCmd
-	initFunc func(config *config.GlobalConfig, port int, promPort int) error
+	ctx       context.Context
+	configMap map[string]any
+	apiConfig *api.Config
 }
 
 func NewApiCmd() *ApiCmd {
-	ret := &ApiCmd{RootCmd: NewRootCmd("api"), initFunc: api.Start}
-	ret.SetRootCmdPt(ret)
-	ret.addPreRun()
-	ret.addRunE()
+	var apiConfig api.Config
+	ret := &ApiCmd{apiConfig: &apiConfig}
+	ret.configMap = map[string]any{
+		OpenIMAPICfgFileName:    &apiConfig.RpcConfig,
+		ZookeeperConfigFileName: &apiConfig.ZookeeperConfig,
+		ShareFileName:           &apiConfig.Share,
+	}
+	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
+	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
+	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		return ret.runE()
+	}
 	return ret
 }
 
-func (a *ApiCmd) addPreRun() {
-	a.Command.PreRun = func(cmd *cobra.Command, args []string) {
-		a.port = a.getPortFlag(cmd)
-		a.prometheusPort = a.getPrometheusPortFlag(cmd)
-	}
+func (a *ApiCmd) Exec() error {
+	return a.Execute()
 }
 
-func (a *ApiCmd) addRunE() {
-	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return a.initFunc(a.config, a.port, a.prometheusPort)
-	}
-}
-
-func (a *ApiCmd) GetPortFromConfig(portType string) int {
-	if portType == constant.FlagPort {
-		return a.config.Api.OpenImApiPort[0]
-	} else if portType == constant.FlagPrometheusPort {
-		return a.config.Prometheus.ApiPrometheusPort[0]
-	}
-	return 0
+func (a *ApiCmd) runE() error {
+	return api.Start(a.ctx, a.Index(), a.apiConfig)
 }

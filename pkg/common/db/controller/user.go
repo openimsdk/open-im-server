@@ -16,16 +16,16 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/db/tx"
+	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/pagination"
-	"github.com/OpenIMSDK/tools/tx"
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/errs"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
 type UserDatabase interface {
@@ -39,13 +39,11 @@ type UserDatabase interface {
 	FindNotification(ctx context.Context, level int64) (users []*relation.UserModel, err error)
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db
 	Create(ctx context.Context, users []*relation.UserModel) (err error)
-	// Update update (non-zero value) external guarantee userID exists
-	//Update(ctx context.Context, user *relation.UserModel) (err error)
 	// UpdateByMap update (zero value) external guarantee userID exists
 	UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error)
 	// FindUser
 	PageFindUser(ctx context.Context, level1 int64, level2 int64, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
-	//FindUser with keyword
+	// FindUser with keyword
 	PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID string, nickName string, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
 	// Page If not found, no error is returned
 	Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error)
@@ -74,7 +72,7 @@ type UserDatabase interface {
 	// SetUserStatus Set the user status and store the user status in redis
 	SetUserStatus(ctx context.Context, userID string, status, platformID int32) error
 
-	//CRUD user command
+	// CRUD user command
 	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error
 	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error
 	UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error
@@ -83,19 +81,19 @@ type UserDatabase interface {
 }
 
 type userDatabase struct {
-	tx      tx.CtxTx
+	tx      tx.Tx
 	userDB  relation.UserModelInterface
 	cache   cache.UserCache
-	mongoDB unrelationtb.UserModelInterface
+	mongoDB relation.SubscribeUserModelInterface
 }
 
-func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx tx.CtxTx, mongoDB unrelationtb.UserModelInterface) UserDatabase {
+func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx tx.Tx, mongoDB relation.SubscribeUserModelInterface) UserDatabase {
 	return &userDatabase{userDB: userDB, cache: cache, tx: tx, mongoDB: mongoDB}
 }
 
 func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel) error {
 	// Extract user IDs from the given user models.
-	userIDs := utils.Slice(users, func(e *relation.UserModel) string {
+	userIDs := datautil.Slice(users, func(e *relation.UserModel) string {
 		return e.UserID
 	})
 
@@ -106,7 +104,7 @@ func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel
 	}
 
 	// Determine which users are missing from the database.
-	missingUsers := utils.SliceAnySub(users, existingUsers, func(e *relation.UserModel) string {
+	missingUsers := datautil.SliceAnySub(users, existingUsers, func(e *relation.UserModel) string {
 		return e.UserID
 	})
 
@@ -127,7 +125,7 @@ func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (use
 		return
 	}
 	if len(users) != len(userIDs) {
-		err = errs.ErrRecordNotFound.Wrap("userID not found")
+		err = errs.ErrRecordNotFound.WrapMsg("userID not found")
 	}
 	return
 }
@@ -137,12 +135,10 @@ func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*rel
 	return u.cache.GetUsersInfo(ctx, userIDs)
 }
 
-// Find userInfo By Nickname.
 func (u *userDatabase) FindByNickname(ctx context.Context, nickname string) (users []*relation.UserModel, err error) {
 	return u.userDB.TakeByNickname(ctx, nickname)
 }
 
-// Find notificationAccouts.
 func (u *userDatabase) FindNotification(ctx context.Context, level int64) (users []*relation.UserModel, err error) {
 	return u.userDB.TakeNotification(ctx, level)
 }
@@ -153,19 +149,11 @@ func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) 
 		if err = u.userDB.Create(ctx, users); err != nil {
 			return err
 		}
-		return u.cache.DelUsersInfo(utils.Slice(users, func(e *relation.UserModel) string {
+		return u.cache.DelUsersInfo(datautil.Slice(users, func(e *relation.UserModel) string {
 			return e.UserID
 		})...).ExecDel(ctx)
 	})
 }
-
-//// Update (non-zero value) externally guarantees that userID exists.
-//func (u *userDatabase) Update(ctx context.Context, user *relation.UserModel) (err error) {
-//	if err := u.userDB.Update(ctx, user); err != nil {
-//		return err
-//	}
-//	return u.cache.DelUsersInfo(user.UserID).ExecDel(ctx)
-//}
 
 // UpdateByMap update (zero value) externally guarantees that userID exists.
 func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]any) (err error) {
@@ -186,13 +174,7 @@ func (u *userDatabase) PageFindUser(ctx context.Context, level1 int64, level2 in
 	return u.userDB.PageFindUser(ctx, level1, level2, pagination)
 }
 
-func (u *userDatabase) PageFindUserWithKeyword(
-	ctx context.Context,
-	level1 int64,
-	level2 int64,
-	userID, nickName string,
-	pagination pagination.Pagination,
-) (count int64, users []*relation.UserModel, err error) {
+func (u *userDatabase) PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID, nickName string, pagination pagination.Pagination) (count int64, users []*relation.UserModel, err error) {
 	return u.userDB.PageFindUserWithKeyword(ctx, level1, level2, userID, nickName, pagination)
 }
 
@@ -267,19 +249,24 @@ func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*
 func (u *userDatabase) SetUserStatus(ctx context.Context, userID string, status, platformID int32) error {
 	return u.cache.SetUserStatus(ctx, userID, status, platformID)
 }
+
 func (u *userDatabase) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error {
 	return u.userDB.AddUserCommand(ctx, userID, Type, UUID, value, ex)
 }
+
 func (u *userDatabase) DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error {
 	return u.userDB.DeleteUserCommand(ctx, userID, Type, UUID)
 }
+
 func (u *userDatabase) UpdateUserCommand(ctx context.Context, userID string, Type int32, UUID string, val map[string]any) error {
 	return u.userDB.UpdateUserCommand(ctx, userID, Type, UUID, val)
 }
+
 func (u *userDatabase) GetUserCommands(ctx context.Context, userID string, Type int32) ([]*user.CommandInfoResp, error) {
 	commands, err := u.userDB.GetUserCommand(ctx, userID, Type)
 	return commands, err
 }
+
 func (u *userDatabase) GetAllUserCommands(ctx context.Context, userID string) ([]*user.AllCommandInfoResp, error) {
 	commands, err := u.userDB.GetAllUserCommand(ctx, userID)
 	return commands, err

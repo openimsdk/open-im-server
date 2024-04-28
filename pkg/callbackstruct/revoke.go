@@ -20,6 +20,7 @@ type CallbackAfterRevokeMsgReq struct {
 	Seq             int64  `json:"seq"`
 	UserID          string `json:"userID"`
 }
+
 type CallbackAfterRevokeMsgResp struct {
 	CommonCallbackResp
 }

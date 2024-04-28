@@ -1,0 +1,30 @@
+rpc:
+  # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
+  registerIP: ''
+  # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+  ports: [ 10140 ]
+
+prometheus:
+  # Enable or disable Prometheus monitoring
+  enable: true
+  # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
+  ports: [ 20112 ]
+
+# IP address that the RPC/WebSocket service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
+listenIP: 0.0.0.0
+
+longConnSvr:
+  # WebSocket listening ports, must match the number of rpc.ports
+  ports: [ 10001 ]
+  # Maximum number of WebSocket connections
+  websocketMaxConnNum: 100000
+  # Maximum length of the entire WebSocket message packet
+  websocketMaxMsgLen: 4096
+  # WebSocket connection handshake timeout in seconds
+  websocketTimeout: 10
+
+# 1: For Android, iOS, Windows, Mac, and web platforms, only one instance can be online at a time
+multiLoginPolicy: 1
+
+
+

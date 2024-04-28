@@ -51,137 +51,89 @@
 
 </p>
 
-## :busts_in_silhouette: Community
+## :busts_in_silhouette: Join Our Community
 
-+ 💬 [Follow our Twitter account](https://twitter.com/founder_im63606)
-+ 👫 [Join our Reddit](https://www.reddit.com/r/OpenIMessaging)
-+ 🚀 [Join our Slack community](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [Join our wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
-+ 📚 [OpenIM Community](https://github.com/OpenIMSDK/community)
-+ 💕 [OpenIM Interest Group](https://github.com/Openim-sigs)
++ 💬 [Follow us on Twitter](https://twitter.com/founder_im63606)
++ 🚀 [Join our Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2hljfom5u-9ZuzP3NfEKW~BJKbpLm0Hw)
++ :eyes: [Join our WeChat Group](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## Ⓜ️ About OpenIM
 
-OpenIM is a service platform specifically designed for integrating chat, audio-video calls, notifications, and AI chatbots into applications. It provides a range of powerful APIs and Webhooks, enabling developers to easily incorporate these interactive features into their applications. OpenIM is not a standalone chat application, but rather serves as a platform to support other applications in achieving rich communication functionalities. The following diagram illustrates the interaction between AppServer, AppClient, OpenIMServer, and OpenIMSDK to explain in detail.
+Unlike standalone chat applications such as Telegram, Signal, and Rocket.Chat, OpenIM offers an open-source instant messaging solution designed specifically for developers rather than as a directly installable standalone chat app. Comprising OpenIM SDK and OpenIM Server, it provides developers with a complete set of tools and services to integrate instant messaging functions into their applications, including message sending and receiving, user management, and group management. Overall, OpenIM aims to provide developers with the necessary tools and framework to implement efficient instant messaging solutions in their applications.
 
 ![App-OpenIM Relationship](./docs/images/oepnim-design.png)
 
-## 🚀 About OpenIMSDK
+## 🚀 Introduction to OpenIMSDK
 
-**OpenIMSDK** is an IM SDK designed for **OpenIMServer**, created specifically for embedding in client applications. Its main features and modules are as follows:
+**OpenIMSDK**, designed for **OpenIMServer**, is an IM SDK created specifically for integration into client applications. It supports various functionalities and modules:
 
 + 🌟 Main Features:
-
-  - 📦 Local storage
-  - 🔔 Listener callbacks
-  - 🛡️ API wrapping
-  - 🌐 Connection management
+  - 📦 Local Storage
+  - 🔔 Listener Callbacks
+  - 🛡️ API Wrapping
+  - 🌐 Connection Management
 
 + 📚 Main Modules:
-
   1. 🚀 Initialization and Login
   2. 👤 User Management
-  3. 👫 Friend Management
+  3. 👫 Friends Management
   4. 🤖 Group Functions
-  5. 💬 Conversation Handling
+  5. 💬 Session Handling
 
-It is built using Golang and supports cross-platform deployment, ensuring a consistent access experience across all platforms.
+Built with Golang and supports cross-platform deployment to ensure a consistent integration experience across all platforms.
 
-👉 **[Explore GO SDK](https://github.com/openimsdk/openim-sdk-core)**
+👉 **[Explore the GO SDK](https://github.com/openimsdk/openim-sdk-core)**
 
-## 🌐 About OpenIMServer
+## 🌐 Introduction to OpenIMServer 
 
-+ **OpenIMServer** has the following characteristics:
-  - 🌐 Microservice architecture: Supports cluster mode, including a gateway and multiple rpc services.
-  - 🚀 Diverse deployment methods: Supports deployment via source code, Kubernetes, or Docker.
-  - Support for massive user base: Super large groups with hundreds of thousands of users, tens of millions of users, and billions of messages.
++ **OpenIMServer** features include:
+  - 🌐 Microservices Architecture: Supports cluster mode, including a gateway and multiple rpc services.
+  - 🚀 Diverse Deployment Options: Supports source code, Kubernetes, or Docker deployment.
+  - Massive User Support: Supports large-scale groups with hundreds of thousands, millions of users, and billions of messages.
 
-### Enhanced Business Functionality:
+### Enhanced Business Functions:
 
-+ **REST API**: OpenIMServer offers REST APIs for business systems, aimed at empowering businesses with more functionalities, such as creating groups and sending push messages through backend interfaces.
-+ **Webhooks**: OpenIMServer provides callback capabilities to extend more business forms. A callback means that OpenIMServer sends a request to the business server before or after a certain event, like callbacks before or after sending a message.
++ **REST API**: Provides a REST API for business systems to enhance functionality, such as group creation and message pushing through backend interfaces.
 
-👉 **[Learn more](https://docs.openim.io/guides/introduction/product)**
++ **Webhooks**: Expands business forms through callbacks, sending requests to business servers before or after certain events.
 
-## :building_construction: Overall Architecture
-
-Delve into the heart of Open-IM-Server's functionality with our architecture diagram.
-
-![Overall Architecture](./docs/images/architecture-layers.png)
-
+  ![Overall Architecture](./docs/images/architecture-layers.png)
 
 ## :rocket: Quick Start
 
-We support many platforms. Here are the addresses for quick experience on the web side：
+Experience online for iOS/Android/H5/PC/Web:
 
-👉 **[OpenIM online web demo](https://web-enterprise.rentsoft.cn/)**
+👉 **[OpenIM Online Demo](https://www.openim.io/en/commercial)**
 
-🤲 To facilitate user experience, we offer various deployment solutions. You can choose your deployment method from the list below:
+To facilitate user experience, we offer various deployment solutions. You can choose your preferred deployment method from the list below:
 
 + **[Source Code Deployment Guide](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
 + **[Docker Deployment Guide](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[Kubernetes Deployment Guide](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
-+ **[Mac Developer Deployment Guide](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
 
-## :hammer_and_wrench: To Start Developing OpenIM
+## System Support
 
-[![Open in Dev Container](https://img.shields.io/static/v1?label=Dev%20Container&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/github/openimsdk/open-im-server)
+Supports Linux, Windows, Mac systems, and ARM and AMD CPU architectures.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/openimsdk/open-im-server)
+## :link: Links
 
-OpenIM Our goal is to build a top-level open source community. We have a set of standards, in the [Community repository](https://github.com/OpenIMSDK/community).
+  + **[Developer Manual](https://docs.openim.io/)**
+  + **[Changelog](https://github.com/openimsdk/open-im-server/blob/main/CHANGELOG.md)**
 
-If you'd like to contribute to this Open-IM-Server repository, please read our [contributor documentation](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md).
+## :writing_hand: How to Contribute
 
-Before you start, please make sure your changes are in demand. The best for that is to create a [new discussion](https://github.com/openimsdk/open-im-server/discussions/new/choose) OR [Slack Communication](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q), or if you find an issue, [report it](https://github.com/openimsdk/open-im-server/issues/new/choose) first.
+We welcome contributions of any kind! Please make sure to read our [Contributor Documentation](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md) before submitting a Pull Request.
 
-- [OpenIM API Reference](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/api.md)
-- [OpenIM Bash Logging](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/bash-log.md)
-- [OpenIM CI/CD Actions](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/cicd-actions.md)
-- [OpenIM Code Conventions](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/code-conventions.md)
-- [OpenIM Commit Guidelines](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/commit.md)
-- [OpenIM Development Guide](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/development.md)
-- [OpenIM Directory Structure](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/directory.md)
-- [OpenIM Environment Setup](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/environment.md)
-- [OpenIM Error Code Reference](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/error-code.md)
-- [OpenIM Git Workflow](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/git-workflow.md)
-- [OpenIM Git Cherry Pick Guide](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/gitcherry-pick.md)
-- [OpenIM GitHub Workflow](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/github-workflow.md)
-- [OpenIM Go Code Standards](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/go-code.md)
-- [OpenIM Image Guidelines](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/images.md)
-- [OpenIM Initial Configuration](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/init-config.md)
-- [OpenIM Docker Installation Guide](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/install-docker.md)
-- [OpenIM OpenIM Linux System Installation](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/install-openim-linux-system.md)
-- [OpenIM Linux Development Guide](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/linux-development.md)
-- [OpenIM Local Actions Guide](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/local-actions.md)
-- [OpenIM Logging Conventions](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/logging.md)
-- [OpenIM Offline Deployment](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/offline-deployment.md)
-- [OpenIM Protoc Tools](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/protoc-tools.md)
-- [OpenIM Testing Guide](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/test.md)
-- [OpenIM Utility Go](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/util-go.md)
-- [OpenIM Makefile Utilities](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/util-makefile.md)
-- [OpenIM Script Utilities](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/util-scripts.md)
-- [OpenIM Versioning](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/version.md)
-- [Manage backend and monitor deployment](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
-- [Mac Developer Deployment Guide for OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
+  + **[Report a Bug](https://github.com/openimsdk/open-im-server/issues/new?assignees=&labels=bug&template=bug_report.md&title=)**
+  + **[Suggest a Feature](https://github.com/openimsdk/open-im-server/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=)**
+  + **[Submit a Pull Request](https://github.com/openimsdk/open-im-server/pulls)**
 
-## :calendar: Community Meetings
+Thank you for contributing to building a powerful instant messaging solution!
 
-We want anyone to get involved in our community and contributing code, we offer gifts and rewards, and we welcome you to join us every Thursday night.
+## :closed_book: License
 
-Our conference is in the [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) 🎯, then you can search the Open-IM-Server pipeline to join
+OpenIMSDK is available under the Apache License 2.0. See the [LICENSE file](https://github.com/openimsdk/open-im-server/blob/main/LICENSE) for more information.
 
-We take notes of each [biweekly meeting](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) in [GitHub discussions](https://github.com/openimsdk/open-im-server/discussions/categories/meeting), Our historical meeting notes, as well as replays of the meetings are available at [Google Docs :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing).
 
-## :eyes: Who Are Using OpenIM
-
-Check out our [user case studies](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) page for a list of the project users. Don't hesitate to leave a [📝comment](https://github.com/openimsdk/open-im-server/issues/379) and share your use case.
-
-## :page_facing_up: License
-
-OpenIM is licensed under the Apache 2.0 license. See [LICENSE](https://github.com/openimsdk/open-im-server/tree/main/LICENSE) for the full license text.
-
-The OpenIM logo, including its variations and animated versions, displayed in this repository [OpenIM](https://github.com/openimsdk/open-im-server) under the [assets/logo](./assets/logo) and [assets/logo-gif](assets/logo-gif) directories, are protected by copyright laws.
 
 ## 🔮 Thanks to our contributors!
 

@@ -1,0 +1,2 @@
+chatRecordsClearTime: "0 2 * * *"
+retainChatRecords: 365

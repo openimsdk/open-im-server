@@ -18,21 +18,22 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	pbmsg "github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/utils"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/protocol/constant"
+	pbmsg "github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/timeutil"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -47,7 +48,7 @@ type CommonMsgDatabase interface {
 	// BatchInsertChat2DB inserts a batch of messages into the database for a specific conversation.
 	BatchInsertChat2DB(ctx context.Context, conversationID string, msgs []*sdkws.MsgData, currentMaxSeq int64) error
 	// RevokeMsg revokes a message in a conversation.
-	RevokeMsg(ctx context.Context, conversationID string, seq int64, revoke *unrelationtb.RevokeModel) error
+	RevokeMsg(ctx context.Context, conversationID string, seq int64, revoke *relation.RevokeModel) error
 	// MarkSingleChatMsgsAsRead marks messages as read for a single chat by sequence numbers.
 	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, seqs []int64) error
 	// DeleteMessagesFromCache deletes message caches from Redis by sequence numbers.
@@ -100,75 +101,58 @@ type CommonMsgDatabase interface {
 	MsgToPushMQ(ctx context.Context, key, conversarionID string, msg2mq *sdkws.MsgData) (int32, int64, error)
 	MsgToMongoMQ(ctx context.Context, key, conversarionID string, msgs []*sdkws.MsgData, lastSeq int64) error
 
-	RangeUserSendCount(
-		ctx context.Context,
-		start time.Time,
-		end time.Time,
-		group bool,
-		ase bool,
-		pageNumber int32,
-		showNumber int32,
-	) (msgCount int64, userCount int64, users []*unrelationtb.UserCount, dateCount map[string]int64, err error)
-	RangeGroupSendCount(
-		ctx context.Context,
-		start time.Time,
-		end time.Time,
-		ase bool,
-		pageNumber int32,
-		showNumber int32,
-	) (msgCount int64, userCount int64, groups []*unrelationtb.GroupCount, dateCount map[string]int64, err error)
+	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*relation.UserCount, dateCount map[string]int64, err error)
+	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*relation.GroupCount, dateCount map[string]int64, err error)
 	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
+
+	// clear msg
+	GetBeforeMsg(ctx context.Context, ts int64, limit int) ([]*relation.MsgDocModel, error)
+	DeleteDocMsgBefore(ctx context.Context, ts int64, doc *relation.MsgDocModel) ([]int, error)
 }
 
-func NewCommonMsgDatabase(msgDocModel unrelationtb.MsgDocModelInterface, cacheModel cache.MsgModel, config *config.GlobalConfig) (CommonMsgDatabase, error) {
-	producerConfig := &kafka.ProducerConfig{
-		ProducerAck:  config.Kafka.ProducerAck,
-		CompressType: config.Kafka.CompressType,
-		Username:     config.Kafka.Username,
-		Password:     config.Kafka.Password,
-	}
-
-	var tlsConfig *kafka.TLSConfig
-	if config.Kafka.TLS != nil {
-		tlsConfig = &kafka.TLSConfig{
-			CACrt:              config.Kafka.TLS.CACrt,
-			ClientCrt:          config.Kafka.TLS.ClientCrt,
-			ClientKey:          config.Kafka.TLS.ClientKey,
-			ClientKeyPwd:       config.Kafka.TLS.ClientKeyPwd,
-			InsecureSkipVerify: false,
-		}
-	}
-	producerToRedis, err := kafka.NewKafkaProducer(config.Kafka.Addr, config.Kafka.LatestMsgToRedis.Topic, producerConfig, tlsConfig)
+func NewCommonMsgDatabase(msgDocModel relation.MsgDocModelInterface, msg cache.MsgCache, seq cache.SeqCache, kafkaConf *config.Kafka) (CommonMsgDatabase, error) {
+	conf, err := kafka.BuildProducerConfig(*kafkaConf.Build())
 	if err != nil {
 		return nil, err
 	}
-	producerToMongo, err := kafka.NewKafkaProducer(config.Kafka.Addr, config.Kafka.MsgToMongo.Topic, producerConfig, tlsConfig)
+	producerToRedis, err := kafka.NewKafkaProducer(conf, kafkaConf.Address, kafkaConf.ToRedisTopic)
 	if err != nil {
 		return nil, err
 	}
-	producerToPush, err := kafka.NewKafkaProducer(config.Kafka.Addr, config.Kafka.MsgToPush.Topic, producerConfig, tlsConfig)
+	producerToMongo, err := kafka.NewKafkaProducer(conf, kafkaConf.Address, kafkaConf.ToMongoTopic)
+	if err != nil {
+		return nil, err
+	}
+	producerToPush, err := kafka.NewKafkaProducer(conf, kafkaConf.Address, kafkaConf.ToPushTopic)
 	if err != nil {
 		return nil, err
 	}
 	return &commonMsgDatabase{
 		msgDocDatabase:  msgDocModel,
-		cache:           cacheModel,
+		msg:             msg,
+		seq:             seq,
 		producer:        producerToRedis,
 		producerToMongo: producerToMongo,
 		producerToPush:  producerToPush,
 	}, nil
 }
 
-func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, config *config.GlobalConfig) (CommonMsgDatabase, error) {
-	cacheModel := cache.NewMsgCacheModel(rdb, config)
-	msgDocModel := unrelation.NewMsgMongoDriver(database)
-	return NewCommonMsgDatabase(msgDocModel, cacheModel, config)
-}
+//func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, config *tools.CronTaskConfig) (CommonMsgDatabase, error) {
+//	msgDocModel, err := mgo.NewMsgMongo(database)
+//	if err != nil {
+//		return nil, err
+//	}
+//	//todo MsgCacheTimeout
+//	msg := cache.NewMsgCache(rdb, 86400, config.RedisConfig.EnablePipeline)
+//	seq := cache.NewSeqCache(rdb)
+//	return NewCommonMsgDatabase(msgDocModel, msg, seq, &config.KafkaConfig)
+//}
 
 type commonMsgDatabase struct {
-	msgDocDatabase   unrelationtb.MsgDocModelInterface
-	msg              unrelationtb.MsgDocModel
-	cache            cache.MsgModel
+	msgDocDatabase   relation.MsgDocModelInterface
+	msgTable         relation.MsgDocModel
+	msg              cache.MsgCache
+	seq              cache.SeqCache
 	producer         *kafka.Producer
 	producerToMongo  *kafka.Producer
 	producerToModify *kafka.Producer
@@ -209,24 +193,24 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 	if len(fields) == 0 {
 		return nil
 	}
-	num := db.msg.GetSingleGocMsgNum()
+	num := db.msgTable.GetSingleGocMsgNum()
 	// num = 100
 	for i, field := range fields { // Check the type of the field
 		var ok bool
 		switch key {
 		case updateKeyMsg:
-			var msg *unrelationtb.MsgDataModel
-			msg, ok = field.(*unrelationtb.MsgDataModel)
+			var msg *relation.MsgDataModel
+			msg, ok = field.(*relation.MsgDataModel)
 			if msg != nil && msg.Seq != firstSeq+int64(i) {
-				return errs.ErrInternalServer.Wrap("seq is invalid")
+				return errs.ErrInternalServer.WrapMsg("seq is invalid")
 			}
 		case updateKeyRevoke:
-			_, ok = field.(*unrelationtb.RevokeModel)
+			_, ok = field.(*relation.RevokeModel)
 		default:
-			return errs.ErrInternalServer.Wrap("key is invalid")
+			return errs.ErrInternalServer.WrapMsg("key is invalid")
 		}
 		if !ok {
-			return errs.ErrInternalServer.Wrap("field type is invalid")
+			return errs.ErrInternalServer.WrapMsg("field type is invalid")
 		}
 	}
 	// Returns true if the document exists in the database, false if the document does not exist in the database
@@ -235,8 +219,8 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 			res *mongo.UpdateResult
 			err error
 		)
-		docID := db.msg.GetDocID(conversationID, seq)
-		index := db.msg.GetMsgIndex(seq)
+		docID := db.msgTable.GetDocID(conversationID, seq)
+		index := db.msgTable.GetMsgIndex(seq)
 		field := fields[i]
 		switch key {
 		case updateKeyMsg:
@@ -261,31 +245,31 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 				continue // The current data has been updated, skip the current data
 			}
 		}
-		doc := unrelationtb.MsgDocModel{
-			DocID: db.msg.GetDocID(conversationID, seq),
-			Msg:   make([]*unrelationtb.MsgInfoModel, num),
+		doc := relation.MsgDocModel{
+			DocID: db.msgTable.GetDocID(conversationID, seq),
+			Msg:   make([]*relation.MsgInfoModel, num),
 		}
 		var insert int // Inserted data number
 		for j := i; j < len(fields); j++ {
 			seq = firstSeq + int64(j)
-			if db.msg.GetDocID(conversationID, seq) != doc.DocID {
+			if db.msgTable.GetDocID(conversationID, seq) != doc.DocID {
 				break
 			}
 			insert++
 			switch key {
 			case updateKeyMsg:
-				doc.Msg[db.msg.GetMsgIndex(seq)] = &unrelationtb.MsgInfoModel{
-					Msg: fields[j].(*unrelationtb.MsgDataModel),
+				doc.Msg[db.msgTable.GetMsgIndex(seq)] = &relation.MsgInfoModel{
+					Msg: fields[j].(*relation.MsgDataModel),
 				}
 			case updateKeyRevoke:
-				doc.Msg[db.msg.GetMsgIndex(seq)] = &unrelationtb.MsgInfoModel{
-					Revoke: fields[j].(*unrelationtb.RevokeModel),
+				doc.Msg[db.msgTable.GetMsgIndex(seq)] = &relation.MsgInfoModel{
+					Revoke: fields[j].(*relation.RevokeModel),
 				}
 			}
 		}
 		for i, model := range doc.Msg {
 			if model == nil {
-				model = &unrelationtb.MsgInfoModel{}
+				model = &relation.MsgInfoModel{}
 				doc.Msg[i] = model
 			}
 			if model.DelList == nil {
@@ -308,16 +292,16 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 
 func (db *commonMsgDatabase) BatchInsertChat2DB(ctx context.Context, conversationID string, msgList []*sdkws.MsgData, currentMaxSeq int64) error {
 	if len(msgList) == 0 {
-		return errs.ErrArgs.Wrap("msgList is empty")
+		return errs.ErrArgs.WrapMsg("msgList is empty")
 	}
 	msgs := make([]any, len(msgList))
 	for i, msg := range msgList {
 		if msg == nil {
 			continue
 		}
-		var offlinePushModel *unrelationtb.OfflinePushModel
+		var offlinePushModel *relation.OfflinePushModel
 		if msg.OfflinePushInfo != nil {
-			offlinePushModel = &unrelationtb.OfflinePushModel{
+			offlinePushModel = &relation.OfflinePushModel{
 				Title:         msg.OfflinePushInfo.Title,
 				Desc:          msg.OfflinePushInfo.Desc,
 				Ex:            msg.OfflinePushInfo.Ex,
@@ -325,7 +309,7 @@ func (db *commonMsgDatabase) BatchInsertChat2DB(ctx context.Context, conversatio
 				IOSBadgeCount: msg.OfflinePushInfo.IOSBadgeCount,
 			}
 		}
-		msgs[i] = &unrelationtb.MsgDataModel{
+		msgs[i] = &relation.MsgDataModel{
 			SendID:           msg.SendID,
 			RecvID:           msg.RecvID,
 			GroupID:          msg.GroupID,
@@ -352,15 +336,15 @@ func (db *commonMsgDatabase) BatchInsertChat2DB(ctx context.Context, conversatio
 	return db.BatchInsertBlock(ctx, conversationID, msgs, updateKeyMsg, msgList[0].Seq)
 }
 
-func (db *commonMsgDatabase) RevokeMsg(ctx context.Context, conversationID string, seq int64, revoke *unrelationtb.RevokeModel) error {
+func (db *commonMsgDatabase) RevokeMsg(ctx context.Context, conversationID string, seq int64, revoke *relation.RevokeModel) error {
 	return db.BatchInsertBlock(ctx, conversationID, []any{revoke}, updateKeyRevoke, seq)
 }
 
 func (db *commonMsgDatabase) MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, totalSeqs []int64) error {
-	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, totalSeqs) {
+	for docID, seqs := range db.msgTable.GetDocIDSeqsMap(conversationID, totalSeqs) {
 		var indexes []int64
 		for _, seq := range seqs {
-			indexes = append(indexes, db.msg.GetMsgIndex(seq))
+			indexes = append(indexes, db.msgTable.GetMsgIndex(seq))
 		}
 		log.ZDebug(ctx, "MarkSingleChatMsgsAsRead", "userID", userID, "docID", docID, "indexes", indexes)
 		if err := db.msgDocDatabase.MarkSingleChatMsgsAsRead(ctx, userID, docID, indexes); err != nil {
@@ -372,25 +356,25 @@ func (db *commonMsgDatabase) MarkSingleChatMsgsAsRead(ctx context.Context, userI
 }
 
 func (db *commonMsgDatabase) DeleteMessagesFromCache(ctx context.Context, conversationID string, seqs []int64) error {
-	return db.cache.DeleteMessages(ctx, conversationID, seqs)
+	return db.msg.DeleteMessages(ctx, conversationID, seqs)
 }
 
 func (db *commonMsgDatabase) DelUserDeleteMsgsList(ctx context.Context, conversationID string, seqs []int64) {
-	db.cache.DelUserDeleteMsgsList(ctx, conversationID, seqs)
+	db.msg.DelUserDeleteMsgsList(ctx, conversationID, seqs)
 }
 
 func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
-	currentMaxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
+	currentMaxSeq, err := db.seq.GetMaxSeq(ctx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
-		log.ZError(ctx, "db.cache.GetMaxSeq", err)
+		log.ZError(ctx, "db.seq.GetMaxSeq", err)
 		return 0, false, err
 	}
 	lenList := len(msgs)
-	if int64(lenList) > db.msg.GetSingleGocMsgNum() {
-		return 0, false, errors.New("too large")
+	if int64(lenList) > db.msgTable.GetSingleGocMsgNum() {
+		return 0, false, errs.New("message count exceeds limit", "limit", db.msgTable.GetSingleGocMsgNum()).Wrap()
 	}
 	if lenList < 1 {
-		return 0, false, errors.New("too short as 0")
+		return 0, false, errs.New("no messages to insert", "minCount", 1).Wrap()
 	}
 	if errs.Unwrap(err) == redis.Nil {
 		isNew = true
@@ -402,19 +386,22 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 		m.Seq = currentMaxSeq
 		userSeqMap[m.SendID] = m.Seq
 	}
-	failedNum, err := db.cache.SetMessageToCache(ctx, conversationID, msgs)
+
+	failedNum, err := db.msg.SetMessageToCache(ctx, conversationID, msgs)
 	if err != nil {
 		prommetrics.MsgInsertRedisFailedCounter.Add(float64(failedNum))
 		log.ZError(ctx, "setMessageToCache error", err, "len", len(msgs), "conversationID", conversationID)
 	} else {
 		prommetrics.MsgInsertRedisSuccessCounter.Inc()
 	}
-	err = db.cache.SetMaxSeq(ctx, conversationID, currentMaxSeq)
+
+	err = db.seq.SetMaxSeq(ctx, conversationID, currentMaxSeq)
 	if err != nil {
-		log.ZError(ctx, "db.cache.SetMaxSeq error", err, "conversationID", conversationID)
+		log.ZError(ctx, "db.seq.SetMaxSeq error", err, "conversationID", conversationID)
 		prommetrics.SeqSetFailedCounter.Inc()
 	}
-	err = db.cache.SetHasReadSeqs(ctx, conversationID, userSeqMap)
+
+	err = db.seq.SetHasReadSeqs(ctx, conversationID, userSeqMap)
 	if err != nil {
 		log.ZError(ctx, "SetHasReadSeqs error", err, "userSeqMap", userSeqMap, "conversationID", conversationID)
 		prommetrics.SeqSetFailedCounter.Inc()
@@ -423,7 +410,7 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 }
 
 func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
-	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, seqs) {
+	for docID, seqs := range db.msgTable.GetDocIDSeqsMap(conversationID, seqs) {
 		// log.ZDebug(ctx, "getMsgBySeqs", "docID", docID, "seqs", seqs)
 		msgs, err := db.findMsgInfoBySeq(ctx, userID, docID, conversationID, seqs)
 		if err != nil {
@@ -436,7 +423,7 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversat
 	return totalMsgs, nil
 }
 
-func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][]*unrelationtb.MsgInfoModel, userID, conversationID string, msg *unrelationtb.MsgInfoModel) {
+func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][]*relation.MsgInfoModel, userID, conversationID string, msg *relation.MsgInfoModel) {
 	if msg.IsRead {
 		msg.Msg.IsRead = true
 	}
@@ -458,12 +445,12 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][
 	if quoteMsg.QuoteMessage == nil || quoteMsg.QuoteMessage.ContentType == constant.MsgRevokeNotification {
 		return
 	}
-	var msgs []*unrelationtb.MsgInfoModel
+	var msgs []*relation.MsgInfoModel
 	if v, ok := cache[quoteMsg.QuoteMessage.Seq]; ok {
 		msgs = v
 	} else {
 		if quoteMsg.QuoteMessage.Seq > 0 {
-			ms, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, db.msg.GetDocID(conversationID, quoteMsg.QuoteMessage.Seq), []int64{quoteMsg.QuoteMessage.Seq})
+			ms, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, db.msgTable.GetDocID(conversationID, quoteMsg.QuoteMessage.Seq), []int64{quoteMsg.QuoteMessage.Seq})
 			if err != nil {
 				log.ZError(ctx, "GetMsgBySeqIndexIn1Doc", err, "conversationID", conversationID, "seq", quoteMsg.QuoteMessage.Seq)
 				return
@@ -487,17 +474,17 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][
 		return
 	}
 	msg.Msg.Content = string(data)
-	if _, err := db.msgDocDatabase.UpdateMsg(ctx, db.msg.GetDocID(conversationID, msg.Msg.Seq), db.msg.GetMsgIndex(msg.Msg.Seq), "msg", msg.Msg); err != nil {
+	if _, err := db.msgDocDatabase.UpdateMsg(ctx, db.msgTable.GetDocID(conversationID, msg.Msg.Seq), db.msgTable.GetMsgIndex(msg.Msg.Seq), "msg", msg.Msg); err != nil {
 		log.ZError(ctx, "UpdateMsgContent", err)
 	}
 }
 
-func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID string, conversationID string, seqs []int64) (totalMsgs []*unrelationtb.MsgInfoModel, err error) {
+func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID string, conversationID string, seqs []int64) (totalMsgs []*relation.MsgInfoModel, err error) {
 	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, docID, seqs)
 	if err != nil {
 		return nil, err
 	}
-	tempCache := make(map[int64][]*unrelationtb.MsgInfoModel)
+	tempCache := make(map[int64][]*relation.MsgInfoModel)
 	for _, msg := range msgs {
 		db.handlerDBMsg(ctx, tempCache, userID, conversationID, msg)
 	}
@@ -506,7 +493,7 @@ func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID
 
 func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, userID string, conversationID string, allSeqs []int64, begin, end int64) (seqMsgs []*sdkws.MsgData, err error) {
 	log.ZDebug(ctx, "getMsgBySeqsRange", "conversationID", conversationID, "allSeqs", allSeqs, "begin", begin, "end", end)
-	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, allSeqs) {
+	for docID, seqs := range db.msgTable.GetDocIDSeqsMap(conversationID, allSeqs) {
 		log.ZDebug(ctx, "getMsgBySeqsRange", "docID", docID, "seqs", seqs)
 		msgs, err := db.findMsgInfoBySeq(ctx, userID, docID, conversationID, seqs)
 		if err != nil {
@@ -542,23 +529,23 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, userID strin
 // "userMinSeq" can be set as the same value as the conversation's "maxSeq" at the moment they join the group.
 // This ensures that their message retrieval starts from the point they joined.
 func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID string, conversationID string, begin, end, num, userMaxSeq int64) (int64, int64, []*sdkws.MsgData, error) {
-	userMinSeq, err := db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
+	userMinSeq, err := db.seq.GetConversationUserMinSeq(ctx, conversationID, userID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return 0, 0, nil, err
 	}
-	minSeq, err := db.cache.GetMinSeq(ctx, conversationID)
+	minSeq, err := db.seq.GetMinSeq(ctx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return 0, 0, nil, err
 	}
 	if userMinSeq > minSeq {
 		minSeq = userMinSeq
 	}
-	//"minSeq" represents the startSeq value that the user can retrieve.
+	// "minSeq" represents the startSeq value that the user can retrieve.
 	if minSeq > end {
-		log.ZInfo(ctx, "minSeq > end", "minSeq", minSeq, "end", end)
+		log.ZWarn(ctx, "minSeq > end", errs.New("minSeq>end"), "minSeq", minSeq, "end", end)
 		return 0, 0, nil, nil
 	}
-	maxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
+	maxSeq, err := db.seq.GetMaxSeq(ctx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return 0, 0, nil, err
 	}
@@ -568,7 +555,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 			maxSeq = userMaxSeq
 		}
 	}
-	//"maxSeq" represents the endSeq value that the user can retrieve.
+	// "maxSeq" represents the endSeq value that the user can retrieve.
 
 	if begin < minSeq {
 		begin = minSeq
@@ -576,9 +563,9 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 	if end > maxSeq {
 		end = maxSeq
 	}
-	//"begin" and "end" represent the actual startSeq and endSeq values that the user can retrieve.
+	// "begin" and "end" represent the actual startSeq and endSeq values that the user can retrieve.
 	if end < begin {
-		return 0, 0, nil, errs.ErrArgs.Wrap("seq end < begin")
+		return 0, 0, nil, errs.ErrArgs.WrapMsg("seq end < begin")
 	}
 	var seqs []int64
 	if end-begin+1 <= num {
@@ -591,25 +578,13 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 		}
 	}
 
-	//167 178 10
-	//if end-num <  {
-	//
-	//}
-	//var seqs []int64
-	//for i := end; i > end-num; i-- {
-	//	if i >= begin {
-	//		seqs = append([]int64{i}, seqs...)
-	//	} else {
-	//		break
-	//	}
-	//}
 	if len(seqs) == 0 {
 		return 0, 0, nil, nil
 	}
 	newBegin := seqs[0]
 	newEnd := seqs[len(seqs)-1]
 	log.ZDebug(ctx, "GetMsgBySeqsRange", "first seqs", seqs, "newBegin", newBegin, "newEnd", newEnd)
-	cachedMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, conversationID, seqs)
+	cachedMsgs, failedSeqs, err := db.msg.GetMessagesBySeq(ctx, conversationID, seqs)
 	if err != nil {
 		if err != redis.Nil {
 
@@ -618,13 +593,13 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 	}
 	var successMsgs []*sdkws.MsgData
 	if len(cachedMsgs) > 0 {
-		delSeqs, err := db.cache.GetUserDelList(ctx, userID, conversationID)
+		delSeqs, err := db.msg.GetUserDelList(ctx, userID, conversationID)
 		if err != nil && errs.Unwrap(err) != redis.Nil {
 			return 0, 0, nil, err
 		}
 		var cacheDelNum int
 		for _, msg := range cachedMsgs {
-			if !utils.Contain(msg.Seq, delSeqs...) {
+			if !datautil.Contain(msg.Seq, delSeqs...) {
 				successMsgs = append(successMsgs, msg)
 			} else {
 				cacheDelNum += 1
@@ -635,7 +610,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 		for i := 1; i <= cacheDelNum; {
 			newSeq := newBegin - int64(i)
 			if newSeq >= begin {
-				if !utils.Contain(newSeq, delSeqs...) {
+				if !datautil.Contain(newSeq, delSeqs...) {
 					log.ZDebug(ctx, "seq del in cache, a new seq in range append", "new seq", newSeq)
 					reGetSeqsCache = append(reGetSeqsCache, newSeq)
 					i++
@@ -646,7 +621,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 		}
 		if len(reGetSeqsCache) > 0 {
 			log.ZDebug(ctx, "reGetSeqsCache", "reGetSeqsCache", reGetSeqsCache)
-			cachedMsgs, failedSeqs2, err := db.cache.GetMessagesBySeq(ctx, conversationID, reGetSeqsCache)
+			cachedMsgs, failedSeqs2, err := db.msg.GetMessagesBySeq(ctx, conversationID, reGetSeqsCache)
 			if err != nil {
 				if err != redis.Nil {
 
@@ -676,15 +651,15 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 }
 
 func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (int64, int64, []*sdkws.MsgData, error) {
-	userMinSeq, err := db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
+	userMinSeq, err := db.seq.GetConversationUserMinSeq(ctx, conversationID, userID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return 0, 0, nil, err
 	}
-	minSeq, err := db.cache.GetMinSeq(ctx, conversationID)
+	minSeq, err := db.seq.GetMinSeq(ctx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return 0, 0, nil, err
 	}
-	maxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
+	maxSeq, err := db.seq.GetMaxSeq(ctx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return 0, 0, nil, err
 	}
@@ -697,28 +672,14 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, co
 			newSeqs = append(newSeqs, seq)
 		}
 	}
-	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, conversationID, newSeqs)
+	successMsgs, failedSeqs, err := db.msg.GetMessagesBySeq(ctx, conversationID, newSeqs)
 	if err != nil {
 		if err != redis.Nil {
 			log.ZError(ctx, "get message from redis exception", err, "failedSeqs", failedSeqs, "conversationID", conversationID)
 		}
 	}
-	log.ZInfo(
-		ctx,
-		"db.cache.GetMessagesBySeq",
-		"userID",
-		userID,
-		"conversationID",
-		conversationID,
-		"seqs",
-		seqs,
-		"successMsgs",
-		len(successMsgs),
-		"failedSeqs",
-		failedSeqs,
-		"conversationID",
-		conversationID,
-	)
+	log.ZDebug(ctx, "db.seq.GetMessagesBySeq", "userID", userID, "conversationID", conversationID, "seqs",
+		seqs, "len(successMsgs)", len(successMsgs), "failedSeqs", failedSeqs)
 
 	if len(failedSeqs) > 0 {
 		mongoMsgs, err := db.getMsgBySeqs(ctx, userID, conversationID, failedSeqs)
@@ -739,17 +700,17 @@ func (db *commonMsgDatabase) DeleteConversationMsgsAndSetMinSeq(ctx context.Cont
 	if err != nil {
 		return err
 	}
-	log.ZInfo(ctx, "DeleteConversationMsgsAndSetMinSeq", "conversationID", conversationID, "minSeq", minSeq)
+	log.ZDebug(ctx, "DeleteConversationMsgsAndSetMinSeq", "conversationID", conversationID, "minSeq", minSeq)
 	if minSeq == 0 {
 		return nil
 	}
 	if remainTime == 0 {
-		err = db.cache.CleanUpOneConversationAllMsg(ctx, conversationID)
+		err = db.msg.CleanUpOneConversationAllMsg(ctx, conversationID)
 		if err != nil {
 			log.ZWarn(ctx, "CleanUpOneUserAllMsg", err, "conversationID", conversationID)
 		}
 	}
-	return db.cache.SetMinSeq(ctx, conversationID, minSeq)
+	return db.seq.SetMinSeq(ctx, conversationID, minSeq)
 }
 
 func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string, conversationID string, destructTime int64, lastMsgDestructTime time.Time) (seqs []int64, err error) {
@@ -759,7 +720,7 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 		msgDocModel, err := db.msgDocDatabase.GetMsgDocModelByIndex(ctx, conversationID, index, 1)
 		if err != nil || msgDocModel.DocID == "" {
 			if err != nil {
-				if err == unrelation.ErrMsgListNotExist {
+				if err == relation.ErrMsgListNotExist {
 					log.ZDebug(ctx, "not doc find", "conversationID", conversationID, "userID", userID, "index", index)
 				} else {
 					log.ZError(ctx, "deleteMsgRecursion GetUserMsgListByIndex failed", err, "conversationID", conversationID, "index", index)
@@ -769,14 +730,14 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 			break
 		}
 		index++
-		//&& msgDocModel.Msg[0].Msg.SendTime > lastMsgDestructTime.UnixMilli()
+		// && msgDocModel.Msg[0].Msg.SendTime > lastMsgDestructTime.UnixMilli()
 		if len(msgDocModel.Msg) > 0 {
 			i := 0
 			var over bool
 			for _, msg := range msgDocModel.Msg {
 				i++
 				if msg != nil && msg.Msg != nil && msg.Msg.SendTime+destructTime*1000 <= time.Now().UnixMilli() {
-					if msg.Msg.SendTime+destructTime*1000 > lastMsgDestructTime.UnixMilli() && !utils.Contain(userID, msg.DelList...) {
+					if msg.Msg.SendTime+destructTime*1000 > lastMsgDestructTime.UnixMilli() && !datautil.Contain(userID, msg.DelList...) {
 						seqs = append(seqs, msg.Msg.Seq)
 					}
 				} else {
@@ -794,12 +755,12 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 	log.ZDebug(ctx, "UserMsgsDestruct", "conversationID", conversationID, "userID", userID, "seqs", seqs)
 	if len(seqs) > 0 {
 		userMinSeq := seqs[len(seqs)-1] + 1
-		currentUserMinSeq, err := db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
+		currentUserMinSeq, err := db.seq.GetConversationUserMinSeq(ctx, conversationID, userID)
 		if err != nil && errs.Unwrap(err) != redis.Nil {
 			return nil, err
 		}
 		if currentUserMinSeq < userMinSeq {
-			if err := db.cache.SetConversationUserMinSeq(ctx, conversationID, userID, userMinSeq); err != nil {
+			if err := db.seq.SetConversationUserMinSeq(ctx, conversationID, userID, userMinSeq); err != nil {
 				return nil, err
 			}
 		}
@@ -826,7 +787,7 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 	msgDocModel, err := db.msgDocDatabase.GetMsgDocModelByIndex(ctx, conversationID, index, 1)
 	if err != nil || msgDocModel.DocID == "" {
 		if err != nil {
-			if err == unrelation.ErrMsgListNotExist {
+			if err == relation.ErrMsgListNotExist {
 				log.ZDebug(ctx, "deleteMsgRecursion ErrMsgListNotExist", "conversationID", conversationID, "index:", index)
 			} else {
 				log.ZError(ctx, "deleteMsgRecursion GetUserMsgListByIndex failed", err, "conversationID", conversationID, "index", index)
@@ -840,10 +801,10 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 		return delStruct.getSetMinSeq() + 1, nil
 	}
 	log.ZDebug(ctx, "doc info", "conversationID", conversationID, "index", index, "docID", msgDocModel.DocID, "len", len(msgDocModel.Msg))
-	if int64(len(msgDocModel.Msg)) > db.msg.GetSingleGocMsgNum() {
+	if int64(len(msgDocModel.Msg)) > db.msgTable.GetSingleGocMsgNum() {
 		log.ZWarn(ctx, "msgs too large", nil, "length", len(msgDocModel.Msg), "docID:", msgDocModel.DocID)
 	}
-	if msgDocModel.IsFull() && msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.SendTime+(remainTime*1000) < utils.GetCurrentTimestampByMill() {
+	if msgDocModel.IsFull() && msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.SendTime+(remainTime*1000) < timeutil.GetCurrentTimestampByMill() {
 		log.ZDebug(ctx, "doc is full and all msg is expired", "docID", msgDocModel.DocID)
 		delStruct.delDocIDs = append(delStruct.delDocIDs, msgDocModel.DocID)
 		delStruct.minSeq = msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.Seq
@@ -851,7 +812,7 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 		var delMsgIndexs []int
 		for i, MsgInfoModel := range msgDocModel.Msg {
 			if MsgInfoModel != nil && MsgInfoModel.Msg != nil {
-				if utils.GetCurrentTimestampByMill() > MsgInfoModel.Msg.SendTime+(remainTime*1000) {
+				if timeutil.GetCurrentTimestampByMill() > MsgInfoModel.Msg.SendTime+(remainTime*1000) {
 					delMsgIndexs = append(delMsgIndexs, i)
 				}
 			}
@@ -868,13 +829,13 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 }
 
 func (db *commonMsgDatabase) DeleteMsgsPhysicalBySeqs(ctx context.Context, conversationID string, allSeqs []int64) error {
-	if err := db.cache.DeleteMessages(ctx, conversationID, allSeqs); err != nil {
+	if err := db.msg.DeleteMessages(ctx, conversationID, allSeqs); err != nil {
 		return err
 	}
-	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, allSeqs) {
+	for docID, seqs := range db.msgTable.GetDocIDSeqsMap(conversationID, allSeqs) {
 		var indexes []int
 		for _, seq := range seqs {
-			indexes = append(indexes, int(db.msg.GetMsgIndex(seq)))
+			indexes = append(indexes, int(db.msgTable.GetMsgIndex(seq)))
 		}
 		if err := db.msgDocDatabase.DeleteMsgsInOneDocByIndex(ctx, docID, indexes); err != nil {
 			return err
@@ -884,7 +845,7 @@ func (db *commonMsgDatabase) DeleteMsgsPhysicalBySeqs(ctx context.Context, conve
 }
 
 func (db *commonMsgDatabase) DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error {
-	cachedMsgs, _, err := db.cache.GetMessagesBySeq(ctx, conversationID, seqs)
+	cachedMsgs, _, err := db.msg.GetMessagesBySeq(ctx, conversationID, seqs)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		log.ZWarn(ctx, "DeleteUserMsgsBySeqs", err, "conversationID", conversationID, "seqs", seqs)
 		return err
@@ -894,14 +855,14 @@ func (db *commonMsgDatabase) DeleteUserMsgsBySeqs(ctx context.Context, userID st
 		for _, msg := range cachedMsgs {
 			cacheSeqs = append(cacheSeqs, msg.Seq)
 		}
-		if err := db.cache.UserDeleteMsgs(ctx, conversationID, cacheSeqs, userID); err != nil {
+		if err := db.msg.UserDeleteMsgs(ctx, conversationID, cacheSeqs, userID); err != nil {
 			return err
 		}
 	}
 
-	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, seqs) {
+	for docID, seqs := range db.msgTable.GetDocIDSeqsMap(conversationID, seqs) {
 		for _, seq := range seqs {
-			if _, err := db.msgDocDatabase.PushUnique(ctx, docID, db.msg.GetMsgIndex(seq), "del_list", []string{userID}); err != nil {
+			if _, err := db.msgDocDatabase.PushUnique(ctx, docID, db.msgTable.GetMsgIndex(seq), "del_list", []string{userID}); err != nil {
 				return err
 			}
 		}
@@ -915,91 +876,91 @@ func (db *commonMsgDatabase) DeleteMsgsBySeqs(ctx context.Context, conversationI
 
 func (db *commonMsgDatabase) CleanUpUserConversationsMsgs(ctx context.Context, user string, conversationIDs []string) {
 	for _, conversationID := range conversationIDs {
-		maxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
+		maxSeq, err := db.seq.GetMaxSeq(ctx, conversationID)
 		if err != nil {
 			if err == redis.Nil {
-				log.ZInfo(ctx, "max seq is nil", "conversationID", conversationID)
+				log.ZDebug(ctx, "max seq is nil", "conversationID", conversationID)
 			} else {
 				log.ZError(ctx, "get max seq failed", err, "conversationID", conversationID)
 			}
 			continue
 		}
-		if err := db.cache.SetMinSeq(ctx, conversationID, maxSeq+1); err != nil {
+		if err := db.seq.SetMinSeq(ctx, conversationID, maxSeq+1); err != nil {
 			log.ZError(ctx, "set min seq failed", err, "conversationID", conversationID, "minSeq", maxSeq+1)
 		}
 	}
 }
 
 func (db *commonMsgDatabase) SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error {
-	return db.cache.SetMaxSeq(ctx, conversationID, maxSeq)
+	return db.seq.SetMaxSeq(ctx, conversationID, maxSeq)
 }
 
 func (db *commonMsgDatabase) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
-	return db.cache.GetMaxSeqs(ctx, conversationIDs)
+	return db.seq.GetMaxSeqs(ctx, conversationIDs)
 }
 
 func (db *commonMsgDatabase) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
-	return db.cache.GetMaxSeq(ctx, conversationID)
+	return db.seq.GetMaxSeq(ctx, conversationID)
 }
 
 func (db *commonMsgDatabase) SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error {
-	return db.cache.SetMinSeq(ctx, conversationID, minSeq)
+	return db.seq.SetMinSeq(ctx, conversationID, minSeq)
 }
 
 func (db *commonMsgDatabase) SetMinSeqs(ctx context.Context, seqs map[string]int64) error {
-	return db.cache.SetMinSeqs(ctx, seqs)
+	return db.seq.SetMinSeqs(ctx, seqs)
 }
 
 func (db *commonMsgDatabase) GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
-	return db.cache.GetMinSeqs(ctx, conversationIDs)
+	return db.seq.GetMinSeqs(ctx, conversationIDs)
 }
 
 func (db *commonMsgDatabase) GetMinSeq(ctx context.Context, conversationID string) (int64, error) {
-	return db.cache.GetMinSeq(ctx, conversationID)
+	return db.seq.GetMinSeq(ctx, conversationID)
 }
 
 func (db *commonMsgDatabase) GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
-	return db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
+	return db.seq.GetConversationUserMinSeq(ctx, conversationID, userID)
 }
 
 func (db *commonMsgDatabase) GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (map[string]int64, error) {
-	return db.cache.GetConversationUserMinSeqs(ctx, conversationID, userIDs)
+	return db.seq.GetConversationUserMinSeqs(ctx, conversationID, userIDs)
 }
 
 func (db *commonMsgDatabase) SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error {
-	return db.cache.SetConversationUserMinSeq(ctx, conversationID, userID, minSeq)
+	return db.seq.SetConversationUserMinSeq(ctx, conversationID, userID, minSeq)
 }
 
 func (db *commonMsgDatabase) SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error) {
-	return db.cache.SetConversationUserMinSeqs(ctx, conversationID, seqs)
+	return db.seq.SetConversationUserMinSeqs(ctx, conversationID, seqs)
 }
 
 func (db *commonMsgDatabase) SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
-	return db.cache.SetUserConversationsMinSeqs(ctx, userID, seqs)
+	return db.seq.SetUserConversationsMinSeqs(ctx, userID, seqs)
 }
 
 func (db *commonMsgDatabase) UserSetHasReadSeqs(ctx context.Context, userID string, hasReadSeqs map[string]int64) error {
-	return db.cache.UserSetHasReadSeqs(ctx, userID, hasReadSeqs)
+	return db.seq.UserSetHasReadSeqs(ctx, userID, hasReadSeqs)
 }
 
 func (db *commonMsgDatabase) SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error {
-	return db.cache.SetHasReadSeq(ctx, userID, conversationID, hasReadSeq)
+	return db.seq.SetHasReadSeq(ctx, userID, conversationID, hasReadSeq)
 }
 
 func (db *commonMsgDatabase) GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
-	return db.cache.GetHasReadSeqs(ctx, userID, conversationIDs)
+	return db.seq.GetHasReadSeqs(ctx, userID, conversationIDs)
 }
 
 func (db *commonMsgDatabase) GetHasReadSeq(ctx context.Context, userID string, conversationID string) (int64, error) {
-	return db.cache.GetHasReadSeq(ctx, userID, conversationID)
+	return db.seq.GetHasReadSeq(ctx, userID, conversationID)
 }
 
 func (db *commonMsgDatabase) SetSendMsgStatus(ctx context.Context, id string, status int32) error {
-	return db.cache.SetSendMsgStatus(ctx, id, status)
+	return db.msg.SetSendMsgStatus(ctx, id, status)
 }
 
 func (db *commonMsgDatabase) GetSendMsgStatus(ctx context.Context, id string) (int32, error) {
-	return db.cache.GetSendMsgStatus(ctx, id)
+	return db.msg.GetSendMsgStatus(ctx, id)
 }
 
 func (db *commonMsgDatabase) GetConversationMinMaxSeqInMongoAndCache(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error) {
@@ -1007,11 +968,11 @@ func (db *commonMsgDatabase) GetConversationMinMaxSeqInMongoAndCache(ctx context
 	if err != nil {
 		return
 	}
-	minSeqCache, err = db.cache.GetMinSeq(ctx, conversationID)
+	minSeqCache, err = db.seq.GetMinSeq(ctx, conversationID)
 	if err != nil {
 		return
 	}
-	maxSeqCache, err = db.cache.GetMaxSeq(ctx, conversationID)
+	maxSeqCache, err = db.seq.GetMaxSeq(ctx, conversationID)
 	if err != nil {
 		return
 	}
@@ -1044,7 +1005,7 @@ func (db *commonMsgDatabase) RangeUserSendCount(
 	ase bool,
 	pageNumber int32,
 	showNumber int32,
-) (msgCount int64, userCount int64, users []*unrelationtb.UserCount, dateCount map[string]int64, err error) {
+) (msgCount int64, userCount int64, users []*relation.UserCount, dateCount map[string]int64, err error) {
 	return db.msgDocDatabase.RangeUserSendCount(ctx, start, end, group, ase, pageNumber, showNumber)
 }
 
@@ -1055,7 +1016,7 @@ func (db *commonMsgDatabase) RangeGroupSendCount(
 	ase bool,
 	pageNumber int32,
 	showNumber int32,
-) (msgCount int64, userCount int64, groups []*unrelationtb.GroupCount, dateCount map[string]int64, err error) {
+) (msgCount int64, userCount int64, groups []*relation.GroupCount, dateCount map[string]int64, err error) {
 	return db.msgDocDatabase.RangeGroupSendCount(ctx, start, end, ase, pageNumber, showNumber)
 }
 
@@ -1078,12 +1039,12 @@ func (db *commonMsgDatabase) FindOneByDocIDs(ctx context.Context, conversationID
 	totalMsgs := make(map[string]*sdkws.MsgData)
 	for _, conversationID := range conversationIDs {
 		seq := seqs[conversationID]
-		docID := db.msg.GetDocID(conversationID, seq)
+		docID := db.msgTable.GetDocID(conversationID, seq)
 		msgs, err := db.msgDocDatabase.FindOneByDocID(ctx, docID)
 		if err != nil {
 			return nil, err
 		}
-		index := db.msg.GetMsgIndex(seq)
+		index := db.msgTable.GetMsgIndex(seq)
 		totalMsgs[conversationID] = convert.MsgDB2Pb(msgs.Msg[index].Msg)
 	}
 	return totalMsgs, nil
@@ -1091,4 +1052,73 @@ func (db *commonMsgDatabase) FindOneByDocIDs(ctx context.Context, conversationID
 
 func (db *commonMsgDatabase) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string) {
 	db.msgDocDatabase.ConvertMsgsDocLen(ctx, conversationIDs)
+}
+
+func (db *commonMsgDatabase) GetBeforeMsg(ctx context.Context, ts int64, limit int) ([]*relation.MsgDocModel, error) {
+	return db.msgDocDatabase.GetBeforeMsg(ctx, ts, limit)
+}
+
+func (db *commonMsgDatabase) DeleteDocMsgBefore(ctx context.Context, ts int64, doc *relation.MsgDocModel) ([]int, error) {
+	var notNull int
+	index := make([]int, 0, len(doc.Msg))
+	for i, message := range doc.Msg {
+		if message.Msg != nil {
+			notNull++
+			if message.Msg.SendTime < ts {
+				index = append(index, i)
+			}
+		}
+	}
+	if len(index) == 0 {
+		return index, nil
+	}
+	maxSeq := doc.Msg[index[len(index)-1]].Msg.Seq
+	conversationID := doc.DocID[:strings.LastIndex(doc.DocID, ":")]
+	if err := db.setMinSeq(ctx, conversationID, maxSeq+1); err != nil {
+		return index, err
+	}
+	if len(index) == notNull {
+		return index, db.msgDocDatabase.DeleteDoc(ctx, doc.DocID)
+	} else {
+		return index, db.msgDocDatabase.DeleteMsgByIndex(ctx, doc.DocID, index)
+	}
+}
+
+//func (db *commonMsgDatabase) ClearMsg(ctx context.Context, ts int64) (err error) {
+//	var (
+//		docNum int
+//		msgNum int
+//		start  = time.Now()
+//	)
+//	for {
+//		msgs, err := db.msgDocDatabase.GetBeforeMsg(ctx, ts, 100)
+//		if err != nil {
+//			return err
+//		}
+//		if len(msgs) == 0 {
+//			return nil
+//		}
+//		for _, msg := range msgs {
+//			num, err := db.deleteOneMsg(ctx, ts, msg)
+//			if err != nil {
+//				return err
+//			}
+//			docNum++
+//			msgNum += num
+//		}
+//	}
+//}
+
+func (db *commonMsgDatabase) setMinSeq(ctx context.Context, conversationID string, seq int64) error {
+	dbSeq, err := db.seq.GetMinSeq(ctx, conversationID)
+	if err != nil {
+		if errors.Is(errs.Unwrap(err), redis.Nil) {
+			return nil
+		}
+		return err
+	}
+	if dbSeq >= seq {
+		return nil
+	}
+	return db.seq.SetMinSeq(ctx, conversationID, seq)
 }

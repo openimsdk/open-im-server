@@ -18,11 +18,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mgoutil"
-	"github.com/OpenIMSDK/tools/pagination"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -48,15 +48,24 @@ type ConversationMgo struct {
 }
 
 func (c *ConversationMgo) Create(ctx context.Context, conversations []*relation.ConversationModel) (err error) {
-	return mgoutil.InsertMany(ctx, c.coll, conversations)
+	return mongoutil.InsertMany(ctx, c.coll, conversations)
 }
 
 func (c *ConversationMgo) Delete(ctx context.Context, groupIDs []string) (err error) {
-	return mgoutil.DeleteMany(ctx, c.coll, bson.M{"group_id": bson.M{"$in": groupIDs}})
+	return mongoutil.DeleteMany(ctx, c.coll, bson.M{"group_id": bson.M{"$in": groupIDs}})
 }
 
 func (c *ConversationMgo) UpdateByMap(ctx context.Context, userIDs []string, conversationID string, args map[string]any) (rows int64, err error) {
-	res, err := mgoutil.UpdateMany(ctx, c.coll, bson.M{"owner_user_id": bson.M{"$in": userIDs}, "conversation_id": conversationID}, bson.M{"$set": args})
+	if len(args) == 0 {
+		return 0, nil
+	}
+	filter := bson.M{
+		"conversation_id": conversationID,
+	}
+	if len(userIDs) > 0 {
+		filter["owner_user_id"] = bson.M{"$in": userIDs}
+	}
+	res, err := mongoutil.UpdateMany(ctx, c.coll, filter, bson.M{"$set": args})
 	if err != nil {
 		return 0, err
 	}
@@ -64,36 +73,35 @@ func (c *ConversationMgo) UpdateByMap(ctx context.Context, userIDs []string, con
 }
 
 func (c *ConversationMgo) Update(ctx context.Context, conversation *relation.ConversationModel) (err error) {
-	return mgoutil.UpdateOne(ctx, c.coll, bson.M{"owner_user_id": conversation.OwnerUserID, "conversation_id": conversation.ConversationID}, bson.M{"$set": conversation}, true)
+	return mongoutil.UpdateOne(ctx, c.coll, bson.M{"owner_user_id": conversation.OwnerUserID, "conversation_id": conversation.ConversationID}, bson.M{"$set": conversation}, true)
 }
 
 func (c *ConversationMgo) Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*relation.ConversationModel, err error) {
-	return mgoutil.Find[*relation.ConversationModel](ctx, c.coll, bson.M{"owner_user_id": ownerUserID, "conversation_id": bson.M{"$in": conversationIDs}})
+	return mongoutil.Find[*relation.ConversationModel](ctx, c.coll, bson.M{"owner_user_id": ownerUserID, "conversation_id": bson.M{"$in": conversationIDs}})
 }
 
 func (c *ConversationMgo) FindUserID(ctx context.Context, userIDs []string, conversationIDs []string) ([]string, error) {
-	return mgoutil.Find[string](
+	return mongoutil.Find[string](
 		ctx,
 		c.coll,
 		bson.M{"owner_user_id": bson.M{"$in": userIDs}, "conversation_id": bson.M{"$in": conversationIDs}},
 		options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1}),
 	)
 }
-
 func (c *ConversationMgo) FindUserIDAllConversationID(ctx context.Context, userID string) ([]string, error) {
-	return mgoutil.Find[string](ctx, c.coll, bson.M{"owner_user_id": userID}, options.Find().SetProjection(bson.M{"_id": 0, "conversation_id": 1}))
+	return mongoutil.Find[string](ctx, c.coll, bson.M{"owner_user_id": userID}, options.Find().SetProjection(bson.M{"_id": 0, "conversation_id": 1}))
 }
 
 func (c *ConversationMgo) Take(ctx context.Context, userID, conversationID string) (conversation *relation.ConversationModel, err error) {
-	return mgoutil.FindOne[*relation.ConversationModel](ctx, c.coll, bson.M{"owner_user_id": userID, "conversation_id": conversationID})
+	return mongoutil.FindOne[*relation.ConversationModel](ctx, c.coll, bson.M{"owner_user_id": userID, "conversation_id": conversationID})
 }
 
 func (c *ConversationMgo) FindConversationID(ctx context.Context, userID string, conversationIDs []string) (existConversationID []string, err error) {
-	return mgoutil.Find[string](ctx, c.coll, bson.M{"owner_user_id": userID, "conversation_id": bson.M{"$in": conversationIDs}}, options.Find().SetProjection(bson.M{"_id": 0, "conversation_id": 1}))
+	return mongoutil.Find[string](ctx, c.coll, bson.M{"owner_user_id": userID, "conversation_id": bson.M{"$in": conversationIDs}}, options.Find().SetProjection(bson.M{"_id": 0, "conversation_id": 1}))
 }
 
 func (c *ConversationMgo) FindUserIDAllConversations(ctx context.Context, userID string) (conversations []*relation.ConversationModel, err error) {
-	return mgoutil.Find[*relation.ConversationModel](ctx, c.coll, bson.M{"owner_user_id": userID})
+	return mongoutil.Find[*relation.ConversationModel](ctx, c.coll, bson.M{"owner_user_id": userID})
 }
 
 func (c *ConversationMgo) FindRecvMsgUserIDs(ctx context.Context, conversationID string, recvOpts []int) ([]string, error) {
@@ -103,22 +111,22 @@ func (c *ConversationMgo) FindRecvMsgUserIDs(ctx context.Context, conversationID
 	} else {
 		filter = bson.M{"conversation_id": conversationID, "recv_msg_opt": bson.M{"$in": recvOpts}}
 	}
-	return mgoutil.Find[string](ctx, c.coll, filter, options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1}))
+	return mongoutil.Find[string](ctx, c.coll, filter, options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1}))
 }
 
 func (c *ConversationMgo) GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) (opt int, err error) {
-	return mgoutil.FindOne[int](ctx, c.coll, bson.M{"owner_user_id": ownerUserID, "conversation_id": conversationID}, options.FindOne().SetProjection(bson.M{"recv_msg_opt": 1}))
+	return mongoutil.FindOne[int](ctx, c.coll, bson.M{"owner_user_id": ownerUserID, "conversation_id": conversationID}, options.FindOne().SetProjection(bson.M{"recv_msg_opt": 1}))
 }
 
 func (c *ConversationMgo) GetAllConversationIDs(ctx context.Context) ([]string, error) {
-	return mgoutil.Aggregate[string](ctx, c.coll, []bson.M{
+	return mongoutil.Aggregate[string](ctx, c.coll, []bson.M{
 		{"$group": bson.M{"_id": "$conversation_id"}},
 		{"$project": bson.M{"_id": 0, "conversation_id": "$_id"}},
 	})
 }
 
 func (c *ConversationMgo) GetAllConversationIDsNumber(ctx context.Context) (int64, error) {
-	counts, err := mgoutil.Aggregate[int64](ctx, c.coll, []bson.M{
+	counts, err := mongoutil.Aggregate[int64](ctx, c.coll, []bson.M{
 		{"$group": bson.M{"_id": "$conversation_id"}},
 		{"$group": bson.M{"_id": nil, "count": bson.M{"$sum": 1}}},
 		{"$project": bson.M{"_id": 0}},
@@ -133,16 +141,16 @@ func (c *ConversationMgo) GetAllConversationIDsNumber(ctx context.Context) (int6
 }
 
 func (c *ConversationMgo) PageConversationIDs(ctx context.Context, pagination pagination.Pagination) (conversationIDs []string, err error) {
-	return mgoutil.FindPageOnly[string](ctx, c.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"conversation_id": 1}))
+	return mongoutil.FindPageOnly[string](ctx, c.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"conversation_id": 1}))
 }
 
 func (c *ConversationMgo) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relation.ConversationModel, error) {
-	return mgoutil.Find[*relation.ConversationModel](ctx, c.coll, bson.M{"conversation_id": bson.M{"$in": conversationIDs}})
+	return mongoutil.Find[*relation.ConversationModel](ctx, c.coll, bson.M{"conversation_id": bson.M{"$in": conversationIDs}})
 }
 
 func (c *ConversationMgo) GetConversationIDsNeedDestruct(ctx context.Context) ([]*relation.ConversationModel, error) {
-	//"is_msg_destruct = 1 && msg_destruct_time != 0 && (UNIX_TIMESTAMP(NOW()) > (msg_destruct_time + UNIX_TIMESTAMP(latest_msg_destruct_time)) || latest_msg_destruct_time is NULL)"
-	return mgoutil.Find[*relation.ConversationModel](ctx, c.coll, bson.M{
+	// "is_msg_destruct = 1 && msg_destruct_time != 0 && (UNIX_TIMESTAMP(NOW()) > (msg_destruct_time + UNIX_TIMESTAMP(latest_msg_destruct_time)) || latest_msg_destruct_time is NULL)"
+	return mongoutil.Find[*relation.ConversationModel](ctx, c.coll, bson.M{
 		"is_msg_destruct":   1,
 		"msg_destruct_time": bson.M{"$ne": 0},
 		"$or": []bson.M{
@@ -162,7 +170,7 @@ func (c *ConversationMgo) GetConversationIDsNeedDestruct(ctx context.Context) ([
 }
 
 func (c *ConversationMgo) GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error) {
-	return mgoutil.Find[string](
+	return mongoutil.Find[string](
 		ctx,
 		c.coll,
 		bson.M{"conversation_id": conversationID, "recv_msg_opt": bson.M{"$ne": constant.ReceiveMessage}},

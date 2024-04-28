@@ -18,25 +18,24 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"strconv"
 	"sync"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/utils/splitter"
-	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	http2 "github.com/openimsdk/open-im-server/v3/pkg/common/http"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/httputil"
+	"github.com/openimsdk/tools/utils/splitter"
 	"github.com/redis/go-redis/v9"
 )
 
 var (
-	ErrTokenExpire = errors.New("token expire")
-	ErrUserIDEmpty = errors.New("userIDs is empty")
+	ErrTokenExpire = errs.New("token expire")
+	ErrUserIDEmpty = errs.New("userIDs is empty")
 )
 
 const (
@@ -45,32 +44,34 @@ const (
 	taskURL      = "/push/list/message"
 	batchPushURL = "/push/list/alias"
 
-	// codes.
+	// Codes.
 	tokenExpireCode = 10001
 	tokenExpireTime = 60 * 60 * 23
 	taskIDTTL       = 1000 * 60 * 60 * 24
 )
 
 type Client struct {
-	cache           cache.MsgModel
+	cache           cache.ThirdCache
 	tokenExpireTime int64
 	taskIDTTL       int64
-	config          *config.GlobalConfig
+	pushConf        *config.Push
+	httpClient      *httputil.HTTPClient
 }
 
-func NewClient(config *config.GlobalConfig, cache cache.MsgModel) *Client {
+func NewClient(pushConf *config.Push, cache cache.ThirdCache) *Client {
 	return &Client{cache: cache,
 		tokenExpireTime: tokenExpireTime,
 		taskIDTTL:       taskIDTTL,
-		config:          config,
+		pushConf:        pushConf,
+		httpClient:      httputil.NewHTTPClient(httputil.NewClientConfig()),
 	}
 }
 
-func (g *Client) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
+func (g *Client) Push(ctx context.Context, userIDs []string, title, content string, opts *options.Opts) error {
 	token, err := g.cache.GetGetuiToken(ctx)
 	if err != nil {
 		if errs.Unwrap(err) == redis.Nil {
-			log.ZInfo(ctx, "getui token not exist in redis")
+			log.ZDebug(ctx, "getui token not exist in redis")
 			token, err = g.getTokenAndSave2Redis(ctx)
 			if err != nil {
 				return err
@@ -79,7 +80,7 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 			return err
 		}
 	}
-	pushReq := newPushReq(g.config, title, content)
+	pushReq := newPushReq(g.pushConf, title, content)
 	pushReq.setPushChannel(title, content)
 	if len(userIDs) > 1 {
 		maxNum := 999
@@ -114,13 +115,13 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 func (g *Client) Auth(ctx context.Context, timeStamp int64) (token string, expireTime int64, err error) {
 	h := sha256.New()
 	h.Write(
-		[]byte(g.config.Push.GeTui.AppKey + strconv.Itoa(int(timeStamp)) + g.config.Push.GeTui.MasterSecret),
+		[]byte(g.pushConf.GeTui.AppKey + strconv.Itoa(int(timeStamp)) + g.pushConf.GeTui.MasterSecret),
 	)
 	sign := hex.EncodeToString(h.Sum(nil))
 	reqAuth := AuthReq{
 		Sign:      sign,
 		Timestamp: strconv.Itoa(int(timeStamp)),
-		AppKey:    g.config.Push.GeTui.AppKey,
+		AppKey:    g.pushConf.GeTui.AppKey,
 	}
 	respAuth := AuthResp{}
 	err = g.request(ctx, authURL, reqAuth, "", &respAuth)
@@ -163,7 +164,7 @@ func (g *Client) request(ctx context.Context, url string, input any, token strin
 	header := map[string]string{"token": token}
 	resp := &Resp{}
 	resp.Data = output
-	return g.postReturn(ctx, g.config.Push.GeTui.PushUrl+url, header, input, resp, 3)
+	return g.postReturn(ctx, g.pushConf.GeTui.PushUrl+url, header, input, resp, 3)
 }
 
 func (g *Client) postReturn(
@@ -174,7 +175,7 @@ func (g *Client) postReturn(
 	output RespI,
 	timeout int,
 ) error {
-	err := http2.PostReturn(ctx, url, header, input, output, timeout)
+	err := g.httpClient.PostReturn(ctx, url, header, input, output, timeout)
 	if err != nil {
 		return err
 	}

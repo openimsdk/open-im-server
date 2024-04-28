@@ -18,14 +18,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 
-	"github.com/OpenIMSDK/protocol/auth"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/third"
+	"github.com/openimsdk/protocol/auth"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/third"
+	"github.com/openimsdk/tools/errs"
 )
 
 type Api struct {
@@ -39,7 +39,7 @@ type Api struct {
 func (a *Api) apiPost(ctx context.Context, path string, req any, resp any) error {
 	operationID, _ := ctx.Value("operationID").(string)
 	if operationID == "" {
-		return errors.New("call api operationID is empty")
+		return errs.New("call api operationID is empty")
 	}
 	reqBody, err := json.Marshal(req)
 	if err != nil {

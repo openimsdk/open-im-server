@@ -15,7 +15,7 @@
 package relation
 
 import (
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -31,5 +31,5 @@ type GroupSimpleUserID struct {
 }
 
 func IsNotFound(err error) bool {
-	return utils.Unwrap(err) == mongo.ErrNoDocuments
+	return errs.Unwrap(err) == mongo.ErrNoDocuments
 }

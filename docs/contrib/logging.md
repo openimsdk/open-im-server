@@ -66,7 +66,7 @@ The `CodeError` interface is designed to provide a unified mechanism for error h
 
 ## Logging Standards and Code Examples
 
-In the OpenIM project, we use the unified logging package `github.com/OpenIMSDK/tools/log` for logging to achieve efficient log management and analysis. This logging package supports structured logging formats, making it easier for developers to handle log information.
+In the OpenIM project, we use the unified logging package `github.com/openimsdk/tools/log` for logging to achieve efficient log management and analysis. This logging package supports structured logging formats, making it easier for developers to handle log information.
 
 ### Logger Interface and Implementation
 
@@ -96,7 +96,7 @@ func main() {
 
 ## Error Handling and Code Examples
 
-We use the `github.com/OpenIMSDK/tools/errs` package for unified error handling and wrapping.
+We use the `github.com/openimsdk/tools/errs` package for unified error handling and wrapping.
 
 ### CodeError Interface and Implementation
 
@@ -121,7 +121,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/tools/errs"
 )
 
 func main() {
@@ -164,7 +164,7 @@ More details")
 
    import (
        "context"
-       "github.com/OpenIMSDK/tools/log"
+       "github.com/openimsdk/tools/log"
    )
 
    func main() {
@@ -226,7 +226,7 @@ More details")
    package main
 
    import (
-       "github.com/OpenIMSDK/tools/log"
+       "github.com/openimsdk/tools/log"
        "context"
    )
 
@@ -337,7 +337,19 @@ More details")
        // Suppose an error occurs here
        err, _ := someFunc()
        if err != nil {
-         return errs.Wrap(err, "doSomething failed")
+         return errs.WrapMsg(err, "doSomething failed")
+       }
+   }
+   ```
+
+   It just works if the package is wrong:
+
+   ```go
+      func doSomething() error {
+       // Suppose an error occurs here
+       err, _ := someFunc()
+       if err != nil {
+         return errs.Wrap(err)
        }
    }
    ```
@@ -384,3 +396,112 @@ More details")
        return nil
    }
    ```
+
+
+### About WrapMsg Use
+
+```go
+// 	"github.com/openimsdk/tools/errs"
+func WrapMsg(err error, msg string, kv ...any) error {
+	if len(kv) == 0 {
+		if len(msg) == 0 {
+			return errors.WithStack(err)
+		} else {
+			return errors.WithMessage(err, msg)
+		}
+	}
+	var buf bytes.Buffer
+	if len(msg) > 0 {
+		buf.WriteString(msg)
+		buf.WriteString(" ")
+	}
+	for i := 0; i < len(kv); i += 2 {
+		if i > 0 {
+			buf.WriteString(", ")
+		}
+		buf.WriteString(toString(kv[i]))
+		buf.WriteString("=")
+		buf.WriteString(toString(kv[i+1]))
+	}
+	return errors.WithMessage(err, buf.String())
+}
+```
+
+1. **Function Signature**:
+   - `err error`: The original error object.
+   - `msg string`: The message text to append to the error.
+   - `kv ...any`: A variable number of parameters used to pass key-value pairs. `any` was introduced in Go 1.18 and is equivalent to `interface{}`, meaning any type.
+
+2. **Logic**:
+   - If there are no key-value pairs (`kv` is empty):
+     - If `msg` is also empty, use `errors.WithStack(err)` to return the original error with the call stack appended.
+     - If `msg` is not empty, use `errors.WithMessage(err, msg)` to append the message text to the original error.
+   - If there are key-value pairs, the function constructs a string containing the message text and all key-value pairs. The key-value pairs are added in the format `"key=value"`, separated by commas. If a message text is provided, it is added first, followed by a space.
+
+3. **Key-Value Pair Formatting**:
+   - A loop iterates over all the key-value pairs, processing one pair at a time.
+   - The `toString` function (although not provided in the code, we can assume it converts any type to a string) is used to convert both keys and values to strings, and they are added to a `bytes.Buffer` in the format `"key=value"`.
+
+4. **Result**:
+   - Use `errors.WithMessage(err, buf.String())` to append the constructed message text to the original error, and return this new error object.
+
+Next, let's demonstrate several ways to use the `WrapMsg` function:
+
+**Example 1: No Additional Information**
+
+```go
+// "github.com/openimsdk/tools/errs"
+err := errors.New("original error")
+wrappedErr := errs.WrapMsg(err, "")
+// wrappedErr will contain the original error and its call stack
+```
+
+**Example 2: Message Text Only**
+
+```go
+// "github.com/openimsdk/tools/errs"
+err := errors.New("original error")
+wrappedErr := errs.WrapMsg(err, "additional error information")
+// wrappedErr will contain the original error, call stack, and "additional error information"
+```
+
+**Example 3: Message Text and Key-Value Pairs**
+
+```go
+// "github.com/openimsdk/tools/errs"
+err := errors.New("original error")
+wrappedErr := errs.WrapMsg(err, "problem occurred", "code", 404, "url", "webhook://example.com")
+// wrappedErr will contain the original error, call stack, and "problem occurred code=404, url=http://example.com"
+```
+
+**Example 4: Key-Value Pairs Only**
+
+```go
+// "github.com/openimsdk/tools/errs"
+err := errors.New("original error")
+wrappedErr := errs.WrapMsg(err, "", "user", "john_doe", "action", "login")
+// wrappedErr will contain the original error, call stack, and "user=john_doe, action=login"
+```
+
+> [!TIP] WThese examples demonstrate how the `errs.WrapMsg` function can flexibly handle error messages and context data, helping developers to more effectively track and debug their programs.
+
+
+### Example 5: Dynamic Key-Value Pairs from Context
+Suppose we have some runtime context variables, such as a user ID and the type of operation being performed, and we want to include these variables in the error message. This can help with later debugging and identifying the specific environment of the issue.
+
+```go
+// Define some context variables
+userID := "user123"
+operation := "update profile"
+errorCode := 500
+requestURL := "webhook://example.com/updateProfile"
+
+// Create a new error
+err := errors.New("original error")
+
+// Wrap the error, including dynamic key-value pairs from the context
+wrappedErr := errs.WrapMsg(err, "operation failed", "user", userID, "action", operation, "code", errorCode, "url", requestURL)
+// wrappedErr will contain the original error, call stack, and "operation failed user=user123, action=update profile, code=500, url=http://example.com/updateProfile"
+```
+
+> [!TIP]In this example, the `WrapMsg` function accepts not just a static error message and additional information, but also dynamic key-value pairs generated from the code's execution context, such as the user ID, operation type, error code, and the URL of the request. Including this contextual information in the error message makes it easier for developers to understand and resolve the issue.

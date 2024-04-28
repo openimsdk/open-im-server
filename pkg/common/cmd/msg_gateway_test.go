@@ -15,11 +15,12 @@
 package cmd
 
 import (
-	"testing"
-
-	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/openimsdk/protocol/auth"
+	"github.com/openimsdk/tools/apiresp"
+	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/stretchr/testify/mock"
-	"gotest.tools/assert"
+	"math"
+	"testing"
 )
 
 // MockRootCmd is a mock type for the RootCmd type
@@ -32,20 +33,29 @@ func (m *MockRootCmd) Execute() error {
 	return args.Error(0)
 }
 
-func TestMsgGatewayCmd_GetPortFromConfig(t *testing.T) {
-	msgGatewayCmd := &MsgGatewayCmd{RootCmd: &RootCmd{}}
-	tests := []struct {
-		portType string
-		want     int
-	}{
-		{constant.FlagWsPort, 8080}, // Replace 8080 with the expected port from the config
-		{constant.FlagPort, 8081},   // Replace 8081 with the expected port from the config
-		{"invalid", 0},
+func TestName(t *testing.T) {
+	resp := &apiresp.ApiResponse{
+		ErrCode: 1234,
+		ErrMsg:  "test",
+		ErrDlt:  "4567",
+		Data: &auth.UserTokenResp{
+			Token:             "1234567",
+			ExpireTimeSeconds: math.MaxInt64,
+		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.portType, func(t *testing.T) {
-			got := msgGatewayCmd.GetPortFromConfig(tt.portType)
-			assert.Equal(t, tt.want, got)
-		})
+	data, err := resp.MarshalJSON()
+	if err != nil {
+		panic(err)
 	}
+	t.Log(string(data))
+
+	var rReso apiresp.ApiResponse
+	rReso.Data = &auth.UserTokenResp{}
+
+	if err := jsonutil.JsonUnmarshal(data, &rReso); err != nil {
+		panic(err)
+	}
+
+	t.Logf("%+v\n", rReso)
+
 }
