@@ -896,3 +896,89 @@ func (m *MsgMgo) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string
 		}
 	}
 }
+
+func (m *MsgMgo) GetBeforeMsg(ctx context.Context, ts int64, limit int) ([]*relation.MsgDocModel, error) {
+	return mongoutil.Aggregate[*relation.MsgDocModel](ctx, m.coll, []bson.M{
+		{
+			"$match": bson.M{
+				"msgs.msg.send_time": bson.M{
+					"$lt": ts,
+				},
+			},
+		},
+		{
+			"$project": bson.M{
+				"_id":                0,
+				"doc_id":             1,
+				"msgs.msg.send_time": 1,
+				"msgs.msg.seq":       1,
+			},
+		},
+		{
+			"$limit": limit,
+		},
+	})
+}
+
+func (m *MsgMgo) DeleteMsgByIndex(ctx context.Context, docID string, index []int) error {
+	if len(index) == 0 {
+		return nil
+	}
+	model := &relation.MsgInfoModel{DelList: []string{}}
+	set := make(map[string]any)
+	for i := range index {
+		set[fmt.Sprintf("msgs.%d", i)] = model
+	}
+	return mongoutil.UpdateOne(ctx, m.coll, bson.M{"doc_id": docID}, bson.M{"$set": set}, true)
+}
+
+//func (m *MsgMgo) ClearMsg(ctx context.Context, t time.Time) (int64, error) {
+//	ts := t.UnixMilli()
+//	var count int64
+//	for {
+//		msgs, err := m.GetBeforeMsg(ctx, ts, 100)
+//		if err != nil {
+//			return count, err
+//		}
+//		if len(msgs) == 0 {
+//			return count, nil
+//		}
+//		for _, msg := range msgs {
+//			num, err := m.deleteOneMsg(ctx, ts, msg)
+//			count += num
+//			if err != nil {
+//				return count, err
+//			}
+//		}
+//	}
+//}
+
+func (m *MsgMgo) DeleteDoc(ctx context.Context, docID string) error {
+	return mongoutil.DeleteOne(ctx, m.coll, bson.M{"doc_id": docID})
+}
+
+//func (m *MsgMgo) DeleteDocMsg(ctx context.Context, ts int64, doc *relation.MsgDocModel) (int64, error) {
+//	var notNull int
+//	index := make([]int, 0, len(doc.Msg))
+//	for i, message := range doc.Msg {
+//		if message.Msg != nil {
+//			notNull++
+//			if message.Msg.SendTime < ts {
+//				index = append(index, i)
+//			}
+//		}
+//	}
+//	if len(index) == 0 {
+//		return 0, errs.New("no msg to delete").WrapMsg("deleteOneMsg", "docID", doc.DocID)
+//	}
+//	if len(index) == notNull {
+//		if err := m.DeleteDoc(ctx, doc.DocID); err != nil {
+//			return 0, err
+//		}
+//	} else {
+//		if err := m.setNullMsg(ctx, doc.DocID, index); err != nil {
+//			return 0, err
+//		}
+//	}
+//	return int64(len(index)), nil
+//}

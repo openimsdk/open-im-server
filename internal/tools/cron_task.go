@@ -16,8 +16,14 @@ package tools
 
 import (
 	"context"
+	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/tools/db/redisutil"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/mw"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"os"
 	"os/signal"
 	"syscall"
@@ -25,96 +31,58 @@ import (
 
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"
 )
 
 type CronTaskConfig struct {
 	CronTask        config.CronTask
-	RedisConfig     config.Redis
-	MongodbConfig   config.Mongo
 	ZookeeperConfig config.ZooKeeper
 	Share           config.Share
-	KafkaConfig     config.Kafka
 }
 
 func Start(ctx context.Context, config *CronTaskConfig) error {
-
-	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime",
-		config.CronTask.ChatRecordsClearTime, "msgDestructTime", config.CronTask.MsgDestructTime)
-
-	msgTool, err := InitMsgTool(ctx, config)
+	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime", config.CronTask.ChatRecordsClearTime, "msgDestructTime", config.CronTask.RetainChatRecords)
+	if config.CronTask.RetainChatRecords < 1 {
+		return errs.New("msg destruct time must be greater than 1").Wrap()
+	}
+	client, err := kdisc.NewDiscoveryRegister(&config.ZookeeperConfig, &config.Share)
+	if err != nil {
+		return errs.WrapMsg(err, "failed to register discovery service")
+	}
+	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	ctx, exitBy := context.WithCancelCause(context.Background())
+	ctx = mcontext.SetOpUserID(ctx, config.Share.IMAdminUserID[0])
+	conn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
 	if err != nil {
 		return err
 	}
-
-	msgTool.convertTools()
-
-	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
-	if err != nil {
-		return err
-	}
-
-	// register cron tasks
-	var crontab = cron.New()
-
-	_, err = crontab.AddFunc(config.CronTask.ChatRecordsClearTime,
-		cronWrapFunc(config, rdb, "cron_clear_msg_and_fix_seq", msgTool.AllConversationClearMsgAndFixSeq))
-	if err != nil {
-		return errs.Wrap(err)
-	}
-
-	_, err = crontab.AddFunc(config.CronTask.MsgDestructTime,
-		cronWrapFunc(config, rdb, "cron_conversations_destruct_msgs", msgTool.ConversationsDestructMsgs))
-	if err != nil {
-		return errs.WrapMsg(err, "cron_conversations_destruct_msgs")
-	}
-
-	// start crontab
-	crontab.Start()
-
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGTERM)
-	<-sigs
-
-	// stop crontab, Wait for the running task to exit.
-	cronCtx := crontab.Stop()
-
-	select {
-	case <-cronCtx.Done():
-		// graceful exit
-
-	case <-time.After(15 * time.Second):
-		// forced exit on timeout
-	}
-
-	return nil
-}
-
-// netlock redis lock.
-func netlock(rdb redis.UniversalClient, key string, ttl time.Duration) bool {
-	value := "used"
-	ok, err := rdb.SetNX(context.Background(), key, value, ttl).Result() // nolint
-	if err != nil {
-		// when err is about redis server, return true.
-		return false
-	}
-
-	return ok
-}
-
-func cronWrapFunc(config *CronTaskConfig, rdb redis.UniversalClient, key string, fn func()) func() {
-	enableCronLocker := config.CronTask.EnableCronLocker
-	return func() {
-		// if don't enable cron-locker, call fn directly.
-		if !enableCronLocker {
-			fn()
+	cli := msg.NewMsgClient(conn)
+	go func() {
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.SIGTERM)
+		select {
+		case <-ctx.Done():
+		case s := <-sigs:
+			exitBy(fmt.Errorf("exit signal %s", s))
+		}
+	}()
+	crontab := cron.New()
+	clearFunc := func() {
+		now := time.Now()
+		deltime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.RetainChatRecords))
+		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deltime.UnixMilli()))
+		log.ZInfo(ctx, "clear chat records", "deltime", deltime, "timestamp", deltime.UnixMilli())
+		if _, err := cli.ClearMsg(ctx, &msg.ClearMsgReq{Timestamp: deltime.UnixMilli()}); err != nil {
+			log.ZError(ctx, "cron clear chat records failed", err, "deltime", deltime, "cont", time.Since(now))
 			return
 		}
-
-		// when acquire redis lock, call fn().
-		if netlock(rdb, key, 5*time.Second) {
-			fn()
-		}
+		log.ZInfo(ctx, "cron clear chat records success", "deltime", deltime, "cont", time.Since(now))
 	}
+	if _, err := crontab.AddFunc(config.CronTask.ChatRecordsClearTime, clearFunc); err != nil {
+		return errs.Wrap(err)
+	}
+	log.ZInfo(ctx, "start cron task", "chatRecordsClearTime", config.CronTask.ChatRecordsClearTime)
+	crontab.Start()
+	<-ctx.Done()
+	return context.Cause(ctx)
 }
