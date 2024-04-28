@@ -15,16 +15,11 @@
 package cmd
 
 import (
-	"context"
-
-	"github.com/openimsdk/open-im-server/v3/internal/tools"
-	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
 type MsgUtilsCmd struct {
 	cobra.Command
-	MsgTool *tools.MsgTool
 }
 
 func (m *MsgUtilsCmd) AddUserIDFlag() {
@@ -146,27 +141,7 @@ func NewSeqCmd() *SeqCmd {
 
 func (s *SeqCmd) GetSeqCmd() *cobra.Command {
 	s.Command.Run = func(cmdLines *cobra.Command, args []string) {
-		_, err := tools.InitMsgTool(context.Background(), nil)
-		if err != nil {
-			program.ExitWithError(err)
-		}
-		userID := s.getUserIDFlag(cmdLines)
-		superGroupID := s.getSuperGroupIDFlag(cmdLines)
-		// beginSeq := s.getBeginSeqFlag(cmdLines)
-		// limit := s.getLimitFlag(cmdLines)
-		if userID != "" {
-			// seq, err := msgTool.s(context.Background(), userID)
-			if err != nil {
-				panic(err)
-			}
-			// println(seq)
-		} else if superGroupID != "" {
-			// seq, err := msgTool.GetSuperGroupSeq(context.Background(), superGroupID)
-			if err != nil {
-				panic(err)
-			}
-			// println(seq)
-		}
+
 	}
 	return &s.Command
 }
