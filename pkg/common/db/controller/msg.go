@@ -17,6 +17,8 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -102,6 +104,10 @@ type CommonMsgDatabase interface {
 	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*relation.UserCount, dateCount map[string]int64, err error)
 	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*relation.GroupCount, dateCount map[string]int64, err error)
 	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
+
+	// clear msg
+	GetBeforeMsg(ctx context.Context, ts int64, limit int) ([]*relation.MsgDocModel, error)
+	DeleteDocMsgBefore(ctx context.Context, ts int64, doc *relation.MsgDocModel) ([]int, error)
 }
 
 func NewCommonMsgDatabase(msgDocModel relation.MsgDocModelInterface, msg cache.MsgCache, seq cache.SeqCache, kafkaConf *config.Kafka) (CommonMsgDatabase, error) {
@@ -1046,4 +1052,73 @@ func (db *commonMsgDatabase) FindOneByDocIDs(ctx context.Context, conversationID
 
 func (db *commonMsgDatabase) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string) {
 	db.msgDocDatabase.ConvertMsgsDocLen(ctx, conversationIDs)
+}
+
+func (db *commonMsgDatabase) GetBeforeMsg(ctx context.Context, ts int64, limit int) ([]*relation.MsgDocModel, error) {
+	return db.msgDocDatabase.GetBeforeMsg(ctx, ts, limit)
+}
+
+func (db *commonMsgDatabase) DeleteDocMsgBefore(ctx context.Context, ts int64, doc *relation.MsgDocModel) ([]int, error) {
+	var notNull int
+	index := make([]int, 0, len(doc.Msg))
+	for i, message := range doc.Msg {
+		if message.Msg != nil {
+			notNull++
+			if message.Msg.SendTime < ts {
+				index = append(index, i)
+			}
+		}
+	}
+	if len(index) == 0 {
+		return index, nil
+	}
+	maxSeq := doc.Msg[index[len(index)-1]].Msg.Seq
+	conversationID := doc.DocID[:strings.LastIndex(doc.DocID, ":")]
+	if err := db.setMinSeq(ctx, conversationID, maxSeq+1); err != nil {
+		return index, err
+	}
+	if len(index) == notNull {
+		return index, db.msgDocDatabase.DeleteDoc(ctx, doc.DocID)
+	} else {
+		return index, db.msgDocDatabase.DeleteMsgByIndex(ctx, doc.DocID, index)
+	}
+}
+
+//func (db *commonMsgDatabase) ClearMsg(ctx context.Context, ts int64) (err error) {
+//	var (
+//		docNum int
+//		msgNum int
+//		start  = time.Now()
+//	)
+//	for {
+//		msgs, err := db.msgDocDatabase.GetBeforeMsg(ctx, ts, 100)
+//		if err != nil {
+//			return err
+//		}
+//		if len(msgs) == 0 {
+//			return nil
+//		}
+//		for _, msg := range msgs {
+//			num, err := db.deleteOneMsg(ctx, ts, msg)
+//			if err != nil {
+//				return err
+//			}
+//			docNum++
+//			msgNum += num
+//		}
+//	}
+//}
+
+func (db *commonMsgDatabase) setMinSeq(ctx context.Context, conversationID string, seq int64) error {
+	dbSeq, err := db.seq.GetMinSeq(ctx, conversationID)
+	if err != nil {
+		if errors.Is(errs.Unwrap(err), redis.Nil) {
+			return nil
+		}
+		return err
+	}
+	if dbSeq >= seq {
+		return nil
+	}
+	return db.seq.SetMinSeq(ctx, conversationID, seq)
 }

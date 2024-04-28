@@ -536,3 +536,46 @@ func (c *conversationServer) GetConversationNotReceiveMessageUserIDs(ctx context
 	}
 	return &pbconversation.GetConversationNotReceiveMessageUserIDsResp{UserIDs: userIDs}, nil
 }
+
+func (c *conversationServer) UpdateConversation(ctx context.Context, req *pbconversation.UpdateConversationReq) (*pbconversation.UpdateConversationResp, error) {
+	m := make(map[string]any)
+	if req.RecvMsgOpt != nil {
+		m["recv_msg_opt"] = req.RecvMsgOpt.Value
+	}
+	if req.AttachedInfo != nil {
+		m["attached_info"] = req.AttachedInfo.Value
+	}
+	if req.Ex != nil {
+		m["ex"] = req.Ex.Value
+	}
+	if req.IsPinned != nil {
+		m["is_pinned"] = req.IsPinned.Value
+	}
+	if req.GroupAtType != nil {
+		m["group_at_type"] = req.GroupAtType.Value
+	}
+	if req.MsgDestructTime != nil {
+		m["msg_destruct_time"] = req.MsgDestructTime.Value
+	}
+	if req.IsMsgDestruct != nil {
+		m["is_msg_destruct"] = req.IsMsgDestruct.Value
+	}
+	if req.BurnDuration != nil {
+		m["burn_duration"] = req.BurnDuration.Value
+	}
+	if req.IsPrivateChat != nil {
+		m["is_private_chat"] = req.IsPrivateChat.Value
+	}
+	if req.MinSeq != nil {
+		m["min_seq"] = req.MinSeq.Value
+	}
+	if req.MaxSeq != nil {
+		m["max_seq"] = req.MaxSeq.Value
+	}
+	if len(m) > 0 {
+		if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.UserIDs, req.ConversationID, m); err != nil {
+			return nil, err
+		}
+	}
+	return &pbconversation.UpdateConversationResp{}, nil
+}
