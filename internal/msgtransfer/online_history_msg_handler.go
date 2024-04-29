@@ -176,14 +176,14 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 				if v.message.Options != nil {
 					msg.Options = msgprocessor.NewMsgOptions()
 				}
+				msg.Options = msgprocessor.WithOptions(msg.Options,
+					msgprocessor.WithOfflinePush(options.IsOfflinePush()),
+					msgprocessor.WithUnreadCount(options.IsUnreadCount()),
+				)
 				v.message.Options = msgprocessor.WithOptions(
 					v.message.Options,
 					msgprocessor.WithOfflinePush(false),
 					msgprocessor.WithUnreadCount(false),
-				)
-				msg.Options = msgprocessor.WithOptions(msg.Options,
-					msgprocessor.WithOfflinePush(options.IsOfflinePush()),
-					msgprocessor.WithUnreadCount(options.IsUnreadCount()),
 				)
 				storageMsgList = append(storageMsgList, msg)
 			}
