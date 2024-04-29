@@ -38,10 +38,6 @@ func Start(ctx context.Context, index int, conf *Config) error {
 	if err != nil {
 		return err
 	}
-	prometheusPort, err := datautil.GetElemByIndex(conf.MsgGateway.Prometheus.Ports, index)
-	if err != nil {
-		return err
-	}
 	rpcPort, err := datautil.GetElemByIndex(conf.MsgGateway.RPC.Ports, index)
 	if err != nil {
 		return err
@@ -57,7 +53,7 @@ func Start(ctx context.Context, index int, conf *Config) error {
 		return err
 	}
 
-	hubServer := NewServer(rpcPort, prometheusPort, longServer, conf)
+	hubServer := NewServer(rpcPort, longServer, conf)
 	netDone := make(chan error)
 	go func() {
 		err = hubServer.Start(ctx, index, conf)

@@ -44,13 +44,13 @@ import (
 )
 
 type MsgTransfer struct {
-	// This consumer aggregated messages, subscribed to the topic:ws2ms_chat,
+	// This consumer aggregated messages, subscribed to the topic:toRedis,
 	// the modification notification is sent to msg_to_modify topic, the message is stored in redis, Incr Redis,
-	// and then the message is sent to ms2pschat topic for push, and the message is sent to msg_to_mongo topic for persistence
+	// and then the message is sent to ms2pschat topic for push, and the message is sent to toMongo topic for persistence
 	historyCH      *OnlineHistoryRedisConsumerHandler
 	historyMongoCH *OnlineHistoryMongoConsumerHandler
 	// mongoDB batch insert, delete messages in redis after success,
-	// and handle the deletion notification message deleted subscriptions topic: msg_to_mongo
+	// and handle the deletion notification message deleted subscriptions topic: to
 	ctx    context.Context
 	cancel context.CancelFunc
 }
@@ -82,7 +82,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	//todo MsgCacheTimeout
 	msgModel := cache.NewMsgCache(rdb, config.RedisConfig.EnablePipeline)
 	seqModel := cache.NewSeqCache(rdb)
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
@@ -111,10 +110,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 }
 
 func (m *MsgTransfer) Start(index int, config *Config) error {
-	prometheusPort, err := datautil.GetElemByIndex(config.MsgTransfer.Prometheus.Ports, index)
-	if err != nil {
-		return err
-	}
+
 	m.ctx, m.cancel = context.WithCancel(context.Background())
 
 	var (
@@ -124,20 +120,26 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 
 	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyCH)
 	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyMongoCH)
-	err = m.historyCH.redisMessageBatches.Start()
+	err := m.historyCH.redisMessageBatches.Start()
 	if err != nil {
 		return err
 	}
 
 	if config.MsgTransfer.Prometheus.Enable {
 		go func() {
+			prometheusPort, err := datautil.GetElemByIndex(config.MsgTransfer.Prometheus.Ports, index)
+			if err != nil {
+				netErr = err
+				netDone <- struct{}{}
+				return
+			}
 			proreg := prometheus.NewRegistry()
 			proreg.MustRegister(
 				collectors.NewGoCollector(),
 			)
 			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer", &config.Share)...)
 			http.Handle("/metrics", promhttp.HandlerFor(proreg, promhttp.HandlerOpts{Registry: proreg}))
-			err := http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil)
+			err = http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil)
 			if err != nil && err != http.ErrServerClosed {
 				netErr = errs.WrapMsg(err, "prometheus start error", "prometheusPort", prometheusPort)
 				netDone <- struct{}{}

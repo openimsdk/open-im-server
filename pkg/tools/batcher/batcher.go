@@ -24,7 +24,7 @@ type Config struct {
 	dataBuffer int           // The size of the main data channel
 	worker     int           // Number of coroutines processed in parallel
 	interval   time.Duration // Time of message aggregations
-	syncWait   bool          // Whether to wait synchronously after distributing messages
+	syncWait   bool          // Whether to wait synchronously after distributing messages have been consumed
 }
 
 type Option func(c *Config)

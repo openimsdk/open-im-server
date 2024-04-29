@@ -51,10 +51,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	prometheusPort, err := datautil.GetElemByIndex(config.RpcConfig.Prometheus.Ports, index)
-	if err != nil {
-		return err
-	}
 
 	var client discovery.SvcDiscoveryRegistry
 
@@ -65,13 +61,20 @@ func Start(ctx context.Context, index int, config *Config) error {
 	}
 
 	var (
-		netDone = make(chan struct{}, 1)
-		netErr  error
+		netDone        = make(chan struct{}, 1)
+		netErr         error
+		prometheusPort int
 	)
 
 	router := newGinRouter(client, config)
 	if config.RpcConfig.Prometheus.Enable {
 		go func() {
+			prometheusPort, err = datautil.GetElemByIndex(config.RpcConfig.Prometheus.Ports, index)
+			if err != nil {
+				netErr = err
+				netDone <- struct{}{}
+				return
+			}
 			p := ginprom.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
 			p.SetListenAddress(fmt.Sprintf(":%d", prometheusPort))
 			if err = p.Use(router); err != nil && err != http.ErrServerClosed {
