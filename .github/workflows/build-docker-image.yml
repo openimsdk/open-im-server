@@ -15,14 +15,16 @@
 name: Publish Docker image
 
 on:
-  schedule:
-  - cron: '30 2 * * *'
   push:
     branches:
       - main
       - release-*
     tags:
       - v*
+  pull_request:
+    branches:
+      - main
+      - release-*
   workflow_dispatch:
 
 env:
