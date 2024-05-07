@@ -87,6 +87,8 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
+	fmt.Println("thirdConfig", thirdConfig)
+
 	if thirdConfig.Object.Enable == "minio" {
 		err = config.LoadConfig(filepath.Join(configDir, cmd.MinioConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MinioConfigFileName], minioConfig)
 		if err != nil {
@@ -94,6 +96,8 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 		}
 	} else {
 		minioConfig = nil
+		fmt.Println("minioConfig = nil")
+
 	}
 	err = config.LoadConfig(filepath.Join(configDir, cmd.ZookeeperConfigFileName), cmd.ConfigEnvPrefixMap[cmd.ZookeeperConfigFileName], zookeeperConfig)
 	if err != nil {
