@@ -6,22 +6,12 @@ package main
 import (
 	"github.com/openimsdk/gomake/mageutil"
 	"os"
-	"strings"
 )
 
 var Default = Build
 
 func Build() {
-	platforms := os.Getenv("PLATFORMS")
-	if platforms == "" {
-		platforms = mageutil.DetectPlatform()
-	}
-
-	for _, platform := range strings.Split(platforms, " ") {
-		mageutil.CompileForPlatform(platform)
-	}
-
-	mageutil.PrintGreen("All binaries under cmd and tools were successfully compiled.")
+	mageutil.Build()
 }
 
 func Start() {
