@@ -11,7 +11,7 @@ import (
 var Default = Build
 
 func Build() {
-
+	mageutil.Build()
 }
 
 func Start() {
