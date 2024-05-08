@@ -51,6 +51,7 @@ services:
     ports:
       - "12181:2181"
     environment:
+      #JVMFLAGS: "-Xms32m -Xmx128m"
       TZ: "Asia/Shanghai"
       ALLOW_ANONYMOUS_LOGIN: "yes"
     restart: always
@@ -70,6 +71,7 @@ services:
     command: >
       bash -c "/opt/bitnami/scripts/kafka/run.sh & /opt/bitnami/kafka/create-topic.sh; wait"
     environment:
+      #KAFKA_HEAP_OPTS: "-Xms128m -Xmx256m"
       TZ: Asia/Shanghai
       KAFKA_CFG_NODE_ID: 0
       KAFKA_CFG_PROCESS_ROLES: controller,broker
@@ -117,5 +119,6 @@ services:
       - "11002:80"
     networks:
       - openim
+
 
 
