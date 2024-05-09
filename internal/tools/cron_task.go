@@ -25,8 +25,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/openimsdk/tools/errs"
@@ -50,22 +48,12 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	ctx, exitBy := context.WithCancelCause(context.Background())
 	ctx = mcontext.SetOpUserID(ctx, config.Share.IMAdminUserID[0])
 	conn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
 	if err != nil {
 		return err
 	}
 	cli := msg.NewMsgClient(conn)
-	go func() {
-		sigs := make(chan os.Signal, 1)
-		signal.Notify(sigs, syscall.SIGTERM)
-		select {
-		case <-ctx.Done():
-		case s := <-sigs:
-			exitBy(fmt.Errorf("exit signal %s", s))
-		}
-	}()
 	crontab := cron.New()
 	clearFunc := func() {
 		now := time.Now()
@@ -84,5 +72,5 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	log.ZInfo(ctx, "start cron task", "chatRecordsClearTime", config.CronTask.ChatRecordsClearTime)
 	crontab.Start()
 	<-ctx.Done()
-	return context.Cause(ctx)
+	return nil
 }

@@ -66,6 +66,7 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 		kafkaConfig     = &config.Kafka{}
 		minioConfig     = &config.Minio{}
 		zookeeperConfig = &config.ZooKeeper{}
+		thirdConfig     = &config.Third{}
 	)
 	err := config.LoadConfig(filepath.Join(configDir, cmd.MongodbConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MongodbConfigFileName], mongoConfig)
 	if err != nil {
@@ -82,11 +83,19 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.LoadConfig(filepath.Join(configDir, cmd.MinioConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MinioConfigFileName], minioConfig)
+	err = config.LoadConfig(filepath.Join(configDir, cmd.OpenIMRPCThirdCfgFileName), cmd.ConfigEnvPrefixMap[cmd.OpenIMRPCThirdCfgFileName], thirdConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
+	if thirdConfig.Object.Enable == "minio" {
+		err = config.LoadConfig(filepath.Join(configDir, cmd.MinioConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MinioConfigFileName], minioConfig)
+		if err != nil {
+			return nil, nil, nil, nil, nil, err
+		}
+	} else {
+		minioConfig = nil
+	}
 	err = config.LoadConfig(filepath.Join(configDir, cmd.ZookeeperConfigFileName), cmd.ConfigEnvPrefixMap[cmd.ZookeeperConfigFileName], zookeeperConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
@@ -131,12 +140,15 @@ func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *
 		"Redis": func() error {
 			return CheckRedis(ctx, redisConfig)
 		},
-		"MinIO": func() error {
-			return CheckMinIO(ctx, minioConfig)
-		},
 		"Kafka": func() error {
 			return CheckKafka(ctx, kafkaConfig)
 		},
+	}
+
+	if minioConfig != nil {
+		checks["MinIO"] = func() error {
+			return CheckMinIO(ctx, minioConfig)
+		}
 	}
 
 	for i := 0; i < maxRetry; i++ {
