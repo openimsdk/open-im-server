@@ -16,36 +16,42 @@ package discoveryregister
 
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	getcd "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/etcd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
 	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/discovery/zookeeper"
 	"github.com/openimsdk/tools/errs"
 	"time"
 )
 
+const (
+	zookeeperConst = "zookeeper"
+	kubenetesConst = "k8s"
+	directConst    = "direct"
+	etcd           = "etcd"
+)
+
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
-func NewDiscoveryRegister(discovery *config.Discovery, share *config.Share) (discovery.SvcDiscoveryRegistry, error) {
-	switch discovery.Enable {
-	case "zookeeper":
+func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share) (discovery.SvcDiscoveryRegistry1, error) {
+	switch share.Env {
+	case zookeeperConst:
+
 		return zookeeper.NewZkClient(
-			discovery.ZooKeeper.Address,
-			discovery.ZooKeeper.Schema,
+			zookeeperConfig.Address,
+			zookeeperConfig.Schema,
 			zookeeper.WithFreq(time.Hour),
-			zookeeper.WithUserNameAndPassword(discovery.ZooKeeper.Username, discovery.ZooKeeper.Password),
+			zookeeper.WithUserNameAndPassword(zookeeperConfig.Username, zookeeperConfig.Password),
 			zookeeper.WithRoundRobin(),
 			zookeeper.WithTimeout(10),
 		)
-	case "k8s":
+	case kubenetesConst:
 		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
-	case "etcd":
-		return etcd.NewSvcDiscoveryRegistry(
-			discovery.Etcd.RootDirectory,
-			discovery.Etcd.Address,
-			etcd.WithDialTimeout(10*time.Second),
-			etcd.WithMaxCallSendMsgSize(20*1024*1024),
-			etcd.WithUsernameAndPassword(discovery.Etcd.Username, discovery.Etcd.Password))
+	case etcd:
+		return getcd.NewSvcDiscoveryRegistry("openim", []string{"http://localhost:2379"})
+	case directConst:
+		//return direct.NewConnDirect(config)
 	default:
-		return nil, errs.New("unsupported discovery type", "type", discovery.Enable).Wrap()
+		return nil, errs.New("unsupported discovery type", "type", share.Env).Wrap()
 	}
+	return nil, nil
 }
