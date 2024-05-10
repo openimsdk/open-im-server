@@ -28,7 +28,7 @@ const (
 	zookeeperConst = "zookeeper"
 	kubenetesConst = "k8s"
 	directConst    = "direct"
-	etcd           = "etcd"
+	etcdConst      = "etcd"
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
@@ -46,7 +46,7 @@ func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share
 		)
 	case kubenetesConst:
 		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
-	case etcd:
+	case etcdConst:
 		return getcd.NewSvcDiscoveryRegistry("openim", []string{"http://localhost:2379"})
 	case directConst:
 		//return direct.NewConnDirect(config)
