@@ -16,6 +16,7 @@ package discoveryregister
 
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	getcd "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/etcd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/zookeeper"
@@ -27,10 +28,11 @@ const (
 	zookeeperConst = "zookeeper"
 	kubenetesConst = "k8s"
 	directConst    = "direct"
+	etcd           = "etcd"
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
-func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share) (discovery.SvcDiscoveryRegistry, error) {
+func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share) (discovery.SvcDiscoveryRegistry1, error) {
 	switch share.Env {
 	case zookeeperConst:
 
@@ -44,6 +46,8 @@ func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share
 		)
 	case kubenetesConst:
 		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
+	case etcd:
+		return getcd.NewSvcDiscoveryRegistry("openim", []string{"http://localhost:2379"})
 	case directConst:
 		//return direct.NewConnDirect(config)
 	default:
