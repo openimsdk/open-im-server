@@ -33,6 +33,7 @@ const (
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
 func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share) (discovery.SvcDiscoveryRegistry1, error) {
+	return getcd.NewSvcDiscoveryRegistry("openim", []string{"http://localhost:2379"})
 	switch share.Env {
 	case zookeeperConst:
 
