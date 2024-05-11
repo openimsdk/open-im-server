@@ -1,0 +1,16 @@
+
+enable: "etcd"
+etcd:
+  schema: openim
+  address: [ http://localhost:2379 ]
+  username: ''
+  password: ''
+
+
+zookeeper:
+  schema: openim
+  address: [ localhost:12181 ]
+  username: ''
+  password: ''
+
+
