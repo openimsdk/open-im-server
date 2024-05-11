@@ -45,22 +45,11 @@ func CheckZookeeper(ctx context.Context, config *config.ZooKeeper) error {
 }
 
 func CheckEtcd(ctx context.Context, config *config.Etcd) error {
-	etcd.Check(ctx, config.Address, "/check_openim_component",
+	return etcd.Check(ctx, config.Address, "/check_openim_component",
 		true,
 		etcd.WithDialTimeout(10*time.Second),
 		etcd.WithMaxCallSendMsgSize(20*1024*1024),
 		etcd.WithUsernameAndPassword(config.Username, config.Password))
-	return nil
-}
-
-func CheckDiscovery(ctx context.Context, config *config.Discovery) error {
-	switch config.Enable {
-	case "etcd":
-		return CheckEtcd(ctx, &config.Etcd)
-
-	}
-
-	return nil
 }
 
 func CheckMongo(ctx context.Context, config *config.Mongo) error {
