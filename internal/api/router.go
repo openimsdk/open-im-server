@@ -34,7 +34,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	messageRpc := rpcclient.NewMessage(disCov, config.Share.RpcRegisterName.Msg)
 	conversationRpc := rpcclient.NewConversation(disCov, config.Share.RpcRegisterName.Conversation)
 	authRpc := rpcclient.NewAuth(disCov, config.Share.RpcRegisterName.Auth)
-	thirdRpc := rpcclient.NewThird(disCov, config.Share.RpcRegisterName.Third, config.RpcConfig.Prometheus.GrafanaURL)
+	thirdRpc := rpcclient.NewThird(disCov, config.Share.RpcRegisterName.Third, config.API.Prometheus.GrafanaURL)
 
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc, config.Share.IMAdminUserID)
