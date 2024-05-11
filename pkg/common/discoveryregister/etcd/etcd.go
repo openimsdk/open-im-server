@@ -3,6 +3,7 @@ package etcd
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/endpoints"
 	"go.etcd.io/etcd/client/v3/naming/resolver"
@@ -172,4 +173,49 @@ func (r *SvcDiscoveryRegistryImpl) Close() {
 	if r.client != nil {
 		_ = r.client.Close()
 	}
+}
+
+// Check verifies if etcd is running by checking the existence of the root node and optionally creates it
+func Check(ctx context.Context, etcdServers []string, etcdRoot string, createIfNotExist bool, options ...ZkOption) error {
+	// Configure the etcd client with default settings
+	cfg := clientv3.Config{
+		Endpoints: etcdServers,
+	}
+
+	// Apply provided options to the config
+	for _, opt := range options {
+		opt(&cfg)
+	}
+
+	client, err := clientv3.New(cfg)
+	if err != nil {
+		return errors.Wrap(err, "failed to connect to etcd")
+	}
+	defer client.Close()
+
+	// Create a child context with a default timeout or use the provided context
+	opCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	// Check if the root node exists
+	resp, err := client.Get(opCtx, etcdRoot)
+	if err != nil {
+		return errors.Wrap(err, "failed to get the root node from etcd")
+	}
+
+	// If root node does not exist and createIfNotExist is true, create the root node
+	if len(resp.Kvs) == 0 {
+		if createIfNotExist {
+			_, err := client.Put(opCtx, etcdRoot, "")
+			if err != nil {
+				return errors.Wrap(err, "failed to create the root node in etcd")
+			}
+			fmt.Printf("Root node %s did not exist, but has been created.\n", etcdRoot)
+		} else {
+			return fmt.Errorf("root node %s does not exist in etcd", etcdRoot)
+		}
+	} else {
+		fmt.Printf("Etcd is running and the root node %s exists.\n", etcdRoot)
+	}
+	return nil
 }

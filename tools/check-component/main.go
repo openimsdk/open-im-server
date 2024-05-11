@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/etcd"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
-	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/discovery/zookeeper"
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/minio"
@@ -45,11 +45,22 @@ func CheckZookeeper(ctx context.Context, config *config.ZooKeeper) error {
 }
 
 func CheckEtcd(ctx context.Context, config *config.Etcd) error {
-	return etcd.Check(ctx, config.Address, "/check_openim_component",
+	etcd.Check(ctx, config.Address, "/check_openim_component",
 		true,
 		etcd.WithDialTimeout(10*time.Second),
 		etcd.WithMaxCallSendMsgSize(20*1024*1024),
 		etcd.WithUsernameAndPassword(config.Username, config.Password))
+	return nil
+}
+
+func CheckDiscovery(ctx context.Context, config *config.Discovery) error {
+	switch config.Enable {
+	case "etcd":
+		return CheckEtcd(ctx, &config.Etcd)
+
+	}
+
+	return nil
 }
 
 func CheckMongo(ctx context.Context, config *config.Mongo) error {
@@ -139,28 +150,28 @@ func main() {
 func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *config.Redis, kafkaConfig *config.Kafka, minioConfig *config.Minio, discovery *config.Discovery, maxRetry int) error {
 	checksDone := make(map[string]bool)
 
-	checks := map[string]func(ctx context.Context) error{
-		"Mongo": func(ctx context.Context) error {
+	checks := map[string]func() error{
+		"Mongo": func() error {
 			return CheckMongo(ctx, mongoConfig)
 		},
-		"Redis": func(ctx context.Context) error {
+		"Redis": func() error {
 			return CheckRedis(ctx, redisConfig)
 		},
-		"Kafka": func(ctx context.Context) error {
+		"Kafka": func() error {
 			return CheckKafka(ctx, kafkaConfig)
 		},
 	}
 	if minioConfig != nil {
-		checks["MinIO"] = func(ctx context.Context) error {
+		checks["MinIO"] = func() error {
 			return CheckMinIO(ctx, minioConfig)
 		}
 	}
 	if discovery.Enable == "etcd" {
-		checks["Etcd"] = func(ctx context.Context) error {
+		checks["Etcd"] = func() error {
 			return CheckEtcd(ctx, &discovery.Etcd)
 		}
 	} else if discovery.Enable == "zookeeper" {
-		checks["Zookeeper"] = func(ctx context.Context) error {
+		checks["Zookeeper"] = func() error {
 			return CheckZookeeper(ctx, &discovery.ZooKeeper)
 		}
 	}
@@ -169,7 +180,7 @@ func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *
 		allSuccess := true
 		for name, check := range checks {
 			if !checksDone[name] {
-				if err := check(ctx); err != nil {
+				if err := check(); err != nil {
 					fmt.Printf("%s check failed: %v\n", name, err)
 					allSuccess = false
 				} else {
