@@ -46,7 +46,7 @@ func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share
 	case kubenetesConst:
 		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
 	case etcdConst:
-		return getcd.NewSvcDiscoveryRegistry("etcd", []string{"http://localhost:2379"})
+		return getcd.NewSvcDiscoveryRegistry("etcd", []string{"localhost:2379"})
 	case directConst:
 		//return direct.NewConnDirect(config)
 	default:
