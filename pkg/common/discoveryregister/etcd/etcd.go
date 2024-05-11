@@ -174,7 +174,7 @@ func (r *SvcDiscoveryRegistryImpl) Close() {
 	}
 }
 
-// Check verifies if etcd is running by checking the existence of the root node and optionally creates it
+// Check verifies if etcd is running by checking the existence of the root node and optionally creates it with a lease
 func Check(ctx context.Context, etcdServers []string, etcdRoot string, createIfNotExist bool, options ...ZkOption) error {
 	// Configure the etcd client with default settings
 	cfg := clientv3.Config{
@@ -192,30 +192,52 @@ func Check(ctx context.Context, etcdServers []string, etcdRoot string, createIfN
 	}
 	defer client.Close()
 
+	// Determine timeout for context
+	var opCtx context.Context
+	var cancel context.CancelFunc
 	if cfg.DialTimeout != 0 {
-		ctx, _ = context.WithTimeout(ctx, cfg.DialTimeout)
+		opCtx, cancel = context.WithTimeout(ctx, cfg.DialTimeout)
 	} else {
-		ctx, _ = context.WithTimeout(ctx, 10*time.Second)
+		opCtx, cancel = context.WithTimeout(ctx, 10*time.Second)
 	}
+	defer cancel()
 
 	// Check if the root node exists
-	resp, err := client.Get(ctx, etcdRoot)
+	resp, err := client.Get(opCtx, etcdRoot)
 	if err != nil {
 		return errors.Wrap(err, "failed to get the root node from etcd")
 	}
 
-	// If root node does not exist and createIfNotExist is true, create the root node
+	// If root node does not exist and createIfNotExist is true, create the root node with a lease
 	if len(resp.Kvs) == 0 {
 		if createIfNotExist {
-			_, err := client.Put(ctx, etcdRoot, "")
+			var leaseTTL int64 = 10
+			var leaseResp *clientv3.LeaseGrantResponse
+			if leaseTTL > 0 {
+				// Create a lease
+				leaseResp, err = client.Grant(opCtx, leaseTTL)
+				if err != nil {
+					return errors.Wrap(err, "failed to create lease in etcd")
+				}
+			}
+
+			// Put the key with the lease
+			putOpts := []clientv3.OpOption{}
+			if leaseResp != nil {
+				putOpts = append(putOpts, clientv3.WithLease(leaseResp.ID))
+			}
+
+			_, err := client.Put(opCtx, etcdRoot, "", putOpts...)
 			if err != nil {
 				return errors.Wrap(err, "failed to create the root node in etcd")
 			}
+			fmt.Printf("Root node %s did not exist, but has been created.\n", etcdRoot)
 		} else {
 			return fmt.Errorf("root node %s does not exist in etcd", etcdRoot)
 		}
 	} else {
 		fmt.Printf("Etcd is running and the root node %s exists.\n", etcdRoot)
 	}
+
 	return nil
 }
