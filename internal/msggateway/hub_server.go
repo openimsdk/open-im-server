@@ -35,7 +35,7 @@ func (s *Server) InitServer(ctx context.Context, config *Config, disCov discover
 }
 
 func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
-	return startrpc.Start(ctx, &conf.ZookeeperConfig, &conf.MsgGateway.Prometheus, conf.MsgGateway.ListenIP,
+	return startrpc.Start(ctx, &conf.Discovery, &conf.MsgGateway.Prometheus, conf.MsgGateway.ListenIP,
 		conf.MsgGateway.RPC.RegisterIP,
 		conf.MsgGateway.RPC.Ports, index,
 		conf.Share.RpcRegisterName.MessageGateway,

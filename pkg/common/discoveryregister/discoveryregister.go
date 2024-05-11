@@ -24,33 +24,31 @@ import (
 	"time"
 )
 
-const (
-	zookeeperConst = "zookeeper"
-	kubenetesConst = "k8s"
-	directConst    = "direct"
-	etcdConst      = "etcd"
-)
-
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
-func NewDiscoveryRegister(zookeeperConfig *config.ZooKeeper, share *config.Share) (discovery.SvcDiscoveryRegistry, error) {
-	switch share.Env {
-	case zookeeperConst:
+func NewDiscoveryRegister(discovery *config.Discovery, share *config.Share) (discovery.SvcDiscoveryRegistry, error) {
+	switch discovery.Enable {
+	case "zookeeper":
 		return zookeeper.NewZkClient(
-			zookeeperConfig.Address,
-			zookeeperConfig.Schema,
+			discovery.ZooKeeper.Address,
+			discovery.ZooKeeper.Schema,
 			zookeeper.WithFreq(time.Hour),
-			zookeeper.WithUserNameAndPassword(zookeeperConfig.Username, zookeeperConfig.Password),
+			zookeeper.WithUserNameAndPassword(discovery.ZooKeeper.Username, discovery.ZooKeeper.Password),
 			zookeeper.WithRoundRobin(),
 			zookeeper.WithTimeout(10),
 		)
-	case kubenetesConst:
+	case "k8s":
 		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
-	case etcdConst:
-		return getcd.NewSvcDiscoveryRegistry("etcd", []string{"localhost:2379"})
-	case directConst:
+	case "etcd":
+		return getcd.NewSvcDiscoveryRegistry(
+			discovery.Etcd.RootDirectory,
+			discovery.Etcd.Address,
+			getcd.WithDialTimeout(10*time.Second),
+			getcd.WithMaxCallSendMsgSize(20*1024*1024),
+			getcd.WithUsernameAndPassword(discovery.Etcd.Username, discovery.Etcd.Password))
+	case "direct":
 		//return direct.NewConnDirect(config)
 	default:
-		return nil, errs.New("unsupported discovery type", "type", share.Env).Wrap()
+		return nil, errs.New("unsupported discovery type", "type", discovery.Enable).Wrap()
 	}
 	return nil, nil
 }

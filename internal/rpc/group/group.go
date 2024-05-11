@@ -68,11 +68,11 @@ type Config struct {
 	RpcConfig          config.Group
 	RedisConfig        config.Redis
 	MongodbConfig      config.Mongo
-	ZookeeperConfig    config.ZooKeeper
 	NotificationConfig config.Notification
 	Share              config.Share
 	WebhooksConfig     config.Webhooks
 	LocalCacheConfig   config.LocalCache
+	Discovery          config.Discovery
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
