@@ -91,17 +91,12 @@ func (r *SvcDiscoveryRegistryImpl) Register(serviceName, host string, port int, 
 
 	endpoint := endpoints.Endpoint{Addr: fmt.Sprintf("%s:%d", host, port)}
 	err = em.AddEndpoint(context.TODO(), r.serviceKey, endpoint, clientv3.WithLease(leaseResp.ID))
-	return err
-	//
-	//lease, _ := r.client.Grant(context.TODO(), 30)
-	//
-	//em, err = endpoints.NewManager(r.client, "foo/bar/my-service")
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//err := em.AddEndpoint(context.TODO(), "foo/bar/my-service/e1", endpoints.Endpoint{Addr: "1.2.3.4"}, clientv3.WithLease(lease.ID))
+	if err != nil {
+		return err
+	}
 
+	_, kaErr := r.client.KeepAlive(context.Background(), r.leaseID)
+	return kaErr
 }
 
 func (r *SvcDiscoveryRegistryImpl) UnRegister() error {
