@@ -85,7 +85,7 @@ func (r *SvcDiscoveryRegistryImpl) GetUserIdHashGatewayHost(ctx context.Context,
 
 // GetConns returns gRPC client connections for a given service name
 func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
-	target := fmt.Sprintf("etcd:///%s", serviceName)
+	target := fmt.Sprintf("etcd:///%s/%s", r.rootDirectory, serviceName)
 	conn, err := grpc.DialContext(ctx, target, append(append(r.dialOptions, opts...), grpc.WithResolvers(r.resolver))...)
 	if err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName str
 
 // GetConn returns a single gRPC client connection for a given service name
 func (r *SvcDiscoveryRegistryImpl) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	target := fmt.Sprintf("etcd:///%s", serviceName)
+	target := fmt.Sprintf("etcd:///%s/%s", r.rootDirectory, serviceName)
 	return grpc.DialContext(ctx, target, append(append(r.dialOptions, opts...), grpc.WithResolvers(r.resolver))...)
 }
 
