@@ -37,7 +37,6 @@ func NewMsgTransferCmd() *MsgTransferCmd {
 		RedisConfigFileName:          &msgTransferConfig.RedisConfig,
 		MongodbConfigFileName:        &msgTransferConfig.MongodbConfig,
 		KafkaConfigFileName:          &msgTransferConfig.KafkaConfig,
-		ZookeeperConfigFileName:      &msgTransferConfig.ZookeeperConfig,
 		ShareFileName:                &msgTransferConfig.Share,
 		WebhooksConfigFileName:       &msgTransferConfig.WebhooksConfig,
 		DiscoveryConfigFilename:      &msgTransferConfig.Discovery,
