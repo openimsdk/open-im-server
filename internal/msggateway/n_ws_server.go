@@ -211,8 +211,7 @@ func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *C
 
 	// Online push user online message to other node
 	for _, v := range conns {
-		v := v
-		log.ZDebug(ctx, " sendUserOnlineInfoToOtherNode conn ", "target", v.Target())
+		v := v // safe closure var
 		if v.Target() == ws.disCov.GetSelfConnTarget() {
 			log.ZDebug(ctx, "Filter out this node", "node", v.Target())
 			continue
@@ -268,8 +267,6 @@ func (ws *WsServer) registerClient(client *Client) {
 	}
 
 	wg := sync.WaitGroup{}
-	log.ZDebug(client.ctx, "ws.msgGatewayConfig.Discovery.Enable", ws.msgGatewayConfig.Discovery.Enable)
-
 	if ws.msgGatewayConfig.Discovery.Enable != "k8s" {
 		wg.Add(1)
 		go func() {
