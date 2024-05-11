@@ -44,6 +44,9 @@ func NewSvcDiscoveryRegistry(schema string, endpoints []string) (*SvcDiscoveryRe
 	}, nil
 }
 
+func (r *SvcDiscoveryRegistryImpl) GetUserIdHashGatewayHost(ctx context.Context, userId string) (string, error) {
+	return "", nil
+}
 func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
 	target := fmt.Sprintf("%s:///%s", r.schema, serviceName)
 	conn, err := grpc.DialContext(ctx, target, append(r.dialOptions, opts...)...)
