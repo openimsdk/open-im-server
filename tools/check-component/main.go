@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/etcd"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery/zookeeper"
@@ -43,6 +44,25 @@ func CheckZookeeper(ctx context.Context, config *config.ZooKeeper) error {
 	return zookeeper.Check(ctx, config.Address, config.Schema, zookeeper.WithUserNameAndPassword(config.Username, config.Password))
 }
 
+func CheckEtcd(ctx context.Context, config *config.Etcd) error {
+	etcd.Check(ctx, config.Address, "/check_openim_component",
+		true,
+		etcd.WithDialTimeout(10*time.Second),
+		etcd.WithMaxCallSendMsgSize(20*1024*1024),
+		etcd.WithUsernameAndPassword(config.Username, config.Password))
+	return nil
+}
+
+func CheckDiscovery(ctx context.Context, config *config.Discovery) error {
+	switch config.Enable {
+	case "etcd":
+		return CheckEtcd(ctx, &config.Etcd)
+
+	}
+
+	return nil
+}
+
 func CheckMongo(ctx context.Context, config *config.Mongo) error {
 	return mongoutil.Check(ctx, config.Build())
 }
@@ -59,14 +79,14 @@ func CheckKafka(ctx context.Context, conf *config.Kafka) error {
 	return kafka.Check(ctx, conf.Build(), []string{conf.ToMongoTopic, conf.ToRedisTopic, conf.ToPushTopic})
 }
 
-func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, *config.Minio, *config.ZooKeeper, error) {
+func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, *config.Minio, *config.Discovery, error) {
 	var (
-		mongoConfig     = &config.Mongo{}
-		redisConfig     = &config.Redis{}
-		kafkaConfig     = &config.Kafka{}
-		minioConfig     = &config.Minio{}
-		zookeeperConfig = &config.ZooKeeper{}
-		thirdConfig     = &config.Third{}
+		mongoConfig = &config.Mongo{}
+		redisConfig = &config.Redis{}
+		kafkaConfig = &config.Kafka{}
+		minioConfig = &config.Minio{}
+		discovery   = &config.Discovery{}
+		thirdConfig = &config.Third{}
 	)
 	err := config.LoadConfig(filepath.Join(configDir, cmd.MongodbConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MongodbConfigFileName], mongoConfig)
 	if err != nil {
@@ -96,11 +116,11 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 	} else {
 		minioConfig = nil
 	}
-	err = config.LoadConfig(filepath.Join(configDir, cmd.ZookeeperConfigFileName), cmd.ConfigEnvPrefixMap[cmd.ZookeeperConfigFileName], zookeeperConfig)
+	err = config.LoadConfig(filepath.Join(configDir, cmd.DiscoveryConfigFilename), cmd.ConfigEnvPrefixMap[cmd.DiscoveryConfigFilename], discovery)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
-	return mongoConfig, redisConfig, kafkaConfig, minioConfig, zookeeperConfig, nil
+	return mongoConfig, redisConfig, kafkaConfig, minioConfig, discovery, nil
 }
 
 func main() {
@@ -127,13 +147,10 @@ func main() {
 	}
 }
 
-func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *config.Redis, kafkaConfig *config.Kafka, minioConfig *config.Minio, zookeeperConfig *config.ZooKeeper, maxRetry int) error {
+func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *config.Redis, kafkaConfig *config.Kafka, minioConfig *config.Minio, discovery *config.Discovery, maxRetry int) error {
 	checksDone := make(map[string]bool)
 
 	checks := map[string]func() error{
-		"Zookeeper": func() error {
-			return CheckZookeeper(ctx, zookeeperConfig)
-		},
 		"Mongo": func() error {
 			return CheckMongo(ctx, mongoConfig)
 		},
@@ -144,10 +161,18 @@ func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *
 			return CheckKafka(ctx, kafkaConfig)
 		},
 	}
-
 	if minioConfig != nil {
 		checks["MinIO"] = func() error {
 			return CheckMinIO(ctx, minioConfig)
+		}
+	}
+	if discovery.Enable == "etcd" {
+		checks["Etcd"] = func() error {
+			return CheckEtcd(ctx, &discovery.Etcd)
+		}
+	} else if discovery.Enable == "zookeeper" {
+		checks["Zookeeper"] = func() error {
+			return CheckZookeeper(ctx, &discovery.ZooKeeper)
 		}
 	}
 
