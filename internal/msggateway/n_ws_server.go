@@ -216,7 +216,7 @@ func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *C
 			log.ZDebug(ctx, "Filter out this node", "node", v.Target())
 			continue
 		}
-
+		log.ZDebug(ctx, "target ", v.Target())
 		wg.Go(func() error {
 			msgClient := msggateway.NewMsgGatewayClient(v)
 			_, err := msgClient.MultiTerminalLoginCheck(ctx, &msggateway.MultiTerminalLoginCheckReq{
