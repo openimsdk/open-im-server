@@ -212,7 +212,6 @@ func Check(ctx context.Context, etcdServers []string, etcdRoot string, createIfN
 			if err != nil {
 				return errors.Wrap(err, "failed to create the root node in etcd")
 			}
-			fmt.Printf("Root node %s did not exist, but has been created.\n", etcdRoot)
 		} else {
 			return fmt.Errorf("root node %s does not exist in etcd", etcdRoot)
 		}
