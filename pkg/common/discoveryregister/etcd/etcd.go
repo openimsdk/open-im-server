@@ -17,12 +17,14 @@ type ZkOption func(*clientv3.Config)
 
 // SvcDiscoveryRegistryImpl implementation
 type SvcDiscoveryRegistryImpl struct {
-	client        *clientv3.Client
-	resolver      gresolver.Builder
-	dialOptions   []grpc.DialOption
-	serviceKey    string
-	endpointMgr   endpoints.Manager
-	leaseID       clientv3.LeaseID
+	client            *clientv3.Client
+	resolver          gresolver.Builder
+	dialOptions       []grpc.DialOption
+	serviceKey        string
+	endpointMgr       endpoints.Manager
+	leaseID           clientv3.LeaseID
+	rpcRegisterTarget string
+
 	rootDirectory string
 }
 
@@ -101,7 +103,9 @@ func (r *SvcDiscoveryRegistryImpl) GetConn(ctx context.Context, serviceName stri
 
 // GetSelfConnTarget returns the connection target for the current service
 func (r *SvcDiscoveryRegistryImpl) GetSelfConnTarget() string {
-	return fmt.Sprintf("etcd:///%s", r.serviceKey)
+	return r.rpcRegisterTarget
+	//	return fmt.Sprintf("etcd:///%s", r.serviceKey)
+
 }
 
 // AddOption appends gRPC dial options to the existing options
@@ -131,7 +135,9 @@ func (r *SvcDiscoveryRegistryImpl) Register(serviceName, host string, port int, 
 	}
 	r.leaseID = leaseResp.ID
 
-	endpoint := endpoints.Endpoint{Addr: fmt.Sprintf("%s:%d", host, port)}
+	r.rpcRegisterTarget = fmt.Sprintf("%s:%d", host, port)
+	endpoint := endpoints.Endpoint{Addr: r.rpcRegisterTarget}
+
 	err = em.AddEndpoint(context.TODO(), r.serviceKey, endpoint, clientv3.WithLease(leaseResp.ID))
 	if err != nil {
 		return err
