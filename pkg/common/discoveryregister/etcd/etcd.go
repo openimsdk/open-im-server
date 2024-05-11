@@ -109,7 +109,7 @@ func (r *SvcDiscoveryRegistryImpl) keepAliveLease(leaseID clientv3.LeaseID) {
 
 	for ka := range ch {
 		if ka != nil {
-			fmt.Printf("Received lease keep-alive response: %v", ka)
+			fmt.Printf("Received lease keep-alive response: %v\n", ka)
 		} else {
 			fmt.Printf("Lease keep-alive response channel closed")
 			break
