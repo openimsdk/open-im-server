@@ -26,7 +26,6 @@ var (
 	LocalCacheConfigFileName         string
 	KafkaConfigFileName              string
 	RedisConfigFileName              string
-	ZookeeperConfigFileName          string
 	MongodbConfigFileName            string
 	MinioConfigFileName              string
 	LogConfigFileName                string
@@ -55,7 +54,6 @@ func init() {
 	LocalCacheConfigFileName = "local-cache.yml"
 	KafkaConfigFileName = "kafka.yml"
 	RedisConfigFileName = "redis.yml"
-	ZookeeperConfigFileName = "zookeeper.yml"
 	MongodbConfigFileName = "mongodb.yml"
 	MinioConfigFileName = "minio.yml"
 	LogConfigFileName = "log.yml"
@@ -76,7 +74,7 @@ func init() {
 	ConfigEnvPrefixMap = make(map[string]string)
 	fileNames := []string{
 		FileName, NotificationFileName, ShareFileName, WebhooksConfigFileName,
-		KafkaConfigFileName, RedisConfigFileName, ZookeeperConfigFileName,
+		KafkaConfigFileName, RedisConfigFileName,
 		MongodbConfigFileName, MinioConfigFileName, LogConfigFileName,
 		OpenIMAPICfgFileName, OpenIMCronTaskCfgFileName, OpenIMMsgGatewayCfgFileName,
 		OpenIMMsgTransferCfgFileName, OpenIMPushCfgFileName, OpenIMRPCAuthCfgFileName,

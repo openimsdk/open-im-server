@@ -48,10 +48,9 @@ type conversationServer struct {
 }
 
 type Config struct {
-	RpcConfig     config.Conversation
-	RedisConfig   config.Redis
-	MongodbConfig config.Mongo
-	//	ZookeeperConfig    config.ZooKeeper
+	RpcConfig          config.Conversation
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
 	NotificationConfig config.Notification
 	Share              config.Share
 	LocalCacheConfig   config.LocalCache
