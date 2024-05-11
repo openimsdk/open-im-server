@@ -12,11 +12,6 @@ import (
 	"sync"
 )
 
-const (
-	KUBERNETES = "k8s"
-	ZOOKEEPER  = "zookeeper"
-)
-
 type OnlinePusher interface {
 	GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData,
 		pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error)
@@ -42,10 +37,12 @@ func (u emptyOnlinePUsher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *
 }
 
 func NewOnlinePusher(disCov discovery.SvcDiscoveryRegistry, config *Config) OnlinePusher {
-	switch config.Share.Env {
-	case KUBERNETES:
+	switch config.Discovery.Enable {
+	case "k8s":
 		return NewK8sStaticConsistentHash(disCov, config)
-	case ZOOKEEPER:
+	case "zookeeper":
+		return NewDefaultAllNode(disCov, config)
+	case "etcd":
 		return NewDefaultAllNode(disCov, config)
 	default:
 		return newEmptyOnlinePUsher()

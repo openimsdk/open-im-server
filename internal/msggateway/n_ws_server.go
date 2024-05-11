@@ -267,7 +267,7 @@ func (ws *WsServer) registerClient(client *Client) {
 	}
 
 	wg := sync.WaitGroup{}
-	if ws.msgGatewayConfig.Share.Env == "zookeeper" {
+	if ws.msgGatewayConfig.Discovery.Enable != "k8s" {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
