@@ -193,12 +193,14 @@ func Check(ctx context.Context, etcdServers []string, etcdRoot string, createIfN
 	}
 	defer client.Close()
 
-	// Create a child context with a default timeout or use the provided context
-	opCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
+	if cfg.DialTimeout != 0 {
+		ctx, _ = context.WithTimeout(ctx, cfg.DialTimeout)
+	} else {
+		ctx, _ = context.WithTimeout(ctx, 10*time.Second)
+	}
 
 	// Check if the root node exists
-	resp, err := client.Get(opCtx, etcdRoot)
+	resp, err := client.Get(ctx, etcdRoot)
 	if err != nil {
 		return errors.Wrap(err, "failed to get the root node from etcd")
 	}
@@ -206,7 +208,7 @@ func Check(ctx context.Context, etcdServers []string, etcdRoot string, createIfN
 	// If root node does not exist and createIfNotExist is true, create the root node
 	if len(resp.Kvs) == 0 {
 		if createIfNotExist {
-			_, err := client.Put(opCtx, etcdRoot, "")
+			_, err := client.Put(ctx, etcdRoot, "")
 			if err != nil {
 				return errors.Wrap(err, "failed to create the root node in etcd")
 			}
