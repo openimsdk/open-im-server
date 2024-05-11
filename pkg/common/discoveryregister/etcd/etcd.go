@@ -83,7 +83,7 @@ func (r *SvcDiscoveryRegistryImpl) Register(serviceName, host string, port int, 
 	}
 	r.endpointMgr = em
 
-	leaseResp, err := r.client.Grant(context.Background(), 5)
+	leaseResp, err := r.client.Grant(context.Background(), 30)
 	if err != nil {
 		return err
 	}
@@ -91,11 +91,6 @@ func (r *SvcDiscoveryRegistryImpl) Register(serviceName, host string, port int, 
 
 	endpoint := endpoints.Endpoint{Addr: fmt.Sprintf("%s:%d", host, port)}
 	err = em.AddEndpoint(context.TODO(), r.serviceKey, endpoint, clientv3.WithLease(leaseResp.ID))
-	if err != nil {
-		return err
-	}
-
-	_, err = r.client.KeepAlive(context.Background(), r.leaseID)
 	return err
 }
 
