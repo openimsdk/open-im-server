@@ -1,10 +1,10 @@
 
 enable: "etcd"
 etcd:
-  schema: openim
-  address: [ http://localhost:2379 ]
+  address: [ localhost:12379 ]
   username: ''
   password: ''
+
 
 
 zookeeper:
