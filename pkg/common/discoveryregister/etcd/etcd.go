@@ -95,8 +95,26 @@ func (r *SvcDiscoveryRegistryImpl) Register(serviceName, host string, port int, 
 		return err
 	}
 
-	_, kaErr := r.client.KeepAlive(context.Background(), r.leaseID)
-	return kaErr
+	go r.keepAliveLease(r.leaseID)
+
+	return nil
+}
+
+func (r *SvcDiscoveryRegistryImpl) keepAliveLease(leaseID clientv3.LeaseID) {
+	ch, err := r.client.KeepAlive(context.Background(), leaseID)
+	if err != nil {
+		log.Printf("Failed to keep lease alive: %v", err)
+		return
+	}
+
+	for ka := range ch {
+		if ka != nil {
+			fmt.Printf("Received lease keep-alive response: %v", ka)
+		} else {
+			fmt.Printf("Lease keep-alive response channel closed")
+			break
+		}
+	}
 }
 
 func (r *SvcDiscoveryRegistryImpl) UnRegister() error {
