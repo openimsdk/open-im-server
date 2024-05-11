@@ -42,6 +42,7 @@ var (
 	OpenIMRPCMsgCfgFileName          string
 	OpenIMRPCThirdCfgFileName        string
 	OpenIMRPCUserCfgFileName         string
+	DiscoveryConfigFilename          string
 )
 
 var ConfigEnvPrefixMap map[string]string
@@ -70,6 +71,7 @@ func init() {
 	OpenIMRPCMsgCfgFileName = "openim-rpc-msg.yml"
 	OpenIMRPCThirdCfgFileName = "openim-rpc-third.yml"
 	OpenIMRPCUserCfgFileName = "openim-rpc-user.yml"
+	DiscoveryConfigFilename = "discovery.yml"
 
 	ConfigEnvPrefixMap = make(map[string]string)
 	fileNames := []string{
@@ -79,7 +81,7 @@ func init() {
 		OpenIMAPICfgFileName, OpenIMCronTaskCfgFileName, OpenIMMsgGatewayCfgFileName,
 		OpenIMMsgTransferCfgFileName, OpenIMPushCfgFileName, OpenIMRPCAuthCfgFileName,
 		OpenIMRPCConversationCfgFileName, OpenIMRPCFriendCfgFileName, OpenIMRPCGroupCfgFileName,
-		OpenIMRPCMsgCfgFileName, OpenIMRPCThirdCfgFileName, OpenIMRPCUserCfgFileName,
+		OpenIMRPCMsgCfgFileName, OpenIMRPCThirdCfgFileName, OpenIMRPCUserCfgFileName, DiscoveryConfigFilename,
 	}
 
 	for _, fileName := range fileNames {

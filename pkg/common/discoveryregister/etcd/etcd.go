@@ -8,27 +8,38 @@ import (
 	"go.etcd.io/etcd/client/v3/naming/resolver"
 	"google.golang.org/grpc"
 	gresolver "google.golang.org/grpc/resolver"
-
-	"log"
 	"time"
 )
 
+// ZkOption defines a function type for modifying clientv3.Config
+type ZkOption func(*clientv3.Config)
+
 // SvcDiscoveryRegistryImpl implementation
 type SvcDiscoveryRegistryImpl struct {
-	client      *clientv3.Client
-	resolver    gresolver.Builder
-	dialOptions []grpc.DialOption
-	serviceKey  string
-	endpointMgr endpoints.Manager
-	leaseID     clientv3.LeaseID
-	schema      string
+	client        *clientv3.Client
+	resolver      gresolver.Builder
+	dialOptions   []grpc.DialOption
+	serviceKey    string
+	endpointMgr   endpoints.Manager
+	leaseID       clientv3.LeaseID
+	rootDirectory string
 }
 
-func NewSvcDiscoveryRegistry(schema string, endpoints []string) (*SvcDiscoveryRegistryImpl, error) {
+// NewSvcDiscoveryRegistry creates a new service discovery registry implementation
+func NewSvcDiscoveryRegistry(rootDirectory string, endpoints []string, options ...ZkOption) (*SvcDiscoveryRegistryImpl, error) {
 	cfg := clientv3.Config{
 		Endpoints:   endpoints,
 		DialTimeout: 5 * time.Second,
+		// Increase keep-alive queue capacity and message size
+		PermitWithoutStream: true,
+		MaxCallSendMsgSize:  10 * 1024 * 1024, // 10 MB
 	}
+
+	// Apply provided options to the config
+	for _, opt := range options {
+		opt(&cfg)
+	}
+
 	client, err := clientv3.New(cfg)
 	if err != nil {
 		return nil, err
@@ -38,17 +49,42 @@ func NewSvcDiscoveryRegistry(schema string, endpoints []string) (*SvcDiscoveryRe
 		return nil, err
 	}
 	return &SvcDiscoveryRegistryImpl{
-		client:   client,
-		resolver: r,
-		schema:   schema,
+		client:        client,
+		resolver:      r,
+		rootDirectory: rootDirectory,
 	}, nil
 }
 
+// WithDialTimeout sets a custom dial timeout for the etcd client
+func WithDialTimeout(timeout time.Duration) ZkOption {
+	return func(cfg *clientv3.Config) {
+		cfg.DialTimeout = timeout
+	}
+}
+
+// WithMaxCallSendMsgSize sets a custom max call send message size for the etcd client
+func WithMaxCallSendMsgSize(size int) ZkOption {
+	return func(cfg *clientv3.Config) {
+		cfg.MaxCallSendMsgSize = size
+	}
+}
+
+// WithUsernameAndPassword sets a username and password for the etcd client
+func WithUsernameAndPassword(username, password string) ZkOption {
+	return func(cfg *clientv3.Config) {
+		cfg.Username = username
+		cfg.Password = password
+	}
+}
+
+// GetUserIdHashGatewayHost returns the gateway host for a given user ID hash
 func (r *SvcDiscoveryRegistryImpl) GetUserIdHashGatewayHost(ctx context.Context, userId string) (string, error) {
 	return "", nil
 }
+
+// GetConns returns gRPC client connections for a given service name
 func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
-	target := fmt.Sprintf("%s:///%s", r.schema, serviceName)
+	target := fmt.Sprintf("etcd:///%s", serviceName)
 	conn, err := grpc.DialContext(ctx, target, append(append(r.dialOptions, opts...), grpc.WithResolvers(r.resolver))...)
 	if err != nil {
 		return nil, err
@@ -56,34 +92,39 @@ func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName str
 	return []*grpc.ClientConn{conn}, nil
 }
 
+// GetConn returns a single gRPC client connection for a given service name
 func (r *SvcDiscoveryRegistryImpl) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	target := fmt.Sprintf("%s:///%s", r.schema, serviceName)
+	target := fmt.Sprintf("etcd:///%s", serviceName)
 	return grpc.DialContext(ctx, target, append(append(r.dialOptions, opts...), grpc.WithResolvers(r.resolver))...)
 }
 
+// GetSelfConnTarget returns the connection target for the current service
 func (r *SvcDiscoveryRegistryImpl) GetSelfConnTarget() string {
-	return fmt.Sprintf("%s:///%s", r.schema, r.serviceKey)
+	return fmt.Sprintf("etcd:///%s", r.serviceKey)
 }
 
+// AddOption appends gRPC dial options to the existing options
 func (r *SvcDiscoveryRegistryImpl) AddOption(opts ...grpc.DialOption) {
 	r.dialOptions = append(r.dialOptions, opts...)
 }
 
+// CloseConn closes a given gRPC client connection
 func (r *SvcDiscoveryRegistryImpl) CloseConn(conn *grpc.ClientConn) {
 	if err := conn.Close(); err != nil {
-		log.Printf("Failed to close connection: %v", err)
+		fmt.Printf("Failed to close connection: %v\n", err)
 	}
 }
 
+// Register registers a new service endpoint with etcd
 func (r *SvcDiscoveryRegistryImpl) Register(serviceName, host string, port int, opts ...grpc.DialOption) error {
-	r.serviceKey = fmt.Sprintf("%s/%s-%d", serviceName, host, port)
-	em, err := endpoints.NewManager(r.client, serviceName)
+	r.serviceKey = fmt.Sprintf("%s/%s/%s-%d", r.rootDirectory, serviceName, host, port)
+	em, err := endpoints.NewManager(r.client, r.rootDirectory+"/"+serviceName)
 	if err != nil {
 		return err
 	}
 	r.endpointMgr = em
 
-	leaseResp, err := r.client.Grant(context.Background(), 30)
+	leaseResp, err := r.client.Grant(context.Background(), 60) // Increase TTL time
 	if err != nil {
 		return err
 	}
@@ -100,10 +141,11 @@ func (r *SvcDiscoveryRegistryImpl) Register(serviceName, host string, port int, 
 	return nil
 }
 
+// keepAliveLease maintains the lease alive by sending keep-alive requests
 func (r *SvcDiscoveryRegistryImpl) keepAliveLease(leaseID clientv3.LeaseID) {
 	ch, err := r.client.KeepAlive(context.Background(), leaseID)
 	if err != nil {
-		log.Printf("Failed to keep lease alive: %v", err)
+		fmt.Printf("Failed to keep lease alive: %v\n", err)
 		return
 	}
 
@@ -111,12 +153,13 @@ func (r *SvcDiscoveryRegistryImpl) keepAliveLease(leaseID clientv3.LeaseID) {
 		if ka != nil {
 			fmt.Printf("Received lease keep-alive response: %v\n", ka)
 		} else {
-			fmt.Printf("Lease keep-alive response channel closed")
-			break
+			fmt.Printf("Lease keep-alive response channel closed\n")
+			return
 		}
 	}
 }
 
+// UnRegister removes the service endpoint from etcd
 func (r *SvcDiscoveryRegistryImpl) UnRegister() error {
 	if r.endpointMgr == nil {
 		return fmt.Errorf("endpoint manager is not initialized")
@@ -124,6 +167,7 @@ func (r *SvcDiscoveryRegistryImpl) UnRegister() error {
 	return r.endpointMgr.DeleteEndpoint(context.TODO(), r.serviceKey)
 }
 
+// Close closes the etcd client connection
 func (r *SvcDiscoveryRegistryImpl) Close() {
 	if r.client != nil {
 		_ = r.client.Close()
