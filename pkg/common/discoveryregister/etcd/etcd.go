@@ -49,7 +49,7 @@ func (r *SvcDiscoveryRegistryImpl) GetUserIdHashGatewayHost(ctx context.Context,
 }
 func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
 	target := fmt.Sprintf("%s:///%s", r.schema, serviceName)
-	conn, err := grpc.DialContext(ctx, target, append(r.dialOptions, opts...)...)
+	conn, err := grpc.DialContext(ctx, target, grpc.WithResolvers(r.resolver))
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName str
 
 func (r *SvcDiscoveryRegistryImpl) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	target := fmt.Sprintf("%s:///%s", r.schema, serviceName)
-	return grpc.DialContext(ctx, target, append(r.dialOptions, opts...)...)
+	return grpc.DialContext(ctx, target, grpc.WithResolvers(r.resolver))
 }
 
 func (r *SvcDiscoveryRegistryImpl) GetSelfConnTarget() string {
