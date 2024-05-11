@@ -76,7 +76,7 @@ func (r *SvcDiscoveryRegistryImpl) CloseConn(conn *grpc.ClientConn) {
 }
 
 func (r *SvcDiscoveryRegistryImpl) Register(serviceName, host string, port int, opts ...grpc.DialOption) error {
-	r.serviceKey = fmt.Sprintf("%s/%s:%d", serviceName, host, port)
+	r.serviceKey = fmt.Sprintf("%s/%s/%d", serviceName, host, port)
 	em, err := endpoints.NewManager(r.client, serviceName)
 	if err != nil {
 		return err
