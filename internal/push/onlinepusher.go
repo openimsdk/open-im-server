@@ -86,6 +86,7 @@ func (d *DefaultAllNode) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.M
 
 	// Online push message
 	for _, conn := range conns {
+		log.ZDebug(ctx, "get gateway conn detail ", "conn ", *conn)
 		conn := conn // loop var safe
 		ctx := ctx
 		wg.Go(func() error {
