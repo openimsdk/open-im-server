@@ -100,6 +100,7 @@ func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName str
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
+	fmt.Printf("all conns ", serviceName, r.connMap[fullServiceKey])
 	return r.connMap[fullServiceKey], nil
 }
 
