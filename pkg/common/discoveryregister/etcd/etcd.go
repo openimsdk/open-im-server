@@ -100,7 +100,8 @@ func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName str
 
 	for _, kv := range resp.Kvs {
 		endpoint := string(kv.Key[len(fullServiceKey)+1:]) // Extract the endpoint address
-		target := fmt.Sprintf("etcd://%s/%s/%s", r.rootDirectory, serviceName, endpoint)
+		//target := fmt.Sprintf("etcd://%s/%s/%s", r.rootDirectory, serviceName, endpoint)
+		target := endpoint
 		conn, err := grpc.DialContext(ctx, target, append(append(r.dialOptions, opts...), grpc.WithResolvers(r.resolver))...)
 		if err != nil {
 			fmt.Println("DialContext ", target, err.Error())
@@ -140,7 +141,7 @@ func (r *SvcDiscoveryRegistryImpl) CloseConn(conn *grpc.ClientConn) {
 
 // Register registers a new service endpoint with etcd
 func (r *SvcDiscoveryRegistryImpl) Register(serviceName, host string, port int, opts ...grpc.DialOption) error {
-	r.serviceKey = fmt.Sprintf("%s/%s/%s-%d", r.rootDirectory, serviceName, host, port)
+	r.serviceKey = fmt.Sprintf("%s/%s/%s:%d", r.rootDirectory, serviceName, host, port)
 	em, err := endpoints.NewManager(r.client, r.rootDirectory+"/"+serviceName)
 	if err != nil {
 		return err
