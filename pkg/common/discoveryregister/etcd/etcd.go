@@ -94,6 +94,7 @@ func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName str
 	// List all endpoints for the service
 	resp, err := r.client.Get(ctx, fullServiceKey, clientv3.WithPrefix())
 	if err != nil {
+		fmt.Println("GetConns get ", fullServiceKey, err.Error())
 		return nil, err
 	}
 
@@ -102,6 +103,7 @@ func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName str
 		target := fmt.Sprintf("etcd://%s", endpoint)
 		conn, err := grpc.DialContext(ctx, target, append(append(r.dialOptions, opts...), grpc.WithResolvers(r.resolver))...)
 		if err != nil {
+			fmt.Println("DialContext ", target, err.Error())
 			return nil, err
 		}
 		conns = append(conns, conn)
