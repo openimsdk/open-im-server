@@ -108,7 +108,7 @@ func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName str
 		}
 		conns = append(conns, conn)
 	}
-
+	fmt.Println("GetConns number ", len(conns))
 	return conns, nil
 }
 
