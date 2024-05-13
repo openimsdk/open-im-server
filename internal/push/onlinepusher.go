@@ -2,6 +2,7 @@ package push
 
 import (
 	"context"
+	"fmt"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
@@ -81,7 +82,8 @@ func (d *DefaultAllNode) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.M
 
 	// Online push message
 	for _, conn := range conns {
-		log.ZDebug(ctx, "get gateway conn detail ", "conn ", *conn)
+		fmt.Println(ctx, "get gateway conn detail ", "conn ", *conn)
+
 		conn := conn // loop var safe
 		wg.Go(func() error {
 			msgClient := msggateway.NewMsgGatewayClient(conn)
