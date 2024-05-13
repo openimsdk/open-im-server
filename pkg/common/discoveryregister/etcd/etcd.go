@@ -193,8 +193,7 @@ func (r *SvcDiscoveryRegistryImpl) refreshConnMap(prefix string) {
 		fmt.Printf("Failed to get endpoints: %v\n", err)
 		return
 	}
-
-	// Update the connMap with new connections
+	r.connMap[prefix] = []*grpc.ClientConn{} // Update the connMap with new connections
 	for _, kv := range resp.Kvs {
 		_, addr := r.splitEndpoint(string(kv.Key))
 		conn, err := grpc.DialContext(context.Background(), addr, append(r.dialOptions, grpc.WithResolvers(r.resolver))...)
