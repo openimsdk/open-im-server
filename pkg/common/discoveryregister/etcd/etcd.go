@@ -100,7 +100,7 @@ func (r *SvcDiscoveryRegistryImpl) GetConns(ctx context.Context, serviceName str
 
 	for _, kv := range resp.Kvs {
 		endpoint := string(kv.Key[len(fullServiceKey)+1:]) // Extract the endpoint address
-		target := fmt.Sprintf("etcd://%s", endpoint)
+		target := fmt.Sprintf("etcd://%s/%s/%s", r.rootDirectory, serviceName, endpoint)
 		conn, err := grpc.DialContext(ctx, target, append(append(r.dialOptions, opts...), grpc.WithResolvers(r.resolver))...)
 		if err != nil {
 			fmt.Println("DialContext ", target, err.Error())
