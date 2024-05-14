@@ -147,20 +147,15 @@ func (och *OnlineHistoryRedisConsumerHandler) categorizeMessageLists(totalMsgs [
 				if v.message.Options != nil {
 					msg.Options = msgprocessor.NewMsgOptions()
 				}
-				if options.IsOfflinePush() {
-					v.message.Options = msgprocessor.WithOptions(
-						v.message.Options,
-						msgprocessor.WithOfflinePush(false),
-					)
-					msg.Options = msgprocessor.WithOptions(msg.Options, msgprocessor.WithOfflinePush(true))
-				}
-				if options.IsUnreadCount() {
-					v.message.Options = msgprocessor.WithOptions(
-						v.message.Options,
-						msgprocessor.WithUnreadCount(false),
-					)
-					msg.Options = msgprocessor.WithOptions(msg.Options, msgprocessor.WithUnreadCount(true))
-				}
+				msg.Options = msgprocessor.WithOptions(msg.Options,
+					msgprocessor.WithOfflinePush(options.IsOfflinePush()),
+					msgprocessor.WithUnreadCount(options.IsUnreadCount()),
+				)
+				v.message.Options = msgprocessor.WithOptions(
+					v.message.Options,
+					msgprocessor.WithOfflinePush(false),
+					msgprocessor.WithUnreadCount(false),
+				)
 				ctxMsg := &ContextMsg{
 					message: msg,
 					ctx:     v.ctx,
