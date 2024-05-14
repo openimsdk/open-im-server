@@ -139,28 +139,28 @@ func main() {
 func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *config.Redis, kafkaConfig *config.Kafka, minioConfig *config.Minio, discovery *config.Discovery, maxRetry int) error {
 	checksDone := make(map[string]bool)
 
-	checks := map[string]func() error{
-		"Mongo": func() error {
+	checks := map[string]func(ctx context.Context) error{
+		"Mongo": func(ctx context.Context) error {
 			return CheckMongo(ctx, mongoConfig)
 		},
-		"Redis": func() error {
+		"Redis": func(ctx context.Context) error {
 			return CheckRedis(ctx, redisConfig)
 		},
-		"Kafka": func() error {
+		"Kafka": func(ctx context.Context) error {
 			return CheckKafka(ctx, kafkaConfig)
 		},
 	}
 	if minioConfig != nil {
-		checks["MinIO"] = func() error {
+		checks["MinIO"] = func(ctx context.Context) error {
 			return CheckMinIO(ctx, minioConfig)
 		}
 	}
 	if discovery.Enable == "etcd" {
-		checks["Etcd"] = func() error {
+		checks["Etcd"] = func(ctx context.Context) error {
 			return CheckEtcd(ctx, &discovery.Etcd)
 		}
 	} else if discovery.Enable == "zookeeper" {
-		checks["Zookeeper"] = func() error {
+		checks["Zookeeper"] = func(ctx context.Context) error {
 			return CheckZookeeper(ctx, &discovery.ZooKeeper)
 		}
 	}
@@ -169,7 +169,7 @@ func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *
 		allSuccess := true
 		for name, check := range checks {
 			if !checksDone[name] {
-				if err := check(); err != nil {
+				if err := check(ctx); err != nil {
 					fmt.Printf("%s check failed: %v\n", name, err)
 					allSuccess = false
 				} else {
