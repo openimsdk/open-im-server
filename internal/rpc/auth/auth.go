@@ -45,10 +45,10 @@ type authServer struct {
 }
 
 type Config struct {
-	RpcConfig       config.Auth
-	RedisConfig     config.Redis
-	ZookeeperConfig config.ZooKeeper
-	Share           config.Share
+	RpcConfig   config.Auth
+	RedisConfig config.Redis
+	Share       config.Share
+	Discovery   config.Discovery
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {

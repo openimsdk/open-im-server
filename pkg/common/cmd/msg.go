@@ -36,13 +36,13 @@ func NewMsgRpcCmd() *MsgRpcCmd {
 	ret.configMap = map[string]any{
 		OpenIMRPCMsgCfgFileName:  &msgConfig.RpcConfig,
 		RedisConfigFileName:      &msgConfig.RedisConfig,
-		ZookeeperConfigFileName:  &msgConfig.ZookeeperConfig,
 		MongodbConfigFileName:    &msgConfig.MongodbConfig,
 		KafkaConfigFileName:      &msgConfig.KafkaConfig,
 		ShareFileName:            &msgConfig.Share,
 		NotificationFileName:     &msgConfig.NotificationConfig,
 		WebhooksConfigFileName:   &msgConfig.WebhooksConfig,
 		LocalCacheConfigFileName: &msgConfig.LocalCacheConfig,
+		DiscoveryConfigFilename:  &msgConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -57,7 +57,7 @@ func (a *MsgRpcCmd) Exec() error {
 }
 
 func (a *MsgRpcCmd) runE() error {
-	return startrpc.Start(a.ctx, &a.msgConfig.ZookeeperConfig, &a.msgConfig.RpcConfig.Prometheus, a.msgConfig.RpcConfig.RPC.ListenIP,
+	return startrpc.Start(a.ctx, &a.msgConfig.Discovery, &a.msgConfig.RpcConfig.Prometheus, a.msgConfig.RpcConfig.RPC.ListenIP,
 		a.msgConfig.RpcConfig.RPC.RegisterIP, a.msgConfig.RpcConfig.RPC.Ports,
 		a.Index(), a.msgConfig.Share.RpcRegisterName.Msg, &a.msgConfig.Share, a.msgConfig, msg.Start)
 }
