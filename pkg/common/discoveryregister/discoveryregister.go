@@ -45,10 +45,7 @@ func NewDiscoveryRegister(discovery *config.Discovery, share *config.Share) (dis
 			etcd.WithDialTimeout(10*time.Second),
 			etcd.WithMaxCallSendMsgSize(20*1024*1024),
 			etcd.WithUsernameAndPassword(discovery.Etcd.Username, discovery.Etcd.Password))
-	case "direct":
-		//return direct.NewConnDirect(config)
 	default:
 		return nil, errs.New("unsupported discovery type", "type", discovery.Enable).Wrap()
 	}
-	return nil, nil
 }
