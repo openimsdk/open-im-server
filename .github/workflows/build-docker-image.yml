@@ -15,8 +15,6 @@
 name: Publish Docker image
 
 on:
-  schedule:
-  - cron: '30 2 * * *'
   push:
     branches:
       - main
@@ -31,6 +29,7 @@ env:
 
 jobs:
   build-dockerhub:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
