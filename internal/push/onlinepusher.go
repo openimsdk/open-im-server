@@ -91,6 +91,7 @@ func (d *DefaultAllNode) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.M
 			msgClient := msggateway.NewMsgGatewayClient(conn)
 			reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, input)
 			if err != nil {
+				log.ZError(ctx, "SuperGroupOnlineBatchPushOneMsg ", err, input.String())
 				return nil
 			}
 
