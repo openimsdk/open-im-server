@@ -16,9 +16,9 @@ package discoveryregister
 
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	getcd "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/etcd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
 	"github.com/openimsdk/tools/discovery"
+	getcd "github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/discovery/zookeeper"
 	"github.com/openimsdk/tools/errs"
 	"time"
