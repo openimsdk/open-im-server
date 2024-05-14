@@ -18,7 +18,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
 	"github.com/openimsdk/tools/discovery"
-	getcd "github.com/openimsdk/tools/discovery/etcd"
+	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/discovery/zookeeper"
 	"github.com/openimsdk/tools/errs"
 	"time"
@@ -39,12 +39,12 @@ func NewDiscoveryRegister(discovery *config.Discovery, share *config.Share) (dis
 	case "k8s":
 		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
 	case "etcd":
-		return getcd.NewSvcDiscoveryRegistry(
+		return etcd.NewSvcDiscoveryRegistry(
 			discovery.Etcd.RootDirectory,
 			discovery.Etcd.Address,
-			getcd.WithDialTimeout(10*time.Second),
-			getcd.WithMaxCallSendMsgSize(20*1024*1024),
-			getcd.WithUsernameAndPassword(discovery.Etcd.Username, discovery.Etcd.Password))
+			etcd.WithDialTimeout(10*time.Second),
+			etcd.WithMaxCallSendMsgSize(20*1024*1024),
+			etcd.WithUsernameAndPassword(discovery.Etcd.Username, discovery.Etcd.Password))
 	case "direct":
 		//return direct.NewConnDirect(config)
 	default:
