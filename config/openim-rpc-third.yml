@@ -30,18 +30,3 @@ object:
     accessKeySecret: ''
     sessionToken: ''
     publicRead: false
-  kodo:
-    endpoint: "webhook://s3.cn-east-1.qiniucs.com"
-    bucket: "demo-9999999"
-    bucketURL: "webhook://your.domain.com"
-    accessKeyID: ''
-    accessKeySecret: ''
-    sessionToken: ''
-    publicRead: false
-  aws:
-    endpoint: "''"
-    region: "us-east-1"
-    bucket: "demo-9999999"
-    accessKeyID: ''
-    accessKeySecret: ''
-    publicRead: false
