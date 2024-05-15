@@ -24,11 +24,11 @@ type Config struct {
 	RedisConfig        config.Redis
 	MongodbConfig      config.Mongo
 	KafkaConfig        config.Kafka
-	ZookeeperConfig    config.ZooKeeper
 	NotificationConfig config.Notification
 	Share              config.Share
 	WebhooksConfig     config.Webhooks
 	LocalCacheConfig   config.LocalCache
+	Discovery          config.Discovery
 }
 
 func (p pushServer) PushMsg(ctx context.Context, req *pbpush.PushMsgReq) (*pbpush.PushMsgResp, error) {

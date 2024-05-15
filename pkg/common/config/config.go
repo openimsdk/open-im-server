@@ -15,14 +15,13 @@
 package config
 
 import (
-	"fmt"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
-	"net"
+	"strings"
 	"time"
 )
 
@@ -346,7 +345,6 @@ type AfterConfig struct {
 
 type Share struct {
 	Secret          string          `mapstructure:"secret"`
-	Env             string          `mapstructure:"env"`
 	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
 	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
 }
@@ -433,6 +431,19 @@ type ZooKeeper struct {
 	Password string   `mapstructure:"password"`
 }
 
+type Discovery struct {
+	Enable    string    `mapstructure:"enable"`
+	Etcd      Etcd      `mapstructure:"etcd"`
+	ZooKeeper ZooKeeper `mapstructure:"zooKeeper"`
+}
+
+type Etcd struct {
+	RootDirectory string   `mapstructure:"rootDirectory"`
+	Address       []string `mapstructure:"address"`
+	Username      string   `mapstructure:"username"`
+	Password      string   `mapstructure:"password"`
+}
+
 func (m *Mongo) Build() *mongoutil.Config {
 	return &mongoutil.Config{
 		Uri:         m.URI,
@@ -473,25 +484,23 @@ func (k *Kafka) Build() *kafka.Config {
 		},
 	}
 }
+
 func (m *Minio) Build() *minio.Config {
-	conf := minio.Config{
+	formatEndpoint := func(address string) string {
+		if strings.HasPrefix(address, "http://") || strings.HasPrefix(address, "https://") {
+			return address
+		}
+		return "http://" + address
+	}
+	return &minio.Config{
 		Bucket:          m.Bucket,
 		AccessKeyID:     m.AccessKeyID,
 		SecretAccessKey: m.SecretAccessKey,
 		SessionToken:    m.SessionToken,
 		PublicRead:      m.PublicRead,
+		Endpoint:        formatEndpoint(m.InternalAddress),
+		SignEndpoint:    formatEndpoint(m.ExternalAddress),
 	}
-	if _, _, err := net.SplitHostPort(m.InternalAddress); err == nil {
-		conf.Endpoint = fmt.Sprintf("http://%s", m.InternalAddress)
-	} else {
-		conf.Endpoint = m.InternalAddress
-	}
-	if _, _, err := net.SplitHostPort(m.ExternalAddress); err == nil {
-		conf.SignEndpoint = fmt.Sprintf("http://%s", m.ExternalAddress)
-	} else {
-		conf.SignEndpoint = m.ExternalAddress
-	}
-	return &conf
 }
 func (c *Cos) Build() *cos.Config {
 	return &cos.Config{

@@ -61,11 +61,11 @@ type Config struct {
 	RedisConfig        config.Redis
 	MongodbConfig      config.Mongo
 	KafkaConfig        config.Kafka
-	ZookeeperConfig    config.ZooKeeper
 	NotificationConfig config.Notification
 	Share              config.Share
 	WebhooksConfig     config.Webhooks
 	LocalCacheConfig   config.LocalCache
+	Discovery          config.Discovery
 }
 
 func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {

@@ -44,7 +44,7 @@ import (
 )
 
 // Start rpc server.
-func Start[T any](ctx context.Context, zookeeperConfig *config2.ZooKeeper, prometheusConfig *config2.Prometheus, listenIP,
+func Start[T any](ctx context.Context, discovery *config2.Discovery, prometheusConfig *config2.Prometheus, listenIP,
 	registerIP string, rpcPorts []int, index int, rpcRegisterName string, share *config2.Share, config T, rpcFn func(ctx context.Context,
 	config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 
@@ -68,7 +68,7 @@ func Start[T any](ctx context.Context, zookeeperConfig *config2.ZooKeeper, prome
 	}
 
 	defer listener.Close()
-	client, err := kdisc.NewDiscoveryRegister(zookeeperConfig, share)
+	client, err := kdisc.NewDiscoveryRegister(discovery, share)
 	if err != nil {
 		return err
 	}
