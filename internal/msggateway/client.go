@@ -286,6 +286,7 @@ func (c *Client) KickOnlineMessage() error {
 	resp := Resp{
 		ReqIdentifier: WSKickOnlineMsg,
 	}
+	log.ZDebug(c.ctx, "KickOnlineMessage debug ")
 	err := c.writeBinaryMsg(resp)
 	c.close()
 	return err

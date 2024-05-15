@@ -36,12 +36,12 @@ func NewThirdRpcCmd() *ThirdRpcCmd {
 	ret.configMap = map[string]any{
 		OpenIMRPCThirdCfgFileName: &thirdConfig.RpcConfig,
 		RedisConfigFileName:       &thirdConfig.RedisConfig,
-		ZookeeperConfigFileName:   &thirdConfig.ZookeeperConfig,
 		MongodbConfigFileName:     &thirdConfig.MongodbConfig,
 		ShareFileName:             &thirdConfig.Share,
 		NotificationFileName:      &thirdConfig.NotificationConfig,
 		MinioConfigFileName:       &thirdConfig.MinioConfig,
 		LocalCacheConfigFileName:  &thirdConfig.LocalCacheConfig,
+		DiscoveryConfigFilename:   &thirdConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -56,7 +56,7 @@ func (a *ThirdRpcCmd) Exec() error {
 }
 
 func (a *ThirdRpcCmd) runE() error {
-	return startrpc.Start(a.ctx, &a.thirdConfig.ZookeeperConfig, &a.thirdConfig.RpcConfig.Prometheus, a.thirdConfig.RpcConfig.RPC.ListenIP,
+	return startrpc.Start(a.ctx, &a.thirdConfig.Discovery, &a.thirdConfig.RpcConfig.Prometheus, a.thirdConfig.RpcConfig.RPC.ListenIP,
 		a.thirdConfig.RpcConfig.RPC.RegisterIP, a.thirdConfig.RpcConfig.RPC.Ports,
 		a.Index(), a.thirdConfig.Share.RpcRegisterName.Third, &a.thirdConfig.Share, a.thirdConfig, third.Start)
 }
