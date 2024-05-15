@@ -14,7 +14,7 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/protocol v0.0.65
-	github.com/openimsdk/tools v0.0.49-alpha.2
+	github.com/openimsdk/tools v0.0.49-alpha.19
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
@@ -43,7 +43,6 @@ require (
 	go.uber.org/automaxprocs v1.5.3
 	golang.org/x/sync v0.6.0
 )
-
 
 require (
 	cloud.google.com/go v0.112.0 // indirect
@@ -75,7 +74,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-zookeeper/zk v1.0.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
