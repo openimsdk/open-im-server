@@ -36,9 +36,9 @@ func NewMsgGatewayCmd() *MsgGatewayCmd {
 	ret := &MsgGatewayCmd{msgGatewayConfig: &msgGatewayConfig}
 	ret.configMap = map[string]any{
 		OpenIMMsgGatewayCfgFileName: &msgGatewayConfig.MsgGateway,
-		ZookeeperConfigFileName:     &msgGatewayConfig.ZookeeperConfig,
 		ShareFileName:               &msgGatewayConfig.Share,
 		WebhooksConfigFileName:      &msgGatewayConfig.WebhooksConfig,
+		DiscoveryConfigFilename:     &msgGatewayConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)

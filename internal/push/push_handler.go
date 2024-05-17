@@ -60,7 +60,7 @@ func NewConsumerHandler(config *Config, offlinePusher offlinepush.OfflinePusher,
 	var consumerHandler ConsumerHandler
 	var err error
 	consumerHandler.pushConsumerGroup, err = kafka.NewMConsumerGroup(config.KafkaConfig.Build(), config.KafkaConfig.ToPushGroupID,
-		[]string{config.KafkaConfig.ToPushTopic})
+		[]string{config.KafkaConfig.ToPushTopic}, true)
 	if err != nil {
 		return nil, err
 	}
