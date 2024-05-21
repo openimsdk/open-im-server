@@ -45,14 +45,13 @@ import (
 
 type MsgTransfer struct {
 	// This consumer aggregated messages, subscribed to the topic:toRedis,
-	// the modification notification is sent to msg_to_modify topic, the message is stored in redis, Incr Redis,
-	// and then the message is sent to ms2pschat topic for push, and the message is sent to toMongo topic for persistence
-	historyCH      *OnlineHistoryRedisConsumerHandler
+	//  the message is stored in redis, Incr Redis, and then the message is sent to toPush topic for push,
+	// and the message is sent to toMongo topic for persistence
+	historyCH *OnlineHistoryRedisConsumerHandler
+	//This consumer handle message to mongo
 	historyMongoCH *OnlineHistoryMongoConsumerHandler
-	// mongoDB batch insert, delete messages in redis after success,
-	// and handle the deletion notification message deleted subscriptions topic: to
-	ctx    context.Context
-	cancel context.CancelFunc
+	ctx            context.Context
+	cancel         context.CancelFunc
 }
 
 type Config struct {
