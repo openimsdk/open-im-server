@@ -345,7 +345,6 @@ type AfterConfig struct {
 
 type Share struct {
 	Secret          string          `mapstructure:"secret"`
-	Env             string          `mapstructure:"env"`
 	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
 	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
 }
@@ -430,6 +429,19 @@ type ZooKeeper struct {
 	Address  []string `mapstructure:"address"`
 	Username string   `mapstructure:"username"`
 	Password string   `mapstructure:"password"`
+}
+
+type Discovery struct {
+	Enable    string    `mapstructure:"enable"`
+	Etcd      Etcd      `mapstructure:"etcd"`
+	ZooKeeper ZooKeeper `mapstructure:"zooKeeper"`
+}
+
+type Etcd struct {
+	RootDirectory string   `mapstructure:"rootDirectory"`
+	Address       []string `mapstructure:"address"`
+	Username      string   `mapstructure:"username"`
+	Password      string   `mapstructure:"password"`
 }
 
 func (m *Mongo) Build() *mongoutil.Config {

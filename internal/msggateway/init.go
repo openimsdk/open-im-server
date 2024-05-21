@@ -24,10 +24,10 @@ import (
 )
 
 type Config struct {
-	MsgGateway      config.MsgGateway
-	ZookeeperConfig config.ZooKeeper
-	Share           config.Share
-	WebhooksConfig  config.Webhooks
+	MsgGateway     config.MsgGateway
+	Share          config.Share
+	WebhooksConfig config.Webhooks
+	Discovery      config.Discovery
 }
 
 // Start run ws server.

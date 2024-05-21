@@ -56,13 +56,13 @@ type MsgTransfer struct {
 }
 
 type Config struct {
-	MsgTransfer     config.MsgTransfer
-	RedisConfig     config.Redis
-	MongodbConfig   config.Mongo
-	KafkaConfig     config.Kafka
-	ZookeeperConfig config.ZooKeeper
-	Share           config.Share
-	WebhooksConfig  config.Webhooks
+	MsgTransfer    config.MsgTransfer
+	RedisConfig    config.Redis
+	MongodbConfig  config.Mongo
+	KafkaConfig    config.Kafka
+	Share          config.Share
+	WebhooksConfig config.Webhooks
+	Discovery      config.Discovery
 }
 
 func Start(ctx context.Context, index int, config *Config) error {
@@ -76,7 +76,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	client, err := kdisc.NewDiscoveryRegister(&config.ZookeeperConfig, &config.Share)
+	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, &config.Share)
 	if err != nil {
 		return err
 	}

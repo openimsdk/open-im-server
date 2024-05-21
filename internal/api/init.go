@@ -38,16 +38,13 @@ import (
 )
 
 type Config struct {
-	RpcConfig          config.API
-	MongodbConfig      config.Mongo
-	ZookeeperConfig    config.ZooKeeper
-	NotificationConfig config.Notification
-	Share              config.Share
-	MinioConfig        config.Minio
+	API       config.API
+	Share     config.Share
+	Discovery config.Discovery
 }
 
 func Start(ctx context.Context, index int, config *Config) error {
-	apiPort, err := datautil.GetElemByIndex(config.RpcConfig.Api.Ports, index)
+	apiPort, err := datautil.GetElemByIndex(config.API.Api.Ports, index)
 	if err != nil {
 		return err
 	}
@@ -55,7 +52,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	var client discovery.SvcDiscoveryRegistry
 
 	// Determine whether zk is passed according to whether it is a clustered deployment
-	client, err = kdisc.NewDiscoveryRegister(&config.ZookeeperConfig, &config.Share)
+	client, err = kdisc.NewDiscoveryRegister(&config.Discovery, &config.Share)
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
@@ -67,9 +64,9 @@ func Start(ctx context.Context, index int, config *Config) error {
 	)
 
 	router := newGinRouter(client, config)
-	if config.RpcConfig.Prometheus.Enable {
+	if config.API.Prometheus.Enable {
 		go func() {
-			prometheusPort, err = datautil.GetElemByIndex(config.RpcConfig.Prometheus.Ports, index)
+			prometheusPort, err = datautil.GetElemByIndex(config.API.Prometheus.Ports, index)
 			if err != nil {
 				netErr = err
 				netDone <- struct{}{}
@@ -84,7 +81,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 		}()
 
 	}
-	address := net.JoinHostPort(network.GetListenIP(config.RpcConfig.Api.ListenIP), strconv.Itoa(apiPort))
+	address := net.JoinHostPort(network.GetListenIP(config.API.Api.ListenIP), strconv.Itoa(apiPort))
 
 	server := http.Server{Addr: address, Handler: router}
 	log.CInfo(ctx, "API server is initializing", "address", address, "apiPort", apiPort, "prometheusPort", prometheusPort)

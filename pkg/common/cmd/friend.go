@@ -36,12 +36,12 @@ func NewFriendRpcCmd() *FriendRpcCmd {
 	ret.configMap = map[string]any{
 		OpenIMRPCFriendCfgFileName: &friendConfig.RpcConfig,
 		RedisConfigFileName:        &friendConfig.RedisConfig,
-		ZookeeperConfigFileName:    &friendConfig.ZookeeperConfig,
 		MongodbConfigFileName:      &friendConfig.MongodbConfig,
 		ShareFileName:              &friendConfig.Share,
 		NotificationFileName:       &friendConfig.NotificationConfig,
 		WebhooksConfigFileName:     &friendConfig.WebhooksConfig,
 		LocalCacheConfigFileName:   &friendConfig.LocalCacheConfig,
+		DiscoveryConfigFilename:    &friendConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -56,7 +56,7 @@ func (a *FriendRpcCmd) Exec() error {
 }
 
 func (a *FriendRpcCmd) runE() error {
-	return startrpc.Start(a.ctx, &a.friendConfig.ZookeeperConfig, &a.friendConfig.RpcConfig.Prometheus, a.friendConfig.RpcConfig.RPC.ListenIP,
+	return startrpc.Start(a.ctx, &a.friendConfig.Discovery, &a.friendConfig.RpcConfig.Prometheus, a.friendConfig.RpcConfig.RPC.ListenIP,
 		a.friendConfig.RpcConfig.RPC.RegisterIP, a.friendConfig.RpcConfig.RPC.Ports,
 		a.Index(), a.friendConfig.Share.RpcRegisterName.Friend, &a.friendConfig.Share, a.friendConfig, friend.Start)
 }

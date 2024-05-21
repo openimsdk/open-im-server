@@ -22,6 +22,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/discovery/zookeeper"
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/minio"
@@ -43,6 +44,14 @@ func CheckZookeeper(ctx context.Context, config *config.ZooKeeper) error {
 	return zookeeper.Check(ctx, config.Address, config.Schema, zookeeper.WithUserNameAndPassword(config.Username, config.Password))
 }
 
+func CheckEtcd(ctx context.Context, config *config.Etcd) error {
+	return etcd.Check(ctx, config.Address, "/check_openim_component",
+		true,
+		etcd.WithDialTimeout(10*time.Second),
+		etcd.WithMaxCallSendMsgSize(20*1024*1024),
+		etcd.WithUsernameAndPassword(config.Username, config.Password))
+}
+
 func CheckMongo(ctx context.Context, config *config.Mongo) error {
 	return mongoutil.Check(ctx, config.Build())
 }
@@ -59,14 +68,14 @@ func CheckKafka(ctx context.Context, conf *config.Kafka) error {
 	return kafka.Check(ctx, conf.Build(), []string{conf.ToMongoTopic, conf.ToRedisTopic, conf.ToPushTopic})
 }
 
-func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, *config.Minio, *config.ZooKeeper, error) {
+func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, *config.Minio, *config.Discovery, error) {
 	var (
-		mongoConfig     = &config.Mongo{}
-		redisConfig     = &config.Redis{}
-		kafkaConfig     = &config.Kafka{}
-		minioConfig     = &config.Minio{}
-		zookeeperConfig = &config.ZooKeeper{}
-		thirdConfig     = &config.Third{}
+		mongoConfig = &config.Mongo{}
+		redisConfig = &config.Redis{}
+		kafkaConfig = &config.Kafka{}
+		minioConfig = &config.Minio{}
+		discovery   = &config.Discovery{}
+		thirdConfig = &config.Third{}
 	)
 	err := config.LoadConfig(filepath.Join(configDir, cmd.MongodbConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MongodbConfigFileName], mongoConfig)
 	if err != nil {
@@ -96,11 +105,11 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 	} else {
 		minioConfig = nil
 	}
-	err = config.LoadConfig(filepath.Join(configDir, cmd.ZookeeperConfigFileName), cmd.ConfigEnvPrefixMap[cmd.ZookeeperConfigFileName], zookeeperConfig)
+	err = config.LoadConfig(filepath.Join(configDir, cmd.DiscoveryConfigFilename), cmd.ConfigEnvPrefixMap[cmd.DiscoveryConfigFilename], discovery)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
-	return mongoConfig, redisConfig, kafkaConfig, minioConfig, zookeeperConfig, nil
+	return mongoConfig, redisConfig, kafkaConfig, minioConfig, discovery, nil
 }
 
 func main() {
@@ -127,27 +136,32 @@ func main() {
 	}
 }
 
-func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *config.Redis, kafkaConfig *config.Kafka, minioConfig *config.Minio, zookeeperConfig *config.ZooKeeper, maxRetry int) error {
+func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *config.Redis, kafkaConfig *config.Kafka, minioConfig *config.Minio, discovery *config.Discovery, maxRetry int) error {
 	checksDone := make(map[string]bool)
 
-	checks := map[string]func() error{
-		"Zookeeper": func() error {
-			return CheckZookeeper(ctx, zookeeperConfig)
-		},
-		"Mongo": func() error {
+	checks := map[string]func(ctx context.Context) error{
+		"Mongo": func(ctx context.Context) error {
 			return CheckMongo(ctx, mongoConfig)
 		},
-		"Redis": func() error {
+		"Redis": func(ctx context.Context) error {
 			return CheckRedis(ctx, redisConfig)
 		},
-		"Kafka": func() error {
+		"Kafka": func(ctx context.Context) error {
 			return CheckKafka(ctx, kafkaConfig)
 		},
 	}
-
 	if minioConfig != nil {
-		checks["MinIO"] = func() error {
+		checks["MinIO"] = func(ctx context.Context) error {
 			return CheckMinIO(ctx, minioConfig)
+		}
+	}
+	if discovery.Enable == "etcd" {
+		checks["Etcd"] = func(ctx context.Context) error {
+			return CheckEtcd(ctx, &discovery.Etcd)
+		}
+	} else if discovery.Enable == "zookeeper" {
+		checks["Zookeeper"] = func(ctx context.Context) error {
+			return CheckZookeeper(ctx, &discovery.ZooKeeper)
 		}
 	}
 
@@ -155,7 +169,7 @@ func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *
 		allSuccess := true
 		for name, check := range checks {
 			if !checksDone[name] {
-				if err := check(); err != nil {
+				if err := check(ctx); err != nil {
 					fmt.Printf("%s check failed: %v\n", name, err)
 					allSuccess = false
 				} else {

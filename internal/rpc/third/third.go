@@ -46,11 +46,11 @@ type Config struct {
 	RpcConfig          config.Third
 	RedisConfig        config.Redis
 	MongodbConfig      config.Mongo
-	ZookeeperConfig    config.ZooKeeper
 	NotificationConfig config.Notification
 	Share              config.Share
 	MinioConfig        config.Minio
 	LocalCacheConfig   config.LocalCache
+	Discovery          config.Discovery
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {

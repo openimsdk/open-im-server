@@ -33,9 +33,9 @@ func NewApiCmd() *ApiCmd {
 	var apiConfig api.Config
 	ret := &ApiCmd{apiConfig: &apiConfig}
 	ret.configMap = map[string]any{
-		OpenIMAPICfgFileName:    &apiConfig.RpcConfig,
-		ZookeeperConfigFileName: &apiConfig.ZookeeperConfig,
+		OpenIMAPICfgFileName:    &apiConfig.API,
 		ShareFileName:           &apiConfig.Share,
+		DiscoveryConfigFilename: &apiConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)

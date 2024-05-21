@@ -12,11 +12,6 @@ import (
 	"sync"
 )
 
-const (
-	KUBERNETES = "k8s"
-	ZOOKEEPER  = "zookeeper"
-)
-
 type OnlinePusher interface {
 	GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData,
 		pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error)
@@ -42,10 +37,12 @@ func (u emptyOnlinePUsher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *
 }
 
 func NewOnlinePusher(disCov discovery.SvcDiscoveryRegistry, config *Config) OnlinePusher {
-	switch config.Share.Env {
-	case KUBERNETES:
+	switch config.Discovery.Enable {
+	case "k8s":
 		return NewK8sStaticConsistentHash(disCov, config)
-	case ZOOKEEPER:
+	case "zookeeper":
+		return NewDefaultAllNode(disCov, config)
+	case "etcd":
 		return NewDefaultAllNode(disCov, config)
 	default:
 		return newEmptyOnlinePUsher()
@@ -64,7 +61,12 @@ func NewDefaultAllNode(disCov discovery.SvcDiscoveryRegistry, config *Config) *D
 func (d *DefaultAllNode) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData,
 	pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
 	conns, err := d.disCov.GetConns(ctx, d.config.Share.RpcRegisterName.MessageGateway)
-	log.ZDebug(ctx, "get gateway conn", "conn length", len(conns))
+	if len(conns) == 0 {
+		log.ZWarn(ctx, "get gateway conn 0 ", nil)
+	} else {
+		log.ZDebug(ctx, "get gateway conn", "conn length", len(conns))
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -85,10 +87,12 @@ func (d *DefaultAllNode) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.M
 	// Online push message
 	for _, conn := range conns {
 		conn := conn // loop var safe
+		ctx := ctx
 		wg.Go(func() error {
 			msgClient := msggateway.NewMsgGatewayClient(conn)
 			reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, input)
 			if err != nil {
+				log.ZError(ctx, "SuperGroupOnlineBatchPushOneMsg ", err, "req:", input.String())
 				return nil
 			}
 

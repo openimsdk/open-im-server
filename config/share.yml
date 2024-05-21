@@ -1,5 +1,4 @@
 secret: openIM123
-env: zookeeper
 rpcRegisterName:
   user: user
   friend: friend
