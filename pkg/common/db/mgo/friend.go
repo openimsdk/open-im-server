@@ -62,7 +62,26 @@ func (f *FriendMgo) Create(ctx context.Context, friends []*relation.FriendModel)
 	return Success(func() error {
 		return mongoutil.InsertMany(ctx, f.coll, friends)
 	}, func() error {
-
+		mp := make(map[string][]string)
+		for _, friend := range friends {
+			mp[friend.OwnerUserID] = append(mp[friend.OwnerUserID], friend.FriendUserID)
+		}
+		for ownerUserID, friendUserIDs := range mp {
+			if err := f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, false); err != nil {
+				return err
+			}
+		}
+		return nil
+	}, func() error {
+		mp := make(map[string][]string)
+		for _, friend := range friends {
+			mp[friend.FriendUserID] = append(mp[friend.FriendUserID], friend.OwnerUserID)
+		}
+		for friendUserID, ownerUserIDs := range mp {
+			if err := f.friend.WriteLog(ctx, friendUserID, ownerUserIDs, false); err != nil {
+				return err
+			}
+		}
 		return nil
 	})
 }
@@ -78,7 +97,12 @@ func (f *FriendMgo) Delete(ctx context.Context, ownerUserID string, friendUserID
 	}, func() error {
 		return f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, true)
 	}, func() error {
-
+		for _, userID := range friendUserIDs {
+			if err := f.friend.WriteLog(ctx, userID, []string{ownerUserID}, true); err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 }
 
@@ -95,6 +119,8 @@ func (f *FriendMgo) UpdateByMap(ctx context.Context, ownerUserID string, friendU
 		return mongoutil.UpdateOne(ctx, f.coll, filter, bson.M{"$set": args}, true)
 	}, func() error {
 		return f.owner.WriteLog(ctx, ownerUserID, []string{friendUserID}, false)
+	}, func() error {
+		return f.friend.WriteLog(ctx, friendUserID, []string{ownerUserID}, false)
 	})
 }
 
@@ -178,6 +204,13 @@ func (f *FriendMgo) UpdateFriends(ctx context.Context, ownerUserID string, frien
 		return mongoutil.Ignore(mongoutil.UpdateMany(ctx, f.coll, filter, update))
 	}, func() error {
 		return f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, false)
+	}, func() error {
+		for _, userID := range friendUserIDs {
+			if err := f.friend.WriteLog(ctx, userID, []string{ownerUserID}, true); err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 }
 
