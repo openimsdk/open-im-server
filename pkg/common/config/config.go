@@ -348,6 +348,7 @@ type Share struct {
 	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
 	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
 }
+
 type RpcRegisterName struct {
 	User           string `mapstructure:"user"`
 	Friend         string `mapstructure:"friend"`

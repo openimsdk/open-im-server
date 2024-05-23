@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"net/http"
+	"strings"
 )
 
 func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.Engine {
@@ -25,7 +26,6 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("required_if", RequiredIf)
 	}
-	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	// init rpc client here
 	userRpc := rpcclient.NewUser(disCov, config.Share.RpcRegisterName.User, config.Share.RpcRegisterName.MessageGateway,
 		config.Share.IMAdminUserID)
@@ -36,37 +36,37 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	authRpc := rpcclient.NewAuth(disCov, config.Share.RpcRegisterName.Auth)
 	thirdRpc := rpcclient.NewThird(disCov, config.Share.RpcRegisterName.Third, config.API.Prometheus.GrafanaURL)
 
+	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID(), GinParseToken(authRpc))
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc, config.Share.IMAdminUserID)
-	ParseToken := GinParseToken(authRpc)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
-		userRouterGroup.POST("/update_user_info", ParseToken, u.UpdateUserInfo)
-		userRouterGroup.POST("/update_user_info_ex", ParseToken, u.UpdateUserInfoEx)
-		userRouterGroup.POST("/set_global_msg_recv_opt", ParseToken, u.SetGlobalRecvMessageOpt)
-		userRouterGroup.POST("/get_users_info", ParseToken, u.GetUsersPublicInfo)
-		userRouterGroup.POST("/get_all_users_uid", ParseToken, u.GetAllUsersID)
-		userRouterGroup.POST("/account_check", ParseToken, u.AccountCheck)
-		userRouterGroup.POST("/get_users", ParseToken, u.GetUsers)
-		userRouterGroup.POST("/get_users_online_status", ParseToken, u.GetUsersOnlineStatus)
-		userRouterGroup.POST("/get_users_online_token_detail", ParseToken, u.GetUsersOnlineTokenDetail)
-		userRouterGroup.POST("/subscribe_users_status", ParseToken, u.SubscriberStatus)
-		userRouterGroup.POST("/get_users_status", ParseToken, u.GetUserStatus)
-		userRouterGroup.POST("/get_subscribe_users_status", ParseToken, u.GetSubscribeUsersStatus)
+		userRouterGroup.POST("/update_user_info", u.UpdateUserInfo)
+		userRouterGroup.POST("/update_user_info_ex", u.UpdateUserInfoEx)
+		userRouterGroup.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
+		userRouterGroup.POST("/get_users_info", u.GetUsersPublicInfo)
+		userRouterGroup.POST("/get_all_users_uid", u.GetAllUsersID)
+		userRouterGroup.POST("/account_check", u.AccountCheck)
+		userRouterGroup.POST("/get_users", u.GetUsers)
+		userRouterGroup.POST("/get_users_online_status", u.GetUsersOnlineStatus)
+		userRouterGroup.POST("/get_users_online_token_detail", u.GetUsersOnlineTokenDetail)
+		userRouterGroup.POST("/subscribe_users_status", u.SubscriberStatus)
+		userRouterGroup.POST("/get_users_status", u.GetUserStatus)
+		userRouterGroup.POST("/get_subscribe_users_status", u.GetSubscribeUsersStatus)
 
-		userRouterGroup.POST("/process_user_command_add", ParseToken, u.ProcessUserCommandAdd)
-		userRouterGroup.POST("/process_user_command_delete", ParseToken, u.ProcessUserCommandDelete)
-		userRouterGroup.POST("/process_user_command_update", ParseToken, u.ProcessUserCommandUpdate)
-		userRouterGroup.POST("/process_user_command_get", ParseToken, u.ProcessUserCommandGet)
-		userRouterGroup.POST("/process_user_command_get_all", ParseToken, u.ProcessUserCommandGetAll)
+		userRouterGroup.POST("/process_user_command_add", u.ProcessUserCommandAdd)
+		userRouterGroup.POST("/process_user_command_delete", u.ProcessUserCommandDelete)
+		userRouterGroup.POST("/process_user_command_update", u.ProcessUserCommandUpdate)
+		userRouterGroup.POST("/process_user_command_get", u.ProcessUserCommandGet)
+		userRouterGroup.POST("/process_user_command_get_all", u.ProcessUserCommandGetAll)
 
-		userRouterGroup.POST("/add_notification_account", ParseToken, u.AddNotificationAccount)
-		userRouterGroup.POST("/update_notification_account", ParseToken, u.UpdateNotificationAccountInfo)
-		userRouterGroup.POST("/search_notification_account", ParseToken, u.SearchNotificationAccount)
+		userRouterGroup.POST("/add_notification_account", u.AddNotificationAccount)
+		userRouterGroup.POST("/update_notification_account", u.UpdateNotificationAccountInfo)
+		userRouterGroup.POST("/search_notification_account", u.SearchNotificationAccount)
 	}
 	// friend routing group
-	friendRouterGroup := r.Group("/friend", ParseToken)
+	friendRouterGroup := r.Group("/friend")
 	{
 		f := NewFriendApi(*friendRpc)
 		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)
@@ -88,7 +88,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		friendRouterGroup.POST("/update_friends", f.UpdateFriends)
 	}
 	g := NewGroupApi(*groupRpc)
-	groupRouterGroup := r.Group("/group", ParseToken)
+	groupRouterGroup := r.Group("/group")
 	{
 		groupRouterGroup.POST("/create_group", g.CreateGroup)
 		groupRouterGroup.POST("/set_group_info", g.SetGroupInfo)
@@ -120,12 +120,12 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	{
 		a := NewAuthApi(*authRpc)
 		authRouterGroup.POST("/user_token", a.UserToken)
-		authRouterGroup.POST("/get_user_token", ParseToken, a.GetUserToken)
+		authRouterGroup.POST("/get_user_token", a.GetUserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
-		authRouterGroup.POST("/force_logout", ParseToken, a.ForceLogout)
+		authRouterGroup.POST("/force_logout", a.ForceLogout)
 	}
 	// Third service
-	thirdGroup := r.Group("/third", ParseToken)
+	thirdGroup := r.Group("/third")
 	{
 		t := NewThirdApi(*thirdRpc)
 		thirdGroup.GET("/prometheus", t.GetPrometheus)
@@ -137,7 +137,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		logs.POST("/delete", t.DeleteLogs)
 		logs.POST("/search", t.SearchLogs)
 
-		objectGroup := r.Group("/object", ParseToken)
+		objectGroup := r.Group("/object")
 
 		objectGroup.POST("/part_limit", t.PartLimit)
 		objectGroup.POST("/part_size", t.PartSize)
@@ -150,7 +150,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		objectGroup.GET("/*name", t.ObjectRedirect)
 	}
 	// Message
-	msgGroup := r.Group("/msg", ParseToken)
+	msgGroup := r.Group("/msg")
 	{
 		msgGroup.POST("/newest_seq", m.GetSeq)
 		msgGroup.POST("/search_msg", m.SearchMsg)
@@ -174,7 +174,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		msgGroup.POST("/get_server_time", m.GetServerTime)
 	}
 	// Conversation
-	conversationGroup := r.Group("/conversation", ParseToken)
+	conversationGroup := r.Group("/conversation")
 	{
 		c := NewConversationApi(*conversationRpc)
 		conversationGroup.POST("/get_sorted_conversation_list", c.GetSortedConversationList)
@@ -185,7 +185,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		conversationGroup.POST("/get_conversation_offline_push_user_ids", c.GetConversationOfflinePushUserIDs)
 	}
 
-	statisticsGroup := r.Group("/statistics", ParseToken)
+	statisticsGroup := r.Group("/statistics")
 	{
 		statisticsGroup.POST("/user/register", u.UserRegisterCount)
 		statisticsGroup.POST("/user/active", m.GetActiveUser)
@@ -199,6 +199,13 @@ func GinParseToken(authRPC *rpcclient.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		switch c.Request.Method {
 		case http.MethodPost:
+			for _, wApi := range Whitelist {
+				if strings.HasPrefix(c.Request.URL.Path, wApi) {
+					c.Next()
+					return
+				}
+			}
+
 			token := c.Request.Header.Get(constant.Token)
 			if token == "" {
 				log.ZWarn(c, "header get token error", servererrs.ErrArgs.WrapMsg("header must have token"))
@@ -217,4 +224,11 @@ func GinParseToken(authRPC *rpcclient.Auth) gin.HandlerFunc {
 			c.Next()
 		}
 	}
+}
+
+// Whitelist api not parse token
+var Whitelist = []string{
+	"/user/user_register",
+	"/auth/user_token",
+	"/auth/parse_token",
 }
