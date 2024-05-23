@@ -1,4 +1,4 @@
-db.demo.updateMany(
+db.friend_version.updateMany(
     {
         "d_id": "100"
     },
@@ -18,7 +18,7 @@ db.demo.updateMany(
                 version: {
                     $add: ["$version", 1]
                 },
-                update_time: new Date(),
+                last_update: new Date(),
 
             }
         },
@@ -35,7 +35,7 @@ db.demo.updateMany(
                                 [
                                     {
                                         e_id: "1000",
-                                        update_time: new Date(),
+                                        last_update: new Date(),
                                         version: "$version",
                                         deleted: false
                                     }
@@ -57,7 +57,7 @@ db.demo.updateMany(
                                         },
                                         then: {
                                             e_id: "1000",
-                                            update_time: new Date(),
+                                            last_update: new Date(),
                                             version: "$version",
                                             deleted: false
                                         },

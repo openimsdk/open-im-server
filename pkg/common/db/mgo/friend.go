@@ -16,6 +16,7 @@ package mgo
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/tools/db/mongoutil"
@@ -27,7 +28,9 @@ import (
 
 // FriendMgo implements FriendModelInterface using MongoDB as the storage backend.
 type FriendMgo struct {
-	coll *mongo.Collection
+	coll   *mongo.Collection
+	owner  dataver.DataLog
+	friend dataver.DataLog
 }
 
 // NewFriendMongo creates a new instance of FriendMgo with the provided MongoDB database.
@@ -43,12 +46,25 @@ func NewFriendMongo(db *mongo.Database) (relation.FriendModelInterface, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &FriendMgo{coll: coll}, nil
+	owner, err := dataver.NewDataLog(db.Collection("friend_owner_log"))
+	if err != nil {
+		return nil, err
+	}
+	friend, err := dataver.NewDataLog(db.Collection("friend_log"))
+	if err != nil {
+		return nil, err
+	}
+	return &FriendMgo{coll: coll, owner: owner, friend: friend}, nil
 }
 
 // Create inserts multiple friend records.
 func (f *FriendMgo) Create(ctx context.Context, friends []*relation.FriendModel) error {
-	return mongoutil.InsertMany(ctx, f.coll, friends)
+	return Success(func() error {
+		return mongoutil.InsertMany(ctx, f.coll, friends)
+	}, func() error {
+
+		return nil
+	})
 }
 
 // Delete removes specified friends of the owner user.
@@ -57,7 +73,13 @@ func (f *FriendMgo) Delete(ctx context.Context, ownerUserID string, friendUserID
 		"owner_user_id":  ownerUserID,
 		"friend_user_id": bson.M{"$in": friendUserIDs},
 	}
-	return mongoutil.DeleteOne(ctx, f.coll, filter)
+	return Success(func() error {
+		return mongoutil.DeleteOne(ctx, f.coll, filter)
+	}, func() error {
+		return f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, true)
+	}, func() error {
+
+	})
 }
 
 // UpdateByMap updates specific fields of a friend document using a map.
@@ -69,17 +91,12 @@ func (f *FriendMgo) UpdateByMap(ctx context.Context, ownerUserID string, friendU
 		"owner_user_id":  ownerUserID,
 		"friend_user_id": friendUserID,
 	}
-	return mongoutil.UpdateOne(ctx, f.coll, filter, bson.M{"$set": args}, true)
+	return Success(func() error {
+		return mongoutil.UpdateOne(ctx, f.coll, filter, bson.M{"$set": args}, true)
+	}, func() error {
+		return f.owner.WriteLog(ctx, ownerUserID, []string{friendUserID}, false)
+	})
 }
-
-// Update modifies multiple friend documents.
-// func (f *FriendMgo) Update(ctx context.Context, friends []*relation.FriendModel) error {
-// 	filter := bson.M{
-// 		"owner_user_id":  ownerUserID,
-// 		"friend_user_id": friendUserID,
-// 	}
-// 	return mgotool.UpdateMany(ctx, f.coll, filter, friends)
-// }
 
 // UpdateRemark updates the remark for a specific friend.
 func (f *FriendMgo) UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) error {
@@ -157,7 +174,18 @@ func (f *FriendMgo) UpdateFriends(ctx context.Context, ownerUserID string, frien
 	// Create an update document
 	update := bson.M{"$set": val}
 
-	// Perform the update operation for all matching documents
-	_, err := mongoutil.UpdateMany(ctx, f.coll, filter, update)
-	return err
+	return Success(func() error {
+		return mongoutil.Ignore(mongoutil.UpdateMany(ctx, f.coll, filter, update))
+	}, func() error {
+		return f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, false)
+	})
+}
+
+func Success(fns ...func() error) error {
+	for _, fn := range fns {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
