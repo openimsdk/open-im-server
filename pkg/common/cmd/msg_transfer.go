@@ -37,9 +37,9 @@ func NewMsgTransferCmd() *MsgTransferCmd {
 		RedisConfigFileName:          &msgTransferConfig.RedisConfig,
 		MongodbConfigFileName:        &msgTransferConfig.MongodbConfig,
 		KafkaConfigFileName:          &msgTransferConfig.KafkaConfig,
-		ZookeeperConfigFileName:      &msgTransferConfig.ZookeeperConfig,
 		ShareFileName:                &msgTransferConfig.Share,
 		WebhooksConfigFileName:       &msgTransferConfig.WebhooksConfig,
+		DiscoveryConfigFilename:      &msgTransferConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)

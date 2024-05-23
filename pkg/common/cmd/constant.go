@@ -26,7 +26,6 @@ var (
 	LocalCacheConfigFileName         string
 	KafkaConfigFileName              string
 	RedisConfigFileName              string
-	ZookeeperConfigFileName          string
 	MongodbConfigFileName            string
 	MinioConfigFileName              string
 	LogConfigFileName                string
@@ -42,6 +41,7 @@ var (
 	OpenIMRPCMsgCfgFileName          string
 	OpenIMRPCThirdCfgFileName        string
 	OpenIMRPCUserCfgFileName         string
+	DiscoveryConfigFilename          string
 )
 
 var ConfigEnvPrefixMap map[string]string
@@ -54,7 +54,6 @@ func init() {
 	LocalCacheConfigFileName = "local-cache.yml"
 	KafkaConfigFileName = "kafka.yml"
 	RedisConfigFileName = "redis.yml"
-	ZookeeperConfigFileName = "zookeeper.yml"
 	MongodbConfigFileName = "mongodb.yml"
 	MinioConfigFileName = "minio.yml"
 	LogConfigFileName = "log.yml"
@@ -70,16 +69,17 @@ func init() {
 	OpenIMRPCMsgCfgFileName = "openim-rpc-msg.yml"
 	OpenIMRPCThirdCfgFileName = "openim-rpc-third.yml"
 	OpenIMRPCUserCfgFileName = "openim-rpc-user.yml"
+	DiscoveryConfigFilename = "discovery.yml"
 
 	ConfigEnvPrefixMap = make(map[string]string)
 	fileNames := []string{
 		FileName, NotificationFileName, ShareFileName, WebhooksConfigFileName,
-		KafkaConfigFileName, RedisConfigFileName, ZookeeperConfigFileName,
+		KafkaConfigFileName, RedisConfigFileName,
 		MongodbConfigFileName, MinioConfigFileName, LogConfigFileName,
 		OpenIMAPICfgFileName, OpenIMCronTaskCfgFileName, OpenIMMsgGatewayCfgFileName,
 		OpenIMMsgTransferCfgFileName, OpenIMPushCfgFileName, OpenIMRPCAuthCfgFileName,
 		OpenIMRPCConversationCfgFileName, OpenIMRPCFriendCfgFileName, OpenIMRPCGroupCfgFileName,
-		OpenIMRPCMsgCfgFileName, OpenIMRPCThirdCfgFileName, OpenIMRPCUserCfgFileName,
+		OpenIMRPCMsgCfgFileName, OpenIMRPCThirdCfgFileName, OpenIMRPCUserCfgFileName, DiscoveryConfigFilename,
 	}
 
 	for _, fileName := range fileNames {

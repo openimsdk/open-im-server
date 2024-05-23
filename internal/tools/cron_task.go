@@ -33,9 +33,9 @@ import (
 )
 
 type CronTaskConfig struct {
-	CronTask        config.CronTask
-	ZookeeperConfig config.ZooKeeper
-	Share           config.Share
+	CronTask  config.CronTask
+	Share     config.Share
+	Discovery config.Discovery
 }
 
 func Start(ctx context.Context, config *CronTaskConfig) error {
@@ -43,7 +43,7 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	if config.CronTask.RetainChatRecords < 1 {
 		return errs.New("msg destruct time must be greater than 1").Wrap()
 	}
-	client, err := kdisc.NewDiscoveryRegister(&config.ZookeeperConfig, &config.Share)
+	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, &config.Share)
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}

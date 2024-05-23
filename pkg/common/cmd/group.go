@@ -36,12 +36,12 @@ func NewGroupRpcCmd() *GroupRpcCmd {
 	ret.configMap = map[string]any{
 		OpenIMRPCGroupCfgFileName: &groupConfig.RpcConfig,
 		RedisConfigFileName:       &groupConfig.RedisConfig,
-		ZookeeperConfigFileName:   &groupConfig.ZookeeperConfig,
 		MongodbConfigFileName:     &groupConfig.MongodbConfig,
 		ShareFileName:             &groupConfig.Share,
 		NotificationFileName:      &groupConfig.NotificationConfig,
 		WebhooksConfigFileName:    &groupConfig.WebhooksConfig,
 		LocalCacheConfigFileName:  &groupConfig.LocalCacheConfig,
+		DiscoveryConfigFilename:   &groupConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -56,7 +56,7 @@ func (a *GroupRpcCmd) Exec() error {
 }
 
 func (a *GroupRpcCmd) runE() error {
-	return startrpc.Start(a.ctx, &a.groupConfig.ZookeeperConfig, &a.groupConfig.RpcConfig.Prometheus, a.groupConfig.RpcConfig.RPC.ListenIP,
+	return startrpc.Start(a.ctx, &a.groupConfig.Discovery, &a.groupConfig.RpcConfig.Prometheus, a.groupConfig.RpcConfig.RPC.ListenIP,
 		a.groupConfig.RpcConfig.RPC.RegisterIP, a.groupConfig.RpcConfig.RPC.Ports,
 		a.Index(), a.groupConfig.Share.RpcRegisterName.Group, &a.groupConfig.Share, a.groupConfig, group.Start)
 }
