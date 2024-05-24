@@ -97,7 +97,7 @@ func (l *logModel) WriteLog(ctx context.Context, dId string, eIds []string, dele
 	}
 	if res, err := l.writeLogBatch(ctx, dId, eIds, deleted, now); err != nil {
 		return err
-	} else if res.ModifiedCount == 0 {
+	} else if res.MatchedCount == 0 {
 		return errs.ErrInternalServer.WrapMsg("mongodb return value that should not occur", "coll", l.coll.Name(), "dId", dId, "eIds", eIds)
 	}
 	return nil
@@ -253,7 +253,7 @@ func (l *logModel) FindChangeLog(ctx context.Context, dId string, version uint, 
 		return nil, err
 	}
 	if len(res) == 0 {
-		return nil, errs.Wrap(mongo.ErrNoDocuments)
+		return &WriteLog{}, nil
 	}
 	return res[0], nil
 }
