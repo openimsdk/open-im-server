@@ -28,9 +28,8 @@ import (
 
 // FriendMgo implements FriendModelInterface using MongoDB as the storage backend.
 type FriendMgo struct {
-	coll   *mongo.Collection
-	owner  dataver.DataLog
-	friend dataver.DataLog
+	coll  *mongo.Collection
+	owner dataver.DataLog
 }
 
 // NewFriendMongo creates a new instance of FriendMgo with the provided MongoDB database.
@@ -50,11 +49,7 @@ func NewFriendMongo(db *mongo.Database) (relation.FriendModelInterface, error) {
 	if err != nil {
 		return nil, err
 	}
-	friend, err := dataver.NewDataLog(db.Collection("friend_log"))
-	if err != nil {
-		return nil, err
-	}
-	return &FriendMgo{coll: coll, owner: owner, friend: friend}, nil
+	return &FriendMgo{coll: coll, owner: owner}, nil
 }
 
 // Create inserts multiple friend records.
@@ -72,17 +67,6 @@ func (f *FriendMgo) Create(ctx context.Context, friends []*relation.FriendModel)
 			}
 		}
 		return nil
-	}, func() error {
-		mp := make(map[string][]string)
-		for _, friend := range friends {
-			mp[friend.FriendUserID] = append(mp[friend.FriendUserID], friend.OwnerUserID)
-		}
-		for friendUserID, ownerUserIDs := range mp {
-			if err := f.friend.WriteLog(ctx, friendUserID, ownerUserIDs, false); err != nil {
-				return err
-			}
-		}
-		return nil
 	})
 }
 
@@ -96,13 +80,6 @@ func (f *FriendMgo) Delete(ctx context.Context, ownerUserID string, friendUserID
 		return mongoutil.DeleteOne(ctx, f.coll, filter)
 	}, func() error {
 		return f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, true)
-	}, func() error {
-		for _, userID := range friendUserIDs {
-			if err := f.friend.WriteLog(ctx, userID, []string{ownerUserID}, true); err != nil {
-				return err
-			}
-		}
-		return nil
 	})
 }
 
@@ -119,8 +96,6 @@ func (f *FriendMgo) UpdateByMap(ctx context.Context, ownerUserID string, friendU
 		return mongoutil.UpdateOne(ctx, f.coll, filter, bson.M{"$set": args}, true)
 	}, func() error {
 		return f.owner.WriteLog(ctx, ownerUserID, []string{friendUserID}, false)
-	}, func() error {
-		return f.friend.WriteLog(ctx, friendUserID, []string{ownerUserID}, false)
 	})
 }
 
@@ -204,13 +179,6 @@ func (f *FriendMgo) UpdateFriends(ctx context.Context, ownerUserID string, frien
 		return mongoutil.Ignore(mongoutil.UpdateMany(ctx, f.coll, filter, update))
 	}, func() error {
 		return f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, false)
-	}, func() error {
-		for _, userID := range friendUserIDs {
-			if err := f.friend.WriteLog(ctx, userID, []string{ownerUserID}, true); err != nil {
-				return err
-			}
-		}
-		return nil
 	})
 }
 
