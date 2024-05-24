@@ -24,6 +24,23 @@ type WriteLog struct {
 	LogLen     int       `bson:"log_len"`
 }
 
+func (w *WriteLog) Full() bool {
+	if w.Version == 0 {
+		return true
+	}
+	return len(w.Logs) != w.LogLen
+}
+
+func (w *WriteLog) DeleteEId() []string {
+	var eIds []string
+	for _, l := range w.Logs {
+		if l.Deleted {
+			eIds = append(eIds, l.EID)
+		}
+	}
+	return eIds
+}
+
 type Elem struct {
 	EID        string    `bson:"e_id"`
 	Deleted    bool      `bson:"deleted"`
@@ -33,7 +50,7 @@ type Elem struct {
 
 type DataLog interface {
 	WriteLog(ctx context.Context, dId string, eIds []string, deleted bool) error
-	FindChangeLog(ctx context.Context, did string, version uint, limit int) (*WriteLog, error)
+	FindChangeLog(ctx context.Context, dId string, version uint, limit int) (*WriteLog, error)
 	DeleteAfterUnchangedLog(ctx context.Context, deadline time.Time) error
 }
 
@@ -173,11 +190,11 @@ func (l *logModel) writeLogBatch(ctx context.Context, dId string, eIds []string,
 	return mongoutil.UpdateMany(ctx, l.coll, filter, pipeline)
 }
 
-func (l *logModel) FindChangeLog(ctx context.Context, did string, version uint, limit int) (*WriteLog, error) {
+func (l *logModel) FindChangeLog(ctx context.Context, dId string, version uint, limit int) (*WriteLog, error) {
 	pipeline := []bson.M{
 		{
 			"$match": bson.M{
-				"d_id": did,
+				"d_id": dId,
 			},
 		},
 		{

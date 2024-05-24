@@ -16,6 +16,7 @@ package mgo
 
 import (
 	"context"
+	"errors"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
@@ -179,6 +180,20 @@ func (f *FriendMgo) UpdateFriends(ctx context.Context, ownerUserID string, frien
 		return mongoutil.Ignore(mongoutil.UpdateMany(ctx, f.coll, filter, update))
 	}, func() error {
 		return f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, false)
+	})
+}
+
+func (f *FriendMgo) IncrSync(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.SyncResult[*relation.FriendModel], error) {
+	res, err := f.owner.FindChangeLog(ctx, ownerUserID, version, limit)
+	if err != nil {
+		return nil, err
+	}
+	return dataver.NewSyncResult[*relation.FriendModel](res, func(eIds []string) ([]*relation.FriendModel, error) {
+		if len(eIds) == 0 {
+			return nil, errors.New("todo")
+		} else {
+			return f.FindFriends(ctx, ownerUserID, eIds)
+		}
 	})
 }
 

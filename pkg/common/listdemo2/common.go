@@ -70,54 +70,6 @@ func (l *LogModel) InitIndex(ctx context.Context) error {
 	return err
 }
 
-func (l *LogModel) WriteLog1(ctx context.Context, dId string, eId string, deleted bool) {
-	if err := l.WriteLog(ctx, dId, eId, deleted); err != nil {
-		panic(err)
-	}
-}
-
-func (l *LogModel) WriteLogBatch1(ctx context.Context, dId string, eIds []string, deleted bool) {
-	if err := l.WriteLogBatch(ctx, dId, eIds, deleted); err != nil {
-		panic(err)
-	}
-}
-
-func (l *LogModel) WriteLog(ctx context.Context, dId string, eId string, deleted bool) error {
-	now := time.Now()
-	res, err := l.writeLog(ctx, dId, eId, deleted, now)
-	if err != nil {
-		return err
-	}
-	if res.MatchedCount > 0 {
-		return nil
-	}
-	wl := WriteLog{
-		DID: dId,
-		Logs: []LogElem{
-			{
-				EID:        eId,
-				Deleted:    deleted,
-				Version:    FirstVersion,
-				LastUpdate: now,
-			},
-		},
-		Version:    FirstVersion,
-		Deleted:    DefaultDeleteVersion,
-		LastUpdate: now,
-	}
-	if _, err := l.coll.InsertOne(ctx, &wl); err == nil {
-		return nil
-	} else if !mongo.IsDuplicateKeyError(err) {
-		return err
-	}
-	if res, err := l.writeLog(ctx, dId, eId, deleted, now); err != nil {
-		return err
-	} else if res.ModifiedCount == 0 {
-		return errs.ErrInternalServer.WrapMsg("mongodb return value that should not occur", "coll", l.coll.Name(), "dId", dId, "eId", eId)
-	}
-	return nil
-}
-
 func (l *LogModel) writeLog(ctx context.Context, dId string, eId string, deleted bool, now time.Time) (*mongo.UpdateResult, error) {
 	filter := bson.M{
 		"d_id": dId,
@@ -356,7 +308,7 @@ func (l *LogModel) FindChangeLog(ctx context.Context, did string, version uint, 
 		return nil, err
 	}
 	if len(res) == 0 {
-		return nil, ErrNotFound
+		return &WriteLogLen{}, nil
 	}
 	return res[0], nil
 }
