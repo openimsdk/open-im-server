@@ -6,6 +6,7 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
@@ -16,12 +17,13 @@ const (
 )
 
 type WriteLog struct {
-	DID        string    `bson:"d_id"`
-	Logs       []Elem    `bson:"logs"`
-	Version    uint      `bson:"version"`
-	Deleted    uint      `bson:"deleted"`
-	LastUpdate time.Time `bson:"last_update"`
-	LogLen     int       `bson:"log_len"`
+	ID         primitive.ObjectID `bson:"_id"`
+	DID        string             `bson:"d_id"`
+	Logs       []Elem             `bson:"logs"`
+	Version    uint               `bson:"version"`
+	Deleted    uint               `bson:"deleted"`
+	LastUpdate time.Time          `bson:"last_update"`
+	LogLen     int                `bson:"log_len"`
 }
 
 func (w *WriteLog) Full() bool {
