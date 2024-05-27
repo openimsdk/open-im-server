@@ -15,16 +15,16 @@
 package convert
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
 )
 
-func MsgPb2DB(msg *sdkws.MsgData) *relation.MsgDataModel {
+func MsgPb2DB(msg *sdkws.MsgData) *model.MsgDataModel {
 	if msg == nil {
 		return nil
 	}
-	var msgDataModel relation.MsgDataModel
+	var msgDataModel model.MsgDataModel
 	msgDataModel.SendID = msg.SendID
 	msgDataModel.RecvID = msg.RecvID
 	msgDataModel.GroupID = msg.GroupID
@@ -43,7 +43,7 @@ func MsgPb2DB(msg *sdkws.MsgData) *relation.MsgDataModel {
 	msgDataModel.Status = msg.Status
 	msgDataModel.Options = msg.Options
 	if msg.OfflinePushInfo != nil {
-		msgDataModel.OfflinePush = &relation.OfflinePushModel{
+		msgDataModel.OfflinePush = &model.OfflinePushModel{
 			Title:         msg.OfflinePushInfo.Title,
 			Desc:          msg.OfflinePushInfo.Desc,
 			Ex:            msg.OfflinePushInfo.Ex,
@@ -57,7 +57,7 @@ func MsgPb2DB(msg *sdkws.MsgData) *relation.MsgDataModel {
 	return &msgDataModel
 }
 
-func MsgDB2Pb(msgModel *relation.MsgDataModel) *sdkws.MsgData {
+func MsgDB2Pb(msgModel *model.MsgDataModel) *sdkws.MsgData {
 	if msgModel == nil {
 		return nil
 	}

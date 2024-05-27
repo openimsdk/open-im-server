@@ -17,16 +17,17 @@ package friend
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	pbfriend "github.com/openimsdk/protocol/friend"
@@ -96,19 +97,19 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		&msgRpcClient,
 		WithRpcFunc(userRpcClient.GetUsersInfo),
 	)
-	cache.InitLocalCache(&config.LocalCacheConfig)
+	localcache.InitLocalCache(&config.LocalCacheConfig)
 
 	// Register Friend server with refactored MongoDB and Redis integrations
 	pbfriend.RegisterFriendServer(server, &friendServer{
 		friendDatabase: controller.NewFriendDatabase(
 			friendMongoDB,
 			friendRequestMongoDB,
-			cache.NewFriendCacheRedis(rdb, &config.LocalCacheConfig, friendMongoDB, cache.GetDefaultOpt()),
+			redis.NewFriendCacheRedis(rdb, &config.LocalCacheConfig, friendMongoDB, redis.GetRocksCacheOptions()),
 			mgocli.GetTx(),
 		),
 		blackDatabase: controller.NewBlackDatabase(
 			blackMongoDB,
-			cache.NewBlackCacheRedis(rdb, &config.LocalCacheConfig, blackMongoDB, cache.GetDefaultOpt()),
+			redis.NewBlackCacheRedis(rdb, &config.LocalCacheConfig, blackMongoDB, redis.GetRocksCacheOptions()),
 		),
 		userRpcClient:         &userRpcClient,
 		notificationSender:    notificationSender,
@@ -193,7 +194,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.Res
 		return nil, err
 	}
 
-	friendRequest := tablerelation.FriendRequestModel{
+	friendRequest := model.FriendRequest{
 		FromUserID:   req.FromUserID,
 		ToUserID:     req.ToUserID,
 		HandleMsg:    req.HandleMsg,
@@ -384,10 +385,10 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 	if err != nil {
 		return nil, err
 	}
-	friendMap := datautil.SliceToMap(friends, func(e *tablerelation.FriendModel) string {
+	friendMap := datautil.SliceToMap(friends, func(e *model.Friend) string {
 		return e.FriendUserID
 	})
-	blackMap := datautil.SliceToMap(blacks, func(e *tablerelation.BlackModel) string {
+	blackMap := datautil.SliceToMap(blacks, func(e *model.Black) string {
 		return e.BlockUserID
 	})
 	resp := &pbfriend.GetSpecifiedFriendsInfoResp{

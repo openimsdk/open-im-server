@@ -16,13 +16,13 @@ package convert
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/protocol/sdkws"
 	sdk "github.com/openimsdk/protocol/sdkws"
 )
 
-func BlackDB2Pb(ctx context.Context, blackDBs []*relation.BlackModel, f func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (blackPbs []*sdk.BlackInfo, err error) {
+func BlackDB2Pb(ctx context.Context, blackDBs []*model.Black, f func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (blackPbs []*sdk.BlackInfo, err error) {
 	if len(blackDBs) == 0 {
 		return nil, nil
 	}

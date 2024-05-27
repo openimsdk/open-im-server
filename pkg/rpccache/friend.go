@@ -16,8 +16,8 @@ package rpccache
 
 import (
 	"context"
+	cachekey2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -58,10 +58,10 @@ func (f *FriendLocalCache) IsFriend(ctx context.Context, possibleFriendUserID, u
 			log.ZError(ctx, "FriendLocalCache IsFriend return", err)
 		}
 	}()
-	return localcache.AnyValue[bool](f.local.GetLink(ctx, cachekey.GetIsFriendKey(possibleFriendUserID, userID), func(ctx context.Context) (any, error) {
+	return localcache.AnyValue[bool](f.local.GetLink(ctx, cachekey2.GetIsFriendKey(possibleFriendUserID, userID), func(ctx context.Context) (any, error) {
 		log.ZDebug(ctx, "FriendLocalCache IsFriend rpc", "possibleFriendUserID", possibleFriendUserID, "userID", userID)
 		return f.client.IsFriend(ctx, possibleFriendUserID, userID)
-	}, cachekey.GetFriendIDsKey(possibleFriendUserID)))
+	}, cachekey2.GetFriendIDsKey(possibleFriendUserID)))
 }
 
 // IsBlack possibleBlackUserID selfUserID.
@@ -74,8 +74,8 @@ func (f *FriendLocalCache) IsBlack(ctx context.Context, possibleBlackUserID, use
 			log.ZError(ctx, "FriendLocalCache IsBlack return", err)
 		}
 	}()
-	return localcache.AnyValue[bool](f.local.GetLink(ctx, cachekey.GetIsBlackIDsKey(possibleBlackUserID, userID), func(ctx context.Context) (any, error) {
+	return localcache.AnyValue[bool](f.local.GetLink(ctx, cachekey2.GetIsBlackIDsKey(possibleBlackUserID, userID), func(ctx context.Context) (any, error) {
 		log.ZDebug(ctx, "FriendLocalCache IsBlack rpc", "possibleBlackUserID", possibleBlackUserID, "userID", userID)
 		return f.client.IsBlack(ctx, possibleBlackUserID, userID)
-	}, cachekey.GetBlackIDsKey(userID)))
+	}, cachekey2.GetBlackIDsKey(userID)))
 }
