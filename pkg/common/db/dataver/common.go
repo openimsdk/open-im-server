@@ -52,6 +52,27 @@ type Elem struct {
 	LastUpdate time.Time `bson:"last_update"`
 }
 
+type tableWriteLog struct {
+	ID         primitive.ObjectID `bson:"_id"`
+	DID        string             `bson:"d_id"`
+	Logs       []Elem             `bson:"logs"`
+	Version    uint               `bson:"version"`
+	Deleted    uint               `bson:"deleted"`
+	LastUpdate time.Time          `bson:"last_update"`
+}
+
+func (t *tableWriteLog) WriteLog() *WriteLog {
+	return &WriteLog{
+		ID:         t.ID,
+		DID:        t.DID,
+		Logs:       t.Logs,
+		Version:    t.Version,
+		Deleted:    t.Deleted,
+		LastUpdate: t.LastUpdate,
+		LogLen:     0,
+	}
+}
+
 type DataLog interface {
 	WriteLog(ctx context.Context, dId string, eIds []string, deleted bool) error
 	FindChangeLog(ctx context.Context, dId string, version uint, limit int) (*WriteLog, error)
@@ -94,7 +115,7 @@ func (l *logModel) WriteLog(ctx context.Context, dId string, eIds []string, dele
 	if res.MatchedCount > 0 {
 		return nil
 	}
-	if err := l.initDoc(ctx, dId, eIds, deleted, now); err == nil {
+	if _, err := l.initDoc(ctx, dId, eIds, deleted, now); err == nil {
 		return nil
 	} else if !mongo.IsDuplicateKeyError(err) {
 		return err
@@ -107,15 +128,9 @@ func (l *logModel) WriteLog(ctx context.Context, dId string, eIds []string, dele
 	return nil
 }
 
-func (l *logModel) initDoc(ctx context.Context, dId string, eIds []string, deleted bool, now time.Time) error {
-	type tableWriteLog struct {
-		DID        string    `bson:"d_id"`
-		Logs       []Elem    `bson:"logs"`
-		Version    uint      `bson:"version"`
-		Deleted    uint      `bson:"deleted"`
-		LastUpdate time.Time `bson:"last_update"`
-	}
+func (l *logModel) initDoc(ctx context.Context, dId string, eIds []string, deleted bool, now time.Time) (*tableWriteLog, error) {
 	wl := tableWriteLog{
+		ID:         primitive.NewObjectID(),
 		DID:        dId,
 		Logs:       make([]Elem, 0, len(eIds)),
 		Version:    FirstVersion,
@@ -131,12 +146,12 @@ func (l *logModel) initDoc(ctx context.Context, dId string, eIds []string, delet
 		})
 	}
 	_, err := l.coll.InsertOne(ctx, &wl)
-	return err
+	return &wl, err
 }
 
 func (l *logModel) writeLogBatch(ctx context.Context, dId string, eIds []string, deleted bool, now time.Time) (*mongo.UpdateResult, error) {
-	if len(eIds) == 0 {
-		return nil, errs.ErrArgs.WrapMsg("elem id is empty", "dId", dId)
+	if eIds == nil {
+		eIds = []string{}
 	}
 	filter := bson.M{
 		"d_id": dId,
@@ -195,17 +210,25 @@ func (l *logModel) writeLogBatch(ctx context.Context, dId string, eIds []string,
 }
 
 func (l *logModel) findDoc(ctx context.Context, dId string) (*WriteLog, error) {
-	res, err := mongoutil.FindOne[*WriteLog](ctx, l.coll, bson.M{"d_id": dId}, options.FindOne().SetProjection(bson.M{"logs": 0}))
-	if err == nil {
-		return res, nil
-	} else if errors.Is(err, mongo.ErrNoDocuments) {
-		return &WriteLog{}, nil
+	return mongoutil.FindOne[*WriteLog](ctx, l.coll, bson.M{"d_id": dId}, options.FindOne().SetProjection(bson.M{"logs": 0}))
+}
+
+func (l *logModel) FindChangeLog(ctx context.Context, dId string, version uint, limit int) (*WriteLog, error) {
+	if wl, err := l.findChangeLog(ctx, dId, version, limit); err == nil {
+		return wl, nil
+	} else if !errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, err
+	}
+	if res, err := l.initDoc(ctx, dId, nil, false, time.Now()); err == nil {
+		return res.WriteLog(), nil
+	} else if mongo.IsDuplicateKeyError(err) {
+		return l.findChangeLog(ctx, dId, version, limit)
 	} else {
 		return nil, err
 	}
 }
 
-func (l *logModel) FindChangeLog(ctx context.Context, dId string, version uint, limit int) (*WriteLog, error) {
+func (l *logModel) findChangeLog(ctx context.Context, dId string, version uint, limit int) (*WriteLog, error) {
 	if version == 0 && limit == 0 {
 		return l.findDoc(ctx, dId)
 	}
@@ -271,7 +294,7 @@ func (l *logModel) FindChangeLog(ctx context.Context, dId string, version uint, 
 		return nil, err
 	}
 	if len(res) == 0 {
-		return &WriteLog{}, nil
+		return nil, mongo.ErrNoDocuments
 	}
 	return res[0], nil
 }

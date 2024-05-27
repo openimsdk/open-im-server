@@ -56,6 +56,11 @@ type userServer struct {
 	webhookClient            *webhook.Client
 }
 
+func (s *userServer) SearchUser(ctx context.Context, req *pbuser.SearchUserReq) (*pbuser.SearchUserResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 type Config struct {
 	RpcConfig          config.User
 	RedisConfig        config.Redis

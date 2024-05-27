@@ -178,6 +178,6 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
 
-//replace (
-//	github.com/openimsdk/protocol => /Users/chao/Desktop/project/protocol
-//)
+replace (
+	github.com/openimsdk/protocol => /Users/chao/Desktop/project/protocol
+)

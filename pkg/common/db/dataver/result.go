@@ -1,18 +1,29 @@
 package dataver
 
-import "github.com/openimsdk/tools/utils/datautil"
+import (
+	"github.com/openimsdk/tools/utils/datautil"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type SyncResult struct {
 	Version   uint
+	VersionID string
 	DeleteEID []string
 	Changes   []string
 	Full      bool
 }
 
-func NewSyncResult(wl *WriteLog, fullIDs []string) *SyncResult {
+func VersionIDStr(id primitive.ObjectID) string {
+	if id.IsZero() {
+		return ""
+	}
+	return id.String()
+}
+
+func NewSyncResult(wl *WriteLog, fullIDs []string, versionID string) *SyncResult {
 	var findEIDs []string
 	var res SyncResult
-	if wl.Full() {
+	if wl.Full() || VersionIDStr(wl.ID) != versionID {
 		res.Changes = fullIDs
 		res.Full = true
 	} else {

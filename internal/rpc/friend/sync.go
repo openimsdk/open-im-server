@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/binary"
 	"encoding/json"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	pbfriend "github.com/openimsdk/protocol/friend"
@@ -21,7 +22,10 @@ func (s *friendServer) sortFriendUserIDsHash(userIDs []string) uint64 {
 	return binary.BigEndian.Uint64(sum[:])
 }
 
-func (s *friendServer) IncrSyncFriends(ctx context.Context, req *pbfriend.IncrSyncFriendsReq) (*pbfriend.IncrSyncFriendsResp, error) {
+func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *pbfriend.GetIncrementalFriendsReq) (*pbfriend.GetIncrementalFriendsResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	var limit int
 	if req.Version > 0 {
 		limit = s.config.RpcConfig.FriendSyncCount
@@ -35,14 +39,15 @@ func (s *friendServer) IncrSyncFriends(ctx context.Context, req *pbfriend.IncrSy
 		return nil, err
 	}
 	if len(sortUserIDs) == 0 {
-		return &pbfriend.IncrSyncFriendsResp{
+		return &pbfriend.GetIncrementalFriendsResp{
 			Version:   uint64(incrVer.Version),
+			VersionID: dataver.VersionIDStr(incrVer.ID),
 			Full:      true,
 			SyncCount: uint32(s.config.RpcConfig.FriendSyncCount),
 		}, nil
 	}
 	var changes []*relation.FriendModel
-	res := dataver.NewSyncResult(incrVer, sortUserIDs)
+	res := dataver.NewSyncResult(incrVer, sortUserIDs, req.VersionID)
 	if len(res.Changes) > 0 {
 		changes, err = s.friendDatabase.FindFriendsWithError(ctx, req.UserID, res.Changes)
 		if err != nil {
@@ -53,8 +58,9 @@ func (s *friendServer) IncrSyncFriends(ctx context.Context, req *pbfriend.IncrSy
 	if calcHash == req.IdHash {
 		sortUserIDs = nil
 	}
-	return &pbfriend.IncrSyncFriendsResp{
+	return &pbfriend.GetIncrementalFriendsResp{
 		Version:        uint64(res.Version),
+		VersionID:      res.VersionID,
 		Full:           res.Full,
 		SyncCount:      uint32(s.config.RpcConfig.FriendSyncCount),
 		SortUserIdHash: calcHash,

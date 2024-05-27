@@ -193,20 +193,6 @@ func (f *FriendMgo) FindIncrVersion(ctx context.Context, ownerUserID string, ver
 	return f.owner.FindChangeLog(ctx, ownerUserID, version, limit)
 }
 
-//func (f *FriendMgo) IncrSync(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.SyncResult[*relation.FriendModel], error) {
-//	res, err := f.owner.FindChangeLog(ctx, ownerUserID, version, limit)
-//	if err != nil {
-//		return nil, err
-//	}
-//	return dataver.NewSyncResult[*relation.FriendModel](res, func(eIds []string) ([]*relation.FriendModel, error) {
-//		if len(eIds) == 0 {
-//			return nil, errors.New("todo")
-//		} else {
-//			return f.FindFriends(ctx, ownerUserID, eIds)
-//		}
-//	})
-//}
-
 func IncrVersion(dbs ...func() error) error {
 	for _, fn := range dbs {
 		if err := fn(); err != nil {
