@@ -1,0 +1,408 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package redis
+
+import (
+	"context"
+	"fmt"
+	"github.com/dtm-labs/rockscache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/common"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/redis/go-redis/v9"
+	"time"
+)
+
+const (
+	groupExpireTime = time.Second * 60 * 60 * 12
+)
+
+var errIndex = errs.New("err index")
+
+type GroupCacheRedis struct {
+	cache.BatchDeleter
+	groupDB        database.Group
+	groupMemberDB  database.GroupMember
+	groupRequestDB database.GroupRequest
+	expireTime     time.Duration
+	rcClient       *rockscache.Client
+	groupHash      cache.GroupHash
+}
+
+func NewGroupCacheRedis(
+	rdb redis.UniversalClient,
+	localCache *config.LocalCache,
+	groupDB database.Group,
+	groupMemberDB database.GroupMember,
+	groupRequestDB database.GroupRequest,
+	hashCode cache.GroupHash,
+	opts *rockscache.Options,
+) cache.GroupCache {
+	batchHandler := NewBatchDeleterRedis(rdb, opts, []string{localCache.Group.Topic})
+	g := localCache.Group
+	log.ZDebug(context.Background(), "group local cache init", "Topic", g.Topic, "SlotNum", g.SlotNum, "SlotSize", g.SlotSize, "enable", g.Enable())
+
+	return &GroupCacheRedis{
+		BatchDeleter:   batchHandler,
+		rcClient:       rockscache.NewClient(rdb, *opts),
+		expireTime:     groupExpireTime,
+		groupDB:        groupDB,
+		groupMemberDB:  groupMemberDB,
+		groupRequestDB: groupRequestDB,
+		groupHash:      hashCode,
+	}
+}
+
+func (g *GroupCacheRedis) CloneGroupCache() cache.GroupCache {
+	return &GroupCacheRedis{
+		BatchDeleter:   g.BatchDeleter.Clone(),
+		rcClient:       g.rcClient,
+		expireTime:     g.expireTime,
+		groupDB:        g.groupDB,
+		groupMemberDB:  g.groupMemberDB,
+		groupRequestDB: g.groupRequestDB,
+	}
+}
+
+func (g *GroupCacheRedis) getGroupInfoKey(groupID string) string {
+	return cachekey.GetGroupInfoKey(groupID)
+}
+
+func (g *GroupCacheRedis) getJoinedGroupsKey(userID string) string {
+	return cachekey.GetJoinedGroupsKey(userID)
+}
+
+func (g *GroupCacheRedis) getGroupMembersHashKey(groupID string) string {
+	return cachekey.GetGroupMembersHashKey(groupID)
+}
+
+func (g *GroupCacheRedis) getGroupMemberIDsKey(groupID string) string {
+	return cachekey.GetGroupMemberIDsKey(groupID)
+}
+
+func (g *GroupCacheRedis) getGroupMemberInfoKey(groupID, userID string) string {
+	return cachekey.GetGroupMemberInfoKey(groupID, userID)
+}
+
+func (g *GroupCacheRedis) getGroupMemberNumKey(groupID string) string {
+	return cachekey.GetGroupMemberNumKey(groupID)
+}
+
+func (g *GroupCacheRedis) getGroupRoleLevelMemberIDsKey(groupID string, roleLevel int32) string {
+	return cachekey.GetGroupRoleLevelMemberIDsKey(groupID, roleLevel)
+}
+
+func (g *GroupCacheRedis) GetGroupIndex(group *model.Group, keys []string) (int, error) {
+	key := g.getGroupInfoKey(group.GroupID)
+	for i, _key := range keys {
+		if _key == key {
+			return i, nil
+		}
+	}
+
+	return 0, errIndex
+}
+
+func (g *GroupCacheRedis) GetGroupMemberIndex(groupMember *model.GroupMember, keys []string) (int, error) {
+	key := g.getGroupMemberInfoKey(groupMember.GroupID, groupMember.UserID)
+	for i, _key := range keys {
+		if _key == key {
+			return i, nil
+		}
+	}
+
+	return 0, errIndex
+}
+
+func (g *GroupCacheRedis) GetGroupsInfo(ctx context.Context, groupIDs []string) (groups []*model.Group, err error) {
+	return batchGetCache(ctx, g.rcClient, g.expireTime, groupIDs, func(groupID string) string {
+		return g.getGroupInfoKey(groupID)
+	}, func(ctx context.Context, groupID string) (*model.Group, error) {
+		return g.groupDB.Take(ctx, groupID)
+	})
+}
+
+func (g *GroupCacheRedis) GetGroupInfo(ctx context.Context, groupID string) (group *model.Group, err error) {
+	return getCache(ctx, g.rcClient, g.getGroupInfoKey(groupID), g.expireTime, func(ctx context.Context) (*model.Group, error) {
+		return g.groupDB.Take(ctx, groupID)
+	})
+}
+
+func (g *GroupCacheRedis) DelGroupsInfo(groupIDs ...string) cache.GroupCache {
+	newGroupCache := g.CloneGroupCache()
+	keys := make([]string, 0, len(groupIDs))
+	for _, groupID := range groupIDs {
+		keys = append(keys, g.getGroupInfoKey(groupID))
+	}
+	newGroupCache.AddKeys(keys...)
+
+	return newGroupCache
+}
+
+func (g *GroupCacheRedis) DelGroupsOwner(groupIDs ...string) cache.GroupCache {
+	newGroupCache := g.CloneGroupCache()
+	keys := make([]string, 0, len(groupIDs))
+	for _, groupID := range groupIDs {
+		keys = append(keys, g.getGroupRoleLevelMemberIDsKey(groupID, constant.GroupOwner))
+	}
+	newGroupCache.AddKeys(keys...)
+
+	return newGroupCache
+}
+
+func (g *GroupCacheRedis) DelGroupRoleLevel(groupID string, roleLevels []int32) cache.GroupCache {
+	newGroupCache := g.CloneGroupCache()
+	keys := make([]string, 0, len(roleLevels))
+	for _, roleLevel := range roleLevels {
+		keys = append(keys, g.getGroupRoleLevelMemberIDsKey(groupID, roleLevel))
+	}
+	newGroupCache.AddKeys(keys...)
+	return newGroupCache
+}
+
+func (g *GroupCacheRedis) DelGroupAllRoleLevel(groupID string) cache.GroupCache {
+	return g.DelGroupRoleLevel(groupID, []int32{constant.GroupOwner, constant.GroupAdmin, constant.GroupOrdinaryUsers})
+}
+
+func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID string) (hashCode uint64, err error) {
+	if g.groupHash == nil {
+		return 0, errs.ErrInternalServer.WrapMsg("group hash is nil")
+	}
+	return getCache(ctx, g.rcClient, g.getGroupMembersHashKey(groupID), g.expireTime, func(ctx context.Context) (uint64, error) {
+		return g.groupHash.GetGroupHash(ctx, groupID)
+	})
+}
+
+func (g *GroupCacheRedis) GetGroupMemberHashMap(ctx context.Context, groupIDs []string) (map[string]*common.GroupSimpleUserID, error) {
+	if g.groupHash == nil {
+		return nil, errs.ErrInternalServer.WrapMsg("group hash is nil")
+	}
+	res := make(map[string]*common.GroupSimpleUserID)
+	for _, groupID := range groupIDs {
+		hash, err := g.GetGroupMembersHash(ctx, groupID)
+		if err != nil {
+			return nil, err
+		}
+		log.ZDebug(ctx, "GetGroupMemberHashMap", "groupID", groupID, "hash", hash)
+		num, err := g.GetGroupMemberNum(ctx, groupID)
+		if err != nil {
+			return nil, err
+		}
+		res[groupID] = &common.GroupSimpleUserID{Hash: hash, MemberNum: uint32(num)}
+	}
+
+	return res, nil
+}
+
+func (g *GroupCacheRedis) DelGroupMembersHash(groupID string) cache.GroupCache {
+	cache := g.CloneGroupCache()
+	cache.AddKeys(g.getGroupMembersHashKey(groupID))
+
+	return cache
+}
+
+func (g *GroupCacheRedis) GetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error) {
+	return getCache(ctx, g.rcClient, g.getGroupMemberIDsKey(groupID), g.expireTime, func(ctx context.Context) ([]string, error) {
+		return g.groupMemberDB.FindMemberUserID(ctx, groupID)
+	})
+}
+
+func (g *GroupCacheRedis) GetGroupsMemberIDs(ctx context.Context, groupIDs []string) (map[string][]string, error) {
+	m := make(map[string][]string)
+	for _, groupID := range groupIDs {
+		userIDs, err := g.GetGroupMemberIDs(ctx, groupID)
+		if err != nil {
+			return nil, err
+		}
+		m[groupID] = userIDs
+	}
+
+	return m, nil
+}
+
+func (g *GroupCacheRedis) DelGroupMemberIDs(groupID string) cache.GroupCache {
+	cache := g.CloneGroupCache()
+	cache.AddKeys(g.getGroupMemberIDsKey(groupID))
+
+	return cache
+}
+
+func (g *GroupCacheRedis) GetJoinedGroupIDs(ctx context.Context, userID string) (joinedGroupIDs []string, err error) {
+	return getCache(ctx, g.rcClient, g.getJoinedGroupsKey(userID), g.expireTime, func(ctx context.Context) ([]string, error) {
+		return g.groupMemberDB.FindUserJoinedGroupID(ctx, userID)
+	})
+}
+
+func (g *GroupCacheRedis) DelJoinedGroupID(userIDs ...string) cache.GroupCache {
+	keys := make([]string, 0, len(userIDs))
+	for _, userID := range userIDs {
+		keys = append(keys, g.getJoinedGroupsKey(userID))
+	}
+	cache := g.CloneGroupCache()
+	cache.AddKeys(keys...)
+
+	return cache
+}
+
+func (g *GroupCacheRedis) GetGroupMemberInfo(ctx context.Context, groupID, userID string) (groupMember *model.GroupMember, err error) {
+	return getCache(ctx, g.rcClient, g.getGroupMemberInfoKey(groupID, userID), g.expireTime, func(ctx context.Context) (*model.GroupMember, error) {
+		return g.groupMemberDB.Take(ctx, groupID, userID)
+	})
+}
+
+func (g *GroupCacheRedis) GetGroupMembersInfo(ctx context.Context, groupID string, userIDs []string) ([]*model.GroupMember, error) {
+	return batchGetCache(ctx, g.rcClient, g.expireTime, userIDs, func(userID string) string {
+		return g.getGroupMemberInfoKey(groupID, userID)
+	}, func(ctx context.Context, userID string) (*model.GroupMember, error) {
+		return g.groupMemberDB.Take(ctx, groupID, userID)
+	})
+}
+
+func (g *GroupCacheRedis) GetGroupMembersPage(
+	ctx context.Context,
+	groupID string,
+	userIDs []string,
+	showNumber, pageNumber int32,
+) (total uint32, groupMembers []*model.GroupMember, err error) {
+	groupMemberIDs, err := g.GetGroupMemberIDs(ctx, groupID)
+	if err != nil {
+		return 0, nil, err
+	}
+	if userIDs != nil {
+		userIDs = datautil.BothExist(userIDs, groupMemberIDs)
+	} else {
+		userIDs = groupMemberIDs
+	}
+	groupMembers, err = g.GetGroupMembersInfo(ctx, groupID, datautil.Paginate(userIDs, int(showNumber), int(showNumber)))
+
+	return uint32(len(userIDs)), groupMembers, err
+}
+
+func (g *GroupCacheRedis) GetAllGroupMembersInfo(ctx context.Context, groupID string) (groupMembers []*model.GroupMember, err error) {
+	groupMemberIDs, err := g.GetGroupMemberIDs(ctx, groupID)
+	if err != nil {
+		return nil, err
+	}
+
+	return g.GetGroupMembersInfo(ctx, groupID, groupMemberIDs)
+}
+
+func (g *GroupCacheRedis) GetAllGroupMemberInfo(ctx context.Context, groupID string) ([]*model.GroupMember, error) {
+	groupMemberIDs, err := g.GetGroupMemberIDs(ctx, groupID)
+	if err != nil {
+		return nil, err
+	}
+	return g.GetGroupMembersInfo(ctx, groupID, groupMemberIDs)
+}
+
+func (g *GroupCacheRedis) DelGroupMembersInfo(groupID string, userIDs ...string) cache.GroupCache {
+	keys := make([]string, 0, len(userIDs))
+	for _, userID := range userIDs {
+		keys = append(keys, g.getGroupMemberInfoKey(groupID, userID))
+	}
+	cache := g.CloneGroupCache()
+	cache.AddKeys(keys...)
+
+	return cache
+}
+
+func (g *GroupCacheRedis) GetGroupMemberNum(ctx context.Context, groupID string) (memberNum int64, err error) {
+	return getCache(ctx, g.rcClient, g.getGroupMemberNumKey(groupID), g.expireTime, func(ctx context.Context) (int64, error) {
+		return g.groupMemberDB.TakeGroupMemberNum(ctx, groupID)
+	})
+}
+
+func (g *GroupCacheRedis) DelGroupsMemberNum(groupID ...string) cache.GroupCache {
+	keys := make([]string, 0, len(groupID))
+	for _, groupID := range groupID {
+		keys = append(keys, g.getGroupMemberNumKey(groupID))
+	}
+	cache := g.CloneGroupCache()
+	cache.AddKeys(keys...)
+
+	return cache
+}
+
+func (g *GroupCacheRedis) GetGroupOwner(ctx context.Context, groupID string) (*model.GroupMember, error) {
+	members, err := g.GetGroupRoleLevelMemberInfo(ctx, groupID, constant.GroupOwner)
+	if err != nil {
+		return nil, err
+	}
+	if len(members) == 0 {
+		return nil, errs.ErrRecordNotFound.WrapMsg(fmt.Sprintf("group %s owner not found", groupID))
+	}
+	return members[0], nil
+}
+
+func (g *GroupCacheRedis) GetGroupsOwner(ctx context.Context, groupIDs []string) ([]*model.GroupMember, error) {
+	members := make([]*model.GroupMember, 0, len(groupIDs))
+	for _, groupID := range groupIDs {
+		items, err := g.GetGroupRoleLevelMemberInfo(ctx, groupID, constant.GroupOwner)
+		if err != nil {
+			return nil, err
+		}
+		if len(items) > 0 {
+			members = append(members, items[0])
+		}
+	}
+	return members, nil
+}
+
+func (g *GroupCacheRedis) GetGroupRoleLevelMemberIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error) {
+	return getCache(ctx, g.rcClient, g.getGroupRoleLevelMemberIDsKey(groupID, roleLevel), g.expireTime, func(ctx context.Context) ([]string, error) {
+		return g.groupMemberDB.FindRoleLevelUserIDs(ctx, groupID, roleLevel)
+	})
+}
+
+func (g *GroupCacheRedis) GetGroupRoleLevelMemberInfo(ctx context.Context, groupID string, roleLevel int32) ([]*model.GroupMember, error) {
+	userIDs, err := g.GetGroupRoleLevelMemberIDs(ctx, groupID, roleLevel)
+	if err != nil {
+		return nil, err
+	}
+	return g.GetGroupMembersInfo(ctx, groupID, userIDs)
+}
+
+func (g *GroupCacheRedis) GetGroupRolesLevelMemberInfo(ctx context.Context, groupID string, roleLevels []int32) ([]*model.GroupMember, error) {
+	var userIDs []string
+	for _, roleLevel := range roleLevels {
+		ids, err := g.GetGroupRoleLevelMemberIDs(ctx, groupID, roleLevel)
+		if err != nil {
+			return nil, err
+		}
+		userIDs = append(userIDs, ids...)
+	}
+	return g.GetGroupMembersInfo(ctx, groupID, userIDs)
+}
+
+func (g *GroupCacheRedis) FindGroupMemberUser(ctx context.Context, groupIDs []string, userID string) (_ []*model.GroupMember, err error) {
+	if len(groupIDs) == 0 {
+		groupIDs, err = g.GetJoinedGroupIDs(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return batchGetCache(ctx, g.rcClient, g.expireTime, groupIDs, func(groupID string) string {
+		return g.getGroupMemberInfoKey(groupID, userID)
+	}, func(ctx context.Context, groupID string) (*model.GroupMember, error) {
+		return g.groupMemberDB.Take(ctx, groupID, userID)
+	})
+}
