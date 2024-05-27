@@ -2,10 +2,9 @@ package listdemo
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"errors"
+	"github.com/openimsdk/tools/db/mongoutil"
 	"testing"
-	"time"
 )
 
 func Result[V any](val V, err error) V {
@@ -22,20 +21,25 @@ func Check(err error) {
 }
 
 func TestName(t *testing.T) {
-	cli := Result(mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.48:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
-	coll := cli.Database("openim_v3").Collection("friend_version")
-	_ = coll
-	//Result(coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
-	//	{
-	//		Keys: map[string]int{"user_id": 1},
-	//	},
-	//	{
-	//		Keys: map[string]int{"friends.friend_user_id": 1},
-	//	},
-	//}))
+	cli := Result(mongoutil.NewMongoDB(context.Background(), &mongoutil.Config{Uri: "mongodb://openIM:openIM123@172.16.8.48:37017/openim_v3?maxPoolSize=100", Database: "openim_v3"}))
+
+	db := cli.GetDB()
+	tx := cli.GetTx()
 
 	const num = 1
-	lm := &LogModel{coll: coll}
+	lm := &LogModel{coll: db.Collection("friend_version")}
+
+	err := tx.Transaction(context.Background(), func(ctx context.Context) error {
+		err := tx.Transaction(ctx, func(ctx context.Context) error {
+			return lm.WriteLogBatch(ctx, "100", []string{"1000", "2000"}, true)
+		})
+		if err != nil {
+			t.Log("--------->")
+			return err
+		}
+		return errors.New("1234")
+	})
+	t.Log(err)
 
 	//start := time.Now()
 	//eIds := make([]string, 0, num)
@@ -47,11 +51,11 @@ func TestName(t *testing.T) {
 	//t.Log(end.Sub(start))       // 509.962208ms
 	//t.Log(end.Sub(start) / num) // 511.496µs
 
-	start := time.Now()
-	wll, err := lm.FindChangeLog(context.Background(), "100", 3, 100)
-	if err != nil {
-		panic(err)
-	}
-	t.Log(time.Since(start))
-	t.Log(wll)
+	//start := time.Now()
+	//wll, err := lm.FindChangeLog(context.Background(), "100", 3, 100)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//t.Log(time.Since(start))
+	//t.Log(wll)
 }

@@ -1,32 +1,31 @@
 package dataver
 
-type SyncResult[T any] struct {
+import "github.com/openimsdk/tools/utils/datautil"
+
+type SyncResult struct {
 	Version   uint
 	DeleteEID []string
-	Changes   []T
+	Changes   []string
 	Full      bool
 }
 
-func NewSyncResult[T any](wl *WriteLog, find func(eIds []string) ([]T, error)) (*SyncResult[T], error) {
+func NewSyncResult(wl *WriteLog, fullIDs []string) *SyncResult {
 	var findEIDs []string
-	var res SyncResult[T]
+	var res SyncResult
 	if wl.Full() {
+		res.Changes = fullIDs
 		res.Full = true
 	} else {
+		idSet := datautil.SliceSet(fullIDs)
 		for _, l := range wl.Logs {
 			if l.Deleted {
 				res.DeleteEID = append(res.DeleteEID, l.EID)
 			} else {
-				findEIDs = append(findEIDs, l.EID)
+				if _, ok := idSet[l.EID]; ok {
+					findEIDs = append(findEIDs, l.EID)
+				}
 			}
 		}
 	}
-	if res.Full || len(findEIDs) > 0 {
-		var err error
-		res.Changes, err = find(findEIDs)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return &res, nil
+	return &res
 }

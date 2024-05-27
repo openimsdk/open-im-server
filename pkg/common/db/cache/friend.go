@@ -16,6 +16,7 @@ package cache
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -41,12 +42,19 @@ type FriendCache interface {
 	GetFriendIDs(ctx context.Context, ownerUserID string) (friendIDs []string, err error)
 	// Called when friendID list changed
 	DelFriendIDs(ownerUserID ...string) FriendCache
+
+	DelSortFriendUserIDs(ownerUserIDs ...string) FriendCache
+
 	// Get single friendInfo from the cache
 	GetFriend(ctx context.Context, ownerUserID, friendUserID string) (friend *relationtb.FriendModel, err error)
 	// Delete friend when friend info changed
 	DelFriend(ownerUserID, friendUserID string) FriendCache
 	// Delete friends when friends' info changed
 	DelFriends(ownerUserID string, friendUserIDs []string) FriendCache
+
+	FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
+
+	FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error)
 }
 
 // FriendCacheRedis is an implementation of the FriendCache interface using Redis.
@@ -55,6 +63,7 @@ type FriendCacheRedis struct {
 	friendDB   relationtb.FriendModelInterface
 	expireTime time.Duration
 	rcClient   *rockscache.Client
+	syncCount  int
 }
 
 // NewFriendCacheRedis creates a new instance of FriendCacheRedis.
@@ -89,6 +98,10 @@ func (f *FriendCacheRedis) getFriendIDsKey(ownerUserID string) string {
 	return cachekey.GetFriendIDsKey(ownerUserID)
 }
 
+func (f *FriendCacheRedis) getFriendSyncSortUserIDsKey(ownerUserID string) string {
+	return cachekey.GetFriendSyncSortUserIDsKey(ownerUserID, f.syncCount)
+}
+
 // getTwoWayFriendsIDsKey returns the key for storing two-way friend IDs in the cache.
 func (f *FriendCacheRedis) getTwoWayFriendsIDsKey(ownerUserID string) string {
 	return cachekey.GetTwoWayFriendsIDsKey(ownerUserID)
@@ -115,6 +128,16 @@ func (f *FriendCacheRedis) DelFriendIDs(ownerUserIDs ...string) FriendCache {
 	}
 	newGroupCache.AddKeys(keys...)
 
+	return newGroupCache
+}
+
+func (f *FriendCacheRedis) DelSortFriendUserIDs(ownerUserIDs ...string) FriendCache {
+	newGroupCache := f.NewCache()
+	keys := make([]string, 0, len(ownerUserIDs))
+	for _, userID := range ownerUserIDs {
+		keys = append(keys, f.getFriendSyncSortUserIDsKey(userID))
+	}
+	newGroupCache.AddKeys(keys...)
 	return newGroupCache
 }
 
@@ -171,4 +194,14 @@ func (f *FriendCacheRedis) DelFriends(ownerUserID string, friendUserIDs []string
 	}
 
 	return newFriendCache
+}
+
+func (f *FriendCacheRedis) FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error) {
+	return getCache(ctx, f.rcClient, f.getFriendSyncSortUserIDsKey(ownerUserID), f.expireTime, func(ctx context.Context) ([]string, error) {
+		return f.friendDB.FindOwnerFriendUserIds(ctx, ownerUserID, f.syncCount)
+	})
+}
+
+func (f *FriendCacheRedis) FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error) {
+	return f.friendDB.FindIncrVersion(ctx, ownerUserID, version, limit)
 }

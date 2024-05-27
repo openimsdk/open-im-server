@@ -16,6 +16,7 @@ package relation
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
 	"time"
 
 	"github.com/openimsdk/tools/db/pagination"
@@ -25,6 +26,8 @@ import (
 type FriendModel struct {
 	OwnerUserID    string    `bson:"owner_user_id"`
 	FriendUserID   string    `bson:"friend_user_id"`
+	FriendNickname string    `bson:"friend_nickname"`
+	FriendFaceURL  string    `bson:"friend_face_url"`
 	Remark         string    `bson:"remark"`
 	CreateTime     time.Time `bson:"create_time"`
 	AddSource      int32     `bson:"add_source"`
@@ -53,10 +56,14 @@ type FriendModelInterface interface {
 	FindReversalFriends(ctx context.Context, friendUserID string, ownerUserIDs []string) (friends []*FriendModel, err error)
 	// FindOwnerFriends retrieves a paginated list of friends for a given owner.
 	FindOwnerFriends(ctx context.Context, ownerUserID string, pagination pagination.Pagination) (total int64, friends []*FriendModel, err error)
+
+	FindOwnerFriendUserIds(ctx context.Context, ownerUserID string, limit int) ([]string, error)
 	// FindInWhoseFriends finds users who have added the specified user as a friend, with pagination.
 	FindInWhoseFriends(ctx context.Context, friendUserID string, pagination pagination.Pagination) (total int64, friends []*FriendModel, err error)
 	// FindFriendUserIDs retrieves a list of friend user IDs for a given owner.
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
 	// UpdateFriends update friends' fields
 	UpdateFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, val map[string]any) (err error)
+
+	FindIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error)
 }

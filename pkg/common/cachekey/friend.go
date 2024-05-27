@@ -14,11 +14,14 @@
 
 package cachekey
 
+import "strconv"
+
 const (
-	FriendIDsKey        = "FRIEND_IDS:"
-	TwoWayFriendsIDsKey = "COMMON_FRIENDS_IDS:"
-	FriendKey           = "FRIEND_INFO:"
-	IsFriendKey         = "IS_FRIEND:" // local cache key
+	FriendIDsKey             = "FRIEND_IDS:"
+	TwoWayFriendsIDsKey      = "COMMON_FRIENDS_IDS:"
+	FriendKey                = "FRIEND_INFO:"
+	IsFriendKey              = "IS_FRIEND:" // local cache key
+	FriendSyncSortUserIDsKey = "FRIEND_SYNC_SORT_USER_IDS:"
 )
 
 func GetFriendIDsKey(ownerUserID string) string {
@@ -35,4 +38,8 @@ func GetFriendKey(ownerUserID, friendUserID string) string {
 
 func GetIsFriendKey(possibleFriendUserID, userID string) string {
 	return IsFriendKey + possibleFriendUserID + "-" + userID
+}
+
+func GetFriendSyncSortUserIDsKey(ownerUserID string, count int) string {
+	return FriendSyncSortUserIDsKey + strconv.Itoa(count) + ":" + ownerUserID
 }

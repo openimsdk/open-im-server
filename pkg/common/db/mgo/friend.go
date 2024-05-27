@@ -16,7 +16,6 @@ package mgo
 
 import (
 	"context"
-	"errors"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
@@ -55,7 +54,7 @@ func NewFriendMongo(db *mongo.Database) (relation.FriendModelInterface, error) {
 
 // Create inserts multiple friend records.
 func (f *FriendMgo) Create(ctx context.Context, friends []*relation.FriendModel) error {
-	return Success(func() error {
+	return IncrVersion(func() error {
 		return mongoutil.InsertMany(ctx, f.coll, friends)
 	}, func() error {
 		mp := make(map[string][]string)
@@ -77,7 +76,7 @@ func (f *FriendMgo) Delete(ctx context.Context, ownerUserID string, friendUserID
 		"owner_user_id":  ownerUserID,
 		"friend_user_id": bson.M{"$in": friendUserIDs},
 	}
-	return Success(func() error {
+	return IncrVersion(func() error {
 		return mongoutil.DeleteOne(ctx, f.coll, filter)
 	}, func() error {
 		return f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, true)
@@ -93,7 +92,7 @@ func (f *FriendMgo) UpdateByMap(ctx context.Context, ownerUserID string, friendU
 		"owner_user_id":  ownerUserID,
 		"friend_user_id": friendUserID,
 	}
-	return Success(func() error {
+	return IncrVersion(func() error {
 		return mongoutil.UpdateOne(ctx, f.coll, filter, bson.M{"$set": args}, true)
 	}, func() error {
 		return f.owner.WriteLog(ctx, ownerUserID, []string{friendUserID}, false)
@@ -146,7 +145,14 @@ func (f *FriendMgo) FindReversalFriends(ctx context.Context, friendUserID string
 // FindOwnerFriends retrieves a paginated list of friends for a given owner.
 func (f *FriendMgo) FindOwnerFriends(ctx context.Context, ownerUserID string, pagination pagination.Pagination) (int64, []*relation.FriendModel, error) {
 	filter := bson.M{"owner_user_id": ownerUserID}
-	return mongoutil.FindPage[*relation.FriendModel](ctx, f.coll, filter, pagination)
+	opt := options.Find().SetSort(bson.A{bson.M{"friend_nickname": 1}, bson.M{"create_time": 1}})
+	return mongoutil.FindPage[*relation.FriendModel](ctx, f.coll, filter, pagination, opt)
+}
+
+func (f *FriendMgo) FindOwnerFriendUserIds(ctx context.Context, ownerUserID string, limit int) ([]string, error) {
+	filter := bson.M{"owner_user_id": ownerUserID}
+	opt := options.Find().SetProjection(bson.M{"_id": 0, "friend_user_id": 1}).SetSort(bson.A{bson.M{"friend_nickname": 1}, bson.M{"create_time": 1}}).SetLimit(int64(limit))
+	return mongoutil.Find[string](ctx, f.coll, filter, opt)
 }
 
 // FindInWhoseFriends finds users who have added the specified user as a friend, with pagination.
@@ -176,29 +182,33 @@ func (f *FriendMgo) UpdateFriends(ctx context.Context, ownerUserID string, frien
 	// Create an update document
 	update := bson.M{"$set": val}
 
-	return Success(func() error {
+	return IncrVersion(func() error {
 		return mongoutil.Ignore(mongoutil.UpdateMany(ctx, f.coll, filter, update))
 	}, func() error {
 		return f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, false)
 	})
 }
 
-func (f *FriendMgo) IncrSync(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.SyncResult[*relation.FriendModel], error) {
-	res, err := f.owner.FindChangeLog(ctx, ownerUserID, version, limit)
-	if err != nil {
-		return nil, err
-	}
-	return dataver.NewSyncResult[*relation.FriendModel](res, func(eIds []string) ([]*relation.FriendModel, error) {
-		if len(eIds) == 0 {
-			return nil, errors.New("todo")
-		} else {
-			return f.FindFriends(ctx, ownerUserID, eIds)
-		}
-	})
+func (f *FriendMgo) FindIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error) {
+	return f.owner.FindChangeLog(ctx, ownerUserID, version, limit)
 }
 
-func Success(fns ...func() error) error {
-	for _, fn := range fns {
+//func (f *FriendMgo) IncrSync(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.SyncResult[*relation.FriendModel], error) {
+//	res, err := f.owner.FindChangeLog(ctx, ownerUserID, version, limit)
+//	if err != nil {
+//		return nil, err
+//	}
+//	return dataver.NewSyncResult[*relation.FriendModel](res, func(eIds []string) ([]*relation.FriendModel, error) {
+//		if len(eIds) == 0 {
+//			return nil, errors.New("todo")
+//		} else {
+//			return f.FindFriends(ctx, ownerUserID, eIds)
+//		}
+//	})
+//}
+
+func IncrVersion(dbs ...func() error) error {
+	for _, fn := range dbs {
 		if err := fn(); err != nil {
 			return err
 		}

@@ -2,12 +2,14 @@ package dataver
 
 import (
 	"context"
+	"errors"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
 
@@ -192,7 +194,21 @@ func (l *logModel) writeLogBatch(ctx context.Context, dId string, eIds []string,
 	return mongoutil.UpdateMany(ctx, l.coll, filter, pipeline)
 }
 
+func (l *logModel) findDoc(ctx context.Context, dId string) (*WriteLog, error) {
+	res, err := mongoutil.FindOne[*WriteLog](ctx, l.coll, bson.M{"d_id": dId}, options.FindOne().SetProjection(bson.M{"logs": 0}))
+	if err == nil {
+		return res, nil
+	} else if errors.Is(err, mongo.ErrNoDocuments) {
+		return &WriteLog{}, nil
+	} else {
+		return nil, err
+	}
+}
+
 func (l *logModel) FindChangeLog(ctx context.Context, dId string, version uint, limit int) (*WriteLog, error) {
+	if version == 0 && limit == 0 {
+		return l.findDoc(ctx, dId)
+	}
 	pipeline := []bson.M{
 		{
 			"$match": bson.M{

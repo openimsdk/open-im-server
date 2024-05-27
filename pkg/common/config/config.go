@@ -244,7 +244,8 @@ type Friend struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus Prometheus `mapstructure:"prometheus"`
+	Prometheus      Prometheus `mapstructure:"prometheus"`
+	FriendSyncCount int        `mapstructure:"friendSyncCount"`
 }
 
 type Group struct {

@@ -17,6 +17,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -75,6 +76,10 @@ type FriendDatabase interface {
 
 	// UpdateFriends updates fields for friends
 	UpdateFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, val map[string]any) (err error)
+
+	FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
+
+	FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error)
 }
 
 type friendDatabase struct {
@@ -173,7 +178,7 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 			return err
 		}
 		newFriendIDs = append(newFriendIDs, ownerUserID)
-		cache = cache.DelFriendIDs(newFriendIDs...)
+		cache = cache.DelFriendIDs(newFriendIDs...).DelSortFriendUserIDs(ownerUserID)
 		return cache.ExecDel(ctx)
 
 	})
@@ -276,7 +281,7 @@ func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 				return err
 			}
 		}
-		return f.cache.DelFriendIDs(friendRequest.ToUserID, friendRequest.FromUserID).ExecDel(ctx)
+		return f.cache.DelFriendIDs(friendRequest.ToUserID, friendRequest.FromUserID).DelSortFriendUserIDs(friendRequest.ToUserID, friendRequest.FromUserID).ExecDel(ctx)
 	})
 }
 
@@ -285,7 +290,7 @@ func (f *friendDatabase) Delete(ctx context.Context, ownerUserID string, friendU
 	if err := f.friend.Delete(ctx, ownerUserID, friendUserIDs); err != nil {
 		return err
 	}
-	return f.cache.DelFriendIDs(append(friendUserIDs, ownerUserID)...).ExecDel(ctx)
+	return f.cache.DelFriendIDs(append(friendUserIDs, ownerUserID)...).DelSortFriendUserIDs(ownerUserID).ExecDel(ctx)
 }
 
 // UpdateRemark updates the remark for a friend. Zero value for remark is also supported.
@@ -342,5 +347,13 @@ func (f *friendDatabase) UpdateFriends(ctx context.Context, ownerUserID string, 
 	if err := f.friend.UpdateFriends(ctx, ownerUserID, friendUserIDs, val); err != nil {
 		return err
 	}
-	return f.cache.DelFriends(ownerUserID, friendUserIDs).ExecDel(ctx)
+	return f.cache.DelFriends(ownerUserID, friendUserIDs).DelSortFriendUserIDs(ownerUserID).ExecDel(ctx)
+}
+
+func (f *friendDatabase) FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error) {
+	return f.cache.FindSortFriendUserIDs(ctx, ownerUserID)
+}
+
+func (f *friendDatabase) FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error) {
+	return f.cache.FindFriendIncrVersion(ctx, ownerUserID, version, limit)
 }
