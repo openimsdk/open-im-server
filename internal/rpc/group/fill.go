@@ -16,10 +16,9 @@ package group
 
 import (
 	"context"
-
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 )
 
-func (s *groupServer) PopulateGroupMember(ctx context.Context, members ...*relationtb.GroupMemberModel) error {
+func (s *groupServer) PopulateGroupMember(ctx context.Context, members ...*relationtb.GroupMember) error {
 	return s.notification.PopulateGroupMember(ctx, members...)
 }

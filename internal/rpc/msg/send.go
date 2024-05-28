@@ -41,7 +41,7 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.
 		case constant.NotificationChatType:
 			return m.sendMsgNotification(ctx, req)
 		case constant.ReadGroupChatType:
-			return m.sendMsgSuperGroupChat(ctx, req)
+			return m.sendMsgGroupChat(ctx, req)
 		default:
 			return nil, errs.ErrArgs.WrapMsg("unknown sessionType")
 		}
@@ -49,7 +49,7 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.
 	return nil, errs.ErrArgs.WrapMsg("msgData is nil")
 }
 
-func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
+func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
 	if err = m.messageVerification(ctx, req); err != nil {
 		prommetrics.GroupChatMsgProcessFailedCounter.Inc()
 		return nil, err
@@ -110,6 +110,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 		if err != nil {
 			log.ZWarn(ctx, "SetConversations", err, "userID", memberUserIDList, "conversation", conversation)
 		}
+		return
 	}
 	conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtMe}
 	err := m.Conversation.SetConversations(ctx, msg.AtUserIDList, conversation)

@@ -166,7 +166,7 @@ func (b *Batcher[T]) scheduler() {
 		select {
 		case data, ok := <-b.data:
 			if !ok {
-				// 如果data channel意外关闭
+				// If the data channel is closed unexpectedly
 				return
 			}
 			if data == nil {

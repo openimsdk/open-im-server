@@ -16,9 +16,9 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/utils/datautil"
@@ -31,7 +31,7 @@ func (m *msgServer) GetActiveUser(ctx context.Context, req *msg.GetActiveUserReq
 	}
 	var pbUsers []*msg.ActiveUser
 	if len(users) > 0 {
-		userIDs := datautil.Slice(users, func(e *relation.UserCount) string { return e.UserID })
+		userIDs := datautil.Slice(users, func(e *model.UserCount) string { return e.UserID })
 		userMap, err := m.UserLocalCache.GetUsersInfoMap(ctx, userIDs)
 		if err != nil {
 			return nil, err
@@ -66,7 +66,7 @@ func (m *msgServer) GetActiveGroup(ctx context.Context, req *msg.GetActiveGroupR
 	}
 	var pbgroups []*msg.ActiveGroup
 	if len(groups) > 0 {
-		groupIDs := datautil.Slice(groups, func(e *relation.GroupCount) string { return e.GroupID })
+		groupIDs := datautil.Slice(groups, func(e *model.GroupCount) string { return e.GroupID })
 		resp, err := m.GroupLocalCache.GetGroupInfos(ctx, groupIDs)
 		if err != nil {
 			return nil, err
