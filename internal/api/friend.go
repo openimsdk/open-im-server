@@ -98,3 +98,20 @@ func (o *FriendApi) UpdateFriends(c *gin.Context) {
 func (o *FriendApi) GetIncrementalFriends(c *gin.Context) {
 	a2r.Call(friend.FriendClient.GetIncrementalFriends, o.Client, c)
 }
+
+//func BatchIncremental[A, B, C any,D comparable](c *gin.Context, rpc func(client C, ctx context.Context, req *A, options ...grpc.CallOption) (*B, error), getID func(req *A)D, setID func(req *A, id D)) {
+//	req, err := a2r.ParseRequestNotCheck[BatchIncrementalReq[A]](c)
+//	if err != nil {
+//		apiresp.GinError(c, err)
+//		return
+//	}
+//	if len(req.List) == 0 {
+//		apiresp.GinError(c, errs.ErrArgs.WrapMsg("empty versions list"))
+//		return
+//	}
+//}
+//
+//type BatchIncrementalReq[A any] struct {
+//	UserID string `json:"user_id"`
+//	List   []*A   `json:"list"`
+//}

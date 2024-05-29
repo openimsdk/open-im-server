@@ -35,14 +35,15 @@ func (w *WriteLog) Full() bool {
 	return len(w.Logs) != w.LogLen
 }
 
-func (w *WriteLog) DeleteEId() []string {
-	var eIds []string
+func (w *WriteLog) DeleteAndChangeIDs() (delIds []string, changeIds []string) {
 	for _, l := range w.Logs {
 		if l.Deleted {
-			eIds = append(eIds, l.EID)
+			delIds = append(delIds, l.EID)
+		} else {
+			changeIds = append(changeIds, l.EID)
 		}
 	}
-	return eIds
+	return
 }
 
 type Elem struct {

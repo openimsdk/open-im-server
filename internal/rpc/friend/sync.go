@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	pbfriend "github.com/openimsdk/protocol/friend"
 )
@@ -34,38 +33,31 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *pbfriend.
 	if err != nil {
 		return nil, err
 	}
-	sortUserIDs, err := s.friendDatabase.FindSortFriendUserIDs(ctx, req.UserID)
-	if err != nil {
-		return nil, err
+	var (
+		deleteUserIDs []string
+		changeUserIDs []string
+	)
+	if incrVer.Full() {
+		changeUserIDs, err = s.friendDatabase.FindSortFriendUserIDs(ctx, req.UserID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		deleteUserIDs, changeUserIDs = incrVer.DeleteAndChangeIDs()
 	}
-	if len(sortUserIDs) == 0 {
-		return &pbfriend.GetIncrementalFriendsResp{
-			Version:   uint64(incrVer.Version),
-			VersionID: dataver.VersionIDStr(incrVer.ID),
-			Full:      true,
-			SyncCount: uint32(s.config.RpcConfig.FriendSyncCount),
-		}, nil
-	}
-	var changes []*relation.FriendModel
-	res := dataver.NewSyncResult(incrVer, sortUserIDs, req.VersionID)
-	if len(res.Changes) > 0 {
-		changes, err = s.friendDatabase.FindFriendsWithError(ctx, req.UserID, res.Changes)
+	var friends []*relation.FriendModel
+	if len(changeUserIDs) > 0 {
+		friends, err = s.friendDatabase.FindFriendsWithError(ctx, req.UserID, changeUserIDs)
 		if err != nil {
 			return nil, err
 		}
 	}
-	calcHash := s.sortFriendUserIDsHash(sortUserIDs)
-	if calcHash == req.IdHash {
-		sortUserIDs = nil
-	}
 	return &pbfriend.GetIncrementalFriendsResp{
-		Version:        uint64(res.Version),
-		VersionID:      res.VersionID,
-		Full:           res.Full,
-		SyncCount:      uint32(s.config.RpcConfig.FriendSyncCount),
-		SortUserIdHash: calcHash,
-		SortUserIds:    sortUserIDs,
-		DeleteUserIds:  res.DeleteEID,
-		Changes:        friendsDB2PB(changes),
+		Version:       uint64(incrVer.Version),
+		VersionID:     incrVer.ID.String(),
+		Full:          incrVer.Full(),
+		SyncCount:     uint32(s.config.RpcConfig.FriendSyncCount),
+		DeleteUserIds: deleteUserIDs,
+		Changes:       friendsDB2PB(friends),
 	}, nil
 }
