@@ -34,7 +34,7 @@ func UserDB2Pb(user *relationtb.User) *sdkws.UserInfo {
 	}
 }
 
-func UsersDB2Pb(users []*relationtb.UserModel) []*sdkws.UserInfo {
+func UsersDB2Pb(users []*relationtb.User) []*sdkws.UserInfo {
 	return datautil.Slice(users, UserDB2Pb)
 }
 

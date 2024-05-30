@@ -17,28 +17,13 @@ package database
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
-	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/db/pagination"
 )
 
-//// FriendModel represents the data structure for a friend relationship in MongoDB.
-//type FriendModel struct {
-//	OwnerUserID    string    `bson:"owner_user_id"`
-//	FriendUserID   string    `bson:"friend_user_id"`
-//	FriendNickname string    `bson:"friend_nickname"`
-//	FriendFaceURL  string    `bson:"friend_face_url"`
-//	Remark         string    `bson:"remark"`
-//	CreateTime     time.Time `bson:"create_time"`
-//	AddSource      int32     `bson:"add_source"`
-//	OperatorUserID string    `bson:"operator_user_id"`
-//	Ex             string    `bson:"ex"`
-//	IsPinned       bool      `bson:"is_pinned"`
-//}
-
 // Friend defines the operations for managing friends in MongoDB.
-type FriendModelInterface interface {
+type Friend interface {
 	// Create inserts multiple friend records.
 	Create(ctx context.Context, friends []*model.Friend) (err error)
 	// Delete removes specified friends of the owner user.
@@ -71,4 +56,6 @@ type FriendModelInterface interface {
 	UpdateFriendUserInfo(ctx context.Context, friendUserID string, nickname string, faceURL string) error
 
 	SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error)
+
+	FindOwnerFriendUserIds(ctx context.Context, ownerUserID string, limit int) ([]string, error)
 }

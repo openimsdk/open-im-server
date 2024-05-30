@@ -695,7 +695,7 @@ func (s *userServer) userModelToResp(users []*tablerelation.User, pagination pag
 	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: notificationAccounts}
 }
 
-func (s *userServer) NotificationUserInfoUpdate(ctx context.Context, userID string, oldUser *relation.UserModel) error {
+func (s *userServer) NotificationUserInfoUpdate(ctx context.Context, userID string, oldUser *tablerelation.User) error {
 	user, err := s.db.GetUserByID(ctx, userID)
 	if err != nil {
 		return err

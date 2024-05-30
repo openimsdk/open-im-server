@@ -6,7 +6,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	pbfriend "github.com/openimsdk/protocol/friend"
 	"github.com/openimsdk/tools/errs"
 )
@@ -89,7 +89,7 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *pbfriend.
 	} else {
 		deleteUserIDs, changeUserIDs = incrVer.DeleteAndChangeIDs()
 	}
-	var friends []*relation.FriendModel
+	var friends []*model.Friend
 	if len(changeUserIDs) > 0 {
 		friends, err = s.friendDatabase.FindFriendsWithError(ctx, req.UserID, changeUserIDs)
 		if err != nil {

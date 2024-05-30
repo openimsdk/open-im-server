@@ -225,7 +225,7 @@ func (f *FriendMgo) UpdateFriendUserInfo(ctx context.Context, friendUserID strin
 	return err
 }
 
-func (f *FriendMgo) SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*relation.FriendModel, error) {
+func (f *FriendMgo) SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error) {
 	//where := bson.M{
 	//	"owner_user_id": ownerUserID,
 	//	"$or": []bson.M{

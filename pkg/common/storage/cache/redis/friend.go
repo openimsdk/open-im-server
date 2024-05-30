@@ -28,36 +28,11 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
-	"time"
 )
 
 const (
 	friendExpireTime = time.Second * 60 * 60 * 12
 )
-
-//// FriendCache is an interface for caching friend-related data.
-//type FriendCache interface {
-//	metaCache
-//	NewCache() FriendCache
-//	GetFriendIDs(ctx context.Context, ownerUserID string) (friendIDs []string, err error)
-//	// Called when friendID list changed
-//	DelFriendIDs(ownerUserID ...string) FriendCache
-//
-//	DelSortFriendUserIDs(ownerUserIDs ...string) FriendCache
-//
-//	// Get single friendInfo from the cache
-//	GetFriend(ctx context.Context, ownerUserID, friendUserID string) (friend *relationtb.FriendModel, err error)
-//	// Delete friend when friend info changed
-//	DelFriend(ownerUserID, friendUserID string) FriendCache
-//	// Delete friends when friends' info changed
-//	DelFriends(ownerUserID string, friendUserIDs []string) FriendCache
-//
-//	DelOwner(friendUserID string, ownerUserIDs []string) FriendCache
-//
-//	FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
-//
-//	FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error)
-//}
 
 // FriendCacheRedis is an implementation of the FriendCache interface using Redis.
 type FriendCacheRedis struct {
@@ -129,8 +104,8 @@ func (f *FriendCacheRedis) DelFriendIDs(ownerUserIDs ...string) cache.FriendCach
 	return newFriendCache
 }
 
-func (f *FriendCacheRedis) DelSortFriendUserIDs(ownerUserIDs ...string) FriendCache {
-	newGroupCache := f.NewCache()
+func (f *FriendCacheRedis) DelSortFriendUserIDs(ownerUserIDs ...string) cache.FriendCache {
+	newGroupCache := f.CloneFriendCache()
 	keys := make([]string, 0, len(ownerUserIDs))
 	for _, userID := range ownerUserIDs {
 		keys = append(keys, f.getFriendSyncSortUserIDsKey(userID))
@@ -194,7 +169,7 @@ func (f *FriendCacheRedis) DelFriends(ownerUserID string, friendUserIDs []string
 	return newFriendCache
 }
 
-func (f *FriendCacheRedis) DelOwner(friendUserID string, ownerUserIDs []string) FriendCache {
+func (f *FriendCacheRedis) DelOwner(friendUserID string, ownerUserIDs []string) cache.FriendCache {
 	newFriendCache := f.CloneFriendCache()
 
 	for _, ownerUserID := range ownerUserIDs {
