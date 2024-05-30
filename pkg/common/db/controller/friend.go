@@ -80,6 +80,12 @@ type FriendDatabase interface {
 	FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
 
 	FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error)
+
+	FindFriendUserID(ctx context.Context, friendUserID string) ([]string, error)
+
+	UpdateFriendUserInfo(ctx context.Context, friendUserID string, ownerUserID []string, nickname string, faceURL string) error
+
+	SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*relation.FriendModel, error)
 }
 
 type friendDatabase struct {
@@ -356,4 +362,19 @@ func (f *friendDatabase) FindSortFriendUserIDs(ctx context.Context, ownerUserID 
 
 func (f *friendDatabase) FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error) {
 	return f.cache.FindFriendIncrVersion(ctx, ownerUserID, version, limit)
+}
+
+func (f *friendDatabase) FindFriendUserID(ctx context.Context, friendUserID string) ([]string, error) {
+	return f.friend.FindFriendUserID(ctx, friendUserID)
+}
+
+func (f *friendDatabase) UpdateFriendUserInfo(ctx context.Context, friendUserID string, ownerUserIDs []string, nickname string, faceURL string) error {
+	if err := f.friend.UpdateFriendUserInfo(ctx, friendUserID, nickname, faceURL); err != nil {
+		return err
+	}
+	return f.cache.DelOwner(friendUserID, ownerUserIDs).ExecDel(ctx)
+}
+
+func (f *friendDatabase) SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*relation.FriendModel, error) {
+	return f.friend.SearchFriend(ctx, ownerUserID, keyword, pagination)
 }

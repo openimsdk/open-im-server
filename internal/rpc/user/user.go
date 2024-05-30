@@ -16,12 +16,16 @@ package user
 
 import (
 	"context"
+	"errors"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/friend"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	friendpb "github.com/openimsdk/protocol/friend"
+	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/tools/db/redisutil"
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -54,11 +58,6 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 	config                   *Config
 	webhookClient            *webhook.Client
-}
-
-func (s *userServer) SearchUser(ctx context.Context, req *pbuser.SearchUserReq) (*pbuser.SearchUserResp, error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 type Config struct {
@@ -136,26 +135,29 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err := s.webhookBeforeUpdateUserInfo(ctx, &s.config.WebhooksConfig.BeforeUpdateUserInfo, req); err != nil {
 		return nil, err
 	}
-
 	data := convert.UserPb2DBMap(req.UserInfo)
-	if err := s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
-		return nil, err
-	}
-	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
-	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
+	oldUser, err := s.db.GetUserByID(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
-	if req.UserInfo.Nickname != "" || req.UserInfo.FaceURL != "" {
-		if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-			return nil, err
-		}
+	if err := s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
+		return nil, err
 	}
-	for _, friendID := range friends {
-		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
-	}
+	//s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
+	//friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if req.UserInfo.Nickname != "" || req.UserInfo.FaceURL != "" {
+	//	if err = s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID,oldUser); err != nil {
+	//		return nil, err
+	//	}
+	//}
+	//for _, friendID := range friends {
+	//	s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
+	//}
 	s.webhookAfterUpdateUserInfo(ctx, &s.config.WebhooksConfig.AfterUpdateUserInfo, req)
-	if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+	if err = s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID, oldUser); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -170,24 +172,28 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 		return nil, err
 	}
 	data := convert.UserPb2DBMapEx(req.UserInfo)
-	if err = s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
-		return nil, err
-	}
-	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
-	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
+	oldUser, err := s.db.GetUserByID(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
-	if req.UserInfo.Nickname != nil || req.UserInfo.FaceURL != nil {
-		if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-			return nil, err
-		}
+	if err = s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
+		return nil, err
 	}
-	for _, friendID := range friends {
-		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
-	}
+	//s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
+	//friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if req.UserInfo.Nickname != nil || req.UserInfo.FaceURL != nil {
+	//	if err := s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+	//		return nil, err
+	//	}
+	//}
+	//for _, friendID := range friends {
+	//	s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
+	//}
 	s.webhookAfterUpdateUserInfoEx(ctx, &s.config.WebhooksConfig.AfterUpdateUserInfoEx, req)
-	if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+	if err := s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID, oldUser); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -687,4 +693,42 @@ func (s *userServer) userModelToResp(users []*relation.UserModel, pagination pag
 	notificationAccounts := datautil.Paginate(accounts, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
 
 	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: notificationAccounts}
+}
+
+func (s *userServer) NotificationUserInfoUpdate(ctx context.Context, userID string, oldUser *relation.UserModel) error {
+	user, err := s.db.GetUserByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if *user == *oldUser {
+		return nil
+	}
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, userID)
+	if user.Nickname == oldUser.Nickname && user.FaceURL == oldUser.FaceURL {
+		return nil
+	}
+	oldUserInfo := convert.UserDB2Pb(oldUser)
+	newUserInfo := convert.UserDB2Pb(user)
+	var wg sync.WaitGroup
+	var es [2]error
+	wg.Add(len(es))
+	go func() {
+		defer wg.Done()
+		_, es[0] = s.groupRpcClient.Client.NotificationUserInfoUpdate(ctx, &group.NotificationUserInfoUpdateReq{
+			UserID:      userID,
+			OldUserInfo: oldUserInfo,
+			NewUserInfo: newUserInfo,
+		})
+	}()
+
+	go func() {
+		defer wg.Done()
+		_, es[1] = s.friendRpcClient.Client.NotificationUserInfoUpdate(ctx, &friendpb.NotificationUserInfoUpdateReq{
+			UserID:      userID,
+			OldUserInfo: oldUserInfo,
+			NewUserInfo: newUserInfo,
+		})
+	}()
+	wg.Wait()
+	return errors.Join(es[:]...)
 }

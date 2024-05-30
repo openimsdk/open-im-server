@@ -26,13 +26,11 @@ type WriteLog struct {
 	Deleted    uint               `bson:"deleted"`
 	LastUpdate time.Time          `bson:"last_update"`
 	LogLen     int                `bson:"log_len"`
+	queryDoc   bool               `bson:"-"`
 }
 
 func (w *WriteLog) Full() bool {
-	if w.Version == 0 {
-		return true
-	}
-	return len(w.Logs) != w.LogLen
+	return w.queryDoc || w.Version == 0 || len(w.Logs) != w.LogLen
 }
 
 func (w *WriteLog) DeleteAndChangeIDs() (delIds []string, changeIds []string) {
@@ -211,7 +209,12 @@ func (l *logModel) writeLogBatch(ctx context.Context, dId string, eIds []string,
 }
 
 func (l *logModel) findDoc(ctx context.Context, dId string) (*WriteLog, error) {
-	return mongoutil.FindOne[*WriteLog](ctx, l.coll, bson.M{"d_id": dId}, options.FindOne().SetProjection(bson.M{"logs": 0}))
+	res, err := mongoutil.FindOne[*WriteLog](ctx, l.coll, bson.M{"d_id": dId}, options.FindOne().SetProjection(bson.M{"logs": 0}))
+	if err != nil {
+		return nil, err
+	}
+	res.queryDoc = true
+	return res, nil
 }
 
 func (l *logModel) FindChangeLog(ctx context.Context, dId string, version uint, limit int) (*WriteLog, error) {

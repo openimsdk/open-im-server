@@ -52,6 +52,8 @@ type FriendCache interface {
 	// Delete friends when friends' info changed
 	DelFriends(ownerUserID string, friendUserIDs []string) FriendCache
 
+	DelOwner(friendUserID string, ownerUserIDs []string) FriendCache
+
 	FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
 
 	FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error)
@@ -189,6 +191,17 @@ func (f *FriendCacheRedis) DelFriends(ownerUserID string, friendUserIDs []string
 	newFriendCache := f.NewCache()
 
 	for _, friendUserID := range friendUserIDs {
+		key := f.getFriendKey(ownerUserID, friendUserID)
+		newFriendCache.AddKeys(key) // Assuming AddKeys marks the keys for deletion
+	}
+
+	return newFriendCache
+}
+
+func (f *FriendCacheRedis) DelOwner(friendUserID string, ownerUserIDs []string) FriendCache {
+	newFriendCache := f.NewCache()
+
+	for _, ownerUserID := range ownerUserIDs {
 		key := f.getFriendKey(ownerUserID, friendUserID)
 		newFriendCache.AddKeys(key) // Assuming AddKeys marks the keys for deletion
 	}

@@ -8,11 +8,55 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	pbfriend "github.com/openimsdk/protocol/friend"
+	"github.com/openimsdk/tools/errs"
 )
 
+func (s *friendServer) NotificationUserInfoUpdate(ctx context.Context, req *pbfriend.NotificationUserInfoUpdateReq) (*pbfriend.NotificationUserInfoUpdateResp, error) {
+	if req.NewUserInfo == nil {
+		var err error
+		req.NewUserInfo, err = s.userRpcClient.GetUserInfo(ctx, req.UserID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if req.UserID != req.NewUserInfo.UserID {
+		return nil, errs.ErrArgs.WrapMsg("req.UserID != req.NewUserInfo.UserID")
+	}
+	userIDs, err := s.friendDatabase.FindFriendUserID(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	if len(userIDs) > 0 {
+		if err := s.friendDatabase.UpdateFriendUserInfo(ctx, req.UserID, userIDs, req.NewUserInfo.Nickname, req.NewUserInfo.FaceURL); err != nil {
+			return nil, err
+		}
+		s.notificationSender.FriendsInfoUpdateNotification(ctx, req.UserID, userIDs)
+	}
+	return &pbfriend.NotificationUserInfoUpdateResp{}, nil
+}
+
 func (s *friendServer) SearchFriends(ctx context.Context, req *pbfriend.SearchFriendsReq) (*pbfriend.SearchFriendsResp, error) {
-	//TODO implement me
-	panic("implement me")
+	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
+		return nil, err
+	}
+	if req.Keyword == "" {
+		total, friends, err := s.friendDatabase.PageOwnerFriends(ctx, req.UserID, req.Pagination)
+		if err != nil {
+			return nil, err
+		}
+		return &pbfriend.SearchFriendsResp{
+			Total:   total,
+			Friends: friendsDB2PB(friends),
+		}, nil
+	}
+	total, friends, err := s.friendDatabase.SearchFriend(ctx, req.UserID, req.Keyword, req.Pagination)
+	if err != nil {
+		return nil, err
+	}
+	return &pbfriend.SearchFriendsResp{
+		Total:   total,
+		Friends: friendsDB2PB(friends),
+	}, nil
 }
 
 func (s *friendServer) sortFriendUserIDsHash(userIDs []string) uint64 {
@@ -54,7 +98,7 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *pbfriend.
 	}
 	return &pbfriend.GetIncrementalFriendsResp{
 		Version:       uint64(incrVer.Version),
-		VersionID:     incrVer.ID.String(),
+		VersionID:     incrVer.ID.Hex(),
 		Full:          incrVer.Full(),
 		SyncCount:     uint32(s.config.RpcConfig.FriendSyncCount),
 		DeleteUserIds: deleteUserIDs,
