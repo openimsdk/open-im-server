@@ -16,7 +16,6 @@ package database
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/db/pagination"
@@ -49,7 +48,7 @@ type Friend interface {
 	// UpdateFriends update friends' fields
 	UpdateFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, val map[string]any) (err error)
 
-	FindIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error)
+	FindIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*model.VersionLog, error)
 
 	FindFriendUserID(ctx context.Context, friendUserID string) ([]string, error)
 

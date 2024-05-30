@@ -17,7 +17,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
@@ -81,7 +80,7 @@ type FriendDatabase interface {
 
 	FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
 
-	FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error)
+	FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*model.VersionLog, error)
 
 	FindFriendUserID(ctx context.Context, friendUserID string) ([]string, error)
 
@@ -362,7 +361,7 @@ func (f *friendDatabase) FindSortFriendUserIDs(ctx context.Context, ownerUserID 
 	return f.cache.FindSortFriendUserIDs(ctx, ownerUserID)
 }
 
-func (f *friendDatabase) FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error) {
+func (f *friendDatabase) FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*model.VersionLog, error) {
 	return f.cache.FindFriendIncrVersion(ctx, ownerUserID, version, limit)
 }
 

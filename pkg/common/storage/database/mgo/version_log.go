@@ -1,8 +1,10 @@
-package dataver
+package mgo
 
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
@@ -13,84 +15,19 @@ import (
 	"time"
 )
 
-const (
-	FirstVersion         = 1
-	DefaultDeleteVersion = 0
-)
-
-type WriteLog struct {
-	ID         primitive.ObjectID `bson:"_id"`
-	DID        string             `bson:"d_id"`
-	Logs       []Elem             `bson:"logs"`
-	Version    uint               `bson:"version"`
-	Deleted    uint               `bson:"deleted"`
-	LastUpdate time.Time          `bson:"last_update"`
-	LogLen     int                `bson:"log_len"`
-	queryDoc   bool               `bson:"-"`
-}
-
-func (w *WriteLog) Full() bool {
-	return w.queryDoc || w.Version == 0 || len(w.Logs) != w.LogLen
-}
-
-func (w *WriteLog) DeleteAndChangeIDs() (delIds []string, changeIds []string) {
-	for _, l := range w.Logs {
-		if l.Deleted {
-			delIds = append(delIds, l.EID)
-		} else {
-			changeIds = append(changeIds, l.EID)
-		}
-	}
-	return
-}
-
-type Elem struct {
-	EID        string    `bson:"e_id"`
-	Deleted    bool      `bson:"deleted"`
-	Version    uint      `bson:"version"`
-	LastUpdate time.Time `bson:"last_update"`
-}
-
-type tableWriteLog struct {
-	ID         primitive.ObjectID `bson:"_id"`
-	DID        string             `bson:"d_id"`
-	Logs       []Elem             `bson:"logs"`
-	Version    uint               `bson:"version"`
-	Deleted    uint               `bson:"deleted"`
-	LastUpdate time.Time          `bson:"last_update"`
-}
-
-func (t *tableWriteLog) WriteLog() *WriteLog {
-	return &WriteLog{
-		ID:         t.ID,
-		DID:        t.DID,
-		Logs:       t.Logs,
-		Version:    t.Version,
-		Deleted:    t.Deleted,
-		LastUpdate: t.LastUpdate,
-		LogLen:     0,
-	}
-}
-
-type DataLog interface {
-	WriteLog(ctx context.Context, dId string, eIds []string, deleted bool) error
-	FindChangeLog(ctx context.Context, dId string, version uint, limit int) (*WriteLog, error)
-	DeleteAfterUnchangedLog(ctx context.Context, deadline time.Time) error
-}
-
-func NewDataLog(coll *mongo.Collection) (DataLog, error) {
-	lm := &logModel{coll: coll}
+func NewVersionLog(coll *mongo.Collection) (database.VersionLog, error) {
+	lm := &VersionLogMgo{coll: coll}
 	if lm.initIndex(context.Background()) != nil {
 		return nil, errs.ErrInternalServer.WrapMsg("init index failed", "coll", coll.Name())
 	}
 	return lm, nil
 }
 
-type logModel struct {
+type VersionLogMgo struct {
 	coll *mongo.Collection
 }
 
-func (l *logModel) initIndex(ctx context.Context) error {
+func (l *VersionLogMgo) initIndex(ctx context.Context) error {
 	_, err := l.coll.Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys: bson.M{
 			"d_id": 1,
@@ -99,7 +36,7 @@ func (l *logModel) initIndex(ctx context.Context) error {
 	return err
 }
 
-func (l *logModel) WriteLog(ctx context.Context, dId string, eIds []string, deleted bool) error {
+func (l *VersionLogMgo) WriteLog(ctx context.Context, dId string, eIds []string, deleted bool) error {
 	if len(eIds) == 0 {
 		return errs.ErrArgs.WrapMsg("elem id is empty", "dId", dId)
 	}
@@ -127,20 +64,20 @@ func (l *logModel) WriteLog(ctx context.Context, dId string, eIds []string, dele
 	return nil
 }
 
-func (l *logModel) initDoc(ctx context.Context, dId string, eIds []string, deleted bool, now time.Time) (*tableWriteLog, error) {
-	wl := tableWriteLog{
+func (l *VersionLogMgo) initDoc(ctx context.Context, dId string, eIds []string, deleted bool, now time.Time) (*model.VersionLogTable, error) {
+	wl := model.VersionLogTable{
 		ID:         primitive.NewObjectID(),
 		DID:        dId,
-		Logs:       make([]Elem, 0, len(eIds)),
-		Version:    FirstVersion,
-		Deleted:    DefaultDeleteVersion,
+		Logs:       make([]model.VersionLogElem, 0, len(eIds)),
+		Version:    database.FirstVersion,
+		Deleted:    database.DefaultDeleteVersion,
 		LastUpdate: now,
 	}
 	for _, eId := range eIds {
-		wl.Logs = append(wl.Logs, Elem{
+		wl.Logs = append(wl.Logs, model.VersionLogElem{
 			EID:        eId,
 			Deleted:    deleted,
-			Version:    FirstVersion,
+			Version:    database.FirstVersion,
 			LastUpdate: now,
 		})
 	}
@@ -148,7 +85,7 @@ func (l *logModel) initDoc(ctx context.Context, dId string, eIds []string, delet
 	return &wl, err
 }
 
-func (l *logModel) writeLogBatch(ctx context.Context, dId string, eIds []string, deleted bool, now time.Time) (*mongo.UpdateResult, error) {
+func (l *VersionLogMgo) writeLogBatch(ctx context.Context, dId string, eIds []string, deleted bool, now time.Time) (*mongo.UpdateResult, error) {
 	if eIds == nil {
 		eIds = []string{}
 	}
@@ -208,23 +145,22 @@ func (l *logModel) writeLogBatch(ctx context.Context, dId string, eIds []string,
 	return mongoutil.UpdateMany(ctx, l.coll, filter, pipeline)
 }
 
-func (l *logModel) findDoc(ctx context.Context, dId string) (*WriteLog, error) {
-	res, err := mongoutil.FindOne[*WriteLog](ctx, l.coll, bson.M{"d_id": dId}, options.FindOne().SetProjection(bson.M{"logs": 0}))
+func (l *VersionLogMgo) findDoc(ctx context.Context, dId string) (*model.VersionLog, error) {
+	vl, err := mongoutil.FindOne[*model.VersionLogTable](ctx, l.coll, bson.M{"d_id": dId}, options.FindOne().SetProjection(bson.M{"logs": 0}))
 	if err != nil {
 		return nil, err
 	}
-	res.queryDoc = true
-	return res, nil
+	return vl.VersionLog(), nil
 }
 
-func (l *logModel) FindChangeLog(ctx context.Context, dId string, version uint, limit int) (*WriteLog, error) {
+func (l *VersionLogMgo) FindChangeLog(ctx context.Context, dId string, version uint, limit int) (*model.VersionLog, error) {
 	if wl, err := l.findChangeLog(ctx, dId, version, limit); err == nil {
 		return wl, nil
 	} else if !errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, err
 	}
 	if res, err := l.initDoc(ctx, dId, nil, false, time.Now()); err == nil {
-		return res.WriteLog(), nil
+		return res.VersionLog(), nil
 	} else if mongo.IsDuplicateKeyError(err) {
 		return l.findChangeLog(ctx, dId, version, limit)
 	} else {
@@ -232,7 +168,7 @@ func (l *logModel) FindChangeLog(ctx context.Context, dId string, version uint, 
 	}
 }
 
-func (l *logModel) findChangeLog(ctx context.Context, dId string, version uint, limit int) (*WriteLog, error) {
+func (l *VersionLogMgo) findChangeLog(ctx context.Context, dId string, version uint, limit int) (*model.VersionLog, error) {
 	if version == 0 && limit == 0 {
 		return l.findDoc(ctx, dId)
 	}
@@ -293,17 +229,17 @@ func (l *logModel) findChangeLog(ctx context.Context, dId string, version uint, 
 	if limit <= 0 {
 		pipeline = pipeline[:len(pipeline)-1]
 	}
-	res, err := mongoutil.Aggregate[*WriteLog](ctx, l.coll, pipeline)
+	vl, err := mongoutil.Aggregate[*model.VersionLog](ctx, l.coll, pipeline)
 	if err != nil {
 		return nil, err
 	}
-	if len(res) == 0 {
+	if len(vl) == 0 {
 		return nil, mongo.ErrNoDocuments
 	}
-	return res[0], nil
+	return vl[0], nil
 }
 
-func (l *logModel) DeleteAfterUnchangedLog(ctx context.Context, deadline time.Time) error {
+func (l *VersionLogMgo) DeleteAfterUnchangedLog(ctx context.Context, deadline time.Time) error {
 	return mongoutil.DeleteMany(ctx, l.coll, bson.M{
 		"last_update": bson.M{
 			"$lt": deadline,

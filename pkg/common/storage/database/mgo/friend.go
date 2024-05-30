@@ -16,7 +16,6 @@ package mgo
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
@@ -30,7 +29,7 @@ import (
 // FriendMgo implements Friend using MongoDB as the storage backend.
 type FriendMgo struct {
 	coll  *mongo.Collection
-	owner dataver.DataLog
+	owner database.VersionLog
 }
 
 // NewFriendMongo creates a new instance of FriendMgo with the provided MongoDB database.
@@ -46,7 +45,7 @@ func NewFriendMongo(db *mongo.Database) (database.Friend, error) {
 	if err != nil {
 		return nil, err
 	}
-	owner, err := dataver.NewDataLog(db.Collection("friend_owner_log"))
+	owner, err := NewVersionLog(db.Collection("friend_owner_version_log"))
 	if err != nil {
 		return nil, err
 	}
@@ -99,15 +98,6 @@ func (f *FriendMgo) UpdateByMap(ctx context.Context, ownerUserID string, friendU
 		return f.owner.WriteLog(ctx, ownerUserID, []string{friendUserID}, false)
 	})
 }
-
-// Update modifies multiple friend documents.
-// func (f *FriendMgo) Update(ctx context.Context, friends []*relation.Friend) error {
-// 	filter := bson.M{
-// 		"owner_user_id":  ownerUserID,
-// 		"friend_user_id": friendUserID,
-// 	}
-// 	return mgotool.UpdateMany(ctx, f.coll, filter, friends)
-// }
 
 // UpdateRemark updates the remark for a specific friend.
 func (f *FriendMgo) UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) error {
@@ -206,7 +196,7 @@ func (f *FriendMgo) UpdateFriends(ctx context.Context, ownerUserID string, frien
 	})
 }
 
-func (f *FriendMgo) FindIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error) {
+func (f *FriendMgo) FindIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*model.VersionLog, error) {
 	return f.owner.FindChangeLog(ctx, ownerUserID, version, limit)
 }
 

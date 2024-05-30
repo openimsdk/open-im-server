@@ -14,8 +14,8 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/protocol v0.0.69-alpha.2
-	github.com/openimsdk/tools v0.0.49-alpha.23
-	github.com/pkg/errors v0.9.1
+	github.com/openimsdk/tools v0.0.49-alpha.24
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
 	go.mongodb.org/mongo-driver v1.14.0
@@ -178,6 +178,4 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
 
-replace (
-	github.com/openimsdk/protocol => /Users/chao/Desktop/project/protocol
-)
+replace github.com/openimsdk/protocol => /Users/chao/Desktop/project/protocol

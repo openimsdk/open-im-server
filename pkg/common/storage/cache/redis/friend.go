@@ -16,7 +16,6 @@ package redis
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/dataver"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -186,6 +185,6 @@ func (f *FriendCacheRedis) FindSortFriendUserIDs(ctx context.Context, ownerUserI
 	})
 }
 
-func (f *FriendCacheRedis) FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*dataver.WriteLog, error) {
+func (f *FriendCacheRedis) FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*model.VersionLog, error) {
 	return f.friendDB.FindIncrVersion(ctx, ownerUserID, version, limit)
 }
