@@ -16,11 +16,11 @@ package friend
 
 import (
 	"context"
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 	"github.com/openimsdk/protocol/constant"
@@ -46,7 +46,7 @@ func WithFriendDB(db controller.FriendDatabase) friendNotificationSenderOptions 
 }
 
 func WithDBFunc(
-	fn func(ctx context.Context, userIDs []string) (users []*relationtb.UserModel, err error),
+	fn func(ctx context.Context, userIDs []string) (users []*relationtb.User, err error),
 ) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
 		f := func(ctx context.Context, userIDs []string) (result []notification.CommonUser, err error) {

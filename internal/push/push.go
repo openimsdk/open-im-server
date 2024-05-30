@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	pbpush "github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery"
@@ -49,7 +49,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	cacheModel := cache.NewThirdCache(rdb)
+	cacheModel := redis.NewThirdCache(rdb)
 	offlinePusher, err := offlinepush.NewOfflinePusher(&config.RpcConfig, cacheModel)
 	if err != nil {
 		return err
