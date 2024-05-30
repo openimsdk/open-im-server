@@ -15,14 +15,14 @@
 package convert
 
 import (
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/protocol/sdkws"
 )
 
-func UserDB2Pb(user *relationtb.UserModel) *sdkws.UserInfo {
+func UserDB2Pb(user *relationtb.User) *sdkws.UserInfo {
 	return &sdkws.UserInfo{
 		UserID:           user.UserID,
 		Nickname:         user.Nickname,
@@ -38,8 +38,8 @@ func UsersDB2Pb(users []*relationtb.UserModel) []*sdkws.UserInfo {
 	return datautil.Slice(users, UserDB2Pb)
 }
 
-func UserPb2DB(user *sdkws.UserInfo) *relationtb.UserModel {
-	return &relationtb.UserModel{
+func UserPb2DB(user *sdkws.UserInfo) *relationtb.User {
+	return &relationtb.User{
 		UserID:           user.UserID,
 		Nickname:         user.Nickname,
 		FaceURL:          user.FaceURL,

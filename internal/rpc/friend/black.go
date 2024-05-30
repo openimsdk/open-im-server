@@ -16,11 +16,11 @@ package friend
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	pbfriend "github.com/openimsdk/protocol/friend"
 	"github.com/openimsdk/tools/mcontext"
 )
@@ -58,7 +58,7 @@ func (s *friendServer) RemoveBlack(ctx context.Context, req *pbfriend.RemoveBlac
 		return nil, err
 	}
 
-	if err := s.blackDatabase.Delete(ctx, []*relation.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
+	if err := s.blackDatabase.Delete(ctx, []*model.Black{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
 		return nil, err
 	}
 
@@ -75,7 +75,7 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbfriend.AddBlackReq) 
 	if err != nil {
 		return nil, err
 	}
-	black := relation.BlackModel{
+	black := model.Black{
 		OwnerUserID:    req.OwnerUserID,
 		BlockUserID:    req.BlackUserID,
 		OperatorUserID: mcontext.GetOpUserID(ctx),
@@ -83,7 +83,7 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbfriend.AddBlackReq) 
 		Ex:             req.Ex,
 	}
 
-	if err := s.blackDatabase.Create(ctx, []*relation.BlackModel{&black}); err != nil {
+	if err := s.blackDatabase.Create(ctx, []*model.Black{&black}); err != nil {
 		return nil, err
 	}
 	s.notificationSender.BlackAddedNotification(ctx, req)

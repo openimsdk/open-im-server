@@ -17,10 +17,10 @@ package msg
 import (
 	"context"
 	"encoding/json"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
@@ -93,7 +93,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		}
 	}
 	now := time.Now().UnixMilli()
-	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &relation.RevokeModel{
+	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &model.RevokeModel{
 		Role:     role,
 		UserID:   req.UserID,
 		Nickname: user.Nickname,

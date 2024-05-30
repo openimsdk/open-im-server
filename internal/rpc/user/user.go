@@ -19,7 +19,11 @@ import (
 	"errors"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/friend"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
+	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	friendpb "github.com/openimsdk/protocol/friend"
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/tools/db/redisutil"
@@ -30,12 +34,8 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
@@ -81,22 +81,22 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	if err != nil {
 		return err
 	}
-	users := make([]*tablerelation.UserModel, 0)
+	users := make([]*tablerelation.User, 0)
 
 	for _, v := range config.Share.IMAdminUserID {
-		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: v, AppMangerLevel: constant.AppNotificationAdmin})
+		users = append(users, &tablerelation.User{UserID: v, Nickname: v, AppMangerLevel: constant.AppNotificationAdmin})
 	}
 	userDB, err := mgo.NewUserMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
-	userCache := cache.NewUserCacheRedis(rdb, &config.LocalCacheConfig, userDB, cache.GetDefaultOpt())
+	userCache := redis.NewUserCacheRedis(rdb, &config.LocalCacheConfig, userDB, redis.GetRocksCacheOptions())
 	userMongoDB := mgo.NewUserMongoDriver(mgocli.GetDB())
 	database := controller.NewUserDatabase(userDB, userCache, mgocli.GetTx(), userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.Share.RpcRegisterName.Friend)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
-	cache.InitLocalCache(&config.LocalCacheConfig)
+	localcache.InitLocalCache(&config.LocalCacheConfig)
 	u := &userServer{
 		db:                       database,
 		RegisterCenter:           client,
@@ -171,11 +171,11 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	if err = s.webhookBeforeUpdateUserInfoEx(ctx, &s.config.WebhooksConfig.BeforeUpdateUserInfoEx, req); err != nil {
 		return nil, err
 	}
-	data := convert.UserPb2DBMapEx(req.UserInfo)
 	oldUser, err := s.db.GetUserByID(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
+	data := convert.UserPb2DBMapEx(req.UserInfo)
 	if err = s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
@@ -292,9 +292,9 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 		return nil, err
 	}
 	now := time.Now()
-	users := make([]*tablerelation.UserModel, 0, len(req.Users))
+	users := make([]*tablerelation.User, 0, len(req.Users))
 	for _, user := range req.Users {
-		users = append(users, &tablerelation.UserModel{
+		users = append(users, &tablerelation.User{
 			UserID:           user.UserID,
 			Nickname:         user.Nickname,
 			FaceURL:          user.FaceURL,
@@ -414,7 +414,7 @@ func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.Proc
 	if req.Ex != nil {
 		value = req.Ex.Value
 	}
-	// Assuming you have a method in s.db to add a user command
+	// Assuming you have a method in s.storage to add a user command
 	err = s.db.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, value, ex)
 	if err != nil {
 		return nil, err
@@ -462,7 +462,7 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 		val["ex"] = req.Ex.Value
 	}
 
-	// Assuming you have a method in s.db to update a user command
+	// Assuming you have a method in s.storage to update a user command
 	err = s.db.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, val)
 	if err != nil {
 		return nil, err
@@ -559,14 +559,14 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		}
 	}
 
-	user := &tablerelation.UserModel{
+	user := &tablerelation.User{
 		UserID:         req.UserID,
 		Nickname:       req.NickName,
 		FaceURL:        req.FaceURL,
 		CreateTime:     time.Now(),
 		AppMangerLevel: constant.AppNotificationAdmin,
 	}
-	if err := s.db.Create(ctx, []*tablerelation.UserModel{user}); err != nil {
+	if err := s.db.Create(ctx, []*tablerelation.User{user}); err != nil {
 		return nil, err
 	}
 
@@ -609,7 +609,7 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		return nil, err
 	}
 
-	var users []*relation.UserModel
+	var users []*tablerelation.User
 	var err error
 
 	// If a keyword is provided in the request
@@ -675,7 +675,7 @@ func (s *userServer) genUserID() string {
 	return string(data)
 }
 
-func (s *userServer) userModelToResp(users []*relation.UserModel, pagination pagination.Pagination) *pbuser.SearchNotificationAccountResp {
+func (s *userServer) userModelToResp(users []*tablerelation.User, pagination pagination.Pagination) *pbuser.SearchNotificationAccountResp {
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {

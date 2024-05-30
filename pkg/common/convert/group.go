@@ -15,14 +15,14 @@
 package convert
 
 import (
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	pbgroup "github.com/openimsdk/protocol/group"
 	sdkws "github.com/openimsdk/protocol/sdkws"
 )
 
-func Db2PbGroupInfo(m *relation.GroupModel, ownerUserID string, memberCount uint32) *sdkws.GroupInfo {
+func Db2PbGroupInfo(m *model.Group, ownerUserID string, memberCount uint32) *sdkws.GroupInfo {
 	return &sdkws.GroupInfo{
 		GroupID:                m.GroupID,
 		GroupName:              m.GroupName,
@@ -44,8 +44,8 @@ func Db2PbGroupInfo(m *relation.GroupModel, ownerUserID string, memberCount uint
 	}
 }
 
-func Pb2DbGroupRequest(req *pbgroup.GroupApplicationResponseReq, handleUserID string) *relation.GroupRequestModel {
-	return &relation.GroupRequestModel{
+func Pb2DbGroupRequest(req *pbgroup.GroupApplicationResponseReq, handleUserID string) *model.GroupRequest {
+	return &model.GroupRequest{
 		UserID:       req.FromUserID,
 		GroupID:      req.GroupID,
 		HandleResult: req.HandleResult,
@@ -55,7 +55,7 @@ func Pb2DbGroupRequest(req *pbgroup.GroupApplicationResponseReq, handleUserID st
 	}
 }
 
-func Db2PbCMSGroup(m *relation.GroupModel, ownerUserID string, ownerUserName string, memberCount uint32) *pbgroup.CMSGroup {
+func Db2PbCMSGroup(m *model.Group, ownerUserID string, ownerUserName string, memberCount uint32) *pbgroup.CMSGroup {
 	return &pbgroup.CMSGroup{
 		GroupInfo:          Db2PbGroupInfo(m, ownerUserID, memberCount),
 		GroupOwnerUserID:   ownerUserID,
@@ -63,7 +63,7 @@ func Db2PbCMSGroup(m *relation.GroupModel, ownerUserID string, ownerUserName str
 	}
 }
 
-func Db2PbGroupMember(m *relation.GroupMemberModel) *sdkws.GroupMemberFullInfo {
+func Db2PbGroupMember(m *model.GroupMember) *sdkws.GroupMemberFullInfo {
 	return &sdkws.GroupMemberFullInfo{
 		GroupID:   m.GroupID,
 		UserID:    m.UserID,
@@ -80,7 +80,7 @@ func Db2PbGroupMember(m *relation.GroupMemberModel) *sdkws.GroupMemberFullInfo {
 	}
 }
 
-func Db2PbGroupRequest(m *relation.GroupRequestModel, user *sdkws.PublicUserInfo, group *sdkws.GroupInfo) *sdkws.GroupRequest {
+func Db2PbGroupRequest(m *model.GroupRequest, user *sdkws.PublicUserInfo, group *sdkws.GroupInfo) *sdkws.GroupRequest {
 	return &sdkws.GroupRequest{
 		UserInfo:      user,
 		GroupInfo:     group,
@@ -108,8 +108,8 @@ func Db2PbGroupAbstractInfo(
 	}
 }
 
-func Pb2DBGroupInfo(m *sdkws.GroupInfo) *relation.GroupModel {
-	return &relation.GroupModel{
+func Pb2DBGroupInfo(m *sdkws.GroupInfo) *model.Group {
+	return &model.Group{
 		GroupID:                m.GroupID,
 		GroupName:              m.GroupName,
 		Notification:           m.Notification,
@@ -128,8 +128,8 @@ func Pb2DBGroupInfo(m *sdkws.GroupInfo) *relation.GroupModel {
 	}
 }
 
-// func Pb2DbGroupMember(m *sdkws.UserInfo) *relation.GroupMemberModel {
-//	return &relation.GroupMemberModel{
+// func Pb2DbGroupMember(m *sdkws.UserInfo) *relation.GroupMember {
+//	return &relation.GroupMember{
 //		UserID:   m.UserID,
 //		Nickname: m.Nickname,
 //		FaceURL:  m.FaceURL,
