@@ -25,7 +25,7 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/go-redis/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
@@ -176,20 +176,15 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 				if v.message.Options != nil {
 					msg.Options = msgprocessor.NewMsgOptions()
 				}
-				if options.IsOfflinePush() {
-					v.message.Options = msgprocessor.WithOptions(
-						v.message.Options,
-						msgprocessor.WithOfflinePush(false),
-					)
-					msg.Options = msgprocessor.WithOptions(msg.Options, msgprocessor.WithOfflinePush(true))
-				}
-				if options.IsUnreadCount() {
-					v.message.Options = msgprocessor.WithOptions(
-						v.message.Options,
-						msgprocessor.WithUnreadCount(false),
-					)
-					msg.Options = msgprocessor.WithOptions(msg.Options, msgprocessor.WithUnreadCount(true))
-				}
+				msg.Options = msgprocessor.WithOptions(msg.Options,
+					msgprocessor.WithOfflinePush(options.IsOfflinePush()),
+					msgprocessor.WithUnreadCount(options.IsUnreadCount()),
+				)
+				v.message.Options = msgprocessor.WithOptions(
+					v.message.Options,
+					msgprocessor.WithOfflinePush(false),
+					msgprocessor.WithUnreadCount(false),
+				)
 				storageMsgList = append(storageMsgList, msg)
 			}
 			if isStorage(v.message) {

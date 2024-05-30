@@ -328,7 +328,7 @@ type Redis struct {
 	Password       string   `mapstructure:"password"`
 	EnablePipeline bool     `mapstructure:"enablePipeline"`
 	ClusterMode    bool     `mapstructure:"clusterMode"`
-	DB             int      `mapstructure:"db"`
+	DB             int      `mapstructure:"storage"`
 	MaxRetry       int      `mapstructure:"MaxRetry"`
 }
 

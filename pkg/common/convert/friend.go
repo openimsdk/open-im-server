@@ -17,15 +17,15 @@ package convert
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/timeutil"
 )
 
-func FriendPb2DB(friend *sdkws.FriendInfo) *relation.FriendModel {
-	dbFriend := &relation.FriendModel{}
+func FriendPb2DB(friend *sdkws.FriendInfo) *model.Friend {
+	dbFriend := &model.Friend{}
 	err := datautil.CopyStructFields(dbFriend, friend)
 	if err != nil {
 		return nil
@@ -35,7 +35,7 @@ func FriendPb2DB(friend *sdkws.FriendInfo) *relation.FriendModel {
 	return dbFriend
 }
 
-func FriendDB2Pb(ctx context.Context, friendDB *relation.FriendModel,
+func FriendDB2Pb(ctx context.Context, friendDB *model.Friend,
 	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
 ) (*sdkws.FriendInfo, error) {
 	users, err := getUsers(ctx, []string{friendDB.FriendUserID})
@@ -55,7 +55,7 @@ func FriendDB2Pb(ctx context.Context, friendDB *relation.FriendModel,
 
 func FriendsDB2Pb(
 	ctx context.Context,
-	friendsDB []*relation.FriendModel,
+	friendsDB []*model.Friend,
 	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
 ) (friendsPb []*sdkws.FriendInfo, err error) {
 	if len(friendsDB) == 0 {
@@ -89,7 +89,7 @@ func FriendsDB2Pb(
 
 }
 
-func FriendRequestDB2Pb(ctx context.Context, friendRequests []*relation.FriendRequestModel, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) ([]*sdkws.FriendRequest, error) {
+func FriendRequestDB2Pb(ctx context.Context, friendRequests []*model.FriendRequest, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) ([]*sdkws.FriendRequest, error) {
 	if len(friendRequests) == 0 {
 		return nil, nil
 	}
@@ -134,8 +134,8 @@ func FriendPb2DBMap(friend *sdkws.FriendInfo) map[string]any {
 
 	val := make(map[string]any)
 
-	// Assuming FriendInfo has similar fields to those in FriendModel.
-	// Add or remove fields based on your actual FriendInfo and FriendModel structures.
+	// Assuming FriendInfo has similar fields to those in Friend.
+	// Add or remove fields based on your actual FriendInfo and Friend structures.
 	if friend.FriendUser != nil {
 		if friend.FriendUser.UserID != "" {
 			val["friend_user_id"] = friend.FriendUser.UserID

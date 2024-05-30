@@ -17,15 +17,16 @@ package conversation
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
+	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/tools/db/redisutil"
 	"sort"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/mgo"
-	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	pbconversation "github.com/openimsdk/protocol/conversation"
@@ -73,13 +74,14 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
 	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
-	cache.InitLocalCache(&config.LocalCacheConfig)
+	localcache.InitLocalCache(&config.LocalCacheConfig)
 	pbconversation.RegisterConversationServer(server, &conversationServer{
 		msgRpcClient:                   &msgRpcClient,
 		user:                           &userRpcClient,
 		conversationNotificationSender: NewConversationNotificationSender(&config.NotificationConfig, &msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
-		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, &config.LocalCacheConfig, cache.GetDefaultOpt(), conversationDB), mgocli.GetTx()),
+		conversationDatabase: controller.NewConversationDatabase(conversationDB,
+			redis.NewConversationRedis(rdb, &config.LocalCacheConfig, redis.GetRocksCacheOptions(), conversationDB), mgocli.GetTx()),
 	})
 	return nil
 }
@@ -192,11 +194,11 @@ func (c *conversationServer) GetConversations(ctx context.Context, req *pbconver
 }
 
 func (c *conversationServer) SetConversation(ctx context.Context, req *pbconversation.SetConversationReq) (*pbconversation.SetConversationResp, error) {
-	var conversation tablerelation.ConversationModel
+	var conversation tablerelation.Conversation
 	if err := datautil.CopyStructFields(&conversation, req.Conversation); err != nil {
 		return nil, err
 	}
-	err := c.conversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tablerelation.ConversationModel{&conversation})
+	err := c.conversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tablerelation.Conversation{&conversation})
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +222,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		}
 	}
 	var unequal int
-	var conv tablerelation.ConversationModel
+	var conv tablerelation.Conversation
 	if len(req.UserIDs) == 1 {
 		cs, err := c.conversationDatabase.FindConversations(ctx, req.UserIDs[0], []string{req.Conversation.ConversationID})
 		if err != nil {
@@ -231,7 +233,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		}
 		conv = *cs[0]
 	}
-	var conversation tablerelation.ConversationModel
+	var conversation tablerelation.Conversation
 	conversation.ConversationID = req.Conversation.ConversationID
 	conversation.ConversationType = req.Conversation.ConversationType
 	conversation.UserID = req.Conversation.UserID
@@ -280,7 +282,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		}
 	}
 	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.ReadGroupChatType {
-		var conversations []*tablerelation.ConversationModel
+		var conversations []*tablerelation.Conversation
 		for _, ownerUserID := range req.UserIDs {
 			conversation2 := conversation
 			conversation2.OwnerUserID = ownerUserID
@@ -328,12 +330,12 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context,
 ) (*pbconversation.CreateSingleChatConversationsResp, error) {
 	switch req.ConversationType {
 	case constant.SingleChatType:
-		var conversation tablerelation.ConversationModel
+		var conversation tablerelation.Conversation
 		conversation.ConversationID = req.ConversationID
 		conversation.ConversationType = req.ConversationType
 		conversation.OwnerUserID = req.SendID
 		conversation.UserID = req.RecvID
-		err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation})
+		err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.Conversation{&conversation})
 		if err != nil {
 			log.ZWarn(ctx, "create conversation failed", err, "conversation", conversation)
 		}
@@ -341,17 +343,17 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context,
 		conversation2 := conversation
 		conversation2.OwnerUserID = req.RecvID
 		conversation2.UserID = req.SendID
-		err = c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation2})
+		err = c.conversationDatabase.CreateConversation(ctx, []*tablerelation.Conversation{&conversation2})
 		if err != nil {
 			log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
 		}
 	case constant.NotificationChatType:
-		var conversation tablerelation.ConversationModel
+		var conversation tablerelation.Conversation
 		conversation.ConversationID = req.ConversationID
 		conversation.ConversationType = req.ConversationType
 		conversation.OwnerUserID = req.RecvID
 		conversation.UserID = req.SendID
-		err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation})
+		err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.Conversation{&conversation})
 		if err != nil {
 			log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
 		}
