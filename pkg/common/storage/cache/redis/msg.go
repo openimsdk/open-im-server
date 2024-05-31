@@ -172,6 +172,7 @@ func (c *msgCache) GetMessagesBySeq(ctx context.Context, conversationID string, 
 
 			msg := &sdkws.MsgData{}
 			msgString, ok := value.(string)
+			fmt.Sprintf("get result", "seq", seq, "msg string", msgString)
 			if !ok || msgprocessor.String2Pb(msgString, msg) != nil {
 				failedSeqs = append(failedSeqs, seq)
 				continue
