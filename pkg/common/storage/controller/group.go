@@ -106,6 +106,13 @@ type GroupDatabase interface {
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
 	// DeleteGroupMemberHash deletes the hash entries for group members in specified groups.
 	DeleteGroupMemberHash(ctx context.Context, groupIDs []string) error
+
+	FindMemberIncrVersion(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error)
+	FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error)
+
+	FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error)
+
+	FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error)
 }
 
 func NewGroupDatabase(
@@ -219,10 +226,21 @@ func (g *groupDatabase) SearchGroup(ctx context.Context, keyword string, paginat
 }
 
 func (g *groupDatabase) UpdateGroup(ctx context.Context, groupID string, data map[string]any) error {
-	if err := g.groupDB.UpdateMap(ctx, groupID, data); err != nil {
-		return err
-	}
-	return g.cache.DelGroupsInfo(groupID).ChainExecDel(ctx)
+	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
+		if err := g.groupDB.UpdateMap(ctx, groupID, data); err != nil {
+			return err
+		}
+		userIDs, err := g.cache.GetGroupMemberIDs(ctx, groupID)
+		if err != nil {
+			return err
+		}
+		for _, userID := range userIDs {
+			if err := g.groupMemberDB.JoinGroupIncrVersion(ctx, userID, []string{groupID}, false); err != nil {
+				return err
+			}
+		}
+		return g.cache.DelGroupsInfo(groupID).ChainExecDel(ctx)
+	})
 }
 
 func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string, deleteMember bool) error {
@@ -231,11 +249,11 @@ func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string, delete
 		if err := g.groupDB.UpdateStatus(ctx, groupID, constant.GroupStatusDismissed); err != nil {
 			return err
 		}
+		userIDs, err := g.cache.GetGroupMemberIDs(ctx, groupID)
+		if err != nil {
+			return err
+		}
 		if deleteMember {
-			userIDs, err := g.cache.GetGroupMemberIDs(ctx, groupID)
-			if err != nil {
-				return err
-			}
 			if err := g.groupMemberDB.Delete(ctx, groupID, nil); err != nil {
 				return err
 			}
@@ -245,6 +263,11 @@ func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string, delete
 				DelGroupMembersHash(groupID).
 				DelGroupAllRoleLevel(groupID).
 				DelGroupMembersInfo(groupID, userIDs...)
+		}
+		if len(userIDs) > 0 {
+			if err := g.groupMemberDB.JoinGroupIncrVersion(ctx, groupID, userIDs, true); err != nil {
+				return err
+			}
 		}
 		return c.DelGroupsInfo(groupID).ChainExecDel(ctx)
 	})
@@ -442,4 +465,20 @@ func (g *groupDatabase) DeleteGroupMemberHash(ctx context.Context, groupIDs []st
 		c = c.DelGroupMembersHash(groupID)
 	}
 	return c.ChainExecDel(ctx)
+}
+
+func (g *groupDatabase) FindMemberIncrVersion(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error) {
+	return g.groupMemberDB.FindMemberIncrVersion(ctx, groupID, version, limit)
+}
+
+func (g *groupDatabase) FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error) {
+	return g.groupMemberDB.FindJoinIncrVersion(ctx, userID, version, limit)
+}
+
+func (g *groupDatabase) FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error) {
+	return g.cache.FindSortGroupMemberUserIDs(ctx, groupID)
+}
+
+func (g *groupDatabase) FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error) {
+	return g.cache.FindSortJoinGroupIDs(ctx, userID)
 }

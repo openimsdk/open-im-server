@@ -77,6 +77,9 @@ type Config struct {
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	if config.RpcConfig.GroupSyncCount <= 0 {
+		config.RpcConfig.GroupSyncCount = constant.MaxSyncPullNumber
+	}
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err
@@ -642,18 +645,29 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbgroup.GetG
 	if req.GroupID == "" {
 		return nil, errs.ErrArgs.WrapMsg("groupID empty")
 	}
-	members, err := s.db.FindGroupMembers(ctx, req.GroupID, req.UserIDs)
+	members, err := s.getGroupMembersInfo(ctx, req.GroupID, req.UserIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &pbgroup.GetGroupMembersInfoResp{
+		Members: members,
+	}, nil
+}
+
+func (s *groupServer) getGroupMembersInfo(ctx context.Context, groupID string, userIDs []string) ([]*sdkws.GroupMemberFullInfo, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
+	members, err := s.db.FindGroupMembers(ctx, groupID, userIDs)
 	if err != nil {
 		return nil, err
 	}
 	if err := s.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
-	return &pbgroup.GetGroupMembersInfoResp{
-		Members: datautil.Slice(members, func(e *model.GroupMember) *sdkws.GroupMemberFullInfo {
-			return convert.Db2PbGroupMember(e)
-		}),
-	}, nil
+	return datautil.Slice(members, func(e *model.GroupMember) *sdkws.GroupMemberFullInfo {
+		return convert.Db2PbGroupMember(e)
+	}), nil
 }
 
 // GetGroupApplicationList handles functions that get a list of group requests.
@@ -722,15 +736,28 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbgroup.GetGroupsI
 	if len(req.GroupIDs) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("groupID is empty")
 	}
-	groups, err := s.db.FindGroup(ctx, req.GroupIDs)
+	groups, err := s.getGroupsInfo(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
-	groupMemberNumMap, err := s.db.MapGroupMemberNum(ctx, req.GroupIDs)
+	return &pbgroup.GetGroupsInfoResp{
+		GroupInfos: groups,
+	}, nil
+}
+
+func (s *groupServer) getGroupsInfo(ctx context.Context, groupIDs []string) ([]*sdkws.GroupInfo, error) {
+	if len(groupIDs) == 0 {
+		return nil, nil
+	}
+	groups, err := s.db.FindGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
-	owners, err := s.db.FindGroupsOwner(ctx, req.GroupIDs)
+	groupMemberNumMap, err := s.db.MapGroupMemberNum(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	owners, err := s.db.FindGroupsOwner(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -740,15 +767,13 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbgroup.GetGroupsI
 	ownerMap := datautil.SliceToMap(owners, func(e *model.GroupMember) string {
 		return e.GroupID
 	})
-	return &pbgroup.GetGroupsInfoResp{
-		GroupInfos: datautil.Slice(groups, func(e *model.Group) *sdkws.GroupInfo {
-			var ownerUserID string
-			if owner, ok := ownerMap[e.GroupID]; ok {
-				ownerUserID = owner.UserID
-			}
-			return convert.Db2PbGroupInfo(e, ownerUserID, groupMemberNumMap[e.GroupID])
-		}),
-	}, nil
+	return datautil.Slice(groups, func(e *model.Group) *sdkws.GroupInfo {
+		var ownerUserID string
+		if owner, ok := ownerMap[e.GroupID]; ok {
+			ownerUserID = owner.UserID
+		}
+		return convert.Db2PbGroupInfo(e, ownerUserID, groupMemberNumMap[e.GroupID])
+	}), nil
 }
 
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup.GroupApplicationResponseReq) (*pbgroup.GroupApplicationResponseResp, error) {

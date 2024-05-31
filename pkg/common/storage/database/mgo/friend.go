@@ -45,7 +45,7 @@ func NewFriendMongo(db *mongo.Database) (database.Friend, error) {
 	if err != nil {
 		return nil, err
 	}
-	owner, err := NewVersionLog(db.Collection("friend_owner_version_log"))
+	owner, err := NewVersionLog(db.Collection("friend_version"))
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (f *FriendMgo) Create(ctx context.Context, friends []*model.Friend) error {
 			mp[friend.OwnerUserID] = append(mp[friend.OwnerUserID], friend.FriendUserID)
 		}
 		for ownerUserID, friendUserIDs := range mp {
-			if err := f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, false); err != nil {
+			if err := f.owner.IncrVersion(ctx, ownerUserID, friendUserIDs, false); err != nil {
 				return err
 			}
 		}
@@ -79,7 +79,7 @@ func (f *FriendMgo) Delete(ctx context.Context, ownerUserID string, friendUserID
 	return mongoutil.IncrVersion(func() error {
 		return mongoutil.DeleteOne(ctx, f.coll, filter)
 	}, func() error {
-		return f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, true)
+		return f.owner.IncrVersion(ctx, ownerUserID, friendUserIDs, true)
 	})
 }
 
@@ -95,7 +95,7 @@ func (f *FriendMgo) UpdateByMap(ctx context.Context, ownerUserID string, friendU
 	return mongoutil.IncrVersion(func() error {
 		return mongoutil.UpdateOne(ctx, f.coll, filter, bson.M{"$set": args}, true)
 	}, func() error {
-		return f.owner.WriteLog(ctx, ownerUserID, []string{friendUserID}, false)
+		return f.owner.IncrVersion(ctx, ownerUserID, []string{friendUserID}, false)
 	})
 }
 
@@ -185,7 +185,7 @@ func (f *FriendMgo) UpdateFriends(ctx context.Context, ownerUserID string, frien
 	return mongoutil.IncrVersion(func() error {
 		return mongoutil.Ignore(mongoutil.UpdateMany(ctx, f.coll, filter, update))
 	}, func() error {
-		return f.owner.WriteLog(ctx, ownerUserID, friendUserIDs, false)
+		return f.owner.IncrVersion(ctx, ownerUserID, friendUserIDs, false)
 	})
 }
 

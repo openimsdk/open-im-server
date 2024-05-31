@@ -36,7 +36,7 @@ func (l *VersionLogMgo) initIndex(ctx context.Context) error {
 	return err
 }
 
-func (l *VersionLogMgo) WriteLog(ctx context.Context, dId string, eIds []string, deleted bool) error {
+func (l *VersionLogMgo) IncrVersion(ctx context.Context, dId string, eIds []string, deleted bool) error {
 	if len(eIds) == 0 {
 		return errs.ErrArgs.WrapMsg("elem id is empty", "dId", dId)
 	}
