@@ -50,8 +50,8 @@ func callLua(ctx context.Context, rdb redis.Scripter, script *redis.Script, keys
 	if redis.HasErrorPrefix(r.Err(), "NOSCRIPT") {
 		if err := script.Load(ctx, rdb).Err(); err != nil {
 			r = script.Eval(ctx, rdb, keys, args)
+		} else {
 			r = script.EvalSha(ctx, rdb, keys, args)
-
 		}
 	}
 	v, err := r.Result()
