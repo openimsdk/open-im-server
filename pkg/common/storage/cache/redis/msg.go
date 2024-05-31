@@ -16,6 +16,7 @@ package redis
 
 import (
 	"context"
+	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -78,6 +79,7 @@ func (c *msgCache) SetMessagesToCache(ctx context.Context, conversationID string
 				values = append(values, s)
 			}
 		}
+		fmt.Print("rdb values is ", keys, values)
 		return LuaSetBatchWithCommonExpire(ctx, c.rdb, keys, values, msgCacheTimeout)
 	})
 	if err != nil {
