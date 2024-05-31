@@ -54,8 +54,6 @@ type CommonMsgDatabase interface {
 	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, seqs []int64) error
 	// DeleteMessagesFromCache deletes message caches from Redis by sequence numbers.
 	DeleteMessagesFromCache(ctx context.Context, conversationID string, seqs []int64) error
-	// DelUserDeleteMsgsList deletes user's message deletion list.
-	DelUserDeleteMsgsList(ctx context.Context, conversationID string, seqs []int64)
 	// BatchInsertChat2Cache increments the sequence number and then batch inserts messages into the cache.
 	BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNewConversation bool, err error)
 	// GetMsgBySeqsRange retrieves messages from MongoDB by a range of sequence numbers.
@@ -347,11 +345,7 @@ func (db *commonMsgDatabase) MarkSingleChatMsgsAsRead(ctx context.Context, userI
 }
 
 func (db *commonMsgDatabase) DeleteMessagesFromCache(ctx context.Context, conversationID string, seqs []int64) error {
-	return db.msg.DeleteMessages(ctx, conversationID, seqs)
-}
-
-func (db *commonMsgDatabase) DelUserDeleteMsgsList(ctx context.Context, conversationID string, seqs []int64) {
-	db.msg.DelUserDeleteMsgsList(ctx, conversationID, seqs)
+	return db.msg.DeleteMessagesFromCache(ctx, conversationID, seqs)
 }
 
 func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
@@ -378,7 +372,7 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 		userSeqMap[m.SendID] = m.Seq
 	}
 
-	failedNum, err := db.msg.SetMessageToCache(ctx, conversationID, msgs)
+	failedNum, err := db.msg.SetMessagesToCache(ctx, conversationID, msgs)
 	if err != nil {
 		prommetrics.MsgInsertRedisFailedCounter.Add(float64(failedNum))
 		log.ZError(ctx, "setMessageToCache error", err, "len", len(msgs), "conversationID", conversationID)
@@ -583,59 +577,17 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 		}
 	}
 	var successMsgs []*sdkws.MsgData
-	if len(cachedMsgs) > 0 {
-		delSeqs, err := db.msg.GetUserDelList(ctx, userID, conversationID)
-		if err != nil && errs.Unwrap(err) != redis.Nil {
-			return 0, 0, nil, err
-		}
-		var cacheDelNum int
-		for _, msg := range cachedMsgs {
-			if !datautil.Contain(msg.Seq, delSeqs...) {
-				successMsgs = append(successMsgs, msg)
-			} else {
-				cacheDelNum += 1
-			}
-		}
-		log.ZDebug(ctx, "get delSeqs from redis", "delSeqs", delSeqs, "userID", userID, "conversationID", conversationID, "cacheDelNum", cacheDelNum)
-		var reGetSeqsCache []int64
-		for i := 1; i <= cacheDelNum; {
-			newSeq := newBegin - int64(i)
-			if newSeq >= begin {
-				if !datautil.Contain(newSeq, delSeqs...) {
-					log.ZDebug(ctx, "seq del in cache, a new seq in range append", "new seq", newSeq)
-					reGetSeqsCache = append(reGetSeqsCache, newSeq)
-					i++
-				}
-			} else {
-				break
-			}
-		}
-		if len(reGetSeqsCache) > 0 {
-			log.ZDebug(ctx, "reGetSeqsCache", "reGetSeqsCache", reGetSeqsCache)
-			cachedMsgs, failedSeqs2, err := db.msg.GetMessagesBySeq(ctx, conversationID, reGetSeqsCache)
-			if err != nil {
-				if err != redis.Nil {
-
-					log.ZError(ctx, "get message from redis exception", err, "conversationID", conversationID, "seqs", reGetSeqsCache)
-				}
-			}
-			failedSeqs = append(failedSeqs, failedSeqs2...)
-			successMsgs = append(successMsgs, cachedMsgs...)
-		}
-	}
-	log.ZDebug(ctx, "get msgs from cache", "successMsgs", successMsgs)
-	if len(failedSeqs) != 0 {
-		log.ZDebug(ctx, "msgs not exist in redis", "seqs", failedSeqs)
-	}
+	log.ZDebug(ctx, "get msgs from cache", "cachedMsgs", cachedMsgs)
 	// get from cache or db
 
 	if len(failedSeqs) > 0 {
+		log.ZDebug(ctx, "msgs not exist in redis", "seqs", failedSeqs)
 		mongoMsgs, err := db.getMsgBySeqsRange(ctx, userID, conversationID, failedSeqs, begin, end)
 		if err != nil {
 
 			return 0, 0, nil, err
 		}
-		successMsgs = append(mongoMsgs, successMsgs...)
+		successMsgs = append(mongoMsgs, cachedMsgs...)
 	}
 
 	return minSeq, maxSeq, successMsgs, nil
@@ -694,12 +646,6 @@ func (db *commonMsgDatabase) DeleteConversationMsgsAndSetMinSeq(ctx context.Cont
 	log.ZDebug(ctx, "DeleteConversationMsgsAndSetMinSeq", "conversationID", conversationID, "minSeq", minSeq)
 	if minSeq == 0 {
 		return nil
-	}
-	if remainTime == 0 {
-		err = db.msg.CleanUpOneConversationAllMsg(ctx, conversationID)
-		if err != nil {
-			log.ZWarn(ctx, "CleanUpOneUserAllMsg", err, "conversationID", conversationID)
-		}
 	}
 	return db.seq.SetMinSeq(ctx, conversationID, minSeq)
 }
@@ -820,7 +766,7 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 }
 
 func (db *commonMsgDatabase) DeleteMsgsPhysicalBySeqs(ctx context.Context, conversationID string, allSeqs []int64) error {
-	if err := db.msg.DeleteMessages(ctx, conversationID, allSeqs); err != nil {
+	if err := db.msg.DeleteMessagesFromCache(ctx, conversationID, allSeqs); err != nil {
 		return err
 	}
 	for docID, seqs := range db.msgTable.GetDocIDSeqsMap(conversationID, allSeqs) {
@@ -836,21 +782,9 @@ func (db *commonMsgDatabase) DeleteMsgsPhysicalBySeqs(ctx context.Context, conve
 }
 
 func (db *commonMsgDatabase) DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error {
-	cachedMsgs, _, err := db.msg.GetMessagesBySeq(ctx, conversationID, seqs)
-	if err != nil && errs.Unwrap(err) != redis.Nil {
-		log.ZWarn(ctx, "DeleteUserMsgsBySeqs", err, "conversationID", conversationID, "seqs", seqs)
+	if err := db.msg.DeleteMessagesFromCache(ctx, conversationID, seqs); err != nil {
 		return err
 	}
-	if len(cachedMsgs) > 0 {
-		var cacheSeqs []int64
-		for _, msg := range cachedMsgs {
-			cacheSeqs = append(cacheSeqs, msg.Seq)
-		}
-		if err := db.msg.UserDeleteMsgs(ctx, conversationID, cacheSeqs, userID); err != nil {
-			return err
-		}
-	}
-
 	for docID, seqs := range db.msgTable.GetDocIDSeqsMap(conversationID, seqs) {
 		for _, seq := range seqs {
 			if _, err := db.msgDocDatabase.PushUnique(ctx, docID, db.msgTable.GetMsgIndex(seq), "del_list", []string{userID}); err != nil {
