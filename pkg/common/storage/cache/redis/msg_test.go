@@ -38,7 +38,7 @@ func Test_msgCache_SetMessagesToCache(t *testing.T) {
 		want    int
 		wantErr assert.ErrorAssertionFunc
 	}{
-		{"test1", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379"})}, args{context.Background(),
+		{"test1", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379", Password: "openIM23"})}, args{context.Background(),
 			"cid", []*sdkws.MsgData{{Seq: 1}, {Seq: 2}, {Seq: 3}}}, 3, assert.NoError},
 	}
 	for _, tt := range tests {
@@ -72,7 +72,7 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 		wantFailedSeqs []int64
 		wantErr        assert.ErrorAssertionFunc
 	}{
-		{"test1", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379"})},
+		{"test1", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379", Password: "openIM23"})},
 			args{context.Background(), "cid", []int64{1, 2, 3}},
 			[]*sdkws.MsgData{{Seq: 1}, {Seq: 2}, {Seq: 3}}, []int64{}, assert.NoError},
 		{"test2", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379"})},
@@ -109,7 +109,7 @@ func Test_msgCache_DeleteMessagesFromCache(t *testing.T) {
 		args    args
 		wantErr assert.ErrorAssertionFunc
 	}{
-		{"test1", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379"})},
+		{"test1", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379", Password: "openIM23"})},
 			args{context.Background(), "cid", []int64{1, 2, 3}}, assert.NoError},
 	}
 	for _, tt := range tests {
