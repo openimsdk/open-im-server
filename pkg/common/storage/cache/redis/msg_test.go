@@ -38,7 +38,7 @@ func Test_msgCache_SetMessagesToCache(t *testing.T) {
 		want    int
 		wantErr assert.ErrorAssertionFunc
 	}{
-		{"test1", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379", Username: "", Password: "openIM23", DB: 0})}, args{context.Background(),
+		{"test1", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379", Username: "", Password: "openIM123", DB: 0})}, args{context.Background(),
 			"cid", []*sdkws.MsgData{{Seq: 1}, {Seq: 2}, {Seq: 3}}}, 3, assert.NoError},
 	}
 	for _, tt := range tests {
