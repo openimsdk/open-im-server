@@ -87,16 +87,20 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 				rdb: tt.fields.rdb,
 			}
 			gotSeqMsgs, gotFailedSeqs, err := c.GetMessagesBySeq(tt.args.ctx, tt.args.conversationID, tt.args.seqs)
-			if err != nil {
-				fmt.Println("Test_msgCache_GetMessagesBySeq err", err)
-			}
-			fmt.Println("Test_msgCache_GetMessagesBySeq result is ", gotSeqMsgs, gotFailedSeqs)
 			if !tt.wantErr(t, err, fmt.Sprintf("GetMessagesBySeq(%v, %v, %v)", tt.args.ctx, tt.args.conversationID, tt.args.seqs)) {
 				return
 			}
-			//assert.Equalf(t, tt.wantSeqMsgs, gotSeqMsgs, "GetMessagesBySeq(%v, %v, %v)", tt.args.ctx, tt.args.conversationID, tt.args.seqs)
+			equalMsgDataSlices(t, tt.wantSeqMsgs, gotSeqMsgs)
 			assert.Equalf(t, tt.wantFailedSeqs, gotFailedSeqs, "GetMessagesBySeq(%v, %v, %v)", tt.args.ctx, tt.args.conversationID, tt.args.seqs)
 		})
+	}
+}
+
+func equalMsgDataSlices(t *testing.T, expected, actual []*sdkws.MsgData) {
+	assert.Equal(t, len(expected), len(actual), "Slices have different lengths")
+	for i := range expected {
+		assert.Equal(t, expected[i].Seq, actual[i].Seq, "Seq not equal")
+		assert.Equal(t, expected[i].Content, actual[i].Content, "Content not equal")
 	}
 }
 
