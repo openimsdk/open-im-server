@@ -19,6 +19,7 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/proto"
 	"testing"
 )
 
@@ -99,7 +100,7 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 func equalMsgDataSlices(t *testing.T, expected, actual []*sdkws.MsgData) {
 	assert.Equal(t, len(expected), len(actual), "Slices have different lengths")
 	for i := range expected {
-		assert.Equal(t, expected[i], actual[i], " not equal")
+		assert.True(t, proto.Equal(expected[i], actual[i]), "Element %d not equal: expected %v, got %v", i, expected[i], actual[i])
 	}
 }
 
