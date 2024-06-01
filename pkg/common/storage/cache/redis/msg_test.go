@@ -79,7 +79,7 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 			[]*sdkws.MsgData{{Seq: 1}, {Seq: 2}, {Seq: 3}}, failedSeq, assert.NoError},
 		{"test2", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379", Password: "openIM123", DB: 0})},
 			args{context.Background(), "cid", []int64{4, 5, 6}},
-			seqMsg, []int64{4, 5, 6}, assert.NoError},
+			nil, []int64{4, 5, 6}, assert.NoError},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
