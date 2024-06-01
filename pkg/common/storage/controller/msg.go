@@ -568,6 +568,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 	}
 	newBegin := seqs[0]
 	newEnd := seqs[len(seqs)-1]
+	var successMsgs []*sdkws.MsgData
 	log.ZDebug(ctx, "GetMsgBySeqsRange", "first seqs", seqs, "newBegin", newBegin, "newEnd", newEnd)
 	cachedMsgs, failedSeqs, err := db.msg.GetMessagesBySeq(ctx, conversationID, seqs)
 	if err != nil {
@@ -576,7 +577,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 			log.ZError(ctx, "get message from redis exception", err, "conversationID", conversationID, "seqs", seqs)
 		}
 	}
-	var successMsgs []*sdkws.MsgData
+	successMsgs = append(successMsgs, cachedMsgs...)
 	log.ZDebug(ctx, "get msgs from cache", "cachedMsgs", cachedMsgs)
 	// get from cache or db
 
@@ -587,7 +588,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 
 			return 0, 0, nil, err
 		}
-		successMsgs = append(mongoMsgs, cachedMsgs...)
+		successMsgs = append(mongoMsgs, successMsgs...)
 	}
 
 	return minSeq, maxSeq, successMsgs, nil
