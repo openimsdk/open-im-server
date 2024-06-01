@@ -90,9 +90,9 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 				fmt.Println("Test_msgCache_GetMessagesBySeq err", err)
 			}
 			fmt.Println("Test_msgCache_GetMessagesBySeq result is ", gotSeqMsgs, gotFailedSeqs)
-			//if !tt.wantErr(t, err, fmt.Sprintf("GetMessagesBySeq(%v, %v, %v)", tt.args.ctx, tt.args.conversationID, tt.args.seqs)) {
-			//	return
-			//}
+			if !tt.wantErr(t, err, fmt.Sprintf("GetMessagesBySeq(%v, %v, %v)", tt.args.ctx, tt.args.conversationID, tt.args.seqs)) {
+				return
+			}
 			//assert.Equalf(t, tt.wantSeqMsgs, gotSeqMsgs, "GetMessagesBySeq(%v, %v, %v)", tt.args.ctx, tt.args.conversationID, tt.args.seqs)
 			//assert.Equalf(t, tt.wantFailedSeqs, gotFailedSeqs, "GetMessagesBySeq(%v, %v, %v)", tt.args.ctx, tt.args.conversationID, tt.args.seqs)
 		})
