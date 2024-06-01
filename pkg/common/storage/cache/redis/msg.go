@@ -72,6 +72,7 @@ func (c *msgCache) SetMessagesToCache(ctx context.Context, conversationID string
 		var values []string
 		for _, key := range keys {
 			if msg, ok := msgMap[key]; ok {
+				fmt.Print("rdb msgData is ", key, msg)
 				s, err := msgprocessor.Pb2String(msg)
 				if err != nil {
 					return err
