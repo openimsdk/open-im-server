@@ -16,7 +16,6 @@ package redis
 
 import (
 	"context"
-	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -72,7 +71,6 @@ func (c *msgCache) SetMessagesToCache(ctx context.Context, conversationID string
 		var values []string
 		for _, key := range keys {
 			if msg, ok := msgMap[key]; ok {
-				fmt.Print("rdb msgData is ", key, msg)
 				s, err := msgprocessor.Pb2String(msg)
 				if err != nil {
 					return err
@@ -80,7 +78,6 @@ func (c *msgCache) SetMessagesToCache(ctx context.Context, conversationID string
 				values = append(values, s)
 			}
 		}
-		fmt.Print("rdb values is ", keys, values)
 		return LuaSetBatchWithCommonExpire(ctx, c.rdb, keys, values, msgCacheTimeout)
 	})
 	if err != nil {
@@ -173,7 +170,6 @@ func (c *msgCache) GetMessagesBySeq(ctx context.Context, conversationID string, 
 
 			msg := &sdkws.MsgData{}
 			msgString, ok := value.(string)
-			fmt.Println("get result", "seq", seq, "msg string", msgString)
 			if !ok || msgprocessor.String2Pb(msgString, msg) != nil {
 				failedSeqs = append(failedSeqs, seq)
 				continue

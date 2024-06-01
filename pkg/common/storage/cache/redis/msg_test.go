@@ -66,7 +66,6 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 		seqs           []int64
 	}
 	var failedSeq []int64
-	//var seqMsg []*sdkws.MsgData
 	tests := []struct {
 		name           string
 		fields         fields
