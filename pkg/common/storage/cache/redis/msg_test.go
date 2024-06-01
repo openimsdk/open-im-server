@@ -99,22 +99,8 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 func equalMsgDataSlices(t *testing.T, expected, actual []*sdkws.MsgData) {
 	assert.Equal(t, len(expected), len(actual), "Slices have different lengths")
 	for i := range expected {
-		assert.Equal(t, expected[i].Seq, actual[i].Seq, "Seq not equal")
-		assert.Equal(t, expected[i].Content, actual[i].Content, "Content not equal")
+		assert.Equal(t, expected[i], actual[i], " not equal")
 	}
-}
-
-func Test_msgCache_GetMessagesBySeq2(t *testing.T) {
-	c := &msgCache{
-		rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379", Password: "openIM123", DB: 0}),
-	}
-	gotSeqMsgs, gotFailedSeqs, err := c.GetMessagesBySeq(context.Background(), "cid", []int64{1, 2, 3})
-	if err != nil {
-		fmt.Println("Test_msgCache_GetMessagesBySeq2 error is ", err)
-		return
-	}
-	fmt.Println("Test_msgCache_GetMessagesBySeq2 result is ", gotSeqMsgs, gotFailedSeqs)
-
 }
 
 func Test_msgCache_DeleteMessagesFromCache(t *testing.T) {
