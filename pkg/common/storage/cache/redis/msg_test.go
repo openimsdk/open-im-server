@@ -65,6 +65,7 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 		seqs           []int64
 	}
 	var failedSeq []int64
+	var seqMsg []*sdkws.MsgData
 	tests := []struct {
 		name           string
 		fields         fields
@@ -78,7 +79,7 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 			[]*sdkws.MsgData{{Seq: 1}, {Seq: 2}, {Seq: 3}}, failedSeq, assert.NoError},
 		{"test2", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379", Password: "openIM123", DB: 0})},
 			args{context.Background(), "cid", []int64{4, 5, 6}},
-			nil, []int64{4, 5, 6}, assert.NoError},
+			seqMsg, []int64{4, 5, 6}, assert.NoError},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -93,8 +94,8 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 			if !tt.wantErr(t, err, fmt.Sprintf("GetMessagesBySeq(%v, %v, %v)", tt.args.ctx, tt.args.conversationID, tt.args.seqs)) {
 				return
 			}
-			//assert.Equalf(t, tt.wantSeqMsgs, gotSeqMsgs, "GetMessagesBySeq(%v, %v, %v)", tt.args.ctx, tt.args.conversationID, tt.args.seqs)
-			//assert.Equalf(t, tt.wantFailedSeqs, gotFailedSeqs, "GetMessagesBySeq(%v, %v, %v)", tt.args.ctx, tt.args.conversationID, tt.args.seqs)
+			assert.Equalf(t, tt.wantSeqMsgs, gotSeqMsgs, "GetMessagesBySeq(%v, %v, %v)", tt.args.ctx, tt.args.conversationID, tt.args.seqs)
+			assert.Equalf(t, tt.wantFailedSeqs, gotFailedSeqs, "GetMessagesBySeq(%v, %v, %v)", tt.args.ctx, tt.args.conversationID, tt.args.seqs)
 		})
 	}
 }
