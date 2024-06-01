@@ -94,6 +94,19 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 	}
 }
 
+func Test_msgCache_GetMessagesBySeq2(t *testing.T) {
+	c := &msgCache{
+		rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379", Password: "openIM123", DB: 0}),
+	}
+	gotSeqMsgs, gotFailedSeqs, err := c.GetMessagesBySeq(context.Background(), "cid", []int64{1, 2, 3})
+	if err != nil {
+		fmt.Println("Test_msgCache_GetMessagesBySeq2 error is ", err)
+		return
+	}
+	fmt.Println("Test_msgCache_GetMessagesBySeq2 result is ", gotSeqMsgs, gotFailedSeqs)
+
+}
+
 func Test_msgCache_DeleteMessagesFromCache(t *testing.T) {
 	type fields struct {
 		rdb redis.UniversalClient
