@@ -64,6 +64,7 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 		conversationID string
 		seqs           []int64
 	}
+	var failedSeq []int64
 	tests := []struct {
 		name           string
 		fields         fields
@@ -74,7 +75,7 @@ func Test_msgCache_GetMessagesBySeq(t *testing.T) {
 	}{
 		{"test1", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379", Password: "openIM123", DB: 0})},
 			args{context.Background(), "cid", []int64{1, 2, 3}},
-			[]*sdkws.MsgData{{Seq: 1}, {Seq: 2}, {Seq: 3}}, nil, assert.NoError},
+			[]*sdkws.MsgData{{Seq: 1}, {Seq: 2}, {Seq: 3}}, failedSeq, assert.NoError},
 		//{"test2", fields{rdb: redis.NewClient(&redis.Options{Addr: "localhost:16379", Password: "openIM123", DB: 0})},
 		//	args{context.Background(), "cid", []int64{4, 5, 6}},
 		//	nil, []int64{4, 5, 6}, assert.NoError},
