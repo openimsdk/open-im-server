@@ -7,7 +7,7 @@ require (
 	github.com/dtm-labs/rockscache v0.1.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.18.0
-	github.com/gogo/protobuf v1.3.2
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
@@ -31,6 +31,7 @@ require (
 	github.com/IBM/sarama v1.43.0
 	github.com/fatih/color v1.14.1
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/kelindar/bitmap v1.5.2
 	github.com/likexian/gokit v0.25.13
@@ -112,8 +113,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/mozillazg/go-httpheader v0.4.0 // indirect
-	github.com/onsi/ginkgo v1.16.5 // indirect
-	github.com/onsi/gomega v1.18.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect

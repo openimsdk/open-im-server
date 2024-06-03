@@ -17,6 +17,7 @@ package push
 import (
 	"context"
 	"encoding/json"
+	"github.com/IBM/sarama"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -25,20 +26,18 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
-	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils/jsonutil"
-	"github.com/redis/go-redis/v9"
-
-	"github.com/IBM/sarama"
 	"github.com/openimsdk/protocol/constant"
 	pbchat "github.com/openimsdk/protocol/msg"
 	pbpush "github.com/openimsdk/protocol/push"
+	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/timeutil"
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -162,7 +161,8 @@ func (c *ConsumerHandler) Push2User(ctx context.Context, userIDs []string, msg *
 
 	err = c.offlinePushMsg(ctx, msg, offlinePUshUserID)
 	if err != nil {
-		return err
+		log.ZWarn(ctx, "offlinePushMsg failed", err, "offlinePUshUserID", offlinePUshUserID, "msg", msg)
+		return nil
 	}
 
 	return nil
@@ -223,8 +223,8 @@ func (c *ConsumerHandler) Push2Group(ctx context.Context, groupID string, msg *s
 
 		err = c.offlinePushMsg(ctx, msg, needOfflinePushUserIDs)
 		if err != nil {
-			log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg)
-			return err
+			log.ZWarn(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg)
+			return nil
 		}
 
 	}

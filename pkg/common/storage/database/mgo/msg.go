@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/openimsdk/protocol/constant"
@@ -108,28 +109,10 @@ func (m *MsgMgo) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID, docID strin
 					{Key: "input", Value: indexs},
 					{Key: "as", Value: "index"},
 					{Key: "in", Value: bson.D{
-						{Key: "$let", Value: bson.D{
-							{Key: "vars", Value: bson.D{
-								{Key: "currentMsg", Value: bson.D{
-									{Key: "$arrayElemAt", Value: bson.A{"$msgs", "$$index"}},
-								}},
-							}},
-							{Key: "in", Value: bson.D{
-								{Key: "$cond", Value: bson.D{
-									{Key: "if", Value: bson.D{
-										{Key: "$in", Value: bson.A{userID, "$$currentMsg.del_list"}},
-									}},
-									{Key: "then", Value: nil},
-									{Key: "else", Value: "$$currentMsg"},
-								}},
-							}},
-						}},
+						{Key: "$arrayElemAt", Value: bson.A{"$msgs", "$$index"}},
 					}},
 				}},
 			}},
-		}}},
-		bson.D{{Key: "$project", Value: bson.D{
-			{Key: "msgs.del_list", Value: 0},
 		}}},
 	}
 	msgDocModel, err := mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, pipeline)
@@ -144,6 +127,10 @@ func (m *MsgMgo) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID, docID strin
 		msg := msgDocModel[0].Msg[i]
 		if msg == nil || msg.Msg == nil {
 			continue
+		}
+		if datautil.Contain(userID, msg.DelList...) {
+			msg.Msg.Content = ""
+			msg.Msg.Status = constant.MsgDeleted
 		}
 		if msg.Revoke != nil {
 			revokeContent := sdkws.MessageRevokedContent{
