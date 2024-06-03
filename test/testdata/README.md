@@ -10,7 +10,7 @@ testdata/
 │
 ├── README.md         # 描述该目录下各子目录和文件的作用
 │
-├── db/              # 存储模拟的数据库数据
+├── storage/              # 存储模拟的数据库数据
 │   ├── users.json   # 用户的模拟数据
 │   └── messages.json # 消息的模拟数据
 │

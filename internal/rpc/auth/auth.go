@@ -17,14 +17,14 @@ package auth
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	pbauth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/protocol/constant"
@@ -61,7 +61,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
-			cache.NewTokenCacheModel(rdb),
+			redis2.NewTokenCacheModel(rdb),
 			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
 		),
