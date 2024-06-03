@@ -123,13 +123,14 @@ func NewGroupDatabase(
 	groupRequestDB database.GroupRequest,
 	ctxTx tx.Tx,
 	groupHash cache.GroupHash,
+	syncCount int,
 ) GroupDatabase {
 	return &groupDatabase{
 		groupDB:        groupDB,
 		groupMemberDB:  groupMemberDB,
 		groupRequestDB: groupRequestDB,
 		ctxTx:          ctxTx,
-		cache:          redis2.NewGroupCacheRedis(rdb, localCache, groupDB, groupMemberDB, groupRequestDB, groupHash, redis2.GetRocksCacheOptions()),
+		cache:          redis2.NewGroupCacheRedis(rdb, localCache, groupDB, groupMemberDB, groupRequestDB, groupHash, redis2.GetRocksCacheOptions(), syncCount),
 	}
 }
 
