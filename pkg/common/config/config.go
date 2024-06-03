@@ -323,13 +323,12 @@ type User struct {
 }
 
 type Redis struct {
-	Address        []string `mapstructure:"address"`
-	Username       string   `mapstructure:"username"`
-	Password       string   `mapstructure:"password"`
-	EnablePipeline bool     `mapstructure:"enablePipeline"`
-	ClusterMode    bool     `mapstructure:"clusterMode"`
-	DB             int      `mapstructure:"storage"`
-	MaxRetry       int      `mapstructure:"MaxRetry"`
+	Address     []string `mapstructure:"address"`
+	Username    string   `mapstructure:"username"`
+	Password    string   `mapstructure:"password"`
+	ClusterMode bool     `mapstructure:"clusterMode"`
+	DB          int      `mapstructure:"storage"`
+	MaxRetry    int      `mapstructure:"MaxRetry"`
 }
 
 type BeforeConfig struct {

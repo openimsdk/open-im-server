@@ -62,16 +62,12 @@ func (c *BatchDeleterRedis) ChainExecDel(ctx context.Context) error {
 func (c *BatchDeleterRedis) execDel(ctx context.Context, keys []string) error {
 	if len(keys) > 0 {
 		log.ZDebug(ctx, "delete cache", "topic", c.redisPubTopics, "keys", keys)
-		slotMapKeys, err := groupKeysBySlot(ctx, c.redisClient, keys)
+		// Batch delete keys
+		err := ProcessKeysBySlot(ctx, c.redisClient, keys, func(ctx context.Context, slot int64, keys []string) error {
+			return c.rocksClient.TagAsDeletedBatch2(ctx, keys)
+		})
 		if err != nil {
 			return err
-		}
-		// Batch delete keys
-		for slot, singleSlotKeys := range slotMapKeys {
-			if err := c.rocksClient.TagAsDeletedBatch2(ctx, singleSlotKeys); err != nil {
-				log.ZWarn(ctx, "Batch delete cache failed", err, "slot", slot, "keys", singleSlotKeys)
-				continue
-			}
 		}
 		// Publish the keys that have been deleted to Redis to update the local cache information of other nodes
 		if len(c.redisPubTopics) > 0 && len(keys) > 0 {
@@ -115,37 +111,6 @@ func GetRocksCacheOptions() *rockscache.Options {
 	opts.RandomExpireAdjustment = 0.2
 
 	return &opts
-}
-
-// groupKeysBySlot groups keys by their Redis cluster hash slots.
-func groupKeysBySlot(ctx context.Context, redisClient redis.UniversalClient, keys []string) (map[int64][]string, error) {
-	slots := make(map[int64][]string)
-	clusterClient, isCluster := redisClient.(*redis.ClusterClient)
-	if isCluster {
-		pipe := clusterClient.Pipeline()
-		cmds := make([]*redis.IntCmd, len(keys))
-		for i, key := range keys {
-			cmds[i] = pipe.ClusterKeySlot(ctx, key)
-		}
-		_, err := pipe.Exec(ctx)
-		if err != nil {
-			return nil, errs.WrapMsg(err, "get slot err")
-		}
-
-		for i, cmd := range cmds {
-			slot, err := cmd.Result()
-			if err != nil {
-				log.ZWarn(ctx, "some key get slot err", err, "key", keys[i])
-				continue
-			}
-			slots[slot] = append(slots[slot], keys[i])
-		}
-	} else {
-		// If not a cluster client, put all keys in the same slot (0)
-		slots[0] = keys
-	}
-
-	return slots, nil
 }
 
 func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key string, expire time.Duration, fn func(ctx context.Context) (T, error)) (T, error) {

@@ -47,7 +47,6 @@ func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 
 type Server struct {
 	rpcPort        int
-	prometheusPort int
 	LongConnServer LongConnServer
 	config         *Config
 	pushTerminal   map[int]struct{}
@@ -57,10 +56,9 @@ func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 	s.LongConnServer = LongConnServer
 }
 
-func NewServer(rpcPort int, proPort int, longConnServer LongConnServer, conf *Config) *Server {
+func NewServer(rpcPort int, longConnServer LongConnServer, conf *Config) *Server {
 	s := &Server{
 		rpcPort:        rpcPort,
-		prometheusPort: proPort,
 		LongConnServer: longConnServer,
 		pushTerminal:   make(map[int]struct{}),
 		config:         conf,
