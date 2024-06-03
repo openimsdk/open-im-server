@@ -20,6 +20,7 @@ import (
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/tools/a2r"
 	"github.com/openimsdk/tools/apiresp"
+	"github.com/openimsdk/tools/log"
 )
 
 type GroupApi rpcclient.Group
@@ -145,7 +146,7 @@ func (o *GroupApi) GetIncrementalGroupMember(c *gin.Context) {
 }
 
 func (o *GroupApi) GetIncrementalGroupMemberBatch(c *gin.Context) {
-	type BatchIncrementalReq[A any] struct {
+	type BatchIncrementalReq struct {
 		UserID string                                `json:"user_id"`
 		List   []*group.GetIncrementalGroupMemberReq `json:"list"`
 	}
@@ -172,6 +173,7 @@ func (o *GroupApi) GetIncrementalGroupMemberBatch(c *gin.Context) {
 			if len(resp.List) == 0 {
 				apiresp.GinError(c, err)
 			} else {
+				log.ZError(c, "group incr sync versopn", err, "groupID", req.GroupID, "success", len(resp.List))
 				apiresp.GinSuccess(c, resp)
 			}
 			return
