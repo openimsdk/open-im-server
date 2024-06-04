@@ -62,4 +62,9 @@ type GroupCache interface {
 
 	FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error)
 	FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error)
+
+	DelMaxGroupMemberVersion(groupIDs ...string) GroupCache
+	DelMaxJoinGroupVersion(userIDs ...string) GroupCache
+	FindMaxGroupMemberVersion(ctx context.Context, groupID string) (*model.VersionLog, error)
+	FindMaxJoinGroupVersion(ctx context.Context, userID string) (*model.VersionLog, error)
 }

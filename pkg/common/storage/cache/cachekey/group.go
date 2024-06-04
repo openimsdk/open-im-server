@@ -28,6 +28,8 @@ const (
 	JoinedGroupsKey            = "JOIN_GROUPS_KEY:"
 	GroupMemberNumKey          = "GROUP_MEMBER_NUM_CACHE:"
 	GroupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:"
+	GroupMemberMaxVersionKey   = "GROUP_MEMBER_MAX_VERSION:"
+	GroupJoinMaxVersionKey     = "GROUP_JOIN_MAX_VERSION:"
 )
 
 func GetGroupInfoKey(groupID string) string {
@@ -56,4 +58,12 @@ func GetGroupMemberNumKey(groupID string) string {
 
 func GetGroupRoleLevelMemberIDsKey(groupID string, roleLevel int32) string {
 	return GroupRoleLevelMemberIDsKey + groupID + "-" + strconv.Itoa(int(roleLevel))
+}
+
+func GetGroupMemberMaxVersionKey(groupID string) string {
+	return GroupMemberMaxVersionKey + groupID
+}
+
+func GetJoinGroupMaxVersionKey(userID string) string {
+	return GroupJoinMaxVersionKey + userID
 }

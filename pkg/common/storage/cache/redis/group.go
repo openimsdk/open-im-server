@@ -114,6 +114,14 @@ func (g *GroupCacheRedis) getGroupRoleLevelMemberIDsKey(groupID string, roleLeve
 	return cachekey.GetGroupRoleLevelMemberIDsKey(groupID, roleLevel)
 }
 
+func (g *GroupCacheRedis) getGroupMemberMaxVersionKey(groupID string) string {
+	return cachekey.GetGroupMemberMaxVersionKey(groupID)
+}
+
+func (g *GroupCacheRedis) getJoinGroupMaxVersionKey(userID string) string {
+	return cachekey.GetJoinGroupMaxVersionKey(userID)
+}
+
 func (g *GroupCacheRedis) GetGroupIndex(group *model.Group, keys []string) (int, error) {
 	key := g.getGroupInfoKey(group.GroupID)
 	for i, _key := range keys {
@@ -430,4 +438,36 @@ func (g *GroupCacheRedis) FindSortJoinGroupIDs(ctx context.Context, userID strin
 		groupIDs = groupIDs[:g.syncCount]
 	}
 	return groupIDs, nil
+}
+
+func (g *GroupCacheRedis) DelMaxGroupMemberVersion(groupIDs ...string) cache.GroupCache {
+	keys := make([]string, 0, len(groupIDs))
+	for _, groupID := range groupIDs {
+		keys = append(keys, g.getGroupMemberMaxVersionKey(groupID))
+	}
+	cache := g.CloneGroupCache()
+	cache.AddKeys(keys...)
+	return cache
+}
+
+func (g *GroupCacheRedis) DelMaxJoinGroupVersion(userIDs ...string) cache.GroupCache {
+	keys := make([]string, 0, len(userIDs))
+	for _, userID := range userIDs {
+		keys = append(keys, g.getJoinGroupMaxVersionKey(userID))
+	}
+	cache := g.CloneGroupCache()
+	cache.AddKeys(keys...)
+	return cache
+}
+
+func (g *GroupCacheRedis) FindMaxGroupMemberVersion(ctx context.Context, groupID string) (*model.VersionLog, error) {
+	return getCache(ctx, g.rcClient, g.getGroupMemberMaxVersionKey(groupID), g.expireTime, func(ctx context.Context) (*model.VersionLog, error) {
+		return g.groupMemberDB.FindJoinIncrVersion(ctx, groupID, 0, 0)
+	})
+}
+
+func (g *GroupCacheRedis) FindMaxJoinGroupVersion(ctx context.Context, userID string) (*model.VersionLog, error) {
+	return getCache(ctx, g.rcClient, g.getJoinGroupMaxVersionKey(userID), g.expireTime, func(ctx context.Context) (*model.VersionLog, error) {
+		return g.groupMemberDB.FindJoinIncrVersion(ctx, userID, 0, 0)
+	})
 }

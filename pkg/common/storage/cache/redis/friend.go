@@ -70,8 +70,12 @@ func (f *FriendCacheRedis) getFriendIDsKey(ownerUserID string) string {
 	return cachekey.GetFriendIDsKey(ownerUserID)
 }
 
-func (f *FriendCacheRedis) getFriendSyncSortUserIDsKey(ownerUserID string) string {
-	return cachekey.GetFriendSyncSortUserIDsKey(ownerUserID, f.syncCount)
+//func (f *FriendCacheRedis) getFriendSyncSortUserIDsKey(ownerUserID string) string {
+//	return cachekey.GetFriendSyncSortUserIDsKey(ownerUserID, f.syncCount)
+//}
+
+func (f *FriendCacheRedis) getFriendMaxVersionKey(ownerUserID string) string {
+	return cachekey.GetFriendMaxVersionKey(ownerUserID)
 }
 
 // getTwoWayFriendsIDsKey returns the key for storing two-way friend IDs in the cache.
@@ -103,15 +107,15 @@ func (f *FriendCacheRedis) DelFriendIDs(ownerUserIDs ...string) cache.FriendCach
 	return newFriendCache
 }
 
-func (f *FriendCacheRedis) DelSortFriendUserIDs(ownerUserIDs ...string) cache.FriendCache {
-	newGroupCache := f.CloneFriendCache()
-	keys := make([]string, 0, len(ownerUserIDs))
-	for _, userID := range ownerUserIDs {
-		keys = append(keys, f.getFriendSyncSortUserIDsKey(userID))
-	}
-	newGroupCache.AddKeys(keys...)
-	return newGroupCache
-}
+//func (f *FriendCacheRedis) DelSortFriendUserIDs(ownerUserIDs ...string) cache.FriendCache {
+//	newGroupCache := f.CloneFriendCache()
+//	keys := make([]string, 0, len(ownerUserIDs))
+//	for _, userID := range ownerUserIDs {
+//		keys = append(keys, f.getFriendSyncSortUserIDsKey(userID))
+//	}
+//	newGroupCache.AddKeys(keys...)
+//	return newGroupCache
+//}
 
 // GetTwoWayFriendIDs retrieves two-way friend IDs from the cache.
 func (f *FriendCacheRedis) GetTwoWayFriendIDs(ctx context.Context, ownerUserID string) (twoWayFriendIDs []string, err error) {
@@ -179,12 +183,29 @@ func (f *FriendCacheRedis) DelOwner(friendUserID string, ownerUserIDs []string) 
 	return newFriendCache
 }
 
-func (f *FriendCacheRedis) FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error) {
-	return getCache(ctx, f.rcClient, f.getFriendSyncSortUserIDsKey(ownerUserID), f.expireTime, func(ctx context.Context) ([]string, error) {
-		return f.friendDB.FindOwnerFriendUserIds(ctx, ownerUserID, f.syncCount)
-	})
+func (f *FriendCacheRedis) DelMaxFriendVersion(ownerUserIDs ...string) cache.FriendCache {
+	newFriendCache := f.CloneFriendCache()
+	for _, ownerUserID := range ownerUserIDs {
+		key := f.getFriendMaxVersionKey(ownerUserID)
+		newFriendCache.AddKeys(key) // Assuming AddKeys marks the keys for deletion
+	}
+
+	return newFriendCache
 }
 
-func (f *FriendCacheRedis) FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*model.VersionLog, error) {
-	return f.friendDB.FindIncrVersion(ctx, ownerUserID, version, limit)
+func (f *FriendCacheRedis) FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error) {
+	userIDs, err := f.GetFriendIDs(ctx, ownerUserID)
+	if err != nil {
+		return nil, err
+	}
+	if len(userIDs) > f.syncCount {
+		userIDs = userIDs[:f.syncCount]
+	}
+	return userIDs, nil
+}
+
+func (f *FriendCacheRedis) FindMaxFriendVersion(ctx context.Context, ownerUserID string) (*model.VersionLog, error) {
+	return getCache(ctx, f.rcClient, f.getFriendMaxVersionKey(ownerUserID), f.expireTime, func(ctx context.Context) (*model.VersionLog, error) {
+		return f.friendDB.FindIncrVersion(ctx, ownerUserID, 0, 0)
+	})
 }
