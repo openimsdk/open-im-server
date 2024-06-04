@@ -257,9 +257,17 @@ func (g *GroupCacheRedis) DelGroupMemberIDs(groupID string) cache.GroupCache {
 	return cache
 }
 
+func (g *GroupCacheRedis) findUserJoinedGroupID(ctx context.Context, userID string) ([]string, error) {
+	groupIDs, err := g.groupMemberDB.FindUserJoinedGroupID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return g.groupDB.FindJoinSortGroupID(ctx, groupIDs)
+}
+
 func (g *GroupCacheRedis) GetJoinedGroupIDs(ctx context.Context, userID string) (joinedGroupIDs []string, err error) {
 	return getCache(ctx, g.rcClient, g.getJoinedGroupsKey(userID), g.expireTime, func(ctx context.Context) ([]string, error) {
-		return g.groupMemberDB.FindUserJoinedGroupID(ctx, userID)
+		return g.findUserJoinedGroupID(ctx, userID)
 	})
 }
 

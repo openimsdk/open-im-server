@@ -116,6 +116,8 @@ type GroupDatabase interface {
 
 	FindMaxGroupMemberVersionCache(ctx context.Context, groupID string) (*model.VersionLog, error)
 	FindMaxJoinGroupVersionCache(ctx context.Context, userID string) (*model.VersionLog, error)
+
+	SearchJoinGroup(ctx context.Context, userID string, keyword string, pagination pagination.Pagination) (int64, []*model.Group, error)
 }
 
 func NewGroupDatabase(
@@ -509,4 +511,12 @@ func (g *groupDatabase) FindMaxGroupMemberVersionCache(ctx context.Context, grou
 
 func (g *groupDatabase) FindMaxJoinGroupVersionCache(ctx context.Context, userID string) (*model.VersionLog, error) {
 	return g.cache.FindMaxJoinGroupVersion(ctx, userID)
+}
+
+func (g *groupDatabase) SearchJoinGroup(ctx context.Context, userID string, keyword string, pagination pagination.Pagination) (int64, []*model.Group, error) {
+	groupIDs, err := g.cache.GetJoinedGroupIDs(ctx, userID)
+	if err != nil {
+		return 0, nil, err
+	}
+	return g.groupDB.SearchJoin(ctx, groupIDs, keyword, pagination)
 }
