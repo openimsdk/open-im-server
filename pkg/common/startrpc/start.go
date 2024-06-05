@@ -52,12 +52,9 @@ func Start[T any](ctx context.Context, discovery *config2.Discovery, prometheusC
 	if err != nil {
 		return err
 	}
-	prometheusPort, err := datautil.GetElemByIndex(prometheusConfig.Ports, index)
-	if err != nil {
-		return err
-	}
+
 	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcPort", rpcPort,
-		"prometheusPort", prometheusPort)
+		"prometheusPorts", prometheusConfig.Ports)
 	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(listenIP), strconv.Itoa(rpcPort))
 	listener, err := net.Listen(
 		"tcp",
@@ -117,9 +114,14 @@ func Start[T any](ctx context.Context, discovery *config2.Discovery, prometheusC
 		netErr     error
 		httpServer *http.Server
 	)
-
-	go func() {
-		if prometheusConfig.Enable && prometheusPort != 0 {
+	if prometheusConfig.Enable {
+		go func() {
+			prometheusPort, err := datautil.GetElemByIndex(prometheusConfig.Ports, index)
+			if err != nil {
+				netErr = err
+				netDone <- struct{}{}
+				return
+			}
 			metric.InitializeMetrics(srv)
 			// Create a HTTP server for prometheus.
 			httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
@@ -127,8 +129,8 @@ func Start[T any](ctx context.Context, discovery *config2.Discovery, prometheusC
 				netErr = errs.WrapMsg(err, "prometheus start err", httpServer.Addr)
 				netDone <- struct{}{}
 			}
-		}
-	}()
+		}()
+	}
 
 	go func() {
 		err := srv.Serve(listener)

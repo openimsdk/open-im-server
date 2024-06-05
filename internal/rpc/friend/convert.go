@@ -2,12 +2,12 @@ package friend
 
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/protocol/friend"
+	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/tools/utils/datautil"
 )
 
-func friendDB2PB(db *model.Friend) *friend.FriendInfo {
-	return &friend.FriendInfo{
+func friendDB2PB(db *model.Friend) *relation.FriendInfo {
+	return &relation.FriendInfo{
 		OwnerUserID:    db.OwnerUserID,
 		FriendUserID:   db.FriendUserID,
 		FriendNickname: db.FriendNickname,
@@ -21,6 +21,6 @@ func friendDB2PB(db *model.Friend) *friend.FriendInfo {
 	}
 }
 
-func friendsDB2PB(db []*model.Friend) []*friend.FriendInfo {
+func friendsDB2PB(db []*model.Friend) []*relation.FriendInfo {
 	return datautil.Slice(db, friendDB2PB)
 }

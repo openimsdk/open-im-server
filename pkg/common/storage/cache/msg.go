@@ -23,13 +23,8 @@ import (
 
 type MsgCache interface {
 	GetMessagesBySeq(ctx context.Context, conversationID string, seqs []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
-	SetMessageToCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int, error)
-	UserDeleteMsgs(ctx context.Context, conversationID string, seqs []int64, userID string) error
-	DelUserDeleteMsgsList(ctx context.Context, conversationID string, seqs []int64)
-	DeleteMessages(ctx context.Context, conversationID string, seqs []int64) error
-	GetUserDelList(ctx context.Context, userID, conversationID string) (seqs []int64, err error)
-	CleanUpOneConversationAllMsg(ctx context.Context, conversationID string) error
-	DelMsgFromCache(ctx context.Context, userID string, seqList []int64) error
+	SetMessagesToCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int, error)
+	DeleteMessagesFromCache(ctx context.Context, conversationID string, seqs []int64) error
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
 	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
 	JudgeMessageReactionExist(ctx context.Context, clientMsgID string, sessionType int32) (bool, error)

@@ -31,10 +31,6 @@ const (
 	reactionNotification = "EX_NOTIFICATION_"
 )
 
-func GetAllMessageCacheKey(conversationID string) string {
-	return messageCache + conversationID + "_*"
-}
-
 func GetMessageCacheKey(conversationID string, seq int64) string {
 	return messageCache + conversationID + "_" + strconv.Itoa(int(seq))
 }

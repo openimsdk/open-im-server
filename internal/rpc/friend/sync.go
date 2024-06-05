@@ -2,14 +2,15 @@ package friend
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	pbfriend "github.com/openimsdk/protocol/friend"
+	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/tools/errs"
 )
 
-func (s *friendServer) NotificationUserInfoUpdate(ctx context.Context, req *pbfriend.NotificationUserInfoUpdateReq) (*pbfriend.NotificationUserInfoUpdateResp, error) {
+func (s *friendServer) NotificationUserInfoUpdate(ctx context.Context, req *relation.NotificationUserInfoUpdateReq) (*relation.NotificationUserInfoUpdateResp, error) {
 	if req.NewUserInfo == nil {
 		var err error
 		req.NewUserInfo, err = s.userRpcClient.GetUserInfo(ctx, req.UserID)
@@ -30,10 +31,10 @@ func (s *friendServer) NotificationUserInfoUpdate(ctx context.Context, req *pbfr
 		}
 		s.notificationSender.FriendsInfoUpdateNotification(ctx, req.UserID, userIDs)
 	}
-	return &pbfriend.NotificationUserInfoUpdateResp{}, nil
+	return &relation.NotificationUserInfoUpdateResp{}, nil
 }
 
-func (s *friendServer) SearchFriends(ctx context.Context, req *pbfriend.SearchFriendsReq) (*pbfriend.SearchFriendsResp, error) {
+func (s *friendServer) SearchFriends(ctx context.Context, req *relation.SearchFriendsReq) (*relation.SearchFriendsResp, error) {
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -42,7 +43,7 @@ func (s *friendServer) SearchFriends(ctx context.Context, req *pbfriend.SearchFr
 		if err != nil {
 			return nil, err
 		}
-		return &pbfriend.SearchFriendsResp{
+		return &relation.SearchFriendsResp{
 			Total:   total,
 			Friends: friendsDB2PB(friends),
 		}, nil
@@ -51,17 +52,18 @@ func (s *friendServer) SearchFriends(ctx context.Context, req *pbfriend.SearchFr
 	if err != nil {
 		return nil, err
 	}
-	return &pbfriend.SearchFriendsResp{
+	return &relation.SearchFriendsResp{
 		Total:   total,
 		Friends: friendsDB2PB(friends),
 	}, nil
 }
 
-func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *pbfriend.GetIncrementalFriendsReq) (*pbfriend.GetIncrementalFriendsResp, error) {
+func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.GetIncrementalFriendsReq) (*relation.GetIncrementalFriendsResp, error) {
 	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
-	opt := incrversion.Option[*pbfriend.FriendInfo, pbfriend.GetIncrementalFriendsResp]{
+
+	opt := incrversion.Option[*relation.FriendInfo, relation.GetIncrementalFriendsResp]{
 		Ctx:             ctx,
 		VersionKey:      req.UserID,
 		VersionID:       req.VersionID,
@@ -70,16 +72,17 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *pbfriend.
 		Version:         s.friendDatabase.FindFriendIncrVersion,
 		CacheMaxVersion: s.friendDatabase.FindMaxFriendVersionCache,
 		SortID:          s.friendDatabase.FindSortFriendUserIDs,
-		Find: func(ctx context.Context, ids []string) ([]*pbfriend.FriendInfo, error) {
+		Find: func(ctx context.Context, ids []string) ([]*relation.FriendInfo, error) {
 			friends, err := s.friendDatabase.FindFriendsWithError(ctx, req.UserID, ids)
 			if err != nil {
 				return nil, err
 			}
 			return friendsDB2PB(friends), nil
 		},
-		ID: func(elem *pbfriend.FriendInfo) string { return elem.FriendUserID },
-		Resp: func(version *model.VersionLog, delIDs []string, list []*pbfriend.FriendInfo, full bool) *pbfriend.GetIncrementalFriendsResp {
-			return &pbfriend.GetIncrementalFriendsResp{
+
+		ID: func(elem *relation.FriendInfo) string { return elem.FriendUserID },
+		Resp: func(version *model.VersionLog, delIDs []string, list []*relation.FriendInfo, full bool) *relation.GetIncrementalFriendsResp {
+			return &relation.GetIncrementalFriendsResp{
 				VersionID:     version.ID.Hex(),
 				Version:       uint64(version.Version),
 				Full:          full,
