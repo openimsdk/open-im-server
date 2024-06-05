@@ -30,7 +30,6 @@ func (v *VersionLogTable) VersionLog() *VersionLog {
 		Deleted:    v.Deleted,
 		LastUpdate: v.LastUpdate,
 		LogLen:     0,
-		queryDoc:   true,
 	}
 }
 
@@ -42,15 +41,10 @@ type VersionLog struct {
 	Deleted    uint               `bson:"deleted"`
 	LastUpdate time.Time          `bson:"last_update"`
 	LogLen     int                `bson:"log_len"`
-	queryDoc   bool               `bson:"-"`
 }
 
-func (w *VersionLog) Full() bool {
-	return w.queryDoc || w.Version == 0 || len(w.Logs) != w.LogLen
-}
-
-func (w *VersionLog) DeleteAndChangeIDs() (delIds []string, changeIds []string) {
-	for _, l := range w.Logs {
+func (v *VersionLog) DeleteAndChangeIDs() (delIds []string, changeIds []string) {
+	for _, l := range v.Logs {
 		if l.Deleted {
 			delIds = append(delIds, l.EID)
 		} else {

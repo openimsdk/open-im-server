@@ -62,26 +62,28 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.
 	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
-	opt := incrversion.Option[*relation.FriendInfo, relation.GetIncrementalFriendsResp]{
-		VersionID: req.VersionID,
-		Version: func() (*model.VersionLog, error) {
-			return s.friendDatabase.FindFriendIncrVersion(ctx, req.UserID, uint(req.Version), incrversion.Limit(s.config.RpcConfig.FriendSyncCount, req.Version))
-		},
-		AllID: func() ([]string, error) {
-			return s.friendDatabase.FindSortFriendUserIDs(ctx, req.UserID)
-		},
-		Find: func(ids []string) ([]*relation.FriendInfo, error) {
+
+	opt := incrversion.Option[*pbfriend.FriendInfo, pbfriend.GetIncrementalFriendsResp]{
+		Ctx:             ctx,
+		VersionKey:      req.UserID,
+		VersionID:       req.VersionID,
+		VersionNumber:   req.Version,
+		SyncLimit:       s.config.RpcConfig.FriendSyncCount,
+		Version:         s.friendDatabase.FindFriendIncrVersion,
+		CacheMaxVersion: s.friendDatabase.FindMaxFriendVersionCache,
+		SortID:          s.friendDatabase.FindSortFriendUserIDs,
+		Find: func(ctx context.Context, ids []string) ([]*pbfriend.FriendInfo, error) {
+
 			friends, err := s.friendDatabase.FindFriendsWithError(ctx, req.UserID, ids)
 			if err != nil {
 				return nil, err
 			}
 			return friendsDB2PB(friends), nil
 		},
-		ID: func(elem *relation.FriendInfo) string {
-			return elem.FriendUserID
-		},
-		Resp: func(version *model.VersionLog, delIDs []string, list []*relation.FriendInfo, full bool) *relation.GetIncrementalFriendsResp {
-			return &relation.GetIncrementalFriendsResp{
+
+		ID: func(elem *pbfriend.FriendInfo) string { return elem.FriendUserID },
+		Resp: func(version *model.VersionLog, delIDs []string, list []*pbfriend.FriendInfo, full bool) *pbfriend.GetIncrementalFriendsResp {
+			return &pbfriend.GetIncrementalFriendsResp{
 				VersionID:     version.ID.Hex(),
 				Version:       uint64(version.Version),
 				Full:          full,
@@ -93,44 +95,3 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.
 	}
 	return opt.Build()
 }
-
-//func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.GetIncrementalFriendsReq) (*relation.GetIncrementalFriendsResp, error) {
-//	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
-//		return nil, err
-//	}
-//	var limit int
-//	if req.Version > 0 {
-//		limit = s.config.RpcConfig.FriendSyncCount
-//	}
-//	incrVer, err := s.friendDatabase.FindFriendIncrVersion(ctx, req.UserID, uint(req.Version), limit)
-//	if err != nil {
-//		return nil, err
-//	}
-//	var (
-//		deleteUserIDs []string
-//		changeUserIDs []string
-//	)
-//	if incrVer.Full() {
-//		changeUserIDs, err = s.friendDatabase.FindSortFriendUserIDs(ctx, req.UserID)
-//		if err != nil {
-//			return nil, err
-//		}
-//	} else {
-//		deleteUserIDs, changeUserIDs = incrVer.DeleteAndChangeIDs()
-//	}
-//	var friends []*model.Friend
-//	if len(changeUserIDs) > 0 {
-//		friends, err = s.friendDatabase.FindFriendsWithError(ctx, req.UserID, changeUserIDs)
-//		if err != nil {
-//			return nil, err
-//		}
-//	}
-//	return &relation.GetIncrementalFriendsResp{
-//		Version:       uint64(incrVer.Version),
-//		VersionID:     incrVer.ID.Hex(),
-//		Full:          incrVer.Full(),
-//		SyncCount:     uint32(s.config.RpcConfig.FriendSyncCount),
-//		DeleteUserIds: deleteUserIDs,
-//		Changes:       friendsDB2PB(friends),
-//	}, nil
-//}
