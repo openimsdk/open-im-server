@@ -63,7 +63,7 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.
 		return nil, err
 	}
 
-	opt := incrversion.Option[*pbfriend.FriendInfo, pbfriend.GetIncrementalFriendsResp]{
+	opt := incrversion.Option[*relation.FriendInfo, relation.GetIncrementalFriendsResp]{
 		Ctx:             ctx,
 		VersionKey:      req.UserID,
 		VersionID:       req.VersionID,
@@ -72,8 +72,7 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.
 		Version:         s.friendDatabase.FindFriendIncrVersion,
 		CacheMaxVersion: s.friendDatabase.FindMaxFriendVersionCache,
 		SortID:          s.friendDatabase.FindSortFriendUserIDs,
-		Find: func(ctx context.Context, ids []string) ([]*pbfriend.FriendInfo, error) {
-
+		Find: func(ctx context.Context, ids []string) ([]*relation.FriendInfo, error) {
 			friends, err := s.friendDatabase.FindFriendsWithError(ctx, req.UserID, ids)
 			if err != nil {
 				return nil, err
@@ -81,9 +80,9 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.
 			return friendsDB2PB(friends), nil
 		},
 
-		ID: func(elem *pbfriend.FriendInfo) string { return elem.FriendUserID },
-		Resp: func(version *model.VersionLog, delIDs []string, list []*pbfriend.FriendInfo, full bool) *pbfriend.GetIncrementalFriendsResp {
-			return &pbfriend.GetIncrementalFriendsResp{
+		ID: func(elem *relation.FriendInfo) string { return elem.FriendUserID },
+		Resp: func(version *model.VersionLog, delIDs []string, list []*relation.FriendInfo, full bool) *relation.GetIncrementalFriendsResp {
+			return &relation.GetIncrementalFriendsResp{
 				VersionID:     version.ID.Hex(),
 				Version:       uint64(version.Version),
 				Full:          full,
