@@ -44,15 +44,14 @@ import (
 )
 
 type MsgTransfer struct {
-	// This consumer aggregated messages, subscribed to the topic:ws2ms_chat,
-	// the modification notification is sent to msg_to_modify topic, the message is stored in redis, Incr Redis,
-	// and then the message is sent to ms2pschat topic for push, and the message is sent to msg_to_mongo topic for persistence
-	historyCH      *OnlineHistoryRedisConsumerHandler
+	// This consumer aggregated messages, subscribed to the topic:toRedis,
+	//  the message is stored in redis, Incr Redis, and then the message is sent to toPush topic for push,
+	// and the message is sent to toMongo topic for persistence
+	historyCH *OnlineHistoryRedisConsumerHandler
+	//This consumer handle message to mongo
 	historyMongoCH *OnlineHistoryMongoConsumerHandler
-	// mongoDB batch insert, delete messages in redis after success,
-	// and handle the deletion notification message deleted subscriptions topic: msg_to_mongo
-	ctx    context.Context
-	cancel context.CancelFunc
+	ctx            context.Context
+	cancel         context.CancelFunc
 }
 
 type Config struct {
@@ -82,8 +81,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	//todo MsgCacheTimeout
-	msgModel := redis.NewMsgCache(rdb, config.RedisConfig.EnablePipeline)
+	msgModel := redis.NewMsgCache(rdb)
 	seqModel := redis.NewSeqCache(rdb)
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
@@ -95,37 +93,23 @@ func Start(ctx context.Context, index int, config *Config) error {
 	}
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
-	msgTransfer, err := NewMsgTransfer(&config.KafkaConfig, msgDatabase, &conversationRpcClient, &groupRpcClient)
+	historyCH, err := NewOnlineHistoryRedisConsumerHandler(&config.KafkaConfig, msgDatabase, &conversationRpcClient, &groupRpcClient)
 	if err != nil {
 		return err
+	}
+	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(&config.KafkaConfig, msgDatabase)
+	if err != nil {
+		return err
+	}
+	msgTransfer := &MsgTransfer{
+		historyCH:      historyCH,
+		historyMongoCH: historyMongoCH,
 	}
 	return msgTransfer.Start(index, config)
 }
 
-func NewMsgTransfer(kafkaConf *config.Kafka, msgDatabase controller.CommonMsgDatabase,
-	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*MsgTransfer, error) {
-	historyCH, err := NewOnlineHistoryRedisConsumerHandler(kafkaConf, msgDatabase, conversationRpcClient, groupRpcClient)
-	if err != nil {
-		return nil, err
-	}
-	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(kafkaConf, msgDatabase)
-	if err != nil {
-		return nil, err
-	}
-
-	return &MsgTransfer{
-		historyCH:      historyCH,
-		historyMongoCH: historyMongoCH,
-	}, nil
-}
-
 func (m *MsgTransfer) Start(index int, config *Config) error {
-	prometheusPort, err := datautil.GetElemByIndex(config.MsgTransfer.Prometheus.Ports, index)
-	if err != nil {
-		return err
-	}
 	m.ctx, m.cancel = context.WithCancel(context.Background())
-
 	var (
 		netDone = make(chan struct{}, 1)
 		netErr  error
@@ -133,16 +117,26 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 
 	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyCH)
 	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyMongoCH)
+	err := m.historyCH.redisMessageBatches.Start()
+	if err != nil {
+		return err
+	}
 
 	if config.MsgTransfer.Prometheus.Enable {
 		go func() {
+			prometheusPort, err := datautil.GetElemByIndex(config.MsgTransfer.Prometheus.Ports, index)
+			if err != nil {
+				netErr = err
+				netDone <- struct{}{}
+				return
+			}
 			proreg := prometheus.NewRegistry()
 			proreg.MustRegister(
 				collectors.NewGoCollector(),
 			)
 			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer", &config.Share)...)
 			http.Handle("/metrics", promhttp.HandlerFor(proreg, promhttp.HandlerOpts{Registry: proreg}))
-			err := http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil)
+			err = http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil)
 			if err != nil && err != http.ErrServerClosed {
 				netErr = errs.WrapMsg(err, "prometheus start error", "prometheusPort", prometheusPort)
 				netDone <- struct{}{}
@@ -157,11 +151,13 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 		program.SIGTERMExit()
 		// graceful close kafka client.
 		m.cancel()
+		m.historyCH.redisMessageBatches.Close()
 		m.historyCH.historyConsumerGroup.Close()
 		m.historyMongoCH.historyConsumerGroup.Close()
 		return nil
 	case <-netDone:
 		m.cancel()
+		m.historyCH.redisMessageBatches.Close()
 		m.historyCH.historyConsumerGroup.Close()
 		m.historyMongoCH.historyConsumerGroup.Close()
 		close(netDone)

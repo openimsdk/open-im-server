@@ -715,7 +715,3 @@ func (g *GroupNotificationSender) GroupMemberSetToOrdinaryUserNotification(ctx c
 	}
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberSetToOrdinaryUserNotification, tips)
 }
-
-func (g *GroupNotificationSender) SuperGroupNotification(ctx context.Context, sendID, recvID string) {
-	g.Notification(ctx, sendID, recvID, constant.SuperGroupUpdateNotification, nil)
-}
