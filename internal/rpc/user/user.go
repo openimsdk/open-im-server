@@ -16,6 +16,12 @@ package user
 
 import (
 	"context"
+	"errors"
+	"math/rand"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/friend"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -23,10 +29,9 @@ import (
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
+	"github.com/openimsdk/protocol/group"
+	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/tools/db/redisutil"
-	"math/rand"
-	"strings"
-	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
@@ -119,8 +124,7 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 
 // deprecated:
 
-//UpdateUserInfo
-
+// UpdateUserInfo
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) (resp *pbuser.UpdateUserInfoResp, err error) {
 	resp = &pbuser.UpdateUserInfoResp{}
 	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID, s.config.Share.IMAdminUserID)
@@ -155,6 +159,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	}
 	return resp, nil
 }
+
 func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (resp *pbuser.UpdateUserInfoExResp, err error) {
 	resp = &pbuser.UpdateUserInfoExResp{}
 	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID, s.config.Share.IMAdminUserID)
@@ -187,6 +192,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	}
 	return resp, nil
 }
+
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.SetGlobalRecvMessageOptReq) (resp *pbuser.SetGlobalRecvMessageOptResp, err error) {
 	resp = &pbuser.SetGlobalRecvMessageOptResp{}
 	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
@@ -245,7 +251,6 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPagi
 		return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
 
 	}
-
 }
 
 func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterReq) (resp *pbuser.UserRegisterResp, err error) {
@@ -342,7 +347,8 @@ func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbus
 
 // GetUserStatus Get the online status of the user.
 func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatusReq) (resp *pbuser.GetUserStatusResp,
-	err error) {
+	err error,
+) {
 	onlineStatusList, err := s.db.GetUserStatus(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err
@@ -352,7 +358,8 @@ func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatu
 
 // SetUserStatus Synchronize user's online status.
 func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatusReq) (resp *pbuser.SetUserStatusResp,
-	err error) {
+	err error,
+) {
 	err = s.db.SetUserStatus(ctx, req.UserID, req.Status, req.PlatformID)
 	if err != nil {
 		return nil, err
@@ -376,7 +383,8 @@ func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatu
 
 // GetSubscribeUsersStatus Get the online status of subscribers.
 func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
-	req *pbuser.GetSubscribeUsersStatusReq) (*pbuser.GetSubscribeUsersStatusResp, error) {
+	req *pbuser.GetSubscribeUsersStatusReq,
+) (*pbuser.GetSubscribeUsersStatusResp, error) {
 	userList, err := s.db.GetAllSubscribeList(ctx, req.UserID)
 	if err != nil {
 		return nil, err
@@ -465,7 +473,6 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 }
 
 func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
-
 	err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID)
 	if err != nil {
 		return nil, err

@@ -16,14 +16,15 @@ package friend
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	pbfriend "github.com/openimsdk/protocol/relation"
+	"github.com/openimsdk/protocol/relation"
 )
 
-func (s *friendServer) webhookAfterDeleteFriend(ctx context.Context, after *config.AfterConfig, req *pbfriend.DeleteFriendReq) {
+func (s *friendServer) webhookAfterDeleteFriend(ctx context.Context, after *config.AfterConfig, req *relation.DeleteFriendReq) {
 	cbReq := &cbapi.CallbackAfterDeleteFriendReq{
 		CallbackCommand: cbapi.CallbackAfterDeleteFriendCommand,
 		OwnerUserID:     req.OwnerUserID,
@@ -32,7 +33,7 @@ func (s *friendServer) webhookAfterDeleteFriend(ctx context.Context, after *conf
 	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterDeleteFriendResp{}, after)
 }
 
-func (s *friendServer) webhookBeforeAddFriend(ctx context.Context, before *config.BeforeConfig, req *pbfriend.ApplyToAddFriendReq) error {
+func (s *friendServer) webhookBeforeAddFriend(ctx context.Context, before *config.BeforeConfig, req *relation.ApplyToAddFriendReq) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		cbReq := &cbapi.CallbackBeforeAddFriendReq{
 			CallbackCommand: cbapi.CallbackBeforeAddFriendCommand,
@@ -50,7 +51,7 @@ func (s *friendServer) webhookBeforeAddFriend(ctx context.Context, before *confi
 	})
 }
 
-func (s *friendServer) webhookAfterAddFriend(ctx context.Context, after *config.AfterConfig, req *pbfriend.ApplyToAddFriendReq) {
+func (s *friendServer) webhookAfterAddFriend(ctx context.Context, after *config.AfterConfig, req *relation.ApplyToAddFriendReq) {
 	cbReq := &cbapi.CallbackAfterAddFriendReq{
 		CallbackCommand: cbapi.CallbackAfterAddFriendCommand,
 		FromUserID:      req.FromUserID,
@@ -61,8 +62,7 @@ func (s *friendServer) webhookAfterAddFriend(ctx context.Context, after *config.
 	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, after)
 }
 
-func (s *friendServer) webhookAfterSetFriendRemark(ctx context.Context, after *config.AfterConfig, req *pbfriend.SetFriendRemarkReq) {
-
+func (s *friendServer) webhookAfterSetFriendRemark(ctx context.Context, after *config.AfterConfig, req *relation.SetFriendRemarkReq) {
 	cbReq := &cbapi.CallbackAfterSetFriendRemarkReq{
 		CallbackCommand: cbapi.CallbackAfterSetFriendRemarkCommand,
 		OwnerUserID:     req.OwnerUserID,
@@ -73,7 +73,7 @@ func (s *friendServer) webhookAfterSetFriendRemark(ctx context.Context, after *c
 	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, after)
 }
 
-func (s *friendServer) webhookAfterImportFriends(ctx context.Context, after *config.AfterConfig, req *pbfriend.ImportFriendReq) {
+func (s *friendServer) webhookAfterImportFriends(ctx context.Context, after *config.AfterConfig, req *relation.ImportFriendReq) {
 	cbReq := &cbapi.CallbackAfterImportFriendsReq{
 		CallbackCommand: cbapi.CallbackAfterImportFriendsCommand,
 		OwnerUserID:     req.OwnerUserID,
@@ -83,7 +83,7 @@ func (s *friendServer) webhookAfterImportFriends(ctx context.Context, after *con
 	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, after)
 }
 
-func (s *friendServer) webhookAfterRemoveBlack(ctx context.Context, after *config.AfterConfig, req *pbfriend.RemoveBlackReq) {
+func (s *friendServer) webhookAfterRemoveBlack(ctx context.Context, after *config.AfterConfig, req *relation.RemoveBlackReq) {
 	cbReq := &cbapi.CallbackAfterRemoveBlackReq{
 		CallbackCommand: cbapi.CallbackAfterRemoveBlackCommand,
 		OwnerUserID:     req.OwnerUserID,
@@ -93,7 +93,7 @@ func (s *friendServer) webhookAfterRemoveBlack(ctx context.Context, after *confi
 	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, after)
 }
 
-func (s *friendServer) webhookBeforeSetFriendRemark(ctx context.Context, before *config.BeforeConfig, req *pbfriend.SetFriendRemarkReq) error {
+func (s *friendServer) webhookBeforeSetFriendRemark(ctx context.Context, before *config.BeforeConfig, req *relation.SetFriendRemarkReq) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		cbReq := &cbapi.CallbackBeforeSetFriendRemarkReq{
 			CallbackCommand: cbapi.CallbackBeforeSetFriendRemarkCommand,
@@ -112,7 +112,7 @@ func (s *friendServer) webhookBeforeSetFriendRemark(ctx context.Context, before 
 	})
 }
 
-func (s *friendServer) webhookBeforeAddBlack(ctx context.Context, before *config.BeforeConfig, req *pbfriend.AddBlackReq) error {
+func (s *friendServer) webhookBeforeAddBlack(ctx context.Context, before *config.BeforeConfig, req *relation.AddBlackReq) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		cbReq := &cbapi.CallbackBeforeAddBlackReq{
 			CallbackCommand: cbapi.CallbackBeforeAddBlackCommand,
@@ -124,7 +124,7 @@ func (s *friendServer) webhookBeforeAddBlack(ctx context.Context, before *config
 	})
 }
 
-func (s *friendServer) webhookBeforeAddFriendAgree(ctx context.Context, before *config.BeforeConfig, req *pbfriend.RespondFriendApplyReq) error {
+func (s *friendServer) webhookBeforeAddFriendAgree(ctx context.Context, before *config.BeforeConfig, req *relation.RespondFriendApplyReq) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		cbReq := &cbapi.CallbackBeforeAddFriendAgreeReq{
 			CallbackCommand: cbapi.CallbackBeforeAddFriendAgreeCommand,
@@ -138,7 +138,7 @@ func (s *friendServer) webhookBeforeAddFriendAgree(ctx context.Context, before *
 	})
 }
 
-func (s *friendServer) webhookBeforeImportFriends(ctx context.Context, before *config.BeforeConfig, req *pbfriend.ImportFriendReq) error {
+func (s *friendServer) webhookBeforeImportFriends(ctx context.Context, before *config.BeforeConfig, req *relation.ImportFriendReq) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		cbReq := &cbapi.CallbackBeforeImportFriendsReq{
 			CallbackCommand: cbapi.CallbackBeforeImportFriendsCommand,

@@ -2,11 +2,12 @@ package friend
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	pbfriend "github.com/openimsdk/protocol/relation"
-	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/protocol/relation"
+	"github.com/openimsdk/tools/errs"
 )
 
 //func (s *friendServer) SearchFriends(ctx context.Context, req *pbfriend.SearchFriendsReq) (*pbfriend.SearchFriendsResp, error) {
@@ -33,7 +34,7 @@ import (
 //	}, nil
 //}
 
-func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *pbfriend.GetIncrementalFriendsReq) (*pbfriend.GetIncrementalFriendsResp, error) {
+func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.GetIncrementalFriendsReq) (*relation.GetIncrementalFriendsResp, error) {
 	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
