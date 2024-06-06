@@ -39,7 +39,7 @@ type FriendCache interface {
 
 	//DelSortFriendUserIDs(ownerUserIDs ...string) FriendCache
 
-	FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
+	//FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
 
 	//FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*relationtb.VersionLog, error)
 

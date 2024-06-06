@@ -59,8 +59,8 @@ type GroupCache interface {
 	GetGroupMemberNum(ctx context.Context, groupID string) (memberNum int64, err error)
 	DelGroupsMemberNum(groupID ...string) GroupCache
 
-	FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error)
-	FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error)
+	//FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error)
+	//FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error)
 
 	DelMaxGroupMemberVersion(groupIDs ...string) GroupCache
 	DelMaxJoinGroupVersion(userIDs ...string) GroupCache

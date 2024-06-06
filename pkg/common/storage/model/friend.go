@@ -22,8 +22,6 @@ import (
 type Friend struct {
 	OwnerUserID    string    `bson:"owner_user_id"`
 	FriendUserID   string    `bson:"friend_user_id"`
-	FriendNickname string    `bson:"friend_nickname"`
-	FriendFaceURL  string    `bson:"friend_face_url"`
 	Remark         string    `bson:"remark"`
 	CreateTime     time.Time `bson:"create_time"`
 	AddSource      int32     `bson:"add_source"`

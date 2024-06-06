@@ -110,9 +110,8 @@ type GroupDatabase interface {
 	FindMemberIncrVersion(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error)
 	FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error)
 
-	FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error)
-
-	FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error)
+	//FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error)
+	//FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error)
 
 	FindMaxGroupMemberVersionCache(ctx context.Context, groupID string) (*model.VersionLog, error)
 	FindMaxJoinGroupVersionCache(ctx context.Context, userID string) (*model.VersionLog, error)
@@ -497,13 +496,13 @@ func (g *groupDatabase) FindJoinIncrVersion(ctx context.Context, userID string, 
 	return g.groupMemberDB.FindJoinIncrVersion(ctx, userID, version, limit)
 }
 
-func (g *groupDatabase) FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error) {
-	return g.cache.FindSortGroupMemberUserIDs(ctx, groupID)
-}
-
-func (g *groupDatabase) FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error) {
-	return g.cache.FindSortJoinGroupIDs(ctx, userID)
-}
+//func (g *groupDatabase) FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error) {
+//	return g.cache.FindSortGroupMemberUserIDs(ctx, groupID)
+//}
+//
+//func (g *groupDatabase) FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error) {
+//	return g.cache.FindSortJoinGroupIDs(ctx, userID)
+//}
 
 func (g *groupDatabase) FindMaxGroupMemberVersionCache(ctx context.Context, groupID string) (*model.VersionLog, error) {
 	return g.cache.FindMaxGroupMemberVersion(ctx, groupID)

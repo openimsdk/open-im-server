@@ -193,16 +193,16 @@ func (f *FriendCacheRedis) DelMaxFriendVersion(ownerUserIDs ...string) cache.Fri
 	return newFriendCache
 }
 
-func (f *FriendCacheRedis) FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error) {
-	userIDs, err := f.GetFriendIDs(ctx, ownerUserID)
-	if err != nil {
-		return nil, err
-	}
-	if len(userIDs) > f.syncCount {
-		userIDs = userIDs[:f.syncCount]
-	}
-	return userIDs, nil
-}
+//func (f *FriendCacheRedis) FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error) {
+//	userIDs, err := f.GetFriendIDs(ctx, ownerUserID)
+//	if err != nil {
+//		return nil, err
+//	}
+//	if len(userIDs) > f.syncCount {
+//		userIDs = userIDs[:f.syncCount]
+//	}
+//	return userIDs, nil
+//}
 
 func (f *FriendCacheRedis) FindMaxFriendVersion(ctx context.Context, ownerUserID string) (*model.VersionLog, error) {
 	return getCache(ctx, f.rcClient, f.getFriendMaxVersionKey(ownerUserID), f.expireTime, func(ctx context.Context) (*model.VersionLog, error) {

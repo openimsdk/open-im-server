@@ -78,7 +78,7 @@ type FriendDatabase interface {
 	// UpdateFriends updates fields for friends
 	UpdateFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, val map[string]any) (err error)
 
-	FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
+	//FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
 
 	FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*model.VersionLog, error)
 
@@ -360,9 +360,9 @@ func (f *friendDatabase) UpdateFriends(ctx context.Context, ownerUserID string, 
 	})
 }
 
-func (f *friendDatabase) FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error) {
-	return f.cache.FindSortFriendUserIDs(ctx, ownerUserID)
-}
+//func (f *friendDatabase) FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error) {
+//	return f.cache.FindSortFriendUserIDs(ctx, ownerUserID)
+//}
 
 func (f *friendDatabase) FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*model.VersionLog, error) {
 	return f.friend.FindIncrVersion(ctx, ownerUserID, version, limit)

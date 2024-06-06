@@ -16,6 +16,8 @@ import (
 //	return maxSync
 //}
 
+const syncLimit = 200
+
 const (
 	tagQuery = iota + 1
 	tagFull
@@ -23,17 +25,17 @@ const (
 )
 
 type Option[A, B any] struct {
-	Ctx             context.Context
-	VersionKey      string
-	VersionID       string
-	VersionNumber   uint64
-	SyncLimit       int
+	Ctx           context.Context
+	VersionKey    string
+	VersionID     string
+	VersionNumber uint64
+	//SyncLimit       int
 	CacheMaxVersion func(ctx context.Context, dId string) (*model.VersionLog, error)
 	Version         func(ctx context.Context, dId string, version uint, limit int) (*model.VersionLog, error)
-	SortID          func(ctx context.Context, dId string) ([]string, error)
-	Find            func(ctx context.Context, ids []string) ([]A, error)
-	ID              func(elem A) string
-	Resp            func(version *model.VersionLog, delIDs []string, list []A, full bool) *B
+	//SortID          func(ctx context.Context, dId string) ([]string, error)
+	Find func(ctx context.Context, ids []string) ([]A, error)
+	ID   func(elem A) string
+	Resp func(version *model.VersionLog, delIDs []string, list []A, full bool) *B
 }
 
 func (o *Option[A, B]) newError(msg string) error {
@@ -47,15 +49,15 @@ func (o *Option[A, B]) check() error {
 	if o.VersionKey == "" {
 		return o.newError("versionKey is empty")
 	}
-	if o.SyncLimit <= 0 {
-		return o.newError("invalid synchronization quantity")
-	}
+	//if o.SyncLimit <= 0 {
+	//	return o.newError("invalid synchronization quantity")
+	//}
 	if o.Version == nil {
 		return o.newError("func version is nil")
 	}
-	if o.SortID == nil {
-		return o.newError("func allID is nil")
-	}
+	//if o.SortID == nil {
+	//	return o.newError("func allID is nil")
+	//}
 	if o.Find == nil {
 		return o.newError("func find is nil")
 	}
@@ -81,7 +83,7 @@ func (o *Option[A, B]) getVersion(tag *int) (*model.VersionLog, error) {
 	if o.CacheMaxVersion == nil {
 		if o.validVersion() {
 			*tag = tagQuery
-			return o.Version(o.Ctx, o.VersionKey, uint(o.VersionNumber), o.SyncLimit)
+			return o.Version(o.Ctx, o.VersionKey, uint(o.VersionNumber), syncLimit)
 		}
 		*tag = tagFull
 		return o.Version(o.Ctx, o.VersionKey, 0, 0)
@@ -103,7 +105,7 @@ func (o *Option[A, B]) getVersion(tag *int) (*model.VersionLog, error) {
 			return cache, nil
 		}
 		*tag = tagQuery
-		return o.Version(o.Ctx, o.VersionKey, uint(o.VersionNumber), o.SyncLimit)
+		return o.Version(o.Ctx, o.VersionKey, uint(o.VersionNumber), syncLimit)
 	}
 }
 
@@ -131,12 +133,11 @@ func (o *Option[A, B]) Build() (*B, error) {
 		deleteIDs []string
 		changeIDs []string
 	)
-	//full := o.VersionID != version.ID.Hex() || version.Full()
 	if full {
-		changeIDs, err = o.SortID(o.Ctx, o.VersionKey)
-		if err != nil {
-			return nil, err
-		}
+		//changeIDs, err = o.SortID(o.Ctx, o.VersionKey)
+		//if err != nil {
+		//	return nil, err
+		//}
 	} else {
 		deleteIDs, changeIDs = version.DeleteAndChangeIDs()
 	}
