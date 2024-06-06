@@ -275,7 +275,7 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *relation.G
 	if err != nil {
 		return nil, err
 	}
-	return &pbfriend.GetDesignatedFriendsResp{
+	return &relation.GetDesignatedFriendsResp{
 		FriendsInfo: friends,
 	}, nil
 }

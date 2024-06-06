@@ -16,10 +16,8 @@ package user
 
 import (
 	"context"
-	"errors"
 	"math/rand"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/friend"
@@ -29,8 +27,6 @@ import (
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
-	"github.com/openimsdk/protocol/group"
-	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"

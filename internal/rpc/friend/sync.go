@@ -2,12 +2,12 @@ package friend
 
 import (
 	"context"
+	"github.com/openimsdk/protocol/sdkws"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/relation"
-	"github.com/openimsdk/tools/errs"
 )
 
 //func (s *friendServer) SearchFriends(ctx context.Context, req *pbfriend.SearchFriendsReq) (*pbfriend.SearchFriendsResp, error) {
@@ -38,7 +38,7 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.
 	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
-	opt := incrversion.Option[*sdkws.FriendInfo, pbfriend.GetIncrementalFriendsResp]{
+	opt := incrversion.Option[*sdkws.FriendInfo, relation.GetIncrementalFriendsResp]{
 		Ctx:             ctx,
 		VersionKey:      req.UserID,
 		VersionID:       req.VersionID,
@@ -51,8 +51,8 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.
 			return s.getFriend(ctx, req.UserID, ids)
 		},
 		ID: func(elem *sdkws.FriendInfo) string { return elem.FriendUser.UserID },
-		Resp: func(version *model.VersionLog, delIDs []string, list []*sdkws.FriendInfo, full bool) *pbfriend.GetIncrementalFriendsResp {
-			return &pbfriend.GetIncrementalFriendsResp{
+		Resp: func(version *model.VersionLog, delIDs []string, list []*sdkws.FriendInfo, full bool) *relation.GetIncrementalFriendsResp {
+			return &relation.GetIncrementalFriendsResp{
 				VersionID:     version.ID.Hex(),
 				Version:       uint64(version.Version),
 				Full:          full,
