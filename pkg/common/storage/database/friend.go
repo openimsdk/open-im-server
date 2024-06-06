@@ -52,9 +52,7 @@ type Friend interface {
 
 	FindFriendUserID(ctx context.Context, friendUserID string) ([]string, error)
 
-	UpdateFriendUserInfo(ctx context.Context, friendUserID string, nickname string, faceURL string) error
-
-	SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error)
+	//SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error)
 
 	FindOwnerFriendUserIds(ctx context.Context, ownerUserID string, limit int) ([]string, error)
 }

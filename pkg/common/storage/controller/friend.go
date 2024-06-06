@@ -86,9 +86,7 @@ type FriendDatabase interface {
 
 	FindFriendUserID(ctx context.Context, friendUserID string) ([]string, error)
 
-	UpdateFriendUserInfo(ctx context.Context, friendUserID string, ownerUserID []string, nickname string, faceURL string) error
-
-	SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error)
+	//SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error)
 }
 
 type friendDatabase struct {
@@ -378,15 +376,6 @@ func (f *friendDatabase) FindFriendUserID(ctx context.Context, friendUserID stri
 	return f.friend.FindFriendUserID(ctx, friendUserID)
 }
 
-func (f *friendDatabase) UpdateFriendUserInfo(ctx context.Context, friendUserID string, ownerUserIDs []string, nickname string, faceURL string) error {
-	return f.tx.Transaction(ctx, func(ctx context.Context) error {
-		if err := f.friend.UpdateFriendUserInfo(ctx, friendUserID, nickname, faceURL); err != nil {
-			return err
-		}
-		return f.cache.DelOwner(friendUserID, ownerUserIDs).DelMaxFriendVersion(ownerUserIDs...).ChainExecDel(ctx)
-	})
-}
-
-func (f *friendDatabase) SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error) {
-	return f.friend.SearchFriend(ctx, ownerUserID, keyword, pagination)
-}
+//func (f *friendDatabase) SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error) {
+//	return f.friend.SearchFriend(ctx, ownerUserID, keyword, pagination)
+//}

@@ -180,7 +180,7 @@ func (o *GroupApi) GetIncrementalGroupMemberBatch(c *gin.Context) {
 		}
 		resp.List[req.GroupID] = res
 		changeCount += len(res.Changes) + len(res.DeleteUserIds)
-		if changeCount > int(res.SyncCount)*4 {
+		if changeCount >= int(res.SyncCount) {
 			break
 		}
 	}

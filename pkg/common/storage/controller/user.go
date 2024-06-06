@@ -60,6 +60,8 @@ type UserDatabase interface {
 	CountTotal(ctx context.Context, before *time.Time) (int64, error)
 	// CountRangeEverydayTotal Get the user increment in the range
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
+
+	SortQuery(ctx context.Context, userIDName map[string]string, asc bool) ([]*model.User, error)
 	// SubscribeUsersStatus Subscribe a user's presence status
 	SubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error
 	// UnsubscribeUsersStatus unsubscribe a user's presence status
@@ -208,6 +210,10 @@ func (u *userDatabase) CountTotal(ctx context.Context, before *time.Time) (count
 // CountRangeEverydayTotal Get the user increment in the range.
 func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
 	return u.userDB.CountRangeEverydayTotal(ctx, start, end)
+}
+
+func (u *userDatabase) SortQuery(ctx context.Context, userIDName map[string]string, asc bool) ([]*model.User, error) {
+	return u.userDB.SortQuery(ctx, userIDName, asc)
 }
 
 // SubscribeUsersStatus Subscribe or unsubscribe a user's presence status.

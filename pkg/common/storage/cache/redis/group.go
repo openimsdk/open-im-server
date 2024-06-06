@@ -27,7 +27,6 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 	"time"
 )
@@ -294,26 +293,6 @@ func (g *GroupCacheRedis) GetGroupMembersInfo(ctx context.Context, groupID strin
 	}, func(ctx context.Context, userID string) (*model.GroupMember, error) {
 		return g.groupMemberDB.Take(ctx, groupID, userID)
 	})
-}
-
-func (g *GroupCacheRedis) GetGroupMembersPage(
-	ctx context.Context,
-	groupID string,
-	userIDs []string,
-	showNumber, pageNumber int32,
-) (total uint32, groupMembers []*model.GroupMember, err error) {
-	groupMemberIDs, err := g.GetGroupMemberIDs(ctx, groupID)
-	if err != nil {
-		return 0, nil, err
-	}
-	if userIDs != nil {
-		userIDs = datautil.BothExist(userIDs, groupMemberIDs)
-	} else {
-		userIDs = groupMemberIDs
-	}
-	groupMembers, err = g.GetGroupMembersInfo(ctx, groupID, datautil.Paginate(userIDs, int(showNumber), int(showNumber)))
-
-	return uint32(len(userIDs)), groupMembers, err
 }
 
 func (g *GroupCacheRedis) GetAllGroupMembersInfo(ctx context.Context, groupID string) (groupMembers []*model.GroupMember, err error) {

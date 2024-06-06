@@ -9,11 +9,6 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 )
 
-func (s *groupServer) SearchGroupMember(ctx context.Context, req *pbgroup.SearchGroupMemberReq) (*pbgroup.SearchGroupMemberResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgroup.GetIncrementalGroupMemberReq) (*pbgroup.GetIncrementalGroupMemberResp, error) {
 	opt := incrversion.Option[*sdkws.GroupMemberFullInfo, pbgroup.GetIncrementalGroupMemberResp]{
 		Ctx:             ctx,

@@ -30,7 +30,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
-	pbfriend "github.com/openimsdk/protocol/friend"
+	pbfriend "github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/discovery"
@@ -48,6 +48,21 @@ type friendServer struct {
 	RegisterCenter        discovery.SvcDiscoveryRegistry
 	config                *Config
 	webhookClient         *webhook.Client
+}
+
+func (s *friendServer) GetIncrementalFriendsApplyTo(ctx context.Context, req *pbfriend.GetIncrementalFriendsApplyToReq) (*pbfriend.GetIncrementalFriendsApplyToResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *friendServer) GetIncrementalFriendsApplyFrom(ctx context.Context, req *pbfriend.GetIncrementalFriendsApplyFromReq) (*pbfriend.GetIncrementalFriendsApplyFromResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *friendServer) GetIncrementalBlacks(ctx context.Context, req *pbfriend.GetIncrementalBlacksReq) (*pbfriend.GetIncrementalBlacksResp, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 type Config struct {
@@ -270,14 +285,24 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbfriend.G
 	if datautil.Duplicate(req.FriendUserIDs) {
 		return nil, errs.ErrArgs.WrapMsg("friend userID repeated")
 	}
-	friends, err := s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
+	friends, err := s.getFriend(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
 		return nil, err
 	}
-	if resp.FriendsInfo, err = convert.FriendsDB2Pb(ctx, friends, s.userRpcClient.GetUsersInfoMap); err != nil {
+	return &pbfriend.GetDesignatedFriendsResp{
+		FriendsInfo: friends,
+	}, nil
+}
+
+func (s *friendServer) getFriend(ctx context.Context, ownerUserID string, friendUserIDs []string) ([]*sdkws.FriendInfo, error) {
+	if len(friendUserIDs) == 0 {
+		return nil, nil
+	}
+	friends, err := s.friendDatabase.FindFriendsWithError(ctx, ownerUserID, friendUserIDs)
+	if err != nil {
 		return nil, err
 	}
-	return resp, nil
+	return convert.FriendsDB2Pb(ctx, friends, s.userRpcClient.GetUsersInfoMap)
 }
 
 // Get the list of friend requests sent out proactively.
@@ -433,6 +458,7 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfrien
 	}
 	return resp, nil
 }
+
 func (s *friendServer) UpdateFriends(
 	ctx context.Context,
 	req *pbfriend.UpdateFriendsReq,

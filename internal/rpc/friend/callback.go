@@ -20,7 +20,7 @@ import (
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	pbfriend "github.com/openimsdk/protocol/friend"
+	pbfriend "github.com/openimsdk/protocol/relation"
 )
 
 func (s *friendServer) webhookAfterDeleteFriend(ctx context.Context, after *config.AfterConfig, req *pbfriend.DeleteFriendReq) {

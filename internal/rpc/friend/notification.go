@@ -24,7 +24,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 	"github.com/openimsdk/protocol/constant"
-	pbfriend "github.com/openimsdk/protocol/friend"
+	pbfriend "github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/mcontext"
 )

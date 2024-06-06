@@ -21,7 +21,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	pbfriend "github.com/openimsdk/protocol/friend"
+	pbfriend "github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/tools/mcontext"
 )
 
