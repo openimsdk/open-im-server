@@ -29,7 +29,7 @@ type Config struct {
 	WebhooksConfig     config.Webhooks
 	LocalCacheConfig   config.LocalCache
 	Discovery          config.Discovery
-	FcmPath            string
+	FcmConfigPath      string
 }
 
 func (p pushServer) PushMsg(ctx context.Context, req *pbpush.PushMsgReq) (*pbpush.PushMsgResp, error) {
@@ -51,7 +51,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	cacheModel := redis.NewThirdCache(rdb)
-	offlinePusher, err := offlinepush.NewOfflinePusher(&config.RpcConfig, cacheModel, config.FcmPath)
+	offlinePusher, err := offlinepush.NewOfflinePusher(&config.RpcConfig, cacheModel, config.FcmConfigPath)
 	if err != nil {
 		return err
 	}
