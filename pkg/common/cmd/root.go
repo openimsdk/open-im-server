@@ -31,6 +31,11 @@ type RootCmd struct {
 	prometheusPort int
 	log            config.Log
 	index          int
+	fcmPath        string
+}
+
+func (r *RootCmd) FcmPath() string {
+	return r.fcmPath
 }
 
 func (r *RootCmd) Index() int {
