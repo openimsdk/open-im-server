@@ -179,10 +179,18 @@ func (o *GroupApi) GetIncrementalGroupMemberBatch(c *gin.Context) {
 			return
 		}
 		resp.List[req.GroupID] = res
-		changeCount += len(res.Changes) + len(res.DeleteUserIds)
-		if changeCount >= int(res.SyncCount) {
+		changeCount += len(res.Insert) + len(res.Delete) + len(res.Update)
+		if changeCount >= 200 {
 			break
 		}
 	}
 	apiresp.GinSuccess(c, resp)
+}
+
+func (o *GroupApi) GetIncrementalGroupMemberUserIDs(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetIncrementalGroupMemberUserIDs, o.Client, c)
+}
+
+func (o *GroupApi) GetIncrementalJoinGroupIDs(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetIncrementalJoinGroupIDs, o.Client, c)
 }

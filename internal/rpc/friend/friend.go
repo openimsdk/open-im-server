@@ -64,9 +64,6 @@ type Config struct {
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	if config.RpcConfig.FriendSyncCount < 1 {
-		config.RpcConfig.FriendSyncCount = constant.MaxSyncPullNumber
-	}
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err

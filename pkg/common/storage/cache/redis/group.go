@@ -45,7 +45,6 @@ type GroupCacheRedis struct {
 	expireTime     time.Duration
 	rcClient       *rockscache.Client
 	groupHash      cache.GroupHash
-	syncCount      int
 }
 
 func NewGroupCacheRedis(
@@ -56,7 +55,6 @@ func NewGroupCacheRedis(
 	groupRequestDB database.GroupRequest,
 	hashCode cache.GroupHash,
 	opts *rockscache.Options,
-	syncCount int,
 ) cache.GroupCache {
 	batchHandler := NewBatchDeleterRedis(rdb, opts, []string{localCache.Group.Topic})
 	g := localCache.Group
@@ -70,7 +68,6 @@ func NewGroupCacheRedis(
 		groupMemberDB:  groupMemberDB,
 		groupRequestDB: groupRequestDB,
 		groupHash:      hashCode,
-		syncCount:      syncCount,
 	}
 }
 

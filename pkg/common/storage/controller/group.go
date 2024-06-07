@@ -117,6 +117,8 @@ type GroupDatabase interface {
 	FindMaxJoinGroupVersionCache(ctx context.Context, userID string) (*model.VersionLog, error)
 
 	SearchJoinGroup(ctx context.Context, userID string, keyword string, pagination pagination.Pagination) (int64, []*model.Group, error)
+
+	FindJoinGroupID(ctx context.Context, userID string) ([]string, error)
 }
 
 func NewGroupDatabase(
@@ -127,14 +129,13 @@ func NewGroupDatabase(
 	groupRequestDB database.GroupRequest,
 	ctxTx tx.Tx,
 	groupHash cache.GroupHash,
-	syncCount int,
 ) GroupDatabase {
 	return &groupDatabase{
 		groupDB:        groupDB,
 		groupMemberDB:  groupMemberDB,
 		groupRequestDB: groupRequestDB,
 		ctxTx:          ctxTx,
-		cache:          redis2.NewGroupCacheRedis(rdb, localCache, groupDB, groupMemberDB, groupRequestDB, groupHash, redis2.GetRocksCacheOptions(), syncCount),
+		cache:          redis2.NewGroupCacheRedis(rdb, localCache, groupDB, groupMemberDB, groupRequestDB, groupHash, redis2.GetRocksCacheOptions()),
 	}
 }
 
@@ -144,6 +145,10 @@ type groupDatabase struct {
 	groupRequestDB database.GroupRequest
 	ctxTx          tx.Tx
 	cache          cache.GroupCache
+}
+
+func (g *groupDatabase) FindJoinGroupID(ctx context.Context, userID string) ([]string, error) {
+	return g.cache.GetJoinedGroupIDs(ctx, userID)
 }
 
 func (g *groupDatabase) FindGroupMembers(ctx context.Context, groupID string, userIDs []string) ([]*model.GroupMember, error) {
@@ -243,7 +248,7 @@ func (g *groupDatabase) UpdateGroup(ctx context.Context, groupID string, data ma
 			return err
 		}
 		for _, userID := range userIDs {
-			if err := g.groupMemberDB.JoinGroupIncrVersion(ctx, userID, []string{groupID}, false); err != nil {
+			if err := g.groupMemberDB.JoinGroupIncrVersion(ctx, userID, []string{groupID}, model.VersionStateUpdate); err != nil {
 				return err
 			}
 
@@ -276,7 +281,7 @@ func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string, delete
 		}
 		c = c.DelMaxJoinGroupVersion(userIDs...)
 		if len(userIDs) > 0 {
-			if err := g.groupMemberDB.JoinGroupIncrVersion(ctx, groupID, userIDs, true); err != nil {
+			if err := g.groupMemberDB.JoinGroupIncrVersion(ctx, groupID, userIDs, model.VersionStateDelete); err != nil {
 				return err
 			}
 		}

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils/datautil"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -35,7 +34,7 @@ type Option[A, B any] struct {
 	//SortID          func(ctx context.Context, dId string) ([]string, error)
 	Find func(ctx context.Context, ids []string) ([]A, error)
 	ID   func(elem A) string
-	Resp func(version *model.VersionLog, delIDs []string, list []A, full bool) *B
+	Resp func(version *model.VersionLog, deleteIds []string, insertList, updateList []A, full bool) *B
 }
 
 func (o *Option[A, B]) newError(msg string) error {
@@ -130,31 +129,28 @@ func (o *Option[A, B]) Build() (*B, error) {
 		panic(fmt.Errorf("undefined tag %d", tag))
 	}
 	var (
-		deleteIDs []string
-		changeIDs []string
+		insertIds []string
+		deleteIds []string
+		updateIds []string
 	)
-	if full {
-		//changeIDs, err = o.SortID(o.Ctx, o.VersionKey)
-		//if err != nil {
-		//	return nil, err
-		//}
-	} else {
-		deleteIDs, changeIDs = version.DeleteAndChangeIDs()
+	if !full {
+		insertIds, deleteIds, updateIds = version.DeleteAndChangeIDs()
 	}
-	var list []A
-	if len(changeIDs) > 0 {
-		list, err = o.Find(o.Ctx, changeIDs)
+	var (
+		insertList []A
+		updateList []A
+	)
+	if len(insertIds) > 0 {
+		insertList, err = o.Find(o.Ctx, insertIds)
 		if err != nil {
 			return nil, err
 		}
-		if (!full) && o.ID != nil && len(changeIDs) != len(list) {
-			foundIDs := datautil.SliceSetAny(list, o.ID)
-			for _, id := range changeIDs {
-				if _, ok := foundIDs[id]; !ok {
-					deleteIDs = append(deleteIDs, id)
-				}
-			}
+	}
+	if len(updateIds) > 0 {
+		updateList, err = o.Find(o.Ctx, updateIds)
+		if err != nil {
+			return nil, err
 		}
 	}
-	return o.Resp(version, deleteIDs, list, full), nil
+	return o.Resp(version, deleteIds, insertList, updateList, full), nil
 }

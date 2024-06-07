@@ -120,6 +120,8 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		groupRouterGroup.POST("/get_incremental_join_group", g.GetIncrementalJoinGroup)
 		groupRouterGroup.POST("/get_incremental_group_member", g.GetIncrementalGroupMember)
 		groupRouterGroup.POST("/get_incremental_group_member_batch", g.GetIncrementalGroupMemberBatch)
+		groupRouterGroup.POST("/get_incremental_group_member_user_ids", g.GetIncrementalGroupMemberUserIDs)
+		groupRouterGroup.POST("/get_incremental_join_group_ids", g.GetIncrementalJoinGroupIDs)
 	}
 	// certificate
 	authRouterGroup := r.Group("/auth")

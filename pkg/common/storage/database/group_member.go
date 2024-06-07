@@ -34,7 +34,7 @@ type GroupMember interface {
 	TakeGroupMemberNum(ctx context.Context, groupID string) (count int64, err error)
 	FindUserManagedGroupID(ctx context.Context, userID string) (groupIDs []string, err error)
 	IsUpdateRoleLevel(data map[string]any) bool
-	JoinGroupIncrVersion(ctx context.Context, userID string, groupIDs []string, deleted bool) error
+	JoinGroupIncrVersion(ctx context.Context, userID string, groupIDs []string, state int32) error
 	FindMemberIncrVersion(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error)
 	FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error)
 }

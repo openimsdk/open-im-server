@@ -25,14 +25,14 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.
 			return s.getFriend(ctx, req.UserID, ids)
 		},
 		ID: func(elem *sdkws.FriendInfo) string { return elem.FriendUser.UserID },
-		Resp: func(version *model.VersionLog, delIDs []string, list []*sdkws.FriendInfo, full bool) *relation.GetIncrementalFriendsResp {
+		Resp: func(version *model.VersionLog, deleteIds []string, insertList, updateList []*sdkws.FriendInfo, full bool) *relation.GetIncrementalFriendsResp {
 			return &relation.GetIncrementalFriendsResp{
-				VersionID:     version.ID.Hex(),
-				Version:       uint64(version.Version),
-				Full:          full,
-				SyncCount:     uint32(s.config.RpcConfig.FriendSyncCount),
-				DeleteUserIds: delIDs,
-				Changes:       list,
+				VersionID: version.ID.Hex(),
+				Version:   uint64(version.Version),
+				Full:      full,
+				Delete:    deleteIds,
+				Insert:    insertList,
+				Update:    updateList,
 			}
 		},
 	}
