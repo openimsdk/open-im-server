@@ -19,7 +19,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/push"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
-	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
@@ -44,10 +43,9 @@ func NewPushRpcCmd() *PushRpcCmd {
 		LocalCacheConfigFileName: &pushConfig.LocalCacheConfig,
 		DiscoveryConfigFilename:  &pushConfig.Discovery,
 	}
-	ret.pushConfig.FcmConfigPath = ret.ConfigPath()
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
+		ret.pushConfig.FcmConfigPath = ret.ConfigPath()
 		return ret.runE()
 	}
 	return ret
