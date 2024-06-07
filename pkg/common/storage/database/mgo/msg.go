@@ -204,9 +204,47 @@ func (m *MsgMgo) GetMsgDocModelByIndex(ctx context.Context, conversationID strin
 	if sort != 1 && sort != -1 {
 		return nil, errs.ErrArgs.WrapMsg("mongo sort must be 1 or -1")
 	}
-	opt := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"doc_id": sort}).SetLimit(1)
-	filter := bson.M{"doc_id": primitive.Regex{Pattern: fmt.Sprintf("^%s:", conversationID)}}
-	msgs, err := mongoutil.Find[*model.MsgDocModel](ctx, m.coll, filter, opt)
+
+	// 构建聚合管道
+	pipeline := mongo.Pipeline{
+		{{
+			"$match", bson.D{
+				{"doc_id", bson.M{"$regex": fmt.Sprintf("^%s:", conversationID)}},
+			},
+		}},
+		{{
+			"$project", bson.M{
+				"doc_id": 1,
+				"seqSuffix": bson.M{ // 创建一个新字段来存储转换后的 seqSuffix 整数
+					"$toInt": bson.M{ // $toInt 表达式
+						"$arrayElemAt": bson.A{ // $arrayElemAt 需要一个数组作为第一个参数
+							bson.M{"$split": []interface{}{"$doc_id", ":"}}, // $split 表达式
+							-1, // 索引，取数组的最后一个元素
+						},
+					},
+				},
+				"msgs": 1,
+			},
+		}},
+		{{
+			"$sort", bson.D{ // 按 seqSuffix 排序
+				{"seqSuffix", sort},
+			},
+		}},
+	}
+
+	// 如果需要分页，可以在这里添加逻辑来动态地修改 pipeline
+	if index > 0 {
+		pipeline = append(pipeline, bson.D{{
+			"$skip", index,
+		}})
+	}
+	pipeline = append(pipeline, bson.D{{
+		"$limit", 1, // 我们只需要一个文档
+	}})
+
+	// 执行聚合查询
+	msgs, err := mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, pipeline)
 	if err != nil {
 		return nil, err
 	}
