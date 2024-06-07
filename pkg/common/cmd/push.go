@@ -44,10 +44,10 @@ func NewPushRpcCmd() *PushRpcCmd {
 		LocalCacheConfigFileName: &pushConfig.LocalCacheConfig,
 		DiscoveryConfigFilename:  &pushConfig.Discovery,
 	}
-	ret.pushConfig.FcmPath = ret.ConfigPath()
-	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
+	ret.pushConfig.FcmConfigPath = ret.ConfigPath()
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 		return ret.runE()
 	}
 	return ret
