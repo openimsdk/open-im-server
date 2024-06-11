@@ -34,7 +34,7 @@ type FriendMgo struct {
 
 // NewFriendMongo creates a new instance of FriendMgo with the provided MongoDB database.
 func NewFriendMongo(db *mongo.Database) (database.Friend, error) {
-	coll := db.Collection("friend")
+	coll := db.Collection(database.FriendName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "owner_user_id", Value: 1},
@@ -45,7 +45,7 @@ func NewFriendMongo(db *mongo.Database) (database.Friend, error) {
 	if err != nil {
 		return nil, err
 	}
-	owner, err := NewVersionLog(db.Collection("friend_version"))
+	owner, err := NewVersionLog(db.Collection(database.FriendVersionName))
 	if err != nil {
 		return nil, err
 	}

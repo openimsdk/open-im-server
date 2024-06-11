@@ -29,7 +29,7 @@ import (
 )
 
 func NewGroupMember(db *mongo.Database) (database.GroupMember, error) {
-	coll := db.Collection("group_member")
+	coll := db.Collection(database.GroupMemberName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "group_id", Value: 1},
@@ -40,11 +40,11 @@ func NewGroupMember(db *mongo.Database) (database.GroupMember, error) {
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
-	member, err := NewVersionLog(db.Collection("group_member_version"))
+	member, err := NewVersionLog(db.Collection(database.GroupMemberVersionName))
 	if err != nil {
 		return nil, err
 	}
-	join, err := NewVersionLog(db.Collection("group_join_version"))
+	join, err := NewVersionLog(db.Collection(database.GroupJoinVersionName))
 	if err != nil {
 		return nil, err
 	}

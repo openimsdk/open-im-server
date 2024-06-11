@@ -28,7 +28,7 @@ import (
 )
 
 func NewLogMongo(db *mongo.Database) (database.Log, error) {
-	coll := db.Collection("log")
+	coll := db.Collection(database.LogName)
 	_, err := coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
 		{
 			Keys: bson.D{

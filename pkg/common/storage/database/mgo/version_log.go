@@ -5,9 +5,9 @@ import (
 	"errors"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils/datautil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -37,34 +37,41 @@ func (l *VersionLogMgo) initIndex(ctx context.Context) error {
 }
 
 func (l *VersionLogMgo) IncrVersion(ctx context.Context, dId string, eIds []string, state int32) error {
-	if len(eIds) == 0 {
-		return errs.ErrArgs.WrapMsg("elem id is empty", "dId", dId)
-	}
-	if datautil.Duplicate(eIds) {
-		return errs.ErrArgs.WrapMsg("elem id is duplicate", "dId", dId, "eIds", eIds)
-	}
-	now := time.Now()
-	res, err := l.writeLogBatch(ctx, dId, eIds, state, now)
-	if err != nil {
-		return err
-	}
-	if res.MatchedCount > 0 {
-		return nil
-	}
-	if _, err := l.initDoc(ctx, dId, eIds, state, now); err == nil {
-		return nil
-	} else if !mongo.IsDuplicateKeyError(err) {
-		return err
-	}
-	if res, err := l.writeLogBatch(ctx, dId, eIds, state, now); err != nil {
-		return err
-	} else if res.MatchedCount == 0 {
-		return errs.ErrInternalServer.WrapMsg("mongodb return value that should not occur", "coll", l.coll.Name(), "dId", dId, "eIds", eIds)
-	}
-	return nil
+	_, err := l.IncrVersionResult(ctx, dId, eIds, state)
+	return err
 }
 
-func (l *VersionLogMgo) initDoc(ctx context.Context, dId string, eIds []string, state int32, now time.Time) (*model.VersionLogTable, error) {
+func (l *VersionLogMgo) IncrVersionResult(ctx context.Context, dId string, eIds []string, state int32) (*model.VersionLog, error) {
+	vl, err := l.incrVersionResult(ctx, dId, eIds, state)
+	if err != nil {
+		return nil, err
+	}
+	versionctx.GetVersionLog(ctx).Append(versionctx.Collection{
+		Name: l.coll.Name(),
+		Doc:  vl,
+	})
+	return vl, nil
+}
+
+func (l *VersionLogMgo) incrVersionResult(ctx context.Context, dId string, eIds []string, state int32) (*model.VersionLog, error) {
+	if len(eIds) == 0 {
+		return nil, errs.ErrArgs.WrapMsg("elem id is empty", "dId", dId)
+	}
+	now := time.Now()
+	if res, err := l.writeLogBatch2(ctx, dId, eIds, state, now); err == nil {
+		return res, nil
+	} else if !errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, err
+	}
+	if res, err := l.initDoc(ctx, dId, eIds, state, now); err == nil {
+		return res, nil
+	} else if !mongo.IsDuplicateKeyError(err) {
+		return nil, err
+	}
+	return l.writeLogBatch2(ctx, dId, eIds, state, now)
+}
+
+func (l *VersionLogMgo) initDoc(ctx context.Context, dId string, eIds []string, state int32, now time.Time) (*model.VersionLog, error) {
 	wl := model.VersionLogTable{
 		ID:         primitive.NewObjectID(),
 		DID:        dId,
@@ -81,11 +88,13 @@ func (l *VersionLogMgo) initDoc(ctx context.Context, dId string, eIds []string, 
 			LastUpdate: now,
 		})
 	}
-	_, err := l.coll.InsertOne(ctx, &wl)
-	return &wl, err
+	if _, err := l.coll.InsertOne(ctx, &wl); err != nil {
+		return nil, err
+	}
+	return wl.VersionLog(), nil
 }
 
-func (l *VersionLogMgo) writeLogBatch(ctx context.Context, dId string, eIds []string, state int32, now time.Time) (*mongo.UpdateResult, error) {
+func (l *VersionLogMgo) writeLogBatch2(ctx context.Context, dId string, eIds []string, state int32, now time.Time) (*model.VersionLog, error) {
 	if eIds == nil {
 		eIds = []string{}
 	}
@@ -142,7 +151,8 @@ func (l *VersionLogMgo) writeLogBatch(ctx context.Context, dId string, eIds []st
 			"$unset": "delete_e_ids",
 		},
 	}
-	return mongoutil.UpdateMany(ctx, l.coll, filter, pipeline)
+	opt := options.FindOneAndUpdate().SetUpsert(false).SetReturnDocument(options.After).SetProjection(bson.M{"logs": 0})
+	return mongoutil.FindOneAndUpdate[*model.VersionLog](ctx, l.coll, filter, pipeline, opt)
 }
 
 func (l *VersionLogMgo) findDoc(ctx context.Context, dId string) (*model.VersionLog, error) {
@@ -160,7 +170,7 @@ func (l *VersionLogMgo) FindChangeLog(ctx context.Context, dId string, version u
 		return nil, err
 	}
 	if res, err := l.initDoc(ctx, dId, nil, 0, time.Now()); err == nil {
-		return res.VersionLog(), nil
+		return res, nil
 	} else if mongo.IsDuplicateKeyError(err) {
 		return l.findChangeLog(ctx, dId, version, limit)
 	} else {

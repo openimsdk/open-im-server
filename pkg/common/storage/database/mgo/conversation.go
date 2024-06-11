@@ -16,6 +16,7 @@ package mgo
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"time"
 
@@ -29,7 +30,7 @@ import (
 )
 
 func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
-	coll := db.Collection("conversation")
+	coll := db.Collection(database.ConversationName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "owner_user_id", Value: 1},

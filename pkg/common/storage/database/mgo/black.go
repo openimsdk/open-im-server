@@ -27,7 +27,7 @@ import (
 )
 
 func NewBlackMongo(db *mongo.Database) (database.Black, error) {
-	coll := db.Collection("black")
+	coll := db.Collection(database.BlackName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "owner_user_id", Value: 1},

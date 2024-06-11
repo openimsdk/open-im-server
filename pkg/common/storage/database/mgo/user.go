@@ -31,7 +31,7 @@ import (
 )
 
 func NewUserMongo(db *mongo.Database) (database.User, error) {
-	coll := db.Collection("user")
+	coll := db.Collection(database.UserName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "user_id", Value: 1},

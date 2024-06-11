@@ -30,7 +30,7 @@ import (
 )
 
 func NewGroupMongo(db *mongo.Database) (database.Group, error) {
-	coll := db.Collection("group")
+	coll := db.Collection(database.GroupName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "group_id", Value: 1},

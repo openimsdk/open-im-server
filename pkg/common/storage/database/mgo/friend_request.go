@@ -27,7 +27,7 @@ import (
 )
 
 func NewFriendRequestMongo(db *mongo.Database) (database.FriendRequest, error) {
-	coll := db.Collection("friend_request")
+	coll := db.Collection(database.FriendRequestName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "from_user_id", Value: 1},

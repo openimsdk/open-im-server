@@ -38,7 +38,7 @@ func (v *VersionLogTable) VersionLog() *VersionLog {
 		Version:    v.Version,
 		Deleted:    v.Deleted,
 		LastUpdate: v.LastUpdate,
-		LogLen:     0,
+		LogLen:     len(v.Logs),
 	}
 }
 
