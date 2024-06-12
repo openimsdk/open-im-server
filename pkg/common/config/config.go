@@ -203,7 +203,7 @@ type Push struct {
 	} `mapstructure:"geTui"`
 	FCM struct {
 		ServiceAccount string `mapstructure:"serviceAccount"`
-		AuthUrl        string `mapstructure:"authUrl"`
+		AuthUrl        string `mapstructure:"authURL"`
 	} `mapstructure:"fcm"`
 	JPNS struct {
 		AppKey       string `mapstructure:"appKey"`

@@ -23,8 +23,9 @@ geTui:
   channelID: ''
   channelName: ''
 fcm:
-  serviceAccount: "x.json"
-  authUrl: ""
+  # Prioritize using file paths. If the file path is empty, use URL
+  serviceAccount: ""  # File path is concatenated with the parameters passed in through - c and serviceAccount.
+  authURL: ""  # file URL. Protocol must be specified.
 jpns:
   appKey: ''
   masterSecret: ''
