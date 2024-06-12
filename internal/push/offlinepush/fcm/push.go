@@ -92,7 +92,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 				Fail = Fail + messageCount
 				// Record push error
 				sendErrBuilder.WriteString(err.Error())
-				sendErrBuilder.WriteByte('\n')
+				sendErrBuilder.WriteByte('.')
 			} else {
 				Success = Success + response.SuccessCount
 				Fail = Fail + response.FailureCount
@@ -101,7 +101,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 					for i := range response.Responses {
 						if !response.Responses[i].Success {
 							msgErrBuilder.WriteString(response.Responses[i].Error.Error())
-							msgErrBuilder.WriteByte('\n')
+							msgErrBuilder.WriteByte('.')
 						}
 					}
 				}
@@ -151,7 +151,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 		}
 	}
 	if Fail != 0 {
-		return errs.New(fmt.Sprintf("%d message send failed\nsend err:%s\n,message err:%s",
+		return errs.New(fmt.Sprintf("%d message send failed;send err:%s;message err:%s",
 			Fail, sendErrBuilder.String(), msgErrBuilder.String())).Wrap()
 	}
 	return nil
