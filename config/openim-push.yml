@@ -24,7 +24,7 @@ geTui:
   channelName: ''
 fcm:
   serviceAccount: "x.json"
-  verifyUrl: ""
+  authUrl: ""
 jpns:
   appKey: ''
   masterSecret: ''

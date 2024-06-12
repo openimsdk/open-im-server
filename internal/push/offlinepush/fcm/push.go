@@ -52,16 +52,16 @@ func NewClient(pushConf *config.Push, cache cache.ThirdCache, fcmConfigPath stri
 		// with file path
 		credentialsFilePath := filepath.Join(fcmConfigPath, pushConf.FCM.ServiceAccount)
 		opt = option.WithCredentialsFile(credentialsFilePath)
-	case len(pushConf.FCM.VerifyUrl) != 0:
-		// with verify url
+	case len(pushConf.FCM.AuthUrl) != 0:
+		// with authentication url
 		client := httputil.NewHTTPClient(httputil.NewClientConfig())
-		resp, err := client.Get(pushConf.FCM.VerifyUrl)
+		resp, err := client.Get(pushConf.FCM.AuthUrl)
 		if err != nil {
-			return nil, errs.Wrap(err)
+			return nil, err
 		}
 		opt = option.WithCredentialsJSON(resp)
 	default:
-		return nil, errs.New("no FCM config")
+		return nil, errs.New("no FCM config").Wrap()
 	}
 
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
