@@ -71,6 +71,17 @@ jobs:
       run: sudo bash bootstrap.sh
       timeout-minutes: 20
 
+    - name: Get Internal IP Address
+      id: get-ip
+      run: |
+        IP=$(hostname -I | awk '{print $1}')
+        echo "The IP Address is: $IP"
+        echo "::set-output name=ip::$IP"
+      
+    - name: Update .env
+      run: |
+        sed -i 's|externalAddress=.*|externalAddress=http://${{ steps.get-ip.outputs.ip }}:10005|' config/minio.yml
+
     - name: Build, Start, Check Services and Print Logs for Linux
       run: |
         sudo mage
@@ -84,108 +95,40 @@ jobs:
         sudo mage start
         sudo mage check
 
+    - name: Checkout chat repository
+      uses: actions/checkout@v4
+      with:
+        repository: 'openimsdk/chat'
+        path: 'chat-repo'
 
-#  build-mac:
-#    name: Execute OpenIM Script On macOS
-#    runs-on: macos-latest
-#    permissions:
-#      contents: write
-#      pull-requests: write
-#    environment:
-#      name: openim
-#    strategy:
-#      matrix:
-#        arch: [arm64, armv7, amd64]
-#    
-#    steps:
-#    - uses: actions/checkout@v3
+    - name: Build and Start Chat Services
+      run: |
+        cd ${{ github.workspace }}/chat-repo
+        sudo mage
+        sudo mage start
+        sudo mage check
+    
+    - name: Checkout e2e repository
+      uses: actions/checkout@v4
+      with:
+          repository: "openimsdk/test-e2e"
+          path: e2e-repo
 
-#    - name: Set up Go
-#      uses: actions/setup-go@v4
-#      with:
-#        go-version: '1.21'
-
-        
-#        while ! docker system info > /dev/null 2>&1; do
-#          echo "Waiting for Docker to start..."
-#          sleep 10  # Increased delay to ensure Docker starts properly
-#        done
-
-#    - name: Install Docker
-#      run: |
-#        brew install docker
-#        brew install docker-compose
-#        sleep 10
-#        docker-compose up -d
-#        sleep 30
-#      timeout-minutes: 20 
-#        
-
-#    - name: init
-#      run: sudo bash bootstrap.sh
-#      timeout-minutes: 20
-
-#    - name: Build, Start, Check Services and Print Logs for Linux
-#      run: |
-#        sudo mage
-#        sudo mage start
-#        sudo mage check
-        
-#    - name: Restart Services and Print Logs
-#      run: |
-#        sudo mage stop
-#        sudo mage start
-#        sudo mage check
-
-#  build-windows:
-#    name: Execute OpenIM Script On Windows
-#    runs-on: windows-latest
-#    permissions:
-#      contents: write
-#      pull-requests: write
-#    environment:
-#      name: openim
-#    strategy:
-#      matrix:
-#        arch: [arm64, armv7, amd64]
-#    
-#    steps:
-#    - uses: actions/checkout@v3
-
-#    - name: Set up Go
-#      uses: actions/setup-go@v4
-#      with:
-#        go-version: '1.21'
-
-#    - name: Set up Docker for Windows
-#      run: |
-#        $images = @("zookeeper", "redis", "kafka")
-#        foreach ($image in $images) {
-#          $tag = "$image:latest"
-#          docker pull $tag | Out-Null
-#          if ($LASTEXITCODE -ne 0) {
-#            Write-Host "Skipping $image as it is not available for Windows"
-#          } else {
-#            Write-Host "Successfully pulled $image"
-#          }
-#        }
-#        docker compose up -d
-#        Start-Sleep -Seconds 30
-#      timeout-minutes: 20
-#      shell: pwsh
-
-#    - name: init
-#      run: bootstrap.bat
-#      timeout-minutes: 20
-
-#    - name: Build, Start, Check Services and Print Logs for Linux
-#      run: |
-#        mage
-#        mage start
-#        mage check        
-
-#    - name: Restart Services and Print Logs
-#      run: |
-#        mage stop
-#        mage start
-#        mage check
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb libxi6 libgconf-2-4
+        cd ${{ github.workspace }}/e2e-repo
+        pip install -r requirements.txt
+    
+    - name: Run tests
+      run: |
+        cd ${{ github.workspace }}/e2e-repo
+        xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pytest -v -s ./script
+    
+    
