@@ -172,22 +172,23 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 		if err != nil {
 			log.ZError(ctx, "forceKickOff", err, "kickReq", kickReq)
 		}
-		m, err := s.authDatabase.GetTokensWithoutError(ctx, userID, int(platformID))
-		if err != nil && err != redis.Nil {
-			return err
-		}
-		if m == nil {
-			return errs.New("token map is empty").Wrap()
-		}
-		for k := range m {
-			m[k] = constant.KickedToken
-			log.ZDebug(ctx, "set token map is ", "token map", m, "userID",
-				userID, "token", k)
+	}
 
-			err = s.authDatabase.SetTokenMapByUidPid(ctx, userID, int(platformID), m)
-			if err != nil {
-				return err
-			}
+	m, err := s.authDatabase.GetTokensWithoutError(ctx, userID, int(platformID))
+	if err != nil && err != redis.Nil {
+		return err
+	}
+	if m == nil {
+		return errs.New("token map is empty").Wrap()
+	}
+	for k := range m {
+		m[k] = constant.KickedToken
+		log.ZDebug(ctx, "set token map is ", "token map", m, "userID",
+			userID, "token", k)
+
+		err = s.authDatabase.SetTokenMapByUidPid(ctx, userID, int(platformID), m)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
