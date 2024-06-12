@@ -17,6 +17,7 @@ package fcm
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
+	"github.com/openimsdk/tools/utils/httputil"
 	"path/filepath"
 
 	firebase "firebase.google.com/go"
@@ -45,8 +46,24 @@ func NewClient(pushConf *config.Push, cache cache.ThirdCache, fcmConfigPath stri
 	//if err != nil {
 	//	return nil, err
 	//}
-	credentialsFilePath := filepath.Join(fcmConfigPath, "config", pushConf.FCM.ServiceAccount)
-	opt := option.WithCredentialsFile(credentialsFilePath)
+	var opt option.ClientOption
+	switch {
+	case len(pushConf.FCM.ServiceAccount) != 0:
+		// with file path
+		credentialsFilePath := filepath.Join(fcmConfigPath, pushConf.FCM.ServiceAccount)
+		opt = option.WithCredentialsFile(credentialsFilePath)
+	case len(pushConf.FCM.VerifyUrl) != 0:
+		// with verify url
+		client := httputil.NewHTTPClient(httputil.NewClientConfig())
+		resp, err := client.Get(pushConf.FCM.VerifyUrl)
+		if err != nil {
+			return nil, errs.Wrap(err)
+		}
+		opt = option.WithCredentialsJSON(resp)
+	default:
+		return nil, errs.New("no FCM config")
+	}
+
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		return nil, errs.Wrap(err)
