@@ -222,14 +222,6 @@ func (c *ConversationRedisCache) DelUserAllHasReadSeqs(ownerUserID string, conve
 	return cache
 }
 
-func (c *ConversationRedisCache) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*model.Conversation, error) {
-	panic("implement me")
-}
-
-func (c *ConversationRedisCache) DelConversationByConversationID(conversationIDs ...string) cache.ConversationCache {
-	panic("implement me")
-}
-
 func (c *ConversationRedisCache) GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error) {
 	return getCache(ctx, c.rcClient, c.getConversationNotReceiveMessageUserIDsKey(conversationID), c.expireTime, func(ctx context.Context) ([]string, error) {
 		return c.conversationDB.GetConversationNotReceiveMessageUserIDs(ctx, conversationID)

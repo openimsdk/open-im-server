@@ -16,37 +16,25 @@ package redis
 
 import (
 	"context"
-	"errors"
-	"github.com/gogo/protobuf/jsonpb"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils/stringutil"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
-	"golang.org/x/sync/errgroup"
 	"time"
-)
+) //
 
-const msgCacheTimeout = 86400 * time.Second
+// msgCacheTimeout is  expiration time of message cache, 86400 seconds
+const msgCacheTimeout = 86400
 
-var concurrentLimit = 3
-
-func NewMsgCache(client redis.UniversalClient, redisEnablePipeline bool) cache.MsgCache {
-	return &msgCache{rdb: client, msgCacheTimeout: msgCacheTimeout, redisEnablePipeline: redisEnablePipeline}
+func NewMsgCache(client redis.UniversalClient) cache.MsgCache {
+	return &msgCache{rdb: client}
 }
 
 type msgCache struct {
-	rdb                 redis.UniversalClient
-	msgCacheTimeout     time.Duration
-	redisEnablePipeline bool
-}
-
-func (c *msgCache) getAllMessageCacheKey(conversationID string) string {
-	return cachekey.GetAllMessageCacheKey(conversationID)
+	rdb redis.UniversalClient
 }
 
 func (c *msgCache) getMessageCacheKey(conversationID string, seq int64) string {
@@ -72,218 +60,41 @@ func (c *msgCache) getMessageReactionExPrefix(clientMsgID string, sessionType in
 	return cachekey.GetMessageReactionExKey(clientMsgID, sessionType)
 }
 
-func (c *msgCache) SetMessageToCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int, error) {
-	if c.redisEnablePipeline {
-		return c.PipeSetMessageToCache(ctx, conversationID, msgs)
-	}
-	return c.ParallelSetMessageToCache(ctx, conversationID, msgs)
-}
-
-func (c *msgCache) PipeSetMessageToCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int, error) {
-	pipe := c.rdb.Pipeline()
-	for _, msg := range msgs {
-		s, err := msgprocessor.Pb2String(msg)
-		if err != nil {
-			return 0, err
-		}
-
-		key := c.getMessageCacheKey(conversationID, msg.Seq)
-		_ = pipe.Set(ctx, key, s, c.msgCacheTimeout)
-	}
-
-	results, err := pipe.Exec(ctx)
-	if err != nil {
-		return 0, errs.Wrap(err)
-	}
-
-	for _, res := range results {
-		if res.Err() != nil {
-			return 0, errs.Wrap(err)
-		}
-	}
-
-	return len(msgs), nil
-}
-
-func (c *msgCache) ParallelSetMessageToCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int, error) {
-	wg := errgroup.Group{}
-	wg.SetLimit(concurrentLimit)
-
-	for _, msg := range msgs {
-		msg := msg // closure safe var
-		wg.Go(func() error {
-			s, err := msgprocessor.Pb2String(msg)
-			if err != nil {
-				return errs.Wrap(err)
-			}
-
-			key := c.getMessageCacheKey(conversationID, msg.Seq)
-			if err := c.rdb.Set(ctx, key, s, c.msgCacheTimeout).Err(); err != nil {
-				return errs.Wrap(err)
-			}
-			return nil
-		})
-	}
-
-	err := wg.Wait()
-	if err != nil {
-		return 0, errs.WrapMsg(err, "wg.Wait failed")
-	}
-
-	return len(msgs), nil
-}
-
-func (c *msgCache) UserDeleteMsgs(ctx context.Context, conversationID string, seqs []int64, userID string) error {
-	for _, seq := range seqs {
-		delUserListKey := c.getMessageDelUserListKey(conversationID, seq)
-		userDelListKey := c.getUserDelList(conversationID, userID)
-		err := c.rdb.SAdd(ctx, delUserListKey, userID).Err()
-		if err != nil {
-			return errs.Wrap(err)
-		}
-		err = c.rdb.SAdd(ctx, userDelListKey, seq).Err()
-		if err != nil {
-			return errs.Wrap(err)
-		}
-		if err := c.rdb.Expire(ctx, delUserListKey, c.msgCacheTimeout).Err(); err != nil {
-			return errs.Wrap(err)
-		}
-		if err := c.rdb.Expire(ctx, userDelListKey, c.msgCacheTimeout).Err(); err != nil {
-			return errs.Wrap(err)
-		}
-	}
-
-	return nil
-}
-
-func (c *msgCache) GetUserDelList(ctx context.Context, userID, conversationID string) (seqs []int64, err error) {
-	result, err := c.rdb.SMembers(ctx, c.getUserDelList(conversationID, userID)).Result()
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
-	seqs = make([]int64, len(result))
-	for i, v := range result {
-		seqs[i] = stringutil.StringToInt64(v)
-	}
-
-	return seqs, nil
-}
-
-func (c *msgCache) DelUserDeleteMsgsList(ctx context.Context, conversationID string, seqs []int64) {
-	for _, seq := range seqs {
-		delUsers, err := c.rdb.SMembers(ctx, c.getMessageDelUserListKey(conversationID, seq)).Result()
-		if err != nil {
-			log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq)
-
-			continue
-		}
-		if len(delUsers) > 0 {
-			var failedFlag bool
-			for _, userID := range delUsers {
-				err = c.rdb.SRem(ctx, c.getUserDelList(conversationID, userID), seq).Err()
+func (c *msgCache) SetMessagesToCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int, error) {
+	msgMap := datautil.SliceToMap(msgs, func(msg *sdkws.MsgData) string {
+		return c.getMessageCacheKey(conversationID, msg.Seq)
+	})
+	keys := datautil.Slice(msgs, func(msg *sdkws.MsgData) string {
+		return c.getMessageCacheKey(conversationID, msg.Seq)
+	})
+	err := ProcessKeysBySlot(ctx, c.rdb, keys, func(ctx context.Context, slot int64, keys []string) error {
+		var values []string
+		for _, key := range keys {
+			if msg, ok := msgMap[key]; ok {
+				s, err := msgprocessor.Pb2String(msg)
 				if err != nil {
-					failedFlag = true
-					log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq, "userID", userID)
+					return err
 				}
-			}
-			if !failedFlag {
-				if err := c.rdb.Del(ctx, c.getMessageDelUserListKey(conversationID, seq)).Err(); err != nil {
-					log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq)
-				}
+				values = append(values, s)
 			}
 		}
-	}
-}
-
-func (c *msgCache) DeleteMessages(ctx context.Context, conversationID string, seqs []int64) error {
-	if c.redisEnablePipeline {
-		return c.PipeDeleteMessages(ctx, conversationID, seqs)
-	}
-
-	return c.ParallelDeleteMessages(ctx, conversationID, seqs)
-}
-
-func (c *msgCache) ParallelDeleteMessages(ctx context.Context, conversationID string, seqs []int64) error {
-	wg := errgroup.Group{}
-	wg.SetLimit(concurrentLimit)
-
-	for _, seq := range seqs {
-		seq := seq
-		wg.Go(func() error {
-			err := c.rdb.Del(ctx, c.getMessageCacheKey(conversationID, seq)).Err()
-			if err != nil {
-				return errs.Wrap(err)
-			}
-			return nil
-		})
-	}
-
-	return wg.Wait()
-}
-
-func (c *msgCache) PipeDeleteMessages(ctx context.Context, conversationID string, seqs []int64) error {
-	pipe := c.rdb.Pipeline()
-	for _, seq := range seqs {
-		_ = pipe.Del(ctx, c.getMessageCacheKey(conversationID, seq))
-	}
-
-	results, err := pipe.Exec(ctx)
+		return LuaSetBatchWithCommonExpire(ctx, c.rdb, keys, values, msgCacheTimeout)
+	})
 	if err != nil {
-		return errs.WrapMsg(err, "pipe.del")
+		return 0, err
 	}
-
-	for _, res := range results {
-		if res.Err() != nil {
-			return errs.Wrap(err)
-		}
-	}
-
-	return nil
+	return len(msgs), nil
 }
 
-func (c *msgCache) CleanUpOneConversationAllMsg(ctx context.Context, conversationID string) error {
-	vals, err := c.rdb.Keys(ctx, c.getAllMessageCacheKey(conversationID)).Result()
-	if errors.Is(err, redis.Nil) {
-		return nil
-	}
-	if err != nil {
-		return errs.Wrap(err)
-	}
-	for _, v := range vals {
-		if err := c.rdb.Del(ctx, v).Err(); err != nil {
-			return errs.Wrap(err)
-		}
-	}
-	return nil
-}
-
-func (c *msgCache) DelMsgFromCache(ctx context.Context, userID string, seqs []int64) error {
+func (c *msgCache) DeleteMessagesFromCache(ctx context.Context, conversationID string, seqs []int64) error {
+	var keys []string
 	for _, seq := range seqs {
-		key := c.getMessageCacheKey(userID, seq)
-		result, err := c.rdb.Get(ctx, key).Result()
-		if err != nil {
-			if errors.Is(err, redis.Nil) {
-				continue
-			}
-
-			return errs.Wrap(err)
-		}
-		var msg sdkws.MsgData
-		err = jsonpb.UnmarshalString(result, &msg)
-		if err != nil {
-			return err
-		}
-		msg.Status = constant.MsgDeleted
-		s, err := msgprocessor.Pb2String(&msg)
-		if err != nil {
-			return errs.Wrap(err)
-		}
-		if err := c.rdb.Set(ctx, key, s, c.msgCacheTimeout).Err(); err != nil {
-			return errs.Wrap(err)
-		}
+		keys = append(keys, c.getMessageCacheKey(conversationID, seq))
 	}
 
-	return nil
+	return ProcessKeysBySlot(ctx, c.rdb, keys, func(ctx context.Context, slot int64, keys []string) error {
+		return LuaDeleteBatch(ctx, c.rdb, keys)
+	})
 }
 
 func (c *msgCache) SetSendMsgStatus(ctx context.Context, id string, status int32) error {
@@ -338,102 +149,39 @@ func (c *msgCache) DeleteOneMessageKey(ctx context.Context, clientMsgID string, 
 }
 
 func (c *msgCache) GetMessagesBySeq(ctx context.Context, conversationID string, seqs []int64) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {
-	if c.redisEnablePipeline {
-		return c.PipeGetMessagesBySeq(ctx, conversationID, seqs)
-	}
-
-	return c.ParallelGetMessagesBySeq(ctx, conversationID, seqs)
-}
-
-func (c *msgCache) PipeGetMessagesBySeq(ctx context.Context, conversationID string, seqs []int64) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {
-	pipe := c.rdb.Pipeline()
-
-	results := []*redis.StringCmd{}
+	var keys []string
+	keySeqMap := make(map[string]int64, 10)
 	for _, seq := range seqs {
-		results = append(results, pipe.Get(ctx, c.getMessageCacheKey(conversationID, seq)))
+		key := c.getMessageCacheKey(conversationID, seq)
+		keys = append(keys, key)
+		keySeqMap[key] = seq
 	}
-
-	_, err = pipe.Exec(ctx)
-	if err != nil && err != redis.Nil {
-		return seqMsgs, failedSeqs, errs.WrapMsg(err, "pipe.get")
-	}
-
-	for idx, res := range results {
-		seq := seqs[idx]
-		if res.Err() != nil {
-			log.ZError(ctx, "GetMessagesBySeq failed", err, "conversationID", conversationID, "seq", seq, "err", res.Err())
-			failedSeqs = append(failedSeqs, seq)
-			continue
+	err = ProcessKeysBySlot(ctx, c.rdb, keys, func(ctx context.Context, slot int64, keys []string) error {
+		result, err := LuaGetBatch(ctx, c.rdb, keys)
+		if err != nil {
+			return err
 		}
-
-		msg := sdkws.MsgData{}
-		if err = msgprocessor.String2Pb(res.Val(), &msg); err != nil {
-			log.ZError(ctx, "GetMessagesBySeq Unmarshal failed", err, "res", res, "conversationID", conversationID, "seq", seq)
-			failedSeqs = append(failedSeqs, seq)
-			continue
-		}
-
-		if msg.Status == constant.MsgDeleted {
-			failedSeqs = append(failedSeqs, seq)
-			continue
-		}
-
-		seqMsgs = append(seqMsgs, &msg)
-	}
-
-	return
-}
-
-func (c *msgCache) ParallelGetMessagesBySeq(ctx context.Context, conversationID string, seqs []int64) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {
-	type entry struct {
-		err error
-		msg *sdkws.MsgData
-	}
-
-	wg := errgroup.Group{}
-	wg.SetLimit(concurrentLimit)
-
-	results := make([]entry, len(seqs)) // set slice len/cap to length of seqs.
-	for idx, seq := range seqs {
-		// closure safe var
-		idx := idx
-		seq := seq
-
-		wg.Go(func() error {
-			res, err := c.rdb.Get(ctx, c.getMessageCacheKey(conversationID, seq)).Result()
-			if err != nil {
-				log.ZError(ctx, "GetMessagesBySeq failed", err, "conversationID", conversationID, "seq", seq)
-				results[idx] = entry{err: err}
-				return nil
+		for i, value := range result {
+			seq := keySeqMap[keys[i]]
+			if value == nil {
+				failedSeqs = append(failedSeqs, seq)
+				continue
 			}
 
-			msg := sdkws.MsgData{}
-			if err = msgprocessor.String2Pb(res, &msg); err != nil {
-				log.ZError(ctx, "GetMessagesBySeq Unmarshal failed", err, "res", res, "conversationID", conversationID, "seq", seq)
-				results[idx] = entry{err: err}
-				return nil
+			msg := &sdkws.MsgData{}
+			msgString, ok := value.(string)
+			if !ok || msgprocessor.String2Pb(msgString, msg) != nil {
+				failedSeqs = append(failedSeqs, seq)
+				continue
 			}
+			seqMsgs = append(seqMsgs, msg)
 
-			if msg.Status == constant.MsgDeleted {
-				results[idx] = entry{err: err}
-				return nil
-			}
-
-			results[idx] = entry{msg: &msg}
-			return nil
-		})
-	}
-
-	_ = wg.Wait()
-
-	for idx, res := range results {
-		if res.err != nil {
-			failedSeqs = append(failedSeqs, seqs[idx])
-			continue
 		}
-
-		seqMsgs = append(seqMsgs, res.msg)
+		return nil
+	})
+	if err != nil {
+		return nil, nil, err
 	}
+	return seqMsgs, failedSeqs, nil
 
-	return
 }

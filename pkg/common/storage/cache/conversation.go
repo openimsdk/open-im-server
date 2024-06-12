@@ -52,9 +52,6 @@ type ConversationCache interface {
 	// GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
 	DelUserAllHasReadSeqs(ownerUserID string, conversationIDs ...string) ConversationCache
 
-	GetConversationsByConversationID(ctx context.Context,
-		conversationIDs []string) ([]*relationtb.Conversation, error)
-	DelConversationByConversationID(conversationIDs ...string) ConversationCache
 	GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error)
 	DelConversationNotReceiveMessageUserIDs(conversationIDs ...string) ConversationCache
 }

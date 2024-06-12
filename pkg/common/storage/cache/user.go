@@ -16,15 +16,15 @@ package cache
 
 import (
 	"context"
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/user"
 )
 
 type UserCache interface {
 	BatchDeleter
 	CloneUserCache() UserCache
-	GetUserInfo(ctx context.Context, userID string) (userInfo *relationtb.User, err error)
-	GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationtb.User, error)
+	GetUserInfo(ctx context.Context, userID string) (userInfo *model.User, err error)
+	GetUsersInfo(ctx context.Context, userIDs []string) ([]*model.User, error)
 	DelUsersInfo(userIDs ...string) UserCache
 	GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error)
 	DelUsersGlobalRecvMsgOpt(userIDs ...string) UserCache
