@@ -44,9 +44,9 @@ type Fcm struct {
 func NewClient(pushConf *config.Push, cache cache.ThirdCache, fcmConfigPath string) (*Fcm, error) {
 	var opt option.ClientOption
 	switch {
-	case len(pushConf.FCM.ServiceAccount) != 0:
+	case len(pushConf.FCM.FilePath) != 0:
 		// with file path
-		credentialsFilePath := filepath.Join(fcmConfigPath, pushConf.FCM.ServiceAccount)
+		credentialsFilePath := filepath.Join(fcmConfigPath, pushConf.FCM.FilePath)
 		opt = option.WithCredentialsFile(credentialsFilePath)
 	case len(pushConf.FCM.AuthUrl) != 0:
 		// with authentication URL

@@ -24,7 +24,7 @@ geTui:
   channelName: ''
 fcm:
   # Prioritize using file paths. If the file path is empty, use URL
-  serviceAccount: ""  # File path is concatenated with the parameters passed in through - c and serviceAccount.
+  filePath: ""  # File path is concatenated with the parameters passed in through - c(`mage` default pass in `config/`) and serviceAccount.
   authURL: ""  # file URL. Protocol must be specified.
 jpns:
   appKey: ''
