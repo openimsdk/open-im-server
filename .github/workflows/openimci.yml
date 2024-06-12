@@ -80,7 +80,8 @@ jobs:
       
     - name: Update .env
       run: |
-        sed -i 's|externalAddress=.*|externalAddress=http://${{ steps.get-ip.outputs.ip }}:10005|' config/minio.yml
+        sed -i 's|externalAddress:.*|externalAddress: "http://${{ steps.get-ip.outputs.ip }}:10005"|' config/minio.yml
+        cat config/minio.yml
 
     - name: Build, Start, Check Services and Print Logs for Linux
       run: |
