@@ -21,6 +21,7 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"github.com/redis/go-redis/v9"
+	"time"
 )
 
 type tokenCache struct {
@@ -33,8 +34,20 @@ func NewTokenCacheModel(rdb redis.UniversalClient) cache.TokenModel {
 	}
 }
 
-func (c *tokenCache) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
+func (c *tokenCache) SetTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
 	return errs.Wrap(c.rdb.HSet(ctx, cachekey.GetTokenKey(userID, platformID), token, flag).Err())
+}
+
+// SetTokenFlagEx set token and flag with expire time
+func (c *tokenCache) SetTokenFlagEx(ctx context.Context, userID string, platformID int, token string, flag int, expire time.Duration) error {
+	key := cachekey.GetTokenKey(userID, platformID)
+	if err := c.rdb.HSet(ctx, key, token, flag).Err(); err != nil {
+		return errs.Wrap(err)
+	}
+	if err := c.rdb.Expire(ctx, key, expire).Err(); err != nil {
+		return errs.Wrap(err)
+	}
+	return nil
 }
 
 func (c *tokenCache) GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error) {

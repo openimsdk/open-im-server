@@ -16,6 +16,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -55,6 +56,7 @@ func (a *authDatabase) SetTokenMapByUidPid(ctx context.Context, userID string, p
 
 // Create Token.
 func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformID int) (string, error) {
+	isCreate := true // flag is create or update
 	tokens, err := a.cache.GetTokensWithoutError(ctx, userID, platformID)
 	if err != nil {
 		return "", err
@@ -64,6 +66,9 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 		_, err = tokenverify.GetClaimFromToken(k, authverify.Secret(a.accessSecret))
 		if err != nil || v != constant.NormalToken {
 			deleteTokenKey = append(deleteTokenKey, k)
+		}
+		if v == constant.NormalToken {
+			isCreate = false
 		}
 	}
 	if len(deleteTokenKey) != 0 {
@@ -79,5 +84,21 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 	if err != nil {
 		return "", errs.WrapMsg(err, "token.SignedString")
 	}
-	return tokenString, a.cache.AddTokenFlag(ctx, userID, platformID, tokenString, constant.NormalToken)
+
+	if isCreate {
+		// should create,should specify expiration time
+		if err = a.cache.SetTokenFlagEx(ctx, userID, platformID, tokenString, constant.NormalToken, a.getExpireTime()); err != nil {
+			return "", err
+		}
+	} else {
+		// should update
+		if err = a.cache.SetTokenFlag(ctx, userID, platformID, tokenString, constant.NormalToken); err != nil {
+			return "", err
+		}
+	}
+	return tokenString, nil
+}
+
+func (a *authDatabase) getExpireTime() time.Duration {
+	return time.Hour * 24 * time.Duration(a.accessExpire)
 }
