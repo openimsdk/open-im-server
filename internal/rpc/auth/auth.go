@@ -178,9 +178,6 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 	if err != nil && err != redis.Nil {
 		return err
 	}
-	if m == nil {
-		return errs.New("token map is empty").Wrap()
-	}
 	for k := range m {
 		m[k] = constant.KickedToken
 		log.ZDebug(ctx, "set token map is ", "token map", m, "userID",
