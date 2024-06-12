@@ -48,10 +48,10 @@ func NewClient(pushConf *config.Push, cache cache.ThirdCache, fcmConfigPath stri
 		// with file path
 		credentialsFilePath := filepath.Join(fcmConfigPath, pushConf.FCM.FilePath)
 		opt = option.WithCredentialsFile(credentialsFilePath)
-	case len(pushConf.FCM.AuthUrl) != 0:
+	case len(pushConf.FCM.AuthURL) != 0:
 		// with authentication URL
 		client := httputil.NewHTTPClient(httputil.NewClientConfig())
-		resp, err := client.Get(pushConf.FCM.AuthUrl)
+		resp, err := client.Get(pushConf.FCM.AuthURL)
 		if err != nil {
 			return nil, err
 		}
