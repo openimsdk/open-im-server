@@ -25,13 +25,14 @@ import (
 )
 
 type tokenCache struct {
-	rdb redis.UniversalClient
+	rdb          redis.UniversalClient
+	accessExpire time.Duration
 }
 
-func NewTokenCacheModel(rdb redis.UniversalClient) cache.TokenModel {
-	return &tokenCache{
-		rdb: rdb,
-	}
+func NewTokenCacheModel(rdb redis.UniversalClient, accessExpire int64) cache.TokenModel {
+	c := &tokenCache{rdb: rdb}
+	c.accessExpire = c.getExpireTime(accessExpire)
+	return c
 }
 
 func (c *tokenCache) SetTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
@@ -39,12 +40,12 @@ func (c *tokenCache) SetTokenFlag(ctx context.Context, userID string, platformID
 }
 
 // SetTokenFlagEx set token and flag with expire time
-func (c *tokenCache) SetTokenFlagEx(ctx context.Context, userID string, platformID int, token string, flag int, expire time.Duration) error {
+func (c *tokenCache) SetTokenFlagEx(ctx context.Context, userID string, platformID int, token string, flag int) error {
 	key := cachekey.GetTokenKey(userID, platformID)
 	if err := c.rdb.HSet(ctx, key, token, flag).Err(); err != nil {
 		return errs.Wrap(err)
 	}
-	if err := c.rdb.Expire(ctx, key, expire).Err(); err != nil {
+	if err := c.rdb.Expire(ctx, key, c.accessExpire).Err(); err != nil {
 		return errs.Wrap(err)
 	}
 	return nil
@@ -73,4 +74,8 @@ func (c *tokenCache) SetTokenMapByUidPid(ctx context.Context, userID string, pla
 
 func (c *tokenCache) DeleteTokenByUidPid(ctx context.Context, userID string, platformID int, fields []string) error {
 	return errs.Wrap(c.rdb.HDel(ctx, cachekey.GetTokenKey(userID, platformID), fields...).Err())
+}
+
+func (c *tokenCache) getExpireTime(t int64) time.Duration {
+	return time.Hour * 24 * time.Duration(t)
 }

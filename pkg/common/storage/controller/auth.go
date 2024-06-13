@@ -16,7 +16,6 @@ package controller
 
 import (
 	"context"
-	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -87,7 +86,7 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 
 	if isCreate {
 		// should create,should specify expiration time
-		if err = a.cache.SetTokenFlagEx(ctx, userID, platformID, tokenString, constant.NormalToken, a.getExpireTime()); err != nil {
+		if err = a.cache.SetTokenFlagEx(ctx, userID, platformID, tokenString, constant.NormalToken); err != nil {
 			return "", err
 		}
 	} else {
@@ -97,8 +96,4 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 		}
 	}
 	return tokenString, nil
-}
-
-func (a *authDatabase) getExpireTime() time.Duration {
-	return time.Hour * 24 * time.Duration(a.accessExpire)
 }
