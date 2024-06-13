@@ -16,8 +16,10 @@ package fcm
 
 import (
 	"context"
+	"fmt"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"path/filepath"
+	"strings"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
@@ -79,6 +81,8 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 	notification.Body = content
 	notification.Title = title
 	var messages []*messaging.Message
+	var sendErrBuilder strings.Builder
+	var msgErrBuilder strings.Builder
 	for userID, personTokens := range allTokens {
 		apns := &messaging.APNSConfig{Payload: &messaging.APNSPayload{Aps: &messaging.Aps{Sound: opts.IOSPushSound}}}
 		messageCount := len(messages)
@@ -86,9 +90,21 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 			response, err := f.fcmMsgCli.SendAll(ctx, messages)
 			if err != nil {
 				Fail = Fail + messageCount
+				// Record push error
+				sendErrBuilder.WriteString(err.Error())
+				sendErrBuilder.WriteByte('.')
 			} else {
 				Success = Success + response.SuccessCount
 				Fail = Fail + response.FailureCount
+				if response.FailureCount != 0 {
+					// Record message error
+					for i := range response.Responses {
+						if !response.Responses[i].Success {
+							msgErrBuilder.WriteString(response.Responses[i].Error.Error())
+							msgErrBuilder.WriteByte('.')
+						}
+					}
+				}
 			}
 			messages = messages[0:0]
 		}
@@ -133,6 +149,10 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 			Success = Success + response.SuccessCount
 			Fail = Fail + response.FailureCount
 		}
+	}
+	if Fail != 0 {
+		return errs.New(fmt.Sprintf("%d message send failed;send err:%s;message err:%s",
+			Fail, sendErrBuilder.String(), msgErrBuilder.String())).Wrap()
 	}
 	return nil
 }
