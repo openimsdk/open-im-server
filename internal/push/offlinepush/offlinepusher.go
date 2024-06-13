@@ -36,13 +36,13 @@ type OfflinePusher interface {
 	Push(ctx context.Context, userIDs []string, title, content string, opts *options.Opts) error
 }
 
-func NewOfflinePusher(pushConf *config.Push, cache cache.ThirdCache) (OfflinePusher, error) {
+func NewOfflinePusher(pushConf *config.Push, cache cache.ThirdCache, fcmConfigPath string) (OfflinePusher, error) {
 	var offlinePusher OfflinePusher
 	switch pushConf.Enable {
 	case geTUI:
 		offlinePusher = getui.NewClient(pushConf, cache)
 	case firebase:
-		return fcm.NewClient(pushConf, cache)
+		return fcm.NewClient(pushConf, cache, fcmConfigPath)
 	case jPush:
 		offlinePusher = jpush.NewClient(pushConf)
 	default:

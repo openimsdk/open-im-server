@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
+	"github.com/openimsdk/tools/utils/httputil"
 	"path/filepath"
 	"strings"
 
@@ -42,13 +43,25 @@ type Fcm struct {
 
 // NewClient initializes a new FCM client using the Firebase Admin SDK.
 // It requires the FCM service account credentials file located within the project's configuration directory.
-func NewClient(pushConf *config.Push, cache cache.ThirdCache) (*Fcm, error) {
-	projectRoot, err := config.GetProjectRoot()
-	if err != nil {
-		return nil, err
+func NewClient(pushConf *config.Push, cache cache.ThirdCache, fcmConfigPath string) (*Fcm, error) {
+	var opt option.ClientOption
+	switch {
+	case len(pushConf.FCM.FilePath) != 0:
+		// with file path
+		credentialsFilePath := filepath.Join(fcmConfigPath, pushConf.FCM.FilePath)
+		opt = option.WithCredentialsFile(credentialsFilePath)
+	case len(pushConf.FCM.AuthURL) != 0:
+		// with authentication URL
+		client := httputil.NewHTTPClient(httputil.NewClientConfig())
+		resp, err := client.Get(pushConf.FCM.AuthURL)
+		if err != nil {
+			return nil, err
+		}
+		opt = option.WithCredentialsJSON(resp)
+	default:
+		return nil, errs.New("no FCM config").Wrap()
 	}
-	credentialsFilePath := filepath.Join(projectRoot, "config", pushConf.FCM.ServiceAccount)
-	opt := option.WithCredentialsFile(credentialsFilePath)
+
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		return nil, errs.Wrap(err)
@@ -58,7 +71,6 @@ func NewClient(pushConf *config.Push, cache cache.ThirdCache) (*Fcm, error) {
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
-
 	return &Fcm{fcmMsgCli: fcmMsgClient, cache: cache}, nil
 }
 
