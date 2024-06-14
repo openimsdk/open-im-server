@@ -2,26 +2,15 @@ package group
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/binary"
-	"encoding/json"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/hashutil"
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/sdkws"
 )
 
-func (s *groupServer) idHash(ids []string) uint64 {
-	if len(ids) == 0 {
-		return 0
-	}
-	data, _ := json.Marshal(ids)
-	sum := md5.Sum(data)
-	return binary.BigEndian.Uint64(sum[:])
-}
-
-func (s *groupServer) GetIncrementalGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetIncrementalGroupMemberUserIDsReq) (*pbgroup.GetIncrementalGroupMemberUserIDsResp, error) {
+func (s *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetFullGroupMemberUserIDsReq) (*pbgroup.GetFullGroupMemberUserIDsResp, error) {
 	vl, err := s.db.FindMaxGroupMemberVersionCache(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
@@ -30,11 +19,11 @@ func (s *groupServer) GetIncrementalGroupMemberUserIDs(ctx context.Context, req 
 	if err != nil {
 		return nil, err
 	}
-	idHash := s.idHash(userIDs)
+	idHash := hashutil.IdHash(userIDs)
 	if req.IdHash == idHash {
 		userIDs = nil
 	}
-	return &pbgroup.GetIncrementalGroupMemberUserIDsResp{
+	return &pbgroup.GetFullGroupMemberUserIDsResp{
 		Version:   idHash,
 		VersionID: vl.ID.Hex(),
 		Equal:     req.IdHash == idHash,
@@ -42,7 +31,7 @@ func (s *groupServer) GetIncrementalGroupMemberUserIDs(ctx context.Context, req 
 	}, nil
 }
 
-func (s *groupServer) GetIncrementalJoinGroupIDs(ctx context.Context, req *pbgroup.GetIncrementalJoinGroupIDsReq) (*pbgroup.GetIncrementalJoinGroupIDsResp, error) {
+func (s *groupServer) GetFullJoinGroupIDs(ctx context.Context, req *pbgroup.GetFullJoinGroupIDsReq) (*pbgroup.GetFullJoinGroupIDsResp, error) {
 	vl, err := s.db.FindMaxJoinGroupVersionCache(ctx, req.UserID)
 	if err != nil {
 		return nil, err
@@ -51,11 +40,11 @@ func (s *groupServer) GetIncrementalJoinGroupIDs(ctx context.Context, req *pbgro
 	if err != nil {
 		return nil, err
 	}
-	idHash := s.idHash(groupIDs)
+	idHash := hashutil.IdHash(groupIDs)
 	if req.IdHash == idHash {
 		groupIDs = nil
 	}
-	return &pbgroup.GetIncrementalJoinGroupIDsResp{
+	return &pbgroup.GetFullJoinGroupIDsResp{
 		Version:   idHash,
 		VersionID: vl.ID.Hex(),
 		Equal:     req.IdHash == idHash,

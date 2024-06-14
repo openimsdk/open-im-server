@@ -187,10 +187,10 @@ func (o *GroupApi) GetIncrementalGroupMemberBatch(c *gin.Context) {
 	apiresp.GinSuccess(c, resp)
 }
 
-func (o *GroupApi) GetIncrementalGroupMemberUserIDs(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetIncrementalGroupMemberUserIDs, o.Client, c)
+func (o *GroupApi) GetFullGroupMemberUserIDs(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetFullGroupMemberUserIDs, o.Client, c)
 }
 
-func (o *GroupApi) GetIncrementalJoinGroupIDs(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetIncrementalJoinGroupIDs, o.Client, c)
+func (o *GroupApi) GetFullJoinGroupIDs(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetFullJoinGroupIDs, o.Client, c)
 }
