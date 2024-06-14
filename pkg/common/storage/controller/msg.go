@@ -69,26 +69,26 @@ type CommonMsgDatabase interface {
 	DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error
 	// DeleteMsgsPhysicalBySeqs physically deletes messages by emptying them based on sequence numbers.
 	DeleteMsgsPhysicalBySeqs(ctx context.Context, conversationID string, seqs []int64) error
-	SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error
+	//SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error
 	GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
 	GetMaxSeq(ctx context.Context, conversationID string) (int64, error)
-	SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error
+	//SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error
 	SetMinSeqs(ctx context.Context, seqs map[string]int64) error
 
-	GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
-	GetMinSeq(ctx context.Context, conversationID string) (int64, error)
-	GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error)
-	GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (map[string]int64, error)
-	SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error
-	SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error)
+	//GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
+	//GetMinSeq(ctx context.Context, conversationID string) (int64, error)
+	//GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error)
+	//GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (map[string]int64, error)
+	//SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error
+	//SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error)
 	SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) (err error)
 	SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error
 	GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error)
 	GetHasReadSeq(ctx context.Context, userID string, conversationID string) (int64, error)
 	UserSetHasReadSeqs(ctx context.Context, userID string, hasReadSeqs map[string]int64) error
 
-	GetMongoMaxAndMinSeq(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo int64, err error)
-	GetConversationMinMaxSeqInMongoAndCache(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error)
+	//GetMongoMaxAndMinSeq(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo int64, err error)
+	//GetConversationMinMaxSeqInMongoAndCache(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error)
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
 	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
 	SearchMessage(ctx context.Context, req *pbmsg.SearchMessageReq) (total int32, msgData []*sdkws.MsgData, err error)
@@ -349,6 +349,8 @@ func (db *commonMsgDatabase) DeleteMessagesFromCache(ctx context.Context, conver
 }
 
 func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
+
+	// TODO set SEQ
 	currentMaxSeq, err := db.seq.GetMaxSeq(ctx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		log.ZError(ctx, "storage.seq.GetMaxSeq", err)
@@ -817,9 +819,9 @@ func (db *commonMsgDatabase) CleanUpUserConversationsMsgs(ctx context.Context, u
 	}
 }
 
-func (db *commonMsgDatabase) SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error {
-	return db.seq.SetMaxSeq(ctx, conversationID, maxSeq)
-}
+//func (db *commonMsgDatabase) SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error {
+//	return db.seq.SetMaxSeq(ctx, conversationID, maxSeq)
+//}
 
 func (db *commonMsgDatabase) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
 	return db.seq.GetMaxSeqs(ctx, conversationIDs)
@@ -837,13 +839,13 @@ func (db *commonMsgDatabase) SetMinSeqs(ctx context.Context, seqs map[string]int
 	return db.seq.SetMinSeqs(ctx, seqs)
 }
 
-func (db *commonMsgDatabase) GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
-	return db.seq.GetMinSeqs(ctx, conversationIDs)
-}
-
-func (db *commonMsgDatabase) GetMinSeq(ctx context.Context, conversationID string) (int64, error) {
-	return db.seq.GetMinSeq(ctx, conversationID)
-}
+//func (db *commonMsgDatabase) GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
+//	return db.seq.GetMinSeqs(ctx, conversationIDs)
+//}
+//
+//func (db *commonMsgDatabase) GetMinSeq(ctx context.Context, conversationID string) (int64, error) {
+//	return db.seq.GetMinSeq(ctx, conversationID)
+//}
 
 func (db *commonMsgDatabase) GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
 	return db.seq.GetConversationUserMinSeq(ctx, conversationID, userID)
