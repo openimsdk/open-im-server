@@ -19,9 +19,12 @@ type SeqMongo struct {
 	coll *mongo.Collection
 }
 
-func (s *SeqMongo) MallocSeq(ctx context.Context, conversationID string, size int64) (int64, error) {
-	if size <= 0 {
+func (s *SeqMongo) Malloc(ctx context.Context, conversationID string, size int64) (int64, error) {
+	if size < 0 {
 		return 0, errors.New("size must be greater than 0")
+	}
+	if size == 0 {
+		return s.GetMaxSeq(ctx, conversationID)
 	}
 	filter := map[string]any{"conversation_id": conversationID}
 	update := map[string]any{
@@ -29,19 +32,11 @@ func (s *SeqMongo) MallocSeq(ctx context.Context, conversationID string, size in
 		"$set": map[string]any{"min_seq": 1},
 	}
 	opt := options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After).SetProjection(map[string]any{"_id": 0, "max_seq": 1})
-	return mongoutil.FindOneAndUpdate[int64](ctx, s.coll, filter, update, opt)
-}
-
-func (s *SeqMongo) Malloc(ctx context.Context, conversationID string, size int64) ([]int64, error) {
-	seq, err := s.MallocSeq(ctx, conversationID, size)
+	lastSeq, err := mongoutil.FindOneAndUpdate[int64](ctx, s.coll, filter, update, opt)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	seqs := make([]int64, 0, size)
-	for i := seq - size + 1; i <= seq; i++ {
-		seqs = append(seqs, i)
-	}
-	return seqs, nil
+	return lastSeq - size, nil
 }
 
 func (s *SeqMongo) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
