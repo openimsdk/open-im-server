@@ -51,11 +51,6 @@ type friendServer struct {
 	webhookClient         *webhook.Client
 }
 
-func (s *friendServer) GetFullFriendUserIDs(ctx context.Context, req *relation.GetFullFriendUserIDsReq) (*relation.GetFullFriendUserIDsResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 type Config struct {
 	RpcConfig     config.Friend
 	RedisConfig   config.Redis
