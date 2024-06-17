@@ -256,3 +256,7 @@ func (l *VersionLogMgo) DeleteAfterUnchangedLog(ctx context.Context, deadline ti
 		},
 	})
 }
+
+func (l *VersionLogMgo) Delete(ctx context.Context, dId string) error {
+	return mongoutil.DeleteOne(ctx, l.coll, bson.M{"d_id": dId})
+}

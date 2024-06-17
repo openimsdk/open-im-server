@@ -21,7 +21,7 @@ func (s *groupServer) idHash(ids []string) uint64 {
 	return binary.BigEndian.Uint64(sum[:])
 }
 
-func (s *groupServer) GetIncrementalGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetIncrementalGroupMemberUserIDsReq) (*pbgroup.GetIncrementalGroupMemberUserIDsResp, error) {
+func (s *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetFullGroupMemberUserIDsReq) (*pbgroup.GetFullGroupMemberUserIDsResp, error) {
 	vl, err := s.db.FindMaxGroupMemberVersionCache(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func (s *groupServer) GetIncrementalGroupMemberUserIDs(ctx context.Context, req 
 	if req.IdHash == idHash {
 		userIDs = nil
 	}
-	return &pbgroup.GetIncrementalGroupMemberUserIDsResp{
+	return &pbgroup.GetFullGroupMemberUserIDsResp{
 		Version:   idHash,
 		VersionID: vl.ID.Hex(),
 		Equal:     req.IdHash == idHash,
@@ -42,7 +42,7 @@ func (s *groupServer) GetIncrementalGroupMemberUserIDs(ctx context.Context, req 
 	}, nil
 }
 
-func (s *groupServer) GetIncrementalJoinGroupIDs(ctx context.Context, req *pbgroup.GetIncrementalJoinGroupIDsReq) (*pbgroup.GetIncrementalJoinGroupIDsResp, error) {
+func (s *groupServer) GetFullJoinGroupIDs(ctx context.Context, req *pbgroup.GetFullJoinGroupIDsReq) (*pbgroup.GetFullJoinGroupIDsResp, error) {
 	vl, err := s.db.FindMaxJoinGroupVersionCache(ctx, req.UserID)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func (s *groupServer) GetIncrementalJoinGroupIDs(ctx context.Context, req *pbgro
 	if req.IdHash == idHash {
 		groupIDs = nil
 	}
-	return &pbgroup.GetIncrementalJoinGroupIDsResp{
+	return &pbgroup.GetFullJoinGroupIDsResp{
 		Version:   idHash,
 		VersionID: vl.ID.Hex(),
 		Equal:     req.IdHash == idHash,
