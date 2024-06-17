@@ -349,7 +349,6 @@ func (db *commonMsgDatabase) DeleteMessagesFromCache(ctx context.Context, conver
 }
 
 func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
-
 	// TODO set SEQ
 	currentMaxSeq, err := db.seq.GetMaxSeq(ctx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {

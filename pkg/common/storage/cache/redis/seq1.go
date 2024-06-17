@@ -47,6 +47,12 @@ func NewTestSeq() *SeqMalloc {
 	}
 }
 
+type RedisSeq struct {
+	Curr int64
+	Last int64
+	Lock *int64
+}
+
 type SeqMalloc struct {
 	rdb      redis.UniversalClient
 	mgo      database.Seq
@@ -118,6 +124,7 @@ end
 local curr_seq = tonumber(redis.call("HGET", key, "CURR"))
 local last_seq = tonumber(redis.call("HGET", key, "LAST"))
 if size == 0 then
+	redis.call("EXPIRE", key, dataSecond)
 	table.insert(result, 0)
 	table.insert(result, curr_seq)
 	table.insert(result, last_seq)
@@ -136,6 +143,7 @@ if max_seq > last_seq then
 	return result
 end
 redis.call("HSET", key, "CURR", max_seq)
+redis.call("EXPIRE", key, dataSecond)
 table.insert(result, 0)
 table.insert(result, curr_seq)
 table.insert(result, last_seq)
@@ -219,6 +227,7 @@ func (s *SeqMalloc) Malloc(ctx context.Context, conversationID string, size int6
 			s.setSeqRetry(ctx, key, states[1], seq+size, seq+mallocSize)
 			return seq, nil
 		case 2: // locked
+			fmt.Println("locked----->", "conversationID", conversationID, "size", size)
 			if err := s.wait(ctx); err != nil {
 				return 0, err
 			}
