@@ -2,24 +2,13 @@ package group
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/binary"
-	"encoding/json"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/hashutil"
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/sdkws"
 )
-
-func (s *groupServer) idHash(ids []string) uint64 {
-	if len(ids) == 0 {
-		return 0
-	}
-	data, _ := json.Marshal(ids)
-	sum := md5.Sum(data)
-	return binary.BigEndian.Uint64(sum[:])
-}
 
 func (s *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetFullGroupMemberUserIDsReq) (*pbgroup.GetFullGroupMemberUserIDsResp, error) {
 	vl, err := s.db.FindMaxGroupMemberVersionCache(ctx, req.GroupID)
@@ -30,7 +19,7 @@ func (s *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgrou
 	if err != nil {
 		return nil, err
 	}
-	idHash := s.idHash(userIDs)
+	idHash := hashutil.IdHash(userIDs)
 	if req.IdHash == idHash {
 		userIDs = nil
 	}
@@ -51,7 +40,7 @@ func (s *groupServer) GetFullJoinGroupIDs(ctx context.Context, req *pbgroup.GetF
 	if err != nil {
 		return nil, err
 	}
-	idHash := s.idHash(groupIDs)
+	idHash := hashutil.IdHash(groupIDs)
 	if req.IdHash == idHash {
 		groupIDs = nil
 	}
