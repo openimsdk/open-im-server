@@ -53,7 +53,7 @@ func NewFriendMongo(db *mongo.Database) (database.Friend, error) {
 }
 
 func (f *FriendMgo) friendSort() any {
-	return bson.D{{"is_pinned", -1}, {"create_time", 1}}
+	return bson.D{{"is_pinned", -1}, {"create_time", 1}, {"_id", 1}}
 }
 
 // Create inserts multiple friend records.
