@@ -15,15 +15,9 @@ func Result[V any](val V, err error) V {
 	return val
 }
 
-func Check(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 func TestName(t *testing.T) {
 	cli := Result(mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.48:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
-	tmp, err := NewSeqMongo(cli.Database("openim_v3"))
+	tmp, err := NewSeqConversationMongo(cli.Database("openim_v3"))
 	if err != nil {
 		panic(err)
 	}
