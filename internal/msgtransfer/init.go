@@ -87,7 +87,12 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqModel, &config.KafkaConfig)
+	seqConversation, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	seqConversationCache := redis.NewSeqConversationCacheRedis(rdb, seqConversation)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqModel, seqConversationCache, &config.KafkaConfig)
 	if err != nil {
 		return err
 	}

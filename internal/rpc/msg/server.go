@@ -91,7 +91,12 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.Share.RpcRegisterName.Friend)
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqModel, &config.KafkaConfig)
+	seqConversation, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	seqConversationCache := redis.NewSeqConversationCacheRedis(rdb, seqConversation)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqModel, seqConversationCache, &config.KafkaConfig)
 	if err != nil {
 		return err
 	}

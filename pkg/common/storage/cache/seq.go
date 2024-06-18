@@ -5,13 +5,13 @@ import (
 )
 
 type SeqCache interface {
-	SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error
-	GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
-	GetMaxSeq(ctx context.Context, conversationID string) (int64, error)
-	SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error
-	SetMinSeqs(ctx context.Context, seqs map[string]int64) error
-	GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
-	GetMinSeq(ctx context.Context, conversationID string) (int64, error)
+	//SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error
+	//GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
+	//GetMaxSeq(ctx context.Context, conversationID string) (int64, error)
+	//SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error
+	//SetMinSeqs(ctx context.Context, seqs map[string]int64) error
+	//GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
+	//GetMinSeq(ctx context.Context, conversationID string) (int64, error)
 	GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error)
 	GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (map[string]int64, error)
 	SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error

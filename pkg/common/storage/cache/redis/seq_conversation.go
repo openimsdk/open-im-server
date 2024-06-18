@@ -3,74 +3,68 @@ package redis
 import (
 	"context"
 	"fmt"
+	"github.com/dtm-labs/rockscache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
 
-type RedisHash struct {
-	NextSeq int64
-	LastSeq int64
-}
-
-func NewTestSeq() *SeqMalloc {
-	mgocli, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.48:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second))
-	if err != nil {
-		panic(err)
-	}
-	model, err := mgo.NewSeqMongo(mgocli.Database("openim_v3"))
-	if err != nil {
-		panic(err)
-	}
-	opt := &redis.Options{
-		Addr:     "172.16.8.48:16379",
-		Password: "openIM123",
-		DB:       1,
-	}
-	rdb := redis.NewClient(opt)
-	if err := rdb.Ping(context.Background()).Err(); err != nil {
-		panic(err)
-	}
-	return &SeqMalloc{
-		rdb: rdb,
-		mgo: model,
-		//lockTime: time.Second * 30,
-		lockTime: time.Second * 60 * 60 * 24 * 1,
-		dataTime: time.Second * 60 * 60 * 24 * 7,
+func NewSeqConversationCacheRedis(rdb redis.UniversalClient, mgo database.SeqConversation) cache.SeqConversationCache {
+	return &seqConversationCacheRedis{
+		rdb:              rdb,
+		mgo:              mgo,
+		lockTime:         time.Second * 3,
+		dataTime:         time.Hour * 24 * 365,
+		minSeqExpireTime: time.Hour,
+		rocks:            rockscache.NewClient(rdb, *GetRocksCacheOptions()),
 	}
 }
 
-type RedisSeq struct {
-	Curr int64
-	Last int64
-	Lock *int64
+type seqConversationCacheRedis struct {
+	rdb              redis.UniversalClient
+	mgo              database.SeqConversation
+	rocks            *rockscache.Client
+	lockTime         time.Duration
+	dataTime         time.Duration
+	minSeqExpireTime time.Duration
 }
 
-type SeqMalloc struct {
-	rdb      redis.UniversalClient
-	mgo      database.Seq
-	lockTime time.Duration
-	dataTime time.Duration
+func (s *seqConversationCacheRedis) getMinSeqKey(conversationID string) string {
+	return cachekey.GetMallocMinSeqKey(conversationID)
 }
 
-func (s *SeqMalloc) getSeqMallocKey(conversationID string) string {
+func (s *seqConversationCacheRedis) SetMinSeq(ctx context.Context, conversationID string, seq int64) error {
+	if err := s.mgo.SetMinSeq(ctx, conversationID, seq); err != nil {
+		return err
+	}
+	if err := s.rocks.TagAsDeleted2(ctx, s.getMinSeqKey(conversationID)); err != nil {
+		return errs.Wrap(err)
+	}
+	return nil
+}
+
+func (s *seqConversationCacheRedis) GetMinSeq(ctx context.Context, conversationID string) (int64, error) {
+	return getCache(ctx, s.rocks, s.getMinSeqKey(conversationID), s.minSeqExpireTime, func(ctx context.Context) (int64, error) {
+		return s.mgo.GetMinSeq(ctx, conversationID)
+	})
+}
+
+func (s *seqConversationCacheRedis) getSeqMallocKey(conversationID string) string {
 	return cachekey.GetMallocSeqKey(conversationID)
 }
 
-func (s *SeqMalloc) setSeq(ctx context.Context, key string, owner int64, currSeq int64, lastSeq int64) (int64, error) {
+func (s *seqConversationCacheRedis) setSeq(ctx context.Context, key string, owner int64, currSeq int64, lastSeq int64) (int64, error) {
 	if lastSeq < currSeq {
 		return 0, errs.New("lastSeq must be greater than currSeq")
 	}
-	// 0： 成功
-	// 1： 成功 锁过期，但未被其他人锁
-	// 2： 已经被锁，但是锁的不是自己
+	// 0: success
+	// 1: success the lock has expired, but has not been locked by anyone else
+	// 2: already locked, but not by yourself
 	script := `
 local key = KEYS[1]
 local lockValue = ARGV[1]
@@ -97,12 +91,12 @@ return 0
 	return result, nil
 }
 
-// malloc size=0为获取当前seq size>0为分配seq
-func (s *SeqMalloc) malloc(ctx context.Context, key string, size int64) ([]int64, error) {
-	// 0： 成功
-	// 1： 需要获取，并加锁
-	// 2： 已经被锁
-	// 3： 超过最大值，并加锁
+// malloc size=0 is to get the current seq size>0 is to allocate seq
+func (s *seqConversationCacheRedis) malloc(ctx context.Context, key string, size int64) ([]int64, error) {
+	// 0: success
+	// 1: need to obtain and lock
+	// 2: already locked
+	// 3: exceeded the maximum value and locked
 	script := `
 local key = KEYS[1]
 local size = tonumber(ARGV[1])
@@ -156,7 +150,7 @@ return result
 	return result, nil
 }
 
-func (s *SeqMalloc) wait(ctx context.Context) error {
+func (s *seqConversationCacheRedis) wait(ctx context.Context) error {
 	timer := time.NewTimer(time.Second / 4)
 	defer timer.Stop()
 	select {
@@ -167,7 +161,7 @@ func (s *SeqMalloc) wait(ctx context.Context) error {
 	}
 }
 
-func (s *SeqMalloc) setSeqRetry(ctx context.Context, key string, owner int64, currSeq int64, lastSeq int64) {
+func (s *seqConversationCacheRedis) setSeqRetry(ctx context.Context, key string, owner int64, currSeq int64, lastSeq int64) {
 	for i := 0; i < 10; i++ {
 		state, err := s.setSeq(ctx, key, owner, currSeq, lastSeq)
 		if err != nil {
@@ -191,13 +185,13 @@ func (s *SeqMalloc) setSeqRetry(ctx context.Context, key string, owner int64, cu
 	log.ZError(ctx, "set seq cache retrying still failed", nil, "key", key, "owner", owner, "currSeq", currSeq, "lastSeq", lastSeq)
 }
 
-func (s *SeqMalloc) getMallocSize(conversationID string, size int64) int64 {
+func (s *seqConversationCacheRedis) getMallocSize(conversationID string, size int64) int64 {
 	if size == 0 {
 		return 0
 	}
 	var basicSize int64
 	if msgprocessor.IsGroupConversationID(conversationID) {
-		basicSize = 200
+		basicSize = 100
 	} else {
 		basicSize = 50
 	}
@@ -205,7 +199,7 @@ func (s *SeqMalloc) getMallocSize(conversationID string, size int64) int64 {
 	return basicSize
 }
 
-func (s *SeqMalloc) Malloc(ctx context.Context, conversationID string, size int64) (int64, error) {
+func (s *seqConversationCacheRedis) Malloc(ctx context.Context, conversationID string, size int64) (int64, error) {
 	if size < 0 {
 		return 0, errs.New("size must be greater than 0")
 	}
@@ -227,7 +221,6 @@ func (s *SeqMalloc) Malloc(ctx context.Context, conversationID string, size int6
 			s.setSeqRetry(ctx, key, states[1], seq+size, seq+mallocSize)
 			return seq, nil
 		case 2: // locked
-			fmt.Println("locked----->", "conversationID", conversationID, "size", size)
 			if err := s.wait(ctx); err != nil {
 				return 0, err
 			}
@@ -257,6 +250,6 @@ func (s *SeqMalloc) Malloc(ctx context.Context, conversationID string, size int6
 	return 0, errs.New("malloc seq waiting for lock timeout", "conversationID", conversationID, "size", size)
 }
 
-func (s *SeqMalloc) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
+func (s *seqConversationCacheRedis) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
 	return s.Malloc(ctx, conversationID, 0)
 }

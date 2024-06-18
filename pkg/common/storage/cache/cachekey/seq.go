@@ -15,24 +15,24 @@
 package cachekey
 
 const (
-	maxSeq                 = "MAX_SEQ:"
-	minSeq                 = "MIN_SEQ:"
-	conversationUserMinSeq = "CON_USER_MIN_SEQ:"
-	hasReadSeq             = "HAS_READ_SEQ:"
+	MaxSeq                 = "MAX_SEQ:"
+	MinSeq                 = "MIN_SEQ:"
+	ConversationUserMinSeq = "CON_USER_MIN_SEQ:"
+	HasReadSeq             = "HAS_READ_SEQ:"
 )
 
 func GetMaxSeqKey(conversationID string) string {
-	return maxSeq + conversationID
+	return MaxSeq + conversationID
 }
 
 func GetMinSeqKey(conversationID string) string {
-	return minSeq + conversationID
+	return MinSeq + conversationID
 }
 
 func GetHasReadSeqKey(conversationID string, userID string) string {
-	return hasReadSeq + userID + ":" + conversationID
+	return HasReadSeq + userID + ":" + conversationID
 }
 
 func GetConversationUserMinSeqKey(conversationID, userID string) string {
-	return conversationUserMinSeq + conversationID + "u:" + userID
+	return ConversationUserMinSeq + conversationID + "u:" + userID
 }
