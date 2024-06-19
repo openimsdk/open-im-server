@@ -2,6 +2,7 @@ package friend
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/hashutil"
 	"github.com/openimsdk/protocol/sdkws"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
@@ -9,6 +10,27 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/relation"
 )
+
+func (s *friendServer) GetFullFriendUserIDs(ctx context.Context, req *relation.GetFullFriendUserIDsReq) (*relation.GetFullFriendUserIDsResp, error) {
+	vl, err := s.db.FindMaxFriendVersionCache(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	userIDs, err := s.db.FindFriendUserIDs(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	idHash := hashutil.IdHash(userIDs)
+	if req.IdHash == idHash {
+		userIDs = nil
+	}
+	return &relation.GetFullFriendUserIDsResp{
+		Version:   idHash,
+		VersionID: vl.ID.Hex(),
+		Equal:     req.IdHash == idHash,
+		UserIDs:   userIDs,
+	}, nil
+}
 
 func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.GetIncrementalFriendsReq) (*relation.GetIncrementalFriendsResp, error) {
 	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
@@ -19,8 +41,8 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.
 		VersionKey:      req.UserID,
 		VersionID:       req.VersionID,
 		VersionNumber:   req.Version,
-		Version:         s.friendDatabase.FindFriendIncrVersion,
-		CacheMaxVersion: s.friendDatabase.FindMaxFriendVersionCache,
+		Version:         s.db.FindFriendIncrVersion,
+		CacheMaxVersion: s.db.FindMaxFriendVersionCache,
 		Find: func(ctx context.Context, ids []string) ([]*sdkws.FriendInfo, error) {
 			return s.getFriend(ctx, req.UserID, ids)
 		},

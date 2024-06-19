@@ -16,6 +16,7 @@ package auth
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/tools/db/redisutil"
@@ -32,7 +33,6 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/tokenverify"
 	"google.golang.org/grpc"
 )
@@ -153,21 +153,19 @@ func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq
 	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
-	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {
+	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID); err != nil {
 		return nil, err
 	}
 	return &pbauth.ForceLogoutResp{}, nil
 }
 
-func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
+func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32) error {
 	conns, err := s.RegisterCenter.GetConns(ctx, s.config.Share.RpcRegisterName.MessageGateway)
 	if err != nil {
 		return err
 	}
 	for _, v := range conns {
 		log.ZDebug(ctx, "forceKickOff", "conn", v.Target())
-	}
-	for _, v := range conns {
 		client := msggateway.NewMsgGatewayClient(v)
 		kickReq := &msggateway.KickUserOfflineReq{KickUserIDList: []string{userID}, PlatformID: platformID}
 		_, err := client.KickUserOffline(ctx, kickReq)
@@ -175,8 +173,24 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 			log.ZError(ctx, "forceKickOff", err, "kickReq", kickReq)
 		}
 	}
+
+	m, err := s.authDatabase.GetTokensWithoutError(ctx, userID, int(platformID))
+	if err != nil && err != redis.Nil {
+		return err
+	}
+	for k := range m {
+		m[k] = constant.KickedToken
+		log.ZDebug(ctx, "set token map is ", "token map", m, "userID",
+			userID, "token", k)
+
+		err = s.authDatabase.SetTokenMapByUidPid(ctx, userID, int(platformID), m)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
+
 func (s *authServer) InvalidateToken(ctx context.Context, req *pbauth.InvalidateTokenReq) (*pbauth.InvalidateTokenResp, error) {
 	m, err := s.authDatabase.GetTokensWithoutError(ctx, req.UserID, int(req.PlatformID))
 	if err != nil && err != redis.Nil {

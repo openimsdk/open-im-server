@@ -243,17 +243,10 @@ func (g *groupDatabase) UpdateGroup(ctx context.Context, groupID string, data ma
 		if err := g.groupDB.UpdateMap(ctx, groupID, data); err != nil {
 			return err
 		}
-		userIDs, err := g.cache.GetGroupMemberIDs(ctx, groupID)
-		if err != nil {
+		if err := g.groupMemberDB.MemberGroupIncrVersion(ctx, groupID, []string{""}, model.VersionStateUpdate); err != nil {
 			return err
 		}
-		for _, userID := range userIDs {
-			if err := g.groupMemberDB.JoinGroupIncrVersion(ctx, userID, []string{groupID}, model.VersionStateUpdate); err != nil {
-				return err
-			}
-
-		}
-		return g.cache.CloneGroupCache().DelGroupsInfo(groupID).DelMaxJoinGroupVersion(userIDs...).ChainExecDel(ctx)
+		return g.cache.CloneGroupCache().DelGroupsInfo(groupID).DelMaxGroupMemberVersion(groupID).ChainExecDel(ctx)
 	})
 }
 
@@ -263,11 +256,11 @@ func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string, delete
 		if err := g.groupDB.UpdateStatus(ctx, groupID, constant.GroupStatusDismissed); err != nil {
 			return err
 		}
-		userIDs, err := g.cache.GetGroupMemberIDs(ctx, groupID)
-		if err != nil {
-			return err
-		}
 		if deleteMember {
+			userIDs, err := g.cache.GetGroupMemberIDs(ctx, groupID)
+			if err != nil {
+				return err
+			}
 			if err := g.groupMemberDB.Delete(ctx, groupID, nil); err != nil {
 				return err
 			}
@@ -277,13 +270,18 @@ func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string, delete
 				DelGroupMembersHash(groupID).
 				DelGroupAllRoleLevel(groupID).
 				DelGroupMembersInfo(groupID, userIDs...).
-				DelMaxGroupMemberVersion(groupID)
-		}
-		c = c.DelMaxJoinGroupVersion(userIDs...)
-		if len(userIDs) > 0 {
-			if err := g.groupMemberDB.JoinGroupIncrVersion(ctx, groupID, userIDs, model.VersionStateDelete); err != nil {
+				DelMaxGroupMemberVersion(groupID).
+				DelMaxJoinGroupVersion(userIDs...)
+			for _, userID := range userIDs {
+				if err := g.groupMemberDB.JoinGroupIncrVersion(ctx, userID, []string{groupID}, model.VersionStateDelete); err != nil {
+					return err
+				}
+			}
+		} else {
+			if err := g.groupMemberDB.MemberGroupIncrVersion(ctx, groupID, []string{""}, model.VersionStateUpdate); err != nil {
 				return err
 			}
+			c = c.DelMaxGroupMemberVersion(groupID)
 		}
 		return c.DelGroupsInfo(groupID).ChainExecDel(ctx)
 	})
@@ -411,12 +409,16 @@ func (g *groupDatabase) TransferGroupOwner(ctx context.Context, groupID string, 
 		return c.DelGroupMembersInfo(groupID, oldOwnerUserID, newOwnerUserID).
 			DelGroupAllRoleLevel(groupID).
 			DelGroupMembersHash(groupID).
-			DelJoinedGroupID(oldOwnerUserID, newOwnerUserID).
+			DelMaxGroupMemberVersion(groupID).
+			DelGroupMemberIDs(groupID).
 			ChainExecDel(ctx)
 	})
 }
 
 func (g *groupDatabase) UpdateGroupMember(ctx context.Context, groupID string, userID string, data map[string]any) error {
+	if len(data) == 0 {
+		return nil
+	}
 	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
 		if err := g.groupMemberDB.Update(ctx, groupID, userID, data); err != nil {
 			return err
@@ -424,9 +426,9 @@ func (g *groupDatabase) UpdateGroupMember(ctx context.Context, groupID string, u
 		c := g.cache.CloneGroupCache()
 		c = c.DelGroupMembersInfo(groupID, userID)
 		if g.groupMemberDB.IsUpdateRoleLevel(data) {
-			c = c.DelGroupAllRoleLevel(groupID)
+			c = c.DelGroupAllRoleLevel(groupID).DelGroupMemberIDs(groupID)
 		}
-		c = c.DelMaxGroupMemberVersion(groupID).DelMaxJoinGroupVersion(userID)
+		c = c.DelMaxGroupMemberVersion(groupID)
 		return c.ChainExecDel(ctx)
 	})
 }
@@ -439,9 +441,9 @@ func (g *groupDatabase) UpdateGroupMembers(ctx context.Context, data []*common.B
 				return err
 			}
 			if g.groupMemberDB.IsUpdateRoleLevel(item.Map) {
-				c = c.DelGroupAllRoleLevel(item.GroupID)
+				c = c.DelGroupAllRoleLevel(item.GroupID).DelGroupMemberIDs(item.GroupID)
 			}
-			c = c.DelGroupMembersInfo(item.GroupID, item.UserID).DelGroupMembersHash(item.GroupID)
+			c = c.DelGroupMembersInfo(item.GroupID, item.UserID).DelMaxGroupMemberVersion(item.GroupID).DelGroupMembersHash(item.GroupID)
 		}
 		return c.ChainExecDel(ctx)
 	})
@@ -500,14 +502,6 @@ func (g *groupDatabase) FindMemberIncrVersion(ctx context.Context, groupID strin
 func (g *groupDatabase) FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error) {
 	return g.groupMemberDB.FindJoinIncrVersion(ctx, userID, version, limit)
 }
-
-//func (g *groupDatabase) FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error) {
-//	return g.cache.FindSortGroupMemberUserIDs(ctx, groupID)
-//}
-//
-//func (g *groupDatabase) FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error) {
-//	return g.cache.FindSortJoinGroupIDs(ctx, userID)
-//}
 
 func (g *groupDatabase) FindMaxGroupMemberVersionCache(ctx context.Context, groupID string) (*model.VersionLog, error) {
 	return g.cache.FindMaxGroupMemberVersion(ctx, groupID)

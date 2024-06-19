@@ -97,12 +97,18 @@ func (g *GroupMemberMgo) Delete(ctx context.Context, groupID string, userIDs []s
 	return mongoutil.IncrVersion(func() error {
 		return mongoutil.DeleteMany(ctx, g.coll, filter)
 	}, func() error {
-		return g.member.IncrVersion(ctx, groupID, userIDs, model.VersionStateDelete)
-	}, func() error {
 		if len(userIDs) == 0 {
-			return nil
+			return g.member.Delete(ctx, groupID)
+		} else {
+			return g.member.IncrVersion(ctx, groupID, userIDs, model.VersionStateDelete)
 		}
-		return g.member.IncrVersion(ctx, groupID, userIDs, model.VersionStateDelete)
+	}, func() error {
+		for _, userID := range userIDs {
+			if err := g.join.IncrVersion(ctx, userID, []string{groupID}, model.VersionStateDelete); err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 }
 
@@ -111,8 +117,6 @@ func (g *GroupMemberMgo) UpdateRoleLevel(ctx context.Context, groupID string, us
 		return g.Update(ctx, groupID, userID, bson.M{"role_level": roleLevel})
 	}, func() error {
 		return g.member.IncrVersion(ctx, groupID, []string{userID}, model.VersionStateUpdate)
-	}, func() error {
-		return g.join.IncrVersion(ctx, groupID, []string{userID}, model.VersionStateUpdate)
 	})
 }
 
@@ -176,6 +180,10 @@ func (g *GroupMemberMgo) IsUpdateRoleLevel(data map[string]any) bool {
 
 func (g *GroupMemberMgo) JoinGroupIncrVersion(ctx context.Context, userID string, groupIDs []string, state int32) error {
 	return g.join.IncrVersion(ctx, userID, groupIDs, state)
+}
+
+func (g *GroupMemberMgo) MemberGroupIncrVersion(ctx context.Context, groupID string, userIDs []string, state int32) error {
+	return g.member.IncrVersion(ctx, groupID, userIDs, state)
 }
 
 func (g *GroupMemberMgo) FindMemberIncrVersion(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error) {
