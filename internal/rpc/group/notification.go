@@ -477,11 +477,16 @@ func (g *GroupNotificationSender) GroupOwnerTransferredNotification(ctx context.
 	}
 	opUserID := mcontext.GetOpUserID(ctx)
 	var member map[string]*sdkws.GroupMemberFullInfo
-	member, err = g.getGroupMemberMap(ctx, req.GroupID, []string{opUserID, req.NewOwnerUserID})
+	member, err = g.getGroupMemberMap(ctx, req.GroupID, []string{opUserID, req.NewOwnerUserID, req.OldOwnerUserID})
 	if err != nil {
 		return
 	}
-	tips := &sdkws.GroupOwnerTransferredTips{Group: group, OpUser: member[opUserID], NewGroupOwner: member[req.NewOwnerUserID]}
+	tips := &sdkws.GroupOwnerTransferredTips{
+		Group:             group,
+		OpUser:            member[opUserID],
+		NewGroupOwner:     member[req.NewOwnerUserID],
+		OldGroupOwnerInfo: member[req.OldOwnerUserID],
+	}
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return
 	}
