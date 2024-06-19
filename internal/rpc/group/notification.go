@@ -324,6 +324,7 @@ func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, 
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return
 	}
+	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips, rpcclient.WithRpcGetUserName())
 }
 
@@ -337,6 +338,7 @@ func (g *GroupNotificationSender) GroupInfoSetNameNotification(ctx context.Conte
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return
 	}
+	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNameNotification, tips)
 }
 
@@ -350,6 +352,7 @@ func (g *GroupNotificationSender) GroupInfoSetAnnouncementNotification(ctx conte
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return
 	}
+	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips, rpcclient.WithRpcGetUserName())
 }
 
@@ -636,6 +639,7 @@ func (g *GroupNotificationSender) GroupMutedNotification(ctx context.Context, gr
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return
 	}
+	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, groupID)
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMutedNotification, tips)
 }
 
@@ -663,6 +667,7 @@ func (g *GroupNotificationSender) GroupCancelMutedNotification(ctx context.Conte
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return
 	}
+	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, groupID)
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupCancelMutedNotification, tips)
 }
 
