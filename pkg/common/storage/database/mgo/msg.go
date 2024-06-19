@@ -205,7 +205,7 @@ func (m *MsgMgo) GetMsgDocModelByIndex(ctx context.Context, conversationID strin
 		return nil, errs.ErrArgs.WrapMsg("mongo sort must be 1 or -1")
 	}
 
-	// 构建聚合管道
+	// parepare pipeline
 	pipeline := mongo.Pipeline{
 		{{
 			"$match", bson.D{
@@ -215,11 +215,11 @@ func (m *MsgMgo) GetMsgDocModelByIndex(ctx context.Context, conversationID strin
 		{{
 			"$project", bson.M{
 				"doc_id": 1,
-				"seqSuffix": bson.M{ // 创建一个新字段来存储转换后的 seqSuffix 整数
-					"$toInt": bson.M{ // $toInt 表达式
-						"$arrayElemAt": bson.A{ // $arrayElemAt 需要一个数组作为第一个参数
-							bson.M{"$split": []interface{}{"$doc_id", ":"}}, // $split 表达式
-							-1, // 索引，取数组的最后一个元素
+				"seqSuffix": bson.M{ // Create a new field to store the converted seqSuffix integer.
+					"$toInt": bson.M{ // $toInt expression
+						"$arrayElemAt": bson.A{ // $arrayElemAt requires an array as the first argument.
+							bson.M{"$split": []interface{}{"$doc_id", ":"}}, // $split expression
+							-1, // Indexing, to take the last element of the array.
 						},
 					},
 				},
@@ -227,23 +227,23 @@ func (m *MsgMgo) GetMsgDocModelByIndex(ctx context.Context, conversationID strin
 			},
 		}},
 		{{
-			"$sort", bson.D{ // 按 seqSuffix 排序
+			"$sort", bson.D{ // Sort by seqSuffix.
 				{"seqSuffix", sort},
 			},
 		}},
 	}
 
-	// 如果需要分页，可以在这里添加逻辑来动态地修改 pipeline
+	// If pagination is needed, logic can be added here to dynamically modify the pipeline.
 	if index > 0 {
 		pipeline = append(pipeline, bson.D{{
 			"$skip", index,
 		}})
 	}
 	pipeline = append(pipeline, bson.D{{
-		"$limit", 1, // 我们只需要一个文档
+		"$limit", 1, // We only need one document.
 	}})
 
-	// 执行聚合查询
+	// Execute an aggregation query.
 	msgs, err := mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, pipeline)
 	if err != nil {
 		return nil, err
