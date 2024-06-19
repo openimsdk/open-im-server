@@ -446,7 +446,7 @@ func (g *GroupCacheRedis) DelMaxJoinGroupVersion(userIDs ...string) cache.GroupC
 
 func (g *GroupCacheRedis) FindMaxGroupMemberVersion(ctx context.Context, groupID string) (*model.VersionLog, error) {
 	return getCache(ctx, g.rcClient, g.getGroupMemberMaxVersionKey(groupID), g.expireTime, func(ctx context.Context) (*model.VersionLog, error) {
-		return g.groupMemberDB.FindJoinIncrVersion(ctx, groupID, 0, 0)
+		return g.groupMemberDB.FindMemberIncrVersion(ctx, groupID, 0, 0)
 	})
 }
 
