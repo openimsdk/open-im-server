@@ -63,6 +63,7 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, servererrs.ErrDismissedAlready.Wrap()
 	}
+	var hasGroupUpdate bool
 	opt := incrversion.Option[*sdkws.GroupMemberFullInfo, pbgroup.GetIncrementalGroupMemberResp]{
 		Ctx:           ctx,
 		VersionKey:    req.GroupID,
@@ -73,17 +74,14 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 			if err != nil {
 				return nil, err
 			}
-			var ok bool
 			vl.Logs = slices.DeleteFunc(vl.Logs, func(elem model.VersionLogElem) bool {
 				if elem.EID == "" {
-					ok = true
+					vl.LogLen--
+					hasGroupUpdate = true
 					return true
 				}
 				return false
 			})
-			if !ok {
-				group = nil
-			}
 			return vl, nil
 		},
 		CacheMaxVersion: s.db.FindMaxGroupMemberVersionCache,
@@ -106,7 +104,7 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 	if err != nil {
 		return nil, err
 	}
-	if group != nil {
+	if resp.Full || hasGroupUpdate {
 		count, err := s.db.FindGroupMemberNum(ctx, group.GroupID)
 		if err != nil {
 			return nil, err
