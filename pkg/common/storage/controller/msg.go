@@ -340,11 +340,6 @@ func (db *commonMsgDatabase) DeleteMessagesFromCache(ctx context.Context, conver
 }
 
 func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
-	currentMaxSeq, err := db.seqConversation.Malloc(ctx, conversationID, int64(len(msgs)))
-	if err != nil {
-		log.ZError(ctx, "storage.seq.Malloc", err)
-		return 0, false, err
-	}
 	lenList := len(msgs)
 	if int64(lenList) > db.msgTable.GetSingleGocMsgNum() {
 		return 0, false, errs.New("message count exceeds limit", "limit", db.msgTable.GetSingleGocMsgNum()).Wrap()
@@ -352,6 +347,12 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	if lenList < 1 {
 		return 0, false, errs.New("no messages to insert", "minCount", 1).Wrap()
 	}
+	currentMaxSeq, err := db.seqConversation.Malloc(ctx, conversationID, int64(len(msgs)))
+	if err != nil {
+		log.ZError(ctx, "storage.seq.Malloc", err)
+		return 0, false, err
+	}
+	isNew = currentMaxSeq == 0
 	lastMaxSeq := currentMaxSeq
 	userSeqMap := make(map[string]int64)
 	for _, m := range msgs {
