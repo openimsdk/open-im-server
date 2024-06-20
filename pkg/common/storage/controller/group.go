@@ -109,6 +109,7 @@ type GroupDatabase interface {
 
 	FindMemberIncrVersion(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error)
 	FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error)
+	MemberGroupIncrVersion(ctx context.Context, groupID string, userIDs []string, state int32) error
 
 	//FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error)
 	//FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error)
@@ -517,4 +518,11 @@ func (g *groupDatabase) SearchJoinGroup(ctx context.Context, userID string, keyw
 		return 0, nil, err
 	}
 	return g.groupDB.SearchJoin(ctx, groupIDs, keyword, pagination)
+}
+
+func (g *groupDatabase) MemberGroupIncrVersion(ctx context.Context, groupID string, userIDs []string, state int32) error {
+	if err := g.groupMemberDB.MemberGroupIncrVersion(ctx, groupID, userIDs, state); err != nil {
+		return err
+	}
+	return g.cache.DelMaxGroupMemberVersion(groupID).ChainExecDel(ctx)
 }

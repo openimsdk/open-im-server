@@ -55,4 +55,6 @@ type Friend interface {
 	//SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error)
 
 	FindOwnerFriendUserIds(ctx context.Context, ownerUserID string, limit int) ([]string, error)
+
+	IncrVersion(ctx context.Context, ownerUserID string, friendUserIDs []string, state int32) error
 }

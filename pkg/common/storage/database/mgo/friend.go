@@ -244,3 +244,7 @@ func (f *FriendMgo) FindFriendUserID(ctx context.Context, friendUserID string) (
 	}
 	return mongoutil.Find[string](ctx, f.coll, filter, options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1}).SetSort(f.friendSort()))
 }
+
+func (f *FriendMgo) IncrVersion(ctx context.Context, ownerUserID string, friendUserIDs []string, state int32) error {
+	return f.owner.IncrVersion(ctx, ownerUserID, friendUserIDs, state)
+}

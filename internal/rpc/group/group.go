@@ -133,12 +133,16 @@ func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 		groupIDs = append(groupIDs, member.GroupID)
 	}
 	for _, groupID := range groupIDs {
+		if err := s.db.MemberGroupIncrVersion(ctx, groupID, []string{req.UserID}, model.VersionStateUpdate); err != nil {
+			return nil, err
+		}
+	}
+	for _, groupID := range groupIDs {
 		s.notification.GroupMemberInfoSetNotification(ctx, groupID, req.UserID)
 	}
 	if err = s.db.DeleteGroupMemberHash(ctx, groupIDs); err != nil {
 		return nil, err
 	}
-
 	return &pbgroup.NotificationUserInfoUpdateResp{}, nil
 }
 
