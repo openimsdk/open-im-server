@@ -18,6 +18,7 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/tools/log"
 
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/db/mongoutil"
@@ -187,9 +188,11 @@ func (g *GroupMemberMgo) MemberGroupIncrVersion(ctx context.Context, groupID str
 }
 
 func (g *GroupMemberMgo) FindMemberIncrVersion(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error) {
+	log.ZDebug(ctx, "find member incr version", "groupID", groupID, "version", version)
 	return g.member.FindChangeLog(ctx, groupID, version, limit)
 }
 
 func (g *GroupMemberMgo) FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error) {
+	log.ZDebug(ctx, "find join incr version", "userID", userID, "version", version)
 	return g.join.FindChangeLog(ctx, userID, version, limit)
 }

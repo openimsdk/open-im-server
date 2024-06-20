@@ -11,6 +11,22 @@ import (
 	"github.com/openimsdk/protocol/relation"
 )
 
+func (s *friendServer) NotificationUserInfoUpdate(ctx context.Context, req *relation.NotificationUserInfoUpdateReq) (*relation.NotificationUserInfoUpdateResp, error) {
+	userIDs, err := s.db.FindFriendUserIDs(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	for _, userID := range userIDs {
+		if err := s.db.OwnerIncrVersion(ctx, userID, []string{req.UserID}, model.VersionStateUpdate); err != nil {
+			return nil, err
+		}
+	}
+	for _, userID := range userIDs {
+		s.notificationSender.FriendInfoUpdatedNotification(ctx, req.UserID, userID)
+	}
+	return &relation.NotificationUserInfoUpdateResp{}, nil
+}
+
 func (s *friendServer) GetFullFriendUserIDs(ctx context.Context, req *relation.GetFullFriendUserIDsReq) (*relation.GetFullFriendUserIDsResp, error) {
 	vl, err := s.db.FindMaxFriendVersionCache(ctx, req.UserID)
 	if err != nil {
