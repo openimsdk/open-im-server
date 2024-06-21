@@ -75,21 +75,43 @@ func (c *seqCache) getSeqs(ctx context.Context, items []string, getkey func(s st
 	return m, nil
 }
 
-func (c *seqCache) SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error {
-	return c.setSeq(ctx, conversationID, maxSeq, c.getMaxSeqKey)
-}
-
-func (c *seqCache) GetMaxSeqs(ctx context.Context, conversationIDs []string) (m map[string]int64, err error) {
-	return c.getSeqs(ctx, conversationIDs, c.getMaxSeqKey)
-}
-
-func (c *seqCache) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
-	return c.getSeq(ctx, conversationID, c.getMaxSeqKey)
-}
-
-func (c *seqCache) SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error {
-	return c.setSeq(ctx, conversationID, minSeq, c.getMinSeqKey)
-}
+//func (c *seqCache) SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error {
+//	return c.setSeq(ctx, conversationID, maxSeq, c.getMaxSeqKey)
+//}
+//
+//func (c *seqCache) GetMaxSeqs(ctx context.Context, conversationIDs []string) (m map[string]int64, err error) {
+//	return c.getSeqs(ctx, conversationIDs, c.getMaxSeqKey)
+//}
+//
+//func (c *seqCache) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
+//	return c.getSeq(ctx, conversationID, c.getMaxSeqKey)
+//}
+//
+//func (c *seqCache) SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error {
+//	return c.setSeq(ctx, conversationID, minSeq, c.getMinSeqKey)
+//}
+//
+//func (c *seqCache) setSeqs(ctx context.Context, seqs map[string]int64, getkey func(key string) string) error {
+//	for conversationID, seq := range seqs {
+//		if err := c.rdb.Set(ctx, getkey(conversationID), seq, 0).Err(); err != nil {
+//			return errs.Wrap(err)
+//		}
+//	}
+//	return nil
+//}
+//
+//
+//func (c *seqCache) GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
+//	return c.getSeqs(ctx, conversationIDs, c.getMinSeqKey)
+//}
+//
+//func (c *seqCache) GetMinSeq(ctx context.Context, conversationID string) (int64, error) {
+//	return c.getSeq(ctx, conversationID, c.getMinSeqKey)
+//}
+//
+//func (c *seqCache) SetMinSeqs(ctx context.Context, seqs map[string]int64) error {
+//	return c.setSeqs(ctx, seqs, c.getMinSeqKey)
+//}
 
 func (c *seqCache) setSeqs(ctx context.Context, seqs map[string]int64, getkey func(key string) string) error {
 	for conversationID, seq := range seqs {
@@ -98,18 +120,6 @@ func (c *seqCache) setSeqs(ctx context.Context, seqs map[string]int64, getkey fu
 		}
 	}
 	return nil
-}
-
-func (c *seqCache) SetMinSeqs(ctx context.Context, seqs map[string]int64) error {
-	return c.setSeqs(ctx, seqs, c.getMinSeqKey)
-}
-
-func (c *seqCache) GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
-	return c.getSeqs(ctx, conversationIDs, c.getMinSeqKey)
-}
-
-func (c *seqCache) GetMinSeq(ctx context.Context, conversationID string) (int64, error) {
-	return c.getSeq(ctx, conversationID, c.getMinSeqKey)
 }
 
 func (c *seqCache) GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
