@@ -217,11 +217,12 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		return nil, err
 	}
 	userIDs := append(append(req.MemberUserIDs, req.AdminUserIDs...), req.OwnerUserID)
+	log.ZDebug(ctx, "userID test", "userIDs", userIDs)
 	opUserID := mcontext.GetOpUserID(ctx)
 	if !datautil.Contain(opUserID, userIDs...) {
 		userIDs = append(userIDs, opUserID)
 	}
-
+	log.ZDebug(ctx, "userID test", "userIDs", userIDs)
 	if datautil.Duplicate(userIDs) {
 		return nil, errs.ErrArgs.WrapMsg("group member repeated")
 	}
