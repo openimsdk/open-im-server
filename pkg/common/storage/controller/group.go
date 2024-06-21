@@ -400,10 +400,7 @@ func (g *groupDatabase) MapGroupMemberNum(ctx context.Context, groupIDs []string
 
 func (g *groupDatabase) TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string, roleLevel int32) error {
 	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
-		if err := g.groupMemberDB.UpdateRoleLevel(ctx, groupID, oldOwnerUserID, roleLevel); err != nil {
-			return err
-		}
-		if err := g.groupMemberDB.UpdateRoleLevel(ctx, groupID, newOwnerUserID, constant.GroupOwner); err != nil {
+		if err := g.groupMemberDB.UpdateUserRoleLevels(ctx, groupID, oldOwnerUserID, roleLevel, newOwnerUserID, constant.GroupOwner); err != nil {
 			return err
 		}
 		c := g.cache.CloneGroupCache()
