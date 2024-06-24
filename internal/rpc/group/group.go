@@ -17,17 +17,18 @@ package group
 import (
 	"context"
 	"fmt"
+	"math/big"
+	"math/rand"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/common"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
-	"math/big"
-	"math/rand"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
@@ -531,6 +532,14 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	if datautil.Contain(opUserID, req.KickedUserIDs...) {
 		return nil, errs.ErrArgs.WrapMsg("opUserID in KickedUserIDs")
 	}
+	owner, err := s.db.TakeGroupOwner(ctx, req.GroupID)
+	if err != nil {
+		return nil, err
+	}
+	if datautil.Contain(owner.UserID, req.KickedUserIDs...) {
+		return nil, errs.ErrArgs.WrapMsg("ownerUID can not Kick")
+	}
+
 	members, err := s.db.FindGroupMembers(ctx, req.GroupID, append(req.KickedUserIDs, opUserID))
 	if err != nil {
 		return nil, err
