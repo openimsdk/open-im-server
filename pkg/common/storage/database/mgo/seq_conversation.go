@@ -28,6 +28,26 @@ type seqConversationMongo struct {
 	coll *mongo.Collection
 }
 
+func (s *seqConversationMongo) setSeq(ctx context.Context, conversationID string, seq int64, field string) error {
+	filter := map[string]any{
+		"conversation_id": conversationID,
+	}
+	insert := bson.M{
+		"conversation_id": conversationID,
+		"min_seq":         0,
+		"max_seq":         0,
+	}
+	delete(insert, field)
+	update := map[string]any{
+		"$set": bson.M{
+			field: seq,
+		},
+		"$setOnInsert": insert,
+	}
+	opt := options.Update().SetUpsert(true)
+	return mongoutil.UpdateOne(ctx, s.coll, filter, update, false, opt)
+}
+
 func (s *seqConversationMongo) Malloc(ctx context.Context, conversationID string, size int64) (int64, error) {
 	if size < 0 {
 		return 0, errors.New("size must be greater than 0")
@@ -48,16 +68,8 @@ func (s *seqConversationMongo) Malloc(ctx context.Context, conversationID string
 	return lastSeq - size, nil
 }
 
-func (s *seqConversationMongo) MallocSeq(ctx context.Context, conversationID string, size int64) ([]int64, error) {
-	first, err := s.Malloc(ctx, conversationID, size)
-	if err != nil {
-		return nil, err
-	}
-	seqs := make([]int64, 0, size)
-	for i := int64(0); i < size; i++ {
-		seqs = append(seqs, first+i+1)
-	}
-	return seqs, nil
+func (s *seqConversationMongo) SetMaxSeq(ctx context.Context, conversationID string, seq int64) error {
+	return s.setSeq(ctx, conversationID, seq, "max_seq")
 }
 
 func (s *seqConversationMongo) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
@@ -83,7 +95,7 @@ func (s *seqConversationMongo) GetMinSeq(ctx context.Context, conversationID str
 }
 
 func (s *seqConversationMongo) SetMinSeq(ctx context.Context, conversationID string, seq int64) error {
-	return mongoutil.UpdateOne(ctx, s.coll, bson.M{"conversation_id": conversationID}, bson.M{"$set": bson.M{"min_seq": seq}}, false)
+	return s.setSeq(ctx, conversationID, seq, "min_seq")
 }
 
 func (s *seqConversationMongo) GetConversation(ctx context.Context, conversationID string) (*model.SeqConversation, error) {

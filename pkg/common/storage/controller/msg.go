@@ -108,7 +108,7 @@ type CommonMsgDatabase interface {
 	DeleteDocMsgBefore(ctx context.Context, ts int64, doc *model.MsgDocModel) ([]int, error)
 }
 
-func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seq cache.SeqCache, seqConversation cache.SeqConversationCache, kafkaConf *config.Kafka) (CommonMsgDatabase, error) {
+func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUser cache.SeqUser, seqConversation cache.SeqConversationCache, kafkaConf *config.Kafka) (CommonMsgDatabase, error) {
 	conf, err := kafka.BuildProducerConfig(*kafkaConf.Build())
 	if err != nil {
 		return nil, err
@@ -128,7 +128,7 @@ func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seq cach
 	return &commonMsgDatabase{
 		msgDocDatabase:  msgDocModel,
 		msg:             msg,
-		seq:             seq,
+		seqUser:         seqUser,
 		seqConversation: seqConversation,
 		producer:        producerToRedis,
 		producerToMongo: producerToMongo,
@@ -140,8 +140,8 @@ type commonMsgDatabase struct {
 	msgDocDatabase  database.Msg
 	msgTable        model.MsgDocModel
 	msg             cache.MsgCache
-	seq             cache.SeqCache
 	seqConversation cache.SeqConversationCache
+	seqUser         cache.SeqUser
 	producer        *kafka.Producer
 	producerToMongo *kafka.Producer
 	producerToPush  *kafka.Producer
@@ -339,6 +339,15 @@ func (db *commonMsgDatabase) DeleteMessagesFromCache(ctx context.Context, conver
 	return db.msg.DeleteMessagesFromCache(ctx, conversationID, seqs)
 }
 
+func (db *commonMsgDatabase) setHasReadSeqs(ctx context.Context, conversationID string, userSeqMap map[string]int64) error {
+	for userID, seq := range userSeqMap {
+		if err := db.seqUser.SetReadSeq(ctx, conversationID, userID, seq); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
 	lenList := len(msgs)
 	if int64(lenList) > db.msgTable.GetSingleGocMsgNum() {
@@ -368,7 +377,7 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	} else {
 		prommetrics.MsgInsertRedisSuccessCounter.Inc()
 	}
-	err = db.seq.SetHasReadSeqs(ctx, conversationID, userSeqMap)
+	err = db.setHasReadSeqs(ctx, conversationID, userSeqMap)
 	if err != nil {
 		log.ZError(ctx, "SetHasReadSeqs error", err, "userSeqMap", userSeqMap, "conversationID", conversationID)
 		prommetrics.SeqSetFailedCounter.Inc()
@@ -496,7 +505,7 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, userID strin
 // "userMinSeq" can be set as the same value as the conversation's "maxSeq" at the moment they join the group.
 // This ensures that their message retrieval starts from the point they joined.
 func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID string, conversationID string, begin, end, num, userMaxSeq int64) (int64, int64, []*sdkws.MsgData, error) {
-	userMinSeq, err := db.seq.GetConversationUserMinSeq(ctx, conversationID, userID)
+	userMinSeq, err := db.seqUser.GetMinSeq(ctx, conversationID, userID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return 0, 0, nil, err
 	}
@@ -574,7 +583,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 }
 
 func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (int64, int64, []*sdkws.MsgData, error) {
-	userMinSeq, err := db.seq.GetConversationUserMinSeq(ctx, conversationID, userID)
+	userMinSeq, err := db.seqUser.GetMinSeq(ctx, conversationID, userID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return 0, 0, nil, err
 	}
@@ -672,12 +681,12 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 	log.ZDebug(ctx, "UserMsgsDestruct", "conversationID", conversationID, "userID", userID, "seqs", seqs)
 	if len(seqs) > 0 {
 		userMinSeq := seqs[len(seqs)-1] + 1
-		currentUserMinSeq, err := db.seq.GetConversationUserMinSeq(ctx, conversationID, userID)
-		if err != nil && errs.Unwrap(err) != redis.Nil {
+		currentUserMinSeq, err := db.seqUser.GetMinSeq(ctx, conversationID, userID)
+		if err != nil {
 			return nil, err
 		}
 		if currentUserMinSeq < userMinSeq {
-			if err := db.seq.SetConversationUserMinSeq(ctx, conversationID, userID, userMinSeq); err != nil {
+			if err := db.seqUser.SetMinSeq(ctx, conversationID, userID, userMinSeq); err != nil {
 				return nil, err
 			}
 		}
@@ -832,40 +841,45 @@ func (db *commonMsgDatabase) SetMinSeqs(ctx context.Context, seqs map[string]int
 	return nil
 }
 
-func (db *commonMsgDatabase) GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
-	return db.seq.GetConversationUserMinSeq(ctx, conversationID, userID)
-}
-
-func (db *commonMsgDatabase) GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (map[string]int64, error) {
-	return db.seq.GetConversationUserMinSeqs(ctx, conversationID, userIDs)
-}
-
-func (db *commonMsgDatabase) SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error {
-	return db.seq.SetConversationUserMinSeq(ctx, conversationID, userID, minSeq)
-}
-
-func (db *commonMsgDatabase) SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error) {
-	return db.seq.SetConversationUserMinSeqs(ctx, conversationID, seqs)
-}
-
 func (db *commonMsgDatabase) SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
-	return db.seq.SetUserConversationsMinSeqs(ctx, userID, seqs)
+	for conversationID, seq := range seqs {
+		if err := db.seqUser.SetMinSeq(ctx, conversationID, userID, seq); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (db *commonMsgDatabase) UserSetHasReadSeqs(ctx context.Context, userID string, hasReadSeqs map[string]int64) error {
-	return db.seq.UserSetHasReadSeqs(ctx, userID, hasReadSeqs)
+	for conversationID, seq := range hasReadSeqs {
+		if err := db.seqUser.SetReadSeq(ctx, conversationID, userID, seq); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (db *commonMsgDatabase) SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error {
-	return db.seq.SetHasReadSeq(ctx, userID, conversationID, hasReadSeq)
+	return db.seqUser.SetReadSeq(ctx, conversationID, userID, hasReadSeq)
 }
 
 func (db *commonMsgDatabase) GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
-	return db.seq.GetHasReadSeqs(ctx, userID, conversationIDs)
+	cSeq := make(map[string]int64)
+	for _, conversationID := range conversationIDs {
+		if _, ok := cSeq[conversationID]; ok {
+			continue
+		}
+		seq, err := db.seqUser.GetReadSeq(ctx, conversationID, userID)
+		if err != nil {
+			return nil, err
+		}
+		cSeq[conversationID] = seq
+	}
+	return cSeq, nil
 }
 
 func (db *commonMsgDatabase) GetHasReadSeq(ctx context.Context, userID string, conversationID string) (int64, error) {
-	return db.seq.GetHasReadSeq(ctx, userID, conversationID)
+	return db.seqUser.GetReadSeq(ctx, conversationID, userID)
 }
 
 func (db *commonMsgDatabase) SetSendMsgStatus(ctx context.Context, id string, status int32) error {

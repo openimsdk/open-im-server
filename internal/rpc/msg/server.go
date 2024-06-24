@@ -86,7 +86,6 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	msgModel := redis.NewMsgCache(rdb)
-	seqModel := redis.NewSeqCache(rdb)
 	conversationClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
 	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
@@ -96,7 +95,12 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	seqConversationCache := redis.NewSeqConversationCacheRedis(rdb, seqConversation)
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqModel, seqConversationCache, &config.KafkaConfig)
+	seqUser, err := mgo.NewSeqUserMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	seqUserCache := redis.NewSeqUserCacheRedis(rdb, seqUser)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, &config.KafkaConfig)
 	if err != nil {
 		return err
 	}

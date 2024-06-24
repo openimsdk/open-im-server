@@ -1,38 +1,30 @@
-// Copyright © 2024 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package cachekey
 
 const (
-	MaxSeq                 = "MAX_SEQ:"
-	MinSeq                 = "MIN_SEQ:"
-	ConversationUserMinSeq = "CON_USER_MIN_SEQ:"
-	HasReadSeq             = "HAS_READ_SEQ:"
+	MallocSeq        = "MALLOC_SEQ:"
+	MallocMinSeqLock = "MALLOC_MIN_SEQ:"
+
+	SeqUserMaxSeq  = "SEQ_USER_MAX:"
+	SeqUserMinSeq  = "SEQ_USER_MIN:"
+	SeqUserReadSeq = "SEQ_USER_READ:"
 )
 
-func GetMaxSeqKey(conversationID string) string {
-	return MaxSeq + conversationID
+func GetMallocSeqKey(conversationID string) string {
+	return MallocSeq + conversationID
 }
 
-func GetMinSeqKey(conversationID string) string {
-	return MinSeq + conversationID
+func GetMallocMinSeqKey(conversationID string) string {
+	return MallocMinSeqLock + conversationID
 }
 
-func GetHasReadSeqKey(conversationID string, userID string) string {
-	return HasReadSeq + userID + ":" + conversationID
+func GetSeqUserMaxSeqKey(conversationID string, userID string) string {
+	return SeqUserMaxSeq + conversationID + ":" + userID
 }
 
-func GetConversationUserMinSeqKey(conversationID, userID string) string {
-	return ConversationUserMinSeq + conversationID + "u:" + userID
+func GetSeqUserMinSeqKey(conversationID string, userID string) string {
+	return SeqUserMinSeq + conversationID + ":" + userID
+}
+
+func GetSeqUserReadSeqKey(conversationID string, userID string) string {
+	return SeqUserReadSeq + conversationID + ":" + userID
 }

@@ -1,28 +1,36 @@
 package internal
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
-	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/yaml.v3"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
+	"sync/atomic"
+	"syscall"
 	"time"
+)
+
+const (
+	MaxSeq                 = "MAX_SEQ:"
+	MinSeq                 = "MIN_SEQ:"
+	ConversationUserMinSeq = "CON_USER_MIN_SEQ:"
+	HasReadSeq             = "HAS_READ_SEQ:"
 )
 
 const (
@@ -42,48 +50,6 @@ func readConfig[T any](dir string, name string) (*T, error) {
 		return nil, err
 	}
 	return &conf, nil
-}
-
-func redisKey(rdb redis.UniversalClient, prefix string, del time.Duration, fn func(ctx context.Context, key string, delKey map[string]struct{}) error) error {
-	var (
-		cursor uint64
-		keys   []string
-		err    error
-	)
-	ctx := context.Background()
-	for {
-		keys, cursor, err = rdb.Scan(ctx, cursor, prefix+"*", batchSize).Result()
-		if err != nil {
-			return err
-		}
-		delKey := make(map[string]struct{})
-		if len(keys) > 0 {
-			for _, key := range keys {
-				if err := fn(ctx, key, delKey); err != nil {
-					return err
-				}
-			}
-		}
-		if len(delKey) > 0 {
-			delKeys := datautil.Keys(delKey)
-			if del < time.Second {
-				if err := rdb.Del(ctx, datautil.Keys(delKey)...).Err(); err != nil {
-					return err
-				}
-			} else {
-				pipe := rdb.Pipeline()
-				for _, key := range delKeys {
-					pipe.Expire(ctx, key, del)
-				}
-				if _, err := pipe.Exec(ctx); err != nil {
-					return err
-				}
-			}
-		}
-		if cursor == 0 {
-			return nil
-		}
-	}
 }
 
 func Main(conf string, del time.Duration) error {
@@ -117,71 +83,218 @@ func Main(conf string, del time.Duration) error {
 	if _, err := mgo.NewSeqConversationMongo(mgocli.GetDB()); err != nil {
 		return err
 	}
-	coll := mgocli.GetDB().Collection(database.SeqConversationName)
-	const prefix = cachekey.MaxSeq
-	fmt.Println("start to convert seq conversation")
-	err = redisKey(rdb, prefix, del, func(ctx context.Context, key string, delKey map[string]struct{}) error {
-		conversationId := strings.TrimPrefix(key, prefix)
-		delKey[key] = struct{}{}
-		maxValue, err := rdb.Get(ctx, key).Result()
-		if err != nil {
-			return err
-		}
-		seq, err := strconv.Atoi(maxValue)
-		if err != nil {
-			return fmt.Errorf("invalid max seq %s", maxValue)
-		}
-		if seq == 0 {
-			return nil
-		}
-		if seq < 0 {
-			return fmt.Errorf("invalid max seq %s", maxValue)
-		}
-		var (
-			minSeq int64
-			maxSeq = int64(seq)
-		)
-		minKey := cachekey.MinSeq + conversationId
-		delKey[minKey] = struct{}{}
-		minValue, err := rdb.Get(ctx, minKey).Result()
-		if err == nil {
-			seq, err := strconv.Atoi(minValue)
-			if err != nil {
-				return fmt.Errorf("invalid min seq %s", minValue)
-			}
-			if seq < 0 {
-				return fmt.Errorf("invalid min seq %s", minValue)
-			}
-			minSeq = int64(seq)
-		} else if !errors.Is(err, redis.Nil) {
-			return err
-		}
-		if maxSeq < minSeq {
-			return fmt.Errorf("invalid max seq %d < min seq %d", maxSeq, minSeq)
-		}
-		res, err := mongoutil.FindOne[*model.SeqConversation](ctx, coll, bson.M{"conversation_id": conversationId}, nil)
-		if err == nil {
-			if res.MaxSeq < int64(seq) {
-				_, err = coll.UpdateOne(ctx, bson.M{"conversation_id": conversationId}, bson.M{"$set": bson.M{"max_seq": maxSeq, "min_seq": minSeq}})
-			}
-			return err
-		} else if errors.Is(err, mongo.ErrNoDocuments) {
-			res = &model.SeqConversation{
-				ConversationID: conversationId,
-				MaxSeq:         maxSeq,
-				MinSeq:         minSeq,
-			}
-			_, err := coll.InsertOne(ctx, res)
-			return err
-		} else {
-			return err
-		}
-	})
+	cSeq, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
-	fmt.Println("convert seq conversation success")
-	return SetVersion(versionColl, seqKey, seqVersion)
+	uSeq, err := mgo.NewSeqUserMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	uSpitHasReadSeq := func(id string) (conversationID string, userID string, err error) {
+		// HasReadSeq + userID + ":" + conversationID
+		arr := strings.Split(id, ":")
+		if len(arr) != 2 || arr[0] == "" || arr[1] == "" {
+			return "", "", fmt.Errorf("invalid has read seq id %s", id)
+		}
+		userID = arr[0]
+		conversationID = arr[1]
+		return
+	}
+	uSpitConversationUserMinSeq := func(id string) (conversationID string, userID string, err error) {
+		// ConversationUserMinSeq + conversationID + "u:" + userID
+		arr := strings.Split(id, "u:")
+		if len(arr) != 2 || arr[0] == "" || arr[1] == "" {
+			return "", "", fmt.Errorf("invalid has read seq id %s", id)
+		}
+		conversationID = arr[0]
+		userID = arr[1]
+		return
+	}
+
+	ts := []*taskSeq{
+		{
+			Prefix: MaxSeq,
+			GetSeq: cSeq.GetMaxSeq,
+			SetSeq: cSeq.SetMinSeq,
+		},
+		{
+			Prefix: MinSeq,
+			GetSeq: cSeq.GetMinSeq,
+			SetSeq: cSeq.SetMinSeq,
+		},
+		{
+			Prefix: HasReadSeq,
+			GetSeq: func(ctx context.Context, id string) (int64, error) {
+				conversationID, userID, err := uSpitHasReadSeq(id)
+				if err != nil {
+					return 0, err
+				}
+				return uSeq.GetReadSeq(ctx, conversationID, userID)
+			},
+			SetSeq: func(ctx context.Context, id string, seq int64) error {
+				conversationID, userID, err := uSpitHasReadSeq(id)
+				if err != nil {
+					return err
+				}
+				return uSeq.SetReadSeq(ctx, conversationID, userID, seq)
+			},
+		},
+		{
+			Prefix: ConversationUserMinSeq,
+			GetSeq: func(ctx context.Context, id string) (int64, error) {
+				conversationID, userID, err := uSpitConversationUserMinSeq(id)
+				if err != nil {
+					return 0, err
+				}
+				return uSeq.GetMinSeq(ctx, conversationID, userID)
+			},
+			SetSeq: func(ctx context.Context, id string, seq int64) error {
+				conversationID, userID, err := uSpitConversationUserMinSeq(id)
+				if err != nil {
+					return err
+				}
+				return uSeq.SetMinSeq(ctx, conversationID, userID, seq)
+			},
+		},
+	}
+
+	cancel()
+	ctx = context.Background()
+
+	var wg sync.WaitGroup
+	wg.Add(len(ts))
+
+	for i := range ts {
+		go func(task *taskSeq) {
+			defer wg.Done()
+			err := seqRedisToMongo(ctx, rdb, task.GetSeq, task.SetSeq, task.Prefix, del, &task.Count)
+			task.End = time.Now()
+			task.Error = err
+		}(ts[i])
+	}
+	start := time.Now()
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGTERM)
+
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+	var buf bytes.Buffer
+
+	printTaskInfo := func(now time.Time) {
+		buf.Reset()
+		buf.WriteString(now.Format(time.DateTime))
+		buf.WriteString(" \n")
+		for i := range ts {
+			task := ts[i]
+			if task.Error == nil {
+				if task.End.IsZero() {
+					buf.WriteString(fmt.Sprintf("[%s] converting %s* count %d", now.Sub(start), task.Prefix, atomic.LoadInt64(&task.Count)))
+				} else {
+					buf.WriteString(fmt.Sprintf("[%s] success %s* count %d", task.End.Sub(start), task.Prefix, atomic.LoadInt64(&task.Count)))
+				}
+			} else {
+				buf.WriteString(fmt.Sprintf("[%s] failed %s* count %d error %s", task.End.Sub(start), task.Prefix, atomic.LoadInt64(&task.Count), task.Error))
+			}
+			buf.WriteString("\n")
+		}
+		fmt.Println(buf.String())
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case s := <-sigs:
+			return fmt.Errorf("exit by signal %s", s)
+		case <-done:
+			errs := make([]error, 0, len(ts))
+			for i := range ts {
+				task := ts[i]
+				if task.Error != nil {
+					errs = append(errs, fmt.Errorf("seq %s failed %w", task.Prefix, task.Error))
+				}
+			}
+			if len(errs) > 0 {
+				return errors.Join(errs...)
+			}
+			printTaskInfo(time.Now())
+			if err := SetVersion(versionColl, seqKey, seqVersion); err != nil {
+				return fmt.Errorf("set mongodb seq version %w", err)
+			}
+			return nil
+		case now := <-ticker.C:
+			printTaskInfo(now)
+		}
+	}
+}
+
+type taskSeq struct {
+	Prefix string
+	Count  int64
+	Error  error
+	End    time.Time
+	GetSeq func(ctx context.Context, id string) (int64, error)
+	SetSeq func(ctx context.Context, id string, seq int64) error
+}
+
+func seqRedisToMongo(ctx context.Context, rdb redis.UniversalClient, getSeq func(ctx context.Context, id string) (int64, error), setSeq func(ctx context.Context, id string, seq int64) error, prefix string, delAfter time.Duration, count *int64) error {
+	var (
+		cursor uint64
+		keys   []string
+		err    error
+	)
+	for {
+		keys, cursor, err = rdb.Scan(ctx, cursor, prefix+"*", batchSize).Result()
+		if err != nil {
+			return err
+		}
+		if len(keys) > 0 {
+			for _, key := range keys {
+				seqStr, err := rdb.Get(ctx, key).Result()
+				if err != nil {
+					return fmt.Errorf("redis get %s failed %w", key, err)
+				}
+				seq, err := strconv.Atoi(seqStr)
+				if err != nil {
+					return fmt.Errorf("invalid %s seq %s", key, seqStr)
+				}
+				if seq < 0 {
+					return fmt.Errorf("invalid %s seq %s", key, seqStr)
+				}
+				id := strings.TrimPrefix(key, prefix)
+				redisSeq := int64(seq)
+				mongoSeq, err := getSeq(ctx, id)
+				if err != nil {
+					return fmt.Errorf("get mongo seq %s failed %w", key, err)
+				}
+				if mongoSeq < redisSeq {
+					if err := setSeq(ctx, id, redisSeq); err != nil {
+						return fmt.Errorf("set mongo seq %s failed %w", key, err)
+					}
+				}
+				if delAfter > 0 {
+					if err := rdb.Expire(ctx, key, delAfter).Err(); err != nil {
+						return fmt.Errorf("redis expire key %s failed %w", key, err)
+					}
+				} else {
+					if err := rdb.Del(ctx, key).Err(); err != nil {
+						return fmt.Errorf("redis del key %s failed %w", key, err)
+					}
+				}
+				atomic.AddInt64(count, 1)
+			}
+		}
+		if cursor == 0 {
+			return nil
+		}
+	}
 }
 
 func CheckVersion(coll *mongo.Collection, key string, currentVersion int) (converted bool, err error) {

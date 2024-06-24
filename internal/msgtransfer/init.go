@@ -82,7 +82,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	msgModel := redis.NewMsgCache(rdb)
-	seqModel := redis.NewSeqCache(rdb)
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
 		return err
@@ -92,7 +91,12 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return err
 	}
 	seqConversationCache := redis.NewSeqConversationCacheRedis(rdb, seqConversation)
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqModel, seqConversationCache, &config.KafkaConfig)
+	seqUser, err := mgo.NewSeqUserMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	seqUserCache := redis.NewSeqUserCacheRedis(rdb, seqUser)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, &config.KafkaConfig)
 	if err != nil {
 		return err
 	}
