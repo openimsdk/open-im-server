@@ -16,10 +16,7 @@ package user
 
 import (
 	"context"
-	"math/rand"
-	"strings"
-	"time"
-
+	"errors"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/friend"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -27,7 +24,13 @@ import (
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
+	"github.com/openimsdk/protocol/group"
+	friendpb "github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/tools/db/redisutil"
+	"math/rand"
+	"strings"
+	"sync"
+	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
@@ -120,7 +123,8 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 
 // deprecated:
 
-// UpdateUserInfo
+//UpdateUserInfo
+
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) (resp *pbuser.UpdateUserInfoResp, err error) {
 	resp = &pbuser.UpdateUserInfoResp{}
 	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID, s.config.Share.IMAdminUserID)
@@ -131,31 +135,33 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err := s.webhookBeforeUpdateUserInfo(ctx, &s.config.WebhooksConfig.BeforeUpdateUserInfo, req); err != nil {
 		return nil, err
 	}
-
 	data := convert.UserPb2DBMap(req.UserInfo)
+	oldUser, err := s.db.GetUserByID(ctx, req.UserInfo.UserID)
+	if err != nil {
+		return nil, err
+	}
 	if err := s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
-	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
-	if err != nil {
-		return nil, err
-	}
-	if req.UserInfo.Nickname != "" || req.UserInfo.FaceURL != "" {
-		if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-			return nil, err
-		}
-	}
-	for _, friendID := range friends {
-		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
-	}
+	//friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if req.UserInfo.Nickname != "" || req.UserInfo.FaceURL != "" {
+	//	if err = s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID,oldUser); err != nil {
+	//		return nil, err
+	//	}
+	//}
+	//for _, friendID := range friends {
+	//	s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
+	//}
 	s.webhookAfterUpdateUserInfo(ctx, &s.config.WebhooksConfig.AfterUpdateUserInfo, req)
-	if err = s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+	if err = s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID, oldUser); err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
-
 func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (resp *pbuser.UpdateUserInfoExResp, err error) {
 	resp = &pbuser.UpdateUserInfoExResp{}
 	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID, s.config.Share.IMAdminUserID)
@@ -165,30 +171,33 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	if err = s.webhookBeforeUpdateUserInfoEx(ctx, &s.config.WebhooksConfig.BeforeUpdateUserInfoEx, req); err != nil {
 		return nil, err
 	}
+	oldUser, err := s.db.GetUserByID(ctx, req.UserInfo.UserID)
+	if err != nil {
+		return nil, err
+	}
 	data := convert.UserPb2DBMapEx(req.UserInfo)
 	if err = s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
-	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
-	if err != nil {
-		return nil, err
-	}
-	if req.UserInfo.Nickname != nil || req.UserInfo.FaceURL != nil {
-		if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-			return nil, err
-		}
-	}
-	for _, friendID := range friends {
-		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
-	}
+	//friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if req.UserInfo.Nickname != nil || req.UserInfo.FaceURL != nil {
+	//	if err := s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+	//		return nil, err
+	//	}
+	//}
+	//for _, friendID := range friends {
+	//	s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
+	//}
 	s.webhookAfterUpdateUserInfoEx(ctx, &s.config.WebhooksConfig.AfterUpdateUserInfoEx, req)
-	if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+	if err := s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID, oldUser); err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
-
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.SetGlobalRecvMessageOptReq) (resp *pbuser.SetGlobalRecvMessageOptResp, err error) {
 	resp = &pbuser.SetGlobalRecvMessageOptResp{}
 	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
@@ -247,6 +256,7 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPagi
 		return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
 
 	}
+
 }
 
 func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterReq) (resp *pbuser.UserRegisterResp, err error) {
@@ -343,8 +353,7 @@ func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbus
 
 // GetUserStatus Get the online status of the user.
 func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatusReq) (resp *pbuser.GetUserStatusResp,
-	err error,
-) {
+	err error) {
 	onlineStatusList, err := s.db.GetUserStatus(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err
@@ -354,8 +363,7 @@ func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatu
 
 // SetUserStatus Synchronize user's online status.
 func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatusReq) (resp *pbuser.SetUserStatusResp,
-	err error,
-) {
+	err error) {
 	err = s.db.SetUserStatus(ctx, req.UserID, req.Status, req.PlatformID)
 	if err != nil {
 		return nil, err
@@ -379,8 +387,7 @@ func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatu
 
 // GetSubscribeUsersStatus Get the online status of subscribers.
 func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
-	req *pbuser.GetSubscribeUsersStatusReq,
-) (*pbuser.GetSubscribeUsersStatusResp, error) {
+	req *pbuser.GetSubscribeUsersStatusReq) (*pbuser.GetSubscribeUsersStatusResp, error) {
 	userList, err := s.db.GetAllSubscribeList(ctx, req.UserID)
 	if err != nil {
 		return nil, err
@@ -469,6 +476,7 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 }
 
 func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.ProcessUserCommandGetReq) (*pbuser.ProcessUserCommandGetResp, error) {
+
 	err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID)
 	if err != nil {
 		return nil, err
@@ -685,6 +693,40 @@ func (s *userServer) userModelToResp(users []*tablerelation.User, pagination pag
 	notificationAccounts := datautil.Paginate(accounts, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
 
 	return &pbuser.SearchNotificationAccountResp{Total: total, NotificationAccounts: notificationAccounts}
+}
+
+func (s *userServer) NotificationUserInfoUpdate(ctx context.Context, userID string, oldUser *tablerelation.User) error {
+	user, err := s.db.GetUserByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if user.Nickname == oldUser.Nickname && user.FaceURL == oldUser.FaceURL {
+		return nil
+	}
+	oldUserInfo := convert.UserDB2Pb(oldUser)
+	newUserInfo := convert.UserDB2Pb(user)
+	var wg sync.WaitGroup
+	var es [2]error
+	wg.Add(len(es))
+	go func() {
+		defer wg.Done()
+		_, es[0] = s.groupRpcClient.Client.NotificationUserInfoUpdate(ctx, &group.NotificationUserInfoUpdateReq{
+			UserID:      userID,
+			OldUserInfo: oldUserInfo,
+			NewUserInfo: newUserInfo,
+		})
+	}()
+
+	go func() {
+		defer wg.Done()
+		_, es[1] = s.friendRpcClient.Client.NotificationUserInfoUpdate(ctx, &friendpb.NotificationUserInfoUpdateReq{
+			UserID:      userID,
+			OldUserInfo: oldUserInfo,
+			NewUserInfo: newUserInfo,
+		})
+	}()
+	wg.Wait()
+	return errors.Join(es[:]...)
 }
 
 func (s *userServer) SortQuery(ctx context.Context, req *pbuser.SortQueryReq) (*pbuser.SortQueryResp, error) {

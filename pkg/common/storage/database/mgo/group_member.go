@@ -18,6 +18,7 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/tools/log"
 
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/db/mongoutil"
@@ -114,11 +115,26 @@ func (g *GroupMemberMgo) Delete(ctx context.Context, groupID string, userIDs []s
 
 func (g *GroupMemberMgo) UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) error {
 	return mongoutil.IncrVersion(func() error {
-		return g.Update(ctx, groupID, userID, bson.M{"role_level": roleLevel})
+		return mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID},
+			bson.M{"$set": bson.M{"role_level": roleLevel}}, true)
 	}, func() error {
 		return g.member.IncrVersion(ctx, groupID, []string{userID}, model.VersionStateUpdate)
+	})
+}
+func (g *GroupMemberMgo) UpdateUserRoleLevels(ctx context.Context, groupID string, firstUserID string, firstUserRoleLevel int32, secondUserID string, secondUserRoleLevel int32) error {
+	return mongoutil.IncrVersion(func() error {
+		if err := mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": firstUserID},
+			bson.M{"$set": bson.M{"role_level": firstUserRoleLevel}}, true); err != nil {
+			return err
+		}
+		if err := mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": secondUserID},
+			bson.M{"$set": bson.M{"role_level": secondUserRoleLevel}}, true); err != nil {
+			return err
+		}
+
+		return nil
 	}, func() error {
-		return g.join.IncrVersion(ctx, userID, []string{groupID}, model.VersionStateUpdate)
+		return g.member.IncrVersion(ctx, groupID, []string{firstUserID, secondUserID}, model.VersionStateUpdate)
 	})
 }
 
@@ -184,10 +200,16 @@ func (g *GroupMemberMgo) JoinGroupIncrVersion(ctx context.Context, userID string
 	return g.join.IncrVersion(ctx, userID, groupIDs, state)
 }
 
+func (g *GroupMemberMgo) MemberGroupIncrVersion(ctx context.Context, groupID string, userIDs []string, state int32) error {
+	return g.member.IncrVersion(ctx, groupID, userIDs, state)
+}
+
 func (g *GroupMemberMgo) FindMemberIncrVersion(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error) {
+	log.ZDebug(ctx, "find member incr version", "groupID", groupID, "version", version)
 	return g.member.FindChangeLog(ctx, groupID, version, limit)
 }
 
 func (g *GroupMemberMgo) FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error) {
+	log.ZDebug(ctx, "find join incr version", "userID", userID, "version", version)
 	return g.join.FindChangeLog(ctx, userID, version, limit)
 }

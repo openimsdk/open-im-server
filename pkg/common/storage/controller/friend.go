@@ -86,7 +86,7 @@ type FriendDatabase interface {
 
 	FindFriendUserID(ctx context.Context, friendUserID string) ([]string, error)
 
-	//SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error)
+	OwnerIncrVersion(ctx context.Context, ownerUserID string, friendUserIDs []string, state int32) error
 }
 
 type friendDatabase struct {
@@ -376,3 +376,10 @@ func (f *friendDatabase) FindFriendUserID(ctx context.Context, friendUserID stri
 //func (f *friendDatabase) SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error) {
 //	return f.friend.SearchFriend(ctx, ownerUserID, keyword, pagination)
 //}
+
+func (f *friendDatabase) OwnerIncrVersion(ctx context.Context, ownerUserID string, friendUserIDs []string, state int32) error {
+	if err := f.friend.IncrVersion(ctx, ownerUserID, friendUserIDs, state); err != nil {
+		return err
+	}
+	return f.cache.DelMaxFriendVersion(ownerUserID).ChainExecDel(ctx)
+}

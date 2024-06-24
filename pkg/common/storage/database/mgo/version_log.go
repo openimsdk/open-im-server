@@ -8,6 +8,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -169,7 +170,9 @@ func (l *VersionLogMgo) FindChangeLog(ctx context.Context, dId string, version u
 	} else if !errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, err
 	}
+	log.ZDebug(ctx, "init doc", "dId", dId)
 	if res, err := l.initDoc(ctx, dId, nil, 0, time.Now()); err == nil {
+		log.ZDebug(ctx, "init doc success", "dId", dId)
 		return res, nil
 	} else if mongo.IsDuplicateKeyError(err) {
 		return l.findChangeLog(ctx, dId, version, limit)
