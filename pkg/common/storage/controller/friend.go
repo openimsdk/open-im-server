@@ -335,9 +335,6 @@ func (f *friendDatabase) FindFriendsWithError(ctx context.Context, ownerUserID s
 	if err != nil {
 		return
 	}
-	if len(friends) != len(friendUserIDs) {
-		err = errs.ErrRecordNotFound.Wrap()
-	}
 	return
 }
 
