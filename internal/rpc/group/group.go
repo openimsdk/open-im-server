@@ -599,7 +599,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 			FaceURL:                group.FaceURL,
 			OwnerUserID:            ownerUserID,
 			CreateTime:             group.CreateTime.UnixMilli(),
-			MemberCount:            num,
+			MemberCount:            num - uint32(len(req.KickedUserIDs)),
 			Ex:                     group.Ex,
 			Status:                 group.Status,
 			CreatorUserID:          group.CreatorUserID,
