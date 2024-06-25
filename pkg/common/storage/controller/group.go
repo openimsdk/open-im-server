@@ -378,6 +378,7 @@ func (g *groupDatabase) DeleteGroupMember(ctx context.Context, groupID string, u
 			DelGroupMembersInfo(groupID, userIDs...).
 			DelGroupAllRoleLevel(groupID).
 			DelMaxGroupMemberVersion(groupID).
+			DelMaxJoinGroupVersion(userIDs...).
 			ChainExecDel(ctx)
 	})
 }
