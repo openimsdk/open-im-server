@@ -17,13 +17,13 @@ package group
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 	"github.com/openimsdk/protocol/constant"
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/sdkws"
@@ -400,11 +400,13 @@ func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx conte
 	if err != nil {
 		return
 	}
-	tips := &sdkws.GroupApplicationAcceptedTips{Group: group, HandleMsg: req.HandledMsg}
-	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+
+	var opUser *sdkws.GroupMemberFullInfo
+	if err = g.fillOpUser(ctx, &opUser, group.GroupID); err != nil {
 		return
 	}
 	for _, userID := range append(userIDs, req.FromUserID) {
+		tips := &sdkws.GroupApplicationAcceptedTips{Group: group, OpUser: opUser, HandleMsg: req.HandledMsg}
 		if userID == req.FromUserID {
 			tips.ReceiverAs = 0
 		} else {
@@ -431,11 +433,13 @@ func (g *GroupNotificationSender) GroupApplicationRejectedNotification(ctx conte
 	if err != nil {
 		return
 	}
-	tips := &sdkws.GroupApplicationRejectedTips{Group: group, HandleMsg: req.HandledMsg}
-	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+
+	var opUser *sdkws.GroupMemberFullInfo
+	if err = g.fillOpUser(ctx, &opUser, group.GroupID); err != nil {
 		return
 	}
 	for _, userID := range append(userIDs, req.FromUserID) {
+		tips := &sdkws.GroupApplicationAcceptedTips{Group: group, OpUser: opUser, HandleMsg: req.HandledMsg}
 		if userID == req.FromUserID {
 			tips.ReceiverAs = 0
 		} else {
