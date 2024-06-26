@@ -72,7 +72,7 @@ func (u *UserMap) Set(key string, v *Client) {
 	}
 }
 
-func (u *UserMap) delete(key string, connRemoteAddr string) (isDeleteUser bool) {
+func (u *UserMap) Delete(key string, connRemoteAddr string) (isDeleteUser bool) {
 	// Attempt to load the clients associated with the key.
 	allClients, existed := u.m.Load(key)
 	if !existed {
@@ -101,7 +101,7 @@ func (u *UserMap) delete(key string, connRemoteAddr string) (isDeleteUser bool) 
 	return false
 }
 
-func (u *UserMap) deleteClients(key string, clients []*Client) (isDeleteUser bool) {
+func (u *UserMap) DeleteClients(key string, clients []*Client) (isDeleteUser bool) {
 	m := datautil.SliceToMapAny(clients, func(c *Client) (string, struct{}) {
 		return c.ctx.GetRemoteAddr(), struct{}{}
 	})

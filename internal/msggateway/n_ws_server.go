@@ -309,7 +309,7 @@ func getRemoteAdders(client []*Client) string {
 }
 
 func (ws *WsServer) KickUserConn(client *Client) error {
-	ws.clients.deleteClients(client.UserID, []*Client{client})
+	ws.clients.DeleteClients(client.UserID, []*Client{client})
 	return client.KickOnlineMessage()
 }
 
@@ -325,7 +325,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 		if !clientOK {
 			return
 		}
-		ws.clients.deleteClients(newClient.UserID, oldClients)
+		ws.clients.DeleteClients(newClient.UserID, oldClients)
 		for _, c := range oldClients {
 			err := c.KickOnlineMessage()
 			if err != nil {
@@ -345,7 +345,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 
 func (ws *WsServer) unregisterClient(client *Client) {
 	defer ws.clientPool.Put(client)
-	isDeleteUser := ws.clients.delete(client.UserID, client.ctx.GetRemoteAddr())
+	isDeleteUser := ws.clients.Delete(client.UserID, client.ctx.GetRemoteAddr())
 	if isDeleteUser {
 		ws.onlineUserNum.Add(-1)
 		prommetrics.OnlineUserGauge.Dec()

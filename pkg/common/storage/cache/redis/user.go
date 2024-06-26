@@ -131,6 +131,15 @@ func (u *UserCacheRedis) DelUsersGlobalRecvMsgOpt(userIDs ...string) cache.UserC
 	return cache
 }
 
+/*
+
+ */
+
+type RedisUserOnline struct {
+	// 平台id, 平台更新时间
+	PlatformIDs map[int32]int64
+}
+
 // GetUserStatus get user status.
 func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
 	userStatus := make([]*user.OnlineStatus, 0, len(userIDs))
