@@ -19,8 +19,27 @@ on:
     branches:
       - main
       - release-*
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - "README_zh-CN.md"
+      - "**.md"
+      - "docs/**"
+      - "CONTRIBUTING.md"
     tags:
       - v*
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+      - release-*
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - "README_zh-CN.md"
+      - "**.md"
+      - "docs/**"
+      - "CONTRIBUTING.md"
   workflow_dispatch:
 
 env:
@@ -29,22 +48,112 @@ env:
 
 jobs:
   build-dockerhub:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
+    if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.merged == false) }}
     steps:
-      - name: Checkout
+      - name: Checkout main repository
         uses: actions/checkout@v4
+        with:
+          path: main-repo
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-# docker.io/openim/openim-server:latest
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./main-repo
+          load: true
+          tags: "openim/openim-server:local"
+
+      - name: Checkout compose repository
+        uses: actions/checkout@v4
+        with:
+          repository: "openimsdk/openim-docker"
+          path: "compose-repo"
+
+      - name: Get Internal IP Address
+        id: get-ip
+        run: |
+          IP=$(hostname -I | awk '{print $1}')
+          echo "The IP Address is: $IP"
+          echo "::set-output name=ip::$IP"
+
+      - name: Update .env to use the local image
+        run: |
+          sed -i 's|OPENIM_SERVER_IMAGE=.*|OPENIM_SERVER_IMAGE=openim/openim-server:local|' ${{ github.workspace }}/compose-repo/.env
+          sed -i 's|MINIO_EXTERNAL_ADDRESS=.*|MINIO_EXTERNAL_ADDRESS=http://${{ steps.get-ip.outputs.ip }}:10005|' ${{ github.workspace }}/compose-repo/.env
+
+      - name: Start services using Docker Compose
+        run: |
+          cd ${{ github.workspace }}/compose-repo
+          docker compose up -d
+          sleep 30
+
+      - name: Check openim-server health
+        run: |
+          timeout=300
+          interval=30
+          elapsed=0
+          while [[ $elapsed -le $timeout ]]; do
+            if ! docker exec openim-server mage check; then
+              echo "openim-server is not ready, waiting..."
+              sleep $interval
+              elapsed=$(($elapsed + $interval))
+            else
+              echo "Health check successful"
+              exit 0
+            fi
+          done
+          echo "Health check failed after 5 minutes"
+          exit 1
+
+      - name: Check openim-chat health
+        if: success()
+        run: |
+          if ! docker exec openim-chat mage check; then
+              echo "openim-chat check failed"
+              exit 1
+            else
+              echo "Health check successful"
+              exit 0
+            fi
+
+      - name: Checkout e2e
+        if: success()
+        uses: actions/checkout@v4
+        with:
+          repository: "openimsdk/test-e2e"
+          path: e2e-repo
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libxi6 libgconf-2-4
+          cd ${{ github.workspace }}/e2e-repo
+          pip install -r requirements.txt
+      
+      - name: Run tests
+        run: |
+          cd ${{ github.workspace }}/e2e-repo
+          xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pytest -v -s ./script
+
       - name: Extract metadata (tags, labels) for Docker
+        if: success()
         id: meta
         uses: docker/metadata-action@v5.5.1
         with:
-          images: openim/openim-server
+          images: |
+            openim/openim-server
+            ghcr.io/openimsdk/openim-server
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server
           # generate Docker tags based on the following events/attributes
           tags: |
             type=ref,event=tag
@@ -58,105 +167,32 @@ jobs:
             type=sha
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          # linux/ppc64le,linux/s390x
-          platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-  build-aliyun:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-# registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:latest
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta2
-        uses: docker/metadata-action@v5.5.1
-        with:
-          images: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server
-          # generate Docker tags based on the following events/attributes
-          tags: |
-            type=ref,event=tag
-            type=schedule
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern=v{{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
-
-      - name: Log in to AliYun Docker Hub
-        uses: docker/login-action@v3
-        with:
-          registry: registry.cn-hangzhou.aliyuncs.com
-          username: ${{ secrets.ALIREGISTRY_USERNAME }}
-          password: ${{ secrets.ALIREGISTRY_TOKEN }}
-      
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          # linux/ppc64le,linux/s390x
-          platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta2.outputs.tags }}
-          labels: ${{ steps.meta2.outputs.labels }}
-
-  build-ghcr:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-# ghcr.io/openimsdk/openim-server:latest
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta3
-        uses: docker/metadata-action@v5.5.1
-        with:
-          images: ghcr.io/openimsdk/openim-server
-          # generate Docker tags based on the following events/attributes
-          tags: |
-            type=ref,event=tag
-            type=schedule
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern=v{{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
-
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Log in to Aliyun Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: registry.cn-hangzhou.aliyuncs.com
+          username: ${{ secrets.ALIREGISTRY_USERNAME }}
+          password: ${{ secrets.ALIREGISTRY_TOKEN }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./main-repo
+          push: true
           # linux/ppc64le,linux/s390x
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta3.outputs.tags }}
-          labels: ${{ steps.meta3.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      
