@@ -33,6 +33,7 @@ import (
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
+	"github.com/openimsdk/tools/s3/kodo"
 	"google.golang.org/grpc"
 )
 
@@ -81,6 +82,8 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		o, err = cos.NewCos(*config.RpcConfig.Object.Cos.Build())
 	case "oss":
 		o, err = oss.NewOSS(*config.RpcConfig.Object.Oss.Build())
+	case "kodo":
+		o, err = kodo.NewKodo(*config.RpcConfig.Object.Kodo.Build())
 	default:
 		err = fmt.Errorf("invalid object enable: %s", enable)
 	}
