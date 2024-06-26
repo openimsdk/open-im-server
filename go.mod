@@ -195,5 +195,3 @@ require (
 	golang.org/x/crypto v0.21.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
-
-replace github.com/openimsdk/tools => /mnt/fork/open-im-tools
