@@ -55,6 +55,9 @@ type SendMsg struct {
 
 	// OfflinePushInfo contains information for offline push notifications.
 	OfflinePushInfo *sdkws.OfflinePushInfo `json:"offlinePushInfo"`
+
+	// Ex stores extended fields
+	Ex string `json:"ex"`
 }
 
 // SendMsgReq extends SendMsg with the requirement of RecvID when SessionType indicates a one-on-one or notification chat.
