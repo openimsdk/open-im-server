@@ -16,15 +16,21 @@ package rpccache
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mq/memamq"
 	"github.com/redis/go-redis/v9"
+	"sync"
+)
+
+const (
+	notificationWorkerCount = 2
+	notificationBufferSize  = 200
 )
 
 func NewConversationLocalCache(client rpcclient.ConversationRpcClient, localCache *config.LocalCache, cli redis.UniversalClient) *ConversationLocalCache {
@@ -39,6 +45,7 @@ func NewConversationLocalCache(client rpcclient.ConversationRpcClient, localCach
 			localcache.WithLocalSuccessTTL(lc.Success()),
 			localcache.WithLocalFailedTTL(lc.Failed()),
 		),
+		queue: memamq.NewMemoryQueue(notificationWorkerCount, notificationBufferSize),
 	}
 	if lc.Enable() {
 		go subscriberRedisDeleteCache(context.Background(), cli, lc.Topic, x.local.DelLocal)
@@ -49,6 +56,8 @@ func NewConversationLocalCache(client rpcclient.ConversationRpcClient, localCach
 type ConversationLocalCache struct {
 	client rpcclient.ConversationRpcClient
 	local  localcache.Cache[any]
+
+	queue *memamq.MemoryQueue
 }
 
 func (c *ConversationLocalCache) GetConversationIDs(ctx context.Context, ownerUserID string) (val []string, err error) {
@@ -91,16 +100,43 @@ func (c *ConversationLocalCache) GetSingleConversationRecvMsgOpt(ctx context.Con
 
 func (c *ConversationLocalCache) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*pbconversation.Conversation, error) {
 	conversations := make([]*pbconversation.Conversation, 0, len(conversationIDs))
+
+	errChan := make(chan error, len(conversationIDs))
+	conversationsChan := make(chan *pbconversation.Conversation, len(conversationIDs))
+	var wg sync.WaitGroup
+	wg.Add(len(conversationIDs))
+
 	for _, conversationID := range conversationIDs {
-		conversation, err := c.GetConversation(ctx, ownerUserID, conversationID)
-		if err != nil {
-			if errs.ErrRecordNotFound.Is(err) {
-				continue
+		err := c.queue.Push(func() {
+			defer wg.Done()
+			conversation, err := c.GetConversation(ctx, ownerUserID, conversationID)
+			if err != nil {
+				if errs.ErrRecordNotFound.Is(err) {
+					return
+				}
+				errChan <- err
+				return
 			}
-			return nil, err
+			conversationsChan <- conversation
+		})
+		if err != nil {
+			// push err
+			return nil, errs.Wrap(err)
 		}
+	}
+	wg.Wait()
+	close(errChan)
+	close(conversationsChan)
+
+	err, ok := <-errChan
+	if ok {
+		return nil, err
+	}
+
+	for conversation := range conversationsChan {
 		conversations = append(conversations, conversation)
 	}
+
 	return conversations, nil
 }
 
