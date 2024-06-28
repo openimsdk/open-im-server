@@ -39,7 +39,9 @@ type S3Database interface {
 	SetObject(ctx context.Context, info *model.Object) error
 	StatObject(ctx context.Context, name string) (*s3.ObjectInfo, error)
 	FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error)
-	DeleteByExpires(ctx context.Context, duration time.Time) error
+	FindByExpires(ctx context.Context, duration time.Time) ([]*model.Object, error)
+	DeleteObject(ctx context.Context, name string) error
+	DeleteSpecifiedData(ctx context.Context, engine string, name string) error
 }
 
 func NewS3Database(rdb redis.UniversalClient, s3 s3.Interface, obj database.ObjectInfo) S3Database {
@@ -113,6 +115,13 @@ func (s *s3Database) StatObject(ctx context.Context, name string) (*s3.ObjectInf
 func (s *s3Database) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
 	return s.s3.FormData(ctx, name, size, contentType, duration)
 }
-func (s *s3Database) DeleteByExpires(ctx context.Context, duration time.Time) error {
-	return s.db.DeleteByExpires(ctx, duration)
+func (s *s3Database) FindByExpires(ctx context.Context, duration time.Time) ([]*model.Object, error) {
+	return s.db.FindByExpires(ctx, duration)
+}
+
+func (s *s3Database) DeleteObject(ctx context.Context, name string) error {
+	return s.s3.DeleteObject(ctx, name)
+}
+func (s *s3Database) DeleteSpecifiedData(ctx context.Context, engine string, name string) error {
+	return s.db.Delete(ctx, engine, name)
 }

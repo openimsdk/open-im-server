@@ -286,9 +286,13 @@ func (t *thirdServer) apiAddress(prefix, name string) string {
 
 func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteOutdatedDataReq) (*third.DeleteOutdatedDataResp, error) {
 	expireTime := time.UnixMilli(req.ExpireTime)
-	err := t.s3dataBase.DeleteByExpires(ctx, expireTime)
+	models, err := t.s3dataBase.FindByExpires(ctx, expireTime)
 	if err != nil {
 		return nil, err
+	}
+	for _, model := range models {
+		t.s3dataBase.DeleteObject(ctx, model.Key)
+		t.s3dataBase.DeleteSpecifiedData(ctx, model.Engine, model.Key)
 	}
 	return &third.DeleteOutdatedDataResp{}, nil
 }
