@@ -49,7 +49,7 @@ func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
 				req := &pbuser.SetUserOnlineStatusReq{
 					Status: datautil.Slice(status, local2pb),
 				}
-				changeStatus[i] = status[0:]
+				changeStatus[i] = status[:0]
 				select {
 				case requestChs[i] <- req:
 				default:
@@ -67,7 +67,7 @@ func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
 			req := &pbuser.SetUserOnlineStatusReq{
 				Status: datautil.Slice(status, local2pb),
 			}
-			changeStatus[i] = status[0:]
+			changeStatus[i] = status[:0]
 			select {
 			case requestChs[i] <- req:
 			default:
@@ -100,6 +100,7 @@ func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
 		case now := <-scanTicker.C:
 			pushUserState(ws.clients.GetAllUserStatus(now.Add(-cachekey.OnlineExpire/3), now)...)
 		case state := <-ws.clients.UserState():
+			log.ZDebug(context.Background(), "user online change", "userID", state.UserID, "online", state.Online, "offline", state.Offline)
 			pushUserState(state)
 		}
 	}
