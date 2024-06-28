@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package mgo
 
 import (
@@ -204,9 +218,47 @@ func (m *MsgMgo) GetMsgDocModelByIndex(ctx context.Context, conversationID strin
 	if sort != 1 && sort != -1 {
 		return nil, errs.ErrArgs.WrapMsg("mongo sort must be 1 or -1")
 	}
-	opt := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"doc_id": sort}).SetLimit(1)
-	filter := bson.M{"doc_id": primitive.Regex{Pattern: fmt.Sprintf("^%s:", conversationID)}}
-	msgs, err := mongoutil.Find[*model.MsgDocModel](ctx, m.coll, filter, opt)
+
+	// parepare pipeline
+	pipeline := mongo.Pipeline{
+		{{
+			"$match", bson.D{
+				{"doc_id", bson.M{"$regex": fmt.Sprintf("^%s:", conversationID)}},
+			},
+		}},
+		{{
+			"$project", bson.M{
+				"doc_id": 1,
+				"seqSuffix": bson.M{ // Create a new field to store the converted seqSuffix integer.
+					"$toInt": bson.M{ // $toInt expression
+						"$arrayElemAt": bson.A{ // $arrayElemAt requires an array as the first argument.
+							bson.M{"$split": []interface{}{"$doc_id", ":"}}, // $split expression
+							-1, // Indexing, to take the last element of the array.
+						},
+					},
+				},
+				"msgs": 1,
+			},
+		}},
+		{{
+			"$sort", bson.D{ // Sort by seqSuffix.
+				{"seqSuffix", sort},
+			},
+		}},
+	}
+
+	// If pagination is needed, logic can be added here to dynamically modify the pipeline.
+	if index > 0 {
+		pipeline = append(pipeline, bson.D{{
+			"$skip", index,
+		}})
+	}
+	pipeline = append(pipeline, bson.D{{
+		"$limit", 1, // We only need one document.
+	}})
+
+	// Execute an aggregation query.
+	msgs, err := mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, pipeline)
 	if err != nil {
 		return nil, err
 	}
