@@ -16,6 +16,8 @@ package mgo
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
@@ -67,4 +69,9 @@ func (o *S3Mongo) Take(ctx context.Context, engine string, name string) (*model.
 
 func (o *S3Mongo) Delete(ctx context.Context, engine string, name string) error {
 	return mongoutil.DeleteOne(ctx, o.coll, bson.M{"name": name, "engine": engine})
+}
+func (o *S3Mongo) DeleteByExpires(ctx context.Context, duration time.Time) error {
+	return mongoutil.DeleteMany(ctx, o.coll, bson.M{
+		"create_time": bson.M{"$lt": duration},
+	})
 }

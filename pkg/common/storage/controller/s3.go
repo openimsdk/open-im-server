@@ -16,11 +16,12 @@ package controller
 
 import (
 	"context"
+	"path/filepath"
+	"time"
+
 	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"path/filepath"
-	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/tools/s3"
@@ -38,6 +39,7 @@ type S3Database interface {
 	SetObject(ctx context.Context, info *model.Object) error
 	StatObject(ctx context.Context, name string) (*s3.ObjectInfo, error)
 	FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error)
+	DeleteByExpires(ctx context.Context, duration time.Time) error
 }
 
 func NewS3Database(rdb redis.UniversalClient, s3 s3.Interface, obj database.ObjectInfo) S3Database {
@@ -110,4 +112,7 @@ func (s *s3Database) StatObject(ctx context.Context, name string) (*s3.ObjectInf
 
 func (s *s3Database) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
 	return s.s3.FormData(ctx, name, size, contentType, duration)
+}
+func (s *s3Database) DeleteByExpires(ctx context.Context, duration time.Time) error {
+	return s.db.DeleteByExpires(ctx, duration)
 }

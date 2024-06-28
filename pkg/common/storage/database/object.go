@@ -16,6 +16,8 @@ package database
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 )
 
@@ -23,4 +25,5 @@ type ObjectInfo interface {
 	SetObject(ctx context.Context, obj *model.Object) error
 	Take(ctx context.Context, engine string, name string) (*model.Object, error)
 	Delete(ctx context.Context, engine string, name string) error
+	DeleteByExpires(ctx context.Context, duration time.Time) error
 }
