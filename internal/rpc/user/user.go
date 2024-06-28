@@ -19,6 +19,7 @@ import (
 	"errors"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/friend"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
@@ -50,6 +51,7 @@ import (
 )
 
 type userServer struct {
+	online                   cache.OnlineCache
 	db                       controller.UserDatabase
 	friendNotificationSender *friend.FriendNotificationSender
 	userNotificationSender   *UserNotificationSender
@@ -98,6 +100,7 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	u := &userServer{
+		online:                   redis.NewUserOnline(rdb),
 		db:                       database,
 		RegisterCenter:           client,
 		friendRpcClient:          &friendRpcClient,
@@ -327,76 +330,6 @@ func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDR
 		return nil, err
 	}
 	return &pbuser.GetAllUserIDResp{Total: int32(total), UserIDs: userIDs}, nil
-}
-
-// SubscribeOrCancelUsersStatus Subscribe online or cancel online users.
-func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbuser.SubscribeOrCancelUsersStatusReq) (resp *pbuser.SubscribeOrCancelUsersStatusResp, err error) {
-	if req.Genre == constant.SubscriberUser {
-		err = s.db.SubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
-		if err != nil {
-			return nil, err
-		}
-		var status []*pbuser.OnlineStatus
-		status, err = s.db.GetUserStatus(ctx, req.UserIDs)
-		if err != nil {
-			return nil, err
-		}
-		return &pbuser.SubscribeOrCancelUsersStatusResp{StatusList: status}, nil
-	} else if req.Genre == constant.Unsubscribe {
-		err = s.db.UnsubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return &pbuser.SubscribeOrCancelUsersStatusResp{}, nil
-}
-
-// GetUserStatus Get the online status of the user.
-func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatusReq) (resp *pbuser.GetUserStatusResp,
-	err error) {
-	onlineStatusList, err := s.db.GetUserStatus(ctx, req.UserIDs)
-	if err != nil {
-		return nil, err
-	}
-	return &pbuser.GetUserStatusResp{StatusList: onlineStatusList}, nil
-}
-
-// SetUserStatus Synchronize user's online status.
-func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatusReq) (resp *pbuser.SetUserStatusResp,
-	err error) {
-	err = s.db.SetUserStatus(ctx, req.UserID, req.Status, req.PlatformID)
-	if err != nil {
-		return nil, err
-	}
-	list, err := s.db.GetSubscribedList(ctx, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	for _, userID := range list {
-		tips := &sdkws.UserStatusChangeTips{
-			FromUserID: req.UserID,
-			ToUserID:   userID,
-			Status:     req.Status,
-			PlatformID: req.PlatformID,
-		}
-		s.userNotificationSender.UserStatusChangeNotification(ctx, tips)
-	}
-
-	return &pbuser.SetUserStatusResp{}, nil
-}
-
-// GetSubscribeUsersStatus Get the online status of subscribers.
-func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
-	req *pbuser.GetSubscribeUsersStatusReq) (*pbuser.GetSubscribeUsersStatusResp, error) {
-	userList, err := s.db.GetAllSubscribeList(ctx, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	onlineStatusList, err := s.db.GetUserStatus(ctx, userList)
-	if err != nil {
-		return nil, err
-	}
-	return &pbuser.GetSubscribeUsersStatusResp{StatusList: onlineStatusList}, nil
 }
 
 // ProcessUserCommandAdd user general function add.

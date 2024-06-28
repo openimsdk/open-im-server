@@ -66,7 +66,13 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		}
 		log.ZInfo(ctx, "cron clear chat records success", "deltime", deltime, "cont", time.Since(now))
 	}
+	delFile := func() {
+
+	}
 	if _, err := crontab.AddFunc(config.CronTask.ChatRecordsClearTime, clearFunc); err != nil {
+		return errs.Wrap(err)
+	}
+	if _, err := crontab.AddFunc(config.CronTask.ChatRecordsClearTime, delFile); err != nil {
 		return errs.Wrap(err)
 	}
 	log.ZInfo(ctx, "start cron task", "chatRecordsClearTime", config.CronTask.ChatRecordsClearTime)

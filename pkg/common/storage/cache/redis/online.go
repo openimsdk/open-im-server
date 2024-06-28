@@ -2,9 +2,21 @@ package redis
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	"github.com/openimsdk/tools/errs"
 	"github.com/redis/go-redis/v9"
+	"strconv"
 	"time"
 )
+
+func NewUserOnline(rdb redis.UniversalClient) cache.OnlineCache {
+	return &userOnline{
+		rdb:         rdb,
+		expire:      cachekey.OnlineExpire,
+		channelName: cachekey.OnlineChannel,
+	}
+}
 
 type userOnline struct {
 	rdb         redis.UniversalClient
@@ -13,7 +25,26 @@ type userOnline struct {
 }
 
 func (s *userOnline) getUserOnlineKey(userID string) string {
-	return "USER_ONLINE:" + userID
+	return cachekey.GetOnlineKey(userID)
+}
+
+func (s *userOnline) GetOnline(ctx context.Context, userID string) ([]int32, error) {
+	members, err := s.rdb.ZRangeByScore(ctx, s.getUserOnlineKey(userID), &redis.ZRangeBy{
+		Min: strconv.FormatInt(time.Now().Unix(), 10),
+		Max: "+inf",
+	}).Result()
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	platformIDs := make([]int32, 0, len(members))
+	for _, member := range members {
+		val, err := strconv.Atoi(member)
+		if err != nil {
+			return nil, errs.Wrap(err)
+		}
+		platformIDs = append(platformIDs, int32(val))
+	}
+	return platformIDs, nil
 }
 
 func (s *userOnline) SetUserOnline(ctx context.Context, userID string, online, offline []int32) error {

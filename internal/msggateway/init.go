@@ -42,16 +42,15 @@ func Start(ctx context.Context, index int, conf *Config) error {
 	if err != nil {
 		return err
 	}
-	longServer, err := NewWsServer(
+	longServer := NewWsServer(
 		conf,
 		WithPort(wsPort),
 		WithMaxConnNum(int64(conf.MsgGateway.LongConnSvr.WebsocketMaxConnNum)),
 		WithHandshakeTimeout(time.Duration(conf.MsgGateway.LongConnSvr.WebsocketTimeout)*time.Second),
 		WithMessageMaxMsgLength(conf.MsgGateway.LongConnSvr.WebsocketMaxMsgLen),
 	)
-	if err != nil {
-		return err
-	}
+
+	go longServer.ChangeOnlineStatus(4)
 
 	hubServer := NewServer(rpcPort, longServer, conf)
 	netDone := make(chan error)

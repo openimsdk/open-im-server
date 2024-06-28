@@ -60,7 +60,7 @@ type WsServer struct {
 	registerChan      chan *Client
 	unregisterChan    chan *Client
 	kickHandlerChan   chan *kickHandler
-	clients           *UserMap
+	clients           UMap
 	clientPool        sync.Pool
 	onlineUserNum     atomic.Int64
 	onlineUserConnNum atomic.Int64
@@ -90,18 +90,18 @@ func (ws *WsServer) SetDiscoveryRegistry(disCov discovery.SvcDiscoveryRegistry, 
 	ws.disCov = disCov
 }
 
-func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, status int32) {
-	err := ws.userClient.SetUserStatus(ctx, client.UserID, status, client.PlatformID)
-	if err != nil {
-		log.ZWarn(ctx, "SetUserStatus err", err)
-	}
-	switch status {
-	case constant.Online:
-		ws.webhookAfterUserOnline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOnline, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
-	case constant.Offline:
-		ws.webhookAfterUserOffline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOffline, client.UserID, client.PlatformID, client.ctx.GetConnID())
-	}
-}
+//func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, status int32) {
+//	err := ws.userClient.SetUserStatus(ctx, client.UserID, status, client.PlatformID)
+//	if err != nil {
+//		log.ZWarn(ctx, "SetUserStatus err", err)
+//	}
+//	switch status {
+//	case constant.Online:
+//		ws.webhookAfterUserOnline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOnline, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
+//	case constant.Offline:
+//		ws.webhookAfterUserOffline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOffline, client.UserID, client.PlatformID, client.ctx.GetConnID())
+//	}
+//}
 
 func (ws *WsServer) UnRegister(c *Client) {
 	ws.unregisterChan <- c
@@ -119,7 +119,7 @@ func (ws *WsServer) GetUserPlatformCons(userID string, platform int) ([]*Client,
 	return ws.clients.Get(userID, platform)
 }
 
-func NewWsServer(msgGatewayConfig *Config, opts ...Option) (*WsServer, error) {
+func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 	var config configs
 	for _, o := range opts {
 		o(&config)
@@ -144,7 +144,7 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) (*WsServer, error) {
 		Compressor:      NewGzipCompressor(),
 		Encoder:         NewGobEncoder(),
 		webhookClient:   webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL),
-	}, nil
+	}
 }
 
 func (ws *WsServer) Run(done chan error) error {
@@ -278,11 +278,11 @@ func (ws *WsServer) registerClient(client *Client) {
 		}()
 	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		ws.SetUserOnlineStatus(client.ctx, client, constant.Online)
-	}()
+	//wg.Add(1)
+	//go func() {
+	//	defer wg.Done()
+	//	ws.SetUserOnlineStatus(client.ctx, client, constant.Online)
+	//}()
 
 	wg.Wait()
 
@@ -351,7 +351,7 @@ func (ws *WsServer) unregisterClient(client *Client) {
 		prommetrics.OnlineUserGauge.Dec()
 	}
 	ws.onlineUserConnNum.Add(-1)
-	ws.SetUserOnlineStatus(client.ctx, client, constant.Offline)
+	//ws.SetUserOnlineStatus(client.ctx, client, constant.Offline)
 	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num",
 		ws.onlineUserNum.Load(), "online user conn Num",
 		ws.onlineUserConnNum.Load(),

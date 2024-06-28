@@ -107,6 +107,7 @@ type API struct {
 type CronTask struct {
 	ChatRecordsClearTime string `mapstructure:"chatRecordsClearTime"`
 	RetainChatRecords    int    `mapstructure:"retainChatRecords"`
+	FileTime             int
 }
 
 type OfflinePushConfig struct {

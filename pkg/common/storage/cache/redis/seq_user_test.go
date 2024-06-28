@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"log"
+	"strconv"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -24,30 +26,39 @@ func newTestOnline() *userOnline {
 
 func TestOnline(t *testing.T) {
 	ts := newTestOnline()
+	var count atomic.Int64
+	for i := 0; i < 64; i++ {
+		go func(userID string) {
+			var err error
+			for i := 0; ; i++ {
+				if i%2 == 0 {
+					err = ts.SetUserOnline(context.Background(), userID, []int32{5, 6}, []int32{7, 8, 9})
+				} else {
+					err = ts.SetUserOnline(context.Background(), userID, []int32{1, 2, 3}, []int32{4, 5, 6})
+				}
+				if err != nil {
+					panic(err)
+				}
+				count.Add(1)
+			}
+		}(strconv.Itoa(10000 + i))
+	}
 
-	//err := ts.SetUserOnline(context.Background(), "1000", []int32{1, 2, 3}, []int32{4, 5, 6})
-	err := ts.SetUserOnline(context.Background(), "1000", nil, []int32{1, 2, 3})
-
-	t.Log(err)
-
+	ticker := time.NewTicker(time.Second)
+	for range ticker.C {
+		t.Log(count.Swap(0))
+	}
 }
 
-/*
-
-local function tableToString(tbl, separator)
-	local result = {}
-    for _, v in ipairs(tbl) do
-        table.insert(result, tostring(v))
-    end
-    return table.concat(result, separator)
-end
-
-local myTable = {"one", "two", "three"}
-local result = tableToString(myTable, ":")
-
-print(result)
-
-*/
+func TestGetOnline(t *testing.T) {
+	ts := newTestOnline()
+	ctx := context.Background()
+	pIDs, err := ts.GetOnline(ctx, "10000")
+	if err != nil {
+		panic(err)
+	}
+	t.Log(pIDs)
+}
 
 func TestRecvOnline(t *testing.T) {
 	ts := newTestOnline()
