@@ -25,7 +25,7 @@ func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
 
 	for i := 0; i < concurrent; i++ {
 		requestChs[i] = make(chan *pbuser.SetUserOnlineStatusReq, 64)
-		changeStatus[i] = make([]UserState, 100)
+		changeStatus[i] = make([]UserState, 0, 100)
 	}
 
 	mergeTicker := time.NewTicker(time.Second)
