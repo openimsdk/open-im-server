@@ -7,7 +7,7 @@ producerAck: ""
 # Compression type to use (e.g., none, gzip, snappy)
 compressType: "none"
 # List of Kafka broker addresses
-address: [ 172.16.8.48:19094 ]
+address: [ localhost:19094 ]
 # Kafka topic for Redis integration
 toRedisTopic: "toRedis"
 # Kafka topic for MongoDB integration

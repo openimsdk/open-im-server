@@ -7,9 +7,9 @@ secretAccessKey: "openIM123"
 # Session token for MinIO authentication (optional)
 sessionToken: ''
 # Internal address of the MinIO server
-internalAddress: "172.16.8.48:10005"
+internalAddress: "localhost:10005"
 # External address of the MinIO server, accessible from outside. Supports both HTTP and HTTPS using a domain name
-externalAddress: "http://172.16.8.48:10005"
+externalAddress: "http://external_ip:10005"
 # Flag to enable or disable public read access to the bucket
 publicRead: false
 
