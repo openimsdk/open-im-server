@@ -61,7 +61,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
-			redis2.NewTokenCacheModel(rdb),
+			redis2.NewTokenCacheModel(rdb, config.RpcConfig.TokenPolicy.Expire),
 			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
 		),
