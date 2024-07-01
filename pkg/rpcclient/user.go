@@ -198,7 +198,7 @@ func (u *UserRpcClient) GetUsersOnlinePlatform(ctx context.Context, userIDs []st
 	if len(userIDs) == 0 {
 		return nil, nil
 	}
-	resp, err := u.Client.GetUserStatus(ctx, &user.GetUserStatusReq{UserIDs: userIDs})
+	resp, err := u.Client.GetUserStatus(ctx, &user.GetUserStatusReq{UserIDs: userIDs, UserID: u.imAdminUserID[0]})
 	if err != nil {
 		return nil, err
 	}
