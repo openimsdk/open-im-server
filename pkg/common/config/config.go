@@ -339,8 +339,9 @@ type BeforeConfig struct {
 }
 
 type AfterConfig struct {
-	Enable  bool `mapstructure:"enable"`
-	Timeout int  `mapstructure:"timeout"`
+	Enable       bool  `mapstructure:"enable"`
+	Timeout      int   `mapstructure:"timeout"`
+	AttentionIds []string `mapstructure:"attentionIds"`
 }
 
 type Share struct {
