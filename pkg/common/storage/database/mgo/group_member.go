@@ -115,9 +115,26 @@ func (g *GroupMemberMgo) Delete(ctx context.Context, groupID string, userIDs []s
 
 func (g *GroupMemberMgo) UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) error {
 	return mongoutil.IncrVersion(func() error {
-		return g.Update(ctx, groupID, userID, bson.M{"role_level": roleLevel})
+		return mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID},
+			bson.M{"$set": bson.M{"role_level": roleLevel}}, true)
 	}, func() error {
 		return g.member.IncrVersion(ctx, groupID, []string{userID}, model.VersionStateUpdate)
+	})
+}
+func (g *GroupMemberMgo) UpdateUserRoleLevels(ctx context.Context, groupID string, firstUserID string, firstUserRoleLevel int32, secondUserID string, secondUserRoleLevel int32) error {
+	return mongoutil.IncrVersion(func() error {
+		if err := mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": firstUserID},
+			bson.M{"$set": bson.M{"role_level": firstUserRoleLevel}}, true); err != nil {
+			return err
+		}
+		if err := mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": secondUserID},
+			bson.M{"$set": bson.M{"role_level": secondUserRoleLevel}}, true); err != nil {
+			return err
+		}
+
+		return nil
+	}, func() error {
+		return g.member.IncrVersion(ctx, groupID, []string{firstUserID, secondUserID}, model.VersionStateUpdate)
 	})
 }
 
