@@ -102,13 +102,11 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		var pushUserIDList []string
 		isSenderSync := datautil.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
 		if !isSenderSync || pbData.MsgData.SendID == pbData.MsgData.RecvID {
-			pushUserIDList, err = c.onlineCache.GetUsersOnline(ctx, []string{pbData.MsgData.RecvID})
+			pushUserIDList = append(pushUserIDList, pbData.MsgData.RecvID)
 		} else {
-			pushUserIDList, err = c.onlineCache.GetUsersOnline(ctx, []string{pbData.MsgData.RecvID, pbData.MsgData.SendID})
+			pushUserIDList = append(pushUserIDList, pbData.MsgData.RecvID, pbData.MsgData.SendID)
 		}
-		if err == nil {
-			err = c.Push2User(ctx, pushUserIDList, pbData.MsgData)
-		}
+		err = c.Push2User(ctx, pushUserIDList, pbData.MsgData)
 	}
 	if err != nil {
 		log.ZWarn(ctx, "push failed", err, "msg", pbData.String())
@@ -129,7 +127,12 @@ func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim s
 }
 
 // Push2User Suitable for two types of conversations, one is SingleChatType and the other is NotificationChatType.
-func (c *ConsumerHandler) Push2User(ctx context.Context, userIDs []string, msg *sdkws.MsgData) error {
+func (c *ConsumerHandler) Push2User(ctx context.Context, userIDs []string, msg *sdkws.MsgData) (err error) {
+	userIDs, err = c.onlineCache.GetUsersOnline(ctx, userIDs)
+	if err != nil {
+		return err
+	}
+
 	log.ZDebug(ctx, "Get msg from msg_transfer And push msg", "userIDs", userIDs, "msg", msg.String())
 	if err := c.webhookBeforeOnlinePush(ctx, &c.config.WebhooksConfig.BeforeOnlinePush, userIDs, msg); err != nil {
 		return err

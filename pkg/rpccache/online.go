@@ -48,9 +48,10 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 		for message := range rdb.Subscribe(ctx, cachekey.OnlineChannel).Channel() {
 			userID, platformIDs, err := parseUserOnlineStatus(message.Payload)
 			if err != nil {
-				log.ZError(ctx, "redis subscribe parseUserOnlineStatus", err, "payload", message.Payload, "channel", message.Channel)
+				log.ZError(ctx, "OnlineCache redis subscribe parseUserOnlineStatus", err, "payload", message.Payload, "channel", message.Channel)
 				continue
 			}
+			log.ZDebug(ctx, "OnlineCache setUserOnline", "userID", userID, "platformIDs", platformIDs, "payload", message.Payload)
 			x.setUserOnline(userID, platformIDs)
 			//if err := x.setUserOnline(ctx, userID, platformIDs); err != nil {
 			//	log.ZError(ctx, "redis subscribe setUserOnline", err, "payload", message.Payload, "channel", message.Channel)
@@ -95,6 +96,7 @@ func (o *OnlineCache) GetUsersOnline(ctx context.Context, userIDs []string) ([]s
 			onlineUserIDs = append(onlineUserIDs, userID)
 		}
 	}
+	log.ZDebug(ctx, "OnlineCache GetUsersOnline", "userIDs", userIDs, "onlineUserIDs", onlineUserIDs)
 	return onlineUserIDs, nil
 }
 
@@ -113,6 +115,7 @@ func (o *OnlineCache) GetGroupOnline(ctx context.Context, groupID string) ([]str
 			onlineUserIDs = append(onlineUserIDs, userID)
 		}
 	}
+	log.ZDebug(ctx, "OnlineCache GetGroupOnline", "groupID", groupID, "onlineUserIDs", onlineUserIDs)
 	return onlineUserIDs, nil
 }
 
