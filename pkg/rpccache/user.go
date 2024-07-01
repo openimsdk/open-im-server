@@ -110,3 +110,18 @@ func (u *UserLocalCache) GetUsersInfoMap(ctx context.Context, userIDs []string) 
 	}
 	return users, nil
 }
+
+//func (u *UserLocalCache) GetUserOnlinePlatform(ctx context.Context, userID string) (val []int32, err error) {
+//	log.ZDebug(ctx, "UserLocalCache GetUserOnlinePlatform req", "userID", userID)
+//	defer func() {
+//		if err == nil {
+//			log.ZDebug(ctx, "UserLocalCache GetUserOnlinePlatform return", "value", val)
+//		} else {
+//			log.ZError(ctx, "UserLocalCache GetUserOnlinePlatform return", err)
+//		}
+//	}()
+//	return localcache.AnyValue[[]int32](u.local.Get(ctx, cachekey.GetOnlineKey(userID), func(ctx context.Context) (any, error) {
+//		log.ZDebug(ctx, "UserLocalCache GetUserGlobalMsgRecvOpt rpc", "userID", userID)
+//		return u.client.GetUserGlobalMsgRecvOpt(ctx, userID)
+//	}))
+//}

@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/redis/go-redis/v9"
 	"log"
 	"strconv"
@@ -15,7 +16,7 @@ func newTestOnline() *userOnline {
 	opt := &redis.Options{
 		Addr:     "172.16.8.48:16379",
 		Password: "openIM123",
-		DB:       1,
+		DB:       0,
 	}
 	rdb := redis.NewClient(opt)
 	if err := rdb.Ping(context.Background()).Err(); err != nil {
@@ -63,7 +64,7 @@ func TestGetOnline(t *testing.T) {
 func TestRecvOnline(t *testing.T) {
 	ts := newTestOnline()
 	ctx := context.Background()
-	pubsub := ts.rdb.Subscribe(ctx, "user_online")
+	pubsub := ts.rdb.Subscribe(ctx, cachekey.OnlineChannel)
 
 	// 等待订阅确认
 	_, err := pubsub.Receive(ctx)

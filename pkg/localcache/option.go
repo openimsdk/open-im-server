@@ -30,7 +30,7 @@ func defaultOption() *option {
 		localSuccessTTL: time.Minute,
 		localFailedTTL:  time.Second * 5,
 		delFn:           make([]func(ctx context.Context, key ...string), 0, 2),
-		target:          emptyTarget{},
+		target:          EmptyTarget{},
 	}
 }
 
@@ -123,14 +123,14 @@ func WithDeleteKeyBefore(fn func(ctx context.Context, key ...string)) Option {
 	}
 }
 
-type emptyTarget struct{}
+type EmptyTarget struct{}
 
-func (e emptyTarget) IncrGetHit() {}
+func (e EmptyTarget) IncrGetHit() {}
 
-func (e emptyTarget) IncrGetSuccess() {}
+func (e EmptyTarget) IncrGetSuccess() {}
 
-func (e emptyTarget) IncrGetFailed() {}
+func (e EmptyTarget) IncrGetFailed() {}
 
-func (e emptyTarget) IncrDelHit() {}
+func (e EmptyTarget) IncrDelHit() {}
 
-func (e emptyTarget) IncrDelNotFound() {}
+func (e EmptyTarget) IncrDelNotFound() {}

@@ -193,3 +193,25 @@ func (u *UserRpcClient) GetNotificationByID(ctx context.Context, userID string) 
 	})
 	return err
 }
+
+func (u *UserRpcClient) GetUsersOnlinePlatform(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
+	resp, err := u.Client.GetUserStatus(ctx, &user.GetUserStatusReq{UserIDs: userIDs})
+	if err != nil {
+		return nil, err
+	}
+	return resp.StatusList, nil
+}
+
+func (u *UserRpcClient) GetUserOnlinePlatform(ctx context.Context, userID string) ([]int32, error) {
+	resp, err := u.GetUsersOnlinePlatform(ctx, []string{userID})
+	if err != nil {
+		return nil, err
+	}
+	if len(resp) == 0 {
+		return nil, nil
+	}
+	return resp[0].PlatformIDs, nil
+}

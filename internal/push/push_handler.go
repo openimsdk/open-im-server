@@ -45,6 +45,7 @@ type ConsumerHandler struct {
 	pushConsumerGroup      *kafka.MConsumerGroup
 	offlinePusher          offlinepush.OfflinePusher
 	onlinePusher           OnlinePusher
+	onlineCache            *rpccache.OnlineCache
 	groupLocalCache        *rpccache.GroupLocalCache
 	conversationLocalCache *rpccache.ConversationLocalCache
 	msgRpcClient           rpcclient.MessageRpcClient
@@ -63,16 +64,17 @@ func NewConsumerHandler(config *Config, offlinePusher offlinepush.OfflinePusher,
 	if err != nil {
 		return nil, err
 	}
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
 	consumerHandler.offlinePusher = offlinePusher
 	consumerHandler.onlinePusher = NewOnlinePusher(client, config)
 	consumerHandler.groupRpcClient = rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
 	consumerHandler.groupLocalCache = rpccache.NewGroupLocalCache(consumerHandler.groupRpcClient, &config.LocalCacheConfig, rdb)
 	consumerHandler.msgRpcClient = rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
 	consumerHandler.conversationRpcClient = rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
-	consumerHandler.conversationLocalCache = rpccache.NewConversationLocalCache(consumerHandler.conversationRpcClient,
-		&config.LocalCacheConfig, rdb)
+	consumerHandler.conversationLocalCache = rpccache.NewConversationLocalCache(consumerHandler.conversationRpcClient, &config.LocalCacheConfig, rdb)
 	consumerHandler.webhookClient = webhook.NewWebhookClient(config.WebhooksConfig.URL)
 	consumerHandler.config = config
+	consumerHandler.onlineCache = rpccache.NewOnlineCache(userRpcClient, consumerHandler.groupLocalCache, rdb)
 	return &consumerHandler, nil
 }
 
@@ -100,11 +102,13 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		var pushUserIDList []string
 		isSenderSync := datautil.GetSwitchFromOptions(pbData.MsgData.Options, constant.IsSenderSync)
 		if !isSenderSync || pbData.MsgData.SendID == pbData.MsgData.RecvID {
-			pushUserIDList = append(pushUserIDList, pbData.MsgData.RecvID)
+			pushUserIDList, err = c.onlineCache.GetUsersOnline(ctx, []string{pbData.MsgData.RecvID})
 		} else {
-			pushUserIDList = append(pushUserIDList, pbData.MsgData.RecvID, pbData.MsgData.SendID)
+			pushUserIDList, err = c.onlineCache.GetUsersOnline(ctx, []string{pbData.MsgData.RecvID, pbData.MsgData.SendID})
 		}
-		err = c.Push2User(ctx, pushUserIDList, pbData.MsgData)
+		if err == nil {
+			err = c.Push2User(ctx, pushUserIDList, pbData.MsgData)
+		}
 	}
 	if err != nil {
 		log.ZWarn(ctx, "push failed", err, "msg", pbData.String())
@@ -233,7 +237,8 @@ func (c *ConsumerHandler) Push2Group(ctx context.Context, groupID string, msg *s
 }
 func (c *ConsumerHandler) groupMessagesHandler(ctx context.Context, groupID string, pushToUserIDs *[]string, msg *sdkws.MsgData) (err error) {
 	if len(*pushToUserIDs) == 0 {
-		*pushToUserIDs, err = c.groupLocalCache.GetGroupMemberIDs(ctx, groupID)
+		//*pushToUserIDs, err = c.groupLocalCache.GetGroupMemberIDs(ctx, groupID)
+		*pushToUserIDs, err = c.onlineCache.GetGroupOnline(ctx, groupID) //
 		if err != nil {
 			return err
 		}
