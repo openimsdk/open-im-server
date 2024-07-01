@@ -17,17 +17,18 @@ package group
 import (
 	"context"
 	"fmt"
+	"math/big"
+	"math/rand"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/common"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
-	"math/big"
-	"math/rand"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
@@ -133,12 +134,16 @@ func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 		groupIDs = append(groupIDs, member.GroupID)
 	}
 	for _, groupID := range groupIDs {
+		if err := s.db.MemberGroupIncrVersion(ctx, groupID, []string{req.UserID}, model.VersionStateUpdate); err != nil {
+			return nil, err
+		}
+	}
+	for _, groupID := range groupIDs {
 		s.notification.GroupMemberInfoSetNotification(ctx, groupID, req.UserID)
 	}
 	if err = s.db.DeleteGroupMemberHash(ctx, groupIDs); err != nil {
 		return nil, err
 	}
-
 	return &pbgroup.NotificationUserInfoUpdateResp{}, nil
 }
 
@@ -527,6 +532,14 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	if datautil.Contain(opUserID, req.KickedUserIDs...) {
 		return nil, errs.ErrArgs.WrapMsg("opUserID in KickedUserIDs")
 	}
+	owner, err := s.db.TakeGroupOwner(ctx, req.GroupID)
+	if err != nil {
+		return nil, err
+	}
+	if datautil.Contain(owner.UserID, req.KickedUserIDs...) {
+		return nil, errs.ErrArgs.WrapMsg("ownerUID can not Kick")
+	}
+
 	members, err := s.db.FindGroupMembers(ctx, req.GroupID, append(req.KickedUserIDs, opUserID))
 	if err != nil {
 		return nil, err
@@ -586,7 +599,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 			FaceURL:                group.FaceURL,
 			OwnerUserID:            ownerUserID,
 			CreateTime:             group.CreateTime.UnixMilli(),
-			MemberCount:            num,
+			MemberCount:            num - uint32(len(req.KickedUserIDs)),
 			Ex:                     group.Ex,
 			Status:                 group.Status,
 			CreatorUserID:          group.CreatorUserID,
@@ -621,18 +634,29 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbgroup.GetG
 	if req.GroupID == "" {
 		return nil, errs.ErrArgs.WrapMsg("groupID empty")
 	}
-	members, err := s.db.FindGroupMembers(ctx, req.GroupID, req.UserIDs)
+	members, err := s.getGroupMembersInfo(ctx, req.GroupID, req.UserIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &pbgroup.GetGroupMembersInfoResp{
+		Members: members,
+	}, nil
+}
+
+func (s *groupServer) getGroupMembersInfo(ctx context.Context, groupID string, userIDs []string) ([]*sdkws.GroupMemberFullInfo, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
+	members, err := s.db.FindGroupMembers(ctx, groupID, userIDs)
 	if err != nil {
 		return nil, err
 	}
 	if err := s.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
-	return &pbgroup.GetGroupMembersInfoResp{
-		Members: datautil.Slice(members, func(e *model.GroupMember) *sdkws.GroupMemberFullInfo {
-			return convert.Db2PbGroupMember(e)
-		}),
-	}, nil
+	return datautil.Slice(members, func(e *model.GroupMember) *sdkws.GroupMemberFullInfo {
+		return convert.Db2PbGroupMember(e)
+	}), nil
 }
 
 // GetGroupApplicationList handles functions that get a list of group requests.
@@ -701,15 +725,28 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbgroup.GetGroupsI
 	if len(req.GroupIDs) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("groupID is empty")
 	}
-	groups, err := s.db.FindGroup(ctx, req.GroupIDs)
+	groups, err := s.getGroupsInfo(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
-	groupMemberNumMap, err := s.db.MapGroupMemberNum(ctx, req.GroupIDs)
+	return &pbgroup.GetGroupsInfoResp{
+		GroupInfos: groups,
+	}, nil
+}
+
+func (s *groupServer) getGroupsInfo(ctx context.Context, groupIDs []string) ([]*sdkws.GroupInfo, error) {
+	if len(groupIDs) == 0 {
+		return nil, nil
+	}
+	groups, err := s.db.FindGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
-	owners, err := s.db.FindGroupsOwner(ctx, req.GroupIDs)
+	groupMemberNumMap, err := s.db.MapGroupMemberNum(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	owners, err := s.db.FindGroupsOwner(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -719,15 +756,13 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbgroup.GetGroupsI
 	ownerMap := datautil.SliceToMap(owners, func(e *model.GroupMember) string {
 		return e.GroupID
 	})
-	return &pbgroup.GetGroupsInfoResp{
-		GroupInfos: datautil.Slice(groups, func(e *model.Group) *sdkws.GroupInfo {
-			var ownerUserID string
-			if owner, ok := ownerMap[e.GroupID]; ok {
-				ownerUserID = owner.UserID
-			}
-			return convert.Db2PbGroupInfo(e, ownerUserID, groupMemberNumMap[e.GroupID])
-		}),
-	}, nil
+	return datautil.Slice(groups, func(e *model.Group) *sdkws.GroupInfo {
+		var ownerUserID string
+		if owner, ok := ownerMap[e.GroupID]; ok {
+			ownerUserID = owner.UserID
+		}
+		return convert.Db2PbGroupInfo(e, ownerUserID, groupMemberNumMap[e.GroupID])
+	}), nil
 }
 
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup.GroupApplicationResponseReq) (*pbgroup.GroupApplicationResponseResp, error) {

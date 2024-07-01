@@ -19,6 +19,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/tools/a2r"
+	"github.com/openimsdk/tools/apiresp"
+	"github.com/openimsdk/tools/log"
 )
 
 type GroupApi rpcclient.Group
@@ -65,6 +67,7 @@ func (o *GroupApi) GetGroupUsersReqApplicationList(c *gin.Context) {
 
 func (o *GroupApi) GetGroupsInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupsInfo, o.Client, c)
+	//a2r.Call(group.GroupClient.GetGroupsInfo, o.Client, c, a2r.NewNilReplaceOption(group.GroupClient.GetGroupsInfo))
 }
 
 func (o *GroupApi) KickGroupMember(c *gin.Context) {
@@ -73,6 +76,7 @@ func (o *GroupApi) KickGroupMember(c *gin.Context) {
 
 func (o *GroupApi) GetGroupMembersInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupMembersInfo, o.Client, c)
+	//a2r.Call(group.GroupClient.GetGroupMembersInfo, o.Client, c, a2r.NewNilReplaceOption(group.GroupClient.GetGroupMembersInfo))
 }
 
 func (o *GroupApi) GetGroupMemberList(c *gin.Context) {
@@ -133,4 +137,62 @@ func (o *GroupApi) GetGroups(c *gin.Context) {
 
 func (o *GroupApi) GetGroupMemberUserIDs(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupMemberUserIDs, o.Client, c)
+}
+
+func (o *GroupApi) GetIncrementalJoinGroup(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetIncrementalJoinGroup, o.Client, c)
+}
+
+func (o *GroupApi) GetIncrementalGroupMember(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetIncrementalGroupMember, o.Client, c)
+}
+
+func (o *GroupApi) GetIncrementalGroupMemberBatch(c *gin.Context) {
+	type BatchIncrementalReq struct {
+		UserID string                                `json:"user_id"`
+		List   []*group.GetIncrementalGroupMemberReq `json:"list"`
+	}
+	type BatchIncrementalResp struct {
+		List map[string]*group.GetIncrementalGroupMemberResp `json:"list"`
+	}
+	req, err := a2r.ParseRequestNotCheck[BatchIncrementalReq](c)
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+	resp := &BatchIncrementalResp{
+		List: make(map[string]*group.GetIncrementalGroupMemberResp),
+	}
+	var (
+		changeCount int
+	)
+	for _, req := range req.List {
+		if _, ok := resp.List[req.GroupID]; ok {
+			continue
+		}
+		res, err := o.Client.GetIncrementalGroupMember(c, req)
+		if err != nil {
+			if len(resp.List) == 0 {
+				apiresp.GinError(c, err)
+			} else {
+				log.ZError(c, "group incr sync versopn", err, "groupID", req.GroupID, "success", len(resp.List))
+				apiresp.GinSuccess(c, resp)
+			}
+			return
+		}
+		resp.List[req.GroupID] = res
+		changeCount += len(res.Insert) + len(res.Delete) + len(res.Update)
+		if changeCount >= 200 {
+			break
+		}
+	}
+	apiresp.GinSuccess(c, resp)
+}
+
+func (o *GroupApi) GetFullGroupMemberUserIDs(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetFullGroupMemberUserIDs, o.Client, c)
+}
+
+func (o *GroupApi) GetFullJoinGroupIDs(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetFullJoinGroupIDs, o.Client, c)
 }

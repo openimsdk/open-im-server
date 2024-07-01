@@ -2,6 +2,9 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -14,8 +17,6 @@ import (
 	"github.com/openimsdk/tools/mw"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"net/http"
-	"strings"
 )
 
 func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.Engine {
@@ -81,11 +82,14 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		friendRouterGroup.POST("/add_black", f.AddBlack)
 		friendRouterGroup.POST("/get_black_list", f.GetPaginationBlacks)
 		friendRouterGroup.POST("/remove_black", f.RemoveBlack)
+		friendRouterGroup.POST("/get_incremental_blacks", f.GetIncrementalBlacks)
 		friendRouterGroup.POST("/import_friend", f.ImportFriends)
 		friendRouterGroup.POST("/is_friend", f.IsFriend)
 		friendRouterGroup.POST("/get_friend_id", f.GetFriendIDs)
 		friendRouterGroup.POST("/get_specified_friends_info", f.GetSpecifiedFriendsInfo)
 		friendRouterGroup.POST("/update_friends", f.UpdateFriends)
+		friendRouterGroup.POST("/get_incremental_friends", f.GetIncrementalFriends)
+		friendRouterGroup.POST("/get_full_friend_user_ids", f.GetFullFriendUserIDs)
 	}
 	g := NewGroupApi(*groupRpc)
 	groupRouterGroup := r.Group("/group")
@@ -114,6 +118,11 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		groupRouterGroup.POST("/get_group_abstract_info", g.GetGroupAbstractInfo)
 		groupRouterGroup.POST("/get_groups", g.GetGroups)
 		groupRouterGroup.POST("/get_group_member_user_id", g.GetGroupMemberUserIDs)
+		groupRouterGroup.POST("/get_incremental_join_group", g.GetIncrementalJoinGroup)
+		groupRouterGroup.POST("/get_incremental_group_member", g.GetIncrementalGroupMember)
+		groupRouterGroup.POST("/get_incremental_group_member_batch", g.GetIncrementalGroupMemberBatch)
+		groupRouterGroup.POST("/get_full_group_member_user_ids", g.GetFullGroupMemberUserIDs)
+		groupRouterGroup.POST("/get_full_join_group_ids", g.GetFullJoinGroupIDs)
 	}
 	// certificate
 	authRouterGroup := r.Group("/auth")

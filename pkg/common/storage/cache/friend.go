@@ -32,4 +32,16 @@ type FriendCache interface {
 	DelFriend(ownerUserID, friendUserID string) FriendCache
 	// Delete friends when friends' info changed
 	DelFriends(ownerUserID string, friendUserIDs []string) FriendCache
+
+	DelOwner(friendUserID string, ownerUserIDs []string) FriendCache
+
+	DelMaxFriendVersion(ownerUserIDs ...string) FriendCache
+
+	//DelSortFriendUserIDs(ownerUserIDs ...string) FriendCache
+
+	//FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
+
+	//FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*relationtb.VersionLog, error)
+
+	FindMaxFriendVersion(ctx context.Context, ownerUserID string) (*relationtb.VersionLog, error)
 }

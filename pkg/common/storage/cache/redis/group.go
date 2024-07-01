@@ -27,7 +27,6 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 	"time"
 )
@@ -109,6 +108,14 @@ func (g *GroupCacheRedis) getGroupMemberNumKey(groupID string) string {
 
 func (g *GroupCacheRedis) getGroupRoleLevelMemberIDsKey(groupID string, roleLevel int32) string {
 	return cachekey.GetGroupRoleLevelMemberIDsKey(groupID, roleLevel)
+}
+
+func (g *GroupCacheRedis) getGroupMemberMaxVersionKey(groupID string) string {
+	return cachekey.GetGroupMemberMaxVersionKey(groupID)
+}
+
+func (g *GroupCacheRedis) getJoinGroupMaxVersionKey(userID string) string {
+	return cachekey.GetJoinGroupMaxVersionKey(userID)
 }
 
 func (g *GroupCacheRedis) GetGroupIndex(group *model.Group, keys []string) (int, error) {
@@ -246,9 +253,17 @@ func (g *GroupCacheRedis) DelGroupMemberIDs(groupID string) cache.GroupCache {
 	return cache
 }
 
+func (g *GroupCacheRedis) findUserJoinedGroupID(ctx context.Context, userID string) ([]string, error) {
+	groupIDs, err := g.groupMemberDB.FindUserJoinedGroupID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return g.groupDB.FindJoinSortGroupID(ctx, groupIDs)
+}
+
 func (g *GroupCacheRedis) GetJoinedGroupIDs(ctx context.Context, userID string) (joinedGroupIDs []string, err error) {
 	return getCache(ctx, g.rcClient, g.getJoinedGroupsKey(userID), g.expireTime, func(ctx context.Context) ([]string, error) {
-		return g.groupMemberDB.FindUserJoinedGroupID(ctx, userID)
+		return g.findUserJoinedGroupID(ctx, userID)
 	})
 }
 
@@ -275,26 +290,6 @@ func (g *GroupCacheRedis) GetGroupMembersInfo(ctx context.Context, groupID strin
 	}, func(ctx context.Context, userID string) (*model.GroupMember, error) {
 		return g.groupMemberDB.Take(ctx, groupID, userID)
 	})
-}
-
-func (g *GroupCacheRedis) GetGroupMembersPage(
-	ctx context.Context,
-	groupID string,
-	userIDs []string,
-	showNumber, pageNumber int32,
-) (total uint32, groupMembers []*model.GroupMember, err error) {
-	groupMemberIDs, err := g.GetGroupMemberIDs(ctx, groupID)
-	if err != nil {
-		return 0, nil, err
-	}
-	if userIDs != nil {
-		userIDs = datautil.BothExist(userIDs, groupMemberIDs)
-	} else {
-		userIDs = groupMemberIDs
-	}
-	groupMembers, err = g.GetGroupMembersInfo(ctx, groupID, datautil.Paginate(userIDs, int(showNumber), int(showNumber)))
-
-	return uint32(len(userIDs)), groupMembers, err
 }
 
 func (g *GroupCacheRedis) GetAllGroupMembersInfo(ctx context.Context, groupID string) (groupMembers []*model.GroupMember, err error) {
@@ -404,5 +399,59 @@ func (g *GroupCacheRedis) FindGroupMemberUser(ctx context.Context, groupIDs []st
 		return g.getGroupMemberInfoKey(groupID, userID)
 	}, func(ctx context.Context, groupID string) (*model.GroupMember, error) {
 		return g.groupMemberDB.Take(ctx, groupID, userID)
+	})
+}
+
+//func (g *GroupCacheRedis) FindSortGroupMemberUserIDs(ctx context.Context, groupID string) ([]string, error) {
+//	userIDs, err := g.GetGroupMemberIDs(ctx, groupID)
+//	if err != nil {
+//		return nil, err
+//	}
+//	if len(userIDs) > g.syncCount {
+//		userIDs = userIDs[:g.syncCount]
+//	}
+//	return userIDs, nil
+//}
+//
+//func (g *GroupCacheRedis) FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error) {
+//	groupIDs, err := g.GetJoinedGroupIDs(ctx, userID)
+//	if err != nil {
+//		return nil, err
+//	}
+//	if len(groupIDs) > g.syncCount {
+//		groupIDs = groupIDs[:g.syncCount]
+//	}
+//	return groupIDs, nil
+//}
+
+func (g *GroupCacheRedis) DelMaxGroupMemberVersion(groupIDs ...string) cache.GroupCache {
+	keys := make([]string, 0, len(groupIDs))
+	for _, groupID := range groupIDs {
+		keys = append(keys, g.getGroupMemberMaxVersionKey(groupID))
+	}
+	cache := g.CloneGroupCache()
+	cache.AddKeys(keys...)
+	return cache
+}
+
+func (g *GroupCacheRedis) DelMaxJoinGroupVersion(userIDs ...string) cache.GroupCache {
+	keys := make([]string, 0, len(userIDs))
+	for _, userID := range userIDs {
+		keys = append(keys, g.getJoinGroupMaxVersionKey(userID))
+	}
+	cache := g.CloneGroupCache()
+	cache.AddKeys(keys...)
+	return cache
+}
+
+func (g *GroupCacheRedis) FindMaxGroupMemberVersion(ctx context.Context, groupID string) (*model.VersionLog, error) {
+	return getCache(ctx, g.rcClient, g.getGroupMemberMaxVersionKey(groupID), g.expireTime, func(ctx context.Context) (*model.VersionLog, error) {
+		return g.groupMemberDB.FindMemberIncrVersion(ctx, groupID, 0, 0)
+	})
+}
+
+func (g *GroupCacheRedis) FindMaxJoinGroupVersion(ctx context.Context, userID string) (*model.VersionLog, error) {
+	return getCache(ctx, g.rcClient, g.getJoinGroupMaxVersionKey(userID), g.expireTime, func(ctx context.Context) (*model.VersionLog, error) {
+		return g.groupMemberDB.FindJoinIncrVersion(ctx, userID, 0, 0)
 	})
 }

@@ -27,7 +27,7 @@ import (
 )
 
 func NewS3Mongo(db *mongo.Database) (database.ObjectInfo, error) {
-	coll := db.Collection("s3")
+	coll := db.Collection(database.ObjectName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "name", Value: 1},
