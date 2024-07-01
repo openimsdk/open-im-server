@@ -41,3 +41,7 @@ func NewThird(discov discovery.SvcDiscoveryRegistry, rpcRegisterName, grafanaUrl
 	}
 	return &Third{discov: discov, Client: client, conn: conn, GrafanaUrl: grafanaUrl}
 }
+func (t *Third) DeleteOutdatedData(ctx context.Context, expires int64) error {
+	_, err := t.Client.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: expires})
+	return err
+}

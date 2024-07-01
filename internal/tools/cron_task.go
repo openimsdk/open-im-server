@@ -17,15 +17,17 @@ package tools
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mw"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"os"
-	"time"
 
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -67,6 +69,25 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		log.ZInfo(ctx, "cron clear chat records success", "deltime", deltime, "cont", time.Since(now))
 	}
 	if _, err := crontab.AddFunc(config.CronTask.ChatRecordsClearTime, clearFunc); err != nil {
+		return errs.Wrap(err)
+	}
+	deleteFunc := func() {
+		now := time.Now()
+		deleteTime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.FileExpireTime))
+		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deleteTime.UnixMilli()))
+		log.ZInfo(ctx, "deleteoutDatedData ", "deletetime", deleteTime, "timestamp", deleteTime.UnixMilli())
+		tConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
+		if err != nil {
+			return
+		}
+		thirdClient := third.NewThirdClient(tConn)
+		if _, err := thirdClient.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: deleteTime.UnixMilli()}); err != nil {
+			log.ZError(ctx, "cron deleteoutDatedData failed", err, "deleteTime", deleteTime, "cont", time.Since(now))
+			return
+		}
+		log.ZInfo(ctx, "cron deleteoutDatedData success", "deltime", deleteTime, "cont", time.Since(now))
+	}
+	if _, err := crontab.AddFunc(string(config.CronTask.FileExpireTime), deleteFunc); err != nil {
 		return errs.Wrap(err)
 	}
 	log.ZInfo(ctx, "start cron task", "chatRecordsClearTime", config.CronTask.ChatRecordsClearTime)
