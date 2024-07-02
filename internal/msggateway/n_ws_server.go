@@ -60,7 +60,7 @@ type WsServer struct {
 	registerChan      chan *Client
 	unregisterChan    chan *Client
 	kickHandlerChan   chan *kickHandler
-	clients           UMap
+	clients           UserMap
 	clientPool        sync.Pool
 	onlineUserNum     atomic.Int64
 	onlineUserConnNum atomic.Int64
