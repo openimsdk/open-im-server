@@ -17,13 +17,9 @@ package main
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/system/program"
-	"os"
 )
 
 func main() {
-	if len(os.Args) == 1 {
-		os.Args = []string{os.Args[0], "-i", "0", "-c", "/Users/chao/Desktop/project/open-im-server/config"}
-	}
 	if err := cmd.NewGroupRpcCmd().Exec(); err != nil {
 		program.ExitWithError(err)
 	}

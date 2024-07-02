@@ -140,7 +140,7 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 		unregisterChan:  make(chan *Client, 1000),
 		kickHandlerChan: make(chan *kickHandler, 1000),
 		validate:        v,
-		clients:         newUserMap(),
+		clients:         newUserMap1(),
 		Compressor:      NewGzipCompressor(),
 		Encoder:         NewGobEncoder(),
 		webhookClient:   webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL),
@@ -345,7 +345,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 
 func (ws *WsServer) unregisterClient(client *Client) {
 	defer ws.clientPool.Put(client)
-	isDeleteUser := ws.clients.Delete(client.UserID, client.ctx.GetRemoteAddr())
+	isDeleteUser := ws.clients.DeleteClients(client.UserID, []*Client{client})
 	if isDeleteUser {
 		ws.onlineUserNum.Add(-1)
 		prommetrics.OnlineUserGauge.Dec()

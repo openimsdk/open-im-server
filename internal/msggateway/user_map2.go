@@ -9,10 +9,9 @@ type UMap interface {
 	GetAll(userID string) ([]*Client, bool)
 	Get(userID string, platformID int) ([]*Client, bool, bool)
 	Set(userID string, v *Client)
-	Delete(userID string, connRemoteAddr string) (isDeleteUser bool)
 	DeleteClients(userID string, clients []*Client) (isDeleteUser bool)
 	UserState() <-chan UserState
-	GetAllUserStatus(deadline, nowtime time.Time) []UserState
+	GetAllUserStatus(deadline time.Time) []UserState
 }
 
 var _ UMap = (*UserMap2)(nil)
@@ -102,26 +101,6 @@ func (u *UserMap2) Set(userID string, client *Client) {
 	u.push(client.UserID, result, nil)
 }
 
-func (u *UserMap2) Delete(userID string, connRemoteAddr string) (isDeleteUser bool) {
-	u.lock.Lock()
-	defer u.lock.Unlock()
-	result, ok := u.data[userID]
-	if !ok {
-		return false
-	}
-	client, ok := result.Clients[connRemoteAddr]
-	if !ok {
-		return false
-	}
-	delete(result.Clients, connRemoteAddr)
-	defer u.push(userID, result, []int32{int32(client.PlatformID)})
-	if len(result.Clients) > 0 {
-		return false
-	}
-	delete(u.data, userID)
-	return true
-}
-
 func (u *UserMap2) DeleteClients(userID string, clients []*Client) (isDeleteUser bool) {
 	if len(clients) == 0 {
 		return false
@@ -145,7 +124,7 @@ func (u *UserMap2) DeleteClients(userID string, clients []*Client) (isDeleteUser
 	return true
 }
 
-func (u *UserMap2) GetAllUserStatus(deadline, nowtime time.Time) []UserState {
+func (u *UserMap2) GetAllUserStatus(deadline time.Time) []UserState {
 	u.lock.RLock()
 	defer u.lock.RUnlock()
 	if len(u.data) == 0 {
@@ -159,7 +138,7 @@ func (u *UserMap2) GetAllUserStatus(deadline, nowtime time.Time) []UserState {
 		if p.Time.Before(deadline) {
 			continue
 		}
-		p.Time = nowtime
+		p.Time = time.Now()
 		online := make([]int32, 0, len(p.Clients))
 		for _, client := range p.Clients {
 			online = append(online, int32(client.PlatformID))
