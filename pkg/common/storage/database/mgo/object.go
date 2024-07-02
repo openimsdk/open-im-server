@@ -75,3 +75,9 @@ func (o *S3Mongo) FindByExpires(ctx context.Context, duration time.Time) ([]*mod
 		"create_time": bson.M{"$lt": duration},
 	})
 }
+func (o *S3Mongo) FindNotDelByS3(ctx context.Context, key string, duration time.Time) (int64, error) {
+	return mongoutil.Count(ctx, o.coll, bson.M{
+		"key":         key,
+		"create_time": bson.M{"$gt": duration},
+	})
+}

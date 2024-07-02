@@ -19,7 +19,7 @@ import (
 	"path/filepath"
 	"time"
 
-	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	redisCache "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
@@ -42,20 +42,25 @@ type S3Database interface {
 	FindByExpires(ctx context.Context, duration time.Time) ([]*model.Object, error)
 	DeleteObject(ctx context.Context, name string) error
 	DeleteSpecifiedData(ctx context.Context, engine string, name string) error
+	FindNotDelByS3(ctx context.Context, key string, duration time.Time) (int64, error)
+	DelS3Key(ctx context.Context, engine string, keys ...string) error
+	GetImageThumbnailKey(ctx context.Context, name string) (string, error)
 }
 
 func NewS3Database(rdb redis.UniversalClient, s3 s3.Interface, obj database.ObjectInfo) S3Database {
 	return &s3Database{
-		s3:    cont.New(redis2.NewS3Cache(rdb, s3), s3),
-		cache: redis2.NewObjectCacheRedis(rdb, obj),
-		db:    obj,
+		s3:      cont.New(redisCache.NewS3Cache(rdb, s3), s3),
+		cache:   redisCache.NewObjectCacheRedis(rdb, obj),
+		s3cache: redisCache.NewS3Cache(rdb, s3),
+		db:      obj,
 	}
 }
 
 type s3Database struct {
-	s3    *cont.Controller
-	cache cache.ObjectCache
-	db    database.ObjectInfo
+	s3      *cont.Controller
+	cache   cache.ObjectCache
+	s3cache cont.S3Cache
+	db      database.ObjectInfo
 }
 
 func (s *s3Database) PartSize(ctx context.Context, size int64) (int64, error) {
@@ -124,4 +129,16 @@ func (s *s3Database) DeleteObject(ctx context.Context, name string) error {
 }
 func (s *s3Database) DeleteSpecifiedData(ctx context.Context, engine string, name string) error {
 	return s.db.Delete(ctx, engine, name)
+}
+
+func (s *s3Database) FindNotDelByS3(ctx context.Context, key string, duration time.Time) (int64, error) {
+	return s.db.FindNotDelByS3(ctx, key, duration)
+}
+
+func (s *s3Database) DelS3Key(ctx context.Context, engine string, keys ...string) error {
+	return s.s3cache.DelS3Key(ctx, engine, keys...)
+}
+
+func (s *s3Database) GetImageThumbnailKey(ctx context.Context, name string) (string, error) {
+	return s.s3.GetImageThumbnailKey(ctx, name)
 }

@@ -26,4 +26,5 @@ type ObjectInfo interface {
 	Take(ctx context.Context, engine string, name string) (*model.Object, error)
 	Delete(ctx context.Context, engine string, name string) error
 	FindByExpires(ctx context.Context, duration time.Time) ([]*model.Object, error)
+	FindNotDelByS3(ctx context.Context, key string, duration time.Time) (int64, error)
 }
