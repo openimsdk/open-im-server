@@ -18,7 +18,9 @@ func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
 	if concurrent < 1 {
 		concurrent = 1
 	}
-	scanTicker := time.NewTicker(time.Minute * 3)
+	const renewalTime = cachekey.OnlineExpire / 3
+	//const renewalTime = time.Second * 10
+	renewalTicker := time.NewTicker(renewalTime)
 
 	requestChs := make([]chan *pbuser.SetUserOnlineStatusReq, concurrent)
 	changeStatus := make([][]UserState, concurrent)
@@ -97,8 +99,11 @@ func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
 		select {
 		case <-mergeTicker.C:
 			pushAllUserState()
-		case now := <-scanTicker.C:
-			pushUserState(ws.clients.GetAllUserStatus(now.Add(-cachekey.OnlineExpire/3), now)...)
+		case now := <-renewalTicker.C:
+			deadline := now.Add(-cachekey.OnlineExpire / 3)
+			users := ws.clients.GetAllUserStatus(deadline, now)
+			log.ZDebug(context.Background(), "renewal ticker", "deadline", deadline, "nowtime", now, "num", len(users))
+			pushUserState(users...)
 		case state := <-ws.clients.UserState():
 			log.ZDebug(context.Background(), "OnlineCache user online change", "userID", state.UserID, "online", state.Online, "offline", state.Offline)
 			pushUserState(state)
