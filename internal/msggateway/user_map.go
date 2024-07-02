@@ -54,14 +54,14 @@ func (u *UserMap) UserState() <-chan UserState {
 	return u.ch
 }
 
-func (u *UserMap) GetAllUserStatus(deadline time.Time) []UserState {
+func (u *UserMap) GetAllUserStatus(deadline time.Time, nowtime time.Time) []UserState {
 	var result []UserState
 	u.m.Range(func(key, value any) bool {
 		client := value.(*UserPlatform1)
 		if client.Time.Before(deadline) {
 			return true
 		}
-		client.Time = time.Now()
+		client.Time = nowtime
 		us := UserState{
 			UserID: key.(string),
 			Online: make([]int32, 0, len(client.Clients)),

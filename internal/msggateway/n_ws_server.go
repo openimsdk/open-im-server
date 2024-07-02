@@ -140,7 +140,7 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 		unregisterChan:  make(chan *Client, 1000),
 		kickHandlerChan: make(chan *kickHandler, 1000),
 		validate:        v,
-		clients:         newUserMap1(),
+		clients:         newUserMap(),
 		Compressor:      NewGzipCompressor(),
 		Encoder:         NewGobEncoder(),
 		webhookClient:   webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL),
