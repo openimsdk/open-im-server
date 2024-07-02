@@ -118,11 +118,11 @@ func (u *userMap) DeleteClients(userID string, clients []*Client) (isDeleteUser 
 	tmp := result.Clients
 	result.Clients = result.Clients[:0]
 	for _, client := range tmp {
-		if _, ok := deleteAddr[client.ctx.GetRemoteAddr()]; ok {
-			continue
+		if _, delCli := deleteAddr[client.ctx.GetRemoteAddr()]; delCli {
+			offline = append(offline, int32(client.PlatformID))
+		} else {
+			result.Clients = append(result.Clients, client)
 		}
-		offline = append(offline, int32(client.PlatformID))
-		result.Clients = append(result.Clients, client)
 	}
 	defer u.push(userID, result, offline)
 	if len(result.Clients) > 0 {

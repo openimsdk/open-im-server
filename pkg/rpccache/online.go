@@ -51,11 +51,8 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 				log.ZError(ctx, "OnlineCache redis subscribe parseUserOnlineStatus", err, "payload", message.Payload, "channel", message.Channel)
 				continue
 			}
-			log.ZDebug(ctx, "OnlineCache setUserOnline", "userID", userID, "platformIDs", platformIDs, "payload", message.Payload)
-			x.setUserOnline(userID, platformIDs)
-			//if err := x.setUserOnline(ctx, userID, platformIDs); err != nil {
-			//	log.ZError(ctx, "redis subscribe setUserOnline", err, "payload", message.Payload, "channel", message.Channel)
-			//}
+			storageCache := x.setUserOnline(userID, platformIDs)
+			log.ZDebug(ctx, "OnlineCache setUserOnline", "userID", userID, "platformIDs", platformIDs, "payload", message.Payload, "storageCache", storageCache)
 		}
 	}()
 	return x
@@ -115,10 +112,10 @@ func (o *OnlineCache) GetGroupOnline(ctx context.Context, groupID string) ([]str
 			onlineUserIDs = append(onlineUserIDs, userID)
 		}
 	}
-	log.ZDebug(ctx, "OnlineCache GetGroupOnline", "groupID", groupID, "onlineUserIDs", onlineUserIDs)
+	log.ZDebug(ctx, "OnlineCache GetGroupOnline", "groupID", groupID, "onlineUserIDs", onlineUserIDs, "allUserID", userIDs)
 	return onlineUserIDs, nil
 }
 
-func (o *OnlineCache) setUserOnline(userID string, platformIDs []int32) {
-	o.local.SetHas(o.getUserOnlineKey(userID), platformIDs)
+func (o *OnlineCache) setUserOnline(userID string, platformIDs []int32) bool {
+	return o.local.SetHas(o.getUserOnlineKey(userID), platformIDs)
 }
