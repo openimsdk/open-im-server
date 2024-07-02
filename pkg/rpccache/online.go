@@ -64,10 +64,6 @@ type OnlineCache struct {
 	local lru.LRU[string, []int32]
 }
 
-func (o *OnlineCache) getUserOnlineKey(userID string) string {
-	return "<u>" + userID
-}
-
 func (o *OnlineCache) GetUserOnlinePlatform(ctx context.Context, userID string) ([]int32, error) {
 	return o.local.Get(userID, func() ([]int32, error) {
 		return o.user.GetUserOnlinePlatform(ctx, userID)
@@ -117,5 +113,5 @@ func (o *OnlineCache) GetGroupOnline(ctx context.Context, groupID string) ([]str
 }
 
 func (o *OnlineCache) setUserOnline(userID string, platformIDs []int32) bool {
-	return o.local.SetHas(o.getUserOnlineKey(userID), platformIDs)
+	return o.local.SetHas(userID, platformIDs)
 }
