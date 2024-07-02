@@ -1,6 +1,8 @@
 package msggateway
 
 import (
+	"context"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"sync"
 	"time"
@@ -57,6 +59,7 @@ func (u *userMap) push(userID string, userPlatform *UserPlatform, offline []int3
 }
 
 func (u *userMap) GetAll(userID string) ([]*Client, bool) {
+	log.ZInfo(context.Background(), "UserMap GetAll", "userID", userID)
 	u.lock.RLock()
 	defer u.lock.RUnlock()
 	result, ok := u.data[userID]
@@ -67,6 +70,7 @@ func (u *userMap) GetAll(userID string) ([]*Client, bool) {
 }
 
 func (u *userMap) Get(userID string, platformID int) ([]*Client, bool, bool) {
+	log.ZInfo(context.Background(), "UserMap Get", "userID", userID, "platformID", platformID)
 	u.lock.RLock()
 	defer u.lock.RUnlock()
 	result, ok := u.data[userID]
@@ -83,6 +87,7 @@ func (u *userMap) Get(userID string, platformID int) ([]*Client, bool, bool) {
 }
 
 func (u *userMap) Set(userID string, client *Client) {
+	log.ZInfo(context.Background(), "UserMap Set", "userID", userID, "client", client.ctx.GetRemoteAddr())
 	u.lock.Lock()
 	defer u.lock.Unlock()
 	result, ok := u.data[userID]
@@ -97,6 +102,7 @@ func (u *userMap) Set(userID string, client *Client) {
 }
 
 func (u *userMap) DeleteClients(userID string, clients []*Client) (isDeleteUser bool) {
+	log.ZInfo(context.Background(), "UserMap DeleteClients", "userID", userID, "client", len(clients))
 	if len(clients) == 0 {
 		return false
 	}
@@ -134,7 +140,7 @@ func (u *userMap) GetAllUserStatus(deadline time.Time, nowtime time.Time) []User
 		if userPlatform.Time.Before(deadline) {
 			continue
 		}
-		userPlatform.Time = time.Now()
+		userPlatform.Time = nowtime
 		online := make([]int32, 0, len(userPlatform.Clients))
 		for _, client := range userPlatform.Clients {
 			online = append(online, int32(client.PlatformID))
