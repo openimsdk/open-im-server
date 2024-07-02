@@ -100,7 +100,7 @@ func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
 		case now := <-scanTicker.C:
 			pushUserState(ws.clients.GetAllUserStatus(now.Add(-cachekey.OnlineExpire/3), now)...)
 		case state := <-ws.clients.UserState():
-			log.ZDebug(context.Background(), "user online change", "userID", state.UserID, "online", state.Online, "offline", state.Offline)
+			log.ZDebug(context.Background(), "OnlineCache user online change", "userID", state.UserID, "online", state.Online, "offline", state.Offline)
 			pushUserState(state)
 		}
 	}
