@@ -28,7 +28,7 @@ import (
 )
 
 func NewGroupRequestMgo(db *mongo.Database) (database.GroupRequest, error) {
-	coll := db.Collection("group_request")
+	coll := db.Collection(database.GroupRequestName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "group_id", Value: 1},

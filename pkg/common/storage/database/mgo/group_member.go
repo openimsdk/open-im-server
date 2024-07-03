@@ -18,6 +18,7 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/tools/log"
 
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/db/mongoutil"
@@ -29,7 +30,7 @@ import (
 )
 
 func NewGroupMember(db *mongo.Database) (database.GroupMember, error) {
-	coll := db.Collection("group_member")
+	coll := db.Collection(database.GroupMemberName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "group_id", Value: 1},
@@ -40,15 +41,53 @@ func NewGroupMember(db *mongo.Database) (database.GroupMember, error) {
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
-	return &GroupMemberMgo{coll: coll}, nil
+	member, err := NewVersionLog(db.Collection(database.GroupMemberVersionName))
+	if err != nil {
+		return nil, err
+	}
+	join, err := NewVersionLog(db.Collection(database.GroupJoinVersionName))
+	if err != nil {
+		return nil, err
+	}
+	return &GroupMemberMgo{coll: coll, member: member, join: join}, nil
 }
 
 type GroupMemberMgo struct {
-	coll *mongo.Collection
+	coll   *mongo.Collection
+	member database.VersionLog
+	join   database.VersionLog
+}
+
+func (g *GroupMemberMgo) memberSort() any {
+	return bson.D{{"role_level", -1}, {"create_time", -1}}
 }
 
 func (g *GroupMemberMgo) Create(ctx context.Context, groupMembers []*model.GroupMember) (err error) {
-	return mongoutil.InsertMany(ctx, g.coll, groupMembers)
+	return mongoutil.IncrVersion(func() error {
+		return mongoutil.InsertMany(ctx, g.coll, groupMembers)
+	}, func() error {
+		gms := make(map[string][]string)
+		for _, member := range groupMembers {
+			gms[member.GroupID] = append(gms[member.GroupID], member.UserID)
+		}
+		for groupID, userIDs := range gms {
+			if err := g.member.IncrVersion(ctx, groupID, userIDs, model.VersionStateInsert); err != nil {
+				return err
+			}
+		}
+		return nil
+	}, func() error {
+		gms := make(map[string][]string)
+		for _, member := range groupMembers {
+			gms[member.UserID] = append(gms[member.UserID], member.GroupID)
+		}
+		for userID, groupIDs := range gms {
+			if err := g.join.IncrVersion(ctx, userID, groupIDs, model.VersionStateInsert); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func (g *GroupMemberMgo) Delete(ctx context.Context, groupID string, userIDs []string) (err error) {
@@ -56,24 +95,62 @@ func (g *GroupMemberMgo) Delete(ctx context.Context, groupID string, userIDs []s
 	if len(userIDs) > 0 {
 		filter["user_id"] = bson.M{"$in": userIDs}
 	}
-	return mongoutil.DeleteMany(ctx, g.coll, filter)
+	return mongoutil.IncrVersion(func() error {
+		return mongoutil.DeleteMany(ctx, g.coll, filter)
+	}, func() error {
+		if len(userIDs) == 0 {
+			return g.member.Delete(ctx, groupID)
+		} else {
+			return g.member.IncrVersion(ctx, groupID, userIDs, model.VersionStateDelete)
+		}
+	}, func() error {
+		for _, userID := range userIDs {
+			if err := g.join.IncrVersion(ctx, userID, []string{groupID}, model.VersionStateDelete); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func (g *GroupMemberMgo) UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) error {
-	return g.Update(ctx, groupID, userID, bson.M{"role_level": roleLevel})
+	return mongoutil.IncrVersion(func() error {
+		return mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID},
+			bson.M{"$set": bson.M{"role_level": roleLevel}}, true)
+	}, func() error {
+		return g.member.IncrVersion(ctx, groupID, []string{userID}, model.VersionStateUpdate)
+	})
+}
+func (g *GroupMemberMgo) UpdateUserRoleLevels(ctx context.Context, groupID string, firstUserID string, firstUserRoleLevel int32, secondUserID string, secondUserRoleLevel int32) error {
+	return mongoutil.IncrVersion(func() error {
+		if err := mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": firstUserID},
+			bson.M{"$set": bson.M{"role_level": firstUserRoleLevel}}, true); err != nil {
+			return err
+		}
+		if err := mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": secondUserID},
+			bson.M{"$set": bson.M{"role_level": secondUserRoleLevel}}, true); err != nil {
+			return err
+		}
+
+		return nil
+	}, func() error {
+		return g.member.IncrVersion(ctx, groupID, []string{firstUserID, secondUserID}, model.VersionStateUpdate)
+	})
 }
 
 func (g *GroupMemberMgo) Update(ctx context.Context, groupID string, userID string, data map[string]any) (err error) {
-	return mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID}, bson.M{"$set": data}, true)
-}
-
-func (g *GroupMemberMgo) Find(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) (groupMembers []*model.GroupMember, err error) {
-	// TODO implement me
-	panic("implement me")
+	if len(data) == 0 {
+		return nil
+	}
+	return mongoutil.IncrVersion(func() error {
+		return mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID}, bson.M{"$set": data}, true)
+	}, func() error {
+		return g.member.IncrVersion(ctx, groupID, []string{userID}, model.VersionStateUpdate)
+	})
 }
 
 func (g *GroupMemberMgo) FindMemberUserID(ctx context.Context, groupID string) (userIDs []string, err error) {
-	return mongoutil.Find[string](ctx, g.coll, bson.M{"group_id": groupID}, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}))
+	return mongoutil.Find[string](ctx, g.coll, bson.M{"group_id": groupID}, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}).SetSort(g.memberSort()))
 }
 
 func (g *GroupMemberMgo) Take(ctx context.Context, groupID string, userID string) (groupMember *model.GroupMember, err error) {
@@ -88,13 +165,13 @@ func (g *GroupMemberMgo) FindRoleLevelUserIDs(ctx context.Context, groupID strin
 	return mongoutil.Find[string](ctx, g.coll, bson.M{"group_id": groupID, "role_level": roleLevel}, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}))
 }
 
-func (g *GroupMemberMgo) SearchMember(ctx context.Context, keyword string, groupID string, pagination pagination.Pagination) (total int64, groupList []*model.GroupMember, err error) {
+func (g *GroupMemberMgo) SearchMember(ctx context.Context, keyword string, groupID string, pagination pagination.Pagination) (int64, []*model.GroupMember, error) {
 	filter := bson.M{"group_id": groupID, "nickname": bson.M{"$regex": keyword}}
-	return mongoutil.FindPage[*model.GroupMember](ctx, g.coll, filter, pagination)
+	return mongoutil.FindPage[*model.GroupMember](ctx, g.coll, filter, pagination, options.Find().SetSort(g.memberSort()))
 }
 
 func (g *GroupMemberMgo) FindUserJoinedGroupID(ctx context.Context, userID string) (groupIDs []string, err error) {
-	return mongoutil.Find[string](ctx, g.coll, bson.M{"user_id": userID}, options.Find().SetProjection(bson.M{"_id": 0, "group_id": 1}))
+	return mongoutil.Find[string](ctx, g.coll, bson.M{"user_id": userID}, options.Find().SetProjection(bson.M{"_id": 0, "group_id": 1}).SetSort(g.memberSort()))
 }
 
 func (g *GroupMemberMgo) TakeGroupMemberNum(ctx context.Context, groupID string) (count int64, err error) {
@@ -117,4 +194,22 @@ func (g *GroupMemberMgo) IsUpdateRoleLevel(data map[string]any) bool {
 	}
 	_, ok := data["role_level"]
 	return ok
+}
+
+func (g *GroupMemberMgo) JoinGroupIncrVersion(ctx context.Context, userID string, groupIDs []string, state int32) error {
+	return g.join.IncrVersion(ctx, userID, groupIDs, state)
+}
+
+func (g *GroupMemberMgo) MemberGroupIncrVersion(ctx context.Context, groupID string, userIDs []string, state int32) error {
+	return g.member.IncrVersion(ctx, groupID, userIDs, state)
+}
+
+func (g *GroupMemberMgo) FindMemberIncrVersion(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error) {
+	log.ZDebug(ctx, "find member incr version", "groupID", groupID, "version", version)
+	return g.member.FindChangeLog(ctx, groupID, version, limit)
+}
+
+func (g *GroupMemberMgo) FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error) {
+	log.ZDebug(ctx, "find join incr version", "userID", userID, "version", version)
+	return g.join.FindChangeLog(ctx, userID, version, limit)
 }
