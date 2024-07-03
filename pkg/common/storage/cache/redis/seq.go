@@ -63,10 +63,12 @@ func (c *seqCache) getSeq(ctx context.Context, conversationID string, getkey fun
 
 func (c *seqCache) getSeqs(ctx context.Context, items []string, getkey func(s string) string) (m map[string]int64, err error) {
 	m = make(map[string]int64, len(items))
-	reverseMap := make(map[string]string, len(items))
-	var lock sync.Mutex
+	var (
+		reverseMap = make(map[string]string, len(items))
+		keys       = make([]string, len(items))
+		lock       sync.Mutex
+	)
 
-	keys := make([]string, len(items))
 	for i, v := range items {
 		keys[i] = getkey(v)
 		reverseMap[getkey(v)] = v
