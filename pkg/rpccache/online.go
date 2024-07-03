@@ -21,7 +21,7 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 		user:  user,
 		group: group,
 		local: lru.NewSlotLRU(1024, localcache.LRUStringHash, func() lru.LRU[string, []int32] {
-			return lru.NewLayLRU[string, []int32](2048, cachekey.OnlineExpire, time.Second*3, localcache.EmptyTarget{}, func(key string, value []int32) {})
+			return lru.NewLayLRU[string, []int32](2048, cachekey.OnlineExpire/2, time.Second*3, localcache.EmptyTarget{}, func(key string, value []int32) {})
 		}),
 	}
 	go func() {
