@@ -24,3 +24,15 @@ type GroupSimpleUserID struct {
 	Hash      uint64
 	MemberNum uint32
 }
+
+type FindPagination struct {
+	PageNumber int32
+	ShowNumber int32
+}
+
+func (f *FindPagination) GetPageNumber() int32 {
+	return f.PageNumber
+}
+func (f *FindPagination) GetShowNumber() int32 {
+	return f.ShowNumber
+}

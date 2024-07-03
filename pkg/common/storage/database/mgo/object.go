@@ -22,6 +22,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
 	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/pagination"
 	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -70,10 +71,10 @@ func (o *S3Mongo) Take(ctx context.Context, engine string, name string) (*model.
 func (o *S3Mongo) Delete(ctx context.Context, engine string, name string) error {
 	return mongoutil.DeleteOne(ctx, o.coll, bson.M{"name": name, "engine": engine})
 }
-func (o *S3Mongo) FindByExpires(ctx context.Context, duration time.Time) ([]*model.Object, error) {
-	return mongoutil.Find[*model.Object](ctx, o.coll, bson.M{
+func (o *S3Mongo) FindByExpires(ctx context.Context, duration time.Time, pagination pagination.Pagination) (total int64, objects []*model.Object, err error) {
+	return mongoutil.FindPage[*model.Object](ctx, o.coll, bson.M{
 		"create_time": bson.M{"$lt": duration},
-	})
+	}, pagination)
 }
 func (o *S3Mongo) FindNotDelByS3(ctx context.Context, key string, duration time.Time) (int64, error) {
 	return mongoutil.Count(ctx, o.coll, bson.M{

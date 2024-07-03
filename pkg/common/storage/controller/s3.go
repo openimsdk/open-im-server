@@ -24,6 +24,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/tools/db/pagination"
 	"github.com/openimsdk/tools/s3"
 	"github.com/openimsdk/tools/s3/cont"
 	"github.com/redis/go-redis/v9"
@@ -39,7 +40,7 @@ type S3Database interface {
 	SetObject(ctx context.Context, info *model.Object) error
 	StatObject(ctx context.Context, name string) (*s3.ObjectInfo, error)
 	FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error)
-	FindByExpires(ctx context.Context, duration time.Time) ([]*model.Object, error)
+	FindByExpires(ctx context.Context, duration time.Time, pagination pagination.Pagination) (total int64, objects []*model.Object, err error)
 	DeleteObject(ctx context.Context, name string) error
 	DeleteSpecifiedData(ctx context.Context, engine string, name string) error
 	FindNotDelByS3(ctx context.Context, key string, duration time.Time) (int64, error)
@@ -120,8 +121,9 @@ func (s *s3Database) StatObject(ctx context.Context, name string) (*s3.ObjectInf
 func (s *s3Database) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
 	return s.s3.FormData(ctx, name, size, contentType, duration)
 }
-func (s *s3Database) FindByExpires(ctx context.Context, duration time.Time) ([]*model.Object, error) {
-	return s.db.FindByExpires(ctx, duration)
+func (s *s3Database) FindByExpires(ctx context.Context, duration time.Time, pagination pagination.Pagination) (total int64, objects []*model.Object, err error) {
+
+	return s.db.FindByExpires(ctx, duration, pagination)
 }
 
 func (s *s3Database) DeleteObject(ctx context.Context, name string) error {
