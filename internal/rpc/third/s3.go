@@ -23,10 +23,14 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/common"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/google/uuid"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -285,14 +289,47 @@ func (t *thirdServer) apiAddress(prefix, name string) string {
 }
 
 func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteOutdatedDataReq) (*third.DeleteOutdatedDataResp, error) {
+	var conf config.Third
 	expireTime := time.UnixMilli(req.ExpireTime)
-	models, err := t.s3dataBase.FindByExpires(ctx, expireTime)
-	if err != nil {
-		return nil, err
+	findPagination := &sdkws.RequestPagination{
+		PageNumber: 1,
+		ShowNumber: 1000,
 	}
-	for _, model := range models {
-		t.s3dataBase.DeleteObject(ctx, model.Key)
-		t.s3dataBase.DeleteSpecifiedData(ctx, model.Engine, model.Key)
+	for {
+		total, models, err := t.s3dataBase.FindByExpires(ctx, expireTime, findPagination)
+		if err != nil && errs.Unwrap(err) != mongo.ErrNoDocuments {
+			return nil, errs.Wrap(err)
+		}
+		needDelObjectKeys := make([]string, 0)
+		for _, model := range models {
+			needDelObjectKeys = append(needDelObjectKeys, model.Key)
+		}
+
+		needDelObjectKeys = datautil.Distinct(needDelObjectKeys)
+		for _, key := range needDelObjectKeys {
+			count, err := t.s3dataBase.FindNotDelByS3(ctx, key, expireTime)
+			if err != nil && errs.Unwrap(err) != mongo.ErrNoDocuments {
+				return nil, errs.Wrap(err)
+			}
+			if int(count) < 1 {
+				thumbnailKey, err := t.s3dataBase.GetImageThumbnailKey(ctx, key)
+				if err != nil {
+					return nil, errs.Wrap(err)
+				}
+				t.s3dataBase.DeleteObject(ctx, thumbnailKey)
+				t.s3dataBase.DelS3Key(ctx, conf.Object.Enable, needDelObjectKeys...)
+				t.s3dataBase.DeleteObject(ctx, key)
+			}
+		}
+		for _, model := range models {
+			err := t.s3dataBase.DeleteSpecifiedData(ctx, model.Engine, model.Name)
+			if err != nil {
+				return nil, errs.Wrap(err)
+			}
+		}
+		if total < int64(findPagination.ShowNumber) {
+			break
+		}
 	}
 	return &third.DeleteOutdatedDataResp{}, nil
 }
