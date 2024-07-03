@@ -29,8 +29,8 @@ import (
 )
 
 const (
-	notificationWorkerCount = 2
-	notificationBufferSize  = 200
+	notificationWorkerCount = 20
+	notificationBufferSize  = 20000
 )
 
 func NewConversationLocalCache(client rpcclient.ConversationRpcClient, localCache *config.LocalCache, cli redis.UniversalClient) *ConversationLocalCache {
@@ -99,14 +99,17 @@ func (c *ConversationLocalCache) GetSingleConversationRecvMsgOpt(ctx context.Con
 }
 
 func (c *ConversationLocalCache) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*pbconversation.Conversation, error) {
-	conversations := make([]*pbconversation.Conversation, 0, len(conversationIDs))
+	var (
+		conversations     = make([]*pbconversation.Conversation, 0, len(conversationIDs))
+		errChan           = make(chan error, 1)
+		conversationsChan = make(chan *pbconversation.Conversation, len(conversationIDs))
+		wg                sync.WaitGroup
+	)
 
-	errChan := make(chan error, len(conversationIDs))
-	conversationsChan := make(chan *pbconversation.Conversation, len(conversationIDs))
-	var wg sync.WaitGroup
 	wg.Add(len(conversationIDs))
 
 	for _, conversationID := range conversationIDs {
+		conversationID := conversationID
 		err := c.queue.Push(func() {
 			defer wg.Done()
 			conversation, err := c.GetConversation(ctx, ownerUserID, conversationID)
@@ -114,7 +117,10 @@ func (c *ConversationLocalCache) GetConversations(ctx context.Context, ownerUser
 				if errs.ErrRecordNotFound.Is(err) {
 					return
 				}
-				errChan <- err
+				select {
+				case errChan <- err:
+				default:
+				}
 				return
 			}
 			conversationsChan <- conversation

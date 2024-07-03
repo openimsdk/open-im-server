@@ -63,11 +63,13 @@ func (c *seqCache) getSeq(ctx context.Context, conversationID string, getkey fun
 
 func (c *seqCache) getSeqs(ctx context.Context, items []string, getkey func(s string) string) (m map[string]int64, err error) {
 	m = make(map[string]int64, len(items))
+	reverseMap := make(map[string]string, len(items))
 	var lock sync.Mutex
 
 	keys := make([]string, len(items))
 	for i, v := range items {
 		keys[i] = getkey(v)
+		reverseMap[getkey(v)] = v
 	}
 
 	manager := NewRedisShardManager(c.rdb)
@@ -86,7 +88,7 @@ func (c *seqCache) getSeqs(ctx context.Context, items []string, getkey func(s st
 			val := stringutil.StringToInt64(strRes)
 			if val != 0 {
 				lock.Lock()
-				m[items[i]] = val
+				m[reverseMap[keys[i]]] = val
 				lock.Unlock()
 			}
 		}
