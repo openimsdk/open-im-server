@@ -158,7 +158,6 @@ func Start[T any](ctx context.Context, discovery *config2.Discovery, prometheusC
 		}
 		return nil
 	case <-netDone:
-		close(netDone)
 		return netErr
 	}
 }
