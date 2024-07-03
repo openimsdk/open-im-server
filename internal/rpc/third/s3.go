@@ -30,6 +30,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -290,7 +291,7 @@ func (t *thirdServer) apiAddress(prefix, name string) string {
 func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteOutdatedDataReq) (*third.DeleteOutdatedDataResp, error) {
 	var conf config.Third
 	expireTime := time.UnixMilli(req.ExpireTime)
-	findPagination := &common.FindPagination{
+	findPagination := &sdkws.RequestPagination{
 		PageNumber: 1,
 		ShowNumber: 1000,
 	}
