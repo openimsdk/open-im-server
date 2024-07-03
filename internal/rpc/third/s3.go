@@ -329,7 +329,6 @@ func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteO
 		if total < int64(findPagination.ShowNumber) {
 			break
 		}
-		findPagination.PageNumber++
 	}
 	return &third.DeleteOutdatedDataResp{}, nil
 }
