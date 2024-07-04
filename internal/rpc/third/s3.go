@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/common"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"go.mongodb.org/mongo-driver/mongo"
 

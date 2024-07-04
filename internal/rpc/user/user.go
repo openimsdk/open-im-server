@@ -60,6 +60,11 @@ type userServer struct {
 	webhookClient            *webhook.Client
 }
 
+func (s *userServer) SetUserOnlineStatus(ctx context.Context, req *pbuser.SetUserOnlineStatusReq) (*pbuser.SetUserOnlineStatusResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 type Config struct {
 	RpcConfig          config.User
 	RedisConfig        config.Redis
