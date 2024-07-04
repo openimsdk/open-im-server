@@ -17,7 +17,7 @@ var (
 			Name: "api_count",
 			Help: "Total number of API calls",
 		},
-		[]string{"path", "code", "type"},
+		[]string{"path", "code"},
 	)
 	httpCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -33,8 +33,8 @@ func init() {
 	apiRegistry.MustRegister(apiCounter, httpCounter)
 }
 
-func APICall(path string, apiCode int, apiType string) {
-	apiCounter.With(prometheus.Labels{"path": path, "code": strconv.Itoa(apiCode), "type": apiType}).Inc()
+func APICall(path string, apiCode int) {
+	apiCounter.With(prometheus.Labels{"path": path, "code": strconv.Itoa(apiCode)}).Inc()
 }
 
 //func HttpCall(path string, method string, status int, duration time.Duration) {

@@ -28,9 +28,9 @@ func prommetricsGin() gin.HandlerFunc {
 		//prommetrics.HttpCall(path, c.Request.Method, c.Writer.Status(), time.Since(start))
 		if c.Request.Method == http.MethodPost {
 			if resp := apiresp.GetGinApiResponse(c); resp == nil {
-				prommetrics.APICall(path, -1, "NO_GIN_RESPONSE_FOUND")
+				prommetrics.APICall(path, -1)
 			} else {
-				prommetrics.APICall(path, resp.ErrCode, resp.ErrMsg)
+				prommetrics.APICall(path, resp.ErrCode)
 			}
 		}
 	}
