@@ -21,17 +21,15 @@ import (
 
 func prommetricsGin() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		//start := time.Now()
 		c.Next()
 		path := c.FullPath()
-		prommetrics.HttpCall(path, c.Request.Method, c.Writer.Status())
-		//prommetrics.HttpCall(path, c.Request.Method, c.Writer.Status(), time.Since(start))
-		if c.Request.Method == http.MethodPost {
-			if resp := apiresp.GetGinApiResponse(c); resp == nil {
-				prommetrics.APICall(path, -1)
-			} else {
-				prommetrics.APICall(path, resp.ErrCode)
-			}
+		if c.Writer.Status() == http.StatusNotFound {
+			prommetrics.HttpCall("<404>", c.Request.Method, c.Writer.Status())
+		} else {
+			prommetrics.HttpCall(path, c.Request.Method, c.Writer.Status())
+		}
+		if resp := apiresp.GetGinApiResponse(c); resp != nil {
+			prommetrics.APICall(path, c.Request.Method, resp.ErrCode)
 		}
 	}
 }
