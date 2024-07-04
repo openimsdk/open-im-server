@@ -29,7 +29,6 @@ import (
 	"time"
 
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-	ginprom "github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
@@ -72,9 +71,9 @@ func Start(ctx context.Context, index int, config *Config) error {
 				netDone <- struct{}{}
 				return
 			}
-			p := ginprom.NewPrometheus("app", prommetrics.GetGinCusMetrics("Api"))
-			p.SetListenAddress(fmt.Sprintf(":%d", prometheusPort))
-			if err = p.Use(router); err != nil && err != http.ErrServerClosed {
+			srv := http.NewServeMux()
+			srv.Handle(prommetrics.ApiPath, prommetrics.ApiHandler())
+			if err := http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), srv); err != nil && err != http.ErrServerClosed {
 				netErr = errs.WrapMsg(err, fmt.Sprintf("prometheus start err: %d", prometheusPort))
 				netDone <- struct{}{}
 			}

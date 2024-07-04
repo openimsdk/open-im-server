@@ -17,7 +17,6 @@ package prommetrics
 import (
 	gp "github.com/grpc-ecosystem/go-grpc-prometheus"
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/ginprometheus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 )
@@ -48,11 +47,11 @@ func GetGrpcCusMetrics(registerName string, share *config2.Share) []prometheus.C
 	}
 }
 
-func GetGinCusMetrics(name string) []*ginprometheus.Metric {
-	switch name {
-	case "Api":
-		return []*ginprometheus.Metric{ApiCustomCnt}
-	default:
-		return []*ginprometheus.Metric{ApiCustomCnt}
-	}
-}
+//func GetGinCusMetrics(name string) []*ginprometheus.Metric {
+//	switch name {
+//	case "Api":
+//		return []*ginprometheus.Metric{ApiCustomCnt}
+//	default:
+//		return []*ginprometheus.Metric{ApiCustomCnt}
+//	}
+//}

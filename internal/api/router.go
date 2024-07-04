@@ -2,8 +2,10 @@ package api
 
 import (
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -18,6 +20,22 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+func prommetricsGin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		c.Next()
+		path := c.FullPath()
+		prommetrics.HttpCall(path, c.Request.Method, c.Writer.Status(), time.Since(start))
+		if c.Request.Method == http.MethodPost {
+			if resp := apiresp.GetGinApiResponse(c); resp == nil {
+				prommetrics.APICall(path, -1, "NO_GIN_RESPONSE_FOUND")
+			} else {
+				prommetrics.APICall(path, resp.ErrCode, resp.ErrMsg)
+			}
+		}
+	}
+}
 
 func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.Engine {
 	disCov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -37,7 +55,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	authRpc := rpcclient.NewAuth(disCov, config.Share.RpcRegisterName.Auth)
 	thirdRpc := rpcclient.NewThird(disCov, config.Share.RpcRegisterName.Third, config.API.Prometheus.GrafanaURL)
 
-	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID(), GinParseToken(authRpc))
+	r.Use(prommetricsGin(), gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID(), GinParseToken(authRpc))
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc, config.Share.IMAdminUserID)
 	userRouterGroup := r.Group("/user")
