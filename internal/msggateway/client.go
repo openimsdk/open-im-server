@@ -72,6 +72,8 @@ type Client struct {
 	closed         atomic.Bool
 	closedErr      error
 	token          string
+	//subLock        sync.Mutex
+	//subUserIDs     map[string]struct{}
 }
 
 // ResetClient updates the client's state with new connection and context information.

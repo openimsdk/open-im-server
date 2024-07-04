@@ -54,13 +54,14 @@ type LongConnServer interface {
 }
 
 type WsServer struct {
-	msgGatewayConfig  *Config
-	port              int
-	wsMaxConnNum      int64
-	registerChan      chan *Client
-	unregisterChan    chan *Client
-	kickHandlerChan   chan *kickHandler
-	clients           UserMap
+	msgGatewayConfig *Config
+	port             int
+	wsMaxConnNum     int64
+	registerChan     chan *Client
+	unregisterChan   chan *Client
+	kickHandlerChan  chan *kickHandler
+	clients          UserMap
+	//subscription      *Subscription
 	clientPool        sync.Pool
 	onlineUserNum     atomic.Int64
 	onlineUserConnNum atomic.Int64
@@ -141,9 +142,10 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 		kickHandlerChan: make(chan *kickHandler, 1000),
 		validate:        v,
 		clients:         newUserMap(),
-		Compressor:      NewGzipCompressor(),
-		Encoder:         NewGobEncoder(),
-		webhookClient:   webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL),
+		//subscription:    newSubscription(),
+		Compressor:    NewGzipCompressor(),
+		Encoder:       NewGobEncoder(),
+		webhookClient: webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL),
 	}
 }
 
