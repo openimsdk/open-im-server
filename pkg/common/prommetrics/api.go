@@ -24,7 +24,8 @@ var (
 			Name: "http_count",
 			Help: "Total number of HTTP calls",
 		},
-		[]string{"path", "method", "status", "duration"},
+		//[]string{"path", "method", "status", "duration"},
+		[]string{"path", "method", "status"},
 	)
 )
 
@@ -36,8 +37,12 @@ func APICall(path string, apiCode int, apiType string) {
 	apiCounter.With(prometheus.Labels{"path": path, "code": strconv.Itoa(apiCode), "type": apiType}).Inc()
 }
 
-func HttpCall(path string, method string, status int, duration time.Duration) {
-	httpCounter.With(prometheus.Labels{"path": path, "method": method, "status": strconv.Itoa(status), "duration": durationRange(duration)}).Inc()
+//func HttpCall(path string, method string, status int, duration time.Duration) {
+//	httpCounter.With(prometheus.Labels{"path": path, "method": method, "status": strconv.Itoa(status), "duration": durationRange(duration)}).Inc()
+//}
+
+func HttpCall(path string, method string, status int) {
+	httpCounter.With(prometheus.Labels{"path": path, "method": method, "status": strconv.Itoa(status)}).Inc()
 }
 
 var (

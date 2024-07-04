@@ -2,14 +2,10 @@ package api
 
 import (
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"net/http"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
@@ -19,14 +15,17 @@ import (
 	"github.com/openimsdk/tools/mw"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"net/http"
+	"strings"
 )
 
 func prommetricsGin() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		start := time.Now()
+		//start := time.Now()
 		c.Next()
 		path := c.FullPath()
-		prommetrics.HttpCall(path, c.Request.Method, c.Writer.Status(), time.Since(start))
+		prommetrics.HttpCall(path, c.Request.Method, c.Writer.Status())
+		//prommetrics.HttpCall(path, c.Request.Method, c.Writer.Status(), time.Since(start))
 		if c.Request.Method == http.MethodPost {
 			if resp := apiresp.GetGinApiResponse(c); resp == nil {
 				prommetrics.APICall(path, -1, "NO_GIN_RESPONSE_FOUND")
