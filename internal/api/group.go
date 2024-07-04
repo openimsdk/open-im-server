@@ -67,6 +67,7 @@ func (o *GroupApi) GetGroupUsersReqApplicationList(c *gin.Context) {
 
 func (o *GroupApi) GetGroupsInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupsInfo, o.Client, c)
+	//a2r.Call(group.GroupClient.GetGroupsInfo, o.Client, c, a2r.NewNilReplaceOption(group.GroupClient.GetGroupsInfo))
 }
 
 func (o *GroupApi) KickGroupMember(c *gin.Context) {
@@ -75,6 +76,7 @@ func (o *GroupApi) KickGroupMember(c *gin.Context) {
 
 func (o *GroupApi) GetGroupMembersInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupMembersInfo, o.Client, c)
+	//a2r.Call(group.GroupClient.GetGroupMembersInfo, o.Client, c, a2r.NewNilReplaceOption(group.GroupClient.GetGroupMembersInfo))
 }
 
 func (o *GroupApi) GetGroupMemberList(c *gin.Context) {

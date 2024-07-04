@@ -25,6 +25,7 @@ type GroupMember interface {
 	Delete(ctx context.Context, groupID string, userIDs []string) (err error)
 	Update(ctx context.Context, groupID string, userID string, data map[string]any) (err error)
 	UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) error
+	UpdateUserRoleLevels(ctx context.Context, groupID string, firstUserID string, firstUserRoleLevel int32, secondUserID string, secondUserRoleLevel int32) error
 	FindMemberUserID(ctx context.Context, groupID string) (userIDs []string, err error)
 	Take(ctx context.Context, groupID string, userID string) (groupMember *model.GroupMember, err error)
 	TakeOwner(ctx context.Context, groupID string) (groupMember *model.GroupMember, err error)
