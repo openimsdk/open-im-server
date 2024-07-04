@@ -66,16 +66,13 @@ func TestRecvOnline(t *testing.T) {
 	ctx := context.Background()
 	pubsub := ts.rdb.Subscribe(ctx, cachekey.OnlineChannel)
 
-	// 等待订阅确认
 	_, err := pubsub.Receive(ctx)
 	if err != nil {
 		log.Fatalf("Could not subscribe: %v", err)
 	}
 
-	// 创建一个通道来接收消息
 	ch := pubsub.Channel()
 
-	// 处理接收到的消息
 	for msg := range ch {
 		fmt.Printf("Received message from channel %s: %s\n", msg.Channel, msg.Payload)
 	}
