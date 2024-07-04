@@ -20,6 +20,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mw"
 	"google.golang.org/grpc"
@@ -39,7 +40,7 @@ type CronTaskConfig struct {
 }
 
 func Start(ctx context.Context, config *CronTaskConfig) error {
-	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime", config.CronTask.ChatRecordsClearTime, "msgDestructTime", config.CronTask.RetainChatRecords)
+	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime", config.CronTask.CronExecuteTime, "msgDestructTime", config.CronTask.RetainChatRecords)
 	if config.CronTask.RetainChatRecords < 1 {
 		return errs.New("msg destruct time must be greater than 1").Wrap()
 	}
@@ -66,16 +67,31 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		}
 		log.ZInfo(ctx, "cron clear chat records success", "deltime", deltime, "cont", time.Since(now))
 	}
-	delFile := func() {
+	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, clearFunc); err != nil {
+		return errs.Wrap(err)
+	}
 
+	tConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
+	if err != nil {
+		return err
 	}
-	if _, err := crontab.AddFunc(config.CronTask.ChatRecordsClearTime, clearFunc); err != nil {
+	thirdClient := third.NewThirdClient(tConn)
+
+	deleteFunc := func() {
+		now := time.Now()
+		deleteTime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.FileExpireTime))
+		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deleteTime.UnixMilli()))
+		log.ZInfo(ctx, "deleteoutDatedData ", "deletetime", deleteTime, "timestamp", deleteTime.UnixMilli())
+		if _, err := thirdClient.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: deleteTime.UnixMilli()}); err != nil {
+			log.ZError(ctx, "cron deleteoutDatedData failed", err, "deleteTime", deleteTime, "cont", time.Since(now))
+			return
+		}
+		log.ZInfo(ctx, "cron deleteoutDatedData success", "deltime", deleteTime, "cont", time.Since(now))
+	}
+	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, deleteFunc); err != nil {
 		return errs.Wrap(err)
 	}
-	if _, err := crontab.AddFunc(config.CronTask.ChatRecordsClearTime, delFile); err != nil {
-		return errs.Wrap(err)
-	}
-	log.ZInfo(ctx, "start cron task", "chatRecordsClearTime", config.CronTask.ChatRecordsClearTime)
+	log.ZInfo(ctx, "start cron task", "CronExecuteTime", config.CronTask.CronExecuteTime)
 	crontab.Start()
 	<-ctx.Done()
 	return nil

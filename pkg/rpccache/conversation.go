@@ -16,15 +16,19 @@ package rpccache
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
+	"golang.org/x/sync/errgroup"
+)
+
+const (
+	conversationWorkerCount = 20
 )
 
 func NewConversationLocalCache(client rpcclient.ConversationRpcClient, localCache *config.LocalCache, cli redis.UniversalClient) *ConversationLocalCache {
@@ -90,15 +94,33 @@ func (c *ConversationLocalCache) GetSingleConversationRecvMsgOpt(ctx context.Con
 }
 
 func (c *ConversationLocalCache) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*pbconversation.Conversation, error) {
-	conversations := make([]*pbconversation.Conversation, 0, len(conversationIDs))
+	var (
+		conversations     = make([]*pbconversation.Conversation, 0, len(conversationIDs))
+		conversationsChan = make(chan *pbconversation.Conversation, len(conversationIDs))
+	)
+
+	g, ctx := errgroup.WithContext(ctx)
+	g.SetLimit(conversationWorkerCount)
+
 	for _, conversationID := range conversationIDs {
-		conversation, err := c.GetConversation(ctx, ownerUserID, conversationID)
-		if err != nil {
-			if errs.ErrRecordNotFound.Is(err) {
-				continue
+		conversationID := conversationID
+		g.Go(func() error {
+			conversation, err := c.GetConversation(ctx, ownerUserID, conversationID)
+			if err != nil {
+				if errs.ErrRecordNotFound.Is(err) {
+					return nil
+				}
+				return err
 			}
-			return nil, err
-		}
+			conversationsChan <- conversation
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+	close(conversationsChan)
+	for conversation := range conversationsChan {
 		conversations = append(conversations, conversation)
 	}
 	return conversations, nil

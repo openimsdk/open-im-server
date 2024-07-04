@@ -82,6 +82,9 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 				}
 				return false
 			})
+			if vl.LogLen > 0 {
+				hasGroupUpdate = true
+			}
 			return vl, nil
 		},
 		CacheMaxVersion: s.db.FindMaxGroupMemberVersionCache,

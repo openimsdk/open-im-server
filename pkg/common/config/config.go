@@ -105,9 +105,9 @@ type API struct {
 }
 
 type CronTask struct {
-	ChatRecordsClearTime string `mapstructure:"chatRecordsClearTime"`
-	RetainChatRecords    int    `mapstructure:"retainChatRecords"`
-	FileTime             int
+	CronExecuteTime   string `mapstructure:"cronExecuteTime"`
+	RetainChatRecords int    `mapstructure:"retainChatRecords"`
+	FileExpireTime    int    `mapstructure:"fileExpireTime"`
 }
 
 type OfflinePushConfig struct {
@@ -340,8 +340,9 @@ type BeforeConfig struct {
 }
 
 type AfterConfig struct {
-	Enable  bool `mapstructure:"enable"`
-	Timeout int  `mapstructure:"timeout"`
+	Enable       bool  `mapstructure:"enable"`
+	Timeout      int   `mapstructure:"timeout"`
+	AttentionIds []string `mapstructure:"attentionIds"`
 }
 
 type Share struct {
