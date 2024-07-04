@@ -43,6 +43,7 @@ func TestName(t *testing.T) {
 			time.Sleep(time.Second * 3)
 		}
 	}()
+	promhttp.Handler()
 	http.Handle("/metrics", promhttp.HandlerFor(registerer, promhttp.HandlerOpts{}))
 	if err := http.ListenAndServe(":2112", nil); err != nil {
 		panic(err)
