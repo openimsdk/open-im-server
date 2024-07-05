@@ -11,10 +11,9 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
-	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/protocol v0.0.69-alpha.24
-	github.com/openimsdk/tools v0.0.49-alpha.41
+	github.com/openimsdk/tools v0.0.49-alpha.45
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
@@ -161,6 +160,7 @@ require (
 	google.golang.org/genproto v0.0.0-20240125205218-1f4bbc51befe // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240123012728-ef4313101c80 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gorm.io/gorm v1.25.8 // indirect
 	stathat.com/c/consistent v1.0.0 // indirect
 )
@@ -168,7 +168,6 @@ require (
 require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
-	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/spf13/cobra v1.8.0
 	github.com/ugorji/go/codec v1.2.11 // indirect
@@ -176,7 +175,3 @@ require (
 	golang.org/x/crypto v0.21.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
-
-//replace (
-//	github.com/openimsdk/tools => /Users/chao/Desktop/withchao/tools
-//)
