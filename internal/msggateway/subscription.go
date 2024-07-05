@@ -1,5 +1,30 @@
 package msggateway
 
+import (
+	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/useronline"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/redis/go-redis/v9"
+	"math/rand"
+	"strconv"
+)
+
+func (ws *WsServer) SubscriberUserOnlineStatusChanges(rdb redis.UniversalClient) {
+	ctx := mcontext.SetOperationID(context.Background(), cachekey.OnlineChannel+strconv.FormatUint(rand.Uint64(), 10))
+	for message := range rdb.Subscribe(ctx, cachekey.OnlineChannel).Channel() {
+		userID, platformIDs, err := useronline.ParseUserOnlineStatus(message.Payload)
+		if err != nil {
+			log.ZError(ctx, "OnlineCache redis subscribe parseUserOnlineStatus", err, "payload", message.Payload, "channel", message.Channel)
+			continue
+		}
+		if ws.clients.RecvSubChange(userID, platformIDs) {
+			log.ZDebug(ctx, "receive subscription message and go back online", "userID", userID)
+		}
+	}
+}
+
 //import (
 //	"context"
 //	"encoding/json"

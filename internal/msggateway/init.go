@@ -17,6 +17,7 @@ package msggateway
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
@@ -26,6 +27,7 @@ import (
 type Config struct {
 	MsgGateway     config.MsgGateway
 	Share          config.Share
+	RedisConfig    config.Redis
 	WebhooksConfig config.Webhooks
 	Discovery      config.Discovery
 }
@@ -42,6 +44,10 @@ func Start(ctx context.Context, index int, conf *Config) error {
 	if err != nil {
 		return err
 	}
+	rdb, err := redisutil.NewRedisClient(ctx, conf.RedisConfig.Build())
+	if err != nil {
+		return err
+	}
 	longServer := NewWsServer(
 		conf,
 		WithPort(wsPort),
@@ -51,6 +57,8 @@ func Start(ctx context.Context, index int, conf *Config) error {
 	)
 
 	go longServer.ChangeOnlineStatus(4)
+
+	go longServer.SubscriberUserOnlineStatusChanges(rdb)
 
 	hubServer := NewServer(rpcPort, longServer, conf)
 	netDone := make(chan error)

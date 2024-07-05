@@ -2,17 +2,16 @@ package rpccache
 
 import (
 	"context"
-	"errors"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache/lru"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/useronline"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/redis/go-redis/v9"
 	"math/rand"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -25,28 +24,9 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 		}),
 	}
 	go func() {
-		parseUserOnlineStatus := func(payload string) (string, []int32, error) {
-			arr := strings.Split(payload, ":")
-			if len(arr) == 0 {
-				return "", nil, errors.New("invalid data")
-			}
-			userID := arr[len(arr)-1]
-			if userID == "" {
-				return "", nil, errors.New("userID is empty")
-			}
-			platformIDs := make([]int32, len(arr)-1)
-			for i := range platformIDs {
-				platformID, err := strconv.Atoi(arr[i])
-				if err != nil {
-					return "", nil, err
-				}
-				platformIDs[i] = int32(platformID)
-			}
-			return userID, platformIDs, nil
-		}
 		ctx := mcontext.SetOperationID(context.Background(), cachekey.OnlineChannel+strconv.FormatUint(rand.Uint64(), 10))
 		for message := range rdb.Subscribe(ctx, cachekey.OnlineChannel).Channel() {
-			userID, platformIDs, err := parseUserOnlineStatus(message.Payload)
+			userID, platformIDs, err := useronline.ParseUserOnlineStatus(message.Payload)
 			if err != nil {
 				log.ZError(ctx, "OnlineCache redis subscribe parseUserOnlineStatus", err, "payload", message.Payload, "channel", message.Channel)
 				continue

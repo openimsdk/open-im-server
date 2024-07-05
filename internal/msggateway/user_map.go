@@ -13,6 +13,7 @@ type UserMap interface {
 	DeleteClients(userID string, clients []*Client) (isDeleteUser bool)
 	UserState() <-chan UserState
 	GetAllUserStatus(deadline time.Time, nowtime time.Time) []UserState
+	RecvSubChange(userID string, platformIDs []int32) bool
 }
 
 type UserState struct {
@@ -37,6 +38,17 @@ func (u *UserPlatform) PlatformIDs() []int32 {
 	return platformIDs
 }
 
+func (u *UserPlatform) PlatformIDSet() map[int32]struct{} {
+	if len(u.Clients) == 0 {
+		return nil
+	}
+	platformIDs := make(map[int32]struct{})
+	for _, client := range u.Clients {
+		platformIDs[int32(client.PlatformID)] = struct{}{}
+	}
+	return platformIDs
+}
+
 func newUserMap() UserMap {
 	return &userMap{
 		data: make(map[string]*UserPlatform),
@@ -48,6 +60,24 @@ type userMap struct {
 	lock sync.RWMutex
 	data map[string]*UserPlatform
 	ch   chan UserState
+}
+
+func (u *userMap) RecvSubChange(userID string, platformIDs []int32) bool {
+	u.lock.RLock()
+	defer u.lock.RUnlock()
+	result, ok := u.data[userID]
+	if !ok {
+		return false
+	}
+	localPlatformIDs := result.PlatformIDSet()
+	for _, platformID := range platformIDs {
+		delete(localPlatformIDs, platformID)
+	}
+	if len(localPlatformIDs) == 0 {
+		return false
+	}
+	u.push(userID, result, nil)
+	return true
 }
 
 func (u *userMap) push(userID string, userPlatform *UserPlatform, offline []int32) bool {
