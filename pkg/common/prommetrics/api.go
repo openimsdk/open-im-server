@@ -39,8 +39,12 @@ func HttpCall(path string, method string, status int) {
 	httpCounter.With(prometheus.Labels{"path": path, "method": method, "status": strconv.Itoa(status)}).Inc()
 }
 
+//func ApiHandler() http.Handler {
+//	return promhttp.InstrumentMetricHandler(
+//		apiRegistry, promhttp.HandlerFor(apiRegistry, promhttp.HandlerOpts{}),
+//	)
+//}
+
 func ApiHandler() http.Handler {
-	return promhttp.InstrumentMetricHandler(
-		apiRegistry, promhttp.HandlerFor(apiRegistry, promhttp.HandlerOpts{}),
-	)
+	return promhttp.HandlerFor(apiRegistry, promhttp.HandlerOpts{})
 }
