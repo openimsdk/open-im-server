@@ -41,13 +41,16 @@ type LocalCache struct {
 }
 
 type Log struct {
-	StorageLocation     string `mapstructure:"storageLocation"`
-	RotationTime        uint   `mapstructure:"rotationTime"`
-	RemainRotationCount uint   `mapstructure:"remainRotationCount"`
-	RemainLogLevel      int    `mapstructure:"remainLogLevel"`
-	IsStdout            bool   `mapstructure:"isStdout"`
-	IsJson              bool   `mapstructure:"isJson"`
-	WithStack           bool   `mapstructure:"withStack"`
+	StorageLocation string `mapstructure:"storageLocation"`
+	RotationTime    uint   `mapstructure:"rotationTime"`
+	RemainLogLevel  int    `mapstructure:"remainLogLevel"`
+	MaxSize         int    `mapstructure:"maxSize"`
+	MaxBackups      int    `mapstructure:"maxBackups"`
+	MaxAge          int    `mapstructure:"maxAge"`
+	Compress        bool   `mapstructure:"compress"`
+	IsStdout        bool   `mapstructure:"isStdout"`
+	IsJson          bool   `mapstructure:"isJson"`
+	WithStack       bool   `mapstructure:"withStack"`
 }
 
 type Minio struct {
@@ -340,8 +343,8 @@ type BeforeConfig struct {
 }
 
 type AfterConfig struct {
-	Enable       bool  `mapstructure:"enable"`
-	Timeout      int   `mapstructure:"timeout"`
+	Enable       bool     `mapstructure:"enable"`
+	Timeout      int      `mapstructure:"timeout"`
 	AttentionIds []string `mapstructure:"attentionIds"`
 }
 

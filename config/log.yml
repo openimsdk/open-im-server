@@ -1,9 +1,15 @@
 # Log storage path, default is acceptable, change to a full path if modification is needed
 storageLocation: ../../../../logs/
 # Log rotation period (in hours), default is acceptable
-rotationTime: 24
-# Number of log files to retain, default is acceptable
-remainRotationCount: 2
+rotationTime: 1
+# Maximum size of each log file (in MB), default is acceptable, it means unlimited
+maxSize: 0
+# Number of log files to retain, default is acceptable, it means whenever the log file is rotated, the old log file will be deleted
+maxBackups: 10
+# Old log retain time (in days), default is acceptable, it means unlimited
+maxAge: 10
+# Whether compress old log files.
+compress: false
 # Log level settings: 3 for production environment; 6 for more verbose logging in debugging environments
 remainLogLevel: 6
 # Whether to output to standard output, default is acceptable
