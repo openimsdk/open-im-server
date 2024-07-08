@@ -20,7 +20,9 @@ func (ws *WsServer) SubscriberUserOnlineStatusChanges(rdb redis.UniversalClient)
 			continue
 		}
 		if ws.clients.RecvSubChange(userID, platformIDs) {
-			log.ZDebug(ctx, "receive subscription message and go back online", "userID", userID)
+			log.ZDebug(ctx, "gateway receive subscription message and go back online", "userID", userID, "platformIDs", platformIDs)
+		} else {
+			log.ZDebug(ctx, "gateway ignore user online status changes", "userID", userID, "platformIDs", platformIDs)
 		}
 	}
 }
