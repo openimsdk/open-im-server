@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	pbAuth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/tools/mcontext"
 	"net/http"
@@ -48,20 +49,22 @@ type LongConnServer interface {
 	KickUserConn(client *Client) error
 	UnRegister(c *Client)
 	SetKickHandlerInfo(i *kickHandler)
+	SubUserOnlineStatus(ctx context.Context, client *Client, data *Req) ([]byte, error)
 	Compressor
 	Encoder
 	MessageHandler
 }
 
 type WsServer struct {
-	msgGatewayConfig *Config
-	port             int
-	wsMaxConnNum     int64
-	registerChan     chan *Client
-	unregisterChan   chan *Client
-	kickHandlerChan  chan *kickHandler
-	clients          UserMap
-	//subscription      *Subscription
+	msgGatewayConfig  *Config
+	port              int
+	wsMaxConnNum      int64
+	registerChan      chan *Client
+	unregisterChan    chan *Client
+	kickHandlerChan   chan *kickHandler
+	clients           UserMap
+	online            *rpccache.OnlineCache
+	subscription      *Subscription
 	clientPool        sync.Pool
 	onlineUserNum     atomic.Int64
 	onlineUserConnNum atomic.Int64
@@ -125,6 +128,8 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 	for _, o := range opts {
 		o(&config)
 	}
+	//userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
+
 	v := validator.New()
 	return &WsServer{
 		msgGatewayConfig: msgGatewayConfig,
@@ -142,10 +147,10 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 		kickHandlerChan: make(chan *kickHandler, 1000),
 		validate:        v,
 		clients:         newUserMap(),
-		//subscription:    newSubscription(),
-		Compressor:    NewGzipCompressor(),
-		Encoder:       NewGobEncoder(),
-		webhookClient: webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL),
+		subscription:    newSubscription(),
+		Compressor:      NewGzipCompressor(),
+		Encoder:         NewGobEncoder(),
+		webhookClient:   webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL),
 	}
 }
 
@@ -353,6 +358,9 @@ func (ws *WsServer) unregisterClient(client *Client) {
 		prommetrics.OnlineUserGauge.Dec()
 	}
 	ws.onlineUserConnNum.Add(-1)
+	client.subLock.Lock()
+	clear(client.subUserIDs)
+	client.subLock.Unlock()
 	//ws.SetUserOnlineStatus(client.ctx, client, constant.Offline)
 	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num",
 		ws.onlineUserNum.Load(), "online user conn Num",

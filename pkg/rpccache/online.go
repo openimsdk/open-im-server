@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb redis.UniversalClient) *OnlineCache {
+func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb redis.UniversalClient, fn func(ctx context.Context, userID string, platformIDs []int32)) *OnlineCache {
 	x := &OnlineCache{
 		user:  user,
 		group: group,
@@ -33,6 +33,9 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 			}
 			storageCache := x.setUserOnline(userID, platformIDs)
 			log.ZDebug(ctx, "OnlineCache setUserOnline", "userID", userID, "platformIDs", platformIDs, "payload", message.Payload, "storageCache", storageCache)
+			if fn != nil {
+				fn(ctx, userID, platformIDs)
+			}
 		}
 	}()
 	return x

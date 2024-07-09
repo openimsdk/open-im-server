@@ -17,6 +17,7 @@ package msggateway
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
 	"time"
@@ -56,11 +57,13 @@ func Start(ctx context.Context, index int, conf *Config) error {
 		WithMessageMaxMsgLength(conf.MsgGateway.LongConnSvr.WebsocketMaxMsgLen),
 	)
 
+	hubServer := NewServer(rpcPort, longServer, conf, func(srv *Server) error {
+		longServer.online = rpccache.NewOnlineCache(srv.userRcp, nil, rdb, longServer.subscriberUserOnlineStatusChanges)
+		return nil
+	})
+
 	go longServer.ChangeOnlineStatus(4)
 
-	go longServer.SubscriberUserOnlineStatusChanges(rdb)
-
-	hubServer := NewServer(rpcPort, longServer, conf)
 	netDone := make(chan error)
 	go func() {
 		err = hubServer.Start(ctx, index, conf)
