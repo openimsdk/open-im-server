@@ -3,10 +3,11 @@ package mgo
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/utils/datautil"
-	"time"
 
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
@@ -358,7 +359,6 @@ func (m *MsgMgo) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (
 			msgInfo.Msg.ContentType = constant.MsgRevokeNotification
 			msgInfo.Msg.Content = string(content)
 		}
-		msgs = append(msgs, msgInfo)
 	}
 	//start := (req.Pagination.PageNumber - 1) * req.Pagination.ShowNumber
 	//n := int32(len(msgs))
