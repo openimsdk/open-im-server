@@ -138,6 +138,7 @@ func (c *Client) readMessage() {
 		if returnErr != nil {
 			log.ZWarn(c.ctx, "readMessage", returnErr, "messageType", messageType)
 			c.closedErr = returnErr
+			<-c.ctx.Done()
 			return
 		}
 
@@ -145,6 +146,7 @@ func (c *Client) readMessage() {
 		if c.closed.Load() {
 			// The scenario where the connection has just been closed, but the coroutine has not exited
 			c.closedErr = ErrConnClosed
+			<-c.ctx.Done()
 			return
 		}
 
@@ -154,10 +156,12 @@ func (c *Client) readMessage() {
 			parseDataErr := c.handleMessage(message)
 			if parseDataErr != nil {
 				c.closedErr = parseDataErr
+				<-c.ctx.Done()
 				return
 			}
 		case MessageText:
 			c.closedErr = ErrNotSupportMessageProtocol
+			<-c.ctx.Done()
 			return
 
 		case PingMessage:
@@ -166,7 +170,9 @@ func (c *Client) readMessage() {
 
 		case CloseMessage:
 			c.closedErr = ErrClientClosed
+			<-c.ctx.Done()
 			return
+
 		default:
 		}
 	}
