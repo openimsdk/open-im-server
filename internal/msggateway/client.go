@@ -20,6 +20,7 @@ import (
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
@@ -111,6 +112,25 @@ func (c *Client) readMessage() {
 	c.conn.SetReadLimit(maxMessageSize)
 	_ = c.conn.SetReadDeadline(pongWait)
 	c.conn.SetPingHandler(c.pingHandler)
+
+	if c.PlatformID == 5 {
+		go func() {
+			ticker := time.NewTicker(20)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-ticker.C:
+					if err := c.writePingMsg(); err != nil {
+						log.ZError(c.ctx, "send Ping Message error.", err)
+						return
+					}
+				case <-c.ctx.Done():
+					return
+				}
+			}
+		}()
+	}
 
 	for {
 		log.ZDebug(c.ctx, "readMessage")
@@ -319,6 +339,22 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 	}
 
 	return c.conn.WriteMessage(MessageBinary, encodedBuf)
+}
+
+func (c *Client) writePingMsg() error {
+	if c.closed.Load() {
+		return nil
+	}
+
+	c.w.Lock()
+	defer c.w.Unlock()
+
+	err := c.conn.SetWriteDeadline(writeWait)
+	if err != nil {
+		return err
+	}
+
+	return c.conn.WriteMessage(PingMessage, nil)
 }
 
 func (c *Client) writePongMsg() error {
