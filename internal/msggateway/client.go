@@ -114,7 +114,7 @@ func (c *Client) readMessage() {
 	c.conn.SetReadLimit(maxMessageSize)
 	_ = c.conn.SetReadDeadline(pongWait)
 	c.conn.SetPingHandler(c.pingHandler)
-	go c.heartbeat(c.hbCtx)
+	go c.activeHeartbeat(c.hbCtx)
 
 	for {
 		log.ZDebug(c.ctx, "readMessage")
@@ -240,7 +240,7 @@ func (c *Client) close() {
 
 	c.closed.Store(true)
 	c.conn.Close()
-	<-c.hbCtx.Done() // Close initiated heartbeat in server send.
+	<-c.hbCtx.Done() // Close server-initiated heartbeat.
 	c.longConnServer.UnRegister(c)
 }
 
@@ -327,7 +327,8 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 	return c.conn.WriteMessage(MessageBinary, encodedBuf)
 }
 
-func (c *Client) heartbeat(ctx context.Context) {
+// Actively initiate Heartbeat when platform in Web.
+func (c *Client) activeHeartbeat(ctx context.Context) {
 	if c.PlatformID == constant.WebPlatformID {
 		log.ZDebug(ctx, "server initiative send heartbeat start.")
 		ticker := time.NewTicker(pingPeriod)
