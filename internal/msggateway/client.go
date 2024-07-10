@@ -348,7 +348,7 @@ func (c *Client) activeHeartbeat(ctx context.Context) {
 				select {
 				case <-ticker.C:
 					if err := c.writePingMsg(); err != nil {
-						log.ZError(c.ctx, "send Ping Message error.", err)
+						log.ZWarn(c.ctx, "send Ping Message error.", err)
 						return
 					}
 				case <-c.hbCtx.Done():
