@@ -1,2 +1,3 @@
-chatRecordsClearTime: "0 2 * * *"
+cronExecuteTime: "0 2 * * *"
 retainChatRecords: 365
+fileExpireTime: 90

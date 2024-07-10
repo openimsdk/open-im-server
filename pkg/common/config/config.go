@@ -15,14 +15,15 @@
 package config
 
 import (
+	"strings"
+	"time"
+
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
-	"strings"
-	"time"
 )
 
 type CacheConfig struct {
@@ -108,8 +109,9 @@ type API struct {
 }
 
 type CronTask struct {
-	ChatRecordsClearTime string `mapstructure:"chatRecordsClearTime"`
-	RetainChatRecords    int    `mapstructure:"retainChatRecords"`
+	CronExecuteTime   string `mapstructure:"cronExecuteTime"`
+	RetainChatRecords int    `mapstructure:"retainChatRecords"`
+	FileExpireTime    int    `mapstructure:"fileExpireTime"`
 }
 
 type OfflinePushConfig struct {

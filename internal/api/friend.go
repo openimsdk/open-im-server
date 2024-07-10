@@ -57,7 +57,6 @@ func (o *FriendApi) GetFriendList(c *gin.Context) {
 
 func (o *FriendApi) GetDesignatedFriends(c *gin.Context) {
 	a2r.Call(relation.FriendClient.GetDesignatedFriends, o.Client, c)
-	//a2r.Call(relation.FriendClient.GetDesignatedFriends, o.Client, c, a2r.NewNilReplaceOption(relation.FriendClient.GetDesignatedFriends))
 }
 
 func (o *FriendApi) SetFriendRemark(c *gin.Context) {

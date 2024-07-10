@@ -12,7 +12,7 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/openimsdk/protocol v0.0.69-alpha.17
+	github.com/openimsdk/protocol v0.0.69-alpha.22
 	github.com/openimsdk/tools v0.0.49-alpha.45
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
@@ -175,5 +175,3 @@ require (
 	golang.org/x/crypto v0.21.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
-
-//replace github.com/openimsdk/protocol => /Users/chao/Desktop/project/protocol
