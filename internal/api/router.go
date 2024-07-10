@@ -207,6 +207,8 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		conversationGroup.POST("/get_conversations", c.GetConversations)
 		conversationGroup.POST("/set_conversations", c.SetConversations)
 		conversationGroup.POST("/get_conversation_offline_push_user_ids", c.GetConversationOfflinePushUserIDs)
+		conversationGroup.POST("/get_full_conversation_ids", c.GetFullOwnerConversationIDs)
+		conversationGroup.POST("/get_incremental_conversation", c.GetIncrementalConversation)
 	}
 
 	statisticsGroup := r.Group("/statistics")

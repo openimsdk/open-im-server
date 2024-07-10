@@ -43,6 +43,7 @@ type thirdServer struct {
 	defaultExpire time.Duration
 	config        *Config
 }
+
 type Config struct {
 	RpcConfig          config.Third
 	RedisConfig        config.Redis

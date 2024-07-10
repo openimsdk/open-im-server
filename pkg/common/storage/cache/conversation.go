@@ -54,4 +54,8 @@ type ConversationCache interface {
 
 	GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error)
 	DelConversationNotReceiveMessageUserIDs(conversationIDs ...string) ConversationCache
+
+	DelConversationVersionUserIDs(userIDs ...string) ConversationCache
+
+	FindMaxConversationUserVersion(ctx context.Context, userID string) (*relationtb.VersionLog, error)
 }
