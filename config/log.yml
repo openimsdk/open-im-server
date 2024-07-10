@@ -1,7 +1,7 @@
 # Log storage path, default is acceptable, change to a full path if modification is needed
 storageLocation: ../../../../logs/
 # Log rotation period (in hours), default is acceptable
-rotationTime: 1
+rotationTime: 24
 # Maximum size of each log file (in MB), default is acceptable, it means unlimited
 maxSize: 0
 # Number of log files to retain, default is acceptable, it means whenever the log file is rotated, the old log file will be deleted
