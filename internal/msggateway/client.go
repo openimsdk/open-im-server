@@ -347,7 +347,7 @@ func (c *Client) activeHeartbeat(ctx context.Context) {
 			for {
 				select {
 				case <-ticker.C:
-					if err := c.conn.WriteMessage(PingMessage, nil); err != nil {
+					if err := c.writePingMsg(); err != nil {
 						log.ZError(c.ctx, "send Ping Message error.", err)
 						return
 					}
@@ -357,6 +357,21 @@ func (c *Client) activeHeartbeat(ctx context.Context) {
 			}
 		}()
 	}
+}
+func (c *Client) writePingMsg() error {
+	if c.closed.Load() {
+		return nil
+	}
+
+	c.w.Lock()
+	defer c.w.Unlock()
+
+	err := c.conn.SetWriteDeadline(writeWait)
+	if err != nil {
+		return err
+	}
+
+	return c.conn.WriteMessage(PingMessage, nil)
 }
 
 func (c *Client) writePongMsg() error {
