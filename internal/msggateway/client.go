@@ -90,7 +90,7 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer
 	c.closed.Store(false)
 	c.closedErr = nil
 	c.token = ctx.GetToken()
-	c.hbCtx, _ = context.WithTimeout(c.ctx, pongWait*2)
+	c.hbCtx, _ = context.WithCancel(c.ctx)
 }
 
 func (c *Client) pingHandler(_ string) error {
@@ -114,10 +114,7 @@ func (c *Client) readMessage() {
 	c.conn.SetReadLimit(maxMessageSize)
 	_ = c.conn.SetReadDeadline(pongWait)
 	c.conn.SetPingHandler(c.pingHandler)
-
-	if c.PlatformID == constant.WebPlatformID {
-		go c.heartbeat(c.hbCtx)
-	}
+	go c.heartbeat(c.hbCtx)
 
 	for {
 		log.ZDebug(c.ctx, "readMessage")
@@ -331,19 +328,21 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 }
 
 func (c *Client) heartbeat(ctx context.Context) {
-	log.ZDebug(ctx, "server initiative send heartbeat start.")
-	ticker := time.NewTicker(pingPeriod)
-	defer ticker.Stop()
+	if c.PlatformID == constant.WebPlatformID {
+		log.ZDebug(ctx, "server initiative send heartbeat start.")
+		ticker := time.NewTicker(pingPeriod)
+		defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C:
-			if err := c.conn.WriteMessage(PingMessage, nil); err != nil {
-				log.ZError(c.ctx, "send Ping Message error.", err)
+		for {
+			select {
+			case <-ticker.C:
+				if err := c.conn.WriteMessage(PingMessage, nil); err != nil {
+					log.ZError(c.ctx, "send Ping Message error.", err)
+					return
+				}
+			case <-c.hbCtx.Done():
 				return
 			}
-		case <-c.hbCtx.Done():
-			return
 		}
 	}
 }
