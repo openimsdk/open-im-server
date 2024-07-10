@@ -736,3 +736,8 @@ func (s *userServer) SortQuery(ctx context.Context, req *pbuser.SortQueryReq) (*
 	}
 	return &pbuser.SortQueryResp{Users: convert.UsersDB2Pb(users)}, nil
 }
+
+func (s *userServer) SetUserOnlineStatus(ctx context.Context, req *pbuser.SetUserOnlineStatusReq) (*pbuser.SetUserOnlineStatusResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
