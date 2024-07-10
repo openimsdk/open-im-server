@@ -15,15 +15,14 @@
 package config
 
 import (
-	"strings"
-	"time"
-
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
+	"strings"
+	"time"
 )
 
 type CacheConfig struct {

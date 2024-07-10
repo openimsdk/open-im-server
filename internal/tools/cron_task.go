@@ -17,9 +17,6 @@ package tools
 import (
 	"context"
 	"fmt"
-	"os"
-	"time"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/protocol/msg"
@@ -28,6 +25,8 @@ import (
 	"github.com/openimsdk/tools/mw"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"os"
+	"time"
 
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"

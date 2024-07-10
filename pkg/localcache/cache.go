@@ -31,6 +31,12 @@ type Cache[V any] interface {
 	Stop()
 }
 
+func LRUStringHash(key string) uint64 {
+	h := fnv.New64a()
+	h.Write(*(*[]byte)(unsafe.Pointer(&key)))
+	return h.Sum64()
+}
+
 func New[V any](opts ...Option) Cache[V] {
 	opt := defaultOption()
 	for _, o := range opts {
@@ -49,11 +55,7 @@ func New[V any](opts ...Option) Cache[V] {
 		if opt.localSlotNum == 1 {
 			c.local = createSimpleLRU()
 		} else {
-			c.local = lru.NewSlotLRU[string, V](opt.localSlotNum, func(key string) uint64 {
-				h := fnv.New64a()
-				h.Write(*(*[]byte)(unsafe.Pointer(&key)))
-				return h.Sum64()
-			}, createSimpleLRU)
+			c.local = lru.NewSlotLRU[string, V](opt.localSlotNum, LRUStringHash, createSimpleLRU)
 		}
 		if opt.linkSlotNum > 0 {
 			c.link = link.New(opt.linkSlotNum)
