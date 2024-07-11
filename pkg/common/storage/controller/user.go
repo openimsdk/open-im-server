@@ -195,7 +195,7 @@ func (u *userDatabase) GetAllUserID(ctx context.Context, pagination pagination.P
 }
 
 func (u *userDatabase) GetUserByID(ctx context.Context, userID string) (user *model.User, err error) {
-	return u.userDB.Take(ctx, userID)
+	return u.cache.GetUserInfo(ctx, userID)
 }
 
 // CountTotal Get the total number of users.
