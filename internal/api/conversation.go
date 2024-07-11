@@ -58,3 +58,7 @@ func (o *ConversationApi) GetFullOwnerConversationIDs(c *gin.Context) {
 func (o *ConversationApi) GetIncrementalConversation(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.GetIncrementalConversation, o.Client, c)
 }
+
+func (o *ConversationApi) GetOwnerConversation(c *gin.Context) {
+	a2r.Call(conversation.ConversationClient.GetOwnerConversation, o.Client, c)
+}
