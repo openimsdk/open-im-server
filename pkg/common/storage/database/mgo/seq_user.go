@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -85,6 +86,23 @@ func (s *seqUserMongo) SetMinSeq(ctx context.Context, conversationID string, use
 
 func (s *seqUserMongo) GetReadSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
 	return s.getSeq(ctx, conversationID, userID, "read_seq")
+}
+
+func (s *seqUserMongo) GetReadSeqs(ctx context.Context, userID string, conversationID []string) (map[string]int64, error) {
+	if len(conversationID) == 0 {
+		return map[string]int64{}, nil
+	}
+	filter := bson.M{"user_id": userID, "conversation_id": bson.M{"$in": conversationID}}
+	opt := options.Find().SetProjection(bson.M{"_id": 0, "conversation_id": 1, "read_seq": 1})
+	seqs, err := mongoutil.Find[*model.SeqUser](ctx, s.coll, filter, opt)
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[string]int64)
+	for _, seq := range seqs {
+		res[seq.ConversationID] = seq.ReadSeq
+	}
+	return res, nil
 }
 
 func (s *seqUserMongo) SetReadSeq(ctx context.Context, conversationID string, userID string, seq int64) error {

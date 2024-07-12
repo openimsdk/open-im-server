@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
@@ -39,19 +40,85 @@ func (s *seqConversationCacheRedis) getMinSeqKey(conversationID string) string {
 }
 
 func (s *seqConversationCacheRedis) SetMinSeq(ctx context.Context, conversationID string, seq int64) error {
-	if err := s.mgo.SetMinSeq(ctx, conversationID, seq); err != nil {
-		return err
-	}
-	if err := s.rocks.TagAsDeleted2(ctx, s.getMinSeqKey(conversationID)); err != nil {
-		return errs.Wrap(err)
-	}
-	return nil
+	return s.SetMinSeqs(ctx, map[string]int64{conversationID: seq})
 }
 
 func (s *seqConversationCacheRedis) GetMinSeq(ctx context.Context, conversationID string) (int64, error) {
 	return getCache(ctx, s.rocks, s.getMinSeqKey(conversationID), s.minSeqExpireTime, func(ctx context.Context) (int64, error) {
 		return s.mgo.GetMinSeq(ctx, conversationID)
 	})
+}
+
+func (s *seqConversationCacheRedis) getSingleMaxSeq(ctx context.Context, conversationID string) (map[string]int64, error) {
+	seq, err := s.GetMaxSeq(ctx, conversationID)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]int64{conversationID: seq}, nil
+}
+
+func (s *seqConversationCacheRedis) batchGetMaxSeq(ctx context.Context, keys []string, keyConversationID map[string]string, seqs map[string]int64) error {
+	result := make([]*redis.StringCmd, len(keys))
+	pipe := s.rdb.Pipeline()
+	for i, key := range keys {
+		result[i] = pipe.HGet(ctx, key, "CURR")
+	}
+	if _, err := pipe.Exec(ctx); err != nil {
+		return errs.Wrap(err)
+	}
+	var notFoundKey []string
+	for i, r := range result {
+		req, err := r.Int64()
+		if err == nil {
+			seqs[keyConversationID[keys[i]]] = req
+		} else if errors.Is(err, redis.Nil) {
+			notFoundKey = append(notFoundKey, keys[i])
+		} else {
+			return errs.Wrap(err)
+		}
+	}
+	if len(notFoundKey) > 0 {
+		conversationID := keyConversationID[notFoundKey[0]]
+		seq, err := s.GetMaxSeq(ctx, conversationID)
+		if err != nil {
+			return err
+		}
+		seqs[conversationID] = seq
+	}
+	return nil
+}
+
+func (s *seqConversationCacheRedis) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
+	switch len(conversationIDs) {
+	case 0:
+		return map[string]int64{}, nil
+	case 1:
+		return s.getSingleMaxSeq(ctx, conversationIDs[0])
+	}
+	keys := make([]string, 0, len(conversationIDs))
+	keyConversationID := make(map[string]string, len(conversationIDs))
+	for _, conversationID := range conversationIDs {
+		key := s.getSeqMallocKey(conversationID)
+		if _, ok := keyConversationID[key]; ok {
+			continue
+		}
+		keys = append(keys, key)
+		keyConversationID[key] = conversationID
+	}
+	if len(keys) == 1 {
+		return s.getSingleMaxSeq(ctx, conversationIDs[0])
+	}
+	slotKeys, err := groupKeysBySlot(ctx, s.rdb, keys)
+	if err != nil {
+		return nil, err
+	}
+	seqs := make(map[string]int64, len(conversationIDs))
+	for _, keys := range slotKeys {
+		if err := s.batchGetMaxSeq(ctx, keys, keyConversationID, seqs); err != nil {
+			return nil, err
+		}
+	}
+	return seqs, nil
 }
 
 func (s *seqConversationCacheRedis) getSeqMallocKey(conversationID string) string {
@@ -252,4 +319,15 @@ func (s *seqConversationCacheRedis) Malloc(ctx context.Context, conversationID s
 
 func (s *seqConversationCacheRedis) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
 	return s.Malloc(ctx, conversationID, 0)
+}
+
+func (s *seqConversationCacheRedis) SetMinSeqs(ctx context.Context, seqs map[string]int64) error {
+	keys := make([]string, 0, len(seqs))
+	for conversationID, seq := range seqs {
+		keys = append(keys, s.getMinSeqKey(conversationID))
+		if err := s.mgo.SetMinSeq(ctx, conversationID, seq); err != nil {
+			return err
+		}
+	}
+	return DeleteCacheBySlot(ctx, s.rocks, keys)
 }

@@ -19,7 +19,7 @@ func getRocksCacheRedisClient(cli *rockscache.Client) redis.UniversalClient {
 	return (*Client)(unsafe.Pointer(cli)).rdb
 }
 
-func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rockscache.Client, expire time.Duration, ids []K, idKey func(id K) string, vId func(v V) K, fn func(ctx context.Context, ids []K) ([]V, error)) ([]V, error) {
+func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rockscache.Client, expire time.Duration, ids []K, idKey func(id K) string, vId func(v *V) K, fn func(ctx context.Context, ids []K) ([]*V, error)) ([]*V, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
@@ -37,7 +37,7 @@ func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rockscac
 	if err != nil {
 		return nil, err
 	}
-	result := make([]V, 0, len(findKeys))
+	result := make([]*V, 0, len(findKeys))
 	for _, keys := range slotKeys {
 		indexCache, err := rcClient.FetchBatch2(ctx, keys, expire, func(idx []int) (map[int]string, error) {
 			queryIds := make([]K, 0, len(idx))
@@ -72,7 +72,7 @@ func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rockscac
 		if err != nil {
 			return nil, err
 		}
-		for _, data := range indexCache {
+		for index, data := range indexCache {
 			if data == "" {
 				continue
 			}
@@ -80,8 +80,15 @@ func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rockscac
 			if err := json.Unmarshal([]byte(data), &value); err != nil {
 				return nil, err
 			}
-			result = append(result, value)
+			if cb, ok := any(&value).(BatchCacheCallback[K]); ok {
+				cb.BatchCache(keyId[keys[index]])
+			}
+			result = append(result, &value)
 		}
 	}
 	return result, nil
+}
+
+type BatchCacheCallback[K comparable] interface {
+	BatchCache(id K)
 }

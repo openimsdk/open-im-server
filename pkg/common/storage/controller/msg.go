@@ -72,15 +72,8 @@ type CommonMsgDatabase interface {
 	//SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error
 	GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
 	GetMaxSeq(ctx context.Context, conversationID string) (int64, error)
-	//SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error
 	SetMinSeqs(ctx context.Context, seqs map[string]int64) error
 
-	//GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
-	//GetMinSeq(ctx context.Context, conversationID string) (int64, error)
-	//GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error)
-	//GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (map[string]int64, error)
-	//SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error
-	//SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error)
 	SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) (err error)
 	SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error
 	GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error)
@@ -784,44 +777,8 @@ func (db *commonMsgDatabase) DeleteUserMsgsBySeqs(ctx context.Context, userID st
 	return nil
 }
 
-func (db *commonMsgDatabase) DeleteMsgsBySeqs(ctx context.Context, conversationID string, seqs []int64) error {
-	return nil
-}
-
-func (db *commonMsgDatabase) CleanUpUserConversationsMsgs(ctx context.Context, user string, conversationIDs []string) {
-	for _, conversationID := range conversationIDs {
-		maxSeq, err := db.seqConversation.GetMaxSeq(ctx, conversationID)
-		if err != nil {
-			if err == redis.Nil {
-				log.ZDebug(ctx, "max seq is nil", "conversationID", conversationID)
-			} else {
-				log.ZError(ctx, "get max seq failed", err, "conversationID", conversationID)
-			}
-			continue
-		}
-		if err := db.seqConversation.SetMinSeq(ctx, conversationID, maxSeq+1); err != nil {
-			log.ZError(ctx, "set min seq failed", err, "conversationID", conversationID, "minSeq", maxSeq+1)
-		}
-	}
-}
-
-//func (db *commonMsgDatabase) SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error {
-//	return db.seq.SetMaxSeq(ctx, conversationID, maxSeq)
-//}
-
 func (db *commonMsgDatabase) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
-	result := make(map[string]int64)
-	for _, conversationID := range conversationIDs {
-		if result[conversationID] != 0 {
-			continue
-		}
-		seq, err := db.seqConversation.GetMaxSeq(ctx, conversationID)
-		if err != nil {
-			return nil, err
-		}
-		result[conversationID] = seq
-	}
-	return result, nil
+	return db.seqConversation.GetMaxSeqs(ctx, conversationIDs)
 }
 
 func (db *commonMsgDatabase) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
@@ -833,30 +790,15 @@ func (db *commonMsgDatabase) SetMinSeq(ctx context.Context, conversationID strin
 }
 
 func (db *commonMsgDatabase) SetMinSeqs(ctx context.Context, seqs map[string]int64) error {
-	for conversationID, seq := range seqs {
-		if err := db.seqConversation.SetMinSeq(ctx, conversationID, seq); err != nil {
-			return err
-		}
-	}
-	return nil
+	return db.seqConversation.SetMinSeqs(ctx, seqs)
 }
 
 func (db *commonMsgDatabase) SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
-	for conversationID, seq := range seqs {
-		if err := db.seqUser.SetMinSeq(ctx, conversationID, userID, seq); err != nil {
-			return err
-		}
-	}
-	return nil
+	return db.seqUser.SetMinSeqs(ctx, userID, seqs)
 }
 
 func (db *commonMsgDatabase) UserSetHasReadSeqs(ctx context.Context, userID string, hasReadSeqs map[string]int64) error {
-	for conversationID, seq := range hasReadSeqs {
-		if err := db.seqUser.SetReadSeq(ctx, conversationID, userID, seq); err != nil {
-			return err
-		}
-	}
-	return nil
+	return db.seqUser.SetReadSeqs(ctx, userID, hasReadSeqs)
 }
 
 func (db *commonMsgDatabase) SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error {
@@ -864,18 +806,7 @@ func (db *commonMsgDatabase) SetHasReadSeq(ctx context.Context, userID string, c
 }
 
 func (db *commonMsgDatabase) GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
-	cSeq := make(map[string]int64)
-	for _, conversationID := range conversationIDs {
-		if _, ok := cSeq[conversationID]; ok {
-			continue
-		}
-		seq, err := db.seqUser.GetReadSeq(ctx, conversationID, userID)
-		if err != nil {
-			return nil, err
-		}
-		cSeq[conversationID] = seq
-	}
-	return cSeq, nil
+	return db.seqUser.GetReadSeqs(ctx, userID, conversationIDs)
 }
 
 func (db *commonMsgDatabase) GetHasReadSeq(ctx context.Context, userID string, conversationID string) (int64, error) {

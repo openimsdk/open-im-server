@@ -2,14 +2,11 @@ package redis
 
 import (
 	"context"
-	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"testing"
-	"time"
 )
 
 func TestName(t *testing.T) {
@@ -37,43 +34,22 @@ func TestName(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	userMgo, err := mgo.NewUserMongo(mgocli.GetDB())
-	if err != nil {
-		panic(err)
-	}
-	rock := rockscache.NewClient(rdb, rockscache.NewDefaultOptions())
-	//var keys []string
-	//for i := 1; i <= 10; i++ {
-	//	keys = append(keys, fmt.Sprintf("test%d", i))
-	//}
-	//res, err := cli.FetchBatch2(ctx, keys, time.Hour, func(idx []int) (map[int]string, error) {
-	//	t.Log("FetchBatch2=>", idx)
-	//	time.Sleep(time.Second * 1)
-	//	res := make(map[int]string)
-	//	for _, i := range idx {
-	//		res[i] = fmt.Sprintf("hello_%d", i)
-	//	}
-	//	t.Log("FetchBatch2=>", res)
-	//	return res, nil
-	//})
+	//userMgo, err := mgo.NewUserMongo(mgocli.GetDB())
 	//if err != nil {
-	//	t.Log(err)
-	//	return
+	//	panic(err)
 	//}
-	//t.Log(res)
-
-	userIDs := []string{"1814217053", "2110910952", "1234567890"}
-
-	res, err := batchGetCache2(ctx, rock, time.Hour, userIDs, func(id string) string {
-		return "TEST_USER:" + id
-	}, func(v *model.User) string {
-		return v.UserID
-	}, func(ctx context.Context, ids []string) ([]*model.User, error) {
-		t.Log("find mongo", ids)
-		return userMgo.Find(ctx, ids)
-	})
+	//rock := rockscache.NewClient(rdb, rockscache.NewDefaultOptions())
+	mgoSeqUser, err := mgo.NewSeqUserMongo(mgocli.GetDB())
 	if err != nil {
 		panic(err)
 	}
-	t.Log("==>", res)
+	seqUser := NewSeqUserCacheRedis(rdb, mgoSeqUser)
+
+	res, err := seqUser.GetReadSeqs(ctx, "2110910952", []string{"sg_2920732023", "sg_345762580"})
+	if err != nil {
+		panic(err)
+	}
+
+	t.Log(res)
+
 }
