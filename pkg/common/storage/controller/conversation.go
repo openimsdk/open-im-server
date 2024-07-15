@@ -68,6 +68,7 @@ type ConversationDatabase interface {
 	// FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 	FindConversationUserVersion(ctx context.Context, userID string, version uint, limit int) (*relationtb.VersionLog, error)
 	FindMaxConversationUserVersionCache(ctx context.Context, userID string) (*relationtb.VersionLog, error)
+	GetOwnerConversation(ctx context.Context, ownerUserID string, pagination pagination.Pagination) (int64, []*relationtb.Conversation, error)
 }
 
 func NewConversationDatabase(conversation database.Conversation, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -334,4 +335,21 @@ func (c *conversationDatabase) FindConversationUserVersion(ctx context.Context, 
 
 func (c *conversationDatabase) FindMaxConversationUserVersionCache(ctx context.Context, userID string) (*relationtb.VersionLog, error) {
 	return c.cache.FindMaxConversationUserVersion(ctx, userID)
+}
+
+func (c *conversationDatabase) GetOwnerConversation(ctx context.Context, ownerUserID string, pagination pagination.Pagination) (int64, []*relationtb.Conversation, error) {
+	conversationIDs, err := c.cache.GetUserConversationIDs(ctx, ownerUserID)
+	if err != nil {
+		return 0, nil, err
+	}
+	findConversationIDs := datautil.Paginate(conversationIDs, int(pagination.GetPageNumber()), int(pagination.GetShowNumber()))
+	conversations := make([]*relationtb.Conversation, 0, len(findConversationIDs))
+	for _, conversationID := range findConversationIDs {
+		conversation, err := c.cache.GetConversation(ctx, ownerUserID, conversationID)
+		if err != nil {
+			return 0, nil, err
+		}
+		conversations = append(conversations, conversation)
+	}
+	return int64(len(conversationIDs)), conversations, nil
 }

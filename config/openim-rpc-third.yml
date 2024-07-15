@@ -30,3 +30,11 @@ object:
     accessKeySecret: ''
     sessionToken: ''
     publicRead: false
+  kodo:
+    endpoint: "http://s3.cn-south-1.qiniucs.com"
+    bucket: "kodo-bucket-test"
+    bucketURL: "http://kodo-bucket-test-oetobfb.qiniudns.com"
+    accessKeyID: ''
+    accessKeySecret: ''
+    sessionToken: ''
+    publicRead: false

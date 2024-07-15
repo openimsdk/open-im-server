@@ -5,6 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -133,9 +136,9 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		groupRouterGroup.POST("/get_group_abstract_info", g.GetGroupAbstractInfo)
 		groupRouterGroup.POST("/get_groups", g.GetGroups)
 		groupRouterGroup.POST("/get_group_member_user_id", g.GetGroupMemberUserIDs)
-		groupRouterGroup.POST("/get_incremental_join_group", g.GetIncrementalJoinGroup)
-		groupRouterGroup.POST("/get_incremental_group_member", g.GetIncrementalGroupMember)
-		groupRouterGroup.POST("/get_incremental_group_member_batch", g.GetIncrementalGroupMemberBatch)
+		groupRouterGroup.POST("/get_incremental_join_groups", g.GetIncrementalJoinGroup)
+		groupRouterGroup.POST("/get_incremental_group_members", g.GetIncrementalGroupMember)
+		groupRouterGroup.POST("/get_incremental_group_members_batch", g.GetIncrementalGroupMemberBatch)
 		groupRouterGroup.POST("/get_full_group_member_user_ids", g.GetFullGroupMemberUserIDs)
 		groupRouterGroup.POST("/get_full_join_group_ids", g.GetFullJoinGroupIDs)
 	}
@@ -208,7 +211,8 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		conversationGroup.POST("/set_conversations", c.SetConversations)
 		conversationGroup.POST("/get_conversation_offline_push_user_ids", c.GetConversationOfflinePushUserIDs)
 		conversationGroup.POST("/get_full_conversation_ids", c.GetFullOwnerConversationIDs)
-		conversationGroup.POST("/get_incremental_conversation", c.GetIncrementalConversation)
+		conversationGroup.POST("/get_incremental_conversations", c.GetIncrementalConversation)
+		conversationGroup.POST("/get_owner_conversation", c.GetOwnerConversation)
 	}
 
 	statisticsGroup := r.Group("/statistics")

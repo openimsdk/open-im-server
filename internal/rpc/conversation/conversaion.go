@@ -591,3 +591,14 @@ func (c *conversationServer) UpdateConversation(ctx context.Context, req *pbconv
 	}
 	return &pbconversation.UpdateConversationResp{}, nil
 }
+
+func (c *conversationServer) GetOwnerConversation(ctx context.Context, req *pbconversation.GetOwnerConversationReq) (*pbconversation.GetOwnerConversationResp, error) {
+	total, conversations, err := c.conversationDatabase.GetOwnerConversation(ctx, req.UserID, req.Pagination)
+	if err != nil {
+		return nil, err
+	}
+	return &pbconversation.GetOwnerConversationResp{
+		Total:         total,
+		Conversations: convert.ConversationsDB2Pb(conversations),
+	}, nil
+}

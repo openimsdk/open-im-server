@@ -16,6 +16,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/tools/a2r"
@@ -99,6 +100,8 @@ func (o *FriendApi) GetIncrementalFriends(c *gin.Context) {
 	a2r.Call(relation.FriendClient.GetIncrementalFriends, o.Client, c)
 }
 
+// GetIncrementalBlacks is temporarily unused.
+// Deprecated: This function is currently unused and may be removed in future versions.
 func (o *FriendApi) GetIncrementalBlacks(c *gin.Context) {
 	a2r.Call(relation.FriendClient.GetIncrementalBlacks, o.Client, c)
 }
