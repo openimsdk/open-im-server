@@ -45,7 +45,6 @@ type S3Database interface {
 	DeleteSpecifiedData(ctx context.Context, engine string, name string) error
 	FindNotDelByS3(ctx context.Context, key string, duration time.Time) (int64, error)
 	DelS3Key(ctx context.Context, engine string, keys ...string) error
-	GetImageThumbnailKey(ctx context.Context, name string) (string, error)
 }
 
 func NewS3Database(rdb redis.UniversalClient, s3 s3.Interface, obj database.ObjectInfo) S3Database {
@@ -139,8 +138,4 @@ func (s *s3Database) FindNotDelByS3(ctx context.Context, key string, duration ti
 
 func (s *s3Database) DelS3Key(ctx context.Context, engine string, keys ...string) error {
 	return s.s3cache.DelS3Key(ctx, engine, keys...)
-}
-
-func (s *s3Database) GetImageThumbnailKey(ctx context.Context, name string) (string, error) {
-	return s.s3.GetImageThumbnailKey(ctx, name)
 }

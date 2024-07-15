@@ -31,9 +31,9 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/s3"
 	"github.com/openimsdk/tools/s3/cos"
+	"github.com/openimsdk/tools/s3/kodo"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
-	"github.com/openimsdk/tools/s3/kodo"
 	"google.golang.org/grpc"
 )
 
@@ -43,6 +43,7 @@ type thirdServer struct {
 	userRpcClient rpcclient.UserRpcClient
 	defaultExpire time.Duration
 	config        *Config
+	minio         *minio.Minio
 }
 
 type Config struct {
@@ -75,10 +76,14 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	}
 	// Select the oss method according to the profile policy
 	enable := config.RpcConfig.Object.Enable
-	var o s3.Interface
+	var (
+		o        s3.Interface
+		minioCli *minio.Minio
+	)
 	switch enable {
 	case "minio":
-		o, err = minio.NewMinio(ctx, redis.NewMinioCache(rdb), *config.MinioConfig.Build())
+		minioCli, err = minio.NewMinio(ctx, redis.NewMinioCache(rdb), *config.MinioConfig.Build())
+		o = minioCli
 	case "cos":
 		o, err = cos.NewCos(*config.RpcConfig.Object.Cos.Build())
 	case "oss":
@@ -98,8 +103,13 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
 		defaultExpire: time.Hour * 24 * 7,
 		config:        config,
+		minio:         minioCli,
 	})
 	return nil
+}
+
+func (t *thirdServer) getMinioImageThumbnailKey(ctx context.Context, name string) (string, error) {
+	return t.minio.GetImageThumbnailKey(ctx, name)
 }
 
 func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {

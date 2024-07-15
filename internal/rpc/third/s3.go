@@ -310,8 +310,8 @@ func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteO
 			if err != nil && errs.Unwrap(err) != mongo.ErrNoDocuments {
 				return nil, errs.Wrap(err)
 			}
-			if int(count) < 1 {
-				thumbnailKey, err := t.s3dataBase.GetImageThumbnailKey(ctx, key)
+			if int(count) < 1 && t.minio != nil {
+				thumbnailKey, err := t.getMinioImageThumbnailKey(ctx, key)
 				if err != nil {
 					return nil, errs.Wrap(err)
 				}
