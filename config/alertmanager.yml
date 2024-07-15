@@ -5,7 +5,7 @@ global:
   smtp_auth_username: alert@openim.io
   smtp_auth_password: YOURAUTHPASSWORD
   smtp_require_tls: false
-  smtp_hello: xxx监控告警
+  smtp_hello: xxx
 
 templates:
   - /etc/alertmanager/email.tmpl
