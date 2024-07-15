@@ -17,6 +17,7 @@ package msgtransfer
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/tools/db/mongoutil"
@@ -29,16 +30,12 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
 	"github.com/openimsdk/tools/system/program"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/collectors"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -139,14 +136,8 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 				netDone <- struct{}{}
 				return
 			}
-			proreg := prometheus.NewRegistry()
-			proreg.MustRegister(
-				collectors.NewGoCollector(),
-			)
-			proreg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer", &config.Share)...)
-			http.Handle("/metrics", promhttp.HandlerFor(proreg, promhttp.HandlerOpts{Registry: proreg}))
-			err = http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil)
-			if err != nil && err != http.ErrServerClosed {
+
+			if err := prommetrics.TransferInit(prometheusPort); err != nil && err != http.ErrServerClosed {
 				netErr = errs.WrapMsg(err, "prometheus start error", "prometheusPort", prometheusPort)
 				netDone <- struct{}{}
 			}
