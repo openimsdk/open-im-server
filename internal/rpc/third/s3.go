@@ -340,3 +340,8 @@ type FormDataMate struct {
 	Group       string `json:"group"`
 	Key         string `json:"key"`
 }
+
+func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteOutdatedDataReq) (*third.DeleteOutdatedDataResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
