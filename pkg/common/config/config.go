@@ -21,6 +21,7 @@ import (
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
+	"github.com/openimsdk/tools/s3/kodo"
 	"strings"
 	"time"
 )
@@ -281,15 +282,7 @@ type Third struct {
 		Enable string `mapstructure:"enable"`
 		Cos    Cos    `mapstructure:"cos"`
 		Oss    Oss    `mapstructure:"oss"`
-		Kodo   struct {
-			Endpoint        string `mapstructure:"endpoint"`
-			Bucket          string `mapstructure:"bucket"`
-			BucketURL       string `mapstructure:"bucketURL"`
-			AccessKeyID     string `mapstructure:"accessKeyID"`
-			AccessKeySecret string `mapstructure:"accessKeySecret"`
-			SessionToken    string `mapstructure:"sessionToken"`
-			PublicRead      bool   `mapstructure:"publicRead"`
-		} `mapstructure:"kodo"`
+		Kodo   Kodo   `mapstructure:"kodo"`
 		Aws struct {
 			Endpoint        string `mapstructure:"endpoint"`
 			Region          string `mapstructure:"region"`
@@ -308,6 +301,16 @@ type Cos struct {
 	PublicRead   bool   `mapstructure:"publicRead"`
 }
 type Oss struct {
+	Endpoint        string `mapstructure:"endpoint"`
+	Bucket          string `mapstructure:"bucket"`
+	BucketURL       string `mapstructure:"bucketURL"`
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	AccessKeySecret string `mapstructure:"accessKeySecret"`
+	SessionToken    string `mapstructure:"sessionToken"`
+	PublicRead      bool   `mapstructure:"publicRead"`
+}
+
+type Kodo struct {
 	Endpoint        string `mapstructure:"endpoint"`
 	Bucket          string `mapstructure:"bucket"`
 	BucketURL       string `mapstructure:"bucketURL"`
@@ -518,6 +521,18 @@ func (c *Cos) Build() *cos.Config {
 
 func (o *Oss) Build() *oss.Config {
 	return &oss.Config{
+		Endpoint:        o.Endpoint,
+		Bucket:          o.Bucket,
+		BucketURL:       o.BucketURL,
+		AccessKeyID:     o.AccessKeyID,
+		AccessKeySecret: o.AccessKeySecret,
+		SessionToken:    o.SessionToken,
+		PublicRead:      o.PublicRead,
+	}
+}
+
+func (o *Kodo) Build() *kodo.Config {
+	return &kodo.Config{
 		Endpoint:        o.Endpoint,
 		Bucket:          o.Bucket,
 		BucketURL:       o.BucketURL,
