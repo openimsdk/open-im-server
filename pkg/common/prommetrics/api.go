@@ -3,15 +3,11 @@ package prommetrics
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net/http"
 	"strconv"
 )
 
-const ApiPath = "/metrics"
-
 var (
-	apiRegistry = prometheus.NewRegistry()
-	apiCounter  = prometheus.NewCounterVec(
+	apiCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "api_count",
 			Help: "Total number of API calls",
@@ -27,8 +23,14 @@ var (
 	)
 )
 
-func init() {
-	apiRegistry.MustRegister(apiCounter, httpCounter)
+func ApiInit(prometheusPort int) error {
+	apiRegistry := prometheus.NewRegistry()
+	cs := append(
+		baseCollector,
+		apiCounter,
+		httpCounter,
+	)
+	return Init(apiRegistry, prometheusPort, commonPath, promhttp.HandlerFor(apiRegistry, promhttp.HandlerOpts{}), cs...)
 }
 
 func APICall(path string, method string, apiCode int) {
@@ -44,7 +46,3 @@ func HttpCall(path string, method string, status int) {
 //		apiRegistry, promhttp.HandlerFor(apiRegistry, promhttp.HandlerOpts{}),
 //	)
 //}
-
-func ApiHandler() http.Handler {
-	return promhttp.HandlerFor(apiRegistry, promhttp.HandlerOpts{})
-}

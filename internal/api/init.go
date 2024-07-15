@@ -71,9 +71,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 				netDone <- struct{}{}
 				return
 			}
-			srv := http.NewServeMux()
-			srv.Handle(prommetrics.ApiPath, prommetrics.ApiHandler())
-			if err := http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), srv); err != nil && err != http.ErrServerClosed {
+			if err := prommetrics.ApiInit(prometheusPort); err != nil && err != http.ErrServerClosed {
 				netErr = errs.WrapMsg(err, fmt.Sprintf("api prometheus start err: %d", prometheusPort))
 				netDone <- struct{}{}
 			}

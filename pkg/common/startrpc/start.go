@@ -17,7 +17,7 @@ package startrpc
 import (
 	"context"
 	"fmt"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc/status"
 	"net"
@@ -42,8 +42,8 @@ import (
 )
 
 // Start rpc server.
-func Start[T any](ctx context.Context, discovery *config2.Discovery, prometheusConfig *config2.Prometheus, listenIP,
-	registerIP string, rpcPorts []int, index int, rpcRegisterName string, share *config2.Share, config T, rpcFn func(ctx context.Context,
+func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusConfig *config.Prometheus, listenIP,
+	registerIP string, rpcPorts []int, index int, rpcRegisterName string, share *config.Share, config T, rpcFn func(ctx context.Context,
 	config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 
 	rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
@@ -82,7 +82,11 @@ func Start[T any](ctx context.Context, discovery *config2.Discovery, prometheusC
 		//reg, metric, _ = prommetrics.NewGrpcPromObj(cusMetrics)
 		//options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
 		//	grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))
-		options = append(options, mw.GrpcServer(), prommetricsInterceptor(rpcRegisterName))
+		options = append(
+			options, mw.GrpcServer(),
+			prommetricsUnaryInterceptor(rpcRegisterName),
+			prommetricsStreamInterceptor(rpcRegisterName),
+		)
 	} else {
 		options = append(options, mw.GrpcServer())
 	}
@@ -121,9 +125,8 @@ func Start[T any](ctx context.Context, discovery *config2.Discovery, prometheusC
 				netDone <- struct{}{}
 				return
 			}
-			srv := http.NewServeMux()
-			srv.Handle(prommetrics.RpcPath, prommetrics.RPCHandler())
-			if err := http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), srv); err != nil && err != http.ErrServerClosed {
+			cs := prommetrics.GetGrpcCusMetrics(rpcRegisterName, share)
+			if err := prommetrics.RpcInit(cs, prometheusPort); err != nil && err != http.ErrServerClosed {
 				netErr = errs.WrapMsg(err, fmt.Sprintf("rpc %s prometheus start err: %d", rpcRegisterName, prometheusPort))
 				netDone <- struct{}{}
 			}
@@ -181,7 +184,7 @@ func gracefulStopWithCtx(ctx context.Context, f func()) error {
 	}
 }
 
-func prommetricsInterceptor(rpcRegisterName string) grpc.ServerOption {
+func prommetricsUnaryInterceptor(rpcRegisterName string) grpc.ServerOption {
 	getCode := func(err error) int {
 		if err == nil {
 			return 0
@@ -197,4 +200,8 @@ func prommetricsInterceptor(rpcRegisterName string) grpc.ServerOption {
 		prommetrics.RPCCall(rpcRegisterName, info.FullMethod, getCode(err))
 		return resp, err
 	})
+}
+
+func prommetricsStreamInterceptor(rpcRegisterName string) grpc.ServerOption {
+	return grpc.ChainStreamInterceptor()
 }
