@@ -36,7 +36,6 @@ type GroupCache interface {
 	DelGroupMembersHash(groupID string) GroupCache
 
 	GetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error)
-	GetGroupsMemberIDs(ctx context.Context, groupIDs []string) (groupMemberIDs map[string][]string, err error)
 
 	DelGroupMemberIDs(groupID string) GroupCache
 

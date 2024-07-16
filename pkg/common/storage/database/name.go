@@ -15,4 +15,6 @@ const (
 	LogName                 = "log"
 	ObjectName              = "s3"
 	UserName                = "user"
+	SeqConversationName     = "seq"
+	SeqUserName             = "seq_user"
 )

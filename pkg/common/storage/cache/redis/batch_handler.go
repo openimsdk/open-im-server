@@ -23,7 +23,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mw/specialerror"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 	"time"
@@ -147,30 +146,30 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	return t, nil
 }
 
-func batchGetCache[T any, K comparable](
-	ctx context.Context,
-	rcClient *rockscache.Client,
-	expire time.Duration,
-	keys []K,
-	keyFn func(key K) string,
-	fns func(ctx context.Context, key K) (T, error),
-) ([]T, error) {
-	if len(keys) == 0 {
-		return nil, nil
-	}
-	res := make([]T, 0, len(keys))
-	for _, key := range keys {
-		val, err := getCache(ctx, rcClient, keyFn(key), expire, func(ctx context.Context) (T, error) {
-			return fns(ctx, key)
-		})
-		if err != nil {
-			if errs.ErrRecordNotFound.Is(specialerror.ErrCode(errs.Unwrap(err))) {
-				continue
-			}
-			return nil, errs.Wrap(err)
-		}
-		res = append(res, val)
-	}
-
-	return res, nil
-}
+//func batchGetCache[T any, K comparable](
+//	ctx context.Context,
+//	rcClient *rockscache.Client,
+//	expire time.Duration,
+//	keys []K,
+//	keyFn func(key K) string,
+//	fns func(ctx context.Context, key K) (T, error),
+//) ([]T, error) {
+//	if len(keys) == 0 {
+//		return nil, nil
+//	}
+//	res := make([]T, 0, len(keys))
+//	for _, key := range keys {
+//		val, err := getCache(ctx, rcClient, keyFn(key), expire, func(ctx context.Context) (T, error) {
+//			return fns(ctx, key)
+//		})
+//		if err != nil {
+//			if errs.ErrRecordNotFound.Is(specialerror.ErrCode(errs.Unwrap(err))) {
+//				continue
+//			}
+//			return nil, errs.Wrap(err)
+//		}
+//		res = append(res, val)
+//	}
+//
+//	return res, nil
+//}
