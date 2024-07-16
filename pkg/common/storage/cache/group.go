@@ -65,5 +65,6 @@ type GroupCache interface {
 	DelMaxGroupMemberVersion(groupIDs ...string) GroupCache
 	DelMaxJoinGroupVersion(userIDs ...string) GroupCache
 	FindMaxGroupMemberVersion(ctx context.Context, groupID string) (*model.VersionLog, error)
+	BatchFindMaxGroupMemberVersion(ctx context.Context, groupIDs []string) ([]*model.VersionLog, error)
 	FindMaxJoinGroupVersion(ctx context.Context, userID string) (*model.VersionLog, error)
 }

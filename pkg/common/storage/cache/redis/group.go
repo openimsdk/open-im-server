@@ -17,6 +17,8 @@ package redis
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
@@ -28,7 +30,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
-	"time"
 )
 
 const (
@@ -448,6 +449,19 @@ func (g *GroupCacheRedis) FindMaxGroupMemberVersion(ctx context.Context, groupID
 	return getCache(ctx, g.rcClient, g.getGroupMemberMaxVersionKey(groupID), g.expireTime, func(ctx context.Context) (*model.VersionLog, error) {
 		return g.groupMemberDB.FindMemberIncrVersion(ctx, groupID, 0, 0)
 	})
+}
+
+func (g *GroupCacheRedis) BatchFindMaxGroupMemberVersion(ctx context.Context, groupIDs []string) (versionLogs []*model.VersionLog, err error) {
+	for _, groupID := range groupIDs {
+		verionLog, err := getCache(ctx, g.rcClient, g.getGroupMemberMaxVersionKey(groupID), g.expireTime, func(ctx context.Context) (*model.VersionLog, error) {
+			return g.groupMemberDB.FindMemberIncrVersion(ctx, groupID, 0, 0)
+		})
+		if err != nil {
+			return nil, errs.Wrap(err)
+		}
+		versionLogs = append(versionLogs, verionLog)
+	}
+	return versionLogs, errs.Wrap(err)
 }
 
 func (g *GroupCacheRedis) FindMaxJoinGroupVersion(ctx context.Context, userID string) (*model.VersionLog, error) {
