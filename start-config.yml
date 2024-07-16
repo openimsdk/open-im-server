@@ -14,4 +14,5 @@ serviceBinaries:
 toolBinaries:
   - check-free-memory
   - check-component
+  - seq
 maxFileDescriptors: 10000

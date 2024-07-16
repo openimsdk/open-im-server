@@ -70,10 +70,6 @@ type UserDatabase interface {
 	GetAllSubscribeList(ctx context.Context, userID string) ([]string, error)
 	// GetSubscribedList Get all subscribed lists
 	GetSubscribedList(ctx context.Context, userID string) ([]string, error)
-	// GetUserStatus Get the online status of the user
-	GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error)
-	// SetUserStatus Set the user status and store the user status in redis
-	SetUserStatus(ctx context.Context, userID string, status, platformID int32) error
 
 	// CRUD user command
 	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error
@@ -199,7 +195,7 @@ func (u *userDatabase) GetAllUserID(ctx context.Context, pagination pagination.P
 }
 
 func (u *userDatabase) GetUserByID(ctx context.Context, userID string) (user *model.User, err error) {
-	return u.userDB.Take(ctx, userID)
+	return u.cache.GetUserInfo(ctx, userID)
 }
 
 // CountTotal Get the total number of users.
@@ -244,17 +240,6 @@ func (u *userDatabase) GetSubscribedList(ctx context.Context, userID string) ([]
 		return nil, err
 	}
 	return list, nil
-}
-
-// GetUserStatus get user status.
-func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
-	onlineStatusList, err := u.cache.GetUserStatus(ctx, userIDs)
-	return onlineStatusList, err
-}
-
-// SetUserStatus Set the user status and save it in redis.
-func (u *userDatabase) SetUserStatus(ctx context.Context, userID string, status, platformID int32) error {
-	return u.cache.SetUserStatus(ctx, userID, status, platformID)
 }
 
 func (u *userDatabase) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error {

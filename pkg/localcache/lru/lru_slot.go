@@ -40,6 +40,10 @@ func (x *slotLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	return x.slots[x.getIndex(key)].Get(key, fetch)
 }
 
+func (x *slotLRU[K, V]) SetHas(key K, value V) bool {
+	return x.slots[x.getIndex(key)].SetHas(key, value)
+}
+
 func (x *slotLRU[K, V]) Del(key K) bool {
 	return x.slots[x.getIndex(key)].Del(key)
 }

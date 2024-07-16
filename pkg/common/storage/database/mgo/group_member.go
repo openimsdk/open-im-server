@@ -154,6 +154,22 @@ func (g *GroupMemberMgo) FindMemberUserID(ctx context.Context, groupID string) (
 	return mongoutil.Find[string](ctx, g.coll, bson.M{"group_id": groupID}, options.Find().SetProjection(bson.M{"_id": 0, "user_id": 1}).SetSort(g.memberSort()))
 }
 
+func (g *GroupMemberMgo) Find(ctx context.Context, groupID string, userIDs []string) ([]*model.GroupMember, error) {
+	filter := bson.M{"group_id": groupID}
+	if len(userIDs) > 0 {
+		filter["user_id"] = bson.M{"$in": userIDs}
+	}
+	return mongoutil.Find[*model.GroupMember](ctx, g.coll, filter)
+}
+
+func (g *GroupMemberMgo) FindInGroup(ctx context.Context, userID string, groupIDs []string) ([]*model.GroupMember, error) {
+	filter := bson.M{"user_id": userID}
+	if len(groupIDs) > 0 {
+		filter["group_id"] = bson.M{"$in": groupIDs}
+	}
+	return mongoutil.Find[*model.GroupMember](ctx, g.coll, filter)
+}
+
 func (g *GroupMemberMgo) Take(ctx context.Context, groupID string, userID string) (groupMember *model.GroupMember, err error) {
 	return mongoutil.FindOne[*model.GroupMember](ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID})
 }
