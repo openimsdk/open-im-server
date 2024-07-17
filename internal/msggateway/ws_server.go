@@ -358,9 +358,7 @@ func (ws *WsServer) unregisterClient(client *Client) {
 		prommetrics.OnlineUserGauge.Dec()
 	}
 	ws.onlineUserConnNum.Add(-1)
-	client.subLock.Lock()
-	clear(client.subUserIDs)
-	client.subLock.Unlock()
+	ws.subscription.DelClient(client)
 	//ws.SetUserOnlineStatus(client.ctx, client, constant.Offline)
 	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num",
 		ws.onlineUserNum.Load(), "online user conn Num",
