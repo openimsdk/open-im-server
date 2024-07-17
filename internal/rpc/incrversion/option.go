@@ -3,6 +3,7 @@ package incrversion
 import (
 	"context"
 	"fmt"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,7 +21,7 @@ const syncLimit = 200
 const (
 	tagQuery = iota + 1
 	tagFull
-	tageEqual
+	tagEqual
 )
 
 type Option[A, B any] struct {
@@ -33,7 +34,6 @@ type Option[A, B any] struct {
 	Version         func(ctx context.Context, dId string, version uint, limit int) (*model.VersionLog, error)
 	//SortID          func(ctx context.Context, dId string) ([]string, error)
 	Find func(ctx context.Context, ids []string) ([]A, error)
-	ID   func(elem A) string
 	Resp func(version *model.VersionLog, deleteIds []string, insertList, updateList []A, full bool) *B
 }
 
@@ -59,9 +59,6 @@ func (o *Option[A, B]) check() error {
 	//}
 	if o.Find == nil {
 		return o.newError("func find is nil")
-	}
-	if o.ID == nil {
-		return o.newError("func id is nil")
 	}
 	if o.Resp == nil {
 		return o.newError("func resp is nil")
@@ -100,7 +97,7 @@ func (o *Option[A, B]) getVersion(tag *int) (*model.VersionLog, error) {
 			return cache, nil
 		}
 		if o.VersionNumber == uint64(cache.Version) {
-			*tag = tageEqual
+			*tag = tagEqual
 			return cache, nil
 		}
 		*tag = tagQuery
@@ -123,7 +120,7 @@ func (o *Option[A, B]) Build() (*B, error) {
 		full = version.ID.Hex() != o.VersionID || uint64(version.Version) < o.VersionNumber || len(version.Logs) != version.LogLen
 	case tagFull:
 		full = true
-	case tageEqual:
+	case tagEqual:
 		full = false
 	default:
 		panic(fmt.Errorf("undefined tag %d", tag))

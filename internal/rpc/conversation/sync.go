@@ -2,6 +2,7 @@ package conversation
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/hashutil"
@@ -40,7 +41,6 @@ func (c *conversationServer) GetIncrementalConversation(ctx context.Context, req
 		Find: func(ctx context.Context, conversationIDs []string) ([]*conversation.Conversation, error) {
 			return c.getConversations(ctx, req.UserID, conversationIDs)
 		},
-		ID: func(elem *conversation.Conversation) string { return elem.GroupID },
 		Resp: func(version *model.VersionLog, delIDs []string, insertList, updateList []*conversation.Conversation, full bool) *conversation.GetIncrementalConversationResp {
 			return &conversation.GetIncrementalConversationResp{
 				VersionID: version.ID.Hex(),
