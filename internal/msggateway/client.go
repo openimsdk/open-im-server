@@ -96,12 +96,14 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer
 	c.hbCtx, c.hbCancel = context.WithCancel(c.ctx)
 }
 
-func (c *Client) pingHandler(_ string) error {
+func (c *Client) pingHandler(appData string) error {
 	if err := c.conn.SetReadDeadline(pongWait); err != nil {
 		return err
 	}
 
-	return c.writePongMsg()
+	log.ZDebug(c.ctx, "ping Handler Success.", "appData", appData)
+
+	return c.writePongMsg(appData)
 }
 
 func (c *Client) pongHandler(_ string) error {
@@ -156,7 +158,7 @@ func (c *Client) readMessage() {
 			return
 
 		case PingMessage:
-			err := c.writePongMsg()
+			err := c.writePongMsg("")
 			log.ZError(c.ctx, "writePongMsg", err)
 
 		case CloseMessage:
@@ -378,7 +380,7 @@ func (c *Client) writePingMsg() error {
 	return c.conn.WriteMessage(PingMessage, nil)
 }
 
-func (c *Client) writePongMsg() error {
+func (c *Client) writePongMsg(appData string) error {
 	if c.closed.Load() {
 		return nil
 	}
@@ -391,5 +393,5 @@ func (c *Client) writePongMsg() error {
 		return err
 	}
 
-	return c.conn.WriteMessage(PongMessage, nil)
+	return c.conn.WriteMessage(PongMessage, []byte(appData))
 }
