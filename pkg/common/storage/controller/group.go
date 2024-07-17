@@ -16,17 +16,19 @@ package controller
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/common"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/db/pagination"
 	"github.com/openimsdk/tools/db/tx"
+	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 )
@@ -108,6 +110,7 @@ type GroupDatabase interface {
 	DeleteGroupMemberHash(ctx context.Context, groupIDs []string) error
 
 	FindMemberIncrVersion(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error)
+	BatchFindMemberIncrVersion(ctx context.Context, groupIDs []string, versions []uint64, limits []int) (map[string]*model.VersionLog, error)
 	FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error)
 	MemberGroupIncrVersion(ctx context.Context, groupID string, userIDs []string, state int32) error
 
@@ -115,6 +118,7 @@ type GroupDatabase interface {
 	//FindSortJoinGroupIDs(ctx context.Context, userID string) ([]string, error)
 
 	FindMaxGroupMemberVersionCache(ctx context.Context, groupID string) (*model.VersionLog, error)
+	BatchFindMaxGroupMemberVersionCache(ctx context.Context, groupIDs []string) (map[string]*model.VersionLog, error)
 	FindMaxJoinGroupVersionCache(ctx context.Context, userID string) (*model.VersionLog, error)
 
 	SearchJoinGroup(ctx context.Context, userID string, keyword string, pagination pagination.Pagination) (int64, []*model.Group, error)
@@ -498,12 +502,44 @@ func (g *groupDatabase) FindMemberIncrVersion(ctx context.Context, groupID strin
 	return g.groupMemberDB.FindMemberIncrVersion(ctx, groupID, version, limit)
 }
 
+func (g *groupDatabase) BatchFindMemberIncrVersion(ctx context.Context, groupIDs []string, versions []uint64, limits []int) (map[string]*model.VersionLog, error) {
+	if len(groupIDs) == 0 {
+		return nil, nil
+	}
+	var uintVersions []uint
+	for _, version := range versions {
+		uintVersions = append(uintVersions, uint(version))
+	}
+	versionLogs, err := g.groupMemberDB.BatchFindMemberIncrVersion(ctx, groupIDs, uintVersions, limits)
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	groupMemberIncrVersionsMap := datautil.SliceToMap(versionLogs, func(e *model.VersionLog) string {
+		return e.DID
+	})
+	return groupMemberIncrVersionsMap, nil
+}
+
 func (g *groupDatabase) FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error) {
 	return g.groupMemberDB.FindJoinIncrVersion(ctx, userID, version, limit)
 }
 
 func (g *groupDatabase) FindMaxGroupMemberVersionCache(ctx context.Context, groupID string) (*model.VersionLog, error) {
 	return g.cache.FindMaxGroupMemberVersion(ctx, groupID)
+}
+
+func (g *groupDatabase) BatchFindMaxGroupMemberVersionCache(ctx context.Context, groupIDs []string) (map[string]*model.VersionLog, error) {
+	if len(groupIDs) == 0 {
+		return nil, nil
+	}
+	versionLogs, err := g.cache.BatchFindMaxGroupMemberVersion(ctx, groupIDs)
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	maxGroupMemberVersionsMap := datautil.SliceToMap(versionLogs, func(e *model.VersionLog) string {
+		return e.DID
+	})
+	return maxGroupMemberVersionsMap, nil
 }
 
 func (g *groupDatabase) FindMaxJoinGroupVersionCache(ctx context.Context, userID string) (*model.VersionLog, error) {

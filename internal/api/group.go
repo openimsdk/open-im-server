@@ -19,8 +19,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/tools/a2r"
-	"github.com/openimsdk/tools/apiresp"
-	"github.com/openimsdk/tools/log"
 )
 
 type GroupApi rpcclient.Group
@@ -148,45 +146,82 @@ func (o *GroupApi) GetIncrementalGroupMember(c *gin.Context) {
 }
 
 func (o *GroupApi) GetIncrementalGroupMemberBatch(c *gin.Context) {
-	type BatchIncrementalReq struct {
-		UserID string                                `json:"user_id"`
-		List   []*group.GetIncrementalGroupMemberReq `json:"list"`
-	}
-	type BatchIncrementalResp struct {
-		List map[string]*group.GetIncrementalGroupMemberResp `json:"list"`
-	}
-	req, err := a2r.ParseRequestNotCheck[BatchIncrementalReq](c)
-	if err != nil {
-		apiresp.GinError(c, err)
-		return
-	}
-	resp := &BatchIncrementalResp{
-		List: make(map[string]*group.GetIncrementalGroupMemberResp),
-	}
-	var (
-		changeCount int
-	)
-	for _, req := range req.List {
-		if _, ok := resp.List[req.GroupID]; ok {
-			continue
-		}
-		res, err := o.Client.GetIncrementalGroupMember(c, req)
-		if err != nil {
-			if len(resp.List) == 0 {
-				apiresp.GinError(c, err)
-			} else {
-				log.ZError(c, "group incr sync versopn", err, "groupID", req.GroupID, "success", len(resp.List))
-				apiresp.GinSuccess(c, resp)
-			}
-			return
-		}
-		resp.List[req.GroupID] = res
-		changeCount += len(res.Insert) + len(res.Delete) + len(res.Update)
-		if changeCount >= 200 {
-			break
-		}
-	}
-	apiresp.GinSuccess(c, resp)
+	a2r.Call(group.GroupClient.BatchGetIncrementalGroupMember, o.Client, c)
+
+	// // OLd. Need Deprecated
+	// // type BatchIncrementalReq struct {
+	// // 	UserID string                                `json:"user_id"`
+	// // 	List   []*group.GetIncrementalGroupMemberReq `json:"list"`
+	// // }
+	// // type BatchIncrementalResp struct {
+	// // 	List map[string]*group.GetIncrementalGroupMemberResp `json:"list"`
+	// // }
+	// // req, err := a2r.ParseRequestNotCheck[BatchIncrementalReq](c)
+	// // if err != nil {
+	// // 	apiresp.GinError(c, err)
+	// // 	return
+	// // }
+	// // resp := &BatchIncrementalResp{
+	// // 	List: make(map[string]*group.GetIncrementalGroupMemberResp),
+	// // }
+
+	// //**** Start ****//
+	// var (
+	// 	changeCount int
+	// )
+	// req, err := a2r.ParseRequestNotCheck[group.BatchGetIncrementalGroupMemberReq](c)
+	// if err != nil {
+	// 	apiresp.GinError(c, err)
+	// 	return
+	// }
+	// resp, err := o.Client.BatchGetIncrementalGroupMember(c, req)
+	// if err != nil {
+	// 	if len(resp.RespList) == 0 {
+	// 		apiresp.GinError(c, err)
+	// 	} else {
+	// 		log.ZError(c, "group incr sync version", err)
+	// 		apiresp.GinSuccess(c, resp)
+	// 	}
+	// }
+
+	// res := make(map[string]*group.GetIncrementalGroupMemberResp)
+	// for k, val := range resp.RespList {
+	// 	changeCount += len(val.Insert) + len(val.Delete) + len(val.Update)
+	// 	if changeCount >= 200 {
+	// 		break
+	// 	}
+	// 	res[k] = val
+	// }
+	// resp = &group.BatchGetIncrementalGroupMemberResp{
+	// 	RespList: res,
+	// }
+
+	// // OLd. Need Deprecated
+	// // for _, req := range req.List {
+	// // 	if _, ok := resp.List[req.GroupID]; ok {
+	// // 		continue
+	// // 	}
+	// // 	res, err := o.Client.GetIncrementalGroupMember(c, req)
+	// // 	if err != nil {
+	// // 		if len(resp.List) == 0 {
+	// // 			apiresp.GinError(c, err)
+	// // 		} else {
+	// // 			log.ZError(c, "group incr sync version", err, "groupID", req.GroupID, "success", len(resp.List))
+	// // 			apiresp.GinSuccess(c, resp)
+	// // 		}
+	// // 		return
+	// // 	}
+	// // 	resp.List[req.GroupID] = res
+	// // 	changeCount += len(res.Insert) + len(res.Delete) + len(res.Update)
+	// // 	if changeCount >= 200 {
+	// // 		break
+	// // 	}
+	// // }
+
+	// apiresp.GinSuccess(c, resp)
+
+	//**** End ****//
+
 }
 
 func (o *GroupApi) GetFullGroupMemberUserIDs(c *gin.Context) {

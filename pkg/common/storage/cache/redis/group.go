@@ -391,17 +391,17 @@ func (g *GroupCacheRedis) FindMaxGroupMemberVersion(ctx context.Context, groupID
 	})
 }
 
-func (g *GroupCacheRedis) BatchFindMaxGroupMemberVersion(ctx context.Context, groupIDs []string) (versionLogs []*model.VersionLog, err error) {
-	for _, groupID := range groupIDs {
-		verionLog, err := getCache(ctx, g.rcClient, g.getGroupMemberMaxVersionKey(groupID), g.expireTime, func(ctx context.Context) (*model.VersionLog, error) {
-			return g.groupMemberDB.FindMemberIncrVersion(ctx, groupID, 0, 0)
+func (g *GroupCacheRedis) BatchFindMaxGroupMemberVersion(ctx context.Context, groupIDs []string) ([]*model.VersionLog, error) {
+	return batchGetCache2(ctx, g.rcClient, g.expireTime, groupIDs,
+		func(groupID string) string {
+			return g.getGroupMemberMaxVersionKey(groupID)
+		}, func(versionLog *model.VersionLog) string {
+			return versionLog.DID
+		}, func(ctx context.Context, groupIDs []string) ([]*model.VersionLog, error) {
+			versions := make([]uint, len(groupIDs))
+			limits := make([]int, len(groupIDs))
+			return g.groupMemberDB.BatchFindMemberIncrVersion(ctx, groupIDs, versions, limits)
 		})
-		if err != nil {
-			return nil, errs.Wrap(err)
-		}
-		versionLogs = append(versionLogs, verionLog)
-	}
-	return versionLogs, errs.Wrap(err)
 }
 
 func (g *GroupCacheRedis) FindMaxJoinGroupVersion(ctx context.Context, userID string) (*model.VersionLog, error) {

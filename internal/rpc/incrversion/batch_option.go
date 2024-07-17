@@ -11,16 +11,15 @@ import (
 
 type BatchOption[A, B any] struct {
 	Ctx            context.Context
-	VersionKeys    []string
+	TargetKeys     []string
 	VersionIDs     []string
 	VersionNumbers []uint64
 	//SyncLimit       int
 	Versions         func(ctx context.Context, dIds []string, versions []uint64, limits []int) (map[string]*model.VersionLog, error)
 	CacheMaxVersions func(ctx context.Context, dIds []string) (map[string]*model.VersionLog, error)
-	//SortID          func(ctx context.Context, dId string) ([]string, error)
-	Find func(ctx context.Context, ids []string) ([]A, error)
+	Find             func(ctx context.Context, dId string, ids []string) (A, error)
 	// Resp func(version map[string]*model.VersionLog, deleteIds, insertList, updateList []A, full bool) []*B
-	Resp func(versions map[string]*model.VersionLog, deleteIdsMap map[string][]string, insertListMap, updateListMap map[string][]A, fullMap map[string]bool) *B
+	Resp func(versions map[string]*model.VersionLog, deleteIdsMap map[string][]string, insertListMap, updateListMap map[string]A, fullMap map[string]bool) *B
 }
 
 func (o *BatchOption[A, B]) newError(msg string) error {
@@ -31,8 +30,8 @@ func (o *BatchOption[A, B]) check() error {
 	if o.Ctx == nil {
 		return o.newError("opt ctx is nil")
 	}
-	if len(o.VersionKeys) == 0 {
-		return o.newError("versionKeys is empty")
+	if len(o.TargetKeys) == 0 {
+		return o.newError("targetKeys is empty")
 	}
 	if o.Versions == nil {
 		return o.newError("func versions is nil")
@@ -64,17 +63,17 @@ func (o *BatchOption[A, B]) equalIDs(objIDs []primitive.ObjectID) []bool {
 }
 
 func (o *BatchOption[A, B]) getVersions(tags *[]int) (versions map[string]*model.VersionLog, err error) {
-	valids := o.validVersions()
-
 	var dIDs []string
 	var versionNums []uint64
 	var limits []int
+
+	valids := o.validVersions()
 
 	if o.CacheMaxVersions == nil {
 		for i, valid := range valids {
 			if valid {
 				(*tags)[i] = tagQuery
-				dIDs = append(dIDs, o.VersionKeys[i])
+				dIDs = append(dIDs, o.TargetKeys[i])
 				versionNums = append(versionNums, o.VersionNumbers[i])
 				limits = append(limits, syncLimit)
 
@@ -85,7 +84,7 @@ func (o *BatchOption[A, B]) getVersions(tags *[]int) (versions map[string]*model
 				// versions[o.VersionKeys[i]] = version[o.VersionKeys[i]]
 			} else {
 				(*tags)[i] = tagFull
-				dIDs = append(dIDs, o.VersionKeys[i])
+				dIDs = append(dIDs, o.TargetKeys[i])
 				versionNums = append(versionNums, 0)
 				limits = append(limits, 0)
 
@@ -102,7 +101,7 @@ func (o *BatchOption[A, B]) getVersions(tags *[]int) (versions map[string]*model
 		}
 		return versions, nil
 	} else {
-		caches, err := o.CacheMaxVersions(o.Ctx, o.VersionKeys)
+		caches, err := o.CacheMaxVersions(o.Ctx, o.TargetKeys)
 		if err != nil {
 			return nil, err
 		}
@@ -119,16 +118,16 @@ func (o *BatchOption[A, B]) getVersions(tags *[]int) (versions map[string]*model
 			} else if !equals[i] {
 				(*tags)[i] = tagFull
 				// versions[o.VersionKeys[i]] = caches[o.VersionKeys[i]]
-			} else if o.VersionNumbers[i] == uint64(caches[o.VersionKeys[i]].Version) {
+			} else if o.VersionNumbers[i] == uint64(caches[o.TargetKeys[i]].Version) {
 				(*tags)[i] = tagEqual
 				// versions[o.VersionKeys[i]] = caches[o.VersionKeys[i]]
 			} else {
 				(*tags)[i] = tagQuery
-				dIDs = append(dIDs, o.VersionKeys[i])
+				dIDs = append(dIDs, o.TargetKeys[i])
 				versionNums = append(versionNums, o.VersionNumbers[i])
 				limits = append(limits, syncLimit)
 
-				delete(caches, o.VersionKeys[i])
+				delete(caches, o.TargetKeys[i])
 				// versions[o.VersionKeys[i]] = version[o.VersionKeys[i]]
 			}
 		}
@@ -149,7 +148,7 @@ func (o *BatchOption[A, B]) Build() (*B, error) {
 		return nil, err
 	}
 
-	tags := make([]int, len(o.VersionKeys))
+	tags := make([]int, len(o.TargetKeys))
 	versions, err := o.getVersions(&tags)
 	if err != nil {
 		return nil, err
@@ -159,12 +158,12 @@ func (o *BatchOption[A, B]) Build() (*B, error) {
 	for i, tag := range tags {
 		switch tag {
 		case tagQuery:
-			version := versions[o.VersionKeys[i]]
-			fullMap[o.VersionKeys[i]] = version.ID.Hex() != o.VersionIDs[i] || uint64(version.Version) < o.VersionNumbers[i] || len(version.Logs) != version.LogLen
+			vLog := versions[o.TargetKeys[i]]
+			fullMap[o.TargetKeys[i]] = vLog.ID.Hex() != o.VersionIDs[i] || uint64(vLog.Version) < o.VersionNumbers[i] || len(vLog.Logs) != vLog.LogLen
 		case tagFull:
-			fullMap[o.VersionKeys[i]] = true
+			fullMap[o.TargetKeys[i]] = true
 		case tagEqual:
-			fullMap[o.VersionKeys[i]] = false
+			fullMap[o.TargetKeys[i]] = false
 		default:
 			panic(fmt.Errorf("undefined tag %d", tag))
 		}
@@ -176,38 +175,38 @@ func (o *BatchOption[A, B]) Build() (*B, error) {
 		updateIdsMap = make(map[string][]string)
 	)
 
-	for _, versionKey := range o.VersionKeys {
-		if !fullMap[versionKey] {
-			version := versions[versionKey]
+	for _, targetKey := range o.TargetKeys {
+		if !fullMap[targetKey] {
+			version := versions[targetKey]
 			insertIds, deleteIds, updateIds := version.DeleteAndChangeIDs()
-			insertIdsMap[versionKey] = insertIds
-			deleteIdsMap[versionKey] = deleteIds
-			updateIdsMap[versionKey] = updateIds
+			insertIdsMap[targetKey] = insertIds
+			deleteIdsMap[targetKey] = deleteIds
+			updateIdsMap[targetKey] = updateIds
 		}
 	}
 
 	var (
-		insertListMap = make(map[string][]A)
-		updateListMap = make(map[string][]A)
+		insertListMap = make(map[string]A)
+		updateListMap = make(map[string]A)
 	)
 
-	for versionKey, insertIds := range insertIdsMap {
+	for targetKey, insertIds := range insertIdsMap {
 		if len(insertIds) > 0 {
-			insertList, err := o.Find(o.Ctx, insertIds)
+			insertList, err := o.Find(o.Ctx, targetKey, insertIds)
 			if err != nil {
 				return nil, err
 			}
-			insertListMap[versionKey] = insertList
+			insertListMap[targetKey] = insertList
 		}
 	}
 
-	for versionKey, updateIds := range updateIdsMap {
+	for targetKey, updateIds := range updateIdsMap {
 		if len(updateIds) > 0 {
-			updateList, err := o.Find(o.Ctx, updateIds)
+			updateList, err := o.Find(o.Ctx, targetKey, updateIds)
 			if err != nil {
 				return nil, err
 			}
-			updateListMap[versionKey] = updateList
+			updateListMap[targetKey] = updateList
 		}
 	}
 

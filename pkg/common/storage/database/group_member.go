@@ -41,5 +41,6 @@ type GroupMember interface {
 	JoinGroupIncrVersion(ctx context.Context, userID string, groupIDs []string, state int32) error
 	MemberGroupIncrVersion(ctx context.Context, groupID string, userIDs []string, state int32) error
 	FindMemberIncrVersion(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error)
+	BatchFindMemberIncrVersion(ctx context.Context, groupIDs []string, versions []uint, limits []int) ([]*model.VersionLog, error)
 	FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error)
 }
