@@ -136,11 +136,8 @@ func (r *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 		r.log.IsStdout,
 		r.log.IsJson,
 		r.log.StorageLocation,
+		r.log.RemainRotationCount,
 		r.log.RotationTime,
-		r.log.MaxBackups,
-		r.log.MaxSize,
-		r.log.MaxAge,
-		r.log.Compress,
 		config.Version,
 	)
 	if err != nil {
