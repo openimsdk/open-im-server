@@ -24,6 +24,10 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+func IsGroupConversationID(conversationID string) bool {
+	return strings.HasPrefix(conversationID, "g_") || strings.HasPrefix(conversationID, "sg_")
+}
+
 func GetNotificationConversationIDByMsg(msg *sdkws.MsgData) string {
 	switch msg.SessionType {
 	case constant.SingleChatType:

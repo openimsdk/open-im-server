@@ -75,6 +75,8 @@ type Client struct {
 	token          string
 	hbCtx          context.Context
 	hbCancel       context.CancelFunc
+	subLock        sync.Mutex
+	subUserIDs     map[string]struct{}
 }
 
 // ResetClient updates the client's state with new connection and context information.
@@ -216,6 +218,8 @@ func (c *Client) handleMessage(message []byte) error {
 		resp, messageErr = c.longConnServer.UserLogout(ctx, binaryReq)
 	case WsSetBackgroundStatus:
 		resp, messageErr = c.setAppBackgroundStatus(ctx, binaryReq)
+	case WsSubUserOnlineStatus:
+		resp, messageErr = c.longConnServer.SubUserOnlineStatus(ctx, c, binaryReq)
 	default:
 		return fmt.Errorf(
 			"ReqIdentifier failed,sendID:%s,msgIncr:%s,reqIdentifier:%d",

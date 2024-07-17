@@ -164,10 +164,12 @@ func (c *ConversationRedisCache) DelConversations(ownerUserID string, conversati
 }
 
 func (c *ConversationRedisCache) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*model.Conversation, error) {
-	return batchGetCache(ctx, c.rcClient, c.expireTime, conversationIDs, func(conversationID string) string {
+	return batchGetCache2(ctx, c.rcClient, c.expireTime, conversationIDs, func(conversationID string) string {
 		return c.getConversationKey(ownerUserID, conversationID)
-	}, func(ctx context.Context, conversationID string) (*model.Conversation, error) {
-		return c.conversationDB.Take(ctx, ownerUserID, conversationID)
+	}, func(conversation *model.Conversation) string {
+		return conversation.ConversationID
+	}, func(ctx context.Context, conversationIDs []string) ([]*model.Conversation, error) {
+		return c.conversationDB.Find(ctx, ownerUserID, conversationIDs)
 	})
 }
 

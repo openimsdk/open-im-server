@@ -19,9 +19,9 @@ import (
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/cos"
+	"github.com/openimsdk/tools/s3/kodo"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
-	"github.com/openimsdk/tools/s3/kodo"
 	"strings"
 	"time"
 )
@@ -42,16 +42,13 @@ type LocalCache struct {
 }
 
 type Log struct {
-	StorageLocation string `mapstructure:"storageLocation"`
-	RotationTime    uint   `mapstructure:"rotationTime"`
-	RemainLogLevel  int    `mapstructure:"remainLogLevel"`
-	MaxSize         int    `mapstructure:"maxSize"`
-	MaxBackups      int    `mapstructure:"maxBackups"`
-	MaxAge          int    `mapstructure:"maxAge"`
-	Compress        bool   `mapstructure:"compress"`
-	IsStdout        bool   `mapstructure:"isStdout"`
-	IsJson          bool   `mapstructure:"isJson"`
-	WithStack       bool   `mapstructure:"withStack"`
+	StorageLocation     string `mapstructure:"storageLocation"`
+	RotationTime        uint   `mapstructure:"rotationTime"`
+	RemainRotationCount uint   `mapstructure:"remainRotationCount"`
+	RemainLogLevel      int    `mapstructure:"remainLogLevel"`
+	IsStdout            bool   `mapstructure:"isStdout"`
+	IsJson              bool   `mapstructure:"isJson"`
+	WithStack           bool   `mapstructure:"withStack"`
 }
 
 type Minio struct {
@@ -109,8 +106,9 @@ type API struct {
 }
 
 type CronTask struct {
-	ChatRecordsClearTime string `mapstructure:"chatRecordsClearTime"`
-	RetainChatRecords    int    `mapstructure:"retainChatRecords"`
+	CronExecuteTime   string `mapstructure:"cronExecuteTime"`
+	RetainChatRecords int    `mapstructure:"retainChatRecords"`
+	FileExpireTime    int    `mapstructure:"fileExpireTime"`
 }
 
 type OfflinePushConfig struct {
@@ -283,7 +281,7 @@ type Third struct {
 		Cos    Cos    `mapstructure:"cos"`
 		Oss    Oss    `mapstructure:"oss"`
 		Kodo   Kodo   `mapstructure:"kodo"`
-		Aws struct {
+		Aws    struct {
 			Endpoint        string `mapstructure:"endpoint"`
 			Region          string `mapstructure:"region"`
 			Bucket          string `mapstructure:"bucket"`

@@ -17,9 +17,9 @@ package startrpc
 import (
 	"context"
 	"fmt"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/prometheus/client_golang/prometheus"
+	"google.golang.org/grpc/status"
 	"net"
 	"net/http"
 	"os"
@@ -29,7 +29,6 @@ import (
 	"syscall"
 	"time"
 
-	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
@@ -38,14 +37,13 @@ import (
 	"github.com/openimsdk/tools/mw"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/network"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 // Start rpc server.
-func Start[T any](ctx context.Context, discovery *config2.Discovery, prometheusConfig *config2.Prometheus, listenIP,
-	registerIP string, rpcPorts []int, index int, rpcRegisterName string, share *config2.Share, config T, rpcFn func(ctx context.Context,
+func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusConfig *config.Prometheus, listenIP,
+	registerIP string, rpcPorts []int, index int, rpcRegisterName string, share *config.Share, config T, rpcFn func(ctx context.Context,
 	config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 
 	rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
@@ -77,13 +75,18 @@ func Start[T any](ctx context.Context, discovery *config2.Discovery, prometheusC
 		return err
 	}
 
-	var reg *prometheus.Registry
-	var metric *grpcprometheus.ServerMetrics
+	//var reg *prometheus.Registry
+	//var metric *grpcprometheus.ServerMetrics
 	if prometheusConfig.Enable {
-		cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, share)
-		reg, metric, _ = prommetrics.NewGrpcPromObj(cusMetrics)
-		options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
-			grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))
+		//cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, share)
+		//reg, metric, _ = prommetrics.NewGrpcPromObj(cusMetrics)
+		//options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
+		//	grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))
+		options = append(
+			options, mw.GrpcServer(),
+			prommetricsUnaryInterceptor(rpcRegisterName),
+			prommetricsStreamInterceptor(rpcRegisterName),
+		)
 	} else {
 		options = append(options, mw.GrpcServer())
 	}
@@ -122,13 +125,18 @@ func Start[T any](ctx context.Context, discovery *config2.Discovery, prometheusC
 				netDone <- struct{}{}
 				return
 			}
-			metric.InitializeMetrics(srv)
-			// Create a HTTP server for prometheus.
-			httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
-			if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				netErr = errs.WrapMsg(err, "prometheus start err", httpServer.Addr)
+			cs := prommetrics.GetGrpcCusMetrics(rpcRegisterName, share)
+			if err := prommetrics.RpcInit(cs, prometheusPort); err != nil && err != http.ErrServerClosed {
+				netErr = errs.WrapMsg(err, fmt.Sprintf("rpc %s prometheus start err: %d", rpcRegisterName, prometheusPort))
 				netDone <- struct{}{}
 			}
+			//metric.InitializeMetrics(srv)
+			// Create a HTTP server for prometheus.
+			//httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
+			//if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			//	netErr = errs.WrapMsg(err, "prometheus start err", httpServer.Addr)
+			//	netDone <- struct{}{}
+			//}
 		}()
 	}
 
@@ -174,4 +182,26 @@ func gracefulStopWithCtx(ctx context.Context, f func()) error {
 	case <-done:
 		return nil
 	}
+}
+
+func prommetricsUnaryInterceptor(rpcRegisterName string) grpc.ServerOption {
+	getCode := func(err error) int {
+		if err == nil {
+			return 0
+		}
+		rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
+		if !ok {
+			return -1
+		}
+		return int(rpcErr.GRPCStatus().Code())
+	}
+	return grpc.ChainUnaryInterceptor(func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+		resp, err := handler(ctx, req)
+		prommetrics.RPCCall(rpcRegisterName, info.FullMethod, getCode(err))
+		return resp, err
+	})
+}
+
+func prommetricsStreamInterceptor(rpcRegisterName string) grpc.ServerOption {
+	return grpc.ChainStreamInterceptor()
 }

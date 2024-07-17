@@ -37,6 +37,7 @@ func NewMsgGatewayCmd() *MsgGatewayCmd {
 	ret.configMap = map[string]any{
 		OpenIMMsgGatewayCfgFileName: &msgGatewayConfig.MsgGateway,
 		ShareFileName:               &msgGatewayConfig.Share,
+		RedisConfigFileName:         &msgGatewayConfig.RedisConfig,
 		WebhooksConfigFileName:      &msgGatewayConfig.WebhooksConfig,
 		DiscoveryConfigFilename:     &msgGatewayConfig.Discovery,
 	}
