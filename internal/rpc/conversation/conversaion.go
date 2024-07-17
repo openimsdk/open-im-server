@@ -184,13 +184,23 @@ func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbcon
 }
 
 func (c *conversationServer) GetConversations(ctx context.Context, req *pbconversation.GetConversationsReq) (*pbconversation.GetConversationsResp, error) {
-	conversations, err := c.conversationDatabase.FindConversations(ctx, req.OwnerUserID, req.ConversationIDs)
+	conversations, err := c.getConversations(ctx, req.OwnerUserID, req.ConversationIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &pbconversation.GetConversationsResp{
+		Conversations: conversations,
+	}, nil
+}
+
+func (c *conversationServer) getConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*pbconversation.Conversation, error) {
+	conversations, err := c.conversationDatabase.FindConversations(ctx, ownerUserID, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
 	resp := &pbconversation.GetConversationsResp{Conversations: []*pbconversation.Conversation{}}
 	resp.Conversations = convert.ConversationsDB2Pb(conversations)
-	return resp, nil
+	return convert.ConversationsDB2Pb(conversations), nil
 }
 
 func (c *conversationServer) SetConversation(ctx context.Context, req *pbconversation.SetConversationReq) (*pbconversation.SetConversationResp, error) {
@@ -580,4 +590,15 @@ func (c *conversationServer) UpdateConversation(ctx context.Context, req *pbconv
 		}
 	}
 	return &pbconversation.UpdateConversationResp{}, nil
+}
+
+func (c *conversationServer) GetOwnerConversation(ctx context.Context, req *pbconversation.GetOwnerConversationReq) (*pbconversation.GetOwnerConversationResp, error) {
+	total, conversations, err := c.conversationDatabase.GetOwnerConversation(ctx, req.UserID, req.Pagination)
+	if err != nil {
+		return nil, err
+	}
+	return &pbconversation.GetOwnerConversationResp{
+		Total:         total,
+		Conversations: convert.ConversationsDB2Pb(conversations),
+	}, nil
 }

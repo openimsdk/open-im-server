@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
@@ -109,7 +110,7 @@ func (rsm *RedisShardManager) ProcessKeysBySlot(
 func groupKeysBySlot(ctx context.Context, redisClient redis.UniversalClient, keys []string) (map[int64][]string, error) {
 	slots := make(map[int64][]string)
 	clusterClient, isCluster := redisClient.(*redis.ClusterClient)
-	if isCluster {
+	if isCluster && len(keys) > 1 {
 		pipe := clusterClient.Pipeline()
 		cmds := make([]*redis.IntCmd, len(keys))
 		for i, key := range keys {
@@ -194,4 +195,17 @@ func ProcessKeysBySlot(
 		return err
 	}
 	return nil
+}
+
+func DeleteCacheBySlot(ctx context.Context, rcClient *rockscache.Client, keys []string) error {
+	switch len(keys) {
+	case 0:
+		return nil
+	case 1:
+		return rcClient.TagAsDeletedBatch2(ctx, keys)
+	default:
+		return ProcessKeysBySlot(ctx, getRocksCacheRedisClient(rcClient), keys, func(ctx context.Context, slot int64, keys []string) error {
+			return rcClient.TagAsDeletedBatch2(ctx, keys)
+		})
+	}
 }

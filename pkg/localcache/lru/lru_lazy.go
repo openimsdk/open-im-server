@@ -88,6 +88,28 @@ func (x *LayLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	return v.value, v.err
 }
 
+//func (x *LayLRU[K, V]) Set(key K, value V) {
+//	x.lock.Lock()
+//	x.core.Add(key, &layLruItem[V]{value: value, expires: time.Now().Add(x.successTTL).UnixMilli()})
+//	x.lock.Unlock()
+//}
+//
+//func (x *LayLRU[K, V]) Has(key K) bool {
+//	x.lock.Lock()
+//	defer x.lock.Unlock()
+//	return x.core.Contains(key)
+//}
+
+func (x *LayLRU[K, V]) SetHas(key K, value V) bool {
+	x.lock.Lock()
+	defer x.lock.Unlock()
+	if x.core.Contains(key) {
+		x.core.Add(key, &layLruItem[V]{value: value, expires: time.Now().Add(x.successTTL).UnixMilli()})
+		return true
+	}
+	return false
+}
+
 func (x *LayLRU[K, V]) Del(key K) bool {
 	x.lock.Lock()
 	ok := x.core.Remove(key)

@@ -19,6 +19,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/tools/discovery"
@@ -31,6 +32,10 @@ import (
 func (s *Server) InitServer(ctx context.Context, config *Config, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	s.LongConnServer.SetDiscoveryRegistry(disCov, config)
 	msggateway.RegisterMsgGatewayServer(server, s)
+	s.userRcp = rpcclient.NewUserRpcClient(disCov, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
+	if s.ready != nil {
+		return s.ready(s)
+	}
 	return nil
 }
 
@@ -50,18 +55,21 @@ type Server struct {
 	LongConnServer LongConnServer
 	config         *Config
 	pushTerminal   map[int]struct{}
+	ready          func(srv *Server) error
+	userRcp        rpcclient.UserRpcClient
 }
 
 func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 	s.LongConnServer = LongConnServer
 }
 
-func NewServer(rpcPort int, longConnServer LongConnServer, conf *Config) *Server {
+func NewServer(rpcPort int, longConnServer LongConnServer, conf *Config, ready func(srv *Server) error) *Server {
 	s := &Server{
 		rpcPort:        rpcPort,
 		LongConnServer: longConnServer,
 		pushTerminal:   make(map[int]struct{}),
 		config:         conf,
+		ready:          ready,
 	}
 	s.pushTerminal[constant.IOSPlatformID] = struct{}{}
 	s.pushTerminal[constant.AndroidPlatformID] = struct{}{}

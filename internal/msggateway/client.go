@@ -20,6 +20,7 @@ import (
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
@@ -72,6 +73,10 @@ type Client struct {
 	closed         atomic.Bool
 	closedErr      error
 	token          string
+	hbCtx          context.Context
+	hbCancel       context.CancelFunc
+	subLock        sync.Mutex
+	subUserIDs     map[string]struct{}
 }
 
 // ResetClient updates the client's state with new connection and context information.
@@ -88,6 +93,7 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer
 	c.closed.Store(false)
 	c.closedErr = nil
 	c.token = ctx.GetToken()
+	c.hbCtx, c.hbCancel = context.WithCancel(c.ctx)
 }
 
 func (c *Client) pingHandler(_ string) error {
@@ -96,6 +102,13 @@ func (c *Client) pingHandler(_ string) error {
 	}
 
 	return c.writePongMsg()
+}
+
+func (c *Client) pongHandler(_ string) error {
+	if err := c.conn.SetReadDeadline(pongWait); err != nil {
+		return err
+	}
+	return nil
 }
 
 // readMessage continuously reads messages from the connection.
@@ -110,7 +123,9 @@ func (c *Client) readMessage() {
 
 	c.conn.SetReadLimit(maxMessageSize)
 	_ = c.conn.SetReadDeadline(pongWait)
+	c.conn.SetPongHandler(c.pongHandler)
 	c.conn.SetPingHandler(c.pingHandler)
+	c.activeHeartbeat(c.hbCtx)
 
 	for {
 		log.ZDebug(c.ctx, "readMessage")
@@ -147,6 +162,7 @@ func (c *Client) readMessage() {
 		case CloseMessage:
 			c.closedErr = ErrClientClosed
 			return
+
 		default:
 		}
 	}
@@ -202,6 +218,8 @@ func (c *Client) handleMessage(message []byte) error {
 		resp, messageErr = c.longConnServer.UserLogout(ctx, binaryReq)
 	case WsSetBackgroundStatus:
 		resp, messageErr = c.setAppBackgroundStatus(ctx, binaryReq)
+	case WsSubUserOnlineStatus:
+		resp, messageErr = c.longConnServer.SubUserOnlineStatus(ctx, c, binaryReq)
 	default:
 		return fmt.Errorf(
 			"ReqIdentifier failed,sendID:%s,msgIncr:%s,reqIdentifier:%d",
@@ -235,6 +253,7 @@ func (c *Client) close() {
 
 	c.closed.Store(true)
 	c.conn.Close()
+	c.hbCancel() // Close server-initiated heartbeat.
 	c.longConnServer.UnRegister(c)
 }
 
@@ -319,6 +338,44 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 	}
 
 	return c.conn.WriteMessage(MessageBinary, encodedBuf)
+}
+
+// Actively initiate Heartbeat when platform in Web.
+func (c *Client) activeHeartbeat(ctx context.Context) {
+	if c.PlatformID == constant.WebPlatformID {
+		go func() {
+			log.ZDebug(ctx, "server initiative send heartbeat start.")
+			ticker := time.NewTicker(pingPeriod)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-ticker.C:
+					if err := c.writePingMsg(); err != nil {
+						log.ZWarn(c.ctx, "send Ping Message error.", err)
+						return
+					}
+				case <-c.hbCtx.Done():
+					return
+				}
+			}
+		}()
+	}
+}
+func (c *Client) writePingMsg() error {
+	if c.closed.Load() {
+		return nil
+	}
+
+	c.w.Lock()
+	defer c.w.Unlock()
+
+	err := c.conn.SetWriteDeadline(writeWait)
+	if err != nil {
+		return err
+	}
+
+	return c.conn.WriteMessage(PingMessage, nil)
 }
 
 func (c *Client) writePongMsg() error {

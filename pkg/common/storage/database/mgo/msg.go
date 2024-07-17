@@ -205,7 +205,7 @@ func (m *MsgMgo) GetMsgDocModelByIndex(ctx context.Context, conversationID strin
 	if sort != 1 && sort != -1 {
 		return nil, errs.ErrArgs.WrapMsg("mongo sort must be 1 or -1")
 	}
-	opt := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"doc_id": sort}).SetLimit(1)
+	opt := options.Find().SetSkip(index).SetSort(bson.M{"_id": sort}).SetLimit(1)
 	filter := bson.M{"doc_id": primitive.Regex{Pattern: fmt.Sprintf("^%s:", conversationID)}}
 	msgs, err := mongoutil.Find[*model.MsgDocModel](ctx, m.coll, filter, opt)
 	if err != nil {
