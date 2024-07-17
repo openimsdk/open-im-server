@@ -94,6 +94,11 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer
 	c.closedErr = nil
 	c.token = ctx.GetToken()
 	c.hbCtx, c.hbCancel = context.WithCancel(c.ctx)
+	if c.subUserIDs == nil {
+		c.subUserIDs = make(map[string]struct{})
+	} else {
+		clear(c.subUserIDs)
+	}
 }
 
 func (c *Client) pingHandler(_ string) error {
