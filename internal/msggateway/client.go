@@ -101,7 +101,7 @@ func (c *Client) pingHandler(appData string) error {
 		return err
 	}
 
-	log.ZDebug(c.ctx, "ping Handler Success.", "pong appData", appData)
+	log.ZDebug(c.ctx, "ping Handler Success.", "appData", appData)
 
 	return c.writePongMsg()
 }
