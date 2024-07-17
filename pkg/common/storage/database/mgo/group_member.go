@@ -59,7 +59,7 @@ type GroupMemberMgo struct {
 }
 
 func (g *GroupMemberMgo) memberSort() any {
-	return bson.D{{"role_level", -1}, {"create_time", -1}}
+	return bson.D{{"role_level", -1}, {"create_time", 1}}
 }
 
 func (g *GroupMemberMgo) Create(ctx context.Context, groupMembers []*model.GroupMember) (err error) {
