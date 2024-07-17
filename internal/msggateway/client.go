@@ -96,10 +96,12 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer
 	c.hbCtx, c.hbCancel = context.WithCancel(c.ctx)
 }
 
-func (c *Client) pingHandler(_ string) error {
+func (c *Client) pingHandler(appData string) error {
 	if err := c.conn.SetReadDeadline(pongWait); err != nil {
 		return err
 	}
+
+	log.ZDebug(c.ctx, "ping Handler Success.", "pong appData", appData)
 
 	return c.writePongMsg()
 }
