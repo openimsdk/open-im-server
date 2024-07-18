@@ -504,19 +504,24 @@ func (g *groupDatabase) FindMemberIncrVersion(ctx context.Context, groupID strin
 
 func (g *groupDatabase) BatchFindMemberIncrVersion(ctx context.Context, groupIDs []string, versions []uint64, limits []int) (map[string]*model.VersionLog, error) {
 	if len(groupIDs) == 0 {
-		return nil, nil
+		return nil, errs.New("groupIDs is nil.")
 	}
+
+	// convert []uint64 to []uint
 	var uintVersions []uint
 	for _, version := range versions {
 		uintVersions = append(uintVersions, uint(version))
 	}
+
 	versionLogs, err := g.groupMemberDB.BatchFindMemberIncrVersion(ctx, groupIDs, uintVersions, limits)
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
+
 	groupMemberIncrVersionsMap := datautil.SliceToMap(versionLogs, func(e *model.VersionLog) string {
 		return e.DID
 	})
+
 	return groupMemberIncrVersionsMap, nil
 }
 

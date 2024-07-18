@@ -398,8 +398,10 @@ func (g *GroupCacheRedis) BatchFindMaxGroupMemberVersion(ctx context.Context, gr
 		}, func(versionLog *model.VersionLog) string {
 			return versionLog.DID
 		}, func(ctx context.Context, groupIDs []string) ([]*model.VersionLog, error) {
+			// create two slices with len is groupIDs, just need 0
 			versions := make([]uint, len(groupIDs))
 			limits := make([]int, len(groupIDs))
+
 			return g.groupMemberDB.BatchFindMemberIncrVersion(ctx, groupIDs, versions, limits)
 		})
 }

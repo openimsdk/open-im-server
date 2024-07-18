@@ -18,8 +18,7 @@ type BatchOption[A, B any] struct {
 	Versions         func(ctx context.Context, dIds []string, versions []uint64, limits []int) (map[string]*model.VersionLog, error)
 	CacheMaxVersions func(ctx context.Context, dIds []string) (map[string]*model.VersionLog, error)
 	Find             func(ctx context.Context, dId string, ids []string) (A, error)
-	// Resp func(version map[string]*model.VersionLog, deleteIds, insertList, updateList []A, full bool) []*B
-	Resp func(versions map[string]*model.VersionLog, deleteIdsMap map[string][]string, insertListMap, updateListMap map[string]A, fullMap map[string]bool) *B
+	Resp             func(versionsMap map[string]*model.VersionLog, deleteIdsMap map[string][]string, insertListMap, updateListMap map[string]A, fullMap map[string]bool) *B
 }
 
 func (o *BatchOption[A, B]) newError(msg string) error {
@@ -212,26 +211,3 @@ func (o *BatchOption[A, B]) Build() (*B, error) {
 
 	return o.Resp(versions, deleteIdsMap, insertListMap, updateListMap, fullMap), nil
 }
-
-// for _, versionLog := range versionLogs {
-// 	if versionLog != nil {
-// 		if !full {
-
-// 		}
-// 		insertIds, deleteIds, updateIds = append(insertIds, versionLog.InsertID...), append(deleteIds, versionLog.DeleteIDs...), append(updateIds, versionLog.UpdateIDs...)
-// 	}
-// }
-
-// insertList, err := o.Find(o.Ctx, insertIds)
-// if err != nil {
-// 	return nil, err
-// }
-
-// updateList, err := o.Find(o.Ctx, updateIds)
-// if err != nil {
-// 	return nil, err
-// }
-
-// full := len(insertIds) > 0 || len(updateIds) > 0
-
-// return o.Resp(versionLogs, deleteIds, insertList, updateList, full), nil
