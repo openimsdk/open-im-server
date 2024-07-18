@@ -152,8 +152,24 @@ func (l *VersionLogMgo) writeLogBatch2(ctx context.Context, dId string, eIds []s
 			"$unset": "delete_e_ids",
 		},
 	}
-	opt := options.FindOneAndUpdate().SetUpsert(false).SetReturnDocument(options.After).SetProjection(bson.M{"logs": 0})
-	return mongoutil.FindOneAndUpdate[*model.VersionLog](ctx, l.coll, filter, pipeline, opt)
+	projection := bson.M{
+		"logs": 0,
+	}
+	opt := options.FindOneAndUpdate().SetUpsert(false).SetReturnDocument(options.After).SetProjection(projection)
+	res, err := mongoutil.FindOneAndUpdate[*model.VersionLog](ctx, l.coll, filter, pipeline, opt)
+	if err != nil {
+		return nil, err
+	}
+	res.Logs = make([]model.VersionLogElem, 0, len(eIds))
+	for _, id := range eIds {
+		res.Logs = append(res.Logs, model.VersionLogElem{
+			EID:        id,
+			State:      state,
+			Version:    res.Version,
+			LastUpdate: res.LastUpdate,
+		})
+	}
+	return res, nil
 }
 
 func (l *VersionLogMgo) findDoc(ctx context.Context, dId string) (*model.VersionLog, error) {
