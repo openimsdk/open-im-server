@@ -119,6 +119,7 @@ func (u *userDatabase) InitOnce(ctx context.Context, users []*model.User) error 
 
 // FindWithError Get the information of the specified user and return an error if the userID is not found.
 func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (users []*model.User, err error) {
+	userIDs = datautil.Distinct(userIDs)
 	users, err = u.cache.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return
