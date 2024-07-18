@@ -18,8 +18,8 @@ import (
 
 func NewVersionLog(coll *mongo.Collection) (database.VersionLog, error) {
 	lm := &VersionLogMgo{coll: coll}
-	if lm.initIndex(context.Background()) != nil {
-		return nil, errs.ErrInternalServer.WrapMsg("init index failed", "coll", coll.Name())
+	if err := lm.initIndex(context.Background()); err != nil {
+		return nil, errs.WrapMsg(err, "init version log index failed", "coll", coll.Name())
 	}
 	return lm, nil
 }
@@ -33,6 +33,7 @@ func (l *VersionLogMgo) initIndex(ctx context.Context) error {
 		Keys: bson.M{
 			"d_id": 1,
 		},
+		Options: options.Index().SetUnique(true),
 	})
 	return err
 }
