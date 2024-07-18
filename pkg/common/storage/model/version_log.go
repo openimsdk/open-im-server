@@ -16,7 +16,7 @@ const (
 
 const (
 	VersionGroupChangeID = ""
-	VersionSortChangeID  = "$"
+	VersionSortChangeID  = "____S_O_R_T_I_D____"
 )
 
 type VersionLogElem struct {
