@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/protocol/sdkws"
 	pbuser "github.com/openimsdk/protocol/user"
 )
 
@@ -38,23 +37,6 @@ func (s *userServer) getUsersOnlineStatus(ctx context.Context, userIDs []string)
 
 // SubscribeOrCancelUsersStatus Subscribe online or cancel online users.
 func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbuser.SubscribeOrCancelUsersStatusReq) (*pbuser.SubscribeOrCancelUsersStatusResp, error) {
-	if req.Genre == constant.SubscriberUser {
-		err := s.db.SubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
-		if err != nil {
-			return nil, err
-		}
-		var status []*pbuser.OnlineStatus
-		status, err = s.getUsersOnlineStatus(ctx, req.UserIDs)
-		if err != nil {
-			return nil, err
-		}
-		return &pbuser.SubscribeOrCancelUsersStatusResp{StatusList: status}, nil
-	} else if req.Genre == constant.Unsubscribe {
-		err := s.db.UnsubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
-		if err != nil {
-			return nil, err
-		}
-	}
 	return &pbuser.SubscribeOrCancelUsersStatusResp{}, nil
 }
 
@@ -82,34 +64,12 @@ func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatu
 	if err := s.online.SetUserOnline(ctx, req.UserID, online, offline); err != nil {
 		return nil, err
 	}
-	list, err := s.db.GetSubscribedList(ctx, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	for _, userID := range list {
-		tips := &sdkws.UserStatusChangeTips{
-			FromUserID: req.UserID,
-			ToUserID:   userID,
-			Status:     req.Status,
-			PlatformID: req.PlatformID,
-		}
-		s.userNotificationSender.UserStatusChangeNotification(ctx, tips)
-	}
-
 	return &pbuser.SetUserStatusResp{}, nil
 }
 
 // GetSubscribeUsersStatus Get the online status of subscribers.
 func (s *userServer) GetSubscribeUsersStatus(ctx context.Context, req *pbuser.GetSubscribeUsersStatusReq) (*pbuser.GetSubscribeUsersStatusResp, error) {
-	userList, err := s.db.GetAllSubscribeList(ctx, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	onlineStatusList, err := s.getUsersOnlineStatus(ctx, userList)
-	if err != nil {
-		return nil, err
-	}
-	return &pbuser.GetSubscribeUsersStatusResp{StatusList: onlineStatusList}, nil
+	return &pbuser.GetSubscribeUsersStatusResp{}, nil
 }
 
 func (s *userServer) SetUserOnlineStatus(ctx context.Context, req *pbuser.SetUserOnlineStatusReq) (*pbuser.SetUserOnlineStatusResp, error) {
