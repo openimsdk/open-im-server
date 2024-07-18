@@ -34,7 +34,9 @@ func (l *VersionLogMgo) initIndex(ctx context.Context) error {
 		Keys: bson.M{
 			"d_id": 1,
 		},
+		Options: options.Index().SetUnique(true),
 	})
+
 	return err
 }
 
