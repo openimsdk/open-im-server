@@ -12,6 +12,11 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 )
 
+func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *pbgroup.BatchGetIncrementalGroupMemberReq) (*pbgroup.BatchGetIncrementalGroupMemberResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (s *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetFullGroupMemberUserIDsReq) (*pbgroup.GetFullGroupMemberUserIDsResp, error) {
 	vl, err := s.db.FindMaxGroupMemberVersionCache(ctx, req.GroupID)
 	if err != nil {
