@@ -324,6 +324,10 @@ func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, co
 	options := config.GetOptionsByNotification(optionsConfig)
 	s.SetOptionsByContentType(ctx, options, contentType)
 	msg.Options = options
+	//根据notification.yml中的配置填充离线推送参数
+	offlineInfo.Title = optionsConfig.OfflinePush.Title
+	offlineInfo.Desc = optionsConfig.OfflinePush.Desc
+	offlineInfo.Ex = optionsConfig.OfflinePush.Ext
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
 	_, err = s.sendMsg(ctx, &req)
