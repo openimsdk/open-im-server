@@ -504,7 +504,7 @@ func (g *groupDatabase) FindMemberIncrVersion(ctx context.Context, groupID strin
 
 func (g *groupDatabase) BatchFindMemberIncrVersion(ctx context.Context, groupIDs []string, versions []uint64, limits []int) (map[string]*model.VersionLog, error) {
 	if len(groupIDs) == 0 {
-		return nil, errs.New("groupIDs is nil.")
+		return nil, errs.Wrap(errs.New("groupIDs is nil."))
 	}
 
 	// convert []uint64 to []uint
@@ -535,7 +535,7 @@ func (g *groupDatabase) FindMaxGroupMemberVersionCache(ctx context.Context, grou
 
 func (g *groupDatabase) BatchFindMaxGroupMemberVersionCache(ctx context.Context, groupIDs []string) (map[string]*model.VersionLog, error) {
 	if len(groupIDs) == 0 {
-		return nil, nil
+		return nil, errs.Wrap(errs.New("groupIDs is nil in Cache."))
 	}
 	versionLogs, err := g.cache.BatchFindMaxGroupMemberVersion(ctx, groupIDs)
 	if err != nil {

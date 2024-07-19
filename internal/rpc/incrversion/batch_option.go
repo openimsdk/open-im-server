@@ -48,7 +48,7 @@ func (o *BatchOption[A, B]) validVersions() []bool {
 	valids := make([]bool, len(o.VersionIDs))
 	for i, versionID := range o.VersionIDs {
 		objID, err := primitive.ObjectIDFromHex(versionID)
-		valids[i] = err == nil && (!objID.IsZero()) && o.VersionNumbers[i] > 0
+		valids[i] = (err == nil && (!objID.IsZero()) && o.VersionNumbers[i] > 0)
 	}
 	return valids
 }
@@ -75,51 +75,41 @@ func (o *BatchOption[A, B]) getVersions(tags *[]int) (versions map[string]*model
 				dIDs = append(dIDs, o.TargetKeys[i])
 				versionNums = append(versionNums, o.VersionNumbers[i])
 				limits = append(limits, syncLimit)
-
-				// version, err := o.Versions(o.Ctx, []string{o.VersionKeys[i]}, []uint64{o.VersionNumbers[i]}, syncLimit)
-				// if err != nil {
-				// 	return nil, err
-				// }
-				// versions[o.VersionKeys[i]] = version[o.VersionKeys[i]]
 			} else {
 				(*tags)[i] = tagFull
 				dIDs = append(dIDs, o.TargetKeys[i])
 				versionNums = append(versionNums, 0)
 				limits = append(limits, 0)
-
-				// version, err := o.Versions(o.Ctx, []string{o.VersionKeys[i]}, []uint64{0}, 0)
-				// if err != nil {
-				// 	return nil, err
-				// }
-				// versions[o.VersionKeys[i]] = version[o.VersionKeys[i]]
 			}
 		}
+
 		versions, err = o.Versions(o.Ctx, dIDs, versionNums, limits)
 		if err != nil {
 			return nil, errs.Wrap(err)
 		}
 		return versions, nil
+
 	} else {
 		caches, err := o.CacheMaxVersions(o.Ctx, o.TargetKeys)
 		if err != nil {
-			return nil, err
+			return nil, errs.Wrap(err)
 		}
+
 		objIDs := make([]primitive.ObjectID, len(o.VersionIDs))
+
 		for i, versionID := range o.VersionIDs {
 			objID, _ := primitive.ObjectIDFromHex(versionID)
 			objIDs[i] = objID
 		}
+
 		equals := o.equalIDs(objIDs)
 		for i, valid := range valids {
 			if !valid {
 				(*tags)[i] = tagFull
-				// versions[o.VersionKeys[i]] = caches[o.VersionKeys[i]]
 			} else if !equals[i] {
 				(*tags)[i] = tagFull
-				// versions[o.VersionKeys[i]] = caches[o.VersionKeys[i]]
 			} else if o.VersionNumbers[i] == uint64(caches[o.TargetKeys[i]].Version) {
 				(*tags)[i] = tagEqual
-				// versions[o.VersionKeys[i]] = caches[o.VersionKeys[i]]
 			} else {
 				(*tags)[i] = tagQuery
 				dIDs = append(dIDs, o.TargetKeys[i])
@@ -127,16 +117,20 @@ func (o *BatchOption[A, B]) getVersions(tags *[]int) (versions map[string]*model
 				limits = append(limits, syncLimit)
 
 				delete(caches, o.TargetKeys[i])
-				// versions[o.VersionKeys[i]] = version[o.VersionKeys[i]]
 			}
 		}
-		version, err := o.Versions(o.Ctx, dIDs, versionNums, limits)
-		if err != nil {
-			return nil, err
+
+		if dIDs != nil {
+			versionMap, err := o.Versions(o.Ctx, dIDs, versionNums, limits)
+			if err != nil {
+				return nil, errs.Wrap(err)
+			}
+
+			for k, v := range versionMap {
+				caches[k] = v
+			}
 		}
-		for k, v := range version {
-			caches[k] = v
-		}
+
 		versions = caches
 	}
 	return versions, nil
@@ -144,13 +138,13 @@ func (o *BatchOption[A, B]) getVersions(tags *[]int) (versions map[string]*model
 
 func (o *BatchOption[A, B]) Build() (*B, error) {
 	if err := o.check(); err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 
 	tags := make([]int, len(o.TargetKeys))
 	versions, err := o.getVersions(&tags)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 
 	fullMap := make(map[string]bool)
@@ -193,7 +187,7 @@ func (o *BatchOption[A, B]) Build() (*B, error) {
 		if len(insertIds) > 0 {
 			insertList, err := o.Find(o.Ctx, targetKey, insertIds)
 			if err != nil {
-				return nil, err
+				return nil, errs.Wrap(err)
 			}
 			insertListMap[targetKey] = insertList
 		}
@@ -203,7 +197,7 @@ func (o *BatchOption[A, B]) Build() (*B, error) {
 		if len(updateIds) > 0 {
 			updateList, err := o.Find(o.Ctx, targetKey, updateIds)
 			if err != nil {
-				return nil, err
+				return nil, errs.Wrap(err)
 			}
 			updateListMap[targetKey] = updateList
 		}

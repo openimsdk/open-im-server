@@ -162,7 +162,7 @@ func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *p
 
 	groups, err := s.db.FindGroup(ctx, groupIDs)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 
 	for _, group := range groups {
@@ -190,7 +190,7 @@ func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *p
 		Versions: func(ctx context.Context, groupIDs []string, versions []uint64, limits []int) (map[string]*model.VersionLog, error) {
 			vLogs, err := s.db.BatchFindMemberIncrVersion(ctx, groupIDs, versions, limits)
 			if err != nil {
-				return nil, err
+				return nil, errs.Wrap(err)
 			}
 
 			for groupID, vlog := range vLogs {
@@ -252,7 +252,7 @@ func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *p
 
 	resp, err = opt.Build()
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 
 	for groupID, val := range resp.RespList {
