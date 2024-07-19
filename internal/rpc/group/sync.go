@@ -2,7 +2,6 @@ package group
 
 import (
 	"context"
-	"slices"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -144,11 +143,12 @@ func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *p
 	groupsVersionMap := make(map[string]*VersionInfo)
 	groupsMap := make(map[string]*model.Group)
 	hasGroupUpdateMap := make(map[string]bool)
+	sortVersionMap := make(map[string]uint64)
 
 	var targetKeys, versionIDs []string
 	var versionNumbers []uint64
 
-	// var requestBodyLen int
+	var requestBodyLen int
 
 	for _, group := range req.ReqList {
 		groupsVersionMap[group.GroupID] = &VersionInfo{
@@ -194,14 +194,20 @@ func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *p
 			}
 
 			for groupID, vlog := range vLogs {
-				vlog.Logs = slices.DeleteFunc(vlog.Logs, func(elem model.VersionLogElem) bool {
-					if elem.EID == "" {
+				vlogElems := make([]model.VersionLogElem, 0, len(vlog.Logs))
+				for i, log := range vlog.Logs {
+					switch log.EID {
+					case model.VersionGroupChangeID:
 						vlog.LogLen--
 						hasGroupUpdateMap[groupID] = true
-						return true
+					case model.VersionSortChangeID:
+						vlog.LogLen--
+						sortVersionMap[groupID] = uint64(log.Version)
+					default:
+						vlogElems = append(vlogElems, vlog.Logs[i])
 					}
-					return false
-				})
+				}
+				vlog.Logs = vlogElems
 				if vlog.LogLen > 0 {
 					hasGroupUpdateMap[groupID] = true
 				}
@@ -223,12 +229,18 @@ func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *p
 
 			for groupID, versionLog := range versions {
 				resList[groupID] = &pbgroup.GetIncrementalGroupMemberResp{
-					VersionID: versionLog.ID.Hex(),
-					Version:   uint64(versionLog.Version),
-					Full:      fullMap[groupID],
-					Delete:    deleteIdsMap[groupID],
-					Insert:    insertListMap[groupID],
-					Update:    updateListMap[groupID],
+					VersionID:   versionLog.ID.Hex(),
+					Version:     uint64(versionLog.Version),
+					Full:        fullMap[groupID],
+					Delete:      deleteIdsMap[groupID],
+					Insert:      insertListMap[groupID],
+					Update:      updateListMap[groupID],
+					SortVersion: sortVersionMap[groupID],
+				}
+
+				requestBodyLen += len(insertListMap[groupID]) + len(updateListMap[groupID]) + len(deleteIdsMap[groupID])
+				if requestBodyLen > 200 {
+					break
 				}
 			}
 
