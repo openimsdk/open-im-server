@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-func Result[V any](val V, err error) V {
-	if err != nil {
-		panic(err)
-	}
-	return val
-}
+//func Result[V any](val V, err error) V {
+//	if err != nil {
+//		panic(err)
+//	}
+//	return val
+//}
 
 func Check(err error) {
 	if err != nil {
@@ -30,7 +30,7 @@ func TestName(t *testing.T) {
 		panic(err)
 	}
 	vl := tmp.(*VersionLogMgo)
-	res, err := vl.writeLogBatch2(context.Background(), "100", []string{"1000", "1001", "1003"}, model.VersionStateInsert, time.Now())
+	res, err := vl.incrVersionResult(context.Background(), "100", []string{"1000", "1001", "1003"}, model.VersionStateInsert)
 	if err != nil {
 		t.Log(err)
 		return

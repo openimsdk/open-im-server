@@ -2,15 +2,11 @@ package msggateway
 
 import (
 	"context"
-	"encoding/json"
-	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/idutil"
 	"google.golang.org/protobuf/proto"
 	"sync"
-	"time"
 )
 
 func (ws *WsServer) subscriberUserOnlineStatusChanges(ctx context.Context, userID string, platformIDs []int32) {
@@ -45,33 +41,19 @@ func (ws *WsServer) SubUserOnlineStatus(ctx context.Context, client *Client, dat
 	return proto.Marshal(&resp)
 }
 
-type subClient struct {
-	clients map[string]*Client
-}
-
 func newSubscription() *Subscription {
 	return &Subscription{
 		userIDs: make(map[string]*subClient),
 	}
 }
 
-type Subscription struct {
-	lock    sync.RWMutex
-	userIDs map[string]*subClient
+type subClient struct {
+	clients map[string]*Client
 }
 
-func (s *Subscription) GetClient(userID string) []*Client {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
-	cs, ok := s.userIDs[userID]
-	if !ok {
-		return nil
-	}
-	clients := make([]*Client, 0, len(cs.clients))
-	for _, client := range cs.clients {
-		clients = append(clients, client)
-	}
-	return clients
+type Subscription struct {
+	lock    sync.RWMutex
+	userIDs map[string]*subClient // subscribe to the user's client connection
 }
 
 func (s *Subscription) DelClient(client *Client) {
@@ -99,6 +81,20 @@ func (s *Subscription) DelClient(client *Client) {
 	}
 }
 
+func (s *Subscription) GetClient(userID string) []*Client {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	cs, ok := s.userIDs[userID]
+	if !ok {
+		return nil
+	}
+	clients := make([]*Client, 0, len(cs.clients))
+	for _, client := range cs.clients {
+		clients = append(clients, client)
+	}
+	return clients
+}
+
 func (s *Subscription) Sub(client *Client, addUserIDs, delUserIDs []string) {
 	if len(addUserIDs)+len(delUserIDs) == 0 {
 		return
@@ -121,6 +117,7 @@ func (s *Subscription) Sub(client *Client, addUserIDs, delUserIDs []string) {
 			continue
 		}
 		client.subUserIDs[userID] = struct{}{}
+		add[userID] = struct{}{}
 	}
 	client.subLock.Unlock()
 	if len(del)+len(add) == 0 {
@@ -154,28 +151,16 @@ func (ws *WsServer) pushUserIDOnlineStatus(ctx context.Context, userID string, p
 	if len(clients) == 0 {
 		return
 	}
-	msgContent, err := json.Marshal(platformIDs)
+	onlineStatus, err := proto.Marshal(&sdkws.SubUserOnlineStatusTips{
+		Subscribers: []*sdkws.SubUserOnlineStatusElem{{UserID: userID, OnlinePlatformIDs: platformIDs}},
+	})
 	if err != nil {
 		log.ZError(ctx, "pushUserIDOnlineStatus json.Marshal", err)
 		return
 	}
-	now := time.Now().UnixMilli()
-	msgID := idutil.GetMsgIDByMD5(userID)
-	msg := &sdkws.MsgData{
-		SendID:           userID,
-		ClientMsgID:      msgID,
-		ServerMsgID:      msgID,
-		SenderPlatformID: constant.AdminPlatformID,
-		SessionType:      constant.NotificationChatType,
-		ContentType:      constant.UserSubscribeOnlineStatusNotification,
-		Content:          msgContent,
-		SendTime:         now,
-		CreateTime:       now,
-	}
 	for _, client := range clients {
-		msg.RecvID = client.UserID
-		if err := client.PushMessage(ctx, msg); err != nil {
-			log.ZError(ctx, "UserSubscribeOnlineStatusNotification push failed", err, "userID", client.UserID, "platformID", client.PlatformID, "changeUserID", userID, "content", msgContent)
+		if err := client.PushUserOnlineStatus(onlineStatus); err != nil {
+			log.ZError(ctx, "UserSubscribeOnlineStatusNotification push failed", err, "userID", client.UserID, "platformID", client.PlatformID, "changeUserID", userID, "changePlatformID", platformIDs)
 		}
 	}
 }
