@@ -78,7 +78,6 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.
 		Find: func(ctx context.Context, ids []string) ([]*sdkws.FriendInfo, error) {
 			return s.getFriend(ctx, req.UserID, ids)
 		},
-		ID: func(elem *sdkws.FriendInfo) string { return elem.FriendUser.UserID },
 		Resp: func(version *model.VersionLog, deleteIds []string, insertList, updateList []*sdkws.FriendInfo, full bool) *relation.GetIncrementalFriendsResp {
 			return &relation.GetIncrementalFriendsResp{
 				VersionID:   version.ID.Hex(),

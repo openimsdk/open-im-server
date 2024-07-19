@@ -16,6 +16,7 @@ package mgo
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/log"
@@ -228,6 +229,11 @@ func (g *GroupMemberMgo) MemberGroupIncrVersion(ctx context.Context, groupID str
 func (g *GroupMemberMgo) FindMemberIncrVersion(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error) {
 	log.ZDebug(ctx, "find member incr version", "groupID", groupID, "version", version)
 	return g.member.FindChangeLog(ctx, groupID, version, limit)
+}
+
+func (g *GroupMemberMgo) BatchFindMemberIncrVersion(ctx context.Context, groupIDs []string, versions []uint, limits []int) ([]*model.VersionLog, error) {
+	log.ZDebug(ctx, "Batch find member incr version", "groupIDs", groupIDs, "versions", versions)
+	return g.member.BatchFindChangeLog(ctx, groupIDs, versions, limits)
 }
 
 func (g *GroupMemberMgo) FindJoinIncrVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error) {
