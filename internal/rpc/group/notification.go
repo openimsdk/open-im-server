@@ -306,6 +306,21 @@ func (g *GroupNotificationSender) setVersion(ctx context.Context, version *uint6
 	}
 }
 
+func (g *GroupNotificationSender) setSortVersion(ctx context.Context, version *uint64, versionID *string, collName string, id string, sortVersion *uint64) {
+	versions := versionctx.GetVersionLog(ctx).Get()
+	for _, coll := range versions {
+		if coll.Name == collName && coll.Doc.DID == id {
+			*version = uint64(coll.Doc.Version)
+			*versionID = coll.Doc.ID.Hex()
+			for _, elem := range coll.Doc.Logs {
+				if elem.EID == model.VersionSortChangeID {
+					*sortVersion = uint64(elem.Version)
+				}
+			}
+		}
+	}
+}
+
 func (g *GroupNotificationSender) GroupCreatedNotification(ctx context.Context, tips *sdkws.GroupCreatedTips) {
 	var err error
 	defer func() {
@@ -707,7 +722,7 @@ func (g *GroupNotificationSender) GroupMemberInfoSetNotification(ctx context.Con
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return
 	}
-	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
+	g.setSortVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID, &tips.GroupSortVersion)
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberInfoSetNotification, tips)
 }
 

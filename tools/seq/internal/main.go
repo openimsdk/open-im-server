@@ -116,7 +116,7 @@ func Main(conf string, del time.Duration) error {
 		{
 			Prefix: MaxSeq,
 			GetSeq: cSeq.GetMaxSeq,
-			SetSeq: cSeq.SetMinSeq,
+			SetSeq: cSeq.SetMaxSeq,
 		},
 		{
 			Prefix: MinSeq,

@@ -109,7 +109,13 @@ func (f *FriendMgo) UpdateByMap(ctx context.Context, ownerUserID string, friendU
 	return mongoutil.IncrVersion(func() error {
 		return mongoutil.UpdateOne(ctx, f.coll, filter, bson.M{"$set": args}, true)
 	}, func() error {
-		return f.owner.IncrVersion(ctx, ownerUserID, []string{friendUserID}, model.VersionStateUpdate)
+		var friendUserIDs []string
+		if f.IsUpdateIsPinned(args) {
+			friendUserIDs = []string{model.VersionSortChangeID, friendUserID}
+		} else {
+			friendUserIDs = []string{friendUserID}
+		}
+		return f.owner.IncrVersion(ctx, ownerUserID, friendUserIDs, model.VersionStateUpdate)
 	})
 }
 
@@ -214,7 +220,7 @@ func (f *FriendMgo) FindFriendUserIDs(ctx context.Context, ownerUserID string) (
 
 func (f *FriendMgo) UpdateFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, val map[string]any) error {
 	// Ensure there are IDs to update
-	if len(friendUserIDs) == 0 {
+	if len(friendUserIDs) == 0 || len(val) == 0 {
 		return nil // Or return an error if you expect there to always be IDs
 	}
 
@@ -230,7 +236,13 @@ func (f *FriendMgo) UpdateFriends(ctx context.Context, ownerUserID string, frien
 	return mongoutil.IncrVersion(func() error {
 		return mongoutil.Ignore(mongoutil.UpdateMany(ctx, f.coll, filter, update))
 	}, func() error {
-		return f.owner.IncrVersion(ctx, ownerUserID, friendUserIDs, model.VersionStateUpdate)
+		var userIDs []string
+		if f.IsUpdateIsPinned(val) {
+			userIDs = append([]string{model.VersionSortChangeID}, friendUserIDs...)
+		} else {
+			userIDs = friendUserIDs
+		}
+		return f.owner.IncrVersion(ctx, ownerUserID, userIDs, model.VersionStateUpdate)
 	})
 }
 
@@ -247,4 +259,12 @@ func (f *FriendMgo) FindFriendUserID(ctx context.Context, friendUserID string) (
 
 func (f *FriendMgo) IncrVersion(ctx context.Context, ownerUserID string, friendUserIDs []string, state int32) error {
 	return f.owner.IncrVersion(ctx, ownerUserID, friendUserIDs, state)
+}
+
+func (f *FriendMgo) IsUpdateIsPinned(data map[string]any) bool {
+	if data == nil {
+		return false
+	}
+	_, ok := data["is_pinned"]
+	return ok
 }
