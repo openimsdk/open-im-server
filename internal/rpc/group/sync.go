@@ -10,8 +10,12 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/sdkws"
-	"slices"
 )
+
+func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *pbgroup.BatchGetIncrementalGroupMemberReq) (*pbgroup.BatchGetIncrementalGroupMemberResp, error) {
+	//TODO implement me
+	panic("implement me")
+}
 
 func (s *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetFullGroupMemberUserIDsReq) (*pbgroup.GetFullGroupMemberUserIDsResp, error) {
 	vl, err := s.db.FindMaxGroupMemberVersionCache(ctx, req.GroupID)
@@ -63,7 +67,10 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, servererrs.ErrDismissedAlready.Wrap()
 	}
-	var hasGroupUpdate bool
+	var (
+		hasGroupUpdate bool
+		sortVersion    uint64
+	)
 	opt := incrversion.Option[*sdkws.GroupMemberFullInfo, pbgroup.GetIncrementalGroupMemberResp]{
 		Ctx:           ctx,
 		VersionKey:    req.GroupID,
@@ -74,14 +81,20 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 			if err != nil {
 				return nil, err
 			}
-			vl.Logs = slices.DeleteFunc(vl.Logs, func(elem model.VersionLogElem) bool {
-				if elem.EID == "" {
+			logs := make([]model.VersionLogElem, 0, len(vl.Logs))
+			for i, log := range vl.Logs {
+				switch log.EID {
+				case model.VersionGroupChangeID:
 					vl.LogLen--
 					hasGroupUpdate = true
-					return true
+				case model.VersionSortChangeID:
+					vl.LogLen--
+					sortVersion = uint64(log.Version)
+				default:
+					logs = append(logs, vl.Logs[i])
 				}
-				return false
-			})
+			}
+			vl.Logs = logs
 			if vl.LogLen > 0 {
 				hasGroupUpdate = true
 			}
@@ -94,12 +107,13 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 		ID: func(elem *sdkws.GroupMemberFullInfo) string { return elem.UserID },
 		Resp: func(version *model.VersionLog, delIDs []string, insertList, updateList []*sdkws.GroupMemberFullInfo, full bool) *pbgroup.GetIncrementalGroupMemberResp {
 			return &pbgroup.GetIncrementalGroupMemberResp{
-				VersionID: version.ID.Hex(),
-				Version:   uint64(version.Version),
-				Full:      full,
-				Delete:    delIDs,
-				Insert:    insertList,
-				Update:    updateList,
+				VersionID:   version.ID.Hex(),
+				Version:     uint64(version.Version),
+				Full:        full,
+				Delete:      delIDs,
+				Insert:      insertList,
+				Update:      updateList,
+				SortVersion: sortVersion,
 			}
 		},
 	}

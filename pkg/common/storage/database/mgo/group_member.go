@@ -59,7 +59,7 @@ type GroupMemberMgo struct {
 }
 
 func (g *GroupMemberMgo) memberSort() any {
-	return bson.D{{"role_level", -1}, {"create_time", -1}}
+	return bson.D{{"role_level", -1}, {"create_time", 1}}
 }
 
 func (g *GroupMemberMgo) Create(ctx context.Context, groupMembers []*model.GroupMember) (err error) {
@@ -118,7 +118,7 @@ func (g *GroupMemberMgo) UpdateRoleLevel(ctx context.Context, groupID string, us
 		return mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID},
 			bson.M{"$set": bson.M{"role_level": roleLevel}}, true)
 	}, func() error {
-		return g.member.IncrVersion(ctx, groupID, []string{userID}, model.VersionStateUpdate)
+		return g.member.IncrVersion(ctx, groupID, []string{model.VersionSortChangeID, userID}, model.VersionStateUpdate)
 	})
 }
 func (g *GroupMemberMgo) UpdateUserRoleLevels(ctx context.Context, groupID string, firstUserID string, firstUserRoleLevel int32, secondUserID string, secondUserRoleLevel int32) error {
@@ -131,10 +131,9 @@ func (g *GroupMemberMgo) UpdateUserRoleLevels(ctx context.Context, groupID strin
 			bson.M{"$set": bson.M{"role_level": secondUserRoleLevel}}, true); err != nil {
 			return err
 		}
-
 		return nil
 	}, func() error {
-		return g.member.IncrVersion(ctx, groupID, []string{firstUserID, secondUserID}, model.VersionStateUpdate)
+		return g.member.IncrVersion(ctx, groupID, []string{model.VersionSortChangeID, firstUserID, secondUserID}, model.VersionStateUpdate)
 	})
 }
 
@@ -145,7 +144,13 @@ func (g *GroupMemberMgo) Update(ctx context.Context, groupID string, userID stri
 	return mongoutil.IncrVersion(func() error {
 		return mongoutil.UpdateOne(ctx, g.coll, bson.M{"group_id": groupID, "user_id": userID}, bson.M{"$set": data}, true)
 	}, func() error {
-		return g.member.IncrVersion(ctx, groupID, []string{userID}, model.VersionStateUpdate)
+		var userIDs []string
+		if g.IsUpdateRoleLevel(data) {
+			userIDs = []string{model.VersionSortChangeID, userID}
+		} else {
+			userIDs = []string{userID}
+		}
+		return g.member.IncrVersion(ctx, groupID, userIDs, model.VersionStateUpdate)
 	})
 }
 

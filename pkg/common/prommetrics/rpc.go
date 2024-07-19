@@ -52,6 +52,8 @@ func GetGrpcCusMetrics(registerName string, share *config.Share) []prometheus.Co
 		return []prometheus.Collector{MsgOfflinePushFailedCounter}
 	case share.RpcRegisterName.Auth:
 		return []prometheus.Collector{UserLoginCounter}
+	case share.RpcRegisterName.User:
+		return []prometheus.Collector{UserRegisterCounter}
 	default:
 		return nil
 	}

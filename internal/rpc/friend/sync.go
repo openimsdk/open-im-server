@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/hashutil"
 	"github.com/openimsdk/protocol/sdkws"
+	"slices"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -52,12 +53,27 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.
 	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
+	var sortVersion uint64
 	opt := incrversion.Option[*sdkws.FriendInfo, relation.GetIncrementalFriendsResp]{
-		Ctx:             ctx,
-		VersionKey:      req.UserID,
-		VersionID:       req.VersionID,
-		VersionNumber:   req.Version,
-		Version:         s.db.FindFriendIncrVersion,
+		Ctx:           ctx,
+		VersionKey:    req.UserID,
+		VersionID:     req.VersionID,
+		VersionNumber: req.Version,
+		Version: func(ctx context.Context, ownerUserID string, version uint, limit int) (*model.VersionLog, error) {
+			vl, err := s.db.FindFriendIncrVersion(ctx, ownerUserID, version, limit)
+			if err != nil {
+				return nil, err
+			}
+			vl.Logs = slices.DeleteFunc(vl.Logs, func(elem model.VersionLogElem) bool {
+				if elem.EID == model.VersionSortChangeID {
+					vl.LogLen--
+					sortVersion = uint64(elem.Version)
+					return true
+				}
+				return false
+			})
+			return vl, nil
+		},
 		CacheMaxVersion: s.db.FindMaxFriendVersionCache,
 		Find: func(ctx context.Context, ids []string) ([]*sdkws.FriendInfo, error) {
 			return s.getFriend(ctx, req.UserID, ids)
@@ -65,12 +81,13 @@ func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.
 		ID: func(elem *sdkws.FriendInfo) string { return elem.FriendUser.UserID },
 		Resp: func(version *model.VersionLog, deleteIds []string, insertList, updateList []*sdkws.FriendInfo, full bool) *relation.GetIncrementalFriendsResp {
 			return &relation.GetIncrementalFriendsResp{
-				VersionID: version.ID.Hex(),
-				Version:   uint64(version.Version),
-				Full:      full,
-				Delete:    deleteIds,
-				Insert:    insertList,
-				Update:    updateList,
+				VersionID:   version.ID.Hex(),
+				Version:     uint64(version.Version),
+				Full:        full,
+				Delete:      deleteIds,
+				Insert:      insertList,
+				Update:      updateList,
+				SortVersion: sortVersion,
 			}
 		},
 	}

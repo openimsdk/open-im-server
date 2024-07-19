@@ -18,8 +18,8 @@ import (
 
 func NewVersionLog(coll *mongo.Collection) (database.VersionLog, error) {
 	lm := &VersionLogMgo{coll: coll}
-	if lm.initIndex(context.Background()) != nil {
-		return nil, errs.ErrInternalServer.WrapMsg("init index failed", "coll", coll.Name())
+	if err := lm.initIndex(context.Background()); err != nil {
+		return nil, errs.WrapMsg(err, "init version log index failed", "coll", coll.Name())
 	}
 	return lm, nil
 }
@@ -33,6 +33,7 @@ func (l *VersionLogMgo) initIndex(ctx context.Context) error {
 		Keys: bson.M{
 			"d_id": 1,
 		},
+		Options: options.Index().SetUnique(true),
 	})
 	return err
 }
@@ -152,8 +153,24 @@ func (l *VersionLogMgo) writeLogBatch2(ctx context.Context, dId string, eIds []s
 			"$unset": "delete_e_ids",
 		},
 	}
-	opt := options.FindOneAndUpdate().SetUpsert(false).SetReturnDocument(options.After).SetProjection(bson.M{"logs": 0})
-	return mongoutil.FindOneAndUpdate[*model.VersionLog](ctx, l.coll, filter, pipeline, opt)
+	projection := bson.M{
+		"logs": 0,
+	}
+	opt := options.FindOneAndUpdate().SetUpsert(false).SetReturnDocument(options.After).SetProjection(projection)
+	res, err := mongoutil.FindOneAndUpdate[*model.VersionLog](ctx, l.coll, filter, pipeline, opt)
+	if err != nil {
+		return nil, err
+	}
+	res.Logs = make([]model.VersionLogElem, 0, len(eIds))
+	for _, id := range eIds {
+		res.Logs = append(res.Logs, model.VersionLogElem{
+			EID:        id,
+			State:      state,
+			Version:    res.Version,
+			LastUpdate: res.LastUpdate,
+		})
+	}
+	return res, nil
 }
 
 func (l *VersionLogMgo) findDoc(ctx context.Context, dId string) (*model.VersionLog, error) {

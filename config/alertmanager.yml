@@ -11,11 +11,20 @@ templates:
   - /etc/alertmanager/email.tmpl
 
 route:
-  group_by: ['alertname']
+  group_by: [ 'alertname' ]
   group_wait: 5s
   group_interval: 5s
   repeat_interval: 5m
   receiver: email
+  routes:
+    - matchers:
+        - alertname = "XXX"
+      group_by: [ 'instance' ]
+      group_wait: 5s
+      group_interval: 5s
+      repeat_interval: 5m
+      receiver: email
+
 receivers:
   - name: email
     email_configs:
