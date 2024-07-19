@@ -19,6 +19,7 @@ import (
 	"errors"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/friend"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
@@ -309,6 +310,8 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	if err := s.db.Create(ctx, users); err != nil {
 		return nil, err
 	}
+
+	prommetrics.UserRegisterCounter.Add(float64(len(users)))
 
 	s.webhookAfterUserRegister(ctx, &s.config.WebhooksConfig.AfterUserRegister, req)
 	return resp, nil
