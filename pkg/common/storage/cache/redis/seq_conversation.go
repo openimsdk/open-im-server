@@ -63,7 +63,7 @@ func (s *seqConversationCacheRedis) batchGetMaxSeq(ctx context.Context, keys []s
 	for i, key := range keys {
 		result[i] = pipe.HGet(ctx, key, "CURR")
 	}
-	if _, err := pipe.Exec(ctx); err != nil {
+	if _, err := pipe.Exec(ctx); err != nil && !errors.Is(err, redis.Nil) {
 		return errs.Wrap(err)
 	}
 	var notFoundKey []string

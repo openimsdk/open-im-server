@@ -16,6 +16,8 @@ package friend
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
 
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
@@ -191,10 +193,37 @@ func (f *FriendNotificationSender) FriendDeletedNotification(ctx context.Context
 	f.Notification(ctx, req.OwnerUserID, req.FriendUserID, constant.FriendDeletedNotification, &tips)
 }
 
+func (f *FriendNotificationSender) setVersion(ctx context.Context, version *uint64, versionID *string, collName string, id string) {
+	versions := versionctx.GetVersionLog(ctx).Get()
+	for _, coll := range versions {
+		if coll.Name == collName && coll.Doc.DID == id {
+			*version = uint64(coll.Doc.Version)
+			*versionID = coll.Doc.ID.Hex()
+			return
+		}
+	}
+}
+
+func (f *FriendNotificationSender) setSortVersion(ctx context.Context, version *uint64, versionID *string, collName string, id string, sortVersion *uint64) {
+	versions := versionctx.GetVersionLog(ctx).Get()
+	for _, coll := range versions {
+		if coll.Name == collName && coll.Doc.DID == id {
+			*version = uint64(coll.Doc.Version)
+			*versionID = coll.Doc.ID.Hex()
+			for _, elem := range coll.Doc.Logs {
+				if elem.EID == relationtb.VersionSortChangeID {
+					*sortVersion = uint64(elem.Version)
+				}
+			}
+		}
+	}
+}
+
 func (f *FriendNotificationSender) FriendRemarkSetNotification(ctx context.Context, fromUserID, toUserID string) {
 	tips := sdkws.FriendInfoChangedTips{FromToUserID: &sdkws.FromToUserID{}}
 	tips.FromToUserID.FromUserID = fromUserID
 	tips.FromToUserID.ToUserID = toUserID
+	f.setSortVersion(ctx, &tips.FriendVersion, &tips.FriendVersionID, database.FriendVersionName, toUserID, &tips.FriendSortVersion)
 	f.Notification(ctx, fromUserID, toUserID, constant.FriendRemarkSetNotification, &tips)
 }
 

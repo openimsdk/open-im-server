@@ -3,6 +3,8 @@ package mgo
 import (
 	"context"
 	"errors"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
@@ -13,13 +15,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"time"
 )
 
 func NewVersionLog(coll *mongo.Collection) (database.VersionLog, error) {
 	lm := &VersionLogMgo{coll: coll}
-	if lm.initIndex(context.Background()) != nil {
-		return nil, errs.ErrInternalServer.WrapMsg("init index failed", "coll", coll.Name())
+	if err := lm.initIndex(context.Background()); err != nil {
+		return nil, errs.WrapMsg(err, "init version log index failed", "coll", coll.Name())
 	}
 	return lm, nil
 }
@@ -33,7 +34,9 @@ func (l *VersionLogMgo) initIndex(ctx context.Context) error {
 		Keys: bson.M{
 			"d_id": 1,
 		},
+		Options: options.Index().SetUnique(true),
 	})
+
 	return err
 }
 
@@ -152,8 +155,24 @@ func (l *VersionLogMgo) writeLogBatch2(ctx context.Context, dId string, eIds []s
 			"$unset": "delete_e_ids",
 		},
 	}
-	opt := options.FindOneAndUpdate().SetUpsert(false).SetReturnDocument(options.After).SetProjection(bson.M{"logs": 0})
-	return mongoutil.FindOneAndUpdate[*model.VersionLog](ctx, l.coll, filter, pipeline, opt)
+	projection := bson.M{
+		"logs": 0,
+	}
+	opt := options.FindOneAndUpdate().SetUpsert(false).SetReturnDocument(options.After).SetProjection(projection)
+	res, err := mongoutil.FindOneAndUpdate[*model.VersionLog](ctx, l.coll, filter, pipeline, opt)
+	if err != nil {
+		return nil, err
+	}
+	res.Logs = make([]model.VersionLogElem, 0, len(eIds))
+	for _, id := range eIds {
+		res.Logs = append(res.Logs, model.VersionLogElem{
+			EID:        id,
+			State:      state,
+			Version:    res.Version,
+			LastUpdate: res.LastUpdate,
+		})
+	}
+	return res, nil
 }
 
 func (l *VersionLogMgo) findDoc(ctx context.Context, dId string) (*model.VersionLog, error) {
@@ -179,6 +198,26 @@ func (l *VersionLogMgo) FindChangeLog(ctx context.Context, dId string, version u
 	} else {
 		return nil, err
 	}
+}
+
+func (l *VersionLogMgo) BatchFindChangeLog(ctx context.Context, dIds []string, versions []uint, limits []int) (vLogs []*model.VersionLog, err error) {
+	for i := 0; i < len(dIds); i++ {
+		if vLog, err := l.findChangeLog(ctx, dIds[i], versions[i], limits[i]); err == nil {
+			vLogs = append(vLogs, vLog)
+		} else if !errors.Is(err, mongo.ErrNoDocuments) {
+			log.ZError(ctx, "findChangeLog error:", errs.Wrap(err))
+		}
+		log.ZDebug(ctx, "init doc", "dId", dIds[i])
+		if res, err := l.initDoc(ctx, dIds[i], nil, 0, time.Now()); err == nil {
+			log.ZDebug(ctx, "init doc success", "dId", dIds[i])
+			vLogs = append(vLogs, res)
+		} else if mongo.IsDuplicateKeyError(err) {
+			l.findChangeLog(ctx, dIds[i], versions[i], limits[i])
+		} else {
+			log.ZError(ctx, "init doc error:", errs.Wrap(err))
+		}
+	}
+	return vLogs, errs.Wrap(err)
 }
 
 func (l *VersionLogMgo) findChangeLog(ctx context.Context, dId string, version uint, limit int) (*model.VersionLog, error) {

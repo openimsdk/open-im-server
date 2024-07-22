@@ -14,6 +14,11 @@ const (
 	VersionStateUpdate
 )
 
+const (
+	VersionGroupChangeID = ""
+	VersionSortChangeID  = "____S_O_R_T_I_D____"
+)
+
 type VersionLogElem struct {
 	EID        string    `bson:"e_id"`
 	State      int32     `bson:"state"`
