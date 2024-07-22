@@ -1,7 +1,7 @@
 # How do I contribute code to OpenIM
 
 <p align="center">
-  <a href="./CONTRIBUTING.md">Englist</a> · 
+  <a href="./CONTRIBUTING.md">English</a> · 
   <a href="./CONTRIBUTING-zh_CN.md">中文</a> · 
   <a href="docs/contributing/CONTRIBUTING-UA.md">Українська</a> · 
   <a href="docs/contributing/CONTRIBUTING-CS.md">Česky</a> · 
