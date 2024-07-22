@@ -156,19 +156,13 @@ func (s *Server) pushToUser(ctx context.Context, userID string, msgData *sdkws.M
 			err := client.PushMessage(ctx, msgData)
 			if err != nil {
 				userPlatform.ResultCode = int64(servererrs.ErrPushMsgErr.Code())
-				//result.Resp = append(result.Resp, userPlatform)
-				//resp = append(resp, userPlatform)
 			} else {
 				if _, ok := s.pushTerminal[client.PlatformID]; ok {
 					result.OnlinePush = true
-					//result.Resp = append(result.Resp, userPlatform)
-					//results.OnlinePush = true
-					//resp = append(resp, userPlatform)
 				}
 			}
 		} else {
 			userPlatform.ResultCode = int64(servererrs.ErrIOSBackgroundPushErr.Code())
-			//resp = append(resp, userPlatform)
 		}
 		result.Resp = append(result.Resp, userPlatform)
 	}
