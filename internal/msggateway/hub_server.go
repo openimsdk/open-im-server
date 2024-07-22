@@ -182,7 +182,8 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 	ch := make(chan *msggateway.SingleMsgToUserResults, len(req.PushToUserIDs))
 	var count atomic.Int64
 	count.Add(int64(len(req.PushToUserIDs)))
-	for _, userID := range req.PushToUserIDs {
+	for i := range req.PushToUserIDs {
+		userID := req.PushToUserIDs[i]
 		err := s.queue.PushCtx(ctx, func() {
 			ch <- s.pushToUser(ctx, userID, req.MsgData)
 			if count.Add(-1) == 0 {
@@ -224,56 +225,6 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 		}
 	}
 }
-
-//func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq) (*msggateway.OnlineBatchPushOneMsgResp, error) {
-//	var singleUserResults []*msggateway.SingleMsgToUserResults
-//	for _, userID := range req.PushToUserIDs {
-//		var resp []*msggateway.SingleMsgToUserPlatform
-//		results := &msggateway.SingleMsgToUserResults{
-//			UserID: userID,
-//		}
-//		clients, ok := s.LongConnServer.GetUserAllCons(userID)
-//		if !ok {
-//			log.ZDebug(ctx, "push user not online", "userID", userID)
-//			results.Resp = resp
-//			singleUserResults = append(singleUserResults, results)
-//			continue
-//		}
-//
-//		log.ZDebug(ctx, "push user online", "clients", clients, "userID", userID)
-//		for _, client := range clients {
-//			if client == nil {
-//				continue
-//			}
-//
-//			userPlatform := &msggateway.SingleMsgToUserPlatform{
-//				RecvPlatFormID: int32(client.PlatformID),
-//			}
-//			if !client.IsBackground ||
-//				(client.IsBackground && client.PlatformID != constant.IOSPlatformID) {
-//				err := client.PushMessage(ctx, req.MsgData)
-//				if err != nil {
-//					userPlatform.ResultCode = int64(servererrs.ErrPushMsgErr.Code())
-//					resp = append(resp, userPlatform)
-//				} else {
-//					if _, ok := s.pushTerminal[client.PlatformID]; ok {
-//						results.OnlinePush = true
-//						resp = append(resp, userPlatform)
-//					}
-//				}
-//			} else {
-//				userPlatform.ResultCode = int64(servererrs.ErrIOSBackgroundPushErr.Code())
-//				resp = append(resp, userPlatform)
-//			}
-//		}
-//		results.Resp = resp
-//		singleUserResults = append(singleUserResults, results)
-//	}
-//
-//	return &msggateway.OnlineBatchPushOneMsgResp{
-//		SinglePushResult: singleUserResults,
-//	}, nil
-//}
 
 func (s *Server) KickUserOffline(
 	ctx context.Context,
