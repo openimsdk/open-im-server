@@ -32,7 +32,7 @@ This script offers a variety of utilities and helpers to enhance and simplify op
 
 ##  brief descriptions of each function 
 
-**Englist:**
+**English:**
 1. `openim::util::ensure-gnu-sed` - Determines if GNU version of `sed` exists on the system and sets its name.
 2. `openim::util::ensure-gnu-date` - Determines if GNU version of `date` exists on the system and sets its name.
 3. `openim::util::check-file-in-alphabetical-order` - Checks if a file is sorted in alphabetical order.
