@@ -78,12 +78,14 @@ func (s *seqConversationCacheRedis) batchGetMaxSeq(ctx context.Context, keys []s
 		}
 	}
 	if len(notFoundKey) > 0 {
-		conversationID := keyConversationID[notFoundKey[0]]
-		seq, err := s.GetMaxSeq(ctx, conversationID)
-		if err != nil {
-			return err
+		for _, key := range notFoundKey {
+			conversationID := keyConversationID[key]
+			seq, err := s.GetMaxSeq(ctx, conversationID)
+			if err != nil {
+				return err
+			}
+			seqs[conversationID] = seq
 		}
-		seqs[conversationID] = seq
 	}
 	return nil
 }
