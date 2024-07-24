@@ -94,6 +94,29 @@ func (m *MsgMgo) FindOneByDocID(ctx context.Context, docID string) (*model.MsgDo
 }
 
 func (m *MsgMgo) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID, docID string, seqs []int64) ([]*model.MsgInfoModel, error) {
+	msgs, err := m.getMsgBySeqIndexIn1Doc(ctx, userID, docID, seqs)
+	if err != nil {
+		return nil, err
+	}
+	if len(msgs) == len(seqs) {
+		return msgs, nil
+	}
+	tmp := make(map[int64]*model.MsgInfoModel)
+	for i, val := range msgs {
+		tmp[val.Msg.Seq] = msgs[i]
+	}
+	res := make([]*model.MsgInfoModel, 0, len(seqs))
+	for _, seq := range seqs {
+		if val, ok := tmp[seq]; ok {
+			res = append(res, val)
+		} else {
+			res = append(res, &model.MsgInfoModel{Msg: &model.MsgDataModel{Seq: seq}})
+		}
+	}
+	return res, nil
+}
+
+func (m *MsgMgo) getMsgBySeqIndexIn1Doc(ctx context.Context, userID, docID string, seqs []int64) ([]*model.MsgInfoModel, error) {
 	indexs := make([]int64, 0, len(seqs))
 	for _, seq := range seqs {
 		indexs = append(indexs, m.model.GetMsgIndex(seq))
