@@ -139,6 +139,7 @@ func (r *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 		r.log.RemainRotationCount,
 		r.log.RotationTime,
 		config.Version,
+		r.log.IsSimplify,
 	)
 	if err != nil {
 		return errs.Wrap(err)
