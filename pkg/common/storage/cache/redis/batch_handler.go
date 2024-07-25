@@ -118,6 +118,7 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	v, err := rcClient.Fetch2(ctx, key, expire, func() (s string, err error) {
 		t, err = fn(ctx)
 		if err != nil {
+			log.ZError(ctx, "getCache query database failed", err, "key", key)
 			return "", err
 		}
 		bs, err := json.Marshal(t)
