@@ -44,38 +44,38 @@ func (s *seqUserCacheRedis) getSeqUserReadSeqKey(conversationID string, userID s
 	return cachekey.GetSeqUserReadSeqKey(conversationID, userID)
 }
 
-func (s *seqUserCacheRedis) GetMaxSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
+func (s *seqUserCacheRedis) GetUserMaxSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
 	return getCache(ctx, s.rocks, s.getSeqUserMaxSeqKey(conversationID, userID), s.expireTime, func(ctx context.Context) (int64, error) {
-		return s.mgo.GetMaxSeq(ctx, conversationID, userID)
+		return s.mgo.GetUserMaxSeq(ctx, conversationID, userID)
 	})
 }
 
-func (s *seqUserCacheRedis) SetMaxSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
-	if err := s.mgo.SetMaxSeq(ctx, conversationID, userID, seq); err != nil {
+func (s *seqUserCacheRedis) SetUserMaxSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
+	if err := s.mgo.SetUserMaxSeq(ctx, conversationID, userID, seq); err != nil {
 		return err
 	}
 	return s.rocks.TagAsDeleted2(ctx, s.getSeqUserMaxSeqKey(conversationID, userID))
 }
 
-func (s *seqUserCacheRedis) GetMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
+func (s *seqUserCacheRedis) GetUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
 	return getCache(ctx, s.rocks, s.getSeqUserMinSeqKey(conversationID, userID), s.expireTime, func(ctx context.Context) (int64, error) {
-		return s.mgo.GetMaxSeq(ctx, conversationID, userID)
+		return s.mgo.GetUserMinSeq(ctx, conversationID, userID)
 	})
 }
 
-func (s *seqUserCacheRedis) SetMinSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
-	return s.SetMinSeqs(ctx, userID, map[string]int64{conversationID: seq})
+func (s *seqUserCacheRedis) SetUserMinSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
+	return s.SetUserMinSeqs(ctx, userID, map[string]int64{conversationID: seq})
 }
 
-func (s *seqUserCacheRedis) GetReadSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
+func (s *seqUserCacheRedis) GetUserReadSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
 	return getCache(ctx, s.rocks, s.getSeqUserReadSeqKey(conversationID, userID), s.readExpireTime, func(ctx context.Context) (int64, error) {
-		return s.mgo.GetMaxSeq(ctx, conversationID, userID)
+		return s.mgo.GetUserReadSeq(ctx, conversationID, userID)
 	})
 }
 
-func (s *seqUserCacheRedis) SetReadSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
+func (s *seqUserCacheRedis) SetUserReadSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
 	if seq%s.readSeqWriteRatio == 0 {
-		if err := s.mgo.SetReadSeq(ctx, conversationID, userID, seq); err != nil {
+		if err := s.mgo.SetUserReadSeq(ctx, conversationID, userID, seq); err != nil {
 			return err
 		}
 	}
@@ -85,10 +85,10 @@ func (s *seqUserCacheRedis) SetReadSeq(ctx context.Context, conversationID strin
 	return nil
 }
 
-func (s *seqUserCacheRedis) SetMinSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
+func (s *seqUserCacheRedis) SetUserMinSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
 	keys := make([]string, 0, len(seqs))
 	for conversationID, seq := range seqs {
-		if err := s.mgo.SetMinSeq(ctx, conversationID, userID, seq); err != nil {
+		if err := s.mgo.SetUserMinSeq(ctx, conversationID, userID, seq); err != nil {
 			return err
 		}
 		keys = append(keys, s.getSeqUserMinSeqKey(conversationID, userID))
@@ -96,7 +96,7 @@ func (s *seqUserCacheRedis) SetMinSeqs(ctx context.Context, userID string, seqs 
 	return DeleteCacheBySlot(ctx, s.rocks, keys)
 }
 
-func (s *seqUserCacheRedis) setRedisReadSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
+func (s *seqUserCacheRedis) setUserRedisReadSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
 	keys := make([]string, 0, len(seqs))
 	keySeq := make(map[string]int64)
 	for conversationID, seq := range seqs {
@@ -121,16 +121,16 @@ func (s *seqUserCacheRedis) setRedisReadSeqs(ctx context.Context, userID string,
 	return nil
 }
 
-func (s *seqUserCacheRedis) SetReadSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
+func (s *seqUserCacheRedis) SetUserReadSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
 	if len(seqs) == 0 {
 		return nil
 	}
-	if err := s.setRedisReadSeqs(ctx, userID, seqs); err != nil {
+	if err := s.setUserRedisReadSeqs(ctx, userID, seqs); err != nil {
 		return err
 	}
 	for conversationID, seq := range seqs {
 		if seq%s.readSeqWriteRatio == 0 {
-			if err := s.mgo.SetReadSeq(ctx, conversationID, userID, seq); err != nil {
+			if err := s.mgo.SetUserReadSeq(ctx, conversationID, userID, seq); err != nil {
 				return err
 			}
 		}
@@ -138,13 +138,13 @@ func (s *seqUserCacheRedis) SetReadSeqs(ctx context.Context, userID string, seqs
 	return nil
 }
 
-func (s *seqUserCacheRedis) GetReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
+func (s *seqUserCacheRedis) GetUserReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
 	res, err := batchGetCache2(ctx, s.rocks, s.readExpireTime, conversationIDs, func(conversationID string) string {
 		return s.getSeqUserReadSeqKey(conversationID, userID)
 	}, func(v *readSeqModel) string {
 		return v.ConversationID
 	}, func(ctx context.Context, conversationIDs []string) ([]*readSeqModel, error) {
-		seqs, err := s.mgo.GetReadSeqs(ctx, userID, conversationIDs)
+		seqs, err := s.mgo.GetUserReadSeqs(ctx, userID, conversationIDs)
 		if err != nil {
 			return nil, err
 		}

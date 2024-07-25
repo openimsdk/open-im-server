@@ -130,14 +130,14 @@ func Main(conf string, del time.Duration) error {
 				if err != nil {
 					return 0, err
 				}
-				return uSeq.GetReadSeq(ctx, conversationID, userID)
+				return uSeq.GetUserReadSeq(ctx, conversationID, userID)
 			},
 			SetSeq: func(ctx context.Context, id string, seq int64) error {
 				conversationID, userID, err := uSpitHasReadSeq(id)
 				if err != nil {
 					return err
 				}
-				return uSeq.SetReadSeq(ctx, conversationID, userID, seq)
+				return uSeq.SetUserReadSeq(ctx, conversationID, userID, seq)
 			},
 		},
 		{
@@ -147,14 +147,14 @@ func Main(conf string, del time.Duration) error {
 				if err != nil {
 					return 0, err
 				}
-				return uSeq.GetMinSeq(ctx, conversationID, userID)
+				return uSeq.GetUserMinSeq(ctx, conversationID, userID)
 			},
 			SetSeq: func(ctx context.Context, id string, seq int64) error {
 				conversationID, userID, err := uSpitConversationUserMinSeq(id)
 				if err != nil {
 					return err
 				}
-				return uSeq.SetMinSeq(ctx, conversationID, userID, seq)
+				return uSeq.SetUserMinSeq(ctx, conversationID, userID, seq)
 			},
 		},
 	}
