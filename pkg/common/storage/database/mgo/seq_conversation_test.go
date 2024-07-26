@@ -26,7 +26,7 @@ func Mongodb() *mongo.Database {
 
 func TestUserSeq(t *testing.T) {
 	uSeq := Result(NewSeqUserMongo(Mongodb())).(*seqUserMongo)
-	t.Log(uSeq.SetMinSeq(context.Background(), "1000", "2000", 4))
+	t.Log(uSeq.SetUserMinSeq(context.Background(), "1000", "2000", 4))
 }
 
 func TestConversationSeq(t *testing.T) {
@@ -34,4 +34,9 @@ func TestConversationSeq(t *testing.T) {
 	t.Log(cSeq.SetMaxSeq(context.Background(), "2000", 10))
 	t.Log(cSeq.Malloc(context.Background(), "2000", 10))
 	t.Log(cSeq.GetMaxSeq(context.Background(), "2000"))
+}
+
+func TestUserGetUserReadSeqs(t *testing.T) {
+	uSeq := Result(NewSeqUserMongo(Mongodb())).(*seqUserMongo)
+	t.Log(uSeq.GetUserReadSeqs(context.Background(), "2110910952", []string{"sg_345762580", "2000", "3000"}))
 }

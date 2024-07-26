@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/hashutil"
 	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/log"
 	"slices"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
@@ -17,13 +18,22 @@ func (s *friendServer) NotificationUserInfoUpdate(ctx context.Context, req *rela
 	if err != nil {
 		return nil, err
 	}
-	for _, userID := range userIDs {
-		if err := s.db.OwnerIncrVersion(ctx, userID, []string{req.UserID}, model.VersionStateUpdate); err != nil {
-			return nil, err
+	if len(userIDs) > 0 {
+		friendUserIDs := []string{req.UserID}
+		noCancelCtx := context.WithoutCancel(ctx)
+		err := s.queue.PushCtx(ctx, func() {
+			for _, userID := range userIDs {
+				if err := s.db.OwnerIncrVersion(noCancelCtx, userID, friendUserIDs, model.VersionStateUpdate); err != nil {
+					log.ZError(ctx, "OwnerIncrVersion", err, "userID", userID, "friendUserIDs", friendUserIDs)
+				}
+			}
+			for _, userID := range userIDs {
+				s.notificationSender.FriendInfoUpdatedNotification(noCancelCtx, req.UserID, userID)
+			}
+		})
+		if err != nil {
+			log.ZError(ctx, "NotificationUserInfoUpdate timeout", err, "userID", req.UserID)
 		}
-	}
-	for _, userID := range userIDs {
-		s.notificationSender.FriendInfoUpdatedNotification(ctx, req.UserID, userID)
 	}
 	return &relation.NotificationUserInfoUpdateResp{}, nil
 }
