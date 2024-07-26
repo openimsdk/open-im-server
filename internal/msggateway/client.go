@@ -407,7 +407,7 @@ func (c *Client) writePongMsg(appData string) error {
 	}
 	err = c.conn.WriteMessage(PongMessage, []byte(appData))
 	if err != nil {
-		log.ZError(c.ctx, "Write Message is error", errs.Wrap(err), "Pong msg", PongMessage)
+		log.ZWarn(c.ctx, "Write Message have error", errs.Wrap(err), "Pong msg", PongMessage)
 	}
 
 	return errs.Wrap(err)
