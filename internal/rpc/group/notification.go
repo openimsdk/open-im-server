@@ -17,6 +17,7 @@ package group
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
@@ -126,25 +127,8 @@ func (g *GroupNotificationSender) getGroupInfo(ctx context.Context, groupID stri
 	if len(ownerUserIDs) > 0 {
 		ownerUserID = ownerUserIDs[0]
 	}
-	return &sdkws.GroupInfo{
-		GroupID:                gm.GroupID,
-		GroupName:              gm.GroupName,
-		Notification:           gm.Notification,
-		Introduction:           gm.Introduction,
-		FaceURL:                gm.FaceURL,
-		OwnerUserID:            ownerUserID,
-		CreateTime:             gm.CreateTime.UnixMilli(),
-		MemberCount:            num,
-		Ex:                     gm.Ex,
-		Status:                 gm.Status,
-		CreatorUserID:          gm.CreatorUserID,
-		GroupType:              gm.GroupType,
-		NeedVerification:       gm.NeedVerification,
-		LookMemberInfo:         gm.LookMemberInfo,
-		ApplyMemberFriend:      gm.ApplyMemberFriend,
-		NotificationUpdateTime: gm.NotificationUpdateTime.UnixMilli(),
-		NotificationUserID:     gm.NotificationUserID,
-	}, nil
+
+	return convert.Db2PbGroupInfo(gm, ownerUserID, num), nil
 }
 
 func (g *GroupNotificationSender) getGroupMembers(ctx context.Context, groupID string, userIDs []string) ([]*sdkws.GroupMemberFullInfo, error) {
@@ -196,29 +180,6 @@ func (g *GroupNotificationSender) getGroupOwnerAndAdminUserID(ctx context.Contex
 	}
 	fn := func(e *model.GroupMember) string { return e.UserID }
 	return datautil.Slice(members, fn), nil
-}
-
-//nolint:unused
-func (g *GroupNotificationSender) groupDB2PB(group *model.Group, ownerUserID string, memberCount uint32) *sdkws.GroupInfo {
-	return &sdkws.GroupInfo{
-		GroupID:                group.GroupID,
-		GroupName:              group.GroupName,
-		Notification:           group.Notification,
-		Introduction:           group.Introduction,
-		FaceURL:                group.FaceURL,
-		OwnerUserID:            ownerUserID,
-		CreateTime:             group.CreateTime.UnixMilli(),
-		MemberCount:            memberCount,
-		Ex:                     group.Ex,
-		Status:                 group.Status,
-		CreatorUserID:          group.CreatorUserID,
-		GroupType:              group.GroupType,
-		NeedVerification:       group.NeedVerification,
-		LookMemberInfo:         group.LookMemberInfo,
-		ApplyMemberFriend:      group.ApplyMemberFriend,
-		NotificationUpdateTime: group.NotificationUpdateTime.UnixMilli(),
-		NotificationUserID:     group.NotificationUserID,
-	}
 }
 
 func (g *GroupNotificationSender) groupMemberDB2PB(member *model.GroupMember, appMangerLevel int32) *sdkws.GroupMemberFullInfo {
