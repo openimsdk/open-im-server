@@ -45,7 +45,7 @@ func TestName(t *testing.T) {
 	}
 	seqUser := NewSeqUserCacheRedis(rdb, mgoSeqUser)
 
-	res, err := seqUser.GetReadSeqs(ctx, "2110910952", []string{"sg_2920732023", "sg_345762580"})
+	res, err := seqUser.GetUserReadSeqs(ctx, "2110910952", []string{"sg_2920732023", "sg_345762580"})
 	if err != nil {
 		panic(err)
 	}

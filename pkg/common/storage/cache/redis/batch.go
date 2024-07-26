@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/dtm-labs/rockscache"
+	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/singleflight"
 	"time"
@@ -49,6 +50,7 @@ func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rockscac
 			}
 			values, err := fn(ctx, queryIds)
 			if err != nil {
+				log.ZError(ctx, "batchGetCache query database failed", err, "keys", keys, "queryIds", queryIds)
 				return nil, err
 			}
 			if len(values) == 0 {
