@@ -84,7 +84,7 @@ type CommonMsgDatabase interface {
 	//GetConversationMinMaxSeqInMongoAndCache(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error)
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
 	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
-	SearchMessage(ctx context.Context, req *pbmsg.SearchMessageReq) (total int32, msgData []*sdkws.MsgData, err error)
+	SearchMessage(ctx context.Context, req *pbmsg.SearchMessageReq) (total int64, msgData []*sdkws.MsgData, err error)
 	FindOneByDocIDs(ctx context.Context, docIDs []string, seqs map[string]int64) (map[string]*sdkws.MsgData, error)
 
 	// to mq
@@ -878,7 +878,7 @@ func (db *commonMsgDatabase) RangeGroupSendCount(
 	return db.msgDocDatabase.RangeGroupSendCount(ctx, start, end, ase, pageNumber, showNumber)
 }
 
-func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbmsg.SearchMessageReq) (total int32, msgData []*sdkws.MsgData, err error) {
+func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbmsg.SearchMessageReq) (total int64, msgData []*sdkws.MsgData, err error) {
 	var totalMsgs []*sdkws.MsgData
 	total, msgs, err := db.msgDocDatabase.SearchMessage(ctx, req)
 	if err != nil {
