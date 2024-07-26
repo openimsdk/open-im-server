@@ -89,5 +89,15 @@ func (x *ExpirationLRU[K, V]) Del(key K) bool {
 	return ok
 }
 
+func (x *ExpirationLRU[K, V]) SetHas(key K, value V) bool {
+	x.lock.Lock()
+	defer x.lock.Unlock()
+	if x.core.Contains(key) {
+		x.core.Add(key, &expirationLruItem[V]{value: value})
+		return true
+	}
+	return false
+}
+
 func (x *ExpirationLRU[K, V]) Stop() {
 }

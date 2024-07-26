@@ -19,7 +19,7 @@
 
 
 <p align="center">
-  <a href="../../README.md">Englist</a> · 
+  <a href="../../README.md">English</a> · 
   <a href="../../README_zh_CN.md">中文</a> · 
   <a href="./README_uk.md">Українська</a> · 
   <a href="./README_cs.md">Česky</a> · 

@@ -43,6 +43,7 @@ const (
 	WSKickOnlineMsg       = 2002
 	WsLogoutMsg           = 2003
 	WsSetBackgroundStatus = 2004
+	WsSubUserOnlineStatus = 2005
 	WSDataError           = 3001
 )
 
@@ -52,6 +53,9 @@ const (
 
 	// Time allowed to read the next pong message from the peer.
 	pongWait = 30 * time.Second
+
+	// Send pings to peer with this period. Must be less than pongWait.
+	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from peer.
 	maxMessageSize = 51200

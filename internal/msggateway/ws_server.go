@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	pbAuth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/tools/mcontext"
 	"net/http"
@@ -48,6 +49,7 @@ type LongConnServer interface {
 	KickUserConn(client *Client) error
 	UnRegister(c *Client)
 	SetKickHandlerInfo(i *kickHandler)
+	SubUserOnlineStatus(ctx context.Context, client *Client, data *Req) ([]byte, error)
 	Compressor
 	Encoder
 	MessageHandler
@@ -60,7 +62,9 @@ type WsServer struct {
 	registerChan      chan *Client
 	unregisterChan    chan *Client
 	kickHandlerChan   chan *kickHandler
-	clients           *UserMap
+	clients           UserMap
+	online            *rpccache.OnlineCache
+	subscription      *Subscription
 	clientPool        sync.Pool
 	onlineUserNum     atomic.Int64
 	onlineUserConnNum atomic.Int64
@@ -90,18 +94,18 @@ func (ws *WsServer) SetDiscoveryRegistry(disCov discovery.SvcDiscoveryRegistry, 
 	ws.disCov = disCov
 }
 
-func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, status int32) {
-	err := ws.userClient.SetUserStatus(ctx, client.UserID, status, client.PlatformID)
-	if err != nil {
-		log.ZWarn(ctx, "SetUserStatus err", err)
-	}
-	switch status {
-	case constant.Online:
-		ws.webhookAfterUserOnline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOnline, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
-	case constant.Offline:
-		ws.webhookAfterUserOffline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOffline, client.UserID, client.PlatformID, client.ctx.GetConnID())
-	}
-}
+//func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, status int32) {
+//	err := ws.userClient.SetUserStatus(ctx, client.UserID, status, client.PlatformID)
+//	if err != nil {
+//		log.ZWarn(ctx, "SetUserStatus err", err)
+//	}
+//	switch status {
+//	case constant.Online:
+//		ws.webhookAfterUserOnline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOnline, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
+//	case constant.Offline:
+//		ws.webhookAfterUserOffline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOffline, client.UserID, client.PlatformID, client.ctx.GetConnID())
+//	}
+//}
 
 func (ws *WsServer) UnRegister(c *Client) {
 	ws.unregisterChan <- c
@@ -119,11 +123,13 @@ func (ws *WsServer) GetUserPlatformCons(userID string, platform int) ([]*Client,
 	return ws.clients.Get(userID, platform)
 }
 
-func NewWsServer(msgGatewayConfig *Config, opts ...Option) (*WsServer, error) {
+func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 	var config configs
 	for _, o := range opts {
 		o(&config)
 	}
+	//userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
+
 	v := validator.New()
 	return &WsServer{
 		msgGatewayConfig: msgGatewayConfig,
@@ -141,10 +147,11 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) (*WsServer, error) {
 		kickHandlerChan: make(chan *kickHandler, 1000),
 		validate:        v,
 		clients:         newUserMap(),
+		subscription:    newSubscription(),
 		Compressor:      NewGzipCompressor(),
 		Encoder:         NewGobEncoder(),
 		webhookClient:   webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL),
-	}, nil
+	}
 }
 
 func (ws *WsServer) Run(done chan error) error {
@@ -278,11 +285,11 @@ func (ws *WsServer) registerClient(client *Client) {
 		}()
 	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		ws.SetUserOnlineStatus(client.ctx, client, constant.Online)
-	}()
+	//wg.Add(1)
+	//go func() {
+	//	defer wg.Done()
+	//	ws.SetUserOnlineStatus(client.ctx, client, constant.Online)
+	//}()
 
 	wg.Wait()
 
@@ -309,7 +316,7 @@ func getRemoteAdders(client []*Client) string {
 }
 
 func (ws *WsServer) KickUserConn(client *Client) error {
-	ws.clients.deleteClients(client.UserID, []*Client{client})
+	ws.clients.DeleteClients(client.UserID, []*Client{client})
 	return client.KickOnlineMessage()
 }
 
@@ -325,7 +332,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 		if !clientOK {
 			return
 		}
-		ws.clients.deleteClients(newClient.UserID, oldClients)
+		ws.clients.DeleteClients(newClient.UserID, oldClients)
 		for _, c := range oldClients {
 			err := c.KickOnlineMessage()
 			if err != nil {
@@ -345,13 +352,14 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 
 func (ws *WsServer) unregisterClient(client *Client) {
 	defer ws.clientPool.Put(client)
-	isDeleteUser := ws.clients.delete(client.UserID, client.ctx.GetRemoteAddr())
+	isDeleteUser := ws.clients.DeleteClients(client.UserID, []*Client{client})
 	if isDeleteUser {
 		ws.onlineUserNum.Add(-1)
 		prommetrics.OnlineUserGauge.Dec()
 	}
 	ws.onlineUserConnNum.Add(-1)
-	ws.SetUserOnlineStatus(client.ctx, client, constant.Offline)
+	ws.subscription.DelClient(client)
+	//ws.SetUserOnlineStatus(client.ctx, client, constant.Offline)
 	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num",
 		ws.onlineUserNum.Load(), "online user conn Num",
 		ws.onlineUserConnNum.Load(),

@@ -19,6 +19,7 @@ import (
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/stretchr/testify/mock"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"math"
 	"testing"
 )
@@ -57,5 +58,11 @@ func TestName(t *testing.T) {
 	}
 
 	t.Logf("%+v\n", rReso)
+
+}
+
+func TestName1(t *testing.T) {
+	t.Log(primitive.NewObjectID().String())
+	t.Log(primitive.NewObjectID().Hex())
 
 }

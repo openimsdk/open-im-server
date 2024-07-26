@@ -30,7 +30,7 @@ import (
 )
 
 func NewGroupMongo(db *mongo.Database) (database.Group, error) {
-	coll := db.Collection("group")
+	coll := db.Collection(database.GroupName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "group_id", Value: 1},
@@ -45,6 +45,10 @@ func NewGroupMongo(db *mongo.Database) (database.Group, error) {
 
 type GroupMgo struct {
 	coll *mongo.Collection
+}
+
+func (g *GroupMgo) sortGroup() any {
+	return bson.D{{"group_name", 1}, {"create_time", 1}}
 }
 
 func (g *GroupMgo) Create(ctx context.Context, groups []*model.Group) (err error) {
@@ -125,4 +129,33 @@ func (g *GroupMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time,
 		res[item.Date] = item.Count
 	}
 	return res, nil
+}
+
+func (g *GroupMgo) FindJoinSortGroupID(ctx context.Context, groupIDs []string) ([]string, error) {
+	if len(groupIDs) < 2 {
+		return groupIDs, nil
+	}
+	filter := bson.M{
+		"group_id": bson.M{"$in": groupIDs},
+		"status":   bson.M{"$ne": constant.GroupStatusDismissed},
+	}
+	opt := options.Find().SetSort(g.sortGroup()).SetProjection(bson.M{"_id": 0, "group_id": 1})
+	return mongoutil.Find[string](ctx, g.coll, filter, opt)
+}
+
+func (g *GroupMgo) SearchJoin(ctx context.Context, groupIDs []string, keyword string, pagination pagination.Pagination) (int64, []*model.Group, error) {
+	if len(groupIDs) == 0 {
+		return 0, nil, nil
+	}
+	filter := bson.M{
+		"group_id": bson.M{"$in": groupIDs},
+		"status":   bson.M{"$ne": constant.GroupStatusDismissed},
+	}
+	if keyword != "" {
+		filter["group_name"] = bson.M{"$regex": keyword}
+	}
+	// Define the sorting options
+	opts := options.Find().SetSort(g.sortGroup())
+	// Perform the search with pagination and sorting
+	return mongoutil.FindPage[*model.Group](ctx, g.coll, filter, pagination, opts)
 }

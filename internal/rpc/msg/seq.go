@@ -16,13 +16,15 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/tools/errs"
+	"github.com/redis/go-redis/v9"
 
 	pbmsg "github.com/openimsdk/protocol/msg"
 )
 
 func (m *msgServer) GetConversationMaxSeq(ctx context.Context, req *pbmsg.GetConversationMaxSeqReq) (*pbmsg.GetConversationMaxSeqResp, error) {
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
-	if err != nil {
+	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return nil, err
 	}
 	return &pbmsg.GetConversationMaxSeqResp{MaxSeq: maxSeq}, nil

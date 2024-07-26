@@ -1,0 +1,34 @@
+global:
+  resolve_timeout: 5m
+  smtp_from: alert@openim.io
+  smtp_smarthost: smtp.163.com:465
+  smtp_auth_username: alert@openim.io
+  smtp_auth_password: YOURAUTHPASSWORD
+  smtp_require_tls: false
+  smtp_hello: xxx
+
+templates:
+  - /etc/alertmanager/email.tmpl
+
+route:
+  group_by: [ 'alertname' ]
+  group_wait: 5s
+  group_interval: 5s
+  repeat_interval: 5m
+  receiver: email
+  routes:
+    - matchers:
+        - alertname = "XXX"
+      group_by: [ 'instance' ]
+      group_wait: 5s
+      group_interval: 5s
+      repeat_interval: 5m
+      receiver: email
+
+receivers:
+  - name: email
+    email_configs:
+      - to: 'alert@example.com'
+        html: '{{ template "email.to.html" . }}'
+        headers: { Subject: "[OPENIM-SERVER]Alarm" }
+        send_resolved: true

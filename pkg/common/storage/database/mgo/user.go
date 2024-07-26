@@ -31,7 +31,7 @@ import (
 )
 
 func NewUserMongo(db *mongo.Database) (database.User, error) {
-	coll := db.Collection("user")
+	coll := db.Collection(database.UserName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "user_id", Value: 1},
@@ -318,4 +318,70 @@ func (u *UserMgo) CountRangeEverydayTotal(ctx context.Context, start time.Time, 
 		res[item.Date] = item.Count
 	}
 	return res, nil
+}
+
+func (u *UserMgo) SortQuery(ctx context.Context, userIDName map[string]string, asc bool) ([]*model.User, error) {
+	if len(userIDName) == 0 {
+		return nil, nil
+	}
+	userIDs := make([]string, 0, len(userIDName))
+	attached := make(map[string]string)
+	for userID, name := range userIDName {
+		userIDs = append(userIDs, userID)
+		if name == "" {
+			continue
+		}
+		attached[userID] = name
+	}
+	var sortValue int
+	if asc {
+		sortValue = 1
+	} else {
+		sortValue = -1
+	}
+	if len(attached) == 0 {
+		filter := bson.M{"user_id": bson.M{"$in": userIDs}}
+		opt := options.Find().SetSort(bson.M{"nickname": sortValue})
+		return mongoutil.Find[*model.User](ctx, u.coll, filter, opt)
+	}
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{
+				"user_id": bson.M{"$in": userIDs},
+			},
+		},
+		{
+			"$addFields": bson.M{
+				"_query_sort_name": bson.M{
+					"$arrayElemAt": []any{
+						bson.M{
+							"$filter": bson.M{
+								"input": bson.M{
+									"$objectToArray": attached,
+								},
+								"as": "item",
+								"cond": bson.M{
+									"$eq": []any{"$$item.k", "$user_id"},
+								},
+							},
+						},
+						0,
+					},
+				},
+			},
+		},
+		{
+			"$addFields": bson.M{
+				"_query_sort_name": bson.M{
+					"$ifNull": []any{"$_query_sort_name.v", "$nickname"},
+				},
+			},
+		},
+		{
+			"$sort": bson.M{
+				"_query_sort_name": sortValue,
+			},
+		},
+	}
+	return mongoutil.Aggregate[*model.User](ctx, u.coll, pipeline)
 }

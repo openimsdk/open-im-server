@@ -15,14 +15,16 @@
 package config
 
 import (
+	"strings"
+	"time"
+
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/cos"
+	"github.com/openimsdk/tools/s3/kodo"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
-	"strings"
-	"time"
 )
 
 type CacheConfig struct {
@@ -47,6 +49,7 @@ type Log struct {
 	RemainLogLevel      int    `mapstructure:"remainLogLevel"`
 	IsStdout            bool   `mapstructure:"isStdout"`
 	IsJson              bool   `mapstructure:"isJson"`
+	IsSimplify          bool   `mapstructure:"isSimplify"`
 	WithStack           bool   `mapstructure:"withStack"`
 }
 
@@ -105,8 +108,9 @@ type API struct {
 }
 
 type CronTask struct {
-	ChatRecordsClearTime string `mapstructure:"chatRecordsClearTime"`
-	RetainChatRecords    int    `mapstructure:"retainChatRecords"`
+	CronExecuteTime   string `mapstructure:"cronExecuteTime"`
+	RetainChatRecords int    `mapstructure:"retainChatRecords"`
+	FileExpireTime    int    `mapstructure:"fileExpireTime"`
 }
 
 type OfflinePushConfig struct {
@@ -202,7 +206,8 @@ type Push struct {
 		ChannelName  string `mapstructure:"channelName"`
 	} `mapstructure:"geTui"`
 	FCM struct {
-		ServiceAccount string `mapstructure:"serviceAccount"`
+		FilePath string `mapstructure:"filePath"`
+		AuthURL  string `mapstructure:"authURL"`
 	} `mapstructure:"fcm"`
 	JPNS struct {
 		AppKey       string `mapstructure:"appKey"`
@@ -277,16 +282,8 @@ type Third struct {
 		Enable string `mapstructure:"enable"`
 		Cos    Cos    `mapstructure:"cos"`
 		Oss    Oss    `mapstructure:"oss"`
-		Kodo   struct {
-			Endpoint        string `mapstructure:"endpoint"`
-			Bucket          string `mapstructure:"bucket"`
-			BucketURL       string `mapstructure:"bucketURL"`
-			AccessKeyID     string `mapstructure:"accessKeyID"`
-			AccessKeySecret string `mapstructure:"accessKeySecret"`
-			SessionToken    string `mapstructure:"sessionToken"`
-			PublicRead      bool   `mapstructure:"publicRead"`
-		} `mapstructure:"kodo"`
-		Aws struct {
+		Kodo   Kodo   `mapstructure:"kodo"`
+		Aws    struct {
 			Endpoint        string `mapstructure:"endpoint"`
 			Region          string `mapstructure:"region"`
 			Bucket          string `mapstructure:"bucket"`
@@ -304,6 +301,16 @@ type Cos struct {
 	PublicRead   bool   `mapstructure:"publicRead"`
 }
 type Oss struct {
+	Endpoint        string `mapstructure:"endpoint"`
+	Bucket          string `mapstructure:"bucket"`
+	BucketURL       string `mapstructure:"bucketURL"`
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	AccessKeySecret string `mapstructure:"accessKeySecret"`
+	SessionToken    string `mapstructure:"sessionToken"`
+	PublicRead      bool   `mapstructure:"publicRead"`
+}
+
+type Kodo struct {
 	Endpoint        string `mapstructure:"endpoint"`
 	Bucket          string `mapstructure:"bucket"`
 	BucketURL       string `mapstructure:"bucketURL"`
@@ -338,8 +345,9 @@ type BeforeConfig struct {
 }
 
 type AfterConfig struct {
-	Enable  bool `mapstructure:"enable"`
-	Timeout int  `mapstructure:"timeout"`
+	Enable       bool     `mapstructure:"enable"`
+	Timeout      int      `mapstructure:"timeout"`
+	AttentionIds []string `mapstructure:"attentionIds"`
 }
 
 type Share struct {
@@ -513,6 +521,18 @@ func (c *Cos) Build() *cos.Config {
 
 func (o *Oss) Build() *oss.Config {
 	return &oss.Config{
+		Endpoint:        o.Endpoint,
+		Bucket:          o.Bucket,
+		BucketURL:       o.BucketURL,
+		AccessKeyID:     o.AccessKeyID,
+		AccessKeySecret: o.AccessKeySecret,
+		SessionToken:    o.SessionToken,
+		PublicRead:      o.PublicRead,
+	}
+}
+
+func (o *Kodo) Build() *kodo.Config {
+	return &kodo.Config{
 		Endpoint:        o.Endpoint,
 		Bucket:          o.Bucket,
 		BucketURL:       o.BucketURL,

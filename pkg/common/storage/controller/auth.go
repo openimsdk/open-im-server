@@ -79,5 +79,9 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 	if err != nil {
 		return "", errs.WrapMsg(err, "token.SignedString")
 	}
-	return tokenString, a.cache.AddTokenFlag(ctx, userID, platformID, tokenString, constant.NormalToken)
+
+	if err = a.cache.SetTokenFlagEx(ctx, userID, platformID, tokenString, constant.NormalToken); err != nil {
+		return "", err
+	}
+	return tokenString, nil
 }

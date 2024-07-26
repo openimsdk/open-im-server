@@ -111,7 +111,7 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 
 func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (resp *msg.SearchMessageResp, err error) {
 	var chatLogs []*sdkws.MsgData
-	var total int32
+	var total int64
 	resp = &msg.SearchMessageResp{}
 	if total, chatLogs, err = m.MsgDatabase.SearchMessage(ctx, req); err != nil {
 		return nil, err
@@ -194,7 +194,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 		}
 		resp.ChatLogs = append(resp.ChatLogs, pbchatLog)
 	}
-	resp.ChatLogsNum = total
+	resp.ChatLogsNum = int32(total)
 	return resp, nil
 }
 

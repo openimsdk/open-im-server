@@ -32,4 +32,8 @@ type Group interface {
 	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
 	// Get Group total quantity every day
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
+
+	FindJoinSortGroupID(ctx context.Context, groupIDs []string) ([]string, error)
+
+	SearchJoin(ctx context.Context, groupIDs []string, keyword string, pagination pagination.Pagination) (int64, []*model.Group, error)
 }

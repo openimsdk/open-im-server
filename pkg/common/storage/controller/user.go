@@ -60,18 +60,8 @@ type UserDatabase interface {
 	CountTotal(ctx context.Context, before *time.Time) (int64, error)
 	// CountRangeEverydayTotal Get the user increment in the range
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
-	// SubscribeUsersStatus Subscribe a user's presence status
-	SubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error
-	// UnsubscribeUsersStatus unsubscribe a user's presence status
-	UnsubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error
-	// GetAllSubscribeList Get a list of all subscriptions
-	GetAllSubscribeList(ctx context.Context, userID string) ([]string, error)
-	// GetSubscribedList Get all subscribed lists
-	GetSubscribedList(ctx context.Context, userID string) ([]string, error)
-	// GetUserStatus Get the online status of the user
-	GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error)
-	// SetUserStatus Set the user status and store the user status in redis
-	SetUserStatus(ctx context.Context, userID string, status, platformID int32) error
+
+	SortQuery(ctx context.Context, userIDName map[string]string, asc bool) ([]*model.User, error)
 
 	// CRUD user command
 	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error
@@ -82,14 +72,13 @@ type UserDatabase interface {
 }
 
 type userDatabase struct {
-	tx      tx.Tx
-	userDB  database.User
-	cache   cache.UserCache
-	mongoDB database.SubscribeUser
+	tx     tx.Tx
+	userDB database.User
+	cache  cache.UserCache
 }
 
-func NewUserDatabase(userDB database.User, cache cache.UserCache, tx tx.Tx, mongoDB database.SubscribeUser) UserDatabase {
-	return &userDatabase{userDB: userDB, cache: cache, tx: tx, mongoDB: mongoDB}
+func NewUserDatabase(userDB database.User, cache cache.UserCache, tx tx.Tx) UserDatabase {
+	return &userDatabase{userDB: userDB, cache: cache, tx: tx}
 }
 
 func (u *userDatabase) InitOnce(ctx context.Context, users []*model.User) error {
@@ -121,6 +110,7 @@ func (u *userDatabase) InitOnce(ctx context.Context, users []*model.User) error 
 
 // FindWithError Get the information of the specified user and return an error if the userID is not found.
 func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (users []*model.User, err error) {
+	userIDs = datautil.Distinct(userIDs)
 	users, err = u.cache.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return
@@ -197,7 +187,7 @@ func (u *userDatabase) GetAllUserID(ctx context.Context, pagination pagination.P
 }
 
 func (u *userDatabase) GetUserByID(ctx context.Context, userID string) (user *model.User, err error) {
-	return u.userDB.Take(ctx, userID)
+	return u.cache.GetUserInfo(ctx, userID)
 }
 
 // CountTotal Get the total number of users.
@@ -210,45 +200,8 @@ func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.T
 	return u.userDB.CountRangeEverydayTotal(ctx, start, end)
 }
 
-// SubscribeUsersStatus Subscribe or unsubscribe a user's presence status.
-func (u *userDatabase) SubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error {
-	err := u.mongoDB.AddSubscriptionList(ctx, userID, userIDs)
-	return err
-}
-
-// UnsubscribeUsersStatus unsubscribe a user's presence status.
-func (u *userDatabase) UnsubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error {
-	err := u.mongoDB.UnsubscriptionList(ctx, userID, userIDs)
-	return err
-}
-
-// GetAllSubscribeList Get a list of all subscriptions.
-func (u *userDatabase) GetAllSubscribeList(ctx context.Context, userID string) ([]string, error) {
-	list, err := u.mongoDB.GetAllSubscribeList(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-	return list, nil
-}
-
-// GetSubscribedList Get all subscribed lists.
-func (u *userDatabase) GetSubscribedList(ctx context.Context, userID string) ([]string, error) {
-	list, err := u.mongoDB.GetSubscribedList(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-	return list, nil
-}
-
-// GetUserStatus get user status.
-func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
-	onlineStatusList, err := u.cache.GetUserStatus(ctx, userIDs)
-	return onlineStatusList, err
-}
-
-// SetUserStatus Set the user status and save it in redis.
-func (u *userDatabase) SetUserStatus(ctx context.Context, userID string, status, platformID int32) error {
-	return u.cache.SetUserStatus(ctx, userID, status, platformID)
+func (u *userDatabase) SortQuery(ctx context.Context, userIDName map[string]string, asc bool) ([]*model.User, error) {
+	return u.userDB.SortQuery(ctx, userIDName, asc)
 }
 
 func (u *userDatabase) AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error {
