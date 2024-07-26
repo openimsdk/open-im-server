@@ -16,6 +16,7 @@ package friend
 
 import (
 	"context"
+	"github.com/openimsdk/tools/mq/memamq"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -49,6 +50,7 @@ type friendServer struct {
 	RegisterCenter        discovery.SvcDiscoveryRegistry
 	config                *Config
 	webhookClient         *webhook.Client
+	queue                 *memamq.MemoryQueue
 }
 
 type Config struct {
@@ -118,8 +120,8 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		conversationRpcClient: rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation),
 		config:                config,
 		webhookClient:         webhook.NewWebhookClient(config.WebhooksConfig.URL),
+		queue:                 memamq.NewMemoryQueue(128, 1024*8),
 	})
-
 	return nil
 }
 

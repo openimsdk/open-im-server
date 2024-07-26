@@ -88,6 +88,14 @@ func (s *seqUserMongo) GetUserReadSeq(ctx context.Context, conversationID string
 	return s.getSeq(ctx, conversationID, userID, "read_seq")
 }
 
+func (s *seqUserMongo) notFoundSet0(seq map[string]int64, conversationIDs []string) {
+	for _, conversationID := range conversationIDs {
+		if _, ok := seq[conversationID]; !ok {
+			seq[conversationID] = 0
+		}
+	}
+}
+
 func (s *seqUserMongo) GetUserReadSeqs(ctx context.Context, userID string, conversationID []string) (map[string]int64, error) {
 	if len(conversationID) == 0 {
 		return map[string]int64{}, nil
@@ -102,6 +110,7 @@ func (s *seqUserMongo) GetUserReadSeqs(ctx context.Context, userID string, conve
 	for _, seq := range seqs {
 		res[seq.ConversationID] = seq.ReadSeq
 	}
+	s.notFoundSet0(res, conversationID)
 	return res, nil
 }
 
