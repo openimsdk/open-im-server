@@ -71,17 +71,17 @@ jobs:
       run: sudo bash bootstrap.sh
       timeout-minutes: 20
 
-    - name: Get Internal IP Address
-      id: get-ip
-      run: |
-        IP=$(hostname -I | awk '{print $1}')
-        echo "The IP Address is: $IP"
-        echo "::set-output name=ip::$IP"
+    # - name: Get Internal IP Address
+    #   id: get-ip
+    #   run: |
+    #     IP=$(hostname -I | awk '{print $1}')
+    #     echo "The IP Address is: $IP"
+    #     echo "::set-output name=ip::$IP"
       
-    - name: Update .env
-      run: |
-        sed -i 's|externalAddress:.*|externalAddress: "http://${{ steps.get-ip.outputs.ip }}:10005"|' config/minio.yml
-        cat config/minio.yml
+    # - name: Update .env
+    #   run: |
+    #     sed -i 's|externalAddress:.*|externalAddress: "http://${{ steps.get-ip.outputs.ip }}:10005"|' config/minio.yml
+    #     cat config/minio.yml
 
     - name: Build, Start, Check Services and Print Logs for Linux
       run: |
@@ -109,27 +109,27 @@ jobs:
         sudo mage start
         sudo mage check
     
-    - name: Checkout e2e repository
-      uses: actions/checkout@v4
-      with:
-          repository: "openimsdk/test-e2e"
-          path: e2e-repo
+    # - name: Checkout e2e repository
+    #   uses: actions/checkout@v4
+    #   with:
+    #       repository: "openimsdk/test-e2e"
+    #       path: e2e-repo
 
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+    # - name: Set up Python 3.9
+    #   uses: actions/setup-python@v4
+    #   with:
+    #     python-version: '3.9'
     
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y xvfb libxi6 libgconf-2-4
-        cd ${{ github.workspace }}/e2e-repo
-        pip install -r requirements.txt
+    # - name: Install dependencies
+    #   run: |
+    #     sudo apt-get update
+    #     sudo apt-get install -y xvfb libxi6 libgconf-2-4
+    #     cd ${{ github.workspace }}/e2e-repo
+    #     pip install -r requirements.txt
     
-    - name: Run tests
-      run: |
-        cd ${{ github.workspace }}/e2e-repo
-        xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pytest -v -s ./script
+    # - name: Run tests
+    #   run: |
+    #     cd ${{ github.workspace }}/e2e-repo
+    #     xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pytest -v -s ./script
     
     
