@@ -393,7 +393,7 @@ func (c *Client) writePingMsg() error {
 func (c *Client) writePongMsg(appData string) error {
 	log.ZDebug(c.ctx, "write Pong Msg in Server", "appData", appData)
 	if c.closed.Load() {
-		log.ZWarn(c.ctx, "is closed in server", nil, "appdata", appData)
+		log.ZWarn(c.ctx, "is closed in server", nil, "appdata", appData, "closed err", c.closedErr)
 		return nil
 	}
 
@@ -412,5 +412,6 @@ func (c *Client) writePongMsg(appData string) error {
 		log.ZWarn(c.ctx, "Write Message have error", errs.Wrap(err), "Pong msg", PongMessage)
 	}
 
+	log.ZDebug(c.ctx, "write message is success", "appdata", appData, "closed err", c.closedErr)
 	return errs.Wrap(err)
 }
