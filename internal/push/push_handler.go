@@ -198,6 +198,7 @@ func (c *ConsumerHandler) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.
 			offlineUserIDs = append(offlineUserIDs, userID)
 		}
 	}
+	log.ZDebug(ctx, "GetConnsAndOnlinePush online cache", "pushToUserIDs", pushToUserIDs, "onlineUserIDs", onlineUserIDs, "offlineUserIDs", offlineUserIDs)
 	var result []*msggateway.SingleMsgToUserResults
 	if len(onlineUserIDs) > 0 {
 		var err error
