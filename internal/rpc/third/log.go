@@ -26,7 +26,6 @@ import (
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/stringutil"
 )
 
 func genLogID() string {
@@ -111,7 +110,7 @@ func dbToPbLogInfos(logs []*relationtb.Log) []*third.LogInfo {
 		return &third.LogInfo{
 			Filename:   log.FileName,
 			UserID:     log.UserID,
-			Platform:   stringutil.StringToInt32(log.Platform),
+			Platform:   int32(constant.PlatformName2ID[log.Platform]),
 			Url:        log.Url,
 			CreateTime: log.CreateTime.UnixMilli(),
 			LogID:      log.LogID,
