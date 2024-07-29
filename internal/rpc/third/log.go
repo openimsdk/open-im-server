@@ -110,7 +110,7 @@ func dbToPbLogInfos(logs []*relationtb.Log) []*third.LogInfo {
 		return &third.LogInfo{
 			Filename:   log.FileName,
 			UserID:     log.UserID,
-			Platform:   int32(constant.PlatformName2ID[log.Platform]),
+			Platform:   log.Platform,
 			Url:        log.Url,
 			CreateTime: log.CreateTime.UnixMilli(),
 			LogID:      log.LogID,
