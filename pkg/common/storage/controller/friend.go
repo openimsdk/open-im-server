@@ -152,42 +152,55 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 	return f.tx.Transaction(ctx, func(ctx context.Context) error {
 		cache := f.cache.CloneFriendCache()
 		// user find friends
-		fs1, err := f.friend.FindFriends(ctx, ownerUserID, friendUserIDs)
+		myFriends, err := f.friend.FindFriends(ctx, ownerUserID, friendUserIDs)
+		if err != nil {
+			return err
+		}
+		addOwners, err := f.friend.FindReversalFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
 		}
 		opUserID := mcontext.GetOperationID(ctx)
-		for _, v := range friendUserIDs {
-			fs1 = append(fs1, &model.Friend{OwnerUserID: ownerUserID, FriendUserID: v, AddSource: addSource, OperatorUserID: opUserID})
-		}
-		fs11 := datautil.DistinctAny(fs1, func(e *model.Friend) string {
-			return e.FriendUserID
+		friends := make([]*model.Friend, 0, len(friendUserIDs)*2)
+		myFriendsSet := datautil.SliceSetAny(myFriends, func(friend *model.Friend) string {
+			return friend.FriendUserID
 		})
-
-		err = f.friend.Create(ctx, fs11)
-		if err != nil {
-			return err
-		}
-		fs2, err := f.friend.FindReversalFriends(ctx, ownerUserID, friendUserIDs)
-		if err != nil {
-			return err
-		}
-		var newFriendIDs []string
-		for _, v := range friendUserIDs {
-			fs2 = append(fs2, &model.Friend{OwnerUserID: v, FriendUserID: ownerUserID, AddSource: addSource, OperatorUserID: opUserID})
-			newFriendIDs = append(newFriendIDs, v)
-		}
-		fs22 := datautil.DistinctAny(fs2, func(e *model.Friend) string {
-			return e.OwnerUserID
+		addOwnersSet := datautil.SliceSetAny(addOwners, func(friend *model.Friend) string {
+			return friend.OwnerUserID
 		})
-		err = f.friend.Create(ctx, fs22)
+		newMyFriendIDs := make([]string, 0, len(friendUserIDs))
+		newMyOwnerIDs := make([]string, 0, len(friendUserIDs))
+		for _, userID := range friendUserIDs {
+			if ownerUserID == userID {
+				continue
+			}
+			if _, ok := myFriendsSet[userID]; !ok {
+				myFriendsSet[userID] = struct{}{}
+				newMyFriendIDs = append(newMyFriendIDs, userID)
+				friends = append(friends, &model.Friend{OwnerUserID: ownerUserID, FriendUserID: userID, AddSource: addSource, OperatorUserID: opUserID})
+			}
+			if _, ok := addOwnersSet[userID]; !ok {
+				addOwnersSet[userID] = struct{}{}
+				newMyOwnerIDs = append(newMyOwnerIDs, userID)
+				friends = append(friends, &model.Friend{OwnerUserID: userID, FriendUserID: ownerUserID, AddSource: addSource, OperatorUserID: opUserID})
+			}
+		}
+		if len(friends) == 0 {
+			return nil
+		}
+		err = f.friend.Create(ctx, friends)
 		if err != nil {
 			return err
 		}
-		newFriendIDs = append(newFriendIDs, ownerUserID)
-		cache = cache.DelFriendIDs(newFriendIDs...).DelMaxFriendVersion(newFriendIDs...)
+		if len(newMyFriendIDs) > 0 {
+			cache = cache.DelFriendIDs(newMyFriendIDs...)
+			cache = cache.DelFriends(ownerUserID, newMyFriendIDs).DelMaxFriendVersion(newMyFriendIDs...)
+		}
+		if len(newMyOwnerIDs) > 0 {
+			cache = cache.DelFriendIDs(newMyOwnerIDs...)
+			cache = cache.DelOwner(ownerUserID, newMyOwnerIDs).DelMaxFriendVersion(newMyOwnerIDs...)
+		}
 		return cache.ChainExecDel(ctx)
-
 	})
 }
 
