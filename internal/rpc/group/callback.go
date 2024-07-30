@@ -127,7 +127,7 @@ func (s *groupServer) webhookBeforeMembersJoinGroup(ctx context.Context, before 
 			return err
 		}
 
-		for _, memberCallbackResp := range resp.MemberCallbacks {
+		for _, memberCallbackResp := range resp.MemberCallbackList {
 			if _, ok := groupMembersMap[(*memberCallbackResp.UserID)]; ok {
 				if memberCallbackResp.MuteEndTime != nil {
 					groupMembersMap[(*memberCallbackResp.UserID)].MuteEndTime = time.UnixMilli(*memberCallbackResp.MuteEndTime)

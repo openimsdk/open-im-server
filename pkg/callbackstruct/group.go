@@ -82,7 +82,7 @@ type MemberJoinGroupCallBack struct {
 
 type CallbackBeforeMembersJoinGroupResp struct {
 	CommonCallbackResp
-	MemberCallbacks []*MemberJoinGroupCallBack
+	MemberCallbackList []*MemberJoinGroupCallBack `json:"memberCallbackList"`
 }
 
 type CallbackBeforeSetGroupMemberInfoReq struct {
