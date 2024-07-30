@@ -246,7 +246,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		return nil, err
 	}
 
-	joinGroup := func(userID string, roleLevel int32) error {
+	joinGroupFunc := func(userID string, roleLevel int32) {
 		groupMember := &model.GroupMember{
 			GroupID:        group.GroupID,
 			UserID:         userID,
@@ -258,25 +258,23 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 			MuteEndTime:    time.UnixMilli(0),
 		}
 
-		if err := s.webhookBeforeMemberJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, groupMember, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
-			return err
-		}
 		groupMembers = append(groupMembers, groupMember)
-		return nil
 	}
-	if err := joinGroup(req.OwnerUserID, constant.GroupOwner); err != nil {
+
+	joinGroupFunc(req.OwnerUserID, constant.GroupOwner)
+
+	for _, userID := range req.AdminUserIDs {
+		joinGroupFunc(userID, constant.GroupAdmin)
+	}
+
+	for _, userID := range req.MemberUserIDs {
+		joinGroupFunc(userID, constant.GroupOrdinaryUsers)
+	}
+
+	if err := s.webhookBeforeMemberJoinGroupBatch(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, groupMembers, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
-	for _, userID := range req.AdminUserIDs {
-		if err := joinGroup(userID, constant.GroupAdmin); err != nil {
-			return nil, err
-		}
-	}
-	for _, userID := range req.MemberUserIDs {
-		if err := joinGroup(userID, constant.GroupOrdinaryUsers); err != nil {
-			return nil, err
-		}
-	}
+
 	if err := s.db.CreateGroup(ctx, []*model.Group{group}, groupMembers); err != nil {
 		return nil, err
 	}
@@ -442,12 +440,13 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 			MuteEndTime:    time.UnixMilli(0),
 		}
 
-		if err := s.webhookBeforeMemberJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, member, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
-			return nil, err
-		}
 		groupMembers = append(groupMembers, member)
-
 	}
+
+	if err := s.webhookBeforeMemberJoinGroupBatch(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, groupMembers, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
+		return nil, err
+	}
+
 	if err := s.db.CreateGroup(ctx, nil, groupMembers); err != nil {
 		return nil, err
 	}
@@ -811,7 +810,6 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 			MuteEndTime:    time.Unix(0, 0),
 			InviterUserID:  groupRequest.InviterUserID,
 			OperatorUserID: mcontext.GetOpUserID(ctx),
-			Ex:             groupRequest.Ex,
 		}
 		if err := s.webhookBeforeMemberJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, member, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
@@ -898,6 +896,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 
 		return &pbgroup.JoinGroupResp{}, nil
 	}
+
 	groupRequest := model.GroupRequest{
 		UserID:      req.InviterUserID,
 		ReqMsg:      req.ReqMessage,

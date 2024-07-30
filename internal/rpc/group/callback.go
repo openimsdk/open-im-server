@@ -16,6 +16,8 @@ package group
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -27,7 +29,6 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
-	"time"
 )
 
 // CallbackBeforeCreateGroup callback before create group.
@@ -121,6 +122,42 @@ func (s *groupServer) webhookBeforeMemberJoinGroup(ctx context.Context, before *
 		datautil.NotNilReplace(&groupMember.Ex, resp.Ex)
 		datautil.NotNilReplace(&groupMember.Nickname, resp.Nickname)
 		datautil.NotNilReplace(&groupMember.RoleLevel, resp.RoleLevel)
+		return nil
+	})
+}
+
+func (s *groupServer) webhookBeforeMemberJoinGroupBatch(ctx context.Context, before *config.BeforeConfig, groupMembers []*model.GroupMember, groupEx string) error {
+	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		groupMembersMap := datautil.SliceToMap(groupMembers, func(e *model.GroupMember) string {
+			return e.UserID
+		})
+		var groupMembersCallback []*callbackstruct.CallbackGroupMember
+
+		for _, member := range groupMembers {
+			groupMembersCallback = append(groupMembersCallback, &callbackstruct.CallbackGroupMember{
+				UserID:  member.UserID,
+				Ex:      member.Ex,
+				GroupEx: groupEx,
+			})
+		}
+
+		cbReq := &callbackstruct.CallbackBeforeMemberJoinGroupBatchReq{
+			CallbackCommand: callbackstruct.CallbackBeforeMemberJoinGroupBatchCommand,
+			MembersList:     groupMembersCallback,
+		}
+		resp := &callbackstruct.CallbackBeforeMemberJoinGroupBatchResp{}
+
+		if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
+			return err
+		}
+
+		for _, memberCallbackResp := range resp.MemberCallbacks {
+			datautil.NotNilReplace(&groupMembersMap[(*memberCallbackResp.UserID)].FaceURL, memberCallbackResp.FaceURL)
+			datautil.NotNilReplace(&groupMembersMap[(*memberCallbackResp.UserID)].Ex, memberCallbackResp.Ex)
+			datautil.NotNilReplace(&groupMembersMap[(*memberCallbackResp.UserID)].Nickname, memberCallbackResp.Nickname)
+			datautil.NotNilReplace(&groupMembersMap[(*memberCallbackResp.UserID)].RoleLevel, memberCallbackResp.RoleLevel)
+		}
+
 		return nil
 	})
 }

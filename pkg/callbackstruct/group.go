@@ -67,6 +67,30 @@ type CallbackBeforeMemberJoinGroupReq struct {
 	GroupEx         string `json:"groupEx"`
 }
 
+type CallbackGroupMember struct {
+	UserID  string `json:"userID"`
+	Ex      string `json:"ex"`
+	GroupEx string `json:"groupEx"`
+}
+
+type CallbackBeforeMemberJoinGroupBatchReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	MembersList     []*CallbackGroupMember
+}
+
+type MemberJoinGroupCallBack struct {
+	UserID      *string `json:"userID"`
+	Nickname    *string `json:"nickname"`
+	FaceURL     *string `json:"faceURL"`
+	RoleLevel   *int32  `json:"roleLevel"`
+	MuteEndTime *int64  `json:"muteEndTime"`
+	Ex          *string `json:"ex"`
+}
+type CallbackBeforeMemberJoinGroupBatchResp struct {
+	CommonCallbackResp
+	MemberCallbacks []*MemberJoinGroupCallBack
+}
+
 type CallbackBeforeMemberJoinGroupResp struct {
 	CommonCallbackResp
 	Nickname    *string `json:"nickname"`
