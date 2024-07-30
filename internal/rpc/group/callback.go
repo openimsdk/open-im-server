@@ -101,32 +101,7 @@ func (s *groupServer) webhookAfterCreateGroup(ctx context.Context, after *config
 	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &callbackstruct.CallbackAfterCreateGroupResp{}, after)
 }
 
-func (s *groupServer) webhookBeforeMemberJoinGroup(ctx context.Context, before *config.BeforeConfig, groupMember *model.GroupMember, groupEx string) error {
-	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
-		cbReq := &callbackstruct.CallbackBeforeMemberJoinGroupReq{
-			CallbackCommand: callbackstruct.CallbackBeforeMemberJoinGroupCommand,
-			GroupID:         groupMember.GroupID,
-			UserID:          groupMember.UserID,
-			Ex:              groupMember.Ex,
-			GroupEx:         groupEx,
-		}
-		resp := &callbackstruct.CallbackBeforeMemberJoinGroupResp{}
-		if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
-			return err
-		}
-
-		if resp.MuteEndTime != nil {
-			groupMember.MuteEndTime = time.UnixMilli(*resp.MuteEndTime)
-		}
-		datautil.NotNilReplace(&groupMember.FaceURL, resp.FaceURL)
-		datautil.NotNilReplace(&groupMember.Ex, resp.Ex)
-		datautil.NotNilReplace(&groupMember.Nickname, resp.Nickname)
-		datautil.NotNilReplace(&groupMember.RoleLevel, resp.RoleLevel)
-		return nil
-	})
-}
-
-func (s *groupServer) webhookBeforeMemberJoinGroupBatch(ctx context.Context, before *config.BeforeConfig, groupMembers []*model.GroupMember, groupEx string) error {
+func (s *groupServer) webhookBeforeMembersJoinGroup(ctx context.Context, before *config.BeforeConfig, groupMembers []*model.GroupMember, groupEx string) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		groupMembersMap := datautil.SliceToMap(groupMembers, func(e *model.GroupMember) string {
 			return e.UserID
@@ -135,27 +110,33 @@ func (s *groupServer) webhookBeforeMemberJoinGroupBatch(ctx context.Context, bef
 
 		for _, member := range groupMembers {
 			groupMembersCallback = append(groupMembersCallback, &callbackstruct.CallbackGroupMember{
-				UserID:  member.UserID,
-				Ex:      member.Ex,
-				GroupEx: groupEx,
+				UserID: member.UserID,
+				Ex:     member.Ex,
 			})
 		}
 
-		cbReq := &callbackstruct.CallbackBeforeMemberJoinGroupBatchReq{
+		cbReq := &callbackstruct.CallbackBeforeMembersJoinGroupReq{
 			CallbackCommand: callbackstruct.CallbackBeforeMemberJoinGroupBatchCommand,
 			MembersList:     groupMembersCallback,
+			GroupEx:         groupEx,
 		}
-		resp := &callbackstruct.CallbackBeforeMemberJoinGroupBatchResp{}
+		resp := &callbackstruct.CallbackBeforeMembersJoinGroupResp{}
 
 		if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
 			return err
 		}
 
 		for _, memberCallbackResp := range resp.MemberCallbacks {
-			datautil.NotNilReplace(&groupMembersMap[(*memberCallbackResp.UserID)].FaceURL, memberCallbackResp.FaceURL)
-			datautil.NotNilReplace(&groupMembersMap[(*memberCallbackResp.UserID)].Ex, memberCallbackResp.Ex)
-			datautil.NotNilReplace(&groupMembersMap[(*memberCallbackResp.UserID)].Nickname, memberCallbackResp.Nickname)
-			datautil.NotNilReplace(&groupMembersMap[(*memberCallbackResp.UserID)].RoleLevel, memberCallbackResp.RoleLevel)
+			if _, ok := groupMembersMap[(*memberCallbackResp.UserID)]; ok {
+				if memberCallbackResp.MuteEndTime != nil {
+					groupMembersMap[(*memberCallbackResp.UserID)].MuteEndTime = time.UnixMilli(*memberCallbackResp.MuteEndTime)
+				}
+
+				datautil.NotNilReplace(&groupMembersMap[(*memberCallbackResp.UserID)].FaceURL, memberCallbackResp.FaceURL)
+				datautil.NotNilReplace(&groupMembersMap[(*memberCallbackResp.UserID)].Ex, memberCallbackResp.Ex)
+				datautil.NotNilReplace(&groupMembersMap[(*memberCallbackResp.UserID)].Nickname, memberCallbackResp.Nickname)
+				datautil.NotNilReplace(&groupMembersMap[(*memberCallbackResp.UserID)].RoleLevel, memberCallbackResp.RoleLevel)
+			}
 		}
 
 		return nil
@@ -281,10 +262,13 @@ func (s *groupServer) webhookBeforeInviteUserToGroup(ctx context.Context, before
 			return err
 		}
 
-		if len(resp.RefusedMembersAccount) > 0 {
-			// Handle the scenario where certain members are refused
-			// You might want to update the req.Members list or handle it as per your business logic
-		}
+		// Handle the scenario where certain members are refused
+		// You might want to update the req.Members list or handle it as per your business logic
+
+		// if len(resp.RefusedMembersAccount) > 0 {
+		// implement members are refused
+		// }
+
 		return nil
 	})
 }
