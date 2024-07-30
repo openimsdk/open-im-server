@@ -271,7 +271,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		joinGroupFunc(userID, constant.GroupOrdinaryUsers)
 	}
 
-	if err := s.webhookBeforeMembersJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, groupMembers, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
+	if err := s.webhookBeforeMembersJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, groupMembers, group.GroupID, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -443,7 +443,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		groupMembers = append(groupMembers, member)
 	}
 
-	if err := s.webhookBeforeMembersJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, groupMembers, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
+	if err := s.webhookBeforeMembersJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, groupMembers, group.GroupID, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -812,7 +812,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 			OperatorUserID: mcontext.GetOpUserID(ctx),
 		}
 
-		if err := s.webhookBeforeMembersJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, []*model.GroupMember{member}, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
+		if err := s.webhookBeforeMembersJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, []*model.GroupMember{member}, group.GroupID, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
 	}
@@ -881,7 +881,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			MuteEndTime:    time.UnixMilli(0),
 		}
 
-		if err := s.webhookBeforeMembersJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, []*model.GroupMember{groupMember}, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
+		if err := s.webhookBeforeMembersJoinGroup(ctx, &s.config.WebhooksConfig.BeforeMemberJoinGroup, []*model.GroupMember{groupMember}, group.GroupID, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
 

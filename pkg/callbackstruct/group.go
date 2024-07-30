@@ -66,6 +66,7 @@ type CallbackGroupMember struct {
 
 type CallbackBeforeMembersJoinGroupReq struct {
 	CallbackCommand `json:"callbackCommand"`
+	GroupID         string `json:"groupID"`
 	MembersList     []*CallbackGroupMember
 	GroupEx         string `json:"groupEx"`
 }

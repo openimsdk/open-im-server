@@ -101,7 +101,7 @@ func (s *groupServer) webhookAfterCreateGroup(ctx context.Context, after *config
 	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &callbackstruct.CallbackAfterCreateGroupResp{}, after)
 }
 
-func (s *groupServer) webhookBeforeMembersJoinGroup(ctx context.Context, before *config.BeforeConfig, groupMembers []*model.GroupMember, groupEx string) error {
+func (s *groupServer) webhookBeforeMembersJoinGroup(ctx context.Context, before *config.BeforeConfig, groupMembers []*model.GroupMember, groupID string, groupEx string) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		groupMembersMap := datautil.SliceToMap(groupMembers, func(e *model.GroupMember) string {
 			return e.UserID
@@ -117,6 +117,7 @@ func (s *groupServer) webhookBeforeMembersJoinGroup(ctx context.Context, before 
 
 		cbReq := &callbackstruct.CallbackBeforeMembersJoinGroupReq{
 			CallbackCommand: callbackstruct.CallbackBeforeMemberJoinGroupBatchCommand,
+			GroupID:         groupID,
 			MembersList:     groupMembersCallback,
 			GroupEx:         groupEx,
 		}
