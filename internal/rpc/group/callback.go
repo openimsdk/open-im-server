@@ -116,7 +116,7 @@ func (s *groupServer) webhookBeforeMembersJoinGroup(ctx context.Context, before 
 		}
 
 		cbReq := &callbackstruct.CallbackBeforeMembersJoinGroupReq{
-			CallbackCommand: callbackstruct.CallbackBeforeMemberJoinGroupBatchCommand,
+			CallbackCommand: callbackstruct.CallbackBeforeMembersJoinGroupCommand,
 			GroupID:         groupID,
 			MembersList:     groupMembersCallback,
 			GroupEx:         groupEx,
