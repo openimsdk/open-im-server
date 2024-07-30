@@ -15,7 +15,6 @@
 package config
 
 import (
-	_ "embed"
 	"os"
 	"path/filepath"
 
@@ -25,9 +24,6 @@ import (
 	"github.com/openimsdk/tools/field"
 	"gopkg.in/yaml.v3"
 )
-
-//go:embed version
-var Version string
 
 const (
 	FileName             = "config.yaml"
