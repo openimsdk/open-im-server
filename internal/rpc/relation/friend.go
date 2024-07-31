@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package friend
+package relation
 
 import (
 	"context"
+
 	"github.com/openimsdk/tools/mq/memamq"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
