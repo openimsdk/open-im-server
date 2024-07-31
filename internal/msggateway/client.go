@@ -397,11 +397,9 @@ func (c *Client) writePongMsg(appData string) error {
 		return nil
 	}
 
-	log.ZDebug(c.ctx, "write Pong Msg in Server", "appData", appData)
 	c.w.Lock()
 	defer c.w.Unlock()
 
-	log.ZDebug(c.ctx, "write Pong Msg in Server", "appData", appData)
 	err := c.conn.SetWriteDeadline(writeWait)
 	if err != nil {
 		log.ZWarn(c.ctx, "SetWriteDeadline in Server have error", errs.Wrap(err), "writeWait", writeWait, "appData", appData)
@@ -412,6 +410,5 @@ func (c *Client) writePongMsg(appData string) error {
 		log.ZWarn(c.ctx, "Write Message have error", errs.Wrap(err), "Pong msg", PongMessage)
 	}
 
-	log.ZDebug(c.ctx, "write message is success", "appdata", appData, "closed err", c.closedErr)
 	return errs.Wrap(err)
 }
