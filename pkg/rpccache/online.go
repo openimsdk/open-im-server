@@ -56,7 +56,7 @@ func (o *OnlineCache) GetUserOnlinePlatform(ctx context.Context, userID string) 
 		return nil, err
 	}
 	log.ZDebug(ctx, "OnlineCache GetUserOnlinePlatform", "userID", userID, "platformIDs", platformIDs)
-	return nil, err
+	return platformIDs, nil
 }
 
 func (o *OnlineCache) GetUserOnline(ctx context.Context, userID string) (bool, error) {
