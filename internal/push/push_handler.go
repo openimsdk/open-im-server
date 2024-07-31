@@ -202,7 +202,7 @@ func (c *ConsumerHandler) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.
 	var result []*msggateway.SingleMsgToUserResults
 	if len(onlineUserIDs) > 0 {
 		var err error
-		result, err = c.onlinePusher.GetConnsAndOnlinePush(ctx, msg, pushToUserIDs)
+		result, err = c.onlinePusher.GetConnsAndOnlinePush(ctx, msg, onlineUserIDs)
 		if err != nil {
 			return nil, err
 		}
