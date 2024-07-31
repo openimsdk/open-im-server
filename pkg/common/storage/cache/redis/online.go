@@ -5,6 +5,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
 	"strconv"
 	"time"
@@ -82,8 +83,11 @@ func (s *userOnline) SetUserOnline(ctx context.Context, userID string, online, o
 		argv = append(argv, platformID)
 	}
 	keys := []string{s.getUserOnlineKey(userID), userID, s.channelName}
-	if err := s.rdb.Eval(ctx, script, keys, argv).Err(); err != nil {
+	status, err := s.rdb.Eval(ctx, script, keys, argv).Result()
+	if err != nil {
+		log.ZError(ctx, "redis SetUserOnline", err, "userID", userID, "online", online, "offline", offline)
 		return err
 	}
+	log.ZDebug(ctx, "redis SetUserOnline", "userID", userID, "online", online, "offline", offline, "status", status)
 	return nil
 }
