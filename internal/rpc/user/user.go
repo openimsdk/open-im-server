@@ -17,7 +17,7 @@ package user
 import (
 	"context"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/internal/rpc/friend"
+	"github.com/openimsdk/open-im-server/v3/internal/rpc/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
@@ -54,7 +54,7 @@ import (
 type userServer struct {
 	online                   cache.OnlineCache
 	db                       controller.UserDatabase
-	friendNotificationSender *friend.FriendNotificationSender
+	friendNotificationSender *relation.FriendNotificationSender
 	userNotificationSender   *UserNotificationSender
 	friendRpcClient          *rpcclient.FriendRpcClient
 	groupRpcClient           *rpcclient.GroupRpcClient
@@ -105,7 +105,7 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 		RegisterCenter:           client,
 		friendRpcClient:          &friendRpcClient,
 		groupRpcClient:           &groupRpcClient,
-		friendNotificationSender: friend.NewFriendNotificationSender(&config.NotificationConfig, &msgRpcClient, friend.WithDBFunc(database.FindWithError)),
+		friendNotificationSender: relation.NewFriendNotificationSender(&config.NotificationConfig, &msgRpcClient, relation.WithDBFunc(database.FindWithError)),
 		userNotificationSender:   NewUserNotificationSender(config, &msgRpcClient, WithUserFunc(database.FindWithError)),
 		config:                   config,
 		webhookClient:            webhook.NewWebhookClient(config.WebhooksConfig.URL),

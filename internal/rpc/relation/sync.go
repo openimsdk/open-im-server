@@ -1,4 +1,4 @@
-package friend
+package relation
 
 import (
 	"context"
