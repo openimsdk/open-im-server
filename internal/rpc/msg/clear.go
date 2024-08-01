@@ -2,7 +2,6 @@ package msg
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -32,8 +31,6 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.
 		start  = time.Now()
 	)
 	clearMsg := func(ctx context.Context) (bool, error) {
-		conversationSeqs := make(map[string]struct{})
-
 		msgs, err := m.MsgDatabase.GetBeforeMsg(ctx, req.Timestamp, 100)
 		if err != nil {
 			return false, err
@@ -41,6 +38,7 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.
 		if len(msgs) == 0 {
 			return false, nil
 		}
+
 		for _, msg := range msgs {
 			index, err := m.MsgDatabase.DeleteDocMsgBefore(ctx, req.Timestamp, msg)
 			if err != nil {
@@ -49,13 +47,11 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.
 			if len(index) == 0 {
 				return false, errs.ErrInternalServer.WrapMsg("delete doc msg failed")
 			}
+
 			docNum++
 			msgNum += len(index)
-			conversationID := msg.DocID[:strings.LastIndex(msg.DocID, ":")]
-			if _, ok := conversationSeqs[conversationID]; !ok {
-				conversationSeqs[conversationID] = struct{}{}
-			}
 		}
+
 		return true, nil
 	}
 
@@ -69,6 +65,7 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.
 			log.ZInfo(ctx, "clear msg success", "docNum", docNum, "msgNum", msgNum, "cost", time.Since(start))
 			break
 		}
+
 		log.ZInfo(ctx, "clearing message", "docNum", docNum, "msgNum", msgNum, "cost", time.Since(start))
 	}
 	return &msg.ClearMsgResp{}, nil
