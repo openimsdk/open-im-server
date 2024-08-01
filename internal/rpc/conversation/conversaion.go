@@ -16,13 +16,16 @@ package conversation
 
 import (
 	"context"
+	"sort"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
-	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	dbModel "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/tools/db/redisutil"
-	"sort"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -40,10 +43,11 @@ import (
 )
 
 type conversationServer struct {
-	msgRpcClient                   *rpcclient.MessageRpcClient
-	user                           *rpcclient.UserRpcClient
-	groupRpcClient                 *rpcclient.GroupRpcClient
-	conversationDatabase           controller.ConversationDatabase
+	msgRpcClient         *rpcclient.MessageRpcClient
+	user                 *rpcclient.UserRpcClient
+	groupRpcClient       *rpcclient.GroupRpcClient
+	conversationDatabase controller.ConversationDatabase
+
 	conversationNotificationSender *ConversationNotificationSender
 	config                         *Config
 }
@@ -204,11 +208,11 @@ func (c *conversationServer) getConversations(ctx context.Context, ownerUserID s
 }
 
 func (c *conversationServer) SetConversation(ctx context.Context, req *pbconversation.SetConversationReq) (*pbconversation.SetConversationResp, error) {
-	var conversation tablerelation.Conversation
+	var conversation dbModel.Conversation
 	if err := datautil.CopyStructFields(&conversation, req.Conversation); err != nil {
 		return nil, err
 	}
-	err := c.conversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tablerelation.Conversation{&conversation})
+	err := c.conversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*dbModel.Conversation{&conversation})
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +236,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		}
 	}
 	var unequal int
-	var conv tablerelation.Conversation
+	var conv dbModel.Conversation
 	if len(req.UserIDs) == 1 {
 		cs, err := c.conversationDatabase.FindConversations(ctx, req.UserIDs[0], []string{req.Conversation.ConversationID})
 		if err != nil {
@@ -243,7 +247,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		}
 		conv = *cs[0]
 	}
-	var conversation tablerelation.Conversation
+	var conversation dbModel.Conversation
 	conversation.ConversationID = req.Conversation.ConversationID
 	conversation.ConversationType = req.Conversation.ConversationType
 	conversation.UserID = req.Conversation.UserID
@@ -292,7 +296,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		}
 	}
 	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.ReadGroupChatType {
-		var conversations []*tablerelation.Conversation
+		var conversations []*dbModel.Conversation
 		for _, ownerUserID := range req.UserIDs {
 			conversation2 := conversation
 			conversation2.OwnerUserID = ownerUserID
@@ -340,12 +344,12 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context,
 ) (*pbconversation.CreateSingleChatConversationsResp, error) {
 	switch req.ConversationType {
 	case constant.SingleChatType:
-		var conversation tablerelation.Conversation
+		var conversation dbModel.Conversation
 		conversation.ConversationID = req.ConversationID
 		conversation.ConversationType = req.ConversationType
 		conversation.OwnerUserID = req.SendID
 		conversation.UserID = req.RecvID
-		err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.Conversation{&conversation})
+		err := c.conversationDatabase.CreateConversation(ctx, []*dbModel.Conversation{&conversation})
 		if err != nil {
 			log.ZWarn(ctx, "create conversation failed", err, "conversation", conversation)
 		}
@@ -353,17 +357,17 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context,
 		conversation2 := conversation
 		conversation2.OwnerUserID = req.RecvID
 		conversation2.UserID = req.SendID
-		err = c.conversationDatabase.CreateConversation(ctx, []*tablerelation.Conversation{&conversation2})
+		err = c.conversationDatabase.CreateConversation(ctx, []*dbModel.Conversation{&conversation2})
 		if err != nil {
 			log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
 		}
 	case constant.NotificationChatType:
-		var conversation tablerelation.Conversation
+		var conversation dbModel.Conversation
 		conversation.ConversationID = req.ConversationID
 		conversation.ConversationType = req.ConversationType
 		conversation.OwnerUserID = req.RecvID
 		conversation.UserID = req.SendID
-		err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.Conversation{&conversation})
+		err := c.conversationDatabase.CreateConversation(ctx, []*dbModel.Conversation{&conversation})
 		if err != nil {
 			log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
 		}
@@ -584,6 +588,9 @@ func (c *conversationServer) UpdateConversation(ctx context.Context, req *pbconv
 	if req.MaxSeq != nil {
 		m["max_seq"] = req.MaxSeq.Value
 	}
+	if req.LatestMsgDestructTime != nil {
+		m["latest_msg_destruct_time"] = time.UnixMilli(req.LatestMsgDestructTime.Value)
+	}
 	if len(m) > 0 {
 		if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.UserIDs, req.ConversationID, m); err != nil {
 			return nil, err
@@ -601,4 +608,55 @@ func (c *conversationServer) GetOwnerConversation(ctx context.Context, req *pbco
 		Total:         total,
 		Conversations: convert.ConversationsDB2Pb(conversations),
 	}, nil
+}
+
+func (c *conversationServer) GetConversationsNeedDestructMsgs(ctx context.Context, _ *pbconversation.GetConversationsNeedDestructMsgsReq) (*pbconversation.GetConversationsNeedDestructMsgsResp, error) {
+	log.ZInfo(ctx, "ConversationDestructMsgs cron start")
+	num, err := c.conversationDatabase.GetAllConversationIDsNumber(ctx)
+	if err != nil {
+		log.ZError(ctx, "GetAllConversationIDsNumber failed", err)
+		return nil, err
+	}
+	const batchNum = 100
+
+	if num == 0 {
+		return nil, errs.New("Need Destruct Msg is nil").Wrap()
+	}
+
+	maxPage := (num + batchNum - 1) / batchNum
+
+	temp := make([]*model.Conversation, 0, maxPage*batchNum)
+
+	for pageNumber := 0; pageNumber < int(maxPage); pageNumber++ {
+		pagination := &sdkws.RequestPagination{
+			PageNumber: int32(pageNumber),
+			ShowNumber: batchNum,
+		}
+
+		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, pagination)
+		if err != nil {
+			log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
+			continue
+		}
+
+		log.ZDebug(ctx, "PageConversationIDs success", "pageNumber", pageNumber, "conversationIDsNum", len(conversationIDs), "conversationIDs", conversationIDs)
+		if len(conversationIDs) == 0 {
+			continue
+		}
+
+		conversations, err := c.conversationDatabase.GetConversationsByConversationID(ctx, conversationIDs)
+		if err != nil {
+			log.ZError(ctx, "GetConversationsByConversationID failed", err, "conversationIDs", conversationIDs)
+			continue
+		}
+
+		for _, conversation := range conversations {
+			if conversation.IsMsgDestruct && conversation.MsgDestructTime != 0 && ((time.Now().UnixMilli() > (conversation.MsgDestructTime + conversation.LatestMsgDestructTime.UnixMilli() + 8*60*60)) || // 8*60*60 is UTC+8
+				conversation.LatestMsgDestructTime.IsZero()) {
+				temp = append(temp, conversation)
+			}
+		}
+	}
+
+	return &pbconversation.GetConversationsNeedDestructMsgsResp{Conversations: convert.ConversationsDB2Pb(temp)}, nil
 }

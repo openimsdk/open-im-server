@@ -17,16 +17,19 @@ package tools
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
+
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mw"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"os"
-	"time"
 
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -50,18 +53,34 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	ctx = mcontext.SetOpUserID(ctx, config.Share.IMAdminUserID[0])
-	conn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
+
+	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
 	if err != nil {
 		return err
 	}
-	cli := msg.NewMsgClient(conn)
+
+	thirdConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
+	if err != nil {
+		return err
+	}
+
+	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
+	if err != nil {
+		return err
+	}
+
+	msgClient := msg.NewMsgClient(msgConn)
+	conversationClient := pbconversation.NewConversationClient(conversationConn)
+	thirdClient := third.NewThirdClient(thirdConn)
+
 	crontab := cron.New()
+
 	clearFunc := func() {
 		now := time.Now()
 		deltime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.RetainChatRecords))
 		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deltime.UnixMilli()))
 		log.ZInfo(ctx, "clear chat records", "deltime", deltime, "timestamp", deltime.UnixMilli())
-		if _, err := cli.ClearMsg(ctx, &msg.ClearMsgReq{Timestamp: deltime.UnixMilli()}); err != nil {
+		if _, err := msgClient.ClearMsg(ctx, &msg.ClearMsgReq{Timestamp: deltime.UnixMilli()}); err != nil {
 			log.ZError(ctx, "cron clear chat records failed", err, "deltime", deltime, "cont", time.Since(now))
 			return
 		}
@@ -71,11 +90,27 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		return errs.Wrap(err)
 	}
 
-	tConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
-	if err != nil {
-		return err
+	msgDestructFunc := func() {
+		now := time.Now()
+		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), now.UnixMilli()))
+		log.ZInfo(ctx, "msg destruct ", "now", now)
+
+		conversations, err := conversationClient.GetConversationsNeedDestructMsgs(ctx, &pbconversation.GetConversationsNeedDestructMsgsReq{})
+		if err != nil {
+			log.ZError(ctx, "Get conversation need Destruct msgs failed.", err)
+			return
+		} else {
+			_, err := msgClient.DestructMsgs(ctx, &msg.DestructMsgsReq{Conversations: conversations.Conversations})
+			if err != nil {
+				log.ZError(ctx, "Destruct Msgs failed.", err)
+				return
+			}
+		}
+		log.ZInfo(ctx, "msg destruct cron task completed", "cont", time.Since(now))
 	}
-	thirdClient := third.NewThirdClient(tConn)
+	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, msgDestructFunc); err != nil {
+		return errs.Wrap(err)
+	}
 
 	deleteFunc := func() {
 		now := time.Now()
@@ -91,6 +126,7 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, deleteFunc); err != nil {
 		return errs.Wrap(err)
 	}
+
 	log.ZInfo(ctx, "start cron task", "CronExecuteTime", config.CronTask.CronExecuteTime)
 	crontab.Start()
 	<-ctx.Done()

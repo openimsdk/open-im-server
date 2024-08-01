@@ -82,7 +82,7 @@ func (c *ConversationRpcClient) SetConversations(ctx context.Context, userIDs []
 	return err
 }
 
-func (c *ConversationRpcClient) UpdateConversations(ctx context.Context, conversation *pbconversation.UpdateConversationReq) error {
+func (c *ConversationRpcClient) UpdateConversation(ctx context.Context, conversation *pbconversation.UpdateConversationReq) error {
 	_, err := c.Client.UpdateConversation(ctx, conversation)
 	return err
 }
@@ -145,4 +145,12 @@ func (c *ConversationRpcClient) GetConversationNotReceiveMessageUserIDs(ctx cont
 		return nil, err
 	}
 	return resp.UserIDs, nil
+}
+
+func (c *ConversationRpcClient) GetConversationsNeedDestructMsgs(ctx context.Context) ([]*pbconversation.Conversation, error) {
+	resp, err := c.Client.GetConversationsNeedDestructMsgs(ctx, &pbconversation.GetConversationsNeedDestructMsgsReq{})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Conversations, nil
 }
