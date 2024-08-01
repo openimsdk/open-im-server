@@ -7,7 +7,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	"github.com/openimsdk/protocol/conversation"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/wrapperspb"
@@ -34,19 +33,6 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.
 	)
 	clearMsg := func(ctx context.Context) (bool, error) {
 		conversationSeqs := make(map[string]struct{})
-
-		// update latest msg destruct time in conversation DB.
-		defer func() {
-			req := &conversation.UpdateConversationReq{
-				LatestMsgDestructTime: wrapperspb.Int64(time.Now().UnixMilli()),
-			}
-			for conversationID := range conversationSeqs {
-				req.ConversationID = conversationID
-				if err := m.Conversation.UpdateConversation(ctx, req); err != nil {
-					log.ZError(ctx, "update conversation max seq failed", err, "conversationID", conversationID, "msgDestructTime", req.MsgDestructTime)
-				}
-			}
-		}()
 
 		msgs, err := m.MsgDatabase.GetBeforeMsg(ctx, req.Timestamp, 100)
 		if err != nil {
