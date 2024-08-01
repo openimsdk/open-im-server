@@ -203,9 +203,9 @@ func (u *userMap) GetAllUserStatus(deadline time.Time, nowtime time.Time) (resul
 	defer u.lock.RUnlock()
 	result = make([]UserState, 0, len(u.data))
 	for userID, userPlatform := range u.data {
-		add := userPlatform.Time.Before(deadline)
-		log.ZDebug(ctx, "userMap GetAllUserStatus", "userID", userID, "add", add, "platforms", userPlatform.String())
-		if add {
+		skip := deadline.Before(userPlatform.Time)
+		log.ZDebug(ctx, "userMap GetAllUserStatus", "userID", userID, "skip", skip, "platforms", userPlatform.String())
+		if skip {
 			continue
 		}
 		userPlatform.Time = nowtime
