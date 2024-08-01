@@ -93,7 +93,7 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	msgDestructFunc := func() {
 		now := time.Now()
 		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), now.UnixMilli()))
-		log.ZInfo(ctx, "msg destruct ", "now", now)
+		log.ZInfo(ctx, "msg destruct cron start", "now", now)
 
 		conversations, err := conversationClient.GetConversationsNeedDestructMsgs(ctx, &pbconversation.GetConversationsNeedDestructMsgsReq{})
 		if err != nil {

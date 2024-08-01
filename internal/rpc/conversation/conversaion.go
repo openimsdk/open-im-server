@@ -611,7 +611,6 @@ func (c *conversationServer) GetOwnerConversation(ctx context.Context, req *pbco
 }
 
 func (c *conversationServer) GetConversationsNeedDestructMsgs(ctx context.Context, _ *pbconversation.GetConversationsNeedDestructMsgsReq) (*pbconversation.GetConversationsNeedDestructMsgsResp, error) {
-	log.ZInfo(ctx, "ConversationDestructMsgs cron start")
 	num, err := c.conversationDatabase.GetAllConversationIDsNumber(ctx)
 	if err != nil {
 		log.ZError(ctx, "GetAllConversationIDsNumber failed", err)
