@@ -53,9 +53,9 @@ func (f *FriendLocalCache) IsFriend(ctx context.Context, possibleFriendUserID, u
 	log.ZDebug(ctx, "FriendLocalCache IsFriend req", "possibleFriendUserID", possibleFriendUserID, "userID", userID)
 	defer func() {
 		if err == nil {
-			log.ZDebug(ctx, "FriendLocalCache IsFriend return", "value", val)
+			log.ZDebug(ctx, "FriendLocalCache IsFriend return", "possibleFriendUserID", possibleFriendUserID, "userID", userID, "value", val)
 		} else {
-			log.ZError(ctx, "FriendLocalCache IsFriend return", err)
+			log.ZError(ctx, "FriendLocalCache IsFriend return", err, "possibleFriendUserID", possibleFriendUserID, "userID", userID)
 		}
 	}()
 	return localcache.AnyValue[bool](f.local.GetLink(ctx, cachekey2.GetIsFriendKey(possibleFriendUserID, userID), func(ctx context.Context) (any, error) {
@@ -69,9 +69,9 @@ func (f *FriendLocalCache) IsBlack(ctx context.Context, possibleBlackUserID, use
 	log.ZDebug(ctx, "FriendLocalCache IsBlack req", "possibleBlackUserID", possibleBlackUserID, "userID", userID)
 	defer func() {
 		if err == nil {
-			log.ZDebug(ctx, "FriendLocalCache IsBlack return", "value", val)
+			log.ZDebug(ctx, "FriendLocalCache IsBlack return", "possibleBlackUserID", possibleBlackUserID, "userID", userID, "value", val)
 		} else {
-			log.ZError(ctx, "FriendLocalCache IsBlack return", err)
+			log.ZError(ctx, "FriendLocalCache IsBlack return", err, "possibleBlackUserID", possibleBlackUserID, "userID", userID)
 		}
 	}()
 	return localcache.AnyValue[bool](f.local.GetLink(ctx, cachekey2.GetIsBlackIDsKey(possibleBlackUserID, userID), func(ctx context.Context) (any, error) {

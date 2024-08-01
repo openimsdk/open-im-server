@@ -59,9 +59,9 @@ func (c *ConversationLocalCache) GetConversationIDs(ctx context.Context, ownerUs
 	log.ZDebug(ctx, "ConversationLocalCache GetConversationIDs req", "ownerUserID", ownerUserID)
 	defer func() {
 		if err == nil {
-			log.ZDebug(ctx, "ConversationLocalCache GetConversationIDs return", "value", val)
+			log.ZDebug(ctx, "ConversationLocalCache GetConversationIDs return", "ownerUserID", ownerUserID, "value", val)
 		} else {
-			log.ZError(ctx, "ConversationLocalCache GetConversationIDs return", err)
+			log.ZError(ctx, "ConversationLocalCache GetConversationIDs return", err, "ownerUserID", ownerUserID)
 		}
 	}()
 	return localcache.AnyValue[[]string](c.local.Get(ctx, cachekey.GetConversationIDsKey(ownerUserID), func(ctx context.Context) (any, error) {
@@ -74,9 +74,9 @@ func (c *ConversationLocalCache) GetConversation(ctx context.Context, userID, co
 	log.ZDebug(ctx, "ConversationLocalCache GetConversation req", "userID", userID, "conversationID", conversationID)
 	defer func() {
 		if err == nil {
-			log.ZDebug(ctx, "ConversationLocalCache GetConversation return", "value", val)
+			log.ZDebug(ctx, "ConversationLocalCache GetConversation return", "userID", userID, "conversationID", conversationID, "value", val)
 		} else {
-			log.ZError(ctx, "ConversationLocalCache GetConversation return", err)
+			log.ZError(ctx, "ConversationLocalCache GetConversation return", err, "userID", userID, "conversationID", conversationID)
 		}
 	}()
 	return localcache.AnyValue[*pbconversation.Conversation](c.local.Get(ctx, cachekey.GetConversationKey(userID, conversationID), func(ctx context.Context) (any, error) {

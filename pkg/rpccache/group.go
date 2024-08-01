@@ -55,9 +55,9 @@ func (g *GroupLocalCache) getGroupMemberIDs(ctx context.Context, groupID string)
 	log.ZDebug(ctx, "GroupLocalCache getGroupMemberIDs req", "groupID", groupID)
 	defer func() {
 		if err == nil {
-			log.ZDebug(ctx, "GroupLocalCache getGroupMemberIDs return", "value", val)
+			log.ZDebug(ctx, "GroupLocalCache getGroupMemberIDs return", "groupID", groupID, "value", val)
 		} else {
-			log.ZError(ctx, "GroupLocalCache getGroupMemberIDs return", err)
+			log.ZError(ctx, "GroupLocalCache getGroupMemberIDs return", err, "groupID", groupID)
 		}
 	}()
 	return localcache.AnyValue[*listMap[string]](g.local.Get(ctx, cachekey.GetGroupMemberIDsKey(groupID), func(ctx context.Context) (any, error) {
@@ -70,9 +70,9 @@ func (g *GroupLocalCache) GetGroupMember(ctx context.Context, groupID, userID st
 	log.ZDebug(ctx, "GroupLocalCache GetGroupInfo req", "groupID", groupID, "userID", userID)
 	defer func() {
 		if err == nil {
-			log.ZDebug(ctx, "GroupLocalCache GetGroupInfo return", "value", val)
+			log.ZDebug(ctx, "GroupLocalCache GetGroupInfo return", "groupID", groupID, "userID", userID, "value", val)
 		} else {
-			log.ZError(ctx, "GroupLocalCache GetGroupInfo return", err)
+			log.ZError(ctx, "GroupLocalCache GetGroupInfo return", err, "groupID", groupID, "userID", userID)
 		}
 	}()
 	return localcache.AnyValue[*sdkws.GroupMemberFullInfo](g.local.Get(ctx, cachekey.GetGroupMemberInfoKey(groupID, userID), func(ctx context.Context) (any, error) {
@@ -85,9 +85,9 @@ func (g *GroupLocalCache) GetGroupInfo(ctx context.Context, groupID string) (val
 	log.ZDebug(ctx, "GroupLocalCache GetGroupInfo req", "groupID", groupID)
 	defer func() {
 		if err == nil {
-			log.ZDebug(ctx, "GroupLocalCache GetGroupInfo return", "value", val)
+			log.ZDebug(ctx, "GroupLocalCache GetGroupInfo return", "groupID", groupID, "value", val)
 		} else {
-			log.ZError(ctx, "GroupLocalCache GetGroupInfo return", err)
+			log.ZError(ctx, "GroupLocalCache GetGroupInfo return", err, "groupID", groupID)
 		}
 	}()
 	return localcache.AnyValue[*sdkws.GroupInfo](g.local.Get(ctx, cachekey.GetGroupInfoKey(groupID), func(ctx context.Context) (any, error) {
