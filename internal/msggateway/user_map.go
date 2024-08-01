@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -36,7 +38,7 @@ type UserPlatform struct {
 func (u *UserPlatform) String() string {
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString("UserPlatform{Time: ")
-	buf.WriteString(u.Time.Format(time.DateTime))
+	buf.WriteString(u.Time.String())
 	buf.WriteString(", Clients<")
 	buf.WriteString(strconv.Itoa(len(u.Clients)))
 	buf.WriteString(">: [")
@@ -189,13 +191,21 @@ func (u *userMap) DeleteClients(userID string, clients []*Client) (isDeleteUser 
 	return true
 }
 
-func (u *userMap) GetAllUserStatus(deadline time.Time, nowtime time.Time) []UserState {
+var opIDIncr atomic.Int64
+
+func (u *userMap) GetAllUserStatus(deadline time.Time, nowtime time.Time) (result []UserState) {
+	ctx := mcontext.SetOperationID(context.Background(), fmt.Sprintf("op_%d", opIDIncr.Add(1)))
+	log.ZDebug(ctx, "userMap GetAllUserStatus", "deadline", deadline, "nowtime", nowtime)
+	defer func() {
+		log.ZDebug(ctx, "userMap GetAllUserStatus", "num", len(result), "result", result)
+	}()
 	u.lock.RLock()
 	defer u.lock.RUnlock()
-	result := make([]UserState, 0, len(u.data))
+	result = make([]UserState, 0, len(u.data))
 	for userID, userPlatform := range u.data {
-		log.ZDebug(context.Background(), "userMap GetAllUserStatus", "userID", userID, "platforms", userPlatform.String())
-		if userPlatform.Time.Before(deadline) {
+		add := userPlatform.Time.Before(deadline)
+		log.ZDebug(ctx, "userMap GetAllUserStatus", "userID", userID, "add", add, "platforms", userPlatform.String())
+		if add {
 			continue
 		}
 		userPlatform.Time = nowtime

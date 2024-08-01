@@ -15,7 +15,7 @@ func (ws *WsServer) subscriberUserOnlineStatusChanges(ctx context.Context, userI
 	} else {
 		log.ZDebug(ctx, "gateway ignore user online status changes", "userID", userID, "platformIDs", platformIDs)
 	}
-	ws.pushUserIDOnlineStatus(ctx, userID, platformIDs)
+	go ws.pushUserIDOnlineStatus(ctx, userID, platformIDs)
 }
 
 func (ws *WsServer) SubUserOnlineStatus(ctx context.Context, client *Client, data *Req) ([]byte, error) {
