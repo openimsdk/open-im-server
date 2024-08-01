@@ -1,6 +1,10 @@
 package msggateway
 
 import (
+	"context"
+	"fmt"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"sync"
 	"time"
@@ -117,6 +121,7 @@ func (u *userMap) Get(userID string, platformID int) ([]*Client, bool, bool) {
 }
 
 func (u *userMap) Set(userID string, client *Client) {
+	log.ZDebug(context.Background(), "userMap Set", "userID", userID, "platformID", client.PlatformID, "platform", constant.PlatformIDToName(client.PlatformID), "pointer", fmt.Sprintf("%p", client))
 	u.lock.Lock()
 	defer u.lock.Unlock()
 	result, ok := u.data[userID]
@@ -162,12 +167,12 @@ func (u *userMap) DeleteClients(userID string, clients []*Client) (isDeleteUser 
 	return true
 }
 
-func (u *userMap) GetAllUserStatus(deadline time.Time, nowtime time.Time) []UserState {
+func (u *userMap) GetAllUserStatus(deadline time.Time, nowtime time.Time) (result []UserState) {
 	u.lock.RLock()
 	defer u.lock.RUnlock()
-	result := make([]UserState, 0, len(u.data))
+	result = make([]UserState, 0, len(u.data))
 	for userID, userPlatform := range u.data {
-		if userPlatform.Time.Before(deadline) {
+		if deadline.Before(userPlatform.Time) {
 			continue
 		}
 		userPlatform.Time = nowtime
