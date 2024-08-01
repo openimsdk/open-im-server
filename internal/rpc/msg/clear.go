@@ -127,6 +127,7 @@ func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) 
 						continue
 					}
 
+					// if you need Notify SDK client userseq is update.
 					// m.msgNotificationSender.UserDeleteMsgsNotification(handleCtx, conversation.OwnerUserID, conversation.ConversationID, seqs)
 				}
 			}
@@ -137,5 +138,3 @@ func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) 
 
 	return nil, nil
 }
-
-

@@ -75,7 +75,8 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 
 	crontab := cron.New()
 
-	clearFunc := func() {
+	// scheduled hard delete outdated Msgs in specific time.
+	clearMsgFunc := func() {
 		now := time.Now()
 		deltime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.RetainChatRecords))
 		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deltime.UnixMilli()))
@@ -86,10 +87,11 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		}
 		log.ZInfo(ctx, "cron clear chat records success", "deltime", deltime, "cont", time.Since(now))
 	}
-	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, clearFunc); err != nil {
+	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, clearMsgFunc); err != nil {
 		return errs.Wrap(err)
 	}
 
+	// scheduled soft delete outdated Msgs in specific time when user set `is_msg_destruct` feature.
 	msgDestructFunc := func() {
 		now := time.Now()
 		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), now.UnixMilli()))
@@ -112,7 +114,8 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		return errs.Wrap(err)
 	}
 
-	deleteFunc := func() {
+	// scheduled delete outdated file Objects and their datas in specific time.
+	deleteObjectFunc := func() {
 		now := time.Now()
 		deleteTime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.FileExpireTime))
 		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deleteTime.UnixMilli()))
@@ -123,7 +126,7 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		}
 		log.ZInfo(ctx, "cron deleteoutDatedData success", "deltime", deleteTime, "cont", time.Since(now))
 	}
-	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, deleteFunc); err != nil {
+	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, deleteObjectFunc); err != nil {
 		return errs.Wrap(err)
 	}
 
