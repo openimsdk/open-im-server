@@ -1,16 +1,12 @@
 package msggateway
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
-	"strconv"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
@@ -33,23 +29,6 @@ type UserState struct {
 type UserPlatform struct {
 	Time    time.Time
 	Clients []*Client
-}
-
-func (u *UserPlatform) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("UserPlatform{Time: ")
-	buf.WriteString(u.Time.String())
-	buf.WriteString(", Clients<")
-	buf.WriteString(strconv.Itoa(len(u.Clients)))
-	buf.WriteString(">: [")
-	for i, client := range u.Clients {
-		if i > 0 {
-			buf.WriteString(", ")
-		}
-		buf.WriteString(fmt.Sprintf("%p %d %s", u.Clients[i], client.PlatformID, constant.PlatformIDToName(client.PlatformID)))
-	}
-	buf.WriteString("]}")
-	return buf.String()
 }
 
 func (u *UserPlatform) PlatformIDs() []int32 {
@@ -161,9 +140,6 @@ func (u *userMap) DeleteClients(userID string, clients []*Client) (isDeleteUser 
 	if len(clients) == 0 {
 		return false
 	}
-	for i, client := range clients {
-		log.ZDebug(context.Background(), "userMap DeleteClients", "userID", userID, "platformID", client.PlatformID, "platform", constant.PlatformIDToName(client.PlatformID), "count", fmt.Sprintf("%p %d/%d", clients[i], i+1, len(clients)))
-	}
 	u.lock.Lock()
 	defer u.lock.Unlock()
 	result, ok := u.data[userID]
@@ -191,21 +167,12 @@ func (u *userMap) DeleteClients(userID string, clients []*Client) (isDeleteUser 
 	return true
 }
 
-var opIDIncr atomic.Int64
-
 func (u *userMap) GetAllUserStatus(deadline time.Time, nowtime time.Time) (result []UserState) {
-	ctx := mcontext.SetOperationID(context.Background(), fmt.Sprintf("op_%d", opIDIncr.Add(1)))
-	log.ZDebug(ctx, "userMap GetAllUserStatus", "deadline", deadline, "nowtime", nowtime)
-	defer func() {
-		log.ZDebug(ctx, "userMap GetAllUserStatus", "num", len(result), "result", result)
-	}()
 	u.lock.RLock()
 	defer u.lock.RUnlock()
 	result = make([]UserState, 0, len(u.data))
 	for userID, userPlatform := range u.data {
-		skip := deadline.Before(userPlatform.Time)
-		log.ZDebug(ctx, "userMap GetAllUserStatus", "userID", userID, "skip", skip, "platforms", userPlatform.String())
-		if skip {
+		if deadline.Before(userPlatform.Time) {
 			continue
 		}
 		userPlatform.Time = nowtime
