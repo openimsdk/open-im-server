@@ -4,13 +4,16 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/binary"
+	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	pbuser "github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
 	"math/rand"
+	"os"
 	"strconv"
+	"sync/atomic"
 	"time"
 )
 
@@ -78,8 +81,10 @@ func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
 		}
 	}
 
-	opIdCtx := mcontext.SetOperationID(context.Background(), "r"+strconv.FormatUint(rNum, 10))
+	var count atomic.Int64
+	operationIDPrefix := fmt.Sprintf("p_%d_", os.Getpid())
 	doRequest := func(req *pbuser.SetUserOnlineStatusReq) {
+		opIdCtx := mcontext.SetOperationID(context.Background(), operationIDPrefix+strconv.FormatInt(count.Add(1), 10))
 		ctx, cancel := context.WithTimeout(opIdCtx, time.Second*5)
 		defer cancel()
 		if _, err := ws.userClient.Client.SetUserOnlineStatus(ctx, req); err != nil {
@@ -102,7 +107,7 @@ func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
 		case now := <-renewalTicker.C:
 			deadline := now.Add(-cachekey.OnlineExpire / 3)
 			users := ws.clients.GetAllUserStatus(deadline, now)
-			log.ZDebug(context.Background(), "renewal ticker", "deadline", deadline, "nowtime", now, "num", len(users))
+			log.ZDebug(context.Background(), "renewal ticker", "deadline", deadline, "nowtime", now, "num", len(users), "users", users)
 			pushUserState(users...)
 		case state := <-ws.clients.UserState():
 			log.ZDebug(context.Background(), "OnlineCache user online change", "userID", state.UserID, "online", state.Online, "offline", state.Offline)
