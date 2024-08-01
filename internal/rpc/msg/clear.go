@@ -132,5 +132,10 @@ func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) 
 			return nil
 		})
 	}
+
+	if err := errg.Wait(); err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
