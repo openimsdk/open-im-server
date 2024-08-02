@@ -22,7 +22,7 @@ import (
 
 func ConversationDB2Pb(conversationDB *model.Conversation) *conversation.Conversation {
 	conversationPB := &conversation.Conversation{}
-	conversationPB.LatestMsgDestructTime = conversationDB.LatestMsgDestructTime.Unix()
+	conversationPB.LatestMsgDestructTime = conversationDB.LatestMsgDestructTime.UnixMilli()
 	if err := datautil.CopyStructFields(conversationPB, conversationDB); err != nil {
 		return nil
 	}
@@ -35,7 +35,7 @@ func ConversationsDB2Pb(conversationsDB []*model.Conversation) (conversationsPB 
 		if err := datautil.CopyStructFields(conversationPB, conversationDB); err != nil {
 			continue
 		}
-		conversationPB.LatestMsgDestructTime = conversationDB.LatestMsgDestructTime.Unix()
+		conversationPB.LatestMsgDestructTime = conversationDB.LatestMsgDestructTime.UnixMilli()
 		conversationsPB = append(conversationsPB, conversationPB)
 	}
 	return conversationsPB
