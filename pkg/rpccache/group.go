@@ -17,6 +17,8 @@ package rpccache
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	"github.com/openimsdk/protocol/group"
+	"github.com/openimsdk/tools/utils/datautil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
@@ -32,7 +34,7 @@ func NewGroupLocalCache(client rpcclient.GroupRpcClient, localCache *config.Loca
 	log.ZDebug(context.Background(), "GroupLocalCache", "topic", lc.Topic, "slotNum", lc.SlotNum, "slotSize", lc.SlotSize, "enable", lc.Enable())
 	x := &GroupLocalCache{
 		client: client,
-		local: localcache.New[any](
+		local: localcache.New[[]byte](
 			localcache.WithLocalSlotNum(lc.SlotNum),
 			localcache.WithLocalSlotSize(lc.SlotSize),
 			localcache.WithLinkSlotNum(lc.SlotNum),
@@ -48,10 +50,10 @@ func NewGroupLocalCache(client rpcclient.GroupRpcClient, localCache *config.Loca
 
 type GroupLocalCache struct {
 	client rpcclient.GroupRpcClient
-	local  localcache.Cache[any]
+	local  localcache.Cache[[]byte]
 }
 
-func (g *GroupLocalCache) getGroupMemberIDs(ctx context.Context, groupID string) (val *listMap[string], err error) {
+func (g *GroupLocalCache) getGroupMemberIDs(ctx context.Context, groupID string) (val *group.GetGroupMemberUserIDsResp, err error) {
 	log.ZDebug(ctx, "GroupLocalCache getGroupMemberIDs req", "groupID", groupID)
 	defer func() {
 		if err == nil {
@@ -60,9 +62,10 @@ func (g *GroupLocalCache) getGroupMemberIDs(ctx context.Context, groupID string)
 			log.ZError(ctx, "GroupLocalCache getGroupMemberIDs return", err, "groupID", groupID)
 		}
 	}()
-	return localcache.AnyValue[*listMap[string]](g.local.Get(ctx, cachekey.GetGroupMemberIDsKey(groupID), func(ctx context.Context) (any, error) {
+	var cache cacheProto[group.GetGroupMemberUserIDsResp]
+	return cache.Unmarshal(g.local.Get(ctx, cachekey.GetGroupMemberIDsKey(groupID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "GroupLocalCache getGroupMemberIDs rpc", "groupID", groupID)
-		return newListMap(g.client.GetGroupMemberIDs(ctx, groupID))
+		return cache.Marshal(g.client.Client.GetGroupMemberUserIDs(ctx, &group.GetGroupMemberUserIDsReq{GroupID: groupID}))
 	}))
 }
 
@@ -75,9 +78,10 @@ func (g *GroupLocalCache) GetGroupMember(ctx context.Context, groupID, userID st
 			log.ZError(ctx, "GroupLocalCache GetGroupInfo return", err, "groupID", groupID, "userID", userID)
 		}
 	}()
-	return localcache.AnyValue[*sdkws.GroupMemberFullInfo](g.local.Get(ctx, cachekey.GetGroupMemberInfoKey(groupID, userID), func(ctx context.Context) (any, error) {
+	var cache cacheProto[sdkws.GroupMemberFullInfo]
+	return cache.Unmarshal(g.local.Get(ctx, cachekey.GetGroupMemberInfoKey(groupID, userID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "GroupLocalCache GetGroupInfo rpc", "groupID", groupID, "userID", userID)
-		return g.client.GetGroupMemberCache(ctx, groupID, userID)
+		return cache.Marshal(g.client.GetGroupMemberCache(ctx, groupID, userID))
 	}))
 }
 
@@ -90,9 +94,10 @@ func (g *GroupLocalCache) GetGroupInfo(ctx context.Context, groupID string) (val
 			log.ZError(ctx, "GroupLocalCache GetGroupInfo return", err, "groupID", groupID)
 		}
 	}()
-	return localcache.AnyValue[*sdkws.GroupInfo](g.local.Get(ctx, cachekey.GetGroupInfoKey(groupID), func(ctx context.Context) (any, error) {
+	var cache cacheProto[sdkws.GroupInfo]
+	return cache.Unmarshal(g.local.Get(ctx, cachekey.GetGroupInfoKey(groupID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "GroupLocalCache GetGroupInfo rpc", "groupID", groupID)
-		return g.client.GetGroupInfoCache(ctx, groupID)
+		return cache.Marshal(g.client.GetGroupInfoCache(ctx, groupID))
 	}))
 }
 
@@ -101,7 +106,7 @@ func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string)
 	if err != nil {
 		return nil, err
 	}
-	return res.List, nil
+	return res.UserIDs, nil
 }
 
 func (g *GroupLocalCache) GetGroupMemberIDMap(ctx context.Context, groupID string) (map[string]struct{}, error) {
@@ -109,7 +114,7 @@ func (g *GroupLocalCache) GetGroupMemberIDMap(ctx context.Context, groupID strin
 	if err != nil {
 		return nil, err
 	}
-	return res.Map, nil
+	return datautil.SliceSet(res.UserIDs), nil
 }
 
 func (g *GroupLocalCache) GetGroupInfos(ctx context.Context, groupIDs []string) ([]*sdkws.GroupInfo, error) {
