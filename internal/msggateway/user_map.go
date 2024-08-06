@@ -1,10 +1,6 @@
 package msggateway
 
 import (
-	"context"
-	"fmt"
-	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"sync"
 	"time"
@@ -121,7 +117,6 @@ func (u *userMap) Get(userID string, platformID int) ([]*Client, bool, bool) {
 }
 
 func (u *userMap) Set(userID string, client *Client) {
-	log.ZDebug(context.Background(), "userMap Set", "userID", userID, "platformID", client.PlatformID, "platform", constant.PlatformIDToName(client.PlatformID), "pointer", fmt.Sprintf("%p", client))
 	u.lock.Lock()
 	defer u.lock.Unlock()
 	result, ok := u.data[userID]

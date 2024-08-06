@@ -377,8 +377,19 @@ func (m *MsgMgo) searchMessageIndex(ctx context.Context, filter any, nextID prim
 	if !nextID.IsZero() {
 		pipeline = append(pipeline, bson.M{"$match": bson.M{"_id": bson.M{"$gt": nextID}}})
 	}
+	coarseFilter := bson.M{
+		"$or": bson.A{
+			bson.M{
+				"doc_id": primitive.Regex{Pattern: "^sg_"},
+			},
+			bson.M{
+				"doc_id": primitive.Regex{Pattern: "^si_"},
+			},
+		},
+	}
 	pipeline = append(pipeline,
 		bson.M{"$sort": bson.M{"_id": 1}},
+		bson.M{"$match": coarseFilter},
 		bson.M{"$match": filter},
 		bson.M{"$limit": limit},
 		bson.M{

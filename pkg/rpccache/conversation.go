@@ -23,6 +23,7 @@ import (
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
 )
@@ -36,7 +37,7 @@ func NewConversationLocalCache(client rpcclient.ConversationRpcClient, localCach
 	log.ZDebug(context.Background(), "ConversationLocalCache", "topic", lc.Topic, "slotNum", lc.SlotNum, "slotSize", lc.SlotSize, "enable", lc.Enable())
 	x := &ConversationLocalCache{
 		client: client,
-		local: localcache.New[any](
+		local: localcache.New[[]byte](
 			localcache.WithLocalSlotNum(lc.SlotNum),
 			localcache.WithLocalSlotSize(lc.SlotSize),
 			localcache.WithLinkSlotNum(lc.SlotNum),
@@ -52,21 +53,30 @@ func NewConversationLocalCache(client rpcclient.ConversationRpcClient, localCach
 
 type ConversationLocalCache struct {
 	client rpcclient.ConversationRpcClient
-	local  localcache.Cache[any]
+	local  localcache.Cache[[]byte]
 }
 
 func (c *ConversationLocalCache) GetConversationIDs(ctx context.Context, ownerUserID string) (val []string, err error) {
-	log.ZDebug(ctx, "ConversationLocalCache GetConversationIDs req", "ownerUserID", ownerUserID)
+	resp, err := c.getConversationIDs(ctx, ownerUserID)
+	if err != nil {
+		return nil, err
+	}
+	return resp.ConversationIDs, nil
+}
+
+func (c *ConversationLocalCache) getConversationIDs(ctx context.Context, ownerUserID string) (val *pbconversation.GetConversationIDsResp, err error) {
+	log.ZDebug(ctx, "ConversationLocalCache getConversationIDs req", "ownerUserID", ownerUserID)
 	defer func() {
 		if err == nil {
-			log.ZDebug(ctx, "ConversationLocalCache GetConversationIDs return", "value", val)
+			log.ZDebug(ctx, "ConversationLocalCache getConversationIDs return", "ownerUserID", ownerUserID, "value", val)
 		} else {
-			log.ZError(ctx, "ConversationLocalCache GetConversationIDs return", err)
+			log.ZError(ctx, "ConversationLocalCache getConversationIDs return", err, "ownerUserID", ownerUserID)
 		}
 	}()
-	return localcache.AnyValue[[]string](c.local.Get(ctx, cachekey.GetConversationIDsKey(ownerUserID), func(ctx context.Context) (any, error) {
-		log.ZDebug(ctx, "ConversationLocalCache GetConversationIDs rpc", "ownerUserID", ownerUserID)
-		return c.client.GetConversationIDs(ctx, ownerUserID)
+	var cache cacheProto[pbconversation.GetConversationIDsResp]
+	return cache.Unmarshal(c.local.Get(ctx, cachekey.GetConversationIDsKey(ownerUserID), func(ctx context.Context) ([]byte, error) {
+		log.ZDebug(ctx, "ConversationLocalCache getConversationIDs rpc", "ownerUserID", ownerUserID)
+		return cache.Marshal(c.client.Client.GetConversationIDs(ctx, &pbconversation.GetConversationIDsReq{UserID: ownerUserID}))
 	}))
 }
 
@@ -74,14 +84,15 @@ func (c *ConversationLocalCache) GetConversation(ctx context.Context, userID, co
 	log.ZDebug(ctx, "ConversationLocalCache GetConversation req", "userID", userID, "conversationID", conversationID)
 	defer func() {
 		if err == nil {
-			log.ZDebug(ctx, "ConversationLocalCache GetConversation return", "value", val)
+			log.ZDebug(ctx, "ConversationLocalCache GetConversation return", "userID", userID, "conversationID", conversationID, "value", val)
 		} else {
-			log.ZError(ctx, "ConversationLocalCache GetConversation return", err)
+			log.ZError(ctx, "ConversationLocalCache GetConversation return", err, "userID", userID, "conversationID", conversationID)
 		}
 	}()
-	return localcache.AnyValue[*pbconversation.Conversation](c.local.Get(ctx, cachekey.GetConversationKey(userID, conversationID), func(ctx context.Context) (any, error) {
+	var cache cacheProto[pbconversation.Conversation]
+	return cache.Unmarshal(c.local.Get(ctx, cachekey.GetConversationKey(userID, conversationID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "ConversationLocalCache GetConversation rpc", "userID", userID, "conversationID", conversationID)
-		return c.client.GetConversation(ctx, userID, conversationID)
+		return cache.Marshal(c.client.GetConversation(ctx, userID, conversationID))
 	}))
 }
 
@@ -126,9 +137,19 @@ func (c *ConversationLocalCache) GetConversations(ctx context.Context, ownerUser
 	return conversations, nil
 }
 
-func (c *ConversationLocalCache) getConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) (*listMap[string], error) {
-	return localcache.AnyValue[*listMap[string]](c.local.Get(ctx, cachekey.GetConversationNotReceiveMessageUserIDsKey(conversationID), func(ctx context.Context) (any, error) {
-		return newListMap(c.client.GetConversationNotReceiveMessageUserIDs(ctx, conversationID))
+func (c *ConversationLocalCache) getConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) (val *pbconversation.GetConversationNotReceiveMessageUserIDsResp, err error) {
+	log.ZDebug(ctx, "ConversationLocalCache getConversationNotReceiveMessageUserIDs req", "conversationID", conversationID)
+	defer func() {
+		if err == nil {
+			log.ZDebug(ctx, "ConversationLocalCache getConversationNotReceiveMessageUserIDs return", "conversationID", conversationID, "value", val)
+		} else {
+			log.ZError(ctx, "ConversationLocalCache getConversationNotReceiveMessageUserIDs return", err, "conversationID", conversationID)
+		}
+	}()
+	var cache cacheProto[pbconversation.GetConversationNotReceiveMessageUserIDsResp]
+	return cache.Unmarshal(c.local.Get(ctx, cachekey.GetConversationNotReceiveMessageUserIDsKey(conversationID), func(ctx context.Context) ([]byte, error) {
+		log.ZDebug(ctx, "ConversationLocalCache getConversationNotReceiveMessageUserIDs rpc", "conversationID", conversationID)
+		return cache.Marshal(c.client.Client.GetConversationNotReceiveMessageUserIDs(ctx, &pbconversation.GetConversationNotReceiveMessageUserIDsReq{ConversationID: conversationID}))
 	}))
 }
 
@@ -137,7 +158,7 @@ func (c *ConversationLocalCache) GetConversationNotReceiveMessageUserIDs(ctx con
 	if err != nil {
 		return nil, err
 	}
-	return res.List, nil
+	return res.UserIDs, nil
 }
 
 func (c *ConversationLocalCache) GetConversationNotReceiveMessageUserIDMap(ctx context.Context, conversationID string) (map[string]struct{}, error) {
@@ -145,5 +166,5 @@ func (c *ConversationLocalCache) GetConversationNotReceiveMessageUserIDMap(ctx c
 	if err != nil {
 		return nil, err
 	}
-	return res.Map, nil
+	return datautil.SliceSet(res.UserIDs), nil
 }

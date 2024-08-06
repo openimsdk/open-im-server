@@ -47,7 +47,7 @@ type OnlineCache struct {
 	local lru.LRU[string, []int32]
 }
 
-func (o *OnlineCache) GetUserOnlinePlatform(ctx context.Context, userID string) ([]int32, error) {
+func (o *OnlineCache) getUserOnlinePlatform(ctx context.Context, userID string) ([]int32, error) {
 	platformIDs, err := o.local.Get(userID, func() ([]int32, error) {
 		return o.user.GetUserOnlinePlatform(ctx, userID)
 	})
@@ -59,8 +59,18 @@ func (o *OnlineCache) GetUserOnlinePlatform(ctx context.Context, userID string) 
 	return platformIDs, nil
 }
 
+func (o *OnlineCache) GetUserOnlinePlatform(ctx context.Context, userID string) ([]int32, error) {
+	platformIDs, err := o.getUserOnlinePlatform(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	tmp := make([]int32, len(platformIDs))
+	copy(tmp, platformIDs)
+	return platformIDs, nil
+}
+
 func (o *OnlineCache) GetUserOnline(ctx context.Context, userID string) (bool, error) {
-	platformIDs, err := o.GetUserOnlinePlatform(ctx, userID)
+	platformIDs, err := o.getUserOnlinePlatform(ctx, userID)
 	if err != nil {
 		return false, err
 	}
