@@ -1,4 +1,35 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.0.1"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -18,7 +49,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 3,
+  "id": null,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -35,7 +66,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Is the service up.",
           "fieldConfig": {
@@ -84,8 +115,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -121,7 +151,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -141,7 +171,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of online users and login users within the time frame.",
           "fieldConfig": {
@@ -190,8 +220,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -244,7 +273,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -260,7 +289,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "increase(user_login_total[$time])",
@@ -277,7 +306,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of register users within the time frame.",
           "fieldConfig": {
@@ -326,8 +355,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -380,7 +408,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -400,7 +428,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of chat msg success.",
           "fieldConfig": {
@@ -449,8 +477,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -486,7 +513,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -502,7 +529,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "increase(group_chat_msg_process_success_total[$time])",
@@ -519,7 +546,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of chat msg failed .",
           "fieldConfig": {
@@ -568,8 +595,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -637,7 +663,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -653,7 +679,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "increase(group_chat_msg_process_failed_total[$time])",
@@ -670,7 +696,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of msg failed offline pushed.",
           "fieldConfig": {
@@ -719,8 +745,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -773,7 +798,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -793,7 +818,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of failed set seq.",
           "fieldConfig": {
@@ -842,8 +867,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -896,7 +920,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -916,7 +940,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of successfully inserted messages.",
           "fieldConfig": {
@@ -965,8 +989,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1002,7 +1025,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -1018,7 +1041,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "increase(msg_insert_mongo_success_total[$time])",
@@ -1035,7 +1058,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of failed insertion messages.",
           "fieldConfig": {
@@ -1084,8 +1107,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1121,7 +1143,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -1137,7 +1159,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "increase(msg_insert_mongo_failed_total[$time])",
@@ -1168,7 +1190,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of call of all API.",
           "fieldConfig": {
@@ -1217,8 +1239,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1254,7 +1275,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -1274,7 +1295,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of call of all API within the time frame.",
           "fieldConfig": {
@@ -1323,8 +1344,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1385,7 +1405,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -1405,7 +1425,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of err return of API.",
           "fieldConfig": {
@@ -1454,8 +1474,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1491,7 +1510,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -1511,7 +1530,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of err return of API with err code.",
           "fieldConfig": {
@@ -1560,8 +1579,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1597,7 +1615,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -1617,7 +1635,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the qps of API.",
           "fieldConfig": {
@@ -1666,8 +1684,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1719,7 +1736,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -1739,7 +1756,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of err return of API within the time frame.",
           "fieldConfig": {
@@ -1788,8 +1805,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1825,7 +1841,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -1845,7 +1861,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of err return of API with err code within the time frame..",
           "fieldConfig": {
@@ -1894,8 +1910,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1931,7 +1946,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -1965,7 +1980,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of call of all RPC.",
           "fieldConfig": {
@@ -2014,8 +2029,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2051,7 +2065,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -2071,7 +2085,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the error return of RPC.",
           "fieldConfig": {
@@ -2120,8 +2134,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2157,7 +2170,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -2177,7 +2190,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the error return of RPC with code.",
           "fieldConfig": {
@@ -2226,8 +2239,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2263,7 +2275,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -2283,7 +2295,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of call of all RPC within the time frame.",
           "fieldConfig": {
@@ -2368,7 +2380,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -2388,7 +2400,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of RPC calls within the time frame, aggregated by name.",
           "fieldConfig": {
@@ -2473,7 +2485,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -2493,7 +2505,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of call of RPC within the time frame, aggregated by address.",
           "fieldConfig": {
@@ -2578,7 +2590,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -2598,7 +2610,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the error return of RPC within the time frame within the time frame.",
           "fieldConfig": {
@@ -2683,7 +2695,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -2703,7 +2715,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the error return of RPC with code within the time frame within the time frame.",
           "fieldConfig": {
@@ -2788,7 +2800,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -2822,7 +2834,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of HTTP requests.",
           "fieldConfig": {
@@ -2871,8 +2883,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2908,7 +2919,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -2928,7 +2939,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of HTTP requests with status.",
           "fieldConfig": {
@@ -2977,8 +2988,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3014,7 +3024,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -3034,7 +3044,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of HTTP requests within the time frame.",
           "fieldConfig": {
@@ -3083,8 +3093,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3120,7 +3129,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -3140,7 +3149,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of HTTP requests with status within the time frame.",
           "fieldConfig": {
@@ -3189,8 +3198,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3226,7 +3234,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -3246,7 +3254,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the qps of HTTP.",
           "fieldConfig": {
@@ -3347,7 +3355,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -3369,7 +3377,7 @@
       "type": "row"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -3377,749 +3385,841 @@
         "y": 4
       },
       "id": 6,
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-          },
-          "description": "This metric represents the proportion of CPU runtime within 1 second. It is calculated as the average CPU runtime over 1 minute.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 12,
-            "x": 0,
-            "y": 16
-          },
-          "id": 5,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.3.7",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "label_replace(\r\n  rate(process_cpu_seconds_total{job=~\"$rpcNameFilter\"}[1m])*100,\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "interval": "",
-              "legendFormat": "{{job}}: {{instance}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "CPU Usage Percentage",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-          },
-          "description": "This metric represents the proportion of CPU runtime within 1 second. It is calculated as the average CPU runtime over 1 minute.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 12,
-            "x": 12,
-            "y": 16
-          },
-          "id": 4,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.3.7",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "label_replace(\r\n  rate(process_cpu_seconds_total{job!~\"$rpcNameFilter\"}[1m])*100,\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "interval": "",
-              "legendFormat": "{{job}}: {{instance}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "CPU Usage Percentage",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-          },
-          "description": "This metric represents the number of open file descriptors.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 12,
-            "x": 0,
-            "y": 27
-          },
-          "id": 7,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.3.7",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "label_replace(\r\n  process_open_fds{job=~\"$rpcNameFilter\"},\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "interval": "",
-              "legendFormat": "{{job}}: {{instance}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Open File Descriptors",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-          },
-          "description": "This metric represents the number of open file descriptors.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 12,
-            "x": 12,
-            "y": 27
-          },
-          "id": 8,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.3.7",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "label_replace(\r\n  process_open_fds{job!~\"$rpcNameFilter\"},\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "interval": "",
-              "legendFormat": "{{job}}: {{instance}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Open File Descriptors",
-          "type": "timeseries"
-        },
-        {
-          "gridPos": {
-            "h": 11,
-            "w": 12,
-            "x": 0,
-            "y": 38
-          },
-          "id": 9,
-          "libraryPanel": {
-            "name": "Virtual Memory bytes",
-            "uid": "fdriqgnk5lnnke"
-          },
-          "title": "Virtual Memory bytes"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-          },
-          "description": "This metric represents the number of process virtual memory bytes.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "bytes"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 12,
-            "x": 12,
-            "y": 38
-          },
-          "id": 10,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.3.7",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "label_replace(\r\n  process_virtual_memory_bytes{job!~\"$rpcNameFilter\"},\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "interval": "",
-              "legendFormat": "{{job}}: {{instance}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Virtual Memory bytes",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-          },
-          "description": "This metric represents the number of process resident memory bytes.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "bytes"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 12,
-            "x": 0,
-            "y": 49
-          },
-          "id": 11,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.3.7",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "label_replace(\r\n  process_resident_memory_bytes{job=~\"$rpcNameFilter\"},\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "interval": "",
-              "legendFormat": "{{job}}: {{instance}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Resident Memory bytes",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-          },
-          "description": "This metric represents the number of process resident memory bytes.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "bytes"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 12,
-            "x": 12,
-            "y": 49
-          },
-          "id": 12,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.3.7",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "label_replace(\r\n  process_resident_memory_bytes{job!~\"$rpcNameFilter\"},\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "interval": "",
-              "legendFormat": "{{job}}: {{instance}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Resident Memory bytes",
-          "type": "timeseries"
-        }
-      ],
+      "panels": [],
       "title": "Process",
       "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "This metric represents the proportion of CPU runtime within 1 second. It is calculated as the average CPU runtime over 1 minute.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.3.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_replace(\r\n  rate(process_cpu_seconds_total{job=~\"$rpcNameFilter\"}[1m])*100,\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{job}}: {{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "CPU Usage Percentage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "This metric represents the proportion of CPU runtime within 1 second. It is calculated as the average CPU runtime over 1 minute.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.3.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_replace(\r\n  rate(process_cpu_seconds_total{job!~\"$rpcNameFilter\"}[1m])*100,\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{job}}: {{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "CPU Usage Percentage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "This metric represents the number of open file descriptors.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.3.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_replace(\r\n  process_open_fds{job=~\"$rpcNameFilter\"},\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{job}}: {{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Open File Descriptors",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "This metric represents the number of open file descriptors.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.3.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_replace(\r\n  process_open_fds{job!~\"$rpcNameFilter\"},\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{job}}: {{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Open File Descriptors",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "This metric represents the number of process virtual memory bytes.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 27
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.3.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_replace(\r\n  process_virtual_memory_bytes{job=~\"$rpcNameFilter\"},\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{job}}: {{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Virtual Memory bytes",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "This metric represents the number of process virtual memory bytes.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.3.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_replace(\r\n  process_virtual_memory_bytes{job!~\"$rpcNameFilter\"},\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{job}}: {{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Virtual Memory bytes",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "This metric represents the number of process resident memory bytes.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 38
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.3.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_replace(\r\n  process_resident_memory_bytes{job=~\"$rpcNameFilter\"},\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{job}}: {{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Resident Memory bytes",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "This metric represents the number of process resident memory bytes.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 38
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.3.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_replace(\r\n  process_resident_memory_bytes{job!~\"$rpcNameFilter\"},\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{job}}: {{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Resident Memory bytes",
+      "type": "timeseries"
     },
     {
       "collapsed": true,
@@ -4127,14 +4227,14 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 49
       },
       "id": 3,
       "panels": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Measures the frequency of garbage collection operations in the Go environment, averaged over the last five minutes.",
           "fieldConfig": {
@@ -4183,8 +4283,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -4220,7 +4319,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -4240,7 +4339,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Measures the frequency of garbage collection operations in the Go environment, averaged over the last five minutes.",
           "fieldConfig": {
@@ -4285,8 +4384,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -4322,7 +4420,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "label_replace(\r\n  rate(go_gc_duration_seconds_count{job!~\"$rpcNameFilter\"}[5m]),\r\n  \"job\",\r\n  \"$1\",\r\n  \"job\",\r\n  \".*openim-(.*)\"\r\n)",
@@ -4339,7 +4437,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of goroutines.",
           "fieldConfig": {
@@ -4388,8 +4486,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -4425,7 +4522,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -4445,7 +4542,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of goroutines.",
           "fieldConfig": {
@@ -4494,8 +4591,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -4531,7 +4627,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -4551,7 +4647,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of bytes allocated and still in use.",
           "fieldConfig": {
@@ -4600,8 +4696,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -4637,7 +4732,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -4657,7 +4752,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of bytes allocated and still in use.",
           "fieldConfig": {
@@ -4706,8 +4801,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -4743,7 +4837,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -4763,7 +4857,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of bytes used by the profiling bucket hash table.",
           "fieldConfig": {
@@ -4812,8 +4906,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -4849,7 +4942,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -4869,7 +4962,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of bytes used by the profiling bucket hash table.",
           "fieldConfig": {
@@ -4918,8 +5011,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -4955,7 +5047,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -4975,7 +5067,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of bytes in use by mcache structures.",
           "fieldConfig": {
@@ -5024,8 +5116,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -5061,7 +5152,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -5081,7 +5172,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "This metric represents the number of bytes in use by mcache structures.",
           "fieldConfig": {
@@ -5130,8 +5221,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -5167,7 +5257,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "f6b25a33-8915-4220-ad0b-2c4c60eb07ab"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -5243,9 +5333,9 @@
       },
       {
         "current": {
-          "selected": true,
-          "text": "1h",
-          "value": "1h"
+          "selected": false,
+          "text": "5m",
+          "value": "5m"
         },
         "description": "Global promQL time range.",
         "hide": 0,
@@ -5260,7 +5350,7 @@
             "value": "1m"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "5m",
             "value": "5m"
           },
@@ -5270,7 +5360,7 @@
             "value": "30m"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "1h",
             "value": "1h"
           },
@@ -5351,6 +5441,6 @@
   "timezone": "",
   "title": "Demo",
   "uid": "a506d250-b606-4702-86a7-ac6aa1d069a1",
-  "version": 22,
+  "version": 23,
   "weekStart": ""
 }
