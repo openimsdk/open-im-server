@@ -234,7 +234,7 @@ func (m *Manage) RunTask(ctx context.Context, task Task) (string, error) {
 	}
 	for i, currentPartSize := range part.PartSizes {
 		md5Reader := NewMd5Reader(io.LimitReader(reader, currentPartSize))
-		if m.doPut(ctx, m.api.Client, initiateMultipartUploadResp.Upload.Sign, uploadParts[i], md5Reader, currentPartSize); err != nil {
+		if err := m.doPut(ctx, m.api.Client, initiateMultipartUploadResp.Upload.Sign, uploadParts[i], md5Reader, currentPartSize); err != nil {
 			return "", err
 		}
 		if md5val := md5Reader.Md5(); md5val != part.PartMd5s[i] {
