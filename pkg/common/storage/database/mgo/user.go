@@ -167,6 +167,10 @@ func (u *UserMgo) DeleteUserCommand(ctx context.Context, userID string, Type int
 	filter := bson.M{"userID": userID, "type": Type, "uuid": UUID}
 
 	result, err := collection.DeleteOne(ctx, filter)
+	// when err is not nil, result might be nil
+	if err != nil {
+		return errs.Wrap(err)
+	}
 	if result.DeletedCount == 0 {
 		// No records found to update
 		return errs.Wrap(errs.ErrRecordNotFound)
