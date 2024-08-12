@@ -6,7 +6,7 @@ jobs:
   assign-issue:
     if: |
       contains(github.event.comment.body, '/assign') || contains(github.event.comment.body, '/accept') &&
-      !contains(github.event.comment.user.login, 'OpenIM-Robot')
+      !contains(github.event.comment.user.login, 'openim-robot')
     runs-on: ubuntu-latest
     permissions:
       issues: write
