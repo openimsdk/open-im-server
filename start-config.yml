@@ -3,7 +3,7 @@ serviceBinaries:
   openim-crontask: 1
   openim-rpc-user: 1
   openim-msggateway: 1
-  openim-push: 1
+  openim-push: 4
   openim-msgtransfer: 4
   openim-rpc-conversation: 1
   openim-rpc-auth: 1
