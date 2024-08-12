@@ -39,8 +39,8 @@ jobs:
       - name: Set up infra services
         uses: hoverkraft-tech/compose-action@v2.0.1
         # Uncomment and set the correct path to your docker-compose file
-        # with:
-        #   compose-file: "./docker/docker-compose.yml"
+        with:
+          compose-file: "./docker/docker-compose.yml"
 
         # run: |
         #   sudo docker compose up -d
