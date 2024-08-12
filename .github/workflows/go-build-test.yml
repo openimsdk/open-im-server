@@ -47,18 +47,17 @@ jobs:
         #   sudo sleep 30  # Increased sleep time for better stability
         # timeout-minutes: 60 # Increased timeout for Docker setup
 
+      # - name: Get Internal IP Address
+      #   id: get-ip
+      #   run: |
+      #     IP=$(hostname -I | awk '{print $1}')
+      #     echo "The IP Address is: $IP"
+      #     echo "::set-output name=ip::$IP"
 
-    # - name: Get Internal IP Address
-    #   id: get-ip
-    #   run: |
-    #     IP=$(hostname -I | awk '{print $1}')
-    #     echo "The IP Address is: $IP"
-    #     echo "::set-output name=ip::$IP"
-      
-    # - name: Update .env
-    #   run: |
-    #     sed -i 's|externalAddress:.*|externalAddress: "http://${{ steps.get-ip.outputs.ip }}:10005"|' config/minio.yml
-    #     cat config/minio.yml
+      # - name: Update .env
+      #   run: |
+      #     sed -i 's|externalAddress:.*|externalAddress: "http://${{ steps.get-ip.outputs.ip }}:10005"|' config/minio.yml
+      #     cat config/minio.yml
 
       - name: Build and test Server Services
         run: |
@@ -72,16 +71,12 @@ jobs:
           repository: "openimsdk/chat"
           path: "chat-repo"
 
-      - name: Get Chat dependencies
-        run: |
-          cd ${{ github.workspace }}/chat-repo
-          go install github.com/magefile/mage@latest
-          go mod tidy
-          go mod download
-
       - name: Build and test Chat Services
         run: |
           cd ${{ github.workspace }}/chat-repo
+          go mod tidy
+          go mod download
+          go install github.com/magefile/mage@latest
           sudo mage build
           sudo mage start
           sudo mage check
