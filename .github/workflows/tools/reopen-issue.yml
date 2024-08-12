@@ -28,7 +28,7 @@ jobs:
               per_page: 100
             });
             const issueNumbers = issues
-              .filter(issue => !issue.pull_request) // 排除PR
+              .filter(issue => !issue.pull_request) // exclude PR
               .map(issue => issue.number);
             console.log(`Fetched issues: ${issueNumbers}`);
             return issueNumbers;
