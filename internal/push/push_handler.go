@@ -91,9 +91,9 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 	}
 	sec := msgFromMQ.MsgData.SendTime / 1000
 	nowSec := timeutil.GetCurrentTimestampBySecond()
+
 	if nowSec-sec > 10 {
 		log.ZWarn(ctx, "ignore push msg", nil, "msg", pbData.String(), "sec", sec, "nowSec", nowSec, "nowSec-sec", nowSec-sec)
-		return
 	}
 	var err error
 	switch msgFromMQ.MsgData.SessionType {
