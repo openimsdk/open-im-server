@@ -41,6 +41,7 @@ func toCommonCallback(ctx context.Context, msg *pbchat.SendMsgReq, command strin
 		MsgFrom:          msg.MsgData.MsgFrom,
 		ContentType:      msg.MsgData.ContentType,
 		Status:           msg.MsgData.Status,
+		SendTime:         msg.MsgData.SendTime,
 		CreateTime:       msg.MsgData.CreateTime,
 		AtUserIDList:     msg.MsgData.AtUserIDList,
 		SenderFaceURL:    msg.MsgData.SenderFaceURL,
