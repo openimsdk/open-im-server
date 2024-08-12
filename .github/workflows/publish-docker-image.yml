@@ -1,63 +1,34 @@
-# Copyright © 2023 OpenIM open source community. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-name: Publish Docker image
+name: Publish Docker image to registries
 
 on:
   push:
     branches:
-      - main
       - release-*
-    paths-ignore:
-      - "docs/**"
-      - "README.md"
-      - "README_zh-CN.md"
-      - "**.md"
-      - "docs/**"
-      - "CONTRIBUTING.md"
-    tags:
-      - v*
-  pull_request:
-    types: [closed]
-    branches:
-      - main
-      - release-*
-    paths-ignore:
-      - "docs/**"
-      - "README.md"
-      - "README_zh-CN.md"
-      - "**.md"
-      - "docs/**"
-      - "CONTRIBUTING.md"
-  workflow_dispatch:
 
-env:
-  # Common versions
-  GO_VERSION: "1.20"
+  release:
+    types: [published]
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag version to be used for Docker image"
+        required: true
+        default: "v3.8.0"
+
+# env:
+#   GO_VERSION: "1.21"
 
 jobs:
-  build-dockerhub:
+  publish-docker-images:
     runs-on: ubuntu-latest
-    if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.merged == false) }}
     steps:
-      - name: Checkout main repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           path: main-repo
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+        
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -90,7 +61,7 @@ jobs:
         run: |
           cd ${{ github.workspace }}/compose-repo
           docker compose up -d
-          sleep 30
+          sleep 60
 
       - name: Check openim-server health
         run: |
@@ -121,31 +92,8 @@ jobs:
               exit 0
             fi
 
-      # - name: Checkout e2e
-      #   if: success()
-      #   uses: actions/checkout@v4
-      #   with:
-      #     repository: "openimsdk/test-e2e"
-      #     path: e2e-repo
 
-      # - name: Set up Python 3.9
-      #   uses: actions/setup-python@v4
-      #   with:
-      #     python-version: '3.9'
-      
-      # - name: Install dependencies
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install -y xvfb libxi6 libgconf-2-4
-      #     cd ${{ github.workspace }}/e2e-repo
-      #     pip install -r requirements.txt
-      
-      # - name: Run tests
-      #   run: |
-      #     cd ${{ github.workspace }}/e2e-repo
-      #     xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pytest -v -s ./script
-
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Extract metadata for Docker #  (tags, labels) 
         if: success()
         id: meta
         uses: docker/metadata-action@v5.5.1
@@ -154,6 +102,7 @@ jobs:
             openim/openim-server
             ghcr.io/openimsdk/openim-server
             registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server
+
           # generate Docker tags based on the following events/attributes
           tags: |
             type=ref,event=tag
@@ -186,13 +135,11 @@ jobs:
           username: ${{ secrets.ALIREGISTRY_USERNAME }}
           password: ${{ secrets.ALIREGISTRY_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker images
         uses: docker/build-push-action@v5
         with:
           context: ./main-repo
           push: true
-          # linux/ppc64le,linux/s390x
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      
