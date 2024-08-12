@@ -192,6 +192,7 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 		if err != nil {
 			return err
 		}
+		cache = cache.DelFriendIDs(ownerUserID).DelMaxFriendVersion(ownerUserID)
 		if len(newMyFriendIDs) > 0 {
 			cache = cache.DelFriendIDs(newMyFriendIDs...)
 			cache = cache.DelFriends(ownerUserID, newMyFriendIDs).DelMaxFriendVersion(newMyFriendIDs...)

@@ -78,8 +78,8 @@ func (f *FriendRpcClient) GetFriendIDs(ctx context.Context, ownerUserID string) 
 	return resp.FriendIDs, nil
 }
 
-func (b *FriendRpcClient) IsBlack(ctx context.Context, possibleBlackUserID, userID string) (bool, error) {
-	r, err := b.Client.IsBlack(ctx, &relation.IsBlackReq{UserID1: possibleBlackUserID, UserID2: userID})
+func (f *FriendRpcClient) IsBlack(ctx context.Context, possibleBlackUserID, userID string) (bool, error) {
+	r, err := f.Client.IsBlack(ctx, &relation.IsBlackReq{UserID1: possibleBlackUserID, UserID2: userID})
 	if err != nil {
 		return false, err
 	}
