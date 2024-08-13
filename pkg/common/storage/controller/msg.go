@@ -956,8 +956,10 @@ func (db *commonMsgDatabase) DeleteDocMsgBefore(ctx context.Context, ts int64, d
 		return index, err
 	}
 	if len(index) == notNull {
+		log.ZDebug(ctx, "Delete db in Doc", "DocID", doc.DocID, "index", index, "maxSeq", maxSeq)
 		return index, db.msgDocDatabase.DeleteDoc(ctx, doc.DocID)
 	} else {
+		log.ZDebug(ctx, "delete db in index", "DocID", doc.DocID, "index", index, "maxSeq", maxSeq)
 		return index, db.msgDocDatabase.DeleteMsgByIndex(ctx, doc.DocID, index)
 	}
 }

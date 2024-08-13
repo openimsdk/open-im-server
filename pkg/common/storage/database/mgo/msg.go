@@ -1245,7 +1245,7 @@ func (m *MsgMgo) GetDocIDs(ctx context.Context) ([]string, error) {
 		skip = rand.Intn(int(count / int64(limit)))
 		offset = skip * limit
 	}
-
+	log.ZDebug(ctx, "offset", "skip", skip, "offset", offset)
 	res, err := mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, []bson.M{
 		{
 			"$project": bson.M{
