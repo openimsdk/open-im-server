@@ -918,11 +918,20 @@ func (db *commonMsgDatabase) ConvertMsgsDocLen(ctx context.Context, conversation
 func (db *commonMsgDatabase) GetBeforeMsg(ctx context.Context, ts int64, docIDs []string, limit int) ([]*model.MsgDocModel, error) {
 	var msgs []*model.MsgDocModel
 	for i := 0; i < len(docIDs); i += 1000 {
-		res, err := db.msgDocDatabase.GetBeforeMsg(ctx, ts, docIDs[i:i+1000], limit)
+		end := i + 1000
+		if end > len(docIDs) {
+			end = len(docIDs)
+		}
+
+		res, err := db.msgDocDatabase.GetBeforeMsg(ctx, ts, docIDs[i:end], limit)
 		if err != nil {
 			return nil, err
 		}
 		msgs = append(msgs, res...)
+
+		if len(msgs) >= limit {
+			return msgs[:limit], nil
+		}
 	}
 	return msgs, nil
 }
@@ -968,14 +977,5 @@ func (db *commonMsgDatabase) setMinSeq(ctx context.Context, conversationID strin
 }
 
 func (db *commonMsgDatabase) GetDocIDs(ctx context.Context) ([]string, error) {
-	var docIDsList []string
-
-	docIDs, err := db.msgDocDatabase.GetDocIDs(ctx)
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
-
-	docIDsList = append(docIDsList, docIDs...)
-
-	return docIDsList, nil
+	return db.msgDocDatabase.GetDocIDs(ctx)
 }

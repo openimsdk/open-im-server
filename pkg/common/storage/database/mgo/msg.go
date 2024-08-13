@@ -1238,10 +1238,10 @@ func (m *MsgMgo) GetDocIDs(ctx context.Context) ([]string, error) {
 	}
 
 	if count < int64(limit) {
-		skip = int(count)
+		skip = 0
 	} else {
 		rand.Seed(uint64(time.Now().UnixMilli()))
-		skip = rand.Intn(int(count - int64(limit)))
+		skip = rand.Intn(int(count))
 	}
 
 	res, err := mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, []bson.M{
@@ -1251,7 +1251,10 @@ func (m *MsgMgo) GetDocIDs(ctx context.Context) ([]string, error) {
 			},
 		},
 		{
-			"$limit": skip,
+			"$skip": skip,
+		},
+		{
+			"$limit": limit,
 		},
 	})
 
