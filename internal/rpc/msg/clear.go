@@ -37,7 +37,7 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.
 			return false, err
 		}
 
-		msgs, err := m.MsgDatabase.GetBeforeMsg(ctx, req.Timestamp, docIDs, 1000)
+		msgs, err := m.MsgDatabase.GetBeforeMsg(ctx, req.Timestamp, docIDs, 5000)
 		if err != nil {
 			return false, err
 		}
