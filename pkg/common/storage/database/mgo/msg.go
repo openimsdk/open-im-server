@@ -1243,7 +1243,7 @@ func (m *MsgMgo) GetDocIDs(ctx context.Context) ([]string, error) {
 	} else {
 		rand.Seed(uint64(time.Now().UnixMilli()))
 		skip = rand.Intn(int(count / int64(limit)))
-		offset = skip * (int(count) / limit)
+		offset = skip * limit
 	}
 
 	res, err := mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, []bson.M{
