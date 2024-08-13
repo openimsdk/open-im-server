@@ -1231,6 +1231,7 @@ func (m *MsgMgo) GetDocIDs(ctx context.Context) ([]string, error) {
 	limit := 5000
 	var skip int
 	var docIDs []string
+	var offset int
 
 	count, err := m.coll.CountDocuments(ctx, bson.M{})
 	if err != nil {
@@ -1241,7 +1242,8 @@ func (m *MsgMgo) GetDocIDs(ctx context.Context) ([]string, error) {
 		skip = 0
 	} else {
 		rand.Seed(uint64(time.Now().UnixMilli()))
-		skip = rand.Intn(int(count))
+		skip = rand.Intn(int(count / int64(limit)))
+		offset = skip * (int(count) / limit)
 	}
 
 	res, err := mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, []bson.M{
@@ -1251,7 +1253,7 @@ func (m *MsgMgo) GetDocIDs(ctx context.Context) ([]string, error) {
 			},
 		},
 		{
-			"$skip": skip,
+			"$skip": offset,
 		},
 		{
 			"$limit": limit,
