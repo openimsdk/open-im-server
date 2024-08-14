@@ -634,11 +634,11 @@ func (c *conversationServer) GetConversationsNeedDestructMsgs(ctx context.Contex
 
 		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, pagination)
 		if err != nil {
-			log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
+			// log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
 			continue
 		}
 
-		log.ZDebug(ctx, "PageConversationIDs success", "pageNumber", pageNumber, "conversationIDsNum", len(conversationIDs), "conversationIDs", conversationIDs)
+		// log.ZDebug(ctx, "PageConversationIDs success", "pageNumber", pageNumber, "conversationIDsNum", len(conversationIDs), "conversationIDs", conversationIDs)
 		if len(conversationIDs) == 0 {
 			continue
 		}
