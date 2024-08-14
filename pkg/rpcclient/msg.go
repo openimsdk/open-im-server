@@ -337,7 +337,9 @@ func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, co
 }
 
 func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, sendID, recvID string, contentType, sessionType int32, m proto.Message, opts ...NotificationOptions) {
-	s.queue.Push(func() { s.send(ctx, sendID, recvID, contentType, sessionType, m, opts...) })
+	if err := s.queue.Push(func() { s.send(ctx, sendID, recvID, contentType, sessionType, m, opts...) }); err != nil {
+		log.ZWarn(ctx, "Push to queue failed", err, "sendID", sendID, "recvID", recvID, "msg", jsonutil.StructToJsonString(m))
+	}
 }
 
 func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...NotificationOptions) {
