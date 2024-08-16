@@ -30,8 +30,14 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.
 		msgNum int
 		start  = time.Now()
 	)
+
 	clearMsg := func(ctx context.Context) (bool, error) {
-		msgs, err := m.MsgDatabase.GetBeforeMsg(ctx, req.Timestamp, 100)
+		docIDs, err := m.MsgDatabase.GetDocIDs(ctx)
+		if err != nil {
+			return false, err
+		}
+
+		msgs, err := m.MsgDatabase.GetBeforeMsg(ctx, req.Timestamp, docIDs, 5000)
 		if err != nil {
 			return false, err
 		}
@@ -55,19 +61,14 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.
 		return true, nil
 	}
 
-	for {
-		keep, err := clearMsg(ctx)
-		if err != nil {
-			log.ZError(ctx, "clear msg failed", err, "docNum", docNum, "msgNum", msgNum, "cost", time.Since(start))
-			return nil, err
-		}
-		if !keep {
-			log.ZInfo(ctx, "clear msg success", "docNum", docNum, "msgNum", msgNum, "cost", time.Since(start))
-			break
-		}
-
-		log.ZInfo(ctx, "clearing message", "docNum", docNum, "msgNum", msgNum, "cost", time.Since(start))
+	_, err = clearMsg(ctx)
+	if err != nil {
+		log.ZError(ctx, "clear msg failed", err, "docNum", docNum, "msgNum", msgNum, "cost", time.Since(start))
+		return nil, err
 	}
+
+	log.ZInfo(ctx, "clearing message", "docNum", docNum, "msgNum", msgNum, "cost", time.Since(start))
+
 	return &msg.ClearMsgResp{}, nil
 }
 

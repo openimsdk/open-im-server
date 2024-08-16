@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  # - name: "Bug Report"
+  #   description: "Report a bug in the project"
+  #   file: "bug-report.yml"
+  - name: 📢 Connect on slack
+    url: https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg
+    about: Support OpenIM-related requests or issues, get in touch with developers and help on slack
+  - name: 🌐 OpenIM Blog
+    url: https://www.openim.io/
+    about: Open the OpenIM community blog
