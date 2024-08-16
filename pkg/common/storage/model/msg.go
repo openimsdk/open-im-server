@@ -92,15 +92,15 @@ type GroupCount struct {
 	Count   int64  `bson:"count"`
 }
 
-func (MsgDocModel) TableName() string {
+func (*MsgDocModel) TableName() string {
 	return MsgTableName
 }
 
-func (MsgDocModel) GetSingleGocMsgNum() int64 {
+func (*MsgDocModel) GetSingleGocMsgNum() int64 {
 	return singleGocMsgNum
 }
 
-func (MsgDocModel) GetSingleGocMsgNum5000() int64 {
+func (*MsgDocModel) GetSingleGocMsgNum5000() int64 {
 	return singleGocMsgNum5000
 }
 
@@ -108,12 +108,12 @@ func (m *MsgDocModel) IsFull() bool {
 	return m.Msg[len(m.Msg)-1].Msg != nil
 }
 
-func (m MsgDocModel) GetDocID(conversationID string, seq int64) string {
+func (m *MsgDocModel) GetDocID(conversationID string, seq int64) string {
 	seqSuffix := (seq - 1) / singleGocMsgNum
 	return m.indexGen(conversationID, seqSuffix)
 }
 
-func (m MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[string][]int64 {
+func (m *MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[string][]int64 {
 	t := make(map[string][]int64)
 	for i := 0; i < len(seqs); i++ {
 		docID := m.GetDocID(conversationID, seqs[i])
@@ -127,15 +127,15 @@ func (m MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[st
 	return t
 }
 
-func (MsgDocModel) GetMsgIndex(seq int64) int64 {
+func (*MsgDocModel) GetMsgIndex(seq int64) int64 {
 	return (seq - 1) % singleGocMsgNum
 }
 
-func (MsgDocModel) indexGen(conversationID string, seqSuffix int64) string {
+func (*MsgDocModel) indexGen(conversationID string, seqSuffix int64) string {
 	return conversationID + ":" + strconv.FormatInt(seqSuffix, 10)
 }
 
-func (MsgDocModel) GenExceptionMessageBySeqs(seqs []int64) (exceptionMsg []*sdkws.MsgData) {
+func (*MsgDocModel) GenExceptionMessageBySeqs(seqs []int64) (exceptionMsg []*sdkws.MsgData) {
 	for _, v := range seqs {
 		msgModel := new(sdkws.MsgData)
 		msgModel.Seq = v
