@@ -7,7 +7,7 @@ serviceBinaries:
   openim-msgtransfer: 4
   openim-rpc-conversation: 1
   openim-rpc-auth: 1
-  openim-rpc-group: 1
+  openim-rpc-group: 2
   openim-rpc-friend: 1
   openim-rpc-msg: 1
   openim-rpc-third: 1
