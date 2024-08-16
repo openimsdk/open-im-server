@@ -16,6 +16,7 @@ package msgtransfer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -137,7 +138,7 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 				return
 			}
 
-			if err := prommetrics.TransferInit(prometheusPort); err != nil && err != http.ErrServerClosed {
+			if err := prommetrics.TransferInit(prometheusPort); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				netErr = errs.WrapMsg(err, "prometheus start error", "prometheusPort", prometheusPort)
 				netDone <- struct{}{}
 			}

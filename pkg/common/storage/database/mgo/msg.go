@@ -117,9 +117,9 @@ func (m *MsgMgo) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID, docID strin
 }
 
 func (m *MsgMgo) getMsgBySeqIndexIn1Doc(ctx context.Context, userID, docID string, seqs []int64) ([]*model.MsgInfoModel, error) {
-	indexs := make([]int64, 0, len(seqs))
+	indexes := make([]int64, 0, len(seqs))
 	for _, seq := range seqs {
-		indexs = append(indexs, m.model.GetMsgIndex(seq))
+		indexes = append(indexes, m.model.GetMsgIndex(seq))
 	}
 	pipeline := mongo.Pipeline{
 		bson.D{{Key: "$match", Value: bson.D{
@@ -130,7 +130,7 @@ func (m *MsgMgo) getMsgBySeqIndexIn1Doc(ctx context.Context, userID, docID strin
 			{Key: "doc_id", Value: 1},
 			{Key: "msgs", Value: bson.D{
 				{Key: "$map", Value: bson.D{
-					{Key: "input", Value: indexs},
+					{Key: "input", Value: indexes},
 					{Key: "as", Value: "index"},
 					{Key: "in", Value: bson.D{
 						{Key: "$arrayElemAt", Value: bson.A{"$msgs", "$$index"}},
