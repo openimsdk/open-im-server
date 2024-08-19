@@ -75,7 +75,7 @@ Go to your fork on GitHub and click the "Pull Request" button. Ensure the PR des
 ### 9. Sign the CLA
 If this is your first time submitting a PR, you will need to reply in the comments of the PR:
 ```
-I have read the CLA Document and I hereby sign the CLA
+The signature to be committed in order to sign the CLA
 ```
 
 ### Programming Standards
