@@ -247,6 +247,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		}
 		conv = *cs[0]
 	}
+
 	var conversation dbModel.Conversation
 	conversation.ConversationID = req.Conversation.ConversationID
 	conversation.ConversationType = req.Conversation.ConversationType
@@ -259,12 +260,14 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			unequal++
 		}
 	}
+
 	if req.Conversation.AttachedInfo != nil {
 		m["attached_info"] = req.Conversation.AttachedInfo.Value
 		if req.Conversation.AttachedInfo.Value != conv.AttachedInfo {
 			unequal++
 		}
 	}
+
 	if req.Conversation.Ex != nil {
 		m["ex"] = req.Conversation.Ex.Value
 		if req.Conversation.Ex.Value != conv.Ex {
@@ -277,24 +280,48 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			unequal++
 		}
 	}
+
 	if req.Conversation.GroupAtType != nil {
 		m["group_at_type"] = req.Conversation.GroupAtType.Value
 		if req.Conversation.GroupAtType.Value != conv.GroupAtType {
 			unequal++
 		}
 	}
+
 	if req.Conversation.MsgDestructTime != nil {
 		m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
 		if req.Conversation.MsgDestructTime.Value != conv.MsgDestructTime {
 			unequal++
 		}
 	}
+
 	if req.Conversation.IsMsgDestruct != nil {
 		m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
 		if req.Conversation.IsMsgDestruct.Value != conv.IsMsgDestruct {
 			unequal++
 		}
 	}
+
+	if req.Conversation.BurnDuration != nil {
+		m["burn_duration"] = req.Conversation.BurnDuration.Value
+		if req.Conversation.BurnDuration.Value != conv.BurnDuration {
+			unequal++
+		}
+	}
+
+	if len(m) != 0 {
+		if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, req.UserIDs, &conversation, m); err != nil {
+			return nil, err
+		}
+	}
+
+	if unequal > 0 {
+		for _, v := range req.UserIDs {
+			c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
+		}
+		return &pbconversation.SetConversationsResp{}, nil
+	}
+
 	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.ReadGroupChatType {
 		var conversations []*dbModel.Conversation
 		for _, ownerUserID := range req.UserIDs {
@@ -310,23 +337,6 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		for _, userID := range req.UserIDs {
 			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
 				req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
-		}
-	}
-
-	if req.Conversation.BurnDuration != nil {
-		m["burn_duration"] = req.Conversation.BurnDuration.Value
-		if req.Conversation.BurnDuration.Value != conv.BurnDuration {
-			unequal++
-		}
-	}
-
-	if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, req.UserIDs, &conversation, m); err != nil {
-		return nil, err
-	}
-
-	if unequal > 0 {
-		for _, v := range req.UserIDs {
-			c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
 		}
 	}
 

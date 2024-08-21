@@ -1,4 +1,4 @@
-url: "webhook://127.0.0.1:10008/callbackExample"
+url: webhook://127.0.0.1:10008/callbackExample
 beforeSendSingleMsg:
   enable: false
   timeout: 5
