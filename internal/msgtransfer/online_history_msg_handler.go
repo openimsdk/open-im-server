@@ -16,6 +16,7 @@ package msgtransfer
 
 import (
 	"context"
+	"errors"
 	"github.com/IBM/sarama"
 	"github.com/go-redis/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -187,7 +188,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 	if len(storageMessageList) > 0 {
 		msg := storageMessageList[0]
 		lastSeq, isNewConversation, err := och.msgDatabase.BatchInsertChat2Cache(ctx, conversationID, storageMessageList)
-		if err != nil && errs.Unwrap(err) != redis.Nil {
+		if err != nil && !errors.Is(errs.Unwrap(err), redis.Nil) {
 			log.ZError(ctx, "batch data insert to redis err", err, "storageMsgList", storageMessageList)
 			return
 		}
