@@ -77,7 +77,7 @@ git push origin fix-bug-123
 ### 9. 签署 CLA
 如果这是你第一次提交 PR，你需要在 PR 的评论中回复：
 ```
-The signature to be committed in order to sign the CLA
+I have read the CLA Document and I hereby sign the CLA
 ```
 
 ### 编程规范
