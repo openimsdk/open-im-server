@@ -3,17 +3,17 @@ username: ''
 # Password for authentication
 password: ''
 # Producer acknowledgment settings
-producerAck: ""
+producerAck: 
 # Compression type to use (e.g., none, gzip, snappy)
-compressType: "none"
+compressType: none
 # List of Kafka broker addresses
 address: [ localhost:19094 ]
 # Kafka topic for Redis integration
-toRedisTopic: "toRedis"
+toRedisTopic: toRedis
 # Kafka topic for MongoDB integration
-toMongoTopic: "toMongo"
+toMongoTopic: toMongo
 # Kafka topic for push notifications
-toPushTopic: "toPush"
+toPushTopic: toPush
 # Consumer group ID for Redis topic
 toRedisGroupID: redis
 # Consumer group ID for MongoDB topic
@@ -25,12 +25,12 @@ tls:
   # Enable or disable TLS
   enableTLS: false
   # CA certificate file path
-  caCrt: ""
+  caCrt: 
   # Client certificate file path
-  clientCrt: ""
+  clientCrt: 
   # Client key file path
-  clientKey: ""
+  clientKey: 
   # Client key password
-  clientKeyPwd: ""
+  clientKeyPwd: 
   # Whether to skip TLS verification (not recommended for production)
   insecureSkipVerify: false
