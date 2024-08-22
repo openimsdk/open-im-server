@@ -315,12 +315,6 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		}
 	}
 
-	if len(m) != 0 {
-		if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, req.UserIDs, &conversation, m); err != nil {
-			return nil, err
-		}
-	}
-
 	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.ReadGroupChatType {
 		var conversations []*dbModel.Conversation
 		for _, ownerUserID := range req.UserIDs {
@@ -338,12 +332,19 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
 				req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
 		}
-	}
+	} else {
+		if len(m) != 0 {
+			if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, req.UserIDs, &conversation, m); err != nil {
+				return nil, err
+			}
 
-	if unequal > 0 {
-		for _, v := range req.UserIDs {
-			c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
+			if unequal > 0 {
+				for _, v := range req.UserIDs {
+					c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
+				}
+			}
 		}
+
 	}
 
 	return &pbconversation.SetConversationsResp{}, nil
