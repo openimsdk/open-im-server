@@ -59,6 +59,7 @@ func NewGroupNotificationSender(
 		config:             config,
 
 		conversationRpcClient: conversationRpcClient,
+		msgRpcClient:          msgRpcClient,
 	}
 }
 
@@ -69,6 +70,7 @@ type GroupNotificationSender struct {
 	config       *Config
 
 	conversationRpcClient *rpcclient.ConversationRpcClient
+	msgRpcClient          *rpcclient.MessageRpcClient
 }
 
 func (g *GroupNotificationSender) PopulateGroupMember(ctx context.Context, members ...*model.GroupMember) error {
@@ -516,14 +518,11 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, g
 
 	if !g.config.RpcConfig.EnableHistoryForNewMembers {
 		conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
-		conversation, err := g.conversationRpcClient.GetConversationsByConversationID(ctx, []string{conversationID})
+		maxSeq, err := g.msgRpcClient.GetConversationMaxSeq(ctx, conversationID)
 		if err != nil {
 			return err
 		}
-		if len(conversation) == 0 {
-			return errs.New("group conversation not found").Wrap()
-		}
-		err = g.conversationRpcClient.SetConversationMaxSeq(ctx, entrantUserID, conversationID, conversation[0].MaxSeq)
+		err = g.conversationRpcClient.SetConversationMinSeq(ctx, entrantUserID, conversationID, maxSeq)
 		if err != nil {
 			return err
 		}
