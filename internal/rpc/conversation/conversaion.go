@@ -289,21 +289,18 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		unequal := len(m)
 
 		if req.Conversation.RecvMsgOpt != nil {
-			m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
 			if req.Conversation.RecvMsgOpt.Value != conversationMap[userID].RecvMsgOpt {
 				unequal--
 			}
 		}
 
 		if req.Conversation.AttachedInfo != nil {
-			m["attached_info"] = req.Conversation.AttachedInfo.Value
 			if req.Conversation.AttachedInfo.Value != conversationMap[userID].AttachedInfo {
 				unequal--
 			}
 		}
 
 		if req.Conversation.Ex != nil {
-			m["ex"] = req.Conversation.Ex.Value
 			if req.Conversation.Ex.Value != conversationMap[userID].Ex {
 				unequal--
 			}
@@ -316,28 +313,24 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		}
 
 		if req.Conversation.GroupAtType != nil {
-			m["group_at_type"] = req.Conversation.GroupAtType.Value
 			if req.Conversation.GroupAtType.Value != conversationMap[userID].GroupAtType {
 				unequal--
 			}
 		}
 
 		if req.Conversation.MsgDestructTime != nil {
-			m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
 			if req.Conversation.MsgDestructTime.Value != conversationMap[userID].MsgDestructTime {
 				unequal--
 			}
 		}
 
 		if req.Conversation.IsMsgDestruct != nil {
-			m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
 			if req.Conversation.IsMsgDestruct.Value != conversationMap[userID].IsMsgDestruct {
 				unequal--
 			}
 		}
 
 		if req.Conversation.BurnDuration != nil {
-			m["burn_duration"] = req.Conversation.BurnDuration.Value
 			if req.Conversation.BurnDuration.Value != conversationMap[userID].BurnDuration {
 				unequal--
 			}
