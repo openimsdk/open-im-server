@@ -247,7 +247,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		if len(conversationList) != 0 {
 			conversationMap[userID] = conversationList[0]
 		} else {
-			conversationMap[userID] = &dbModel.Conversation{}
+			needUpdateUsersList = append(needUpdateUsersList, userID)
 		}
 	}
 
