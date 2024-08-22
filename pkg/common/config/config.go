@@ -258,7 +258,8 @@ type Group struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus Prometheus `mapstructure:"prometheus"`
+	Prometheus                 Prometheus `mapstructure:"prometheus"`
+	EnableHistoryForNewMembers bool       `mapstructure:"enableHistoryForNewMembers"`
 }
 
 type Msg struct {
