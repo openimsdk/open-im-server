@@ -333,6 +333,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		if err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, conversations); err != nil {
 			return nil, err
 		}
+
 		for _, userID := range req.UserIDs {
 			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
 				req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
