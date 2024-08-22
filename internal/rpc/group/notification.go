@@ -538,7 +538,7 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, g
 	if err != nil {
 		return err
 	}
-	tips := &sdkws.MemberEnterTips{Group: group, EntrantUser: users}
+	tips := &sdkws.MemberEnterTips{Group: group, EntrantUsers: users}
 	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberEnterNotification, tips)
 	return nil
