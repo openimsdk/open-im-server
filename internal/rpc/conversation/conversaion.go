@@ -236,20 +236,15 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		}
 	}
 
-	var unequal int
-	var conv *dbModel.Conversation
+	conversationMap := make(map[string]*dbModel.Conversation)
+	var needUpdateUsersList []string
 
-	if len(req.UserIDs) == 1 {
-		cs, err := c.conversationDatabase.FindConversations(ctx, req.UserIDs[0], []string{req.Conversation.ConversationID})
+	for _, userID := range req.UserIDs {
+		conversationList, err := c.conversationDatabase.FindConversations(ctx, userID, []string{req.Conversation.ConversationID})
 		if err != nil {
 			return nil, err
 		}
-
-		if len(cs) > 0 {
-			conv = cs[0]
-		} else {
-			unequal++
-		}
+		conversationMap[userID] = conversationList[0]
 	}
 
 	var conversation dbModel.Conversation
@@ -260,58 +255,96 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 
 	m := make(map[string]any)
 
-	if req.Conversation.RecvMsgOpt != nil {
-		m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
-		if conv != nil && req.Conversation.RecvMsgOpt.Value != conv.RecvMsgOpt {
-			unequal++
+	setConversationFieldsFunc := func() {
+		if req.Conversation.RecvMsgOpt != nil {
+			m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
+		}
+		if req.Conversation.AttachedInfo != nil {
+			m["attached_info"] = req.Conversation.AttachedInfo.Value
+		}
+		if req.Conversation.Ex != nil {
+			m["ex"] = req.Conversation.Ex.Value
+		}
+		if req.Conversation.IsPinned != nil {
+			m["is_pinned"] = req.Conversation.IsPinned.Value
+		}
+		if req.Conversation.GroupAtType != nil {
+			m["group_at_type"] = req.Conversation.GroupAtType.Value
+		}
+		if req.Conversation.MsgDestructTime != nil {
+			m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
+		}
+		if req.Conversation.MsgDestructTime != nil {
+			m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
+		}
+		if req.Conversation.BurnDuration != nil {
+			m["burn_duration"] = req.Conversation.BurnDuration.Value
 		}
 	}
 
-	if req.Conversation.AttachedInfo != nil {
-		m["attached_info"] = req.Conversation.AttachedInfo.Value
-		if conv != nil && req.Conversation.AttachedInfo.Value != conv.AttachedInfo {
-			unequal++
-		}
-	}
+	// set need set field in conversation
+	setConversationFieldsFunc()
 
-	if req.Conversation.Ex != nil {
-		m["ex"] = req.Conversation.Ex.Value
-		if conv != nil && req.Conversation.Ex.Value != conv.Ex {
-			unequal++
-		}
-	}
-	if req.Conversation.IsPinned != nil {
-		m["is_pinned"] = req.Conversation.IsPinned.Value
-		if conv != nil && req.Conversation.IsPinned.Value != conv.IsPinned {
-			unequal++
-		}
-	}
+	for userID := range conversationMap {
+		unequal := len(m)
 
-	if req.Conversation.GroupAtType != nil {
-		m["group_at_type"] = req.Conversation.GroupAtType.Value
-		if conv != nil && req.Conversation.GroupAtType.Value != conv.GroupAtType {
-			unequal++
+		if req.Conversation.RecvMsgOpt != nil {
+			m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
+			if req.Conversation.RecvMsgOpt.Value != conversationMap[userID].RecvMsgOpt {
+				unequal--
+			}
 		}
-	}
 
-	if req.Conversation.MsgDestructTime != nil {
-		m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
-		if conv != nil && req.Conversation.MsgDestructTime.Value != conv.MsgDestructTime {
-			unequal++
+		if req.Conversation.AttachedInfo != nil {
+			m["attached_info"] = req.Conversation.AttachedInfo.Value
+			if req.Conversation.AttachedInfo.Value != conversationMap[userID].AttachedInfo {
+				unequal--
+			}
 		}
-	}
 
-	if req.Conversation.IsMsgDestruct != nil {
-		m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
-		if conv != nil && req.Conversation.IsMsgDestruct.Value != conv.IsMsgDestruct {
-			unequal++
+		if req.Conversation.Ex != nil {
+			m["ex"] = req.Conversation.Ex.Value
+			if req.Conversation.Ex.Value != conversationMap[userID].Ex {
+				unequal--
+			}
 		}
-	}
+		if req.Conversation.IsPinned != nil {
+			m["is_pinned"] = req.Conversation.IsPinned.Value
+			if req.Conversation.IsPinned.Value != conversationMap[userID].IsPinned {
+				unequal--
+			}
+		}
 
-	if req.Conversation.BurnDuration != nil {
-		m["burn_duration"] = req.Conversation.BurnDuration.Value
-		if conv != nil && req.Conversation.BurnDuration.Value != conv.BurnDuration {
-			unequal++
+		if req.Conversation.GroupAtType != nil {
+			m["group_at_type"] = req.Conversation.GroupAtType.Value
+			if req.Conversation.GroupAtType.Value != conversationMap[userID].GroupAtType {
+				unequal--
+			}
+		}
+
+		if req.Conversation.MsgDestructTime != nil {
+			m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
+			if req.Conversation.MsgDestructTime.Value != conversationMap[userID].MsgDestructTime {
+				unequal--
+			}
+		}
+
+		if req.Conversation.IsMsgDestruct != nil {
+			m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
+			if req.Conversation.IsMsgDestruct.Value != conversationMap[userID].IsMsgDestruct {
+				unequal--
+			}
+		}
+
+		if req.Conversation.BurnDuration != nil {
+			m["burn_duration"] = req.Conversation.BurnDuration.Value
+			if req.Conversation.BurnDuration.Value != conversationMap[userID].BurnDuration {
+				unequal--
+			}
+		}
+
+		if unequal > 0 {
+			needUpdateUsersList = append(needUpdateUsersList, userID)
 		}
 	}
 
@@ -334,17 +367,14 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		}
 	} else {
 		if len(m) != 0 {
-			if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, req.UserIDs, &conversation, m); err != nil {
+			if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, needUpdateUsersList, &conversation, m); err != nil {
 				return nil, err
 			}
 
-			if unequal > 0 {
-				for _, v := range req.UserIDs {
-					c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
-				}
+			for _, v := range needUpdateUsersList {
+				c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
 			}
 		}
-
 	}
 
 	return &pbconversation.SetConversationsResp{}, nil
