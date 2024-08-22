@@ -457,9 +457,6 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	if err := s.db.CreateGroup(ctx, nil, groupMembers); err != nil {
 		return nil, err
 	}
-	if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, req.InvitedUserIDs); err != nil {
-		return nil, err
-	}
 
 	if err = s.notification.MemberEnterNotification(ctx, req.GroupID, req.InvitedUserIDs...); err != nil {
 		return nil, err
@@ -832,9 +829,6 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 	}
 	switch req.HandleResult {
 	case constant.GroupResponseAgree:
-		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
-			return nil, err
-		}
 		s.notification.GroupApplicationAcceptedNotification(ctx, req)
 		if member == nil {
 			log.ZDebug(ctx, "GroupApplicationResponse", "member is nil")
@@ -901,9 +895,6 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			return nil, err
 		}
 
-		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
-			return nil, err
-		}
 		if err = s.notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID); err != nil {
 			return nil, err
 		}

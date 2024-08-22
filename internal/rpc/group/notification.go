@@ -529,6 +529,10 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, g
 		}
 	}
 
+	if err := g.conversationRpcClient.GroupChatFirstCreateConversation(ctx, groupID, entrantUserID); err != nil {
+		return err
+	}
+
 	var group *sdkws.GroupInfo
 	group, err = g.getGroupInfo(ctx, groupID)
 	if err != nil {
