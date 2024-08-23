@@ -21,6 +21,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -43,12 +44,22 @@ const (
 	adminReceiver
 )
 
-func NewGroupNotificationSender(db controller.GroupDatabase, msgRpcClient *rpcclient.MessageRpcClient, userRpcClient *rpcclient.UserRpcClient, config *Config, fn func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error)) *GroupNotificationSender {
+func NewGroupNotificationSender(
+	db controller.GroupDatabase,
+	msgRpcClient *rpcclient.MessageRpcClient,
+	userRpcClient *rpcclient.UserRpcClient,
+	conversationRpcClient *rpcclient.ConversationRpcClient,
+	config *Config,
+	fn func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error),
+) *GroupNotificationSender {
 	return &GroupNotificationSender{
 		NotificationSender: rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithRpcClient(msgRpcClient), rpcclient.WithUserRpcClient(userRpcClient)),
 		getUsersInfo:       fn,
 		db:                 db,
 		config:             config,
+
+		conversationRpcClient: conversationRpcClient,
+		msgRpcClient:          msgRpcClient,
 	}
 }
 
@@ -57,6 +68,9 @@ type GroupNotificationSender struct {
 	getUsersInfo func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error)
 	db           controller.GroupDatabase
 	config       *Config
+
+	conversationRpcClient *rpcclient.ConversationRpcClient
+	msgRpcClient          *rpcclient.MessageRpcClient
 }
 
 func (g *GroupNotificationSender) PopulateGroupMember(ctx context.Context, members ...*model.GroupMember) error {
@@ -494,50 +508,43 @@ func (g *GroupNotificationSender) MemberKickedNotification(ctx context.Context, 
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.MemberKickedNotification, tips)
 }
 
-func (g *GroupNotificationSender) MemberInvitedNotification(ctx context.Context, groupID, reason string, invitedUserIDList []string) {
+func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, groupID string, entrantUserID ...string) error {
 	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	var group *sdkws.GroupInfo
-	group, err = g.getGroupInfo(ctx, groupID)
-	if err != nil {
-		return
-	}
 
-	var users []*sdkws.GroupMemberFullInfo
-	users, err = g.getGroupMembers(ctx, groupID, invitedUserIDList)
-	if err != nil {
-		return
-	}
-	tips := &sdkws.MemberInvitedTips{Group: group, InvitedUserList: users}
-	err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID)
-	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
-	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberInvitedNotification, tips)
-}
-
-func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, groupID string, entrantUserID string) {
-	var err error
-	defer func() {
+	if !g.config.RpcConfig.EnableHistoryForNewMembers {
+		conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
+		maxSeq, err := g.msgRpcClient.GetConversationMaxSeq(ctx, conversationID)
 		if err != nil {
-			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
+			return err
 		}
-	}()
+		err = g.conversationRpcClient.SetConversationMinSeq(ctx, entrantUserID, conversationID, maxSeq)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := g.conversationRpcClient.GroupChatFirstCreateConversation(ctx, groupID, entrantUserID); err != nil {
+		return err
+	}
+
 	var group *sdkws.GroupInfo
 	group, err = g.getGroupInfo(ctx, groupID)
 	if err != nil {
-		return
+		return err
 	}
-	var user *sdkws.GroupMemberFullInfo
-	user, err = g.getGroupMember(ctx, groupID, entrantUserID)
+	users, err := g.getGroupMembers(ctx, groupID, entrantUserID)
 	if err != nil {
-		return
+		return err
 	}
-	tips := &sdkws.MemberEnterTips{Group: group, EntrantUser: user}
+	tips := &sdkws.MemberEnterTips{Group: group, EntrantUsers: users}
 	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberEnterNotification, tips)
+	return nil
 }
 
 func (g *GroupNotificationSender) GroupDismissedNotification(ctx context.Context, tips *sdkws.GroupDismissedTips) {

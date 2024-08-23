@@ -11,3 +11,6 @@ prometheus:
   enable: true
   # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
   ports: [ 20103 ]
+
+
+enableHistoryForNewMembers: true

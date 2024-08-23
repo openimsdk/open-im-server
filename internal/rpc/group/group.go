@@ -105,13 +105,20 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	database := controller.NewGroupDatabase(rdb, &config.LocalCacheConfig, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.db = database
 	gs.user = userRpcClient
-	gs.notification = NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, config, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
-		users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
-		if err != nil {
-			return nil, err
-		}
-		return datautil.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
-	})
+	gs.notification = NewGroupNotificationSender(
+		database,
+		&msgRpcClient,
+		&userRpcClient,
+		&conversationRpcClient,
+		config,
+		func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
+			users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
+			if err != nil {
+				return nil, err
+			}
+			return datautil.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
+		},
+	)
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	gs.conversationRpcClient = conversationRpcClient
 	gs.msgRpcClient = msgRpcClient
@@ -450,10 +457,10 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	if err := s.db.CreateGroup(ctx, nil, groupMembers); err != nil {
 		return nil, err
 	}
-	if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, req.InvitedUserIDs); err != nil {
+
+	if err = s.notification.MemberEnterNotification(ctx, req.GroupID, req.InvitedUserIDs...); err != nil {
 		return nil, err
 	}
-	s.notification.MemberInvitedNotification(ctx, req.GroupID, req.Reason, req.InvitedUserIDs)
 	return &pbgroup.InviteUserToGroupResp{}, nil
 }
 
@@ -822,14 +829,13 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 	}
 	switch req.HandleResult {
 	case constant.GroupResponseAgree:
-		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
-			return nil, err
-		}
 		s.notification.GroupApplicationAcceptedNotification(ctx, req)
 		if member == nil {
 			log.ZDebug(ctx, "GroupApplicationResponse", "member is nil")
 		} else {
-			s.notification.MemberEnterNotification(ctx, req.GroupID, req.FromUserID)
+			if err = s.notification.MemberEnterNotification(ctx, req.GroupID, req.FromUserID); err != nil {
+				return nil, err
+			}
 		}
 	case constant.GroupResponseRefuse:
 		s.notification.GroupApplicationRejectedNotification(ctx, req)
@@ -889,10 +895,9 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			return nil, err
 		}
 
-		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
+		if err = s.notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID); err != nil {
 			return nil, err
 		}
-		s.notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID)
 		s.webhookAfterJoinGroup(ctx, &s.config.WebhooksConfig.AfterJoinGroup, req)
 
 		return &pbgroup.JoinGroupResp{}, nil
