@@ -711,9 +711,3 @@ func (c *conversationServer) GetConversationsNeedDestructMsgs(ctx context.Contex
 
 	return &pbconversation.GetConversationsNeedDestructMsgsResp{Conversations: convert.ConversationsDB2Pb(temp)}, nil
 }
-
-// SetConversationMinSeq implements conversation.ConversationServer.
-func (c *conversationServer) SetConversationMinSeq(context.Context, *pbconversation.SetConversationMinSeqReq) (*pbconversation.SetConversationMinSeqResp, error) {
-	_ = c.config
-	panic("unimplemented")
-}
