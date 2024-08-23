@@ -73,14 +73,14 @@ func (s *seqUserCacheRedis) GetUserReadSeq(ctx context.Context, conversationID s
 	})
 }
 
-func (s *seqUserCacheRedis) SetUserReadSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
-	if seq%s.readSeqWriteRatio == 0 {
+func (s *seqUserCacheRedis) SetUserReadSeq(ctx context.Context, conversationID string, userID string, seq int64, writeDB bool) error {
+	if err := s.rocks.RawSet(ctx, s.getSeqUserReadSeqKey(conversationID, userID), strconv.Itoa(int(seq)), s.readExpireTime); err != nil {
+		return errs.Wrap(err)
+	}
+	if writeDB {
 		if err := s.mgo.SetUserReadSeq(ctx, conversationID, userID, seq); err != nil {
 			return err
 		}
-	}
-	if err := s.rocks.RawSet(ctx, s.getSeqUserReadSeqKey(conversationID, userID), strconv.Itoa(int(seq)), s.readExpireTime); err != nil {
-		return errs.Wrap(err)
 	}
 	return nil
 }

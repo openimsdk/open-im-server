@@ -17,6 +17,7 @@ package push
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/IBM/sarama"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
@@ -35,11 +36,17 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/tools/mq/memamq"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/timeutil"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
+	"math/rand"
+	"os"
+	"strconv"
+	"sync/atomic"
+	"time"
 )
 
 type ConsumerHandler struct {
@@ -54,6 +61,7 @@ type ConsumerHandler struct {
 	groupRpcClient         rpcclient.GroupRpcClient
 	webhookClient          *webhook.Client
 	config                 *Config
+	readCh                 chan *sdkws.MarkAsReadTips
 }
 
 func NewConsumerHandler(config *Config, offlinePusher offlinepush.OfflinePusher, rdb redis.UniversalClient,
@@ -76,6 +84,8 @@ func NewConsumerHandler(config *Config, offlinePusher offlinepush.OfflinePusher,
 	consumerHandler.webhookClient = webhook.NewWebhookClient(config.WebhooksConfig.URL)
 	consumerHandler.config = config
 	consumerHandler.onlineCache = rpccache.NewOnlineCache(userRpcClient, consumerHandler.groupLocalCache, rdb, nil)
+	consumerHandler.readCh = make(chan *sdkws.MarkAsReadTips, 1024*8)
+	go consumerHandler.loopRead()
 	return &consumerHandler, nil
 }
 
@@ -89,6 +99,7 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		MsgData:        msgFromMQ.MsgData,
 		ConversationID: msgFromMQ.ConversationID,
 	}
+	c.handlerConversationRead(ctx, pbData.MsgData)
 	sec := msgFromMQ.MsgData.SendTime / 1000
 	nowSec := timeutil.GetCurrentTimestampBySecond()
 	log.ZDebug(ctx, "push msg", "msg", pbData.String(), "sec", sec, "nowSec", nowSec)
@@ -117,6 +128,98 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 func (*ConsumerHandler) Setup(sarama.ConsumerGroupSession) error { return nil }
 
 func (*ConsumerHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil }
+
+func (c *ConsumerHandler) loopRead() {
+	type markKey struct {
+		ConversationID string
+		UserID         string
+	}
+	type markSeq struct {
+		ReadSeq int64
+		MarkSeq int64
+		Count   int64
+	}
+	type asyncRequest struct {
+		ConversationID string
+		UserID         string
+		ReadSeq        int64
+	}
+	ctx := context.Background()
+	ctx = mcontext.WithOpUserIDContext(ctx, c.config.Share.IMAdminUserID[0])
+	opIDPrefix := fmt.Sprintf("mark_read_%d_%d_", os.Getpid(), rand.Uint32())
+	var incr atomic.Uint64
+	maxSeq := make(map[markKey]*markSeq, 1024*8)
+	queue := memamq.NewMemoryQueue(32, 1024)
+	defer queue.Stop()
+	ticker := time.NewTicker(time.Second * 1)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			var markSeqs []asyncRequest
+			for key, seq := range maxSeq {
+				if seq.MarkSeq >= seq.ReadSeq {
+					seq.Count++
+					if seq.Count > 6 {
+						delete(maxSeq, key)
+					}
+					continue
+				}
+				seq.Count = 0
+				seq.MarkSeq = seq.ReadSeq
+				markSeqs = append(markSeqs, asyncRequest{
+					ConversationID: key.ConversationID,
+					UserID:         key.UserID,
+					ReadSeq:        seq.ReadSeq,
+				})
+			}
+			if len(markSeqs) == 0 {
+				continue
+			}
+			go func() {
+				for i := range markSeqs {
+					seq := markSeqs[i]
+					queue.PushCtx(ctx, func() {
+						ctx = mcontext.SetOperationID(ctx, opIDPrefix+strconv.FormatUint(incr.Add(1), 10))
+						_, err := c.msgRpcClient.Client.SetConversationHasReadSeq(ctx, &pbchat.SetConversationHasReadSeqReq{
+							ConversationID: seq.ConversationID,
+							UserID:         seq.UserID,
+							HasReadSeq:     seq.ReadSeq,
+							NoNotification: true,
+						})
+						if err != nil {
+							log.ZError(ctx, "ConsumerHandler SetConversationHasReadSeq", err, "conversationID", seq.ConversationID, "userID", seq.UserID, "readSeq", seq.ReadSeq)
+						}
+					})
+				}
+			}()
+
+		case tips, ok := <-c.readCh:
+			if !ok {
+				return
+			}
+			if tips.HasReadSeq <= 0 {
+				continue
+			}
+			key := markKey{
+				ConversationID: tips.ConversationID,
+				UserID:         tips.MarkAsReadUserID,
+			}
+			ms, ok := maxSeq[key]
+			if ok {
+				if ms.ReadSeq < tips.HasReadSeq {
+					ms.ReadSeq = tips.HasReadSeq
+				}
+			} else {
+				ms = &markSeq{
+					ReadSeq: tips.HasReadSeq,
+					MarkSeq: 0,
+				}
+				maxSeq[key] = ms
+			}
+		}
+	}
+}
 
 func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
@@ -213,6 +316,39 @@ func (c *ConsumerHandler) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.
 		})
 	}
 	return result, nil
+}
+
+func (c *ConsumerHandler) handlerConversationRead(ctx context.Context, msg *sdkws.MsgData) {
+	if msg.ContentType != constant.HasReadReceipt {
+		return
+	}
+	var elem sdkws.NotificationElem
+	if err := json.Unmarshal(msg.Content, &elem); err != nil {
+		log.ZError(ctx, "handlerConversationRead Unmarshal NotificationElem msg err", err, "msg", msg)
+		return
+	}
+	var tips sdkws.MarkAsReadTips
+	if err := json.Unmarshal([]byte(elem.Detail), &tips); err != nil {
+		log.ZError(ctx, "handlerConversationRead Unmarshal MarkAsReadTips msg err", err, "msg", msg)
+		return
+	}
+	if len(tips.Seqs) > 0 {
+		for _, seq := range tips.Seqs {
+			if tips.HasReadSeq < seq {
+				tips.HasReadSeq = seq
+			}
+		}
+		clear(tips.Seqs)
+		tips.Seqs = nil
+	}
+	if tips.HasReadSeq < 0 {
+		return
+	}
+	select {
+	case c.readCh <- &tips:
+	default:
+		log.ZWarn(ctx, "handlerConversationRead readCh is full", nil, "markAsReadTips", &tips)
+	}
 }
 
 func (c *ConsumerHandler) Push2Group(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
