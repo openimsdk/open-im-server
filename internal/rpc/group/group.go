@@ -105,13 +105,20 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	database := controller.NewGroupDatabase(rdb, &config.LocalCacheConfig, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.db = database
 	gs.user = userRpcClient
-	gs.notification = NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, config, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
-		users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
-		if err != nil {
-			return nil, err
-		}
-		return datautil.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
-	})
+	gs.notification = NewGroupNotificationSender(
+		database,
+		&msgRpcClient,
+		&userRpcClient,
+		&conversationRpcClient,
+		config,
+		func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
+			users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
+			if err != nil {
+				return nil, err
+			}
+			return datautil.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
+		},
+	)
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	gs.conversationRpcClient = conversationRpcClient
 	gs.msgRpcClient = msgRpcClient
@@ -450,10 +457,10 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	if err := g.db.CreateGroup(ctx, nil, groupMembers); err != nil {
 		return nil, err
 	}
-	if err := g.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, req.InvitedUserIDs); err != nil {
+
+	if err = g.notification.MemberEnterNotification(ctx, req.GroupID, req.InvitedUserIDs...); err != nil {
 		return nil, err
 	}
-	g.notification.MemberInvitedNotification(ctx, req.GroupID, req.Reason, req.InvitedUserIDs)
 	return &pbgroup.InviteUserToGroupResp{}, nil
 }
 
@@ -822,14 +829,13 @@ func (g *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 	}
 	switch req.HandleResult {
 	case constant.GroupResponseAgree:
-		if err := g.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
-			return nil, err
-		}
 		g.notification.GroupApplicationAcceptedNotification(ctx, req)
 		if member == nil {
 			log.ZDebug(ctx, "GroupApplicationResponse", "member is nil")
 		} else {
-			g.notification.MemberEnterNotification(ctx, req.GroupID, req.FromUserID)
+			if err = g.notification.MemberEnterNotification(ctx, req.GroupID, req.FromUserID); err != nil {
+				return nil, err
+			}
 		}
 	case constant.GroupResponseRefuse:
 		g.notification.GroupApplicationRejectedNotification(ctx, req)
@@ -889,10 +895,9 @@ func (g *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			return nil, err
 		}
 
-		if err := g.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
+		if err = g.notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID); err != nil {
 			return nil, err
 		}
-		g.notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID)
 		g.webhookAfterJoinGroup(ctx, &g.config.WebhooksConfig.AfterJoinGroup, req)
 
 		return &pbgroup.JoinGroupResp{}, nil
@@ -1487,7 +1492,7 @@ func (g *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 		userIDs := make([]string, 0, len(members)+1)
 		for _, member := range members {
 			if _, ok := temp[member.UserID]; ok {
-				return nil, errs.ErrArgs.WrapMsg(fmt.Sprintf("repeat group %g user %g", member.GroupID, member.UserID))
+				return nil, errs.ErrArgs.WrapMsg(fmt.Sprintf("repeat group %s user %s", member.GroupID, member.UserID))
 			}
 			temp[member.UserID] = struct{}{}
 			userIDs = append(userIDs, member.UserID)
@@ -1605,7 +1610,7 @@ func (g *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbgroup.Get
 		return nil, err
 	}
 	if ids := datautil.Single(req.GroupIDs, datautil.Keys(groupUserMap)); len(ids) > 0 {
-		return nil, servererrs.ErrGroupIDNotFound.WrapMsg(fmt.Sprintf("group %g not found member", strings.Join(ids, ",")))
+		return nil, servererrs.ErrGroupIDNotFound.WrapMsg(fmt.Sprintf("group %s not found member", strings.Join(ids, ",")))
 	}
 	return &pbgroup.GetGroupAbstractInfoResp{
 		GroupAbstractInfos: datautil.Slice(groups, func(group *model.Group) *pbgroup.GroupAbstractInfo {
