@@ -33,8 +33,8 @@ jobs:
           remote-repository-name: cla
           create-file-commit-message: 'Creating file for storing CLA Signatures'
           # signed-commit-message: '$contributorName has signed the CLA in $owner/$repo#$pullRequestNo'
-          custom-notsigned-prcomment: '💕 Thank you for your contribution and please kindly read and sign our [CLA Docs](https://github.com/OpenIM-Robot/cla/blob/main/README.md)'
-          custom-pr-sign-comment: 'The signature to be committed in order to sign the CLA'
-          custom-allsigned-prcomment: '🤖 All Contributors have signed the [CLA](https://github.com/OpenIM-Robot/cla/blob/main/README.md).<br> The signed information is recorded [🤖here](https://github.com/openim-sigs/cla/tree/main/signatures/cla.json)'
+          custom-notsigned-prcomment: '💕 Thank you for your contribution and please kindly read and sign our CLA. [CLA Docs](https://github.com/OpenIM-Robot/cla/blob/main/README.md)'
+          custom-pr-sign-comment: 'I have read the CLA Document and I hereby sign the CLA'
+          custom-allsigned-prcomment: '🤖 All Contributors have signed the [CLA](https://github.com/OpenIM-Robot/cla/blob/main/README.md).<br> The signed information is recorded [**here**](https://github.com/OpenIM-Robot/cla/blob/main/signatures/cla.json)'
           #lock-pullrequest-aftermerge: false - if you don't want this bot to automatically lock the pull request after merging (default - true)
           #use-dco-flag: true - If you are using DCO instead of CLA
