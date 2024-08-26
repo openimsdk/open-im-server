@@ -23,6 +23,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"github.com/openimsdk/protocol/msg"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -522,8 +523,11 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, g
 		if err != nil {
 			return err
 		}
-		err = g.conversationRpcClient.SetConversationMinSeq(ctx, entrantUserID, conversationID, maxSeq)
-		if err != nil {
+		if _, err = g.msgRpcClient.SetUserConversationsMinSeq(ctx, &msg.SetUserConversationsMinSeqReq{
+			UserIDs:        entrantUserID,
+			ConversationID: conversationID,
+			Seq:            maxSeq,
+		}); err != nil {
 			return err
 		}
 	}
@@ -541,9 +545,9 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, g
 	if err != nil {
 		return err
 	}
-	tips := &sdkws.MemberEnterTips{Group: group, EntrantUsers: users}
+	tips := &sdkws.MemberInvitedTips{Group: group, InvitedUserList: users}
 	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
-	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberEnterNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberInvitedNotification, tips)
 	return nil
 }
 
