@@ -338,7 +338,7 @@ func (db *commonMsgDatabase) DeleteMessagesFromCache(ctx context.Context, conver
 
 func (db *commonMsgDatabase) setHasReadSeqs(ctx context.Context, conversationID string, userSeqMap map[string]int64) error {
 	for userID, seq := range userSeqMap {
-		if err := db.seqUser.SetUserReadSeq(ctx, conversationID, userID, seq, false); err != nil {
+		if err := db.seqUser.SetUserReadSeq(ctx, conversationID, userID, seq); err != nil {
 			return err
 		}
 	}
@@ -806,11 +806,11 @@ func (db *commonMsgDatabase) UserSetHasReadSeqs(ctx context.Context, userID stri
 }
 
 func (db *commonMsgDatabase) SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error {
-	return db.seqUser.SetUserReadSeq(ctx, conversationID, userID, hasReadSeq, false)
+	return db.seqUser.SetUserReadSeq(ctx, conversationID, userID, hasReadSeq)
 }
 
 func (db *commonMsgDatabase) SetHasReadSeqToDB(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error {
-	return db.seqUser.SetUserReadSeq(ctx, conversationID, userID, hasReadSeq, true)
+	return db.seqUser.SetUserReadSeqToDB(ctx, conversationID, userID, hasReadSeq)
 }
 
 func (db *commonMsgDatabase) GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {

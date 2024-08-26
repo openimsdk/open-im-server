@@ -17,9 +17,13 @@ package main
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/system/program"
+	"os"
 )
 
 func main() {
+	if len(os.Args) == 1 {
+		os.Args = append(os.Args, "-i", "0", "-c", "/Users/chao/Desktop/withchao/open-im-server/config/")
+	}
 	if err := cmd.NewMsgTransferCmd().Exec(); err != nil {
 		program.ExitWithError(err)
 	}
