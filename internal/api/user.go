@@ -36,9 +36,11 @@ func (u *UserApi) UserRegister(c *gin.Context) {
 	a2r.Call(user.UserClient.UserRegister, u.Client, c)
 }
 
+// UpdateUserInfo is deprecated. Use UpdateUserInfoEx
 func (u *UserApi) UpdateUserInfo(c *gin.Context) {
 	a2r.Call(user.UserClient.UpdateUserInfo, u.Client, c)
 }
+
 func (u *UserApi) UpdateUserInfoEx(c *gin.Context) {
 	a2r.Call(user.UserClient.UpdateUserInfoEx, u.Client, c)
 }
