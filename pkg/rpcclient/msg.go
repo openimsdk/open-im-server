@@ -159,6 +159,15 @@ func (m *MessageRpcClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*m
 	return resp, nil
 }
 
+// SetUserConversationsMinSeq set min seq
+func (m *MessageRpcClient) SetUserConversationsMinSeq(ctx context.Context, req *msg.SetUserConversationsMinSeqReq) (*msg.SetUserConversationsMinSeqResp, error) {
+	resp, err := m.Client.SetUserConversationsMinSeq(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 // GetMaxSeq retrieves the maximum sequence number from the gRPC client.
 // Errors during the gRPC call are wrapped to provide additional context.
 func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
