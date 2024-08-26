@@ -151,7 +151,7 @@ func (c *ConsumerHandler) loopRead() {
 	maxSeq := make(map[markKey]*markSeq, 1024*8)
 	queue := memamq.NewMemoryQueue(32, 1024)
 	defer queue.Stop()
-	ticker := time.NewTicker(time.Second * 1)
+	ticker := time.NewTicker(time.Second * 10)
 	defer ticker.Stop()
 	for {
 		select {
@@ -179,7 +179,7 @@ func (c *ConsumerHandler) loopRead() {
 			go func() {
 				for i := range markSeqs {
 					seq := markSeqs[i]
-					queue.PushCtx(ctx, func() {
+					_ = queue.PushCtx(ctx, func() {
 						ctx = mcontext.SetOperationID(ctx, opIDPrefix+strconv.FormatUint(incr.Add(1), 10))
 						_, err := c.msgRpcClient.Client.SetConversationHasReadSeq(ctx, &pbchat.SetConversationHasReadSeqReq{
 							ConversationID: seq.ConversationID,

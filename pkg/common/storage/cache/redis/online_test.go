@@ -18,18 +18,20 @@ maxRetry: 10
 */
 func TestName111111(t *testing.T) {
 	conf := config.Redis{
-		Address: []string{
-			"172.16.8.48:7001",
-			"172.16.8.48:7002",
-			"172.16.8.48:7003",
-			"172.16.8.48:7004",
-			"172.16.8.48:7005",
-			"172.16.8.48:7006",
-		},
-		ClusterMode: true,
-		Password:    "passwd123",
+		//Address: []string{
+		//	"172.16.8.48:7001",
+		//	"172.16.8.48:7002",
+		//	"172.16.8.48:7003",
+		//	"172.16.8.48:7004",
+		//	"172.16.8.48:7005",
+		//	"172.16.8.48:7006",
+		//},
+		//ClusterMode: true,
+		//Password:    "passwd123",
+		Address:  []string{"localhost:16379"},
+		Password: "openIM123",
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*1000)
 	defer cancel()
 	rdb, err := redisutil.NewRedisClient(ctx, conf.Build())
 	if err != nil {
@@ -39,5 +41,11 @@ func TestName111111(t *testing.T) {
 
 	userID := "123456"
 	t.Log(online.GetOnline(ctx, userID))
+	t.Log(online.SetUserOnline(ctx, userID, []int32{1, 2, 3, 4}, nil))
+	t.Log(online.GetOnline(ctx, userID))
+
+}
+
+func TestName111(t *testing.T) {
 
 }
