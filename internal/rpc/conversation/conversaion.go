@@ -52,11 +52,6 @@ type conversationServer struct {
 	config                         *Config
 }
 
-func (c *conversationServer) SetConversationMinSeq(ctx context.Context, req *pbconversation.SetConversationMinSeqReq) (*pbconversation.SetConversationMinSeqResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 type Config struct {
 	RpcConfig          config.Conversation
 	RedisConfig        config.Redis
