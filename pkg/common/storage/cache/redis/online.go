@@ -82,7 +82,7 @@ func (s *userOnline) SetUserOnline(ctx context.Context, userID string, online, o
 	for _, platformID := range online {
 		argv = append(argv, platformID)
 	}
-	keys := []string{s.getUserOnlineKey(userID), userID}
+	keys := []string{s.getUserOnlineKey(userID)}
 	platformIDs, err := s.rdb.Eval(ctx, script, keys, argv).StringSlice()
 	if err != nil {
 		log.ZError(ctx, "redis SetUserOnline", err, "userID", userID, "online", online, "offline", offline)
