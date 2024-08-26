@@ -130,6 +130,13 @@ beforeSetGroupInfo:
   enable: false
   timeout: 5
   failedContinue: true
+afterSetGroupInfoEX:
+  enable: false
+  timeout: 5
+beforeSetGroupInfoEX:
+  enable: false
+  timeout: 5
+  failedContinue: true
 afterRevokeMsg:
   enable: false
   timeout: 5

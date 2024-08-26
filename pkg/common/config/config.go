@@ -258,7 +258,8 @@ type Group struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus Prometheus `mapstructure:"prometheus"`
+	Prometheus                 Prometheus `mapstructure:"prometheus"`
+	EnableHistoryForNewMembers bool       `mapstructure:"enableHistoryForNewMembers"`
 }
 
 type Msg struct {
@@ -421,6 +422,8 @@ type Webhooks struct {
 	BeforeInviteUserToGroup  BeforeConfig `mapstructure:"beforeInviteUserToGroup"`
 	AfterSetGroupInfo        AfterConfig  `mapstructure:"afterSetGroupInfo"`
 	BeforeSetGroupInfo       BeforeConfig `mapstructure:"beforeSetGroupInfo"`
+	AfterSetGroupInfoEX      AfterConfig  `mapstructure:"afterSetGroupInfoEX"`
+	BeforeSetGroupInfoEX     BeforeConfig `mapstructure:"beforeSetGroupInfoEX"`
 	AfterRevokeMsg           AfterConfig  `mapstructure:"afterRevokeMsg"`
 	BeforeAddBlack           BeforeConfig `mapstructure:"beforeAddBlack"`
 	AfterAddFriend           AfterConfig  `mapstructure:"afterAddFriend"`

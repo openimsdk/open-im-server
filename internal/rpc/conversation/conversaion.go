@@ -441,6 +441,14 @@ func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbc
 	return &pbconversation.SetConversationMaxSeqResp{}, nil
 }
 
+func (c *conversationServer) SetConversationMinSeq(ctx context.Context, req *pbconversation.SetConversationMinSeqReq) (*pbconversation.SetConversationMinSeqResp, error) {
+	if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.OwnerUserID, req.ConversationID,
+		map[string]any{"min_seq": req.MinSeq}); err != nil {
+		return nil, err
+	}
+	return &pbconversation.SetConversationMinSeqResp{}, nil
+}
+
 func (c *conversationServer) GetConversationIDs(ctx context.Context, req *pbconversation.GetConversationIDsReq) (*pbconversation.GetConversationIDsResp, error) {
 	conversationIDs, err := c.conversationDatabase.GetConversationIDs(ctx, req.UserID)
 	if err != nil {
