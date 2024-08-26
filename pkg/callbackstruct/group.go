@@ -17,6 +17,7 @@ package callbackstruct
 import (
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	common "github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/protocol/wrapperspb"
 )
 
 type CallbackCommand string
@@ -240,5 +241,50 @@ type CallbackAfterSetGroupInfoReq struct {
 }
 
 type CallbackAfterSetGroupInfoResp struct {
+	CommonCallbackResp
+}
+
+type CallbackBeforeSetGroupInfoEXReq struct {
+	CallbackCommand   `json:"callbackCommand"`
+	OperationID       string                  `json:"operationID"`
+	GroupID           string                  `json:"groupID"`
+	GroupName         string                  `json:"groupName"`
+	Notification      *wrapperspb.StringValue `json:"notification"`
+	Introduction      *wrapperspb.StringValue `json:"introduction"`
+	FaceURL           *wrapperspb.StringValue `json:"faceURL"`
+	Ex                *wrapperspb.StringValue `json:"ex"`
+	NeedVerification  *wrapperspb.Int32Value  `json:"needVerification"`
+	LookMemberInfo    *wrapperspb.Int32Value  `json:"lookMemberInfo"`
+	ApplyMemberFriend *wrapperspb.Int32Value  `json:"applyMemberFriend"`
+}
+
+type CallbackBeforeSetGroupInfoEXResp struct {
+	CommonCallbackResp
+	GroupID           string                  `json:"groupID"`
+	GroupName         string                  `json:"groupName"`
+	Notification      *wrapperspb.StringValue `json:"notification"`
+	Introduction      *wrapperspb.StringValue `json:"introduction"`
+	FaceURL           *wrapperspb.StringValue `json:"faceURL"`
+	Ex                *wrapperspb.StringValue `json:"ex"`
+	NeedVerification  *wrapperspb.Int32Value  `json:"needVerification"`
+	LookMemberInfo    *wrapperspb.Int32Value  `json:"lookMemberInfo"`
+	ApplyMemberFriend *wrapperspb.Int32Value  `json:"applyMemberFriend"`
+}
+
+type CallbackAfterSetGroupInfoEXReq struct {
+	CallbackCommand   `json:"callbackCommand"`
+	OperationID       string                  `json:"operationID"`
+	GroupID           string                  `json:"groupID"`
+	GroupName         string                  `json:"groupName"`
+	Notification      *wrapperspb.StringValue `json:"notification"`
+	Introduction      *wrapperspb.StringValue `json:"introduction"`
+	FaceURL           *wrapperspb.StringValue `json:"faceURL"`
+	Ex                *wrapperspb.StringValue `json:"ex"`
+	NeedVerification  *wrapperspb.Int32Value  `json:"needVerification"`
+	LookMemberInfo    *wrapperspb.Int32Value  `json:"lookMemberInfo"`
+	ApplyMemberFriend *wrapperspb.Int32Value  `json:"applyMemberFriend"`
+}
+
+type CallbackAfterSetGroupInfoEXResp struct {
 	CommonCallbackResp
 }
