@@ -16,10 +16,11 @@ package database
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/msg"
 	"go.mongodb.org/mongo-driver/mongo"
-	"time"
 )
 
 type Msg interface {
@@ -44,5 +45,7 @@ type Msg interface {
 
 	DeleteDoc(ctx context.Context, docID string) error
 	DeleteMsgByIndex(ctx context.Context, docID string, index []int) error
-	GetBeforeMsg(ctx context.Context, ts int64, limit int) ([]*model.MsgDocModel, error)
+	GetBeforeMsg(ctx context.Context, ts int64, docIDs []string, limit int) ([]*model.MsgDocModel, error)
+
+	GetDocIDs(ctx context.Context) ([]string, error)
 }

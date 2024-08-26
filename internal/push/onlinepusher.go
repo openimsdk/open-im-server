@@ -19,20 +19,20 @@ type OnlinePusher interface {
 		pushToUserIDs *[]string) []string
 }
 
-type emptyOnlinePUsher struct{}
+type emptyOnlinePusher struct{}
 
-func newEmptyOnlinePUsher() *emptyOnlinePUsher {
-	return &emptyOnlinePUsher{}
+func newEmptyOnlinePusher() *emptyOnlinePusher {
+	return &emptyOnlinePusher{}
 }
 
-func (emptyOnlinePUsher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData,
+func (emptyOnlinePusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData,
 	pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
-	log.ZWarn(ctx, "emptyOnlinePUsher GetConnsAndOnlinePush", nil)
+	log.ZWarn(ctx, "emptyOnlinePusher GetConnsAndOnlinePush", nil)
 	return nil, nil
 }
-func (u emptyOnlinePUsher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *sdkws.MsgData,
+func (u emptyOnlinePusher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *sdkws.MsgData,
 	wsResults []*msggateway.SingleMsgToUserResults, pushToUserIDs *[]string) []string {
-	log.ZWarn(ctx, "emptyOnlinePUsher GetOnlinePushFailedUserIDs", nil)
+	log.ZWarn(ctx, "emptyOnlinePusher GetOnlinePushFailedUserIDs", nil)
 	return nil
 }
 
@@ -45,7 +45,7 @@ func NewOnlinePusher(disCov discovery.SvcDiscoveryRegistry, config *Config) Onli
 	case "etcd":
 		return NewDefaultAllNode(disCov, config)
 	default:
-		return newEmptyOnlinePUsher()
+		return newEmptyOnlinePusher()
 	}
 }
 

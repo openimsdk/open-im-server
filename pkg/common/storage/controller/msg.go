@@ -18,10 +18,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"strings"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
@@ -89,16 +90,18 @@ type CommonMsgDatabase interface {
 
 	// to mq
 	MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) error
-	MsgToPushMQ(ctx context.Context, key, conversarionID string, msg2mq *sdkws.MsgData) (int32, int64, error)
-	MsgToMongoMQ(ctx context.Context, key, conversarionID string, msgs []*sdkws.MsgData, lastSeq int64) error
+	MsgToPushMQ(ctx context.Context, key, conversationID string, msg2mq *sdkws.MsgData) (int32, int64, error)
+	MsgToMongoMQ(ctx context.Context, key, conversationID string, msgs []*sdkws.MsgData, lastSeq int64) error
 
 	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*model.UserCount, dateCount map[string]int64, err error)
 	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*model.GroupCount, dateCount map[string]int64, err error)
 	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
 
 	// clear msg
-	GetBeforeMsg(ctx context.Context, ts int64, limit int) ([]*model.MsgDocModel, error)
+	GetBeforeMsg(ctx context.Context, ts int64, docIds []string, limit int) ([]*model.MsgDocModel, error)
 	DeleteDocMsgBefore(ctx context.Context, ts int64, doc *model.MsgDocModel) ([]int, error)
+
+	GetDocIDs(ctx context.Context) ([]string, error)
 }
 
 func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUser cache.SeqUser, seqConversation cache.SeqConversationCache, kafkaConf *config.Kafka) (CommonMsgDatabase, error) {
@@ -912,8 +915,25 @@ func (db *commonMsgDatabase) ConvertMsgsDocLen(ctx context.Context, conversation
 	db.msgDocDatabase.ConvertMsgsDocLen(ctx, conversationIDs)
 }
 
-func (db *commonMsgDatabase) GetBeforeMsg(ctx context.Context, ts int64, limit int) ([]*model.MsgDocModel, error) {
-	return db.msgDocDatabase.GetBeforeMsg(ctx, ts, limit)
+func (db *commonMsgDatabase) GetBeforeMsg(ctx context.Context, ts int64, docIDs []string, limit int) ([]*model.MsgDocModel, error) {
+	var msgs []*model.MsgDocModel
+	for i := 0; i < len(docIDs); i += 1000 {
+		end := i + 1000
+		if end > len(docIDs) {
+			end = len(docIDs)
+		}
+
+		res, err := db.msgDocDatabase.GetBeforeMsg(ctx, ts, docIDs[i:end], limit)
+		if err != nil {
+			return nil, err
+		}
+		msgs = append(msgs, res...)
+
+		if len(msgs) >= limit {
+			return msgs[:limit], nil
+		}
+	}
+	return msgs, nil
 }
 
 func (db *commonMsgDatabase) DeleteDocMsgBefore(ctx context.Context, ts int64, doc *model.MsgDocModel) ([]int, error) {
@@ -936,8 +956,10 @@ func (db *commonMsgDatabase) DeleteDocMsgBefore(ctx context.Context, ts int64, d
 		return index, err
 	}
 	if len(index) == notNull {
+		log.ZDebug(ctx, "Delete db in Doc", "DocID", doc.DocID, "index", index, "maxSeq", maxSeq)
 		return index, db.msgDocDatabase.DeleteDoc(ctx, doc.DocID)
 	} else {
+		log.ZDebug(ctx, "delete db in index", "DocID", doc.DocID, "index", index, "maxSeq", maxSeq)
 		return index, db.msgDocDatabase.DeleteMsgByIndex(ctx, doc.DocID, index)
 	}
 }
@@ -954,4 +976,8 @@ func (db *commonMsgDatabase) setMinSeq(ctx context.Context, conversationID strin
 		return nil
 	}
 	return db.seqConversation.SetMinSeq(ctx, conversationID, seq)
+}
+
+func (db *commonMsgDatabase) GetDocIDs(ctx context.Context) ([]string, error) {
+	return db.msgDocDatabase.GetDocIDs(ctx)
 }
