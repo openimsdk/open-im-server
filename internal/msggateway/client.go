@@ -271,11 +271,13 @@ func (c *Client) replyMessage(ctx context.Context, binaryReq *Req, err error, re
 		ErrMsg:        errResp.ErrMsg,
 		Data:          resp,
 	}
+	t := time.Now()
 	log.ZDebug(ctx, "gateway reply message", "resp", mReply.String())
 	err = c.writeBinaryMsg(mReply)
 	if err != nil {
 		log.ZWarn(ctx, "wireBinaryMsg replyMessage", err, "resp", mReply.String())
 	}
+	log.ZDebug(ctx, "wireBinaryMsg end", "time cost", time.Since(t))
 
 	if binaryReq.ReqIdentifier == WsLogoutMsg {
 		return errs.New("user logout", "operationID", binaryReq.OperationID).Wrap()
