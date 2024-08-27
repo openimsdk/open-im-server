@@ -362,7 +362,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 				req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
 		}
 	} else {
-		if len(m) != 0 {
+		if len(m) != 0 && len(needUpdateUsersList) != 0 {
 			if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, needUpdateUsersList, &conversation, m); err != nil {
 				return nil, err
 			}
