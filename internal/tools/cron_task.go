@@ -25,7 +25,6 @@ import (
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 
-	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mw"
 	"google.golang.org/grpc"
@@ -59,10 +58,10 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		return err
 	}
 
-	thirdConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
-	if err != nil {
-		return err
-	}
+	// thirdConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
+	// if err != nil {
+	// 	return err
+	// }
 
 	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
 	if err != nil {
@@ -71,7 +70,7 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 
 	msgClient := msg.NewMsgClient(msgConn)
 	conversationClient := pbconversation.NewConversationClient(conversationConn)
-	thirdClient := third.NewThirdClient(thirdConn)
+	// thirdClient := third.NewThirdClient(thirdConn)
 
 	crontab := cron.New()
 
