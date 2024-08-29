@@ -23,7 +23,6 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mq/memamq"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/idutil"
@@ -298,7 +297,8 @@ func WithRpcGetUserName() NotificationOptions {
 }
 
 func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, contentType, sessionType int32, m proto.Message, opts ...NotificationOptions) {
-	ctx = mcontext.WithMustInfoCtx([]string{mcontext.GetOperationID(ctx), mcontext.GetOpUserID(ctx), mcontext.GetOpUserPlatform(ctx), mcontext.GetConnID(ctx)})
+	//ctx = mcontext.WithMustInfoCtx([]string{mcontext.GetOperationID(ctx), mcontext.GetOpUserID(ctx), mcontext.GetOpUserPlatform(ctx), mcontext.GetConnID(ctx)})
+	ctx = context.WithoutCancel(ctx)
 	ctx, cancel := context.WithTimeout(ctx, time.Second*time.Duration(5))
 	defer cancel()
 	n := sdkws.NotificationElem{Detail: jsonutil.StructToJsonString(m)}
