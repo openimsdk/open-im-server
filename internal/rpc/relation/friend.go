@@ -121,7 +121,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		conversationRpcClient: rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation),
 		config:                config,
 		webhookClient:         webhook.NewWebhookClient(config.WebhooksConfig.URL),
-		queue:                 memamq.NewMemoryQueue(128, 1024*8),
+		queue:                 memamq.NewMemoryQueue(16, 1024*1024),
 	})
 	return nil
 }
