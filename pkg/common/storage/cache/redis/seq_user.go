@@ -74,15 +74,20 @@ func (s *seqUserCacheRedis) GetUserReadSeq(ctx context.Context, conversationID s
 }
 
 func (s *seqUserCacheRedis) SetUserReadSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
-	if seq%s.readSeqWriteRatio == 0 {
-		if err := s.mgo.SetUserReadSeq(ctx, conversationID, userID, seq); err != nil {
-			return err
+	dbSeq, err := s.GetUserReadSeq(ctx, conversationID, userID)
+	if err != nil {
+		return err
+	}
+	if dbSeq < seq {
+		if err := s.rocks.RawSet(ctx, s.getSeqUserReadSeqKey(conversationID, userID), strconv.Itoa(int(seq)), s.readExpireTime); err != nil {
+			return errs.Wrap(err)
 		}
 	}
-	if err := s.rocks.RawSet(ctx, s.getSeqUserReadSeqKey(conversationID, userID), strconv.Itoa(int(seq)), s.readExpireTime); err != nil {
-		return errs.Wrap(err)
-	}
 	return nil
+}
+
+func (s *seqUserCacheRedis) SetUserReadSeqToDB(ctx context.Context, conversationID string, userID string, seq int64) error {
+	return s.mgo.SetUserReadSeq(ctx, conversationID, userID, seq)
 }
 
 func (s *seqUserCacheRedis) SetUserMinSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
@@ -127,13 +132,6 @@ func (s *seqUserCacheRedis) SetUserReadSeqs(ctx context.Context, userID string, 
 	}
 	if err := s.setUserRedisReadSeqs(ctx, userID, seqs); err != nil {
 		return err
-	}
-	for conversationID, seq := range seqs {
-		if seq%s.readSeqWriteRatio == 0 {
-			if err := s.mgo.SetUserReadSeq(ctx, conversationID, userID, seq); err != nil {
-				return err
-			}
-		}
 	}
 	return nil
 }

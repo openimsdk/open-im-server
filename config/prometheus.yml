@@ -19,65 +19,65 @@ rule_files:
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
 scrape_configs:
-  # The job name is added as a label job=job_name" to any timeseries scraped from this config.
+  # The job name is added as a label "job=job_name" to any timeseries scraped from this config.
   # Monitored information captured by prometheus
 
   # prometheus fetches application services
   - job_name: node_exporter
     static_configs:
-      - targets: [ internal_ip:20114 ]
+      - targets: [ internal_ip:20500 ]
   - job_name: openimserver-openim-api
     static_configs:
-      - targets: [ internal_ip:20113 ]
+      - targets: [ internal_ip:20502 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-msggateway
     static_configs:
-      - targets: [ internal_ip:20112 ]
+      - targets: [ internal_ip:20640 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-msgtransfer
     static_configs:
-      - targets: [ internal_ip:20111, internal_ip:20110, internal_ip:20109, internal_ip:20108 ]
+      - targets: [ internal_ip:20600, internal_ip:20601, internal_ip:20602, internal_ip:20603 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-push
     static_configs:
-      - targets: [ internal_ip:20107 ]
+      - targets: [ internal_ip:20670, internal_ip:20671, internal_ip:20672, internal_ip:20673]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-auth
     static_configs:
-      - targets: [ internal_ip:20106 ]
+      - targets: [ internal_ip:20600 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-conversation
     static_configs:
-      - targets: [ internal_ip:20105 ]
+      - targets: [ internal_ip:20680 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-friend
     static_configs:
-      - targets: [ internal_ip:20104 ]
+      - targets: [ internal_ip:20620 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-group
     static_configs:
-      - targets: [ internal_ip:20103 ]
+      - targets: [ internal_ip:20650 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-msg
     static_configs:
-      - targets: [ internal_ip:20102 ]
+      - targets: [ internal_ip:20630 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-third
     static_configs:
-      - targets: [ internal_ip:20101 ]
+      - targets: [ internal_ip:20690 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-user
     static_configs:
-      - targets: [ internal_ip:20100 ]
+      - targets: [ internal_ip:20610 ]
         labels:
           namespace: default

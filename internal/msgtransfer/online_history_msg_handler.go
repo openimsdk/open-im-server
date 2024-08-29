@@ -16,6 +16,7 @@ package msgtransfer
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/IBM/sarama"
 	"github.com/go-redis/redis"
@@ -89,6 +90,7 @@ func NewOnlineHistoryRedisConsumerHandler(kafkaConf *config.Kafka, database cont
 	och.conversationRpcClient = conversationRpcClient
 	och.groupRpcClient = groupRpcClient
 	och.historyConsumerGroup = historyConsumerGroup
+
 	return &och, err
 }
 func (och *OnlineHistoryRedisConsumerHandler) do(ctx context.Context, channelID int, val *batcher.Msg[sarama.ConsumerMessage]) {
@@ -97,6 +99,7 @@ func (och *OnlineHistoryRedisConsumerHandler) do(ctx context.Context, channelID 
 	ctx = withAggregationCtx(ctx, ctxMessages)
 	log.ZInfo(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMessages),
 		"key", val.Key())
+	och.doSetReadSeq(ctx, ctxMessages)
 
 	storageMsgList, notStorageMsgList, storageNotificationList, notStorageNotificationList :=
 		och.categorizeMessageLists(ctxMessages)
@@ -108,6 +111,60 @@ func (och *OnlineHistoryRedisConsumerHandler) do(ctx context.Context, channelID 
 	conversationIDNotification := msgprocessor.GetNotificationConversationIDByMsg(ctxMessages[0].message)
 	och.handleMsg(ctx, val.Key(), conversationIDMsg, storageMsgList, notStorageMsgList)
 	och.handleNotification(ctx, val.Key(), conversationIDNotification, storageNotificationList, notStorageNotificationList)
+}
+
+func (och *OnlineHistoryRedisConsumerHandler) doSetReadSeq(ctx context.Context, msgs []*ContextMsg) {
+	type seqKey struct {
+		conversationID string
+		userID         string
+	}
+	var readSeq map[seqKey]int64
+	for _, msg := range msgs {
+		if msg.message.ContentType != constant.HasReadReceipt {
+			continue
+		}
+		var elem sdkws.NotificationElem
+		if err := json.Unmarshal(msg.message.Content, &elem); err != nil {
+			log.ZError(ctx, "handlerConversationRead Unmarshal NotificationElem msg err", err, "msg", msg)
+			continue
+		}
+		var tips sdkws.MarkAsReadTips
+		if err := json.Unmarshal([]byte(elem.Detail), &tips); err != nil {
+			log.ZError(ctx, "handlerConversationRead Unmarshal MarkAsReadTips msg err", err, "msg", msg)
+			continue
+		}
+		if len(tips.Seqs) > 0 {
+			for _, seq := range tips.Seqs {
+				if tips.HasReadSeq < seq {
+					tips.HasReadSeq = seq
+				}
+			}
+			clear(tips.Seqs)
+			tips.Seqs = nil
+		}
+		if tips.HasReadSeq < 0 {
+			continue
+		}
+		if readSeq == nil {
+			readSeq = make(map[seqKey]int64)
+		}
+		key := seqKey{
+			conversationID: tips.ConversationID,
+			userID:         tips.MarkAsReadUserID,
+		}
+		if readSeq[key] > tips.HasReadSeq {
+			continue
+		}
+		readSeq[key] = tips.HasReadSeq
+	}
+	if readSeq == nil {
+		return
+	}
+	for key, seq := range readSeq {
+		if err := och.msgDatabase.SetHasReadSeqToDB(ctx, key.userID, key.conversationID, seq); err != nil {
+			log.ZError(ctx, "set read seq to db error", err, "userID", key.userID, "conversationID", key.conversationID, "seq", seq)
+		}
+	}
 }
 
 func (och *OnlineHistoryRedisConsumerHandler) parseConsumerMessages(ctx context.Context, consumerMessages []*sarama.ConsumerMessage) []*ContextMsg {

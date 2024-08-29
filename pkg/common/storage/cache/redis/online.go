@@ -8,6 +8,7 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -66,11 +67,10 @@ func (s *userOnline) SetUserOnline(ctx context.Context, userID string, online, o
 	local change = (num1 ~= num2) or (num2 ~= num3)
 	if change then
 		local members = redis.call("ZRANGE", key, 0, -1)
-		table.insert(members, KEYS[2])
-		redis.call("PUBLISH", KEYS[3], table.concat(members, ":"))
-		return 1
+		table.insert(members, "1")
+		return members
 	else
-		return 0
+		return {"0"}
 	end
 `
 	now := time.Now()
@@ -82,12 +82,24 @@ func (s *userOnline) SetUserOnline(ctx context.Context, userID string, online, o
 	for _, platformID := range online {
 		argv = append(argv, platformID)
 	}
-	keys := []string{s.getUserOnlineKey(userID), userID, s.channelName}
-	status, err := s.rdb.Eval(ctx, script, keys, argv).Result()
+	keys := []string{s.getUserOnlineKey(userID)}
+	platformIDs, err := s.rdb.Eval(ctx, script, keys, argv).StringSlice()
 	if err != nil {
 		log.ZError(ctx, "redis SetUserOnline", err, "userID", userID, "online", online, "offline", offline)
 		return err
 	}
-	log.ZDebug(ctx, "redis SetUserOnline", "userID", userID, "online", online, "offline", offline, "status", status)
+	if len(platformIDs) == 0 {
+		return errs.ErrInternalServer.WrapMsg("SetUserOnline redis lua invalid return value")
+	}
+	if platformIDs[len(platformIDs)-1] != "0" {
+		log.ZDebug(ctx, "redis SetUserOnline push", "userID", userID, "online", online, "offline", offline, "platformIDs", platformIDs[:len(platformIDs)-1])
+		platformIDs[len(platformIDs)-1] = userID
+		msg := strings.Join(platformIDs, ":")
+		if err := s.rdb.Publish(ctx, s.channelName, msg).Err(); err != nil {
+			return errs.Wrap(err)
+		}
+	} else {
+		log.ZDebug(ctx, "redis SetUserOnline not push", "userID", userID, "online", online, "offline", offline)
+	}
 	return nil
 }

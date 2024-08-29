@@ -17,6 +17,11 @@ package user
 import (
 	"context"
 	"errors"
+	"math/rand"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -29,10 +34,6 @@ import (
 	"github.com/openimsdk/protocol/group"
 	friendpb "github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/tools/db/redisutil"
-	"math/rand"
-	"strings"
-	"sync"
-	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
@@ -147,41 +148,35 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 		return nil, err
 	}
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
-	//friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if req.UserInfo.Nickname != "" || req.UserInfo.FaceURL != "" {
-	//	if err = s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID,oldUser); err != nil {
-	//		return nil, err
-	//	}
-	//}
-	//for _, friendID := range friends {
-	//	s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
-	//}
+
 	s.webhookAfterUpdateUserInfo(ctx, &s.config.WebhooksConfig.AfterUpdateUserInfo, req)
 	if err = s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID, oldUser); err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
+
 func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUserInfoExReq) (resp *pbuser.UpdateUserInfoExResp, err error) {
 	resp = &pbuser.UpdateUserInfoExResp{}
 	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID, s.config.Share.IMAdminUserID)
 	if err != nil {
 		return nil, err
 	}
+
 	if err = s.webhookBeforeUpdateUserInfoEx(ctx, &s.config.WebhooksConfig.BeforeUpdateUserInfoEx, req); err != nil {
 		return nil, err
 	}
+
 	oldUser, err := s.db.GetUserByID(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
+
 	data := convert.UserPb2DBMapEx(req.UserInfo)
 	if err = s.db.UpdateByMap(ctx, req.UserInfo.UserID, data); err != nil {
 		return nil, err
 	}
+
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
 	//friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
 	//if err != nil {
@@ -199,6 +194,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	if err := s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID, oldUser); err != nil {
 		return nil, err
 	}
+
 	return resp, nil
 }
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.SetGlobalRecvMessageOptReq) (resp *pbuser.SetGlobalRecvMessageOptResp, err error) {

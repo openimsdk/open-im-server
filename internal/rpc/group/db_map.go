@@ -54,6 +54,39 @@ func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[s
 	return m
 }
 
+func UpdateGroupInfoEXMap(ctx context.Context, group *sdkws.GroupInfoForSetEX) map[string]any {
+	m := make(map[string]any)
+
+	if group.GroupName != "" {
+		m["group_name"] = group.GroupName
+	}
+	if group.Notification != nil {
+		m["notification"] = group.Notification.Value
+		m["notification_update_time"] = time.Now()
+		m["notification_user_id"] = mcontext.GetOpUserID(ctx)
+	}
+	if group.Introduction != nil {
+		m["introduction"] = group.Introduction.Value
+	}
+	if group.FaceURL != nil {
+		m["face_url"] = group.FaceURL.Value
+	}
+	if group.NeedVerification != nil {
+		m["need_verification"] = group.NeedVerification.Value
+	}
+	if group.LookMemberInfo != nil {
+		m["look_member_info"] = group.LookMemberInfo.Value
+	}
+	if group.ApplyMemberFriend != nil {
+		m["apply_member_friend"] = group.ApplyMemberFriend.Value
+	}
+	if group.Ex != nil {
+		m["ex"] = group.Ex.Value
+	}
+
+	return m
+}
+
 func UpdateGroupStatusMap(status int) map[string]any {
 	return map[string]any{
 		"status": status,
