@@ -269,8 +269,8 @@ func WithUserRpcClient(userRpcClient *UserRpcClient) NotificationSenderOptions {
 }
 
 const (
-	notificationWorkerCount = 2
-	notificationBufferSize  = 200
+	notificationWorkerCount = 16
+	notificationBufferSize  = 1024 * 1024 * 2
 )
 
 func NewNotificationSender(conf *config.Notification, opts ...NotificationSenderOptions) *NotificationSender {
