@@ -115,21 +115,21 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		return errs.Wrap(err)
 	}
 
-	// scheduled delete outdated file Objects and their datas in specific time.
-	deleteObjectFunc := func() {
-		now := time.Now()
-		deleteTime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.FileExpireTime))
-		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deleteTime.UnixMilli()))
-		log.ZInfo(ctx, "deleteoutDatedData ", "deletetime", deleteTime, "timestamp", deleteTime.UnixMilli())
-		if _, err := thirdClient.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: deleteTime.UnixMilli()}); err != nil {
-			log.ZError(ctx, "cron deleteoutDatedData failed", err, "deleteTime", deleteTime, "cont", time.Since(now))
-			return
-		}
-		log.ZInfo(ctx, "cron deleteoutDatedData success", "deltime", deleteTime, "cont", time.Since(now))
-	}
-	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, deleteObjectFunc); err != nil {
-		return errs.Wrap(err)
-	}
+	// // scheduled delete outdated file Objects and their datas in specific time.
+	// deleteObjectFunc := func() {
+	// 	now := time.Now()
+	// 	deleteTime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.FileExpireTime))
+	// 	ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deleteTime.UnixMilli()))
+	// 	log.ZInfo(ctx, "deleteoutDatedData ", "deletetime", deleteTime, "timestamp", deleteTime.UnixMilli())
+	// 	if _, err := thirdClient.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: deleteTime.UnixMilli()}); err != nil {
+	// 		log.ZError(ctx, "cron deleteoutDatedData failed", err, "deleteTime", deleteTime, "cont", time.Since(now))
+	// 		return
+	// 	}
+	// 	log.ZInfo(ctx, "cron deleteoutDatedData success", "deltime", deleteTime, "cont", time.Since(now))
+	// }
+	// if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, deleteObjectFunc); err != nil {
+	// 	return errs.Wrap(err)
+	// }
 
 	log.ZInfo(ctx, "start cron task", "CronExecuteTime", config.CronTask.CronExecuteTime)
 	crontab.Start()
