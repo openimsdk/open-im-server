@@ -293,49 +293,48 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		unequal := len(m)
 
 		if req.Conversation.RecvMsgOpt != nil {
-			if req.Conversation.RecvMsgOpt.Value != conversationMap[userID].RecvMsgOpt {
+			if req.Conversation.RecvMsgOpt.Value == conversationMap[userID].RecvMsgOpt {
 				unequal--
 			}
 		}
 
 		if req.Conversation.AttachedInfo != nil {
-			if req.Conversation.AttachedInfo.Value != conversationMap[userID].AttachedInfo {
+			if req.Conversation.AttachedInfo.Value == conversationMap[userID].AttachedInfo {
 				unequal--
 			}
 		}
 
 		if req.Conversation.Ex != nil {
-			if req.Conversation.Ex.Value != conversationMap[userID].Ex {
+			if req.Conversation.Ex.Value == conversationMap[userID].Ex {
 				unequal--
 			}
 		}
 		if req.Conversation.IsPinned != nil {
-			m["is_pinned"] = req.Conversation.IsPinned.Value
-			if req.Conversation.IsPinned.Value != conversationMap[userID].IsPinned {
+			if req.Conversation.IsPinned.Value == conversationMap[userID].IsPinned {
 				unequal--
 			}
 		}
 
 		if req.Conversation.GroupAtType != nil {
-			if req.Conversation.GroupAtType.Value != conversationMap[userID].GroupAtType {
+			if req.Conversation.GroupAtType.Value == conversationMap[userID].GroupAtType {
 				unequal--
 			}
 		}
 
 		if req.Conversation.MsgDestructTime != nil {
-			if req.Conversation.MsgDestructTime.Value != conversationMap[userID].MsgDestructTime {
+			if req.Conversation.MsgDestructTime.Value == conversationMap[userID].MsgDestructTime {
 				unequal--
 			}
 		}
 
 		if req.Conversation.IsMsgDestruct != nil {
-			if req.Conversation.IsMsgDestruct.Value != conversationMap[userID].IsMsgDestruct {
+			if req.Conversation.IsMsgDestruct.Value == conversationMap[userID].IsMsgDestruct {
 				unequal--
 			}
 		}
 
 		if req.Conversation.BurnDuration != nil {
-			if req.Conversation.BurnDuration.Value != conversationMap[userID].BurnDuration {
+			if req.Conversation.BurnDuration.Value == conversationMap[userID].BurnDuration {
 				unequal--
 			}
 		}
@@ -363,7 +362,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 				req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
 		}
 	} else {
-		if len(m) != 0 {
+		if len(m) != 0 && len(needUpdateUsersList) != 0 {
 			if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, needUpdateUsersList, &conversation, m); err != nil {
 				return nil, err
 			}
