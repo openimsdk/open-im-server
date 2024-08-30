@@ -535,28 +535,7 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, g
 	if err := g.conversationRpcClient.GroupChatFirstCreateConversation(ctx, groupID, entrantUserID); err != nil {
 		return err
 	}
-	opUserID := mcontext.GetOpUserID(ctx)
-	var opUser *sdkws.GroupMemberFullInfo
-	if authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
-		opUser = &sdkws.GroupMemberFullInfo{
-			GroupID:        groupID,
-			UserID:         opUserID,
-			AppMangerLevel: constant.AppAdmin,
-		}
-	} else {
-		users, err := g.getGroupMembers(ctx, groupID, []string{opUserID})
-		if err != nil {
-			return err
-		}
-		if len(users) == 0 {
-			opUser = &sdkws.GroupMemberFullInfo{
-				GroupID: groupID,
-				UserID:  opUserID,
-			}
-		} else {
-			opUser = users[0]
-		}
-	}
+
 	var group *sdkws.GroupInfo
 	group, err = g.getGroupInfo(ctx, groupID)
 	if err != nil {
@@ -566,7 +545,8 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, g
 	if err != nil {
 		return err
 	}
-	tips := &sdkws.MemberInvitedTips{Group: group, InvitedUserList: users, OpUser: opUser}
+
+	tips := &sdkws.MemberInvitedTips{Group: group, InvitedUserList: users}
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return nil
 	}
