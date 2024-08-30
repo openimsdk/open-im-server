@@ -567,6 +567,9 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, g
 		return err
 	}
 	tips := &sdkws.MemberInvitedTips{Group: group, InvitedUserList: users, OpUser: opUser}
+	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return nil
+	}
 	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberInvitedNotification, tips)
 	return nil
