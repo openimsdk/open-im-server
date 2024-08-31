@@ -221,6 +221,10 @@ func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.
 	return resp, nil
 }
 
+func (m *MessageRpcClient) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq) (*msg.GetSeqMessageResp, error) {
+	return m.Client.GetSeqMessage(ctx, req)
+}
+
 func (m *MessageRpcClient) GetConversationMaxSeq(ctx context.Context, conversationID string) (int64, error) {
 	resp, err := m.Client.GetConversationMaxSeq(ctx, &msg.GetConversationMaxSeqReq{ConversationID: conversationID})
 	if err != nil {

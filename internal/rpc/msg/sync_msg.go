@@ -86,6 +86,29 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 	return resp, nil
 }
 
+func (m *msgServer) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq) (*msg.GetSeqMessageResp, error) {
+	conversations := make(map[string]*msg.ConversationMessage)
+	for _, conv := range req.Conversations {
+		if _, ok := conversations[conv.ConversationID]; !ok {
+			continue
+		}
+		_, _, msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, conv.ConversationID, conv.Seqs)
+		if err != nil {
+			return nil, err
+		}
+		values := make(map[int64]*sdkws.MsgData)
+		for i, data := range msgs {
+			values[data.Seq] = msgs[i]
+		}
+		conversations[conv.ConversationID] = &msg.ConversationMessage{
+			Msgs: values,
+		}
+	}
+	return &msg.GetSeqMessageResp{
+		Conversations: conversations,
+	}, nil
+}
+
 func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
 	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err

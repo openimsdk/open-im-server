@@ -94,6 +94,7 @@ type MessageHandler interface {
 	SendMessage(context context.Context, data *Req) ([]byte, error)
 	SendSignalMessage(context context.Context, data *Req) ([]byte, error)
 	PullMessageBySeqList(context context.Context, data *Req) ([]byte, error)
+	GetSeqMessage(context context.Context, data *Req) ([]byte, error)
 	UserLogout(context context.Context, data *Req) ([]byte, error)
 	SetUserDeviceBackground(context context.Context, data *Req) ([]byte, bool, error)
 }
@@ -181,6 +182,25 @@ func (g GrpcHandler) PullMessageBySeqList(context context.Context, data *Req) ([
 		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "PullMessageBySeqsReq")
 	}
 	resp, err := g.msgRpcClient.PullMessageBySeqList(context, &req)
+	if err != nil {
+		return nil, err
+	}
+	c, err := proto.Marshal(resp)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "error marshaling response", "action", "marshal", "dataType", "PullMessageBySeqsResp")
+	}
+	return c, nil
+}
+
+func (g GrpcHandler) GetSeqMessage(context context.Context, data *Req) ([]byte, error) {
+	req := msg.GetSeqMessageReq{}
+	if err := proto.Unmarshal(data.Data, &req); err != nil {
+		return nil, errs.WrapMsg(err, "error unmarshaling request", "action", "unmarshal", "dataType", "PullMessageBySeqsReq")
+	}
+	if err := g.validate.Struct(data); err != nil {
+		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "PullMessageBySeqsReq")
+	}
+	resp, err := g.msgRpcClient.GetSeqMessage(context, &req)
 	if err != nil {
 		return nil, err
 	}
