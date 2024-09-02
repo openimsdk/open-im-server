@@ -336,7 +336,8 @@ type Redis struct {
 	Password    string   `mapstructure:"password"`
 	ClusterMode bool     `mapstructure:"clusterMode"`
 	DB          int      `mapstructure:"storage"`
-	MaxRetry    int      `mapstructure:"MaxRetry"`
+	MaxRetry    int      `mapstructure:"maxRetry"`
+	PoolSize    int      `mapstructure:"poolSize"`
 }
 
 type BeforeConfig struct {
@@ -474,6 +475,7 @@ func (r *Redis) Build() *redisutil.Config {
 		Password:    r.Password,
 		DB:          r.DB,
 		MaxRetry:    r.MaxRetry,
+		PoolSize:    r.PoolSize,
 	}
 }
 
