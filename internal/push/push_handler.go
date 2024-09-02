@@ -94,7 +94,7 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 
 	if nowSec-sec > 10 {
 		prommetrics.MsgLoneTimePushCounter.Inc()
-		log.ZWarn(ctx, "It’s been a while since the message was sent, so the receiver can’t get it now.", nil, "msg", pbData.String(), "sec", sec, "nowSec", nowSec, "nowSec-sec", nowSec-sec)
+		log.ZWarn(ctx, "it’s been a while since the message was sent", nil, "msg", pbData.String(), "sec", sec, "nowSec", nowSec, "nowSec-sec", nowSec-sec)
 	}
 	var err error
 	switch msgFromMQ.MsgData.SessionType {
