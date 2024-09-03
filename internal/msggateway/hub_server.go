@@ -155,6 +155,7 @@ func (s *Server) pushToUser(ctx context.Context, userID string, msgData *sdkws.M
 			(client.IsBackground && client.PlatformID != constant.IOSPlatformID) {
 			err := client.PushMessage(ctx, msgData)
 			if err != nil {
+				log.ZWarn(ctx, "online push msg failed", err, "userID", userID, "platformID", client.PlatformID)
 				userPlatform.ResultCode = int64(servererrs.ErrPushMsgErr.Code())
 			} else {
 				if _, ok := s.pushTerminal[client.PlatformID]; ok {
