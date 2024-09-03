@@ -237,6 +237,10 @@ func (och *OnlineHistoryRedisConsumerHandler) categorizeMessageLists(totalMsgs [
 }
 
 func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key, conversationID string, storageList, notStorageList []*ContextMsg) {
+	for _, storageMsg := range storageList {
+		log.ZDebug(ctx, "handle storage msg", "msg", storageMsg.message.String())
+	}
+
 	och.toPushTopic(ctx, key, conversationID, notStorageList)
 	var storageMessageList []*sdkws.MsgData
 	for _, msg := range storageList {
@@ -311,8 +315,9 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Con
 	}
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(_ context.Context, key, conversationID string, msgs []*ContextMsg) {
+func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(ctx context.Context, key, conversationID string, msgs []*ContextMsg) {
 	for _, v := range msgs {
+		log.ZDebug(ctx, "push msg to topic", "msg", v.message.String())
 		och.msgDatabase.MsgToPushMQ(v.ctx, key, conversationID, v.message)
 	}
 }
