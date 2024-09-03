@@ -1125,33 +1125,36 @@ func (g *groupServer) SetGroupInfoEX(ctx context.Context, req *pbgroup.SetGroupI
 	if req.GroupInfoForSetEX.Notification != nil {
 		num--
 
-		func() {
-			conversation := &pbconversation.ConversationReq{
-				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupInfoForSetEX.GroupID),
-				ConversationType: constant.ReadGroupChatType,
-				GroupID:          req.GroupInfoForSetEX.GroupID,
-			}
+		if req.GroupInfoForSetEX.Notification.Value != "" {
+			func() {
+				conversation := &pbconversation.ConversationReq{
+					ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupInfoForSetEX.GroupID),
+					ConversationType: constant.ReadGroupChatType,
+					GroupID:          req.GroupInfoForSetEX.GroupID,
+				}
 
-			resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupInfoForSetEX.GroupID})
-			if err != nil {
-				log.ZWarn(ctx, "GetGroupMemberIDs", err)
-				return
-			}
+				resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupInfoForSetEX.GroupID})
+				if err != nil {
+					log.ZWarn(ctx, "GetGroupMemberIDs", err)
+					return
+				}
 
-			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
+				conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
 
-			if err := g.conversationRpcClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
-				log.ZWarn(ctx, "SetConversations", err, resp.UserIDs, conversation)
-			}
-		}()
+				if err := g.conversationRpcClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
+					log.ZWarn(ctx, "SetConversations", err, resp.UserIDs, conversation)
+				}
+			}()
 
-		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
+			g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
+		}
 	}
+
 	if req.GroupInfoForSetEX.GroupName != "" {
 		num--
-
 		g.notification.GroupInfoSetNameNotification(ctx, &sdkws.GroupInfoSetNameTips{Group: tips.Group, OpUser: tips.OpUser})
 	}
+
 	if num > 0 {
 		g.notification.GroupInfoSetNotification(ctx, tips)
 	}

@@ -312,16 +312,20 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *rel
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
+
 	total, friendRequests, err := s.db.PageFriendRequestToMe(ctx, req.UserID, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
+
 	resp = &relation.GetPaginationFriendsApplyToResp{}
 	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userRpcClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
 	}
+
 	resp.Total = int32(total)
+
 	return resp, nil
 }
 
