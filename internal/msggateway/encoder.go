@@ -15,6 +15,8 @@
 package msggateway
 
 import (
+	"encoding/json"
+
 	"github.com/openimsdk/tools/errs"
 )
 
@@ -30,17 +32,17 @@ func NewGobEncoder() *GobEncoder {
 }
 
 func (g *GobEncoder) Encode(data any) ([]byte, error) {
-	if b, ok := data.([]byte); ok {
-		return b, nil
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errs.New("Encoder.Encode failed", "action", "encode")
 	}
-	return nil, errs.New("Encoder.Encode failed", "action", "encode")
+	return b, nil
 }
 
 func (g *GobEncoder) Decode(encodeData []byte, decodeData any) error {
-	if b, ok := decodeData.(*[]byte); ok {
-		*b = encodeData
-		return nil
+	err := json.Unmarshal(encodeData, decodeData)
+	if err != nil {
+		return errs.New("Encoder.Decode failed", "action", "decode")
 	}
-
-	return errs.New("Encoder.Decode failed", "action", "decode")
+	return nil
 }
