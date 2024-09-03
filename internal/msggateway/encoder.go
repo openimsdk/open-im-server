@@ -15,9 +15,6 @@
 package msggateway
 
 import (
-	"bytes"
-	"encoding/gob"
-
 	"github.com/openimsdk/tools/errs"
 )
 
@@ -33,19 +30,17 @@ func NewGobEncoder() *GobEncoder {
 }
 
 func (g *GobEncoder) Encode(data any) ([]byte, error) {
-	buff := bytes.Buffer{}
-	enc := gob.NewEncoder(&buff)
-	if err := enc.Encode(data); err != nil {
-		return nil, errs.WrapMsg(err, "GobEncoder.Encode failed", "action", "encode")
+	if b, ok := data.([]byte); ok {
+		return b, nil
 	}
-	return buff.Bytes(), nil
+	return nil, errs.New("Encoder.Encode failed", "action", "encode")
 }
 
 func (g *GobEncoder) Decode(encodeData []byte, decodeData any) error {
-	buff := bytes.NewBuffer(encodeData)
-	dec := gob.NewDecoder(buff)
-	if err := dec.Decode(decodeData); err != nil {
-		return errs.WrapMsg(err, "GobEncoder.Decode failed", "action", "decode")
+	if b, ok := decodeData.(*[]byte); ok {
+		*b = encodeData
+		return nil
 	}
-	return nil
+
+	return errs.New("Encoder.Decode failed", "action", "decode")
 }
