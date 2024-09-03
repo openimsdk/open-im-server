@@ -17,6 +17,7 @@ package dummy
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
+	"github.com/openimsdk/tools/log"
 )
 
 func NewClient() *Dummy {
@@ -27,5 +28,6 @@ type Dummy struct {
 }
 
 func (d *Dummy) Push(ctx context.Context, userIDs []string, title, content string, opts *options.Opts) error {
+	log.ZInfo(ctx, "dummy push")
 	return nil
 }
