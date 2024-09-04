@@ -833,7 +833,7 @@ func (g *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 		if member == nil {
 			log.ZDebug(ctx, "GroupApplicationResponse", "member is nil")
 		} else {
-			if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, groupRequest.InviterUserID, req.FromUserID); err != nil {
+			if err = g.notification.MemberEnterNotification(ctx, req.GroupID, req.FromUserID); err != nil {
 				return nil, err
 			}
 		}
@@ -1028,7 +1028,7 @@ func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 			}
 			resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupInfoForSet.GroupID})
 			if err != nil {
-				log.ZWarn(ctx, "GetGroupMemberIDs", err)
+				log.ZWarn(ctx, "GetGroupMemberIDs is failed.", err)
 				return
 			}
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
@@ -1133,18 +1133,18 @@ func (g *groupServer) SetGroupInfoEX(ctx context.Context, req *pbgroup.SetGroupI
 					GroupID:          req.GroupInfoForSetEX.GroupID,
 				}
 
-			resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupInfoForSetEX.GroupID})
-			if err != nil {
-				log.ZWarn(ctx, "GetGroupMemberIDs", err)
-				return
-			}
+				resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupInfoForSetEX.GroupID})
+				if err != nil {
+					log.ZWarn(ctx, "GetGroupMemberIDs is failed.", err)
+					return
+				}
 
 				conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
 
-			if err := g.conversationRpcClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
-				log.ZWarn(ctx, "SetConversations", err, resp.UserIDs, conversation)
-			}
-		}()
+				if err := g.conversationRpcClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
+					log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
+				}
+			}()
 
 			g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
 		}
