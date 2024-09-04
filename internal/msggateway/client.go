@@ -220,6 +220,8 @@ func (c *Client) handleMessage(message []byte) error {
 		resp, messageErr = c.longConnServer.SendSignalMessage(ctx, binaryReq)
 	case WSPullMsgBySeqList:
 		resp, messageErr = c.longConnServer.PullMessageBySeqList(ctx, binaryReq)
+	case WSPullMsg:
+		resp, messageErr = c.longConnServer.GetSeqMessage(ctx, binaryReq)
 	case WsLogoutMsg:
 		resp, messageErr = c.longConnServer.UserLogout(ctx, binaryReq)
 	case WsSetBackgroundStatus:
