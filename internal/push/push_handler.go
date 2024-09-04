@@ -40,6 +40,7 @@ import (
 	"github.com/openimsdk/tools/utils/timeutil"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
+	"time"
 )
 
 type ConsumerHandler struct {
@@ -218,16 +219,26 @@ func (c *ConsumerHandler) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.
 
 func (c *ConsumerHandler) Push2Group(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
 	log.ZDebug(ctx, "Get group msg from msg_transfer and push msg", "msg", msg.String(), "groupID", groupID)
+	defer func(duration time.Time) {
+		t := time.Since(duration)
+		if t.Seconds() > 5 {
+			log.ZWarn(ctx, "Get group msg from msg_transfer and push msg", nil, "msg", msg.String(), "groupID", groupID, "time cost", t)
+		} else {
+			log.ZDebug(ctx, "Get group msg from msg_transfer and push msg", "msg", msg.String(), "groupID", groupID, "time cost", t)
+		}
+	}(time.Now())
 	var pushToUserIDs []string
 	if err = c.webhookBeforeGroupOnlinePush(ctx, &c.config.WebhooksConfig.BeforeGroupOnlinePush, groupID, msg,
 		&pushToUserIDs); err != nil {
 		return err
 	}
+	log.ZDebug(ctx, "webhookBeforeGroupOnlinePush end")
 
 	err = c.groupMessagesHandler(ctx, groupID, &pushToUserIDs, msg)
 	if err != nil {
 		return err
 	}
+	log.ZDebug(ctx, "groupMessagesHandler end")
 
 	wsResults, err := c.GetConnsAndOnlinePush(ctx, msg, pushToUserIDs)
 	if err != nil {
@@ -240,12 +251,14 @@ func (c *ConsumerHandler) Push2Group(ctx context.Context, groupID string, msg *s
 		return nil
 	}
 	needOfflinePushUserIDs := c.onlinePusher.GetOnlinePushFailedUserIDs(ctx, msg, wsResults, &pushToUserIDs)
-
+	log.ZDebug(ctx, "GetOnlinePushFailedUserIDs end")
 	//filter some user, like don not disturb or don't need offline push etc.
 	needOfflinePushUserIDs, err = c.filterGroupMessageOfflinePush(ctx, groupID, msg, needOfflinePushUserIDs)
 	if err != nil {
 		return err
 	}
+	log.ZDebug(ctx, "filterGroupMessageOfflinePush end")
+
 	// Use offline push messaging
 	if len(needOfflinePushUserIDs) > 0 {
 		var offlinePushUserIDs []string
@@ -253,7 +266,7 @@ func (c *ConsumerHandler) Push2Group(ctx context.Context, groupID string, msg *s
 		if err != nil {
 			return err
 		}
-
+		log.ZDebug(ctx, "webhookBeforeOfflinePush end")
 		if len(offlinePushUserIDs) > 0 {
 			needOfflinePushUserIDs = offlinePushUserIDs
 		}
