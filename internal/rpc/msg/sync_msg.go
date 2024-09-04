@@ -16,16 +16,15 @@ package msg
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
-	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/timeutil"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
@@ -82,6 +81,35 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 			}
 			resp.NotificationMsgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: notificationMsgs, IsEnd: isEnd}
 		}
+	}
+	return resp, nil
+}
+
+func (m *msgServer) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq) (*msg.GetSeqMessageResp, error) {
+	resp := &msg.GetSeqMessageResp{
+		Msgs:             make(map[string]*sdkws.PullMsgs),
+		NotificationMsgs: make(map[string]*sdkws.PullMsgs),
+	}
+	for _, conv := range req.Conversations {
+		_, _, msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, conv.ConversationID, conv.Seqs)
+		if err != nil {
+			return nil, err
+		}
+		var pullMsgs *sdkws.PullMsgs
+		if ok := false; conversationutil.IsNotificationConversationID(conv.ConversationID) {
+			pullMsgs, ok = resp.NotificationMsgs[conv.ConversationID]
+			if !ok {
+				pullMsgs = &sdkws.PullMsgs{}
+				resp.NotificationMsgs[conv.ConversationID] = pullMsgs
+			}
+		} else {
+			pullMsgs, ok = resp.Msgs[conv.ConversationID]
+			if !ok {
+				pullMsgs = &sdkws.PullMsgs{}
+				resp.NotificationMsgs[conv.ConversationID] = pullMsgs
+			}
+		}
+		pullMsgs.Msgs = append(pullMsgs.Msgs, msgs...)
 	}
 	return resp, nil
 }

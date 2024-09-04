@@ -833,7 +833,7 @@ func (g *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 		if member == nil {
 			log.ZDebug(ctx, "GroupApplicationResponse", "member is nil")
 		} else {
-			if err = g.notification.MemberEnterNotification(ctx, req.GroupID, req.FromUserID); err != nil {
+			if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, groupRequest.InviterUserID, req.FromUserID); err != nil {
 				return nil, err
 			}
 		}
