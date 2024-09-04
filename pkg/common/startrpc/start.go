@@ -54,7 +54,16 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcPort", rpcPort,
 		"prometheusPorts", prometheusConfig.Ports)
 	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(listenIP), strconv.Itoa(rpcPort))
-	listener, err := net.Listen(
+
+	lc := net.ListenConfig{
+		Control: func(network, address string, conn syscall.RawConn) error {
+			return conn.Control(func(fd uintptr) {
+				_ = syscall.SetsockoptInt(syscall.Handle(fd), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
+			})
+		},
+	}
+	listener, err := lc.Listen(
+		ctx,
 		"tcp",
 		rpcTcpAddr,
 	)
