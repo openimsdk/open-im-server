@@ -16,27 +16,28 @@ package group
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
-	"github.com/openimsdk/protocol/msg"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 	"github.com/openimsdk/protocol/constant"
 	pbgroup "github.com/openimsdk/protocol/group"
+	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/stringutil"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // GroupApplicationReceiver
@@ -246,7 +247,7 @@ func (g *GroupNotificationSender) fillOpUserByUserID(ctx context.Context, userID
 			member, err := g.db.TakeGroupMember(ctx, groupID, userID)
 			if err == nil {
 				*opUser = g.groupMemberDB2PB(member, 0)
-			} else if !errs.ErrRecordNotFound.Is(err) {
+			} else if !(errors.Is(err, mongo.ErrNoDocuments) || errs.ErrRecordNotFound.Is(err)) {
 				return err
 			}
 		}

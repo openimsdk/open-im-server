@@ -195,10 +195,10 @@ func (g GrpcHandler) PullMessageBySeqList(context context.Context, data *Req) ([
 func (g GrpcHandler) GetSeqMessage(context context.Context, data *Req) ([]byte, error) {
 	req := msg.GetSeqMessageReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
-		return nil, errs.WrapMsg(err, "error unmarshaling request", "action", "unmarshal", "dataType", "PullMessageBySeqsReq")
+		return nil, errs.WrapMsg(err, "error unmarshaling request", "action", "unmarshal", "dataType", "GetSeqMessage")
 	}
 	if err := g.validate.Struct(data); err != nil {
-		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "PullMessageBySeqsReq")
+		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "GetSeqMessage")
 	}
 	resp, err := g.msgRpcClient.GetSeqMessage(context, &req)
 	if err != nil {
@@ -206,7 +206,7 @@ func (g GrpcHandler) GetSeqMessage(context context.Context, data *Req) ([]byte, 
 	}
 	c, err := proto.Marshal(resp)
 	if err != nil {
-		return nil, errs.WrapMsg(err, "error marshaling response", "action", "marshal", "dataType", "PullMessageBySeqsResp")
+		return nil, errs.WrapMsg(err, "error marshaling response", "action", "marshal", "dataType", "GetSeqMessage")
 	}
 	return c, nil
 }
