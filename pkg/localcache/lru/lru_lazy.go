@@ -116,6 +116,12 @@ func (x *LayLRU[K, V]) SetHasBatch(data map[K]V) bool {
 //	return x.core.Contains(key)
 //}
 
+func (x *LayLRU[K, V]) Set(key K, value V) {
+	x.lock.Lock()
+	defer x.lock.Unlock()
+	x.core.Add(key, &layLruItem[V]{value: value, expires: time.Now().Add(x.successTTL).UnixMilli()})
+}
+
 func (x *LayLRU[K, V]) SetHas(key K, value V) bool {
 	x.lock.Lock()
 	defer x.lock.Unlock()

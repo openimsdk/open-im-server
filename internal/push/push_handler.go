@@ -76,7 +76,7 @@ func NewConsumerHandler(config *Config, offlinePusher offlinepush.OfflinePusher,
 	consumerHandler.conversationLocalCache = rpccache.NewConversationLocalCache(consumerHandler.conversationRpcClient, &config.LocalCacheConfig, rdb)
 	consumerHandler.webhookClient = webhook.NewWebhookClient(config.WebhooksConfig.URL)
 	consumerHandler.config = config
-	consumerHandler.onlineCache = rpccache.NewOnlineCache(userRpcClient, consumerHandler.groupLocalCache, rdb, nil)
+	consumerHandler.onlineCache = rpccache.NewOnlineCache(userRpcClient, consumerHandler.groupLocalCache, rdb, config.RpcConfig.FullUserCache, nil)
 	return &consumerHandler, nil
 }
 

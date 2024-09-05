@@ -38,7 +38,7 @@ iosPush:
       badgeCount: true
       production: false
 
-
+fullUserCache: true
 
 
 
