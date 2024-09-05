@@ -27,7 +27,7 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 	switch x.fullUserCache {
 	case true:
 		x.mapCache = cacheutil.NewCache[string, []int32]()
-		if err := x.initUsersOnlineStatus(context.TODO()); err != nil {
+		if err := x.initUsersOnlineStatus(mcontext.SetOperationID(context.TODO(), strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10))); err != nil {
 			return nil, err
 		}
 	case false:
