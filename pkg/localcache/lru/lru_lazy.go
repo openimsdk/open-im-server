@@ -88,6 +88,22 @@ func (x *LayLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	return v.value, v.err
 }
 
+func (x *LayLRU[K, V]) GetBatch(keys []K, fetch func() ([]V, error)) ([]V, error) {
+	return nil, nil
+}
+
+func (x *LayLRU[K, V]) SetHasBatch(data map[K]V) bool {
+	x.lock.Lock()
+	defer x.lock.Unlock()
+	for key, value := range data {
+		if x.core.Contains(key) {
+			x.core.Add(key, &layLruItem[V]{value: value, expires: time.Now().Add(x.successTTL).UnixMilli()})
+			return true
+		}
+	}
+	return false
+}
+
 //func (x *LayLRU[K, V]) Set(key K, value V) {
 //	x.lock.Lock()
 //	x.core.Add(key, &layLruItem[V]{value: value, expires: time.Now().Add(x.successTTL).UnixMilli()})

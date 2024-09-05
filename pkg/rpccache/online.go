@@ -77,6 +77,15 @@ func (o *OnlineCache) GetUserOnline(ctx context.Context, userID string) (bool, e
 	return len(platformIDs) > 0, nil
 }
 
+func (o *OnlineCache) GetUsersOnline(ctx context.Context, usersID []string) ([]string, []string, error) {
+	var (
+		onlineUserIDS  []string
+		offlineUserIDs []string
+	)
+
+	return onlineUserIDS, offlineUserIDs, nil
+}
+
 //func (o *OnlineCache) GetUsersOnline(ctx context.Context, userIDs []string) ([]string, error) {
 //	onlineUserIDs := make([]string, 0, len(userIDs))
 //	for _, userID := range userIDs {

@@ -185,21 +185,12 @@ func (c *ConsumerHandler) shouldPushOffline(_ context.Context, msg *sdkws.MsgDat
 }
 
 func (c *ConsumerHandler) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) ([]*msggateway.SingleMsgToUserResults, error) {
-	var (
-		onlineUserIDs  []string
-		offlineUserIDs []string
-	)
-	for _, userID := range pushToUserIDs {
-		online, err := c.onlineCache.GetUserOnline(ctx, userID)
-		if err != nil {
-			return nil, err
-		}
-		if online {
-			onlineUserIDs = append(onlineUserIDs, userID)
-		} else {
-			offlineUserIDs = append(offlineUserIDs, userID)
-		}
+
+	onlineUserIDs, offlineUserIDs, err := c.onlineCache.GetUsersOnline(ctx, pushToUserIDs)
+	if err != nil {
+		return nil, err
 	}
+
 	log.ZDebug(ctx, "GetConnsAndOnlinePush online cache", "sendID", msg.SendID, "recvID", msg.RecvID, "groupID", msg.GroupID, "sessionType", msg.SessionType, "clientMsgID", msg.ClientMsgID, "serverMsgID", msg.ServerMsgID, "offlineUserIDs", offlineUserIDs, "onlineUserIDs", onlineUserIDs)
 	var result []*msggateway.SingleMsgToUserResults
 	if len(onlineUserIDs) > 0 {
@@ -398,6 +389,7 @@ func (c *ConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (title, conten
 	}
 	return
 }
+
 func (c *ConsumerHandler) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
 	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
 	maxSeq, err := c.msgRpcClient.GetConversationMaxSeq(ctx, conversationID)
@@ -406,6 +398,7 @@ func (c *ConsumerHandler) DeleteMemberAndSetConversationSeq(ctx context.Context,
 	}
 	return c.conversationRpcClient.SetConversationMaxSeq(ctx, userIDs, conversationID, maxSeq)
 }
+
 func unmarshalNotificationElem(bytes []byte, t any) error {
 	var notification sdkws.NotificationElem
 	if err := json.Unmarshal(bytes, &notification); err != nil {
