@@ -58,7 +58,7 @@ func Start(ctx context.Context, index int, conf *Config) error {
 	)
 
 	hubServer := NewServer(rpcPort, longServer, conf, func(srv *Server) error {
-		longServer.online = rpccache.NewOnlineCache(srv.userRcp, nil, rdb, false, longServer.subscriberUserOnlineStatusChanges)
+		longServer.online, _ = rpccache.NewOnlineCache(srv.userRcp, nil, rdb, false, longServer.subscriberUserOnlineStatusChanges)
 		return nil
 	})
 

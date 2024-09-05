@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb redis.UniversalClient, fullUserCache bool, fn func(ctx context.Context, userID string, platformIDs []int32)) *OnlineCache {
+func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb redis.UniversalClient, fullUserCache bool, fn func(ctx context.Context, userID string, platformIDs []int32)) (*OnlineCache, error) {
 	x := &OnlineCache{
 		user:          user,
 		group:         group,
@@ -27,6 +27,9 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 	switch x.fullUserCache {
 	case true:
 		x.mapCache = cacheutil.NewCache[string, []int32]()
+		if err := x.initUsersOnlineStatus(context.TODO()); err != nil {
+			return nil, err
+		}
 	case false:
 		x.lruCache = lru.NewSlotLRU(1024, localcache.LRUStringHash, func() lru.LRU[string, []int32] {
 			return lru.NewLayLRU[string, []int32](2048, cachekey.OnlineExpire/2, time.Second*3, localcache.EmptyTarget{}, func(key string, value []int32) {})
@@ -60,7 +63,7 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 
 		}
 	}()
-	return x
+	return x, nil
 }
 
 type OnlineCache struct {
