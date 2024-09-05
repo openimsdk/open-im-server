@@ -86,7 +86,7 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) error {
 	)
 
 	defer func(t time.Time) {
-		log.ZDebug(ctx, "init users online status end", "cost", time.Since(t), "totalSet", totalSet)
+		log.ZWarn(ctx, "init users online status end", nil, "cost", time.Since(t), "totalSet", totalSet)
 	}(time.Now())
 
 	for page := int32(1); ; page++ {
@@ -162,7 +162,7 @@ func (o *OnlineCache) GetUsersOnline(ctx context.Context, usersID []string) ([]s
 	case false:
 	}
 
-	log.ZDebug(ctx, "get users online", "online users length", len(onlineUserIDS), "offline users length", len(offlineUserIDs))
+	log.ZWarn(ctx, "get users online", nil, "online users length", len(onlineUserIDS), "offline users length", len(offlineUserIDs))
 	return onlineUserIDS, offlineUserIDs, nil
 }
 
