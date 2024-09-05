@@ -2,6 +2,10 @@ package rpccache
 
 import (
 	"context"
+	"math/rand"
+	"strconv"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache/lru"
@@ -10,9 +14,6 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/redis/go-redis/v9"
-	"math/rand"
-	"strconv"
-	"time"
 )
 
 func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb redis.UniversalClient, fn func(ctx context.Context, userID string, platformIDs []int32)) *OnlineCache {
@@ -69,6 +70,16 @@ func (o *OnlineCache) GetUserOnlinePlatform(ctx context.Context, userID string) 
 	return platformIDs, nil
 }
 
+// func (o *OnlineCache) GetUserOnlinePlatformBatch(ctx context.Context, userIDs []string) (map[string]int32, error) {
+// 	platformIDs, err := o.getUserOnlinePlatform(ctx, userIDs)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	tmp := make([]int32, len(platformIDs))
+// 	copy(tmp, platformIDs)
+// 	return platformIDs, nil
+// }
+
 func (o *OnlineCache) GetUserOnline(ctx context.Context, userID string) (bool, error) {
 	platformIDs, err := o.getUserOnlinePlatform(ctx, userID)
 	if err != nil {
@@ -77,19 +88,59 @@ func (o *OnlineCache) GetUserOnline(ctx context.Context, userID string) (bool, e
 	return len(platformIDs) > 0, nil
 }
 
-func (o *OnlineCache) GetUsersOnline(ctx context.Context, usersID []string) ([]string, []string, error) {
+// ----------------------
+
+func (o *OnlineCache) getUserOnlinePlatformBatch(ctx context.Context, userIDs []string) (map[string][]int32, error) {
+	platformIDsMap, err := o.local.GetBatch(userIDs, func(missingUsers []string) (map[string][]int32, error) {
+		platformIDsMap := make(map[string][]int32)
+
+		usersStatus, err := o.user.GetUsersOnlinePlatform(ctx, missingUsers)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, user := range usersStatus {
+			platformIDsMap[user.UserID] = user.PlatformIDs
+		}
+
+		return platformIDsMap, nil
+	})
+	if err != nil {
+		log.ZError(ctx, "OnlineCache GetUserOnlinePlatform", err, "userID", userIDs)
+		return nil, err
+	}
+
+	//log.ZDebug(ctx, "OnlineCache GetUserOnlinePlatform", "userID", userID, "platformIDs", platformIDs)
+	return platformIDsMap, nil
+}
+
+// Finalllllllllllllllllllllllllll
+func (o *OnlineCache) GetUsersOnline(ctx context.Context, userIDs []string) ([]string, []string, error) {
 	var (
-		onlineUserIDS  []string
+		onlineUserIDs  []string
 		offlineUserIDs []string
 	)
 
-	return onlineUserIDS, offlineUserIDs, nil
+	userOnlineMap, err := o.getUserOnlinePlatformBatch(ctx, userIDs)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	for key, value := range userOnlineMap {
+		if len(value) > 0 {
+			onlineUserIDs = append(onlineUserIDs, key)
+		} else {
+			offlineUserIDs = append(offlineUserIDs, key)
+		}
+	}
+
+	return onlineUserIDs, offlineUserIDs, nil
 }
 
 //func (o *OnlineCache) GetUsersOnline(ctx context.Context, userIDs []string) ([]string, error) {
 //	onlineUserIDs := make([]string, 0, len(userIDs))
 //	for _, userID := range userIDs {
-//		online, err := o.GetUserOnline(ctx, userID)
+// online, err := o.GetUserOnline(ctx, userID)
 //		if err != nil {
 //			return nil, err
 //		}
