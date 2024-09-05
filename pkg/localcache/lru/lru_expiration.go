@@ -99,5 +99,11 @@ func (x *ExpirationLRU[K, V]) SetHas(key K, value V) bool {
 	return false
 }
 
+func (x *ExpirationLRU[K, V]) Set(key K, value V) {
+	x.lock.Lock()
+	defer x.lock.Unlock()
+	x.core.Add(key, &expirationLruItem[V]{value: value})
+}
+
 func (x *ExpirationLRU[K, V]) Stop() {
 }
