@@ -40,6 +40,8 @@ import (
 	"github.com/openimsdk/tools/utils/timeutil"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
+	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -67,6 +69,20 @@ func NewConsumerHandler(config *Config, offlinePusher offlinepush.OfflinePusher,
 		return nil, err
 	}
 	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
+	for {
+		ctx := mcontext.SetOperationID(context.TODO(), strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10))
+		conns, err := userRpcClient.Discov.GetConns(
+			ctx,
+			config.Share.RpcRegisterName.User,
+		)
+		if err != nil || len(conns) == 0 {
+			time.Sleep(time.Second)
+			log.ZWarn(ctx, "waiting for user rpc", err)
+		} else {
+			break
+		}
+	}
+
 	consumerHandler.offlinePusher = offlinePusher
 	consumerHandler.onlinePusher = NewOnlinePusher(client, config)
 	consumerHandler.groupRpcClient = rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
@@ -215,7 +231,7 @@ func (c *ConsumerHandler) Push2Group(ctx context.Context, groupID string, msg *s
 	log.ZDebug(ctx, "Get group msg from msg_transfer and push msg", "msg", msg.String(), "groupID", groupID)
 	defer func(duration time.Time) {
 		t := time.Since(duration)
-		if t.Seconds() > 5 {
+		if t.Seconds() > 1 {
 			log.ZWarn(ctx, "Get group msg from msg_transfer and push msg end", nil, "msg", msg.String(), "groupID", groupID, "time cost", t)
 		} else {
 			log.ZDebug(ctx, "Get group msg from msg_transfer and push msg end", "msg", msg.String(), "groupID", groupID, "time cost", t)
