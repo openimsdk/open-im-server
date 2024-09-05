@@ -106,7 +106,7 @@ func (m *msgServer) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq
 			pullMsgs, ok = resp.Msgs[conv.ConversationID]
 			if !ok {
 				pullMsgs = &sdkws.PullMsgs{}
-				resp.NotificationMsgs[conv.ConversationID] = pullMsgs
+				resp.Msgs[conv.ConversationID] = pullMsgs
 			}
 		}
 		pullMsgs.Msgs = append(pullMsgs.Msgs, msgs...)
