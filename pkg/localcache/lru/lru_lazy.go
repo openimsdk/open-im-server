@@ -156,6 +156,11 @@ func (x *LayLRU[K, V]) GetBatch(keys []K, fetchBatch func([]K) (map[K]V, error))
 }
 
 func (x *LayLRU[K, V]) GetBatchs(keys []K, fetch func(keys []K) (map[K]V, error)) ([]V, error) {
+	var (
+		err  error
+		once sync.Once
+	)
+
 	x.lock.Lock()
 	res := make([]V, 0)
 	queries := make([]K, 0)
@@ -165,18 +170,28 @@ func (x *LayLRU[K, V]) GetBatchs(keys []K, fetch func(keys []K) (map[K]V, error)
 		if ok {
 			x.lock.Unlock()
 			v.lock.Lock()
-			expires, value, _ := v.expires, v.value, v.err
+			expires, value, err1 := v.expires, v.value, v.err
 			if expires != 0 && expires > time.Now().UnixMilli() {
 				v.lock.Unlock()
 				x.target.IncrGetHit()
 				res = append(res, value)
+				if err1 != nil {
+					once.Do(func() {
+						err = err1
+					})
+				}
 				continue
 			}
 		}
 		queries = append(queries, key)
 		x.lock.Unlock()
 	}
-	values, err := fetch(queries)
+	values, err1 := fetch(queries)
+	if err1 != nil {
+		once.Do(func() {
+			err = err1
+		})
+	}
 	for key, val := range values {
 		v := &layLruItem[V]{}
 		v.value = val
@@ -198,7 +213,7 @@ func (x *LayLRU[K, V]) GetBatchs(keys []K, fetch func(keys []K) (map[K]V, error)
 	return res, err
 }
 
-func (x *LayLRU[K, V]) SetBatch(data map[K]V) bool {
+func (x *LayLRU[K, V]) SetBatch(data map[K]V) {
 	x.lock.Lock()
 	defer x.lock.Unlock()
 
