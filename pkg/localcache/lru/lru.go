@@ -21,7 +21,6 @@ type EvictCallback[K comparable, V any] simplelru.EvictCallback[K, V]
 type LRU[K comparable, V any] interface {
 	Get(key K, fetch func() (V, error)) (V, error)
 	Set(key K, value V)
-	GetBatch(key []K, fetchBatch func([]K) (map[string]V, error)) (map[string]V, error)
 	SetHas(key K, value V) bool
 	Del(key K) bool
 	Stop()
