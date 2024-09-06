@@ -145,6 +145,7 @@ func (o *OnlineCache) GetUserOnline(ctx context.Context, userID string) (bool, e
 }
 
 func (o *OnlineCache) GetUsersOnline(ctx context.Context, usersID []string) ([]string, []string, error) {
+	t := time.Now()
 	var (
 		onlineUserIDS  []string
 		offlineUserIDs []string
@@ -162,7 +163,7 @@ func (o *OnlineCache) GetUsersOnline(ctx context.Context, usersID []string) ([]s
 	case false:
 	}
 
-	log.ZWarn(ctx, "get users online", nil, "online users length", len(onlineUserIDS), "offline users length", len(offlineUserIDs))
+	log.ZWarn(ctx, "get users online", nil, "online users length", len(onlineUserIDS), "offline users length", len(offlineUserIDs), "cost", time.Since(t))
 	return onlineUserIDS, offlineUserIDs, nil
 }
 
