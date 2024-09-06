@@ -86,6 +86,8 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) error {
 		totalSet int
 	)
 
+	time.Sleep(time.Second * 10)
+
 	defer func(t time.Time) {
 		log.ZWarn(ctx, "init users online status end", nil, "cost", time.Since(t), "totalSet", totalSet)
 	}(time.Now())
@@ -186,7 +188,7 @@ func (o *OnlineCache) GetUsersOnline(ctx context.Context, userIDs []string) ([]s
 		onlineUserIDs  = make([]string, 0, len(userIDs))
 		offlineUserIDs = make([]string, 0, len(userIDs))
 	)
-	//
+
 	//userOnlineMap, err := o.getUserOnlinePlatformBatch(ctx, userIDs)
 	//if err != nil {
 	//	return nil, nil, err
