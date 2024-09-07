@@ -97,7 +97,7 @@ func (och *OnlineHistoryRedisConsumerHandler) do(ctx context.Context, channelID 
 	ctx = mcontext.WithTriggerIDContext(ctx, val.TriggerID())
 	ctxMessages := och.parseConsumerMessages(ctx, val.Val())
 	ctx = withAggregationCtx(ctx, ctxMessages)
-	log.ZInfo(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMessages),
+	log.ZDebug(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMessages),
 		"key", val.Key())
 	och.doSetReadSeq(ctx, ctxMessages)
 
@@ -256,7 +256,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 		if isNewConversation {
 			switch msg.SessionType {
 			case constant.ReadGroupChatType:
-				log.ZInfo(ctx, "group chat first create conversation", "conversationID",
+				log.ZDebug(ctx, "group chat first create conversation", "conversationID",
 					conversationID)
 				userIDs, err := och.groupRpcClient.GetGroupMemberIDs(ctx, msg.GroupID)
 				if err != nil {
@@ -343,7 +343,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Cleanup(_ sarama.ConsumerGroupSess
 
 func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(session sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
-	log.ZInfo(context.Background(), "online new session msg come", "highWaterMarkOffset",
+	log.ZDebug(context.Background(), "online new session msg come", "highWaterMarkOffset",
 		claim.HighWaterMarkOffset(), "topic", claim.Topic(), "partition", claim.Partition())
 	och.redisMessageBatches.OnComplete = func(lastMessage *sarama.ConsumerMessage, totalCount int) {
 		session.MarkMessage(lastMessage, "")

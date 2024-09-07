@@ -40,8 +40,6 @@ import (
 	"github.com/openimsdk/tools/utils/timeutil"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
-	"math/rand"
-	"strconv"
 	"time"
 )
 
@@ -69,19 +67,6 @@ func NewConsumerHandler(config *Config, offlinePusher offlinepush.OfflinePusher,
 		return nil, err
 	}
 	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
-	for {
-		ctx := mcontext.SetOperationID(context.TODO(), strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10))
-		conns, err := userRpcClient.Discov.GetConns(
-			ctx,
-			config.Share.RpcRegisterName.User,
-		)
-		if err != nil || len(conns) == 0 {
-			time.Sleep(time.Second)
-			log.ZWarn(ctx, "waiting for user rpc", err)
-		} else {
-			break
-		}
-	}
 
 	consumerHandler.offlinePusher = offlinePusher
 	consumerHandler.onlinePusher = NewOnlinePusher(client, config)
@@ -228,48 +213,42 @@ func (c *ConsumerHandler) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.
 }
 
 func (c *ConsumerHandler) Push2Group(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
-	//log.ZDebug(ctx, "Get group msg from msg_transfer and push msg", "msg", msg.String(), "groupID", groupID)
-	log.ZWarn(ctx, "Get group msg from msg_transfer and push msg", nil, "msg", msg.String(), "groupID", groupID)
+	log.ZInfo(ctx, "Get group msg from msg_transfer and push msg", "msg", msg.String(), "groupID", groupID)
 	defer func(duration time.Time) {
 		t := time.Since(duration)
-		log.ZWarn(ctx, "Get group msg from msg_transfer and push msg end", nil, "msg", msg.String(), "groupID", groupID, "time cost", t)
+		log.ZInfo(ctx, "Get group msg from msg_transfer and push msg end", "msg", msg.String(), "groupID", groupID, "time cost", t)
 	}(time.Now())
 	var pushToUserIDs []string
 	if err = c.webhookBeforeGroupOnlinePush(ctx, &c.config.WebhooksConfig.BeforeGroupOnlinePush, groupID, msg,
 		&pushToUserIDs); err != nil {
 		return err
 	}
-	//log.ZDebug(ctx, "webhookBeforeGroupOnlinePush end")
-	log.ZWarn(ctx, "webhookBeforeGroupOnlinePush end", nil)
+	log.ZInfo(ctx, "webhookBeforeGroupOnlinePush end")
 
 	err = c.groupMessagesHandler(ctx, groupID, &pushToUserIDs, msg)
 	if err != nil {
 		return err
 	}
-	//log.ZDebug(ctx, "groupMessagesHandler end")
-	log.ZWarn(ctx, "groupMessagesHandler end", nil)
+	log.ZInfo(ctx, "groupMessagesHandler end")
 
 	wsResults, err := c.GetConnsAndOnlinePush(ctx, msg, pushToUserIDs)
 	if err != nil {
 		return err
 	}
 
-	//log.ZDebug(ctx, "group push result", "result", wsResults, "msg", msg)
-	log.ZWarn(ctx, "group push result", nil, "result", wsResults, "msg", msg)
+	log.ZInfo(ctx, "group push result", "result", wsResults, "msg", msg)
 
 	if !c.shouldPushOffline(ctx, msg) {
 		return nil
 	}
 	needOfflinePushUserIDs := c.onlinePusher.GetOnlinePushFailedUserIDs(ctx, msg, wsResults, &pushToUserIDs)
-	//log.ZDebug(ctx, "GetOnlinePushFailedUserIDs end")
-	log.ZWarn(ctx, "GetOnlinePushFailedUserIDs end", nil)
+	log.ZInfo(ctx, "GetOnlinePushFailedUserIDs end")
 	//filter some user, like don not disturb or don't need offline push etc.
 	needOfflinePushUserIDs, err = c.filterGroupMessageOfflinePush(ctx, groupID, msg, needOfflinePushUserIDs)
 	if err != nil {
 		return err
 	}
-	//log.ZDebug(ctx, "filterGroupMessageOfflinePush end")
-	log.ZWarn(ctx, "filterGroupMessageOfflinePush end", nil)
+	log.ZInfo(ctx, "filterGroupMessageOfflinePush end")
 
 	// Use offline push messaging
 	if len(needOfflinePushUserIDs) > 0 {
@@ -278,8 +257,7 @@ func (c *ConsumerHandler) Push2Group(ctx context.Context, groupID string, msg *s
 		if err != nil {
 			return err
 		}
-		//log.ZDebug(ctx, "webhookBeforeOfflinePush end")
-		log.ZWarn(ctx, "webhookBeforeOfflinePush end", nil)
+		log.ZInfo(ctx, "webhookBeforeOfflinePush end")
 		if len(offlinePushUserIDs) > 0 {
 			needOfflinePushUserIDs = offlinePushUserIDs
 		}
@@ -327,7 +305,7 @@ func (c *ConsumerHandler) groupMessagesHandler(ctx context.Context, groupID stri
 				if unmarshalNotificationElem(msg.Content, &tips) != nil {
 					return err
 				}
-				log.ZInfo(ctx, "GroupDismissedNotificationInfo****", "groupID", groupID, "num", len(*pushToUserIDs), "list", pushToUserIDs)
+				log.ZDebug(ctx, "GroupDismissedNotificationInfo****", "groupID", groupID, "num", len(*pushToUserIDs), "list", pushToUserIDs)
 				if len(c.config.Share.IMAdminUserID) > 0 {
 					ctx = mcontext.WithOpUserIDContext(ctx, c.config.Share.IMAdminUserID[0])
 				}

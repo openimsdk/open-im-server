@@ -89,7 +89,7 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) error {
 	time.Sleep(time.Second * 10)
 
 	defer func(t time.Time) {
-		log.ZWarn(ctx, "init users online status end", nil, "cost", time.Since(t), "totalSet", totalSet)
+		log.ZInfo(ctx, "init users online status end", "cost", time.Since(t), "totalSet", totalSet)
 	}(time.Now())
 
 	for page := int32(1); ; page++ {
