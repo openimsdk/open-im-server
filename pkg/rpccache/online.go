@@ -2,6 +2,7 @@ package rpccache
 
 import (
 	"context"
+	"fmt"
 	"github.com/openimsdk/protocol/user"
 	"golang.org/x/sync/errgroup"
 	"math/rand"
@@ -95,8 +96,10 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) error {
 	}()
 
 	var (
-		totalSet atomic.Int64
-		gr, _    = errgroup.WithContext(ctx)
+		totalSet      atomic.Int64
+		maxTries      = 5
+		retryInterval = time.Second * 5
+		gr, _         = errgroup.WithContext(ctx)
 	)
 	gr.SetLimit(10)
 
@@ -116,35 +119,33 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) error {
 
 		gr.Go(func() error {
 			var (
-				usersStatus []*user.OnlineStatus
-				resp        *user.GetAllUserIDResp
-				err         error
-				maxTries    = 5
+				usersStatus    []*user.OnlineStatus
+				resp           *user.GetAllUserIDResp
+				err            error
+				retryOperation = func(operation func() error, operationName string) error {
+					for i := 0; i < maxTries; i++ {
+						if err = operation(); err != nil {
+							log.ZWarn(ctx, fmt.Sprintf("initUsersOnlineStatus: %s failed", operationName), err, "page", page, "retries", i+1)
+							time.Sleep(retryInterval)
+						} else {
+							return nil
+						}
+					}
+					return err
+				}
 			)
 
-			for i := 0; i < maxTries; i++ {
+			if err = retryOperation(func() error {
 				resp, err = o.user.GetAllUserID(ctx, page, constant.ParamMaxLength)
-				if err != nil {
-					log.ZWarn(ctx, "initUsersOnlineStatus: GetAllUserID failed", err, "page", page, "retries", i+1)
-					time.Sleep(time.Second * 5)
-				} else {
-					break
-				}
-			}
-			if err != nil {
+				return err
+			}, "GetAllUserID"); err != nil {
 				return err
 			}
 
-			for i := 0; i < maxTries; i++ {
+			if err = retryOperation(func() error {
 				usersStatus, err = o.user.GetUsersOnlinePlatform(ctx, resp.UserIDs)
-				if err != nil {
-					log.ZError(ctx, "initUsersOnlineStatus: GetAllUserID failed", err, "page", page, "retries", i+1)
-					time.Sleep(time.Second * 5)
-				} else {
-					break
-				}
-			}
-			if err != nil {
+				return err
+			}, "GetUsersOnlinePlatform"); err != nil {
 				return err
 			}
 
