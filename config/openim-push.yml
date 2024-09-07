@@ -4,13 +4,13 @@ rpc:
   # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
   listenIP: 0.0.0.0
   # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
-  ports: [ 10170, 10171, 10172, 10173, 10174, 10175, 10176, 10177, 10178, 10179, 11170, 11171, 11172, 11173, 11174, 11175 ]
+  ports: [ 6050, 6051, 6052, 6053, 6054, 6055, 6056, 6057, 6058, 6059, 6060, 6061, 6062, 6063, 6064, 6065 ]
 
 prometheus:
   # Enable or disable Prometheus monitoring
   enable: true
   # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
-  ports: [ 20670, 20671, 20672, 20673, 20674, 20675, 20676, 20677, 20678, 20679, 21670, 21671, 21672, 21673, 21674, 21675 ]
+  ports: [ 8050, 8051, 8052, 8053, 8054, 8055, 8056, 8057, 8058, 8059, 8060, 8061, 8062, 8063, 8064, 8065 ]
 
 maxConcurrentWorkers: 3
 #Use geTui for offline push notifications, or choose fcm or jpns; corresponding configuration settings must be specified.
@@ -39,8 +39,3 @@ iosPush:
       production: false
 
 fullUserCache: true
-
-
-
-
-
