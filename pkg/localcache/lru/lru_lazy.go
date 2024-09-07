@@ -15,14 +15,10 @@
 package lru
 
 import (
-	"context"
 	"sync"
 	"time"
 
 	"github.com/hashicorp/golang-lru/v2/simplelru"
-	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils/datautil"
 )
 
 type layLruItem[V any] struct {
@@ -92,77 +88,14 @@ func (x *LayLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	return v.value, v.err
 }
 
-func (x *LayLRU[K, V]) GetBatch(keys []K, fetchBatch func([]K) (map[K]V, error)) (map[K]V, error) {
-	ctx := context.Background()
-	resultMap := make(map[K]V)
-	// errorMap := make(map[K]error)
-	missingKeys := []K{}
-	lazyLruItemMap := make(map[K]*layLruItem[V])
-
-	for _, key := range keys {
-		x.lock.Lock()
-		v, ok := x.core.Get(key)
-		lazyLruItemMap[key] = v
-		if ok {
-			x.lock.Unlock()
-			v.lock.Lock()
-			expires, value, err := v.expires, v.value, v.err
-			if expires != 0 && expires > time.Now().UnixMilli() {
-				v.lock.Unlock()
-				resultMap[key] = value
-				x.target.IncrGetHit()
-			} else {
-				missingKeys = append(missingKeys, key)
-				v.lock.Unlock()
-			}
-			if err != nil {
-				log.ZWarn(ctx, "Get Local LRU is failed.", errs.Wrap(err))
-			}
-			continue
-		} else {
-			// initialize and insert new lazyLruItem
-			v = &layLruItem[V]{}
-			lazyLruItemMap[key] = v
-			x.core.Add(key, v)
-			v.lock.Lock()
-			missingKeys = append(missingKeys, key)
-			x.lock.Unlock()
-		}
-		defer v.lock.Unlock()
-	}
-
-	x.lock.Unlock()
-
-	// Fetch missing Key
-	if len(missingKeys) > 0 {
-		failedKey := missingKeys
-		fetchMap, err := fetchBatch(missingKeys)
-		if err != nil {
-			log.ZWarn(ctx, "fetch Key is failed.", errs.Wrap(err))
-		}
-
-		for key, value := range fetchMap {
-			resultMap[key] = value
-			lazyLruItemMap[key].expires = time.Now().Add(x.successTTL).UnixMilli()
-			x.target.IncrGetSuccess()
-			failedKey = datautil.DeleteElems(failedKey, key)
-		}
-		for _, key := range failedKey {
-			lazyLruItemMap[key].expires = time.Now().Add(x.failedTTL).UnixMilli()
-			x.target.IncrGetFailed()
-		}
-	}
-	return resultMap, nil
-}
-
-func (x *LayLRU[K, V]) GetBatchs(keys []K, fetch func(keys []K) (map[K]V, error)) ([]V, error) {
+func (x *LayLRU[K, V]) GetBatch(keys []K, fetch func(keys []K) (map[K]V, error)) (map[K]V, error) {
 	var (
 		err  error
 		once sync.Once
 	)
 
 	x.lock.Lock()
-	res := make([]V, 0)
+	res := make(map[K]V)
 	queries := make([]K, 0)
 	setVs := make(map[K]*layLruItem[V])
 	for _, key := range keys {
@@ -174,7 +107,7 @@ func (x *LayLRU[K, V]) GetBatchs(keys []K, fetch func(keys []K) (map[K]V, error)
 			if expires != 0 && expires > time.Now().UnixMilli() {
 				v.lock.Unlock()
 				x.target.IncrGetHit()
-				res = append(res, value)
+				res[key] = value
 				if err1 != nil {
 					once.Do(func() {
 						err = err1
@@ -207,27 +140,12 @@ func (x *LayLRU[K, V]) GetBatchs(keys []K, fetch func(keys []K) (map[K]V, error)
 		x.lock.Lock()
 		x.core.Add(key, v)
 		x.lock.Unlock()
-		res = append(res, val)
+		res[key] = val
 	}
 
 	return res, err
 }
 
-func (x *LayLRU[K, V]) SetBatch(data map[K]V) {
-	x.lock.Lock()
-	defer x.lock.Unlock()
-
-	for key, value := range data {
-		x.core.Add(key, &layLruItem[V]{value: value, expires: time.Now().Add(x.successTTL).UnixMilli()})
-	}
-}
-
-//func (x *LayLRU[K, V]) Set(key K, value V) {
-//	x.lock.Lock()
-//	x.core.Add(key, &layLruItem[V]{value: value, expires: time.Now().Add(x.successTTL).UnixMilli()})
-//	x.lock.Unlock()
-//}
-//
 //func (x *LayLRU[K, V]) Has(key K) bool {
 //	x.lock.Lock()
 //	defer x.lock.Unlock()

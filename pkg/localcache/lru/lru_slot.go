@@ -32,6 +32,29 @@ type slotLRU[K comparable, V any] struct {
 	hash  func(k K) uint64
 }
 
+func (x *slotLRU[K, V]) GetBatch(keys []K, fetch func(keys []K) (map[K]V, error)) (map[K]V, error) {
+	var (
+		slotKeys = make(map[uint64][]K)
+		vs       = make(map[K]V)
+	)
+
+	for _, k := range keys {
+		index := x.getIndex(k)
+		slotKeys[index] = append(slotKeys[index], k)
+	}
+
+	for k, v := range slotKeys {
+		batches, err := x.slots[k].GetBatch(v, fetch)
+		if err != nil {
+			return nil, err
+		}
+		for key, value := range batches {
+			vs[key] = value
+		}
+	}
+	return vs, nil
+}
+
 func (x *slotLRU[K, V]) getIndex(k K) uint64 {
 	return x.hash(k) % x.n
 }

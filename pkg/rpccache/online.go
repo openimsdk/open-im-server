@@ -205,29 +205,27 @@ func (o *OnlineCache) GetUserOnline(ctx context.Context, userID string) (bool, e
 	return len(platformIDs) > 0, nil
 }
 
-//func (o *OnlineCache) getUserOnlinePlatformBatch(ctx context.Context, userIDs []string) (map[string][]int32, error) {
-//	platformIDsMap, err := o.lruCache.GetBatch(userIDs, func(missingUsers []string) (map[string][]int32, error) {
-//		platformIDsMap := make(map[string][]int32)
-//
-//		usersStatus, err := o.user.GetUsersOnlinePlatform(ctx, missingUsers)
-//		if err != nil {
-//			return nil, err
-//		}
-//
-//		for _, user := range usersStatus {
-//			platformIDsMap[user.UserID] = user.PlatformIDs
-//		}
-//
-//		return platformIDsMap, nil
-//	})
-//	if err != nil {
-//		log.ZError(ctx, "OnlineCache GetUserOnlinePlatform", err, "userID", userIDs)
-//		return nil, err
-//	}
-//
-//	//log.ZDebug(ctx, "OnlineCache GetUserOnlinePlatform", "userID", userID, "platformIDs", platformIDs)
-//	return platformIDsMap, nil
-//}
+func (o *OnlineCache) getUserOnlinePlatformBatch(ctx context.Context, userIDs []string) (map[string][]int32, error) {
+	platformIDsMap, err := o.lruCache.GetBatch(userIDs, func(missingUsers []string) (map[string][]int32, error) {
+		platformIDsMap := make(map[string][]int32)
+
+		usersStatus, err := o.user.GetUsersOnlinePlatform(ctx, missingUsers)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, u := range usersStatus {
+			platformIDsMap[u.UserID] = u.PlatformIDs
+		}
+
+		return platformIDsMap, nil
+	})
+	if err != nil {
+		log.ZError(ctx, "OnlineCache GetUserOnlinePlatform", err, "userID", userIDs)
+		return nil, err
+	}
+	return platformIDsMap, nil
+}
 
 func (o *OnlineCache) GetUsersOnline(ctx context.Context, userIDs []string) ([]string, []string, error) {
 	t := time.Now()
@@ -236,19 +234,6 @@ func (o *OnlineCache) GetUsersOnline(ctx context.Context, userIDs []string) ([]s
 		onlineUserIDs  = make([]string, 0, len(userIDs))
 		offlineUserIDs = make([]string, 0, len(userIDs))
 	)
-
-	//userOnlineMap, err := o.getUserOnlinePlatformBatch(ctx, userIDs)
-	//if err != nil {
-	//	return nil, nil, err
-	//}
-	//
-	//for key, value := range userOnlineMap {
-	//	if len(value) > 0 {
-	//		onlineUserIDs = append(onlineUserIDs, key)
-	//	} else {
-	//		offlineUserIDs = append(offlineUserIDs, key)
-	//	}
-	//}
 
 	switch o.fullUserCache {
 	case true:
@@ -260,6 +245,18 @@ func (o *OnlineCache) GetUsersOnline(ctx context.Context, userIDs []string) ([]s
 			}
 		}
 	case false:
+		userOnlineMap, err := o.getUserOnlinePlatformBatch(ctx, userIDs)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		for key, value := range userOnlineMap {
+			if len(value) > 0 {
+				onlineUserIDs = append(onlineUserIDs, key)
+			} else {
+				offlineUserIDs = append(offlineUserIDs, key)
+			}
+		}
 	}
 
 	log.ZWarn(ctx, "get users online", nil, "online users length", len(userIDs), "offline users length", len(offlineUserIDs), "cost", time.Since(t))
