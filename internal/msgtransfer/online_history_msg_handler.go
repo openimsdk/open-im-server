@@ -237,6 +237,7 @@ func (och *OnlineHistoryRedisConsumerHandler) categorizeMessageLists(totalMsgs [
 }
 
 func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key, conversationID string, storageList, notStorageList []*ContextMsg) {
+	log.ZInfo(ctx, "handle storage msg")
 	for _, storageMsg := range storageList {
 		log.ZDebug(ctx, "handle storage msg", "msg", storageMsg.message.String())
 	}
@@ -253,6 +254,8 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 			log.ZError(ctx, "batch data insert to redis err", err, "storageMsgList", storageMessageList)
 			return
 		}
+		log.ZInfo(ctx, "BatchInsertChat2Cache end")
+
 		if isNewConversation {
 			switch msg.SessionType {
 			case constant.ReadGroupChatType:
@@ -263,6 +266,8 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 					log.ZWarn(ctx, "get group member ids error", err, "conversationID",
 						conversationID)
 				} else {
+					log.ZInfo(ctx, "GetGroupMemberIDs end")
+
 					if err := och.conversationRpcClient.GroupChatFirstCreateConversation(ctx,
 						msg.GroupID, userIDs); err != nil {
 						log.ZWarn(ctx, "single chat first create conversation error", err,
@@ -281,13 +286,16 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 			}
 		}
 
-		log.ZDebug(ctx, "success incr to next topic")
+		log.ZInfo(ctx, "success incr to next topic")
 		err = och.msgDatabase.MsgToMongoMQ(ctx, key, conversationID, storageMessageList, lastSeq)
 		if err != nil {
 			log.ZError(ctx, "Msg To MongoDB MQ error", err, "conversationID",
 				conversationID, "storageList", storageMessageList, "lastSeq", lastSeq)
 		}
+		log.ZInfo(ctx, "MsgToMongoMQ end")
+
 		och.toPushTopic(ctx, key, conversationID, storageList)
+		log.ZInfo(ctx, "toPushTopic end")
 	}
 }
 

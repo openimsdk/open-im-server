@@ -135,20 +135,27 @@ func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim s
 
 // Push2User Suitable for two types of conversations, one is SingleChatType and the other is NotificationChatType.
 func (c *ConsumerHandler) Push2User(ctx context.Context, userIDs []string, msg *sdkws.MsgData) (err error) {
-	log.ZDebug(ctx, "Get msg from msg_transfer And push msg", "userIDs", userIDs, "msg", msg.String())
+	log.ZInfo(ctx, "Get msg from msg_transfer And push msg", "userIDs", userIDs, "msg", msg.String())
+	defer func(duration time.Time) {
+		t := time.Since(duration)
+		log.ZInfo(ctx, "Get msg from msg_transfer And push msg", "msg", msg.String(), "time cost", t)
+	}(time.Now())
 	if err := c.webhookBeforeOnlinePush(ctx, &c.config.WebhooksConfig.BeforeOnlinePush, userIDs, msg); err != nil {
 		return err
 	}
+	log.ZInfo(ctx, "webhookBeforeOnlinePush end")
+
 	wsResults, err := c.GetConnsAndOnlinePush(ctx, msg, userIDs)
 	if err != nil {
 		return err
 	}
 
-	log.ZDebug(ctx, "single and notification push result", "result", wsResults, "msg", msg, "push_to_userID", userIDs)
+	log.ZInfo(ctx, "single and notification push result", "result", wsResults, "msg", msg, "push_to_userID", userIDs)
 
 	if !c.shouldPushOffline(ctx, msg) {
 		return nil
 	}
+	log.ZInfo(ctx, "shouldPushOffline end")
 
 	for _, v := range wsResults {
 		//message sender do not need offline push
@@ -167,7 +174,7 @@ func (c *ConsumerHandler) Push2User(ctx context.Context, userIDs []string, msg *
 		offlinePushUserID, msg, nil); err != nil {
 		return err
 	}
-
+	log.ZInfo(ctx, "webhookBeforeOfflinePush end")
 	err = c.offlinePushMsg(ctx, msg, offlinePushUserID)
 	if err != nil {
 		log.ZWarn(ctx, "offlinePushMsg failed", err, "offlinePushUserID", offlinePushUserID, "msg", msg)
@@ -267,7 +274,6 @@ func (c *ConsumerHandler) Push2Group(ctx context.Context, groupID string, msg *s
 			log.ZWarn(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg)
 			return nil
 		}
-
 	}
 
 	return nil
