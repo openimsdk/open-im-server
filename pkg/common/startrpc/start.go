@@ -55,17 +55,10 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 		"prometheusPorts", prometheusConfig.Ports)
 	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(listenIP), strconv.Itoa(rpcPort))
 
-	lc := createListener()
-	listener, err := lc.Listen(
-		ctx,
+	listener, err := net.Listen(
 		"tcp",
 		rpcTcpAddr,
 	)
-	if err != nil {
-		return errs.WrapMsg(err, "listen err", "rpcTcpAddr", rpcTcpAddr)
-	}
-
-	defer listener.Close()
 	client, err := kdisc.NewDiscoveryRegister(discovery, share)
 	if err != nil {
 		return err
