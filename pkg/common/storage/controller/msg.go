@@ -30,6 +30,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/protocol/constant"
 	pbmsg "github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -92,6 +93,7 @@ type CommonMsgDatabase interface {
 	// to mq
 	MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) error
 	MsgToPushMQ(ctx context.Context, key, conversationID string, msg2mq *sdkws.MsgData) (int32, int64, error)
+	MsgToOfflinePushMQ(ctx context.Context, key string, userIDs []string, msg2mq *sdkws.MsgData) error
 	MsgToMongoMQ(ctx context.Context, key, conversationID string, msgs []*sdkws.MsgData, lastSeq int64) error
 
 	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*model.UserCount, dateCount map[string]int64, err error)
@@ -122,26 +124,32 @@ func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUser 
 	if err != nil {
 		return nil, err
 	}
+	producerToOfflinePush, err := kafka.NewKafkaProducer(conf, kafkaConf.Address, kafkaConf.ToOfflinePushTopic)
+	if err != nil {
+		return nil, err
+	}
 	return &commonMsgDatabase{
-		msgDocDatabase:  msgDocModel,
-		msg:             msg,
-		seqUser:         seqUser,
-		seqConversation: seqConversation,
-		producer:        producerToRedis,
-		producerToMongo: producerToMongo,
-		producerToPush:  producerToPush,
+		msgDocDatabase:        msgDocModel,
+		msg:                   msg,
+		seqUser:               seqUser,
+		seqConversation:       seqConversation,
+		producer:              producerToRedis,
+		producerToMongo:       producerToMongo,
+		producerToPush:        producerToPush,
+		producerToOfflinePush: producerToOfflinePush,
 	}, nil
 }
 
 type commonMsgDatabase struct {
-	msgDocDatabase  database.Msg
-	msgTable        model.MsgDocModel
-	msg             cache.MsgCache
-	seqConversation cache.SeqConversationCache
-	seqUser         cache.SeqUser
-	producer        *kafka.Producer
-	producerToMongo *kafka.Producer
-	producerToPush  *kafka.Producer
+	msgDocDatabase        database.Msg
+	msgTable              model.MsgDocModel
+	msg                   cache.MsgCache
+	seqConversation       cache.SeqConversationCache
+	seqUser               cache.SeqUser
+	producer              *kafka.Producer
+	producerToMongo       *kafka.Producer
+	producerToPush        *kafka.Producer
+	producerToOfflinePush *kafka.Producer
 }
 
 func (db *commonMsgDatabase) MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) error {
@@ -156,6 +164,11 @@ func (db *commonMsgDatabase) MsgToPushMQ(ctx context.Context, key, conversationI
 		return 0, 0, err
 	}
 	return partition, offset, nil
+}
+
+func (db *commonMsgDatabase) MsgToOfflinePushMQ(ctx context.Context, key string, userIDs []string, msg2mq *sdkws.MsgData) error {
+	_, _, err := db.producerToOfflinePush.SendMessage(ctx, key, &push.PushMsgReq{MsgData: msg2mq, UserIDs: userIDs})
+	return err
 }
 
 func (db *commonMsgDatabase) MsgToMongoMQ(ctx context.Context, key, conversationID string, messages []*sdkws.MsgData, lastSeq int64) error {

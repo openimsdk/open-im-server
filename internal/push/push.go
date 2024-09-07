@@ -2,11 +2,14 @@ package push
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	pbpush "github.com/openimsdk/protocol/push"
+	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery"
 	"google.golang.org/grpc"
@@ -46,6 +49,10 @@ func (p pushServer) DelUserPushToken(ctx context.Context,
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
+	if err != nil {
+		return err
+	}
 	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
@@ -56,8 +63,28 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	database := controller.NewPushDatabase(cacheModel)
+	msgModel := redis.NewMsgCache(rdb)
+	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	seqConversation, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	seqConversationCache := redis.NewSeqConversationCacheRedis(rdb, seqConversation)
+	seqUser, err := mgo.NewSeqUserMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+	seqUserCache := redis.NewSeqUserCacheRedis(rdb, seqUser)
 
-	consumer, err := NewConsumerHandler(config, offlinePusher, rdb, client)
+	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, &config.KafkaConfig)
+	if err != nil {
+		return err
+	}
+
+	consumer, err := NewConsumerHandler(config, msgDatabase, offlinePusher, rdb, client)
 	if err != nil {
 		return err
 	}
