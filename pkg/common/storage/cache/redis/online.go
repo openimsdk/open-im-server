@@ -60,6 +60,7 @@ func (s *userOnline) GetAllOnlineUsers(ctx context.Context, cursor uint64) (map[
 	}
 
 	for _, key := range keys {
+		userID := cachekey.GetOnlineKeyUserID(key)
 		strValues, err := s.rdb.ZRange(ctx, key, 0, -1).Result()
 		if err != nil {
 			return nil, 0, err
@@ -74,7 +75,7 @@ func (s *userOnline) GetAllOnlineUsers(ctx context.Context, cursor uint64) (map[
 			values = append(values, int32(intValue))
 		}
 
-		result[key] = values
+		result[userID] = values
 	}
 
 	return result, nextCursor, nil
