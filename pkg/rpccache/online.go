@@ -81,10 +81,6 @@ type OnlineCache struct {
 
 func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) (err error) {
 	log.ZDebug(ctx, "init users online status begin")
-	defer func() {
-		o.CurrentPhase = DoOnlineStatusOver
-		o.Cond.Broadcast()
-	}()
 
 	var (
 		totalSet      atomic.Int64
@@ -96,6 +92,8 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) (err error) {
 
 	defer func(t time.Time) {
 		log.ZInfo(ctx, "init users online status end", "cost", time.Since(t), "totalSet", totalSet.Load())
+		o.CurrentPhase = DoOnlineStatusOver
+		o.Cond.Broadcast()
 	}(time.Now())
 
 	retryOperation := func(operation func() error, operationName string) error {
