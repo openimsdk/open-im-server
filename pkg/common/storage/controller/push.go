@@ -43,8 +43,10 @@ func NewPushDatabase(cache cache.ThirdCache, kafkaConf *config.Kafka) PushDataba
 	if err != nil {
 		return nil
 	}
-	return &pushDataBase{cache: cache,
-		producerToOfflinePush: producerToOfflinePush}
+	return &pushDataBase{
+		cache:                 cache,
+		producerToOfflinePush: producerToOfflinePush,
+	}
 }
 
 func (p *pushDataBase) DelFcmToken(ctx context.Context, userID string, platformID int) error {
