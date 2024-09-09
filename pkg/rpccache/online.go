@@ -32,16 +32,19 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 		Cond:          sync.NewCond(l),
 	}
 
+	ctx := mcontext.SetOperationID(context.TODO(), strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10))
+
 	switch x.fullUserCache {
 	case true:
+		log.ZDebug(ctx, "fullUserCache is true")
 		x.mapCache = cacheutil.NewCache[string, []int32]()
 		go func() {
-			ctx := mcontext.SetOperationID(context.TODO(), strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10))
 			if err := x.initUsersOnlineStatus(ctx); err != nil {
 				log.ZError(ctx, "initUsersOnlineStatus failed", err)
 			}
 		}()
 	case false:
+		log.ZDebug(ctx, "fullUserCache is false")
 		x.lruCache = lru.NewSlotLRU(1024, localcache.LRUStringHash, func() lru.LRU[string, []int32] {
 			return lru.NewLayLRU[string, []int32](2048, cachekey.OnlineExpire/2, time.Second*3, localcache.EmptyTarget{}, func(key string, value []int32) {})
 		})
