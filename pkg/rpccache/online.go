@@ -110,9 +110,10 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) (err error) {
 		return err
 	}
 
+	cursor := uint64(0)
 	for resp == nil || resp.NextCursor != 0 {
 		if err = retryOperation(func() error {
-			resp, err = o.user.GetAllOnlineUsers(ctx, 0)
+			resp, err = o.user.GetAllOnlineUsers(ctx, cursor)
 			if err != nil {
 				return err
 			}
@@ -123,6 +124,7 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) (err error) {
 				}
 				totalSet.Add(1)
 			}
+			cursor = resp.NextCursor
 			return nil
 		}, "getAllOnlineUsers"); err != nil {
 			return err
