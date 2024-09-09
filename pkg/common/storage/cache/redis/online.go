@@ -2,8 +2,10 @@ package redis
 
 import (
 	"context"
+	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
@@ -47,6 +49,35 @@ func (s *userOnline) GetOnline(ctx context.Context, userID string) ([]int32, err
 		platformIDs = append(platformIDs, int32(val))
 	}
 	return platformIDs, nil
+}
+
+func (s *userOnline) GetAllOnlineUsers(ctx context.Context, cursor uint64) (map[string][]int32, uint64, error) {
+	result := make(map[string][]int32)
+
+	keys, nextCursor, err := s.rdb.Scan(ctx, cursor, fmt.Sprintf("%s*", cachekey.OnlineKey), constant.ParamMaxLength).Result()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	for _, key := range keys {
+		strValues, err := s.rdb.ZRange(ctx, key, 0, -1).Result()
+		if err != nil {
+			return nil, 0, err
+		}
+
+		values := make([]int32, 0, len(strValues))
+		for _, value := range strValues {
+			intValue, err := strconv.Atoi(value)
+			if err != nil {
+				return nil, 0, errs.Wrap(err)
+			}
+			values = append(values, int32(intValue))
+		}
+
+		result[key] = values
+	}
+
+	return result, nextCursor, nil
 }
 
 func (s *userOnline) SetUserOnline(ctx context.Context, userID string, online, offline []int32) error {

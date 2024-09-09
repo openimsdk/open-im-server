@@ -224,3 +224,7 @@ func (u *UserRpcClient) GetUserOnlinePlatform(ctx context.Context, userID string
 	}
 	return resp[0].PlatformIDs, nil
 }
+
+func (u *UserRpcClient) GetAllOnlineUsers(ctx context.Context, cursor uint64) (*user.GetAllOnlineUsersResp, error) {
+	return u.Client.GetAllOnlineUsers(ctx, &user.GetAllOnlineUsersReq{Cursor: cursor})
+}

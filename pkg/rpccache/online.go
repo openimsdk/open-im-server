@@ -3,10 +3,11 @@ package rpccache
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/user"
-	"golang.org/x/sync/errgroup"
 	"math/rand"
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache/lru"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/useronline"
-	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/db/cacheutil"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
@@ -27,7 +27,7 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 		user:          user,
 		group:         group,
 		fullUserCache: fullUserCache,
-		initDone:      make(chan struct{}),
+		Cond:          sync.NewCond(&sync.Mutex{}),
 	}
 
 	switch x.fullUserCache {
@@ -43,38 +43,23 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 		x.lruCache = lru.NewSlotLRU(1024, localcache.LRUStringHash, func() lru.LRU[string, []int32] {
 			return lru.NewLayLRU[string, []int32](2048, cachekey.OnlineExpire/2, time.Second*3, localcache.EmptyTarget{}, func(key string, value []int32) {})
 		})
-		close(x.initDone)
+		x.CurrentPhase = DoSubscribeOver
+		x.Cond.Broadcast()
 	}
 
 	go func() {
-		ctx := mcontext.SetOperationID(context.Background(), cachekey.OnlineChannel+strconv.FormatUint(rand.Uint64(), 10))
-		for message := range rdb.Subscribe(ctx, cachekey.OnlineChannel).Channel() {
-			userID, platformIDs, err := useronline.ParseUserOnlineStatus(message.Payload)
-			if err != nil {
-				log.ZError(ctx, "OnlineCache setHasUserOnline redis subscribe parseUserOnlineStatus", err, "payload", message.Payload, "channel", message.Channel)
-				continue
-			}
-
-			switch x.fullUserCache {
-			case true:
-				if len(platformIDs) == 0 {
-					// offline
-					x.mapCache.Delete(userID)
-				} else {
-					x.mapCache.Store(userID, platformIDs)
-				}
-			case false:
-				storageCache := x.setHasUserOnline(userID, platformIDs)
-				log.ZDebug(ctx, "OnlineCache setHasUserOnline", "userID", userID, "platformIDs", platformIDs, "payload", message.Payload, "storageCache", storageCache)
-				if fn != nil {
-					fn(ctx, userID, platformIDs)
-				}
-			}
-
-		}
+		x.doSubscribe(rdb, fn)
 	}()
 	return x, nil
 }
+
+type initPhase int
+
+const (
+	Begin initPhase = iota
+	DoOnlineStatusOver
+	DoSubscribeOver
+)
 
 type OnlineCache struct {
 	user  rpcclient.UserRpcClient
@@ -86,83 +71,111 @@ type OnlineCache struct {
 
 	lruCache lru.LRU[string, []int32]
 	mapCache *cacheutil.Cache[string, []int32]
-	initDone chan struct{}
+
+	Cond         *sync.Cond
+	CurrentPhase initPhase
 }
 
-func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) error {
+func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) (err error) {
 	log.ZDebug(ctx, "init users online status begin")
 	defer func() {
-		close(o.initDone)
+		o.CurrentPhase = DoOnlineStatusOver
+		o.Cond.Broadcast()
 	}()
 
 	var (
 		totalSet      atomic.Int64
 		maxTries      = 5
 		retryInterval = time.Second * 5
-		gr, _         = errgroup.WithContext(ctx)
-	)
-	gr.SetLimit(10)
 
-	time.Sleep(time.Second * 10)
+		resp *user.GetAllOnlineUsersResp
+	)
 
 	defer func(t time.Time) {
 		log.ZInfo(ctx, "init users online status end", "cost", time.Since(t), "totalSet", totalSet.Load())
 	}(time.Now())
 
-	page := int32(1)
-	resp, err := o.user.GetAllUserID(ctx, page, constant.ParamMaxLength)
-	if err != nil {
+	retryOperation := func(operation func() error, operationName string) error {
+		for i := 0; i < maxTries; i++ {
+			if err = operation(); err != nil {
+				log.ZWarn(ctx, fmt.Sprintf("initUsersOnlineStatus: %s failed", operationName), err)
+				time.Sleep(retryInterval)
+			} else {
+				return nil
+			}
+		}
 		return err
 	}
-	for page = 2; (page-1)*constant.ParamMaxLength < resp.Total; page++ {
-		page := page
 
-		gr.Go(func() error {
-			var (
-				usersStatus    []*user.OnlineStatus
-				resp           *user.GetAllUserIDResp
-				err            error
-				retryOperation = func(operation func() error, operationName string) error {
-					for i := 0; i < maxTries; i++ {
-						if err = operation(); err != nil {
-							log.ZWarn(ctx, fmt.Sprintf("initUsersOnlineStatus: %s failed", operationName), err, "page", page, "retries", i+1)
-							time.Sleep(retryInterval)
-						} else {
-							return nil
-						}
-					}
-					return err
-				}
-			)
-
-			if err = retryOperation(func() error {
-				resp, err = o.user.GetAllUserID(ctx, page, constant.ParamMaxLength)
-				return err
-			}, "GetAllUserID"); err != nil {
+	for resp == nil || resp.NextCursor != 0 {
+		if err = retryOperation(func() error {
+			resp, err = o.user.GetAllOnlineUsers(ctx, 0)
+			if err != nil {
 				return err
 			}
 
-			if err = retryOperation(func() error {
-				usersStatus, err = o.user.GetUsersOnlinePlatform(ctx, resp.UserIDs)
-				return err
-			}, "GetUsersOnlinePlatform"); err != nil {
-				return err
-			}
-
-			for _, u := range usersStatus {
+			for _, u := range resp.StatusList {
 				if u.Status == constant.Online {
 					o.setUserOnline(u.UserID, u.PlatformIDs)
 				}
 				totalSet.Add(1)
 			}
 			return nil
-		})
+		}, "getAllOnlineUsers"); err != nil {
+			return err
+		}
+	}
 
-	}
-	if err = gr.Wait(); err != nil {
-		return err
-	}
 	return nil
+}
+
+func (o *OnlineCache) doSubscribe(rdb redis.UniversalClient, fn func(ctx context.Context, userID string, platformIDs []int32)) {
+	ctx := mcontext.SetOperationID(context.Background(), cachekey.OnlineChannel+strconv.FormatUint(rand.Uint64(), 10))
+	ch := rdb.Subscribe(ctx, cachekey.OnlineChannel).Channel()
+	for o.CurrentPhase < DoOnlineStatusOver {
+		o.Cond.Wait()
+	}
+
+	doMessage := func(message *redis.Message) {
+		userID, platformIDs, err := useronline.ParseUserOnlineStatus(message.Payload)
+		if err != nil {
+			log.ZError(ctx, "OnlineCache setHasUserOnline redis subscribe parseUserOnlineStatus", err, "payload", message.Payload, "channel", message.Channel)
+			return
+		}
+
+		switch o.fullUserCache {
+		case true:
+			if len(platformIDs) == 0 {
+				// offline
+				o.mapCache.Delete(userID)
+			} else {
+				o.mapCache.Store(userID, platformIDs)
+			}
+		case false:
+			storageCache := o.setHasUserOnline(userID, platformIDs)
+			log.ZDebug(ctx, "OnlineCache setHasUserOnline", "userID", userID, "platformIDs", platformIDs, "payload", message.Payload, "storageCache", storageCache)
+			if fn != nil {
+				fn(ctx, userID, platformIDs)
+			}
+		}
+	}
+
+	if o.CurrentPhase == DoOnlineStatusOver {
+		for done := false; !done; {
+			select {
+			case message := <-ch:
+				doMessage(message)
+			default:
+				o.CurrentPhase = DoSubscribeOver
+				o.Cond.Broadcast()
+				done = true
+			}
+		}
+	}
+
+	for message := range ch {
+		doMessage(message)
+	}
 }
 
 func (o *OnlineCache) getUserOnlinePlatform(ctx context.Context, userID string) ([]int32, error) {

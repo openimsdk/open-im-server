@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"github.com/openimsdk/tools/utils/datautil"
 
 	"github.com/openimsdk/protocol/constant"
 	pbuser "github.com/openimsdk/protocol/user"
@@ -80,4 +81,23 @@ func (s *userServer) SetUserOnlineStatus(ctx context.Context, req *pbuser.SetUse
 		}
 	}
 	return &pbuser.SetUserOnlineStatusResp{}, nil
+}
+
+func (s *userServer) GetAllOnlineUsers(ctx context.Context, req *pbuser.GetAllOnlineUsersReq) (*pbuser.GetAllOnlineUsersResp, error) {
+	resMap, nextCursor, err := s.online.GetAllOnlineUsers(ctx, req.Cursor)
+	if err != nil {
+		return nil, err
+	}
+	resp := &pbuser.GetAllOnlineUsersResp{
+		StatusList: make([]*pbuser.OnlineStatus, 0, len(resMap)),
+		NextCursor: nextCursor,
+	}
+	for userID, plats := range resMap {
+		resp.StatusList = append(resp.StatusList, &pbuser.OnlineStatus{
+			UserID:      userID,
+			Status:      int32(datautil.If(len(plats) > 0, constant.Online, constant.Offline)),
+			PlatformIDs: plats,
+		})
+	}
+	return resp, nil
 }
