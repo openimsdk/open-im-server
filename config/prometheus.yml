@@ -28,56 +28,59 @@ scrape_configs:
       - targets: [ internal_ip:20500 ]
   - job_name: openimserver-openim-api
     static_configs:
-      - targets: [ internal_ip:20502 ]
+      - targets: [ internal_ip:12002 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-msggateway
     static_configs:
-      - targets: [ internal_ip:20640 ]
+      - targets: [ internal_ip:12140 ]
+#      - targets: [ internal_ip:12140, internal_ip:12141, internal_ip:12142, internal_ip:12143, internal_ip:12144, internal_ip:12145, internal_ip:12146, internal_ip:12147, internal_ip:12148, internal_ip:12149, internal_ip:12150, internal_ip:12151, internal_ip:12152, internal_ip:12153, internal_ip:12154, internal_ip:12155 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-msgtransfer
     static_configs:
-      - targets: [ internal_ip:20600, internal_ip:20601, internal_ip:20602, internal_ip:20603 ]
+      - targets: [ internal_ip:12000, internal_ip:12001, internal_ip:12002, internal_ip:12003, internal_ip:12004, internal_ip:12005, internal_ip:12006, internal_ip:12007 ]
+#      - targets: [ internal_ip:12000, internal_ip:12001, internal_ip:12002, internal_ip:12003, internal_ip:12004, internal_ip:12005, internal_ip:12006, internal_ip:12007, internal_ip:12008, internal_ip:12009, internal_ip:12010, internal_ip:12011, internal_ip:12012, internal_ip:12013, internal_ip:12014, internal_ip:12015 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-push
     static_configs:
-      - targets: [ internal_ip:20670, internal_ip:20671, internal_ip:20672, internal_ip:20673]
+      - targets: [ internal_ip:12170, internal_ip:12171, internal_ip:12172, internal_ip:12173, internal_ip:12174, internal_ip:12175, internal_ip:12176, internal_ip:12177 ]
+#      - targets: [ internal_ip:12170, internal_ip:12171, internal_ip:12172, internal_ip:12173, internal_ip:12174, internal_ip:12175, internal_ip:12176, internal_ip:12177, internal_ip:12178, internal_ip:12179, internal_ip:12180, internal_ip:12181, internal_ip:12182, internal_ip:12183, internal_ip:12184, internal_ip:12185 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-auth
     static_configs:
-      - targets: [ internal_ip:20600 ]
+      - targets: [ internal_ip:12200 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-conversation
     static_configs:
-      - targets: [ internal_ip:20680 ]
+      - targets: [ internal_ip:12220 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-friend
     static_configs:
-      - targets: [ internal_ip:20620 ]
+      - targets: [ internal_ip:12240 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-group
     static_configs:
-      - targets: [ internal_ip:20650 ]
+      - targets: [ internal_ip:12260 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-msg
     static_configs:
-      - targets: [ internal_ip:20630 ]
+      - targets: [ internal_ip:12280 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-third
     static_configs:
-      - targets: [ internal_ip:20690 ]
+      - targets: [ internal_ip:12300 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-rpc-user
     static_configs:
-      - targets: [ internal_ip:20610 ]
+      - targets: [ internal_ip:12320 ]
         labels:
           namespace: default
