@@ -4,14 +4,17 @@ rpc:
   # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
   listenIP: 0.0.0.0
   # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
-  ports: [ 7080, 7081, 7082, 7083, 7084, 7085, 7086, 7087, 7088, 7089, 7090, 7091, 7092, 7093, 7094, 7095 ]
+  ports: [ 10130 ]
 
 prometheus:
   # Enable or disable Prometheus monitoring
   enable: true
   # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
-  ports: [ 9080, 9081, 9082, 9083, 9084, 9085, 9086, 9087, 9088, 9089, 9090, 9091, 9092, 9093, 9094, 9095 ]
+  ports: [ 20630 ]
 
 
 # Does sending messages require friend verification
 friendVerify: false
+
+
+

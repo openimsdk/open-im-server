@@ -26,77 +26,58 @@ scrape_configs:
   - job_name: node_exporter
     static_configs:
       - targets: [ internal_ip:20500 ]
-
   - job_name: openimserver-openim-api
     static_configs:
-      - targets: [internal_ip:10012]
+      - targets: [ internal_ip:20502 ]
         labels:
           namespace: default
-
   - job_name: openimserver-openim-msggateway
     static_configs:
-      - targets: [ internal_ip:8000 ]
-#      - targets: [ internal_ip:8000, internal_ip:8001, internal_ip:8002, internal_ip:8003, internal_ip:8004, internal_ip:8005, internal_ip:8006, internal_ip:8007 ]
+      - targets: [ internal_ip:20640 ]
         labels:
           namespace: default
-
   - job_name: openimserver-openim-msgtransfer
     static_configs:
-      - targets: [ internal_ip:8100, internal_ip:8101, internal_ip:8102, internal_ip:8103, internal_ip:8104, internal_ip:8105, internal_ip:8106, internal_ip:8107 ]
-#      - targets: [ internal_ip:8100, internal_ip:8101, internal_ip:8102, internal_ip:8103, internal_ip:8104, internal_ip:8105, internal_ip:8106, internal_ip:8107, internal_ip:8108, internal_ip:8109, internal_ip:8110, internal_ip:8111, internal_ip:8112, internal_ip:8113, internal_ip:8114, internal_ip:8115 ]
+      - targets: [ internal_ip:20600, internal_ip:20601, internal_ip:20602, internal_ip:20603 ]
         labels:
           namespace: default
-
   - job_name: openimserver-openim-push
     static_configs:
-      - targets: [ internal_ip:8050, internal_ip:8051, internal_ip:8052, internal_ip:8053, internal_ip:8054, internal_ip:8055, internal_ip:8056, internal_ip:8057 ]
-#      - targets: [ internal_ip:8050, internal_ip:8051, internal_ip:8052, internal_ip:8053, internal_ip:8054, internal_ip:8055, internal_ip:8056, internal_ip:8057, internal_ip:8058, internal_ip:8059, internal_ip:8060, internal_ip:8061, internal_ip:8062, internal_ip:8063, internal_ip:8064, internal_ip:8065 ]
+      - targets: [ internal_ip:20670, internal_ip:20671, internal_ip:20672, internal_ip:20673]
         labels:
           namespace: default
-
   - job_name: openimserver-openim-rpc-auth
     static_configs:
-      - targets: [ internal_ip:9000 ]
+      - targets: [ internal_ip:20600 ]
         labels:
           namespace: default
-
   - job_name: openimserver-openim-rpc-conversation
     static_configs:
-      - targets: [ internal_ip:9020]
+      - targets: [ internal_ip:20680 ]
         labels:
           namespace: default
-
   - job_name: openimserver-openim-rpc-friend
     static_configs:
-      - targets: [ internal_ip:9040 ]
-#      - targets: [ internal_ip:9040, internal_ip:9041, internal_ip:9042, internal_ip:9043, internal_ip:9044, internal_ip:9045, internal_ip:9046, internal_ip:9047, internal_ip:9048, internal_ip:9049, internal_ip:9050, internal_ip:9051, internal_ip:9052, internal_ip:9053, internal_ip:9054, internal_ip:9055 ]
+      - targets: [ internal_ip:20620 ]
         labels:
           namespace: default
-
   - job_name: openimserver-openim-rpc-group
     static_configs:
-      - targets: [ internal_ip:9060 ]
-#      - targets: [ internal_ip:9060, internal_ip:9061, internal_ip:9062, internal_ip:9063, internal_ip:9064, internal_ip:9065, internal_ip:9066, internal_ip:9067, internal_ip:9068, internal_ip:9069, internal_ip:9070, internal_ip:9071, internal_ip:9072, internal_ip:9073, internal_ip:9074, internal_ip:9075 ]
+      - targets: [ internal_ip:20650 ]
         labels:
           namespace: default
-
   - job_name: openimserver-openim-rpc-msg
     static_configs:
-      - targets: [ internal_ip:9080 ]
-#      - targets: [ internal_ip:9080, internal_ip:9081, internal_ip:9082, internal_ip:9083, internal_ip:9084, internal_ip:9085, internal_ip:9086, internal_ip:9087, internal_ip:9088, internal_ip:9089, internal_ip:9090, internal_ip:9091, internal_ip:9092, internal_ip:9093, internal_ip:9094, internal_ip:9095 ]
+      - targets: [ internal_ip:20630 ]
         labels:
           namespace: default
-
   - job_name: openimserver-openim-rpc-third
     static_configs:
-      - targets: [ internal_ip:9100 ]
-#      - targets: [ internal_ip:9100, internal_ip:9101, internal_ip:9102, internal_ip:9103, internal_ip:9104, internal_ip:9105, internal_ip:9106, internal_ip:9107, internal_ip:9108, internal_ip:9109, internal_ip:9110, internal_ip:9111, internal_ip:9112, internal_ip:9113, internal_ip:9114, internal_ip:9115 ]
+      - targets: [ internal_ip:20690 ]
         labels:
           namespace: default
-
   - job_name: openimserver-openim-rpc-user
     static_configs:
-      - targets: [ internal_ip:9120 ]
-#      - targets: [ internal_ip:9120, internal_ip:9121, internal_ip:9122, internal_ip:9123, internal_ip:9124, internal_ip:9125, internal_ip:9126, internal_ip:9127, internal_ip:9128, internal_ip:9129, internal_ip:9130, internal_ip:9131, internal_ip:9132, internal_ip:9133, internal_ip:9134, internal_ip:9135 ]
+      - targets: [ internal_ip:20610 ]
         labels:
           namespace: default

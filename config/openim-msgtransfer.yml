@@ -3,4 +3,4 @@ prometheus:
   enable: true
   # List of ports that Prometheus listens on; each port corresponds to an instance of monitoring. Ensure these are managed accordingly
   # Because four instances have been launched, four ports need to be specified
-  ports: [ 8100, 8101, 8102, 8103, 8104, 8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115 ]
+  ports: [ 20600, 20601, 20602, 20603 ]
