@@ -23,11 +23,13 @@ import (
 )
 
 func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb redis.UniversalClient, fullUserCache bool, fn func(ctx context.Context, userID string, platformIDs []int32)) (*OnlineCache, error) {
+	l := &sync.Mutex{}
 	x := &OnlineCache{
 		user:          user,
 		group:         group,
 		fullUserCache: fullUserCache,
-		Cond:          sync.NewCond(&sync.Mutex{}),
+		Lock:          l,
+		Cond:          sync.NewCond(l),
 	}
 
 	switch x.fullUserCache {
@@ -72,6 +74,7 @@ type OnlineCache struct {
 	lruCache lru.LRU[string, []int32]
 	mapCache *cacheutil.Cache[string, []int32]
 
+	Lock         *sync.Mutex
 	Cond         *sync.Cond
 	CurrentPhase initPhase
 }
@@ -131,10 +134,12 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) (err error) {
 
 func (o *OnlineCache) doSubscribe(rdb redis.UniversalClient, fn func(ctx context.Context, userID string, platformIDs []int32)) {
 	ctx := mcontext.SetOperationID(context.Background(), cachekey.OnlineChannel+strconv.FormatUint(rand.Uint64(), 10))
+	o.Lock.Lock()
 	ch := rdb.Subscribe(ctx, cachekey.OnlineChannel).Channel()
 	for o.CurrentPhase < DoOnlineStatusOver {
 		o.Cond.Wait()
 	}
+	o.Lock.Unlock()
 
 	doMessage := func(message *redis.Message) {
 		userID, platformIDs, err := useronline.ParseUserOnlineStatus(message.Payload)

@@ -125,9 +125,11 @@ func (*ConsumerHandler) Setup(sarama.ConsumerGroupSession) error { return nil }
 func (*ConsumerHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil }
 
 func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	c.onlineCache.Lock.Lock()
 	for c.onlineCache.CurrentPhase < rpccache.DoSubscribeOver {
 		c.onlineCache.Cond.Wait()
 	}
+	c.onlineCache.Lock.Unlock()
 	for msg := range claim.Messages() {
 		ctx := c.pushConsumerGroup.GetContextFromMsg(msg)
 		c.handleMs2PsChat(ctx, msg.Value)
