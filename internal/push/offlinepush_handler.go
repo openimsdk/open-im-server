@@ -10,6 +10,7 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	pbpush "github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/utils/jsonutil"
@@ -49,13 +50,15 @@ func (o *OfflinePushConsumerHandler) handleMsg2OfflinePush(ctx context.Context, 
 		log.ZError(ctx, "offline push Unmarshal msg err", err, "msg", string(msg))
 		return
 	}
-	if offlinePushMsg.MsgData == nil && offlinePushMsg.UserIDs == nil {
-		log.ZInfo(ctx, "receive to OfflinePush MQ", "userIDs", offlinePushMsg.UserIDs, "msg", offlinePushMsg.MsgData)
+	if offlinePushMsg.MsgData == nil || offlinePushMsg.UserIDs == nil {
+		log.ZError(ctx, "offline push msg is empty", errs.New("offlinePushMsg is empty"), "userIDs", offlinePushMsg.UserIDs, "msg", offlinePushMsg.MsgData)
+		return
+	}
+	log.ZInfo(ctx, "receive to OfflinePush MQ", "userIDs", offlinePushMsg.UserIDs, "msg", offlinePushMsg.MsgData)
 
-		err := o.offlinePushMsg(ctx, offlinePushMsg.MsgData, offlinePushMsg.UserIDs)
-		if err != nil {
-			log.ZWarn(ctx, "offline push failed", err, "msg", offlinePushMsg.String())
-		}
+	err := o.offlinePushMsg(ctx, offlinePushMsg.MsgData, offlinePushMsg.UserIDs)
+	if err != nil {
+		log.ZWarn(ctx, "offline push failed", err, "msg", offlinePushMsg.String())
 	}
 }
 
