@@ -53,7 +53,7 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 	}
 
 	go func() {
-		x.doSubscribe(rdb, fn)
+		x.doSubscribe(ctx, rdb, fn)
 	}()
 	return x, nil
 }
@@ -135,8 +135,7 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) (err error) {
 	return nil
 }
 
-func (o *OnlineCache) doSubscribe(rdb redis.UniversalClient, fn func(ctx context.Context, userID string, platformIDs []int32)) {
-	ctx := mcontext.SetOperationID(context.Background(), cachekey.OnlineChannel+strconv.FormatUint(rand.Uint64(), 10))
+func (o *OnlineCache) doSubscribe(ctx context.Context, rdb redis.UniversalClient, fn func(ctx context.Context, userID string, platformIDs []int32)) {
 	o.Lock.Lock()
 	ch := rdb.Subscribe(ctx, cachekey.OnlineChannel).Channel()
 	for o.CurrentPhase < DoOnlineStatusOver {
