@@ -143,6 +143,7 @@ func (o *OnlineCache) doSubscribe(rdb redis.UniversalClient, fn func(ctx context
 		o.Cond.Wait()
 	}
 	o.Lock.Unlock()
+	log.ZInfo(ctx, "begin doSubscribe")
 
 	doMessage := func(message *redis.Message) {
 		userID, platformIDs, err := useronline.ParseUserOnlineStatus(message.Payload)
@@ -150,7 +151,7 @@ func (o *OnlineCache) doSubscribe(rdb redis.UniversalClient, fn func(ctx context
 			log.ZError(ctx, "OnlineCache setHasUserOnline redis subscribe parseUserOnlineStatus", err, "payload", message.Payload, "channel", message.Channel)
 			return
 		}
-
+		log.ZDebug(ctx, fmt.Sprintf("get subscribe %s message", cachekey.OnlineChannel), "useID", userID, "platformIDs", platformIDs)
 		switch o.fullUserCache {
 		case true:
 			if len(platformIDs) == 0 {
@@ -280,7 +281,7 @@ func (o *OnlineCache) GetUsersOnline(ctx context.Context, userIDs []string) ([]s
 		}
 	}
 
-	log.ZWarn(ctx, "get users online", nil, "online users length", len(userIDs), "offline users length", len(offlineUserIDs), "cost", time.Since(t))
+	log.ZInfo(ctx, "get users online", nil, "online users length", len(userIDs), "offline users length", len(offlineUserIDs), "cost", time.Since(t))
 	return userIDs, offlineUserIDs, nil
 }
 
