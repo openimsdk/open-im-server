@@ -18,6 +18,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/IBM/sarama"
 	"github.com/go-redis/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -33,9 +37,6 @@ import (
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"google.golang.org/protobuf/proto"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const (
@@ -56,19 +57,19 @@ type OnlineHistoryRedisConsumerHandler struct {
 
 	redisMessageBatches *batcher.Batcher[sarama.ConsumerMessage]
 
-	msgDatabase           controller.CommonMsgDatabase
+	msgTransferDatabase   controller.MsgTransferDatabase
 	conversationRpcClient *rpcclient.ConversationRpcClient
 	groupRpcClient        *rpcclient.GroupRpcClient
 }
 
-func NewOnlineHistoryRedisConsumerHandler(kafkaConf *config.Kafka, database controller.CommonMsgDatabase,
+func NewOnlineHistoryRedisConsumerHandler(kafkaConf *config.Kafka, database controller.MsgTransferDatabase,
 	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) (*OnlineHistoryRedisConsumerHandler, error) {
 	historyConsumerGroup, err := kafka.NewMConsumerGroup(kafkaConf.Build(), kafkaConf.ToRedisGroupID, []string{kafkaConf.ToRedisTopic}, false)
 	if err != nil {
 		return nil, err
 	}
 	var och OnlineHistoryRedisConsumerHandler
-	och.msgDatabase = database
+	och.msgTransferDatabase = database
 
 	b := batcher.New[sarama.ConsumerMessage](
 		batcher.WithSize(size),
@@ -97,7 +98,7 @@ func (och *OnlineHistoryRedisConsumerHandler) do(ctx context.Context, channelID 
 	ctx = mcontext.WithTriggerIDContext(ctx, val.TriggerID())
 	ctxMessages := och.parseConsumerMessages(ctx, val.Val())
 	ctx = withAggregationCtx(ctx, ctxMessages)
-	log.ZDebug(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMessages),
+	log.ZInfo(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMessages),
 		"key", val.Key())
 	och.doSetReadSeq(ctx, ctxMessages)
 
@@ -161,7 +162,7 @@ func (och *OnlineHistoryRedisConsumerHandler) doSetReadSeq(ctx context.Context, 
 		return
 	}
 	for key, seq := range readSeq {
-		if err := och.msgDatabase.SetHasReadSeqToDB(ctx, key.userID, key.conversationID, seq); err != nil {
+		if err := och.msgTransferDatabase.SetHasReadSeqToDB(ctx, key.userID, key.conversationID, seq); err != nil {
 			log.ZError(ctx, "set read seq to db error", err, "userID", key.userID, "conversationID", key.conversationID, "seq", seq)
 		}
 	}
@@ -249,7 +250,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 	}
 	if len(storageMessageList) > 0 {
 		msg := storageMessageList[0]
-		lastSeq, isNewConversation, err := och.msgDatabase.BatchInsertChat2Cache(ctx, conversationID, storageMessageList)
+		lastSeq, isNewConversation, err := och.msgTransferDatabase.BatchInsertChat2Cache(ctx, conversationID, storageMessageList)
 		if err != nil && !errors.Is(errs.Unwrap(err), redis.Nil) {
 			log.ZError(ctx, "batch data insert to redis err", err, "storageMsgList", storageMessageList)
 			return
@@ -287,7 +288,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 		}
 
 		log.ZInfo(ctx, "success incr to next topic")
-		err = och.msgDatabase.MsgToMongoMQ(ctx, key, conversationID, storageMessageList, lastSeq)
+		err = och.msgTransferDatabase.MsgToMongoMQ(ctx, key, conversationID, storageMessageList, lastSeq)
 		if err != nil {
 			log.ZError(ctx, "Msg To MongoDB MQ error", err, "conversationID",
 				conversationID, "storageList", storageMessageList, "lastSeq", lastSeq)
@@ -307,14 +308,14 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Con
 		storageMessageList = append(storageMessageList, msg.message)
 	}
 	if len(storageMessageList) > 0 {
-		lastSeq, _, err := och.msgDatabase.BatchInsertChat2Cache(ctx, conversationID, storageMessageList)
+		lastSeq, _, err := och.msgTransferDatabase.BatchInsertChat2Cache(ctx, conversationID, storageMessageList)
 		if err != nil {
 			log.ZError(ctx, "notification batch insert to redis error", err, "conversationID", conversationID,
 				"storageList", storageMessageList)
 			return
 		}
 		log.ZDebug(ctx, "success to next topic", "conversationID", conversationID)
-		err = och.msgDatabase.MsgToMongoMQ(ctx, key, conversationID, storageMessageList, lastSeq)
+		err = och.msgTransferDatabase.MsgToMongoMQ(ctx, key, conversationID, storageMessageList, lastSeq)
 		if err != nil {
 			log.ZError(ctx, "Msg To MongoDB MQ error", err, "conversationID",
 				conversationID, "storageList", storageMessageList, "lastSeq", lastSeq)
@@ -326,7 +327,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Con
 func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(ctx context.Context, key, conversationID string, msgs []*ContextMsg) {
 	for _, v := range msgs {
 		log.ZDebug(ctx, "push msg to topic", "msg", v.message.String())
-		och.msgDatabase.MsgToPushMQ(v.ctx, key, conversationID, v.message)
+		_, _, _ = och.msgTransferDatabase.MsgToPushMQ(v.ctx, key, conversationID, v.message)
 	}
 }
 

@@ -106,7 +106,7 @@ func (m *msgServer) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq
 			pullMsgs, ok = resp.Msgs[conv.ConversationID]
 			if !ok {
 				pullMsgs = &sdkws.PullMsgs{}
-				resp.NotificationMsgs[conv.ConversationID] = pullMsgs
+				resp.Msgs[conv.ConversationID] = pullMsgs
 			}
 		}
 		pullMsgs.Msgs = append(pullMsgs.Msgs, msgs...)
@@ -131,6 +131,12 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 	if err != nil {
 		log.ZWarn(ctx, "GetMaxSeqs error", err, "conversationIDs", conversationIDs, "maxSeqs", maxSeqs)
 		return nil, err
+	}
+	// avoid pulling messages from sessions with a large number of max seq values of 0
+	for conversationID, seq := range maxSeqs {
+		if seq == 0 {
+			delete(maxSeqs, conversationID)
+		}
 	}
 	resp := new(sdkws.GetMaxSeqResp)
 	resp.MaxSeqs = maxSeqs
