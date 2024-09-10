@@ -132,6 +132,12 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 		log.ZWarn(ctx, "GetMaxSeqs error", err, "conversationIDs", conversationIDs, "maxSeqs", maxSeqs)
 		return nil, err
 	}
+	// avoid pulling messages from sessions with a large number of max seq values of 0
+	for conversationID, seq := range maxSeqs {
+		if seq == 0 {
+			delete(maxSeqs, conversationID)
+		}
+	}
 	resp := new(sdkws.GetMaxSeqResp)
 	resp.MaxSeqs = maxSeqs
 	return resp, nil
