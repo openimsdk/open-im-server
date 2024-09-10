@@ -111,6 +111,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
+
 	msgTransfer := &MsgTransfer{
 		historyCH:      historyCH,
 		historyMongoCH: historyMongoCH,

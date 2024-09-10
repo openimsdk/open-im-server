@@ -35,8 +35,8 @@ done
 echo "Kafka is ready. Creating topics..."
 
 
-topics=("toRedis" "toMongo" "toPush")
-partitions=16
+topics=("toRedis" "toMongo" "toPush" "toOfflinePush")
+partitions=8
 replicationFactor=1
 
 for topic in "${topics[@]}"; do
