@@ -16,6 +16,7 @@ package msgtransfer
 
 import (
 	"context"
+
 	"github.com/IBM/sarama"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -28,10 +29,10 @@ import (
 
 type OnlineHistoryMongoConsumerHandler struct {
 	historyConsumerGroup *kafka.MConsumerGroup
-	msgDatabase          controller.CommonMsgDatabase
+	msgTransferDatabase  controller.MsgTransferDatabase
 }
 
-func NewOnlineHistoryMongoConsumerHandler(kafkaConf *config.Kafka, database controller.CommonMsgDatabase) (*OnlineHistoryMongoConsumerHandler, error) {
+func NewOnlineHistoryMongoConsumerHandler(kafkaConf *config.Kafka, database controller.MsgTransferDatabase) (*OnlineHistoryMongoConsumerHandler, error) {
 	historyConsumerGroup, err := kafka.NewMConsumerGroup(kafkaConf.Build(), kafkaConf.ToMongoGroupID, []string{kafkaConf.ToMongoTopic}, true)
 	if err != nil {
 		return nil, err
@@ -39,7 +40,7 @@ func NewOnlineHistoryMongoConsumerHandler(kafkaConf *config.Kafka, database cont
 
 	mc := &OnlineHistoryMongoConsumerHandler{
 		historyConsumerGroup: historyConsumerGroup,
-		msgDatabase:          database,
+		msgTransferDatabase:  database,
 	}
 	return mc, nil
 }
@@ -57,7 +58,7 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Cont
 		return
 	}
 	log.ZInfo(ctx, "mongo consumer recv msg", "msgs", msgFromMQ.String())
-	err = mc.msgDatabase.BatchInsertChat2DB(ctx, msgFromMQ.ConversationID, msgFromMQ.MsgData, msgFromMQ.LastSeq)
+	err = mc.msgTransferDatabase.BatchInsertChat2DB(ctx, msgFromMQ.ConversationID, msgFromMQ.MsgData, msgFromMQ.LastSeq)
 	if err != nil {
 		log.ZError(
 			ctx,
@@ -76,7 +77,7 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Cont
 	for _, msg := range msgFromMQ.MsgData {
 		seqs = append(seqs, msg.Seq)
 	}
-	err = mc.msgDatabase.DeleteMessagesFromCache(ctx, msgFromMQ.ConversationID, seqs)
+	err = mc.msgTransferDatabase.DeleteMessagesFromCache(ctx, msgFromMQ.ConversationID, seqs)
 	if err != nil {
 		log.ZError(
 			ctx,
