@@ -49,11 +49,14 @@ func (o *OfflinePushConsumerHandler) handleMsg2OfflinePush(ctx context.Context, 
 		log.ZError(ctx, "offline push Unmarshal msg err", err, "msg", string(msg))
 		return
 	}
-	err := o.offlinePushMsg(ctx, offlinePushMsg.MsgData, offlinePushMsg.UserIDs)
-	if err != nil {
-		log.ZWarn(ctx, "offline push failed", err, "msg", offlinePushMsg.String())
-	}
+	if offlinePushMsg.MsgData == nil && offlinePushMsg.UserIDs == nil {
+		log.ZInfo(ctx, "receive to OfflinePush MQ", "userIDs", offlinePushMsg.UserIDs, "msg", offlinePushMsg.MsgData)
 
+		err := o.offlinePushMsg(ctx, offlinePushMsg.MsgData, offlinePushMsg.UserIDs)
+		if err != nil {
+			log.ZWarn(ctx, "offline push failed", err, "msg", offlinePushMsg.String())
+		}
+	}
 }
 
 func (c *OfflinePushConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (title, content string, opts *options.Opts, err error) {
