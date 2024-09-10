@@ -18,6 +18,7 @@ type pushServer struct {
 	disCov        discovery.SvcDiscoveryRegistry
 	offlinePusher offlinepush.OfflinePusher
 	pushCh        *ConsumerHandler
+	offlinePushCh *OfflinePushConsumerHandler
 }
 
 type Config struct {
@@ -55,18 +56,30 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+
 	database := controller.NewPushDatabase(cacheModel, &config.KafkaConfig)
 
 	consumer, err := NewConsumerHandler(config, database, offlinePusher, rdb, client)
 	if err != nil {
 		return err
 	}
+
+	offlinePushConsumer, err := NewOfflinePushConsumerHandler(config)
+	if err != nil {
+		return err
+	}
+
 	pbpush.RegisterPushMsgServiceServer(server, &pushServer{
 		database:      database,
 		disCov:        client,
 		offlinePusher: offlinePusher,
 		pushCh:        consumer,
+		offlinePushCh: offlinePushConsumer,
 	})
+
 	go consumer.pushConsumerGroup.RegisterHandleAndConsumer(ctx, consumer)
+
+	go offlinePushConsumer.OfflinePushConsumerGroup.RegisterHandleAndConsumer(ctx, offlinePushConsumer)
+
 	return nil
 }

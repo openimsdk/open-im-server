@@ -49,7 +49,7 @@ func NewConsumerHandler(config *Config, database controller.PushDatabase, offlin
 	var consumerHandler ConsumerHandler
 	var err error
 	consumerHandler.pushConsumerGroup, err = kafka.NewMConsumerGroup(config.KafkaConfig.Build(), config.KafkaConfig.ToPushGroupID,
-		[]string{config.KafkaConfig.ToPushTopic, config.KafkaConfig.ToOfflinePushTopic}, true)
+		[]string{config.KafkaConfig.ToPushTopic}, true)
 	if err != nil {
 		return nil, err
 	}
@@ -103,19 +103,6 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 	}
 }
 
-func (c *ConsumerHandler) handleMsg2OfflinePush(ctx context.Context, msg []byte) {
-	offlinePushMsg := pbpush.PushMsgReq{}
-	if err := proto.Unmarshal(msg, &offlinePushMsg); err != nil {
-		log.ZError(ctx, "offline push Unmarshal msg err", err, "msg", string(msg))
-		return
-	}
-	err := c.offlinePushMsg(ctx, offlinePushMsg.MsgData, offlinePushMsg.UserIDs)
-	if err != nil {
-		log.ZWarn(ctx, "offline push failed", err, "msg", offlinePushMsg.String())
-	}
-
-}
-
 func (*ConsumerHandler) Setup(sarama.ConsumerGroupSession) error { return nil }
 
 func (*ConsumerHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil }
@@ -123,12 +110,7 @@ func (*ConsumerHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil 
 func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		ctx := c.pushConsumerGroup.GetContextFromMsg(msg)
-		switch msg.Topic {
-		case c.config.KafkaConfig.ToPushTopic:
-			c.handleMs2PsChat(ctx, msg.Value)
-		case c.config.KafkaConfig.ToOfflinePushTopic:
-			c.handleMsg2OfflinePush(ctx, msg.Value)
-		}
+		c.handleMs2PsChat(ctx, msg.Value)
 		sess.MarkMessage(msg, "")
 	}
 	return nil
