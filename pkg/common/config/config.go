@@ -73,18 +73,21 @@ type Mongo struct {
 	MaxRetry    int      `mapstructure:"maxRetry"`
 }
 type Kafka struct {
-	Username       string    `mapstructure:"username"`
-	Password       string    `mapstructure:"password"`
-	ProducerAck    string    `mapstructure:"producerAck"`
-	CompressType   string    `mapstructure:"compressType"`
-	Address        []string  `mapstructure:"address"`
-	ToRedisTopic   string    `mapstructure:"toRedisTopic"`
-	ToMongoTopic   string    `mapstructure:"toMongoTopic"`
-	ToPushTopic    string    `mapstructure:"toPushTopic"`
-	ToRedisGroupID string    `mapstructure:"toRedisGroupID"`
-	ToMongoGroupID string    `mapstructure:"toMongoGroupID"`
-	ToPushGroupID  string    `mapstructure:"toPushGroupID"`
-	Tls            TLSConfig `mapstructure:"tls"`
+	Username           string   `mapstructure:"username"`
+	Password           string   `mapstructure:"password"`
+	ProducerAck        string   `mapstructure:"producerAck"`
+	CompressType       string   `mapstructure:"compressType"`
+	Address            []string `mapstructure:"address"`
+	ToRedisTopic       string   `mapstructure:"toRedisTopic"`
+	ToMongoTopic       string   `mapstructure:"toMongoTopic"`
+	ToPushTopic        string   `mapstructure:"toPushTopic"`
+	ToOfflinePushTopic string   `mapstructure:"toOfflinePushTopic"`
+	ToRedisGroupID     string   `mapstructure:"toRedisGroupID"`
+	ToMongoGroupID     string   `mapstructure:"toMongoGroupID"`
+	ToPushGroupID      string   `mapstructure:"toPushGroupID"`
+	ToOfflineGroupID   string   `mapstructure:"toOfflinePushGroupID"`
+
+	Tls TLSConfig `mapstructure:"tls"`
 }
 type TLSConfig struct {
 	EnableTLS          bool   `mapstructure:"enableTLS"`
