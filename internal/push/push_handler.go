@@ -276,7 +276,7 @@ func (c *ConsumerHandler) asyncOfflinePush(ctx context.Context, needOfflinePushU
 	if err := c.pushDatabase.MsgToOfflinePushMQ(ctx, conversationutil.GenConversationUniqueKeyForSingle(msg.SendID, msg.RecvID), needOfflinePushUserIDs, msg); err != nil {
 		log.ZError(ctx, "Msg To OfflinePush MQ error", err, "needOfflinePushUserIDs",
 			needOfflinePushUserIDs, "msg", msg)
-		// prommetrics.SingleChatMsgProcessFailedCounter.Inc()
+		prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 		return
 	}
 }
