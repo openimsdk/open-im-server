@@ -22,9 +22,10 @@ type OfflinePushConsumerHandler struct {
 	offlinePusher            offlinepush.OfflinePusher
 }
 
-func NewOfflinePushConsumerHandler(config *Config) (*OfflinePushConsumerHandler, error) {
+func NewOfflinePushConsumerHandler(config *Config, offlinePusher offlinepush.OfflinePusher) (*OfflinePushConsumerHandler, error) {
 	var offlinePushConsumerHandler OfflinePushConsumerHandler
 	var err error
+	offlinePushConsumerHandler.offlinePusher = offlinePusher
 	offlinePushConsumerHandler.OfflinePushConsumerGroup, err = kafka.NewMConsumerGroup(config.KafkaConfig.Build(), config.KafkaConfig.ToOfflineGroupID,
 		[]string{config.KafkaConfig.ToOfflinePushTopic}, true)
 	if err != nil {
