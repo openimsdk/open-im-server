@@ -48,7 +48,7 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 		x.lruCache = lru.NewSlotLRU(1024, localcache.LRUStringHash, func() lru.LRU[string, []int32] {
 			return lru.NewLayLRU[string, []int32](2048, cachekey.OnlineExpire/2, time.Second*3, localcache.EmptyTarget{}, func(key string, value []int32) {})
 		})
-		x.CurrentPhase = DoSubscribeOver
+		x.CurrentPhase.Store(DoSubscribeOver)
 		x.Cond.Broadcast()
 	}
 
@@ -58,10 +58,8 @@ func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb re
 	return x, nil
 }
 
-type initPhase int
-
 const (
-	Begin initPhase = iota
+	Begin uint32 = iota
 	DoOnlineStatusOver
 	DoSubscribeOver
 )
@@ -79,7 +77,7 @@ type OnlineCache struct {
 
 	Lock         *sync.Mutex
 	Cond         *sync.Cond
-	CurrentPhase initPhase
+	CurrentPhase atomic.Uint32
 }
 
 func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) (err error) {
@@ -95,7 +93,7 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) (err error) {
 
 	defer func(t time.Time) {
 		log.ZInfo(ctx, "init users online status end", "cost", time.Since(t), "totalSet", totalSet.Load())
-		o.CurrentPhase = DoOnlineStatusOver
+		o.CurrentPhase.Store(DoOnlineStatusOver)
 		o.Cond.Broadcast()
 	}(time.Now())
 
@@ -138,7 +136,7 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) (err error) {
 func (o *OnlineCache) doSubscribe(ctx context.Context, rdb redis.UniversalClient, fn func(ctx context.Context, userID string, platformIDs []int32)) {
 	o.Lock.Lock()
 	ch := rdb.Subscribe(ctx, cachekey.OnlineChannel).Channel()
-	for o.CurrentPhase < DoOnlineStatusOver {
+	for o.CurrentPhase.Load() < DoOnlineStatusOver {
 		o.Cond.Wait()
 	}
 	o.Lock.Unlock()
@@ -168,13 +166,13 @@ func (o *OnlineCache) doSubscribe(ctx context.Context, rdb redis.UniversalClient
 		}
 	}
 
-	if o.CurrentPhase == DoOnlineStatusOver {
+	if o.CurrentPhase.Load() == DoOnlineStatusOver {
 		for done := false; !done; {
 			select {
 			case message := <-ch:
 				doMessage(message)
 			default:
-				o.CurrentPhase = DoSubscribeOver
+				o.CurrentPhase.Store(DoSubscribeOver)
 				o.Cond.Broadcast()
 				done = true
 			}

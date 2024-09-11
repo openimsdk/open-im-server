@@ -116,7 +116,7 @@ func (*ConsumerHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil 
 
 func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	c.onlineCache.Lock.Lock()
-	for c.onlineCache.CurrentPhase < rpccache.DoSubscribeOver {
+	for c.onlineCache.CurrentPhase.Load() < rpccache.DoSubscribeOver {
 		c.onlineCache.Cond.Wait()
 	}
 	c.onlineCache.Lock.Unlock()
