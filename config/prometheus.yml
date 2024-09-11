@@ -39,8 +39,8 @@ scrape_configs:
           namespace: default
   - job_name: openimserver-openim-msgtransfer
     static_configs:
-      - targets: [ internal_ip:12000, internal_ip:12001, internal_ip:12002, internal_ip:12003, internal_ip:12004, internal_ip:12005, internal_ip:12006, internal_ip:12007 ]
-#      - targets: [ internal_ip:12000, internal_ip:12001, internal_ip:12002, internal_ip:12003, internal_ip:12004, internal_ip:12005, internal_ip:12006, internal_ip:12007, internal_ip:12008, internal_ip:12009, internal_ip:12010, internal_ip:12011, internal_ip:12012, internal_ip:12013, internal_ip:12014, internal_ip:12015 ]
+      - targets: [ internal_ip:12020, internal_ip:12021, internal_ip:12022, internal_ip:12023, internal_ip:12024, internal_ip:12025, internal_ip:12026, internal_ip:12027 ]
+#      - targets: [ internal_ip:12020, internal_ip:12021, internal_ip:12022, internal_ip:12023, internal_ip:12024, internal_ip:12025, internal_ip:12026, internal_ip:12027, internal_ip:12028, internal_ip:12029, internal_ip:12030, internal_ip:12031, internal_ip:12032, internal_ip:12033, internal_ip:12034, internal_ip:12035 ]
         labels:
           namespace: default
   - job_name: openimserver-openim-push
