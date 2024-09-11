@@ -14,12 +14,16 @@ toRedisTopic: toRedis
 toMongoTopic: toMongo
 # Kafka topic for push notifications
 toPushTopic: toPush
+# Kafka topic for offline push notifications
+toOfflinePushTopic: toOfflinePush
 # Consumer group ID for Redis topic
 toRedisGroupID: redis
 # Consumer group ID for MongoDB topic
 toMongoGroupID: mongo
 # Consumer group ID for push notifications topic
 toPushGroupID: push
+# Consumer group ID for offline push notifications topic
+toOfflinePushGroupID: offlinePush
 # TLS (Transport Layer Security) configuration
 tls:
   # Enable or disable TLS
