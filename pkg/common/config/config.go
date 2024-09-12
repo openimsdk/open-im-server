@@ -100,8 +100,9 @@ type TLSConfig struct {
 
 type API struct {
 	Api struct {
-		ListenIP string `mapstructure:"listenIP"`
-		Ports    []int  `mapstructure:"ports"`
+		ListenIP         string `mapstructure:"listenIP"`
+		Ports            []int  `mapstructure:"ports"`
+		CompressionLevel int    `mapstructure:"compressionLevel"`
 	} `mapstructure:"api"`
 	Prometheus struct {
 		Enable     bool   `mapstructure:"enable"`
@@ -223,6 +224,7 @@ type Push struct {
 		BadgeCount bool   `mapstructure:"badgeCount"`
 		Production bool   `mapstructure:"production"`
 	} `mapstructure:"iosPush"`
+	FullUserCache bool `mapstructure:"fullUserCache"`
 }
 
 type Auth struct {
