@@ -17,21 +17,22 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
+	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mq/memamq"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/idutil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/timeutil"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
-	"time"
 )
 
 func newContentTypeConf(conf *config.Notification) map[int32]config.NotificationConfig {
@@ -159,6 +160,15 @@ func (m *MessageRpcClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*m
 	return resp, nil
 }
 
+// SetUserConversationsMinSeq set min seq
+func (m *MessageRpcClient) SetUserConversationsMinSeq(ctx context.Context, req *msg.SetUserConversationsMinSeqReq) (*msg.SetUserConversationsMinSeqResp, error) {
+	resp, err := m.Client.SetUserConversationsMinSeq(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 // GetMaxSeq retrieves the maximum sequence number from the gRPC client.
 // Errors during the gRPC call are wrapped to provide additional context.
 func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
@@ -174,6 +184,9 @@ func (m *MessageRpcClient) GetMaxSeqs(ctx context.Context, conversationIDs []str
 	resp, err := m.Client.GetMaxSeqs(ctx, &msg.GetMaxSeqsReq{
 		ConversationIDs: conversationIDs,
 	})
+	if err != nil {
+		return nil, err
+	}
 	return resp.MaxSeqs, err
 }
 
@@ -182,6 +195,9 @@ func (m *MessageRpcClient) GetHasReadSeqs(ctx context.Context, userID string, co
 		UserID:          userID,
 		ConversationIDs: conversationIDs,
 	})
+	if err != nil {
+		return nil, err
+	}
 	return resp.MaxSeqs, err
 }
 
@@ -190,6 +206,9 @@ func (m *MessageRpcClient) GetMsgByConversationIDs(ctx context.Context, docIDs [
 		ConversationIDs: docIDs,
 		MaxSeqs:         seqs,
 	})
+	if err != nil {
+		return nil, err
+	}
 	return resp.MsgDatas, err
 }
 
@@ -202,6 +221,19 @@ func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.
 		return nil, err
 	}
 	return resp, nil
+}
+
+func (m *MessageRpcClient) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *msg.GetConversationsHasReadAndMaxSeqReq) (*msg.GetConversationsHasReadAndMaxSeqResp, error) {
+	resp, err := m.Client.GetConversationsHasReadAndMaxSeq(ctx, req)
+	if err != nil {
+		// Wrap the error to provide more context if the gRPC call fails.
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (m *MessageRpcClient) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq) (*msg.GetSeqMessageResp, error) {
+	return m.Client.GetSeqMessage(ctx, req)
 }
 
 func (m *MessageRpcClient) GetConversationMaxSeq(ctx context.Context, conversationID string) (int64, error) {
@@ -252,8 +284,8 @@ func WithUserRpcClient(userRpcClient *UserRpcClient) NotificationSenderOptions {
 }
 
 const (
-	notificationWorkerCount = 2
-	notificationBufferSize  = 200
+	notificationWorkerCount = 16
+	notificationBufferSize  = 1024 * 1024 * 2
 )
 
 func NewNotificationSender(conf *config.Notification, opts ...NotificationSenderOptions) *NotificationSender {
@@ -280,7 +312,8 @@ func WithRpcGetUserName() NotificationOptions {
 }
 
 func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, contentType, sessionType int32, m proto.Message, opts ...NotificationOptions) {
-	ctx = mcontext.WithMustInfoCtx([]string{mcontext.GetOperationID(ctx), mcontext.GetOpUserID(ctx), mcontext.GetOpUserPlatform(ctx), mcontext.GetConnID(ctx)})
+	//ctx = mcontext.WithMustInfoCtx([]string{mcontext.GetOperationID(ctx), mcontext.GetOpUserID(ctx), mcontext.GetOpUserPlatform(ctx), mcontext.GetConnID(ctx)})
+	ctx = context.WithoutCancel(ctx)
 	ctx, cancel := context.WithTimeout(ctx, time.Second*time.Duration(5))
 	defer cancel()
 	n := sdkws.NotificationElem{Detail: jsonutil.StructToJsonString(m)}
@@ -324,6 +357,10 @@ func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, co
 	options := config.GetOptionsByNotification(optionsConfig)
 	s.SetOptionsByContentType(ctx, options, contentType)
 	msg.Options = options
+	// fill Notification OfflinePush by config
+	offlineInfo.Title = optionsConfig.OfflinePush.Title
+	offlineInfo.Desc = optionsConfig.OfflinePush.Desc
+	offlineInfo.Ex = optionsConfig.OfflinePush.Ext
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
 	_, err = s.sendMsg(ctx, &req)
@@ -333,7 +370,9 @@ func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, co
 }
 
 func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, sendID, recvID string, contentType, sessionType int32, m proto.Message, opts ...NotificationOptions) {
-	s.queue.Push(func() { s.send(ctx, sendID, recvID, contentType, sessionType, m, opts...) })
+	if err := s.queue.Push(func() { s.send(ctx, sendID, recvID, contentType, sessionType, m, opts...) }); err != nil {
+		log.ZWarn(ctx, "Push to queue failed", err, "sendID", sendID, "recvID", recvID, "msg", jsonutil.StructToJsonString(m))
+	}
 }
 
 func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...NotificationOptions) {

@@ -16,13 +16,15 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/tools/errs"
+	"github.com/redis/go-redis/v9"
 
 	pbmsg "github.com/openimsdk/protocol/msg"
 )
 
 func (m *msgServer) GetConversationMaxSeq(ctx context.Context, req *pbmsg.GetConversationMaxSeqReq) (*pbmsg.GetConversationMaxSeqResp, error) {
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
-	if err != nil {
+	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return nil, err
 	}
 	return &pbmsg.GetConversationMaxSeqResp{MaxSeq: maxSeq}, nil
@@ -50,4 +52,13 @@ func (m *msgServer) GetMsgByConversationIDs(ctx context.Context, req *pbmsg.GetM
 		return nil, err
 	}
 	return &pbmsg.GetMsgByConversationIDsResp{MsgDatas: Msgs}, nil
+}
+
+func (m *msgServer) SetUserConversationsMinSeq(ctx context.Context, req *pbmsg.SetUserConversationsMinSeqReq) (*pbmsg.SetUserConversationsMinSeqResp, error) {
+	for _, userID := range req.UserIDs {
+		if err := m.MsgDatabase.SetUserConversationsMinSeqs(ctx, userID, map[string]int64{req.ConversationID: req.Seq}); err != nil {
+			return nil, err
+		}
+	}
+	return &pbmsg.SetUserConversationsMinSeqResp{}, nil
 }

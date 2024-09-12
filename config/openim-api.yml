@@ -3,11 +3,14 @@ api:
   listenIP: 0.0.0.0
   # Listening ports; if multiple are configured, multiple instances will be launched, must be consistent with the number of prometheus.ports
   ports: [ 10002 ]
+  # API compression level; 0: default compression, 1: best compression, 2: best speed, -1: no compression
+  compressionLevel: 0
+
 
 prometheus:
   # Whether to enable prometheus
   enable: true
   # Prometheus listening ports, must match the number of api.ports
-  ports: [ 20113 ]
+  ports: [ 12002 ]
   # This address can be accessed via a browser
   grafanaURL: http://127.0.0.1:13000/

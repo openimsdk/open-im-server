@@ -35,6 +35,10 @@ func (o *GroupApi) SetGroupInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.SetGroupInfo, o.Client, c)
 }
 
+func (o *GroupApi) SetGroupInfoEX(c *gin.Context) {
+	a2r.Call(group.GroupClient.SetGroupInfoEX, o.Client, c)
+}
+
 func (o *GroupApi) JoinGroup(c *gin.Context) {
 	a2r.Call(group.GroupClient.JoinGroup, o.Client, c)
 }
@@ -65,6 +69,7 @@ func (o *GroupApi) GetGroupUsersReqApplicationList(c *gin.Context) {
 
 func (o *GroupApi) GetGroupsInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupsInfo, o.Client, c)
+	//a2r.Call(group.GroupClient.GetGroupsInfo, o.Client, c, a2r.NewNilReplaceOption(group.GroupClient.GetGroupsInfo))
 }
 
 func (o *GroupApi) KickGroupMember(c *gin.Context) {
@@ -73,6 +78,7 @@ func (o *GroupApi) KickGroupMember(c *gin.Context) {
 
 func (o *GroupApi) GetGroupMembersInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupMembersInfo, o.Client, c)
+	//a2r.Call(group.GroupClient.GetGroupMembersInfo, o.Client, c, a2r.NewNilReplaceOption(group.GroupClient.GetGroupMembersInfo))
 }
 
 func (o *GroupApi) GetGroupMemberList(c *gin.Context) {
@@ -133,4 +139,24 @@ func (o *GroupApi) GetGroups(c *gin.Context) {
 
 func (o *GroupApi) GetGroupMemberUserIDs(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupMemberUserIDs, o.Client, c)
+}
+
+func (o *GroupApi) GetIncrementalJoinGroup(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetIncrementalJoinGroup, o.Client, c)
+}
+
+func (o *GroupApi) GetIncrementalGroupMember(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetIncrementalGroupMember, o.Client, c)
+}
+
+func (o *GroupApi) GetIncrementalGroupMemberBatch(c *gin.Context) {
+	a2r.Call(group.GroupClient.BatchGetIncrementalGroupMember, o.Client, c)
+}
+
+func (o *GroupApi) GetFullGroupMemberUserIDs(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetFullGroupMemberUserIDs, o.Client, c)
+}
+
+func (o *GroupApi) GetFullJoinGroupIDs(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetFullJoinGroupIDs, o.Client, c)
 }

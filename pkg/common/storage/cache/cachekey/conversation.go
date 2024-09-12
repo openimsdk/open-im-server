@@ -23,6 +23,7 @@ const (
 	SuperGroupRecvMsgNotNotifyUserIDsKey     = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
 	SuperGroupRecvMsgNotNotifyUserIDsHashKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS_HASH:"
 	ConversationNotReceiveMessageUserIDsKey  = "CONVERSATION_NOT_RECEIVE_MESSAGE_USER_IDS:"
+	ConversationUserMaxKey                   = "CONVERSATION_USER_MAX:"
 )
 
 func GetConversationKey(ownerUserID, conversationID string) string {
@@ -55,4 +56,8 @@ func GetConversationNotReceiveMessageUserIDsKey(conversationID string) string {
 
 func GetUserConversationIDsHashKey(ownerUserID string) string {
 	return ConversationIDsHashKey + ownerUserID
+}
+
+func GetConversationUserMaxVersionKey(userID string) string {
+	return ConversationUserMaxKey + userID
 }

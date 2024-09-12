@@ -16,9 +16,11 @@ package cmd
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/group"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
+	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
@@ -44,7 +46,7 @@ func NewGroupRpcCmd() *GroupRpcCmd {
 		DiscoveryConfigFilename:   &groupConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
-	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
+	ret.ctx = context.WithValue(context.Background(), "version", version.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		return ret.runE()
 	}
@@ -58,5 +60,5 @@ func (a *GroupRpcCmd) Exec() error {
 func (a *GroupRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.groupConfig.Discovery, &a.groupConfig.RpcConfig.Prometheus, a.groupConfig.RpcConfig.RPC.ListenIP,
 		a.groupConfig.RpcConfig.RPC.RegisterIP, a.groupConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.groupConfig.Share.RpcRegisterName.Group, &a.groupConfig.Share, a.groupConfig, group.Start)
+		a.Index(), a.groupConfig.Share.RpcRegisterName.Group, &a.groupConfig.Share, a.groupConfig, group.Start, versionctx.EnableVersionCtx())
 }

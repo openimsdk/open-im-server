@@ -10,5 +10,5 @@ rpcRegisterName:
   conversation: conversation
   third: third
 
-imAdminUserID: [ "imAdmin" ]
+imAdminUserID: [ imAdmin ]
 

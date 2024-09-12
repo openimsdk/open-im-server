@@ -17,7 +17,6 @@ package cachekey
 const (
 	UserInfoKey             = "USER_INFO:"
 	UserGlobalRecvMsgOptKey = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
-	olineStatusKey          = "ONLINE_STATUS:"
 )
 
 func GetUserInfoKey(userID string) string {
@@ -26,8 +25,4 @@ func GetUserInfoKey(userID string) string {
 
 func GetUserGlobalRecvMsgOptKey(userID string) string {
 	return UserGlobalRecvMsgOptKey + userID
-}
-
-func GetOnlineStatusKey(modKey string) string {
-	return olineStatusKey + modKey
 }

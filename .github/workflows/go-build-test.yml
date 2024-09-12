@@ -1,0 +1,138 @@
+name: Go Build Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+
+  workflow_dispatch:
+
+jobs:
+  go-build:
+    name: Test with go ${{ matrix.go_version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        go_version: ["1.21.x", "1.22.x"]
+
+    steps:
+      - name: Checkout Server repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go ${{ matrix.go_version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go_version }}
+
+      - name: Get Server dependencies
+        run: |
+          go install github.com/magefile/mage@latest
+          go mod tidy
+          go mod download
+
+      - name: Set up infra services
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        # Uncomment and set the correct path to your docker-compose file
+        with:
+          compose-file: "./docker-compose.yml"
+
+        # run: |
+        #   sudo docker compose up -d
+        #   sudo sleep 30  # Increased sleep time for better stability
+        # timeout-minutes: 60 # Increased timeout for Docker setup
+
+
+    # - name: Get Internal IP Address
+    #   id: get-ip
+    #   run: |
+    #     IP=$(hostname -I | awk '{print $1}')
+    #     echo "The IP Address is: $IP"
+    #     echo "::set-output name=ip::$IP"
+      
+    # - name: Update .env
+    #   run: |
+    #     sed -i 's|externalAddress:.*|externalAddress: "http://${{ steps.get-ip.outputs.ip }}:10005"|' config/minio.yml
+    #     cat config/minio.yml
+
+      - name: Build and test Server Services
+        run: |
+          mage build
+          mage start
+          mage check
+
+      - name: Checkout Chat repository
+        uses: actions/checkout@v4
+        with:
+          repository: "openimsdk/chat"
+          path: "chat-repo"
+
+      - name: Get Chat dependencies
+        run: |
+          cd ${{ github.workspace }}/chat-repo
+          go mod tidy
+          go mod download
+          go install github.com/magefile/mage@latest
+
+      - name: Build and test Chat Services
+        run: |
+          cd ${{ github.workspace }}/chat-repo
+          mage build
+          mage start
+          mage check
+
+  dockerfile-test:
+    name: Build and Test Dockerfile
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go_version: ["1.21"]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go ${{ matrix.go_version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go_version }}
+
+      - name: Get dependencies
+        run: |
+          go mod tidy
+          go mod download
+          go install github.com/magefile/mage@latest
+
+      - name: Build Docker Image
+        run: |
+          IMAGE_NAME="${{ github.event.repository.name }}-test"
+          CONTAINER_NAME="${{ github.event.repository.name }}-container"
+          docker build -t $IMAGE_NAME .
+
+      - name: Run Docker Container
+        run: |
+          IMAGE_NAME="${{ github.event.repository.name }}-test"
+          CONTAINER_NAME="${{ github.event.repository.name }}-container"
+          docker run --name $CONTAINER_NAME -d $IMAGE_NAME
+          docker ps -a
+
+      - name: Test Docker Container Logs
+        run: |
+          CONTAINER_NAME="${{ github.event.repository.name }}-container"
+          docker logs $CONTAINER_NAME
+
+      # - name: Cleanup Docker Container
+      #   run: |
+      #     CONTAINER_NAME="${{ github.event.repository.name }}-container"
+      #     IMAGE_NAME="${{ github.event.repository.name }}-test"
+      #     docker stop $CONTAINER_NAME
+      #     docker rm $CONTAINER_NAME
+      #     docker rmi $IMAGE_NAME

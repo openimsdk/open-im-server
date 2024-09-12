@@ -88,6 +88,86 @@ func (x *LayLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	return v.value, v.err
 }
 
+func (x *LayLRU[K, V]) GetBatch(keys []K, fetch func(keys []K) (map[K]V, error)) (map[K]V, error) {
+	var (
+		err  error
+		once sync.Once
+	)
+
+	x.lock.Lock()
+	res := make(map[K]V)
+	queries := make([]K, 0)
+	setVs := make(map[K]*layLruItem[V])
+	for _, key := range keys {
+		v, ok := x.core.Get(key)
+		if ok {
+			x.lock.Unlock()
+			v.lock.Lock()
+			expires, value, err1 := v.expires, v.value, v.err
+			if expires != 0 && expires > time.Now().UnixMilli() {
+				v.lock.Unlock()
+				x.target.IncrGetHit()
+				res[key] = value
+				if err1 != nil {
+					once.Do(func() {
+						err = err1
+					})
+				}
+				continue
+			}
+		}
+		queries = append(queries, key)
+		x.lock.Unlock()
+	}
+	values, err1 := fetch(queries)
+	if err1 != nil {
+		once.Do(func() {
+			err = err1
+		})
+	}
+	for key, val := range values {
+		v := &layLruItem[V]{}
+		v.value = val
+
+		if err == nil {
+			v.expires = time.Now().Add(x.successTTL).UnixMilli()
+			x.target.IncrGetSuccess()
+		} else {
+			v.expires = time.Now().Add(x.failedTTL).UnixMilli()
+			x.target.IncrGetFailed()
+		}
+		setVs[key] = v
+		x.lock.Lock()
+		x.core.Add(key, v)
+		x.lock.Unlock()
+		res[key] = val
+	}
+
+	return res, err
+}
+
+//func (x *LayLRU[K, V]) Has(key K) bool {
+//	x.lock.Lock()
+//	defer x.lock.Unlock()
+//	return x.core.Contains(key)
+//}
+
+func (x *LayLRU[K, V]) Set(key K, value V) {
+	x.lock.Lock()
+	defer x.lock.Unlock()
+	x.core.Add(key, &layLruItem[V]{value: value, expires: time.Now().Add(x.successTTL).UnixMilli()})
+}
+
+func (x *LayLRU[K, V]) SetHas(key K, value V) bool {
+	x.lock.Lock()
+	defer x.lock.Unlock()
+	if x.core.Contains(key) {
+		x.core.Add(key, &layLruItem[V]{value: value, expires: time.Now().Add(x.successTTL).UnixMilli()})
+		return true
+	}
+	return false
+}
+
 func (x *LayLRU[K, V]) Del(key K) bool {
 	x.lock.Lock()
 	ok := x.core.Remove(key)

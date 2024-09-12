@@ -95,6 +95,10 @@ func (c *ConversationRedisCache) getUserConversationIDsHashKey(ownerUserID strin
 	return cachekey.GetUserConversationIDsHashKey(ownerUserID)
 }
 
+func (c *ConversationRedisCache) getConversationUserMaxVersionKey(ownerUserID string) string {
+	return cachekey.GetConversationUserMaxVersionKey(ownerUserID)
+}
+
 func (c *ConversationRedisCache) GetUserConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
 	return getCache(ctx, c.rcClient, c.getConversationIDsKey(ownerUserID), c.expireTime, func(ctx context.Context) ([]string, error) {
 		return c.conversationDB.FindUserIDAllConversationID(ctx, ownerUserID)
@@ -160,10 +164,12 @@ func (c *ConversationRedisCache) DelConversations(ownerUserID string, conversati
 }
 
 func (c *ConversationRedisCache) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*model.Conversation, error) {
-	return batchGetCache(ctx, c.rcClient, c.expireTime, conversationIDs, func(conversationID string) string {
+	return batchGetCache2(ctx, c.rcClient, c.expireTime, conversationIDs, func(conversationID string) string {
 		return c.getConversationKey(ownerUserID, conversationID)
-	}, func(ctx context.Context, conversationID string) (*model.Conversation, error) {
-		return c.conversationDB.Take(ctx, ownerUserID, conversationID)
+	}, func(conversation *model.Conversation) string {
+		return conversation.ConversationID
+	}, func(ctx context.Context, conversationIDs []string) ([]*model.Conversation, error) {
+		return c.conversationDB.Find(ctx, ownerUserID, conversationIDs)
 	})
 }
 
@@ -233,6 +239,19 @@ func (c *ConversationRedisCache) DelConversationNotReceiveMessageUserIDs(convers
 	for _, conversationID := range conversationIDs {
 		cache.AddKeys(c.getConversationNotReceiveMessageUserIDsKey(conversationID))
 	}
-
 	return cache
+}
+
+func (c *ConversationRedisCache) DelConversationVersionUserIDs(userIDs ...string) cache.ConversationCache {
+	cache := c.CloneConversationCache()
+	for _, userID := range userIDs {
+		cache.AddKeys(c.getConversationUserMaxVersionKey(userID))
+	}
+	return cache
+}
+
+func (c *ConversationRedisCache) FindMaxConversationUserVersion(ctx context.Context, userID string) (*model.VersionLog, error) {
+	return getCache(ctx, c.rcClient, c.getConversationUserMaxVersionKey(userID), c.expireTime, func(ctx context.Context) (*model.VersionLog, error) {
+		return c.conversationDB.FindConversationUserVersion(ctx, userID, 0, 0)
+	})
 }

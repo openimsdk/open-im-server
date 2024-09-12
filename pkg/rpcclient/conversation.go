@@ -77,12 +77,17 @@ func (c *ConversationRpcClient) SetConversationMaxSeq(ctx context.Context, owner
 	return err
 }
 
+func (c *ConversationRpcClient) SetConversationMinSeq(ctx context.Context, ownerUserIDs []string, conversationID string, minSeq int64) error {
+	_, err := c.Client.SetConversationMinSeq(ctx, &pbconversation.SetConversationMinSeqReq{OwnerUserID: ownerUserIDs, ConversationID: conversationID, MinSeq: minSeq})
+	return err
+}
+
 func (c *ConversationRpcClient) SetConversations(ctx context.Context, userIDs []string, conversation *pbconversation.ConversationReq) error {
 	_, err := c.Client.SetConversations(ctx, &pbconversation.SetConversationsReq{UserIDs: userIDs, Conversation: conversation})
 	return err
 }
 
-func (c *ConversationRpcClient) UpdateConversations(ctx context.Context, conversation *pbconversation.UpdateConversationReq) error {
+func (c *ConversationRpcClient) UpdateConversation(ctx context.Context, conversation *pbconversation.UpdateConversationReq) error {
 	_, err := c.Client.UpdateConversation(ctx, conversation)
 	return err
 }
@@ -145,4 +150,12 @@ func (c *ConversationRpcClient) GetConversationNotReceiveMessageUserIDs(ctx cont
 		return nil, err
 	}
 	return resp.UserIDs, nil
+}
+
+func (c *ConversationRpcClient) GetConversationsNeedDestructMsgs(ctx context.Context) ([]*pbconversation.Conversation, error) {
+	resp, err := c.Client.GetConversationsNeedDestructMsgs(ctx, &pbconversation.GetConversationsNeedDestructMsgsReq{})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Conversations, nil
 }

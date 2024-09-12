@@ -183,5 +183,4 @@ func (c *msgCache) GetMessagesBySeq(ctx context.Context, conversationID string, 
 		return nil, nil, err
 	}
 	return seqMsgs, failedSeqs, nil
-
 }

@@ -15,14 +15,16 @@
 package config
 
 import (
+	"strings"
+	"time"
+
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/cos"
+	"github.com/openimsdk/tools/s3/kodo"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
-	"strings"
-	"time"
 )
 
 type CacheConfig struct {
@@ -47,6 +49,7 @@ type Log struct {
 	RemainLogLevel      int    `mapstructure:"remainLogLevel"`
 	IsStdout            bool   `mapstructure:"isStdout"`
 	IsJson              bool   `mapstructure:"isJson"`
+	IsSimplify          bool   `mapstructure:"isSimplify"`
 	WithStack           bool   `mapstructure:"withStack"`
 }
 
@@ -70,18 +73,21 @@ type Mongo struct {
 	MaxRetry    int      `mapstructure:"maxRetry"`
 }
 type Kafka struct {
-	Username       string    `mapstructure:"username"`
-	Password       string    `mapstructure:"password"`
-	ProducerAck    string    `mapstructure:"producerAck"`
-	CompressType   string    `mapstructure:"compressType"`
-	Address        []string  `mapstructure:"address"`
-	ToRedisTopic   string    `mapstructure:"toRedisTopic"`
-	ToMongoTopic   string    `mapstructure:"toMongoTopic"`
-	ToPushTopic    string    `mapstructure:"toPushTopic"`
-	ToRedisGroupID string    `mapstructure:"toRedisGroupID"`
-	ToMongoGroupID string    `mapstructure:"toMongoGroupID"`
-	ToPushGroupID  string    `mapstructure:"toPushGroupID"`
-	Tls            TLSConfig `mapstructure:"tls"`
+	Username           string   `mapstructure:"username"`
+	Password           string   `mapstructure:"password"`
+	ProducerAck        string   `mapstructure:"producerAck"`
+	CompressType       string   `mapstructure:"compressType"`
+	Address            []string `mapstructure:"address"`
+	ToRedisTopic       string   `mapstructure:"toRedisTopic"`
+	ToMongoTopic       string   `mapstructure:"toMongoTopic"`
+	ToPushTopic        string   `mapstructure:"toPushTopic"`
+	ToOfflinePushTopic string   `mapstructure:"toOfflinePushTopic"`
+	ToRedisGroupID     string   `mapstructure:"toRedisGroupID"`
+	ToMongoGroupID     string   `mapstructure:"toMongoGroupID"`
+	ToPushGroupID      string   `mapstructure:"toPushGroupID"`
+	ToOfflineGroupID   string   `mapstructure:"toOfflinePushGroupID"`
+
+	Tls TLSConfig `mapstructure:"tls"`
 }
 type TLSConfig struct {
 	EnableTLS          bool   `mapstructure:"enableTLS"`
@@ -94,8 +100,9 @@ type TLSConfig struct {
 
 type API struct {
 	Api struct {
-		ListenIP string `mapstructure:"listenIP"`
-		Ports    []int  `mapstructure:"ports"`
+		ListenIP         string `mapstructure:"listenIP"`
+		Ports            []int  `mapstructure:"ports"`
+		CompressionLevel int    `mapstructure:"compressionLevel"`
 	} `mapstructure:"api"`
 	Prometheus struct {
 		Enable     bool   `mapstructure:"enable"`
@@ -105,8 +112,9 @@ type API struct {
 }
 
 type CronTask struct {
-	ChatRecordsClearTime string `mapstructure:"chatRecordsClearTime"`
-	RetainChatRecords    int    `mapstructure:"retainChatRecords"`
+	CronExecuteTime   string `mapstructure:"cronExecuteTime"`
+	RetainChatRecords int    `mapstructure:"retainChatRecords"`
+	FileExpireTime    int    `mapstructure:"fileExpireTime"`
 }
 
 type OfflinePushConfig struct {
@@ -216,6 +224,7 @@ type Push struct {
 		BadgeCount bool   `mapstructure:"badgeCount"`
 		Production bool   `mapstructure:"production"`
 	} `mapstructure:"iosPush"`
+	FullUserCache bool `mapstructure:"fullUserCache"`
 }
 
 type Auth struct {
@@ -254,7 +263,8 @@ type Group struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
-	Prometheus Prometheus `mapstructure:"prometheus"`
+	Prometheus                 Prometheus `mapstructure:"prometheus"`
+	EnableHistoryForNewMembers bool       `mapstructure:"enableHistoryForNewMembers"`
 }
 
 type Msg struct {
@@ -278,16 +288,8 @@ type Third struct {
 		Enable string `mapstructure:"enable"`
 		Cos    Cos    `mapstructure:"cos"`
 		Oss    Oss    `mapstructure:"oss"`
-		Kodo   struct {
-			Endpoint        string `mapstructure:"endpoint"`
-			Bucket          string `mapstructure:"bucket"`
-			BucketURL       string `mapstructure:"bucketURL"`
-			AccessKeyID     string `mapstructure:"accessKeyID"`
-			AccessKeySecret string `mapstructure:"accessKeySecret"`
-			SessionToken    string `mapstructure:"sessionToken"`
-			PublicRead      bool   `mapstructure:"publicRead"`
-		} `mapstructure:"kodo"`
-		Aws struct {
+		Kodo   Kodo   `mapstructure:"kodo"`
+		Aws    struct {
 			Endpoint        string `mapstructure:"endpoint"`
 			Region          string `mapstructure:"region"`
 			Bucket          string `mapstructure:"bucket"`
@@ -314,6 +316,16 @@ type Oss struct {
 	PublicRead      bool   `mapstructure:"publicRead"`
 }
 
+type Kodo struct {
+	Endpoint        string `mapstructure:"endpoint"`
+	Bucket          string `mapstructure:"bucket"`
+	BucketURL       string `mapstructure:"bucketURL"`
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	AccessKeySecret string `mapstructure:"accessKeySecret"`
+	SessionToken    string `mapstructure:"sessionToken"`
+	PublicRead      bool   `mapstructure:"publicRead"`
+}
+
 type User struct {
 	RPC struct {
 		RegisterIP string `mapstructure:"registerIP"`
@@ -329,7 +341,8 @@ type Redis struct {
 	Password    string   `mapstructure:"password"`
 	ClusterMode bool     `mapstructure:"clusterMode"`
 	DB          int      `mapstructure:"storage"`
-	MaxRetry    int      `mapstructure:"MaxRetry"`
+	MaxRetry    int      `mapstructure:"maxRetry"`
+	PoolSize    int      `mapstructure:"poolSize"`
 }
 
 type BeforeConfig struct {
@@ -339,8 +352,9 @@ type BeforeConfig struct {
 }
 
 type AfterConfig struct {
-	Enable  bool `mapstructure:"enable"`
-	Timeout int  `mapstructure:"timeout"`
+	Enable       bool     `mapstructure:"enable"`
+	Timeout      int      `mapstructure:"timeout"`
+	AttentionIds []string `mapstructure:"attentionIds"`
 }
 
 type Share struct {
@@ -414,6 +428,8 @@ type Webhooks struct {
 	BeforeInviteUserToGroup  BeforeConfig `mapstructure:"beforeInviteUserToGroup"`
 	AfterSetGroupInfo        AfterConfig  `mapstructure:"afterSetGroupInfo"`
 	BeforeSetGroupInfo       BeforeConfig `mapstructure:"beforeSetGroupInfo"`
+	AfterSetGroupInfoEX      AfterConfig  `mapstructure:"afterSetGroupInfoEX"`
+	BeforeSetGroupInfoEX     BeforeConfig `mapstructure:"beforeSetGroupInfoEX"`
 	AfterRevokeMsg           AfterConfig  `mapstructure:"afterRevokeMsg"`
 	BeforeAddBlack           BeforeConfig `mapstructure:"beforeAddBlack"`
 	AfterAddFriend           AfterConfig  `mapstructure:"afterAddFriend"`
@@ -464,6 +480,7 @@ func (r *Redis) Build() *redisutil.Config {
 		Password:    r.Password,
 		DB:          r.DB,
 		MaxRetry:    r.MaxRetry,
+		PoolSize:    r.PoolSize,
 	}
 }
 
@@ -514,6 +531,18 @@ func (c *Cos) Build() *cos.Config {
 
 func (o *Oss) Build() *oss.Config {
 	return &oss.Config{
+		Endpoint:        o.Endpoint,
+		Bucket:          o.Bucket,
+		BucketURL:       o.BucketURL,
+		AccessKeyID:     o.AccessKeyID,
+		AccessKeySecret: o.AccessKeySecret,
+		SessionToken:    o.SessionToken,
+		PublicRead:      o.PublicRead,
+	}
+}
+
+func (o *Kodo) Build() *kodo.Config {
+	return &kodo.Config{
 		Endpoint:        o.Endpoint,
 		Bucket:          o.Bucket,
 		BucketURL:       o.BucketURL,

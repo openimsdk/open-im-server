@@ -10,4 +10,5 @@ remainLogLevel: 6
 isStdout: false
 # Whether to log in JSON format, default is acceptable
 isJson: false
-
+# output simplify log when KeyAndValues's value len is bigger than 50 in rpc method log
+isSimplify: true

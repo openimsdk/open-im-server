@@ -35,7 +35,7 @@ done
 echo "Kafka is ready. Creating topics..."
 
 
-topics=("toRedis" "toMongo" "toPush")
+topics=("toRedis" "toMongo" "toPush" "toOfflinePush")
 partitions=8
 replicationFactor=1
 

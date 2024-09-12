@@ -41,6 +41,7 @@ func toCommonCallback(ctx context.Context, msg *pbchat.SendMsgReq, command strin
 		MsgFrom:          msg.MsgData.MsgFrom,
 		ContentType:      msg.MsgData.ContentType,
 		Status:           msg.MsgData.Status,
+		SendTime:         msg.MsgData.SendTime,
 		CreateTime:       msg.MsgData.CreateTime,
 		AtUserIDList:     msg.MsgData.AtUserIDList,
 		SenderFaceURL:    msg.MsgData.SenderFaceURL,
@@ -81,6 +82,11 @@ func (m *msgServer) webhookBeforeSendSingleMsg(ctx context.Context, before *conf
 
 func (m *msgServer) webhookAfterSendSingleMsg(ctx context.Context, after *config.AfterConfig, msg *pbchat.SendMsgReq) {
 	if msg.MsgData.ContentType == constant.Typing {
+		return
+	}
+	// According to the attentionIds configuration, only some users are sent
+	attentionIds := after.AttentionIds
+	if attentionIds != nil && !datautil.Contain(msg.MsgData.RecvID, attentionIds...) && !datautil.Contain(msg.MsgData.SendID, attentionIds...) {
 		return
 	}
 	cbReq := &cbapi.CallbackAfterSendSingleMsgReq{
