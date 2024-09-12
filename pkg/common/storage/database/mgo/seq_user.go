@@ -115,5 +115,12 @@ func (s *seqUserMongo) GetUserReadSeqs(ctx context.Context, userID string, conve
 }
 
 func (s *seqUserMongo) SetUserReadSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
+	dbSeq, err := s.GetUserReadSeq(ctx, conversationID, userID)
+	if err != nil {
+		return err
+	}
+	if dbSeq > seq {
+		return nil
+	}
 	return s.setSeq(ctx, conversationID, userID, seq, "read_seq")
 }

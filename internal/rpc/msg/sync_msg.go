@@ -16,16 +16,15 @@ package msg
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
-	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/timeutil"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
@@ -86,6 +85,35 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 	return resp, nil
 }
 
+func (m *msgServer) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq) (*msg.GetSeqMessageResp, error) {
+	resp := &msg.GetSeqMessageResp{
+		Msgs:             make(map[string]*sdkws.PullMsgs),
+		NotificationMsgs: make(map[string]*sdkws.PullMsgs),
+	}
+	for _, conv := range req.Conversations {
+		_, _, msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, conv.ConversationID, conv.Seqs)
+		if err != nil {
+			return nil, err
+		}
+		var pullMsgs *sdkws.PullMsgs
+		if ok := false; conversationutil.IsNotificationConversationID(conv.ConversationID) {
+			pullMsgs, ok = resp.NotificationMsgs[conv.ConversationID]
+			if !ok {
+				pullMsgs = &sdkws.PullMsgs{}
+				resp.NotificationMsgs[conv.ConversationID] = pullMsgs
+			}
+		} else {
+			pullMsgs, ok = resp.Msgs[conv.ConversationID]
+			if !ok {
+				pullMsgs = &sdkws.PullMsgs{}
+				resp.Msgs[conv.ConversationID] = pullMsgs
+			}
+		}
+		pullMsgs.Msgs = append(pullMsgs.Msgs, msgs...)
+	}
+	return resp, nil
+}
+
 func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
 	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err
@@ -103,6 +131,12 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 	if err != nil {
 		log.ZWarn(ctx, "GetMaxSeqs error", err, "conversationIDs", conversationIDs, "maxSeqs", maxSeqs)
 		return nil, err
+	}
+	// avoid pulling messages from sessions with a large number of max seq values of 0
+	for conversationID, seq := range maxSeqs {
+		if seq == 0 {
+			delete(maxSeqs, conversationID)
+		}
 	}
 	resp := new(sdkws.GetMaxSeqResp)
 	resp.MaxSeqs = maxSeqs

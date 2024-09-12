@@ -265,7 +265,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		if clientOK {
 			ws.clients.Set(client.UserID, client)
 			// There is already a connection to the platform
-			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID",
+			log.ZDebug(client.ctx, "repeat login", "userID", client.UserID, "platformID",
 				client.PlatformID, "old remote addr", getRemoteAdders(oldClients))
 			ws.onlineUserConnNum.Add(1)
 		} else {
@@ -275,7 +275,7 @@ func (ws *WsServer) registerClient(client *Client) {
 	}
 
 	wg := sync.WaitGroup{}
-	log.ZDebug(client.ctx, "ws.msgGatewayConfig.Discovery.Enable", ws.msgGatewayConfig.Discovery.Enable)
+	log.ZDebug(client.ctx, "ws.msgGatewayConfig.Discovery.Enable", "discoveryEnable", ws.msgGatewayConfig.Discovery.Enable)
 
 	if ws.msgGatewayConfig.Discovery.Enable != "k8s" {
 		wg.Add(1)
@@ -293,7 +293,7 @@ func (ws *WsServer) registerClient(client *Client) {
 
 	wg.Wait()
 
-	log.ZInfo(
+	log.ZDebug(
 		client.ctx,
 		"user online",
 		"online user Num",
@@ -360,7 +360,7 @@ func (ws *WsServer) unregisterClient(client *Client) {
 	ws.onlineUserConnNum.Add(-1)
 	ws.subscription.DelClient(client)
 	//ws.SetUserOnlineStatus(client.ctx, client, constant.Offline)
-	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num",
+	log.ZDebug(client.ctx, "user offline", "close reason", client.closedErr, "online user Num",
 		ws.onlineUserNum.Load(), "online user conn Num",
 		ws.onlineUserConnNum.Load(),
 	)

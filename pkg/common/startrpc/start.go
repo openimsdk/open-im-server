@@ -25,7 +25,6 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
-	"sync"
 	"syscall"
 	"time"
 
@@ -35,7 +34,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
-	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/network"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -54,6 +52,7 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcPort", rpcPort,
 		"prometheusPorts", prometheusConfig.Ports)
 	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(listenIP), strconv.Itoa(rpcPort))
+
 	listener, err := net.Listen(
 		"tcp",
 		rpcTcpAddr,
@@ -61,7 +60,6 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	if err != nil {
 		return errs.WrapMsg(err, "listen err", "rpcTcpAddr", rpcTcpAddr)
 	}
-
 	defer listener.Close()
 	client, err := kdisc.NewDiscoveryRegister(discovery, share)
 	if err != nil {
@@ -92,10 +90,6 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	}
 
 	srv := grpc.NewServer(options...)
-	once := sync.Once{}
-	defer func() {
-		once.Do(srv.GracefulStop)
-	}()
 
 	err = rpcFn(ctx, config, client, srv)
 	if err != nil {
@@ -113,9 +107,8 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	}
 
 	var (
-		netDone    = make(chan struct{}, 2)
-		netErr     error
-		httpServer *http.Server
+		netDone = make(chan struct{}, 2)
+		netErr  error
 	)
 	if prometheusConfig.Enable {
 		go func() {
@@ -152,17 +145,10 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	signal.Notify(sigs, syscall.SIGTERM)
 	select {
 	case <-sigs:
-		program.SIGTERMExit()
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		if err := gracefulStopWithCtx(ctx, srv.GracefulStop); err != nil {
 			return err
-		}
-		ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
-		defer cancel()
-		err := httpServer.Shutdown(ctx)
-		if err != nil {
-			return errs.WrapMsg(err, "shutdown err")
 		}
 		return nil
 	case <-netDone:

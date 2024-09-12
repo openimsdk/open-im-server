@@ -1,4 +1,4 @@
-url: "webhook://127.0.0.1:10008/callbackExample"
+url: webhook://127.0.0.1:10008/callbackExample
 beforeSendSingleMsg:
   enable: false
   timeout: 5
@@ -127,6 +127,13 @@ afterSetGroupInfo:
   enable: false
   timeout: 5
 beforeSetGroupInfo:
+  enable: false
+  timeout: 5
+  failedContinue: true
+afterSetGroupInfoEX:
+  enable: false
+  timeout: 5
+beforeSetGroupInfoEX:
   enable: false
   timeout: 5
   failedContinue: true

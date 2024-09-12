@@ -221,11 +221,11 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbconvers
 	return resp, nil
 }
 
-// nolint
 func (c *conversationServer) SetConversations(ctx context.Context, req *pbconversation.SetConversationsReq) (*pbconversation.SetConversationsResp, error) {
 	if req.Conversation == nil {
 		return nil, errs.ErrArgs.WrapMsg("conversation must not be nil")
 	}
+
 	if req.Conversation.ConversationType == constant.WriteGroupChatType {
 		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
 		if err != nil {
@@ -235,98 +235,141 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			return nil, servererrs.ErrDismissedAlready.WrapMsg("group dismissed")
 		}
 	}
-	var unequal int
-	var conv dbModel.Conversation
-	if len(req.UserIDs) == 1 {
-		cs, err := c.conversationDatabase.FindConversations(ctx, req.UserIDs[0], []string{req.Conversation.ConversationID})
+
+	conversationMap := make(map[string]*dbModel.Conversation)
+	var needUpdateUsersList []string
+
+	for _, userID := range req.UserIDs {
+		conversationList, err := c.conversationDatabase.FindConversations(ctx, userID, []string{req.Conversation.ConversationID})
 		if err != nil {
 			return nil, err
 		}
-		if len(cs) == 0 {
-			return nil, errs.ErrRecordNotFound.WrapMsg("conversation not found")
+		if len(conversationList) != 0 {
+			conversationMap[userID] = conversationList[0]
+		} else {
+			needUpdateUsersList = append(needUpdateUsersList, userID)
 		}
-		conv = *cs[0]
 	}
+
 	var conversation dbModel.Conversation
 	conversation.ConversationID = req.Conversation.ConversationID
 	conversation.ConversationType = req.Conversation.ConversationType
 	conversation.UserID = req.Conversation.UserID
 	conversation.GroupID = req.Conversation.GroupID
+
 	m := make(map[string]any)
-	if req.Conversation.RecvMsgOpt != nil {
-		m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
-		if req.Conversation.RecvMsgOpt.Value != conv.RecvMsgOpt {
-			unequal++
+
+	setConversationFieldsFunc := func() {
+		if req.Conversation.RecvMsgOpt != nil {
+			m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
+		}
+		if req.Conversation.AttachedInfo != nil {
+			m["attached_info"] = req.Conversation.AttachedInfo.Value
+		}
+		if req.Conversation.Ex != nil {
+			m["ex"] = req.Conversation.Ex.Value
+		}
+		if req.Conversation.IsPinned != nil {
+			m["is_pinned"] = req.Conversation.IsPinned.Value
+		}
+		if req.Conversation.GroupAtType != nil {
+			m["group_at_type"] = req.Conversation.GroupAtType.Value
+		}
+		if req.Conversation.MsgDestructTime != nil {
+			m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
+		}
+		if req.Conversation.MsgDestructTime != nil {
+			m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
+		}
+		if req.Conversation.BurnDuration != nil {
+			m["burn_duration"] = req.Conversation.BurnDuration.Value
 		}
 	}
-	if req.Conversation.AttachedInfo != nil {
-		m["attached_info"] = req.Conversation.AttachedInfo.Value
-		if req.Conversation.AttachedInfo.Value != conv.AttachedInfo {
-			unequal++
+
+	// set need set field in conversation
+	setConversationFieldsFunc()
+
+	for userID := range conversationMap {
+		unequal := len(m)
+
+		if req.Conversation.RecvMsgOpt != nil {
+			if req.Conversation.RecvMsgOpt.Value == conversationMap[userID].RecvMsgOpt {
+				unequal--
+			}
+		}
+
+		if req.Conversation.AttachedInfo != nil {
+			if req.Conversation.AttachedInfo.Value == conversationMap[userID].AttachedInfo {
+				unequal--
+			}
+		}
+
+		if req.Conversation.Ex != nil {
+			if req.Conversation.Ex.Value == conversationMap[userID].Ex {
+				unequal--
+			}
+		}
+		if req.Conversation.IsPinned != nil {
+			if req.Conversation.IsPinned.Value == conversationMap[userID].IsPinned {
+				unequal--
+			}
+		}
+
+		if req.Conversation.GroupAtType != nil {
+			if req.Conversation.GroupAtType.Value == conversationMap[userID].GroupAtType {
+				unequal--
+			}
+		}
+
+		if req.Conversation.MsgDestructTime != nil {
+			if req.Conversation.MsgDestructTime.Value == conversationMap[userID].MsgDestructTime {
+				unequal--
+			}
+		}
+
+		if req.Conversation.IsMsgDestruct != nil {
+			if req.Conversation.IsMsgDestruct.Value == conversationMap[userID].IsMsgDestruct {
+				unequal--
+			}
+		}
+
+		if req.Conversation.BurnDuration != nil {
+			if req.Conversation.BurnDuration.Value == conversationMap[userID].BurnDuration {
+				unequal--
+			}
+		}
+
+		if unequal > 0 {
+			needUpdateUsersList = append(needUpdateUsersList, userID)
 		}
 	}
-	if req.Conversation.Ex != nil {
-		m["ex"] = req.Conversation.Ex.Value
-		if req.Conversation.Ex.Value != conv.Ex {
-			unequal++
-		}
-	}
-	if req.Conversation.IsPinned != nil {
-		m["is_pinned"] = req.Conversation.IsPinned.Value
-		if req.Conversation.IsPinned.Value != conv.IsPinned {
-			unequal++
-		}
-	}
-	if req.Conversation.GroupAtType != nil {
-		m["group_at_type"] = req.Conversation.GroupAtType.Value
-		if req.Conversation.GroupAtType.Value != conv.GroupAtType {
-			unequal++
-		}
-	}
-	if req.Conversation.MsgDestructTime != nil {
-		m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
-		if req.Conversation.MsgDestructTime.Value != conv.MsgDestructTime {
-			unequal++
-		}
-	}
-	if req.Conversation.IsMsgDestruct != nil {
-		m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
-		if req.Conversation.IsMsgDestruct.Value != conv.IsMsgDestruct {
-			unequal++
-		}
-	}
+
 	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.ReadGroupChatType {
 		var conversations []*dbModel.Conversation
 		for _, ownerUserID := range req.UserIDs {
-			conversation2 := conversation
-			conversation2.OwnerUserID = ownerUserID
-			conversation2.IsPrivateChat = req.Conversation.IsPrivateChat.Value
-			conversations = append(conversations, &conversation2)
+			transConversation := conversation
+			transConversation.OwnerUserID = ownerUserID
+			transConversation.IsPrivateChat = req.Conversation.IsPrivateChat.Value
+			conversations = append(conversations, &transConversation)
 		}
 
 		if err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, conversations); err != nil {
 			return nil, err
 		}
+
 		for _, userID := range req.UserIDs {
 			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
 				req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
 		}
-	}
+	} else {
+		if len(m) != 0 && len(needUpdateUsersList) != 0 {
+			if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, needUpdateUsersList, &conversation, m); err != nil {
+				return nil, err
+			}
 
-	if req.Conversation.BurnDuration != nil {
-		m["burn_duration"] = req.Conversation.BurnDuration.Value
-		if req.Conversation.BurnDuration.Value != conv.BurnDuration {
-			unequal++
-		}
-	}
-
-	if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, req.UserIDs, &conversation, m); err != nil {
-		return nil, err
-	}
-
-	if unequal > 0 {
-		for _, v := range req.UserIDs {
-			c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
+			for _, v := range needUpdateUsersList {
+				c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
+			}
 		}
 	}
 
@@ -390,6 +433,14 @@ func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbc
 		return nil, err
 	}
 	return &pbconversation.SetConversationMaxSeqResp{}, nil
+}
+
+func (c *conversationServer) SetConversationMinSeq(ctx context.Context, req *pbconversation.SetConversationMinSeqReq) (*pbconversation.SetConversationMinSeqResp, error) {
+	if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.OwnerUserID, req.ConversationID,
+		map[string]any{"min_seq": req.MinSeq}); err != nil {
+		return nil, err
+	}
+	return &pbconversation.SetConversationMinSeqResp{}, nil
 }
 
 func (c *conversationServer) GetConversationIDs(ctx context.Context, req *pbconversation.GetConversationIDsReq) (*pbconversation.GetConversationIDsResp, error) {
@@ -634,11 +685,11 @@ func (c *conversationServer) GetConversationsNeedDestructMsgs(ctx context.Contex
 
 		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, pagination)
 		if err != nil {
-			log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
+			// log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
 			continue
 		}
 
-		log.ZDebug(ctx, "PageConversationIDs success", "pageNumber", pageNumber, "conversationIDsNum", len(conversationIDs), "conversationIDs", conversationIDs)
+		// log.ZDebug(ctx, "PageConversationIDs success", "pageNumber", pageNumber, "conversationIDsNum", len(conversationIDs), "conversationIDs", conversationIDs)
 		if len(conversationIDs) == 0 {
 			continue
 		}
