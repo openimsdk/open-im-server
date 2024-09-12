@@ -99,7 +99,6 @@ func (x *LayLRU[K, V]) GetBatch(keys []K, fetch func(keys []K) (map[K]V, error))
 	queries := make([]K, 0)
 	setVs := make(map[K]*layLruItem[V])
 	for _, key := range keys {
-		x.lock.Unlock()
 		v, ok := x.core.Get(key)
 		x.lock.Unlock()
 		if ok {
