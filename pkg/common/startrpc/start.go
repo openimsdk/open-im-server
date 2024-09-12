@@ -25,7 +25,6 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
-	"sync"
 	"syscall"
 	"time"
 
@@ -58,6 +57,10 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 		"tcp",
 		rpcTcpAddr,
 	)
+	if err != nil {
+		return errs.WrapMsg(err, "listen err", "rpcTcpAddr", rpcTcpAddr)
+	}
+	defer listener.Close()
 	client, err := kdisc.NewDiscoveryRegister(discovery, share)
 	if err != nil {
 		return err
@@ -87,10 +90,6 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	}
 
 	srv := grpc.NewServer(options...)
-	once := sync.Once{}
-	defer func() {
-		once.Do(srv.GracefulStop)
-	}()
 
 	err = rpcFn(ctx, config, client, srv)
 	if err != nil {
