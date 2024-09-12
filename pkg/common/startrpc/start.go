@@ -35,7 +35,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
-	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/network"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -109,9 +108,8 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	}
 
 	var (
-		netDone    = make(chan struct{}, 2)
-		netErr     error
-		httpServer *http.Server
+		netDone = make(chan struct{}, 2)
+		netErr  error
 	)
 	if prometheusConfig.Enable {
 		go func() {
@@ -148,17 +146,10 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	signal.Notify(sigs, syscall.SIGTERM)
 	select {
 	case <-sigs:
-		program.SIGTERMExit()
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		if err := gracefulStopWithCtx(ctx, srv.GracefulStop); err != nil {
 			return err
-		}
-		ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
-		defer cancel()
-		err := httpServer.Shutdown(ctx)
-		if err != nil {
-			return errs.WrapMsg(err, "shutdown err")
 		}
 		return nil
 	case <-netDone:
