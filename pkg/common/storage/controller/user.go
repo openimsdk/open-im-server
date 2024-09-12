@@ -16,12 +16,13 @@ package controller
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/db/pagination"
 	"github.com/openimsdk/tools/db/tx"
 	"github.com/openimsdk/tools/utils/datautil"
-	"time"
 
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/errs"
@@ -111,10 +112,14 @@ func (u *userDatabase) InitOnce(ctx context.Context, users []*model.User) error 
 // FindWithError Get the information of the specified user and return an error if the userID is not found.
 func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (users []*model.User, err error) {
 	userIDs = datautil.Distinct(userIDs)
+
+	// TODO: Add logic to identify which user IDs are distinct and which user IDs were not found.
+
 	users, err = u.cache.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return
 	}
+
 	if len(users) != len(userIDs) {
 		err = errs.ErrRecordNotFound.WrapMsg("userID not found")
 	}
