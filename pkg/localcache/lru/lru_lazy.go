@@ -99,13 +99,12 @@ func (x *LayLRU[K, V]) GetBatch(keys []K, fetch func(keys []K) (map[K]V, error))
 	queries := make([]K, 0)
 	setVs := make(map[K]*layLruItem[V])
 	for _, key := range keys {
+		x.lock.Unlock()
 		v, ok := x.core.Get(key)
+		x.lock.Unlock()
 		if ok {
-			x.lock.Unlock()
-			v.lock.Lock()
 			expires, value, err1 := v.expires, v.value, v.err
 			if expires != 0 && expires > time.Now().UnixMilli() {
-				v.lock.Unlock()
 				x.target.IncrGetHit()
 				res[key] = value
 				if err1 != nil {
@@ -117,7 +116,6 @@ func (x *LayLRU[K, V]) GetBatch(keys []K, fetch func(keys []K) (map[K]V, error))
 			}
 		}
 		queries = append(queries, key)
-		x.lock.Unlock()
 	}
 	values, err1 := fetch(queries)
 	if err1 != nil {
