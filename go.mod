@@ -48,6 +48,8 @@ require (
 
 require (
 	cloud.google.com/go v0.112.0 // indirect
+	cloud.google.com/go/compute v1.23.3 // indirect
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	cloud.google.com/go/firestore v1.14.0 // indirect
 	cloud.google.com/go/iam v1.1.5 // indirect
