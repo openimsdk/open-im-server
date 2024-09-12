@@ -11,6 +11,6 @@ prometheus:
   # Whether to enable prometheus
   enable: true
   # Prometheus listening ports, must match the number of api.ports
-  ports: [ 20502 ]
+  ports: [ 12002 ]
   # This address can be accessed via a browser
   grafanaURL: http://127.0.0.1:13000/

@@ -224,6 +224,7 @@ type Push struct {
 		BadgeCount bool   `mapstructure:"badgeCount"`
 		Production bool   `mapstructure:"production"`
 	} `mapstructure:"iosPush"`
+	FullUserCache bool `mapstructure:"fullUserCache"`
 }
 
 type Auth struct {
