@@ -102,7 +102,9 @@ func (x *LayLRU[K, V]) GetBatch(keys []K, fetch func(keys []K) (map[K]V, error))
 		v, ok := x.core.Get(key)
 		x.lock.Unlock()
 		if ok {
+			v.lock.Lock()
 			expires, value, err1 := v.expires, v.value, v.err
+			v.lock.Unlock()
 			if expires != 0 && expires > time.Now().UnixMilli() {
 				x.target.IncrGetHit()
 				res[key] = value
