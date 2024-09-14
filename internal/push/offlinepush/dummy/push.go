@@ -28,6 +28,6 @@ type Dummy struct {
 }
 
 func (d *Dummy) Push(ctx context.Context, userIDs []string, title, content string, opts *options.Opts) error {
-	log.ZInfo(ctx, "dummy push")
+	log.ZDebug(ctx, "dummy push")
 	return nil
 }

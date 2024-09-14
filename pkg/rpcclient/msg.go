@@ -17,6 +17,11 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
+	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
@@ -28,9 +33,6 @@ import (
 	"github.com/openimsdk/tools/utils/idutil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/timeutil"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
-	"time"
 )
 
 func newContentTypeConf(conf *config.Notification) map[int32]config.NotificationConfig {
@@ -214,6 +216,15 @@ func (m *MessageRpcClient) GetMsgByConversationIDs(ctx context.Context, docIDs [
 // It directly forwards the request to the gRPC client and returns the response along with any error encountered.
 func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
 	resp, err := m.Client.PullMessageBySeqs(ctx, req)
+	if err != nil {
+		// Wrap the error to provide more context if the gRPC call fails.
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (m *MessageRpcClient) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *msg.GetConversationsHasReadAndMaxSeqReq) (*msg.GetConversationsHasReadAndMaxSeqResp, error) {
+	resp, err := m.Client.GetConversationsHasReadAndMaxSeq(ctx, req)
 	if err != nil {
 		// Wrap the error to provide more context if the gRPC call fails.
 		return nil, err

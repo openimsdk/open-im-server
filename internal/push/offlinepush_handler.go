@@ -63,7 +63,7 @@ func (o *OfflinePushConsumerHandler) handleMsg2OfflinePush(ctx context.Context, 
 	}
 }
 
-func (c *OfflinePushConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (title, content string, opts *options.Opts, err error) {
+func (o *OfflinePushConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (title, content string, opts *options.Opts, err error) {
 	type AtTextElem struct {
 		Text       string   `json:"text,omitempty"`
 		AtUserList []string `json:"atUserList,omitempty"`
@@ -108,12 +108,12 @@ func (c *OfflinePushConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (ti
 	return
 }
 
-func (c *OfflinePushConsumerHandler) offlinePushMsg(ctx context.Context, msg *sdkws.MsgData, offlinePushUserIDs []string) error {
-	title, content, opts, err := c.getOfflinePushInfos(msg)
+func (o *OfflinePushConsumerHandler) offlinePushMsg(ctx context.Context, msg *sdkws.MsgData, offlinePushUserIDs []string) error {
+	title, content, opts, err := o.getOfflinePushInfos(msg)
 	if err != nil {
 		return err
 	}
-	err = c.offlinePusher.Push(ctx, offlinePushUserIDs, title, content, opts)
+	err = o.offlinePusher.Push(ctx, offlinePushUserIDs, title, content, opts)
 	if err != nil {
 		prommetrics.MsgOfflinePushFailedCounter.Inc()
 		return err

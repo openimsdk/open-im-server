@@ -51,6 +51,11 @@ type ExpirationLRU[K comparable, V any] struct {
 	target     Target
 }
 
+func (x *ExpirationLRU[K, V]) GetBatch(keys []K, fetch func(keys []K) (map[K]V, error)) (map[K]V, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (x *ExpirationLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	x.lock.Lock()
 	v, ok := x.core.Get(key)
@@ -97,6 +102,12 @@ func (x *ExpirationLRU[K, V]) SetHas(key K, value V) bool {
 		return true
 	}
 	return false
+}
+
+func (x *ExpirationLRU[K, V]) Set(key K, value V) {
+	x.lock.Lock()
+	defer x.lock.Unlock()
+	x.core.Add(key, &expirationLruItem[V]{value: value})
 }
 
 func (x *ExpirationLRU[K, V]) Stop() {

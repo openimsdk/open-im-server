@@ -304,6 +304,13 @@ func (g *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	}
 	g.notification.GroupCreatedNotification(ctx, tips)
 
+	if req.GroupInfo.Notification != "" {
+		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{
+			Group:  tips.Group,
+			OpUser: tips.OpUser,
+		})
+	}
+
 	reqCallBackAfter := &pbgroup.CreateGroupReq{
 		MemberUserIDs: userIDs,
 		GroupInfo:     resp.GroupInfo,

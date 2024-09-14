@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/dtm-labs/rockscache"
+	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/singleflight"
@@ -65,6 +66,7 @@ func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rockscac
 				}
 				bs, err := json.Marshal(value)
 				if err != nil {
+					log.ZError(ctx, "marshal failed", err)
 					return nil, err
 				}
 				cacheIndex[index] = string(bs)
@@ -72,7 +74,7 @@ func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rockscac
 			return cacheIndex, nil
 		})
 		if err != nil {
-			return nil, err
+			return nil, errs.WrapMsg(err, "FetchBatch2 failed")
 		}
 		for index, data := range indexCache {
 			if data == "" {
@@ -80,7 +82,7 @@ func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rockscac
 			}
 			var value V
 			if err := json.Unmarshal([]byte(data), &value); err != nil {
-				return nil, err
+				return nil, errs.WrapMsg(err, "Unmarshal failed")
 			}
 			if cb, ok := any(&value).(BatchCacheCallback[K]); ok {
 				cb.BatchCache(keyId[keys[index]])
