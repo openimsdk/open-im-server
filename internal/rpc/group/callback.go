@@ -359,10 +359,10 @@ func (s *groupServer) webhookAfterSetGroupInfo(ctx context.Context, after *confi
 	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &callbackstruct.CallbackAfterSetGroupInfoResp{}, after)
 }
 
-func (s *groupServer) webhookBeforeSetGroupInfoEX(ctx context.Context, before *config.BeforeConfig, req *group.SetGroupInfoEXReq) error {
+func (s *groupServer) webhookBeforeSetGroupInfoEx(ctx context.Context, before *config.BeforeConfig, req *group.SetGroupInfoExReq) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
-		cbReq := &callbackstruct.CallbackBeforeSetGroupInfoEXReq{
-			CallbackCommand: callbackstruct.CallbackBeforeSetGroupInfoCommand,
+		cbReq := &callbackstruct.CallbackBeforeSetGroupInfoExReq{
+			CallbackCommand: callbackstruct.CallbackBeforeSetGroupInfoExCommand,
 			GroupID:         req.GroupInfoForSet.GroupID,
 			GroupName:       req.GroupInfoForSet.GroupName,
 			Notification:    req.GroupInfoForSet.Notification,
@@ -385,7 +385,7 @@ func (s *groupServer) webhookBeforeSetGroupInfoEX(ctx context.Context, before *c
 			cbReq.ApplyMemberFriend = req.GroupInfoForSet.ApplyMemberFriend
 		}
 
-		resp := &callbackstruct.CallbackBeforeSetGroupInfoEXResp{}
+		resp := &callbackstruct.CallbackBeforeSetGroupInfoExResp{}
 
 		if err := s.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
 			return err
@@ -404,9 +404,9 @@ func (s *groupServer) webhookBeforeSetGroupInfoEX(ctx context.Context, before *c
 	})
 }
 
-func (s *groupServer) webhookAfterSetGroupInfoEX(ctx context.Context, after *config.AfterConfig, req *group.SetGroupInfoEXReq) {
-	cbReq := &callbackstruct.CallbackAfterSetGroupInfoEXReq{
-		CallbackCommand: callbackstruct.CallbackAfterSetGroupInfoCommand,
+func (s *groupServer) webhookAfterSetGroupInfoEx(ctx context.Context, after *config.AfterConfig, req *group.SetGroupInfoExReq) {
+	cbReq := &callbackstruct.CallbackAfterSetGroupInfoExReq{
+		CallbackCommand: callbackstruct.CallbackAfterSetGroupInfoExCommand,
 		GroupID:         req.GroupInfoForSet.GroupID,
 		GroupName:       req.GroupInfoForSet.GroupName,
 		Notification:    req.GroupInfoForSet.Notification,
@@ -427,5 +427,5 @@ func (s *groupServer) webhookAfterSetGroupInfoEX(ctx context.Context, after *con
 		cbReq.ApplyMemberFriend = req.GroupInfoForSet.ApplyMemberFriend
 	}
 
-	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &callbackstruct.CallbackAfterSetGroupInfoEXResp{}, after)
+	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &callbackstruct.CallbackAfterSetGroupInfoExResp{}, after)
 }

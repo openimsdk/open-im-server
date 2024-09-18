@@ -54,7 +54,7 @@ func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[s
 	return m
 }
 
-func UpdateGroupInfoEXMap(ctx context.Context, group *sdkws.GroupInfoForSetEX) map[string]any {
+func UpdateGroupInfoExMap(ctx context.Context, group *sdkws.GroupInfoForSetEx) map[string]any {
 	m := make(map[string]any)
 
 	if group.GroupName != "" {

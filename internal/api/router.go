@@ -130,7 +130,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	{
 		groupRouterGroup.POST("/create_group", g.CreateGroup)
 		groupRouterGroup.POST("/set_group_info", g.SetGroupInfo)
-		groupRouterGroup.POST("/set_group_info_ex", g.SetGroupInfoEX)
+		groupRouterGroup.POST("/set_group_info_ex", g.SetGroupInfoEx)
 		groupRouterGroup.POST("/join_group", g.JoinGroup)
 		groupRouterGroup.POST("/quit_group", g.QuitGroup)
 		groupRouterGroup.POST("/group_application_response", g.ApplicationGroupResponse)

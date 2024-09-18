@@ -1058,7 +1058,7 @@ func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	return &pbgroup.SetGroupInfoResp{}, nil
 }
 
-func (g *groupServer) SetGroupInfoEX(ctx context.Context, req *pbgroup.SetGroupInfoEXReq) (*pbgroup.SetGroupInfoEXResp, error) {
+func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupInfoExReq) (*pbgroup.SetGroupInfoExResp, error) {
 	var opMember *model.GroupMember
 
 	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
@@ -1078,7 +1078,7 @@ func (g *groupServer) SetGroupInfoEX(ctx context.Context, req *pbgroup.SetGroupI
 		}
 	}
 
-	if err := g.webhookBeforeSetGroupInfoEX(ctx, &g.config.WebhooksConfig.BeforeSetGroupInfoEX, req); err != nil && err != servererrs.ErrCallbackContinue {
+	if err := g.webhookBeforeSetGroupInfoEx(ctx, &g.config.WebhooksConfig.BeforeSetGroupInfoEx, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -1104,9 +1104,9 @@ func (g *groupServer) SetGroupInfoEX(ctx context.Context, req *pbgroup.SetGroupI
 		return nil, err
 	}
 
-	updatedData := UpdateGroupInfoEXMap(ctx, req.GroupInfoForSet)
+	updatedData := UpdateGroupInfoExMap(ctx, req.GroupInfoForSet)
 	if len(updatedData) == 0 {
-		return &pbgroup.SetGroupInfoEXResp{}, nil
+		return &pbgroup.SetGroupInfoExResp{}, nil
 	}
 
 	if err := g.db.UpdateGroup(ctx, group.GroupID, updatedData); err != nil {
@@ -1166,9 +1166,9 @@ func (g *groupServer) SetGroupInfoEX(ctx context.Context, req *pbgroup.SetGroupI
 		g.notification.GroupInfoSetNotification(ctx, tips)
 	}
 
-	g.webhookAfterSetGroupInfoEX(ctx, &g.config.WebhooksConfig.AfterSetGroupInfoEX, req)
+	g.webhookAfterSetGroupInfoEx(ctx, &g.config.WebhooksConfig.AfterSetGroupInfoEx, req)
 
-	return &pbgroup.SetGroupInfoEXResp{}, nil
+	return &pbgroup.SetGroupInfoExResp{}, nil
 }
 
 func (g *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.TransferGroupOwnerReq) (*pbgroup.TransferGroupOwnerResp, error) {
