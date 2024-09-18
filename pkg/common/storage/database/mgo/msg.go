@@ -8,6 +8,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/utils/datautil"
+	"golang.org/x/exp/rand"
 
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
@@ -117,9 +118,9 @@ func (m *MsgMgo) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID, docID strin
 }
 
 func (m *MsgMgo) getMsgBySeqIndexIn1Doc(ctx context.Context, userID, docID string, seqs []int64) ([]*model.MsgInfoModel, error) {
-	indexs := make([]int64, 0, len(seqs))
+	indexes := make([]int64, 0, len(seqs))
 	for _, seq := range seqs {
-		indexs = append(indexs, m.model.GetMsgIndex(seq))
+		indexes = append(indexes, m.model.GetMsgIndex(seq))
 	}
 	pipeline := mongo.Pipeline{
 		bson.D{{Key: "$match", Value: bson.D{
@@ -130,7 +131,7 @@ func (m *MsgMgo) getMsgBySeqIndexIn1Doc(ctx context.Context, userID, docID strin
 			{Key: "doc_id", Value: 1},
 			{Key: "msgs", Value: bson.D{
 				{Key: "$map", Value: bson.D{
-					{Key: "input", Value: indexs},
+					{Key: "input", Value: indexes},
 					{Key: "as", Value: "index"},
 					{Key: "in", Value: bson.D{
 						{Key: "$arrayElemAt", Value: bson.A{"$msgs", "$$index"}},
@@ -1226,10 +1227,53 @@ func (m *MsgMgo) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string
 	}
 }
 
-func (m *MsgMgo) GetBeforeMsg(ctx context.Context, ts int64, limit int) ([]*model.MsgDocModel, error) {
+func (m *MsgMgo) GetDocIDs(ctx context.Context) ([]string, error) {
+	limit := 5000
+	var skip int
+	var docIDs []string
+	var offset int
+
+	count, err := m.coll.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	if count < int64(limit) {
+		skip = 0
+	} else {
+		rand.Seed(uint64(time.Now().UnixMilli()))
+		skip = rand.Intn(int(count / int64(limit)))
+		offset = skip * limit
+	}
+	log.ZDebug(ctx, "offset", "skip", skip, "offset", offset)
+	res, err := mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, []bson.M{
+		{
+			"$project": bson.M{
+				"doc_id": 1,
+			},
+		},
+		{
+			"$skip": offset,
+		},
+		{
+			"$limit": limit,
+		},
+	})
+
+	for _, doc := range res {
+		docIDs = append(docIDs, doc.DocID)
+	}
+
+	return docIDs, errs.Wrap(err)
+}
+
+func (m *MsgMgo) GetBeforeMsg(ctx context.Context, ts int64, docIDs []string, limit int) ([]*model.MsgDocModel, error) {
 	return mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, []bson.M{
 		{
 			"$match": bson.M{
+				"doc_id": bson.M{
+					"$in": docIDs,
+				},
 				"msgs.msg.send_time": bson.M{
 					"$lt": ts,
 				},

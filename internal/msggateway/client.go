@@ -22,6 +22,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"google.golang.org/protobuf/proto"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
@@ -30,7 +32,6 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/stringutil"
-	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -220,6 +221,10 @@ func (c *Client) handleMessage(message []byte) error {
 		resp, messageErr = c.longConnServer.SendSignalMessage(ctx, binaryReq)
 	case WSPullMsgBySeqList:
 		resp, messageErr = c.longConnServer.PullMessageBySeqList(ctx, binaryReq)
+	case WSPullMsg:
+		resp, messageErr = c.longConnServer.GetSeqMessage(ctx, binaryReq)
+	case WSGetConvMaxReadSeq:
+		resp, messageErr = c.longConnServer.GetConversationsHasReadAndMaxSeq(ctx, binaryReq)
 	case WsLogoutMsg:
 		resp, messageErr = c.longConnServer.UserLogout(ctx, binaryReq)
 	case WsSetBackgroundStatus:
@@ -271,11 +276,13 @@ func (c *Client) replyMessage(ctx context.Context, binaryReq *Req, err error, re
 		ErrMsg:        errResp.ErrMsg,
 		Data:          resp,
 	}
+	t := time.Now()
 	log.ZDebug(ctx, "gateway reply message", "resp", mReply.String())
 	err = c.writeBinaryMsg(mReply)
 	if err != nil {
 		log.ZWarn(ctx, "wireBinaryMsg replyMessage", err, "resp", mReply.String())
 	}
+	log.ZDebug(ctx, "wireBinaryMsg end", "time cost", time.Since(t))
 
 	if binaryReq.ReqIdentifier == WsLogoutMsg {
 		return errs.New("user logout", "operationID", binaryReq.OperationID).Wrap()

@@ -1,6 +1,9 @@
 package cachekey
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 const (
 	OnlineKey     = "ONLINE:"
@@ -10,4 +13,8 @@ const (
 
 func GetOnlineKey(userID string) string {
 	return OnlineKey + userID
+}
+
+func GetOnlineKeyUserID(key string) string {
+	return strings.TrimPrefix(key, OnlineKey)
 }

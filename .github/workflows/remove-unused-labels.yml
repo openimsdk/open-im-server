@@ -1,0 +1,74 @@
+name: Remove Unused Labels
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: read
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Fetch All Issues and PRs
+        id: fetch_issues_prs
+        uses: actions/github-script@v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              per_page: 100
+            });
+
+            const labelsInUse = new Set();
+            issues.forEach(issue => {
+              issue.labels.forEach(label => {
+                labelsInUse.add(label.name);
+              });
+            });
+
+            return JSON.stringify(Array.from(labelsInUse));
+          result-encoding: string
+
+      - name: Fetch All Labels
+        id: fetch_labels
+        uses: actions/github-script@v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const labels = await github.paginate(github.rest.issues.listLabelsForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+
+            return JSON.stringify(labels.map(label => label.name));
+          result-encoding: string
+
+      - name: Remove Unused Labels
+        uses: actions/github-script@v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const labelsInUse = new Set(JSON.parse(process.env.LABELS_IN_USE));
+            const allLabels = JSON.parse(process.env.ALL_LABELS);
+
+            const unusedLabels = allLabels.filter(label => !labelsInUse.has(label));
+
+            for (const label of unusedLabels) {
+              await github.rest.issues.deleteLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: label
+              });
+              console.log(`Deleted label: ${label}`);
+            }
+        env:
+          LABELS_IN_USE: ${{ steps.fetch_issues_prs.outputs.result }}
+          ALL_LABELS: ${{ steps.fetch_labels.outputs.result }}

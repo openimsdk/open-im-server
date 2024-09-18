@@ -169,6 +169,15 @@ func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
 	return authverify.CheckAccessV3(ctx, ownerUserID, u.imAdminUserID)
 }
 
+// GetAllUserID retrieves all user IDs with pagination options.
+func (u *UserRpcClient) GetAllUserID(ctx context.Context, pageNumber, showNumber int32) (*user.GetAllUserIDResp, error) {
+	resp, err := u.Client.GetAllUserID(ctx, &user.GetAllUserIDReq{Pagination: &sdkws.RequestPagination{PageNumber: pageNumber, ShowNumber: showNumber}})
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 // GetAllUserIDs retrieves all user IDs with pagination options.
 func (u *UserRpcClient) GetAllUserIDs(ctx context.Context, pageNumber, showNumber int32) ([]string, error) {
 	resp, err := u.Client.GetAllUserID(ctx, &user.GetAllUserIDReq{Pagination: &sdkws.RequestPagination{PageNumber: pageNumber, ShowNumber: showNumber}})
@@ -214,4 +223,8 @@ func (u *UserRpcClient) GetUserOnlinePlatform(ctx context.Context, userID string
 		return nil, nil
 	}
 	return resp[0].PlatformIDs, nil
+}
+
+func (u *UserRpcClient) GetAllOnlineUsers(ctx context.Context, cursor uint64) (*user.GetAllOnlineUsersResp, error) {
+	return u.Client.GetAllOnlineUsers(ctx, &user.GetAllOnlineUsersReq{Cursor: cursor})
 }

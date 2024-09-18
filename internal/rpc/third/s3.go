@@ -290,6 +290,7 @@ func (t *thirdServer) apiAddress(prefix, name string) string {
 func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteOutdatedDataReq) (*third.DeleteOutdatedDataResp, error) {
 	var conf config.Third
 	expireTime := time.UnixMilli(req.ExpireTime)
+	var deltotal int
 	findPagination := &sdkws.RequestPagination{
 		PageNumber: 1,
 		ShowNumber: 1000,
@@ -311,10 +312,8 @@ func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteO
 				return nil, errs.Wrap(err)
 			}
 			if int(count) < 1 && t.minio != nil {
-				thumbnailKey, err := t.getMinioImageThumbnailKey(ctx, key)
-				if err != nil {
-					return nil, errs.Wrap(err)
-				}
+				thumbnailKey, _ := t.getMinioImageThumbnailKey(ctx, key)
+
 				t.s3dataBase.DeleteObject(ctx, thumbnailKey)
 				t.s3dataBase.DelS3Key(ctx, conf.Object.Enable, needDelObjectKeys...)
 				t.s3dataBase.DeleteObject(ctx, key)
@@ -329,7 +328,9 @@ func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteO
 		if total < int64(findPagination.ShowNumber) {
 			break
 		}
+		deltotal += int(total)
 	}
+	log.ZDebug(ctx, "DeleteOutdatedData", "delete Total", deltotal)
 	return &third.DeleteOutdatedDataResp{}, nil
 }
 

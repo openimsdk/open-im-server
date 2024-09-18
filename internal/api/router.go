@@ -2,11 +2,16 @@ package api
 
 import (
 	"fmt"
+	"github.com/gin-contrib/gzip"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"net/http"
+	"strings"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -16,8 +21,13 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
-	"net/http"
-	"strings"
+)
+
+const (
+	NoCompression      = -1
+	DefaultCompression = 0
+	BestCompression    = 1
+	BestSpeed          = 2
 )
 
 func prommetricsGin() gin.HandlerFunc {
@@ -52,7 +62,15 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	conversationRpc := rpcclient.NewConversation(disCov, config.Share.RpcRegisterName.Conversation)
 	authRpc := rpcclient.NewAuth(disCov, config.Share.RpcRegisterName.Auth)
 	thirdRpc := rpcclient.NewThird(disCov, config.Share.RpcRegisterName.Third, config.API.Prometheus.GrafanaURL)
-
+	switch config.API.Api.CompressionLevel {
+	case NoCompression:
+	case DefaultCompression:
+		r.Use(gzip.Gzip(gzip.DefaultCompression))
+	case BestCompression:
+		r.Use(gzip.Gzip(gzip.BestCompression))
+	case BestSpeed:
+		r.Use(gzip.Gzip(gzip.BestSpeed))
+	}
 	r.Use(prommetricsGin(), gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID(), GinParseToken(authRpc))
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc, config.Share.IMAdminUserID)
@@ -112,6 +130,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	{
 		groupRouterGroup.POST("/create_group", g.CreateGroup)
 		groupRouterGroup.POST("/set_group_info", g.SetGroupInfo)
+		groupRouterGroup.POST("/set_group_info_ex", g.SetGroupInfoEX)
 		groupRouterGroup.POST("/join_group", g.JoinGroup)
 		groupRouterGroup.POST("/quit_group", g.QuitGroup)
 		groupRouterGroup.POST("/group_application_response", g.ApplicationGroupResponse)
