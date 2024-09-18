@@ -363,26 +363,26 @@ func (s *groupServer) webhookBeforeSetGroupInfoEX(ctx context.Context, before *c
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		cbReq := &callbackstruct.CallbackBeforeSetGroupInfoEXReq{
 			CallbackCommand: callbackstruct.CallbackBeforeSetGroupInfoCommand,
-			GroupID:         req.GroupInfoForSetEX.GroupID,
-			GroupName:       req.GroupInfoForSetEX.GroupName,
-			Notification:    req.GroupInfoForSetEX.Notification,
-			Introduction:    req.GroupInfoForSetEX.Introduction,
-			FaceURL:         req.GroupInfoForSetEX.FaceURL,
+			GroupID:         req.GroupInfoForSet.GroupID,
+			GroupName:       req.GroupInfoForSet.GroupName,
+			Notification:    req.GroupInfoForSet.Notification,
+			Introduction:    req.GroupInfoForSet.Introduction,
+			FaceURL:         req.GroupInfoForSet.FaceURL,
 		}
 
-		if req.GroupInfoForSetEX.Ex != nil {
-			cbReq.Ex = req.GroupInfoForSetEX.Ex
+		if req.GroupInfoForSet.Ex != nil {
+			cbReq.Ex = req.GroupInfoForSet.Ex
 		}
 		log.ZDebug(ctx, "debug CallbackBeforeSetGroupInfoEX", "ex", cbReq.Ex)
 
-		if req.GroupInfoForSetEX.NeedVerification != nil {
-			cbReq.NeedVerification = req.GroupInfoForSetEX.NeedVerification
+		if req.GroupInfoForSet.NeedVerification != nil {
+			cbReq.NeedVerification = req.GroupInfoForSet.NeedVerification
 		}
-		if req.GroupInfoForSetEX.LookMemberInfo != nil {
-			cbReq.LookMemberInfo = req.GroupInfoForSetEX.LookMemberInfo
+		if req.GroupInfoForSet.LookMemberInfo != nil {
+			cbReq.LookMemberInfo = req.GroupInfoForSet.LookMemberInfo
 		}
-		if req.GroupInfoForSetEX.ApplyMemberFriend != nil {
-			cbReq.ApplyMemberFriend = req.GroupInfoForSetEX.ApplyMemberFriend
+		if req.GroupInfoForSet.ApplyMemberFriend != nil {
+			cbReq.ApplyMemberFriend = req.GroupInfoForSet.ApplyMemberFriend
 		}
 
 		resp := &callbackstruct.CallbackBeforeSetGroupInfoEXResp{}
@@ -391,14 +391,14 @@ func (s *groupServer) webhookBeforeSetGroupInfoEX(ctx context.Context, before *c
 			return err
 		}
 
-		datautil.NotNilReplace(&req.GroupInfoForSetEX.GroupID, &resp.GroupID)
-		datautil.NotNilReplace(&req.GroupInfoForSetEX.GroupName, &resp.GroupName)
-		datautil.NotNilReplace(&req.GroupInfoForSetEX.FaceURL, &resp.FaceURL)
-		datautil.NotNilReplace(&req.GroupInfoForSetEX.Introduction, &resp.Introduction)
-		datautil.NotNilReplace(&req.GroupInfoForSetEX.Ex, &resp.Ex)
-		datautil.NotNilReplace(&req.GroupInfoForSetEX.NeedVerification, &resp.NeedVerification)
-		datautil.NotNilReplace(&req.GroupInfoForSetEX.LookMemberInfo, &resp.LookMemberInfo)
-		datautil.NotNilReplace(&req.GroupInfoForSetEX.ApplyMemberFriend, &resp.ApplyMemberFriend)
+		datautil.NotNilReplace(&req.GroupInfoForSet.GroupID, &resp.GroupID)
+		datautil.NotNilReplace(&req.GroupInfoForSet.GroupName, &resp.GroupName)
+		datautil.NotNilReplace(&req.GroupInfoForSet.FaceURL, &resp.FaceURL)
+		datautil.NotNilReplace(&req.GroupInfoForSet.Introduction, &resp.Introduction)
+		datautil.NotNilReplace(&req.GroupInfoForSet.Ex, &resp.Ex)
+		datautil.NotNilReplace(&req.GroupInfoForSet.NeedVerification, &resp.NeedVerification)
+		datautil.NotNilReplace(&req.GroupInfoForSet.LookMemberInfo, &resp.LookMemberInfo)
+		datautil.NotNilReplace(&req.GroupInfoForSet.ApplyMemberFriend, &resp.ApplyMemberFriend)
 
 		return nil
 	})
@@ -407,24 +407,24 @@ func (s *groupServer) webhookBeforeSetGroupInfoEX(ctx context.Context, before *c
 func (s *groupServer) webhookAfterSetGroupInfoEX(ctx context.Context, after *config.AfterConfig, req *group.SetGroupInfoEXReq) {
 	cbReq := &callbackstruct.CallbackAfterSetGroupInfoEXReq{
 		CallbackCommand: callbackstruct.CallbackAfterSetGroupInfoCommand,
-		GroupID:         req.GroupInfoForSetEX.GroupID,
-		GroupName:       req.GroupInfoForSetEX.GroupName,
-		Notification:    req.GroupInfoForSetEX.Notification,
-		Introduction:    req.GroupInfoForSetEX.Introduction,
-		FaceURL:         req.GroupInfoForSetEX.FaceURL,
+		GroupID:         req.GroupInfoForSet.GroupID,
+		GroupName:       req.GroupInfoForSet.GroupName,
+		Notification:    req.GroupInfoForSet.Notification,
+		Introduction:    req.GroupInfoForSet.Introduction,
+		FaceURL:         req.GroupInfoForSet.FaceURL,
 	}
 
-	if req.GroupInfoForSetEX.Ex != nil {
-		cbReq.Ex = req.GroupInfoForSetEX.Ex
+	if req.GroupInfoForSet.Ex != nil {
+		cbReq.Ex = req.GroupInfoForSet.Ex
 	}
-	if req.GroupInfoForSetEX.NeedVerification != nil {
-		cbReq.NeedVerification = req.GroupInfoForSetEX.NeedVerification
+	if req.GroupInfoForSet.NeedVerification != nil {
+		cbReq.NeedVerification = req.GroupInfoForSet.NeedVerification
 	}
-	if req.GroupInfoForSetEX.LookMemberInfo != nil {
-		cbReq.LookMemberInfo = req.GroupInfoForSetEX.LookMemberInfo
+	if req.GroupInfoForSet.LookMemberInfo != nil {
+		cbReq.LookMemberInfo = req.GroupInfoForSet.LookMemberInfo
 	}
-	if req.GroupInfoForSetEX.ApplyMemberFriend != nil {
-		cbReq.ApplyMemberFriend = req.GroupInfoForSetEX.ApplyMemberFriend
+	if req.GroupInfoForSet.ApplyMemberFriend != nil {
+		cbReq.ApplyMemberFriend = req.GroupInfoForSet.ApplyMemberFriend
 	}
 
 	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &callbackstruct.CallbackAfterSetGroupInfoEXResp{}, after)

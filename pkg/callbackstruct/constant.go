@@ -18,7 +18,7 @@ const (
 	CallbackBeforeInviteJoinGroupCommand    = "callbackBeforeInviteJoinGroupCommand"
 	CallbackAfterJoinGroupCommand           = "callbackAfterJoinGroupCommand"
 	CallbackAfterSetGroupInfoCommand        = "callbackAfterSetGroupInfoCommand"
-	CallbackAfterSetGroupInfoEXCommand      = "callbackAfterSetGroupInfoCommandEX"
+	CallbackAfterSetGroupInfoEXCommand      = "callbackAfterSetGroupInfoEXCommand"
 	CallbackBeforeSetGroupInfoCommand       = "callbackBeforeSetGroupInfoCommand"
 	CallbackBeforeSetGroupInfoEXCommand     = "callbackBeforeSetGroupInfoEXCommand"
 	CallbackAfterRevokeMsgCommand           = "callbackBeforeAfterMsgCommand"
