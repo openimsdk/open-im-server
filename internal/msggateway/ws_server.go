@@ -425,6 +425,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.ZDebug(connContext, "new conn", "token", connContext.GetToken())
 	// Create a WebSocket long connection object
 	wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
 	if err := wsLongConn.GenerateLongConn(w, r); err != nil {
