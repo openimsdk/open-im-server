@@ -1104,9 +1104,13 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		return nil, err
 	}
 
-	updatedData := UpdateGroupInfoExMap(ctx, req)
+	updatedData, err := UpdateGroupInfoExMap(ctx, req)
 	if len(updatedData) == 0 {
 		return &pbgroup.SetGroupInfoExResp{}, nil
+	}
+
+	if err != nil {
+		return nil, err
 	}
 
 	if err := g.db.UpdateGroup(ctx, group.GroupID, updatedData); err != nil {
