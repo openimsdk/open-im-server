@@ -130,10 +130,10 @@ beforeSetGroupInfo:
   enable: false
   timeout: 5
   failedContinue: true
-afterSetGroupInfoEX:
+afterSetGroupInfoEx:
   enable: false
   timeout: 5
-beforeSetGroupInfoEX:
+beforeSetGroupInfoEx:
   enable: false
   timeout: 5
   failedContinue: true
