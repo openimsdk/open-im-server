@@ -248,7 +248,7 @@ type CallbackBeforeSetGroupInfoExReq struct {
 	CallbackCommand   `json:"callbackCommand"`
 	OperationID       string                  `json:"operationID"`
 	GroupID           string                  `json:"groupID"`
-	GroupName         string                  `json:"groupName"`
+	GroupName         *wrapperspb.StringValue `json:"groupName"`
 	Notification      *wrapperspb.StringValue `json:"notification"`
 	Introduction      *wrapperspb.StringValue `json:"introduction"`
 	FaceURL           *wrapperspb.StringValue `json:"faceURL"`
@@ -261,7 +261,7 @@ type CallbackBeforeSetGroupInfoExReq struct {
 type CallbackBeforeSetGroupInfoExResp struct {
 	CommonCallbackResp
 	GroupID           string                  `json:"groupID"`
-	GroupName         string                  `json:"groupName"`
+	GroupName         *wrapperspb.StringValue `json:"groupName"`
 	Notification      *wrapperspb.StringValue `json:"notification"`
 	Introduction      *wrapperspb.StringValue `json:"introduction"`
 	FaceURL           *wrapperspb.StringValue `json:"faceURL"`
@@ -275,7 +275,7 @@ type CallbackAfterSetGroupInfoExReq struct {
 	CallbackCommand   `json:"callbackCommand"`
 	OperationID       string                  `json:"operationID"`
 	GroupID           string                  `json:"groupID"`
-	GroupName         string                  `json:"groupName"`
+	GroupName         *wrapperspb.StringValue `json:"groupName"`
 	Notification      *wrapperspb.StringValue `json:"notification"`
 	Introduction      *wrapperspb.StringValue `json:"introduction"`
 	FaceURL           *wrapperspb.StringValue `json:"faceURL"`

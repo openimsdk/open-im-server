@@ -1064,7 +1064,7 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
 		var err error
 
-		opMember, err = g.db.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, mcontext.GetOpUserID(ctx))
+		opMember, err = g.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -1082,7 +1082,7 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		return nil, err
 	}
 
-	group, err := g.db.TakeGroup(ctx, req.GroupInfoForSet.GroupID)
+	group, err := g.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -1104,7 +1104,7 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		return nil, err
 	}
 
-	updatedData := UpdateGroupInfoExMap(ctx, req.GroupInfoForSet)
+	updatedData := UpdateGroupInfoExMap(ctx, req)
 	if len(updatedData) == 0 {
 		return &pbgroup.SetGroupInfoExResp{}, nil
 	}
@@ -1113,7 +1113,7 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		return nil, err
 	}
 
-	group, err = g.db.TakeGroup(ctx, req.GroupInfoForSet.GroupID)
+	group, err = g.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -1129,18 +1129,18 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 	}
 
 	num := len(updatedData)
-	if req.GroupInfoForSet.Notification != nil {
+	if req.Notification != nil {
 		num--
 
-		if req.GroupInfoForSet.Notification.Value != "" {
+		if req.Notification.Value != "" {
 			func() {
 				conversation := &pbconversation.ConversationReq{
-					ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupInfoForSet.GroupID),
+					ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
 					ConversationType: constant.ReadGroupChatType,
-					GroupID:          req.GroupInfoForSet.GroupID,
+					GroupID:          req.GroupID,
 				}
 
-				resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupInfoForSet.GroupID})
+				resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupID})
 				if err != nil {
 					log.ZWarn(ctx, "GetGroupMemberIDs is failed.", err)
 					return
@@ -1157,7 +1157,7 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		}
 	}
 
-	if req.GroupInfoForSet.GroupName != "" {
+	if req.GroupName != nil {
 		num--
 		g.notification.GroupInfoSetNameNotification(ctx, &sdkws.GroupInfoSetNameTips{Group: tips.Group, OpUser: tips.OpUser})
 	}

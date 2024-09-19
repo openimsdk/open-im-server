@@ -54,10 +54,10 @@ func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[s
 	return m
 }
 
-func UpdateGroupInfoExMap(ctx context.Context, group *sdkws.GroupInfoForSetEx) map[string]any {
+func UpdateGroupInfoExMap(ctx context.Context, group *pbgroup.SetGroupInfoExReq) map[string]any {
 	m := make(map[string]any)
 
-	if group.GroupName != "" {
+	if group.GroupName != nil {
 		m["group_name"] = group.GroupName
 	}
 	if group.Notification != nil {
