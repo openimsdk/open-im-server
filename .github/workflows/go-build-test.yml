@@ -143,7 +143,7 @@ jobs:
 
       - name: Build test SDK core
         run: |
-          cd ${{ env.SDK_DIR }}
+          cd ${{ github.workspace }}/${{ env.SDK_DIR }}
           go mod tidy
           cd integration_test
           mkdir data
