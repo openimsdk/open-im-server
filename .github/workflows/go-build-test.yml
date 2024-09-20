@@ -105,14 +105,14 @@ jobs:
         go_version: [ "1.22.x" ]
 
     steps:
+      - name: Checkout Server repository
+        uses: actions/checkout@v4
+
       - name: Checkout SDK repository
         uses: actions/checkout@v4
         with:
           repository: 'openimsdk/openim-sdk-core'
           path: ${{ env.SDK_DIR }}
-
-      - name: Checkout Server repository
-        uses: actions/checkout@v4
 
       - name: Set up Go ${{ matrix.go_version }}
         uses: actions/setup-go@v5
@@ -143,7 +143,7 @@ jobs:
 
       - name: Build test SDK core
         run: |
-          cd ${{ github.workspace }}/${{ env.SDK_DIR }}
+          cd ${{ env.SDK_DIR }}
           go mod tidy
           cd integration_test
           mkdir data
