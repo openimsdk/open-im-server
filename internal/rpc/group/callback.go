@@ -218,6 +218,7 @@ func (s *groupServer) webhookAfterKickGroupMember(ctx context.Context, after *co
 		CallbackCommand: callbackstruct.CallbackAfterKickGroupCommand,
 		GroupID:         req.GroupID,
 		KickedUserIDs:   req.KickedUserIDs,
+		Reason:          req.Reason,
 	}
 	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &callbackstruct.CallbackKillGroupMemberResp{}, after)
 }
