@@ -53,8 +53,7 @@ type User struct {
 
 // UserRegisterRequest represents a request to register a user.
 type UserRegisterRequest struct {
-	Secret string `json:"secret"`
-	Users  []User `json:"users"`
+	Users []User `json:"users"`
 }
 
 /* func main() {
@@ -109,8 +108,7 @@ func RegisterUser(token, userID, nickname, faceURL string) error {
 		FaceURL:  faceURL,
 	}
 	reqBody := UserRegisterRequest{
-		Secret: SecretKey,
-		Users:  []User{user},
+		Users: []User{user},
 	}
 	reqBytes, err := json.Marshal(reqBody)
 	if err != nil {

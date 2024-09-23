@@ -16,6 +16,7 @@ package user
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/tools/utils/datautil"
 
@@ -88,7 +89,6 @@ func (s *userServer) webhookBeforeUserRegister(ctx context.Context, before *conf
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		cbReq := &cbapi.CallbackBeforeUserRegisterReq{
 			CallbackCommand: cbapi.CallbackBeforeUserRegisterCommand,
-			Secret:          req.Secret,
 			Users:           req.Users,
 		}
 
@@ -108,7 +108,6 @@ func (s *userServer) webhookBeforeUserRegister(ctx context.Context, before *conf
 func (s *userServer) webhookAfterUserRegister(ctx context.Context, after *config.AfterConfig, req *pbuser.UserRegisterReq) {
 	cbReq := &cbapi.CallbackAfterUserRegisterReq{
 		CallbackCommand: cbapi.CallbackAfterUserRegisterCommand,
-		Secret:          req.Secret,
 		Users:           req.Users,
 	}
 
