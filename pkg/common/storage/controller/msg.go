@@ -446,7 +446,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 
 func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (int64, int64, []*sdkws.MsgData, error) {
 	userMinSeq, err := db.seqUser.GetUserMinSeq(ctx, conversationID, userID)
-	if err != nil && errs.Unwrap(err) != redis.Nil {
+	if err != nil {
 		return 0, 0, nil, err
 	}
 	minSeq, err := db.seqConversation.GetMinSeq(ctx, conversationID)
@@ -457,14 +457,27 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, co
 	if err != nil {
 		return 0, 0, nil, err
 	}
-	if userMinSeq < minSeq {
+	userMaxSeq, err := db.seqUser.GetUserMaxSeq(ctx, conversationID, userID)
+	if err != nil {
+		return 0, 0, nil, err
+	}
+	if userMinSeq > minSeq {
 		minSeq = userMinSeq
 	}
-	var newSeqs []int64
+	if userMaxSeq > 0 && userMaxSeq < maxSeq {
+		maxSeq = userMaxSeq
+	}
+	newSeqs := make([]int64, 0, len(seqs))
 	for _, seq := range seqs {
+		if seq <= 0 {
+			continue
+		}
 		if seq >= minSeq && seq <= maxSeq {
 			newSeqs = append(newSeqs, seq)
 		}
+	}
+	if len(newSeqs) == 0 {
+		return minSeq, maxSeq, nil, nil
 	}
 	successMsgs, failedSeqs, err := db.msg.GetMessagesBySeq(ctx, conversationID, newSeqs)
 	if err != nil {
