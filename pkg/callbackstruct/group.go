@@ -244,11 +244,11 @@ type CallbackAfterSetGroupInfoResp struct {
 	CommonCallbackResp
 }
 
-type CallbackBeforeSetGroupInfoEXReq struct {
+type CallbackBeforeSetGroupInfoExReq struct {
 	CallbackCommand   `json:"callbackCommand"`
 	OperationID       string                  `json:"operationID"`
 	GroupID           string                  `json:"groupID"`
-	GroupName         string                  `json:"groupName"`
+	GroupName         *wrapperspb.StringValue `json:"groupName"`
 	Notification      *wrapperspb.StringValue `json:"notification"`
 	Introduction      *wrapperspb.StringValue `json:"introduction"`
 	FaceURL           *wrapperspb.StringValue `json:"faceURL"`
@@ -258,10 +258,10 @@ type CallbackBeforeSetGroupInfoEXReq struct {
 	ApplyMemberFriend *wrapperspb.Int32Value  `json:"applyMemberFriend"`
 }
 
-type CallbackBeforeSetGroupInfoEXResp struct {
+type CallbackBeforeSetGroupInfoExResp struct {
 	CommonCallbackResp
 	GroupID           string                  `json:"groupID"`
-	GroupName         string                  `json:"groupName"`
+	GroupName         *wrapperspb.StringValue `json:"groupName"`
 	Notification      *wrapperspb.StringValue `json:"notification"`
 	Introduction      *wrapperspb.StringValue `json:"introduction"`
 	FaceURL           *wrapperspb.StringValue `json:"faceURL"`
@@ -271,11 +271,11 @@ type CallbackBeforeSetGroupInfoEXResp struct {
 	ApplyMemberFriend *wrapperspb.Int32Value  `json:"applyMemberFriend"`
 }
 
-type CallbackAfterSetGroupInfoEXReq struct {
+type CallbackAfterSetGroupInfoExReq struct {
 	CallbackCommand   `json:"callbackCommand"`
 	OperationID       string                  `json:"operationID"`
 	GroupID           string                  `json:"groupID"`
-	GroupName         string                  `json:"groupName"`
+	GroupName         *wrapperspb.StringValue `json:"groupName"`
 	Notification      *wrapperspb.StringValue `json:"notification"`
 	Introduction      *wrapperspb.StringValue `json:"introduction"`
 	FaceURL           *wrapperspb.StringValue `json:"faceURL"`
@@ -285,6 +285,6 @@ type CallbackAfterSetGroupInfoEXReq struct {
 	ApplyMemberFriend *wrapperspb.Int32Value  `json:"applyMemberFriend"`
 }
 
-type CallbackAfterSetGroupInfoEXResp struct {
+type CallbackAfterSetGroupInfoExResp struct {
 	CommonCallbackResp
 }
