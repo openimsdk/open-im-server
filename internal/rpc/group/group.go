@@ -304,6 +304,13 @@ func (g *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	}
 	g.notification.GroupCreatedNotification(ctx, tips)
 
+	if req.GroupInfo.Notification != "" {
+		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{
+			Group:  tips.Group,
+			OpUser: tips.OpUser,
+		})
+	}
+
 	reqCallBackAfter := &pbgroup.CreateGroupReq{
 		MemberUserIDs: userIDs,
 		GroupInfo:     resp.GroupInfo,
@@ -833,7 +840,7 @@ func (g *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 		if member == nil {
 			log.ZDebug(ctx, "GroupApplicationResponse", "member is nil")
 		} else {
-			if err = g.notification.MemberEnterNotification(ctx, req.GroupID, req.FromUserID); err != nil {
+			if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, groupRequest.InviterUserID, req.FromUserID); err != nil {
 				return nil, err
 			}
 		}
@@ -1028,12 +1035,12 @@ func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 			}
 			resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupInfoForSet.GroupID})
 			if err != nil {
-				log.ZWarn(ctx, "GetGroupMemberIDs", err)
+				log.ZWarn(ctx, "GetGroupMemberIDs is failed.", err)
 				return
 			}
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
 			if err := g.conversationRpcClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
-				log.ZWarn(ctx, "SetConversations", err, resp.UserIDs, conversation)
+				log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
 			}
 		}()
 		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
@@ -1051,13 +1058,13 @@ func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	return &pbgroup.SetGroupInfoResp{}, nil
 }
 
-func (g *groupServer) SetGroupInfoEX(ctx context.Context, req *pbgroup.SetGroupInfoEXReq) (*pbgroup.SetGroupInfoEXResp, error) {
+func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupInfoExReq) (*pbgroup.SetGroupInfoExResp, error) {
 	var opMember *model.GroupMember
 
 	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
 		var err error
 
-		opMember, err = g.db.TakeGroupMember(ctx, req.GroupInfoForSetEX.GroupID, mcontext.GetOpUserID(ctx))
+		opMember, err = g.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -1071,11 +1078,11 @@ func (g *groupServer) SetGroupInfoEX(ctx context.Context, req *pbgroup.SetGroupI
 		}
 	}
 
-	if err := g.webhookBeforeSetGroupInfoEX(ctx, &g.config.WebhooksConfig.BeforeSetGroupInfoEX, req); err != nil && err != servererrs.ErrCallbackContinue {
+	if err := g.webhookBeforeSetGroupInfoEx(ctx, &g.config.WebhooksConfig.BeforeSetGroupInfoEx, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
 
-	group, err := g.db.TakeGroup(ctx, req.GroupInfoForSetEX.GroupID)
+	group, err := g.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -1097,16 +1104,20 @@ func (g *groupServer) SetGroupInfoEX(ctx context.Context, req *pbgroup.SetGroupI
 		return nil, err
 	}
 
-	updatedData := UpdateGroupInfoEXMap(ctx, req.GroupInfoForSetEX)
+	updatedData, err := UpdateGroupInfoExMap(ctx, req)
 	if len(updatedData) == 0 {
-		return &pbgroup.SetGroupInfoEXResp{}, nil
+		return &pbgroup.SetGroupInfoExResp{}, nil
+	}
+
+	if err != nil {
+		return nil, err
 	}
 
 	if err := g.db.UpdateGroup(ctx, group.GroupID, updatedData); err != nil {
 		return nil, err
 	}
 
-	group, err = g.db.TakeGroup(ctx, req.GroupInfoForSetEX.GroupID)
+	group, err = g.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -1122,43 +1133,46 @@ func (g *groupServer) SetGroupInfoEX(ctx context.Context, req *pbgroup.SetGroupI
 	}
 
 	num := len(updatedData)
-	if req.GroupInfoForSetEX.Notification != nil {
+	if req.Notification != nil {
 		num--
 
-		func() {
-			conversation := &pbconversation.ConversationReq{
-				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupInfoForSetEX.GroupID),
-				ConversationType: constant.ReadGroupChatType,
-				GroupID:          req.GroupInfoForSetEX.GroupID,
-			}
+		if req.Notification.Value != "" {
+			func() {
+				conversation := &pbconversation.ConversationReq{
+					ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
+					ConversationType: constant.ReadGroupChatType,
+					GroupID:          req.GroupID,
+				}
 
-			resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupInfoForSetEX.GroupID})
-			if err != nil {
-				log.ZWarn(ctx, "GetGroupMemberIDs", err)
-				return
-			}
+				resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupID})
+				if err != nil {
+					log.ZWarn(ctx, "GetGroupMemberIDs is failed.", err)
+					return
+				}
 
-			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
+				conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
 
-			if err := g.conversationRpcClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
-				log.ZWarn(ctx, "SetConversations", err, resp.UserIDs, conversation)
-			}
-		}()
+				if err := g.conversationRpcClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
+					log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
+				}
+			}()
 
-		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
+			g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
+		}
 	}
-	if req.GroupInfoForSetEX.GroupName != "" {
-		num--
 
+	if req.GroupName != nil {
+		num--
 		g.notification.GroupInfoSetNameNotification(ctx, &sdkws.GroupInfoSetNameTips{Group: tips.Group, OpUser: tips.OpUser})
 	}
+
 	if num > 0 {
 		g.notification.GroupInfoSetNotification(ctx, tips)
 	}
 
-	g.webhookAfterSetGroupInfoEX(ctx, &g.config.WebhooksConfig.AfterSetGroupInfoEX, req)
+	g.webhookAfterSetGroupInfoEx(ctx, &g.config.WebhooksConfig.AfterSetGroupInfoEx, req)
 
-	return &pbgroup.SetGroupInfoEXResp{}, nil
+	return &pbgroup.SetGroupInfoExResp{}, nil
 }
 
 func (g *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.TransferGroupOwnerReq) (*pbgroup.TransferGroupOwnerResp, error) {
