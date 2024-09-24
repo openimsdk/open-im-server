@@ -60,16 +60,27 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 		return "", err
 	}
 	var deleteTokenKey []string
+	var kickedTokenKey []string
 	for k, v := range tokens {
-		_, err = tokenverify.GetClaimFromToken(k, authverify.Secret(a.accessSecret))
+		t, err := tokenverify.GetClaimFromToken(k, authverify.Secret(a.accessSecret))
 		if err != nil || v != constant.NormalToken {
 			deleteTokenKey = append(deleteTokenKey, k)
+		} else if t.UserID == userID && t.PlatformID == platformID {
+			kickedTokenKey = append(kickedTokenKey, k)
 		}
 	}
 	if len(deleteTokenKey) != 0 {
 		err = a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
 		if err != nil {
 			return "", err
+		}
+	}
+	if len(kickedTokenKey) != 0 {
+		for _, k := range kickedTokenKey {
+			err := a.cache.SetTokenFlagEx(ctx, userID, platformID, k, constant.KickedToken)
+			if err != nil {
+				return "", err
+			}
 		}
 	}
 
