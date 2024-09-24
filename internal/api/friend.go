@@ -72,6 +72,10 @@ func (o *FriendApi) GetPaginationBlacks(c *gin.Context) {
 	a2r.Call(relation.FriendClient.GetPaginationBlacks, o.Client, c)
 }
 
+func (o *FriendApi) GetSpecifiedBlacks(c *gin.Context) {
+	a2r.Call(relation.FriendClient.GetSpecifiedBlacks, o.Client, c)
+}
+
 func (o *FriendApi) RemoveBlack(c *gin.Context) {
 	a2r.Call(relation.FriendClient.RemoveBlack, o.Client, c)
 }
