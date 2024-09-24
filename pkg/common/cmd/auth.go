@@ -35,10 +35,11 @@ func NewAuthRpcCmd() *AuthRpcCmd {
 	var authConfig auth.Config
 	ret := &AuthRpcCmd{authConfig: &authConfig}
 	ret.configMap = map[string]any{
-		OpenIMRPCAuthCfgFileName: &authConfig.RpcConfig,
-		RedisConfigFileName:      &authConfig.RedisConfig,
-		ShareFileName:            &authConfig.Share,
-		DiscoveryConfigFilename:  &authConfig.Discovery,
+		OpenIMRPCAuthCfgFileName:    &authConfig.RpcConfig,
+		OpenIMMsgGatewayCfgFileName: &authConfig.MsgGatewayConfig,
+		RedisConfigFileName:         &authConfig.RedisConfig,
+		ShareFileName:               &authConfig.Share,
+		DiscoveryConfigFilename:     &authConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)
