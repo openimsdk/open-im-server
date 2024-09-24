@@ -275,7 +275,6 @@ func GinParseToken(authRPC *rpcclient.Auth) gin.HandlerFunc {
 
 // Whitelist api not parse token
 var Whitelist = []string{
-	"/user/user_register",
 	"/auth/user_token",
 	"/auth/parse_token",
 }
