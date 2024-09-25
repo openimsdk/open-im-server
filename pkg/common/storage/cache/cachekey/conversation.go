@@ -17,6 +17,7 @@ package cachekey
 const (
 	ConversationKey                          = "CONVERSATION:"
 	ConversationIDsKey                       = "CONVERSATION_IDS:"
+	NotNotifyConversationIDsKey              = "NOT_NOTIFY_CONVERSATION_IDS:"
 	ConversationIDsHashKey                   = "CONVERSATION_IDS_HASH:"
 	ConversationHasReadSeqKey                = "CONVERSATION_HAS_READ_SEQ:"
 	RecvMsgOptKey                            = "RECV_MSG_OPT:"
@@ -32,6 +33,10 @@ func GetConversationKey(ownerUserID, conversationID string) string {
 
 func GetConversationIDsKey(ownerUserID string) string {
 	return ConversationIDsKey + ownerUserID
+}
+
+func GetNotNotifyConversationIDsKey(ownerUserID string) string {
+	return NotNotifyConversationIDsKey + ownerUserID
 }
 
 func GetSuperGroupRecvNotNotifyUserIDsKey(groupID string) string {
