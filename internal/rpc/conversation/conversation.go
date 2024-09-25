@@ -718,3 +718,11 @@ func (c *conversationServer) GetNotNotifyConversationIDs(ctx context.Context, re
 	}
 	return &pbconversation.GetNotNotifyConversationIDsResp{ConversationIDs: conversationIDs}, nil
 }
+
+func (c *conversationServer) GetPinnedConversationIDs(ctx context.Context, req *pbconversation.GetPinnedConversationIDsReq) (*pbconversation.GetPinnedConversationIDsResp, error) {
+	conversationIDs, err := c.conversationDatabase.GetPinnedConversationIDs(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return &pbconversation.GetPinnedConversationIDsResp{ConversationIDs: conversationIDs}, nil
+}

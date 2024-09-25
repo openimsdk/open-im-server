@@ -18,6 +18,7 @@ const (
 	ConversationKey                          = "CONVERSATION:"
 	ConversationIDsKey                       = "CONVERSATION_IDS:"
 	NotNotifyConversationIDsKey              = "NOT_NOTIFY_CONVERSATION_IDS:"
+	PinnedConversationIDsKey                 = "PINNED_CONVERSATION_IDS:"
 	ConversationIDsHashKey                   = "CONVERSATION_IDS_HASH:"
 	ConversationHasReadSeqKey                = "CONVERSATION_HAS_READ_SEQ:"
 	RecvMsgOptKey                            = "RECV_MSG_OPT:"
@@ -37,6 +38,10 @@ func GetConversationIDsKey(ownerUserID string) string {
 
 func GetNotNotifyConversationIDsKey(ownerUserID string) string {
 	return NotNotifyConversationIDsKey + ownerUserID
+}
+
+func GetPinnedConversationIDs(ownerUserID string) string {
+	return PinnedConversationIDsKey + ownerUserID
 }
 
 func GetSuperGroupRecvNotNotifyUserIDsKey(groupID string) string {
