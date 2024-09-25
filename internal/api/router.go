@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+
 	"github.com/gin-contrib/gzip"
 
 	"github.com/gin-gonic/gin"
@@ -115,6 +116,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		friendRouterGroup.POST("/set_friend_remark", f.SetFriendRemark)
 		friendRouterGroup.POST("/add_black", f.AddBlack)
 		friendRouterGroup.POST("/get_black_list", f.GetPaginationBlacks)
+		friendRouterGroup.POST("/get_specified_blacks", f.GetSpecifiedBlacks)
 		friendRouterGroup.POST("/remove_black", f.RemoveBlack)
 		friendRouterGroup.POST("/get_incremental_blacks", f.GetIncrementalBlacks)
 		friendRouterGroup.POST("/import_friend", f.ImportFriends)
@@ -230,6 +232,8 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		conversationGroup.POST("/get_full_conversation_ids", c.GetFullOwnerConversationIDs)
 		conversationGroup.POST("/get_incremental_conversations", c.GetIncrementalConversation)
 		conversationGroup.POST("/get_owner_conversation", c.GetOwnerConversation)
+		conversationGroup.POST("/get_not_notify_conversation_ids", c.GetNotNotifyConversationIDs)
+		conversationGroup.POST("/get_pinned_conversation_ids", c.GetPinnedConversationIDs)
 	}
 
 	statisticsGroup := r.Group("/statistics")
@@ -275,7 +279,6 @@ func GinParseToken(authRPC *rpcclient.Auth) gin.HandlerFunc {
 
 // Whitelist api not parse token
 var Whitelist = []string{
-	"/user/user_register",
 	"/auth/user_token",
 	"/auth/parse_token",
 }
