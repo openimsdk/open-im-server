@@ -104,13 +104,13 @@ func (c *ConversationRedisCache) getConversationUserMaxVersionKey(ownerUserID st
 }
 
 func (c *ConversationRedisCache) GetUserConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
-	return getCache(ctx, c.rcClient, c.getNotNotifyConversationIDsKey(ownerUserID), c.expireTime, func(ctx context.Context) ([]string, error) {
+	return getCache(ctx, c.rcClient, c.getConversationIDsKey(ownerUserID), c.expireTime, func(ctx context.Context) ([]string, error) {
 		return c.conversationDB.FindUserIDAllConversationID(ctx, ownerUserID)
 	})
 }
 
 func (c *ConversationRedisCache) GetUserNotNotifyConversationIDs(ctx context.Context, userID string) ([]string, error) {
-	return getCache(ctx, c.rcClient, c.getConversationIDsKey(userID), c.expireTime, func(ctx context.Context) ([]string, error) {
+	return getCache(ctx, c.rcClient, c.getNotNotifyConversationIDsKey(userID), c.expireTime, func(ctx context.Context) ([]string, error) {
 		return c.conversationDB.FindUserIDAllNotNotifyConversationID(ctx, userID)
 	})
 }
