@@ -12,6 +12,7 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
+	"strconv"
 	"time"
 )
 
@@ -57,6 +58,14 @@ func (s *seqConversationCacheRedis) getSingleMaxSeq(ctx context.Context, convers
 	return map[string]int64{conversationID: seq}, nil
 }
 
+func (s *seqConversationCacheRedis) getSingleMaxSeqWithTime(ctx context.Context, conversationID string) (map[string]database.SeqTime, error) {
+	seq, err := s.GetMaxSeqWithTime(ctx, conversationID)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]database.SeqTime{conversationID: seq}, nil
+}
+
 func (s *seqConversationCacheRedis) batchGetMaxSeq(ctx context.Context, keys []string, keyConversationID map[string]string, seqs map[string]int64) error {
 	result := make([]*redis.StringCmd, len(keys))
 	pipe := s.rdb.Pipeline()
@@ -80,6 +89,46 @@ func (s *seqConversationCacheRedis) batchGetMaxSeq(ctx context.Context, keys []s
 	for _, key := range notFoundKey {
 		conversationID := keyConversationID[key]
 		seq, err := s.GetMaxSeq(ctx, conversationID)
+		if err != nil {
+			return err
+		}
+		seqs[conversationID] = seq
+	}
+	return nil
+}
+
+func (s *seqConversationCacheRedis) batchGetMaxSeqWithTime(ctx context.Context, keys []string, keyConversationID map[string]string, seqs map[string]database.SeqTime) error {
+	result := make([]*redis.SliceCmd, len(keys))
+	pipe := s.rdb.Pipeline()
+	for i, key := range keys {
+		result[i] = pipe.HMGet(ctx, key, "CURR", "TIME")
+	}
+	if _, err := pipe.Exec(ctx); err != nil && !errors.Is(err, redis.Nil) {
+		return errs.Wrap(err)
+	}
+	var notFoundKey []string
+	for i, r := range result {
+		val, err := r.Result()
+		if len(val) != 2 {
+			return errs.WrapMsg(err, "batchGetMaxSeqWithTime invalid result", "key", keys[i], "res", val)
+		}
+		if val[0] == nil {
+			notFoundKey = append(notFoundKey, keys[i])
+			continue
+		}
+		seq, err := s.parseInt64(val[0])
+		if err != nil {
+			return err
+		}
+		mill, err := s.parseInt64(val[1])
+		if err != nil {
+			return err
+		}
+		seqs[keyConversationID[keys[i]]] = database.SeqTime{Seq: seq, Time: mill}
+	}
+	for _, key := range notFoundKey {
+		conversationID := keyConversationID[key]
+		seq, err := s.GetMaxSeqWithTime(ctx, conversationID)
 		if err != nil {
 			return err
 		}
@@ -115,6 +164,39 @@ func (s *seqConversationCacheRedis) GetMaxSeqs(ctx context.Context, conversation
 	seqs := make(map[string]int64, len(conversationIDs))
 	for _, keys := range slotKeys {
 		if err := s.batchGetMaxSeq(ctx, keys, keyConversationID, seqs); err != nil {
+			return nil, err
+		}
+	}
+	return seqs, nil
+}
+
+func (s *seqConversationCacheRedis) GetMaxSeqsWithTime(ctx context.Context, conversationIDs []string) (map[string]database.SeqTime, error) {
+	switch len(conversationIDs) {
+	case 0:
+		return map[string]database.SeqTime{}, nil
+	case 1:
+		return s.getSingleMaxSeqWithTime(ctx, conversationIDs[0])
+	}
+	keys := make([]string, 0, len(conversationIDs))
+	keyConversationID := make(map[string]string, len(conversationIDs))
+	for _, conversationID := range conversationIDs {
+		key := s.getSeqMallocKey(conversationID)
+		if _, ok := keyConversationID[key]; ok {
+			continue
+		}
+		keys = append(keys, key)
+		keyConversationID[key] = conversationID
+	}
+	if len(keys) == 1 {
+		return s.getSingleMaxSeqWithTime(ctx, conversationIDs[0])
+	}
+	slotKeys, err := groupKeysBySlot(ctx, s.rdb, keys)
+	if err != nil {
+		return nil, err
+	}
+	seqs := make(map[string]database.SeqTime, len(conversationIDs))
+	for _, keys := range slotKeys {
+		if err := s.batchGetMaxSeqWithTime(ctx, keys, keyConversationID, seqs); err != nil {
 			return nil, err
 		}
 	}
@@ -318,11 +400,11 @@ func (s *seqConversationCacheRedis) mallocTime(ctx context.Context, conversation
 			}
 			if lastSeq == seq {
 				s.setSeqRetry(ctx, key, states[3], currSeq+size, seq+mallocSize)
-				return currSeq, 0, nil
+				return currSeq, states[4], nil
 			} else {
 				log.ZWarn(ctx, "malloc seq not equal cache last seq", nil, "conversationID", conversationID, "currSeq", currSeq, "lastSeq", lastSeq, "mallocSeq", seq)
 				s.setSeqRetry(ctx, key, states[3], seq+size, seq+mallocSize)
-				return seq, 0, nil
+				return seq, states[4], nil
 			}
 		default:
 			log.ZError(ctx, "malloc seq unknown state", nil, "state", states[0], "conversationID", conversationID, "size", size)
@@ -337,6 +419,14 @@ func (s *seqConversationCacheRedis) GetMaxSeq(ctx context.Context, conversationI
 	return s.Malloc(ctx, conversationID, 0)
 }
 
+func (s *seqConversationCacheRedis) GetMaxSeqWithTime(ctx context.Context, conversationID string) (database.SeqTime, error) {
+	seq, mill, err := s.mallocTime(ctx, conversationID, 0)
+	if err != nil {
+		return database.SeqTime{}, err
+	}
+	return database.SeqTime{Seq: seq, Time: mill}, nil
+}
+
 func (s *seqConversationCacheRedis) SetMinSeqs(ctx context.Context, seqs map[string]int64) error {
 	keys := make([]string, 0, len(seqs))
 	for conversationID, seq := range seqs {
@@ -348,6 +438,79 @@ func (s *seqConversationCacheRedis) SetMinSeqs(ctx context.Context, seqs map[str
 	return DeleteCacheBySlot(ctx, s.rocks, keys)
 }
 
-func (s *seqConversationCacheRedis) GetMaxSeqWithTime(ctx context.Context, conversationID string) (int64, int64, error) {
-	return s.mallocTime(ctx, conversationID, 0)
+// GetCacheMaxSeqWithTime only get the existing cache, if there is no cache, no cache will be generated
+func (s *seqConversationCacheRedis) GetCacheMaxSeqWithTime(ctx context.Context, conversationIDs []string) (map[string]database.SeqTime, error) {
+	if len(conversationIDs) == 0 {
+		return map[string]database.SeqTime{}, nil
+	}
+	key2conversationID := make(map[string]string)
+	keys := make([]string, 0, len(conversationIDs))
+	for _, conversationID := range conversationIDs {
+		key := s.getSeqMallocKey(conversationID)
+		if _, ok := key2conversationID[key]; ok {
+			continue
+		}
+		key2conversationID[key] = conversationID
+		keys = append(keys, key)
+	}
+	slotKeys, err := groupKeysBySlot(ctx, s.rdb, keys)
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[string]database.SeqTime)
+	for _, keys := range slotKeys {
+		if len(keys) == 0 {
+			continue
+		}
+		pipe := s.rdb.Pipeline()
+		cmds := make([]*redis.SliceCmd, 0, len(keys))
+		for _, key := range keys {
+			cmds = append(cmds, pipe.HMGet(ctx, key, "CURR", "TIME"))
+		}
+		if _, err := pipe.Exec(ctx); err != nil {
+			return nil, errs.Wrap(err)
+		}
+		for i, cmd := range cmds {
+			val, err := cmd.Result()
+			if err != nil {
+				return nil, err
+			}
+			if len(val) != 2 {
+				return nil, errs.WrapMsg(err, "GetCacheMaxSeqWithTime invalid result", "key", keys[i], "res", val)
+			}
+			if val[0] == nil {
+				continue
+			}
+			seq, err := s.parseInt64(val[0])
+			if err != nil {
+				return nil, err
+			}
+			mill, err := s.parseInt64(val[1])
+			if err != nil {
+				return nil, err
+			}
+			conversationID := key2conversationID[keys[i]]
+			res[conversationID] = database.SeqTime{Seq: seq, Time: mill}
+		}
+	}
+	return res, nil
+}
+
+func (s *seqConversationCacheRedis) parseInt64(val any) (int64, error) {
+	switch v := val.(type) {
+	case nil:
+		return 0, nil
+	case int:
+		return int64(v), nil
+	case int64:
+		return v, nil
+	case string:
+		res, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return 0, errs.WrapMsg(err, "invalid string not int64", "value", v)
+		}
+		return res, nil
+	default:
+		return 0, errs.New("invalid result not int64", "resType", fmt.Sprintf("%T", v), "value", v)
+	}
 }

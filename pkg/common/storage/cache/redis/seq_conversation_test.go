@@ -110,10 +110,34 @@ func TestMinSeq(t *testing.T) {
 
 func TestMalloc(t *testing.T) {
 	ts := newTestSeq()
-	t.Log(ts.Malloc(context.Background(), "10000000", 100))
+	t.Log(ts.mallocTime(context.Background(), "10000000", 100))
+}
+
+func TestHMGET(t *testing.T) {
+	ts := newTestSeq()
+	res, err := ts.GetCacheMaxSeqWithTime(context.Background(), []string{"10000000", "123456"})
+	if err != nil {
+		panic(err)
+	}
+	t.Log(res)
 }
 
 func TestGetMaxSeqWithTime(t *testing.T) {
 	ts := newTestSeq()
 	t.Log(ts.GetMaxSeqWithTime(context.Background(), "10000000"))
 }
+
+func TestGetMaxSeqWithTime1(t *testing.T) {
+	ts := newTestSeq()
+	t.Log(ts.GetMaxSeqsWithTime(context.Background(), []string{"10000000", "12345", "111"}))
+}
+
+//
+//func TestHMGET(t *testing.T) {
+//	ts := newTestSeq()
+//	res, err := ts.rdb.HMGet(context.Background(), "MALLOC_SEQ:1", "CURR", "TIME1").Result()
+//	if err != nil {
+//		panic(err)
+//	}
+//	t.Log(res)
+//}
