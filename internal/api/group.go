@@ -35,8 +35,8 @@ func (o *GroupApi) SetGroupInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.SetGroupInfo, o.Client, c)
 }
 
-func (o *GroupApi) SetGroupInfoEX(c *gin.Context) {
-	a2r.Call(group.GroupClient.SetGroupInfoEX, o.Client, c)
+func (o *GroupApi) SetGroupInfoEx(c *gin.Context) {
+	a2r.Call(group.GroupClient.SetGroupInfoEx, o.Client, c)
 }
 
 func (o *GroupApi) JoinGroup(c *gin.Context) {

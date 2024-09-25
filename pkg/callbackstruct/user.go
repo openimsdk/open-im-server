@@ -72,7 +72,6 @@ type CallbackAfterUpdateUserInfoExResp struct {
 
 type CallbackBeforeUserRegisterReq struct {
 	CallbackCommand `json:"callbackCommand"`
-	Secret          string            `json:"secret"`
 	Users           []*sdkws.UserInfo `json:"users"`
 }
 
@@ -83,7 +82,6 @@ type CallbackBeforeUserRegisterResp struct {
 
 type CallbackAfterUserRegisterReq struct {
 	CallbackCommand `json:"callbackCommand"`
-	Secret          string            `json:"secret"`
 	Users           []*sdkws.UserInfo `json:"users"`
 }
 

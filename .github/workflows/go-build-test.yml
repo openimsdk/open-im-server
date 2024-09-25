@@ -89,6 +89,65 @@ jobs:
           mage start
           mage check
 
+  go-test:
+    name: Benchmark Test with go ${{ matrix.go_version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+    env:
+      SDK_DIR: openim-sdk-core
+      CONFIG_PATH: config/notification.yml
+    #   pull-requests: write
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        go_version: [ "1.22.x" ]
+
+    steps:
+      - name: Checkout Server repository
+        uses: actions/checkout@v4
+
+      - name: Checkout SDK repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'openimsdk/openim-sdk-core'
+          path: ${{ env.SDK_DIR }}
+
+      - name: Set up Go ${{ matrix.go_version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go_version }}
+
+      - name: Get Server dependencies
+        run: |
+          go install github.com/magefile/mage@latest
+          go mod download
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.34.1/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+      - name: Modify Server Configuration
+        run: |
+          yq e '.groupCreated.unreadCount = true' -i ${{ env.CONFIG_PATH }}
+          yq e '.friendApplicationApproved.unreadCount = true' -i ${{ env.CONFIG_PATH }}
+
+      - name: Start Server Services
+        run: |
+          docker compose up -d
+          mage build
+          mage start
+          mage check
+
+      - name: Build test SDK core
+        run: |
+          cd ${{ env.SDK_DIR }}
+          go mod tidy
+          cd integration_test
+          mkdir data
+          go run main.go -lgr 0.8 -imf -crg -ckgn -ckcon -sem -ckmsn -u 20 -su 5 -lg 2 -cg 2 -cgm 3 -sm 10 -gm 10 -reg
+
   dockerfile-test:
     name: Build and Test Dockerfile
     runs-on: ubuntu-latest

@@ -321,7 +321,7 @@ func (ws *WsServer) KickUserConn(client *Client) error {
 }
 
 func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Client, newClient *Client) {
-	switch ws.msgGatewayConfig.MsgGateway.MultiLoginPolicy {
+	switch ws.msgGatewayConfig.Share.MultiLoginPolicy {
 	case constant.DefalutNotKick:
 	case constant.PCAndOther:
 		if constant.PlatformIDToClass(newClient.PlatformID) == constant.TerminalPC {

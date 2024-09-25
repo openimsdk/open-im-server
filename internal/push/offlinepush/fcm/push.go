@@ -154,7 +154,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 	}
 	messageCount := len(messages)
 	if messageCount > 0 {
-		response, err := f.fcmMsgCli.SendAll(ctx, messages)
+		response, err := f.fcmMsgCli.SendEach(ctx, messages)
 		if err != nil {
 			Fail = Fail + messageCount
 		} else {

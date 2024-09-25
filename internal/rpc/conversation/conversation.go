@@ -278,8 +278,8 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		if req.Conversation.MsgDestructTime != nil {
 			m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
 		}
-		if req.Conversation.MsgDestructTime != nil {
-			m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
+		if req.Conversation.IsMsgDestruct != nil {
+			m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
 		}
 		if req.Conversation.BurnDuration != nil {
 			m["burn_duration"] = req.Conversation.BurnDuration.Value
@@ -709,4 +709,12 @@ func (c *conversationServer) GetConversationsNeedDestructMsgs(ctx context.Contex
 	}
 
 	return &pbconversation.GetConversationsNeedDestructMsgsResp{Conversations: convert.ConversationsDB2Pb(temp)}, nil
+}
+
+func (c *conversationServer) GetNotNotifyConversationIDs(ctx context.Context, req *pbconversation.GetNotNotifyConversationIDsReq) (*pbconversation.GetNotNotifyConversationIDsResp, error) {
+	conversationIDs, err := c.conversationDatabase.GetNotNotifyConversationIDs(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return &pbconversation.GetNotNotifyConversationIDsResp{ConversationIDs: conversationIDs}, nil
 }
