@@ -67,6 +67,10 @@ func (o *GroupApi) GetGroupUsersReqApplicationList(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupUsersReqApplicationList, o.Client, c)
 }
 
+func (o *GroupApi) GetSpecifiedUserGroupRequestInfo(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetSpecifiedUserGroupRequestInfo, o.Client, c)
+}
+
 func (o *GroupApi) GetGroupsInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupsInfo, o.Client, c)
 	//a2r.Call(group.GroupClient.GetGroupsInfo, o.Client, c, a2r.NewNilReplaceOption(group.GroupClient.GetGroupsInfo))

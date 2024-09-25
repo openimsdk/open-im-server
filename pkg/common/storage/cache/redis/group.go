@@ -111,6 +111,10 @@ func (g *GroupCacheRedis) getGroupRoleLevelMemberIDsKey(groupID string, roleLeve
 	return cachekey.GetGroupRoleLevelMemberIDsKey(groupID, roleLevel)
 }
 
+func (g *GroupCacheRedis) getGroupAdminLevelMemberIDsKey(groupID string) string {
+	return cachekey.GetGroupAdminLevelMemberIDsKey(groupID)
+}
+
 func (g *GroupCacheRedis) getGroupMemberMaxVersionKey(groupID string) string {
 	return cachekey.GetGroupMemberMaxVersionKey(groupID)
 }
@@ -325,6 +329,12 @@ func (g *GroupCacheRedis) GetGroupsOwner(ctx context.Context, groupIDs []string)
 func (g *GroupCacheRedis) GetGroupRoleLevelMemberIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error) {
 	return getCache(ctx, g.rcClient, g.getGroupRoleLevelMemberIDsKey(groupID, roleLevel), g.expireTime, func(ctx context.Context) ([]string, error) {
 		return g.groupMemberDB.FindRoleLevelUserIDs(ctx, groupID, roleLevel)
+	})
+}
+
+func (g *GroupCacheRedis) GetGroupAdminLevelMemberIDs(ctx context.Context, groupID string) ([]string, error) {
+	return getCache(ctx, g.rcClient, g.getGroupAdminLevelMemberIDsKey(groupID), g.expireTime, func(ctx context.Context) ([]string, error) {
+		return g.groupMemberDB.FindAdminLevelUserIDs(ctx, groupID)
 	})
 }
 
