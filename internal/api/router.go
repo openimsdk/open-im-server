@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
 
 	"github.com/gin-contrib/gzip"
 
@@ -75,7 +76,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	r.Use(prommetricsGin(), gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID(), GinParseToken(authRpc))
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc, config.Share.IMAdminUserID)
-	j := NewJSSdkApi(messageRpc.Client, conversationRpc.Client)
+	j := jssdk.NewJSSdkApi(messageRpc.Client, conversationRpc.Client)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -246,8 +247,8 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	}
 
 	jssdk := r.Group("/jssdk")
-	jssdk.POST("/get_conversation", j.GetConversations)
-	jssdk.POST("/get_active_conversation", j.GetActiveConversation)
+	jssdk.POST("/get_conversations", j.GetConversations)
+	jssdk.POST("/get_active_conversations", j.GetActiveConversations)
 
 	return r
 }

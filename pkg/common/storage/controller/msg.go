@@ -880,5 +880,6 @@ func (db *commonMsgDatabase) GetMaxSeqWithTime(ctx context.Context, conversation
 }
 
 func (db *commonMsgDatabase) GetMaxSeqsWithTime(ctx context.Context, conversationIDs []string) (map[string]database.SeqTime, error) {
+	// todo: only the time in the redis cache will be taken, not the message time
 	return db.seqConversation.GetMaxSeqsWithTime(ctx, conversationIDs)
 }
