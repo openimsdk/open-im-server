@@ -28,6 +28,7 @@ type Conversation interface {
 	FindUserID(ctx context.Context, userIDs []string, conversationIDs []string) ([]string, error)
 	FindUserIDAllConversationID(ctx context.Context, userID string) ([]string, error)
 	FindUserIDAllNotNotifyConversationID(ctx context.Context, userID string) ([]string, error)
+	FindUserIDAllPinnedConversationID(ctx context.Context, userID string) ([]string, error)
 	Take(ctx context.Context, userID, conversationID string) (conversation *model.Conversation, err error)
 	FindConversationID(ctx context.Context, userID string, conversationIDs []string) (existConversationID []string, err error)
 	FindUserIDAllConversations(ctx context.Context, userID string) (conversations []*model.Conversation, err error)

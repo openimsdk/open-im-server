@@ -75,6 +75,10 @@ func (c *ConversationRedisCache) getNotNotifyConversationIDsKey(ownerUserID stri
 	return cachekey.GetNotNotifyConversationIDsKey(ownerUserID)
 }
 
+func (c *ConversationRedisCache) getPinnedConversationIDsKey(ownerUserID string) string {
+	return cachekey.GetPinnedConversationIDs(ownerUserID)
+}
+
 func (c *ConversationRedisCache) getSuperGroupRecvNotNotifyUserIDsKey(groupID string) string {
 	return cachekey.GetSuperGroupRecvNotNotifyUserIDsKey(groupID)
 }
@@ -112,6 +116,12 @@ func (c *ConversationRedisCache) GetUserConversationIDs(ctx context.Context, own
 func (c *ConversationRedisCache) GetUserNotNotifyConversationIDs(ctx context.Context, userID string) ([]string, error) {
 	return getCache(ctx, c.rcClient, c.getNotNotifyConversationIDsKey(userID), c.expireTime, func(ctx context.Context) ([]string, error) {
 		return c.conversationDB.FindUserIDAllNotNotifyConversationID(ctx, userID)
+	})
+}
+
+func (c *ConversationRedisCache) GetPinnedConversationIDs(ctx context.Context, userID string) ([]string, error) {
+	return getCache(ctx, c.rcClient, c.getPinnedConversationIDsKey(userID), c.expireTime, func(ctx context.Context) ([]string, error) {
+		return c.conversationDB.FindUserIDAllPinnedConversationID(ctx, userID)
 	})
 }
 
@@ -256,6 +266,14 @@ func (c *ConversationRedisCache) DelConversationNotNotifyMessageUserIDs(userIDs 
 	cache := c.CloneConversationCache()
 	for _, userID := range userIDs {
 		cache.AddKeys(c.getNotNotifyConversationIDsKey(userID))
+	}
+	return cache
+}
+
+func (c *ConversationRedisCache) DelConversationPinnedMessageUserIDs(userIDs ...string) cache.ConversationCache {
+	cache := c.CloneConversationCache()
+	for _, userID := range userIDs {
+		cache.AddKeys(c.getPinnedConversationIDsKey(userID))
 	}
 	return cache
 }

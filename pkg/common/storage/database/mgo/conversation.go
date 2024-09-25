@@ -131,6 +131,13 @@ func (c *ConversationMgo) FindUserIDAllNotNotifyConversationID(ctx context.Conte
 	}, options.Find().SetProjection(bson.M{"_id": 0, "conversation_id": 1}))
 }
 
+func (c *ConversationMgo) FindUserIDAllPinnedConversationID(ctx context.Context, userID string) ([]string, error) {
+	return mongoutil.Find[string](ctx, c.coll, bson.M{
+		"owner_user_id": userID,
+		"is_pinned":     true,
+	}, options.Find().SetProjection(bson.M{"_id": 0, "conversation_id": 1}))
+}
+
 func (c *ConversationMgo) Take(ctx context.Context, userID, conversationID string) (conversation *model.Conversation, err error) {
 	return mongoutil.FindOne[*model.Conversation](ctx, c.coll, bson.M{"owner_user_id": userID, "conversation_id": conversationID})
 }
