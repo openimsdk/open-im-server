@@ -109,12 +109,12 @@ func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (
 func (u *UserRpcClient) GetPublicUserInfos(
 	ctx context.Context,
 	userIDs []string,
-	complete bool,
 ) ([]*sdkws.PublicUserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	return datautil.Slice(users, func(e *sdkws.UserInfo) *sdkws.PublicUserInfo {
 		return &sdkws.PublicUserInfo{
 			UserID:   e.UserID,
@@ -127,10 +127,11 @@ func (u *UserRpcClient) GetPublicUserInfos(
 
 // GetPublicUserInfo retrieves public information for a single user based on the provided user ID.
 func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
-	users, err := u.GetPublicUserInfos(ctx, []string{userID}, true)
+	users, err := u.GetPublicUserInfos(ctx, []string{userID})
 	if err != nil {
 		return nil, err
 	}
+
 	return users[0], nil
 }
 
@@ -138,12 +139,12 @@ func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*
 func (u *UserRpcClient) GetPublicUserInfoMap(
 	ctx context.Context,
 	userIDs []string,
-	complete bool,
 ) (map[string]*sdkws.PublicUserInfo, error) {
-	users, err := u.GetPublicUserInfos(ctx, userIDs, complete)
+	users, err := u.GetPublicUserInfos(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	return datautil.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
 		return e.UserID
 	}), nil

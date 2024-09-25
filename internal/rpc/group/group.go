@@ -167,11 +167,11 @@ func (g *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error
 	return nil
 }
 
-func (g *groupServer) GetPublicUserInfoMap(ctx context.Context, userIDs []string, complete bool) (map[string]*sdkws.PublicUserInfo, error) {
+func (g *groupServer) GetPublicUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.PublicUserInfo, error) {
 	if len(userIDs) == 0 {
 		return map[string]*sdkws.PublicUserInfo{}, nil
 	}
-	users, err := g.user.GetPublicUserInfos(ctx, userIDs, complete)
+	users, err := g.user.GetPublicUserInfos(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -696,7 +696,7 @@ func (g *groupServer) GetGroupApplicationList(ctx context.Context, req *pbgroup.
 		userIDs = append(userIDs, gr.UserID)
 	}
 	userIDs = datautil.Distinct(userIDs)
-	userMap, err := g.user.GetPublicUserInfoMap(ctx, userIDs, true)
+	userMap, err := g.user.GetPublicUserInfoMap(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}

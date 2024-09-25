@@ -22,8 +22,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	firebase "firebase.google.com/go"
-	"firebase.google.com/go/messaging"
+	firebase "firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/messaging"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/protocol/constant"
@@ -99,7 +99,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 		apns := &messaging.APNSConfig{Payload: &messaging.APNSPayload{Aps: &messaging.Aps{Sound: opts.IOSPushSound}}}
 		messageCount := len(messages)
 		if messageCount >= SinglePushCountLimit {
-			response, err := f.fcmMsgCli.SendAll(ctx, messages)
+			response, err := f.fcmMsgCli.SendEach(ctx, messages)
 			if err != nil {
 				Fail = Fail + messageCount
 				// Record push error
@@ -154,7 +154,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 	}
 	messageCount := len(messages)
 	if messageCount > 0 {
-		response, err := f.fcmMsgCli.SendAll(ctx, messages)
+		response, err := f.fcmMsgCli.SendEach(ctx, messages)
 		if err != nil {
 			Fail = Fail + messageCount
 		} else {
