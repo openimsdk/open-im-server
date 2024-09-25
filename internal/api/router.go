@@ -140,6 +140,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		groupRouterGroup.POST("/get_recv_group_applicationList", g.GetRecvGroupApplicationList)
 		groupRouterGroup.POST("/get_user_req_group_applicationList", g.GetUserReqGroupApplicationList)
 		groupRouterGroup.POST("/get_group_users_req_application_list", g.GetGroupUsersReqApplicationList)
+		groupRouterGroup.POST("/get_specified_user_group_request_info", g.GetSpecifiedUserGroupRequestInfo)
 		groupRouterGroup.POST("/get_groups_info", g.GetGroupsInfo)
 		groupRouterGroup.POST("/kick_group", g.KickGroupMember)
 		groupRouterGroup.POST("/get_group_members_info", g.GetGroupMembersInfo)
