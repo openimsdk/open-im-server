@@ -69,6 +69,10 @@ type ConversationDatabase interface {
 	FindConversationUserVersion(ctx context.Context, userID string, version uint, limit int) (*relationtb.VersionLog, error)
 	FindMaxConversationUserVersionCache(ctx context.Context, userID string) (*relationtb.VersionLog, error)
 	GetOwnerConversation(ctx context.Context, ownerUserID string, pagination pagination.Pagination) (int64, []*relationtb.Conversation, error)
+	// GetNotNotifyConversationIDs gets not notify conversationIDs by userID
+	GetNotNotifyConversationIDs(ctx context.Context, userID string) ([]string, error)
+	// GetPinnedConversationIDs gets pinned conversationIDs by userID
+	GetPinnedConversationIDs(ctx context.Context, userID string) ([]string, error)
 }
 
 func NewConversationDatabase(conversation database.Conversation, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -108,6 +112,10 @@ func (c *conversationDatabase) SetUsersConversationFieldTx(ctx context.Context, 
 			}
 			if _, ok := fieldMap["recv_msg_opt"]; ok {
 				cache = cache.DelConversationNotReceiveMessageUserIDs(conversation.ConversationID)
+				cache = cache.DelConversationNotNotifyMessageUserIDs(userIDs...)
+			}
+			if _, ok := fieldMap["is_pinned"]; ok {
+				cache = cache.DelConversationPinnedMessageUserIDs(userIDs...)
 			}
 			cache = cache.DelConversationVersionUserIDs(haveUserIDs...)
 		}
@@ -144,6 +152,10 @@ func (c *conversationDatabase) UpdateUsersConversationField(ctx context.Context,
 	cache = cache.DelUsersConversation(conversationID, userIDs...).DelConversationVersionUserIDs(userIDs...)
 	if _, ok := args["recv_msg_opt"]; ok {
 		cache = cache.DelConversationNotReceiveMessageUserIDs(conversationID)
+		cache = cache.DelConversationNotNotifyMessageUserIDs(userIDs...)
+	}
+	if _, ok := args["is_pinned"]; ok {
+		cache = cache.DelConversationPinnedMessageUserIDs(userIDs...)
 	}
 	return cache.ChainExecDel(ctx)
 }
@@ -152,14 +164,30 @@ func (c *conversationDatabase) CreateConversation(ctx context.Context, conversat
 	if err := c.conversationDB.Create(ctx, conversations); err != nil {
 		return err
 	}
-	var userIDs []string
+	var (
+		userIDs          []string
+		notNotifyUserIDs []string
+		pinnedUserIDs    []string
+	)
+
 	cache := c.cache.CloneConversationCache()
 	for _, conversation := range conversations {
 		cache = cache.DelConversations(conversation.OwnerUserID, conversation.ConversationID)
 		cache = cache.DelConversationNotReceiveMessageUserIDs(conversation.ConversationID)
 		userIDs = append(userIDs, conversation.OwnerUserID)
+		if conversation.RecvMsgOpt == constant.ReceiveNotNotifyMessage {
+			notNotifyUserIDs = append(notNotifyUserIDs, conversation.OwnerUserID)
+		}
+		if conversation.IsPinned == true {
+			pinnedUserIDs = append(pinnedUserIDs, conversation.OwnerUserID)
+		}
 	}
-	return cache.DelConversationIDs(userIDs...).DelUserConversationIDsHash(userIDs...).DelConversationVersionUserIDs(userIDs...).ChainExecDel(ctx)
+	return cache.DelConversationIDs(userIDs...).
+		DelUserConversationIDsHash(userIDs...).
+		DelConversationVersionUserIDs(userIDs...).
+		DelConversationNotNotifyMessageUserIDs(notNotifyUserIDs...).
+		DelConversationPinnedMessageUserIDs(pinnedUserIDs...).
+		ChainExecDel(ctx)
 }
 
 func (c *conversationDatabase) SyncPeerUserPrivateConversationTx(ctx context.Context, conversations []*relationtb.Conversation) error {
@@ -212,7 +240,10 @@ func (c *conversationDatabase) GetUserAllConversation(ctx context.Context, owner
 func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationtb.Conversation) error {
 	return c.tx.Transaction(ctx, func(ctx context.Context) error {
 		cache := c.cache.CloneConversationCache()
-		cache = cache.DelConversationVersionUserIDs(ownerUserID)
+		cache = cache.DelConversationVersionUserIDs(ownerUserID).
+			DelConversationNotNotifyMessageUserIDs(ownerUserID).
+			DelConversationPinnedMessageUserIDs(ownerUserID)
+
 		groupIDs := datautil.Distinct(datautil.Filter(conversations, func(e *relationtb.Conversation) (string, bool) {
 			return e.GroupID, e.GroupID != ""
 		}))
@@ -352,4 +383,20 @@ func (c *conversationDatabase) GetOwnerConversation(ctx context.Context, ownerUs
 		conversations = append(conversations, conversation)
 	}
 	return int64(len(conversationIDs)), conversations, nil
+}
+
+func (c *conversationDatabase) GetNotNotifyConversationIDs(ctx context.Context, userID string) ([]string, error) {
+	conversationIDs, err := c.cache.GetUserNotNotifyConversationIDs(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return conversationIDs, nil
+}
+
+func (c *conversationDatabase) GetPinnedConversationIDs(ctx context.Context, userID string) ([]string, error) {
+	conversationIDs, err := c.cache.GetPinnedConversationIDs(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return conversationIDs, nil
 }

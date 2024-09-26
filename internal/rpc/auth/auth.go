@@ -64,6 +64,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 			redis2.NewTokenCacheModel(rdb, config.RpcConfig.TokenPolicy.Expire),
 			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
+			config.Share.MultiLoginPolicy,
 		),
 		config: config,
 	})

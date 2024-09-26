@@ -25,6 +25,8 @@ type ConversationCache interface {
 	CloneConversationCache() ConversationCache
 	// get user's conversationIDs from msgCache
 	GetUserConversationIDs(ctx context.Context, ownerUserID string) ([]string, error)
+	GetUserNotNotifyConversationIDs(ctx context.Context, userID string) ([]string, error)
+	GetPinnedConversationIDs(ctx context.Context, userID string) ([]string, error)
 	DelConversationIDs(userIDs ...string) ConversationCache
 
 	GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error)
@@ -54,7 +56,8 @@ type ConversationCache interface {
 
 	GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error)
 	DelConversationNotReceiveMessageUserIDs(conversationIDs ...string) ConversationCache
-
+	DelConversationNotNotifyMessageUserIDs(userIDs ...string) ConversationCache
+	DelConversationPinnedMessageUserIDs(userIDs ...string) ConversationCache
 	DelConversationVersionUserIDs(userIDs ...string) ConversationCache
 
 	FindMaxConversationUserVersion(ctx context.Context, userID string) (*relationtb.VersionLog, error)

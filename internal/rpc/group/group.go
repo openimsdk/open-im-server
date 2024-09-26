@@ -167,11 +167,11 @@ func (g *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error
 	return nil
 }
 
-func (g *groupServer) GetPublicUserInfoMap(ctx context.Context, userIDs []string, complete bool) (map[string]*sdkws.PublicUserInfo, error) {
+func (g *groupServer) GetPublicUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.PublicUserInfo, error) {
 	if len(userIDs) == 0 {
 		return map[string]*sdkws.PublicUserInfo{}, nil
 	}
-	users, err := g.user.GetPublicUserInfos(ctx, userIDs, complete)
+	users, err := g.user.GetPublicUserInfos(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -696,7 +696,7 @@ func (g *groupServer) GetGroupApplicationList(ctx context.Context, req *pbgroup.
 		userIDs = append(userIDs, gr.UserID)
 	}
 	userIDs = datautil.Distinct(userIDs)
-	userMap, err := g.user.GetPublicUserInfoMap(ctx, userIDs, true)
+	userMap, err := g.user.GetPublicUserInfoMap(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -1685,36 +1685,51 @@ func (g *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 	if err != nil {
 		return nil, err
 	}
+
 	if len(requests) == 0 {
 		return &pbgroup.GetGroupUsersReqApplicationListResp{}, nil
 	}
+
 	groupIDs := datautil.Distinct(datautil.Slice(requests, func(e *model.GroupRequest) string {
 		return e.GroupID
 	}))
+
 	groups, err := g.db.FindGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	groupMap := datautil.SliceToMap(groups, func(e *model.Group) string {
 		return e.GroupID
 	})
+
 	if ids := datautil.Single(groupIDs, datautil.Keys(groupMap)); len(ids) > 0 {
 		return nil, servererrs.ErrGroupIDNotFound.WrapMsg(strings.Join(ids, ","))
 	}
+
+	userMap, err := g.user.GetPublicUserInfoMap(ctx, req.UserIDs)
+	if err != nil {
+		return nil, err
+	}
+
 	owners, err := g.db.FindGroupsOwner(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	if err := g.PopulateGroupMember(ctx, owners...); err != nil {
 		return nil, err
 	}
+
 	ownerMap := datautil.SliceToMap(owners, func(e *model.GroupMember) string {
 		return e.GroupID
 	})
+
 	groupMemberNum, err := g.db.MapGroupMemberNum(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	return &pbgroup.GetGroupUsersReqApplicationListResp{
 		Total: int64(len(requests)),
 		GroupRequests: datautil.Slice(requests, func(e *model.GroupRequest) *sdkws.GroupRequest {
@@ -1722,7 +1737,71 @@ func (g *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 			if owner, ok := ownerMap[e.GroupID]; ok {
 				ownerUserID = owner.UserID
 			}
-			return convert.Db2PbGroupRequest(e, nil, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerUserID, groupMemberNum[e.GroupID]))
+
+			var userInfo *sdkws.PublicUserInfo
+			if user, ok := userMap[e.UserID]; !ok {
+				userInfo = user
+			}
+
+			return convert.Db2PbGroupRequest(e, userInfo, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerUserID, groupMemberNum[e.GroupID]))
 		}),
 	}, nil
+}
+
+func (g *groupServer) GetSpecifiedUserGroupRequestInfo(ctx context.Context, req *pbgroup.GetSpecifiedUserGroupRequestInfoReq) (*pbgroup.GetSpecifiedUserGroupRequestInfoResp, error) {
+	opUserID := mcontext.GetOpUserID(ctx)
+
+	owners, err := g.db.FindGroupsOwner(ctx, []string{req.GroupID})
+	if err != nil {
+		return nil, err
+	}
+
+	if req.UserID != opUserID {
+		req.UserID = mcontext.GetOpUserID(ctx)
+		adminIDs, err := g.db.GetGroupRoleLevelMemberIDs(ctx, req.GroupID, constant.GroupAdmin)
+		if err != nil {
+			return nil, err
+		}
+
+		adminIDs = append(adminIDs, owners[0].UserID)
+
+		if !datautil.Contain(req.UserID, adminIDs...) {
+			return nil, errs.ErrNoPermission.WrapMsg("opUser no permission")
+		}
+	}
+	requests, err := g.db.FindGroupRequests(ctx, req.GroupID, []string{req.UserID})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(requests) == 0 {
+		return &pbgroup.GetSpecifiedUserGroupRequestInfoResp{}, nil
+	}
+
+	groups, err := g.db.FindGroup(ctx, []string{req.GroupID})
+	if err != nil {
+		return nil, err
+	}
+
+	userInfos, err := g.user.GetPublicUserInfos(ctx, []string{req.UserID})
+	if err != nil {
+		return nil, err
+	}
+
+	groupMemberNum, err := g.db.MapGroupMemberNum(ctx, []string{req.GroupID})
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &pbgroup.GetSpecifiedUserGroupRequestInfoResp{
+		GroupRequests: make([]*sdkws.GroupRequest, 0, len(requests)),
+	}
+
+	for _, request := range requests {
+		resp.GroupRequests = append(resp.GroupRequests, convert.Db2PbGroupRequest(request, userInfos[0], convert.Db2PbGroupInfo(groups[0], owners[0].UserID, groupMemberNum[groups[0].GroupID])))
+	}
+
+	resp.Total = uint32(len(requests))
+
+	return resp, nil
 }
