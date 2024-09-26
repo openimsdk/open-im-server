@@ -185,7 +185,6 @@ type MsgGateway struct {
 		WebsocketMaxMsgLen  int   `mapstructure:"websocketMaxMsgLen"`
 		WebsocketTimeout    int   `mapstructure:"websocketTimeout"`
 	} `mapstructure:"longConnSvr"`
-	MultiLoginPolicy int `mapstructure:"multiLoginPolicy"`
 }
 
 type MsgTransfer struct {
@@ -358,9 +357,10 @@ type AfterConfig struct {
 }
 
 type Share struct {
-	Secret          string          `mapstructure:"secret"`
-	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
-	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
+	Secret           string          `mapstructure:"secret"`
+	RpcRegisterName  RpcRegisterName `mapstructure:"rpcRegisterName"`
+	IMAdminUserID    []string        `mapstructure:"imAdminUserID"`
+	MultiLoginPolicy int             `mapstructure:"multiLoginPolicy"`
 }
 type RpcRegisterName struct {
 	User           string `mapstructure:"user"`

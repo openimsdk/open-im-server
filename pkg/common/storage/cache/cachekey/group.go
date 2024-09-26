@@ -20,16 +20,17 @@ import (
 )
 
 const (
-	groupExpireTime            = time.Second * 60 * 60 * 12
-	GroupInfoKey               = "GROUP_INFO:"
-	GroupMemberIDsKey          = "GROUP_MEMBER_IDS:"
-	GroupMembersHashKey        = "GROUP_MEMBERS_HASH2:"
-	GroupMemberInfoKey         = "GROUP_MEMBER_INFO:"
-	JoinedGroupsKey            = "JOIN_GROUPS_KEY:"
-	GroupMemberNumKey          = "GROUP_MEMBER_NUM_CACHE:"
-	GroupRoleLevelMemberIDsKey = "GROUP_ROLE_LEVEL_MEMBER_IDS:"
-	GroupMemberMaxVersionKey   = "GROUP_MEMBER_MAX_VERSION:"
-	GroupJoinMaxVersionKey     = "GROUP_JOIN_MAX_VERSION:"
+	groupExpireTime             = time.Second * 60 * 60 * 12
+	GroupInfoKey                = "GROUP_INFO:"
+	GroupMemberIDsKey           = "GROUP_MEMBER_IDS:"
+	GroupMembersHashKey         = "GROUP_MEMBERS_HASH2:"
+	GroupMemberInfoKey          = "GROUP_MEMBER_INFO:"
+	JoinedGroupsKey             = "JOIN_GROUPS_KEY:"
+	GroupMemberNumKey           = "GROUP_MEMBER_NUM_CACHE:"
+	GroupRoleLevelMemberIDsKey  = "GROUP_ROLE_LEVEL_MEMBER_IDS:"
+	GroupAdminLevelMemberIDsKey = "GROUP_ADMIN_LEVEL_MEMBER_IDS:"
+	GroupMemberMaxVersionKey    = "GROUP_MEMBER_MAX_VERSION:"
+	GroupJoinMaxVersionKey      = "GROUP_JOIN_MAX_VERSION:"
 )
 
 func GetGroupInfoKey(groupID string) string {
