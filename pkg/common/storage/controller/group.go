@@ -71,8 +71,6 @@ type GroupDatabase interface {
 	PageGroupRequest(ctx context.Context, groupIDs []string, pagination pagination.Pagination) (int64, []*model.GroupRequest, error)
 	// GetGroupRoleLevelMemberIDs retrieves user IDs of group members with a specific role level.
 	GetGroupRoleLevelMemberIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error)
-	// GetGroupAdminLevelMemberIDs retrieves user IDs of group members with an admin role level.
-	GetGroupAdminLevelMemberIDs(ctx context.Context, groupID string) ([]string, error)
 
 	// PageGetJoinGroup paginates through groups that a user has joined.
 	PageGetJoinGroup(ctx context.Context, userID string, pagination pagination.Pagination) (total int64, totalGroupMembers []*model.GroupMember, err error)
@@ -180,10 +178,6 @@ func (g *groupDatabase) FindGroupsOwner(ctx context.Context, groupIDs []string) 
 
 func (g *groupDatabase) GetGroupRoleLevelMemberIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error) {
 	return g.cache.GetGroupRoleLevelMemberIDs(ctx, groupID, roleLevel)
-}
-
-func (g *groupDatabase) GetGroupAdminLevelMemberIDs(ctx context.Context, groupID string) ([]string, error) {
-	return g.cache.GetGroupAdminLevelMemberIDs(ctx, groupID)
 }
 
 func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*model.Group, groupMembers []*model.GroupMember) error {
