@@ -66,11 +66,6 @@ type groupServer struct {
 	webhookClient         *webhook.Client
 }
 
-func (s *groupServer) GetSpecifiedUserGroupRequestInfo(ctx context.Context, req *pbgroup.GetSpecifiedUserGroupRequestInfoReq) (*pbgroup.GetSpecifiedUserGroupRequestInfoResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 type Config struct {
 	RpcConfig          config.Group
 	RedisConfig        config.Redis
