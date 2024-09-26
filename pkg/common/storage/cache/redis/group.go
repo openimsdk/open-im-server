@@ -111,10 +111,6 @@ func (g *GroupCacheRedis) getGroupRoleLevelMemberIDsKey(groupID string, roleLeve
 	return cachekey.GetGroupRoleLevelMemberIDsKey(groupID, roleLevel)
 }
 
-func (g *GroupCacheRedis) getGroupAdminLevelMemberIDsKey(groupID string) string {
-	return cachekey.GetGroupAdminLevelMemberIDsKey(groupID)
-}
-
 func (g *GroupCacheRedis) getGroupMemberMaxVersionKey(groupID string) string {
 	return cachekey.GetGroupMemberMaxVersionKey(groupID)
 }

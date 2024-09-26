@@ -1751,14 +1751,21 @@ func (g *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 func (g *groupServer) GetSpecifiedUserGroupRequestInfo(ctx context.Context, req *pbgroup.GetSpecifiedUserGroupRequestInfoReq) (*pbgroup.GetSpecifiedUserGroupRequestInfoResp, error) {
 	opUserID := mcontext.GetOpUserID(ctx)
 
+	owners, err := g.db.FindGroupsOwner(ctx, []string{req.GroupID})
+	if err != nil {
+		return nil, err
+	}
+
 	if req.UserID != opUserID {
 		req.UserID = mcontext.GetOpUserID(ctx)
-		memberIDs, err := g.db.GetGroupAdminLevelMemberIDs(ctx, req.GroupID)
+		adminIDs, err := g.db.GetGroupRoleLevelMemberIDs(ctx, req.GroupID, constant.GroupAdmin)
 		if err != nil {
 			return nil, err
 		}
 
-		if !datautil.Contain(req.UserID, memberIDs...) {
+		adminIDs = append(adminIDs, owners[0].UserID)
+
+		if !datautil.Contain(req.UserID, adminIDs...) {
 			return nil, errs.ErrNoPermission.WrapMsg("opUser no permission")
 		}
 	}
@@ -1777,11 +1784,6 @@ func (g *groupServer) GetSpecifiedUserGroupRequestInfo(ctx context.Context, req 
 	}
 
 	userInfos, err := g.user.GetPublicUserInfos(ctx, []string{req.UserID})
-	if err != nil {
-		return nil, err
-	}
-
-	owners, err := g.db.FindGroupsOwner(ctx, []string{req.GroupID})
 	if err != nil {
 		return nil, err
 	}

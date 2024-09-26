@@ -61,10 +61,6 @@ func GetGroupRoleLevelMemberIDsKey(groupID string, roleLevel int32) string {
 	return GroupRoleLevelMemberIDsKey + groupID + "-" + strconv.Itoa(int(roleLevel))
 }
 
-func GetGroupAdminLevelMemberIDsKey(groupID string) string {
-	return GroupAdminLevelMemberIDsKey + groupID
-}
-
 func GetGroupMemberMaxVersionKey(groupID string) string {
 	return GroupMemberMaxVersionKey + groupID
 }
