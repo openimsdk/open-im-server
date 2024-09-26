@@ -328,12 +328,6 @@ func (g *GroupCacheRedis) GetGroupRoleLevelMemberIDs(ctx context.Context, groupI
 	})
 }
 
-func (g *GroupCacheRedis) GetGroupAdminLevelMemberIDs(ctx context.Context, groupID string) ([]string, error) {
-	return getCache(ctx, g.rcClient, g.getGroupAdminLevelMemberIDsKey(groupID), g.expireTime, func(ctx context.Context) ([]string, error) {
-		return g.groupMemberDB.FindAdminLevelUserIDs(ctx, groupID)
-	})
-}
-
 func (g *GroupCacheRedis) GetGroupRoleLevelMemberInfo(ctx context.Context, groupID string, roleLevel int32) ([]*model.GroupMember, error) {
 	userIDs, err := g.GetGroupRoleLevelMemberIDs(ctx, groupID, roleLevel)
 	if err != nil {
