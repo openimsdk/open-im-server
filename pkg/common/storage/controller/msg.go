@@ -74,6 +74,10 @@ type CommonMsgDatabase interface {
 	GetHasReadSeq(ctx context.Context, userID string, conversationID string) (int64, error)
 	UserSetHasReadSeqs(ctx context.Context, userID string, hasReadSeqs map[string]int64) error
 
+	GetMaxSeqsWithTime(ctx context.Context, conversationIDs []string) (map[string]database.SeqTime, error)
+	GetMaxSeqWithTime(ctx context.Context, conversationID string) (database.SeqTime, error)
+	GetCacheMaxSeqWithTime(ctx context.Context, conversationIDs []string) (map[string]database.SeqTime, error)
+
 	//GetMongoMaxAndMinSeq(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo int64, err error)
 	//GetConversationMinMaxSeqInMongoAndCache(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error)
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
@@ -865,4 +869,17 @@ func (db *commonMsgDatabase) setMinSeq(ctx context.Context, conversationID strin
 
 func (db *commonMsgDatabase) GetDocIDs(ctx context.Context) ([]string, error) {
 	return db.msgDocDatabase.GetDocIDs(ctx)
+}
+
+func (db *commonMsgDatabase) GetCacheMaxSeqWithTime(ctx context.Context, conversationIDs []string) (map[string]database.SeqTime, error) {
+	return db.seqConversation.GetCacheMaxSeqWithTime(ctx, conversationIDs)
+}
+
+func (db *commonMsgDatabase) GetMaxSeqWithTime(ctx context.Context, conversationID string) (database.SeqTime, error) {
+	return db.seqConversation.GetMaxSeqWithTime(ctx, conversationID)
+}
+
+func (db *commonMsgDatabase) GetMaxSeqsWithTime(ctx context.Context, conversationIDs []string) (map[string]database.SeqTime, error) {
+	// todo: only the time in the redis cache will be taken, not the message time
+	return db.seqConversation.GetMaxSeqsWithTime(ctx, conversationIDs)
 }

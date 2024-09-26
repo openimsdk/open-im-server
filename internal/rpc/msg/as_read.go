@@ -55,7 +55,7 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 			conversationMaxSeqMap[conversation.ConversationID] = conversation.MaxSeq
 		}
 	}
-	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
+	maxSeqs, err := m.MsgDatabase.GetMaxSeqsWithTime(ctx, conversationIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,8 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	for conversationID, maxSeq := range maxSeqs {
 		resp.Seqs[conversationID] = &msg.Seqs{
 			HasReadSeq: hasReadSeqs[conversationID],
-			MaxSeq:     maxSeq,
+			MaxSeq:     maxSeq.Seq,
+			MaxSeqTime: maxSeq.Time,
 		}
 		if v, ok := conversationMaxSeqMap[conversationID]; ok {
 			resp.Seqs[conversationID].MaxSeq = v
