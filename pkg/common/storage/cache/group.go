@@ -49,7 +49,6 @@ type GroupCache interface {
 	FindGroupMemberUser(ctx context.Context, groupIDs []string, userID string) ([]*model.GroupMember, error)
 
 	GetGroupRoleLevelMemberIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error)
-	GetGroupAdminLevelMemberIDs(ctx context.Context, groupID string) ([]string, error)
 	GetGroupOwner(ctx context.Context, groupID string) (*model.GroupMember, error)
 	GetGroupsOwner(ctx context.Context, groupIDs []string) ([]*model.GroupMember, error)
 	DelGroupRoleLevel(groupID string, roleLevel []int32) GroupCache
