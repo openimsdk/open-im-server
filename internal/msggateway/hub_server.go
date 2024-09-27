@@ -111,7 +111,7 @@ func (s *Server) GetUsersOnlineStatus(
 			}
 
 			ps := new(msggateway.GetUsersOnlineStatusResp_SuccessDetail)
-			ps.Platform = constant.PlatformIDToName(client.PlatformID)
+			ps.PlatformID = int32(client.PlatformID)
 			ps.Status = constant.OnlineStatus
 			ps.ConnID = client.ctx.GetConnID()
 			ps.Token = client.token

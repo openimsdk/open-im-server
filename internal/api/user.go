@@ -153,7 +153,7 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 	}
 
 	for _, v1 := range req.UserIDs {
-		m := make(map[string][]string, 10)
+		m := make(map[int32][]string, 10)
 		flag = false
 		temp := new(msggateway.SingleDetail)
 		for _, v2 := range wsResult {
@@ -162,17 +162,17 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 				temp.UserID = v1
 				temp.Status = constant.OnlineStatus
 				for _, status := range v2.DetailPlatformStatus {
-					if v, ok := m[status.Platform]; ok {
-						m[status.Platform] = append(v, status.Token)
+					if v, ok := m[status.PlatformID]; ok {
+						m[status.PlatformID] = append(v, status.Token)
 					} else {
-						m[status.Platform] = []string{status.Token}
+						m[status.PlatformID] = []string{status.Token}
 					}
 				}
 			}
 		}
 		for p, tokens := range m {
 			t := new(msggateway.SinglePlatformToken)
-			t.Platform = p
+			t.PlatformID = p
 			t.Token = tokens
 			t.Total = int32(len(tokens))
 			temp.SinglePlatformToken = append(temp.SinglePlatformToken, t)
