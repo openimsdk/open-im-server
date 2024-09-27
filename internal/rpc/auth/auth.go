@@ -79,7 +79,7 @@ func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*
 	}
 
 	if datautil.Contain(req.UserID, s.config.Share.IMAdminUserID...) {
-		return nil, errs.ErrNoPermission.WrapMsg("userID is not admin permission.")
+		return nil, errs.ErrNoPermission.WrapMsg("userID is not admin permission.", "userID", req.UserID)
 
 	}
 
