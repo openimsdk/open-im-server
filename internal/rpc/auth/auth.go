@@ -76,13 +76,24 @@ func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*
 	if req.Secret != s.config.Share.Secret {
 		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
+
+	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+
+	if req.PlatformID != constant.AdminPlatformID {
+		return nil, errs.ErrNoPermission.WrapMsg("platformID invalid. platformID must be adminPlatformID")
+	}
+
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
+
 	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(req.PlatformID))
 	if err != nil {
 		return nil, err
 	}
+
 	prommetrics.UserLoginCounter.Inc()
 	resp.Token = token
 	resp.ExpireTimeSeconds = s.config.RpcConfig.TokenPolicy.Expire * 24 * 60 * 60
@@ -93,6 +104,11 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
+
+	if req.PlatformID == constant.AdminPlatformID {
+		return nil, errs.ErrNoPermission.WrapMsg("platformID invalid. platformID must not be adminPlatformID")
+	}
+
 	resp := pbauth.GetUserTokenResp{}
 
 	if authverify.IsManagerUserID(req.UserID, s.config.Share.IMAdminUserID) {
