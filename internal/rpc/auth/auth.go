@@ -78,7 +78,7 @@ func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*
 		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
 
-	if datautil.Contain(req.UserID, s.config.Share.IMAdminUserID...) {
+	if !datautil.Contain(req.UserID, s.config.Share.IMAdminUserID...) {
 		return nil, errs.ErrArgs.WrapMsg("userID is error.", "userID", req.UserID, "adminUserID", s.config.Share.IMAdminUserID)
 
 	}
