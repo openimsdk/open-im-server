@@ -20,6 +20,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -77,19 +78,16 @@ func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*
 		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
 
-	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
-		return nil, err
-	}
+	if datautil.Contain(req.UserID, s.config.Share.IMAdminUserID...) {
+		return nil, errs.ErrNoPermission.WrapMsg("userID is not admin permission.")
 
-	if req.PlatformID != constant.AdminPlatformID {
-		return nil, errs.ErrNoPermission.WrapMsg("platformID invalid. platformID must be adminPlatformID")
 	}
 
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 
-	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(req.PlatformID))
+	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(constant.AdminPlatformID))
 	if err != nil {
 		return nil, err
 	}
