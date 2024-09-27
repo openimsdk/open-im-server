@@ -374,7 +374,7 @@ func (s *groupServer) webhookBeforeSetGroupInfoEx(ctx context.Context, before *c
 		if req.Ex != nil {
 			cbReq.Ex = req.Ex
 		}
-		log.ZDebug(ctx, "debug CallbackBeforeSetGroupInfoEX", "ex", cbReq.Ex)
+		log.ZDebug(ctx, "debug CallbackBeforeSetGroupInfoEx", "ex", cbReq.Ex)
 
 		if req.NeedVerification != nil {
 			cbReq.NeedVerification = req.NeedVerification

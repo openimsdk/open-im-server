@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+
 	"github.com/openimsdk/tools/utils/datautil"
 
 	"github.com/openimsdk/protocol/constant"
@@ -61,7 +62,7 @@ func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatu
 	case constant.Online:
 		online = []int32{req.PlatformID}
 	case constant.Offline:
-		online = []int32{req.PlatformID}
+		offline = []int32{req.PlatformID}
 	}
 	if err := s.online.SetUserOnline(ctx, req.UserID, online, offline); err != nil {
 		return nil, err

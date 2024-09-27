@@ -107,14 +107,14 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 			if v2.UserID == v1 {
 				flag = true
 				res.UserID = v1
-				res.Status = constant.OnlineStatus
+				res.Status = constant.Online
 				res.DetailPlatformStatus = append(res.DetailPlatformStatus, v2.DetailPlatformStatus...)
 				break
 			}
 		}
 		if !flag {
 			res.UserID = v1
-			res.Status = constant.OfflineStatus
+			res.Status = constant.Offline
 		}
 		respResult = append(respResult, res)
 	}
@@ -160,7 +160,7 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 			if v2.UserID == v1 {
 				flag = true
 				temp.UserID = v1
-				temp.Status = constant.OnlineStatus
+				temp.Status = constant.Online
 				for _, status := range v2.DetailPlatformStatus {
 					if v, ok := m[status.PlatformID]; ok {
 						m[status.PlatformID] = append(v, status.Token)
