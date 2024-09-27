@@ -212,6 +212,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *relation.Res
 		if err != nil {
 			return nil, err
 		}
+		s.webhookAfterAddFriendAgree(ctx, &s.config.WebhooksConfig.AfterAddFriendAgree, req)
 		s.notificationSender.FriendApplicationAgreedNotification(ctx, req)
 		return resp, nil
 	}
