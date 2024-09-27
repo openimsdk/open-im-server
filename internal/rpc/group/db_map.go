@@ -58,8 +58,12 @@ func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[s
 func UpdateGroupInfoExMap(ctx context.Context, group *pbgroup.SetGroupInfoExReq) (map[string]any, error) {
 	m := make(map[string]any)
 
-	if group.GroupName != nil && group.GroupName.Value != "" {
-		return nil, errs.ErrArgs.WrapMsg("group name is empty")
+	if group.GroupName != nil {
+		if group.GroupName.Value != "" {
+			m["group_name"] = group.GroupName.Value
+		} else {
+			return nil, errs.ErrArgs.WrapMsg("group name is empty")
+		}
 	}
 	if group.Notification != nil {
 		m["notification"] = group.Notification.Value
