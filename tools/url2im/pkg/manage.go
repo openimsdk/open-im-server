@@ -21,7 +21,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/openimsdk/tools/errs"
 	"io"
 	"log"
 	"net/http"
@@ -33,6 +32,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/openimsdk/tools/errs"
 
 	"github.com/openimsdk/protocol/third"
 )
@@ -95,7 +96,7 @@ func (m *Manage) Run() error {
 	}
 	var err error
 	ctx := context.WithValue(m.ctx, "operationID", fmt.Sprintf("%s_init", m.prefix))
-	m.api.Token, err = m.api.GetToken(ctx)
+	m.api.Token, err = m.api.GetAdminToken(ctx)
 	if err != nil {
 		return err
 	}

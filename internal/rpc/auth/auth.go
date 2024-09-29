@@ -72,8 +72,8 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	return nil
 }
 
-func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*pbauth.UserTokenResp, error) {
-	resp := pbauth.UserTokenResp{}
+func (s *authServer) GetAdminToken(ctx context.Context, req *pbauth.GetAdminTokenReq) (*pbauth.GetAdminTokenResp, error) {
+	resp := pbauth.GetAdminTokenResp{}
 	if req.Secret != s.config.Share.Secret {
 		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
