@@ -90,6 +90,18 @@ type CallbackBeforeAddFriendAgreeResp struct {
 	CommonCallbackResp
 }
 
+type CallbackAfterAddFriendAgreeReq struct {
+	CallbackCommand `json:"callbackCommand"`
+	FromUserID      string `json:"fromUserID" `
+	ToUserID        string `json:"blackUserID"`
+	HandleResult    int32  `json:"HandleResult"`
+	HandleMsg       string `json:"HandleMsg"`
+}
+
+type CallbackAfterAddFriendAgreeResp struct {
+	CommonCallbackResp
+}
+
 type CallbackAfterDeleteFriendReq struct {
 	CallbackCommand `json:"callbackCommand"`
 	OwnerUserID     string `json:"ownerUserID" `
