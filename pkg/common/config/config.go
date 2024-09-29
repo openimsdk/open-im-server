@@ -434,6 +434,7 @@ type Webhooks struct {
 	BeforeAddBlack           BeforeConfig `mapstructure:"beforeAddBlack"`
 	AfterAddFriend           AfterConfig  `mapstructure:"afterAddFriend"`
 	BeforeAddFriendAgree     BeforeConfig `mapstructure:"beforeAddFriendAgree"`
+	AfterAddFriendAgree      AfterConfig  `mapstructure:"afterAddFriendAgree"`
 	AfterDeleteFriend        AfterConfig  `mapstructure:"afterDeleteFriend"`
 	BeforeImportFriends      BeforeConfig `mapstructure:"beforeImportFriends"`
 	AfterImportFriends       AfterConfig  `mapstructure:"afterImportFriends"`

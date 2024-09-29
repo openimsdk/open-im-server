@@ -151,6 +151,9 @@ beforeAddFriendAgree:
   enable: false
   timeout: 5
   failedContinue: true
+afterAddFriendAgree:
+  enable: false
+  timeout: 5
 afterDeleteFriend:
   enable: false
   timeout: 5
