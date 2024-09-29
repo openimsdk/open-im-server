@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+
 	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
 
 	"github.com/gin-contrib/gzip"
