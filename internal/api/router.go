@@ -169,7 +169,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	authRouterGroup := r.Group("/auth")
 	{
 		a := NewAuthApi(*authRpc)
-		authRouterGroup.POST("/user_token", a.UserToken)
+		authRouterGroup.POST("/get_admin_token", a.GetAdminToken)
 		authRouterGroup.POST("/get_user_token", a.GetUserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", a.ForceLogout)
@@ -288,6 +288,6 @@ func GinParseToken(authRPC *rpcclient.Auth) gin.HandlerFunc {
 
 // Whitelist api not parse token
 var Whitelist = []string{
-	"/auth/user_token",
+	"/auth/get_admin_token",
 	"/auth/parse_token",
 }

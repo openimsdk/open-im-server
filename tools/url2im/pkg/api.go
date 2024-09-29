@@ -87,13 +87,13 @@ func (a *Api) apiPost(ctx context.Context, path string, req any, resp any) error
 	return nil
 }
 
-func (a *Api) GetToken(ctx context.Context) (string, error) {
-	req := auth.UserTokenReq{
+func (a *Api) GetAdminToken(ctx context.Context) (string, error) {
+	req := auth.GetAdminTokenReq{
 		UserID: a.UserID,
 		Secret: a.Secret,
 	}
-	var resp auth.UserTokenResp
-	if err := a.apiPost(ctx, "/auth/user_token", &req, &resp); err != nil {
+	var resp auth.GetAdminTokenResp
+	if err := a.apiPost(ctx, "/auth/get_admin_token", &req, &resp); err != nil {
 		return "", err
 	}
 	return resp.Token, nil
