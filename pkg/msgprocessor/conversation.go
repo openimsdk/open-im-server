@@ -39,7 +39,9 @@ func GetNotificationConversationIDByMsg(msg *sdkws.MsgData) string {
 	case constant.ReadGroupChatType:
 		return "n_" + msg.GroupID
 	case constant.NotificationChatType:
-		return "n_" + msg.SendID + "_" + msg.RecvID
+		l := []string{msg.SendID, msg.RecvID}
+		sort.Strings(l)
+		return "n_" + strings.Join(l, "_")
 	}
 	return ""
 }
