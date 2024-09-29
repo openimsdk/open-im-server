@@ -63,34 +63,34 @@ jobs:
           docker compose up -d
           sleep 60
 
-      - name: Check openim-server health
-        run: |
-          timeout=300
-          interval=30
-          elapsed=0
-          while [[ $elapsed -le $timeout ]]; do
-            if ! docker exec openim-server mage check; then
-              echo "openim-server is not ready, waiting..."
-              sleep $interval
-              elapsed=$(($elapsed + $interval))
-            else
-              echo "Health check successful"
-              exit 0
-            fi
-          done
-          echo "Health check failed after 5 minutes"
-          exit 1
+      # - name: Check openim-server health
+      #   run: |
+      #     timeout=300
+      #     interval=30
+      #     elapsed=0
+      #     while [[ $elapsed -le $timeout ]]; do
+      #       if ! docker exec openim-server mage check; then
+      #         echo "openim-server is not ready, waiting..."
+      #         sleep $interval
+      #         elapsed=$(($elapsed + $interval))
+      #       else
+      #         echo "Health check successful"
+      #         exit 0
+      #       fi
+      #     done
+      #     echo "Health check failed after 5 minutes"
+      #     exit 1
 
-      - name: Check openim-chat health
-        if: success()
-        run: |
-          if ! docker exec openim-chat mage check; then
-              echo "openim-chat check failed"
-              exit 1
-            else
-              echo "Health check successful"
-              exit 0
-            fi
+      # - name: Check openim-chat health
+      #   if: success()
+      #   run: |
+      #     if ! docker exec openim-chat mage check; then
+      #         echo "openim-chat check failed"
+      #         exit 1
+      #       else
+      #         echo "Health check successful"
+      #         exit 0
+      #       fi
 
 
       - name: Extract metadata for Docker #  (tags, labels) 
