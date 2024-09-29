@@ -82,7 +82,7 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 	const adminTokenMaxNum = 30
 	if platformID == constant.AdminPlatformID {
 		if len(kickedTokenKey) > adminTokenMaxNum {
-			kickedTokenKey = kickedTokenKey[:adminTokenMaxNum]
+			kickedTokenKey = kickedTokenKey[:len(kickedTokenKey)-adminTokenMaxNum]
 		} else {
 			kickedTokenKey = nil
 		}
