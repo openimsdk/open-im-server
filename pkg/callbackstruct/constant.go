@@ -25,6 +25,7 @@ const (
 	CallbackBeforeAddBlackCommand           = "callbackBeforeAddBlackCommand"
 	CallbackAfterAddFriendCommand           = "callbackAfterAddFriendCommand"
 	CallbackBeforeAddFriendAgreeCommand     = "callbackBeforeAddFriendAgreeCommand"
+	CallbackAfterAddFriendAgreeCommand      = "callbackAfterAddFriendAgreeCommand"
 	CallbackAfterDeleteFriendCommand        = "callbackAfterDeleteFriendCommand"
 	CallbackBeforeImportFriendsCommand      = "callbackBeforeImportFriendsCommand"
 	CallbackAfterImportFriendsCommand       = "callbackAfterImportFriendsCommand"
