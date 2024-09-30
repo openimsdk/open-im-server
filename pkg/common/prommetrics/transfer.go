@@ -16,6 +16,7 @@ package prommetrics
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
@@ -40,3 +41,16 @@ var (
 		Help: "The number of failed set seq",
 	})
 )
+
+func TransferInit(prometheusPort int) error {
+	reg := prometheus.NewRegistry()
+	cs := append(
+		baseCollector,
+		MsgInsertRedisSuccessCounter,
+		MsgInsertRedisFailedCounter,
+		MsgInsertMongoSuccessCounter,
+		MsgInsertMongoFailedCounter,
+		SeqSetFailedCounter,
+	)
+	return Init(reg, prometheusPort, commonPath, promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}), cs...)
+}

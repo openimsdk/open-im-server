@@ -16,10 +16,10 @@ package msggateway
 
 import (
 	"crypto/rand"
+	"github.com/stretchr/testify/assert"
 	"sync"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
+	"unsafe"
 )
 
 func mockRandom() []byte {
@@ -131,4 +131,9 @@ func BenchmarkDecompressWithSyncPool(b *testing.B) {
 		_, err := compressor.DecompressWithPool(comdata)
 		assert.Equal(b, nil, err)
 	}
+}
+
+func TestName(t *testing.T) {
+	t.Log(unsafe.Sizeof(Client{}))
+
 }

@@ -16,26 +16,26 @@ package convert
 
 import (
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
 	"github.com/openimsdk/protocol/sdkws"
 )
 
-func UsersDB2Pb(users []*relationtb.User) []*sdkws.UserInfo {
-	result := make([]*sdkws.UserInfo, 0, len(users))
-	for _, user := range users {
-		userPb := &sdkws.UserInfo{
-			UserID:           user.UserID,
-			Nickname:         user.Nickname,
-			FaceURL:          user.FaceURL,
-			Ex:               user.Ex,
-			CreateTime:       user.CreateTime.UnixMilli(),
-			AppMangerLevel:   user.AppMangerLevel,
-			GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
-		}
-		result = append(result, userPb)
+func UserDB2Pb(user *relationtb.User) *sdkws.UserInfo {
+	return &sdkws.UserInfo{
+		UserID:           user.UserID,
+		Nickname:         user.Nickname,
+		FaceURL:          user.FaceURL,
+		Ex:               user.Ex,
+		CreateTime:       user.CreateTime.UnixMilli(),
+		AppMangerLevel:   user.AppMangerLevel,
+		GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
 	}
-	return result
+}
+
+func UsersDB2Pb(users []*relationtb.User) []*sdkws.UserInfo {
+	return datautil.Slice(users, UserDB2Pb)
 }
 
 func UserPb2DB(user *sdkws.UserInfo) *relationtb.User {

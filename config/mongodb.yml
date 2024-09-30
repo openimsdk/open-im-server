@@ -1,5 +1,5 @@
 # URI for database connection, leave empty if using address and credential settings directly
-uri: ''
+uri: 
 # List of MongoDB server addresses
 address: [ localhost:37017 ]
 # Name of the database

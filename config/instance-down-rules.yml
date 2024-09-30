@@ -1,0 +1,44 @@
+groups:
+  - name: instance_down
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minutes."
+
+  - name: database_insert_failure_alerts
+    rules:
+      - alert: DatabaseInsertFailed
+        expr: (increase(msg_insert_redis_failed_total[5m]) > 0) or (increase(msg_insert_mongo_failed_total[5m]) > 0)
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Increase in MsgInsertRedisFailedCounter or MsgInsertMongoFailedCounter detected"
+          description: "Either MsgInsertRedisFailedCounter or MsgInsertMongoFailedCounter has increased in the last 5 minutes, indicating failures in message insert operations to Redis or MongoDB,maybe the redis or mongodb is crash."
+
+  - name: registrations_few
+    rules:
+      - alert: RegistrationsFew
+        expr: increase(user_login_total[1h]) == 0
+        for: 1m
+        labels:
+          severity: info
+        annotations:
+          summary: "Too few registrations within the time frame"
+          description: "The number of registrations in the last hour is 0. There might be some issues."
+
+  - name: messages_few
+    rules:
+      - alert: MessagesFew
+        expr: (increase(single_chat_msg_process_success_total[1h])+increase(group_chat_msg_process_success_total[1h])) == 0
+        for: 1m
+        labels:
+          severity: info
+        annotations:
+          summary: "Too few messages within the time frame"
+          description: "The number of messages sent in the last hour is 0. There might be some issues."

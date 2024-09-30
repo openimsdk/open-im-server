@@ -16,6 +16,7 @@ package mgo
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"time"
 
@@ -29,7 +30,7 @@ import (
 )
 
 func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
-	coll := db.Collection("conversation")
+	coll := db.Collection(database.ConversationName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "owner_user_id", Value: 1},
@@ -40,40 +41,71 @@ func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
-	return &ConversationMgo{coll: coll}, nil
+	version, err := NewVersionLog(db.Collection(database.ConversationVersionName))
+	if err != nil {
+		return nil, err
+	}
+	return &ConversationMgo{version: version, coll: coll}, nil
 }
 
 type ConversationMgo struct {
-	coll *mongo.Collection
+	version database.VersionLog
+	coll    *mongo.Collection
 }
 
 func (c *ConversationMgo) Create(ctx context.Context, conversations []*model.Conversation) (err error) {
-	return mongoutil.InsertMany(ctx, c.coll, conversations)
+	return mongoutil.IncrVersion(func() error {
+		return mongoutil.InsertMany(ctx, c.coll, conversations)
+	}, func() error {
+		userConversation := make(map[string][]string)
+		for _, conversation := range conversations {
+			userConversation[conversation.OwnerUserID] = append(userConversation[conversation.OwnerUserID], conversation.ConversationID)
+		}
+		for userID, conversationIDs := range userConversation {
+			if err := c.version.IncrVersion(ctx, userID, conversationIDs, model.VersionStateInsert); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
-func (c *ConversationMgo) Delete(ctx context.Context, groupIDs []string) (err error) {
-	return mongoutil.DeleteMany(ctx, c.coll, bson.M{"group_id": bson.M{"$in": groupIDs}})
-}
-
-func (c *ConversationMgo) UpdateByMap(ctx context.Context, userIDs []string, conversationID string, args map[string]any) (rows int64, err error) {
-	if len(args) == 0 {
+func (c *ConversationMgo) UpdateByMap(ctx context.Context, userIDs []string, conversationID string, args map[string]any) (int64, error) {
+	if len(args) == 0 || len(userIDs) == 0 {
 		return 0, nil
 	}
 	filter := bson.M{
 		"conversation_id": conversationID,
+		"owner_user_id":   bson.M{"$in": userIDs},
 	}
-	if len(userIDs) > 0 {
-		filter["owner_user_id"] = bson.M{"$in": userIDs}
-	}
-	res, err := mongoutil.UpdateMany(ctx, c.coll, filter, bson.M{"$set": args})
+	var rows int64
+	err := mongoutil.IncrVersion(func() error {
+		res, err := mongoutil.UpdateMany(ctx, c.coll, filter, bson.M{"$set": args})
+		if err != nil {
+			return err
+		}
+		rows = res.ModifiedCount
+		return nil
+	}, func() error {
+		for _, userID := range userIDs {
+			if err := c.version.IncrVersion(ctx, userID, []string{conversationID}, model.VersionStateUpdate); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		return 0, err
 	}
-	return res.ModifiedCount, nil
+	return rows, nil
 }
 
 func (c *ConversationMgo) Update(ctx context.Context, conversation *model.Conversation) (err error) {
-	return mongoutil.UpdateOne(ctx, c.coll, bson.M{"owner_user_id": conversation.OwnerUserID, "conversation_id": conversation.ConversationID}, bson.M{"$set": conversation}, true)
+	return mongoutil.IncrVersion(func() error {
+		return mongoutil.UpdateOne(ctx, c.coll, bson.M{"owner_user_id": conversation.OwnerUserID, "conversation_id": conversation.ConversationID}, bson.M{"$set": conversation}, true)
+	}, func() error {
+		return c.version.IncrVersion(ctx, conversation.OwnerUserID, []string{conversation.ConversationID}, model.VersionStateUpdate)
+	})
 }
 
 func (c *ConversationMgo) Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*model.Conversation, err error) {
@@ -90,6 +122,20 @@ func (c *ConversationMgo) FindUserID(ctx context.Context, userIDs []string, conv
 }
 func (c *ConversationMgo) FindUserIDAllConversationID(ctx context.Context, userID string) ([]string, error) {
 	return mongoutil.Find[string](ctx, c.coll, bson.M{"owner_user_id": userID}, options.Find().SetProjection(bson.M{"_id": 0, "conversation_id": 1}))
+}
+
+func (c *ConversationMgo) FindUserIDAllNotNotifyConversationID(ctx context.Context, userID string) ([]string, error) {
+	return mongoutil.Find[string](ctx, c.coll, bson.M{
+		"owner_user_id": userID,
+		"recv_msg_opt":  constant.ReceiveNotNotifyMessage,
+	}, options.Find().SetProjection(bson.M{"_id": 0, "conversation_id": 1}))
+}
+
+func (c *ConversationMgo) FindUserIDAllPinnedConversationID(ctx context.Context, userID string) ([]string, error) {
+	return mongoutil.Find[string](ctx, c.coll, bson.M{
+		"owner_user_id": userID,
+		"is_pinned":     true,
+	}, options.Find().SetProjection(bson.M{"_id": 0, "conversation_id": 1}))
 }
 
 func (c *ConversationMgo) Take(ctx context.Context, userID, conversationID string) (conversation *model.Conversation, err error) {
@@ -176,4 +222,8 @@ func (c *ConversationMgo) GetConversationNotReceiveMessageUserIDs(ctx context.Co
 		bson.M{"conversation_id": conversationID, "recv_msg_opt": bson.M{"$ne": constant.ReceiveMessage}},
 		options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1}),
 	)
+}
+
+func (c *ConversationMgo) FindConversationUserVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error) {
+	return c.version.FindChangeLog(ctx, userID, version, limit)
 }

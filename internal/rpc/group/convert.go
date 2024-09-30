@@ -57,3 +57,7 @@ func (s *groupServer) groupMemberDB2PB(member *model.GroupMember, appMangerLevel
 		InviterUserID:  member.InviterUserID,
 	}
 }
+
+func (s *groupServer) groupMemberDB2PB2(member *model.GroupMember) *sdkws.GroupMemberFullInfo {
+	return s.groupMemberDB2PB(member, 0)
+}

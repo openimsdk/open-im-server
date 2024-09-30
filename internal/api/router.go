@@ -2,9 +2,21 @@ package api
 
 import (
 	"fmt"
+
+	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
+
+	"github.com/gin-contrib/gzip"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
+	"net/http"
+	"strings"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
@@ -12,11 +24,29 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"net/http"
-	"strings"
 )
+
+const (
+	NoCompression      = -1
+	DefaultCompression = 0
+	BestCompression    = 1
+	BestSpeed          = 2
+)
+
+func prommetricsGin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+		path := c.FullPath()
+		if c.Writer.Status() == http.StatusNotFound {
+			prommetrics.HttpCall("<404>", c.Request.Method, c.Writer.Status())
+		} else {
+			prommetrics.HttpCall(path, c.Request.Method, c.Writer.Status())
+		}
+		if resp := apiresp.GetGinApiResponse(c); resp != nil {
+			prommetrics.APICall(path, c.Request.Method, resp.ErrCode)
+		}
+	}
+}
 
 func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.Engine {
 	disCov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -35,10 +65,19 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	conversationRpc := rpcclient.NewConversation(disCov, config.Share.RpcRegisterName.Conversation)
 	authRpc := rpcclient.NewAuth(disCov, config.Share.RpcRegisterName.Auth)
 	thirdRpc := rpcclient.NewThird(disCov, config.Share.RpcRegisterName.Third, config.API.Prometheus.GrafanaURL)
-
-	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID(), GinParseToken(authRpc))
+	switch config.API.Api.CompressionLevel {
+	case NoCompression:
+	case DefaultCompression:
+		r.Use(gzip.Gzip(gzip.DefaultCompression))
+	case BestCompression:
+		r.Use(gzip.Gzip(gzip.BestCompression))
+	case BestSpeed:
+		r.Use(gzip.Gzip(gzip.BestSpeed))
+	}
+	r.Use(prommetricsGin(), gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID(), GinParseToken(authRpc))
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc, config.Share.IMAdminUserID)
+	j := jssdk.NewJSSdkApi(messageRpc.Client, conversationRpc.Client)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -80,18 +119,23 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		friendRouterGroup.POST("/set_friend_remark", f.SetFriendRemark)
 		friendRouterGroup.POST("/add_black", f.AddBlack)
 		friendRouterGroup.POST("/get_black_list", f.GetPaginationBlacks)
+		friendRouterGroup.POST("/get_specified_blacks", f.GetSpecifiedBlacks)
 		friendRouterGroup.POST("/remove_black", f.RemoveBlack)
+		friendRouterGroup.POST("/get_incremental_blacks", f.GetIncrementalBlacks)
 		friendRouterGroup.POST("/import_friend", f.ImportFriends)
 		friendRouterGroup.POST("/is_friend", f.IsFriend)
 		friendRouterGroup.POST("/get_friend_id", f.GetFriendIDs)
 		friendRouterGroup.POST("/get_specified_friends_info", f.GetSpecifiedFriendsInfo)
 		friendRouterGroup.POST("/update_friends", f.UpdateFriends)
+		friendRouterGroup.POST("/get_incremental_friends", f.GetIncrementalFriends)
+		friendRouterGroup.POST("/get_full_friend_user_ids", f.GetFullFriendUserIDs)
 	}
 	g := NewGroupApi(*groupRpc)
 	groupRouterGroup := r.Group("/group")
 	{
 		groupRouterGroup.POST("/create_group", g.CreateGroup)
 		groupRouterGroup.POST("/set_group_info", g.SetGroupInfo)
+		groupRouterGroup.POST("/set_group_info_ex", g.SetGroupInfoEx)
 		groupRouterGroup.POST("/join_group", g.JoinGroup)
 		groupRouterGroup.POST("/quit_group", g.QuitGroup)
 		groupRouterGroup.POST("/group_application_response", g.ApplicationGroupResponse)
@@ -99,6 +143,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		groupRouterGroup.POST("/get_recv_group_applicationList", g.GetRecvGroupApplicationList)
 		groupRouterGroup.POST("/get_user_req_group_applicationList", g.GetUserReqGroupApplicationList)
 		groupRouterGroup.POST("/get_group_users_req_application_list", g.GetGroupUsersReqApplicationList)
+		groupRouterGroup.POST("/get_specified_user_group_request_info", g.GetSpecifiedUserGroupRequestInfo)
 		groupRouterGroup.POST("/get_groups_info", g.GetGroupsInfo)
 		groupRouterGroup.POST("/kick_group", g.KickGroupMember)
 		groupRouterGroup.POST("/get_group_members_info", g.GetGroupMembersInfo)
@@ -114,12 +159,17 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		groupRouterGroup.POST("/get_group_abstract_info", g.GetGroupAbstractInfo)
 		groupRouterGroup.POST("/get_groups", g.GetGroups)
 		groupRouterGroup.POST("/get_group_member_user_id", g.GetGroupMemberUserIDs)
+		groupRouterGroup.POST("/get_incremental_join_groups", g.GetIncrementalJoinGroup)
+		groupRouterGroup.POST("/get_incremental_group_members", g.GetIncrementalGroupMember)
+		groupRouterGroup.POST("/get_incremental_group_members_batch", g.GetIncrementalGroupMemberBatch)
+		groupRouterGroup.POST("/get_full_group_member_user_ids", g.GetFullGroupMemberUserIDs)
+		groupRouterGroup.POST("/get_full_join_group_ids", g.GetFullJoinGroupIDs)
 	}
 	// certificate
 	authRouterGroup := r.Group("/auth")
 	{
 		a := NewAuthApi(*authRpc)
-		authRouterGroup.POST("/user_token", a.UserToken)
+		authRouterGroup.POST("/get_admin_token", a.GetAdminToken)
 		authRouterGroup.POST("/get_user_token", a.GetUserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", a.ForceLogout)
@@ -183,6 +233,11 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		conversationGroup.POST("/get_conversations", c.GetConversations)
 		conversationGroup.POST("/set_conversations", c.SetConversations)
 		conversationGroup.POST("/get_conversation_offline_push_user_ids", c.GetConversationOfflinePushUserIDs)
+		conversationGroup.POST("/get_full_conversation_ids", c.GetFullOwnerConversationIDs)
+		conversationGroup.POST("/get_incremental_conversations", c.GetIncrementalConversation)
+		conversationGroup.POST("/get_owner_conversation", c.GetOwnerConversation)
+		conversationGroup.POST("/get_not_notify_conversation_ids", c.GetNotNotifyConversationIDs)
+		conversationGroup.POST("/get_pinned_conversation_ids", c.GetPinnedConversationIDs)
 	}
 
 	statisticsGroup := r.Group("/statistics")
@@ -192,6 +247,11 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		statisticsGroup.POST("/group/create", g.GroupCreateCount)
 		statisticsGroup.POST("/group/active", m.GetActiveGroup)
 	}
+
+	jssdk := r.Group("/jssdk")
+	jssdk.POST("/get_conversations", j.GetConversations)
+	jssdk.POST("/get_active_conversations", j.GetActiveConversations)
+
 	return r
 }
 
@@ -228,7 +288,6 @@ func GinParseToken(authRPC *rpcclient.Auth) gin.HandlerFunc {
 
 // Whitelist api not parse token
 var Whitelist = []string{
-	"/user/user_register",
-	"/auth/user_token",
+	"/auth/get_admin_token",
 	"/auth/parse_token",
 }

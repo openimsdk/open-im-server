@@ -1,4 +1,4 @@
-url: "webhook://127.0.0.1:10008/callbackExample"
+url: http://127.0.0.1:10006/callbackExample
 beforeSendSingleMsg:
   enable: false
   timeout: 5
@@ -13,6 +13,9 @@ afterUpdateUserInfoEx:
 afterSendSingleMsg:
   enable: false
   timeout: 5
+  # Only the senID/recvID specified in attentionIds will send the callback
+  # if not set, all user messages will be callback
+  attentionIds: []
 beforeSendGroupMsg:
   enable: false
   timeout: 5
@@ -127,6 +130,13 @@ beforeSetGroupInfo:
   enable: false
   timeout: 5
   failedContinue: true
+afterSetGroupInfoEx:
+  enable: false
+  timeout: 5
+beforeSetGroupInfoEx:
+  enable: false
+  timeout: 5
+  failedContinue: true
 afterRevokeMsg:
   enable: false
   timeout: 5
@@ -141,6 +151,9 @@ beforeAddFriendAgree:
   enable: false
   timeout: 5
   failedContinue: true
+afterAddFriendAgree:
+  enable: false
+  timeout: 5
 afterDeleteFriend:
   enable: false
   timeout: 5

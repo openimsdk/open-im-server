@@ -10,5 +10,7 @@ rpcRegisterName:
   conversation: conversation
   third: third
 
-imAdminUserID: [ "imAdmin" ]
+imAdminUserID: [ imAdmin ]
 
+# 1: For Android, iOS, Windows, Mac, and web platforms, only one instance can be online at a time
+multiLoginPolicy: 1

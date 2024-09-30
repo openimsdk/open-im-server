@@ -1,0 +1,35 @@
+name: User First Interaction
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    branches: [main]
+    types: [opened]
+
+jobs:
+  check_for_first_interaction:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/first-interaction@v1.3.0
+        with:
+          repo-token: ${{ secrets.BOT_TOKEN }}
+          pr-message: |
+            Hello! Thank you for your contribution.
+            
+            If you are fixing a bug, please reference the issue number in the description.
+
+            If you are implementing a feature request, please check with the maintainers that the feature will be accepted first.
+
+            [Join slack 🤖](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) to connect and communicate with our developers.
+
+            Please leave your information in the [✨ discussions](https://github.com/orgs/OpenIMSDK/discussions/426), we expect anyone to join OpenIM developer community.
+
+          issue-message: |
+            Hello! Thank you for filing an issue.
+
+            If this is a bug report, please include relevant logs to help us debug the problem.
+            
+            [Join slack 🤖](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) to connect and communicate with our developers.
+        continue-on-error: true

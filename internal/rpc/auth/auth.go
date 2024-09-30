@@ -16,9 +16,11 @@ package auth
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -32,7 +34,6 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/tokenverify"
 	"google.golang.org/grpc"
 )
@@ -61,27 +62,36 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
-			redis2.NewTokenCacheModel(rdb),
+			redis2.NewTokenCacheModel(rdb, config.RpcConfig.TokenPolicy.Expire),
 			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
+			config.Share.MultiLoginPolicy,
 		),
 		config: config,
 	})
 	return nil
 }
 
-func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*pbauth.UserTokenResp, error) {
-	resp := pbauth.UserTokenResp{}
+func (s *authServer) GetAdminToken(ctx context.Context, req *pbauth.GetAdminTokenReq) (*pbauth.GetAdminTokenResp, error) {
+	resp := pbauth.GetAdminTokenResp{}
 	if req.Secret != s.config.Share.Secret {
 		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
+
+	if !datautil.Contain(req.UserID, s.config.Share.IMAdminUserID...) {
+		return nil, errs.ErrArgs.WrapMsg("userID is error.", "userID", req.UserID, "adminUserID", s.config.Share.IMAdminUserID)
+
+	}
+
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(req.PlatformID))
+
+	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(constant.AdminPlatformID))
 	if err != nil {
 		return nil, err
 	}
+
 	prommetrics.UserLoginCounter.Inc()
 	resp.Token = token
 	resp.ExpireTimeSeconds = s.config.RpcConfig.TokenPolicy.Expire * 24 * 60 * 60
@@ -92,6 +102,11 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
+
+	if req.PlatformID == constant.AdminPlatformID {
+		return nil, errs.ErrNoPermission.WrapMsg("platformID invalid. platformID must not be adminPlatformID")
+	}
+
 	resp := pbauth.GetUserTokenResp{}
 
 	if authverify.IsManagerUserID(req.UserID, s.config.Share.IMAdminUserID) {
@@ -153,21 +168,19 @@ func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq
 	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
-	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {
+	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID); err != nil {
 		return nil, err
 	}
 	return &pbauth.ForceLogoutResp{}, nil
 }
 
-func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
+func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32) error {
 	conns, err := s.RegisterCenter.GetConns(ctx, s.config.Share.RpcRegisterName.MessageGateway)
 	if err != nil {
 		return err
 	}
 	for _, v := range conns {
 		log.ZDebug(ctx, "forceKickOff", "conn", v.Target())
-	}
-	for _, v := range conns {
 		client := msggateway.NewMsgGatewayClient(v)
 		kickReq := &msggateway.KickUserOfflineReq{KickUserIDList: []string{userID}, PlatformID: platformID}
 		_, err := client.KickUserOffline(ctx, kickReq)
@@ -175,8 +188,24 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 			log.ZError(ctx, "forceKickOff", err, "kickReq", kickReq)
 		}
 	}
+
+	m, err := s.authDatabase.GetTokensWithoutError(ctx, userID, int(platformID))
+	if err != nil && err != redis.Nil {
+		return err
+	}
+	for k := range m {
+		m[k] = constant.KickedToken
+		log.ZDebug(ctx, "set token map is ", "token map", m, "userID",
+			userID, "token", k)
+
+		err = s.authDatabase.SetTokenMapByUidPid(ctx, userID, int(platformID), m)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
+
 func (s *authServer) InvalidateToken(ctx context.Context, req *pbauth.InvalidateTokenReq) (*pbauth.InvalidateTokenResp, error) {
 	m, err := s.authDatabase.GetTokensWithoutError(ctx, req.UserID, int(req.PlatformID))
 	if err != nil && err != redis.Nil {

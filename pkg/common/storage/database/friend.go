@@ -16,6 +16,7 @@ package database
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/db/pagination"
 )
@@ -46,4 +47,14 @@ type Friend interface {
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
 	// UpdateFriends update friends' fields
 	UpdateFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, val map[string]any) (err error)
+
+	FindIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*model.VersionLog, error)
+
+	FindFriendUserID(ctx context.Context, friendUserID string) ([]string, error)
+
+	//SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error)
+
+	FindOwnerFriendUserIds(ctx context.Context, ownerUserID string, limit int) ([]string, error)
+
+	IncrVersion(ctx context.Context, ownerUserID string, friendUserIDs []string, state int32) error
 }

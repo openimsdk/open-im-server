@@ -16,35 +16,36 @@ package cmd
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/internal/rpc/friend"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+
+	"github.com/openimsdk/open-im-server/v3/internal/rpc/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
+	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
 
 type FriendRpcCmd struct {
 	*RootCmd
-	ctx          context.Context
-	configMap    map[string]any
-	friendConfig *friend.Config
+	ctx            context.Context
+	configMap      map[string]any
+	relationConfig *relation.Config
 }
 
 func NewFriendRpcCmd() *FriendRpcCmd {
-	var friendConfig friend.Config
-	ret := &FriendRpcCmd{friendConfig: &friendConfig}
+	var relationConfig relation.Config
+	ret := &FriendRpcCmd{relationConfig: &relationConfig}
 	ret.configMap = map[string]any{
-		OpenIMRPCFriendCfgFileName: &friendConfig.RpcConfig,
-		RedisConfigFileName:        &friendConfig.RedisConfig,
-		MongodbConfigFileName:      &friendConfig.MongodbConfig,
-		ShareFileName:              &friendConfig.Share,
-		NotificationFileName:       &friendConfig.NotificationConfig,
-		WebhooksConfigFileName:     &friendConfig.WebhooksConfig,
-		LocalCacheConfigFileName:   &friendConfig.LocalCacheConfig,
-		DiscoveryConfigFilename:    &friendConfig.Discovery,
+		OpenIMRPCFriendCfgFileName: &relationConfig.RpcConfig,
+		RedisConfigFileName:        &relationConfig.RedisConfig,
+		MongodbConfigFileName:      &relationConfig.MongodbConfig,
+		ShareFileName:              &relationConfig.Share,
+		NotificationFileName:       &relationConfig.NotificationConfig,
+		WebhooksConfigFileName:     &relationConfig.WebhooksConfig,
+		LocalCacheConfigFileName:   &relationConfig.LocalCacheConfig,
+		DiscoveryConfigFilename:    &relationConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
-	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
+	ret.ctx = context.WithValue(context.Background(), "version", version.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		return ret.runE()
 	}
@@ -56,7 +57,7 @@ func (a *FriendRpcCmd) Exec() error {
 }
 
 func (a *FriendRpcCmd) runE() error {
-	return startrpc.Start(a.ctx, &a.friendConfig.Discovery, &a.friendConfig.RpcConfig.Prometheus, a.friendConfig.RpcConfig.RPC.ListenIP,
-		a.friendConfig.RpcConfig.RPC.RegisterIP, a.friendConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.friendConfig.Share.RpcRegisterName.Friend, &a.friendConfig.Share, a.friendConfig, friend.Start)
+	return startrpc.Start(a.ctx, &a.relationConfig.Discovery, &a.relationConfig.RpcConfig.Prometheus, a.relationConfig.RpcConfig.RPC.ListenIP,
+		a.relationConfig.RpcConfig.RPC.RegisterIP, a.relationConfig.RpcConfig.RPC.Ports,
+		a.Index(), a.relationConfig.Share.RpcRegisterName.Friend, &a.relationConfig.Share, a.relationConfig, relation.Start)
 }

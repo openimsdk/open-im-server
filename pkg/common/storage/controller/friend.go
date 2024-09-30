@@ -77,6 +77,16 @@ type FriendDatabase interface {
 
 	// UpdateFriends updates fields for friends
 	UpdateFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, val map[string]any) (err error)
+
+	//FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
+
+	FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*model.VersionLog, error)
+
+	FindMaxFriendVersionCache(ctx context.Context, ownerUserID string) (*model.VersionLog, error)
+
+	FindFriendUserID(ctx context.Context, friendUserID string) ([]string, error)
+
+	OwnerIncrVersion(ctx context.Context, ownerUserID string, friendUserIDs []string, state int32) error
 }
 
 type friendDatabase struct {
@@ -142,42 +152,56 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 	return f.tx.Transaction(ctx, func(ctx context.Context) error {
 		cache := f.cache.CloneFriendCache()
 		// user find friends
-		fs1, err := f.friend.FindFriends(ctx, ownerUserID, friendUserIDs)
+		myFriends, err := f.friend.FindFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
 		}
-		opUserID := mcontext.GetOperationID(ctx)
-		for _, v := range friendUserIDs {
-			fs1 = append(fs1, &model.Friend{OwnerUserID: ownerUserID, FriendUserID: v, AddSource: addSource, OperatorUserID: opUserID})
+		addOwners, err := f.friend.FindReversalFriends(ctx, ownerUserID, friendUserIDs)
+		if err != nil {
+			return err
 		}
-		fs11 := datautil.DistinctAny(fs1, func(e *model.Friend) string {
-			return e.FriendUserID
+		opUserID := mcontext.GetOpUserID(ctx)
+		friends := make([]*model.Friend, 0, len(friendUserIDs)*2)
+		myFriendsSet := datautil.SliceSetAny(myFriends, func(friend *model.Friend) string {
+			return friend.FriendUserID
 		})
-
-		err = f.friend.Create(ctx, fs11)
-		if err != nil {
-			return err
-		}
-		fs2, err := f.friend.FindReversalFriends(ctx, ownerUserID, friendUserIDs)
-		if err != nil {
-			return err
-		}
-		var newFriendIDs []string
-		for _, v := range friendUserIDs {
-			fs2 = append(fs2, &model.Friend{OwnerUserID: v, FriendUserID: ownerUserID, AddSource: addSource, OperatorUserID: opUserID})
-			newFriendIDs = append(newFriendIDs, v)
-		}
-		fs22 := datautil.DistinctAny(fs2, func(e *model.Friend) string {
-			return e.OwnerUserID
+		addOwnersSet := datautil.SliceSetAny(addOwners, func(friend *model.Friend) string {
+			return friend.OwnerUserID
 		})
-		err = f.friend.Create(ctx, fs22)
+		newMyFriendIDs := make([]string, 0, len(friendUserIDs))
+		newMyOwnerIDs := make([]string, 0, len(friendUserIDs))
+		for _, userID := range friendUserIDs {
+			if ownerUserID == userID {
+				continue
+			}
+			if _, ok := myFriendsSet[userID]; !ok {
+				myFriendsSet[userID] = struct{}{}
+				newMyFriendIDs = append(newMyFriendIDs, userID)
+				friends = append(friends, &model.Friend{OwnerUserID: ownerUserID, FriendUserID: userID, AddSource: addSource, OperatorUserID: opUserID})
+			}
+			if _, ok := addOwnersSet[userID]; !ok {
+				addOwnersSet[userID] = struct{}{}
+				newMyOwnerIDs = append(newMyOwnerIDs, userID)
+				friends = append(friends, &model.Friend{OwnerUserID: userID, FriendUserID: ownerUserID, AddSource: addSource, OperatorUserID: opUserID})
+			}
+		}
+		if len(friends) == 0 {
+			return nil
+		}
+		err = f.friend.Create(ctx, friends)
 		if err != nil {
 			return err
 		}
-		newFriendIDs = append(newFriendIDs, ownerUserID)
-		cache = cache.DelFriendIDs(newFriendIDs...)
+		cache = cache.DelFriendIDs(ownerUserID).DelMaxFriendVersion(ownerUserID)
+		if len(newMyFriendIDs) > 0 {
+			cache = cache.DelFriendIDs(newMyFriendIDs...)
+			cache = cache.DelFriends(ownerUserID, newMyFriendIDs).DelMaxFriendVersion(newMyFriendIDs...)
+		}
+		if len(newMyOwnerIDs) > 0 {
+			cache = cache.DelFriendIDs(newMyOwnerIDs...)
+			cache = cache.DelOwner(ownerUserID, newMyOwnerIDs).DelMaxFriendVersion(newMyOwnerIDs...)
+		}
 		return cache.ChainExecDel(ctx)
-
 	})
 }
 
@@ -278,7 +302,7 @@ func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 				return err
 			}
 		}
-		return f.cache.DelFriendIDs(friendRequest.ToUserID, friendRequest.FromUserID).ChainExecDel(ctx)
+		return f.cache.DelFriendIDs(friendRequest.ToUserID, friendRequest.FromUserID).DelMaxFriendVersion(friendRequest.ToUserID, friendRequest.FromUserID).ChainExecDel(ctx)
 	})
 }
 
@@ -287,7 +311,8 @@ func (f *friendDatabase) Delete(ctx context.Context, ownerUserID string, friendU
 	if err := f.friend.Delete(ctx, ownerUserID, friendUserIDs); err != nil {
 		return err
 	}
-	return f.cache.DelFriendIDs(append(friendUserIDs, ownerUserID)...).ChainExecDel(ctx)
+	userIds := append(friendUserIDs, ownerUserID)
+	return f.cache.DelFriendIDs(userIds...).DelMaxFriendVersion(userIds...).ChainExecDel(ctx)
 }
 
 // UpdateRemark updates the remark for a friend. Zero value for remark is also supported.
@@ -295,7 +320,7 @@ func (f *friendDatabase) UpdateRemark(ctx context.Context, ownerUserID, friendUs
 	if err := f.friend.UpdateRemark(ctx, ownerUserID, friendUserID, remark); err != nil {
 		return err
 	}
-	return f.cache.DelFriend(ownerUserID, friendUserID).ChainExecDel(ctx)
+	return f.cache.DelFriend(ownerUserID, friendUserID).DelMaxFriendVersion(ownerUserID).ChainExecDel(ctx)
 }
 
 // PageOwnerFriends retrieves the list of friends for the ownerUserID. It does not return an error if the result is empty.
@@ -324,9 +349,6 @@ func (f *friendDatabase) FindFriendsWithError(ctx context.Context, ownerUserID s
 	if err != nil {
 		return
 	}
-	if len(friends) != len(friendUserIDs) {
-		err = errs.ErrRecordNotFound.Wrap()
-	}
 	return
 }
 
@@ -341,8 +363,37 @@ func (f *friendDatabase) UpdateFriends(ctx context.Context, ownerUserID string, 
 	if len(val) == 0 {
 		return nil
 	}
-	if err := f.friend.UpdateFriends(ctx, ownerUserID, friendUserIDs, val); err != nil {
+	return f.tx.Transaction(ctx, func(ctx context.Context) error {
+		if err := f.friend.UpdateFriends(ctx, ownerUserID, friendUserIDs, val); err != nil {
+			return err
+		}
+		return f.cache.DelFriends(ownerUserID, friendUserIDs).DelMaxFriendVersion(ownerUserID).ChainExecDel(ctx)
+	})
+}
+
+//func (f *friendDatabase) FindSortFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error) {
+//	return f.cache.FindSortFriendUserIDs(ctx, ownerUserID)
+//}
+
+func (f *friendDatabase) FindFriendIncrVersion(ctx context.Context, ownerUserID string, version uint, limit int) (*model.VersionLog, error) {
+	return f.friend.FindIncrVersion(ctx, ownerUserID, version, limit)
+}
+
+func (f *friendDatabase) FindMaxFriendVersionCache(ctx context.Context, ownerUserID string) (*model.VersionLog, error) {
+	return f.cache.FindMaxFriendVersion(ctx, ownerUserID)
+}
+
+func (f *friendDatabase) FindFriendUserID(ctx context.Context, friendUserID string) ([]string, error) {
+	return f.friend.FindFriendUserID(ctx, friendUserID)
+}
+
+//func (f *friendDatabase) SearchFriend(ctx context.Context, ownerUserID, keyword string, pagination pagination.Pagination) (int64, []*model.Friend, error) {
+//	return f.friend.SearchFriend(ctx, ownerUserID, keyword, pagination)
+//}
+
+func (f *friendDatabase) OwnerIncrVersion(ctx context.Context, ownerUserID string, friendUserIDs []string, state int32) error {
+	if err := f.friend.IncrVersion(ctx, ownerUserID, friendUserIDs, state); err != nil {
 		return err
 	}
-	return f.cache.DelFriends(ownerUserID, friendUserIDs).ChainExecDel(ctx)
+	return f.cache.DelMaxFriendVersion(ownerUserID).ChainExecDel(ctx)
 }

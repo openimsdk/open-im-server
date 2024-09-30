@@ -50,3 +50,23 @@ func (o *ConversationApi) SetConversations(c *gin.Context) {
 func (o *ConversationApi) GetConversationOfflinePushUserIDs(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.GetConversationOfflinePushUserIDs, o.Client, c)
 }
+
+func (o *ConversationApi) GetFullOwnerConversationIDs(c *gin.Context) {
+	a2r.Call(conversation.ConversationClient.GetFullOwnerConversationIDs, o.Client, c)
+}
+
+func (o *ConversationApi) GetIncrementalConversation(c *gin.Context) {
+	a2r.Call(conversation.ConversationClient.GetIncrementalConversation, o.Client, c)
+}
+
+func (o *ConversationApi) GetOwnerConversation(c *gin.Context) {
+	a2r.Call(conversation.ConversationClient.GetOwnerConversation, o.Client, c)
+}
+
+func (o *ConversationApi) GetNotNotifyConversationIDs(c *gin.Context) {
+	a2r.Call(conversation.ConversationClient.GetNotNotifyConversationIDs, o.Client, c)
+}
+
+func (o *ConversationApi) GetPinnedConversationIDs(c *gin.Context) {
+	a2r.Call(conversation.ConversationClient.GetPinnedConversationIDs, o.Client, c)
+}

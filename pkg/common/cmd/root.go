@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/spf13/cobra"
@@ -31,6 +32,11 @@ type RootCmd struct {
 	prometheusPort int
 	log            config.Log
 	index          int
+	configPath     string
+}
+
+func (r *RootCmd) ConfigPath() string {
+	return r.configPath
 }
 
 func (r *RootCmd) Index() int {
@@ -123,22 +129,24 @@ func (r *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 }
 
 func (r *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
-	err := log.InitFromConfig(
+	err := log.InitLoggerFromConfig(
 
 		cmdOpts.loggerPrefixName,
 		r.processName,
+		"", "",
 		r.log.RemainLogLevel,
 		r.log.IsStdout,
 		r.log.IsJson,
 		r.log.StorageLocation,
 		r.log.RemainRotationCount,
 		r.log.RotationTime,
-		config.Version,
+		version.Version,
+		r.log.IsSimplify,
 	)
 	if err != nil {
 		return errs.Wrap(err)
 	}
-	return errs.Wrap(log.InitConsoleLogger(r.processName, r.log.RemainLogLevel, r.log.IsJson, config.Version))
+	return errs.Wrap(log.InitConsoleLogger(r.processName, r.log.RemainLogLevel, r.log.IsJson, version.Version))
 
 }
 
@@ -153,6 +161,7 @@ func (r *RootCmd) getFlag(cmd *cobra.Command) (string, int, error) {
 	if err != nil {
 		return "", 0, errs.Wrap(err)
 	}
+	r.configPath = configDirectory
 	index, err := cmd.Flags().GetInt(FlagTransferIndex)
 	if err != nil {
 		return "", 0, errs.Wrap(err)

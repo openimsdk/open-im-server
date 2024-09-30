@@ -16,9 +16,10 @@ package cmd
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/internal/push"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
+	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 )
@@ -36,7 +37,6 @@ func NewPushRpcCmd() *PushRpcCmd {
 	ret.configMap = map[string]any{
 		OpenIMPushCfgFileName:    &pushConfig.RpcConfig,
 		RedisConfigFileName:      &pushConfig.RedisConfig,
-		MongodbConfigFileName:    &pushConfig.MongodbConfig,
 		KafkaConfigFileName:      &pushConfig.KafkaConfig,
 		ShareFileName:            &pushConfig.Share,
 		NotificationFileName:     &pushConfig.NotificationConfig,
@@ -45,8 +45,9 @@ func NewPushRpcCmd() *PushRpcCmd {
 		DiscoveryConfigFilename:  &pushConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
-	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
+	ret.ctx = context.WithValue(context.Background(), "version", version.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		ret.pushConfig.FcmConfigPath = ret.ConfigPath()
 		return ret.runE()
 	}
 	return ret

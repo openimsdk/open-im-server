@@ -36,10 +36,10 @@ func (u *User) GetFaceURL() string {
 	return u.FaceURL
 }
 
-func (u User) GetUserID() string {
+func (u *User) GetUserID() string {
 	return u.UserID
 }
 
-func (u User) GetEx() string {
+func (u *User) GetEx() string {
 	return u.Ex
 }

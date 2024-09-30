@@ -66,12 +66,16 @@ func (c *UserConnContext) Value(key any) any {
 }
 
 func newContext(respWriter http.ResponseWriter, req *http.Request) *UserConnContext {
+	remoteAddr := req.RemoteAddr
+	if forwarded := req.Header.Get("X-Forwarded-For"); forwarded != "" {
+		remoteAddr += "_" + forwarded
+	}
 	return &UserConnContext{
 		RespWriter: respWriter,
 		Req:        req,
 		Path:       req.URL.Path,
 		Method:     req.Method,
-		RemoteAddr: req.RemoteAddr,
+		RemoteAddr: remoteAddr,
 		ConnID:     encrypt.Md5(req.RemoteAddr + "_" + strconv.Itoa(int(timeutil.GetCurrentTimestampByMill()))),
 	}
 }

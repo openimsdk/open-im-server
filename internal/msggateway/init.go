@@ -17,6 +17,8 @@ package msggateway
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
+	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
 	"time"
 
@@ -26,6 +28,7 @@ import (
 type Config struct {
 	MsgGateway     config.MsgGateway
 	Share          config.Share
+	RedisConfig    config.Redis
 	WebhooksConfig config.Webhooks
 	Discovery      config.Discovery
 }
@@ -42,18 +45,25 @@ func Start(ctx context.Context, index int, conf *Config) error {
 	if err != nil {
 		return err
 	}
-	longServer, err := NewWsServer(
+	rdb, err := redisutil.NewRedisClient(ctx, conf.RedisConfig.Build())
+	if err != nil {
+		return err
+	}
+	longServer := NewWsServer(
 		conf,
 		WithPort(wsPort),
 		WithMaxConnNum(int64(conf.MsgGateway.LongConnSvr.WebsocketMaxConnNum)),
 		WithHandshakeTimeout(time.Duration(conf.MsgGateway.LongConnSvr.WebsocketTimeout)*time.Second),
 		WithMessageMaxMsgLength(conf.MsgGateway.LongConnSvr.WebsocketMaxMsgLen),
 	)
-	if err != nil {
-		return err
-	}
 
-	hubServer := NewServer(rpcPort, longServer, conf)
+	hubServer := NewServer(rpcPort, longServer, conf, func(srv *Server) error {
+		longServer.online, _ = rpccache.NewOnlineCache(srv.userRcp, nil, rdb, false, longServer.subscriberUserOnlineStatusChanges)
+		return nil
+	})
+
+	go longServer.ChangeOnlineStatus(4)
+
 	netDone := make(chan error)
 	go func() {
 		err = hubServer.Start(ctx, index, conf)
