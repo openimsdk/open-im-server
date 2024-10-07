@@ -279,6 +279,11 @@ msg:
 	@echo "${NOW} Starting to build rpc_msg..."
 	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH};go build -ldflags="-w -s" -o ./bin/openim-rpc-msg cmd/openim-rpc/openim-rpc-msg/main.go
 
+.PHONY:test-user
+test-user:
+	@echo "${NOW} Starting to test rpc_user..."
+	go test ./internal/rpc/user 
+	
 .PHONY:user
 user:
 	@echo "${NOW} Starting to build rpc_user..."

@@ -1,16 +1,18 @@
-go 1.18
+go 1.21
+
+toolchain go1.23.2
 
 use (
 	.
 	./test/typecheck
 	./tools/changelog
+	./tools/component
+	./tools/data-conversion
 	//./tools/imctl
 	./tools/infra
 	./tools/ncpu
 	./tools/openim-web
+	./tools/url2im
 	./tools/versionchecker
 	./tools/yamlfmt
-	./tools/component
-	./tools/url2im
-	./tools/data-conversion
 )

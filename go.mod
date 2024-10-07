@@ -1,6 +1,6 @@
 module github.com/openimsdk/open-im-server/v3
 
-go 1.19
+go 1.21
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
@@ -118,6 +118,7 @@ require (
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect

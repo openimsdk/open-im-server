@@ -58,6 +58,14 @@ pipeline {
             ])
           }
         }
+
+        stage("Unit-Test") {
+            steps {
+                echo 'UNIT TEST EXECUTION STARTED'
+                sh 'make test-user'
+            }
+        }
+
         stage('CommitHash') {
             steps {
                 script {
@@ -113,8 +121,7 @@ pipeline {
                 extensions: [],
                 gitTool: 'Default',
                 submoduleCfg: [],
-                userRemoteConfigs: [[url: "https://github.com/${ORGANIZATION_NAME}/${SERVICE_NAME_INFRA}", credentialsId: "${CREDENTIALS_ID}"]]
-            ])
+                userRemoteConfigs: [[url: "https://github.com/${ORGANIZATION_NAME}/${SERVICE_NAME_INFRA}", credentialsId: "${CREDENTIALS_ID}"]]])
             }
         }
 
