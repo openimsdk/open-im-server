@@ -36,7 +36,7 @@ func filterMsg(msg *pbchat.SendMsgReq, attentionIds, allowedTypes, deniedTypes [
 
 func isInInterval(contentType int32, interval []string) bool {
 	for _, v := range interval {
-		if strings.Contains(separator, v) {
+		if strings.Contains(v, separator) {
 			// is interval
 			bounds := strings.Split(v, separator)
 			if len(bounds) != 2 {
