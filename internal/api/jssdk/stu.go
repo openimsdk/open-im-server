@@ -12,8 +12,11 @@ type ActiveConversationsReq struct {
 type ConversationMsg struct {
 	Conversation *conversation.Conversation `json:"conversation"`
 	LastMsg      *sdkws.MsgData             `json:"lastMsg"`
-	MaxSeq       int64                      `json:"maxSeq"`
-	ReadSeq      int64                      `json:"readSeq"`
+	User         *sdkws.UserInfo
+	Friend       *sdkws.FriendInfo
+	Group        *sdkws.GroupInfo
+	MaxSeq       int64 `json:"maxSeq"`
+	ReadSeq      int64 `json:"readSeq"`
 }
 
 type ConversationsResp struct {
