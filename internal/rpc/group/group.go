@@ -1764,6 +1764,7 @@ func (g *groupServer) GetSpecifiedUserGroupRequestInfo(ctx context.Context, req 
 		}
 
 		adminIDs = append(adminIDs, owners[0].UserID)
+		adminIDs = append(adminIDs, g.config.Share.IMAdminUserID...)
 
 		if !datautil.Contain(req.UserID, adminIDs...) {
 			return nil, errs.ErrNoPermission.WrapMsg("opUser no permission")
