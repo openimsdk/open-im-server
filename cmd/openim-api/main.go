@@ -15,17 +15,12 @@
 package main
 
 import (
-	_ "net/http/pprof"
-	"os"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/system/program"
+	_ "net/http/pprof"
 )
 
 func main() {
-	if len(os.Args) == 1 {
-		os.Args = []string{os.Args[0], "-i", "0", "-c", "/Users/chao/Desktop/withchao/open-im-server/config"}
-	}
 	if err := cmd.NewApiCmd().Exec(); err != nil {
 		program.ExitWithError(err)
 	}
