@@ -1,0 +1,65 @@
+name: Bug Report
+title: "[BUG] "
+labels: ["bug"]
+description: "Create a detailed report to help us identify and resolve issues."
+# assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: "Thank you for taking the time to fill out the bug report. Please provide as much information as possible to help us understand and replicate the bug."
+
+  - type: input
+    id: openim-server-version
+    attributes:
+      label: OpenIM Server Version
+      description: "Please provide the version number of OpenIM Server you are using."
+      placeholder: "e.g., 3.8.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Operating System and CPU Architecture
+      description: "Please select the operating system and describe the CPU architecture."
+      options:
+        - Linux (AMD)
+        - Linux (ARM)
+        - Windows (AMD)
+        - Windows (ARM)
+        - macOS (AMD)
+        - macOS (ARM)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deployment-method
+    attributes:
+      label: Deployment Method
+      description: "Please specify how OpenIM Server was deployed."
+      options:
+        - Source Code Deployment
+        - Docker Deployment
+    validations:
+      required: true
+      
+  - type: textarea
+    id: bug-description-reproduction
+    attributes:
+      label: Bug Description and Steps to Reproduce
+      description: "Provide a detailed description of the bug and a step-by-step guide on how to reproduce it."
+      placeholder: "Describe the bug in detail here...\n\nSteps to reproduce the bug on the server:\n1. Start the server with specific configurations (mention any relevant config details).\n2. Make an API call to '...' endpoint with the following payload '...'.\n3. Observe the behavior and note any error messages or logs.\n4. Mention any additional setup relevant to the bug (e.g., database version, external service dependencies)."
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "If possible, please add screenshots to help explain your problem."
+
+  - type: textarea
+    id: screenshots-link
+    attributes:
+      label: Screenshots Link
+      description: "If applicable, please provide any links to screenshots here."
+      placeholder: "Paste your screenshot URL here, e.g., http://imgur.com/example"

@@ -1,0 +1,78 @@
+name: Reopen and Update Stale Issues
+
+on:
+  workflow_dispatch:
+
+jobs:
+  reopen_stale_issues:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Closed Issues with lifecycle/stale Label
+        id: fetch_issues
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed',
+              labels: 'lifecycle/stale',
+              per_page: 100
+            });
+            const issueNumbers = issues
+              .filter(issue => !issue.pull_request) // exclude PR
+              .map(issue => issue.number);
+            console.log(`Fetched issues: ${issueNumbers}`);
+            return issueNumbers;
+
+      - name: Set issue numbers
+        id: set_issue_numbers
+        run: |
+          echo "ISSUE_NUMBERS=${{ steps.fetch_issues.outputs.result }}" >> $GITHUB_ENV
+          echo "Issue numbers: ${{ steps.fetch_issues.outputs.result }}"
+
+      - name: Reopen Issues
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumbers = JSON.parse(process.env.ISSUE_NUMBERS);
+            console.log(`Reopening issues: ${issueNumbers}`);
+
+            for (const issue_number of issueNumbers) {
+              // Reopen the issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue_number,
+                state: 'open'
+              });
+              console.log(`Reopened issue #${issue_number}`);
+            }
+
+      - name: Remove lifecycle/stale Label
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumbers = JSON.parse(process.env.ISSUE_NUMBERS);
+            console.log(`Removing 'lifecycle/stale' label from issues: ${issueNumbers}`);
+
+            for (const issue_number of issueNumbers) {
+              // Remove the lifecycle/stale label
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue_number,
+                name: 'lifecycle/stale'
+              });
+              console.log(`Removed label 'lifecycle/stale' from issue #${issue_number}`);
+            }

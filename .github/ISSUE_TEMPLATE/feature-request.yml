@@ -1,0 +1,43 @@
+name: Feature Request
+title: "[FEATURE REQUEST] "
+labels: ["feature request","enhancement"]
+description: "Propose a new feature or improvement that you believe will help enhance the project."
+# assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: "Thank you for taking the time to propose a feature request. Please fill in as much detail as possible to help us understand why this feature is necessary and how it should work."
+
+  - type: textarea
+    id: feature-reason
+    attributes:
+      label: Why this feature?
+      description: "Explain why this feature is needed. What problem does it solve? How does it benefit the project and its users?"
+      placeholder: "Describe the need for this feature..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution-proposal
+    attributes:
+      label: Suggested Solution
+      description: "Describe your proposed solution for this feature. How do you envision it working?"
+      placeholder: "Detail your solution here..."
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "Please provide any other relevant information or screenshots that could help illustrate your idea."
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Additional Information
+      description: "Include any additional information, links, or screenshots that might be relevant to your feature request."
+      placeholder: "Add more context or links to relevant resources..."
+
+  - type: markdown
+    attributes:
+      value: "Thank you for contributing to the project! We appreciate your input and will review your suggestion as soon as possible."

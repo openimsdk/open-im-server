@@ -19,8 +19,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils/stringutil"
 	"github.com/redis/go-redis/v9"
+	"strconv"
 	"time"
 )
 
@@ -58,9 +58,12 @@ func (c *tokenCache) GetTokensWithoutError(ctx context.Context, userID string, p
 	}
 	mm := make(map[string]int)
 	for k, v := range m {
-		mm[k] = stringutil.StringToInt(v)
+		state, err := strconv.Atoi(v)
+		if err != nil {
+			return nil, errs.WrapMsg(err, "redis token value is not int", "value", v, "userID", userID, "platformID", platformID)
+		}
+		mm[k] = state
 	}
-
 	return mm, nil
 }
 

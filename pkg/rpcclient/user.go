@@ -109,12 +109,12 @@ func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (
 func (u *UserRpcClient) GetPublicUserInfos(
 	ctx context.Context,
 	userIDs []string,
-	complete bool,
 ) ([]*sdkws.PublicUserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	return datautil.Slice(users, func(e *sdkws.UserInfo) *sdkws.PublicUserInfo {
 		return &sdkws.PublicUserInfo{
 			UserID:   e.UserID,
@@ -127,10 +127,11 @@ func (u *UserRpcClient) GetPublicUserInfos(
 
 // GetPublicUserInfo retrieves public information for a single user based on the provided user ID.
 func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
-	users, err := u.GetPublicUserInfos(ctx, []string{userID}, true)
+	users, err := u.GetPublicUserInfos(ctx, []string{userID})
 	if err != nil {
 		return nil, err
 	}
+
 	return users[0], nil
 }
 
@@ -138,12 +139,12 @@ func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*
 func (u *UserRpcClient) GetPublicUserInfoMap(
 	ctx context.Context,
 	userIDs []string,
-	complete bool,
 ) (map[string]*sdkws.PublicUserInfo, error) {
-	users, err := u.GetPublicUserInfos(ctx, userIDs, complete)
+	users, err := u.GetPublicUserInfos(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	return datautil.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
 		return e.UserID
 	}), nil
@@ -167,6 +168,15 @@ func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
 		return err
 	}
 	return authverify.CheckAccessV3(ctx, ownerUserID, u.imAdminUserID)
+}
+
+// GetAllUserID retrieves all user IDs with pagination options.
+func (u *UserRpcClient) GetAllUserID(ctx context.Context, pageNumber, showNumber int32) (*user.GetAllUserIDResp, error) {
+	resp, err := u.Client.GetAllUserID(ctx, &user.GetAllUserIDReq{Pagination: &sdkws.RequestPagination{PageNumber: pageNumber, ShowNumber: showNumber}})
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 // GetAllUserIDs retrieves all user IDs with pagination options.
@@ -214,4 +224,8 @@ func (u *UserRpcClient) GetUserOnlinePlatform(ctx context.Context, userID string
 		return nil, nil
 	}
 	return resp[0].PlatformIDs, nil
+}
+
+func (u *UserRpcClient) GetAllOnlineUsers(ctx context.Context, cursor uint64) (*user.GetAllOnlineUsersResp, error) {
+	return u.Client.GetAllOnlineUsers(ctx, &user.GetAllOnlineUsersReq{Cursor: cursor})
 }

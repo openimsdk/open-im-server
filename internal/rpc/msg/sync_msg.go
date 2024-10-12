@@ -16,16 +16,16 @@ package msg
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
-	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/timeutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
@@ -86,6 +86,35 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 	return resp, nil
 }
 
+func (m *msgServer) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq) (*msg.GetSeqMessageResp, error) {
+	resp := &msg.GetSeqMessageResp{
+		Msgs:             make(map[string]*sdkws.PullMsgs),
+		NotificationMsgs: make(map[string]*sdkws.PullMsgs),
+	}
+	for _, conv := range req.Conversations {
+		_, _, msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, conv.ConversationID, conv.Seqs)
+		if err != nil {
+			return nil, err
+		}
+		var pullMsgs *sdkws.PullMsgs
+		if ok := false; conversationutil.IsNotificationConversationID(conv.ConversationID) {
+			pullMsgs, ok = resp.NotificationMsgs[conv.ConversationID]
+			if !ok {
+				pullMsgs = &sdkws.PullMsgs{}
+				resp.NotificationMsgs[conv.ConversationID] = pullMsgs
+			}
+		} else {
+			pullMsgs, ok = resp.Msgs[conv.ConversationID]
+			if !ok {
+				pullMsgs = &sdkws.PullMsgs{}
+				resp.Msgs[conv.ConversationID] = pullMsgs
+			}
+		}
+		pullMsgs.Msgs = append(pullMsgs.Msgs, msgs...)
+	}
+	return resp, nil
+}
+
 func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
 	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err
@@ -104,13 +133,20 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 		log.ZWarn(ctx, "GetMaxSeqs error", err, "conversationIDs", conversationIDs, "maxSeqs", maxSeqs)
 		return nil, err
 	}
+	// avoid pulling messages from sessions with a large number of max seq values of 0
+	for conversationID, seq := range maxSeqs {
+		if seq == 0 {
+			delete(maxSeqs, conversationID)
+		}
+	}
 	resp := new(sdkws.GetMaxSeqResp)
 	resp.MaxSeqs = maxSeqs
 	return resp, nil
 }
 
 func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (resp *msg.SearchMessageResp, err error) {
-	var chatLogs []*sdkws.MsgData
+	// var chatLogs []*sdkws.MsgData
+	var chatLogs []*msg.SearchedMsgData
 	var total int64
 	resp = &msg.SearchMessageResp{}
 	if total, chatLogs, err = m.MsgDatabase.SearchMessage(ctx, req); err != nil {
@@ -125,17 +161,19 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 		recvMap  = make(map[string]string)
 		groupMap = make(map[string]*sdkws.GroupInfo)
 	)
+
 	for _, chatLog := range chatLogs {
-		if chatLog.SenderNickname == "" {
-			sendIDs = append(sendIDs, chatLog.SendID)
+		if chatLog.MsgData.SenderNickname == "" {
+			sendIDs = append(sendIDs, chatLog.MsgData.SendID)
 		}
-		switch chatLog.SessionType {
+		switch chatLog.MsgData.SessionType {
 		case constant.SingleChatType, constant.NotificationChatType:
-			recvIDs = append(recvIDs, chatLog.RecvID)
+			recvIDs = append(recvIDs, chatLog.MsgData.RecvID)
 		case constant.WriteGroupChatType, constant.ReadGroupChatType:
-			groupIDs = append(groupIDs, chatLog.GroupID)
+			groupIDs = append(groupIDs, chatLog.MsgData.GroupID)
 		}
 	}
+
 	// Retrieve sender and receiver information
 	if len(sendIDs) != 0 {
 		sendInfos, err := m.UserLocalCache.GetUsersInfo(ctx, sendIDs)
@@ -146,6 +184,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			sendMap[sendInfo.UserID] = sendInfo.Nickname
 		}
 	}
+
 	if len(recvIDs) != 0 {
 		recvInfos, err := m.UserLocalCache.GetUsersInfo(ctx, recvIDs)
 		if err != nil {
@@ -171,20 +210,21 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			}
 		}
 	}
+
 	// Construct response with updated information
 	for _, chatLog := range chatLogs {
 		pbchatLog := &msg.ChatLog{}
-		datautil.CopyStructFields(pbchatLog, chatLog)
-		pbchatLog.SendTime = chatLog.SendTime
-		pbchatLog.CreateTime = chatLog.CreateTime
-		if chatLog.SenderNickname == "" {
-			pbchatLog.SenderNickname = sendMap[chatLog.SendID]
+		datautil.CopyStructFields(pbchatLog, chatLog.MsgData)
+		pbchatLog.SendTime = chatLog.MsgData.SendTime
+		pbchatLog.CreateTime = chatLog.MsgData.CreateTime
+		if chatLog.MsgData.SenderNickname == "" {
+			pbchatLog.SenderNickname = sendMap[chatLog.MsgData.SendID]
 		}
-		switch chatLog.SessionType {
+		switch chatLog.MsgData.SessionType {
 		case constant.SingleChatType, constant.NotificationChatType:
-			pbchatLog.RecvNickname = recvMap[chatLog.RecvID]
-		case constant.WriteGroupChatType, constant.ReadGroupChatType:
-			groupInfo := groupMap[chatLog.GroupID]
+			pbchatLog.RecvNickname = recvMap[chatLog.MsgData.RecvID]
+		case constant.ReadGroupChatType:
+			groupInfo := groupMap[chatLog.MsgData.GroupID]
 			pbchatLog.SenderFaceURL = groupInfo.FaceURL
 			pbchatLog.GroupMemberCount = groupInfo.MemberCount // Reflects actual member count
 			pbchatLog.RecvID = groupInfo.GroupID
@@ -192,7 +232,9 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			pbchatLog.GroupOwner = groupInfo.OwnerUserID
 			pbchatLog.GroupType = groupInfo.GroupType
 		}
-		resp.ChatLogs = append(resp.ChatLogs, pbchatLog)
+		searchChatLog := &msg.SearchChatLog{ChatLog: pbchatLog, IsRevoked: chatLog.IsRevoked}
+
+		resp.ChatLogs = append(resp.ChatLogs, searchChatLog)
 	}
 	resp.ChatLogsNum = int32(total)
 	return resp, nil

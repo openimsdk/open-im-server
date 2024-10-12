@@ -35,6 +35,7 @@ type CommonCallbackReq struct {
 	MsgFrom          int32    `json:"msgFrom"`
 	ContentType      int32    `json:"contentType"`
 	Status           int32    `json:"status"`
+	SendTime         int64    `json:"sendTime"`
 	CreateTime       int64    `json:"createTime"`
 	Content          string   `json:"content"`
 	Seq              uint32   `json:"seq"`
