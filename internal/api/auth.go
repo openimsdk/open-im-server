@@ -27,8 +27,8 @@ func NewAuthApi(client rpcclient.Auth) AuthApi {
 	return AuthApi(client)
 }
 
-func (o *AuthApi) UserToken(c *gin.Context) {
-	a2r.Call(auth.AuthClient.UserToken, o.Client, c)
+func (o *AuthApi) GetAdminToken(c *gin.Context) {
+	a2r.Call(auth.AuthClient.GetAdminToken, o.Client, c)
 }
 
 func (o *AuthApi) GetUserToken(c *gin.Context) {

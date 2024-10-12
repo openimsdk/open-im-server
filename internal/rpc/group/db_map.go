@@ -20,6 +20,7 @@ import (
 
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/mcontext"
 )
 
@@ -52,6 +53,43 @@ func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[s
 		m["ex"] = group.Ex.Value
 	}
 	return m
+}
+
+func UpdateGroupInfoExMap(ctx context.Context, group *pbgroup.SetGroupInfoExReq) (map[string]any, error) {
+	m := make(map[string]any)
+
+	if group.GroupName != nil {
+		if group.GroupName.Value != "" {
+			m["group_name"] = group.GroupName.Value
+		} else {
+			return nil, errs.ErrArgs.WrapMsg("group name is empty")
+		}
+	}
+	if group.Notification != nil {
+		m["notification"] = group.Notification.Value
+		m["notification_update_time"] = time.Now()
+		m["notification_user_id"] = mcontext.GetOpUserID(ctx)
+	}
+	if group.Introduction != nil {
+		m["introduction"] = group.Introduction.Value
+	}
+	if group.FaceURL != nil {
+		m["face_url"] = group.FaceURL.Value
+	}
+	if group.NeedVerification != nil {
+		m["need_verification"] = group.NeedVerification.Value
+	}
+	if group.LookMemberInfo != nil {
+		m["look_member_info"] = group.LookMemberInfo.Value
+	}
+	if group.ApplyMemberFriend != nil {
+		m["apply_member_friend"] = group.ApplyMemberFriend.Value
+	}
+	if group.Ex != nil {
+		m["ex"] = group.Ex.Value
+	}
+
+	return m, nil
 }
 
 func UpdateGroupStatusMap(status int) map[string]any {

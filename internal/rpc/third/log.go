@@ -17,8 +17,9 @@ package third
 import (
 	"context"
 	"crypto/rand"
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"time"
+
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"

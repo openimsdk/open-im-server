@@ -49,14 +49,14 @@ func NewMessageApi(msgRpcClient *rpcclient.Message, userRpcClient *rpcclient.Use
 		userRpcClient: rpcclient.NewUserRpcClientByUser(userRpcClient), imAdminUserID: imAdminUserID}
 }
 
-func (MessageApi) SetOptions(options map[string]bool, value bool) {
+func (*MessageApi) SetOptions(options map[string]bool, value bool) {
 	datautil.SetSwitchFromOptions(options, constant.IsHistory, value)
 	datautil.SetSwitchFromOptions(options, constant.IsPersistent, value)
 	datautil.SetSwitchFromOptions(options, constant.IsSenderSync, value)
 	datautil.SetSwitchFromOptions(options, constant.IsConversationUpdate, value)
 }
 
-func (m MessageApi) newUserSendMsgReq(_ *gin.Context, params *apistruct.SendMsg) *msg.SendMsgReq {
+func (m *MessageApi) newUserSendMsgReq(_ *gin.Context, params *apistruct.SendMsg) *msg.SendMsgReq {
 	var newContent string
 	options := make(map[string]bool, 5)
 	switch params.ContentType {
@@ -231,7 +231,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	}
 
 	// Set the status to successful if the message is sent.
-	var status int = constant.MsgSendSuccessed
+	var status = constant.MsgSendSuccessed
 
 	// Attempt to update the message sending status in the system.
 	_, err = m.Client.SetSendMsgStatus(c, &msg.SetSendMsgStatusReq{

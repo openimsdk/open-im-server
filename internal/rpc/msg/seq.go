@@ -16,10 +16,10 @@ package msg
 
 import (
 	"context"
+	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/tools/errs"
 	"github.com/redis/go-redis/v9"
-
-	pbmsg "github.com/openimsdk/protocol/msg"
+	"sort"
 )
 
 func (m *msgServer) GetConversationMaxSeq(ctx context.Context, req *pbmsg.GetConversationMaxSeqReq) (*pbmsg.GetConversationMaxSeqResp, error) {
@@ -52,4 +52,35 @@ func (m *msgServer) GetMsgByConversationIDs(ctx context.Context, req *pbmsg.GetM
 		return nil, err
 	}
 	return &pbmsg.GetMsgByConversationIDsResp{MsgDatas: Msgs}, nil
+}
+
+func (m *msgServer) SetUserConversationsMinSeq(ctx context.Context, req *pbmsg.SetUserConversationsMinSeqReq) (*pbmsg.SetUserConversationsMinSeqResp, error) {
+	for _, userID := range req.UserIDs {
+		if err := m.MsgDatabase.SetUserConversationsMinSeqs(ctx, userID, map[string]int64{req.ConversationID: req.Seq}); err != nil {
+			return nil, err
+		}
+	}
+	return &pbmsg.SetUserConversationsMinSeqResp{}, nil
+}
+
+func (m *msgServer) GetActiveConversation(ctx context.Context, req *pbmsg.GetActiveConversationReq) (*pbmsg.GetActiveConversationResp, error) {
+	res, err := m.MsgDatabase.GetCacheMaxSeqWithTime(ctx, req.ConversationIDs)
+	if err != nil {
+		return nil, err
+	}
+	conversations := make([]*pbmsg.ActiveConversation, 0, len(res))
+	for conversationID, val := range res {
+		conversations = append(conversations, &pbmsg.ActiveConversation{
+			MaxSeq:         val.Seq,
+			LastTime:       val.Time,
+			ConversationID: conversationID,
+		})
+	}
+	if req.Limit > 0 {
+		sort.Sort(activeConversations(conversations))
+		if len(conversations) > int(req.Limit) {
+			conversations = conversations[:req.Limit]
+		}
+	}
+	return &pbmsg.GetActiveConversationResp{Conversations: conversations}, nil
 }

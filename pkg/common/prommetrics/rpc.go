@@ -47,9 +47,17 @@ func GetGrpcCusMetrics(registerName string, share *config.Share) []prometheus.Co
 	case share.RpcRegisterName.MessageGateway:
 		return []prometheus.Collector{OnlineUserGauge}
 	case share.RpcRegisterName.Msg:
-		return []prometheus.Collector{SingleChatMsgProcessSuccessCounter, SingleChatMsgProcessFailedCounter, GroupChatMsgProcessSuccessCounter, GroupChatMsgProcessFailedCounter}
+		return []prometheus.Collector{
+			SingleChatMsgProcessSuccessCounter,
+			SingleChatMsgProcessFailedCounter,
+			GroupChatMsgProcessSuccessCounter,
+			GroupChatMsgProcessFailedCounter,
+		}
 	case share.RpcRegisterName.Push:
-		return []prometheus.Collector{MsgOfflinePushFailedCounter}
+		return []prometheus.Collector{
+			MsgOfflinePushFailedCounter,
+			MsgLoneTimePushCounter,
+		}
 	case share.RpcRegisterName.Auth:
 		return []prometheus.Collector{UserLoginCounter}
 	case share.RpcRegisterName.User:

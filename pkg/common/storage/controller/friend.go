@@ -160,7 +160,7 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 		if err != nil {
 			return err
 		}
-		opUserID := mcontext.GetOperationID(ctx)
+		opUserID := mcontext.GetOpUserID(ctx)
 		friends := make([]*model.Friend, 0, len(friendUserIDs)*2)
 		myFriendsSet := datautil.SliceSetAny(myFriends, func(friend *model.Friend) string {
 			return friend.FriendUserID
@@ -192,6 +192,7 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 		if err != nil {
 			return err
 		}
+		cache = cache.DelFriendIDs(ownerUserID).DelMaxFriendVersion(ownerUserID)
 		if len(newMyFriendIDs) > 0 {
 			cache = cache.DelFriendIDs(newMyFriendIDs...)
 			cache = cache.DelFriends(ownerUserID, newMyFriendIDs).DelMaxFriendVersion(newMyFriendIDs...)

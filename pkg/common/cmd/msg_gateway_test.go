@@ -15,13 +15,14 @@
 package cmd
 
 import (
+	"math"
+	"testing"
+
 	"github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"math"
-	"testing"
 )
 
 // MockRootCmd is a mock type for the RootCmd type
@@ -39,7 +40,7 @@ func TestName(t *testing.T) {
 		ErrCode: 1234,
 		ErrMsg:  "test",
 		ErrDlt:  "4567",
-		Data: &auth.UserTokenResp{
+		Data: &auth.GetUserTokenResp{
 			Token:             "1234567",
 			ExpireTimeSeconds: math.MaxInt64,
 		},
@@ -51,7 +52,7 @@ func TestName(t *testing.T) {
 	t.Log(string(data))
 
 	var rReso apiresp.ApiResponse
-	rReso.Data = &auth.UserTokenResp{}
+	rReso.Data = &auth.GetUserTokenResp{}
 
 	if err := jsonutil.JsonUnmarshal(data, &rReso); err != nil {
 		panic(err)
