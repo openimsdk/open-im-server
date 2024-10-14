@@ -254,7 +254,7 @@ func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conver
 
 func (db *msgTransferDatabase) setHasReadSeqs(ctx context.Context, conversationID string, userSeqMap map[string]int64) error {
 	for userID, seq := range userSeqMap {
-		if err := db.seqUser.SetUserReadSeq(ctx, conversationID, userID, seq); err != nil {
+		if err := db.seqUser.SetUserReadSeqToDB(ctx, conversationID, userID, seq); err != nil {
 			return err
 		}
 	}
