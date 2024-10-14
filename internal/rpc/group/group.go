@@ -1485,9 +1485,6 @@ func (g *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 		return nil, errs.ErrNoPermission.WrapMsg("no op user id")
 	}
 	isAppManagerUid := authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID)
-	for i := range req.Members {
-		req.Members[i].FaceURL = nil
-	}
 	groupMembers := make(map[string][]*pbgroup.SetGroupMemberInfo)
 	for i, member := range req.Members {
 		if member.RoleLevel != nil {
