@@ -212,6 +212,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *relation.Res
 		if err != nil {
 			return nil, err
 		}
+		s.webhookAfterAddFriendAgree(ctx, &s.config.WebhooksConfig.AfterAddFriendAgree, req)
 		s.notificationSender.FriendApplicationAgreedNotification(ctx, req)
 		return resp, nil
 	}
@@ -272,7 +273,14 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *relation.SetFri
 	return &relation.SetFriendRemarkResp{}, nil
 }
 
-// ok.
+func (s *friendServer) GetFriendInfo(ctx context.Context, req *relation.GetFriendInfoReq) (*relation.GetFriendInfoResp, error) {
+	friends, err := s.db.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &relation.GetFriendInfoResp{FriendInfos: convert.FriendOnlyDB2PbOnly(friends)}, nil
+}
+
 func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *relation.GetDesignatedFriendsReq) (resp *relation.GetDesignatedFriendsResp, err error) {
 	resp = &relation.GetDesignatedFriendsResp{}
 	if datautil.Duplicate(req.FriendUserIDs) {

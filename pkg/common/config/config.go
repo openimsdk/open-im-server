@@ -345,15 +345,19 @@ type Redis struct {
 }
 
 type BeforeConfig struct {
-	Enable         bool `mapstructure:"enable"`
-	Timeout        int  `mapstructure:"timeout"`
-	FailedContinue bool `mapstructure:"failedContinue"`
+	Enable         bool     `mapstructure:"enable"`
+	Timeout        int      `mapstructure:"timeout"`
+	FailedContinue bool     `mapstructure:"failedContinue"`
+	AllowedTypes   []string `mapstructure:"allowedTypes"`
+	DeniedTypes    []string `mapstructure:"deniedTypes"`
 }
 
 type AfterConfig struct {
 	Enable       bool     `mapstructure:"enable"`
 	Timeout      int      `mapstructure:"timeout"`
 	AttentionIds []string `mapstructure:"attentionIds"`
+	AllowedTypes []string `mapstructure:"allowedTypes"`
+	DeniedTypes  []string `mapstructure:"deniedTypes"`
 }
 
 type Share struct {
@@ -434,6 +438,7 @@ type Webhooks struct {
 	BeforeAddBlack           BeforeConfig `mapstructure:"beforeAddBlack"`
 	AfterAddFriend           AfterConfig  `mapstructure:"afterAddFriend"`
 	BeforeAddFriendAgree     BeforeConfig `mapstructure:"beforeAddFriendAgree"`
+	AfterAddFriendAgree      AfterConfig  `mapstructure:"afterAddFriendAgree"`
 	AfterDeleteFriend        AfterConfig  `mapstructure:"afterDeleteFriend"`
 	BeforeImportFriends      BeforeConfig `mapstructure:"beforeImportFriends"`
 	AfterImportFriends       AfterConfig  `mapstructure:"afterImportFriends"`

@@ -43,19 +43,6 @@ services:
     networks:
       - openim
 
-  zookeeper:
-    image: "${ZOOKEEPER_IMAGE}"
-    container_name: zookeeper
-    ports:
-      - "12181:2181"
-    environment:
-      #JVMFLAGS: "-Xms32m -Xmx128m"
-      TZ: "Asia/Shanghai"
-      ALLOW_ANONYMOUS_LOGIN: "yes"
-    restart: always
-    networks:
-      - openim
-
   etcd:
     image: "${ETCD_IMAGE}"
     container_name: etcd
@@ -142,6 +129,7 @@ services:
 #    image: ${PROMETHEUS_IMAGE}
 #    container_name: prometheus
 #    restart: always
+#    user: root
 #    volumes:
 #      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
 #      - ./config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml

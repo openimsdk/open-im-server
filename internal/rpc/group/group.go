@@ -1485,9 +1485,6 @@ func (g *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 		return nil, errs.ErrNoPermission.WrapMsg("no op user id")
 	}
 	isAppManagerUid := authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID)
-	for i := range req.Members {
-		req.Members[i].FaceURL = nil
-	}
 	groupMembers := make(map[string][]*pbgroup.SetGroupMemberInfo)
 	for i, member := range req.Members {
 		if member.RoleLevel != nil {
@@ -1764,6 +1761,7 @@ func (g *groupServer) GetSpecifiedUserGroupRequestInfo(ctx context.Context, req 
 		}
 
 		adminIDs = append(adminIDs, owners[0].UserID)
+		adminIDs = append(adminIDs, g.config.Share.IMAdminUserID...)
 
 		if !datautil.Contain(req.UserID, adminIDs...) {
 			return nil, errs.ErrNoPermission.WrapMsg("opUser no permission")

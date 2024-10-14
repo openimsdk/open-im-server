@@ -12,8 +12,8 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/openimsdk/protocol v0.0.72-alpha.30
-	github.com/openimsdk/tools v0.0.50-alpha.12
+	github.com/openimsdk/protocol v0.0.72-alpha.41
+	github.com/openimsdk/tools v0.0.50-alpha.16
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0

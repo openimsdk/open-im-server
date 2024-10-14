@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+
 	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
 
 	"github.com/gin-contrib/gzip"
@@ -76,7 +77,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	r.Use(prommetricsGin(), gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID(), GinParseToken(authRpc))
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc, config.Share.IMAdminUserID)
-	j := jssdk.NewJSSdkApi(messageRpc.Client, conversationRpc.Client)
+	j := jssdk.NewJSSdkApi(userRpc.Client, friendRpc.Client, groupRpc.Client, messageRpc.Client, conversationRpc.Client)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -168,7 +169,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	authRouterGroup := r.Group("/auth")
 	{
 		a := NewAuthApi(*authRpc)
-		authRouterGroup.POST("/user_token", a.UserToken)
+		authRouterGroup.POST("/get_admin_token", a.GetAdminToken)
 		authRouterGroup.POST("/get_user_token", a.GetUserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", a.ForceLogout)
@@ -287,6 +288,6 @@ func GinParseToken(authRPC *rpcclient.Auth) gin.HandlerFunc {
 
 // Whitelist api not parse token
 var Whitelist = []string{
-	"/auth/user_token",
+	"/auth/get_admin_token",
 	"/auth/parse_token",
 }

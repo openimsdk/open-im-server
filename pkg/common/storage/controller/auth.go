@@ -16,6 +16,7 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/tools/log"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -77,12 +78,23 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 			return "", err
 		}
 	}
+
+	const adminTokenMaxNum = 30
+	if platformID == constant.AdminPlatformID {
+		if len(kickedTokenKey) > adminTokenMaxNum {
+			kickedTokenKey = kickedTokenKey[:len(kickedTokenKey)-adminTokenMaxNum]
+		} else {
+			kickedTokenKey = nil
+		}
+	}
+
 	if len(kickedTokenKey) != 0 {
 		for _, k := range kickedTokenKey {
 			err := a.cache.SetTokenFlagEx(ctx, userID, platformID, k, constant.KickedToken)
 			if err != nil {
 				return "", err
 			}
+			log.ZDebug(ctx, "kicked token in create token", "token", k)
 		}
 	}
 
