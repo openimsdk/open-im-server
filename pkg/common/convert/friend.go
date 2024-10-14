@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/protocol/relation"
 
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/utils/datautil"
@@ -35,9 +36,7 @@ func FriendPb2DB(friend *sdkws.FriendInfo) *model.Friend {
 	return dbFriend
 }
 
-func FriendDB2Pb(ctx context.Context, friendDB *model.Friend,
-	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
-) (*sdkws.FriendInfo, error) {
+func FriendDB2Pb(ctx context.Context, friendDB *model.Friend, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (*sdkws.FriendInfo, error) {
 	users, err := getUsers(ctx, []string{friendDB.FriendUserID})
 	if err != nil {
 		return nil, err
@@ -53,11 +52,7 @@ func FriendDB2Pb(ctx context.Context, friendDB *model.Friend,
 	}, nil
 }
 
-func FriendsDB2Pb(
-	ctx context.Context,
-	friendsDB []*model.Friend,
-	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
-) (friendsPb []*sdkws.FriendInfo, err error) {
+func FriendsDB2Pb(ctx context.Context, friendsDB []*model.Friend, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (friendsPb []*sdkws.FriendInfo, err error) {
 	if len(friendsDB) == 0 {
 		return nil, nil
 	}
@@ -86,7 +81,21 @@ func FriendsDB2Pb(
 		friendsPb = append(friendsPb, friendPb)
 	}
 	return friendsPb, nil
+}
 
+func FriendOnlyDB2PbOnly(friendsDB []*model.Friend) []*relation.FriendInfoOnly {
+	return datautil.Slice(friendsDB, func(f *model.Friend) *relation.FriendInfoOnly {
+		return &relation.FriendInfoOnly{
+			OwnerUserID:    f.OwnerUserID,
+			FriendUserID:   f.FriendUserID,
+			Remark:         f.Remark,
+			CreateTime:     f.CreateTime.UnixMilli(),
+			AddSource:      f.AddSource,
+			OperatorUserID: f.OperatorUserID,
+			Ex:             f.Ex,
+			IsPinned:       f.IsPinned,
+		}
+	})
 }
 
 func FriendRequestDB2Pb(ctx context.Context, friendRequests []*model.FriendRequest, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) ([]*sdkws.FriendRequest, error) {
