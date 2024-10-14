@@ -90,6 +90,19 @@ func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
 		if _, err := ws.userClient.Client.SetUserOnlineStatus(ctx, req); err != nil {
 			log.ZError(ctx, "update user online status", err)
 		}
+		for _, ss := range req.Status {
+			for _, online := range ss.Online {
+				client, _, _ := ws.clients.Get(ss.UserID, int(online))
+				back := false
+				if len(client) > 0 {
+					back = client[0].IsBackground
+				}
+				ws.webhookAfterUserOnline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOnline, ss.UserID, int(online), back, ss.ConnID)
+			}
+			for _, offline := range ss.Offline {
+				ws.webhookAfterUserOffline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOffline, ss.UserID, int(offline), ss.ConnID)
+			}
+		}
 	}
 
 	for i := 0; i < concurrent; i++ {
