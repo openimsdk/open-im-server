@@ -616,7 +616,7 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, g
 		OperationTime: time.Now().UnixMilli(),
 	}
 	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
-	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberInvitedNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberEnterNotification, tips)
 	return nil
 }
 
