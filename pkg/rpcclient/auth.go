@@ -61,3 +61,14 @@ func (a *Auth) InvalidateToken(ctx context.Context, preservedToken, userID strin
 	}
 	return resp, err
 }
+
+func (a *Auth) KickTokens(ctx context.Context, tokens []string) (*auth.KickTokensResp, error) {
+	req := auth.KickTokensReq{
+		Tokens: tokens,
+	}
+	resp, err := a.Client.KickTokens(ctx, &req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
