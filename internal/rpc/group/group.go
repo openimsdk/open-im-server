@@ -465,7 +465,7 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		return nil, err
 	}
 
-	if err = g.notification.MemberEnterNotification(ctx, req.GroupID, req.InvitedUserIDs...); err != nil {
+	if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, opUserID, req.InvitedUserIDs...); err != nil {
 		return nil, err
 	}
 	return &pbgroup.InviteUserToGroupResp{}, nil

@@ -38,6 +38,7 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"go.mongodb.org/mongo-driver/mongo"
+	"time"
 )
 
 // GroupApplicationReceiver
@@ -572,8 +573,51 @@ func (g *GroupNotificationSender) GroupApplicationAgreeMemberEnterNotification(c
 	return nil
 }
 
-func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, groupID string, entrantUserID ...string) error {
-	return g.GroupApplicationAgreeMemberEnterNotification(ctx, groupID, "", entrantUserID...)
+func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, groupID string, entrantUserID string) error {
+	var err error
+	defer func() {
+		if err != nil {
+			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
+		}
+	}()
+
+	if !g.config.RpcConfig.EnableHistoryForNewMembers {
+		conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
+		maxSeq, err := g.msgRpcClient.GetConversationMaxSeq(ctx, conversationID)
+		if err != nil {
+			return err
+		}
+		if _, err = g.msgRpcClient.SetUserConversationsMinSeq(ctx, &msg.SetUserConversationsMinSeqReq{
+			UserIDs:        []string{entrantUserID},
+			ConversationID: conversationID,
+			Seq:            maxSeq,
+		}); err != nil {
+			return err
+		}
+	}
+
+	if err := g.conversationRpcClient.GroupChatFirstCreateConversation(ctx, groupID, []string{entrantUserID}); err != nil {
+		return err
+	}
+
+	var group *sdkws.GroupInfo
+	group, err = g.getGroupInfo(ctx, groupID)
+	if err != nil {
+		return err
+	}
+	user, err := g.getGroupMember(ctx, groupID, entrantUserID)
+	if err != nil {
+		return err
+	}
+
+	tips := &sdkws.MemberEnterTips{
+		Group:         group,
+		EntrantUser:   user,
+		OperationTime: time.Now().UnixMilli(),
+	}
+	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberEnterNotification, tips)
+	return nil
 }
 
 func (g *GroupNotificationSender) GroupDismissedNotification(ctx context.Context, tips *sdkws.GroupDismissedTips) {
