@@ -100,7 +100,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 
 		memberUserIDList = datautil.DeleteElems(memberUserIDList, msg.SendID)
 
-		atUserID = datautil.Single([]string{constant.AtAllString}, atUserID)
+		atUserID = datautil.Single([]string{constant.AtAllString}, msg.AtUserIDList)
 
 		if len(atUserID) == 0 { // just @everyone
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
