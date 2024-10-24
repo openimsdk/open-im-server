@@ -19,6 +19,14 @@ func GenGroupConversationID(groupID string) string {
 	return "sg_" + groupID
 }
 
+func IsGroupConversationID(conversationID string) bool {
+	return strings.HasPrefix(conversationID, "sg_")
+}
+
+func IsNotificationConversationID(conversationID string) bool {
+	return strings.HasPrefix(conversationID, "n_")
+}
+
 func GenConversationUniqueKeyForSingle(sendID, recvID string) string {
 	l := []string{sendID, recvID}
 	sort.Strings(l)

@@ -1,17 +1,3 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package msggateway
 
 import (
@@ -212,7 +198,6 @@ func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *C
 	if err != nil {
 		return err
 	}
-
 	wg := errgroup.Group{}
 	wg.SetLimit(concurrentRequest)
 
@@ -265,7 +250,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		if clientOK {
 			ws.clients.Set(client.UserID, client)
 			// There is already a connection to the platform
-			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID",
+			log.ZDebug(client.ctx, "repeat login", "userID", client.UserID, "platformID",
 				client.PlatformID, "old remote addr", getRemoteAdders(oldClients))
 			ws.onlineUserConnNum.Add(1)
 		} else {
@@ -293,7 +278,7 @@ func (ws *WsServer) registerClient(client *Client) {
 
 	wg.Wait()
 
-	log.ZInfo(
+	log.ZDebug(
 		client.ctx,
 		"user online",
 		"online user Num",
@@ -321,8 +306,32 @@ func (ws *WsServer) KickUserConn(client *Client) error {
 }
 
 func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Client, newClient *Client) {
-	switch ws.msgGatewayConfig.MsgGateway.MultiLoginPolicy {
+	kickTokenFunc := func(kickClients []*Client) {
+		var kickTokens []string
+		ws.clients.DeleteClients(newClient.UserID, kickClients)
+		for _, c := range kickClients {
+			kickTokens = append(kickTokens, c.token)
+			err := c.KickOnlineMessage()
+			if err != nil {
+				log.ZWarn(c.ctx, "KickOnlineMessage", err)
+			}
+		}
+		ctx := mcontext.WithMustInfoCtx(
+			[]string{newClient.ctx.GetOperationID(), newClient.ctx.GetUserID(),
+				constant.PlatformIDToName(newClient.PlatformID), newClient.ctx.GetConnID()},
+		)
+		if _, err := ws.authClient.KickTokens(ctx, kickTokens); err != nil {
+			log.ZWarn(newClient.ctx, "kickTokens err", err)
+		}
+	}
+
+	switch ws.msgGatewayConfig.Share.MultiLogin.Policy {
 	case constant.DefalutNotKick:
+	case constant.WebAndOther:
+		if constant.PlatformIDToClass(newClient.PlatformID) == constant.WebPlatformStr {
+			return
+		}
+		fallthrough
 	case constant.PCAndOther:
 		if constant.PlatformIDToClass(newClient.PlatformID) == constant.TerminalPC {
 			return
@@ -347,6 +356,35 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			log.ZWarn(newClient.ctx, "InvalidateToken err", err, "userID", newClient.UserID,
 				"platformID", newClient.PlatformID)
 		}
+	case constant.PcMobileAndWeb:
+		clients, ok := ws.clients.GetAll(newClient.UserID)
+		if !ok {
+			return
+		}
+		var (
+			kickClients []*Client
+		)
+		for _, client := range clients {
+			if constant.PlatformIDToClass(client.PlatformID) == constant.PlatformIDToClass(newClient.PlatformID) {
+				kickClients = append(kickClients, client)
+			}
+		}
+		kickTokenFunc(kickClients)
+
+	case constant.SingleTerminalLogin:
+		clients, ok := ws.clients.GetAll(newClient.UserID)
+		if !ok {
+			return
+		}
+		var (
+			kickClients []*Client
+		)
+		for _, client := range clients {
+			kickClients = append(kickClients, client)
+		}
+		kickTokenFunc(kickClients)
+	case constant.Customize:
+		// todo
 	}
 }
 
@@ -360,7 +398,7 @@ func (ws *WsServer) unregisterClient(client *Client) {
 	ws.onlineUserConnNum.Add(-1)
 	ws.subscription.DelClient(client)
 	//ws.SetUserOnlineStatus(client.ctx, client, constant.Offline)
-	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num",
+	log.ZDebug(client.ctx, "user offline", "close reason", client.closedErr, "online user Num",
 		ws.onlineUserNum.Load(), "online user conn Num",
 		ws.onlineUserConnNum.Load(),
 	)
@@ -425,6 +463,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.ZDebug(connContext, "new conn", "token", connContext.GetToken())
 	// Create a WebSocket long connection object
 	wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout, ws.writeBufferSize)
 	if err := wsLongConn.GenerateLongConn(w, r); err != nil {

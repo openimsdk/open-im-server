@@ -20,6 +20,7 @@ import (
 
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/mcontext"
 )
 
@@ -54,11 +55,15 @@ func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[s
 	return m
 }
 
-func UpdateGroupInfoEXMap(ctx context.Context, group *sdkws.GroupInfoForSetEX) map[string]any {
+func UpdateGroupInfoExMap(ctx context.Context, group *pbgroup.SetGroupInfoExReq) (map[string]any, error) {
 	m := make(map[string]any)
 
-	if group.GroupName != "" {
-		m["group_name"] = group.GroupName
+	if group.GroupName != nil {
+		if group.GroupName.Value != "" {
+			m["group_name"] = group.GroupName.Value
+		} else {
+			return nil, errs.ErrArgs.WrapMsg("group name is empty")
+		}
 	}
 	if group.Notification != nil {
 		m["notification"] = group.Notification.Value
@@ -84,7 +89,7 @@ func UpdateGroupInfoEXMap(ctx context.Context, group *sdkws.GroupInfoForSetEX) m
 		m["ex"] = group.Ex.Value
 	}
 
-	return m
+	return m, nil
 }
 
 func UpdateGroupStatusMap(status int) map[string]any {

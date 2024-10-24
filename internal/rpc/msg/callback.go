@@ -67,6 +67,9 @@ func (m *msgServer) webhookBeforeSendSingleMsg(ctx context.Context, before *conf
 		if msg.MsgData.ContentType == constant.Typing {
 			return nil
 		}
+		if !filterBeforeMsg(msg, before) {
+			return nil
+		}
 		cbReq := &cbapi.CallbackBeforeSendSingleMsgReq{
 			CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackBeforeSendSingleMsgCommand),
 			RecvID:            msg.MsgData.RecvID,
@@ -84,9 +87,7 @@ func (m *msgServer) webhookAfterSendSingleMsg(ctx context.Context, after *config
 	if msg.MsgData.ContentType == constant.Typing {
 		return
 	}
-	// According to the attentionIds configuration, only some users are sent
-	attentionIds := after.AttentionIds
-	if attentionIds != nil && !datautil.Contain(msg.MsgData.RecvID, attentionIds...) && !datautil.Contain(msg.MsgData.SendID, attentionIds...) {
+	if !filterAfterMsg(msg, after) {
 		return
 	}
 	cbReq := &cbapi.CallbackAfterSendSingleMsgReq{
@@ -98,6 +99,9 @@ func (m *msgServer) webhookAfterSendSingleMsg(ctx context.Context, after *config
 
 func (m *msgServer) webhookBeforeSendGroupMsg(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
+		if !filterBeforeMsg(msg, before) {
+			return nil
+		}
 		if msg.MsgData.ContentType == constant.Typing {
 			return nil
 		}
@@ -117,6 +121,9 @@ func (m *msgServer) webhookAfterSendGroupMsg(ctx context.Context, after *config.
 	if msg.MsgData.ContentType == constant.Typing {
 		return
 	}
+	if !filterAfterMsg(msg, after) {
+		return
+	}
 	cbReq := &cbapi.CallbackAfterSendGroupMsgReq{
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendGroupMsgCommand),
 		GroupID:           msg.MsgData.GroupID,
@@ -127,6 +134,9 @@ func (m *msgServer) webhookAfterSendGroupMsg(ctx context.Context, after *config.
 func (m *msgServer) webhookBeforeMsgModify(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		if msg.MsgData.ContentType != constant.Text {
+			return nil
+		}
+		if !filterBeforeMsg(msg, before) {
 			return nil
 		}
 		cbReq := &cbapi.CallbackMsgModifyCommandReq{

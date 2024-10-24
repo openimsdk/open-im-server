@@ -1,17 +1,3 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package redis
 
 import (
@@ -19,8 +5,9 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils/stringutil"
 	"github.com/redis/go-redis/v9"
+	"strconv"
+	"sync"
 	"time"
 )
 
@@ -58,10 +45,50 @@ func (c *tokenCache) GetTokensWithoutError(ctx context.Context, userID string, p
 	}
 	mm := make(map[string]int)
 	for k, v := range m {
-		mm[k] = stringutil.StringToInt(v)
+		state, err := strconv.Atoi(v)
+		if err != nil {
+			return nil, errs.WrapMsg(err, "redis token value is not int", "value", v, "userID", userID, "platformID", platformID)
+		}
+		mm[k] = state
 	}
-
 	return mm, nil
+}
+
+func (c *tokenCache) GetAllTokensWithoutError(ctx context.Context, userID string) (map[int]map[string]int, error) {
+	var (
+		res     = make(map[int]map[string]int)
+		resLock = sync.Mutex{}
+	)
+
+	keys := cachekey.GetAllPlatformTokenKey(userID)
+	if err := ProcessKeysBySlot(ctx, c.rdb, keys, func(ctx context.Context, slot int64, keys []string) error {
+		pipe := c.rdb.Pipeline()
+		mapRes := make([]*redis.MapStringStringCmd, len(keys))
+		for i, key := range keys {
+			mapRes[i] = pipe.HGetAll(ctx, key)
+		}
+		_, err := pipe.Exec(ctx)
+		if err != nil {
+			return err
+		}
+		for i, m := range mapRes {
+			mm := make(map[string]int)
+			for k, v := range m.Val() {
+				state, err := strconv.Atoi(v)
+				if err != nil {
+					return errs.WrapMsg(err, "redis token value is not int", "value", v, "userID", userID)
+				}
+				mm[k] = state
+			}
+			resLock.Lock()
+			res[cachekey.GetPlatformIDByTokenKey(keys[i])] = mm
+			resLock.Unlock()
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (c *tokenCache) SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error {
@@ -70,6 +97,18 @@ func (c *tokenCache) SetTokenMapByUidPid(ctx context.Context, userID string, pla
 		mm[k] = v
 	}
 	return errs.Wrap(c.rdb.HSet(ctx, cachekey.GetTokenKey(userID, platformID), mm).Err())
+}
+
+func (c *tokenCache) BatchSetTokenMapByUidPid(ctx context.Context, tokens map[string]map[string]int) error {
+	pipe := c.rdb.Pipeline()
+	for k, v := range tokens {
+		pipe.HSet(ctx, k, v)
+	}
+	_, err := pipe.Exec(ctx)
+	if err != nil {
+		return errs.Wrap(err)
+	}
+	return nil
 }
 
 func (c *tokenCache) DeleteTokenByUidPid(ctx context.Context, userID string, platformID int, fields []string) error {

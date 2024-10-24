@@ -16,6 +16,8 @@ package msggateway
 
 import (
 	"context"
+	"sync/atomic"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
@@ -30,7 +32,6 @@ import (
 	"github.com/openimsdk/tools/mq/memamq"
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
-	"sync/atomic"
 )
 
 func (s *Server) InitServer(ctx context.Context, config *Config, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -111,15 +112,14 @@ func (s *Server) GetUsersOnlineStatus(
 			}
 
 			ps := new(msggateway.GetUsersOnlineStatusResp_SuccessDetail)
-			ps.Platform = constant.PlatformIDToName(client.PlatformID)
-			ps.Status = constant.OnlineStatus
+			ps.PlatformID = int32(client.PlatformID)
 			ps.ConnID = client.ctx.GetConnID()
 			ps.Token = client.token
 			ps.IsBackground = client.IsBackground
-			uresp.Status = constant.OnlineStatus
+			uresp.Status = constant.Online
 			uresp.DetailPlatformStatus = append(uresp.DetailPlatformStatus, ps)
 		}
-		if uresp.Status == constant.OnlineStatus {
+		if uresp.Status == constant.Online {
 			resp.SuccessResult = append(resp.SuccessResult, uresp)
 		}
 	}

@@ -138,6 +138,18 @@ func (s *friendServer) webhookBeforeAddFriendAgree(ctx context.Context, before *
 	})
 }
 
+func (s *friendServer) webhookAfterAddFriendAgree(ctx context.Context, after *config.AfterConfig, req *relation.RespondFriendApplyReq) {
+	cbReq := &cbapi.CallbackAfterAddFriendAgreeReq{
+		CallbackCommand: cbapi.CallbackAfterAddFriendAgreeCommand,
+		FromUserID:      req.FromUserID,
+		ToUserID:        req.ToUserID,
+		HandleMsg:       req.HandleMsg,
+		HandleResult:    req.HandleResult,
+	}
+	resp := &cbapi.CallbackAfterAddFriendAgreeResp{}
+	s.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, after)
+}
+
 func (s *friendServer) webhookBeforeImportFriends(ctx context.Context, before *config.BeforeConfig, req *relation.ImportFriendReq) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		cbReq := &cbapi.CallbackBeforeImportFriendsReq{

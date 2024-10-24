@@ -73,18 +73,21 @@ type Mongo struct {
 	MaxRetry    int      `mapstructure:"maxRetry"`
 }
 type Kafka struct {
-	Username       string    `mapstructure:"username"`
-	Password       string    `mapstructure:"password"`
-	ProducerAck    string    `mapstructure:"producerAck"`
-	CompressType   string    `mapstructure:"compressType"`
-	Address        []string  `mapstructure:"address"`
-	ToRedisTopic   string    `mapstructure:"toRedisTopic"`
-	ToMongoTopic   string    `mapstructure:"toMongoTopic"`
-	ToPushTopic    string    `mapstructure:"toPushTopic"`
-	ToRedisGroupID string    `mapstructure:"toRedisGroupID"`
-	ToMongoGroupID string    `mapstructure:"toMongoGroupID"`
-	ToPushGroupID  string    `mapstructure:"toPushGroupID"`
-	Tls            TLSConfig `mapstructure:"tls"`
+	Username           string   `mapstructure:"username"`
+	Password           string   `mapstructure:"password"`
+	ProducerAck        string   `mapstructure:"producerAck"`
+	CompressType       string   `mapstructure:"compressType"`
+	Address            []string `mapstructure:"address"`
+	ToRedisTopic       string   `mapstructure:"toRedisTopic"`
+	ToMongoTopic       string   `mapstructure:"toMongoTopic"`
+	ToPushTopic        string   `mapstructure:"toPushTopic"`
+	ToOfflinePushTopic string   `mapstructure:"toOfflinePushTopic"`
+	ToRedisGroupID     string   `mapstructure:"toRedisGroupID"`
+	ToMongoGroupID     string   `mapstructure:"toMongoGroupID"`
+	ToPushGroupID      string   `mapstructure:"toPushGroupID"`
+	ToOfflineGroupID   string   `mapstructure:"toOfflinePushGroupID"`
+
+	Tls TLSConfig `mapstructure:"tls"`
 }
 type TLSConfig struct {
 	EnableTLS          bool   `mapstructure:"enableTLS"`
@@ -97,8 +100,9 @@ type TLSConfig struct {
 
 type API struct {
 	Api struct {
-		ListenIP string `mapstructure:"listenIP"`
-		Ports    []int  `mapstructure:"ports"`
+		ListenIP         string `mapstructure:"listenIP"`
+		Ports            []int  `mapstructure:"ports"`
+		CompressionLevel int    `mapstructure:"compressionLevel"`
 	} `mapstructure:"api"`
 	Prometheus struct {
 		Enable     bool   `mapstructure:"enable"`
@@ -181,7 +185,6 @@ type MsgGateway struct {
 		WebsocketMaxMsgLen  int   `mapstructure:"websocketMaxMsgLen"`
 		WebsocketTimeout    int   `mapstructure:"websocketTimeout"`
 	} `mapstructure:"longConnSvr"`
-	MultiLoginPolicy int `mapstructure:"multiLoginPolicy"`
 }
 
 type MsgTransfer struct {
@@ -220,6 +223,7 @@ type Push struct {
 		BadgeCount bool   `mapstructure:"badgeCount"`
 		Production bool   `mapstructure:"production"`
 	} `mapstructure:"iosPush"`
+	FullUserCache bool `mapstructure:"fullUserCache"`
 }
 
 type Auth struct {
@@ -336,26 +340,50 @@ type Redis struct {
 	Password    string   `mapstructure:"password"`
 	ClusterMode bool     `mapstructure:"clusterMode"`
 	DB          int      `mapstructure:"storage"`
-	MaxRetry    int      `mapstructure:"MaxRetry"`
+	MaxRetry    int      `mapstructure:"maxRetry"`
+	PoolSize    int      `mapstructure:"poolSize"`
 }
 
 type BeforeConfig struct {
-	Enable         bool `mapstructure:"enable"`
-	Timeout        int  `mapstructure:"timeout"`
-	FailedContinue bool `mapstructure:"failedContinue"`
+	Enable         bool     `mapstructure:"enable"`
+	Timeout        int      `mapstructure:"timeout"`
+	FailedContinue bool     `mapstructure:"failedContinue"`
+	AllowedTypes   []string `mapstructure:"allowedTypes"`
+	DeniedTypes    []string `mapstructure:"deniedTypes"`
 }
 
 type AfterConfig struct {
 	Enable       bool     `mapstructure:"enable"`
 	Timeout      int      `mapstructure:"timeout"`
 	AttentionIds []string `mapstructure:"attentionIds"`
+	AllowedTypes []string `mapstructure:"allowedTypes"`
+	DeniedTypes  []string `mapstructure:"deniedTypes"`
 }
 
 type Share struct {
 	Secret          string          `mapstructure:"secret"`
 	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
 	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
+	MultiLogin      MultiLogin      `mapstructure:"multiLogin"`
 }
+
+type MultiLogin struct {
+	Policy            int `mapstructure:"policy"`
+	MaxNumOneEnd      int `mapstructure:"maxNumOneEnd"`
+	CustomizeLoginNum struct {
+		IOS     int `mapstructure:"ios"`
+		Android int `mapstructure:"android"`
+		Windows int `mapstructure:"windows"`
+		OSX     int `mapstructure:"osx"`
+		Web     int `mapstructure:"web"`
+		MiniWeb int `mapstructure:"miniWeb"`
+		Linux   int `mapstructure:"linux"`
+		APad    int `mapstructure:"aPad"`
+		IPad    int `mapstructure:"iPad"`
+		Admin   int `mapstructure:"admin"`
+	} `mapstructure:"customizeLoginNum"`
+}
+
 type RpcRegisterName struct {
 	User           string `mapstructure:"user"`
 	Friend         string `mapstructure:"friend"`
@@ -422,12 +450,13 @@ type Webhooks struct {
 	BeforeInviteUserToGroup  BeforeConfig `mapstructure:"beforeInviteUserToGroup"`
 	AfterSetGroupInfo        AfterConfig  `mapstructure:"afterSetGroupInfo"`
 	BeforeSetGroupInfo       BeforeConfig `mapstructure:"beforeSetGroupInfo"`
-	AfterSetGroupInfoEX      AfterConfig  `mapstructure:"afterSetGroupInfoEX"`
-	BeforeSetGroupInfoEX     BeforeConfig `mapstructure:"beforeSetGroupInfoEX"`
+	AfterSetGroupInfoEx      AfterConfig  `mapstructure:"afterSetGroupInfoEx"`
+	BeforeSetGroupInfoEx     BeforeConfig `mapstructure:"beforeSetGroupInfoEx"`
 	AfterRevokeMsg           AfterConfig  `mapstructure:"afterRevokeMsg"`
 	BeforeAddBlack           BeforeConfig `mapstructure:"beforeAddBlack"`
 	AfterAddFriend           AfterConfig  `mapstructure:"afterAddFriend"`
 	BeforeAddFriendAgree     BeforeConfig `mapstructure:"beforeAddFriendAgree"`
+	AfterAddFriendAgree      AfterConfig  `mapstructure:"afterAddFriendAgree"`
 	AfterDeleteFriend        AfterConfig  `mapstructure:"afterDeleteFriend"`
 	BeforeImportFriends      BeforeConfig `mapstructure:"beforeImportFriends"`
 	AfterImportFriends       AfterConfig  `mapstructure:"afterImportFriends"`
@@ -474,6 +503,7 @@ func (r *Redis) Build() *redisutil.Config {
 		Password:    r.Password,
 		DB:          r.DB,
 		MaxRetry:    r.MaxRetry,
+		PoolSize:    r.PoolSize,
 	}
 }
 

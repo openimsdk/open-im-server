@@ -86,7 +86,7 @@ func (c *ConversationLocalCache) GetConversation(ctx context.Context, userID, co
 		if err == nil {
 			log.ZDebug(ctx, "ConversationLocalCache GetConversation return", "userID", userID, "conversationID", conversationID, "value", val)
 		} else {
-			log.ZError(ctx, "ConversationLocalCache GetConversation return", err, "userID", userID, "conversationID", conversationID)
+			log.ZWarn(ctx, "ConversationLocalCache GetConversation return", err, "userID", userID, "conversationID", conversationID)
 		}
 	}()
 	var cache cacheProto[pbconversation.Conversation]
