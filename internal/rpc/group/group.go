@@ -1526,29 +1526,61 @@ func (g *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 		case 0:
 			if !isAppManagerUid {
 				roleLevel := dbMembers[opUserIndex].RoleLevel
-				if roleLevel != constant.GroupOwner {
-					switch roleLevel {
-					case constant.GroupAdmin:
-						for _, member := range dbMembers {
-							if member.RoleLevel == constant.GroupOwner {
-								return nil, errs.ErrNoPermission.WrapMsg("admin can not change group owner")
-							}
-							if member.RoleLevel == constant.GroupAdmin && member.UserID != opUserID {
-								return nil, errs.ErrNoPermission.WrapMsg("admin can not change other group admin")
-							}
+				var (
+					dbSelf  = &model.GroupMember{}
+					reqSelf *pbgroup.SetGroupMemberInfo
+				)
+				switch roleLevel {
+				case constant.GroupOwner:
+					for _, member := range dbMembers {
+						if member.UserID == opUserID {
+							dbSelf = member
+							break
 						}
-					case constant.GroupOrdinaryUsers:
-						for _, member := range dbMembers {
-							if !(member.RoleLevel == constant.GroupOrdinaryUsers && member.UserID == opUserID) {
-								return nil, errs.ErrNoPermission.WrapMsg("ordinary users can not change other role level")
-							}
+					}
+				case constant.GroupAdmin:
+					for _, member := range dbMembers {
+						if member.UserID == opUserID {
+							dbSelf = member
 						}
-					default:
-						for _, member := range dbMembers {
-							if member.RoleLevel >= roleLevel {
-								return nil, errs.ErrNoPermission.WrapMsg("can not change higher role level")
-							}
+						if member.RoleLevel == constant.GroupOwner {
+							return nil, errs.ErrNoPermission.WrapMsg("admin can not change group owner")
 						}
+						if member.RoleLevel == constant.GroupAdmin && member.UserID != opUserID {
+							return nil, errs.ErrNoPermission.WrapMsg("admin can not change other group admin")
+						}
+					}
+				case constant.GroupOrdinaryUsers:
+					for _, member := range dbMembers {
+						if member.UserID == opUserID {
+							dbSelf = member
+						}
+						if !(member.RoleLevel == constant.GroupOrdinaryUsers && member.UserID == opUserID) {
+							return nil, errs.ErrNoPermission.WrapMsg("ordinary users can not change other role level")
+						}
+					}
+				default:
+					for _, member := range dbMembers {
+						if member.UserID == opUserID {
+							dbSelf = member
+						}
+						if member.RoleLevel >= roleLevel {
+							return nil, errs.ErrNoPermission.WrapMsg("can not change higher role level")
+						}
+					}
+				}
+				for _, member := range req.Members {
+					if member.UserID == opUserID {
+						reqSelf = member
+						break
+					}
+				}
+				if reqSelf != nil && reqSelf.RoleLevel != nil {
+					if reqSelf.RoleLevel.GetValue() > dbSelf.RoleLevel {
+						return nil, errs.ErrNoPermission.WrapMsg("can not improve role level by self")
+					}
+					if roleLevel == constant.GroupOwner {
+						return nil, errs.ErrArgs.WrapMsg("group owner can not change own role level") // Prevent the absence of a group owner
 					}
 				}
 			}
@@ -1589,7 +1621,7 @@ func (g *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 				g.notification.GroupMemberSetToOrdinaryUserNotification(ctx, member.GroupID, member.UserID)
 			}
 		}
-		if member.Nickname != nil || member.FaceURL != nil || member.Ex != nil {
+		if member.Nickname != nil || member.FaceURL != nil || member.Ex != nil || member.RoleLevel != nil {
 			g.notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
 		}
 	}
