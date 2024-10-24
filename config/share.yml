@@ -14,7 +14,7 @@ imAdminUserID: [ imAdmin ]
 
 # 1: For Android, iOS, Windows, Mac, and web platforms, only one instance can be online at a time
 multiLogin:
-  policy: 6
+  policy: 1
   maxNumOneEnd: 30
   customizeLoginNum:
     ios: 1
