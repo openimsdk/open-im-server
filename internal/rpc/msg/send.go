@@ -29,7 +29,6 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/stringutil"
 )
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.SendMsgResp, error) {
@@ -80,13 +79,17 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *pbmsg.SendMsgReq)
 
 func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgData) {
 	log.ZDebug(nctx, "setConversationAtInfo", "msg", msg)
+
 	ctx := mcontext.NewCtx("@@@" + mcontext.GetOperationID(nctx))
+
 	var atUserID []string
+
 	conversation := &pbconversation.ConversationReq{
 		ConversationID:   msgprocessor.GetConversationIDByMsg(msg),
 		ConversationType: msg.SessionType,
 		GroupID:          msg.GroupID,
 	}
+
 	tagAll := datautil.Contain(constant.AtAllString, msg.AtUserIDList...)
 	if tagAll {
 		memberUserIDList, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, msg.GroupID)
@@ -94,25 +97,35 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			log.ZWarn(ctx, "GetGroupMemberIDs", err)
 			return
 		}
-		atUserID = stringutil.DifferenceString([]string{constant.AtAllString}, msg.AtUserIDList)
+
+		memberUserIDList = datautil.DeleteElems(memberUserIDList, msg.SendID)
+
+		atUserID = datautil.Single([]string{constant.AtAllString}, atUserID)
+
 		if len(atUserID) == 0 { // just @everyone
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
 		} else { // @Everyone and @other people
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAllAtMe}
+
 			err = m.Conversation.SetConversations(ctx, atUserID, conversation)
 			if err != nil {
 				log.ZWarn(ctx, "SetConversations", err, "userID", atUserID, "conversation", conversation)
 			}
-			memberUserIDList = stringutil.DifferenceString(atUserID, memberUserIDList)
+
+			memberUserIDList = datautil.Single(atUserID, memberUserIDList)
 		}
+
 		conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
+
 		err = m.Conversation.SetConversations(ctx, memberUserIDList, conversation)
 		if err != nil {
 			log.ZWarn(ctx, "SetConversations", err, "userID", memberUserIDList, "conversation", conversation)
 		}
+
 		return
 	}
 	conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtMe}
+
 	err := m.Conversation.SetConversations(ctx, msg.AtUserIDList, conversation)
 	if err != nil {
 		log.ZWarn(ctx, "SetConversations", err, msg.AtUserIDList, conversation)
