@@ -27,12 +27,12 @@ func newEmptyOnlinePusher() *emptyOnlinePusher {
 
 func (emptyOnlinePusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData,
 	pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
-	log.ZWarn(ctx, "emptyOnlinePusher GetConnsAndOnlinePush", nil)
+	log.ZInfo(ctx, "emptyOnlinePusher GetConnsAndOnlinePush", nil)
 	return nil, nil
 }
 func (u emptyOnlinePusher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *sdkws.MsgData,
 	wsResults []*msggateway.SingleMsgToUserResults, pushToUserIDs *[]string) []string {
-	log.ZWarn(ctx, "emptyOnlinePusher GetOnlinePushFailedUserIDs", nil)
+	log.ZInfo(ctx, "emptyOnlinePusher GetOnlinePushFailedUserIDs", nil)
 	return nil
 }
 

@@ -23,10 +23,13 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"strings"
 )
 
 const (
-	geTUI    = "geTui"
+	geTUI    = "getui"
 	firebase = "fcm"
 	jPush    = "jpush"
 )
@@ -38,6 +41,7 @@ type OfflinePusher interface {
 
 func NewOfflinePusher(pushConf *config.Push, cache cache.ThirdCache, fcmConfigPath string) (OfflinePusher, error) {
 	var offlinePusher OfflinePusher
+	pushConf.Enable = strings.ToLower(pushConf.Enable)
 	switch pushConf.Enable {
 	case geTUI:
 		offlinePusher = getui.NewClient(pushConf, cache)
@@ -47,6 +51,7 @@ func NewOfflinePusher(pushConf *config.Push, cache cache.ThirdCache, fcmConfigPa
 		offlinePusher = jpush.NewClient(pushConf)
 	default:
 		offlinePusher = dummy.NewClient()
+		log.ZWarn(mcontext.WithMustInfoCtx([]string{"push start", "admin", "admin", ""}), "Unknown push config", nil)
 	}
 	return offlinePusher, nil
 }

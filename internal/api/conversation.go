@@ -62,3 +62,11 @@ func (o *ConversationApi) GetIncrementalConversation(c *gin.Context) {
 func (o *ConversationApi) GetOwnerConversation(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.GetOwnerConversation, o.Client, c)
 }
+
+func (o *ConversationApi) GetNotNotifyConversationIDs(c *gin.Context) {
+	a2r.Call(conversation.ConversationClient.GetNotNotifyConversationIDs, o.Client, c)
+}
+
+func (o *ConversationApi) GetPinnedConversationIDs(c *gin.Context) {
+	a2r.Call(conversation.ConversationClient.GetPinnedConversationIDs, o.Client, c)
+}

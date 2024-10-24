@@ -20,6 +20,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -64,24 +65,33 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 			redis2.NewTokenCacheModel(rdb, config.RpcConfig.TokenPolicy.Expire),
 			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
+			config.Share.MultiLogin,
 		),
 		config: config,
 	})
 	return nil
 }
 
-func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*pbauth.UserTokenResp, error) {
-	resp := pbauth.UserTokenResp{}
+func (s *authServer) GetAdminToken(ctx context.Context, req *pbauth.GetAdminTokenReq) (*pbauth.GetAdminTokenResp, error) {
+	resp := pbauth.GetAdminTokenResp{}
 	if req.Secret != s.config.Share.Secret {
 		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
+
+	if !datautil.Contain(req.UserID, s.config.Share.IMAdminUserID...) {
+		return nil, errs.ErrArgs.WrapMsg("userID is error.", "userID", req.UserID, "adminUserID", s.config.Share.IMAdminUserID)
+
+	}
+
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(req.PlatformID))
+
+	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(constant.AdminPlatformID))
 	if err != nil {
 		return nil, err
 	}
+
 	prommetrics.UserLoginCounter.Inc()
 	resp.Token = token
 	resp.ExpireTimeSeconds = s.config.RpcConfig.TokenPolicy.Expire * 24 * 60 * 60
@@ -92,6 +102,11 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
+
+	if req.PlatformID == constant.AdminPlatformID {
+		return nil, errs.ErrNoPermission.WrapMsg("platformID invalid. platformID must not be adminPlatformID")
+	}
+
 	resp := pbauth.GetUserTokenResp{}
 
 	if authverify.IsManagerUserID(req.UserID, s.config.Share.IMAdminUserID) {
@@ -214,4 +229,11 @@ func (s *authServer) InvalidateToken(ctx context.Context, req *pbauth.Invalidate
 		return nil, err
 	}
 	return &pbauth.InvalidateTokenResp{}, nil
+}
+
+func (s *authServer) KickTokens(ctx context.Context, req *pbauth.KickTokensReq) (*pbauth.KickTokensResp, error) {
+	if err := s.authDatabase.BatchSetTokenMapByUidPid(ctx, req.Tokens); err != nil {
+		return nil, err
+	}
+	return &pbauth.KickTokensResp{}, nil
 }

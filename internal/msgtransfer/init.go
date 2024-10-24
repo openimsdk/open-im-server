@@ -18,19 +18,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	discRegister "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/errs"
@@ -65,6 +66,7 @@ type Config struct {
 func Start(ctx context.Context, index int, config *Config) error {
 	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "prometheusPorts",
 		config.MsgTransfer.Prometheus.Ports, "index", index)
+
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err
@@ -73,12 +75,13 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, &config.Share)
+	client, err := discRegister.NewDiscoveryRegister(&config.Discovery, &config.Share)
 	if err != nil {
 		return err
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
+
 	msgModel := redis.NewMsgCache(rdb)
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
@@ -94,20 +97,21 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return err
 	}
 	seqUserCache := redis.NewSeqUserCacheRedis(rdb, seqUser)
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, &config.KafkaConfig)
+	msgTransferDatabase, err := controller.NewMsgTransferDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, &config.KafkaConfig)
 	if err != nil {
 		return err
 	}
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
-	historyCH, err := NewOnlineHistoryRedisConsumerHandler(&config.KafkaConfig, msgDatabase, &conversationRpcClient, &groupRpcClient)
+	historyCH, err := NewOnlineHistoryRedisConsumerHandler(&config.KafkaConfig, msgTransferDatabase, &conversationRpcClient, &groupRpcClient)
 	if err != nil {
 		return err
 	}
-	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(&config.KafkaConfig, msgDatabase)
+	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(&config.KafkaConfig, msgTransferDatabase)
 	if err != nil {
 		return err
 	}
+
 	msgTransfer := &MsgTransfer{
 		historyCH:      historyCH,
 		historyMongoCH: historyMongoCH,

@@ -4,14 +4,10 @@ rpc:
   # Listening IP; 0.0.0.0 means both internal and external IPs are listened to, if blank, the internal network IP is automatically obtained by default
   listenIP: 0.0.0.0
   # Listening ports; if multiple are configured, multiple instances will be launched, and must be consistent with the number of prometheus.ports
-  ports: [ 10110 ]
+  ports: [ 10320 ]
 
 prometheus:
   # Whether to enable prometheus
   enable: true
   # Prometheus listening ports, must be consistent with the number of rpc.ports
-  ports: [ 20610 ]
-
-
-
-
+  ports: [ 12320 ]

@@ -14,7 +14,7 @@ import (
 )
 
 func newTestSeq() *seqConversationCacheRedis {
-	mgocli, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.48:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second))
+	mgocli, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://openIM:openIM123@127.0.0.1:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second))
 	if err != nil {
 		panic(err)
 	}
@@ -23,7 +23,7 @@ func newTestSeq() *seqConversationCacheRedis {
 		panic(err)
 	}
 	opt := &redis.Options{
-		Addr:     "172.16.8.48:16379",
+		Addr:     "127.0.0.1:16379",
 		Password: "openIM123",
 		DB:       1,
 	}
@@ -107,3 +107,37 @@ func TestMinSeq(t *testing.T) {
 	ts := newTestSeq()
 	t.Log(ts.GetMinSeq(context.Background(), "10000000"))
 }
+
+func TestMalloc(t *testing.T) {
+	ts := newTestSeq()
+	t.Log(ts.mallocTime(context.Background(), "10000000", 100))
+}
+
+func TestHMGET(t *testing.T) {
+	ts := newTestSeq()
+	res, err := ts.GetCacheMaxSeqWithTime(context.Background(), []string{"10000000", "123456"})
+	if err != nil {
+		panic(err)
+	}
+	t.Log(res)
+}
+
+func TestGetMaxSeqWithTime(t *testing.T) {
+	ts := newTestSeq()
+	t.Log(ts.GetMaxSeqWithTime(context.Background(), "10000000"))
+}
+
+func TestGetMaxSeqWithTime1(t *testing.T) {
+	ts := newTestSeq()
+	t.Log(ts.GetMaxSeqsWithTime(context.Background(), []string{"10000000", "12345", "111"}))
+}
+
+//
+//func TestHMGET(t *testing.T) {
+//	ts := newTestSeq()
+//	res, err := ts.rdb.HMGet(context.Background(), "MALLOC_SEQ:1", "CURR", "TIME1").Result()
+//	if err != nil {
+//		panic(err)
+//	}
+//	t.Log(res)
+//}

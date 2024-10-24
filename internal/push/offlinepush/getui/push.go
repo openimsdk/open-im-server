@@ -18,11 +18,11 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"strconv"
 	"sync"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/tools/errs"
@@ -91,6 +91,15 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 			for i, v := range s.GetSplitResult() {
 				go func(index int, userIDs []string) {
 					defer wg.Done()
+					for i := 0; i < len(userIDs); i += maxNum {
+						end := i + maxNum
+						if end > len(userIDs) {
+							end = len(userIDs)
+						}
+						if err = g.batchPush(ctx, token, userIDs[i:end], pushReq); err != nil {
+							log.ZError(ctx, "batchPush failed", err, "index", index, "token", token, "req", pushReq)
+						}
+					}
 					if err = g.batchPush(ctx, token, userIDs, pushReq); err != nil {
 						log.ZError(ctx, "batchPush failed", err, "index", index, "token", token, "req", pushReq)
 					}

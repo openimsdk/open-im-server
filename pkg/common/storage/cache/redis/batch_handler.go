@@ -28,6 +28,10 @@ import (
 	"time"
 )
 
+const (
+	rocksCacheTimeout = 11 * time.Second
+)
+
 // BatchDeleterRedis is a concrete implementation of the BatchDeleter interface based on Redis and RocksCache.
 type BatchDeleterRedis struct {
 	redisClient    redis.UniversalClient
@@ -106,6 +110,8 @@ func (c *BatchDeleterRedis) AddKeys(keys ...string) {
 // GetRocksCacheOptions returns the default configuration options for RocksCache.
 func GetRocksCacheOptions() *rockscache.Options {
 	opts := rockscache.NewDefaultOptions()
+	opts.LockExpire = rocksCacheTimeout
+	opts.WaitReplicasTimeout = rocksCacheTimeout
 	opts.StrongConsistency = true
 	opts.RandomExpireAdjustment = 0.2
 
@@ -118,7 +124,7 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	v, err := rcClient.Fetch2(ctx, key, expire, func() (s string, err error) {
 		t, err = fn(ctx)
 		if err != nil {
-			log.ZError(ctx, "getCache query database failed", err, "key", key)
+			//log.ZError(ctx, "getCache query database failed", err, "key", key)
 			return "", err
 		}
 		bs, err := json.Marshal(t)

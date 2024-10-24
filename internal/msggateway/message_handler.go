@@ -19,6 +19,8 @@ import (
 	"sync"
 
 	"github.com/go-playground/validator/v10"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/msg"
@@ -27,7 +29,6 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/jsonutil"
-	"google.golang.org/protobuf/proto"
 )
 
 type Req struct {
@@ -94,6 +95,8 @@ type MessageHandler interface {
 	SendMessage(context context.Context, data *Req) ([]byte, error)
 	SendSignalMessage(context context.Context, data *Req) ([]byte, error)
 	PullMessageBySeqList(context context.Context, data *Req) ([]byte, error)
+	GetConversationsHasReadAndMaxSeq(context context.Context, data *Req) ([]byte, error)
+	GetSeqMessage(context context.Context, data *Req) ([]byte, error)
 	UserLogout(context context.Context, data *Req) ([]byte, error)
 	SetUserDeviceBackground(context context.Context, data *Req) ([]byte, bool, error)
 }
@@ -175,7 +178,7 @@ func (g GrpcHandler) SendSignalMessage(context context.Context, data *Req) ([]by
 func (g GrpcHandler) PullMessageBySeqList(context context.Context, data *Req) ([]byte, error) {
 	req := sdkws.PullMessageBySeqsReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
-		return nil, errs.WrapMsg(err, "error unmarshaling request", "action", "unmarshal", "dataType", "PullMessageBySeqsReq")
+		return nil, errs.WrapMsg(err, "err proto unmarshal", "action", "unmarshal", "dataType", "PullMessageBySeqsReq")
 	}
 	if err := g.validate.Struct(data); err != nil {
 		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "PullMessageBySeqsReq")
@@ -187,6 +190,44 @@ func (g GrpcHandler) PullMessageBySeqList(context context.Context, data *Req) ([
 	c, err := proto.Marshal(resp)
 	if err != nil {
 		return nil, errs.WrapMsg(err, "error marshaling response", "action", "marshal", "dataType", "PullMessageBySeqsResp")
+	}
+	return c, nil
+}
+
+func (g GrpcHandler) GetConversationsHasReadAndMaxSeq(context context.Context, data *Req) ([]byte, error) {
+	req := msg.GetConversationsHasReadAndMaxSeqReq{}
+	if err := proto.Unmarshal(data.Data, &req); err != nil {
+		return nil, errs.WrapMsg(err, "err proto unmarshal", "action", "unmarshal", "dataType", "GetConversationsHasReadAndMaxSeq")
+	}
+	if err := g.validate.Struct(data); err != nil {
+		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "GetConversationsHasReadAndMaxSeq")
+	}
+	resp, err := g.msgRpcClient.GetConversationsHasReadAndMaxSeq(context, &req)
+	if err != nil {
+		return nil, err
+	}
+	c, err := proto.Marshal(resp)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "error marshaling response", "action", "marshal", "dataType", "GetConversationsHasReadAndMaxSeq")
+	}
+	return c, nil
+}
+
+func (g GrpcHandler) GetSeqMessage(context context.Context, data *Req) ([]byte, error) {
+	req := msg.GetSeqMessageReq{}
+	if err := proto.Unmarshal(data.Data, &req); err != nil {
+		return nil, errs.WrapMsg(err, "error unmarshaling request", "action", "unmarshal", "dataType", "GetSeqMessage")
+	}
+	if err := g.validate.Struct(data); err != nil {
+		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "GetSeqMessage")
+	}
+	resp, err := g.msgRpcClient.GetSeqMessage(context, &req)
+	if err != nil {
+		return nil, err
+	}
+	c, err := proto.Marshal(resp)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "error marshaling response", "action", "marshal", "dataType", "GetSeqMessage")
 	}
 	return c, nil
 }

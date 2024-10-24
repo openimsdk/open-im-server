@@ -16,8 +16,8 @@ package rpcclient
 
 import (
 	"context"
+
 	"github.com/openimsdk/protocol/auth"
-	pbAuth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/system/program"
 	"google.golang.org/grpc"
@@ -38,8 +38,8 @@ type Auth struct {
 	discov discovery.SvcDiscoveryRegistry
 }
 
-func (a *Auth) ParseToken(ctx context.Context, token string) (*pbAuth.ParseTokenResp, error) {
-	req := pbAuth.ParseTokenReq{
+func (a *Auth) ParseToken(ctx context.Context, token string) (*auth.ParseTokenResp, error) {
+	req := auth.ParseTokenReq{
 		Token: token,
 	}
 	resp, err := a.Client.ParseToken(ctx, &req)
@@ -49,13 +49,24 @@ func (a *Auth) ParseToken(ctx context.Context, token string) (*pbAuth.ParseToken
 	return resp, err
 }
 
-func (a *Auth) InvalidateToken(ctx context.Context, preservedToken, userID string, platformID int) (*pbAuth.InvalidateTokenResp, error) {
-	req := pbAuth.InvalidateTokenReq{
+func (a *Auth) InvalidateToken(ctx context.Context, preservedToken, userID string, platformID int) (*auth.InvalidateTokenResp, error) {
+	req := auth.InvalidateTokenReq{
 		PreservedToken: preservedToken,
 		UserID:         userID,
 		PlatformID:     int32(platformID),
 	}
 	resp, err := a.Client.InvalidateToken(ctx, &req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
+
+func (a *Auth) KickTokens(ctx context.Context, tokens []string) (*auth.KickTokensResp, error) {
+	req := auth.KickTokensReq{
+		Tokens: tokens,
+	}
+	resp, err := a.Client.KickTokens(ctx, &req)
 	if err != nil {
 		return nil, err
 	}

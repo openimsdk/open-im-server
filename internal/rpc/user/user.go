@@ -47,7 +47,6 @@ import (
 	"github.com/openimsdk/tools/db/pagination"
 	registry "github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
 )
@@ -263,10 +262,11 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	if len(req.Users) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("users is empty")
 	}
-	if req.Secret != s.config.Share.Secret {
-		log.ZDebug(ctx, "UserRegister", s.config.Share.Secret, req.Secret)
-		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
+
+	if err = authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
 	}
+
 	if datautil.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
 		return nil, errs.ErrArgs.WrapMsg("userID repeated")
 	}

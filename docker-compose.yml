@@ -1,5 +1,3 @@
-version: '3'
-
 networks:
   openim:
     driver: bridge
@@ -42,19 +40,6 @@ services:
     sysctls:
       net.core.somaxconn: 1024
     command: redis-server /usr/local/redis/config/redis.conf --requirepass openIM123 --appendonly yes
-    networks:
-      - openim
-
-  zookeeper:
-    image: "${ZOOKEEPER_IMAGE}"
-    container_name: zookeeper
-    ports:
-      - "12181:2181"
-    environment:
-      #JVMFLAGS: "-Xms32m -Xmx128m"
-      TZ: "Asia/Shanghai"
-      ALLOW_ANONYMOUS_LOGIN: "yes"
-    restart: always
     networks:
       - openim
 
@@ -144,6 +129,7 @@ services:
 #    image: ${PROMETHEUS_IMAGE}
 #    container_name: prometheus
 #    restart: always
+#    user: root
 #    volumes:
 #      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
 #      - ./config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml
@@ -185,5 +171,4 @@ services:
 #      - ${DATA_DIR:-./}/components/grafana:/var/lib/grafana
 #    networks:
 #      - openim
-
 
