@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/protocol/constant"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -82,6 +83,9 @@ func (db *msgTransferDatabase) BatchInsertChat2DB(ctx context.Context, conversat
 				IOSPushSound:  msg.OfflinePushInfo.IOSPushSound,
 				IOSBadgeCount: msg.OfflinePushInfo.IOSBadgeCount,
 			}
+		}
+		if msg.Status == constant.MsgStatusSending {
+			msg.Status = constant.MsgStatusSendSuccess
 		}
 		msgs[i] = &model.MsgDataModel{
 			SendID:           msg.SendID,
