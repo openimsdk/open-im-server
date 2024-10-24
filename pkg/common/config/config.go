@@ -361,11 +361,29 @@ type AfterConfig struct {
 }
 
 type Share struct {
-	Secret           string          `mapstructure:"secret"`
-	RpcRegisterName  RpcRegisterName `mapstructure:"rpcRegisterName"`
-	IMAdminUserID    []string        `mapstructure:"imAdminUserID"`
-	MultiLoginPolicy int             `mapstructure:"multiLoginPolicy"`
+	Secret          string          `mapstructure:"secret"`
+	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
+	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
+	MultiLogin      MultiLogin      `mapstructure:"multiLogin"`
 }
+
+type MultiLogin struct {
+	Policy            int `mapstructure:"policy"`
+	MaxNumOneEnd      int `mapstructure:"maxNumOneEnd"`
+	CustomizeLoginNum struct {
+		IOS     int `mapstructure:"ios"`
+		Android int `mapstructure:"android"`
+		Windows int `mapstructure:"windows"`
+		OSX     int `mapstructure:"osx"`
+		Web     int `mapstructure:"web"`
+		MiniWeb int `mapstructure:"miniWeb"`
+		Linux   int `mapstructure:"linux"`
+		APad    int `mapstructure:"aPad"`
+		IPad    int `mapstructure:"iPad"`
+		Admin   int `mapstructure:"admin"`
+	} `mapstructure:"customizeLoginNum"`
+}
+
 type RpcRegisterName struct {
 	User           string `mapstructure:"user"`
 	Friend         string `mapstructure:"friend"`
