@@ -1180,36 +1180,53 @@ func (g *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 	if err != nil {
 		return nil, err
 	}
+
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, servererrs.ErrDismissedAlready.Wrap()
 	}
+
 	if req.OldOwnerUserID == req.NewOwnerUserID {
 		return nil, errs.ErrArgs.WrapMsg("OldOwnerUserID == NewOwnerUserID")
 	}
+
 	members, err := g.db.FindGroupMembers(ctx, req.GroupID, []string{req.OldOwnerUserID, req.NewOwnerUserID})
 	if err != nil {
 		return nil, err
 	}
+
 	if err := g.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
+
 	memberMap := datautil.SliceToMap(members, func(e *model.GroupMember) string { return e.UserID })
 	if ids := datautil.Single([]string{req.OldOwnerUserID, req.NewOwnerUserID}, datautil.Keys(memberMap)); len(ids) > 0 {
 		return nil, errs.ErrArgs.WrapMsg("user not in group " + strings.Join(ids, ","))
 	}
+
 	oldOwner := memberMap[req.OldOwnerUserID]
 	if oldOwner == nil {
 		return nil, errs.ErrArgs.WrapMsg("OldOwnerUserID not in group " + req.NewOwnerUserID)
 	}
+
 	newOwner := memberMap[req.NewOwnerUserID]
 	if newOwner == nil {
 		return nil, errs.ErrArgs.WrapMsg("NewOwnerUser not in group " + req.NewOwnerUserID)
 	}
+
 	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
 		if !(mcontext.GetOpUserID(ctx) == oldOwner.UserID && oldOwner.RoleLevel == constant.GroupOwner) {
 			return nil, errs.ErrNoPermission.WrapMsg("no permission transfer group owner")
 		}
 	}
+
+	if newOwner.MuteEndTime != time.Unix(0, 0) {
+		if _, err := g.CancelMuteGroupMember(ctx, &pbgroup.CancelMuteGroupMemberReq{
+			GroupID: group.GroupID,
+			UserID:  req.NewOwnerUserID}); err != nil {
+			return nil, err
+		}
+	}
+
 	if err := g.db.TransferGroupOwner(ctx, req.GroupID, req.OldOwnerUserID, req.NewOwnerUserID, newOwner.RoleLevel); err != nil {
 		return nil, err
 	}
@@ -1217,6 +1234,7 @@ func (g *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 	g.webhookAfterTransferGroupOwner(ctx, &g.config.WebhooksConfig.AfterTransferGroupOwner, req)
 
 	g.notification.GroupOwnerTransferredNotification(ctx, req)
+
 	return &pbgroup.TransferGroupOwnerResp{}, nil
 }
 
@@ -1425,32 +1443,38 @@ func (g *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbgroup.Ca
 	if err != nil {
 		return nil, err
 	}
+
 	if err := g.PopulateGroupMember(ctx, member); err != nil {
 		return nil, err
 	}
+
 	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
 		opMember, err := g.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
+
 		switch member.RoleLevel {
 		case constant.GroupOwner:
-			return nil, errs.ErrNoPermission.WrapMsg("set group owner mute")
+			return nil, errs.ErrNoPermission.WrapMsg("Can not set group owner unmute")
 		case constant.GroupAdmin:
 			if opMember.RoleLevel != constant.GroupOwner {
-				return nil, errs.ErrNoPermission.WrapMsg("set group admin mute")
+				return nil, errs.ErrNoPermission.WrapMsg("Can not set group admin unmute")
 			}
 		case constant.GroupOrdinaryUsers:
 			if !(opMember.RoleLevel == constant.GroupAdmin || opMember.RoleLevel == constant.GroupOwner) {
-				return nil, errs.ErrNoPermission.WrapMsg("set group ordinary users mute")
+				return nil, errs.ErrNoPermission.WrapMsg("Can not set group ordinary users unmute")
 			}
 		}
 	}
+
 	data := UpdateGroupMemberMutedTimeMap(time.Unix(0, 0))
 	if err := g.db.UpdateGroupMember(ctx, member.GroupID, member.UserID, data); err != nil {
 		return nil, err
 	}
+
 	g.notification.GroupMemberCancelMutedNotification(ctx, req.GroupID, req.UserID)
+
 	return &pbgroup.CancelMuteGroupMemberResp{}, nil
 }
 
