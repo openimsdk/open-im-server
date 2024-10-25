@@ -16,9 +16,10 @@ package controller
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -194,7 +195,7 @@ func (c *conversationDatabase) SyncPeerUserPrivateConversationTx(ctx context.Con
 	return c.tx.Transaction(ctx, func(ctx context.Context) error {
 		cache := c.cache.CloneConversationCache()
 		for _, conversation := range conversations {
-			cache = cache.DelConversationVersionUserIDs(conversation.OwnerUserID)
+			cache = cache.DelConversationVersionUserIDs(conversation.OwnerUserID, conversation.UserID)
 			for _, v := range [][2]string{{conversation.OwnerUserID, conversation.UserID}, {conversation.UserID, conversation.OwnerUserID}} {
 				ownerUserID := v[0]
 				userID := v[1]
