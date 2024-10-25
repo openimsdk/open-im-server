@@ -194,6 +194,9 @@ func (c *ConsumerHandler) shouldPushOffline(_ context.Context, msg *sdkws.MsgDat
 }
 
 func (c *ConsumerHandler) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) ([]*msggateway.SingleMsgToUserResults, error) {
+	if msg != nil && msg.Status == constant.MsgStatusSending {
+		msg.Status = constant.MsgStatusSendSuccess
+	}
 	onlineUserIDs, offlineUserIDs, err := c.onlineCache.GetUsersOnline(ctx, pushToUserIDs)
 	if err != nil {
 		return nil, err
