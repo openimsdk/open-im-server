@@ -1,26 +1,12 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package controller
 
 import (
 	"context"
-	"github.com/openimsdk/tools/log"
-
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/tokenverify"
@@ -32,18 +18,41 @@ type AuthDatabase interface {
 	// Create token
 	CreateToken(ctx context.Context, userID string, platformID int) (string, error)
 
+	BatchSetTokenMapByUidPid(ctx context.Context, tokens []string) error
+
 	SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error
 }
 
-type authDatabase struct {
-	cache            cache.TokenModel
-	accessSecret     string
-	accessExpire     int64
-	multiLoginPolicy int
+type multiLoginConfig struct {
+	Policy            int
+	MaxNumOneEnd      int
+	CustomizeLoginNum map[int]int
 }
 
-func NewAuthDatabase(cache cache.TokenModel, accessSecret string, accessExpire int64, policy int) AuthDatabase {
-	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire, multiLoginPolicy: policy}
+type authDatabase struct {
+	cache        cache.TokenModel
+	accessSecret string
+	accessExpire int64
+	multiLogin   multiLoginConfig
+}
+
+func NewAuthDatabase(cache cache.TokenModel, accessSecret string, accessExpire int64, multiLogin config.MultiLogin) AuthDatabase {
+	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire, multiLogin: multiLoginConfig{
+		Policy:       multiLogin.Policy,
+		MaxNumOneEnd: multiLogin.MaxNumOneEnd,
+		CustomizeLoginNum: map[int]int{
+			constant.IOSPlatformID:        multiLogin.CustomizeLoginNum.IOS,
+			constant.AndroidPlatformID:    multiLogin.CustomizeLoginNum.Android,
+			constant.WindowsPlatformID:    multiLogin.CustomizeLoginNum.Windows,
+			constant.OSXPlatformID:        multiLogin.CustomizeLoginNum.OSX,
+			constant.WebPlatformID:        multiLogin.CustomizeLoginNum.Web,
+			constant.MiniWebPlatformID:    multiLogin.CustomizeLoginNum.MiniWeb,
+			constant.LinuxPlatformID:      multiLogin.CustomizeLoginNum.Linux,
+			constant.AndroidPadPlatformID: multiLogin.CustomizeLoginNum.APad,
+			constant.IPadPlatformID:       multiLogin.CustomizeLoginNum.IPad,
+			constant.AdminPlatformID:      multiLogin.CustomizeLoginNum.Admin,
+		},
+	}}
 }
 
 // If the result is empty.
@@ -55,22 +64,38 @@ func (a *authDatabase) SetTokenMapByUidPid(ctx context.Context, userID string, p
 	return a.cache.SetTokenMapByUidPid(ctx, userID, platformID, m)
 }
 
+func (a *authDatabase) BatchSetTokenMapByUidPid(ctx context.Context, tokens []string) error {
+	setMap := make(map[string]map[string]int)
+	for _, token := range tokens {
+		claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret(a.accessSecret))
+		key := cachekey.GetTokenKey(claims.UserID, claims.PlatformID)
+		if err != nil {
+			continue
+		} else {
+			if v, ok := setMap[key]; ok {
+				v[token] = constant.KickedToken
+			} else {
+				setMap[key] = map[string]int{
+					token: constant.KickedToken,
+				}
+			}
+		}
+	}
+	if err := a.cache.BatchSetTokenMapByUidPid(ctx, setMap); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Create Token.
 func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformID int) (string, error) {
-	// todo: get all platform token
-	tokens, err := a.cache.GetTokensWithoutError(ctx, userID, platformID)
+	tokens, err := a.cache.GetAllTokensWithoutError(ctx, userID)
 	if err != nil {
 		return "", err
 	}
-	var deleteTokenKey []string
-	var kickedTokenKey []string
-	for k, v := range tokens {
-		t, err := tokenverify.GetClaimFromToken(k, authverify.Secret(a.accessSecret))
-		if err != nil || v != constant.NormalToken {
-			deleteTokenKey = append(deleteTokenKey, k)
-		} else if a.checkKickToken(ctx, platformID, t) {
-			kickedTokenKey = append(kickedTokenKey, k)
-		}
+	deleteTokenKey, kickedTokenKey, err := a.checkToken(ctx, tokens, platformID)
+	if err != nil {
+		return "", err
 	}
 	if len(deleteTokenKey) != 0 {
 		err = a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
@@ -78,16 +103,6 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 			return "", err
 		}
 	}
-
-	const adminTokenMaxNum = 30
-	if platformID == constant.AdminPlatformID {
-		if len(kickedTokenKey) > adminTokenMaxNum {
-			kickedTokenKey = kickedTokenKey[:len(kickedTokenKey)-adminTokenMaxNum]
-		} else {
-			kickedTokenKey = nil
-		}
-	}
-
 	if len(kickedTokenKey) != 0 {
 		for _, k := range kickedTokenKey {
 			err := a.cache.SetTokenFlagEx(ctx, userID, platformID, k, constant.KickedToken)
@@ -111,22 +126,140 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 	return tokenString, nil
 }
 
-func (a *authDatabase) checkKickToken(ctx context.Context, platformID int, token *tokenverify.Claims) bool {
-	switch a.multiLoginPolicy {
-	case constant.DefalutNotKick:
-		return false
-	case constant.PCAndOther:
-		if constant.PlatformIDToClass(platformID) == constant.TerminalPC ||
-			constant.PlatformIDToClass(token.PlatformID) == constant.TerminalPC {
-			return false
+func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string]int, platformID int) ([]string, []string, error) {
+	// todo: Move the logic for handling old data to another location.
+	var (
+		loginTokenMap  = make(map[int][]string) // The length of the value of the map must be greater than 0
+		deleteToken    = make([]string, 0)
+		kickToken      = make([]string, 0)
+		adminToken     = make([]string, 0)
+		unkickTerminal = ""
+	)
+
+	for plfID, tks := range tokens {
+		for k, v := range tks {
+			_, err := tokenverify.GetClaimFromToken(k, authverify.Secret(a.accessSecret))
+			if err != nil || v != constant.NormalToken {
+				deleteToken = append(deleteToken, k)
+			} else {
+				if plfID != constant.AdminPlatformID {
+					loginTokenMap[plfID] = append(loginTokenMap[plfID], k)
+				} else {
+					adminToken = append(adminToken, k)
+				}
+			}
 		}
-		return true
-	case constant.AllLoginButSameTermKick:
-		if platformID == token.PlatformID {
-			return true
-		}
-		return false
-	default:
-		return false
 	}
+
+	switch a.multiLogin.Policy {
+	case constant.DefalutNotKick:
+		for plt, ts := range loginTokenMap {
+			l := len(ts)
+			if platformID == plt {
+				l++
+			}
+			limit := a.multiLogin.MaxNumOneEnd
+			if l > limit {
+				kickToken = append(kickToken, ts[:l-limit]...)
+			}
+		}
+	case constant.AllLoginButSameTermKick:
+		for plt, ts := range loginTokenMap {
+			kickToken = append(kickToken, ts[:len(ts)-1]...)
+			if plt == platformID {
+				kickToken = append(kickToken, ts[len(ts)-1])
+			}
+		}
+	case constant.SingleTerminalLogin:
+		for _, ts := range loginTokenMap {
+			kickToken = append(kickToken, ts...)
+		}
+	case constant.WebAndOther:
+		unkickTerminal = constant.WebPlatformStr
+		fallthrough
+	case constant.PCAndOther:
+		if unkickTerminal == "" {
+			unkickTerminal = constant.TerminalPC
+		}
+		if constant.PlatformIDToClass(platformID) != unkickTerminal {
+			for plt, ts := range loginTokenMap {
+				if constant.PlatformIDToClass(plt) != unkickTerminal {
+					kickToken = append(kickToken, ts...)
+				}
+			}
+		} else {
+			var (
+				preKick   []string
+				isReserve = true
+			)
+			for plt, ts := range loginTokenMap {
+				if constant.PlatformIDToClass(plt) != unkickTerminal {
+					// Keep a token from another end
+					if isReserve {
+						isReserve = false
+						kickToken = append(kickToken, ts[:len(ts)-1]...)
+						preKick = append(preKick, ts[len(ts)-1])
+						continue
+					} else {
+						// Prioritize keeping Android
+						if plt == constant.AndroidPlatformID {
+							kickToken = append(kickToken, preKick...)
+							kickToken = append(kickToken, ts[:len(ts)-1]...)
+						} else {
+							kickToken = append(kickToken, ts...)
+						}
+					}
+				}
+			}
+		}
+	case constant.PcMobileAndWeb:
+		var (
+			reserved = make(map[string]bool)
+		)
+
+		for plt, ts := range loginTokenMap {
+			if constant.PlatformIDToClass(plt) == constant.PlatformIDToClass(platformID) {
+				kickToken = append(kickToken, ts...)
+			} else {
+				if !reserved[constant.PlatformIDToClass(plt)] {
+					reserved[constant.PlatformIDToClass(plt)] = true
+					kickToken = append(kickToken, ts[:len(ts)-1]...)
+					continue
+				} else {
+					kickToken = append(kickToken, ts...)
+				}
+			}
+		}
+
+	case constant.Customize:
+		if a.multiLogin.CustomizeLoginNum[platformID] <= 0 {
+			return nil, nil, errs.New("Do not allow login on this end").Wrap()
+		}
+		for plt, ts := range loginTokenMap {
+			l := len(ts)
+			if platformID == plt {
+				l++
+			}
+			// a.multiLogin.CustomizeLoginNum[platformID] must > 0
+			limit := min(a.multiLogin.CustomizeLoginNum[plt], a.multiLogin.MaxNumOneEnd)
+			if l > limit {
+				kickToken = append(kickToken, ts[:l-limit]...)
+			}
+		}
+	default:
+		return nil, nil, errs.New("unknown multiLogin policy").Wrap()
+	}
+
+	var adminTokenMaxNum = a.multiLogin.MaxNumOneEnd
+	if a.multiLogin.Policy == constant.Customize {
+		adminTokenMaxNum = a.multiLogin.CustomizeLoginNum[constant.AdminPlatformID]
+	}
+	l := len(adminToken)
+	if platformID == constant.AdminPlatformID {
+		l++
+	}
+	if l > adminTokenMaxNum {
+		kickToken = append(kickToken, adminToken[:l-adminTokenMaxNum]...)
+	}
+	return deleteToken, kickToken, nil
 }

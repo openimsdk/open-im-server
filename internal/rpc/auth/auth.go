@@ -65,7 +65,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 			redis2.NewTokenCacheModel(rdb, config.RpcConfig.TokenPolicy.Expire),
 			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
-			config.Share.MultiLoginPolicy,
+			config.Share.MultiLogin,
 		),
 		config: config,
 	})
@@ -229,4 +229,11 @@ func (s *authServer) InvalidateToken(ctx context.Context, req *pbauth.Invalidate
 		return nil, err
 	}
 	return &pbauth.InvalidateTokenResp{}, nil
+}
+
+func (s *authServer) KickTokens(ctx context.Context, req *pbauth.KickTokensReq) (*pbauth.KickTokensResp, error) {
+	if err := s.authDatabase.BatchSetTokenMapByUidPid(ctx, req.Tokens); err != nil {
+		return nil, err
+	}
+	return &pbauth.KickTokensResp{}, nil
 }
