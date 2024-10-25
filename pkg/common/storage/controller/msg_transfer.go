@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/protocol/constant"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -82,6 +83,9 @@ func (db *msgTransferDatabase) BatchInsertChat2DB(ctx context.Context, conversat
 				IOSPushSound:  msg.OfflinePushInfo.IOSPushSound,
 				IOSBadgeCount: msg.OfflinePushInfo.IOSBadgeCount,
 			}
+		}
+		if msg.Status == constant.MsgStatusSending {
+			msg.Status = constant.MsgStatusSendSuccess
 		}
 		msgs[i] = &model.MsgDataModel{
 			SendID:           msg.SendID,
@@ -254,7 +258,7 @@ func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conver
 
 func (db *msgTransferDatabase) setHasReadSeqs(ctx context.Context, conversationID string, userSeqMap map[string]int64) error {
 	for userID, seq := range userSeqMap {
-		if err := db.seqUser.SetUserReadSeq(ctx, conversationID, userID, seq); err != nil {
+		if err := db.seqUser.SetUserReadSeqToDB(ctx, conversationID, userID, seq); err != nil {
 			return err
 		}
 	}
