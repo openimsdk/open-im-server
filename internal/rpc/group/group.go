@@ -1624,7 +1624,6 @@ func (g *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 		if member.Nickname != nil || member.FaceURL != nil || member.Ex != nil {
 			g.notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
 		}
-
 	}
 	for i := 0; i < len(req.Members); i++ {
 		g.webhookAfterSetGroupMemberInfo(ctx, &g.config.WebhooksConfig.AfterSetGroupMemberInfo, req.Members[i])
