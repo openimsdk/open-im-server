@@ -116,18 +116,17 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 
 func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesignateUsersReq) (resp *pbuser.GetDesignateUsersResp, err error) {
 	resp = &pbuser.GetDesignateUsersResp{}
-	users, err := s.db.FindWithError(ctx, req.UserIDs)
+	users, err := s.db.Find(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	resp.UsersInfo = convert.UsersDB2Pb(users)
 	return resp, nil
 }
 
 // deprecated:
-
-//UpdateUserInfo
-
+// UpdateUserInfo
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) (resp *pbuser.UpdateUserInfoResp, err error) {
 	resp = &pbuser.UpdateUserInfoResp{}
 	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID, s.config.Share.IMAdminUserID)
