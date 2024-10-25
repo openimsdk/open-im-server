@@ -38,12 +38,13 @@ import (
 )
 
 type thirdServer struct {
-	thirdDatabase controller.ThirdDatabase
-	s3dataBase    controller.S3Database
-	userRpcClient rpcclient.UserRpcClient
-	defaultExpire time.Duration
-	config        *Config
-	minio         *minio.Minio
+	thirdDatabase       controller.ThirdDatabase
+	s3dataBase          controller.S3Database
+	userRpcClient       rpcclient.UserRpcClient
+	defaultExpire       time.Duration
+	config              *Config
+	minio               *minio.Minio
+	applicationDatabase controller.ApplicationDatabase
 }
 
 type Config struct {
@@ -74,6 +75,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	applicationMgo, err := mgo.NewApplicationMgo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+
 	// Select the oss method according to the profile policy
 	enable := config.RpcConfig.Object.Enable
 	var (
@@ -98,12 +104,13 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	}
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	third.RegisterThirdServer(server, &thirdServer{
-		thirdDatabase: controller.NewThirdDatabase(redis.NewThirdCache(rdb), logdb),
-		userRpcClient: rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID),
-		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
-		defaultExpire: time.Hour * 24 * 7,
-		config:        config,
-		minio:         minioCli,
+		thirdDatabase:       controller.NewThirdDatabase(redis.NewThirdCache(rdb), logdb),
+		userRpcClient:       rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID),
+		s3dataBase:          controller.NewS3Database(rdb, o, s3db),
+		defaultExpire:       time.Hour * 24 * 7,
+		config:              config,
+		minio:               minioCli,
+		applicationDatabase: controller.NewApplicationDatabase(applicationMgo, redis.NewApplicationRedisCache(applicationMgo, rdb)),
 	})
 	return nil
 }

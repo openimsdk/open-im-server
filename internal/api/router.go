@@ -198,6 +198,13 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		objectGroup.POST("/initiate_form_data", t.InitiateFormData)
 		objectGroup.POST("/complete_form_data", t.CompleteFormData)
 		objectGroup.GET("/*name", t.ObjectRedirect)
+
+		applicationGroup := r.Group("application")
+		applicationGroup.POST("/add_version", t.AddApplicationVersion)
+		applicationGroup.POST("/update_version", t.UpdateApplicationVersion)
+		applicationGroup.POST("/delete_version", t.DeleteApplicationVersion)
+		applicationGroup.POST("/latest_version", t.LatestApplicationVersion)
+		applicationGroup.POST("/page_versions", t.PageApplicationVersion)
 	}
 	// Message
 	msgGroup := r.Group("/msg")
@@ -290,4 +297,6 @@ func GinParseToken(authRPC *rpcclient.Auth) gin.HandlerFunc {
 var Whitelist = []string{
 	"/auth/get_admin_token",
 	"/auth/parse_token",
+	"/application/latest_version",
+	"/application/page_versions",
 }
