@@ -16,6 +16,7 @@ package rpccache
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
@@ -97,6 +98,7 @@ func (u *UserLocalCache) GetUsersInfo(ctx context.Context, userIDs []string) ([]
 		user, err := u.GetUserInfo(ctx, userID)
 		if err != nil {
 			if errs.ErrRecordNotFound.Is(err) {
+				log.ZWarn(ctx, "User info notFound", err, "userID", userID)
 				continue
 			}
 			return nil, err
