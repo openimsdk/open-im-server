@@ -2,11 +2,7 @@ name: Go Build Test
 
 on:
   push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
     paths-ignore:
       - '**/*.md'
 

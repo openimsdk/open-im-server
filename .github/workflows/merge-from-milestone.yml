@@ -17,9 +17,6 @@ on:
         required: true
         default: 'pre-release-v3.8.2'
 
-  schedule:
-    - cron: '0 2 * * 0'
-
 env:
   MILESTONE_NAME: ${{ github.event.inputs.milestone_name || 'v3.8.2' }}
   TARGET_BRANCH: ${{ github.event.inputs.target_branch || 'pre-release-v3.8.2' }}
