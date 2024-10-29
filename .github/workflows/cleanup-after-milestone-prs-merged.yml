@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4.2.0
 
     - name: Get the PR title and extract PR numbers
       id: extract_pr_numbers
