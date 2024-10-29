@@ -1026,7 +1026,7 @@ func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	}
 	num := len(update)
 	if req.GroupInfoForSet.Notification != "" {
-		num--
+		num -= 3
 		func() {
 			conversation := &pbconversation.ConversationReq{
 				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupInfoForSet.GroupID),
@@ -1133,8 +1133,9 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 	}
 
 	num := len(updatedData)
+
 	if req.Notification != nil {
-		num--
+		num -= 3
 
 		if req.Notification.Value != "" {
 			func() {
