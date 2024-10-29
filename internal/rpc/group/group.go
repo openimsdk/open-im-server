@@ -1219,7 +1219,7 @@ func (g *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 		}
 	}
 
-	if newOwner.MuteEndTime != time.Unix(0, 0) {
+	if newOwner.MuteEndTime.After(time.Now()) {
 		if _, err := g.CancelMuteGroupMember(ctx, &pbgroup.CancelMuteGroupMemberReq{
 			GroupID: group.GroupID,
 			UserID:  req.NewOwnerUserID}); err != nil {
