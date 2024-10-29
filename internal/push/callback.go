@@ -24,7 +24,6 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils/datautil"
 )
 
 func (c *ConsumerHandler) webhookBeforeOfflinePush(ctx context.Context, before *config.BeforeConfig, userIDs []string, msg *sdkws.MsgData, offlinePushUserIDs *[]string) error {
@@ -70,7 +69,7 @@ func (c *ConsumerHandler) webhookBeforeOfflinePush(ctx context.Context, before *
 
 func (c *ConsumerHandler) webhookBeforeOnlinePush(ctx context.Context, before *config.BeforeConfig, userIDs []string, msg *sdkws.MsgData) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
-		if datautil.Contain(msg.SendID, userIDs...) || msg.ContentType == constant.Typing {
+		if msg.ContentType == constant.Typing {
 			return nil
 		}
 		req := callbackstruct.CallbackBeforePushReq{
