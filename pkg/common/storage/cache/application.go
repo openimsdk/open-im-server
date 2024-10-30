@@ -6,6 +6,6 @@ import (
 )
 
 type ApplicationCache interface {
-	LatestVersion(ctx context.Context, platform string) (*model.Application, error)
+	LatestVersion(ctx context.Context, platform string, hot bool) (*model.Application, error)
 	DeleteCache(ctx context.Context, platforms []string) error
 }
