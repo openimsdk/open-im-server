@@ -298,5 +298,4 @@ var Whitelist = []string{
 	"/auth/get_admin_token",
 	"/auth/parse_token",
 	"/application/latest_version",
-	"/application/page_versions",
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type ApplicationDatabase interface {
-	LatestVersion(ctx context.Context, platform string, hot bool) (*model.Application, error)
+	LatestVersion(ctx context.Context, platform string) (*model.Application, error)
 	AddVersion(ctx context.Context, val *model.Application) error
 	UpdateVersion(ctx context.Context, id primitive.ObjectID, update map[string]any) error
 	DeleteVersion(ctx context.Context, id []primitive.ObjectID) error
@@ -26,8 +26,8 @@ type applicationDatabase struct {
 	cache cache.ApplicationCache
 }
 
-func (a *applicationDatabase) LatestVersion(ctx context.Context, platform string, hot bool) (*model.Application, error) {
-	return a.cache.LatestVersion(ctx, platform, hot)
+func (a *applicationDatabase) LatestVersion(ctx context.Context, platform string) (*model.Application, error) {
+	return a.cache.LatestVersion(ctx, platform)
 }
 
 func (a *applicationDatabase) AddVersion(ctx context.Context, val *model.Application) error {

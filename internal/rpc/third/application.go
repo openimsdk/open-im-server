@@ -36,31 +36,15 @@ func (t *thirdServer) db2pbApplication(val *model.Application) *third.Applicatio
 	}
 }
 
-func (t *thirdServer) getLatestApplicationVersion(ctx context.Context, platform string, hot bool) (*third.ApplicationVersion, error) {
-	res, err := t.applicationDatabase.LatestVersion(ctx, platform, hot)
+func (t *thirdServer) LatestApplicationVersion(ctx context.Context, req *third.LatestApplicationVersionReq) (*third.LatestApplicationVersionResp, error) {
+	res, err := t.applicationDatabase.LatestVersion(ctx, req.Platform)
 	if err == nil {
-		return t.db2pbApplication(res), nil
+		return &third.LatestApplicationVersionResp{Version: t.db2pbApplication(res)}, nil
 	} else if IsNotFound(err) {
-		return nil, nil
+		return &third.LatestApplicationVersionResp{}, nil
 	} else {
 		return nil, err
 	}
-}
-
-func (t *thirdServer) LatestApplicationVersion(ctx context.Context, req *third.LatestApplicationVersionReq) (*third.LatestApplicationVersionResp, error) {
-	var (
-		resp third.LatestApplicationVersionResp
-		err  error
-	)
-	resp.Version, err = t.getLatestApplicationVersion(ctx, req.Platform, false)
-	if err != nil {
-		return nil, err
-	}
-	resp.Hot, err = t.getLatestApplicationVersion(ctx, req.Platform, true)
-	if err != nil {
-		return nil, err
-	}
-	return &resp, nil
 }
 
 func (t *thirdServer) AddApplicationVersion(ctx context.Context, req *third.AddApplicationVersionReq) (*third.AddApplicationVersionResp, error) {

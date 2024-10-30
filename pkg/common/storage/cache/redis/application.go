@@ -26,9 +26,9 @@ type ApplicationRedisCache struct {
 	expireTime time.Duration
 }
 
-func (a *ApplicationRedisCache) LatestVersion(ctx context.Context, platform string, hot bool) (*model.Application, error) {
-	return getCache(ctx, a.rcClient, cachekey.GetApplicationLatestVersionKey(platform, hot), a.expireTime, func(ctx context.Context) (*model.Application, error) {
-		return a.db.LatestVersion(ctx, platform, hot)
+func (a *ApplicationRedisCache) LatestVersion(ctx context.Context, platform string) (*model.Application, error) {
+	return getCache(ctx, a.rcClient, cachekey.GetApplicationLatestVersionKey(platform), a.expireTime, func(ctx context.Context) (*model.Application, error) {
+		return a.db.LatestVersion(ctx, platform)
 	})
 }
 
@@ -36,9 +36,9 @@ func (a *ApplicationRedisCache) DeleteCache(ctx context.Context, platforms []str
 	if len(platforms) == 0 {
 		return nil
 	}
-	keys := make([]string, 0, len(platforms)*2)
+	keys := make([]string, 0, len(platforms))
 	for _, platform := range platforms {
-		keys = append(keys, cachekey.GetApplicationLatestVersionKey(platform, true), cachekey.GetApplicationLatestVersionKey(platform, false))
+		keys = append(keys, cachekey.GetApplicationLatestVersionKey(platform))
 	}
 	return a.deleter.ExecDelWithKeys(ctx, keys)
 }

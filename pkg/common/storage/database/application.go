@@ -8,7 +8,7 @@ import (
 )
 
 type Application interface {
-	LatestVersion(ctx context.Context, platform string, hot bool) (*model.Application, error)
+	LatestVersion(ctx context.Context, platform string) (*model.Application, error)
 	AddVersion(ctx context.Context, val *model.Application) error
 	UpdateVersion(ctx context.Context, id primitive.ObjectID, update map[string]any) error
 	DeleteVersion(ctx context.Context, id []primitive.ObjectID) error
