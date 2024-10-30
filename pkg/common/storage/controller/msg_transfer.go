@@ -24,8 +24,11 @@ type MsgTransferDatabase interface {
 	DeleteMessagesFromCache(ctx context.Context, conversationID string, seqs []int64) error
 
 	// BatchInsertChat2Cache increments the sequence number and then batch inserts messages into the cache.
-	BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNewConversation bool, err error)
-	SetHasReadSeqToDB(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error
+	BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNewConversation bool, userHasReadMap map[string]int64, err error)
+
+	SetHasReadSeqs(ctx context.Context, conversationID string, userSeqMap map[string]int64) error
+
+	SetHasReadSeqToDB(ctx context.Context, conversationID string, userSeqMap map[string]int64) error
 
 	// to mq
 	MsgToPushMQ(ctx context.Context, key, conversationID string, msg2mq *sdkws.MsgData) (int32, int64, error)
@@ -219,18 +222,18 @@ func (db *msgTransferDatabase) DeleteMessagesFromCache(ctx context.Context, conv
 	return db.msg.DeleteMessagesFromCache(ctx, conversationID, seqs)
 }
 
-func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
+func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, userHasReadMap map[string]int64, err error) {
 	lenList := len(msgs)
 	if int64(lenList) > db.msgTable.GetSingleGocMsgNum() {
-		return 0, false, errs.New("message count exceeds limit", "limit", db.msgTable.GetSingleGocMsgNum()).Wrap()
+		return 0, false, nil, errs.New("message count exceeds limit", "limit", db.msgTable.GetSingleGocMsgNum()).Wrap()
 	}
 	if lenList < 1 {
-		return 0, false, errs.New("no messages to insert", "minCount", 1).Wrap()
+		return 0, false, nil, errs.New("no messages to insert", "minCount", 1).Wrap()
 	}
 	currentMaxSeq, err := db.seqConversation.Malloc(ctx, conversationID, int64(len(msgs)))
 	if err != nil {
 		log.ZError(ctx, "storage.seq.Malloc", err)
-		return 0, false, err
+		return 0, false, nil, err
 	}
 	isNew = currentMaxSeq == 0
 	lastMaxSeq := currentMaxSeq
@@ -248,25 +251,25 @@ func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conver
 	} else {
 		prommetrics.MsgInsertRedisSuccessCounter.Inc()
 	}
-	err = db.setHasReadSeqs(ctx, conversationID, userSeqMap)
-	if err != nil {
-		log.ZError(ctx, "SetHasReadSeqs error", err, "userSeqMap", userSeqMap, "conversationID", conversationID)
-		prommetrics.SeqSetFailedCounter.Inc()
-	}
-	return lastMaxSeq, isNew, errs.Wrap(err)
+	return lastMaxSeq, isNew, userSeqMap, errs.Wrap(err)
 }
 
-func (db *msgTransferDatabase) setHasReadSeqs(ctx context.Context, conversationID string, userSeqMap map[string]int64) error {
+func (db *msgTransferDatabase) SetHasReadSeqs(ctx context.Context, conversationID string, userSeqMap map[string]int64) error {
 	for userID, seq := range userSeqMap {
-		if err := db.seqUser.SetUserReadSeqToDB(ctx, conversationID, userID, seq); err != nil {
+		if err := db.seqUser.SetUserReadSeq(ctx, conversationID, userID, seq); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (db *msgTransferDatabase) SetHasReadSeqToDB(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error {
-	return db.seqUser.SetUserReadSeqToDB(ctx, conversationID, userID, hasReadSeq)
+func (db *msgTransferDatabase) SetHasReadSeqToDB(ctx context.Context, conversationID string, userSeqMap map[string]int64) error {
+	for userID, seq := range userSeqMap {
+		if err := db.seqUser.SetUserReadSeqToDB(ctx, conversationID, userID, seq); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (db *msgTransferDatabase) MsgToPushMQ(ctx context.Context, key, conversationID string, msg2mq *sdkws.MsgData) (int32, int64, error) {

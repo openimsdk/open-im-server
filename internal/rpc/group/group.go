@@ -1026,7 +1026,7 @@ func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	}
 	num := len(update)
 	if req.GroupInfoForSet.Notification != "" {
-		num--
+		num -= 3
 		func() {
 			conversation := &pbconversation.ConversationReq{
 				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupInfoForSet.GroupID),
@@ -1133,8 +1133,9 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 	}
 
 	num := len(updatedData)
+
 	if req.Notification != nil {
-		num--
+		num -= 3
 
 		if req.Notification.Value != "" {
 			func() {
@@ -1219,7 +1220,7 @@ func (g *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 		}
 	}
 
-	if newOwner.MuteEndTime != time.Unix(0, 0) {
+	if newOwner.MuteEndTime.After(time.Now()) {
 		if _, err := g.CancelMuteGroupMember(ctx, &pbgroup.CancelMuteGroupMemberReq{
 			GroupID: group.GroupID,
 			UserID:  req.NewOwnerUserID}); err != nil {
