@@ -6,7 +6,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 	"time"
 )
@@ -27,9 +26,9 @@ type ApplicationRedisCache struct {
 	expireTime time.Duration
 }
 
-func (a *ApplicationRedisCache) LatestVersion(ctx context.Context, platform string) (*model.Application, error) {
-	return getCache(ctx, a.rcClient, cachekey.GetApplicationLatestVersionKey(platform), a.expireTime, func(ctx context.Context) (*model.Application, error) {
-		return a.db.LatestVersion(ctx, platform)
+func (a *ApplicationRedisCache) LatestVersion(ctx context.Context, platform string, hot bool) (*model.Application, error) {
+	return getCache(ctx, a.rcClient, cachekey.GetApplicationLatestVersionKey(platform, hot), a.expireTime, func(ctx context.Context) (*model.Application, error) {
+		return a.db.LatestVersion(ctx, platform, hot)
 	})
 }
 
@@ -37,7 +36,9 @@ func (a *ApplicationRedisCache) DeleteCache(ctx context.Context, platforms []str
 	if len(platforms) == 0 {
 		return nil
 	}
-	return a.deleter.ExecDelWithKeys(ctx, datautil.Slice(platforms, func(platform string) string {
-		return cachekey.GetApplicationLatestVersionKey(platform)
-	}))
+	keys := make([]string, 0, len(platforms)*2)
+	for _, platform := range platforms {
+		keys = append(keys, cachekey.GetApplicationLatestVersionKey(platform, true), cachekey.GetApplicationLatestVersionKey(platform, false))
+	}
+	return a.deleter.ExecDelWithKeys(ctx, keys)
 }
