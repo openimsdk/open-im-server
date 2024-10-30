@@ -18,6 +18,7 @@ func NewApplicationMgo(db *mongo.Database) (*ApplicationMgo, error) {
 			Keys: bson.D{
 				{Key: "platform", Value: 1},
 				{Key: "version", Value: 1},
+				{Key: "hot", Value: 1},
 			},
 			Options: options.Index().SetUnique(true),
 		},
@@ -41,8 +42,8 @@ func (a *ApplicationMgo) sort() any {
 	return bson.D{{"latest", -1}, {"_id", -1}}
 }
 
-func (a *ApplicationMgo) LatestVersion(ctx context.Context, platform string) (*model.Application, error) {
-	return mongoutil.FindOne[*model.Application](ctx, a.coll, bson.M{"platform": platform}, options.FindOne().SetSort(a.sort()))
+func (a *ApplicationMgo) LatestVersion(ctx context.Context, platform string, hot bool) (*model.Application, error) {
+	return mongoutil.FindOne[*model.Application](ctx, a.coll, bson.M{"platform": platform, "hot": hot}, options.FindOne().SetSort(a.sort()))
 }
 
 func (a *ApplicationMgo) AddVersion(ctx context.Context, val *model.Application) error {

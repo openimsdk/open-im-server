@@ -31,19 +31,36 @@ func (t *thirdServer) db2pbApplication(val *model.Application) *third.Applicatio
 		Text:       val.Text,
 		Force:      val.Force,
 		Latest:     val.Latest,
+		Hot:        val.Hot,
 		CreateTime: val.CreateTime.UnixMilli(),
 	}
 }
 
-func (t *thirdServer) LatestApplicationVersion(ctx context.Context, req *third.LatestApplicationVersionReq) (*third.LatestApplicationVersionResp, error) {
-	res, err := t.applicationDatabase.LatestVersion(ctx, req.Platform)
+func (t *thirdServer) getLatestApplicationVersion(ctx context.Context, platform string, hot bool) (*third.ApplicationVersion, error) {
+	res, err := t.applicationDatabase.LatestVersion(ctx, platform, hot)
 	if err == nil {
-		return &third.LatestApplicationVersionResp{Version: t.db2pbApplication(res)}, nil
+		return t.db2pbApplication(res), nil
 	} else if IsNotFound(err) {
-		return &third.LatestApplicationVersionResp{}, nil
+		return nil, nil
 	} else {
 		return nil, err
 	}
+}
+
+func (t *thirdServer) LatestApplicationVersion(ctx context.Context, req *third.LatestApplicationVersionReq) (*third.LatestApplicationVersionResp, error) {
+	var (
+		resp third.LatestApplicationVersionResp
+		err  error
+	)
+	resp.Version, err = t.getLatestApplicationVersion(ctx, req.Platform, false)
+	if err != nil {
+		return nil, err
+	}
+	resp.Hot, err = t.getLatestApplicationVersion(ctx, req.Platform, true)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
 }
 
 func (t *thirdServer) AddApplicationVersion(ctx context.Context, req *third.AddApplicationVersionReq) (*third.AddApplicationVersionResp, error) {
@@ -58,6 +75,7 @@ func (t *thirdServer) AddApplicationVersion(ctx context.Context, req *third.AddA
 		Text:       req.Text,
 		Force:      req.Force,
 		Latest:     req.Latest,
+		Hot:        req.Hot,
 		CreateTime: time.Now(),
 	}
 	if err := t.applicationDatabase.AddVersion(ctx, val); err != nil {
@@ -81,6 +99,7 @@ func (t *thirdServer) UpdateApplicationVersion(ctx context.Context, req *third.U
 	putUpdate(update, "text", req.Text)
 	putUpdate(update, "force", req.Force)
 	putUpdate(update, "latest", req.Latest)
+	putUpdate(update, "hot", req.Hot)
 	if err := t.applicationDatabase.UpdateVersion(ctx, oid, update); err != nil {
 		return nil, err
 	}
