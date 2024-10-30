@@ -1,0 +1,65 @@
+name: Cleanup After Milestone PRs Merged
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  handle_pr:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4.2.0
+
+    - name: Get the PR title and extract PR numbers
+      id: extract_pr_numbers
+      run: |
+        # Get the PR title
+        PR_TITLE="${{ github.event.pull_request.title }}"
+
+        echo "PR Title: $PR_TITLE"
+
+        # Extract PR numbers from the title
+        PR_NUMBERS=$(echo "$PR_TITLE" | grep -oE "#[0-9]+" | tr -d '#' | tr '\n' ' ')
+        echo "Extracted PR Numbers: $PR_NUMBERS"
+
+        # Save PR numbers to a file
+        echo "$PR_NUMBERS" > pr_numbers.txt
+        echo "Saved PR Numbers to pr_numbers.txt"
+
+        # Check if the title matches a specific pattern
+        if echo "$PR_TITLE" | grep -qE "^deps: Merge( #[0-9]+)+ PRs into .+"; then
+          echo "proceed=true" >> $GITHUB_OUTPUT
+        else
+          echo "proceed=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Use extracted PR numbers and label PRs
+      if: (steps.extract_pr_numbers.outputs.proceed == 'true' || contains(github.event.pull_request.labels.*.name, 'milestone-merge')) && github.event.pull_request.merged == true
+      run: |
+        # Read the previously saved PR numbers
+        PR_NUMBERS=$(cat pr_numbers.txt)
+        echo "Using extracted PR Numbers: $PR_NUMBERS"
+
+        # Loop through each PR number and add label
+        for PR_NUMBER in $PR_NUMBERS; do
+          echo "Adding 'cherry-picked' label to PR #$PR_NUMBER"
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/labels \
+            -d '{"labels":["cherry-picked"]}'
+        done
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Delete branch after PR close
+      if: steps.extract_pr_numbers.outputs.proceed == 'true' || contains(github.event.pull_request.labels.*.name, 'milestone-merge')
+      run: |
+        BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+        echo "Branch to delete: $BRANCH_NAME"
+        git push origin --delete "$BRANCH_NAME"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

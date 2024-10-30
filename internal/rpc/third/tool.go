@@ -82,3 +82,11 @@ func checkValidObjectName(objectName string) error {
 func (t *thirdServer) IsManagerUserID(opUserID string) bool {
 	return authverify.IsManagerUserID(opUserID, t.config.Share.IMAdminUserID)
 }
+
+func putUpdate[T any](update map[string]any, name string, val interface{ GetValuePtr() *T }) {
+	ptrVal := val.GetValuePtr()
+	if ptrVal == nil {
+		return
+	}
+	update[name] = *ptrVal
+}

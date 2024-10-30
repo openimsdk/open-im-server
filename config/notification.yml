@@ -1,20 +1,3 @@
-# Copyright © 2023 OpenIM. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# Determines if a message should be sent. If set to false, it triggers a silent sync without a message. If true, it requires triggering a conversation.
-# For rpc notification, send twice: once as a message and once as a notification.
-# The options field 'isNotification' indicates if it's a notification.
 groupCreated:
   isSendMsg: true
 # Reliability level of the message sending.
@@ -309,9 +292,9 @@ userInfoUpdated:
   unreadCount: false
   offlinePush:
     enable: true
-    title: Remove a blocked user
-    desc: Remove a blocked user
-    ext: Remove a blocked user
+    title: userInfo updated
+    desc: userInfo updated
+    ext: userInfo updated
 
 userStatusChanged:
   isSendMsg: false
