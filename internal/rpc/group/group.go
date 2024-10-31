@@ -1811,7 +1811,6 @@ func (g *groupServer) GetSpecifiedUserGroupRequestInfo(ctx context.Context, req 
 	}
 
 	if req.UserID != opUserID {
-		req.UserID = mcontext.GetOpUserID(ctx)
 		adminIDs, err := g.db.GetGroupRoleLevelMemberIDs(ctx, req.GroupID, constant.GroupAdmin)
 		if err != nil {
 			return nil, err
@@ -1820,10 +1819,11 @@ func (g *groupServer) GetSpecifiedUserGroupRequestInfo(ctx context.Context, req 
 		adminIDs = append(adminIDs, owners[0].UserID)
 		adminIDs = append(adminIDs, g.config.Share.IMAdminUserID...)
 
-		if !datautil.Contain(req.UserID, adminIDs...) {
+		if !datautil.Contain(opUserID, adminIDs...) {
 			return nil, errs.ErrNoPermission.WrapMsg("opUser no permission")
 		}
 	}
+
 	requests, err := g.db.FindGroupRequests(ctx, req.GroupID, []string{req.UserID})
 	if err != nil {
 		return nil, err
