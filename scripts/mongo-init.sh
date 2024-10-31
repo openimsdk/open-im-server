@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+echo "before running mongosh..."
+
 mongosh <<EOF
 var maxRetries = 300;
 var connected = false;
@@ -61,6 +63,4 @@ if (connected) {
 }
 EOF
 
-
-
-
+echo "mongosh completed..."
