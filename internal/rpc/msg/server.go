@@ -42,8 +42,9 @@ type (
 
 	// MsgServer encapsulates dependencies required for message handling.
 	msgServer struct {
-		RegisterCenter         discovery.SvcDiscoveryRegistry   // Service discovery registry for service registration.
-		MsgDatabase            controller.CommonMsgDatabase     // Interface for message database operations.
+		RegisterCenter         discovery.SvcDiscoveryRegistry // Service discovery registry for service registration.
+		MsgDatabase            controller.CommonMsgDatabase   // Interface for message database operations.
+		StreamMsgDatabase      controller.StreamMsgDatabase
 		Conversation           *rpcclient.ConversationRpcClient // RPC client for conversation service.
 		UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
 		FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
