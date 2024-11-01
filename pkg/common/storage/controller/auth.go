@@ -228,9 +228,6 @@ func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string
 	}
 
 	var adminTokenMaxNum = a.multiLogin.MaxNumOneEnd
-	if a.multiLogin.Policy == constant.Customize {
-		adminTokenMaxNum = a.multiLogin.CustomizeLoginNum[constant.AdminPlatformID]
-	}
 	l := len(adminToken)
 	if platformID == constant.AdminPlatformID {
 		l++
