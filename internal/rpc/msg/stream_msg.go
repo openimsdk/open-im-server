@@ -31,8 +31,11 @@ func (m *msgServer) getStreamMsg(ctx context.Context, clientMsgID string) (*mode
 	if err != nil {
 		return nil, err
 	}
-	if !res.End && res.DeadlineTime.Before(time.Now()) {
+	now := time.Now()
+	if !res.End && res.DeadlineTime.Before(now) {
 		res.End = true
+		res.DeadlineTime = now
+		_ = m.StreamMsgDatabase.AppendStreamMsg(ctx, res.ClientMsgID, 0, nil, true, now)
 	}
 	return res, nil
 }
@@ -64,7 +67,8 @@ func (m *msgServer) AppendStreamMsg(ctx context.Context, req *msg.AppendStreamMs
 	if len(req.Packets) == 0 && res.End == req.End {
 		return &msg.AppendStreamMsgResp{}, nil
 	}
-	if err := m.StreamMsgDatabase.AppendStreamMsg(ctx, req.ClientMsgID, int(req.StartIndex), req.Packets, req.End); err != nil {
+	deadlineTime := time.Now().Add(StreamDeadlineTime)
+	if err := m.StreamMsgDatabase.AppendStreamMsg(ctx, req.ClientMsgID, int(req.StartIndex), req.Packets, req.End, deadlineTime); err != nil {
 		return nil, err
 	}
 	conversation, err := m.Conversation.GetConversation(ctx, res.UserID, res.ConversationID)
@@ -72,10 +76,11 @@ func (m *msgServer) AppendStreamMsg(ctx context.Context, req *msg.AppendStreamMs
 		return nil, err
 	}
 	tips := &sdkws.StreamMsgTips{
-		ClientMsgID: res.ClientMsgID,
-		StartIndex:  req.StartIndex,
-		Packets:     req.Packets,
-		End:         req.End,
+		ConversationID: res.ConversationID,
+		ClientMsgID:    res.ClientMsgID,
+		StartIndex:     req.StartIndex,
+		Packets:        req.Packets,
+		End:            req.End,
 	}
 	var (
 		recvID      string

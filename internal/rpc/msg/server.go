@@ -102,6 +102,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	streamMsg, err := mgo.NewStreamMsgMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	seqUserCache := redis.NewSeqUserCacheRedis(rdb, seqUser)
 	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, &config.KafkaConfig)
 	if err != nil {
@@ -110,6 +114,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	s := &msgServer{
 		Conversation:           &conversationClient,
 		MsgDatabase:            msgDatabase,
+		StreamMsgDatabase:      controller.NewStreamMsgDatabase(streamMsg),
 		RegisterCenter:         client,
 		UserLocalCache:         rpccache.NewUserLocalCache(userRpcClient, &config.LocalCacheConfig, rdb),
 		GroupLocalCache:        rpccache.NewGroupLocalCache(groupRpcClient, &config.LocalCacheConfig, rdb),
