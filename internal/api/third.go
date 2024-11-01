@@ -170,23 +170,3 @@ func (o *ThirdApi) SearchLogs(c *gin.Context) {
 func (o *ThirdApi) GetPrometheus(c *gin.Context) {
 	c.Redirect(http.StatusFound, o.GrafanaUrl)
 }
-
-func (o *ThirdApi) LatestApplicationVersion(c *gin.Context) {
-	a2r.Call(third.ThirdClient.LatestApplicationVersion, o.Client, c)
-}
-
-func (o *ThirdApi) AddApplicationVersion(c *gin.Context) {
-	a2r.Call(third.ThirdClient.AddApplicationVersion, o.Client, c)
-}
-
-func (o *ThirdApi) UpdateApplicationVersion(c *gin.Context) {
-	a2r.Call(third.ThirdClient.UpdateApplicationVersion, o.Client, c)
-}
-
-func (o *ThirdApi) DeleteApplicationVersion(c *gin.Context) {
-	a2r.Call(third.ThirdClient.DeleteApplicationVersion, o.Client, c)
-}
-
-func (o *ThirdApi) PageApplicationVersion(c *gin.Context) {
-	a2r.Call(third.ThirdClient.PageApplicationVersion, o.Client, c)
-}
