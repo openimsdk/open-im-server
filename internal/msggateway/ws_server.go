@@ -356,7 +356,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			log.ZWarn(newClient.ctx, "InvalidateToken err", err, "userID", newClient.UserID,
 				"platformID", newClient.PlatformID)
 		}
-	case constant.PcMobileAndWeb:
+	case constant.AllLoginButSameClassKick:
 		clients, ok := ws.clients.GetAll(newClient.UserID)
 		if !ok {
 			return

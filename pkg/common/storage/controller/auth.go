@@ -214,17 +214,17 @@ func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string
 				}
 			}
 		}
-	case constant.PcMobileAndWeb:
+	case constant.AllLoginButSameClassKick:
 		var (
-			reserved = make(map[string]bool)
+			reserved = make(map[string]struct{})
 		)
 
 		for plt, ts := range loginTokenMap {
 			if constant.PlatformIDToClass(plt) == constant.PlatformIDToClass(platformID) {
 				kickToken = append(kickToken, ts...)
 			} else {
-				if !reserved[constant.PlatformIDToClass(plt)] {
-					reserved[constant.PlatformIDToClass(plt)] = true
+				if _, ok := reserved[constant.PlatformIDToClass(plt)]; !ok {
+					reserved[constant.PlatformIDToClass(plt)] = struct{}{}
 					kickToken = append(kickToken, ts[:len(ts)-1]...)
 					continue
 				} else {
