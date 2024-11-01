@@ -327,11 +327,6 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 
 	switch ws.msgGatewayConfig.Share.MultiLogin.Policy {
 	case constant.DefalutNotKick:
-	case constant.WebAndOther:
-		if constant.PlatformIDToClass(newClient.PlatformID) == constant.WebPlatformStr {
-			return
-		}
-		fallthrough
 	case constant.PCAndOther:
 		if constant.PlatformIDToClass(newClient.PlatformID) == constant.TerminalPC {
 			return
@@ -356,7 +351,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			log.ZWarn(newClient.ctx, "InvalidateToken err", err, "userID", newClient.UserID,
 				"platformID", newClient.PlatformID)
 		}
-	case constant.PcMobileAndWeb:
+	case constant.AllLoginButSameClassKick:
 		clients, ok := ws.clients.GetAll(newClient.UserID)
 		if !ok {
 			return
@@ -370,21 +365,6 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			}
 		}
 		kickTokenFunc(kickClients)
-
-	case constant.SingleTerminalLogin:
-		clients, ok := ws.clients.GetAll(newClient.UserID)
-		if !ok {
-			return
-		}
-		var (
-			kickClients []*Client
-		)
-		for _, client := range clients {
-			kickClients = append(kickClients, client)
-		}
-		kickTokenFunc(kickClients)
-	case constant.Customize:
-		// todo
 	}
 }
 
