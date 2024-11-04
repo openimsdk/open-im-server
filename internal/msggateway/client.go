@@ -16,6 +16,7 @@ package msggateway
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"runtime/debug"
 	"sync"
@@ -159,9 +160,12 @@ func (c *Client) readMessage() {
 				return
 			}
 		case MessageText:
-			c.closedErr = ErrNotSupportMessageProtocol
-			return
-
+			_ = c.conn.SetReadDeadline(pongWait)
+			parseDataErr := c.handlerTextMessage(message)
+			if parseDataErr != nil {
+				c.closedErr = parseDataErr
+				return
+			}
 		case PingMessage:
 			err := c.writePongMsg("")
 			log.ZError(c.ctx, "writePongMsg", err)
@@ -418,4 +422,24 @@ func (c *Client) writePongMsg(appData string) error {
 	}
 
 	return errs.Wrap(err)
+}
+
+func (c *Client) handlerTextMessage(b []byte) error {
+	var msg TextMessage
+	if err := json.Unmarshal(b, &msg); err != nil {
+		return err
+	}
+	switch msg.Type {
+	case TextPong:
+		return nil
+	case TextPing:
+		msg.Type = TextPong
+		msgData, err := json.Marshal(msg)
+		if err != nil {
+			return err
+		}
+		return c.conn.WriteMessage(MessageText, msgData)
+	default:
+		return fmt.Errorf("not support message type %s", msg.Type)
+	}
 }
