@@ -438,6 +438,9 @@ func (c *Client) handlerTextMessage(b []byte) error {
 		if err != nil {
 			return err
 		}
+		if err := c.conn.SetWriteDeadline(writeWait); err != nil {
+			return err
+		}
 		return c.conn.WriteMessage(MessageText, msgData)
 	default:
 		return fmt.Errorf("not support message type %s", msg.Type)
