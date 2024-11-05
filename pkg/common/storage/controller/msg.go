@@ -443,6 +443,11 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 			return 0, 0, nil, err
 		}
 		successMsgs = append(mongoMsgs, successMsgs...)
+
+		_, err = db.msg.SetMessagesToCache(ctx, conversationID, mongoMsgs)
+		if err != nil {
+			return 0, 0, nil, err
+		}
 	}
 
 	return minSeq, maxSeq, successMsgs, nil
@@ -500,6 +505,11 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, co
 		}
 
 		successMsgs = append(successMsgs, mongoMsgs...)
+
+		_, err = db.msg.SetMessagesToCache(ctx, conversationID, mongoMsgs)
+		if err != nil {
+			return 0, 0, nil, err
+		}
 	}
 	return minSeq, maxSeq, successMsgs, nil
 }
