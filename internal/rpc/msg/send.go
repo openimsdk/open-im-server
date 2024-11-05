@@ -34,6 +34,11 @@ import (
 func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.SendMsgResp, error) {
 	if req.MsgData != nil {
 		m.encapsulateMsgData(req.MsgData)
+		if req.MsgData.ContentType == constant.Stream {
+			if err := m.handlerStreamMsg(ctx, req.MsgData); err != nil {
+				return nil, err
+			}
+		}
 		switch req.MsgData.SessionType {
 		case constant.SingleChatType:
 			return m.sendMsgSingleChat(ctx, req)
