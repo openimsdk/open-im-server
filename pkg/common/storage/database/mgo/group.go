@@ -76,7 +76,7 @@ func (g *GroupMgo) Take(ctx context.Context, groupID string) (group *model.Group
 
 func (g *GroupMgo) Search(ctx context.Context, keyword string, pagination pagination.Pagination) (total int64, groups []*model.Group, err error) {
 	// Define the sorting options
-	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
+	opts := options.Find().SetSort(bson.D{{Key: "create_time", Value: -1}})
 
 	// Perform the search with pagination and sorting
 	return mongoutil.FindPage[*model.Group](ctx, g.coll, bson.M{

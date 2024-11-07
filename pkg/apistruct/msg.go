@@ -81,6 +81,11 @@ type TextElem struct {
 	Content string `json:"content" validate:"required"`
 }
 
+type StreamMsgElem struct {
+	Type    string `mapstructure:"type" validate:"required"`
+	Content string `mapstructure:"content" validate:"required"`
+}
+
 type RevokeElem struct {
 	RevokeMsgClientID string `mapstructure:"revokeMsgClientID" validate:"required"`
 }
