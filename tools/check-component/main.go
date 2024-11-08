@@ -78,35 +78,35 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 		discovery   = &config.Discovery{}
 		thirdConfig = &config.Third{}
 	)
-	err := config.LoadConfig(filepath.Join(configDir, cmd.MongodbConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MongodbConfigFileName], mongoConfig)
+	err := config.Load(configDir, cmd.MongodbConfigFileName, cmd.ConfigEnvPrefixMap[cmd.MongodbConfigFileName], mongoConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.LoadConfig(filepath.Join(configDir, cmd.RedisConfigFileName), cmd.ConfigEnvPrefixMap[cmd.RedisConfigFileName], redisConfig)
+	err = config.Load(configDir, cmd.RedisConfigFileName, cmd.ConfigEnvPrefixMap[cmd.RedisConfigFileName], redisConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.LoadConfig(filepath.Join(configDir, cmd.KafkaConfigFileName), cmd.ConfigEnvPrefixMap[cmd.KafkaConfigFileName], kafkaConfig)
+	err = config.Load(configDir, cmd.KafkaConfigFileName, cmd.ConfigEnvPrefixMap[cmd.KafkaConfigFileName], kafkaConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.LoadConfig(filepath.Join(configDir, cmd.OpenIMRPCThirdCfgFileName), cmd.ConfigEnvPrefixMap[cmd.OpenIMRPCThirdCfgFileName], thirdConfig)
+	err = config.Load(configDir, cmd.OpenIMRPCThirdCfgFileName, cmd.ConfigEnvPrefixMap[cmd.OpenIMRPCThirdCfgFileName], thirdConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
 	if thirdConfig.Object.Enable == "minio" {
-		err = config.LoadConfig(filepath.Join(configDir, cmd.MinioConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MinioConfigFileName], minioConfig)
+		err = config.Load(configDir, cmd.MinioConfigFileName, cmd.ConfigEnvPrefixMap[cmd.MinioConfigFileName], minioConfig)
 		if err != nil {
 			return nil, nil, nil, nil, nil, err
 		}
 	} else {
 		minioConfig = nil
 	}
-	err = config.LoadConfig(filepath.Join(configDir, cmd.DiscoveryConfigFilename), cmd.ConfigEnvPrefixMap[cmd.DiscoveryConfigFilename], discovery)
+	err = config.Load(configDir, cmd.DiscoveryConfigFilename, cmd.ConfigEnvPrefixMap[cmd.DiscoveryConfigFilename], discovery)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}

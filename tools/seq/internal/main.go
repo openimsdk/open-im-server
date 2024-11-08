@@ -5,6 +5,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"syscall"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
@@ -15,15 +25,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/yaml.v3"
-	"os"
-	"os/signal"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"sync"
-	"sync/atomic"
-	"syscall"
-	"time"
 )
 
 const (
@@ -41,6 +42,9 @@ const (
 )
 
 func readConfig[T any](dir string, name string) (*T, error) {
+	if os.Getenv(config.DeploymentType) == config.KUBERNETES {
+		dir = os.Getenv(config.MountConfigFilePath)
+	}
 	data, err := os.ReadFile(filepath.Join(dir, name))
 	if err != nil {
 		return nil, err

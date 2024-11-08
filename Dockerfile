@@ -1,5 +1,5 @@
 # Use Go 1.21 Alpine as the base image for building the application
-FROM golang:1.21-alpine AS builder
+FROM golang:1.22-alpine AS builder
 
 # Define the base directory for the application as an environment variable
 ENV SERVER_DIR=/openim-server
@@ -22,7 +22,7 @@ RUN go install github.com/magefile/mage@v1.15.0
 RUN mage build
 
 # Using Alpine Linux with Go environment for the final image
-FROM golang:1.21-alpine
+FROM golang:1.22-alpine
 
 # Install necessary packages, such as bash
 RUN apk add --no-cache bash
@@ -43,7 +43,7 @@ COPY --from=builder $SERVER_DIR/start-config.yml $SERVER_DIR/
 COPY --from=builder $SERVER_DIR/go.mod $SERVER_DIR/
 COPY --from=builder $SERVER_DIR/go.sum $SERVER_DIR/
 
-RUN go get github.com/openimsdk/gomake@v0.0.14-alpha.5
+RUN go get github.com/mo3et/openim-gomake@v0.0.18
 
 # Set the command to run when the container starts
 ENTRYPOINT ["sh", "-c", "mage start && tail -f /dev/null"]

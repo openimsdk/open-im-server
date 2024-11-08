@@ -4,8 +4,9 @@
 package main
 
 import (
-	"github.com/openimsdk/gomake/mageutil"
 	"os"
+
+	"github.com/mo3et/openim-gomake/mageutil"
 )
 
 var Default = Build
