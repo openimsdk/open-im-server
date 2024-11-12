@@ -17,6 +17,7 @@ package msggateway
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/tools/mw"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
@@ -363,6 +364,11 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 func (c *Client) activeHeartbeat(ctx context.Context) {
 	if c.PlatformID == constant.WebPlatformID {
 		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					mw.PanicStackToLog(ctx, r)
+				}
+			}()
 			log.ZDebug(ctx, "server initiative send heartbeat start.")
 			ticker := time.NewTicker(pingPeriod)
 			defer ticker.Stop()

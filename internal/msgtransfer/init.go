@@ -136,6 +136,11 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 
 	if config.MsgTransfer.Prometheus.Enable {
 		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					mw.PanicStackToLog(m.ctx, r)
+				}
+			}()
 			prometheusPort, err := datautil.GetElemByIndex(config.MsgTransfer.Prometheus.Ports, index)
 			if err != nil {
 				netErr = err
