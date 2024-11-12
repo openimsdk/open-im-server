@@ -22,7 +22,7 @@ RUN go install github.com/magefile/mage@v1.15.0
 RUN mage build
 
 # Using Alpine Linux with Go environment for the final image
-FROM golang:1.21-alpine
+FROM golang:1.22-alpine
 
 # Install necessary packages, such as bash
 RUN apk add --no-cache bash
