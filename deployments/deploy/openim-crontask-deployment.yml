@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: crontask-container
-          image: op-crontask:v3.9
+          image: openim-crontask:v3.9
           env:
             - name: CONFIG_PATH
               value: "/config"
