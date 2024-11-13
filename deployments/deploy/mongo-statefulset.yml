@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-statefulset
+spec:
+  serviceName: "mongo"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:6.0.2
+          command:
+            [
+              "/bin/bash",
+              "-c",
+              "docker-entrypoint.sh mongod --wiredTigerCacheSizeGB 1 --auth & sleep 15; /scripts/mongo-init.sh; wait",
+            ]
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo_initdb_root_username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo_initdb_root_password
+            - name: MONGO_INITDB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo_initdb_database
+            - name: MONGO_OPENIM_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo_openim_username
+            - name: MONGO_OPENIM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo_openim_password
+          volumeMounts:
+            - name: mongo-storage
+              mountPath: /data/db
+            - name: script-volume
+              mountPath: /scripts
+              # subPath: mongo-init.sh
+
+      volumes:
+        - name: script-volume
+          configMap:
+            name: openim-config
+            items:
+              - key: mongo-init.sh
+                path: mongo-init.sh
+                mode: 0755
+        - name: mongo-storage
+          persistentVolumeClaim:
+            claimName: mongo-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

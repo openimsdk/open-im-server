@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: friend-rpc-service
+spec:
+  selector:
+    app: friend-rpc-server
+  ports:
+    - name: http-10240
+      protocol: TCP
+      port: 10240
+      targetPort: 10240
+    - name: prometheus-12240
+      protocol: TCP
+      port: 12240
+      targetPort: 12240
+  type: ClusterIP

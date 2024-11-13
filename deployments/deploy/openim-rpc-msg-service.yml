@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: msg-rpc-service
+spec:
+  selector:
+    app: msg-rpc-server
+  ports:
+    - name: http-10280
+      protocol: TCP
+      port: 10280
+      targetPort: 10280
+    - name: prometheus-12280
+      protocol: TCP
+      port: 12280
+      targetPort: 12280
+  type: ClusterIP

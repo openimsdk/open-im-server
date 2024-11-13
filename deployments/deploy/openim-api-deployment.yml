@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openim-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openim-api
+  template:
+    metadata:
+      labels:
+        app: openim-api
+    spec:
+      containers:
+        - name: openim-api-container
+          image: op-api:v3.90
+          # imagePullPolicy: Never
+          env:
+            - name: CONFIG_PATH
+              value: "/config"
+            - name: DEPLOYMENT_TYPE
+              value: "kubernetes"
+          volumeMounts:
+            - name: openim-config
+              mountPath: "/config"
+              readOnly: true
+          ports:
+            - containerPort: 10002
+            - containerPort: 12002
+      volumes:
+        - name: openim-config
+          configMap:
+            name: openim-config

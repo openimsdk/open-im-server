@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: friend-rpc-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: friend-rpc-server
+  template:
+    metadata:
+      labels:
+        app: friend-rpc-server
+    spec:
+      containers:
+        - name: friend-rpc-server-container
+          image: op-friend:v3.9
+          # imagePullPolicy: Never
+          env:
+            - name: DEPLOYMENT_TYPE
+              value: "kubernetes"
+            - name: CONFIG_PATH
+              value: "/config"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: redis-password
+          volumeMounts:
+            - name: openim-config
+              mountPath: "/config"
+              readOnly: true
+            - name: notification-config
+              mountPath: "/config/notification.yml"
+              subPath: notification.yml
+              readOnly: true
+          ports:
+            - containerPort: 10240
+            - containerPort: 12240
+      volumes:
+        - name: openim-config
+          configMap:
+            name: openim-config
+        - name: notification-config
+          configMap:
+            name: notification-config

@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: third-rpc-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: third-rpc-server
+  template:
+    metadata:
+      labels:
+        app: third-rpc-server
+    spec:
+      containers:
+        - name: third-rpc-server-container
+          image: op-third:v3.9
+          # imagePullPolicy: Never
+          env:
+            - name: DEPLOYMENT_TYPE
+              value: "kubernetes"
+            - name: CONFIG_PATH
+              value: "/config"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: minio-root-user
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: minio-root-password
+          volumeMounts:
+            - name: openim-config
+              mountPath: "/config"
+              readOnly: true
+            - name: notification-config
+              mountPath: "/config/notification.yml"
+              subPath: notification.yml
+              readOnly: true
+          ports:
+            - containerPort: 10300
+            - containerPort: 12300
+      volumes:
+        - name: openim-config
+          configMap:
+            name: openim-config
+        - name: notification-config
+          configMap:
+            name: notification-config

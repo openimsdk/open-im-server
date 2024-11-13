@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: group-rpc-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: group-rpc-server
+  template:
+    metadata:
+      labels:
+        app: group-rpc-server
+    spec:
+      containers:
+        - name: group-rpc-server-container
+          image: op-group:v3.9
+          # imagePullPolicy: Never
+          env:
+            - name: DEPLOYMENT_TYPE
+              value: "kubernetes"
+            - name: CONFIG_PATH
+              value: "/config"
+          volumeMounts:
+            - name: openim-config
+              mountPath: "/config"
+              readOnly: true
+            - name: notification-config
+              mountPath: "/config/notification.yml"
+              subPath: notification.yml
+              readOnly: true
+          ports:
+            - containerPort: 10260
+            - containerPort: 12260
+      volumes:
+        - name: openim-config
+          configMap:
+            name: openim-config
+        - name: notification-config
+          configMap:
+            name: notification-config

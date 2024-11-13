@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openim-msgtransfer-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openim-msgtransfer-server
+  template:
+    metadata:
+      labels:
+        app: openim-msgtransfer-server
+    spec:
+      containers:
+        - name: openim-msgtransfer-container
+          image: op-msgtransfer:v3.9
+          env:
+            - name: CONFIG_PATH
+              value: "/config"
+            - name: DEPLOYMENT_TYPE
+              value: "kubernetes"
+          volumeMounts:
+            - name: openim-config
+              mountPath: "/config"
+              readOnly: true
+          ports:
+            # - containerPort: 15200
+            - containerPort: 12020
+      volumes:
+        - name: openim-config
+          configMap:
+            name: openim-config
