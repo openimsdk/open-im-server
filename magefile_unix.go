@@ -6,7 +6,7 @@ package main
 import (
 	"syscall"
 
-	"github.com/mo3et/openim-gomake/mageutil"
+	"github.com/openimsdk/gomake/mageutil"
 )
 
 func setMaxOpenFiles() error {
