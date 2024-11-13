@@ -42,8 +42,9 @@ type (
 
 	// MsgServer encapsulates dependencies required for message handling.
 	msgServer struct {
-		RegisterCenter         discovery.SvcDiscoveryRegistry   // Service discovery registry for service registration.
-		MsgDatabase            controller.CommonMsgDatabase     // Interface for message database operations.
+		RegisterCenter         discovery.SvcDiscoveryRegistry // Service discovery registry for service registration.
+		MsgDatabase            controller.CommonMsgDatabase   // Interface for message database operations.
+		StreamMsgDatabase      controller.StreamMsgDatabase
 		Conversation           *rpcclient.ConversationRpcClient // RPC client for conversation service.
 		UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
 		FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
@@ -101,6 +102,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	streamMsg, err := mgo.NewStreamMsgMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	seqUserCache := redis.NewSeqUserCacheRedis(rdb, seqUser)
 	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, &config.KafkaConfig)
 	if err != nil {
@@ -109,6 +114,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	s := &msgServer{
 		Conversation:           &conversationClient,
 		MsgDatabase:            msgDatabase,
+		StreamMsgDatabase:      controller.NewStreamMsgDatabase(streamMsg),
 		RegisterCenter:         client,
 		UserLocalCache:         rpccache.NewUserLocalCache(userRpcClient, &config.LocalCacheConfig, rdb),
 		GroupLocalCache:        rpccache.NewGroupLocalCache(groupRpcClient, &config.LocalCacheConfig, rdb),

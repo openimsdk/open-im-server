@@ -172,17 +172,8 @@ func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string
 				kickToken = append(kickToken, ts[len(ts)-1])
 			}
 		}
-	case constant.SingleTerminalLogin:
-		for _, ts := range loginTokenMap {
-			kickToken = append(kickToken, ts...)
-		}
-	case constant.WebAndOther:
-		unkickTerminal = constant.WebPlatformStr
-		fallthrough
 	case constant.PCAndOther:
-		if unkickTerminal == "" {
-			unkickTerminal = constant.TerminalPC
-		}
+		unkickTerminal = constant.TerminalPC
 		if constant.PlatformIDToClass(platformID) != unkickTerminal {
 			for plt, ts := range loginTokenMap {
 				if constant.PlatformIDToClass(plt) != unkickTerminal {
@@ -214,38 +205,22 @@ func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string
 				}
 			}
 		}
-	case constant.PcMobileAndWeb:
+	case constant.AllLoginButSameClassKick:
 		var (
-			reserved = make(map[string]bool)
+			reserved = make(map[string]struct{})
 		)
 
 		for plt, ts := range loginTokenMap {
 			if constant.PlatformIDToClass(plt) == constant.PlatformIDToClass(platformID) {
 				kickToken = append(kickToken, ts...)
 			} else {
-				if !reserved[constant.PlatformIDToClass(plt)] {
-					reserved[constant.PlatformIDToClass(plt)] = true
+				if _, ok := reserved[constant.PlatformIDToClass(plt)]; !ok {
+					reserved[constant.PlatformIDToClass(plt)] = struct{}{}
 					kickToken = append(kickToken, ts[:len(ts)-1]...)
 					continue
 				} else {
 					kickToken = append(kickToken, ts...)
 				}
-			}
-		}
-
-	case constant.Customize:
-		if a.multiLogin.CustomizeLoginNum[platformID] <= 0 {
-			return nil, nil, errs.New("Do not allow login on this end").Wrap()
-		}
-		for plt, ts := range loginTokenMap {
-			l := len(ts)
-			if platformID == plt {
-				l++
-			}
-			// a.multiLogin.CustomizeLoginNum[platformID] must > 0
-			limit := min(a.multiLogin.CustomizeLoginNum[plt], a.multiLogin.MaxNumOneEnd)
-			if l > limit {
-				kickToken = append(kickToken, ts[:l-limit]...)
 			}
 		}
 	default:

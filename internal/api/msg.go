@@ -175,6 +175,8 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 		data = apistruct.CustomElem{}
 	case constant.Quote:
 		data = apistruct.QuoteElem{}
+	case constant.Stream:
+		data = apistruct.StreamMsgElem{}
 	case constant.OANotification:
 		data = apistruct.OANotificationElem{}
 		req.SessionType = constant.NotificationChatType
@@ -374,4 +376,12 @@ func (m *MessageApi) SearchMsg(c *gin.Context) {
 
 func (m *MessageApi) GetServerTime(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetServerTime, m.Client, c)
+}
+
+func (m *MessageApi) GetStreamMsg(c *gin.Context) {
+	a2r.Call(msg.MsgClient.GetStreamMsg, m.Client, c)
+}
+
+func (m *MessageApi) AppendStreamMsg(c *gin.Context) {
+	a2r.Call(msg.MsgClient.AppendStreamMsg, m.Client, c)
 }

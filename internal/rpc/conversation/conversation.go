@@ -261,27 +261,35 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 
 	setConversationFieldsFunc := func() {
 		if req.Conversation.RecvMsgOpt != nil {
+			conversation.RecvMsgOpt = req.Conversation.RecvMsgOpt.Value
 			m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
 		}
 		if req.Conversation.AttachedInfo != nil {
+			conversation.AttachedInfo = req.Conversation.AttachedInfo.Value
 			m["attached_info"] = req.Conversation.AttachedInfo.Value
 		}
 		if req.Conversation.Ex != nil {
+			conversation.Ex = req.Conversation.Ex.Value
 			m["ex"] = req.Conversation.Ex.Value
 		}
 		if req.Conversation.IsPinned != nil {
+			conversation.IsPinned = req.Conversation.IsPinned.Value
 			m["is_pinned"] = req.Conversation.IsPinned.Value
 		}
 		if req.Conversation.GroupAtType != nil {
+			conversation.GroupAtType = req.Conversation.GroupAtType.Value
 			m["group_at_type"] = req.Conversation.GroupAtType.Value
 		}
 		if req.Conversation.MsgDestructTime != nil {
+			conversation.MsgDestructTime = req.Conversation.MsgDestructTime.Value
 			m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
 		}
 		if req.Conversation.IsMsgDestruct != nil {
+			conversation.IsMsgDestruct = req.Conversation.IsMsgDestruct.Value
 			m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
 		}
 		if req.Conversation.BurnDuration != nil {
+			conversation.BurnDuration = req.Conversation.BurnDuration.Value
 			m["burn_duration"] = req.Conversation.BurnDuration.Value
 		}
 	}
