@@ -1,9 +1,11 @@
 # Kubernetes Deployment
 
+## Resource Requests
+- CPU: 2 cores
+- Memory: 4 GiB
+- Disk usage: 20 GiB (on Node)
+
 ## Origin Deploy
-
-## First, Deployment All config and services
-
 1. Enter the target dir
 `cd ./deployments/deploy/`
 
@@ -19,7 +21,7 @@ Run infrasturcture components.
 >Note: Ensure that infrastructure services like MinIO, Redis, and Kafka are running before deploying the main applications.
 
 
-Final, run all deployments and services
+3. run all deployments and services
 
 ```bash
 kubectl apply \
