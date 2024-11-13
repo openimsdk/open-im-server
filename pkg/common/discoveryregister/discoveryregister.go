@@ -38,7 +38,7 @@ func NewDiscoveryRegister(discovery *config.Discovery, share *config.Share) (dis
 			zookeeper.WithTimeout(10),
 		)
 	case "kubernetes":
-		return kubernetes.NewK8sConnManager("default")
+		return kubernetes.NewKubernetesConnManager("default")
 	case "etcd":
 		return etcd.NewSvcDiscoveryRegistry(
 			discovery.Etcd.RootDirectory,
