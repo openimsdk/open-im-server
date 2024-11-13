@@ -18,7 +18,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -37,10 +37,16 @@ import (
 
 const maxRetry = 180
 
+const (
+	MountConfigFilePath = "CONFIG_PATH"
+	DeploymentType      = "DEPLOYMENT_TYPE"
+	KUBERNETES          = "kubernetes"
+)
+
 func CheckZookeeper(ctx context.Context, config *config.ZooKeeper) error {
 	// Temporary disable logging
 	originalLogger := log.Default().Writer()
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	defer log.SetOutput(originalLogger) // Ensure logging is restored
 	return zookeeper.Check(ctx, config.Address, config.Schema, zookeeper.WithUserNameAndPassword(config.Username, config.Password))
 }
@@ -78,6 +84,13 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 		discovery   = &config.Discovery{}
 		thirdConfig = &config.Third{}
 	)
+	if os.Getenv(DeploymentType) == KUBERNETES {
+		configDir = os.Getenv(MountConfigFilePath)
+		if configDir == "" {
+			return nil, nil, nil, nil, nil, fmt.Errorf("%s env is empty", MountConfigFilePath)
+		}
+	}
+
 	err := config.Load(configDir, cmd.MongodbConfigFileName, cmd.ConfigEnvPrefixMap[cmd.MongodbConfigFileName], mongoConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
