@@ -4,6 +4,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 
 	"github.com/mo3et/openim-gomake/mageutil"
@@ -12,7 +13,14 @@ import (
 var Default = Build
 
 func Build() {
-	mageutil.Build()
+	flag.Parse()
+
+	bin := flag.Args()
+	if len(bin) != 0 {
+		bin = bin[1:]
+	}
+
+	mageutil.Build(bin)
 }
 
 func Start() {
