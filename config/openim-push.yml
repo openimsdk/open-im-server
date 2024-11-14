@@ -24,7 +24,7 @@ geTui:
   channelName:
 fcm:
   # Prioritize using file paths. If the file path is empty, use URL
-  filePath:   # File path is concatenated with the parameters passed in through - c(`mage` default pass in `config/`) and filePath. 
+  filePath:   # File path is concatenated with the parameters passed in through - c(`mage` default pass in `config/`) and filePath.
   authURL:   #  Must start with https or http.
 jpns:
   appKey:
@@ -34,8 +34,8 @@ jpns:
 
 # iOS system push sound and badge count
 iosPush:
-      pushSound: xxx
-      badgeCount: true
-      production: false
+  pushSound: xxx
+  badgeCount: true
+  production: false
 
 fullUserCache: true
