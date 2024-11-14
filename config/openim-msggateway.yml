@@ -22,6 +22,3 @@ longConnSvr:
   websocketMaxMsgLen: 4096
   # WebSocket connection handshake timeout in seconds
   websocketTimeout: 10
-
-# 1: For Android, iOS, Windows, Mac, and web platforms, only one instance can be online at a time
-multiLoginPolicy: 1
