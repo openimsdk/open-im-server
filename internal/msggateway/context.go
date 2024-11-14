@@ -193,7 +193,11 @@ func (c *UserConnContext) ParseEssentialArgs() error {
 	_, err := strconv.Atoi(platformIDStr)
 	if err != nil {
 		return servererrs.ErrConnArgsErr.WrapMsg("platformID is not int")
-
+	}
+	switch sdkType, _ := c.Query(SDKType); sdkType {
+	case "", GoSDK, JsSDK:
+	default:
+		return servererrs.ErrConnArgsErr.WrapMsg("sdkType is not go or js")
 	}
 	return nil
 }
