@@ -153,6 +153,14 @@ func (c *UserConnContext) GetCompression() bool {
 	return false
 }
 
+func (c *UserConnContext) GetSDKType() string {
+	sdkType := c.Req.URL.Query().Get(SDKType)
+	if sdkType == "" {
+		sdkType = GoSDK
+	}
+	return sdkType
+}
+
 func (c *UserConnContext) ShouldSendResp() bool {
 	errResp, exists := c.Query(SendResponse)
 	if exists {

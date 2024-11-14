@@ -455,8 +455,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Retrieve a client object from the client pool, reset its state, and associate it with the current WebSocket long connection
 	client := ws.clientPool.Get().(*Client)
-	sdkType, _ := connContext.Query(SDKType)
-	client.ResetClient(connContext, wsLongConn, ws, sdkType)
+	client.ResetClient(connContext, wsLongConn, ws)
 
 	// Register the client with the server and start message processing
 	ws.registerChan <- client

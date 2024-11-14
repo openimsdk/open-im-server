@@ -84,7 +84,7 @@ type Client struct {
 }
 
 // ResetClient updates the client's state with new connection and context information.
-func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer LongConnServer, sdkType string) {
+func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer LongConnServer) {
 	c.w = new(sync.Mutex)
 	c.conn = conn
 	c.PlatformID = stringutil.StringToInt(ctx.GetPlatformID())
@@ -97,14 +97,11 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer
 	c.closed.Store(false)
 	c.closedErr = nil
 	c.token = ctx.GetToken()
-	c.SDKType = sdkType
+	c.SDKType = ctx.GetSDKType()
 	c.hbCtx, c.hbCancel = context.WithCancel(c.ctx)
 	c.subLock = new(sync.Mutex)
 	if c.subUserIDs != nil {
 		clear(c.subUserIDs)
-	}
-	if c.SDKType == "" {
-		c.SDKType = GoSDK
 	}
 	if c.SDKType == GoSDK {
 		c.Encoder = NewGobEncoder()
