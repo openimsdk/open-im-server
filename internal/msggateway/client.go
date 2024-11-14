@@ -70,6 +70,8 @@ type Client struct {
 	IsCompress     bool   `json:"isCompress"`
 	UserID         string `json:"userID"`
 	IsBackground   bool   `json:"isBackground"`
+	SDKType        string `json:"sdkType"`
+	Encoder        Encoder
 	ctx            *UserConnContext
 	longConnServer LongConnServer
 	closed         atomic.Bool
@@ -82,7 +84,7 @@ type Client struct {
 }
 
 // ResetClient updates the client's state with new connection and context information.
-func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer LongConnServer) {
+func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer LongConnServer, sdkType string) {
 	c.w = new(sync.Mutex)
 	c.conn = conn
 	c.PlatformID = stringutil.StringToInt(ctx.GetPlatformID())
@@ -95,10 +97,19 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer
 	c.closed.Store(false)
 	c.closedErr = nil
 	c.token = ctx.GetToken()
+	c.SDKType = sdkType
 	c.hbCtx, c.hbCancel = context.WithCancel(c.ctx)
 	c.subLock = new(sync.Mutex)
 	if c.subUserIDs != nil {
 		clear(c.subUserIDs)
+	}
+	if c.SDKType == "" {
+		c.SDKType = GoSDK
+	}
+	if c.SDKType == GoSDK {
+		c.Encoder = NewGobEncoder()
+	} else {
+		c.Encoder = NewJsonEncoder()
 	}
 	c.subUserIDs = make(map[string]struct{})
 }
@@ -192,7 +203,7 @@ func (c *Client) handleMessage(message []byte) error {
 	var binaryReq = getReq()
 	defer freeReq(binaryReq)
 
-	err := c.longConnServer.Decode(message, binaryReq)
+	err := c.Encoder.Decode(message, binaryReq)
 	if err != nil {
 		return err
 	}
@@ -339,7 +350,7 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 		return nil
 	}
 
-	encodedBuf, err := c.longConnServer.Encode(resp)
+	encodedBuf, err := c.Encoder.Encode(resp)
 	if err != nil {
 		return err
 	}

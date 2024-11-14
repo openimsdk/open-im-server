@@ -37,7 +37,6 @@ type LongConnServer interface {
 	SetKickHandlerInfo(i *kickHandler)
 	SubUserOnlineStatus(ctx context.Context, client *Client, data *Req) ([]byte, error)
 	Compressor
-	Encoder
 	MessageHandler
 }
 
@@ -61,7 +60,7 @@ type WsServer struct {
 	authClient        *rpcclient.Auth
 	disCov            discovery.SvcDiscoveryRegistry
 	Compressor
-	Encoder
+	//Encoder
 	MessageHandler
 	webhookClient *webhook.Client
 }
@@ -135,7 +134,6 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 		clients:         newUserMap(),
 		subscription:    newSubscription(),
 		Compressor:      NewGzipCompressor(),
-		Encoder:         NewGobEncoder(),
 		webhookClient:   webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL),
 	}
 }
@@ -278,14 +276,7 @@ func (ws *WsServer) registerClient(client *Client) {
 
 	wg.Wait()
 
-	log.ZDebug(
-		client.ctx,
-		"user online",
-		"online user Num",
-		ws.onlineUserNum.Load(),
-		"online user conn Num",
-		ws.onlineUserConnNum.Load(),
-	)
+	log.ZDebug(client.ctx, "user online", "online user Num", ws.onlineUserNum.Load(), "online user conn Num", ws.onlineUserConnNum.Load())
 }
 
 func getRemoteAdders(client []*Client) string {
@@ -484,7 +475,8 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Retrieve a client object from the client pool, reset its state, and associate it with the current WebSocket long connection
 	client := ws.clientPool.Get().(*Client)
-	client.ResetClient(connContext, wsLongConn, ws)
+	sdkType, _ := connContext.Query(SDKType)
+	client.ResetClient(connContext, wsLongConn, ws, sdkType)
 
 	// Register the client with the server and start message processing
 	ws.registerChan <- client

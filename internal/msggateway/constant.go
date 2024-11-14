@@ -27,6 +27,12 @@ const (
 	GzipCompressionProtocol = "gzip"
 	BackgroundStatus        = "isBackground"
 	SendResponse            = "isMsgResp"
+	SDKType                 = "sdkType"
+)
+
+const (
+	GoSDK = "go"
+	JsSDK = "js"
 )
 
 const (
