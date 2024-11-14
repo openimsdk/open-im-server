@@ -153,6 +153,14 @@ func (c *UserConnContext) GetCompression() bool {
 	return false
 }
 
+func (c *UserConnContext) GetSDKType() string {
+	sdkType := c.Req.URL.Query().Get(SDKType)
+	if sdkType == "" {
+		sdkType = GoSDK
+	}
+	return sdkType
+}
+
 func (c *UserConnContext) ShouldSendResp() bool {
 	errResp, exists := c.Query(SendResponse)
 	if exists {
@@ -193,7 +201,11 @@ func (c *UserConnContext) ParseEssentialArgs() error {
 	_, err := strconv.Atoi(platformIDStr)
 	if err != nil {
 		return servererrs.ErrConnArgsErr.WrapMsg("platformID is not int")
-
+	}
+	switch sdkType, _ := c.Query(SDKType); sdkType {
+	case "", GoSDK, JsSDK:
+	default:
+		return servererrs.ErrConnArgsErr.WrapMsg("sdkType is not go or js")
 	}
 	return nil
 }
