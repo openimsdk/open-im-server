@@ -83,17 +83,11 @@ func NewServer(rpcPort int, longConnServer LongConnServer, conf *Config, ready f
 	return s
 }
 
-func (s *Server) OnlinePushMsg(
-	context context.Context,
-	req *msggateway.OnlinePushMsgReq,
-) (*msggateway.OnlinePushMsgResp, error) {
+func (s *Server) OnlinePushMsg(context context.Context, req *msggateway.OnlinePushMsgReq) (*msggateway.OnlinePushMsgResp, error) {
 	panic("implement me")
 }
 
-func (s *Server) GetUsersOnlineStatus(
-	ctx context.Context,
-	req *msggateway.GetUsersOnlineStatusReq,
-) (*msggateway.GetUsersOnlineStatusResp, error) {
+func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUsersOnlineStatusReq) (*msggateway.GetUsersOnlineStatusResp, error) {
 	if !authverify.IsAppManagerUid(ctx, s.config.Share.IMAdminUserID) {
 		return nil, errs.ErrNoPermission.WrapMsg("only app manager")
 	}
@@ -155,6 +149,7 @@ func (s *Server) pushToUser(ctx context.Context, userID string, msgData *sdkws.M
 			(client.IsBackground && client.PlatformID != constant.IOSPlatformID) {
 			err := client.PushMessage(ctx, msgData)
 			if err != nil {
+				log.ZWarn(ctx, "online push msg failed", err, "userID", userID, "platformID", client.PlatformID)
 				userPlatform.ResultCode = int64(servererrs.ErrPushMsgErr.Code())
 			} else {
 				if _, ok := s.pushTerminal[client.PlatformID]; ok {
@@ -220,10 +215,7 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 	}
 }
 
-func (s *Server) KickUserOffline(
-	ctx context.Context,
-	req *msggateway.KickUserOfflineReq,
-) (*msggateway.KickUserOfflineResp, error) {
+func (s *Server) KickUserOffline(ctx context.Context, req *msggateway.KickUserOfflineReq) (*msggateway.KickUserOfflineResp, error) {
 	for _, v := range req.KickUserIDList {
 		clients, _, ok := s.LongConnServer.GetUserPlatformCons(v, int(req.PlatformID))
 		if !ok {

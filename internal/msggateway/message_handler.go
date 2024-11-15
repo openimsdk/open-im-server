@@ -16,6 +16,7 @@ package msggateway
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
 
 	"github.com/go-playground/validator/v10"
@@ -30,6 +31,16 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/jsonutil"
 )
+
+const (
+	TextPing = "ping"
+	TextPong = "pong"
+)
+
+type TextMessage struct {
+	Type string          `json:"type"`
+	Body json.RawMessage `json:"body"`
+}
 
 type Req struct {
 	ReqIdentifier int32  `json:"reqIdentifier" validate:"required"`
