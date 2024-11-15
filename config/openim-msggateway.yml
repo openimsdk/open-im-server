@@ -22,5 +22,3 @@ longConnSvr:
   websocketMaxMsgLen: 4096
   # WebSocket connection handshake timeout in seconds
   websocketTimeout: 10
-
-
