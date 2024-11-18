@@ -110,7 +110,6 @@ services:
     networks:
       - openim
 
-
   minio:
     image: "${MINIO_IMAGE}"
     ports:
@@ -146,7 +145,7 @@ services:
       - "11002:80"
     networks:
       - openim
-
+      
 #  prometheus:
 #    image: ${PROMETHEUS_IMAGE}
 #    container_name: prometheus
