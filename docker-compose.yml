@@ -23,6 +23,12 @@ services:
           pwd: \"$$MONGO_OPENIM_PASSWORD\",
           roles: [{role: \"readWrite\", db: \"$$MONGO_INITDB_DATABASE\"}]
         });
+        print(\"User created successfully: \");
+        print(\"Username: $$MONGO_OPENIM_USERNAME\");
+        print(\"Password: $$MONGO_OPENIM_PASSWORD\");
+        print(\"Database: $$MONGO_INITDB_DATABASE\");
+      } else {
+        print(\"User already exists in database: $$MONGO_INITDB_DATABASE, Username: $$MONGO_OPENIM_USERNAME\");
       }
       " &&
       tail -f /dev/null
