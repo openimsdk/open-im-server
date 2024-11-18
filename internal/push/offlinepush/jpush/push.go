@@ -89,9 +89,9 @@ func (j *JPush) Push(ctx context.Context, userIDs []string, title, content strin
 func (j *JPush) request(ctx context.Context, po body.PushObj, resp *map[string]any, timeout int) error {
 	err := j.httpClient.PostReturn(
 		ctx,
-		j.pushConf.JPNS.PushURL,
+		j.pushConf.JPush.PushURL,
 		map[string]string{
-			"Authorization": j.getAuthorization(j.pushConf.JPNS.AppKey, j.pushConf.JPNS.MasterSecret),
+			"Authorization": j.getAuthorization(j.pushConf.JPush.AppKey, j.pushConf.JPush.MasterSecret),
 		},
 		po,
 		resp,

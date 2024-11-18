@@ -64,7 +64,7 @@ func (n *Notification) SetExtras(extras map[string]string) {
 }
 
 func (n *Notification) SetAndroidIntent(pushConf *config.Push) {
-	n.Android.Intent.URL = pushConf.JPNS.PushIntent
+	n.Android.Intent.URL = pushConf.JPush.PushIntent
 }
 
 func (n *Notification) IOSEnableMutableContent() {
