@@ -66,7 +66,7 @@ func CheckMinIO(ctx context.Context, config *config.Minio) error {
 }
 
 func CheckKafka(ctx context.Context, conf *config.Kafka) error {
-	return kafka.Check(ctx, conf.Build(), []string{conf.ToMongoTopic, conf.ToRedisTopic, conf.ToPushTopic, conf.ToOfflinePushTopic})
+	return kafka.CheckHealth(ctx, conf.Build())
 }
 
 func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, *config.Minio, *config.Discovery, error) {
