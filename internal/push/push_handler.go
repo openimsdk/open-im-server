@@ -4,6 +4,10 @@ import (
 	"context"
 	"encoding/json"
 
+	"math/rand"
+	"strconv"
+	"time"
+
 	"github.com/IBM/sarama"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
@@ -27,9 +31,6 @@ import (
 	"github.com/openimsdk/tools/utils/timeutil"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
-	"math/rand"
-	"strconv"
-	"time"
 )
 
 type ConsumerHandler struct {
@@ -335,6 +336,7 @@ func (c *ConsumerHandler) groupMessagesHandler(ctx context.Context, groupID stri
 func (c *ConsumerHandler) offlinePushMsg(ctx context.Context, msg *sdkws.MsgData, offlinePushUserIDs []string) error {
 	title, content, opts, err := c.getOfflinePushInfos(msg)
 	if err != nil {
+		log.ZError(ctx, "getOfflinePushInfos failed", err, "msg", msg)
 		return err
 	}
 	err = c.offlinePusher.Push(ctx, offlinePushUserIDs, title, content, opts)
@@ -364,7 +366,7 @@ func (c *ConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (title, conten
 		IsAtSelf   bool     `json:"isAtSelf"`
 	}
 
-	opts = &options.Opts{Signal: &options.Signal{}}
+	opts = &options.Opts{Signal: &options.Signal{ClientMsgID: msg.ClientMsgID}}
 	if msg.OfflinePushInfo != nil {
 		opts.IOSBadgeCount = msg.OfflinePushInfo.IOSBadgeCount
 		opts.IOSPushSound = msg.OfflinePushInfo.IOSPushSound
