@@ -95,8 +95,6 @@ services:
       - "19094:9094"
     volumes:
       - "${DATA_DIR}/components/kafka:/bitnami/kafka"
-    command: >
-      bash -c "/opt/bitnami/scripts/kafka/run.sh & /opt/bitnami/kafka/create-topic.sh; wait"
     environment:
       #KAFKA_HEAP_OPTS: "-Xms128m -Xmx256m"
       TZ: Asia/Shanghai
