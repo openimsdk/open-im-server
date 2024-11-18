@@ -69,6 +69,7 @@ type Mongo struct {
 	Database    string   `mapstructure:"database"`
 	Username    string   `mapstructure:"username"`
 	Password    string   `mapstructure:"password"`
+	AuthSource  string   `mapstructure:"authSource"`
 	MaxPoolSize int      `mapstructure:"maxPoolSize"`
 	MaxRetry    int      `mapstructure:"maxRetry"`
 }
@@ -490,6 +491,7 @@ func (m *Mongo) Build() *mongoutil.Config {
 		Database:    m.Database,
 		Username:    m.Username,
 		Password:    m.Password,
+		AuthSource:  m.AuthSource,
 		MaxPoolSize: m.MaxPoolSize,
 		MaxRetry:    m.MaxRetry,
 	}
