@@ -30,18 +30,6 @@ spec:
             - containerPort: 9092 # PLAINTEXT
             - containerPort: 9093 # CONTROLLER
             - containerPort: 9094 # EXTERNAL
-          # command:
-          #   - /bin/bash
-          #   - "-c"
-          #   - |
-          #     # /opt/bitnami/scripts/kafka/run.sh & /opt/bitnami/kafka/create-topic.sh; wait
-          #     # /opt/bitnami/scripts/kafka/entrypoint.sh && /opt/bitnami/scripts/kafka/setup.sh  && /opt/bitnami/scripts/kafka/run.sh
-          #     & while ! echo > /dev/tcp/localhost/9092; do
-          #         echo "Waiting for Kafka to start..."
-          #         sleep 5
-          #       done
-          #       /opt/bitnami/kafka/create-topic.sh
-          #       tail -f /dev/null
           env:
             - name: TZ
               value: "Asia/Shanghai"
@@ -59,24 +47,11 @@ spec:
               value: "CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT"
             - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
               value: "CONTROLLER"
+            - name: KAFKA_NUM_PARTITIONS
+              value: "8"
+            - name: KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE
+              value: "true"
           volumeMounts:
-            - name: kafka-data
-              mountPath: /bitnami/kafka
-            - name: kafka-scripts
-              mountPath: /opt/bitnami/kafka/create-topic.sh
-              subPath: create-topic.sh
-        - name: create-topics
-          image: bitnami/kafka:3.5.1
-          command:
-            - /bin/bash
-            - "-c"
-            - |
-              /opt/bitnami/kafka/create-topic.sh && \
-              tail -f /dev/null
-          volumeMounts:
-            - name: kafka-scripts
-              mountPath: /opt/bitnami/kafka/create-topic.sh
-              subPath: create-topic.sh
             - name: kafka-data
               mountPath: /bitnami/kafka
       volumes:
@@ -84,9 +59,6 @@ spec:
           configMap:
             name: openim-config
             defaultMode: 0755
-            items:
-              - key: create-topic.sh
-                path: create-topic.sh
         - name: kafka-data
           persistentVolumeClaim:
             claimName: kafka-pvc
