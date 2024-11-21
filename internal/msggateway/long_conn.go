@@ -17,7 +17,6 @@ package msggateway
 import (
 	"encoding/json"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/openimsdk/tools/apiresp"
@@ -56,7 +55,6 @@ type GWebSocket struct {
 	conn             *websocket.Conn
 	handshakeTimeout time.Duration
 	writeBufferSize  int
-	lock             sync.Mutex
 }
 
 func newGWebSocket(protocolType int, handshakeTimeout time.Duration, wbs int) *GWebSocket {
@@ -86,8 +84,6 @@ func (d *GWebSocket) GenerateLongConn(w http.ResponseWriter, r *http.Request) er
 }
 
 func (d *GWebSocket) WriteMessage(messageType int, message []byte) error {
-	d.lock.Lock()
-	defer d.lock.Unlock()
 	// d.setSendConn(d.conn)
 	return d.conn.WriteMessage(messageType, message)
 }
