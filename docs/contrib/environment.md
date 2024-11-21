@@ -474,10 +474,10 @@ This section involves setting up additional configuration variables for Websocke
 | GETUI_CHANNEL_ID        | [User Defined]    | GeTui Channel ID                 |
 | GETUI_CHANNEL_NAME      | [User Defined]    | GeTui Channel Name               |
 | FCM_SERVICE_ACCOUNT     | "x.json"          | FCM Service Account              |
-| JPNS_APP_KEY            | [User Defined]    | JPNS Application Key             |
-| JPNS_MASTER_SECRET      | [User Defined]    | JPNS Master Secret               |
-| JPNS_PUSH_URL           | [User Defined]    | JPNS Push Notification URL       |
-| JPNS_PUSH_INTENT        | [User Defined]    | JPNS Push Intent                 |
+| JPUSH_APP_KEY            | [User Defined]    | JPUSH Application Key             |
+| JPUSH_MASTER_SECRET      | [User Defined]    | JPUSH Master Secret               |
+| JPUSH_PUSH_URL           | [User Defined]    | JPUSH Push Notification URL       |
+| JPUSH_PUSH_INTENT        | [User Defined]    | JPUSH Push Intent                 |
 | IM_ADMIN_USERID         | "imAdmin"         | IM Administrator ID              |
 | IM_ADMIN_NAME           | "imAdmin"         | IM Administrator Nickname        |
 | MULTILOGIN_POLICY       | "1"               | Multi-login Policy               |

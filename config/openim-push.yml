@@ -13,7 +13,7 @@ prometheus:
   ports: [ 12170, 12171, 12172, 12173, 12174, 12175, 12176, 12177, 12178, 12179, 12180, 12182, 12183, 12184, 12185, 12186 ]
 
 maxConcurrentWorkers: 3
-#Use geTui for offline push notifications, or choose fcm or jpns; corresponding configuration settings must be specified.
+#Use geTui for offline push notifications, or choose fcm or jpush; corresponding configuration settings must be specified.
 enable: geTui
 geTui:
   pushUrl: https://restapi.getui.com/v2/$appId
@@ -26,7 +26,7 @@ fcm:
   # Prioritize using file paths. If the file path is empty, use URL
   filePath:   # File path is concatenated with the parameters passed in through - c(`mage` default pass in `config/`) and filePath.
   authURL:   #  Must start with https or http.
-jpns:
+jpush:
   appKey:
   masterSecret:
   pushURL:
