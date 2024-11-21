@@ -1,4 +1,4 @@
-# Use Go 1.21 Alpine as the base image for building the application
+# Use Go 1.22 Alpine as the base image for building the application
 FROM golang:1.22-alpine AS builder
 
 # Define the base directory for the application as an environment variable

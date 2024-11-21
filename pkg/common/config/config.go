@@ -69,6 +69,7 @@ type Mongo struct {
 	Database    string   `mapstructure:"database"`
 	Username    string   `mapstructure:"username"`
 	Password    string   `mapstructure:"password"`
+	AuthSource  string   `mapstructure:"authSource"`
 	MaxPoolSize int      `mapstructure:"maxPoolSize"`
 	MaxRetry    int      `mapstructure:"maxRetry"`
 }
@@ -212,12 +213,12 @@ type Push struct {
 		FilePath string `mapstructure:"filePath"`
 		AuthURL  string `mapstructure:"authURL"`
 	} `mapstructure:"fcm"`
-	JPNS struct {
+	JPush struct {
 		AppKey       string `mapstructure:"appKey"`
 		MasterSecret string `mapstructure:"masterSecret"`
 		PushURL      string `mapstructure:"pushURL"`
 		PushIntent   string `mapstructure:"pushIntent"`
-	} `mapstructure:"jpns"`
+	} `mapstructure:"jpush"`
 	IOSPush struct {
 		PushSound  string `mapstructure:"pushSound"`
 		BadgeCount bool   `mapstructure:"badgeCount"`
@@ -490,6 +491,7 @@ func (m *Mongo) Build() *mongoutil.Config {
 		Database:    m.Database,
 		Username:    m.Username,
 		Password:    m.Password,
+		AuthSource:  m.AuthSource,
 		MaxPoolSize: m.MaxPoolSize,
 		MaxRetry:    m.MaxRetry,
 	}

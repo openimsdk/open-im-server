@@ -15,6 +15,7 @@
 package body
 
 import (
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
@@ -26,38 +27,44 @@ type Notification struct {
 
 type Android struct {
 	Alert  string `json:"alert,omitempty"`
+	Title  string `json:"title,omitempty"`
 	Intent struct {
 		URL string `json:"url,omitempty"`
 	} `json:"intent,omitempty"`
-	Extras Extras `json:"extras"`
+	Extras map[string]string `json:"extras,omitempty"`
 }
 type Ios struct {
-	Alert          string `json:"alert,omitempty"`
-	Sound          string `json:"sound,omitempty"`
-	Badge          string `json:"badge,omitempty"`
-	Extras         Extras `json:"extras"`
-	MutableContent bool   `json:"mutable-content"`
+	Alert          IosAlert          `json:"alert,omitempty"`
+	Sound          string            `json:"sound,omitempty"`
+	Badge          string            `json:"badge,omitempty"`
+	Extras         map[string]string `json:"extras,omitempty"`
+	MutableContent bool              `json:"mutable-content"`
 }
 
-type Extras struct {
-	ClientMsgID string `json:"clientMsgID"`
+type IosAlert struct {
+	Title string `json:"title,omitempty"`
+	Body  string `json:"body,omitempty"`
 }
 
-func (n *Notification) SetAlert(alert string) {
+func (n *Notification) SetAlert(alert string, title string, opts *options.Opts) {
 	n.Alert = alert
 	n.Android.Alert = alert
-	n.IOS.Alert = alert
-	n.IOS.Sound = "default"
-	n.IOS.Badge = "+1"
+	n.Android.Title = title
+	n.IOS.Alert.Body = alert
+	n.IOS.Alert.Title = title
+	n.IOS.Sound = opts.IOSPushSound
+	if opts.IOSBadgeCount {
+		n.IOS.Badge = "+1"
+	}
 }
 
-func (n *Notification) SetExtras(extras Extras) {
+func (n *Notification) SetExtras(extras map[string]string) {
 	n.IOS.Extras = extras
 	n.Android.Extras = extras
 }
 
 func (n *Notification) SetAndroidIntent(pushConf *config.Push) {
-	n.Android.Intent.URL = pushConf.JPNS.PushIntent
+	n.Android.Intent.URL = pushConf.JPush.PushIntent
 }
 
 func (n *Notification) IOSEnableMutableContent() {
