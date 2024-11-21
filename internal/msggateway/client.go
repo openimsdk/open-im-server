@@ -452,6 +452,8 @@ func (c *Client) handlerTextMessage(b []byte) error {
 		if err != nil {
 			return err
 		}
+		c.w.Lock()
+		defer c.w.Unlock()
 		if err := c.conn.SetWriteDeadline(writeWait); err != nil {
 			return err
 		}
