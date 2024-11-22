@@ -4,6 +4,10 @@ import (
 	"context"
 	"encoding/json"
 
+	"math/rand"
+	"strconv"
+	"time"
+
 	"github.com/IBM/sarama"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
@@ -27,9 +31,6 @@ import (
 	"github.com/openimsdk/tools/utils/timeutil"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
-	"math/rand"
-	"strconv"
-	"time"
 )
 
 type ConsumerHandler struct {
@@ -165,17 +166,21 @@ func (c *ConsumerHandler) Push2User(ctx context.Context, userIDs []string, msg *
 			return nil
 		}
 	}
-	offlinePushUserID := []string{msg.RecvID}
+	needOfflinePushUserID := []string{msg.RecvID}
+	var offlinePushUserID []string
 
 	//receiver offline push
-	if err = c.webhookBeforeOfflinePush(ctx, &c.config.WebhooksConfig.BeforeOfflinePush,
-		offlinePushUserID, msg, nil); err != nil {
+	if err = c.webhookBeforeOfflinePush(ctx, &c.config.WebhooksConfig.BeforeOfflinePush, needOfflinePushUserID, msg, &offlinePushUserID); err != nil {
 		return err
 	}
 	log.ZInfo(ctx, "webhookBeforeOfflinePush end")
-	err = c.offlinePushMsg(ctx, msg, offlinePushUserID)
+
+	if len(offlinePushUserID) > 0 {
+		needOfflinePushUserID = offlinePushUserID
+	}
+	err = c.offlinePushMsg(ctx, msg, needOfflinePushUserID)
 	if err != nil {
-		log.ZWarn(ctx, "offlinePushMsg failed", err, "offlinePushUserID", offlinePushUserID, "msg", msg)
+		log.ZWarn(ctx, "offlinePushMsg failed", err, "needOfflinePushUserID", needOfflinePushUserID, "msg", msg)
 		return nil
 	}
 
@@ -335,6 +340,7 @@ func (c *ConsumerHandler) groupMessagesHandler(ctx context.Context, groupID stri
 func (c *ConsumerHandler) offlinePushMsg(ctx context.Context, msg *sdkws.MsgData, offlinePushUserIDs []string) error {
 	title, content, opts, err := c.getOfflinePushInfos(msg)
 	if err != nil {
+		log.ZError(ctx, "getOfflinePushInfos failed", err, "msg", msg)
 		return err
 	}
 	err = c.offlinePusher.Push(ctx, offlinePushUserIDs, title, content, opts)
@@ -364,7 +370,7 @@ func (c *ConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (title, conten
 		IsAtSelf   bool     `json:"isAtSelf"`
 	}
 
-	opts = &options.Opts{Signal: &options.Signal{}}
+	opts = &options.Opts{Signal: &options.Signal{ClientMsgID: msg.ClientMsgID}}
 	if msg.OfflinePushInfo != nil {
 		opts.IOSBadgeCount = msg.OfflinePushInfo.IOSBadgeCount
 		opts.IOSPushSound = msg.OfflinePushInfo.IOSPushSound

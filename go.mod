@@ -1,6 +1,8 @@
 module github.com/openimsdk/open-im-server/v3
 
-go 1.21.2
+go 1.22.0
+
+toolchain go1.23.2
 
 require (
 	firebase.google.com/go/v4 v4.14.1
@@ -13,7 +15,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/protocol v0.0.72-alpha.55
-	github.com/openimsdk/tools v0.0.50-alpha.16
+	github.com/openimsdk/tools v0.0.50-alpha.32
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
@@ -92,7 +94,7 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/go-logr/logr v1.4.1 // indirect
+	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect

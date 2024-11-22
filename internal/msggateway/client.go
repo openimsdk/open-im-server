@@ -16,7 +16,9 @@ package msggateway
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/openimsdk/tools/mw"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
@@ -69,6 +71,8 @@ type Client struct {
 	IsCompress     bool   `json:"isCompress"`
 	UserID         string `json:"userID"`
 	IsBackground   bool   `json:"isBackground"`
+	SDKType        string `json:"sdkType"`
+	Encoder        Encoder
 	ctx            *UserConnContext
 	longConnServer LongConnServer
 	closed         atomic.Bool
@@ -94,10 +98,16 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer
 	c.closed.Store(false)
 	c.closedErr = nil
 	c.token = ctx.GetToken()
+	c.SDKType = ctx.GetSDKType()
 	c.hbCtx, c.hbCancel = context.WithCancel(c.ctx)
 	c.subLock = new(sync.Mutex)
 	if c.subUserIDs != nil {
 		clear(c.subUserIDs)
+	}
+	if c.SDKType == GoSDK {
+		c.Encoder = NewGobEncoder()
+	} else {
+		c.Encoder = NewJsonEncoder()
 	}
 	c.subUserIDs = make(map[string]struct{})
 }
@@ -159,9 +169,12 @@ func (c *Client) readMessage() {
 				return
 			}
 		case MessageText:
-			c.closedErr = ErrNotSupportMessageProtocol
-			return
-
+			_ = c.conn.SetReadDeadline(pongWait)
+			parseDataErr := c.handlerTextMessage(message)
+			if parseDataErr != nil {
+				c.closedErr = parseDataErr
+				return
+			}
 		case PingMessage:
 			err := c.writePongMsg("")
 			log.ZError(c.ctx, "writePongMsg", err)
@@ -188,7 +201,7 @@ func (c *Client) handleMessage(message []byte) error {
 	var binaryReq = getReq()
 	defer freeReq(binaryReq)
 
-	err := c.longConnServer.Decode(message, binaryReq)
+	err := c.Encoder.Decode(message, binaryReq)
 	if err != nil {
 		return err
 	}
@@ -335,7 +348,7 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 		return nil
 	}
 
-	encodedBuf, err := c.longConnServer.Encode(resp)
+	encodedBuf, err := c.Encoder.Encode(resp)
 	if err != nil {
 		return err
 	}
@@ -363,6 +376,11 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 func (c *Client) activeHeartbeat(ctx context.Context) {
 	if c.PlatformID == constant.WebPlatformID {
 		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					mw.PanicStackToLog(ctx, r)
+				}
+			}()
 			log.ZDebug(ctx, "server initiative send heartbeat start.")
 			ticker := time.NewTicker(pingPeriod)
 			defer ticker.Stop()
@@ -418,4 +436,29 @@ func (c *Client) writePongMsg(appData string) error {
 	}
 
 	return errs.Wrap(err)
+}
+
+func (c *Client) handlerTextMessage(b []byte) error {
+	var msg TextMessage
+	if err := json.Unmarshal(b, &msg); err != nil {
+		return err
+	}
+	switch msg.Type {
+	case TextPong:
+		return nil
+	case TextPing:
+		msg.Type = TextPong
+		msgData, err := json.Marshal(msg)
+		if err != nil {
+			return err
+		}
+		c.w.Lock()
+		defer c.w.Unlock()
+		if err := c.conn.SetWriteDeadline(writeWait); err != nil {
+			return err
+		}
+		return c.conn.WriteMessage(MessageText, msgData)
+	default:
+		return fmt.Errorf("not support message type %s", msg.Type)
+	}
 }
