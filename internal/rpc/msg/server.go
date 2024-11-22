@@ -139,3 +139,11 @@ func (m *msgServer) conversationAndGetRecvID(conversation *conversation.Conversa
 	}
 	return ""
 }
+
+func (m *msgServer) AppendStreamMsg(ctx context.Context, req *msg.AppendStreamMsgReq) (*msg.AppendStreamMsgResp, error) {
+	return nil, nil
+}
+
+func (m *msgServer) GetStreamMsg(ctx context.Context, req *msg.GetStreamMsgReq) (*msg.GetStreamMsgResp, error) {
+	return nil, nil
+}
