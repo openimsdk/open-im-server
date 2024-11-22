@@ -26,9 +26,8 @@ type AuthDatabase interface {
 }
 
 type multiLoginConfig struct {
-	Policy            int
-	MaxNumOneEnd      int
-	CustomizeLoginNum map[int]int
+	Policy       int
+	MaxNumOneEnd int
 }
 
 type authDatabase struct {
@@ -42,19 +41,9 @@ func NewAuthDatabase(cache cache.TokenModel, accessSecret string, accessExpire i
 	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire, multiLogin: multiLoginConfig{
 		Policy:       multiLogin.Policy,
 		MaxNumOneEnd: multiLogin.MaxNumOneEnd,
-		CustomizeLoginNum: map[int]int{
-			constant.IOSPlatformID:        multiLogin.CustomizeLoginNum.IOS,
-			constant.AndroidPlatformID:    multiLogin.CustomizeLoginNum.Android,
-			constant.WindowsPlatformID:    multiLogin.CustomizeLoginNum.Windows,
-			constant.OSXPlatformID:        multiLogin.CustomizeLoginNum.OSX,
-			constant.WebPlatformID:        multiLogin.CustomizeLoginNum.Web,
-			constant.MiniWebPlatformID:    multiLogin.CustomizeLoginNum.MiniWeb,
-			constant.LinuxPlatformID:      multiLogin.CustomizeLoginNum.Linux,
-			constant.AndroidPadPlatformID: multiLogin.CustomizeLoginNum.APad,
-			constant.IPadPlatformID:       multiLogin.CustomizeLoginNum.IPad,
-			constant.AdminPlatformID:      multiLogin.CustomizeLoginNum.Admin,
-		},
-	}}
+	},
+		adminUserIDs: adminUserIDs,
+	}
 }
 
 // If the result is empty.
