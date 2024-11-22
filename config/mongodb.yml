@@ -8,6 +8,8 @@ database: openim_v3
 username: openIM
 # Password for database authentication
 password: openIM123
+# Authentication source for database authentication, if use root user, set it to admin
+authSource: openim_v3
 # Maximum number of connections in the connection pool
 maxPoolSize: 100
 # Maximum number of retry attempts for a failed database connection

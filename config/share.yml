@@ -16,14 +16,3 @@ imAdminUserID: [ imAdmin ]
 multiLogin:
   policy: 1
   maxNumOneEnd: 30
-  customizeLoginNum:
-    ios: 1
-    android: 1
-    windows: 1
-    osx: 1
-    web: 1
-    miniWeb: 1
-    linux: 1
-    aPad: 1
-    iPad: 1
-    admin: 1

@@ -240,11 +240,11 @@ push:
     channelName: ${GETUI_CHANNEL_NAME}
   fcm:
     serviceAccount: "${FCM_SERVICE_ACCOUNT}"
-  jpns:
-    appKey: ${JPNS_APP_KEY}
-    masterSecret: ${JPNS_MASTER_SECRET}
-    pushUrl: ${JPNS_PUSH_URL}
-    pushIntent: ${JPNS_PUSH_INTENT}
+  jpush:
+    appKey: ${JPUSH_APP_KEY}
+    masterSecret: ${JPUSH_MASTER_SECRET}
+    pushUrl: ${JPUSH_PUSH_URL}
+    pushIntent: ${JPUSH_PUSH_INTENT}
 
 # App manager configuration
 #

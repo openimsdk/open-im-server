@@ -2,15 +2,15 @@ package controller
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
-	"github.com/openimsdk/tools/log"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/tokenverify"
 )
 
@@ -26,9 +26,8 @@ type AuthDatabase interface {
 }
 
 type multiLoginConfig struct {
-	Policy            int
-	MaxNumOneEnd      int
-	CustomizeLoginNum map[int]int
+	Policy       int
+	MaxNumOneEnd int
 }
 
 type authDatabase struct {
@@ -36,25 +35,15 @@ type authDatabase struct {
 	accessSecret string
 	accessExpire int64
 	multiLogin   multiLoginConfig
+	adminUserIDs []string
 }
 
-func NewAuthDatabase(cache cache.TokenModel, accessSecret string, accessExpire int64, multiLogin config.MultiLogin) AuthDatabase {
+func NewAuthDatabase(cache cache.TokenModel, accessSecret string, accessExpire int64, multiLogin config.MultiLogin, adminUserIDs []string) AuthDatabase {
 	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire, multiLogin: multiLoginConfig{
 		Policy:       multiLogin.Policy,
 		MaxNumOneEnd: multiLogin.MaxNumOneEnd,
-		CustomizeLoginNum: map[int]int{
-			constant.IOSPlatformID:        multiLogin.CustomizeLoginNum.IOS,
-			constant.AndroidPlatformID:    multiLogin.CustomizeLoginNum.Android,
-			constant.WindowsPlatformID:    multiLogin.CustomizeLoginNum.Windows,
-			constant.OSXPlatformID:        multiLogin.CustomizeLoginNum.OSX,
-			constant.WebPlatformID:        multiLogin.CustomizeLoginNum.Web,
-			constant.MiniWebPlatformID:    multiLogin.CustomizeLoginNum.MiniWeb,
-			constant.LinuxPlatformID:      multiLogin.CustomizeLoginNum.Linux,
-			constant.AndroidPadPlatformID: multiLogin.CustomizeLoginNum.APad,
-			constant.IPadPlatformID:       multiLogin.CustomizeLoginNum.IPad,
-			constant.AdminPlatformID:      multiLogin.CustomizeLoginNum.Admin,
-		},
-	}}
+	}, adminUserIDs: adminUserIDs,
+	}
 }
 
 // If the result is empty.
@@ -91,27 +80,31 @@ func (a *authDatabase) BatchSetTokenMapByUidPid(ctx context.Context, tokens []st
 
 // Create Token.
 func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformID int) (string, error) {
-	tokens, err := a.cache.GetAllTokensWithoutError(ctx, userID)
-	if err != nil {
-		return "", err
-	}
-	deleteTokenKey, kickedTokenKey, err := a.checkToken(ctx, tokens, platformID)
-	if err != nil {
-		return "", err
-	}
-	if len(deleteTokenKey) != 0 {
-		err = a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
+	isAdmin := authverify.IsManagerUserID(userID, a.adminUserIDs)
+	if !isAdmin {
+		tokens, err := a.cache.GetAllTokensWithoutError(ctx, userID)
 		if err != nil {
 			return "", err
 		}
-	}
-	if len(kickedTokenKey) != 0 {
-		for _, k := range kickedTokenKey {
-			err := a.cache.SetTokenFlagEx(ctx, userID, platformID, k, constant.KickedToken)
+
+		deleteTokenKey, kickedTokenKey, err := a.checkToken(ctx, tokens, platformID)
+		if err != nil {
+			return "", err
+		}
+		if len(deleteTokenKey) != 0 {
+			err = a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
 			if err != nil {
 				return "", err
 			}
-			log.ZDebug(ctx, "kicked token in create token", "token", k)
+		}
+		if len(kickedTokenKey) != 0 {
+			for _, k := range kickedTokenKey {
+				err := a.cache.SetTokenFlagEx(ctx, userID, platformID, k, constant.KickedToken)
+				if err != nil {
+					return "", err
+				}
+				log.ZDebug(ctx, "kicked token in create token", "token", k)
+			}
 		}
 	}
 
@@ -122,9 +115,12 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 		return "", errs.WrapMsg(err, "token.SignedString")
 	}
 
-	if err = a.cache.SetTokenFlagEx(ctx, userID, platformID, tokenString, constant.NormalToken); err != nil {
-		return "", err
+	if !isAdmin {
+		if err = a.cache.SetTokenFlagEx(ctx, userID, platformID, tokenString, constant.NormalToken); err != nil {
+			return "", err
+		}
 	}
+
 	return tokenString, nil
 }
 
@@ -172,17 +168,8 @@ func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string
 				kickToken = append(kickToken, ts[len(ts)-1])
 			}
 		}
-	case constant.SingleTerminalLogin:
-		for _, ts := range loginTokenMap {
-			kickToken = append(kickToken, ts...)
-		}
-	case constant.WebAndOther:
-		unkickTerminal = constant.WebPlatformStr
-		fallthrough
 	case constant.PCAndOther:
-		if unkickTerminal == "" {
-			unkickTerminal = constant.TerminalPC
-		}
+		unkickTerminal = constant.TerminalPC
 		if constant.PlatformIDToClass(platformID) != unkickTerminal {
 			for plt, ts := range loginTokenMap {
 				if constant.PlatformIDToClass(plt) != unkickTerminal {
@@ -214,17 +201,17 @@ func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string
 				}
 			}
 		}
-	case constant.PcMobileAndWeb:
+	case constant.AllLoginButSameClassKick:
 		var (
-			reserved = make(map[string]bool)
+			reserved = make(map[string]struct{})
 		)
 
 		for plt, ts := range loginTokenMap {
 			if constant.PlatformIDToClass(plt) == constant.PlatformIDToClass(platformID) {
 				kickToken = append(kickToken, ts...)
 			} else {
-				if !reserved[constant.PlatformIDToClass(plt)] {
-					reserved[constant.PlatformIDToClass(plt)] = true
+				if _, ok := reserved[constant.PlatformIDToClass(plt)]; !ok {
+					reserved[constant.PlatformIDToClass(plt)] = struct{}{}
 					kickToken = append(kickToken, ts[:len(ts)-1]...)
 					continue
 				} else {
@@ -232,36 +219,20 @@ func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string
 				}
 			}
 		}
-
-	case constant.Customize:
-		if a.multiLogin.CustomizeLoginNum[platformID] <= 0 {
-			return nil, nil, errs.New("Do not allow login on this end").Wrap()
-		}
-		for plt, ts := range loginTokenMap {
-			l := len(ts)
-			if platformID == plt {
-				l++
-			}
-			// a.multiLogin.CustomizeLoginNum[platformID] must > 0
-			limit := min(a.multiLogin.CustomizeLoginNum[plt], a.multiLogin.MaxNumOneEnd)
-			if l > limit {
-				kickToken = append(kickToken, ts[:l-limit]...)
-			}
-		}
 	default:
 		return nil, nil, errs.New("unknown multiLogin policy").Wrap()
 	}
 
-	var adminTokenMaxNum = a.multiLogin.MaxNumOneEnd
-	if a.multiLogin.Policy == constant.Customize {
-		adminTokenMaxNum = a.multiLogin.CustomizeLoginNum[constant.AdminPlatformID]
-	}
-	l := len(adminToken)
-	if platformID == constant.AdminPlatformID {
-		l++
-	}
-	if l > adminTokenMaxNum {
-		kickToken = append(kickToken, adminToken[:l-adminTokenMaxNum]...)
-	}
+	//var adminTokenMaxNum = a.multiLogin.MaxNumOneEnd
+	//if a.multiLogin.Policy == constant.Customize {
+	//	adminTokenMaxNum = a.multiLogin.CustomizeLoginNum[constant.AdminPlatformID]
+	//}
+	//l := len(adminToken)
+	//if platformID == constant.AdminPlatformID {
+	//	l++
+	//}
+	//if l > adminTokenMaxNum {
+	//	kickToken = append(kickToken, adminToken[:l-adminTokenMaxNum]...)
+	//}
 	return deleteToken, kickToken, nil
 }

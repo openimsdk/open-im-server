@@ -29,5 +29,6 @@ type Dummy struct {
 
 func (d *Dummy) Push(ctx context.Context, userIDs []string, title, content string, opts *options.Opts) error {
 	log.ZDebug(ctx, "dummy push")
+	log.ZWarn(ctx, "Dummy push", nil, "ps", "The offline push is not configured. To configure it, please go to config/openim-push.yml.")
 	return nil
 }

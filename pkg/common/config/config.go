@@ -69,6 +69,7 @@ type Mongo struct {
 	Database    string   `mapstructure:"database"`
 	Username    string   `mapstructure:"username"`
 	Password    string   `mapstructure:"password"`
+	AuthSource  string   `mapstructure:"authSource"`
 	MaxPoolSize int      `mapstructure:"maxPoolSize"`
 	MaxRetry    int      `mapstructure:"maxRetry"`
 }
@@ -212,12 +213,12 @@ type Push struct {
 		FilePath string `mapstructure:"filePath"`
 		AuthURL  string `mapstructure:"authURL"`
 	} `mapstructure:"fcm"`
-	JPNS struct {
+	JPush struct {
 		AppKey       string `mapstructure:"appKey"`
 		MasterSecret string `mapstructure:"masterSecret"`
 		PushURL      string `mapstructure:"pushURL"`
 		PushIntent   string `mapstructure:"pushIntent"`
-	} `mapstructure:"jpns"`
+	} `mapstructure:"jpush"`
 	IOSPush struct {
 		PushSound  string `mapstructure:"pushSound"`
 		BadgeCount bool   `mapstructure:"badgeCount"`
@@ -368,20 +369,8 @@ type Share struct {
 }
 
 type MultiLogin struct {
-	Policy            int `mapstructure:"policy"`
-	MaxNumOneEnd      int `mapstructure:"maxNumOneEnd"`
-	CustomizeLoginNum struct {
-		IOS     int `mapstructure:"ios"`
-		Android int `mapstructure:"android"`
-		Windows int `mapstructure:"windows"`
-		OSX     int `mapstructure:"osx"`
-		Web     int `mapstructure:"web"`
-		MiniWeb int `mapstructure:"miniWeb"`
-		Linux   int `mapstructure:"linux"`
-		APad    int `mapstructure:"aPad"`
-		IPad    int `mapstructure:"iPad"`
-		Admin   int `mapstructure:"admin"`
-	} `mapstructure:"customizeLoginNum"`
+	Policy       int `mapstructure:"policy"`
+	MaxNumOneEnd int `mapstructure:"maxNumOneEnd"`
 }
 
 type RpcRegisterName struct {
@@ -490,6 +479,7 @@ func (m *Mongo) Build() *mongoutil.Config {
 		Database:    m.Database,
 		Username:    m.Username,
 		Password:    m.Password,
+		AuthSource:  m.AuthSource,
 		MaxPoolSize: m.MaxPoolSize,
 		MaxRetry:    m.MaxRetry,
 	}

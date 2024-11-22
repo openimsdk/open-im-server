@@ -74,6 +74,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+
 	// Select the oss method according to the profile policy
 	enable := config.RpcConfig.Object.Enable
 	var (

@@ -37,7 +37,6 @@ type LongConnServer interface {
 	SetKickHandlerInfo(i *kickHandler)
 	SubUserOnlineStatus(ctx context.Context, client *Client, data *Req) ([]byte, error)
 	Compressor
-	Encoder
 	MessageHandler
 }
 
@@ -61,7 +60,7 @@ type WsServer struct {
 	authClient        *rpcclient.Auth
 	disCov            discovery.SvcDiscoveryRegistry
 	Compressor
-	Encoder
+	//Encoder
 	MessageHandler
 	webhookClient *webhook.Client
 }
@@ -135,7 +134,6 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 		clients:         newUserMap(),
 		subscription:    newSubscription(),
 		Compressor:      NewGzipCompressor(),
-		Encoder:         NewGobEncoder(),
 		webhookClient:   webhook.NewWebhookClient(msgGatewayConfig.WebhooksConfig.URL),
 	}
 }
@@ -278,14 +276,7 @@ func (ws *WsServer) registerClient(client *Client) {
 
 	wg.Wait()
 
-	log.ZDebug(
-		client.ctx,
-		"user online",
-		"online user Num",
-		ws.onlineUserNum.Load(),
-		"online user conn Num",
-		ws.onlineUserConnNum.Load(),
-	)
+	log.ZDebug(client.ctx, "user online", "online user Num", ws.onlineUserNum.Load(), "online user conn Num", ws.onlineUserConnNum.Load())
 }
 
 func getRemoteAdders(client []*Client) string {
@@ -327,11 +318,6 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 
 	switch ws.msgGatewayConfig.Share.MultiLogin.Policy {
 	case constant.DefalutNotKick:
-	case constant.WebAndOther:
-		if constant.PlatformIDToClass(newClient.PlatformID) == constant.WebPlatformStr {
-			return
-		}
-		fallthrough
 	case constant.PCAndOther:
 		if constant.PlatformIDToClass(newClient.PlatformID) == constant.TerminalPC {
 			return
@@ -356,7 +342,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			log.ZWarn(newClient.ctx, "InvalidateToken err", err, "userID", newClient.UserID,
 				"platformID", newClient.PlatformID)
 		}
-	case constant.PcMobileAndWeb:
+	case constant.AllLoginButSameClassKick:
 		clients, ok := ws.clients.GetAll(newClient.UserID)
 		if !ok {
 			return
@@ -370,21 +356,6 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			}
 		}
 		kickTokenFunc(kickClients)
-
-	case constant.SingleTerminalLogin:
-		clients, ok := ws.clients.GetAll(newClient.UserID)
-		if !ok {
-			return
-		}
-		var (
-			kickClients []*Client
-		)
-		for _, client := range clients {
-			kickClients = append(kickClients, client)
-		}
-		kickTokenFunc(kickClients)
-	case constant.Customize:
-		// todo
 	}
 }
 
