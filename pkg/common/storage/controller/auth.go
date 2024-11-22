@@ -42,7 +42,7 @@ func NewAuthDatabase(cache cache.TokenModel, accessSecret string, accessExpire i
 	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire, multiLogin: multiLoginConfig{
 		Policy:       multiLogin.Policy,
 		MaxNumOneEnd: multiLogin.MaxNumOneEnd,
-	},
+	}, adminUserIDs: adminUserIDs,
 	}
 }
 
