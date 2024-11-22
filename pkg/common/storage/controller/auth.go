@@ -34,14 +34,26 @@ type authDatabase struct {
 	accessSecret string
 	accessExpire int64
 	multiLogin   multiLoginConfig
+	adminUserIDs []string
 }
 
-func NewAuthDatabase(cache cache.TokenModel, accessSecret string, accessExpire int64, multiLogin config.MultiLogin) AuthDatabase {
+func NewAuthDatabase(cache cache.TokenModel, accessSecret string, accessExpire int64, multiLogin config.MultiLogin, adminUserIDs []string) AuthDatabase {
 	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire, multiLogin: multiLoginConfig{
 		Policy:       multiLogin.Policy,
 		MaxNumOneEnd: multiLogin.MaxNumOneEnd,
-	},
-		adminUserIDs: adminUserIDs,
+		CustomizeLoginNum: map[int]int{
+			constant.IOSPlatformID:        multiLogin.CustomizeLoginNum.IOS,
+			constant.AndroidPlatformID:    multiLogin.CustomizeLoginNum.Android,
+			constant.WindowsPlatformID:    multiLogin.CustomizeLoginNum.Windows,
+			constant.OSXPlatformID:        multiLogin.CustomizeLoginNum.OSX,
+			constant.WebPlatformID:        multiLogin.CustomizeLoginNum.Web,
+			constant.MiniWebPlatformID:    multiLogin.CustomizeLoginNum.MiniWeb,
+			constant.LinuxPlatformID:      multiLogin.CustomizeLoginNum.Linux,
+			constant.AndroidPadPlatformID: multiLogin.CustomizeLoginNum.APad,
+			constant.IPadPlatformID:       multiLogin.CustomizeLoginNum.IPad,
+			constant.AdminPlatformID:      multiLogin.CustomizeLoginNum.Admin,
+		},
+	}, adminUserIDs: adminUserIDs,
 	}
 }
 
@@ -79,27 +91,31 @@ func (a *authDatabase) BatchSetTokenMapByUidPid(ctx context.Context, tokens []st
 
 // Create Token.
 func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformID int) (string, error) {
-	tokens, err := a.cache.GetAllTokensWithoutError(ctx, userID)
-	if err != nil {
-		return "", err
-	}
-	deleteTokenKey, kickedTokenKey, err := a.checkToken(ctx, tokens, platformID)
-	if err != nil {
-		return "", err
-	}
-	if len(deleteTokenKey) != 0 {
-		err = a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
+	isAdmin := authverify.IsManagerUserID(userID, a.adminUserIDs)
+	if !isAdmin {
+		tokens, err := a.cache.GetAllTokensWithoutError(ctx, userID)
 		if err != nil {
 			return "", err
 		}
-	}
-	if len(kickedTokenKey) != 0 {
-		for _, k := range kickedTokenKey {
-			err := a.cache.SetTokenFlagEx(ctx, userID, platformID, k, constant.KickedToken)
+
+		deleteTokenKey, kickedTokenKey, err := a.checkToken(ctx, tokens, platformID)
+		if err != nil {
+			return "", err
+		}
+		if len(deleteTokenKey) != 0 {
+			err = a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
 			if err != nil {
 				return "", err
 			}
-			log.ZDebug(ctx, "kicked token in create token", "token", k)
+		}
+		if len(kickedTokenKey) != 0 {
+			for _, k := range kickedTokenKey {
+				err := a.cache.SetTokenFlagEx(ctx, userID, platformID, k, constant.KickedToken)
+				if err != nil {
+					return "", err
+				}
+				log.ZDebug(ctx, "kicked token in create token", "token", k)
+			}
 		}
 	}
 
@@ -110,9 +126,12 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 		return "", errs.WrapMsg(err, "token.SignedString")
 	}
 
-	if err = a.cache.SetTokenFlagEx(ctx, userID, platformID, tokenString, constant.NormalToken); err != nil {
-		return "", err
+	if !isAdmin {
+		if err = a.cache.SetTokenFlagEx(ctx, userID, platformID, tokenString, constant.NormalToken); err != nil {
+			return "", err
+		}
 	}
+
 	return tokenString, nil
 }
 
@@ -215,16 +234,16 @@ func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string
 		return nil, nil, errs.New("unknown multiLogin policy").Wrap()
 	}
 
-	var adminTokenMaxNum = a.multiLogin.MaxNumOneEnd
-	if a.multiLogin.Policy == constant.Customize {
-		adminTokenMaxNum = a.multiLogin.CustomizeLoginNum[constant.AdminPlatformID]
-	}
-	l := len(adminToken)
-	if platformID == constant.AdminPlatformID {
-		l++
-	}
-	if l > adminTokenMaxNum {
-		kickToken = append(kickToken, adminToken[:l-adminTokenMaxNum]...)
-	}
+	//var adminTokenMaxNum = a.multiLogin.MaxNumOneEnd
+	//if a.multiLogin.Policy == constant.Customize {
+	//	adminTokenMaxNum = a.multiLogin.CustomizeLoginNum[constant.AdminPlatformID]
+	//}
+	//l := len(adminToken)
+	//if platformID == constant.AdminPlatformID {
+	//	l++
+	//}
+	//if l > adminTokenMaxNum {
+	//	kickToken = append(kickToken, adminToken[:l-adminTokenMaxNum]...)
+	//}
 	return deleteToken, kickToken, nil
 }
