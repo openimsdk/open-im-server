@@ -1,0 +1,78 @@
+name: Release Changelog
+
+on:
+  release:
+    types: [released]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Go Changelog Generator
+      run: |
+        # Run the Go changelog generator, passing the release tag if available
+        if [ "${{ github.event.release.tag_name }}" = "latest" ]; then
+          go run tools/changelog/changelog.go > "${{ github.event.release.tag_name }}-changelog.md"
+        else
+          go run tools/changelog/changelog.go "${{ github.event.release.tag_name }}" > "${{ github.event.release.tag_name }}-changelog.md"
+        fi
+
+    - name: Handle changelog files
+      run: |
+        # Ensure that the CHANGELOG directory exists
+        mkdir -p CHANGELOG
+
+        # Extract Major.Minor version by removing the 'v' prefix from the tag name
+        TAG_NAME=${{ github.event.release.tag_name }}
+        CHANGELOG_VERSION_NUMBER=$(echo "$TAG_NAME" | sed 's/^v//' | grep -oP '^\d+\.\d+')
+
+        # Define the new changelog file path
+        CHANGELOG_FILENAME="CHANGELOG-$CHANGELOG_VERSION_NUMBER.md"
+        CHANGELOG_PATH="CHANGELOG/$CHANGELOG_FILENAME"
+
+        # Check if the changelog file for the current release already exists
+        if [ -f "$CHANGELOG_PATH" ]; then
+          # If the file exists, append the new changelog to the existing one
+          cat "$CHANGELOG_PATH" >> "${TAG_NAME}-changelog.md"
+          # Overwrite the existing changelog with the updated content
+          mv "${TAG_NAME}-changelog.md" "$CHANGELOG_PATH"
+        else
+          # If the changelog file doesn't exist, rename the temp changelog file to the new changelog file
+          mv "${TAG_NAME}-changelog.md" "$CHANGELOG_PATH"
+
+          # Ensure that README.md exists
+          if [ ! -f "CHANGELOG/README.md" ]; then
+            echo -e "# CHANGELOGs\n\n" > CHANGELOG/README.md
+          fi
+          
+            # Add the new changelog entry at the top of the README.md
+            if ! grep -q "\[$CHANGELOG_FILENAME\]" CHANGELOG/README.md; then
+            sed -i "3i- [$CHANGELOG_FILENAME](./$CHANGELOG_FILENAME)" CHANGELOG/README.md
+            # Remove the extra newline character added by sed
+            # sed -i '4d' CHANGELOG/README.md
+            fi
+          fi
+
+    - name: Clean up
+      run: |
+        # Remove any temporary files that were created during the process
+        rm -f "${{ github.event.release.tag_name }}-changelog.md"
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v7.0.5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "Update CHANGELOG for release ${{ github.event.release.tag_name }}"
+        title: "Update CHANGELOG for release ${{ github.event.release.tag_name }}"
+        body: "This PR updates the CHANGELOG files for release ${{ github.event.release.tag_name }}"
+        branch: changelog-${{ github.event.release.tag_name }} 
+        base: main 
+        delete-branch: true
+        labels: changelog

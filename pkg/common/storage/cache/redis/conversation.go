@@ -38,7 +38,7 @@ const (
 func NewConversationRedis(rdb redis.UniversalClient, localCache *config.LocalCache, opts *rockscache.Options, db database.Conversation) cache.ConversationCache {
 	batchHandler := NewBatchDeleterRedis(rdb, opts, []string{localCache.Conversation.Topic})
 	c := localCache.Conversation
-	log.ZDebug(context.Background(), "black local cache init", "Topic", c.Topic, "SlotNum", c.SlotNum, "SlotSize", c.SlotSize, "enable", c.Enable())
+	log.ZDebug(context.Background(), "conversation local cache init", "Topic", c.Topic, "SlotNum", c.SlotNum, "SlotSize", c.SlotSize, "enable", c.Enable())
 	return &ConversationRedisCache{
 		BatchDeleter:   batchHandler,
 		rcClient:       rockscache.NewClient(rdb, *opts),

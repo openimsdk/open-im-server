@@ -23,8 +23,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
-	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mcontext"
 	"strings"
 )
 
@@ -51,7 +49,6 @@ func NewOfflinePusher(pushConf *config.Push, cache cache.ThirdCache, fcmConfigPa
 		offlinePusher = jpush.NewClient(pushConf)
 	default:
 		offlinePusher = dummy.NewClient()
-		log.ZWarn(mcontext.WithMustInfoCtx([]string{"push start", "admin", "admin", ""}), "Unknown push config", nil)
 	}
 	return offlinePusher, nil
 }
