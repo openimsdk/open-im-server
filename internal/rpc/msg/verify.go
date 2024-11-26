@@ -59,6 +59,9 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			data.MsgData.ContentType >= constant.NotificationBegin {
 			return nil
 		}
+		if err := m.webhookBeforeSendSingleMsg(ctx, &m.config.WebhooksConfig.BeforeSendSingleMsg, data); err != nil {
+			return err
+		}
 		black, err := m.FriendLocalCache.IsBlack(ctx, data.MsgData.SendID, data.MsgData.RecvID)
 		if err != nil {
 			return err
