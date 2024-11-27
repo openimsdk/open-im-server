@@ -16,8 +16,10 @@ package cache
 
 import (
 	"context"
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+
 	"github.com/openimsdk/tools/s3"
+
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 )
 
 type ObjectCache interface {

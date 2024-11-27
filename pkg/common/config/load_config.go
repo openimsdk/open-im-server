@@ -1,10 +1,11 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/openimsdk/tools/errs"
 	"github.com/spf13/viper"
-	"strings"
 )
 
 func LoadConfig(path string, envPrefix string, config any) error {

@@ -3,16 +3,18 @@ package redis
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
-	mgo2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
-	"github.com/redis/go-redis/v9"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"strconv"
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/redis/go-redis/v9"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	mgo2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 )
 
 func newTestOnline() *userOnline {

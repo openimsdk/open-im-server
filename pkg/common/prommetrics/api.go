@@ -1,9 +1,10 @@
 package prommetrics
 
 import (
+	"strconv"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"strconv"
 )
 
 var (

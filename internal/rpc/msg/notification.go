@@ -17,9 +17,10 @@ package msg
 import (
 	"context"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 type MsgNotificationSender struct {

@@ -1,11 +1,13 @@
 package prommetrics
 
 import (
+	"strconv"
+
 	gp "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"strconv"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 const rpcPath = commonPath

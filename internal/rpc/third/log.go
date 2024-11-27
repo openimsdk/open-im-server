@@ -19,14 +19,14 @@ import (
 	"crypto/rand"
 	"time"
 
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 )
 
 func genLogID() string {

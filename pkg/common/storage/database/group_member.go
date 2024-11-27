@@ -17,8 +17,9 @@ package database
 import (
 	"context"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/db/pagination"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 )
 
 type GroupMember interface {

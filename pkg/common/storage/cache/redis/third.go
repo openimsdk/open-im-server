@@ -16,11 +16,13 @@ package redis
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	"time"
+
 	"github.com/openimsdk/tools/errs"
 	"github.com/redis/go-redis/v9"
-	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 )
 
 func NewThirdCache(rdb redis.UniversalClient) cache.ThirdCache {

@@ -2,6 +2,9 @@ package jssdk
 
 import (
 	"context"
+	"io"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/tools/a2r"
 	"github.com/openimsdk/tools/apiresp"
@@ -9,8 +12,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
-	"io"
-	"strings"
 )
 
 func field[A, B, C any](ctx context.Context, fn func(ctx context.Context, req *A, opts ...grpc.CallOption) (*B, error), req *A, get func(*B) C) (C, error) {

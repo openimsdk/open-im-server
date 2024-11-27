@@ -2,10 +2,11 @@ package redis
 
 import (
 	"context"
+	"testing"
+
 	"github.com/go-redis/redismock/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestLuaSetBatchWithCommonExpire(t *testing.T) {

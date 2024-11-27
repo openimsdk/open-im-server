@@ -16,10 +16,11 @@ package msggateway
 
 import (
 	"crypto/rand"
-	"github.com/stretchr/testify/assert"
 	"sync"
 	"testing"
 	"unsafe"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func mockRandom() []byte {

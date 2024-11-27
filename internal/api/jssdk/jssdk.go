@@ -2,6 +2,8 @@ package jssdk
 
 import (
 	"context"
+	"sort"
+
 	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/group"
@@ -12,7 +14,6 @@ import (
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
-	"sort"
 )
 
 const (

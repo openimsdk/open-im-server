@@ -17,8 +17,9 @@ package group
 import (
 	"context"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	pbgroup "github.com/openimsdk/protocol/group"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 )
 
 // GetGroupInfoCache get group info from cache.

@@ -19,9 +19,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/openimsdk/tools/apiresp"
-
 	"github.com/gorilla/websocket"
+	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/errs"
 )
 

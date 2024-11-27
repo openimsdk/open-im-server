@@ -16,6 +16,7 @@ package group
 
 import (
 	"context"
+
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 )
 

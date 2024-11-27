@@ -2,6 +2,8 @@ package push
 
 import (
 	"context"
+	"sync"
+
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
@@ -9,7 +11,6 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
-	"sync"
 )
 
 type OnlinePusher interface {
