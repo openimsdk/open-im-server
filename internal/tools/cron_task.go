@@ -24,6 +24,7 @@ import (
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/third"
 
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mw"
@@ -58,10 +59,10 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		return err
 	}
 
-	// thirdConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
-	// if err != nil {
-	// 	return err
-	// }
+	thirdConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
+	if err != nil {
+		return err
+	}
 
 	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
 	if err != nil {
@@ -70,7 +71,7 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 
 	msgClient := msg.NewMsgClient(msgConn)
 	conversationClient := pbconversation.NewConversationClient(conversationConn)
-	// thirdClient := third.NewThirdClient(thirdConn)
+	thirdClient := third.NewThirdClient(thirdConn)
 
 	crontab := cron.New()
 
@@ -92,6 +93,13 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	}
 
 	// scheduled soft delete outdated Msgs in specific time when user set `is_msg_destruct` feature.
+	// lose seq-user, but conversation still exists.
+	// seq是总长度 seq-user是用户能获取的范围
+	// 如果退群了 seq-user就固定 拉取不到最新的
+
+	// 群聊控制 seq 用户控制 seq-user
+
+	// 改动后需要写进去Conversation
 	msgDestructFunc := func() {
 		now := time.Now()
 		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), now.UnixMilli()))
@@ -114,21 +122,21 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		return errs.Wrap(err)
 	}
 
-	// // scheduled delete outdated file Objects and their datas in specific time.
-	// deleteObjectFunc := func() {
-	// 	now := time.Now()
-	// 	deleteTime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.FileExpireTime))
-	// 	ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deleteTime.UnixMilli()))
-	// 	log.ZDebug(ctx, "deleteoutDatedData ", "deletetime", deleteTime, "timestamp", deleteTime.UnixMilli())
-	// 	if _, err := thirdClient.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: deleteTime.UnixMilli()}); err != nil {
-	// 		log.ZError(ctx, "cron deleteoutDatedData failed", err, "deleteTime", deleteTime, "cont", time.Since(now))
-	// 		return
-	// 	}
-	// 	log.ZDebug(ctx, "cron deleteoutDatedData success", "deltime", deleteTime, "cont", time.Since(now))
-	// }
-	// if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, deleteObjectFunc); err != nil {
-	// 	return errs.Wrap(err)
-	// }
+	// scheduled delete outdated file Objects and their datas in specific time.
+	deleteObjectFunc := func() {
+		now := time.Now()
+		deleteTime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.FileExpireTime))
+		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deleteTime.UnixMilli()))
+		log.ZDebug(ctx, "deleteoutDatedData ", "deletetime", deleteTime, "timestamp", deleteTime.UnixMilli())
+		if _, err := thirdClient.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: deleteTime.UnixMilli()}); err != nil {
+			log.ZError(ctx, "cron deleteoutDatedData failed", err, "deleteTime", deleteTime, "cont", time.Since(now))
+			return
+		}
+		log.ZDebug(ctx, "cron deleteoutDatedData success", "deltime", deleteTime, "cont", time.Since(now))
+	}
+	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, deleteObjectFunc); err != nil {
+		return errs.Wrap(err)
+	}
 
 	log.ZDebug(ctx, "start cron task", "CronExecuteTime", config.CronTask.CronExecuteTime)
 	crontab.Start()

@@ -291,46 +291,72 @@ func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteO
 	var conf config.Third
 	expireTime := time.UnixMilli(req.ExpireTime)
 	var deltotal int
+	excuteNum := 5
+
 	findPagination := &sdkws.RequestPagination{
 		PageNumber: 1,
 		ShowNumber: 1000,
 	}
-	for {
+
+	for i := 0; i < excuteNum; i++ {
+		// Find all expired data in S3 database
 		total, models, err := t.s3dataBase.FindByExpires(ctx, expireTime, findPagination)
 		if err != nil && errs.Unwrap(err) != mongo.ErrNoDocuments {
 			return nil, errs.Wrap(err)
 		}
-		needDelObjectKeys := make([]string, 0)
+		needDelObjectKeys := make([]string, len(models))
 		for _, model := range models {
 			needDelObjectKeys = append(needDelObjectKeys, model.Key)
 		}
 
+		// Remove duplicate keys, have the same key use in different models
 		needDelObjectKeys = datautil.Distinct(needDelObjectKeys)
+
 		for _, key := range needDelObjectKeys {
-			count, err := t.s3dataBase.FindNotDelByS3(ctx, key, expireTime)
+			// Find all models by key
+			keyModels, err := t.s3dataBase.FindModelsByKey(ctx, key)
 			if err != nil && errs.Unwrap(err) != mongo.ErrNoDocuments {
 				return nil, errs.Wrap(err)
 			}
-			if int(count) < 1 && t.minio != nil {
+
+			// check keyModels, if all keyModels.
+			needDelKey := true // Default can delete
+			for _, model := range keyModels {
+				// If group is empty or CreateTime is after expireTime, can't delete this key
+				if model.Group == "" || model.CreateTime.After(expireTime) {
+					needDelKey = false
+					break
+				}
+			}
+
+			// If this object is not referenced by not expire data, delete it
+			if needDelKey && t.minio != nil {
 				thumbnailKey, _ := t.getMinioImageThumbnailKey(ctx, key)
 
 				t.s3dataBase.DeleteObject(ctx, thumbnailKey)
-				t.s3dataBase.DelS3Key(ctx, conf.Object.Enable, needDelObjectKeys...)
 				t.s3dataBase.DeleteObject(ctx, key)
+
+				t.s3dataBase.DelS3Key(ctx, conf.Object.Enable, key)
 			}
 		}
+
 		for _, model := range models {
+			// Delete all expired data row in S3 database
 			err := t.s3dataBase.DeleteSpecifiedData(ctx, model.Engine, model.Name)
 			if err != nil {
 				return nil, errs.Wrap(err)
 			}
 		}
+
 		if total < int64(findPagination.ShowNumber) {
 			break
 		}
+
 		deltotal += int(total)
 	}
+
 	log.ZDebug(ctx, "DeleteOutdatedData", "delete Total", deltotal)
+
 	return &third.DeleteOutdatedDataResp{}, nil
 }
 

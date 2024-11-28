@@ -43,7 +43,7 @@ type S3Database interface {
 	FindByExpires(ctx context.Context, duration time.Time, pagination pagination.Pagination) (total int64, objects []*model.Object, err error)
 	DeleteObject(ctx context.Context, name string) error
 	DeleteSpecifiedData(ctx context.Context, engine string, name string) error
-	FindNotDelByS3(ctx context.Context, key string, duration time.Time) (int64, error)
+	FindModelsByKey(ctx context.Context, key string) (objects []*model.Object, err error)
 	DelS3Key(ctx context.Context, engine string, keys ...string) error
 }
 
@@ -132,8 +132,8 @@ func (s *s3Database) DeleteSpecifiedData(ctx context.Context, engine string, nam
 	return s.db.Delete(ctx, engine, name)
 }
 
-func (s *s3Database) FindNotDelByS3(ctx context.Context, key string, duration time.Time) (int64, error) {
-	return s.db.FindNotDelByS3(ctx, key, duration)
+func (s *s3Database) FindModelsByKey(ctx context.Context, key string) (objects []*model.Object, err error) {
+	return s.db.FindModelsByKey(ctx, key)
 }
 
 func (s *s3Database) DelS3Key(ctx context.Context, engine string, keys ...string) error {
