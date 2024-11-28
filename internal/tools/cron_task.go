@@ -93,13 +93,6 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	}
 
 	// scheduled soft delete outdated Msgs in specific time when user set `is_msg_destruct` feature.
-	// lose seq-user, but conversation still exists.
-	// seq是总长度 seq-user是用户能获取的范围
-	// 如果退群了 seq-user就固定 拉取不到最新的
-
-	// 群聊控制 seq 用户控制 seq-user
-
-	// 改动后需要写进去Conversation
 	msgDestructFunc := func() {
 		now := time.Now()
 		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), now.UnixMilli()))
