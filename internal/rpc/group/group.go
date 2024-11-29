@@ -57,6 +57,7 @@ import (
 )
 
 type groupServer struct {
+	pbgroup.UnimplementedGroupServer
 	db                    controller.GroupDatabase
 	user                  rpcclient.UserRpcClient
 	notification          *GroupNotificationSender
