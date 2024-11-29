@@ -196,7 +196,7 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 	}
 
 	m, err := s.authDatabase.GetTokensWithoutError(ctx, userID, int(platformID))
-	if err != nil && errors.Is(err, redis.Nil) {
+	if err != nil && !errors.Is(err, redis.Nil) {
 		return err
 	}
 	for k := range m {
@@ -214,7 +214,7 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 
 func (s *authServer) InvalidateToken(ctx context.Context, req *pbauth.InvalidateTokenReq) (*pbauth.InvalidateTokenResp, error) {
 	m, err := s.authDatabase.GetTokensWithoutError(ctx, req.UserID, int(req.PlatformID))
-	if err != nil && errors.Is(err, redis.Nil) {
+	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
 	}
 	if m == nil {
