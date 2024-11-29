@@ -54,6 +54,7 @@ type (
 		msgNotificationSender  *MsgNotificationSender           // RPC client for sending msg notifications.
 		config                 *Config                          // Global configuration settings.
 		webhookClient          *webhook.Client
+		msg.UnimplementedMsgServer
 	}
 
 	Config struct {
