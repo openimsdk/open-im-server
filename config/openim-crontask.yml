@@ -1,3 +1,4 @@
 cronExecuteTime: 0 2 * * *
 retainChatRecords: 365
-fileExpireTime: 90
+fileExpireTime: 180
+deleteObjectType: ["msg-picture","msg-file", "msg-voice","msg-video","msg-video-snapshot","sdklog"]

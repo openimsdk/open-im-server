@@ -31,6 +31,8 @@ import (
 
 func NewS3Mongo(db *mongo.Database) (database.ObjectInfo, error) {
 	coll := db.Collection(database.ObjectName)
+
+	// Create index for name
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "name", Value: 1},
@@ -40,6 +42,27 @@ func NewS3Mongo(db *mongo.Database) (database.ObjectInfo, error) {
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
+
+	// Create index for create_time
+	_, err = coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "create_time", Value: 1},
+		},
+	})
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+
+	// Create index for key
+	_, err = coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "key", Value: 1},
+		},
+	})
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+
 	return &S3Mongo{coll: coll}, nil
 }
 
@@ -71,14 +94,18 @@ func (o *S3Mongo) Take(ctx context.Context, engine string, name string) (*model.
 func (o *S3Mongo) Delete(ctx context.Context, engine string, name string) error {
 	return mongoutil.DeleteOne(ctx, o.coll, bson.M{"name": name, "engine": engine})
 }
-func (o *S3Mongo) FindByExpires(ctx context.Context, duration time.Time, pagination pagination.Pagination) (total int64, objects []*model.Object, err error) {
+
+// Find Expires object
+func (o *S3Mongo) FindNeedDeleteObjectByDB(ctx context.Context, duration time.Time, needDelType []string, pagination pagination.Pagination) (total int64, objects []*model.Object, err error) {
 	return mongoutil.FindPage[*model.Object](ctx, o.coll, bson.M{
 		"create_time": bson.M{"$lt": duration},
+		"group":       bson.M{"$in": needDelType},
 	}, pagination)
 }
-func (o *S3Mongo) FindNotDelByS3(ctx context.Context, key string, duration time.Time) (int64, error) {
-	return mongoutil.Count(ctx, o.coll, bson.M{
-		"key":         key,
-		"create_time": bson.M{"$gt": duration},
+
+// Find object by key
+func (o *S3Mongo) FindModelsByKey(ctx context.Context, key string) (objects []*model.Object, err error) {
+	return mongoutil.Find[*model.Object](ctx, o.coll, bson.M{
+		"key": key,
 	})
 }
