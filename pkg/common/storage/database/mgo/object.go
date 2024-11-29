@@ -96,10 +96,10 @@ func (o *S3Mongo) Delete(ctx context.Context, engine string, name string) error 
 }
 
 // Find Expires object
-func (o *S3Mongo) FindByExpires(ctx context.Context, duration time.Time, pagination pagination.Pagination) (total int64, objects []*model.Object, err error) {
+func (o *S3Mongo) FindNeedDeleteObjectByDB(ctx context.Context, duration time.Time, needDelType []string, pagination pagination.Pagination) (total int64, objects []*model.Object, err error) {
 	return mongoutil.FindPage[*model.Object](ctx, o.coll, bson.M{
 		"create_time": bson.M{"$lt": duration},
-		"group":       bson.M{"$ne": ""},
+		"group":       bson.M{"$in": needDelType},
 	}, pagination)
 }
 

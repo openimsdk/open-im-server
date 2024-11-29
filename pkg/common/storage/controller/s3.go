@@ -40,7 +40,7 @@ type S3Database interface {
 	SetObject(ctx context.Context, info *model.Object) error
 	StatObject(ctx context.Context, name string) (*s3.ObjectInfo, error)
 	FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error)
-	FindByExpires(ctx context.Context, duration time.Time, pagination pagination.Pagination) (total int64, objects []*model.Object, err error)
+	FindNeedDeleteObjectByDB(ctx context.Context, duration time.Time, needDelType []string, pagination pagination.Pagination) (total int64, objects []*model.Object, err error)
 	DeleteObject(ctx context.Context, name string) error
 	DeleteSpecifiedData(ctx context.Context, engine string, name string) error
 	FindModelsByKey(ctx context.Context, key string) (objects []*model.Object, err error)
@@ -120,9 +120,8 @@ func (s *s3Database) StatObject(ctx context.Context, name string) (*s3.ObjectInf
 func (s *s3Database) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
 	return s.s3.FormData(ctx, name, size, contentType, duration)
 }
-func (s *s3Database) FindByExpires(ctx context.Context, duration time.Time, pagination pagination.Pagination) (total int64, objects []*model.Object, err error) {
-
-	return s.db.FindByExpires(ctx, duration, pagination)
+func (s *s3Database) FindNeedDeleteObjectByDB(ctx context.Context, duration time.Time, needDelType []string, pagination pagination.Pagination) (total int64, objects []*model.Object, err error) {
+	return s.db.FindNeedDeleteObjectByDB(ctx, duration, needDelType, pagination)
 }
 
 func (s *s3Database) DeleteObject(ctx context.Context, name string) error {

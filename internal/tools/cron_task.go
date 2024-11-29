@@ -118,13 +118,29 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	// scheduled delete outdated file Objects and their datas in specific time.
 	deleteObjectFunc := func() {
 		now := time.Now()
+		executeNum := 5
+		// number of pagination. if need modify, need update value in third.DeleteOutdatedData
+		pageShowNumber := 500
 		deleteTime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.FileExpireTime))
 		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deleteTime.UnixMilli()))
-		log.ZDebug(ctx, "deleteoutDatedData ", "deletetime", deleteTime, "timestamp", deleteTime.UnixMilli())
-		if _, err := thirdClient.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: deleteTime.UnixMilli()}); err != nil {
-			log.ZError(ctx, "cron deleteoutDatedData failed", err, "deleteTime", deleteTime, "cont", time.Since(now))
+		log.ZDebug(ctx, "deleteoutDatedData", "deletetime", deleteTime, "timestamp", deleteTime.UnixMilli())
+
+		if len(config.CronTask.DeleteObjectType) == 0 {
+			log.ZDebug(ctx, "cron deleteoutDatedData not type need delete", "deletetime", deleteTime, "DeleteObjectType", config.CronTask.DeleteObjectType, "cont", time.Since(now))
 			return
 		}
+
+		for i := 0; i < executeNum; i++ {
+			resp, err := thirdClient.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: deleteTime.UnixMilli(), ObjectGroup: config.CronTask.DeleteObjectType})
+			if err != nil {
+				log.ZError(ctx, "cron deleteoutDatedData failed", err, "deleteTime", deleteTime, "cont", time.Since(now))
+				return
+			}
+			if resp.Count == 0 || resp.Count < int32(pageShowNumber) {
+				break
+			}
+		}
+
 		log.ZDebug(ctx, "cron deleteoutDatedData success", "deltime", deleteTime, "cont", time.Since(now))
 	}
 	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, deleteObjectFunc); err != nil {

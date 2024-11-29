@@ -296,8 +296,6 @@ func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteO
 		ShowNumber: 500,
 	}
 
-	log.ZDebug(ctx, "del type is ", "needDelType", req.ObjectGroup)
-
 	// Find all expired data in S3 database
 	total, models, err := t.s3dataBase.FindNeedDeleteObjectByDB(ctx, expireTime, req.ObjectGroup, findPagination)
 	if err != nil && errs.Unwrap(err) != mongo.ErrNoDocuments {
