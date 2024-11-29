@@ -436,19 +436,37 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 	return &pbconversation.CreateGroupChatConversationsResp{}, nil
 }
 
+// func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbconversation.SetConversationMaxSeqReq) (*pbconversation.SetConversationMaxSeqResp, error) {
+// 	if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.OwnerUserID, req.ConversationID,
+// 		map[string]any{"max_seq": req.MaxSeq}); err != nil {
+// 		return nil, err
+// 	}
+
+// 	return &pbconversation.SetConversationMaxSeqResp{}, nil
+// }
+
 func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbconversation.SetConversationMaxSeqReq) (*pbconversation.SetConversationMaxSeqResp, error) {
-	if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.OwnerUserID, req.ConversationID,
-		map[string]any{"max_seq": req.MaxSeq}); err != nil {
-		return nil, err
+
+	if err := c.conversationDatabase.SetUserConversationMaxSeq(ctx, req.ConversationID, req.OwnerUserID[0], req.MaxSeq); err != nil {
+		return nil, errs.Wrap(err)
 	}
+
 	return &pbconversation.SetConversationMaxSeqResp{}, nil
 }
 
+// func (c *conversationServer) SetConversationMinSeq(ctx context.Context, req *pbconversation.SetConversationMinSeqReq) (*pbconversation.SetConversationMinSeqResp, error) {
+// 	if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.OwnerUserID, req.ConversationID,
+// 		map[string]any{"min_seq": req.MinSeq}); err != nil {
+// 		return nil, err
+// 	}
+// 	return &pbconversation.SetConversationMinSeqResp{}, nil
+// }
+
 func (c *conversationServer) SetConversationMinSeq(ctx context.Context, req *pbconversation.SetConversationMinSeqReq) (*pbconversation.SetConversationMinSeqResp, error) {
-	if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.OwnerUserID, req.ConversationID,
-		map[string]any{"min_seq": req.MinSeq}); err != nil {
-		return nil, err
+	if err := c.conversationDatabase.SetUserConversationMinSeq(ctx, req.ConversationID, req.OwnerUserID[0], req.MinSeq); err != nil {
+		return nil, errs.Wrap(err)
 	}
+
 	return &pbconversation.SetConversationMinSeqResp{}, nil
 }
 

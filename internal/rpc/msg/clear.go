@@ -12,6 +12,7 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/idutil"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"golang.org/x/sync/errgroup"
@@ -100,6 +101,8 @@ func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) 
 				}
 
 				if len(seqs) > 0 {
+					minseq := datautil.Max(seqs...)
+
 					if err := m.Conversation.UpdateConversation(handleCtx,
 						&pbconversation.UpdateConversationReq{
 							UserIDs:               []string{conversation.OwnerUserID},
@@ -107,6 +110,10 @@ func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) 
 							LatestMsgDestructTime: wrapperspb.Int64(time.Now().UnixMilli())}); err != nil {
 						log.ZError(handleCtx, "updateUsersConversationField failed", err, "conversationID", conversation.ConversationID, "ownerUserID", conversation.OwnerUserID)
 						continue
+					}
+
+					if err := m.Conversation.SetConversationMinSeq(handleCtx, []string{conversation.OwnerUserID}, conversation.ConversationID, minseq); err != nil {
+						return err
 					}
 
 					// if you need Notify SDK client userseq is update.

@@ -16,9 +16,11 @@ package mgo
 
 import (
 	"context"
+	"errors"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"time"
 
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/db/mongoutil"
@@ -226,4 +228,50 @@ func (c *ConversationMgo) GetConversationNotReceiveMessageUserIDs(ctx context.Co
 
 func (c *ConversationMgo) FindConversationUserVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error) {
 	return c.version.FindChangeLog(ctx, userID, version, limit)
+}
+
+func (s *ConversationMgo) setSeq(ctx context.Context, conversationID string, userID string, seq int64, field string) error {
+	filter := map[string]any{
+		"owner_user_id":   userID,
+		"conversation_id": conversationID,
+	}
+	update := map[string]any{
+		"$set": bson.M{
+			field: seq,
+		},
+	}
+	return mongoutil.UpdateOne(ctx, s.coll, filter, update, false, nil)
+}
+
+func (s *ConversationMgo) getSeq(ctx context.Context, conversationID string, userID string, failed string) (int64, error) {
+	filter := map[string]any{
+		"owner_user_id":   userID,
+		"conversation_id": conversationID,
+	}
+
+	opt := options.FindOne().SetProjection(bson.M{"_id": 0, failed: 1})
+	seq, err := mongoutil.FindOne[int64](ctx, s.coll, filter, opt)
+	if err == nil {
+		return seq, nil
+	} else if errors.Is(err, mongo.ErrNoDocuments) {
+		return 0, nil
+	} else {
+		return 0, err
+	}
+}
+
+func (s *ConversationMgo) GetUserConversationMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
+	return s.getSeq(ctx, conversationID, userID, "min_seq")
+}
+
+func (s *ConversationMgo) SetUserConversationMinSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
+	return s.setSeq(ctx, conversationID, userID, seq, "min_seq")
+}
+
+func (s *ConversationMgo) GetUserConversationMaxSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
+	return s.getSeq(ctx, conversationID, userID, "max_seq")
+}
+
+func (s *ConversationMgo) SetUserConversationMaxSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
+	return s.setSeq(ctx, conversationID, userID, seq, "max_seq")
 }

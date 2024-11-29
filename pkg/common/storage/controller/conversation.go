@@ -74,6 +74,15 @@ type ConversationDatabase interface {
 	GetNotNotifyConversationIDs(ctx context.Context, userID string) ([]string, error)
 	// GetPinnedConversationIDs gets pinned conversationIDs by userID
 	GetPinnedConversationIDs(ctx context.Context, userID string) ([]string, error)
+
+	// GetUserConversationMinSeq is get user specific conversation min seq
+	GetUserConversationMinSeq(ctx context.Context, conversationID, userID string) (int64, error)
+	// SetUserConversationMinSeq is set user specific conversation min seq
+	SetUserConversationMinSeq(ctx context.Context, conversationID, userID string, seq int64) error
+	// GetUserConversationMaxSeq is get user specific conversation max seq
+	GetUserConversationMaxSeq(ctx context.Context, conversationID, userID string) (int64, error)
+	// SetUserConversationMaxSeq is set user specific conversation max seq
+	SetUserConversationMaxSeq(ctx context.Context, conversationID, userID string, seq int64) error
 }
 
 func NewConversationDatabase(conversation database.Conversation, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -400,4 +409,29 @@ func (c *conversationDatabase) GetPinnedConversationIDs(ctx context.Context, use
 		return nil, err
 	}
 	return conversationIDs, nil
+}
+
+func (c *conversationDatabase) GetUserConversationMinSeq(ctx context.Context, conversationID, userID string) (int64, error) {
+	seq, err := c.conversationDB.GetUserConversationMinSeq(ctx, conversationID, userID)
+	if err != nil {
+		return 0, err
+	}
+
+	return seq, nil
+}
+func (c *conversationDatabase) SetUserConversationMinSeq(ctx context.Context, conversationID, userID string, seq int64) error {
+	return c.conversationDB.SetUserConversationMinSeq(ctx, conversationID, userID, seq)
+}
+
+func (c *conversationDatabase) GetUserConversationMaxSeq(ctx context.Context, conversationID, userID string) (int64, error) {
+	seq, err := c.conversationDB.GetUserConversationMaxSeq(ctx, conversationID, userID)
+	if err != nil {
+		return 0, err
+	}
+
+	return seq, nil
+}
+
+func (c *conversationDatabase) SetUserConversationMaxSeq(ctx context.Context, conversationID, userID string, seq int64) error {
+	return c.conversationDB.SetUserConversationMaxSeq(ctx, conversationID, userID, seq)
 }
