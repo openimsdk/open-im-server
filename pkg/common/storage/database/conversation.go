@@ -42,9 +42,4 @@ type Conversation interface {
 	GetConversationIDsNeedDestruct(ctx context.Context) ([]*model.Conversation, error)
 	GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error)
 	FindConversationUserVersion(ctx context.Context, userID string, version uint, limit int) (*model.VersionLog, error)
-
-	GetUserConversationMinSeq(ctx context.Context, conversationID, userID string) (int64, error)
-	SetUserConversationMinSeq(ctx context.Context, conversationID, userID string, seq int64) error
-	GetUserConversationMaxSeq(ctx context.Context, conversationID, userID string) (int64, error)
-	SetUserConversationMaxSeq(ctx context.Context, conversationID, userID string, seq int64) error
 }
