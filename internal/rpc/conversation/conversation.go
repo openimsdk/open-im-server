@@ -695,7 +695,7 @@ func (c *conversationServer) GetConversationsNeedClearMsg(ctx context.Context, _
 
 		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, pagination)
 		if err != nil {
-			// log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
+			log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
 			continue
 		}
 
