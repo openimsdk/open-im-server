@@ -43,6 +43,7 @@ import (
 )
 
 type conversationServer struct {
+	pbconversation.UnimplementedConversationServer
 	msgRpcClient         *rpcclient.MessageRpcClient
 	user                 *rpcclient.UserRpcClient
 	groupRpcClient       *rpcclient.GroupRpcClient
