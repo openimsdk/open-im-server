@@ -113,9 +113,10 @@ type API struct {
 }
 
 type CronTask struct {
-	CronExecuteTime   string `mapstructure:"cronExecuteTime"`
-	RetainChatRecords int    `mapstructure:"retainChatRecords"`
-	FileExpireTime    int    `mapstructure:"fileExpireTime"`
+	CronExecuteTime   string   `mapstructure:"cronExecuteTime"`
+	RetainChatRecords int      `mapstructure:"retainChatRecords"`
+	FileExpireTime    int      `mapstructure:"fileExpireTime"`
+	DeleteObjectType  []string `mapstructure:"deleteObjectType"`
 }
 
 type OfflinePushConfig struct {
