@@ -244,8 +244,8 @@ func (m *MessageRpcClient) GetConversationMaxSeq(ctx context.Context, conversati
 	return resp.MaxSeq, nil
 }
 
-func (m *MessageRpcClient) ClearMsg(ctx context.Context, ts int64) error {
-	_, err := m.Client.ClearMsg(ctx, &msg.ClearMsgReq{Timestamp: ts})
+func (m *MessageRpcClient) DestructMsgs(ctx context.Context, ts int64) error {
+	_, err := m.Client.DestructMsgs(ctx, &msg.DestructMsgsReq{Timestamp: ts})
 	return err
 }
 
