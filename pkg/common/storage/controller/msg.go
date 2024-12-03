@@ -57,8 +57,8 @@ type CommonMsgDatabase interface {
 	// DeleteConversationMsgsAndSetMinSeq deletes conversation messages and resets the minimum sequence number. If `remainTime` is 0, all messages are deleted (this method does not delete Redis
 	// cache).
 	DeleteConversationMsgsAndSetMinSeq(ctx context.Context, conversationID string, remainTime int64) error
-	// UserMsgsDestruct marks messages for deletion based on destruct time and returns a list of sequence numbers for marked messages.
-	UserMsgsDestruct(ctx context.Context, userID string, conversationID string, destructTime int64, lastMsgDestructTime time.Time) (seqs []int64, err error)
+	// ClearUserMsgs marks messages for deletion based on clear time and returns a list of sequence numbers for marked messages.
+	ClearUserMsgs(ctx context.Context, userID string, conversationID string, clearTime int64, lastMsgClearTime time.Time) (seqs []int64, err error)
 	// DeleteUserMsgsBySeqs allows a user to delete messages based on sequence numbers.
 	DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error
 	// DeleteMsgsPhysicalBySeqs physically deletes messages by emptying them based on sequence numbers.
@@ -92,7 +92,7 @@ type CommonMsgDatabase interface {
 	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*model.GroupCount, dateCount map[string]int64, err error)
 	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
 
-	// clear msg
+	// get Msg when destruct msg before
 	GetBeforeMsg(ctx context.Context, ts int64, docIds []string, limit int) ([]*model.MsgDocModel, error)
 	DeleteDocMsgBefore(ctx context.Context, ts int64, doc *model.MsgDocModel) ([]int, error)
 
@@ -528,10 +528,10 @@ func (db *commonMsgDatabase) DeleteConversationMsgsAndSetMinSeq(ctx context.Cont
 	return db.seqConversation.SetMinSeq(ctx, conversationID, minSeq)
 }
 
-func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string, conversationID string, destructTime int64, lastMsgDestructTime time.Time) (seqs []int64, err error) {
+func (db *commonMsgDatabase) ClearUserMsgs(ctx context.Context, userID string, conversationID string, clearTime int64, lastMsgClearTime time.Time) (seqs []int64, err error) {
 	var index int64
 	for {
-		// from oldest 2 newest
+		// from oldest 2 newest, ASC
 		msgDocModel, err := db.msgDocDatabase.GetMsgDocModelByIndex(ctx, conversationID, index, 1)
 		if err != nil || msgDocModel.DocID == "" {
 			if err != nil {
@@ -544,15 +544,19 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 			// If an error is reported, or the error cannot be obtained, it is physically deleted and seq delMongoMsgsPhysical(delStruct.delDocIDList) is returned to end the recursion
 			break
 		}
+
 		index++
-		// && msgDocModel.Msg[0].Msg.SendTime > lastMsgDestructTime.UnixMilli()
+
+		// && msgDocModel.Msg[0].Msg.SendTime > lastMsgClearTime.UnixMilli()
 		if len(msgDocModel.Msg) > 0 {
 			i := 0
 			var over bool
 			for _, msg := range msgDocModel.Msg {
 				i++
-				if msg != nil && msg.Msg != nil && msg.Msg.SendTime+destructTime*1000 <= time.Now().UnixMilli() {
-					if msg.Msg.SendTime+destructTime*1000 > lastMsgDestructTime.UnixMilli() && !datautil.Contain(userID, msg.DelList...) {
+				// over clear time, need to clear
+				if msg != nil && msg.Msg != nil && msg.Msg.SendTime+clearTime*1000 <= time.Now().UnixMilli() {
+					// if msg is not in del list, add to del list
+					if msg.Msg.SendTime+clearTime*1000 > lastMsgClearTime.UnixMilli() && !datautil.Contain(userID, msg.DelList...) {
 						seqs = append(seqs, msg.Msg.Seq)
 					}
 				} else {
@@ -567,13 +571,18 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 		}
 	}
 
-	log.ZDebug(ctx, "UserMsgsDestruct", "conversationID", conversationID, "userID", userID, "seqs", seqs)
+	log.ZDebug(ctx, "ClearUserMsgs", "conversationID", conversationID, "userID", userID, "seqs", seqs)
+
+	// have msg need to destruct
 	if len(seqs) > 0 {
-		userMinSeq := seqs[len(seqs)-1] + 1
-		currentUserMinSeq, err := db.seqUser.GetUserMinSeq(ctx, conversationID, userID)
+		// update min seq to clear after
+		userMinSeq := seqs[len(seqs)-1] + 1                                             // user min seq when clear after
+		currentUserMinSeq, err := db.seqUser.GetUserMinSeq(ctx, conversationID, userID) // user min seq when clear before
 		if err != nil {
 			return nil, err
 		}
+
+		// if before < after, update min seq
 		if currentUserMinSeq < userMinSeq {
 			if err := db.seqUser.SetUserMinSeq(ctx, conversationID, userID, userMinSeq); err != nil {
 				return nil, err
