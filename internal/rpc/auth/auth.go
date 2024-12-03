@@ -129,7 +129,7 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 func (s *authServer) parseToken(ctx context.Context, tokensString string) (claims *tokenverify.Claims, err error) {
 	claims, err = tokenverify.GetClaimFromToken(tokensString, authverify.Secret(s.config.Share.Secret))
 	if err != nil {
-		return nil, errs.Wrap(err)
+		return nil, err
 	}
 	isAdmin := authverify.IsManagerUserID(claims.UserID, s.config.Share.IMAdminUserID)
 	if isAdmin {
