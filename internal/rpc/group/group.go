@@ -57,6 +57,7 @@ import (
 )
 
 type groupServer struct {
+	pbgroup.UnimplementedGroupServer
 	db                    controller.GroupDatabase
 	user                  rpcclient.UserRpcClient
 	notification          *GroupNotificationSender
@@ -963,6 +964,7 @@ func (g *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 	if err != nil {
 		return err
 	}
+
 	return g.conversationRpcClient.SetConversationMaxSeq(ctx, userIDs, conevrsationID, maxSeq)
 }
 

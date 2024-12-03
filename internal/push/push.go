@@ -14,6 +14,7 @@ import (
 )
 
 type pushServer struct {
+	pbpush.UnimplementedPushMsgServiceServer
 	database      controller.PushDatabase
 	disCov        discovery.SvcDiscoveryRegistry
 	offlinePusher offlinepush.OfflinePusher
