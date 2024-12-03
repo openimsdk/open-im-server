@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/tools/mw"
 	"strconv"
 	"strings"
 	"sync"
@@ -346,6 +347,12 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Con
 	}
 }
 func (och *OnlineHistoryRedisConsumerHandler) HandleUserHasReadSeqMessages(ctx context.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			mw.PanicStackToLog(ctx, r)
+		}
+	}()
+
 	defer och.wg.Done()
 
 	for msg := range och.conversationUserHasReadChan {

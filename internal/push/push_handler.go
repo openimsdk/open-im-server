@@ -166,17 +166,21 @@ func (c *ConsumerHandler) Push2User(ctx context.Context, userIDs []string, msg *
 			return nil
 		}
 	}
-	offlinePushUserID := []string{msg.RecvID}
+	needOfflinePushUserID := []string{msg.RecvID}
+	var offlinePushUserID []string
 
 	//receiver offline push
-	if err = c.webhookBeforeOfflinePush(ctx, &c.config.WebhooksConfig.BeforeOfflinePush,
-		offlinePushUserID, msg, nil); err != nil {
+	if err = c.webhookBeforeOfflinePush(ctx, &c.config.WebhooksConfig.BeforeOfflinePush, needOfflinePushUserID, msg, &offlinePushUserID); err != nil {
 		return err
 	}
 	log.ZInfo(ctx, "webhookBeforeOfflinePush end")
-	err = c.offlinePushMsg(ctx, msg, offlinePushUserID)
+
+	if len(offlinePushUserID) > 0 {
+		needOfflinePushUserID = offlinePushUserID
+	}
+	err = c.offlinePushMsg(ctx, msg, needOfflinePushUserID)
 	if err != nil {
-		log.ZWarn(ctx, "offlinePushMsg failed", err, "offlinePushUserID", offlinePushUserID, "msg", msg)
+		log.ZWarn(ctx, "offlinePushMsg failed", err, "needOfflinePushUserID", needOfflinePushUserID, "msg", msg)
 		return nil
 	}
 

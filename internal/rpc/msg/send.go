@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/tools/mw"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -83,7 +84,14 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *pbmsg.SendMsgReq)
 }
 
 func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgData) {
+
 	log.ZDebug(nctx, "setConversationAtInfo", "msg", msg)
+
+	defer func() {
+		if r := recover(); r != nil {
+			mw.PanicStackToLog(nctx, r)
+		}
+	}()
 
 	ctx := mcontext.NewCtx("@@@" + mcontext.GetOperationID(nctx))
 
@@ -171,9 +179,6 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 		return nil, nil
 	} else {
-		if err = m.webhookBeforeSendSingleMsg(ctx, &m.config.WebhooksConfig.BeforeSendSingleMsg, req); err != nil {
-			return nil, err
-		}
 		if err := m.webhookBeforeMsgModify(ctx, &m.config.WebhooksConfig.BeforeMsgModify, req); err != nil {
 			return nil, err
 		}

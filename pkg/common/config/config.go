@@ -113,9 +113,10 @@ type API struct {
 }
 
 type CronTask struct {
-	CronExecuteTime   string `mapstructure:"cronExecuteTime"`
-	RetainChatRecords int    `mapstructure:"retainChatRecords"`
-	FileExpireTime    int    `mapstructure:"fileExpireTime"`
+	CronExecuteTime   string   `mapstructure:"cronExecuteTime"`
+	RetainChatRecords int      `mapstructure:"retainChatRecords"`
+	FileExpireTime    int      `mapstructure:"fileExpireTime"`
+	DeleteObjectType  []string `mapstructure:"deleteObjectType"`
 }
 
 type OfflinePushConfig struct {
@@ -369,20 +370,8 @@ type Share struct {
 }
 
 type MultiLogin struct {
-	Policy            int `mapstructure:"policy"`
-	MaxNumOneEnd      int `mapstructure:"maxNumOneEnd"`
-	CustomizeLoginNum struct {
-		IOS     int `mapstructure:"ios"`
-		Android int `mapstructure:"android"`
-		Windows int `mapstructure:"windows"`
-		OSX     int `mapstructure:"osx"`
-		Web     int `mapstructure:"web"`
-		MiniWeb int `mapstructure:"miniWeb"`
-		Linux   int `mapstructure:"linux"`
-		APad    int `mapstructure:"aPad"`
-		IPad    int `mapstructure:"iPad"`
-		Admin   int `mapstructure:"admin"`
-	} `mapstructure:"customizeLoginNum"`
+	Policy       int `mapstructure:"policy"`
+	MaxNumOneEnd int `mapstructure:"maxNumOneEnd"`
 }
 
 type RpcRegisterName struct {

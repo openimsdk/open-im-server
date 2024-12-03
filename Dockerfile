@@ -8,7 +8,7 @@ ENV SERVER_DIR=/openim-server
 WORKDIR $SERVER_DIR
 
 # Set the Go proxy to improve dependency resolution speed
-ENV GOPROXY=https://goproxy.io,direct
+# ENV GOPROXY=https://goproxy.io,direct
 
 # Copy all files from the current directory into the container
 COPY . .

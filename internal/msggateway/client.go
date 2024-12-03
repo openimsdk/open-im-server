@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/openimsdk/tools/mw"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
@@ -375,6 +376,11 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 func (c *Client) activeHeartbeat(ctx context.Context) {
 	if c.PlatformID == constant.WebPlatformID {
 		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					mw.PanicStackToLog(ctx, r)
+				}
+			}()
 			log.ZDebug(ctx, "server initiative send heartbeat start.")
 			ticker := time.NewTicker(pingPeriod)
 			defer ticker.Stop()
@@ -446,6 +452,8 @@ func (c *Client) handlerTextMessage(b []byte) error {
 		if err != nil {
 			return err
 		}
+		c.w.Lock()
+		defer c.w.Unlock()
 		if err := c.conn.SetWriteDeadline(writeWait); err != nil {
 			return err
 		}

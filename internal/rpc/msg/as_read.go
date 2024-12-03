@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"errors"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/protocol/constant"
@@ -108,7 +109,7 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 		return nil, err
 	}
 	currentHasReadSeq, err := m.MsgDatabase.GetHasReadSeq(ctx, req.UserID, req.ConversationID)
-	if err != nil && errs.Unwrap(err) != redis.Nil {
+	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
 	}
 	if hasReadSeq > currentHasReadSeq {
@@ -136,7 +137,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		return nil, err
 	}
 	hasReadSeq, err := m.MsgDatabase.GetHasReadSeq(ctx, req.UserID, req.ConversationID)
-	if err != nil && errs.Unwrap(err) != redis.Nil {
+	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
 	}
 	var seqs []int64
@@ -180,14 +181,23 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 			req.UserID, seqs, hasReadSeq)
 	}
 
-	reqCall := &cbapi.CallbackGroupMsgReadReq{
-		SendID:       conversation.OwnerUserID,
-		ReceiveID:    req.UserID,
-		UnreadMsgNum: req.HasReadSeq,
-		ContentType:  int64(conversation.ConversationType),
+	if conversation.ConversationType == constant.SingleChatType {
+		reqCall := &cbapi.CallbackSingleMsgReadReq{
+			ConversationID: conversation.ConversationID,
+			UserID:         conversation.OwnerUserID,
+			Seqs:           req.Seqs,
+			ContentType:    conversation.ConversationType,
+		}
+		m.webhookAfterSingleMsgRead(ctx, &m.config.WebhooksConfig.AfterSingleMsgRead, reqCall)
+	} else if conversation.ConversationType == constant.ReadGroupChatType {
+		reqCall := &cbapi.CallbackGroupMsgReadReq{
+			SendID:       conversation.OwnerUserID,
+			ReceiveID:    req.UserID,
+			UnreadMsgNum: req.HasReadSeq,
+			ContentType:  int64(conversation.ConversationType),
+		}
+		m.webhookAfterGroupMsgRead(ctx, &m.config.WebhooksConfig.AfterGroupMsgRead, reqCall)
 	}
-
-	m.webhookAfterGroupMsgRead(ctx, &m.config.WebhooksConfig.AfterGroupMsgRead, reqCall)
 	return &msg.MarkConversationAsReadResp{}, nil
 }
 

@@ -16,6 +16,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -39,6 +40,7 @@ import (
 )
 
 type authServer struct {
+	pbauth.UnimplementedAuthServer
 	authDatabase   controller.AuthDatabase
 	userRpcClient  *rpcclient.UserRpcClient
 	RegisterCenter discovery.SvcDiscoveryRegistry
@@ -66,6 +68,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
 			config.Share.MultiLogin,
+			config.Share.IMAdminUserID,
 		),
 		config: config,
 	})
@@ -129,6 +132,10 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
+	isAdmin := authverify.IsManagerUserID(claims.UserID, s.config.Share.IMAdminUserID)
+	if isAdmin {
+		return claims, nil
+	}
 	m, err := s.authDatabase.GetTokensWithoutError(ctx, claims.UserID, claims.PlatformID)
 	if err != nil {
 		return nil, err
@@ -190,7 +197,7 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 	}
 
 	m, err := s.authDatabase.GetTokensWithoutError(ctx, userID, int(platformID))
-	if err != nil && err != redis.Nil {
+	if err != nil && !errors.Is(err, redis.Nil) {
 		return err
 	}
 	for k := range m {
@@ -208,7 +215,7 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 
 func (s *authServer) InvalidateToken(ctx context.Context, req *pbauth.InvalidateTokenReq) (*pbauth.InvalidateTokenResp, error) {
 	m, err := s.authDatabase.GetTokensWithoutError(ctx, req.UserID, int(req.PlatformID))
-	if err != nil && err != redis.Nil {
+	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
 	}
 	if m == nil {
