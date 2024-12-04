@@ -46,8 +46,7 @@ func (s *Server) InitServer(ctx context.Context, config *Config, disCov discover
 
 func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 	return startrpc.Start(ctx, &conf.Discovery, &conf.MsgGateway.Prometheus, conf.MsgGateway.ListenIP,
-		conf.MsgGateway.RPC.RegisterIP,
-		conf.MsgGateway.RPC.Ports, index,
+		index,
 		conf.Share.RpcRegisterName.MessageGateway,
 		&conf.Share,
 		conf,
@@ -57,7 +56,7 @@ func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 
 type Server struct {
 	msggateway.UnimplementedMsgGatewayServer
-	rpcPort        int
+
 	LongConnServer LongConnServer
 	config         *Config
 	pushTerminal   map[int]struct{}
@@ -70,9 +69,8 @@ func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 	s.LongConnServer = LongConnServer
 }
 
-func NewServer(rpcPort int, longConnServer LongConnServer, conf *Config, ready func(srv *Server) error) *Server {
+func NewServer(longConnServer LongConnServer, conf *Config, ready func(srv *Server) error) *Server {
 	s := &Server{
-		rpcPort:        rpcPort,
 		LongConnServer: longConnServer,
 		pushTerminal:   make(map[int]struct{}),
 		config:         conf,
