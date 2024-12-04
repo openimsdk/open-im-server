@@ -97,6 +97,9 @@ type CommonMsgDatabase interface {
 	DeleteDocMsgBefore(ctx context.Context, ts int64, doc *model.MsgDocModel) ([]int, error)
 
 	GetDocIDs(ctx context.Context) ([]string, error)
+
+	SetUserConversationsMaxSeq(ctx context.Context, conversationID string, userID string, seq int64) error
+	SetUserConversationsMinSeq(ctx context.Context, conversationID string, userID string, seq int64) error
 }
 
 func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUser cache.SeqUser, seqConversation cache.SeqConversationCache, kafkaConf *config.Kafka) (CommonMsgDatabase, error) {
@@ -700,6 +703,14 @@ func (db *commonMsgDatabase) SetMinSeqs(ctx context.Context, seqs map[string]int
 
 func (db *commonMsgDatabase) SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
 	return db.seqUser.SetUserMinSeqs(ctx, userID, seqs)
+}
+
+func (db *commonMsgDatabase) SetUserConversationsMaxSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
+	return db.seqUser.SetUserMaxSeq(ctx, conversationID, userID, seq)
+}
+
+func (db *commonMsgDatabase) SetUserConversationsMinSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
+	return db.seqUser.SetUserMinSeq(ctx, conversationID, userID, seq)
 }
 
 func (db *commonMsgDatabase) UserSetHasReadSeqs(ctx context.Context, userID string, hasReadSeqs map[string]int64) error {
