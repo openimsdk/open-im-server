@@ -16,6 +16,7 @@ package conversation
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	pbmsg "github.com/openimsdk/protocol/msg"
 	"sort"
 	"time"
@@ -432,6 +433,10 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context,
 func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, req *pbconversation.CreateGroupChatConversationsReq) (*pbconversation.CreateGroupChatConversationsResp, error) {
 	err := c.conversationDatabase.CreateGroupChatConversation(ctx, req.GroupID, req.UserIDs)
 	if err != nil {
+		return nil, err
+	}
+	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID)
+	if _, err := c.msgRpcClient.Client.SetUserConversationMaxSeq(ctx, &pbmsg.SetUserConversationMaxSeqReq{ConversationID: conversationID, OwnerUserID: req.UserIDs, MaxSeq: 0}); err != nil {
 		return nil, err
 	}
 	return &pbconversation.CreateGroupChatConversationsResp{}, nil
