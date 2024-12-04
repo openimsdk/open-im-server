@@ -1,27 +1,28 @@
 package config
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLoadLogConfig(t *testing.T) {
 	var log Log
-	err := LoadConfig("../../../config/log.yml", "IMENV_LOG", &log)
+	err := Load("../../../config/log.yml", "IMENV_LOG", "", &log)
 	assert.Nil(t, err)
 	assert.Equal(t, "../../../../logs/", log.StorageLocation)
 }
 
 func TestLoadMinioConfig(t *testing.T) {
 	var storageConfig Minio
-	err := LoadConfig("../../../config/minio.yml", "IMENV_MINIO", &storageConfig)
+	err := Load("../../../config/minio.yml", "IMENV_MINIO", "", &storageConfig)
 	assert.Nil(t, err)
 	assert.Equal(t, "openim", storageConfig.Bucket)
 }
 
 func TestLoadWebhooksConfig(t *testing.T) {
 	var webhooks Webhooks
-	err := LoadConfig("../../../config/webhooks.yml", "IMENV_WEBHOOKS", &webhooks)
+	err := Load("../../../config/webhooks.yml", "IMENV_WEBHOOKS", "", &webhooks)
 	assert.Nil(t, err)
 	assert.Equal(t, 5, webhooks.BeforeAddBlack.Timeout)
 
@@ -29,7 +30,7 @@ func TestLoadWebhooksConfig(t *testing.T) {
 
 func TestLoadOpenIMRpcUserConfig(t *testing.T) {
 	var user User
-	err := LoadConfig("../../../config/openim-rpc-user.yml", "IMENV_OPENIM_RPC_USER", &user)
+	err := Load("../../../config/openim-rpc-user.yml", "IMENV_OPENIM_RPC_USER", "", &user)
 	assert.Nil(t, err)
 	//export IMENV_OPENIM_RPC_USER_RPC_LISTENIP="0.0.0.0"
 	assert.Equal(t, "0.0.0.0", user.RPC.ListenIP)
@@ -39,14 +40,14 @@ func TestLoadOpenIMRpcUserConfig(t *testing.T) {
 
 func TestLoadNotificationConfig(t *testing.T) {
 	var noti Notification
-	err := LoadConfig("../../../config/notification.yml", "IMENV_NOTIFICATION", &noti)
+	err := Load("../../../config/notification.yml", "IMENV_NOTIFICATION", "", &noti)
 	assert.Nil(t, err)
 	assert.Equal(t, "Your friend's profile has been changed", noti.FriendRemarkSet.OfflinePush.Title)
 }
 
 func TestLoadOpenIMThirdConfig(t *testing.T) {
 	var third Third
-	err := LoadConfig("../../../config/openim-rpc-third.yml", "IMENV_OPENIM_RPC_THIRD", &third)
+	err := Load("../../../config/openim-rpc-third.yml", "IMENV_OPENIM_RPC_THIRD", "", &third)
 	assert.Nil(t, err)
 	assert.Equal(t, "enabled", third.Object.Enable)
 	assert.Equal(t, "https://oss-cn-chengdu.aliyuncs.com", third.Object.Oss.Endpoint)
