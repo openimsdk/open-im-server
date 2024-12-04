@@ -197,7 +197,6 @@ type Push struct {
 	RPC struct {
 		RegisterIP string `mapstructure:"registerIP"`
 		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus           Prometheus `mapstructure:"prometheus"`
 	MaxConcurrentWorkers int        `mapstructure:"maxConcurrentWorkers"`
