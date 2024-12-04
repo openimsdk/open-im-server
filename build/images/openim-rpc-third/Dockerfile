@@ -1,44 +1,57 @@
-# Copyright © 2023 OpenIM. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Use Go 1.22 Alpine as the base image for building the application
+FROM golang:1.22-alpine AS builder
+# Define the base directory for the application as an environment variable
+ENV SERVER_DIR=/openim-server
 
-# OpenIM base image: https://github.com/openim-sigs/openim-base-image
+# Set the working directory inside the container based on the environment variable
+WORKDIR $SERVER_DIR
 
-# Set go mod installation source and proxy
+# Set the Go proxy to improve dependency resolution speed
 
-FROM golang:1.20 AS builder
+ENV GOPROXY=https://goproxy.io,direct
 
-ARG GO111MODULE=on
-
-WORKDIR /openim/openim-server
-
-ENV GO111MODULE=$GO111MODULE
-ENV GOPROXY=$GOPROXY
-
-COPY go.mod go.sum ./
-RUN go mod download
-
+# Copy all files from the current directory into the container
 COPY . .
 
-RUN make build BINS=openim-rpc-third
+RUN go mod download
 
-RUN cp /openim/openim-server/_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-third /usr/bin/openim-rpc-third
+# Install Mage to use for building the application
+RUN go install github.com/magefile/mage@v1.15.0
 
-# FROM ghcr.io/openim-sigs/openim-bash-image:latest
-FROM ghcr.io/openim-sigs/openim-bash-image:latest
+ENV BINS=openim-rpc-third
 
-WORKDIR /openim/openim-server
+# Optionally build your application if needed
+RUN mage build ${BINS} check-free-memory seq || true
 
-COPY --from=builder /usr/bin/openim-rpc-third ./bin/openim-rpc-third
+# Using Alpine Linux with Go environment for the final image
+FROM golang:1.22-alpine
 
-ENTRYPOINT ["./bin/openim-rpc-third"]
+# Install necessary packages, such as bash
+RUN apk add bash
+
+# Set the environment and work directory
+ENV SERVER_DIR=/openim-server
+WORKDIR $SERVER_DIR
+
+
+# Copy the compiled binaries and mage from the builder image to the final image
+COPY --from=builder $SERVER_DIR/_output $SERVER_DIR/_output
+COPY --from=builder $SERVER_DIR/config $SERVER_DIR/config
+COPY --from=builder /go/bin/mage /usr/local/bin/mage
+COPY --from=builder $SERVER_DIR/magefile_windows.go $SERVER_DIR/
+COPY --from=builder $SERVER_DIR/magefile_unix.go $SERVER_DIR/
+COPY --from=builder $SERVER_DIR/magefile.go $SERVER_DIR/
+# COPY --from=builder $SERVER_DIR/start-config.yml $SERVER_DIR/
+COPY --from=builder $SERVER_DIR/go.mod $SERVER_DIR/
+COPY --from=builder $SERVER_DIR/go.sum $SERVER_DIR/
+
+
+RUN echo -e "serviceBinaries:\n  openim-rpc-third: 1 \n" \
+    > $SERVER_DIR/start-config.yml && \
+    echo -e "toolBinaries:\n  - check-free-memory\n  - seq\n" >> $SERVER_DIR/start-config.yml && \
+    echo "maxFileDescriptors: 10000" >> $SERVER_DIR/start-config.yml
+
+RUN go get github.com/openimsdk/gomake@v0.0.15-alpha.1
+
+# Set the command to run when the container starts
+ENTRYPOINT ["sh", "-c", "mage start && tail -f /dev/null"]
