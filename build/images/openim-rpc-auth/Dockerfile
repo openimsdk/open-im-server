@@ -54,7 +54,7 @@ RUN echo -e "serviceBinaries:\n  openim-rpc-auth: 1 \n" \
     echo -e "toolBinaries:\n  - check-free-memory\n  - seq\n" >> $SERVER_DIR/start-config.yml && \
     echo "maxFileDescriptors: 10000" >> $SERVER_DIR/start-config.yml
 
-RUN go get github.com/openimsdk/openim-gomake@0.0.15-alpha.1
+RUN go get github.com/openimsdk/gomake@v0.0.15-alpha.1
 
 # Set the command to run when the container starts
 ENTRYPOINT ["sh", "-c", "mage start && tail -f /dev/null"]
