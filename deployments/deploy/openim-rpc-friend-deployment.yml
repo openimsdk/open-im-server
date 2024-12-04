@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: friend-rpc-server-container
-          image: openim-friend:v3.9
+          image: openim/openim-rpc-friend:v3.9
           # imagePullPolicy: Never
           env:
             - name: DEPLOYMENT_TYPE

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: group-rpc-server-container
-          image: openim-group:v3.9
+          image: openim/openim-rpc-group:v3.9
           # imagePullPolicy: Never
           env:
             - name: DEPLOYMENT_TYPE

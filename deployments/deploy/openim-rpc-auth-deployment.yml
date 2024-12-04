@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: auth-rpc-server-container
-          image: openim-auth:v3.9
+          image: openim/openim-rpc-auth:v3.9
           imagePullPolicy: Never
           env:
             - name: DEPLOYMENT_TYPE

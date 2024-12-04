@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: openim-push-container
-          image: openim-push:v3.9
+          image: openim/openim-push:v3.9
           env:
             - name: CONFIG_PATH
               value: "/config"

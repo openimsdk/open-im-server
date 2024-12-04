@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: msg-rpc-server-container
-          image: openim-msg:v3.9
+          image: openim/openim-rpc-msg:v3.9
           # imagePullPolicy: Never
           env:
             - name: DEPLOYMENT_TYPE
