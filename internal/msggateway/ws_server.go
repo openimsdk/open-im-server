@@ -3,26 +3,28 @@ package msggateway
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
-	pbAuth "github.com/openimsdk/protocol/auth"
-	"github.com/openimsdk/tools/mcontext"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"golang.org/x/sync/errgroup"
+
+	pbAuth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/stringutil"
-	"golang.org/x/sync/errgroup"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 type LongConnServer interface {

@@ -16,14 +16,16 @@ package rpccache
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+
+	"github.com/redis/go-redis/v9"
+
 	"github.com/openimsdk/protocol/relation"
+	"github.com/openimsdk/tools/log"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	"github.com/openimsdk/tools/log"
-	"github.com/redis/go-redis/v9"
 )
 
 func NewFriendLocalCache(client rpcclient.FriendRpcClient, localCache *config.LocalCache, cli redis.UniversalClient) *FriendLocalCache {

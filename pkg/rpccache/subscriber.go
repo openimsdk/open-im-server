@@ -17,10 +17,11 @@ package rpccache
 import (
 	"context"
 	"encoding/json"
-	"github.com/openimsdk/tools/mw"
+
+	"github.com/redis/go-redis/v9"
 
 	"github.com/openimsdk/tools/log"
-	"github.com/redis/go-redis/v9"
+	"github.com/openimsdk/tools/mw"
 )
 
 func subscriberRedisDeleteCache(ctx context.Context, client redis.UniversalClient, channel string, del func(ctx context.Context, key ...string)) {

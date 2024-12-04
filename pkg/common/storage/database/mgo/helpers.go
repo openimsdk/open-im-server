@@ -15,8 +15,9 @@
 package mgo
 
 import (
-	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/openimsdk/tools/errs"
 )
 
 func IsNotFound(err error) bool {

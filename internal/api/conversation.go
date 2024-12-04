@@ -16,9 +16,11 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+
 	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/a2r"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 type ConversationApi rpcclient.Conversation

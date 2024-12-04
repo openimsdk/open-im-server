@@ -17,11 +17,13 @@ package cmd
 import (
 	"context"
 
+	"github.com/spf13/cobra"
+
+	"github.com/openimsdk/tools/system/program"
+
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
-	"github.com/openimsdk/tools/system/program"
-	"github.com/spf13/cobra"
 )
 
 type FriendRpcCmd struct {

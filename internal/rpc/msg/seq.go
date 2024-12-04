@@ -17,9 +17,11 @@ package msg
 import (
 	"context"
 	"errors"
-	pbmsg "github.com/openimsdk/protocol/msg"
-	"github.com/redis/go-redis/v9"
 	"sort"
+
+	"github.com/redis/go-redis/v9"
+
+	pbmsg "github.com/openimsdk/protocol/msg"
 )
 
 func (m *msgServer) GetConversationMaxSeq(ctx context.Context, req *pbmsg.GetConversationMaxSeqReq) (*pbmsg.GetConversationMaxSeqResp, error) {

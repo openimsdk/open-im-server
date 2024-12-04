@@ -15,7 +15,6 @@
 package msggateway
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -25,6 +24,8 @@ import (
 	"github.com/openimsdk/tools/utils/encrypt"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"github.com/openimsdk/tools/utils/timeutil"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 )
 
 type UserConnContext struct {

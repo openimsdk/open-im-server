@@ -19,8 +19,9 @@ import (
 	"math/rand"
 	"strings"
 
-	"github.com/openimsdk/tools/log"
 	"google.golang.org/grpc/resolver"
+
+	"github.com/openimsdk/tools/log"
 )
 
 const (

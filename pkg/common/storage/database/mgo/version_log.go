@@ -5,16 +5,18 @@ import (
 	"errors"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
-	"github.com/openimsdk/tools/db/mongoutil"
-	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
 )
 
 func NewVersionLog(coll *mongo.Collection) (database.VersionLog, error) {

@@ -17,10 +17,11 @@ package rpcclient
 import (
 	"context"
 
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/system/program"
-	"google.golang.org/grpc"
 )
 
 type Push struct {

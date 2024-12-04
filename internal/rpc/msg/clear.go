@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
+	"golang.org/x/sync/errgroup"
+
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/wrapperspb"
@@ -15,7 +15,9 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/idutil"
 	"github.com/openimsdk/tools/utils/stringutil"
-	"golang.org/x/sync/errgroup"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 )
 
 // hard delete in Database.

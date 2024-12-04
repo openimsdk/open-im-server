@@ -22,7 +22,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
@@ -33,6 +32,8 @@ import (
 	"github.com/openimsdk/tools/utils/idutil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/timeutil"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 func newContentTypeConf(conf *config.Notification) map[int32]config.NotificationConfig {

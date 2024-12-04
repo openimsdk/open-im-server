@@ -16,7 +16,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/protocol/user"
@@ -24,6 +24,8 @@ import (
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 type UserApi rpcclient.User

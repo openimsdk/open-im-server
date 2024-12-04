@@ -15,8 +15,9 @@
 package rpccache
 
 import (
-	"github.com/openimsdk/tools/errs"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/openimsdk/tools/errs"
 )
 
 func newListMap[V comparable](values []V, err error) (*listMap[V], error) {

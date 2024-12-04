@@ -2,15 +2,16 @@ package relation
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/hashutil"
+	"slices"
+
+	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
-	"slices"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/protocol/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/hashutil"
 )
 
 func (s *friendServer) NotificationUserInfoUpdate(ctx context.Context, req *relation.NotificationUserInfoUpdateReq) (*relation.NotificationUserInfoUpdateResp, error) {

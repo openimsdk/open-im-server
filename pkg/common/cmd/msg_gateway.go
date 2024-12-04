@@ -17,11 +17,12 @@ package cmd
 import (
 	"context"
 
-	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
-	"github.com/openimsdk/open-im-server/v3/version"
+	"github.com/spf13/cobra"
 
 	"github.com/openimsdk/tools/system/program"
-	"github.com/spf13/cobra"
+
+	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
+	"github.com/openimsdk/open-im-server/v3/version"
 )
 
 type MsgGatewayCmd struct {

@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/openimsdk/tools/errs"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 )
 
 type BatchOption[A, B any] struct {
