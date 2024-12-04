@@ -11,14 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type seqUserFunc func(ctx context.Context, conversationID string, userID string, seq int64) error
-
-type SeqUserHook struct {
-	SetUserMaxSeq func(ctx context.Context, conversationID string, userID string, seq int64) error
-	SetUserMinSeq func(ctx context.Context, conversationID string, userID string, seq int64) error
-}
-
-func NewSeqUserMongo(db *mongo.Database, hook *SeqUserHook) (database.SeqUser, error) {
+func NewSeqUserMongo(db *mongo.Database) (database.SeqUser, error) {
 	coll := db.Collection(database.SeqUserName)
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
@@ -29,15 +22,11 @@ func NewSeqUserMongo(db *mongo.Database, hook *SeqUserHook) (database.SeqUser, e
 	if err != nil {
 		return nil, err
 	}
-	if hook == nil {
-		hook = &SeqUserHook{}
-	}
-	return &seqUserMongo{coll: coll, hook: hook}, nil
+	return &seqUserMongo{coll: coll}, nil
 }
 
 type seqUserMongo struct {
 	coll *mongo.Collection
-	hook *SeqUserHook
 }
 
 func (s *seqUserMongo) setSeq(ctx context.Context, conversationID string, userID string, seq int64, field string) error {
@@ -63,12 +52,12 @@ func (s *seqUserMongo) setSeq(ctx context.Context, conversationID string, userID
 	return mongoutil.UpdateOne(ctx, s.coll, filter, update, false, opt)
 }
 
-func (s *seqUserMongo) getSeq(ctx context.Context, conversationID string, userID string, field string) (int64, error) {
+func (s *seqUserMongo) getSeq(ctx context.Context, conversationID string, userID string, failed string) (int64, error) {
 	filter := map[string]any{
 		"user_id":         userID,
 		"conversation_id": conversationID,
 	}
-	opt := options.FindOne().SetProjection(bson.M{"_id": 0, field: 1})
+	opt := options.FindOne().SetProjection(bson.M{"_id": 0, failed: 1})
 	seq, err := mongoutil.FindOne[int64](ctx, s.coll, filter, opt)
 	if err == nil {
 		return seq, nil
@@ -83,21 +72,8 @@ func (s *seqUserMongo) GetUserMaxSeq(ctx context.Context, conversationID string,
 	return s.getSeq(ctx, conversationID, userID, "max_seq")
 }
 
-func (s *seqUserMongo) withHook(ctx context.Context, conversationID string, userID string, seq int64, field string, hookFn seqUserFunc) error {
-	if err := s.setSeq(ctx, conversationID, userID, seq, field); err != nil {
-		return err
-	}
-	if hookFn != nil {
-		if err := hookFn(ctx, conversationID, userID, seq); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (s *seqUserMongo) SetUserMaxSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
-	//return s.setSeq(ctx, conversationID, userID, seq, "max_seq")
-	return s.withHook(ctx, conversationID, userID, seq, "max_seq", s.hook.SetUserMaxSeq)
+	return s.setSeq(ctx, conversationID, userID, seq, "max_seq")
 }
 
 func (s *seqUserMongo) GetUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
@@ -105,8 +81,7 @@ func (s *seqUserMongo) GetUserMinSeq(ctx context.Context, conversationID string,
 }
 
 func (s *seqUserMongo) SetUserMinSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
-	//return s.setSeq(ctx, conversationID, userID, seq, "min_seq")
-	return s.withHook(ctx, conversationID, userID, seq, "min_seq", s.hook.SetUserMinSeq)
+	return s.setSeq(ctx, conversationID, userID, seq, "min_seq")
 }
 
 func (s *seqUserMongo) GetUserReadSeq(ctx context.Context, conversationID string, userID string) (int64, error) {

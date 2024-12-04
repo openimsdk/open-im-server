@@ -16,7 +16,6 @@ package msg
 
 import (
 	"context"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
@@ -99,14 +98,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	seqConversationCache := redis.NewSeqConversationCacheRedis(rdb, seqConversation)
-	seqUser, err := mgo.NewSeqUserMongo(mgocli.GetDB(), &mgo.SeqUserHook{
-		SetUserMaxSeq: func(ctx context.Context, conversationID string, userID string, seq int64) error {
-			return conversationClient.SetConversationMaxSeq(ctx, []string{userID}, conversationID, seq)
-		},
-		SetUserMinSeq: func(ctx context.Context, conversationID string, userID string, seq int64) error {
-			return conversationClient.SetConversationMinSeq(ctx, []string{userID}, conversationID, seq)
-		},
-	})
+	seqUser, err := mgo.NewSeqUserMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}

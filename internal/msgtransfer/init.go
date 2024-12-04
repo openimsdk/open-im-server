@@ -92,7 +92,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return err
 	}
 	seqConversationCache := redis.NewSeqConversationCacheRedis(rdb, seqConversation)
-	seqUser, err := mgo.NewSeqUserMongo(mgocli.GetDB(), nil)
+	seqUser, err := mgo.NewSeqUserMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
