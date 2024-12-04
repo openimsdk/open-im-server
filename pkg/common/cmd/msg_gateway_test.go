@@ -18,11 +18,12 @@ import (
 	"math"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/utils/jsonutil"
-	"github.com/stretchr/testify/mock"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // MockRootCmd is a mock type for the RootCmd type

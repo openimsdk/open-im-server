@@ -15,8 +15,9 @@
 package callbackstruct
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/tools/errs"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 )
 
 const (

@@ -17,11 +17,12 @@ package rpcclient
 import (
 	"context"
 
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/protocol/relation"
 	sdkws "github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/system/program"
-	"google.golang.org/grpc"
 )
 
 type Friend struct {

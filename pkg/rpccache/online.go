@@ -3,23 +3,25 @@ package rpccache
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/protocol/user"
 	"math/rand"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/redis/go-redis/v9"
+
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/db/cacheutil"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache/lru"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/useronline"
-	"github.com/openimsdk/tools/db/cacheutil"
-	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mcontext"
-	"github.com/redis/go-redis/v9"
 )
 
 func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb redis.UniversalClient, fullUserCache bool, fn func(ctx context.Context, userID string, platformIDs []int32)) (*OnlineCache, error) {

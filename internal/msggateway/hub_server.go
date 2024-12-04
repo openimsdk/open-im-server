@@ -18,10 +18,8 @@ import (
 	"context"
 	"sync/atomic"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/protocol/sdkws"
@@ -31,7 +29,11 @@ import (
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mq/memamq"
 	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/grpc"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 func (s *Server) InitServer(ctx context.Context, config *Config, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {

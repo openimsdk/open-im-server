@@ -18,25 +18,26 @@ import (
 	"context"
 	"errors"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
-	"github.com/openimsdk/tools/db/redisutil"
-	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	pbauth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
+	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/tokenverify"
-	"google.golang.org/grpc"
+	"github.com/openimsdk/tools/utils/datautil"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 type authServer struct {

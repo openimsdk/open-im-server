@@ -21,6 +21,7 @@ import (
 	"runtime"
 
 	"github.com/fatih/color"
+
 	"github.com/openimsdk/tools/utils/timeutil"
 )
 

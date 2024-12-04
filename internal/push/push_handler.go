@@ -3,21 +3,14 @@ package push
 import (
 	"context"
 	"encoding/json"
-
 	"math/rand"
 	"strconv"
 	"time"
 
 	"github.com/IBM/sarama"
-	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
-	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	pbpush "github.com/openimsdk/protocol/push"
@@ -29,8 +22,16 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/timeutil"
-	"github.com/redis/go-redis/v9"
-	"google.golang.org/protobuf/proto"
+
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 )
 
 type ConsumerHandler struct {
@@ -414,7 +415,7 @@ func (c *ConsumerHandler) DeleteMemberAndSetConversationSeq(ctx context.Context,
 	if err != nil {
 		return err
 	}
-	
+
 	return c.conversationRpcClient.SetConversationMaxSeq(ctx, userIDs, conversationID, maxSeq)
 }
 

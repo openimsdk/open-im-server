@@ -17,14 +17,10 @@ package third
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
@@ -34,7 +30,13 @@ import (
 	"github.com/openimsdk/tools/s3/kodo"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
-	"google.golang.org/grpc"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 type thirdServer struct {

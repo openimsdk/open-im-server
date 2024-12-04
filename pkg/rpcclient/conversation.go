@@ -18,11 +18,12 @@ import (
 	"context"
 	"fmt"
 
+	"google.golang.org/grpc"
+
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/system/program"
-	"google.golang.org/grpc"
 )
 
 type Conversation struct {

@@ -16,11 +16,13 @@ package redis
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/protocol/sdkws"
+	"testing"
+
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/proto"
-	"testing"
+
+	"github.com/openimsdk/protocol/sdkws"
 )
 
 func Test_msgCache_SetMessagesToCache(t *testing.T) {

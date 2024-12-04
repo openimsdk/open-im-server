@@ -17,27 +17,29 @@ package startrpc
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/grpc/status"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/internal/tools/addr"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
+
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/network"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"strconv"
+
+	"github.com/openimsdk/open-im-server/v3/internal/tools/addr"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 )
 
 // Start rpc server.

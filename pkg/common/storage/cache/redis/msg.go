@@ -2,15 +2,20 @@ package redis
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"time"
+
+	"github.com/redis/go-redis/v9"
+
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/redis/go-redis/v9"
-	"time"
-) //
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+)
+
+//
 
 // msgCacheTimeout is  expiration time of message cache, 86400 seconds
 const msgCacheTimeout = 86400

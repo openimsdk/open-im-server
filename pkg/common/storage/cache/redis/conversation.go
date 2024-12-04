@@ -16,19 +16,22 @@ package redis
 
 import (
 	"context"
+	"math/big"
+	"strings"
+	"time"
+
 	"github.com/dtm-labs/rockscache"
+	"github.com/redis/go-redis/v9"
+
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/encrypt"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/encrypt"
-	"github.com/redis/go-redis/v9"
-	"math/big"
-	"strings"
-	"time"
 )
 
 const (

@@ -2,14 +2,17 @@ package redis
 
 import (
 	"context"
+	"strconv"
+	"time"
+
 	"github.com/dtm-labs/rockscache"
+	"github.com/redis/go-redis/v9"
+
+	"github.com/openimsdk/tools/errs"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
-	"github.com/openimsdk/tools/errs"
-	"github.com/redis/go-redis/v9"
-	"strconv"
-	"time"
 )
 
 func NewSeqUserCacheRedis(rdb redis.UniversalClient, mgo database.SeqUser) cache.SeqUser {

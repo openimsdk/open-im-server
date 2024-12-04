@@ -17,15 +17,17 @@ package rpccache
 import (
 	"context"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
-	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/redis/go-redis/v9"
+
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/redis/go-redis/v9"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 func NewUserLocalCache(client rpcclient.UserRpcClient, localCache *config.LocalCache, cli redis.UniversalClient) *UserLocalCache {

@@ -1,11 +1,13 @@
 package msg
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	pbchat "github.com/openimsdk/protocol/msg"
-	"github.com/openimsdk/tools/utils/datautil"
 	"strconv"
 	"strings"
+
+	pbchat "github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/tools/utils/datautil"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 const (

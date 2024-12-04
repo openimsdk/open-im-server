@@ -15,11 +15,12 @@
 package convert
 
 import (
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"reflect"
 	"testing"
 
 	"github.com/openimsdk/protocol/sdkws"
+
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 )
 
 func TestUsersDB2Pb(t *testing.T) {

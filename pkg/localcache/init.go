@@ -15,10 +15,11 @@
 package localcache
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"strings"
 	"sync"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 )
 
 var (

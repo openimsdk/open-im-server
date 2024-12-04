@@ -18,11 +18,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"gopkg.in/yaml.v3"
+
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/field"
-	"gopkg.in/yaml.v3"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 )
 
 const (

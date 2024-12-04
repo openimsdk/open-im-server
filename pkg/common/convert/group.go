@@ -15,11 +15,12 @@
 package convert
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"time"
 
 	pbgroup "github.com/openimsdk/protocol/group"
 	sdkws "github.com/openimsdk/protocol/sdkws"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 )
 
 func Db2PbGroupInfo(m *model.Group, ownerUserID string, memberCount uint32) *sdkws.GroupInfo {

@@ -15,10 +15,11 @@
 package msg
 
 import (
-	"github.com/openimsdk/protocol/msg"
-	"github.com/openimsdk/tools/errs"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/tools/errs"
 )
 
 func IsNotFound(err error) bool {

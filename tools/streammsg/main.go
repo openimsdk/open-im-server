@@ -5,19 +5,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
-	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+
 	"github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/errs"
-	"io"
-	"net/http"
-	"strings"
-	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
+	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 )
 
 const (
