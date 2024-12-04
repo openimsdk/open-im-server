@@ -99,7 +99,14 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	seqConversationCache := redis.NewSeqConversationCacheRedis(rdb, seqConversation)
-	seqUser, err := mgo.NewSeqUserMongo(mgocli.GetDB())
+	seqUser, err := mgo.NewSeqUserMongo(mgocli.GetDB(), &mgo.SeqUserHook{
+		SetUserMaxSeq: func(ctx context.Context, conversationID string, userID string, seq int64) error {
+			return conversationClient.SetConversationMaxSeq(ctx, []string{userID}, conversationID, seq)
+		},
+		SetUserMinSeq: func(ctx context.Context, conversationID string, userID string, seq int64) error {
+			return conversationClient.SetConversationMinSeq(ctx, []string{userID}, conversationID, seq)
+		},
+	})
 	if err != nil {
 		return err
 	}

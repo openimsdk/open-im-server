@@ -87,7 +87,7 @@ func Main(conf string, del time.Duration) error {
 	if err != nil {
 		return err
 	}
-	uSeq, err := mgo.NewSeqUserMongo(mgocli.GetDB())
+	uSeq, err := mgo.NewSeqUserMongo(mgocli.GetDB(), nil)
 	if err != nil {
 		return err
 	}
