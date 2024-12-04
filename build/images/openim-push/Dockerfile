@@ -21,7 +21,7 @@ RUN go install github.com/magefile/mage@v1.15.0
 ENV BINS=openim-push
 
 # Optionally build your application if needed
-RUN mage build ${BINS} check-free-memory seq || true
+RUN mage build ${BINS} || true
 
 # Using Alpine Linux with Go environment for the final image
 FROM golang:1.22-alpine
