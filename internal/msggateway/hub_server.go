@@ -55,6 +55,8 @@ func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 }
 
 type Server struct {
+	msggateway.UnimplementedMsgGatewayServer
+
 	LongConnServer LongConnServer
 	config         *Config
 	pushTerminal   map[int]struct{}

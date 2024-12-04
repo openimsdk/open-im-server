@@ -179,7 +179,7 @@ func (c *conversationDatabase) CreateConversation(ctx context.Context, conversat
 		if conversation.RecvMsgOpt == constant.ReceiveNotNotifyMessage {
 			notNotifyUserIDs = append(notNotifyUserIDs, conversation.OwnerUserID)
 		}
-		if conversation.IsPinned == true {
+		if conversation.IsPinned {
 			pinnedUserIDs = append(pinnedUserIDs, conversation.OwnerUserID)
 		}
 	}

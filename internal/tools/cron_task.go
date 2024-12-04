@@ -24,6 +24,7 @@ import (
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/third"
 
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mw"
@@ -58,10 +59,10 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 		return err
 	}
 
-	// thirdConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
-	// if err != nil {
-	// 	return err
-	// }
+	thirdConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
+	if err != nil {
+		return err
+	}
 
 	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
 	if err != nil {
@@ -70,65 +71,82 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 
 	msgClient := msg.NewMsgClient(msgConn)
 	conversationClient := pbconversation.NewConversationClient(conversationConn)
-	// thirdClient := third.NewThirdClient(thirdConn)
+	thirdClient := third.NewThirdClient(thirdConn)
 
 	crontab := cron.New()
 
 	// scheduled hard delete outdated Msgs in specific time.
-	clearMsgFunc := func() {
+	destructMsgsFunc := func() {
 		now := time.Now()
 		deltime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.RetainChatRecords))
 		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deltime.UnixMilli()))
-		log.ZDebug(ctx, "clear chat records", "deltime", deltime, "timestamp", deltime.UnixMilli())
+		log.ZDebug(ctx, "Destruct chat records", "deltime", deltime, "timestamp", deltime.UnixMilli())
 
-		if _, err := msgClient.ClearMsg(ctx, &msg.ClearMsgReq{Timestamp: deltime.UnixMilli()}); err != nil {
-			log.ZError(ctx, "cron clear chat records failed", err, "deltime", deltime, "cont", time.Since(now))
+		if _, err := msgClient.DestructMsgs(ctx, &msg.DestructMsgsReq{Timestamp: deltime.UnixMilli()}); err != nil {
+			log.ZError(ctx, "cron destruct chat records failed", err, "deltime", deltime, "cont", time.Since(now))
 			return
 		}
-		log.ZDebug(ctx, "cron clear chat records success", "deltime", deltime, "cont", time.Since(now))
+		log.ZDebug(ctx, "cron destruct chat records success", "deltime", deltime, "cont", time.Since(now))
+	}
+	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, destructMsgsFunc); err != nil {
+		return errs.Wrap(err)
+	}
+
+	// scheduled soft delete outdated Msgs in specific time when user set `is_msg_destruct` feature.
+	clearMsgFunc := func() {
+		now := time.Now()
+		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), now.UnixMilli()))
+		log.ZDebug(ctx, "clear msg cron start", "now", now)
+
+		conversations, err := conversationClient.GetConversationsNeedClearMsg(ctx, &pbconversation.GetConversationsNeedClearMsgReq{})
+		if err != nil {
+			log.ZError(ctx, "Get conversation need Destruct msgs failed.", err)
+			return
+		}
+
+		_, err = msgClient.ClearMsg(ctx, &msg.ClearMsgReq{Conversations: conversations.Conversations})
+		if err != nil {
+			log.ZError(ctx, "Clear Msg failed.", err)
+			return
+		}
+
+		log.ZDebug(ctx, "clear msg cron task completed", "cont", time.Since(now))
 	}
 	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, clearMsgFunc); err != nil {
 		return errs.Wrap(err)
 	}
 
-	// scheduled soft delete outdated Msgs in specific time when user set `is_msg_destruct` feature.
-	msgDestructFunc := func() {
+	// scheduled delete outdated file Objects and their datas in specific time.
+	deleteObjectFunc := func() {
 		now := time.Now()
-		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), now.UnixMilli()))
-		log.ZDebug(ctx, "msg destruct cron start", "now", now)
+		executeNum := 5
+		// number of pagination. if need modify, need update value in third.DeleteOutdatedData
+		pageShowNumber := 500
+		deleteTime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.FileExpireTime))
+		ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deleteTime.UnixMilli()))
+		log.ZDebug(ctx, "deleteoutDatedData", "deletetime", deleteTime, "timestamp", deleteTime.UnixMilli())
 
-		conversations, err := conversationClient.GetConversationsNeedDestructMsgs(ctx, &pbconversation.GetConversationsNeedDestructMsgsReq{})
-		if err != nil {
-			log.ZError(ctx, "Get conversation need Destruct msgs failed.", err)
+		if len(config.CronTask.DeleteObjectType) == 0 {
+			log.ZDebug(ctx, "cron deleteoutDatedData not type need delete", "deletetime", deleteTime, "DeleteObjectType", config.CronTask.DeleteObjectType, "cont", time.Since(now))
 			return
-		} else {
-			_, err := msgClient.DestructMsgs(ctx, &msg.DestructMsgsReq{Conversations: conversations.Conversations})
+		}
+
+		for i := 0; i < executeNum; i++ {
+			resp, err := thirdClient.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: deleteTime.UnixMilli(), ObjectGroup: config.CronTask.DeleteObjectType})
 			if err != nil {
-				log.ZError(ctx, "Destruct Msgs failed.", err)
+				log.ZError(ctx, "cron deleteoutDatedData failed", err, "deleteTime", deleteTime, "cont", time.Since(now))
 				return
 			}
+			if resp.Count == 0 || resp.Count < int32(pageShowNumber) {
+				break
+			}
 		}
-		log.ZDebug(ctx, "msg destruct cron task completed", "cont", time.Since(now))
+
+		log.ZDebug(ctx, "cron deleteoutDatedData success", "deltime", deleteTime, "cont", time.Since(now))
 	}
-	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, msgDestructFunc); err != nil {
+	if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, deleteObjectFunc); err != nil {
 		return errs.Wrap(err)
 	}
-
-	// // scheduled delete outdated file Objects and their datas in specific time.
-	// deleteObjectFunc := func() {
-	// 	now := time.Now()
-	// 	deleteTime := now.Add(-time.Hour * 24 * time.Duration(config.CronTask.FileExpireTime))
-	// 	ctx := mcontext.SetOperationID(ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), deleteTime.UnixMilli()))
-	// 	log.ZDebug(ctx, "deleteoutDatedData ", "deletetime", deleteTime, "timestamp", deleteTime.UnixMilli())
-	// 	if _, err := thirdClient.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: deleteTime.UnixMilli()}); err != nil {
-	// 		log.ZError(ctx, "cron deleteoutDatedData failed", err, "deleteTime", deleteTime, "cont", time.Since(now))
-	// 		return
-	// 	}
-	// 	log.ZDebug(ctx, "cron deleteoutDatedData success", "deltime", deleteTime, "cont", time.Since(now))
-	// }
-	// if _, err := crontab.AddFunc(config.CronTask.CronExecuteTime, deleteObjectFunc); err != nil {
-	// 	return errs.Wrap(err)
-	// }
 
 	log.ZDebug(ctx, "start cron task", "CronExecuteTime", config.CronTask.CronExecuteTime)
 	crontab.Start()
