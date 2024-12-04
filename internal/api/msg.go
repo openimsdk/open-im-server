@@ -173,6 +173,8 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 		data = apistruct.AtElem{}
 	case constant.Custom:
 		data = apistruct.CustomElem{}
+	case constant.Quote:
+		data = apistruct.QuoteElem{}
 	case constant.Stream:
 		data = apistruct.StreamMsgElem{}
 	case constant.OANotification:
