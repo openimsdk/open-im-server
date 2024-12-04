@@ -24,10 +24,10 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/internal/tools/addr"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
@@ -37,22 +37,15 @@ import (
 	"github.com/openimsdk/tools/utils/network"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"strconv"
 )
 
 // Start rpc server.
-func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusConfig *config.Prometheus, listenIP,
-	registerIP string, rpcPorts []int, index int, rpcRegisterName string, share *config.Share, config T, rpcFn func(ctx context.Context,
-	config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
+func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusConfig *config.Prometheus, listenIP string,
+	index int, rpcRegisterName string, share *config.Share, config T, rpcFn func(ctx context.Context,
+		config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 
-	rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
-	if err != nil {
-		return err
-	}
-
-	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcPort", rpcPort,
-		"prometheusPorts", prometheusConfig.Ports)
-	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(listenIP), strconv.Itoa(rpcPort))
-
+	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(listenIP), "0")
 	listener, err := net.Listen(
 		"tcp",
 		rpcTcpAddr,
@@ -60,6 +53,14 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	if err != nil {
 		return errs.WrapMsg(err, "listen err", "rpcTcpAddr", rpcTcpAddr)
 	}
+
+	h, portStr, _ := net.SplitHostPort(listener.Addr().String())
+	host, _ := addr.Extract(h)
+	port, _ := strconv.Atoi(portStr)
+
+	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcPort", portStr,
+		"prometheusPorts", prometheusConfig.Ports)
+
 	defer listener.Close()
 	client, err := kdisc.NewDiscoveryRegister(discovery, share)
 	if err != nil {
@@ -68,17 +69,13 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 
 	defer client.Close()
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	registerIP, err = network.GetRpcRegisterIP(registerIP)
-	if err != nil {
-		return err
-	}
 
-	//var reg *prometheus.Registry
-	//var metric *grpcprometheus.ServerMetrics
+	// var reg *prometheus.Registry
+	// var metric *grpcprometheus.ServerMetrics
 	if prometheusConfig.Enable {
-		//cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, share)
-		//reg, metric, _ = prommetrics.NewGrpcPromObj(cusMetrics)
-		//options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
+		// cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, share)
+		// reg, metric, _ = prommetrics.NewGrpcPromObj(cusMetrics)
+		// options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
 		//	grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))
 		options = append(
 			options, mw.GrpcServer(),
@@ -98,8 +95,8 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 
 	err = client.Register(
 		rpcRegisterName,
-		registerIP,
-		rpcPort,
+		host,
+		port,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -123,13 +120,13 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 				netErr = errs.WrapMsg(err, fmt.Sprintf("rpc %s prometheus start err: %d", rpcRegisterName, prometheusPort))
 				netDone <- struct{}{}
 			}
-			//metric.InitializeMetrics(srv)
+			// metric.InitializeMetrics(srv)
 			// Create a HTTP server for prometheus.
-			//httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
-			//if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			// httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
+			// if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			//	netErr = errs.WrapMsg(err, "prometheus start err", httpServer.Addr)
 			//	netDone <- struct{}{}
-			//}
+			// }
 		}()
 	}
 
