@@ -13,18 +13,12 @@ ENV GOPROXY=https://goproxy.io,direct
 # Copy all files from the current directory into the container
 COPY . .
 
-RUN go mod download
+RUN go mod tidy
 
-# Install Mage to use for building the application
-RUN go install github.com/magefile/mage@v1.15.0
-
-ENV BINS=openim-api
-
-# Optionally build your application if needed
-RUN mage build ${BINS} || true
+RUN go build -o _output/openim-api ./cmd/openim-api
 
 # Using Alpine Linux with Go environment for the final image
-FROM golang:1.22-alpine
+FROM alpine:latest
 
 # Install necessary packages, such as bash
 RUN apk add --no-cache bash
@@ -36,22 +30,8 @@ WORKDIR $SERVER_DIR
 
 # Copy the compiled binaries and mage from the builder image to the final image
 COPY --from=builder $SERVER_DIR/_output $SERVER_DIR/_output
-COPY --from=builder $SERVER_DIR/config $SERVER_DIR/config
-COPY --from=builder /go/bin/mage /usr/local/bin/mage
-COPY --from=builder $SERVER_DIR/magefile_windows.go $SERVER_DIR/
-COPY --from=builder $SERVER_DIR/magefile_unix.go $SERVER_DIR/
-COPY --from=builder $SERVER_DIR/magefile.go $SERVER_DIR/
-# COPY --from=builder $SERVER_DIR/start-config.yml $SERVER_DIR/
-COPY --from=builder $SERVER_DIR/go.mod $SERVER_DIR/
-COPY --from=builder $SERVER_DIR/go.sum $SERVER_DIR/
-
-
-RUN echo -e "serviceBinaries:\n  openim-api: 1 \n" \
-    > $SERVER_DIR/start-config.yml && \
-    echo -e "toolBinaries:\n  - check-free-memory\n  - seq\n" >> $SERVER_DIR/start-config.yml && \
-    echo "maxFileDescriptors: 10000" >> $SERVER_DIR/start-config.yml
-
-RUN go get github.com/openimsdk/gomake@v0.0.15-alpha.1
+# COPY --from=builder $SERVER_DIR/config $SERVER_DIR/config
 
 # Set the command to run when the container starts
-ENTRYPOINT ["sh", "-c", "mage start && tail -f /dev/null"]
+ENTRYPOINT ["sh", "-c", "_output/openim-api"]
+# ENTRYPOINT ["sh", "-c", "_output/openim-api -c /openim-server/config && tail -f /dev/null"]
