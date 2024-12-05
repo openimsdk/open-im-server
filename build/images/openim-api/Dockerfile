@@ -17,7 +17,7 @@ RUN go mod tidy
 
 RUN go build -o _output/openim-api ./cmd/openim-api
 
-# Using Alpine Linux with Go environment for the final image
+# Using Alpine Linux for the final image
 FROM alpine:latest
 
 # Install necessary packages, such as bash
@@ -30,7 +30,7 @@ WORKDIR $SERVER_DIR
 
 # Copy the compiled binaries and mage from the builder image to the final image
 COPY --from=builder $SERVER_DIR/_output $SERVER_DIR/_output
-# COPY --from=builder $SERVER_DIR/config $SERVER_DIR/config
+COPY --from=builder $SERVER_DIR/config $SERVER_DIR/config
 
 # Set the command to run when the container starts
 ENTRYPOINT ["sh", "-c", "_output/openim-api"]
