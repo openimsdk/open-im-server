@@ -58,5 +58,5 @@ func (a *ThirdRpcCmd) Exec() error {
 
 func (a *ThirdRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.thirdConfig.Discovery, &a.thirdConfig.RpcConfig.Prometheus, a.thirdConfig.RpcConfig.RPC.ListenIP,
-		a.Index(), a.thirdConfig.Share.RpcRegisterName.Third, &a.thirdConfig.Share, a.thirdConfig, third.Start)
+		a.Index(), a.thirdConfig.Discovery.RpcService.Third, &a.thirdConfig.Share, a.thirdConfig, third.Start)
 }

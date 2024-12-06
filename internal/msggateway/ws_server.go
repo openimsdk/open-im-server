@@ -72,9 +72,9 @@ type kickHandler struct {
 }
 
 func (ws *WsServer) SetDiscoveryRegistry(disCov discovery.SvcDiscoveryRegistry, config *Config) {
-	ws.MessageHandler = NewGrpcHandler(ws.validate, disCov, &config.Share.RpcRegisterName)
-	u := rpcclient.NewUserRpcClient(disCov, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
-	ws.authClient = rpcclient.NewAuth(disCov, config.Share.RpcRegisterName.Auth)
+	ws.MessageHandler = NewGrpcHandler(ws.validate, disCov, &config.Discovery.RpcService)
+	u := rpcclient.NewUserRpcClient(disCov, config.Discovery.RpcService.User, config.Share.IMAdminUserID)
+	ws.authClient = rpcclient.NewAuth(disCov, config.Discovery.RpcService.Auth)
 	ws.userClient = &u
 	ws.disCov = disCov
 }
@@ -113,7 +113,7 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 	for _, o := range opts {
 		o(&config)
 	}
-	//userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
+	//userRpcClient := rpcclient.NewUserRpcClient(client, config.Discovery.RpcService.User, config.Share.IMAdminUserID)
 
 	v := validator.New()
 	return &WsServer{
@@ -192,7 +192,7 @@ func (ws *WsServer) Run(done chan error) error {
 var concurrentRequest = 3
 
 func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *Client) error {
-	conns, err := ws.disCov.GetConns(ctx, ws.msgGatewayConfig.Share.RpcRegisterName.MessageGateway)
+	conns, err := ws.disCov.GetConns(ctx, ws.msgGatewayConfig.Discovery.RpcService.MessageGateway)
 	if err != nil {
 		return err
 	}

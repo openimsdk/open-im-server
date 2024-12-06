@@ -362,10 +362,9 @@ type AfterConfig struct {
 }
 
 type Share struct {
-	Secret          string          `mapstructure:"secret"`
-	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
-	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
-	MultiLogin      MultiLogin      `mapstructure:"multiLogin"`
+	Secret        string     `mapstructure:"secret"`
+	IMAdminUserID []string   `mapstructure:"imAdminUserID"`
+	MultiLogin    MultiLogin `mapstructure:"multiLogin"`
 }
 
 type MultiLogin struct {
@@ -373,7 +372,7 @@ type MultiLogin struct {
 	MaxNumOneEnd int `mapstructure:"maxNumOneEnd"`
 }
 
-type RpcRegisterName struct {
+type RpcService struct {
 	User           string `mapstructure:"user"`
 	Friend         string `mapstructure:"friend"`
 	Msg            string `mapstructure:"msg"`
@@ -385,7 +384,7 @@ type RpcRegisterName struct {
 	Third          string `mapstructure:"third"`
 }
 
-func (r *RpcRegisterName) GetServiceNames() []string {
+func (r *RpcService) GetServiceNames() []string {
 	return []string{
 		r.User,
 		r.Friend,
@@ -460,9 +459,9 @@ type ZooKeeper struct {
 }
 
 type Discovery struct {
-	Enable    string    `mapstructure:"enable"`
-	Etcd      Etcd      `mapstructure:"etcd"`
-	ZooKeeper ZooKeeper `mapstructure:"zooKeeper"`
+	Enable     string     `mapstructure:"enable"`
+	Etcd       Etcd       `mapstructure:"etcd"`
+	RpcService RpcService `mapstructure:"rpcService"`
 }
 
 type Etcd struct {

@@ -59,5 +59,5 @@ func (a *MsgRpcCmd) Exec() error {
 
 func (a *MsgRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.msgConfig.Discovery, &a.msgConfig.RpcConfig.Prometheus, a.msgConfig.RpcConfig.RPC.ListenIP,
-		a.Index(), a.msgConfig.Share.RpcRegisterName.Msg, &a.msgConfig.Share, a.msgConfig, msg.Start)
+		a.Index(), a.msgConfig.Discovery.RpcService.Msg, &a.msgConfig.Share, a.msgConfig, msg.Start)
 }
