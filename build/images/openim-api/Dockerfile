@@ -8,7 +8,7 @@ ENV SERVER_DIR=/openim-server
 WORKDIR $SERVER_DIR
 
 # Set the Go proxy to improve dependency resolution speed
-ENV GOPROXY=https://goproxy.io,direct
+#ENV GOPROXY=https://goproxy.io,direct
 
 # Copy all files from the current directory into the container
 COPY . .
@@ -34,4 +34,3 @@ COPY --from=builder $SERVER_DIR/config $SERVER_DIR/config
 
 # Set the command to run when the container starts
 ENTRYPOINT ["sh", "-c", "_output/openim-api"]
-# ENTRYPOINT ["sh", "-c", "_output/openim-api -c /openim-server/config && tail -f /dev/null"]
