@@ -23,7 +23,6 @@ import (
 	"github.com/openimsdk/tools/discovery/kubernetes"
 
 	"github.com/openimsdk/tools/discovery/etcd"
-	"github.com/openimsdk/tools/discovery/zookeeper"
 	"github.com/openimsdk/tools/errs"
 )
 
@@ -34,17 +33,8 @@ func NewDiscoveryRegister(discovery *config.Discovery, runtimeEnv string) (disco
 	}
 
 	switch discovery.Enable {
-	case "zookeeper":
-		return zookeeper.NewZkClient(
-			discovery.ZooKeeper.Address,
-			discovery.ZooKeeper.Schema,
-			zookeeper.WithFreq(time.Hour),
-			zookeeper.WithUserNameAndPassword(discovery.ZooKeeper.Username, discovery.ZooKeeper.Password),
-			zookeeper.WithRoundRobin(),
-			zookeeper.WithTimeout(10),
-		)
-	case "k8s":
-		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
+	case "kubernetes":
+		return kubernetes.NewKubernetesConnManager(discovery.Kubernetes.Namespace)
 	case "etcd":
 		return etcd.NewSvcDiscoveryRegistry(
 			discovery.Etcd.RootDirectory,
