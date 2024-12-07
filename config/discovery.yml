@@ -5,6 +5,9 @@ etcd:
   username: ''
   password: ''
 
+kubenetes:
+  namespace: default
+
 rpcService:
   user: user-rpc-service
   friend: friend-rpc-service
@@ -15,5 +18,3 @@ rpcService:
   auth: auth-rpc-service
   conversation: conversation-rpc-service
   third: third-rpc-service
-
-

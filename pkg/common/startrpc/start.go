@@ -18,15 +18,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/grpc/status"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/runtimeenv"
+	"google.golang.org/grpc/status"
+
+	"strconv"
 
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -37,7 +41,6 @@ import (
 	"github.com/openimsdk/tools/utils/network"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"strconv"
 )
 
 // Start rpc server.
@@ -50,6 +53,8 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 		netDone    = make(chan struct{}, 2)
 		netErr     error
 	)
+
+	runTimeEnv := runtimeenv.PrintRuntimeEnvironment()
 
 	if !autoSetPorts {
 		rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
@@ -107,11 +112,11 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	registerIP = network.GetListenIP(registerIP)
 	port, _ := strconv.Atoi(portStr)
 
-	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcPort", portStr,
+	log.CInfo(ctx, "RPC server is initializing", "runTimeEnv", runTimeEnv, "rpcRegisterName", rpcRegisterName, "rpcPort", portStr,
 		"prometheusPorts", prometheusConfig.Ports)
 
 	defer listener.Close()
-	client, err := kdisc.NewDiscoveryRegister(discovery)
+	client, err := kdisc.NewDiscoveryRegister(discovery, runTimeEnv)
 	if err != nil {
 		return err
 	}

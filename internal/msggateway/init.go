@@ -16,11 +16,13 @@ package msggateway
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
-	"time"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 
 	"github.com/openimsdk/tools/log"
 )
@@ -31,11 +33,15 @@ type Config struct {
 	RedisConfig    config.Redis
 	WebhooksConfig config.Webhooks
 	Discovery      config.Discovery
+
+	RuntimeEnv string
 }
 
 // Start run ws server.
 func Start(ctx context.Context, index int, conf *Config) error {
-	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "autoSetPorts", conf.MsgGateway.RPC.AutoSetPorts,
+	conf.RuntimeEnv = runtimeenv.PrintRuntimeEnvironment()
+
+	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "runtimeEnv", conf.RuntimeEnv, "autoSetPorts", conf.MsgGateway.RPC.AutoSetPorts,
 		"rpcPorts", conf.MsgGateway.RPC.Ports,
 		"wsPort", conf.MsgGateway.LongConnSvr.Ports, "prometheusPorts", conf.MsgGateway.Prometheus.Ports)
 	wsPort, err := datautil.GetElemByIndex(conf.MsgGateway.LongConnSvr.Ports, index)
