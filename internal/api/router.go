@@ -57,14 +57,14 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		_ = v.RegisterValidation("required_if", RequiredIf)
 	}
 	// init rpc client here
-	userRpc := rpcclient.NewUser(disCov, config.Share.RpcRegisterName.User, config.Share.RpcRegisterName.MessageGateway,
+	userRpc := rpcclient.NewUser(disCov, config.Discovery.RpcService.User, config.Discovery.RpcService.MessageGateway,
 		config.Share.IMAdminUserID)
-	groupRpc := rpcclient.NewGroup(disCov, config.Share.RpcRegisterName.Group)
-	friendRpc := rpcclient.NewFriend(disCov, config.Share.RpcRegisterName.Friend)
-	messageRpc := rpcclient.NewMessage(disCov, config.Share.RpcRegisterName.Msg)
-	conversationRpc := rpcclient.NewConversation(disCov, config.Share.RpcRegisterName.Conversation)
-	authRpc := rpcclient.NewAuth(disCov, config.Share.RpcRegisterName.Auth)
-	thirdRpc := rpcclient.NewThird(disCov, config.Share.RpcRegisterName.Third, config.API.Prometheus.GrafanaURL)
+	groupRpc := rpcclient.NewGroup(disCov, config.Discovery.RpcService.Group)
+	friendRpc := rpcclient.NewFriend(disCov, config.Discovery.RpcService.Friend)
+	messageRpc := rpcclient.NewMessage(disCov, config.Discovery.RpcService.Msg)
+	conversationRpc := rpcclient.NewConversation(disCov, config.Discovery.RpcService.Conversation)
+	authRpc := rpcclient.NewAuth(disCov, config.Discovery.RpcService.Auth)
+	thirdRpc := rpcclient.NewThird(disCov, config.Discovery.RpcService.Third, config.API.Prometheus.GrafanaURL)
 	switch config.API.Api.CompressionLevel {
 	case NoCompression:
 	case DefaultCompression:

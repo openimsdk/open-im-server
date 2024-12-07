@@ -73,7 +73,7 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 		if err != nil {
 			return err
 		}
-		cs := prommetrics.GetGrpcCusMetrics(rpcRegisterName, share)
+		cs := prommetrics.GetGrpcCusMetrics(rpcRegisterName, discovery)
 		go func() {
 			if err := prommetrics.RpcInit(cs, prometheusPort); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				netErr = errs.WrapMsg(err, fmt.Sprintf("rpc %s prometheus start err: %d", rpcRegisterName, prometheusPort))
@@ -107,7 +107,7 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 		"prometheusPorts", prometheusConfig.Ports)
 
 	defer listener.Close()
-	client, err := kdisc.NewDiscoveryRegister(discovery, runTimeEnv)
+	client, err := kdisc.NewDiscoveryRegister(discovery)
 	if err != nil {
 		return err
 	}
