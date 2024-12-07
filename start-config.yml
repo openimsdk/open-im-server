@@ -13,6 +13,6 @@ serviceBinaries:
   openim-rpc-third: 1
 toolBinaries:
   - check-free-memory
-  # - check-component
+  - check-component
   - seq
 maxFileDescriptors: 10000

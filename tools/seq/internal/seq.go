@@ -20,6 +20,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -42,9 +43,10 @@ const (
 )
 
 func readConfig[T any](dir string, name string) (*T, error) {
-	if os.Getenv(config.DeploymentType) == config.KUBERNETES {
+	if runtimeenv.PrintRuntimeEnvironment() == config.KUBERNETES {
 		dir = os.Getenv(config.MountConfigFilePath)
 	}
+
 	data, err := os.ReadFile(filepath.Join(dir, name))
 	if err != nil {
 		return nil, err
