@@ -15,9 +15,10 @@
 package config
 
 import (
-	"github.com/openimsdk/tools/s3/aws"
 	"strings"
 	"time"
+
+	"github.com/openimsdk/tools/s3/aws"
 
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
@@ -474,7 +475,12 @@ type ZooKeeper struct {
 type Discovery struct {
 	Enable     string     `mapstructure:"enable"`
 	Etcd       Etcd       `mapstructure:"etcd"`
+	Kubernetes Kubernetes `mapstructure:"kubernetes"`
 	RpcService RpcService `mapstructure:"rpcService"`
+}
+
+type Kubernetes struct {
+	Namespace string `mapstructure:"namespace"`
 }
 
 type Etcd struct {
