@@ -18,6 +18,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/openimsdk/tools/s3/aws"
+
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
@@ -461,9 +463,14 @@ type ZooKeeper struct {
 }
 
 type Discovery struct {
-	Enable    string    `mapstructure:"enable"`
-	Etcd      Etcd      `mapstructure:"etcd"`
-	ZooKeeper ZooKeeper `mapstructure:"zooKeeper"`
+	Enable     string     `mapstructure:"enable"`
+	Etcd       Etcd       `mapstructure:"etcd"`
+	Kubernetes Kubernetes `mapstructure:"kubernetes"`
+	RpcService RpcService `mapstructure:"rpcService"`
+}
+
+type Kubernetes struct {
+	Namespace string `mapstructure:"namespace"`
 }
 
 type Etcd struct {
