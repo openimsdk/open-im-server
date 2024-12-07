@@ -17,6 +17,12 @@ package config
 const ConfKey = "conf"
 
 const (
+	MountConfigFilePath = "CONFIG_PATH"
+	DeploymentType      = "DEPLOYMENT_TYPE"
+	KUBERNETES          = "kubernetes"
+)
+
+const (
 	// DefaultDirPerm is used for creating general directories, allowing the owner to read, write, and execute,
 	// while the group and others can only read and execute.
 	DefaultDirPerm = 0755
