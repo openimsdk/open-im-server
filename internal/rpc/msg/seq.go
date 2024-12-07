@@ -84,3 +84,21 @@ func (m *msgServer) GetActiveConversation(ctx context.Context, req *pbmsg.GetAct
 	}
 	return &pbmsg.GetActiveConversationResp{Conversations: conversations}, nil
 }
+
+func (m *msgServer) SetUserConversationMaxSeq(ctx context.Context, req *pbmsg.SetUserConversationMaxSeqReq) (*pbmsg.SetUserConversationMaxSeqResp, error) {
+	for _, userID := range req.OwnerUserID {
+		if err := m.MsgDatabase.SetUserConversationsMaxSeq(ctx, req.ConversationID, userID, req.MaxSeq); err != nil {
+			return nil, err
+		}
+	}
+	return &pbmsg.SetUserConversationMaxSeqResp{}, nil
+}
+
+func (m *msgServer) SetUserConversationMinSeq(ctx context.Context, req *pbmsg.SetUserConversationMinSeqReq) (*pbmsg.SetUserConversationMinSeqResp, error) {
+	for _, userID := range req.OwnerUserID {
+		if err := m.MsgDatabase.SetUserConversationsMinSeq(ctx, req.ConversationID, userID, req.MinSeq); err != nil {
+			return nil, err
+		}
+	}
+	return &pbmsg.SetUserConversationMinSeqResp{}, nil
+}
