@@ -42,25 +42,25 @@ func GetGrpcServerMetrics() *gp.ServerMetrics {
 	return grpcMetrics
 }
 
-func GetGrpcCusMetrics(registerName string, share *config.Share) []prometheus.Collector {
+func GetGrpcCusMetrics(registerName string, discovery *config.Discovery) []prometheus.Collector {
 	switch registerName {
-	case share.RpcRegisterName.MessageGateway:
+	case discovery.RpcService.MessageGateway:
 		return []prometheus.Collector{OnlineUserGauge}
-	case share.RpcRegisterName.Msg:
+	case discovery.RpcService.Msg:
 		return []prometheus.Collector{
 			SingleChatMsgProcessSuccessCounter,
 			SingleChatMsgProcessFailedCounter,
 			GroupChatMsgProcessSuccessCounter,
 			GroupChatMsgProcessFailedCounter,
 		}
-	case share.RpcRegisterName.Push:
+	case discovery.RpcService.Push:
 		return []prometheus.Collector{
 			MsgOfflinePushFailedCounter,
 			MsgLoneTimePushCounter,
 		}
-	case share.RpcRegisterName.Auth:
+	case discovery.RpcService.Auth:
 		return []prometheus.Collector{UserLoginCounter}
-	case share.RpcRegisterName.User:
+	case discovery.RpcService.User:
 		return []prometheus.Collector{UserRegisterCounter}
 	default:
 		return nil

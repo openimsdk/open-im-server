@@ -5,4 +5,15 @@ etcd:
   username: ''
   password: ''
 
+rpcService:
+  user: user-rpc-service
+  friend: friend-rpc-service
+  msg: msg-rpc-service
+  push: push-rpc-service
+  messageGateway: messageGateway-rpc-service
+  group: group-rpc-service
+  auth: auth-rpc-service
+  conversation: conversation-rpc-service
+  third: third-rpc-service
+
 

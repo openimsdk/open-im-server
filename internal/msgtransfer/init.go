@@ -75,7 +75,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	client, err := discRegister.NewDiscoveryRegister(&config.Discovery, &config.Share)
+	client, err := discRegister.NewDiscoveryRegister(&config.Discovery)
 	if err != nil {
 		return err
 	}
@@ -101,8 +101,8 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
+	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Discovery.RpcService.Conversation)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Discovery.RpcService.Group)
 	historyCH, err := NewOnlineHistoryRedisConsumerHandler(&config.KafkaConfig, msgTransferDatabase, &conversationRpcClient, &groupRpcClient)
 	if err != nil {
 		return err

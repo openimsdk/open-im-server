@@ -3,6 +3,11 @@ rpc:
   registerIP: 
   # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
   listenIP: 0.0.0.0
+  # autoSetPorts indicates whether to automatically set the ports
+  autoSetPorts: true
+  # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+  # It will only take effect when autoSetPorts is set to false.
+  ports: [ 10300 ]
 
 prometheus:
   # Enable or disable Prometheus monitoring
@@ -29,10 +34,17 @@ object:
     sessionToken: 
     publicRead: false
   kodo:
-    endpoint: http://s3.cn-south-1.qiniucs.com
-    bucket: kodo-bucket-test
-    bucketURL: http://kodo-bucket-test-oetobfb.qiniudns.com
-    accessKeyID: 
-    accessKeySecret: 
+    endpoint: https://s3.cn-south-1.qiniucs.com
+    bucket: testdemo12313
+    bucketURL: http://so2at6d05.hn-bkt.clouddn.com
+    accessKeyID:
+    accessKeySecret:
     sessionToken: 
+    publicRead: false
+  aws:
+    region: ap-southeast-2
+    bucket: testdemo832234
+    accessKeyID:
+    secretAccessKey:
+    sessionToken:
     publicRead: false
