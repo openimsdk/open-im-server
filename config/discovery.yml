@@ -5,7 +5,7 @@ etcd:
   username: ''
   password: ''
 
-kubenetes:
+kubernetes:
   namespace: default
 
 rpcService:
