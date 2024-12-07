@@ -34,10 +34,17 @@ object:
     sessionToken: 
     publicRead: false
   kodo:
-    endpoint: http://s3.cn-south-1.qiniucs.com
-    bucket: kodo-bucket-test
-    bucketURL: http://kodo-bucket-test-oetobfb.qiniudns.com
-    accessKeyID: 
-    accessKeySecret: 
+    endpoint: https://s3.cn-south-1.qiniucs.com
+    bucket: testdemo12313
+    bucketURL: http://so2at6d05.hn-bkt.clouddn.com
+    accessKeyID:
+    accessKeySecret:
     sessionToken: 
+    publicRead: false
+  aws:
+    region: ap-southeast-2
+    bucket: testdemo832234
+    accessKeyID:
+    secretAccessKey:
+    sessionToken:
     publicRead: false
