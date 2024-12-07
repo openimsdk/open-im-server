@@ -163,10 +163,6 @@ func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *
 		checks["Etcd"] = func(ctx context.Context) error {
 			return CheckEtcd(ctx, &discovery.Etcd)
 		}
-	} else if discovery.Enable == "zookeeper" {
-		checks["Zookeeper"] = func(ctx context.Context) error {
-			return CheckZookeeper(ctx, &discovery.ZooKeeper)
-		}
 	}
 
 	for i := 0; i < maxRetry; i++ {

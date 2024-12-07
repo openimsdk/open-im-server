@@ -116,7 +116,7 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 		"prometheusPorts", prometheusConfig.Ports)
 
 	defer listener.Close()
-	client, err := kdisc.NewDiscoveryRegister(discovery, runTimeEnv)
+	client, err := kdisc.NewDiscoveryRegister(discovery)
 	if err != nil {
 		return err
 	}
