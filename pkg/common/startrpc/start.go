@@ -17,9 +17,6 @@ package startrpc
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/grpc/status"
 	"net"
 	"net/http"
 	"os"
@@ -27,6 +24,13 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/runtimeenv"
+	"google.golang.org/grpc/status"
+
+	"strconv"
 
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -44,9 +48,22 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	registerIP string, rpcPorts []int, index int, rpcRegisterName string, share *config.Share, config T, rpcFn func(ctx context.Context,
 	config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 
-	rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
-	if err != nil {
-		return err
+	var (
+		rpcTcpAddr string
+		netDone    = make(chan struct{}, 2)
+		netErr     error
+	)
+
+	runTimeEnv := runtimeenv.PrintRuntimeEnvironment()
+
+	if !autoSetPorts {
+		rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
+		if err != nil {
+			return err
+		}
+		rpcTcpAddr = net.JoinHostPort(network.GetListenIP(listenIP), strconv.Itoa(rpcPort))
+	} else {
+		rpcTcpAddr = net.JoinHostPort(network.GetListenIP(listenIP), "0")
 	}
 
 	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcPort", rpcPort,
@@ -60,8 +77,16 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	if err != nil {
 		return errs.WrapMsg(err, "listen err", "rpcTcpAddr", rpcTcpAddr)
 	}
+
+	_, portStr, _ := net.SplitHostPort(listener.Addr().String())
+	registerIP = network.GetListenIP(registerIP)
+	port, _ := strconv.Atoi(portStr)
+
+	log.CInfo(ctx, "RPC server is initializing", "runTimeEnv", runTimeEnv, "rpcRegisterName", rpcRegisterName, "rpcPort", portStr,
+		"prometheusPorts", prometheusConfig.Ports)
+
 	defer listener.Close()
-	client, err := kdisc.NewDiscoveryRegister(discovery, share)
+	client, err := kdisc.NewDiscoveryRegister(discovery, runTimeEnv)
 	if err != nil {
 		return err
 	}

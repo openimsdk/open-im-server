@@ -28,6 +28,7 @@ import (
 
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mw"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -40,14 +41,18 @@ type CronTaskConfig struct {
 	CronTask  config.CronTask
 	Share     config.Share
 	Discovery config.Discovery
+
+	runTimeEnv string
 }
 
 func Start(ctx context.Context, config *CronTaskConfig) error {
-	log.CInfo(ctx, "CRON-TASK server is initializing", "chatRecordsClearTime", config.CronTask.CronExecuteTime, "msgDestructTime", config.CronTask.RetainChatRecords)
+	config.runTimeEnv = runtimeenv.PrintRuntimeEnvironment()
+
+	log.CInfo(ctx, "CRON-TASK server is initializing", "runTimeEnv", config.runTimeEnv, "chatRecordsClearTime", config.CronTask.CronExecuteTime, "msgDestructTime", config.CronTask.RetainChatRecords)
 	if config.CronTask.RetainChatRecords < 1 {
 		return errs.New("msg destruct time must be greater than 1").Wrap()
 	}
-	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, &config.Share)
+	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, config.runTimeEnv)
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
