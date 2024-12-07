@@ -5,16 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
-	"github.com/openimsdk/tools/db/mongoutil"
-	"github.com/openimsdk/tools/db/redisutil"
-	"github.com/redis/go-redis/v9"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"gopkg.in/yaml.v3"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -24,6 +14,18 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/utils/runtimeenv"
+	"github.com/redis/go-redis/v9"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -41,6 +43,10 @@ const (
 )
 
 func readConfig[T any](dir string, name string) (*T, error) {
+	if runtimeenv.PrintRuntimeEnvironment() == config.KUBERNETES {
+		dir = os.Getenv(config.MountConfigFilePath)
+	}
+
 	data, err := os.ReadFile(filepath.Join(dir, name))
 	if err != nil {
 		return nil, err

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: third-rpc-service
+spec:
+  selector:
+    app: third-rpc-server
+  ports:
+    - name: http-10300
+      protocol: TCP
+      port: 10300
+      targetPort: 10300
+    - name: prometheus-12300
+      protocol: TCP
+      port: 12300
+      targetPort: 12300
+  type: ClusterIP
