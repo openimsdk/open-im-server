@@ -177,8 +177,9 @@ type Prometheus struct {
 
 type MsgGateway struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus  Prometheus `mapstructure:"prometheus"`
 	ListenIP    string     `mapstructure:"listenIP"`
@@ -196,8 +197,10 @@ type MsgTransfer struct {
 
 type Push struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus           Prometheus `mapstructure:"prometheus"`
 	MaxConcurrentWorkers int        `mapstructure:"maxConcurrentWorkers"`
@@ -230,9 +233,10 @@ type Push struct {
 
 type Auth struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus  Prometheus `mapstructure:"prometheus"`
 	TokenPolicy struct {
@@ -242,27 +246,30 @@ type Auth struct {
 
 type Conversation struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type Friend struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type Group struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus                 Prometheus `mapstructure:"prometheus"`
 	EnableHistoryForNewMembers bool       `mapstructure:"enableHistoryForNewMembers"`
@@ -270,9 +277,10 @@ type Group struct {
 
 type Msg struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus   Prometheus `mapstructure:"prometheus"`
 	FriendVerify bool       `mapstructure:"friendVerify"`
@@ -280,9 +288,10 @@ type Msg struct {
 
 type Third struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 	Object     struct {
@@ -331,9 +340,10 @@ type Aws struct {
 
 type User struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 }
