@@ -37,7 +37,7 @@ import (
 func (s *Server) InitServer(ctx context.Context, config *Config, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	s.LongConnServer.SetDiscoveryRegistry(disCov, config)
 	msggateway.RegisterMsgGatewayServer(server, s)
-	s.userRcp = rpcclient.NewUserRpcClient(disCov, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
+	s.userRcp = rpcclient.NewUserRpcClient(disCov, config.Discovery.RpcService.User, config.Share.IMAdminUserID)
 	if s.ready != nil {
 		return s.ready(s)
 	}
@@ -48,7 +48,7 @@ func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 	return startrpc.Start(ctx, &conf.Discovery, &conf.MsgGateway.Prometheus, conf.MsgGateway.ListenIP,
 		conf.MsgGateway.RPC.RegisterIP,
 		conf.MsgGateway.RPC.AutoSetPorts, conf.MsgGateway.RPC.Ports, index,
-		conf.Share.RpcRegisterName.MessageGateway,
+		conf.Discovery.RpcService.MessageGateway,
 		&conf.Share,
 		conf,
 		s.InitServer,

@@ -93,8 +93,8 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	}
 
 	// Initialize RPC clients
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.Discovery.RpcService.User, config.Share.IMAdminUserID)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Discovery.RpcService.Msg)
 
 	// Initialize notification sender
 	notificationSender := NewFriendNotificationSender(
@@ -119,7 +119,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		userRpcClient:         &userRpcClient,
 		notificationSender:    notificationSender,
 		RegisterCenter:        client,
-		conversationRpcClient: rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation),
+		conversationRpcClient: rpcclient.NewConversationRpcClient(client, config.Discovery.RpcService.Conversation),
 		config:                config,
 		webhookClient:         webhook.NewWebhookClient(config.WebhooksConfig.URL),
 		queue:                 memamq.NewMemoryQueue(16, 1024*1024),
