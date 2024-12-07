@@ -60,7 +60,7 @@ func NewDefaultAllNode(disCov discovery.SvcDiscoveryRegistry, config *Config) *D
 
 func (d *DefaultAllNode) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData,
 	pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
-	conns, err := d.disCov.GetConns(ctx, d.config.Share.RpcRegisterName.MessageGateway)
+	conns, err := d.disCov.GetConns(ctx, d.config.Discovery.RpcService.MessageGateway)
 	if len(conns) == 0 {
 		log.ZWarn(ctx, "get gateway conn 0 ", nil)
 	} else {

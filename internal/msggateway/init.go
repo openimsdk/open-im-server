@@ -16,11 +16,13 @@ package msggateway
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
-	"time"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 
 	"github.com/openimsdk/tools/log"
 )
@@ -31,20 +33,22 @@ type Config struct {
 	RedisConfig    config.Redis
 	WebhooksConfig config.Webhooks
 	Discovery      config.Discovery
+
+	RuntimeEnv string
 }
 
 // Start run ws server.
 func Start(ctx context.Context, index int, conf *Config) error {
-	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "rpcPorts", conf.MsgGateway.RPC.Ports,
+	conf.RuntimeEnv = runtimeenv.PrintRuntimeEnvironment()
+
+	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "runtimeEnv", conf.RuntimeEnv, "autoSetPorts", conf.MsgGateway.RPC.AutoSetPorts,
+		"rpcPorts", conf.MsgGateway.RPC.Ports,
 		"wsPort", conf.MsgGateway.LongConnSvr.Ports, "prometheusPorts", conf.MsgGateway.Prometheus.Ports)
 	wsPort, err := datautil.GetElemByIndex(conf.MsgGateway.LongConnSvr.Ports, index)
 	if err != nil {
 		return err
 	}
-	rpcPort, err := datautil.GetElemByIndex(conf.MsgGateway.RPC.Ports, index)
-	if err != nil {
-		return err
-	}
+
 	rdb, err := redisutil.NewRedisClient(ctx, conf.RedisConfig.Build())
 	if err != nil {
 		return err
@@ -57,7 +61,7 @@ func Start(ctx context.Context, index int, conf *Config) error {
 		WithMessageMaxMsgLength(conf.MsgGateway.LongConnSvr.WebsocketMaxMsgLen),
 	)
 
-	hubServer := NewServer(rpcPort, longServer, conf, func(srv *Server) error {
+	hubServer := NewServer(longServer, conf, func(srv *Server) error {
 		longServer.online, _ = rpccache.NewOnlineCache(srv.userRcp, nil, rdb, false, longServer.subscriberUserOnlineStatusChanges)
 		return nil
 	})

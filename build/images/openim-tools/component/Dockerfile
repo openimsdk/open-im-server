@@ -18,11 +18,11 @@
 
 # FROM golang:1.20 AS builder
 
-# ARG GO111MODULE=on
+# 
 
 # WORKDIR /openim/openim-server
 
-# ENV GO111MODULE=$GO111MODULE
+# 
 # ENV GOPROXY=$GOPROXY
 
 # COPY go.mod go.sum ./
@@ -50,9 +50,6 @@
 
 # Use Go 1.22 Alpine as the base image for building the application
 FROM golang:1.22-alpine AS builder
-
-ARG GO111MODULE=on
-
 # Define the base directory for the application as an environment variable
 ENV SERVER_DIR=/openim-server
 
@@ -60,8 +57,8 @@ ENV SERVER_DIR=/openim-server
 WORKDIR $SERVER_DIR
 
 # Set the Go proxy to improve dependency resolution speed
-ENV GO111MODULE=$GO111MODULE
-ENV GOPROXY=https://goproxy.io,direct
+
+#ENV GOPROXY=https://goproxy.io,direct
 
 # Copy all files from the current directory into the container
 COPY . .

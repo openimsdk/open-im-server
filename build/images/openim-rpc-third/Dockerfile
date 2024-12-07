@@ -1,8 +1,5 @@
 # Use Go 1.22 Alpine as the base image for building the application
 FROM golang:1.22-alpine AS builder
-
-ARG GO111MODULE=on
-
 # Define the base directory for the application as an environment variable
 ENV SERVER_DIR=/openim-server
 
@@ -10,27 +7,24 @@ ENV SERVER_DIR=/openim-server
 WORKDIR $SERVER_DIR
 
 # Set the Go proxy to improve dependency resolution speed
-ENV GO111MODULE=$GO111MODULE
-ENV GOPROXY=https://goproxy.io,direct
+
+#ENV GOPROXY=https://goproxy.io,direct
 
 # Copy all files from the current directory into the container
 COPY . .
 
-RUN go mod download
+RUN go mod tidy
 
-# Install Mage to use for building the application
-RUN go install github.com/magefile/mage@v1.15.0
 
-ENV BINS=openim-rpc-third
 
-# Optionally build your application if needed
-RUN mage build ${BINS} check-free-memory seq || true
+RUN go build -o _output/openim-rpc-third ./cmd/openim-rpc/openim-rpc-third
 
-# Using Alpine Linux with Go environment for the final image
-FROM golang:1.22-alpine
+
+# Using Alpine Linux for the final image
+FROM alpine:latest
 
 # Install necessary packages, such as bash
-RUN apk add bash
+RUN apk add --no-cache bash
 
 # Set the environment and work directory
 ENV SERVER_DIR=/openim-server
@@ -39,22 +33,7 @@ WORKDIR $SERVER_DIR
 
 # Copy the compiled binaries and mage from the builder image to the final image
 COPY --from=builder $SERVER_DIR/_output $SERVER_DIR/_output
-COPY --from=builder $SERVER_DIR/config $SERVER_DIR/config
-COPY --from=builder /go/bin/mage /usr/local/bin/mage
-COPY --from=builder $SERVER_DIR/magefile_windows.go $SERVER_DIR/
-COPY --from=builder $SERVER_DIR/magefile_unix.go $SERVER_DIR/
-COPY --from=builder $SERVER_DIR/magefile.go $SERVER_DIR/
-# COPY --from=builder $SERVER_DIR/start-config.yml $SERVER_DIR/
-COPY --from=builder $SERVER_DIR/go.mod $SERVER_DIR/
-COPY --from=builder $SERVER_DIR/go.sum $SERVER_DIR/
-
-
-RUN echo -e "serviceBinaries:\n  openim-rpc-third: 1 \n" \
-    > $SERVER_DIR/start-config.yml && \
-    echo -e "toolBinaries:\n  - check-free-memory\n  - seq\n" >> $SERVER_DIR/start-config.yml && \
-    echo "maxFileDescriptors: 10000" >> $SERVER_DIR/start-config.yml
-
-RUN go get github.com/openimsdk/gomake@v0.0.15-alpha.1
+# COPY --from=builder $SERVER_DIR/config $SERVER_DIR/config
 
 # Set the command to run when the container starts
-ENTRYPOINT ["sh", "-c", "mage start && tail -f /dev/null"]
+ENTRYPOINT ["sh", "-c", "_output/openim-rpc-third"]

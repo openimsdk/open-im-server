@@ -10,15 +10,16 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Load(configDirectory string, configFileName string, envPrefix string, config any) error {
-	if os.Getenv(DeploymentType) == KUBERNETES {
+func Load(configDirectory string, configFileName string, envPrefix string, runtimeEnv string, config any) error {
+	if runtimeEnv == KUBERNETES {
 		mountPath := os.Getenv(MountConfigFilePath)
 		if mountPath == "" {
 			return errs.ErrArgs.WrapMsg(MountConfigFilePath + " env is empty")
 		}
-		return loadConfigK8s(filepath.Join(mountPath, configFileName), envPrefix, config)
 
+		return loadConfig(filepath.Join(mountPath, configFileName), envPrefix, config)
 	}
+
 	return loadConfig(filepath.Join(configDirectory, configFileName), envPrefix, config)
 }
 

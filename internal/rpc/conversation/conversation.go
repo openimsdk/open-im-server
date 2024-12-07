@@ -16,6 +16,8 @@ package conversation
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	pbmsg "github.com/openimsdk/protocol/msg"
 	"sort"
 	"time"
 
@@ -76,9 +78,9 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Discovery.RpcService.Group)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Discovery.RpcService.Msg)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.Discovery.RpcService.User, config.Share.IMAdminUserID)
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	pbconversation.RegisterConversationServer(server, &conversationServer{
 		msgRpcClient:                   &msgRpcClient,
@@ -433,22 +435,37 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 	if err != nil {
 		return nil, err
 	}
+	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID)
+	if _, err := c.msgRpcClient.Client.SetUserConversationMaxSeq(ctx, &pbmsg.SetUserConversationMaxSeqReq{ConversationID: conversationID, OwnerUserID: req.UserIDs, MaxSeq: 0}); err != nil {
+		return nil, err
+	}
 	return &pbconversation.CreateGroupChatConversationsResp{}, nil
 }
 
 func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbconversation.SetConversationMaxSeqReq) (*pbconversation.SetConversationMaxSeqResp, error) {
+	if _, err := c.msgRpcClient.Client.SetUserConversationMaxSeq(ctx, &pbmsg.SetUserConversationMaxSeqReq{ConversationID: req.ConversationID, OwnerUserID: req.OwnerUserID, MaxSeq: req.MaxSeq}); err != nil {
+		return nil, err
+	}
 	if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.OwnerUserID, req.ConversationID,
 		map[string]any{"max_seq": req.MaxSeq}); err != nil {
 		return nil, err
 	}
-
+	for _, userID := range req.OwnerUserID {
+		c.conversationNotificationSender.ConversationChangeNotification(ctx, userID, []string{req.ConversationID})
+	}
 	return &pbconversation.SetConversationMaxSeqResp{}, nil
 }
 
 func (c *conversationServer) SetConversationMinSeq(ctx context.Context, req *pbconversation.SetConversationMinSeqReq) (*pbconversation.SetConversationMinSeqResp, error) {
+	if _, err := c.msgRpcClient.Client.SetUserConversationMinSeq(ctx, &pbmsg.SetUserConversationMinSeqReq{ConversationID: req.ConversationID, OwnerUserID: req.OwnerUserID, MinSeq: req.MinSeq}); err != nil {
+		return nil, err
+	}
 	if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.OwnerUserID, req.ConversationID,
 		map[string]any{"min_seq": req.MinSeq}); err != nil {
 		return nil, err
+	}
+	for _, userID := range req.OwnerUserID {
+		c.conversationNotificationSender.ConversationChangeNotification(ctx, userID, []string{req.ConversationID})
 	}
 	return &pbconversation.SetConversationMinSeqResp{}, nil
 }
