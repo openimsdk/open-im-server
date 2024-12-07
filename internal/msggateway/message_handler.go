@@ -120,7 +120,7 @@ type GrpcHandler struct {
 	validate     *validator.Validate
 }
 
-func NewGrpcHandler(validate *validator.Validate, client discovery.SvcDiscoveryRegistry, rpcRegisterName *config.RpcRegisterName) *GrpcHandler {
+func NewGrpcHandler(validate *validator.Validate, client discovery.SvcDiscoveryRegistry, rpcRegisterName *config.RpcService) *GrpcHandler {
 	msgRpcClient := rpcclient.NewMessageRpcClient(client, rpcRegisterName.Msg)
 	pushRpcClient := rpcclient.NewPushRpcClient(client, rpcRegisterName.Push)
 	return &GrpcHandler{

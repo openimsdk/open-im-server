@@ -89,10 +89,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	msgModel := redis.NewMsgCache(rdb)
-	conversationClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
-	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.Share.RpcRegisterName.Friend)
+	conversationClient := rpcclient.NewConversationRpcClient(client, config.Discovery.RpcService.Conversation)
+	userRpcClient := rpcclient.NewUserRpcClient(client, config.Discovery.RpcService.User, config.Share.IMAdminUserID)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Discovery.RpcService.Group)
+	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.Discovery.RpcService.Friend)
 	seqConversation, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return err
