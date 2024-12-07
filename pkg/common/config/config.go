@@ -15,6 +15,7 @@
 package config
 
 import (
+	"github.com/openimsdk/tools/s3/aws"
 	"strings"
 	"time"
 
@@ -290,14 +291,7 @@ type Third struct {
 		Cos    Cos    `mapstructure:"cos"`
 		Oss    Oss    `mapstructure:"oss"`
 		Kodo   Kodo   `mapstructure:"kodo"`
-		Aws    struct {
-			Endpoint        string `mapstructure:"endpoint"`
-			Region          string `mapstructure:"region"`
-			Bucket          string `mapstructure:"bucket"`
-			AccessKeyID     string `mapstructure:"accessKeyID"`
-			AccessKeySecret string `mapstructure:"accessKeySecret"`
-			PublicRead      bool   `mapstructure:"publicRead"`
-		} `mapstructure:"aws"`
+		Aws    Aws    `mapstructure:"aws"`
 	} `mapstructure:"object"`
 }
 type Cos struct {
@@ -323,6 +317,15 @@ type Kodo struct {
 	BucketURL       string `mapstructure:"bucketURL"`
 	AccessKeyID     string `mapstructure:"accessKeyID"`
 	AccessKeySecret string `mapstructure:"accessKeySecret"`
+	SessionToken    string `mapstructure:"sessionToken"`
+	PublicRead      bool   `mapstructure:"publicRead"`
+}
+
+type Aws struct {
+	Region          string `mapstructure:"region"`
+	Bucket          string `mapstructure:"bucket"`
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	SecretAccessKey string `mapstructure:"secretAccessKey"`
 	SessionToken    string `mapstructure:"sessionToken"`
 	PublicRead      bool   `mapstructure:"publicRead"`
 }
@@ -533,6 +536,7 @@ func (m *Minio) Build() *minio.Config {
 		SignEndpoint:    formatEndpoint(m.ExternalAddress),
 	}
 }
+
 func (c *Cos) Build() *cos.Config {
 	return &cos.Config{
 		BucketURL:    c.BucketURL,
@@ -564,6 +568,16 @@ func (o *Kodo) Build() *kodo.Config {
 		AccessKeySecret: o.AccessKeySecret,
 		SessionToken:    o.SessionToken,
 		PublicRead:      o.PublicRead,
+	}
+}
+
+func (o *Aws) Build() *aws.Config {
+	return &aws.Config{
+		Region:          o.Region,
+		Bucket:          o.Bucket,
+		AccessKeyID:     o.AccessKeyID,
+		SecretAccessKey: o.SecretAccessKey,
+		SessionToken:    o.SessionToken,
 	}
 }
 
