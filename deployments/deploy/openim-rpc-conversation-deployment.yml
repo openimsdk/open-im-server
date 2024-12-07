@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: conversation-rpc-server
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: conversation-rpc-server

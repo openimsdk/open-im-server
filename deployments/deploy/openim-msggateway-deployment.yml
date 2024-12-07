@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: openim-msggateway-server
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: openim-msggateway-server

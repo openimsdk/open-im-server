@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: third-rpc-server
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: third-rpc-server

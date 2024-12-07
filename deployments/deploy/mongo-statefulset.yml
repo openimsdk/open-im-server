@@ -4,7 +4,7 @@ metadata:
   name: mongo-statefulset
 spec:
   serviceName: "mongo"
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: mongo

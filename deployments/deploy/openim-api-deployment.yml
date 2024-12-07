@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: openim-api
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: openim-api
@@ -15,7 +15,6 @@ spec:
       containers:
         - name: openim-api-container
           image: openim/openim-api:v3.8.3
-          
           env:
             - name: CONFIG_PATH
               value: "/config"

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: auth-rpc-server
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: auth-rpc-server

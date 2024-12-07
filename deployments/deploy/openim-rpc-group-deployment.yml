@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: group-rpc-server
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: group-rpc-server
