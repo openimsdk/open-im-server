@@ -15,7 +15,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/protocol v0.0.72-alpha.61
-	github.com/openimsdk/tools v0.0.50-alpha.43
+	github.com/openimsdk/tools v0.0.50-alpha.44
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
@@ -94,9 +94,9 @@ require (
 	github.com/eapache/go-resiliency v1.6.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/elastic/go-sysinfo v1.0.2 // indirect
 	github.com/elastic/go-windows v1.0.0 // indirect
+	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
@@ -136,6 +136,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/joeshaw/multierror v0.0.0-20140124173710-69b34d4ec901 // indirect
+	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kelindar/simd v1.1.2 // indirect
 	github.com/klauspost/compress v1.17.7 // indirect
@@ -209,15 +210,14 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gorm.io/gorm v1.25.8 // indirect
+	howett.net/plist v0.0.0-20181124034731-591f970eefbb // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
 	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8 // indirect
+	modernc.org/fileutil v1.0.0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
-	howett.net/plist v0.0.0-20181124034731-591f970eefbb // indirect
-	modernc.org/fileutil v1.0.0 // indirect
-	stathat.com/c/consistent v1.0.0 // indirect
 )
 
 require (
