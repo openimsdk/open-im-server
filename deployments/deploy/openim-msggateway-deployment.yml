@@ -14,12 +14,10 @@ spec:
     spec:
       containers:
         - name: openim-msggateway-container
-          image: openim/openim-msggateway:v3.9
+          image: openim/openim-msggateway:v3.8.3
           env:
             - name: CONFIG_PATH
               value: "/config"
-            - name: DEPLOYMENT_TYPE
-              value: "kubernetes"
           volumeMounts:
             - name: openim-config
               mountPath: "/config"

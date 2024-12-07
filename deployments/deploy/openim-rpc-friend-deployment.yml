@@ -14,11 +14,10 @@ spec:
     spec:
       containers:
         - name: friend-rpc-server-container
-          image: openim/openim-rpc-friend:v3.9
-          # imagePullPolicy: Never
+          image: openim/openim-rpc-friend:v3.8.3
+          
           env:
-            - name: DEPLOYMENT_TYPE
-              value: "kubernetes"
+
             - name: CONFIG_PATH
               value: "/config"
             - name: REDIS_PASSWORD

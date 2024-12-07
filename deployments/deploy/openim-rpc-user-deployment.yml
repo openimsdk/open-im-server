@@ -14,11 +14,9 @@ spec:
     spec:
       containers:
         - name: user-rpc-server-container
-          image: openim/openim-rpc-user:v3.9
-          # imagePullPolicy: Never
+          image: openim/openim-rpc-user:v3.8.3
+          
           env:
-            - name: DEPLOYMENT_TYPE
-              value: "kubernetes"
             - name: CONFIG_PATH
               value: "/config"
           volumeMounts:

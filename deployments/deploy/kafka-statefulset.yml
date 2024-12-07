@@ -47,18 +47,13 @@ spec:
               value: "CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT"
             - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
               value: "CONTROLLER"
-            - name: KAFKA_NUM_PARTITIONS
-              value: "8"
             - name: KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE
               value: "true"
           volumeMounts:
             - name: kafka-data
               mountPath: /bitnami/kafka
+
       volumes:
-        - name: kafka-scripts
-          configMap:
-            name: openim-config
-            defaultMode: 0755
         - name: kafka-data
           persistentVolumeClaim:
             claimName: kafka-pvc

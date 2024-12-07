@@ -14,11 +14,9 @@ spec:
     spec:
       containers:
         - name: conversation-rpc-server-container
-          image: openim/openim-rpc-conversation:v3.9
+          image: openim/openim-rpc-conversation:v3.8.3
           imagePullPolicy: Never
           env:
-            - name: DEPLOYMENT_TYPE
-              value: "kubernetes"
             - name: CONFIG_PATH
               value: "/config"
           volumeMounts:
