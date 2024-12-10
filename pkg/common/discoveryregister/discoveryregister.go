@@ -26,6 +26,10 @@ import (
 	"github.com/openimsdk/tools/errs"
 )
 
+const (
+	Etcd = "etcd"
+)
+
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
 func NewDiscoveryRegister(discovery *config.Discovery, runtimeEnv string) (discovery.SvcDiscoveryRegistry, error) {
 	if runtimeEnv == "kubernetes" {
@@ -35,7 +39,7 @@ func NewDiscoveryRegister(discovery *config.Discovery, runtimeEnv string) (disco
 	switch discovery.Enable {
 	case "kubernetes":
 		return kubernetes.NewKubernetesConnManager(discovery.Kubernetes.Namespace)
-	case "etcd":
+	case Etcd:
 		return etcd.NewSvcDiscoveryRegistry(
 			discovery.Etcd.RootDirectory,
 			discovery.Etcd.Address,
