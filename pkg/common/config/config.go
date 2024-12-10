@@ -106,9 +106,10 @@ type API struct {
 		CompressionLevel int    `mapstructure:"compressionLevel"`
 	} `mapstructure:"api"`
 	Prometheus struct {
-		Enable     bool   `mapstructure:"enable"`
-		Ports      []int  `mapstructure:"ports"`
-		GrafanaURL string `mapstructure:"grafanaURL"`
+		Enable       bool   `mapstructure:"enable"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
+		GrafanaURL   string `mapstructure:"grafanaURL"`
 	} `mapstructure:"prometheus"`
 }
 
@@ -191,7 +192,11 @@ type MsgGateway struct {
 }
 
 type MsgTransfer struct {
-	Prometheus Prometheus `mapstructure:"prometheus"`
+	Prometheus struct {
+		Enable       bool  `mapstructure:"enable"`
+		AutoSetPorts bool  `mapstructure:"autoSetPorts"`
+		Ports        []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
 }
 
 type Push struct {

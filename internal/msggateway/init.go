@@ -35,7 +35,7 @@ type Config struct {
 
 // Start run ws server.
 func Start(ctx context.Context, index int, conf *Config) error {
-	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "autoSetPorts", conf.MsgGateway.RPC.AutoSetPorts,
+	log.CInfo(ctx, "MSG-GATEWAY server is initializing",
 		"rpcPorts", conf.MsgGateway.RPC.Ports,
 		"wsPort", conf.MsgGateway.LongConnSvr.Ports, "prometheusPorts", conf.MsgGateway.Prometheus.Ports)
 	wsPort, err := datautil.GetElemByIndex(conf.MsgGateway.LongConnSvr.Ports, index)

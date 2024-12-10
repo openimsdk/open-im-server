@@ -23,12 +23,16 @@ import (
 	"time"
 )
 
+const (
+	Etcd = "etcd"
+)
+
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
 func NewDiscoveryRegister(discovery *config.Discovery) (discovery.SvcDiscoveryRegistry, error) {
 	switch discovery.Enable {
 	case "k8s":
 		return kubernetes.NewK8sDiscoveryRegister(discovery.RpcService.MessageGateway)
-	case "etcd":
+	case Etcd:
 		return etcd.NewSvcDiscoveryRegistry(
 			discovery.Etcd.RootDirectory,
 			discovery.Etcd.Address,

@@ -3,6 +3,7 @@ package prommetrics
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"net"
 	"strconv"
 )
 
@@ -23,14 +24,14 @@ var (
 	)
 )
 
-func ApiInit(prometheusPort int) error {
+func ApiInit(listener net.Listener) error {
 	apiRegistry := prometheus.NewRegistry()
 	cs := append(
 		baseCollector,
 		apiCounter,
 		httpCounter,
 	)
-	return Init(apiRegistry, prometheusPort, commonPath, promhttp.HandlerFor(apiRegistry, promhttp.HandlerOpts{}), cs...)
+	return Init(apiRegistry, listener, commonPath, promhttp.HandlerFor(apiRegistry, promhttp.HandlerOpts{}), cs...)
 }
 
 func APICall(path string, method string, apiCode int) {
