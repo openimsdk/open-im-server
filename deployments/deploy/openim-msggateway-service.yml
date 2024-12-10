@@ -6,10 +6,14 @@ spec:
   selector:
     app: openim-msggateway-server
   ports:
-    - name: http-10001
+    - name: longConnServer-10001
       protocol: TCP
       port: 10001
       targetPort: 10001
+    - name: http-12001
+      protocol: TCP
+      port: 12001
+      targetPort: 12001
     - name: prometheus-12001
       protocol: TCP
       port: 12001

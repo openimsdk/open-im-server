@@ -19,6 +19,11 @@ spec:
           env:
             - name: CONFIG_PATH
               value: "/config"
+            - name: IMENV_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: redis-password
           volumeMounts:
             - name: openim-config
               mountPath: "/config"

@@ -6,7 +6,6 @@ spec:
   selector:
     app: openim-msgtransfer-server
   ports:
-    # TODO Need check port!!!
     - name: prometheus-12020
       protocol: TCP
       port: 12020

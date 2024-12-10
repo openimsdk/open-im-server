@@ -17,10 +17,14 @@ spec:
           image: openim/openim-api:v3.8.3
           env:
             - name: CONFIG_PATH
-              value: "/config"
+              value: "/config"          
           volumeMounts:
             - name: openim-config
               mountPath: "/config"
+              readOnly: true
+            - name: notification-config
+              mountPath: "/config/notification.yml"
+              subPath: notification.yml
               readOnly: true
           ports:
             - containerPort: 10002
@@ -29,3 +33,6 @@ spec:
         - name: openim-config
           configMap:
             name: openim-config
+        - name: notification-config
+          configMap:
+            name: notification-config

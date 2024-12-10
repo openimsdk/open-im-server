@@ -14,17 +14,26 @@ spec:
     spec:
       containers:
         - name: third-rpc-server-container
-          image: openim/openim-rpc-third:v3.8.3
-          
+          image: openim/openim-rpc-third:v3.8.3          
           env:
             - name: CONFIG_PATH
               value: "/config"
-            - name: MINIO_ACCESS_KEY
+            - name: IMENV_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: redis-password
+            - name: IMENV_MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo_openim_password
+            - name: IMENV_MINIO_ACCESSKEYID
               valueFrom:
                 secretKeyRef:
                   name: minio-secret
                   key: minio-root-user
-            - name: MINIO_SECRET_KEY
+            - name: IMENV_MINIO_SECRETACCESSKEY
               valueFrom:
                 secretKeyRef:
                   name: minio-secret
