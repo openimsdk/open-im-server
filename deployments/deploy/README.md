@@ -12,7 +12,7 @@
 2. Deploy configs and dependencies
 
 Apply all config and dependencies
-`kubectl apply -f ./openim-config.yml -f ./notification-config.yml -f ./kafka-service.yml`
+`kubectl apply -f ./openim-config.yml -f `
 
 Run infrasturcture components.
 
