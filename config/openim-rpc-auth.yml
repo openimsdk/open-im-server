@@ -10,7 +10,6 @@ rpc:
   # It will only take effect when autoSetPorts is set to false.
   ports: [ 10200 ]
 
-
 prometheus:
   # Enable or disable Prometheus monitoring
   enable: true
