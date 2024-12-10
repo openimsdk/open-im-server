@@ -27,10 +27,6 @@ spec:
             - name: openim-config
               mountPath: "/config"
               readOnly: true
-            - name: notification-config
-              mountPath: "/config/notification.yml"
-              subPath: notification.yml
-              readOnly: true
           ports:
             - containerPort: 10170
             - containerPort: 12170
@@ -38,6 +34,3 @@ spec:
         - name: openim-config
           configMap:
             name: openim-config
-        - name: notification-config
-          configMap:
-            name: notification-config

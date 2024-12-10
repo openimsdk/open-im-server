@@ -14,11 +14,11 @@ data:
       password: ''
 
     rpcService:
+      messageGateway: messageGateway-rpc-service
       user: user-rpc-service
       friend: friend-rpc-service
       msg: msg-rpc-service
       push: push-rpc-service
-      messageGateway: messageGateway-rpc-service
       group: group-rpc-service
       auth: auth-rpc-service
       conversation: conversation-rpc-service
@@ -166,50 +166,51 @@ data:
 
   openim-push.yml: |
     rpc:
-       # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
-       registerIP:
-       # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
-       listenIP: 0.0.0.0
-       # autoSetPorts indicates whether to automatically set the ports
-       # if you use in kubernetes, set it to false
-       autoSetPorts: true
-       # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
-       # It will only take effect when autoSetPorts is set to false.
-       ports: [ 10170 ]
+      # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
+      registerIP:
+      # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
+      listenIP: 0.0.0.0
+      # autoSetPorts indicates whether to automatically set the ports
+      # if you use in kubernetes, set it to false
+      autoSetPorts: false
+      # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+      # It will only take effect when autoSetPorts is set to false.
+      ports: [ 10170 ]
 
-     prometheus:
-       # Enable or disable Prometheus monitoring
-       enable: true
-       # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
-       ports: [ 12170 ]
 
-     maxConcurrentWorkers: 3
-     #Use geTui for offline push notifications, or choose fcm or jpns; corresponding configuration settings must be specified.
-     enable: geTui
-     geTui:
-       pushUrl: https://restapi.getui.com/v2/$appId
-       masterSecret:
-       appKey:
-       intent:
-       channelID:
-       channelName:
-     fcm:
-       # Prioritize using file paths. If the file path is empty, use URL
-       filePath:   # File path is concatenated with the parameters passed in through - c(`mage` default pass in `config/`) and filePath.
-       authURL:   #  Must start with https or http.
-     jpns:
-       appKey:
-       masterSecret:
-       pushURL:
-       pushIntent:
+    prometheus:
+      # Enable or disable Prometheus monitoring
+      enable: true
+      # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
+      ports: [ 12170 ]
 
-     # iOS system push sound and badge count
-     iosPush:
-           pushSound: xxx
-           badgeCount: true
-           production: false
+    maxConcurrentWorkers: 3
+    #Use geTui for offline push notifications, or choose fcm or jpns; corresponding configuration settings must be specified.
+    enable:
+    geTui:
+      pushUrl: https://restapi.getui.com/v2/$appId
+      masterSecret:
+      appKey:
+      intent:
+      channelID:
+      channelName:
+    fcm:
+      # Prioritize using file paths. If the file path is empty, use URL
+      filePath:   # File path is concatenated with the parameters passed in through - c(`mage` default pass in `config/`) and filePath.
+      authURL:   #  Must start with https or http.
+    jpush:
+      appKey:
+      masterSecret:
+      pushURL:
+      pushIntent:
 
-     fullUserCache: true
+    # iOS system push sound and badge count
+    iosPush:
+      pushSound: xxx
+      badgeCount: true
+      production: false
+
+    fullUserCache: true
 
   openim-rpc-auth.yml: |
     rpc:
@@ -245,7 +246,7 @@ data:
       autoSetPorts: false
       # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
       # It will only take effect when autoSetPorts is set to false.
-      ports: [ 10200 ]
+      ports: [ 10220 ]
 
     prometheus:
       # Enable or disable Prometheus monitoring
@@ -449,330 +450,330 @@ data:
     # Flag to enable or disable public read access to the bucket
     publicRead: "false"
 
-  # notification.yml: |
-  #   groupCreated:
-  #     isSendMsg: true
-  #   # Reliability level of the message sending.
-  #   # Set to 1 to send only when online, 2 for guaranteed delivery.
-  #     reliabilityLevel: 1
-  #   # This setting is effective only when 'isSendMsg' is true.
-  #   # It controls whether to count unread messages.
-  #     unreadCount: false
-  #   # Configuration for offline push notifications.
-  #     offlinePush:
-  #       # Enables or disables offline push notifications.
-  #       enable: false
-  #       # Title for the notification when a group is created.
-  #       title: create group title
-  #       # Description for the notification.
-  #       desc: create group desc
-  #       # Additional information for the notification.
-  #       ext: create group ext
+  notification.yml: |
+    groupCreated:
+      isSendMsg: true
+    # Reliability level of the message sending.
+    # Set to 1 to send only when online, 2 for guaranteed delivery.
+      reliabilityLevel: 1
+    # This setting is effective only when 'isSendMsg' is true.
+    # It controls whether to count unread messages.
+      unreadCount: false
+    # Configuration for offline push notifications.
+      offlinePush:
+        # Enables or disables offline push notifications.
+        enable: false
+        # Title for the notification when a group is created.
+        title: create group title
+        # Description for the notification.
+        desc: create group desc
+        # Additional information for the notification.
+        ext: create group ext
 
-  #   groupInfoSet:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: groupInfoSet title
-  #       desc: groupInfoSet desc
-  #       ext: groupInfoSet ext
+    groupInfoSet:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupInfoSet title
+        desc: groupInfoSet desc
+        ext: groupInfoSet ext
 
-  #   joinGroupApplication:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: joinGroupApplication title
-  #       desc: joinGroupApplication desc
-  #       ext: joinGroupApplication ext
+    joinGroupApplication:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: joinGroupApplication title
+        desc: joinGroupApplication desc
+        ext: joinGroupApplication ext
 
-  #   memberQuit:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: memberQuit title
-  #       desc: memberQuit desc
-  #       ext: memberQuit ext
+    memberQuit:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: memberQuit title
+        desc: memberQuit desc
+        ext: memberQuit ext
 
-  #   groupApplicationAccepted:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: groupApplicationAccepted title
-  #       desc: groupApplicationAccepted desc
-  #       ext: groupApplicationAccepted ext
+    groupApplicationAccepted:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupApplicationAccepted title
+        desc: groupApplicationAccepted desc
+        ext: groupApplicationAccepted ext
 
-  #   groupApplicationRejected:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: groupApplicationRejected title
-  #       desc: groupApplicationRejected desc
-  #       ext: groupApplicationRejected ext
+    groupApplicationRejected:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupApplicationRejected title
+        desc: groupApplicationRejected desc
+        ext: groupApplicationRejected ext
 
-  #   groupOwnerTransferred:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: groupOwnerTransferred title
-  #       desc: groupOwnerTransferred desc
-  #       ext: groupOwnerTransferred ext
+    groupOwnerTransferred:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupOwnerTransferred title
+        desc: groupOwnerTransferred desc
+        ext: groupOwnerTransferred ext
 
-  #   memberKicked:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: memberKicked title
-  #       desc: memberKicked desc
-  #       ext: memberKicked ext
+    memberKicked:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: memberKicked title
+        desc: memberKicked desc
+        ext: memberKicked ext
 
-  #   memberInvited:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: memberInvited title
-  #       desc: memberInvited desc
-  #       ext: memberInvited ext
+    memberInvited:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: memberInvited title
+        desc: memberInvited desc
+        ext: memberInvited ext
 
-  #   memberEnter:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: memberEnter title
-  #       desc: memberEnter desc
-  #       ext: memberEnter ext
+    memberEnter:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: memberEnter title
+        desc: memberEnter desc
+        ext: memberEnter ext
 
-  #   groupDismissed:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: groupDismissed title
-  #       desc: groupDismissed desc
-  #       ext: groupDismissed ext
+    groupDismissed:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupDismissed title
+        desc: groupDismissed desc
+        ext: groupDismissed ext
 
-  #   groupMuted:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: groupMuted title
-  #       desc: groupMuted desc
-  #       ext: groupMuted ext
+    groupMuted:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupMuted title
+        desc: groupMuted desc
+        ext: groupMuted ext
 
-  #   groupCancelMuted:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: groupCancelMuted title
-  #       desc: groupCancelMuted desc
-  #       ext: groupCancelMuted ext
-  #     defaultTips:
-  #       tips: group Cancel Muted
+    groupCancelMuted:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupCancelMuted title
+        desc: groupCancelMuted desc
+        ext: groupCancelMuted ext
+      defaultTips:
+        tips: group Cancel Muted
 
-  #   groupMemberMuted:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: groupMemberMuted title
-  #       desc: groupMemberMuted desc
-  #       ext: groupMemberMuted ext
+    groupMemberMuted:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupMemberMuted title
+        desc: groupMemberMuted desc
+        ext: groupMemberMuted ext
 
-  #   groupMemberCancelMuted:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: groupMemberCancelMuted title
-  #       desc: groupMemberCancelMuted desc
-  #       ext: groupMemberCancelMuted ext
+    groupMemberCancelMuted:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupMemberCancelMuted title
+        desc: groupMemberCancelMuted desc
+        ext: groupMemberCancelMuted ext
 
-  #   groupMemberInfoSet:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: groupMemberInfoSet title
-  #       desc: groupMemberInfoSet desc
-  #       ext: groupMemberInfoSet ext
+    groupMemberInfoSet:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupMemberInfoSet title
+        desc: groupMemberInfoSet desc
+        ext: groupMemberInfoSet ext
 
-  #   groupInfoSetAnnouncement:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: groupInfoSetAnnouncement title
-  #       desc: groupInfoSetAnnouncement desc
-  #       ext: groupInfoSetAnnouncement ext
+    groupInfoSetAnnouncement:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupInfoSetAnnouncement title
+        desc: groupInfoSetAnnouncement desc
+        ext: groupInfoSetAnnouncement ext
 
-  #   groupInfoSetName:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: groupInfoSetName title
-  #       desc: groupInfoSetName desc
-  #       ext: groupInfoSetName ext
+    groupInfoSetName:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupInfoSetName title
+        desc: groupInfoSetName desc
+        ext: groupInfoSetName ext
 
-  #   #############################friend#################################
-  #   friendApplicationAdded:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: Somebody applies to add you as a friend
-  #       desc: Somebody applies to add you as a friend
-  #       ext: Somebody applies to add you as a friend
+    #############################friend#################################
+    friendApplicationAdded:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: Somebody applies to add you as a friend
+        desc: Somebody applies to add you as a friend
+        ext: Somebody applies to add you as a friend
 
-  #   friendApplicationApproved:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: true
-  #       title: Someone applies to add your friend application
-  #       desc: Someone applies to add your friend application
-  #       ext: Someone applies to add your friend application
+    friendApplicationApproved:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: Someone applies to add your friend application
+        desc: Someone applies to add your friend application
+        ext: Someone applies to add your friend application
 
-  #   friendApplicationRejected:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: true
-  #       title: Someone rejected your friend application
-  #       desc: Someone rejected your friend application
-  #       ext: Someone rejected your friend application
+    friendApplicationRejected:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: Someone rejected your friend application
+        desc: Someone rejected your friend application
+        ext: Someone rejected your friend application
 
-  #   friendAdded:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: true
-  #       title: We have become friends
-  #       desc: We have become friends
-  #       ext: We have become friends
+    friendAdded:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: We have become friends
+        desc: We have become friends
+        ext: We have become friends
 
-  #   friendDeleted:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: true
-  #       title: deleted a friend
-  #       desc: deleted a friend
-  #       ext: deleted a friend
+    friendDeleted:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: deleted a friend
+        desc: deleted a friend
+        ext: deleted a friend
 
-  #   friendRemarkSet:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: true
-  #       title: Your friend's profile has been changed
-  #       desc: Your friend's profile has been changed
-  #       ext: Your friend's profile has been changed
+    friendRemarkSet:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: Your friend's profile has been changed
+        desc: Your friend's profile has been changed
+        ext: Your friend's profile has been changed
 
-  #   blackAdded:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: true
-  #       title: blocked a user
-  #       desc: blocked a user
-  #       ext: blocked a user
+    blackAdded:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: blocked a user
+        desc: blocked a user
+        ext: blocked a user
 
-  #   blackDeleted:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: true
-  #       title: Remove a blocked user
-  #       desc: Remove a blocked user
-  #       ext: Remove a blocked user
+    blackDeleted:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: Remove a blocked user
+        desc: Remove a blocked user
+        ext: Remove a blocked user
 
-  #   friendInfoUpdated:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: true
-  #       title: friend info updated
-  #       desc: friend info updated
-  #       ext: friend info updated
+    friendInfoUpdated:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: friend info updated
+        desc: friend info updated
+        ext: friend info updated
 
-  #   #####################user#########################
-  #   userInfoUpdated:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: true
-  #       title: userInfo updated
-  #       desc: userInfo updated
-  #       ext: userInfo updated
+    #####################user#########################
+    userInfoUpdated:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: userInfo updated
+        desc: userInfo updated
+        ext: userInfo updated
 
-  #   userStatusChanged:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: false
-  #       title: user status changed
-  #       desc: user status changed
-  #       ext: user status changed
+    userStatusChanged:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: user status changed
+        desc: user status changed
+        ext: user status changed
 
-  #   #####################conversation#########################
-  #   conversationChanged:
-  #     isSendMsg: false
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: true
-  #       title: conversation changed
-  #       desc: conversation changed
-  #       ext: conversation changed
+    #####################conversation#########################
+    conversationChanged:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: conversation changed
+        desc: conversation changed
+        ext: conversation changed
 
-  #   conversationSetPrivate:
-  #     isSendMsg: true
-  #     reliabilityLevel: 1
-  #     unreadCount: false
-  #     offlinePush:
-  #       enable: true
-  #       title: burn after reading
-  #       desc: burn after reading
-  #       ext: burn after reading
+    conversationSetPrivate:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: burn after reading
+        desc: burn after reading
+        ext: burn after reading
 
   prometheus.yml: |
     # my global config
