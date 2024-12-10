@@ -15,9 +15,9 @@
 package prommetrics
 
 import (
-	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
+	"net"
 	"net/http"
 )
 
@@ -30,9 +30,9 @@ var (
 	}
 )
 
-func Init(registry *prometheus.Registry, prometheusPort int, path string, handler http.Handler, cs ...prometheus.Collector) error {
+func Init(registry *prometheus.Registry, listener net.Listener, path string, handler http.Handler, cs ...prometheus.Collector) error {
 	registry.MustRegister(cs...)
 	srv := http.NewServeMux()
 	srv.Handle(path, handler)
-	return http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), srv)
+	return http.Serve(listener, srv)
 }

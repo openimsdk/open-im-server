@@ -15,13 +15,13 @@
 package config
 
 import (
-	"github.com/openimsdk/tools/s3/aws"
 	"strings"
 	"time"
 
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/tools/s3/aws"
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/kodo"
 	"github.com/openimsdk/tools/s3/minio"
@@ -107,9 +107,10 @@ type API struct {
 		CompressionLevel int    `mapstructure:"compressionLevel"`
 	} `mapstructure:"api"`
 	Prometheus struct {
-		Enable     bool   `mapstructure:"enable"`
-		Ports      []int  `mapstructure:"ports"`
-		GrafanaURL string `mapstructure:"grafanaURL"`
+		Enable       bool   `mapstructure:"enable"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
+		GrafanaURL   string `mapstructure:"grafanaURL"`
 	} `mapstructure:"prometheus"`
 }
 
@@ -177,8 +178,9 @@ type Prometheus struct {
 
 type MsgGateway struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus  Prometheus `mapstructure:"prometheus"`
 	ListenIP    string     `mapstructure:"listenIP"`
@@ -191,14 +193,19 @@ type MsgGateway struct {
 }
 
 type MsgTransfer struct {
-	Prometheus Prometheus `mapstructure:"prometheus"`
+	Prometheus struct {
+		Enable       bool  `mapstructure:"enable"`
+		AutoSetPorts bool  `mapstructure:"autoSetPorts"`
+		Ports        []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
 }
 
 type Push struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus           Prometheus `mapstructure:"prometheus"`
 	MaxConcurrentWorkers int        `mapstructure:"maxConcurrentWorkers"`
@@ -231,9 +238,10 @@ type Push struct {
 
 type Auth struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus  Prometheus `mapstructure:"prometheus"`
 	TokenPolicy struct {
@@ -243,27 +251,30 @@ type Auth struct {
 
 type Conversation struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type Friend struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type Group struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus                 Prometheus `mapstructure:"prometheus"`
 	EnableHistoryForNewMembers bool       `mapstructure:"enableHistoryForNewMembers"`
@@ -271,9 +282,10 @@ type Group struct {
 
 type Msg struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus   Prometheus `mapstructure:"prometheus"`
 	FriendVerify bool       `mapstructure:"friendVerify"`
@@ -281,9 +293,10 @@ type Msg struct {
 
 type Third struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 	Object     struct {
@@ -332,9 +345,10 @@ type Aws struct {
 
 type User struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 }
