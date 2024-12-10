@@ -18,9 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/openimsdk/tools/discovery/etcd"
-	"github.com/openimsdk/tools/utils/jsonutil"
-	"github.com/openimsdk/tools/utils/network"
 	"net"
 	"net/http"
 	"os"
@@ -28,12 +25,17 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/openimsdk/tools/discovery/etcd"
+	"github.com/openimsdk/tools/utils/jsonutil"
+	"github.com/openimsdk/tools/utils/network"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	discRegister "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
@@ -57,6 +59,8 @@ type MsgTransfer struct {
 	historyMongoCH *OnlineHistoryMongoConsumerHandler
 	ctx            context.Context
 	cancel         context.CancelFunc
+
+	runTimeEnv string
 }
 
 type Config struct {
@@ -70,7 +74,9 @@ type Config struct {
 }
 
 func Start(ctx context.Context, index int, config *Config) error {
-	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "prometheusPorts",
+	runTimeEnv := runtimeenv.PrintRuntimeEnvironment()
+
+	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "runTimeEnv", runTimeEnv, "prometheusPorts",
 		config.MsgTransfer.Prometheus.Ports, "index", index)
 
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
@@ -81,7 +87,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	client, err := discRegister.NewDiscoveryRegister(&config.Discovery)
+	client, err := discRegister.NewDiscoveryRegister(&config.Discovery, runTimeEnv)
 	if err != nil {
 		return err
 	}
@@ -121,6 +127,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	msgTransfer := &MsgTransfer{
 		historyCH:      historyCH,
 		historyMongoCH: historyMongoCH,
+		runTimeEnv:     runTimeEnv,
 	}
 	return msgTransfer.Start(index, config)
 }
@@ -140,7 +147,7 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 		return err
 	}
 
-	client, err := kdisc.NewDiscoveryRegister(&config.Discovery)
+	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, m.runTimeEnv)
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}

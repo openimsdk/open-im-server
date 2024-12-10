@@ -18,17 +18,21 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
+	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"google.golang.org/grpc/status"
-	"net"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
+
+	"github.com/openimsdk/tools/utils/runtimeenv"
 
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -39,7 +43,6 @@ import (
 	"github.com/openimsdk/tools/utils/network"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"strconv"
 )
 
 // Start rpc server.
@@ -58,6 +61,8 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	if err != nil {
 		return err
 	}
+
+	runTimeEnv := runtimeenv.PrintRuntimeEnvironment()
 
 	if !autoSetPorts {
 		rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
@@ -82,7 +87,7 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 	if autoSetPorts && discovery.Enable != kdisc.Etcd {
 		return errs.New("only etcd support autoSetPorts", "rpcRegisterName", rpcRegisterName).Wrap()
 	}
-	client, err := kdisc.NewDiscoveryRegister(discovery)
+	client, err := kdisc.NewDiscoveryRegister(discovery, runTimeEnv)
 	if err != nil {
 		return err
 	}
@@ -129,7 +134,6 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 				return errs.WrapMsg(err, "listen err", "rpcTcpAddr", rpcTcpAddr)
 			}
 		}
-
 		cs := prommetrics.GetGrpcCusMetrics(rpcRegisterName, discovery)
 		go func() {
 			if err := prommetrics.RpcInit(cs, listener); err != nil && !errors.Is(err, http.ErrServerClosed) {

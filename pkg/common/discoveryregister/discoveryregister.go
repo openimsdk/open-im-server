@@ -15,12 +15,15 @@
 package discoveryregister
 
 import (
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
 	"github.com/openimsdk/tools/discovery"
+
+	"github.com/openimsdk/tools/discovery/kubernetes"
+
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
-	"time"
 )
 
 const (
@@ -28,10 +31,14 @@ const (
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
-func NewDiscoveryRegister(discovery *config.Discovery) (discovery.SvcDiscoveryRegistry, error) {
+func NewDiscoveryRegister(discovery *config.Discovery, runtimeEnv string) (discovery.SvcDiscoveryRegistry, error) {
+	if runtimeEnv == "kubernetes" {
+		discovery.Enable = "kubernetes"
+	}
+
 	switch discovery.Enable {
-	case "k8s":
-		return kubernetes.NewK8sDiscoveryRegister(discovery.RpcService.MessageGateway)
+	case "kubernetes":
+		return kubernetes.NewKubernetesConnManager(discovery.Kubernetes.Namespace)
 	case Etcd:
 		return etcd.NewSvcDiscoveryRegistry(
 			discovery.Etcd.RootDirectory,

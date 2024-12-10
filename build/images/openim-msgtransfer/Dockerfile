@@ -1,44 +1,39 @@
-# Copyright © 2023 OpenIM. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Use Go 1.22 Alpine as the base image for building the application
+FROM golang:1.22-alpine AS builder
+# Define the base directory for the application as an environment variable
+ENV SERVER_DIR=/openim-server
 
-# OpenIM base image: https://github.com/openim-sigs/openim-base-image
+# Set the working directory inside the container based on the environment variable
+WORKDIR $SERVER_DIR
 
-# Set go mod installation source and proxy
+# Set the Go proxy to improve dependency resolution speed
 
-FROM golang:1.20 AS builder
+#ENV GOPROXY=https://goproxy.io,direct
 
-ARG GO111MODULE=on
-
-WORKDIR /openim/openim-server
-
-ENV GO111MODULE=$GO111MODULE
-ENV GOPROXY=$GOPROXY
-
-COPY go.mod go.sum ./
-RUN go mod download
-
+# Copy all files from the current directory into the container
 COPY . .
 
-RUN make build BINS=openim-msgtransfer
+RUN go mod tidy
 
-RUN cp /openim/openim-server/_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-msgtransfer /usr/bin/openim-msgtransfer
 
-# FROM ghcr.io/openim-sigs/openim-bash-image:latest
-FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
-WORKDIR /openim/openim-server
+RUN go build -o _output/openim-msgtransfer ./cmd/openim-msgtransfer
 
-COPY --from=builder /usr/bin/openim-msgtransfer ./bin/openim-msgtransfer
 
-ENTRYPOINT ["./bin/openim-msgtransfer"]
+# Using Alpine Linux for the final image
+FROM alpine:latest
+
+# Install necessary packages, such as bash
+RUN apk add --no-cache bash
+
+# Set the environment and work directory
+ENV SERVER_DIR=/openim-server
+WORKDIR $SERVER_DIR
+
+
+# Copy the compiled binaries and mage from the builder image to the final image
+COPY --from=builder $SERVER_DIR/_output $SERVER_DIR/_output
+# COPY --from=builder $SERVER_DIR/config $SERVER_DIR/config
+
+# Set the command to run when the container starts
+ENTRYPOINT ["sh", "-c", "_output/openim-msgtransfer"]
