@@ -204,7 +204,7 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
-					mw.PanicStackToLog(m.ctx, r)
+					log.ZPanic(m.ctx, "MsgTransfer Start Panic", r)
 				}
 			}()
 			if err := prommetrics.TransferInit(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {

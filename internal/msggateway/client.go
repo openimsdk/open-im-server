@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/openimsdk/tools/mw"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
@@ -378,7 +377,7 @@ func (c *Client) activeHeartbeat(ctx context.Context) {
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
-					mw.PanicStackToLog(ctx, r)
+					log.ZPanic(ctx, "activeHeartbeat Panic", r)
 				}
 			}()
 			log.ZDebug(ctx, "server initiative send heartbeat start.")

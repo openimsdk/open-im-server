@@ -16,7 +16,6 @@ package msg
 
 import (
 	"context"
-	"github.com/openimsdk/tools/mw"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -89,7 +88,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 
 	defer func() {
 		if r := recover(); r != nil {
-			mw.PanicStackToLog(nctx, r)
+			log.ZPanic(nctx, "setConversationAtInfo Panic", r)
 		}
 	}()
 
