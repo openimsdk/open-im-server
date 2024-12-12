@@ -3,14 +3,15 @@ package msggateway
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
-	pbAuth "github.com/openimsdk/protocol/auth"
-	"github.com/openimsdk/tools/mcontext"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
+	pbAuth "github.com/openimsdk/protocol/auth"
+	"github.com/openimsdk/tools/mcontext"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
