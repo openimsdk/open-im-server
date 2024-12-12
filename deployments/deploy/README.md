@@ -1,25 +1,34 @@
 # Kubernetes Deployment
 
 ## Resource Requests
+
 - CPU: 2 cores
 - Memory: 4 GiB
 - Disk usage: 20 GiB (on Node)
 
 ## Origin Deploy
+
 1. Enter the target dir
-`cd ./deployments/deploy/`
+   `cd ./deployments/deploy/`
 
 2. Deploy configs and dependencies
+   Upate your `openim-config.yml`
 
 Apply all config and dependencies
-`kubectl apply -f ./openim-config.yml -f `
+`kubectl apply -f ./openim-config.yml`
+
+> Attation: If you use `default` namespace, you can excute `clusterRile.yml` to create a cluster role binding for default service account.
+>
+> Namespace is modify to `discovery.yml` in `openim-config.yml`, you can change `kubernetes.namespace` to your namespace.
+
+Excute `clusterRole.yml`
+`kubectl apply -f ./clusterRole.yml`
 
 Run infrasturcture components.
 
 `kubectl apply -f minio-service.yml -f minio-statefulset.yml -f mongo-service.yml -f mongo-statefulset.yml -f redis-service.yml -f redis-statefulset.yml -f kafka-service.yml -f kafka-statefulset.yml`
 
->Note: Ensure that infrastructure services like MinIO, Redis, and Kafka are running before deploying the main applications.
-
+> Note: Ensure that infrastructure services like MinIO, Redis, and Kafka are running before deploying the main applications.
 
 3. run all deployments and services
 
@@ -51,7 +60,7 @@ kubectl apply \
 ```
 
 4. Verification
-After deploying the services, verify that everything is running smoothly:
+   After deploying the services, verify that everything is running smoothly:
 
 ```bash
 # Check the status of all pods
@@ -72,4 +81,5 @@ kubectl get all
 `kubectl delete -f ./`
 
 ### Notes:
+
 - If you use a specific namespace for your deployment, be sure to append the -n <namespace> flag to your kubectl commands.
