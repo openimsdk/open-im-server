@@ -48,7 +48,7 @@ func prommetricsGin() gin.HandlerFunc {
 	}
 }
 
-func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.Engine {
+func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config, client discovery.SvcDiscoveryRegistry) *gin.Engine {
 	disCov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	gin.SetMode(gin.ReleaseMode)
@@ -78,6 +78,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc, config.Share.IMAdminUserID)
 	j := jssdk.NewJSSdkApi(userRpc.Client, friendRpc.Client, groupRpc.Client, messageRpc.Client, conversationRpc.Client)
+	pd := NewPrometheusDiscoveryApi(config, client)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -253,6 +254,19 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	jssdk := r.Group("/jssdk")
 	jssdk.POST("/get_conversations", j.GetConversations)
 	jssdk.POST("/get_active_conversations", j.GetActiveConversations)
+
+	proDiscoveryGroup := r.Group("/prometheus_discovery", pd.Enable)
+	proDiscoveryGroup.GET("/api", pd.Api)
+	proDiscoveryGroup.GET("/user", pd.User)
+	proDiscoveryGroup.GET("/group", pd.Group)
+	proDiscoveryGroup.GET("/msg", pd.Msg)
+	proDiscoveryGroup.GET("/friend", pd.Friend)
+	proDiscoveryGroup.GET("/conversation", pd.Conversation)
+	proDiscoveryGroup.GET("/third", pd.Third)
+	proDiscoveryGroup.GET("/auth", pd.Auth)
+	proDiscoveryGroup.GET("/push", pd.Push)
+	proDiscoveryGroup.GET("/msg_gateway", pd.MessageGateway)
+	proDiscoveryGroup.GET("/msg_transfer", pd.MessageTransfer)
 
 	return r
 }
