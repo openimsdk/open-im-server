@@ -33,6 +33,7 @@ import (
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/system/program"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 )
 
 const maxRetry = 180
@@ -78,35 +79,37 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 		discovery   = &config.Discovery{}
 		thirdConfig = &config.Third{}
 	)
-	err := config.LoadConfig(filepath.Join(configDir, cmd.MongodbConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MongodbConfigFileName], mongoConfig)
+	runtimeEnv := runtimeenv.PrintRuntimeEnvironment()
+
+	err := config.Load(configDir, cmd.MongodbConfigFileName, cmd.ConfigEnvPrefixMap[cmd.MongodbConfigFileName], runtimeEnv, mongoConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.LoadConfig(filepath.Join(configDir, cmd.RedisConfigFileName), cmd.ConfigEnvPrefixMap[cmd.RedisConfigFileName], redisConfig)
+	err = config.Load(configDir, cmd.RedisConfigFileName, cmd.ConfigEnvPrefixMap[cmd.RedisConfigFileName], runtimeEnv, redisConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.LoadConfig(filepath.Join(configDir, cmd.KafkaConfigFileName), cmd.ConfigEnvPrefixMap[cmd.KafkaConfigFileName], kafkaConfig)
+	err = config.Load(configDir, cmd.KafkaConfigFileName, cmd.ConfigEnvPrefixMap[cmd.KafkaConfigFileName], runtimeEnv, kafkaConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.LoadConfig(filepath.Join(configDir, cmd.OpenIMRPCThirdCfgFileName), cmd.ConfigEnvPrefixMap[cmd.OpenIMRPCThirdCfgFileName], thirdConfig)
+	err = config.Load(configDir, cmd.OpenIMRPCThirdCfgFileName, cmd.ConfigEnvPrefixMap[cmd.OpenIMRPCThirdCfgFileName], runtimeEnv, thirdConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
 	if thirdConfig.Object.Enable == "minio" {
-		err = config.LoadConfig(filepath.Join(configDir, cmd.MinioConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MinioConfigFileName], minioConfig)
+		err = config.Load(configDir, cmd.MinioConfigFileName, cmd.ConfigEnvPrefixMap[cmd.MinioConfigFileName], runtimeEnv, minioConfig)
 		if err != nil {
 			return nil, nil, nil, nil, nil, err
 		}
 	} else {
 		minioConfig = nil
 	}
-	err = config.LoadConfig(filepath.Join(configDir, cmd.DiscoveryConfigFilename), cmd.ConfigEnvPrefixMap[cmd.DiscoveryConfigFilename], discovery)
+	err = config.Load(configDir, cmd.DiscoveryConfigFilename, cmd.ConfigEnvPrefixMap[cmd.DiscoveryConfigFilename], runtimeEnv, discovery)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
@@ -159,10 +162,6 @@ func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *
 	if discovery.Enable == "etcd" {
 		checks["Etcd"] = func(ctx context.Context) error {
 			return CheckEtcd(ctx, &discovery.Etcd)
-		}
-	} else if discovery.Enable == "zookeeper" {
-		checks["Zookeeper"] = func(ctx context.Context) error {
-			return CheckZookeeper(ctx, &discovery.ZooKeeper)
 		}
 	}
 

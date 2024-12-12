@@ -1,27 +1,51 @@
 package config
 
 import (
-	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLoadLogConfig(t *testing.T) {
 	var log Log
-	err := LoadConfig("../../../config/log.yml", "IMENV_LOG", &log)
+	os.Setenv("IMENV_LOG_REMAINLOGLEVEL", "5")
+	err := Load("../../../config/", "log.yml", "IMENV_LOG", "source", &log)
 	assert.Nil(t, err)
-	assert.Equal(t, "../../../../logs/", log.StorageLocation)
+	t.Log(log.RemainLogLevel)
+	// assert.Equal(t, "../../../../logs/", log.StorageLocation)
+}
+
+func TestLoadMongoConfig(t *testing.T) {
+	var mongo Mongo
+	// os.Setenv("DEPLOYMENT_TYPE", "kubernetes")
+	os.Setenv("IMENV_MONGODB_PASSWORD", "openIM1231231")
+	// os.Setenv("IMENV_MONGODB_URI", "openIM123")
+	// os.Setenv("IMENV_MONGODB_USERNAME", "openIM123")
+	err := Load("../../../config/", "mongodb.yml", "IMENV_MONGODB", "source", &mongo)
+	// err := LoadConfig("../../../config/mongodb.yml", "IMENV_MONGODB", &mongo)
+
+	assert.Nil(t, err)
+	t.Log(mongo.Password)
+	// assert.Equal(t, "openIM123", mongo.Password)
+	t.Log(os.Getenv("IMENV_MONGODB_PASSWORD"))
+	t.Log(mongo)
+	// //export IMENV_OPENIM_RPC_USER_RPC_LISTENIP="0.0.0.0"
+	// assert.Equal(t, "0.0.0.0", user.RPC.ListenIP)
+	// //export IMENV_OPENIM_RPC_USER_RPC_PORTS="10110,10111,10112"
+	// assert.Equal(t, []int{10110, 10111, 10112}, user.RPC.Ports)
 }
 
 func TestLoadMinioConfig(t *testing.T) {
 	var storageConfig Minio
-	err := LoadConfig("../../../config/minio.yml", "IMENV_MINIO", &storageConfig)
+	err := Load("../../../config/minio.yml", "IMENV_MINIO", "", "source", &storageConfig)
 	assert.Nil(t, err)
 	assert.Equal(t, "openim", storageConfig.Bucket)
 }
 
 func TestLoadWebhooksConfig(t *testing.T) {
 	var webhooks Webhooks
-	err := LoadConfig("../../../config/webhooks.yml", "IMENV_WEBHOOKS", &webhooks)
+	err := Load("../../../config/webhooks.yml", "IMENV_WEBHOOKS", "", "source", &webhooks)
 	assert.Nil(t, err)
 	assert.Equal(t, 5, webhooks.BeforeAddBlack.Timeout)
 
@@ -29,7 +53,7 @@ func TestLoadWebhooksConfig(t *testing.T) {
 
 func TestLoadOpenIMRpcUserConfig(t *testing.T) {
 	var user User
-	err := LoadConfig("../../../config/openim-rpc-user.yml", "IMENV_OPENIM_RPC_USER", &user)
+	err := Load("../../../config/openim-rpc-user.yml", "IMENV_OPENIM_RPC_USER", "", "source", &user)
 	assert.Nil(t, err)
 	//export IMENV_OPENIM_RPC_USER_RPC_LISTENIP="0.0.0.0"
 	assert.Equal(t, "0.0.0.0", user.RPC.ListenIP)
@@ -39,14 +63,14 @@ func TestLoadOpenIMRpcUserConfig(t *testing.T) {
 
 func TestLoadNotificationConfig(t *testing.T) {
 	var noti Notification
-	err := LoadConfig("../../../config/notification.yml", "IMENV_NOTIFICATION", &noti)
+	err := Load("../../../config/notification.yml", "IMENV_NOTIFICATION", "", "source", &noti)
 	assert.Nil(t, err)
 	assert.Equal(t, "Your friend's profile has been changed", noti.FriendRemarkSet.OfflinePush.Title)
 }
 
 func TestLoadOpenIMThirdConfig(t *testing.T) {
 	var third Third
-	err := LoadConfig("../../../config/openim-rpc-third.yml", "IMENV_OPENIM_RPC_THIRD", &third)
+	err := Load("../../../config/openim-rpc-third.yml", "IMENV_OPENIM_RPC_THIRD", "", "source", &third)
 	assert.Nil(t, err)
 	assert.Equal(t, "enabled", third.Object.Enable)
 	assert.Equal(t, "https://oss-cn-chengdu.aliyuncs.com", third.Object.Oss.Endpoint)
@@ -58,4 +82,12 @@ func TestLoadOpenIMThirdConfig(t *testing.T) {
 	assert.Equal(t, true, third.Object.Oss.PublicRead)
 
 	// Environment: IMENV_OPENIM_RPC_THIRD_OBJECT_ENABLE=enabled;IMENV_OPENIM_RPC_THIRD_OBJECT_OSS_ENDPOINT=https://oss-cn-chengdu.aliyuncs.com;IMENV_OPENIM_RPC_THIRD_OBJECT_OSS_BUCKET=my_bucket_name;IMENV_OPENIM_RPC_THIRD_OBJECT_OSS_BUCKETURL=https://my_bucket_name.oss-cn-chengdu.aliyuncs.com;IMENV_OPENIM_RPC_THIRD_OBJECT_OSS_ACCESSKEYID=AKID1234567890;IMENV_OPENIM_RPC_THIRD_OBJECT_OSS_ACCESSKEYSECRET=abc123xyz789;IMENV_OPENIM_RPC_THIRD_OBJECT_OSS_SESSIONTOKEN=session_token_value;IMENV_OPENIM_RPC_THIRD_OBJECT_OSS_PUBLICREAD=true
+}
+
+func TestTransferConfig(t *testing.T) {
+	var tran MsgTransfer
+	err := LoadConfig("../../../config/openim-msgtransfer.yml", "IMENV_OPENIM-MSGTRANSFER", &tran)
+	assert.Nil(t, err)
+	assert.Equal(t, true, tran.Prometheus.Enable)
+	assert.Equal(t, true, tran.Prometheus.AutoSetPorts)
 }

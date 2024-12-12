@@ -5,6 +5,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"net"
 	"strconv"
 )
 
@@ -21,13 +22,13 @@ var (
 	)
 )
 
-func RpcInit(cs []prometheus.Collector, prometheusPort int) error {
+func RpcInit(cs []prometheus.Collector, listener net.Listener) error {
 	reg := prometheus.NewRegistry()
 	cs = append(append(
 		baseCollector,
 		rpcCounter,
 	), cs...)
-	return Init(reg, prometheusPort, rpcPath, promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}), cs...)
+	return Init(reg, listener, rpcPath, promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}), cs...)
 }
 
 func RPCCall(name string, path string, code int) {
@@ -42,25 +43,25 @@ func GetGrpcServerMetrics() *gp.ServerMetrics {
 	return grpcMetrics
 }
 
-func GetGrpcCusMetrics(registerName string, share *config.Share) []prometheus.Collector {
+func GetGrpcCusMetrics(registerName string, discovery *config.Discovery) []prometheus.Collector {
 	switch registerName {
-	case share.RpcRegisterName.MessageGateway:
+	case discovery.RpcService.MessageGateway:
 		return []prometheus.Collector{OnlineUserGauge}
-	case share.RpcRegisterName.Msg:
+	case discovery.RpcService.Msg:
 		return []prometheus.Collector{
 			SingleChatMsgProcessSuccessCounter,
 			SingleChatMsgProcessFailedCounter,
 			GroupChatMsgProcessSuccessCounter,
 			GroupChatMsgProcessFailedCounter,
 		}
-	case share.RpcRegisterName.Push:
+	case discovery.RpcService.Push:
 		return []prometheus.Collector{
 			MsgOfflinePushFailedCounter,
 			MsgLoneTimePushCounter,
 		}
-	case share.RpcRegisterName.Auth:
+	case discovery.RpcService.Auth:
 		return []prometheus.Collector{UserLoginCounter}
-	case share.RpcRegisterName.User:
+	case discovery.RpcService.User:
 		return []prometheus.Collector{UserRegisterCounter}
 	default:
 		return nil

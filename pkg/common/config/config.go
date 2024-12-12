@@ -21,6 +21,7 @@ import (
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/mq/kafka"
+	"github.com/openimsdk/tools/s3/aws"
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/kodo"
 	"github.com/openimsdk/tools/s3/minio"
@@ -106,9 +107,10 @@ type API struct {
 		CompressionLevel int    `mapstructure:"compressionLevel"`
 	} `mapstructure:"api"`
 	Prometheus struct {
-		Enable     bool   `mapstructure:"enable"`
-		Ports      []int  `mapstructure:"ports"`
-		GrafanaURL string `mapstructure:"grafanaURL"`
+		Enable       bool   `mapstructure:"enable"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
+		GrafanaURL   string `mapstructure:"grafanaURL"`
 	} `mapstructure:"prometheus"`
 }
 
@@ -176,8 +178,9 @@ type Prometheus struct {
 
 type MsgGateway struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus  Prometheus `mapstructure:"prometheus"`
 	ListenIP    string     `mapstructure:"listenIP"`
@@ -190,13 +193,19 @@ type MsgGateway struct {
 }
 
 type MsgTransfer struct {
-	Prometheus Prometheus `mapstructure:"prometheus"`
+	Prometheus struct {
+		Enable       bool  `mapstructure:"enable"`
+		AutoSetPorts bool  `mapstructure:"autoSetPorts"`
+		Ports        []int `mapstructure:"ports"`
+	} `mapstructure:"prometheus"`
 }
 
 type Push struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus           Prometheus `mapstructure:"prometheus"`
 	MaxConcurrentWorkers int        `mapstructure:"maxConcurrentWorkers"`
@@ -229,9 +238,10 @@ type Push struct {
 
 type Auth struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus  Prometheus `mapstructure:"prometheus"`
 	TokenPolicy struct {
@@ -241,27 +251,30 @@ type Auth struct {
 
 type Conversation struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type Friend struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type Group struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus                 Prometheus `mapstructure:"prometheus"`
 	EnableHistoryForNewMembers bool       `mapstructure:"enableHistoryForNewMembers"`
@@ -269,9 +282,10 @@ type Group struct {
 
 type Msg struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus   Prometheus `mapstructure:"prometheus"`
 	FriendVerify bool       `mapstructure:"friendVerify"`
@@ -279,9 +293,10 @@ type Msg struct {
 
 type Third struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 	Object     struct {
@@ -289,14 +304,7 @@ type Third struct {
 		Cos    Cos    `mapstructure:"cos"`
 		Oss    Oss    `mapstructure:"oss"`
 		Kodo   Kodo   `mapstructure:"kodo"`
-		Aws    struct {
-			Endpoint        string `mapstructure:"endpoint"`
-			Region          string `mapstructure:"region"`
-			Bucket          string `mapstructure:"bucket"`
-			AccessKeyID     string `mapstructure:"accessKeyID"`
-			AccessKeySecret string `mapstructure:"accessKeySecret"`
-			PublicRead      bool   `mapstructure:"publicRead"`
-		} `mapstructure:"aws"`
+		Aws    Aws    `mapstructure:"aws"`
 	} `mapstructure:"object"`
 }
 type Cos struct {
@@ -326,11 +334,21 @@ type Kodo struct {
 	PublicRead      bool   `mapstructure:"publicRead"`
 }
 
+type Aws struct {
+	Region          string `mapstructure:"region"`
+	Bucket          string `mapstructure:"bucket"`
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	SecretAccessKey string `mapstructure:"secretAccessKey"`
+	SessionToken    string `mapstructure:"sessionToken"`
+	PublicRead      bool   `mapstructure:"publicRead"`
+}
+
 type User struct {
 	RPC struct {
-		RegisterIP string `mapstructure:"registerIP"`
-		ListenIP   string `mapstructure:"listenIP"`
-		Ports      []int  `mapstructure:"ports"`
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 }
@@ -362,10 +380,9 @@ type AfterConfig struct {
 }
 
 type Share struct {
-	Secret          string          `mapstructure:"secret"`
-	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
-	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
-	MultiLogin      MultiLogin      `mapstructure:"multiLogin"`
+	Secret        string     `mapstructure:"secret"`
+	IMAdminUserID []string   `mapstructure:"imAdminUserID"`
+	MultiLogin    MultiLogin `mapstructure:"multiLogin"`
 }
 
 type MultiLogin struct {
@@ -373,7 +390,7 @@ type MultiLogin struct {
 	MaxNumOneEnd int `mapstructure:"maxNumOneEnd"`
 }
 
-type RpcRegisterName struct {
+type RpcService struct {
 	User           string `mapstructure:"user"`
 	Friend         string `mapstructure:"friend"`
 	Msg            string `mapstructure:"msg"`
@@ -385,7 +402,7 @@ type RpcRegisterName struct {
 	Third          string `mapstructure:"third"`
 }
 
-func (r *RpcRegisterName) GetServiceNames() []string {
+func (r *RpcService) GetServiceNames() []string {
 	return []string{
 		r.User,
 		r.Friend,
@@ -460,9 +477,14 @@ type ZooKeeper struct {
 }
 
 type Discovery struct {
-	Enable    string    `mapstructure:"enable"`
-	Etcd      Etcd      `mapstructure:"etcd"`
-	ZooKeeper ZooKeeper `mapstructure:"zooKeeper"`
+	Enable     string     `mapstructure:"enable"`
+	Etcd       Etcd       `mapstructure:"etcd"`
+	Kubernetes Kubernetes `mapstructure:"kubernetes"`
+	RpcService RpcService `mapstructure:"rpcService"`
+}
+
+type Kubernetes struct {
+	Namespace string `mapstructure:"namespace"`
 }
 
 type Etcd struct {
@@ -532,6 +554,7 @@ func (m *Minio) Build() *minio.Config {
 		SignEndpoint:    formatEndpoint(m.ExternalAddress),
 	}
 }
+
 func (c *Cos) Build() *cos.Config {
 	return &cos.Config{
 		BucketURL:    c.BucketURL,
@@ -563,6 +586,16 @@ func (o *Kodo) Build() *kodo.Config {
 		AccessKeySecret: o.AccessKeySecret,
 		SessionToken:    o.SessionToken,
 		PublicRead:      o.PublicRead,
+	}
+}
+
+func (o *Aws) Build() *aws.Config {
+	return &aws.Config{
+		Region:          o.Region,
+		Bucket:          o.Bucket,
+		AccessKeyID:     o.AccessKeyID,
+		SecretAccessKey: o.SecretAccessKey,
+		SessionToken:    o.SessionToken,
 	}
 }
 

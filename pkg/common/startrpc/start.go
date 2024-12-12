@@ -16,18 +16,24 @@ package startrpc
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/grpc/status"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/internal/tools/addr"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/discovery/etcd"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/jsonutil"
+	"google.golang.org/grpc/status"
+
+	"github.com/openimsdk/tools/utils/runtimeenv"
+
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
@@ -37,32 +43,51 @@ import (
 	"github.com/openimsdk/tools/utils/network"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"strconv"
 )
 
 // Start rpc server.
-func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusConfig *config.Prometheus, listenIP string,
-	index int, rpcRegisterName string, share *config.Share, config T, rpcFn func(ctx context.Context,
-		config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
+func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusConfig *config.Prometheus, listenIP,
+	registerIP string, autoSetPorts bool, rpcPorts []int, index int, rpcRegisterName string, share *config.Share, config T, rpcFn func(ctx context.Context,
+	config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 
-	rpcTcpAddr := net.JoinHostPort(network.GetListenIP(listenIP), "0")
-	listener, err := net.Listen(
-		"tcp",
-		rpcTcpAddr,
+	var (
+		rpcTcpAddr     string
+		netDone        = make(chan struct{}, 2)
+		netErr         error
+		prometheusPort int
 	)
+
+	registerIP, err := network.GetRpcRegisterIP(registerIP)
 	if err != nil {
-		return errs.WrapMsg(err, "listen err", "rpcTcpAddr", rpcTcpAddr)
+		return err
 	}
 
-	h, portStr, _ := net.SplitHostPort(listener.Addr().String())
-	host, _ := addr.Extract(h)
-	port, _ := strconv.Atoi(portStr)
+	runTimeEnv := runtimeenv.PrintRuntimeEnvironment()
 
-	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcPort", portStr,
-		"prometheusPorts", prometheusConfig.Ports)
+	if !autoSetPorts {
+		rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
+		if err != nil {
+			return err
+		}
+		rpcTcpAddr = net.JoinHostPort(network.GetListenIP(listenIP), strconv.Itoa(rpcPort))
+	} else {
+		rpcTcpAddr = net.JoinHostPort(network.GetListenIP(listenIP), "0")
+	}
 
-	defer listener.Close()
-	client, err := kdisc.NewDiscoveryRegister(discovery, share)
+	getAutoPort := func() (net.Listener, int, error) {
+		listener, err := net.Listen("tcp", rpcTcpAddr)
+		if err != nil {
+			return nil, 0, errs.WrapMsg(err, "listen err", "rpcTcpAddr", rpcTcpAddr)
+		}
+		_, portStr, _ := net.SplitHostPort(listener.Addr().String())
+		port, _ := strconv.Atoi(portStr)
+		return listener, port, nil
+	}
+
+	if autoSetPorts && discovery.Enable != kdisc.Etcd {
+		return errs.New("only etcd support autoSetPorts", "rpcRegisterName", rpcRegisterName).Wrap()
+	}
+	client, err := kdisc.NewDiscoveryRegister(discovery, runTimeEnv)
 	if err != nil {
 		return err
 	}
@@ -82,10 +107,60 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 			prommetricsUnaryInterceptor(rpcRegisterName),
 			prommetricsStreamInterceptor(rpcRegisterName),
 		)
+
+		var (
+			listener net.Listener
+		)
+
+		if autoSetPorts {
+			listener, prometheusPort, err = getAutoPort()
+			if err != nil {
+				return err
+			}
+
+			etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
+
+			_, err = etcdClient.Put(ctx, prommetrics.BuildDiscoveryKey(rpcRegisterName), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
+			if err != nil {
+				return errs.WrapMsg(err, "etcd put err")
+			}
+		} else {
+			prometheusPort, err = datautil.GetElemByIndex(prometheusConfig.Ports, index)
+			if err != nil {
+				return err
+			}
+			listener, err = net.Listen("tcp", fmt.Sprintf(":%d", prometheusPort))
+			if err != nil {
+				return errs.WrapMsg(err, "listen err", "rpcTcpAddr", rpcTcpAddr)
+			}
+		}
+		cs := prommetrics.GetGrpcCusMetrics(rpcRegisterName, discovery)
+		go func() {
+			if err := prommetrics.RpcInit(cs, listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				netErr = errs.WrapMsg(err, fmt.Sprintf("rpc %s prometheus start err: %d", rpcRegisterName, prometheusPort))
+				netDone <- struct{}{}
+			}
+			//metric.InitializeMetrics(srv)
+			// Create a HTTP server for prometheus.
+			// httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
+			// if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			//	netErr = errs.WrapMsg(err, "prometheus start err", httpServer.Addr)
+			//	netDone <- struct{}{}
+			// }
+		}()
 	} else {
 		options = append(options, mw.GrpcServer())
 	}
 
+	listener, port, err := getAutoPort()
+	if err != nil {
+		return err
+	}
+
+	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcPort", port,
+		"prometheusPort", prometheusPort)
+
+	defer listener.Close()
 	srv := grpc.NewServer(options...)
 
 	err = rpcFn(ctx, config, client, srv)
@@ -95,39 +170,12 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 
 	err = client.Register(
 		rpcRegisterName,
-		host,
+		registerIP,
 		port,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		return err
-	}
-
-	var (
-		netDone = make(chan struct{}, 2)
-		netErr  error
-	)
-	if prometheusConfig.Enable {
-		go func() {
-			prometheusPort, err := datautil.GetElemByIndex(prometheusConfig.Ports, index)
-			if err != nil {
-				netErr = err
-				netDone <- struct{}{}
-				return
-			}
-			cs := prommetrics.GetGrpcCusMetrics(rpcRegisterName, share)
-			if err := prommetrics.RpcInit(cs, prometheusPort); err != nil && err != http.ErrServerClosed {
-				netErr = errs.WrapMsg(err, fmt.Sprintf("rpc %s prometheus start err: %d", rpcRegisterName, prometheusPort))
-				netDone <- struct{}{}
-			}
-			// metric.InitializeMetrics(srv)
-			// Create a HTTP server for prometheus.
-			// httpServer = &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
-			// if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			//	netErr = errs.WrapMsg(err, "prometheus start err", httpServer.Addr)
-			//	netDone <- struct{}{}
-			// }
-		}()
 	}
 
 	go func() {

@@ -21,6 +21,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
+	"github.com/openimsdk/tools/s3/aws"
+	"github.com/openimsdk/tools/s3/kodo"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
@@ -31,7 +33,6 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/s3"
 	"github.com/openimsdk/tools/s3/cos"
-	"github.com/openimsdk/tools/s3/kodo"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
 	"google.golang.org/grpc"
@@ -92,6 +93,8 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		o, err = oss.NewOSS(*config.RpcConfig.Object.Oss.Build())
 	case "kodo":
 		o, err = kodo.NewKodo(*config.RpcConfig.Object.Kodo.Build())
+	case "aws":
+		o, err = aws.NewAws(*config.RpcConfig.Object.Aws.Build())
 	default:
 		err = fmt.Errorf("invalid object enable: %s", enable)
 	}
@@ -101,7 +104,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	third.RegisterThirdServer(server, &thirdServer{
 		thirdDatabase: controller.NewThirdDatabase(redis.NewThirdCache(rdb), logdb),
-		userRpcClient: rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID),
+		userRpcClient: rpcclient.NewUserRpcClient(client, config.Discovery.RpcService.User, config.Share.IMAdminUserID),
 		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
 		defaultExpire: time.Hour * 24 * 7,
 		config:        config,
