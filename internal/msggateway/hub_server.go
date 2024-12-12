@@ -37,7 +37,7 @@ import (
 func (s *Server) InitServer(ctx context.Context, config *Config, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	s.LongConnServer.SetDiscoveryRegistry(disCov, config)
 	msggateway.RegisterMsgGatewayServer(server, s)
-	s.userRcp = rpcclient.NewUserRpcClient(disCov, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
+	s.userRcp = rpcclient.NewUserRpcClient(disCov, config.Discovery.RpcService.User, config.Share.IMAdminUserID)
 	if s.ready != nil {
 		return s.ready(s)
 	}
@@ -47,8 +47,8 @@ func (s *Server) InitServer(ctx context.Context, config *Config, disCov discover
 func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 	return startrpc.Start(ctx, &conf.Discovery, &conf.MsgGateway.Prometheus, conf.MsgGateway.ListenIP,
 		conf.MsgGateway.RPC.RegisterIP,
-		conf.MsgGateway.RPC.Ports, index,
-		conf.Share.RpcRegisterName.MessageGateway,
+		conf.MsgGateway.RPC.AutoSetPorts, conf.MsgGateway.RPC.Ports, index,
+		conf.Discovery.RpcService.MessageGateway,
 		&conf.Share,
 		conf,
 		s.InitServer,
@@ -57,7 +57,7 @@ func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 
 type Server struct {
 	msggateway.UnimplementedMsgGatewayServer
-	rpcPort        int
+
 	LongConnServer LongConnServer
 	config         *Config
 	pushTerminal   map[int]struct{}
@@ -70,9 +70,8 @@ func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 	s.LongConnServer = LongConnServer
 }
 
-func NewServer(rpcPort int, longConnServer LongConnServer, conf *Config, ready func(srv *Server) error) *Server {
+func NewServer(longConnServer LongConnServer, conf *Config, ready func(srv *Server) error) *Server {
 	s := &Server{
-		rpcPort:        rpcPort,
 		LongConnServer: longConnServer,
 		pushTerminal:   make(map[int]struct{}),
 		config:         conf,

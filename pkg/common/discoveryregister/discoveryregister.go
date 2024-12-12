@@ -15,30 +15,31 @@
 package discoveryregister
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
-	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/discovery/etcd"
-	"github.com/openimsdk/tools/discovery/zookeeper"
-	"github.com/openimsdk/tools/errs"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/discovery"
+
+	"github.com/openimsdk/tools/discovery/kubernetes"
+
+	"github.com/openimsdk/tools/discovery/etcd"
+	"github.com/openimsdk/tools/errs"
+)
+
+const (
+	Etcd = "etcd"
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
-func NewDiscoveryRegister(discovery *config.Discovery, share *config.Share) (discovery.SvcDiscoveryRegistry, error) {
+func NewDiscoveryRegister(discovery *config.Discovery, runtimeEnv string) (discovery.SvcDiscoveryRegistry, error) {
+	if runtimeEnv == "kubernetes" {
+		discovery.Enable = "kubernetes"
+	}
+
 	switch discovery.Enable {
-	case "zookeeper":
-		return zookeeper.NewZkClient(
-			discovery.ZooKeeper.Address,
-			discovery.ZooKeeper.Schema,
-			zookeeper.WithFreq(time.Hour),
-			zookeeper.WithUserNameAndPassword(discovery.ZooKeeper.Username, discovery.ZooKeeper.Password),
-			zookeeper.WithRoundRobin(),
-			zookeeper.WithTimeout(10),
-		)
-	case "k8s":
-		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
-	case "etcd":
+	case "kubernetes":
+		return kubernetes.NewKubernetesConnManager(discovery.Kubernetes.Namespace)
+	case Etcd:
 		return etcd.NewSvcDiscoveryRegistry(
 			discovery.Etcd.RootDirectory,
 			discovery.Etcd.Address,

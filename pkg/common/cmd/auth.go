@@ -55,6 +55,6 @@ func (a *AuthRpcCmd) Exec() error {
 
 func (a *AuthRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.authConfig.Discovery, &a.authConfig.RpcConfig.Prometheus, a.authConfig.RpcConfig.RPC.ListenIP,
-		a.authConfig.RpcConfig.RPC.RegisterIP, a.authConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.authConfig.Share.RpcRegisterName.Auth, &a.authConfig.Share, a.authConfig, auth.Start)
+		a.authConfig.RpcConfig.RPC.RegisterIP, a.authConfig.RpcConfig.RPC.AutoSetPorts, a.authConfig.RpcConfig.RPC.Ports,
+		a.Index(), a.authConfig.Discovery.RpcService.Auth, &a.authConfig.Share, a.authConfig, auth.Start)
 }
