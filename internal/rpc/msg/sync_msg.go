@@ -97,8 +97,6 @@ func (m *msgServer) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq
 			return nil, err
 		}
 		var pullMsgs *sdkws.PullMsgs
-		pullMsgs.IsEnd = isEnd
-		pullMsgs.EndSeq = endSeq
 		if ok := false; conversationutil.IsNotificationConversationID(conv.ConversationID) {
 			pullMsgs, ok = resp.NotificationMsgs[conv.ConversationID]
 			if !ok {
@@ -113,6 +111,8 @@ func (m *msgServer) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq
 			}
 		}
 		pullMsgs.Msgs = append(pullMsgs.Msgs, msgs...)
+		pullMsgs.IsEnd = isEnd
+		pullMsgs.EndSeq = endSeq
 	}
 	return resp, nil
 }
