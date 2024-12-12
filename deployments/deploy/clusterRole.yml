@@ -2,11 +2,10 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  # role name
   name: service-reader
 rules:
   - apiGroups: [""]
-    resources: ["services"]
+    resources: ["services", "endpoints"]
     verbs: ["get", "list", "watch"]
 
 ---

@@ -1,19 +1,19 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: openim-msggateway-service
+  name: messagegateway-rpc-service
 spec:
   selector:
-    app: openim-msggateway-server
+    app: messagegateway-rpc-server
   ports:
     - name: longConnServer-10001
       protocol: TCP
       port: 10001
       targetPort: 10001
-    - name: http-12001
+    - name: grpc-10140
       protocol: TCP
-      port: 12001
-      targetPort: 12001
+      port: 10140
+      targetPort: 10140
     - name: prometheus-12001
       protocol: TCP
       port: 12001

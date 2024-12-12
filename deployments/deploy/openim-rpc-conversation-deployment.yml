@@ -15,7 +15,6 @@ spec:
       containers:
         - name: conversation-rpc-server-container
           image: openim/openim-rpc-conversation:v3.8.3
-          imagePullPolicy: Never
           env:
             - name: CONFIG_PATH
               value: "/config"

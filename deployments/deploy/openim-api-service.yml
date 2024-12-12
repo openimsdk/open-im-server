@@ -6,11 +6,11 @@ spec:
   selector:
     app: openim-api
   ports:
-    - name: http-10302
+    - name: http-10002
       protocol: TCP
       port: 10002
       targetPort: 10002
-    - name: prometheus-20113
+    - name: prometheus-12002
       protocol: TCP
       port: 12002
       targetPort: 12002

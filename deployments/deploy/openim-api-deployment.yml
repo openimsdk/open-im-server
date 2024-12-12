@@ -17,7 +17,25 @@ spec:
           image: openim/openim-api:v3.8.3
           env:
             - name: CONFIG_PATH
-              value: "/config"          
+              value: "/config"
+            - name: IMENV_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: redis-password
+
+            - name: IMENV_MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo_openim_password
+
+            - name: IMENV_MONGODB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo_openim_username
+
           volumeMounts:
             - name: openim-config
               mountPath: "/config"

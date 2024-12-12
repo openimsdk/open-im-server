@@ -18,7 +18,6 @@ spec:
           env:
             - name: CONFIG_PATH
               value: "/config"
-
           volumeMounts:
             - name: openim-config
               mountPath: "/config"

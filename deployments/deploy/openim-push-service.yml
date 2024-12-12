@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: openim-push-service
+  name: push-rpc-service
 spec:
   selector:
-    app: openim-push-server
+    app: push-rpc-server
   ports:
     - name: http-10170
       protocol: TCP

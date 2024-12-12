@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: openim-push-server
+  name: push-rpc-server
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: openim-push-server
+      app: push-rpc-server
   template:
     metadata:
       labels:
-        app: openim-push-server
+        app: push-rpc-server
     spec:
       containers:
-        - name: openim-push-container
+        - name: push-rpc-server-container
           image: openim/openim-push:v3.8.3
           env:
             - name: CONFIG_PATH

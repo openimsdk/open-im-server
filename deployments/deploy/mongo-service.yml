@@ -10,4 +10,4 @@ spec:
       protocol: TCP
       port: 37017
       targetPort: 27017
-  type: ClusterIP
+  type: NodePort

@@ -17,7 +17,6 @@ spec:
       containers:
         - name: minio
           image: minio/minio:RELEASE.2024-01-11T07-46-16Z
-          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9000 # MinIO service port
             - containerPort: 9090 # MinIO console port
@@ -29,23 +28,22 @@ spec:
           env:
             - name: TZ
               value: "Asia/Shanghai"
-            - name: MINIO_ACCESS_KEY
+            - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
                   name: minio-secret
                   key: minio-root-user
-            - name: MINIO_SECRET_KEY
+            - name: MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: minio-secret
                   key: minio-root-password
-
           command:
-            - minio
-            - server
-            - /data
-            - "--console-address"
-            - ":9090"
+            - "/bin/sh"
+            - "-c"
+            - |
+              mkdir -p /data && \
+              minio server /data --console-address ":9090"
       volumes:
         - name: minio-data
           persistentVolumeClaim:
