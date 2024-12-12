@@ -18,12 +18,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/tools/mw"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 
 	"github.com/IBM/sarama"
 	"github.com/go-redis/redis"
@@ -349,7 +349,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Con
 func (och *OnlineHistoryRedisConsumerHandler) HandleUserHasReadSeqMessages(ctx context.Context) {
 	defer func() {
 		if r := recover(); r != nil {
-			mw.PanicStackToLog(ctx, r)
+			log.ZPanic(ctx, "HandleUserHasReadSeqMessages Panic", r)
 		}
 	}()
 
