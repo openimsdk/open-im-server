@@ -110,7 +110,7 @@ func UpdateGroupMemberMap(req *pbgroup.SetGroupMemberInfo) map[string]any {
 		m["nickname"] = req.Nickname.Value
 	}
 	if req.FaceURL != nil {
-		m["user_group_face_url"] = req.FaceURL.Value
+		m["face_url"] = req.FaceURL.Value
 	}
 	if req.RoleLevel != nil {
 		m["role_level"] = req.RoleLevel.Value

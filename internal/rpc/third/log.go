@@ -50,14 +50,14 @@ func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) 
 	platform := constant.PlatformID2Name[int(req.Platform)]
 	for _, fileURL := range req.FileURLs {
 		log := relationtb.Log{
-			Platform:   platform,
-			UserID:     userID,
-			CreateTime: time.Now(),
-			Url:        fileURL.URL,
-			FileName:   fileURL.Filename,
-			SystemType: req.SystemType,
-			Version:    req.Version,
-			Ex:         req.Ex,
+			Platform:     platform,
+			UserID:       userID,
+			CreateTime:   time.Now(),
+			Url:          fileURL.URL,
+			FileName:     fileURL.Filename,
+			AppFramework: req.AppFramework,
+			Version:      req.Version,
+			Ex:           req.Ex,
 		}
 		for i := 0; i < 20; i++ {
 			id := genLogID()

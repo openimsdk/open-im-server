@@ -16,6 +16,8 @@ package conversation
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	pbmsg "github.com/openimsdk/protocol/msg"
 	"sort"
 	"time"
 
@@ -43,6 +45,7 @@ import (
 )
 
 type conversationServer struct {
+	pbconversation.UnimplementedConversationServer
 	msgRpcClient         *rpcclient.MessageRpcClient
 	user                 *rpcclient.UserRpcClient
 	groupRpcClient       *rpcclient.GroupRpcClient
@@ -432,21 +435,37 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 	if err != nil {
 		return nil, err
 	}
+	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID)
+	if _, err := c.msgRpcClient.Client.SetUserConversationMaxSeq(ctx, &pbmsg.SetUserConversationMaxSeqReq{ConversationID: conversationID, OwnerUserID: req.UserIDs, MaxSeq: 0}); err != nil {
+		return nil, err
+	}
 	return &pbconversation.CreateGroupChatConversationsResp{}, nil
 }
 
 func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbconversation.SetConversationMaxSeqReq) (*pbconversation.SetConversationMaxSeqResp, error) {
+	if _, err := c.msgRpcClient.Client.SetUserConversationMaxSeq(ctx, &pbmsg.SetUserConversationMaxSeqReq{ConversationID: req.ConversationID, OwnerUserID: req.OwnerUserID, MaxSeq: req.MaxSeq}); err != nil {
+		return nil, err
+	}
 	if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.OwnerUserID, req.ConversationID,
 		map[string]any{"max_seq": req.MaxSeq}); err != nil {
 		return nil, err
+	}
+	for _, userID := range req.OwnerUserID {
+		c.conversationNotificationSender.ConversationChangeNotification(ctx, userID, []string{req.ConversationID})
 	}
 	return &pbconversation.SetConversationMaxSeqResp{}, nil
 }
 
 func (c *conversationServer) SetConversationMinSeq(ctx context.Context, req *pbconversation.SetConversationMinSeqReq) (*pbconversation.SetConversationMinSeqResp, error) {
+	if _, err := c.msgRpcClient.Client.SetUserConversationMinSeq(ctx, &pbmsg.SetUserConversationMinSeqReq{ConversationID: req.ConversationID, OwnerUserID: req.OwnerUserID, MinSeq: req.MinSeq}); err != nil {
+		return nil, err
+	}
 	if err := c.conversationDatabase.UpdateUsersConversationField(ctx, req.OwnerUserID, req.ConversationID,
 		map[string]any{"min_seq": req.MinSeq}); err != nil {
 		return nil, err
+	}
+	for _, userID := range req.OwnerUserID {
+		c.conversationNotificationSender.ConversationChangeNotification(ctx, userID, []string{req.ConversationID})
 	}
 	return &pbconversation.SetConversationMinSeqResp{}, nil
 }
@@ -669,7 +688,7 @@ func (c *conversationServer) GetOwnerConversation(ctx context.Context, req *pbco
 	}, nil
 }
 
-func (c *conversationServer) GetConversationsNeedDestructMsgs(ctx context.Context, _ *pbconversation.GetConversationsNeedDestructMsgsReq) (*pbconversation.GetConversationsNeedDestructMsgsResp, error) {
+func (c *conversationServer) GetConversationsNeedClearMsg(ctx context.Context, _ *pbconversation.GetConversationsNeedClearMsgReq) (*pbconversation.GetConversationsNeedClearMsgResp, error) {
 	num, err := c.conversationDatabase.GetAllConversationIDsNumber(ctx)
 	if err != nil {
 		log.ZError(ctx, "GetAllConversationIDsNumber failed", err)
@@ -693,7 +712,7 @@ func (c *conversationServer) GetConversationsNeedDestructMsgs(ctx context.Contex
 
 		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, pagination)
 		if err != nil {
-			// log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
+			log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
 			continue
 		}
 
@@ -716,7 +735,7 @@ func (c *conversationServer) GetConversationsNeedDestructMsgs(ctx context.Contex
 		}
 	}
 
-	return &pbconversation.GetConversationsNeedDestructMsgsResp{Conversations: convert.ConversationsDB2Pb(temp)}, nil
+	return &pbconversation.GetConversationsNeedClearMsgResp{Conversations: convert.ConversationsDB2Pb(temp)}, nil
 }
 
 func (c *conversationServer) GetNotNotifyConversationIDs(ctx context.Context, req *pbconversation.GetNotNotifyConversationIDsReq) (*pbconversation.GetNotNotifyConversationIDsResp, error) {

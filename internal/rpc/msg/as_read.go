@@ -137,7 +137,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		return nil, err
 	}
 	hasReadSeq, err := m.MsgDatabase.GetHasReadSeq(ctx, req.UserID, req.ConversationID)
-	if err != nil && errors.Is(err, redis.Nil) {
+	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
 	}
 	var seqs []int64

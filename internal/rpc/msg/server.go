@@ -16,7 +16,6 @@ package msg
 
 import (
 	"context"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
@@ -54,6 +53,7 @@ type (
 		msgNotificationSender  *MsgNotificationSender           // RPC client for sending msg notifications.
 		config                 *Config                          // Global configuration settings.
 		webhookClient          *webhook.Client
+		msg.UnimplementedMsgServer
 	}
 
 	Config struct {
