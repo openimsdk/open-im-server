@@ -26,7 +26,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
@@ -46,8 +46,8 @@ import (
 )
 
 // Start rpc server.
-func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusConfig *config.Prometheus, listenIP,
-	registerIP string, autoSetPorts bool, rpcPorts []int, index int, rpcRegisterName string, share *config.Share, config T, rpcFn func(ctx context.Context,
+func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConfig *conf.Prometheus, listenIP,
+	registerIP string, autoSetPorts bool, rpcPorts []int, index int, rpcRegisterName string, share *conf.Share, config T, rpcFn func(ctx context.Context,
 	config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 
 	var (
@@ -84,7 +84,7 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 		return listener, port, nil
 	}
 
-	if autoSetPorts && discovery.Enable != kdisc.Etcd {
+	if autoSetPorts && discovery.Enable != conf.ETCD {
 		return errs.New("only etcd support autoSetPorts", "rpcRegisterName", rpcRegisterName).Wrap()
 	}
 	client, err := kdisc.NewDiscoveryRegister(discovery, runTimeEnv)
