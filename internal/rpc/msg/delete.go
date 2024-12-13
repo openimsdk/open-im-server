@@ -138,8 +138,15 @@ func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []str
 	}
 	isSyncSelf, isSyncOther := m.validateDeleteSyncOpt(deleteSyncOpt)
 	if !isSyncOther {
-		if err := m.MsgDatabase.SetUserConversationsMinSeqs(ctx, userID, m.getMinSeqs(maxSeqs)); err != nil {
+		setSeqs := m.getMinSeqs(maxSeqs)
+		if err := m.MsgDatabase.SetUserConversationsMinSeqs(ctx, userID, setSeqs); err != nil {
 			return err
+		}
+		ownerUserIDs := []string{userID}
+		for conversationID, seq := range setSeqs {
+			if err := m.Conversation.SetConversationMinSeq(ctx, ownerUserIDs, conversationID, seq); err != nil {
+				return err
+			}
 		}
 		// notification 2 self
 		if isSyncSelf {

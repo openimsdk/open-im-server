@@ -26,7 +26,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
@@ -41,9 +41,9 @@ import (
 )
 
 type Config struct {
-	API       config.API
-	Share     config.Share
-	Discovery config.Discovery
+	API       conf.API
+	Share     conf.Share
+	Discovery conf.Discovery
 
 	RuntimeEnv string
 }
@@ -86,7 +86,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return listener, port, nil
 	}
 
-	if config.API.Prometheus.AutoSetPorts && config.Discovery.Enable != kdisc.Etcd {
+	if config.API.Prometheus.AutoSetPorts && config.Discovery.Enable != conf.ETCD {
 		return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
 	}
 
