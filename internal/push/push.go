@@ -33,8 +33,8 @@ type Config struct {
 	LocalCacheConfig   config.LocalCache
 	Discovery          config.Discovery
 	FcmConfigPath      string
-	
-	runTimeEnv         string
+
+	runTimeEnv string
 }
 
 func (p pushServer) PushMsg(ctx context.Context, req *pbpush.PushMsgReq) (*pbpush.PushMsgResp, error) {
