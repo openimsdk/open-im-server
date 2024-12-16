@@ -5,16 +5,17 @@ import (
 	"crypto/md5"
 	"encoding/binary"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
-	pbuser "github.com/openimsdk/protocol/user"
-	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils/datautil"
 	"math/rand"
 	"os"
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	pbuser "github.com/openimsdk/protocol/user"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
@@ -87,7 +88,7 @@ func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
 		opIdCtx := mcontext.SetOperationID(context.Background(), operationIDPrefix+strconv.FormatInt(count.Add(1), 10))
 		ctx, cancel := context.WithTimeout(opIdCtx, time.Second*5)
 		defer cancel()
-		if _, err := ws.userClient.Client.SetUserOnlineStatus(ctx, req); err != nil {
+		if err := pbuser.SetUserOnlineStatusCaller.Execute(ctx, req); err != nil {
 			log.ZError(ctx, "update user online status", err)
 		}
 		for _, ss := range req.Status {

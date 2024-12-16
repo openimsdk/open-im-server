@@ -16,52 +16,58 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/a2r"
 	"github.com/openimsdk/tools/apiresp"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 )
 
-type UserApi rpcclient.User
+type UserApi struct {
+	Discov                discovery.SvcDiscoveryRegistry
+	MessageGateWayRpcName string
+}
 
-func NewUserApi(client rpcclient.User) UserApi {
-	return UserApi(client)
+func NewUserApi(discov discovery.SvcDiscoveryRegistry, messageGateWayRpcName string) UserApi {
+	return UserApi{
+		Discov:                discov,
+		MessageGateWayRpcName: messageGateWayRpcName,
+	}
 }
 
 func (u *UserApi) UserRegister(c *gin.Context) {
-	a2r.Call(user.UserClient.UserRegister, u.Client, c)
+	a2r.CallV2(user.UserRegisterCaller.Invoke, c)
 }
 
 // UpdateUserInfo is deprecated. Use UpdateUserInfoEx
 func (u *UserApi) UpdateUserInfo(c *gin.Context) {
-	a2r.Call(user.UserClient.UpdateUserInfo, u.Client, c)
+	a2r.CallV2(user.UpdateUserInfoCaller.Invoke, c)
 }
 
 func (u *UserApi) UpdateUserInfoEx(c *gin.Context) {
-	a2r.Call(user.UserClient.UpdateUserInfoEx, u.Client, c)
+	a2r.CallV2(user.UpdateUserInfoExCaller.Invoke, c)
 }
 func (u *UserApi) SetGlobalRecvMessageOpt(c *gin.Context) {
-	a2r.Call(user.UserClient.SetGlobalRecvMessageOpt, u.Client, c)
+	a2r.CallV2(user.SetGlobalRecvMessageOptCaller.Invoke, c)
 }
 
 func (u *UserApi) GetUsersPublicInfo(c *gin.Context) {
-	a2r.Call(user.UserClient.GetDesignateUsers, u.Client, c)
+	a2r.CallV2(user.GetDesignateUsersCaller.Invoke, c)
 }
 
 func (u *UserApi) GetAllUsersID(c *gin.Context) {
-	a2r.Call(user.UserClient.GetAllUserID, u.Client, c)
+	a2r.CallV2(user.GetAllUserIDCaller.Invoke, c)
 }
 
 func (u *UserApi) AccountCheck(c *gin.Context) {
-	a2r.Call(user.UserClient.AccountCheck, u.Client, c)
+	a2r.CallV2(user.AccountCheckCaller.Invoke, c)
 }
 
 func (u *UserApi) GetUsers(c *gin.Context) {
-	a2r.Call(user.UserClient.GetPaginationUsers, u.Client, c)
+	a2r.CallV2(user.GetPaginationUsersCaller.Invoke, c)
 }
 
 // GetUsersOnlineStatus Get user online status.
@@ -122,7 +128,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 }
 
 func (u *UserApi) UserRegisterCount(c *gin.Context) {
-	a2r.Call(user.UserClient.UserRegisterCount, u.Client, c)
+	a2r.CallV2(user.UserRegisterCountCaller.Invoke, c)
 }
 
 // GetUsersOnlineTokenDetail Get user online token details.
@@ -188,52 +194,52 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 
 // SubscriberStatus Presence status of subscribed users.
 func (u *UserApi) SubscriberStatus(c *gin.Context) {
-	a2r.Call(user.UserClient.SubscribeOrCancelUsersStatus, u.Client, c)
+	a2r.CallV2(user.SubscribeOrCancelUsersStatusCaller.Invoke, c)
 }
 
 // GetUserStatus Get the online status of the user.
 func (u *UserApi) GetUserStatus(c *gin.Context) {
-	a2r.Call(user.UserClient.GetUserStatus, u.Client, c)
+	a2r.CallV2(user.GetUserStatusCaller.Invoke, c)
 }
 
 // GetSubscribeUsersStatus Get the online status of subscribers.
 func (u *UserApi) GetSubscribeUsersStatus(c *gin.Context) {
-	a2r.Call(user.UserClient.GetSubscribeUsersStatus, u.Client, c)
+	a2r.CallV2(user.GetSubscribeUsersStatusCaller.Invoke, c)
 }
 
 // ProcessUserCommandAdd user general function add.
 func (u *UserApi) ProcessUserCommandAdd(c *gin.Context) {
-	a2r.Call(user.UserClient.ProcessUserCommandAdd, u.Client, c)
+	a2r.CallV2(user.ProcessUserCommandAddCaller.Invoke, c)
 }
 
 // ProcessUserCommandDelete user general function delete.
 func (u *UserApi) ProcessUserCommandDelete(c *gin.Context) {
-	a2r.Call(user.UserClient.ProcessUserCommandDelete, u.Client, c)
+	a2r.CallV2(user.ProcessUserCommandDeleteCaller.Invoke, c)
 }
 
 // ProcessUserCommandUpdate  user general function update.
 func (u *UserApi) ProcessUserCommandUpdate(c *gin.Context) {
-	a2r.Call(user.UserClient.ProcessUserCommandUpdate, u.Client, c)
+	a2r.CallV2(user.ProcessUserCommandUpdateCaller.Invoke, c)
 }
 
 // ProcessUserCommandGet user general function get.
 func (u *UserApi) ProcessUserCommandGet(c *gin.Context) {
-	a2r.Call(user.UserClient.ProcessUserCommandGet, u.Client, c)
+	a2r.CallV2(user.ProcessUserCommandGetCaller.Invoke, c)
 }
 
 // ProcessUserCommandGet user general function get all.
 func (u *UserApi) ProcessUserCommandGetAll(c *gin.Context) {
-	a2r.Call(user.UserClient.ProcessUserCommandGetAll, u.Client, c)
+	a2r.CallV2(user.ProcessUserCommandGetAllCaller.Invoke, c)
 }
 
 func (u *UserApi) AddNotificationAccount(c *gin.Context) {
-	a2r.Call(user.UserClient.AddNotificationAccount, u.Client, c)
+	a2r.CallV2(user.AddNotificationAccountCaller.Invoke, c)
 }
 
 func (u *UserApi) UpdateNotificationAccountInfo(c *gin.Context) {
-	a2r.Call(user.UserClient.UpdateNotificationAccountInfo, u.Client, c)
+	a2r.CallV2(user.UpdateNotificationAccountInfoCaller.Invoke, c)
 }
 
 func (u *UserApi) SearchNotificationAccount(c *gin.Context) {
-	a2r.Call(user.UserClient.SearchNotificationAccount, u.Client, c)
+	a2r.CallV2(user.SearchNotificationAccountCaller.Invoke, c)
 }

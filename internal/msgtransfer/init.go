@@ -113,9 +113,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Discovery.RpcService.Conversation)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Discovery.RpcService.Group)
-	historyCH, err := NewOnlineHistoryRedisConsumerHandler(&config.KafkaConfig, msgTransferDatabase, &conversationRpcClient, &groupRpcClient)
+	historyCH, err := NewOnlineHistoryRedisConsumerHandler(&config.KafkaConfig, msgTransferDatabase)
 	if err != nil {
 		return err
 	}
@@ -150,6 +148,9 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, m.runTimeEnv)
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
+	}
+	if err = rpcclient.InitRpcCaller(client, config.Discovery.RpcService); err != nil {
+		return err
 	}
 
 	registerIP, err := network.GetRpcRegisterIP("")

@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
@@ -44,7 +45,6 @@ type (
 		RegisterCenter         discovery.SvcDiscoveryRegistry // Service discovery registry for service registration.
 		MsgDatabase            controller.CommonMsgDatabase   // Interface for message database operations.
 		StreamMsgDatabase      controller.StreamMsgDatabase
-		Conversation           *rpcclient.ConversationRpcClient // RPC client for conversation service.
 		UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
 		FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
 		GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
@@ -89,10 +89,6 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	msgModel := redis.NewMsgCache(rdb)
-	conversationClient := rpcclient.NewConversationRpcClient(client, config.Discovery.RpcService.Conversation)
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.Discovery.RpcService.User, config.Share.IMAdminUserID)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Discovery.RpcService.Group)
-	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.Discovery.RpcService.Friend)
 	seqConversation, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return err
@@ -112,14 +108,13 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	s := &msgServer{
-		Conversation:           &conversationClient,
 		MsgDatabase:            msgDatabase,
 		StreamMsgDatabase:      controller.NewStreamMsgDatabase(streamMsg),
 		RegisterCenter:         client,
-		UserLocalCache:         rpccache.NewUserLocalCache(userRpcClient, &config.LocalCacheConfig, rdb),
-		GroupLocalCache:        rpccache.NewGroupLocalCache(groupRpcClient, &config.LocalCacheConfig, rdb),
-		ConversationLocalCache: rpccache.NewConversationLocalCache(conversationClient, &config.LocalCacheConfig, rdb),
-		FriendLocalCache:       rpccache.NewFriendLocalCache(friendRpcClient, &config.LocalCacheConfig, rdb),
+		UserLocalCache:         rpccache.NewUserLocalCache(&config.LocalCacheConfig, rdb),
+		GroupLocalCache:        rpccache.NewGroupLocalCache(&config.LocalCacheConfig, rdb),
+		ConversationLocalCache: rpccache.NewConversationLocalCache(&config.LocalCacheConfig, rdb),
+		FriendLocalCache:       rpccache.NewFriendLocalCache(&config.LocalCacheConfig, rdb),
 		config:                 config,
 		webhookClient:          webhook.NewWebhookClient(config.WebhooksConfig.URL),
 	}

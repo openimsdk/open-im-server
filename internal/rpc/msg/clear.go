@@ -6,7 +6,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	pbconversation "github.com/openimsdk/protocol/conversation"
+	pbconv "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/wrapperspb"
 	"github.com/openimsdk/tools/errs"
@@ -105,18 +105,21 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.
 					minseq := datautil.Max(seqs...)
 
 					// update
-					if err := m.Conversation.UpdateConversation(handleCtx,
-						&pbconversation.UpdateConversationReq{
-							UserIDs:               []string{conversation.OwnerUserID},
-							ConversationID:        conversation.ConversationID,
-							LatestMsgDestructTime: wrapperspb.Int64(time.Now().UnixMilli()),
-							MinSeq:                wrapperspb.Int64(minseq),
-						}); err != nil {
+					if err := pbconv.UpdateConversationCaller.Execute(ctx, &pbconv.UpdateConversationReq{
+						ConversationID:        conversation.ConversationID,
+						UserIDs:               []string{conversation.OwnerUserID},
+						MinSeq:                wrapperspb.Int64(minseq),
+						LatestMsgDestructTime: wrapperspb.Int64(time.Now().UnixMilli()),
+					}); err != nil {
 						log.ZError(handleCtx, "updateUsersConversationField failed", err, "conversationID", conversation.ConversationID, "ownerUserID", conversation.OwnerUserID)
 						continue
 					}
 
-					if err := m.Conversation.SetConversationMinSeq(handleCtx, []string{conversation.OwnerUserID}, conversation.ConversationID, minseq); err != nil {
+					if err := pbconv.SetConversationMinSeqCaller.Execute(ctx, &pbconv.SetConversationMinSeqReq{
+						ConversationID: conversation.ConversationID,
+						OwnerUserID:    []string{conversation.OwnerUserID},
+						MinSeq:         minseq,
+					}); err != nil {
 						return err
 					}
 

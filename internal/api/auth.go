@@ -16,29 +16,28 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/tools/a2r"
 )
 
-type AuthApi rpcclient.Auth
+type AuthApi struct{}
 
-func NewAuthApi(client rpcclient.Auth) AuthApi {
-	return AuthApi(client)
+func NewAuthApi() AuthApi {
+	return AuthApi{}
 }
 
 func (o *AuthApi) GetAdminToken(c *gin.Context) {
-	a2r.Call(auth.AuthClient.GetAdminToken, o.Client, c)
+	a2r.CallV2(auth.GetAdminTokenCaller.Invoke, c)
 }
 
 func (o *AuthApi) GetUserToken(c *gin.Context) {
-	a2r.Call(auth.AuthClient.GetUserToken, o.Client, c)
+	a2r.CallV2(auth.GetUserTokenCaller.Invoke, c)
 }
 
 func (o *AuthApi) ParseToken(c *gin.Context) {
-	a2r.Call(auth.AuthClient.ParseToken, o.Client, c)
+	a2r.CallV2(auth.ParseTokenCaller.Invoke, c)
 }
 
 func (o *AuthApi) ForceLogout(c *gin.Context) {
-	a2r.Call(auth.AuthClient.ForceLogout, o.Client, c)
+	a2r.CallV2(auth.ForceLogoutCaller.Invoke, c)
 }

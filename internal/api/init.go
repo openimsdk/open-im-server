@@ -29,6 +29,7 @@ import (
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
@@ -62,6 +63,10 @@ func Start(ctx context.Context, index int, config *Config) error {
 	client, err = kdisc.NewDiscoveryRegister(&config.Discovery, config.RuntimeEnv)
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
+	}
+
+	if err = rpcclient.InitRpcCaller(client, config.Discovery.RpcService); err != nil {
+		return err
 	}
 
 	var (
