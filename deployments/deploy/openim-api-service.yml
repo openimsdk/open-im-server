@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: openim-api-service
+spec:
+  selector:
+    app: openim-api
+  ports:
+    - name: http-10002
+      protocol: TCP
+      port: 10002
+      targetPort: 10002
+    - name: prometheus-12002
+      protocol: TCP
+      port: 12002
+      targetPort: 12002
+  type: NodePort

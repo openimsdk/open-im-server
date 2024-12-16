@@ -86,7 +86,7 @@ func TestLoadOpenIMThirdConfig(t *testing.T) {
 
 func TestTransferConfig(t *testing.T) {
 	var tran MsgTransfer
-	err := LoadConfig("../../../config/openim-msgtransfer.yml", "IMENV_OPENIM-MSGTRANSFER", &tran)
+	err := Load("../../../config/openim-msgtransfer.yml", "IMENV_OPENIM-MSGTRANSFER", "", "source", &tran)
 	assert.Nil(t, err)
 	assert.Equal(t, true, tran.Prometheus.Enable)
 	assert.Equal(t, true, tran.Prometheus.AutoSetPorts)

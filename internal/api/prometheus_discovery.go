@@ -2,8 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/discovery"
@@ -11,7 +13,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"net/http"
 )
 
 type PrometheusDiscoveryApi struct {
@@ -23,14 +24,14 @@ func NewPrometheusDiscoveryApi(config *Config, client discovery.SvcDiscoveryRegi
 	api := &PrometheusDiscoveryApi{
 		config: config,
 	}
-	if config.Discovery.Enable == discoveryregister.Etcd {
+	if config.Discovery.Enable == conf.ETCD {
 		api.client = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 	}
 	return api
 }
 
 func (p *PrometheusDiscoveryApi) Enable(c *gin.Context) {
-	if p.config.Discovery.Enable != discoveryregister.Etcd {
+	if p.config.Discovery.Enable != conf.ETCD {
 		c.JSON(http.StatusOK, []struct{}{})
 		c.Abort()
 	}

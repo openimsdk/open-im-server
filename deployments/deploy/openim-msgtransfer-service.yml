@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: openim-msgtransfer-service
+spec:
+  selector:
+    app: openim-msgtransfer-server
+  ports:
+    - name: prometheus-12020
+      protocol: TCP
+      port: 12020
+      targetPort: 12020
+  type: ClusterIP

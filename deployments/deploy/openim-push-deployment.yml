@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: push-rpc-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: push-rpc-server
+  template:
+    metadata:
+      labels:
+        app: push-rpc-server
+    spec:
+      containers:
+        - name: push-rpc-server-container
+          image: openim/openim-push:v3.8.3
+          env:
+            - name: CONFIG_PATH
+              value: "/config"
+            - name: IMENV_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: redis-password
+          volumeMounts:
+            - name: openim-config
+              mountPath: "/config"
+              readOnly: true
+          ports:
+            - containerPort: 10170
+            - containerPort: 12170
+      volumes:
+        - name: openim-config
+          configMap:
+            name: openim-config

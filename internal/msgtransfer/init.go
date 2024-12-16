@@ -37,7 +37,7 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/runtimeenv"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	discRegister "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
@@ -64,13 +64,13 @@ type MsgTransfer struct {
 }
 
 type Config struct {
-	MsgTransfer    config.MsgTransfer
-	RedisConfig    config.Redis
-	MongodbConfig  config.Mongo
-	KafkaConfig    config.Kafka
-	Share          config.Share
-	WebhooksConfig config.Webhooks
-	Discovery      config.Discovery
+	MsgTransfer    conf.MsgTransfer
+	RedisConfig    conf.Redis
+	MongodbConfig  conf.Mongo
+	KafkaConfig    conf.Kafka
+	Share          conf.Share
+	WebhooksConfig conf.Webhooks
+	Discovery      conf.Discovery
 }
 
 func Start(ctx context.Context, index int, config *Config) error {
@@ -168,7 +168,7 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 		return listener, port, nil
 	}
 
-	if config.MsgTransfer.Prometheus.AutoSetPorts && config.Discovery.Enable != kdisc.Etcd {
+	if config.MsgTransfer.Prometheus.AutoSetPorts && config.Discovery.Enable != conf.ETCD {
 		return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
 	}
 
