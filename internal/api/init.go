@@ -33,11 +33,14 @@ import (
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mw"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/network"
 	"github.com/openimsdk/tools/utils/runtimeenv"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Config struct {
@@ -60,7 +63,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
-
+	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	if err = rpcclient.InitRpcCaller(client, config.Discovery.RpcService); err != nil {
 		return err
 	}
