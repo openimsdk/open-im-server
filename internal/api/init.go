@@ -30,7 +30,6 @@ import (
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -57,10 +56,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 
 	config.RuntimeEnv = runtimeenv.PrintRuntimeEnvironment()
 
-	var client discovery.SvcDiscoveryRegistry
-
-	// Determine whether zk is passed according to whether it is a clustered deployment
-	client, err = kdisc.NewDiscoveryRegister(&config.Discovery, config.RuntimeEnv)
+	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, config.RuntimeEnv)
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
@@ -95,7 +91,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
 	}
 
-	router := newGinRouter(client, config, client)
+	router := newGinRouter(client, config)
 	if config.API.Prometheus.Enable {
 		var (
 			listener net.Listener

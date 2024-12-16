@@ -47,7 +47,7 @@ func prommetricsGin() gin.HandlerFunc {
 	}
 }
 
-func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config, client discovery.SvcDiscoveryRegistry) *gin.Engine {
+func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.Engine {
 	disCov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	gin.SetMode(gin.ReleaseMode)
@@ -68,7 +68,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config, client 
 	u := NewUserApi(disCov, config.Discovery.RpcService.MessageGateway)
 	m := NewMessageApi(config.Share.IMAdminUserID)
 	j := jssdk.NewJSSdkApi()
-	pd := NewPrometheusDiscoveryApi(config, client)
+	pd := NewPrometheusDiscoveryApi(config, disCov)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
