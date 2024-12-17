@@ -173,6 +173,7 @@ services:
       - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
       - ./config/email.tmpl:/etc/alertmanager/email.tmpl
     command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
       - '--web.listen-address=:${ALERTMANAGER_PORT}'
     network_mode: host
 
