@@ -354,7 +354,15 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			needUpdateUsersList = append(needUpdateUsersList, userID)
 		}
 	}
+	if len(m) != 0 && len(needUpdateUsersList) != 0 {
+		if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, needUpdateUsersList, &conversation, m); err != nil {
+			return nil, err
+		}
 
+		for _, v := range needUpdateUsersList {
+			c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
+		}
+	}
 	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.ReadGroupChatType {
 		var conversations []*dbModel.Conversation
 		for _, ownerUserID := range req.UserIDs {
@@ -371,16 +379,6 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		for _, userID := range req.UserIDs {
 			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
 				req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
-		}
-	} else {
-		if len(m) != 0 && len(needUpdateUsersList) != 0 {
-			if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, needUpdateUsersList, &conversation, m); err != nil {
-				return nil, err
-			}
-
-			for _, v := range needUpdateUsersList {
-				c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
-			}
 		}
 	}
 
