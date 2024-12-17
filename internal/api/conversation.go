@@ -27,45 +27,45 @@ func NewConversationApi() ConversationApi {
 }
 
 func (o *ConversationApi) GetAllConversations(c *gin.Context) {
-	a2r.CallV2(conversation.GetAllConversationsCaller.Invoke, c)
+	a2r.CallV2(c, conversation.GetAllConversationsCaller.Invoke)
 }
 
 func (o *ConversationApi) GetSortedConversationList(c *gin.Context) {
-	a2r.CallV2(conversation.GetSortedConversationListCaller.Invoke, c)
+	a2r.CallV2(c, conversation.GetSortedConversationListCaller.Invoke)
 }
 
 func (o *ConversationApi) GetConversation(c *gin.Context) {
-	a2r.CallV2(conversation.GetConversationCaller.Invoke, c)
+	a2r.CallV2(c, conversation.GetConversationCaller.Invoke)
 }
 
 func (o *ConversationApi) GetConversations(c *gin.Context) {
-	a2r.CallV2(conversation.GetConversationsCaller.Invoke, c)
+	a2r.CallV2(c, conversation.GetConversationsCaller.Invoke)
 }
 
 func (o *ConversationApi) SetConversations(c *gin.Context) {
-	a2r.CallV2(conversation.SetConversationsCaller.Invoke, c)
+	a2r.CallV2(c, conversation.SetConversationsCaller.Invoke)
 }
 
 func (o *ConversationApi) GetConversationOfflinePushUserIDs(c *gin.Context) {
-	a2r.CallV2(conversation.GetConversationOfflinePushUserIDsCaller.Invoke, c)
+	a2r.CallV2(c, conversation.GetConversationOfflinePushUserIDsCaller.Invoke)
 }
 
 func (o *ConversationApi) GetFullOwnerConversationIDs(c *gin.Context) {
-	a2r.CallV2(conversation.GetFullOwnerConversationIDsCaller.Invoke, c)
+	a2r.CallV2(c, conversation.GetFullOwnerConversationIDsCaller.Invoke)
 }
 
 func (o *ConversationApi) GetIncrementalConversation(c *gin.Context) {
-	a2r.CallV2(conversation.GetIncrementalConversationCaller.Invoke, c)
+	a2r.CallV2(c, conversation.GetIncrementalConversationCaller.Invoke)
 }
 
 func (o *ConversationApi) GetOwnerConversation(c *gin.Context) {
-	a2r.CallV2(conversation.GetOwnerConversationCaller.Invoke, c)
+	a2r.CallV2(c, conversation.GetOwnerConversationCaller.Invoke)
 }
 
 func (o *ConversationApi) GetNotNotifyConversationIDs(c *gin.Context) {
-	a2r.CallV2(conversation.GetNotNotifyConversationIDsCaller.Invoke, c)
+	a2r.CallV2(c, conversation.GetNotNotifyConversationIDsCaller.Invoke)
 }
 
 func (o *ConversationApi) GetPinnedConversationIDs(c *gin.Context) {
-	a2r.CallV2(conversation.GetPinnedConversationIDsCaller.Invoke, c)
+	a2r.CallV2(c, conversation.GetPinnedConversationIDsCaller.Invoke)
 }

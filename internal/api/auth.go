@@ -27,17 +27,17 @@ func NewAuthApi() AuthApi {
 }
 
 func (o *AuthApi) GetAdminToken(c *gin.Context) {
-	a2r.CallV2(auth.GetAdminTokenCaller.Invoke, c)
+	a2r.CallV2(c, auth.GetAdminTokenCaller.Invoke)
 }
 
 func (o *AuthApi) GetUserToken(c *gin.Context) {
-	a2r.CallV2(auth.GetUserTokenCaller.Invoke, c)
+	a2r.CallV2(c, auth.GetUserTokenCaller.Invoke)
 }
 
 func (o *AuthApi) ParseToken(c *gin.Context) {
-	a2r.CallV2(auth.ParseTokenCaller.Invoke, c)
+	a2r.CallV2(c, auth.ParseTokenCaller.Invoke)
 }
 
 func (o *AuthApi) ForceLogout(c *gin.Context) {
-	a2r.CallV2(auth.ForceLogoutCaller.Invoke, c)
+	a2r.CallV2(c, auth.ForceLogoutCaller.Invoke)
 }

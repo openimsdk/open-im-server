@@ -27,101 +27,101 @@ func NewGroupApi() GroupApi {
 }
 
 func (o *GroupApi) CreateGroup(c *gin.Context) {
-	a2r.CallV2(group.CreateGroupCaller.Invoke, c)
+	a2r.CallV2(c, group.CreateGroupCaller.Invoke)
 }
 
 func (o *GroupApi) SetGroupInfo(c *gin.Context) {
-	a2r.CallV2(group.SetGroupInfoCaller.Invoke, c)
+	a2r.CallV2(c, group.SetGroupInfoCaller.Invoke)
 }
 
 func (o *GroupApi) SetGroupInfoEx(c *gin.Context) {
-	a2r.CallV2(group.SetGroupInfoExCaller.Invoke, c)
+	a2r.CallV2(c, group.SetGroupInfoExCaller.Invoke)
 }
 
 func (o *GroupApi) JoinGroup(c *gin.Context) {
-	a2r.CallV2(group.JoinGroupCaller.Invoke, c)
+	a2r.CallV2(c, group.JoinGroupCaller.Invoke)
 }
 
 func (o *GroupApi) QuitGroup(c *gin.Context) {
-	a2r.CallV2(group.QuitGroupCaller.Invoke, c)
+	a2r.CallV2(c, group.QuitGroupCaller.Invoke)
 }
 
 func (o *GroupApi) ApplicationGroupResponse(c *gin.Context) {
-	a2r.CallV2(group.GroupApplicationResponseCaller.Invoke, c)
+	a2r.CallV2(c, group.GroupApplicationResponseCaller.Invoke)
 }
 
 func (o *GroupApi) TransferGroupOwner(c *gin.Context) {
-	a2r.CallV2(group.TransferGroupOwnerCaller.Invoke, c)
+	a2r.CallV2(c, group.TransferGroupOwnerCaller.Invoke)
 }
 
 func (o *GroupApi) GetRecvGroupApplicationList(c *gin.Context) {
-	a2r.CallV2(group.GetGroupApplicationListCaller.Invoke, c)
+	a2r.CallV2(c, group.GetGroupApplicationListCaller.Invoke)
 }
 
 func (o *GroupApi) GetUserReqGroupApplicationList(c *gin.Context) {
-	a2r.CallV2(group.GetUserReqApplicationListCaller.Invoke, c)
+	a2r.CallV2(c, group.GetUserReqApplicationListCaller.Invoke)
 }
 
 func (o *GroupApi) GetGroupUsersReqApplicationList(c *gin.Context) {
-	a2r.CallV2(group.GetGroupUsersReqApplicationListCaller.Invoke, c)
+	a2r.CallV2(c, group.GetGroupUsersReqApplicationListCaller.Invoke)
 }
 
 func (o *GroupApi) GetSpecifiedUserGroupRequestInfo(c *gin.Context) {
-	a2r.CallV2(group.GetSpecifiedUserGroupRequestInfoCaller.Invoke, c)
+	a2r.CallV2(c, group.GetSpecifiedUserGroupRequestInfoCaller.Invoke)
 }
 
 func (o *GroupApi) GetGroupsInfo(c *gin.Context) {
-	a2r.CallV2(group.GetGroupsInfoCaller.Invoke, c)
+	a2r.CallV2(c, group.GetGroupsInfoCaller.Invoke)
 	//a2r.Call(group.GroupClient.GetGroupsInfo, o.Client, c, a2r.NewNilReplaceOption(group.GroupClient.GetGroupsInfo))
 }
 
 func (o *GroupApi) KickGroupMember(c *gin.Context) {
-	a2r.CallV2(group.KickGroupMemberCaller.Invoke, c)
+	a2r.CallV2(c, group.KickGroupMemberCaller.Invoke)
 }
 
 func (o *GroupApi) GetGroupMembersInfo(c *gin.Context) {
-	a2r.CallV2(group.GetGroupMembersInfoCaller.Invoke, c)
+	a2r.CallV2(c, group.GetGroupMembersInfoCaller.Invoke)
 	//a2r.Call(group.GroupClient.GetGroupMembersInfo, o.Client, c, a2r.NewNilReplaceOption(group.GroupClient.GetGroupMembersInfo))
 }
 
 func (o *GroupApi) GetGroupMemberList(c *gin.Context) {
-	a2r.CallV2(group.GetGroupMemberListCaller.Invoke, c)
+	a2r.CallV2(c, group.GetGroupMemberListCaller.Invoke)
 }
 
 func (o *GroupApi) InviteUserToGroup(c *gin.Context) {
-	a2r.CallV2(group.InviteUserToGroupCaller.Invoke, c)
+	a2r.CallV2(c, group.InviteUserToGroupCaller.Invoke)
 }
 
 func (o *GroupApi) GetJoinedGroupList(c *gin.Context) {
-	a2r.CallV2(group.GetJoinedGroupListCaller.Invoke, c)
+	a2r.CallV2(c, group.GetJoinedGroupListCaller.Invoke)
 }
 
 func (o *GroupApi) DismissGroup(c *gin.Context) {
-	a2r.CallV2(group.DismissGroupCaller.Invoke, c)
+	a2r.CallV2(c, group.DismissGroupCaller.Invoke)
 }
 
 func (o *GroupApi) MuteGroupMember(c *gin.Context) {
-	a2r.CallV2(group.MuteGroupMemberCaller.Invoke, c)
+	a2r.CallV2(c, group.MuteGroupMemberCaller.Invoke)
 }
 
 func (o *GroupApi) CancelMuteGroupMember(c *gin.Context) {
-	a2r.CallV2(group.CancelMuteGroupMemberCaller.Invoke, c)
+	a2r.CallV2(c, group.CancelMuteGroupMemberCaller.Invoke)
 }
 
 func (o *GroupApi) MuteGroup(c *gin.Context) {
-	a2r.CallV2(group.MuteGroupCaller.Invoke, c)
+	a2r.CallV2(c, group.MuteGroupCaller.Invoke)
 }
 
 func (o *GroupApi) CancelMuteGroup(c *gin.Context) {
-	a2r.CallV2(group.CancelMuteGroupCaller.Invoke, c)
+	a2r.CallV2(c, group.CancelMuteGroupCaller.Invoke)
 }
 
 func (o *GroupApi) SetGroupMemberInfo(c *gin.Context) {
-	a2r.CallV2(group.SetGroupMemberInfoCaller.Invoke, c)
+	a2r.CallV2(c, group.SetGroupMemberInfoCaller.Invoke)
 }
 
 func (o *GroupApi) GetGroupAbstractInfo(c *gin.Context) {
-	a2r.CallV2(group.GetGroupAbstractInfoCaller.Invoke, c)
+	a2r.CallV2(c, group.GetGroupAbstractInfoCaller.Invoke)
 }
 
 // func (g *Group) SetGroupMemberNickname(c *gin.Context) {
@@ -133,33 +133,33 @@ func (o *GroupApi) GetGroupAbstractInfo(c *gin.Context) {
 //}
 
 func (o *GroupApi) GroupCreateCount(c *gin.Context) {
-	a2r.CallV2(group.GroupCreateCountCaller.Invoke, c)
+	a2r.CallV2(c, group.GroupCreateCountCaller.Invoke)
 }
 
 func (o *GroupApi) GetGroups(c *gin.Context) {
-	a2r.CallV2(group.GetGroupsCaller.Invoke, c)
+	a2r.CallV2(c, group.GetGroupsCaller.Invoke)
 }
 
 func (o *GroupApi) GetGroupMemberUserIDs(c *gin.Context) {
-	a2r.CallV2(group.GetGroupMemberUserIDsCaller.Invoke, c)
+	a2r.CallV2(c, group.GetGroupMemberUserIDsCaller.Invoke)
 }
 
 func (o *GroupApi) GetIncrementalJoinGroup(c *gin.Context) {
-	a2r.CallV2(group.GetIncrementalJoinGroupCaller.Invoke, c)
+	a2r.CallV2(c, group.GetIncrementalJoinGroupCaller.Invoke)
 }
 
 func (o *GroupApi) GetIncrementalGroupMember(c *gin.Context) {
-	a2r.CallV2(group.GetIncrementalGroupMemberCaller.Invoke, c)
+	a2r.CallV2(c, group.GetIncrementalGroupMemberCaller.Invoke)
 }
 
 func (o *GroupApi) GetIncrementalGroupMemberBatch(c *gin.Context) {
-	a2r.CallV2(group.BatchGetIncrementalGroupMemberCaller.Invoke, c)
+	a2r.CallV2(c, group.BatchGetIncrementalGroupMemberCaller.Invoke)
 }
 
 func (o *GroupApi) GetFullGroupMemberUserIDs(c *gin.Context) {
-	a2r.CallV2(group.GetFullGroupMemberUserIDsCaller.Invoke, c)
+	a2r.CallV2(c, group.GetFullGroupMemberUserIDsCaller.Invoke)
 }
 
 func (o *GroupApi) GetFullJoinGroupIDs(c *gin.Context) {
-	a2r.CallV2(group.GetFullJoinGroupIDsCaller.Invoke, c)
+	a2r.CallV2(c, group.GetFullJoinGroupIDsCaller.Invoke)
 }

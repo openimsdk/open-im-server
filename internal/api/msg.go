@@ -105,51 +105,51 @@ func (m *MessageApi) newUserSendMsgReq(_ *gin.Context, params *apistruct.SendMsg
 }
 
 func (m *MessageApi) GetSeq(c *gin.Context) {
-	a2r.CallV2(msg.GetMaxSeqCaller.Invoke, c)
+	a2r.CallV2(c, msg.GetMaxSeqCaller.Invoke)
 }
 
 func (m *MessageApi) PullMsgBySeqs(c *gin.Context) {
-	a2r.CallV2(msg.PullMessageBySeqsCaller.Invoke, c)
+	a2r.CallV2(c, msg.PullMessageBySeqsCaller.Invoke)
 }
 
 func (m *MessageApi) RevokeMsg(c *gin.Context) {
-	a2r.CallV2(msg.RevokeMsgCaller.Invoke, c)
+	a2r.CallV2(c, msg.RevokeMsgCaller.Invoke)
 }
 
 func (m *MessageApi) MarkMsgsAsRead(c *gin.Context) {
-	a2r.CallV2(msg.MarkMsgsAsReadCaller.Invoke, c)
+	a2r.CallV2(c, msg.MarkMsgsAsReadCaller.Invoke)
 }
 
 func (m *MessageApi) MarkConversationAsRead(c *gin.Context) {
-	a2r.CallV2(msg.MarkConversationAsReadCaller.Invoke, c)
+	a2r.CallV2(c, msg.MarkConversationAsReadCaller.Invoke)
 }
 
 func (m *MessageApi) GetConversationsHasReadAndMaxSeq(c *gin.Context) {
-	a2r.CallV2(msg.GetConversationsHasReadAndMaxSeqCaller.Invoke, c)
+	a2r.CallV2(c, msg.GetConversationsHasReadAndMaxSeqCaller.Invoke)
 }
 
 func (m *MessageApi) SetConversationHasReadSeq(c *gin.Context) {
-	a2r.CallV2(msg.SetConversationHasReadSeqCaller.Invoke, c)
+	a2r.CallV2(c, msg.SetConversationHasReadSeqCaller.Invoke)
 }
 
 func (m *MessageApi) ClearConversationsMsg(c *gin.Context) {
-	a2r.CallV2(msg.ClearConversationsMsgCaller.Invoke, c)
+	a2r.CallV2(c, msg.ClearConversationsMsgCaller.Invoke)
 }
 
 func (m *MessageApi) UserClearAllMsg(c *gin.Context) {
-	a2r.CallV2(msg.UserClearAllMsgCaller.Invoke, c)
+	a2r.CallV2(c, msg.UserClearAllMsgCaller.Invoke)
 }
 
 func (m *MessageApi) DeleteMsgs(c *gin.Context) {
-	a2r.CallV2(msg.DeleteMsgsCaller.Invoke, c)
+	a2r.CallV2(c, msg.DeleteMsgsCaller.Invoke)
 }
 
 func (m *MessageApi) DeleteMsgPhysicalBySeq(c *gin.Context) {
-	a2r.CallV2(msg.DeleteMsgPhysicalBySeqCaller.Invoke, c)
+	a2r.CallV2(c, msg.DeleteMsgPhysicalBySeqCaller.Invoke)
 }
 
 func (m *MessageApi) DeleteMsgPhysical(c *gin.Context) {
-	a2r.CallV2(msg.DeleteMsgPhysicalCaller.Invoke, c)
+	a2r.CallV2(c, msg.DeleteMsgPhysicalCaller.Invoke)
 }
 
 func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendMsgReq *msg.SendMsgReq, err error) {
@@ -355,33 +355,33 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 }
 
 func (m *MessageApi) CheckMsgIsSendSuccess(c *gin.Context) {
-	a2r.CallV2(msg.GetSendMsgStatusCaller.Invoke, c)
+	a2r.CallV2(c, msg.GetSendMsgStatusCaller.Invoke)
 }
 
 func (m *MessageApi) GetUsersOnlineStatus(c *gin.Context) {
-	a2r.CallV2(msg.GetSendMsgStatusCaller.Invoke, c)
+	a2r.CallV2(c, msg.GetSendMsgStatusCaller.Invoke)
 }
 
 func (m *MessageApi) GetActiveUser(c *gin.Context) {
-	a2r.CallV2(msg.GetActiveUserCaller.Invoke, c)
+	a2r.CallV2(c, msg.GetActiveUserCaller.Invoke)
 }
 
 func (m *MessageApi) GetActiveGroup(c *gin.Context) {
-	a2r.CallV2(msg.GetActiveGroupCaller.Invoke, c)
+	a2r.CallV2(c, msg.GetActiveGroupCaller.Invoke)
 }
 
 func (m *MessageApi) SearchMsg(c *gin.Context) {
-	a2r.CallV2(msg.SearchMessageCaller.Invoke, c)
+	a2r.CallV2(c, msg.SearchMessageCaller.Invoke)
 }
 
 func (m *MessageApi) GetServerTime(c *gin.Context) {
-	a2r.CallV2(msg.GetServerTimeCaller.Invoke, c)
+	a2r.CallV2(c, msg.GetServerTimeCaller.Invoke)
 }
 
 func (m *MessageApi) GetStreamMsg(c *gin.Context) {
-	a2r.CallV2(msg.GetStreamMsgCaller.Invoke, c)
+	a2r.CallV2(c, msg.GetStreamMsgCaller.Invoke)
 }
 
 func (m *MessageApi) AppendStreamMsg(c *gin.Context) {
-	a2r.CallV2(msg.AppendStreamMsgCaller.Invoke, c)
+	a2r.CallV2(c, msg.AppendStreamMsgCaller.Invoke)
 }

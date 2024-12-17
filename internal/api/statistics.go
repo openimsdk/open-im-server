@@ -27,5 +27,5 @@ func NewStatisticsApi() StatisticsApi {
 }
 
 func (s *StatisticsApi) UserRegister(c *gin.Context) {
-	a2r.CallV2(user.UserRegisterCountCaller.Invoke, c)
+	a2r.CallV2(c, user.UserRegisterCountCaller.Invoke)
 }
