@@ -13,7 +13,7 @@ rpcService:
   friend: friend-rpc-service
   msg: msg-rpc-service
   push: push-rpc-service
-  messageGateway: messageGateway-rpc-service
+  messageGateway: messagegateway-rpc-service
   group: group-rpc-service
   auth: auth-rpc-service
   conversation: conversation-rpc-service

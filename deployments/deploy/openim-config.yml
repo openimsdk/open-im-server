@@ -1,0 +1,1070 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openim-config
+data:
+  discovery.yml: |
+    enable: "kubernetes"
+    kubernetes:
+      namespace: default
+    etcd:
+      rootDirectory: openim
+      address: [ localhost:12379 ]
+      username: ''
+      password: ''
+
+    rpcService:
+      user: user-rpc-service
+      friend: friend-rpc-service
+      msg: msg-rpc-service
+      push: push-rpc-service
+      messageGateway: messagegateway-rpc-service
+      group: group-rpc-service
+      auth: auth-rpc-service
+      conversation: conversation-rpc-service
+      third: third-rpc-service
+
+  log.yml: |
+    # Log storage path, default is acceptable, change to a full path if modification is needed
+    # storageLocation: ../../../../logs/
+    storageLocation: ./logs/
+    # Log rotation period (in hours), default is acceptable
+    rotationTime: 24
+    # Number of log files to retain, default is acceptable
+    remainRotationCount: 2
+    # Log level settings: 3 for production environment; 6 for more verbose logging in debugging environments
+    remainLogLevel: 6
+    # Whether to output to standard output, default is acceptable
+    isStdout: true
+    # Whether to log in JSON format, default is acceptable
+    isJson: false
+    # output simplify log when KeyAndValues's value len is bigger than 50 in rpc method log
+    isSimplify: true
+
+  mongodb.yml: |
+    # URI for database connection, leave empty if using address and credential settings directly
+    uri: ''
+    # List of MongoDB server addresses
+    address: [ mongo-service:37017 ]
+    # Name of the database
+    database: openim_v3
+    # Username for database authentication
+    username: openIM
+    # Password for database authentication
+    password: openIM123
+    # Authentication source for database authentication, if use root user, set it to admin
+    authSource: openim_v3
+    # Maximum number of connections in the connection pool
+    maxPoolSize: 100
+    # Maximum number of retry attempts for a failed database connection
+    maxRetry: 10
+
+  local-cache.yml: |
+    user:
+      topic: DELETE_CACHE_USER
+      slotNum: 100
+      slotSize: 2000
+      successExpire: 300
+      failedExpire: 5
+    group:
+      topic: DELETE_CACHE_GROUP
+      slotNum: 100
+      slotSize: 2000
+      successExpire: 300
+      failedExpire: 5
+    friend:
+      topic: DELETE_CACHE_FRIEND
+      slotNum: 100
+      slotSize: 2000
+      successExpire: 300
+      failedExpire: 5
+    conversation:
+      topic: DELETE_CACHE_CONVERSATION
+      slotNum: 100
+      slotSize: 2000
+      successExpire: 300
+      failedExpire: 5
+
+  openim-api.yml: |
+    api:
+      # Listening IP; 0.0.0.0 means both internal and external IPs are listened to, default is recommended
+      listenIP: 0.0.0.0
+      # Listening ports; if multiple are configured, multiple instances will be launched, must be consistent with the number of prometheus.ports
+      ports: [ 10002 ]
+      # API compression level; 0: default compression, 1: best compression, 2: best speed, -1: no compression
+      compressionLevel: 0
+
+    prometheus:
+      # Whether to enable prometheus
+      enable: true
+      # Prometheus listening ports, must match the number of api.ports
+      ports: [ 12002 ]
+      # This address can be accessed via a browser
+      grafanaURL: http://127.0.0.1:13000/
+
+  openim-rpc-user.yml: |
+    rpc:
+      # API or other RPCs can access this RPC through this IP; if left blank, the internal network IP is obtained by default
+      registerIP:
+      # Listening IP; 0.0.0.0 means both internal and external IPs are listened to, if blank, the internal network IP is automatically obtained by default
+      listenIP: 0.0.0.0
+      # autoSetPorts indicates whether to automatically set the ports
+      # if you use in kubernetes, set it to false
+      autoSetPorts: false
+      # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+      # It will only take effect when autoSetPorts is set to false.
+      ports: [ 10320 ]
+    prometheus:
+      # Whether to enable prometheus
+      enable: true
+      # Prometheus listening ports, must be consistent with the number of rpc.ports
+      ports: [ 12320 ]
+
+  openim-crontask.yml: |
+    cronExecuteTime: 0 2 * * *
+    retainChatRecords: 365
+    fileExpireTime: 180
+    deleteObjectType: ["msg-picture","msg-file", "msg-voice","msg-video","msg-video-snapshot","sdklog"]
+
+  openim-msggateway.yml: |
+    rpc:
+      # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
+      registerIP:
+      # autoSetPorts indicates whether to automatically set the ports
+      # if you use in kubernetes, set it to false
+      autoSetPorts: false
+      # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+      # It will only take effect when autoSetPorts is set to false.
+      ports: [ 10140 ]
+
+    prometheus:
+      # Enable or disable Prometheus monitoring
+      enable: true
+      # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
+      ports: [ 12140 ]
+
+    # IP address that the RPC/WebSocket service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
+    listenIP: 0.0.0.0
+
+    longConnSvr:
+      # WebSocket listening ports, must match the number of rpc.ports
+      ports: [ 10001 ]
+      # Maximum number of WebSocket connections
+      websocketMaxConnNum: 100000
+      # Maximum length of the entire WebSocket message packet
+      websocketMaxMsgLen: 4096
+      # WebSocket connection handshake timeout in seconds
+      websocketTimeout: 10
+
+  openim-msgtransfer.yml: |
+    prometheus:
+      # Enable or disable Prometheus monitoring
+      enable: true
+      # List of ports that Prometheus listens on; each port corresponds to an instance of monitoring. Ensure these are managed accordingly
+      # Because four instances have been launched, four ports need to be specified
+      ports: [ 12020 ]
+
+  openim-push.yml: |
+    rpc:
+      # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
+      registerIP:
+      # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
+      listenIP: 0.0.0.0
+      # autoSetPorts indicates whether to automatically set the ports
+      # if you use in kubernetes, set it to false
+      autoSetPorts: false
+      # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+      # It will only take effect when autoSetPorts is set to false.
+      ports: [ 10170 ]
+
+
+    prometheus:
+      # Enable or disable Prometheus monitoring
+      enable: true
+      # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
+      ports: [ 12170 ]
+
+    maxConcurrentWorkers: 3
+    #Use geTui for offline push notifications, or choose fcm or jpns; corresponding configuration settings must be specified.
+    enable:
+    geTui:
+      pushUrl: https://restapi.getui.com/v2/$appId
+      masterSecret:
+      appKey:
+      intent:
+      channelID:
+      channelName:
+    fcm:
+      # Prioritize using file paths. If the file path is empty, use URL
+      filePath:   # File path is concatenated with the parameters passed in through - c(`mage` default pass in `config/`) and filePath.
+      authURL:   #  Must start with https or http.
+    jpush:
+      appKey:
+      masterSecret:
+      pushURL:
+      pushIntent:
+
+    # iOS system push sound and badge count
+    iosPush:
+      pushSound: xxx
+      badgeCount: true
+      production: false
+
+    fullUserCache: true
+
+  openim-rpc-auth.yml: |
+    rpc:
+      # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
+      registerIP:
+      # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
+      listenIP: 0.0.0.0
+      # autoSetPorts indicates whether to automatically set the ports
+      # if you use in kubernetes, set it to false
+      autoSetPorts: false
+      # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+      # It will only take effect when autoSetPorts is set to false.
+      ports: [ 10200 ]
+
+    prometheus:
+      # Enable or disable Prometheus monitoring
+      enable: true
+      # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
+      ports: [12200]
+
+    tokenPolicy:
+      # Token validity period, in days
+      expire: 90
+
+  openim-rpc-conversation.yml: |
+    rpc:
+      # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
+      registerIP:
+      # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
+      listenIP: 0.0.0.0
+      # autoSetPorts indicates whether to automatically set the ports
+      # if you use in kubernetes, set it to false
+      autoSetPorts: false
+      # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+      # It will only take effect when autoSetPorts is set to false.
+      ports: [ 10220 ]
+
+    prometheus:
+      # Enable or disable Prometheus monitoring
+      enable: true
+      # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
+      ports: [ 12200 ]
+
+    tokenPolicy:
+      # Token validity period, in days
+      expire: 90
+
+  openim-rpc-friend.yml: |
+    rpc:
+      # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
+      registerIP:
+      # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
+      listenIP: 0.0.0.0
+      # autoSetPorts indicates whether to automatically set the ports
+      # if you use in kubernetes, set it to false
+      autoSetPorts: false
+      # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+      # It will only take effect when autoSetPorts is set to false.
+      ports: [ 10240 ]
+
+    prometheus:
+      # Enable or disable Prometheus monitoring
+      enable: true
+      # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
+      ports: [ 12240 ]
+
+  openim-rpc-group.yml: |
+    rpc:
+      # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
+      registerIP:
+      # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
+      listenIP: 0.0.0.0
+      # autoSetPorts indicates whether to automatically set the ports
+      # if you use in kubernetes, set it to false
+      autoSetPorts: false
+      # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+      # It will only take effect when autoSetPorts is set to false.
+      ports: [ 10260 ]
+
+    prometheus:
+      # Enable or disable Prometheus monitoring
+      enable: true
+      # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
+      ports: [ 12260 ]
+
+    enableHistoryForNewMembers: true
+
+  openim-rpc-msg.yml: |
+    rpc:
+      # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
+      registerIP:
+      # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
+      listenIP: 0.0.0.0
+      # autoSetPorts indicates whether to automatically set the ports
+      # if you use in kubernetes, set it to false
+      autoSetPorts: false
+      # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+      ports: [ 10280 ]
+
+    prometheus:
+      # Enable or disable Prometheus monitoring
+      enable: true
+      # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
+      ports: [ 12280 ]
+
+
+    # Does sending messages require friend verification
+    friendVerify: false
+
+  openim-rpc-third.yml: |
+    rpc:
+      # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
+      registerIP:
+      # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
+      listenIP: 0.0.0.0
+      # autoSetPorts indicates whether to automatically set the ports
+      # if you use in kubernetes, set it to false
+      autoSetPorts: false
+      # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+      # It will only take effect when autoSetPorts is set to false.
+      ports: [ 10300 ]
+
+    prometheus:
+      # Enable or disable Prometheus monitoring
+      enable: true
+      # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
+      ports: [ 12300 ]
+
+
+    object:
+      # Use MinIO as object storage, or set to "cos", "oss", "kodo", "aws", while also configuring the corresponding settings
+      enable: minio
+      cos:
+        bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
+        secretID:
+        secretKey:
+        sessionToken:
+        publicRead: false
+      oss:
+        endpoint: https://oss-cn-chengdu.aliyuncs.com
+        bucket: demo-9999999
+        bucketURL: https://demo-9999999.oss-cn-chengdu.aliyuncs.com
+        accessKeyID:
+        accessKeySecret:
+        sessionToken:
+        publicRead: false
+      kodo:
+        endpoint: http://s3.cn-south-1.qiniucs.com
+        bucket: kodo-bucket-test
+        bucketURL: http://kodo-bucket-test-oetobfb.qiniudns.com
+        accessKeyID:
+        accessKeySecret:
+        sessionToken:
+        publicRead: false
+      aws:
+        region: ap-southeast-2
+        bucket: testdemo832234
+        accessKeyID:
+        secretAccessKey:
+        sessionToken:
+        publicRead: false
+
+  share.yml: |
+    secret: openIM123
+
+    imAdminUserID: ["imAdmin"]
+
+    # 1: For Android, iOS, Windows, Mac, and web platforms, only one instance can be online at a time
+    multiLogin:
+      policy: 1
+      maxNumOneEnd: 30
+
+  kafka.yml: |
+    # Username for authentication
+    username: ''
+    # Password for authentication
+    password: ''
+    # Producer acknowledgment settings
+    producerAck:
+    # Compression type to use (e.g., none, gzip, snappy)
+    compressType: none
+    # List of Kafka broker addresses
+    address: [ "kafka-service:19094" ]
+    # Kafka topic for Redis integration
+    toRedisTopic: toRedis
+    # Kafka topic for MongoDB integration
+    toMongoTopic: toMongo
+    # Kafka topic for push notifications
+    toPushTopic: toPush
+    # Kafka topic for offline push notifications
+    toOfflinePushTopic: toOfflinePush
+    # Consumer group ID for Redis topic
+    toRedisGroupID: redis
+    # Consumer group ID for MongoDB topic
+    toMongoGroupID: mongo
+    # Consumer group ID for push notifications topic
+    toPushGroupID: push
+    # Consumer group ID for offline push notifications topic
+    toOfflinePushGroupID: offlinePush
+    # TLS (Transport Layer Security) configuration
+    tls:
+      # Enable or disable TLS
+      enableTLS: false
+      # CA certificate file path
+      caCrt:
+      # Client certificate file path
+      clientCrt:
+      # Client key file path
+      clientKey:
+      # Client key password
+      clientKeyPwd:
+      # Whether to skip TLS verification (not recommended for production)
+      insecureSkipVerify: false
+
+  redis.yml: |
+    address: [ "redis-service:16379" ]
+    username:
+    password:  # openIM123
+    clusterMode: false
+    db: 0
+    maxRetry: 10
+    poolSize: 100
+
+  minio.yml: |
+    # Name of the bucket in MinIO
+    bucket: openim
+    # Access key ID for MinIO authentication
+    accessKeyID: root   
+    # Secret access key for MinIO authentication
+    secretAccessKey:    # openIM123
+    # Session token for MinIO authentication (optional)
+    sessionToken:
+    # Internal address of the MinIO server
+    internalAddress: minio-service:10005
+    # External address of the MinIO server, accessible from outside. Supports both HTTP and HTTPS using a domain name
+    externalAddress: http://minio-service:10005
+    # Flag to enable or disable public read access to the bucket
+    publicRead: "false"
+
+  notification.yml: |
+    groupCreated:
+      isSendMsg: true
+    # Reliability level of the message sending.
+    # Set to 1 to send only when online, 2 for guaranteed delivery.
+      reliabilityLevel: 1
+    # This setting is effective only when 'isSendMsg' is true.
+    # It controls whether to count unread messages.
+      unreadCount: false
+    # Configuration for offline push notifications.
+      offlinePush:
+        # Enables or disables offline push notifications.
+        enable: false
+        # Title for the notification when a group is created.
+        title: create group title
+        # Description for the notification.
+        desc: create group desc
+        # Additional information for the notification.
+        ext: create group ext
+
+    groupInfoSet:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupInfoSet title
+        desc: groupInfoSet desc
+        ext: groupInfoSet ext
+
+    joinGroupApplication:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: joinGroupApplication title
+        desc: joinGroupApplication desc
+        ext: joinGroupApplication ext
+
+    memberQuit:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: memberQuit title
+        desc: memberQuit desc
+        ext: memberQuit ext
+
+    groupApplicationAccepted:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupApplicationAccepted title
+        desc: groupApplicationAccepted desc
+        ext: groupApplicationAccepted ext
+
+    groupApplicationRejected:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupApplicationRejected title
+        desc: groupApplicationRejected desc
+        ext: groupApplicationRejected ext
+
+    groupOwnerTransferred:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupOwnerTransferred title
+        desc: groupOwnerTransferred desc
+        ext: groupOwnerTransferred ext
+
+    memberKicked:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: memberKicked title
+        desc: memberKicked desc
+        ext: memberKicked ext
+
+    memberInvited:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: memberInvited title
+        desc: memberInvited desc
+        ext: memberInvited ext
+
+    memberEnter:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: memberEnter title
+        desc: memberEnter desc
+        ext: memberEnter ext
+
+    groupDismissed:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupDismissed title
+        desc: groupDismissed desc
+        ext: groupDismissed ext
+
+    groupMuted:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupMuted title
+        desc: groupMuted desc
+        ext: groupMuted ext
+
+    groupCancelMuted:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupCancelMuted title
+        desc: groupCancelMuted desc
+        ext: groupCancelMuted ext
+      defaultTips:
+        tips: group Cancel Muted
+
+    groupMemberMuted:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupMemberMuted title
+        desc: groupMemberMuted desc
+        ext: groupMemberMuted ext
+
+    groupMemberCancelMuted:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupMemberCancelMuted title
+        desc: groupMemberCancelMuted desc
+        ext: groupMemberCancelMuted ext
+
+    groupMemberInfoSet:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupMemberInfoSet title
+        desc: groupMemberInfoSet desc
+        ext: groupMemberInfoSet ext
+
+    groupInfoSetAnnouncement:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupInfoSetAnnouncement title
+        desc: groupInfoSetAnnouncement desc
+        ext: groupInfoSetAnnouncement ext
+
+    groupInfoSetName:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: groupInfoSetName title
+        desc: groupInfoSetName desc
+        ext: groupInfoSetName ext
+
+    #############################friend#################################
+    friendApplicationAdded:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: Somebody applies to add you as a friend
+        desc: Somebody applies to add you as a friend
+        ext: Somebody applies to add you as a friend
+
+    friendApplicationApproved:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: Someone applies to add your friend application
+        desc: Someone applies to add your friend application
+        ext: Someone applies to add your friend application
+
+    friendApplicationRejected:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: Someone rejected your friend application
+        desc: Someone rejected your friend application
+        ext: Someone rejected your friend application
+
+    friendAdded:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: We have become friends
+        desc: We have become friends
+        ext: We have become friends
+
+    friendDeleted:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: deleted a friend
+        desc: deleted a friend
+        ext: deleted a friend
+
+    friendRemarkSet:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: Your friend's profile has been changed
+        desc: Your friend's profile has been changed
+        ext: Your friend's profile has been changed
+
+    blackAdded:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: blocked a user
+        desc: blocked a user
+        ext: blocked a user
+
+    blackDeleted:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: Remove a blocked user
+        desc: Remove a blocked user
+        ext: Remove a blocked user
+
+    friendInfoUpdated:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: friend info updated
+        desc: friend info updated
+        ext: friend info updated
+
+    #####################user#########################
+    userInfoUpdated:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: userInfo updated
+        desc: userInfo updated
+        ext: userInfo updated
+
+    userStatusChanged:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: user status changed
+        desc: user status changed
+        ext: user status changed
+
+    #####################conversation#########################
+    conversationChanged:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: conversation changed
+        desc: conversation changed
+        ext: conversation changed
+
+    conversationSetPrivate:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: burn after reading
+        desc: burn after reading
+        ext: burn after reading
+
+  webhooks.yml: |
+    url: http://127.0.0.1:10006/callbackExample
+    beforeSendSingleMsg:
+      enable: false
+      timeout: 5
+      failedContinue: true
+      # Only the contentType in allowedTypes will send the callback.
+      # Supports two formats: a single type or a range. The range is defined by the lower and upper bounds connected with a hyphen ("-").
+      # e.g. allowedTypes: [1, 100, 200-500, 600-700] means that only contentType within the range
+      # {1, 100} ∪ [200, 500] ∪ [600, 700] will be allowed through the filter.
+      # If not set, all contentType messages will through this filter.
+      allowedTypes: []
+      # Only the contentType not in deniedTypes will send the callback.
+      # Supports two formats, same as allowedTypes.
+      # If not set, all contentType messages will through this filter.
+      deniedTypes: []
+    beforeUpdateUserInfoEx:
+      enable:  false
+      timeout: 5
+      failedContinue: true
+    afterUpdateUserInfoEx:
+      enable:  false
+      timeout: 5
+    afterSendSingleMsg:
+      enable: false
+      timeout: 5
+      # Only the senID/recvID specified in attentionIds will send the callback
+      # if not set, all user messages will be callback
+      attentionIds: []
+      # See beforeSendSingleMsg comment.
+      allowedTypes: []
+      deniedTypes: []
+    beforeSendGroupMsg:
+      enable: false
+      timeout: 5
+      failedContinue: true
+      # See beforeSendSingleMsg comment.
+      allowedTypes: []
+      deniedTypes: []
+    beforeMsgModify:
+      enable: false
+      timeout: 5
+      failedContinue: true
+      # See beforeSendSingleMsg comment.
+      allowedTypes: []
+      deniedTypes: []
+    afterSendGroupMsg:
+      enable: false
+      timeout: 5
+      # See beforeSendSingleMsg comment.
+      allowedTypes: []
+      deniedTypes: []
+    afterUserOnline:
+      enable: false
+      timeout: 5
+    afterUserOffline:
+      enable: false
+      timeout: 5
+    afterUserKickOff:
+      enable: false
+      timeout: 5
+    beforeOfflinePush:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    beforeOnlinePush:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    beforeGroupOnlinePush:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    beforeAddFriend:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    beforeUpdateUserInfo:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    afterUpdateUserInfo:
+      enable: false
+      timeout: 5
+    beforeCreateGroup:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    afterCreateGroup:
+      enable: false
+      timeout: 5
+    beforeMemberJoinGroup:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    beforeSetGroupMemberInfo:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    afterSetGroupMemberInfo:
+      enable: false
+      timeout: 5
+    afterQuitGroup:
+      enable: false
+      timeout: 5
+    afterKickGroupMember:
+      enable: false
+      timeout: 5
+    afterDismissGroup:
+      enable: false
+      timeout: 5
+    beforeApplyJoinGroup:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    afterGroupMsgRead:
+      enable: false
+      timeout: 5
+    afterSingleMsgRead:
+      enable: false
+      timeout: 5
+    beforeUserRegister:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    afterUserRegister:
+      enable: false
+      timeout: 5
+    afterTransferGroupOwner:
+      enable: false
+      timeout: 5
+    beforeSetFriendRemark:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    afterSetFriendRemark:
+      enable: false
+      timeout: 5
+    afterGroupMsgRevoke:
+      enable: false
+      timeout: 5
+    afterJoinGroup:
+      enable: false
+      timeout: 5
+    beforeInviteUserToGroup:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    afterSetGroupInfo:
+      enable: false
+      timeout: 5
+    beforeSetGroupInfo:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    afterSetGroupInfoEx:
+      enable: false
+      timeout: 5
+    beforeSetGroupInfoEx:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    afterRevokeMsg:
+      enable: false
+      timeout: 5
+    beforeAddBlack:
+      enable: false
+      timeout: 5
+      failedContinue:
+    afterAddFriend:
+      enable: false
+      timeout: 5
+    beforeAddFriendAgree:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    afterAddFriendAgree:
+      enable: false
+      timeout: 5
+    afterDeleteFriend:
+      enable: false
+      timeout: 5
+    beforeImportFriends:
+      enable: false
+      timeout: 5
+      failedContinue: true
+    afterImportFriends:
+      enable: false
+      timeout: 5
+    afterRemoveBlack:
+      enable: false
+      timeout: 5
+
+  prometheus.yml: |
+    # my global config
+    global:
+      scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+      evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+      # scrape_timeout is set to the global default (10s).
+
+    # Alertmanager configuration
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets: [internal_ip:19093]
+
+    # Load rules once and periodically evaluate them according to the global evaluation_interval.
+    rule_files:
+      - instance-down-rules.yml
+    # - first_rules.yml
+    # - second_rules.yml
+
+    # A scrape configuration containing exactly one endpoint to scrape:
+    # Here it's Prometheus itself.
+    scrape_configs:
+      # The job name is added as a label "job=job_name" to any timeseries scraped from this config.
+      # Monitored information captured by prometheus
+
+      # prometheus fetches application services
+      - job_name: node_exporter
+        static_configs:
+          - targets: [ internal_ip:20500 ]
+      - job_name: openimserver-openim-api
+        static_configs:
+          - targets: [ internal_ip:12002 ]
+            labels:
+              namespace: default
+      - job_name: openimserver-openim-msggateway
+        static_configs:
+          - targets: [ internal_ip:12140 ]
+    #      - targets: [ internal_ip:12140, internal_ip:12141, internal_ip:12142, internal_ip:12143, internal_ip:12144, internal_ip:12145, internal_ip:12146, internal_ip:12147, internal_ip:12148, internal_ip:12149, internal_ip:12150, internal_ip:12151, internal_ip:12152, internal_ip:12153, internal_ip:12154, internal_ip:12155 ]
+            labels:
+              namespace: default
+      - job_name: openimserver-openim-msgtransfer
+        static_configs:
+          - targets: [ internal_ip:12020, internal_ip:12021, internal_ip:12022, internal_ip:12023, internal_ip:12024, internal_ip:12025, internal_ip:12026, internal_ip:12027 ]
+    #      - targets: [ internal_ip:12020, internal_ip:12021, internal_ip:12022, internal_ip:12023, internal_ip:12024, internal_ip:12025, internal_ip:12026, internal_ip:12027, internal_ip:12028, internal_ip:12029, internal_ip:12030, internal_ip:12031, internal_ip:12032, internal_ip:12033, internal_ip:12034, internal_ip:12035 ]
+            labels:
+              namespace: default
+      - job_name: openimserver-openim-push
+        static_configs:
+          - targets: [ internal_ip:12170, internal_ip:12171, internal_ip:12172, internal_ip:12173, internal_ip:12174, internal_ip:12175, internal_ip:12176, internal_ip:12177 ]
+    #      - targets: [ internal_ip:12170, internal_ip:12171, internal_ip:12172, internal_ip:12173, internal_ip:12174, internal_ip:12175, internal_ip:12176, internal_ip:12177, internal_ip:12178, internal_ip:12179, internal_ip:12180,  internal_ip:12182, internal_ip:12183, internal_ip:12184, internal_ip:12185, internal_ip:12186 ]
+            labels:
+              namespace: default
+      - job_name: openimserver-openim-rpc-auth
+        static_configs:
+          - targets: [ internal_ip:12200 ]
+            labels:
+              namespace: default
+      - job_name: openimserver-openim-rpc-conversation
+        static_configs:
+          - targets: [ internal_ip:12220 ]
+            labels:
+              namespace: default
+      - job_name: openimserver-openim-rpc-friend
+        static_configs:
+          - targets: [ internal_ip:12240 ]
+            labels:
+              namespace: default
+      - job_name: openimserver-openim-rpc-group
+        static_configs:
+          - targets: [ internal_ip:12260 ]
+            labels:
+              namespace: default
+      - job_name: openimserver-openim-rpc-msg
+        static_configs:
+          - targets: [ internal_ip:12280 ]
+            labels:
+              namespace: default
+      - job_name: openimserver-openim-rpc-third
+        static_configs:
+          - targets: [ internal_ip:12300 ]
+            labels:
+              namespace: default
+      - job_name: openimserver-openim-rpc-user
+        static_configs:
+          - targets: [ internal_ip:12320 ]
+            labels:
+              namespace: default
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-secret
+type: Opaque
+data:
+  mongo_initdb_root_username: cm9vdA== # base64 for "root"
+  mongo_initdb_root_password: b3BlbklNMTIz # base64 for "openIM123"
+  mongo_initdb_database: b3BlbmltX3Yz # base64 for "openim_v3"
+  mongo_openim_username: b3BlbklN # base64 for "openIM"
+  mongo_openim_password: b3BlbklNMTIz # base64 for "openIM123"

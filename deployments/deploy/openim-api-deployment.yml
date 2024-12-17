@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openim-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: openim-api
+  template:
+    metadata:
+      labels:
+        app: openim-api
+    spec:
+      containers:
+        - name: openim-api-container
+          image: openim/openim-api:v3.8.3
+          env:
+            - name: CONFIG_PATH
+              value: "/config"
+            - name: IMENV_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: redis-password
+
+            - name: IMENV_MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo_openim_password
+
+            - name: IMENV_MONGODB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo_openim_username
+
+          volumeMounts:
+            - name: openim-config
+              mountPath: "/config"
+              readOnly: true
+          ports:
+            - containerPort: 10002
+            - containerPort: 12002
+      volumes:
+        - name: openim-config
+          configMap:
+            name: openim-config
