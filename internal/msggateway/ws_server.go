@@ -16,7 +16,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/tools/discovery"
@@ -57,8 +56,6 @@ type WsServer struct {
 	handshakeTimeout  time.Duration
 	writeBufferSize   int
 	validate          *validator.Validate
-	userClient        *rpcclient.UserRpcClient
-	authClient        *rpcclient.Auth
 	disCov            discovery.SvcDiscoveryRegistry
 	Compressor
 	//Encoder
@@ -73,10 +70,7 @@ type kickHandler struct {
 }
 
 func (ws *WsServer) SetDiscoveryRegistry(disCov discovery.SvcDiscoveryRegistry, config *Config) {
-	ws.MessageHandler = NewGrpcHandler(ws.validate, disCov, &config.Discovery.RpcService)
-	u := rpcclient.NewUserRpcClient(disCov, config.Discovery.RpcService.User, config.Share.IMAdminUserID)
-	ws.authClient = rpcclient.NewAuth(disCov, config.Discovery.RpcService.Auth)
-	ws.userClient = &u
+	ws.MessageHandler = NewGrpcHandler(ws.validate)
 	ws.disCov = disCov
 }
 
@@ -312,7 +306,8 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			[]string{newClient.ctx.GetOperationID(), newClient.ctx.GetUserID(),
 				constant.PlatformIDToName(newClient.PlatformID), newClient.ctx.GetConnID()},
 		)
-		if _, err := ws.authClient.KickTokens(ctx, kickTokens); err != nil {
+
+		if err := pbAuth.KickTokensCaller.Execute(ctx, &pbAuth.KickTokensReq{Tokens: kickTokens}); err != nil {
 			log.ZWarn(newClient.ctx, "kickTokens err", err)
 		}
 	}
@@ -339,7 +334,11 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			[]string{newClient.ctx.GetOperationID(), newClient.ctx.GetUserID(),
 				constant.PlatformIDToName(newClient.PlatformID), newClient.ctx.GetConnID()},
 		)
-		if _, err := ws.authClient.InvalidateToken(ctx, newClient.token, newClient.UserID, newClient.PlatformID); err != nil {
+		if err := pbAuth.InvalidateTokenCaller.Execute(ctx, &pbAuth.InvalidateTokenReq{
+			PreservedToken: newClient.token,
+			UserID:         newClient.UserID,
+			PlatformID:     int32(newClient.PlatformID),
+		}); err != nil {
 			log.ZWarn(newClient.ctx, "InvalidateToken err", err, "userID", newClient.UserID,
 				"platformID", newClient.PlatformID)
 		}
@@ -410,7 +409,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call the authentication client to parse the Token obtained from the context
-	resp, err := ws.authClient.ParseToken(connContext, connContext.GetToken())
+	resp, err := pbAuth.ParseTokenCaller.Invoke(connContext, &pbAuth.ParseTokenReq{Token: connContext.GetToken()})
 	if err != nil {
 		// If there's an error parsing the Token, decide whether to send the error message via WebSocket based on the context flag
 		shouldSendError := connContext.ShouldSendResp()

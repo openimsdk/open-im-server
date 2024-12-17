@@ -21,7 +21,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/constant"
-	pbconversation "github.com/openimsdk/protocol/conversation"
+	pbconv "github.com/openimsdk/protocol/conversation"
 	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/protocol/wrapperspb"
@@ -96,7 +96,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 
 	var atUserID []string
 
-	conversation := &pbconversation.ConversationReq{
+	conversation := &pbconv.ConversationReq{
 		ConversationID:   msgprocessor.GetConversationIDByMsg(msg),
 		ConversationType: msg.SessionType,
 		GroupID:          msg.GroupID,
@@ -119,7 +119,10 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 		} else { // @Everyone and @other people
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAllAtMe}
 
-			err = m.Conversation.SetConversations(ctx, atUserID, conversation)
+			err = pbconv.SetConversationsCaller.Execute(ctx, &pbconv.SetConversationsReq{
+				UserIDs:      atUserID,
+				Conversation: conversation,
+			})
 			if err != nil {
 				log.ZWarn(ctx, "SetConversations", err, "userID", atUserID, "conversation", conversation)
 			}
@@ -129,7 +132,10 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 
 		conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
 
-		err = m.Conversation.SetConversations(ctx, memberUserIDList, conversation)
+		err = pbconv.SetConversationsCaller.Execute(ctx, &pbconv.SetConversationsReq{
+			UserIDs:      memberUserIDList,
+			Conversation: conversation,
+		})
 		if err != nil {
 			log.ZWarn(ctx, "SetConversations", err, "userID", memberUserIDList, "conversation", conversation)
 		}
@@ -138,7 +144,10 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 	}
 	conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtMe}
 
-	err := m.Conversation.SetConversations(ctx, msg.AtUserIDList, conversation)
+	err := pbconv.SetConversationsCaller.Execute(ctx, &pbconv.SetConversationsReq{
+		UserIDs:      msg.AtUserIDList,
+		Conversation: conversation,
+	})
 	if err != nil {
 		log.ZWarn(ctx, "SetConversations", err, msg.AtUserIDList, conversation)
 	}

@@ -3,7 +3,6 @@ package push
 import (
 	"context"
 	"encoding/json"
-
 	"math/rand"
 	"strconv"
 	"time"
@@ -16,11 +15,14 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/constant"
+	pbconv "github.com/openimsdk/protocol/conversation"
+	"github.com/openimsdk/protocol/group"
+	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/msggateway"
 	pbpush "github.com/openimsdk/protocol/push"
+	"github.com/openimsdk/protocol/rpccall"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
@@ -41,9 +43,6 @@ type ConsumerHandler struct {
 	onlineCache            *rpccache.OnlineCache
 	groupLocalCache        *rpccache.GroupLocalCache
 	conversationLocalCache *rpccache.ConversationLocalCache
-	msgRpcClient           rpcclient.MessageRpcClient
-	conversationRpcClient  rpcclient.ConversationRpcClient
-	groupRpcClient         rpcclient.GroupRpcClient
 	webhookClient          *webhook.Client
 	config                 *Config
 }
@@ -58,19 +57,14 @@ func NewConsumerHandler(config *Config, database controller.PushDatabase, offlin
 		return nil, err
 	}
 
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.Discovery.RpcService.User, config.Share.IMAdminUserID)
-
 	consumerHandler.offlinePusher = offlinePusher
 	consumerHandler.onlinePusher = NewOnlinePusher(client, config)
-	consumerHandler.groupRpcClient = rpcclient.NewGroupRpcClient(client, config.Discovery.RpcService.Group)
-	consumerHandler.groupLocalCache = rpccache.NewGroupLocalCache(consumerHandler.groupRpcClient, &config.LocalCacheConfig, rdb)
-	consumerHandler.msgRpcClient = rpcclient.NewMessageRpcClient(client, config.Discovery.RpcService.Msg)
-	consumerHandler.conversationRpcClient = rpcclient.NewConversationRpcClient(client, config.Discovery.RpcService.Conversation)
-	consumerHandler.conversationLocalCache = rpccache.NewConversationLocalCache(consumerHandler.conversationRpcClient, &config.LocalCacheConfig, rdb)
+	consumerHandler.groupLocalCache = rpccache.NewGroupLocalCache(&config.LocalCacheConfig, rdb)
+	consumerHandler.conversationLocalCache = rpccache.NewConversationLocalCache(&config.LocalCacheConfig, rdb)
 	consumerHandler.webhookClient = webhook.NewWebhookClient(config.WebhooksConfig.URL)
 	consumerHandler.config = config
 	consumerHandler.pushDatabase = database
-	consumerHandler.onlineCache, err = rpccache.NewOnlineCache(userRpcClient, consumerHandler.groupLocalCache, rdb, config.RpcConfig.FullUserCache, nil)
+	consumerHandler.onlineCache, err = rpccache.NewOnlineCache(config.Share.IMAdminUserID, consumerHandler.groupLocalCache, rdb, config.RpcConfig.FullUserCache, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +321,7 @@ func (c *ConsumerHandler) groupMessagesHandler(ctx context.Context, groupID stri
 					ctx = mcontext.WithOpUserIDContext(ctx, c.config.Share.IMAdminUserID[0])
 				}
 				defer func(groupID string) {
-					if err = c.groupRpcClient.DismissGroup(ctx, groupID); err != nil {
+					if err = group.DismissGroupCaller.Execute(ctx, &group.DismissGroupReq{GroupID: groupID}); err != nil {
 						log.ZError(ctx, "DismissGroup Notification clear members", err, "groupID", groupID)
 					}
 				}(groupID)
@@ -355,8 +349,10 @@ func (c *ConsumerHandler) filterGroupMessageOfflinePush(ctx context.Context, gro
 	offlinePushUserIDs []string) (userIDs []string, err error) {
 
 	//todo local cache Obtain the difference set through local comparison.
-	needOfflinePushUserIDs, err := c.conversationRpcClient.GetConversationOfflinePushUserIDs(
-		ctx, conversationutil.GenGroupConversationID(groupID), offlinePushUserIDs)
+	needOfflinePushUserIDs, err := rpccall.ExtractField(ctx, pbconv.GetConversationOfflinePushUserIDsCaller.Invoke, &pbconv.GetConversationOfflinePushUserIDsReq{
+		ConversationID: conversationutil.GenGroupConversationID(groupID),
+		UserIDs:        offlinePushUserIDs,
+	}, (*pbconv.GetConversationOfflinePushUserIDsResp).GetUserIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -410,12 +406,18 @@ func (c *ConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (title, conten
 
 func (c *ConsumerHandler) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
 	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
-	maxSeq, err := c.msgRpcClient.GetConversationMaxSeq(ctx, conversationID)
+	maxSeq, err := rpccall.ExtractField(ctx, msg.GetConversationMaxSeqCaller.Invoke,
+		&msg.GetConversationMaxSeqReq{ConversationID: conversationID},
+		(*msg.GetConversationMaxSeqResp).GetMaxSeq)
 	if err != nil {
 		return err
 	}
 
-	return c.conversationRpcClient.SetConversationMaxSeq(ctx, userIDs, conversationID, maxSeq)
+	return pbconv.SetConversationMaxSeqCaller.Execute(ctx, &pbconv.SetConversationMaxSeqReq{
+		ConversationID: conversationID,
+		OwnerUserID:    userIDs,
+		MaxSeq:         maxSeq,
+	})
 }
 
 func unmarshalNotificationElem(bytes []byte, t any) error {

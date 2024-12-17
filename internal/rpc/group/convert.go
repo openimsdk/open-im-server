@@ -19,7 +19,7 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 )
 
-func (s *groupServer) groupDB2PB(group *model.Group, ownerUserID string, memberCount uint32) *sdkws.GroupInfo {
+func (g *groupServer) groupDB2PB(group *model.Group, ownerUserID string, memberCount uint32) *sdkws.GroupInfo {
 	return &sdkws.GroupInfo{
 		GroupID:                group.GroupID,
 		GroupName:              group.GroupName,
@@ -41,7 +41,7 @@ func (s *groupServer) groupDB2PB(group *model.Group, ownerUserID string, memberC
 	}
 }
 
-func (s *groupServer) groupMemberDB2PB(member *model.GroupMember, appMangerLevel int32) *sdkws.GroupMemberFullInfo {
+func (g *groupServer) groupMemberDB2PB(member *model.GroupMember, appMangerLevel int32) *sdkws.GroupMemberFullInfo {
 	return &sdkws.GroupMemberFullInfo{
 		GroupID:        member.GroupID,
 		UserID:         member.UserID,
@@ -58,6 +58,6 @@ func (s *groupServer) groupMemberDB2PB(member *model.GroupMember, appMangerLevel
 	}
 }
 
-func (s *groupServer) groupMemberDB2PB2(member *model.GroupMember) *sdkws.GroupMemberFullInfo {
-	return s.groupMemberDB2PB(member, 0)
+func (g *groupServer) groupMemberDB2PB2(member *model.GroupMember) *sdkws.GroupMemberFullInfo {
+	return g.groupMemberDB2PB(member, 0)
 }

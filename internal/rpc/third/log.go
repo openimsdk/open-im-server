@@ -20,6 +20,7 @@ import (
 	"time"
 
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -149,7 +150,7 @@ func (t *thirdServer) SearchLogs(ctx context.Context, req *third.SearchLogsReq) 
 	for _, log := range logs {
 		userIDs = append(userIDs, log.UserID)
 	}
-	userMap, err := t.userRpcClient.GetUsersInfoMap(ctx, userIDs)
+	userMap, err := rpcclient.GetUsersInfoMap(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}

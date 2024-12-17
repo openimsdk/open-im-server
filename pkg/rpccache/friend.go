@@ -16,21 +16,20 @@ package rpccache
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/protocol/relation"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
 )
 
-func NewFriendLocalCache(client rpcclient.FriendRpcClient, localCache *config.LocalCache, cli redis.UniversalClient) *FriendLocalCache {
+func NewFriendLocalCache(localCache *config.LocalCache, cli redis.UniversalClient) *FriendLocalCache {
 	lc := localCache.Friend
 	log.ZDebug(context.Background(), "FriendLocalCache", "topic", lc.Topic, "slotNum", lc.SlotNum, "slotSize", lc.SlotSize, "enable", lc.Enable())
 	x := &FriendLocalCache{
-		client: client,
 		local: localcache.New[[]byte](
 			localcache.WithLocalSlotNum(lc.SlotNum),
 			localcache.WithLocalSlotSize(lc.SlotSize),
@@ -46,8 +45,7 @@ func NewFriendLocalCache(client rpcclient.FriendRpcClient, localCache *config.Lo
 }
 
 type FriendLocalCache struct {
-	client rpcclient.FriendRpcClient
-	local  localcache.Cache[[]byte]
+	local localcache.Cache[[]byte]
 }
 
 func (f *FriendLocalCache) IsFriend(ctx context.Context, possibleFriendUserID, userID string) (val bool, err error) {
@@ -70,7 +68,7 @@ func (f *FriendLocalCache) isFriend(ctx context.Context, possibleFriendUserID, u
 	var cache cacheProto[relation.IsFriendResp]
 	return cache.Unmarshal(f.local.GetLink(ctx, cachekey.GetIsFriendKey(possibleFriendUserID, userID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "FriendLocalCache isFriend rpc", "possibleFriendUserID", possibleFriendUserID, "userID", userID)
-		return cache.Marshal(f.client.Client.IsFriend(ctx, &relation.IsFriendReq{UserID1: userID, UserID2: possibleFriendUserID}))
+		return cache.Marshal(relation.IsFriendCaller.Invoke(ctx, &relation.IsFriendReq{UserID1: userID, UserID2: possibleFriendUserID}))
 	}, cachekey.GetFriendIDsKey(possibleFriendUserID)))
 }
 
@@ -96,6 +94,6 @@ func (f *FriendLocalCache) isBlack(ctx context.Context, possibleBlackUserID, use
 	var cache cacheProto[relation.IsBlackResp]
 	return cache.Unmarshal(f.local.GetLink(ctx, cachekey.GetIsBlackIDsKey(possibleBlackUserID, userID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "FriendLocalCache IsBlack rpc", "possibleBlackUserID", possibleBlackUserID, "userID", userID)
-		return cache.Marshal(f.client.Client.IsBlack(ctx, &relation.IsBlackReq{UserID1: possibleBlackUserID, UserID2: userID}))
+		return cache.Marshal(relation.IsBlackCaller.Invoke(ctx, &relation.IsBlackReq{UserID1: possibleBlackUserID, UserID2: userID}))
 	}, cachekey.GetBlackIDsKey(userID)))
 }

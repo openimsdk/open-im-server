@@ -22,12 +22,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/jsonutil"
 )
@@ -115,18 +112,11 @@ type MessageHandler interface {
 var _ MessageHandler = (*GrpcHandler)(nil)
 
 type GrpcHandler struct {
-	msgRpcClient *rpcclient.MessageRpcClient
-	pushClient   *rpcclient.PushRpcClient
-	validate     *validator.Validate
+	validate *validator.Validate
 }
 
-func NewGrpcHandler(validate *validator.Validate, client discovery.SvcDiscoveryRegistry, rpcRegisterName *config.RpcService) *GrpcHandler {
-	msgRpcClient := rpcclient.NewMessageRpcClient(client, rpcRegisterName.Msg)
-	pushRpcClient := rpcclient.NewPushRpcClient(client, rpcRegisterName.Push)
-	return &GrpcHandler{
-		msgRpcClient: &msgRpcClient,
-		pushClient:   &pushRpcClient, validate: validate,
-	}
+func NewGrpcHandler(validate *validator.Validate) *GrpcHandler {
+	return &GrpcHandler{validate: validate}
 }
 
 func (g GrpcHandler) GetSeq(ctx context.Context, data *Req) ([]byte, error) {
@@ -137,7 +127,7 @@ func (g GrpcHandler) GetSeq(ctx context.Context, data *Req) ([]byte, error) {
 	if err := g.validate.Struct(&req); err != nil {
 		return nil, errs.WrapMsg(err, "GetSeq: validation failed", "action", "validate", "dataType", "GetMaxSeqReq")
 	}
-	resp, err := g.msgRpcClient.GetMaxSeq(ctx, &req)
+	resp, err := msg.GetMaxSeqCaller.Invoke(ctx, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +151,7 @@ func (g GrpcHandler) SendMessage(ctx context.Context, data *Req) ([]byte, error)
 	}
 
 	req := msg.SendMsgReq{MsgData: &msgData}
-	resp, err := g.msgRpcClient.SendMsg(ctx, &req)
+	resp, err := msg.SendMsgCaller.Invoke(ctx, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +165,7 @@ func (g GrpcHandler) SendMessage(ctx context.Context, data *Req) ([]byte, error)
 }
 
 func (g GrpcHandler) SendSignalMessage(context context.Context, data *Req) ([]byte, error) {
-	resp, err := g.msgRpcClient.SendMsg(context, nil)
+	resp, err := msg.SendMsgCaller.Invoke(context, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +176,7 @@ func (g GrpcHandler) SendSignalMessage(context context.Context, data *Req) ([]by
 	return c, nil
 }
 
-func (g GrpcHandler) PullMessageBySeqList(context context.Context, data *Req) ([]byte, error) {
+func (g GrpcHandler) PullMessageBySeqList(ctx context.Context, data *Req) ([]byte, error) {
 	req := sdkws.PullMessageBySeqsReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, errs.WrapMsg(err, "err proto unmarshal", "action", "unmarshal", "dataType", "PullMessageBySeqsReq")
@@ -194,7 +184,7 @@ func (g GrpcHandler) PullMessageBySeqList(context context.Context, data *Req) ([
 	if err := g.validate.Struct(data); err != nil {
 		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "PullMessageBySeqsReq")
 	}
-	resp, err := g.msgRpcClient.PullMessageBySeqList(context, &req)
+	resp, err := msg.PullMessageBySeqsCaller.Invoke(ctx, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +195,7 @@ func (g GrpcHandler) PullMessageBySeqList(context context.Context, data *Req) ([
 	return c, nil
 }
 
-func (g GrpcHandler) GetConversationsHasReadAndMaxSeq(context context.Context, data *Req) ([]byte, error) {
+func (g GrpcHandler) GetConversationsHasReadAndMaxSeq(ctx context.Context, data *Req) ([]byte, error) {
 	req := msg.GetConversationsHasReadAndMaxSeqReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, errs.WrapMsg(err, "err proto unmarshal", "action", "unmarshal", "dataType", "GetConversationsHasReadAndMaxSeq")
@@ -213,7 +203,7 @@ func (g GrpcHandler) GetConversationsHasReadAndMaxSeq(context context.Context, d
 	if err := g.validate.Struct(data); err != nil {
 		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "GetConversationsHasReadAndMaxSeq")
 	}
-	resp, err := g.msgRpcClient.GetConversationsHasReadAndMaxSeq(context, &req)
+	resp, err := msg.GetConversationsHasReadAndMaxSeqCaller.Invoke(ctx, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -224,7 +214,7 @@ func (g GrpcHandler) GetConversationsHasReadAndMaxSeq(context context.Context, d
 	return c, nil
 }
 
-func (g GrpcHandler) GetSeqMessage(context context.Context, data *Req) ([]byte, error) {
+func (g GrpcHandler) GetSeqMessage(ctx context.Context, data *Req) ([]byte, error) {
 	req := msg.GetSeqMessageReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, errs.WrapMsg(err, "error unmarshaling request", "action", "unmarshal", "dataType", "GetSeqMessage")
@@ -232,7 +222,7 @@ func (g GrpcHandler) GetSeqMessage(context context.Context, data *Req) ([]byte, 
 	if err := g.validate.Struct(data); err != nil {
 		return nil, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "GetSeqMessage")
 	}
-	resp, err := g.msgRpcClient.GetSeqMessage(context, &req)
+	resp, err := msg.GetSeqMessageCaller.Invoke(ctx, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -243,12 +233,12 @@ func (g GrpcHandler) GetSeqMessage(context context.Context, data *Req) ([]byte, 
 	return c, nil
 }
 
-func (g GrpcHandler) UserLogout(context context.Context, data *Req) ([]byte, error) {
+func (g GrpcHandler) UserLogout(ctx context.Context, data *Req) ([]byte, error) {
 	req := push.DelUserPushTokenReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, errs.WrapMsg(err, "error unmarshaling request", "action", "unmarshal", "dataType", "DelUserPushTokenReq")
 	}
-	resp, err := g.pushClient.DelUserPushToken(context, &req)
+	resp, err := push.DelUserPushTokenCaller.Invoke(ctx, &req)
 	if err != nil {
 		return nil, err
 	}

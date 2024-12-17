@@ -2,6 +2,8 @@ package jssdk
 
 import (
 	"context"
+	"sort"
+
 	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/group"
@@ -12,7 +14,6 @@ import (
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
-	"sort"
 )
 
 const (
@@ -20,22 +21,11 @@ const (
 	defaultGetActiveConversation = 100
 )
 
-func NewJSSdkApi(user user.UserClient, friend relation.FriendClient, group group.GroupClient, msg msg.MsgClient, conv conversation.ConversationClient) *JSSdk {
-	return &JSSdk{
-		user:   user,
-		friend: friend,
-		group:  group,
-		msg:    msg,
-		conv:   conv,
-	}
+func NewJSSdkApi() *JSSdk {
+	return &JSSdk{}
 }
 
 type JSSdk struct {
-	user   user.UserClient
-	friend relation.FriendClient
-	group  group.GroupClient
-	msg    msg.MsgClient
-	conv   conversation.ConversationClient
 }
 
 func (x *JSSdk) GetActiveConversations(c *gin.Context) {
@@ -67,11 +57,11 @@ func (x *JSSdk) fillConversations(ctx context.Context, conversations []*jssdk.Co
 		groupMap  map[string]*sdkws.GroupInfo
 	)
 	if len(userIDs) > 0 {
-		users, err := field(ctx, x.user.GetDesignateUsers, &user.GetDesignateUsersReq{UserIDs: userIDs}, (*user.GetDesignateUsersResp).GetUsersInfo)
+		users, err := field(ctx, user.GetDesignateUsersCaller.Invoke, &user.GetDesignateUsersReq{UserIDs: userIDs}, (*user.GetDesignateUsersResp).GetUsersInfo)
 		if err != nil {
 			return err
 		}
-		friends, err := field(ctx, x.friend.GetFriendInfo, &relation.GetFriendInfoReq{OwnerUserID: conversations[0].Conversation.OwnerUserID, FriendUserIDs: userIDs}, (*relation.GetFriendInfoResp).GetFriendInfos)
+		friends, err := field(ctx, relation.GetFriendInfoCaller.Invoke, &relation.GetFriendInfoReq{OwnerUserID: conversations[0].Conversation.OwnerUserID, FriendUserIDs: userIDs}, (*relation.GetFriendInfoResp).GetFriendInfos)
 		if err != nil {
 			return err
 		}
@@ -79,7 +69,7 @@ func (x *JSSdk) fillConversations(ctx context.Context, conversations []*jssdk.Co
 		friendMap = datautil.SliceToMap(friends, (*relation.FriendInfoOnly).GetFriendUserID)
 	}
 	if len(groupIDs) > 0 {
-		resp, err := x.group.GetGroupsInfo(ctx, &group.GetGroupsInfoReq{GroupIDs: groupIDs})
+		resp, err := group.GetGroupsInfoCaller.Invoke(ctx, &group.GetGroupsInfoReq{GroupIDs: groupIDs})
 		if err != nil {
 			return err
 		}
@@ -101,7 +91,7 @@ func (x *JSSdk) getActiveConversations(ctx context.Context, req *jssdk.GetActive
 		req.Count = defaultGetActiveConversation
 	}
 	req.OwnerUserID = mcontext.GetOpUserID(ctx)
-	conversationIDs, err := field(ctx, x.conv.GetConversationIDs,
+	conversationIDs, err := field(ctx, conversation.GetConversationIDsCaller.Invoke,
 		&conversation.GetConversationIDsReq{UserID: req.OwnerUserID}, (*conversation.GetConversationIDsResp).GetConversationIDs)
 	if err != nil {
 		return nil, err
@@ -109,12 +99,12 @@ func (x *JSSdk) getActiveConversations(ctx context.Context, req *jssdk.GetActive
 	if len(conversationIDs) == 0 {
 		return &jssdk.GetActiveConversationsResp{}, nil
 	}
-	readSeq, err := field(ctx, x.msg.GetHasReadSeqs,
+	readSeq, err := field(ctx, msg.GetHasReadSeqsCaller.Invoke,
 		&msg.GetHasReadSeqsReq{UserID: req.OwnerUserID, ConversationIDs: conversationIDs}, (*msg.SeqsInfoResp).GetMaxSeqs)
 	if err != nil {
 		return nil, err
 	}
-	activeConversation, err := field(ctx, x.msg.GetActiveConversation,
+	activeConversation, err := field(ctx, msg.GetActiveConversationCaller.Invoke,
 		&msg.GetActiveConversationReq{ConversationIDs: conversationIDs}, (*msg.GetActiveConversationResp).GetConversations)
 	if err != nil {
 		return nil, err
@@ -126,7 +116,7 @@ func (x *JSSdk) getActiveConversations(ctx context.Context, req *jssdk.GetActive
 		Conversation: activeConversation,
 	}
 	if len(activeConversation) > 1 {
-		pinnedConversationIDs, err := field(ctx, x.conv.GetPinnedConversationIDs,
+		pinnedConversationIDs, err := field(ctx, conversation.GetPinnedConversationIDsCaller.Invoke,
 			&conversation.GetPinnedConversationIDsReq{UserID: req.OwnerUserID}, (*conversation.GetPinnedConversationIDsResp).GetConversationIDs)
 		if err != nil {
 			return nil, err
@@ -135,7 +125,7 @@ func (x *JSSdk) getActiveConversations(ctx context.Context, req *jssdk.GetActive
 	}
 	sort.Sort(&sortConversations)
 	sortList := sortConversations.Top(int(req.Count))
-	conversations, err := field(ctx, x.conv.GetConversations,
+	conversations, err := field(ctx, conversation.GetConversationsCaller.Invoke,
 		&conversation.GetConversationsReq{
 			OwnerUserID: req.OwnerUserID,
 			ConversationIDs: datautil.Slice(sortList, func(c *msg.ActiveConversation) string {
@@ -144,7 +134,7 @@ func (x *JSSdk) getActiveConversations(ctx context.Context, req *jssdk.GetActive
 	if err != nil {
 		return nil, err
 	}
-	msgs, err := field(ctx, x.msg.GetSeqMessage,
+	msgs, err := field(ctx, msg.GetSeqMessageCaller.Invoke,
 		&msg.GetSeqMessageReq{
 			UserID: req.OwnerUserID,
 			Conversations: datautil.Slice(sortList, func(c *msg.ActiveConversation) *msg.ConversationSeqs {
@@ -195,7 +185,7 @@ func (x *JSSdk) getActiveConversations(ctx context.Context, req *jssdk.GetActive
 
 func (x *JSSdk) getConversations(ctx context.Context, req *jssdk.GetConversationsReq) (*jssdk.GetConversationsResp, error) {
 	req.OwnerUserID = mcontext.GetOpUserID(ctx)
-	conversations, err := field(ctx, x.conv.GetConversations, &conversation.GetConversationsReq{OwnerUserID: req.OwnerUserID, ConversationIDs: req.ConversationIDs}, (*conversation.GetConversationsResp).GetConversations)
+	conversations, err := field(ctx, conversation.GetConversationsCaller.Invoke, &conversation.GetConversationsReq{OwnerUserID: req.OwnerUserID, ConversationIDs: req.ConversationIDs}, (*conversation.GetConversationsResp).GetConversations)
 	if err != nil {
 		return nil, err
 	}
@@ -205,12 +195,12 @@ func (x *JSSdk) getConversations(ctx context.Context, req *jssdk.GetConversation
 	req.ConversationIDs = datautil.Slice(conversations, func(c *conversation.Conversation) string {
 		return c.ConversationID
 	})
-	maxSeqs, err := field(ctx, x.msg.GetMaxSeqs,
+	maxSeqs, err := field(ctx, msg.GetMaxSeqsCaller.Invoke,
 		&msg.GetMaxSeqsReq{ConversationIDs: req.ConversationIDs}, (*msg.SeqsInfoResp).GetMaxSeqs)
 	if err != nil {
 		return nil, err
 	}
-	readSeqs, err := field(ctx, x.msg.GetHasReadSeqs,
+	readSeqs, err := field(ctx, msg.GetHasReadSeqsCaller.Invoke,
 		&msg.GetHasReadSeqsReq{UserID: req.OwnerUserID, ConversationIDs: req.ConversationIDs}, (*msg.SeqsInfoResp).GetMaxSeqs)
 	if err != nil {
 		return nil, err
@@ -226,7 +216,7 @@ func (x *JSSdk) getConversations(ctx context.Context, req *jssdk.GetConversation
 	}
 	var msgs map[string]*sdkws.PullMsgs
 	if len(conversationSeqs) > 0 {
-		msgs, err = field(ctx, x.msg.GetSeqMessage,
+		msgs, err = field(ctx, msg.GetSeqMessageCaller.Invoke,
 			&msg.GetSeqMessageReq{UserID: req.OwnerUserID, Conversations: conversationSeqs}, (*msg.GetSeqMessageResp).GetMsgs)
 		if err != nil {
 			return nil, err

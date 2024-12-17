@@ -17,99 +17,98 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/tools/a2r"
 )
 
-type FriendApi rpcclient.Friend
+type FriendApi struct{}
 
-func NewFriendApi(client rpcclient.Friend) FriendApi {
-	return FriendApi(client)
+func NewFriendApi() FriendApi {
+	return FriendApi{}
 }
 
 func (o *FriendApi) ApplyToAddFriend(c *gin.Context) {
-	a2r.Call(relation.FriendClient.ApplyToAddFriend, o.Client, c)
+	a2r.CallV2(c, relation.ApplyToAddFriendCaller.Invoke)
 }
 
 func (o *FriendApi) RespondFriendApply(c *gin.Context) {
-	a2r.Call(relation.FriendClient.RespondFriendApply, o.Client, c)
+	a2r.CallV2(c, relation.RespondFriendApplyCaller.Invoke)
 }
 
 func (o *FriendApi) DeleteFriend(c *gin.Context) {
-	a2r.Call(relation.FriendClient.DeleteFriend, o.Client, c)
+	a2r.CallV2(c, relation.DeleteFriendCaller.Invoke)
 }
 
 func (o *FriendApi) GetFriendApplyList(c *gin.Context) {
-	a2r.Call(relation.FriendClient.GetPaginationFriendsApplyTo, o.Client, c)
+	a2r.CallV2(c, relation.GetPaginationFriendsApplyToCaller.Invoke)
 }
 
 func (o *FriendApi) GetDesignatedFriendsApply(c *gin.Context) {
-	a2r.Call(relation.FriendClient.GetDesignatedFriendsApply, o.Client, c)
+	a2r.CallV2(c, relation.GetDesignatedFriendsApplyCaller.Invoke)
 }
 
 func (o *FriendApi) GetSelfApplyList(c *gin.Context) {
-	a2r.Call(relation.FriendClient.GetPaginationFriendsApplyFrom, o.Client, c)
+	a2r.CallV2(c, relation.GetPaginationFriendsApplyFromCaller.Invoke)
 }
 
 func (o *FriendApi) GetFriendList(c *gin.Context) {
-	a2r.Call(relation.FriendClient.GetPaginationFriends, o.Client, c)
+	a2r.CallV2(c, relation.GetPaginationFriendsCaller.Invoke)
 }
 
 func (o *FriendApi) GetDesignatedFriends(c *gin.Context) {
-	a2r.Call(relation.FriendClient.GetDesignatedFriends, o.Client, c)
+	a2r.CallV2(c, relation.GetDesignatedFriendsCaller.Invoke)
 }
 
 func (o *FriendApi) SetFriendRemark(c *gin.Context) {
-	a2r.Call(relation.FriendClient.SetFriendRemark, o.Client, c)
+	a2r.CallV2(c, relation.SetFriendRemarkCaller.Invoke)
 }
 
 func (o *FriendApi) AddBlack(c *gin.Context) {
-	a2r.Call(relation.FriendClient.AddBlack, o.Client, c)
+	a2r.CallV2(c, relation.AddBlackCaller.Invoke)
 }
 
 func (o *FriendApi) GetPaginationBlacks(c *gin.Context) {
-	a2r.Call(relation.FriendClient.GetPaginationBlacks, o.Client, c)
+	a2r.CallV2(c, relation.GetPaginationBlacksCaller.Invoke)
 }
 
 func (o *FriendApi) GetSpecifiedBlacks(c *gin.Context) {
-	a2r.Call(relation.FriendClient.GetSpecifiedBlacks, o.Client, c)
+	a2r.CallV2(c, relation.GetSpecifiedBlacksCaller.Invoke)
 }
 
 func (o *FriendApi) RemoveBlack(c *gin.Context) {
-	a2r.Call(relation.FriendClient.RemoveBlack, o.Client, c)
+	a2r.CallV2(c, relation.RemoveBlackCaller.Invoke)
 }
 
 func (o *FriendApi) ImportFriends(c *gin.Context) {
-	a2r.Call(relation.FriendClient.ImportFriends, o.Client, c)
+	a2r.CallV2(c, relation.ImportFriendsCaller.Invoke)
 }
 
 func (o *FriendApi) IsFriend(c *gin.Context) {
-	a2r.Call(relation.FriendClient.IsFriend, o.Client, c)
+	a2r.CallV2(c, relation.IsFriendCaller.Invoke)
 }
 
 func (o *FriendApi) GetFriendIDs(c *gin.Context) {
-	a2r.Call(relation.FriendClient.GetFriendIDs, o.Client, c)
+	a2r.CallV2(c, relation.GetFriendIDsCaller.Invoke)
 }
 
 func (o *FriendApi) GetSpecifiedFriendsInfo(c *gin.Context) {
-	a2r.Call(relation.FriendClient.GetSpecifiedFriendsInfo, o.Client, c)
+	a2r.CallV2(c, relation.GetSpecifiedFriendsInfoCaller.Invoke)
 }
 
 func (o *FriendApi) UpdateFriends(c *gin.Context) {
-	a2r.Call(relation.FriendClient.UpdateFriends, o.Client, c)
+	a2r.CallV2(c, relation.UpdateFriendsCaller.Invoke)
 }
 
 func (o *FriendApi) GetIncrementalFriends(c *gin.Context) {
-	a2r.Call(relation.FriendClient.GetIncrementalFriends, o.Client, c)
+	a2r.CallV2(c, relation.GetIncrementalFriendsCaller.Invoke)
 }
 
 // GetIncrementalBlacks is temporarily unused.
 // Deprecated: This function is currently unused and may be removed in future versions.
 func (o *FriendApi) GetIncrementalBlacks(c *gin.Context) {
-	a2r.Call(relation.FriendClient.GetIncrementalBlacks, o.Client, c)
+	a2r.CallV2(c, relation.GetIncrementalBlacksCaller.Invoke)
 }
 
 func (o *FriendApi) GetFullFriendUserIDs(c *gin.Context) {
-	a2r.Call(relation.FriendClient.GetFullFriendUserIDs, o.Client, c)
+	a2r.CallV2(c, relation.GetFullFriendUserIDsCaller.Invoke)
 }
