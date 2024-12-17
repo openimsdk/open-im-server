@@ -269,7 +269,6 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversat
 	}
 	return totalMsgs, nil
 }
-
 func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][]*model.MsgInfoModel, userID, conversationID string, msg *model.MsgInfoModel) {
 	if msg.IsRead {
 		msg.Msg.IsRead = true
@@ -280,16 +279,53 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][
 	if msg.Msg.Content == "" {
 		return
 	}
+	type MsgData struct {
+		SendID           string                 `json:"sendID"`
+		RecvID           string                 `json:"recvID"`
+		GroupID          string                 `json:"groupID"`
+		ClientMsgID      string                 `json:"clientMsgID"`
+		ServerMsgID      string                 `json:"serverMsgID"`
+		SenderPlatformID int32                  `json:"senderPlatformID"`
+		SenderNickname   string                 `json:"senderNickname"`
+		SenderFaceURL    string                 `json:"senderFaceURL"`
+		SessionType      int32                  `json:"sessionType"`
+		MsgFrom          int32                  `json:"msgFrom"`
+		ContentType      int32                  `json:"contentType"`
+		Content          string                 `json:"content"`
+		Seq              int64                  `json:"seq"`
+		SendTime         int64                  `json:"sendTime"`
+		CreateTime       int64                  `json:"createTime"`
+		Status           int32                  `json:"status"`
+		IsRead           bool                   `json:"isRead"`
+		Options          map[string]bool        `json:"options,omitempty"`
+		OfflinePushInfo  *sdkws.OfflinePushInfo `json:"offlinePushInfo"`
+		AtUserIDList     []string               `json:"atUserIDList"`
+		AttachedInfo     string                 `json:"attachedInfo"`
+		Ex               string                 `json:"ex"`
+		KeyVersion       int32                  `json:"keyVersion"`
+		DstUserIDs       []string               `json:"dstUserIDs"`
+	}
 	var quoteMsg struct {
 		Text              string          `json:"text,omitempty"`
-		QuoteMessage      *sdkws.MsgData  `json:"quoteMessage,omitempty"`
+		QuoteMessage      *MsgData        `json:"quoteMessage,omitempty"`
 		MessageEntityList json.RawMessage `json:"messageEntityList,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(msg.Msg.Content), &quoteMsg); err != nil {
 		log.ZError(ctx, "json.Unmarshal", err)
 		return
 	}
-	if quoteMsg.QuoteMessage == nil || quoteMsg.QuoteMessage.ContentType == constant.MsgRevokeNotification {
+	if quoteMsg.QuoteMessage == nil || quoteMsg.QuoteMessage.Content == "" {
+		return
+	}
+	if quoteMsg.QuoteMessage.Content == "e30=" {
+		quoteMsg.QuoteMessage.Content = "{}"
+		data, err := json.Marshal(&quoteMsg)
+		if err != nil {
+			return
+		}
+		msg.Msg.Content = string(data)
+	}
+	if quoteMsg.QuoteMessage.Seq <= 0 && quoteMsg.QuoteMessage.ContentType == constant.MsgRevokeNotification {
 		return
 	}
 	var msgs []*model.MsgInfoModel
@@ -311,9 +347,9 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][
 	}
 	quoteMsg.QuoteMessage.ContentType = constant.MsgRevokeNotification
 	if len(msgs) > 0 {
-		quoteMsg.QuoteMessage.Content = []byte(msgs[0].Msg.Content)
+		quoteMsg.QuoteMessage.Content = msgs[0].Msg.Content
 	} else {
-		quoteMsg.QuoteMessage.Content = []byte("{}")
+		quoteMsg.QuoteMessage.Content = "{}"
 	}
 	data, err := json.Marshal(&quoteMsg)
 	if err != nil {
@@ -321,9 +357,9 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][
 		return
 	}
 	msg.Msg.Content = string(data)
-	if _, err := db.msgDocDatabase.UpdateMsg(ctx, db.msgTable.GetDocID(conversationID, msg.Msg.Seq), db.msgTable.GetMsgIndex(msg.Msg.Seq), "msg", msg.Msg); err != nil {
-		log.ZError(ctx, "UpdateMsgContent", err)
-	}
+	//if _, err := db.msgDocDatabase.UpdateMsg(ctx, db.msgTable.GetDocID(conversationID, msg.Msg.Seq), db.msgTable.GetMsgIndex(msg.Msg.Seq), "msg", msg.Msg); err != nil {
+	//	log.ZError(ctx, "UpdateMsgContent", err)
+	//}
 }
 
 func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID string, conversationID string, seqs []int64) (totalMsgs []*model.MsgInfoModel, err error) {
