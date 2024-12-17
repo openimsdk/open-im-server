@@ -103,11 +103,11 @@ spec:
 
 So, you need following configurations to set secret:
 
-- MONGODB_PASSWORD
-- MINIO_SECRETACCESSKEY
-- REDIS_PASSWORD
-- MINIO_SECRETACCESSKEY
-- MINIO_ACCESSKEYID
+- `MONGODB_USERNAME`
+- `MONGODB_PASSWORD`
+- `REDIS_PASSWORD`
+- `MINIO_ACCESSKEYID`
+- `MINIO_SECRETACCESSKEY`
 
 ### Apply all config and dependencies
 

@@ -30,12 +30,6 @@ spec:
                   name: mongo-secret
                   key: mongo_openim_password
 
-            - name: IMENV_MONGODB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mongo-secret
-                  key: mongo_openim_username
-
           volumeMounts:
             - name: openim-config
               mountPath: "/config"
