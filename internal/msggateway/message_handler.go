@@ -115,8 +115,8 @@ type GrpcHandler struct {
 	validate *validator.Validate
 }
 
-func NewGrpcHandler() *GrpcHandler {
-	return &GrpcHandler{}
+func NewGrpcHandler(validate *validator.Validate) *GrpcHandler {
+	return &GrpcHandler{validate: validate}
 }
 
 func (g GrpcHandler) GetSeq(ctx context.Context, data *Req) ([]byte, error) {

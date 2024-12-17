@@ -70,7 +70,7 @@ type kickHandler struct {
 }
 
 func (ws *WsServer) SetDiscoveryRegistry(disCov discovery.SvcDiscoveryRegistry, config *Config) {
-	ws.MessageHandler = NewGrpcHandler()
+	ws.MessageHandler = NewGrpcHandler(ws.validate)
 	ws.disCov = disCov
 }
 
