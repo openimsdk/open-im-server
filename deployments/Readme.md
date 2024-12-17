@@ -50,6 +50,7 @@ In `openim-config.yml`, you need modify the following configurations:
 **redis.yml**
 
 - `address`: set to your already redis address or redis Service name and port in your deployed.
+- `password`: **need to set to secret use base64 encode.**
 
 **minio.yml**
 
@@ -65,7 +66,7 @@ A Secret is an object that contains a small amount of sensitive data. Such as pa
 
 #### Example:
 
-create a secret for redis password. You can create new file is `redis-secret.yml` or append to `openim-config.yml` use `---` split it.
+create a secret for redis password. You can create new file is `redis-secret.yml` or append contents to `openim-config.yml` use `---` split it.
 
 ```yaml
 apiVersion: v1
@@ -87,12 +88,12 @@ OpenIM Server use prefix `IMENV_`, OpenIM Chat use prefix `CHATENV_`. Next adapt
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: group-user-server
+  name: rpc-user-server
 spec:
   template:
     spec:
       containers:
-        - name: group-user-server
+        - name: rpc-user-server
           env:
             - name: IMENV_REDIS_PASSWORD # adapt to redis.yml password field
               valueFrom:
