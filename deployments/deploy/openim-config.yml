@@ -4,7 +4,7 @@ metadata:
   name: openim-config
 data:
   discovery.yml: |
-    enable: "kubernetes"
+    enable: "kubernetes" # "kubernetes" or "etcd"
     kubernetes:
       namespace: default
     etcd:

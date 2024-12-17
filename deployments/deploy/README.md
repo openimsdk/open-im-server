@@ -8,13 +8,109 @@
 
 ## Origin Deploy
 
-1. Enter the target dir
-   `cd ./deployments/deploy/`
+### Enter the target dir
 
-2. Deploy configs and dependencies
-   Upate your `openim-config.yml`
+`cd ./deployments/deploy/`
 
-Apply all config and dependencies
+### Deploy configs and dependencies
+
+Upate your `openim-config.yml`. **You can check the official docs for more details.**
+
+In `openim-config.yml`, you need modify the following configurations:
+
+**discovery.yml**
+
+- `kubernetes.namespace`: default is `default`, you can change it to your namespace.
+- `enable`: set to `kubernetes`
+- `rpcService`: Every field value need to same to the corresponding service name. Such as `user` value in same to `openim-rpc-user-service.yml` service name.
+
+**log.yml**
+
+- `storageLocation`: log save path in container.
+- `isStdout`: output in kubectl log.
+- `isJson`: log format to JSON.
+
+**mongodb.yml**
+
+- `address`: set to your already mongodb address or mongo Service name and port in your deployed.
+- `username`: set to your mongodb username.
+- `database`: set to your mongodb database name.
+- `password`: **need to set to secret use base64 encode.**
+- `authSource`: set to your mongodb authSource, default is `openim_v3`.
+
+**share.yml**
+
+- `secret`: same to **OpenIM Chat** secret.
+- `imAdminUserID`: default is `imAdmin`.
+
+**kafka.yml**
+
+- `address`: set to your already kafka address or kafka Service name and port in your deployed.
+
+**redis.yml**
+
+- `address`: set to your already redis address or redis Service name and port in your deployed.
+
+**minio.yml**
+
+- `bucket`: set to your minio bucket name or use default value `openim`.
+- `accessKeyID`: set to your minio accessKey ID or use `root`.
+- `secretAccessKey`: need to set to secret use base64 encode.
+- `internalAddress`: set to your already minio internal address or minio Service name and port in your deployed.
+- `externalAddress`: set to your already expose minio external address or minio Service name and port in your deployed.
+
+### Set the secret
+
+A Secret is an object that contains a small amount of sensitive data. Such as password and secret. Secret is similar to ConfigMaps.
+
+#### Example:
+
+create a secret for redis password. You can create new file is `redis-secret.yml` or append to `openim-config.yml` use `---` split it.
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+type: Opaque
+data:
+  redis-password: b3BlbklNMTIz # "openIM123" in base64
+```
+
+#### Usage:
+
+use secret in deployment file. If you apply the secret to IM Server, you need adapt the Env Name to config file and all toupper.
+
+OpenIM Server use prefix `IMENV_`, OpenIM Chat use prefix `CHATENV_`. Next adapt is the config file name. Like `redis.yml`. Such as `IMENV_REDIS_PASSWORD` is mapped to `redis.yml` password filed in OpenIM Server.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: group-user-server
+spec:
+  template:
+    spec:
+      containers:
+        - name: group-user-server
+          env:
+            - name: IMENV_REDIS_PASSWORD # adapt to redis.yml password field
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: redis-password
+```
+
+So, you need following configurations to set secret:
+
+- MONGODB_PASSWORD
+- MINIO_SECRETACCESSKEY
+- REDIS_PASSWORD
+- MINIO_SECRETACCESSKEY
+- MINIO_ACCESSKEYID
+
+### Apply all config and dependencies
+
 `kubectl apply -f ./openim-config.yml`
 
 > Attation: If you use `default` namespace, you can excute `clusterRile.yml` to create a cluster role binding for default service account.
@@ -24,13 +120,15 @@ Apply all config and dependencies
 Excute `clusterRole.yml`
 `kubectl apply -f ./clusterRole.yml`
 
+**If you have already deployed the storage component, you need to update corresponding config and secret. And pass corresponding deployments and services build.**
+
 Run infrasturcture components.
 
 `kubectl apply -f minio-service.yml -f minio-statefulset.yml -f mongo-service.yml -f mongo-statefulset.yml -f redis-service.yml -f redis-statefulset.yml -f kafka-service.yml -f kafka-statefulset.yml`
 
 > Note: Ensure that infrastructure services like MinIO, Redis, and Kafka are running before deploying the main applications.
 
-3. run all deployments and services
+### run all deployments and services
 
 ```bash
 kubectl apply \
@@ -59,8 +157,9 @@ kubectl apply \
   -f openim-rpc-third-service.yml
 ```
 
-4. Verification
-   After deploying the services, verify that everything is running smoothly:
+### Verification
+
+After deploying the services, verify that everything is running smoothly:
 
 ```bash
 # Check the status of all pods
@@ -76,7 +175,7 @@ kubectl get deployments
 kubectl get all
 ```
 
-5. clean all
+### clean all
 
 `kubectl delete -f ./`
 
