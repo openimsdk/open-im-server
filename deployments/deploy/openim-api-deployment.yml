@@ -21,13 +21,17 @@ spec:
             - name: IMENV_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: redis-secret
+                  name: openim-redis-secret
                   key: redis-password
-
+            - name: IMENV_MONGODB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: openim-mongo-secret
+                  key: mongo_openim_username
             - name: IMENV_MONGODB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mongo-secret
+                  name: openim-mongo-secret
                   key: mongo_openim_password
 
           volumeMounts:
