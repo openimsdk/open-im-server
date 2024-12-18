@@ -33,6 +33,11 @@ spec:
                 secretKeyRef:
                   name: openim-mongo-secret
                   key: mongo_openim_password
+            - name: IMENV_KAFKA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openim-kafka-secret
+                  key: kafka-password
           volumeMounts:
             - name: openim-config
               mountPath: "/config"
