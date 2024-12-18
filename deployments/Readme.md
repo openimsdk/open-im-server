@@ -37,11 +37,6 @@ In `openim-config.yml`, you need modify the following configurations:
 - `database`: set to your mongodb database name.(Need have a created database.)
 - `authSource`: set to your mongodb authSource. (authSource is specify the database name associated with the user's credentials, user need create in this database.)
 
-**share.yml**
-
-- `secret`: same to **OpenIM Chat** secret.
-- `imAdminUserID`: default is `imAdmin`.
-
 **kafka.yml**
 
 - `address`: set to your already kafka address or kafka Service name and port in your deployed.
@@ -90,7 +85,7 @@ data:
 
 #### Minio:
 
-Update the `minio-root-user` and `minio-root-password` value in `minio-secret.yml` to your MinIO access key and secret key encoded in base64.
+Update the `minio-root-user` and `minio-root-password` value in `minio-secret.yml` to your MinIO accessKeyID and secretAccessKey encoded in base64.
 
 ```yaml
 apiVersion: v1
