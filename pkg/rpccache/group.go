@@ -16,24 +16,24 @@ package rpccache
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/protocol/group"
+	"github.com/openimsdk/protocol/rpccall"
 	"github.com/openimsdk/tools/utils/datautil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
 )
 
-func NewGroupLocalCache(client rpcclient.GroupRpcClient, localCache *config.LocalCache, cli redis.UniversalClient) *GroupLocalCache {
+func NewGroupLocalCache(localCache *config.LocalCache, cli redis.UniversalClient) *GroupLocalCache {
 	lc := localCache.Group
 	log.ZDebug(context.Background(), "GroupLocalCache", "topic", lc.Topic, "slotNum", lc.SlotNum, "slotSize", lc.SlotSize, "enable", lc.Enable())
 	x := &GroupLocalCache{
-		client: client,
 		local: localcache.New[[]byte](
 			localcache.WithLocalSlotNum(lc.SlotNum),
 			localcache.WithLocalSlotSize(lc.SlotSize),
@@ -49,8 +49,7 @@ func NewGroupLocalCache(client rpcclient.GroupRpcClient, localCache *config.Loca
 }
 
 type GroupLocalCache struct {
-	client rpcclient.GroupRpcClient
-	local  localcache.Cache[[]byte]
+	local localcache.Cache[[]byte]
 }
 
 func (g *GroupLocalCache) getGroupMemberIDs(ctx context.Context, groupID string) (val *group.GetGroupMemberUserIDsResp, err error) {
@@ -65,7 +64,7 @@ func (g *GroupLocalCache) getGroupMemberIDs(ctx context.Context, groupID string)
 	var cache cacheProto[group.GetGroupMemberUserIDsResp]
 	return cache.Unmarshal(g.local.Get(ctx, cachekey.GetGroupMemberIDsKey(groupID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "GroupLocalCache getGroupMemberIDs rpc", "groupID", groupID)
-		return cache.Marshal(g.client.Client.GetGroupMemberUserIDs(ctx, &group.GetGroupMemberUserIDsReq{GroupID: groupID}))
+		return cache.Marshal(group.GetGroupMemberUserIDsCaller.Invoke(ctx, &group.GetGroupMemberUserIDsReq{GroupID: groupID}))
 	}))
 }
 
@@ -81,7 +80,13 @@ func (g *GroupLocalCache) GetGroupMember(ctx context.Context, groupID, userID st
 	var cache cacheProto[sdkws.GroupMemberFullInfo]
 	return cache.Unmarshal(g.local.Get(ctx, cachekey.GetGroupMemberInfoKey(groupID, userID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "GroupLocalCache GetGroupInfo rpc", "groupID", groupID, "userID", userID)
-		return cache.Marshal(g.client.GetGroupMemberCache(ctx, groupID, userID))
+		return cache.Marshal(rpccall.ExtractField(ctx, group.GetGroupMemberCacheCaller.Invoke,
+			&group.GetGroupMemberCacheReq{
+				GroupID:       groupID,
+				GroupMemberID: userID,
+			},
+			(*group.GetGroupMemberCacheResp).GetMember,
+		))
 	}))
 }
 
@@ -97,7 +102,10 @@ func (g *GroupLocalCache) GetGroupInfo(ctx context.Context, groupID string) (val
 	var cache cacheProto[sdkws.GroupInfo]
 	return cache.Unmarshal(g.local.Get(ctx, cachekey.GetGroupInfoKey(groupID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "GroupLocalCache GetGroupInfo rpc", "groupID", groupID)
-		return cache.Marshal(g.client.GetGroupInfoCache(ctx, groupID))
+		return cache.Marshal(rpccall.ExtractField(ctx, group.GetGroupInfoCacheCaller.Invoke,
+			&group.GetGroupInfoCacheReq{
+				GroupID: groupID,
+			}, (*group.GetGroupInfoCacheResp).GetGroupInfo))
 	}))
 }
 

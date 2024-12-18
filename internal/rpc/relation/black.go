@@ -18,10 +18,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
@@ -39,7 +39,7 @@ func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *relation.Ge
 		return nil, err
 	}
 	resp = &relation.GetPaginationBlacksResp{}
-	resp.Blacks, err = convert.BlackDB2Pb(ctx, blacks, s.userRpcClient.GetUsersInfoMap)
+	resp.Blacks, err = convert.BlackDB2Pb(ctx, blacks, rpcclient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (s *friendServer) AddBlack(ctx context.Context, req *relation.AddBlackReq) 
 		return nil, err
 	}
 
-	_, err := s.userRpcClient.GetUsersInfo(ctx, []string{req.OwnerUserID, req.BlackUserID})
+	_, err := rpcclient.GetUsersInfo(ctx, []string{req.OwnerUserID, req.BlackUserID})
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (s *friendServer) GetSpecifiedBlacks(ctx context.Context, req *relation.Get
 		return nil, errs.ErrArgs.WrapMsg("userIDList repeated")
 	}
 
-	userMap, err := s.userRpcClient.GetPublicUserInfoMap(ctx, req.UserIDList)
+	userMap, err := rpcclient.GetPublicUserInfoMap(ctx, req.UserIDList)
 	if err != nil {
 		return nil, err
 	}

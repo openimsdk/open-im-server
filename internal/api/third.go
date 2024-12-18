@@ -16,33 +16,35 @@ package api
 
 import (
 	"context"
-	"google.golang.org/grpc"
 	"math/rand"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 
+	"google.golang.org/grpc"
+
 	"github.com/gin-gonic/gin"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/a2r"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/mcontext"
 )
 
-type ThirdApi rpcclient.Third
+type ThirdApi struct {
+	GrafanaUrl string
+}
 
-func NewThirdApi(client rpcclient.Third) ThirdApi {
-	return ThirdApi(client)
+func NewThirdApi(grafanaUrl string) ThirdApi {
+	return ThirdApi{GrafanaUrl: grafanaUrl}
 }
 
 func (o *ThirdApi) FcmUpdateToken(c *gin.Context) {
-	a2r.Call(third.ThirdClient.FcmUpdateToken, o.Client, c)
+	a2r.CallV2(c, third.FcmUpdateTokenCaller.Invoke)
 }
 
 func (o *ThirdApi) SetAppBadge(c *gin.Context) {
-	a2r.Call(third.ThirdClient.SetAppBadge, o.Client, c)
+	a2r.CallV2(c, third.SetAppBadgeCaller.Invoke)
 }
 
 // #################### s3 ####################
@@ -77,44 +79,44 @@ func setURLPrefix(c *gin.Context, urlPrefix *string) error {
 }
 
 func (o *ThirdApi) PartLimit(c *gin.Context) {
-	a2r.Call(third.ThirdClient.PartLimit, o.Client, c)
+	a2r.CallV2(c, third.PartLimitCaller.Invoke)
 }
 
 func (o *ThirdApi) PartSize(c *gin.Context) {
-	a2r.Call(third.ThirdClient.PartSize, o.Client, c)
+	a2r.CallV2(c, third.PartSizeCaller.Invoke)
 }
 
 func (o *ThirdApi) InitiateMultipartUpload(c *gin.Context) {
 	opt := setURLPrefixOption(third.ThirdClient.InitiateMultipartUpload, func(req *third.InitiateMultipartUploadReq) error {
 		return setURLPrefix(c, &req.UrlPrefix)
 	})
-	a2r.Call(third.ThirdClient.InitiateMultipartUpload, o.Client, c, opt)
+	a2r.CallV2(c, third.InitiateMultipartUploadCaller.Invoke, opt)
 }
 
 func (o *ThirdApi) AuthSign(c *gin.Context) {
-	a2r.Call(third.ThirdClient.AuthSign, o.Client, c)
+	a2r.CallV2(c, third.AuthSignCaller.Invoke)
 }
 
 func (o *ThirdApi) CompleteMultipartUpload(c *gin.Context) {
 	opt := setURLPrefixOption(third.ThirdClient.CompleteMultipartUpload, func(req *third.CompleteMultipartUploadReq) error {
 		return setURLPrefix(c, &req.UrlPrefix)
 	})
-	a2r.Call(third.ThirdClient.CompleteMultipartUpload, o.Client, c, opt)
+	a2r.CallV2(c, third.CompleteMultipartUploadCaller.Invoke, opt)
 }
 
 func (o *ThirdApi) AccessURL(c *gin.Context) {
-	a2r.Call(third.ThirdClient.AccessURL, o.Client, c)
+	a2r.CallV2(c, third.AccessURLCaller.Invoke)
 }
 
 func (o *ThirdApi) InitiateFormData(c *gin.Context) {
-	a2r.Call(third.ThirdClient.InitiateFormData, o.Client, c)
+	a2r.CallV2(c, third.InitiateFormDataCaller.Invoke)
 }
 
 func (o *ThirdApi) CompleteFormData(c *gin.Context) {
 	opt := setURLPrefixOption(third.ThirdClient.CompleteFormData, func(req *third.CompleteFormDataReq) error {
 		return setURLPrefix(c, &req.UrlPrefix)
 	})
-	a2r.Call(third.ThirdClient.CompleteFormData, o.Client, c, opt)
+	a2r.CallV2(c, third.CompleteFormDataCaller.Invoke, opt)
 }
 
 func (o *ThirdApi) ObjectRedirect(c *gin.Context) {
@@ -138,7 +140,7 @@ func (o *ThirdApi) ObjectRedirect(c *gin.Context) {
 		}
 		query[key] = values[0]
 	}
-	resp, err := o.Client.AccessURL(ctx, &third.AccessURLReq{Name: name, Query: query})
+	resp, err := third.AccessURLCaller.Invoke(ctx, &third.AccessURLReq{Name: name, Query: query})
 	if err != nil {
 		if errs.ErrArgs.Is(err) {
 			c.String(http.StatusBadRequest, err.Error())
@@ -156,15 +158,15 @@ func (o *ThirdApi) ObjectRedirect(c *gin.Context) {
 
 // #################### logs ####################.
 func (o *ThirdApi) UploadLogs(c *gin.Context) {
-	a2r.Call(third.ThirdClient.UploadLogs, o.Client, c)
+	a2r.CallV2(c, third.UploadLogsCaller.Invoke)
 }
 
 func (o *ThirdApi) DeleteLogs(c *gin.Context) {
-	a2r.Call(third.ThirdClient.DeleteLogs, o.Client, c)
+	a2r.CallV2(c, third.DeleteLogsCaller.Invoke)
 }
 
 func (o *ThirdApi) SearchLogs(c *gin.Context) {
-	a2r.Call(third.ThirdClient.SearchLogs, o.Client, c)
+	a2r.CallV2(c, third.SearchLogsCaller.Invoke)
 }
 
 func (o *ThirdApi) GetPrometheus(c *gin.Context) {

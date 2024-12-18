@@ -28,11 +28,10 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func NewUserLocalCache(client rpcclient.UserRpcClient, localCache *config.LocalCache, cli redis.UniversalClient) *UserLocalCache {
+func NewUserLocalCache(localCache *config.LocalCache, cli redis.UniversalClient) *UserLocalCache {
 	lc := localCache.User
 	log.ZDebug(context.Background(), "UserLocalCache", "topic", lc.Topic, "slotNum", lc.SlotNum, "slotSize", lc.SlotSize, "enable", lc.Enable())
 	x := &UserLocalCache{
-		client: client,
 		local: localcache.New[[]byte](
 			localcache.WithLocalSlotNum(lc.SlotNum),
 			localcache.WithLocalSlotSize(lc.SlotSize),
@@ -48,8 +47,7 @@ func NewUserLocalCache(client rpcclient.UserRpcClient, localCache *config.LocalC
 }
 
 type UserLocalCache struct {
-	client rpcclient.UserRpcClient
-	local  localcache.Cache[[]byte]
+	local localcache.Cache[[]byte]
 }
 
 func (u *UserLocalCache) GetUserInfo(ctx context.Context, userID string) (val *sdkws.UserInfo, err error) {
@@ -64,7 +62,7 @@ func (u *UserLocalCache) GetUserInfo(ctx context.Context, userID string) (val *s
 	var cache cacheProto[sdkws.UserInfo]
 	return cache.Unmarshal(u.local.Get(ctx, cachekey.GetUserInfoKey(userID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "UserLocalCache GetUserInfo rpc", "userID", userID)
-		return cache.Marshal(u.client.GetUserInfo(ctx, userID))
+		return cache.Marshal(rpcclient.GetUserInfo(ctx, userID))
 	}))
 }
 
@@ -88,7 +86,7 @@ func (u *UserLocalCache) getUserGlobalMsgRecvOpt(ctx context.Context, userID str
 	var cache cacheProto[user.GetGlobalRecvMessageOptResp]
 	return cache.Unmarshal(u.local.Get(ctx, cachekey.GetUserGlobalRecvMsgOptKey(userID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "UserLocalCache GetUserGlobalMsgRecvOpt rpc", "userID", userID)
-		return cache.Marshal(u.client.Client.GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{UserID: userID}))
+		return cache.Marshal(user.GetGlobalRecvMessageOptCaller.Invoke(ctx, &user.GetGlobalRecvMessageOptReq{UserID: userID}))
 	}))
 }
 

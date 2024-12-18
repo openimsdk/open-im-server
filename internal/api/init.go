@@ -29,15 +29,18 @@ import (
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mw"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/network"
 	"github.com/openimsdk/tools/utils/runtimeenv"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Config struct {
@@ -56,12 +59,13 @@ func Start(ctx context.Context, index int, config *Config) error {
 
 	config.RuntimeEnv = runtimeenv.PrintRuntimeEnvironment()
 
-	var client discovery.SvcDiscoveryRegistry
-
-	// Determine whether zk is passed according to whether it is a clustered deployment
-	client, err = kdisc.NewDiscoveryRegister(&config.Discovery, config.RuntimeEnv)
+	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, config.RuntimeEnv)
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
+	}
+	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
+	if err = rpcclient.InitRpcCaller(client, config.Discovery.RpcService); err != nil {
+		return err
 	}
 
 	var (
@@ -90,7 +94,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
 	}
 
-	router := newGinRouter(client, config, client)
+	router := newGinRouter(client, config)
 	if config.API.Prometheus.Enable {
 		var (
 			listener net.Listener

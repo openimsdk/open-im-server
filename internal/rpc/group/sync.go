@@ -15,12 +15,12 @@ import (
 	"github.com/openimsdk/tools/log"
 )
 
-func (s *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetFullGroupMemberUserIDsReq) (*pbgroup.GetFullGroupMemberUserIDsResp, error) {
-	vl, err := s.db.FindMaxGroupMemberVersionCache(ctx, req.GroupID)
+func (g *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetFullGroupMemberUserIDsReq) (*pbgroup.GetFullGroupMemberUserIDsResp, error) {
+	vl, err := g.db.FindMaxGroupMemberVersionCache(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
-	userIDs, err := s.db.FindGroupMemberUserID(ctx, req.GroupID)
+	userIDs, err := g.db.FindGroupMemberUserID(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -36,12 +36,12 @@ func (s *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgrou
 	}, nil
 }
 
-func (s *groupServer) GetFullJoinGroupIDs(ctx context.Context, req *pbgroup.GetFullJoinGroupIDsReq) (*pbgroup.GetFullJoinGroupIDsResp, error) {
-	vl, err := s.db.FindMaxJoinGroupVersionCache(ctx, req.UserID)
+func (g *groupServer) GetFullJoinGroupIDs(ctx context.Context, req *pbgroup.GetFullJoinGroupIDsReq) (*pbgroup.GetFullJoinGroupIDsResp, error) {
+	vl, err := g.db.FindMaxJoinGroupVersionCache(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	groupIDs, err := s.db.FindJoinGroupID(ctx, req.UserID)
+	groupIDs, err := g.db.FindJoinGroupID(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +57,8 @@ func (s *groupServer) GetFullJoinGroupIDs(ctx context.Context, req *pbgroup.GetF
 	}, nil
 }
 
-func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgroup.GetIncrementalGroupMemberReq) (*pbgroup.GetIncrementalGroupMemberResp, error) {
-	group, err := s.db.TakeGroup(ctx, req.GroupID)
+func (g *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgroup.GetIncrementalGroupMemberReq) (*pbgroup.GetIncrementalGroupMemberResp, error) {
+	group, err := g.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 		VersionID:     req.VersionID,
 		VersionNumber: req.Version,
 		Version: func(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error) {
-			vl, err := s.db.FindMemberIncrVersion(ctx, groupID, version, limit)
+			vl, err := g.db.FindMemberIncrVersion(ctx, groupID, version, limit)
 			if err != nil {
 				return nil, err
 			}
@@ -98,9 +98,9 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 			}
 			return vl, nil
 		},
-		CacheMaxVersion: s.db.FindMaxGroupMemberVersionCache,
+		CacheMaxVersion: g.db.FindMaxGroupMemberVersionCache,
 		Find: func(ctx context.Context, ids []string) ([]*sdkws.GroupMemberFullInfo, error) {
-			return s.getGroupMembersInfo(ctx, req.GroupID, ids)
+			return g.getGroupMembersInfo(ctx, req.GroupID, ids)
 		},
 		Resp: func(version *model.VersionLog, delIDs []string, insertList, updateList []*sdkws.GroupMemberFullInfo, full bool) *pbgroup.GetIncrementalGroupMemberResp {
 			return &pbgroup.GetIncrementalGroupMemberResp{
@@ -119,20 +119,20 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 		return nil, err
 	}
 	if resp.Full || hasGroupUpdate {
-		count, err := s.db.FindGroupMemberNum(ctx, group.GroupID)
+		count, err := g.db.FindGroupMemberNum(ctx, group.GroupID)
 		if err != nil {
 			return nil, err
 		}
-		owner, err := s.db.TakeGroupOwner(ctx, group.GroupID)
+		owner, err := g.db.TakeGroupOwner(ctx, group.GroupID)
 		if err != nil {
 			return nil, err
 		}
-		resp.Group = s.groupDB2PB(group, owner.UserID, count)
+		resp.Group = g.groupDB2PB(group, owner.UserID, count)
 	}
 	return resp, nil
 }
 
-func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *pbgroup.BatchGetIncrementalGroupMemberReq) (resp *pbgroup.BatchGetIncrementalGroupMemberResp, err error) {
+func (g *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *pbgroup.BatchGetIncrementalGroupMemberReq) (resp *pbgroup.BatchGetIncrementalGroupMemberResp, err error) {
 	type VersionInfo struct {
 		GroupID       string
 		VersionID     string
@@ -161,7 +161,7 @@ func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *p
 		groupIDs = append(groupIDs, group.GroupID)
 	}
 
-	groups, err := s.db.FindGroup(ctx, groupIDs)
+	groups, err := g.db.FindGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
@@ -189,7 +189,7 @@ func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *p
 		VersionIDs:     versionIDs,
 		VersionNumbers: versionNumbers,
 		Versions: func(ctx context.Context, groupIDs []string, versions []uint64, limits []int) (map[string]*model.VersionLog, error) {
-			vLogs, err := s.db.BatchFindMemberIncrVersion(ctx, groupIDs, versions, limits)
+			vLogs, err := g.db.BatchFindMemberIncrVersion(ctx, groupIDs, versions, limits)
 			if err != nil {
 				return nil, errs.Wrap(err)
 			}
@@ -216,9 +216,9 @@ func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *p
 
 			return vLogs, nil
 		},
-		CacheMaxVersions: s.db.BatchFindMaxGroupMemberVersionCache,
+		CacheMaxVersions: g.db.BatchFindMaxGroupMemberVersionCache,
 		Find: func(ctx context.Context, groupID string, ids []string) ([]*sdkws.GroupMemberFullInfo, error) {
-			memberInfo, err := s.getGroupMembersInfo(ctx, groupID, ids)
+			memberInfo, err := g.getGroupMembersInfo(ctx, groupID, ids)
 			if err != nil {
 				return nil, err
 			}
@@ -258,17 +258,17 @@ func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *p
 
 	for groupID, val := range resp.RespList {
 		if val.Full || hasGroupUpdateMap[groupID] {
-			count, err := s.db.FindGroupMemberNum(ctx, groupID)
+			count, err := g.db.FindGroupMemberNum(ctx, groupID)
 			if err != nil {
 				return nil, err
 			}
 
-			owner, err := s.db.TakeGroupOwner(ctx, groupID)
+			owner, err := g.db.TakeGroupOwner(ctx, groupID)
 			if err != nil {
 				return nil, err
 			}
 
-			resp.RespList[groupID].Group = s.groupDB2PB(groupsMap[groupID], owner.UserID, count)
+			resp.RespList[groupID].Group = g.groupDB2PB(groupsMap[groupID], owner.UserID, count)
 		}
 	}
 
@@ -276,8 +276,8 @@ func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *p
 
 }
 
-func (s *groupServer) GetIncrementalJoinGroup(ctx context.Context, req *pbgroup.GetIncrementalJoinGroupReq) (*pbgroup.GetIncrementalJoinGroupResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+func (g *groupServer) GetIncrementalJoinGroup(ctx context.Context, req *pbgroup.GetIncrementalJoinGroupReq) (*pbgroup.GetIncrementalJoinGroupResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, g.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	opt := incrversion.Option[*sdkws.GroupInfo, pbgroup.GetIncrementalJoinGroupResp]{
@@ -285,9 +285,9 @@ func (s *groupServer) GetIncrementalJoinGroup(ctx context.Context, req *pbgroup.
 		VersionKey:      req.UserID,
 		VersionID:       req.VersionID,
 		VersionNumber:   req.Version,
-		Version:         s.db.FindJoinIncrVersion,
-		CacheMaxVersion: s.db.FindMaxJoinGroupVersionCache,
-		Find:            s.getGroupsInfo,
+		Version:         g.db.FindJoinIncrVersion,
+		CacheMaxVersion: g.db.FindMaxJoinGroupVersionCache,
+		Find:            g.getGroupsInfo,
 		Resp: func(version *model.VersionLog, delIDs []string, insertList, updateList []*sdkws.GroupInfo, full bool) *pbgroup.GetIncrementalJoinGroupResp {
 			return &pbgroup.GetIncrementalJoinGroupResp{
 				VersionID: version.ID.Hex(),

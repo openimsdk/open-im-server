@@ -22,8 +22,8 @@ import (
 )
 
 // GetGroupInfoCache get group info from cache.
-func (s *groupServer) GetGroupInfoCache(ctx context.Context, req *pbgroup.GetGroupInfoCacheReq) (*pbgroup.GetGroupInfoCacheResp, error) {
-	group, err := s.db.TakeGroup(ctx, req.GroupID)
+func (g *groupServer) GetGroupInfoCache(ctx context.Context, req *pbgroup.GetGroupInfoCacheReq) (*pbgroup.GetGroupInfoCacheResp, error) {
+	group, err := g.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -32,8 +32,8 @@ func (s *groupServer) GetGroupInfoCache(ctx context.Context, req *pbgroup.GetGro
 	}, nil
 }
 
-func (s *groupServer) GetGroupMemberCache(ctx context.Context, req *pbgroup.GetGroupMemberCacheReq) (*pbgroup.GetGroupMemberCacheResp, error) {
-	members, err := s.db.TakeGroupMember(ctx, req.GroupID, req.GroupMemberID)
+func (g *groupServer) GetGroupMemberCache(ctx context.Context, req *pbgroup.GetGroupMemberCacheReq) (*pbgroup.GetGroupMemberCacheResp, error) {
+	members, err := g.db.TakeGroupMember(ctx, req.GroupID, req.GroupMemberID)
 	if err != nil {
 		return nil, err
 	}

@@ -27,8 +27,8 @@ type ConversationNotificationSender struct {
 	*rpcclient.NotificationSender
 }
 
-func NewConversationNotificationSender(conf *config.Notification, msgRpcClient *rpcclient.MessageRpcClient) *ConversationNotificationSender {
-	return &ConversationNotificationSender{rpcclient.NewNotificationSender(conf, rpcclient.WithRpcClient(msgRpcClient))}
+func NewConversationNotificationSender(conf *config.Notification) *ConversationNotificationSender {
+	return &ConversationNotificationSender{rpcclient.NewNotificationSender(conf, rpcclient.WithRpcClient())}
 }
 
 // SetPrivate invote.

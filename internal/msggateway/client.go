@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"runtime/debug"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -132,7 +131,7 @@ func (c *Client) readMessage() {
 	defer func() {
 		if r := recover(); r != nil {
 			c.closedErr = ErrPanic
-			fmt.Println("socket have panic err:", r, string(debug.Stack()))
+			log.ZPanic(c.ctx, "socket have panic err:", r)
 		}
 		c.close()
 	}()

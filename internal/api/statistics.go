@@ -16,17 +16,16 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/a2r"
 )
 
-type StatisticsApi rpcclient.User
+type StatisticsApi struct{}
 
-func NewStatisticsApi(client rpcclient.User) StatisticsApi {
-	return StatisticsApi(client)
+func NewStatisticsApi() StatisticsApi {
+	return StatisticsApi{}
 }
 
 func (s *StatisticsApi) UserRegister(c *gin.Context) {
-	a2r.Call(user.UserClient.UserRegisterCount, s.Client, c)
+	a2r.CallV2(c, user.UserRegisterCountCaller.Invoke)
 }

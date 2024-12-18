@@ -18,6 +18,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -29,8 +31,10 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 	"github.com/openimsdk/protocol/constant"
+	pbconv "github.com/openimsdk/protocol/conversation"
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/rpccall"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -38,7 +42,6 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"go.mongodb.org/mongo-driver/mongo"
-	"time"
 )
 
 // GroupApplicationReceiver
@@ -49,20 +52,14 @@ const (
 
 func NewGroupNotificationSender(
 	db controller.GroupDatabase,
-	msgRpcClient *rpcclient.MessageRpcClient,
-	userRpcClient *rpcclient.UserRpcClient,
-	conversationRpcClient *rpcclient.ConversationRpcClient,
 	config *Config,
 	fn func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error),
 ) *GroupNotificationSender {
 	return &GroupNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithRpcClient(msgRpcClient), rpcclient.WithUserRpcClient(userRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithRpcClient(), rpcclient.WithUserRpcClient()),
 		getUsersInfo:       fn,
 		db:                 db,
 		config:             config,
-
-		conversationRpcClient: conversationRpcClient,
-		msgRpcClient:          msgRpcClient,
 	}
 }
 
@@ -71,9 +68,6 @@ type GroupNotificationSender struct {
 	getUsersInfo func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error)
 	db           controller.GroupDatabase
 	config       *Config
-
-	conversationRpcClient *rpcclient.ConversationRpcClient
-	msgRpcClient          *rpcclient.MessageRpcClient
 }
 
 func (g *GroupNotificationSender) PopulateGroupMember(ctx context.Context, members ...*model.GroupMember) error {
@@ -524,11 +518,14 @@ func (g *GroupNotificationSender) GroupApplicationAgreeMemberEnterNotification(c
 
 	if !g.config.RpcConfig.EnableHistoryForNewMembers {
 		conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
-		maxSeq, err := g.msgRpcClient.GetConversationMaxSeq(ctx, conversationID)
+		maxSeq, err := rpccall.ExtractField(ctx, msg.GetConversationMaxSeqCaller.Invoke,
+			&msg.GetConversationMaxSeqReq{ConversationID: conversationID},
+			(*msg.GetConversationMaxSeqResp).GetMaxSeq)
 		if err != nil {
 			return err
 		}
-		if _, err = g.msgRpcClient.SetUserConversationsMinSeq(ctx, &msg.SetUserConversationsMinSeqReq{
+
+		if err := msg.SetUserConversationsMinSeqCaller.Execute(ctx, &msg.SetUserConversationsMinSeqReq{
 			UserIDs:        entrantUserID,
 			ConversationID: conversationID,
 			Seq:            maxSeq,
@@ -537,7 +534,10 @@ func (g *GroupNotificationSender) GroupApplicationAgreeMemberEnterNotification(c
 		}
 	}
 
-	if err := g.conversationRpcClient.GroupChatFirstCreateConversation(ctx, groupID, entrantUserID); err != nil {
+	if err := pbconv.CreateGroupChatConversationsCaller.Execute(ctx, &pbconv.CreateGroupChatConversationsReq{
+		UserIDs: entrantUserID,
+		GroupID: groupID,
+	}); err != nil {
 		return err
 	}
 
@@ -583,11 +583,13 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, g
 
 	if !g.config.RpcConfig.EnableHistoryForNewMembers {
 		conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
-		maxSeq, err := g.msgRpcClient.GetConversationMaxSeq(ctx, conversationID)
+		maxSeq, err := rpccall.ExtractField(ctx, msg.GetConversationMaxSeqCaller.Invoke,
+			&msg.GetConversationMaxSeqReq{ConversationID: conversationID},
+			(*msg.GetConversationMaxSeqResp).GetMaxSeq)
 		if err != nil {
 			return err
 		}
-		if _, err = g.msgRpcClient.SetUserConversationsMinSeq(ctx, &msg.SetUserConversationsMinSeqReq{
+		if err := msg.SetUserConversationsMinSeqCaller.Execute(ctx, &msg.SetUserConversationsMinSeqReq{
 			UserIDs:        []string{entrantUserID},
 			ConversationID: conversationID,
 			Seq:            maxSeq,
@@ -596,7 +598,10 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, g
 		}
 	}
 
-	if err := g.conversationRpcClient.GroupChatFirstCreateConversation(ctx, groupID, []string{entrantUserID}); err != nil {
+	if err := pbconv.CreateGroupChatConversationsCaller.Execute(ctx, &pbconv.CreateGroupChatConversationsReq{
+		UserIDs: []string{entrantUserID},
+		GroupID: groupID,
+	}); err != nil {
 		return err
 	}
 
