@@ -5,4 +5,5 @@ imAdminUserID: [ imAdmin ]
 # 1: For Android, iOS, Windows, Mac, and web platforms, only one instance can be online at a time
 multiLogin:
   policy: 1
+  # max num of tokens in one end
   maxNumOneEnd: 30

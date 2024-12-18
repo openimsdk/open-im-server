@@ -25,7 +25,7 @@ scrape_configs:
   # prometheus fetches application services
   - job_name: node_exporter
     static_configs:
-      - targets: [ 127.0.0.1:20500 ]
+      - targets: [ 127.0.0.1:19100 ]
 
   - job_name: openimserver-openim-api
     http_sd_configs:
