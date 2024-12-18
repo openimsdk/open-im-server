@@ -24,7 +24,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
-	"github.com/openimsdk/tools/db/pagination"
 	"github.com/openimsdk/tools/s3"
 	"github.com/openimsdk/tools/s3/cont"
 	"github.com/redis/go-redis/v9"
@@ -40,10 +39,8 @@ type S3Database interface {
 	SetObject(ctx context.Context, info *model.Object) error
 	StatObject(ctx context.Context, name string) (*s3.ObjectInfo, error)
 	FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error)
-	FindNeedDeleteObjectByDB(ctx context.Context, duration time.Time, needDelType []string, pagination pagination.Pagination) (total int64, objects []*model.Object, err error)
-	DeleteObject(ctx context.Context, name string) error
-	DeleteSpecifiedData(ctx context.Context, engine string, name string) error
-	FindModelsByKey(ctx context.Context, key string) (objects []*model.Object, err error)
+	FindExpirationObject(ctx context.Context, engine string, expiration time.Time, needDelType []string, count int64) ([]*model.Object, error)
+	DeleteSpecifiedData(ctx context.Context, engine string, name []string) error
 	DelS3Key(ctx context.Context, engine string, keys ...string) error
 }
 
@@ -120,19 +117,12 @@ func (s *s3Database) StatObject(ctx context.Context, name string) (*s3.ObjectInf
 func (s *s3Database) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
 	return s.s3.FormData(ctx, name, size, contentType, duration)
 }
-func (s *s3Database) FindNeedDeleteObjectByDB(ctx context.Context, duration time.Time, needDelType []string, pagination pagination.Pagination) (total int64, objects []*model.Object, err error) {
-	return s.db.FindNeedDeleteObjectByDB(ctx, duration, needDelType, pagination)
+func (s *s3Database) FindExpirationObject(ctx context.Context, engine string, expiration time.Time, needDelType []string, count int64) ([]*model.Object, error) {
+	return s.db.FindExpirationObject(ctx, engine, expiration, needDelType, count)
 }
 
-func (s *s3Database) DeleteObject(ctx context.Context, name string) error {
-	return s.s3.DeleteObject(ctx, name)
-}
-func (s *s3Database) DeleteSpecifiedData(ctx context.Context, engine string, name string) error {
+func (s *s3Database) DeleteSpecifiedData(ctx context.Context, engine string, name []string) error {
 	return s.db.Delete(ctx, engine, name)
-}
-
-func (s *s3Database) FindModelsByKey(ctx context.Context, key string) (objects []*model.Object, err error) {
-	return s.db.FindModelsByKey(ctx, key)
 }
 
 func (s *s3Database) DelS3Key(ctx context.Context, engine string, keys ...string) error {

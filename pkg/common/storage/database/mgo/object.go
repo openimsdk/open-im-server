@@ -22,7 +22,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
 	"github.com/openimsdk/tools/db/mongoutil"
-	"github.com/openimsdk/tools/db/pagination"
 	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -91,21 +90,21 @@ func (o *S3Mongo) Take(ctx context.Context, engine string, name string) (*model.
 	return mongoutil.FindOne[*model.Object](ctx, o.coll, bson.M{"name": name, "engine": engine})
 }
 
-func (o *S3Mongo) Delete(ctx context.Context, engine string, name string) error {
-	return mongoutil.DeleteOne(ctx, o.coll, bson.M{"name": name, "engine": engine})
+func (o *S3Mongo) Delete(ctx context.Context, engine string, name []string) error {
+	if len(name) == 0 {
+		return nil
+	}
+	return mongoutil.DeleteOne(ctx, o.coll, bson.M{"engine": engine, "name": bson.M{"$in": name}})
 }
 
-// Find Expires object
-func (o *S3Mongo) FindNeedDeleteObjectByDB(ctx context.Context, duration time.Time, needDelType []string, pagination pagination.Pagination) (total int64, objects []*model.Object, err error) {
-	return mongoutil.FindPage[*model.Object](ctx, o.coll, bson.M{
-		"create_time": bson.M{"$lt": duration},
-		"group":       bson.M{"$in": needDelType},
-	}, pagination)
-}
-
-// Find object by key
-func (o *S3Mongo) FindModelsByKey(ctx context.Context, key string) (objects []*model.Object, err error) {
+func (o *S3Mongo) FindExpirationObject(ctx context.Context, engine string, expiration time.Time, needDelType []string, count int64) ([]*model.Object, error) {
+	opt := options.Find()
+	if count > 0 {
+		opt.SetLimit(count)
+	}
 	return mongoutil.Find[*model.Object](ctx, o.coll, bson.M{
-		"key": key,
-	})
+		"engine":      engine,
+		"create_time": bson.M{"$lt": expiration},
+		"group":       bson.M{"$in": needDelType},
+	}, opt)
 }

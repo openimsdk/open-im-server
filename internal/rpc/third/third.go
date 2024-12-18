@@ -44,7 +44,7 @@ type thirdServer struct {
 	s3dataBase    controller.S3Database
 	defaultExpire time.Duration
 	config        *Config
-	minio         *minio.Minio
+	s3            s3.Interface
 }
 
 type Config struct {
@@ -79,13 +79,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	// Select the oss method according to the profile policy
 	enable := config.RpcConfig.Object.Enable
 	var (
-		o        s3.Interface
-		minioCli *minio.Minio
+		o s3.Interface
 	)
 	switch enable {
 	case "minio":
-		minioCli, err = minio.NewMinio(ctx, redis.NewMinioCache(rdb), *config.MinioConfig.Build())
-		o = minioCli
+		o, err = minio.NewMinio(ctx, redis.NewMinioCache(rdb), *config.MinioConfig.Build())
 	case "cos":
 		o, err = cos.NewCos(*config.RpcConfig.Object.Cos.Build())
 	case "oss":
@@ -106,13 +104,9 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
 		defaultExpire: time.Hour * 24 * 7,
 		config:        config,
-		minio:         minioCli,
+		s3:            o,
 	})
 	return nil
-}
-
-func (t *thirdServer) getMinioImageThumbnailKey(ctx context.Context, name string) (string, error) {
-	return t.minio.GetImageThumbnailKey(ctx, name)
 }
 
 func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {
