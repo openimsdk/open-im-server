@@ -16,4 +16,4 @@ prometheus:
   # It will only take effect when autoSetPorts is set to false.
   ports: [ 12002 ]
   # This address can be accessed via a browser
-  grafanaURL: http://127.0.0.1:13000/
+  grafanaURL:

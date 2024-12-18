@@ -126,8 +126,8 @@ jobs:
 
       - name: Modify Server Configuration
         run: |
-          yq e '.groupCreated.unreadCount = true' -i ${{ env.CONFIG_PATH }}
-          yq e '.friendApplicationApproved.unreadCount = true' -i ${{ env.CONFIG_PATH }}
+          yq e '.groupCreated.isSendMsg = true' -i ${{ env.CONFIG_PATH }}
+          yq e '.friendApplicationApproved.isSendMsg = true' -i ${{ env.CONFIG_PATH }}
 
       - name: Start Server Services
         run: |
