@@ -6,6 +6,15 @@
 - Memory: 4 GiB
 - Disk usage: 20 GiB (on Node)
 
+## Preconditions
+
+ensure that you have already deployed the following components:
+
+- Redis
+- MongoDB
+- Kafka
+- MinIO
+
 ## Origin Deploy
 
 ### Enter the target dir
@@ -14,29 +23,19 @@
 
 ### Deploy configs and dependencies
 
-Upate your `openim-config.yml`. **You can check the official docs for more details.**
+Upate your configMap `openim-config.yml`. **You can check the official docs for more details.**
 
 In `openim-config.yml`, you need modify the following configurations:
 
 **discovery.yml**
 
 - `kubernetes.namespace`: default is `default`, you can change it to your namespace.
-- `enable`: set to `kubernetes`
-- `rpcService`: Every field value need to same to the corresponding service name. Such as `user` value in same to `openim-rpc-user-service.yml` service name.
-
-**log.yml**
-
-- `storageLocation`: log save path in container.
-- `isStdout`: output in kubectl log.
-- `isJson`: log format to JSON.
 
 **mongodb.yml**
 
 - `address`: set to your already mongodb address or mongo Service name and port in your deployed.
-- `username`: set to your mongodb username.
 - `database`: set to your mongodb database name.
-- `password`: **need to set to secret use base64 encode.**
-- `authSource`: set to your mongodb authSource, default is `openim_v3`.
+- `authSource`: set to your mongodb authSource. (authSource is specify the database name associated with the user's credentials, user need create in this database.)
 
 **share.yml**
 
@@ -50,15 +49,11 @@ In `openim-config.yml`, you need modify the following configurations:
 **redis.yml**
 
 - `address`: set to your already redis address or redis Service name and port in your deployed.
-- `password`: **need to set to secret use base64 encode.**
 
 **minio.yml**
 
-- `bucket`: set to your minio bucket name or use default value `openim`.
-- `accessKeyID`: set to your minio accessKey ID or use `root`.
-- `secretAccessKey`: need to set to secret use base64 encode.
 - `internalAddress`: set to your already minio internal address or minio Service name and port in your deployed.
-- `externalAddress`: set to your already expose minio external address or minio Service name and port in your deployed.
+- `externalAddress`: set to your already expose minio external address.
 
 ### Set the secret
 
@@ -66,16 +61,18 @@ A Secret is an object that contains a small amount of sensitive data. Such as pa
 
 #### Example:
 
-create a secret for redis password. You can create new file is `redis-secret.yml` or append contents to `openim-config.yml` use `---` split it.
+create a secret for redis password. You can update `redis-secret.yml`.
+
+you need update `redis-password` value to your redis password in base64.
 
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: redis-secret
+  name: openim-redis-secret
 type: Opaque
 data:
-  redis-password: b3BlbklNMTIz # "openIM123" in base64
+  redis-password: b3BlbklNMTIz # you need update to your redis password in base64
 ```
 
 #### Usage:
@@ -95,11 +92,11 @@ spec:
       containers:
         - name: rpc-user-server
           env:
-            - name: IMENV_REDIS_PASSWORD # adapt to redis.yml password field
+            - name: IMENV_REDIS_PASSWORD # adapt to redis.yml password field in OpenIM Server config, Don't modify it.
               valueFrom:
                 secretKeyRef:
-                  name: redis-secret
-                  key: redis-password
+                  name: openim-redis-secret # You deployed secret name
+                  key: redis-password # You deployed secret key name
 ```
 
 So, you need following configurations to set secret:
@@ -109,6 +106,12 @@ So, you need following configurations to set secret:
 - `REDIS_PASSWORD`
 - `MINIO_ACCESSKEYID`
 - `MINIO_SECRETACCESSKEY`
+
+Apply the secret.
+
+```shell
+kubectl apply -f redis-secret.yml -f minio-secret.yml -f mongo-secret.yml
+```
 
 ### Apply all config and dependencies
 
@@ -123,10 +126,6 @@ So, you need following configurations to set secret:
 `kubectl apply -f ./clusterRole.yml`
 
 **If you have already deployed the storage component, you need to update corresponding config and secret. And pass corresponding deployments and services build.**
-
-Run infrasturcture components.
-
-`kubectl apply -f minio-service.yml -f minio-statefulset.yml -f mongo-service.yml -f mongo-statefulset.yml -f redis-service.yml -f redis-statefulset.yml -f kafka-service.yml -f kafka-statefulset.yml`
 
 > Note: Ensure that infrastructure services like MinIO, Redis, and Kafka are running before deploying the main applications.
 
