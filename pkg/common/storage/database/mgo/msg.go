@@ -1227,8 +1227,7 @@ func (m *MsgMgo) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string
 	}
 }
 
-func (m *MsgMgo) GetDocIDs(ctx context.Context) ([]string, error) {
-	limit := 5000
+func (m *MsgMgo) GetRandDocIDs(ctx context.Context, limit int) ([]string, error) {
 	var skip int
 	var docIDs []string
 	var offset int
@@ -1267,15 +1266,18 @@ func (m *MsgMgo) GetDocIDs(ctx context.Context) ([]string, error) {
 	return docIDs, errs.Wrap(err)
 }
 
-func (m *MsgMgo) GetBeforeMsg(ctx context.Context, ts int64, docIDs []string, limit int) ([]*model.MsgDocModel, error) {
+func (m *MsgMgo) GetRandBeforeMsg(ctx context.Context, ts int64, limit int) ([]*model.MsgDocModel, error) {
 	return mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, []bson.M{
 		{
 			"$match": bson.M{
-				"doc_id": bson.M{
-					"$in": docIDs,
-				},
-				"msgs.msg.send_time": bson.M{
-					"$lt": ts,
+				"msgs": bson.M{
+					"$not": bson.M{
+						"$elemMatch": bson.M{
+							"msg.send_time": bson.M{
+								"$gt": ts,
+							},
+						},
+					},
 				},
 			},
 		},
@@ -1288,7 +1290,7 @@ func (m *MsgMgo) GetBeforeMsg(ctx context.Context, ts int64, docIDs []string, li
 			},
 		},
 		{
-			"$limit": limit,
+			"$sample": limit,
 		},
 	})
 }

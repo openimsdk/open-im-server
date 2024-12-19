@@ -15,20 +15,21 @@ func (c *cronServer) clearS3() {
 	// number of pagination. if need modify, need update value in third.DeleteOutdatedData
 	pageShowNumber := 500
 	deleteTime := start.Add(-time.Hour * 24 * time.Duration(c.config.CronTask.FileExpireTime))
-	operationID := fmt.Sprintf("cron_%d_%d", os.Getpid(), deleteTime.UnixMilli())
+	operationID := fmt.Sprintf("cron_s3_%d_%d", os.Getpid(), deleteTime.UnixMilli())
 	ctx := mcontext.SetOperationID(c.ctx, operationID)
 	log.ZDebug(ctx, "deleteoutDatedData", "deletetime", deleteTime, "timestamp", deleteTime.UnixMilli())
+	var count int
 	for i := 1; i <= executeNum; i++ {
 		ctx := mcontext.SetOperationID(c.ctx, fmt.Sprintf("%s_%d", operationID, i))
-		resp, err := c.thirdClient.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: deleteTime.UnixMilli(), ObjectGroup: c.config.CronTask.DeleteObjectType, Count: int32(pageShowNumber)})
+		resp, err := c.thirdClient.DeleteOutdatedData(ctx, &third.DeleteOutdatedDataReq{ExpireTime: deleteTime.UnixMilli(), ObjectGroup: c.config.CronTask.DeleteObjectType, Limit: int32(pageShowNumber)})
 		if err != nil {
-			log.ZError(ctx, "cron deleteoutDatedData failed", err, "deleteTime", deleteTime, "cont", time.Since(start))
+			log.ZError(ctx, "cron deleteoutDatedData failed", err)
 			return
 		}
+		count += int(resp.Count)
 		if resp.Count < int32(pageShowNumber) {
 			break
 		}
 	}
-
-	log.ZDebug(ctx, "cron deleteoutDatedData success", "deltime", deleteTime, "cont", time.Since(start))
+	log.ZDebug(ctx, "cron deleteoutDatedData success", "deltime", deleteTime, "cont", time.Since(start), "count", count)
 }

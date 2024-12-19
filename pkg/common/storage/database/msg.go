@@ -45,7 +45,7 @@ type Msg interface {
 
 	DeleteDoc(ctx context.Context, docID string) error
 	DeleteMsgByIndex(ctx context.Context, docID string, index []int) error
-	GetBeforeMsg(ctx context.Context, ts int64, docIDs []string, limit int) ([]*model.MsgDocModel, error)
+	GetRandBeforeMsg(ctx context.Context, ts int64, limit int) ([]*model.MsgDocModel, error)
 
-	GetDocIDs(ctx context.Context) ([]string, error)
+	GetRandDocIDs(ctx context.Context, limit int) ([]string, error)
 }

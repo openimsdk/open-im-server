@@ -12,9 +12,9 @@ import (
 
 func (c *cronServer) clearUserMsg() {
 	now := time.Now()
-	ctx := mcontext.SetOperationID(c.ctx, fmt.Sprintf("cron_%d_%d", os.Getpid(), now.UnixMilli()))
-	log.ZDebug(ctx, "clear msg cron start", "now", now)
-
+	operationID := fmt.Sprintf("cron_user_msg_%d_%d", os.Getpid(), now.UnixMilli())
+	ctx := mcontext.SetOperationID(c.ctx, operationID)
+	log.ZDebug(ctx, "clear msg cron start")
 	conversations, err := c.conversationClient.GetConversationsNeedClearMsg(ctx, &pbconversation.GetConversationsNeedClearMsgReq{})
 	if err != nil {
 		log.ZError(ctx, "Get conversation need Destruct msgs failed.", err)

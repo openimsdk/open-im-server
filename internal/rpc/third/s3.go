@@ -19,6 +19,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"path"
 	"strconv"
 	"time"
@@ -284,10 +285,13 @@ func (t *thirdServer) apiAddress(prefix, name string) string {
 }
 
 func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteOutdatedDataReq) (*third.DeleteOutdatedDataResp, error) {
+	if err := authverify.CheckAdmin(ctx, t.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	engine := t.config.RpcConfig.Object.Enable
 	expireTime := time.UnixMilli(req.ExpireTime)
 	// Find all expired data in S3 database
-	models, err := t.s3dataBase.FindExpirationObject(ctx, engine, expireTime, req.ObjectGroup, int64(req.Count))
+	models, err := t.s3dataBase.FindExpirationObject(ctx, engine, expireTime, req.ObjectGroup, int64(req.Limit))
 	if err != nil {
 		return nil, err
 	}
