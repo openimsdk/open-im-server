@@ -103,6 +103,8 @@ type CommonMsgDatabase interface {
 	SetUserConversationsMinSeq(ctx context.Context, conversationID string, userID string, seq int64) error
 
 	DeleteDoc(ctx context.Context, docID string) error
+
+	GetLastMessageSeqByTime(ctx context.Context, conversationID string, time int64) (int64, error)
 }
 
 func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUser cache.SeqUser, seqConversation cache.SeqConversationCache, kafkaConf *config.Kafka) (CommonMsgDatabase, error) {
@@ -1015,4 +1017,8 @@ func (db *commonMsgDatabase) GetMaxSeqsWithTime(ctx context.Context, conversatio
 
 func (db *commonMsgDatabase) DeleteDoc(ctx context.Context, docID string) error {
 	return db.msgDocDatabase.DeleteDoc(ctx, docID)
+}
+
+func (db *commonMsgDatabase) GetLastMessageSeqByTime(ctx context.Context, conversationID string, time int64) (int64, error) {
+	return db.msgDocDatabase.GetLastMessageSeqByTime(ctx, conversationID, time)
 }

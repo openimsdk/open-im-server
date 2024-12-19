@@ -10,7 +10,6 @@ import (
 	pbconv "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/wrapperspb"
-	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
@@ -20,15 +19,9 @@ import (
 )
 
 // hard delete in Database.
-func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) (_ *msg.DestructMsgsResp, err error) {
+func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) (*msg.DestructMsgsResp, error) {
 	if err := authverify.CheckAdmin(ctx, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err
-	}
-	if req.Timestamp > time.Now().UnixMilli() {
-		return nil, errs.ErrArgs.WrapMsg("request millisecond timestamp error")
-	}
-	if req.Limit <= 0 {
-		return nil, errs.ErrArgs.WrapMsg("request limit error")
 	}
 	docs, err := m.MsgDatabase.GetRandBeforeMsg(ctx, req.Timestamp, int(req.Limit))
 	if err != nil {
@@ -66,7 +59,7 @@ func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) 
 }
 
 // soft delete for user self
-func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.ClearMsgResp, err error) {
+func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (*msg.ClearMsgResp, error) {
 	temp := convert.ConversationsPb2DB(req.Conversations)
 
 	batchNum := 100
@@ -127,4 +120,12 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.
 	}
 
 	return nil, nil
+}
+
+func (m *msgServer) GetLastMessageSeqByTime(ctx context.Context, req *msg.GetLastMessageSeqByTimeReq) (*msg.GetLastMessageSeqByTimeResp, error) {
+	seq, err := m.MsgDatabase.GetLastMessageSeqByTime(ctx, req.ConversationID, req.Time)
+	if err != nil {
+		return nil, err
+	}
+	return &msg.GetLastMessageSeqByTimeResp{Seq: seq}, nil
 }

@@ -15,10 +15,10 @@ import (
 )
 
 func TestName1(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*300)
-	defer cancel()
-	cli := Result(mongo.Connect(ctx, options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.66:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
-
+	//ctx, cancel := context.WithTimeout(context.Background(), time.Second*300)
+	//defer cancel()
+	//cli := Result(mongo.Connect(ctx, options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.66:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
+	//
 	//v := &MsgMgo{
 	//	coll: cli.Database("openim_v3").Collection("msg3"),
 	//}
@@ -44,16 +44,16 @@ func TestName1(t *testing.T) {
 	//}
 	//
 	//t.Log(total)
-
-	msg, err := NewMsgMongo(cli.Database("openim_v3"))
-	if err != nil {
-		panic(err)
-	}
-	res, err := msg.GetBeforeMsg(ctx, time.Now().UnixMilli(), []string{"1:0"}, 1000)
-	if err != nil {
-		panic(err)
-	}
-	t.Log(len(res))
+	//
+	//msg, err := NewMsgMongo(cli.Database("openim_v3"))
+	//if err != nil {
+	//	panic(err)
+	//}
+	//res, err := msg.GetBeforeMsg(ctx, time.Now().UnixMilli(), []string{"1:0"}, 1000)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//t.Log(len(res))
 }
 
 func TestName10(t *testing.T) {
@@ -95,13 +95,20 @@ func TestName4(t *testing.T) {
 	defer cancel()
 	cli := Result(mongo.Connect(ctx, options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.66:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
 
-	msg, err := NewMsgMongo(cli.Database("openim_v3"))
+	msg, err := NewConversationMongo(cli.Database("openim_v3"))
 	if err != nil {
 		panic(err)
 	}
-	res, err := msg.GetBeforeMsg(ctx, time.Now().UnixMilli(), []string{"1:0"}, 1000)
+	ts := time.Now().UnixMilli()
+	t.Log(ts)
+	res, err := msg.FindRandConversation(ctx, ts, 10)
 	if err != nil {
 		panic(err)
 	}
-	t.Log(len(res))
+	t.Log(res)
+}
+
+func TestName5(t *testing.T) {
+	var v time.Time
+	t.Log(v.UnixMilli())
 }

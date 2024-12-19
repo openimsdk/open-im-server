@@ -763,3 +763,32 @@ func (c *conversationServer) GetPinnedConversationIDs(ctx context.Context, req *
 	}
 	return &pbconversation.GetPinnedConversationIDsResp{ConversationIDs: conversationIDs}, nil
 }
+
+func (c *conversationServer) ClearUserConversationMsg(ctx context.Context, req *pbconversation.ClearUserConversationMsgReq) (*pbconversation.ClearUserConversationMsgResp, error) {
+	conversations, err := c.conversationDatabase.FindRandConversation(ctx, req.Timestamp, int(req.Limit))
+	if err != nil {
+		return nil, err
+	}
+	for _, conversation := range conversations {
+		if conversation.IsMsgDestruct == false || conversation.MsgDestructTime == 0 {
+			continue
+		}
+		rcpReq := &pbmsg.GetLastMessageSeqByTimeReq{ConversationID: conversation.ConversationID, Time: req.Timestamp - conversation.MsgDestructTime}
+		resp, err := pbmsg.GetLastMessageSeqByTime.Invoke(ctx, rcpReq)
+		if err != nil {
+			return nil, err
+		}
+		if resp.Seq == 0 {
+			continue
+		}
+		_, err = c.SetConversationMinSeq(ctx, &pbconversation.SetConversationMinSeqReq{
+			ConversationID: conversation.ConversationID,
+			OwnerUserID:    []string{conversation.OwnerUserID},
+			MinSeq:         resp.Seq + 1,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &pbconversation.ClearUserConversationMsgResp{}, nil
+}

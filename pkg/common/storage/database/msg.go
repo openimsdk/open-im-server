@@ -48,4 +48,6 @@ type Msg interface {
 	GetRandBeforeMsg(ctx context.Context, ts int64, limit int) ([]*model.MsgDocModel, error)
 
 	GetRandDocIDs(ctx context.Context, limit int) ([]string, error)
+
+	GetLastMessageSeqByTime(ctx context.Context, conversationID string, time int64) (int64, error)
 }
