@@ -1,9 +1,7 @@
 package api
 
 import (
-	"context"
 	"fmt"
-	"github.com/openimsdk/protocol/user"
 	"net/http"
 	"strings"
 
@@ -299,17 +297,4 @@ func GinParseToken() gin.HandlerFunc {
 var Whitelist = []string{
 	"/auth/get_admin_token",
 	"/auth/parse_token",
-}
-
-func init() {
-
-	var uc user.UserClient
-	var g *gin.Engine
-	g.POST("/get_admin_token", New(uc, uc.AccountCheck))
-
-}
-
-func New[A, B, C any](c C, fn func(c C, ctx context.Context, req *A, opts ...grpc.CallOption) (*B, error)) func(c *gin.Context) {
-
-	return nil
 }
