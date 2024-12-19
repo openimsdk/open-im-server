@@ -47,7 +47,7 @@ In `openim-config.yml`, you need modify the following configurations:
 
 **minio.yml**
 
-- `internalAddress`: set to your already minio internal address or minio Service name and port in your deployed.
+- `internalAddress`: set to your minio Service name and port in your deployed.
 - `externalAddress`: set to your already expose minio external address.
 
 ### Set the secret
@@ -65,7 +65,7 @@ metadata:
   name: openim-redis-secret
 type: Opaque
 data:
-  redis-password: b3BlbklNMTIz # update to your redis password encoded in base64
+  redis-password: b3BlbklNMTIz # update to your redis password encoded in base64, if need empty, you can set to ""
 ```
 
 #### Mongo:
@@ -79,8 +79,8 @@ metadata:
   name: openim-mongo-secret
 type: Opaque
 data:
-  mongo_openim_username: b3BlbklN # update to your mongo username encoded in base64, this user credentials need in authSource database.
-  mongo_openim_password: b3BlbklNMTIz # update to your mongo password encoded in base64
+  mongo_openim_username: b3BlbklN # update to your mongo username encoded in base64, if need empty, you can set to "" (this user credentials need in authSource database).
+  mongo_openim_password: b3BlbklNMTIz # update to your mongo password encoded in base64, if need empty, you can set to ""
 ```
 
 #### Minio:
@@ -94,8 +94,8 @@ metadata:
   name: openim-minio-secret
 type: Opaque
 data:
-  minio-root-user: cm9vdA== # update to your minio accessKeyID encoded in base64
-  minio-root-password: b3BlbklNMTIz # update to your minio secretAccessKey encoded in base64
+  minio-root-user: cm9vdA== # update to your minio accessKeyID encoded in base64, if need empty, you can set to ""
+  minio-root-password: b3BlbklNMTIz # update to your minio secretAccessKey encoded in base64, if need empty, you can set to ""
 ```
 
 #### Kafka:
@@ -109,7 +109,7 @@ metadata:
   name: openim-kafka-secret
 type: Opaque
 data:
-  kafka-password: "" # update to your kafka password encoded in base64
+  kafka-password: b3BlbklNMTIz # update to your kafka password encoded in base64, if need empty, you can set to ""
 ```
 
 ### Apply the secret.
@@ -118,13 +118,13 @@ data:
 kubectl apply -f redis-secret.yml -f minio-secret.yml -f mongo-secret.yml -f kafka-secret.yml
 ```
 
-### Apply all config and dependencies
+### Apply all config
+
+`kubectl apply -f ./openim-config.yml`
 
 > Attation: If you use `default` namespace, you can excute `clusterRile.yml` to create a cluster role binding for default service account.
 >
 > Namespace is modify to `discovery.yml` in `openim-config.yml`, you can change `kubernetes.namespace` to your namespace.
-
-`kubectl apply -f ./openim-config.yml`
 
 **Excute `clusterRole.yml`**
 
