@@ -42,6 +42,7 @@ type S3Database interface {
 	FindExpirationObject(ctx context.Context, engine string, expiration time.Time, needDelType []string, count int64) ([]*model.Object, error)
 	DeleteSpecifiedData(ctx context.Context, engine string, name []string) error
 	DelS3Key(ctx context.Context, engine string, keys ...string) error
+	GetKeyCount(ctx context.Context, engine string, key string) (int64, error)
 }
 
 func NewS3Database(rdb redis.UniversalClient, s3 s3.Interface, obj database.ObjectInfo) S3Database {
@@ -117,8 +118,13 @@ func (s *s3Database) StatObject(ctx context.Context, name string) (*s3.ObjectInf
 func (s *s3Database) FormData(ctx context.Context, name string, size int64, contentType string, duration time.Duration) (*s3.FormData, error) {
 	return s.s3.FormData(ctx, name, size, contentType, duration)
 }
+
 func (s *s3Database) FindExpirationObject(ctx context.Context, engine string, expiration time.Time, needDelType []string, count int64) ([]*model.Object, error) {
 	return s.db.FindExpirationObject(ctx, engine, expiration, needDelType, count)
+}
+
+func (s *s3Database) GetKeyCount(ctx context.Context, engine string, key string) (int64, error) {
+	return s.db.GetKeyCount(ctx, engine, key)
 }
 
 func (s *s3Database) DeleteSpecifiedData(ctx context.Context, engine string, name []string) error {

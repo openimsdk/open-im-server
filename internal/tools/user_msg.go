@@ -15,7 +15,7 @@ func (c *cronServer) clearUserMsg() {
 	ctx := mcontext.SetOperationID(c.ctx, operationID)
 	log.ZDebug(ctx, "clear user msg cron start")
 	const (
-		deleteCount = 200
+		deleteCount = 10000
 		deleteLimit = 100
 	)
 	var count int

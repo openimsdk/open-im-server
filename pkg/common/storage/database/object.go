@@ -26,4 +26,5 @@ type ObjectInfo interface {
 	Take(ctx context.Context, engine string, name string) (*model.Object, error)
 	Delete(ctx context.Context, engine string, name []string) error
 	FindExpirationObject(ctx context.Context, engine string, expiration time.Time, needDelType []string, count int64) ([]*model.Object, error)
+	GetKeyCount(ctx context.Context, engine string, key string) (int64, error)
 }

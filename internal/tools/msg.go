@@ -16,7 +16,7 @@ func (c *cronServer) deleteMsg() {
 	ctx := mcontext.SetOperationID(c.ctx, operationID)
 	log.ZDebug(ctx, "Destruct chat records", "deltime", deltime, "timestamp", deltime.UnixMilli())
 	const (
-		deleteCount = 200
+		deleteCount = 10000
 		deleteLimit = 50
 	)
 	var count int
@@ -28,9 +28,9 @@ func (c *cronServer) deleteMsg() {
 			break
 		}
 		count += int(resp.Count)
-		if resp.Count <= deleteLimit {
+		if resp.Count < deleteLimit {
 			break
 		}
 	}
-	log.ZDebug(ctx, "cron destruct chat records end", "deltime", deltime, "cont", time.Since(now), "deleteDocs", count)
+	log.ZDebug(ctx, "cron destruct chat records end", "deltime", deltime, "cont", time.Since(now), "count", count)
 }

@@ -108,3 +108,7 @@ func (o *S3Mongo) FindExpirationObject(ctx context.Context, engine string, expir
 		"group":       bson.M{"$in": needDelType},
 	}, opt)
 }
+
+func (o *S3Mongo) GetKeyCount(ctx context.Context, engine string, key string) (int64, error) {
+	return mongoutil.Count(ctx, o.coll, bson.M{"engine": engine, "key": key})
+}

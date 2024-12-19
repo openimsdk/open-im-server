@@ -16,7 +16,7 @@ func (c *cronServer) clearS3() {
 	ctx := mcontext.SetOperationID(c.ctx, operationID)
 	log.ZDebug(ctx, "deleteoutDatedData", "deletetime", deleteTime, "timestamp", deleteTime.UnixMilli())
 	const (
-		deleteCount = 200
+		deleteCount = 10000
 		deleteLimit = 100
 	)
 
