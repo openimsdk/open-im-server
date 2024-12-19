@@ -4,7 +4,7 @@ metadata:
   name: openim-config
 data:
   discovery.yml: |
-    enable: "kubernetes"
+    enable: "kubernetes" # "kubernetes" or "etcd"
     kubernetes:
       namespace: default
     etcd:
@@ -26,7 +26,6 @@ data:
 
   log.yml: |
     # Log storage path, default is acceptable, change to a full path if modification is needed
-    # storageLocation: ../../../../logs/
     storageLocation: ./logs/
     # Log rotation period (in hours), default is acceptable
     rotationTime: 24
@@ -49,9 +48,9 @@ data:
     # Name of the database
     database: openim_v3
     # Username for database authentication
-    username: openIM
+    username: ''  # openIM
     # Password for database authentication
-    password: openIM123
+    password: '' # openIM123
     # Authentication source for database authentication, if use root user, set it to admin
     authSource: openim_v3
     # Maximum number of connections in the connection pool
@@ -1055,16 +1054,3 @@ data:
           - targets: [ internal_ip:12320 ]
             labels:
               namespace: default
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mongo-secret
-type: Opaque
-data:
-  mongo_initdb_root_username: cm9vdA== # base64 for "root"
-  mongo_initdb_root_password: b3BlbklNMTIz # base64 for "openIM123"
-  mongo_initdb_database: b3BlbmltX3Yz # base64 for "openim_v3"
-  mongo_openim_username: b3BlbklN # base64 for "openIM"
-  mongo_openim_password: b3BlbklNMTIz # base64 for "openIM123"

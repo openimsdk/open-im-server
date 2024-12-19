@@ -29,9 +29,6 @@ spec:
           volumeMounts:
             - name: redis-data
               mountPath: /data
-            # - name: redis-config-volume
-            #   mountPath: /usr/local/redis/config/redis.conf
-            #   subPath: redis.conf
           command:
             [
               "/bin/sh",
@@ -56,11 +53,3 @@ spec:
   resources:
     requests:
       storage: 5Gi
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: redis-secret
-type: Opaque
-data:
-  redis-password: b3BlbklNMTIz # "openIM123" in base64

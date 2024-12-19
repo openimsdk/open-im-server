@@ -47,27 +47,27 @@ spec:
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: mongo-secret
+                  name: openim-mongo-init-secret
                   key: mongo_initdb_root_username
             - name: MONGO_INITDB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mongo-secret
+                  name: openim-mongo-init-secret
                   key: mongo_initdb_root_password
             - name: MONGO_INITDB_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: mongo-secret
+                  name: openim-mongo-init-secret
                   key: mongo_initdb_database
             - name: MONGO_OPENIM_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: mongo-secret
+                  name: openim-mongo-init-secret
                   key: mongo_openim_username
             - name: MONGO_OPENIM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mongo-secret
+                  name: openim-mongo-init-secret
                   key: mongo_openim_password
             - name: TZ
               value: "Asia/Shanghai"
@@ -93,3 +93,16 @@ spec:
   resources:
     requests:
       storage: 5Gi
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openim-mongo-init-secret
+type: Opaque
+data:
+  mongo_initdb_root_username: cm9vdA== # base64 for "root"
+  mongo_initdb_root_password: b3BlbklNMTIz # base64 for "openIM123"
+  mongo_initdb_database: b3BlbmltX3Yz # base64 for "openim_v3"
+  mongo_openim_username: b3BlbklN # base64 for "openIM"
+  mongo_openim_password: b3BlbklNMTIz # base64 for "openIM123"

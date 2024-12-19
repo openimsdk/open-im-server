@@ -31,12 +31,12 @@ spec:
             - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
-                  name: minio-secret
+                  name: openim-minio-secret
                   key: minio-root-user
             - name: MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: minio-secret
+                  name: openim-minio-secret
                   key: minio-root-password
           command:
             - "/bin/sh"
@@ -76,12 +76,4 @@ spec:
     requests:
       storage: 2Gi
 
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: minio-secret
-type: Opaque
-data:
-  minio-root-user: cm9vdA== # Base64 encoded "root"
-  minio-root-password: b3BlbklNMTIz # Base64 encoded "openIM123"
+

@@ -22,7 +22,7 @@ spec:
             - name: IMENV_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: redis-secret
+                  name: openim-redis-secret
                   key: redis-password
           volumeMounts:
             - name: openim-config
