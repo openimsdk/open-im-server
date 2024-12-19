@@ -1,12 +1,11 @@
 package api
 
 import (
-	"net/http"
+	"encoding/json"
 
 	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/apiresp"
-	"gopkg.in/yaml.v3"
 )
 
 type ConfigManager struct {
@@ -20,10 +19,10 @@ func NewConfigManager(api *config.API) *ConfigManager {
 }
 
 func (cm *ConfigManager) LoadApiConfig(c *gin.Context) {
-	b, err := yaml.Marshal(cm.apiConfig)
+	b, err := json.Marshal(cm.apiConfig)
 	if err != nil {
 		apiresp.GinError(c, err) // args option error
 		return
 	}
-	c.Data(http.StatusOK, "text/yaml; charset=utf-8", b)
+	apiresp.GinSuccess(c, string(b))
 }
