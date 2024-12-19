@@ -68,7 +68,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	u := NewUserApi(disCov, config.Discovery.RpcService.MessageGateway)
 	m := NewMessageApi(config.Share.IMAdminUserID)
 	j := jssdk.NewJSSdkApi()
-	pd := NewPrometheusDiscoveryApi(config, disCov)
+
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -245,6 +245,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	jssdk.POST("/get_conversations", j.GetConversations)
 	jssdk.POST("/get_active_conversations", j.GetActiveConversations)
 
+	pd := NewPrometheusDiscoveryApi(config, disCov)
 	proDiscoveryGroup := r.Group("/prometheus_discovery", pd.Enable)
 	proDiscoveryGroup.GET("/api", pd.Api)
 	proDiscoveryGroup.GET("/user", pd.User)
@@ -258,6 +259,9 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	proDiscoveryGroup.GET("/msg_gateway", pd.MessageGateway)
 	proDiscoveryGroup.GET("/msg_transfer", pd.MessageTransfer)
 
+	cm := NewConfigManager(&config.API)
+	configGroup := r.Group("/config")
+	configGroup.GET("/api", cm.LoadApiConfig)
 	return r
 }
 
