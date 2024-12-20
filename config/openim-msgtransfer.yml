@@ -5,4 +5,4 @@ prometheus:
   autoSetPorts: true
   # List of ports that Prometheus listens on; each port corresponds to an instance of monitoring. Ensure these are managed accordingly
   # It will only take effect when autoSetPorts is set to false.
-  ports: [ 12020, 12021, 12022, 12023, 12024, 12025, 12026, 12027, 12028, 12029, 12030, 12031, 12032, 12033, 12034, 12035 ]
+  ports:

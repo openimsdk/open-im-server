@@ -194,3 +194,21 @@ services:
     volumes:
       - ${DATA_DIR:-./}/components/grafana:/var/lib/grafana
     network_mode: host
+
+  node-exporter:
+    image: ${NODE_EXPORTER_IMAGE}
+    container_name: node-exporter
+    restart: always
+    profiles:
+      - m
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--web.listen-address=:19100'
+    network_mode: host
+
