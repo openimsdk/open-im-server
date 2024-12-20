@@ -2,6 +2,7 @@ package msg
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -9,7 +10,6 @@ import (
 	pbconv "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/wrapperspb"
-	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
@@ -19,63 +19,50 @@ import (
 )
 
 // hard delete in Database.
-func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) (_ *msg.DestructMsgsResp, err error) {
+func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) (*msg.DestructMsgsResp, error) {
 	if err := authverify.CheckAdmin(ctx, m.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
-	if req.Timestamp > time.Now().UnixMilli() {
-		return nil, errs.ErrArgs.WrapMsg("request millisecond timestamp error")
-	}
-	var (
-		docNum   int
-		msgNum   int
-		start    = time.Now()
-		getLimit = 5000
-	)
-
-	destructMsg := func(ctx context.Context) (bool, error) {
-		docIDs, err := m.MsgDatabase.GetDocIDs(ctx)
-		if err != nil {
-			return false, err
-		}
-
-		msgs, err := m.MsgDatabase.GetBeforeMsg(ctx, req.Timestamp, docIDs, getLimit)
-		if err != nil {
-			return false, err
-		}
-		if len(msgs) == 0 {
-			return false, nil
-		}
-
-		for _, msg := range msgs {
-			index, err := m.MsgDatabase.DeleteDocMsgBefore(ctx, req.Timestamp, msg)
-			if err != nil {
-				return false, err
-			}
-			if len(index) == 0 {
-				return false, errs.ErrInternalServer.WrapMsg("delete doc msg failed")
-			}
-
-			docNum++
-			msgNum += len(index)
-		}
-
-		return true, nil
-	}
-
-	_, err = destructMsg(ctx)
+	docs, err := m.MsgDatabase.GetRandBeforeMsg(ctx, req.Timestamp, int(req.Limit))
 	if err != nil {
-		log.ZError(ctx, "clear msg failed", err, "docNum", docNum, "msgNum", msgNum, "cost", time.Since(start))
 		return nil, err
 	}
-
-	log.ZDebug(ctx, "clearing message", "docNum", docNum, "msgNum", msgNum, "cost", time.Since(start))
-
-	return &msg.DestructMsgsResp{}, nil
+	for i, doc := range docs {
+		if err := m.MsgDatabase.DeleteDoc(ctx, doc.DocID); err != nil {
+			return nil, err
+		}
+		log.ZDebug(ctx, "DestructMsgs delete doc", "index", i, "docID", doc.DocID)
+		index := strings.LastIndex(doc.DocID, ":")
+		if index < 0 {
+			continue
+		}
+		var minSeq int64
+		for _, model := range doc.Msg {
+			if model.Msg == nil {
+				continue
+			}
+			if model.Msg.Seq > minSeq {
+				minSeq = model.Msg.Seq
+			}
+		}
+		if minSeq <= 0 {
+			continue
+		}
+		conversationID := doc.DocID[:index]
+		if conversationID == "" {
+			continue
+		}
+		minSeq++
+		if err := m.MsgDatabase.SetMinSeq(ctx, conversationID, minSeq); err != nil {
+			return nil, err
+		}
+		log.ZDebug(ctx, "DestructMsgs delete doc set min seq", "index", i, "docID", doc.DocID, "conversationID", conversationID, "setMinSeq", minSeq)
+	}
+	return &msg.DestructMsgsResp{Count: int32(len(docs))}, nil
 }
 
 // soft delete for user self
-func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.ClearMsgResp, err error) {
+func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (*msg.ClearMsgResp, error) {
 	temp := convert.ConversationsPb2DB(req.Conversations)
 
 	batchNum := 100
@@ -136,4 +123,12 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (_ *msg.
 	}
 
 	return nil, nil
+}
+
+func (m *msgServer) GetLastMessageSeqByTime(ctx context.Context, req *msg.GetLastMessageSeqByTimeReq) (*msg.GetLastMessageSeqByTimeResp, error) {
+	seq, err := m.MsgDatabase.GetLastMessageSeqByTime(ctx, req.ConversationID, req.Time)
+	if err != nil {
+		return nil, err
+	}
+	return &msg.GetLastMessageSeqByTimeResp{Seq: seq}, nil
 }

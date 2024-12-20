@@ -1227,8 +1227,7 @@ func (m *MsgMgo) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string
 	}
 }
 
-func (m *MsgMgo) GetDocIDs(ctx context.Context) ([]string, error) {
-	limit := 5000
+func (m *MsgMgo) GetRandDocIDs(ctx context.Context, limit int) ([]string, error) {
 	var skip int
 	var docIDs []string
 	var offset int
@@ -1267,15 +1266,18 @@ func (m *MsgMgo) GetDocIDs(ctx context.Context) ([]string, error) {
 	return docIDs, errs.Wrap(err)
 }
 
-func (m *MsgMgo) GetBeforeMsg(ctx context.Context, ts int64, docIDs []string, limit int) ([]*model.MsgDocModel, error) {
+func (m *MsgMgo) GetRandBeforeMsg(ctx context.Context, ts int64, limit int) ([]*model.MsgDocModel, error) {
 	return mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, []bson.M{
 		{
 			"$match": bson.M{
-				"doc_id": bson.M{
-					"$in": docIDs,
-				},
-				"msgs.msg.send_time": bson.M{
-					"$lt": ts,
+				"msgs": bson.M{
+					"$not": bson.M{
+						"$elemMatch": bson.M{
+							"msg.send_time": bson.M{
+								"$gt": ts,
+							},
+						},
+					},
 				},
 			},
 		},
@@ -1288,7 +1290,9 @@ func (m *MsgMgo) GetBeforeMsg(ctx context.Context, ts int64, docIDs []string, li
 			},
 		},
 		{
-			"$limit": limit,
+			"$sample": bson.M{
+				"size": limit,
+			},
 		},
 	})
 }
@@ -1305,53 +1309,58 @@ func (m *MsgMgo) DeleteMsgByIndex(ctx context.Context, docID string, index []int
 	return mongoutil.UpdateOne(ctx, m.coll, bson.M{"doc_id": docID}, bson.M{"$set": set}, true)
 }
 
-//func (m *MsgMgo) ClearMsg(ctx context.Context, t time.Time) (int64, error) {
-//	ts := t.UnixMilli()
-//	var count int64
-//	for {
-//		msgs, err := m.GetBeforeMsg(ctx, ts, 100)
-//		if err != nil {
-//			return count, err
-//		}
-//		if len(msgs) == 0 {
-//			return count, nil
-//		}
-//		for _, msg := range msgs {
-//			num, err := m.deleteOneMsg(ctx, ts, msg)
-//			count += num
-//			if err != nil {
-//				return count, err
-//			}
-//		}
-//	}
-//}
-
 func (m *MsgMgo) DeleteDoc(ctx context.Context, docID string) error {
 	return mongoutil.DeleteOne(ctx, m.coll, bson.M{"doc_id": docID})
 }
 
-//func (m *MsgMgo) DeleteDocMsg(ctx context.Context, ts int64, doc *relation.MsgDocModel) (int64, error) {
-//	var notNull int
-//	index := make([]int, 0, len(doc.Msg))
-//	for i, message := range doc.Msg {
-//		if message.Msg != nil {
-//			notNull++
-//			if message.Msg.SendTime < ts {
-//				index = append(index, i)
-//			}
-//		}
-//	}
-//	if len(index) == 0 {
-//		return 0, errs.New("no msg to delete").WrapMsg("deleteOneMsg", "docID", doc.DocID)
-//	}
-//	if len(index) == notNull {
-//		if err := m.DeleteDoc(ctx, doc.DocID); err != nil {
-//			return 0, err
-//		}
-//	} else {
-//		if err := m.setNullMsg(ctx, doc.DocID, index); err != nil {
-//			return 0, err
-//		}
-//	}
-//	return int64(len(index)), nil
-//}
+func (m *MsgMgo) GetLastMessageSeqByTime(ctx context.Context, conversationID string, time int64) (int64, error) {
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{
+				"doc_id": bson.M{
+					"$regex": fmt.Sprintf("^%s", conversationID),
+				},
+			},
+		},
+		{
+			"$match": bson.M{
+				"msgs.msg.send_time": bson.M{
+					"$lte": time,
+				},
+			},
+		},
+		{
+			"$sort": bson.M{
+				"_id": -1,
+			},
+		},
+		{
+			"$limit": 1,
+		},
+		{
+			"$project": bson.M{
+				"_id":                0,
+				"doc_id":             1,
+				"msgs.msg.send_time": 1,
+				"msgs.msg.seq":       1,
+			},
+		},
+	}
+	res, err := mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, pipeline)
+	if err != nil {
+		return 0, err
+	}
+	if len(res) == 0 {
+		return 0, nil
+	}
+	var seq int64
+	for _, v := range res[0].Msg {
+		if v.Msg == nil {
+			continue
+		}
+		if v.Msg.SendTime <= time {
+			seq = v.Msg.Seq
+		}
+	}
+	return seq, nil
+}
