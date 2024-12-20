@@ -9,17 +9,17 @@ import (
 )
 
 type ConfigManager struct {
-	apiConfig *config.API
+	config *config.AllConfig
 }
 
-func NewConfigManager(api *config.API) *ConfigManager {
+func NewConfigManager(cfg *config.AllConfig) *ConfigManager {
 	return &ConfigManager{
-		apiConfig: api,
+		config: cfg,
 	}
 }
 
-func (cm *ConfigManager) LoadApiConfig(c *gin.Context) {
-	b, err := json.Marshal(cm.apiConfig)
+func (cm *ConfigManager) GetConfig(c *gin.Context) {
+	b, err := json.Marshal(cm.config)
 	if err != nil {
 		apiresp.GinError(c, err) // args option error
 		return

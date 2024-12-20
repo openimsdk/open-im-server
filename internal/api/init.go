@@ -44,9 +44,7 @@ import (
 )
 
 type Config struct {
-	API       conf.API
-	Share     conf.Share
-	Discovery conf.Discovery
+	*conf.AllConfig
 
 	RuntimeEnv string
 }

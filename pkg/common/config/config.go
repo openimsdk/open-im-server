@@ -679,3 +679,49 @@ func InitNotification(notification *Notification) {
 	notification.ConversationSetPrivate.UnreadCount = false
 	notification.ConversationSetPrivate.ReliabilityLevel = 1
 }
+
+type AllConfig struct {
+	Discovery    Discovery
+	LocalCache   LocalCache
+	Log          Log
+	Notification Notification
+	API          API
+	CronTask     CronTask
+	MsgGateway   MsgGateway
+	MsgTransfer  MsgTransfer
+	Push         Push
+	Auth         Auth
+	Conversation Conversation
+	Friend       Friend
+	Group        Group
+	Msg          Msg
+	Third        Third
+	User         User
+	Share        Share
+	Webhooks     Webhooks
+}
+
+var (
+	NotificationFileName             = "notification.yml"
+	ShareFileName                    = "share.yml"
+	WebhooksConfigFileName           = "webhooks.yml"
+	LocalCacheConfigFileName         = "local-cache.yml"
+	KafkaConfigFileName              = "kafka.yml"
+	RedisConfigFileName              = "redis.yml"
+	MongodbConfigFileName            = "mongodb.yml"
+	MinioConfigFileName              = "minio.yml"
+	LogConfigFileName                = "log.yml"
+	OpenIMAPICfgFileName             = "openim-api.yml"
+	OpenIMCronTaskCfgFileName        = "openim-crontask.yml"
+	OpenIMMsgGatewayCfgFileName      = "openim-msggateway.yml"
+	OpenIMMsgTransferCfgFileName     = "openim-msgtransfer.yml"
+	OpenIMPushCfgFileName            = "openim-push.yml"
+	OpenIMRPCAuthCfgFileName         = "openim-rpc-auth.yml"
+	OpenIMRPCConversationCfgFileName = "openim-rpc-conversation.yml"
+	OpenIMRPCFriendCfgFileName       = "openim-rpc-friend.yml"
+	OpenIMRPCGroupCfgFileName        = "openim-rpc-group.yml"
+	OpenIMRPCMsgCfgFileName          = "openim-rpc-msg.yml"
+	OpenIMRPCThirdCfgFileName        = "openim-rpc-third.yml"
+	OpenIMRPCUserCfgFileName         = "openim-rpc-user.yml"
+	DiscoveryConfigFilename          = "discovery.yml"
+)
