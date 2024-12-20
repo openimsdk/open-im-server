@@ -518,9 +518,13 @@ func (g *GroupNotificationSender) GroupApplicationAgreeMemberEnterNotification(c
 
 	if !g.config.RpcConfig.EnableHistoryForNewMembers {
 		conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
+
 		maxSeq, err := rpccall.ExtractField(ctx, msg.GetConversationMaxSeqCaller.Invoke,
 			&msg.GetConversationMaxSeqReq{ConversationID: conversationID},
 			(*msg.GetConversationMaxSeqResp).GetMaxSeq)
+		maxSeq,err := g.
+
+
 		if err != nil {
 			return err
 		}

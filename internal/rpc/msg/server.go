@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -36,39 +37,40 @@ import (
 )
 
 type MessageInterceptorFunc func(ctx context.Context, globalConfig *Config, req *msg.SendMsgReq) (*sdkws.MsgData, error)
-type (
-	// MessageInterceptorChain defines a chain of message interceptor functions.
-	MessageInterceptorChain []MessageInterceptorFunc
 
-	// MsgServer encapsulates dependencies required for message handling.
-	msgServer struct {
-		RegisterCenter         discovery.SvcDiscoveryRegistry // Service discovery registry for service registration.
-		MsgDatabase            controller.CommonMsgDatabase   // Interface for message database operations.
-		StreamMsgDatabase      controller.StreamMsgDatabase
-		UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
-		FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
-		GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
-		ConversationLocalCache *rpccache.ConversationLocalCache // Local cache for conversation data.
-		Handlers               MessageInterceptorChain          // Chain of handlers for processing messages.
-		notificationSender     *rpcclient.NotificationSender    // RPC client for sending notifications.
-		msgNotificationSender  *MsgNotificationSender           // RPC client for sending msg notifications.
-		config                 *Config                          // Global configuration settings.
-		webhookClient          *webhook.Client
-		msg.UnimplementedMsgServer
-	}
+// MessageInterceptorChain defines a chain of message interceptor functions.
+type MessageInterceptorChain []MessageInterceptorFunc
 
-	Config struct {
-		RpcConfig          config.Msg
-		RedisConfig        config.Redis
-		MongodbConfig      config.Mongo
-		KafkaConfig        config.Kafka
-		NotificationConfig config.Notification
-		Share              config.Share
-		WebhooksConfig     config.Webhooks
-		LocalCacheConfig   config.LocalCache
-		Discovery          config.Discovery
-	}
-)
+type Config struct {
+	RpcConfig          config.Msg
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
+	KafkaConfig        config.Kafka
+	NotificationConfig config.Notification
+	Share              config.Share
+	WebhooksConfig     config.Webhooks
+	LocalCacheConfig   config.LocalCache
+	Discovery          config.Discovery
+}
+
+// MsgServer encapsulates dependencies required for message handling.
+type msgServer struct {
+	RegisterCenter         discovery.SvcDiscoveryRegistry // Service discovery registry for service registration.
+	MsgDatabase            controller.CommonMsgDatabase   // Interface for message database operations.
+	StreamMsgDatabase      controller.StreamMsgDatabase
+	UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
+	FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
+	GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
+	ConversationLocalCache *rpccache.ConversationLocalCache // Local cache for conversation data.
+	Handlers               MessageInterceptorChain          // Chain of handlers for processing messages.
+	notificationSender     *rpcclient.NotificationSender    // RPC client for sending notifications.
+	msgNotificationSender  *MsgNotificationSender           // RPC client for sending msg notifications.
+	config                 *Config                          // Global configuration settings.
+	webhookClient          *webhook.Client
+	msg.UnimplementedMsgServer
+	// todo
+	conversationClient rpcli.ConversationClient
+}
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
 	m.Handlers = append(m.Handlers, interceptorFunc...)

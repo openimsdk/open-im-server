@@ -21,7 +21,6 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
-	"github.com/openimsdk/protocol/rpccall"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/timeutil"
@@ -75,22 +74,13 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 		if err := m.MsgDatabase.DeleteMsgsPhysicalBySeqs(ctx, req.ConversationID, req.Seqs); err != nil {
 			return nil, err
 		}
-
-		conversations, err := rpccall.ExtractField(ctx, conversation.GetConversationsByConversationIDCaller.Invoke, &conversation.GetConversationsByConversationIDReq{
-			ConversationIDs: []string{req.ConversationID},
-		}, (*conversation.GetConversationsByConversationIDResp).GetConversations)
+		conv, err := m.conversationClient.GetConversationsByConversationID(ctx, req.ConversationID)
 		if err != nil {
 			return nil, err
 		}
 		tips := &sdkws.DeleteMsgsTips{UserID: req.UserID, ConversationID: req.ConversationID, Seqs: req.Seqs}
-		m.notificationSender.NotificationWithSessionType(
-			ctx,
-			req.UserID,
-			m.conversationAndGetRecvID(conversations[0], req.UserID),
-			constant.DeleteMsgsNotification,
-			conversations[0].ConversationType,
-			tips,
-		)
+		m.notificationSender.NotificationWithSessionType(ctx, req.UserID, m.conversationAndGetRecvID(conv, req.UserID),
+			constant.DeleteMsgsNotification, conv.ConversationType, tips)
 	} else {
 		if err := m.MsgDatabase.DeleteUserMsgsBySeqs(ctx, req.UserID, req.ConversationID, req.Seqs); err != nil {
 			return nil, err
@@ -125,9 +115,7 @@ func (m *msgServer) DeleteMsgPhysical(ctx context.Context, req *msg.DeleteMsgPhy
 }
 
 func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []string, userID string, deleteSyncOpt *msg.DeleteSyncOpt) error {
-	conversations, err := rpccall.ExtractField(ctx, conversation.GetConversationsByConversationIDCaller.Invoke, &conversation.GetConversationsByConversationIDReq{
-		ConversationIDs: conversationIDs,
-	}, (*conversation.GetConversationsByConversationIDResp).GetConversations)
+	conversations, err := m.conversationClient.GetConversationsByConversationIDs(ctx, conversationIDs)
 	if err != nil {
 		return err
 	}
@@ -150,11 +138,7 @@ func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []str
 		}
 		ownerUserIDs := []string{userID}
 		for conversationID, seq := range setSeqs {
-			if err := conversation.SetConversationMinSeqCaller.Execute(ctx, &conversation.SetConversationMinSeqReq{
-				ConversationID: conversationID,
-				OwnerUserID:    ownerUserIDs,
-				MinSeq:         seq,
-			}); err != nil {
+			if err := m.conversationClient.SetConversationMinSeq(ctx, conversationID, ownerUserIDs, seq); err != nil {
 				return err
 			}
 		}

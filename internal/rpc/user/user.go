@@ -17,6 +17,7 @@ package user
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"math/rand"
 	"strings"
 	"sync"
@@ -59,6 +60,9 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 	config                   *Config
 	webhookClient            *webhook.Client
+	// todo
+	groupClient    *rpcli.GroupClient
+	relationClient *rpcli.RelationClient
 }
 
 type Config struct {
@@ -633,7 +637,7 @@ func (s *userServer) NotificationUserInfoUpdate(ctx context.Context, userID stri
 	wg.Add(len(es))
 	go func() {
 		defer wg.Done()
-		_, es[0] = group.NotificationUserInfoUpdateCaller.Invoke(ctx, &group.NotificationUserInfoUpdateReq{
+		_, es[0] = s.groupClient.NotificationUserInfoUpdate(ctx, &group.NotificationUserInfoUpdateReq{
 			UserID:      userID,
 			OldUserInfo: oldUserInfo,
 			NewUserInfo: newUserInfo,
@@ -642,7 +646,7 @@ func (s *userServer) NotificationUserInfoUpdate(ctx context.Context, userID stri
 
 	go func() {
 		defer wg.Done()
-		_, es[1] = friendpb.NotificationUserInfoUpdateCaller.Invoke(ctx, &friendpb.NotificationUserInfoUpdateReq{
+		_, es[1] = s.relationClient.NotificationUserInfoUpdate(ctx, &friendpb.NotificationUserInfoUpdateReq{
 			UserID:      userID,
 			OldUserInfo: oldUserInfo,
 			NewUserInfo: newUserInfo,

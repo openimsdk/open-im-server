@@ -17,6 +17,7 @@ package group
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -41,8 +42,6 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	pbconv "github.com/openimsdk/protocol/conversation"
 	pbgroup "github.com/openimsdk/protocol/group"
-	"github.com/openimsdk/protocol/msg"
-	"github.com/openimsdk/protocol/rpccall"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/protocol/wrapperspb"
 	"github.com/openimsdk/tools/db/mongoutil"
@@ -63,6 +62,9 @@ type groupServer struct {
 	notification  *GroupNotificationSender
 	config        *Config
 	webhookClient *webhook.Client
+	// todo
+	msgClient          *rpcli.MsgClient
+	conversationClient *rpcli.ConversationClient
 }
 
 type Config struct {
@@ -950,18 +952,11 @@ func (g *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 
 func (g *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
 	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
-	maxSeq, err := rpccall.ExtractField(ctx, msg.GetConversationMaxSeqCaller.Invoke,
-		&msg.GetConversationMaxSeqReq{ConversationID: conversationID},
-		(*msg.GetConversationMaxSeqResp).GetMaxSeq)
+	maxSeq, err := g.msgClient.GetConversationMaxSeq(ctx, conversationID)
 	if err != nil {
 		return err
 	}
-
-	return pbconv.SetConversationMaxSeqCaller.Execute(ctx, &pbconv.SetConversationMaxSeqReq{
-		ConversationID: conversationID,
-		OwnerUserID:    userIDs,
-		MaxSeq:         maxSeq,
-	})
+	return g.conversationClient.SetConversationMaxSeq(ctx, conversationID, userIDs, maxSeq)
 }
 
 func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInfoReq) (*pbgroup.SetGroupInfoResp, error) {
@@ -1037,11 +1032,7 @@ func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 				return
 			}
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
-
-			if err := pbconv.SetConversationsCaller.Execute(ctx, &pbconv.SetConversationsReq{
-				UserIDs:      resp.UserIDs,
-				Conversation: conversation,
-			}); err != nil {
+			if err := g.conversationClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
 				log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
 			}
 		}()
@@ -1154,11 +1145,7 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 				}
 
 				conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
-
-				if err := pbconv.SetConversationsCaller.Execute(ctx, &pbconv.SetConversationsReq{
-					UserIDs:      resp.UserIDs,
-					Conversation: conversation,
-				}); err != nil {
+				if err := g.conversationClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
 					log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
 				}
 			}()
