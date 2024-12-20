@@ -74,6 +74,8 @@ type ConversationDatabase interface {
 	GetNotNotifyConversationIDs(ctx context.Context, userID string) ([]string, error)
 	// GetPinnedConversationIDs gets pinned conversationIDs by userID
 	GetPinnedConversationIDs(ctx context.Context, userID string) ([]string, error)
+	// FindRandConversation finds random conversations based on the specified timestamp and limit.
+	FindRandConversation(ctx context.Context, ts int64, limit int) ([]*relationtb.Conversation, error)
 }
 
 func NewConversationDatabase(conversation database.Conversation, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -400,4 +402,8 @@ func (c *conversationDatabase) GetPinnedConversationIDs(ctx context.Context, use
 		return nil, err
 	}
 	return conversationIDs, nil
+}
+
+func (c *conversationDatabase) FindRandConversation(ctx context.Context, ts int64, limit int) ([]*relationtb.Conversation, error) {
+	return c.conversationDB.FindRandConversation(ctx, ts, limit)
 }

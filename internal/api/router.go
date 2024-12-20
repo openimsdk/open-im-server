@@ -173,6 +173,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		authRouterGroup.POST("/get_user_token", a.GetUserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", a.ForceLogout)
+
 	}
 	// Third service
 	thirdGroup := r.Group("/third")
