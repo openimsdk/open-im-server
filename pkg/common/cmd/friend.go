@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
@@ -35,14 +36,14 @@ func NewFriendRpcCmd() *FriendRpcCmd {
 	var relationConfig relation.Config
 	ret := &FriendRpcCmd{relationConfig: &relationConfig}
 	ret.configMap = map[string]any{
-		OpenIMRPCFriendCfgFileName: &relationConfig.RpcConfig,
-		RedisConfigFileName:        &relationConfig.RedisConfig,
-		MongodbConfigFileName:      &relationConfig.MongodbConfig,
-		ShareFileName:              &relationConfig.Share,
-		NotificationFileName:       &relationConfig.NotificationConfig,
-		WebhooksConfigFileName:     &relationConfig.WebhooksConfig,
-		LocalCacheConfigFileName:   &relationConfig.LocalCacheConfig,
-		DiscoveryConfigFilename:    &relationConfig.Discovery,
+		config.OpenIMRPCFriendCfgFileName: &relationConfig.RpcConfig,
+		config.RedisConfigFileName:        &relationConfig.RedisConfig,
+		config.MongodbConfigFileName:      &relationConfig.MongodbConfig,
+		config.ShareFileName:              &relationConfig.Share,
+		config.NotificationFileName:       &relationConfig.NotificationConfig,
+		config.WebhooksConfigFileName:     &relationConfig.WebhooksConfig,
+		config.LocalCacheConfigFileName:   &relationConfig.LocalCacheConfig,
+		config.DiscoveryConfigFilename:    &relationConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

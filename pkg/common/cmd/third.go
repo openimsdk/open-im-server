@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/third"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
@@ -35,14 +36,14 @@ func NewThirdRpcCmd() *ThirdRpcCmd {
 	var thirdConfig third.Config
 	ret := &ThirdRpcCmd{thirdConfig: &thirdConfig}
 	ret.configMap = map[string]any{
-		OpenIMRPCThirdCfgFileName: &thirdConfig.RpcConfig,
-		RedisConfigFileName:       &thirdConfig.RedisConfig,
-		MongodbConfigFileName:     &thirdConfig.MongodbConfig,
-		ShareFileName:             &thirdConfig.Share,
-		NotificationFileName:      &thirdConfig.NotificationConfig,
-		MinioConfigFileName:       &thirdConfig.MinioConfig,
-		LocalCacheConfigFileName:  &thirdConfig.LocalCacheConfig,
-		DiscoveryConfigFilename:   &thirdConfig.Discovery,
+		config.OpenIMRPCThirdCfgFileName: &thirdConfig.RpcConfig,
+		config.RedisConfigFileName:       &thirdConfig.RedisConfig,
+		config.MongodbConfigFileName:     &thirdConfig.MongodbConfig,
+		config.ShareFileName:             &thirdConfig.Share,
+		config.NotificationFileName:      &thirdConfig.NotificationConfig,
+		config.MinioConfigFileName:       &thirdConfig.MinioConfig,
+		config.LocalCacheConfigFileName:  &thirdConfig.LocalCacheConfig,
+		config.DiscoveryConfigFilename:   &thirdConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

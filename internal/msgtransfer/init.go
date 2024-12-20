@@ -40,7 +40,7 @@ import (
 	"github.com/openimsdk/tools/utils/runtimeenv"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	discRegister "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	discRegister "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"

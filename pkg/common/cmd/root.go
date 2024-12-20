@@ -117,7 +117,7 @@ func (r *RootCmd) initializeConfiguration(cmd *cobra.Command, opts *CmdOpts) err
 		}
 	}
 	// Load common log configuration file
-	return config.Load(configDirectory, LogConfigFileName, ConfigEnvPrefixMap[LogConfigFileName], runtimeEnv, &r.log)
+	return config.Load(configDirectory, config.LogConfigFileName, ConfigEnvPrefixMap[config.LogConfigFileName], runtimeEnv, &r.log)
 }
 
 func (r *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {

@@ -701,7 +701,74 @@ type AllConfig struct {
 	Webhooks     Webhooks
 }
 
+func (a *AllConfig) Name2Config(name string) any {
+	switch name {
+	case DiscoveryConfigFilename:
+		return a.Discovery
+	case LocalCacheConfigFileName:
+		return a.LocalCache
+	case LogConfigFileName:
+		return a.Log
+	case NotificationFileName:
+		return a.Notification
+	case OpenIMAPICfgFileName:
+		return a.API
+	case OpenIMCronTaskCfgFileName:
+		return a.CronTask
+	case OpenIMMsgGatewayCfgFileName:
+		return a.MsgGateway
+	case OpenIMMsgTransferCfgFileName:
+		return a.MsgTransfer
+	case OpenIMPushCfgFileName:
+		return a.Push
+	case OpenIMRPCAuthCfgFileName:
+		return a.Auth
+	case OpenIMRPCConversationCfgFileName:
+		return a.Conversation
+	case OpenIMRPCFriendCfgFileName:
+		return a.Friend
+	case OpenIMRPCGroupCfgFileName:
+		return a.Group
+	case OpenIMRPCMsgCfgFileName:
+		return a.Msg
+	case OpenIMRPCThirdCfgFileName:
+		return a.Third
+	case OpenIMRPCUserCfgFileName:
+		return a.User
+	case ShareFileName:
+		return a.Share
+	case WebhooksConfigFileName:
+		return a.Webhooks
+	default:
+		return nil
+	}
+}
+
+func (a *AllConfig) GetConfigNames() []string {
+	return []string{
+		DiscoveryConfigFilename,
+		LocalCacheConfigFileName,
+		LogConfigFileName,
+		NotificationFileName,
+		OpenIMAPICfgFileName,
+		OpenIMCronTaskCfgFileName,
+		OpenIMMsgGatewayCfgFileName,
+		OpenIMMsgTransferCfgFileName,
+		OpenIMPushCfgFileName,
+		OpenIMRPCAuthCfgFileName,
+		OpenIMRPCConversationCfgFileName,
+		OpenIMRPCFriendCfgFileName,
+		OpenIMRPCGroupCfgFileName,
+		OpenIMRPCMsgCfgFileName,
+		OpenIMRPCThirdCfgFileName,
+		OpenIMRPCUserCfgFileName,
+		ShareFileName,
+		WebhooksConfigFileName,
+	}
+}
+
 var (
+	FileName                         = "config.yaml"
 	NotificationFileName             = "notification.yml"
 	ShareFileName                    = "share.yml"
 	WebhooksConfigFileName           = "webhooks.yml"

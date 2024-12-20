@@ -35,7 +35,7 @@ import (
 
 	"github.com/openimsdk/tools/utils/runtimeenv"
 
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"

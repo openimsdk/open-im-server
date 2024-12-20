@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/internal/api"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
@@ -34,9 +35,23 @@ func NewApiCmd() *ApiCmd {
 	var apiConfig api.Config
 	ret := &ApiCmd{apiConfig: &apiConfig}
 	ret.configMap = map[string]any{
-		OpenIMAPICfgFileName:    &apiConfig.API,
-		ShareFileName:           &apiConfig.Share,
-		DiscoveryConfigFilename: &apiConfig.Discovery,
+		config.DiscoveryConfigFilename:          &apiConfig.Discovery,
+		config.LocalCacheConfigFileName:         &apiConfig.LocalCache,
+		config.LogConfigFileName:                &apiConfig.Log,
+		config.OpenIMAPICfgFileName:             &apiConfig.API,
+		config.OpenIMCronTaskCfgFileName:        &apiConfig.CronTask,
+		config.OpenIMMsgGatewayCfgFileName:      &apiConfig.MsgGateway,
+		config.OpenIMMsgTransferCfgFileName:     &apiConfig.MsgTransfer,
+		config.OpenIMPushCfgFileName:            &apiConfig.Push,
+		config.OpenIMRPCAuthCfgFileName:         &apiConfig.Auth,
+		config.OpenIMRPCConversationCfgFileName: &apiConfig.Conversation,
+		config.OpenIMRPCFriendCfgFileName:       &apiConfig.Friend,
+		config.OpenIMRPCGroupCfgFileName:        &apiConfig.Group,
+		config.OpenIMRPCMsgCfgFileName:          &apiConfig.Msg,
+		config.OpenIMRPCThirdCfgFileName:        &apiConfig.Third,
+		config.OpenIMRPCUserCfgFileName:         &apiConfig.User,
+		config.ShareFileName:                    &apiConfig.Share,
+		config.WebhooksConfigFileName:           &apiConfig.Webhooks,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

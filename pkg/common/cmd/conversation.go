@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/conversation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
@@ -35,13 +36,13 @@ func NewConversationRpcCmd() *ConversationRpcCmd {
 	var conversationConfig conversation.Config
 	ret := &ConversationRpcCmd{conversationConfig: &conversationConfig}
 	ret.configMap = map[string]any{
-		OpenIMRPCConversationCfgFileName: &conversationConfig.RpcConfig,
-		RedisConfigFileName:              &conversationConfig.RedisConfig,
-		MongodbConfigFileName:            &conversationConfig.MongodbConfig,
-		ShareFileName:                    &conversationConfig.Share,
-		NotificationFileName:             &conversationConfig.NotificationConfig,
-		LocalCacheConfigFileName:         &conversationConfig.LocalCacheConfig,
-		DiscoveryConfigFilename:          &conversationConfig.Discovery,
+		config.OpenIMRPCConversationCfgFileName: &conversationConfig.RpcConfig,
+		config.RedisConfigFileName:              &conversationConfig.RedisConfig,
+		config.MongodbConfigFileName:            &conversationConfig.MongodbConfig,
+		config.ShareFileName:                    &conversationConfig.Share,
+		config.NotificationFileName:             &conversationConfig.NotificationConfig,
+		config.LocalCacheConfigFileName:         &conversationConfig.LocalCacheConfig,
+		config.DiscoveryConfigFilename:          &conversationConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

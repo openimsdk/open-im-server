@@ -27,7 +27,7 @@ import (
 	"time"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/discovery/etcd"

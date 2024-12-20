@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/msg"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
@@ -35,15 +36,15 @@ func NewMsgRpcCmd() *MsgRpcCmd {
 	var msgConfig msg.Config
 	ret := &MsgRpcCmd{msgConfig: &msgConfig}
 	ret.configMap = map[string]any{
-		OpenIMRPCMsgCfgFileName:  &msgConfig.RpcConfig,
-		RedisConfigFileName:      &msgConfig.RedisConfig,
-		MongodbConfigFileName:    &msgConfig.MongodbConfig,
-		KafkaConfigFileName:      &msgConfig.KafkaConfig,
-		ShareFileName:            &msgConfig.Share,
-		NotificationFileName:     &msgConfig.NotificationConfig,
-		WebhooksConfigFileName:   &msgConfig.WebhooksConfig,
-		LocalCacheConfigFileName: &msgConfig.LocalCacheConfig,
-		DiscoveryConfigFilename:  &msgConfig.Discovery,
+		config.OpenIMRPCMsgCfgFileName:  &msgConfig.RpcConfig,
+		config.RedisConfigFileName:      &msgConfig.RedisConfig,
+		config.MongodbConfigFileName:    &msgConfig.MongodbConfig,
+		config.KafkaConfigFileName:      &msgConfig.KafkaConfig,
+		config.ShareFileName:            &msgConfig.Share,
+		config.NotificationFileName:     &msgConfig.NotificationConfig,
+		config.WebhooksConfigFileName:   &msgConfig.WebhooksConfig,
+		config.LocalCacheConfigFileName: &msgConfig.LocalCacheConfig,
+		config.DiscoveryConfigFilename:  &msgConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

@@ -259,9 +259,11 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	proDiscoveryGroup.GET("/msg_gateway", pd.MessageGateway)
 	proDiscoveryGroup.GET("/msg_transfer", pd.MessageTransfer)
 
-	cm := NewConfigManager(config.AllConfig)
-	configGroup := r.Group("/config")
-	configGroup.GET("/api", cm.GetConfig)
+	cm := NewConfigManager(config.Share.IMAdminUserID, config.AllConfig)
+	configGroup := r.Group("/config", cm.CheckAdmin)
+	configGroup.POST("/get_config_list", cm.GetConfigList)
+	configGroup.POST("/get_config", cm.GetConfig)
+	configGroup.POST("/set_config", cm.SetConfig)
 	return r
 }
 
