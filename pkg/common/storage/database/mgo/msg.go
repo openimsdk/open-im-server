@@ -1318,16 +1318,14 @@ func (m *MsgMgo) GetLastMessageSeqByTime(ctx context.Context, conversationID str
 		{
 			"$match": bson.M{
 				"doc_id": bson.M{
-					"$regex": fmt.Sprintf("^%s:", conversationID),
+					"$regex": fmt.Sprintf("^%s", conversationID),
 				},
 			},
 		},
 		{
 			"$match": bson.M{
 				"msgs.msg.send_time": bson.M{
-					"msgs.msg.send_time": bson.M{
-						"$lte": time,
-					},
+					"$lte": time,
 				},
 			},
 		},
@@ -1342,6 +1340,7 @@ func (m *MsgMgo) GetLastMessageSeqByTime(ctx context.Context, conversationID str
 		{
 			"$project": bson.M{
 				"_id":                0,
+				"doc_id":             1,
 				"msgs.msg.send_time": 1,
 				"msgs.msg.seq":       1,
 			},
@@ -1356,6 +1355,9 @@ func (m *MsgMgo) GetLastMessageSeqByTime(ctx context.Context, conversationID str
 	}
 	var seq int64
 	for _, v := range res[0].Msg {
+		if v.Msg == nil {
+			continue
+		}
 		if v.Msg.SendTime <= time {
 			seq = v.Msg.Seq
 		}

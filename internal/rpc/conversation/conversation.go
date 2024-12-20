@@ -769,7 +769,8 @@ func (c *conversationServer) ClearUserConversationMsg(ctx context.Context, req *
 	if err != nil {
 		return nil, err
 	}
-	for _, conversation := range conversations {
+	latestMsgDestructTime := time.UnixMilli(req.Timestamp)
+	for i, conversation := range conversations {
 		if conversation.IsMsgDestruct == false || conversation.MsgDestructTime == 0 {
 			continue
 		}
@@ -778,17 +779,37 @@ func (c *conversationServer) ClearUserConversationMsg(ctx context.Context, req *
 		if err != nil {
 			return nil, err
 		}
-		if resp.Seq == 0 {
+		if resp.Seq <= 0 {
+			log.ZDebug(ctx, "ClearUserConversationMsg GetLastMessageSeqByTime seq <= 0", "index", i, "conversationID", conversation.ConversationID, "ownerUserID", conversation.OwnerUserID, "msgDestructTime", conversation.MsgDestructTime, "seq", resp.Seq)
+			if err := c.setConversationMinSeqAndLatestMsgDestructTime(ctx, conversation.ConversationID, conversation.OwnerUserID, -1, latestMsgDestructTime); err != nil {
+				return nil, err
+			}
 			continue
 		}
-		_, err = c.SetConversationMinSeq(ctx, &pbconversation.SetConversationMinSeqReq{
-			ConversationID: conversation.ConversationID,
-			OwnerUserID:    []string{conversation.OwnerUserID},
-			MinSeq:         resp.Seq + 1,
-		})
-		if err != nil {
+		resp.Seq++
+		if err := c.setConversationMinSeqAndLatestMsgDestructTime(ctx, conversation.ConversationID, conversation.OwnerUserID, resp.Seq, latestMsgDestructTime); err != nil {
 			return nil, err
 		}
+		log.ZDebug(ctx, "ClearUserConversationMsg set min seq", "index", i, "conversationID", conversation.ConversationID, "ownerUserID", conversation.OwnerUserID, "seq", resp.Seq, "msgDestructTime", conversation.MsgDestructTime)
 	}
-	return &pbconversation.ClearUserConversationMsgResp{}, nil
+	return &pbconversation.ClearUserConversationMsgResp{Count: int32(len(conversations))}, nil
+}
+
+func (c *conversationServer) setConversationMinSeqAndLatestMsgDestructTime(ctx context.Context, conversationID string, ownerUserID string, minSeq int64, latestMsgDestructTime time.Time) error {
+	update := map[string]any{
+		"latest_msg_destruct_time": latestMsgDestructTime,
+	}
+	if minSeq >= 0 {
+		req := &pbmsg.SetUserConversationMinSeqReq{ConversationID: conversationID, OwnerUserID: []string{ownerUserID}, MinSeq: minSeq}
+		if _, err := pbmsg.SetUserConversationMinSeqCaller.Invoke(ctx, req); err != nil {
+			return err
+		}
+		update["min_seq"] = minSeq
+	}
+
+	if err := c.conversationDatabase.UpdateUsersConversationField(ctx, []string{ownerUserID}, conversationID, update); err != nil {
+		return err
+	}
+	c.conversationNotificationSender.ConversationChangeNotification(ctx, ownerUserID, []string{conversationID})
+	return nil
 }

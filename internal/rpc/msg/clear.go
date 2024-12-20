@@ -27,10 +27,11 @@ func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) 
 	if err != nil {
 		return nil, err
 	}
-	for _, doc := range docs {
+	for i, doc := range docs {
 		if err := m.MsgDatabase.DeleteDoc(ctx, doc.DocID); err != nil {
 			return nil, err
 		}
+		log.ZDebug(ctx, "DestructMsgs delete doc", "index", i, "docID", doc.DocID)
 		index := strings.LastIndex(doc.DocID, ":")
 		if index < 0 {
 			continue
@@ -51,9 +52,11 @@ func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) 
 		if conversationID == "" {
 			continue
 		}
+		minSeq++
 		if err := m.MsgDatabase.SetMinSeq(ctx, conversationID, minSeq); err != nil {
 			return nil, err
 		}
+		log.ZDebug(ctx, "DestructMsgs delete doc set min seq", "index", i, "docID", doc.DocID, "conversationID", conversationID, "setMinSeq", minSeq)
 	}
 	return &msg.DestructMsgsResp{Count: int32(len(docs))}, nil
 }

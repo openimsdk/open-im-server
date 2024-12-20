@@ -95,13 +95,13 @@ func TestName4(t *testing.T) {
 	defer cancel()
 	cli := Result(mongo.Connect(ctx, options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.66:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
 
-	msg, err := NewConversationMongo(cli.Database("openim_v3"))
+	msg, err := NewMsgMongo(cli.Database("openim_v3"))
 	if err != nil {
 		panic(err)
 	}
-	ts := time.Now().UnixMilli()
+	ts := time.Now().Add(-time.Hour * 24 * 5).UnixMilli()
 	t.Log(ts)
-	res, err := msg.FindRandConversation(ctx, ts, 10)
+	res, err := msg.GetLastMessageSeqByTime(ctx, "sg_1523453548", ts)
 	if err != nil {
 		panic(err)
 	}

@@ -295,22 +295,19 @@ func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteO
 	if err != nil {
 		return nil, err
 	}
-	keyCount := make(map[string]int)
-	for _, obj := range models {
-		keyCount[obj.Key]++
-	}
-	for _, obj := range models {
-		count, err := t.s3dataBase.GetKeyCount(ctx, engine, obj.Key)
-		if err != nil {
-			return nil, err
-		}
+	for i, obj := range models {
 		if err := t.s3dataBase.DeleteSpecifiedData(ctx, engine, []string{obj.Name}); err != nil {
 			return nil, errs.Wrap(err)
 		}
 		if err := t.s3dataBase.DelS3Key(ctx, engine, obj.Name); err != nil {
 			return nil, err
 		}
-		if int(count) <= keyCount[obj.Key] {
+		count, err := t.s3dataBase.GetKeyCount(ctx, engine, obj.Key)
+		if err != nil {
+			return nil, err
+		}
+		log.ZDebug(ctx, "delete s3 object record", "index", i, "s3", obj, "count", count)
+		if count == 0 {
 			if err := t.s3.DeleteObject(ctx, obj.Key); err != nil {
 				return nil, err
 			}
