@@ -32,7 +32,7 @@ type ApiCmd struct {
 }
 
 func NewApiCmd() *ApiCmd {
-	var apiConfig api.Config
+	apiConfig := api.Config{AllConfig: &config.AllConfig{}}
 	ret := &ApiCmd{apiConfig: &apiConfig}
 	ret.configMap = map[string]any{
 		config.DiscoveryConfigFilename:          &apiConfig.Discovery,
