@@ -59,5 +59,15 @@ func (a *ConversationRpcCmd) Exec() error {
 func (a *ConversationRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.conversationConfig.Discovery, &a.conversationConfig.RpcConfig.Prometheus, a.conversationConfig.RpcConfig.RPC.ListenIP,
 		a.conversationConfig.RpcConfig.RPC.RegisterIP, a.conversationConfig.RpcConfig.RPC.AutoSetPorts, a.conversationConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.conversationConfig.Discovery.RpcService.Conversation, &a.conversationConfig.NotificationConfig, a.conversationConfig, conversation.Start)
+		a.Index(), a.conversationConfig.Discovery.RpcService.Conversation, &a.conversationConfig.NotificationConfig, a.conversationConfig,
+		[]string{
+			a.conversationConfig.RpcConfig.GetConfigFileName(),
+			a.conversationConfig.RedisConfig.GetConfigFileName(),
+			a.conversationConfig.MongodbConfig.GetConfigFileName(),
+			a.conversationConfig.NotificationConfig.GetConfigFileName(),
+			a.conversationConfig.Share.GetConfigFileName(),
+			a.conversationConfig.LocalCacheConfig.GetConfigFileName(),
+			a.conversationConfig.Discovery.GetConfigFileName(),
+		},
+		conversation.Start)
 }

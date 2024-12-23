@@ -61,5 +61,17 @@ func (a *UserRpcCmd) Exec() error {
 func (a *UserRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.userConfig.Discovery, &a.userConfig.RpcConfig.Prometheus, a.userConfig.RpcConfig.RPC.ListenIP,
 		a.userConfig.RpcConfig.RPC.RegisterIP, a.userConfig.RpcConfig.RPC.AutoSetPorts, a.userConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.userConfig.Discovery.RpcService.User, &a.userConfig.NotificationConfig, a.userConfig, user.Start)
+		a.Index(), a.userConfig.Discovery.RpcService.User, &a.userConfig.NotificationConfig, a.userConfig,
+		[]string{
+			a.userConfig.RpcConfig.GetConfigFileName(),
+			a.userConfig.RedisConfig.GetConfigFileName(),
+			a.userConfig.MongodbConfig.GetConfigFileName(),
+			a.userConfig.KafkaConfig.GetConfigFileName(),
+			a.userConfig.NotificationConfig.GetConfigFileName(),
+			a.userConfig.Share.GetConfigFileName(),
+			a.userConfig.WebhooksConfig.GetConfigFileName(),
+			a.userConfig.LocalCacheConfig.GetConfigFileName(),
+			a.userConfig.Discovery.GetConfigFileName(),
+		},
+		user.Start)
 }

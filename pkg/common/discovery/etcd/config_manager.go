@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"sync"
 	"syscall"
 
 	"github.com/openimsdk/tools/errs"
@@ -20,6 +21,7 @@ const (
 type ConfigManager struct {
 	client           *clientv3.Client
 	watchConfigNames []string
+	lock             sync.RWMutex
 }
 
 func BuildKey(s string) string {
@@ -47,10 +49,12 @@ func (c *ConfigManager) Watch(ctx context.Context) {
 			for _, event := range watchResp.Events {
 				if event.IsModify() {
 					if datautil.Contain(string(event.Kv.Key), c.watchConfigNames...) {
+						c.lock.Lock()
 						err := restartServer(ctx)
 						if err != nil {
 							log.ZError(ctx, "restart server err", err)
 						}
+						c.lock.Unlock()
 					}
 				}
 			}

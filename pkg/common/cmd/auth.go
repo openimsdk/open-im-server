@@ -57,5 +57,12 @@ func (a *AuthRpcCmd) Exec() error {
 func (a *AuthRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.authConfig.Discovery, &a.authConfig.RpcConfig.Prometheus, a.authConfig.RpcConfig.RPC.ListenIP,
 		a.authConfig.RpcConfig.RPC.RegisterIP, a.authConfig.RpcConfig.RPC.AutoSetPorts, a.authConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.authConfig.Discovery.RpcService.Auth, nil, a.authConfig, auth.Start)
+		a.Index(), a.authConfig.Discovery.RpcService.Auth, nil, a.authConfig,
+		[]string{
+			a.authConfig.RpcConfig.GetConfigFileName(),
+			a.authConfig.Share.GetConfigFileName(),
+			a.authConfig.RedisConfig.GetConfigFileName(),
+			a.authConfig.Discovery.GetConfigFileName(),
+		},
+		auth.Start)
 }

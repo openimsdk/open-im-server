@@ -51,7 +51,7 @@ func (cm *ConfigManager) GetConfig(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail("config name not found").Wrap())
 		return
 	}
-	b, err := json.Marshal(cm.config)
+	b, err := json.Marshal(conf)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return
