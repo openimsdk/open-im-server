@@ -15,16 +15,25 @@ type ConversationClient struct {
 }
 
 func (x *ConversationClient) SetConversationMaxSeq(ctx context.Context, conversationID string, ownerUserIDs []string, maxSeq int64) error {
+	if len(ownerUserIDs) == 0 {
+		return nil
+	}
 	req := &conversation.SetConversationMaxSeqReq{ConversationID: conversationID, OwnerUserID: ownerUserIDs, MaxSeq: maxSeq}
 	return ignoreResp(x.ConversationClient.SetConversationMaxSeq(ctx, req))
 }
 
-func (x *ConversationClient) SetConversations(ctx context.Context, userIDs []string, info *conversation.ConversationReq) error {
-	req := &conversation.SetConversationsReq{UserIDs: userIDs, Conversation: info}
+func (x *ConversationClient) SetConversations(ctx context.Context, ownerUserIDs []string, info *conversation.ConversationReq) error {
+	if len(ownerUserIDs) == 0 {
+		return nil
+	}
+	req := &conversation.SetConversationsReq{UserIDs: ownerUserIDs, Conversation: info}
 	return ignoreResp(x.ConversationClient.SetConversations(ctx, req))
 }
 
 func (x *ConversationClient) GetConversationsByConversationIDs(ctx context.Context, conversationIDs []string) ([]*conversation.Conversation, error) {
+	if len(conversationIDs) == 0 {
+		return nil, nil
+	}
 	req := &conversation.GetConversationsByConversationIDReq{ConversationIDs: conversationIDs}
 	return extractField(ctx, x.ConversationClient.GetConversationsByConversationID, req, (*conversation.GetConversationsByConversationIDResp).GetConversations)
 }
@@ -34,6 +43,9 @@ func (x *ConversationClient) GetConversationsByConversationID(ctx context.Contex
 }
 
 func (x *ConversationClient) SetConversationMinSeq(ctx context.Context, conversationID string, ownerUserIDs []string, minSeq int64) error {
+	if len(ownerUserIDs) == 0 {
+		return nil
+	}
 	req := &conversation.SetConversationMinSeqReq{ConversationID: conversationID, OwnerUserID: ownerUserIDs, MinSeq: minSeq}
 	return ignoreResp(x.ConversationClient.SetConversationMinSeq(ctx, req))
 }
@@ -44,6 +56,9 @@ func (x *ConversationClient) GetConversation(ctx context.Context, conversationID
 }
 
 func (x *ConversationClient) GetConversations(ctx context.Context, conversationIDs []string, ownerUserID string) ([]*conversation.Conversation, error) {
+	if len(conversationIDs) == 0 {
+		return nil, nil
+	}
 	req := &conversation.GetConversationsReq{ConversationIDs: conversationIDs, OwnerUserID: ownerUserID}
 	return extractField(ctx, x.ConversationClient.GetConversations, req, (*conversation.GetConversationsResp).GetConversations)
 }
@@ -59,6 +74,9 @@ func (x *ConversationClient) GetPinnedConversationIDs(ctx context.Context, owner
 }
 
 func (x *ConversationClient) CreateGroupChatConversations(ctx context.Context, groupID string, userIDs []string) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
 	req := &conversation.CreateGroupChatConversationsReq{GroupID: groupID, UserIDs: userIDs}
 	return ignoreResp(x.ConversationClient.CreateGroupChatConversations(ctx, req))
 }
@@ -68,6 +86,9 @@ func (x *ConversationClient) CreateSingleChatConversations(ctx context.Context, 
 }
 
 func (x *ConversationClient) GetConversationOfflinePushUserIDs(ctx context.Context, conversationID string, userIDs []string) ([]string, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
 	req := &conversation.GetConversationOfflinePushUserIDsReq{ConversationID: conversationID, UserIDs: userIDs}
 	return extractField(ctx, x.ConversationClient.GetConversationOfflinePushUserIDs, req, (*conversation.GetConversationOfflinePushUserIDsResp).GetUserIDs)
 }

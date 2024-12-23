@@ -15,6 +15,9 @@ type RelationClient struct {
 }
 
 func (x *RelationClient) GetFriendsInfo(ctx context.Context, ownerUserID string, friendUserIDs []string) ([]*relation.FriendInfoOnly, error) {
+	if len(friendUserIDs) == 0 {
+		return nil, nil
+	}
 	req := &relation.GetFriendInfoReq{OwnerUserID: ownerUserID, FriendUserIDs: friendUserIDs}
 	return extractField(ctx, x.FriendClient.GetFriendInfo, req, (*relation.GetFriendInfoResp).GetFriendInfos)
 }

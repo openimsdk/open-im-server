@@ -126,6 +126,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		config:             config,
 		webhookClient:      webhook.NewWebhookClient(config.WebhooksConfig.URL),
 		queue:              memamq.NewMemoryQueue(16, 1024*1024),
+		userClient:         userClient,
 	})
 	return nil
 }

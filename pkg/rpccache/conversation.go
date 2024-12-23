@@ -92,7 +92,7 @@ func (c *ConversationLocalCache) GetConversation(ctx context.Context, userID, co
 	var cache cacheProto[pbconversation.Conversation]
 	return cache.Unmarshal(c.local.Get(ctx, cachekey.GetConversationKey(userID, conversationID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "ConversationLocalCache GetConversation rpc", "userID", userID, "conversationID", conversationID)
-		return cache.Marshal(c.client.GetConversation(ctx, userID, conversationID))
+		return cache.Marshal(c.client.GetConversation(ctx, conversationID, userID))
 	}))
 }
 

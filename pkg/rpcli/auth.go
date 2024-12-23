@@ -15,6 +15,9 @@ type AuthClient struct {
 }
 
 func (x *AuthClient) KickTokens(ctx context.Context, tokens []string) error {
+	if len(tokens) == 0 {
+		return nil
+	}
 	return ignoreResp(x.AuthClient.KickTokens(ctx, &auth.KickTokensReq{Tokens: tokens}))
 }
 

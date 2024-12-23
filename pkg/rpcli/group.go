@@ -16,6 +16,9 @@ type GroupClient struct {
 }
 
 func (x *GroupClient) GetGroupsInfo(ctx context.Context, groupIDs []string) ([]*sdkws.GroupInfo, error) {
+	if len(groupIDs) == 0 {
+		return nil, nil
+	}
 	req := &group.GetGroupsInfoReq{GroupIDs: groupIDs}
 	return extractField(ctx, x.GroupClient.GetGroupsInfo, req, (*group.GetGroupsInfoResp).GetGroupInfos)
 }
@@ -30,7 +33,7 @@ func (x *GroupClient) GetGroupInfoCache(ctx context.Context, groupID string) (*s
 }
 
 func (x *GroupClient) GetGroupMemberCache(ctx context.Context, groupID string, userID string) (*sdkws.GroupMemberFullInfo, error) {
-	req := &group.GetGroupMemberCacheReq{GroupID: groupID}
+	req := &group.GetGroupMemberCacheReq{GroupID: groupID, GroupMemberID: userID}
 	return extractField(ctx, x.GroupClient.GetGroupMemberCache, req, (*group.GetGroupMemberCacheResp).GetMember)
 }
 

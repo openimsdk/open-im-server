@@ -18,6 +18,9 @@ type UserClient struct {
 }
 
 func (x *UserClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
 	req := &user.GetDesignateUsersReq{UserIDs: userIDs}
 	return extractField(ctx, x.UserClient.GetDesignateUsers, req, (*user.GetDesignateUsersResp).GetUsersInfo)
 }
@@ -27,6 +30,9 @@ func (x *UserClient) GetUserInfo(ctx context.Context, userID string) (*sdkws.Use
 }
 
 func (x *UserClient) CheckUser(ctx context.Context, userIDs []string) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
 	users, err := x.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return err
@@ -73,14 +79,14 @@ func (x *UserClient) GetUserOnlinePlatform(ctx context.Context, userID string) (
 }
 
 func (x *UserClient) SetUserOnlineStatus(ctx context.Context, req *user.SetUserOnlineStatusReq) error {
+	if len(req.Status) == 0 {
+		return nil
+	}
 	return ignoreResp(x.UserClient.SetUserOnlineStatus(ctx, req))
 }
 
 func (x *UserClient) GetNotificationByID(ctx context.Context, userID string) error {
-	_, err := x.UserClient.GetNotificationAccount(ctx, &user.GetNotificationAccountReq{
-		UserID: userID,
-	})
-	return err
+	return ignoreResp(x.UserClient.GetNotificationAccount(ctx, &user.GetNotificationAccountReq{UserID: userID}))
 }
 
 func (x *UserClient) GetAllUserIDs(ctx context.Context, pageNumber, showNumber int32) ([]string, error) {
