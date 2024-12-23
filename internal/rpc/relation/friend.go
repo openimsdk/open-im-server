@@ -16,6 +16,7 @@ package relation
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/tools/mq/memamq"
 
@@ -31,7 +32,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/sdkws"
@@ -51,6 +51,7 @@ type friendServer struct {
 	config             *Config
 	webhookClient      *webhook.Client
 	queue              *memamq.MemoryQueue
+	userClient         *rpcli.UserClient
 }
 
 type Config struct {
@@ -90,10 +91,21 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 
+	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
+	if err != nil {
+		return err
+	}
+	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
+	if err != nil {
+		return err
+	}
+	userClient := rpcli.NewUserClient(userConn)
+
 	// Initialize notification sender
 	notificationSender := NewFriendNotificationSender(
 		&config.NotificationConfig,
-		WithRpcFunc(rpcclient.GetUsersInfo),
+		rpcli.NewMsgClient(msgConn),
+		WithRpcFunc(userClient.GetUsersInfo),
 	)
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 
@@ -130,7 +142,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *relation.Apply
 	if err = s.webhookBeforeAddFriend(ctx, &s.config.WebhooksConfig.BeforeAddFriend, req); err != nil && err != servererrs.ErrCallbackContinue {
 		return nil, err
 	}
-	if _, err := rpcclient.GetUsersInfoMap(ctx, []string{req.ToUserID, req.FromUserID}); err != nil {
+	if err := s.userClient.CheckUser(ctx, []string{req.ToUserID, req.FromUserID}); err != nil {
 		return nil, err
 	}
 
@@ -155,7 +167,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *relation.ImportFr
 		return nil, err
 	}
 
-	if _, err := rpcclient.GetUsersInfo(ctx, append([]string{req.OwnerUserID}, req.FriendUserIDs...)); err != nil {
+	if err := s.userClient.CheckUser(ctx, append([]string{req.OwnerUserID}, req.FriendUserIDs...)); err != nil {
 		return nil, err
 	}
 	if datautil.Contain(req.OwnerUserID, req.FriendUserIDs...) {
@@ -296,7 +308,7 @@ func (s *friendServer) getFriend(ctx context.Context, ownerUserID string, friend
 	if err != nil {
 		return nil, err
 	}
-	return convert.FriendsDB2Pb(ctx, friends, rpcclient.GetUsersInfoMap)
+	return convert.FriendsDB2Pb(ctx, friends, s.userClient.GetUsersInfoMap)
 }
 
 // Get the list of friend requests sent out proactively.
@@ -308,7 +320,7 @@ func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context,
 		return nil, err
 	}
 	resp = &relation.GetDesignatedFriendsApplyResp{}
-	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, rpcclient.GetUsersInfoMap)
+	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +339,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *rel
 	}
 
 	resp = &relation.GetPaginationFriendsApplyToResp{}
-	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, rpcclient.GetUsersInfoMap)
+	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
 	}
@@ -349,7 +361,7 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *r
 		return nil, err
 	}
 
-	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, rpcclient.GetUsersInfoMap)
+	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
 	}
@@ -380,7 +392,7 @@ func (s *friendServer) GetPaginationFriends(ctx context.Context, req *relation.G
 	}
 
 	resp = &relation.GetPaginationFriendsResp{}
-	resp.FriendsInfo, err = convert.FriendsDB2Pb(ctx, friends, rpcclient.GetUsersInfoMap)
+	resp.FriendsInfo, err = convert.FriendsDB2Pb(ctx, friends, s.userClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
 	}
@@ -413,7 +425,7 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *relatio
 		return nil, errs.ErrArgs.WrapMsg("userIDList repeated")
 	}
 
-	userMap, err := rpcclient.GetUsersInfoMap(ctx, req.UserIDList)
+	userMap, err := s.userClient.GetUsersInfoMap(ctx, req.UserIDList)
 	if err != nil {
 		return nil, err
 	}

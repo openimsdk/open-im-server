@@ -1,9 +1,12 @@
 package rpcli
 
-import "github.com/openimsdk/protocol/third"
+import (
+	"github.com/openimsdk/protocol/third"
+	"google.golang.org/grpc"
+)
 
-func NewThirdClient(cli third.ThirdClient) *ThirdClient {
-	return &ThirdClient{cli}
+func NewThirdClient(cc grpc.ClientConnInterface) *ThirdClient {
+	return &ThirdClient{third.NewThirdClient(cc)}
 }
 
 type ThirdClient struct {

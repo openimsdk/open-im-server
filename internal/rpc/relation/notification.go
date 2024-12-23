@@ -16,6 +16,8 @@ package relation
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/protocol/msg"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
@@ -85,12 +87,11 @@ func WithRpcFunc(
 	}
 }
 
-func NewFriendNotificationSender(
-	conf *config.Notification,
-	opts ...friendNotificationSenderOptions,
-) *FriendNotificationSender {
+func NewFriendNotificationSender(conf *config.Notification, msgClient *rpcli.MsgClient, opts ...friendNotificationSenderOptions) *FriendNotificationSender {
 	f := &FriendNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(conf, rpcclient.WithRpcClient()),
+		NotificationSender: rpcclient.NewNotificationSender(conf, rpcclient.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
+			return msgClient.SendMsg(ctx, req)
+		})),
 	}
 	for _, opt := range opts {
 		opt(f)

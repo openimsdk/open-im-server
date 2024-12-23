@@ -14,96 +14,97 @@
 
 package rpcclient
 
-import (
-	"context"
-	"strings"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/protocol/user"
-	"github.com/openimsdk/tools/utils/datautil"
-)
-
-// GetUsersInfo retrieves information for multiple users based on their user IDs.
-func GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
-	if len(userIDs) == 0 {
-		return []*sdkws.UserInfo{}, nil
-	}
-	resp, err := user.GetDesignateUsersCaller.Invoke(ctx, &user.GetDesignateUsersReq{
-		UserIDs: userIDs,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if ids := datautil.Single(userIDs, datautil.Slice(resp.UsersInfo, func(e *sdkws.UserInfo) string {
-		return e.UserID
-	})); len(ids) > 0 {
-		return nil, servererrs.ErrUserIDNotFound.WrapMsg(strings.Join(ids, ","))
-	}
-	return resp.UsersInfo, nil
-}
-
-// GetUserInfo retrieves information for a single user based on the provided user ID.
-func GetUserInfo(ctx context.Context, userID string) (*sdkws.UserInfo, error) {
-	users, err := GetUsersInfo(ctx, []string{userID})
-	if err != nil {
-		return nil, err
-	}
-	return users[0], nil
-}
-
-// GetUsersInfoMap retrieves a map of user information indexed by their user IDs.
-func GetUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
-	users, err := GetUsersInfo(ctx, userIDs)
-	if err != nil {
-		return nil, err
-	}
-	return datautil.SliceToMap(users, func(e *sdkws.UserInfo) string {
-		return e.UserID
-	}), nil
-}
-
-// GetPublicUserInfos retrieves public information for multiple users based on their user IDs.
-func GetPublicUserInfos(
-	ctx context.Context,
-	userIDs []string,
-) ([]*sdkws.PublicUserInfo, error) {
-	users, err := GetUsersInfo(ctx, userIDs)
-	if err != nil {
-		return nil, err
-	}
-
-	return datautil.Slice(users, func(e *sdkws.UserInfo) *sdkws.PublicUserInfo {
-		return &sdkws.PublicUserInfo{
-			UserID:   e.UserID,
-			Nickname: e.Nickname,
-			FaceURL:  e.FaceURL,
-			Ex:       e.Ex,
-		}
-	}), nil
-}
-
-// GetPublicUserInfo retrieves public information for a single user based on the provided user ID.
-func GetPublicUserInfo(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
-	users, err := GetPublicUserInfos(ctx, []string{userID})
-	if err != nil {
-		return nil, err
-	}
-
-	return users[0], nil
-}
-
-// GetPublicUserInfoMap retrieves a map of public user information indexed by their user IDs.
-func GetPublicUserInfoMap(
-	ctx context.Context,
-	userIDs []string,
-) (map[string]*sdkws.PublicUserInfo, error) {
-	users, err := GetPublicUserInfos(ctx, userIDs)
-	if err != nil {
-		return nil, err
-	}
-
-	return datautil.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
-		return e.UserID
-	}), nil
-}
+//
+//import (
+//	"context"
+//	"strings"
+//
+//	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+//	"github.com/openimsdk/protocol/sdkws"
+//	"github.com/openimsdk/protocol/user"
+//	"github.com/openimsdk/tools/utils/datautil"
+//)
+//
+//// GetUsersInfo retrieves information for multiple users based on their user IDs.
+//func GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
+//	if len(userIDs) == 0 {
+//		return []*sdkws.UserInfo{}, nil
+//	}
+//	resp, err := user.GetDesignateUsersCaller.Invoke(ctx, &user.GetDesignateUsersReq{
+//		UserIDs: userIDs,
+//	})
+//	if err != nil {
+//		return nil, err
+//	}
+//	if ids := datautil.Single(userIDs, datautil.Slice(resp.UsersInfo, func(e *sdkws.UserInfo) string {
+//		return e.UserID
+//	})); len(ids) > 0 {
+//		return nil, servererrs.ErrUserIDNotFound.WrapMsg(strings.Join(ids, ","))
+//	}
+//	return resp.UsersInfo, nil
+//}
+//
+//// GetUserInfo retrieves information for a single user based on the provided user ID.
+//func GetUserInfo(ctx context.Context, userID string) (*sdkws.UserInfo, error) {
+//	users, err := GetUsersInfo(ctx, []string{userID})
+//	if err != nil {
+//		return nil, err
+//	}
+//	return users[0], nil
+//}
+//
+//// GetUsersInfoMap retrieves a map of user information indexed by their user IDs.
+//func GetUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
+//	users, err := GetUsersInfo(ctx, userIDs)
+//	if err != nil {
+//		return nil, err
+//	}
+//	return datautil.SliceToMap(users, func(e *sdkws.UserInfo) string {
+//		return e.UserID
+//	}), nil
+//}
+//
+//// GetPublicUserInfos retrieves public information for multiple users based on their user IDs.
+//func GetPublicUserInfos(
+//	ctx context.Context,
+//	userIDs []string,
+//) ([]*sdkws.PublicUserInfo, error) {
+//	users, err := GetUsersInfo(ctx, userIDs)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return datautil.Slice(users, func(e *sdkws.UserInfo) *sdkws.PublicUserInfo {
+//		return &sdkws.PublicUserInfo{
+//			UserID:   e.UserID,
+//			Nickname: e.Nickname,
+//			FaceURL:  e.FaceURL,
+//			Ex:       e.Ex,
+//		}
+//	}), nil
+//}
+//
+//// GetPublicUserInfo retrieves public information for a single user based on the provided user ID.
+//func GetPublicUserInfo(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
+//	users, err := GetPublicUserInfos(ctx, []string{userID})
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return users[0], nil
+//}
+//
+//// GetPublicUserInfoMap retrieves a map of public user information indexed by their user IDs.
+//func GetPublicUserInfoMap(
+//	ctx context.Context,
+//	userIDs []string,
+//) (map[string]*sdkws.PublicUserInfo, error) {
+//	users, err := GetPublicUserInfos(ctx, userIDs)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return datautil.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
+//		return e.UserID
+//	}), nil
+//}

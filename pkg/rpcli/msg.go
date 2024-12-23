@@ -4,51 +4,63 @@ import (
 	"context"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
+	"google.golang.org/grpc"
 )
 
-func NewMsgClient(cli msg.MsgClient) *MsgClient {
-	return &MsgClient{cli}
+func NewMsgClient(cc grpc.ClientConnInterface) *MsgClient {
+	return &MsgClient{msg.NewMsgClient(cc)}
 }
 
 type MsgClient struct {
 	msg.MsgClient
 }
 
-func (x *MsgClient) cli() msg.MsgClient {
-	return x.MsgClient
-}
-
 func (x *MsgClient) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
 	req := &msg.GetMaxSeqsReq{ConversationIDs: conversationIDs}
-	return extractField(ctx, x.cli().GetMaxSeqs, req, (*msg.SeqsInfoResp).GetMaxSeqs)
+	return extractField(ctx, x.MsgClient.GetMaxSeqs, req, (*msg.SeqsInfoResp).GetMaxSeqs)
 }
 
 func (x *MsgClient) GetMsgByConversationIDs(ctx context.Context, conversationIDs []string, maxSeqs map[string]int64) (map[string]*sdkws.MsgData, error) {
 	req := &msg.GetMsgByConversationIDsReq{ConversationIDs: conversationIDs, MaxSeqs: maxSeqs}
-	return extractField(ctx, x.cli().GetMsgByConversationIDs, req, (*msg.GetMsgByConversationIDsResp).GetMsgDatas)
+	return extractField(ctx, x.MsgClient.GetMsgByConversationIDs, req, (*msg.GetMsgByConversationIDsResp).GetMsgDatas)
 }
 
 func (x *MsgClient) GetHasReadSeqs(ctx context.Context, conversationIDs []string, userID string) (map[string]int64, error) {
 	req := &msg.GetHasReadSeqsReq{ConversationIDs: conversationIDs, UserID: userID}
-	return extractField(ctx, x.cli().GetHasReadSeqs, req, (*msg.SeqsInfoResp).GetMaxSeqs)
+	return extractField(ctx, x.MsgClient.GetHasReadSeqs, req, (*msg.SeqsInfoResp).GetMaxSeqs)
 }
 
 func (x *MsgClient) SetUserConversationMaxSeq(ctx context.Context, conversationID string, ownerUserIDs []string, maxSeq int64) error {
 	req := &msg.SetUserConversationMaxSeqReq{ConversationID: conversationID, OwnerUserID: ownerUserIDs, MaxSeq: maxSeq}
-	return ignoreResp(x.cli().SetUserConversationMaxSeq(ctx, req))
+	return ignoreResp(x.MsgClient.SetUserConversationMaxSeq(ctx, req))
 }
 
 func (x *MsgClient) SetUserConversationMin(ctx context.Context, conversationID string, ownerUserIDs []string, minSeq int64) error {
 	req := &msg.SetUserConversationsMinSeqReq{ConversationID: conversationID, UserIDs: ownerUserIDs, Seq: minSeq}
-	return ignoreResp(x.cli().SetUserConversationsMinSeq(ctx, req))
+	return ignoreResp(x.MsgClient.SetUserConversationsMinSeq(ctx, req))
 }
 
 func (x *MsgClient) GetLastMessageSeqByTime(ctx context.Context, conversationID string, lastTime int64) (int64, error) {
 	req := &msg.GetLastMessageSeqByTimeReq{ConversationID: conversationID, Time: lastTime}
-	return extractField(ctx, x.cli().GetLastMessageSeqByTime, req, (*msg.GetLastMessageSeqByTimeResp).GetSeq)
+	return extractField(ctx, x.MsgClient.GetLastMessageSeqByTime, req, (*msg.GetLastMessageSeqByTimeResp).GetSeq)
 }
 
 func (x *MsgClient) GetConversationMaxSeq(ctx context.Context, conversationID string) (int64, error) {
 	req := &msg.GetConversationMaxSeqReq{ConversationID: conversationID}
-	return extractField(ctx, x.cli().GetConversationMaxSeq, req, (*msg.GetConversationMaxSeqResp).GetMaxSeq)
+	return extractField(ctx, x.MsgClient.GetConversationMaxSeq, req, (*msg.GetConversationMaxSeqResp).GetMaxSeq)
+}
+
+func (x *MsgClient) GetActiveConversation(ctx context.Context, conversationIDs []string) ([]*msg.ActiveConversation, error) {
+	req := &msg.GetActiveConversationReq{ConversationIDs: conversationIDs}
+	return extractField(ctx, x.MsgClient.GetActiveConversation, req, (*msg.GetActiveConversationResp).GetConversations)
+}
+
+func (x *MsgClient) GetSeqMessage(ctx context.Context, userID string, conversations []*msg.ConversationSeqs) (map[string]*sdkws.PullMsgs, error) {
+	req := &msg.GetSeqMessageReq{UserID: userID, Conversations: conversations}
+	return extractField(ctx, x.MsgClient.GetSeqMessage, req, (*msg.GetSeqMessageResp).GetMsgs)
+}
+
+func (x *MsgClient) SetUserConversationsMinSeq(ctx context.Context, conversationID string, userIDs []string, seq int64) error {
+	req := &msg.SetUserConversationsMinSeqReq{ConversationID: conversationID, UserIDs: userIDs, Seq: seq}
+	return ignoreResp(x.MsgClient.SetUserConversationsMinSeq(ctx, req))
 }

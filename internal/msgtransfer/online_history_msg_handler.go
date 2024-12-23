@@ -18,6 +18,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/tools/discovery"
 	"strconv"
 	"strings"
 	"sync"
@@ -25,15 +27,12 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/go-redis/redis"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/tools/batcher"
 	"github.com/openimsdk/protocol/constant"
 	pbconv "github.com/openimsdk/protocol/conversation"
-	"github.com/openimsdk/protocol/group"
-	"github.com/openimsdk/protocol/rpccall"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -72,16 +71,30 @@ type OnlineHistoryRedisConsumerHandler struct {
 	msgTransferDatabase         controller.MsgTransferDatabase
 	conversationUserHasReadChan chan *userHasReadSeq
 	wg                          sync.WaitGroup
+
+	groupClient        *rpcli.GroupClient
+	conversationClient *rpcli.ConversationClient
 }
 
-func NewOnlineHistoryRedisConsumerHandler(kafkaConf *config.Kafka, database controller.MsgTransferDatabase) (*OnlineHistoryRedisConsumerHandler, error) {
+func NewOnlineHistoryRedisConsumerHandler(ctx context.Context, client discovery.SvcDiscoveryRegistry, config *Config, database controller.MsgTransferDatabase) (*OnlineHistoryRedisConsumerHandler, error) {
+	kafkaConf := config.KafkaConfig
 	historyConsumerGroup, err := kafka.NewMConsumerGroup(kafkaConf.Build(), kafkaConf.ToRedisGroupID, []string{kafkaConf.ToRedisTopic}, false)
+	if err != nil {
+		return nil, err
+	}
+	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
+	if err != nil {
+		return nil, err
+	}
+	conversationConn, err := client.GetConn(ctx, config.Discovery.RpcService.Conversation)
 	if err != nil {
 		return nil, err
 	}
 	var och OnlineHistoryRedisConsumerHandler
 	och.msgTransferDatabase = database
 	och.conversationUserHasReadChan = make(chan *userHasReadSeq, hasReadChanBuffer)
+	och.groupClient = rpcli.NewGroupClient(groupConn)
+	och.conversationClient = rpcli.NewConversationClient(conversationConn)
 	och.wg.Add(1)
 
 	b := batcher.New[sarama.ConsumerMessage](
@@ -109,15 +122,13 @@ func (och *OnlineHistoryRedisConsumerHandler) do(ctx context.Context, channelID 
 	ctx = mcontext.WithTriggerIDContext(ctx, val.TriggerID())
 	ctxMessages := och.parseConsumerMessages(ctx, val.Val())
 	ctx = withAggregationCtx(ctx, ctxMessages)
-	log.ZInfo(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMessages),
-		"key", val.Key())
+	log.ZInfo(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMessages), "key", val.Key())
 	och.doSetReadSeq(ctx, ctxMessages)
 
 	storageMsgList, notStorageMsgList, storageNotificationList, notStorageNotificationList :=
 		och.categorizeMessageLists(ctxMessages)
 	log.ZDebug(ctx, "number of categorized messages", "storageMsgList", len(storageMsgList), "notStorageMsgList",
-		len(notStorageMsgList), "storageNotificationList", len(storageNotificationList), "notStorageNotificationList",
-		len(notStorageNotificationList))
+		len(notStorageMsgList), "storageNotificationList", len(storageNotificationList), "notStorageNotificationList", len(notStorageNotificationList))
 
 	conversationIDMsg := msgprocessor.GetChatConversationIDByMsg(ctxMessages[0].message)
 	conversationIDNotification := msgprocessor.GetNotificationConversationIDByMsg(ctxMessages[0].message)
@@ -282,31 +293,26 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 				log.ZDebug(ctx, "group chat first create conversation", "conversationID",
 					conversationID)
 
-				userIDs, err := rpccall.ExtractField(ctx, group.GetGroupMemberUserIDsCaller.Invoke,
-					&group.GetGroupMemberUserIDsReq{
-						GroupID: msg.GroupID,
-					}, (*group.GetGroupMemberUserIDsResp).GetUserIDs)
+				userIDs, err := och.groupClient.GetGroupMemberUserIDs(ctx, msg.GroupID)
 				if err != nil {
 					log.ZWarn(ctx, "get group member ids error", err, "conversationID",
 						conversationID)
 				} else {
 					log.ZInfo(ctx, "GetGroupMemberIDs end")
 
-					if err := pbconv.CreateGroupChatConversationsCaller.Execute(ctx, &pbconv.CreateGroupChatConversationsReq{
-						UserIDs: userIDs,
-						GroupID: msg.GroupID,
-					}); err != nil {
+					if err := och.conversationClient.CreateGroupChatConversations(ctx, msg.GroupID, userIDs); err != nil {
 						log.ZWarn(ctx, "single chat first create conversation error", err,
 							"conversationID", conversationID)
 					}
 				}
 			case constant.SingleChatType, constant.NotificationChatType:
-				if err := pbconv.CreateSingleChatConversationsCaller.Execute(ctx, &pbconv.CreateSingleChatConversationsReq{
+				req := &pbconv.CreateSingleChatConversationsReq{
 					RecvID:           msg.RecvID,
 					SendID:           msg.SendID,
 					ConversationID:   conversationID,
 					ConversationType: msg.SessionType,
-				}); err != nil {
+				}
+				if err := och.conversationClient.CreateSingleChatConversations(ctx, req); err != nil {
 					log.ZWarn(ctx, "single chat or notification first create conversation error", err,
 						"conversationID", conversationID, "sessionType", msg.SessionType)
 				}

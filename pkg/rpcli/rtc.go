@@ -2,10 +2,11 @@ package rpcli
 
 import (
 	"github.com/openimsdk/protocol/rtc"
+	"google.golang.org/grpc"
 )
 
-func NewRtcServiceClient(cli rtc.RtcServiceClient) *RtcServiceClient {
-	return &RtcServiceClient{cli}
+func NewRtcServiceClient(cc grpc.ClientConnInterface) *RtcServiceClient {
+	return &RtcServiceClient{rtc.NewRtcServiceClient(cc)}
 }
 
 type RtcServiceClient struct {

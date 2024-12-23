@@ -32,7 +32,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/sdkws"
@@ -50,7 +49,8 @@ type conversationServer struct {
 
 	conversationNotificationSender *ConversationNotificationSender
 	config                         *Config
-	// todo
+
+	userClient  *rpcli.UserClient
 	msgClient   *rpcli.MsgClient
 	groupClient *rpcli.GroupClient
 }
@@ -78,11 +78,27 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
+	if err != nil {
+		return err
+	}
+	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
+	if err != nil {
+		return err
+	}
+	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
+	if err != nil {
+		return err
+	}
+	msgClient := rpcli.NewMsgClient(msgConn)
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	pbconversation.RegisterConversationServer(server, &conversationServer{
-		conversationNotificationSender: NewConversationNotificationSender(&config.NotificationConfig),
+		conversationNotificationSender: NewConversationNotificationSender(&config.NotificationConfig, msgClient),
 		conversationDatabase: controller.NewConversationDatabase(conversationDB,
 			redis.NewConversationRedis(rdb, &config.LocalCacheConfig, redis.GetRocksCacheOptions(), conversationDB), mgocli.GetTx()),
+		userClient:  rpcli.NewUserClient(userConn),
+		groupClient: rpcli.NewGroupClient(groupConn),
+		msgClient:   msgClient,
 	})
 	return nil
 }
@@ -560,7 +576,7 @@ func (c *conversationServer) getConversationInfo(
 		}
 	}
 	if len(sendIDs) != 0 {
-		sendInfos, err := rpcclient.GetUsersInfo(ctx, sendIDs)
+		sendInfos, err := c.userClient.GetUsersInfo(ctx, sendIDs)
 		if err != nil {
 			return nil, err
 		}

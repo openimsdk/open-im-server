@@ -16,6 +16,8 @@ package user
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/protocol/msg"
 
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
@@ -59,9 +61,11 @@ func WithUserFunc(
 	}
 }
 
-func NewUserNotificationSender(config *Config, opts ...userNotificationSenderOptions) *UserNotificationSender {
+func NewUserNotificationSender(config *Config, msgClient *rpcli.MsgClient, opts ...userNotificationSenderOptions) *UserNotificationSender {
 	f := &UserNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithRpcClient()),
+		NotificationSender: rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
+			return msgClient.SendMsg(ctx, req)
+		})),
 	}
 	for _, opt := range opts {
 		opt(f)

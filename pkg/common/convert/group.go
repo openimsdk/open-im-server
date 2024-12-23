@@ -80,9 +80,18 @@ func Db2PbGroupMember(m *model.GroupMember) *sdkws.GroupMemberFullInfo {
 	}
 }
 
-func Db2PbGroupRequest(m *model.GroupRequest, user *sdkws.PublicUserInfo, group *sdkws.GroupInfo) *sdkws.GroupRequest {
+func Db2PbGroupRequest(m *model.GroupRequest, user *sdkws.UserInfo, group *sdkws.GroupInfo) *sdkws.GroupRequest {
+	var pu *sdkws.PublicUserInfo
+	if user != nil {
+		pu = &sdkws.PublicUserInfo{
+			UserID:   user.UserID,
+			Nickname: user.Nickname,
+			FaceURL:  user.FaceURL,
+			Ex:       user.Ex,
+		}
+	}
 	return &sdkws.GroupRequest{
-		UserInfo:      user,
+		UserInfo:      pu,
 		GroupInfo:     group,
 		HandleResult:  m.HandleResult,
 		ReqMsg:        m.ReqMsg,

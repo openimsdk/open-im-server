@@ -2,10 +2,11 @@ package rpcli
 
 import (
 	"github.com/openimsdk/protocol/push"
+	"google.golang.org/grpc"
 )
 
-func NewPushMsgServiceClient(cli push.PushMsgServiceClient) *PushMsgServiceClient {
-	return &PushMsgServiceClient{cli}
+func NewPushMsgServiceClient(cc grpc.ClientConnInterface) *PushMsgServiceClient {
+	return &PushMsgServiceClient{push.NewPushMsgServiceClient(cc)}
 }
 
 type PushMsgServiceClient struct {

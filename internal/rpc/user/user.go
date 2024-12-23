@@ -95,6 +95,11 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	if err != nil {
 		return err
 	}
+	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
+	if err != nil {
+		return err
+	}
+	msgClient := rpcli.NewMsgClient(msgConn)
 	userCache := redis.NewUserCacheRedis(rdb, &config.LocalCacheConfig, userDB, redis.GetRocksCacheOptions())
 	database := controller.NewUserDatabase(userDB, userCache, mgocli.GetTx())
 	localcache.InitLocalCache(&config.LocalCacheConfig)
@@ -102,8 +107,8 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 		online:                   redis.NewUserOnline(rdb),
 		db:                       database,
 		RegisterCenter:           client,
-		friendNotificationSender: relation.NewFriendNotificationSender(&config.NotificationConfig, relation.WithDBFunc(database.FindWithError)),
-		userNotificationSender:   NewUserNotificationSender(config, WithUserFunc(database.FindWithError)),
+		friendNotificationSender: relation.NewFriendNotificationSender(&config.NotificationConfig, msgClient, relation.WithDBFunc(database.FindWithError)),
+		userNotificationSender:   NewUserNotificationSender(config, msgClient, WithUserFunc(database.FindWithError)),
 		config:                   config,
 		webhookClient:            webhook.NewWebhookClient(config.WebhooksConfig.URL),
 	}

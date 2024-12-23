@@ -1,9 +1,12 @@
 package rpcli
 
-import "github.com/openimsdk/protocol/auth"
+import (
+	"github.com/openimsdk/protocol/auth"
+	"google.golang.org/grpc"
+)
 
-func NewAuthClient(cli auth.AuthClient) *AuthClient {
-	return &AuthClient{cli}
+func NewAuthClient(cc grpc.ClientConnInterface) *AuthClient {
+	return &AuthClient{auth.NewAuthClient(cc)}
 }
 
 type AuthClient struct {

@@ -3,10 +3,11 @@ package rpcli
 import (
 	"context"
 	"github.com/openimsdk/protocol/conversation"
+	"google.golang.org/grpc"
 )
 
-func NewConversationClient(cli conversation.ConversationClient) *ConversationClient {
-	return &ConversationClient{cli}
+func NewConversationClient(cc grpc.ClientConnInterface) *ConversationClient {
+	return &ConversationClient{conversation.NewConversationClient(cc)}
 }
 
 type ConversationClient struct {
@@ -45,4 +46,28 @@ func (x *ConversationClient) GetConversation(ctx context.Context, conversationID
 func (x *ConversationClient) GetConversations(ctx context.Context, conversationIDs []string, ownerUserID string) ([]*conversation.Conversation, error) {
 	req := &conversation.GetConversationsReq{ConversationIDs: conversationIDs, OwnerUserID: ownerUserID}
 	return extractField(ctx, x.ConversationClient.GetConversations, req, (*conversation.GetConversationsResp).GetConversations)
+}
+
+func (x *ConversationClient) GetConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
+	req := &conversation.GetConversationIDsReq{UserID: ownerUserID}
+	return extractField(ctx, x.ConversationClient.GetConversationIDs, req, (*conversation.GetConversationIDsResp).GetConversationIDs)
+}
+
+func (x *ConversationClient) GetPinnedConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
+	req := &conversation.GetPinnedConversationIDsReq{UserID: ownerUserID}
+	return extractField(ctx, x.ConversationClient.GetPinnedConversationIDs, req, (*conversation.GetPinnedConversationIDsResp).GetConversationIDs)
+}
+
+func (x *ConversationClient) CreateGroupChatConversations(ctx context.Context, groupID string, userIDs []string) error {
+	req := &conversation.CreateGroupChatConversationsReq{GroupID: groupID, UserIDs: userIDs}
+	return ignoreResp(x.ConversationClient.CreateGroupChatConversations(ctx, req))
+}
+
+func (x *ConversationClient) CreateSingleChatConversations(ctx context.Context, req *conversation.CreateSingleChatConversationsReq) error {
+	return ignoreResp(x.ConversationClient.CreateSingleChatConversations(ctx, req))
+}
+
+func (x *ConversationClient) GetConversationOfflinePushUserIDs(ctx context.Context, conversationID string, userIDs []string) ([]string, error) {
+	req := &conversation.GetConversationOfflinePushUserIDsReq{ConversationID: conversationID, UserIDs: userIDs}
+	return extractField(ctx, x.ConversationClient.GetConversationOfflinePushUserIDs, req, (*conversation.GetConversationOfflinePushUserIDsResp).GetUserIDs)
 }
