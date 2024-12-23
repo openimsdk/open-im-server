@@ -75,3 +75,15 @@ func (x *UserClient) GetUserOnlinePlatform(ctx context.Context, userID string) (
 func (x *UserClient) SetUserOnlineStatus(ctx context.Context, req *user.SetUserOnlineStatusReq) error {
 	return ignoreResp(x.UserClient.SetUserOnlineStatus(ctx, req))
 }
+
+func (x *UserClient) GetNotificationByID(ctx context.Context, userID string) error {
+	_, err := x.UserClient.GetNotificationAccount(ctx, &user.GetNotificationAccountReq{
+		UserID: userID,
+	})
+	return err
+}
+
+func (x *UserClient) GetAllUserIDs(ctx context.Context, pageNumber, showNumber int32) ([]string, error) {
+	req := &user.GetAllUserIDReq{Pagination: &sdkws.RequestPagination{PageNumber: pageNumber, ShowNumber: showNumber}}
+	return extractField(ctx, x.UserClient.GetAllUserID, req, (*user.GetAllUserIDResp).GetUserIDs)
+}

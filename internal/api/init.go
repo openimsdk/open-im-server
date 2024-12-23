@@ -29,7 +29,6 @@ import (
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -64,9 +63,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	if err = rpcclient.InitRpcCaller(client, config.Discovery.RpcService); err != nil {
-		return err
-	}
 
 	var (
 		netDone        = make(chan struct{}, 1)
@@ -94,7 +90,10 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
 	}
 
-	router := newGinRouter(client, config)
+	router, err := newGinRouter(ctx, client, config)
+	if err != nil {
+		return err
+	}
 	if config.API.Prometheus.Enable {
 		var (
 			listener net.Listener
