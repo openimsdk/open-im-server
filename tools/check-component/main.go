@@ -24,7 +24,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
@@ -87,35 +86,35 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 	)
 	runtimeEnv := runtimeenv.PrintRuntimeEnvironment()
 
-	err := config.Load(configDir, config.MongodbConfigFileName, cmd.ConfigEnvPrefixMap[config.MongodbConfigFileName], runtimeEnv, mongoConfig)
+	err := config.Load(configDir, config.MongodbConfigFileName, config.EnvPrefixMap[config.MongodbConfigFileName], runtimeEnv, mongoConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.Load(configDir, config.RedisConfigFileName, cmd.ConfigEnvPrefixMap[config.RedisConfigFileName], runtimeEnv, redisConfig)
+	err = config.Load(configDir, config.RedisConfigFileName, config.EnvPrefixMap[config.RedisConfigFileName], runtimeEnv, redisConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.Load(configDir, config.KafkaConfigFileName, cmd.ConfigEnvPrefixMap[config.KafkaConfigFileName], runtimeEnv, kafkaConfig)
+	err = config.Load(configDir, config.KafkaConfigFileName, config.EnvPrefixMap[config.KafkaConfigFileName], runtimeEnv, kafkaConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.Load(configDir, config.OpenIMRPCThirdCfgFileName, cmd.ConfigEnvPrefixMap[config.OpenIMRPCThirdCfgFileName], runtimeEnv, thirdConfig)
+	err = config.Load(configDir, config.OpenIMRPCThirdCfgFileName, config.EnvPrefixMap[config.OpenIMRPCThirdCfgFileName], runtimeEnv, thirdConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
 	if thirdConfig.Object.Enable == "minio" {
-		err = config.Load(configDir, config.MinioConfigFileName, cmd.ConfigEnvPrefixMap[config.MinioConfigFileName], runtimeEnv, minioConfig)
+		err = config.Load(configDir, config.MinioConfigFileName, config.EnvPrefixMap[config.MinioConfigFileName], runtimeEnv, minioConfig)
 		if err != nil {
 			return nil, nil, nil, nil, nil, err
 		}
 	} else {
 		minioConfig = nil
 	}
-	err = config.Load(configDir, config.DiscoveryConfigFilename, cmd.ConfigEnvPrefixMap[config.DiscoveryConfigFilename], runtimeEnv, discovery)
+	err = config.Load(configDir, config.DiscoveryConfigFilename, config.EnvPrefixMap[config.DiscoveryConfigFilename], runtimeEnv, discovery)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}

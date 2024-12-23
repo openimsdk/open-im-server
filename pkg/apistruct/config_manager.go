@@ -12,5 +12,5 @@ type GetConfigListResp struct {
 
 type SetConfigReq struct {
 	ConfigName string `json:"config_name"`
-	Data       string `json:"data"`
+	Data       []byte `json:"data"`
 }

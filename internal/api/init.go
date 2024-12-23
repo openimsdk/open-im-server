@@ -47,6 +47,7 @@ type Config struct {
 	*conf.AllConfig
 
 	RuntimeEnv string
+	ConfigPath string
 }
 
 func Start(ctx context.Context, index int, config *Config) error {

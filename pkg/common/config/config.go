@@ -682,8 +682,11 @@ func InitNotification(notification *Notification) {
 
 type AllConfig struct {
 	Discovery    Discovery
+	Kafka        Kafka
 	LocalCache   LocalCache
 	Log          Log
+	Minio        Minio
+	Mongo        Mongo
 	Notification Notification
 	API          API
 	CronTask     CronTask
@@ -697,47 +700,56 @@ type AllConfig struct {
 	Msg          Msg
 	Third        Third
 	User         User
+	Redis        Redis
 	Share        Share
 	Webhooks     Webhooks
 }
 
 func (a *AllConfig) Name2Config(name string) any {
 	switch name {
-	case DiscoveryConfigFilename:
+	case a.Discovery.GetConfigFileName():
 		return a.Discovery
-	case LocalCacheConfigFileName:
+	case a.Kafka.GetConfigFileName():
+		return a.Kafka
+	case a.LocalCache.GetConfigFileName():
 		return a.LocalCache
-	case LogConfigFileName:
+	case a.Log.GetConfigFileName():
 		return a.Log
-	case NotificationFileName:
+	case a.Minio.GetConfigFileName():
+		return a.Minio
+	case a.Mongo.GetConfigFileName():
+		return a.Mongo
+	case a.Notification.GetConfigFileName():
 		return a.Notification
-	case OpenIMAPICfgFileName:
+	case a.API.GetConfigFileName():
 		return a.API
-	case OpenIMCronTaskCfgFileName:
+	case a.CronTask.GetConfigFileName():
 		return a.CronTask
-	case OpenIMMsgGatewayCfgFileName:
+	case a.MsgGateway.GetConfigFileName():
 		return a.MsgGateway
-	case OpenIMMsgTransferCfgFileName:
+	case a.MsgTransfer.GetConfigFileName():
 		return a.MsgTransfer
-	case OpenIMPushCfgFileName:
+	case a.Push.GetConfigFileName():
 		return a.Push
-	case OpenIMRPCAuthCfgFileName:
+	case a.Auth.GetConfigFileName():
 		return a.Auth
-	case OpenIMRPCConversationCfgFileName:
+	case a.Conversation.GetConfigFileName():
 		return a.Conversation
-	case OpenIMRPCFriendCfgFileName:
+	case a.Friend.GetConfigFileName():
 		return a.Friend
-	case OpenIMRPCGroupCfgFileName:
+	case a.Group.GetConfigFileName():
 		return a.Group
-	case OpenIMRPCMsgCfgFileName:
+	case a.Msg.GetConfigFileName():
 		return a.Msg
-	case OpenIMRPCThirdCfgFileName:
+	case a.Third.GetConfigFileName():
 		return a.Third
-	case OpenIMRPCUserCfgFileName:
+	case a.User.GetConfigFileName():
 		return a.User
-	case ShareFileName:
+	case a.Redis.GetConfigFileName():
+		return a.Redis
+	case a.Share.GetConfigFileName():
 		return a.Share
-	case WebhooksConfigFileName:
+	case a.Webhooks.GetConfigFileName():
 		return a.Webhooks
 	default:
 		return nil
@@ -746,38 +758,40 @@ func (a *AllConfig) Name2Config(name string) any {
 
 func (a *AllConfig) GetConfigNames() []string {
 	return []string{
-		DiscoveryConfigFilename,
-		LocalCacheConfigFileName,
-		LogConfigFileName,
-		NotificationFileName,
-		OpenIMAPICfgFileName,
-		OpenIMCronTaskCfgFileName,
-		OpenIMMsgGatewayCfgFileName,
-		OpenIMMsgTransferCfgFileName,
-		OpenIMPushCfgFileName,
-		OpenIMRPCAuthCfgFileName,
-		OpenIMRPCConversationCfgFileName,
-		OpenIMRPCFriendCfgFileName,
-		OpenIMRPCGroupCfgFileName,
-		OpenIMRPCMsgCfgFileName,
-		OpenIMRPCThirdCfgFileName,
-		OpenIMRPCUserCfgFileName,
-		ShareFileName,
-		WebhooksConfigFileName,
+		a.Discovery.GetConfigFileName(),
+		a.Kafka.GetConfigFileName(),
+		a.LocalCache.GetConfigFileName(),
+		a.Log.GetConfigFileName(),
+		a.Minio.GetConfigFileName(),
+		a.Mongo.GetConfigFileName(),
+		a.Notification.GetConfigFileName(),
+		a.API.GetConfigFileName(),
+		a.CronTask.GetConfigFileName(),
+		a.MsgGateway.GetConfigFileName(),
+		a.MsgTransfer.GetConfigFileName(),
+		a.Push.GetConfigFileName(),
+		a.Auth.GetConfigFileName(),
+		a.Conversation.GetConfigFileName(),
+		a.Friend.GetConfigFileName(),
+		a.Group.GetConfigFileName(),
+		a.Msg.GetConfigFileName(),
+		a.Third.GetConfigFileName(),
+		a.User.GetConfigFileName(),
+		a.Redis.GetConfigFileName(),
+		a.Share.GetConfigFileName(),
+		a.Webhooks.GetConfigFileName(),
 	}
 }
 
 var (
 	FileName                         = "config.yaml"
-	NotificationFileName             = "notification.yml"
-	ShareFileName                    = "share.yml"
-	WebhooksConfigFileName           = "webhooks.yml"
-	LocalCacheConfigFileName         = "local-cache.yml"
+	DiscoveryConfigFilename          = "discovery.yml"
 	KafkaConfigFileName              = "kafka.yml"
-	RedisConfigFileName              = "redis.yml"
-	MongodbConfigFileName            = "mongodb.yml"
-	MinioConfigFileName              = "minio.yml"
+	LocalCacheConfigFileName         = "local-cache.yml"
 	LogConfigFileName                = "log.yml"
+	MinioConfigFileName              = "minio.yml"
+	MongodbConfigFileName            = "mongodb.yml"
+	NotificationFileName             = "notification.yml"
 	OpenIMAPICfgFileName             = "openim-api.yml"
 	OpenIMCronTaskCfgFileName        = "openim-crontask.yml"
 	OpenIMMsgGatewayCfgFileName      = "openim-msggateway.yml"
@@ -790,5 +804,95 @@ var (
 	OpenIMRPCMsgCfgFileName          = "openim-rpc-msg.yml"
 	OpenIMRPCThirdCfgFileName        = "openim-rpc-third.yml"
 	OpenIMRPCUserCfgFileName         = "openim-rpc-user.yml"
-	DiscoveryConfigFilename          = "discovery.yml"
+	RedisConfigFileName              = "redis.yml"
+	ShareFileName                    = "share.yml"
+	WebhooksConfigFileName           = "webhooks.yml"
 )
+
+func (d *Discovery) GetConfigFileName() string {
+	return DiscoveryConfigFilename
+}
+
+func (k *Kafka) GetConfigFileName() string {
+	return KafkaConfigFileName
+}
+
+func (lc *LocalCache) GetConfigFileName() string {
+	return LocalCacheConfigFileName
+}
+
+func (l *Log) GetConfigFileName() string {
+	return LogConfigFileName
+}
+
+func (m *Minio) GetConfigFileName() string {
+	return MinioConfigFileName
+}
+
+func (m *Mongo) GetConfigFileName() string {
+	return MongodbConfigFileName
+}
+
+func (n *Notification) GetConfigFileName() string {
+	return NotificationFileName
+}
+
+func (a *API) GetConfigFileName() string {
+	return OpenIMAPICfgFileName
+}
+
+func (ct *CronTask) GetConfigFileName() string {
+	return OpenIMCronTaskCfgFileName
+}
+
+func (mg *MsgGateway) GetConfigFileName() string {
+	return OpenIMMsgGatewayCfgFileName
+}
+
+func (mt *MsgTransfer) GetConfigFileName() string {
+	return OpenIMMsgTransferCfgFileName
+}
+
+func (p *Push) GetConfigFileName() string {
+	return OpenIMPushCfgFileName
+}
+
+func (a *Auth) GetConfigFileName() string {
+	return OpenIMRPCAuthCfgFileName
+}
+
+func (c *Conversation) GetConfigFileName() string {
+	return OpenIMRPCConversationCfgFileName
+}
+
+func (f *Friend) GetConfigFileName() string {
+	return OpenIMRPCFriendCfgFileName
+}
+
+func (g *Group) GetConfigFileName() string {
+	return OpenIMRPCGroupCfgFileName
+}
+
+func (m *Msg) GetConfigFileName() string {
+	return OpenIMRPCMsgCfgFileName
+}
+
+func (t *Third) GetConfigFileName() string {
+	return OpenIMRPCThirdCfgFileName
+}
+
+func (u *User) GetConfigFileName() string {
+	return OpenIMRPCUserCfgFileName
+}
+
+func (r *Redis) GetConfigFileName() string {
+	return RedisConfigFileName
+}
+
+func (s *Share) GetConfigFileName() string {
+	return ShareFileName
+}
+
+func (w *Webhooks) GetConfigFileName() string {
+	return WebhooksConfigFileName
+}

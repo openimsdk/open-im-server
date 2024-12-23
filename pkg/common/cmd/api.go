@@ -36,8 +36,12 @@ func NewApiCmd() *ApiCmd {
 	ret := &ApiCmd{apiConfig: &apiConfig}
 	ret.configMap = map[string]any{
 		config.DiscoveryConfigFilename:          &apiConfig.Discovery,
+		config.KafkaConfigFileName:              &apiConfig.Kafka,
 		config.LocalCacheConfigFileName:         &apiConfig.LocalCache,
 		config.LogConfigFileName:                &apiConfig.Log,
+		config.MinioConfigFileName:              &apiConfig.Minio,
+		config.MongodbConfigFileName:            &apiConfig.Mongo,
+		config.NotificationFileName:             &apiConfig.Notification,
 		config.OpenIMAPICfgFileName:             &apiConfig.API,
 		config.OpenIMCronTaskCfgFileName:        &apiConfig.CronTask,
 		config.OpenIMMsgGatewayCfgFileName:      &apiConfig.MsgGateway,
@@ -50,12 +54,14 @@ func NewApiCmd() *ApiCmd {
 		config.OpenIMRPCMsgCfgFileName:          &apiConfig.Msg,
 		config.OpenIMRPCThirdCfgFileName:        &apiConfig.Third,
 		config.OpenIMRPCUserCfgFileName:         &apiConfig.User,
+		config.RedisConfigFileName:              &apiConfig.Redis,
 		config.ShareFileName:                    &apiConfig.Share,
 		config.WebhooksConfigFileName:           &apiConfig.Webhooks,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		apiConfig.ConfigPath = ret.configPath
 		return ret.runE()
 	}
 	return ret
