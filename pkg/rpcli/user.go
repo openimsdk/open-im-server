@@ -71,3 +71,7 @@ func (x *UserClient) GetUserOnlinePlatform(ctx context.Context, userID string) (
 	}
 	return status[0].PlatformIDs, nil
 }
+
+func (x *UserClient) SetUserOnlineStatus(ctx context.Context, req *user.SetUserOnlineStatusReq) error {
+	return ignoreResp(x.UserClient.SetUserOnlineStatus(ctx, req))
+}

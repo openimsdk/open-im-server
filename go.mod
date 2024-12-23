@@ -225,4 +225,5 @@ require (
 
 replace (
 	github.com/openimsdk/protocol => /Users/chao/Desktop/code/protocol
+	github.com/openimsdk/tools => /Users/chao/Desktop/code/tools
 )
