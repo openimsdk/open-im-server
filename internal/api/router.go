@@ -264,6 +264,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	configGroup.POST("/get_config_list", cm.GetConfigList)
 	configGroup.POST("/get_config", cm.GetConfig)
 	configGroup.POST("/set_config", cm.SetConfig)
+	configGroup.POST("/reset_config", cm.ResetConfig)
 	return r
 }
 
