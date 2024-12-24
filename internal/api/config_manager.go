@@ -12,6 +12,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/runtimeenv"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -196,11 +197,16 @@ func (cm *ConfigManager) restart(c *gin.Context) {
 
 	changedKeys := make([]string, 0, len(configMap))
 	for k, v := range configMap {
-		err := config.Load(cm.configPath, k, config.EnvPrefixMap[k],
-			cm.runtimeEnv, v.new)
+		err := config.Load(
+			cm.configPath,
+			k,
+			config.EnvPrefixMap[k],
+			cm.runtimeEnv,
+			v.new,
+		)
 		if err != nil {
-			apiresp.GinError(c, errs.WrapMsg(err, "load config failed"))
-			return
+			log.ZError(c, "load config failed", err)
+			continue
 		}
 		v.isChanged = reflect.DeepEqual(v.old, v.new)
 		if v.isChanged {
@@ -211,13 +217,13 @@ func (cm *ConfigManager) restart(c *gin.Context) {
 	for _, k := range changedKeys {
 		data, err := json.Marshal(configMap[k].new)
 		if err != nil {
-			apiresp.GinError(c, errs.WrapMsg(err, "marshal config failed"))
-			return
+			log.ZError(c, "marshal config failed", err)
+			continue
 		}
 		_, err = cm.client.Put(c, etcd.BuildKey(k), string(data))
 		if err != nil {
-			apiresp.GinError(c, errs.WrapMsg(err, "save to etcd failed"))
-			return
+			log.ZError(c, "save to etcd failed", err)
+			continue
 		}
 	}
 	etcd.CanRestart <- struct{}{}
