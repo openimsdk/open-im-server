@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-	"sync"
 	"syscall"
 
 	"github.com/openimsdk/tools/errs"
@@ -19,8 +18,14 @@ const (
 )
 
 var (
-	ShutDowns []func() error
+	ShutDowns  []func() error
+	CanRestart chan struct{}
 )
+
+func init() {
+	CanRestart = make(chan struct{}, 1)
+	CanRestart <- struct{}{}
+}
 
 func RegisterShutDown(shutDown ...func() error) {
 	ShutDowns = append(ShutDowns, shutDown...)
@@ -29,7 +34,6 @@ func RegisterShutDown(shutDown ...func() error) {
 type ConfigManager struct {
 	client           *clientv3.Client
 	watchConfigNames []string
-	lock             sync.RWMutex
 }
 
 func BuildKey(s string) string {
@@ -57,12 +61,12 @@ func (c *ConfigManager) Watch(ctx context.Context) {
 			for _, event := range watchResp.Events {
 				if event.IsModify() {
 					if datautil.Contain(string(event.Kv.Key), c.watchConfigNames...) {
-						c.lock.Lock()
+						<-CanRestart
 						err := restartServer(ctx)
 						if err != nil {
 							log.ZError(ctx, "restart server err", err)
+							CanRestart <- struct{}{}
 						}
-						c.lock.Unlock()
 					}
 				}
 			}

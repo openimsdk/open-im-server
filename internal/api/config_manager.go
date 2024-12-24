@@ -158,6 +158,12 @@ func compareAndSave[T any](c *gin.Context, old any, req *apistruct.SetConfigReq,
 }
 
 func (cm *ConfigManager) ResetConfig(c *gin.Context) {
+	go cm.restart(c)
+	apiresp.GinSuccess(c, nil)
+}
+
+func (cm *ConfigManager) restart(c *gin.Context) {
+	<-etcd.CanRestart
 	type initConf struct {
 		old       any
 		new       any
@@ -214,5 +220,5 @@ func (cm *ConfigManager) ResetConfig(c *gin.Context) {
 			return
 		}
 	}
-	apiresp.GinSuccess(c, nil)
+	etcd.CanRestart <- struct{}{}
 }
