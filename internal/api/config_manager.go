@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 
 	"github.com/gin-gonic/gin"
@@ -216,7 +215,6 @@ func (cm *ConfigManager) restart(c *gin.Context) {
 	}
 
 	for _, k := range changedKeys {
-		fmt.Println("HHHHHHHHHHHHHHHH+", k)
 		data, err := json.Marshal(configMap[k].new)
 		if err != nil {
 			log.ZError(c, "marshal config failed", err)
