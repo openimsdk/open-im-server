@@ -132,7 +132,7 @@ func (c *Client) readMessage() {
 	defer func() {
 		if r := recover(); r != nil {
 			c.closedErr = ErrPanic
-			fmt.Println("socket have panic err:", r, string(debug.Stack()))
+			log.ZPanic(c.ctx, "socket have panic err:", errs.ErrPanic(r))
 		}
 		c.close()
 	}()
@@ -377,7 +377,7 @@ func (c *Client) activeHeartbeat(ctx context.Context) {
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
-					log.ZPanic(ctx, "activeHeartbeat Panic", r)
+					log.ZPanic(ctx, "activeHeartbeat Panic", errs.ErrPanic(r))
 				}
 			}()
 			log.ZDebug(ctx, "server initiative send heartbeat start.")

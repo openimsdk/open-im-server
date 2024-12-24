@@ -140,7 +140,7 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
-					log.ZPanic(m.ctx, "MsgTransfer Start Panic", r)
+					log.ZPanic(m.ctx, "MsgTransfer Start Panic", errs.ErrPanic(r))
 				}
 			}()
 			prometheusPort, err := datautil.GetElemByIndex(config.MsgTransfer.Prometheus.Ports, index)

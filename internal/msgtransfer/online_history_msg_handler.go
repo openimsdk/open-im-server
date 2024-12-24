@@ -368,7 +368,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Con
 func (och *OnlineHistoryRedisConsumerHandler) HandleUserHasReadSeqMessages(ctx context.Context) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.ZPanic(ctx, "HandleUserHasReadSeqMessages Panic", r)
+			log.ZPanic(ctx, "HandleUserHasReadSeqMessages Panic", errs.ErrPanic(r))
 		}
 	}()
 
