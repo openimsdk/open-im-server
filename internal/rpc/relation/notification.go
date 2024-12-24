@@ -27,8 +27,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"github.com/openimsdk/open-im-server/v3/pkg/notification"
+	"github.com/openimsdk/open-im-server/v3/pkg/notification/common_user"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/sdkws"
@@ -38,7 +38,7 @@ import (
 type FriendNotificationSender struct {
 	*rpcclient.NotificationSender
 	// Target not found err
-	getUsersInfo func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error)
+	getUsersInfo func(ctx context.Context, userIDs []string) ([]common_user.CommonUser, error)
 	// db controller
 	db controller.FriendDatabase
 }
@@ -55,7 +55,7 @@ func WithDBFunc(
 	fn func(ctx context.Context, userIDs []string) (users []*relationtb.User, err error),
 ) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
-		f := func(ctx context.Context, userIDs []string) (result []notification.CommonUser, err error) {
+		f := func(ctx context.Context, userIDs []string) (result []common_user.CommonUser, err error) {
 			users, err := fn(ctx, userIDs)
 			if err != nil {
 				return nil, err
@@ -73,7 +73,7 @@ func WithRpcFunc(
 	fn func(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error),
 ) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
-		f := func(ctx context.Context, userIDs []string) (result []notification.CommonUser, err error) {
+		f := func(ctx context.Context, userIDs []string) (result []common_user.CommonUser, err error) {
 			users, err := fn(ctx, userIDs)
 			if err != nil {
 				return nil, err

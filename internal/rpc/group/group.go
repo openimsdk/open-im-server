@@ -36,7 +36,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/grouphash"
+	"github.com/openimsdk/open-im-server/v3/pkg/notification/grouphash"
 	"github.com/openimsdk/protocol/constant"
 	pbconv "github.com/openimsdk/protocol/conversation"
 	pbgroup "github.com/openimsdk/protocol/group"

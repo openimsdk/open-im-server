@@ -29,8 +29,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"github.com/openimsdk/open-im-server/v3/pkg/notification"
+	"github.com/openimsdk/open-im-server/v3/pkg/notification/common_user"
 	"github.com/openimsdk/protocol/constant"
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/msg"
@@ -57,12 +57,12 @@ func NewNotificationSender(db controller.GroupDatabase, config *Config, userClie
 			}),
 			rpcclient.WithUserRpcClient(userClient.GetUserInfo),
 		),
-		getUsersInfo: func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
+		getUsersInfo: func(ctx context.Context, userIDs []string) ([]common_user.CommonUser, error) {
 			users, err := userClient.GetUsersInfo(ctx, userIDs)
 			if err != nil {
 				return nil, err
 			}
-			return datautil.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
+			return datautil.Slice(users, func(e *sdkws.UserInfo) common_user.CommonUser { return e }), nil
 		},
 		db:                 db,
 		config:             config,
@@ -73,7 +73,7 @@ func NewNotificationSender(db controller.GroupDatabase, config *Config, userClie
 
 type NotificationSender struct {
 	*rpcclient.NotificationSender
-	getUsersInfo       func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error)
+	getUsersInfo       func(ctx context.Context, userIDs []string) ([]common_user.CommonUser, error)
 	db                 controller.GroupDatabase
 	config             *Config
 	msgClient          *rpcli.MsgClient
@@ -95,7 +95,7 @@ func (g *NotificationSender) PopulateGroupMember(ctx context.Context, members ..
 		if err != nil {
 			return err
 		}
-		userMap := make(map[string]notification.CommonUser)
+		userMap := make(map[string]common_user.CommonUser)
 		for i, user := range users {
 			userMap[user.GetUserID()] = users[i]
 		}
