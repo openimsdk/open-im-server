@@ -19,10 +19,9 @@ import (
 	"crypto/rand"
 	"time"
 
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/errs"
@@ -149,7 +148,7 @@ func (t *thirdServer) SearchLogs(ctx context.Context, req *third.SearchLogsReq) 
 	for _, log := range logs {
 		userIDs = append(userIDs, log.UserID)
 	}
-	userMap, err := t.userRpcClient.GetUsersInfoMap(ctx, userIDs)
+	userMap, err := t.userClient.GetUsersInfoMap(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}

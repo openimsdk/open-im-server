@@ -16,11 +16,11 @@ package rpccache
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/errs"
@@ -28,7 +28,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func NewUserLocalCache(client rpcclient.UserRpcClient, localCache *config.LocalCache, cli redis.UniversalClient) *UserLocalCache {
+func NewUserLocalCache(client *rpcli.UserClient, localCache *config.LocalCache, cli redis.UniversalClient) *UserLocalCache {
 	lc := localCache.User
 	log.ZDebug(context.Background(), "UserLocalCache", "topic", lc.Topic, "slotNum", lc.SlotNum, "slotSize", lc.SlotSize, "enable", lc.Enable())
 	x := &UserLocalCache{
@@ -48,7 +48,7 @@ func NewUserLocalCache(client rpcclient.UserRpcClient, localCache *config.LocalC
 }
 
 type UserLocalCache struct {
-	client rpcclient.UserRpcClient
+	client *rpcli.UserClient
 	local  localcache.Cache[[]byte]
 }
 
@@ -88,7 +88,7 @@ func (u *UserLocalCache) getUserGlobalMsgRecvOpt(ctx context.Context, userID str
 	var cache cacheProto[user.GetGlobalRecvMessageOptResp]
 	return cache.Unmarshal(u.local.Get(ctx, cachekey.GetUserGlobalRecvMsgOptKey(userID), func(ctx context.Context) ([]byte, error) {
 		log.ZDebug(ctx, "UserLocalCache GetUserGlobalMsgRecvOpt rpc", "userID", userID)
-		return cache.Marshal(u.client.Client.GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{UserID: userID}))
+		return cache.Marshal(u.client.UserClient.GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{UserID: userID}))
 	}))
 }
 

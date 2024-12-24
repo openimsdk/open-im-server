@@ -21,24 +21,26 @@ import (
 	"github.com/openimsdk/tools/a2r"
 )
 
-type AuthApi rpcclient.Auth
+type AuthApi struct {
+	Client auth.AuthClient
+}
 
-func NewAuthApi(client rpcclient.Auth) AuthApi {
-	return AuthApi(client)
+func NewAuthApi(client auth.AuthClient) AuthApi {
+	return AuthApi{client}
 }
 
 func (o *AuthApi) GetAdminToken(c *gin.Context) {
-	a2r.Call(auth.AuthClient.GetAdminToken, o.Client, c)
+	a2r.Call(c, auth.AuthClient.GetAdminToken, o.Client)
 }
 
 func (o *AuthApi) GetUserToken(c *gin.Context) {
-	a2r.Call(auth.AuthClient.GetUserToken, o.Client, c)
+	a2r.Call(c, auth.AuthClient.GetUserToken, o.Client)
 }
 
 func (o *AuthApi) ParseToken(c *gin.Context) {
-	a2r.Call(auth.AuthClient.ParseToken, o.Client, c)
+	a2r.Call(c, auth.AuthClient.ParseToken, o.Client)
 }
 
 func (o *AuthApi) ForceLogout(c *gin.Context) {
-	a2r.Call(auth.AuthClient.ForceLogout, o.Client, c)
+	a2r.Call(c, auth.AuthClient.ForceLogout, o.Client)
 }

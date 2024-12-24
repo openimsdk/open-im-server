@@ -17,6 +17,7 @@ package user
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"math/rand"
 	"strings"
 	"sync"
@@ -62,6 +63,8 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 	config                   *Config
 	webhookClient            *webhook.Client
+	groupClient              *rpcli.GroupClient
+	relationClient           *rpcli.RelationClient
 }
 
 type Config struct {
@@ -94,6 +97,19 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	if err != nil {
 		return err
 	}
+	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
+	if err != nil {
+		return err
+	}
+	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
+	if err != nil {
+		return err
+	}
+	friendConn, err := client.GetConn(ctx, config.Discovery.RpcService.Friend)
+	if err != nil {
+		return err
+	}
+	msgClient := rpcli.NewMsgClient(msgConn)
 	userCache := redis.NewUserCacheRedis(rdb, &config.LocalCacheConfig, userDB, redis.GetRocksCacheOptions())
 	database := controller.NewUserDatabase(userDB, userCache, mgocli.GetTx())
 	friendRpcClient := rpcclient.NewFriendRpcClient(client, config.Share.RpcRegisterName.Friend)
@@ -104,12 +120,13 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 		online:                   redis.NewUserOnline(rdb),
 		db:                       database,
 		RegisterCenter:           client,
-		friendRpcClient:          &friendRpcClient,
-		groupRpcClient:           &groupRpcClient,
-		friendNotificationSender: relation.NewFriendNotificationSender(&config.NotificationConfig, &msgRpcClient, relation.WithDBFunc(database.FindWithError)),
-		userNotificationSender:   NewUserNotificationSender(config, &msgRpcClient, WithUserFunc(database.FindWithError)),
+		friendNotificationSender: relation.NewFriendNotificationSender(&config.NotificationConfig, msgClient, relation.WithDBFunc(database.FindWithError)),
+		userNotificationSender:   NewUserNotificationSender(config, msgClient, WithUserFunc(database.FindWithError)),
 		config:                   config,
 		webhookClient:            webhook.NewWebhookClient(config.WebhooksConfig.URL),
+
+		groupClient:    rpcli.NewGroupClient(groupConn),
+		relationClient: rpcli.NewRelationClient(friendConn),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.db.InitOnce(context.Background(), users)
@@ -641,7 +658,7 @@ func (s *userServer) NotificationUserInfoUpdate(ctx context.Context, userID stri
 	wg.Add(len(es))
 	go func() {
 		defer wg.Done()
-		_, es[0] = s.groupRpcClient.Client.NotificationUserInfoUpdate(ctx, &group.NotificationUserInfoUpdateReq{
+		_, es[0] = s.groupClient.NotificationUserInfoUpdate(ctx, &group.NotificationUserInfoUpdateReq{
 			UserID:      userID,
 			OldUserInfo: oldUserInfo,
 			NewUserInfo: newUserInfo,
@@ -650,7 +667,7 @@ func (s *userServer) NotificationUserInfoUpdate(ctx context.Context, userID stri
 
 	go func() {
 		defer wg.Done()
-		_, es[1] = s.friendRpcClient.Client.NotificationUserInfoUpdate(ctx, &friendpb.NotificationUserInfoUpdateReq{
+		_, es[1] = s.relationClient.NotificationUserInfoUpdate(ctx, &friendpb.NotificationUserInfoUpdateReq{
 			UserID:      userID,
 			OldUserInfo: oldUserInfo,
 			NewUserInfo: newUserInfo,

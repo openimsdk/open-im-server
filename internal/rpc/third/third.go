@@ -17,6 +17,9 @@ package third
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
@@ -45,6 +48,7 @@ type thirdServer struct {
 	defaultExpire time.Duration
 	config        *Config
 	s3            s3.Interface
+	userClient    *rpcli.UserClient
 }
 
 type Config struct {
@@ -96,6 +100,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
+	if err != nil {
+		return err
+	}
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	third.RegisterThirdServer(server, &thirdServer{
 		thirdDatabase: controller.NewThirdDatabase(redis.NewThirdCache(rdb), logdb),
@@ -104,6 +112,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		defaultExpire: time.Hour * 24 * 7,
 		config:        config,
 		s3:            o,
+		userClient:    rpcli.NewUserClient(userConn),
 	})
 	return nil
 }

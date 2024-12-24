@@ -17,7 +17,6 @@ package rpccache
 import (
 	"context"
 	"encoding/json"
-
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
 )

@@ -23,6 +23,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/discovery/etcd"
+	"github.com/openimsdk/tools/utils/jsonutil"
+	"github.com/openimsdk/tools/utils/network"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
@@ -81,7 +86,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-
 	msgModel := redis.NewMsgCache(rdb)
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
@@ -101,9 +105,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
-	historyCH, err := NewOnlineHistoryRedisConsumerHandler(&config.KafkaConfig, msgTransferDatabase, &conversationRpcClient, &groupRpcClient)
+	historyCH, err := NewOnlineHistoryRedisConsumerHandler(ctx, client, config, msgTransferDatabase)
 	if err != nil {
 		return err
 	}

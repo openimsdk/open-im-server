@@ -28,6 +28,14 @@ import (
 	"syscall"
 	"time"
 
+	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/discovery/etcd"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/jsonutil"
+	"google.golang.org/grpc/status"
+
+	"github.com/openimsdk/tools/utils/runtimeenv"
+
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
@@ -68,13 +76,9 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 
 	defer client.Close()
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	registerIP, err = network.GetRpcRegisterIP(registerIP)
-	if err != nil {
-		return err
-	}
 
-	//var reg *prometheus.Registry
-	//var metric *grpcprometheus.ServerMetrics
+	// var reg *prometheus.Registry
+	// var metric *grpcprometheus.ServerMetrics
 	if prometheusConfig.Enable {
 		//cusMetrics := prommetrics.GetGrpcCusMetrics(rpcRegisterName, share)
 		//reg, metric, _ = prommetrics.NewGrpcPromObj(cusMetrics)

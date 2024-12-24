@@ -271,15 +271,17 @@ func WithLocalSendMsg(sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*m
 	}
 }
 
-func WithRpcClient(msgRpcClient *MessageRpcClient) NotificationSenderOptions {
+func WithRpcClient(sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)) NotificationSenderOptions {
 	return func(s *NotificationSender) {
-		s.sendMsg = msgRpcClient.SendMsg
+		s.sendMsg = func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
+			return sendMsg(ctx, req)
+		}
 	}
 }
 
-func WithUserRpcClient(userRpcClient *UserRpcClient) NotificationSenderOptions {
+func WithUserRpcClient(getUserInfo func(ctx context.Context, userID string) (*sdkws.UserInfo, error)) NotificationSenderOptions {
 	return func(s *NotificationSender) {
-		s.getUserInfo = userRpcClient.GetUserInfo
+		s.getUserInfo = getUserInfo
 	}
 }
 

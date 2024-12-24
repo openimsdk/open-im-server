@@ -3,6 +3,7 @@ package rpccache
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/user"
 	"math/rand"
@@ -22,10 +23,10 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func NewOnlineCache(user rpcclient.UserRpcClient, group *GroupLocalCache, rdb redis.UniversalClient, fullUserCache bool, fn func(ctx context.Context, userID string, platformIDs []int32)) (*OnlineCache, error) {
+func NewOnlineCache(client *rpcli.UserClient, group *GroupLocalCache, rdb redis.UniversalClient, fullUserCache bool, fn func(ctx context.Context, userID string, platformIDs []int32)) (*OnlineCache, error) {
 	l := &sync.Mutex{}
 	x := &OnlineCache{
-		user:          user,
+		client:        client,
 		group:         group,
 		fullUserCache: fullUserCache,
 		Lock:          l,
@@ -65,8 +66,8 @@ const (
 )
 
 type OnlineCache struct {
-	user  rpcclient.UserRpcClient
-	group *GroupLocalCache
+	client *rpcli.UserClient
+	group  *GroupLocalCache
 
 	// fullUserCache if enabled, caches the online status of all users using mapCache;
 	// otherwise, only a portion of users' online statuses (regardless of whether they are online) will be cached using lruCache.
@@ -112,7 +113,7 @@ func (o *OnlineCache) initUsersOnlineStatus(ctx context.Context) (err error) {
 	cursor := uint64(0)
 	for resp == nil || resp.NextCursor != 0 {
 		if err = retryOperation(func() error {
-			resp, err = o.user.GetAllOnlineUsers(ctx, cursor)
+			resp, err = o.client.GetAllOnlineUsers(ctx, cursor)
 			if err != nil {
 				return err
 			}
@@ -186,7 +187,7 @@ func (o *OnlineCache) doSubscribe(ctx context.Context, rdb redis.UniversalClient
 
 func (o *OnlineCache) getUserOnlinePlatform(ctx context.Context, userID string) ([]int32, error) {
 	platformIDs, err := o.lruCache.Get(userID, func() ([]int32, error) {
-		return o.user.GetUserOnlinePlatform(ctx, userID)
+		return o.client.GetUserOnlinePlatform(ctx, userID)
 	})
 	if err != nil {
 		log.ZError(ctx, "OnlineCache GetUserOnlinePlatform", err, "userID", userID)
@@ -227,8 +228,7 @@ func (o *OnlineCache) GetUserOnline(ctx context.Context, userID string) (bool, e
 func (o *OnlineCache) getUserOnlinePlatformBatch(ctx context.Context, userIDs []string) (map[string][]int32, error) {
 	platformIDsMap, err := o.lruCache.GetBatch(userIDs, func(missingUsers []string) (map[string][]int32, error) {
 		platformIDsMap := make(map[string][]int32)
-
-		usersStatus, err := o.user.GetUsersOnlinePlatform(ctx, missingUsers)
+		usersStatus, err := o.client.GetUsersOnlinePlatform(ctx, missingUsers)
 		if err != nil {
 			return nil, err
 		}
