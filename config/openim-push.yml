@@ -21,7 +21,7 @@ prometheus:
 maxConcurrentWorkers: 3
 #Use geTui for offline push notifications, or choose fcm or jpns; corresponding configuration settings must be specified.
 enable:
-geTui:
+getui:
   pushUrl: https://restapi.getui.com/v2/$appId
   masterSecret:
   appKey:

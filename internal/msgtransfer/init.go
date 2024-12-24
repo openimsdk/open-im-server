@@ -103,6 +103,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 			config.Share.GetConfigFileName(),
 			config.WebhooksConfig.GetConfigFileName(),
 			config.Discovery.GetConfigFileName(),
+			conf.LogConfigFileName,
 		})
 		cm.Watch(ctx)
 	}

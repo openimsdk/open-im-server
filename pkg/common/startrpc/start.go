@@ -53,6 +53,7 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 	rpcFn func(ctx context.Context, config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error,
 	options ...grpc.ServerOption) error {
 
+	watchConfigNames = append(watchConfigNames, conf.LogConfigFileName)
 	var (
 		rpcTcpAddr     string
 		netDone        = make(chan struct{}, 2)

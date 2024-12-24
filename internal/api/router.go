@@ -300,17 +300,21 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 		proDiscoveryGroup.GET("/msg_transfer", pd.MessageTransfer)
 	}
 
+	var etcdClient *clientv3.Client
+	if cfg.Discovery.Enable == config.ETCD {
+		etcdClient = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
+	}
+	cm := NewConfigManager(cfg.Share.IMAdminUserID, cfg.AllConfig, etcdClient, cfg.ConfigPath, cfg.RuntimeEnv)
 	{
-		var etcdClient *clientv3.Client
-		if cfg.Discovery.Enable == config.ETCD {
-			etcdClient = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
-		}
-		cm := NewConfigManager(cfg.Share.IMAdminUserID, cfg.AllConfig, etcdClient, cfg.ConfigPath, cfg.RuntimeEnv)
+
 		configGroup := r.Group("/config", cm.CheckAdmin)
 		configGroup.POST("/get_config_list", cm.GetConfigList)
 		configGroup.POST("/get_config", cm.GetConfig)
 		configGroup.POST("/set_config", cm.SetConfig)
 		configGroup.POST("/reset_config", cm.ResetConfig)
+	}
+	{
+		r.POST("/restart", cm.Restart)
 	}
 	return r, nil
 }

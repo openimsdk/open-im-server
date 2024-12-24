@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"sync"
 	"syscall"
 
 	"github.com/openimsdk/tools/errs"
@@ -15,17 +16,12 @@ import (
 
 const (
 	ConfigKeyPrefix = "/open-im/config/"
+	RestartKey      = "restart"
 )
 
 var (
-	ShutDowns  []func() error
-	CanRestart chan struct{}
+	ShutDowns []func() error
 )
-
-func init() {
-	CanRestart = make(chan struct{}, 1)
-	CanRestart <- struct{}{}
-}
 
 func RegisterShutDown(shutDown ...func() error) {
 	ShutDowns = append(ShutDowns, shutDown...)
@@ -34,6 +30,7 @@ func RegisterShutDown(shutDown ...func() error) {
 type ConfigManager struct {
 	client           *clientv3.Client
 	watchConfigNames []string
+	lock             sync.Mutex
 }
 
 func BuildKey(s string) string {
@@ -43,7 +40,7 @@ func BuildKey(s string) string {
 func NewConfigManager(client *clientv3.Client, configNames []string) *ConfigManager {
 	return &ConfigManager{
 		client:           client,
-		watchConfigNames: datautil.Batch(func(s string) string { return BuildKey(s) }, configNames)}
+		watchConfigNames: datautil.Batch(func(s string) string { return BuildKey(s) }, append(configNames, RestartKey))}
 }
 
 func (c *ConfigManager) Watch(ctx context.Context) {
@@ -61,12 +58,12 @@ func (c *ConfigManager) Watch(ctx context.Context) {
 			for _, event := range watchResp.Events {
 				if event.IsModify() {
 					if datautil.Contain(string(event.Kv.Key), c.watchConfigNames...) {
-						<-CanRestart
+						c.lock.Lock()
 						err := restartServer(ctx)
 						if err != nil {
 							log.ZError(ctx, "restart server err", err)
-							CanRestart <- struct{}{}
 						}
+						c.lock.Unlock()
 					}
 				}
 			}

@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"reflect"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
@@ -159,12 +161,12 @@ func compareAndSave[T any](c *gin.Context, old any, req *apistruct.SetConfigReq,
 }
 
 func (cm *ConfigManager) ResetConfig(c *gin.Context) {
-	go cm.restart(c)
+	go cm.resetConfig(c)
 	apiresp.GinSuccess(c, nil)
 }
 
-func (cm *ConfigManager) restart(c *gin.Context) {
-	<-etcd.CanRestart
+func (cm *ConfigManager) resetConfig(c *gin.Context) {
+	txn := cm.client.Txn(c)
 	type initConf struct {
 		old       any
 		new       any
@@ -220,11 +222,25 @@ func (cm *ConfigManager) restart(c *gin.Context) {
 			log.ZError(c, "marshal config failed", err)
 			continue
 		}
-		_, err = cm.client.Put(c, etcd.BuildKey(k), string(data))
-		if err != nil {
-			log.ZError(c, "save to etcd failed", err)
-			continue
-		}
+		txn = txn.Then(clientv3.OpPut(etcd.BuildKey(k), string(data)))
 	}
-	etcd.CanRestart <- struct{}{}
+	_, err := txn.Commit()
+	if err != nil {
+		log.ZError(c, "commit etcd txn failed", err)
+		return
+	}
+}
+
+func (cm *ConfigManager) Restart(c *gin.Context) {
+	go cm.restart(c)
+	apiresp.GinSuccess(c, nil)
+}
+
+func (cm *ConfigManager) restart(c *gin.Context) {
+	time.Sleep(time.Millisecond * 200) // wait for Restart http call return
+	t := time.Now().Unix()
+	_, err := cm.client.Put(c, etcd.BuildKey(etcd.RestartKey), strconv.Itoa(int(t)))
+	if err != nil {
+		log.ZError(c, "restart etcd put key failed", err)
+	}
 }
