@@ -70,7 +70,7 @@ func (cm *ConfigManager) GetConfigList(c *gin.Context) {
 
 func (cm *ConfigManager) SetConfig(c *gin.Context) {
 	var req apistruct.SetConfigReq
-	if err := c.BindJSON(&req.Data); err != nil {
+	if err := c.BindJSON(&req); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
@@ -133,7 +133,7 @@ func (cm *ConfigManager) SetConfig(c *gin.Context) {
 
 func compareAndSave[T any](c *gin.Context, old any, req *apistruct.SetConfigReq, client *clientv3.Client) error {
 	conf := new(T)
-	err := json.Unmarshal(req.Data, &conf)
+	err := json.Unmarshal([]byte(req.Data), &conf)
 	if err != nil {
 		return errs.ErrArgs.WithDetail(err.Error()).Wrap()
 	}
