@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -26,8 +27,8 @@ import (
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/notification"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
@@ -36,39 +37,39 @@ import (
 )
 
 type MessageInterceptorFunc func(ctx context.Context, globalConfig *Config, req *msg.SendMsgReq) (*sdkws.MsgData, error)
-type (
-	// MessageInterceptorChain defines a chain of message interceptor functions.
-	MessageInterceptorChain []MessageInterceptorFunc
 
-	// MsgServer encapsulates dependencies required for message handling.
-	msgServer struct {
-		RegisterCenter         discovery.SvcDiscoveryRegistry // Service discovery registry for service registration.
-		MsgDatabase            controller.CommonMsgDatabase   // Interface for message database operations.
-		StreamMsgDatabase      controller.StreamMsgDatabase
-		UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
-		FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
-		GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
-		ConversationLocalCache *rpccache.ConversationLocalCache // Local cache for conversation data.
-		Handlers               MessageInterceptorChain          // Chain of handlers for processing messages.
-		notificationSender     *rpcclient.NotificationSender    // RPC client for sending notifications.
-		msgNotificationSender  *MsgNotificationSender           // RPC client for sending msg notifications.
-		config                 *Config                          // Global configuration settings.
-		webhookClient          *webhook.Client
-		msg.UnimplementedMsgServer
-	}
+// MessageInterceptorChain defines a chain of message interceptor functions.
+type MessageInterceptorChain []MessageInterceptorFunc
 
-	Config struct {
-		RpcConfig          config.Msg
-		RedisConfig        config.Redis
-		MongodbConfig      config.Mongo
-		KafkaConfig        config.Kafka
-		NotificationConfig config.Notification
-		Share              config.Share
-		WebhooksConfig     config.Webhooks
-		LocalCacheConfig   config.LocalCache
-		Discovery          config.Discovery
-	}
-)
+type Config struct {
+	RpcConfig          config.Msg
+	RedisConfig        config.Redis
+	MongodbConfig      config.Mongo
+	KafkaConfig        config.Kafka
+	NotificationConfig config.Notification
+	Share              config.Share
+	WebhooksConfig     config.Webhooks
+	LocalCacheConfig   config.LocalCache
+	Discovery          config.Discovery
+}
+
+// MsgServer encapsulates dependencies required for message handling.
+type msgServer struct {
+	msg.UnimplementedMsgServer
+	RegisterCenter         discovery.SvcDiscoveryRegistry // Service discovery registry for service registration.
+	MsgDatabase            controller.CommonMsgDatabase   // Interface for message database operations.
+	StreamMsgDatabase      controller.StreamMsgDatabase
+	UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
+	FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
+	GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
+	ConversationLocalCache *rpccache.ConversationLocalCache // Local cache for conversation data.
+	Handlers               MessageInterceptorChain          // Chain of handlers for processing messages.
+	notificationSender     *rpcclient.NotificationSender    // RPC client for sending notifications.
+	msgNotificationSender  *MsgNotificationSender           // RPC client for sending msg notifications.
+	config                 *Config                          // Global configuration settings.
+	webhookClient          *webhook.Client
+	conversationClient     *rpcli.ConversationClient
+}
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
 	m.Handlers = append(m.Handlers, interceptorFunc...)
@@ -107,16 +108,34 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
+	if err != nil {
+		return err
+	}
+	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
+	if err != nil {
+		return err
+	}
+	friendConn, err := client.GetConn(ctx, config.Discovery.RpcService.Friend)
+	if err != nil {
+		return err
+	}
+	conversationConn, err := client.GetConn(ctx, config.Discovery.RpcService.Conversation)
+	if err != nil {
+		return err
+	}
+	conversationClient := rpcli.NewConversationClient(conversationConn)
 	s := &msgServer{
 		MsgDatabase:            msgDatabase,
 		StreamMsgDatabase:      controller.NewStreamMsgDatabase(streamMsg),
 		RegisterCenter:         client,
-		UserLocalCache:         rpccache.NewUserLocalCache(&config.LocalCacheConfig, rdb),
-		GroupLocalCache:        rpccache.NewGroupLocalCache(&config.LocalCacheConfig, rdb),
-		ConversationLocalCache: rpccache.NewConversationLocalCache(&config.LocalCacheConfig, rdb),
-		FriendLocalCache:       rpccache.NewFriendLocalCache(&config.LocalCacheConfig, rdb),
+		UserLocalCache:         rpccache.NewUserLocalCache(rpcli.NewUserClient(userConn), &config.LocalCacheConfig, rdb),
+		GroupLocalCache:        rpccache.NewGroupLocalCache(rpcli.NewGroupClient(groupConn), &config.LocalCacheConfig, rdb),
+		ConversationLocalCache: rpccache.NewConversationLocalCache(conversationClient, &config.LocalCacheConfig, rdb),
+		FriendLocalCache:       rpccache.NewFriendLocalCache(rpcli.NewRelationClient(friendConn), &config.LocalCacheConfig, rdb),
 		config:                 config,
 		webhookClient:          webhook.NewWebhookClient(config.WebhooksConfig.URL),
+		conversationClient:     conversationClient,
 	}
 
 	s.notificationSender = rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithLocalSendMsg(s.SendMsg))

@@ -3,6 +3,7 @@ package msggateway
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -31,7 +32,7 @@ type LongConnServer interface {
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s any) error
-	SetDiscoveryRegistry(client discovery.SvcDiscoveryRegistry, config *Config)
+	SetDiscoveryRegistry(ctx context.Context, client discovery.SvcDiscoveryRegistry, config *Config) error
 	KickUserConn(client *Client) error
 	UnRegister(c *Client)
 	SetKickHandlerInfo(i *kickHandler)
@@ -61,6 +62,8 @@ type WsServer struct {
 	//Encoder
 	MessageHandler
 	webhookClient *webhook.Client
+	userClient    *rpcli.UserClient
+	authClient    *rpcli.AuthClient
 }
 
 type kickHandler struct {
@@ -69,9 +72,28 @@ type kickHandler struct {
 	newClient  *Client
 }
 
-func (ws *WsServer) SetDiscoveryRegistry(disCov discovery.SvcDiscoveryRegistry, config *Config) {
-	ws.MessageHandler = NewGrpcHandler(ws.validate)
+func (ws *WsServer) SetDiscoveryRegistry(ctx context.Context, disCov discovery.SvcDiscoveryRegistry, config *Config) error {
+	userConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.User)
+	if err != nil {
+		return err
+	}
+	pushConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.Push)
+	if err != nil {
+		return err
+	}
+	authConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.Auth)
+	if err != nil {
+		return err
+	}
+	msgConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.Msg)
+	if err != nil {
+		return err
+	}
+	ws.userClient = rpcli.NewUserClient(userConn)
+	ws.authClient = rpcli.NewAuthClient(authConn)
+	ws.MessageHandler = NewGrpcHandler(ws.validate, rpcli.NewMsgClient(msgConn), rpcli.NewPushMsgServiceClient(pushConn))
 	ws.disCov = disCov
+	return nil
 }
 
 //func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, status int32) {
@@ -306,8 +328,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			[]string{newClient.ctx.GetOperationID(), newClient.ctx.GetUserID(),
 				constant.PlatformIDToName(newClient.PlatformID), newClient.ctx.GetConnID()},
 		)
-
-		if err := pbAuth.KickTokensCaller.Execute(ctx, &pbAuth.KickTokensReq{Tokens: kickTokens}); err != nil {
+		if err := ws.authClient.KickTokens(ctx, kickTokens); err != nil {
 			log.ZWarn(newClient.ctx, "kickTokens err", err)
 		}
 	}
@@ -334,11 +355,12 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			[]string{newClient.ctx.GetOperationID(), newClient.ctx.GetUserID(),
 				constant.PlatformIDToName(newClient.PlatformID), newClient.ctx.GetConnID()},
 		)
-		if err := pbAuth.InvalidateTokenCaller.Execute(ctx, &pbAuth.InvalidateTokenReq{
+		req := &pbAuth.InvalidateTokenReq{
 			PreservedToken: newClient.token,
 			UserID:         newClient.UserID,
 			PlatformID:     int32(newClient.PlatformID),
-		}); err != nil {
+		}
+		if err := ws.authClient.InvalidateToken(ctx, req); err != nil {
 			log.ZWarn(newClient.ctx, "InvalidateToken err", err, "userID", newClient.UserID,
 				"platformID", newClient.PlatformID)
 		}
@@ -409,7 +431,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call the authentication client to parse the Token obtained from the context
-	resp, err := pbAuth.ParseTokenCaller.Invoke(connContext, &pbAuth.ParseTokenReq{Token: connContext.GetToken()})
+	resp, err := ws.authClient.ParseToken(connContext, connContext.GetToken())
 	if err != nil {
 		// If there's an error parsing the Token, decide whether to send the error message via WebSocket based on the context flag
 		shouldSendError := connContext.ShouldSendResp()

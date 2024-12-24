@@ -3,6 +3,7 @@ package push
 import (
 	"context"
 	"encoding/json"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"math/rand"
 	"strconv"
 	"time"
@@ -17,12 +18,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/constant"
-	pbconv "github.com/openimsdk/protocol/conversation"
-	"github.com/openimsdk/protocol/group"
-	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/msggateway"
 	pbpush "github.com/openimsdk/protocol/push"
-	"github.com/openimsdk/protocol/rpccall"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
@@ -45,9 +42,13 @@ type ConsumerHandler struct {
 	conversationLocalCache *rpccache.ConversationLocalCache
 	webhookClient          *webhook.Client
 	config                 *Config
+	userClient             *rpcli.UserClient
+	groupClient            *rpcli.GroupClient
+	msgClient              *rpcli.MsgClient
+	conversationClient     *rpcli.ConversationClient
 }
 
-func NewConsumerHandler(config *Config, database controller.PushDatabase, offlinePusher offlinepush.OfflinePusher, rdb redis.UniversalClient,
+func NewConsumerHandler(ctx context.Context, config *Config, database controller.PushDatabase, offlinePusher offlinepush.OfflinePusher, rdb redis.UniversalClient,
 	client discovery.SvcDiscoveryRegistry) (*ConsumerHandler, error) {
 	var consumerHandler ConsumerHandler
 	var err error
@@ -56,15 +57,35 @@ func NewConsumerHandler(config *Config, database controller.PushDatabase, offlin
 	if err != nil {
 		return nil, err
 	}
+	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
+	if err != nil {
+		return nil, err
+	}
+	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
+	if err != nil {
+		return nil, err
+	}
+	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
+	if err != nil {
+		return nil, err
+	}
+	conversationConn, err := client.GetConn(ctx, config.Discovery.RpcService.Conversation)
+	if err != nil {
+		return nil, err
+	}
+	consumerHandler.userClient = rpcli.NewUserClient(userConn)
+	consumerHandler.groupClient = rpcli.NewGroupClient(groupConn)
+	consumerHandler.msgClient = rpcli.NewMsgClient(msgConn)
+	consumerHandler.conversationClient = rpcli.NewConversationClient(conversationConn)
 
 	consumerHandler.offlinePusher = offlinePusher
 	consumerHandler.onlinePusher = NewOnlinePusher(client, config)
-	consumerHandler.groupLocalCache = rpccache.NewGroupLocalCache(&config.LocalCacheConfig, rdb)
-	consumerHandler.conversationLocalCache = rpccache.NewConversationLocalCache(&config.LocalCacheConfig, rdb)
+	consumerHandler.groupLocalCache = rpccache.NewGroupLocalCache(consumerHandler.groupClient, &config.LocalCacheConfig, rdb)
+	consumerHandler.conversationLocalCache = rpccache.NewConversationLocalCache(consumerHandler.conversationClient, &config.LocalCacheConfig, rdb)
 	consumerHandler.webhookClient = webhook.NewWebhookClient(config.WebhooksConfig.URL)
 	consumerHandler.config = config
 	consumerHandler.pushDatabase = database
-	consumerHandler.onlineCache, err = rpccache.NewOnlineCache(config.Share.IMAdminUserID, consumerHandler.groupLocalCache, rdb, config.RpcConfig.FullUserCache, nil)
+	consumerHandler.onlineCache, err = rpccache.NewOnlineCache(consumerHandler.userClient, consumerHandler.groupLocalCache, rdb, config.RpcConfig.FullUserCache, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -321,7 +342,7 @@ func (c *ConsumerHandler) groupMessagesHandler(ctx context.Context, groupID stri
 					ctx = mcontext.WithOpUserIDContext(ctx, c.config.Share.IMAdminUserID[0])
 				}
 				defer func(groupID string) {
-					if err = group.DismissGroupCaller.Execute(ctx, &group.DismissGroupReq{GroupID: groupID}); err != nil {
+					if err := c.groupClient.DismissGroup(ctx, groupID, true); err != nil {
 						log.ZError(ctx, "DismissGroup Notification clear members", err, "groupID", groupID)
 					}
 				}(groupID)
@@ -347,12 +368,7 @@ func (c *ConsumerHandler) offlinePushMsg(ctx context.Context, msg *sdkws.MsgData
 
 func (c *ConsumerHandler) filterGroupMessageOfflinePush(ctx context.Context, groupID string, msg *sdkws.MsgData,
 	offlinePushUserIDs []string) (userIDs []string, err error) {
-
-	//todo local cache Obtain the difference set through local comparison.
-	needOfflinePushUserIDs, err := rpccall.ExtractField(ctx, pbconv.GetConversationOfflinePushUserIDsCaller.Invoke, &pbconv.GetConversationOfflinePushUserIDsReq{
-		ConversationID: conversationutil.GenGroupConversationID(groupID),
-		UserIDs:        offlinePushUserIDs,
-	}, (*pbconv.GetConversationOfflinePushUserIDsResp).GetUserIDs)
+	needOfflinePushUserIDs, err := c.conversationClient.GetConversationOfflinePushUserIDs(ctx, conversationutil.GenGroupConversationID(groupID), offlinePushUserIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -406,18 +422,11 @@ func (c *ConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (title, conten
 
 func (c *ConsumerHandler) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
 	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
-	maxSeq, err := rpccall.ExtractField(ctx, msg.GetConversationMaxSeqCaller.Invoke,
-		&msg.GetConversationMaxSeqReq{ConversationID: conversationID},
-		(*msg.GetConversationMaxSeqResp).GetMaxSeq)
+	maxSeq, err := c.msgClient.GetConversationMaxSeq(ctx, conversationID)
 	if err != nil {
 		return err
 	}
-
-	return pbconv.SetConversationMaxSeqCaller.Execute(ctx, &pbconv.SetConversationMaxSeqReq{
-		ConversationID: conversationID,
-		OwnerUserID:    userIDs,
-		MaxSeq:         maxSeq,
-	})
+	return c.conversationClient.SetConversationMaxSeq(ctx, conversationID, userIDs, maxSeq)
 }
 
 func unmarshalNotificationElem(bytes []byte, t any) error {
@@ -425,6 +434,5 @@ func unmarshalNotificationElem(bytes []byte, t any) error {
 	if err := json.Unmarshal(bytes, &notification); err != nil {
 		return err
 	}
-
 	return json.Unmarshal([]byte(notification.Detail), t)
 }

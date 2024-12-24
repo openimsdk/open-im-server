@@ -25,7 +25,6 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/utils/jsonutil"
@@ -93,10 +92,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	if err = rpcclient.InitRpcCaller(client, config.Discovery.RpcService); err != nil {
-		return err
-	}
-
 	msgModel := redis.NewMsgCache(rdb)
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
@@ -116,7 +111,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	historyCH, err := NewOnlineHistoryRedisConsumerHandler(&config.KafkaConfig, msgTransferDatabase)
+	historyCH, err := NewOnlineHistoryRedisConsumerHandler(ctx, client, config, msgTransferDatabase)
 	if err != nil {
 		return err
 	}
