@@ -70,7 +70,7 @@ func (cm *ConfigManager) GetConfigList(c *gin.Context) {
 
 func (cm *ConfigManager) SetConfig(c *gin.Context) {
 	var req apistruct.SetConfigReq
-	if err := c.BindJSON(&req); err != nil {
+	if err := c.BindJSON(&req.Data); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
