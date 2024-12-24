@@ -18,6 +18,14 @@ const (
 	ConfigKeyPrefix = "/open-im/config/"
 )
 
+var (
+	ShutDowns []func() error
+)
+
+func RegisterShutDown(shutDown ...func() error) {
+	ShutDowns = append(ShutDowns, shutDown...)
+}
+
 type ConfigManager struct {
 	client           *clientv3.Client
 	watchConfigNames []string
@@ -82,6 +90,12 @@ func restartServer(ctx context.Context) error {
 
 	if runtime.GOOS != "windows" {
 		cmd.SysProcAttr = &syscall.SysProcAttr{}
+	}
+	log.ZInfo(ctx, "shutdown server")
+	for _, f := range ShutDowns {
+		if err = f(); err != nil {
+			log.ZError(ctx, "shutdown fail", err)
+		}
 	}
 
 	log.ZInfo(ctx, "restart server")

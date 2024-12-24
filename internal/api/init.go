@@ -156,13 +156,20 @@ func Start(ctx context.Context, index int, config *Config) error {
 	signal.Notify(sigs, syscall.SIGTERM)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	shutdown := func() error {
+		err := server.Shutdown(ctx)
+		if err != nil {
+			return errs.WrapMsg(err, "shutdown err")
+		}
+		return nil
+	}
+	disetcd.RegisterShutDown(shutdown)
 	defer cancel()
 	select {
 	case <-sigs:
 		program.SIGTERMExit()
-		err := server.Shutdown(ctx)
-		if err != nil {
-			return errs.WrapMsg(err, "shutdown err")
+		if err := shutdown(); err != nil {
+			return err
 		}
 	case <-netDone:
 		close(netDone)
