@@ -56,11 +56,10 @@ import (
 
 type groupServer struct {
 	pbgroup.UnimplementedGroupServer
-	db            controller.GroupDatabase
-	notification  *NotificationSender
-	config        *Config
-	webhookClient *webhook.Client
-	// todo
+	db                 controller.GroupDatabase
+	notification       *NotificationSender
+	config             *Config
+	webhookClient      *webhook.Client
 	userClient         *rpcli.UserClient
 	msgClient          *rpcli.MsgClient
 	conversationClient *rpcli.ConversationClient

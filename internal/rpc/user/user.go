@@ -60,9 +60,8 @@ type userServer struct {
 	RegisterCenter           registry.SvcDiscoveryRegistry
 	config                   *Config
 	webhookClient            *webhook.Client
-	// todo
-	groupClient    *rpcli.GroupClient
-	relationClient *rpcli.RelationClient
+	groupClient              *rpcli.GroupClient
+	relationClient           *rpcli.RelationClient
 }
 
 type Config struct {
@@ -99,6 +98,14 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	if err != nil {
 		return err
 	}
+	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
+	if err != nil {
+		return err
+	}
+	friendConn, err := client.GetConn(ctx, config.Discovery.RpcService.Friend)
+	if err != nil {
+		return err
+	}
 	msgClient := rpcli.NewMsgClient(msgConn)
 	userCache := redis.NewUserCacheRedis(rdb, &config.LocalCacheConfig, userDB, redis.GetRocksCacheOptions())
 	database := controller.NewUserDatabase(userDB, userCache, mgocli.GetTx())
@@ -111,6 +118,9 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 		userNotificationSender:   NewUserNotificationSender(config, msgClient, WithUserFunc(database.FindWithError)),
 		config:                   config,
 		webhookClient:            webhook.NewWebhookClient(config.WebhooksConfig.URL),
+
+		groupClient:    rpcli.NewGroupClient(groupConn),
+		relationClient: rpcli.NewRelationClient(friendConn),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.db.InitOnce(context.Background(), users)

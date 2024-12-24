@@ -530,18 +530,3 @@ func (s *friendServer) UpdateFriends(
 	s.notificationSender.FriendsInfoUpdateNotification(ctx, req.OwnerUserID, req.FriendUserIDs)
 	return resp, nil
 }
-
-func (s *friendServer) GetIncrementalFriendsApplyTo(ctx context.Context, req *relation.GetIncrementalFriendsApplyToReq) (*relation.GetIncrementalFriendsApplyToResp, error) {
-	// TODO implement me
-	return nil, nil
-}
-
-func (s *friendServer) GetIncrementalFriendsApplyFrom(ctx context.Context, req *relation.GetIncrementalFriendsApplyFromReq) (*relation.GetIncrementalFriendsApplyFromResp, error) {
-	// TODO implement me
-	return nil, nil
-}
-
-func (s *friendServer) GetIncrementalBlacks(ctx context.Context, req *relation.GetIncrementalBlacksReq) (*relation.GetIncrementalBlacksResp, error) {
-	// TODO implement me
-	return nil, nil
-}

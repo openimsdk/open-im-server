@@ -17,7 +17,6 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -133,8 +132,6 @@ type NotificationSender struct {
 	sendMsg         func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)
 	getUserInfo     func(ctx context.Context, userID string) (*sdkws.UserInfo, error)
 	queue           *memamq.MemoryQueue
-	// todo
-	msgClient *rpcli.MsgClient
 }
 
 func WithQueue(queue *memamq.MemoryQueue) NotificationSenderOptions {
