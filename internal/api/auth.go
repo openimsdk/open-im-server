@@ -20,24 +20,26 @@ import (
 	"github.com/openimsdk/tools/a2r"
 )
 
-type AuthApi struct{}
+type AuthApi struct {
+	Client auth.AuthClient
+}
 
-func NewAuthApi() AuthApi {
-	return AuthApi{}
+func NewAuthApi(client auth.AuthClient) AuthApi {
+	return AuthApi{client}
 }
 
 func (o *AuthApi) GetAdminToken(c *gin.Context) {
-	a2r.CallV2(c, auth.GetAdminTokenCaller.Invoke)
+	a2r.Call(c, auth.AuthClient.GetAdminToken, o.Client)
 }
 
 func (o *AuthApi) GetUserToken(c *gin.Context) {
-	a2r.CallV2(c, auth.GetUserTokenCaller.Invoke)
+	a2r.Call(c, auth.AuthClient.GetUserToken, o.Client)
 }
 
 func (o *AuthApi) ParseToken(c *gin.Context) {
-	a2r.CallV2(c, auth.ParseTokenCaller.Invoke)
+	a2r.Call(c, auth.AuthClient.ParseToken, o.Client)
 }
 
 func (o *AuthApi) ForceLogout(c *gin.Context) {
-	a2r.CallV2(c, auth.ForceLogoutCaller.Invoke)
+	a2r.Call(c, auth.AuthClient.ForceLogout, o.Client)
 }

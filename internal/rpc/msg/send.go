@@ -118,25 +118,14 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
 		} else { // @Everyone and @other people
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAllAtMe}
-
-			err = pbconv.SetConversationsCaller.Execute(ctx, &pbconv.SetConversationsReq{
-				UserIDs:      atUserID,
-				Conversation: conversation,
-			})
-			if err != nil {
+			if err := m.conversationClient.SetConversations(ctx, atUserID, conversation); err != nil {
 				log.ZWarn(ctx, "SetConversations", err, "userID", atUserID, "conversation", conversation)
 			}
-
 			memberUserIDList = datautil.Single(atUserID, memberUserIDList)
 		}
 
 		conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
-
-		err = pbconv.SetConversationsCaller.Execute(ctx, &pbconv.SetConversationsReq{
-			UserIDs:      memberUserIDList,
-			Conversation: conversation,
-		})
-		if err != nil {
+		if err := m.conversationClient.SetConversations(ctx, memberUserIDList, conversation); err != nil {
 			log.ZWarn(ctx, "SetConversations", err, "userID", memberUserIDList, "conversation", conversation)
 		}
 
@@ -144,11 +133,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 	}
 	conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtMe}
 
-	err := pbconv.SetConversationsCaller.Execute(ctx, &pbconv.SetConversationsReq{
-		UserIDs:      msg.AtUserIDList,
-		Conversation: conversation,
-	})
-	if err != nil {
+	if err := m.conversationClient.SetConversations(ctx, msg.AtUserIDList, conversation); err != nil {
 		log.ZWarn(ctx, "SetConversations", err, msg.AtUserIDList, conversation)
 	}
 }

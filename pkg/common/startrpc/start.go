@@ -27,7 +27,6 @@ import (
 	"time"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
@@ -100,10 +99,6 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 
 	defer client.Close()
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-
-	if err = rpcclient.InitRpcCaller(client, discovery.RpcService); err != nil {
-		return err
-	}
 
 	// var reg *prometheus.Registry
 	// var metric *grpcprometheus.ServerMetrics

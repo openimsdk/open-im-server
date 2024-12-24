@@ -88,7 +88,7 @@ func (ws *WsServer) ChangeOnlineStatus(concurrent int) {
 		opIdCtx := mcontext.SetOperationID(context.Background(), operationIDPrefix+strconv.FormatInt(count.Add(1), 10))
 		ctx, cancel := context.WithTimeout(opIdCtx, time.Second*5)
 		defer cancel()
-		if err := pbuser.SetUserOnlineStatusCaller.Execute(ctx, req); err != nil {
+		if err := ws.userClient.SetUserOnlineStatus(ctx, req); err != nil {
 			log.ZError(ctx, "update user online status", err)
 		}
 		for _, ss := range req.Status {
