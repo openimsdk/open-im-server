@@ -218,6 +218,7 @@ func (cm *ConfigManager) restart(c *gin.Context) {
 			fmt.Println("JJJJJJJJJJJJJJJJJJJ")
 			fmt.Println(v.old)
 			fmt.Println(v.new)
+			fmt.Println(v.isChanged)
 			fmt.Println("SSSSSSSSSSSSSSSSSSSSS")
 		}
 	}
