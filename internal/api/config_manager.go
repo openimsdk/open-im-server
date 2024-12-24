@@ -215,6 +215,7 @@ func (cm *ConfigManager) restart(c *gin.Context) {
 		}
 	}
 
+	fmt.Println("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH+", len(changedKeys))
 	for _, k := range changedKeys {
 		fmt.Println(k)
 		fmt.Println(configMap[k].new)
