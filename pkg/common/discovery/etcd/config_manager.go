@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	ConfigKeyPrefix = "/config/"
+	ConfigKeyPrefix = "/open-im/config/"
 )
 
 type ConfigManager struct {
