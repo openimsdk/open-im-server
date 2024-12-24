@@ -210,7 +210,7 @@ func (cm *ConfigManager) restart(c *gin.Context) {
 			continue
 		}
 		v.isChanged = reflect.DeepEqual(v.old, v.new)
-		if v.isChanged {
+		if !v.isChanged {
 			changedKeys = append(changedKeys, k)
 		}
 
