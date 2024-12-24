@@ -40,6 +40,7 @@ import (
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/network"
 	"github.com/openimsdk/tools/utils/runtimeenv"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -94,7 +95,11 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
 	}
 
-	router := newGinRouter(client, config)
+	var etcdClient *clientv3.Client
+	if config.Discovery.Enable == conf.ETCD {
+		etcdClient = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
+	}
+	router := newGinRouter(client, config, etcdClient)
 	if config.API.Prometheus.Enable {
 		var (
 			listener net.Listener
@@ -105,8 +110,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 			if err != nil {
 				return err
 			}
-
-			etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 
 			_, err = etcdClient.Put(ctx, prommetrics.BuildDiscoveryKey(prommetrics.APIKeyName), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
 			if err != nil {

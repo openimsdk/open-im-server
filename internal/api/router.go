@@ -7,6 +7,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
 	pbAuth "github.com/openimsdk/protocol/auth"
+	clientv3 "go.etcd.io/etcd/client/v3"
 
 	"github.com/gin-contrib/gzip"
 
@@ -47,7 +48,7 @@ func prommetricsGin() gin.HandlerFunc {
 	}
 }
 
-func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.Engine {
+func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config, client *clientv3.Client) *gin.Engine {
 	disCov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 	gin.SetMode(gin.ReleaseMode)
@@ -259,7 +260,7 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	proDiscoveryGroup.GET("/msg_gateway", pd.MessageGateway)
 	proDiscoveryGroup.GET("/msg_transfer", pd.MessageTransfer)
 
-	cm := NewConfigManager(config.Share.IMAdminUserID, config.AllConfig, config.ConfigPath, config.RuntimeEnv)
+	cm := NewConfigManager(config.Share.IMAdminUserID, config.AllConfig, client, config.ConfigPath, config.RuntimeEnv)
 	configGroup := r.Group("/config", cm.CheckAdmin)
 	configGroup.POST("/get_config_list", cm.GetConfigList)
 	configGroup.POST("/get_config", cm.GetConfig)

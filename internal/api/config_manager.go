@@ -24,10 +24,11 @@ type ConfigManager struct {
 	runtimeEnv    string
 }
 
-func NewConfigManager(IMAdminUserID []string, cfg *config.AllConfig, configPath string, runtimeEnv string) *ConfigManager {
+func NewConfigManager(IMAdminUserID []string, cfg *config.AllConfig, client *clientv3.Client, configPath string, runtimeEnv string) *ConfigManager {
 	return &ConfigManager{
 		imAdminUserID: IMAdminUserID,
 		config:        cfg,
+		client:        client,
 		configPath:    configPath,
 		runtimeEnv:    runtimeEnv,
 	}
@@ -69,6 +70,10 @@ func (cm *ConfigManager) GetConfigList(c *gin.Context) {
 }
 
 func (cm *ConfigManager) SetConfig(c *gin.Context) {
+	if cm.config.Discovery.Enable != config.ETCD {
+		apiresp.GinError(c, errs.New("only etcd support set config").Wrap())
+		return
+	}
 	var req apistruct.SetConfigReq
 	if err := c.BindJSON(&req); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
