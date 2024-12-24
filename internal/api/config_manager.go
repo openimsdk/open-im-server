@@ -213,12 +213,16 @@ func (cm *ConfigManager) restart(c *gin.Context) {
 		if v.isChanged {
 			changedKeys = append(changedKeys, k)
 		}
+
+		if k == cm.config.Push.GetConfigFileName() {
+			fmt.Println("JJJJJJJJJJJJJJJJJJJ")
+			fmt.Println(v.old)
+			fmt.Println(v.new)
+			fmt.Println("SSSSSSSSSSSSSSSSSSSSS")
+		}
 	}
 
-	fmt.Println("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH+", len(changedKeys))
 	for _, k := range changedKeys {
-		fmt.Println(k)
-		fmt.Println(configMap[k].new)
 		data, err := json.Marshal(configMap[k].new)
 		if err != nil {
 			log.ZError(c, "marshal config failed", err)
