@@ -216,6 +216,7 @@ func (cm *ConfigManager) restart(c *gin.Context) {
 	}
 
 	for _, k := range changedKeys {
+		fmt.Println(k)
 		fmt.Println(configMap[k].new)
 		data, err := json.Marshal(configMap[k].new)
 		if err != nil {
