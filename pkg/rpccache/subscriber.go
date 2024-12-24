@@ -17,6 +17,7 @@ package rpccache
 import (
 	"context"
 	"encoding/json"
+	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
 )
@@ -24,7 +25,7 @@ import (
 func subscriberRedisDeleteCache(ctx context.Context, client redis.UniversalClient, channel string, del func(ctx context.Context, key ...string)) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.ZPanic(ctx, "subscriberRedisDeleteCache Panic", r)
+			log.ZPanic(ctx, "subscriberRedisDeleteCache Panic", errs.ErrPanic(r))
 		}
 	}()
 	for message := range client.Subscribe(ctx, channel).Channel() {

@@ -88,7 +88,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 
 	defer func() {
 		if r := recover(); r != nil {
-			log.ZPanic(nctx, "setConversationAtInfo Panic", r)
+			log.ZPanic(nctx, "setConversationAtInfo Panic", errs.ErrPanic(r))
 		}
 	}()
 
