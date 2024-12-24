@@ -21,7 +21,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
@@ -39,7 +38,7 @@ func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *relation.Ge
 		return nil, err
 	}
 	resp = &relation.GetPaginationBlacksResp{}
-	resp.Blacks, err = convert.BlackDB2Pb(ctx, blacks, rpcclient.GetUsersInfoMap)
+	resp.Blacks, err = convert.BlackDB2Pb(ctx, blacks, s.userClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
 	}
@@ -81,9 +80,7 @@ func (s *friendServer) AddBlack(ctx context.Context, req *relation.AddBlackReq) 
 	if err := s.webhookBeforeAddBlack(ctx, &s.config.WebhooksConfig.BeforeAddBlack, req); err != nil {
 		return nil, err
 	}
-
-	_, err := rpcclient.GetUsersInfo(ctx, []string{req.OwnerUserID, req.BlackUserID})
-	if err != nil {
+	if err := s.userClient.CheckUser(ctx, []string{req.OwnerUserID, req.BlackUserID}); err != nil {
 		return nil, err
 	}
 	black := model.Black{
@@ -114,7 +111,7 @@ func (s *friendServer) GetSpecifiedBlacks(ctx context.Context, req *relation.Get
 		return nil, errs.ErrArgs.WrapMsg("userIDList repeated")
 	}
 
-	userMap, err := rpcclient.GetPublicUserInfoMap(ctx, req.UserIDList)
+	userMap, err := s.userClient.GetUsersInfoMap(ctx, req.UserIDList)
 	if err != nil {
 		return nil, err
 	}
@@ -132,13 +129,26 @@ func (s *friendServer) GetSpecifiedBlacks(ctx context.Context, req *relation.Get
 		Blacks: make([]*sdkws.BlackInfo, 0, len(req.UserIDList)),
 	}
 
+	toPublcUser := func(userID string) *sdkws.PublicUserInfo {
+		v, ok := userMap[userID]
+		if !ok {
+			return nil
+		}
+		return &sdkws.PublicUserInfo{
+			UserID:   v.UserID,
+			Nickname: v.Nickname,
+			FaceURL:  v.FaceURL,
+			Ex:       v.Ex,
+		}
+	}
+
 	for _, userID := range req.UserIDList {
 		if black := blackMap[userID]; black != nil {
 			resp.Blacks = append(resp.Blacks,
 				&sdkws.BlackInfo{
 					OwnerUserID:    black.OwnerUserID,
 					CreateTime:     black.CreateTime.UnixMilli(),
-					BlackUserInfo:  userMap[userID],
+					BlackUserInfo:  toPublcUser(userID),
 					AddSource:      black.AddSource,
 					OperatorUserID: black.OperatorUserID,
 					Ex:             black.Ex,

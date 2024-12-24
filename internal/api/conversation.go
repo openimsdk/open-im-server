@@ -20,52 +20,54 @@ import (
 	"github.com/openimsdk/tools/a2r"
 )
 
-type ConversationApi struct{}
+type ConversationApi struct {
+	Client conversation.ConversationClient
+}
 
-func NewConversationApi() ConversationApi {
-	return ConversationApi{}
+func NewConversationApi(client conversation.ConversationClient) ConversationApi {
+	return ConversationApi{client}
 }
 
 func (o *ConversationApi) GetAllConversations(c *gin.Context) {
-	a2r.CallV2(c, conversation.GetAllConversationsCaller.Invoke)
+	a2r.Call(c, conversation.ConversationClient.GetAllConversations, o.Client)
 }
 
 func (o *ConversationApi) GetSortedConversationList(c *gin.Context) {
-	a2r.CallV2(c, conversation.GetSortedConversationListCaller.Invoke)
+	a2r.Call(c, conversation.ConversationClient.GetSortedConversationList, o.Client)
 }
 
 func (o *ConversationApi) GetConversation(c *gin.Context) {
-	a2r.CallV2(c, conversation.GetConversationCaller.Invoke)
+	a2r.Call(c, conversation.ConversationClient.GetConversation, o.Client)
 }
 
 func (o *ConversationApi) GetConversations(c *gin.Context) {
-	a2r.CallV2(c, conversation.GetConversationsCaller.Invoke)
+	a2r.Call(c, conversation.ConversationClient.GetConversations, o.Client)
 }
 
 func (o *ConversationApi) SetConversations(c *gin.Context) {
-	a2r.CallV2(c, conversation.SetConversationsCaller.Invoke)
+	a2r.Call(c, conversation.ConversationClient.SetConversations, o.Client)
 }
 
 func (o *ConversationApi) GetConversationOfflinePushUserIDs(c *gin.Context) {
-	a2r.CallV2(c, conversation.GetConversationOfflinePushUserIDsCaller.Invoke)
+	a2r.Call(c, conversation.ConversationClient.GetConversationOfflinePushUserIDs, o.Client)
 }
 
 func (o *ConversationApi) GetFullOwnerConversationIDs(c *gin.Context) {
-	a2r.CallV2(c, conversation.GetFullOwnerConversationIDsCaller.Invoke)
+	a2r.Call(c, conversation.ConversationClient.GetFullOwnerConversationIDs, o.Client)
 }
 
 func (o *ConversationApi) GetIncrementalConversation(c *gin.Context) {
-	a2r.CallV2(c, conversation.GetIncrementalConversationCaller.Invoke)
+	a2r.Call(c, conversation.ConversationClient.GetIncrementalConversation, o.Client)
 }
 
 func (o *ConversationApi) GetOwnerConversation(c *gin.Context) {
-	a2r.CallV2(c, conversation.GetOwnerConversationCaller.Invoke)
+	a2r.Call(c, conversation.ConversationClient.GetOwnerConversation, o.Client)
 }
 
 func (o *ConversationApi) GetNotNotifyConversationIDs(c *gin.Context) {
-	a2r.CallV2(c, conversation.GetNotNotifyConversationIDsCaller.Invoke)
+	a2r.Call(c, conversation.ConversationClient.GetNotNotifyConversationIDs, o.Client)
 }
 
 func (o *ConversationApi) GetPinnedConversationIDs(c *gin.Context) {
-	a2r.CallV2(c, conversation.GetPinnedConversationIDsCaller.Invoke)
+	a2r.Call(c, conversation.ConversationClient.GetPinnedConversationIDs, o.Client)
 }

@@ -30,7 +30,6 @@ import (
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -40,7 +39,6 @@ import (
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/network"
 	"github.com/openimsdk/tools/utils/runtimeenv"
-	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -65,9 +63,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	if err = rpcclient.InitRpcCaller(client, config.Discovery.RpcService); err != nil {
-		return err
-	}
 
 	var (
 		netDone        = make(chan struct{}, 1)
@@ -95,11 +90,10 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
 	}
 
-	var etcdClient *clientv3.Client
-	if config.Discovery.Enable == conf.ETCD {
-		etcdClient = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
+	router, err := newGinRouter(ctx, client, config)
+	if err != nil {
+		return err
 	}
-	router := newGinRouter(client, config, etcdClient)
 	if config.API.Prometheus.Enable {
 		var (
 			listener net.Listener
@@ -110,6 +104,8 @@ func Start(ctx context.Context, index int, config *Config) error {
 			if err != nil {
 				return err
 			}
+
+			etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 
 			_, err = etcdClient.Put(ctx, prommetrics.BuildDiscoveryKey(prommetrics.APIKeyName), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
 			if err != nil {

@@ -16,6 +16,7 @@ package msggateway
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"sync/atomic"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -34,7 +35,14 @@ import (
 )
 
 func (s *Server) InitServer(ctx context.Context, config *Config, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	s.LongConnServer.SetDiscoveryRegistry(disCov, config)
+	userConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.User)
+	if err != nil {
+		return err
+	}
+	s.userClient = rpcli.NewUserClient(userConn)
+	if err := s.LongConnServer.SetDiscoveryRegistry(ctx, disCov, config); err != nil {
+		return err
+	}
 	msggateway.RegisterMsgGatewayServer(server, s)
 	if s.ready != nil {
 		return s.ready(s)
@@ -68,6 +76,7 @@ type Server struct {
 	pushTerminal   map[int]struct{}
 	ready          func(srv *Server) error
 	queue          *memamq.MemoryQueue
+	userClient     *rpcli.UserClient
 }
 
 func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
