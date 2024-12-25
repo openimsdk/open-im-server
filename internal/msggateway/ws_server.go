@@ -190,9 +190,8 @@ func (ws *WsServer) Run(done chan error) error {
 			netErr = errs.WrapMsg(err, "ws start err", server.Addr)
 		}
 	}()
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	shutDown := func() error {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-		defer cancel()
 		sErr := server.Shutdown(ctx)
 		if sErr != nil {
 			return errs.WrapMsg(sErr, "shutdown err")
@@ -200,8 +199,8 @@ func (ws *WsServer) Run(done chan error) error {
 		close(shutdownDone)
 		return nil
 	}
-	log.ZError(context.Background(), "NJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ", nil)
 	etcd.RegisterShutDown(shutDown)
+	defer cancel()
 	var err error
 	select {
 	case err = <-done:
