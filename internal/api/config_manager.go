@@ -97,7 +97,7 @@ func (cm *ConfigManager) SetConfig(c *gin.Context) {
 	case cm.config.Mongo.GetConfigFileName():
 		err = compareAndSave[config.Mongo](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
 	case cm.config.Notification.GetConfigFileName():
-		err = compareAndSave[config.NotificationConfig](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Notification](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
 	case cm.config.API.GetConfigFileName():
 		err = compareAndSave[config.API](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
 	case cm.config.CronTask.GetConfigFileName():
