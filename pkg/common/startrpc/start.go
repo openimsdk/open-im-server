@@ -188,7 +188,7 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 
 	go func() {
 		err := srv.Serve(listener)
-		if err != nil {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			netErr = errs.WrapMsg(err, "rpc start err: ", rpcTcpAddr)
 			netDone <- struct{}{}
 		}
