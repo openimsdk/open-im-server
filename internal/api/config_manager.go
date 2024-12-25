@@ -216,18 +216,22 @@ func (cm *ConfigManager) resetConfig(c *gin.Context) {
 		}
 	}
 
+	ops := make([]clientv3.Op, 0)
 	for _, k := range changedKeys {
 		data, err := json.Marshal(configMap[k].new)
 		if err != nil {
 			log.ZError(c, "marshal config failed", err)
 			continue
 		}
-		txn = txn.Then(clientv3.OpPut(etcd.BuildKey(k), string(data)))
+		ops = append(ops, clientv3.OpPut(etcd.BuildKey(k), string(data)))
 	}
-	_, err := txn.Commit()
-	if err != nil {
-		log.ZError(c, "commit etcd txn failed", err)
-		return
+	if len(ops) > 0 {
+		txn.Then(ops...)
+		_, err := txn.Commit()
+		if err != nil {
+			log.ZError(c, "commit etcd txn failed", err)
+			return
+		}
 	}
 }
 
