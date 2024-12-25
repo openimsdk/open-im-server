@@ -16,8 +16,7 @@ package cache
 
 import (
 	"context"
-	"time"
-
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/sdkws"
 )
 
@@ -27,12 +26,7 @@ type MsgCache interface {
 	DeleteMessagesFromCache(ctx context.Context, conversationID string, seqs []int64) error
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
 	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
-	JudgeMessageReactionExist(ctx context.Context, clientMsgID string, sessionType int32) (bool, error)
-	GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error)
-	DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error
-	SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error)
-	GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error)
-	SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error
-	LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
-	UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
+
+	GetMessageBySeqs(ctx context.Context, conversationID string, seqs []int64) ([]*model.MsgInfoModel, error)
+	DelMessageBySeqs(ctx context.Context, conversationID string, seqs []int64) error
 }

@@ -143,3 +143,7 @@ func (*MsgDocModel) GenExceptionMessageBySeqs(seqs []int64) (exceptionMsg []*sdk
 	}
 	return exceptionMsg
 }
+
+func (*MsgDocModel) GetMinSeq(index int) int64 {
+	return int64(index*singleGocMsgNum) + 1
+}

@@ -41,13 +41,12 @@ type Msg interface {
 	SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (int64, []*model.MsgInfoModel, error)
 	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*model.UserCount, dateCount map[string]int64, err error)
 	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*model.GroupCount, dateCount map[string]int64, err error)
-	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
 
 	DeleteDoc(ctx context.Context, docID string) error
 	DeleteMsgByIndex(ctx context.Context, docID string, index []int) error
 	GetRandBeforeMsg(ctx context.Context, ts int64, limit int) ([]*model.MsgDocModel, error)
 
-	GetRandDocIDs(ctx context.Context, limit int) ([]string, error)
-
 	GetLastMessageSeqByTime(ctx context.Context, conversationID string, time int64) (int64, error)
+
+	FindSeqs(ctx context.Context, conversationID string, seqs []int64) ([]*model.MsgInfoModel, error)
 }
