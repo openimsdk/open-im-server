@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -56,7 +57,7 @@ func (a *authDatabase) SetTokenMapByUidPid(ctx context.Context, userID string, p
 }
 
 func (a *authDatabase) BatchSetTokenMapByUidPid(ctx context.Context, tokens []string) error {
-	setMap := make(map[string]map[string]int)
+	setMap := make(map[string]map[string]any)
 	for _, token := range tokens {
 		claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret(a.accessSecret))
 		key := cachekey.GetTokenKey(claims.UserID, claims.PlatformID)
@@ -66,7 +67,7 @@ func (a *authDatabase) BatchSetTokenMapByUidPid(ctx context.Context, tokens []st
 			if v, ok := setMap[key]; ok {
 				v[token] = constant.KickedToken
 			} else {
-				setMap[key] = map[string]int{
+				setMap[key] = map[string]any{
 					token: constant.KickedToken,
 				}
 			}
