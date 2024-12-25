@@ -107,6 +107,7 @@ func restartServer(ctx context.Context) error {
 	if err != nil {
 		return errs.New("restart server fail").Wrap()
 	}
+	log.ZInfo(ctx, "cmd start over")
 
 	os.Exit(0)
 	return nil
