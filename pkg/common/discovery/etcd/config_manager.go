@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
@@ -99,6 +100,7 @@ func restartServer(ctx context.Context) error {
 			log.ZError(ctx, "shutdown fail", err)
 		}
 	}
+	fmt.Println("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
 
 	log.ZInfo(ctx, "restart server")
 	err = cmd.Start()
