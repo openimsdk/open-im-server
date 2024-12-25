@@ -151,8 +151,9 @@ func Start(ctx context.Context, index int, config *Config) error {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGTERM)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	shutdown := func() error {
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
 		err := server.Shutdown(ctx)
 		if err != nil {
 			return errs.WrapMsg(err, "shutdown err")
@@ -160,7 +161,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return nil
 	}
 	disetcd.RegisterShutDown(shutdown)
-	defer cancel()
 	select {
 	case <-sigs:
 		program.SIGTERMExit()
