@@ -105,7 +105,9 @@ func restartServer(ctx context.Context) error {
 	if err != nil {
 		return errs.New("restart server fail").Wrap()
 	}
+	fmt.Println("::::::::::::::::::::::::::::::::::::::::::::::::::::")
 	fmt.Println(cmd.String())
+	fmt.Println("::::::::::::::::::::::::::::::::::::::::::::::::::::")
 
 	os.Exit(0)
 	return nil
