@@ -196,9 +196,7 @@ func (ws *WsServer) Run(done chan error) error {
 		if sErr != nil {
 			return errs.WrapMsg(sErr, "shutdown err")
 		}
-		fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 		close(shutdownDone)
-		fmt.Println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
 		return nil
 	}
 	etcd.RegisterShutDown(shutDown)

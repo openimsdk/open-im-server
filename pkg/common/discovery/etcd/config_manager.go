@@ -94,6 +94,7 @@ func restartServer(ctx context.Context) error {
 	}
 	log.ZInfo(ctx, "shutdown server")
 	for _, f := range ShutDowns {
+		log.ZInfo(ctx, "shutdown ffff!!!!!")
 		if err = f(); err != nil {
 			log.ZError(ctx, "shutdown fail", err)
 		}
