@@ -27,7 +27,8 @@ import (
 	"time"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
+	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
@@ -43,11 +44,10 @@ import (
 )
 
 type Config struct {
-	API       conf.API
-	Share     conf.Share
-	Discovery conf.Discovery
+	*conf.AllConfig
 
 	RuntimeEnv string
+	ConfigPath string
 }
 
 func Start(ctx context.Context, index int, config *Config) error {
@@ -139,21 +139,32 @@ func Start(ctx context.Context, index int, config *Config) error {
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			netErr = errs.WrapMsg(err, fmt.Sprintf("api start err: %s", server.Addr))
 			netDone <- struct{}{}
-
 		}
 	}()
+
+	if config.Discovery.Enable == conf.ETCD {
+		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), config.GetConfigNames())
+		cm.Watch(ctx)
+	}
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGTERM)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-	select {
-	case <-sigs:
-		program.SIGTERMExit()
+	shutdown := func() error {
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
 		err := server.Shutdown(ctx)
 		if err != nil {
 			return errs.WrapMsg(err, "shutdown err")
+		}
+		return nil
+	}
+	disetcd.RegisterShutDown(shutdown)
+	select {
+	case <-sigs:
+		program.SIGTERMExit()
+		if err := shutdown(); err != nil {
+			return err
 		}
 	case <-netDone:
 		close(netDone)

@@ -23,7 +23,7 @@ func TestLoadMongoConfig(t *testing.T) {
 	// os.Setenv("IMENV_MONGODB_URI", "openIM123")
 	// os.Setenv("IMENV_MONGODB_USERNAME", "openIM123")
 	err := Load("../../../config/", "mongodb.yml", "IMENV_MONGODB", "source", &mongo)
-	// err := LoadConfig("../../../config/mongodb.yml", "IMENV_MONGODB", &mongo)
+	// err := LoadApiConfig("../../../config/mongodb.yml", "IMENV_MONGODB", &mongo)
 
 	assert.Nil(t, err)
 	t.Log(mongo.Password)

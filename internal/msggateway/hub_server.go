@@ -57,6 +57,13 @@ func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 		conf.Discovery.RpcService.MessageGateway,
 		nil,
 		conf,
+		[]string{
+			conf.Share.GetConfigFileName(),
+			conf.Discovery.GetConfigFileName(),
+			conf.MsgGateway.GetConfigFileName(),
+			conf.WebhooksConfig.GetConfigFileName(),
+			conf.RedisConfig.GetConfigFileName(),
+		},
 		s.InitServer,
 	)
 }

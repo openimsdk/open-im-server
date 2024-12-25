@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"syscall"
 
+	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/utils/jsonutil"
@@ -39,7 +40,7 @@ import (
 	"github.com/openimsdk/tools/utils/runtimeenv"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	discRegister "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	discRegister "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -92,6 +93,21 @@ func Start(ctx context.Context, index int, config *Config) error {
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
+
+	if config.Discovery.Enable == conf.ETCD {
+		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), []string{
+			config.MsgTransfer.GetConfigFileName(),
+			config.RedisConfig.GetConfigFileName(),
+			config.MongodbConfig.GetConfigFileName(),
+			config.KafkaConfig.GetConfigFileName(),
+			config.Share.GetConfigFileName(),
+			config.WebhooksConfig.GetConfigFileName(),
+			config.Discovery.GetConfigFileName(),
+			conf.LogConfigFileName,
+		})
+		cm.Watch(ctx)
+	}
+
 	msgModel := redis.NewMsgCache(rdb)
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
@@ -125,6 +141,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 		historyMongoCH: historyMongoCH,
 		runTimeEnv:     runTimeEnv,
 	}
+
 	return msgTransfer.Start(index, config, client)
 }
 
