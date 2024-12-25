@@ -185,9 +185,9 @@ func (ws *WsServer) Run(done chan error) error {
 	go func() {
 		http.HandleFunc("/", ws.wsHandler)
 		err := server.ListenAndServe()
-		defer close(netDone)
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			netErr = errs.WrapMsg(err, "ws start err", server.Addr)
+			netDone <- struct{}{}
 		}
 	}()
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -204,7 +204,6 @@ func (ws *WsServer) Run(done chan error) error {
 	var err error
 	select {
 	case err = <-done:
-		fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 		if err := shutDown(); err != nil {
 			return err
 		}
@@ -212,7 +211,6 @@ func (ws *WsServer) Run(done chan error) error {
 			return err
 		}
 	case <-netDone:
-		fmt.Println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
 	}
 	return netErr
 

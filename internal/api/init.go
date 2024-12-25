@@ -139,7 +139,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			netErr = errs.WrapMsg(err, fmt.Sprintf("api start err: %s", server.Addr))
 			netDone <- struct{}{}
-
 		}
 	}()
 
