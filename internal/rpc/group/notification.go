@@ -18,8 +18,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
@@ -533,7 +534,7 @@ func (g *NotificationSender) GroupApplicationAgreeMemberEnterNotification(ctx co
 		if err != nil {
 			return err
 		}
-		if err := g.msgClient.SetUserConversationsMinSeq(ctx, conversationID, entrantUserID, maxSeq); err != nil {
+		if err := g.msgClient.SetUserConversationsMinSeq(ctx, conversationID, entrantUserID, maxSeq+1); err != nil {
 			return err
 		}
 	}
@@ -587,7 +588,7 @@ func (g *NotificationSender) MemberEnterNotification(ctx context.Context, groupI
 		if err != nil {
 			return err
 		}
-		if err := g.msgClient.SetUserConversationsMinSeq(ctx, conversationID, []string{entrantUserID}, maxSeq); err != nil {
+		if err := g.msgClient.SetUserConversationsMinSeq(ctx, conversationID, []string{entrantUserID}, maxSeq+1); err != nil {
 			return err
 		}
 	}
