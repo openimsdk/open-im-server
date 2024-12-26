@@ -101,14 +101,14 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 		ConversationType: msg.SessionType,
 		GroupID:          msg.GroupID,
 	}
+	memberUserIDList, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, msg.GroupID)
+	if err != nil {
+		log.ZWarn(ctx, "GetGroupMemberIDs", err)
+		return
+	}
 
 	tagAll := datautil.Contain(constant.AtAllString, msg.AtUserIDList...)
 	if tagAll {
-		memberUserIDList, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, msg.GroupID)
-		if err != nil {
-			log.ZWarn(ctx, "GetGroupMemberIDs", err)
-			return
-		}
 
 		memberUserIDList = datautil.DeleteElems(memberUserIDList, msg.SendID)
 
@@ -118,6 +118,9 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
 		} else { // @Everyone and @other people
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAllAtMe}
+			atUserID = datautil.SliceIntersectFuncs(atUserID, memberUserIDList, func(a string) string { return a }, func(b string) string {
+				return b
+			})
 			if err := m.conversationClient.SetConversations(ctx, atUserID, conversation); err != nil {
 				log.ZWarn(ctx, "SetConversations", err, "userID", atUserID, "conversation", conversation)
 			}
@@ -131,10 +134,13 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 
 		return
 	}
+	atUserID = datautil.SliceIntersectFuncs(msg.AtUserIDList, memberUserIDList, func(a string) string { return a }, func(b string) string {
+		return b
+	})
 	conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtMe}
 
-	if err := m.conversationClient.SetConversations(ctx, msg.AtUserIDList, conversation); err != nil {
-		log.ZWarn(ctx, "SetConversations", err, msg.AtUserIDList, conversation)
+	if err := m.conversationClient.SetConversations(ctx, atUserID, conversation); err != nil {
+		log.ZWarn(ctx, "SetConversations", err, atUserID, conversation)
 	}
 }
 
