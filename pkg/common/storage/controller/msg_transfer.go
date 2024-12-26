@@ -251,9 +251,6 @@ func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conver
 		userSeqMap[m.SendID] = m.Seq
 		seqs = append(seqs, m.Seq)
 	}
-	if err := db.msgCache.DelMessageBySeqs(ctx, conversationID, seqs); err != nil {
-		return 0, false, nil, err
-	}
 	if err := db.msgCache.SetMessageBySeqs(ctx, conversationID, datautil.Slice(msgs, convert.MsgPb2DB)); err != nil {
 		return 0, false, nil, err
 	}
