@@ -532,9 +532,6 @@ func (db *commonMsgDatabase) GetMessagesBySeqWithBounds(ctx context.Context, use
 }
 
 func (db *commonMsgDatabase) DeleteMsgsPhysicalBySeqs(ctx context.Context, conversationID string, allSeqs []int64) error {
-	if err := db.msgCache.DelMessageBySeqs(ctx, conversationID, allSeqs); err != nil {
-		return err
-	}
 	for docID, seqs := range db.msgTable.GetDocIDSeqsMap(conversationID, allSeqs) {
 		var indexes []int
 		for _, seq := range seqs {
@@ -548,9 +545,6 @@ func (db *commonMsgDatabase) DeleteMsgsPhysicalBySeqs(ctx context.Context, conve
 }
 
 func (db *commonMsgDatabase) DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error {
-	if err := db.msgCache.DelMessageBySeqs(ctx, conversationID, seqs); err != nil {
-		return err
-	}
 	for docID, seqs := range db.msgTable.GetDocIDSeqsMap(conversationID, seqs) {
 		for _, seq := range seqs {
 			if _, err := db.msgDocDatabase.PushUnique(ctx, docID, db.msgTable.GetMsgIndex(seq), "del_list", []string{userID}); err != nil {

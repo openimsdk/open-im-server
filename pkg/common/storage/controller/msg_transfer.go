@@ -120,7 +120,8 @@ func (db *msgTransferDatabase) BatchInsertChat2DB(ctx context.Context, conversat
 	if err := db.BatchInsertBlock(ctx, conversationID, msgs, updateKeyMsg, msgList[0].Seq); err != nil {
 		return err
 	}
-	return db.msgCache.DelMessageBySeqs(ctx, conversationID, seqs)
+	//return db.msgCache.DelMessageBySeqs(ctx, conversationID, seqs)
+	return nil
 }
 
 func (db *msgTransferDatabase) BatchInsertBlock(ctx context.Context, conversationID string, fields []any, key int8, firstSeq int64) error {
