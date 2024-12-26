@@ -25,4 +25,5 @@ type MsgCache interface {
 
 	GetMessageBySeqs(ctx context.Context, conversationID string, seqs []int64) ([]*model.MsgInfoModel, error)
 	DelMessageBySeqs(ctx context.Context, conversationID string, seqs []int64) error
+	SetMessageBySeqs(ctx context.Context, conversationID string, msgs []*model.MsgDataModel) error
 }

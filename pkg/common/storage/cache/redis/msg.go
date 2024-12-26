@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
@@ -72,6 +73,22 @@ func (c *msgCache) DelMessageBySeqs(ctx context.Context, conversationID string, 
 	}
 	for _, keys := range slotKeys {
 		if err := c.rcClient.TagAsDeletedBatch2(ctx, keys); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *msgCache) SetMessageBySeqs(ctx context.Context, conversationID string, msgs []*model.MsgDataModel) error {
+	for _, msg := range msgs {
+		if msg == nil || msg.Seq <= 0 {
+			continue
+		}
+		data, err := json.Marshal(msg)
+		if err != nil {
+			return err
+		}
+		if err := c.rcClient.RawSet(ctx, cachekey.GetMsgCacheKey(conversationID, msg.Seq), string(data), msgCacheTimeout); err != nil {
 			return err
 		}
 	}

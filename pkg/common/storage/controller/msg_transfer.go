@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/utils/datautil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
@@ -250,6 +252,9 @@ func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conver
 		seqs = append(seqs, m.Seq)
 	}
 	if err := db.msgCache.DelMessageBySeqs(ctx, conversationID, seqs); err != nil {
+		return 0, false, nil, err
+	}
+	if err := db.msgCache.SetMessageBySeqs(ctx, conversationID, datautil.Slice(msgs, convert.MsgPb2DB)); err != nil {
 		return 0, false, nil, err
 	}
 	return lastMaxSeq, isNew, userSeqMap, nil
