@@ -19,17 +19,12 @@ import (
 )
 
 const (
-	messageCache      = "MESSAGE_CACHE:"
 	sendMsgFailedFlag = "SEND_MSG_FAILED_FLAG:"
-	messageCacheV2    = "MESSAGE_CACHE_V2:"
+	messageCache      = "MSG_CACHE:"
 )
 
-func GetMessageCacheKey(conversationID string, seq int64) string {
-	return messageCache + conversationID + "_" + strconv.Itoa(int(seq))
-}
-
-func GetMessageCacheKeyV2(conversationID string, seq int64) string {
-	return messageCacheV2 + conversationID + "_" + strconv.Itoa(int(seq))
+func GetMsgCacheKey(conversationID string, seq int64) string {
+	return messageCache + conversationID + ":" + strconv.Itoa(int(seq))
 }
 
 func GetSendMsgKey(id string) string {

@@ -58,8 +58,6 @@ type CommonMsgDatabase interface {
 	GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (minSeq int64, maxSeq int64, seqMsg []*sdkws.MsgData, err error)
 
 	GetMessagesBySeqWithBounds(ctx context.Context, userID string, conversationID string, seqs []int64, pullOrder sdkws.PullOrder) (bool, int64, []*sdkws.MsgData, error)
-	// ClearUserMsgs marks messages for deletion based on clear time and returns a list of sequence numbers for marked messages.
-	ClearUserMsgs(ctx context.Context, userID string, conversationID string, clearTime int64, lastMsgClearTime time.Time) (seqs []int64, err error)
 	// DeleteUserMsgsBySeqs allows a user to delete messages based on sequence numbers.
 	DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error
 	// DeleteMsgsPhysicalBySeqs physically deletes messages by emptying them based on sequence numbers.
@@ -112,7 +110,7 @@ func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUser 
 	}
 	return &commonMsgDatabase{
 		msgDocDatabase:  msgDocModel,
-		msg:             msg,
+		msgCache:        msg,
 		seqUser:         seqUser,
 		seqConversation: seqConversation,
 		producer:        producerToRedis,
@@ -122,7 +120,7 @@ func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUser 
 type commonMsgDatabase struct {
 	msgDocDatabase  database.Msg
 	msgTable        model.MsgDocModel
-	msg             cache.MsgCache
+	msgCache        cache.MsgCache
 	seqConversation cache.SeqConversationCache
 	seqUser         cache.SeqUser
 	producer        *kafka.Producer
@@ -239,7 +237,7 @@ func (db *commonMsgDatabase) RevokeMsg(ctx context.Context, conversationID strin
 	if err := db.batchInsertBlock(ctx, conversationID, []any{revoke}, updateKeyRevoke, seq); err != nil {
 		return err
 	}
-	return db.msg.DelMessageBySeqs(ctx, conversationID, []int64{seq})
+	return db.msgCache.DelMessageBySeqs(ctx, conversationID, []int64{seq})
 }
 
 func (db *commonMsgDatabase) MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, totalSeqs []int64) error {
@@ -254,7 +252,7 @@ func (db *commonMsgDatabase) MarkSingleChatMsgsAsRead(ctx context.Context, userI
 			return err
 		}
 	}
-	return db.msg.DelMessageBySeqs(ctx, conversationID, totalSeqs)
+	return db.msgCache.DelMessageBySeqs(ctx, conversationID, totalSeqs)
 }
 
 func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
@@ -533,82 +531,8 @@ func (db *commonMsgDatabase) GetMessagesBySeqWithBounds(ctx context.Context, use
 	return isEnd, endSeq, successMsgs, nil
 }
 
-func (db *commonMsgDatabase) ClearUserMsgs(ctx context.Context, userID string, conversationID string, clearTime int64, lastMsgClearTime time.Time) (seqs []int64, err error) {
-	var index int64
-	for {
-		// from oldest 2 newest, ASC
-		msgDocModel, err := db.msgDocDatabase.GetMsgDocModelByIndex(ctx, conversationID, index, 1)
-		if err != nil || msgDocModel.DocID == "" {
-			if err != nil {
-				if err == model.ErrMsgListNotExist {
-					log.ZDebug(ctx, "not doc find", "conversationID", conversationID, "userID", userID, "index", index)
-				} else {
-					log.ZError(ctx, "deleteMsgRecursion GetUserMsgListByIndex failed", err, "conversationID", conversationID, "index", index)
-				}
-			}
-			// If an error is reported, or the error cannot be obtained, it is physically deleted and seq delMongoMsgsPhysical(delStruct.delDocIDList) is returned to end the recursion
-			break
-		}
-
-		index++
-
-		// && msgDocModel.Msg[0].Msg.SendTime > lastMsgClearTime.UnixMilli()
-		if len(msgDocModel.Msg) > 0 {
-			i := 0
-			var over bool
-			for _, msg := range msgDocModel.Msg {
-				i++
-				// over clear time, need to clear
-				if msg != nil && msg.Msg != nil && msg.Msg.SendTime+clearTime*1000 <= time.Now().UnixMilli() {
-					// if msg is not in del list, add to del list
-					if msg.Msg.SendTime+clearTime*1000 > lastMsgClearTime.UnixMilli() && !datautil.Contain(userID, msg.DelList...) {
-						seqs = append(seqs, msg.Msg.Seq)
-					}
-				} else {
-					log.ZDebug(ctx, "all msg need destruct is found", "conversationID", conversationID, "userID", userID, "index", index, "stop index", i)
-					over = true
-					break
-				}
-			}
-			if over {
-				break
-			}
-		}
-	}
-
-	log.ZDebug(ctx, "ClearUserMsgs", "conversationID", conversationID, "userID", userID, "seqs", seqs)
-
-	// have msg need to destruct
-	if len(seqs) > 0 {
-		// update min seq to clear after
-		userMinSeq := seqs[len(seqs)-1] + 1                                             // user min seq when clear after
-		currentUserMinSeq, err := db.seqUser.GetUserMinSeq(ctx, conversationID, userID) // user min seq when clear before
-		if err != nil {
-			return nil, err
-		}
-
-		// if before < after, update min seq
-		if currentUserMinSeq < userMinSeq {
-			if err := db.seqUser.SetUserMinSeq(ctx, conversationID, userID, userMinSeq); err != nil {
-				return nil, err
-			}
-		}
-	}
-	return seqs, nil
-}
-
-// this is struct for recursion.
-type delMsgRecursionStruct struct {
-	minSeq    int64
-	delDocIDs []string
-}
-
-func (d *delMsgRecursionStruct) getSetMinSeq() int64 {
-	return d.minSeq
-}
-
 func (db *commonMsgDatabase) DeleteMsgsPhysicalBySeqs(ctx context.Context, conversationID string, allSeqs []int64) error {
-	if err := db.msg.DeleteMessagesFromCache(ctx, conversationID, allSeqs); err != nil {
+	if err := db.msgCache.DelMessageBySeqs(ctx, conversationID, allSeqs); err != nil {
 		return err
 	}
 	for docID, seqs := range db.msgTable.GetDocIDSeqsMap(conversationID, allSeqs) {
@@ -620,11 +544,11 @@ func (db *commonMsgDatabase) DeleteMsgsPhysicalBySeqs(ctx context.Context, conve
 			return err
 		}
 	}
-	return db.msg.DelMessageBySeqs(ctx, conversationID, allSeqs)
+	return db.msgCache.DelMessageBySeqs(ctx, conversationID, allSeqs)
 }
 
 func (db *commonMsgDatabase) DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error {
-	if err := db.msg.DeleteMessagesFromCache(ctx, conversationID, seqs); err != nil {
+	if err := db.msgCache.DelMessageBySeqs(ctx, conversationID, seqs); err != nil {
 		return err
 	}
 	for docID, seqs := range db.msgTable.GetDocIDSeqsMap(conversationID, seqs) {
@@ -634,7 +558,7 @@ func (db *commonMsgDatabase) DeleteUserMsgsBySeqs(ctx context.Context, userID st
 			}
 		}
 	}
-	return db.msg.DelMessageBySeqs(ctx, conversationID, seqs)
+	return db.msgCache.DelMessageBySeqs(ctx, conversationID, seqs)
 }
 
 func (db *commonMsgDatabase) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
@@ -678,11 +602,11 @@ func (db *commonMsgDatabase) GetHasReadSeq(ctx context.Context, userID string, c
 }
 
 func (db *commonMsgDatabase) SetSendMsgStatus(ctx context.Context, id string, status int32) error {
-	return db.msg.SetSendMsgStatus(ctx, id, status)
+	return db.msgCache.SetSendMsgStatus(ctx, id, status)
 }
 
 func (db *commonMsgDatabase) GetSendMsgStatus(ctx context.Context, id string) (int32, error) {
-	return db.msg.GetSendMsgStatus(ctx, id)
+	return db.msgCache.GetSendMsgStatus(ctx, id)
 }
 
 func (db *commonMsgDatabase) GetConversationMinMaxSeqInMongoAndCache(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error) {
@@ -812,7 +736,7 @@ func (db *commonMsgDatabase) DeleteDoc(ctx context.Context, docID string) error 
 	if err := db.msgDocDatabase.DeleteDoc(ctx, docID); err != nil {
 		return err
 	}
-	return db.msg.DelMessageBySeqs(ctx, conversationID, seqs)
+	return db.msgCache.DelMessageBySeqs(ctx, conversationID, seqs)
 }
 
 func (db *commonMsgDatabase) GetLastMessageSeqByTime(ctx context.Context, conversationID string, time int64) (int64, error) {
@@ -872,7 +796,7 @@ func (db *commonMsgDatabase) handlerQuote(ctx context.Context, userID, conversat
 }
 
 func (db *commonMsgDatabase) GetMessageBySeqs(ctx context.Context, conversationID string, userID string, seqs []int64) ([]*sdkws.MsgData, error) {
-	msgs, err := db.msg.GetMessageBySeqs(ctx, conversationID, seqs)
+	msgs, err := db.msgCache.GetMessageBySeqs(ctx, conversationID, seqs)
 	if err != nil {
 		return nil, err
 	}

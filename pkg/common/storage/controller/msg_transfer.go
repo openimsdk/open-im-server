@@ -5,7 +5,6 @@ import (
 	"github.com/openimsdk/protocol/constant"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
@@ -50,7 +49,7 @@ func NewMsgTransferDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUse
 	}
 	return &msgTransferDatabase{
 		msgDocDatabase:  msgDocModel,
-		msg:             msg,
+		msgCache:        msg,
 		seqUser:         seqUser,
 		seqConversation: seqConversation,
 		producerToMongo: producerToMongo,
@@ -61,7 +60,7 @@ func NewMsgTransferDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUse
 type msgTransferDatabase struct {
 	msgDocDatabase  database.Msg
 	msgTable        model.MsgDocModel
-	msg             cache.MsgCache
+	msgCache        cache.MsgCache
 	seqConversation cache.SeqConversationCache
 	seqUser         cache.SeqUser
 	producerToMongo *kafka.Producer
@@ -73,10 +72,12 @@ func (db *msgTransferDatabase) BatchInsertChat2DB(ctx context.Context, conversat
 		return errs.ErrArgs.WrapMsg("msgList is empty")
 	}
 	msgs := make([]any, len(msgList))
+	seqs := make([]int64, len(msgList))
 	for i, msg := range msgList {
 		if msg == nil {
 			continue
 		}
+		seqs[i] = msg.Seq
 		var offlinePushModel *model.OfflinePushModel
 		if msg.OfflinePushInfo != nil {
 			offlinePushModel = &model.OfflinePushModel{
@@ -114,7 +115,10 @@ func (db *msgTransferDatabase) BatchInsertChat2DB(ctx context.Context, conversat
 			Ex:               msg.Ex,
 		}
 	}
-	return db.BatchInsertBlock(ctx, conversationID, msgs, updateKeyMsg, msgList[0].Seq)
+	if err := db.BatchInsertBlock(ctx, conversationID, msgs, updateKeyMsg, msgList[0].Seq); err != nil {
+		return err
+	}
+	return db.msgCache.DelMessageBySeqs(ctx, conversationID, seqs)
 }
 
 func (db *msgTransferDatabase) BatchInsertBlock(ctx context.Context, conversationID string, fields []any, key int8, firstSeq int64) error {
@@ -219,7 +223,7 @@ func (db *msgTransferDatabase) BatchInsertBlock(ctx context.Context, conversatio
 }
 
 func (db *msgTransferDatabase) DeleteMessagesFromCache(ctx context.Context, conversationID string, seqs []int64) error {
-	return db.msg.DeleteMessagesFromCache(ctx, conversationID, seqs)
+	return db.msgCache.DelMessageBySeqs(ctx, conversationID, seqs)
 }
 
 func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, userHasReadMap map[string]int64, err error) {
@@ -238,20 +242,17 @@ func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conver
 	isNew = currentMaxSeq == 0
 	lastMaxSeq := currentMaxSeq
 	userSeqMap := make(map[string]int64)
+	seqs := make([]int64, 0, lenList)
 	for _, m := range msgs {
 		currentMaxSeq++
 		m.Seq = currentMaxSeq
 		userSeqMap[m.SendID] = m.Seq
+		seqs = append(seqs, m.Seq)
 	}
-
-	failedNum, err := db.msg.SetMessagesToCache(ctx, conversationID, msgs)
-	if err != nil {
-		prommetrics.MsgInsertRedisFailedCounter.Add(float64(failedNum))
-		log.ZError(ctx, "setMessageToCache error", err, "len", len(msgs), "conversationID", conversationID)
-	} else {
-		prommetrics.MsgInsertRedisSuccessCounter.Inc()
+	if err := db.msgCache.DelMessageBySeqs(ctx, conversationID, seqs); err != nil {
+		return 0, false, nil, err
 	}
-	return lastMaxSeq, isNew, userSeqMap, errs.Wrap(err)
+	return lastMaxSeq, isNew, userSeqMap, nil
 }
 
 func (db *msgTransferDatabase) SetHasReadSeqs(ctx context.Context, conversationID string, userSeqMap map[string]int64) error {

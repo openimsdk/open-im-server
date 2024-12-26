@@ -17,13 +17,9 @@ package cache
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/protocol/sdkws"
 )
 
 type MsgCache interface {
-	GetMessagesBySeq(ctx context.Context, conversationID string, seqs []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
-	SetMessagesToCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int, error)
-	DeleteMessagesFromCache(ctx context.Context, conversationID string, seqs []int64) error
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
 	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
 

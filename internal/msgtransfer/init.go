@@ -92,11 +92,11 @@ func Start(ctx context.Context, index int, config *Config) error {
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	msgModel := redis.NewMsgCache(rdb)
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
+	msgModel := redis.NewMsgCache(rdb, msgDocModel)
 	seqConversation, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return err
