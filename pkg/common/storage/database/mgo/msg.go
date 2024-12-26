@@ -39,12 +39,6 @@ type MsgMgo struct {
 	model model.MsgDocModel
 }
 
-func (m *MsgMgo) PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []model.MsgInfoModel) error {
-	filter := bson.M{"doc_id": docID}
-	update := bson.M{"$push": bson.M{"msgs": bson.M{"$each": msgsToMongo}}}
-	return mongoutil.UpdateOne(ctx, m.coll, filter, update, false)
-}
-
 func (m *MsgMgo) Create(ctx context.Context, msg *model.MsgDocModel) error {
 	return mongoutil.InsertMany(ctx, m.coll, []*model.MsgDocModel{msg})
 }
@@ -75,16 +69,6 @@ func (m *MsgMgo) PushUnique(ctx context.Context, docID string, index int64, key 
 		},
 	}
 	return mongoutil.UpdateOneResult(ctx, m.coll, filter, update)
-}
-
-func (m *MsgMgo) UpdateMsgContent(ctx context.Context, docID string, index int64, msg []byte) error {
-	filter := bson.M{"doc_id": docID}
-	update := bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", index): msg}}
-	return mongoutil.UpdateOne(ctx, m.coll, filter, update, false)
-}
-
-func (m *MsgMgo) IsExistDocID(ctx context.Context, docID string) (bool, error) {
-	return mongoutil.Exist(ctx, m.coll, bson.M{"doc_id": docID})
 }
 
 func (m *MsgMgo) FindOneByDocID(ctx context.Context, docID string) (*model.MsgDocModel, error) {
@@ -213,13 +197,6 @@ func (m *MsgMgo) GetOldestMsg(ctx context.Context, conversationID string) (*mode
 			}
 		}
 	}
-}
-
-func (m *MsgMgo) DeleteDocs(ctx context.Context, docIDs []string) error {
-	if len(docIDs) == 0 {
-		return nil
-	}
-	return mongoutil.DeleteMany(ctx, m.coll, bson.M{"doc_id": bson.M{"$in": docIDs}})
 }
 
 func (m *MsgMgo) GetMsgDocModelByIndex(ctx context.Context, conversationID string, index, sort int64) (*model.MsgDocModel, error) {
@@ -418,22 +395,6 @@ func (m *MsgMgo) searchMessage(ctx context.Context, req *msg.SearchMessageReq) (
 			return int64(count), data, nil
 		}
 	}
-}
-
-func (m *MsgMgo) getDocRange(ctx context.Context, id primitive.ObjectID, index []int64) ([]*model.MsgInfoModel, error) {
-	if len(index) == 0 {
-		return nil, nil
-	}
-
-	pipeline := bson.A{
-		bson.M{"$match": bson.M{"_id": id}},
-		bson.M{"$project": "$msgs"},
-	}
-	msgs, err := mongoutil.Aggregate[*model.MsgInfoModel](ctx, m.coll, pipeline)
-	if err != nil {
-		return nil, err
-	}
-	return msgs, nil
 }
 
 func (m *MsgMgo) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (int64, []*model.MsgInfoModel, error) {
@@ -978,18 +939,6 @@ func (m *MsgMgo) GetRandBeforeMsg(ctx context.Context, ts int64, limit int) ([]*
 			},
 		},
 	})
-}
-
-func (m *MsgMgo) DeleteMsgByIndex(ctx context.Context, docID string, index []int) error {
-	if len(index) == 0 {
-		return nil
-	}
-	model := &model.MsgInfoModel{DelList: []string{}}
-	set := make(map[string]any)
-	for i := range index {
-		set[fmt.Sprintf("msgs.%d", i)] = model
-	}
-	return mongoutil.UpdateOne(ctx, m.coll, bson.M{"doc_id": docID}, bson.M{"$set": set}, true)
 }
 
 func (m *MsgMgo) DeleteDoc(ctx context.Context, docID string) error {
