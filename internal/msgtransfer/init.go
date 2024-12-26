@@ -86,11 +86,26 @@ func Start(ctx context.Context, index int, config *Config) error {
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	msgModel := redis.NewMsgCache(rdb)
+
+	if config.Discovery.Enable == conf.ETCD {
+		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), []string{
+			config.MsgTransfer.GetConfigFileName(),
+			config.RedisConfig.GetConfigFileName(),
+			config.MongodbConfig.GetConfigFileName(),
+			config.KafkaConfig.GetConfigFileName(),
+			config.Share.GetConfigFileName(),
+			config.WebhooksConfig.GetConfigFileName(),
+			config.Discovery.GetConfigFileName(),
+			conf.LogConfigFileName,
+		})
+		cm.Watch(ctx)
+	}
+
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
+	msgModel := redis.NewMsgCache(rdb, msgDocModel)
 	seqConversation, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return err

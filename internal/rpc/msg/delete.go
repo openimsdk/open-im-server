@@ -106,10 +106,8 @@ func (m *msgServer) DeleteMsgPhysical(ctx context.Context, req *msg.DeleteMsgPhy
 		return nil, err
 	}
 	remainTime := timeutil.GetCurrentTimestampBySecond() - req.Timestamp
-	for _, conversationID := range req.ConversationIDs {
-		if err := m.MsgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, remainTime); err != nil {
-			log.ZWarn(ctx, "DeleteConversationMsgsAndSetMinSeq error", err, "conversationID", conversationID, "err", err)
-		}
+	if _, err := m.DestructMsgs(ctx, &msg.DestructMsgsReq{Timestamp: remainTime, Limit: 9999}); err != nil {
+		return nil, err
 	}
 	return &msg.DeleteMsgPhysicalResp{}, nil
 }
