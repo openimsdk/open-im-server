@@ -3,7 +3,7 @@ package tools
 import (
 	"context"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/third"

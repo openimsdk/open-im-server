@@ -2,8 +2,10 @@ package tools
 
 import (
 	"context"
+	"testing"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/third"
@@ -12,7 +14,6 @@ import (
 	"github.com/robfig/cron/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"testing"
 )
 
 func TestName(t *testing.T) {

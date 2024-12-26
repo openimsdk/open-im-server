@@ -15,7 +15,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/tools/db/mongoutil"
@@ -59,11 +58,11 @@ func readConfig[T any](dir string, name string) (*T, error) {
 }
 
 func Main(conf string, del time.Duration) error {
-	redisConfig, err := readConfig[config.Redis](conf, cmd.RedisConfigFileName)
+	redisConfig, err := readConfig[config.Redis](conf, config.RedisConfigFileName)
 	if err != nil {
 		return err
 	}
-	mongodbConfig, err := readConfig[config.Mongo](conf, cmd.MongodbConfigFileName)
+	mongodbConfig, err := readConfig[config.Mongo](conf, config.MongodbConfigFileName)
 	if err != nil {
 		return err
 	}

@@ -82,6 +82,8 @@ services:
       - ETCD_INITIAL_CLUSTER=s1=http://0.0.0.0:2380
       - ETCD_INITIAL_CLUSTER_TOKEN=tkn
       - ETCD_INITIAL_CLUSTER_STATE=new
+    volumes:
+      - "${DATA_DIR}/components/etcd:/etcd-data"
     restart: always
     networks:
       - openim
