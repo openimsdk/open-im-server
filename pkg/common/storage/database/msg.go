@@ -24,7 +24,7 @@ import (
 )
 
 type Msg interface {
-	PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []model.MsgInfoModel) error
+	//PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []model.MsgInfoModel) error
 	Create(ctx context.Context, model *model.MsgDocModel) error
 	UpdateMsg(ctx context.Context, docID string, index int64, key string, value any) (*mongo.UpdateResult, error)
 	PushUnique(ctx context.Context, docID string, index int64, key string, value any) (*mongo.UpdateResult, error)

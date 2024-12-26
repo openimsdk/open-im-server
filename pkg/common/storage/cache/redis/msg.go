@@ -79,16 +79,16 @@ func (c *msgCache) DelMessageBySeqs(ctx context.Context, conversationID string, 
 	return nil
 }
 
-func (c *msgCache) SetMessageBySeqs(ctx context.Context, conversationID string, msgs []*model.MsgDataModel) error {
+func (c *msgCache) SetMessageBySeqs(ctx context.Context, conversationID string, msgs []*model.MsgInfoModel) error {
 	for _, msg := range msgs {
-		if msg == nil || msg.Seq <= 0 {
+		if msg == nil || msg.Msg == nil || msg.Msg.Seq <= 0 {
 			continue
 		}
 		data, err := json.Marshal(msg)
 		if err != nil {
 			return err
 		}
-		if err := c.rcClient.RawSet(ctx, cachekey.GetMsgCacheKey(conversationID, msg.Seq), string(data), msgCacheTimeout); err != nil {
+		if err := c.rcClient.RawSet(ctx, cachekey.GetMsgCacheKey(conversationID, msg.Msg.Seq), string(data), msgCacheTimeout); err != nil {
 			return err
 		}
 	}

@@ -252,7 +252,12 @@ func (db *msgTransferDatabase) BatchInsertChat2Cache(ctx context.Context, conver
 		userSeqMap[m.SendID] = m.Seq
 		seqs = append(seqs, m.Seq)
 	}
-	if err := db.msgCache.SetMessageBySeqs(ctx, conversationID, datautil.Slice(msgs, convert.MsgPb2DB)); err != nil {
+	msgToDB := func(msg *sdkws.MsgData) *model.MsgInfoModel {
+		return &model.MsgInfoModel{
+			Msg: convert.MsgPb2DB(msg),
+		}
+	}
+	if err := db.msgCache.SetMessageBySeqs(ctx, conversationID, datautil.Slice(msgs, msgToDB)); err != nil {
 		return 0, false, nil, err
 	}
 	return lastMaxSeq, isNew, userSeqMap, nil

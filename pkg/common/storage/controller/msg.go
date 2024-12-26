@@ -260,6 +260,9 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversat
 }
 
 func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][]*model.MsgInfoModel, userID, conversationID string, msg *model.MsgInfoModel) {
+	if msg == nil || msg.Msg == nil {
+		return
+	}
 	if msg.IsRead {
 		msg.Msg.IsRead = true
 	}
