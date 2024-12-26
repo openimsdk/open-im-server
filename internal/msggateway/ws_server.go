@@ -2,13 +2,16 @@ package msggateway
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	pbAuth "github.com/openimsdk/protocol/auth"
@@ -182,21 +185,28 @@ func (ws *WsServer) Run(done chan error) error {
 	go func() {
 		http.HandleFunc("/", ws.wsHandler)
 		err := server.ListenAndServe()
-		defer close(netDone)
-		if err != nil && err != http.ErrServerClosed {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			netErr = errs.WrapMsg(err, "ws start err", server.Addr)
+			netDone <- struct{}{}
 		}
 	}()
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-	var err error
-	select {
-	case err = <-done:
+	shutDown := func() error {
 		sErr := server.Shutdown(ctx)
 		if sErr != nil {
 			return errs.WrapMsg(sErr, "shutdown err")
 		}
 		close(shutdownDone)
+		return nil
+	}
+	etcd.RegisterShutDown(shutDown)
+	defer cancel()
+	var err error
+	select {
+	case err = <-done:
+		if err := shutDown(); err != nil {
+			return err
+		}
 		if err != nil {
 			return err
 		}

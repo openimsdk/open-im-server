@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/spf13/cobra"
 )
 
@@ -26,11 +27,11 @@ func (m *MsgUtilsCmd) AddUserIDFlag() {
 	m.Command.PersistentFlags().StringP("userID", "u", "", "openIM userID")
 }
 func (m *MsgUtilsCmd) AddIndexFlag() {
-	m.Command.PersistentFlags().IntP(FlagTransferIndex, "i", 0, "process startup sequence number")
+	m.Command.PersistentFlags().IntP(config.FlagTransferIndex, "i", 0, "process startup sequence number")
 }
 
 func (m *MsgUtilsCmd) AddConfigDirFlag() {
-	m.Command.PersistentFlags().StringP(FlagConf, "c", "", "path of config directory")
+	m.Command.PersistentFlags().StringP(config.FlagConf, "c", "", "path of config directory")
 
 }
 

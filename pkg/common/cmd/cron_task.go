@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/internal/tools"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
@@ -34,9 +35,9 @@ func NewCronTaskCmd() *CronTaskCmd {
 	var cronTaskConfig tools.CronTaskConfig
 	ret := &CronTaskCmd{cronTaskConfig: &cronTaskConfig}
 	ret.configMap = map[string]any{
-		OpenIMCronTaskCfgFileName: &cronTaskConfig.CronTask,
-		ShareFileName:             &cronTaskConfig.Share,
-		DiscoveryConfigFilename:   &cronTaskConfig.Discovery,
+		config.OpenIMCronTaskCfgFileName: &cronTaskConfig.CronTask,
+		config.ShareFileName:             &cronTaskConfig.Share,
+		config.DiscoveryConfigFilename:   &cronTaskConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
@@ -35,14 +36,14 @@ func NewFriendRpcCmd() *FriendRpcCmd {
 	var relationConfig relation.Config
 	ret := &FriendRpcCmd{relationConfig: &relationConfig}
 	ret.configMap = map[string]any{
-		OpenIMRPCFriendCfgFileName: &relationConfig.RpcConfig,
-		RedisConfigFileName:        &relationConfig.RedisConfig,
-		MongodbConfigFileName:      &relationConfig.MongodbConfig,
-		ShareFileName:              &relationConfig.Share,
-		NotificationFileName:       &relationConfig.NotificationConfig,
-		WebhooksConfigFileName:     &relationConfig.WebhooksConfig,
-		LocalCacheConfigFileName:   &relationConfig.LocalCacheConfig,
-		DiscoveryConfigFilename:    &relationConfig.Discovery,
+		config.OpenIMRPCFriendCfgFileName: &relationConfig.RpcConfig,
+		config.RedisConfigFileName:        &relationConfig.RedisConfig,
+		config.MongodbConfigFileName:      &relationConfig.MongodbConfig,
+		config.ShareFileName:              &relationConfig.Share,
+		config.NotificationFileName:       &relationConfig.NotificationConfig,
+		config.WebhooksConfigFileName:     &relationConfig.WebhooksConfig,
+		config.LocalCacheConfigFileName:   &relationConfig.LocalCacheConfig,
+		config.DiscoveryConfigFilename:    &relationConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)
@@ -59,5 +60,16 @@ func (a *FriendRpcCmd) Exec() error {
 func (a *FriendRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.relationConfig.Discovery, &a.relationConfig.RpcConfig.Prometheus, a.relationConfig.RpcConfig.RPC.ListenIP,
 		a.relationConfig.RpcConfig.RPC.RegisterIP, a.relationConfig.RpcConfig.RPC.AutoSetPorts, a.relationConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.relationConfig.Discovery.RpcService.Friend, &a.relationConfig.NotificationConfig, a.relationConfig, relation.Start)
+		a.Index(), a.relationConfig.Discovery.RpcService.Friend, &a.relationConfig.NotificationConfig, a.relationConfig,
+		[]string{
+			a.relationConfig.RpcConfig.GetConfigFileName(),
+			a.relationConfig.RedisConfig.GetConfigFileName(),
+			a.relationConfig.MongodbConfig.GetConfigFileName(),
+			a.relationConfig.NotificationConfig.GetConfigFileName(),
+			a.relationConfig.Share.GetConfigFileName(),
+			a.relationConfig.WebhooksConfig.GetConfigFileName(),
+			a.relationConfig.LocalCacheConfig.GetConfigFileName(),
+			a.relationConfig.Discovery.GetConfigFileName(),
+		},
+		relation.Start)
 }

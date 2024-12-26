@@ -27,6 +27,7 @@ import (
 	"time"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
@@ -34,7 +35,7 @@ import (
 
 	"github.com/openimsdk/tools/utils/runtimeenv"
 
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
@@ -48,9 +49,11 @@ import (
 // Start rpc server.
 func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConfig *conf.Prometheus, listenIP,
 	registerIP string, autoSetPorts bool, rpcPorts []int, index int, rpcRegisterName string, notification *conf.Notification, config T,
+	watchConfigNames []string,
 	rpcFn func(ctx context.Context, config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error,
 	options ...grpc.ServerOption) error {
 
+	watchConfigNames = append(watchConfigNames, conf.LogConfigFileName)
 	var (
 		rpcTcpAddr     string
 		netDone        = make(chan struct{}, 2)
@@ -185,11 +188,16 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 
 	go func() {
 		err := srv.Serve(listener)
-		if err != nil {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			netErr = errs.WrapMsg(err, "rpc start err: ", rpcTcpAddr)
 			netDone <- struct{}{}
 		}
 	}()
+
+	if discovery.Enable == conf.ETCD {
+		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), watchConfigNames)
+		cm.Watch(ctx)
+	}
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGTERM)
