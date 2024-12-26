@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messagegateway-rpc-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: messagegateway-rpc-server
+  template:
+    metadata:
+      labels:
+        app: messagegateway-rpc-server
+    spec:
+      containers:
+        - name: openim-msggateway-container
+          image: openim/openim-msggateway:v3.8.3
+          env:
+            - name: CONFIG_PATH
+              value: "/config"
+            - name: IMENV_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openim-redis-secret
+                  key: redis-password
+          volumeMounts:
+            - name: openim-config
+              mountPath: "/config"
+              readOnly: true
+          ports:
+            - containerPort: 10140
+            - containerPort: 12001
+      volumes:
+        - name: openim-config
+          configMap:
+            name: openim-config
