@@ -143,9 +143,22 @@ func (r *RootCmd) updateConfigFromEtcd(opts *CmdOpts) error {
 	}
 
 	update := func(configFileName string, configStruct any) error {
+		ctx := context.TODO()
 		key := disetcd.BuildKey(configFileName)
-		etcdRes, err := r.etcdClient.Get(context.TODO(), key)
-		if err != nil || etcdRes.Count == 0 {
+		etcdRes, err := r.etcdClient.Get(ctx, key)
+		if err != nil {
+			log.ZWarn(ctx, "root cmd updateConfigFromEtcd, etcd Get err: %v", errs.Wrap(err))
+			return nil
+		}
+		if etcdRes.Count == 0 {
+			data, err := json.Marshal(configStruct)
+			if err != nil {
+				return errs.ErrArgs.WithDetail(err.Error()).Wrap()
+			}
+			_, err = r.etcdClient.Put(ctx, disetcd.BuildKey(configFileName), string(data))
+			if err != nil {
+				log.ZWarn(ctx, "root cmd updateConfigFromEtcd, etcd Put err: %v", errs.Wrap(err))
+			}
 			return nil
 		}
 		err = json.Unmarshal(etcdRes.Kvs[0].Value, configStruct)
