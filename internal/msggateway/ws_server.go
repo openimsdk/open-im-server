@@ -9,24 +9,18 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
-	pbAuth "github.com/openimsdk/protocol/auth"
-	"github.com/openimsdk/tools/mcontext"
-	"net/http"
-	"sync"
-	"sync/atomic"
-	"time"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
+	pbAuth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"golang.org/x/sync/errgroup"
 )
@@ -62,8 +56,6 @@ type WsServer struct {
 	handshakeTimeout  time.Duration
 	writeBufferSize   int
 	validate          *validator.Validate
-	userClient        *rpcclient.UserRpcClient
-	authClient        *rpcclient.Auth
 	disCov            discovery.SvcDiscoveryRegistry
 	Compressor
 	//Encoder
@@ -80,19 +72,19 @@ type kickHandler struct {
 }
 
 func (ws *WsServer) SetDiscoveryRegistry(ctx context.Context, disCov discovery.SvcDiscoveryRegistry, config *Config) error {
-	userConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.User)
+	userConn, err := disCov.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
 	}
-	pushConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.Push)
+	pushConn, err := disCov.GetConn(ctx, config.Share.RpcRegisterName.Push)
 	if err != nil {
 		return err
 	}
-	authConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.Auth)
+	authConn, err := disCov.GetConn(ctx, config.Share.RpcRegisterName.Auth)
 	if err != nil {
 		return err
 	}
-	msgConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.Msg)
+	msgConn, err := disCov.GetConn(ctx, config.Share.RpcRegisterName.Msg)
 	if err != nil {
 		return err
 	}

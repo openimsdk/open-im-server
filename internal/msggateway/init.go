@@ -41,10 +41,6 @@ func Start(ctx context.Context, index int, conf *Config) error {
 	if err != nil {
 		return err
 	}
-	rpcPort, err := datautil.GetElemByIndex(conf.MsgGateway.RPC.Ports, index)
-	if err != nil {
-		return err
-	}
 	rdb, err := redisutil.NewRedisClient(ctx, conf.RedisConfig.Build())
 	if err != nil {
 		return err

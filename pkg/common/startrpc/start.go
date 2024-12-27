@@ -28,14 +28,6 @@ import (
 	"syscall"
 	"time"
 
-	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/tools/discovery/etcd"
-	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/jsonutil"
-	"google.golang.org/grpc/status"
-
-	"github.com/openimsdk/tools/utils/runtimeenv"
-
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"

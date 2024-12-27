@@ -16,7 +16,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
@@ -41,9 +40,6 @@ type ConsumerHandler struct {
 	onlineCache            *rpccache.OnlineCache
 	groupLocalCache        *rpccache.GroupLocalCache
 	conversationLocalCache *rpccache.ConversationLocalCache
-	msgRpcClient           rpcclient.MessageRpcClient
-	conversationRpcClient  rpcclient.ConversationRpcClient
-	groupRpcClient         rpcclient.GroupRpcClient
 	webhookClient          *webhook.Client
 	config                 *Config
 	userClient             *rpcli.UserClient
@@ -61,19 +57,19 @@ func NewConsumerHandler(ctx context.Context, config *Config, database controller
 	if err != nil {
 		return nil, err
 	}
-	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
+	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return nil, err
 	}
-	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
+	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
 	if err != nil {
 		return nil, err
 	}
-	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
+	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
 	if err != nil {
 		return nil, err
 	}
-	conversationConn, err := client.GetConn(ctx, config.Discovery.RpcService.Conversation)
+	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +77,6 @@ func NewConsumerHandler(ctx context.Context, config *Config, database controller
 	consumerHandler.groupClient = rpcli.NewGroupClient(groupConn)
 	consumerHandler.msgClient = rpcli.NewMsgClient(msgConn)
 	consumerHandler.conversationClient = rpcli.NewConversationClient(conversationConn)
-
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
 
 	consumerHandler.offlinePusher = offlinePusher
 	consumerHandler.onlinePusher = NewOnlinePusher(client, config)

@@ -91,11 +91,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 
-	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
+	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
 	}
-	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
+	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
 	if err != nil {
 		return err
 	}

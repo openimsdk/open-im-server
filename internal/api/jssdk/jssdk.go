@@ -13,7 +13,6 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
-	"sort"
 )
 
 const (
@@ -21,22 +20,23 @@ const (
 	defaultGetActiveConversation = 100
 )
 
-func NewJSSdkApi(user user.UserClient, friend relation.FriendClient, group group.GroupClient, msg msg.MsgClient, conv conversation.ConversationClient) *JSSdk {
+func NewJSSdkApi(userClient *rpcli.UserClient, relationClient *rpcli.RelationClient, groupClient *rpcli.GroupClient,
+	conversationClient *rpcli.ConversationClient, msgClient *rpcli.MsgClient) *JSSdk {
 	return &JSSdk{
-		user:   user,
-		friend: friend,
-		group:  group,
-		msg:    msg,
-		conv:   conv,
+		userClient:         userClient,
+		relationClient:     relationClient,
+		groupClient:        groupClient,
+		conversationClient: conversationClient,
+		msgClient:          msgClient,
 	}
 }
 
 type JSSdk struct {
-	userClient         rpcli.UserClient
-	relationClient     rpcli.RelationClient
-	groupClient        rpcli.GroupClient
-	conversationClient rpcli.ConversationClient
-	msgClient          rpcli.MsgClient
+	userClient         *rpcli.UserClient
+	relationClient     *rpcli.RelationClient
+	groupClient        *rpcli.GroupClient
+	conversationClient *rpcli.ConversationClient
+	msgClient          *rpcli.MsgClient
 }
 
 func (x *JSSdk) GetActiveConversations(c *gin.Context) {

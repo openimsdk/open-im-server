@@ -42,7 +42,6 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"go.mongodb.org/mongo-driver/mongo"
-	"time"
 )
 
 // GroupApplicationReceiver

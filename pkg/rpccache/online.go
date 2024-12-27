@@ -15,7 +15,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache/lru"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/useronline"
 	"github.com/openimsdk/tools/db/cacheutil"
 	"github.com/openimsdk/tools/log"

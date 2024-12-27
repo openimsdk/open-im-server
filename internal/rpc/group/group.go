@@ -103,15 +103,15 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	//msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
 	//conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
 
-	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
+	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
 	}
-	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
+	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
 	if err != nil {
 		return err
 	}
-	conversationConn, err := client.GetConn(ctx, config.Discovery.RpcService.Conversation)
+	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
 	if err != nil {
 		return err
 	}

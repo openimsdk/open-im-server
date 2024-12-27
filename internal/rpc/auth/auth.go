@@ -42,7 +42,6 @@ import (
 type authServer struct {
 	pbauth.UnimplementedAuthServer
 	authDatabase   controller.AuthDatabase
-	userRpcClient  *rpcclient.UserRpcClient
 	RegisterCenter discovery.SvcDiscoveryRegistry
 	config         *Config
 	userClient     *rpcli.UserClient
@@ -60,12 +59,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
+	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
 	}
 	pbauth.RegisterAuthServer(server, &authServer{
-		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
 			redis2.NewTokenCacheModel(rdb, config.RpcConfig.TokenPolicy.Expire),

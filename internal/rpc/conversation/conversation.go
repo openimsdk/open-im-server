@@ -45,9 +45,6 @@ import (
 
 type conversationServer struct {
 	pbconversation.UnimplementedConversationServer
-	msgRpcClient         *rpcclient.MessageRpcClient
-	user                 *rpcclient.UserRpcClient
-	groupRpcClient       *rpcclient.GroupRpcClient
 	conversationDatabase controller.ConversationDatabase
 
 	conversationNotificationSender *ConversationNotificationSender
@@ -81,15 +78,15 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
+	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
 	}
-	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
+	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
 	if err != nil {
 		return err
 	}
-	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
+	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
 	if err != nil {
 		return err
 	}

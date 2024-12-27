@@ -29,10 +29,8 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/go-redis/redis"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/tools/batcher"
 	"github.com/openimsdk/protocol/constant"
 	pbconv "github.com/openimsdk/protocol/conversation"
@@ -72,8 +70,6 @@ type OnlineHistoryRedisConsumerHandler struct {
 	redisMessageBatches *batcher.Batcher[sarama.ConsumerMessage]
 
 	msgTransferDatabase         controller.MsgTransferDatabase
-	conversationRpcClient       *rpcclient.ConversationRpcClient
-	groupRpcClient              *rpcclient.GroupRpcClient
 	conversationUserHasReadChan chan *userHasReadSeq
 	wg                          sync.WaitGroup
 
@@ -87,11 +83,11 @@ func NewOnlineHistoryRedisConsumerHandler(ctx context.Context, client discovery.
 	if err != nil {
 		return nil, err
 	}
-	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
+	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
 	if err != nil {
 		return nil, err
 	}
-	conversationConn, err := client.GetConn(ctx, config.Discovery.RpcService.Conversation)
+	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
 	if err != nil {
 		return nil, err
 	}
@@ -119,11 +115,9 @@ func NewOnlineHistoryRedisConsumerHandler(ctx context.Context, client discovery.
 	}
 	b.Do = och.do
 	och.redisMessageBatches = b
-	och.conversationRpcClient = conversationRpcClient
-	och.groupRpcClient = groupRpcClient
 	och.historyConsumerGroup = historyConsumerGroup
 
-	return &och, err
+	return &och, nil
 }
 func (och *OnlineHistoryRedisConsumerHandler) do(ctx context.Context, channelID int, val *batcher.Msg[sarama.ConsumerMessage]) {
 	ctx = mcontext.WithTriggerIDContext(ctx, val.TriggerID())

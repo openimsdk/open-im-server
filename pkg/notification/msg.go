@@ -19,17 +19,14 @@ import (
 	"encoding/json"
 	"time"
 
-	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mq/memamq"
-	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/idutil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/timeutil"
@@ -127,126 +124,6 @@ func newSessionTypeConf() map[int32]int32 {
 		// delete
 		constant.DeleteMsgsNotification: constant.SingleChatType,
 	}
-}
-
-type Message struct {
-	conn   grpc.ClientConnInterface
-	Client msg.MsgClient
-	discov discovery.SvcDiscoveryRegistry
-}
-
-func NewMessage(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) *Message {
-	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
-	if err != nil {
-		program.ExitWithError(err)
-	}
-	client := msg.NewMsgClient(conn)
-	return &Message{discov: discov, conn: conn, Client: client}
-}
-
-type MessageRpcClient Message
-
-func NewMessageRpcClient(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) MessageRpcClient {
-	return MessageRpcClient(*NewMessage(discov, rpcRegisterName))
-}
-
-// SendMsg sends a message through the gRPC client and returns the response.
-// It wraps any encountered error for better error handling and context understanding.
-func (m *MessageRpcClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
-	resp, err := m.Client.SendMsg(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// SetUserConversationsMinSeq set min seq
-func (m *MessageRpcClient) SetUserConversationsMinSeq(ctx context.Context, req *msg.SetUserConversationsMinSeqReq) (*msg.SetUserConversationsMinSeqResp, error) {
-	resp, err := m.Client.SetUserConversationsMinSeq(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// GetMaxSeq retrieves the maximum sequence number from the gRPC client.
-// Errors during the gRPC call are wrapped to provide additional context.
-func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
-	resp, err := m.Client.GetMaxSeq(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (m *MessageRpcClient) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
-	log.ZDebug(ctx, "GetMaxSeqs", "conversationIDs", conversationIDs)
-	resp, err := m.Client.GetMaxSeqs(ctx, &msg.GetMaxSeqsReq{
-		ConversationIDs: conversationIDs,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return resp.MaxSeqs, err
-}
-
-func (m *MessageRpcClient) GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
-	resp, err := m.Client.GetHasReadSeqs(ctx, &msg.GetHasReadSeqsReq{
-		UserID:          userID,
-		ConversationIDs: conversationIDs,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return resp.MaxSeqs, err
-}
-
-func (m *MessageRpcClient) GetMsgByConversationIDs(ctx context.Context, docIDs []string, seqs map[string]int64) (map[string]*sdkws.MsgData, error) {
-	resp, err := m.Client.GetMsgByConversationIDs(ctx, &msg.GetMsgByConversationIDsReq{
-		ConversationIDs: docIDs,
-		MaxSeqs:         seqs,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return resp.MsgDatas, err
-}
-
-// PullMessageBySeqList retrieves messages by their sequence numbers using the gRPC client.
-// It directly forwards the request to the gRPC client and returns the response along with any error encountered.
-func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
-	resp, err := m.Client.PullMessageBySeqs(ctx, req)
-	if err != nil {
-		// Wrap the error to provide more context if the gRPC call fails.
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (m *MessageRpcClient) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *msg.GetConversationsHasReadAndMaxSeqReq) (*msg.GetConversationsHasReadAndMaxSeqResp, error) {
-	resp, err := m.Client.GetConversationsHasReadAndMaxSeq(ctx, req)
-	if err != nil {
-		// Wrap the error to provide more context if the gRPC call fails.
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (m *MessageRpcClient) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq) (*msg.GetSeqMessageResp, error) {
-	return m.Client.GetSeqMessage(ctx, req)
-}
-
-func (m *MessageRpcClient) GetConversationMaxSeq(ctx context.Context, conversationID string) (int64, error) {
-	resp, err := m.Client.GetConversationMaxSeq(ctx, &msg.GetConversationMaxSeqReq{ConversationID: conversationID})
-	if err != nil {
-		return 0, err
-	}
-	return resp.MaxSeq, nil
-}
-
-func (m *MessageRpcClient) DestructMsgs(ctx context.Context, ts int64) error {
-	_, err := m.Client.DestructMsgs(ctx, &msg.DestructMsgsReq{Timestamp: ts})
-	return err
 }
 
 type NotificationSender struct {
