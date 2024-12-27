@@ -7,15 +7,12 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/tools/utils/datautil"
-	"golang.org/x/exp/rand"
-
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -40,12 +37,6 @@ func NewMsgMongo(db *mongo.Database) (database.Msg, error) {
 type MsgMgo struct {
 	coll  *mongo.Collection
 	model model.MsgDocModel
-}
-
-func (m *MsgMgo) PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []model.MsgInfoModel) error {
-	filter := bson.M{"doc_id": docID}
-	update := bson.M{"$push": bson.M{"msgs": bson.M{"$each": msgsToMongo}}}
-	return mongoutil.UpdateOne(ctx, m.coll, filter, update, false)
 }
 
 func (m *MsgMgo) Create(ctx context.Context, msg *model.MsgDocModel) error {
@@ -78,16 +69,6 @@ func (m *MsgMgo) PushUnique(ctx context.Context, docID string, index int64, key 
 		},
 	}
 	return mongoutil.UpdateOneResult(ctx, m.coll, filter, update)
-}
-
-func (m *MsgMgo) UpdateMsgContent(ctx context.Context, docID string, index int64, msg []byte) error {
-	filter := bson.M{"doc_id": docID}
-	update := bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", index): msg}}
-	return mongoutil.UpdateOne(ctx, m.coll, filter, update, false)
-}
-
-func (m *MsgMgo) IsExistDocID(ctx context.Context, docID string) (bool, error) {
-	return mongoutil.Exist(ctx, m.coll, bson.M{"doc_id": docID})
 }
 
 func (m *MsgMgo) FindOneByDocID(ctx context.Context, docID string) (*model.MsgDocModel, error) {
@@ -218,13 +199,6 @@ func (m *MsgMgo) GetOldestMsg(ctx context.Context, conversationID string) (*mode
 	}
 }
 
-func (m *MsgMgo) DeleteDocs(ctx context.Context, docIDs []string) error {
-	if len(docIDs) == 0 {
-		return nil
-	}
-	return mongoutil.DeleteMany(ctx, m.coll, bson.M{"doc_id": bson.M{"$in": docIDs}})
-}
-
 func (m *MsgMgo) GetMsgDocModelByIndex(ctx context.Context, conversationID string, index, sort int64) (*model.MsgDocModel, error) {
 	if sort != 1 && sort != -1 {
 		return nil, errs.ErrArgs.WrapMsg("mongo sort must be 1 or -1")
@@ -278,95 +252,6 @@ func (m *MsgMgo) MarkSingleChatMsgsAsRead(ctx context.Context, userID string, do
 	}
 	return nil
 }
-
-//func (m *MsgMgo) searchCount(ctx context.Context, filter any) (int64, error) {
-//
-//	return nil, nil
-//}
-
-//func (m *MsgMgo) searchMessage(ctx context.Context, filter any, nextID primitive.ObjectID, content bool, limit int) (int64, []*model.MsgInfoModel, primitive.ObjectID, error) {
-//	var pipeline bson.A
-//	if !nextID.IsZero() {
-//		pipeline = append(pipeline, bson.M{"$match": bson.M{"_id": bson.M{"$gt": nextID}}})
-//	}
-//	pipeline = append(pipeline,
-//		bson.M{"$match": filter},
-//		bson.M{"$limit": limit},
-//		bson.M{"$unwind": "$msgs"},
-//		bson.M{"$match": filter},
-//		bson.M{
-//			"$group": bson.M{
-//				"_id": "$_id",
-//				"doc_id": bson.M{
-//					"$first": "$doc_id",
-//				},
-//				"msgs": bson.M{"$push": "$msgs"},
-//			},
-//		},
-//	)
-//	if !content {
-//		pipeline = append(pipeline,
-//			bson.M{
-//				"$project": bson.M{
-//					"_id":   1,
-//					"count": bson.M{"$size": "$msgs"},
-//				},
-//			},
-//		)
-//		type result struct {
-//			ID    primitive.ObjectID `bson:"_id"`
-//			Count int64              `bson:"count"`
-//		}
-//		res, err := mongoutil.Aggregate[result](ctx, m.coll, pipeline)
-//		if err != nil {
-//			return 0, nil, primitive.ObjectID{}, err
-//		}
-//		if len(res) == 0 {
-//			return 0, nil, primitive.ObjectID{}, nil
-//		}
-//		var count int64
-//		for _, r := range res {
-//			count += r.Count
-//		}
-//		return count, nil, res[len(res)-1].ID, nil
-//	}
-//	type result struct {
-//		ID  primitive.ObjectID    `bson:"_id"`
-//		Msg []*model.MsgInfoModel `bson:"msgs"`
-//	}
-//	res, err := mongoutil.Aggregate[result](ctx, m.coll, pipeline)
-//	if err != nil {
-//		return 0, nil, primitive.ObjectID{}, err
-//	}
-//	if len(res) == 0 {
-//		return 0, nil, primitive.ObjectID{}, err
-//	}
-//	var count int
-//	for _, r := range res {
-//		count += len(r.Msg)
-//	}
-//	msgs := make([]*model.MsgInfoModel, 0, count)
-//	for _, r := range res {
-//		msgs = append(msgs, r.Msg...)
-//	}
-//	return int64(count), msgs, res[len(res)-1].ID, nil
-//}
-
-/*
-
-db.msg3.aggregate(
-    [
-        {
-            "$match": {
-                "doc_id": "si_7009965934_8710838466:0"
-            },
-
-        }
-    ]
-)
-
-
-*/
 
 type searchMessageIndex struct {
 	ID    primitive.ObjectID `bson:"_id"`
@@ -512,22 +397,6 @@ func (m *MsgMgo) searchMessage(ctx context.Context, req *msg.SearchMessageReq) (
 	}
 }
 
-func (m *MsgMgo) getDocRange(ctx context.Context, id primitive.ObjectID, index []int64) ([]*model.MsgInfoModel, error) {
-	if len(index) == 0 {
-		return nil, nil
-	}
-
-	pipeline := bson.A{
-		bson.M{"$match": bson.M{"_id": id}},
-		bson.M{"$project": "$msgs"},
-	}
-	msgs, err := mongoutil.Aggregate[*model.MsgInfoModel](ctx, m.coll, pipeline)
-	if err != nil {
-		return nil, err
-	}
-	return msgs, nil
-}
-
 func (m *MsgMgo) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (int64, []*model.MsgInfoModel, error) {
 	count, data, err := m.searchMessage(ctx, req)
 	if err != nil {
@@ -555,143 +424,6 @@ func (m *MsgMgo) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (
 	}
 	return count, msgs, nil
 }
-
-//func (m *MsgMgo) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (int32, []*model.MsgInfoModel, error) {
-//	where := make(bson.A, 0, 6)
-//	if req.RecvID != "" {
-//		if req.SessionType == constant.ReadGroupChatType {
-//			where = append(where, bson.M{
-//				"$or": bson.A{
-//					bson.M{"doc_id": "^n_" + req.RecvID + ":"},
-//					bson.M{"doc_id": "^sg_" + req.RecvID + ":"},
-//				},
-//			})
-//		} else {
-//			where = append(where, bson.M{"msgs.msg.recv_id": req.RecvID})
-//		}
-//	}
-//	if req.SendID != "" {
-//		where = append(where, bson.M{"msgs.msg.send_id": req.SendID})
-//	}
-//	if req.ContentType != 0 {
-//		where = append(where, bson.M{"msgs.msg.content_type": req.ContentType})
-//	}
-//	if req.SessionType != 0 {
-//		where = append(where, bson.M{"msgs.msg.session_type": req.SessionType})
-//	}
-//	if req.SendTime != "" {
-//		sendTime, err := time.Parse(time.DateOnly, req.SendTime)
-//		if err != nil {
-//			return 0, nil, errs.ErrArgs.WrapMsg("invalid sendTime", "req", req.SendTime, "format", time.DateOnly, "cause", err.Error())
-//		}
-//		where = append(where,
-//			bson.M{
-//				"msgs.msg.send_time": bson.M{
-//					"$gte": sendTime.UnixMilli(),
-//				},
-//			},
-//			bson.M{
-//				"msgs.msg.send_time": bson.M{
-//					"$lt": sendTime.Add(time.Hour * 24).UnixMilli(),
-//				},
-//			},
-//		)
-//	}
-//	opt := options.Find().SetLimit(100)
-//	res, err := mongoutil.Find[model.MsgDocModel](ctx, m.coll, bson.M{"$and": where}, opt)
-//	if err != nil {
-//		return 0, nil, err
-//	}
-//	_ = res
-//	fmt.Println()
-//
-//	return 0, nil, nil
-//	pipeline := bson.A{
-//		bson.M{
-//			"$unwind": "$msgs",
-//		},
-//	}
-//	if len(where) > 0 {
-//		pipeline = append(pipeline, bson.M{
-//			"$match": bson.M{"$and": where},
-//		})
-//	}
-//	pipeline = append(pipeline,
-//		bson.M{
-//			"$project": bson.M{
-//				"_id": 0,
-//				"msg": "$msgs.msg",
-//			},
-//		},
-//		bson.M{
-//			"$count": "count",
-//		},
-//	)
-//	//count, err := mongoutil.Aggregate[int32](ctx, m.coll, pipeline)
-//	//if err != nil {
-//	//	return 0, nil, err
-//	//}
-//	//if len(count) == 0 || count[0] == 0 {
-//	//	return 0, nil, nil
-//	//}
-//	count := []int32{0}
-//	pipeline = pipeline[:len(pipeline)-1]
-//	pipeline = append(pipeline,
-//		bson.M{
-//			"$skip": (req.Pagination.GetPageNumber() - 1) * req.Pagination.GetShowNumber(),
-//		},
-//		bson.M{
-//			"$limit": req.Pagination.GetShowNumber(),
-//		},
-//	)
-//	msgs, err := mongoutil.Aggregate[*model.MsgInfoModel](ctx, m.coll, pipeline)
-//	if err != nil {
-//		return 0, nil, err
-//	}
-//	for i := range msgs {
-//		msgInfo := msgs[i]
-//		if msgInfo == nil || msgInfo.Msg == nil {
-//			continue
-//		}
-//		if msgInfo.Revoke != nil {
-//			revokeContent := sdkws.MessageRevokedContent{
-//				RevokerID:                   msgInfo.Revoke.UserID,
-//				RevokerRole:                 msgInfo.Revoke.Role,
-//				ClientMsgID:                 msgInfo.Msg.ClientMsgID,
-//				RevokerNickname:             msgInfo.Revoke.Nickname,
-//				RevokeTime:                  msgInfo.Revoke.Time,
-//				SourceMessageSendTime:       msgInfo.Msg.SendTime,
-//				SourceMessageSendID:         msgInfo.Msg.SendID,
-//				SourceMessageSenderNickname: msgInfo.Msg.SenderNickname,
-//				SessionType:                 msgInfo.Msg.SessionType,
-//				Seq:                         msgInfo.Msg.Seq,
-//				Ex:                          msgInfo.Msg.Ex,
-//			}
-//			data, err := jsonutil.JsonMarshal(&revokeContent)
-//			if err != nil {
-//				return 0, nil, errs.WrapMsg(err, "json.Marshal revokeContent")
-//			}
-//			elem := sdkws.NotificationElem{Detail: string(data)}
-//			content, err := jsonutil.JsonMarshal(&elem)
-//			if err != nil {
-//				return 0, nil, errs.WrapMsg(err, "json.Marshal elem")
-//			}
-//			msgInfo.Msg.ContentType = constant.MsgRevokeNotification
-//			msgInfo.Msg.Content = string(content)
-//		}
-//	}
-//	//start := (req.Pagination.PageNumber - 1) * req.Pagination.ShowNumber
-//	//n := int32(len(msgs))
-//	//if start >= n {
-//	//	return n, []*relation.MsgInfoModel{}, nil
-//	//}
-//	//if start+req.Pagination.ShowNumber < n {
-//	//	msgs = msgs[start : start+req.Pagination.ShowNumber]
-//	//} else {
-//	//	msgs = msgs[start:]
-//	//}
-//	return count[0], msgs, nil
-//}
 
 func (m *MsgMgo) RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*model.UserCount, dateCount map[string]int64, err error) {
 	var sort int
@@ -1178,94 +910,6 @@ func (m *MsgMgo) RangeGroupSendCount(ctx context.Context, start time.Time, end t
 	return result[0].MsgCount, result[0].UserCount, groups, dateCount, nil
 }
 
-func (m *MsgMgo) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string) {
-	for _, conversationID := range conversationIDs {
-		regex := primitive.Regex{Pattern: fmt.Sprintf("^%s:", conversationID)}
-		msgDocs, err := mongoutil.Find[*model.MsgDocModel](ctx, m.coll, bson.M{"doc_id": regex})
-		if err != nil {
-			log.ZError(ctx, "convertAll find msg doc failed", err, "conversationID", conversationID)
-			continue
-		}
-		if len(msgDocs) < 1 {
-			continue
-		}
-		log.ZDebug(ctx, "msg doc convert", "conversationID", conversationID, "len(msgDocs)", len(msgDocs))
-		if len(msgDocs[0].Msg) == int(m.model.GetSingleGocMsgNum5000()) {
-			if err := mongoutil.DeleteMany(ctx, m.coll, bson.M{"doc_id": regex}); err != nil {
-				log.ZError(ctx, "convertAll delete many failed", err, "conversationID", conversationID)
-				continue
-			}
-			var newMsgDocs []any
-			for _, msgDoc := range msgDocs {
-				if int64(len(msgDoc.Msg)) == m.model.GetSingleGocMsgNum() {
-					continue
-				}
-				var index int64
-				for index < int64(len(msgDoc.Msg)) {
-					msg := msgDoc.Msg[index]
-					if msg != nil && msg.Msg != nil {
-						msgDocModel := model.MsgDocModel{DocID: m.model.GetDocID(conversationID, msg.Msg.Seq)}
-						end := index + m.model.GetSingleGocMsgNum()
-						if int(end) >= len(msgDoc.Msg) {
-							msgDocModel.Msg = msgDoc.Msg[index:]
-						} else {
-							msgDocModel.Msg = msgDoc.Msg[index:end]
-						}
-						newMsgDocs = append(newMsgDocs, msgDocModel)
-						index = end
-					} else {
-						break
-					}
-				}
-			}
-			if err = mongoutil.InsertMany(ctx, m.coll, newMsgDocs); err != nil {
-				log.ZError(ctx, "convertAll insert many failed", err, "conversationID", conversationID, "len(newMsgDocs)", len(newMsgDocs))
-			} else {
-				log.ZDebug(ctx, "msg doc convert", "conversationID", conversationID, "len(newMsgDocs)", len(newMsgDocs))
-			}
-		}
-	}
-}
-
-func (m *MsgMgo) GetRandDocIDs(ctx context.Context, limit int) ([]string, error) {
-	var skip int
-	var docIDs []string
-	var offset int
-
-	count, err := m.coll.CountDocuments(ctx, bson.M{})
-	if err != nil {
-		return nil, err
-	}
-
-	if count < int64(limit) {
-		skip = 0
-	} else {
-		rand.Seed(uint64(time.Now().UnixMilli()))
-		skip = rand.Intn(int(count / int64(limit)))
-		offset = skip * limit
-	}
-	log.ZDebug(ctx, "offset", "skip", skip, "offset", offset)
-	res, err := mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, []bson.M{
-		{
-			"$project": bson.M{
-				"doc_id": 1,
-			},
-		},
-		{
-			"$skip": offset,
-		},
-		{
-			"$limit": limit,
-		},
-	})
-
-	for _, doc := range res {
-		docIDs = append(docIDs, doc.DocID)
-	}
-
-	return docIDs, errs.Wrap(err)
-}
-
 func (m *MsgMgo) GetRandBeforeMsg(ctx context.Context, ts int64, limit int) ([]*model.MsgDocModel, error) {
 	return mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, []bson.M{
 		{
@@ -1295,18 +939,6 @@ func (m *MsgMgo) GetRandBeforeMsg(ctx context.Context, ts int64, limit int) ([]*
 			},
 		},
 	})
-}
-
-func (m *MsgMgo) DeleteMsgByIndex(ctx context.Context, docID string, index []int) error {
-	if len(index) == 0 {
-		return nil
-	}
-	model := &model.MsgInfoModel{DelList: []string{}}
-	set := make(map[string]any)
-	for i := range index {
-		set[fmt.Sprintf("msgs.%d", i)] = model
-	}
-	return mongoutil.UpdateOne(ctx, m.coll, bson.M{"doc_id": docID}, bson.M{"$set": set}, true)
 }
 
 func (m *MsgMgo) DeleteDoc(ctx context.Context, docID string) error {
@@ -1363,4 +995,56 @@ func (m *MsgMgo) GetLastMessageSeqByTime(ctx context.Context, conversationID str
 		}
 	}
 	return seq, nil
+}
+
+func (m *MsgMgo) onlyFindDocIndex(ctx context.Context, docID string, indexes []int64) ([]*model.MsgInfoModel, error) {
+	if len(indexes) == 0 {
+		return nil, nil
+	}
+	pipeline := mongo.Pipeline{
+		bson.D{{Key: "$match", Value: bson.D{
+			{Key: "doc_id", Value: docID},
+		}}},
+		bson.D{{Key: "$project", Value: bson.D{
+			{Key: "_id", Value: 0},
+			{Key: "doc_id", Value: 1},
+			{Key: "msgs", Value: bson.D{
+				{Key: "$map", Value: bson.D{
+					{Key: "input", Value: indexes},
+					{Key: "as", Value: "index"},
+					{Key: "in", Value: bson.D{
+						{Key: "$arrayElemAt", Value: bson.A{"$msgs", "$$index"}},
+					}},
+				}},
+			}},
+		}}},
+	}
+	msgDocModel, err := mongoutil.Aggregate[*model.MsgDocModel](ctx, m.coll, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	if len(msgDocModel) == 0 {
+		return nil, nil
+	}
+	return msgDocModel[0].Msg, nil
+}
+
+func (m *MsgMgo) FindSeqs(ctx context.Context, conversationID string, seqs []int64) ([]*model.MsgInfoModel, error) {
+	if len(seqs) == 0 {
+		return nil, nil
+	}
+	result := make([]*model.MsgInfoModel, 0, len(seqs))
+	for docID, seqs := range m.model.GetDocIDSeqsMap(conversationID, seqs) {
+		res, err := m.onlyFindDocIndex(ctx, docID, datautil.Slice(seqs, m.model.GetMsgIndex))
+		if err != nil {
+			return nil, err
+		}
+		for i, re := range res {
+			if re == nil || re.Msg == nil {
+				continue
+			}
+			result = append(result, res[i])
+		}
+	}
+	return result, nil
 }
