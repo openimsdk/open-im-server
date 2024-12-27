@@ -23,11 +23,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/discovery/etcd"
-	"github.com/openimsdk/tools/utils/jsonutil"
-	"github.com/openimsdk/tools/utils/network"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
@@ -38,7 +33,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	discRegister "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
@@ -86,20 +80,6 @@ func Start(ctx context.Context, index int, config *Config) error {
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-
-	if config.Discovery.Enable == conf.ETCD {
-		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), []string{
-			config.MsgTransfer.GetConfigFileName(),
-			config.RedisConfig.GetConfigFileName(),
-			config.MongodbConfig.GetConfigFileName(),
-			config.KafkaConfig.GetConfigFileName(),
-			config.Share.GetConfigFileName(),
-			config.WebhooksConfig.GetConfigFileName(),
-			config.Discovery.GetConfigFileName(),
-			conf.LogConfigFileName,
-		})
-		cm.Watch(ctx)
-	}
 
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
@@ -153,11 +133,6 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 
 	if config.MsgTransfer.Prometheus.Enable {
 		go func() {
-			defer func() {
-				if r := recover(); r != nil {
-					log.ZPanic(m.ctx, "MsgTransfer Start Panic", errs.ErrPanic(r))
-				}
-			}()
 			prometheusPort, err := datautil.GetElemByIndex(config.MsgTransfer.Prometheus.Ports, index)
 			if err != nil {
 				netErr = err

@@ -22,6 +22,7 @@ import (
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/a2r"
 	"github.com/openimsdk/tools/apiresp"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 )
@@ -29,10 +30,10 @@ import (
 type UserApi struct {
 	Client user.UserClient
 	discov discovery.SvcDiscoveryRegistry
-	config config.RpcService
+	config config.RpcRegisterName
 }
 
-func NewUserApi(client user.UserClient, discov discovery.SvcDiscoveryRegistry, config config.RpcService) UserApi {
+func NewUserApi(client user.UserClient, discov discovery.SvcDiscoveryRegistry, config config.RpcRegisterName) UserApi {
 	return UserApi{Client: client, discov: discov, config: config}
 }
 

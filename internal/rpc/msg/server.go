@@ -56,9 +56,8 @@ type Config struct {
 // MsgServer encapsulates dependencies required for message handling.
 type msgServer struct {
 	msg.UnimplementedMsgServer
-	RegisterCenter         discovery.SvcDiscoveryRegistry // Service discovery registry for service registration.
-	MsgDatabase            controller.CommonMsgDatabase   // Interface for message database operations.
-	StreamMsgDatabase      controller.StreamMsgDatabase
+	RegisterCenter         discovery.SvcDiscoveryRegistry   // Service discovery registry for service registration.
+	MsgDatabase            controller.CommonMsgDatabase     // Interface for message database operations.
 	UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
 	FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
 	GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
@@ -104,25 +103,24 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
+	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
 	}
-	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
+	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
 	if err != nil {
 		return err
 	}
-	friendConn, err := client.GetConn(ctx, config.Discovery.RpcService.Friend)
+	friendConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Friend)
 	if err != nil {
 		return err
 	}
-	conversationConn, err := client.GetConn(ctx, config.Discovery.RpcService.Conversation)
+	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
 	if err != nil {
 		return err
 	}
 	conversationClient := rpcli.NewConversationClient(conversationConn)
 	s := &msgServer{
-		Conversation:           &conversationClient,
 		MsgDatabase:            msgDatabase,
 		RegisterCenter:         client,
 		UserLocalCache:         rpccache.NewUserLocalCache(rpcli.NewUserClient(userConn), &config.LocalCacheConfig, rdb),
@@ -154,12 +152,4 @@ func (m *msgServer) conversationAndGetRecvID(conversation *conversation.Conversa
 		return conversation.GroupID
 	}
 	return ""
-}
-
-func (m *msgServer) AppendStreamMsg(ctx context.Context, req *msg.AppendStreamMsgReq) (*msg.AppendStreamMsgResp, error) {
-	return nil, nil
-}
-
-func (m *msgServer) GetStreamMsg(ctx context.Context, req *msg.GetStreamMsgReq) (*msg.GetStreamMsgResp, error) {
-	return nil, nil
 }

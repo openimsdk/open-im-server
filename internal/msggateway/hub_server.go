@@ -22,7 +22,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/protocol/sdkws"
@@ -36,7 +35,7 @@ import (
 )
 
 func (s *Server) InitServer(ctx context.Context, config *Config, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	userConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.User)
+	userConn, err := disCov.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
 	}
@@ -45,7 +44,6 @@ func (s *Server) InitServer(ctx context.Context, config *Config, disCov discover
 		return err
 	}
 	msggateway.RegisterMsgGatewayServer(server, s)
-	s.userRcp = rpcclient.NewUserRpcClient(disCov, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
 	if s.ready != nil {
 		return s.ready(s)
 	}
@@ -70,7 +68,6 @@ type Server struct {
 	config         *Config
 	pushTerminal   map[int]struct{}
 	ready          func(srv *Server) error
-	userRcp        rpcclient.UserRpcClient
 	queue          *memamq.MemoryQueue
 	userClient     *rpcli.UserClient
 }
@@ -79,9 +76,8 @@ func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 	s.LongConnServer = LongConnServer
 }
 
-func NewServer(rpcPort int, longConnServer LongConnServer, conf *Config, ready func(srv *Server) error) *Server {
+func NewServer(longConnServer LongConnServer, conf *Config, ready func(srv *Server) error) *Server {
 	s := &Server{
-		rpcPort:        rpcPort,
 		LongConnServer: longConnServer,
 		pushTerminal:   make(map[int]struct{}),
 		config:         conf,

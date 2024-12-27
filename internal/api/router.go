@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	pbAuth "github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/msg"
@@ -23,12 +24,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"net/http"
-	"strings"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/discovery"
@@ -61,31 +58,31 @@ func prommetricsGin() gin.HandlerFunc {
 func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, config *Config) (*gin.Engine, error) {
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-	authConn, err := client.GetConn(ctx, config.Discovery.RpcService.Auth)
+	authConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Auth)
 	if err != nil {
 		return nil, err
 	}
-	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
+	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return nil, err
 	}
-	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
+	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
 	if err != nil {
 		return nil, err
 	}
-	friendConn, err := client.GetConn(ctx, config.Discovery.RpcService.Friend)
+	friendConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Friend)
 	if err != nil {
 		return nil, err
 	}
-	conversationConn, err := client.GetConn(ctx, config.Discovery.RpcService.Conversation)
+	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
 	if err != nil {
 		return nil, err
 	}
-	thirdConn, err := client.GetConn(ctx, config.Discovery.RpcService.Third)
+	thirdConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
 	if err != nil {
 		return nil, err
 	}
-	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
+	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -94,15 +91,6 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("required_if", RequiredIf)
 	}
-	// init rpc client here
-	userRpc := rpcclient.NewUser(disCov, config.Share.RpcRegisterName.User, config.Share.RpcRegisterName.MessageGateway,
-		config.Share.IMAdminUserID)
-	groupRpc := rpcclient.NewGroup(disCov, config.Share.RpcRegisterName.Group)
-	friendRpc := rpcclient.NewFriend(disCov, config.Share.RpcRegisterName.Friend)
-	messageRpc := rpcclient.NewMessage(disCov, config.Share.RpcRegisterName.Msg)
-	conversationRpc := rpcclient.NewConversation(disCov, config.Share.RpcRegisterName.Conversation)
-	authRpc := rpcclient.NewAuth(disCov, config.Share.RpcRegisterName.Auth)
-	thirdRpc := rpcclient.NewThird(disCov, config.Share.RpcRegisterName.Third, config.API.Prometheus.GrafanaURL)
 	switch config.API.Api.CompressionLevel {
 	case NoCompression:
 	case DefaultCompression:
@@ -112,10 +100,10 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	case BestSpeed:
 		r.Use(gzip.Gzip(gzip.BestSpeed))
 	}
-	r.Use(prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(), mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)))
-	j := jssdk.NewJSSdkApi()
+	r.Use(prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(),
+		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)))
 
-	u := NewUserApi(user.NewUserClient(userConn), client, config.Discovery.RpcService)
+	u := NewUserApi(user.NewUserClient(userConn), client, config.Share.RpcRegisterName)
 	{
 		userRouterGroup := r.Group("/user")
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -290,24 +278,11 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	}
 
 	{
+		j := jssdk.NewJSSdkApi(rpcli.NewUserClient(userConn), rpcli.NewRelationClient(friendConn),
+			rpcli.NewGroupClient(groupConn), rpcli.NewConversationClient(conversationConn), rpcli.NewMsgClient(msgConn))
 		jssdk := r.Group("/jssdk")
 		jssdk.POST("/get_conversations", j.GetConversations)
 		jssdk.POST("/get_active_conversations", j.GetActiveConversations)
-	}
-	{
-		pd := NewPrometheusDiscoveryApi(config, client)
-		proDiscoveryGroup := r.Group("/prometheus_discovery", pd.Enable)
-		proDiscoveryGroup.GET("/api", pd.Api)
-		proDiscoveryGroup.GET("/user", pd.User)
-		proDiscoveryGroup.GET("/group", pd.Group)
-		proDiscoveryGroup.GET("/msg", pd.Msg)
-		proDiscoveryGroup.GET("/friend", pd.Friend)
-		proDiscoveryGroup.GET("/conversation", pd.Conversation)
-		proDiscoveryGroup.GET("/third", pd.Third)
-		proDiscoveryGroup.GET("/auth", pd.Auth)
-		proDiscoveryGroup.GET("/push", pd.Push)
-		proDiscoveryGroup.GET("/msg_gateway", pd.MessageGateway)
-		proDiscoveryGroup.GET("/msg_transfer", pd.MessageTransfer)
 	}
 
 	return r, nil
