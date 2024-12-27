@@ -20,16 +20,23 @@ const (
 	defaultGetActiveConversation = 100
 )
 
-func NewJSSdkApi() *JSSdk {
-	return &JSSdk{}
+func NewJSSdkApi(userClient *rpcli.UserClient, relationClient *rpcli.RelationClient, groupClient *rpcli.GroupClient,
+	conversationClient *rpcli.ConversationClient, msgClient *rpcli.MsgClient) *JSSdk {
+	return &JSSdk{
+		userClient:         userClient,
+		relationClient:     relationClient,
+		groupClient:        groupClient,
+		conversationClient: conversationClient,
+		msgClient:          msgClient,
+	}
 }
 
 type JSSdk struct {
-	userClient         rpcli.UserClient
-	relationClient     rpcli.RelationClient
-	groupClient        rpcli.GroupClient
-	conversationClient rpcli.ConversationClient
-	msgClient          rpcli.MsgClient
+	userClient         *rpcli.UserClient
+	relationClient     *rpcli.RelationClient
+	groupClient        *rpcli.GroupClient
+	conversationClient *rpcli.ConversationClient
+	msgClient          *rpcli.MsgClient
 }
 
 func (x *JSSdk) GetActiveConversations(c *gin.Context) {

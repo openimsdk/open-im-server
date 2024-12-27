@@ -116,7 +116,7 @@ func NewOnlineHistoryRedisConsumerHandler(ctx context.Context, client discovery.
 	och.redisMessageBatches = b
 	och.historyConsumerGroup = historyConsumerGroup
 
-	return &och, err
+	return &och, nil
 }
 func (och *OnlineHistoryRedisConsumerHandler) do(ctx context.Context, channelID int, val *batcher.Msg[sarama.ConsumerMessage]) {
 	ctx = mcontext.WithTriggerIDContext(ctx, val.TriggerID())
