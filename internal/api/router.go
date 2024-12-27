@@ -314,7 +314,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 		configGroup.POST("/reset_config", cm.ResetConfig)
 	}
 	{
-		r.POST("/restart", cm.Restart)
+		r.POST("/restart", cm.CheckAdmin, cm.Restart)
 	}
 	return r, nil
 }
