@@ -2,8 +2,6 @@ module github.com/openimsdk/open-im-server/v3
 
 go 1.22.7
 
-toolchain go1.23.2
-
 require (
 	firebase.google.com/go/v4 v4.14.1
 	github.com/dtm-labs/rockscache v0.1.1
@@ -14,8 +12,8 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/openimsdk/protocol v0.0.72-alpha.63
-	github.com/openimsdk/tools v0.0.50-alpha.50
+	github.com/openimsdk/protocol v0.0.72-alpha.68
+	github.com/openimsdk/tools v0.0.50-alpha.62
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
@@ -44,7 +42,6 @@ require (
 	github.com/spf13/viper v1.18.2
 	github.com/stathat/consistent v1.0.0
 	go.uber.org/automaxprocs v1.5.3
-	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 	golang.org/x/sync v0.8.0
 )
 
@@ -175,6 +172,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.7.0 // indirect
+	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/image v0.15.0 // indirect
 	golang.org/x/net v0.29.0 // indirect
 	golang.org/x/oauth2 v0.23.0 // indirect

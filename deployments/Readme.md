@@ -1,175 +1,188 @@
-# OpenIM Application Containerization Deployment Guide
+# Kubernetes Deployment
 
-OpenIM supports a variety of cluster deployment methods, including but not limited to `helm`, `sealos`, `kustomize`
+## Resource Requests
 
-Various contributors, as well as previous official releases, have provided some referenceable solutions:
+- CPU: 2 cores
+- Memory: 4 GiB
+- Disk usage: 20 GiB (on Node)
 
-+ [k8s-jenkins Repository](https://github.com/OpenIMSDK/k8s-jenkins)
-+ [open-im-server-k8s-deploy Repository](https://github.com/openimsdk/open-im-server-k8s-deploy)
-+ [openim-charts Repository](https://github.com/OpenIMSDK/openim-charts)
-+ [deploy-openim Repository](https://github.com/showurl/deploy-openim)
+## Preconditions
 
-### Dependency Check
+ensure that you have already deployed the following components:
 
-```bash
-Kubernetes: >= 1.16.0-0
-Helm: >= 3.0
-```
+- Redis
+- MongoDB
+- Kafka
+- MinIO
 
-### Minimum Configuration
+## Origin Deploy
 
-The recommended minimum configuration for a production environment is as follows:
+### Enter the target dir
+
+`cd ./deployments/deploy/`
+
+### Deploy configs and dependencies
+
+Upate your configMap `openim-config.yml`. **You can check the official docs for more details.**
+
+In `openim-config.yml`, you need modify the following configurations:
+
+**discovery.yml**
+
+- `kubernetes.namespace`: default is `default`, you can change it to your namespace.
+
+**mongodb.yml**
+
+- `address`: set to your already mongodb address or mongo Service name and port in your deployed.
+- `database`: set to your mongodb database name.(Need have a created database.)
+- `authSource`: set to your mongodb authSource. (authSource is specify the database name associated with the user's credentials, user need create in this database.)
+
+**kafka.yml**
+
+- `address`: set to your already kafka address or kafka Service name and port in your deployed.
+
+**redis.yml**
+
+- `address`: set to your already redis address or redis Service name and port in your deployed.
+
+**minio.yml**
+
+- `internalAddress`: set to your minio Service name and port in your deployed.
+- `externalAddress`: set to your already expose minio external address.
+
+### Set the secret
+
+A Secret is an object that contains a small amount of sensitive data. Such as password and secret. Secret is similar to ConfigMaps.
+
+#### Redis:
+
+Update the `redis-password` value in `redis-secret.yml` to your Redis password encoded in base64.
 
 ```yaml
-CPU: 4
-Memory: 8G
-Disk: 100G
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openim-redis-secret
+type: Opaque
+data:
+  redis-password: b3BlbklNMTIz # update to your redis password encoded in base64, if need empty, you can set to ""
 ```
 
-## Configuration File Generation
+#### Mongo:
 
-We have automated all the files, making the generation of configuration files optional for OpenIM. However, if you desire custom configurations, you can follow the steps below:
+Update the `mongo_openim_username`, `mongo_openim_password` value in `mongo-secret.yml` to your Mongo username and password encoded in base64.
 
-```bash
-$ make init
-# Alternatively, use script:
-# ./scripts/init-config.sh
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openim-mongo-secret
+type: Opaque
+data:
+  mongo_openim_username: b3BlbklN # update to your mongo username encoded in base64, if need empty, you can set to "" (this user credentials need in authSource database).
+  mongo_openim_password: b3BlbklNMTIz # update to your mongo password encoded in base64, if need empty, you can set to ""
 ```
 
-At this point, configuration files will be generated under `deployments/openim/config`, which you can modify as per your requirements.
+#### Minio:
 
-## Cluster Setup
+Update the `minio-root-user` and `minio-root-password` value in `minio-secret.yml` to your MinIO accessKeyID and secretAccessKey encoded in base64.
 
-If you already have a `kubernetes` cluster, or if you wish to build a `kubernetes` cluster from scratch, you can skip this step.
-
-For a quick start, I used [sealos](https://github.com/labring/sealos) to rapidly set up the cluster, with sealos also being a wrapper for kubeadm at its core:
-
-```bash
-$ SEALOS_VERSION=`curl -s https://api.github.com/repos/labring/sealos/releases/latest | grep -oE '"tag_name": "[^"]+"' | head -n1 | cut -d'"' -f4` && \
-  curl -sfL https://raw.githubusercontent.com/labring/sealos/${SEALOS_VERSION}/scripts/install.sh |
-  sh -s ${SEALOS_VERSION} labring/sealos
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openim-minio-secret
+type: Opaque
+data:
+  minio-root-user: cm9vdA== # update to your minio accessKeyID encoded in base64, if need empty, you can set to ""
+  minio-root-password: b3BlbklNMTIz # update to your minio secretAccessKey encoded in base64, if need empty, you can set to ""
 ```
 
-**Supported Versions:**
+#### Kafka:
 
-+ docker: `labring/kubernetes-docker`:(v1.24.0~v1.27.0)
-+ containerd: `labring/kubernetes`:(v1.24.0~v1.27.0)
+Update the `kafka-password` value in `kafka-secret.yml` to your Kafka password encoded in base64.
 
-#### Cluster Installation:
-
-Cluster details are as follows:
-
-| Hostname | IP Address | System Info                                                  |
-| -------- | ---------- | ------------------------------------------------------------ |
-| master01 | 10.0.0.9   | `Linux VM-0-9-ubuntu 5.15.0-76-generic #83-Ubuntu SMP Thu Jun 15 19:16:32 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux` |
-| node01   | 10.0.0.4   | Similar to master01                                          |
-| node02   | 10.0.0.10  | Similar to master01                                          |
-
-```bash
-$ export CLUSTER_USERNAME=ubuntu
-$ export CLUSTER_PASSWORD=123456
-$ sudo sealos run labring/kubernetes:v1.25.0 labring/helm:v3.8.2 labring/calico:v3.24.1 \
-    --masters 10.0.0.9 \
-    --nodes 10.0.0.4,10.0.0.10 \
-    -u "$CLUSTER_USERNAME" \
-    -p "$CLUSTER_PASSWORD"
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openim-kafka-secret
+type: Opaque
+data:
+  kafka-password: b3BlbklNMTIz # update to your kafka password encoded in base64, if need empty, you can set to ""
 ```
 
-> **Node** Uninstallation method: using `kubeadm` for uninstallation does not remove `etcd` and `cni` related configurations. Manual clearance or using `sealos` for uninstallation is needed.
+### Apply the secret.
+
+```shell
+kubectl apply -f redis-secret.yml -f minio-secret.yml -f mongo-secret.yml -f kafka-secret.yml
+```
+
+### Apply all config
+
+`kubectl apply -f ./openim-config.yml`
+
+> Attation: If you use `default` namespace, you can excute `clusterRile.yml` to create a cluster role binding for default service account.
 >
-> ```bash
-> $ sealos reset
-> ```
+> Namespace is modify to `discovery.yml` in `openim-config.yml`, you can change `kubernetes.namespace` to your namespace.
 
-If you are local, you can also use Kind and Minikube to test, for example, using Kind:
+**Excute `clusterRole.yml`**
 
-```bash
-$ GO111MODULE="on" go get sigs.k8s.io/kind@v0.11.1
-$ kind create cluster
-```
+`kubectl apply -f ./clusterRole.yml`
 
-### Installing helm
+### run all deployments and services
 
-Helm simplifies the deployment and management of Kubernetes applications to a large extent by offering version control and release management through packaging.
-
-**Using Script:**
+> Note: Ensure that infrastructure services like MinIO, Redis, and Kafka are running before deploying the main applications.
 
 ```bash
-$ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+kubectl apply \
+  -f openim-api-deployment.yml \
+  -f openim-api-service.yml \
+  -f openim-crontask-deployment.yml \
+  -f openim-rpc-user-deployment.yml \
+  -f openim-rpc-user-service.yml \
+  -f openim-msggateway-deployment.yml \
+  -f openim-msggateway-service.yml \
+  -f openim-push-deployment.yml \
+  -f openim-push-service.yml \
+  -f openim-msgtransfer-service.yml \
+  -f openim-msgtransfer-deployment.yml \
+  -f openim-rpc-conversation-deployment.yml \
+  -f openim-rpc-conversation-service.yml \
+  -f openim-rpc-auth-deployment.yml \
+  -f openim-rpc-auth-service.yml \
+  -f openim-rpc-group-deployment.yml \
+  -f openim-rpc-group-service.yml \
+  -f openim-rpc-friend-deployment.yml \
+  -f openim-rpc-friend-service.yml \
+  -f openim-rpc-msg-deployment.yml \
+  -f openim-rpc-msg-service.yml \
+  -f openim-rpc-third-deployment.yml \
+  -f openim-rpc-third-service.yml
 ```
 
-**Adding Repository:**
+### Verification
+
+After deploying the services, verify that everything is running smoothly:
 
 ```bash
-$ helm repo add brigade https://openimsdk.github.io/openim-charts
+# Check the status of all pods
+kubectl get pods
+
+# Check the status of services
+kubectl get svc
+
+# Check the status of deployments
+kubectl get deployments
+
+# View all resources
+kubectl get all
 ```
 
-### OpenIM Image Strategy
+### clean all
 
-Automated offerings include aliyun, ghcr, docker hub: [Image Documentation](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/images.md)
+`kubectl delete -f ./`
 
-**Local Test Build Method:**
+### Notes:
 
-```bash
-$ make image
-```
-
-> This command assists in quickly building the required images locally. For a detailed build strategy, refer to the [Build Documentation](https://github.com/openimsdk/open-im-server/blob/main/build/README.md).
-
-## Installation
-
-Explore our Helm-Charts repository and read through: [Helm-Charts Repository](https://github.com/openimsdk/helm-charts)
-
-
-Using the helm charts repository, you can ignore the following configuration, but if you want to just use the server and scale on top of it, you can go ahead:
-
-**Use the Helm template to generate the deployment yaml file: `openim-charts.yaml`**
-
-**Gen Image:**
-
-```bash
-../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/helm-image.yaml > ./charts/generated-configs/helm-image.yaml
-```
-
-**Gen Charts:**
-
-```bash
-for chart in ./charts/*/; do
-    if [[ "$chart" == *"generated-configs"* || "$chart" == *"helmfile.yaml"* ]]; then
-        continue
-    fi
-
-    if [ -f "${chart}values.yaml" ]; then
-        helm template "$chart" -f "./charts/generated-configs/helm-image.yaml" -f "./charts/generated-configs/config.yaml" -f "./charts/generated-configs/notification.yaml" >> openim-charts.yaml
-    else
-        helm template "$chart" >> openim-charts.yaml
-    fi
-done
-```
-
-**Use Helmfile:**
-
-```bash
-GO111MODULE=on go get github.com/roboll/helmfile@latest
-```
-
-```bash
-export MONGO_ADDRESS=im-mongo
-export MONGO_PORT=27017
-export REDIS_ADDRESS=im-redis-master
-export REDIS_PORT=6379
-export KAFKA_ADDRESS=im-kafka
-export KAFKA_PORT=9092
-export OBJECT_APIURL="https://openim.server.com/api"
-export MINIO_ENDPOINT="http://im-minio:9000"
-export MINIO_SIGN_ENDPOINT="https://openim.server.com/im-minio-api"
-
-mkdir ./charts/generated-configs
-../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/config.yaml > ./charts/generated-configs/config.yaml
-cp ../config/notification.yaml ./charts/generated-configs/notification.yaml
-../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/helm-image.yaml > ./charts/generated-configs/helm-image.yaml
-```
-
-```bash
-helmfile apply
-```
+- If you use a specific namespace for your deployment, be sure to append the -n <namespace> flag to your kubectl commands.

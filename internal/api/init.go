@@ -62,7 +62,10 @@ func Start(ctx context.Context, index int, config *Config) error {
 		prometheusPort int
 	)
 
-	router := newGinRouter(client, config)
+	router, err := newGinRouter(ctx, client, config)
+	if err != nil {
+		return err
+	}
 	if config.API.Prometheus.Enable {
 		go func() {
 			prometheusPort, err = datautil.GetElemByIndex(config.API.Prometheus.Ports, index)

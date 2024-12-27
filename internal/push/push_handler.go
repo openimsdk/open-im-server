@@ -3,7 +3,7 @@ package push
 import (
 	"context"
 	"encoding/json"
-
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"math/rand"
 	"strconv"
 	"time"
@@ -16,7 +16,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
@@ -41,14 +40,15 @@ type ConsumerHandler struct {
 	onlineCache            *rpccache.OnlineCache
 	groupLocalCache        *rpccache.GroupLocalCache
 	conversationLocalCache *rpccache.ConversationLocalCache
-	msgRpcClient           rpcclient.MessageRpcClient
-	conversationRpcClient  rpcclient.ConversationRpcClient
-	groupRpcClient         rpcclient.GroupRpcClient
 	webhookClient          *webhook.Client
 	config                 *Config
+	userClient             *rpcli.UserClient
+	groupClient            *rpcli.GroupClient
+	msgClient              *rpcli.MsgClient
+	conversationClient     *rpcli.ConversationClient
 }
 
-func NewConsumerHandler(config *Config, database controller.PushDatabase, offlinePusher offlinepush.OfflinePusher, rdb redis.UniversalClient,
+func NewConsumerHandler(ctx context.Context, config *Config, database controller.PushDatabase, offlinePusher offlinepush.OfflinePusher, rdb redis.UniversalClient,
 	client discovery.SvcDiscoveryRegistry) (*ConsumerHandler, error) {
 	var consumerHandler ConsumerHandler
 	var err error
@@ -57,20 +57,35 @@ func NewConsumerHandler(config *Config, database controller.PushDatabase, offlin
 	if err != nil {
 		return nil, err
 	}
-
-	userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
+	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
+	if err != nil {
+		return nil, err
+	}
+	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
+	if err != nil {
+		return nil, err
+	}
+	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
+	if err != nil {
+		return nil, err
+	}
+	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
+	if err != nil {
+		return nil, err
+	}
+	consumerHandler.userClient = rpcli.NewUserClient(userConn)
+	consumerHandler.groupClient = rpcli.NewGroupClient(groupConn)
+	consumerHandler.msgClient = rpcli.NewMsgClient(msgConn)
+	consumerHandler.conversationClient = rpcli.NewConversationClient(conversationConn)
 
 	consumerHandler.offlinePusher = offlinePusher
 	consumerHandler.onlinePusher = NewOnlinePusher(client, config)
-	consumerHandler.groupRpcClient = rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
-	consumerHandler.groupLocalCache = rpccache.NewGroupLocalCache(consumerHandler.groupRpcClient, &config.LocalCacheConfig, rdb)
-	consumerHandler.msgRpcClient = rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
-	consumerHandler.conversationRpcClient = rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
-	consumerHandler.conversationLocalCache = rpccache.NewConversationLocalCache(consumerHandler.conversationRpcClient, &config.LocalCacheConfig, rdb)
+	consumerHandler.groupLocalCache = rpccache.NewGroupLocalCache(consumerHandler.groupClient, &config.LocalCacheConfig, rdb)
+	consumerHandler.conversationLocalCache = rpccache.NewConversationLocalCache(consumerHandler.conversationClient, &config.LocalCacheConfig, rdb)
 	consumerHandler.webhookClient = webhook.NewWebhookClient(config.WebhooksConfig.URL)
 	consumerHandler.config = config
 	consumerHandler.pushDatabase = database
-	consumerHandler.onlineCache, err = rpccache.NewOnlineCache(userRpcClient, consumerHandler.groupLocalCache, rdb, config.RpcConfig.FullUserCache, nil)
+	consumerHandler.onlineCache, err = rpccache.NewOnlineCache(consumerHandler.userClient, consumerHandler.groupLocalCache, rdb, config.RpcConfig.FullUserCache, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +342,7 @@ func (c *ConsumerHandler) groupMessagesHandler(ctx context.Context, groupID stri
 					ctx = mcontext.WithOpUserIDContext(ctx, c.config.Share.IMAdminUserID[0])
 				}
 				defer func(groupID string) {
-					if err = c.groupRpcClient.DismissGroup(ctx, groupID); err != nil {
+					if err := c.groupClient.DismissGroup(ctx, groupID, true); err != nil {
 						log.ZError(ctx, "DismissGroup Notification clear members", err, "groupID", groupID)
 					}
 				}(groupID)
@@ -353,10 +368,7 @@ func (c *ConsumerHandler) offlinePushMsg(ctx context.Context, msg *sdkws.MsgData
 
 func (c *ConsumerHandler) filterGroupMessageOfflinePush(ctx context.Context, groupID string, msg *sdkws.MsgData,
 	offlinePushUserIDs []string) (userIDs []string, err error) {
-
-	//todo local cache Obtain the difference set through local comparison.
-	needOfflinePushUserIDs, err := c.conversationRpcClient.GetConversationOfflinePushUserIDs(
-		ctx, conversationutil.GenGroupConversationID(groupID), offlinePushUserIDs)
+	needOfflinePushUserIDs, err := c.conversationClient.GetConversationOfflinePushUserIDs(ctx, conversationutil.GenGroupConversationID(groupID), offlinePushUserIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -410,12 +422,11 @@ func (c *ConsumerHandler) getOfflinePushInfos(msg *sdkws.MsgData) (title, conten
 
 func (c *ConsumerHandler) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
 	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
-	maxSeq, err := c.msgRpcClient.GetConversationMaxSeq(ctx, conversationID)
+	maxSeq, err := c.msgClient.GetConversationMaxSeq(ctx, conversationID)
 	if err != nil {
 		return err
 	}
-	
-	return c.conversationRpcClient.SetConversationMaxSeq(ctx, userIDs, conversationID, maxSeq)
+	return c.conversationClient.SetConversationMaxSeq(ctx, conversationID, userIDs, maxSeq)
 }
 
 func unmarshalNotificationElem(bytes []byte, t any) error {
@@ -423,6 +434,5 @@ func unmarshalNotificationElem(bytes []byte, t any) error {
 	if err := json.Unmarshal(bytes, &notification); err != nil {
 		return err
 	}
-
 	return json.Unmarshal([]byte(notification.Detail), t)
 }

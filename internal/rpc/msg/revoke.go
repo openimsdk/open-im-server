@@ -63,7 +63,8 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	log.ZDebug(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
 	var role int32
 	if !authverify.IsAppManagerUid(ctx, m.config.Share.IMAdminUserID) {
-		switch msgs[0].SessionType {
+		sessionType := msgs[0].SessionType
+		switch sessionType {
 		case constant.SingleChatType:
 			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID, m.config.Share.IMAdminUserID); err != nil {
 				return nil, err
@@ -89,7 +90,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 				role = member.RoleLevel
 			}
 		default:
-			return nil, errs.ErrInternalServer.WrapMsg("msg sessionType not supported")
+			return nil, errs.ErrInternalServer.WrapMsg("msg sessionType not supported", "sessionType", sessionType)
 		}
 	}
 	now := time.Now().UnixMilli()

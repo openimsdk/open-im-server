@@ -33,7 +33,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	discRegister "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
@@ -82,11 +81,11 @@ func Start(ctx context.Context, index int, config *Config) error {
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 
-	msgModel := redis.NewMsgCache(rdb)
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
+	msgModel := redis.NewMsgCache(rdb, msgDocModel)
 	seqConversation, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return err
@@ -101,9 +100,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client, config.Share.RpcRegisterName.Group)
-	historyCH, err := NewOnlineHistoryRedisConsumerHandler(&config.KafkaConfig, msgTransferDatabase, &conversationRpcClient, &groupRpcClient)
+	historyCH, err := NewOnlineHistoryRedisConsumerHandler(ctx, client, config, msgTransferDatabase)
 	if err != nil {
 		return err
 	}
@@ -136,11 +133,6 @@ func (m *MsgTransfer) Start(index int, config *Config) error {
 
 	if config.MsgTransfer.Prometheus.Enable {
 		go func() {
-			defer func() {
-				if r := recover(); r != nil {
-					log.ZPanic(m.ctx, "MsgTransfer Start Panic", r)
-				}
-			}()
 			prometheusPort, err := datautil.GetElemByIndex(config.MsgTransfer.Prometheus.Ports, index)
 			if err != nil {
 				netErr = err

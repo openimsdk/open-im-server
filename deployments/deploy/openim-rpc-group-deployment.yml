@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: group-rpc-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: group-rpc-server
+  template:
+    metadata:
+      labels:
+        app: group-rpc-server
+    spec:
+      containers:
+        - name: group-rpc-server-container
+          image: openim/openim-rpc-group:v3.8.3
+          env:
+            - name: CONFIG_PATH
+              value: "/config"
+            - name: IMENV_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openim-redis-secret
+                  key: redis-password
+            - name: IMENV_MONGODB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: openim-mongo-secret
+                  key: mongo_openim_username
+            - name: IMENV_MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openim-mongo-secret
+                  key: mongo_openim_password
+          volumeMounts:
+            - name: openim-config
+              mountPath: "/config"
+              readOnly: true
+          ports:
+            - containerPort: 10260
+            - containerPort: 12260
+      volumes:
+        - name: openim-config
+          configMap:
+            name: openim-config

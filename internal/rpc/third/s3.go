@@ -19,17 +19,14 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"path"
 	"strconv"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"go.mongodb.org/mongo-driver/mongo"
-
 	"github.com/google/uuid"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -288,87 +285,35 @@ func (t *thirdServer) apiAddress(prefix, name string) string {
 }
 
 func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteOutdatedDataReq) (*third.DeleteOutdatedDataResp, error) {
-	var conf config.Third
+	if err := authverify.CheckAdmin(ctx, t.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	engine := t.config.RpcConfig.Object.Enable
 	expireTime := time.UnixMilli(req.ExpireTime)
-
-	findPagination := &sdkws.RequestPagination{
-		PageNumber: 1,
-		ShowNumber: 500,
-	}
-
 	// Find all expired data in S3 database
-	total, models, err := t.s3dataBase.FindNeedDeleteObjectByDB(ctx, expireTime, req.ObjectGroup, findPagination)
-	if err != nil && errs.Unwrap(err) != mongo.ErrNoDocuments {
-		return nil, errs.Wrap(err)
+	models, err := t.s3dataBase.FindExpirationObject(ctx, engine, expireTime, req.ObjectGroup, int64(req.Limit))
+	if err != nil {
+		return nil, err
 	}
-
-	if total == 0 {
-		log.ZDebug(ctx, "Not have OutdatedData", "delete Total", total)
-		return &third.DeleteOutdatedDataResp{Count: int32(total)}, nil
-	}
-
-	needDelObjectKeys := make([]string, len(models))
-	for _, model := range models {
-		needDelObjectKeys = append(needDelObjectKeys, model.Key)
-	}
-
-	// Remove duplicate keys, have the same key use in different models
-	needDelObjectKeys = datautil.Distinct(needDelObjectKeys)
-
-	for _, key := range needDelObjectKeys {
-		// Find all models by key
-		keyModels, err := t.s3dataBase.FindModelsByKey(ctx, key)
-		if err != nil && errs.Unwrap(err) != mongo.ErrNoDocuments {
+	for i, obj := range models {
+		if err := t.s3dataBase.DeleteSpecifiedData(ctx, engine, []string{obj.Name}); err != nil {
 			return nil, errs.Wrap(err)
 		}
-
-		// check keyModels, if all keyModels.
-		needDelKey := true // Default can delete
-		for _, keymodel := range keyModels {
-			// If group is empty or CreateTime is after expireTime, can't delete this key
-			if keymodel.Group == "" || keymodel.CreateTime.After(expireTime) {
-				needDelKey = false
-				break
-			}
+		if err := t.s3dataBase.DelS3Key(ctx, engine, obj.Name); err != nil {
+			return nil, err
 		}
-
-		// If this object is not referenced by not expire data, delete it
-		if needDelKey && t.minio != nil {
-			// If have a thumbnail, delete it
-			thumbnailKey, _ := t.getMinioImageThumbnailKey(ctx, key)
-			if thumbnailKey != "" {
-				err := t.s3dataBase.DeleteObject(ctx, thumbnailKey)
-				if err != nil {
-					log.ZWarn(ctx, "Delete thumbnail object is error:", errs.Wrap(err), "thumbnailKey", thumbnailKey)
-				}
-			}
-
-			// Delete object
-			err = t.s3dataBase.DeleteObject(ctx, key)
-			if err != nil {
-				log.ZWarn(ctx, "Delete object is error", errs.Wrap(err), "object key", key)
-			}
-
-			// Delete cache key
-			err = t.s3dataBase.DelS3Key(ctx, conf.Object.Enable, key)
-			if err != nil {
-				log.ZWarn(ctx, "Delete cache key is error:", errs.Wrap(err), "cache S3 key:", key)
-			}
-		}
-	}
-
-	// handle delete data in S3 database
-	for _, model := range models {
-		// Delete all expired data row in S3 database
-		err := t.s3dataBase.DeleteSpecifiedData(ctx, model.Engine, model.Name)
+		count, err := t.s3dataBase.GetKeyCount(ctx, engine, obj.Key)
 		if err != nil {
-			return nil, errs.Wrap(err)
+			return nil, err
+		}
+		log.ZDebug(ctx, "delete s3 object record", "index", i, "s3", obj, "count", count)
+		if count == 0 {
+			if err := t.s3.DeleteObject(ctx, obj.Key); err != nil {
+				return nil, err
+			}
 		}
 	}
-
-	log.ZDebug(ctx, "DeleteOutdatedData", "delete Total", total)
-
-	return &third.DeleteOutdatedDataResp{Count: int32(total)}, nil
+	return &third.DeleteOutdatedDataResp{Count: int32(len(models))}, nil
 }
 
 type FormDataMate struct {

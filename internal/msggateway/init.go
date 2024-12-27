@@ -41,10 +41,6 @@ func Start(ctx context.Context, index int, conf *Config) error {
 	if err != nil {
 		return err
 	}
-	rpcPort, err := datautil.GetElemByIndex(conf.MsgGateway.RPC.Ports, index)
-	if err != nil {
-		return err
-	}
 	rdb, err := redisutil.NewRedisClient(ctx, conf.RedisConfig.Build())
 	if err != nil {
 		return err
@@ -57,9 +53,10 @@ func Start(ctx context.Context, index int, conf *Config) error {
 		WithMessageMaxMsgLength(conf.MsgGateway.LongConnSvr.WebsocketMaxMsgLen),
 	)
 
-	hubServer := NewServer(rpcPort, longServer, conf, func(srv *Server) error {
-		longServer.online, _ = rpccache.NewOnlineCache(srv.userRcp, nil, rdb, false, longServer.subscriberUserOnlineStatusChanges)
-		return nil
+	hubServer := NewServer(longServer, conf, func(srv *Server) error {
+		var err error
+		longServer.online, err = rpccache.NewOnlineCache(srv.userClient, nil, rdb, false, longServer.subscriberUserOnlineStatusChanges)
+		return err
 	})
 
 	go longServer.ChangeOnlineStatus(4)

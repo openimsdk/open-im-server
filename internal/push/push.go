@@ -32,11 +32,8 @@ type Config struct {
 	LocalCacheConfig   config.LocalCache
 	Discovery          config.Discovery
 	FcmConfigPath      string
-}
 
-func (p pushServer) PushMsg(ctx context.Context, req *pbpush.PushMsgReq) (*pbpush.PushMsgResp, error) {
-	//todo reserved Interface
-	return nil, nil
+	runTimeEnv string
 }
 
 func (p pushServer) DelUserPushToken(ctx context.Context,
@@ -60,7 +57,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 
 	database := controller.NewPushDatabase(cacheModel, &config.KafkaConfig)
 
-	consumer, err := NewConsumerHandler(config, database, offlinePusher, rdb, client)
+	consumer, err := NewConsumerHandler(ctx, config, database, offlinePusher, rdb, client)
 	if err != nil {
 		return err
 	}

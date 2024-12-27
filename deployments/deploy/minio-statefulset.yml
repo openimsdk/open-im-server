@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  labels:
+    app: minio
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+        - name: minio
+          image: minio/minio:RELEASE.2024-01-11T07-46-16Z
+          ports:
+            - containerPort: 9000 # MinIO service port
+            - containerPort: 9090 # MinIO console port
+          volumeMounts:
+            - name: minio-data
+              mountPath: /data
+            - name: minio-config
+              mountPath: /root/.minio
+          env:
+            - name: TZ
+              value: "Asia/Shanghai"
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: openim-minio-secret
+                  key: minio-root-user
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openim-minio-secret
+                  key: minio-root-password
+          command:
+            - "/bin/sh"
+            - "-c"
+            - |
+              mkdir -p /data && \
+              minio server /data --console-address ":9090"
+      volumes:
+        - name: minio-data
+          persistentVolumeClaim:
+            claimName: minio-pvc
+        - name: minio-config
+          persistentVolumeClaim:
+            claimName: minio-config-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-config-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+

@@ -2,13 +2,14 @@ package redis
 
 import (
 	"context"
+	"strconv"
+	"sync"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/tools/errs"
 	"github.com/redis/go-redis/v9"
-	"strconv"
-	"sync"
-	"time"
 )
 
 type tokenCache struct {
@@ -99,7 +100,7 @@ func (c *tokenCache) SetTokenMapByUidPid(ctx context.Context, userID string, pla
 	return errs.Wrap(c.rdb.HSet(ctx, cachekey.GetTokenKey(userID, platformID), mm).Err())
 }
 
-func (c *tokenCache) BatchSetTokenMapByUidPid(ctx context.Context, tokens map[string]map[string]int) error {
+func (c *tokenCache) BatchSetTokenMapByUidPid(ctx context.Context, tokens map[string]map[string]any) error {
 	pipe := c.rdb.Pipeline()
 	for k, v := range tokens {
 		pipe.HSet(ctx, k, v)

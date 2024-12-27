@@ -83,7 +83,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 
 	defer func() {
 		if r := recover(); r != nil {
-			log.ZPanic(nctx, "setConversationAtInfo Panic", r)
+			log.ZPanic(nctx, "setConversationAtInfo Panic", errs.ErrPanic(r))
 		}
 	}()
 
@@ -96,14 +96,14 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 		ConversationType: msg.SessionType,
 		GroupID:          msg.GroupID,
 	}
+	memberUserIDList, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, msg.GroupID)
+	if err != nil {
+		log.ZWarn(ctx, "GetGroupMemberIDs", err)
+		return
+	}
 
 	tagAll := datautil.Contain(constant.AtAllString, msg.AtUserIDList...)
 	if tagAll {
-		memberUserIDList, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, msg.GroupID)
-		if err != nil {
-			log.ZWarn(ctx, "GetGroupMemberIDs", err)
-			return
-		}
 
 		memberUserIDList = datautil.DeleteElems(memberUserIDList, msg.SendID)
 
@@ -113,29 +113,29 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
 		} else { // @Everyone and @other people
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAllAtMe}
-
-			err = m.Conversation.SetConversations(ctx, atUserID, conversation)
-			if err != nil {
+			atUserID = datautil.SliceIntersectFuncs(atUserID, memberUserIDList, func(a string) string { return a }, func(b string) string {
+				return b
+			})
+			if err := m.conversationClient.SetConversations(ctx, atUserID, conversation); err != nil {
 				log.ZWarn(ctx, "SetConversations", err, "userID", atUserID, "conversation", conversation)
 			}
-
 			memberUserIDList = datautil.Single(atUserID, memberUserIDList)
 		}
 
 		conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
-
-		err = m.Conversation.SetConversations(ctx, memberUserIDList, conversation)
-		if err != nil {
+		if err := m.conversationClient.SetConversations(ctx, memberUserIDList, conversation); err != nil {
 			log.ZWarn(ctx, "SetConversations", err, "userID", memberUserIDList, "conversation", conversation)
 		}
 
 		return
 	}
+	atUserID = datautil.SliceIntersectFuncs(msg.AtUserIDList, memberUserIDList, func(a string) string { return a }, func(b string) string {
+		return b
+	})
 	conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtMe}
 
-	err := m.Conversation.SetConversations(ctx, msg.AtUserIDList, conversation)
-	if err != nil {
-		log.ZWarn(ctx, "SetConversations", err, msg.AtUserIDList, conversation)
+	if err := m.conversationClient.SetConversations(ctx, atUserID, conversation); err != nil {
+		log.ZWarn(ctx, "SetConversations", err, atUserID, conversation)
 	}
 }
 

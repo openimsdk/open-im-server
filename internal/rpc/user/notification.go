@@ -16,18 +16,21 @@ package user
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/protocol/msg"
+
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
+	"github.com/openimsdk/open-im-server/v3/pkg/notification/common_user"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/notification"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
 )
 
 type UserNotificationSender struct {
 	*rpcclient.NotificationSender
-	getUsersInfo func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error)
+	getUsersInfo func(ctx context.Context, userIDs []string) ([]common_user.CommonUser, error)
 	// db controller
 	db controller.UserDatabase
 }
@@ -44,7 +47,7 @@ func WithUserFunc(
 	fn func(ctx context.Context, userIDs []string) (users []*relationtb.User, err error),
 ) userNotificationSenderOptions {
 	return func(u *UserNotificationSender) {
-		f := func(ctx context.Context, userIDs []string) (result []notification.CommonUser, err error) {
+		f := func(ctx context.Context, userIDs []string) (result []common_user.CommonUser, err error) {
 			users, err := fn(ctx, userIDs)
 			if err != nil {
 				return nil, err
@@ -58,9 +61,11 @@ func WithUserFunc(
 	}
 }
 
-func NewUserNotificationSender(config *Config, msgRpcClient *rpcclient.MessageRpcClient, opts ...userNotificationSenderOptions) *UserNotificationSender {
+func NewUserNotificationSender(config *Config, msgClient *rpcli.MsgClient, opts ...userNotificationSenderOptions) *UserNotificationSender {
 	f := &UserNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithRpcClient(msgRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
+			return msgClient.SendMsg(ctx, req)
+		})),
 	}
 	for _, opt := range opts {
 		opt(f)
