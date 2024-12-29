@@ -1,0 +1,91 @@
+name: Build and release services Images
+
+on:
+  push:
+    branches:
+      - release-*
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag version to be used for Docker image"
+        required: true
+        default: "v3.8.3"
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Aliyun Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: registry.cn-hangzhou.aliyuncs.com
+          username: ${{ secrets.ALIREGISTRY_USERNAME }}
+          password: ${{ secrets.ALIREGISTRY_TOKEN }}
+
+      - name: Extract metadata for Docker (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          tags: |
+            type=ref,event=tag
+            type=schedule
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            # type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern=release-{{raw}}
+            type=sha
+            type=raw,value=${{ github.event.inputs.tag }}
+
+      - name: Build and push Docker images
+        run: |
+          ROOT_DIR="build/images"
+          for dir in "$ROOT_DIR"/*/; do
+              # Find Dockerfile or *.dockerfile in a case-insensitive manner
+              dockerfile=$(find "$dir" -maxdepth 1 -type f \( -iname 'dockerfile' -o -iname '*.dockerfile' \) | head -n 1)
+              
+              if [ -n "$dockerfile" ] && [ -f "$dockerfile" ]; then
+                  IMAGE_NAME=$(basename "$dir")
+                  echo "Building Docker image for $IMAGE_NAME with tags:"
+                  
+                  # Initialize tag arguments
+                  tag_args=()
+
+                  # Read each tag and append --tag arguments
+                  while IFS= read -r tag; do
+                      tag_args+=(--tag "${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$tag")
+                      tag_args+=(--tag "ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME:$tag")
+                      tag_args+=(--tag "registry.cn-hangzhou.aliyuncs.com/openimsdk/$IMAGE_NAME:$tag")
+                  done <<< "${{ steps.meta.outputs.tags }}"
+
+                  # Build and push the Docker image with all tags
+                  docker buildx build --platform linux/amd64,linux/arm64 \
+                    --file "$dockerfile" \
+                    "${tag_args[@]}" \
+                    --push "$dir"
+              else
+                  echo "No valid Dockerfile found in $dir"
+              fi
+          done
