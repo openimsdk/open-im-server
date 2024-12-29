@@ -61,8 +61,8 @@ jobs:
 
       - name: Build and push Docker images
         run: |
-          ROOT_DIR="build/images"
-          for dir in "$ROOT_DIR"/*/; do
+          IMG_DIR="build/images"
+          for dir in "$IMG_DIR"/*/; do
               # Find Dockerfile or *.dockerfile in a case-insensitive manner
               dockerfile=$(find "$dir" -maxdepth 1 -type f \( -iname 'dockerfile' -o -iname '*.dockerfile' \) | head -n 1)
               
@@ -72,14 +72,14 @@ jobs:
                   
                   # Initialize tag arguments
                   tag_args=()
-  
+
                   # Read each tag and append --tag arguments
                   while IFS= read -r tag; do
                       tag_args+=(--tag "${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$tag")
                       tag_args+=(--tag "ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME:$tag")
                       tag_args+=(--tag "registry.cn-hangzhou.aliyuncs.com/openimsdk/$IMAGE_NAME:$tag")
                   done <<< "${{ steps.meta.outputs.tags }}"
-  
+
                   # Build and push the Docker image with all tags
                   docker buildx build --platform linux/amd64,linux/arm64 \
                     --file "$dockerfile" \
