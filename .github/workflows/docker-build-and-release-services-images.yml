@@ -84,7 +84,8 @@ jobs:
                   docker buildx build --platform linux/amd64,linux/arm64 \
                     --file "$dockerfile" \
                     "${tag_args[@]}" \
-                    --push "$dir"
+                    --push \
+                    "."
               else
                   echo "No valid Dockerfile found in $dir"
               fi
