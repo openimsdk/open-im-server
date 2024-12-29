@@ -46,3 +46,27 @@ func (x *GroupClient) GetGroupMemberUserIDs(ctx context.Context, groupID string)
 	req := &group.GetGroupMemberUserIDsReq{GroupID: groupID}
 	return extractField(ctx, x.GroupClient.GetGroupMemberUserIDs, req, (*group.GetGroupMemberUserIDsResp).GetUserIDs)
 }
+
+func (x *GroupClient) GetGroupMembersInfo(ctx context.Context, groupID string, userIDs []string) ([]*sdkws.GroupMemberFullInfo, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
+	req := &group.GetGroupMembersInfoReq{GroupID: groupID, UserIDs: userIDs}
+	return extractField(ctx, x.GroupClient.GetGroupMembersInfo, req, (*group.GetGroupMembersInfoResp).GetMembers)
+}
+
+func (x *GroupClient) GetGroupMemberInfo(ctx context.Context, groupID string, userID string) (*sdkws.GroupMemberFullInfo, error) {
+	return firstValue(x.GetGroupMembersInfo(ctx, groupID, []string{userID}))
+}
+
+func (x *GroupClient) GetGroupMemberMapInfo(ctx context.Context, groupID string, userIDs []string) (map[string]*sdkws.GroupMemberFullInfo, error) {
+	members, err := x.GetGroupMembersInfo(ctx, groupID, userIDs)
+	if err != nil {
+		return nil, err
+	}
+	memberMap := make(map[string]*sdkws.GroupMemberFullInfo)
+	for _, member := range members {
+		memberMap[member.UserID] = member
+	}
+	return memberMap, nil
+}

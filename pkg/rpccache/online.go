@@ -206,16 +206,6 @@ func (o *OnlineCache) GetUserOnlinePlatform(ctx context.Context, userID string) 
 	return platformIDs, nil
 }
 
-// func (o *OnlineCache) GetUserOnlinePlatformBatch(ctx context.Context, userIDs []string) (map[string]int32, error) {
-// 	platformIDs, err := o.getUserOnlinePlatform(ctx, userIDs)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	tmp := make([]int32, len(platformIDs))
-// 	copy(tmp, platformIDs)
-// 	return platformIDs, nil
-// }
-
 func (o *OnlineCache) GetUserOnline(ctx context.Context, userID string) (bool, error) {
 	platformIDs, err := o.getUserOnlinePlatform(ctx, userID)
 	if err != nil {
@@ -225,6 +215,9 @@ func (o *OnlineCache) GetUserOnline(ctx context.Context, userID string) (bool, e
 }
 
 func (o *OnlineCache) getUserOnlinePlatformBatch(ctx context.Context, userIDs []string) (map[string][]int32, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
 	platformIDsMap, err := o.lruCache.GetBatch(userIDs, func(missingUsers []string) (map[string][]int32, error) {
 		platformIDsMap := make(map[string][]int32)
 		usersStatus, err := o.client.GetUsersOnlinePlatform(ctx, missingUsers)
@@ -280,40 +273,6 @@ func (o *OnlineCache) GetUsersOnline(ctx context.Context, userIDs []string) ([]s
 	log.ZInfo(ctx, "get users online", "online users length", len(userIDs), "offline users length", len(offlineUserIDs), "cost", time.Since(t))
 	return userIDs, offlineUserIDs, nil
 }
-
-//func (o *OnlineCache) GetUsersOnline(ctx context.Context, userIDs []string) ([]string, error) {
-//	onlineUserIDs := make([]string, 0, len(userIDs))
-//	for _, userID := range userIDs {
-// online, err := o.GetUserOnline(ctx, userID)
-//		if err != nil {
-//			return nil, err
-//		}
-//		if online {
-//			onlineUserIDs = append(onlineUserIDs, userID)
-//		}
-//	}
-//	log.ZDebug(ctx, "OnlineCache GetUsersOnline", "userIDs", userIDs, "onlineUserIDs", onlineUserIDs)
-//	return onlineUserIDs, nil
-//}
-//
-//func (o *OnlineCache) GetGroupOnline(ctx context.Context, groupID string) ([]string, error) {
-//	userIDs, err := o.group.GetGroupMemberIDs(ctx, groupID)
-//	if err != nil {
-//		return nil, err
-//	}
-//	var onlineUserIDs []string
-//	for _, userID := range userIDs {
-//		online, err := o.GetUserOnline(ctx, userID)
-//		if err != nil {
-//			return nil, err
-//		}
-//		if online {
-//			onlineUserIDs = append(onlineUserIDs, userID)
-//		}
-//	}
-//	log.ZDebug(ctx, "OnlineCache GetGroupOnline", "groupID", groupID, "onlineUserIDs", onlineUserIDs, "allUserID", userIDs)
-//	return onlineUserIDs, nil
-//}
 
 func (o *OnlineCache) setUserOnline(userID string, platformIDs []int32) {
 	switch o.fullUserCache {
