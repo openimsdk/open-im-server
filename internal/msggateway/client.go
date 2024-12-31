@@ -242,6 +242,8 @@ func (c *Client) handleMessage(message []byte) error {
 		resp, messageErr = c.setAppBackgroundStatus(ctx, binaryReq)
 	case WsSubUserOnlineStatus:
 		resp, messageErr = c.longConnServer.SubUserOnlineStatus(ctx, c, binaryReq)
+	case WsPullConvLastMessage:
+		resp, messageErr = c.longConnServer.GetLastMessage(ctx, binaryReq)
 	default:
 		return fmt.Errorf(
 			"ReqIdentifier failed,sendID:%s,msgIncr:%s,reqIdentifier:%d",

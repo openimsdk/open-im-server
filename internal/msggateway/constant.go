@@ -52,6 +52,7 @@ const (
 	WsLogoutMsg           = 2003
 	WsSetBackgroundStatus = 2004
 	WsSubUserOnlineStatus = 2005
+	WsPullConvLastMessage = 2006
 	WSDataError           = 3001
 )
 

@@ -245,3 +245,11 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 func (m *msgServer) GetServerTime(ctx context.Context, _ *msg.GetServerTimeReq) (*msg.GetServerTimeResp, error) {
 	return &msg.GetServerTimeResp{ServerTime: timeutil.GetCurrentTimestampByMill()}, nil
 }
+
+func (m *msgServer) GetLastMessage(ctx context.Context, req *msg.GetLastMessageReq) (*msg.GetLastMessageResp, error) {
+	msgs, err := m.MsgDatabase.GetLastMessage(ctx, req.ConversationIDs, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return &msg.GetLastMessageResp{Msgs: msgs}, nil
+}
