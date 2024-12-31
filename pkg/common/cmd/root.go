@@ -141,9 +141,24 @@ func (r *RootCmd) updateConfigFromEtcd(opts *CmdOpts) error {
 	if r.etcdClient == nil {
 		return nil
 	}
+	ctx := context.TODO()
+
+	res, err := r.etcdClient.Get(ctx, disetcd.BuildKey(disetcd.EnableConfigCenterKey))
+	if err != nil {
+		log.ZWarn(ctx, "root cmd updateConfigFromEtcd, etcd Get EnableConfigCenterKey err: %v", errs.Wrap(err))
+		return nil
+	}
+	if res.Count == 0 {
+		return nil
+	} else {
+		if string(res.Kvs[0].Value) == disetcd.Disable {
+			return nil
+		} else if string(res.Kvs[0].Value) != disetcd.Enable {
+			return errs.New("unknown EnableConfigCenter value").Wrap()
+		}
+	}
 
 	update := func(configFileName string, configStruct any) error {
-		ctx := context.TODO()
 		key := disetcd.BuildKey(configFileName)
 		etcdRes, err := r.etcdClient.Get(ctx, key)
 		if err != nil {
