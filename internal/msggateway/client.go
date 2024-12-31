@@ -236,14 +236,14 @@ func (c *Client) handleMessage(message []byte) error {
 		resp, messageErr = c.longConnServer.GetSeqMessage(ctx, binaryReq)
 	case WSGetConvMaxReadSeq:
 		resp, messageErr = c.longConnServer.GetConversationsHasReadAndMaxSeq(ctx, binaryReq)
+	case WsPullConvLastMessage:
+		resp, messageErr = c.longConnServer.GetLastMessage(ctx, binaryReq)
 	case WsLogoutMsg:
 		resp, messageErr = c.longConnServer.UserLogout(ctx, binaryReq)
 	case WsSetBackgroundStatus:
 		resp, messageErr = c.setAppBackgroundStatus(ctx, binaryReq)
 	case WsSubUserOnlineStatus:
 		resp, messageErr = c.longConnServer.SubUserOnlineStatus(ctx, c, binaryReq)
-	case WsPullConvLastMessage:
-		resp, messageErr = c.longConnServer.GetLastMessage(ctx, binaryReq)
 	default:
 		return fmt.Errorf(
 			"ReqIdentifier failed,sendID:%s,msgIncr:%s,reqIdentifier:%d",
