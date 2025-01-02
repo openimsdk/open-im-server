@@ -112,3 +112,15 @@ func (o *S3Mongo) FindExpirationObject(ctx context.Context, engine string, expir
 func (o *S3Mongo) GetKeyCount(ctx context.Context, engine string, key string) (int64, error) {
 	return mongoutil.Count(ctx, o.coll, bson.M{"engine": engine, "key": key})
 }
+
+func (o *S3Mongo) GetEngineCount(ctx context.Context, engine string) (int64, error) {
+	return mongoutil.Count(ctx, o.coll, bson.M{"engine": engine})
+}
+
+func (o *S3Mongo) GetEngineInfo(ctx context.Context, engine string, limit int, skip int) ([]*model.Object, error) {
+	return mongoutil.Find[*model.Object](ctx, o.coll, bson.M{"engine": engine}, options.Find().SetLimit(int64(limit)).SetSkip(int64(skip)))
+}
+
+func (o *S3Mongo) UpdateEngine(ctx context.Context, oldEngine, oldName string, newEngine string) error {
+	return mongoutil.UpdateOne(ctx, o.coll, bson.M{"engine": oldEngine, "name": oldName}, bson.M{"$set": bson.M{"engine": newEngine}}, false)
+}

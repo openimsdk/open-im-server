@@ -39,5 +39,6 @@ type Msg interface {
 	DeleteDoc(ctx context.Context, docID string) error
 	GetRandBeforeMsg(ctx context.Context, ts int64, limit int) ([]*model.MsgDocModel, error)
 	GetLastMessageSeqByTime(ctx context.Context, conversationID string, time int64) (int64, error)
+	GetLastMessage(ctx context.Context, conversationID string) (*model.MsgInfoModel, error)
 	FindSeqs(ctx context.Context, conversationID string, seqs []int64) ([]*model.MsgInfoModel, error)
 }
