@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"reflect"
 	"strconv"
@@ -35,13 +34,14 @@ type ConfigManager struct {
 }
 
 func NewConfigManager(IMAdminUserID []string, cfg *config.AllConfig, client *clientv3.Client, configPath string, runtimeEnv string) *ConfigManager {
-	return &ConfigManager{
+	cm := &ConfigManager{
 		imAdminUserID: IMAdminUserID,
 		config:        cfg,
 		client:        client,
 		configPath:    configPath,
 		runtimeEnv:    runtimeEnv,
 	}
+	return cm
 }
 
 func (cm *ConfigManager) CheckAdmin(c *gin.Context) {
@@ -168,11 +168,15 @@ func compareAndSave[T any](c *gin.Context, old any, req *apistruct.SetConfigReq,
 }
 
 func (cm *ConfigManager) ResetConfig(c *gin.Context) {
-	go cm.resetConfig(c)
+	go func() {
+		if err := cm.resetConfig(c); err != nil {
+			log.ZError(c, "reset config err", err)
+		}
+	}()
 	apiresp.GinSuccess(c, nil)
 }
 
-func (cm *ConfigManager) resetConfig(c *gin.Context) {
+func (cm *ConfigManager) resetConfig(c *gin.Context, ops ...clientv3.Op) error {
 	txn := cm.client.Txn(c)
 	type initConf struct {
 		old       any
@@ -223,7 +227,6 @@ func (cm *ConfigManager) resetConfig(c *gin.Context) {
 		}
 	}
 
-	ops := make([]clientv3.Op, 0)
 	for _, k := range changedKeys {
 		data, err := json.Marshal(configMap[k].new)
 		if err != nil {
@@ -236,10 +239,10 @@ func (cm *ConfigManager) resetConfig(c *gin.Context) {
 		txn.Then(ops...)
 		_, err := txn.Commit()
 		if err != nil {
-			log.ZError(c, "commit etcd txn failed", err)
-			return
+			return errs.WrapMsg(err, "commit etcd txn failed")
 		}
 	}
+	return nil
 }
 
 func (cm *ConfigManager) Restart(c *gin.Context) {
@@ -276,9 +279,9 @@ func (cm *ConfigManager) SetEnableConfigManager(c *gin.Context) {
 	if !(resp.Count > 0 && string(resp.Kvs[0].Value) == etcd.Enable) && req.Enable {
 		go func() {
 			time.Sleep(waitHttp) // wait for Restart http call return
-			err := cm.writeAllConfig(c, clientv3.OpPut(etcd.BuildKey(etcd.EnableConfigCenterKey), enableStr))
+			err := cm.resetConfig(c, clientv3.OpPut(etcd.BuildKey(etcd.EnableConfigCenterKey), enableStr))
 			if err != nil {
-				log.ZError(c, "writeAllConfig failed", err)
+				log.ZError(c, "resetConfig failed", err)
 			}
 		}()
 	} else {
@@ -303,46 +306,4 @@ func (cm *ConfigManager) GetEnableConfigManager(c *gin.Context) {
 		enable = true
 	}
 	apiresp.GinSuccess(c, &apistruct.GetEnableConfigManagerResp{Enable: enable})
-}
-
-func (cm *ConfigManager) writeAllConfig(ctx context.Context, ops ...clientv3.Op) error {
-	getWriteConfigOp(ctx, cm.config.Discovery.GetConfigFileName(), cm.config.Discovery, &ops)
-	getWriteConfigOp(ctx, cm.config.Kafka.GetConfigFileName(), cm.config.Kafka, &ops)
-	getWriteConfigOp(ctx, cm.config.LocalCache.GetConfigFileName(), cm.config.LocalCache, &ops)
-	getWriteConfigOp(ctx, cm.config.Log.GetConfigFileName(), cm.config.Log, &ops)
-	getWriteConfigOp(ctx, cm.config.Minio.GetConfigFileName(), cm.config.Minio, &ops)
-	getWriteConfigOp(ctx, cm.config.Mongo.GetConfigFileName(), cm.config.Mongo, &ops)
-	getWriteConfigOp(ctx, cm.config.Notification.GetConfigFileName(), cm.config.Notification, &ops)
-	getWriteConfigOp(ctx, cm.config.API.GetConfigFileName(), cm.config.API, &ops)
-	getWriteConfigOp(ctx, cm.config.CronTask.GetConfigFileName(), cm.config.CronTask, &ops)
-	getWriteConfigOp(ctx, cm.config.MsgGateway.GetConfigFileName(), cm.config.MsgGateway, &ops)
-	getWriteConfigOp(ctx, cm.config.MsgTransfer.GetConfigFileName(), cm.config.MsgTransfer, &ops)
-	getWriteConfigOp(ctx, cm.config.Push.GetConfigFileName(), cm.config.Push, &ops)
-	getWriteConfigOp(ctx, cm.config.Auth.GetConfigFileName(), cm.config.Auth, &ops)
-	getWriteConfigOp(ctx, cm.config.Conversation.GetConfigFileName(), cm.config.Conversation, &ops)
-	getWriteConfigOp(ctx, cm.config.Friend.GetConfigFileName(), cm.config.Friend, &ops)
-	getWriteConfigOp(ctx, cm.config.Group.GetConfigFileName(), cm.config.Group, &ops)
-	getWriteConfigOp(ctx, cm.config.Msg.GetConfigFileName(), cm.config.Msg, &ops)
-	getWriteConfigOp(ctx, cm.config.Third.GetConfigFileName(), cm.config.Third, &ops)
-	getWriteConfigOp(ctx, cm.config.User.GetConfigFileName(), cm.config.User, &ops)
-	getWriteConfigOp(ctx, cm.config.Redis.GetConfigFileName(), cm.config.Redis, &ops)
-	getWriteConfigOp(ctx, cm.config.Share.GetConfigFileName(), cm.config.Share, &ops)
-	getWriteConfigOp(ctx, cm.config.Webhooks.GetConfigFileName(), cm.config.Webhooks, &ops)
-	txn := cm.client.Txn(ctx)
-	txn.Then(ops...)
-	_, err := txn.Commit()
-	if err != nil {
-		return errs.WrapMsg(err, "writeAllConfig failed commit")
-	}
-	return nil
-}
-
-func getWriteConfigOp[T any](ctx context.Context, key string, config T, ops *[]clientv3.Op) {
-	data, err := json.Marshal(config)
-	if err != nil {
-		log.ZError(ctx, "marshal config failed", err)
-		return
-	}
-	*ops = append(*ops, clientv3.OpPut(key, string(data)))
-	return
 }

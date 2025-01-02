@@ -113,7 +113,9 @@ func (r *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) e
 	if err := r.initializeLogger(cmdOpts); err != nil {
 		return errs.WrapMsg(err, "failed to initialize logger")
 	}
-
+	if err := r.etcdClient.Close(); err != nil {
+		return errs.WrapMsg(err, "failed to close etcd client")
+	}
 	return nil
 }
 
