@@ -169,19 +169,18 @@ func compareAndSave[T any](c *gin.Context, old any, req *apistruct.SetConfigReq,
 
 func (cm *ConfigManager) ResetConfig(c *gin.Context) {
 	go func() {
-		if err := cm.resetConfig(c); err != nil {
+		if err := cm.resetConfig(c, true); err != nil {
 			log.ZError(c, "reset config err", err)
 		}
 	}()
 	apiresp.GinSuccess(c, nil)
 }
 
-func (cm *ConfigManager) resetConfig(c *gin.Context, ops ...clientv3.Op) error {
+func (cm *ConfigManager) resetConfig(c *gin.Context, checkChange bool, ops ...clientv3.Op) error {
 	txn := cm.client.Txn(c)
 	type initConf struct {
-		old       any
-		new       any
-		isChanged bool
+		old any
+		new any
 	}
 	configMap := map[string]*initConf{
 		cm.config.Discovery.GetConfigFileName():    {old: &cm.config.Discovery, new: new(config.Discovery)},
@@ -221,8 +220,8 @@ func (cm *ConfigManager) resetConfig(c *gin.Context, ops ...clientv3.Op) error {
 			log.ZError(c, "load config failed", err)
 			continue
 		}
-		v.isChanged = reflect.DeepEqual(v.old, v.new)
-		if !v.isChanged {
+		equal := reflect.DeepEqual(v.old, v.new)
+		if !checkChange || !equal {
 			changedKeys = append(changedKeys, k)
 		}
 	}
@@ -279,7 +278,7 @@ func (cm *ConfigManager) SetEnableConfigManager(c *gin.Context) {
 	if !(resp.Count > 0 && string(resp.Kvs[0].Value) == etcd.Enable) && req.Enable {
 		go func() {
 			time.Sleep(waitHttp) // wait for Restart http call return
-			err := cm.resetConfig(c, clientv3.OpPut(etcd.BuildKey(etcd.EnableConfigCenterKey), enableStr))
+			err := cm.resetConfig(c, false, clientv3.OpPut(etcd.BuildKey(etcd.EnableConfigCenterKey), enableStr))
 			if err != nil {
 				log.ZError(c, "resetConfig failed", err)
 			}
