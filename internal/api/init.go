@@ -43,9 +43,8 @@ func Start(ctx context.Context, index int, cfg *Config) error {
 
 	var client discovery.SvcDiscoveryRegistry
 
-	// Determine whether zk is passed according to whether it is a clustered deployment
-	client, err = kdisc.NewDiscoveryRegister(&cfg.Discovery, &cfg.Share, []string{
-		cfg.Share.RpcRegisterName.MessageGateway,
+	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, config.RuntimeEnv, []string{
+		config.Discovery.RpcService.MessageGateway,
 	})
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")

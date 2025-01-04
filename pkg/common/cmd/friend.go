@@ -59,7 +59,16 @@ func (a *FriendRpcCmd) Exec() error {
 func (a *FriendRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.relationConfig.Discovery, &a.relationConfig.RpcConfig.Prometheus, a.relationConfig.RpcConfig.RPC.ListenIP,
 		a.relationConfig.RpcConfig.RPC.RegisterIP, a.relationConfig.RpcConfig.RPC.AutoSetPorts, a.relationConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.relationConfig.Share.RpcRegisterName.Friend, &a.relationConfig.Share, a.relationConfig,
-		nil,
+		a.Index(), a.relationConfig.Discovery.RpcService.Friend, &a.relationConfig.NotificationConfig, a.relationConfig,
+		[]string{
+			a.relationConfig.RpcConfig.GetConfigFileName(),
+			a.relationConfig.RedisConfig.GetConfigFileName(),
+			a.relationConfig.MongodbConfig.GetConfigFileName(),
+			a.relationConfig.NotificationConfig.GetConfigFileName(),
+			a.relationConfig.Share.GetConfigFileName(),
+			a.relationConfig.WebhooksConfig.GetConfigFileName(),
+			a.relationConfig.LocalCacheConfig.GetConfigFileName(),
+			a.relationConfig.Discovery.GetConfigFileName(),
+		}, nil,
 		relation.Start)
 }
