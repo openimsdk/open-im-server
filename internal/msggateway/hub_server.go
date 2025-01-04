@@ -100,10 +100,6 @@ func NewServer(longConnServer LongConnServer, conf *Config, ready func(srv *Serv
 	return s
 }
 
-func (s *Server) OnlinePushMsg(context context.Context, req *msggateway.OnlinePushMsgReq) (*msggateway.OnlinePushMsgResp, error) {
-	panic("implement me")
-}
-
 func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUsersOnlineStatusReq) (*msggateway.GetUsersOnlineStatusResp, error) {
 	if !authverify.IsAppManagerUid(ctx, s.config.Share.IMAdminUserID) {
 		return nil, errs.ErrNoPermission.WrapMsg("only app manager")
@@ -135,11 +131,6 @@ func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUs
 		}
 	}
 	return &resp, nil
-}
-
-func (s *Server) OnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq) (*msggateway.OnlineBatchPushOneMsgResp, error) {
-	// todo implement
-	return nil, nil
 }
 
 func (s *Server) pushToUser(ctx context.Context, userID string, msgData *sdkws.MsgData) *msggateway.SingleMsgToUserResults {

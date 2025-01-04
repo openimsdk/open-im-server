@@ -997,6 +997,68 @@ func (m *MsgMgo) GetLastMessageSeqByTime(ctx context.Context, conversationID str
 	return seq, nil
 }
 
+func (m *MsgMgo) GetLastMessage(ctx context.Context, conversationID string) (*model.MsgInfoModel, error) {
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{
+				"doc_id": bson.M{
+					"$regex": fmt.Sprintf("^%s", conversationID),
+				},
+			},
+		},
+		{
+			"$match": bson.M{
+				"msgs.msg.status": bson.M{
+					"$lt": constant.MsgStatusHasDeleted,
+				},
+			},
+		},
+		{
+			"$sort": bson.M{
+				"_id": -1,
+			},
+		},
+		{
+			"$limit": 1,
+		},
+		{
+			"$project": bson.M{
+				"_id":    0,
+				"doc_id": 0,
+			},
+		},
+		{
+			"$unwind": "$msgs",
+		},
+		{
+			"$match": bson.M{
+				"msgs.msg.status": bson.M{
+					"$lt": constant.MsgStatusHasDeleted,
+				},
+			},
+		},
+		{
+			"$sort": bson.M{
+				"msgs.msg.seq": -1,
+			},
+		},
+		{
+			"$limit": 1,
+		},
+	}
+	type Result struct {
+		Msgs *model.MsgInfoModel `bson:"msgs"`
+	}
+	res, err := mongoutil.Aggregate[*Result](ctx, m.coll, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	if len(res) == 0 {
+		return nil, errs.Wrap(mongo.ErrNoDocuments)
+	}
+	return res[0].Msgs, nil
+}
+
 func (m *MsgMgo) onlyFindDocIndex(ctx context.Context, docID string, indexes []int64) ([]*model.MsgInfoModel, error) {
 	if len(indexes) == 0 {
 		return nil, nil
