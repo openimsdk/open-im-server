@@ -15,6 +15,7 @@
 package config
 
 import (
+	"github.com/openimsdk/tools/s3/aws"
 	"strings"
 	"time"
 
@@ -290,14 +291,7 @@ type Third struct {
 		Cos    Cos    `mapstructure:"cos"`
 		Oss    Oss    `mapstructure:"oss"`
 		Kodo   Kodo   `mapstructure:"kodo"`
-		Aws    struct {
-			Endpoint        string `mapstructure:"endpoint"`
-			Region          string `mapstructure:"region"`
-			Bucket          string `mapstructure:"bucket"`
-			AccessKeyID     string `mapstructure:"accessKeyID"`
-			AccessKeySecret string `mapstructure:"accessKeySecret"`
-			PublicRead      bool   `mapstructure:"publicRead"`
-		} `mapstructure:"aws"`
+		Aws    Aws    `mapstructure:"aws"`
 	} `mapstructure:"object"`
 }
 type Cos struct {
@@ -325,6 +319,15 @@ type Kodo struct {
 	AccessKeySecret string `mapstructure:"accessKeySecret"`
 	SessionToken    string `mapstructure:"sessionToken"`
 	PublicRead      bool   `mapstructure:"publicRead"`
+}
+
+type Aws struct {
+	Endpoint        string `mapstructure:"endpoint"`
+	Region          string `mapstructure:"region"`
+	Bucket          string `mapstructure:"bucket"`
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	SecretAccessKey string `mapstructure:"secretAccessKey"`
+	SessionToken    string `mapstructure:"sessionToken"`
 }
 
 type User struct {
@@ -567,6 +570,16 @@ func (o *Kodo) Build() *kodo.Config {
 	}
 }
 
+func (o *Aws) Build() *aws.Config {
+	return &aws.Config{
+		Region:          o.Region,
+		Bucket:          o.Bucket,
+		AccessKeyID:     o.AccessKeyID,
+		SecretAccessKey: o.SecretAccessKey,
+		SessionToken:    o.SessionToken,
+	}
+}
+
 func (l *CacheConfig) Failed() time.Duration {
 	return time.Second * time.Duration(l.FailedExpire)
 }
@@ -577,4 +590,116 @@ func (l *CacheConfig) Success() time.Duration {
 
 func (l *CacheConfig) Enable() bool {
 	return l.Topic != "" && l.SlotNum > 0 && l.SlotSize > 0
+}
+
+var (
+	DiscoveryConfigFilename          = "discovery.yml"
+	KafkaConfigFileName              = "kafka.yml"
+	LocalCacheConfigFileName         = "local-cache.yml"
+	LogConfigFileName                = "log.yml"
+	MinioConfigFileName              = "minio.yml"
+	MongodbConfigFileName            = "mongodb.yml"
+	OpenIMAPICfgFileName             = "openim-api.yml"
+	OpenIMCronTaskCfgFileName        = "openim-crontask.yml"
+	OpenIMMsgGatewayCfgFileName      = "openim-msggateway.yml"
+	OpenIMMsgTransferCfgFileName     = "openim-msgtransfer.yml"
+	OpenIMPushCfgFileName            = "openim-push.yml"
+	OpenIMRPCAuthCfgFileName         = "openim-rpc-auth.yml"
+	OpenIMRPCConversationCfgFileName = "openim-rpc-conversation.yml"
+	OpenIMRPCFriendCfgFileName       = "openim-rpc-friend.yml"
+	OpenIMRPCGroupCfgFileName        = "openim-rpc-group.yml"
+	OpenIMRPCMsgCfgFileName          = "openim-rpc-msg.yml"
+	OpenIMRPCThirdCfgFileName        = "openim-rpc-third.yml"
+	OpenIMRPCUserCfgFileName         = "openim-rpc-user.yml"
+	RedisConfigFileName              = "redis.yml"
+	ShareFileName                    = "share.yml"
+	WebhooksConfigFileName           = "webhooks.yml"
+)
+
+func (d *Discovery) GetConfigFileName() string {
+	return DiscoveryConfigFilename
+}
+
+func (k *Kafka) GetConfigFileName() string {
+	return KafkaConfigFileName
+}
+
+func (lc *LocalCache) GetConfigFileName() string {
+	return LocalCacheConfigFileName
+}
+
+func (l *Log) GetConfigFileName() string {
+	return LogConfigFileName
+}
+
+func (m *Minio) GetConfigFileName() string {
+	return MinioConfigFileName
+}
+
+func (m *Mongo) GetConfigFileName() string {
+	return MongodbConfigFileName
+}
+
+func (n *Notification) GetConfigFileName() string {
+	return NotificationFileName
+}
+
+func (a *API) GetConfigFileName() string {
+	return OpenIMAPICfgFileName
+}
+
+func (ct *CronTask) GetConfigFileName() string {
+	return OpenIMCronTaskCfgFileName
+}
+
+func (mg *MsgGateway) GetConfigFileName() string {
+	return OpenIMMsgGatewayCfgFileName
+}
+
+func (mt *MsgTransfer) GetConfigFileName() string {
+	return OpenIMMsgTransferCfgFileName
+}
+
+func (p *Push) GetConfigFileName() string {
+	return OpenIMPushCfgFileName
+}
+
+func (a *Auth) GetConfigFileName() string {
+	return OpenIMRPCAuthCfgFileName
+}
+
+func (c *Conversation) GetConfigFileName() string {
+	return OpenIMRPCConversationCfgFileName
+}
+
+func (f *Friend) GetConfigFileName() string {
+	return OpenIMRPCFriendCfgFileName
+}
+
+func (g *Group) GetConfigFileName() string {
+	return OpenIMRPCGroupCfgFileName
+}
+
+func (m *Msg) GetConfigFileName() string {
+	return OpenIMRPCMsgCfgFileName
+}
+
+func (t *Third) GetConfigFileName() string {
+	return OpenIMRPCThirdCfgFileName
+}
+
+func (u *User) GetConfigFileName() string {
+	return OpenIMRPCUserCfgFileName
+}
+
+func (r *Redis) GetConfigFileName() string {
+	return RedisConfigFileName
+}
+
+func (s *Share) GetConfigFileName() string {
+	return ShareFileName
+}
+
+func (w *Webhooks) GetConfigFileName() string {
+	return WebhooksConfigFileName
 }
