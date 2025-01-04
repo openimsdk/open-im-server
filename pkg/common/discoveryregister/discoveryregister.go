@@ -25,7 +25,15 @@ import (
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
-func NewDiscoveryRegister(discovery *config.Discovery, share *config.Share, watchNames []string) (discovery.SvcDiscoveryRegistry, error) {
+func NewDiscoveryRegister(discovery *config.Discovery, runtimeEnv string, watchNames []string) (discovery.SvcDiscoveryRegistry, error) {
+	if runtimeEnv == config.KUBERNETES {
+		return kubernetes.NewKubernetesConnManager(discovery.Kubernetes.Namespace,
+			grpc.WithDefaultCallOptions(
+				grpc.MaxCallSendMsgSize(1024*1024*20),
+			),
+		)
+	}
+
 	switch discovery.Enable {
 	case "k8s":
 		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)

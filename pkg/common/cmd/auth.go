@@ -60,5 +60,8 @@ func (a *AuthRpcCmd) runE() error {
 		[]string{
 			a.authConfig.Share.RpcRegisterName.MessageGateway,
 		},
+		[]string{
+			a.authConfig.Discovery.RpcService.MessageGateway,
+		},
 		auth.Start)
 }
