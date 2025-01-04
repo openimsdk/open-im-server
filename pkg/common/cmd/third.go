@@ -70,6 +70,6 @@ func (a *ThirdRpcCmd) runE() error {
 			a.thirdConfig.MinioConfig.GetConfigFileName(),
 			a.thirdConfig.LocalCacheConfig.GetConfigFileName(),
 			a.thirdConfig.Discovery.GetConfigFileName(),
-		},
+		}, nil,
 		third.Start)
 }

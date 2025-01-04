@@ -70,6 +70,6 @@ func (a *FriendRpcCmd) runE() error {
 			a.relationConfig.WebhooksConfig.GetConfigFileName(),
 			a.relationConfig.LocalCacheConfig.GetConfigFileName(),
 			a.relationConfig.Discovery.GetConfigFileName(),
-		},
+		}, nil,
 		relation.Start)
 }

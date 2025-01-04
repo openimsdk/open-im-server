@@ -71,6 +71,6 @@ func (a *GroupRpcCmd) runE() error {
 			a.groupConfig.WebhooksConfig.GetConfigFileName(),
 			a.groupConfig.LocalCacheConfig.GetConfigFileName(),
 			a.groupConfig.Discovery.GetConfigFileName(),
-		},
+		}, nil,
 		group.Start, versionctx.EnableVersionCtx())
 }

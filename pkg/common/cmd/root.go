@@ -93,7 +93,7 @@ func (r *RootCmd) initEtcd() error {
 		return err
 	}
 	if disConfig.Enable == config.ETCD {
-		discov, _ := kdisc.NewDiscoveryRegister(&disConfig, env)
+		discov, _ := kdisc.NewDiscoveryRegister(&disConfig, env, nil)
 		r.etcdClient = discov.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 	}
 	return nil

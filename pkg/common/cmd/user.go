@@ -72,6 +72,6 @@ func (a *UserRpcCmd) runE() error {
 			a.userConfig.WebhooksConfig.GetConfigFileName(),
 			a.userConfig.LocalCacheConfig.GetConfigFileName(),
 			a.userConfig.Discovery.GetConfigFileName(),
-		},
+		}, nil,
 		user.Start)
 }
