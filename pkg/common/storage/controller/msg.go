@@ -97,6 +97,8 @@ type CommonMsgDatabase interface {
 	DeleteDoc(ctx context.Context, docID string) error
 
 	GetLastMessageSeqByTime(ctx context.Context, conversationID string, time int64) (int64, error)
+
+	GetLastMessage(ctx context.Context, conversationIDS []string, userID string) (map[string]*sdkws.MsgData, error)
 }
 
 func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUser cache.SeqUser, seqConversation cache.SeqConversationCache, kafkaConf *config.Kafka) (CommonMsgDatabase, error) {
@@ -811,8 +813,29 @@ func (db *commonMsgDatabase) GetMessageBySeqs(ctx context.Context, conversationI
 		if v, ok := seqMsgs[seq]; ok {
 			res = append(res, convert.MsgDB2Pb(v.Msg))
 		} else {
-			res = append(res, &sdkws.MsgData{Seq: seq})
+			res = append(res, &sdkws.MsgData{Seq: seq, Status: constant.MsgStatusHasDeleted})
 		}
+	}
+	return res, nil
+}
+
+func (db *commonMsgDatabase) GetLastMessage(ctx context.Context, conversationIDs []string, userID string) (map[string]*sdkws.MsgData, error) {
+	res := make(map[string]*sdkws.MsgData)
+	for _, conversationID := range conversationIDs {
+		if _, ok := res[conversationID]; ok {
+			continue
+		}
+		msg, err := db.msgDocDatabase.GetLastMessage(ctx, conversationID)
+		if err != nil {
+			if errs.Unwrap(err) == mongo.ErrNoDocuments {
+				continue
+			}
+			return nil, err
+		}
+		tmp := []*model.MsgInfoModel{msg}
+		db.handlerDeleteAndRevoked(ctx, userID, tmp)
+		db.handlerQuote(ctx, userID, conversationID, tmp)
+		res[conversationID] = convert.MsgDB2Pb(msg.Msg)
 	}
 	return res, nil
 }

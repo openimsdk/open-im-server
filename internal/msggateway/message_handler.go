@@ -108,6 +108,7 @@ type MessageHandler interface {
 	GetSeqMessage(ctx context.Context, data *Req) ([]byte, error)
 	UserLogout(ctx context.Context, data *Req) ([]byte, error)
 	SetUserDeviceBackground(ctx context.Context, data *Req) ([]byte, bool, error)
+	GetLastMessage(ctx context.Context, data *Req) ([]byte, error)
 }
 
 var _ MessageHandler = (*GrpcHandler)(nil)
@@ -265,4 +266,16 @@ func (g *GrpcHandler) SetUserDeviceBackground(ctx context.Context, data *Req) ([
 		return nil, false, errs.WrapMsg(err, "validation failed", "action", "validate", "dataType", "SetAppBackgroundStatusReq")
 	}
 	return nil, req.IsBackground, nil
+}
+
+func (g *GrpcHandler) GetLastMessage(ctx context.Context, data *Req) ([]byte, error) {
+	var req msg.GetLastMessageReq
+	if err := proto.Unmarshal(data.Data, &req); err != nil {
+		return nil, err
+	}
+	resp, err := g.msgClient.GetLastMessage(ctx, &req)
+	if err != nil {
+		return nil, err
+	}
+	return proto.Marshal(resp)
 }
