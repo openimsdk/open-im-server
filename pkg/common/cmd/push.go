@@ -72,5 +72,8 @@ func (a *PushRpcCmd) runE() error {
 			a.pushConfig.LocalCacheConfig.GetConfigFileName(),
 			a.pushConfig.Discovery.GetConfigFileName(),
 		},
+		[]string{
+			a.pushConfig.Discovery.RpcService.MessageGateway,
+		},
 		push.Start)
 }

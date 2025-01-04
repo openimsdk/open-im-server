@@ -16,8 +16,9 @@ package msggateway
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"sync/atomic"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -63,6 +64,9 @@ func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 			conf.MsgGateway.GetConfigFileName(),
 			conf.WebhooksConfig.GetConfigFileName(),
 			conf.RedisConfig.GetConfigFileName(),
+		},
+		[]string{
+			conf.Discovery.RpcService.MessageGateway,
 		},
 		s.InitServer,
 	)

@@ -14,11 +14,6 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
-const (
-	ConfigKeyPrefix = "/open-im/config/"
-	RestartKey      = "restart"
-)
-
 var (
 	ShutDowns []func() error
 )

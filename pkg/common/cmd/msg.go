@@ -72,6 +72,6 @@ func (a *MsgRpcCmd) runE() error {
 			a.msgConfig.WebhooksConfig.GetConfigFileName(),
 			a.msgConfig.LocalCacheConfig.GetConfigFileName(),
 			a.msgConfig.Discovery.GetConfigFileName(),
-		},
+		}, nil,
 		msg.Start)
 }

@@ -68,6 +68,6 @@ func (a *ConversationRpcCmd) runE() error {
 			a.conversationConfig.Share.GetConfigFileName(),
 			a.conversationConfig.LocalCacheConfig.GetConfigFileName(),
 			a.conversationConfig.Discovery.GetConfigFileName(),
-		},
+		}, nil,
 		conversation.Start)
 }

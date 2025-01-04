@@ -14,3 +14,11 @@ type SetConfigReq struct {
 	ConfigName string `json:"configName"`
 	Data       string `json:"data"`
 }
+
+type SetEnableConfigManagerReq struct {
+	Enable bool `json:"enable"`
+}
+
+type GetEnableConfigManagerResp struct {
+	Enable bool `json:"enable"`
+}
