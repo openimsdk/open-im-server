@@ -148,3 +148,26 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Verify multi-platform support
+        run: |
+          for dir in build/images/*/; do
+              IMAGE_NAME=$(basename "$dir" | tr '[:upper:]' '[:lower:]')
+              for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n'); do
+                  manifest=$(docker manifest inspect "${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$tag" || echo "error")
+                  if [[ "$manifest" == "error" ]]; then
+                      echo "Manifest not found for $IMAGE_NAME:$tag"
+                      exit 1
+                  fi
+                  amd64_found=$(echo "$manifest" | jq '.manifests[] | select(.platform.architecture == "amd64")')
+                  arm64_found=$(echo "$manifest" | jq '.manifests[] | select(.platform.architecture == "arm64")')
+                  if [[ -z "$amd64_found" ]]; then
+                      echo "Multi-platform support check failed for $IMAGE_NAME:$tag - missing amd64"
+                      exit 1
+                  fi
+                  if [[ -z "$arm64_found" ]]; then
+                      echo "Multi-platform support check failed for $IMAGE_NAME:$tag - missing arm64"
+                      exit 1
+                  fi
+              done
+          done
