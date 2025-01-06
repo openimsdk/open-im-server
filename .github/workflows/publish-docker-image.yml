@@ -151,22 +151,22 @@ jobs:
 
       - name: Verify multi-platform support
         run: |
-          for dir in build/images/*/; do
-              IMAGE_NAME=$(basename "$dir" | tr '[:upper:]' '[:lower:]')
+          images=("openim/openim-server" "ghcr.io/openimsdk/openim-server" "registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server")
+          for image in "${images[@]}"; do
               for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n'); do
-                  manifest=$(docker manifest inspect "${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$tag" || echo "error")
+                  manifest=$(docker manifest inspect "$image:$tag" || echo "error")
                   if [[ "$manifest" == "error" ]]; then
-                      echo "Manifest not found for $IMAGE_NAME:$tag"
+                      echo "Manifest not found for $image:$tag"
                       exit 1
                   fi
                   amd64_found=$(echo "$manifest" | jq '.manifests[] | select(.platform.architecture == "amd64")')
                   arm64_found=$(echo "$manifest" | jq '.manifests[] | select(.platform.architecture == "arm64")')
                   if [[ -z "$amd64_found" ]]; then
-                      echo "Multi-platform support check failed for $IMAGE_NAME:$tag - missing amd64"
+                      echo "Multi-platform support check failed for $image:$tag - missing amd64"
                       exit 1
                   fi
                   if [[ -z "$arm64_found" ]]; then
-                      echo "Multi-platform support check failed for $IMAGE_NAME:$tag - missing arm64"
+                      echo "Multi-platform support check failed for $image:$tag - missing arm64"
                       exit 1
                   fi
               done
