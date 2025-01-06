@@ -124,7 +124,7 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 		return nil, err
 	}
 	if user.AppMangerLevel >= constant.AppNotificationAdmin {
-		return nil, errs.New("app account can`t get token").Wrap()
+		return nil, errs.ErrArgs.WrapMsg("app account can`t get token")
 	}
 	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(req.PlatformID))
 	if err != nil {

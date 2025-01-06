@@ -260,7 +260,7 @@ func (cm *ConfigManager) restart(c *gin.Context) {
 
 func (cm *ConfigManager) SetEnableConfigManager(c *gin.Context) {
 	if cm.config.Discovery.Enable != config.ETCD {
-		apiresp.GinError(c, errs.New("only etcd support set config").Wrap())
+		apiresp.GinError(c, errs.New("only etcd support config manager").Wrap())
 		return
 	}
 	var req apistruct.SetEnableConfigManagerReq
