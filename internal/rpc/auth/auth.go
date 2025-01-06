@@ -17,6 +17,7 @@ package auth
 import (
 	"context"
 	"errors"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -118,8 +119,12 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 	if authverify.IsManagerUserID(req.UserID, s.config.Share.IMAdminUserID) {
 		return nil, errs.ErrNoPermission.WrapMsg("don't get Admin token")
 	}
-	if err := s.userClient.CheckUser(ctx, []string{req.UserID}); err != nil {
+	user, err := s.userClient.GetUserInfo(ctx, req.UserID)
+	if err != nil {
 		return nil, err
+	}
+	if user.AppMangerLevel >= constant.AppNotificationAdmin {
+		return nil, errs.New("app account can`t get token").Wrap()
 	}
 	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(req.PlatformID))
 	if err != nil {
