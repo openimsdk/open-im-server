@@ -17,7 +17,6 @@ package user
 import (
 	"context"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"math/rand"
 	"strings"
 	"sync"
@@ -32,6 +31,7 @@ import (
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"github.com/openimsdk/protocol/group"
 	friendpb "github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/tools/db/redisutil"
@@ -480,7 +480,9 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
-
+	if req.AppMangerLevel < constant.AppNotificationAdmin {
+		return nil, errs.ErrArgs.WithDetail("app level not supported")
+	}
 	if req.UserID == "" {
 		for i := 0; i < 20; i++ {
 			userId := s.genUserID()
@@ -506,16 +508,17 @@ func (s *userServer) AddNotificationAccount(ctx context.Context, req *pbuser.Add
 		Nickname:       req.NickName,
 		FaceURL:        req.FaceURL,
 		CreateTime:     time.Now(),
-		AppMangerLevel: constant.AppNotificationAdmin,
+		AppMangerLevel: req.AppMangerLevel,
 	}
 	if err := s.db.Create(ctx, []*tablerelation.User{user}); err != nil {
 		return nil, err
 	}
 
 	return &pbuser.AddNotificationAccountResp{
-		UserID:   req.UserID,
-		NickName: req.NickName,
-		FaceURL:  req.FaceURL,
+		UserID:         req.UserID,
+		NickName:       req.NickName,
+		FaceURL:        req.FaceURL,
+		AppMangerLevel: req.AppMangerLevel,
 	}, nil
 }
 
@@ -595,8 +598,13 @@ func (s *userServer) GetNotificationAccount(ctx context.Context, req *pbuser.Get
 	if err != nil {
 		return nil, servererrs.ErrUserIDNotFound.Wrap()
 	}
-	if user.AppMangerLevel == constant.AppAdmin || user.AppMangerLevel == constant.AppNotificationAdmin {
-		return &pbuser.GetNotificationAccountResp{}, nil
+	if user.AppMangerLevel == constant.AppAdmin || user.AppMangerLevel >= constant.AppNotificationAdmin {
+		return &pbuser.GetNotificationAccountResp{Account: &pbuser.NotificationAccountInfo{
+			UserID:         user.UserID,
+			FaceURL:        user.FaceURL,
+			NickName:       user.Nickname,
+			AppMangerLevel: user.AppMangerLevel,
+		}}, nil
 	}
 
 	return nil, errs.ErrNoPermission.WrapMsg("notification messages cannot be sent for this ID")
@@ -621,11 +629,12 @@ func (s *userServer) userModelToResp(users []*tablerelation.User, pagination pag
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {
-		if v.AppMangerLevel == constant.AppNotificationAdmin && !datautil.Contain(v.UserID, s.config.Share.IMAdminUserID...) {
+		if v.AppMangerLevel >= constant.AppNotificationAdmin && !datautil.Contain(v.UserID, s.config.Share.IMAdminUserID...) {
 			temp := &pbuser.NotificationAccountInfo{
-				UserID:   v.UserID,
-				FaceURL:  v.FaceURL,
-				NickName: v.Nickname,
+				UserID:         v.UserID,
+				FaceURL:        v.FaceURL,
+				NickName:       v.Nickname,
+				AppMangerLevel: v.AppMangerLevel,
 			}
 			accounts = append(accounts, temp)
 			total += 1
