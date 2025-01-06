@@ -19,22 +19,29 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
+const (
+	// wait for Restart http call return
+	waitHttp = time.Millisecond * 200
+)
+
 type ConfigManager struct {
 	imAdminUserID []string
 	config        *config.AllConfig
 	client        *clientv3.Client
-	configPath    string
-	runtimeEnv    string
+
+	configPath string
+	runtimeEnv string
 }
 
 func NewConfigManager(IMAdminUserID []string, cfg *config.AllConfig, client *clientv3.Client, configPath string, runtimeEnv string) *ConfigManager {
-	return &ConfigManager{
+	cm := &ConfigManager{
 		imAdminUserID: IMAdminUserID,
 		config:        cfg,
 		client:        client,
 		configPath:    configPath,
 		runtimeEnv:    runtimeEnv,
 	}
+	return cm
 }
 
 func (cm *ConfigManager) CheckAdmin(c *gin.Context) {
@@ -85,49 +92,49 @@ func (cm *ConfigManager) SetConfig(c *gin.Context) {
 	var err error
 	switch req.ConfigName {
 	case cm.config.Discovery.GetConfigFileName():
-		err = compareAndSave[config.Discovery](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Discovery](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Kafka.GetConfigFileName():
-		err = compareAndSave[config.Kafka](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Kafka](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.LocalCache.GetConfigFileName():
-		err = compareAndSave[config.LocalCache](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.LocalCache](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Log.GetConfigFileName():
-		err = compareAndSave[config.Log](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Log](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Minio.GetConfigFileName():
-		err = compareAndSave[config.Minio](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Minio](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Mongo.GetConfigFileName():
-		err = compareAndSave[config.Mongo](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Mongo](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Notification.GetConfigFileName():
-		err = compareAndSave[config.Notification](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Notification](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.API.GetConfigFileName():
-		err = compareAndSave[config.API](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.API](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.CronTask.GetConfigFileName():
-		err = compareAndSave[config.CronTask](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.CronTask](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.MsgGateway.GetConfigFileName():
-		err = compareAndSave[config.MsgGateway](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.MsgGateway](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.MsgTransfer.GetConfigFileName():
-		err = compareAndSave[config.MsgTransfer](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.MsgTransfer](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Push.GetConfigFileName():
-		err = compareAndSave[config.Push](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Push](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Auth.GetConfigFileName():
-		err = compareAndSave[config.Auth](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Auth](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Conversation.GetConfigFileName():
-		err = compareAndSave[config.Conversation](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Conversation](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Friend.GetConfigFileName():
-		err = compareAndSave[config.Friend](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Friend](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Group.GetConfigFileName():
-		err = compareAndSave[config.Group](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Group](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Msg.GetConfigFileName():
-		err = compareAndSave[config.Msg](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Msg](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Third.GetConfigFileName():
-		err = compareAndSave[config.Third](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Third](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.User.GetConfigFileName():
-		err = compareAndSave[config.User](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.User](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Redis.GetConfigFileName():
-		err = compareAndSave[config.Redis](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Redis](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Share.GetConfigFileName():
-		err = compareAndSave[config.Share](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Share](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	case cm.config.Webhooks.GetConfigFileName():
-		err = compareAndSave[config.Webhooks](c, cm.config.Name2Config(req.ConfigName), &req, cm.client)
+		err = compareAndSave[config.Webhooks](c, cm.config.Name2Config(req.ConfigName), &req, cm)
 	default:
 		apiresp.GinError(c, errs.ErrArgs.Wrap())
 		return
@@ -139,7 +146,7 @@ func (cm *ConfigManager) SetConfig(c *gin.Context) {
 	apiresp.GinSuccess(c, nil)
 }
 
-func compareAndSave[T any](c *gin.Context, old any, req *apistruct.SetConfigReq, client *clientv3.Client) error {
+func compareAndSave[T any](c *gin.Context, old any, req *apistruct.SetConfigReq, cm *ConfigManager) error {
 	conf := new(T)
 	err := json.Unmarshal([]byte(req.Data), &conf)
 	if err != nil {
@@ -153,7 +160,7 @@ func compareAndSave[T any](c *gin.Context, old any, req *apistruct.SetConfigReq,
 	if err != nil {
 		return errs.ErrArgs.WithDetail(err.Error()).Wrap()
 	}
-	_, err = client.Put(c, etcd.BuildKey(req.ConfigName), string(data))
+	_, err = cm.client.Put(c, etcd.BuildKey(req.ConfigName), string(data))
 	if err != nil {
 		return errs.WrapMsg(err, "save to etcd failed")
 	}
@@ -161,16 +168,19 @@ func compareAndSave[T any](c *gin.Context, old any, req *apistruct.SetConfigReq,
 }
 
 func (cm *ConfigManager) ResetConfig(c *gin.Context) {
-	go cm.resetConfig(c)
+	go func() {
+		if err := cm.resetConfig(c, true); err != nil {
+			log.ZError(c, "reset config err", err)
+		}
+	}()
 	apiresp.GinSuccess(c, nil)
 }
 
-func (cm *ConfigManager) resetConfig(c *gin.Context) {
+func (cm *ConfigManager) resetConfig(c *gin.Context, checkChange bool, ops ...clientv3.Op) error {
 	txn := cm.client.Txn(c)
 	type initConf struct {
-		old       any
-		new       any
-		isChanged bool
+		old any
+		new any
 	}
 	configMap := map[string]*initConf{
 		cm.config.Discovery.GetConfigFileName():    {old: &cm.config.Discovery, new: new(config.Discovery)},
@@ -210,13 +220,12 @@ func (cm *ConfigManager) resetConfig(c *gin.Context) {
 			log.ZError(c, "load config failed", err)
 			continue
 		}
-		v.isChanged = reflect.DeepEqual(v.old, v.new)
-		if !v.isChanged {
+		equal := reflect.DeepEqual(v.old, v.new)
+		if !checkChange || !equal {
 			changedKeys = append(changedKeys, k)
 		}
 	}
 
-	ops := make([]clientv3.Op, 0)
 	for _, k := range changedKeys {
 		data, err := json.Marshal(configMap[k].new)
 		if err != nil {
@@ -229,10 +238,10 @@ func (cm *ConfigManager) resetConfig(c *gin.Context) {
 		txn.Then(ops...)
 		_, err := txn.Commit()
 		if err != nil {
-			log.ZError(c, "commit etcd txn failed", err)
-			return
+			return errs.WrapMsg(err, "commit etcd txn failed")
 		}
 	}
+	return nil
 }
 
 func (cm *ConfigManager) Restart(c *gin.Context) {
@@ -241,10 +250,59 @@ func (cm *ConfigManager) Restart(c *gin.Context) {
 }
 
 func (cm *ConfigManager) restart(c *gin.Context) {
-	time.Sleep(time.Millisecond * 200) // wait for Restart http call return
+	time.Sleep(waitHttp) // wait for Restart http call return
 	t := time.Now().Unix()
 	_, err := cm.client.Put(c, etcd.BuildKey(etcd.RestartKey), strconv.Itoa(int(t)))
 	if err != nil {
 		log.ZError(c, "restart etcd put key failed", err)
 	}
+}
+
+func (cm *ConfigManager) SetEnableConfigManager(c *gin.Context) {
+	var req apistruct.SetEnableConfigManagerReq
+	if err := c.BindJSON(&req); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	var enableStr string
+	if req.Enable {
+		enableStr = etcd.Enable
+	} else {
+		enableStr = etcd.Disable
+	}
+	resp, err := cm.client.Get(c, etcd.BuildKey(etcd.EnableConfigCenterKey))
+	if err != nil {
+		apiresp.GinError(c, errs.WrapMsg(err, "getEnableConfigManager failed"))
+		return
+	}
+	if !(resp.Count > 0 && string(resp.Kvs[0].Value) == etcd.Enable) && req.Enable {
+		go func() {
+			time.Sleep(waitHttp) // wait for Restart http call return
+			err := cm.resetConfig(c, false, clientv3.OpPut(etcd.BuildKey(etcd.EnableConfigCenterKey), enableStr))
+			if err != nil {
+				log.ZError(c, "resetConfig failed", err)
+			}
+		}()
+	} else {
+		_, err = cm.client.Put(c, etcd.BuildKey(etcd.EnableConfigCenterKey), enableStr)
+		if err != nil {
+			apiresp.GinError(c, errs.WrapMsg(err, "setEnableConfigManager failed"))
+			return
+		}
+	}
+
+	apiresp.GinSuccess(c, nil)
+}
+
+func (cm *ConfigManager) GetEnableConfigManager(c *gin.Context) {
+	resp, err := cm.client.Get(c, etcd.BuildKey(etcd.EnableConfigCenterKey))
+	if err != nil {
+		apiresp.GinError(c, errs.WrapMsg(err, "getEnableConfigManager failed"))
+		return
+	}
+	var enable bool
+	if resp.Count > 0 && string(resp.Kvs[0].Value) == etcd.Enable {
+		enable = true
+	}
+	apiresp.GinSuccess(c, &apistruct.GetEnableConfigManagerResp{Enable: enable})
 }
