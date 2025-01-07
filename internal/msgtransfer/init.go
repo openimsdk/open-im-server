@@ -87,7 +87,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	client, err := discRegister.NewDiscoveryRegister(&config.Discovery, runTimeEnv)
+	client, err := discRegister.NewDiscoveryRegister(&config.Discovery, runTimeEnv, nil)
 	if err != nil {
 		return err
 	}

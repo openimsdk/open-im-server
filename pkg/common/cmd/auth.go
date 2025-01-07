@@ -64,5 +64,8 @@ func (a *AuthRpcCmd) runE() error {
 			a.authConfig.RedisConfig.GetConfigFileName(),
 			a.authConfig.Discovery.GetConfigFileName(),
 		},
+		[]string{
+			a.authConfig.Discovery.RpcService.MessageGateway,
+		},
 		auth.Start)
 }

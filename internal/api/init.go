@@ -58,7 +58,9 @@ func Start(ctx context.Context, index int, config *Config) error {
 
 	config.RuntimeEnv = runtimeenv.PrintRuntimeEnvironment()
 
-	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, config.RuntimeEnv)
+	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, config.RuntimeEnv, []string{
+		config.Discovery.RpcService.MessageGateway,
+	})
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
