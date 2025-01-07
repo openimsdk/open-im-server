@@ -2,6 +2,15 @@ package api
 
 import (
 	"context"
+	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	pbAuth "github.com/openimsdk/protocol/auth"
+	"github.com/openimsdk/protocol/conversation"
+	"github.com/openimsdk/protocol/group"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/relation"
+	"github.com/openimsdk/protocol/third"
+	"github.com/openimsdk/protocol/user"
 	"net/http"
 	"strings"
 
@@ -22,7 +31,6 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 const (
@@ -47,8 +55,10 @@ func prommetricsGin() gin.HandlerFunc {
 	}
 }
 
-func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cfg *Config) (*gin.Engine, error) {
-	authConn, err := client.GetConn(ctx, cfg.Discovery.RpcService.Auth)
+func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, config *Config) (*gin.Engine, error) {
+	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
+	authConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Auth)
 	if err != nil {
 		return nil, err
 	}
