@@ -115,7 +115,6 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern=v{{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
             type=semver,pattern=release-{{raw}}
             type=sha
             type=raw,value=${{ github.event.inputs.tag }}
