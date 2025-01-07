@@ -270,8 +270,8 @@ func (o *OnlineCache) GetUsersOnline(ctx context.Context, userIDs []string) ([]s
 		}
 	}
 
-	log.ZInfo(ctx, "get users online", "online users length", len(userIDs), "offline users length", len(offlineUserIDs), "cost", time.Since(t))
-	return userIDs, offlineUserIDs, nil
+	log.ZInfo(ctx, "get users online", "online users length", len(onlineUserIDs), "offline users length", len(offlineUserIDs), "cost", time.Since(t))
+	return onlineUserIDs, offlineUserIDs, nil
 }
 
 func (o *OnlineCache) setUserOnline(userID string, platformIDs []int32) {
