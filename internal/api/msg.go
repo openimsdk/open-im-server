@@ -251,7 +251,8 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 		Key              string `json:"key"`
 		Data             string `json:"data"`
 		SendUserID       string `json:"sendUserID" binding:"required"`
-		RecvUserID       string `json:"recvUserID" binding:"required"`
+		RecvUserID       string `json:"recvUserID"`
+		RecvGroupID      string `json:"recvGroupID"`
 		SendMsg          bool   `json:"sendMsg"`
 		ReliabilityLevel *int   `json:"reliabilityLevel"`
 		UnreadCount      bool   `json:"unreadCount"`
@@ -259,6 +260,20 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 	if err := c.BindJSON(&req); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
+	}
+	if req.RecvUserID == "" && req.RecvGroupID == "" {
+		apiresp.GinError(c, errs.ErrArgs.WrapMsg("recvUserID and recvGroupID cannot be empty at the same time"))
+		return
+	}
+	if req.RecvUserID != "" && req.RecvGroupID != "" {
+		apiresp.GinError(c, errs.ErrArgs.WrapMsg("recvUserID and recvGroupID cannot be set at the same time"))
+		return
+	}
+	var sessionType int32
+	if req.RecvUserID != "" {
+		sessionType = constant.SingleChatType
+	} else {
+		sessionType = constant.ReadGroupChatType
 	}
 	if req.ReliabilityLevel == nil {
 		req.ReliabilityLevel = datautil.ToPtr(1)
@@ -269,8 +284,9 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 	}
 	sendMsgReq := msg.SendMsgReq{
 		MsgData: &sdkws.MsgData{
-			SendID: req.SendUserID,
-			RecvID: req.RecvUserID,
+			SendID:  req.SendUserID,
+			RecvID:  req.RecvUserID,
+			GroupID: req.RecvGroupID,
 			Content: []byte(jsonutil.StructToJsonString(&sdkws.NotificationElem{
 				Detail: jsonutil.StructToJsonString(&struct {
 					Key  string `json:"key"`
@@ -279,7 +295,7 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 			})),
 			MsgFrom:     constant.SysMsgType,
 			ContentType: constant.BusinessNotification,
-			SessionType: constant.SingleChatType,
+			SessionType: sessionType,
 			CreateTime:  timeutil.GetCurrentTimestampByMill(),
 			ClientMsgID: idutil.GetMsgIDByMD5(mcontext.GetOpUserID(c)),
 			Options: config.GetOptionsByNotification(config.NotificationConfig{
