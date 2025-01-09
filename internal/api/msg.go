@@ -248,16 +248,21 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 
 func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 	req := struct {
-		Key        string `json:"key"`
-		Data       string `json:"data"`
-		SendUserID string `json:"sendUserID" binding:"required"`
-		RecvUserID string `json:"recvUserID" binding:"required"`
+		Key              string `json:"key"`
+		Data             string `json:"data"`
+		SendUserID       string `json:"sendUserID" binding:"required"`
+		RecvUserID       string `json:"recvUserID" binding:"required"`
+		SendMsg          bool   `json:"sendMsg"`
+		ReliabilityLevel *int   `json:"reliabilityLevel"`
+		UnreadCount      bool   `json:"unreadCount"`
 	}{}
 	if err := c.BindJSON(&req); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-
+	if req.ReliabilityLevel == nil {
+		req.ReliabilityLevel = datautil.ToPtr(1)
+	}
 	if !authverify.IsAppManagerUid(c, m.imAdminUserID) {
 		apiresp.GinError(c, errs.ErrNoPermission.WrapMsg("only app manager can send message"))
 		return
@@ -278,9 +283,9 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 			CreateTime:  timeutil.GetCurrentTimestampByMill(),
 			ClientMsgID: idutil.GetMsgIDByMD5(mcontext.GetOpUserID(c)),
 			Options: config.GetOptionsByNotification(config.NotificationConfig{
-				IsSendMsg:        false,
-				ReliabilityLevel: 1,
-				UnreadCount:      false,
+				IsSendMsg:        req.SendMsg,
+				ReliabilityLevel: *req.ReliabilityLevel,
+				UnreadCount:      req.UnreadCount,
 			}),
 		},
 	}
