@@ -255,7 +255,6 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 		RecvGroupID      string `json:"recvGroupID"`
 		SendMsg          bool   `json:"sendMsg"`
 		ReliabilityLevel *int   `json:"reliabilityLevel"`
-		UnreadCount      bool   `json:"unreadCount"`
 	}{}
 	if err := c.BindJSON(&req); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
@@ -301,7 +300,7 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 			Options: config.GetOptionsByNotification(config.NotificationConfig{
 				IsSendMsg:        req.SendMsg,
 				ReliabilityLevel: *req.ReliabilityLevel,
-				UnreadCount:      req.UnreadCount,
+				UnreadCount:      false,
 			}),
 		},
 	}
