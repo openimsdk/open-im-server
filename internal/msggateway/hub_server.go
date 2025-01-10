@@ -16,8 +16,9 @@ package msggateway
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"sync/atomic"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -57,6 +58,9 @@ func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 		conf.Share.RpcRegisterName.MessageGateway,
 		&conf.Share,
 		conf,
+		[]string{
+			conf.Share.RpcRegisterName.MessageGateway,
+		},
 		s.InitServer,
 	)
 }

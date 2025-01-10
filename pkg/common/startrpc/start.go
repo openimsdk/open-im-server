@@ -17,9 +17,6 @@ package startrpc
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/grpc/status"
 	"net"
 	"net/http"
 	"os"
@@ -27,6 +24,10 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/utils/datautil"
+	"google.golang.org/grpc/status"
 
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -41,8 +42,10 @@ import (
 
 // Start rpc server.
 func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusConfig *config.Prometheus, listenIP,
-	registerIP string, rpcPorts []int, index int, rpcRegisterName string, share *config.Share, config T, rpcFn func(ctx context.Context,
-	config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
+	registerIP string, rpcPorts []int, index int, rpcRegisterName string, share *config.Share, config T,
+	watchServiceNames []string,
+	rpcFn func(ctx context.Context,
+		config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 
 	rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
 	if err != nil {
@@ -61,7 +64,7 @@ func Start[T any](ctx context.Context, discovery *config.Discovery, prometheusCo
 		return errs.WrapMsg(err, "listen err", "rpcTcpAddr", rpcTcpAddr)
 	}
 	defer listener.Close()
-	client, err := kdisc.NewDiscoveryRegister(discovery, share)
+	client, err := kdisc.NewDiscoveryRegister(discovery, share, watchServiceNames)
 	if err != nil {
 		return err
 	}
