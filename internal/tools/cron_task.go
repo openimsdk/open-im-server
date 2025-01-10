@@ -16,6 +16,7 @@ package tools
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	pbconversation "github.com/openimsdk/protocol/conversation"
@@ -43,7 +44,7 @@ func Start(ctx context.Context, config *CronTaskConfig) error {
 	if config.CronTask.RetainChatRecords < 1 {
 		return errs.New("msg destruct time must be greater than 1").Wrap()
 	}
-	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, &config.Share)
+	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, &config.Share, nil)
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
