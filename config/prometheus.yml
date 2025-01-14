@@ -8,7 +8,7 @@ global:
 alerting:
   alertmanagers:
     - static_configs:
-        - targets: [internal_ip:19093]
+        - targets: [127.0.0.1:19093]
 
 # Load rules once and periodically evaluate them according to the global evaluation_interval.
 rule_files:
@@ -25,95 +25,95 @@ scrape_configs:
   # prometheus fetches application services
   - job_name: node_exporter
     static_configs:
-      - targets: [ internal_ip:20500 ]
+      - targets: [ 127.0.0.1:19100 ]
 
   - job_name: openimserver-openim-api
     http_sd_configs:
-      - url: "http://internal_ip:10002/prometheus_discovery/api"
+      - url: "http://127.0.0.1:10002/prometheus_discovery/api"
 #    static_configs:
-#      - targets: [ internal_ip:12002 ]
+#      - targets: [ 127.0.0.1:12002 ]
 #        labels:
 #          namespace: default
 
   - job_name: openimserver-openim-msggateway
     http_sd_configs:
-      - url: "http://internal_ip:10002/prometheus_discovery/msg_gateway"
+      - url: "http://127.0.0.1:10002/prometheus_discovery/msg_gateway"
 #    static_configs:
-#      - targets: [ internal_ip:12140 ]
-#        #      - targets: [ internal_ip:12140, internal_ip:12141, internal_ip:12142, internal_ip:12143, internal_ip:12144, internal_ip:12145, internal_ip:12146, internal_ip:12147, internal_ip:12148, internal_ip:12149, internal_ip:12150, internal_ip:12151, internal_ip:12152, internal_ip:12153, internal_ip:12154, internal_ip:12155 ]
+#      - targets: [ 127.0.0.1:12140 ]
+#        #      - targets: [ 127.0.0.1:12140, 127.0.0.1:12141, 127.0.0.1:12142, 127.0.0.1:12143, 127.0.0.1:12144, 127.0.0.1:12145, 127.0.0.1:12146, 127.0.0.1:12147, 127.0.0.1:12148, 127.0.0.1:12149, 127.0.0.1:12150, 127.0.0.1:12151, 127.0.0.1:12152, 127.0.0.1:12153, 127.0.0.1:12154, 127.0.0.1:12155 ]
 #        labels:
 #          namespace: default
 
   - job_name: openimserver-openim-msgtransfer
     http_sd_configs:
-      - url: "http://internal_ip:10002/prometheus_discovery/msg_transfer"
+      - url: "http://127.0.0.1:10002/prometheus_discovery/msg_transfer"
 #    static_configs:
-#      - targets: [ internal_ip:12020, internal_ip:12021, internal_ip:12022, internal_ip:12023, internal_ip:12024, internal_ip:12025, internal_ip:12026, internal_ip:12027 ]
-#        #      - targets: [ internal_ip:12020, internal_ip:12021, internal_ip:12022, internal_ip:12023, internal_ip:12024, internal_ip:12025, internal_ip:12026, internal_ip:12027, internal_ip:12028, internal_ip:12029, internal_ip:12030, internal_ip:12031, internal_ip:12032, internal_ip:12033, internal_ip:12034, internal_ip:12035 ]
+#      - targets: [ 127.0.0.1:12020, 127.0.0.1:12021, 127.0.0.1:12022, 127.0.0.1:12023, 127.0.0.1:12024, 127.0.0.1:12025, 127.0.0.1:12026, 127.0.0.1:12027 ]
+#        #      - targets: [ 127.0.0.1:12020, 127.0.0.1:12021, 127.0.0.1:12022, 127.0.0.1:12023, 127.0.0.1:12024, 127.0.0.1:12025, 127.0.0.1:12026, 127.0.0.1:12027, 127.0.0.1:12028, 127.0.0.1:12029, 127.0.0.1:12030, 127.0.0.1:12031, 127.0.0.1:12032, 127.0.0.1:12033, 127.0.0.1:12034, 127.0.0.1:12035 ]
 #        labels:
 #          namespace: default
 
   - job_name: openimserver-openim-push
     http_sd_configs:
-      - url: "http://internal_ip:10002/prometheus_discovery/push"
+      - url: "http://127.0.0.1:10002/prometheus_discovery/push"
 #    static_configs:
-#      - targets: [ internal_ip:12170, internal_ip:12171, internal_ip:12172, internal_ip:12173, internal_ip:12174, internal_ip:12175, internal_ip:12176, internal_ip:12177 ]
-##      - targets: [ internal_ip:12170, internal_ip:12171, internal_ip:12172, internal_ip:12173, internal_ip:12174, internal_ip:12175, internal_ip:12176, internal_ip:12177, internal_ip:12178, internal_ip:12179, internal_ip:12180,  internal_ip:12182, internal_ip:12183, internal_ip:12184, internal_ip:12185, internal_ip:12186 ]
+#      - targets: [ 127.0.0.1:12170, 127.0.0.1:12171, 127.0.0.1:12172, 127.0.0.1:12173, 127.0.0.1:12174, 127.0.0.1:12175, 127.0.0.1:12176, 127.0.0.1:12177 ]
+##      - targets: [ 127.0.0.1:12170, 127.0.0.1:12171, 127.0.0.1:12172, 127.0.0.1:12173, 127.0.0.1:12174, 127.0.0.1:12175, 127.0.0.1:12176, 127.0.0.1:12177, 127.0.0.1:12178, 127.0.0.1:12179, 127.0.0.1:12180,  127.0.0.1:12182, 127.0.0.1:12183, 127.0.0.1:12184, 127.0.0.1:12185, 127.0.0.1:12186 ]
 #        labels:
 #          namespace: default
 
   - job_name: openimserver-openim-rpc-auth
     http_sd_configs:
-      - url: "http://internal_ip:10002/prometheus_discovery/auth"
+      - url: "http://127.0.0.1:10002/prometheus_discovery/auth"
 #    static_configs:
-#      - targets: [ internal_ip:12200 ]
+#      - targets: [ 127.0.0.1:12200 ]
 #        labels:
 #          namespace: default
 
   - job_name: openimserver-openim-rpc-conversation
     http_sd_configs:
-      - url: "http://internal_ip:10002/prometheus_discovery/conversation"
+      - url: "http://127.0.0.1:10002/prometheus_discovery/conversation"
 #    static_configs:
-#      - targets: [ internal_ip:12220 ]
+#      - targets: [ 127.0.0.1:12220 ]
 #        labels:
 #          namespace: default
 
   - job_name: openimserver-openim-rpc-friend
     http_sd_configs:
-      - url: "http://internal_ip:10002/prometheus_discovery/friend"
+      - url: "http://127.0.0.1:10002/prometheus_discovery/friend"
 #    static_configs:
-#      - targets: [ internal_ip:12240 ]
+#      - targets: [ 127.0.0.1:12240 ]
 #        labels:
 #          namespace: default
 
   - job_name: openimserver-openim-rpc-group
     http_sd_configs:
-      - url: "http://internal_ip:10002/prometheus_discovery/group"
+      - url: "http://127.0.0.1:10002/prometheus_discovery/group"
 #    static_configs:
-#      - targets: [ internal_ip:12260 ]
+#      - targets: [ 127.0.0.1:12260 ]
 #        labels:
 #          namespace: default.
 
   - job_name: openimserver-openim-rpc-msg
     http_sd_configs:
-      - url: "http://internal_ip:10002/prometheus_discovery/msg"
+      - url: "http://127.0.0.1:10002/prometheus_discovery/msg"
 #    static_configs:
-#      - targets: [ internal_ip:12280 ]
+#      - targets: [ 127.0.0.1:12280 ]
 #        labels:
 #          namespace: default
 
   - job_name: openimserver-openim-rpc-third
     http_sd_configs:
-      - url: "http://internal_ip:10002/prometheus_discovery/third"
+      - url: "http://127.0.0.1:10002/prometheus_discovery/third"
 #    static_configs:
-#      - targets: [ internal_ip:12300 ]
+#      - targets: [ 127.0.0.1:12300 ]
 #        labels:
 #          namespace: default
 
   - job_name: openimserver-openim-rpc-user
     http_sd_configs:
-      - url: "http://internal_ip:10002/prometheus_discovery/user"
+      - url: "http://127.0.0.1:10002/prometheus_discovery/user"
 #    static_configs:
-#      - targets: [ internal_ip:12320 ]
+#      - targets: [ 127.0.0.1:12320 ]
 #        labels:
 #          namespace: default
