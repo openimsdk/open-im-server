@@ -209,5 +209,5 @@ services:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/rootfs'
-      - '--web.listen-address=:{NODE_EXPORTER_PORT}'
+      - '--web.listen-address=:${NODE_EXPORTER_PORT}'
     network_mode: host
