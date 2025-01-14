@@ -5,6 +5,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"net"
 	"strconv"
 )
 
@@ -21,13 +22,13 @@ var (
 	)
 )
 
-func RpcInit(cs []prometheus.Collector, prometheusPort int) error {
+func RpcInit(cs []prometheus.Collector, listener net.Listener) error {
 	reg := prometheus.NewRegistry()
 	cs = append(append(
 		baseCollector,
 		rpcCounter,
 	), cs...)
-	return Init(reg, prometheusPort, rpcPath, promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}), cs...)
+	return Init(reg, listener, rpcPath, promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}), cs...)
 }
 
 func RPCCall(name string, path string, code int) {

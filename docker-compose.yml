@@ -146,49 +146,68 @@ services:
     networks:
       - openim
       
-#  prometheus:
-#    image: ${PROMETHEUS_IMAGE}
-#    container_name: prometheus
-#    restart: always
-#    user: root
-#    volumes:
-#      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
-#      - ./config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml
-#      - ${DATA_DIR}/components/prometheus/data:/prometheus
-#    command:
-#      - '--config.file=/etc/prometheus/prometheus.yml'
-#      - '--storage.tsdb.path=/prometheus'
-#    ports:
-#      - "19091:9090"
-#    networks:
-#      - openim
-#
-#  alertmanager:
-#    image: ${ALERTMANAGER_IMAGE}
-#    container_name: alertmanager
-#    restart: always
-#    volumes:
-#      - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-#      - ./config/email.tmpl:/etc/alertmanager/email.tmpl
-#    ports:
-#      - "19093:9093"
-#    networks:
-#      - openim
-#
-#  grafana:
-#    image: ${GRAFANA_IMAGE}
-#    container_name: grafana
-#    user: root
-#    restart: always
-#    environment:
-#      - GF_SECURITY_ALLOW_EMBEDDING=true
-#      - GF_SESSION_COOKIE_SAMESITE=none
-#      - GF_SESSION_COOKIE_SECURE=true
-#      - GF_AUTH_ANONYMOUS_ENABLED=true
-#      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-#    ports:
-#      - "13000:3000"
-#    volumes:
-#      - ${DATA_DIR:-./}/components/grafana:/var/lib/grafana
-#    networks:
-#      - openim
+  prometheus:
+    image: ${PROMETHEUS_IMAGE}
+    container_name: prometheus
+    restart: always
+    user: root
+    profiles:
+      - m
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml
+      - ${DATA_DIR}/components/prometheus/data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.listen-address=:${PROMETHEUS_PORT}'
+    network_mode: host
+
+  alertmanager:
+    image: ${ALERTMANAGER_IMAGE}
+    container_name: alertmanager
+    restart: always
+    profiles:
+      - m
+    volumes:
+      - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ./config/email.tmpl:/etc/alertmanager/email.tmpl
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--web.listen-address=:${ALERTMANAGER_PORT}'
+    network_mode: host
+
+  grafana:
+    image: ${GRAFANA_IMAGE}
+    container_name: grafana
+    user: root
+    restart: always
+    profiles:
+      - m
+    environment:
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_SESSION_COOKIE_SAMESITE=none
+      - GF_SESSION_COOKIE_SECURE=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_SERVER_HTTP_PORT=${GRAFANA_PORT}
+    volumes:
+      - ${DATA_DIR:-./}/components/grafana:/var/lib/grafana
+    network_mode: host
+
+  node-exporter:
+    image: ${NODE_EXPORTER_IMAGE}
+    container_name: node-exporter
+    restart: always
+    profiles:
+      - m
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--web.listen-address=:{NODE_EXPORTER_PORT}'
+    network_mode: host

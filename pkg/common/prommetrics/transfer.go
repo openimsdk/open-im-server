@@ -17,6 +17,7 @@ package prommetrics
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"net"
 )
 
 var (
@@ -42,7 +43,7 @@ var (
 	})
 )
 
-func TransferInit(prometheusPort int) error {
+func TransferInit(listener net.Listener) error {
 	reg := prometheus.NewRegistry()
 	cs := append(
 		baseCollector,
@@ -52,5 +53,5 @@ func TransferInit(prometheusPort int) error {
 		MsgInsertMongoFailedCounter,
 		SeqSetFailedCounter,
 	)
-	return Init(reg, prometheusPort, commonPath, promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}), cs...)
+	return Init(reg, listener, commonPath, promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}), cs...)
 }

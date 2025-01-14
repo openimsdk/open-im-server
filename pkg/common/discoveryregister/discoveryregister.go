@@ -21,22 +21,12 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
-	"github.com/openimsdk/tools/discovery/zookeeper"
 	"github.com/openimsdk/tools/errs"
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
 func NewDiscoveryRegister(discovery *config.Discovery, share *config.Share, watchNames []string) (discovery.SvcDiscoveryRegistry, error) {
 	switch discovery.Enable {
-	case "zookeeper":
-		return zookeeper.NewZkClient(
-			discovery.ZooKeeper.Address,
-			discovery.ZooKeeper.Schema,
-			zookeeper.WithFreq(time.Hour),
-			zookeeper.WithUserNameAndPassword(discovery.ZooKeeper.Username, discovery.ZooKeeper.Password),
-			zookeeper.WithRoundRobin(),
-			zookeeper.WithTimeout(10),
-		)
 	case "k8s":
 		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
 	case "etcd":

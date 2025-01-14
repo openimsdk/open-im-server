@@ -14,7 +14,10 @@
 
 package config
 
-const ConfKey = "conf"
+const (
+	ConfKey = "conf"
+	ETCD    = "etcd"
+)
 
 const (
 	// DefaultDirPerm is used for creating general directories, allowing the owner to read, write, and execute,
