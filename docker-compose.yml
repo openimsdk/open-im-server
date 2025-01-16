@@ -98,7 +98,6 @@ services:
       - "19094:9094"
     volumes:
       - "${DATA_DIR}/components/kafka:/bitnami/kafka"
-      - "${KAFKA_BACKUP_DIR}:/data/backup"
     environment:
       #KAFKA_HEAP_OPTS: "-Xms128m -Xmx256m"
       TZ: Asia/Shanghai
