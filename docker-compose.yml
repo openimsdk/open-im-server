@@ -37,6 +37,7 @@ services:
       - "${DATA_DIR}/components/mongodb/data/db:/data/db"
       - "${DATA_DIR}/components/mongodb/data/logs:/data/logs"
       - "${DATA_DIR}/components/mongodb/data/conf:/etc/mongo"
+      - "${MONGO_BACKUP_DIR}:/data/backup"
     environment:
       - TZ=Asia/Shanghai
       - wiredTigerCacheSizeGB=1
