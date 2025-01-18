@@ -155,7 +155,7 @@ jobs:
            check_error "$send_msg_response"
 
           # Test get users
-          get_users_response=$(curl -X POST -H "Content-Type: application/json" -H "operationID: imAdmin" -H "token: ${{ env.ADMIN_TOKEN }}" -d '{
+          get_users_response=$(curl -X POST -H "Content-Type: application/json" -H "operationID: imAdmin" -H "token: $adminToken" -d '{
             "pagination": {
                "pageNumber": 1,
                "showNumber": 100
