@@ -166,7 +166,7 @@ func (k *K8sStaticConsistentHash) GetConnsAndOnlinePush(ctx context.Context, msg
 		}
 	}
 	log.ZDebug(ctx, "genUsers send hosts struct:", "usersHost", usersHost)
-	var usersConns = make(map[*grpc.ClientConn][]string)
+	var usersConns = make(map[grpc.ClientConnInterface][]string)
 	for host, userIds := range usersHost {
 		tconn, _ := k.disCov.GetConn(ctx, host)
 		usersConns[tconn] = userIds
