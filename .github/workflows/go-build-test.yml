@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
     paths-ignore:
-      - '**/*.md'
+      - "**/*.md"
 
   workflow_dispatch:
 
@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        go_version: ["1.21.x", "1.22.x"]
+        go_version: ["1.22.x"]
 
     steps:
       - name: Checkout Server repository
@@ -37,27 +37,20 @@ jobs:
 
       - name: Set up infra services
         uses: hoverkraft-tech/compose-action@v2.0.1
-        # Uncomment and set the correct path to your docker-compose file
         with:
           compose-file: "./docker-compose.yml"
 
-        # run: |
-        #   sudo docker compose up -d
-        #   sudo sleep 30  # Increased sleep time for better stability
-        # timeout-minutes: 60 # Increased timeout for Docker setup
+      # - name: Get Internal IP Address
+      #   id: get-ip
+      #   run: |
+      #     IP=$(hostname -I | awk '{print $1}')
+      #     echo "The IP Address is: $IP"
+      #     echo "::set-output name=ip::$IP"
 
-
-    # - name: Get Internal IP Address
-    #   id: get-ip
-    #   run: |
-    #     IP=$(hostname -I | awk '{print $1}')
-    #     echo "The IP Address is: $IP"
-    #     echo "::set-output name=ip::$IP"
-      
-    # - name: Update .env
-    #   run: |
-    #     sed -i 's|externalAddress:.*|externalAddress: "http://${{ steps.get-ip.outputs.ip }}:10005"|' config/minio.yml
-    #     cat config/minio.yml
+      # - name: Update .env
+      #   run: |
+      #     sed -i 's|externalAddress:.*|externalAddress: "http://${{ steps.get-ip.outputs.ip }}:10005"|' config/minio.yml
+      #     cat config/minio.yml
 
       - name: Build and test Server Services
         run: |
@@ -85,6 +78,90 @@ jobs:
           mage start
           mage check
 
+      - name: Test Server and Chat
+        run: |
+          check_error() {
+            echo "Response: $1"
+            errCode=$(echo $1 | jq -r '.errCode')
+            if [ "$errCode" != "0" ]; then
+              errMsg=$(echo $1 | jq -r '.errMsg')
+              echo "Error: $errMsg"
+              exit 1
+            fi
+          }
+
+          # Test register
+          response1=$(curl -X POST -H "Content-Type: application/json" -H "operationID: imAdmin" -d '{
+            "verifyCode": "666666",
+            "platform": 3,
+            "autoLogin": true,
+            "user":{
+            "nickname": "test12312",
+            "areaCode":"+86",
+            "phoneNumber": "12345678190",
+            "password":"test123456"
+            }
+          }' http://127.0.0.1:10008/account/register)
+          check_error "$response1"
+          userID1=$(echo $response1 | jq -r '.data.userID')
+          echo "userID1: $userID1"
+
+          response2=$(curl -X POST -H "Content-Type: application/json" -H "operationID: imAdmin" -d '{
+            "verifyCode": "666666",
+            "platform": 3,
+            "autoLogin": true,
+            "user":{
+            "nickname": "test22312",
+            "areaCode":"+86",
+            "phoneNumber": "12345678290",
+            "password":"test123456"
+            }
+          }' http://127.0.0.1:10008/account/register)
+          check_error "$response2"
+          userID2=$(echo $response2 | jq -r '.data.userID')
+          echo "userID2: $userID2"
+
+          # Test login
+          login_response=$(curl -X POST -H "Content-Type: application/json" -H "operationID: imAdmin"  -d '{
+            "platform": 3,
+            "areaCode":"+86",
+            "phoneNumber": "12345678190",
+            "password":"test123456"
+          }' http://localhost:10008/account/login)
+          check_error "$login_response"
+
+          # Test get admin token
+          get_admin_token_response=$(curl -X POST -H "Content-Type: application/json" -H "operationID: imAdmin" -d '{
+            "secret": "openIM123",
+            "platformID": 2,
+            "userID": "imAdmin"
+          }' http://127.0.0.1:10002/auth/get_admin_token)
+          check_error "$get_admin_token_response"
+          adminToken=$(echo $get_admin_token_response | jq -r '.data.token')
+          echo "adminToken: $adminToken"
+
+          # Test send message
+          send_msg_response=$(curl -X POST -H "Content-Type: application/json" -H "operationID: imAdmin" -H "token: $adminToken" -d '{
+            "sendID": "'$userID1'",
+            "recvID": "'$userID2'",
+            "senderPlatformID": 3,
+            "content": {
+              "content": "hello!!"
+            },
+            "contentType": 101,
+            "sessionType": 1
+           }' http://127.0.0.1:10002/msg/send_msg)
+           check_error "$send_msg_response"
+
+          # Test get users
+          get_users_response=$(curl -X POST -H "Content-Type: application/json" -H "operationID: imAdmin" -H "token: $adminToken" -d '{
+            "pagination": {
+               "pageNumber": 1,
+               "showNumber": 100
+             }
+            }' http://127.0.0.1:10002/user/get_users)
+          check_error "$get_users_response"
+
   go-test:
     name: Benchmark Test with go ${{ matrix.go_version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -93,11 +170,11 @@ jobs:
     env:
       SDK_DIR: openim-sdk-core
       CONFIG_PATH: config/notification.yml
-    #   pull-requests: write
+
     strategy:
       matrix:
-        os: [ ubuntu-latest ]
-        go_version: [ "1.22.x" ]
+        os: [ubuntu-latest]
+        go_version: ["1.22.x"]
 
     steps:
       - name: Checkout Server repository
@@ -106,7 +183,8 @@ jobs:
       - name: Checkout SDK repository
         uses: actions/checkout@v4
         with:
-          repository: 'openimsdk/openim-sdk-core'
+          repository: "openimsdk/openim-sdk-core"
+          ref: "release-v3.8"
           path: ${{ env.SDK_DIR }}
 
       - name: Set up Go ${{ matrix.go_version }}
@@ -119,15 +197,10 @@ jobs:
           go install github.com/magefile/mage@latest
           go mod download
 
-      - name: Install yq
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/download/v4.34.1/yq_linux_amd64 -O /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
-
       - name: Modify Server Configuration
         run: |
-          yq e '.groupCreated.unreadCount = true' -i ${{ env.CONFIG_PATH }}
-          yq e '.friendApplicationApproved.unreadCount = true' -i ${{ env.CONFIG_PATH }}
+          yq e '.groupCreated.isSendMsg = true' -i ${{ env.CONFIG_PATH }}
+          yq e '.friendApplicationApproved.isSendMsg = true' -i ${{ env.CONFIG_PATH }}
 
       - name: Start Server Services
         run: |
@@ -183,11 +256,3 @@ jobs:
         run: |
           CONTAINER_NAME="${{ github.event.repository.name }}-container"
           docker logs $CONTAINER_NAME
-
-      # - name: Cleanup Docker Container
-      #   run: |
-      #     CONTAINER_NAME="${{ github.event.repository.name }}-container"
-      #     IMAGE_NAME="${{ github.event.repository.name }}-test"
-      #     docker stop $CONTAINER_NAME
-      #     docker rm $CONTAINER_NAME
-      #     docker rmi $IMAGE_NAME
