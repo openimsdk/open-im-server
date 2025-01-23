@@ -113,26 +113,14 @@ jobs:
 
               echo "Cherry-picking commit: $merge_commit"
               if ! git cherry-pick "$merge_commit" --strategy=recursive -X theirs; then
-                echo "Cherry-pick encountered conflicts, attempting to resolve..."
-                git status --porcelain | grep '^UU ' | cut -c 4- | while read -r file; do
-                  echo "Resolving conflict in $file"
-                  git add "$file"
-                done
-                git status --porcelain | grep '^AA ' | cut -c 4- | while read -r file; do
-                  echo "Adding new file $file"
-                  git add "$file"
-                done
-                git status --porcelain | grep '^DD ' | cut -c 4- | while read -r file; do
-                  echo "Removing deleted file $file"
-                  git rm "$file"
-                done
-                git cherry-pick --continue || { echo "Cherry-pick failed"; continue; }
+                echo "Cherry-pick encountered conflicts, attempting to continue..."
+                git cherry-pick --continue || { echo "Cherry-pick failed"; exit 1; }
               fi
 
               git remote set-url origin "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git"
               
               echo "Pushing branch: $cherry_pick_branch"
-              git push origin $cherry_pick_branch --force || { echo "Push failed"; continue; }
+              git push origin $cherry_pick_branch --force || { echo "Push failed"; exit 1; }
 
               new_pr_title="$pr_title [Created by @$pr_creator from #$pr_number]"
               new_pr_body="$pr_body
