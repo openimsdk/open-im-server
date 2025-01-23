@@ -99,7 +99,7 @@ jobs:
             merge_commit=$(echo "$pr_details" | jq -r '.merge_commit_sha')
             short_commit_hash=$(echo "$merge_commit" | cut -c 1-7)
 
-            if [ "$merge_commit" != "null" ];then
+            if [ "$merge_commit" != "null" ]; then
               git fetch origin
               
               echo "Checking out target branch: $TARGET_BRANCH"
@@ -117,7 +117,6 @@ jobs:
                 git cherry-pick --continue || { echo "Cherry-pick failed"; exit 1; }
               fi
 
-              git cherry-pick "$merge_commit" --strategy=recursive -X theirs || git cherry-pick --continue
               git remote set-url origin "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git"
               
               echo "Pushing branch: $cherry_pick_branch"
@@ -125,7 +124,7 @@ jobs:
 
               new_pr_title="$pr_title [Created by @$pr_creator from #$pr_number]"
               new_pr_body="$pr_body
-              > This PR cherry-picks commit from original PR #$pr_number."
+              > This PR is created from original PR #$pr_number."
 
               response=$(curl -s -X POST -H "Authorization: token $BOT_TOKEN" \
                 -H "Accept: application/vnd.github+json" \
