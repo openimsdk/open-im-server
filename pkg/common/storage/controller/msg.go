@@ -18,10 +18,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/openimsdk/tools/utils/jsonutil"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/openimsdk/tools/utils/jsonutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
@@ -722,13 +723,13 @@ func (db *commonMsgDatabase) DeleteDoc(ctx context.Context, docID string) error 
 	if index <= 0 {
 		return errs.ErrInternalServer.WrapMsg("docID is invalid", "docID", docID)
 	}
-	index, err := strconv.Atoi(docID[index+1:])
+	docIndex, err := strconv.Atoi(docID[index+1:])
 	if err != nil {
 		return errs.WrapMsg(err, "strconv.Atoi", "docID", docID)
 	}
 	conversationID := docID[:index]
 	seqs := make([]int64, db.msgTable.GetSingleGocMsgNum())
-	minSeq := db.msgTable.GetMinSeq(index)
+	minSeq := db.msgTable.GetMinSeq(docIndex)
 	for i := range seqs {
 		seqs[i] = minSeq + int64(i)
 	}
