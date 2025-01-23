@@ -17,7 +17,7 @@ import (
 type pushServer struct {
 	pbpush.UnimplementedPushMsgServiceServer
 	database      controller.PushDatabase
-	disCov        discovery.SvcDiscoveryRegistry
+	disCov        discovery.Conn
 	offlinePusher offlinepush.OfflinePusher
 	pushCh        *ConsumerHandler
 	offlinePushCh *OfflinePushConsumerHandler
@@ -45,7 +45,7 @@ func (p pushServer) DelUserPushToken(ctx context.Context,
 	return &pbpush.DelUserPushTokenResp{}, nil
 }
 
-func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
 	config.runTimeEnv = runtimeenv.PrintRuntimeEnvironment()
 
 	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())

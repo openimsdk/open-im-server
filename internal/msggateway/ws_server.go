@@ -35,7 +35,7 @@ type LongConnServer interface {
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s any) error
-	SetDiscoveryRegistry(ctx context.Context, client discovery.SvcDiscoveryRegistry, config *Config) error
+	SetDiscoveryRegistry(ctx context.Context, client discovery.Conn, config *Config) error
 	KickUserConn(client *Client) error
 	UnRegister(c *Client)
 	SetKickHandlerInfo(i *kickHandler)
@@ -60,7 +60,7 @@ type WsServer struct {
 	handshakeTimeout  time.Duration
 	writeBufferSize   int
 	validate          *validator.Validate
-	disCov            discovery.SvcDiscoveryRegistry
+	disCov            discovery.Conn
 	Compressor
 	//Encoder
 	MessageHandler
@@ -75,7 +75,7 @@ type kickHandler struct {
 	newClient  *Client
 }
 
-func (ws *WsServer) SetDiscoveryRegistry(ctx context.Context, disCov discovery.SvcDiscoveryRegistry, config *Config) error {
+func (ws *WsServer) SetDiscoveryRegistry(ctx context.Context, disCov discovery.Conn, config *Config) error {
 	userConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err

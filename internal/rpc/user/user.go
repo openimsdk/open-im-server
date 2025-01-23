@@ -45,7 +45,7 @@ import (
 	pbuser "github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/pagination"
-	registry "github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
@@ -57,7 +57,7 @@ type userServer struct {
 	db                       controller.UserDatabase
 	friendNotificationSender *relation.FriendNotificationSender
 	userNotificationSender   *UserNotificationSender
-	RegisterCenter           registry.SvcDiscoveryRegistry
+	RegisterCenter           discovery.Conn
 	config                   *Config
 	webhookClient            *webhook.Client
 	groupClient              *rpcli.GroupClient
@@ -76,7 +76,7 @@ type Config struct {
 	Discovery          config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err

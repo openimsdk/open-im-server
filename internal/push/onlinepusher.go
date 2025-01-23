@@ -41,8 +41,7 @@ func (u emptyOnlinePusher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *
 	return nil
 }
 
-func NewOnlinePusher(disCov discovery.SvcDiscoveryRegistry, config *Config) OnlinePusher {
-
+func NewOnlinePusher(disCov discovery.Conn, config *Config) OnlinePusher {
 	if config.runTimeEnv == conf.KUBERNETES {
 		return NewDefaultAllNode(disCov, config)
 	}
@@ -56,11 +55,11 @@ func NewOnlinePusher(disCov discovery.SvcDiscoveryRegistry, config *Config) Onli
 }
 
 type DefaultAllNode struct {
-	disCov discovery.SvcDiscoveryRegistry
+	disCov discovery.Conn
 	config *Config
 }
 
-func NewDefaultAllNode(disCov discovery.SvcDiscoveryRegistry, config *Config) *DefaultAllNode {
+func NewDefaultAllNode(disCov discovery.Conn, config *Config) *DefaultAllNode {
 	return &DefaultAllNode{disCov: disCov, config: config}
 }
 

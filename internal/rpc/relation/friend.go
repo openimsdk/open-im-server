@@ -16,6 +16,7 @@ package relation
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/tools/mq/memamq"
@@ -47,7 +48,7 @@ type friendServer struct {
 	db                 controller.FriendDatabase
 	blackDatabase      controller.BlackDatabase
 	notificationSender *FriendNotificationSender
-	RegisterCenter     discovery.SvcDiscoveryRegistry
+	RegisterCenter     discovery.Conn
 	config             *Config
 	webhookClient      *webhook.Client
 	queue              *memamq.MemoryQueue
@@ -66,7 +67,7 @@ type Config struct {
 	Discovery          config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err

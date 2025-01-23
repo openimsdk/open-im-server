@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -56,8 +57,8 @@ type Config struct {
 // MsgServer encapsulates dependencies required for message handling.
 type msgServer struct {
 	msg.UnimplementedMsgServer
-	RegisterCenter         discovery.SvcDiscoveryRegistry // Service discovery registry for service registration.
-	MsgDatabase            controller.CommonMsgDatabase   // Interface for message database operations.
+	RegisterCenter         discovery.Conn               // Service discovery registry for service registration.
+	MsgDatabase            controller.CommonMsgDatabase // Interface for message database operations.
 	StreamMsgDatabase      controller.StreamMsgDatabase
 	UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
 	FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
@@ -76,7 +77,7 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 
 }
 
-func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err

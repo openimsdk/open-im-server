@@ -35,7 +35,7 @@ func loadConfig(path string, envPrefix string, config any) error {
 	}
 
 	if err := v.Unmarshal(config, func(config *mapstructure.DecoderConfig) {
-		config.TagName = "mapstructure"
+		config.TagName = StructTagName
 	}); err != nil {
 		return errs.WrapMsg(err, "failed to unmarshal config", "path", path, "envPrefix", envPrefix)
 	}

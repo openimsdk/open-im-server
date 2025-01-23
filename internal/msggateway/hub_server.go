@@ -35,7 +35,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func (s *Server) InitServer(ctx context.Context, config *Config, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+func (s *Server) InitServer(ctx context.Context, config *Config, disCov discovery.Conn, server grpc.ServiceRegistrar) error {
 	userConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err

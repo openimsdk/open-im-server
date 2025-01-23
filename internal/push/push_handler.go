@@ -50,7 +50,7 @@ type ConsumerHandler struct {
 }
 
 func NewConsumerHandler(ctx context.Context, config *Config, database controller.PushDatabase, offlinePusher offlinepush.OfflinePusher, rdb redis.UniversalClient,
-	client discovery.SvcDiscoveryRegistry) (*ConsumerHandler, error) {
+	client discovery.Conn) (*ConsumerHandler, error) {
 	var consumerHandler ConsumerHandler
 	var err error
 	consumerHandler.pushConsumerGroup, err = kafka.NewMConsumerGroup(config.KafkaConfig.Build(), config.KafkaConfig.ToPushGroupID,

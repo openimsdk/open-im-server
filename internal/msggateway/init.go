@@ -34,14 +34,14 @@ type Config struct {
 	WebhooksConfig config.Webhooks
 	Discovery      config.Discovery
 
-	RuntimeEnv string
+	runtimeEnv string
 }
 
 // Start run ws server.
 func Start(ctx context.Context, index int, conf *Config) error {
-	conf.RuntimeEnv = runtimeenv.PrintRuntimeEnvironment()
+	conf.runtimeEnv = runtimeenv.PrintRuntimeEnvironment()
 
-	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "runtimeEnv", conf.RuntimeEnv,
+	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "runtimeEnv", conf.runtimeEnv,
 		"rpcPorts", conf.MsgGateway.RPC.Ports,
 		"wsPort", conf.MsgGateway.LongConnSvr.Ports, "prometheusPorts", conf.MsgGateway.Prometheus.Ports)
 	wsPort, err := datautil.GetElemByIndex(conf.MsgGateway.LongConnSvr.Ports, index)

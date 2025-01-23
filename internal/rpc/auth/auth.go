@@ -43,7 +43,7 @@ import (
 type authServer struct {
 	pbauth.UnimplementedAuthServer
 	authDatabase   controller.AuthDatabase
-	RegisterCenter discovery.SvcDiscoveryRegistry
+	RegisterCenter discovery.Conn
 	config         *Config
 	userClient     *rpcli.UserClient
 }
@@ -55,7 +55,7 @@ type Config struct {
 	Discovery   config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
 	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
