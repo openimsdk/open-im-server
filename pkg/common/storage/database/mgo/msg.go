@@ -1125,8 +1125,6 @@ func (m *MsgMgo) findBeforeDocSendTime(ctx context.Context, docID string, limit 
 			"$project": bson.M{
 				"_id":    0,
 				"doc_id": 0,
-				//"msgs.msg.send_time": 1,
-				//"msgs.msg.seq":       1,
 			},
 		},
 		{
