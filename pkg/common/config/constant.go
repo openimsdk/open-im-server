@@ -21,6 +21,7 @@ const (
 	DeploymentType      = "DEPLOYMENT_TYPE"
 	KUBERNETES          = "kubernetes"
 	ETCD                = "etcd"
+	Standalone          = "standalone"
 )
 
 const (

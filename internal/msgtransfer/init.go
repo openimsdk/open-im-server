@@ -176,11 +176,10 @@ func (m *MsgTransfer) Start(index int, config *Config, client discovery.SvcDisco
 		return listener, port, nil
 	}
 
-	if config.MsgTransfer.Prometheus.AutoSetPorts && config.Discovery.Enable != conf.ETCD {
-		return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
-	}
-
-	if config.MsgTransfer.Prometheus.Enable {
+	if config.Discovery.Enable != conf.Standalone && config.MsgTransfer.Prometheus.Enable {
+		if config.MsgTransfer.Prometheus.AutoSetPorts && config.Discovery.Enable != conf.ETCD {
+			return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
+		}
 		var (
 			listener       net.Listener
 			prometheusPort int

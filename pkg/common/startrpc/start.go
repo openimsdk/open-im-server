@@ -53,6 +53,14 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 	rpcFn func(ctx context.Context, config T, client discovery.Conn, server grpc.ServiceRegistrar) error,
 	options ...grpc.ServerOption) error {
 
+	if notification != nil {
+		conf.InitNotification(notification)
+	}
+
+	if discovery.Enable == conf.Standalone {
+		return nil
+	}
+
 	watchConfigNames = append(watchConfigNames, conf.LogConfigFileName)
 	var (
 		rpcTcpAddr     string
@@ -60,10 +68,6 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 		netErr         error
 		prometheusPort int
 	)
-
-	if notification != nil {
-		conf.InitNotification(notification)
-	}
 
 	registerIP, err := network.GetRpcRegisterIP(registerIP)
 	if err != nil {

@@ -19,6 +19,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/discovery/standalone"
 	"google.golang.org/grpc"
 
 	"github.com/openimsdk/tools/discovery/kubernetes"
@@ -38,6 +39,8 @@ func NewDiscoveryRegister(discovery *config.Discovery, runtimeEnv string, watchN
 	}
 
 	switch discovery.Enable {
+	case config.Standalone:
+		return standalone.GetSvcDiscoveryRegistry(), nil
 	case config.ETCD:
 		return etcd.NewSvcDiscoveryRegistry(
 			discovery.Etcd.RootDirectory,

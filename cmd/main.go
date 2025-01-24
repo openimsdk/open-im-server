@@ -100,7 +100,7 @@ func (x *cmds) readConfig() error {
 		}
 		x.conf[getTypePath(field.Type())] = data
 	}
-	val := config.Discovery{Enable: discovery.Standalone}
+	val := config.Discovery{Enable: config.Standalone}
 	var buf bytes.Buffer
 	if err := yaml.NewEncoder(&buf).Encode(&val); err != nil {
 		return err
