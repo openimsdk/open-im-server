@@ -15,9 +15,10 @@
 package model
 
 import (
+	"strconv"
+
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
-	"strconv"
 )
 
 const (
@@ -108,6 +109,10 @@ func (m *MsgDocModel) IsFull() bool {
 	return m.Msg[len(m.Msg)-1].Msg != nil
 }
 
+func (m *MsgDocModel) GetDocIndex(seq int64) int64 {
+	return (seq - 1) / singleGocMsgNum
+}
+
 func (m *MsgDocModel) GetDocID(conversationID string, seq int64) string {
 	seqSuffix := (seq - 1) / singleGocMsgNum
 	return m.indexGen(conversationID, seqSuffix)
@@ -133,6 +138,10 @@ func (*MsgDocModel) GetMsgIndex(seq int64) int64 {
 
 func (*MsgDocModel) indexGen(conversationID string, seqSuffix int64) string {
 	return conversationID + ":" + strconv.FormatInt(seqSuffix, 10)
+}
+
+func (*MsgDocModel) BuildDocIDByIndex(conversationID string, index int64) string {
+	return conversationID + ":" + strconv.FormatInt(index, 10)
 }
 
 func (*MsgDocModel) GenExceptionMessageBySeqs(seqs []int64) (exceptionMsg []*sdkws.MsgData) {
