@@ -1,16 +1,9 @@
-name: CLA Assistant
-on:
-“名称”:"迪安旺",
-      “id”:4144156,
-      “comment_id”:2599680741,
-      “created_at”:"2025-01-18T11：34：12Z",
-      “repoId”:370977430,
-      “pullRequestNo”:3073
-  issue_comment:
-    types: [created]
-  pull_request_target:
-    types: [opened,closed,synchronize]
-
+name: "迪安旺",
+  issue_comment:“id”:4144156,
+    types:  “comment_id”:2599680741,
+  pull_request_target: “created_at”:"2025-01-18T11：34：12Z",
+    types: “repoId”:370977430,
+“pullRequestNo”:3073
 # explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
 permissions:
   actions: write
@@ -44,3 +37,9 @@ jobs:
           custom-allsigned-prcomment: '🤖 All Contributors have signed the [CLA](https://github.com/OpenIM-Robot/cla/blob/main/README.md).<br> The signed information is recorded [**here**](https://github.com/OpenIM-Robot/cla/blob/main/signatures/cla.json)'
           #lock-pullrequest-aftermerge: false - if you don't want this bot to automatically lock the pull request after merging (default - true)
           #use-dco-flag: true - If you are using DCO instead of CLA
+
+      
+     
+     
+      
+      
