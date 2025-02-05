@@ -132,7 +132,8 @@ Thank you for contributing to building a powerful instant messaging solution!
 
 ## :closed_book: License
 
-OpenIMSDK is available under the Apache License 2.0. See the [LICENSE file](https://github.com/openimsdk/open-im-server/blob/main/LICENSE) for more information. 
+For more details, please refer to [here](./LICENSE).
+
 
 
 
