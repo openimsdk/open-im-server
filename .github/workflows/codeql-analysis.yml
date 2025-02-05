@@ -59,7 +59,7 @@ jobs:
     #    and modify them (or add more) to build your code if your project
     #    uses a compiled language
 
-    #- run: |
+    #- run: |contributor-assistant/github-action@v2.4.0' （SHA：9340315624c6e16cef1f2c63bdeb0f0c49c6f474）
     #   make bootstrap
     #   make release
 
