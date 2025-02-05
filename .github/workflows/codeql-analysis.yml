@@ -59,7 +59,7 @@ jobs:
     #    and modify them (or add more) to build your code if your project
     #    uses a compiled language
 
-    #- run: |
+    #- run: |8beae97
     #   make bootstrap
     #   make release
 
