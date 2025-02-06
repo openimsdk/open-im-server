@@ -17,6 +17,7 @@ package msg
 import (
 	"context"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -78,6 +79,11 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 }
 
 func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+	builder := mqbuild.NewBuilder(&config.Discovery, &config.KafkaConfig)
+	redisProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToRedisTopic)
+	if err != nil {
+		return err
+	}
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
 		return err
@@ -105,10 +111,6 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		return err
 	}
 	seqUserCache := redis.NewSeqUserCacheRedis(rdb, seqUser)
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, &config.KafkaConfig)
-	if err != nil {
-		return err
-	}
 	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err
@@ -126,6 +128,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		return err
 	}
 	conversationClient := rpcli.NewConversationClient(conversationConn)
+	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, redisProducer)
 	s := &msgServer{
 		MsgDatabase:            msgDatabase,
 		StreamMsgDatabase:      controller.NewStreamMsgDatabase(streamMsg),

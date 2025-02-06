@@ -35,8 +35,15 @@ import (
 
 func main() {
 	var configPath string
-	flag.StringVar(&configPath, "c", "/Users/chao/Desktop/code/open-im-server/config", "config path")
+	flag.StringVar(&configPath, "c", "", "config path")
 	flag.Parse()
+	if configPath == "" {
+		if runtime.GOOS == "linux" {
+			configPath = "/root/dt/open-im-server/config"
+		} else {
+			configPath = "/Users/chao/Desktop/code/open-im-server/config"
+		}
+	}
 	cmd := newCmds(configPath)
 	putCmd1(cmd, auth.Start)
 	putCmd1(cmd, conversation.Start)
@@ -52,8 +59,9 @@ func main() {
 	ctx := context.Background()
 	if err := cmd.run(ctx); err != nil {
 		fmt.Println(err)
+		return
 	}
-	fmt.Println("success")
+	fmt.Println("exit")
 }
 
 func getTypePath(typ reflect.Type) string {

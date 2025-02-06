@@ -2,16 +2,17 @@ package mgo
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/tools/db/mongoutil"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"math"
 	"math/rand"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func TestName1(t *testing.T) {
@@ -93,7 +94,7 @@ func TestName3(t *testing.T) {
 func TestName4(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*300)
 	defer cancel()
-	cli := Result(mongo.Connect(ctx, options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.66:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
+	cli := Result(mongo.Connect(ctx, options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.135:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
 
 	msg, err := NewMsgMongo(cli.Database("openim_v3"))
 	if err != nil {
@@ -109,6 +110,41 @@ func TestName4(t *testing.T) {
 }
 
 func TestName5(t *testing.T) {
-	var v time.Time
-	t.Log(v.UnixMilli())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*300)
+	defer cancel()
+	cli := Result(mongo.Connect(ctx, options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.135:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
+
+	tmp, err := NewMsgMongo(cli.Database("openim_v3"))
+	if err != nil {
+		panic(err)
+	}
+	msg := tmp.(*MsgMgo)
+	ts := time.Now().Add(-time.Hour * 24 * 5).UnixMilli()
+	t.Log(ts)
+	var seqs []int64
+	for i := 1; i < 256; i++ {
+		seqs = append(seqs, int64(i))
+	}
+	res, err := msg.FindSeqs(ctx, "si_4924054191_9511766539", seqs)
+	if err != nil {
+		panic(err)
+	}
+	t.Log(res)
+}
+
+func TestName6(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*300)
+	defer cancel()
+	cli := Result(mongo.Connect(ctx, options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.135:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
+
+	tmp, err := NewMsgMongo(cli.Database("openim_v3"))
+	if err != nil {
+		panic(err)
+	}
+	msg := tmp.(*MsgMgo)
+	seq, sendTime, err := msg.findBeforeSendTime(ctx, "si_4924054191_9511766539", 1144)
+	if err != nil {
+		panic(err)
+	}
+	t.Log(seq, sendTime)
 }

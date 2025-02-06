@@ -26,6 +26,7 @@ import (
 	"syscall"
 
 	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
+	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/utils/jsonutil"
@@ -76,6 +77,8 @@ type Config struct {
 func Start(ctx context.Context, index int, config *Config) error {
 	runTimeEnv := runtimeenv.PrintRuntimeEnvironment()
 
+	builder := mqbuild.NewBuilder(&config.Discovery, &config.KafkaConfig)
+
 	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "runTimeEnv", runTimeEnv, "prometheusPorts",
 		config.MsgTransfer.Prometheus.Ports, "index", index)
 
@@ -107,7 +110,14 @@ func Start(ctx context.Context, index int, config *Config) error {
 		})
 		cm.Watch(ctx)
 	}
-
+	mongoProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToMongoTopic)
+	if err != nil {
+		return err
+	}
+	pushProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToPushTopic)
+	if err != nil {
+		return err
+	}
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
 		return err
@@ -123,7 +133,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return err
 	}
 	seqUserCache := redis.NewSeqUserCacheRedis(rdb, seqUser)
-	msgTransferDatabase, err := controller.NewMsgTransferDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, &config.KafkaConfig)
+	msgTransferDatabase, err := controller.NewMsgTransferDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, mongoProducer, pushProducer)
 	if err != nil {
 		return err
 	}

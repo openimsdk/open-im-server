@@ -30,13 +30,11 @@ func newEmptyOnlinePusher() *emptyOnlinePusher {
 	return &emptyOnlinePusher{}
 }
 
-func (emptyOnlinePusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData,
-	pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
+func (emptyOnlinePusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
 	log.ZInfo(ctx, "emptyOnlinePusher GetConnsAndOnlinePush", nil)
 	return nil, nil
 }
-func (u emptyOnlinePusher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *sdkws.MsgData,
-	wsResults []*msggateway.SingleMsgToUserResults, pushToUserIDs *[]string) []string {
+func (u emptyOnlinePusher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *sdkws.MsgData, wsResults []*msggateway.SingleMsgToUserResults, pushToUserIDs *[]string) []string {
 	log.ZInfo(ctx, "emptyOnlinePusher GetOnlinePushFailedUserIDs", nil)
 	return nil
 }
