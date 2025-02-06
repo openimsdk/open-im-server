@@ -301,7 +301,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 	if cfg.Discovery.Enable == config.ETCD {
 		etcdClient = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 	}
-	cm := NewConfigManager(cfg.Share.IMAdminUserID, cfg.AllConfig, etcdClient, cfg.ConfigPath, cfg.RuntimeEnv)
+	cm := NewConfigManager(cfg.Share.IMAdminUserID, &cfg.AllConfig, etcdClient, string(cfg.ConfigPath))
 	{
 
 		configGroup := r.Group("/config", cm.CheckAdmin)

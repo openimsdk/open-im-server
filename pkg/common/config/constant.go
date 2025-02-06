@@ -14,12 +14,14 @@
 
 package config
 
+import "github.com/openimsdk/tools/utils/runtimeenv"
+
 const ConfKey = "conf"
 
 const (
 	MountConfigFilePath = "CONFIG_PATH"
 	DeploymentType      = "DEPLOYMENT_TYPE"
-	KUBERNETES          = "kubernetes"
+	KUBERNETES          = runtimeenv.Kubernetes
 	ETCD                = "etcd"
 	Standalone          = "standalone"
 )

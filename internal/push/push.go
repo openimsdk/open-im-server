@@ -15,7 +15,6 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils/runtimeenv"
 	"google.golang.org/grpc"
 )
 
@@ -35,9 +34,7 @@ type Config struct {
 	WebhooksConfig     config.Webhooks
 	LocalCacheConfig   config.LocalCache
 	Discovery          config.Discovery
-	FcmConfigPath      string
-
-	runTimeEnv string
+	FcmConfigPath      config.Path
 }
 
 func (p pushServer) DelUserPushToken(ctx context.Context,
@@ -49,14 +46,12 @@ func (p pushServer) DelUserPushToken(ctx context.Context,
 }
 
 func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
-	config.runTimeEnv = runtimeenv.PrintRuntimeEnvironment()
-
 	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
 	if err != nil {
 		return err
 	}
 	cacheModel := redis.NewThirdCache(rdb)
-	offlinePusher, err := offlinepush.NewOfflinePusher(&config.RpcConfig, cacheModel, config.FcmConfigPath)
+	offlinePusher, err := offlinepush.NewOfflinePusher(&config.RpcConfig, cacheModel, string(config.FcmConfigPath))
 	if err != nil {
 		return err
 	}

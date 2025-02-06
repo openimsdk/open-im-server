@@ -19,12 +19,11 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
-	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/mq"
-
 	"sync"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/tools/discovery"
 
 	"github.com/go-redis/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -79,7 +78,7 @@ type ConsumerMessage struct {
 	Value []byte
 }
 
-func NewOnlineHistoryRedisConsumerHandler(ctx context.Context, client discovery.SvcDiscoveryRegistry, config *Config, database controller.MsgTransferDatabase, historyConsumer mq.Consumer) (*OnlineHistoryRedisConsumerHandler, error) {
+func NewOnlineHistoryRedisConsumerHandler(ctx context.Context, client discovery.SvcDiscoveryRegistry, config *Config, database controller.MsgTransferDatabase) (*OnlineHistoryRedisConsumerHandler, error) {
 	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
 	if err != nil {
 		return nil, err

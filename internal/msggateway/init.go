@@ -33,15 +33,11 @@ type Config struct {
 	RedisConfig    config.Redis
 	WebhooksConfig config.Webhooks
 	Discovery      config.Discovery
-
-	runtimeEnv string
 }
 
 // Start run ws server.
 func Start(ctx context.Context, index int, conf *Config) error {
-	conf.runtimeEnv = runtimeenv.PrintRuntimeEnvironment()
-
-	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "runtimeEnv", conf.runtimeEnv,
+	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "runtimeEnv", runtimeenv.RuntimeEnvironment(),
 		"rpcPorts", conf.MsgGateway.RPC.Ports,
 		"wsPort", conf.MsgGateway.LongConnSvr.Ports, "prometheusPorts", conf.MsgGateway.Prometheus.Ports)
 	wsPort, err := datautil.GetElemByIndex(conf.MsgGateway.LongConnSvr.Ports, index)

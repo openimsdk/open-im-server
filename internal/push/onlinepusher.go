@@ -11,6 +11,7 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
@@ -40,14 +41,14 @@ func (u emptyOnlinePusher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *
 }
 
 func NewOnlinePusher(disCov discovery.Conn, config *Config) OnlinePusher {
-	if config.runTimeEnv == conf.KUBERNETES {
+	if runtimeenv.RuntimeEnvironment() == conf.KUBERNETES {
 		return NewDefaultAllNode(disCov, config)
 	}
 	switch config.Discovery.Enable {
 	case conf.ETCD:
 		return NewDefaultAllNode(disCov, config)
 	default:
-		log.ZError(context.Background(), "NewOnlinePusher is error", errs.Wrap(errors.New("unsupported discovery type")), "type", config.Discovery.Enable)
+		log.ZWarn(context.Background(), "NewOnlinePusher is error", errs.Wrap(errors.New("unsupported discovery type")), "type", config.Discovery.Enable)
 		return nil
 	}
 }

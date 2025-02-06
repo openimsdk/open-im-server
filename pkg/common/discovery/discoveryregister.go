@@ -20,6 +20,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/standalone"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 	"google.golang.org/grpc"
 
 	"github.com/openimsdk/tools/discovery/kubernetes"
@@ -29,8 +30,8 @@ import (
 )
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
-func NewDiscoveryRegister(discovery *config.Discovery, runtimeEnv string, watchNames []string) (discovery.SvcDiscoveryRegistry, error) {
-	if runtimeEnv == config.KUBERNETES {
+func NewDiscoveryRegister(discovery *config.Discovery, watchNames []string) (discovery.SvcDiscoveryRegistry, error) {
+	if runtimeenv.RuntimeEnvironment() == config.KUBERNETES {
 		return kubernetes.NewKubernetesConnManager(discovery.Kubernetes.Namespace,
 			grpc.WithDefaultCallOptions(
 				grpc.MaxCallSendMsgSize(1024*1024*20),

@@ -29,6 +29,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
+	"github.com/openimsdk/tools/mq"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/network"
 
@@ -52,16 +53,16 @@ import (
 )
 
 type MsgTransfer struct {
+	historyConsumer      mq.Consumer
+	historyMongoConsumer mq.Consumer
 	// This consumer aggregated messages, subscribed to the topic:toRedis,
 	//  the message is stored in redis, Incr Redis, and then the message is sent to toPush topic for push,
 	// and the message is sent to toMongo topic for persistence
-	historyCH *OnlineHistoryRedisConsumerHandler
+	historyHandler *OnlineHistoryRedisConsumerHandler
 	//This consumer handle message to mongo
-	historyMongoCH *OnlineHistoryMongoConsumerHandler
-	ctx            context.Context
-	cancel         context.CancelFunc
-
-	runTimeEnv string
+	historyMongoHandler *OnlineHistoryMongoConsumerHandler
+	ctx                 context.Context
+	cancel              context.CancelFunc
 }
 
 type Config struct {
@@ -75,11 +76,10 @@ type Config struct {
 }
 
 func Start(ctx context.Context, index int, config *Config) error {
-	runTimeEnv := runtimeenv.PrintRuntimeEnvironment()
 
 	builder := mqbuild.NewBuilder(&config.Discovery, &config.KafkaConfig)
 
-	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "runTimeEnv", runTimeEnv, "prometheusPorts",
+	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "runTimeEnv", runtimeenv.RuntimeEnvironment(), "prometheusPorts",
 		config.MsgTransfer.Prometheus.Ports, "index", index)
 
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
@@ -90,7 +90,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	client, err := discRegister.NewDiscoveryRegister(&config.Discovery, runTimeEnv, nil)
+	client, err := discRegister.NewDiscoveryRegister(&config.Discovery, nil)
 	if err != nil {
 		return err
 	}
@@ -137,19 +137,25 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	historyCH, err := NewOnlineHistoryRedisConsumerHandler(ctx, client, config, msgTransferDatabase)
+	historyConsumer, err := builder.GetTopicConsumer(ctx, config.KafkaConfig.ToRedisTopic)
 	if err != nil {
 		return err
 	}
-	historyMongoCH, err := NewOnlineHistoryMongoConsumerHandler(&config.KafkaConfig, msgTransferDatabase)
+	historyMongoConsumer, err := builder.GetTopicConsumer(ctx, config.KafkaConfig.ToMongoTopic)
 	if err != nil {
 		return err
 	}
+	historyHandler, err := NewOnlineHistoryRedisConsumerHandler(ctx, client, config, msgTransferDatabase)
+	if err != nil {
+		return err
+	}
+	historyMongoHandler := NewOnlineHistoryMongoConsumerHandler(msgTransferDatabase)
 
 	msgTransfer := &MsgTransfer{
-		historyCH:      historyCH,
-		historyMongoCH: historyMongoCH,
-		runTimeEnv:     runTimeEnv,
+		historyConsumer:      historyConsumer,
+		historyMongoConsumer: historyMongoConsumer,
+		historyHandler:       historyHandler,
+		historyMongoHandler:  historyMongoHandler,
 	}
 
 	return msgTransfer.Start(index, config, client)
@@ -162,10 +168,30 @@ func (m *MsgTransfer) Start(index int, config *Config, client discovery.SvcDisco
 		netErr  error
 	)
 
-	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyCH)
-	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.ctx, m.historyMongoCH)
-	go m.historyCH.HandleUserHasReadSeqMessages(m.ctx)
-	err := m.historyCH.redisMessageBatches.Start()
+	go func() {
+		for {
+			if err := m.historyConsumer.Subscribe(m.ctx, m.historyHandler.HandlerRedisMessage); err != nil {
+				log.ZError(m.ctx, "historyConsumer err", err)
+				return
+			}
+		}
+	}()
+
+	go func() {
+		fn := func(ctx context.Context, key string, value []byte) error {
+			m.historyMongoHandler.HandleChatWs2Mongo(ctx, key, value)
+			return nil
+		}
+		for {
+			if err := m.historyMongoConsumer.Subscribe(m.ctx, fn); err != nil {
+				log.ZError(m.ctx, "historyMongoConsumer err", err)
+				return
+			}
+		}
+	}()
+
+	go m.historyHandler.HandleUserHasReadSeqMessages(m.ctx)
+	err := m.historyHandler.redisMessageBatches.Start()
 	if err != nil {
 		return err
 	}
@@ -237,18 +263,18 @@ func (m *MsgTransfer) Start(index int, config *Config, client discovery.SvcDisco
 	case <-sigs:
 		program.SIGTERMExit()
 		// graceful close kafka client.
+		_ = m.historyConsumer.Close()
+		_ = m.historyMongoConsumer.Close()
 		m.cancel()
-		m.historyCH.redisMessageBatches.Close()
-		m.historyCH.Close()
-		m.historyCH.historyConsumerGroup.Close()
-		m.historyMongoCH.historyConsumerGroup.Close()
+		m.historyHandler.redisMessageBatches.Close()
+		m.historyHandler.Close()
 		return nil
 	case <-netDone:
+		_ = m.historyConsumer.Close()
+		_ = m.historyMongoConsumer.Close()
 		m.cancel()
-		m.historyCH.redisMessageBatches.Close()
-		m.historyCH.Close()
-		m.historyCH.historyConsumerGroup.Close()
-		m.historyMongoCH.historyConsumerGroup.Close()
+		m.historyHandler.redisMessageBatches.Close()
+		m.historyHandler.Close()
 		close(netDone)
 		return netErr
 	}

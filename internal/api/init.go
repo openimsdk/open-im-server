@@ -44,10 +44,9 @@ import (
 )
 
 type Config struct {
-	*conf.AllConfig
+	conf.AllConfig
 
-	RuntimeEnv string
-	ConfigPath string
+	ConfigPath conf.Path
 }
 
 func Start(ctx context.Context, index int, config *Config) error {
@@ -56,9 +55,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return err
 	}
 
-	config.RuntimeEnv = runtimeenv.PrintRuntimeEnvironment()
-
-	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, config.RuntimeEnv, []string{
+	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, []string{
 		config.Discovery.RpcService.MessageGateway,
 	})
 	if err != nil {
@@ -135,7 +132,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 	address := net.JoinHostPort(network.GetListenIP(config.API.Api.ListenIP), strconv.Itoa(apiPort))
 
 	server := http.Server{Addr: address, Handler: router}
-	log.CInfo(ctx, "API server is initializing", "runtimeEnv", config.RuntimeEnv, "address", address, "apiPort", apiPort, "prometheusPort", prometheusPort)
+	log.CInfo(ctx, "API server is initializing", "runtimeEnv", runtimeenv.RuntimeEnvironment(), "address", address, "apiPort", apiPort, "prometheusPort", prometheusPort)
 	go func() {
 		err = server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {

@@ -30,6 +30,8 @@ import (
 
 const StructTagName = "yaml"
 
+type Path string
+
 type CacheConfig struct {
 	Topic         string `yaml:"topic"`
 	SlotNum       int    `yaml:"slotNum"`

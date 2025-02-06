@@ -33,8 +33,6 @@ import (
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"google.golang.org/grpc/status"
 
-	"github.com/openimsdk/tools/utils/runtimeenv"
-
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
@@ -74,8 +72,6 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 		return err
 	}
 
-	runTimeEnv := runtimeenv.PrintRuntimeEnvironment()
-
 	if !autoSetPorts {
 		rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
 		if err != nil {
@@ -99,7 +95,7 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 	if autoSetPorts && discovery.Enable != conf.ETCD {
 		return errs.New("only etcd support autoSetPorts", "rpcRegisterName", rpcRegisterName).Wrap()
 	}
-	client, err := kdisc.NewDiscoveryRegister(discovery, runTimeEnv, watchServiceNames)
+	client, err := kdisc.NewDiscoveryRegister(discovery, watchServiceNames)
 	if err != nil {
 		return err
 	}

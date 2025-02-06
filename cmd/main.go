@@ -137,11 +137,25 @@ func (x *cmds) parseConf(conf any) error {
 		pkt := getTypePath(field.Type())
 		confData, ok := x.conf[pkt]
 		if !ok {
-			if typeField.Name == "FcmConfigPath" && field.Kind() == reflect.String {
+			switch field.Interface().(type) {
+			case config.Path:
 				field.SetString(x.confPath)
-				continue
+			case config.AllConfig:
+				var allConf config.AllConfig
+				if err := x.parseConf(&allConf); err != nil {
+					return err
+				}
+				field.Set(reflect.ValueOf(allConf))
+			case *config.AllConfig:
+				var allConf config.AllConfig
+				if err := x.parseConf(&allConf); err != nil {
+					return err
+				}
+				field.Set(reflect.ValueOf(&allConf))
+			default:
+				return fmt.Errorf("config field %s %s not found", vof.Type().Name(), typeField.Name)
 			}
-			return fmt.Errorf("config field %s %s not found", vof.Type().Name(), typeField.Name)
+			continue
 		}
 		if confData == nil {
 			continue
@@ -172,15 +186,24 @@ func (x *cmds) run(ctx context.Context) error {
 			return err
 		}
 	}
-	for _, cmd := range x.cmds {
-		fmt.Println("start", cmd.Name)
-		if err := cmd.Func(ctx); err != nil {
-			fmt.Println("start failed", cmd.Name, err)
-			return err
-		}
-		fmt.Println("start ok", cmd.Name)
+	if len(x.cmds) == 0 {
+		return fmt.Errorf("no command to run")
 	}
-	return nil
+	ctx, cancel := context.WithCancelCause(ctx)
+	for i := range x.cmds {
+		cmd := x.cmds[i]
+		go func() {
+			fmt.Println("start", cmd.Name)
+			if err := cmd.Func(ctx); err != nil {
+				fmt.Println("start failed", cmd.Name, err)
+				cancel(err)
+				return
+			}
+			fmt.Println("start end", cmd.Name)
+		}()
+	}
+	<-ctx.Done()
+	return context.Cause(ctx)
 }
 
 type cmdName struct {
