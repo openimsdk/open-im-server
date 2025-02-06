@@ -17,8 +17,9 @@ package msg
 import (
 	"context"
 	"encoding/json"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -79,8 +80,10 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 				switch members[req.UserID].RoleLevel {
 				case constant.GroupOwner:
 				case constant.GroupAdmin:
-					if members[msgs[0].SendID].RoleLevel != constant.GroupOrdinaryUsers {
-						return nil, errs.ErrNoPermission.WrapMsg("no permission")
+					if sendMember, ok := members[msgs[0].SendID]; ok {
+						if sendMember.RoleLevel != constant.GroupOrdinaryUsers {
+							return nil, errs.ErrNoPermission.WrapMsg("no permission")
+						}
 					}
 				default:
 					return nil, errs.ErrNoPermission.WrapMsg("no permission")
