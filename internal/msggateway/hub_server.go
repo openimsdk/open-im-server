@@ -22,7 +22,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/protocol/sdkws"
@@ -51,26 +50,26 @@ func (s *Server) InitServer(ctx context.Context, config *Config, disCov discover
 	return nil
 }
 
-func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
-	return startrpc.Start(ctx, &conf.Discovery, &conf.MsgGateway.Prometheus, conf.MsgGateway.ListenIP,
-		conf.MsgGateway.RPC.RegisterIP,
-		conf.MsgGateway.RPC.AutoSetPorts, conf.MsgGateway.RPC.Ports, index,
-		conf.Discovery.RpcService.MessageGateway,
-		nil,
-		conf,
-		[]string{
-			conf.Share.GetConfigFileName(),
-			conf.Discovery.GetConfigFileName(),
-			conf.MsgGateway.GetConfigFileName(),
-			conf.WebhooksConfig.GetConfigFileName(),
-			conf.RedisConfig.GetConfigFileName(),
-		},
-		[]string{
-			conf.Discovery.RpcService.MessageGateway,
-		},
-		s.InitServer,
-	)
-}
+//func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
+//	return startrpc.Start(ctx, &conf.Discovery, &conf.MsgGateway.Prometheus, conf.MsgGateway.ListenIP,
+//		conf.MsgGateway.RPC.RegisterIP,
+//		conf.MsgGateway.RPC.AutoSetPorts, conf.MsgGateway.RPC.Ports, index,
+//		conf.Discovery.RpcService.MessageGateway,
+//		nil,
+//		conf,
+//		[]string{
+//			conf.Share.GetConfigFileName(),
+//			conf.Discovery.GetConfigFileName(),
+//			conf.MsgGateway.GetConfigFileName(),
+//			conf.WebhooksConfig.GetConfigFileName(),
+//			conf.RedisConfig.GetConfigFileName(),
+//		},
+//		[]string{
+//			conf.Discovery.RpcService.MessageGateway,
+//		},
+//		s.InitServer,
+//	)
+//}
 
 type Server struct {
 	msggateway.UnimplementedMsgGatewayServer

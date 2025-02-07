@@ -220,4 +220,5 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
 
-replace github.com/openimsdk/tools => github.com/withchao/tools v0.0.50-alpha.38.0.20250207092500-cc9b95a0cdcc
+//replace github.com/openimsdk/tools => github.com/withchao/tools v0.0.50-alpha.38.0.20250207092500-cc9b95a0cdcc
+replace github.com/openimsdk/tools => /Users/chao/Desktop/code/tools

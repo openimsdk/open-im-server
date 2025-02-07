@@ -2,7 +2,7 @@ package push
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/openimsdk/protocol/msggateway"
@@ -40,18 +40,17 @@ func (u emptyOnlinePusher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *
 	return nil
 }
 
-func NewOnlinePusher(disCov discovery.Conn, config *Config) OnlinePusher {
+func NewOnlinePusher(disCov discovery.Conn, config *Config) (OnlinePusher, error) {
 	if runtimeenv.RuntimeEnvironment() == conf.KUBERNETES {
-		return NewDefaultAllNode(disCov, config)
+		return NewDefaultAllNode(disCov, config), nil
 	}
 	switch config.Discovery.Enable {
 	case conf.ETCD:
-		return NewDefaultAllNode(disCov, config)
+		return NewDefaultAllNode(disCov, config), nil
 	case conf.Standalone:
-		return nil
+		return NewDefaultAllNode(disCov, config), nil
 	default:
-		log.ZWarn(context.Background(), "NewOnlinePusher is error", errs.Wrap(errors.New("unsupported discovery type")), "type", config.Discovery.Enable)
-		return nil
+		return nil, errs.New(fmt.Sprintf("unsupported discovery type %s", config.Discovery.Enable))
 	}
 }
 

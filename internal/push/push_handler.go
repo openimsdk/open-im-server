@@ -45,8 +45,6 @@ type ConsumerHandler struct {
 }
 
 func NewConsumerHandler(ctx context.Context, config *Config, database controller.PushDatabase, offlinePusher offlinepush.OfflinePusher, rdb redis.UniversalClient, client discovery.Conn) (*ConsumerHandler, error) {
-	var consumerHandler ConsumerHandler
-	var err error
 	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return nil, err
@@ -63,13 +61,18 @@ func NewConsumerHandler(ctx context.Context, config *Config, database controller
 	if err != nil {
 		return nil, err
 	}
+	onlinePusher, err := NewOnlinePusher(client, config)
+	if err != nil {
+		return nil, err
+	}
+	var consumerHandler ConsumerHandler
 	consumerHandler.userClient = rpcli.NewUserClient(userConn)
 	consumerHandler.groupClient = rpcli.NewGroupClient(groupConn)
 	consumerHandler.msgClient = rpcli.NewMsgClient(msgConn)
 	consumerHandler.conversationClient = rpcli.NewConversationClient(conversationConn)
 
 	consumerHandler.offlinePusher = offlinePusher
-	consumerHandler.onlinePusher = NewOnlinePusher(client, config)
+	consumerHandler.onlinePusher = onlinePusher
 	consumerHandler.groupLocalCache = rpccache.NewGroupLocalCache(consumerHandler.groupClient, &config.LocalCacheConfig, rdb)
 	consumerHandler.conversationLocalCache = rpccache.NewConversationLocalCache(consumerHandler.conversationClient, &config.LocalCacheConfig, rdb)
 	consumerHandler.webhookClient = webhook.NewWebhookClient(config.WebhooksConfig.URL)

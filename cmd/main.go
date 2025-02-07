@@ -45,17 +45,17 @@ func main() {
 		}
 	}
 	cmd := newCmds(configPath)
-	putCmd1(cmd, auth.Start)
-	putCmd1(cmd, conversation.Start)
-	putCmd1(cmd, relation.Start)
-	putCmd1(cmd, group.Start)
-	putCmd1(cmd, msg.Start)
-	putCmd1(cmd, third.Start)
-	putCmd1(cmd, user.Start)
-	putCmd1(cmd, push.Start)
-	putCmd2(cmd, msggateway.Start)
-	putCmd2(cmd, msgtransfer.Start)
-	putCmd2(cmd, api.Start)
+	putCmd1(cmd, false, auth.Start)
+	putCmd1(cmd, false, conversation.Start)
+	putCmd1(cmd, false, relation.Start)
+	putCmd1(cmd, false, group.Start)
+	putCmd1(cmd, false, msg.Start)
+	putCmd1(cmd, false, third.Start)
+	putCmd1(cmd, false, user.Start)
+	putCmd1(cmd, false, push.Start)
+	putCmd3(cmd, true, msggateway.Start)
+	putCmd2(cmd, true, msgtransfer.Start)
+	putCmd2(cmd, true, api.Start)
 	ctx := context.Background()
 	if err := cmd.run(ctx); err != nil {
 		fmt.Println(err)
@@ -176,8 +176,8 @@ func (x *cmds) parseConf(conf any) error {
 	return nil
 }
 
-func (x *cmds) add(name string, fn func(ctx context.Context) error) {
-	x.cmds = append(x.cmds, cmdName{Name: name, Func: fn})
+func (x *cmds) add(name string, block bool, fn func(ctx context.Context) error) {
+	x.cmds = append(x.cmds, cmdName{Name: name, Block: block, Func: fn})
 }
 
 func (x *cmds) run(ctx context.Context) error {
@@ -193,13 +193,14 @@ func (x *cmds) run(ctx context.Context) error {
 	for i := range x.cmds {
 		cmd := x.cmds[i]
 		go func() {
-			fmt.Println("start", cmd.Name)
+			//fmt.Println("start", cmd.Name)
 			if err := cmd.Func(ctx); err != nil {
-				fmt.Println("start failed", cmd.Name, err)
-				cancel(err)
+				cancel(fmt.Errorf("server %s exit %w", cmd.Name, err))
 				return
 			}
-			fmt.Println("start end", cmd.Name)
+			if cmd.Block {
+				cancel(fmt.Errorf("server %s exit", cmd.Name))
+			}
 		}()
 	}
 	<-ctx.Done()
@@ -207,8 +208,9 @@ func (x *cmds) run(ctx context.Context) error {
 }
 
 type cmdName struct {
-	Name string
-	Func func(ctx context.Context) error
+	Name  string
+	Func  func(ctx context.Context) error
+	Block bool
 }
 
 func getFuncPacketName(fn any) string {
@@ -219,8 +221,8 @@ func getFuncPacketName(fn any) string {
 	return name
 }
 
-func putCmd1[C any](cmd *cmds, fn func(ctx context.Context, config *C, client discovery.Conn, server grpc.ServiceRegistrar) error) {
-	cmd.add(getFuncPacketName(fn), func(ctx context.Context) error {
+func putCmd1[C any](cmd *cmds, block bool, fn func(ctx context.Context, config *C, client discovery.Conn, server grpc.ServiceRegistrar) error) {
+	cmd.add(getFuncPacketName(fn), block, func(ctx context.Context) error {
 		var conf C
 		if err := cmd.parseConf(&conf); err != nil {
 			return err
@@ -229,12 +231,22 @@ func putCmd1[C any](cmd *cmds, fn func(ctx context.Context, config *C, client di
 	})
 }
 
-func putCmd2[C any](cmd *cmds, fn func(ctx context.Context, index int, config *C) error) {
-	cmd.add(getFuncPacketName(fn), func(ctx context.Context) error {
+func putCmd2[C any](cmd *cmds, block bool, fn func(ctx context.Context, index int, config *C) error) {
+	cmd.add(getFuncPacketName(fn), block, func(ctx context.Context) error {
 		var conf C
 		if err := cmd.parseConf(&conf); err != nil {
 			return err
 		}
 		return fn(ctx, 0, &conf)
+	})
+}
+
+func putCmd3[C any](cmd *cmds, block bool, fn func(ctx context.Context, config *C, client discovery.Conn, server grpc.ServiceRegistrar, index int) error) {
+	cmd.add(getFuncPacketName(fn), block, func(ctx context.Context) error {
+		var conf C
+		if err := cmd.parseConf(&conf); err != nil {
+			return err
+		}
+		return fn(ctx, &conf, standalone.GetDiscoveryConn(), standalone.GetServiceRegistrar(), 0)
 	})
 }

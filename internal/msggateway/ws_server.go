@@ -2,7 +2,6 @@ package msggateway
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"sync"
@@ -11,7 +10,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	pbAuth "github.com/openimsdk/protocol/auth"
@@ -30,7 +28,7 @@ import (
 )
 
 type LongConnServer interface {
-	Run(done chan error) error
+	Run(ctx context.Context) error
 	wsHandler(w http.ResponseWriter, r *http.Request)
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
@@ -158,19 +156,14 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 	}
 }
 
-func (ws *WsServer) Run(done chan error) error {
-	var (
-		client       *Client
-		netErr       error
-		shutdownDone = make(chan struct{}, 1)
-	)
+func (ws *WsServer) Run(ctx context.Context) error {
+	var client *Client
 
-	server := http.Server{Addr: ":" + stringutil.IntToString(ws.port), Handler: nil}
-
+	ctx, cancel := context.WithCancelCause(ctx)
 	go func() {
 		for {
 			select {
-			case <-shutdownDone:
+			case <-ctx.Done():
 				return
 			case client = <-ws.registerChan:
 				ws.registerClient(client)
@@ -181,42 +174,31 @@ func (ws *WsServer) Run(done chan error) error {
 			}
 		}
 	}()
-	netDone := make(chan struct{}, 1)
+
+	server := http.Server{Addr: fmt.Sprintf(":%d", ws.port), Handler: nil}
 	go func() {
 		http.HandleFunc("/", ws.wsHandler)
 		err := server.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			netErr = errs.WrapMsg(err, "ws start err", server.Addr)
-			netDone <- struct{}{}
+		if err == nil {
+			err = fmt.Errorf("http server closed")
 		}
+		cancel(fmt.Errorf("msg gateway %w", err))
 	}()
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+
 	shutDown := func() error {
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
 		sErr := server.Shutdown(ctx)
 		if sErr != nil {
 			return errs.WrapMsg(sErr, "shutdown err")
 		}
-		close(shutdownDone)
 		return nil
 	}
-	etcd.RegisterShutDown(shutDown)
-	defer cancel()
-	var err error
-	select {
-	case err = <-done:
-		if err := shutDown(); err != nil {
-			return err
-		}
-		if err != nil {
-			return err
-		}
-	case <-netDone:
-	}
-	return netErr
-
+	<-ctx.Done()
+	return shutDown()
 }
 
-var concurrentRequest = 3
+const concurrentRequest = 3
 
 func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *Client) error {
 	conns, err := ws.disCov.GetConns(ctx, ws.msgGatewayConfig.Discovery.RpcService.MessageGateway)
