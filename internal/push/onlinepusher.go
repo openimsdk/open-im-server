@@ -47,6 +47,8 @@ func NewOnlinePusher(disCov discovery.Conn, config *Config) OnlinePusher {
 	switch config.Discovery.Enable {
 	case conf.ETCD:
 		return NewDefaultAllNode(disCov, config)
+	case conf.Standalone:
+		return nil
 	default:
 		log.ZWarn(context.Background(), "NewOnlinePusher is error", errs.Wrap(errors.New("unsupported discovery type")), "type", config.Discovery.Enable)
 		return nil

@@ -127,7 +127,6 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 			}
 
 			etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
-
 			_, err = etcdClient.Put(ctx, prommetrics.BuildDiscoveryKey(rpcRegisterName), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
 			if err != nil {
 				return errs.WrapMsg(err, "etcd put err")
@@ -176,7 +175,17 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 		return err
 	}
 
+	// todo
+	//err = client.Register(
+	//	ctx,
+	//	"prometheus"+rpcRegisterName,
+	//	registerIP,
+	//	port,
+	//	grpc.WithTransportCredentials(insecure.NewCredentials()),
+	//)
+
 	err = client.Register(
+		ctx,
 		rpcRegisterName,
 		registerIP,
 		port,
