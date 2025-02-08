@@ -26,18 +26,15 @@ type CronTaskConfig struct {
 	CronTask  config.CronTask
 	Share     config.Share
 	Discovery config.Discovery
-
-	runTimeEnv string
 }
 
 func Start(ctx context.Context, conf *CronTaskConfig) error {
-	conf.runTimeEnv = runtimeenv.PrintRuntimeEnvironment()
 
-	log.CInfo(ctx, "CRON-TASK server is initializing", "runTimeEnv", conf.runTimeEnv, "chatRecordsClearTime", conf.CronTask.CronExecuteTime, "msgDestructTime", conf.CronTask.RetainChatRecords)
+	log.CInfo(ctx, "CRON-TASK server is initializing", "runTimeEnv", runtimeenv.RuntimeEnvironment(), "chatRecordsClearTime", conf.CronTask.CronExecuteTime, "msgDestructTime", conf.CronTask.RetainChatRecords)
 	if conf.CronTask.RetainChatRecords < 1 {
 		return errs.New("msg destruct time must be greater than 1").Wrap()
 	}
-	client, err := kdisc.NewDiscoveryRegister(&conf.Discovery, conf.runTimeEnv, nil)
+	client, err := kdisc.NewDiscoveryRegister(&conf.Discovery, nil)
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}

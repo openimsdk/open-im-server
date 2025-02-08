@@ -94,6 +94,9 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")),
 	)
 
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGTERM)
+
 	var gsrv grpcServiceRegistrar
 
 	err = rpcFn(ctx, config, client, &gsrv)
@@ -160,9 +163,6 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 			close(rpcGracefulStop)
 		}()
 	}
-
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGTERM)
 
 	select {
 	case val := <-sigs:

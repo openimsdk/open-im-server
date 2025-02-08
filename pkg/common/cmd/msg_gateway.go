@@ -57,10 +57,8 @@ func (m *MsgGatewayCmd) Exec() error {
 
 func (m *MsgGatewayCmd) runE() error {
 	m.msgGatewayConfig.Index = config.Index(m.Index())
-	//return msggateway.Start(m.ctx, m.msgGatewayConfig, "", "")
-	//return msggateway.Start(m.ctx, m.msgGatewayConfig, "", "")
-	var prometheus config.Prometheus
 	rpc := m.msgGatewayConfig.MsgGateway.RPC
+	var prometheus config.Prometheus
 	return startrpc.Start(
 		m.ctx, &m.msgGatewayConfig.Discovery,
 		&prometheus,
@@ -68,8 +66,8 @@ func (m *MsgGatewayCmd) runE() error {
 		rpc.AutoSetPorts,
 		rpc.Ports, int(m.msgGatewayConfig.Index),
 		m.msgGatewayConfig.Discovery.RpcService.MessageGateway,
-		"",
-		m.msgGatewayConfig.MsgGateway,
+		nil,
+		m.msgGatewayConfig,
 		[]string{},
 		[]string{},
 		msggateway.Start,
