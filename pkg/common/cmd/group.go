@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/group"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
 	"github.com/openimsdk/open-im-server/v3/version"
@@ -36,14 +37,14 @@ func NewGroupRpcCmd() *GroupRpcCmd {
 	var groupConfig group.Config
 	ret := &GroupRpcCmd{groupConfig: &groupConfig}
 	ret.configMap = map[string]any{
-		OpenIMRPCGroupCfgFileName: &groupConfig.RpcConfig,
-		RedisConfigFileName:       &groupConfig.RedisConfig,
-		MongodbConfigFileName:     &groupConfig.MongodbConfig,
-		ShareFileName:             &groupConfig.Share,
-		NotificationFileName:      &groupConfig.NotificationConfig,
-		WebhooksConfigFileName:    &groupConfig.WebhooksConfig,
-		LocalCacheConfigFileName:  &groupConfig.LocalCacheConfig,
-		DiscoveryConfigFilename:   &groupConfig.Discovery,
+		config.OpenIMRPCGroupCfgFileName: &groupConfig.RpcConfig,
+		config.RedisConfigFileName:       &groupConfig.RedisConfig,
+		config.MongodbConfigFileName:     &groupConfig.MongodbConfig,
+		config.ShareFileName:             &groupConfig.Share,
+		config.NotificationFileName:      &groupConfig.NotificationConfig,
+		config.WebhooksConfigFileName:    &groupConfig.WebhooksConfig,
+		config.LocalCacheConfigFileName:  &groupConfig.LocalCacheConfig,
+		config.DiscoveryConfigFilename:   &groupConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

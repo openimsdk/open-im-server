@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
@@ -34,13 +35,13 @@ func NewMsgTransferCmd() *MsgTransferCmd {
 	var msgTransferConfig msgtransfer.Config
 	ret := &MsgTransferCmd{msgTransferConfig: &msgTransferConfig}
 	ret.configMap = map[string]any{
-		OpenIMMsgTransferCfgFileName: &msgTransferConfig.MsgTransfer,
-		RedisConfigFileName:          &msgTransferConfig.RedisConfig,
-		MongodbConfigFileName:        &msgTransferConfig.MongodbConfig,
-		KafkaConfigFileName:          &msgTransferConfig.KafkaConfig,
-		ShareFileName:                &msgTransferConfig.Share,
-		WebhooksConfigFileName:       &msgTransferConfig.WebhooksConfig,
-		DiscoveryConfigFilename:      &msgTransferConfig.Discovery,
+		config.OpenIMMsgTransferCfgFileName: &msgTransferConfig.MsgTransfer,
+		config.RedisConfigFileName:          &msgTransferConfig.RedisConfig,
+		config.MongodbConfigFileName:        &msgTransferConfig.MongodbConfig,
+		config.KafkaConfigFileName:          &msgTransferConfig.KafkaConfig,
+		config.ShareFileName:                &msgTransferConfig.Share,
+		config.WebhooksConfigFileName:       &msgTransferConfig.WebhooksConfig,
+		config.DiscoveryConfigFilename:      &msgTransferConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

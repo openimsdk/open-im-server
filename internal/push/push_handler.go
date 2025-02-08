@@ -58,19 +58,19 @@ func NewConsumerHandler(ctx context.Context, config *Config, database controller
 	if err != nil {
 		return nil, err
 	}
-	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
+	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return nil, err
 	}
-	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
+	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
 	if err != nil {
 		return nil, err
 	}
-	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
+	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
 	if err != nil {
 		return nil, err
 	}
-	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
+	conversationConn, err := client.GetConn(ctx, config.Discovery.RpcService.Conversation)
 	if err != nil {
 		return nil, err
 	}

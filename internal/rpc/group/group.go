@@ -24,22 +24,21 @@ import (
 	"strings"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/common"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/notification/grouphash"
 	"github.com/openimsdk/protocol/constant"
-	pbconversation "github.com/openimsdk/protocol/conversation"
+	pbconv "github.com/openimsdk/protocol/conversation"
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/protocol/wrapperspb"
@@ -103,15 +102,15 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	//msgRpcClient := rpcclient.NewMessageRpcClient(client, config.Share.RpcRegisterName.Msg)
 	//conversationRpcClient := rpcclient.NewConversationRpcClient(client, config.Share.RpcRegisterName.Conversation)
 
-	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
+	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err
 	}
-	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
+	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
 	if err != nil {
 		return err
 	}
-	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
+	conversationConn, err := client.GetConn(ctx, config.Discovery.RpcService.Conversation)
 	if err != nil {
 		return err
 	}
@@ -1015,7 +1014,7 @@ func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 	if req.GroupInfoForSet.Notification != "" {
 		num -= 3
 		func() {
-			conversation := &pbconversation.ConversationReq{
+			conversation := &pbconv.ConversationReq{
 				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupInfoForSet.GroupID),
 				ConversationType: constant.ReadGroupChatType,
 				GroupID:          req.GroupInfoForSet.GroupID,
@@ -1126,7 +1125,7 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 
 		if req.Notification.Value != "" {
 			func() {
-				conversation := &pbconversation.ConversationReq{
+				conversation := &pbconv.ConversationReq{
 					ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
 					ConversationType: constant.ReadGroupChatType,
 					GroupID:          req.GroupID,

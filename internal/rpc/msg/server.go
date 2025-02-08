@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -103,19 +104,19 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
+	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err
 	}
-	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
+	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
 	if err != nil {
 		return err
 	}
-	friendConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Friend)
+	friendConn, err := client.GetConn(ctx, config.Discovery.RpcService.Friend)
 	if err != nil {
 		return err
 	}
-	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
+	conversationConn, err := client.GetConn(ctx, config.Discovery.RpcService.Conversation)
 	if err != nil {
 		return err
 	}

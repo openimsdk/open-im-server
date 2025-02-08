@@ -79,15 +79,15 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
+	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err
 	}
-	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
+	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
 	if err != nil {
 		return err
 	}
-	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
+	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
 	if err != nil {
 		return err
 	}
@@ -238,11 +238,13 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 	if req.Conversation == nil {
 		return nil, errs.ErrArgs.WrapMsg("conversation must not be nil")
 	}
-
 	if req.Conversation.ConversationType == constant.WriteGroupChatType {
 		groupInfo, err := c.groupClient.GetGroupInfo(ctx, req.Conversation.GroupID)
 		if err != nil {
 			return nil, err
+		}
+		if groupInfo == nil {
+			return nil, servererrs.ErrGroupIDNotFound.WrapMsg(req.Conversation.GroupID)
 		}
 		if groupInfo.Status == constant.GroupStatusDismissed {
 			return nil, servererrs.ErrDismissedAlready.WrapMsg("group dismissed")

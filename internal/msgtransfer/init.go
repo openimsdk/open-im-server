@@ -25,6 +25,8 @@ import (
 	"strconv"
 	"syscall"
 
+	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/network"
@@ -35,10 +37,10 @@ import (
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	discRegister "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	discRegister "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -57,6 +59,8 @@ type MsgTransfer struct {
 	historyMongoCH *OnlineHistoryMongoConsumerHandler
 	ctx            context.Context
 	cancel         context.CancelFunc
+
+	runTimeEnv string
 }
 
 type Config struct {
@@ -70,8 +74,9 @@ type Config struct {
 }
 
 func Start(ctx context.Context, index int, config *Config) error {
+	runTimeEnv := runtimeenv.PrintRuntimeEnvironment()
 
-	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "prometheusPorts",
+	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "runTimeEnv", runTimeEnv, "prometheusPorts",
 		config.MsgTransfer.Prometheus.Ports, "index", index)
 
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
@@ -88,6 +93,20 @@ func Start(ctx context.Context, index int, config *Config) error {
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
+
+	if config.Discovery.Enable == conf.ETCD {
+		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), []string{
+			config.MsgTransfer.GetConfigFileName(),
+			config.RedisConfig.GetConfigFileName(),
+			config.MongodbConfig.GetConfigFileName(),
+			config.KafkaConfig.GetConfigFileName(),
+			config.Share.GetConfigFileName(),
+			config.WebhooksConfig.GetConfigFileName(),
+			config.Discovery.GetConfigFileName(),
+			conf.LogConfigFileName,
+		})
+		cm.Watch(ctx)
+	}
 
 	msgDocModel, err := mgo.NewMsgMongo(mgocli.GetDB())
 	if err != nil {
@@ -120,11 +139,13 @@ func Start(ctx context.Context, index int, config *Config) error {
 	msgTransfer := &MsgTransfer{
 		historyCH:      historyCH,
 		historyMongoCH: historyMongoCH,
+		runTimeEnv:     runTimeEnv,
 	}
-	return msgTransfer.Start(index, config)
+
+	return msgTransfer.Start(index, config, client)
 }
 
-func (m *MsgTransfer) Start(index int, cfg *Config) error {
+func (m *MsgTransfer) Start(index int, config *Config, client discovery.SvcDiscoveryRegistry) error {
 	m.ctx, m.cancel = context.WithCancel(context.Background())
 	var (
 		netDone = make(chan struct{}, 1)
@@ -137,11 +158,6 @@ func (m *MsgTransfer) Start(index int, cfg *Config) error {
 	err := m.historyCH.redisMessageBatches.Start()
 	if err != nil {
 		return err
-	}
-
-	client, err := kdisc.NewDiscoveryRegister(&cfg.Discovery, &cfg.Share, nil)
-	if err != nil {
-		return errs.WrapMsg(err, "failed to register discovery service")
 	}
 
 	registerIP, err := network.GetRpcRegisterIP("")
@@ -160,17 +176,17 @@ func (m *MsgTransfer) Start(index int, cfg *Config) error {
 		return listener, port, nil
 	}
 
-	if cfg.MsgTransfer.Prometheus.AutoSetPorts && cfg.Discovery.Enable != conf.ETCD {
+	if config.MsgTransfer.Prometheus.AutoSetPorts && config.Discovery.Enable != conf.ETCD {
 		return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
 	}
 
-	if cfg.MsgTransfer.Prometheus.Enable {
+	if config.MsgTransfer.Prometheus.Enable {
 		var (
 			listener       net.Listener
 			prometheusPort int
 		)
 
-		if cfg.MsgTransfer.Prometheus.AutoSetPorts {
+		if config.MsgTransfer.Prometheus.AutoSetPorts {
 			listener, prometheusPort, err = getAutoPort()
 			if err != nil {
 				return err
@@ -183,7 +199,7 @@ func (m *MsgTransfer) Start(index int, cfg *Config) error {
 				return errs.WrapMsg(err, "etcd put err")
 			}
 		} else {
-			prometheusPort, err = datautil.GetElemByIndex(cfg.MsgTransfer.Prometheus.Ports, index)
+			prometheusPort, err = datautil.GetElemByIndex(config.MsgTransfer.Prometheus.Ports, index)
 			if err != nil {
 				return err
 			}

@@ -12,14 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package discoveryregister
+package discovery
 
 import (
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/kubernetes"
 	"github.com/openimsdk/tools/discovery"
+	"google.golang.org/grpc"
+
+	"github.com/openimsdk/tools/discovery/kubernetes"
+
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
 )
@@ -35,9 +38,7 @@ func NewDiscoveryRegister(discovery *config.Discovery, runtimeEnv string, watchN
 	}
 
 	switch discovery.Enable {
-	case "k8s":
-		return kubernetes.NewK8sDiscoveryRegister(share.RpcRegisterName.MessageGateway)
-	case "etcd":
+	case config.ETCD:
 		return etcd.NewSvcDiscoveryRegistry(
 			discovery.Etcd.RootDirectory,
 			discovery.Etcd.Address,

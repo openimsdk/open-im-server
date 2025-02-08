@@ -2,14 +2,19 @@ package push
 
 import (
 	"context"
+	"errors"
+	"sync"
+
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
-	"sync"
+
+	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type OnlinePusher interface {
@@ -37,15 +42,16 @@ func (u emptyOnlinePusher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *
 }
 
 func NewOnlinePusher(disCov discovery.SvcDiscoveryRegistry, config *Config) OnlinePusher {
-	switch config.Discovery.Enable {
-	case "k8s":
-		return NewK8sStaticConsistentHash(disCov, config)
-	case "zookeeper":
+
+	if config.runTimeEnv == conf.KUBERNETES {
 		return NewDefaultAllNode(disCov, config)
-	case "etcd":
+	}
+	switch config.Discovery.Enable {
+	case conf.ETCD:
 		return NewDefaultAllNode(disCov, config)
 	default:
-		return newEmptyOnlinePusher()
+		log.ZError(context.Background(), "NewOnlinePusher is error", errs.Wrap(errors.New("unsupported discovery type")), "type", config.Discovery.Enable)
+		return nil
 	}
 }
 
@@ -60,7 +66,7 @@ func NewDefaultAllNode(disCov discovery.SvcDiscoveryRegistry, config *Config) *D
 
 func (d *DefaultAllNode) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData,
 	pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
-	conns, err := d.disCov.GetConns(ctx, d.config.Share.RpcRegisterName.MessageGateway)
+	conns, err := d.disCov.GetConns(ctx, d.config.Discovery.RpcService.MessageGateway)
 	if len(conns) == 0 {
 		log.ZWarn(ctx, "get gateway conn 0 ", nil)
 	} else {

@@ -2,25 +2,29 @@ package msggateway
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
 
-	"github.com/go-playground/validator/v10"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	pbAuth "github.com/openimsdk/protocol/auth"
+	"github.com/openimsdk/tools/mcontext"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"golang.org/x/sync/errgroup"
 )
@@ -72,19 +76,19 @@ type kickHandler struct {
 }
 
 func (ws *WsServer) SetDiscoveryRegistry(ctx context.Context, disCov discovery.SvcDiscoveryRegistry, config *Config) error {
-	userConn, err := disCov.GetConn(ctx, config.Share.RpcRegisterName.User)
+	userConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err
 	}
-	pushConn, err := disCov.GetConn(ctx, config.Share.RpcRegisterName.Push)
+	pushConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.Push)
 	if err != nil {
 		return err
 	}
-	authConn, err := disCov.GetConn(ctx, config.Share.RpcRegisterName.Auth)
+	authConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.Auth)
 	if err != nil {
 		return err
 	}
-	msgConn, err := disCov.GetConn(ctx, config.Share.RpcRegisterName.Msg)
+	msgConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.Msg)
 	if err != nil {
 		return err
 	}
@@ -129,7 +133,7 @@ func NewWsServer(msgGatewayConfig *Config, opts ...Option) *WsServer {
 	for _, o := range opts {
 		o(&config)
 	}
-	//userRpcClient := rpcclient.NewUserRpcClient(client, config.Share.RpcRegisterName.User, config.Share.IMAdminUserID)
+	//userRpcClient := rpcclient.NewUserRpcClient(client, config.Discovery.RpcService.User, config.Share.IMAdminUserID)
 
 	v := validator.New()
 	return &WsServer{
@@ -181,21 +185,28 @@ func (ws *WsServer) Run(done chan error) error {
 	go func() {
 		http.HandleFunc("/", ws.wsHandler)
 		err := server.ListenAndServe()
-		defer close(netDone)
-		if err != nil && err != http.ErrServerClosed {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			netErr = errs.WrapMsg(err, "ws start err", server.Addr)
+			netDone <- struct{}{}
 		}
 	}()
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-	var err error
-	select {
-	case err = <-done:
+	shutDown := func() error {
 		sErr := server.Shutdown(ctx)
 		if sErr != nil {
 			return errs.WrapMsg(sErr, "shutdown err")
 		}
 		close(shutdownDone)
+		return nil
+	}
+	etcd.RegisterShutDown(shutDown)
+	defer cancel()
+	var err error
+	select {
+	case err = <-done:
+		if err := shutDown(); err != nil {
+			return err
+		}
 		if err != nil {
 			return err
 		}
@@ -208,7 +219,7 @@ func (ws *WsServer) Run(done chan error) error {
 var concurrentRequest = 3
 
 func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *Client) error {
-	conns, err := ws.disCov.GetConns(ctx, ws.msgGatewayConfig.Share.RpcRegisterName.MessageGateway)
+	conns, err := ws.disCov.GetConns(ctx, ws.msgGatewayConfig.Discovery.RpcService.MessageGateway)
 	if err != nil {
 		return err
 	}

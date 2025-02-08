@@ -36,7 +36,7 @@ import (
 )
 
 func (s *Server) InitServer(ctx context.Context, config *Config, disCov discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	userConn, err := disCov.GetConn(ctx, config.Share.RpcRegisterName.User)
+	userConn, err := disCov.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err
 	}
@@ -54,13 +54,16 @@ func (s *Server) InitServer(ctx context.Context, config *Config, disCov discover
 func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 	return startrpc.Start(ctx, &conf.Discovery, &conf.MsgGateway.Prometheus, conf.MsgGateway.ListenIP,
 		conf.MsgGateway.RPC.RegisterIP,
-		conf.MsgGateway.RPC.AutoSetPorts,
-		conf.MsgGateway.RPC.Ports, index,
-		conf.Share.RpcRegisterName.MessageGateway,
-		&conf.Share,
+		conf.MsgGateway.RPC.AutoSetPorts, conf.MsgGateway.RPC.Ports, index,
+		conf.Discovery.RpcService.MessageGateway,
+		nil,
 		conf,
 		[]string{
-			conf.Share.RpcRegisterName.MessageGateway,
+			conf.Share.GetConfigFileName(),
+			conf.Discovery.GetConfigFileName(),
+			conf.MsgGateway.GetConfigFileName(),
+			conf.WebhooksConfig.GetConfigFileName(),
+			conf.RedisConfig.GetConfigFileName(),
 		},
 		[]string{
 			conf.Discovery.RpcService.MessageGateway,
@@ -71,7 +74,7 @@ func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 
 type Server struct {
 	msggateway.UnimplementedMsgGatewayServer
-	rpcPort        int
+
 	LongConnServer LongConnServer
 	config         *Config
 	pushTerminal   map[int]struct{}

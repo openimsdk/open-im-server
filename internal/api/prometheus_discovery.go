@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/discovery"
@@ -20,18 +20,18 @@ type PrometheusDiscoveryApi struct {
 	client *clientv3.Client
 }
 
-func NewPrometheusDiscoveryApi(cfg *Config, client discovery.SvcDiscoveryRegistry) *PrometheusDiscoveryApi {
+func NewPrometheusDiscoveryApi(config *Config, client discovery.SvcDiscoveryRegistry) *PrometheusDiscoveryApi {
 	api := &PrometheusDiscoveryApi{
-		config: cfg,
+		config: config,
 	}
-	if cfg.Discovery.Enable == config.ETCD {
+	if config.Discovery.Enable == conf.ETCD {
 		api.client = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 	}
 	return api
 }
 
 func (p *PrometheusDiscoveryApi) Enable(c *gin.Context) {
-	if p.config.Discovery.Enable != config.ETCD {
+	if p.config.Discovery.Enable != conf.ETCD {
 		c.JSON(http.StatusOK, []struct{}{})
 		c.Abort()
 	}
@@ -74,39 +74,39 @@ func (p *PrometheusDiscoveryApi) Api(c *gin.Context) {
 }
 
 func (p *PrometheusDiscoveryApi) User(c *gin.Context) {
-	p.discovery(c, p.config.Share.RpcRegisterName.User)
+	p.discovery(c, p.config.Discovery.RpcService.User)
 }
 
 func (p *PrometheusDiscoveryApi) Group(c *gin.Context) {
-	p.discovery(c, p.config.Share.RpcRegisterName.Group)
+	p.discovery(c, p.config.Discovery.RpcService.Group)
 }
 
 func (p *PrometheusDiscoveryApi) Msg(c *gin.Context) {
-	p.discovery(c, p.config.Share.RpcRegisterName.Msg)
+	p.discovery(c, p.config.Discovery.RpcService.Msg)
 }
 
 func (p *PrometheusDiscoveryApi) Friend(c *gin.Context) {
-	p.discovery(c, p.config.Share.RpcRegisterName.Friend)
+	p.discovery(c, p.config.Discovery.RpcService.Friend)
 }
 
 func (p *PrometheusDiscoveryApi) Conversation(c *gin.Context) {
-	p.discovery(c, p.config.Share.RpcRegisterName.Conversation)
+	p.discovery(c, p.config.Discovery.RpcService.Conversation)
 }
 
 func (p *PrometheusDiscoveryApi) Third(c *gin.Context) {
-	p.discovery(c, p.config.Share.RpcRegisterName.Third)
+	p.discovery(c, p.config.Discovery.RpcService.Third)
 }
 
 func (p *PrometheusDiscoveryApi) Auth(c *gin.Context) {
-	p.discovery(c, p.config.Share.RpcRegisterName.Auth)
+	p.discovery(c, p.config.Discovery.RpcService.Auth)
 }
 
 func (p *PrometheusDiscoveryApi) Push(c *gin.Context) {
-	p.discovery(c, p.config.Share.RpcRegisterName.Push)
+	p.discovery(c, p.config.Discovery.RpcService.Push)
 }
 
 func (p *PrometheusDiscoveryApi) MessageGateway(c *gin.Context) {
-	p.discovery(c, p.config.Share.RpcRegisterName.MessageGateway)
+	p.discovery(c, p.config.Discovery.RpcService.MessageGateway)
 }
 
 func (p *PrometheusDiscoveryApi) MessageTransfer(c *gin.Context) {

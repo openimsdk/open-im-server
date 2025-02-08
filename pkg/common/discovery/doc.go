@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package kubernetes // import "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister/etcd"
+package discovery // import "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"

@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package api
 
 import (
@@ -12,36 +26,37 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/tools/mw"
-	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/network"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
+	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mw"
 	"github.com/openimsdk/tools/system/program"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
+	"github.com/openimsdk/tools/utils/network"
+	"github.com/openimsdk/tools/utils/runtimeenv"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Config struct {
-	API       config.API
-	Share     config.Share
-	Discovery config.Discovery
+	*conf.AllConfig
+
+	RuntimeEnv string
+	ConfigPath string
 }
 
-func Start(ctx context.Context, index int, cfg *Config) error {
-	apiPort, err := datautil.GetElemByIndex(cfg.API.Api.Ports, index)
+func Start(ctx context.Context, index int, config *Config) error {
+	apiPort, err := datautil.GetElemByIndex(config.API.Api.Ports, index)
 	if err != nil {
 		return err
 	}
 
-	var client discovery.SvcDiscoveryRegistry
+	config.RuntimeEnv = runtimeenv.PrintRuntimeEnvironment()
 
 	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, config.RuntimeEnv, []string{
 		config.Discovery.RpcService.MessageGateway,
@@ -49,8 +64,7 @@ func Start(ctx context.Context, index int, cfg *Config) error {
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
 	}
-	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
+	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 
 	var (
 		netDone        = make(chan struct{}, 1)
@@ -58,10 +72,6 @@ func Start(ctx context.Context, index int, cfg *Config) error {
 		prometheusPort int
 	)
 
-	router, err := newGinRouter(ctx, client, cfg)
-	if err != nil {
-		return err
-	}
 	registerIP, err := network.GetRpcRegisterIP("")
 	if err != nil {
 		return err
@@ -78,16 +88,20 @@ func Start(ctx context.Context, index int, cfg *Config) error {
 		return listener, port, nil
 	}
 
-	if cfg.API.Prometheus.AutoSetPorts && cfg.Discovery.Enable != config.ETCD {
+	if config.API.Prometheus.AutoSetPorts && config.Discovery.Enable != conf.ETCD {
 		return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
 	}
 
-	if cfg.API.Prometheus.Enable {
+	router, err := newGinRouter(ctx, client, config)
+	if err != nil {
+		return err
+	}
+	if config.API.Prometheus.Enable {
 		var (
 			listener net.Listener
 		)
 
-		if cfg.API.Prometheus.AutoSetPorts {
+		if config.API.Prometheus.AutoSetPorts {
 			listener, prometheusPort, err = getAutoPort()
 			if err != nil {
 				return err
@@ -100,7 +114,7 @@ func Start(ctx context.Context, index int, cfg *Config) error {
 				return errs.WrapMsg(err, "etcd put err")
 			}
 		} else {
-			prometheusPort, err = datautil.GetElemByIndex(cfg.API.Prometheus.Ports, index)
+			prometheusPort, err = datautil.GetElemByIndex(config.API.Prometheus.Ports, index)
 			if err != nil {
 				return err
 			}
@@ -118,30 +132,41 @@ func Start(ctx context.Context, index int, cfg *Config) error {
 		}()
 
 	}
-	address := net.JoinHostPort(network.GetListenIP(cfg.API.Api.ListenIP), strconv.Itoa(apiPort))
+	address := net.JoinHostPort(network.GetListenIP(config.API.Api.ListenIP), strconv.Itoa(apiPort))
 
 	server := http.Server{Addr: address, Handler: router}
-	log.CInfo(ctx, "API server is initializing", "address", address, "apiPort", apiPort, "prometheusPort", prometheusPort)
+	log.CInfo(ctx, "API server is initializing", "runtimeEnv", config.RuntimeEnv, "address", address, "apiPort", apiPort, "prometheusPort", prometheusPort)
 	go func() {
 		err = server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			netErr = errs.WrapMsg(err, fmt.Sprintf("api start err: %s", server.Addr))
 			netDone <- struct{}{}
-
 		}
 	}()
+
+	if config.Discovery.Enable == conf.ETCD {
+		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), config.GetConfigNames())
+		cm.Watch(ctx)
+	}
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGTERM)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-	select {
-	case <-sigs:
-		program.SIGTERMExit()
+	shutdown := func() error {
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
 		err := server.Shutdown(ctx)
 		if err != nil {
 			return errs.WrapMsg(err, "shutdown err")
+		}
+		return nil
+	}
+	disetcd.RegisterShutDown(shutdown)
+	select {
+	case <-sigs:
+		program.SIGTERMExit()
+		if err := shutdown(); err != nil {
+			return err
 		}
 	case <-netDone:
 		close(netDone)

@@ -27,12 +27,15 @@ import (
 	"time"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"google.golang.org/grpc/status"
 
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	"github.com/openimsdk/tools/utils/runtimeenv"
+
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
@@ -50,6 +53,7 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 	rpcFn func(ctx context.Context, config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error,
 	options ...grpc.ServerOption) error {
 
+	watchConfigNames = append(watchConfigNames, conf.LogConfigFileName)
 	var (
 		rpcTcpAddr     string
 		netDone        = make(chan struct{}, 2)
@@ -57,10 +61,16 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 		prometheusPort int
 	)
 
+	if notification != nil {
+		conf.InitNotification(notification)
+	}
+
 	registerIP, err := network.GetRpcRegisterIP(registerIP)
 	if err != nil {
 		return err
 	}
+
+	runTimeEnv := runtimeenv.PrintRuntimeEnvironment()
 
 	if !autoSetPorts {
 		rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
@@ -132,7 +142,7 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 				return errs.WrapMsg(err, "listen err", "rpcTcpAddr", rpcTcpAddr)
 			}
 		}
-		cs := prommetrics.GetGrpcCusMetrics(rpcRegisterName, share)
+		cs := prommetrics.GetGrpcCusMetrics(rpcRegisterName, discovery)
 		go func() {
 			if err := prommetrics.RpcInit(cs, listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				netErr = errs.WrapMsg(err, fmt.Sprintf("rpc %s prometheus start err: %d", rpcRegisterName, prometheusPort))
@@ -183,6 +193,11 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 			netDone <- struct{}{}
 		}
 	}()
+
+	if discovery.Enable == conf.ETCD {
+		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), watchConfigNames)
+		cm.Watch(ctx)
+	}
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGTERM)

@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/version"
 
 	"github.com/openimsdk/tools/system/program"
@@ -35,11 +36,11 @@ func NewMsgGatewayCmd() *MsgGatewayCmd {
 	var msgGatewayConfig msggateway.Config
 	ret := &MsgGatewayCmd{msgGatewayConfig: &msgGatewayConfig}
 	ret.configMap = map[string]any{
-		OpenIMMsgGatewayCfgFileName: &msgGatewayConfig.MsgGateway,
-		ShareFileName:               &msgGatewayConfig.Share,
-		RedisConfigFileName:         &msgGatewayConfig.RedisConfig,
-		WebhooksConfigFileName:      &msgGatewayConfig.WebhooksConfig,
-		DiscoveryConfigFilename:     &msgGatewayConfig.Discovery,
+		config.OpenIMMsgGatewayCfgFileName: &msgGatewayConfig.MsgGateway,
+		config.ShareFileName:               &msgGatewayConfig.Share,
+		config.RedisConfigFileName:         &msgGatewayConfig.RedisConfig,
+		config.WebhooksConfigFileName:      &msgGatewayConfig.WebhooksConfig,
+		config.DiscoveryConfigFilename:     &msgGatewayConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

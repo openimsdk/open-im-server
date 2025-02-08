@@ -94,15 +94,15 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	if err != nil {
 		return err
 	}
-	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
+	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
 	if err != nil {
 		return err
 	}
-	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
+	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
 	if err != nil {
 		return err
 	}
-	friendConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Friend)
+	friendConn, err := client.GetConn(ctx, config.Discovery.RpcService.Friend)
 	if err != nil {
 		return err
 	}

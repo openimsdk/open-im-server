@@ -2,6 +2,7 @@ package rpcli
 
 import (
 	"context"
+
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/errs"

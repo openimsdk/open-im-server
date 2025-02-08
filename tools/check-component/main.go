@@ -18,13 +18,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
@@ -33,14 +32,21 @@ import (
 	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/system/program"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 )
 
 const maxRetry = 180
 
+const (
+	MountConfigFilePath = "CONFIG_PATH"
+	DeploymentType      = "DEPLOYMENT_TYPE"
+	KUBERNETES          = "kubernetes"
+)
+
 func CheckZookeeper(ctx context.Context, config *config.ZooKeeper) error {
 	// Temporary disable logging
 	originalLogger := log.Default().Writer()
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	defer log.SetOutput(originalLogger) // Ensure logging is restored
 	return zookeeper.Check(ctx, config.Address, config.Schema, zookeeper.WithUserNameAndPassword(config.Username, config.Password))
 }
@@ -78,35 +84,37 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 		discovery   = &config.Discovery{}
 		thirdConfig = &config.Third{}
 	)
-	err := config.LoadConfig(filepath.Join(configDir, cmd.MongodbConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MongodbConfigFileName], mongoConfig)
+	runtimeEnv := runtimeenv.PrintRuntimeEnvironment()
+
+	err := config.Load(configDir, config.MongodbConfigFileName, config.EnvPrefixMap[config.MongodbConfigFileName], runtimeEnv, mongoConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.LoadConfig(filepath.Join(configDir, cmd.RedisConfigFileName), cmd.ConfigEnvPrefixMap[cmd.RedisConfigFileName], redisConfig)
+	err = config.Load(configDir, config.RedisConfigFileName, config.EnvPrefixMap[config.RedisConfigFileName], runtimeEnv, redisConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.LoadConfig(filepath.Join(configDir, cmd.KafkaConfigFileName), cmd.ConfigEnvPrefixMap[cmd.KafkaConfigFileName], kafkaConfig)
+	err = config.Load(configDir, config.KafkaConfigFileName, config.EnvPrefixMap[config.KafkaConfigFileName], runtimeEnv, kafkaConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
-	err = config.LoadConfig(filepath.Join(configDir, cmd.OpenIMRPCThirdCfgFileName), cmd.ConfigEnvPrefixMap[cmd.OpenIMRPCThirdCfgFileName], thirdConfig)
+	err = config.Load(configDir, config.OpenIMRPCThirdCfgFileName, config.EnvPrefixMap[config.OpenIMRPCThirdCfgFileName], runtimeEnv, thirdConfig)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 
 	if thirdConfig.Object.Enable == "minio" {
-		err = config.LoadConfig(filepath.Join(configDir, cmd.MinioConfigFileName), cmd.ConfigEnvPrefixMap[cmd.MinioConfigFileName], minioConfig)
+		err = config.Load(configDir, config.MinioConfigFileName, config.EnvPrefixMap[config.MinioConfigFileName], runtimeEnv, minioConfig)
 		if err != nil {
 			return nil, nil, nil, nil, nil, err
 		}
 	} else {
 		minioConfig = nil
 	}
-	err = config.LoadConfig(filepath.Join(configDir, cmd.DiscoveryConfigFilename), cmd.ConfigEnvPrefixMap[cmd.DiscoveryConfigFilename], discovery)
+	err = config.Load(configDir, config.DiscoveryConfigFilename, config.EnvPrefixMap[config.DiscoveryConfigFilename], runtimeEnv, discovery)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
@@ -159,10 +167,6 @@ func performChecks(ctx context.Context, mongoConfig *config.Mongo, redisConfig *
 	if discovery.Enable == "etcd" {
 		checks["Etcd"] = func(ctx context.Context) error {
 			return CheckEtcd(ctx, &discovery.Etcd)
-		}
-	} else if discovery.Enable == "zookeeper" {
-		checks["Zookeeper"] = func(ctx context.Context) error {
-			return CheckZookeeper(ctx, &discovery.ZooKeeper)
 		}
 	}
 

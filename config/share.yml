@@ -1,18 +1,9 @@
 secret: openIM123
-rpcRegisterName:
-  user: user
-  friend: friend
-  msg: msg
-  push: push
-  messageGateway: messageGateway
-  group: group
-  auth: auth
-  conversation: conversation
-  third: third
 
 imAdminUserID: [ imAdmin ]
 
 # 1: For Android, iOS, Windows, Mac, and web platforms, only one instance can be online at a time
 multiLogin:
   policy: 1
+  # max num of tokens in one end
   maxNumOneEnd: 30

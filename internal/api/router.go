@@ -5,29 +5,29 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gin-contrib/gzip"
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
+	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	pbAuth "github.com/openimsdk/protocol/auth"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/protocol/user"
-
-	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
-
-	"github.com/gin-contrib/gzip"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 const (
@@ -52,32 +52,32 @@ func prommetricsGin() gin.HandlerFunc {
 	}
 }
 
-func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, config *Config) (*gin.Engine, error) {
-	authConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Auth)
+func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cfg *Config) (*gin.Engine, error) {
+	authConn, err := client.GetConn(ctx, cfg.Discovery.RpcService.Auth)
 	if err != nil {
 		return nil, err
 	}
-	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
+	userConn, err := client.GetConn(ctx, cfg.Discovery.RpcService.User)
 	if err != nil {
 		return nil, err
 	}
-	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
+	groupConn, err := client.GetConn(ctx, cfg.Discovery.RpcService.Group)
 	if err != nil {
 		return nil, err
 	}
-	friendConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Friend)
+	friendConn, err := client.GetConn(ctx, cfg.Discovery.RpcService.Friend)
 	if err != nil {
 		return nil, err
 	}
-	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
+	conversationConn, err := client.GetConn(ctx, cfg.Discovery.RpcService.Conversation)
 	if err != nil {
 		return nil, err
 	}
-	thirdConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Third)
+	thirdConn, err := client.GetConn(ctx, cfg.Discovery.RpcService.Third)
 	if err != nil {
 		return nil, err
 	}
-	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
+	msgConn, err := client.GetConn(ctx, cfg.Discovery.RpcService.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("required_if", RequiredIf)
 	}
-	switch config.API.Api.CompressionLevel {
+	switch cfg.API.Api.CompressionLevel {
 	case NoCompression:
 	case DefaultCompression:
 		r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -95,11 +95,12 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	case BestSpeed:
 		r.Use(gzip.Gzip(gzip.BestSpeed))
 	}
-	r.Use(prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(), mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)))
-	u := NewUserApi(user.NewUserClient(userConn), client, config.Share.RpcRegisterName)
-	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), config.Share.IMAdminUserID)
-	userRouterGroup := r.Group("/user")
+	r.Use(prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(),
+		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)))
+
+	u := NewUserApi(user.NewUserClient(userConn), client, cfg.Discovery.RpcService)
 	{
+		userRouterGroup := r.Group("/user")
 		userRouterGroup.POST("/user_register", u.UserRegister)
 		userRouterGroup.POST("/update_user_info", u.UpdateUserInfo)
 		userRouterGroup.POST("/update_user_info_ex", u.UpdateUserInfoEx)
@@ -198,7 +199,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	}
 	// Third service
 	{
-		t := NewThirdApi(third.NewThirdClient(thirdConn), config.API.Prometheus.GrafanaURL)
+		t := NewThirdApi(third.NewThirdClient(thirdConn), cfg.API.Prometheus.GrafanaURL)
 		thirdGroup := r.Group("/third")
 		thirdGroup.GET("/prometheus", t.GetPrometheus)
 		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)
@@ -222,6 +223,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		objectGroup.GET("/*name", t.ObjectRedirect)
 	}
 	// Message
+	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), cfg.Share.IMAdminUserID)
 	{
 		msgGroup := r.Group("/msg")
 		msgGroup.POST("/newest_seq", m.GetSeq)
@@ -244,6 +246,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		msgGroup.POST("/batch_send_msg", m.BatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 		msgGroup.POST("/get_server_time", m.GetServerTime)
+		msgGroup.POST("/get_stream_msg", m.GetStreamMsg)
+		msgGroup.POST("/append_stream_msg", m.AppendStreamMsg)
 	}
 	// Conversation
 	{
@@ -278,7 +282,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		jssdk.POST("/get_active_conversations", j.GetActiveConversations)
 	}
 	{
-		pd := NewPrometheusDiscoveryApi(config, client)
+		pd := NewPrometheusDiscoveryApi(cfg, client)
 		proDiscoveryGroup := r.Group("/prometheus_discovery", pd.Enable)
 		proDiscoveryGroup.GET("/api", pd.Api)
 		proDiscoveryGroup.GET("/user", pd.User)

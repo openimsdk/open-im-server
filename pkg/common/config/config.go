@@ -380,10 +380,9 @@ type AfterConfig struct {
 }
 
 type Share struct {
-	Secret          string          `mapstructure:"secret"`
-	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
-	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
-	MultiLogin      MultiLogin      `mapstructure:"multiLogin"`
+	Secret        string     `mapstructure:"secret"`
+	IMAdminUserID []string   `mapstructure:"imAdminUserID"`
+	MultiLogin    MultiLogin `mapstructure:"multiLogin"`
 }
 
 type MultiLogin struct {
@@ -478,11 +477,41 @@ type ZooKeeper struct {
 }
 
 type Discovery struct {
-	Enable    string    `mapstructure:"enable"`
-	Etcd      Etcd      `mapstructure:"etcd"`
-	ZooKeeper ZooKeeper `mapstructure:"zooKeeper"`
+	Enable     string     `mapstructure:"enable"`
+	Etcd       Etcd       `mapstructure:"etcd"`
+	Kubernetes Kubernetes `mapstructure:"kubernetes"`
+	RpcService RpcService `mapstructure:"rpcService"`
 }
 
+type RpcService struct {
+	User           string `mapstructure:"user"`
+	Friend         string `mapstructure:"friend"`
+	Msg            string `mapstructure:"msg"`
+	Push           string `mapstructure:"push"`
+	MessageGateway string `mapstructure:"messageGateway"`
+	Group          string `mapstructure:"group"`
+	Auth           string `mapstructure:"auth"`
+	Conversation   string `mapstructure:"conversation"`
+	Third          string `mapstructure:"third"`
+}
+
+func (r *RpcService) GetServiceNames() []string {
+	return []string{
+		r.User,
+		r.Friend,
+		r.Msg,
+		r.Push,
+		r.MessageGateway,
+		r.Group,
+		r.Auth,
+		r.Conversation,
+		r.Third,
+	}
+}
+
+type Kubernetes struct {
+	Namespace string `yaml:"namespace"`
+}
 type Etcd struct {
 	RootDirectory string   `mapstructure:"rootDirectory"`
 	Address       []string `mapstructure:"address"`
@@ -716,4 +745,176 @@ func (s *Share) GetConfigFileName() string {
 
 func (w *Webhooks) GetConfigFileName() string {
 	return WebhooksConfigFileName
+}
+
+func InitNotification(notification *Notification) {
+	notification.GroupCreated.UnreadCount = false
+	notification.GroupCreated.ReliabilityLevel = 1
+	notification.GroupInfoSet.UnreadCount = false
+	notification.GroupInfoSet.ReliabilityLevel = 1
+	notification.JoinGroupApplication.UnreadCount = false
+	notification.JoinGroupApplication.ReliabilityLevel = 1
+	notification.MemberQuit.UnreadCount = false
+	notification.MemberQuit.ReliabilityLevel = 1
+	notification.GroupApplicationAccepted.UnreadCount = false
+	notification.GroupApplicationAccepted.ReliabilityLevel = 1
+	notification.GroupApplicationRejected.UnreadCount = false
+	notification.GroupApplicationRejected.ReliabilityLevel = 1
+	notification.GroupOwnerTransferred.UnreadCount = false
+	notification.GroupOwnerTransferred.ReliabilityLevel = 1
+	notification.MemberKicked.UnreadCount = false
+	notification.MemberKicked.ReliabilityLevel = 1
+	notification.MemberInvited.UnreadCount = false
+	notification.MemberInvited.ReliabilityLevel = 1
+	notification.MemberEnter.UnreadCount = false
+	notification.MemberEnter.ReliabilityLevel = 1
+	notification.GroupDismissed.UnreadCount = false
+	notification.GroupDismissed.ReliabilityLevel = 1
+	notification.GroupMuted.UnreadCount = false
+	notification.GroupMuted.ReliabilityLevel = 1
+	notification.GroupCancelMuted.UnreadCount = false
+	notification.GroupCancelMuted.ReliabilityLevel = 1
+	notification.GroupMemberMuted.UnreadCount = false
+	notification.GroupMemberMuted.ReliabilityLevel = 1
+	notification.GroupMemberCancelMuted.UnreadCount = false
+	notification.GroupMemberCancelMuted.ReliabilityLevel = 1
+	notification.GroupMemberInfoSet.UnreadCount = false
+	notification.GroupMemberInfoSet.ReliabilityLevel = 1
+	notification.GroupMemberSetToAdmin.UnreadCount = false
+	notification.GroupMemberSetToAdmin.ReliabilityLevel = 1
+	notification.GroupMemberSetToOrdinary.UnreadCount = false
+	notification.GroupMemberSetToOrdinary.ReliabilityLevel = 1
+	notification.GroupInfoSetAnnouncement.UnreadCount = false
+	notification.GroupInfoSetAnnouncement.ReliabilityLevel = 1
+	notification.GroupInfoSetName.UnreadCount = false
+	notification.GroupInfoSetName.ReliabilityLevel = 1
+	notification.FriendApplicationAdded.UnreadCount = false
+	notification.FriendApplicationAdded.ReliabilityLevel = 1
+	notification.FriendApplicationApproved.UnreadCount = false
+	notification.FriendApplicationApproved.ReliabilityLevel = 1
+	notification.FriendApplicationRejected.UnreadCount = false
+	notification.FriendApplicationRejected.ReliabilityLevel = 1
+	notification.FriendAdded.UnreadCount = false
+	notification.FriendAdded.ReliabilityLevel = 1
+	notification.FriendDeleted.UnreadCount = false
+	notification.FriendDeleted.ReliabilityLevel = 1
+	notification.FriendRemarkSet.UnreadCount = false
+	notification.FriendRemarkSet.ReliabilityLevel = 1
+	notification.BlackAdded.UnreadCount = false
+	notification.BlackAdded.ReliabilityLevel = 1
+	notification.BlackDeleted.UnreadCount = false
+	notification.BlackDeleted.ReliabilityLevel = 1
+	notification.FriendInfoUpdated.UnreadCount = false
+	notification.FriendInfoUpdated.ReliabilityLevel = 1
+	notification.UserInfoUpdated.UnreadCount = false
+	notification.UserInfoUpdated.ReliabilityLevel = 1
+	notification.UserStatusChanged.UnreadCount = false
+	notification.UserStatusChanged.ReliabilityLevel = 1
+	notification.ConversationChanged.UnreadCount = false
+	notification.ConversationChanged.ReliabilityLevel = 1
+	notification.ConversationSetPrivate.UnreadCount = false
+	notification.ConversationSetPrivate.ReliabilityLevel = 1
+}
+
+type AllConfig struct {
+	Discovery    Discovery
+	Kafka        Kafka
+	LocalCache   LocalCache
+	Log          Log
+	Minio        Minio
+	Mongo        Mongo
+	Notification Notification
+	API          API
+	CronTask     CronTask
+	MsgGateway   MsgGateway
+	MsgTransfer  MsgTransfer
+	Push         Push
+	Auth         Auth
+	Conversation Conversation
+	Friend       Friend
+	Group        Group
+	Msg          Msg
+	Third        Third
+	User         User
+	Redis        Redis
+	Share        Share
+	Webhooks     Webhooks
+}
+
+func (a *AllConfig) Name2Config(name string) any {
+	switch name {
+	case a.Discovery.GetConfigFileName():
+		return a.Discovery
+	case a.Kafka.GetConfigFileName():
+		return a.Kafka
+	case a.LocalCache.GetConfigFileName():
+		return a.LocalCache
+	case a.Log.GetConfigFileName():
+		return a.Log
+	case a.Minio.GetConfigFileName():
+		return a.Minio
+	case a.Mongo.GetConfigFileName():
+		return a.Mongo
+	case a.Notification.GetConfigFileName():
+		return a.Notification
+	case a.API.GetConfigFileName():
+		return a.API
+	case a.CronTask.GetConfigFileName():
+		return a.CronTask
+	case a.MsgGateway.GetConfigFileName():
+		return a.MsgGateway
+	case a.MsgTransfer.GetConfigFileName():
+		return a.MsgTransfer
+	case a.Push.GetConfigFileName():
+		return a.Push
+	case a.Auth.GetConfigFileName():
+		return a.Auth
+	case a.Conversation.GetConfigFileName():
+		return a.Conversation
+	case a.Friend.GetConfigFileName():
+		return a.Friend
+	case a.Group.GetConfigFileName():
+		return a.Group
+	case a.Msg.GetConfigFileName():
+		return a.Msg
+	case a.Third.GetConfigFileName():
+		return a.Third
+	case a.User.GetConfigFileName():
+		return a.User
+	case a.Redis.GetConfigFileName():
+		return a.Redis
+	case a.Share.GetConfigFileName():
+		return a.Share
+	case a.Webhooks.GetConfigFileName():
+		return a.Webhooks
+	default:
+		return nil
+	}
+}
+
+func (a *AllConfig) GetConfigNames() []string {
+	return []string{
+		a.Discovery.GetConfigFileName(),
+		a.Kafka.GetConfigFileName(),
+		a.LocalCache.GetConfigFileName(),
+		a.Log.GetConfigFileName(),
+		a.Minio.GetConfigFileName(),
+		a.Mongo.GetConfigFileName(),
+		a.Notification.GetConfigFileName(),
+		a.API.GetConfigFileName(),
+		a.CronTask.GetConfigFileName(),
+		a.MsgGateway.GetConfigFileName(),
+		a.MsgTransfer.GetConfigFileName(),
+		a.Push.GetConfigFileName(),
+		a.Auth.GetConfigFileName(),
+		a.Conversation.GetConfigFileName(),
+		a.Friend.GetConfigFileName(),
+		a.Group.GetConfigFileName(),
+		a.Msg.GetConfigFileName(),
+		a.Third.GetConfigFileName(),
+		a.User.GetConfigFileName(),
+		a.Redis.GetConfigFileName(),
+		a.Share.GetConfigFileName(),
+		a.Webhooks.GetConfigFileName(),
+	}
 }

@@ -16,6 +16,7 @@ package relation
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/tools/mq/memamq"
@@ -91,11 +92,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 
-	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
+	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err
 	}
-	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
+	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
 	if err != nil {
 		return err
 	}

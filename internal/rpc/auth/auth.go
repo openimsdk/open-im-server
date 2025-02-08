@@ -60,7 +60,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
+	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err
 	}
@@ -187,7 +187,7 @@ func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq
 }
 
 func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32) error {
-	conns, err := s.RegisterCenter.GetConns(ctx, s.config.Share.RpcRegisterName.MessageGateway)
+	conns, err := s.RegisterCenter.GetConns(ctx, s.config.Discovery.RpcService.MessageGateway)
 	if err != nil {
 		return err
 	}

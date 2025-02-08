@@ -25,10 +25,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-
 	"github.com/IBM/sarama"
 	"github.com/go-redis/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/tools/batcher"
@@ -83,11 +82,11 @@ func NewOnlineHistoryRedisConsumerHandler(ctx context.Context, client discovery.
 	if err != nil {
 		return nil, err
 	}
-	groupConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Group)
+	groupConn, err := client.GetConn(ctx, config.Discovery.RpcService.Group)
 	if err != nil {
 		return nil, err
 	}
-	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
+	conversationConn, err := client.GetConn(ctx, config.Discovery.RpcService.Conversation)
 	if err != nil {
 		return nil, err
 	}
