@@ -6,11 +6,15 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
 	"path"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"strings"
+	"sync"
+	"syscall"
+	"time"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/openimsdk/open-im-server/v3/internal/api"
@@ -27,6 +31,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/standalone"
+	"github.com/openimsdk/tools/log"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
@@ -188,9 +193,42 @@ func (x *cmds) run(ctx context.Context) error {
 		return err
 	}
 	ctx, cancel := context.WithCancelCause(ctx)
+
+	go func() {
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.SIGTERM)
+		select {
+		case <-ctx.Done():
+			return
+		case val := <-sigs:
+			cancel(fmt.Errorf("signal %s", val.String()))
+		}
+	}()
+
 	for i := range x.cmds {
 		cmd := x.cmds[i]
+		if cmd.Block {
+			continue
+		}
+		if err := cmd.Func(ctx); err != nil {
+			cancel(fmt.Errorf("server %s exit %w", cmd.Name, err))
+			return err
+		}
 		go func() {
+			if cmd.Block {
+				cancel(fmt.Errorf("server %s exit", cmd.Name))
+			}
+		}()
+	}
+	var wg sync.WaitGroup
+	for i := range x.cmds {
+		cmd := x.cmds[i]
+		if !cmd.Block {
+			continue
+		}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
 			if err := cmd.Func(ctx); err != nil {
 				cancel(fmt.Errorf("server %s exit %w", cmd.Name, err))
 				return
@@ -201,7 +239,22 @@ func (x *cmds) run(ctx context.Context) error {
 		}()
 	}
 	<-ctx.Done()
-	return context.Cause(ctx)
+
+	exitCause := context.Cause(ctx)
+	log.ZWarn(ctx, "server exit cause", exitCause)
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-time.After(time.Second * 20):
+		log.ZError(ctx, "server exit timeout", nil)
+	case <-done:
+		log.ZInfo(ctx, "server exit done")
+	}
+	return exitCause
 }
 
 func putCmd[C any](cmd *cmds, block bool, fn func(ctx context.Context, config *C, client discovery.Conn, server grpc.ServiceRegistrar) error) {
