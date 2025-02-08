@@ -59,7 +59,16 @@ func (a *ThirdRpcCmd) Exec() error {
 func (a *ThirdRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.thirdConfig.Discovery, &a.thirdConfig.RpcConfig.Prometheus, a.thirdConfig.RpcConfig.RPC.ListenIP,
 		a.thirdConfig.RpcConfig.RPC.RegisterIP, a.thirdConfig.RpcConfig.RPC.AutoSetPorts, a.thirdConfig.RpcConfig.RPC.Ports,
-		a.Index(), a.thirdConfig.Share.RpcRegisterName.Third, &a.thirdConfig.Share, a.thirdConfig,
-		nil,
+		a.Index(), a.thirdConfig.Discovery.RpcService.Third, &a.thirdConfig.NotificationConfig, a.thirdConfig,
+		[]string{
+			a.thirdConfig.RpcConfig.GetConfigFileName(),
+			a.thirdConfig.RedisConfig.GetConfigFileName(),
+			a.thirdConfig.MongodbConfig.GetConfigFileName(),
+			a.thirdConfig.NotificationConfig.GetConfigFileName(),
+			a.thirdConfig.Share.GetConfigFileName(),
+			a.thirdConfig.MinioConfig.GetConfigFileName(),
+			a.thirdConfig.LocalCacheConfig.GetConfigFileName(),
+			a.thirdConfig.Discovery.GetConfigFileName(),
+		}, nil,
 		third.Start)
 }

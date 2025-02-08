@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/tools/seq/internal"
+	"os"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/tools/seq/internal"
 )
 
 func main() {
@@ -17,6 +19,8 @@ func main() {
 	flag.Parse()
 	if err := internal.Main(config, time.Duration(second)*time.Second); err != nil {
 		fmt.Println("seq task", err)
+		os.Exit(1)
+		return
 	}
 	fmt.Println("seq task success!")
 }

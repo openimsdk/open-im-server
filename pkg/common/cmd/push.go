@@ -64,5 +64,8 @@ func (a *PushRpcCmd) runE() error {
 		[]string{
 			a.pushConfig.Share.RpcRegisterName.MessageGateway,
 		},
+		[]string{
+			a.pushConfig.Discovery.RpcService.MessageGateway,
+		},
 		push.Start)
 }

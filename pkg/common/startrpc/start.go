@@ -45,8 +45,8 @@ import (
 
 // Start rpc server.
 func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConfig *conf.Prometheus, listenIP,
-	registerIP string, autoSetPorts bool, rpcPorts []int, index int, rpcRegisterName string, share *conf.Share, config T,
-	watchServiceNames []string,
+	registerIP string, autoSetPorts bool, rpcPorts []int, index int, rpcRegisterName string, notification *conf.Notification, config T,
+	watchConfigNames []string, watchServiceNames []string,
 	rpcFn func(ctx context.Context, config T, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error,
 	options ...grpc.ServerOption) error {
 
@@ -85,7 +85,7 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 	if autoSetPorts && discovery.Enable != conf.ETCD {
 		return errs.New("only etcd support autoSetPorts", "rpcRegisterName", rpcRegisterName).Wrap()
 	}
-	client, err := kdisc.NewDiscoveryRegister(discovery, share, watchServiceNames)
+	client, err := kdisc.NewDiscoveryRegister(discovery, runTimeEnv, watchServiceNames)
 	if err != nil {
 		return err
 	}
