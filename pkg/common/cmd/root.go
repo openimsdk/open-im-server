@@ -87,6 +87,25 @@ func NewRootCmd(processName string, opts ...func(*CmdOpts)) *RootCmd {
 	return rootCmd
 }
 
+func (r *RootCmd) initEtcd() error {
+	configDirectory, _, err := r.getFlag(&r.Command)
+	if err != nil {
+		return err
+	}
+	disConfig := config.Discovery{}
+	env := runtimeenv.PrintRuntimeEnvironment()
+	err = config.Load(configDirectory, config.DiscoveryConfigFilename, config.EnvPrefixMap[config.DiscoveryConfigFilename],
+		env, &disConfig)
+	if err != nil {
+		return err
+	}
+	if disConfig.Enable == config.ETCD {
+		discov, _ := kdisc.NewDiscoveryRegister(&disConfig, env, nil)
+		r.etcdClient = discov.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
+	}
+	return nil
+}
+
 func (r *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) error {
 	cmdOpts := r.applyOptions(opts...)
 	if err := r.initializeConfiguration(cmd, cmdOpts); err != nil {
@@ -96,7 +115,9 @@ func (r *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) e
 	if err := r.initializeLogger(cmdOpts); err != nil {
 		return errs.WrapMsg(err, "failed to initialize logger")
 	}
-
+	if err := r.etcdClient.Close(); err != nil {
+		return errs.WrapMsg(err, "failed to close etcd client")
+	}
 	return nil
 }
 
@@ -115,8 +136,65 @@ func (r *RootCmd) initializeConfiguration(cmd *cobra.Command, opts *CmdOpts) err
 		}
 	}
 	// Load common log configuration file
-	return config.LoadConfig(filepath.Join(configDirectory, LogConfigFileName),
-		ConfigEnvPrefixMap[LogConfigFileName], &r.log)
+	return config.Load(configDirectory, config.LogConfigFileName, config.EnvPrefixMap[config.LogConfigFileName], runtimeEnv, &r.log)
+}
+
+func (r *RootCmd) updateConfigFromEtcd(opts *CmdOpts) error {
+	if r.etcdClient == nil {
+		return nil
+	}
+	ctx := context.TODO()
+
+	res, err := r.etcdClient.Get(ctx, disetcd.BuildKey(disetcd.EnableConfigCenterKey))
+	if err != nil {
+		log.ZWarn(ctx, "root cmd updateConfigFromEtcd, etcd Get EnableConfigCenterKey err: %v", errs.Wrap(err))
+		return nil
+	}
+	if res.Count == 0 {
+		return nil
+	} else {
+		if string(res.Kvs[0].Value) == disetcd.Disable {
+			return nil
+		} else if string(res.Kvs[0].Value) != disetcd.Enable {
+			return errs.New("unknown EnableConfigCenter value").Wrap()
+		}
+	}
+
+	update := func(configFileName string, configStruct any) error {
+		key := disetcd.BuildKey(configFileName)
+		etcdRes, err := r.etcdClient.Get(ctx, key)
+		if err != nil {
+			log.ZWarn(ctx, "root cmd updateConfigFromEtcd, etcd Get err: %v", errs.Wrap(err))
+			return nil
+		}
+		if etcdRes.Count == 0 {
+			data, err := json.Marshal(configStruct)
+			if err != nil {
+				return errs.ErrArgs.WithDetail(err.Error()).Wrap()
+			}
+			_, err = r.etcdClient.Put(ctx, disetcd.BuildKey(configFileName), string(data))
+			if err != nil {
+				log.ZWarn(ctx, "root cmd updateConfigFromEtcd, etcd Put err: %v", errs.Wrap(err))
+			}
+			return nil
+		}
+		err = json.Unmarshal(etcdRes.Kvs[0].Value, configStruct)
+		if err != nil {
+			return errs.WrapMsg(err, "failed to unmarshal config from etcd")
+		}
+		return nil
+	}
+	for configFileName, configStruct := range opts.configMap {
+		if err := update(configFileName, configStruct); err != nil {
+			return err
+		}
+	}
+	if err := update(config.LogConfigFileName, &r.log); err != nil {
+		return err
+	}
+	// Load common log configuration file
+	return nil
+
 }
 
 func (r *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {

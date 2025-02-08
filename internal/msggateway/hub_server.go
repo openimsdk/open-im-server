@@ -62,6 +62,9 @@ func (s *Server) Start(ctx context.Context, index int, conf *Config) error {
 		[]string{
 			conf.Share.RpcRegisterName.MessageGateway,
 		},
+		[]string{
+			conf.Discovery.RpcService.MessageGateway,
+		},
 		s.InitServer,
 	)
 }
