@@ -113,26 +113,33 @@ jobs:
 
               echo "Cherry-picking commit: $merge_commit"
               if ! git cherry-pick "$merge_commit" --strategy=recursive -X theirs; then
-                echo "Cherry-pick encountered conflicts, attempting to resolve..."
-                git status --porcelain | grep '^UU ' | cut -c 4- | while read -r file; do
-                  echo "Resolving conflict in $file"
-                  git add "$file"
+                echo "Conflict detected for $merge_commit. Resolving with incoming changes."
+                conflict_files=$(git diff --name-only --diff-filter=U)
+                echo "Conflicting files:"
+                echo "$conflict_files"
+
+                for file in $conflict_files; do
+                  if [ -f "$file" ]; then
+                    echo "Resolving conflict for $file"
+                    git add "$file"
+                  else
+                    echo "File $file has been deleted. Skipping."
+                    git rm "$file"
+                  fi
                 done
-                git status --porcelain | grep '^AA ' | cut -c 4- | while read -r file; do
-                  echo "Adding new file $file"
-                  git add "$file"
-                done
-                git status --porcelain | grep '^DD ' | cut -c 4- | while read -r file; do
-                  echo "Removing deleted file $file"
-                  git rm "$file"
-                done
-                git cherry-pick --continue || { echo "Cherry-pick failed"; continue; }
+
+                echo "Conflicts resolved. Continuing cherry-pick."
+                git cherry-pick --continue || { echo "Cherry-pick failed, but continuing to create PR."; }
+              else
+                echo "Cherry-pick successful for commit $merge_commit."
               fi
 
               git remote set-url origin "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git"
               
               echo "Pushing branch: $cherry_pick_branch"
-              git push origin $cherry_pick_branch --force || { echo "Push failed"; continue; }
+              if ! git push origin $cherry_pick_branch --force; then
+                echo "Push failed, but continuing to create PR..."
+              fi
 
               new_pr_title="$pr_title [Created by @$pr_creator from #$pr_number]"
               new_pr_body="$pr_body
