@@ -129,12 +129,12 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, _ grpc.Se
 	//}
 	address := net.JoinHostPort(network.GetListenIP(config.API.Api.ListenIP), strconv.Itoa(apiPort))
 
-	server := http.Server{Addr: address, Handler: router}
+	httpServer := &http.Server{Addr: address, Handler: router}
 	log.CInfo(ctx, "API server is initializing", "runtimeEnv", runtimeenv.RuntimeEnvironment(), "address", address, "apiPort", apiPort, "prometheusPort", prometheusPort)
 	go func() {
-		err = server.ListenAndServe()
+		err = httpServer.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			netErr = errs.WrapMsg(err, fmt.Sprintf("api start err: %s", server.Addr))
+			netErr = errs.WrapMsg(err, fmt.Sprintf("api start err: %s", httpServer.Addr))
 			netDone <- struct{}{}
 		}
 	}()
@@ -150,13 +150,12 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, _ grpc.Se
 	shutdown := func() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
-		err := server.Shutdown(ctx)
+		err := httpServer.Shutdown(ctx)
 		if err != nil {
 			return errs.WrapMsg(err, "shutdown err")
 		}
 		return nil
 	}
-	disetcd.RegisterShutDown(shutdown)
 	select {
 	case <-sigs:
 		program.SIGTERMExit()
