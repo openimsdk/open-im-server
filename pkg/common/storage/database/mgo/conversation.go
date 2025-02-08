@@ -243,7 +243,14 @@ func (c *ConversationMgo) FindRandConversation(ctx context.Context, ts int64, li
 					"$add": []any{
 						bson.M{
 							"$toLong": "$latest_msg_destruct_time",
-						}, "$msg_destruct_time"},
+						},
+						bson.M{
+							"$multiply": []any{
+								"$msg_destruct_time",
+								1000, // convert to milliseconds
+							},
+						},
+					},
 				},
 			},
 		},
