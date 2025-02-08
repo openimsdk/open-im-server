@@ -16,9 +16,10 @@ package conversation
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"sort"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -771,7 +772,7 @@ func (c *conversationServer) ClearUserConversationMsg(ctx context.Context, req *
 		if conversation.IsMsgDestruct == false || conversation.MsgDestructTime == 0 {
 			continue
 		}
-		seq, err := c.msgClient.GetLastMessageSeqByTime(ctx, conversation.ConversationID, req.Timestamp-conversation.MsgDestructTime)
+		seq, err := c.msgClient.GetLastMessageSeqByTime(ctx, conversation.ConversationID, req.Timestamp-(conversation.MsgDestructTime*1000))
 		if err != nil {
 			return nil, err
 		}
