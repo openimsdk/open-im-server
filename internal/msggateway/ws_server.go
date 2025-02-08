@@ -21,7 +21,6 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
 	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"golang.org/x/sync/errgroup"
@@ -175,27 +174,33 @@ func (ws *WsServer) Run(ctx context.Context) error {
 		}
 	}()
 
-	server := http.Server{Addr: fmt.Sprintf(":%d", ws.port), Handler: nil}
+	done := make(chan struct{})
 	go func() {
+		wsServer := http.Server{Addr: fmt.Sprintf(":%d", ws.port), Handler: nil}
 		http.HandleFunc("/", ws.wsHandler)
-		err := server.ListenAndServe()
+		go func() {
+			defer close(done)
+			<-ctx.Done()
+			_ = wsServer.Shutdown(context.Background())
+		}()
+		err := wsServer.ListenAndServe()
 		if err == nil {
 			err = fmt.Errorf("http server closed")
 		}
 		cancel(fmt.Errorf("msg gateway %w", err))
 	}()
 
-	shutDown := func() error {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-		defer cancel()
-		sErr := server.Shutdown(ctx)
-		if sErr != nil {
-			return errs.WrapMsg(sErr, "shutdown err")
-		}
-		return nil
-	}
 	<-ctx.Done()
-	return shutDown()
+
+	timeout := time.NewTimer(time.Second * 15)
+	defer timeout.Stop()
+	select {
+	case <-timeout.C:
+		log.ZWarn(ctx, "msg gateway graceful stop timeout", nil)
+	case <-done:
+		log.ZDebug(ctx, "msg gateway graceful stop done")
+	}
+	return context.Cause(ctx)
 }
 
 const concurrentRequest = 3

@@ -23,7 +23,6 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
-	"sync"
 	"syscall"
 	"time"
 
@@ -49,87 +48,23 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, service g
 		return err
 	}
 
-	//client, err := kdisc.NewDiscoveryRegister(&config.Discovery, []string{
-	//	config.Discovery.RpcService.MessageGateway,
-	//})
-	//if err != nil {
-	//	return errs.WrapMsg(err, "failed to register discovery service")
-	//}
-	//client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-
-	//registerIP, err := network.GetRpcRegisterIP("")
-	//if err != nil {
-	//	return err
-	//}
-	//
-	// todo
-	//getAutoPort := func() (net.Listener, int, error) {
-	//	registerAddr := net.JoinHostPort(registerIP, "0")
-	//	listener, err := net.Listen("tcp", registerAddr)
-	//	if err != nil {
-	//		return nil, 0, errs.WrapMsg(err, "listen err", "registerAddr", registerAddr)
-	//	}
-	//	_, portStr, _ := net.SplitHostPort(listener.Addr().String())
-	//	port, _ := strconv.Atoi(portStr)
-	//	return listener, port, nil
-	//}
-	//
-	//if config.API.Prometheus.AutoSetPorts && config.Discovery.Enable != conf.ETCD {
-	//	return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
-	//}
-
 	router, err := newGinRouter(ctx, client, config)
 	if err != nil {
 		return err
 	}
-	//if config.API.Prometheus.Enable {
-	//	var (
-	//		listener net.Listener
-	//	)
-	//
-	//	if config.API.Prometheus.AutoSetPorts {
-	//		listener, prometheusPort, err = getAutoPort()
-	//		if err != nil {
-	//			return err
-	//		}
-	//
-	//		etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
-	//
-	//		_, err = etcdClient.Put(ctx, prommetrics.BuildDiscoveryKey(prommetrics.APIKeyName), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
-	//		if err != nil {
-	//			return errs.WrapMsg(err, "etcd put err")
-	//		}
-	//	} else {
-	//		prometheusPort, err = datautil.GetElemByIndex(config.API.Prometheus.Ports, index)
-	//		if err != nil {
-	//			return err
-	//		}
-	//		listener, err = net.Listen("tcp", fmt.Sprintf(":%d", prometheusPort))
-	//		if err != nil {
-	//			return errs.WrapMsg(err, "listen err", "addr", fmt.Sprintf(":%d", prometheusPort))
-	//		}
-	//	}
-	//
-	//	go func() {
-	//		if err := prommetrics.ApiInit(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
-	//			netErr = errs.WrapMsg(err, fmt.Sprintf("api prometheus start err: %d", prometheusPort))
-	//			netDone <- struct{}{}
-	//		}
-	//	}()
-	//
-	//}
-	var wg sync.WaitGroup
+
 	ctx, cancel := context.WithCancelCause(ctx)
+	done := make(chan struct{})
 	go func() {
-		wg.Add(1)
 		httpServer := &http.Server{
 			Handler: router,
 			Addr:    net.JoinHostPort(network.GetListenIP(config.API.Api.ListenIP), strconv.Itoa(apiPort)),
 		}
 		log.CInfo(ctx, "api server is init", "runtimeEnv", runtimeenv.RuntimeEnvironment(), "address", httpServer.Addr, "apiPort", apiPort)
 		go func() {
-			defer wg.Done()
+			defer close(done)
 			<-ctx.Done()
+			log.ZDebug(ctx, "api server is shutting down")
 			if err := httpServer.Shutdown(context.Background()); err != nil {
 				log.ZWarn(ctx, "api server shutdown err", err)
 			}
@@ -156,11 +91,6 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, service g
 	}
 	exitCause := context.Cause(ctx)
 	log.ZWarn(ctx, "api server exit", exitCause)
-	done := make(chan struct{})
-	go func() {
-		wg.Wait()
-		close(done)
-	}()
 	timer := time.NewTimer(time.Second * 15)
 	defer timer.Stop()
 	select {

@@ -5,6 +5,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net"
 	"os"
 	"os/signal"
 	"path"
@@ -29,9 +30,11 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/third"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/user"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/standalone"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
@@ -192,11 +195,39 @@ func (x *cmds) run(ctx context.Context) error {
 	if err := x.initAllConfig(); err != nil {
 		return err
 	}
+
 	ctx, cancel := context.WithCancelCause(ctx)
+
+	if prometheus := x.config.API.Prometheus; prometheus.Enable {
+		var (
+			port int
+			err  error
+		)
+		if !prometheus.AutoSetPorts {
+			port, err = datautil.GetElemByIndex(prometheus.Ports, 0)
+			if err != nil {
+				return err
+			}
+		}
+		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+		if err != nil {
+			return fmt.Errorf("prometheus listen %d error %w", port, err)
+		}
+		defer listener.Close()
+		prommetrics.RegistryAll()
+		log.ZDebug(ctx, "prometheus start", "addr", listener.Addr())
+		go func() {
+			err := prommetrics.Start(listener)
+			if err == nil {
+				err = fmt.Errorf("http done")
+			}
+			cancel(fmt.Errorf("prometheus %w", err))
+		}()
+	}
 
 	go func() {
 		sigs := make(chan os.Signal, 1)
-		signal.Notify(sigs, syscall.SIGTERM)
+		signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
 		select {
 		case <-ctx.Done():
 			return

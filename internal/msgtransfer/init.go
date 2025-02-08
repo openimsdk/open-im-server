@@ -155,10 +155,10 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		historyMongoHandler:  historyMongoHandler,
 	}
 
-	return msgTransfer.Start(int(config.Index), config, client)
+	return msgTransfer.Start(ctx, int(config.Index), config, client)
 }
 
-func (m *MsgTransfer) Start(index int, config *Config, client discovery.Conn) error {
+func (m *MsgTransfer) Start(ctx context.Context, index int, config *Config, client discovery.Conn) error {
 	m.ctx, m.cancel = context.WithCancel(context.Background())
 	var (
 		netDone = make(chan struct{}, 1)
@@ -254,6 +254,7 @@ func (m *MsgTransfer) Start(index int, config *Config, client discovery.Conn) er
 		}()
 	}
 
+	// todo
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGTERM)
 	select {

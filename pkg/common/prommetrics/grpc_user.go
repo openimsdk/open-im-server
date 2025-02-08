@@ -8,3 +8,7 @@ var (
 		Help: "The number of user login",
 	})
 )
+
+func RegistryUser() {
+	registry.MustRegister(UserRegisterCounter)
+}

@@ -303,7 +303,6 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 	}
 	cm := NewConfigManager(cfg.Share.IMAdminUserID, &cfg.AllConfig, etcdClient, string(cfg.ConfigPath))
 	{
-
 		configGroup := r.Group("/config", cm.CheckAdmin)
 		configGroup.POST("/get_config_list", cm.GetConfigList)
 		configGroup.POST("/get_config", cm.GetConfig)
