@@ -53,9 +53,9 @@ func main() {
 	putCmd1(cmd, false, third.Start)
 	putCmd1(cmd, false, user.Start)
 	putCmd1(cmd, false, push.Start)
-	putCmd3(cmd, true, msggateway.Start)
-	putCmd2(cmd, true, msgtransfer.Start)
-	putCmd2(cmd, true, api.Start)
+	putCmd1(cmd, true, msggateway.Start)
+	putCmd1(cmd, true, msgtransfer.Start)
+	putCmd1(cmd, true, api.Start)
 	ctx := context.Background()
 	if err := cmd.run(ctx); err != nil {
 		fmt.Println(err)
@@ -231,22 +231,23 @@ func putCmd1[C any](cmd *cmds, block bool, fn func(ctx context.Context, config *
 	})
 }
 
-func putCmd2[C any](cmd *cmds, block bool, fn func(ctx context.Context, index int, config *C) error) {
-	cmd.add(getFuncPacketName(fn), block, func(ctx context.Context) error {
-		var conf C
-		if err := cmd.parseConf(&conf); err != nil {
-			return err
-		}
-		return fn(ctx, 0, &conf)
-	})
-}
-
-func putCmd3[C any](cmd *cmds, block bool, fn func(ctx context.Context, config *C, client discovery.Conn, server grpc.ServiceRegistrar, index int) error) {
-	cmd.add(getFuncPacketName(fn), block, func(ctx context.Context) error {
-		var conf C
-		if err := cmd.parseConf(&conf); err != nil {
-			return err
-		}
-		return fn(ctx, &conf, standalone.GetDiscoveryConn(), standalone.GetServiceRegistrar(), 0)
-	})
-}
+//
+//func putCmd2[C any](cmd *cmds, block bool, fn func(ctx context.Context, index int, config *C) error) {
+//	cmd.add(getFuncPacketName(fn), block, func(ctx context.Context) error {
+//		var conf C
+//		if err := cmd.parseConf(&conf); err != nil {
+//			return err
+//		}
+//		return fn(ctx, 0, &conf)
+//	})
+//}
+//
+//func putCmd3[C any](cmd *cmds, block bool, fn func(ctx context.Context, config *C, client discovery.Conn, server grpc.ServiceRegistrar, index int) error) {
+//	cmd.add(getFuncPacketName(fn), block, func(ctx context.Context) error {
+//		var conf C
+//		if err := cmd.parseConf(&conf); err != nil {
+//			return err
+//		}
+//		return fn(ctx, &conf, standalone.GetDiscoveryConn(), standalone.GetServiceRegistrar(), 0)
+//	})
+//}

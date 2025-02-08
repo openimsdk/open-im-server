@@ -56,5 +56,6 @@ func (m *MsgTransferCmd) Exec() error {
 }
 
 func (m *MsgTransferCmd) runE() error {
+	m.msgTransferConfig.Index = config.Index(m.Index())
 	return msgtransfer.Start(m.ctx, m.Index(), m.msgTransferConfig)
 }

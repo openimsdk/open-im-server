@@ -29,6 +29,7 @@ import (
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -45,21 +46,22 @@ type Config struct {
 	conf.AllConfig
 
 	ConfigPath conf.Path
+	Index      conf.Index
 }
 
-func Start(ctx context.Context, index int, config *Config) error {
-	apiPort, err := datautil.GetElemByIndex(config.API.Api.Ports, index)
+func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+	apiPort, err := datautil.GetElemByIndex(config.API.Api.Ports, int(config.Index))
 	if err != nil {
 		return err
 	}
 
-	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, []string{
-		config.Discovery.RpcService.MessageGateway,
-	})
-	if err != nil {
-		return errs.WrapMsg(err, "failed to register discovery service")
-	}
-	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
+	//client, err := kdisc.NewDiscoveryRegister(&config.Discovery, []string{
+	//	config.Discovery.RpcService.MessageGateway,
+	//})
+	//if err != nil {
+	//	return errs.WrapMsg(err, "failed to register discovery service")
+	//}
+	//client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 
 	var (
 		netDone        = make(chan struct{}, 1)

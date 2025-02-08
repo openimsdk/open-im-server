@@ -32,6 +32,8 @@ const StructTagName = "yaml"
 
 type Path string
 
+type Index int
+
 type CacheConfig struct {
 	Topic         string `yaml:"topic"`
 	SlotNum       int    `yaml:"slotNum"`
@@ -181,11 +183,7 @@ type Prometheus struct {
 }
 
 type MsgGateway struct {
-	RPC struct {
-		RegisterIP   string `yaml:"registerIP"`
-		AutoSetPorts bool   `yaml:"autoSetPorts"`
-		Ports        []int  `yaml:"ports"`
-	} `yaml:"rpc"`
+	RPC         RPC        `yaml:"rpc"`
 	Prometheus  Prometheus `yaml:"prometheus"`
 	ListenIP    string     `yaml:"listenIP"`
 	LongConnSvr struct {
@@ -205,12 +203,7 @@ type MsgTransfer struct {
 }
 
 type Push struct {
-	RPC struct {
-		RegisterIP   string `yaml:"registerIP"`
-		ListenIP     string `yaml:"listenIP"`
-		AutoSetPorts bool   `yaml:"autoSetPorts"`
-		Ports        []int  `yaml:"ports"`
-	} `yaml:"rpc"`
+	RPC                  RPC        `yaml:"rpc"`
 	Prometheus           Prometheus `yaml:"prometheus"`
 	MaxConcurrentWorkers int        `yaml:"maxConcurrentWorkers"`
 	Enable               string     `yaml:"enable"`
@@ -241,12 +234,7 @@ type Push struct {
 }
 
 type Auth struct {
-	RPC struct {
-		RegisterIP   string `yaml:"registerIP"`
-		ListenIP     string `yaml:"listenIP"`
-		AutoSetPorts bool   `yaml:"autoSetPorts"`
-		Ports        []int  `yaml:"ports"`
-	} `yaml:"rpc"`
+	RPC         RPC        `yaml:"rpc"`
 	Prometheus  Prometheus `yaml:"prometheus"`
 	TokenPolicy struct {
 		Expire int64 `yaml:"expire"`
@@ -254,54 +242,29 @@ type Auth struct {
 }
 
 type Conversation struct {
-	RPC struct {
-		RegisterIP   string `yaml:"registerIP"`
-		ListenIP     string `yaml:"listenIP"`
-		AutoSetPorts bool   `yaml:"autoSetPorts"`
-		Ports        []int  `yaml:"ports"`
-	} `yaml:"rpc"`
+	RPC        RPC        `yaml:"rpc"`
 	Prometheus Prometheus `yaml:"prometheus"`
 }
 
 type Friend struct {
-	RPC struct {
-		RegisterIP   string `yaml:"registerIP"`
-		ListenIP     string `yaml:"listenIP"`
-		AutoSetPorts bool   `yaml:"autoSetPorts"`
-		Ports        []int  `yaml:"ports"`
-	} `yaml:"rpc"`
+	RPC        RPC        `yaml:"rpc"`
 	Prometheus Prometheus `yaml:"prometheus"`
 }
 
 type Group struct {
-	RPC struct {
-		RegisterIP   string `yaml:"registerIP"`
-		ListenIP     string `yaml:"listenIP"`
-		AutoSetPorts bool   `yaml:"autoSetPorts"`
-		Ports        []int  `yaml:"ports"`
-	} `yaml:"rpc"`
+	RPC                        RPC        `yaml:"rpc"`
 	Prometheus                 Prometheus `yaml:"prometheus"`
 	EnableHistoryForNewMembers bool       `yaml:"enableHistoryForNewMembers"`
 }
 
 type Msg struct {
-	RPC struct {
-		RegisterIP   string `yaml:"registerIP"`
-		ListenIP     string `yaml:"listenIP"`
-		AutoSetPorts bool   `yaml:"autoSetPorts"`
-		Ports        []int  `yaml:"ports"`
-	} `yaml:"rpc"`
+	RPC          RPC        `yaml:"rpc"`
 	Prometheus   Prometheus `yaml:"prometheus"`
 	FriendVerify bool       `yaml:"friendVerify"`
 }
 
 type Third struct {
-	RPC struct {
-		RegisterIP   string `yaml:"registerIP"`
-		ListenIP     string `yaml:"listenIP"`
-		AutoSetPorts bool   `yaml:"autoSetPorts"`
-		Ports        []int  `yaml:"ports"`
-	} `yaml:"rpc"`
+	RPC        RPC        `yaml:"rpc"`
 	Prometheus Prometheus `yaml:"prometheus"`
 	Object     struct {
 		Enable string `yaml:"enable"`
@@ -348,13 +311,15 @@ type Aws struct {
 }
 
 type User struct {
-	RPC struct {
-		RegisterIP   string `yaml:"registerIP"`
-		ListenIP     string `yaml:"listenIP"`
-		AutoSetPorts bool   `yaml:"autoSetPorts"`
-		Ports        []int  `yaml:"ports"`
-	} `yaml:"rpc"`
+	RPC        RPC        `yaml:"rpc"`
 	Prometheus Prometheus `yaml:"prometheus"`
+}
+
+type RPC struct {
+	RegisterIP   string `yaml:"registerIP"`
+	ListenIP     string `yaml:"listenIP"`
+	AutoSetPorts bool   `yaml:"autoSetPorts"`
+	Ports        []int  `yaml:"ports"`
 }
 
 type Redis struct {

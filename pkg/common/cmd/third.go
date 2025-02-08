@@ -22,6 +22,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
+	"github.com/openimsdk/tools/utils/network"
 	"github.com/spf13/cobra"
 )
 

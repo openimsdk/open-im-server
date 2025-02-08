@@ -35,14 +35,15 @@ type Config struct {
 	RedisConfig    config.Redis
 	WebhooksConfig config.Webhooks
 	Discovery      config.Discovery
+	Index          config.Index
 }
 
 // Start run ws server.
-func Start(ctx context.Context, conf *Config, client discovery.Conn, server grpc.ServiceRegistrar, index int) error {
+func Start(ctx context.Context, conf *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
 	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "runtimeEnv", runtimeenv.RuntimeEnvironment(),
 		"rpcPorts", conf.MsgGateway.RPC.Ports,
 		"wsPort", conf.MsgGateway.LongConnSvr.Ports, "prometheusPorts", conf.MsgGateway.Prometheus.Ports)
-	wsPort, err := datautil.GetElemByIndex(conf.MsgGateway.LongConnSvr.Ports, index)
+	wsPort, err := datautil.GetElemByIndex(conf.MsgGateway.LongConnSvr.Ports, int(conf.Index))
 	if err != nil {
 		return err
 	}
@@ -71,11 +72,6 @@ func Start(ctx context.Context, conf *Config, client discovery.Conn, server grpc
 
 	go longServer.ChangeOnlineStatus(4)
 
-	//netDone := make(chan error)
-	//go func() {
-	//	err = hubServer.Start(ctx, index, conf)
-	//	netDone <- err
-	//}()
 	return hubServer.LongConnServer.Run(ctx)
 }
 

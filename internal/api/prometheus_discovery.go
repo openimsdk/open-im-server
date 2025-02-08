@@ -20,7 +20,7 @@ type PrometheusDiscoveryApi struct {
 	client *clientv3.Client
 }
 
-func NewPrometheusDiscoveryApi(config *Config, client discovery.SvcDiscoveryRegistry) *PrometheusDiscoveryApi {
+func NewPrometheusDiscoveryApi(config *Config, client discovery.Conn) *PrometheusDiscoveryApi {
 	api := &PrometheusDiscoveryApi{
 		config: config,
 	}

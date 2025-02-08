@@ -42,14 +42,11 @@ import (
 	"github.com/openimsdk/tools/utils/runtimeenv"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	discRegister "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mw"
 	"github.com/openimsdk/tools/system/program"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type MsgTransfer struct {
@@ -73,14 +70,14 @@ type Config struct {
 	Share          conf.Share
 	WebhooksConfig conf.Webhooks
 	Discovery      conf.Discovery
+	Index          conf.Index
 }
 
-func Start(ctx context.Context, index int, config *Config) error {
-
+func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
 	builder := mqbuild.NewBuilder(&config.Discovery, &config.KafkaConfig)
 
 	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "runTimeEnv", runtimeenv.RuntimeEnvironment(), "prometheusPorts",
-		config.MsgTransfer.Prometheus.Ports, "index", index)
+		config.MsgTransfer.Prometheus.Ports, "index", config.Index)
 
 	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
 	if err != nil {
@@ -90,12 +87,12 @@ func Start(ctx context.Context, index int, config *Config) error {
 	if err != nil {
 		return err
 	}
-	client, err := discRegister.NewDiscoveryRegister(&config.Discovery, nil)
-	if err != nil {
-		return err
-	}
-	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
+	//client, err := discRegister.NewDiscoveryRegister(&config.Discovery, nil)
+	//if err != nil {
+	//	return err
+	//}
+	//client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
+	//	grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 
 	if config.Discovery.Enable == conf.ETCD {
 		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), []string{
@@ -158,10 +155,10 @@ func Start(ctx context.Context, index int, config *Config) error {
 		historyMongoHandler:  historyMongoHandler,
 	}
 
-	return msgTransfer.Start(index, config, client)
+	return msgTransfer.Start(int(config.Index), config, client)
 }
 
-func (m *MsgTransfer) Start(index int, config *Config, client discovery.SvcDiscoveryRegistry) error {
+func (m *MsgTransfer) Start(index int, config *Config, client discovery.Conn) error {
 	m.ctx, m.cancel = context.WithCancel(context.Background())
 	var (
 		netDone = make(chan struct{}, 1)
