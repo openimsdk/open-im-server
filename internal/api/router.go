@@ -246,8 +246,6 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 		msgGroup.POST("/batch_send_msg", m.BatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 		msgGroup.POST("/get_server_time", m.GetServerTime)
-		msgGroup.POST("/get_stream_msg", m.GetStreamMsg)
-		msgGroup.POST("/append_stream_msg", m.AppendStreamMsg)
 	}
 	// Conversation
 	{
