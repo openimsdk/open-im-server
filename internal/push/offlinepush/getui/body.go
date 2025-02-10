@@ -18,6 +18,12 @@ import (
 	"fmt"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/utils/datautil"
+)
+
+var (
+	incOne = datautil.ToPtr("+1")
+	addNum = "1"
 )
 
 type Resp struct {
@@ -112,6 +118,7 @@ type Notification struct {
 	ChannelID   string `json:"channelID"`
 	ChannelName string `json:"ChannelName"`
 	ClickType   string `json:"click_type"`
+	BadgeAddNum string `json:"badge_add_num"`
 }
 
 type Options struct {
@@ -140,6 +147,7 @@ func newPushReq(pushConf *config.Push, title, content string) PushReq {
 		ClickType:   "startapp",
 		ChannelID:   pushConf.GeTui.ChannelID,
 		ChannelName: pushConf.GeTui.ChannelName,
+		BadgeAddNum: addNum,
 	}}}
 	return pushReq
 }
@@ -156,6 +164,7 @@ func (pushReq *PushReq) setPushChannel(title string, body string) {
 	notify := "notify"
 	pushReq.PushChannel.Ios.NotificationType = &notify
 	pushReq.PushChannel.Ios.Aps.Sound = "default"
+	pushReq.PushChannel.Ios.AutoBadge = incOne
 	pushReq.PushChannel.Ios.Aps.Alert = Alert{
 		Title: title,
 		Body:  body,

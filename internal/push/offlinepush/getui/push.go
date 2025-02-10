@@ -18,6 +18,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"strconv"
 	"sync"
 	"time"
@@ -70,7 +71,7 @@ func NewClient(pushConf *config.Push, cache cache.ThirdCache) *Client {
 func (g *Client) Push(ctx context.Context, userIDs []string, title, content string, opts *options.Opts) error {
 	token, err := g.cache.GetGetuiToken(ctx)
 	if err != nil {
-		if errs.Unwrap(err) == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			log.ZDebug(ctx, "getui token not exist in redis")
 			token, err = g.getTokenAndSave2Redis(ctx)
 			if err != nil {
