@@ -96,7 +96,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	pbconversation.RegisterConversationServer(server, &conversationServer{
 		conversationNotificationSender: NewConversationNotificationSender(&config.NotificationConfig, msgClient),
 		conversationDatabase: controller.NewConversationDatabase(conversationDB,
-			redis.NewConversationRedis(rdb, &config.LocalCacheConfig, redis.GetRocksCacheOptions(), conversationDB), mgocli.GetTx()),
+			redis.NewConversationRedis(rdb, &config.LocalCacheConfig, conversationDB), mgocli.GetTx()),
 		userClient:  rpcli.NewUserClient(userConn),
 		groupClient: rpcli.NewGroupClient(groupConn),
 		msgClient:   msgClient,

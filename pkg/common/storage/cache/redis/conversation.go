@@ -1,47 +1,30 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package redis
 
 import (
 	"context"
-	"github.com/dtm-labs/rockscache"
+	"math/big"
+	"strings"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/encrypt"
 	"github.com/redis/go-redis/v9"
-	"math/big"
-	"strings"
-	"time"
 )
 
 const (
 	conversationExpireTime = time.Second * 60 * 60 * 12
 )
 
-func NewConversationRedis(rdb redis.UniversalClient, localCache *config.LocalCache, opts *rockscache.Options, db database.Conversation) cache.ConversationCache {
-	batchHandler := NewBatchDeleterRedis(rdb, opts, []string{localCache.Conversation.Topic})
-	c := localCache.Conversation
-	log.ZDebug(context.Background(), "conversation local cache init", "Topic", c.Topic, "SlotNum", c.SlotNum, "SlotSize", c.SlotSize, "enable", c.Enable())
+func NewConversationRedis(rdb redis.UniversalClient, localCache *config.LocalCache, db database.Conversation) cache.ConversationCache {
+	rc := newRocksCacheClient(rdb)
 	return &ConversationRedisCache{
-		BatchDeleter:   batchHandler,
-		rcClient:       rockscache.NewClient(rdb, *opts),
+		BatchDeleter:   rc.GetBatchDeleter(localCache.Conversation.Topic),
+		rcClient:       rc,
 		conversationDB: db,
 		expireTime:     conversationExpireTime,
 	}
@@ -49,7 +32,7 @@ func NewConversationRedis(rdb redis.UniversalClient, localCache *config.LocalCac
 
 type ConversationRedisCache struct {
 	cache.BatchDeleter
-	rcClient       *rockscache.Client
+	rcClient       *rocksCacheClient
 	conversationDB database.Conversation
 	expireTime     time.Duration
 }

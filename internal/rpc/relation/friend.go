@@ -115,12 +115,12 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		db: controller.NewFriendDatabase(
 			friendMongoDB,
 			friendRequestMongoDB,
-			redis.NewFriendCacheRedis(rdb, &config.LocalCacheConfig, friendMongoDB, redis.GetRocksCacheOptions()),
+			redis.NewFriendCacheRedis(rdb, &config.LocalCacheConfig, friendMongoDB),
 			mgocli.GetTx(),
 		),
 		blackDatabase: controller.NewBlackDatabase(
 			blackMongoDB,
-			redis.NewBlackCacheRedis(rdb, &config.LocalCacheConfig, blackMongoDB, redis.GetRocksCacheOptions()),
+			redis.NewBlackCacheRedis(rdb, &config.LocalCacheConfig, blackMongoDB),
 		),
 		notificationSender: notificationSender,
 		RegisterCenter:     client,
