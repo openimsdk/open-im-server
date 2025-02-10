@@ -5,16 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
-	"github.com/openimsdk/tools/db/mongoutil"
-	"github.com/openimsdk/tools/db/redisutil"
-	"github.com/redis/go-redis/v9"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"gopkg.in/yaml.v3"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -24,6 +14,17 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/redis/go-redis/v9"
+	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
@@ -41,12 +42,22 @@ const (
 )
 
 func readConfig[T any](dir string, name string) (*T, error) {
-	data, err := os.ReadFile(filepath.Join(dir, name))
-	if err != nil {
+	if runtimeenv.PrintRuntimeEnvironment() == config.KUBERNETES {
+		dir = os.Getenv(config.MountConfigFilePath)
+	}
+	v := viper.New()
+	v.SetEnvPrefix(config.EnvPrefixMap[name])
+	v.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.SetConfigFile(filepath.Join(dir, name))
+	if err := v.ReadInConfig(); err != nil {
 		return nil, err
 	}
+	fn := func(config *mapstructure.DecoderConfig) {
+		config.TagName = "mapstructure"
+	}
 	var conf T
-	if err := yaml.Unmarshal(data, &conf); err != nil {
+	if err := v.Unmarshal(&conf, fn); err != nil {
 		return nil, err
 	}
 	return &conf, nil
