@@ -1,12 +1,10 @@
 groupCreated:
   isSendMsg: true
-# Reliability level of the message sending.
-# Set to 1 to send only when online, 2 for guaranteed delivery.
+  # Deprecated. Fixed as 1.
   reliabilityLevel: 1
-# This setting is effective only when 'isSendMsg' is true.
-# It controls whether to count unread messages.
+  # Deprecated. Fixed as false.
   unreadCount: false
-# Configuration for offline push notifications.
+  # Configuration for offline push notifications.
   offlinePush:
     # Enables or disables offline push notifications.
     enable: false
