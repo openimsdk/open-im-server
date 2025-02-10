@@ -26,9 +26,7 @@ import (
 )
 
 const (
-	FileName             = "config.yaml"
-	NotificationFileName = "notification.yaml"
-	DefaultFolderPath    = "../config/"
+	FileName = "config.yaml"
 )
 
 // return absolude path join ../config/, this is k8s container config path.

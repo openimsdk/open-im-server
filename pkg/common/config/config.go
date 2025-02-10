@@ -635,7 +635,7 @@ func (l *CacheConfig) Enable() bool {
 	return l.Topic != "" && l.SlotNum > 0 && l.SlotSize > 0
 }
 
-var (
+const (
 	DiscoveryConfigFilename          = "discovery.yml"
 	KafkaConfigFileName              = "kafka.yml"
 	LocalCacheConfigFileName         = "local-cache.yml"
@@ -657,6 +657,7 @@ var (
 	RedisConfigFileName              = "redis.yml"
 	ShareFileName                    = "share.yml"
 	WebhooksConfigFileName           = "webhooks.yml"
+	NotificationFileName             = "notification.yml"
 )
 
 func (d *Discovery) GetConfigFileName() string {
