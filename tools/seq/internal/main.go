@@ -20,6 +20,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/bson"
@@ -64,11 +65,11 @@ func readConfig[T any](dir string, name string) (*T, error) {
 }
 
 func Main(conf string, del time.Duration) error {
-	redisConfig, err := readConfig[config.Redis](conf, cmd.RedisConfigFileName)
+	redisConfig, err := readConfig[config.Redis](conf, config.RedisConfigFileName)
 	if err != nil {
 		return err
 	}
-	mongodbConfig, err := readConfig[config.Mongo](conf, cmd.MongodbConfigFileName)
+	mongodbConfig, err := readConfig[config.Mongo](conf, config.MongodbConfigFileName)
 	if err != nil {
 		return err
 	}
