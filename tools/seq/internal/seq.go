@@ -47,6 +47,9 @@ func readConfig[T any](dir string, name string) (*T, error) {
 		dir = os.Getenv(config.MountConfigFilePath)
 	}
 	v := viper.New()
+	v.SetEnvPrefix(config.EnvPrefixMap[name])
+	v.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.SetConfigFile(filepath.Join(dir, name))
 	if err := v.ReadInConfig(); err != nil {
 		return nil, err
