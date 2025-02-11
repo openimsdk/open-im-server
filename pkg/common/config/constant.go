@@ -23,7 +23,7 @@ const (
 	DeploymentType      = "DEPLOYMENT_TYPE"
 	KUBERNETES          = runtimeenv.Kubernetes
 	ETCD                = "etcd"
-	Standalone          = "standalone"
+	//Standalone          = "standalone"
 )
 
 const (

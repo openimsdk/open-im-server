@@ -19,6 +19,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/internal/tools"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
@@ -28,11 +29,11 @@ type CronTaskCmd struct {
 	*RootCmd
 	ctx            context.Context
 	configMap      map[string]any
-	cronTaskConfig *tools.CronTaskConfig
+	cronTaskConfig *tools.Config
 }
 
 func NewCronTaskCmd() *CronTaskCmd {
-	var cronTaskConfig tools.CronTaskConfig
+	var cronTaskConfig tools.Config
 	ret := &CronTaskCmd{cronTaskConfig: &cronTaskConfig}
 	ret.configMap = map[string]any{
 		config.OpenIMCronTaskCfgFileName: &cronTaskConfig.CronTask,
@@ -52,5 +53,18 @@ func (a *CronTaskCmd) Exec() error {
 }
 
 func (a *CronTaskCmd) runE() error {
-	return tools.Start(a.ctx, a.cronTaskConfig)
+	var prometheus config.Prometheus
+	return startrpc.Start(
+		a.ctx, &a.cronTaskConfig.Discovery,
+		&prometheus,
+		"", "",
+		false,
+		nil, 0,
+		"",
+		nil,
+		a.cronTaskConfig,
+		[]string{},
+		[]string{},
+		tools.Start,
+	)
 }

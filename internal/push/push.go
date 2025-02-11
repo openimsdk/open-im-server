@@ -9,9 +9,9 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	pbpush "github.com/openimsdk/protocol/push"
-	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
@@ -46,7 +46,8 @@ func (p pushServer) DelUserPushToken(ctx context.Context,
 }
 
 func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
-	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
+	dbb := dbbuild.NewBuilder(nil, &config.RedisConfig)
+	rdb, err := dbb.Redis(ctx)
 	if err != nil {
 		return err
 	}
@@ -55,7 +56,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	if err != nil {
 		return err
 	}
-	builder := mqbuild.NewBuilder(&config.Discovery, &config.KafkaConfig)
+	builder := mqbuild.NewBuilder(&config.KafkaConfig)
 
 	offlinePushProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToOfflinePushTopic)
 	if err != nil {

@@ -18,11 +18,11 @@ import (
 	"context"
 	"errors"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
-	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 
@@ -56,7 +56,8 @@ type Config struct {
 }
 
 func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
-	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
+	dbb := dbbuild.NewBuilder(nil, &config.RedisConfig)
+	rdb, err := dbb.Redis(ctx)
 	if err != nil {
 		return err
 	}

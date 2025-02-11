@@ -31,6 +31,9 @@ import (
 
 // NewDiscoveryRegister creates a new service discovery and registry client based on the provided environment type.
 func NewDiscoveryRegister(discovery *config.Discovery, watchNames []string) (discovery.SvcDiscoveryRegistry, error) {
+	if config.Standalone() {
+		return standalone.GetSvcDiscoveryRegistry(), nil
+	}
 	if runtimeenv.RuntimeEnvironment() == config.KUBERNETES {
 		return kubernetes.NewKubernetesConnManager(discovery.Kubernetes.Namespace,
 			grpc.WithDefaultCallOptions(
@@ -40,8 +43,6 @@ func NewDiscoveryRegister(discovery *config.Discovery, watchNames []string) (dis
 	}
 
 	switch discovery.Enable {
-	case config.Standalone:
-		return standalone.GetSvcDiscoveryRegistry(), nil
 	case config.ETCD:
 		return etcd.NewSvcDiscoveryRegistry(
 			discovery.Etcd.RootDirectory,

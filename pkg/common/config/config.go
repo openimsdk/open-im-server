@@ -323,6 +323,7 @@ type RPC struct {
 }
 
 type Redis struct {
+	Disable     bool     `yaml:"disable"`
 	Address     []string `yaml:"address"`
 	Username    string   `yaml:"username"`
 	Password    string   `yaml:"password"`

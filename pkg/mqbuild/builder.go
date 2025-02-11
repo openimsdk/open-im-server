@@ -15,8 +15,8 @@ type Builder interface {
 	GetTopicConsumer(ctx context.Context, topic string) (mq.Consumer, error)
 }
 
-func NewBuilder(discovery *config.Discovery, kafka *config.Kafka) Builder {
-	if discovery.Enable == config.Standalone {
+func NewBuilder(kafka *config.Kafka) Builder {
+	if config.Standalone() {
 		return standaloneBuilder{}
 	}
 	return &kafkaBuilder{

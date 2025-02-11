@@ -19,8 +19,8 @@ import (
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
-	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/runtimeenv"
@@ -48,10 +48,12 @@ func Start(ctx context.Context, conf *Config, client discovery.Conn, server grpc
 		return err
 	}
 
-	rdb, err := redisutil.NewRedisClient(ctx, conf.RedisConfig.Build())
+	dbb := dbbuild.NewBuilder(nil, &conf.RedisConfig)
+	rdb, err := dbb.Redis(ctx)
 	if err != nil {
 		return err
 	}
+
 	longServer := NewWsServer(
 		conf,
 		WithPort(wsPort),

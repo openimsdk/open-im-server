@@ -16,34 +16,22 @@ package msgtransfer
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"net"
-	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 
 	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/mq"
-	"github.com/openimsdk/tools/utils/jsonutil"
-	"github.com/openimsdk/tools/utils/network"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
-	"github.com/openimsdk/tools/db/mongoutil"
-	"github.com/openimsdk/tools/db/redisutil"
-	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/runtimeenv"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/system/program"
 	"google.golang.org/grpc"
@@ -74,25 +62,19 @@ type Config struct {
 }
 
 func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
-	builder := mqbuild.NewBuilder(&config.Discovery, &config.KafkaConfig)
+	builder := mqbuild.NewBuilder(&config.KafkaConfig)
 
 	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "runTimeEnv", runtimeenv.RuntimeEnvironment(), "prometheusPorts",
 		config.MsgTransfer.Prometheus.Ports, "index", config.Index)
-
-	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
+	dbb := dbbuild.NewBuilder(&config.MongodbConfig, &config.RedisConfig)
+	mgocli, err := dbb.Mongo(ctx)
 	if err != nil {
 		return err
 	}
-	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
+	rdb, err := dbb.Redis(ctx)
 	if err != nil {
 		return err
 	}
-	//client, err := discRegister.NewDiscoveryRegister(&config.Discovery, nil)
-	//if err != nil {
-	//	return err
-	//}
-	//client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
-	//	grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
 
 	if config.Discovery.Enable == conf.ETCD {
 		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), []string{
@@ -191,67 +173,6 @@ func (m *MsgTransfer) Start(ctx context.Context, index int, config *Config, clie
 	err := m.historyHandler.redisMessageBatches.Start()
 	if err != nil {
 		return err
-	}
-
-	registerIP, err := network.GetRpcRegisterIP("")
-	if err != nil {
-		return err
-	}
-
-	getAutoPort := func() (net.Listener, int, error) {
-		registerAddr := net.JoinHostPort(registerIP, "0")
-		listener, err := net.Listen("tcp", registerAddr)
-		if err != nil {
-			return nil, 0, errs.WrapMsg(err, "listen err", "registerAddr", registerAddr)
-		}
-		_, portStr, _ := net.SplitHostPort(listener.Addr().String())
-		port, _ := strconv.Atoi(portStr)
-		return listener, port, nil
-	}
-
-	if config.Discovery.Enable != conf.Standalone && config.MsgTransfer.Prometheus.Enable {
-		if config.MsgTransfer.Prometheus.AutoSetPorts && config.Discovery.Enable != conf.ETCD {
-			return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
-		}
-		var (
-			listener       net.Listener
-			prometheusPort int
-		)
-
-		if config.MsgTransfer.Prometheus.AutoSetPorts {
-			listener, prometheusPort, err = getAutoPort()
-			if err != nil {
-				return err
-			}
-
-			etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
-
-			_, err = etcdClient.Put(context.TODO(), prommetrics.BuildDiscoveryKey(prommetrics.MessageTransferKeyName), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
-			if err != nil {
-				return errs.WrapMsg(err, "etcd put err")
-			}
-		} else {
-			prometheusPort, err = datautil.GetElemByIndex(config.MsgTransfer.Prometheus.Ports, index)
-			if err != nil {
-				return err
-			}
-			listener, err = net.Listen("tcp", fmt.Sprintf(":%d", prometheusPort))
-			if err != nil {
-				return errs.WrapMsg(err, "listen err", "addr", fmt.Sprintf(":%d", prometheusPort))
-			}
-		}
-
-		go func() {
-			defer func() {
-				if r := recover(); r != nil {
-					log.ZPanic(m.ctx, "MsgTransfer Start Panic", errs.ErrPanic(r))
-				}
-			}()
-			if err := prommetrics.TransferInit(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				netErr = errs.WrapMsg(err, "prometheus start error", "prometheusPort", prometheusPort)
-				netDone <- struct{}{}
-			}
-		}()
 	}
 
 	// todo

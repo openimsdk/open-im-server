@@ -16,6 +16,7 @@ package startrpc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -26,6 +27,7 @@ import (
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/network"
 	"google.golang.org/grpc/status"
 
@@ -39,7 +41,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConfig *conf.Prometheus, listenIP,
+func init() {
+	prommetrics.RegistryAll()
+}
+
+func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *conf.Prometheus, listenIP,
 	registerIP string, autoSetPorts bool, rpcPorts []int, index int, rpcRegisterName string, notification *conf.Notification, config T,
 	watchConfigNames []string, watchServiceNames []string,
 	rpcFn func(ctx context.Context, config T, client discovery.Conn, server grpc.ServiceRegistrar) error,
@@ -47,10 +53,6 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 
 	if notification != nil {
 		conf.InitNotification(notification)
-	}
-
-	if discovery.Enable == conf.Standalone {
-		return nil
 	}
 
 	options = append(options, mw.GrpcServer())
@@ -83,7 +85,7 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 
 	watchConfigNames = append(watchConfigNames, conf.LogConfigFileName)
 
-	client, err := kdisc.NewDiscoveryRegister(discovery, watchServiceNames)
+	client, err := kdisc.NewDiscoveryRegister(disc, watchServiceNames)
 	if err != nil {
 		return err
 	}
@@ -116,15 +118,20 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 		if err != nil {
 			return err
 		}
-		if err := client.Register(ctx, "prometheus_"+rpcRegisterName, registerIP, prometheusPort); err != nil {
+		log.ZDebug(ctx, "prometheus start", "addr", prometheusListener.Addr(), "rpcRegisterName", rpcRegisterName)
+		target, err := jsonutil.JsonMarshal(prommetrics.BuildDefaultTarget(registerIP, prometheusPort))
+		if err != nil {
 			return err
 		}
-
-		cs := prommetrics.GetGrpcCusMetrics(rpcRegisterName, discovery)
+		if err := client.SetKey(ctx, prommetrics.BuildDiscoveryKey(prommetrics.APIKeyName), target); err != nil {
+			if !errors.Is(err, discovery.ErrNotSupported) {
+				return err
+			}
+		}
 		go func() {
-			err := prommetrics.RpcInit(cs, prometheusListener)
+			err := prommetrics.Start(prometheusListener)
 			if err == nil {
-				err = fmt.Errorf("serve end")
+				err = fmt.Errorf("listener done")
 			}
 			cancel(fmt.Errorf("prommetrics %s %w", rpcRegisterName, err))
 		}()

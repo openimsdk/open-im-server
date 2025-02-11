@@ -41,13 +41,14 @@ func (u emptyOnlinePusher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *
 }
 
 func NewOnlinePusher(disCov discovery.Conn, config *Config) (OnlinePusher, error) {
+	if conf.Standalone() {
+		return NewDefaultAllNode(disCov, config), nil
+	}
 	if runtimeenv.RuntimeEnvironment() == conf.KUBERNETES {
 		return NewDefaultAllNode(disCov, config), nil
 	}
 	switch config.Discovery.Enable {
 	case conf.ETCD:
-		return NewDefaultAllNode(disCov, config), nil
-	case conf.Standalone:
 		return NewDefaultAllNode(disCov, config), nil
 	default:
 		return nil, errs.New(fmt.Sprintf("unsupported discovery type %s", config.Discovery.Enable))

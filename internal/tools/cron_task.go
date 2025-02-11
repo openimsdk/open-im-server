@@ -4,41 +4,34 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
 	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/third"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
-
-	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/mw"
-	"github.com/openimsdk/tools/utils/runtimeenv"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 	"github.com/robfig/cron/v3"
+	"google.golang.org/grpc"
 )
 
-type CronTaskConfig struct {
+type Config struct {
 	CronTask  config.CronTask
 	Share     config.Share
 	Discovery config.Discovery
 }
 
-func Start(ctx context.Context, conf *CronTaskConfig) error {
+// func Start(ctx context.Context, conf *CronTaskConfig) error {
+func Start(ctx context.Context, conf *Config, client discovery.Conn, service grpc.ServiceRegistrar) error {
 
 	log.CInfo(ctx, "CRON-TASK server is initializing", "runTimeEnv", runtimeenv.RuntimeEnvironment(), "chatRecordsClearTime", conf.CronTask.CronExecuteTime, "msgDestructTime", conf.CronTask.RetainChatRecords)
 	if conf.CronTask.RetainChatRecords < 1 {
-		return errs.New("msg destruct time must be greater than 1").Wrap()
+		return nil
 	}
-	client, err := kdisc.NewDiscoveryRegister(&conf.Discovery, nil)
-	if err != nil {
-		return errs.WrapMsg(err, "failed to register discovery service")
-	}
-	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	ctx = mcontext.SetOpUserID(ctx, conf.Share.IMAdminUserID[0])
 
 	msgConn, err := client.GetConn(ctx, conf.Discovery.RpcService.Msg)
@@ -91,7 +84,7 @@ func Start(ctx context.Context, conf *CronTaskConfig) error {
 
 type cronServer struct {
 	ctx                context.Context
-	config             *CronTaskConfig
+	config             *Config
 	cron               *cron.Cron
 	msgClient          msg.MsgClient
 	conversationClient pbconversation.ConversationClient

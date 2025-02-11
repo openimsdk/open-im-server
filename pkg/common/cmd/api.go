@@ -74,12 +74,15 @@ func (a *ApiCmd) Exec() error {
 
 func (a *ApiCmd) runE() error {
 	a.apiConfig.Index = config.Index(a.Index())
-	var prometheus config.Prometheus
+	prometheus := config.Prometheus{
+		Enable: a.apiConfig.API.Prometheus.Enable,
+		Ports:  a.apiConfig.API.Prometheus.Ports,
+	}
 	return startrpc.Start(
 		a.ctx, &a.apiConfig.Discovery,
 		&prometheus,
 		a.apiConfig.API.Api.ListenIP, "",
-		false,
+		a.apiConfig.API.Prometheus.AutoSetPorts,
 		nil, int(a.apiConfig.Index),
 		a.apiConfig.Discovery.RpcService.MessageGateway,
 		&a.apiConfig.Notification,

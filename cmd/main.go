@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net"
@@ -29,15 +30,22 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/relation"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/third"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/user"
+	"github.com/openimsdk/open-im-server/v3/internal/tools"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/standalone"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/network"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
+
+func init() {
+	config.SetStandalone()
+	prommetrics.RegistryAll()
+}
 
 func main() {
 	var configPath string
@@ -62,6 +70,7 @@ func main() {
 	putCmd(cmd, true, msggateway.Start)
 	putCmd(cmd, true, msgtransfer.Start)
 	putCmd(cmd, true, api.Start)
+	putCmd(cmd, true, tools.Start)
 	ctx := context.Background()
 	if err := cmd.run(ctx); err != nil {
 		fmt.Println(err)
@@ -91,7 +100,7 @@ func (x *cmds) getTypePath(typ reflect.Type) string {
 }
 
 func (x *cmds) initDiscovery() {
-	x.config.Discovery.Enable = config.Standalone
+	x.config.Discovery.Enable = "standalone"
 	vof := reflect.ValueOf(&x.config.Discovery.RpcService).Elem()
 	tof := reflect.TypeOf(&x.config.Discovery.RpcService).Elem()
 	num := tof.NumField()
@@ -143,6 +152,9 @@ func (x *cmds) initAllConfig() error {
 		}
 	}
 	x.initDiscovery()
+	x.config.Redis.Disable = true
+	x.config.LocalCache = config.LocalCache{}
+	config.InitNotification(&x.config.Notification)
 	return nil
 }
 
@@ -209,13 +221,23 @@ func (x *cmds) run(ctx context.Context) error {
 				return err
 			}
 		}
+		ip, err := network.GetLocalIP()
+		if err != nil {
+			return err
+		}
 		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 		if err != nil {
 			return fmt.Errorf("prometheus listen %d error %w", port, err)
 		}
 		defer listener.Close()
-		prommetrics.RegistryAll()
 		log.ZDebug(ctx, "prometheus start", "addr", listener.Addr())
+		target, err := json.Marshal(prommetrics.BuildDefaultTarget(ip, listener.Addr().(*net.TCPAddr).Port))
+		if err != nil {
+			return err
+		}
+		if err := standalone.GetKeyValue().SetKey(ctx, prommetrics.BuildDiscoveryKey(prommetrics.APIKeyName), target); err != nil {
+			return err
+		}
 		go func() {
 			err := prommetrics.Start(listener)
 			if err == nil {
@@ -278,7 +300,6 @@ func (x *cmds) run(ctx context.Context) error {
 		wg.Wait()
 		close(done)
 	}()
-
 	select {
 	case <-time.After(time.Second * 20):
 		log.ZError(ctx, "server exit timeout", nil)

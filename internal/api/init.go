@@ -17,17 +17,15 @@ package api
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
-	"os"
-	"os/signal"
 	"strconv"
-	"syscall"
 	"time"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/network"
@@ -60,7 +58,6 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, service g
 			Handler: router,
 			Addr:    net.JoinHostPort(network.GetListenIP(config.API.Api.ListenIP), strconv.Itoa(apiPort)),
 		}
-		log.CInfo(ctx, "api server is init", "runtimeEnv", runtimeenv.RuntimeEnvironment(), "address", httpServer.Addr, "apiPort", apiPort)
 		go func() {
 			defer close(done)
 			<-ctx.Done()
@@ -69,6 +66,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, service g
 				log.ZWarn(ctx, "api server shutdown err", err)
 			}
 		}()
+		log.CInfo(ctx, "api server is init", "runtimeEnv", runtimeenv.RuntimeEnvironment(), "address", httpServer.Addr, "apiPort", apiPort)
 		err := httpServer.ListenAndServe()
 		if err == nil {
 			err = errors.New("api done")
@@ -76,19 +74,18 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, service g
 		cancel(err)
 	}()
 
-	//if config.Discovery.Enable == conf.ETCD {
-	//	cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), config.GetConfigNames())
-	//	cm.Watch(ctx)
-	//}
-
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGTERM)
-	select {
-	case val := <-sigs:
-		log.ZDebug(ctx, "recv exit", "signal", val.String())
-		cancel(fmt.Errorf("signal %s", val.String()))
-	case <-ctx.Done():
+	if config.Discovery.Enable == conf.ETCD {
+		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), config.GetConfigNames())
+		cm.Watch(ctx)
 	}
+	//sigs := make(chan os.Signal, 1)
+	//signal.Notify(sigs, syscall.SIGTERM)
+	//select {
+	//case val := <-sigs:
+	//	log.ZDebug(ctx, "recv exit", "signal", val.String())
+	//	cancel(fmt.Errorf("signal %s", val.String()))
+	//case <-ctx.Done():
+	//}
 	exitCause := context.Cause(ctx)
 	log.ZWarn(ctx, "api server exit", exitCause)
 	timer := time.NewTimer(time.Second * 15)
