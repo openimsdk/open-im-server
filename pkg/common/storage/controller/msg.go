@@ -310,7 +310,7 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][
 		log.ZError(ctx, "json.Unmarshal", err)
 		return
 	}
-	if quoteMsg.QuoteMessage == nil || quoteMsg.QuoteMessage.Content == "" {
+	if quoteMsg.QuoteMessage == nil {
 		return
 	}
 	if quoteMsg.QuoteMessage.Content == "e30=" {
