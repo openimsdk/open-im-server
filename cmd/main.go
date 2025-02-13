@@ -73,10 +73,10 @@ func main() {
 	putCmd(cmd, true, cron.Start)
 	ctx := context.Background()
 	if err := cmd.run(ctx); err != nil {
-		fmt.Println(err)
+		_, _ = fmt.Fprintf(os.Stderr, "server exit %s", err)
+		os.Exit(1)
 		return
 	}
-	fmt.Println("exit")
 }
 
 func newCmds(confPath string) *cmds {
