@@ -38,6 +38,7 @@ func NewPushRpcCmd() *PushRpcCmd {
 	ret.configMap = map[string]any{
 		config.OpenIMPushCfgFileName:    &pushConfig.RpcConfig,
 		config.RedisConfigFileName:      &pushConfig.RedisConfig,
+		config.MongodbConfigFileName:    &pushConfig.MongoConfig,
 		config.KafkaConfigFileName:      &pushConfig.KafkaConfig,
 		config.ShareFileName:            &pushConfig.Share,
 		config.NotificationFileName:     &pushConfig.NotificationConfig,

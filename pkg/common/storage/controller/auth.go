@@ -60,10 +60,10 @@ func (a *authDatabase) BatchSetTokenMapByUidPid(ctx context.Context, tokens []st
 	setMap := make(map[string]map[string]any)
 	for _, token := range tokens {
 		claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret(a.accessSecret))
-		key := cachekey.GetTokenKey(claims.UserID, claims.PlatformID)
 		if err != nil {
 			continue
 		} else {
+			key := cachekey.GetTokenKey(claims.UserID, claims.PlatformID)
 			if v, ok := setMap[key]; ok {
 				v[token] = constant.KickedToken
 			} else {

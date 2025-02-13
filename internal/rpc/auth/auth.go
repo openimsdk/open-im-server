@@ -18,6 +18,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
@@ -51,15 +54,30 @@ type authServer struct {
 type Config struct {
 	RpcConfig   config.Auth
 	RedisConfig config.Redis
+	MongoConfig config.Mongo
 	Share       config.Share
 	Discovery   config.Discovery
 }
 
 func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
-	dbb := dbbuild.NewBuilder(nil, &config.RedisConfig)
+	dbb := dbbuild.NewBuilder(&config.MongoConfig, &config.RedisConfig)
 	rdb, err := dbb.Redis(ctx)
 	if err != nil {
 		return err
+	}
+	var token cache.TokenModel
+	if rdb == nil {
+		mdb, err := dbb.Mongo(ctx)
+		if err != nil {
+			return err
+		}
+		mc, err := mgo.NewCacheMgo(mdb.GetDB())
+		if err != nil {
+			return err
+		}
+		token = mcache.NewTokenCacheModel(mc, config.RpcConfig.TokenPolicy.Expire)
+	} else {
+		token = redis2.NewTokenCacheModel(rdb, config.RpcConfig.TokenPolicy.Expire)
 	}
 	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
@@ -68,7 +86,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	pbauth.RegisterAuthServer(server, &authServer{
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
-			redis2.NewTokenCacheModel(rdb, config.RpcConfig.TokenPolicy.Expire),
+			token,
 			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
 			config.Share.MultiLogin,

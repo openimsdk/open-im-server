@@ -132,19 +132,19 @@ func TestName5(t *testing.T) {
 	t.Log(res)
 }
 
-func TestName6(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*300)
-	defer cancel()
-	cli := Result(mongo.Connect(ctx, options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.135:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
-
-	tmp, err := NewMsgMongo(cli.Database("openim_v3"))
-	if err != nil {
-		panic(err)
-	}
-	msg := tmp.(*MsgMgo)
-	seq, sendTime, err := msg.findBeforeSendTime(ctx, "si_4924054191_9511766539", 1144)
-	if err != nil {
-		panic(err)
-	}
-	t.Log(seq, sendTime)
-}
+//func TestName6(t *testing.T) {
+//	ctx, cancel := context.WithTimeout(context.Background(), time.Second*300)
+//	defer cancel()
+//	cli := Result(mongo.Connect(ctx, options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.135:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
+//
+//	tmp, err := NewMsgMongo(cli.Database("openim_v3"))
+//	if err != nil {
+//		panic(err)
+//	}
+//	msg := tmp.(*MsgMgo)
+//	seq, sendTime, err := msg.findBeforeSendTime(ctx, "si_4924054191_9511766539", 1144)
+//	if err != nil {
+//		panic(err)
+//	}
+//	t.Log(seq, sendTime)
+//}

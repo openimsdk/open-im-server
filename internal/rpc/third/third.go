@@ -19,8 +19,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/tools/s3/disable"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -79,15 +82,31 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	if err != nil {
 		return err
 	}
-
+	var thirdCache cache.ThirdCache
+	if rdb == nil {
+		tc, err := mgo.NewCacheMgo(mgocli.GetDB())
+		if err != nil {
+			return err
+		}
+		thirdCache = mcache.NewThirdCache(tc)
+	} else {
+		thirdCache = redis.NewThirdCache(rdb)
+	}
 	// Select the oss method according to the profile policy
-	enable := config.RpcConfig.Object.Enable
-	var (
-		o s3.Interface
-	)
-	switch enable {
+	var o s3.Interface
+	switch enable := config.RpcConfig.Object.Enable; enable {
 	case "minio":
-		o, err = minio.NewMinio(ctx, redis.NewMinioCache(rdb), *config.MinioConfig.Build())
+		var minioCache minio.Cache
+		if rdb == nil {
+			mc, err := mgo.NewCacheMgo(mgocli.GetDB())
+			if err != nil {
+				return err
+			}
+			minioCache = mcache.NewMinioCache(mc)
+		} else {
+			minioCache = redis.NewMinioCache(rdb)
+		}
+		o, err = minio.NewMinio(ctx, minioCache, *config.MinioConfig.Build())
 	case "cos":
 		o, err = cos.NewCos(*config.RpcConfig.Object.Cos.Build())
 	case "oss":
@@ -96,6 +115,8 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		o, err = kodo.NewKodo(*config.RpcConfig.Object.Kodo.Build())
 	case "aws":
 		o, err = aws.NewAws(*config.RpcConfig.Object.Aws.Build())
+	case "":
+		o = disable.NewDisable()
 	default:
 		err = fmt.Errorf("invalid object enable: %s", enable)
 	}
@@ -108,7 +129,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	}
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	third.RegisterThirdServer(server, &thirdServer{
-		thirdDatabase: controller.NewThirdDatabase(redis.NewThirdCache(rdb), logdb),
+		thirdDatabase: controller.NewThirdDatabase(thirdCache, logdb),
 		s3dataBase:    controller.NewS3Database(rdb, o, s3db),
 		defaultExpire: time.Hour * 24 * 7,
 		config:        config,

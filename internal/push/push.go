@@ -7,8 +7,11 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	pbpush "github.com/openimsdk/protocol/push"
@@ -28,6 +31,7 @@ type pushServer struct {
 type Config struct {
 	RpcConfig          config.Push
 	RedisConfig        config.Redis
+	MongoConfig        config.Mongo
 	KafkaConfig        config.Kafka
 	NotificationConfig config.Notification
 	Share              config.Share
@@ -46,12 +50,25 @@ func (p pushServer) DelUserPushToken(ctx context.Context,
 }
 
 func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
-	dbb := dbbuild.NewBuilder(nil, &config.RedisConfig)
+	dbb := dbbuild.NewBuilder(&config.MongoConfig, &config.RedisConfig)
 	rdb, err := dbb.Redis(ctx)
 	if err != nil {
 		return err
 	}
-	cacheModel := redis.NewThirdCache(rdb)
+	var cacheModel cache.ThirdCache
+	if rdb == nil {
+		mdb, err := dbb.Mongo(ctx)
+		if err != nil {
+			return err
+		}
+		mc, err := mgo.NewCacheMgo(mdb.GetDB())
+		if err != nil {
+			return err
+		}
+		cacheModel = mcache.NewThirdCache(mc)
+	} else {
+		cacheModel = redis.NewThirdCache(rdb)
+	}
 	offlinePusher, err := offlinepush.NewOfflinePusher(&config.RpcConfig, cacheModel, string(config.FcmConfigPath))
 	if err != nil {
 		return err
