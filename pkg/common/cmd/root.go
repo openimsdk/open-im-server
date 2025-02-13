@@ -203,7 +203,6 @@ func (r *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 
 func (r *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 	err := log.InitLoggerFromConfig(
-
 		cmdOpts.loggerPrefixName,
 		r.processName,
 		"", "",

@@ -33,9 +33,11 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/tools/cron"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/standalone"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/network"
 	"github.com/spf13/viper"
@@ -52,11 +54,9 @@ func main() {
 	flag.StringVar(&configPath, "c", "", "config path")
 	flag.Parse()
 	if configPath == "" {
-		if runtime.GOOS == "linux" {
-			configPath = "/root/dt/open-im-server/config"
-		} else {
-			configPath = "/Users/chao/Desktop/code/open-im-server/config"
-		}
+		_, _ = fmt.Fprintln(os.Stderr, "config path is empty")
+		os.Exit(1)
+		return
 	}
 	cmd := newCmds(configPath)
 	putCmd(cmd, false, auth.Start)
@@ -152,7 +152,7 @@ func (x *cmds) initAllConfig() error {
 		}
 	}
 	x.initDiscovery()
-	x.config.Redis.Disable = true
+	x.config.Redis.Disable = false
 	x.config.LocalCache = config.LocalCache{}
 	config.InitNotification(&x.config.Notification)
 	return nil
@@ -200,11 +200,35 @@ func (x *cmds) add(name string, block bool, fn func(ctx context.Context) error) 
 	x.cmds = append(x.cmds, cmdName{Name: name, Block: block, Func: fn})
 }
 
+func (x *cmds) initLog() error {
+	conf := x.config.Log
+	if err := log.InitLoggerFromConfig(
+		"openim-server",
+		program.GetProcessName(),
+		"", "",
+		conf.RemainLogLevel,
+		conf.IsStdout,
+		conf.IsJson,
+		conf.StorageLocation,
+		conf.RemainRotationCount,
+		conf.RotationTime,
+		strings.TrimSpace(version.Version),
+		conf.IsSimplify,
+	); err != nil {
+		return err
+	}
+	return nil
+
+}
+
 func (x *cmds) run(ctx context.Context) error {
 	if len(x.cmds) == 0 {
 		return fmt.Errorf("no command to run")
 	}
 	if err := x.initAllConfig(); err != nil {
+		return err
+	}
+	if err := x.initLog(); err != nil {
 		return err
 	}
 
@@ -297,11 +321,9 @@ func (x *cmds) run(ctx context.Context) error {
 		}()
 	}
 	<-ctx.Done()
-
 	exitCause := context.Cause(ctx)
 	log.ZWarn(ctx, "notification of service closure", exitCause)
 	done := wait.Wait()
-	<-done
 	timeout := time.NewTimer(time.Second * 10)
 	defer timeout.Stop()
 	for {
