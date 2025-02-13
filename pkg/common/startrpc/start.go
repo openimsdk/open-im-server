@@ -30,7 +30,6 @@ import (
 	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/jsonutil"
 	"google.golang.org/grpc/status"
 
 	"github.com/openimsdk/tools/utils/runtimeenv"
@@ -127,11 +126,7 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 			}
 
 			etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
-
-			_, err = etcdClient.Put(ctx, prommetrics.BuildDiscoveryKey(rpcRegisterName), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
-			if err != nil {
-				return errs.WrapMsg(err, "etcd put err")
-			}
+			prommetrics.Register(ctx, etcdClient, rpcRegisterName, registerIP, prometheusPort)
 		} else {
 			prometheusPort, err = datautil.GetElemByIndex(prometheusConfig.Ports, index)
 			if err != nil {

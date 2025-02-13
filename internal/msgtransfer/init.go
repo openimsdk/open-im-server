@@ -28,7 +28,6 @@ import (
 	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
-	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/network"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -193,11 +192,7 @@ func (m *MsgTransfer) Start(index int, config *Config, client discovery.SvcDisco
 			}
 
 			etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
-
-			_, err = etcdClient.Put(context.TODO(), prommetrics.BuildDiscoveryKey(prommetrics.MessageTransferKeyName), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
-			if err != nil {
-				return errs.WrapMsg(err, "etcd put err")
-			}
+			prommetrics.Register(context.TODO(), etcdClient, prommetrics.MessageTransferKeyName, registerIP, prometheusPort)
 		} else {
 			prometheusPort, err = datautil.GetElemByIndex(config.MsgTransfer.Prometheus.Ports, index)
 			if err != nil {
