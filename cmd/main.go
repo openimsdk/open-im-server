@@ -8,14 +8,12 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"os/signal"
 	"path"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -210,6 +208,11 @@ func (x *cmds) run(ctx context.Context) error {
 
 	ctx, cancel := context.WithCancelCause(ctx)
 
+	go func() {
+		<-ctx.Done()
+		log.ZError(ctx, "context server exit cause", context.Cause(ctx))
+	}()
+
 	if prometheus := x.config.API.Prometheus; prometheus.Enable {
 		var (
 			port int
@@ -247,16 +250,16 @@ func (x *cmds) run(ctx context.Context) error {
 		}()
 	}
 
-	go func() {
-		sigs := make(chan os.Signal, 1)
-		signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
-		select {
-		case <-ctx.Done():
-			return
-		case val := <-sigs:
-			cancel(fmt.Errorf("signal %s", val.String()))
-		}
-	}()
+	//go func() {
+	//	sigs := make(chan os.Signal, 1)
+	//	signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
+	//	select {
+	//	case <-ctx.Done():
+	//		return
+	//	case val := <-sigs:
+	//		cancel(fmt.Errorf("signal %s", val.String()))
+	//	}
+	//}()
 
 	for i := range x.cmds {
 		cmd := x.cmds[i]

@@ -9,6 +9,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/tools/errs"
@@ -17,6 +18,9 @@ import (
 )
 
 func NewSeqConversationCacheRedis(rdb redis.UniversalClient, mgo database.SeqConversation) cache.SeqConversationCache {
+	if rdb == nil {
+		return mcache.NewSeqConversationCache(mgo)
+	}
 	return &seqConversationCacheRedis{
 		mgo:              mgo,
 		lockTime:         time.Second * 3,

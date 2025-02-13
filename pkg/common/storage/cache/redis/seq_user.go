@@ -72,6 +72,9 @@ func (s *seqUserCacheRedis) GetUserReadSeq(ctx context.Context, conversationID s
 }
 
 func (s *seqUserCacheRedis) SetUserReadSeq(ctx context.Context, conversationID string, userID string, seq int64) error {
+	if s.rocks.GetRedis() == nil {
+		return s.SetUserReadSeqToDB(ctx, conversationID, userID, seq)
+	}
 	dbSeq, err := s.GetUserReadSeq(ctx, conversationID, userID)
 	if err != nil {
 		return err

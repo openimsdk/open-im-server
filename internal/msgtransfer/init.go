@@ -21,6 +21,8 @@ import (
 	"syscall"
 
 	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
@@ -101,7 +103,16 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	if err != nil {
 		return err
 	}
-	msgModel := redis.NewMsgCache(rdb, msgDocModel)
+	var msgModel cache.MsgCache
+	if rdb == nil {
+		cm, err := mgo.NewCacheMgo(mgocli.GetDB())
+		if err != nil {
+			return err
+		}
+		msgModel = mcache.NewMsgCache(cm, msgDocModel)
+	} else {
+		msgModel = redis.NewMsgCache(rdb, msgDocModel)
+	}
 	seqConversation, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return err

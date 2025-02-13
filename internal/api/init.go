@@ -17,15 +17,14 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"strconv"
 	"time"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/network"
@@ -51,7 +50,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, service g
 		return err
 	}
 
-	ctx, cancel := context.WithCancelCause(ctx)
+	apiCtx, apiCancel := context.WithCancelCause(context.Background())
 	done := make(chan struct{})
 	go func() {
 		httpServer := &http.Server{
@@ -60,7 +59,11 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, service g
 		}
 		go func() {
 			defer close(done)
-			<-ctx.Done()
+			select {
+			case <-ctx.Done():
+				apiCancel(fmt.Errorf("recv ctx %w", context.Cause(ctx)))
+			case <-apiCtx.Done():
+			}
 			log.ZDebug(ctx, "api server is shutting down")
 			if err := httpServer.Shutdown(context.Background()); err != nil {
 				log.ZWarn(ctx, "api server shutdown err", err)
@@ -71,13 +74,13 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, service g
 		if err == nil {
 			err = errors.New("api done")
 		}
-		cancel(err)
+		apiCancel(err)
 	}()
 
-	if config.Discovery.Enable == conf.ETCD {
-		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), config.GetConfigNames())
-		cm.Watch(ctx)
-	}
+	//if config.Discovery.Enable == conf.ETCD {
+	//	cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), config.GetConfigNames())
+	//	cm.Watch(ctx)
+	//}
 	//sigs := make(chan os.Signal, 1)
 	//signal.Notify(sigs, syscall.SIGTERM)
 	//select {
@@ -86,6 +89,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, service g
 	//	cancel(fmt.Errorf("signal %s", val.String()))
 	//case <-ctx.Done():
 	//}
+	<-apiCtx.Done()
 	exitCause := context.Cause(ctx)
 	log.ZWarn(ctx, "api server exit", exitCause)
 	timer := time.NewTimer(time.Second * 15)
