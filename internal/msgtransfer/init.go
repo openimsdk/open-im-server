@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -26,7 +25,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/mq"
 	"github.com/openimsdk/tools/utils/runtimeenv"
 
@@ -75,19 +73,19 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		return err
 	}
 
-	if config.Discovery.Enable == conf.ETCD {
-		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), []string{
-			config.MsgTransfer.GetConfigFileName(),
-			config.RedisConfig.GetConfigFileName(),
-			config.MongodbConfig.GetConfigFileName(),
-			config.KafkaConfig.GetConfigFileName(),
-			config.Share.GetConfigFileName(),
-			config.WebhooksConfig.GetConfigFileName(),
-			config.Discovery.GetConfigFileName(),
-			conf.LogConfigFileName,
-		})
-		cm.Watch(ctx)
-	}
+	//if config.Discovery.Enable == conf.ETCD {
+	//	cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), []string{
+	//		config.MsgTransfer.GetConfigFileName(),
+	//		config.RedisConfig.GetConfigFileName(),
+	//		config.MongodbConfig.GetConfigFileName(),
+	//		config.KafkaConfig.GetConfigFileName(),
+	//		config.Share.GetConfigFileName(),
+	//		config.WebhooksConfig.GetConfigFileName(),
+	//		config.Discovery.GetConfigFileName(),
+	//		conf.LogConfigFileName,
+	//	})
+	//	cm.Watch(ctx)
+	//}
 	mongoProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToMongoTopic)
 	if err != nil {
 		return err

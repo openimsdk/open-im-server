@@ -58,7 +58,7 @@ func (a *CronTaskCmd) runE() error {
 		a.ctx, &a.cronTaskConfig.Discovery,
 		&prometheus,
 		"", "",
-		false,
+		true,
 		nil, 0,
 		"",
 		nil,

@@ -61,27 +61,16 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 	if err != nil {
 		return err
 	}
-	var (
-		rpcListenAddr        string
-		prometheusListenAddr string
-	)
+	var prometheusListenAddr string
 	if autoSetPorts {
-		rpcListenAddr = net.JoinHostPort(listenIP, "0")
 		prometheusListenAddr = net.JoinHostPort(listenIP, "0")
 	} else {
-		rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
-		if err != nil {
-			return err
-		}
 		prometheusPort, err := datautil.GetElemByIndex(prometheusConfig.Ports, index)
 		if err != nil {
 			return err
 		}
-		rpcListenAddr = net.JoinHostPort(listenIP, strconv.Itoa(rpcPort))
 		prometheusListenAddr = net.JoinHostPort(listenIP, strconv.Itoa(prometheusPort))
 	}
-
-	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcAddr", rpcListenAddr, "prometheusAddr", prometheusListenAddr)
 
 	watchConfigNames = append(watchConfigNames, conf.LogConfigFileName)
 
@@ -149,6 +138,17 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 			rpcServer.RegisterService(desc, impl)
 			return
 		}
+		var rpcListenAddr string
+		if autoSetPorts {
+			rpcListenAddr = net.JoinHostPort(listenIP, "0")
+		} else {
+			rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
+			if err != nil {
+				cancel(fmt.Errorf("rpcPorts index out of range %s %w", rpcRegisterName, err))
+				return
+			}
+			rpcListenAddr = net.JoinHostPort(listenIP, strconv.Itoa(rpcPort))
+		}
 		rpcListener, err := net.Listen("tcp", rpcListenAddr)
 		if err != nil {
 			cancel(fmt.Errorf("listen rpc %s %s %w", rpcRegisterName, rpcListenAddr, err))
@@ -186,6 +186,7 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 		return err
 	}
 	<-ctx.Done()
+	log.ZDebug(ctx, "cmd wait done", "err", context.Cause(ctx))
 	if rpcGracefulStop != nil {
 		timeout := time.NewTimer(time.Second * 15)
 		defer timeout.Stop()
