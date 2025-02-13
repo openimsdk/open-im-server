@@ -67,7 +67,7 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 	)
 	if autoSetPorts {
 		rpcListenAddr = net.JoinHostPort(listenIP, "0")
-		prometheusListenAddr = net.JoinHostPort("", "0")
+		prometheusListenAddr = net.JoinHostPort(listenIP, "0")
 	} else {
 		rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
 		if err != nil {
@@ -78,7 +78,7 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 			return err
 		}
 		rpcListenAddr = net.JoinHostPort(listenIP, strconv.Itoa(rpcPort))
-		prometheusListenAddr = net.JoinHostPort("", strconv.Itoa(prometheusPort))
+		prometheusListenAddr = net.JoinHostPort(listenIP, strconv.Itoa(prometheusPort))
 	}
 
 	log.CInfo(ctx, "RPC server is initializing", "rpcRegisterName", rpcRegisterName, "rpcAddr", rpcListenAddr, "prometheusAddr", prometheusListenAddr)
@@ -96,10 +96,19 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")),
 	)
 
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGTERM)
-
 	ctx, cancel := context.WithCancelCause(ctx)
+
+	go func() {
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
+		select {
+		case <-ctx.Done():
+			return
+		case val := <-sigs:
+			log.ZDebug(ctx, "recv signal", "signal", val.String())
+			cancel(fmt.Errorf("signal %s", val.String()))
+		}
+	}()
 
 	if prometheusListenAddr != "" {
 		options = append(
@@ -176,13 +185,7 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 	if err != nil {
 		return err
 	}
-
-	select {
-	case val := <-sigs:
-		log.ZDebug(ctx, "recv exit", "signal", val.String())
-		cancel(fmt.Errorf("signal %s", val.String()))
-	case <-ctx.Done():
-	}
+	<-ctx.Done()
 	if rpcGracefulStop != nil {
 		timeout := time.NewTimer(time.Second * 15)
 		defer timeout.Stop()
