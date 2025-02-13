@@ -25,11 +25,11 @@ type Config struct {
 	Discovery config.Discovery
 }
 
-// func Start(ctx context.Context, conf *CronTaskConfig) error {
 func Start(ctx context.Context, conf *Config, client discovery.Conn, service grpc.ServiceRegistrar) error {
-
 	log.CInfo(ctx, "CRON-TASK server is initializing", "runTimeEnv", runtimeenv.RuntimeEnvironment(), "chatRecordsClearTime", conf.CronTask.CronExecuteTime, "msgDestructTime", conf.CronTask.RetainChatRecords)
 	if conf.CronTask.RetainChatRecords < 1 {
+		log.ZInfo(ctx, "disable cron")
+		<-ctx.Done()
 		return nil
 	}
 	ctx = mcontext.SetOpUserID(ctx, conf.Share.IMAdminUserID[0])
@@ -78,7 +78,9 @@ func Start(ctx context.Context, conf *Config, client discovery.Conn, service grp
 	}
 	log.ZDebug(ctx, "start cron task", "CronExecuteTime", conf.CronTask.CronExecuteTime)
 	srv.cron.Start()
+	log.ZDebug(ctx, "cron task server is running")
 	<-ctx.Done()
+	log.ZDebug(ctx, "cron task server is shutting down")
 	return nil
 }
 

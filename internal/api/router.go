@@ -283,7 +283,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 	}
 	{
 		pd := NewPrometheusDiscoveryApi(cfg, client)
-		proDiscoveryGroup := r.Group("/prometheus_discovery", pd.Enable)
+		proDiscoveryGroup := r.Group("/prometheus_discovery")
 		proDiscoveryGroup.GET("/api", pd.Api)
 		proDiscoveryGroup.GET("/user", pd.User)
 		proDiscoveryGroup.GET("/group", pd.Group)

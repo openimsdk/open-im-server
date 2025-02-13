@@ -8,12 +8,14 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/signal"
 	"path"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -250,16 +252,17 @@ func (x *cmds) run(ctx context.Context) error {
 		}()
 	}
 
-	//go func() {
-	//	sigs := make(chan os.Signal, 1)
-	//	signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
-	//	select {
-	//	case <-ctx.Done():
-	//		return
-	//	case val := <-sigs:
-	//		cancel(fmt.Errorf("signal %s", val.String()))
-	//	}
-	//}()
+	go func() {
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
+		select {
+		case <-ctx.Done():
+			return
+		case val := <-sigs:
+			log.ZDebug(ctx, "recv signal", "signal", val.String())
+			cancel(fmt.Errorf("signal %s", val.String()))
+		}
+	}()
 
 	for i := range x.cmds {
 		cmd := x.cmds[i]
