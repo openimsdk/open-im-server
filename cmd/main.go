@@ -30,7 +30,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/relation"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/third"
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/user"
-	"github.com/openimsdk/open-im-server/v3/internal/tools"
+	"github.com/openimsdk/open-im-server/v3/internal/tools/cron"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/discovery"
@@ -70,7 +70,7 @@ func main() {
 	putCmd(cmd, true, msggateway.Start)
 	putCmd(cmd, true, msgtransfer.Start)
 	putCmd(cmd, true, api.Start)
-	putCmd(cmd, true, tools.Start)
+	putCmd(cmd, true, cron.Start)
 	ctx := context.Background()
 	if err := cmd.run(ctx); err != nil {
 		fmt.Println(err)
@@ -279,40 +279,45 @@ func (x *cmds) run(ctx context.Context) error {
 			}
 		}()
 	}
-	var wg sync.WaitGroup
+
+	var wait cmdManger
 	for i := range x.cmds {
 		cmd := x.cmds[i]
 		if !cmd.Block {
 			continue
 		}
-		wg.Add(1)
+		wait.Start(cmd.Name)
 		go func() {
-			defer wg.Done()
+			defer wait.Shutdown(cmd.Name)
 			if err := cmd.Func(ctx); err != nil {
 				cancel(fmt.Errorf("server %s exit %w", cmd.Name, err))
 				return
 			}
-			if cmd.Block {
-				cancel(fmt.Errorf("server %s exit", cmd.Name))
-			}
+			cancel(fmt.Errorf("server %s exit", cmd.Name))
 		}()
 	}
 	<-ctx.Done()
 
 	exitCause := context.Cause(ctx)
-	log.ZWarn(ctx, "server exit cause", exitCause)
-	done := make(chan struct{})
-	go func() {
-		wg.Wait()
-		close(done)
-	}()
-	select {
-	case <-time.After(time.Second * 20):
-		log.ZError(ctx, "server exit timeout", nil)
-	case <-done:
-		log.ZInfo(ctx, "server exit done")
+	log.ZWarn(ctx, "notification of service closure", exitCause)
+	done := wait.Wait()
+	<-done
+	timeout := time.NewTimer(time.Second * 10)
+	defer timeout.Stop()
+	for {
+		select {
+		case <-timeout.C:
+			log.ZWarn(ctx, "server exit timeout", nil, "running", wait.Running())
+			return exitCause
+		case _, ok := <-done:
+			if ok {
+				log.ZWarn(ctx, "waiting for the service to exit", nil, "running", wait.Running())
+			} else {
+				log.ZInfo(ctx, "all server exit done")
+				return exitCause
+			}
+		}
 	}
-	return exitCause
 }
 
 func putCmd[C any](cmd *cmds, block bool, fn func(ctx context.Context, config *C, client discovery.Conn, server grpc.ServiceRegistrar) error) {
@@ -327,4 +332,66 @@ func putCmd[C any](cmd *cmds, block bool, fn func(ctx context.Context, config *C
 		}
 		return fn(ctx, &conf, standalone.GetDiscoveryConn(), standalone.GetServiceRegistrar())
 	})
+}
+
+type cmdManger struct {
+	lock  sync.Mutex
+	done  chan struct{}
+	count int
+	names map[string]struct{}
+}
+
+func (x *cmdManger) Start(name string) {
+	x.lock.Lock()
+	defer x.lock.Unlock()
+	if x.names == nil {
+		x.names = make(map[string]struct{})
+	}
+	if x.done == nil {
+		x.done = make(chan struct{}, 1)
+	}
+	if _, ok := x.names[name]; ok {
+		panic(fmt.Errorf("cmd %s already exists", name))
+	}
+	x.count++
+	x.names[name] = struct{}{}
+}
+
+func (x *cmdManger) Shutdown(name string) {
+	x.lock.Lock()
+	defer x.lock.Unlock()
+	if _, ok := x.names[name]; !ok {
+		panic(fmt.Errorf("cmd %s not exists", name))
+	}
+	delete(x.names, name)
+	x.count--
+	if x.count == 0 {
+		close(x.done)
+	} else {
+		select {
+		case x.done <- struct{}{}:
+		default:
+		}
+	}
+}
+
+func (x *cmdManger) Wait() <-chan struct{} {
+	x.lock.Lock()
+	defer x.lock.Unlock()
+	if x.count == 0 || x.done == nil {
+		tmp := make(chan struct{})
+		close(tmp)
+		return tmp
+	}
+	return x.done
+}
+
+func (x *cmdManger) Running() []string {
+	x.lock.Lock()
+	defer x.lock.Unlock()
+	names := make([]string, 0, len(x.names))
+	for name := range x.names {
+		names = append(names, name)
+	}
+	return names
 }

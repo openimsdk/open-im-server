@@ -17,7 +17,7 @@ package cmd
 import (
 	"context"
 
-	"github.com/openimsdk/open-im-server/v3/internal/tools"
+	"github.com/openimsdk/open-im-server/v3/internal/tools/cron"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
@@ -29,11 +29,11 @@ type CronTaskCmd struct {
 	*RootCmd
 	ctx            context.Context
 	configMap      map[string]any
-	cronTaskConfig *tools.Config
+	cronTaskConfig *cron.Config
 }
 
 func NewCronTaskCmd() *CronTaskCmd {
-	var cronTaskConfig tools.Config
+	var cronTaskConfig cron.Config
 	ret := &CronTaskCmd{cronTaskConfig: &cronTaskConfig}
 	ret.configMap = map[string]any{
 		config.OpenIMCronTaskCfgFileName: &cronTaskConfig.CronTask,
@@ -65,6 +65,6 @@ func (a *CronTaskCmd) runE() error {
 		a.cronTaskConfig,
 		[]string{},
 		[]string{},
-		tools.Start,
+		cron.Start,
 	)
 }

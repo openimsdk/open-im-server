@@ -16,9 +16,7 @@ package msgtransfer
 
 import (
 	"context"
-	"os"
-	"os/signal"
-	"syscall"
+	"fmt"
 
 	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
@@ -35,7 +33,6 @@ import (
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/system/program"
 	"google.golang.org/grpc"
 )
 
@@ -49,7 +46,7 @@ type MsgTransfer struct {
 	//This consumer handle message to mongo
 	historyMongoHandler *OnlineHistoryMongoConsumerHandler
 	ctx                 context.Context
-	cancel              context.CancelFunc
+	//cancel              context.CancelFunc
 }
 
 type Config struct {
@@ -148,19 +145,17 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		historyMongoHandler:  historyMongoHandler,
 	}
 
-	return msgTransfer.Start(ctx, int(config.Index), config, client)
+	return msgTransfer.Start(ctx)
 }
 
-func (m *MsgTransfer) Start(ctx context.Context, index int, config *Config, client discovery.Conn) error {
-	m.ctx, m.cancel = context.WithCancel(context.Background())
-	var (
-		netDone = make(chan struct{}, 1)
-		netErr  error
-	)
+func (m *MsgTransfer) Start(ctx context.Context) error {
+	var cancel context.CancelCauseFunc
+	m.ctx, cancel = context.WithCancelCause(ctx)
 
 	go func() {
 		for {
 			if err := m.historyConsumer.Subscribe(m.ctx, m.historyHandler.HandlerRedisMessage); err != nil {
+				cancel(fmt.Errorf("history consumer %w", err))
 				log.ZError(m.ctx, "historyConsumer err", err)
 				return
 			}
@@ -174,6 +169,7 @@ func (m *MsgTransfer) Start(ctx context.Context, index int, config *Config, clie
 		}
 		for {
 			if err := m.historyMongoConsumer.Subscribe(m.ctx, fn); err != nil {
+				cancel(fmt.Errorf("history mongo consumer %w", err))
 				log.ZError(m.ctx, "historyMongoConsumer err", err)
 				return
 			}
@@ -181,31 +177,11 @@ func (m *MsgTransfer) Start(ctx context.Context, index int, config *Config, clie
 	}()
 
 	go m.historyHandler.HandleUserHasReadSeqMessages(m.ctx)
+
 	err := m.historyHandler.redisMessageBatches.Start()
 	if err != nil {
 		return err
 	}
-
-	// todo
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGTERM)
-	select {
-	case <-sigs:
-		program.SIGTERMExit()
-		// graceful close kafka client.
-		_ = m.historyConsumer.Close()
-		_ = m.historyMongoConsumer.Close()
-		m.cancel()
-		m.historyHandler.redisMessageBatches.Close()
-		m.historyHandler.Close()
-		return nil
-	case <-netDone:
-		_ = m.historyConsumer.Close()
-		_ = m.historyMongoConsumer.Close()
-		m.cancel()
-		m.historyHandler.redisMessageBatches.Close()
-		m.historyHandler.Close()
-		close(netDone)
-		return netErr
-	}
+	<-m.ctx.Done()
+	return context.Cause(m.ctx)
 }
