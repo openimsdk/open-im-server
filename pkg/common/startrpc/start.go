@@ -124,7 +124,7 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 			return err
 		}
 		if err := client.SetKey(ctx, prommetrics.BuildDiscoveryKey(prommetrics.APIKeyName), target); err != nil {
-			if !errors.Is(err, discovery.ErrNotSupported) {
+			if !errors.Is(err, discovery.ErrNotSupportedKeyValue) {
 				return err
 			}
 		}

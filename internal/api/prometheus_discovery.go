@@ -34,7 +34,7 @@ func NewPrometheusDiscoveryApi(config *Config, client discovery.Conn) *Prometheu
 func (p *PrometheusDiscoveryApi) discovery(c *gin.Context, key string) {
 	value, err := p.kv.GetKey(c, prommetrics.BuildDiscoveryKey(key))
 	if err != nil {
-		if errors.Is(err, discovery.ErrNotSupported) {
+		if errors.Is(err, discovery.ErrNotSupportedKeyValue) {
 			c.JSON(http.StatusOK, []struct{}{})
 			return
 		}

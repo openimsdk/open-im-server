@@ -13,7 +13,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/protocol v0.0.72-alpha.71
-	github.com/openimsdk/tools v0.0.50-alpha.70
+	github.com/openimsdk/tools v0.0.50-alpha.73
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
@@ -220,5 +220,4 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
 
-//replace github.com/openimsdk/tools => github.com/withchao/tools v0.0.50-alpha.38.0.20250207092500-cc9b95a0cdcc
-replace github.com/openimsdk/tools => /Users/chao/Desktop/code/tools
+//replace github.com/openimsdk/tools => /Users/chao/Desktop/code/tools
