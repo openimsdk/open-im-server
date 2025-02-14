@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
@@ -17,10 +18,7 @@ import (
 )
 
 func NewUserOnline(rdb redis.UniversalClient) cache.OnlineCache {
-	//if rdb == nil || config.Standalone() {
-	//	return mcache.NewOnlineCache()
-	//}
-	if rdb == nil {
+	if rdb == nil || config.Standalone() {
 		return mcache.NewOnlineCache()
 	}
 	return &userOnline{
