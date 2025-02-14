@@ -7,10 +7,18 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 )
 
+var (
+	globalOnlineCache cache.OnlineCache
+	globalOnlineOnce  sync.Once
+)
+
 func NewOnlineCache() cache.OnlineCache {
-	return &onlineCache{
-		user: make(map[string]map[int32]struct{}),
-	}
+	globalOnlineOnce.Do(func() {
+		globalOnlineCache = &onlineCache{
+			user: make(map[string]map[int32]struct{}),
+		}
+	})
+	return globalOnlineCache
 }
 
 type onlineCache struct {
