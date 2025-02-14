@@ -1091,21 +1091,147 @@ func (m *MsgMgo) onlyFindDocIndex(ctx context.Context, docID string, indexes []i
 	return msgDocModel[0].Msg, nil
 }
 
+//func (m *MsgMgo) FindSeqs(ctx context.Context, conversationID string, seqs []int64) ([]*model.MsgInfoModel, error) {
+//	if len(seqs) == 0 {
+//		return nil, nil
+//	}
+//	result := make([]*model.MsgInfoModel, 0, len(seqs))
+//	for docID, seqs := range m.model.GetDocIDSeqsMap(conversationID, seqs) {
+//		res, err := m.onlyFindDocIndex(ctx, docID, datautil.Slice(seqs, m.model.GetMsgIndex))
+//		if err != nil {
+//			return nil, err
+//		}
+//		for i, re := range res {
+//			if re == nil || re.Msg == nil {
+//				continue
+//			}
+//			result = append(result, res[i])
+//		}
+//	}
+//	return result, nil
+//}
+
+func (m *MsgMgo) findBeforeDocSendTime(ctx context.Context, docID string, limit int64) (int64, int64, error) {
+	if limit == 0 {
+		return 0, 0, nil
+	}
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{
+				"doc_id": docID,
+			},
+		},
+		{
+			"$project": bson.M{
+				"_id":    0,
+				"doc_id": 0,
+			},
+		},
+		{
+			"$unwind": "$msgs",
+		},
+		{
+			"$project": bson.M{
+				//"_id":                0,
+				//"doc_id":             0,
+				"msgs.msg.send_time": 1,
+				"msgs.msg.seq":       1,
+			},
+		},
+	}
+	if limit > 0 {
+		pipeline = append(pipeline, bson.M{"$limit": limit})
+	}
+	type Result struct {
+		Msgs *model.MsgInfoModel `bson:"msgs"`
+	}
+	res, err := mongoutil.Aggregate[Result](ctx, m.coll, pipeline)
+	if err != nil {
+		return 0, 0, err
+	}
+	for i := len(res) - 1; i > 0; i-- {
+		v := res[i]
+		if v.Msgs != nil && v.Msgs.Msg != nil && v.Msgs.Msg.SendTime > 0 {
+			return v.Msgs.Msg.Seq, v.Msgs.Msg.SendTime, nil
+		}
+	}
+	return 0, 0, nil
+}
+
+func (m *MsgMgo) findBeforeSendTime(ctx context.Context, conversationID string, seq int64) (int64, int64, error) {
+	first := true
+	for i := m.model.GetDocIndex(seq); i >= 0; i-- {
+		limit := int64(-1)
+		if first {
+			first = false
+			limit = m.model.GetMsgIndex(seq)
+		}
+		docID := m.model.BuildDocIDByIndex(conversationID, i)
+		msgSeq, msgSendTime, err := m.findBeforeDocSendTime(ctx, docID, limit)
+		if err != nil {
+			return 0, 0, err
+		}
+		if msgSendTime > 0 {
+			return msgSeq, msgSendTime, nil
+		}
+	}
+	return 0, 0, nil
+}
+
 func (m *MsgMgo) FindSeqs(ctx context.Context, conversationID string, seqs []int64) ([]*model.MsgInfoModel, error) {
 	if len(seqs) == 0 {
 		return nil, nil
 	}
+	var abnormalSeq []int64
 	result := make([]*model.MsgInfoModel, 0, len(seqs))
-	for docID, seqs := range m.model.GetDocIDSeqsMap(conversationID, seqs) {
-		res, err := m.onlyFindDocIndex(ctx, docID, datautil.Slice(seqs, m.model.GetMsgIndex))
+	for docID, docSeqs := range m.model.GetDocIDSeqsMap(conversationID, seqs) {
+		res, err := m.onlyFindDocIndex(ctx, docID, datautil.Slice(docSeqs, m.model.GetMsgIndex))
 		if err != nil {
 			return nil, err
 		}
+		if len(res) == 0 {
+			abnormalSeq = append(abnormalSeq, docSeqs...)
+			continue
+		}
 		for i, re := range res {
-			if re == nil || re.Msg == nil {
+			if re == nil || re.Msg == nil || re.Msg.SendTime == 0 {
+				abnormalSeq = append(abnormalSeq, docSeqs[i])
 				continue
 			}
 			result = append(result, res[i])
+		}
+	}
+	if len(abnormalSeq) > 0 {
+		datautil.Sort(abnormalSeq, false)
+		sendTime := make(map[int64]int64)
+		var (
+			lastSeq      int64
+			lastSendTime int64
+		)
+		for _, seq := range abnormalSeq {
+			if lastSendTime > 0 && lastSeq <= seq {
+				sendTime[seq] = lastSendTime
+				continue
+			}
+			msgSeq, msgSendTime, err := m.findBeforeSendTime(ctx, conversationID, seq)
+			if err != nil {
+				return nil, err
+			}
+			if msgSendTime <= 0 {
+				break
+			}
+			sendTime[seq] = msgSendTime
+			lastSeq = msgSeq
+			lastSendTime = msgSendTime
+		}
+		for _, seq := range abnormalSeq {
+			result = append(result, &model.MsgInfoModel{
+				Msg: &model.MsgDataModel{
+					Seq:      seq,
+					Status:   constant.MsgStatusHasDeleted,
+					SendTime: sendTime[seq],
+				},
+			})
 		}
 	}
 	return result, nil

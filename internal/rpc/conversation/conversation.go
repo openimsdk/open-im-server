@@ -773,7 +773,7 @@ func (c *conversationServer) ClearUserConversationMsg(ctx context.Context, req *
 		if conversation.IsMsgDestruct == false || conversation.MsgDestructTime == 0 {
 			continue
 		}
-		seq, err := c.msgClient.GetLastMessageSeqByTime(ctx, conversation.ConversationID, req.Timestamp-conversation.MsgDestructTime)
+		seq, err := c.msgClient.GetLastMessageSeqByTime(ctx, conversation.ConversationID, req.Timestamp-(conversation.MsgDestructTime*1000))
 		if err != nil {
 			return nil, err
 		}

@@ -306,7 +306,7 @@ func (db *commonMsgDatabase) handlerDBMsg(ctx context.Context, cache map[int64][
 		log.ZError(ctx, "json.Unmarshal", err)
 		return
 	}
-	if quoteMsg.QuoteMessage == nil || quoteMsg.QuoteMessage.Content == "" {
+	if quoteMsg.QuoteMessage == nil {
 		return
 	}
 	if quoteMsg.QuoteMessage.Content == "e30=" {
@@ -719,13 +719,13 @@ func (db *commonMsgDatabase) DeleteDoc(ctx context.Context, docID string) error 
 	if index <= 0 {
 		return errs.ErrInternalServer.WrapMsg("docID is invalid", "docID", docID)
 	}
-	index, err := strconv.Atoi(docID[index+1:])
+	docIndex, err := strconv.Atoi(docID[index+1:])
 	if err != nil {
 		return errs.WrapMsg(err, "strconv.Atoi", "docID", docID)
 	}
 	conversationID := docID[:index]
 	seqs := make([]int64, db.msgTable.GetSingleGocMsgNum())
-	minSeq := db.msgTable.GetMinSeq(index)
+	minSeq := db.msgTable.GetMinSeq(docIndex)
 	for i := range seqs {
 		seqs[i] = minSeq + int64(i)
 	}

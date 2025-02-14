@@ -61,8 +61,12 @@ func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(ctx context.Cont
 	} else {
 		prommetrics.MsgInsertMongoSuccessCounter.Inc()
 	}
-	var seqs []int64
-	for _, msg := range msgFromMQ.MsgData {
-		seqs = append(seqs, msg.Seq)
-	}
+	//var seqs []int64
+	//for _, msg := range msgFromMQ.MsgData {
+	//	seqs = append(seqs, msg.Seq)
+	//}
+	//if err := mc.msgTransferDatabase.DeleteMessagesFromCache(ctx, msgFromMQ.ConversationID, seqs); err != nil {
+	//	log.ZError(ctx, "remove cache msg from redis err", err, "msg",
+	//		msgFromMQ.MsgData, "conversationID", msgFromMQ.ConversationID)
+	//}
 }
