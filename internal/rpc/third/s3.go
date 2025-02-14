@@ -19,10 +19,11 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"path"
 	"strconv"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 
 	"github.com/google/uuid"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -37,7 +38,10 @@ import (
 )
 
 func (t *thirdServer) PartLimit(ctx context.Context, req *third.PartLimitReq) (*third.PartLimitResp, error) {
-	limit := t.s3dataBase.PartLimit()
+	limit, err := t.s3dataBase.PartLimit()
+	if err != nil {
+		return nil, err
+	}
 	return &third.PartLimitResp{
 		MinPartSize: limit.MinPartSize,
 		MaxPartSize: limit.MaxPartSize,

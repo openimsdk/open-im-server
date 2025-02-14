@@ -1,12 +1,13 @@
-package tools
+package cron
 
 import (
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"os"
-	"time"
 )
 
 func (c *cronServer) clearS3() {

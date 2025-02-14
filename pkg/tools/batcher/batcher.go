@@ -3,11 +3,12 @@ package batcher
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils/idutil"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils/idutil"
 )
 
 var (
@@ -245,7 +246,9 @@ func (b *Batcher[T]) distributeMessage(messages map[string][]*T, totalCount int,
 	if b.config.syncWait {
 		b.counter.Wait()
 	}
-	b.OnComplete(lastMessage, totalCount)
+	if b.OnComplete != nil {
+		b.OnComplete(lastMessage, totalCount)
+	}
 }
 
 func (b *Batcher[T]) run(channelID int, ch <-chan *Msg[T]) {

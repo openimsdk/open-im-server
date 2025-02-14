@@ -38,6 +38,7 @@ func NewPushRpcCmd() *PushRpcCmd {
 	ret.configMap = map[string]any{
 		config.OpenIMPushCfgFileName:    &pushConfig.RpcConfig,
 		config.RedisConfigFileName:      &pushConfig.RedisConfig,
+		config.MongodbConfigFileName:    &pushConfig.MongoConfig,
 		config.KafkaConfigFileName:      &pushConfig.KafkaConfig,
 		config.ShareFileName:            &pushConfig.Share,
 		config.NotificationFileName:     &pushConfig.NotificationConfig,
@@ -48,7 +49,7 @@ func NewPushRpcCmd() *PushRpcCmd {
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		ret.pushConfig.FcmConfigPath = ret.ConfigPath()
+		ret.pushConfig.FcmConfigPath = config.Path(ret.ConfigPath())
 		return ret.runE()
 	}
 	return ret

@@ -3,18 +3,24 @@ package redis
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func NewUserOnline(rdb redis.UniversalClient) cache.OnlineCache {
+	if rdb == nil || config.Standalone() {
+		return mcache.NewOnlineCache()
+	}
 	return &userOnline{
 		rdb:         rdb,
 		expire:      cachekey.OnlineExpire,

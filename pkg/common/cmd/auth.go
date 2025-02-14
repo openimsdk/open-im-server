@@ -38,6 +38,7 @@ func NewAuthRpcCmd() *AuthRpcCmd {
 	ret.configMap = map[string]any{
 		config.OpenIMRPCAuthCfgFileName: &authConfig.RpcConfig,
 		config.RedisConfigFileName:      &authConfig.RedisConfig,
+		config.MongodbConfigFileName:    &authConfig.MongoConfig,
 		config.ShareFileName:            &authConfig.Share,
 		config.DiscoveryConfigFilename:  &authConfig.Discovery,
 	}

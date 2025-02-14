@@ -2,7 +2,7 @@ package push
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/openimsdk/protocol/msggateway"
@@ -11,6 +11,7 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/runtimeenv"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
@@ -30,37 +31,36 @@ func newEmptyOnlinePusher() *emptyOnlinePusher {
 	return &emptyOnlinePusher{}
 }
 
-func (emptyOnlinePusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData,
-	pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
+func (emptyOnlinePusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
 	log.ZInfo(ctx, "emptyOnlinePusher GetConnsAndOnlinePush", nil)
 	return nil, nil
 }
-func (u emptyOnlinePusher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *sdkws.MsgData,
-	wsResults []*msggateway.SingleMsgToUserResults, pushToUserIDs *[]string) []string {
+func (u emptyOnlinePusher) GetOnlinePushFailedUserIDs(ctx context.Context, msg *sdkws.MsgData, wsResults []*msggateway.SingleMsgToUserResults, pushToUserIDs *[]string) []string {
 	log.ZInfo(ctx, "emptyOnlinePusher GetOnlinePushFailedUserIDs", nil)
 	return nil
 }
 
-func NewOnlinePusher(disCov discovery.SvcDiscoveryRegistry, config *Config) OnlinePusher {
-
-	if config.runTimeEnv == conf.KUBERNETES {
-		return NewDefaultAllNode(disCov, config)
+func NewOnlinePusher(disCov discovery.Conn, config *Config) (OnlinePusher, error) {
+	if conf.Standalone() {
+		return NewDefaultAllNode(disCov, config), nil
+	}
+	if runtimeenv.RuntimeEnvironment() == conf.KUBERNETES {
+		return NewDefaultAllNode(disCov, config), nil
 	}
 	switch config.Discovery.Enable {
 	case conf.ETCD:
-		return NewDefaultAllNode(disCov, config)
+		return NewDefaultAllNode(disCov, config), nil
 	default:
-		log.ZError(context.Background(), "NewOnlinePusher is error", errs.Wrap(errors.New("unsupported discovery type")), "type", config.Discovery.Enable)
-		return nil
+		return nil, errs.New(fmt.Sprintf("unsupported discovery type %s", config.Discovery.Enable))
 	}
 }
 
 type DefaultAllNode struct {
-	disCov discovery.SvcDiscoveryRegistry
+	disCov discovery.Conn
 	config *Config
 }
 
-func NewDefaultAllNode(disCov discovery.SvcDiscoveryRegistry, config *Config) *DefaultAllNode {
+func NewDefaultAllNode(disCov discovery.Conn, config *Config) *DefaultAllNode {
 	return &DefaultAllNode{disCov: disCov, config: config}
 }
 
@@ -166,7 +166,7 @@ func (k *K8sStaticConsistentHash) GetConnsAndOnlinePush(ctx context.Context, msg
 		}
 	}
 	log.ZDebug(ctx, "genUsers send hosts struct:", "usersHost", usersHost)
-	var usersConns = make(map[*grpc.ClientConn][]string)
+	var usersConns = make(map[grpc.ClientConnInterface][]string)
 	for host, userIds := range usersHost {
 		tconn, _ := k.disCov.GetConn(ctx, host)
 		usersConns[tconn] = userIds

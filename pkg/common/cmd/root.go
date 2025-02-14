@@ -12,7 +12,6 @@ import (
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils/runtimeenv"
 	"github.com/spf13/cobra"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -86,14 +85,12 @@ func (r *RootCmd) initEtcd() error {
 		return err
 	}
 	disConfig := config.Discovery{}
-	env := runtimeenv.PrintRuntimeEnvironment()
-	err = config.Load(configDirectory, config.DiscoveryConfigFilename, config.EnvPrefixMap[config.DiscoveryConfigFilename],
-		env, &disConfig)
+	err = config.Load(configDirectory, config.DiscoveryConfigFilename, config.EnvPrefixMap[config.DiscoveryConfigFilename], &disConfig)
 	if err != nil {
 		return err
 	}
 	if disConfig.Enable == config.ETCD {
-		discov, _ := kdisc.NewDiscoveryRegister(&disConfig, env, nil)
+		discov, _ := kdisc.NewDiscoveryRegister(&disConfig, nil)
 		r.etcdClient = discov.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 	}
 	return nil
@@ -125,18 +122,16 @@ func (r *RootCmd) initializeConfiguration(cmd *cobra.Command, opts *CmdOpts) err
 		return err
 	}
 
-	runtimeEnv := runtimeenv.PrintRuntimeEnvironment()
-
 	// Load common configuration file
 	//opts.configMap[ShareFileName] = StructEnvPrefix{EnvPrefix: shareEnvPrefix, ConfigStruct: &r.share}
 	for configFileName, configStruct := range opts.configMap {
-		err := config.Load(configDirectory, configFileName, config.EnvPrefixMap[configFileName], runtimeEnv, configStruct)
+		err := config.Load(configDirectory, configFileName, config.EnvPrefixMap[configFileName], configStruct)
 		if err != nil {
 			return err
 		}
 	}
 	// Load common log configuration file
-	return config.Load(configDirectory, config.LogConfigFileName, config.EnvPrefixMap[config.LogConfigFileName], runtimeEnv, &r.log)
+	return config.Load(configDirectory, config.LogConfigFileName, config.EnvPrefixMap[config.LogConfigFileName], &r.log)
 }
 
 func (r *RootCmd) updateConfigFromEtcd(opts *CmdOpts) error {
@@ -208,7 +203,6 @@ func (r *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 
 func (r *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 	err := log.InitLoggerFromConfig(
-
 		cmdOpts.loggerPrefixName,
 		r.processName,
 		"", "",
