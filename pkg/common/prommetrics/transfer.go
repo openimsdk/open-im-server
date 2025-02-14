@@ -15,9 +15,10 @@
 package prommetrics
 
 import (
+	"net"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net"
 )
 
 var (
@@ -42,6 +43,16 @@ var (
 		Help: "The number of failed set seq",
 	})
 )
+
+func RegistryTransfer() {
+	registry.MustRegister(
+		MsgInsertRedisSuccessCounter,
+		MsgInsertRedisFailedCounter,
+		MsgInsertMongoSuccessCounter,
+		MsgInsertMongoFailedCounter,
+		SeqSetFailedCounter,
+	)
+}
 
 func TransferInit(listener net.Listener) error {
 	reg := prometheus.NewRegistry()

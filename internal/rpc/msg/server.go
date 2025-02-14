@@ -17,22 +17,23 @@ package msg
 import (
 	"context"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
+	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
+	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
-	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/db/mongoutil"
-	"github.com/openimsdk/tools/db/redisutil"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/notification"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
 	"google.golang.org/grpc"
 )
@@ -57,8 +58,9 @@ type Config struct {
 // MsgServer encapsulates dependencies required for message handling.
 type msgServer struct {
 	msg.UnimplementedMsgServer
-	RegisterCenter         discovery.SvcDiscoveryRegistry   // Service discovery registry for service registration.
-	MsgDatabase            controller.CommonMsgDatabase     // Interface for message database operations.
+	RegisterCenter         discovery.Conn               // Service discovery registry for service registration.
+	MsgDatabase            controller.CommonMsgDatabase // Interface for message database operations.
+	StreamMsgDatabase      controller.StreamMsgDatabase
 	UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
 	FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
 	GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
@@ -76,12 +78,18 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 
 }
 
-func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
-	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
+func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+	builder := mqbuild.NewBuilder(&config.KafkaConfig)
+	redisProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToRedisTopic)
 	if err != nil {
 		return err
 	}
-	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
+	dbb := dbbuild.NewBuilder(&config.MongodbConfig, &config.RedisConfig)
+	mgocli, err := dbb.Mongo(ctx)
+	if err != nil {
+		return err
+	}
+	rdb, err := dbb.Redis(ctx)
 	if err != nil {
 		return err
 	}
@@ -89,7 +97,16 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	msgModel := redis.NewMsgCache(rdb, msgDocModel)
+	var msgModel cache.MsgCache
+	if rdb == nil {
+		cm, err := mgo.NewCacheMgo(mgocli.GetDB())
+		if err != nil {
+			return err
+		}
+		msgModel = mcache.NewMsgCache(cm, msgDocModel)
+	} else {
+		msgModel = redis.NewMsgCache(rdb, msgDocModel)
+	}
 	seqConversation, err := mgo.NewSeqConversationMongo(mgocli.GetDB())
 	if err != nil {
 		return err
@@ -100,10 +117,6 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	seqUserCache := redis.NewSeqUserCacheRedis(rdb, seqUser)
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, &config.KafkaConfig)
-	if err != nil {
-		return err
-	}
 	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err
@@ -121,6 +134,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	conversationClient := rpcli.NewConversationClient(conversationConn)
+	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, redisProducer)
 	s := &msgServer{
 		MsgDatabase:            msgDatabase,
 		RegisterCenter:         client,

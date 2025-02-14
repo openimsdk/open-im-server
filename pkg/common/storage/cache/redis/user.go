@@ -1,30 +1,16 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package redis
 
 import (
 	"context"
+	"time"
+
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
-	"time"
 )
 
 const (
@@ -38,19 +24,17 @@ type UserCacheRedis struct {
 	rdb        redis.UniversalClient
 	userDB     database.User
 	expireTime time.Duration
-	rcClient   *rockscache.Client
+	rcClient   *rocksCacheClient
 }
 
 func NewUserCacheRedis(rdb redis.UniversalClient, localCache *config.LocalCache, userDB database.User, options *rockscache.Options) cache.UserCache {
-	batchHandler := NewBatchDeleterRedis(rdb, options, []string{localCache.User.Topic})
-	u := localCache.User
-	log.ZDebug(context.Background(), "user local cache init", "Topic", u.Topic, "SlotNum", u.SlotNum, "SlotSize", u.SlotSize, "enable", u.Enable())
+	rc := newRocksCacheClient(rdb)
 	return &UserCacheRedis{
-		BatchDeleter: batchHandler,
+		BatchDeleter: rc.GetBatchDeleter(localCache.User.Topic),
 		rdb:          rdb,
 		userDB:       userDB,
 		expireTime:   userExpireTime,
-		rcClient:     rockscache.NewClient(rdb, *options),
+		rcClient:     rc,
 	}
 }
 

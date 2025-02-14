@@ -3,27 +3,64 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"time"
+
 	"github.com/dtm-labs/rockscache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
-	"golang.org/x/sync/singleflight"
-	"time"
-	"unsafe"
 )
 
-func getRocksCacheRedisClient(cli *rockscache.Client) redis.UniversalClient {
-	type Client struct {
-		rdb redis.UniversalClient
-		_   rockscache.Options
-		_   singleflight.Group
-	}
-	return (*Client)(unsafe.Pointer(cli)).rdb
+// GetRocksCacheOptions returns the default configuration options for RocksCache.
+func GetRocksCacheOptions() *rockscache.Options {
+	opts := rockscache.NewDefaultOptions()
+	opts.LockExpire = rocksCacheTimeout
+	opts.WaitReplicasTimeout = rocksCacheTimeout
+	opts.StrongConsistency = true
+	opts.RandomExpireAdjustment = 0.2
+
+	return &opts
 }
 
-func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rockscache.Client, expire time.Duration, ids []K, idKey func(id K) string, vId func(v *V) K, fn func(ctx context.Context, ids []K) ([]*V, error)) ([]*V, error) {
+func newRocksCacheClient(rdb redis.UniversalClient) *rocksCacheClient {
+	if rdb == nil {
+		return &rocksCacheClient{}
+	}
+	rc := &rocksCacheClient{
+		rdb:    rdb,
+		client: rockscache.NewClient(rdb, *GetRocksCacheOptions()),
+	}
+	return rc
+}
+
+type rocksCacheClient struct {
+	rdb    redis.UniversalClient
+	client *rockscache.Client
+}
+
+func (x *rocksCacheClient) GetClient() *rockscache.Client {
+	return x.client
+}
+
+func (x *rocksCacheClient) Disable() bool {
+	return x.client == nil
+}
+
+func (x *rocksCacheClient) GetRedis() redis.UniversalClient {
+	return x.rdb
+}
+
+func (x *rocksCacheClient) GetBatchDeleter(topics ...string) cache.BatchDeleter {
+	return NewBatchDeleterRedis(x, topics)
+}
+
+func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rocksCacheClient, expire time.Duration, ids []K, idKey func(id K) string, vId func(v *V) K, fn func(ctx context.Context, ids []K) ([]*V, error)) ([]*V, error) {
 	if len(ids) == 0 {
 		return nil, nil
+	}
+	if rcClient.Disable() {
+		return fn(ctx, ids)
 	}
 	findKeys := make([]string, 0, len(ids))
 	keyId := make(map[string]K)
@@ -35,13 +72,13 @@ func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rockscac
 		keyId[key] = id
 		findKeys = append(findKeys, key)
 	}
-	slotKeys, err := groupKeysBySlot(ctx, getRocksCacheRedisClient(rcClient), findKeys)
+	slotKeys, err := groupKeysBySlot(ctx, rcClient.GetRedis(), findKeys)
 	if err != nil {
 		return nil, err
 	}
 	result := make([]*V, 0, len(findKeys))
 	for _, keys := range slotKeys {
-		indexCache, err := rcClient.FetchBatch2(ctx, keys, expire, func(idx []int) (map[int]string, error) {
+		indexCache, err := rcClient.GetClient().FetchBatch2(ctx, keys, expire, func(idx []int) (map[int]string, error) {
 			queryIds := make([]K, 0, len(idx))
 			idIndex := make(map[K]int)
 			for _, index := range idx {

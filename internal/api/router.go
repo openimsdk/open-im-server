@@ -57,7 +57,7 @@ func prommetricsGin() gin.HandlerFunc {
 	}
 }
 
-func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cfg *Config) (*gin.Engine, error) {
+func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin.Engine, error) {
 	authConn, err := client.GetConn(ctx, cfg.Discovery.RpcService.Auth)
 	if err != nil {
 		return nil, err
@@ -291,7 +291,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 	}
 	{
 		pd := NewPrometheusDiscoveryApi(cfg, client)
-		proDiscoveryGroup := r.Group("/prometheus_discovery", pd.Enable)
+		proDiscoveryGroup := r.Group("/prometheus_discovery")
 		proDiscoveryGroup.GET("/api", pd.Api)
 		proDiscoveryGroup.GET("/user", pd.User)
 		proDiscoveryGroup.GET("/group", pd.Group)
@@ -309,9 +309,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 	if cfg.Discovery.Enable == config.ETCD {
 		etcdClient = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 	}
-	cm := NewConfigManager(cfg.Share.IMAdminUserID, cfg.AllConfig, etcdClient, cfg.ConfigPath, cfg.RuntimeEnv)
+	cm := NewConfigManager(cfg.Share.IMAdminUserID, &cfg.AllConfig, etcdClient, string(cfg.ConfigPath))
 	{
-
 		configGroup := r.Group("/config", cm.CheckAdmin)
 		configGroup.POST("/get_config_list", cm.GetConfigList)
 		configGroup.POST("/get_config", cm.GetConfig)
