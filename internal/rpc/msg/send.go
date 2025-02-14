@@ -195,3 +195,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		}, nil
 	}
 }
+
+func (m *msgServer) SendSimpleMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.SendMsgResp, error) {
+
+}
