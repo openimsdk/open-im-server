@@ -39,7 +39,7 @@ type UserDatabase interface {
 	// Find userInfo By Nickname
 	FindByNickname(ctx context.Context, nickname string) (users []*model.User, err error)
 	// FindNotification find system account by level
-	FindNotification(ctx context.Context, level int32) (users []*model.User, err error)
+	FindNotification(ctx context.Context, level int64) (users []*model.User, err error)
 	// FindSystemAccount find all system account
 	FindSystemAccount(ctx context.Context) (users []*model.User, err error)
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the storage

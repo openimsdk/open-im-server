@@ -582,7 +582,7 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 
 	// If no keyword, find users with notification settings
 	if req.AppManagerLevel != nil {
-		users, err = s.db.FindNotification(ctx, *req.AppManagerLevel)
+		users, err = s.db.FindNotification(ctx, int64(*req.AppManagerLevel))
 		if err != nil {
 			return nil, err
 		}
