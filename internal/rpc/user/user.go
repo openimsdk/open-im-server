@@ -566,7 +566,7 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		}
 
 		// Convert users to response format
-		resp := s.userModelToResp(users, req.Pagination)
+		resp := s.userModelToResp(users, req.Pagination, req.AppManagerLevel)
 		if resp.Total != 0 {
 			return resp, nil
 		}
@@ -576,17 +576,24 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		if err != nil {
 			return nil, err
 		}
-		resp = s.userModelToResp(users, req.Pagination)
+		resp = s.userModelToResp(users, req.Pagination, req.AppManagerLevel)
 		return resp, nil
 	}
 
 	// If no keyword, find users with notification settings
-	users, err = s.db.FindNotification(ctx, constant.AppNotificationAdmin)
-	if err != nil {
-		return nil, err
+	if req.AppManagerLevel != nil {
+		users, err = s.db.FindNotification(ctx, *req.AppManagerLevel)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		users, err = s.db.FindSystemAccount(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	resp := s.userModelToResp(users, req.Pagination)
+	resp := s.userModelToResp(users, req.Pagination, req.AppManagerLevel)
 	return resp, nil
 }
 
@@ -625,11 +632,16 @@ func (s *userServer) genUserID() string {
 	return string(data)
 }
 
-func (s *userServer) userModelToResp(users []*tablerelation.User, pagination pagination.Pagination) *pbuser.SearchNotificationAccountResp {
+func (s *userServer) userModelToResp(users []*tablerelation.User, pagination pagination.Pagination, appManagerLevel *int32) *pbuser.SearchNotificationAccountResp {
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {
 		if v.AppMangerLevel >= constant.AppNotificationAdmin && !datautil.Contain(v.UserID, s.config.Share.IMAdminUserID...) {
+			if appManagerLevel != nil {
+				if v.AppMangerLevel != *appManagerLevel {
+					continue
+				}
+			}
 			temp := &pbuser.NotificationAccountInfo{
 				UserID:         v.UserID,
 				FaceURL:        v.FaceURL,

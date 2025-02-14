@@ -364,19 +364,17 @@ type Redis struct {
 }
 
 type BeforeConfig struct {
-	Enable         bool     `mapstructure:"enable"`
-	Timeout        int      `mapstructure:"timeout"`
-	FailedContinue bool     `mapstructure:"failedContinue"`
-	AllowedTypes   []string `mapstructure:"allowedTypes"`
-	DeniedTypes    []string `mapstructure:"deniedTypes"`
+	Enable         bool    `mapstructure:"enable"`
+	Timeout        int     `mapstructure:"timeout"`
+	FailedContinue bool    `mapstructure:"failedContinue"`
+	DeniedTypes    []int32 `mapstructure:"deniedTypes"`
 }
 
 type AfterConfig struct {
 	Enable       bool     `mapstructure:"enable"`
 	Timeout      int      `mapstructure:"timeout"`
 	AttentionIds []string `mapstructure:"attentionIds"`
-	AllowedTypes []string `mapstructure:"allowedTypes"`
-	DeniedTypes  []string `mapstructure:"deniedTypes"`
+	DeniedTypes  []int32  `mapstructure:"deniedTypes"`
 }
 
 type Share struct {

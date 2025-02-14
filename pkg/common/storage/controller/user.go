@@ -20,6 +20,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/db/pagination"
 	"github.com/openimsdk/tools/db/tx"
 	"github.com/openimsdk/tools/utils/datautil"
@@ -37,8 +38,10 @@ type UserDatabase interface {
 	Find(ctx context.Context, userIDs []string) (users []*model.User, err error)
 	// Find userInfo By Nickname
 	FindByNickname(ctx context.Context, nickname string) (users []*model.User, err error)
-	// Find notificationAccounts
-	FindNotification(ctx context.Context, level int64) (users []*model.User, err error)
+	// FindNotification find system account by level
+	FindNotification(ctx context.Context, level int32) (users []*model.User, err error)
+	// FindSystemAccount find all system account
+	FindSystemAccount(ctx context.Context) (users []*model.User, err error)
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the storage
 	Create(ctx context.Context, users []*model.User) (err error)
 	// UpdateByMap update (zero value) external guarantee userID exists
@@ -137,6 +140,10 @@ func (u *userDatabase) FindByNickname(ctx context.Context, nickname string) (use
 
 func (u *userDatabase) FindNotification(ctx context.Context, level int64) (users []*model.User, err error) {
 	return u.userDB.TakeNotification(ctx, level)
+}
+
+func (u *userDatabase) FindSystemAccount(ctx context.Context) (users []*model.User, err error) {
+	return u.userDB.TakeGTEAppManagerLevel(ctx, constant.AppNotificationAdmin)
 }
 
 // Create Insert multiple external guarantees that the userID is not repeated and does not exist in the storage.
