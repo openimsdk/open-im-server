@@ -22,8 +22,13 @@ import (
 )
 
 var (
-	incOne = datautil.ToPtr("+1")
-	addNum = "1"
+	incOne          = datautil.ToPtr("+1")
+	addNum          = "1"
+	defaultStrategy = strategy{
+		Default: 1,
+		IOS:     4,
+		St:      4,
+	}
 )
 
 type Resp struct {
@@ -64,7 +69,14 @@ type TaskResp struct {
 }
 
 type Settings struct {
-	TTL *int64 `json:"ttl"`
+	TTL      *int64   `json:"ttl"`
+	Strategy strategy `json:"strategy"`
+}
+
+type strategy struct {
+	Default int64 `json:"default"`
+	IOS     int64 `json:"ios"`
+	St      int64 `json:"st"`
 }
 
 type Audience struct {

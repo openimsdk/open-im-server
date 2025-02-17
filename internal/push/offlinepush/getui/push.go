@@ -145,7 +145,7 @@ func (g *Client) Auth(ctx context.Context, timeStamp int64) (token string, expir
 func (g *Client) GetTaskID(ctx context.Context, token string, pushReq PushReq) (string, error) {
 	respTask := TaskResp{}
 	ttl := int64(1000 * 60 * 5)
-	pushReq.Settings = &Settings{TTL: &ttl}
+	pushReq.Settings = &Settings{TTL: &ttl, Strategy: defaultStrategy}
 	err := g.request(ctx, taskURL, pushReq, token, &respTask)
 	if err != nil {
 		return "", errs.Wrap(err)
@@ -205,7 +205,7 @@ func (g *Client) getTokenAndSave2Redis(ctx context.Context) (token string, err e
 }
 
 func (g *Client) GetTaskIDAndSave2Redis(ctx context.Context, token string, pushReq PushReq) (taskID string, err error) {
-	pushReq.Settings = &Settings{TTL: &g.taskIDTTL}
+	pushReq.Settings = &Settings{TTL: &g.taskIDTTL, Strategy: defaultStrategy}
 	taskID, err = g.GetTaskID(ctx, token, pushReq)
 	if err != nil {
 		return
