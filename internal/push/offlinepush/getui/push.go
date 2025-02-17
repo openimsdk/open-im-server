@@ -185,12 +185,12 @@ func (g *Client) postReturn(
 	output RespI,
 	timeout int,
 ) error {
-	log.ZDebug(ctx, "url:", url, "header:", header, "input:", input, "timeout:", timeout)
+	log.ZDebug(ctx, "postReturn", "url:", url, "header:", header, "input:", input, "timeout:", timeout)
 	err := g.httpClient.PostReturn(ctx, url, header, input, output, timeout)
 	if err != nil {
 		return err
 	}
-	log.ZDebug(ctx, "output:", output)
+	log.ZDebug(ctx, "postReturn", "output:", output)
 	return output.parseError()
 }
 
