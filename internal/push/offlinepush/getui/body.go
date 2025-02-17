@@ -26,18 +26,6 @@ var (
 	addNum          = "1"
 	defaultStrategy = strategy{
 		Default: 1,
-		IOS:     1,
-		St:      1,
-		Hw:      1,
-		Ho:      1,
-		XM:      1,
-		XMG:     1,
-		VV:      1,
-		Op:      1,
-		OpG:     1,
-		MZ:      1,
-		HosHw:   1,
-		WX:      1,
 	}
 	msgCategory = "CATEGORY_MESSAGE"
 )
@@ -86,18 +74,18 @@ type Settings struct {
 
 type strategy struct {
 	Default int64 `json:"default"`
-	IOS     int64 `json:"ios"`
-	St      int64 `json:"st"`
-	Hw      int64 `json:"hw"`
-	Ho      int64 `json:"ho"`
-	XM      int64 `json:"xm"`
-	XMG     int64 `json:"xmg"`
-	VV      int64 `json:"vv"`
-	Op      int64 `json:"op"`
-	OpG     int64 `json:"opg"`
-	MZ      int64 `json:"mz"`
-	HosHw   int64 `json:"hoshw"`
-	WX      int64 `json:"wx"`
+	//IOS     int64 `json:"ios"`
+	//St      int64 `json:"st"`
+	//Hw      int64 `json:"hw"`
+	//Ho      int64 `json:"ho"`
+	//XM      int64 `json:"xm"`
+	//XMG     int64 `json:"xmg"`
+	//VV      int64 `json:"vv"`
+	//Op      int64 `json:"op"`
+	//OpG     int64 `json:"opg"`
+	//MZ      int64 `json:"mz"`
+	//HosHw   int64 `json:"hoshw"`
+	//WX      int64 `json:"wx"`
 }
 
 type Audience struct {
@@ -161,6 +149,7 @@ type Options struct {
 		ChannelID    string `json:"/message/android/notification/channel_id"`
 		Sound        string `json:"/message/android/notification/sound"`
 		Importance   string `json:"/message/android/notification/importance"`
+		Category     string `json:"/message/android/category"`
 	} `json:"HW"`
 	XM struct {
 		ChannelID string `json:"/extra.channel_id"`
@@ -216,7 +205,8 @@ func (pushReq *PushReq) setPushChannel(title string, body string) {
 			ChannelID    string `json:"/message/android/notification/channel_id"`
 			Sound        string `json:"/message/android/notification/sound"`
 			Importance   string `json:"/message/android/notification/importance"`
-		}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "NORMAL"},
+			Category     string `json:"/message/android/category"`
+		}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "NORMAL", Category: "IM"},
 		XM: struct {
 			ChannelID string `json:"/extra.channel_id"`
 		}{ChannelID: "high_system"},
