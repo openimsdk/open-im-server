@@ -18,6 +18,16 @@ import (
 	"fmt"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/tools/utils/datautil"
+)
+
+var (
+	incOne          = datautil.ToPtr("+1")
+	addNum          = "1"
+	defaultStrategy = strategy{
+		Default: 1,
+	}
+	msgCategory = "CATEGORY_MESSAGE"
 )
 
 type Resp struct {
@@ -58,7 +68,24 @@ type TaskResp struct {
 }
 
 type Settings struct {
-	TTL *int64 `json:"ttl"`
+	TTL      *int64   `json:"ttl"`
+	Strategy strategy `json:"strategy"`
+}
+
+type strategy struct {
+	Default int64 `json:"default"`
+	//IOS     int64 `json:"ios"`
+	//St      int64 `json:"st"`
+	//Hw      int64 `json:"hw"`
+	//Ho      int64 `json:"ho"`
+	//XM      int64 `json:"xm"`
+	//XMG     int64 `json:"xmg"`
+	//VV      int64 `json:"vv"`
+	//Op      int64 `json:"op"`
+	//OpG     int64 `json:"opg"`
+	//MZ      int64 `json:"mz"`
+	//HosHw   int64 `json:"hoshw"`
+	//WX      int64 `json:"wx"`
 }
 
 type Audience struct {
@@ -112,6 +139,8 @@ type Notification struct {
 	ChannelID   string `json:"channelID"`
 	ChannelName string `json:"ChannelName"`
 	ClickType   string `json:"click_type"`
+	BadgeAddNum string `json:"badge_add_num"`
+	Category    string `json:"category"`
 }
 
 type Options struct {
@@ -120,6 +149,7 @@ type Options struct {
 		ChannelID    string `json:"/message/android/notification/channel_id"`
 		Sound        string `json:"/message/android/notification/sound"`
 		Importance   string `json:"/message/android/notification/importance"`
+		Category     string `json:"/message/android/category"`
 	} `json:"HW"`
 	XM struct {
 		ChannelID string `json:"/extra.channel_id"`
@@ -140,6 +170,8 @@ func newPushReq(pushConf *config.Push, title, content string) PushReq {
 		ClickType:   "startapp",
 		ChannelID:   pushConf.GeTui.ChannelID,
 		ChannelName: pushConf.GeTui.ChannelName,
+		BadgeAddNum: addNum,
+		Category:    msgCategory,
 	}}}
 	return pushReq
 }
@@ -156,6 +188,7 @@ func (pushReq *PushReq) setPushChannel(title string, body string) {
 	notify := "notify"
 	pushReq.PushChannel.Ios.NotificationType = &notify
 	pushReq.PushChannel.Ios.Aps.Sound = "default"
+	pushReq.PushChannel.Ios.AutoBadge = incOne
 	pushReq.PushChannel.Ios.Aps.Alert = Alert{
 		Title: title,
 		Body:  body,
@@ -172,7 +205,8 @@ func (pushReq *PushReq) setPushChannel(title string, body string) {
 			ChannelID    string `json:"/message/android/notification/channel_id"`
 			Sound        string `json:"/message/android/notification/sound"`
 			Importance   string `json:"/message/android/notification/importance"`
-		}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "NORMAL"},
+			Category     string `json:"/message/android/category"`
+		}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "NORMAL", Category: "IM"},
 		XM: struct {
 			ChannelID string `json:"/extra.channel_id"`
 		}{ChannelID: "high_system"},
