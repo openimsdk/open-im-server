@@ -197,6 +197,10 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 }
 
 func (m *msgServer) SendSimpleMsg(ctx context.Context, req *pbmsg.SendSimpleMsgReq) (*pbmsg.SendSimpleMsgResp, error) {
+	user, err := m.UserLocalCache.GetUserInfo(ctx, req.SendID)
+	if err != nil {
+		return nil, err
+	}
 	msgData := &sdkws.MsgData{
 		SendID:           req.SendID,
 		RecvID:           req.RecvID,
@@ -204,11 +208,11 @@ func (m *msgServer) SendSimpleMsg(ctx context.Context, req *pbmsg.SendSimpleMsgR
 		ClientMsgID:      GetMsgID(req.SendID),
 		ServerMsgID:      GetMsgID(req.SendID),
 		SenderPlatformID: constant.AdminPlatformID,
-		SenderNickname:   "",
-		SenderFaceURL:    "",
-		SessionType:      0,
-		MsgFrom:          0,
-		ContentType:      0,
+		SenderNickname:   user.Nickname,
+		SenderFaceURL:    user.FaceURL,
+		SessionType:      datautil.If[int32](req.RecvID == "", constant.ReadGroupChatType, constant.SingleChatType),
+		MsgFrom:          constant.UserMsgType,
+		ContentType:      constant.Text,
 		Content:          req.Content,
 		Seq:              0,
 		SendTime:         0,
