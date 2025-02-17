@@ -26,9 +26,20 @@ var (
 	addNum          = "1"
 	defaultStrategy = strategy{
 		Default: 1,
-		IOS:     4,
-		St:      4,
+		IOS:     1,
+		St:      1,
+		Hw:      1,
+		Ho:      1,
+		XM:      1,
+		XMG:     1,
+		VV:      1,
+		Op:      1,
+		OpG:     1,
+		MZ:      1,
+		HosHw:   1,
+		WX:      1,
 	}
+	msgCategory = "CATEGORY_MESSAGE"
 )
 
 type Resp struct {
@@ -77,6 +88,16 @@ type strategy struct {
 	Default int64 `json:"default"`
 	IOS     int64 `json:"ios"`
 	St      int64 `json:"st"`
+	Hw      int64 `json:"hw"`
+	Ho      int64 `json:"ho"`
+	XM      int64 `json:"xm"`
+	XMG     int64 `json:"xmg"`
+	VV      int64 `json:"vv"`
+	Op      int64 `json:"op"`
+	OpG     int64 `json:"opg"`
+	MZ      int64 `json:"mz"`
+	HosHw   int64 `json:"hoshw"`
+	WX      int64 `json:"wx"`
 }
 
 type Audience struct {
@@ -131,6 +152,7 @@ type Notification struct {
 	ChannelName string `json:"ChannelName"`
 	ClickType   string `json:"click_type"`
 	BadgeAddNum string `json:"badge_add_num"`
+	Category    string `json:"category"`
 }
 
 type Options struct {
@@ -160,6 +182,7 @@ func newPushReq(pushConf *config.Push, title, content string) PushReq {
 		ChannelID:   pushConf.GeTui.ChannelID,
 		ChannelName: pushConf.GeTui.ChannelName,
 		BadgeAddNum: addNum,
+		Category:    msgCategory,
 	}}}
 	return pushReq
 }
