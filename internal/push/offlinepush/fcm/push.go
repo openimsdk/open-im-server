@@ -16,11 +16,13 @@ package fcm
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
-	"github.com/openimsdk/tools/utils/httputil"
 	"path/filepath"
 	"strings"
+
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
+	"github.com/openimsdk/tools/utils/httputil"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
@@ -133,7 +135,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 			unreadCountSum, err := f.cache.GetUserBadgeUnreadCountSum(ctx, userID)
 			if err == nil && unreadCountSum != 0 {
 				apns.Payload.Aps.Badge = &unreadCountSum
-			} else if err == redis.Nil || unreadCountSum == 0 {
+			} else if errors.Is(err, redis.Nil) || unreadCountSum == 0 {
 				zero := 1
 				apns.Payload.Aps.Badge = &zero
 			} else {
