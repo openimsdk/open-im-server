@@ -15,12 +15,16 @@
 package api
 
 import (
+	"encoding/base64"
+	"encoding/json"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
@@ -366,6 +370,83 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 		})
 	}
 	apiresp.GinSuccess(c, resp)
+}
+
+func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
+	encodedKey, ok := c.GetQuery(webhook.Key)
+	if !ok {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail("missing key in query").Wrap())
+		return
+	}
+
+	decodedData, err := base64.StdEncoding.DecodeString(encodedKey)
+	if err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	var (
+		req        apistruct.SendSingleMsgReq
+		keyMsgData apistruct.KeyMsgData
+
+		sendID      string
+		sessionType int32
+		recvID      string
+	)
+	err = json.Unmarshal(decodedData, &keyMsgData)
+	if err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	if keyMsgData.GroupID != "" {
+		sessionType = constant.ReadGroupChatType
+		sendID = req.SendID
+	} else {
+		sessionType = constant.SingleChatType
+		sendID = keyMsgData.RecvID
+		recvID = keyMsgData.SendID
+	}
+	// check param
+	if keyMsgData.SendID == "" {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail("missing recvID or GroupID").Wrap())
+		return
+	}
+	if sendID == "" {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail("missing sendID").Wrap())
+		return
+	}
+
+	msgData := &sdkws.MsgData{
+		SendID:           sendID,
+		RecvID:           recvID,
+		GroupID:          keyMsgData.GroupID,
+		ClientMsgID:      idutil.GetMsgIDByMD5(sendID),
+		SenderPlatformID: constant.AdminPlatformID,
+		SessionType:      sessionType,
+		MsgFrom:          constant.UserMsgType,
+		ContentType:      constant.Text,
+		Content:          []byte(req.Content),
+		OfflinePushInfo:  req.OfflinePushInfo,
+		Ex:               req.Ex,
+	}
+
+	respPb, err := m.Client.SendMsg(c, &msg.SendMsgReq{MsgData: msgData})
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+
+	var status = constant.MsgSendSuccessed
+
+	_, err = m.Client.SetSendMsgStatus(c, &msg.SetSendMsgStatusReq{
+		Status: int32(status),
+	})
+
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+
+	apiresp.GinSuccess(c, respPb)
 }
 
 func (m *MessageApi) CheckMsgIsSendSuccess(c *gin.Context) {

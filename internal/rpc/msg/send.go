@@ -195,34 +195,3 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		}, nil
 	}
 }
-
-func (m *msgServer) SendSimpleMsg(ctx context.Context, req *pbmsg.SendSimpleMsgReq) (*pbmsg.SendSimpleMsgResp, error) {
-	user, err := m.UserLocalCache.GetUserInfo(ctx, req.SendID)
-	if err != nil {
-		return nil, err
-	}
-	msgData := &sdkws.MsgData{
-		SendID:           req.SendID,
-		RecvID:           req.RecvID,
-		GroupID:          req.GroupID,
-		ClientMsgID:      GetMsgID(req.SendID),
-		ServerMsgID:      GetMsgID(req.SendID),
-		SenderPlatformID: constant.AdminPlatformID,
-		SenderNickname:   user.Nickname,
-		SenderFaceURL:    user.FaceURL,
-		SessionType:      datautil.If[int32](req.RecvID == "", constant.ReadGroupChatType, constant.SingleChatType),
-		MsgFrom:          constant.UserMsgType,
-		ContentType:      constant.Text,
-		Content:          req.Content,
-		Seq:              0,
-		SendTime:         0,
-		CreateTime:       0,
-		Status:           0,
-		IsRead:           false,
-		Options:          nil,
-		OfflinePushInfo:  nil,
-		AtUserIDList:     nil,
-		AttachedInfo:     "",
-		Ex:               "",
-	}
-}

@@ -39,6 +39,8 @@ type Client struct {
 const (
 	webhookWorkerCount = 2
 	webhookBufferSize  = 100
+
+	Key = "key"
 )
 
 func NewWebhookClient(url string, options ...*memamq.MemoryQueue) *Client {
@@ -68,9 +70,9 @@ func (c *Client) AsyncPost(ctx context.Context, command string, req callbackstru
 	}
 }
 
-func (c *Client) AsyncPostWithKey(ctx context.Context, command string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, after *config.AfterConfig) {
+func (c *Client) AsyncPostWithQuery(ctx context.Context, command string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, after *config.AfterConfig, queryParams map[string]string) {
 	if after.Enable {
-		c.queue.Push(func() { c.post(ctx, command, req, resp, after.Timeout) })
+		c.queue.Push(func() { c.postWithQuery(ctx, command, req, resp, after.Timeout, queryParams) })
 	}
 }
 
