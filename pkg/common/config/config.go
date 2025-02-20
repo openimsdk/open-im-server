@@ -334,19 +334,17 @@ type Redis struct {
 }
 
 type BeforeConfig struct {
-	Enable         bool     `yaml:"enable"`
-	Timeout        int      `yaml:"timeout"`
-	FailedContinue bool     `yaml:"failedContinue"`
-	AllowedTypes   []string `yaml:"allowedTypes"`
-	DeniedTypes    []string `yaml:"deniedTypes"`
+	Enable         bool    `yaml:"enable"`
+	Timeout        int     `yaml:"timeout"`
+	FailedContinue bool    `yaml:"failedContinue"`
+	DeniedTypes    []int32 `yaml:"deniedTypes"`
 }
 
 type AfterConfig struct {
 	Enable       bool     `yaml:"enable"`
 	Timeout      int      `yaml:"timeout"`
 	AttentionIds []string `yaml:"attentionIds"`
-	AllowedTypes []string `yaml:"allowedTypes"`
-	DeniedTypes  []string `yaml:"deniedTypes"`
+	DeniedTypes  []int32  `yaml:"deniedTypes"`
 }
 
 type Share struct {
