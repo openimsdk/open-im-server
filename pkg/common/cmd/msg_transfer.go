@@ -19,6 +19,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
@@ -56,5 +57,19 @@ func (m *MsgTransferCmd) Exec() error {
 }
 
 func (m *MsgTransferCmd) runE() error {
-	return msgtransfer.Start(m.ctx, m.Index(), m.msgTransferConfig)
+	m.msgTransferConfig.Index = config.Index(m.Index())
+	var prometheus config.Prometheus
+	return startrpc.Start(
+		m.ctx, &m.msgTransferConfig.Discovery,
+		&prometheus,
+		"", "",
+		true,
+		nil, int(m.msgTransferConfig.Index),
+		"",
+		nil,
+		m.msgTransferConfig,
+		[]string{},
+		[]string{},
+		msgtransfer.Start,
+	)
 }

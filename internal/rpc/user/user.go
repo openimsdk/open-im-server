@@ -23,29 +23,27 @@ import (
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/group"
 	friendpb "github.com/openimsdk/protocol/relation"
-	"github.com/openimsdk/tools/db/redisutil"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/sdkws"
 	pbuser "github.com/openimsdk/protocol/user"
-	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/pagination"
-	registry "github.com/openimsdk/tools/discovery"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
@@ -57,7 +55,7 @@ type userServer struct {
 	db                       controller.UserDatabase
 	friendNotificationSender *relation.FriendNotificationSender
 	userNotificationSender   *UserNotificationSender
-	RegisterCenter           registry.SvcDiscoveryRegistry
+	RegisterCenter           discovery.Conn
 	config                   *Config
 	webhookClient            *webhook.Client
 	groupClient              *rpcli.GroupClient
@@ -76,15 +74,17 @@ type Config struct {
 	Discovery          config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
+func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+	dbb := dbbuild.NewBuilder(&config.MongodbConfig, &config.RedisConfig)
+	mgocli, err := dbb.Mongo(ctx)
 	if err != nil {
 		return err
 	}
-	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
+	rdb, err := dbb.Redis(ctx)
 	if err != nil {
 		return err
 	}
+
 	users := make([]*tablerelation.User, 0)
 
 	for _, v := range config.Share.IMAdminUserID {

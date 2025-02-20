@@ -3,14 +3,15 @@ package rpccache
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
-	"github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/protocol/user"
 	"math/rand"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/user"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
@@ -51,10 +52,11 @@ func NewOnlineCache(client *rpcli.UserClient, group *GroupLocalCache, rdb redis.
 		x.CurrentPhase.Store(DoSubscribeOver)
 		x.Cond.Broadcast()
 	}
-
-	go func() {
-		x.doSubscribe(ctx, rdb, fn)
-	}()
+	if rdb != nil {
+		go func() {
+			x.doSubscribe(ctx, rdb, fn)
+		}()
+	}
 	return x, nil
 }
 

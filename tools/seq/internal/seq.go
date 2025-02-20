@@ -43,7 +43,7 @@ const (
 )
 
 func readConfig[T any](dir string, name string) (*T, error) {
-	if runtimeenv.PrintRuntimeEnvironment() == config.KUBERNETES {
+	if runtimeenv.RuntimeEnvironment() == config.KUBERNETES {
 		dir = os.Getenv(config.MountConfigFilePath)
 	}
 	v := viper.New()
