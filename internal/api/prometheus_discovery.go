@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,16 +12,16 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/log"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type PrometheusDiscoveryApi struct {
 	config *Config
 	client *clientv3.Client
+	kv     discovery.KeyValue
 }
 
-func NewPrometheusDiscoveryApi(config *Config, client discovery.SvcDiscoveryRegistry) *PrometheusDiscoveryApi {
+func NewPrometheusDiscoveryApi(config *Config, client discovery.Conn) *PrometheusDiscoveryApi {
 	api := &PrometheusDiscoveryApi{
 		config: config,
 	}
@@ -30,43 +31,26 @@ func NewPrometheusDiscoveryApi(config *Config, client discovery.SvcDiscoveryRegi
 	return api
 }
 
-func (p *PrometheusDiscoveryApi) Enable(c *gin.Context) {
-	if p.config.Discovery.Enable != conf.ETCD {
-		c.JSON(http.StatusOK, []struct{}{})
-		c.Abort()
-	}
-}
-
 func (p *PrometheusDiscoveryApi) discovery(c *gin.Context, key string) {
-	eResp, err := p.client.Get(c, prommetrics.BuildDiscoveryKey(key))
+	value, err := p.kv.GetKey(c, prommetrics.BuildDiscoveryKey(key))
 	if err != nil {
-		// Log and respond with an error if preparation fails.
-		apiresp.GinError(c, errs.WrapMsg(err, "etcd get err"))
+		if errors.Is(err, discovery.ErrNotSupportedKeyValue) {
+			c.JSON(http.StatusOK, []struct{}{})
+			return
+		}
+		apiresp.GinError(c, errs.WrapMsg(err, "get key value"))
 		return
 	}
-	if len(eResp.Kvs) == 0 {
-		c.JSON(http.StatusOK, []*prommetrics.Target{})
+	if len(value) == 0 {
+		c.JSON(http.StatusOK, []*prommetrics.RespTarget{})
+		return
 	}
-
-	var (
-		resp = &prommetrics.RespTarget{
-			Targets: make([]string, 0, len(eResp.Kvs)),
-		}
-	)
-
-	for i := range eResp.Kvs {
-		var target prommetrics.Target
-		err = json.Unmarshal(eResp.Kvs[i].Value, &target)
-		if err != nil {
-			log.ZError(c, "prometheus unmarshal err", errs.Wrap(err))
-		}
-		resp.Targets = append(resp.Targets, target.Target)
-		if resp.Labels == nil {
-			resp.Labels = target.Labels
-		}
+	var resp prommetrics.RespTarget
+	if err := json.Unmarshal(value, &resp); err != nil {
+		apiresp.GinError(c, errs.WrapMsg(err, "json unmarshal err"))
+		return
 	}
-
-	c.JSON(200, []*prommetrics.RespTarget{resp})
+	c.JSON(http.StatusOK, []*prommetrics.RespTarget{&resp})
 }
 
 func (p *PrometheusDiscoveryApi) Api(c *gin.Context) {

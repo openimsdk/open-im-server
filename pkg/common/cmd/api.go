@@ -19,6 +19,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/internal/api"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
@@ -32,7 +33,7 @@ type ApiCmd struct {
 }
 
 func NewApiCmd() *ApiCmd {
-	apiConfig := api.Config{AllConfig: &config.AllConfig{}}
+	var apiConfig api.Config
 	ret := &ApiCmd{apiConfig: &apiConfig}
 	ret.configMap = map[string]any{
 		config.DiscoveryConfigFilename:          &apiConfig.Discovery,
@@ -61,7 +62,7 @@ func NewApiCmd() *ApiCmd {
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		apiConfig.ConfigPath = ret.configPath
+		apiConfig.ConfigPath = config.Path(ret.configPath)
 		return ret.runE()
 	}
 	return ret
@@ -72,5 +73,22 @@ func (a *ApiCmd) Exec() error {
 }
 
 func (a *ApiCmd) runE() error {
-	return api.Start(a.ctx, a.Index(), a.apiConfig)
+	a.apiConfig.Index = config.Index(a.Index())
+	prometheus := config.Prometheus{
+		Enable: a.apiConfig.API.Prometheus.Enable,
+		Ports:  a.apiConfig.API.Prometheus.Ports,
+	}
+	return startrpc.Start(
+		a.ctx, &a.apiConfig.Discovery,
+		&prometheus,
+		a.apiConfig.API.Api.ListenIP, "",
+		a.apiConfig.API.Prometheus.AutoSetPorts,
+		nil, int(a.apiConfig.Index),
+		a.apiConfig.Discovery.RpcService.MessageGateway,
+		&a.apiConfig.Notification,
+		a.apiConfig,
+		[]string{},
+		[]string{},
+		api.Start,
+	)
 }

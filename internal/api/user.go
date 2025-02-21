@@ -29,11 +29,11 @@ import (
 
 type UserApi struct {
 	Client user.UserClient
-	discov discovery.SvcDiscoveryRegistry
+	discov discovery.Conn
 	config config.RpcService
 }
 
-func NewUserApi(client user.UserClient, discov discovery.SvcDiscoveryRegistry, config config.RpcService) UserApi {
+func NewUserApi(client user.UserClient, discov discovery.Conn, config config.RpcService) UserApi {
 	return UserApi{Client: client, discov: discov, config: config}
 }
 

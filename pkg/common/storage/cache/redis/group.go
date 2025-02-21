@@ -1,17 +1,3 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package redis
 
 import (
@@ -19,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
@@ -36,34 +21,21 @@ const (
 	groupExpireTime = time.Second * 60 * 60 * 12
 )
 
-var errIndex = errs.New("err index")
-
 type GroupCacheRedis struct {
 	cache.BatchDeleter
 	groupDB        database.Group
 	groupMemberDB  database.GroupMember
 	groupRequestDB database.GroupRequest
 	expireTime     time.Duration
-	rcClient       *rockscache.Client
+	rcClient       *rocksCacheClient
 	groupHash      cache.GroupHash
 }
 
-func NewGroupCacheRedis(
-	rdb redis.UniversalClient,
-	localCache *config.LocalCache,
-	groupDB database.Group,
-	groupMemberDB database.GroupMember,
-	groupRequestDB database.GroupRequest,
-	hashCode cache.GroupHash,
-	opts *rockscache.Options,
-) cache.GroupCache {
-	batchHandler := NewBatchDeleterRedis(rdb, opts, []string{localCache.Group.Topic})
-	g := localCache.Group
-	log.ZDebug(context.Background(), "group local cache init", "Topic", g.Topic, "SlotNum", g.SlotNum, "SlotSize", g.SlotSize, "enable", g.Enable())
-
+func NewGroupCacheRedis(rdb redis.UniversalClient, localCache *config.LocalCache, groupDB database.Group, groupMemberDB database.GroupMember, groupRequestDB database.GroupRequest, hashCode cache.GroupHash) cache.GroupCache {
+	rc := newRocksCacheClient(rdb)
 	return &GroupCacheRedis{
-		BatchDeleter:   batchHandler,
-		rcClient:       rockscache.NewClient(rdb, *opts),
+		BatchDeleter:   rc.GetBatchDeleter(localCache.Group.Topic),
+		rcClient:       rc,
 		expireTime:     groupExpireTime,
 		groupDB:        groupDB,
 		groupMemberDB:  groupMemberDB,
