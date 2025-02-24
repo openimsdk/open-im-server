@@ -370,7 +370,6 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			}
 			oldClients = append(oldClients, c)
 		}
-
 		fallthrough
 	case constant.AllLoginButSameTermKick:
 		if !clientOK {
