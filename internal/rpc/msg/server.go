@@ -23,6 +23,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
@@ -35,7 +37,6 @@ import (
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
-	"google.golang.org/grpc"
 )
 
 type MessageInterceptorFunc func(ctx context.Context, globalConfig *Config, req *msg.SendMsgReq) (*sdkws.MsgData, error)
@@ -66,7 +67,7 @@ type msgServer struct {
 	GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
 	ConversationLocalCache *rpccache.ConversationLocalCache // Local cache for conversation data.
 	Handlers               MessageInterceptorChain          // Chain of handlers for processing messages.
-	notificationSender     *rpcclient.NotificationSender    // RPC client for sending notifications.
+	notificationSender     *notification.NotificationSender // RPC client for sending notifications.
 	msgNotificationSender  *MsgNotificationSender           // RPC client for sending msg notifications.
 	config                 *Config                          // Global configuration settings.
 	webhookClient          *webhook.Client
@@ -152,8 +153,8 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		conversationClient:     conversationClient,
 	}
 
-	s.notificationSender = rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithLocalSendMsg(s.SendMsg))
-	s.msgNotificationSender = NewMsgNotificationSender(config, rpcclient.WithLocalSendMsg(s.SendMsg))
+	s.notificationSender = notification.NewNotificationSender(&config.NotificationConfig, notification.WithLocalSendMsg(s.SendMsg))
+	s.msgNotificationSender = NewMsgNotificationSender(config, notification.WithLocalSendMsg(s.SendMsg))
 
 	msg.RegisterMsgServer(server, s)
 

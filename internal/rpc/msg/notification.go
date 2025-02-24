@@ -23,11 +23,11 @@ import (
 )
 
 type MsgNotificationSender struct {
-	*rpcclient.NotificationSender
+	*notification.NotificationSender
 }
 
-func NewMsgNotificationSender(config *Config, opts ...rpcclient.NotificationSenderOptions) *MsgNotificationSender {
-	return &MsgNotificationSender{rpcclient.NewNotificationSender(&config.NotificationConfig, opts...)}
+func NewMsgNotificationSender(config *Config, opts ...notification.NotificationSenderOptions) *MsgNotificationSender {
+	return &MsgNotificationSender{notification.NewNotificationSender(&config.NotificationConfig, opts...)}
 }
 
 func (m *MsgNotificationSender) UserDeleteMsgsNotification(ctx context.Context, userID, conversationID string, seqs []int64) {
