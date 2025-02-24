@@ -340,6 +340,15 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 		if constant.PlatformIDToClass(newClient.PlatformID) == constant.TerminalPC {
 			return
 		}
+		clients, ok := ws.clients.GetAll(newClient.UserID)
+		clientOK = ok
+		oldClients = make([]*Client, 0, len(clients))
+		for _, c := range clients {
+			if constant.PlatformIDToClass(c.PlatformID) == constant.TerminalPC {
+				continue
+			}
+			oldClients = append(oldClients, c)
+		}
 		fallthrough
 	case constant.AllLoginButSameTermKick:
 		if !clientOK {
