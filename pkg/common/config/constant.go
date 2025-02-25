@@ -15,8 +15,10 @@
 package config
 
 const (
-	ConfKey = "conf"
-	ETCD    = "etcd"
+	MountConfigFilePath = "CONFIG_PATH"
+	DeploymentType      = "DEPLOYMENT_TYPE"
+	KUBERNETES          = "kubernetes"
+	ETCD                = "etcd"
 )
 
 const (
