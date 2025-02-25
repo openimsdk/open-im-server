@@ -18,6 +18,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"strconv"
 	"sync"
 	"time"
@@ -70,7 +71,7 @@ func NewClient(pushConf *config.Push, cache cache.ThirdCache) *Client {
 func (g *Client) Push(ctx context.Context, userIDs []string, title, content string, opts *options.Opts) error {
 	token, err := g.cache.GetGetuiToken(ctx)
 	if err != nil {
-		if errs.Unwrap(err) == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			log.ZDebug(ctx, "getui token not exist in redis")
 			token, err = g.getTokenAndSave2Redis(ctx)
 			if err != nil {
@@ -144,7 +145,7 @@ func (g *Client) Auth(ctx context.Context, timeStamp int64) (token string, expir
 func (g *Client) GetTaskID(ctx context.Context, token string, pushReq PushReq) (string, error) {
 	respTask := TaskResp{}
 	ttl := int64(1000 * 60 * 5)
-	pushReq.Settings = &Settings{TTL: &ttl}
+	pushReq.Settings = &Settings{TTL: &ttl, Strategy: defaultStrategy}
 	err := g.request(ctx, taskURL, pushReq, token, &respTask)
 	if err != nil {
 		return "", errs.Wrap(err)
@@ -188,6 +189,7 @@ func (g *Client) postReturn(
 	if err != nil {
 		return err
 	}
+	log.ZDebug(ctx, "postReturn", "url", url, "header", header, "input", input, "timeout", timeout, "output", output)
 	return output.parseError()
 }
 
@@ -204,7 +206,7 @@ func (g *Client) getTokenAndSave2Redis(ctx context.Context) (token string, err e
 }
 
 func (g *Client) GetTaskIDAndSave2Redis(ctx context.Context, token string, pushReq PushReq) (taskID string, err error) {
-	pushReq.Settings = &Settings{TTL: &g.taskIDTTL}
+	pushReq.Settings = &Settings{TTL: &g.taskIDTTL, Strategy: defaultStrategy}
 	taskID, err = g.GetTaskID(ctx, token, pushReq)
 	if err != nil {
 		return
