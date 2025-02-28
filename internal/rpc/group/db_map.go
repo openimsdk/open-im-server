@@ -69,15 +69,10 @@ func UpdateGroupInfoExMap(ctx context.Context, group *pbgroup.SetGroupInfoExReq)
 	}
 
 	if group.Notification != nil {
-		// if Notification only contains spaces, set it to empty string
-		if strings.TrimSpace(group.Notification.Value) != "" {
-			m["notification"] = group.Notification.Value
-			notificationFlag = true
-		} else {
-			m["notification"] = ""
-			group.Notification.Value = ""
-			normalFlag = true
-		}
+		notificationFlag = true
+		group.Notification.Value = strings.TrimSpace(group.Notification.Value) // if Notification only contains spaces, set it to empty string
+
+		m["notification"] = group.Notification.Value
 		m["notification_user_id"] = mcontext.GetOpUserID(ctx)
 		m["notification_update_time"] = time.Now()
 	}

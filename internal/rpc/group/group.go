@@ -1115,8 +1115,9 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		tips.OpUser = g.groupMemberDB2PB(opMember, 0)
 	}
 
-	if req.Notification != nil {
-		if notificationFlag {
+	if notificationFlag {
+		if req.Notification.Value != "" {
+
 			conversation := &pbconv.ConversationReq{
 				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
 				ConversationType: constant.ReadGroupChatType,
@@ -1136,9 +1137,9 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 
 			g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser}, &notificationFlag)
 		} else {
+			notificationFlag = false
 			g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser}, &notificationFlag)
 		}
-
 	}
 
 	if groupNameFlag {
