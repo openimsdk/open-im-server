@@ -288,10 +288,11 @@ func (g *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	g.notification.GroupCreatedNotification(ctx, tips, req.SendNotification)
 
 	if req.GroupInfo.Notification != "" {
+		notificationFlag := true
 		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{
 			Group:  tips.Group,
 			OpUser: tips.OpUser,
-		})
+		}, &notificationFlag)
 	}
 
 	reqCallBackAfter := &pbgroup.CreateGroupReq{
@@ -1026,7 +1027,8 @@ func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 				log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
 			}
 		}()
-		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
+		notficationFlag := true
+		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser}, &notficationFlag)
 	}
 	if req.GroupInfoForSet.GroupName != "" {
 		num--
@@ -1117,7 +1119,6 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 
 	if notificationFlag {
 		if req.Notification.Value != "" {
-
 			conversation := &pbconv.ConversationReq{
 				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
 				ConversationType: constant.ReadGroupChatType,
