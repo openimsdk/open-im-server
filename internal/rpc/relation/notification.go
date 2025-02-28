@@ -16,6 +16,7 @@ package relation
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"github.com/openimsdk/protocol/msg"
 
@@ -36,7 +37,7 @@ import (
 )
 
 type FriendNotificationSender struct {
-	*rpcclient.NotificationSender
+	*notification.NotificationSender
 	// Target not found err
 	getUsersInfo func(ctx context.Context, userIDs []string) ([]common_user.CommonUser, error)
 	// db controller
@@ -89,7 +90,7 @@ func WithRpcFunc(
 
 func NewFriendNotificationSender(conf *config.Notification, msgClient *rpcli.MsgClient, opts ...friendNotificationSenderOptions) *FriendNotificationSender {
 	f := &FriendNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(conf, rpcclient.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
+		NotificationSender: notification.NewNotificationSender(conf, notification.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
 			return msgClient.SendMsg(ctx, req)
 		})),
 	}

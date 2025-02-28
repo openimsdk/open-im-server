@@ -24,6 +24,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+
+	"google.golang.org/grpc"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/common"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
@@ -52,7 +59,6 @@ import (
 	"github.com/openimsdk/tools/mw/specialerror"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/encrypt"
-	"google.golang.org/grpc"
 )
 
 type groupServer struct {
@@ -289,7 +295,7 @@ func (g *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 			break
 		}
 	}
-	g.notification.GroupCreatedNotification(ctx, tips)
+	g.notification.GroupCreatedNotification(ctx, tips, req.SendNotification)
 
 	if req.GroupInfo.Notification != "" {
 		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{
@@ -452,7 +458,7 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		return nil, err
 	}
 
-	if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, opUserID, req.InvitedUserIDs...); err != nil {
+	if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, req.SendNotification, opUserID, req.InvitedUserIDs...); err != nil {
 		return nil, err
 	}
 	return &pbgroup.InviteUserToGroupResp{}, nil
@@ -618,7 +624,7 @@ func (g *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	for _, userID := range req.KickedUserIDs {
 		tips.KickedUserList = append(tips.KickedUserList, convert.Db2PbGroupMember(memberMap[userID]))
 	}
-	g.notification.MemberKickedNotification(ctx, tips)
+	g.notification.MemberKickedNotification(ctx, tips, req.SendNotification)
 	if err := g.deleteMemberAndSetConversationSeq(ctx, req.GroupID, req.KickedUserIDs); err != nil {
 		return nil, err
 	}
@@ -827,7 +833,7 @@ func (g *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 		if member == nil {
 			log.ZDebug(ctx, "GroupApplicationResponse", "member is nil")
 		} else {
-			if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, groupRequest.InviterUserID, req.FromUserID); err != nil {
+			if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, nil, groupRequest.InviterUserID, req.FromUserID); err != nil {
 				return nil, err
 			}
 		}
@@ -1373,7 +1379,7 @@ func (g *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 		if mcontext.GetOpUserID(ctx) == owner.UserID {
 			tips.OpUser = g.groupMemberDB2PB(owner, 0)
 		}
-		g.notification.GroupDismissedNotification(ctx, tips)
+		g.notification.GroupDismissedNotification(ctx, tips, req.SendNotification)
 	}
 	membersID, err := g.db.FindGroupMemberUserID(ctx, group.GroupID)
 	if err != nil {

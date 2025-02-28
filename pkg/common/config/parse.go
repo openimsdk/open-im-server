@@ -18,11 +18,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/field"
-	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -58,10 +59,13 @@ func GetProjectRoot() (string, error) {
 	return projectRoot, nil
 }
 
-func GetOptionsByNotification(cfg NotificationConfig) msgprocessor.Options {
+func GetOptionsByNotification(cfg NotificationConfig, sendNotification *bool) msgprocessor.Options {
 	opts := msgprocessor.NewOptions()
 
-	if cfg.UnreadCount {
+	if sendNotification != nil {
+		cfg.IsSendMsg = *sendNotification
+	}
+	if cfg.IsSendMsg {
 		opts = msgprocessor.WithOptions(opts, msgprocessor.WithUnreadCount(true))
 	}
 	if cfg.OfflinePush.Enable {
