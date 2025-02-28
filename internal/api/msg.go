@@ -308,7 +308,7 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 				IsSendMsg:        req.SendMsg,
 				ReliabilityLevel: *req.ReliabilityLevel,
 				UnreadCount:      false,
-			}),
+			}, nil),
 		},
 	}
 	respPb, err := m.Client.SendMsg(c, &sendMsgReq)

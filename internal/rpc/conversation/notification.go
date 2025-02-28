@@ -16,6 +16,7 @@ package conversation
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"github.com/openimsdk/protocol/msg"
 
@@ -26,11 +27,11 @@ import (
 )
 
 type ConversationNotificationSender struct {
-	*rpcclient.NotificationSender
+	*notification.NotificationSender
 }
 
 func NewConversationNotificationSender(conf *config.Notification, msgClient *rpcli.MsgClient) *ConversationNotificationSender {
-	return &ConversationNotificationSender{rpcclient.NewNotificationSender(conf, rpcclient.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
+	return &ConversationNotificationSender{notification.NewNotificationSender(conf, notification.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
 		return msgClient.SendMsg(ctx, req)
 	}))}
 }
