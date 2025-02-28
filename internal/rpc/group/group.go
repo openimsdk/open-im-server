@@ -1086,6 +1086,11 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		return nil, err
 	}
 
+	// if Notification only contains spaces, set it to empty string
+	if strings.TrimSpace(req.Notification.Value) == "" {
+		req.Notification.Value = ""
+	}
+
 	updatedData, err := UpdateGroupInfoExMap(ctx, req)
 	if len(updatedData) == 0 {
 		return &pbgroup.SetGroupInfoExResp{}, nil
@@ -1114,12 +1119,13 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		tips.OpUser = g.groupMemberDB2PB(opMember, 0)
 	}
 
+	// num is len of updatedData, use for the different type of notification
 	num := len(updatedData)
 
 	if req.Notification != nil {
-		num -= 3
-
 		if req.Notification.Value != "" {
+			num -= 3
+
 			func() {
 				conversation := &pbconv.ConversationReq{
 					ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
@@ -1148,6 +1154,7 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		g.notification.GroupInfoSetNameNotification(ctx, &sdkws.GroupInfoSetNameTips{Group: tips.Group, OpUser: tips.OpUser})
 	}
 
+	// if num > 0, send the normal notification
 	if num > 0 {
 		g.notification.GroupInfoSetNotification(ctx, tips)
 	}
