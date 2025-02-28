@@ -75,6 +75,7 @@ func UpdateGroupInfoExMap(ctx context.Context, group *pbgroup.SetGroupInfoExReq)
 			notificationFlag = true
 		} else {
 			m["notification"] = ""
+			group.Notification.Value = ""
 			normalFlag = true
 		}
 		m["notification_user_id"] = mcontext.GetOpUserID(ctx)
