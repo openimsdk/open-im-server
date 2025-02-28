@@ -179,8 +179,8 @@ func NewNotificationSender(conf *config.Notification, opts ...NotificationSender
 }
 
 type notificationOpt struct {
-	RpcGetUsername   bool
-	SendNotification *bool
+	RpcGetUsername bool
+	SendMessage    *bool
 }
 
 type NotificationOptions func(*notificationOpt)
@@ -190,9 +190,9 @@ func WithRpcGetUserName() NotificationOptions {
 		opt.RpcGetUsername = true
 	}
 }
-func WithSendNotification(send *bool) NotificationOptions {
+func WithSendMessage(sendMessage *bool) NotificationOptions {
 	return func(opt *notificationOpt) {
-		opt.SendNotification = send
+		opt.SendMessage = sendMessage
 	}
 }
 
@@ -238,7 +238,7 @@ func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, co
 	if sendID == recvID && contentType == constant.HasReadReceipt {
 		optionsConfig.ReliabilityLevel = constant.UnreliableNotification
 	}
-	options := config.GetOptionsByNotification(optionsConfig, notificationOpt.SendNotification)
+	options := config.GetOptionsByNotification(optionsConfig, notificationOpt.SendMessage)
 	s.SetOptionsByContentType(ctx, options, contentType)
 	msg.Options = options
 	// fill Notification OfflinePush by config
