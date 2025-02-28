@@ -1087,12 +1087,7 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		return nil, err
 	}
 
-	// if Notification only contains spaces, set it to empty string
-	if strings.TrimSpace(req.Notification.Value) == "" {
-		req.Notification.Value = ""
-	}
-
-	updatedData, err := UpdateGroupInfoExMap(ctx, req)
+	updatedData, normalFlag, groupNameFlag, notificationFlag, err := UpdateGroupInfoExMap(ctx, req)
 	if len(updatedData) == 0 {
 		return &pbgroup.SetGroupInfoExResp{}, nil
 	}
@@ -1120,43 +1115,35 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		tips.OpUser = g.groupMemberDB2PB(opMember, 0)
 	}
 
-	// num is len of updatedData, use for the different type of notification
-	num := len(updatedData)
+	if notificationFlag {
+		func() {
+			conversation := &pbconv.ConversationReq{
+				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
+				ConversationType: constant.ReadGroupChatType,
+				GroupID:          req.GroupID,
+			}
 
-	if req.Notification != nil {
-		if req.Notification.Value != "" {
-			num -= 3
+			resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupID})
+			if err != nil {
+				log.ZWarn(ctx, "GetGroupMemberIDs is failed.", err)
+				return
+			}
 
-			func() {
-				conversation := &pbconv.ConversationReq{
-					ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
-					ConversationType: constant.ReadGroupChatType,
-					GroupID:          req.GroupID,
-				}
+			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
+			if err := g.conversationClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
+				log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
+			}
+		}()
 
-				resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupID})
-				if err != nil {
-					log.ZWarn(ctx, "GetGroupMemberIDs is failed.", err)
-					return
-				}
-
-				conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
-				if err := g.conversationClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
-					log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
-				}
-			}()
-
-			g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
-		}
+		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
 	}
 
-	if req.GroupName != nil {
-		num--
+	if groupNameFlag {
 		g.notification.GroupInfoSetNameNotification(ctx, &sdkws.GroupInfoSetNameTips{Group: tips.Group, OpUser: tips.OpUser})
 	}
 
-	// if num > 0, send the normal notification
-	if num > 0 {
+	// if updatedData > 0, send the normal notification
+	if normalFlag {
 		g.notification.GroupInfoSetNotification(ctx, tips)
 	}
 

@@ -16,6 +16,7 @@ package group
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	pbgroup "github.com/openimsdk/protocol/group"
@@ -55,41 +56,56 @@ func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[s
 	return m
 }
 
-func UpdateGroupInfoExMap(ctx context.Context, group *pbgroup.SetGroupInfoExReq) (map[string]any, error) {
-	m := make(map[string]any)
+func UpdateGroupInfoExMap(ctx context.Context, group *pbgroup.SetGroupInfoExReq) (m map[string]any, normalFlag, groupNameFlag, notificationFlag bool, err error) {
+	m = make(map[string]any)
 
 	if group.GroupName != nil {
-		if group.GroupName.Value != "" {
+		if strings.TrimSpace(group.GroupName.Value) != "" {
 			m["group_name"] = group.GroupName.Value
+			groupNameFlag = true
 		} else {
-			return nil, errs.ErrArgs.WrapMsg("group name is empty")
+			return nil, normalFlag, notificationFlag, groupNameFlag, errs.ErrArgs.WrapMsg("group name is empty")
 		}
 	}
+
 	if group.Notification != nil {
-		m["notification"] = group.Notification.Value
-		m["notification_update_time"] = time.Now()
+		// if Notification only contains spaces, set it to empty string
+		if strings.TrimSpace(group.Notification.Value) != "" {
+			m["notification"] = group.Notification.Value
+			notificationFlag = true
+		} else {
+			m["notification"] = ""
+			normalFlag = true
+		}
 		m["notification_user_id"] = mcontext.GetOpUserID(ctx)
+		m["notification_update_time"] = time.Now()
 	}
 	if group.Introduction != nil {
 		m["introduction"] = group.Introduction.Value
+		normalFlag = true
 	}
 	if group.FaceURL != nil {
 		m["face_url"] = group.FaceURL.Value
+		normalFlag = true
 	}
 	if group.NeedVerification != nil {
 		m["need_verification"] = group.NeedVerification.Value
+		normalFlag = true
 	}
 	if group.LookMemberInfo != nil {
 		m["look_member_info"] = group.LookMemberInfo.Value
+		normalFlag = true
 	}
 	if group.ApplyMemberFriend != nil {
 		m["apply_member_friend"] = group.ApplyMemberFriend.Value
+		normalFlag = true
 	}
 	if group.Ex != nil {
 		m["ex"] = group.Ex.Value
+		normalFlag = true
 	}
 
-	return m, nil
+	return m, normalFlag, groupNameFlag, notificationFlag, nil
 }
 
 func UpdateGroupStatusMap(status int) map[string]any {
