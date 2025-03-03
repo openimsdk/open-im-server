@@ -288,10 +288,11 @@ func (g *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	g.notification.GroupCreatedNotification(ctx, tips, req.SendMessage)
 
 	if req.GroupInfo.Notification != "" {
+		notificationFlag := true
 		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{
 			Group:  tips.Group,
 			OpUser: tips.OpUser,
-		})
+		}, &notificationFlag)
 	}
 
 	reqCallBackAfter := &pbgroup.CreateGroupReq{
@@ -1026,7 +1027,8 @@ func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 				log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
 			}
 		}()
-		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
+		notficationFlag := true
+		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser}, &notficationFlag)
 	}
 	if req.GroupInfoForSet.GroupName != "" {
 		num--
@@ -1087,7 +1089,7 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		return nil, err
 	}
 
-	updatedData, err := UpdateGroupInfoExMap(ctx, req)
+	updatedData, normalFlag, groupNameFlag, notificationFlag, err := UpdateGroupInfoExMap(ctx, req)
 	if len(updatedData) == 0 {
 		return &pbgroup.SetGroupInfoExResp{}, nil
 	}
@@ -1115,41 +1117,38 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		tips.OpUser = g.groupMemberDB2PB(opMember, 0)
 	}
 
-	num := len(updatedData)
-
-	if req.Notification != nil {
-		num -= 3
-
+	if notificationFlag {
 		if req.Notification.Value != "" {
-			func() {
-				conversation := &pbconv.ConversationReq{
-					ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
-					ConversationType: constant.ReadGroupChatType,
-					GroupID:          req.GroupID,
-				}
+			conversation := &pbconv.ConversationReq{
+				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
+				ConversationType: constant.ReadGroupChatType,
+				GroupID:          req.GroupID,
+			}
 
-				resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupID})
-				if err != nil {
-					log.ZWarn(ctx, "GetGroupMemberIDs is failed.", err)
-					return
-				}
+			resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupID})
+			if err != nil {
+				log.ZWarn(ctx, "GetGroupMemberIDs is failed.", err)
+				return nil, err
+			}
 
-				conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
-				if err := g.conversationClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
-					log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
-				}
-			}()
+			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
+			if err := g.conversationClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
+				log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
+			}
 
-			g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
+			g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser}, &notificationFlag)
+		} else {
+			notificationFlag = false
+			g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser}, &notificationFlag)
 		}
 	}
 
-	if req.GroupName != nil {
-		num--
+	if groupNameFlag {
 		g.notification.GroupInfoSetNameNotification(ctx, &sdkws.GroupInfoSetNameTips{Group: tips.Group, OpUser: tips.OpUser})
 	}
 
-	if num > 0 {
+	// if updatedData > 0, send the normal notification
+	if normalFlag {
 		g.notification.GroupInfoSetNotification(ctx, tips)
 	}
 
