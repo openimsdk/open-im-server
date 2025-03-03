@@ -285,7 +285,7 @@ func (g *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 			break
 		}
 	}
-	g.notification.GroupCreatedNotification(ctx, tips, req.SendNotification)
+	g.notification.GroupCreatedNotification(ctx, tips, req.SendMessage)
 
 	if req.GroupInfo.Notification != "" {
 		notificationFlag := true
@@ -449,7 +449,7 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		return nil, err
 	}
 
-	if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, req.SendNotification, opUserID, req.InvitedUserIDs...); err != nil {
+	if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, req.SendMessage, opUserID, req.InvitedUserIDs...); err != nil {
 		return nil, err
 	}
 	return &pbgroup.InviteUserToGroupResp{}, nil
@@ -615,7 +615,7 @@ func (g *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	for _, userID := range req.KickedUserIDs {
 		tips.KickedUserList = append(tips.KickedUserList, convert.Db2PbGroupMember(memberMap[userID]))
 	}
-	g.notification.MemberKickedNotification(ctx, tips, req.SendNotification)
+	g.notification.MemberKickedNotification(ctx, tips, req.SendMessage)
 	if err := g.deleteMemberAndSetConversationSeq(ctx, req.GroupID, req.KickedUserIDs); err != nil {
 		return nil, err
 	}
@@ -1368,7 +1368,7 @@ func (g *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 		if mcontext.GetOpUserID(ctx) == owner.UserID {
 			tips.OpUser = g.groupMemberDB2PB(owner, 0)
 		}
-		g.notification.GroupDismissedNotification(ctx, tips, req.SendNotification)
+		g.notification.GroupDismissedNotification(ctx, tips, req.SendMessage)
 	}
 	membersID, err := g.db.FindGroupMemberUserID(ctx, group.GroupID)
 	if err != nil {
