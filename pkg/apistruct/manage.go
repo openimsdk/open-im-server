@@ -15,6 +15,7 @@
 package apistruct
 
 import (
+	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 )
 
@@ -124,4 +125,15 @@ type SingleReturnResult struct {
 
 	// RecvID uniquely identifies the receiver of the message.
 	RecvID string `json:"recvID"`
+
+	// Modify fields modified via webhook.
+	Modify map[string]any `json:"modify,omitempty"`
+}
+
+type SendMsgResp struct {
+	// SendMsgResp original response.
+	*pbmsg.SendMsgResp
+
+	// Modify fields modified via webhook.
+	Modify map[string]any `json:"modify,omitempty"`
 }

@@ -15,9 +15,15 @@
 package api
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"sync"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
+	"google.golang.org/protobuf/reflect/protoreflect"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -35,6 +41,39 @@ import (
 	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/timeutil"
 )
+
+var (
+	msgDataDescriptor     []protoreflect.FieldDescriptor
+	msgDataDescriptorOnce sync.Once
+)
+
+func getMsgDataDescriptor() []protoreflect.FieldDescriptor {
+	msgDataDescriptorOnce.Do(func() {
+		skip := make(map[string]struct{})
+		respFields := new(msg.SendMsgResp).ProtoReflect().Descriptor().Fields()
+		for i := 0; i < respFields.Len(); i++ {
+			field := respFields.Get(i)
+			if !field.HasJSONName() {
+				continue
+			}
+			skip[field.JSONName()] = struct{}{}
+		}
+		fields := new(sdkws.MsgData).ProtoReflect().Descriptor().Fields()
+		num := fields.Len()
+		msgDataDescriptor = make([]protoreflect.FieldDescriptor, 0, num)
+		for i := 0; i < num; i++ {
+			field := fields.Get(i)
+			if !field.HasJSONName() {
+				continue
+			}
+			if _, ok := skip[field.JSONName()]; ok {
+				continue
+			}
+			msgDataDescriptor = append(msgDataDescriptor, fields.Get(i))
+		}
+	})
+	return msgDataDescriptor
+}
 
 type MessageApi struct {
 	Client        msg.MsgClient
@@ -190,6 +229,42 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 	return m.newUserSendMsgReq(c, &req), nil
 }
 
+func (m *MessageApi) getModifyFields(req, respModify *sdkws.MsgData) map[string]any {
+	if req == nil || respModify == nil {
+		return nil
+	}
+	fields := make(map[string]any)
+	reqProtoReflect := req.ProtoReflect()
+	respProtoReflect := respModify.ProtoReflect()
+	for _, descriptor := range getMsgDataDescriptor() {
+		reqValue := reqProtoReflect.Get(descriptor)
+		respValue := respProtoReflect.Get(descriptor)
+		if !reqValue.Equal(respValue) {
+			val := respValue.Interface()
+			name := descriptor.JSONName()
+			if name == "content" {
+				if bs, ok := val.([]byte); ok {
+					val = string(bs)
+				}
+			}
+			fields[name] = val
+		}
+	}
+	if len(fields) == 0 {
+		fields = nil
+	}
+	return fields
+}
+
+func (m *MessageApi) ginRespSendMsg(c *gin.Context, req *msg.SendMsgReq, resp *msg.SendMsgResp) {
+	res := m.getModifyFields(req.MsgData, resp.Modify)
+	resp.Modify = nil
+	apiresp.GinSuccess(c, &apistruct.SendMsgResp{
+		SendMsgResp: resp,
+		Modify:      res,
+	})
+}
+
 // SendMessage handles the sending of a message. It's an HTTP handler function to be used with Gin framework.
 func (m *MessageApi) SendMessage(c *gin.Context) {
 	// Initialize a request struct for sending a message.
@@ -243,7 +318,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	}
 
 	// Respond with a success message and the response payload.
-	apiresp.GinSuccess(c, respPb)
+	m.ginRespSendMsg(c, sendMsgReq, respPb)
 }
 
 func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
@@ -309,7 +384,7 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 		apiresp.GinError(c, err)
 		return
 	}
-	apiresp.GinSuccess(c, respPb)
+	m.ginRespSendMsg(c, &sendMsgReq, respPb)
 }
 
 func (m *MessageApi) BatchSendMsg(c *gin.Context) {
@@ -363,9 +438,91 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 			ClientMsgID: rpcResp.ClientMsgID,
 			SendTime:    rpcResp.SendTime,
 			RecvID:      recvID,
+			Modify:      m.getModifyFields(sendMsgReq.MsgData, rpcResp.Modify),
 		})
 	}
 	apiresp.GinSuccess(c, resp)
+}
+
+func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
+	encodedKey, ok := c.GetQuery(webhook.Key)
+	if !ok {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail("missing key in query").Wrap())
+		return
+	}
+
+	decodedData, err := base64.StdEncoding.DecodeString(encodedKey)
+	if err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	var (
+		req        apistruct.SendSingleMsgReq
+		keyMsgData apistruct.KeyMsgData
+
+		sendID      string
+		sessionType int32
+		recvID      string
+	)
+	err = json.Unmarshal(decodedData, &keyMsgData)
+	if err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	if keyMsgData.GroupID != "" {
+		sessionType = constant.ReadGroupChatType
+		sendID = req.SendID
+	} else {
+		sessionType = constant.SingleChatType
+		sendID = keyMsgData.RecvID
+		recvID = keyMsgData.SendID
+	}
+	// check param
+	if keyMsgData.SendID == "" {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail("missing recvID or GroupID").Wrap())
+		return
+	}
+	if sendID == "" {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail("missing sendID").Wrap())
+		return
+	}
+
+	msgData := &sdkws.MsgData{
+		SendID:           sendID,
+		RecvID:           recvID,
+		GroupID:          keyMsgData.GroupID,
+		ClientMsgID:      idutil.GetMsgIDByMD5(sendID),
+		SenderPlatformID: constant.AdminPlatformID,
+		SessionType:      sessionType,
+		MsgFrom:          constant.UserMsgType,
+		ContentType:      constant.Text,
+		Content:          []byte(req.Content),
+		OfflinePushInfo:  req.OfflinePushInfo,
+		Ex:               req.Ex,
+	}
+
+	sendReq := &msg.SendMsgReq{
+		MsgData: msgData,
+	}
+
+	respPb, err := m.Client.SendMsg(c, sendReq)
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+
+	var status = constant.MsgSendSuccessed
+
+	_, err = m.Client.SetSendMsgStatus(c, &msg.SetSendMsgStatusReq{
+		Status: int32(status),
+	})
+
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+
+	m.ginRespSendMsg(c, sendReq, respPb)
 }
 
 func (m *MessageApi) CheckMsgIsSendSuccess(c *gin.Context) {
