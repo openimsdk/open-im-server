@@ -237,6 +237,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 	if req.Conversation == nil {
 		return nil, errs.ErrArgs.WrapMsg("conversation must not be nil")
 	}
+
 	if req.Conversation.ConversationType == constant.WriteGroupChatType {
 		groupInfo, err := c.groupClient.GetGroupInfo(ctx, req.Conversation.GroupID)
 		if err != nil {
@@ -271,109 +272,29 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 	conversation.UserID = req.Conversation.UserID
 	conversation.GroupID = req.Conversation.GroupID
 
-	m := make(map[string]any)
-
-	setConversationFieldsFunc := func() {
-		if req.Conversation.RecvMsgOpt != nil {
-			conversation.RecvMsgOpt = req.Conversation.RecvMsgOpt.Value
-			m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
-		}
-		if req.Conversation.AttachedInfo != nil {
-			conversation.AttachedInfo = req.Conversation.AttachedInfo.Value
-			m["attached_info"] = req.Conversation.AttachedInfo.Value
-		}
-		if req.Conversation.Ex != nil {
-			conversation.Ex = req.Conversation.Ex.Value
-			m["ex"] = req.Conversation.Ex.Value
-		}
-		if req.Conversation.IsPinned != nil {
-			conversation.IsPinned = req.Conversation.IsPinned.Value
-			m["is_pinned"] = req.Conversation.IsPinned.Value
-		}
-		if req.Conversation.GroupAtType != nil {
-			conversation.GroupAtType = req.Conversation.GroupAtType.Value
-			m["group_at_type"] = req.Conversation.GroupAtType.Value
-		}
-		if req.Conversation.MsgDestructTime != nil {
-			conversation.MsgDestructTime = req.Conversation.MsgDestructTime.Value
-			m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
-		}
-		if req.Conversation.IsMsgDestruct != nil {
-			conversation.IsMsgDestruct = req.Conversation.IsMsgDestruct.Value
-			m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
-		}
-		if req.Conversation.BurnDuration != nil {
-			conversation.BurnDuration = req.Conversation.BurnDuration.Value
-			m["burn_duration"] = req.Conversation.BurnDuration.Value
-		}
+	m, conversation, err := UpdateConversationsMap(ctx, req)
+	if err != nil {
+		return nil, err
 	}
 
-	// set need set field in conversation
-	setConversationFieldsFunc()
-
 	for userID := range conversationMap {
-		unequal := len(m)
+		unequal := UserUpdateCheckMap(ctx, userID, req.Conversation, conversationMap[userID])
 
-		if req.Conversation.RecvMsgOpt != nil {
-			if req.Conversation.RecvMsgOpt.Value == conversationMap[userID].RecvMsgOpt {
-				unequal--
-			}
-		}
-
-		if req.Conversation.AttachedInfo != nil {
-			if req.Conversation.AttachedInfo.Value == conversationMap[userID].AttachedInfo {
-				unequal--
-			}
-		}
-
-		if req.Conversation.Ex != nil {
-			if req.Conversation.Ex.Value == conversationMap[userID].Ex {
-				unequal--
-			}
-		}
-		if req.Conversation.IsPinned != nil {
-			if req.Conversation.IsPinned.Value == conversationMap[userID].IsPinned {
-				unequal--
-			}
-		}
-
-		if req.Conversation.GroupAtType != nil {
-			if req.Conversation.GroupAtType.Value == conversationMap[userID].GroupAtType {
-				unequal--
-			}
-		}
-
-		if req.Conversation.MsgDestructTime != nil {
-			if req.Conversation.MsgDestructTime.Value == conversationMap[userID].MsgDestructTime {
-				unequal--
-			}
-		}
-
-		if req.Conversation.IsMsgDestruct != nil {
-			if req.Conversation.IsMsgDestruct.Value == conversationMap[userID].IsMsgDestruct {
-				unequal--
-			}
-		}
-
-		if req.Conversation.BurnDuration != nil {
-			if req.Conversation.BurnDuration.Value == conversationMap[userID].BurnDuration {
-				unequal--
-			}
-		}
-
-		if unequal > 0 {
+		if unequal {
 			needUpdateUsersList = append(needUpdateUsersList, userID)
 		}
 	}
+
 	if len(m) != 0 && len(needUpdateUsersList) != 0 {
 		if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, needUpdateUsersList, &conversation, m); err != nil {
 			return nil, err
 		}
 
-		for _, v := range needUpdateUsersList {
-			c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
+		for _, userID := range needUpdateUsersList {
+			c.conversationNotificationSender.ConversationChangeNotification(ctx, userID, []string{req.Conversation.ConversationID})
 		}
 	}
+
 	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.ReadGroupChatType {
 		var conversations []*dbModel.Conversation
 		for _, ownerUserID := range req.UserIDs {
