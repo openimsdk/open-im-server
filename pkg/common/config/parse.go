@@ -58,10 +58,13 @@ func GetProjectRoot() (string, error) {
 	return projectRoot, nil
 }
 
-func GetOptionsByNotification(cfg NotificationConfig) msgprocessor.Options {
+func GetOptionsByNotification(cfg NotificationConfig, sendMessage *bool) msgprocessor.Options {
 	opts := msgprocessor.NewOptions()
 
-	if cfg.UnreadCount {
+	if sendMessage != nil {
+		cfg.IsSendMsg = *sendMessage
+	}
+	if cfg.IsSendMsg {
 		opts = msgprocessor.WithOptions(opts, msgprocessor.WithUnreadCount(true))
 	}
 	if cfg.OfflinePush.Enable {
