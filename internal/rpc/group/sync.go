@@ -20,7 +20,7 @@ func (g *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgrou
 	if err != nil {
 		return nil, err
 	}
-	userIDs, err := s.db.FindGroupMemberUserID(ctx, req.GroupID)
+	userIDs, err := g.db.FindGroupMemberUserID(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -141,9 +141,9 @@ func (g *groupServer) GetIncrementalJoinGroup(ctx context.Context, req *pbgroup.
 		VersionKey:      req.UserID,
 		VersionID:       req.VersionID,
 		VersionNumber:   req.Version,
-		Version:         s.db.FindJoinIncrVersion,
-		CacheMaxVersion: s.db.FindMaxJoinGroupVersionCache,
-		Find:            s.getGroupsInfo,
+		Version:         g.db.FindJoinIncrVersion,
+		CacheMaxVersion: g.db.FindMaxJoinGroupVersionCache,
+		Find:            g.getGroupsInfo,
 		Resp: func(version *model.VersionLog, delIDs []string, insertList, updateList []*sdkws.GroupInfo, full bool) *pbgroup.GetIncrementalJoinGroupResp {
 			return &pbgroup.GetIncrementalJoinGroupResp{
 				VersionID: version.ID.Hex(),
