@@ -1,11 +1,13 @@
 package msg
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	pbchat "github.com/openimsdk/protocol/msg"
-	"github.com/openimsdk/tools/utils/datautil"
 	"strconv"
 	"strings"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/protocol/constant"
+	pbchat "github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 const (
@@ -13,28 +15,50 @@ const (
 )
 
 func filterAfterMsg(msg *pbchat.SendMsgReq, after *config.AfterConfig) bool {
-	return filterMsg(msg, after.AttentionIds, after.AllowedTypes, after.DeniedTypes)
+	return filterMsg(msg, after.AttentionIds, after.DeniedTypes)
 }
 
 func filterBeforeMsg(msg *pbchat.SendMsgReq, before *config.BeforeConfig) bool {
-	return filterMsg(msg, nil, before.AllowedTypes, before.DeniedTypes)
+	return filterMsg(msg, nil, before.DeniedTypes)
 }
 
-func filterMsg(msg *pbchat.SendMsgReq, attentionIds, allowedTypes, deniedTypes []string) bool {
+func filterMsg(msg *pbchat.SendMsgReq, attentionIds []string, deniedTypes []int32) bool {
 	// According to the attentionIds configuration, only some users are sent
-	if len(attentionIds) != 0 && !datautil.Contains([]string{msg.MsgData.SendID, msg.MsgData.RecvID}, attentionIds...) {
+	if len(attentionIds) != 0 && !datautil.Contain(msg.MsgData.RecvID, attentionIds...) {
 		return false
 	}
-	if len(allowedTypes) != 0 && !isInInterval(msg.MsgData.ContentType, allowedTypes) {
+
+	if defaultDeniedTypes(msg.MsgData.ContentType) {
 		return false
 	}
-	if len(deniedTypes) != 0 && isInInterval(msg.MsgData.ContentType, deniedTypes) {
+
+	if len(deniedTypes) != 0 && datautil.Contain(msg.MsgData.ContentType, deniedTypes...) {
 		return false
 	}
+	//if len(allowedTypes) != 0 && !isInInterval(msg.MsgData.ContentType, allowedTypes) {
+	//	return false
+	//}
+	//if len(deniedTypes) != 0 && isInInterval(msg.MsgData.ContentType, deniedTypes) {
+	//	return false
+	//}
 	return true
 }
 
-func isInInterval(contentType int32, interval []string) bool {
+func defaultDeniedTypes(contentType int32) bool {
+	if contentType >= constant.NotificationBegin && contentType <= constant.NotificationEnd {
+		return true
+	}
+	if contentType == constant.Typing {
+		return true
+	}
+	return false
+}
+
+// isInInterval if data is in interval
+// Supports two formats: a single type or a range. The range is defined by the lower and upper bounds connected with a hyphen ("-")
+// e.g. [1, 100, 200-500, 600-700] means that only data within the range
+// {1, 100} ∪ [200, 500] ∪ [600, 700] will return true.
+func isInInterval(data int32, interval []string) bool {
 	for _, v := range interval {
 		if strings.Contains(v, separator) {
 			// is interval
@@ -50,7 +74,7 @@ func isInInterval(contentType int32, interval []string) bool {
 			if err != nil {
 				continue
 			}
-			if datautil.BetweenEq(int(contentType), bottom, top) {
+			if datautil.BetweenEq(int(data), bottom, top) {
 				return true
 			}
 		} else {
@@ -58,7 +82,7 @@ func isInInterval(contentType int32, interval []string) bool {
 			if err != nil {
 				continue
 			}
-			if int(contentType) == iv {
+			if int(data) == iv {
 				return true
 			}
 		}
