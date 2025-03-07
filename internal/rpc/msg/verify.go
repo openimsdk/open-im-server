@@ -25,9 +25,6 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/encrypt"
 	"github.com/openimsdk/tools/utils/timeutil"
-	"math/rand"
-	"strconv"
-	"time"
 
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
@@ -149,27 +146,9 @@ func (m *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 		msg.SendTime = timeutil.GetCurrentTimestampByMill()
 	}
 	switch msg.ContentType {
-	case constant.Text:
-		fallthrough
-	case constant.Picture:
-		fallthrough
-	case constant.Voice:
-		fallthrough
-	case constant.Video:
-		fallthrough
-	case constant.File:
-		fallthrough
-	case constant.AtText:
-		fallthrough
-	case constant.Merger:
-		fallthrough
-	case constant.Card:
-		fallthrough
-	case constant.Location:
-		fallthrough
-	case constant.Custom:
-		fallthrough
-	case constant.Quote:
+	case constant.Text, constant.Picture, constant.Voice, constant.Video,
+		constant.File, constant.AtText, constant.Merger, constant.Card,
+		constant.Location, constant.Custom, constant.Quote, constant.AdvancedText, constant.MarkdownText:
 	case constant.Revoke:
 		datautil.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
 		datautil.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)

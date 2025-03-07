@@ -17,6 +17,9 @@ package webhook
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+	"net/url"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -25,7 +28,6 @@ import (
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/mq/memamq"
 	"github.com/openimsdk/tools/utils/httputil"
-	"net/http"
 )
 
 type Client struct {
@@ -37,6 +39,8 @@ type Client struct {
 const (
 	webhookWorkerCount = 2
 	webhookBufferSize  = 100
+
+	Key = "key"
 )
 
 func NewWebhookClient(url string, options ...*memamq.MemoryQueue) *Client {
@@ -66,6 +70,12 @@ func (c *Client) AsyncPost(ctx context.Context, command string, req callbackstru
 	}
 }
 
+func (c *Client) AsyncPostWithQuery(ctx context.Context, command string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, after *config.AfterConfig, queryParams map[string]string) {
+	if after.Enable {
+		c.queue.Push(func() { c.postWithQuery(ctx, command, req, resp, after.Timeout, queryParams) })
+	}
+}
+
 func (c *Client) post(ctx context.Context, command string, input interface{}, output callbackstruct.CallbackResp, timeout int) error {
 	ctx = mcontext.WithMustInfoCtx([]string{mcontext.GetOperationID(ctx), mcontext.GetOpUserID(ctx), mcontext.GetOpUserPlatform(ctx), mcontext.GetConnID(ctx)})
 	fullURL := c.url + "/" + command
@@ -81,6 +91,44 @@ func (c *Client) post(ctx context.Context, command string, input interface{}, ou
 	if err := output.Parse(); err != nil {
 		return err
 	}
+	log.ZInfo(ctx, "webhook success", "url", fullURL, "input", input, "response", string(b))
+	return nil
+}
+
+func (c *Client) postWithQuery(ctx context.Context, command string, input interface{}, output callbackstruct.CallbackResp, timeout int, queryParams map[string]string) error {
+	ctx = mcontext.WithMustInfoCtx([]string{mcontext.GetOperationID(ctx), mcontext.GetOpUserID(ctx), mcontext.GetOpUserPlatform(ctx), mcontext.GetConnID(ctx)})
+	fullURL := c.url + "/" + command
+
+	parsedURL, err := url.Parse(fullURL)
+	if err != nil {
+		return servererrs.ErrNetwork.WrapMsg(err.Error(), "failed to parse URL", fullURL)
+	}
+
+	query := parsedURL.Query()
+
+	operationID, _ := ctx.Value(constant.OperationID).(string)
+
+	for key, value := range queryParams {
+		query.Set(key, value)
+	}
+
+	parsedURL.RawQuery = query.Encode()
+
+	fullURL = parsedURL.String()
+	log.ZInfo(ctx, "webhook", "url", fullURL, "input", input, "config", timeout)
+
+	b, err := c.client.Post(ctx, fullURL, map[string]string{constant.OperationID: operationID}, input, timeout)
+	if err != nil {
+		return servererrs.ErrNetwork.WrapMsg(err.Error(), "post url", fullURL)
+	}
+
+	if err = json.Unmarshal(b, output); err != nil {
+		return servererrs.ErrData.WithDetail(err.Error() + " response format error")
+	}
+	if err := output.Parse(); err != nil {
+		return err
+	}
+
 	log.ZInfo(ctx, "webhook success", "url", fullURL, "input", input, "response", string(b))
 	return nil
 }
