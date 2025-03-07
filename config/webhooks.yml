@@ -3,14 +3,7 @@ beforeSendSingleMsg:
   enable: false
   timeout: 5
   failedContinue: true
-  # Only the contentType in allowedTypes will send the callback.
-  # Supports two formats: a single type or a range. The range is defined by the lower and upper bounds connected with a hyphen ("-").
-  # e.g. allowedTypes: [1, 100, 200-500, 600-700] means that only contentType within the range
-  # {1, 100} ∪ [200, 500] ∪ [600, 700] will be allowed through the filter.
-  # If not set, all contentType messages will through this filter.
-  allowedTypes: []
   # Only the contentType not in deniedTypes will send the callback.
-  # Supports two formats, same as allowedTypes.
   # If not set, all contentType messages will through this filter.
   deniedTypes: []
 beforeUpdateUserInfoEx:
@@ -23,31 +16,30 @@ afterUpdateUserInfoEx:
 afterSendSingleMsg:
   enable: false
   timeout: 5
-  # Only the senID/recvID specified in attentionIds will send the callback
+  # Only the recvID specified in attentionIds will send the callback
   # if not set, all user messages will be callback
   attentionIds: []
   # See beforeSendSingleMsg comment.
-  allowedTypes: []
   deniedTypes: []
 beforeSendGroupMsg:
   enable: false
   timeout: 5
   failedContinue: true
   # See beforeSendSingleMsg comment.
-  allowedTypes: []
   deniedTypes: []
 beforeMsgModify:
   enable: false
   timeout: 5
   failedContinue: true
   # See beforeSendSingleMsg comment.
-  allowedTypes: []
   deniedTypes: []
 afterSendGroupMsg:
   enable: false
   timeout: 5
+  # Only the recvID specified in attentionIds will send the callback
+  # if not set, all user messages will be callback
+  attentionIds: []
   # See beforeSendSingleMsg comment.
-  allowedTypes: []
   deniedTypes: []
 afterUserOnline:
   enable: false

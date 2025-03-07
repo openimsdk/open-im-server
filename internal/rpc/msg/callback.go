@@ -100,7 +100,7 @@ func (m *msgServer) webhookAfterSendSingleMsg(ctx context.Context, after *config
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendSingleMsgCommand),
 		RecvID:            msg.MsgData.RecvID,
 	}
-	m.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendSingleMsgResp{}, after)
+	m.webhookClient.AsyncPostWithQuery(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendSingleMsgResp{}, after, buildKeyMsgDataQuery(msg.MsgData))
 }
 
 func (m *msgServer) webhookBeforeSendGroupMsg(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
@@ -134,7 +134,8 @@ func (m *msgServer) webhookAfterSendGroupMsg(ctx context.Context, after *config.
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendGroupMsgCommand),
 		GroupID:           msg.MsgData.GroupID,
 	}
-	m.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendGroupMsgResp{}, after)
+
+	m.webhookClient.AsyncPostWithQuery(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendGroupMsgResp{}, after, buildKeyMsgDataQuery(msg.MsgData))
 }
 
 func (m *msgServer) webhookBeforeMsgModify(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq, beforeMsgData **sdkws.MsgData) error {
@@ -202,4 +203,16 @@ func (m *msgServer) webhookAfterRevokeMsg(ctx context.Context, after *config.Aft
 		UserID:          req.UserID,
 	}
 	m.webhookClient.AsyncPost(ctx, callbackReq.GetCallbackCommand(), callbackReq, &cbapi.CallbackAfterRevokeMsgResp{}, after)
+}
+
+func buildKeyMsgDataQuery(msg *sdkws.MsgData) map[string]string {
+	keyMsgData := apistruct.KeyMsgData{
+		SendID:  msg.SendID,
+		RecvID:  msg.RecvID,
+		GroupID: msg.GroupID,
+	}
+
+	return map[string]string{
+		webhook.Key: base64.StdEncoding.EncodeToString(stringutil.StructToJsonBytes(keyMsgData)),
+	}
 }
