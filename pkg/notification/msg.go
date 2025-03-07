@@ -190,6 +190,7 @@ func WithRpcGetUserName() NotificationOptions {
 		opt.RpcGetUsername = true
 	}
 }
+
 func WithSendNotification(send *bool) NotificationOptions {
 	return func(opt *notificationOpt) {
 		opt.SendNotification = send

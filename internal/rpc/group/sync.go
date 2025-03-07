@@ -11,12 +11,12 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/log"
 )
 
-func (s *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetFullGroupMemberUserIDsReq) (*pbgroup.GetFullGroupMemberUserIDsResp, error) {
-	vl, err := s.db.FindMaxGroupMemberVersionCache(ctx, req.GroupID)
+const versionSyncLimit = 500
+
+func (g *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetFullGroupMemberUserIDsReq) (*pbgroup.GetFullGroupMemberUserIDsResp, error) {
+	vl, err := g.db.FindMaxGroupMemberVersionCache(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -132,152 +132,8 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 	return resp, nil
 }
 
-func (s *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *pbgroup.BatchGetIncrementalGroupMemberReq) (resp *pbgroup.BatchGetIncrementalGroupMemberResp, err error) {
-	type VersionInfo struct {
-		GroupID       string
-		VersionID     string
-		VersionNumber uint64
-	}
-
-	var groupIDs []string
-
-	groupsVersionMap := make(map[string]*VersionInfo)
-	groupsMap := make(map[string]*model.Group)
-	hasGroupUpdateMap := make(map[string]bool)
-	sortVersionMap := make(map[string]uint64)
-
-	var targetKeys, versionIDs []string
-	var versionNumbers []uint64
-
-	var requestBodyLen int
-
-	for _, group := range req.ReqList {
-		groupsVersionMap[group.GroupID] = &VersionInfo{
-			GroupID:       group.GroupID,
-			VersionID:     group.VersionID,
-			VersionNumber: group.Version,
-		}
-
-		groupIDs = append(groupIDs, group.GroupID)
-	}
-
-	groups, err := s.db.FindGroup(ctx, groupIDs)
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
-
-	for _, group := range groups {
-		if group.Status == constant.GroupStatusDismissed {
-			err = servererrs.ErrDismissedAlready.Wrap()
-			log.ZError(ctx, "This group is Dismissed Already", err, "group is", group.GroupID)
-
-			delete(groupsVersionMap, group.GroupID)
-		} else {
-			groupsMap[group.GroupID] = group
-		}
-	}
-
-	for groupID, vInfo := range groupsVersionMap {
-		targetKeys = append(targetKeys, groupID)
-		versionIDs = append(versionIDs, vInfo.VersionID)
-		versionNumbers = append(versionNumbers, vInfo.VersionNumber)
-	}
-
-	opt := incrversion.BatchOption[[]*sdkws.GroupMemberFullInfo, pbgroup.BatchGetIncrementalGroupMemberResp]{
-		Ctx:            ctx,
-		TargetKeys:     targetKeys,
-		VersionIDs:     versionIDs,
-		VersionNumbers: versionNumbers,
-		Versions: func(ctx context.Context, groupIDs []string, versions []uint64, limits []int) (map[string]*model.VersionLog, error) {
-			vLogs, err := s.db.BatchFindMemberIncrVersion(ctx, groupIDs, versions, limits)
-			if err != nil {
-				return nil, errs.Wrap(err)
-			}
-
-			for groupID, vlog := range vLogs {
-				vlogElems := make([]model.VersionLogElem, 0, len(vlog.Logs))
-				for i, log := range vlog.Logs {
-					switch log.EID {
-					case model.VersionGroupChangeID:
-						vlog.LogLen--
-						hasGroupUpdateMap[groupID] = true
-					case model.VersionSortChangeID:
-						vlog.LogLen--
-						sortVersionMap[groupID] = uint64(log.Version)
-					default:
-						vlogElems = append(vlogElems, vlog.Logs[i])
-					}
-				}
-				vlog.Logs = vlogElems
-				if vlog.LogLen > 0 {
-					hasGroupUpdateMap[groupID] = true
-				}
-			}
-
-			return vLogs, nil
-		},
-		CacheMaxVersions: s.db.BatchFindMaxGroupMemberVersionCache,
-		Find: func(ctx context.Context, groupID string, ids []string) ([]*sdkws.GroupMemberFullInfo, error) {
-			memberInfo, err := s.getGroupMembersInfo(ctx, groupID, ids)
-			if err != nil {
-				return nil, err
-			}
-
-			return memberInfo, err
-		},
-		Resp: func(versions map[string]*model.VersionLog, deleteIdsMap map[string][]string, insertListMap, updateListMap map[string][]*sdkws.GroupMemberFullInfo, fullMap map[string]bool) *pbgroup.BatchGetIncrementalGroupMemberResp {
-			resList := make(map[string]*pbgroup.GetIncrementalGroupMemberResp)
-
-			for groupID, versionLog := range versions {
-				resList[groupID] = &pbgroup.GetIncrementalGroupMemberResp{
-					VersionID:   versionLog.ID.Hex(),
-					Version:     uint64(versionLog.Version),
-					Full:        fullMap[groupID],
-					Delete:      deleteIdsMap[groupID],
-					Insert:      insertListMap[groupID],
-					Update:      updateListMap[groupID],
-					SortVersion: sortVersionMap[groupID],
-				}
-
-				requestBodyLen += len(insertListMap[groupID]) + len(updateListMap[groupID]) + len(deleteIdsMap[groupID])
-				if requestBodyLen > 200 {
-					break
-				}
-			}
-
-			return &pbgroup.BatchGetIncrementalGroupMemberResp{
-				RespList: resList,
-			}
-		},
-	}
-
-	resp, err = opt.Build()
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
-
-	for groupID, val := range resp.RespList {
-		if val.Full || hasGroupUpdateMap[groupID] {
-			count, err := s.db.FindGroupMemberNum(ctx, groupID)
-			if err != nil {
-				return nil, err
-			}
-
-			owner, err := s.db.TakeGroupOwner(ctx, groupID)
-			if err != nil {
-				return nil, err
-			}
-
-			resp.RespList[groupID].Group = s.groupDB2PB(groupsMap[groupID], owner.UserID, count)
-		}
-	}
-
-	return resp, nil
-
-}
-
-func (s *groupServer) GetIncrementalJoinGroup(ctx context.Context, req *pbgroup.GetIncrementalJoinGroupReq) (*pbgroup.GetIncrementalJoinGroupResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+func (g *groupServer) GetIncrementalJoinGroup(ctx context.Context, req *pbgroup.GetIncrementalJoinGroupReq) (*pbgroup.GetIncrementalJoinGroupResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, g.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	opt := incrversion.Option[*sdkws.GroupInfo, pbgroup.GetIncrementalJoinGroupResp]{
@@ -300,4 +156,24 @@ func (s *groupServer) GetIncrementalJoinGroup(ctx context.Context, req *pbgroup.
 		},
 	}
 	return opt.Build()
+}
+
+func (g *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *pbgroup.BatchGetIncrementalGroupMemberReq) (*pbgroup.BatchGetIncrementalGroupMemberResp, error) {
+	var num int
+	resp := make(map[string]*pbgroup.GetIncrementalGroupMemberResp)
+	for _, memberReq := range req.ReqList {
+		if _, ok := resp[memberReq.GroupID]; ok {
+			continue
+		}
+		memberResp, err := g.GetIncrementalGroupMember(ctx, memberReq)
+		if err != nil {
+			return nil, err
+		}
+		resp[memberReq.GroupID] = memberResp
+		num += len(memberResp.Insert) + len(memberResp.Update) + len(memberResp.Delete)
+		if num >= versionSyncLimit {
+			break
+		}
+	}
+	return &pbgroup.BatchGetIncrementalGroupMemberResp{RespList: resp}, nil
 }
