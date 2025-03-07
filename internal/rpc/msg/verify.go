@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/encrypt"
@@ -62,6 +63,13 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		}
 		if err := m.webhookBeforeSendSingleMsg(ctx, &m.config.WebhooksConfig.BeforeSendSingleMsg, data); err != nil {
 			return err
+		}
+		u, err := m.UserLocalCache.GetUserInfo(ctx, data.MsgData.SendID)
+		if err != nil {
+			return err
+		}
+		if authverify.CheckSystemAccount(ctx, u.AppMangerLevel) {
+			return nil
 		}
 		black, err := m.FriendLocalCache.IsBlack(ctx, data.MsgData.SendID, data.MsgData.RecvID)
 		if err != nil {
