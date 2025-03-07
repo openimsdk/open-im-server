@@ -70,7 +70,7 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 		return err
 	}
 
-	runTimeEnv := runtimeenv.PrintRuntimeEnvironment()
+	runTimeEnv := runtimeenv.RuntimeEnvironment()
 
 	if !autoSetPorts {
 		rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
@@ -177,6 +177,7 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 	}
 
 	err = client.Register(
+		ctx,
 		rpcRegisterName,
 		registerIP,
 		port,

@@ -74,7 +74,7 @@ type Config struct {
 }
 
 func Start(ctx context.Context, index int, config *Config) error {
-	runTimeEnv := runtimeenv.PrintRuntimeEnvironment()
+	runTimeEnv := runtimeenv.RuntimeEnvironment()
 
 	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "runTimeEnv", runTimeEnv, "prometheusPorts",
 		config.MsgTransfer.Prometheus.Ports, "index", index)

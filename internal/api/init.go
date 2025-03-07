@@ -56,7 +56,7 @@ func Start(ctx context.Context, index int, config *Config) error {
 		return err
 	}
 
-	config.RuntimeEnv = runtimeenv.PrintRuntimeEnvironment()
+	config.RuntimeEnv = runtimeenv.RuntimeEnvironment()
 
 	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, config.RuntimeEnv, []string{
 		config.Discovery.RpcService.MessageGateway,

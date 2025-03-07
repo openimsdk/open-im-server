@@ -21,9 +21,9 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mq/kafka"
 	"google.golang.org/protobuf/proto"
 )
 

@@ -31,7 +31,7 @@ type CronTaskConfig struct {
 }
 
 func Start(ctx context.Context, conf *CronTaskConfig) error {
-	conf.runTimeEnv = runtimeenv.PrintRuntimeEnvironment()
+	conf.runTimeEnv = runtimeenv.RuntimeEnvironment()
 
 	log.CInfo(ctx, "CRON-TASK server is initializing", "runTimeEnv", conf.runTimeEnv, "chatRecordsClearTime", conf.CronTask.CronExecuteTime, "msgDestructTime", conf.CronTask.RetainChatRecords)
 	if conf.CronTask.RetainChatRecords < 1 {
