@@ -16,9 +16,10 @@ package mgo
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"time"
 
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/db/mongoutil"
@@ -69,6 +70,10 @@ func (u *UserMgo) Take(ctx context.Context, userID string) (user *model.User, er
 
 func (u *UserMgo) TakeNotification(ctx context.Context, level int64) (user []*model.User, err error) {
 	return mongoutil.Find[*model.User](ctx, u.coll, bson.M{"app_manger_level": level})
+}
+
+func (u *UserMgo) TakeGTEAppManagerLevel(ctx context.Context, level int64) (user []*model.User, err error) {
+	return mongoutil.Find[*model.User](ctx, u.coll, bson.M{"app_manager_level": bson.M{"$gte": level}})
 }
 
 func (u *UserMgo) TakeByNickname(ctx context.Context, nickname string) (user []*model.User, err error) {
