@@ -3,11 +3,12 @@ package msggateway
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -212,15 +213,19 @@ func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *C
 	if err != nil {
 		return err
 	}
+	if len(conns) == 0 || (len(conns) == 1 && ws.disCov.IsSelfNode(conns[0])) {
+		return nil
+	}
+
 	wg := errgroup.Group{}
 	wg.SetLimit(concurrentRequest)
 
 	// Online push user online message to other node
 	for _, v := range conns {
 		v := v
-		log.ZDebug(ctx, " sendUserOnlineInfoToOtherNode conn ", "target", v.Target())
-		if v.Target() == ws.disCov.GetSelfConnTarget() {
-			log.ZDebug(ctx, "Filter out this node", "node", v.Target())
+		log.ZDebug(ctx, "sendUserOnlineInfoToOtherNode conn")
+		if ws.disCov.IsSelfNode(v) {
+			log.ZDebug(ctx, "Filter out this node")
 			continue
 		}
 
@@ -231,7 +236,7 @@ func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *C
 				PlatformID: int32(client.PlatformID), Token: client.token,
 			})
 			if err != nil {
-				log.ZWarn(ctx, "MultiTerminalLoginCheck err", err, "node", v.Target())
+				log.ZWarn(ctx, "MultiTerminalLoginCheck err", err)
 			}
 			return nil
 		})

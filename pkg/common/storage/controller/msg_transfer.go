@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/utils/datautil"
 
@@ -14,7 +16,6 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mq/kafka"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

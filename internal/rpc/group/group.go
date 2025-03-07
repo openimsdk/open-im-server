@@ -17,12 +17,13 @@ package group
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"math/big"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/common"
@@ -1129,7 +1130,7 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 
 	if notificationFlag {
 		if req.Notification.Value != "" {
-			conversation := &pbconv.ConversationReq{
+			conversation := &pbconversation.ConversationReq{
 				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
 				ConversationType: constant.ReadGroupChatType,
 				GroupID:          req.GroupID,

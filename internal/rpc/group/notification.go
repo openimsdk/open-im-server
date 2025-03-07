@@ -52,11 +52,11 @@ const (
 
 func NewNotificationSender(db controller.GroupDatabase, config *Config, userClient *rpcli.UserClient, msgClient *rpcli.MsgClient, conversationClient *rpcli.ConversationClient) *NotificationSender {
 	return &NotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(&config.NotificationConfig,
-			rpcclient.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
+		NotificationSender: notification.NewNotificationSender(&config.NotificationConfig,
+			notification.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
 				return msgClient.SendMsg(ctx, req)
 			}),
-			rpcclient.WithUserRpcClient(userClient.GetUserInfo),
+			notification.WithUserRpcClient(userClient.GetUserInfo),
 		),
 		getUsersInfo: func(ctx context.Context, userIDs []string) ([]common_user.CommonUser, error) {
 			users, err := userClient.GetUsersInfo(ctx, userIDs)
@@ -73,7 +73,7 @@ func NewNotificationSender(db controller.GroupDatabase, config *Config, userClie
 }
 
 type NotificationSender struct {
-	*rpcclient.NotificationSender
+	*notification.NotificationSender
 	getUsersInfo       func(ctx context.Context, userIDs []string) ([]common_user.CommonUser, error)
 	db                 controller.GroupDatabase
 	config             *Config
@@ -332,7 +332,7 @@ func (g *NotificationSender) GroupInfoSetNotification(ctx context.Context, tips 
 		return
 	}
 	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
-	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips, rpcclient.WithRpcGetUserName())
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips, notification.WithRpcGetUserName())
 }
 
 func (g *NotificationSender) GroupInfoSetNameNotification(ctx context.Context, tips *sdkws.GroupInfoSetNameTips) {

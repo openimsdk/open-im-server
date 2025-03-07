@@ -23,11 +23,11 @@ import (
 )
 
 type MsgNotificationSender struct {
-	*rpcclient.NotificationSender
+	*notification.NotificationSender
 }
 
-func NewMsgNotificationSender(config *Config, opts ...rpcclient.NotificationSenderOptions) *MsgNotificationSender {
-	return &MsgNotificationSender{rpcclient.NewNotificationSender(&config.NotificationConfig, opts...)}
+func NewMsgNotificationSender(config *Config, opts ...notification.NotificationSenderOptions) *MsgNotificationSender {
+	return &MsgNotificationSender{notification.NewNotificationSender(&config.NotificationConfig, opts...)}
 }
 
 func (m *MsgNotificationSender) UserDeleteMsgsNotification(ctx context.Context, userID, conversationID string, seqs []int64) {
@@ -47,4 +47,8 @@ func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conv
 		HasReadSeq:       hasReadSeq,
 	}
 	m.NotificationWithSessionType(ctx, sendID, recvID, constant.HasReadReceipt, sessionType, tips)
+}
+
+func (m *MsgNotificationSender) StreamMsgNotification(ctx context.Context, sendID string, recvID string, sessionType int32, tips *sdkws.StreamMsgTips) {
+	m.NotificationWithSessionType(ctx, sendID, recvID, constant.StreamMsgNotification, sessionType, tips)
 }

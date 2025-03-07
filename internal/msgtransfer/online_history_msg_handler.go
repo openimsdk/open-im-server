@@ -30,6 +30,7 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/go-redis/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/tools/batcher"
 	"github.com/openimsdk/protocol/constant"
@@ -38,7 +39,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/utils/stringutil"
 	"google.golang.org/protobuf/proto"
 )

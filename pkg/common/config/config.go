@@ -18,9 +18,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
-	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/aws"
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/kodo"

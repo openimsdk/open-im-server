@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rpcclient
+package notification
 
 import (
 	"context"
@@ -197,7 +197,6 @@ func WithSendMessage(sendMessage *bool) NotificationOptions {
 }
 
 func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, contentType, sessionType int32, m proto.Message, opts ...NotificationOptions) {
-	//ctx = mcontext.WithMustInfoCtx([]string{mcontext.GetOperationID(ctx), mcontext.GetOpUserID(ctx), mcontext.GetOpUserPlatform(ctx), mcontext.GetConnID(ctx)})
 	ctx = context.WithoutCancel(ctx)
 	ctx, cancel := context.WithTimeout(ctx, time.Second*time.Duration(5))
 	defer cancel()
@@ -214,7 +213,7 @@ func (s *NotificationSender) send(ctx context.Context, sendID, recvID string, co
 	var req msg.SendMsgReq
 	var msg sdkws.MsgData
 	var userInfo *sdkws.UserInfo
-	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
+	if notificationOpt.RpcGetUsername && s.getUserInfo != nil {
 		userInfo, err = s.getUserInfo(ctx, sendID)
 		if err != nil {
 			log.ZWarn(ctx, "getUserInfo failed", err, "sendID", sendID)

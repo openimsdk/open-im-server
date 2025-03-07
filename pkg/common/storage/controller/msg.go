@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/tools/utils/jsonutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
@@ -38,7 +39,6 @@ import (
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/utils/datautil"
 )
 

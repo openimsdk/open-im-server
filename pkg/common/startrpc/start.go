@@ -167,6 +167,7 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 	}
 
 	err = client.Register(
+		ctx,
 		rpcRegisterName,
 		registerIP,
 		port,

@@ -16,6 +16,8 @@ package msg
 
 import (
 	"context"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/notification"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -27,7 +29,6 @@ import (
 	"github.com/openimsdk/tools/db/redisutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/notification"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/conversation"
@@ -63,7 +64,7 @@ type msgServer struct {
 	GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
 	ConversationLocalCache *rpccache.ConversationLocalCache // Local cache for conversation data.
 	Handlers               MessageInterceptorChain          // Chain of handlers for processing messages.
-	notificationSender     *rpcclient.NotificationSender    // RPC client for sending notifications.
+	notificationSender     *notification.NotificationSender // RPC client for sending notifications.
 	msgNotificationSender  *MsgNotificationSender           // RPC client for sending msg notifications.
 	config                 *Config                          // Global configuration settings.
 	webhookClient          *webhook.Client
@@ -132,8 +133,8 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		conversationClient:     conversationClient,
 	}
 
-	s.notificationSender = rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithLocalSendMsg(s.SendMsg))
-	s.msgNotificationSender = NewMsgNotificationSender(config, rpcclient.WithLocalSendMsg(s.SendMsg))
+	s.notificationSender = notification.NewNotificationSender(&config.NotificationConfig, notification.WithLocalSendMsg(s.SendMsg))
+	s.msgNotificationSender = NewMsgNotificationSender(config, notification.WithLocalSendMsg(s.SendMsg))
 
 	msg.RegisterMsgServer(server, s)
 
