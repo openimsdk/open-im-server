@@ -23,10 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
-
-	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
