@@ -37,7 +37,10 @@ const (
 
 // General error codes.
 const (
-	NoError       = 0     // No error
+	NoError = 0 // No error
+
+	SecretNotChangedError = 50 // secret not changed
+
 	DatabaseError = 90002 // Database error (redis/mysql, etc.)
 	NetworkError  = 90004 // Network error
 	DataError     = 90007 // Data error

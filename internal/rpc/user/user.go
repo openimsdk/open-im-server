@@ -49,6 +49,10 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	defaultSecret = "openIM123"
+)
+
 type userServer struct {
 	pbuser.UnimplementedUserServer
 	online                   cache.OnlineCache
@@ -272,6 +276,10 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	resp = &pbuser.UserRegisterResp{}
 	if len(req.Users) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("users is empty")
+	}
+	// check if secret is changed
+	if s.config.Share.Secret == defaultSecret {
+		return nil, servererrs.ErrSecretNotChanged.Wrap()
 	}
 
 	if err = authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
