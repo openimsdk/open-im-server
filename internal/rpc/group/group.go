@@ -395,6 +395,8 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		if err := g.PopulateGroupMember(ctx, groupMember); err != nil {
 			return nil, err
 		}
+	} else {
+		opUserID = mcontext.GetOpUserID(ctx)
 	}
 
 	if err := g.webhookBeforeInviteUserToGroup(ctx, &g.config.WebhooksConfig.BeforeInviteUserToGroup, req); err != nil && err != servererrs.ErrCallbackContinue {
@@ -430,6 +432,7 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 			}
 		}
 	}
+
 	var groupMembers []*model.GroupMember
 	for _, userID := range req.InvitedUserIDs {
 		member := &model.GroupMember{
