@@ -307,6 +307,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		configGroup.POST("/get_config_list", cm.GetConfigList)
 		configGroup.POST("/get_config", cm.GetConfig)
 		configGroup.POST("/set_config", cm.SetConfig)
+		configGroup.POST("/set_configs", cm.SetConfigs)
 		configGroup.POST("/reset_config", cm.ResetConfig)
 		configGroup.POST("/set_enable_config_manager", cm.SetEnableConfigManager)
 		configGroup.POST("/get_enable_config_manager", cm.GetEnableConfigManager)
