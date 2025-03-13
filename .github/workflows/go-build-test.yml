@@ -12,6 +12,10 @@ jobs:
   go-build:
     name: Test with go ${{ matrix.go_version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+
+    env:
+      SHARE_CONFIG_PATH: config/share.yml
+
     permissions:
       contents: write
       pull-requests: write
@@ -39,6 +43,10 @@ jobs:
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
           compose-file: "./docker-compose.yml"
+
+      - name: Modify Server Configuration
+        run: |
+          yq e '.secret = 123456' -i ${{ env.SHARE_CONFIG_PATH }}
 
       # - name: Get Internal IP Address
       #   id: get-ip
@@ -70,6 +78,10 @@ jobs:
           go mod tidy
           go mod download
           go install github.com/magefile/mage@latest
+
+      - name: Modify Chat Configuration
+        run: |
+          yq e '.openIM.secret = 123456' -i chat-repo/${{ env.SHARE_CONFIG_PATH }}
 
       - name: Build and test Chat Services
         run: |
