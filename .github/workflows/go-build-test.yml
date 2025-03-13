@@ -81,7 +81,7 @@ jobs:
 
       - name: Modify Chat Configuration
         run: |
-          yq e '.openIM.secret = 123456' -i chat-repo/${{ env.SHARE_CONFIG_PATH }}
+          yq e '.openIM.secret = 123456' -i ${{ env.SHARE_CONFIG_PATH }}
 
       - name: Build and test Chat Services
         run: |
