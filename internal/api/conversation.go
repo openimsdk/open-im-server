@@ -74,5 +74,5 @@ func (o *ConversationApi) GetPinnedConversationIDs(c *gin.Context) {
 }
 
 func (o *ConversationApi) UpdateConversationsByUser(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.UpdateConversationsByUser, o.Client, c)
+	a2r.Call(c, conversation.ConversationClient.UpdateConversationsByUser, o.Client)
 }
