@@ -185,7 +185,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: "openimsdk/openim-sdk-core"
-          ref: "release-v3.8"
+          ref: "main"
           path: ${{ env.SDK_DIR }}
 
       - name: Set up Go ${{ matrix.go_version }}
