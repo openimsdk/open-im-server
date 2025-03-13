@@ -169,7 +169,8 @@ jobs:
       contents: write
     env:
       SDK_DIR: openim-sdk-core
-      CONFIG_PATH: config/notification.yml
+      NOTIFICATION_CONFIG_PATH: config/notification.yml
+      SHARE_CONFIG_PATH: config/share.yml
 
     strategy:
       matrix:
@@ -199,8 +200,9 @@ jobs:
 
       - name: Modify Server Configuration
         run: |
-          yq e '.groupCreated.isSendMsg = true' -i ${{ env.CONFIG_PATH }}
-          yq e '.friendApplicationApproved.isSendMsg = true' -i ${{ env.CONFIG_PATH }}
+          yq e '.groupCreated.isSendMsg = true' -i ${{ env.NOTIFICATION_CONFIG_PATH }}
+          yq e '.friendApplicationApproved.isSendMsg = true' -i ${{ env.NOTIFICATION_CONFIG_PATH }}
+          yq e '.secret = 123456' -i ${{ env.SHARE_CONFIG_PATH }}
 
       - name: Start Server Services
         run: |
