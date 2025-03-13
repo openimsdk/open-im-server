@@ -144,7 +144,7 @@ jobs:
 
           # Test get admin token
           get_admin_token_response=$(curl -X POST -H "Content-Type: application/json" -H "operationID: imAdmin" -d '{
-            "secret": "openIM123",
+            "secret": "123456",
             "platformID": 2,
             "userID": "imAdmin"
           }' http://127.0.0.1:10002/auth/get_admin_token)
