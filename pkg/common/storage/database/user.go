@@ -16,10 +16,11 @@ package database
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/db/pagination"
-	"time"
 )
 
 type User interface {
@@ -28,6 +29,7 @@ type User interface {
 	Find(ctx context.Context, userIDs []string) (users []*model.User, err error)
 	Take(ctx context.Context, userID string) (user *model.User, err error)
 	TakeNotification(ctx context.Context, level int64) (user []*model.User, err error)
+	TakeGTEAppManagerLevel(ctx context.Context, level int64) (user []*model.User, err error)
 	TakeByNickname(ctx context.Context, nickname string) (user []*model.User, err error)
 	Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*model.User, err error)
 	PageFindUser(ctx context.Context, level1 int64, level2 int64, pagination pagination.Pagination) (count int64, users []*model.User, err error)

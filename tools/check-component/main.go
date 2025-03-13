@@ -25,11 +25,11 @@ import (
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/discovery/zookeeper"
-	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/runtimeenv"
@@ -84,7 +84,7 @@ func initConfig(configDir string) (*config.Mongo, *config.Redis, *config.Kafka, 
 		discovery   = &config.Discovery{}
 		thirdConfig = &config.Third{}
 	)
-	runtimeEnv := runtimeenv.PrintRuntimeEnvironment()
+	runtimeEnv := runtimeenv.RuntimeEnvironment()
 
 	err := config.Load(configDir, config.MongodbConfigFileName, config.EnvPrefixMap[config.MongodbConfigFileName], runtimeEnv, mongoConfig)
 	if err != nil {

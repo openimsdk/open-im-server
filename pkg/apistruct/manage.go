@@ -15,6 +15,7 @@
 package apistruct
 
 import (
+	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 )
 
@@ -111,6 +112,21 @@ type BatchSendMsgResp struct {
 	FailedIDs []string `json:"failedUserIDs"`
 }
 
+// SendSingleMsgReq defines the structure for sending a message to multiple recipients.
+type SendSingleMsgReq struct {
+	// groupMsg should appoint sendID
+	SendID          string                 `json:"sendID"`
+	Content         string                 `json:"content" binding:"required"`
+	OfflinePushInfo *sdkws.OfflinePushInfo `json:"offlinePushInfo"`
+	Ex              string                 `json:"ex"`
+}
+
+type KeyMsgData struct {
+	SendID  string `json:"sendID"`
+	RecvID  string `json:"recvID"`
+	GroupID string `json:"groupID"`
+}
+
 // SingleReturnResult encapsulates the result of a single message send attempt.
 type SingleReturnResult struct {
 	// ServerMsgID is the message identifier on the server-side.
@@ -124,4 +140,15 @@ type SingleReturnResult struct {
 
 	// RecvID uniquely identifies the receiver of the message.
 	RecvID string `json:"recvID"`
+
+	// Modify fields modified via webhook.
+	Modify map[string]any `json:"modify,omitempty"`
+}
+
+type SendMsgResp struct {
+	// SendMsgResp original response.
+	*pbmsg.SendMsgResp
+
+	// Modify fields modified via webhook.
+	Modify map[string]any `json:"modify,omitempty"`
 }

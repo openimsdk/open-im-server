@@ -16,7 +16,13 @@ package msg
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils/stringutil"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -94,7 +100,7 @@ func (m *msgServer) webhookAfterSendSingleMsg(ctx context.Context, after *config
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendSingleMsgCommand),
 		RecvID:            msg.MsgData.RecvID,
 	}
-	m.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendSingleMsgResp{}, after)
+	m.webhookClient.AsyncPostWithQuery(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendSingleMsgResp{}, after, buildKeyMsgDataQuery(msg.MsgData))
 }
 
 func (m *msgServer) webhookBeforeSendGroupMsg(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
@@ -128,14 +134,15 @@ func (m *msgServer) webhookAfterSendGroupMsg(ctx context.Context, after *config.
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendGroupMsgCommand),
 		GroupID:           msg.MsgData.GroupID,
 	}
-	m.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendGroupMsgResp{}, after)
+
+	m.webhookClient.AsyncPostWithQuery(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendGroupMsgResp{}, after, buildKeyMsgDataQuery(msg.MsgData))
 }
 
-func (m *msgServer) webhookBeforeMsgModify(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
+func (m *msgServer) webhookBeforeMsgModify(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq, beforeMsgData **sdkws.MsgData) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
-		if msg.MsgData.ContentType != constant.Text {
-			return nil
-		}
+		//if msg.MsgData.ContentType != constant.Text {
+		//	return nil
+		//}
 		if !filterBeforeMsg(msg, before) {
 			return nil
 		}
@@ -146,9 +153,14 @@ func (m *msgServer) webhookBeforeMsgModify(ctx context.Context, before *config.B
 		if err := m.webhookClient.SyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, resp, before); err != nil {
 			return err
 		}
-
+		if beforeMsgData != nil {
+			*beforeMsgData = proto.Clone(msg.MsgData).(*sdkws.MsgData)
+		}
 		if resp.Content != nil {
 			msg.MsgData.Content = []byte(*resp.Content)
+			if err := json.Unmarshal(msg.MsgData.Content, &struct{}{}); err != nil {
+				return errs.ErrArgs.WrapMsg("webhook msg modify content is not json", "content", string(msg.MsgData.Content))
+			}
 		}
 		datautil.NotNilReplace(msg.MsgData.OfflinePushInfo, resp.OfflinePushInfo)
 		datautil.NotNilReplace(&msg.MsgData.RecvID, resp.RecvID)
@@ -191,4 +203,16 @@ func (m *msgServer) webhookAfterRevokeMsg(ctx context.Context, after *config.Aft
 		UserID:          req.UserID,
 	}
 	m.webhookClient.AsyncPost(ctx, callbackReq.GetCallbackCommand(), callbackReq, &cbapi.CallbackAfterRevokeMsgResp{}, after)
+}
+
+func buildKeyMsgDataQuery(msg *sdkws.MsgData) map[string]string {
+	keyMsgData := apistruct.KeyMsgData{
+		SendID:  msg.SendID,
+		RecvID:  msg.RecvID,
+		GroupID: msg.GroupID,
+	}
+
+	return map[string]string{
+		webhook.Key: base64.StdEncoding.EncodeToString(stringutil.StructToJsonBytes(keyMsgData)),
+	}
 }

@@ -18,9 +18,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
-	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/aws"
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/kodo"
@@ -364,19 +364,17 @@ type Redis struct {
 }
 
 type BeforeConfig struct {
-	Enable         bool     `mapstructure:"enable"`
-	Timeout        int      `mapstructure:"timeout"`
-	FailedContinue bool     `mapstructure:"failedContinue"`
-	AllowedTypes   []string `mapstructure:"allowedTypes"`
-	DeniedTypes    []string `mapstructure:"deniedTypes"`
+	Enable         bool    `yaml:"enable"`
+	Timeout        int     `yaml:"timeout"`
+	FailedContinue bool    `yaml:"failedContinue"`
+	DeniedTypes    []int32 `yaml:"deniedTypes"`
 }
 
 type AfterConfig struct {
-	Enable       bool     `mapstructure:"enable"`
-	Timeout      int      `mapstructure:"timeout"`
-	AttentionIds []string `mapstructure:"attentionIds"`
-	AllowedTypes []string `mapstructure:"allowedTypes"`
-	DeniedTypes  []string `mapstructure:"deniedTypes"`
+	Enable       bool     `yaml:"enable"`
+	Timeout      int      `yaml:"timeout"`
+	AttentionIds []string `yaml:"attentionIds"`
+	DeniedTypes  []int32  `yaml:"deniedTypes"`
 }
 
 type Share struct {

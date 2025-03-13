@@ -20,6 +20,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
 )
@@ -54,4 +55,8 @@ func CheckAdmin(ctx context.Context, imAdminUserID []string) error {
 
 func IsManagerUserID(opUserID string, imAdminUserID []string) bool {
 	return datautil.Contain(opUserID, imAdminUserID...)
+}
+
+func CheckSystemAccount(ctx context.Context, level int32) bool {
+	return level >= constant.AppAdmin
 }

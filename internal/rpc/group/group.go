@@ -17,12 +17,13 @@ package group
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"math/big"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
@@ -392,6 +393,8 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		if err := g.PopulateGroupMember(ctx, groupMember); err != nil {
 			return nil, err
 		}
+	} else {
+		opUserID = mcontext.GetOpUserID(ctx)
 	}
 
 	if err := g.webhookBeforeInviteUserToGroup(ctx, &g.config.WebhooksConfig.BeforeInviteUserToGroup, req); err != nil && err != servererrs.ErrCallbackContinue {
@@ -427,6 +430,7 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 			}
 		}
 	}
+
 	var groupMembers []*model.GroupMember
 	for _, userID := range req.InvitedUserIDs {
 		member := &model.GroupMember{

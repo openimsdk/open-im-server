@@ -31,7 +31,7 @@ joinGroupApplication:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: false
+    enable: true
     title: joinGroupApplication title
     desc: joinGroupApplication desc
     ext: joinGroupApplication ext
@@ -51,7 +51,7 @@ groupApplicationAccepted:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: false
+    enable: true
     title: groupApplicationAccepted title
     desc: groupApplicationAccepted desc
     ext: groupApplicationAccepted ext
@@ -61,7 +61,7 @@ groupApplicationRejected:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: false
+    enable: true
     title: groupApplicationRejected title
     desc: groupApplicationRejected desc
     ext: groupApplicationRejected ext
@@ -198,7 +198,7 @@ friendApplicationAdded:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: false
+    enable: true
     title: Somebody applies to add you as a friend
     desc: Somebody applies to add you as a friend
     ext: Somebody applies to add you as a friend
@@ -228,7 +228,7 @@ friendAdded:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: true
+    enable: false
     title: We have become friends
     desc: We have become friends
     ext: We have become friends
@@ -238,7 +238,7 @@ friendDeleted:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: true
+    enable: false
     title: deleted a friend
     desc: deleted a friend
     ext: deleted a friend
@@ -248,7 +248,7 @@ friendRemarkSet:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: true
+    enable: false
     title: Your friend's profile has been changed
     desc: Your friend's profile has been changed
     ext: Your friend's profile has been changed
@@ -258,7 +258,7 @@ blackAdded:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: true
+    enable: false
     title: blocked a user
     desc: blocked a user
     ext: blocked a user
@@ -268,7 +268,7 @@ blackDeleted:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: true
+    enable: false
     title: Remove a blocked user
     desc: Remove a blocked user
     ext: Remove a blocked user
@@ -278,7 +278,7 @@ friendInfoUpdated:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: true
+    enable: false
     title: friend info updated
     desc: friend info updated
     ext: friend info updated
@@ -289,7 +289,7 @@ userInfoUpdated:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: true
+    enable: false
     title: userInfo updated
     desc: userInfo updated
     ext: userInfo updated
@@ -310,7 +310,7 @@ conversationChanged:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: true
+    enable: false
     title: conversation changed
     desc: conversation changed
     ext: conversation changed
@@ -320,7 +320,7 @@ conversationSetPrivate:
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
-    enable: true
+    enable: false
     title: burn after reading
     desc: burn after reading
     ext: burn after reading
