@@ -85,32 +85,28 @@ func (a *authDatabase) BatchSetTokenMapByUidPid(ctx context.Context, tokens []st
 
 // Create Token.
 func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformID int) (string, error) {
-	isAdmin := authverify.IsManagerUserID(userID, a.adminUserIDs)
-	if !isAdmin {
-		tokens, err := a.cache.GetAllTokensWithoutError(ctx, userID)
-		if err != nil {
-			return "", err
-		}
+	tokens, err := a.cache.GetAllTokensWithoutError(ctx, userID)
+	if err != nil {
+		return "", err
+	}
 
-	deleteTokenKey, kickedTokenKey, adminTokens, err := a.checkToken(ctx, tokens, platformID)
+	deleteTokenKey, kickedTokenKey, err := a.checkToken(ctx, tokens, platformID)
 	if err != nil {
 		return "", err
 	}
 	if len(deleteTokenKey) != 0 {
-		err = a.cache.DeleteTokenByTokenMap(ctx, userID, deleteTokenKey)
+		err = a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
 		if err != nil {
 			return "", err
 		}
 	}
 	if len(kickedTokenKey) != 0 {
-		for plt, ks := range kickedTokenKey {
-			for _, k := range ks {
-				err := a.cache.SetTokenFlagEx(ctx, userID, plt, k, constant.KickedToken)
-				if err != nil {
-					return "", err
-				}
-				log.ZDebug(ctx, "kicked token in create token", "token", k)
+		for _, k := range kickedTokenKey {
+			err := a.cache.SetTokenFlagEx(ctx, userID, platformID, k, constant.KickedToken)
+			if err != nil {
+				return "", err
 			}
+			log.ZDebug(ctx, "kicked token in create token", "token", k)
 		}
 	}
 	if len(adminTokens) != 0 {
@@ -126,10 +122,8 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 		return "", errs.WrapMsg(err, "token.SignedString")
 	}
 
-	if !isAdmin {
-		if err = a.cache.SetTokenFlagEx(ctx, userID, platformID, tokenString, constant.NormalToken); err != nil {
-			return "", err
-		}
+	if err = a.cache.SetTokenFlagEx(ctx, userID, platformID, tokenString, constant.NormalToken); err != nil {
+		return "", err
 	}
 
 	return tokenString, nil
@@ -241,9 +235,6 @@ func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string
 	}
 
 	//var adminTokenMaxNum = a.multiLogin.MaxNumOneEnd
-	//if a.multiLogin.Policy == constant.Customize {
-	//	adminTokenMaxNum = a.multiLogin.CustomizeLoginNum[constant.AdminPlatformID]
-	//}
 	//l := len(adminToken)
 	//if platformID == constant.AdminPlatformID {
 	//	l++
@@ -251,9 +242,8 @@ func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string
 	//if l > adminTokenMaxNum {
 	//	kickToken = append(kickToken, adminToken[:l-adminTokenMaxNum]...)
 	//}
-	var deleteAdminToken []string
 	if platformID == constant.AdminPlatformID {
-		deleteAdminToken = adminToken
+		kickToken = append(kickToken, adminToken...)
 	}
-	return deleteToken, kickToken, deleteAdminToken, nil
+	return deleteToken, kickToken, nil
 }
