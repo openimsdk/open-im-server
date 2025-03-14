@@ -366,10 +366,10 @@ func (c *conversationServer) UpdateConversationsByUser(ctx context.Context, req 
 }
 
 // create conversation without notification for msg redis transfer.
-func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, req *pbconversation.CreateSingleChatConversationsReq) (*pbconversation.CreateSingleChatConversationsResp, error) {
+func (c *conversationServer) CreateSingleChatConversations(ctx context.Context,
+	req *pbconversation.CreateSingleChatConversationsReq,
+) (*pbconversation.CreateSingleChatConversationsResp, error) {
 	var conversation dbModel.Conversation
-	conversation.CreateTime = time.Now()
-
 	switch req.ConversationType {
 	case constant.SingleChatType:
 		// sendUser create
@@ -377,7 +377,6 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, 
 		conversation.ConversationType = req.ConversationType
 		conversation.OwnerUserID = req.SendID
 		conversation.UserID = req.RecvID
-
 		if err := c.webhookBeforeCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateSingleChatConversations, &conversation); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
@@ -393,7 +392,6 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, 
 		conversation2 := conversation
 		conversation2.OwnerUserID = req.RecvID
 		conversation2.UserID = req.SendID
-
 		if err := c.webhookBeforeCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateSingleChatConversations, &conversation); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
@@ -409,7 +407,6 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, 
 		conversation.ConversationType = req.ConversationType
 		conversation.OwnerUserID = req.RecvID
 		conversation.UserID = req.SendID
-
 		if err := c.webhookBeforeCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateSingleChatConversations, &conversation); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
@@ -431,7 +428,6 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 	conversation.ConversationID = msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID)
 	conversation.GroupID = req.GroupID
 	conversation.ConversationType = constant.ReadGroupChatType
-	conversation.CreateTime = time.Now()
 
 	if err := c.webhookBeforeCreateGroupChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateGroupChatConversations, &conversation); err != nil {
 		return nil, err
@@ -439,9 +435,6 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 
 	err := c.conversationDatabase.CreateGroupChatConversation(ctx, req.GroupID, req.UserIDs, &conversation)
 	if err != nil {
-		return nil, err
-	}
-	if err := c.msgClient.SetUserConversationMaxSeq(ctx, conversation.ConversationID, req.UserIDs, 0); err != nil {
 		return nil, err
 	}
 
