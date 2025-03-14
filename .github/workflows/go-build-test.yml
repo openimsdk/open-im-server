@@ -12,6 +12,10 @@ jobs:
   go-build:
     name: Test with go ${{ matrix.go_version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+
+    env:
+      SHARE_CONFIG_PATH: config/share.yml
+
     permissions:
       contents: write
       pull-requests: write
@@ -39,6 +43,10 @@ jobs:
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
           compose-file: "./docker-compose.yml"
+
+      - name: Modify Server Configuration
+        run: |
+          yq e '.secret = 123456' -i ${{ env.SHARE_CONFIG_PATH }}
 
       # - name: Get Internal IP Address
       #   id: get-ip
@@ -70,6 +78,11 @@ jobs:
           go mod tidy
           go mod download
           go install github.com/magefile/mage@latest
+
+      - name: Modify Chat Configuration
+        run: |
+          cd ${{ github.workspace }}/chat-repo
+          yq e '.openIM.secret = 123456' -i ${{ env.SHARE_CONFIG_PATH }}
 
       - name: Build and test Chat Services
         run: |
@@ -132,7 +145,7 @@ jobs:
 
           # Test get admin token
           get_admin_token_response=$(curl -X POST -H "Content-Type: application/json" -H "operationID: imAdmin" -d '{
-            "secret": "openIM123",
+            "secret": "123456",
             "platformID": 2,
             "userID": "imAdmin"
           }' http://127.0.0.1:10002/auth/get_admin_token)
@@ -169,7 +182,8 @@ jobs:
       contents: write
     env:
       SDK_DIR: openim-sdk-core
-      CONFIG_PATH: config/notification.yml
+      NOTIFICATION_CONFIG_PATH: config/notification.yml
+      SHARE_CONFIG_PATH: config/share.yml
 
     strategy:
       matrix:
@@ -184,7 +198,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: "openimsdk/openim-sdk-core"
-          ref: "release-v3.8"
+          ref: "main"
           path: ${{ env.SDK_DIR }}
 
       - name: Set up Go ${{ matrix.go_version }}
@@ -199,8 +213,9 @@ jobs:
 
       - name: Modify Server Configuration
         run: |
-          yq e '.groupCreated.isSendMsg = true' -i ${{ env.CONFIG_PATH }}
-          yq e '.friendApplicationApproved.isSendMsg = true' -i ${{ env.CONFIG_PATH }}
+          yq e '.groupCreated.isSendMsg = true' -i ${{ env.NOTIFICATION_CONFIG_PATH }}
+          yq e '.friendApplicationApproved.isSendMsg = true' -i ${{ env.NOTIFICATION_CONFIG_PATH }}
+          yq e '.secret = 123456' -i ${{ env.SHARE_CONFIG_PATH }}
 
       - name: Start Server Services
         run: |
