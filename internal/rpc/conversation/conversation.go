@@ -30,6 +30,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	dbModel "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
@@ -49,9 +50,10 @@ type conversationServer struct {
 	conversationNotificationSender *ConversationNotificationSender
 	config                         *Config
 
-	userClient  *rpcli.UserClient
-	msgClient   *rpcli.MsgClient
-	groupClient *rpcli.GroupClient
+	webhookClient *webhook.Client
+	userClient    *rpcli.UserClient
+	msgClient     *rpcli.MsgClient
+	groupClient   *rpcli.GroupClient
 }
 
 type Config struct {
@@ -60,6 +62,7 @@ type Config struct {
 	MongodbConfig      config.Mongo
 	NotificationConfig config.Notification
 	Share              config.Share
+	WebhooksConfig     config.Webhooks
 	LocalCacheConfig   config.LocalCache
 	Discovery          config.Discovery
 }
@@ -90,16 +93,25 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	if err != nil {
 		return err
 	}
+
 	msgClient := rpcli.NewMsgClient(msgConn)
+
+	cs := conversationServer{
+		config:        config,
+		webhookClient: webhook.NewWebhookClient(config.WebhooksConfig.URL),
+		userClient:    rpcli.NewUserClient(userConn),
+		groupClient:   rpcli.NewGroupClient(groupConn),
+		msgClient:     msgClient,
+	}
+
+	cs.conversationNotificationSender = NewConversationNotificationSender(&config.NotificationConfig, msgClient)
+	cs.conversationDatabase = controller.NewConversationDatabase(
+		conversationDB,
+		redis.NewConversationRedis(rdb, &config.LocalCacheConfig, conversationDB),
+		mgocli.GetTx())
+
 	localcache.InitLocalCache(&config.LocalCacheConfig)
-	pbconversation.RegisterConversationServer(server, &conversationServer{
-		conversationNotificationSender: NewConversationNotificationSender(&config.NotificationConfig, msgClient),
-		conversationDatabase: controller.NewConversationDatabase(conversationDB,
-			redis.NewConversationRedis(rdb, &config.LocalCacheConfig, conversationDB), mgocli.GetTx()),
-		userClient:  rpcli.NewUserClient(userConn),
-		groupClient: rpcli.NewGroupClient(groupConn),
-		msgClient:   msgClient,
-	})
+	pbconversation.RegisterConversationServer(server, &cs)
 	return nil
 }
 
@@ -326,49 +338,76 @@ func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req
 func (c *conversationServer) CreateSingleChatConversations(ctx context.Context,
 	req *pbconversation.CreateSingleChatConversationsReq,
 ) (*pbconversation.CreateSingleChatConversationsResp, error) {
+	var conversation dbModel.Conversation
 	switch req.ConversationType {
 	case constant.SingleChatType:
-		var conversation dbModel.Conversation
+		// sendUser create
 		conversation.ConversationID = req.ConversationID
 		conversation.ConversationType = req.ConversationType
 		conversation.OwnerUserID = req.SendID
 		conversation.UserID = req.RecvID
+		if err := c.webhookBeforeCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateSingleChatConversations, &conversation); err != nil && err != servererrs.ErrCallbackContinue {
+			return nil, err
+		}
+
 		err := c.conversationDatabase.CreateConversation(ctx, []*dbModel.Conversation{&conversation})
 		if err != nil {
 			log.ZWarn(ctx, "create conversation failed", err, "conversation", conversation)
 		}
 
+		c.webhookAfterCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.AfterCreateSingleChatConversations, &conversation)
+
+		// recvUser create
 		conversation2 := conversation
 		conversation2.OwnerUserID = req.RecvID
 		conversation2.UserID = req.SendID
+		if err := c.webhookBeforeCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateSingleChatConversations, &conversation); err != nil && err != servererrs.ErrCallbackContinue {
+			return nil, err
+		}
+
 		err = c.conversationDatabase.CreateConversation(ctx, []*dbModel.Conversation{&conversation2})
 		if err != nil {
 			log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
 		}
+
+		c.webhookAfterCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.AfterCreateSingleChatConversations, &conversation2)
 	case constant.NotificationChatType:
-		var conversation dbModel.Conversation
 		conversation.ConversationID = req.ConversationID
 		conversation.ConversationType = req.ConversationType
 		conversation.OwnerUserID = req.RecvID
 		conversation.UserID = req.SendID
+		if err := c.webhookBeforeCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateSingleChatConversations, &conversation); err != nil && err != servererrs.ErrCallbackContinue {
+			return nil, err
+		}
+
 		err := c.conversationDatabase.CreateConversation(ctx, []*dbModel.Conversation{&conversation})
 		if err != nil {
 			log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
 		}
+
+		c.webhookAfterCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.AfterCreateSingleChatConversations, &conversation)
 	}
 
 	return &pbconversation.CreateSingleChatConversationsResp{}, nil
 }
 
 func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, req *pbconversation.CreateGroupChatConversationsReq) (*pbconversation.CreateGroupChatConversationsResp, error) {
-	err := c.conversationDatabase.CreateGroupChatConversation(ctx, req.GroupID, req.UserIDs)
+	var conversation dbModel.Conversation
+
+	conversation.ConversationID = msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID)
+	conversation.GroupID = req.GroupID
+	conversation.ConversationType = constant.ReadGroupChatType
+
+	if err := c.webhookBeforeCreateGroupChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateGroupChatConversations, &conversation); err != nil {
+		return nil, err
+	}
+
+	err := c.conversationDatabase.CreateGroupChatConversation(ctx, req.GroupID, req.UserIDs, &conversation)
 	if err != nil {
 		return nil, err
 	}
-	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID)
-	if err := c.msgClient.SetUserConversationMaxSeq(ctx, conversationID, req.UserIDs, 0); err != nil {
-		return nil, err
-	}
+
+	c.webhookAfterCreateGroupChatConversations(ctx, &c.config.WebhooksConfig.AfterCreateGroupChatConversations, &conversation)
 	return &pbconversation.CreateGroupChatConversationsResp{}, nil
 }
 
