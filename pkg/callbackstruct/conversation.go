@@ -1,6 +1,8 @@
 package callbackstruct
 
-import "time"
+import (
+	"time"
+)
 
 type Conversation struct {
 	OwnerUserID           string    `json:"owner_user_id"`

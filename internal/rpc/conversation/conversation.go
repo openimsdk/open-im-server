@@ -338,11 +338,6 @@ func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req
 func (c *conversationServer) CreateSingleChatConversations(ctx context.Context,
 	req *pbconversation.CreateSingleChatConversationsReq,
 ) (*pbconversation.CreateSingleChatConversationsResp, error) {
-	log.ZWarn(ctx, "create Single Chat Conversations is start", nil, "req", req)
-	// if err := c.webhookBeforeCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateSingleChatConversations, req); err != nil && err != servererrs.ErrCallbackContinue {
-	// 	return nil, err
-	// }
-
 	var conversation dbModel.Conversation
 	switch req.ConversationType {
 	case constant.SingleChatType:
@@ -397,23 +392,22 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context,
 }
 
 func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, req *pbconversation.CreateGroupChatConversationsReq) (*pbconversation.CreateGroupChatConversationsResp, error) {
-	var conversations dbModel.Conversation
+	var conversation dbModel.Conversation
 
-	conversations.ConversationID = msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID)
-	conversations.GroupID = req.GroupID
-	conversations.ConversationType = constant.ReadGroupChatType
-	// conversations.MaxSeq = 0
+	conversation.ConversationID = msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID)
+	conversation.GroupID = req.GroupID
+	conversation.ConversationType = constant.ReadGroupChatType
 
-	if err := c.webhookBeforeCreateGroupChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateGroupChatConversations, &conversations); err != nil {
+	if err := c.webhookBeforeCreateGroupChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateGroupChatConversations, &conversation); err != nil {
 		return nil, err
 	}
 
-	err := c.conversationDatabase.CreateGroupChatConversation(ctx, req.GroupID, req.UserIDs, &conversations)
+	err := c.conversationDatabase.CreateGroupChatConversation(ctx, req.GroupID, req.UserIDs, &conversation)
 	if err != nil {
 		return nil, err
 	}
 
-	c.webhookAfterCreateGroupChatConversations(ctx, &c.config.WebhooksConfig.AfterCreateGroupChatConversations, &conversations)
+	c.webhookAfterCreateGroupChatConversations(ctx, &c.config.WebhooksConfig.AfterCreateGroupChatConversations, &conversation)
 	return &pbconversation.CreateGroupChatConversationsResp{}, nil
 }
 
