@@ -13,25 +13,18 @@ import (
 func (c *conversationServer) webhookBeforeCreateSingleChatConversations(ctx context.Context, before *config.BeforeConfig, req *dbModel.Conversation) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		cbReq := &callbackstruct.CallbackBeforeCreateSingleChatConversationsReq{
-			CallbackCommand:       callbackstruct.CallbackBeforeCreateSingleChatConversationsCommand,
-			OwnerUserID:           req.OwnerUserID,
-			ConversationID:        req.ConversationID,
-			ConversationType:      req.ConversationType,
-			UserID:                req.UserID,
-			GroupID:               req.GroupID,
-			RecvMsgOpt:            req.RecvMsgOpt,
-			IsPinned:              req.IsPinned,
-			IsPrivateChat:         req.IsPrivateChat,
-			BurnDuration:          req.BurnDuration,
-			GroupAtType:           req.GroupAtType,
-			AttachedInfo:          req.AttachedInfo,
-			Ex:                    req.Ex,
-			MaxSeq:                req.MaxSeq,
-			MinSeq:                req.MinSeq,
-			CreateTime:            req.CreateTime,
-			IsMsgDestruct:         req.IsMsgDestruct,
-			MsgDestructTime:       req.MsgDestructTime,
-			LatestMsgDestructTime: req.LatestMsgDestructTime,
+			CallbackCommand:  callbackstruct.CallbackBeforeCreateSingleChatConversationsCommand,
+			OwnerUserID:      req.OwnerUserID,
+			ConversationID:   req.ConversationID,
+			ConversationType: req.ConversationType,
+			UserID:           req.UserID,
+			RecvMsgOpt:       req.RecvMsgOpt,
+			IsPinned:         req.IsPinned,
+			IsPrivateChat:    req.IsPrivateChat,
+			BurnDuration:     req.BurnDuration,
+			GroupAtType:      req.GroupAtType,
+			AttachedInfo:     req.AttachedInfo,
+			Ex:               req.Ex,
 		}
 
 		resp := &callbackstruct.CallbackBeforeCreateSingleChatConversationsResp{}
@@ -40,11 +33,6 @@ func (c *conversationServer) webhookBeforeCreateSingleChatConversations(ctx cont
 			return err
 		}
 
-		datautil.NotNilReplace(&req.OwnerUserID, resp.OwnerUserID)
-		datautil.NotNilReplace(&req.ConversationID, resp.ConversationID)
-		datautil.NotNilReplace(&req.ConversationType, resp.ConversationType)
-		datautil.NotNilReplace(&req.UserID, resp.UserID)
-		datautil.NotNilReplace(&req.GroupID, resp.GroupID)
 		datautil.NotNilReplace(&req.RecvMsgOpt, resp.RecvMsgOpt)
 		datautil.NotNilReplace(&req.IsPinned, resp.IsPinned)
 		datautil.NotNilReplace(&req.IsPrivateChat, resp.IsPrivateChat)
@@ -52,38 +40,24 @@ func (c *conversationServer) webhookBeforeCreateSingleChatConversations(ctx cont
 		datautil.NotNilReplace(&req.GroupAtType, resp.GroupAtType)
 		datautil.NotNilReplace(&req.AttachedInfo, resp.AttachedInfo)
 		datautil.NotNilReplace(&req.Ex, resp.Ex)
-		datautil.NotNilReplace(&req.MaxSeq, resp.MaxSeq)
-		datautil.NotNilReplace(&req.MinSeq, resp.MinSeq)
-		datautil.NotNilReplace(&req.CreateTime, resp.CreateTime)
-		datautil.NotNilReplace(&req.IsMsgDestruct, resp.IsMsgDestruct)
-		datautil.NotNilReplace(&req.MsgDestructTime, resp.MsgDestructTime)
-		datautil.NotNilReplace(&req.LatestMsgDestructTime, resp.LatestMsgDestructTime)
-
 		return nil
 	})
 }
 
 func (c *conversationServer) webhookAfterCreateSingleChatConversations(ctx context.Context, after *config.AfterConfig, req *dbModel.Conversation) error {
 	cbReq := &callbackstruct.CallbackAfterCreateSingleChatConversationsReq{
-		CallbackCommand:       callbackstruct.CallbackAfterCreateSingleChatConversationsCommand,
-		OwnerUserID:           req.OwnerUserID,
-		ConversationID:        req.ConversationID,
-		ConversationType:      req.ConversationType,
-		UserID:                req.UserID,
-		GroupID:               req.GroupID,
-		RecvMsgOpt:            req.RecvMsgOpt,
-		IsPinned:              req.IsPinned,
-		IsPrivateChat:         req.IsPrivateChat,
-		BurnDuration:          req.BurnDuration,
-		GroupAtType:           req.GroupAtType,
-		AttachedInfo:          req.AttachedInfo,
-		Ex:                    req.Ex,
-		MaxSeq:                req.MaxSeq,
-		MinSeq:                req.MinSeq,
-		CreateTime:            req.CreateTime,
-		IsMsgDestruct:         req.IsMsgDestruct,
-		MsgDestructTime:       req.MsgDestructTime,
-		LatestMsgDestructTime: req.LatestMsgDestructTime,
+		CallbackCommand:  callbackstruct.CallbackAfterCreateSingleChatConversationsCommand,
+		OwnerUserID:      req.OwnerUserID,
+		ConversationID:   req.ConversationID,
+		ConversationType: req.ConversationType,
+		UserID:           req.UserID,
+		RecvMsgOpt:       req.RecvMsgOpt,
+		IsPinned:         req.IsPinned,
+		IsPrivateChat:    req.IsPrivateChat,
+		BurnDuration:     req.BurnDuration,
+		GroupAtType:      req.GroupAtType,
+		AttachedInfo:     req.AttachedInfo,
+		Ex:               req.Ex,
 	}
 
 	c.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &callbackstruct.CallbackAfterCreateSingleChatConversationsResp{}, after)
@@ -93,23 +67,17 @@ func (c *conversationServer) webhookAfterCreateSingleChatConversations(ctx conte
 func (c *conversationServer) webhookBeforeCreateGroupChatConversations(ctx context.Context, before *config.BeforeConfig, req *dbModel.Conversation) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
 		cbReq := &callbackstruct.CallbackBeforeCreateGroupChatConversationsReq{
-			CallbackCommand:       callbackstruct.CallbackBeforeCreateGroupChatConversationsCommand,
-			ConversationID:        req.ConversationID,
-			ConversationType:      req.ConversationType,
-			GroupID:               req.GroupID,
-			RecvMsgOpt:            req.RecvMsgOpt,
-			IsPinned:              req.IsPinned,
-			IsPrivateChat:         req.IsPrivateChat,
-			BurnDuration:          req.BurnDuration,
-			GroupAtType:           req.GroupAtType,
-			AttachedInfo:          req.AttachedInfo,
-			Ex:                    req.Ex,
-			MaxSeq:                req.MaxSeq,
-			MinSeq:                req.MinSeq,
-			CreateTime:            req.CreateTime,
-			IsMsgDestruct:         req.IsMsgDestruct,
-			MsgDestructTime:       req.MsgDestructTime,
-			LatestMsgDestructTime: req.LatestMsgDestructTime,
+			CallbackCommand:  callbackstruct.CallbackBeforeCreateGroupChatConversationsCommand,
+			ConversationID:   req.ConversationID,
+			ConversationType: req.ConversationType,
+			GroupID:          req.GroupID,
+			RecvMsgOpt:       req.RecvMsgOpt,
+			IsPinned:         req.IsPinned,
+			IsPrivateChat:    req.IsPrivateChat,
+			BurnDuration:     req.BurnDuration,
+			GroupAtType:      req.GroupAtType,
+			AttachedInfo:     req.AttachedInfo,
+			Ex:               req.Ex,
 		}
 
 		resp := &callbackstruct.CallbackBeforeCreateGroupChatConversationsResp{}
@@ -118,9 +86,6 @@ func (c *conversationServer) webhookBeforeCreateGroupChatConversations(ctx conte
 			return err
 		}
 
-		datautil.NotNilReplace(&req.ConversationID, resp.ConversationID)
-		datautil.NotNilReplace(&req.ConversationType, resp.ConversationType)
-		datautil.NotNilReplace(&req.GroupID, resp.GroupID)
 		datautil.NotNilReplace(&req.RecvMsgOpt, resp.RecvMsgOpt)
 		datautil.NotNilReplace(&req.IsPinned, resp.IsPinned)
 		datautil.NotNilReplace(&req.IsPrivateChat, resp.IsPrivateChat)
@@ -128,35 +93,23 @@ func (c *conversationServer) webhookBeforeCreateGroupChatConversations(ctx conte
 		datautil.NotNilReplace(&req.GroupAtType, resp.GroupAtType)
 		datautil.NotNilReplace(&req.AttachedInfo, resp.AttachedInfo)
 		datautil.NotNilReplace(&req.Ex, resp.Ex)
-		datautil.NotNilReplace(&req.MaxSeq, resp.MaxSeq)
-		datautil.NotNilReplace(&req.MinSeq, resp.MinSeq)
-		datautil.NotNilReplace(&req.CreateTime, resp.CreateTime)
-		datautil.NotNilReplace(&req.IsMsgDestruct, resp.IsMsgDestruct)
-		datautil.NotNilReplace(&req.MsgDestructTime, resp.MsgDestructTime)
-		datautil.NotNilReplace(&req.LatestMsgDestructTime, resp.LatestMsgDestructTime)
 		return nil
 	})
 }
 
 func (c *conversationServer) webhookAfterCreateGroupChatConversations(ctx context.Context, after *config.AfterConfig, req *dbModel.Conversation) error {
 	cbReq := &callbackstruct.CallbackAfterCreateGroupChatConversationsReq{
-		CallbackCommand:       callbackstruct.CallbackAfterCreateGroupChatConversationsCommand,
-		ConversationID:        req.ConversationID,
-		ConversationType:      req.ConversationType,
-		GroupID:               req.GroupID,
-		RecvMsgOpt:            req.RecvMsgOpt,
-		IsPinned:              req.IsPinned,
-		IsPrivateChat:         req.IsPrivateChat,
-		BurnDuration:          req.BurnDuration,
-		GroupAtType:           req.GroupAtType,
-		AttachedInfo:          req.AttachedInfo,
-		Ex:                    req.Ex,
-		MaxSeq:                req.MaxSeq,
-		MinSeq:                req.MinSeq,
-		CreateTime:            req.CreateTime,
-		IsMsgDestruct:         req.IsMsgDestruct,
-		MsgDestructTime:       req.MsgDestructTime,
-		LatestMsgDestructTime: req.LatestMsgDestructTime,
+		CallbackCommand:  callbackstruct.CallbackAfterCreateGroupChatConversationsCommand,
+		ConversationID:   req.ConversationID,
+		ConversationType: req.ConversationType,
+		GroupID:          req.GroupID,
+		RecvMsgOpt:       req.RecvMsgOpt,
+		IsPinned:         req.IsPinned,
+		IsPrivateChat:    req.IsPrivateChat,
+		BurnDuration:     req.BurnDuration,
+		GroupAtType:      req.GroupAtType,
+		AttachedInfo:     req.AttachedInfo,
+		Ex:               req.Ex,
 	}
 
 	c.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &callbackstruct.CallbackAfterCreateGroupChatConversationsResp{}, after)
