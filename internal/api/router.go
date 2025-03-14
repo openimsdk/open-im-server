@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	clientv3 "go.etcd.io/etcd/client/v3"
+
 	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -27,7 +29,6 @@ import (
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 const (
@@ -246,8 +247,6 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		msgGroup.POST("/batch_send_msg", m.BatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 		msgGroup.POST("/get_server_time", m.GetServerTime)
-		msgGroup.POST("/get_stream_msg", m.GetStreamMsg)
-		msgGroup.POST("/append_stream_msg", m.AppendStreamMsg)
 	}
 	// Conversation
 	{
@@ -264,6 +263,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		conversationGroup.POST("/get_owner_conversation", c.GetOwnerConversation)
 		conversationGroup.POST("/get_not_notify_conversation_ids", c.GetNotNotifyConversationIDs)
 		conversationGroup.POST("/get_pinned_conversation_ids", c.GetPinnedConversationIDs)
+		conversationGroup.POST("/update_conversations_by_user", c.UpdateConversationsByUser)
 	}
 
 	{

@@ -551,11 +551,3 @@ func (m *MessageApi) SearchMsg(c *gin.Context) {
 func (m *MessageApi) GetServerTime(c *gin.Context) {
 	a2r.Call(c, msg.MsgClient.GetServerTime, m.Client)
 }
-
-func (m *MessageApi) GetStreamMsg(c *gin.Context) {
-	a2r.Call(c, msg.MsgClient.GetServerTime, m.Client)
-}
-
-func (m *MessageApi) AppendStreamMsg(c *gin.Context) {
-	a2r.Call(c, msg.MsgClient.GetServerTime, m.Client)
-}

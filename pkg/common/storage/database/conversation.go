@@ -24,6 +24,7 @@ import (
 type Conversation interface {
 	Create(ctx context.Context, conversations []*model.Conversation) (err error)
 	UpdateByMap(ctx context.Context, userIDs []string, conversationID string, args map[string]any) (rows int64, err error)
+	UpdateUserConversations(ctx context.Context, userID string, args map[string]any) ([]*model.Conversation, error)
 	Update(ctx context.Context, conversation *model.Conversation) (err error)
 	Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*model.Conversation, err error)
 	FindUserID(ctx context.Context, userIDs []string, conversationIDs []string) ([]string, error)
