@@ -21,23 +21,32 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/pagination"
 	"github.com/openimsdk/tools/errs"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
 	coll := db.Collection(database.ConversationName)
-	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "owner_user_id", Value: 1},
-			{Key: "conversation_id", Value: 1},
+	_, err := coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "owner_user_id", Value: 1},
+				{Key: "conversation_id", Value: 1},
+			},
+			Options: options.Index().SetUnique(true),
 		},
-		Options: options.Index().SetUnique(true),
+		{
+			Keys: bson.D{
+				{Key: "user_id", Value: 1},
+			},
+			Options: options.Index(),
+		},
 	})
 	if err != nil {
 		return nil, errs.Wrap(err)
@@ -99,6 +108,38 @@ func (c *ConversationMgo) UpdateByMap(ctx context.Context, userIDs []string, con
 		return 0, err
 	}
 	return rows, nil
+}
+
+func (c *ConversationMgo) UpdateUserConversations(ctx context.Context, userID string, args map[string]any) ([]*model.Conversation, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
+	filter := bson.M{
+		"user_id": userID,
+	}
+
+	conversations, err := mongoutil.Find[*model.Conversation](ctx, c.coll, filter, options.Find().SetProjection(bson.M{"_id": 0, "owner_user_id": 1, "conversation_id": 1}))
+	if err != nil {
+		return nil, err
+	}
+	err = mongoutil.IncrVersion(func() error {
+		_, err := mongoutil.UpdateMany(ctx, c.coll, filter, bson.M{"$set": args})
+		if err != nil {
+			return err
+		}
+		return nil
+	}, func() error {
+		for _, conversation := range conversations {
+			if err := c.version.IncrVersion(ctx, conversation.OwnerUserID, []string{conversation.ConversationID}, model.VersionStateUpdate); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return conversations, nil
 }
 
 func (c *ConversationMgo) Update(ctx context.Context, conversation *model.Conversation) (err error) {
