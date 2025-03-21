@@ -22,6 +22,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -40,7 +42,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/grpc"
 )
 
 type conversationServer struct {
@@ -327,6 +328,19 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 	}
 
 	return &pbconversation.SetConversationsResp{}, nil
+}
+
+func (c *conversationServer) UpdateConversationsByUser(ctx context.Context, req *pbconversation.UpdateConversationsByUserReq) (*pbconversation.UpdateConversationsByUserResp, error) {
+	m := make(map[string]any)
+	if req.Ex != nil {
+		m["ex"] = req.Ex.Value
+	}
+	if len(m) > 0 {
+		if err := c.conversationDatabase.UpdateUserConversations(ctx, req.UserID, m); err != nil {
+			return nil, err
+		}
+	}
+	return &pbconversation.UpdateConversationsByUserResp{}, nil
 }
 
 // Get user IDs with "Do Not Disturb" enabled in super large groups.
