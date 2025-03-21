@@ -17,7 +17,6 @@ package msg
 import (
 	"context"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"

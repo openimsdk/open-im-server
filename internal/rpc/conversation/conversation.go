@@ -350,9 +350,6 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 }
 
 func (c *conversationServer) UpdateConversationsByUser(ctx context.Context, req *pbconversation.UpdateConversationsByUserReq) (*pbconversation.UpdateConversationsByUserResp, error) {
-	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
-		return nil, err
-	}
 	m := make(map[string]any)
 	if req.Ex != nil {
 		m["ex"] = req.Ex.Value
@@ -363,6 +360,11 @@ func (c *conversationServer) UpdateConversationsByUser(ctx context.Context, req 
 		}
 	}
 	return &pbconversation.UpdateConversationsByUserResp{}, nil
+}
+
+// Get user IDs with "Do Not Disturb" enabled in super large groups.
+func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbconversation.GetRecvMsgNotNotifyUserIDsReq) (*pbconversation.GetRecvMsgNotNotifyUserIDsResp, error) {
+	return nil, errs.New("deprecated")
 }
 
 // create conversation without notification for msg redis transfer.

@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	clientv3 "go.etcd.io/etcd/client/v3"
+
 	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -28,8 +30,6 @@ import (
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
-	"github.com/openimsdk/tools/mw/api"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 const (
