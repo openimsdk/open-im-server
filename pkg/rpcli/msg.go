@@ -2,9 +2,11 @@ package rpcli
 
 import (
 	"context"
+
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
-	"google.golang.org/grpc"
 )
 
 func NewMsgClient(cc grpc.ClientConnInterface) *MsgClient {
