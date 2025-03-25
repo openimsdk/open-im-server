@@ -17,6 +17,8 @@ package msg
 import (
 	"context"
 
+	"google.golang.org/protobuf/proto"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
@@ -29,7 +31,6 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/protobuf/proto"
 )
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.SendMsgResp, error) {
@@ -49,11 +50,6 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.
 
 func (m *msgServer) sendMsg(ctx context.Context, req *pbmsg.SendMsgReq, before **sdkws.MsgData) (*pbmsg.SendMsgResp, error) {
 	m.encapsulateMsgData(req.MsgData)
-	if req.MsgData.ContentType == constant.Stream {
-		if err := m.handlerStreamMsg(ctx, req.MsgData); err != nil {
-			return nil, err
-		}
-	}
 	switch req.MsgData.SessionType {
 	case constant.SingleChatType:
 		return m.sendMsgSingleChat(ctx, req, before)

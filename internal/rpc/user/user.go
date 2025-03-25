@@ -49,6 +49,10 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	defaultSecret = "openIM123"
+)
+
 type userServer struct {
 	pbuser.UnimplementedUserServer
 	online                   cache.OnlineCache
@@ -88,7 +92,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	users := make([]*tablerelation.User, 0)
 
 	for _, v := range config.Share.IMAdminUserID {
-		users = append(users, &tablerelation.User{UserID: v, Nickname: v, AppMangerLevel: constant.AppNotificationAdmin})
+		users = append(users, &tablerelation.User{UserID: v, Nickname: v, AppMangerLevel: constant.AppAdmin})
 	}
 	userDB, err := mgo.NewUserMongo(mgocli.GetDB())
 	if err != nil {
@@ -272,6 +276,10 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	resp = &pbuser.UserRegisterResp{}
 	if len(req.Users) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("users is empty")
+	}
+	// check if secret is changed
+	if s.config.Share.Secret == defaultSecret {
+		return nil, servererrs.ErrSecretNotChanged.Wrap()
 	}
 
 	if err = authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
@@ -605,7 +613,7 @@ func (s *userServer) GetNotificationAccount(ctx context.Context, req *pbuser.Get
 	if err != nil {
 		return nil, servererrs.ErrUserIDNotFound.Wrap()
 	}
-	if user.AppMangerLevel == constant.AppAdmin || user.AppMangerLevel >= constant.AppNotificationAdmin {
+	if user.AppMangerLevel >= constant.AppAdmin {
 		return &pbuser.GetNotificationAccountResp{Account: &pbuser.NotificationAccountInfo{
 			UserID:         user.UserID,
 			FaceURL:        user.FaceURL,
