@@ -79,15 +79,40 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		// 创建一个最小的消息对象，包含必要的字段
 		msgToRevoke = &sdkws.MsgData{
 			SendID:         req.UserID,  // 使用撤回者作为发送者
-			ConversationID: req.ConversationID,
 			Seq:            req.Seq,
 			SessionType:    getSessionTypeFromConversationID(req.ConversationID), // 辅助函数获取会话类型
 			ClientMsgID:    "missing_" + strconv.FormatInt(req.Seq, 10), // 生成一个临时ID
 			SendTime:       time.Now().UnixMilli() - 1000, // 设置为稍早的时间
 		}
+		
+		// 根据会话类型设置GroupID或RecvID
+		if msgToRevoke.SessionType == constant.ReadGroupChatType {
+			// 从会话ID提取群组ID
+			if strings.HasPrefix(req.ConversationID, "sg_") {
+				msgToRevoke.GroupID = req.ConversationID[3:] // 移除"sg_"前缀
+			}
+		} else {
+			// 对于单聊，需要从会话ID解析出接收者ID
+			if strings.HasPrefix(req.ConversationID, "si_") || strings.HasPrefix(req.ConversationID, "sp_") {
+				parts := strings.Split(req.ConversationID[3:], "_")
+				if len(parts) == 2 {
+					// 会话ID一般格式为: si_发送者ID_接收者ID
+					// 如果当前用户是发送者，则接收者是另一方
+					if parts[0] == req.UserID {
+						msgToRevoke.RecvID = parts[1]
+					} else {
+						msgToRevoke.RecvID = parts[0]
+					}
+				} else {
+					// 无法解析时设置为空
+					msgToRevoke.RecvID = ""
+				}
+			} else {
+				msgToRevoke.RecvID = ""
+			}
+		}
 	} else {
 		msgToRevoke = msgs[0]
-		// 检查是否已经撤回
 		if msgToRevoke.ContentType == constant.MsgRevokeNotification {
 			return nil, servererrs.ErrMsgAlreadyRevoke.WrapMsg("msg already revoke")
 		}
