@@ -17,6 +17,8 @@ package msg
 import (
 	"context"
 	"encoding/json"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
@@ -49,38 +51,69 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if err != nil {
 		return nil, err
 	}
+	
+	// 获取消息并添加容错处理
 	_, _, msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.ConversationID, []int64{req.Seq})
 	if err != nil {
-		return nil, err
-	}
-	if len(msgs) == 0 || msgs[0] == nil {
-		return nil, errs.ErrRecordNotFound.WrapMsg("msg not found")
-	}
-	if msgs[0].ContentType == constant.MsgRevokeNotification {
-		return nil, servererrs.ErrMsgAlreadyRevoke.WrapMsg("msg already revoke")
+		// 记录错误但继续执行
+		log.ZWarn(ctx, "GetMsgBySeqs error when revoking message", err, 
+				"userID", req.UserID, "conversationID", req.ConversationID, "seq", req.Seq)
+	} else if len(msgs) == 0 || msgs[0] == nil {
+		// 检查seq是否在当前会话的有效范围内
+		maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
+		if err != nil {
+			log.ZWarn(ctx, "GetMaxSeq error when revoking message", err, 
+					"conversationID", req.ConversationID)
+		} else if req.Seq > maxSeq {
+			return nil, errs.ErrArgs.WrapMsg("seq exceeds maxSeq")
+		}
+		
+		// 记录警告但继续执行
+		log.ZWarn(ctx, "Message not found when revoking, but will proceed", nil,
+				"userID", req.UserID, "conversationID", req.ConversationID, "seq", req.Seq)
 	}
 
-	data, _ := json.Marshal(msgs[0])
+	// 如果消息不存在，创建一个最小化的替代对象用于撤回通知
+	var msgToRevoke *sdkws.MsgData
+	if len(msgs) == 0 || msgs[0] == nil {
+		// 创建一个最小的消息对象，包含必要的字段
+		msgToRevoke = &sdkws.MsgData{
+			SendID:         req.UserID,  // 使用撤回者作为发送者
+			ConversationID: req.ConversationID,
+			Seq:            req.Seq,
+			SessionType:    getSessionTypeFromConversationID(req.ConversationID), // 辅助函数获取会话类型
+			ClientMsgID:    "missing_" + strconv.FormatInt(req.Seq, 10), // 生成一个临时ID
+			SendTime:       time.Now().UnixMilli() - 1000, // 设置为稍早的时间
+		}
+	} else {
+		msgToRevoke = msgs[0]
+		// 检查是否已经撤回
+		if msgToRevoke.ContentType == constant.MsgRevokeNotification {
+			return nil, servererrs.ErrMsgAlreadyRevoke.WrapMsg("msg already revoke")
+		}
+	}
+
+	data, _ := json.Marshal(msgToRevoke)
 	log.ZDebug(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
 	var role int32
 	if !authverify.IsAppManagerUid(ctx, m.config.Share.IMAdminUserID) {
-		sessionType := msgs[0].SessionType
+		sessionType := msgToRevoke.SessionType
 		switch sessionType {
 		case constant.SingleChatType:
-			if err := authverify.CheckAccessV3(ctx, msgs[0].SendID, m.config.Share.IMAdminUserID); err != nil {
+			if err := authverify.CheckAccessV3(ctx, msgToRevoke.SendID, m.config.Share.IMAdminUserID); err != nil {
 				return nil, err
 			}
 			role = user.AppMangerLevel
 		case constant.ReadGroupChatType:
-			members, err := m.GroupLocalCache.GetGroupMemberInfoMap(ctx, msgs[0].GroupID, datautil.Distinct([]string{req.UserID, msgs[0].SendID}))
+			members, err := m.GroupLocalCache.GetGroupMemberInfoMap(ctx, msgToRevoke.GroupID, datautil.Distinct([]string{req.UserID, msgToRevoke.SendID}))
 			if err != nil {
 				return nil, err
 			}
-			if req.UserID != msgs[0].SendID {
+			if req.UserID != msgToRevoke.SendID {
 				switch members[req.UserID].RoleLevel {
 				case constant.GroupOwner:
 				case constant.GroupAdmin:
-					if sendMember, ok := members[msgs[0].SendID]; ok {
+					if sendMember, ok := members[msgToRevoke.SendID]; ok {
 						if sendMember.RoleLevel != constant.GroupOrdinaryUsers {
 							return nil, errs.ErrNoPermission.WrapMsg("no permission")
 						}
@@ -114,20 +147,31 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	}
 	tips := sdkws.RevokeMsgTips{
 		RevokerUserID:  revokerUserID,
-		ClientMsgID:    msgs[0].ClientMsgID,
+		ClientMsgID:    msgToRevoke.ClientMsgID,
 		RevokeTime:     now,
 		Seq:            req.Seq,
-		SesstionType:   msgs[0].SessionType,
+		SesstionType:   msgToRevoke.SessionType,
 		ConversationID: req.ConversationID,
 		IsAdminRevoke:  flag,
 	}
 	var recvID string
-	if msgs[0].SessionType == constant.ReadGroupChatType {
-		recvID = msgs[0].GroupID
+	if msgToRevoke.SessionType == constant.ReadGroupChatType {
+		recvID = msgToRevoke.GroupID
 	} else {
-		recvID = msgs[0].RecvID
+		recvID = msgToRevoke.RecvID
 	}
-	m.notificationSender.NotificationWithSessionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips)
+	m.notificationSender.NotificationWithSessionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgToRevoke.SessionType, &tips)
 	m.webhookAfterRevokeMsg(ctx, &m.config.WebhooksConfig.AfterRevokeMsg, req)
 	return &msg.RevokeMsgResp{}, nil
+}
+
+func getSessionTypeFromConversationID(conversationID string) int32 {
+	// 通常会话ID格式为: "单聊前缀{userID}" 或 "群聊前缀{groupID}"
+	if strings.HasPrefix(conversationID, "sp_") || strings.HasPrefix(conversationID, "si_") {
+		return constant.SingleChatType
+	} else if strings.HasPrefix(conversationID, "sg_") {
+		return constant.ReadGroupChatType
+	}
+	// 默认返回单聊类型
+	return constant.SingleChatType
 }
