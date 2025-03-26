@@ -52,14 +52,14 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		return nil, err
 	}
 	
-	// 获取消息并添加容错处理
+	// Get message and add fault tolerance handling
 	_, _, msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.ConversationID, []int64{req.Seq})
 	if err != nil {
-		// 记录错误但继续执行
+		// Log the error but continue execution
 		log.ZWarn(ctx, "GetMsgBySeqs error when revoking message", err, 
 				"userID", req.UserID, "conversationID", req.ConversationID, "seq", req.Seq)
 	} else if len(msgs) == 0 || msgs[0] == nil {
-		// 检查seq是否在当前会话的有效范围内
+		// Check if seq is within valid range for the current conversation
 		maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
 		if err != nil {
 			log.ZWarn(ctx, "GetMaxSeq error when revoking message", err, 
@@ -68,43 +68,43 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 			return nil, errs.ErrArgs.WrapMsg("seq exceeds maxSeq")
 		}
 		
-		// 记录警告但继续执行
+		// Log warning but continue execution
 		log.ZWarn(ctx, "Message not found when revoking, but will proceed", nil,
 				"userID", req.UserID, "conversationID", req.ConversationID, "seq", req.Seq)
 	}
 
-	// 如果消息不存在，创建一个最小化的替代对象用于撤回通知
+	// If message doesn't exist, create a minimal substitute for revocation notification
 	var msgToRevoke *sdkws.MsgData
 	if len(msgs) == 0 || msgs[0] == nil {
-		// 创建一个最小的消息对象，包含必要的字段
+		// Create a minimal message object with necessary fields
 		msgToRevoke = &sdkws.MsgData{
-			SendID:         req.UserID,  // 使用撤回者作为发送者
+			SendID:         req.UserID,  // Use revoker as sender
 			Seq:            req.Seq,
-			SessionType:    getSessionTypeFromConversationID(req.ConversationID), // 辅助函数获取会话类型
-			ClientMsgID:    "missing_" + strconv.FormatInt(req.Seq, 10), // 生成一个临时ID
-			SendTime:       time.Now().UnixMilli() - 1000, // 设置为稍早的时间
+			SessionType:    getSessionTypeFromConversationID(req.ConversationID), // Helper function to get session type
+			ClientMsgID:    "missing_" + strconv.FormatInt(req.Seq, 10), // Generate a temporary ID
+			SendTime:       time.Now().UnixMilli() - 1000, // Set to a slightly earlier time
 		}
 		
-		// 根据会话类型设置GroupID或RecvID
+		// Set GroupID or RecvID based on session type
 		if msgToRevoke.SessionType == constant.ReadGroupChatType {
-			// 从会话ID提取群组ID
+			// Extract group ID from conversation ID
 			if strings.HasPrefix(req.ConversationID, "sg_") {
-				msgToRevoke.GroupID = req.ConversationID[3:] // 移除"sg_"前缀
+				msgToRevoke.GroupID = req.ConversationID[3:] // Remove "sg_" prefix
 			}
 		} else {
-			// 对于单聊，需要从会话ID解析出接收者ID
+			// For single chat, parse receiver ID from conversation ID
 			if strings.HasPrefix(req.ConversationID, "si_") || strings.HasPrefix(req.ConversationID, "sp_") {
 				parts := strings.Split(req.ConversationID[3:], "_")
 				if len(parts) == 2 {
-					// 会话ID一般格式为: si_发送者ID_接收者ID
-					// 如果当前用户是发送者，则接收者是另一方
+					// Conversation ID format is typically: si_senderID_receiverID
+					// If current user is the sender, then receiver is the other party
 					if parts[0] == req.UserID {
 						msgToRevoke.RecvID = parts[1]
 					} else {
 						msgToRevoke.RecvID = parts[0]
 					}
 				} else {
-					// 无法解析时设置为空
+					// Set empty if parsing fails
 					msgToRevoke.RecvID = ""
 				}
 			} else {
@@ -191,12 +191,12 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 }
 
 func getSessionTypeFromConversationID(conversationID string) int32 {
-	// 通常会话ID格式为: "单聊前缀{userID}" 或 "群聊前缀{groupID}"
+	// Conversation ID format is typically: "single chat prefix{userID}" or "group chat prefix{groupID}"
 	if strings.HasPrefix(conversationID, "sp_") || strings.HasPrefix(conversationID, "si_") {
 		return constant.SingleChatType
 	} else if strings.HasPrefix(conversationID, "sg_") {
 		return constant.ReadGroupChatType
 	}
-	// 默认返回单聊类型
+	// Default to single chat type
 	return constant.SingleChatType
 }
