@@ -1,6 +1,6 @@
-secret: openIM123
+secret: openIM1234
 
-imAdminUserID: [ imAdmin ]
+imAdminUserID: [imAdmin]
 
 # 1: For Android, iOS, Windows, Mac, and web platforms, only one instance can be online at a time
 multiLogin:
