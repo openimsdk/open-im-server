@@ -22,7 +22,6 @@ import (
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/db/pagination"
 	"github.com/openimsdk/tools/db/tx"
@@ -48,7 +47,7 @@ type ConversationDatabase interface {
 	// transactional.
 	SetUsersConversationFieldTx(ctx context.Context, userIDs []string, conversation *relationtb.Conversation, fieldMap map[string]any) error
 	// CreateGroupChatConversation creates a group chat conversation for the specified group ID and user IDs.
-	CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error
+	CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string, conversations *relationtb.Conversation) error
 	// GetConversationIDs retrieves conversation IDs for a given user.
 	GetConversationIDs(ctx context.Context, userID string) ([]string, error)
 	// GetUserConversationIDsHash gets the hash of conversation IDs for a given user.
@@ -298,10 +297,10 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 //	return c.cache.GetSuperGroupRecvMsgNotNotifyUserIDs(ctx, groupID)
 //}
 
-func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error {
+func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string, conversation *relationtb.Conversation) error {
 	return c.tx.Transaction(ctx, func(ctx context.Context) error {
 		cache := c.cache.CloneConversationCache()
-		conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
+		conversationID := conversation.ConversationID
 		existConversationUserIDs, err := c.conversationDB.FindUserID(ctx, userIDs, []string{conversationID})
 		if err != nil {
 			return err
@@ -309,7 +308,15 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 		notExistUserIDs := stringutil.DifferenceString(userIDs, existConversationUserIDs)
 		var conversations []*relationtb.Conversation
 		for _, v := range notExistUserIDs {
-			conversation := relationtb.Conversation{ConversationType: constant.ReadGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID}
+			conversation := relationtb.Conversation{
+				ConversationType: conversation.ConversationType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID,
+				// the parameters have default value
+				RecvMsgOpt: conversation.RecvMsgOpt, IsPinned: conversation.IsPinned, IsPrivateChat: conversation.IsPrivateChat,
+				BurnDuration: conversation.BurnDuration, GroupAtType: conversation.GroupAtType, AttachedInfo: conversation.AttachedInfo,
+				Ex: conversation.Ex, MaxSeq: conversation.MaxSeq, MinSeq: conversation.MinSeq, CreateTime: conversation.CreateTime,
+				MsgDestructTime: conversation.MsgDestructTime, IsMsgDestruct: conversation.IsMsgDestruct, LatestMsgDestructTime: conversation.LatestMsgDestructTime,
+			}
+
 			conversations = append(conversations, &conversation)
 			cache = cache.DelConversations(v, conversationID).DelConversationNotReceiveMessageUserIDs(conversationID)
 		}
@@ -320,7 +327,7 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 				return err
 			}
 		}
-		_, err = c.conversationDB.UpdateByMap(ctx, existConversationUserIDs, conversationID, map[string]any{"max_seq": 0})
+		_, err = c.conversationDB.UpdateByMap(ctx, existConversationUserIDs, conversationID, map[string]any{"max_seq": conversation.MaxSeq})
 		if err != nil {
 			return err
 		}
