@@ -60,10 +60,9 @@ const (
 	MaxUser  = 10000
 	MaxGroup = 1000
 
-	CreateUserTicker  = 10 * time.Second // Ticker is 1min in create user
-	SendMessageTicker = 1 * time.Second  // Ticker is 1s in send message
-	CreateGroupTicker = 10 * time.Second
-	// CreateGroupTicker = 1 * time.Minute
+	CreateUserTicker  = 1 * time.Minute // Ticker is 1min in create user
+	SendMessageTicker = 1 * time.Second // Ticker is 1s in send message
+	CreateGroupTicker = 1 * time.Minute
 )
 
 type BaseResp struct {
