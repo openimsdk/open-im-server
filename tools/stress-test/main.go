@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/protocol/auth"
 	"github.com/openimsdk/protocol/constant"
@@ -59,9 +60,10 @@ const (
 	MaxUser  = 10000
 	MaxGroup = 1000
 
-	CreateUserTicker  = 1 * time.Minute // Ticker is 1min in create user
-	SendMessageTicker = 1 * time.Second // Ticker is 1s in send message
-	CreateGroupTicker = 1 * time.Minute
+	CreateUserTicker  = 10 * time.Second // Ticker is 1min in create user
+	SendMessageTicker = 1 * time.Second  // Ticker is 1s in send message
+	CreateGroupTicker = 10 * time.Second
+	// CreateGroupTicker = 1 * time.Minute
 )
 
 type BaseResp struct {
@@ -232,12 +234,15 @@ func (st *StressTest) SendMsg(ctx context.Context, userID string) error {
 		"content": fmt.Sprintf("index %d. The current time is %s", st.MsgCounter, time.Now().Format("2006-01-02 15:04:05.000")),
 	}
 
-	req := map[string]any{
-		"sendID":      userID,
-		"groupID":     st.DefaultGroupID,
-		"contentType": constant.Text,
-		"sessionType": constant.ReadGroupChatType,
-		"content":     contentObj,
+	req := &apistruct.SendMsgReq{
+		SendMsg: apistruct.SendMsg{
+			SendID:         userID,
+			SenderNickname: userID,
+			GroupID:        st.DefaultGroupID,
+			ContentType:    constant.Text,
+			SessionType:    constant.ReadGroupChatType,
+			Content:        contentObj,
+		},
 	}
 
 	_, err := st.PostRequest(ctx, ApiAddress+SendMsg, &req)
@@ -254,15 +259,18 @@ func (st *StressTest) SendMsg(ctx context.Context, userID string) error {
 func (st *StressTest) CreateGroup(ctx context.Context, userID string) (string, error) {
 	groupID := fmt.Sprintf("StressTestGroup_%d_%s", st.GroupCounter, time.Now().Format("20060102150405"))
 
-	req := map[string]any{
-		"memberUserIDs": TestTargetUserList,
-		"ownerUserID":   userID,
-		"groupInfo": map[string]any{
-			"groupID":   groupID,
-			"groupName": groupID,
-			"groupType": constant.WorkingGroup,
-		},
+	groupInfo := &sdkws.GroupInfo{
+		GroupID:   groupID,
+		GroupName: groupID,
+		GroupType: constant.WorkingGroup,
 	}
+
+	req := group.CreateGroupReq{
+		OwnerUserID:   userID,
+		MemberUserIDs: TestTargetUserList,
+		GroupInfo:     groupInfo,
+	}
+
 	resp := group.CreateGroupResp{}
 
 	response, err := st.PostRequest(ctx, ApiAddress+CreateGroup, &req)
