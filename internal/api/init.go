@@ -90,7 +90,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, service g
 	//case <-ctx.Done():
 	//}
 	<-apiCtx.Done()
-	exitCause := context.Cause(ctx)
+	exitCause := context.Cause(apiCtx)
 	log.ZWarn(ctx, "api server exit", exitCause)
 	timer := time.NewTimer(time.Second * 15)
 	defer timer.Stop()

@@ -4,6 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
+	"path/filepath"
+	"time"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -19,10 +24,6 @@ import (
 	"github.com/openimsdk/tools/s3/oss"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
-	"net/http"
-	"path/filepath"
-	"time"
 )
 
 const defaultTimeout = time.Second * 10
@@ -159,7 +160,7 @@ func doObject(db database.ObjectInfo, newS3, oldS3 s3.Interface, skip int) (*Res
 	if err != nil {
 		return nil, err
 	}
-	putURL, err := newS3.PresignedPutObject(ctx, obj.Key, time.Hour)
+	putURL, err := newS3.PresignedPutObject(ctx, obj.Key, time.Hour, &s3.PutOption{ContentType: obj.ContentType})
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +177,7 @@ func doObject(db database.ObjectInfo, newS3, oldS3 s3.Interface, skip int) (*Res
 		return nil, fmt.Errorf("download object failed %s", downloadResp.Status)
 	}
 	log.Printf("file size %d", obj.Size)
-	request, err := http.NewRequest(http.MethodPut, putURL, downloadResp.Body)
+	request, err := http.NewRequest(http.MethodPut, putURL.URL, downloadResp.Body)
 	if err != nil {
 		return nil, err
 	}
