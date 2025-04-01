@@ -144,24 +144,23 @@ func Start(ctx context.Context, index int, config *Config) error {
 		}
 	}()
 
-	if config.Discovery.Enable == conf.ETCD {
-		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), config.GetConfigNames())
-		cm.Watch(ctx)
-	}
-
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGTERM)
-
-	shutdown := func() error {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-		defer cancel()
-		err := server.Shutdown(ctx)
-		if err != nil {
-			return errs.WrapMsg(err, "shutdown err")
-		}
-		return nil
-	}
-	disetcd.RegisterShutDown(shutdown)
+	//if config.Discovery.Enable == conf.ETCD {
+	//	cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), config.GetConfigNames())
+	//	cm.Watch(ctx)
+	//}
+	//sigs := make(chan os.Signal, 1)
+	//signal.Notify(sigs, syscall.SIGTERM)
+	//select {
+	//case val := <-sigs:
+	//	log.ZDebug(ctx, "recv exit", "signal", val.String())
+	//	cancel(fmt.Errorf("signal %s", val.String()))
+	//case <-ctx.Done():
+	//}
+	<-apiCtx.Done()
+	exitCause := context.Cause(apiCtx)
+	log.ZWarn(ctx, "api server exit", exitCause)
+	timer := time.NewTimer(time.Second * 15)
+	defer timer.Stop()
 	select {
 	case <-sigs:
 		program.SIGTERMExit()
