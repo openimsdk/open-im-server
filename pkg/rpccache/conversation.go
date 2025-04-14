@@ -154,7 +154,7 @@ func (c *ConversationLocalCache) getConversationNotReceiveMessageUserIDs(ctx con
 	}))
 }
 
-func (c *ConversationLocalCache) getPinnedConversations(ctx context.Context, userID string) (val []string, err error) {
+func (c *ConversationLocalCache) getPinnedConversationIDs(ctx context.Context, userID string) (val []string, err error) {
 	log.ZDebug(ctx, "ConversationLocalCache getPinnedConversations req", "userID", userID)
 	defer func() {
 		if err == nil {
@@ -190,6 +190,6 @@ func (c *ConversationLocalCache) GetConversationNotReceiveMessageUserIDMap(ctx c
 	return datautil.SliceSet(res.UserIDs), nil
 }
 
-func (c *ConversationLocalCache) GetPinnedConversations(ctx context.Context, userID string) ([]string, error) {
-	return c.getPinnedConversations(ctx, userID)
+func (c *ConversationLocalCache) GetPinnedConversationIDs(ctx context.Context, userID string) ([]string, error) {
+	return c.getPinnedConversationIDs(ctx, userID)
 }
