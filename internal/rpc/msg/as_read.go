@@ -62,11 +62,11 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	}
 	resp := &msg.GetConversationsHasReadAndMaxSeqResp{Seqs: make(map[string]*msg.Seqs)}
 	if req.ReturnPinned {
-		pinnedConversations, err := m.ConversationLocalCache.GetPinnedConversations(ctx, req.UserID)
+		pinnedConversationIDs, err := m.ConversationLocalCache.GetPinnedConversations(ctx, req.UserID)
 		if err != nil {
 			return nil, err
 		}
-		resp.PinnedConversationIDs = pinnedConversations
+		resp.PinnedConversationIDs = pinnedConversationIDs
 	}
 	for conversationID, maxSeq := range maxSeqs {
 		resp.Seqs[conversationID] = &msg.Seqs{
