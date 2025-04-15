@@ -283,7 +283,8 @@ func (g *NotificationSender) fillUserByUserID(ctx context.Context, userID string
 
 func (g *NotificationSender) setVersion(ctx context.Context, version *uint64, versionID *string, collName string, id string) {
 	versions := versionctx.GetVersionLog(ctx).Get()
-	for _, coll := range versions {
+	for i := len(versions) - 1; i >= 0; i-- {
+		coll := versions[i]
 		if coll.Name == collName && coll.Doc.DID == id {
 			*version = uint64(coll.Doc.Version)
 			*versionID = coll.Doc.ID.Hex()
