@@ -321,7 +321,12 @@ func (m *MsgMgo) searchMessageIndex(ctx context.Context, filter any, nextID prim
 }
 
 func (m *MsgMgo) searchMessage(ctx context.Context, req *msg.SearchMessageReq) (int64, []searchMessageIndex, error) {
-	filter := bson.M{}
+	filter := bson.M{
+		"msgs.msg": bson.M{
+			"$exists": true,
+			"$type":   "object",
+		},
+	}
 	if req.RecvID != "" {
 		filter["$or"] = bson.A{
 			bson.M{"msgs.msg.recv_id": req.RecvID},
