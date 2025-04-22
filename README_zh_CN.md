@@ -140,7 +140,7 @@ This software is licensed under a dual-license model:
 
 If you wish to use this software under commercial terms, please contact us at: contact@openim.io
 
-For more information, see: https://www.openim.io/en/licensing
+For more information, see: https://www.openim.io/zh/licensing
 
 
 
