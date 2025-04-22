@@ -384,7 +384,6 @@ func main() {
 					os.Exit(1)
 					return
 				}
-
 				// Invite To Group
 				if err = st.InviteToGroup(st.Ctx, userCreatedID); err != nil {
 					log.ZError(st.Ctx, "Invite To Group failed.", err, "UserID", userCreatedID)
@@ -417,8 +416,8 @@ func main() {
 
 			case <-ticker.C:
 				// Send Message
-				if err = st.SendMsg(st.Ctx, st.DefaultSendUserID); err != nil {
-					log.ZError(st.Ctx, "Send Message failed.", err, "UserID", st.DefaultSendUserID)
+				if err = st.SendMsg(st.Ctx, st.DefaultUserID); err != nil {
+					log.ZError(st.Ctx, "Send Message failed.", err, "UserID", st.DefaultUserID)
 					continue
 				}
 			}
