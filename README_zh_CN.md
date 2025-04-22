@@ -133,15 +133,14 @@
 
 ## :closed_book:  开源许可证 License
 
-This software is licensed under a dual-license model:
+本软件采用双重授权模型：
 
-- The GNU Affero General Public License (AGPL), Version 3 or later; **OR**
-- Commercial license terms from OpenIMSDK.
+GNU Affero 通用公共许可证（AGPL）第 3 版或更高版本；或
 
-If you wish to use this software under commercial terms, please contact us at: contact@openim.io
+来自 OpenIMSDK 的商业授权条款。
 
-For more information, see: https://www.openim.io/zh/licensing
-
+如需商用，请联系：contact@openim.io
+详见：https://www.openim.io/en/licensing
 
 
 ## 🔮 Thanks to our contributors!
