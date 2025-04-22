@@ -131,9 +131,18 @@
 
 感谢您的贡献，一起来打造强大的即时通讯解决方案！
 
-## :closed_book: 许可证
+## :closed_book:  开源许可证 License
 
-  OpenIMSDK 在 Apache License 2.0 许可下可用。查看[LICENSE 文件](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)了解更多信息。
+This software is licensed under a dual-license model:
+
+- The GNU Affero General Public License (AGPL), Version 3 or later; **OR**
+- Commercial license terms from OpenIMSDK.
+
+If you wish to use this software under commercial terms, please contact us at: contact@openim.io
+
+For more information, see: https://www.openim.io/en/licensing
+
+
 
 ## 🔮 Thanks to our contributors!
 
