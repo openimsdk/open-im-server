@@ -133,7 +133,7 @@
 
 ## :closed_book: 许可证
 
-  OpenIMSDK 在 Apache License 2.0 许可下可用。查看[LICENSE 文件](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)了解更多信息。
+This software is licensed under the Apache License 2.0
 
 ## 🔮 Thanks to our contributors!
 
