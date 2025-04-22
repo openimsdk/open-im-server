@@ -453,12 +453,25 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		return nil, err
 	}
 
-	if err := g.db.CreateGroup(ctx, nil, groupMembers); err != nil {
-		return nil, err
-	}
+	const singleQuantity = 50
+	for start := 0; start < len(groupMembers); start += singleQuantity {
+		end := start + singleQuantity
+		if end > len(groupMembers) {
+			end = len(groupMembers)
+		}
+		currentMembers := groupMembers[start:end]
 
-	if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, req.SendMessage, opUserID, req.InvitedUserIDs...); err != nil {
-		return nil, err
+		if err := g.db.CreateGroup(ctx, nil, currentMembers); err != nil {
+			return nil, err
+		}
+
+		userIDs := datautil.Slice(currentMembers, func(e *model.GroupMember) string {
+			return e.UserID
+		})
+
+		if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, req.SendMessage, opUserID, userIDs...); err != nil {
+			return nil, err
+		}
 	}
 	return &pbgroup.InviteUserToGroupResp{}, nil
 }
