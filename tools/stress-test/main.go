@@ -72,22 +72,22 @@ type BaseResp struct {
 }
 
 type StressTest struct {
-	Conf              *conf
-	AdminUserID       string
-	AdminToken        string
-	DefaultGroupID    string
-	DefaultSendUserID string
-	UserCounter       int
-	GroupCounter      int
-	MsgCounter        int
-	CreatedUsers      []string
-	CreatedGroups     []string
-	Mutex             sync.Mutex
-	Ctx               context.Context
-	Cancel            context.CancelFunc
-	HttpClient        *http.Client
-	Wg                sync.WaitGroup
-	Once              sync.Once
+	Conf           *conf
+	AdminUserID    string
+	AdminToken     string
+	DefaultGroupID string
+	DefaultUserID  string
+	UserCounter    int
+	GroupCounter   int
+	MsgCounter     int
+	CreatedUsers   []string
+	CreatedGroups  []string
+	Mutex          sync.Mutex
+	Ctx            context.Context
+	Cancel         context.CancelFunc
+	HttpClient     *http.Client
+	Wg             sync.WaitGroup
+	Once           sync.Once
 }
 
 type conf struct {
@@ -384,7 +384,6 @@ func main() {
 					os.Exit(1)
 					return
 				}
-
 				// Invite To Group
 				if err = st.InviteToGroup(st.Ctx, userCreatedID); err != nil {
 					log.ZError(st.Ctx, "Invite To Group failed.", err, "UserID", userCreatedID)
@@ -393,7 +392,7 @@ func main() {
 				}
 
 				st.Once.Do(func() {
-					st.DefaultSendUserID = userCreatedID
+					st.DefaultUserID = userCreatedID
 					fmt.Println("Default Send User Created ID:", userCreatedID)
 					close(ch)
 				})
@@ -417,8 +416,8 @@ func main() {
 
 			case <-ticker.C:
 				// Send Message
-				if err = st.SendMsg(st.Ctx, st.DefaultSendUserID); err != nil {
-					log.ZError(st.Ctx, "Send Message failed.", err, "UserID", st.DefaultSendUserID)
+				if err = st.SendMsg(st.Ctx, st.DefaultUserID); err != nil {
+					log.ZError(st.Ctx, "Send Message failed.", err, "UserID", st.DefaultUserID)
 					continue
 				}
 			}
@@ -443,9 +442,9 @@ func main() {
 			case <-ticker.C:
 
 				// Create Group
-				_, err := st.CreateGroup(st.Ctx, st.DefaultSendUserID)
+				_, err := st.CreateGroup(st.Ctx, st.DefaultUserID)
 				if err != nil {
-					log.ZError(st.Ctx, "Create Group failed.", err, "UserID", st.DefaultSendUserID)
+					log.ZError(st.Ctx, "Create Group failed.", err, "UserID", st.DefaultUserID)
 					os.Exit(1)
 					return
 				}
