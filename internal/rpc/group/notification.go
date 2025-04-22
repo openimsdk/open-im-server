@@ -522,17 +522,7 @@ func (g *NotificationSender) MemberKickedNotification(ctx context.Context, tips 
 }
 
 func (g *NotificationSender) GroupApplicationAgreeMemberEnterNotification(ctx context.Context, groupID string, SendMessage *bool, invitedOpUserID string, entrantUserID ...string) error {
-	const singleQuantity = 50
-	for start := 0; start < len(entrantUserID); start += singleQuantity {
-		end := start + singleQuantity
-		if end > len(entrantUserID) {
-			end = len(entrantUserID)
-		}
-		if err := g.groupApplicationAgreeMemberEnterNotification(ctx, groupID, SendMessage, invitedOpUserID, entrantUserID[start:end]...); err != nil {
-			return err
-		}
-	}
-	return nil
+	return g.groupApplicationAgreeMemberEnterNotification(ctx, groupID, SendMessage, invitedOpUserID, entrantUserID...)
 }
 
 func (g *NotificationSender) groupApplicationAgreeMemberEnterNotification(ctx context.Context, groupID string, SendMessage *bool, invitedOpUserID string, entrantUserID ...string) error {
