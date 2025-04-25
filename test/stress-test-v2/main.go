@@ -56,6 +56,7 @@ var (
 
 const (
 	MaxUser            = 100000
+	Max1kUser          = 1000
 	Max100KGroup       = 100
 	Max999Group        = 1000
 	MaxInviteUserLimit = 999
@@ -553,7 +554,7 @@ func main() {
 						// continue
 					}
 
-					for i := 0; i < MaxUser/MaxInviteUserLimit; i++ {
+					for i := 0; i <= MaxUser/MaxInviteUserLimit; i++ {
 						InviteUserIDs := make([]string, 0)
 						// ensure TargetUserList is in group
 						InviteUserIDs = append(InviteUserIDs, TestTargetUserList...)
@@ -635,13 +636,13 @@ func main() {
 						log.ZError(st.Ctx, "Create group failed.", err)
 						// continue
 					}
-					for i := 0; i < MaxUser/MaxInviteUserLimit; i++ {
+					for i := 0; i <= Max1kUser/MaxInviteUserLimit; i++ {
 						InviteUserIDs := make([]string, 0)
 						// ensure TargetUserList is in group
 						InviteUserIDs = append(InviteUserIDs, TestTargetUserList...)
 
 						startIdx := max(i*MaxInviteUserLimit, 1)
-						endIdx := min((i+1)*MaxInviteUserLimit, MaxUser)
+						endIdx := min((i+1)*MaxInviteUserLimit, Max1kUser)
 
 						for j := startIdx; j < endIdx; j++ {
 							userCreatedID := fmt.Sprintf("v2_StressTest_User_%d", j)
