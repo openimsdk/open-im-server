@@ -132,7 +132,7 @@ Thank you for contributing to building a powerful instant messaging solution!
 
 ## :closed_book: License
 
-For more details, please refer to [here](./LICENSE).
+This software is licensed under the Apache License 2.0
 
 
 
