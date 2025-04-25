@@ -21,6 +21,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"reflect"
 	"strconv"
 	"syscall"
 	"time"
@@ -45,6 +46,36 @@ func init() {
 	prommetrics.RegistryAll()
 }
 
+func getConfigRpcMaxRequestBody(value reflect.Value) *conf.MaxRequestBody {
+	for value.Kind() == reflect.Pointer {
+		value = value.Elem()
+	}
+	if value.Kind() == reflect.Struct {
+		num := value.NumField()
+		for i := 0; i < num; i++ {
+			field := value.Field(i)
+			if !field.CanInterface() {
+				continue
+			}
+			for field.Kind() == reflect.Pointer {
+				field = field.Elem()
+			}
+			switch elem := field.Interface().(type) {
+			case conf.Share:
+				return &elem.RPCMaxBodySize
+			case conf.MaxRequestBody:
+				return &elem
+			}
+			if field.Kind() == reflect.Struct {
+				if elem := getConfigRpcMaxRequestBody(field); elem != nil {
+					return elem
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *conf.Prometheus, listenIP,
 	registerIP string, autoSetPorts bool, rpcPorts []int, index int, rpcRegisterName string, notification *conf.Notification, config T,
 	watchConfigNames []string, watchServiceNames []string,
@@ -55,7 +86,24 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 		conf.InitNotification(notification)
 	}
 
-	options = append(options, mw.GrpcServer())
+	maxRequestBody := getConfigRpcMaxRequestBody(reflect.ValueOf(config))
+
+	log.ZDebug(ctx, "rpc start", "rpcMaxRequestBody", maxRequestBody, "rpcRegisterName", rpcRegisterName, "registerIP", registerIP, "listenIP", listenIP)
+
+	options = append(options,
+		mw.GrpcServer(),
+	)
+	var clientOptions []grpc.DialOption
+	if maxRequestBody != nil {
+		if maxRequestBody.RequestMaxBodySize > 0 {
+			options = append(options, grpc.MaxRecvMsgSize(maxRequestBody.RequestMaxBodySize))
+			clientOptions = append(clientOptions, grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(maxRequestBody.RequestMaxBodySize)))
+		}
+		if maxRequestBody.ResponseMaxBodySize > 0 {
+			options = append(options, grpc.MaxSendMsgSize(maxRequestBody.ResponseMaxBodySize))
+			clientOptions = append(clientOptions, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxRequestBody.ResponseMaxBodySize)))
+		}
+	}
 
 	registerIP, err := network.GetRpcRegisterIP(registerIP)
 	if err != nil {
@@ -84,6 +132,9 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 		mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")),
 	)
+	if len(clientOptions) > 0 {
+		client.AddOption(clientOptions...)
+	}
 
 	ctx, cancel := context.WithCancelCause(ctx)
 

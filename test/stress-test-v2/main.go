@@ -56,6 +56,7 @@ var (
 
 const (
 	MaxUser            = 100000
+	Max1kUser          = 1000
 	Max100KGroup       = 100
 	Max999Group        = 1000
 	MaxInviteUserLimit = 999
@@ -161,7 +162,7 @@ func (st *StressTest) PostRequest(ctx context.Context, url string, reqbody any) 
 
 	if baseResp.ErrCode != 0 {
 		err = fmt.Errorf(baseResp.ErrMsg)
-		log.ZError(ctx, "Failed to send request", err, "url", url, "reqbody", reqbody, "resp", baseResp)
+		// log.ZError(ctx, "Failed to send request", err, "url", url, "reqbody", reqbody, "resp", baseResp)
 		return nil, err
 	}
 
@@ -530,9 +531,20 @@ func main() {
 				// Create 100K groups
 				st.Wg.Add(1)
 				go func(idx int) {
+					startTime := time.Now()
+					defer func() {
+						elapsedTime := time.Since(startTime)
+						log.ZInfo(st.Ctx, "100K group creation completed",
+							"groupID", fmt.Sprintf("v2_StressTest_Group_100K_%d", idx),
+							"index", idx,
+							"duration", elapsedTime.String())
+					}()
+
 					defer st.Wg.Done()
 					defer func() {
+						st.Mutex.Lock()
 						st.Create100kGroupCounter++
+						st.Mutex.Unlock()
 					}()
 
 					groupID := fmt.Sprintf("v2_StressTest_Group_100K_%d", idx)
@@ -542,7 +554,7 @@ func main() {
 						// continue
 					}
 
-					for i := 0; i < MaxUser/MaxInviteUserLimit; i++ {
+					for i := 0; i <= MaxUser/MaxInviteUserLimit; i++ {
 						InviteUserIDs := make([]string, 0)
 						// ensure TargetUserList is in group
 						InviteUserIDs = append(InviteUserIDs, TestTargetUserList...)
@@ -556,7 +568,7 @@ func main() {
 						}
 
 						if len(InviteUserIDs) == 0 {
-							log.ZWarn(st.Ctx, "InviteUserIDs is empty", nil, "groupID", groupID)
+							// log.ZWarn(st.Ctx, "InviteUserIDs is empty", nil, "groupID", groupID)
 							continue
 						}
 
@@ -567,7 +579,7 @@ func main() {
 						}
 
 						if len(InviteUserIDs) == 0 {
-							log.ZWarn(st.Ctx, "InviteUserIDs is empty", nil, "groupID", groupID)
+							// log.ZWarn(st.Ctx, "InviteUserIDs is empty", nil, "groupID", groupID)
 							continue
 						}
 
@@ -602,9 +614,20 @@ func main() {
 				// Create 999 groups
 				st.Wg.Add(1)
 				go func(idx int) {
+					startTime := time.Now()
+					defer func() {
+						elapsedTime := time.Since(startTime)
+						log.ZInfo(st.Ctx, "999 group creation completed",
+							"groupID", fmt.Sprintf("v2_StressTest_Group_1K_%d", idx),
+							"index", idx,
+							"duration", elapsedTime.String())
+					}()
+
 					defer st.Wg.Done()
 					defer func() {
+						st.Mutex.Lock()
 						st.Create999GroupCounter++
+						st.Mutex.Unlock()
 					}()
 
 					groupID := fmt.Sprintf("v2_StressTest_Group_1K_%d", idx)
@@ -613,13 +636,13 @@ func main() {
 						log.ZError(st.Ctx, "Create group failed.", err)
 						// continue
 					}
-					for i := 0; i < MaxUser/MaxInviteUserLimit; i++ {
+					for i := 0; i <= Max1kUser/MaxInviteUserLimit; i++ {
 						InviteUserIDs := make([]string, 0)
 						// ensure TargetUserList is in group
 						InviteUserIDs = append(InviteUserIDs, TestTargetUserList...)
 
 						startIdx := max(i*MaxInviteUserLimit, 1)
-						endIdx := min((i+1)*MaxInviteUserLimit, MaxUser)
+						endIdx := min((i+1)*MaxInviteUserLimit, Max1kUser)
 
 						for j := startIdx; j < endIdx; j++ {
 							userCreatedID := fmt.Sprintf("v2_StressTest_User_%d", j)
@@ -627,7 +650,7 @@ func main() {
 						}
 
 						if len(InviteUserIDs) == 0 {
-							log.ZWarn(st.Ctx, "InviteUserIDs is empty", nil, "groupID", groupID)
+							// log.ZWarn(st.Ctx, "InviteUserIDs is empty", nil, "groupID", groupID)
 							continue
 						}
 
@@ -638,7 +661,7 @@ func main() {
 						}
 
 						if len(InviteUserIDs) == 0 {
-							log.ZWarn(st.Ctx, "InviteUserIDs is empty", nil, "groupID", groupID)
+							// log.ZWarn(st.Ctx, "InviteUserIDs is empty", nil, "groupID", groupID)
 							continue
 						}
 
