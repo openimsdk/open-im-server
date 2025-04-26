@@ -57,7 +57,7 @@ type Config struct {
 // MsgServer encapsulates dependencies required for message handling.
 type msgServer struct {
 	msg.UnimplementedMsgServer
-	RegisterCenter         discovery.SvcDiscoveryRegistry   // Service discovery registry for service registration.
+	RegisterCenter         discovery.Conn                   // Service discovery registry for service registration.
 	MsgDatabase            controller.CommonMsgDatabase     // Interface for message database operations.
 	UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
 	FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
@@ -100,10 +100,6 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	seqUserCache := redis.NewSeqUserCacheRedis(rdb, seqUser)
-	msgDatabase, err := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, &config.KafkaConfig)
-	if err != nil {
-		return err
-	}
 	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
 		return err
