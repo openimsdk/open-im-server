@@ -12,7 +12,7 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/openimsdk/protocol v0.0.73-alpha.6
+	github.com/openimsdk/protocol v0.0.73-alpha.7
 	github.com/openimsdk/tools v0.0.50-alpha.79
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
@@ -34,7 +34,7 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/kelindar/bitmap v1.5.2
 	github.com/likexian/gokit v0.25.13
-	github.com/openimsdk/gomake v0.0.15-alpha.2
+	github.com/openimsdk/gomake v0.0.15-alpha.5
 	github.com/redis/go-redis/v9 v9.4.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil v3.21.11+incompatible

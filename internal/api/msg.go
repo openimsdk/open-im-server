@@ -551,3 +551,11 @@ func (m *MessageApi) SearchMsg(c *gin.Context) {
 func (m *MessageApi) GetServerTime(c *gin.Context) {
 	a2r.Call(c, msg.MsgClient.GetServerTime, m.Client)
 }
+
+func (m *MessageApi) GetConversationsUnreadCount(c *gin.Context) {
+	a2r.Call(c, msg.MsgClient.GetConversationsUnreadCount, m.Client)
+}
+
+func (m *MessageApi) ClearConversationsUnreadCount(c *gin.Context) {
+	a2r.Call(c, msg.MsgClient.ClearConversationsUnreadCount, m.Client)
+}
