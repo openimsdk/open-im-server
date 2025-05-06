@@ -159,15 +159,17 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 	if err != nil {
 		return nil, err
 	}
-	isAdmin := authverify.IsManagerUserID(claims.UserID, s.config.Share.IMAdminUserID)
-	if isAdmin {
-		return claims, nil
-	}
 	m, err := s.authDatabase.GetTokensWithoutError(ctx, claims.UserID, claims.PlatformID)
 	if err != nil {
 		return nil, err
 	}
 	if len(m) == 0 {
+		isAdmin := authverify.IsManagerUserID(claims.UserID, s.config.Share.IMAdminUserID)
+		if isAdmin {
+			if err = s.authDatabase.GetTemporaryTokensWithoutError(ctx, claims.UserID, claims.PlatformID, tokensString); err == nil {
+				return claims, nil
+			}
+		}
 		return nil, servererrs.ErrTokenNotExist.Wrap()
 	}
 	if v, ok := m[tokensString]; ok {
@@ -178,6 +180,13 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 			return nil, servererrs.ErrTokenKicked.Wrap()
 		default:
 			return nil, errs.Wrap(errs.ErrTokenUnknown)
+		}
+	} else {
+		isAdmin := authverify.IsManagerUserID(claims.UserID, s.config.Share.IMAdminUserID)
+		if isAdmin {
+			if err = s.authDatabase.GetTemporaryTokensWithoutError(ctx, claims.UserID, claims.PlatformID, tokensString); err == nil {
+				return claims, nil
+			}
 		}
 	}
 	return nil, servererrs.ErrTokenNotExist.Wrap()
