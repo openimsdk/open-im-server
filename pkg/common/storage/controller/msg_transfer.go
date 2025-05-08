@@ -81,42 +81,10 @@ func (db *msgTransferDatabase) BatchInsertChat2DB(ctx context.Context, conversat
 			continue
 		}
 		seqs[i] = msg.Seq
-		var offlinePushModel *model.OfflinePushModel
-		if msg.OfflinePushInfo != nil {
-			offlinePushModel = &model.OfflinePushModel{
-				Title:         msg.OfflinePushInfo.Title,
-				Desc:          msg.OfflinePushInfo.Desc,
-				Ex:            msg.OfflinePushInfo.Ex,
-				IOSPushSound:  msg.OfflinePushInfo.IOSPushSound,
-				IOSBadgeCount: msg.OfflinePushInfo.IOSBadgeCount,
-			}
-		}
 		if msg.Status == constant.MsgStatusSending {
 			msg.Status = constant.MsgStatusSendSuccess
 		}
-		msgs[i] = &model.MsgDataModel{
-			SendID:           msg.SendID,
-			RecvID:           msg.RecvID,
-			GroupID:          msg.GroupID,
-			ClientMsgID:      msg.ClientMsgID,
-			ServerMsgID:      msg.ServerMsgID,
-			SenderPlatformID: msg.SenderPlatformID,
-			SenderNickname:   msg.SenderNickname,
-			SenderFaceURL:    msg.SenderFaceURL,
-			SessionType:      msg.SessionType,
-			MsgFrom:          msg.MsgFrom,
-			ContentType:      msg.ContentType,
-			Content:          string(msg.Content),
-			Seq:              msg.Seq,
-			SendTime:         msg.SendTime,
-			CreateTime:       msg.CreateTime,
-			Status:           msg.Status,
-			Options:          msg.Options,
-			OfflinePush:      offlinePushModel,
-			AtUserIDList:     msg.AtUserIDList,
-			AttachedInfo:     msg.AttachedInfo,
-			Ex:               msg.Ex,
-		}
+		msgs[i] = convert.MsgPb2DB(msg)
 	}
 	if err := db.BatchInsertBlock(ctx, conversationID, msgs, updateKeyMsg, msgList[0].Seq); err != nil {
 		return err
