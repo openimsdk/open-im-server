@@ -76,6 +76,9 @@ func (g *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, servererrs.ErrDismissedAlready.Wrap()
 	}
+	if _, err := g.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx)); err != nil {
+		return nil, err
+	}
 	var (
 		hasGroupUpdate bool
 		sortVersion    uint64
@@ -170,7 +173,6 @@ func (g *groupServer) GetIncrementalJoinGroup(ctx context.Context, req *pbgroup.
 }
 
 func (g *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *pbgroup.BatchGetIncrementalGroupMemberReq) (*pbgroup.BatchGetIncrementalGroupMemberResp, error) {
-
 	var num int
 	resp := make(map[string]*pbgroup.GetIncrementalGroupMemberResp)
 	for _, memberReq := range req.ReqList {

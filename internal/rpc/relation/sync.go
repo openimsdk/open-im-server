@@ -40,9 +40,6 @@ func (s *friendServer) NotificationUserInfoUpdate(ctx context.Context, req *rela
 }
 
 func (s *friendServer) GetFullFriendUserIDs(ctx context.Context, req *relation.GetFullFriendUserIDsReq) (*relation.GetFullFriendUserIDsResp, error) {
-	req.ProtoReflect()
-
-	req.ProtoReflect().Type()
 	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
