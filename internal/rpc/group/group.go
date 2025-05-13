@@ -487,6 +487,11 @@ func (g *groupServer) GetGroupAllMember(ctx context.Context, req *pbgroup.GetGro
 }
 
 func (g *groupServer) GetGroupMemberList(ctx context.Context, req *pbgroup.GetGroupMemberListReq) (*pbgroup.GetGroupMemberListResp, error) {
+	if opUserID := mcontext.GetOpUserID(ctx); !datautil.Contain(opUserID, g.config.Share.IMAdminUserID...) {
+		if _, err := g.db.TakeGroupMember(ctx, req.GroupID, opUserID); err != nil {
+			return nil, err
+		}
+	}
 	var (
 		total   int64
 		members []*model.GroupMember
@@ -495,34 +500,13 @@ func (g *groupServer) GetGroupMemberList(ctx context.Context, req *pbgroup.GetGr
 	if req.Keyword == "" {
 		total, members, err = g.db.PageGetGroupMember(ctx, req.GroupID, req.Pagination)
 	} else {
-		members, err = g.db.FindGroupMemberAll(ctx, req.GroupID)
+		total, members, err = g.db.SearchGroupMember(ctx, req.GroupID, req.Keyword, req.Pagination)
 	}
 	if err != nil {
 		return nil, err
 	}
 	if err := g.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
-	}
-	if req.Keyword != "" {
-		groupMembers := make([]*model.GroupMember, 0)
-		for _, member := range members {
-			if member.UserID == req.Keyword {
-				groupMembers = append(groupMembers, member)
-				total++
-				continue
-			}
-			if member.Nickname == req.Keyword {
-				groupMembers = append(groupMembers, member)
-				total++
-				continue
-			}
-		}
-
-		members := datautil.Paginate(groupMembers, int(req.Pagination.GetPageNumber()), int(req.Pagination.GetShowNumber()))
-		return &pbgroup.GetGroupMemberListResp{
-			Total:   uint32(total),
-			Members: datautil.Batch(convert.Db2PbGroupMember, members),
-		}, nil
 	}
 	return &pbgroup.GetGroupMemberListResp{
 		Total:   uint32(total),

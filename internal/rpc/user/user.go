@@ -283,9 +283,9 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 		return nil, errs.ErrArgs.WrapMsg("users is empty")
 	}
 	// check if secret is changed
-	if s.config.Share.Secret == defaultSecret {
-		return nil, servererrs.ErrSecretNotChanged.Wrap()
-	}
+	//if s.config.Share.Secret == defaultSecret {
+	//	return nil, servererrs.ErrSecretNotChanged.Wrap()
+	//}
 
 	if err = authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err

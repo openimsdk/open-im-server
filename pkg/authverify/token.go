@@ -46,8 +46,8 @@ func IsAppManagerUid(ctx context.Context, imAdminUserID []string) bool {
 	return datautil.Contain(mcontext.GetOpUserID(ctx), imAdminUserID...)
 }
 
-func CheckAdmin(ctx context.Context, imAdminUserID []string) error {
-	if datautil.Contain(mcontext.GetOpUserID(ctx), imAdminUserID...) {
+func CheckAdmin(ctx context.Context) error {
+	if IsAdmin(ctx) {
 		return nil
 	}
 	return servererrs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
@@ -59,4 +59,30 @@ func IsManagerUserID(opUserID string, imAdminUserID []string) bool {
 
 func CheckSystemAccount(ctx context.Context, level int32) bool {
 	return level >= constant.AppAdmin
+}
+
+type ctxAuthKey struct{}
+
+func WithIMAdminUserIDs(ctx context.Context, imAdminUserID []string) context.Context {
+	return context.WithValue(ctx, ctxAuthKey{}, imAdminUserID)
+}
+
+func GetIMAdminUserIDs(ctx context.Context) []string {
+	imAdminUserID, _ := ctx.Value(ctxAuthKey{}).([]string)
+	return imAdminUserID
+}
+
+func IsAdmin(ctx context.Context) bool {
+	return datautil.Contain(mcontext.GetOpUserID(ctx), GetIMAdminUserIDs(ctx)...)
+}
+
+func CheckAccess(ctx context.Context, ownerUserID string) error {
+	opUserID := mcontext.GetOpUserID(ctx)
+	if opUserID == ownerUserID {
+		return nil
+	}
+	if !datautil.Contain(mcontext.GetOpUserID(ctx), GetIMAdminUserIDs(ctx)...) {
+		return servererrs.ErrNoPermission.WrapMsg("ownerUserID", ownerUserID)
+	}
+	return nil
 }
