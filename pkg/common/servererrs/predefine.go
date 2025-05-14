@@ -17,6 +17,8 @@ package servererrs
 import "github.com/openimsdk/tools/errs"
 
 var (
+	ErrSecretNotChanged = errs.NewCodeError(SecretNotChangedError, "secret not changed, please change secret in config/share.yml for security reasons")
+
 	ErrDatabase         = errs.NewCodeError(DatabaseError, "DatabaseError")
 	ErrNetwork          = errs.NewCodeError(NetworkError, "NetworkError")
 	ErrCallback         = errs.NewCodeError(CallbackError, "CallbackError")
