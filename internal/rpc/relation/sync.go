@@ -2,10 +2,11 @@ package relation
 
 import (
 	"context"
+	"slices"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/util/hashutil"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"
-	"slices"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -39,6 +40,9 @@ func (s *friendServer) NotificationUserInfoUpdate(ctx context.Context, req *rela
 }
 
 func (s *friendServer) GetFullFriendUserIDs(ctx context.Context, req *relation.GetFullFriendUserIDsReq) (*relation.GetFullFriendUserIDsResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	vl, err := s.db.FindMaxFriendVersionCache(ctx, req.UserID)
 	if err != nil {
 		return nil, err
@@ -60,7 +64,7 @@ func (s *friendServer) GetFullFriendUserIDs(ctx context.Context, req *relation.G
 }
 
 func (s *friendServer) GetIncrementalFriends(ctx context.Context, req *relation.GetIncrementalFriendsReq) (*relation.GetIncrementalFriendsResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	var sortVersion uint64

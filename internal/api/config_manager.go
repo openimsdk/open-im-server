@@ -44,7 +44,7 @@ func NewConfigManager(IMAdminUserID []string, cfg *config.AllConfig, client *cli
 }
 
 func (cm *ConfigManager) CheckAdmin(c *gin.Context) {
-	if err := authverify.CheckAdmin(c, cm.imAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(c); err != nil {
 		apiresp.GinError(c, err)
 		c.Abort()
 	}

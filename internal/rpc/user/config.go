@@ -11,7 +11,7 @@ import (
 
 func (s *userServer) GetUserClientConfig(ctx context.Context, req *pbuser.GetUserClientConfigReq) (*pbuser.GetUserClientConfigResp, error) {
 	if req.UserID != "" {
-		if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 			return nil, err
 		}
 		if _, err := s.db.GetUserByID(ctx, req.UserID); err != nil {
@@ -26,7 +26,7 @@ func (s *userServer) GetUserClientConfig(ctx context.Context, req *pbuser.GetUse
 }
 
 func (s *userServer) SetUserClientConfig(ctx context.Context, req *pbuser.SetUserClientConfigReq) (*pbuser.SetUserClientConfigResp, error) {
-	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	if req.UserID != "" {
@@ -41,7 +41,7 @@ func (s *userServer) SetUserClientConfig(ctx context.Context, req *pbuser.SetUse
 }
 
 func (s *userServer) DelUserClientConfig(ctx context.Context, req *pbuser.DelUserClientConfigReq) (*pbuser.DelUserClientConfigResp, error) {
-	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	if err := s.clientConfig.DelUserConfig(ctx, req.UserID, req.Keys); err != nil {
@@ -51,7 +51,7 @@ func (s *userServer) DelUserClientConfig(ctx context.Context, req *pbuser.DelUse
 }
 
 func (s *userServer) PageUserClientConfig(ctx context.Context, req *pbuser.PageUserClientConfigReq) (*pbuser.PageUserClientConfigResp, error) {
-	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	total, res, err := s.clientConfig.GetUserConfigPage(ctx, req.UserID, req.Key, req.Pagination)
