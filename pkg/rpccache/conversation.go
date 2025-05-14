@@ -16,6 +16,7 @@ package rpccache
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
@@ -153,6 +154,26 @@ func (c *ConversationLocalCache) getConversationNotReceiveMessageUserIDs(ctx con
 	}))
 }
 
+func (c *ConversationLocalCache) getPinnedConversationIDs(ctx context.Context, userID string) (val []string, err error) {
+	log.ZDebug(ctx, "ConversationLocalCache getPinnedConversations req", "userID", userID)
+	defer func() {
+		if err == nil {
+			log.ZDebug(ctx, "ConversationLocalCache getPinnedConversations return", "userID", userID, "value", val)
+		} else {
+			log.ZError(ctx, "ConversationLocalCache getPinnedConversations return", err, "userID", userID)
+		}
+	}()
+	var cache cacheProto[pbconversation.GetPinnedConversationIDsResp]
+	resp, err := cache.Unmarshal(c.local.Get(ctx, cachekey.GetPinnedConversationIDs(userID), func(ctx context.Context) ([]byte, error) {
+		log.ZDebug(ctx, "ConversationLocalCache getConversationNotReceiveMessageUserIDs rpc", "userID", userID)
+		return cache.Marshal(c.client.ConversationClient.GetPinnedConversationIDs(ctx, &pbconversation.GetPinnedConversationIDsReq{UserID: userID}))
+	}))
+	if err != nil {
+		return nil, err
+	}
+	return resp.ConversationIDs, nil
+}
+
 func (c *ConversationLocalCache) GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error) {
 	res, err := c.getConversationNotReceiveMessageUserIDs(ctx, conversationID)
 	if err != nil {
@@ -167,4 +188,8 @@ func (c *ConversationLocalCache) GetConversationNotReceiveMessageUserIDMap(ctx c
 		return nil, err
 	}
 	return datautil.SliceSet(res.UserIDs), nil
+}
+
+func (c *ConversationLocalCache) GetPinnedConversationIDs(ctx context.Context, userID string) ([]string, error) {
+	return c.getPinnedConversationIDs(ctx, userID)
 }
