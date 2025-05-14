@@ -152,7 +152,7 @@ func (g *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 }
 
 func (g *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
-	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+	if !authverify.IsAdmin(ctx) {
 		groupMember, err := g.db.TakeGroupMember(ctx, groupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return err
@@ -204,7 +204,7 @@ func (g *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	if req.OwnerUserID == "" {
 		return nil, errs.ErrArgs.WrapMsg("no group owner")
 	}
-	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, g.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	userIDs := append(append(req.MemberUserIDs, req.AdminUserIDs...), req.OwnerUserID)
@@ -308,7 +308,7 @@ func (g *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 }
 
 func (g *groupServer) GetJoinedGroupList(ctx context.Context, req *pbgroup.GetJoinedGroupListReq) (*pbgroup.GetJoinedGroupListResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.FromUserID, g.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	total, members, err := g.db.PageGetJoinGroup(ctx, req.FromUserID, req.Pagination)
@@ -380,7 +380,7 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 
 	var groupMember *model.GroupMember
 	var opUserID string
-	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+	if !authverify.IsAdmin(ctx) {
 		opUserID = mcontext.GetOpUserID(ctx)
 		var err error
 		groupMember, err = g.db.TakeGroupMember(ctx, req.GroupID, opUserID)
@@ -399,7 +399,7 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	}
 
 	if group.NeedVerification == constant.AllNeedVerification {
-		if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+		if !authverify.IsAdmin(ctx) {
 			if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
 				var requests []*model.GroupRequest
 				for _, userID := range req.InvitedUserIDs {
@@ -487,6 +487,11 @@ func (g *groupServer) GetGroupAllMember(ctx context.Context, req *pbgroup.GetGro
 }
 
 func (g *groupServer) GetGroupMemberList(ctx context.Context, req *pbgroup.GetGroupMemberListReq) (*pbgroup.GetGroupMemberListResp, error) {
+	if opUserID := mcontext.GetOpUserID(ctx); !datautil.Contain(opUserID, g.config.Share.IMAdminUserID...) {
+		if _, err := g.db.TakeGroupMember(ctx, req.GroupID, opUserID); err != nil {
+			return nil, err
+		}
+	}
 	var (
 		total   int64
 		members []*model.GroupMember
@@ -495,34 +500,13 @@ func (g *groupServer) GetGroupMemberList(ctx context.Context, req *pbgroup.GetGr
 	if req.Keyword == "" {
 		total, members, err = g.db.PageGetGroupMember(ctx, req.GroupID, req.Pagination)
 	} else {
-		members, err = g.db.FindGroupMemberAll(ctx, req.GroupID)
+		total, members, err = g.db.SearchGroupMember(ctx, req.GroupID, req.Keyword, req.Pagination)
 	}
 	if err != nil {
 		return nil, err
 	}
 	if err := g.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
-	}
-	if req.Keyword != "" {
-		groupMembers := make([]*model.GroupMember, 0)
-		for _, member := range members {
-			if member.UserID == req.Keyword {
-				groupMembers = append(groupMembers, member)
-				total++
-				continue
-			}
-			if member.Nickname == req.Keyword {
-				groupMembers = append(groupMembers, member)
-				total++
-				continue
-			}
-		}
-
-		members := datautil.Paginate(groupMembers, int(req.Pagination.GetPageNumber()), int(req.Pagination.GetShowNumber()))
-		return &pbgroup.GetGroupMemberListResp{
-			Total:   uint32(total),
-			Members: datautil.Batch(convert.Db2PbGroupMember, members),
-		}, nil
 	}
 	return &pbgroup.GetGroupMemberListResp{
 		Total:   uint32(total),
@@ -564,7 +548,7 @@ func (g *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	for i, member := range members {
 		memberMap[member.UserID] = members[i]
 	}
-	isAppManagerUid := authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID)
+	isAppManagerUid := authverify.IsAdmin(ctx)
 	opMember := memberMap[opUserID]
 	for _, userID := range req.KickedUserIDs {
 		member, ok := memberMap[userID]
@@ -782,7 +766,7 @@ func (g *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 	if !datautil.Contain(req.HandleResult, constant.GroupResponseAgree, constant.GroupResponseRefuse) {
 		return nil, errs.ErrArgs.WrapMsg("HandleResult unknown")
 	}
-	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+	if !authverify.IsAdmin(ctx) {
 		groupMember, err := g.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
@@ -936,7 +920,7 @@ func (g *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 	if req.UserID == "" {
 		req.UserID = mcontext.GetOpUserID(ctx)
 	} else {
-		if err := authverify.CheckAccessV3(ctx, req.UserID, g.config.Share.IMAdminUserID); err != nil {
+		if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 			return nil, err
 		}
 	}
@@ -974,7 +958,7 @@ func (g *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 
 func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInfoReq) (*pbgroup.SetGroupInfoResp, error) {
 	var opMember *model.GroupMember
-	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+	if !authverify.IsAdmin(ctx) {
 		var err error
 		opMember, err = g.db.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
@@ -1068,7 +1052,7 @@ func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupInfoExReq) (*pbgroup.SetGroupInfoExResp, error) {
 	var opMember *model.GroupMember
 
-	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+	if !authverify.IsAdmin(ctx) {
 		var err error
 
 		opMember, err = g.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
@@ -1217,7 +1201,7 @@ func (g *groupServer) TransferGroupOwner(ctx context.Context, req *pbgroup.Trans
 		return nil, errs.ErrArgs.WrapMsg("NewOwnerUser not in group " + req.NewOwnerUserID)
 	}
 
-	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+	if !authverify.IsAdmin(ctx) {
 		if !(mcontext.GetOpUserID(ctx) == oldOwner.UserID && oldOwner.RoleLevel == constant.GroupOwner) {
 			return nil, errs.ErrNoPermission.WrapMsg("no permission transfer group owner")
 		}
@@ -1360,7 +1344,7 @@ func (g *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 	if err != nil {
 		return nil, err
 	}
-	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+	if !authverify.IsAdmin(ctx) {
 		if owner.UserID != mcontext.GetOpUserID(ctx) {
 			return nil, errs.ErrNoPermission.WrapMsg("not group owner")
 		}
@@ -1417,7 +1401,7 @@ func (g *groupServer) MuteGroupMember(ctx context.Context, req *pbgroup.MuteGrou
 	if err := g.PopulateGroupMember(ctx, member); err != nil {
 		return nil, err
 	}
-	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+	if !authverify.IsAdmin(ctx) {
 		opMember, err := g.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
@@ -1453,7 +1437,7 @@ func (g *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbgroup.Ca
 		return nil, err
 	}
 
-	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+	if !authverify.IsAdmin(ctx) {
 		opMember, err := g.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
@@ -1513,7 +1497,7 @@ func (g *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 	if opUserID == "" {
 		return nil, errs.ErrNoPermission.WrapMsg("no op user id")
 	}
-	isAppManagerUid := authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID)
+	isAppManagerUid := authverify.IsAdmin(ctx)
 	groupMembers := make(map[string][]*pbgroup.SetGroupMemberInfo)
 	for i, member := range req.Members {
 		if member.RoleLevel != nil {

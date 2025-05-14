@@ -134,7 +134,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 // ok.
 func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *relation.ApplyToAddFriendReq) (resp *relation.ApplyToAddFriendResp, err error) {
 	resp = &relation.ApplyToAddFriendResp{}
-	if err := authverify.CheckAccessV3(ctx, req.FromUserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	if req.ToUserID == req.FromUserID {
@@ -164,7 +164,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *relation.Apply
 
 // ok.
 func (s *friendServer) ImportFriends(ctx context.Context, req *relation.ImportFriendReq) (resp *relation.ImportFriendResp, err error) {
-	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 
@@ -200,7 +200,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *relation.ImportFr
 // ok.
 func (s *friendServer) RespondFriendApply(ctx context.Context, req *relation.RespondFriendApplyReq) (resp *relation.RespondFriendApplyResp, err error) {
 	resp = &relation.RespondFriendApplyResp{}
-	if err := authverify.CheckAccessV3(ctx, req.ToUserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.ToUserID); err != nil {
 		return nil, err
 	}
 
@@ -235,7 +235,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *relation.Res
 
 // ok.
 func (s *friendServer) DeleteFriend(ctx context.Context, req *relation.DeleteFriendReq) (resp *relation.DeleteFriendResp, err error) {
-	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 
@@ -260,7 +260,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *relation.SetFri
 		return nil, err
 	}
 
-	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 
@@ -330,7 +330,7 @@ func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context,
 
 // Get received friend requests (i.e., those initiated by others).
 func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *relation.GetPaginationFriendsApplyToReq) (resp *relation.GetPaginationFriendsApplyToResp, err error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 
@@ -353,7 +353,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *rel
 func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *relation.GetPaginationFriendsApplyFromReq) (resp *relation.GetPaginationFriendsApplyFromResp, err error) {
 	resp = &relation.GetPaginationFriendsApplyFromResp{}
 
-	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 
@@ -383,7 +383,7 @@ func (s *friendServer) IsFriend(ctx context.Context, req *relation.IsFriendReq) 
 }
 
 func (s *friendServer) GetPaginationFriends(ctx context.Context, req *relation.GetPaginationFriendsReq) (resp *relation.GetPaginationFriendsResp, err error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 
@@ -404,7 +404,7 @@ func (s *friendServer) GetPaginationFriends(ctx context.Context, req *relation.G
 }
 
 func (s *friendServer) GetFriendIDs(ctx context.Context, req *relation.GetFriendIDsReq) (resp *relation.GetFriendIDsResp, err error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 

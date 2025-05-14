@@ -243,7 +243,7 @@ func (g *NotificationSender) fillUserByUserID(ctx context.Context, userID string
 		return errs.ErrInternalServer.WrapMsg("**sdkws.GroupMemberFullInfo is nil")
 	}
 	if groupID != "" {
-		if authverify.IsManagerUserID(userID, g.config.Share.IMAdminUserID) {
+		if authverify.CheckUserIsAdmin(ctx, userID) {
 			*targetUser = &sdkws.GroupMemberFullInfo{
 				GroupID:        groupID,
 				UserID:         userID,
