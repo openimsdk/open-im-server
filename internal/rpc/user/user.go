@@ -51,6 +51,10 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	defaultSecret = "openIM123"
+)
+
 type userServer struct {
 	pbuser.UnimplementedUserServer
 	online                   cache.OnlineCache
@@ -62,6 +66,7 @@ type userServer struct {
 	webhookClient            *webhook.Client
 	groupClient              *rpcli.GroupClient
 	relationClient           *rpcli.RelationClient
+	clientConfig             controller.ClientConfigDatabase
 }
 
 type Config struct {
@@ -94,6 +99,10 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	if err != nil {
 		return err
 	}
+	clientConfigDB, err := mgo.NewClientConfig(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	msgConn, err := client.GetConn(ctx, config.Discovery.RpcService.Msg)
 	if err != nil {
 		return err
@@ -118,9 +127,9 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 		userNotificationSender:   NewUserNotificationSender(config, msgClient, WithUserFunc(database.FindWithError)),
 		config:                   config,
 		webhookClient:            webhook.NewWebhookClient(config.WebhooksConfig.URL),
-
-		groupClient:    rpcli.NewGroupClient(groupConn),
-		relationClient: rpcli.NewRelationClient(friendConn),
+		clientConfig:             controller.NewClientConfigDatabase(clientConfigDB, redis.NewClientConfigCache(rdb, clientConfigDB), mgocli.GetTx()),
+		groupClient:              rpcli.NewGroupClient(groupConn),
+		relationClient:           rpcli.NewRelationClient(friendConn),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.db.InitOnce(context.Background(), users)
@@ -272,6 +281,10 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	resp = &pbuser.UserRegisterResp{}
 	if len(req.Users) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("users is empty")
+	}
+	// check if secret is changed
+	if s.config.Share.Secret == defaultSecret {
+		return nil, servererrs.ErrSecretNotChanged.Wrap()
 	}
 
 	if err = authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
