@@ -31,21 +31,6 @@ func Secret(secret string) jwt.Keyfunc {
 	}
 }
 
-func CheckAccessV3(ctx context.Context, ownerUserID string, imAdminUserID []string) (err error) {
-	opUserID := mcontext.GetOpUserID(ctx)
-	if datautil.Contain(opUserID, imAdminUserID...) {
-		return nil
-	}
-	if opUserID == ownerUserID {
-		return nil
-	}
-	return servererrs.ErrNoPermission.WrapMsg("ownerUserID", ownerUserID)
-}
-
-func IsAppManagerUid(ctx context.Context, imAdminUserID []string) bool {
-	return datautil.Contain(mcontext.GetOpUserID(ctx), imAdminUserID...)
-}
-
 func CheckAdmin(ctx context.Context) error {
 	if IsAdmin(ctx) {
 		return nil
@@ -53,22 +38,28 @@ func CheckAdmin(ctx context.Context) error {
 	return servererrs.ErrNoPermission.WrapMsg(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
 
-func IsManagerUserID(opUserID string, imAdminUserID []string) bool {
-	return datautil.Contain(opUserID, imAdminUserID...)
+//func IsManagerUserID(opUserID string, imAdminUserID []string) bool {
+//	return datautil.Contain(opUserID, imAdminUserID...)
+//}
+
+func CheckUserIsAdmin(ctx context.Context, userID string) bool {
+	return datautil.Contain(userID, GetIMAdminUserIDs(ctx)...)
 }
 
 func CheckSystemAccount(ctx context.Context, level int32) bool {
 	return level >= constant.AppAdmin
 }
 
-type ctxAuthKey struct{}
+const (
+	CtxIsAdminKey = "CtxIsAdminKey"
+)
 
 func WithIMAdminUserIDs(ctx context.Context, imAdminUserID []string) context.Context {
-	return context.WithValue(ctx, ctxAuthKey{}, imAdminUserID)
+	return context.WithValue(ctx, CtxIsAdminKey, imAdminUserID)
 }
 
 func GetIMAdminUserIDs(ctx context.Context) []string {
-	imAdminUserID, _ := ctx.Value(ctxAuthKey{}).([]string)
+	imAdminUserID, _ := ctx.Value(CtxIsAdminKey).([]string)
 	return imAdminUserID
 }
 
@@ -81,8 +72,8 @@ func CheckAccess(ctx context.Context, ownerUserID string) error {
 	if opUserID == ownerUserID {
 		return nil
 	}
-	if !datautil.Contain(mcontext.GetOpUserID(ctx), GetIMAdminUserIDs(ctx)...) {
-		return servererrs.ErrNoPermission.WrapMsg("ownerUserID", ownerUserID)
+	if datautil.Contain(mcontext.GetOpUserID(ctx), GetIMAdminUserIDs(ctx)...) {
+		return nil
 	}
-	return nil
+	return servererrs.ErrNoPermission.WrapMsg("ownerUserID", ownerUserID)
 }

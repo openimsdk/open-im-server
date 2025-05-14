@@ -11,7 +11,7 @@ import (
 )
 
 func (c *conversationServer) GetFullOwnerConversationIDs(ctx context.Context, req *conversation.GetFullOwnerConversationIDsReq) (*conversation.GetFullOwnerConversationIDsResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, c.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	vl, err := c.conversationDatabase.FindMaxConversationUserVersionCache(ctx, req.UserID)

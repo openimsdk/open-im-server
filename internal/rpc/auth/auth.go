@@ -125,7 +125,7 @@ func (s *authServer) GetAdminToken(ctx context.Context, req *pbauth.GetAdminToke
 }
 
 func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenReq) (*pbauth.GetUserTokenResp, error) {
-	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 
@@ -135,7 +135,7 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 
 	resp := pbauth.GetUserTokenResp{}
 
-	if authverify.IsManagerUserID(req.UserID, s.config.Share.IMAdminUserID) {
+	if authverify.CheckUserIsAdmin(ctx, req.UserID) {
 		return nil, errs.ErrNoPermission.WrapMsg("don't get Admin token")
 	}
 	user, err := s.userClient.GetUserInfo(ctx, req.UserID)
@@ -164,7 +164,7 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 		return nil, err
 	}
 	if len(m) == 0 {
-		isAdmin := authverify.IsManagerUserID(claims.UserID, s.config.Share.IMAdminUserID)
+		isAdmin := authverify.CheckUserIsAdmin(ctx, claims.UserID)
 		if isAdmin {
 			if err = s.authDatabase.GetTemporaryTokensWithoutError(ctx, claims.UserID, claims.PlatformID, tokensString); err == nil {
 				return claims, nil
@@ -182,7 +182,7 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 			return nil, errs.Wrap(errs.ErrTokenUnknown)
 		}
 	} else {
-		isAdmin := authverify.IsManagerUserID(claims.UserID, s.config.Share.IMAdminUserID)
+		isAdmin := authverify.CheckUserIsAdmin(ctx, claims.UserID)
 		if isAdmin {
 			if err = s.authDatabase.GetTemporaryTokensWithoutError(ctx, claims.UserID, claims.PlatformID, tokensString); err == nil {
 				return claims, nil
@@ -205,7 +205,7 @@ func (s *authServer) ParseToken(ctx context.Context, req *pbauth.ParseTokenReq) 
 }
 
 func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq) (*pbauth.ForceLogoutResp, error) {
-	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID); err != nil {
