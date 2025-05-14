@@ -2,15 +2,16 @@ package msg
 
 import (
 	"context"
+	"strings"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/tools/log"
-	"strings"
 )
 
 // DestructMsgs hard delete in Database.
 func (m *msgServer) DestructMsgs(ctx context.Context, req *msg.DestructMsgsReq) (*msg.DestructMsgsResp, error) {
-	if err := authverify.CheckAdmin(ctx, m.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	docs, err := m.MsgDatabase.GetRandBeforeMsg(ctx, req.Timestamp, int(req.Limit))

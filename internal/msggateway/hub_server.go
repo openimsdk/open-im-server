@@ -101,7 +101,7 @@ func NewServer(longConnServer LongConnServer, conf *Config, ready func(srv *Serv
 }
 
 func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUsersOnlineStatusReq) (*msggateway.GetUsersOnlineStatusResp, error) {
-	if !authverify.IsAppManagerUid(ctx, s.config.Share.IMAdminUserID) {
+	if !authverify.IsAdmin(ctx) {
 		return nil, errs.ErrNoPermission.WrapMsg("only app manager")
 	}
 	var resp msggateway.GetUsersOnlineStatusResp
