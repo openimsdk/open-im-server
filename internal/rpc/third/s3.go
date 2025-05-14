@@ -62,7 +62,7 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 		return nil, err
 	}
 	expireTime := time.Now().Add(t.defaultExpire)
-	result, err := t.s3dataBase.InitiateMultipartUpload(ctx, req.Hash, req.Size, t.defaultExpire, int(req.MaxParts))
+	result, err := t.s3dataBase.InitiateMultipartUpload(ctx, req.Hash, req.Size, t.defaultExpire, int(req.MaxParts), req.ContentType)
 	if err != nil {
 		if haErr, ok := errs.Unwrap(err).(*cont.HashAlreadyExistsError); ok {
 			obj := &model.Object{
