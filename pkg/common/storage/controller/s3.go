@@ -33,7 +33,7 @@ type S3Database interface {
 	PartLimit() (*s3.PartLimit, error)
 	PartSize(ctx context.Context, size int64) (int64, error)
 	AuthSign(ctx context.Context, uploadID string, partNumbers []int) (*s3.AuthSignResult, error)
-	InitiateMultipartUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int) (*cont.InitiateUploadResult, error)
+	InitiateMultipartUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int, contentType string) (*cont.InitiateUploadResult, error)
 	CompleteMultipartUpload(ctx context.Context, uploadID string, parts []string) (*cont.UploadResult, error)
 	AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (time.Time, string, error)
 	SetObject(ctx context.Context, info *model.Object) error
@@ -73,8 +73,8 @@ func (s *s3Database) AuthSign(ctx context.Context, uploadID string, partNumbers 
 	return s.s3.AuthSign(ctx, uploadID, partNumbers)
 }
 
-func (s *s3Database) InitiateMultipartUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int) (*cont.InitiateUploadResult, error) {
-	return s.s3.InitiateUpload(ctx, hash, size, expire, maxParts)
+func (s *s3Database) InitiateMultipartUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int, contentType string) (*cont.InitiateUploadResult, error) {
+	return s.s3.InitiateUploadContentType(ctx, hash, size, expire, maxParts, contentType)
 }
 
 func (s *s3Database) CompleteMultipartUpload(ctx context.Context, uploadID string, parts []string) (*cont.UploadResult, error) {

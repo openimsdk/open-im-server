@@ -1382,6 +1382,7 @@ func (g *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 		if err != nil {
 			return nil, err
 		}
+		group.Status = constant.GroupStatusDismissed
 		tips := &sdkws.GroupDismissedTips{
 			Group:  g.groupDB2PB(group, owner.UserID, num),
 			OpUser: &sdkws.GroupMemberFullInfo{},
