@@ -37,7 +37,7 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mw"
+	grpccli "github.com/openimsdk/tools/mw/grpc/client"
 	grpcsrv "github.com/openimsdk/tools/mw/grpc/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -166,8 +166,12 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 
 	defer client.Close()
 	client.AddOption(
-		mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")),
+
+		grpccli.GrpcClientLogger(),
+		grpccli.GrpcClientContext(),
+		grpccli.GrpcClientErrorConvert(),
 	)
 	if len(clientOptions) > 0 {
 		client.AddOption(clientOptions...)
