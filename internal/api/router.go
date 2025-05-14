@@ -9,6 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
 	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
@@ -97,7 +100,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		r.Use(gzip.Gzip(gzip.BestSpeed))
 	}
 	r.Use(prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(),
-		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)))
+		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)), setGinIsAdmin(cfg.Share.IMAdminUserID))
 
 	u := NewUserApi(user.NewUserClient(userConn), client, cfg.Discovery.RpcService)
 	{
@@ -351,6 +354,14 @@ func GinParseToken(authClient *rpcli.AuthClient) gin.HandlerFunc {
 			c.Set(constant.OpUserID, resp.UserID)
 			c.Next()
 		}
+	}
+}
+
+func setGinIsAdmin(imAdminUserID []string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		opUserID := mcontext.GetOpUserID(c)
+		admin := datautil.Contain(opUserID, imAdminUserID...)
+		c.Set(authverify.CtxIsAdminKey, admin)
 	}
 }
 
