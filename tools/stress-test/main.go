@@ -233,15 +233,12 @@ func (st *StressTest) SendMsg(ctx context.Context, userID string) error {
 		"content": fmt.Sprintf("index %d. The current time is %s", st.MsgCounter, time.Now().Format("2006-01-02 15:04:05.000")),
 	}
 
-	req := &apistruct.SendMsgReq{
-		SendMsg: apistruct.SendMsg{
-			SendID:         userID,
-			SenderNickname: userID,
-			GroupID:        st.DefaultGroupID,
-			ContentType:    constant.Text,
-			SessionType:    constant.ReadGroupChatType,
-			Content:        contentObj,
-		},
+	req := map[string]any{
+		"sendID":      userID,
+		"groupID":     st.DefaultGroupID,
+		"contentType": constant.Text,
+		"sessionType": constant.ReadGroupChatType,
+		"content":     contentObj,
 	}
 
 	_, err := st.PostRequest(ctx, ApiAddress+SendMsg, &req)
@@ -258,18 +255,15 @@ func (st *StressTest) SendMsg(ctx context.Context, userID string) error {
 func (st *StressTest) CreateGroup(ctx context.Context, userID string) (string, error) {
 	groupID := fmt.Sprintf("StressTestGroup_%d_%s", st.GroupCounter, time.Now().Format("20060102150405"))
 
-	groupInfo := &sdkws.GroupInfo{
-		GroupID:   groupID,
-		GroupName: groupID,
-		GroupType: constant.WorkingGroup,
+	req := map[string]any{
+		"memberUserIDs": TestTargetUserList,
+		"ownerUserID":   userID,
+		"groupInfo": map[string]any{
+			"groupID":   groupID,
+			"groupName": groupID,
+			"groupType": constant.WorkingGroup,
+		},
 	}
-
-	req := group.CreateGroupReq{
-		OwnerUserID:   userID,
-		MemberUserIDs: TestTargetUserList,
-		GroupInfo:     groupInfo,
-	}
-
 	resp := group.CreateGroupResp{}
 
 	response, err := st.PostRequest(ctx, ApiAddress+CreateGroup, &req)
