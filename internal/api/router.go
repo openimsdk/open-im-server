@@ -124,6 +124,11 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 		userRouterGroup.POST("/add_notification_account", u.AddNotificationAccount)
 		userRouterGroup.POST("/update_notification_account", u.UpdateNotificationAccountInfo)
 		userRouterGroup.POST("/search_notification_account", u.SearchNotificationAccount)
+
+		userRouterGroup.POST("/get_user_client_config", u.GetUserClientConfig)
+		userRouterGroup.POST("/set_user_client_config", u.SetUserClientConfig)
+		userRouterGroup.POST("/del_user_client_config", u.DelUserClientConfig)
+		userRouterGroup.POST("/page_user_client_config", u.PageUserClientConfig)
 	}
 	// friend routing group
 	{
