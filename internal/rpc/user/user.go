@@ -197,6 +197,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	}
 
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
+
 	//friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
 	//if err != nil {
 	//	return nil, err
@@ -209,6 +210,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	//for _, friendID := range friends {
 	//	s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	//}
+
 	s.webhookAfterUpdateUserInfoEx(ctx, &s.config.WebhooksConfig.AfterUpdateUserInfoEx, req)
 	if err := s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID, oldUser); err != nil {
 		return nil, err
