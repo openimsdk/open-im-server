@@ -1,8 +1,9 @@
 package cachekey
 
 import (
-	"github.com/openimsdk/protocol/constant"
 	"strings"
+
+	"github.com/openimsdk/protocol/constant"
 )
 
 const (
@@ -11,6 +12,10 @@ const (
 
 func GetTokenKey(userID string, platformID int) string {
 	return UidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+}
+
+func GetTemporaryTokenKey(userID string, platformID int, token string) string {
+	return UidPidToken + ":TEMPORARY:" + userID + ":" + constant.PlatformIDToName(platformID) + ":" + token
 }
 
 func GetAllPlatformTokenKey(userID string) []string {
