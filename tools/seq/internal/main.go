@@ -337,7 +337,7 @@ func SetVersion(coll *mongo.Collection, key string, version int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	option := options.Update().SetUpsert(true)
-	filter := bson.M{"key": key, "value": strconv.Itoa(version)}
+	filter := bson.M{"key": key}
 	update := bson.M{"$set": bson.M{"key": key, "value": strconv.Itoa(version)}}
 	return mongoutil.UpdateOne(ctx, coll, filter, update, false, option)
 }

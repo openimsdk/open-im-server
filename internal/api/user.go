@@ -242,3 +242,19 @@ func (u *UserApi) UpdateNotificationAccountInfo(c *gin.Context) {
 func (u *UserApi) SearchNotificationAccount(c *gin.Context) {
 	a2r.Call(c, user.UserClient.SearchNotificationAccount, u.Client)
 }
+
+func (u *UserApi) GetUserClientConfig(c *gin.Context) {
+	a2r.Call(c, user.UserClient.GetUserClientConfig, u.Client)
+}
+
+func (u *UserApi) SetUserClientConfig(c *gin.Context) {
+	a2r.Call(c, user.UserClient.SetUserClientConfig, u.Client)
+}
+
+func (u *UserApi) DelUserClientConfig(c *gin.Context) {
+	a2r.Call(c, user.UserClient.DelUserClientConfig, u.Client)
+}
+
+func (u *UserApi) PageUserClientConfig(c *gin.Context) {
+	a2r.Call(c, user.UserClient.PageUserClientConfig, u.Client)
+}

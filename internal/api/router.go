@@ -9,6 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
+	clientv3 "go.etcd.io/etcd/client/v3"
+
 	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -96,7 +101,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 		r.Use(gzip.Gzip(gzip.BestSpeed))
 	}
 	r.Use(prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(),
-		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)))
+		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)), setGinIsAdmin(cfg.Share.IMAdminUserID))
 
 	u := NewUserApi(user.NewUserClient(userConn), client, cfg.Discovery.RpcService)
 	{
@@ -124,6 +129,11 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 		userRouterGroup.POST("/add_notification_account", u.AddNotificationAccount)
 		userRouterGroup.POST("/update_notification_account", u.UpdateNotificationAccountInfo)
 		userRouterGroup.POST("/search_notification_account", u.SearchNotificationAccount)
+
+		userRouterGroup.POST("/get_user_client_config", u.GetUserClientConfig)
+		userRouterGroup.POST("/set_user_client_config", u.SetUserClientConfig)
+		userRouterGroup.POST("/del_user_client_config", u.DelUserClientConfig)
+		userRouterGroup.POST("/page_user_client_config", u.PageUserClientConfig)
 	}
 	// friend routing group
 	{
@@ -344,6 +354,14 @@ func GinParseToken(authClient *rpcli.AuthClient) gin.HandlerFunc {
 			c.Set(constant.OpUserID, resp.UserID)
 			c.Next()
 		}
+	}
+}
+
+func setGinIsAdmin(imAdminUserID []string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		opUserID := mcontext.GetOpUserID(c)
+		admin := datautil.Contain(opUserID, imAdminUserID...)
+		c.Set(authverify.CtxIsAdminKey, admin)
 	}
 }
 

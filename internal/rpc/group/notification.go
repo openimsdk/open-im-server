@@ -242,8 +242,8 @@ func (g *NotificationSender) fillOpUserByUserID(ctx context.Context, userID stri
 		return errs.ErrInternalServer.WrapMsg("**sdkws.GroupMemberFullInfo is nil")
 	}
 	if groupID != "" {
-		if authverify.IsManagerUserID(userID, g.config.Share.IMAdminUserID) {
-			*opUser = &sdkws.GroupMemberFullInfo{
+		if authverify.CheckUserIsAdmin(ctx, userID) {
+			*targetUser = &sdkws.GroupMemberFullInfo{
 				GroupID:        groupID,
 				UserID:         userID,
 				RoleLevel:      constant.GroupAdmin,
@@ -283,7 +283,8 @@ func (g *NotificationSender) fillOpUserByUserID(ctx context.Context, userID stri
 
 func (g *NotificationSender) setVersion(ctx context.Context, version *uint64, versionID *string, collName string, id string) {
 	versions := versionctx.GetVersionLog(ctx).Get()
-	for _, coll := range versions {
+	for i := len(versions) - 1; i >= 0; i-- {
+		coll := versions[i]
 		if coll.Name == collName && coll.Doc.DID == id {
 			*version = uint64(coll.Doc.Version)
 			*versionID = coll.Doc.ID.Hex()
@@ -519,7 +520,11 @@ func (g *NotificationSender) MemberKickedNotification(ctx context.Context, tips 
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.MemberKickedNotification, tips)
 }
 
-func (g *NotificationSender) GroupApplicationAgreeMemberEnterNotification(ctx context.Context, groupID string, invitedOpUserID string, entrantUserID ...string) error {
+func (g *NotificationSender) GroupApplicationAgreeMemberEnterNotification(ctx context.Context, groupID string, SendMessage *bool, invitedOpUserID string, entrantUserID ...string) error {
+	return g.groupApplicationAgreeMemberEnterNotification(ctx, groupID, SendMessage, invitedOpUserID, entrantUserID...)
+}
+
+func (g *NotificationSender) groupApplicationAgreeMemberEnterNotification(ctx context.Context, groupID string, SendMessage *bool, invitedOpUserID string, entrantUserID ...string) error {
 	var err error
 	defer func() {
 		if err != nil {
