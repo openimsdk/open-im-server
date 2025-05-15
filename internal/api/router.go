@@ -12,7 +12,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
-	clientv3 "go.etcd.io/etcd/client/v3"
 
 	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"

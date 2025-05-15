@@ -52,7 +52,7 @@ func (g *groupServer) GetFullJoinGroupIDs(ctx context.Context, req *pbgroup.GetF
 	if err != nil {
 		return nil, err
 	}
-	groupIDs, err := s.db.FindJoinGroupID(ctx, req.UserID)
+	groupIDs, err := g.db.FindJoinGroupID(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -68,8 +68,8 @@ func (g *groupServer) GetFullJoinGroupIDs(ctx context.Context, req *pbgroup.GetF
 	}, nil
 }
 
-func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgroup.GetIncrementalGroupMemberReq) (*pbgroup.GetIncrementalGroupMemberResp, error) {
-	group, err := s.db.TakeGroup(ctx, req.GroupID)
+func (g *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgroup.GetIncrementalGroupMemberReq) (*pbgroup.GetIncrementalGroupMemberResp, error) {
+	group, err := g.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 		VersionID:     req.VersionID,
 		VersionNumber: req.Version,
 		Version: func(ctx context.Context, groupID string, version uint, limit int) (*model.VersionLog, error) {
-			vl, err := s.db.FindMemberIncrVersion(ctx, groupID, version, limit)
+			vl, err := g.db.FindMemberIncrVersion(ctx, groupID, version, limit)
 			if err != nil {
 				return nil, err
 			}
@@ -112,9 +112,9 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 			}
 			return vl, nil
 		},
-		CacheMaxVersion: s.db.FindMaxGroupMemberVersionCache,
+		CacheMaxVersion: g.db.FindMaxGroupMemberVersionCache,
 		Find: func(ctx context.Context, ids []string) ([]*sdkws.GroupMemberFullInfo, error) {
-			return s.getGroupMembersInfo(ctx, req.GroupID, ids)
+			return g.getGroupMembersInfo(ctx, req.GroupID, ids)
 		},
 		Resp: func(version *model.VersionLog, delIDs []string, insertList, updateList []*sdkws.GroupMemberFullInfo, full bool) *pbgroup.GetIncrementalGroupMemberResp {
 			return &pbgroup.GetIncrementalGroupMemberResp{
@@ -133,15 +133,15 @@ func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgrou
 		return nil, err
 	}
 	if resp.Full || hasGroupUpdate {
-		count, err := s.db.FindGroupMemberNum(ctx, group.GroupID)
+		count, err := g.db.FindGroupMemberNum(ctx, group.GroupID)
 		if err != nil {
 			return nil, err
 		}
-		owner, err := s.db.TakeGroupOwner(ctx, group.GroupID)
+		owner, err := g.db.TakeGroupOwner(ctx, group.GroupID)
 		if err != nil {
 			return nil, err
 		}
-		resp.Group = s.groupDB2PB(group, owner.UserID, count)
+		resp.Group = g.groupDB2PB(group, owner.UserID, count)
 	}
 	return resp, nil
 }
@@ -155,9 +155,9 @@ func (g *groupServer) GetIncrementalJoinGroup(ctx context.Context, req *pbgroup.
 		VersionKey:      req.UserID,
 		VersionID:       req.VersionID,
 		VersionNumber:   req.Version,
-		Version:         s.db.FindJoinIncrVersion,
-		CacheMaxVersion: s.db.FindMaxJoinGroupVersionCache,
-		Find:            s.getGroupsInfo,
+		Version:         g.db.FindJoinIncrVersion,
+		CacheMaxVersion: g.db.FindMaxJoinGroupVersionCache,
+		Find:            g.getGroupsInfo,
 		Resp: func(version *model.VersionLog, delIDs []string, insertList, updateList []*sdkws.GroupInfo, full bool) *pbgroup.GetIncrementalJoinGroupResp {
 			return &pbgroup.GetIncrementalJoinGroupResp{
 				VersionID: version.ID.Hex(),
@@ -170,4 +170,24 @@ func (g *groupServer) GetIncrementalJoinGroup(ctx context.Context, req *pbgroup.
 		},
 	}
 	return opt.Build()
+}
+
+func (g *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *pbgroup.BatchGetIncrementalGroupMemberReq) (*pbgroup.BatchGetIncrementalGroupMemberResp, error) {
+	var num int
+	resp := make(map[string]*pbgroup.GetIncrementalGroupMemberResp)
+	for _, memberReq := range req.ReqList {
+		if _, ok := resp[memberReq.GroupID]; ok {
+			continue
+		}
+		memberResp, err := g.GetIncrementalGroupMember(ctx, memberReq)
+		if err != nil {
+			return nil, err
+		}
+		resp[memberReq.GroupID] = memberResp
+		num += len(memberResp.Insert) + len(memberResp.Update) + len(memberResp.Delete)
+		if num >= versionSyncLimit {
+			break
+		}
+	}
+	return &pbgroup.BatchGetIncrementalGroupMemberResp{RespList: resp}, nil
 }

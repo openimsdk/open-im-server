@@ -19,7 +19,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/tools/log"
 	"google.golang.org/protobuf/proto"

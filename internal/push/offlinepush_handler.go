@@ -6,7 +6,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/options"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/protocol/constant"
 	pbpush "github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/protocol/sdkws"

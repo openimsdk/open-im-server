@@ -16,6 +16,7 @@ package user
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"github.com/openimsdk/protocol/msg"
 
@@ -29,7 +30,7 @@ import (
 )
 
 type UserNotificationSender struct {
-	*rpcclient.NotificationSender
+	*notification.NotificationSender
 	getUsersInfo func(ctx context.Context, userIDs []string) ([]common_user.CommonUser, error)
 	// db controller
 	db controller.UserDatabase
@@ -63,7 +64,7 @@ func WithUserFunc(
 
 func NewUserNotificationSender(config *Config, msgClient *rpcli.MsgClient, opts ...userNotificationSenderOptions) *UserNotificationSender {
 	f := &UserNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
+		NotificationSender: notification.NewNotificationSender(&config.NotificationConfig, notification.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
 			return msgClient.SendMsg(ctx, req)
 		})),
 	}

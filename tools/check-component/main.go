@@ -25,11 +25,11 @@ import (
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/discovery/zookeeper"
+	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/system/program"
 )
