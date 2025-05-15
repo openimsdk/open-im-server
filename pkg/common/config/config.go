@@ -18,9 +18,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/mq/kafka"
 	"github.com/openimsdk/tools/s3/aws"
 	"github.com/openimsdk/tools/s3/cos"
 	"github.com/openimsdk/tools/s3/kodo"
@@ -334,25 +334,29 @@ type Redis struct {
 }
 
 type BeforeConfig struct {
-	Enable         bool     `yaml:"enable"`
-	Timeout        int      `yaml:"timeout"`
-	FailedContinue bool     `yaml:"failedContinue"`
-	AllowedTypes   []string `yaml:"allowedTypes"`
-	DeniedTypes    []string `yaml:"deniedTypes"`
+	Enable         bool    `yaml:"enable"`
+	Timeout        int     `yaml:"timeout"`
+	FailedContinue bool    `yaml:"failedContinue"`
+	DeniedTypes    []int32 `yaml:"deniedTypes"`
 }
 
 type AfterConfig struct {
 	Enable       bool     `yaml:"enable"`
 	Timeout      int      `yaml:"timeout"`
 	AttentionIds []string `yaml:"attentionIds"`
-	AllowedTypes []string `yaml:"allowedTypes"`
-	DeniedTypes  []string `yaml:"deniedTypes"`
+	DeniedTypes  []int32  `yaml:"deniedTypes"`
 }
 
 type Share struct {
-	Secret        string     `yaml:"secret"`
-	IMAdminUserID []string   `yaml:"imAdminUserID"`
-	MultiLogin    MultiLogin `yaml:"multiLogin"`
+	Secret         string         `yaml:"secret"`
+	IMAdminUserID  []string       `yaml:"imAdminUserID"`
+	MultiLogin     MultiLogin     `yaml:"multiLogin"`
+	RPCMaxBodySize MaxRequestBody `yaml:"rpcMaxBodySize"`
+}
+
+type MaxRequestBody struct {
+	RequestMaxBodySize  int `yaml:"requestMaxBodySize"`
+	ResponseMaxBodySize int `yaml:"responseMaxBodySize"`
 }
 
 type MultiLogin struct {
@@ -372,7 +376,7 @@ type RpcService struct {
 	Third          string `yaml:"third"`
 }
 
-func (r *RpcRegisterName) GetServiceNames() []string {
+func (r *RpcService) GetServiceNames() []string {
 	return []string{
 		r.User,
 		r.Friend,
@@ -388,55 +392,59 @@ func (r *RpcRegisterName) GetServiceNames() []string {
 
 // FullConfig stores all configurations for before and after events
 type Webhooks struct {
-	URL                      string       `yaml:"url"`
-	BeforeSendSingleMsg      BeforeConfig `yaml:"beforeSendSingleMsg"`
-	BeforeUpdateUserInfoEx   BeforeConfig `yaml:"beforeUpdateUserInfoEx"`
-	AfterUpdateUserInfoEx    AfterConfig  `yaml:"afterUpdateUserInfoEx"`
-	AfterSendSingleMsg       AfterConfig  `yaml:"afterSendSingleMsg"`
-	BeforeSendGroupMsg       BeforeConfig `yaml:"beforeSendGroupMsg"`
-	BeforeMsgModify          BeforeConfig `yaml:"beforeMsgModify"`
-	AfterSendGroupMsg        AfterConfig  `yaml:"afterSendGroupMsg"`
-	AfterUserOnline          AfterConfig  `yaml:"afterUserOnline"`
-	AfterUserOffline         AfterConfig  `yaml:"afterUserOffline"`
-	AfterUserKickOff         AfterConfig  `yaml:"afterUserKickOff"`
-	BeforeOfflinePush        BeforeConfig `yaml:"beforeOfflinePush"`
-	BeforeOnlinePush         BeforeConfig `yaml:"beforeOnlinePush"`
-	BeforeGroupOnlinePush    BeforeConfig `yaml:"beforeGroupOnlinePush"`
-	BeforeAddFriend          BeforeConfig `yaml:"beforeAddFriend"`
-	BeforeUpdateUserInfo     BeforeConfig `yaml:"beforeUpdateUserInfo"`
-	AfterUpdateUserInfo      AfterConfig  `yaml:"afterUpdateUserInfo"`
-	BeforeCreateGroup        BeforeConfig `yaml:"beforeCreateGroup"`
-	AfterCreateGroup         AfterConfig  `yaml:"afterCreateGroup"`
-	BeforeMemberJoinGroup    BeforeConfig `yaml:"beforeMemberJoinGroup"`
-	BeforeSetGroupMemberInfo BeforeConfig `yaml:"beforeSetGroupMemberInfo"`
-	AfterSetGroupMemberInfo  AfterConfig  `yaml:"afterSetGroupMemberInfo"`
-	AfterQuitGroup           AfterConfig  `yaml:"afterQuitGroup"`
-	AfterKickGroupMember     AfterConfig  `yaml:"afterKickGroupMember"`
-	AfterDismissGroup        AfterConfig  `yaml:"afterDismissGroup"`
-	BeforeApplyJoinGroup     BeforeConfig `yaml:"beforeApplyJoinGroup"`
-	AfterGroupMsgRead        AfterConfig  `yaml:"afterGroupMsgRead"`
-	AfterSingleMsgRead       AfterConfig  `yaml:"afterSingleMsgRead"`
-	BeforeUserRegister       BeforeConfig `yaml:"beforeUserRegister"`
-	AfterUserRegister        AfterConfig  `yaml:"afterUserRegister"`
-	AfterTransferGroupOwner  AfterConfig  `yaml:"afterTransferGroupOwner"`
-	BeforeSetFriendRemark    BeforeConfig `yaml:"beforeSetFriendRemark"`
-	AfterSetFriendRemark     AfterConfig  `yaml:"afterSetFriendRemark"`
-	AfterGroupMsgRevoke      AfterConfig  `yaml:"afterGroupMsgRevoke"`
-	AfterJoinGroup           AfterConfig  `yaml:"afterJoinGroup"`
-	BeforeInviteUserToGroup  BeforeConfig `yaml:"beforeInviteUserToGroup"`
-	AfterSetGroupInfo        AfterConfig  `yaml:"afterSetGroupInfo"`
-	BeforeSetGroupInfo       BeforeConfig `yaml:"beforeSetGroupInfo"`
-	AfterSetGroupInfoEx      AfterConfig  `yaml:"afterSetGroupInfoEx"`
-	BeforeSetGroupInfoEx     BeforeConfig `yaml:"beforeSetGroupInfoEx"`
-	AfterRevokeMsg           AfterConfig  `yaml:"afterRevokeMsg"`
-	BeforeAddBlack           BeforeConfig `yaml:"beforeAddBlack"`
-	AfterAddFriend           AfterConfig  `yaml:"afterAddFriend"`
-	BeforeAddFriendAgree     BeforeConfig `yaml:"beforeAddFriendAgree"`
-	AfterAddFriendAgree      AfterConfig  `yaml:"afterAddFriendAgree"`
-	AfterDeleteFriend        AfterConfig  `yaml:"afterDeleteFriend"`
-	BeforeImportFriends      BeforeConfig `yaml:"beforeImportFriends"`
-	AfterImportFriends       AfterConfig  `yaml:"afterImportFriends"`
-	AfterRemoveBlack         AfterConfig  `yaml:"afterRemoveBlack"`
+	URL                                 string       `yaml:"url"`
+	BeforeSendSingleMsg                 BeforeConfig `yaml:"beforeSendSingleMsg"`
+	BeforeUpdateUserInfoEx              BeforeConfig `yaml:"beforeUpdateUserInfoEx"`
+	AfterUpdateUserInfoEx               AfterConfig  `yaml:"afterUpdateUserInfoEx"`
+	AfterSendSingleMsg                  AfterConfig  `yaml:"afterSendSingleMsg"`
+	BeforeSendGroupMsg                  BeforeConfig `yaml:"beforeSendGroupMsg"`
+	BeforeMsgModify                     BeforeConfig `yaml:"beforeMsgModify"`
+	AfterSendGroupMsg                   AfterConfig  `yaml:"afterSendGroupMsg"`
+	AfterUserOnline                     AfterConfig  `yaml:"afterUserOnline"`
+	AfterUserOffline                    AfterConfig  `yaml:"afterUserOffline"`
+	AfterUserKickOff                    AfterConfig  `yaml:"afterUserKickOff"`
+	BeforeOfflinePush                   BeforeConfig `yaml:"beforeOfflinePush"`
+	BeforeOnlinePush                    BeforeConfig `yaml:"beforeOnlinePush"`
+	BeforeGroupOnlinePush               BeforeConfig `yaml:"beforeGroupOnlinePush"`
+	BeforeAddFriend                     BeforeConfig `yaml:"beforeAddFriend"`
+	BeforeUpdateUserInfo                BeforeConfig `yaml:"beforeUpdateUserInfo"`
+	AfterUpdateUserInfo                 AfterConfig  `yaml:"afterUpdateUserInfo"`
+	BeforeCreateGroup                   BeforeConfig `yaml:"beforeCreateGroup"`
+	AfterCreateGroup                    AfterConfig  `yaml:"afterCreateGroup"`
+	BeforeMemberJoinGroup               BeforeConfig `yaml:"beforeMemberJoinGroup"`
+	BeforeSetGroupMemberInfo            BeforeConfig `yaml:"beforeSetGroupMemberInfo"`
+	AfterSetGroupMemberInfo             AfterConfig  `yaml:"afterSetGroupMemberInfo"`
+	AfterQuitGroup                      AfterConfig  `yaml:"afterQuitGroup"`
+	AfterKickGroupMember                AfterConfig  `yaml:"afterKickGroupMember"`
+	AfterDismissGroup                   AfterConfig  `yaml:"afterDismissGroup"`
+	BeforeApplyJoinGroup                BeforeConfig `yaml:"beforeApplyJoinGroup"`
+	AfterGroupMsgRead                   AfterConfig  `yaml:"afterGroupMsgRead"`
+	AfterSingleMsgRead                  AfterConfig  `yaml:"afterSingleMsgRead"`
+	BeforeUserRegister                  BeforeConfig `yaml:"beforeUserRegister"`
+	AfterUserRegister                   AfterConfig  `yaml:"afterUserRegister"`
+	AfterTransferGroupOwner             AfterConfig  `yaml:"afterTransferGroupOwner"`
+	BeforeSetFriendRemark               BeforeConfig `yaml:"beforeSetFriendRemark"`
+	AfterSetFriendRemark                AfterConfig  `yaml:"afterSetFriendRemark"`
+	AfterGroupMsgRevoke                 AfterConfig  `yaml:"afterGroupMsgRevoke"`
+	AfterJoinGroup                      AfterConfig  `yaml:"afterJoinGroup"`
+	BeforeInviteUserToGroup             BeforeConfig `yaml:"beforeInviteUserToGroup"`
+	AfterSetGroupInfo                   AfterConfig  `yaml:"afterSetGroupInfo"`
+	BeforeSetGroupInfo                  BeforeConfig `yaml:"beforeSetGroupInfo"`
+	AfterSetGroupInfoEx                 AfterConfig  `yaml:"afterSetGroupInfoEx"`
+	BeforeSetGroupInfoEx                BeforeConfig `yaml:"beforeSetGroupInfoEx"`
+	AfterRevokeMsg                      AfterConfig  `yaml:"afterRevokeMsg"`
+	BeforeAddBlack                      BeforeConfig `yaml:"beforeAddBlack"`
+	AfterAddFriend                      AfterConfig  `yaml:"afterAddFriend"`
+	BeforeAddFriendAgree                BeforeConfig `yaml:"beforeAddFriendAgree"`
+	AfterAddFriendAgree                 AfterConfig  `yaml:"afterAddFriendAgree"`
+	AfterDeleteFriend                   AfterConfig  `yaml:"afterDeleteFriend"`
+	BeforeImportFriends                 BeforeConfig `yaml:"beforeImportFriends"`
+	AfterImportFriends                  AfterConfig  `yaml:"afterImportFriends"`
+	AfterRemoveBlack                    AfterConfig  `yaml:"afterRemoveBlack"`
+	BeforeCreateSingleChatConversations BeforeConfig `yaml:"beforeCreateSingleChatConversations"`
+	AfterCreateSingleChatConversations  AfterConfig  `yaml:"afterCreateSingleChatConversations"`
+	BeforeCreateGroupChatConversations  BeforeConfig `yaml:"beforeCreateGroupChatConversations"`
+	AfterCreateGroupChatConversations   AfterConfig  `yaml:"afterCreateGroupChatConversations"`
 }
 
 type ZooKeeper struct {
@@ -457,23 +465,6 @@ type Kubernetes struct {
 	Namespace string `yaml:"namespace"`
 }
 
-func (r *RpcService) GetServiceNames() []string {
-	return []string{
-		r.User,
-		r.Friend,
-		r.Msg,
-		r.Push,
-		r.MessageGateway,
-		r.Group,
-		r.Auth,
-		r.Conversation,
-		r.Third,
-	}
-}
-
-type Kubernetes struct {
-	Namespace string `yaml:"namespace"`
-}
 type Etcd struct {
 	RootDirectory string   `yaml:"rootDirectory"`
 	Address       []string `yaml:"address"`
@@ -541,6 +532,7 @@ func (m *Minio) Build() *minio.Config {
 		SignEndpoint:    formatEndpoint(m.ExternalAddress),
 	}
 }
+
 func (c *Cos) Build() *cos.Config {
 	return &cos.Config{
 		BucketURL:    c.BucketURL,
@@ -595,119 +587,6 @@ func (l *CacheConfig) Success() time.Duration {
 
 func (l *CacheConfig) Enable() bool {
 	return l.Topic != "" && l.SlotNum > 0 && l.SlotSize > 0
-}
-
-const (
-	DiscoveryConfigFilename          = "discovery.yml"
-	KafkaConfigFileName              = "kafka.yml"
-	LocalCacheConfigFileName         = "local-cache.yml"
-	LogConfigFileName                = "log.yml"
-	MinioConfigFileName              = "minio.yml"
-	MongodbConfigFileName            = "mongodb.yml"
-	OpenIMAPICfgFileName             = "openim-api.yml"
-	OpenIMCronTaskCfgFileName        = "openim-crontask.yml"
-	OpenIMMsgGatewayCfgFileName      = "openim-msggateway.yml"
-	OpenIMMsgTransferCfgFileName     = "openim-msgtransfer.yml"
-	OpenIMPushCfgFileName            = "openim-push.yml"
-	OpenIMRPCAuthCfgFileName         = "openim-rpc-auth.yml"
-	OpenIMRPCConversationCfgFileName = "openim-rpc-conversation.yml"
-	OpenIMRPCFriendCfgFileName       = "openim-rpc-friend.yml"
-	OpenIMRPCGroupCfgFileName        = "openim-rpc-group.yml"
-	OpenIMRPCMsgCfgFileName          = "openim-rpc-msg.yml"
-	OpenIMRPCThirdCfgFileName        = "openim-rpc-third.yml"
-	OpenIMRPCUserCfgFileName         = "openim-rpc-user.yml"
-	RedisConfigFileName              = "redis.yml"
-	ShareFileName                    = "share.yml"
-	WebhooksConfigFileName           = "webhooks.yml"
-	NotificationFileName             = "notification.yml"
-)
-
-func (d *Discovery) GetConfigFileName() string {
-	return DiscoveryConfigFilename
-}
-
-func (k *Kafka) GetConfigFileName() string {
-	return KafkaConfigFileName
-}
-
-func (lc *LocalCache) GetConfigFileName() string {
-	return LocalCacheConfigFileName
-}
-
-func (l *Log) GetConfigFileName() string {
-	return LogConfigFileName
-}
-
-func (m *Minio) GetConfigFileName() string {
-	return MinioConfigFileName
-}
-
-func (m *Mongo) GetConfigFileName() string {
-	return MongodbConfigFileName
-}
-
-func (n *Notification) GetConfigFileName() string {
-	return NotificationFileName
-}
-
-func (a *API) GetConfigFileName() string {
-	return OpenIMAPICfgFileName
-}
-
-func (ct *CronTask) GetConfigFileName() string {
-	return OpenIMCronTaskCfgFileName
-}
-
-func (mg *MsgGateway) GetConfigFileName() string {
-	return OpenIMMsgGatewayCfgFileName
-}
-
-func (mt *MsgTransfer) GetConfigFileName() string {
-	return OpenIMMsgTransferCfgFileName
-}
-
-func (p *Push) GetConfigFileName() string {
-	return OpenIMPushCfgFileName
-}
-
-func (a *Auth) GetConfigFileName() string {
-	return OpenIMRPCAuthCfgFileName
-}
-
-func (c *Conversation) GetConfigFileName() string {
-	return OpenIMRPCConversationCfgFileName
-}
-
-func (f *Friend) GetConfigFileName() string {
-	return OpenIMRPCFriendCfgFileName
-}
-
-func (g *Group) GetConfigFileName() string {
-	return OpenIMRPCGroupCfgFileName
-}
-
-func (m *Msg) GetConfigFileName() string {
-	return OpenIMRPCMsgCfgFileName
-}
-
-func (t *Third) GetConfigFileName() string {
-	return OpenIMRPCThirdCfgFileName
-}
-
-func (u *User) GetConfigFileName() string {
-	return OpenIMRPCUserCfgFileName
-}
-
-func (r *Redis) GetConfigFileName() string {
-	return RedisConfigFileName
-}
-
-func (s *Share) GetConfigFileName() string {
-	return ShareFileName
-}
-
-func (w *Webhooks) GetConfigFileName() string {
-	return WebhooksConfigFileName
 }
 
 func InitNotification(notification *Notification) {

@@ -44,7 +44,8 @@ func NewAuthDatabase(cache cache.TokenModel, accessSecret string, accessExpire i
 	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire, multiLogin: multiLoginConfig{
 		Policy:       multiLogin.Policy,
 		MaxNumOneEnd: multiLogin.MaxNumOneEnd,
-	}, adminUserIDs: adminUserIDs,
+	},
+		adminUserIDs: adminUserIDs,
 	}
 }
 
@@ -90,23 +91,25 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 		return "", err
 	}
 
-	deleteTokenKey, kickedTokenKey, err := a.checkToken(ctx, tokens, platformID)
+	deleteTokenKey, kickedTokenKey, adminTokens, err := a.checkToken(ctx, tokens, platformID)
 	if err != nil {
 		return "", err
 	}
 	if len(deleteTokenKey) != 0 {
-		err = a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
+		err = a.cache.DeleteTokenByTokenMap(ctx, userID, deleteTokenKey)
 		if err != nil {
 			return "", err
 		}
 	}
 	if len(kickedTokenKey) != 0 {
-		for _, k := range kickedTokenKey {
-			err := a.cache.SetTokenFlagEx(ctx, userID, platformID, k, constant.KickedToken)
-			if err != nil {
-				return "", err
+		for plt, ks := range kickedTokenKey {
+			for _, k := range ks {
+				err := a.cache.SetTokenFlagEx(ctx, userID, plt, k, constant.KickedToken)
+				if err != nil {
+					return "", err
+				}
+				log.ZDebug(ctx, "kicked token in create token", "token", k)
 			}
-			log.ZDebug(ctx, "kicked token in create token", "token", k)
 		}
 	}
 	if len(adminTokens) != 0 {
@@ -242,8 +245,9 @@ func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string
 	//if l > adminTokenMaxNum {
 	//	kickToken = append(kickToken, adminToken[:l-adminTokenMaxNum]...)
 	//}
+	var deleteAdminToken []string
 	if platformID == constant.AdminPlatformID {
-		kickToken = append(kickToken, adminToken...)
+		deleteAdminToken = adminToken
 	}
-	return deleteToken, kickToken, nil
+	return deleteToken, kickToken, deleteAdminToken, nil
 }

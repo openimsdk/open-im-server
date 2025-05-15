@@ -58,15 +58,14 @@ type Config struct {
 // MsgServer encapsulates dependencies required for message handling.
 type msgServer struct {
 	msg.UnimplementedMsgServer
-	RegisterCenter         discovery.Conn               // Service discovery registry for service registration.
-	MsgDatabase            controller.CommonMsgDatabase // Interface for message database operations.
-	StreamMsgDatabase      controller.StreamMsgDatabase
+	RegisterCenter         discovery.Conn                   // Service discovery registry for service registration.
+	MsgDatabase            controller.CommonMsgDatabase     // Interface for message database operations.
 	UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
 	FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
 	GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
 	ConversationLocalCache *rpccache.ConversationLocalCache // Local cache for conversation data.
 	Handlers               MessageInterceptorChain          // Chain of handlers for processing messages.
-	notificationSender     *rpcclient.NotificationSender    // RPC client for sending notifications.
+	notificationSender     *notification.NotificationSender // RPC client for sending notifications.
 	msgNotificationSender  *MsgNotificationSender           // RPC client for sending msg notifications.
 	config                 *Config                          // Global configuration settings.
 	webhookClient          *webhook.Client
@@ -147,8 +146,8 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		conversationClient:     conversationClient,
 	}
 
-	s.notificationSender = rpcclient.NewNotificationSender(&config.NotificationConfig, rpcclient.WithLocalSendMsg(s.SendMsg))
-	s.msgNotificationSender = NewMsgNotificationSender(config, rpcclient.WithLocalSendMsg(s.SendMsg))
+	s.notificationSender = notification.NewNotificationSender(&config.NotificationConfig, notification.WithLocalSendMsg(s.SendMsg))
+	s.msgNotificationSender = NewMsgNotificationSender(config, notification.WithLocalSendMsg(s.SendMsg))
 
 	msg.RegisterMsgServer(server, s)
 

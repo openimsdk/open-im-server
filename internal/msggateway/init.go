@@ -27,7 +27,6 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/utils/datautil"
 )
 
 type Config struct {

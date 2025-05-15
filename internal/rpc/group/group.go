@@ -26,6 +26,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -51,7 +53,6 @@ import (
 	"github.com/openimsdk/tools/mw/specialerror"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/encrypt"
-	"google.golang.org/grpc"
 )
 
 type groupServer struct {
@@ -284,13 +285,14 @@ func (g *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 			break
 		}
 	}
-	g.notification.GroupCreatedNotification(ctx, tips)
+	g.notification.GroupCreatedNotification(ctx, tips, req.SendMessage)
 
 	if req.GroupInfo.Notification != "" {
+		notificationFlag := true
 		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{
 			Group:  tips.Group,
 			OpUser: tips.OpUser,
-		})
+		}, &notificationFlag)
 	}
 
 	reqCallBackAfter := &pbgroup.CreateGroupReq{
@@ -613,7 +615,7 @@ func (g *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 	for _, userID := range req.KickedUserIDs {
 		tips.KickedUserList = append(tips.KickedUserList, convert.Db2PbGroupMember(memberMap[userID]))
 	}
-	g.notification.MemberKickedNotification(ctx, tips)
+	g.notification.MemberKickedNotification(ctx, tips, req.SendMessage)
 	if err := g.deleteMemberAndSetConversationSeq(ctx, req.GroupID, req.KickedUserIDs); err != nil {
 		return nil, err
 	}
@@ -822,8 +824,14 @@ func (g *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 		if member == nil {
 			log.ZDebug(ctx, "GroupApplicationResponse", "member is nil")
 		} else {
-			if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, groupRequest.InviterUserID, req.FromUserID); err != nil {
-				return nil, err
+			if groupRequest.InviterUserID == "" {
+				if err = g.notification.MemberEnterNotification(ctx, req.GroupID, req.FromUserID); err != nil {
+					return nil, err
+				}
+			} else {
+				if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, nil, groupRequest.InviterUserID, req.FromUserID); err != nil {
+					return nil, err
+				}
 			}
 		}
 	case constant.GroupResponseRefuse:
@@ -1025,7 +1033,8 @@ func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 				log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
 			}
 		}()
-		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
+		notficationFlag := true
+		g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser}, &notficationFlag)
 	}
 	if req.GroupInfoForSet.GroupName != "" {
 		num--
@@ -1086,7 +1095,7 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		return nil, err
 	}
 
-	updatedData, err := UpdateGroupInfoExMap(ctx, req)
+	updatedData, normalFlag, groupNameFlag, notificationFlag, err := UpdateGroupInfoExMap(ctx, req)
 	if len(updatedData) == 0 {
 		return &pbgroup.SetGroupInfoExResp{}, nil
 	}
@@ -1114,41 +1123,38 @@ func (g *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		tips.OpUser = g.groupMemberDB2PB(opMember, 0)
 	}
 
-	num := len(updatedData)
-
-	if req.Notification != nil {
-		num -= 3
-
+	if notificationFlag {
 		if req.Notification.Value != "" {
-			func() {
-				conversation := &pbconv.ConversationReq{
-					ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
-					ConversationType: constant.ReadGroupChatType,
-					GroupID:          req.GroupID,
-				}
+			conversation := &pbconv.ConversationReq{
+				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID),
+				ConversationType: constant.ReadGroupChatType,
+				GroupID:          req.GroupID,
+			}
 
-				resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupID})
-				if err != nil {
-					log.ZWarn(ctx, "GetGroupMemberIDs is failed.", err)
-					return
-				}
+			resp, err := g.GetGroupMemberUserIDs(ctx, &pbgroup.GetGroupMemberUserIDsReq{GroupID: req.GroupID})
+			if err != nil {
+				log.ZWarn(ctx, "GetGroupMemberIDs is failed.", err)
+				return nil, err
+			}
 
-				conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
-				if err := g.conversationClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
-					log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
-				}
-			}()
+			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
+			if err := g.conversationClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
+				log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
+			}
 
-			g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
+			g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser}, &notificationFlag)
+		} else {
+			notificationFlag = false
+			g.notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser}, &notificationFlag)
 		}
 	}
 
-	if req.GroupName != nil {
-		num--
+	if groupNameFlag {
 		g.notification.GroupInfoSetNameNotification(ctx, &sdkws.GroupInfoSetNameTips{Group: tips.Group, OpUser: tips.OpUser})
 	}
 
-	if num > 0 {
+	// if updatedData > 0, send the normal notification
+	if normalFlag {
 		g.notification.GroupInfoSetNotification(ctx, tips)
 	}
 
@@ -1369,7 +1375,7 @@ func (g *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 		if mcontext.GetOpUserID(ctx) == owner.UserID {
 			tips.OpUser = g.groupMemberDB2PB(owner, 0)
 		}
-		g.notification.GroupDismissedNotification(ctx, tips)
+		g.notification.GroupDismissedNotification(ctx, tips, req.SendMessage)
 	}
 	membersID, err := g.db.FindGroupMemberUserID(ctx, group.GroupID)
 	if err != nil {

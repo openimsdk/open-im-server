@@ -18,7 +18,6 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/protocol/push"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/log"

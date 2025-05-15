@@ -379,7 +379,7 @@ func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
 				IsSendMsg:        req.SendMsg,
 				ReliabilityLevel: *req.ReliabilityLevel,
 				UnreadCount:      false,
-			}),
+			}, nil),
 		},
 	}
 	respPb, err := m.Client.SendMsg(c, &sendMsgReq)
@@ -524,6 +524,7 @@ func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
 		apiresp.GinError(c, err)
 		return
 	}
+
 	m.ginRespSendMsg(c, sendReq, respPb)
 }
 

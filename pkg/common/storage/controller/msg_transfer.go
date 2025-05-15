@@ -11,7 +11,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"

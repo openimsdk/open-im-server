@@ -22,6 +22,8 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -41,7 +43,6 @@ import (
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/stringutil"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // GroupApplicationReceiver
@@ -52,11 +53,11 @@ const (
 
 func NewNotificationSender(db controller.GroupDatabase, config *Config, userClient *rpcli.UserClient, msgClient *rpcli.MsgClient, conversationClient *rpcli.ConversationClient) *NotificationSender {
 	return &NotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(&config.NotificationConfig,
-			rpcclient.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
+		NotificationSender: notification.NewNotificationSender(&config.NotificationConfig,
+			notification.WithRpcClient(func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
 				return msgClient.SendMsg(ctx, req)
 			}),
-			rpcclient.WithUserRpcClient(userClient.GetUserInfo),
+			notification.WithUserRpcClient(userClient.GetUserInfo),
 		),
 		getUsersInfo: func(ctx context.Context, userIDs []string) ([]common_user.CommonUser, error) {
 			users, err := userClient.GetUsersInfo(ctx, userIDs)
@@ -73,7 +74,7 @@ func NewNotificationSender(db controller.GroupDatabase, config *Config, userClie
 }
 
 type NotificationSender struct {
-	*rpcclient.NotificationSender
+	*notification.NotificationSender
 	getUsersInfo       func(ctx context.Context, userIDs []string) ([]common_user.CommonUser, error)
 	db                 controller.GroupDatabase
 	config             *Config
@@ -233,12 +234,12 @@ func (g *NotificationSender) groupMemberDB2PB(member *model.GroupMember, appMang
 	return result, nil
 } */
 
-func (g *NotificationSender) fillOpUser(ctx context.Context, opUser **sdkws.GroupMemberFullInfo, groupID string) (err error) {
-	return g.fillOpUserByUserID(ctx, mcontext.GetOpUserID(ctx), opUser, groupID)
+func (g *NotificationSender) fillOpUser(ctx context.Context, targetUser **sdkws.GroupMemberFullInfo, groupID string) (err error) {
+	return g.fillUserByUserID(ctx, mcontext.GetOpUserID(ctx), targetUser, groupID)
 }
 
-func (g *NotificationSender) fillOpUserByUserID(ctx context.Context, userID string, opUser **sdkws.GroupMemberFullInfo, groupID string) error {
-	if opUser == nil {
+func (g *NotificationSender) fillUserByUserID(ctx context.Context, userID string, targetUser **sdkws.GroupMemberFullInfo, groupID string) error {
+	if targetUser == nil {
 		return errs.ErrInternalServer.WrapMsg("**sdkws.GroupMemberFullInfo is nil")
 	}
 	if groupID != "" {
@@ -252,7 +253,7 @@ func (g *NotificationSender) fillOpUserByUserID(ctx context.Context, userID stri
 		} else {
 			member, err := g.db.TakeGroupMember(ctx, groupID, userID)
 			if err == nil {
-				*opUser = g.groupMemberDB2PB(member, 0)
+				*targetUser = g.groupMemberDB2PB(member, 0)
 			} else if !(errors.Is(err, mongo.ErrNoDocuments) || errs.ErrRecordNotFound.Is(err)) {
 				return err
 			}
@@ -262,8 +263,8 @@ func (g *NotificationSender) fillOpUserByUserID(ctx context.Context, userID stri
 	if err != nil {
 		return err
 	}
-	if *opUser == nil {
-		*opUser = &sdkws.GroupMemberFullInfo{
+	if *targetUser == nil {
+		*targetUser = &sdkws.GroupMemberFullInfo{
 			GroupID:        groupID,
 			UserID:         userID,
 			Nickname:       user.Nickname,
@@ -271,11 +272,11 @@ func (g *NotificationSender) fillOpUserByUserID(ctx context.Context, userID stri
 			OperatorUserID: userID,
 		}
 	} else {
-		if (*opUser).Nickname == "" {
-			(*opUser).Nickname = user.Nickname
+		if (*targetUser).Nickname == "" {
+			(*targetUser).Nickname = user.Nickname
 		}
-		if (*opUser).FaceURL == "" {
-			(*opUser).FaceURL = user.FaceURL
+		if (*targetUser).FaceURL == "" {
+			(*targetUser).FaceURL = user.FaceURL
 		}
 	}
 	return nil
@@ -308,7 +309,7 @@ func (g *NotificationSender) setSortVersion(ctx context.Context, version *uint64
 	}
 }
 
-func (g *NotificationSender) GroupCreatedNotification(ctx context.Context, tips *sdkws.GroupCreatedTips) {
+func (g *NotificationSender) GroupCreatedNotification(ctx context.Context, tips *sdkws.GroupCreatedTips, SendMessage *bool) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -319,7 +320,7 @@ func (g *NotificationSender) GroupCreatedNotification(ctx context.Context, tips 
 		return
 	}
 	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
-	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupCreatedNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupCreatedNotification, tips, notification.WithSendMessage(SendMessage))
 }
 
 func (g *NotificationSender) GroupInfoSetNotification(ctx context.Context, tips *sdkws.GroupInfoSetTips) {
@@ -333,7 +334,7 @@ func (g *NotificationSender) GroupInfoSetNotification(ctx context.Context, tips 
 		return
 	}
 	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
-	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips, rpcclient.WithRpcGetUserName())
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips, notification.WithRpcGetUserName())
 }
 
 func (g *NotificationSender) GroupInfoSetNameNotification(ctx context.Context, tips *sdkws.GroupInfoSetNameTips) {
@@ -350,7 +351,7 @@ func (g *NotificationSender) GroupInfoSetNameNotification(ctx context.Context, t
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNameNotification, tips)
 }
 
-func (g *NotificationSender) GroupInfoSetAnnouncementNotification(ctx context.Context, tips *sdkws.GroupInfoSetAnnouncementTips) {
+func (g *NotificationSender) GroupInfoSetAnnouncementNotification(ctx context.Context, tips *sdkws.GroupInfoSetAnnouncementTips, sendMessage *bool) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -361,7 +362,7 @@ func (g *NotificationSender) GroupInfoSetAnnouncementNotification(ctx context.Co
 		return
 	}
 	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
-	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips, rpcclient.WithRpcGetUserName())
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips, notification.WithRpcGetUserName(), notification.WithSendMessage(sendMessage))
 }
 
 func (g *NotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbgroup.JoinGroupReq) {
@@ -506,7 +507,7 @@ func (g *NotificationSender) GroupOwnerTransferredNotification(ctx context.Conte
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupOwnerTransferredNotification, tips)
 }
 
-func (g *NotificationSender) MemberKickedNotification(ctx context.Context, tips *sdkws.MemberKickedTips) {
+func (g *NotificationSender) MemberKickedNotification(ctx context.Context, tips *sdkws.MemberKickedTips, SendMessage *bool) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -517,7 +518,7 @@ func (g *NotificationSender) MemberKickedNotification(ctx context.Context, tips 
 		return
 	}
 	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
-	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.MemberKickedNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.MemberKickedNotification, tips, notification.WithSendMessage(SendMessage))
 }
 
 func (g *NotificationSender) GroupApplicationAgreeMemberEnterNotification(ctx context.Context, groupID string, SendMessage *bool, invitedOpUserID string, entrantUserID ...string) error {
@@ -561,20 +562,18 @@ func (g *NotificationSender) groupApplicationAgreeMemberEnterNotification(ctx co
 		InvitedUserList: users,
 	}
 	opUserID := mcontext.GetOpUserID(ctx)
-	if err = g.fillOpUserByUserID(ctx, opUserID, &tips.OpUser, tips.Group.GroupID); err != nil {
+	if err = g.fillUserByUserID(ctx, opUserID, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return nil
 	}
-	switch {
-	case invitedOpUserID == "":
-	case invitedOpUserID == opUserID:
+	if invitedOpUserID == opUserID {
 		tips.InviterUser = tips.OpUser
-	default:
-		if err = g.fillOpUserByUserID(ctx, invitedOpUserID, &tips.InviterUser, tips.Group.GroupID); err != nil {
+	} else {
+		if err = g.fillUserByUserID(ctx, invitedOpUserID, &tips.InviterUser, tips.Group.GroupID); err != nil {
 			return err
 		}
 	}
 	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
-	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberInvitedNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberInvitedNotification, tips, notification.WithSendMessage(SendMessage))
 	return nil
 }
 
@@ -619,7 +618,7 @@ func (g *NotificationSender) MemberEnterNotification(ctx context.Context, groupI
 	return nil
 }
 
-func (g *NotificationSender) GroupDismissedNotification(ctx context.Context, tips *sdkws.GroupDismissedTips) {
+func (g *NotificationSender) GroupDismissedNotification(ctx context.Context, tips *sdkws.GroupDismissedTips, SendMessage *bool) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -629,7 +628,7 @@ func (g *NotificationSender) GroupDismissedNotification(ctx context.Context, tip
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return
 	}
-	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupDismissedNotification, tips)
+	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupDismissedNotification, tips, notification.WithSendMessage(SendMessage))
 }
 
 func (g *NotificationSender) GroupMemberMutedNotification(ctx context.Context, groupID, groupMemberUserID string, mutedSeconds uint32) {
@@ -786,7 +785,7 @@ func (g *NotificationSender) GroupMemberSetToAdminNotification(ctx context.Conte
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return
 	}
-	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
+	g.setSortVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID, &tips.GroupSortVersion)
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberSetToAdminNotification, tips)
 }
 
@@ -811,6 +810,6 @@ func (g *NotificationSender) GroupMemberSetToOrdinaryUserNotification(ctx contex
 	if err = g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return
 	}
-	g.setVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID)
+	g.setSortVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID, &tips.GroupSortVersion)
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberSetToOrdinaryUserNotification, tips)
 }

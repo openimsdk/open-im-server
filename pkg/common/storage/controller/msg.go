@@ -35,7 +35,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
 	"github.com/openimsdk/protocol/constant"
 	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
