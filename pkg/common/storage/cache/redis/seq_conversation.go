@@ -4,33 +4,35 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/dtm-labs/rockscache"
+	"strconv"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/redis/go-redis/v9"
-	"strconv"
-	"time"
 )
 
 func NewSeqConversationCacheRedis(rdb redis.UniversalClient, mgo database.SeqConversation) cache.SeqConversationCache {
+	if rdb == nil {
+		return mcache.NewSeqConversationCache(mgo)
+	}
 	return &seqConversationCacheRedis{
-		rdb:              rdb,
 		mgo:              mgo,
 		lockTime:         time.Second * 3,
 		dataTime:         time.Hour * 24 * 365,
 		minSeqExpireTime: time.Hour,
-		rocks:            rockscache.NewClient(rdb, *GetRocksCacheOptions()),
+		rcClient:         newRocksCacheClient(rdb),
 	}
 }
 
 type seqConversationCacheRedis struct {
-	rdb              redis.UniversalClient
 	mgo              database.SeqConversation
-	rocks            *rockscache.Client
+	rcClient         *rocksCacheClient
 	lockTime         time.Duration
 	dataTime         time.Duration
 	minSeqExpireTime time.Duration
@@ -45,7 +47,7 @@ func (s *seqConversationCacheRedis) SetMinSeq(ctx context.Context, conversationI
 }
 
 func (s *seqConversationCacheRedis) GetMinSeq(ctx context.Context, conversationID string) (int64, error) {
-	return getCache(ctx, s.rocks, s.getMinSeqKey(conversationID), s.minSeqExpireTime, func(ctx context.Context) (int64, error) {
+	return getCache(ctx, s.rcClient, s.getMinSeqKey(conversationID), s.minSeqExpireTime, func(ctx context.Context) (int64, error) {
 		return s.mgo.GetMinSeq(ctx, conversationID)
 	})
 }
@@ -68,7 +70,7 @@ func (s *seqConversationCacheRedis) getSingleMaxSeqWithTime(ctx context.Context,
 
 func (s *seqConversationCacheRedis) batchGetMaxSeq(ctx context.Context, keys []string, keyConversationID map[string]string, seqs map[string]int64) error {
 	result := make([]*redis.StringCmd, len(keys))
-	pipe := s.rdb.Pipeline()
+	pipe := s.rcClient.GetRedis().Pipeline()
 	for i, key := range keys {
 		result[i] = pipe.HGet(ctx, key, "CURR")
 	}
@@ -99,7 +101,7 @@ func (s *seqConversationCacheRedis) batchGetMaxSeq(ctx context.Context, keys []s
 
 func (s *seqConversationCacheRedis) batchGetMaxSeqWithTime(ctx context.Context, keys []string, keyConversationID map[string]string, seqs map[string]database.SeqTime) error {
 	result := make([]*redis.SliceCmd, len(keys))
-	pipe := s.rdb.Pipeline()
+	pipe := s.rcClient.GetRedis().Pipeline()
 	for i, key := range keys {
 		result[i] = pipe.HMGet(ctx, key, "CURR", "TIME")
 	}
@@ -157,7 +159,7 @@ func (s *seqConversationCacheRedis) GetMaxSeqs(ctx context.Context, conversation
 	if len(keys) == 1 {
 		return s.getSingleMaxSeq(ctx, conversationIDs[0])
 	}
-	slotKeys, err := groupKeysBySlot(ctx, s.rdb, keys)
+	slotKeys, err := groupKeysBySlot(ctx, s.rcClient.GetRedis(), keys)
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +192,7 @@ func (s *seqConversationCacheRedis) GetMaxSeqsWithTime(ctx context.Context, conv
 	if len(keys) == 1 {
 		return s.getSingleMaxSeqWithTime(ctx, conversationIDs[0])
 	}
-	slotKeys, err := groupKeysBySlot(ctx, s.rdb, keys)
+	slotKeys, err := groupKeysBySlot(ctx, s.rcClient.GetRedis(), keys)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +236,7 @@ redis.call("HSET", key, "CURR", curr_seq, "LAST", last_seq, "TIME", mallocTime)
 redis.call("EXPIRE", key, dataSecond)
 return 0
 `
-	result, err := s.rdb.Eval(ctx, script, []string{key}, owner, int64(s.dataTime/time.Second), currSeq, lastSeq, mill).Int64()
+	result, err := s.rcClient.GetRedis().Eval(ctx, script, []string{key}, owner, int64(s.dataTime/time.Second), currSeq, lastSeq, mill).Int64()
 	if err != nil {
 		return 0, errs.Wrap(err)
 	}
@@ -305,7 +307,7 @@ table.insert(result, last_seq)
 table.insert(result, mallocTime)
 return result
 `
-	result, err := s.rdb.Eval(ctx, script, []string{key}, size, int64(s.lockTime/time.Second), int64(s.dataTime/time.Second), time.Now().UnixMilli()).Int64Slice()
+	result, err := s.rcClient.GetRedis().Eval(ctx, script, []string{key}, size, int64(s.lockTime/time.Second), int64(s.dataTime/time.Second), time.Now().UnixMilli()).Int64Slice()
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
@@ -438,7 +440,7 @@ func (s *seqConversationCacheRedis) SetMinSeqs(ctx context.Context, seqs map[str
 			return err
 		}
 	}
-	return DeleteCacheBySlot(ctx, s.rocks, keys)
+	return DeleteCacheBySlot(ctx, s.rcClient, keys)
 }
 
 // GetCacheMaxSeqWithTime only get the existing cache, if there is no cache, no cache will be generated
@@ -456,7 +458,7 @@ func (s *seqConversationCacheRedis) GetCacheMaxSeqWithTime(ctx context.Context, 
 		key2conversationID[key] = conversationID
 		keys = append(keys, key)
 	}
-	slotKeys, err := groupKeysBySlot(ctx, s.rdb, keys)
+	slotKeys, err := groupKeysBySlot(ctx, s.rcClient.GetRedis(), keys)
 	if err != nil {
 		return nil, err
 	}
@@ -465,7 +467,7 @@ func (s *seqConversationCacheRedis) GetCacheMaxSeqWithTime(ctx context.Context, 
 		if len(keys) == 0 {
 			continue
 		}
-		pipe := s.rdb.Pipeline()
+		pipe := s.rcClient.GetRedis().Pipeline()
 		cmds := make([]*redis.SliceCmd, 0, len(keys))
 		for _, key := range keys {
 			cmds = append(cmds, pipe.HMGet(ctx, key, "CURR", "TIME"))

@@ -18,11 +18,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
+	"github.com/openimsdk/tools/mq"
+	"github.com/openimsdk/tools/utils/jsonutil"
+	"google.golang.org/protobuf/proto"
+
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/openimsdk/tools/utils/jsonutil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
@@ -30,7 +33,6 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/kafka"
@@ -102,22 +104,14 @@ type CommonMsgDatabase interface {
 	GetLastMessage(ctx context.Context, conversationIDS []string, userID string) (map[string]*sdkws.MsgData, error)
 }
 
-func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUser cache.SeqUser, seqConversation cache.SeqConversationCache, kafkaConf *config.Kafka) (CommonMsgDatabase, error) {
-	conf, err := kafka.BuildProducerConfig(*kafkaConf.Build())
-	if err != nil {
-		return nil, err
-	}
-	producerToRedis, err := kafka.NewKafkaProducer(conf, kafkaConf.Address, kafkaConf.ToRedisTopic)
-	if err != nil {
-		return nil, err
-	}
+func NewCommonMsgDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUser cache.SeqUser, seqConversation cache.SeqConversationCache, producer mq.Producer) CommonMsgDatabase {
 	return &commonMsgDatabase{
 		msgDocDatabase:  msgDocModel,
 		msgCache:        msg,
 		seqUser:         seqUser,
 		seqConversation: seqConversation,
-		producer:        producerToRedis,
-	}, nil
+		producer:        producer,
+	}
 }
 
 type commonMsgDatabase struct {
@@ -126,12 +120,15 @@ type commonMsgDatabase struct {
 	msgCache        cache.MsgCache
 	seqConversation cache.SeqConversationCache
 	seqUser         cache.SeqUser
-	producer        *kafka.Producer
+	producer        mq.Producer
 }
 
 func (db *commonMsgDatabase) MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) error {
-	_, _, err := db.producer.SendMessage(ctx, key, msg2mq)
-	return err
+	data, err := proto.Marshal(msg2mq)
+	if err != nil {
+		return err
+	}
+	return db.producer.SendMessage(ctx, key, data)
 }
 
 func (db *commonMsgDatabase) batchInsertBlock(ctx context.Context, conversationID string, fields []any, key int8, firstSeq int64) error {

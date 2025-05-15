@@ -36,3 +36,12 @@ var (
 		Help: "The number of group chat msg failed processed",
 	})
 )
+
+func RegistryMsg() {
+	registry.MustRegister(
+		SingleChatMsgProcessSuccessCounter,
+		SingleChatMsgProcessFailedCounter,
+		GroupChatMsgProcessSuccessCounter,
+		GroupChatMsgProcessFailedCounter,
+	)
+}

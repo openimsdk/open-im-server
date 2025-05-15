@@ -37,72 +37,13 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	grpccli "github.com/openimsdk/tools/mw/grpc/client"
-	grpcsrv "github.com/openimsdk/tools/mw/grpc/server"
+	"github.com/openimsdk/tools/mw"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 func init() {
 	prommetrics.RegistryAll()
-}
-
-func getConfigRpcMaxRequestBody(value reflect.Value) *conf.MaxRequestBody {
-	for value.Kind() == reflect.Pointer {
-		value = value.Elem()
-	}
-	if value.Kind() == reflect.Struct {
-		num := value.NumField()
-		for i := 0; i < num; i++ {
-			field := value.Field(i)
-			if !field.CanInterface() {
-				continue
-			}
-			for field.Kind() == reflect.Pointer {
-				field = field.Elem()
-			}
-			switch elem := field.Interface().(type) {
-			case conf.Share:
-				return &elem.RPCMaxBodySize
-			case conf.MaxRequestBody:
-				return &elem
-			}
-			if field.Kind() == reflect.Struct {
-				if elem := getConfigRpcMaxRequestBody(field); elem != nil {
-					return elem
-				}
-			}
-		}
-	}
-	return nil
-}
-
-func getConfigShare(value reflect.Value) *conf.Share {
-	for value.Kind() == reflect.Pointer {
-		value = value.Elem()
-	}
-	if value.Kind() == reflect.Struct {
-		num := value.NumField()
-		for i := 0; i < num; i++ {
-			field := value.Field(i)
-			if !field.CanInterface() {
-				continue
-			}
-			for field.Kind() == reflect.Pointer {
-				field = field.Elem()
-			}
-			switch elem := field.Interface().(type) {
-			case conf.Share:
-				return &elem
-			}
-			if field.Kind() == reflect.Struct {
-				if elem := getConfigShare(field); elem != nil {
-					return elem
-				}
-			}
-		}
-	}
-	return nil
 }
 
 func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *conf.Prometheus, listenIP,
@@ -115,32 +56,7 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 		conf.InitNotification(notification)
 	}
 
-	maxRequestBody := getConfigRpcMaxRequestBody(reflect.ValueOf(config))
-	shareConfig := getConfigShare(reflect.ValueOf(config))
-
-	log.ZDebug(ctx, "rpc start", "rpcMaxRequestBody", maxRequestBody, "rpcRegisterName", rpcRegisterName, "registerIP", registerIP, "listenIP", listenIP)
-
-	options = append(options,
-		grpcsrv.GrpcServerMetadataContext(),
-		grpcsrv.GrpcServerLogger(),
-		grpcsrv.GrpcServerErrorConvert(),
-		grpcsrv.GrpcServerRequestValidate(),
-		grpcsrv.GrpcServerPanicCapture(),
-	)
-	if shareConfig != nil && len(shareConfig.IMAdminUserID) > 0 {
-		options = append(options, grpcServerIMAdminUserID(shareConfig.IMAdminUserID))
-	}
-	var clientOptions []grpc.DialOption
-	if maxRequestBody != nil {
-		if maxRequestBody.RequestMaxBodySize > 0 {
-			options = append(options, grpc.MaxRecvMsgSize(maxRequestBody.RequestMaxBodySize))
-			clientOptions = append(clientOptions, grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(maxRequestBody.RequestMaxBodySize)))
-		}
-		if maxRequestBody.ResponseMaxBodySize > 0 {
-			options = append(options, grpc.MaxSendMsgSize(maxRequestBody.ResponseMaxBodySize))
-			clientOptions = append(clientOptions, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxRequestBody.ResponseMaxBodySize)))
-		}
-	}
+	options = append(options, mw.GrpcServer())
 
 	registerIP, err := network.GetRpcRegisterIP(registerIP)
 	if err != nil {
@@ -166,16 +82,9 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 
 	defer client.Close()
 	client.AddOption(
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")),
-
-		grpccli.GrpcClientLogger(),
-		grpccli.GrpcClientContext(),
-		grpccli.GrpcClientErrorConvert(),
 	)
-	if len(clientOptions) > 0 {
-		client.AddOption(clientOptions...)
-	}
 
 	ctx, cancel := context.WithCancelCause(ctx)
 

@@ -1,23 +1,11 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package redis
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
@@ -25,7 +13,6 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
-	"time"
 )
 
 const (
@@ -41,10 +28,10 @@ type BatchDeleterRedis struct {
 }
 
 // NewBatchDeleterRedis creates a new BatchDeleterRedis instance.
-func NewBatchDeleterRedis(redisClient redis.UniversalClient, options *rockscache.Options, redisPubTopics []string) *BatchDeleterRedis {
+func NewBatchDeleterRedis(rcClient *rocksCacheClient, redisPubTopics []string) *BatchDeleterRedis {
 	return &BatchDeleterRedis{
-		redisClient:    redisClient,
-		rocksClient:    rockscache.NewClient(redisClient, *options),
+		redisClient:    rcClient.GetRedis(),
+		rocksClient:    rcClient.GetClient(),
 		redisPubTopics: redisPubTopics,
 	}
 }
@@ -107,21 +94,29 @@ func (c *BatchDeleterRedis) AddKeys(keys ...string) {
 	c.keys = append(c.keys, keys...)
 }
 
-// GetRocksCacheOptions returns the default configuration options for RocksCache.
-func GetRocksCacheOptions() *rockscache.Options {
-	opts := rockscache.NewDefaultOptions()
-	opts.LockExpire = rocksCacheTimeout
-	opts.WaitReplicasTimeout = rocksCacheTimeout
-	opts.StrongConsistency = true
-	opts.RandomExpireAdjustment = 0.2
+type disableBatchDeleter struct{}
 
-	return &opts
+func (x disableBatchDeleter) ChainExecDel(ctx context.Context) error {
+	return nil
 }
 
-func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key string, expire time.Duration, fn func(ctx context.Context) (T, error)) (T, error) {
+func (x disableBatchDeleter) ExecDelWithKeys(ctx context.Context, keys []string) error {
+	return nil
+}
+
+func (x disableBatchDeleter) Clone() cache.BatchDeleter {
+	return x
+}
+
+func (x disableBatchDeleter) AddKeys(keys ...string) {}
+
+func getCache[T any](ctx context.Context, rcClient *rocksCacheClient, key string, expire time.Duration, fn func(ctx context.Context) (T, error)) (T, error) {
+	if rcClient.Disable() {
+		return fn(ctx)
+	}
 	var t T
 	var write bool
-	v, err := rcClient.Fetch2(ctx, key, expire, func() (s string, err error) {
+	v, err := rcClient.GetClient().Fetch2(ctx, key, expire, func() (s string, err error) {
 		t, err = fn(ctx)
 		if err != nil {
 			//log.ZError(ctx, "getCache query database failed", err, "key", key)
@@ -152,31 +147,3 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 
 	return t, nil
 }
-
-//func batchGetCache[T any, K comparable](
-//	ctx context.Context,
-//	rcClient *rockscache.Client,
-//	expire time.Duration,
-//	keys []K,
-//	keyFn func(key K) string,
-//	fns func(ctx context.Context, key K) (T, error),
-//) ([]T, error) {
-//	if len(keys) == 0 {
-//		return nil, nil
-//	}
-//	res := make([]T, 0, len(keys))
-//	for _, key := range keys {
-//		val, err := getCache(ctx, rcClient, keyFn(key), expire, func(ctx context.Context) (T, error) {
-//			return fns(ctx, key)
-//		})
-//		if err != nil {
-//			if errs.ErrRecordNotFound.Is(specialerror.ErrCode(errs.Unwrap(err))) {
-//				continue
-//			}
-//			return nil, errs.Wrap(err)
-//		}
-//		res = append(res, val)
-//	}
-//
-//	return res, nil
-//}

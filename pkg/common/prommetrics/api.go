@@ -1,10 +1,11 @@
 package prommetrics
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net"
 	"strconv"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
@@ -24,6 +25,10 @@ var (
 	)
 )
 
+func RegistryApi() {
+	registry.MustRegister(apiCounter, httpCounter)
+}
+
 func ApiInit(listener net.Listener) error {
 	apiRegistry := prometheus.NewRegistry()
 	cs := append(
@@ -41,9 +46,3 @@ func APICall(path string, method string, apiCode int) {
 func HttpCall(path string, method string, status int) {
 	httpCounter.With(prometheus.Labels{"path": path, "method": method, "status": strconv.Itoa(status)}).Inc()
 }
-
-//func ApiHandler() http.Handler {
-//	return promhttp.InstrumentMetricHandler(
-//		apiRegistry, promhttp.HandlerFor(apiRegistry, promhttp.HandlerOpts{}),
-//	)
-//}

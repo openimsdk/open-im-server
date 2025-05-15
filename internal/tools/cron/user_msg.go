@@ -1,12 +1,13 @@
-package tools
+package cron
 
 import (
 	"fmt"
+	"os"
+	"time"
+
 	pbconversation "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
-	"os"
-	"time"
 )
 
 func (c *cronServer) clearUserMsg() {
