@@ -17,4 +17,6 @@ const (
 	UserName                = "user"
 	SeqConversationName     = "seq"
 	SeqUserName             = "seq_user"
+	StreamMsgName           = "stream_msg"
+	CacheName               = "cache"
 )

@@ -20,128 +20,61 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
-	"os/signal"
 	"strconv"
-	"syscall"
 	"time"
 
 	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discovery"
-	disetcd "github.com/openimsdk/open-im-server/v3/pkg/common/discovery/etcd"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
-	"github.com/openimsdk/tools/discovery/etcd"
-	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mw"
-	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/network"
 	"github.com/openimsdk/tools/utils/runtimeenv"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Config struct {
-	*conf.AllConfig
+	conf.AllConfig
 
-	RuntimeEnv string
-	ConfigPath string
+	ConfigPath conf.Path
+	Index      conf.Index
 }
 
-func Start(ctx context.Context, index int, config *Config) error {
-	apiPort, err := datautil.GetElemByIndex(config.API.Api.Ports, index)
+func Start(ctx context.Context, config *Config, client discovery.Conn, service grpc.ServiceRegistrar) error {
+	apiPort, err := datautil.GetElemByIndex(config.API.Api.Ports, int(config.Index))
 	if err != nil {
 		return err
-	}
-
-	config.RuntimeEnv = runtimeenv.RuntimeEnvironment()
-
-	client, err := kdisc.NewDiscoveryRegister(&config.Discovery, config.RuntimeEnv, []string{
-		config.Discovery.RpcService.MessageGateway,
-	})
-	if err != nil {
-		return errs.WrapMsg(err, "failed to register discovery service")
-	}
-	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")))
-
-	var (
-		netDone        = make(chan struct{}, 1)
-		netErr         error
-		prometheusPort int
-	)
-
-	registerIP, err := network.GetRpcRegisterIP("")
-	if err != nil {
-		return err
-	}
-
-	getAutoPort := func() (net.Listener, int, error) {
-		registerAddr := net.JoinHostPort(registerIP, "0")
-		listener, err := net.Listen("tcp", registerAddr)
-		if err != nil {
-			return nil, 0, errs.WrapMsg(err, "listen err", "registerAddr", registerAddr)
-		}
-		_, portStr, _ := net.SplitHostPort(listener.Addr().String())
-		port, _ := strconv.Atoi(portStr)
-		return listener, port, nil
-	}
-
-	if config.API.Prometheus.AutoSetPorts && config.Discovery.Enable != conf.ETCD {
-		return errs.New("only etcd support autoSetPorts", "RegisterName", "api").Wrap()
 	}
 
 	router, err := newGinRouter(ctx, client, config)
 	if err != nil {
 		return err
 	}
-	if config.API.Prometheus.Enable {
-		var (
-			listener net.Listener
-		)
 
-		if config.API.Prometheus.AutoSetPorts {
-			listener, prometheusPort, err = getAutoPort()
-			if err != nil {
-				return err
-			}
-
-			etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
-
-			_, err = etcdClient.Put(ctx, prommetrics.BuildDiscoveryKey(prommetrics.APIKeyName), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
-			if err != nil {
-				return errs.WrapMsg(err, "etcd put err")
-			}
-		} else {
-			prometheusPort, err = datautil.GetElemByIndex(config.API.Prometheus.Ports, index)
-			if err != nil {
-				return err
-			}
-			listener, err = net.Listen("tcp", fmt.Sprintf(":%d", prometheusPort))
-			if err != nil {
-				return errs.WrapMsg(err, "listen err", "addr", fmt.Sprintf(":%d", prometheusPort))
-			}
+	apiCtx, apiCancel := context.WithCancelCause(context.Background())
+	done := make(chan struct{})
+	go func() {
+		httpServer := &http.Server{
+			Handler: router,
+			Addr:    net.JoinHostPort(network.GetListenIP(config.API.Api.ListenIP), strconv.Itoa(apiPort)),
 		}
-
 		go func() {
-			if err := prommetrics.ApiInit(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				netErr = errs.WrapMsg(err, fmt.Sprintf("api prometheus start err: %d", prometheusPort))
-				netDone <- struct{}{}
+			defer close(done)
+			select {
+			case <-ctx.Done():
+				apiCancel(fmt.Errorf("recv ctx %w", context.Cause(ctx)))
+			case <-apiCtx.Done():
+			}
+			log.ZDebug(ctx, "api server is shutting down")
+			if err := httpServer.Shutdown(context.Background()); err != nil {
+				log.ZWarn(ctx, "api server shutdown err", err)
 			}
 		}()
-
-	}
-	address := net.JoinHostPort(network.GetListenIP(config.API.Api.ListenIP), strconv.Itoa(apiPort))
-
-	server := http.Server{Addr: address, Handler: router}
-	log.CInfo(ctx, "API server is initializing", "runtimeEnv", config.RuntimeEnv, "address", address, "apiPort", apiPort, "prometheusPort", prometheusPort)
-	go func() {
-		err = server.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			netErr = errs.WrapMsg(err, fmt.Sprintf("api start err: %s", server.Addr))
-			netDone <- struct{}{}
+		log.CInfo(ctx, "api server is init", "runtimeEnv", runtimeenv.RuntimeEnvironment(), "address", httpServer.Addr, "apiPort", apiPort)
+		err := httpServer.ListenAndServe()
+		if err == nil {
+			err = errors.New("api done")
 		}
+		apiCancel(err)
 	}()
 
 	//if config.Discovery.Enable == conf.ETCD {
@@ -157,19 +90,15 @@ func Start(ctx context.Context, index int, config *Config) error {
 	//case <-ctx.Done():
 	//}
 	<-apiCtx.Done()
-	exitCause := context.Cause(apiCtx)
+	exitCause := context.Cause(ctx)
 	log.ZWarn(ctx, "api server exit", exitCause)
 	timer := time.NewTimer(time.Second * 15)
 	defer timer.Stop()
 	select {
-	case <-sigs:
-		program.SIGTERMExit()
-		if err := shutdown(); err != nil {
-			return err
-		}
-	case <-netDone:
-		close(netDone)
-		return netErr
+	case <-timer.C:
+		log.ZWarn(ctx, "api server graceful stop timeout", nil)
+	case <-done:
+		log.ZDebug(ctx, "api server graceful stop done")
 	}
-	return nil
+	return exitCause
 }

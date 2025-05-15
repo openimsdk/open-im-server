@@ -27,6 +27,7 @@ type tokenCache struct {
 
 func (x *tokenCache) getTokenKey(userID string, platformID int, token string) string {
 	return cachekey.GetTokenKey(userID, platformID) + ":" + token
+
 }
 
 func (x *tokenCache) SetTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
@@ -54,14 +55,6 @@ func (x *tokenCache) GetTokensWithoutError(ctx context.Context, userID string, p
 		mm[strings.TrimPrefix(k, prefix)] = state
 	}
 	return mm, nil
-}
-
-func (x *tokenCache) HasTemporaryToken(ctx context.Context, userID string, platformID int, token string) error {
-	key := cachekey.GetTemporaryTokenKey(userID, platformID, token)
-	if _, err := x.cache.Get(ctx, []string{key}); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (x *tokenCache) GetAllTokensWithoutError(ctx context.Context, userID string) (map[int]map[string]int, error) {
@@ -134,33 +127,4 @@ func (x *tokenCache) DeleteTokenByUidPid(ctx context.Context, userID string, pla
 
 func (x *tokenCache) getExpireTime(t int64) time.Duration {
 	return time.Hour * 24 * time.Duration(t)
-}
-
-func (x *tokenCache) DeleteTokenByTokenMap(ctx context.Context, userID string, tokens map[int][]string) error {
-	keys := make([]string, 0, len(tokens))
-	for platformID, ts := range tokens {
-		for _, t := range ts {
-			keys = append(keys, x.getTokenKey(userID, platformID, t))
-		}
-	}
-	return x.cache.Del(ctx, keys)
-}
-
-func (x *tokenCache) DeleteAndSetTemporary(ctx context.Context, userID string, platformID int, fields []string) error {
-	keys := make([]string, 0, len(fields))
-	for _, f := range fields {
-		keys = append(keys, x.getTokenKey(userID, platformID, f))
-	}
-	if err := x.cache.Del(ctx, keys); err != nil {
-		return err
-	}
-
-	for _, f := range fields {
-		k := cachekey.GetTemporaryTokenKey(userID, platformID, f)
-		if err := x.cache.Set(ctx, k, "", time.Minute*5); err != nil {
-			return errs.Wrap(err)
-		}
-	}
-
-	return nil
 }

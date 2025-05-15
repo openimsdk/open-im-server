@@ -30,16 +30,14 @@ type ConfigManager struct {
 	client        *clientv3.Client
 
 	configPath string
-	runtimeEnv string
 }
 
-func NewConfigManager(IMAdminUserID []string, cfg *config.AllConfig, client *clientv3.Client, configPath string, runtimeEnv string) *ConfigManager {
+func NewConfigManager(IMAdminUserID []string, cfg *config.AllConfig, client *clientv3.Client, configPath string) *ConfigManager {
 	cm := &ConfigManager{
 		imAdminUserID: IMAdminUserID,
 		config:        cfg,
 		client:        client,
 		configPath:    configPath,
-		runtimeEnv:    runtimeEnv,
 	}
 	return cm
 }
@@ -209,13 +207,7 @@ func (cm *ConfigManager) resetConfig(c *gin.Context, checkChange bool, ops ...cl
 
 	changedKeys := make([]string, 0, len(configMap))
 	for k, v := range configMap {
-		err := config.Load(
-			cm.configPath,
-			k,
-			config.EnvPrefixMap[k],
-			cm.runtimeEnv,
-			v.new,
-		)
+		err := config.Load(cm.configPath, k, config.EnvPrefixMap[k], v.new)
 		if err != nil {
 			log.ZError(c, "load config failed", err)
 			continue

@@ -127,7 +127,7 @@ func (x *CacheMgo) Del(ctx context.Context, key []string) error {
 		return nil
 	}
 	_, err := x.coll.DeleteMany(ctx, bson.M{"key": bson.M{"$in": key}})
-	return errs.Wrap(err)
+	return err
 }
 
 func (x *CacheMgo) lockKey(key string) string {
