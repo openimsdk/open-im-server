@@ -9,11 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
-	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils/datautil"
-
 	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -357,9 +354,7 @@ func GinParseToken(authClient *rpcli.AuthClient) gin.HandlerFunc {
 
 func setGinIsAdmin(imAdminUserID []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		opUserID := mcontext.GetOpUserID(c)
-		admin := datautil.Contain(opUserID, imAdminUserID...)
-		c.Set(authverify.CtxIsAdminKey, admin)
+		c.Set(authverify.CtxAdminUserIDsKey, imAdminUserID)
 	}
 }
 
