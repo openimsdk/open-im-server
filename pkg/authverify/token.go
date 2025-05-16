@@ -51,15 +51,15 @@ func CheckSystemAccount(ctx context.Context, level int32) bool {
 }
 
 const (
-	CtxIsAdminKey = "CtxIsAdminKey"
+	CtxAdminUserIDsKey = "CtxAdminUserIDsKey"
 )
 
 func WithIMAdminUserIDs(ctx context.Context, imAdminUserID []string) context.Context {
-	return context.WithValue(ctx, CtxIsAdminKey, imAdminUserID)
+	return context.WithValue(ctx, CtxAdminUserIDsKey, imAdminUserID)
 }
 
 func GetIMAdminUserIDs(ctx context.Context) []string {
-	imAdminUserID, _ := ctx.Value(CtxIsAdminKey).([]string)
+	imAdminUserID, _ := ctx.Value(CtxAdminUserIDsKey).([]string)
 	return imAdminUserID
 }
 
