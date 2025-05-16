@@ -33,7 +33,7 @@ type ConsumerHandler struct {
 	offlinePusher          offlinepush.OfflinePusher
 	onlinePusher           OnlinePusher
 	pushDatabase           controller.PushDatabase
-	onlineCache            *rpccache.OnlineCache
+	onlineCache            rpccache.OnlineCache
 	groupLocalCache        *rpccache.GroupLocalCache
 	conversationLocalCache *rpccache.ConversationLocalCache
 	webhookClient          *webhook.Client
@@ -120,11 +120,7 @@ func (c *ConsumerHandler) HandleMs2PsChat(ctx context.Context, msg []byte) {
 }
 
 func (c *ConsumerHandler) WaitCache() {
-	c.onlineCache.Lock.Lock()
-	for c.onlineCache.CurrentPhase.Load() < rpccache.DoSubscribeOver {
-		c.onlineCache.Cond.Wait()
-	}
-	c.onlineCache.Lock.Unlock()
+	c.onlineCache.WaitCache()
 }
 
 // Push2User Suitable for two types of conversations, one is SingleChatType and the other is NotificationChatType.
