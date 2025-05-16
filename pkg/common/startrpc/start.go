@@ -47,64 +47,6 @@ func init() {
 	prommetrics.RegistryAll()
 }
 
-func getConfigRpcMaxRequestBody(value reflect.Value) *conf.MaxRequestBody {
-	for value.Kind() == reflect.Pointer {
-		value = value.Elem()
-	}
-	if value.Kind() == reflect.Struct {
-		num := value.NumField()
-		for i := 0; i < num; i++ {
-			field := value.Field(i)
-			if !field.CanInterface() {
-				continue
-			}
-			for field.Kind() == reflect.Pointer {
-				field = field.Elem()
-			}
-			switch elem := field.Interface().(type) {
-			case conf.Share:
-				return &elem.RPCMaxBodySize
-			case conf.MaxRequestBody:
-				return &elem
-			}
-			if field.Kind() == reflect.Struct {
-				if elem := getConfigRpcMaxRequestBody(field); elem != nil {
-					return elem
-				}
-			}
-		}
-	}
-	return nil
-}
-
-func getConfigShare(value reflect.Value) *conf.Share {
-	for value.Kind() == reflect.Pointer {
-		value = value.Elem()
-	}
-	if value.Kind() == reflect.Struct {
-		num := value.NumField()
-		for i := 0; i < num; i++ {
-			field := value.Field(i)
-			if !field.CanInterface() {
-				continue
-			}
-			for field.Kind() == reflect.Pointer {
-				field = field.Elem()
-			}
-			switch elem := field.Interface().(type) {
-			case conf.Share:
-				return &elem
-			}
-			if field.Kind() == reflect.Struct {
-				if elem := getConfigShare(field); elem != nil {
-					return elem
-				}
-			}
-		}
-	}
-	return nil
-}
-
 func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *conf.Prometheus, listenIP,
 	registerIP string, autoSetPorts bool, rpcPorts []int, index int, rpcRegisterName string, notification *conf.Notification, config T,
 	watchConfigNames []string, watchServiceNames []string,
@@ -122,8 +64,8 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 
 	options = append(options,
 		grpcsrv.GrpcServerMetadataContext(),
-		grpcsrv.GrpcServerLogger(),
 		grpcsrv.GrpcServerErrorConvert(),
+		grpcsrv.GrpcServerLogger(),
 		grpcsrv.GrpcServerRequestValidate(),
 		grpcsrv.GrpcServerPanicCapture(),
 	)

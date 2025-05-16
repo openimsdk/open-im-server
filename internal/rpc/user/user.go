@@ -136,6 +136,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 }
 
 func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesignateUsersReq) (resp *pbuser.GetDesignateUsersResp, err error) {
+	return nil, errs.ErrRecordNotFound.WrapMsg("test error")
 	resp = &pbuser.GetDesignateUsersResp{}
 	users, err := s.db.Find(ctx, req.UserIDs)
 	if err != nil {
