@@ -467,6 +467,10 @@ func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
 		sessionType int32
 		recvID      string
 	)
+	if err = c.BindJSON(&req); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
 	err = json.Unmarshal(decodedData, &keyMsgData)
 	if err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
