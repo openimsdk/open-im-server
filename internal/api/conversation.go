@@ -49,9 +49,9 @@ func (o *ConversationApi) SetConversations(c *gin.Context) {
 	a2r.Call(c, conversation.ConversationClient.SetConversations, o.Client)
 }
 
-func (o *ConversationApi) GetConversationOfflinePushUserIDs(c *gin.Context) {
-	a2r.Call(c, conversation.ConversationClient.GetConversationOfflinePushUserIDs, o.Client)
-}
+//func (o *ConversationApi) GetConversationOfflinePushUserIDs(c *gin.Context) {
+//	a2r.Call(c, conversation.ConversationClient.GetConversationOfflinePushUserIDs, o.Client)
+//}
 
 func (o *ConversationApi) GetFullOwnerConversationIDs(c *gin.Context) {
 	a2r.Call(c, conversation.ConversationClient.GetFullOwnerConversationIDs, o.Client)

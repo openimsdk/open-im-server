@@ -72,8 +72,21 @@ func CheckAccess(ctx context.Context, ownerUserID string) error {
 	if opUserID == ownerUserID {
 		return nil
 	}
-	if datautil.Contain(mcontext.GetOpUserID(ctx), GetIMAdminUserIDs(ctx)...) {
+	if datautil.Contain(opUserID, GetIMAdminUserIDs(ctx)...) {
 		return nil
 	}
 	return servererrs.ErrNoPermission.WrapMsg("ownerUserID", ownerUserID)
+}
+
+func CheckAccessIn(ctx context.Context, ownerUserIDs ...string) error {
+	opUserID := mcontext.GetOpUserID(ctx)
+	for _, userID := range ownerUserIDs {
+		if opUserID == userID {
+			return nil
+		}
+	}
+	if datautil.Contain(opUserID, GetIMAdminUserIDs(ctx)...) {
+		return nil
+	}
+	return servererrs.ErrNoPermission.WrapMsg("opUser in ownerUserIDs")
 }

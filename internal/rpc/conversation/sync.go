@@ -35,6 +35,9 @@ func (c *conversationServer) GetFullOwnerConversationIDs(ctx context.Context, re
 }
 
 func (c *conversationServer) GetIncrementalConversation(ctx context.Context, req *conversation.GetIncrementalConversationReq) (*conversation.GetIncrementalConversationResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	opt := incrversion.Option[*conversation.Conversation, conversation.GetIncrementalConversationResp]{
 		Ctx:             ctx,
 		VersionKey:      req.UserID,
