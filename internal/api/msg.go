@@ -513,11 +513,11 @@ func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
 		Ex:               req.Ex,
 	}
 
-	sendReq := &msg.SendMsgReq{
+	sendReq := &msg.SendSimpleMsgReq{
 		MsgData: msgData,
 	}
 
-	respPb, err := m.Client.SendMsg(c, sendReq)
+	respPb, err := m.Client.SendSimpleMsg(c, sendReq)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return
@@ -534,7 +534,12 @@ func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
 		return
 	}
 
-	m.ginRespSendMsg(c, sendReq, respPb)
+	m.ginRespSendMsg(c, &msg.SendMsgReq{MsgData: sendReq.MsgData}, &msg.SendMsgResp{
+		ServerMsgID: respPb.ServerMsgID,
+		ClientMsgID: respPb.ClientMsgID,
+		SendTime:    respPb.SendTime,
+		Modify:      respPb.Modify,
+	})
 }
 
 func (m *MessageApi) CheckMsgIsSendSuccess(c *gin.Context) {
