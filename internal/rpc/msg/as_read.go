@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
@@ -29,6 +30,9 @@ import (
 )
 
 func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *msg.GetConversationsHasReadAndMaxSeqReq) (*msg.GetConversationsHasReadAndMaxSeqResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	var conversationIDs []string
 	if len(req.ConversationIDs) == 0 {
 		var err error
@@ -82,6 +86,9 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 }
 
 func (m *msgServer) SetConversationHasReadSeq(ctx context.Context, req *msg.SetConversationHasReadSeqReq) (*msg.SetConversationHasReadSeqResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
 	if err != nil {
 		return nil, err
@@ -97,8 +104,8 @@ func (m *msgServer) SetConversationHasReadSeq(ctx context.Context, req *msg.SetC
 }
 
 func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadReq) (*msg.MarkMsgsAsReadResp, error) {
-	if len(req.Seqs) < 1 {
-		return nil, errs.ErrArgs.WrapMsg("seqs must not be empty")
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
 	}
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
 	if err != nil {
@@ -139,6 +146,9 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 }
 
 func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkConversationAsReadReq) (*msg.MarkConversationAsReadResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	conversation, err := m.ConversationLocalCache.GetConversation(ctx, req.UserID, req.ConversationID)
 	if err != nil {
 		return nil, err
@@ -216,5 +226,4 @@ func (m *msgServer) sendMarkAsReadNotification(ctx context.Context, conversation
 		HasReadSeq:       hasReadSeq,
 	}
 	m.notificationSender.NotificationWithSessionType(ctx, sendID, recvID, constant.HasReadReceipt, sessionType, tips)
-
 }
