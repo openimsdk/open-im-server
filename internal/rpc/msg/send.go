@@ -17,6 +17,9 @@ package msg
 import (
 	"context"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
@@ -35,6 +38,9 @@ import (
 func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.SendMsgResp, error) {
 	if req.MsgData == nil {
 		return nil, errs.ErrArgs.WrapMsg("msgData is nil")
+	}
+	if err := authverify.CheckAccess(ctx, req.MsgData.SendID); err != nil {
+		return nil, err
 	}
 	before := new(*sdkws.MsgData)
 	resp, err := m.sendMsg(ctx, req, before)
@@ -171,13 +177,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 	isSend := true
 	isNotification := msgprocessor.IsNotificationByMsg(req.MsgData)
 	if !isNotification {
-		isSend, err = m.modifyMessageByUserMessageReceiveOpt(
-			ctx,
-			req.MsgData.RecvID,
-			conversationutil.GenConversationIDForSingle(req.MsgData.SendID, req.MsgData.RecvID),
-			constant.SingleChatType,
-			req,
-		)
+		isSend, err = m.modifyMessageByUserMessageReceiveOpt(authverify.WithTempAdmin(ctx), req.MsgData.RecvID, conversationutil.GenConversationIDForSingle(req.MsgData.SendID, req.MsgData.RecvID), constant.SingleChatType, req)
 		if err != nil {
 			return nil, err
 		}
