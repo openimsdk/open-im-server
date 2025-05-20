@@ -29,6 +29,9 @@ import (
 )
 
 func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	resp := &sdkws.PullMessageBySeqsResp{}
 	resp.Msgs = make(map[string]*sdkws.PullMsgs)
 	resp.NotificationMsgs = make(map[string]*sdkws.PullMsgs)

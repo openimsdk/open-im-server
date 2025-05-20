@@ -262,7 +262,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		conversationGroup.POST("/get_conversation", c.GetConversation)
 		conversationGroup.POST("/get_conversations", c.GetConversations)
 		conversationGroup.POST("/set_conversations", c.SetConversations)
-		conversationGroup.POST("/get_conversation_offline_push_user_ids", c.GetConversationOfflinePushUserIDs)
+		//conversationGroup.POST("/get_conversation_offline_push_user_ids", c.GetConversationOfflinePushUserIDs)
 		conversationGroup.POST("/get_full_conversation_ids", c.GetFullOwnerConversationIDs)
 		conversationGroup.POST("/get_incremental_conversations", c.GetIncrementalConversation)
 		conversationGroup.POST("/get_owner_conversation", c.GetOwnerConversation)
