@@ -11,9 +11,6 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/mcontext"
-	"github.com/openimsdk/tools/utils/datautil"
 )
 
 const versionSyncLimit = 500
@@ -23,10 +20,8 @@ func (g *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgrou
 	if err != nil {
 		return nil, err
 	}
-	if opUserID := mcontext.GetOpUserID(ctx); !datautil.Contain(opUserID, g.config.Share.IMAdminUserID...) {
-		if !datautil.Contain(opUserID, userIDs...) {
-			return nil, errs.ErrNoPermission.WrapMsg("user not in group")
-		}
+	if err := authverify.CheckAccessIn(ctx, userIDs...); err != nil {
+		return nil, err
 	}
 	vl, err := g.db.FindMaxGroupMemberVersionCache(ctx, req.GroupID)
 	if err != nil {
@@ -69,15 +64,15 @@ func (g *groupServer) GetFullJoinGroupIDs(ctx context.Context, req *pbgroup.GetF
 }
 
 func (g *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgroup.GetIncrementalGroupMemberReq) (*pbgroup.GetIncrementalGroupMemberResp, error) {
+	if err := g.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
+	}
 	group, err := g.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, servererrs.ErrDismissedAlready.Wrap()
-	}
-	if _, err := g.db.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx)); err != nil {
-		return nil, err
 	}
 	var (
 		hasGroupUpdate bool

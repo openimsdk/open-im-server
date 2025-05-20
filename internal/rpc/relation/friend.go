@@ -280,6 +280,9 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *relation.SetFri
 }
 
 func (s *friendServer) GetFriendInfo(ctx context.Context, req *relation.GetFriendInfoReq) (*relation.GetFriendInfoResp, error) {
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
+		return nil, err
+	}
 	friends, err := s.db.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
 		return nil, err
@@ -288,6 +291,9 @@ func (s *friendServer) GetFriendInfo(ctx context.Context, req *relation.GetFrien
 }
 
 func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *relation.GetDesignatedFriendsReq) (resp *relation.GetDesignatedFriendsResp, err error) {
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
+		return nil, err
+	}
 	resp = &relation.GetDesignatedFriendsResp{}
 	if datautil.Duplicate(req.FriendUserIDs) {
 		return nil, errs.ErrArgs.WrapMsg("friend userID repeated")
@@ -313,9 +319,10 @@ func (s *friendServer) getFriend(ctx context.Context, ownerUserID string, friend
 }
 
 // Get the list of friend requests sent out proactively.
-func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context,
-	req *relation.GetDesignatedFriendsApplyReq,
-) (resp *relation.GetDesignatedFriendsApplyResp, err error) {
+func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context, req *relation.GetDesignatedFriendsApplyReq) (resp *relation.GetDesignatedFriendsApplyResp, err error) {
+	if err := authverify.CheckAccessIn(ctx, req.FromUserID, req.ToUserID); err != nil {
+		return nil, err
+	}
 	friendRequests, err := s.db.FindBothFriendRequests(ctx, req.FromUserID, req.ToUserID)
 	if err != nil {
 		return nil, err
@@ -374,6 +381,9 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *r
 
 // ok.
 func (s *friendServer) IsFriend(ctx context.Context, req *relation.IsFriendReq) (resp *relation.IsFriendResp, err error) {
+	if err := authverify.CheckAccessIn(ctx, req.UserID1, req.UserID2); err != nil {
+		return nil, err
+	}
 	resp = &relation.IsFriendResp{}
 	resp.InUser1Friends, resp.InUser2Friends, err = s.db.CheckIn(ctx, req.UserID1, req.UserID2)
 	if err != nil {
@@ -426,6 +436,9 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *relatio
 		return nil, errs.ErrArgs.WrapMsg("userIDList repeated")
 	}
 
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
+		return nil, err
+	}
 	userMap, err := s.userClient.GetUsersInfoMap(ctx, req.UserIDList)
 	if err != nil {
 		return nil, err
@@ -494,15 +507,16 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *relatio
 	return resp, nil
 }
 
-func (s *friendServer) UpdateFriends(
-	ctx context.Context,
-	req *relation.UpdateFriendsReq,
-) (*relation.UpdateFriendsResp, error) {
+func (s *friendServer) UpdateFriends(ctx context.Context, req *relation.UpdateFriendsReq) (*relation.UpdateFriendsResp, error) {
 	if len(req.FriendUserIDs) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("friendIDList is empty")
 	}
 	if datautil.Duplicate(req.FriendUserIDs) {
 		return nil, errs.ErrArgs.WrapMsg("friendIDList repeated")
+	}
+
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
+		return nil, err
 	}
 
 	_, err := s.db.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)

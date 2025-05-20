@@ -64,16 +64,57 @@ func GetIMAdminUserIDs(ctx context.Context) []string {
 }
 
 func IsAdmin(ctx context.Context) bool {
-	return datautil.Contain(mcontext.GetOpUserID(ctx), GetIMAdminUserIDs(ctx)...)
+	return IsTempAdmin(ctx) || IsSystemAdmin(ctx)
 }
 
 func CheckAccess(ctx context.Context, ownerUserID string) error {
-	opUserID := mcontext.GetOpUserID(ctx)
-	if opUserID == ownerUserID {
+	if mcontext.GetOpUserID(ctx) == ownerUserID {
 		return nil
 	}
-	if datautil.Contain(mcontext.GetOpUserID(ctx), GetIMAdminUserIDs(ctx)...) {
+	if IsAdmin(ctx) {
 		return nil
 	}
 	return servererrs.ErrNoPermission.WrapMsg("ownerUserID", ownerUserID)
+}
+
+func CheckAccessIn(ctx context.Context, ownerUserIDs ...string) error {
+	opUserID := mcontext.GetOpUserID(ctx)
+	for _, userID := range ownerUserIDs {
+		if opUserID == userID {
+			return nil
+		}
+	}
+	if IsAdmin(ctx) {
+		return nil
+	}
+	return servererrs.ErrNoPermission.WrapMsg("opUser in ownerUserIDs")
+}
+
+var tempAdminValue = []string{"1"}
+
+const ctxTempAdminKey = "ctxImTempAdminKey"
+
+func WithTempAdmin(ctx context.Context) context.Context {
+	keys, _ := ctx.Value(constant.RpcCustomHeader).([]string)
+	if datautil.Contain(ctxTempAdminKey, keys...) {
+		return ctx
+	}
+	if len(keys) > 0 {
+		temp := make([]string, 0, len(keys)+1)
+		temp = append(temp, keys...)
+		keys = append(temp, ctxTempAdminKey)
+	} else {
+		keys = []string{ctxTempAdminKey}
+	}
+	ctx = context.WithValue(ctx, constant.RpcCustomHeader, keys)
+	return context.WithValue(ctx, ctxTempAdminKey, tempAdminValue)
+}
+
+func IsTempAdmin(ctx context.Context) bool {
+	values, _ := ctx.Value(ctxTempAdminKey).([]string)
+	return datautil.Equal(tempAdminValue, values)
+}
+
+func IsSystemAdmin(ctx context.Context) bool {
+	return datautil.Contain(mcontext.GetOpUserID(ctx), GetIMAdminUserIDs(ctx)...)
 }
