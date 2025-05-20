@@ -47,6 +47,9 @@ func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *relation.Ge
 }
 
 func (s *friendServer) IsBlack(ctx context.Context, req *relation.IsBlackReq) (*relation.IsBlackResp, error) {
+	if err := authverify.CheckAccessIn(ctx, req.UserID1, req.UserID2); err != nil {
+		return nil, err
+	}
 	in1, in2, err := s.blackDatabase.CheckIn(ctx, req.UserID1, req.UserID2)
 	if err != nil {
 		return nil, err

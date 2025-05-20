@@ -17,13 +17,14 @@ package group
 import (
 	"context"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	pbgroup "github.com/openimsdk/protocol/group"
 )
 
 // GetGroupInfoCache get group info from cache.
-func (s *groupServer) GetGroupInfoCache(ctx context.Context, req *pbgroup.GetGroupInfoCacheReq) (*pbgroup.GetGroupInfoCacheResp, error) {
-	group, err := s.db.TakeGroup(ctx, req.GroupID)
+func (g *groupServer) GetGroupInfoCache(ctx context.Context, req *pbgroup.GetGroupInfoCacheReq) (*pbgroup.GetGroupInfoCacheResp, error) {
+	group, err := g.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -32,8 +33,11 @@ func (s *groupServer) GetGroupInfoCache(ctx context.Context, req *pbgroup.GetGro
 	}, nil
 }
 
-func (s *groupServer) GetGroupMemberCache(ctx context.Context, req *pbgroup.GetGroupMemberCacheReq) (*pbgroup.GetGroupMemberCacheResp, error) {
-	members, err := s.db.TakeGroupMember(ctx, req.GroupID, req.GroupMemberID)
+func (g *groupServer) GetGroupMemberCache(ctx context.Context, req *pbgroup.GetGroupMemberCacheReq) (*pbgroup.GetGroupMemberCacheResp, error) {
+	if err := authverify.CheckAccess(ctx, req.GroupMemberID); err != nil {
+		return nil, err
+	}
+	members, err := g.db.TakeGroupMember(ctx, req.GroupID, req.GroupMemberID)
 	if err != nil {
 		return nil, err
 	}
