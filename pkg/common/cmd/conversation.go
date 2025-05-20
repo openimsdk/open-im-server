@@ -41,6 +41,7 @@ func NewConversationRpcCmd() *ConversationRpcCmd {
 		config.MongodbConfigFileName:            &conversationConfig.MongodbConfig,
 		config.ShareFileName:                    &conversationConfig.Share,
 		config.NotificationFileName:             &conversationConfig.NotificationConfig,
+		config.WebhooksConfigFileName:           &conversationConfig.WebhooksConfig,
 		config.LocalCacheConfigFileName:         &conversationConfig.LocalCacheConfig,
 		config.DiscoveryConfigFilename:          &conversationConfig.Discovery,
 	}
@@ -67,6 +68,7 @@ func (a *ConversationRpcCmd) runE() error {
 			a.conversationConfig.NotificationConfig.GetConfigFileName(),
 			a.conversationConfig.Share.GetConfigFileName(),
 			a.conversationConfig.LocalCacheConfig.GetConfigFileName(),
+			a.conversationConfig.WebhooksConfig.GetConfigFileName(),
 			a.conversationConfig.Discovery.GetConfigFileName(),
 		}, nil,
 		conversation.Start)

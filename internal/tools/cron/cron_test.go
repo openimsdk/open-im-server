@@ -46,7 +46,7 @@ func TestName(t *testing.T) {
 
 	srv := &cronServer{
 		ctx: ctx,
-		config: &CronTaskConfig{
+		config: &Config{
 			CronTask: config.CronTask{
 				RetainChatRecords: 1,
 				FileExpireTime:    1,
