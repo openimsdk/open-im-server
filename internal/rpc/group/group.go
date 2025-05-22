@@ -471,6 +471,19 @@ func (g *groupServer) GetGroupAllMember(ctx context.Context, req *pbgroup.GetGro
 	if err != nil {
 		return nil, err
 	}
+	if !authverify.IsAdmin(ctx) {
+		var inGroup bool
+		opUserID := mcontext.GetOpUserID(ctx)
+		for _, member := range members {
+			if member.UserID == opUserID {
+				inGroup = true
+				break
+			}
+		}
+		if !inGroup {
+			return nil, errs.ErrNoPermission.WrapMsg("opuser not in group")
+		}
+	}
 	if err := g.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
 	}
@@ -481,11 +494,24 @@ func (g *groupServer) GetGroupAllMember(ctx context.Context, req *pbgroup.GetGro
 	return &resp, nil
 }
 
+func (g *groupServer) checkAdminOrInGroup(ctx context.Context, groupID string) error {
+	if authverify.IsAdmin(ctx) {
+		return nil
+	}
+	opUserID := mcontext.GetOpUserID(ctx)
+	members, err := g.db.FindGroupMembers(ctx, groupID, []string{opUserID})
+	if err != nil {
+		return err
+	}
+	if len(members) == 0 {
+		return errs.ErrNoPermission.WrapMsg("op user not in group")
+	}
+	return nil
+}
+
 func (g *groupServer) GetGroupMemberList(ctx context.Context, req *pbgroup.GetGroupMemberListReq) (*pbgroup.GetGroupMemberListResp, error) {
-	if opUserID := mcontext.GetOpUserID(ctx); !datautil.Contain(opUserID, g.config.Share.IMAdminUserID...) {
-		if _, err := g.db.TakeGroupMember(ctx, req.GroupID, opUserID); err != nil {
-			return nil, err
-		}
+	if err := g.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
 	}
 	var (
 		total   int64
@@ -626,6 +652,9 @@ func (g *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbgroup.GetG
 	if req.GroupID == "" {
 		return nil, errs.ErrArgs.WrapMsg("groupID empty")
 	}
+	if err := g.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
+	}
 	members, err := g.getGroupMembersInfo(ctx, req.GroupID, req.UserIDs)
 	if err != nil {
 		return nil, err
@@ -653,6 +682,9 @@ func (g *groupServer) getGroupMembersInfo(ctx context.Context, groupID string, u
 
 // GetGroupApplicationList handles functions that get a list of group requests.
 func (g *groupServer) GetGroupApplicationList(ctx context.Context, req *pbgroup.GetGroupApplicationListReq) (*pbgroup.GetGroupApplicationListResp, error) {
+	if err := authverify.CheckAccess(ctx, req.FromUserID); err != nil {
+		return nil, err
+	}
 	groupIDs, err := g.db.FindUserManagedGroupID(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
@@ -1647,6 +1679,11 @@ func (g *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbgroup.Get
 	if datautil.Duplicate(req.GroupIDs) {
 		return nil, errs.ErrArgs.WrapMsg("groupIDs duplicate")
 	}
+	for _, groupID := range req.GroupIDs {
+		if err := g.checkAdminOrInGroup(ctx, groupID); err != nil {
+			return nil, err
+		}
+	}
 	groups, err := g.db.FindGroup(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
@@ -1692,6 +1729,9 @@ func (g *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbgroup.Ge
 func (g *groupServer) GetGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetGroupMemberUserIDsReq) (*pbgroup.GetGroupMemberUserIDsResp, error) {
 	userIDs, err := g.db.FindGroupMemberUserID(ctx, req.GroupID)
 	if err != nil {
+		return nil, err
+	}
+	if err := authverify.CheckAccessIn(ctx, userIDs...); err != nil {
 		return nil, err
 	}
 	return &pbgroup.GetGroupMemberUserIDsResp{

@@ -17,6 +17,7 @@ package group
 import (
 	"context"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	pbgroup "github.com/openimsdk/protocol/group"
 )
@@ -33,6 +34,9 @@ func (g *groupServer) GetGroupInfoCache(ctx context.Context, req *pbgroup.GetGro
 }
 
 func (g *groupServer) GetGroupMemberCache(ctx context.Context, req *pbgroup.GetGroupMemberCacheReq) (*pbgroup.GetGroupMemberCacheResp, error) {
+	if err := authverify.CheckAccess(ctx, req.GroupMemberID); err != nil {
+		return nil, err
+	}
 	members, err := g.db.TakeGroupMember(ctx, req.GroupID, req.GroupMemberID)
 	if err != nil {
 		return nil, err
