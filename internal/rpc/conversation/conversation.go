@@ -432,6 +432,9 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 	if err != nil {
 		return nil, err
 	}
+	if err := c.msgClient.SetUserConversationMaxSeq(ctx, conversation.ConversationID, req.UserIDs, 0); err != nil {
+		return nil, err
+	}
 
 	c.webhookAfterCreateGroupChatConversations(ctx, &c.config.WebhooksConfig.AfterCreateGroupChatConversations, &conversation)
 	return &pbconversation.CreateGroupChatConversationsResp{}, nil
