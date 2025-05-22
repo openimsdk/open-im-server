@@ -201,3 +201,25 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		}, nil
 	}
 }
+
+func (m *msgServer) SendSimpleMsg(ctx context.Context, req *pbmsg.SendSimpleMsgReq) (*pbmsg.SendSimpleMsgResp, error) {
+	if req.MsgData == nil {
+		return nil, errs.ErrArgs.WrapMsg("msg data is nil")
+	}
+	sender, err := m.UserLocalCache.GetUserInfo(ctx, req.MsgData.SendID)
+	if err != nil {
+		return nil, err
+	}
+	req.MsgData.SenderFaceURL = sender.FaceURL
+	req.MsgData.SenderNickname = sender.Nickname
+	resp, err := m.SendMsg(ctx, &pbmsg.SendMsgReq{MsgData: req.MsgData})
+	if err != nil {
+		return nil, err
+	}
+	return &pbmsg.SendSimpleMsgResp{
+		ServerMsgID: resp.ServerMsgID,
+		ClientMsgID: resp.ClientMsgID,
+		SendTime:    resp.SendTime,
+		Modify:      resp.Modify,
+	}, nil
+}
