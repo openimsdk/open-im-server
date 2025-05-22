@@ -491,7 +491,25 @@ func (g *groupServer) GetGroupAllMember(ctx context.Context, req *pbgroup.GetGro
 	return &resp, nil
 }
 
+func (g *groupServer) checkAdminOrInGroup(ctx context.Context, groupID string) error {
+	if authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+		return nil
+	}
+	opUserID := mcontext.GetOpUserID(ctx)
+	members, err := g.db.FindGroupMembers(ctx, groupID, []string{opUserID})
+	if err != nil {
+		return err
+	}
+	if len(members) == 0 {
+		return errs.ErrNoPermission.WrapMsg("op user not in group")
+	}
+	return nil
+}
+
 func (g *groupServer) GetGroupMemberList(ctx context.Context, req *pbgroup.GetGroupMemberListReq) (*pbgroup.GetGroupMemberListResp, error) {
+	if err := g.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
+	}
 	var (
 		total   int64
 		members []*model.GroupMember
@@ -500,34 +518,13 @@ func (g *groupServer) GetGroupMemberList(ctx context.Context, req *pbgroup.GetGr
 	if req.Keyword == "" {
 		total, members, err = g.db.PageGetGroupMember(ctx, req.GroupID, req.Pagination)
 	} else {
-		members, err = g.db.FindGroupMemberAll(ctx, req.GroupID)
+		total, members, err = g.db.SearchGroupMember(ctx, req.GroupID, req.Keyword, req.Pagination)
 	}
 	if err != nil {
 		return nil, err
 	}
 	if err := g.PopulateGroupMember(ctx, members...); err != nil {
 		return nil, err
-	}
-	if req.Keyword != "" {
-		groupMembers := make([]*model.GroupMember, 0)
-		for _, member := range members {
-			if member.UserID == req.Keyword {
-				groupMembers = append(groupMembers, member)
-				total++
-				continue
-			}
-			if member.Nickname == req.Keyword {
-				groupMembers = append(groupMembers, member)
-				total++
-				continue
-			}
-		}
-
-		members := datautil.Paginate(groupMembers, int(req.Pagination.GetPageNumber()), int(req.Pagination.GetShowNumber()))
-		return &pbgroup.GetGroupMemberListResp{
-			Total:   uint32(total),
-			Members: datautil.Batch(convert.Db2PbGroupMember, members),
-		}, nil
 	}
 	return &pbgroup.GetGroupMemberListResp{
 		Total:   uint32(total),
@@ -651,6 +648,9 @@ func (g *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbgroup.GetG
 	}
 	if req.GroupID == "" {
 		return nil, errs.ErrArgs.WrapMsg("groupID empty")
+	}
+	if err := g.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
 	}
 	members, err := g.getGroupMembersInfo(ctx, req.GroupID, req.UserIDs)
 	if err != nil {
@@ -1297,6 +1297,9 @@ func (g *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) 
 }
 
 func (g *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbgroup.GetGroupMembersCMSReq) (*pbgroup.GetGroupMembersCMSResp, error) {
+	if err := g.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
+	}
 	total, members, err := g.db.SearchGroupMember(ctx, req.UserName, req.GroupID, req.Pagination)
 	if err != nil {
 		return nil, err
@@ -1672,6 +1675,11 @@ func (g *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbgroup.Get
 	if datautil.Duplicate(req.GroupIDs) {
 		return nil, errs.ErrArgs.WrapMsg("groupIDs duplicate")
 	}
+	for _, groupID := range req.GroupIDs {
+		if err := g.checkAdminOrInGroup(ctx, groupID); err != nil {
+			return nil, err
+		}
+	}
 	groups, err := g.db.FindGroup(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
@@ -1700,6 +1708,9 @@ func (g *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbgroup.Ge
 	if len(req.GroupIDs) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("groupIDs empty")
 	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, g.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	members, err := g.db.FindGroupMemberUser(ctx, req.GroupIDs, req.UserID)
 	if err != nil {
 		return nil, err
@@ -1719,6 +1730,11 @@ func (g *groupServer) GetGroupMemberUserIDs(ctx context.Context, req *pbgroup.Ge
 	if err != nil {
 		return nil, err
 	}
+	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+		if !datautil.Contain(mcontext.GetOpUserID(ctx), userIDs...) {
+			return nil, errs.ErrNoPermission.WrapMsg("opUser no permission")
+		}
+	}
 	return &pbgroup.GetGroupMemberUserIDsResp{
 		UserIDs: userIDs,
 	}, nil
@@ -1727,6 +1743,9 @@ func (g *groupServer) GetGroupMemberUserIDs(ctx context.Context, req *pbgroup.Ge
 func (g *groupServer) GetGroupMemberRoleLevel(ctx context.Context, req *pbgroup.GetGroupMemberRoleLevelReq) (*pbgroup.GetGroupMemberRoleLevelResp, error) {
 	if len(req.RoleLevels) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("RoleLevels empty")
+	}
+	if err := g.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
 	}
 	members, err := g.db.FindGroupMemberRoleLevels(ctx, req.GroupID, req.RoleLevels)
 	if err != nil {

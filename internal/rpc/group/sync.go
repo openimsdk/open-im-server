@@ -11,16 +11,24 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 const versionSyncLimit = 500
 
 func (g *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgroup.GetFullGroupMemberUserIDsReq) (*pbgroup.GetFullGroupMemberUserIDsResp, error) {
-	vl, err := g.db.FindMaxGroupMemberVersionCache(ctx, req.GroupID)
+	userIDs, err := g.db.FindGroupMemberUserID(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
-	userIDs, err := g.db.FindGroupMemberUserID(ctx, req.GroupID)
+	if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
+		if !datautil.Contain(mcontext.GetOpUserID(ctx), userIDs...) {
+			return nil, errs.ErrNoPermission.WrapMsg("op user not in group")
+		}
+	}
+	vl, err := g.db.FindMaxGroupMemberVersionCache(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -37,6 +45,9 @@ func (g *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgrou
 }
 
 func (s *groupServer) GetFullJoinGroupIDs(ctx context.Context, req *pbgroup.GetFullJoinGroupIDsReq) (*pbgroup.GetFullJoinGroupIDsResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
 	vl, err := s.db.FindMaxJoinGroupVersionCache(ctx, req.UserID)
 	if err != nil {
 		return nil, err
@@ -58,6 +69,9 @@ func (s *groupServer) GetFullJoinGroupIDs(ctx context.Context, req *pbgroup.GetF
 }
 
 func (s *groupServer) GetIncrementalGroupMember(ctx context.Context, req *pbgroup.GetIncrementalGroupMemberReq) (*pbgroup.GetIncrementalGroupMemberResp, error) {
+	if err := s.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
+	}
 	group, err := s.db.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
