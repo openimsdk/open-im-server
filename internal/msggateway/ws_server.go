@@ -49,7 +49,7 @@ type WsServer struct {
 	unregisterChan    chan *Client
 	kickHandlerChan   chan *kickHandler
 	clients           UserMap
-	online            *rpccache.OnlineCache
+	online            rpccache.OnlineCache
 	subscription      *Subscription
 	clientPool        sync.Pool
 	onlineUserNum     atomic.Int64

@@ -48,15 +48,7 @@ func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(ctx context.Cont
 	log.ZDebug(ctx, "mongo consumer recv msg", "msgs", msgFromMQ.String())
 	err = mc.msgTransferDatabase.BatchInsertChat2DB(ctx, msgFromMQ.ConversationID, msgFromMQ.MsgData, msgFromMQ.LastSeq)
 	if err != nil {
-		log.ZError(
-			ctx,
-			"single data insert to mongo err",
-			err,
-			"msg",
-			msgFromMQ.MsgData,
-			"conversationID",
-			msgFromMQ.ConversationID,
-		)
+		log.ZError(ctx, "single data insert to mongo err", err, "msg", msgFromMQ.MsgData, "conversationID", msgFromMQ.ConversationID)
 		prommetrics.MsgInsertMongoFailedCounter.Inc()
 	} else {
 		prommetrics.MsgInsertMongoSuccessCounter.Inc()
