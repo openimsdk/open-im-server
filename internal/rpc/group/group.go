@@ -372,6 +372,10 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		return nil, servererrs.ErrDismissedAlready.WrapMsg("group dismissed checking group status found it dismissed")
 	}
 
+	if err := g.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
+	}
+
 	userMap, err := g.userClient.GetUsersInfoMap(ctx, req.InvitedUserIDs)
 	if err != nil {
 		return nil, err
@@ -422,7 +426,7 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 						ReqMessage:    request.ReqMsg,
 						JoinSource:    request.JoinSource,
 						InviterUserID: request.InviterUserID,
-					})
+					}, request)
 				}
 				return &pbgroup.InviteUserToGroupResp{}, nil
 			}
@@ -978,7 +982,7 @@ func (g *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 	if err = g.db.CreateGroupRequest(ctx, []*model.GroupRequest{&groupRequest}); err != nil {
 		return nil, err
 	}
-	g.notification.JoinGroupApplicationNotification(ctx, req)
+	g.notification.JoinGroupApplicationNotification(ctx, req, &groupRequest)
 	return &pbgroup.JoinGroupResp{}, nil
 }
 

@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
+	"github.com/openimsdk/open-im-server/v3/pkg/notification/common_user"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/tools/mq/memamq"
@@ -100,23 +101,24 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		return err
 	}
 	userClient := rpcli.NewUserClient(userConn)
-
+	database := controller.NewFriendDatabase(
+		friendMongoDB,
+		friendRequestMongoDB,
+		redis.NewFriendCacheRedis(rdb, &config.LocalCacheConfig, friendMongoDB),
+		mgocli.GetTx(),
+	)
 	// Initialize notification sender
 	notificationSender := NewFriendNotificationSender(
 		&config.NotificationConfig,
 		rpcli.NewMsgClient(msgConn),
 		WithRpcFunc(userClient.GetUsersInfo),
+		WithFriendDB(database),
 	)
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 
 	// Register Friend server with refactored MongoDB and Redis integrations
 	relation.RegisterFriendServer(server, &friendServer{
-		db: controller.NewFriendDatabase(
-			friendMongoDB,
-			friendRequestMongoDB,
-			redis.NewFriendCacheRedis(rdb, &config.LocalCacheConfig, friendMongoDB),
-			mgocli.GetTx(),
-		),
+		db: database,
 		blackDatabase: controller.NewBlackDatabase(
 			blackMongoDB,
 			redis.NewBlackCacheRedis(rdb, &config.LocalCacheConfig, blackMongoDB),
@@ -328,7 +330,7 @@ func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context, req *relat
 		return nil, err
 	}
 	resp = &relation.GetDesignatedFriendsApplyResp{}
-	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userClient.GetUsersInfoMap)
+	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.getCommonUserMap)
 	if err != nil {
 		return nil, err
 	}
@@ -350,7 +352,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *rel
 	}
 
 	resp = &relation.GetPaginationFriendsApplyToResp{}
-	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userClient.GetUsersInfoMap)
+	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.getCommonUserMap)
 	if err != nil {
 		return nil, err
 	}
@@ -374,7 +376,7 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *r
 	}
 
 	resp = &relation.GetPaginationFriendsApplyFromResp{}
-	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userClient.GetUsersInfoMap)
+	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.getCommonUserMap)
 	if err != nil {
 		return nil, err
 	}
@@ -563,4 +565,14 @@ func (s *friendServer) GetSelfUnhandledApplyCount(ctx context.Context, req *rela
 	return &relation.GetSelfUnhandledApplyCountResp{
 		Count: count,
 	}, nil
+}
+
+func (s *friendServer) getCommonUserMap(ctx context.Context, userIDs []string) (map[string]common_user.CommonUser, error) {
+	users, err := s.userClient.GetUsersInfo(ctx, userIDs)
+	if err != nil {
+		return nil, err
+	}
+	return datautil.SliceToMapAny(users, func(e *sdkws.UserInfo) (string, common_user.CommonUser) {
+		return e.UserID, e
+	}), nil
 }
