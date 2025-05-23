@@ -16,24 +16,32 @@ package mgo
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func NewFriendRequestMongo(db *mongo.Database) (database.FriendRequest, error) {
 	coll := db.Collection(database.FriendRequestName)
-	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "from_user_id", Value: 1},
-			{Key: "to_user_id", Value: 1},
+	_, err := coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "from_user_id", Value: 1},
+				{Key: "to_user_id", Value: 1},
+			},
+			Options: options.Index().SetUnique(true),
 		},
-		Options: options.Index().SetUnique(true),
+		{
+			Keys: bson.D{
+				{Key: "create_time", Value: -1},
+			},
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -45,12 +53,24 @@ type FriendRequestMgo struct {
 	coll *mongo.Collection
 }
 
-func (f *FriendRequestMgo) FindToUserID(ctx context.Context, toUserID string, pagination pagination.Pagination) (total int64, friendRequests []*model.FriendRequest, err error) {
-	return mongoutil.FindPage[*model.FriendRequest](ctx, f.coll, bson.M{"to_user_id": toUserID}, pagination)
+func (f *FriendRequestMgo) sort() any {
+	return bson.E{Key: "create_time", Value: -1}
 }
 
-func (f *FriendRequestMgo) FindFromUserID(ctx context.Context, fromUserID string, pagination pagination.Pagination) (total int64, friendRequests []*model.FriendRequest, err error) {
-	return mongoutil.FindPage[*model.FriendRequest](ctx, f.coll, bson.M{"from_user_id": fromUserID}, pagination)
+func (f *FriendRequestMgo) FindToUserID(ctx context.Context, toUserID string, handleResults []int, pagination pagination.Pagination) (total int64, friendRequests []*model.FriendRequest, err error) {
+	filter := bson.M{"to_user_id": toUserID}
+	if len(handleResults) > 0 {
+		filter["handle_result"] = bson.M{"$in": handleResults}
+	}
+	return mongoutil.FindPage[*model.FriendRequest](ctx, f.coll, filter, pagination, options.Find().SetSort(f.sort()))
+}
+
+func (f *FriendRequestMgo) FindFromUserID(ctx context.Context, fromUserID string, handleResults []int, pagination pagination.Pagination) (total int64, friendRequests []*model.FriendRequest, err error) {
+	filter := bson.M{"from_user_id": fromUserID}
+	if len(handleResults) > 0 {
+		filter["handle_result"] = bson.M{"$in": handleResults}
+	}
+	return mongoutil.FindPage[*model.FriendRequest](ctx, f.coll, filter, pagination, options.Find().SetSort(f.sort()))
 }
 
 func (f *FriendRequestMgo) FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*model.FriendRequest, err error) {
@@ -109,4 +129,12 @@ func (f *FriendRequestMgo) Find(ctx context.Context, fromUserID, toUserID string
 
 func (f *FriendRequestMgo) Take(ctx context.Context, fromUserID, toUserID string) (friendRequest *model.FriendRequest, err error) {
 	return f.Find(ctx, fromUserID, toUserID)
+}
+
+func (f *FriendRequestMgo) GetUnhandledCount(ctx context.Context, userID string, ts int64) (int64, error) {
+	filter := bson.M{"to_user_id": userID, "handle_result": 0}
+	if ts != 0 {
+		filter["req_time"] = bson.M{"$gt": ts}
+	}
+	return mongoutil.Count(ctx, f.coll, filter)
 }

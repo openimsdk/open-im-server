@@ -31,12 +31,19 @@ import (
 
 func NewGroupRequestMgo(db *mongo.Database) (database.GroupRequest, error) {
 	coll := db.Collection(database.GroupRequestName)
-	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "group_id", Value: 1},
-			{Key: "user_id", Value: 1},
+	_, err := coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "group_id", Value: 1},
+				{Key: "user_id", Value: 1},
+			},
+			Options: options.Index().SetUnique(true),
 		},
-		Options: options.Index().SetUnique(true),
+		{
+			Keys: bson.D{
+				{Key: "req_time", Value: -1},
+			},
+		},
 	})
 	if err != nil {
 		return nil, errs.Wrap(err)
@@ -69,7 +76,7 @@ func (g *GroupRequestMgo) FindGroupRequests(ctx context.Context, groupID string,
 }
 
 func (g *GroupRequestMgo) sort() any {
-	return bson.E{Key: "_id", Value: -1}
+	return bson.E{Key: "req_time", Value: -1}
 }
 
 func (g *GroupRequestMgo) Page(ctx context.Context, userID string, groupIDs []string, handleResults []int, pagination pagination.Pagination) (total int64, groups []*model.GroupRequest, err error) {
@@ -98,6 +105,9 @@ func (g *GroupRequestMgo) GetUnhandledCount(ctx context.Context, groupIDs []stri
 	if len(groupIDs) == 0 {
 		return 0, nil
 	}
-
-	return 0, nil
+	filter := bson.M{"group_id": bson.M{"$in": groupIDs}, "handle_result": 0}
+	if ts != 0 {
+		filter["req_time"] = bson.M{"$gt": ts}
+	}
+	return mongoutil.Count(ctx, g.coll, filter)
 }

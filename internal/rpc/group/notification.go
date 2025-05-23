@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -365,6 +366,10 @@ func (g *NotificationSender) GroupInfoSetAnnouncementNotification(ctx context.Co
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips, notification.WithRpcGetUserName(), notification.WithSendMessage(sendMessage))
 }
 
+func (g *NotificationSender) uuid() string {
+	return uuid.New().String()
+}
+
 func (g *NotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbgroup.JoinGroupReq) {
 	var err error
 	defer func() {
@@ -387,7 +392,7 @@ func (g *NotificationSender) JoinGroupApplicationNotification(ctx context.Contex
 		return
 	}
 	userIDs = append(userIDs, req.InviterUserID, mcontext.GetOpUserID(ctx))
-	tips := &sdkws.JoinGroupApplicationTips{Group: group, Applicant: user, ReqMsg: req.ReqMessage}
+	tips := &sdkws.JoinGroupApplicationTips{Group: group, Applicant: user, ReqMsg: req.ReqMessage, Uuid: g.uuid()}
 	for _, userID := range datautil.Distinct(userIDs) {
 		g.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.JoinGroupApplicationNotification, tips)
 	}
@@ -432,8 +437,8 @@ func (g *NotificationSender) GroupApplicationAcceptedNotification(ctx context.Co
 	if err = g.fillOpUser(ctx, &opUser, group.GroupID); err != nil {
 		return
 	}
+	tips := &sdkws.GroupApplicationAcceptedTips{Group: group, OpUser: opUser, HandleMsg: req.HandledMsg, Uuid: g.uuid()}
 	for _, userID := range append(userIDs, req.FromUserID) {
-		tips := &sdkws.GroupApplicationAcceptedTips{Group: group, OpUser: opUser, HandleMsg: req.HandledMsg}
 		if userID == req.FromUserID {
 			tips.ReceiverAs = applicantReceiver
 		} else {
@@ -465,8 +470,8 @@ func (g *NotificationSender) GroupApplicationRejectedNotification(ctx context.Co
 	if err = g.fillOpUser(ctx, &opUser, group.GroupID); err != nil {
 		return
 	}
+	tips := &sdkws.GroupApplicationRejectedTips{Group: group, OpUser: opUser, HandleMsg: req.HandledMsg, Uuid: g.uuid()}
 	for _, userID := range append(userIDs, req.FromUserID) {
-		tips := &sdkws.GroupApplicationAcceptedTips{Group: group, OpUser: opUser, HandleMsg: req.HandledMsg}
 		if userID == req.FromUserID {
 			tips.ReceiverAs = applicantReceiver
 		} else {

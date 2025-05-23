@@ -341,7 +341,10 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *rel
 		return nil, err
 	}
 
-	total, friendRequests, err := s.db.PageFriendRequestToMe(ctx, req.UserID, req.Pagination)
+	handleResults := datautil.Slice(req.HandleResults, func(e int32) int {
+		return int(e)
+	})
+	total, friendRequests, err := s.db.PageFriendRequestToMe(ctx, req.UserID, handleResults, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -358,17 +361,19 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *rel
 }
 
 func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *relation.GetPaginationFriendsApplyFromReq) (resp *relation.GetPaginationFriendsApplyFromResp, err error) {
-	resp = &relation.GetPaginationFriendsApplyFromResp{}
-
 	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 
-	total, friendRequests, err := s.db.PageFriendRequestFromMe(ctx, req.UserID, req.Pagination)
+	handleResults := datautil.Slice(req.HandleResults, func(e int32) int {
+		return int(e)
+	})
+	total, friendRequests, err := s.db.PageFriendRequestFromMe(ctx, req.UserID, handleResults, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
 
+	resp = &relation.GetPaginationFriendsApplyFromResp{}
 	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
@@ -543,4 +548,19 @@ func (s *friendServer) UpdateFriends(ctx context.Context, req *relation.UpdateFr
 
 	s.notificationSender.FriendsInfoUpdateNotification(ctx, req.OwnerUserID, req.FriendUserIDs)
 	return resp, nil
+}
+
+func (s *friendServer) GetSelfUnhandledApplyCount(ctx context.Context, req *relation.GetSelfUnhandledApplyCountReq) (*relation.GetSelfUnhandledApplyCountResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
+
+	count, err := s.db.GetUnhandledCount(ctx, req.UserID, req.Time)
+	if err != nil {
+		return nil, err
+	}
+
+	return &relation.GetSelfUnhandledApplyCountResp{
+		Count: count,
+	}, nil
 }
