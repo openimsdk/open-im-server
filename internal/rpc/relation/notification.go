@@ -19,6 +19,9 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/versionctx"
@@ -52,9 +55,7 @@ func WithFriendDB(db controller.FriendDatabase) friendNotificationSenderOptions 
 	}
 }
 
-func WithDBFunc(
-	fn func(ctx context.Context, userIDs []string) (users []*relationtb.User, err error),
-) friendNotificationSenderOptions {
+func WithDBFunc(fn func(ctx context.Context, userIDs []string) (users []*relationtb.User, err error)) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
 		f := func(ctx context.Context, userIDs []string) (result []common_user.CommonUser, err error) {
 			users, err := fn(ctx, userIDs)
@@ -70,9 +71,7 @@ func WithDBFunc(
 	}
 }
 
-func WithRpcFunc(
-	fn func(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error),
-) friendNotificationSenderOptions {
+func WithRpcFunc(fn func(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error)) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
 		f := func(ctx context.Context, userIDs []string) (result []common_user.CommonUser, err error) {
 			users, err := fn(ctx, userIDs)
@@ -100,10 +99,7 @@ func NewFriendNotificationSender(conf *config.Notification, msgClient *rpcli.Msg
 	return f
 }
 
-func (f *FriendNotificationSender) getUsersInfoMap(
-	ctx context.Context,
-	userIDs []string,
-) (map[string]*sdkws.UserInfo, error) {
+func (f *FriendNotificationSender) getUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
 	users, err := f.getUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
@@ -116,10 +112,7 @@ func (f *FriendNotificationSender) getUsersInfoMap(
 }
 
 //nolint:unused
-func (f *FriendNotificationSender) getFromToUserNickname(
-	ctx context.Context,
-	fromUserID, toUserID string,
-) (string, string, error) {
+func (f *FriendNotificationSender) getFromToUserNickname(ctx context.Context, fromUserID, toUserID string) (string, string, error) {
 	users, err := f.getUsersInfoMap(ctx, []string{fromUserID, toUserID})
 	if err != nil {
 		return "", "", nil
@@ -132,60 +125,107 @@ func (f *FriendNotificationSender) UserInfoUpdatedNotification(ctx context.Conte
 	f.Notification(ctx, mcontext.GetOpUserID(ctx), changedUserID, constant.UserInfoUpdatedNotification, &tips)
 }
 
+func (f *FriendNotificationSender) getCommonUserMap(ctx context.Context, userIDs []string) (map[string]common_user.CommonUser, error) {
+	users, err := f.getUsersInfo(ctx, userIDs)
+	if err != nil {
+		return nil, err
+	}
+	return datautil.SliceToMap(users, func(e common_user.CommonUser) string {
+		return e.GetUserID()
+	}), nil
+}
+
+func (f *FriendNotificationSender) getFriendRequests(ctx context.Context, fromUserID, toUserID string) (*sdkws.FriendRequest, error) {
+	if f.db == nil {
+		return nil, errs.ErrInternalServer.WithDetail("db is nil")
+	}
+	friendRequests, err := f.db.FindBothFriendRequests(ctx, fromUserID, toUserID)
+	if err != nil {
+		return nil, err
+	}
+	requests, err := convert.FriendRequestDB2Pb(ctx, friendRequests, f.getCommonUserMap)
+	if err != nil {
+		return nil, err
+	}
+	for _, request := range requests {
+		if request.FromUserID == fromUserID && request.ToUserID == toUserID {
+			return request, nil
+		}
+	}
+	return nil, errs.ErrRecordNotFound.WrapMsg("friend request not found", "fromUserID", fromUserID, "toUserID", toUserID)
+}
+
 func (f *FriendNotificationSender) FriendApplicationAddNotification(ctx context.Context, req *relation.ApplyToAddFriendReq) {
-	tips := sdkws.FriendApplicationTips{FromToUserID: &sdkws.FromToUserID{
-		FromUserID: req.FromUserID,
-		ToUserID:   req.ToUserID,
-	}}
+	request, err := f.getFriendRequests(ctx, req.FromUserID, req.ToUserID)
+	if err != nil {
+		log.ZError(ctx, "FriendApplicationAddNotification get friend request", err, "fromUserID", req.FromUserID, "toUserID", req.ToUserID)
+		return
+	}
+	tips := sdkws.FriendApplicationTips{
+		FromToUserID: &sdkws.FromToUserID{
+			FromUserID: req.FromUserID,
+			ToUserID:   req.ToUserID,
+		},
+		Request: request,
+	}
 	f.Notification(ctx, req.FromUserID, req.ToUserID, constant.FriendApplicationNotification, &tips)
 }
 
-func (f *FriendNotificationSender) FriendApplicationAgreedNotification(
-	ctx context.Context,
-	req *relation.RespondFriendApplyReq,
-) {
-	tips := sdkws.FriendApplicationApprovedTips{FromToUserID: &sdkws.FromToUserID{
-		FromUserID: req.FromUserID,
-		ToUserID:   req.ToUserID,
-	}, HandleMsg: req.HandleMsg}
+func (f *FriendNotificationSender) FriendApplicationAgreedNotification(ctx context.Context, req *relation.RespondFriendApplyReq) {
+	request, err := f.getFriendRequests(ctx, req.FromUserID, req.ToUserID)
+	if err != nil {
+		log.ZError(ctx, "FriendApplicationAgreedNotification get friend request", err, "fromUserID", req.FromUserID, "toUserID", req.ToUserID)
+		return
+	}
+	tips := sdkws.FriendApplicationApprovedTips{
+		FromToUserID: &sdkws.FromToUserID{
+			FromUserID: req.FromUserID,
+			ToUserID:   req.ToUserID,
+		},
+		HandleMsg: req.HandleMsg,
+		Request:   request,
+	}
 	f.Notification(ctx, req.ToUserID, req.FromUserID, constant.FriendApplicationApprovedNotification, &tips)
 }
 
-func (f *FriendNotificationSender) FriendApplicationRefusedNotification(
-	ctx context.Context,
-	req *relation.RespondFriendApplyReq,
-) {
-	tips := sdkws.FriendApplicationApprovedTips{FromToUserID: &sdkws.FromToUserID{
-		FromUserID: req.FromUserID,
-		ToUserID:   req.ToUserID,
-	}, HandleMsg: req.HandleMsg}
+func (f *FriendNotificationSender) FriendApplicationRefusedNotification(ctx context.Context, req *relation.RespondFriendApplyReq) {
+	request, err := f.getFriendRequests(ctx, req.FromUserID, req.ToUserID)
+	if err != nil {
+		log.ZError(ctx, "FriendApplicationRefusedNotification get friend request", err, "fromUserID", req.FromUserID, "toUserID", req.ToUserID)
+		return
+	}
+	tips := sdkws.FriendApplicationRejectedTips{
+		FromToUserID: &sdkws.FromToUserID{
+			FromUserID: req.FromUserID,
+			ToUserID:   req.ToUserID,
+		},
+		HandleMsg: req.HandleMsg,
+		Request:   request,
+	}
 	f.Notification(ctx, req.ToUserID, req.FromUserID, constant.FriendApplicationRejectedNotification, &tips)
 }
 
-func (f *FriendNotificationSender) FriendAddedNotification(
-	ctx context.Context,
-	operationID, opUserID, fromUserID, toUserID string,
-) error {
-	tips := sdkws.FriendAddedTips{Friend: &sdkws.FriendInfo{}, OpUser: &sdkws.PublicUserInfo{}}
-	user, err := f.getUsersInfo(ctx, []string{opUserID})
-	if err != nil {
-		return err
-	}
-	tips.OpUser.UserID = user[0].GetUserID()
-	tips.OpUser.Ex = user[0].GetEx()
-	tips.OpUser.Nickname = user[0].GetNickname()
-	tips.OpUser.FaceURL = user[0].GetFaceURL()
-	friends, err := f.db.FindFriendsWithError(ctx, fromUserID, []string{toUserID})
-	if err != nil {
-		return err
-	}
-	tips.Friend, err = convert.FriendDB2Pb(ctx, friends[0], f.getUsersInfoMap)
-	if err != nil {
-		return err
-	}
-	f.Notification(ctx, fromUserID, toUserID, constant.FriendAddedNotification, &tips)
-	return nil
-}
+//func (f *FriendNotificationSender) FriendAddedNotification(ctx context.Context, operationID, opUserID, fromUserID, toUserID string) error {
+//	tips := sdkws.FriendAddedTips{Friend: &sdkws.FriendInfo{}, OpUser: &sdkws.PublicUserInfo{}}
+//	user, err := f.getUsersInfo(ctx, []string{opUserID})
+//	if err != nil {
+//		return err
+//	}
+//	tips.OpUser.UserID = user[0].GetUserID()
+//	tips.OpUser.Ex = user[0].GetEx()
+//	tips.OpUser.Nickname = user[0].GetNickname()
+//	tips.OpUser.FaceURL = user[0].GetFaceURL()
+//	friends, err := f.db.FindFriendsWithError(ctx, fromUserID, []string{toUserID})
+//	if err != nil {
+//		return err
+//	}
+//	tips.Friend, err = convert.FriendDB2Pb(ctx, friends[0], f.getUsersInfoMap)
+//	if err != nil {
+//		return err
+//	}
+//	f.Notification(ctx, fromUserID, toUserID, constant.FriendAddedNotification, &tips)
+//	return nil
+//}
 
 func (f *FriendNotificationSender) FriendDeletedNotification(ctx context.Context, req *relation.DeleteFriendReq) {
 	tips := sdkws.FriendDeletedTips{FromToUserID: &sdkws.FromToUserID{

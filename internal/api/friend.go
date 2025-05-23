@@ -114,3 +114,7 @@ func (o *FriendApi) GetIncrementalBlacks(c *gin.Context) {
 func (o *FriendApi) GetFullFriendUserIDs(c *gin.Context) {
 	a2r.Call(c, relation.FriendClient.GetFullFriendUserIDs, o.Client)
 }
+
+func (o *FriendApi) GetSelfUnhandledApplyCount(c *gin.Context) {
+	a2r.Call(c, relation.FriendClient.GetSelfUnhandledApplyCount, o.Client)
+}
