@@ -16,8 +16,10 @@ package mgo
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/tools/utils/datautil"
 
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/pagination"
@@ -66,10 +68,36 @@ func (g *GroupRequestMgo) FindGroupRequests(ctx context.Context, groupID string,
 	return mongoutil.Find[*model.GroupRequest](ctx, g.coll, bson.M{"group_id": groupID, "user_id": bson.M{"$in": userIDs}})
 }
 
-func (g *GroupRequestMgo) Page(ctx context.Context, userID string, pagination pagination.Pagination) (total int64, groups []*model.GroupRequest, err error) {
-	return mongoutil.FindPage[*model.GroupRequest](ctx, g.coll, bson.M{"user_id": userID}, pagination)
+func (g *GroupRequestMgo) sort() any {
+	return bson.E{Key: "_id", Value: -1}
 }
 
-func (g *GroupRequestMgo) PageGroup(ctx context.Context, groupIDs []string, pagination pagination.Pagination) (total int64, groups []*model.GroupRequest, err error) {
-	return mongoutil.FindPage[*model.GroupRequest](ctx, g.coll, bson.M{"group_id": bson.M{"$in": groupIDs}}, pagination)
+func (g *GroupRequestMgo) Page(ctx context.Context, userID string, groupIDs []string, handleResults []int, pagination pagination.Pagination) (total int64, groups []*model.GroupRequest, err error) {
+	filter := bson.M{"user_id": userID}
+	if len(groupIDs) > 0 {
+		filter["group_id"] = bson.M{"$in": datautil.Distinct(groupIDs)}
+	}
+	if len(handleResults) > 0 {
+		filter["handle_result"] = bson.M{"$in": handleResults}
+	}
+	return mongoutil.FindPage[*model.GroupRequest](ctx, g.coll, filter, pagination, options.Find().SetSort(g.sort()))
+}
+
+func (g *GroupRequestMgo) PageGroup(ctx context.Context, groupIDs []string, handleResults []int, pagination pagination.Pagination) (total int64, groups []*model.GroupRequest, err error) {
+	if len(groupIDs) == 0 {
+		return 0, nil, nil
+	}
+	filter := bson.M{"group_id": bson.M{"$in": groupIDs}}
+	if len(handleResults) > 0 {
+		filter["handle_result"] = bson.M{"$in": handleResults}
+	}
+	return mongoutil.FindPage[*model.GroupRequest](ctx, g.coll, filter, pagination, options.Find().SetSort(g.sort()))
+}
+
+func (g *GroupRequestMgo) GetUnhandledCount(ctx context.Context, groupIDs []string, ts int64) (int64, error) {
+	if len(groupIDs) == 0 {
+		return 0, nil
+	}
+
+	return 0, nil
 }

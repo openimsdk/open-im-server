@@ -25,7 +25,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
-
 	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -153,10 +152,14 @@ func (g *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 
 func (g *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
 	if !authverify.IsAdmin(ctx) {
-		groupMember, err := g.db.TakeGroupMember(ctx, groupID, mcontext.GetOpUserID(ctx))
+		members, err := g.db.FindGroupMembers(ctx, groupID, []string{mcontext.GetOpUserID(ctx)})
 		if err != nil {
 			return err
 		}
+		if len(members) == 0 {
+			return errs.ErrNoPermission.WrapMsg("op user not in group")
+		}
+		groupMember := members[0]
 		if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
 			return errs.ErrNoPermission.WrapMsg("no group owner or admin")
 		}
@@ -685,15 +688,34 @@ func (g *groupServer) GetGroupApplicationList(ctx context.Context, req *pbgroup.
 	if err := authverify.CheckAccess(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	groupIDs, err := g.db.FindUserManagedGroupID(ctx, req.FromUserID)
-	if err != nil {
-		return nil, err
+	var (
+		groupIDs []string
+		err      error
+	)
+	if len(req.GroupIDs) == 0 {
+		groupIDs, err = g.db.FindUserManagedGroupID(ctx, req.FromUserID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		req.GroupIDs = datautil.Distinct(req.GroupIDs)
+		if !authverify.IsAdmin(ctx) {
+			for _, groupID := range req.GroupIDs {
+				if err := g.CheckGroupAdmin(ctx, groupID); err != nil {
+					return nil, err
+				}
+			}
+		}
+		groupIDs = req.GroupIDs
 	}
 	resp := &pbgroup.GetGroupApplicationListResp{}
 	if len(groupIDs) == 0 {
 		return resp, nil
 	}
-	total, groupRequests, err := g.db.PageGroupRequest(ctx, groupIDs, req.Pagination)
+	handleResults := datautil.Slice(req.HandleResults, func(e int32) int {
+		return int(e)
+	})
+	total, groupRequests, err := g.db.PageGroupRequest(ctx, groupIDs, handleResults, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -755,6 +777,23 @@ func (g *groupServer) GetGroupsInfo(ctx context.Context, req *pbgroup.GetGroupsI
 	}
 	return &pbgroup.GetGroupsInfoResp{
 		GroupInfos: groups,
+	}, nil
+}
+
+func (g *groupServer) GetGroupApplicationUnhandledCount(ctx context.Context, req *pbgroup.GetGroupApplicationUnhandledCountReq) (*pbgroup.GetGroupApplicationUnhandledCountResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
+	groupIDs, err := g.db.FindUserManagedGroupID(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	count, err := g.db.GetGroupApplicationUnhandledCount(ctx, groupIDs, req.Time)
+	if err != nil {
+		return nil, err
+	}
+	return &pbgroup.GetGroupApplicationUnhandledCountResp{
+		Count: count,
 	}, nil
 }
 
@@ -1322,11 +1361,17 @@ func (g *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbgroup.GetGr
 }
 
 func (g *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbgroup.GetUserReqApplicationListReq) (*pbgroup.GetUserReqApplicationListResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	user, err := g.userClient.GetUserInfo(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	total, requests, err := g.db.PageGroupRequestUser(ctx, req.UserID, req.Pagination)
+	handleResults := datautil.Slice(req.HandleResults, func(e int32) int {
+		return int(e)
+	})
+	total, requests, err := g.db.PageGroupRequestUser(ctx, req.UserID, req.GroupIDs, handleResults, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -1767,6 +1812,9 @@ func (g *groupServer) GetGroupMemberRoleLevel(ctx context.Context, req *pbgroup.
 }
 
 func (g *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *pbgroup.GetGroupUsersReqApplicationListReq) (*pbgroup.GetGroupUsersReqApplicationListResp, error) {
+	if err := g.CheckGroupAdmin(ctx, req.GroupID); err != nil {
+		return nil, err
+	}
 	requests, err := g.db.FindGroupRequests(ctx, req.GroupID, req.UserIDs)
 	if err != nil {
 		return nil, err
