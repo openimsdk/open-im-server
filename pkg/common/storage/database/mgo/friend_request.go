@@ -54,7 +54,7 @@ type FriendRequestMgo struct {
 }
 
 func (f *FriendRequestMgo) sort() any {
-	return bson.E{Key: "create_time", Value: -1}
+	return bson.D{{Key: "create_time", Value: -1}}
 }
 
 func (f *FriendRequestMgo) FindToUserID(ctx context.Context, toUserID string, handleResults []int, pagination pagination.Pagination) (total int64, friendRequests []*model.FriendRequest, err error) {

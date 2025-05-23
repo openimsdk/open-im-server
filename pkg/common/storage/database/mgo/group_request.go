@@ -76,7 +76,7 @@ func (g *GroupRequestMgo) FindGroupRequests(ctx context.Context, groupID string,
 }
 
 func (g *GroupRequestMgo) sort() any {
-	return bson.E{Key: "req_time", Value: -1}
+	return bson.D{{Key: "req_time", Value: -1}}
 }
 
 func (g *GroupRequestMgo) Page(ctx context.Context, userID string, groupIDs []string, handleResults []int, pagination pagination.Pagination) (total int64, groups []*model.GroupRequest, err error) {
