@@ -426,7 +426,7 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 						ReqMessage:    request.ReqMsg,
 						JoinSource:    request.JoinSource,
 						InviterUserID: request.InviterUserID,
-					})
+					}, request)
 				}
 				return &pbgroup.InviteUserToGroupResp{}, nil
 			}
@@ -679,15 +679,34 @@ func (g *groupServer) getGroupMembersInfo(ctx context.Context, groupID string, u
 
 // GetGroupApplicationList handles functions that get a list of group requests.
 func (g *groupServer) GetGroupApplicationList(ctx context.Context, req *pbgroup.GetGroupApplicationListReq) (*pbgroup.GetGroupApplicationListResp, error) {
-	groupIDs, err := g.db.FindUserManagedGroupID(ctx, req.FromUserID)
-	if err != nil {
-		return nil, err
+	var (
+		groupIDs []string
+		err      error
+	)
+	if len(req.GroupIDs) == 0 {
+		groupIDs, err = g.db.FindUserManagedGroupID(ctx, req.FromUserID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		req.GroupIDs = datautil.Distinct(req.GroupIDs)
+		if !authverify.IsAdmin(ctx) {
+			for _, groupID := range req.GroupIDs {
+				if err := g.CheckGroupAdmin(ctx, groupID); err != nil {
+					return nil, err
+				}
+			}
+		}
+		groupIDs = req.GroupIDs
 	}
 	resp := &pbgroup.GetGroupApplicationListResp{}
 	if len(groupIDs) == 0 {
 		return resp, nil
 	}
-	total, groupRequests, err := g.db.PageGroupRequest(ctx, groupIDs, req.Pagination)
+	handleResults := datautil.Slice(req.HandleResults, func(e int32) int {
+		return int(e)
+	})
+	total, groupRequests, err := g.db.PageGroupRequest(ctx, groupIDs, handleResults, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -749,6 +768,23 @@ func (g *groupServer) GetGroupsInfo(ctx context.Context, req *pbgroup.GetGroupsI
 	}
 	return &pbgroup.GetGroupsInfoResp{
 		GroupInfos: groups,
+	}, nil
+}
+
+func (g *groupServer) GetGroupApplicationUnhandledCount(ctx context.Context, req *pbgroup.GetGroupApplicationUnhandledCountReq) (*pbgroup.GetGroupApplicationUnhandledCountResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
+	groupIDs, err := g.db.FindUserManagedGroupID(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	count, err := g.db.GetGroupApplicationUnhandledCount(ctx, groupIDs, req.Time)
+	if err != nil {
+		return nil, err
+	}
+	return &pbgroup.GetGroupApplicationUnhandledCountResp{
+		Count: count,
 	}, nil
 }
 
@@ -933,7 +969,7 @@ func (g *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 	if err = g.db.CreateGroupRequest(ctx, []*model.GroupRequest{&groupRequest}); err != nil {
 		return nil, err
 	}
-	g.notification.JoinGroupApplicationNotification(ctx, req)
+	g.notification.JoinGroupApplicationNotification(ctx, req, &groupRequest)
 	return &pbgroup.JoinGroupResp{}, nil
 }
 
@@ -1320,7 +1356,10 @@ func (g *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbgrou
 	if err != nil {
 		return nil, err
 	}
-	total, requests, err := g.db.PageGroupRequestUser(ctx, req.UserID, req.Pagination)
+	handleResults := datautil.Slice(req.HandleResults, func(e int32) int {
+		return int(e)
+	})
+	total, requests, err := g.db.PageGroupRequestUser(ctx, req.UserID, req.GroupIDs, handleResults, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
