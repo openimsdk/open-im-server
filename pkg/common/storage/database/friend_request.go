@@ -16,6 +16,7 @@ package database
 
 import (
 	"context"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/db/pagination"
 )
@@ -33,8 +34,9 @@ type FriendRequest interface {
 	Find(ctx context.Context, fromUserID, toUserID string) (friendRequest *model.FriendRequest, err error)
 	Take(ctx context.Context, fromUserID, toUserID string) (friendRequest *model.FriendRequest, err error)
 	// Get list of friend requests received by toUserID
-	FindToUserID(ctx context.Context, toUserID string, pagination pagination.Pagination) (total int64, friendRequests []*model.FriendRequest, err error)
+	FindToUserID(ctx context.Context, toUserID string, handleResults []int, pagination pagination.Pagination) (total int64, friendRequests []*model.FriendRequest, err error)
 	// Get list of friend requests sent by fromUserID
-	FindFromUserID(ctx context.Context, fromUserID string, pagination pagination.Pagination) (total int64, friendRequests []*model.FriendRequest, err error)
+	FindFromUserID(ctx context.Context, fromUserID string, handleResults []int, pagination pagination.Pagination) (total int64, friendRequests []*model.FriendRequest, err error)
 	FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*model.FriendRequest, err error)
+	GetUnhandledCount(ctx context.Context, userID string, ts int64) (int64, error)
 }
