@@ -16,17 +16,19 @@ package mgo
 
 import (
 	"context"
+	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/utils/datautil"
 
-	"github.com/openimsdk/tools/db/mongoutil"
-	"github.com/openimsdk/tools/db/pagination"
-	"github.com/openimsdk/tools/errs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/pagination"
+	"github.com/openimsdk/tools/errs"
 )
 
 func NewGroupRequestMgo(db *mongo.Database) (database.GroupRequest, error) {
@@ -107,7 +109,7 @@ func (g *GroupRequestMgo) GetUnhandledCount(ctx context.Context, groupIDs []stri
 	}
 	filter := bson.M{"group_id": bson.M{"$in": groupIDs}, "handle_result": 0}
 	if ts != 0 {
-		filter["req_time"] = bson.M{"$gt": ts}
+		filter["req_time"] = bson.M{"$gt": time.Unix(ts, 0)}
 	}
 	return mongoutil.Count(ctx, g.coll, filter)
 }
