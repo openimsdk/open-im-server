@@ -328,7 +328,7 @@ type Redis struct {
 	Username    string   `yaml:"username"`
 	Password    string   `yaml:"password"`
 	ClusterMode bool     `yaml:"clusterMode"`
-	DB          int      `yaml:"storage"`
+	DB          int      `yaml:"db"`
 	MaxRetry    int      `yaml:"maxRetry"`
 	PoolSize    int      `yaml:"poolSize"`
 }
