@@ -76,6 +76,27 @@ func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rocksCac
 	if err != nil {
 		return nil, err
 	}
+	values, err := fn(ctx, ids)
+	if err != nil {
+		log.ZError(ctx, "batchGetCache query database failed", err, "ids", ids)
+		return nil, err
+	}
+	idToValue := make(map[K]*V)
+	for _, value := range values {
+		idToValue[vId(value)] = value
+	}
+	getSlotValues := func(slotIds []K) []*V {
+		if len(slotIds) == 0 {
+			return nil
+		}
+		slotValues := make([]*V, 0, len(slotIds))
+		for _, id := range slotIds {
+			if value, ok := idToValue[id]; ok {
+				slotValues = append(slotValues, value)
+			}
+		}
+		return slotValues
+	}
 	result := make([]*V, 0, len(findKeys))
 	for _, keys := range slotKeys {
 		indexCache, err := rcClient.GetClient().FetchBatch2(ctx, keys, expire, func(idx []int) (map[int]string, error) {
@@ -86,16 +107,12 @@ func batchGetCache2[K comparable, V any](ctx context.Context, rcClient *rocksCac
 				idIndex[id] = index
 				queryIds = append(queryIds, id)
 			}
-			values, err := fn(ctx, queryIds)
-			if err != nil {
-				log.ZError(ctx, "batchGetCache query database failed", err, "keys", keys, "queryIds", queryIds)
-				return nil, err
-			}
-			if len(values) == 0 {
+			slotValues := getSlotValues(queryIds)
+			if len(slotValues) == 0 {
 				return map[int]string{}, nil
 			}
 			cacheIndex := make(map[int]string)
-			for _, value := range values {
+			for _, value := range slotValues {
 				id := vId(value)
 				index, ok := idIndex[id]
 				if !ok {
