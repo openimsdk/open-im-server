@@ -89,7 +89,7 @@ services:
       - ETCD_USERNAME=openIM
       - ETCD_PASSWORD=openIM123
     volumes:
-      - "${DATA_DIR}/components/etcd1:/etcd-data"
+      - "${DATA_DIR}/components/etcd:/etcd-data"
     command: >
       /bin/sh -c '
         etcd &
