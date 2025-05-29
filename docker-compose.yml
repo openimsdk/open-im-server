@@ -75,6 +75,7 @@ services:
       - "12380:2380"
     environment:
       - ETCD_NAME=s1
+      - ETCD_DATA_DIR=/etcd-data
       - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
       - ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379
       - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
@@ -88,20 +89,69 @@ services:
       - ETCD_USERNAME=openIM
       - ETCD_PASSWORD=openIM123
     volumes:
-      - "${DATA_DIR}/components/etcd:/bitnami/etcd"
-    command: |
-      /bin/bash -c '
-      /opt/bitnami/scripts/etcd/entrypoint.sh /opt/bitnami/scripts/etcd/run.sh &
+      - "${DATA_DIR}/components/etcd1:/etcd-data"
+    command: >
+      /bin/sh -c '
+        etcd &
+        export ETCDCTL_API=3
 
-      sleep 10
+        echo "Waiting for etcd to become healthy..."
+        until etcdctl --endpoints=http://127.0.0.1:2379 endpoint health &>/dev/null; do
+          echo "Waiting for ETCD to start..."
+          sleep 1
+        done
 
-      etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} user add $${ETCD_USERNAME} --new-user-password=$${ETCD_PASSWORD} || true
-      etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} role add openim-role || true
-      etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} role grant-permission openim-role --prefix=true readwrite / || true
-      etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} role grant-permission openim-role --prefix=true readwrite "" || true
-      etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} user grant-role $${ETCD_USERNAME} openim-role || true
+        echo "etcd is healthy."
 
-      tail -f /dev/null
+        echo "Checking authentication status..."
+        if ! etcdctl --endpoints=http://127.0.0.1:2379 auth status | grep -q "Authentication Status: true"; then
+          echo "Authentication is disabled. Creating users and enabling..."
+          
+          # Create users and setup permissions
+          etcdctl --endpoints=http://127.0.0.1:2379 user add $${ETCD_ROOT_USER} --new-user-password=$${ETCD_ROOT_PASSWORD} || true
+          etcdctl --endpoints=http://127.0.0.1:2379 user add $${ETCD_USERNAME} --new-user-password=$${ETCD_PASSWORD} || true
+          
+          etcdctl --endpoints=http://127.0.0.1:2379 role add openim-role || true
+          etcdctl --endpoints=http://127.0.0.1:2379 role grant-permission openim-role --prefix=true readwrite / || true
+          etcdctl --endpoints=http://127.0.0.1:2379 role grant-permission openim-role --prefix=true readwrite "" || true
+          etcdctl --endpoints=http://127.0.0.1:2379 user grant-role $${ETCD_USERNAME} openim-role || true
+          
+          etcdctl --endpoints=http://127.0.0.1:2379 user grant-role $${ETCD_ROOT_USER} $${ETCD_USERNAME} root || true
+          
+          echo "Enabling authentication..."
+          etcdctl --endpoints=http://127.0.0.1:2379 auth enable
+          echo "Authentication enabled successfully"
+        else
+          echo "Authentication is already enabled. Checking OpenIM user..."
+          
+          # Check if openIM user exists and can perform operations
+          if ! etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_USERNAME}:$${ETCD_PASSWORD} put /test/auth "auth-check" &>/dev/null; then
+            echo "OpenIM user test failed. Recreating user with root credentials..."
+            
+            # Try to create/update the openIM user using root credentials
+            etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} user add $${ETCD_USERNAME} --new-user-password=$${ETCD_PASSWORD} --no-password-file || true
+            etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} role add openim-role || true
+            etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} role grant-permission openim-role --prefix=true readwrite / || true
+            etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} role grant-permission openim-role --prefix=true readwrite "" || true
+            etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_ROOT_USER}:$${ETCD_ROOT_PASSWORD} user grant-role $${ETCD_USERNAME} openim-role || true
+            etcdctl --endpoints=http://127.0.0.1:2379 user grant-role $${ETCD_ROOT_USER} $${ETCD_USERNAME} root || true
+            
+            echo "OpenIM user recreated with required permissions"
+          else
+            echo "OpenIM user exists and has correct permissions"
+            etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_USERNAME}:$${ETCD_PASSWORD} del /test/auth &>/dev/null
+          fi
+        fi
+        
+        echo "Testing authentication with OpenIM user..."
+        if etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_USERNAME}:$${ETCD_PASSWORD} put /test/auth "auth-works"; then
+          echo "Authentication working properly"
+          etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_USERNAME}:$${ETCD_PASSWORD} del /test/auth
+        else
+          echo "WARNING: Authentication test failed"
+        fi
+        
+        tail -f /dev/null
       '
     restart: always
     networks:
@@ -172,7 +222,7 @@ services:
       - "11002:80"
     networks:
       - openim
-      
+
   prometheus:
     image: ${PROMETHEUS_IMAGE}
     container_name: prometheus
@@ -185,9 +235,9 @@ services:
       - ./config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml
       - ${DATA_DIR}/components/prometheus/data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.listen-address=:${PROMETHEUS_PORT}'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.listen-address=:${PROMETHEUS_PORT}"
     network_mode: host
 
   alertmanager:
@@ -200,8 +250,8 @@ services:
       - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
       - ./config/email.tmpl:/etc/alertmanager/email.tmpl
     command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
-      - '--web.listen-address=:${ALERTMANAGER_PORT}'
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--web.listen-address=:${ALERTMANAGER_PORT}"
     network_mode: host
 
   grafana:
@@ -233,9 +283,8 @@ services:
       - /sys:/host/sys:ro
       - /:/rootfs:ro
     command:
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-      - '--path.rootfs=/rootfs'
-      - '--web.listen-address=:19100'
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+      - "--web.listen-address=:19100"
     network_mode: host
-
