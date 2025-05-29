@@ -384,6 +384,12 @@ type Share struct {
 	RpcRegisterName RpcRegisterName `mapstructure:"rpcRegisterName"`
 	IMAdminUserID   []string        `mapstructure:"imAdminUserID"`
 	MultiLogin      MultiLogin      `mapstructure:"multiLogin"`
+	RPCMaxBodySize  MaxRequestBody  `mapstructure:"rpcMaxBodySize"`
+}
+
+type MaxRequestBody struct {
+	RequestMaxBodySize  int `mapstructure:"requestMaxBodySize"`
+	ResponseMaxBodySize int `mapstructure:"responseMaxBodySize"`
 }
 
 type MultiLogin struct {

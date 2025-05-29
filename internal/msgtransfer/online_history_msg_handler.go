@@ -18,12 +18,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
-	"github.com/openimsdk/tools/discovery"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/tools/discovery"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 
@@ -289,6 +290,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 		}
 
 		if isNewConversation {
+			ctx := storageList[0].ctx
 			switch msg.SessionType {
 			case constant.ReadGroupChatType:
 				log.ZDebug(ctx, "group chat first create conversation", "conversationID",

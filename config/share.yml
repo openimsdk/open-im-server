@@ -16,3 +16,7 @@ imAdminUserID: [ imAdmin ]
 multiLogin:
   policy: 1
   maxNumOneEnd: 30
+
+rpcMaxBodySize:
+  requestMaxBodySize: 8388608
+  responseMaxBodySize: 8388608

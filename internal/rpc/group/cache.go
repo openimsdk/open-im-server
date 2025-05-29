@@ -33,6 +33,9 @@ func (s *groupServer) GetGroupInfoCache(ctx context.Context, req *pbgroup.GetGro
 }
 
 func (s *groupServer) GetGroupMemberCache(ctx context.Context, req *pbgroup.GetGroupMemberCacheReq) (*pbgroup.GetGroupMemberCacheResp, error) {
+	if err := s.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
+	}
 	members, err := s.db.TakeGroupMember(ctx, req.GroupID, req.GroupMemberID)
 	if err != nil {
 		return nil, err
