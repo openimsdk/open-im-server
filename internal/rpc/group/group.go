@@ -690,7 +690,7 @@ func (g *groupServer) GetGroupApplicationList(ctx context.Context, req *pbgroup.
 		}
 	} else {
 		req.GroupIDs = datautil.Distinct(req.GroupIDs)
-		if !authverify.IsAdmin(ctx) {
+		if !authverify.IsAppManagerUid(ctx, g.config.Share.IMAdminUserID) {
 			for _, groupID := range req.GroupIDs {
 				if err := g.CheckGroupAdmin(ctx, groupID); err != nil {
 					return nil, err
@@ -772,7 +772,7 @@ func (g *groupServer) GetGroupsInfo(ctx context.Context, req *pbgroup.GetGroupsI
 }
 
 func (g *groupServer) GetGroupApplicationUnhandledCount(ctx context.Context, req *pbgroup.GetGroupApplicationUnhandledCountReq) (*pbgroup.GetGroupApplicationUnhandledCountResp, error) {
-	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, g.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
 	groupIDs, err := g.db.FindUserManagedGroupID(ctx, req.UserID)
