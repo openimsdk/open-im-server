@@ -1,13 +1,13 @@
 # Username for authentication
-username: ''
+username: "openIM"
 # Password for authentication
-password: ''
+password: "openIM123"
 # Producer acknowledgment settings
-producerAck: 
+producerAck:
 # Compression type to use (e.g., none, gzip, snappy)
 compressType: none
 # List of Kafka broker addresses
-address: [ localhost:19094 ]
+address: [localhost:19094]
 # Kafka topic for Redis integration
 toRedisTopic: toRedis
 # Kafka topic for MongoDB integration
@@ -29,12 +29,12 @@ tls:
   # Enable or disable TLS
   enableTLS: false
   # CA certificate file path
-  caCrt: 
+  caCrt:
   # Client certificate file path
-  clientCrt: 
+  clientCrt:
   # Client key file path
-  clientKey: 
+  clientKey:
   # Client key password
-  clientKeyPwd: 
+  clientKeyPwd:
   # Whether to skip TLS verification (not recommended for production)
   insecureSkipVerify: false
