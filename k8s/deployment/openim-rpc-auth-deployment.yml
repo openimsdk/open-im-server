@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: auth-rpc-server
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: auth-rpc-server
@@ -12,10 +12,12 @@ spec:
       labels:
         app: auth-rpc-server
     spec:
+      imagePullSecrets:
+        - name: docker-secret
       containers:
         - name: auth-rpc-server-container
-          image: openim/openim-rpc-auth:v3.8.3
-          imagePullPolicy: Never
+          image: openim-rpc-auth:test
+          imagePullPolicy: IfNotPresent
           env:
             - name: CONFIG_PATH
               value: "/config"

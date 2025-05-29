@@ -1,20 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: openim-api
+  name: friend-rpc-server
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: openim-api
+      app: friend-rpc-server
   template:
     metadata:
       labels:
-        app: openim-api
+        app: friend-rpc-server
     spec:
+      imagePullSecrets:
+        - name: docker-secret
       containers:
-        - name: openim-api-container
-          image: openim/openim-api:v3.8.3
+        - name: friend-rpc-server-container
+          image: openim-rpc-friend:test
           env:
             - name: CONFIG_PATH
               value: "/config"
@@ -33,14 +35,13 @@ spec:
                 secretKeyRef:
                   name: openim-mongo-secret
                   key: mongo_openim_password
-
           volumeMounts:
             - name: openim-config
               mountPath: "/config"
               readOnly: true
           ports:
-            - containerPort: 10002
-            - containerPort: 12002
+            - containerPort: 10240
+            - containerPort: 12240
       volumes:
         - name: openim-config
           configMap:

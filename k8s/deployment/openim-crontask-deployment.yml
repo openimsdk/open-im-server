@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: openim-crontask
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: crontask
@@ -12,9 +12,11 @@ spec:
       labels:
         app: crontask
     spec:
+      imagePullSecrets:
+        - name: docker-secret
       containers:
         - name: crontask-container
-          image: openim/openim-crontask:v3.8.3
+          image: openim-crontask:test
           env:
             - name: CONFIG_PATH
               value: "/config"

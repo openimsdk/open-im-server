@@ -1,23 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user-rpc-server
+  name: third-rpc-server
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: user-rpc-server
+      app: third-rpc-server
   template:
     metadata:
       labels:
-        app: user-rpc-server
+        app: third-rpc-server
     spec:
+      imagePullSecrets:
+        - name: docker-secret
       containers:
-        - name: user-rpc-server-container
-          image: openim/openim-rpc-user:v3.8.3
+        - name: third-rpc-server-container
+          image: openim-rpc-third:test
           env:
             - name: CONFIG_PATH
               value: "/config"
+            - name: IMENV_MINIO_ACCESSKEYID
+              valueFrom:
+                secretKeyRef:
+                  name: openim-minio-secret
+                  key: minio-root-user
+            - name: IMENV_MINIO_SECRETACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: openim-minio-secret
+                  key: minio-root-password
             - name: IMENV_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -33,18 +45,13 @@ spec:
                 secretKeyRef:
                   name: openim-mongo-secret
                   key: mongo_openim_password
-            - name: IMENV_KAFKA_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: openim-kafka-secret
-                  key: kafka-password
           volumeMounts:
             - name: openim-config
               mountPath: "/config"
               readOnly: true
           ports:
-            - containerPort: 10320
-            - containerPort: 12320
+            - containerPort: 10300
+            - containerPort: 12300
       volumes:
         - name: openim-config
           configMap:

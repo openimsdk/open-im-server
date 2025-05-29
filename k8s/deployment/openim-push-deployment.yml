@@ -1,20 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: openim-msgtransfer-server
+  name: push-rpc-server
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: openim-msgtransfer-server
+      app: push-rpc-server
   template:
     metadata:
       labels:
-        app: openim-msgtransfer-server
+        app: push-rpc-server
     spec:
+      imagePullSecrets:
+        - name: docker-secret
       containers:
-        - name: openim-msgtransfer-container
-          image: openim/openim-msgtransfer:v3.8.3
+        - name: push-rpc-server-container
+          image: openim-push:test
           env:
             - name: CONFIG_PATH
               value: "/config"
@@ -23,16 +25,6 @@ spec:
                 secretKeyRef:
                   name: openim-redis-secret
                   key: redis-password
-            - name: IMENV_MONGODB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: openim-mongo-secret
-                  key: mongo_openim_username
-            - name: IMENV_MONGODB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: openim-mongo-secret
-                  key: mongo_openim_password
             - name: IMENV_KAFKA_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -43,7 +35,8 @@ spec:
               mountPath: "/config"
               readOnly: true
           ports:
-            - containerPort: 12020
+            - containerPort: 10170
+            - containerPort: 12170
       volumes:
         - name: openim-config
           configMap:
