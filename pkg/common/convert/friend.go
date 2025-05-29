@@ -17,7 +17,9 @@ package convert
 import (
 	"context"
 	"fmt"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/open-im-server/v3/pkg/notification/common_user"
 	"github.com/openimsdk/protocol/relation"
 
 	"github.com/openimsdk/protocol/sdkws"
@@ -98,7 +100,7 @@ func FriendOnlyDB2PbOnly(friendsDB []*model.Friend) []*relation.FriendInfoOnly {
 	})
 }
 
-func FriendRequestDB2Pb(ctx context.Context, friendRequests []*model.FriendRequest, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) ([]*sdkws.FriendRequest, error) {
+func FriendRequestDB2Pb(ctx context.Context, friendRequests []*model.FriendRequest, getUsers func(ctx context.Context, userIDs []string) (map[string]common_user.CommonUser, error)) ([]*sdkws.FriendRequest, error) {
 	if len(friendRequests) == 0 {
 		return nil, nil
 	}
@@ -117,11 +119,11 @@ func FriendRequestDB2Pb(ctx context.Context, friendRequests []*model.FriendReque
 		fromUser := users[friendRequest.FromUserID]
 		res = append(res, &sdkws.FriendRequest{
 			FromUserID:    friendRequest.FromUserID,
-			FromNickname:  fromUser.Nickname,
-			FromFaceURL:   fromUser.FaceURL,
+			FromNickname:  fromUser.GetNickname(),
+			FromFaceURL:   fromUser.GetFaceURL(),
 			ToUserID:      friendRequest.ToUserID,
-			ToNickname:    toUser.Nickname,
-			ToFaceURL:     toUser.FaceURL,
+			ToNickname:    toUser.GetNickname(),
+			ToFaceURL:     toUser.GetFaceURL(),
 			HandleResult:  friendRequest.HandleResult,
 			ReqMsg:        friendRequest.ReqMsg,
 			CreateTime:    friendRequest.CreateTime.UnixMilli(),

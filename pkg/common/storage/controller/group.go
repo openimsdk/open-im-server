@@ -68,7 +68,7 @@ type GroupDatabase interface {
 	// FindUserManagedGroupID retrieves group IDs managed by a user.
 	FindUserManagedGroupID(ctx context.Context, userID string) (groupIDs []string, err error)
 	// PageGroupRequest paginates through group requests for specified groups.
-	PageGroupRequest(ctx context.Context, groupIDs []string, pagination pagination.Pagination) (int64, []*model.GroupRequest, error)
+	PageGroupRequest(ctx context.Context, groupIDs []string, handleResults []int, pagination pagination.Pagination) (int64, []*model.GroupRequest, error)
 	// GetGroupRoleLevelMemberIDs retrieves user IDs of group members with a specific role level.
 	GetGroupRoleLevelMemberIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error)
 
@@ -100,7 +100,7 @@ type GroupDatabase interface {
 	// FindGroupRequests retrieves multiple group join requests.
 	FindGroupRequests(ctx context.Context, groupID string, userIDs []string) ([]*model.GroupRequest, error)
 	// PageGroupRequestUser paginates through group join requests made by a user.
-	PageGroupRequestUser(ctx context.Context, userID string, pagination pagination.Pagination) (int64, []*model.GroupRequest, error)
+	PageGroupRequestUser(ctx context.Context, userID string, groupIDs []string, handleResults []int, pagination pagination.Pagination) (int64, []*model.GroupRequest, error)
 
 	// CountTotal counts the total number of groups as of a certain date.
 	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
@@ -124,6 +124,8 @@ type GroupDatabase interface {
 	SearchJoinGroup(ctx context.Context, userID string, keyword string, pagination pagination.Pagination) (int64, []*model.Group, error)
 
 	FindJoinGroupID(ctx context.Context, userID string) ([]string, error)
+
+	GetGroupApplicationUnhandledCount(ctx context.Context, groupIDs []string, ts int64) (int64, error)
 }
 
 func NewGroupDatabase(
@@ -304,8 +306,8 @@ func (g *groupDatabase) FindUserManagedGroupID(ctx context.Context, userID strin
 	return g.groupMemberDB.FindUserManagedGroupID(ctx, userID)
 }
 
-func (g *groupDatabase) PageGroupRequest(ctx context.Context, groupIDs []string, pagination pagination.Pagination) (int64, []*model.GroupRequest, error) {
-	return g.groupRequestDB.PageGroup(ctx, groupIDs, pagination)
+func (g *groupDatabase) PageGroupRequest(ctx context.Context, groupIDs []string, handleResults []int, pagination pagination.Pagination) (int64, []*model.GroupRequest, error) {
+	return g.groupRequestDB.PageGroup(ctx, groupIDs, handleResults, pagination)
 }
 
 func (g *groupDatabase) PageGetJoinGroup(ctx context.Context, userID string, pagination pagination.Pagination) (total int64, totalGroupMembers []*model.GroupMember, err error) {
@@ -463,16 +465,12 @@ func (g *groupDatabase) CreateGroupRequest(ctx context.Context, requests []*mode
 	})
 }
 
-func (g *groupDatabase) TakeGroupRequest(
-	ctx context.Context,
-	groupID string,
-	userID string,
-) (*model.GroupRequest, error) {
+func (g *groupDatabase) TakeGroupRequest(ctx context.Context, groupID string, userID string) (*model.GroupRequest, error) {
 	return g.groupRequestDB.Take(ctx, groupID, userID)
 }
 
-func (g *groupDatabase) PageGroupRequestUser(ctx context.Context, userID string, pagination pagination.Pagination) (int64, []*model.GroupRequest, error) {
-	return g.groupRequestDB.Page(ctx, userID, pagination)
+func (g *groupDatabase) PageGroupRequestUser(ctx context.Context, userID string, groupIDs []string, handleResults []int, pagination pagination.Pagination) (int64, []*model.GroupRequest, error) {
+	return g.groupRequestDB.Page(ctx, userID, groupIDs, handleResults, pagination)
 }
 
 func (g *groupDatabase) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
@@ -564,4 +562,8 @@ func (g *groupDatabase) MemberGroupIncrVersion(ctx context.Context, groupID stri
 		return err
 	}
 	return g.cache.DelMaxGroupMemberVersion(groupID).ChainExecDel(ctx)
+}
+
+func (g *groupDatabase) GetGroupApplicationUnhandledCount(ctx context.Context, groupIDs []string, ts int64) (int64, error) {
+	return g.groupRequestDB.GetUnhandledCount(ctx, groupIDs, ts)
 }

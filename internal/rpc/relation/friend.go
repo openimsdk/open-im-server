@@ -17,6 +17,7 @@ package relation
 import (
 	"context"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/notification/common_user"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/tools/mq/memamq"
@@ -328,7 +329,7 @@ func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context,
 		return nil, err
 	}
 	resp = &relation.GetDesignatedFriendsApplyResp{}
-	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userClient.GetUsersInfoMap)
+	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.getCommonUserMap)
 	if err != nil {
 		return nil, err
 	}
@@ -341,13 +342,16 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *rel
 		return nil, err
 	}
 
-	total, friendRequests, err := s.db.PageFriendRequestToMe(ctx, req.UserID, req.Pagination)
+	handleResults := datautil.Slice(req.HandleResults, func(e int32) int {
+		return int(e)
+	})
+	total, friendRequests, err := s.db.PageFriendRequestToMe(ctx, req.UserID, handleResults, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
 
 	resp = &relation.GetPaginationFriendsApplyToResp{}
-	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userClient.GetUsersInfoMap)
+	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.getCommonUserMap)
 	if err != nil {
 		return nil, err
 	}
@@ -364,12 +368,15 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *r
 		return nil, err
 	}
 
-	total, friendRequests, err := s.db.PageFriendRequestFromMe(ctx, req.UserID, req.Pagination)
+	handleResults := datautil.Slice(req.HandleResults, func(e int32) int {
+		return int(e)
+	})
+	total, friendRequests, err := s.db.PageFriendRequestFromMe(ctx, req.UserID, handleResults, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
 
-	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userClient.GetUsersInfoMap)
+	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.getCommonUserMap)
 	if err != nil {
 		return nil, err
 	}
@@ -544,4 +551,29 @@ func (s *friendServer) UpdateFriends(
 
 	s.notificationSender.FriendsInfoUpdateNotification(ctx, req.OwnerUserID, req.FriendUserIDs)
 	return resp, nil
+}
+
+func (s *friendServer) GetSelfUnhandledApplyCount(ctx context.Context, req *relation.GetSelfUnhandledApplyCountReq) (*relation.GetSelfUnhandledApplyCountResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+
+	count, err := s.db.GetUnhandledCount(ctx, req.UserID, req.Time)
+	if err != nil {
+		return nil, err
+	}
+
+	return &relation.GetSelfUnhandledApplyCountResp{
+		Count: count,
+	}, nil
+}
+
+func (s *friendServer) getCommonUserMap(ctx context.Context, userIDs []string) (map[string]common_user.CommonUser, error) {
+	users, err := s.userClient.GetUsersInfo(ctx, userIDs)
+	if err != nil {
+		return nil, err
+	}
+	return datautil.SliceToMapAny(users, func(e *sdkws.UserInfo) (string, common_user.CommonUser) {
+		return e.UserID, e
+	}), nil
 }

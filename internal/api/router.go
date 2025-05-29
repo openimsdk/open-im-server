@@ -149,6 +149,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		friendRouterGroup.POST("/update_friends", f.UpdateFriends)
 		friendRouterGroup.POST("/get_incremental_friends", f.GetIncrementalFriends)
 		friendRouterGroup.POST("/get_full_friend_user_ids", f.GetFullFriendUserIDs)
+		friendRouterGroup.POST("/get_self_unhandled_apply_count", f.GetSelfUnhandledApplyCount)
 	}
 
 	g := NewGroupApi(group.NewGroupClient(groupConn))
@@ -185,6 +186,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		groupRouterGroup.POST("/get_incremental_group_members_batch", g.GetIncrementalGroupMemberBatch)
 		groupRouterGroup.POST("/get_full_group_member_user_ids", g.GetFullGroupMemberUserIDs)
 		groupRouterGroup.POST("/get_full_join_group_ids", g.GetFullJoinGroupIDs)
+		groupRouterGroup.POST("/get_group_application_unhandled_count", g.GetGroupApplicationUnhandledCount)
 	}
 	// certificate
 	{
