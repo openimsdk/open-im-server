@@ -87,6 +87,7 @@ func Start(ctx context.Context, conf *Config, client discovery.Conn, service grp
 	log.ZDebug(ctx, "cron task server is running")
 	<-ctx.Done()
 	log.ZDebug(ctx, "cron task server is shutting down")
+	srv.cron.Stop()
 
 	return nil
 }
