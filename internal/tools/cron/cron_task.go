@@ -114,8 +114,7 @@ func (c *cronServer) registerClearS3() error {
 	}
 	_, err := c.cron.AddFunc(c.config.CronTask.CronExecuteTime, func() {
 		c.locker.ExecuteWithLock(c.ctx, c.clearS3)
-	},
-	)
+	})
 	return errs.WrapMsg(err, "failed to register clear s3 cron task")
 }
 
