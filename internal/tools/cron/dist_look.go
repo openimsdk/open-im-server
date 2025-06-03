@@ -229,7 +229,6 @@ func (e *EtcdLocker) IsLockOwner() bool {
 
 func (e *EtcdLocker) ExecuteWithLock(ctx context.Context, task func()) {
 	if atomic.LoadInt32(&e.isLockOwner) == 0 {
-		log.ZDebug(ctx, "Instance does not own lock (local check), skipping task execution", "instanceID", e.instanceID)
 		return
 	}
 	isOwner, err := e.CheckLockOwnership(ctx)
@@ -238,7 +237,6 @@ func (e *EtcdLocker) ExecuteWithLock(ctx context.Context, task func()) {
 		return
 	}
 	if !isOwner {
-		log.ZDebug(ctx, "Instance does not own lock (etcd verification), skipping task execution", "instanceID", e.instanceID)
 		return
 	}
 
