@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"sync/atomic"
 	"time"
 
 	"github.com/openimsdk/tools/log"
@@ -12,22 +11,12 @@ import (
 )
 
 const (
-	lockKey           = "openim/crontask/dist-lock"
-	lockLeaseTTL      = 15 // Lease TTL in seconds
-	acquireRetryDelay = 500 * time.Millisecond
+	lockLeaseTTL = 3000
 )
 
 type EtcdLocker struct {
-	client       *clientv3.Client
-	instanceID   string
-	leaseID      clientv3.LeaseID
-	isLockOwner  int32 // Using atomic for lock ownership check
-	watchCh      clientv3.WatchChan
-	watchCancel  context.CancelFunc
-	leaseTTL     int64
-	stopCh       chan struct{}
-	stoppedCh    chan struct{}
-	acquireDelay time.Duration
+	client     *clientv3.Client
+	instanceID string
 }
 
 // NewEtcdLocker creates a new etcd distributed lock
@@ -37,55 +26,19 @@ func NewEtcdLocker(client *clientv3.Client) (*EtcdLocker, error) {
 	instanceID := fmt.Sprintf("%s-pid-%d-%d", hostname, pid, time.Now().UnixNano())
 
 	locker := &EtcdLocker{
-		client:       client,
-		instanceID:   instanceID,
-		leaseTTL:     lockLeaseTTL,
-		stopCh:       make(chan struct{}),
-		stoppedCh:    make(chan struct{}),
-		acquireDelay: acquireRetryDelay,
+		client:     client,
+		instanceID: instanceID,
 	}
 
 	return locker, nil
 }
 
-func (e *EtcdLocker) Start(ctx context.Context) error {
-	log.ZInfo(ctx, "Starting etcd distributed lock", "instanceID", e.instanceID)
-	go e.runLockLoop(ctx)
-	return nil
-}
+func (e *EtcdLocker) tryAcquireTaskLock(ctx context.Context, taskName string) (clientv3.LeaseID, bool, error) {
+	lockKey := fmt.Sprintf("openim/crontask/%s-lock", taskName)
 
-func (e *EtcdLocker) runLockLoop(ctx context.Context) {
-	defer close(e.stoppedCh)
-	for {
-		select {
-		case <-e.stopCh:
-			e.releaseLock(ctx)
-			return
-		case <-ctx.Done():
-			e.releaseLock(ctx)
-			return
-		default:
-			acquired, err := e.tryAcquireLock(ctx)
-			if err != nil {
-				log.ZWarn(ctx, "Failed to acquire lock", err, "instanceID", e.instanceID)
-				time.Sleep(e.acquireDelay)
-				continue
-			}
-
-			if acquired {
-				e.runKeepAlive(ctx)
-				time.Sleep(e.acquireDelay)
-			} else {
-				e.watchLock(ctx)
-			}
-		}
-	}
-}
-
-func (e *EtcdLocker) tryAcquireLock(ctx context.Context) (bool, error) {
-	lease, err := e.client.Grant(ctx, e.leaseTTL)
+	lease, err := e.client.Grant(ctx, lockLeaseTTL)
 	if err != nil {
-		return false, fmt.Errorf("failed to create lease: %w", err)
+		return 0, false, fmt.Errorf("failed to create lease: %w", err)
 	}
 
 	txnResp, err := e.client.Txn(ctx).
@@ -96,151 +49,119 @@ func (e *EtcdLocker) tryAcquireLock(ctx context.Context) (bool, error) {
 
 	if err != nil {
 		e.client.Revoke(ctx, lease.ID)
-		return false, fmt.Errorf("transaction failed: %w", err)
+		return 0, false, fmt.Errorf("transaction failed: %w", err)
 	}
 
 	if !txnResp.Succeeded {
 		rangeResp := txnResp.Responses[0].GetResponseRange()
 		if len(rangeResp.Kvs) > 0 {
 			currentOwner := string(rangeResp.Kvs[0].Value)
-			log.ZInfo(ctx, "Lock already owned", "instanceID", e.instanceID, "owner", currentOwner)
+			log.ZInfo(ctx, "Task lock already owned, skipping execution",
+				"taskName", taskName,
+				"instanceID", e.instanceID,
+				"currentOwner", currentOwner)
 		}
-
 		e.client.Revoke(ctx, lease.ID)
-		return false, nil
+		return 0, false, nil
 	}
 
-	e.leaseID = lease.ID
-	atomic.StoreInt32(&e.isLockOwner, 1)
-	log.ZInfo(ctx, "Successfully acquired lock", "instanceID", e.instanceID, "leaseID", lease.ID)
-	return true, nil
+	log.ZInfo(ctx, "Successfully acquired task lock",
+		"taskName", taskName,
+		"instanceID", e.instanceID,
+		"leaseID", lease.ID)
+	return lease.ID, true, nil
 }
 
-func (e *EtcdLocker) runKeepAlive(ctx context.Context) {
-	keepAliveCh, err := e.client.KeepAlive(ctx, e.leaseID)
-	if err != nil {
-		log.ZError(ctx, "Failed to start lease keepalive", err, "instanceID", e.instanceID)
-		e.releaseLock(ctx)
+func (e *EtcdLocker) releaseTaskLock(ctx context.Context, taskName string, leaseID clientv3.LeaseID) {
+	if leaseID == 0 {
 		return
 	}
 
-	for {
-		select {
-		case _, ok := <-keepAliveCh:
-			if !ok {
-				log.ZWarn(ctx, "Keepalive channel closed, lock lost", nil, "instanceID", e.instanceID)
-				atomic.StoreInt32(&e.isLockOwner, 0) // Set to false atomically
-				return
-			}
-		case <-ctx.Done():
-			log.ZInfo(ctx, "Context canceled, releasing lock", "instanceID", e.instanceID)
-			e.releaseLock(ctx)
-			return
-		case <-e.stopCh:
-			log.ZInfo(ctx, "Stop signal received, releasing lock", "instanceID", e.instanceID)
-			e.releaseLock(ctx)
-			return
-		}
+	_, err := e.client.Revoke(ctx, leaseID)
+	if err != nil {
+		log.ZWarn(ctx, "Failed to revoke task lease", err,
+			"taskName", taskName,
+			"instanceID", e.instanceID,
+			"leaseID", leaseID)
+	} else {
+		log.ZInfo(ctx, "Successfully released task lock",
+			"taskName", taskName,
+			"instanceID", e.instanceID)
 	}
 }
 
-func (e *EtcdLocker) watchLock(ctx context.Context) {
-	log.ZInfo(ctx, "Starting to watch lock status", "instanceID", e.instanceID)
-	watchCtx, cancel := context.WithCancel(ctx)
-	e.watchCancel = cancel
-	defer e.cancelWatch()
+func (e *EtcdLocker) startLeaseKeepAlive(ctx context.Context, taskName string, leaseID clientv3.LeaseID) (context.CancelFunc, error) {
+	keepAliveCtx, cancel := context.WithCancel(ctx)
 
-	e.watchCh = e.client.Watch(watchCtx, lockKey)
-	for {
-		select {
-		case resp, ok := <-e.watchCh:
-			if !ok {
-				log.ZWarn(ctx, "Watch channel closed", nil, "instanceID", e.instanceID)
-				return
-			}
-			for _, event := range resp.Events {
-				if event.Type == clientv3.EventTypeDelete {
-					log.ZInfo(ctx, "Lock released, attempting to acquire", "instanceID", e.instanceID)
+	keepAliveCh, err := e.client.KeepAlive(keepAliveCtx, leaseID)
+	if err != nil {
+		cancel()
+		return nil, fmt.Errorf("failed to start keepalive: %w", err)
+	}
+
+	go func() {
+		defer cancel()
+		for {
+			select {
+			case _, ok := <-keepAliveCh:
+				if !ok {
+					log.ZWarn(keepAliveCtx, "KeepAlive channel closed, lease may have expired", nil,
+						"taskName", taskName,
+						"instanceID", e.instanceID,
+						"leaseID", leaseID)
 					return
 				}
+
+			case <-keepAliveCtx.Done():
+				log.ZDebug(keepAliveCtx, "KeepAlive stopped",
+					"taskName", taskName,
+					"instanceID", e.instanceID)
+				return
 			}
-		case <-ctx.Done():
-			return
-		case <-e.stopCh:
-			return
 		}
-	}
+	}()
+
+	return cancel, nil
 }
 
-func (e *EtcdLocker) releaseLock(ctx context.Context) {
-	if atomic.LoadInt32(&e.isLockOwner) == 0 {
-		return
-	}
-
-	leaseID := e.leaseID
-	atomic.StoreInt32(&e.isLockOwner, 0)
-	e.leaseID = 0
-	if leaseID != 0 {
-		_, err := e.client.Revoke(context.Background(), leaseID)
-		if err != nil {
-			log.ZWarn(ctx, "Failed to revoke lease", err, "instanceID", e.instanceID, "error", err)
-		} else {
-			log.ZInfo(ctx, "Successfully released lock", "instanceID", e.instanceID)
-		}
-	}
-}
-
-func (e *EtcdLocker) CheckLockOwnership(ctx context.Context) (bool, error) {
-	if atomic.LoadInt32(&e.isLockOwner) == 0 {
-		return false, nil
-	}
-
-	resp, err := e.client.Get(ctx, lockKey)
+func (e *EtcdLocker) ExecuteWithLock(ctx context.Context, taskName string, task func()) {
+	leaseID, acquired, err := e.tryAcquireTaskLock(ctx, taskName)
 	if err != nil {
-		return false, fmt.Errorf("failed to check lock status: %w", err)
-	}
-	if len(resp.Kvs) > 0 && string(resp.Kvs[0].Value) == e.instanceID {
-		return true, nil
-	}
-	if atomic.LoadInt32(&e.isLockOwner) == 1 {
-		log.ZWarn(ctx, "Lock ownership lost unexpectedly", nil, "instanceID", e.instanceID)
-		atomic.StoreInt32(&e.isLockOwner, 0)
-	}
-
-	return false, nil
-}
-
-func (e *EtcdLocker) cancelWatch() {
-	if e.watchCancel != nil {
-		e.watchCancel()
-		e.watchCancel = nil
-	}
-}
-
-func (e *EtcdLocker) Stop() {
-	e.cancelWatch()
-	close(e.stopCh)
-	<-e.stoppedCh
-}
-
-func (e *EtcdLocker) IsLockOwner() bool {
-	return atomic.LoadInt32(&e.isLockOwner) == 1
-}
-
-func (e *EtcdLocker) ExecuteWithLock(ctx context.Context, task func()) {
-	if atomic.LoadInt32(&e.isLockOwner) == 0 {
+		log.ZWarn(ctx, "Failed to acquire task lock", err,
+			"taskName", taskName,
+			"instanceID", e.instanceID)
 		return
 	}
-	isOwner, err := e.CheckLockOwnership(ctx)
+
+	if !acquired {
+		log.ZDebug(ctx, "Task is being executed by another instance, skipping",
+			"taskName", taskName,
+			"instanceID", e.instanceID)
+		return
+	}
+
+	cancelKeepAlive, err := e.startLeaseKeepAlive(ctx, taskName, leaseID)
 	if err != nil {
-		log.ZWarn(ctx, "Failed to verify lock ownership", err, "instanceID", e.instanceID)
-		return
-	}
-	if !isOwner {
+		log.ZWarn(ctx, "Failed to start lease keepalive", err,
+			"taskName", taskName,
+			"instanceID", e.instanceID)
+		e.releaseTaskLock(ctx, taskName, leaseID)
 		return
 	}
 
-	log.ZInfo(ctx, "Starting lock-protected task execution", "instanceID", e.instanceID)
+	defer func() {
+		cancelKeepAlive()
+		e.releaseTaskLock(ctx, taskName, leaseID)
+	}()
+
+	log.ZInfo(ctx, "Starting task execution with lease keepalive",
+		"taskName", taskName,
+		"instanceID", e.instanceID,
+		"leaseID", leaseID)
+
 	task()
-	log.ZInfo(ctx, "Lock-protected task execution completed", "instanceID", e.instanceID)
+
+	log.ZInfo(ctx, "Task execution completed",
+		"taskName", taskName,
+		"instanceID", e.instanceID)
 }

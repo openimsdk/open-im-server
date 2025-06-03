@@ -63,10 +63,6 @@ func Start(ctx context.Context, conf *Config, client discovery.Conn, service grp
 		return err
 	}
 
-	if err := locker.Start(ctx); err != nil {
-		return err
-	}
-
 	srv := &cronServer{
 		ctx:                ctx,
 		config:             conf,
@@ -92,8 +88,6 @@ func Start(ctx context.Context, conf *Config, client discovery.Conn, service grp
 	<-ctx.Done()
 	log.ZDebug(ctx, "cron task server is shutting down")
 
-	locker.Stop() // release distributed lock
-
 	return nil
 }
 
@@ -113,7 +107,7 @@ func (c *cronServer) registerClearS3() error {
 		return nil
 	}
 	_, err := c.cron.AddFunc(c.config.CronTask.CronExecuteTime, func() {
-		c.locker.ExecuteWithLock(c.ctx, c.clearS3)
+		c.locker.ExecuteWithLock(c.ctx, "clearS3", c.clearS3)
 	})
 	return errs.WrapMsg(err, "failed to register clear s3 cron task")
 }
@@ -124,14 +118,14 @@ func (c *cronServer) registerDeleteMsg() error {
 		return nil
 	}
 	_, err := c.cron.AddFunc(c.config.CronTask.CronExecuteTime, func() {
-		c.locker.ExecuteWithLock(c.ctx, c.deleteMsg)
+		c.locker.ExecuteWithLock(c.ctx, "deleteMsg", c.deleteMsg)
 	})
 	return errs.WrapMsg(err, "failed to register delete msg cron task")
 }
 
 func (c *cronServer) registerClearUserMsg() error {
 	_, err := c.cron.AddFunc(c.config.CronTask.CronExecuteTime, func() {
-		c.locker.ExecuteWithLock(c.ctx, c.clearUserMsg)
+		c.locker.ExecuteWithLock(c.ctx, "clearUserMsg", c.clearUserMsg)
 	})
 	return errs.WrapMsg(err, "failed to register clear user msg cron task")
 }
