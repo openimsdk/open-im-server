@@ -144,14 +144,12 @@ func (e *EtcdLocker) runKeepAlive(ctx context.Context) {
 	}
 }
 
-// Watch lock status directly in etcd
 func (e *EtcdLocker) watchLock(ctx context.Context) {
 	log.ZInfo(ctx, "Starting to watch lock status", "instanceID", e.instanceID)
 	watchCtx, cancel := context.WithCancel(ctx)
 	e.watchCancel = cancel
 	defer e.cancelWatch()
 
-	// Watch for changes to the lock key
 	e.watchCh = e.client.Watch(watchCtx, lockKey)
 	for {
 		select {
@@ -174,7 +172,6 @@ func (e *EtcdLocker) watchLock(ctx context.Context) {
 	}
 }
 
-// Release the lock
 func (e *EtcdLocker) releaseLock(ctx context.Context) {
 	if atomic.LoadInt32(&e.isLockOwner) == 0 {
 		return
