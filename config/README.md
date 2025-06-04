@@ -1,48 +1,66 @@
----
-title: 'OpenIM Configuration Files and Common Configuration Item Modifications Guide'
+# 						OpenIM Configuration File Descriptions and Common Configuration Modifications
 
-## Configuration Files Explanation
+## External Component Configurations
 
-| Configuration File              | Description                                                  |
-| ------------------------------- | ------------------------------------------------------------ |
-| **kafka.yml**                   | Configurations for Kafka username, password, address, etc.   |
-| **redis.yml**                   | Configurations for Redis password, address, etc.             |
-| **minio.yml**                   | Configurations for MinIO username, password, address, and external IP/domain; failing to modify external IP or domain may cause image file sending failures |
-| **zookeeper.yml**               | Configurations for ZooKeeper user, password, address, etc.   |
-| **mongodb.yml**                 | Configurations for MongoDB username, password, address, etc. |
-| **log.yml**                     | Configurations for log level and storage directory.          |
-| **notification.yml**            | Configurations for events like adding friends, creating groups, etc. |
-| **share.yml**                   | Common configurations needed by various OpenIM services, such as secret. |
-| **webhooks.yml**                | Configurations for URLs in Webhook.                          |
-| **local-cache.yml**             | Local cache configurations.                                  |
-| **openim-rpc-third.yml**        | Configurations for listening IP, port, and storage settings for images and videos in openim-rpc-third service. |
-| **openim-rpc-user.yml**         | Configurations for listening IP and port in openim-rpc-user service. |
-| **openim-api.yml**              | Configurations for listening IP, port, etc., in openim-api service. |
-| **openim-crontask.yml**         | Configurations for openim-crontask service.                  |
-| **openim-msggateway.yml**       | Configurations for listening IP, port, etc., in openim-msggateway service. |
-| **openim-msgtransfer.yml**      | Configurations for openim-msgtransfer service.               |
-| **openim-push.yml**             | Configurations for listening IP, port, and offline push settings in openim-push service. |
-| **openim-rpc-auth.yml**         | Configurations for listening IP, port, and token expiration settings in openim-rpc-auth service. |
-| **openim-rpc-conversation.yml** | Configurations for listening IP, port, etc., in openim-rpc-conversation service. |
-| **openim-rpc-friend.yml**       | Configurations for listening IP, port, etc., in openim-rpc-friend service. |
-| **openim-rpc-group.yml**        | Configurations for listening IP, port, etc., in openim-rpc-group service. |
-| **openim-rpc-msg.yml**          | Configurations for listening IP, port, and whether to verify friendship before sending messages in openim-rpc-msg service. |
+| Configuration File | Description                                                 |
+| ------------------ |-------------------------------------------------------------|
+| **kafka.yml**      | Configuration for Kafka username, password, address, etc.   |
+| **redis.yml**      | Configuration for Redis password, address, etc.             |
+| **minio.yml**      | Configuration for MinIO username, password, address, etc.   |
+| **mongodb.yml**    | Configuration for MongoDB username, password, address, etc. |
+| **discovery.yml**  | Service discovery and etcd credentials and address.         |
 
-## Common Configuration Item Modifications
+## OpenIMServer Related Configurations
+| Configuration File              | Description                                    |
+| ------------------------------- | ---------------------------------------------- |
+| **log.yml**                     | Configuration for logging levels and storage directory                   |
+| **notification.yml**            | Event notification settings (e.g., add friend, create group)           |
+| **share.yml**                   | Common settings for all services (e.g., secrets)            |
+| **webhooks.yml**                | Webhook URLs and related settings                           |
+| **local-cache.yml**             | Local cache settings (generally do not modify)                 |
+| **openim-rpc-third.yml**        | openim-rpc-third listen IP, port, and object storage settings  |
+| **openim-rpc-user.yml**         | openim-rpc-user listen IP and port settings              |
+| **openim-api.yml**              | openim-api listen IP, port, and other settings               |
+| **openim-crontask.yml**         | openim-crontask scheduled task settings                   |
+| **openim-msggateway.yml**       | openim-msggateway listen IP, port, and other settings           |
+| **openim-msgtransfer.yml**      | Settings for openim-msgtransfer service                   |
+| **openim-push.yml**             | openim-push listen IP, port, and offline push settings        |
+| **openim-rpc-auth.yml**         | openim-rpc-auth listen IP, port, token validity settings |
+| **openim-rpc-conversation.yml** | openim-rpc-conversation listen IP and port settings     |
+| **openim-rpc-friend.yml**       | openim-rpc-friend listen IP and port settings           |
+| **openim-rpc-group.yml**        | openim-rpc-group listen IP and port settings           |
+| **openim-rpc-msg.yml**          | openim-rpc-msg listen IP and port settings         |
 
-| Configuration Item Modification                       | Configuration File      |
-| ----------------------------------------------------- | ----------------------- |
-| Using MinIO for image and video file object storage   | `minio.yml`             |
-| Adjusting production environment logs                 | `log.yml`               |
-| Verifying friendship before sending messages          | `openim-rpc-msg.yml`    |
-| Modifying secret                                      | `share.yml`             |
-| Using OSS, COS, AWS, Kodo for image and video storage | `openim-rpc-third.yml`  |
-| Setting multiple login policy                         | `openim-msggateway.yml` |
-| Setting up offline push                               | `openim-push.yml`       |
 
-## Starting Multiple Instances of an OpenIM Service
+## Monitoring and Alerting Related Configurations
+| Configuration File             | Description     |
+| ------------------------------ | --------------- |
+| **prometheus.yml**             | Prometheus configuration |
+| **instance-down-rules.yml**    | Alert rules       |
+| **alertmanager.yml**           | Alertmanager configuration   |
+| **email.tmpl**                 | Email alert template   |
+| **grefana-template/Demo.json** | Default Grafana dashboard |
 
-To start multiple instances of an OpenIM service, simply increase the corresponding port numbers and modify the `start-config.yml` file in the project root directory. Restart the service to take effect. For example, the configuration to start 2 instances of `openim-rpc-user` is as follows:
+## Common Configuration Modifications
+| Configuration Item                                              | Configuration File                |
+| -------------------------------------------------------- | ----------------------- |
+| Configure MinIO as object storage (focus on the externalAddress field) | `minio.yml`             |
+| Adjust log level and number of log files                              | `log.yml`               |
+| Enable or disable friend verification when sending messages                           | `openim-rpc-msg.yml`    |
+| OpenIMServer secret                                         | `share.yml`             |
+| Configure OSS, COS, AWS, or Kodo as object storage               | `openim-rpc-third.yml`  |
+| Multi-end mutual kick strategy and max concurrent connections per gateway                 | `openim-msggateway.yml` |
+| Offline message push configuration                                            | `openim-push.yml`       |
+| Configure webhooks for callback notifications (e.g., before/after message send)         | `webhooks.yml`          |
+| Whether new group members can view historical messages                          | `openim-rpc-group.yml`  |
+| Token expiration time settings                                      | `openim-rpc-auth.yml`     |
+| Scheduled task settings (e.g., how long to retain messages)                      | `openim-crontask.yml`   |
+
+## Starting Multiple Instances of a Service and Maximum File Descriptors
+
+
+To start multiple instances of an OpenIM service, simply add the corresponding port numbers and modify the `start-config.yml` file in the project’s root directory, 
+then restart the service. For example, to start 2 instances of `openim-rpc-user`:
 
 ```yaml
 rpc:
@@ -55,9 +73,15 @@ prometheus:
   ports: [ 20100, 20101 ]
 ```
 
-Modify `start-config.yml`:
+Modify`start-config.yml`:
 
 ```yaml
 serviceBinaries:
   openim-rpc-user: 2
+```
+
+To set the maximum number of open file descriptors (typically one per online user):
+
+```
+maxFileDescriptors: 10000
 ```
