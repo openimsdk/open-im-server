@@ -347,22 +347,14 @@ type RPC struct {
 }
 
 type Redis struct {
-	Disable      bool     `yaml:"-"`
-	Address      []string `yaml:"address"`
-	Username     string   `yaml:"username"`
-	Password     string   `yaml:"password"`
-	RedisMode    string   `yaml:"redisMode"`
-	DB           int      `yaml:"db"`
-	MaxRetry     int      `yaml:"maxRetry"`
-	PoolSize     int      `yaml:"poolSize"`
-	SentinelMode Sentinel `yaml:"sentinelMode"`
-}
-
-type Sentinel struct {
-	MasterName     string   `yaml:"masterName"`
-	SentinelAddrs  []string `yaml:"sentinelsAddrs"`
-	RouteByLatency bool     `yaml:"routeByLatency"`
-	RouteRandomly  bool     `yaml:"routeRandomly"`
+	Disable     bool     `yaml:"-"`
+	Address     []string `yaml:"address"`
+	Username    string   `yaml:"username"`
+	Password    string   `yaml:"password"`
+	ClusterMode bool     `yaml:"clusterMode"`
+	DB          int      `yaml:"db"`
+	MaxRetry    int      `yaml:"maxRetry"`
+	PoolSize    int      `yaml:"poolSize"`
 }
 
 type BeforeConfig struct {
