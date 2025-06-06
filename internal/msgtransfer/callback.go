@@ -55,9 +55,11 @@ func (mc *OnlineHistoryMongoConsumerHandler) webhookAfterSendSingleMsg(ctx conte
 	if msg.ContentType == constant.Typing {
 		return
 	}
+
 	if !filterAfterMsg(msg, after) {
 		return
 	}
+
 	cbReq := &cbapi.CallbackAfterSendSingleMsgReq{
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendSingleMsgCommand),
 		RecvID:            msg.RecvID,
@@ -69,9 +71,11 @@ func (mc *OnlineHistoryMongoConsumerHandler) webhookAfterSendGroupMsg(ctx contex
 	if msg.ContentType == constant.Typing {
 		return
 	}
+
 	if !filterAfterMsg(msg, after) {
 		return
 	}
+
 	cbReq := &cbapi.CallbackAfterSendGroupMsgReq{
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendGroupMsgCommand),
 		GroupID:           msg.GroupID,
@@ -98,7 +102,11 @@ func filterAfterMsg(msg *sdkws.MsgData, after *config.AfterConfig) bool {
 
 func filterMsg(msg *sdkws.MsgData, attentionIds []string, deniedTypes []int32) bool {
 	// According to the attentionIds configuration, only some users are sent
-	if len(attentionIds) != 0 && !datautil.Contain(msg.RecvID, attentionIds...) {
+	if len(attentionIds) != 0 && msg.ContentType == constant.SingleChatType && !datautil.Contain(msg.RecvID, attentionIds...) {
+		return false
+	}
+
+	if len(attentionIds) != 0 && msg.ContentType == constant.ReadGroupChatType && !datautil.Contain(msg.GroupID, attentionIds...) {
 		return false
 	}
 
