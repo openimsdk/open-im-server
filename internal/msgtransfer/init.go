@@ -134,7 +134,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	if err != nil {
 		return err
 	}
-	historyMongoHandler := NewOnlineHistoryMongoConsumerHandler(msgTransferDatabase)
+	historyMongoHandler := NewOnlineHistoryMongoConsumerHandler(msgTransferDatabase,config)
 
 	msgTransfer := &MsgTransfer{
 		historyConsumer:      historyConsumer,
