@@ -3,7 +3,6 @@ package msgtransfer
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -73,8 +72,6 @@ func (mc *OnlineHistoryMongoConsumerHandler) webhookAfterSendGroupMsg(ctx contex
 	if !filterAfterMsg(msg, after) {
 		return
 	}
-	fmt.Println("webhookAfterSendGroupMsg true excute", msg.Seq)
-
 	cbReq := &cbapi.CallbackAfterSendGroupMsgReq{
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendGroupMsgCommand),
 		GroupID:           msg.GroupID,
