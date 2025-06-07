@@ -50,7 +50,7 @@ func (p pushServer) DelUserPushToken(ctx context.Context,
 	return &pbpush.DelUserPushTokenResp{}, nil
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	dbb := dbbuild.NewBuilder(&config.MongoConfig, &config.RedisConfig)
 	rdb, err := dbb.Redis(ctx)
 	if err != nil {

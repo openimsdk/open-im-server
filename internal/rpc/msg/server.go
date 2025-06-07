@@ -78,7 +78,7 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	builder := mqbuild.NewBuilder(&config.KafkaConfig)
 	redisProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToRedisTopic)
 	if err != nil {

@@ -19,6 +19,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
@@ -65,7 +66,7 @@ func (m *MsgTransferCmd) runE() error {
 		"", "",
 		true,
 		nil, int(m.msgTransferConfig.Index),
-		"",
+		prommetrics.MessageTransferKeyName,
 		nil,
 		m.msgTransferConfig,
 		[]string{},

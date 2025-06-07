@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"net"
@@ -39,7 +38,6 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/network"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
@@ -250,23 +248,12 @@ func (x *cmds) run(ctx context.Context) error {
 				return err
 			}
 		}
-		ip, err := network.GetLocalIP()
-		if err != nil {
-			return err
-		}
 		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 		if err != nil {
 			return fmt.Errorf("prometheus listen %d error %w", port, err)
 		}
 		defer listener.Close()
 		log.ZDebug(ctx, "prometheus start", "addr", listener.Addr())
-		target, err := json.Marshal(prommetrics.BuildDefaultTarget(ip, listener.Addr().(*net.TCPAddr).Port))
-		if err != nil {
-			return err
-		}
-		if err := standalone.GetKeyValue().SetKey(ctx, prommetrics.BuildDiscoveryKey(prommetrics.APIKeyName), target); err != nil {
-			return err
-		}
 		go func() {
 			err := prommetrics.Start(listener)
 			if err == nil {
@@ -342,7 +329,7 @@ func (x *cmds) run(ctx context.Context) error {
 	}
 }
 
-func putCmd[C any](cmd *cmds, block bool, fn func(ctx context.Context, config *C, client discovery.Conn, server grpc.ServiceRegistrar) error) {
+func putCmd[C any](cmd *cmds, block bool, fn func(ctx context.Context, config *C, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error) {
 	name := path.Base(runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name())
 	if index := strings.Index(name, "."); index >= 0 {
 		name = name[:index]
@@ -352,7 +339,7 @@ func putCmd[C any](cmd *cmds, block bool, fn func(ctx context.Context, config *C
 		if err := cmd.parseConf(&conf); err != nil {
 			return err
 		}
-		return fn(ctx, &conf, standalone.GetDiscoveryConn(), standalone.GetServiceRegistrar())
+		return fn(ctx, &conf, standalone.GetSvcDiscoveryRegistry(), standalone.GetServiceRegistrar())
 	})
 }
 
