@@ -1,6 +1,6 @@
 serviceBinaries:
   openim-api: 1
-  openim-crontask: 1
+  openim-crontask: 4
   openim-rpc-user: 1
   openim-msggateway: 1
   openim-push: 8
