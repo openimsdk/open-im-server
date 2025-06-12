@@ -84,17 +84,17 @@ services:
       - ETCD_INITIAL_CLUSTER_TOKEN=tkn
       - ETCD_INITIAL_CLUSTER_STATE=new
       - ALLOW_NONE_AUTHENTICATION=no
-      - ETCD_ROOT_USER=root
-      - ETCD_ROOT_PASSWORD=openIM123
-      - ETCD_USERNAME=openIM
-      - ETCD_PASSWORD=openIM123
+      ## Optional: Enable etcd authentication by setting the following credentials
+      # - ETCD_ROOT_USER=root
+      # - ETCD_ROOT_PASSWORD=openIM123
+      # - ETCD_USERNAME=openIM
+      # - ETCD_PASSWORD=openIM123
     volumes:
       - "${DATA_DIR}/components/etcd:/etcd-data"
     command: >
       /bin/sh -c '
         etcd &
         export ETCDCTL_API=3
-
         echo "Waiting for etcd to become healthy..."
         until etcdctl --endpoints=http://127.0.0.1:2379 endpoint health &>/dev/null; do
           echo "Waiting for ETCD to start..."
@@ -102,6 +102,9 @@ services:
         done
 
         echo "etcd is healthy."
+
+        if [ -n "$${ETCD_ROOT_USER}" ] && [ -n "$${ETCD_ROOT_PASSWORD}" ] && [ -n "$${ETCD_USERNAME}" ] && [ -n "$${ETCD_PASSWORD}" ]; then
+          echo "Authentication credentials provided. Setting up authentication..."
 
         echo "Checking authentication status..."
         if ! etcdctl --endpoints=http://127.0.0.1:2379 auth status | grep -q "Authentication Status: true"; then
@@ -142,13 +145,16 @@ services:
             etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_USERNAME}:$${ETCD_PASSWORD} del /test/auth &>/dev/null
           fi
         fi
-        
         echo "Testing authentication with OpenIM user..."
         if etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_USERNAME}:$${ETCD_PASSWORD} put /test/auth "auth-works"; then
           echo "Authentication working properly"
           etcdctl --endpoints=http://127.0.0.1:2379 --user=$${ETCD_USERNAME}:$${ETCD_PASSWORD} del /test/auth
         else
           echo "WARNING: Authentication test failed"
+          fi
+        else
+          echo "No authentication credentials provided. Running in no-auth mode."
+          echo "To enable authentication, set ETCD_ROOT_USER, ETCD_ROOT_PASSWORD, ETCD_USERNAME, and ETCD_PASSWORD environment variables."
         fi
         
         tail -f /dev/null
@@ -172,18 +178,38 @@ services:
       KAFKA_CFG_NODE_ID: 0
       KAFKA_CFG_PROCESS_ROLES: controller,broker
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:19094
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:SASL_PLAINTEXT,PLAINTEXT:SASL_PLAINTEXT
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_NUM_PARTITIONS: 8
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
 
-      KAFKA_CFG_SASL_ENABLED_MECHANISMS: PLAIN
-      KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
-      KAFKA_CLIENT_USERS: admin,openIM
-      KAFKA_CLIENT_PASSWORDS: admin-secret,openIM123
+      KAFKA_CFG_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,EXTERNAL://localhost:19094"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
 
+      # Authentication configuration variables - comment out to disable auth
+      # KAFKA_USERNAME: "openIM"
+      # KAFKA_PASSWORD: "openIM123"
+    command: >
+      /bin/sh -c '
+        if [ -n "$${KAFKA_USERNAME}" ] && [ -n "$${KAFKA_PASSWORD}" ]; then
+          echo "=== Kafka SASL Authentication ENABLED ==="
+          echo "Username: $${KAFKA_USERNAME}"
+          
+          # Set environment variables for SASL authentication
+          export KAFKA_CFG_LISTENERS="SASL_PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094"
+          export KAFKA_CFG_ADVERTISED_LISTENERS="SASL_PLAINTEXT://kafka:9092,EXTERNAL://localhost:19094"
+          export KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP="CONTROLLER:PLAINTEXT,EXTERNAL:SASL_PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT"
+          export KAFKA_CFG_SASL_ENABLED_MECHANISMS="PLAIN"
+          export KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL="PLAIN"
+          export KAFKA_CFG_INTER_BROKER_LISTENER_NAME="SASL_PLAINTEXT"
+          export KAFKA_CLIENT_USERS="$${KAFKA_USERNAME}"
+          export KAFKA_CLIENT_PASSWORDS="$${KAFKA_PASSWORD}"
+        fi
+        
+        # Start Kafka with the configured environment
+        exec /opt/bitnami/scripts/kafka/entrypoint.sh /opt/bitnami/scripts/kafka/run.sh
+      '
     networks:
       - openim
 

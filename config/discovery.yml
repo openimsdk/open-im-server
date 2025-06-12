@@ -2,8 +2,8 @@ enable: etcd
 etcd:
   rootDirectory: openim
   address: [localhost:12379]
-  username: "openIM"
-  password: "openIM123"
+  # username: "openIM"
+  # password: "openIM123"
 
 kubernetes:
   namespace: default

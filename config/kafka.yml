@@ -1,7 +1,7 @@
-# Username for authentication
-username: "openIM"
-# Password for authentication
-password: "openIM123"
+## Kafka authentication
+# username: "openIM"
+# password: "openIM123"
+
 # Producer acknowledgment settings
 producerAck:
 # Compression type to use (e.g., none, gzip, snappy)
