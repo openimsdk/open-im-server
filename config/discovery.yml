@@ -2,6 +2,8 @@ enable: etcd
 etcd:
   rootDirectory: openim
   address: [localhost:12379]
+  ## Attention: If you set auth in etcd
+  ## you must also update the username and password in Chat project.
   # username: "openIM"
   # password: "openIM123"
 
