@@ -6,35 +6,29 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	conf "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type PrometheusDiscoveryApi struct {
 	config *Config
-	client *clientv3.Client
 	kv     discovery.KeyValue
 }
 
-func NewPrometheusDiscoveryApi(config *Config, client discovery.Conn) *PrometheusDiscoveryApi {
+func NewPrometheusDiscoveryApi(config *Config, client discovery.SvcDiscoveryRegistry) *PrometheusDiscoveryApi {
 	api := &PrometheusDiscoveryApi{
 		config: config,
-	}
-	if config.Discovery.Enable == conf.ETCD {
-		api.client = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
+		kv:     client,
 	}
 	return api
 }
 
 func (p *PrometheusDiscoveryApi) discovery(c *gin.Context, key string) {
-	value, err := p.kv.GetKey(c, prommetrics.BuildDiscoveryKey(key))
+	value, err := p.kv.GetKeyWithPrefix(c, prommetrics.BuildDiscoveryKeyPrefix(key))
 	if err != nil {
-		if errors.Is(err, discovery.ErrNotSupportedKeyValue) {
+		if errors.Is(err, discovery.ErrNotSupported) {
 			c.JSON(http.StatusOK, []struct{}{})
 			return
 		}
@@ -46,10 +40,17 @@ func (p *PrometheusDiscoveryApi) discovery(c *gin.Context, key string) {
 		return
 	}
 	var resp prommetrics.RespTarget
-	if err := json.Unmarshal(value, &resp); err != nil {
-		apiresp.GinError(c, errs.WrapMsg(err, "json unmarshal err"))
-		return
+	for i := range value {
+		var tmp prommetrics.Target
+		if err = json.Unmarshal(value[i], &tmp); err != nil {
+			apiresp.GinError(c, errs.WrapMsg(err, "json unmarshal err"))
+			return
+		}
+
+		resp.Targets = append(resp.Targets, tmp.Target)
+		resp.Labels = tmp.Labels // default label is fixed. See prommetrics.BuildDefaultTarget
 	}
+
 	c.JSON(http.StatusOK, []*prommetrics.RespTarget{&resp})
 }
 
