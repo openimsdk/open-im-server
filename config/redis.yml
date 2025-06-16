@@ -1,7 +1,11 @@
-address: [ localhost:16379 ]
-username: 
+address: [localhost:16379]
+username:
 password: openIM123
 clusterMode: false
 db: 0
 maxRetry: 10
 poolSize: 100
+sentinelMode:
+  enable: true
+  masterName: "redis-master"
+  sentinelsAddrs: ["127.0.0.1:26379", "127.0.0.1:26380", "127.0.0.1:26381"]

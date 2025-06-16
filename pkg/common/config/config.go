@@ -323,14 +323,21 @@ type RPC struct {
 }
 
 type Redis struct {
-	Disable     bool     `yaml:"-"`
-	Address     []string `yaml:"address"`
-	Username    string   `yaml:"username"`
-	Password    string   `yaml:"password"`
-	ClusterMode bool     `yaml:"clusterMode"`
-	DB          int      `yaml:"db"`
-	MaxRetry    int      `yaml:"maxRetry"`
-	PoolSize    int      `yaml:"poolSize"`
+	Disable      bool     `yaml:"-"`
+	Address      []string `yaml:"address"`
+	Username     string   `yaml:"username"`
+	Password     string   `yaml:"password"`
+	ClusterMode  bool     `yaml:"clusterMode"`
+	DB           int      `yaml:"db"`
+	MaxRetry     int      `yaml:"maxRetry"`
+	PoolSize     int      `yaml:"poolSize"`
+	SentinelMode Sentinel `yaml:"sentinelMode"`
+}
+
+type Sentinel struct {
+	Enable        bool     `yaml:"enable"`
+	MasterName    string   `yaml:"masterName"`
+	SentinelAddrs []string `yaml:"sentinelsAddrs"`
 }
 
 type BeforeConfig struct {
@@ -494,6 +501,11 @@ func (r *Redis) Build() *redisutil.Config {
 		DB:          r.DB,
 		MaxRetry:    r.MaxRetry,
 		PoolSize:    r.PoolSize,
+		Sentinel: &redisutil.Sentinel{
+			Enable:        r.SentinelMode.Enable,
+			MasterName:    r.SentinelMode.MasterName,
+			SentinelAddrs: r.SentinelMode.SentinelAddrs,
+		},
 	}
 }
 
