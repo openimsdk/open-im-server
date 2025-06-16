@@ -1,6 +1,6 @@
 ## Kafka authentication
-# username: "openIM"
-# password: "openIM123"
+username:
+password:
 
 # Producer acknowledgment settings
 producerAck:

@@ -84,6 +84,7 @@ services:
       - ETCD_INITIAL_CLUSTER_TOKEN=tkn
       - ETCD_INITIAL_CLUSTER_STATE=new
       - ALLOW_NONE_AUTHENTICATION=no
+
       ## Optional: Enable etcd authentication by setting the following credentials
       # - ETCD_ROOT_USER=root
       # - ETCD_ROOT_PASSWORD=openIM123
