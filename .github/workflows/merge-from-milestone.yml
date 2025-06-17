@@ -155,11 +155,27 @@ jobs:
                   '{title: $title, head: $head, base: $base, body: $body}')")
 
               new_pr_number=$(echo "$response" | jq -r '.number')
-              echo "Created PR #$new_pr_number"
 
-              curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
+              if [[ "$new_pr_number" == "null" || -z "$new_pr_number" ]]; then
+                echo "Failed to create PR. Response: $response"
+              
+                git checkout $TARGET_BRANCH
+
+                git branch -D $cherry_pick_branch
+                
+                echo "Deleted branch: $cherry_pick_branch"
+                git push origin --delete $cherry_pick_branch
+              else
+                echo "Created PR #$new_pr_number"
+
+                curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
                 -H "Accept: application/vnd.github+json" \
                 -d '{"labels": ["milestone-merge"]}' \
                 "https://api.github.com/repos/${{ github.repository }}/issues/$new_pr_number/labels"
+              fi
+
+              echo ""
+              echo "----------------------------------------"
+              echo ""
             fi
           done
