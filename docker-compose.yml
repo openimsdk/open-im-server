@@ -214,3 +214,4 @@ services:
       - '--path.rootfs=/rootfs'
       - '--web.listen-address=:19100'
     network_mode: host
+
