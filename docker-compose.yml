@@ -64,193 +64,6 @@ services:
     sysctls:
       net.core.somaxconn: 1024
     command: redis-server /usr/local/redis/config/redis.conf --requirepass openIM123 --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "openIM123", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 30s
-    networks:
-      - openim
-
-  redis-slave-1:
-    image: "${REDIS_IMAGE}"
-    container_name: redis-slave-1
-    ports:
-      - "16380:6379"
-    volumes:
-      - "${DATA_DIR}/components/redis/slave1:/data"
-    environment:
-      TZ: Asia/Shanghai
-      REDIS_MASTER_HOST: redis
-      REDIS_MASTER_PORT: 6379
-      REDIS_MASTER_PASSWORD: openIM123
-      REDIS_SLAVE_PASSWORD: openIM123
-    restart: always
-    command: >
-      bash -c '
-      echo "port 6379" > /data/redis-slave.conf &&
-      echo "replicaof $${REDIS_MASTER_HOST} $${REDIS_MASTER_PORT}" >> /data/redis-slave.conf &&
-      echo "masterauth $${REDIS_MASTER_PASSWORD}" >> /data/redis-slave.conf &&
-      echo "requirepass $${REDIS_SLAVE_PASSWORD}" >> /data/redis-slave.conf &&
-      echo "appendonly yes" >> /data/redis-slave.conf &&
-      echo "replica-read-only yes" >> /data/redis-slave.conf &&
-      redis-server /data/redis-slave.conf
-      '
-    depends_on:
-      - redis
-    networks:
-      - openim
-
-  redis-slave-2:
-    image: "${REDIS_IMAGE}"
-    container_name: redis-slave-2
-    ports:
-      - "16381:6379"
-    volumes:
-      - "${DATA_DIR}/components/redis/slave2:/data"
-    environment:
-      TZ: Asia/Shanghai
-      REDIS_MASTER_HOST: redis
-      REDIS_MASTER_PORT: 6379
-      REDIS_MASTER_PASSWORD: openIM123
-      REDIS_SLAVE_PASSWORD: openIM123
-    restart: always
-    command: >
-      bash -c '
-      echo "port 6379" > /data/redis-slave.conf &&
-      echo "replicaof $${REDIS_MASTER_HOST} $${REDIS_MASTER_PORT}" >> /data/redis-slave.conf &&
-      echo "masterauth $${REDIS_MASTER_PASSWORD}" >> /data/redis-slave.conf &&
-      echo "requirepass $${REDIS_SLAVE_PASSWORD}" >> /data/redis-slave.conf &&
-      echo "appendonly yes" >> /data/redis-slave.conf &&
-      echo "replica-read-only yes" >> /data/redis-slave.conf &&
-      redis-server /data/redis-slave.conf
-      '
-    depends_on:
-      - redis
-    networks:
-      - openim
-
-  redis-sentinel-1:
-    image: "${REDIS_IMAGE}"
-    container_name: redis-sentinel-1
-    ports:
-      - "26379:26379"
-    volumes:
-      - "${DATA_DIR}/components/redis/sentinel1:/data"
-    environment:
-      TZ: Asia/Shanghai
-      SENTINEL_PORT: 26379
-      REDIS_MASTER_NAME: redis-master
-      REDIS_MASTER_HOST: 127.0.0.1
-      REDIS_MASTER_PORT: 16379
-      REDIS_MASTER_PASSWORD: openIM123
-      SENTINEL_QUORUM: 2
-      SENTINEL_DOWN_AFTER: 30000
-      SENTINEL_PARALLEL_SYNCS: 1
-      SENTINEL_FAILOVER_TIMEOUT: 180000
-    restart: always
-    command: >
-      bash -c '
-      echo "port $${SENTINEL_PORT}" > /data/sentinel.conf &&
-      echo "sentinel monitor $${REDIS_MASTER_NAME} $${REDIS_MASTER_HOST} $${REDIS_MASTER_PORT} $${SENTINEL_QUORUM}" >> /data/sentinel.conf &&
-      echo "sentinel auth-pass $${REDIS_MASTER_NAME} $${REDIS_MASTER_PASSWORD}" >> /data/sentinel.conf &&
-      echo "sentinel down-after-milliseconds $${REDIS_MASTER_NAME} $${SENTINEL_DOWN_AFTER}" >> /data/sentinel.conf &&
-      echo "sentinel parallel-syncs $${REDIS_MASTER_NAME} $${SENTINEL_PARALLEL_SYNCS}" >> /data/sentinel.conf &&
-      echo "sentinel failover-timeout $${REDIS_MASTER_NAME} $${SENTINEL_FAILOVER_TIMEOUT}" >> /data/sentinel.conf &&
-      echo "sentinel resolve-hostnames yes" >> /data/sentinel.conf &&
-      echo "sentinel announce-hostnames yes" >> /data/sentinel.conf &&
-      redis-sentinel /data/sentinel.conf
-      '
-    depends_on:
-      redis:
-        condition: service_healthy
-      redis-slave-1:
-        condition: service_started
-      redis-slave-2:
-        condition: service_started
-    networks:
-      - openim
-
-  redis-sentinel-2:
-    image: "${REDIS_IMAGE}"
-    container_name: redis-sentinel-2
-    ports:
-      - "26380:26379"
-    volumes:
-      - "${DATA_DIR}/components/redis/sentinel2:/data"
-    environment:
-      TZ: Asia/Shanghai
-      SENTINEL_PORT: 26379
-      REDIS_MASTER_NAME: redis-master
-      REDIS_MASTER_HOST: 127.0.0.1
-      REDIS_MASTER_PORT: 16379
-      REDIS_MASTER_PASSWORD: openIM123
-      SENTINEL_QUORUM: 2
-      SENTINEL_DOWN_AFTER: 30000
-      SENTINEL_PARALLEL_SYNCS: 1
-      SENTINEL_FAILOVER_TIMEOUT: 180000
-    restart: always
-    command: >
-      bash -c '
-      echo "port $${SENTINEL_PORT}" > /data/sentinel.conf &&
-      echo "sentinel monitor $${REDIS_MASTER_NAME} $${REDIS_MASTER_HOST} $${REDIS_MASTER_PORT} $${SENTINEL_QUORUM}" >> /data/sentinel.conf &&
-      echo "sentinel auth-pass $${REDIS_MASTER_NAME} $${REDIS_MASTER_PASSWORD}" >> /data/sentinel.conf &&
-      echo "sentinel down-after-milliseconds $${REDIS_MASTER_NAME} $${SENTINEL_DOWN_AFTER}" >> /data/sentinel.conf &&
-      echo "sentinel parallel-syncs $${REDIS_MASTER_NAME} $${SENTINEL_PARALLEL_SYNCS}" >> /data/sentinel.conf &&
-      echo "sentinel failover-timeout $${REDIS_MASTER_NAME} $${SENTINEL_FAILOVER_TIMEOUT}" >> /data/sentinel.conf &&
-      echo "sentinel resolve-hostnames yes" >> /data/sentinel.conf &&
-      echo "sentinel announce-hostnames yes" >> /data/sentinel.conf &&
-      redis-sentinel /data/sentinel.conf
-      '
-    depends_on:
-      redis:
-        condition: service_healthy
-      redis-slave-1:
-        condition: service_started
-      redis-slave-2:
-        condition: service_started
-    networks:
-      - openim
-
-  redis-sentinel-3:
-    image: "${REDIS_IMAGE}"
-    container_name: redis-sentinel-3
-    ports:
-      - "26381:26379"
-    volumes:
-      - "${DATA_DIR}/components/redis/sentinel3:/data"
-    environment:
-      TZ: Asia/Shanghai
-      SENTINEL_PORT: 26379
-      REDIS_MASTER_NAME: redis-master
-      REDIS_MASTER_HOST: 127.0.0.1
-      REDIS_MASTER_PORT: 16379
-      REDIS_MASTER_PASSWORD: openIM123
-      SENTINEL_QUORUM: 2
-      SENTINEL_DOWN_AFTER: 30000
-      SENTINEL_PARALLEL_SYNCS: 1
-      SENTINEL_FAILOVER_TIMEOUT: 180000
-    restart: always
-    command: >
-      bash -c '
-      echo "port $${SENTINEL_PORT}" > /data/sentinel.conf &&
-      echo "sentinel monitor $${REDIS_MASTER_NAME} $${REDIS_MASTER_HOST} $${REDIS_MASTER_PORT} $${SENTINEL_QUORUM}" >> /data/sentinel.conf &&
-      echo "sentinel auth-pass $${REDIS_MASTER_NAME} $${REDIS_MASTER_PASSWORD}" >> /data/sentinel.conf &&
-      echo "sentinel down-after-milliseconds $${REDIS_MASTER_NAME} $${SENTINEL_DOWN_AFTER}" >> /data/sentinel.conf &&
-      echo "sentinel parallel-syncs $${REDIS_MASTER_NAME} $${SENTINEL_PARALLEL_SYNCS}" >> /data/sentinel.conf &&
-      echo "sentinel failover-timeout $${REDIS_MASTER_NAME} $${SENTINEL_FAILOVER_TIMEOUT}" >> /data/sentinel.conf &&
-      echo "sentinel resolve-hostnames yes" >> /data/sentinel.conf &&
-      echo "sentinel announce-hostnames yes" >> /data/sentinel.conf &&
-      redis-sentinel /data/sentinel.conf
-      '
-    depends_on:
-      redis:
-        condition: service_healthy
-      redis-slave-1:
-        condition: service_started
-      redis-slave-2:
-        condition: service_started
     networks:
       - openim
 
@@ -335,7 +148,7 @@ services:
       - "11002:80"
     networks:
       - openim
-
+      
   prometheus:
     image: ${PROMETHEUS_IMAGE}
     container_name: prometheus
@@ -348,9 +161,9 @@ services:
       - ./config/instance-down-rules.yml:/etc/prometheus/instance-down-rules.yml
       - ${DATA_DIR}/components/prometheus/data:/prometheus
     command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.path=/prometheus"
-      - "--web.listen-address=:${PROMETHEUS_PORT}"
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.listen-address=:${PROMETHEUS_PORT}'
     network_mode: host
 
   alertmanager:
@@ -363,8 +176,8 @@ services:
       - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
       - ./config/email.tmpl:/etc/alertmanager/email.tmpl
     command:
-      - "--config.file=/etc/alertmanager/alertmanager.yml"
-      - "--web.listen-address=:${ALERTMANAGER_PORT}"
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--web.listen-address=:${ALERTMANAGER_PORT}'
     network_mode: host
 
   grafana:
@@ -396,8 +209,8 @@ services:
       - /sys:/host/sys:ro
       - /:/rootfs:ro
     command:
-      - "--path.procfs=/host/proc"
-      - "--path.sysfs=/host/sys"
-      - "--path.rootfs=/rootfs"
-      - "--web.listen-address=:19100"
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--web.listen-address=:19100'
     network_mode: host
