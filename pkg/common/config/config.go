@@ -327,7 +327,7 @@ type Redis struct {
 	Address      []string `yaml:"address"`
 	Username     string   `yaml:"username"`
 	Password     string   `yaml:"password"`
-	ClusterMode  bool     `yaml:"clusterMode"`
+	RedisMode    string   `yaml:"redisMode"`
 	DB           int      `yaml:"db"`
 	MaxRetry     int      `yaml:"maxRetry"`
 	PoolSize     int      `yaml:"poolSize"`
@@ -335,9 +335,10 @@ type Redis struct {
 }
 
 type Sentinel struct {
-	Enable        bool     `yaml:"enable"`
-	MasterName    string   `yaml:"masterName"`
-	SentinelAddrs []string `yaml:"sentinelsAddrs"`
+	MasterName     string   `yaml:"masterName"`
+	SentinelAddrs  []string `yaml:"sentinelsAddrs"`
+	RouteByLatency bool     `yaml:"routeByLatency"`
+	RouteRandomly  bool     `yaml:"routeRandomly"`
 }
 
 type BeforeConfig struct {
@@ -494,17 +495,18 @@ func (m *Mongo) Build() *mongoutil.Config {
 
 func (r *Redis) Build() *redisutil.Config {
 	return &redisutil.Config{
-		ClusterMode: r.ClusterMode,
-		Address:     r.Address,
-		Username:    r.Username,
-		Password:    r.Password,
-		DB:          r.DB,
-		MaxRetry:    r.MaxRetry,
-		PoolSize:    r.PoolSize,
+		RedisMode: r.RedisMode,
+		Address:   r.Address,
+		Username:  r.Username,
+		Password:  r.Password,
+		DB:        r.DB,
+		MaxRetry:  r.MaxRetry,
+		PoolSize:  r.PoolSize,
 		Sentinel: &redisutil.Sentinel{
-			Enable:        r.SentinelMode.Enable,
-			MasterName:    r.SentinelMode.MasterName,
-			SentinelAddrs: r.SentinelMode.SentinelAddrs,
+			MasterName:     r.SentinelMode.MasterName,
+			SentinelAddrs:  r.SentinelMode.SentinelAddrs,
+			RouteByLatency: r.SentinelMode.RouteByLatency,
+			RouteRandomly:  r.SentinelMode.RouteRandomly,
 		},
 	}
 }
