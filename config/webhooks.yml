@@ -16,7 +16,7 @@ afterUpdateUserInfoEx:
 afterSendSingleMsg:
   enable: false
   timeout: 5
-  # Only the recvID specified in attentionIds will send the callback
+  # Only the recvIDs specified in attentionIds will send the callback
   # if not set, all user messages will be callback
   attentionIds: []
   # See beforeSendSingleMsg comment.
@@ -36,7 +36,7 @@ beforeMsgModify:
 afterSendGroupMsg:
   enable: false
   timeout: 5
-  # Only the recvID specified in attentionIds will send the callback
+  # Only the GroupIDs specified in attentionIds will send the callback
   # if not set, all user messages will be callback
   attentionIds: []
   # See beforeSendSingleMsg comment.
