@@ -66,7 +66,7 @@ type Config struct {
 	Discovery          config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	dbb := dbbuild.NewBuilder(&config.MongodbConfig, &config.RedisConfig)
 	mgocli, err := dbb.Mongo(ctx)
 	if err != nil {
@@ -192,7 +192,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *relation.ImportFr
 			FromUserID:   req.OwnerUserID,
 			ToUserID:     userID,
 			HandleResult: constant.FriendResponseAgree,
-		})
+		}, false)
 	}
 
 	s.webhookAfterImportFriends(ctx, &s.config.WebhooksConfig.AfterImportFriends, req)
@@ -221,7 +221,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *relation.Res
 			return nil, err
 		}
 		s.webhookAfterAddFriendAgree(ctx, &s.config.WebhooksConfig.AfterAddFriendAgree, req)
-		s.notificationSender.FriendApplicationAgreedNotification(ctx, req)
+		s.notificationSender.FriendApplicationAgreedNotification(ctx, req, true)
 		return resp, nil
 	}
 	if req.HandleResult == constant.FriendResponseRefuse {
