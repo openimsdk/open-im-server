@@ -49,6 +49,7 @@ func Start(ctx context.Context, conf *Config, client discovery.SvcDiscoveryRegis
 		return err
 	}
 
+	var locker Locker
 	if conf.Discovery.Enable == config.ETCD {
 		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), []string{
 			conf.CronTask.GetConfigFileName(),
@@ -56,11 +57,14 @@ func Start(ctx context.Context, conf *Config, client discovery.SvcDiscoveryRegis
 			conf.Discovery.GetConfigFileName(),
 		})
 		cm.Watch(ctx)
+		locker, err = NewEtcdLocker(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient())
+		if err != nil {
+			return err
+		}
 	}
 
-	locker, err := NewEtcdLocker(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient())
-	if err != nil {
-		return err
+	if locker == nil {
+		locker = emptyLocker{}
 	}
 
 	srv := &cronServer{
@@ -92,6 +96,16 @@ func Start(ctx context.Context, conf *Config, client discovery.SvcDiscoveryRegis
 	return nil
 }
 
+type Locker interface {
+	ExecuteWithLock(ctx context.Context, taskName string, task func())
+}
+
+type emptyLocker struct{}
+
+func (emptyLocker) ExecuteWithLock(ctx context.Context, taskName string, task func()) {
+	task()
+}
+
 type cronServer struct {
 	ctx                context.Context
 	config             *Config
@@ -99,7 +113,7 @@ type cronServer struct {
 	msgClient          msg.MsgClient
 	conversationClient pbconversation.ConversationClient
 	thirdClient        third.ThirdClient
-	locker             *EtcdLocker
+	locker             Locker
 }
 
 func (c *cronServer) registerClearS3() error {
