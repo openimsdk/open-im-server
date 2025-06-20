@@ -15,12 +15,12 @@ maxPoolSize: 100
 # Maximum number of retry attempts for a failed database connection
 maxRetry: 10
 # MongoDB Mode, including "standalone", "replicaSet"
-mongoMode: "replicaSet"
+mongoMode: "standalone"
 
 # The following configurations only take effect when mongoMode is set to "replicaSet"
 replicaSet:
   name: rs0
-  hosts: [192.168.1.217:37011, 192.168.1.217:370180, 192.168.1.217:37019]
+  hosts: [127.0.0.1:37017, 127.0.0.1:37018, 127.0.0.1:37019]
   # Read concern level: "local", "available", "majority", "linearizable", "snapshot"
   readConcern: majority
   # maximum staleness of data in seconds
