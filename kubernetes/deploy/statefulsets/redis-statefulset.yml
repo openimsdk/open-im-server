@@ -2,10 +2,8 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: redis-statefulset
-  labels:
-    app: redis
 spec:
-  serviceName: "redis-service"
+  serviceName: "redis"
   replicas: 1
   selector:
     matchLabels:
@@ -20,7 +18,6 @@ spec:
           image: redis:7.0.0
           ports:
             - containerPort: 6379
-              name: redis
           env:
             - name: TZ
               value: "Asia/Shanghai"
@@ -33,18 +30,26 @@ spec:
             - name: redis-data
               mountPath: /data
           command:
-            - /bin/sh
-            - -c
-            - |
-              redis-server \
-                --requirepass "$REDIS_PASSWORD" \
-                --appendonly yes \
-                --dir /data
-  volumeClaimTemplates:
-    - metadata:
-        name: redis-data
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 5Gi
+            [
+              "/bin/sh",
+              "-c",
+              'redis-server  --requirepass "$REDIS_PASSWORD" --appendonly yes',
+            ]
+      volumes:
+        - name: redis-config-volume
+          configMap:
+            name: openim-config
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

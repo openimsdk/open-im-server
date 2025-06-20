@@ -12,10 +12,9 @@ spec:
       labels:
         app: user-rpc-server
     spec:
-      imagePullSecrets:
-        - name: docker-secret
       containers:
         - name: user-rpc-server-container
+          #          image: openim/openim-rpc-user:v3.8.3
           image: openim-rpc-user:test
           env:
             - name: CONFIG_PATH
@@ -35,6 +34,11 @@ spec:
                 secretKeyRef:
                   name: openim-mongo-secret
                   key: mongo_openim_password
+            - name: IMENV_KAFKA_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: openim-kafka-secret
+                  key: kafka-username
             - name: IMENV_KAFKA_PASSWORD
               valueFrom:
                 secretKeyRef:

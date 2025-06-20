@@ -29,7 +29,7 @@ tmp/
 bin/
 output/
 _output/
-deployments/charts/generated-configs/
+kubernetes/charts/generated-configs/
 
 ### OpenIM Config ###
 .env
@@ -37,7 +37,7 @@ config/config.yaml
 config/notification.yaml
 
 ### OpenIM deploy ###
-deployments/openim-server/charts
+kubernetes/openim-server/charts
 
 # files used by the developer
 .idea.md
