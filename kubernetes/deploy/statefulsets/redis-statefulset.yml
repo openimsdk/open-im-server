@@ -4,7 +4,7 @@ metadata:
   name: redis-statefulset
 spec:
   serviceName: "redis"
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: redis
@@ -24,7 +24,7 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: redis-secret
+                  name: openim-redis-secret
                   key: redis-password
           volumeMounts:
             - name: redis-data

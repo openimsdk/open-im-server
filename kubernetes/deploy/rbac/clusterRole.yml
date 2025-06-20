@@ -5,7 +5,7 @@ metadata:
   name: service-reader
 rules:
   - apiGroups: [""]
-    resources: ["services", "endpoints"]
+    resources: ["services", "endpoints", "pods"]
     verbs: ["get", "list", "watch"]
 
 ---

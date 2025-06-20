@@ -1,0 +1,35 @@
+# HTTPS Ingress (TLS + cert-manager)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openim-ingress-https
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - openim-api.localtest.me
+      secretName: openim-api-tls
+  rules:
+    - host: openim-api.localtest.me
+      http:
+        paths:
+          - path: /api/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: openim-api-service
+                port:
+                  number: 10002
+          - path: /msg_gateway/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: messagegateway-rpc-service
+                port:
+                  number: 10001

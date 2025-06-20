@@ -1,20 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: msg-rpc-server
+  name: conversation-rpc-server
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: msg-rpc-server
+      app: conversation-rpc-server
   template:
     metadata:
       labels:
-        app: msg-rpc-server
+        app: conversation-rpc-server
     spec:
+      imagePullSecrets:
+        - name: docker-secret
       containers:
-        - name: msg-rpc-server-container
-          image: openim/openim-rpc-msg:v3.8.3
+        - name: conversation-rpc-server-container
+          image: openim-rpc-conversation:test
           env:
             - name: CONFIG_PATH
               value: "/config"
@@ -33,18 +35,13 @@ spec:
                 secretKeyRef:
                   name: openim-mongo-secret
                   key: mongo_openim_password
-            - name: IMENV_KAFKA_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: openim-kafka-secret
-                  key: kafka-password
           volumeMounts:
             - name: openim-config
               mountPath: "/config"
               readOnly: true
           ports:
-            - containerPort: 10280
-            - containerPort: 12280
+            - containerPort: 10220
+            - containerPort: 12220
       volumes:
         - name: openim-config
           configMap:

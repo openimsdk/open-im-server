@@ -27,7 +27,7 @@ func TestName111111(t *testing.T) {
 			"172.16.8.124:7006",
 		},
 		RedisMode: "cluster",
-		Password:    "passwd123",
+		Password:  "passwd123",
 		//Address:  []string{"localhost:16379"},
 		//Password: "openIM123",
 	}

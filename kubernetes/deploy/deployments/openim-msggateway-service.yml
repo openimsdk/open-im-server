@@ -6,7 +6,7 @@ spec:
   selector:
     app: messagegateway-rpc-server
   ports:
-    - name: longConnServer-10001
+    - name: longconnserver-10001
       protocol: TCP
       port: 10001
       targetPort: 10001
