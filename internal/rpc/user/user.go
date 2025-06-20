@@ -79,7 +79,7 @@ type Config struct {
 	Discovery          config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	dbb := dbbuild.NewBuilder(&config.MongodbConfig, &config.RedisConfig)
 	mgocli, err := dbb.Mongo(ctx)
 	if err != nil {
@@ -197,6 +197,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	}
 
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
+
 	//friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
 	//if err != nil {
 	//	return nil, err
@@ -209,6 +210,7 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	//for _, friendID := range friends {
 	//	s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	//}
+
 	s.webhookAfterUpdateUserInfoEx(ctx, &s.config.WebhooksConfig.AfterUpdateUserInfoEx, req)
 	if err := s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID, oldUser); err != nil {
 		return nil, err

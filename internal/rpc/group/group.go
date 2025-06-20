@@ -25,7 +25,6 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
-
 	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -77,7 +76,7 @@ type Config struct {
 	Discovery          config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	dbb := dbbuild.NewBuilder(&config.MongodbConfig, &config.RedisConfig)
 	mgocli, err := dbb.Mongo(ctx)
 	if err != nil {
@@ -153,10 +152,14 @@ func (g *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 
 func (g *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
 	if !authverify.IsAdmin(ctx) {
-		groupMember, err := g.db.TakeGroupMember(ctx, groupID, mcontext.GetOpUserID(ctx))
+		members, err := g.db.FindGroupMembers(ctx, groupID, []string{mcontext.GetOpUserID(ctx)})
 		if err != nil {
 			return err
 		}
+		if len(members) == 0 {
+			return errs.ErrNoPermission.WrapMsg("op user not in group")
+		}
+		groupMember := members[0]
 		if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
 			return errs.ErrNoPermission.WrapMsg("no group owner or admin")
 		}
@@ -369,6 +372,10 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		return nil, servererrs.ErrDismissedAlready.WrapMsg("group dismissed checking group status found it dismissed")
 	}
 
+	if err := g.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
+	}
+
 	userMap, err := g.userClient.GetUsersInfoMap(ctx, req.InvitedUserIDs)
 	if err != nil {
 		return nil, err
@@ -379,9 +386,9 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	}
 
 	var groupMember *model.GroupMember
-	var opUserID string
+	opUserID := mcontext.GetOpUserID(ctx)
+
 	if !authverify.IsAdmin(ctx) {
-		opUserID = mcontext.GetOpUserID(ctx)
 		var err error
 		groupMember, err = g.db.TakeGroupMember(ctx, req.GroupID, opUserID)
 		if err != nil {
@@ -390,8 +397,6 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		if err := g.PopulateGroupMember(ctx, groupMember); err != nil {
 			return nil, err
 		}
-	} else {
-		opUserID = mcontext.GetOpUserID(ctx)
 	}
 
 	if err := g.webhookBeforeInviteUserToGroup(ctx, &g.config.WebhooksConfig.BeforeInviteUserToGroup, req); err != nil && err != servererrs.ErrCallbackContinue {
@@ -421,7 +426,7 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 						ReqMessage:    request.ReqMsg,
 						JoinSource:    request.JoinSource,
 						InviterUserID: request.InviterUserID,
-					})
+					}, request)
 				}
 				return &pbgroup.InviteUserToGroupResp{}, nil
 			}
@@ -450,10 +455,7 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 
 	const singleQuantity = 50
 	for start := 0; start < len(groupMembers); start += singleQuantity {
-		end := start + singleQuantity
-		if end > len(groupMembers) {
-			end = len(groupMembers)
-		}
+		end := min(start+singleQuantity, len(groupMembers))
 		currentMembers := groupMembers[start:end]
 
 		if err := g.db.CreateGroup(ctx, nil, currentMembers); err != nil {
@@ -464,8 +466,8 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 			return e.UserID
 		})
 
-		if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, req.SendMessage, opUserID, userIDs...); err != nil {
-			return nil, err
+		if len(userIDs) != 0 {
+			g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, req.SendMessage, opUserID, userIDs...)
 		}
 	}
 	return &pbgroup.InviteUserToGroupResp{}, nil
@@ -690,15 +692,34 @@ func (g *groupServer) GetGroupApplicationList(ctx context.Context, req *pbgroup.
 	if err := authverify.CheckAccess(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	groupIDs, err := g.db.FindUserManagedGroupID(ctx, req.FromUserID)
-	if err != nil {
-		return nil, err
+	var (
+		groupIDs []string
+		err      error
+	)
+	if len(req.GroupIDs) == 0 {
+		groupIDs, err = g.db.FindUserManagedGroupID(ctx, req.FromUserID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		req.GroupIDs = datautil.Distinct(req.GroupIDs)
+		if !authverify.IsAdmin(ctx) {
+			for _, groupID := range req.GroupIDs {
+				if err := g.CheckGroupAdmin(ctx, groupID); err != nil {
+					return nil, err
+				}
+			}
+		}
+		groupIDs = req.GroupIDs
 	}
 	resp := &pbgroup.GetGroupApplicationListResp{}
 	if len(groupIDs) == 0 {
 		return resp, nil
 	}
-	total, groupRequests, err := g.db.PageGroupRequest(ctx, groupIDs, req.Pagination)
+	handleResults := datautil.Slice(req.HandleResults, func(e int32) int {
+		return int(e)
+	})
+	total, groupRequests, err := g.db.PageGroupRequest(ctx, groupIDs, handleResults, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -760,6 +781,23 @@ func (g *groupServer) GetGroupsInfo(ctx context.Context, req *pbgroup.GetGroupsI
 	}
 	return &pbgroup.GetGroupsInfoResp{
 		GroupInfos: groups,
+	}, nil
+}
+
+func (g *groupServer) GetGroupApplicationUnhandledCount(ctx context.Context, req *pbgroup.GetGroupApplicationUnhandledCountReq) (*pbgroup.GetGroupApplicationUnhandledCountResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
+	groupIDs, err := g.db.FindUserManagedGroupID(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	count, err := g.db.GetGroupApplicationUnhandledCount(ctx, groupIDs, req.Time)
+	if err != nil {
+		return nil, err
+	}
+	return &pbgroup.GetGroupApplicationUnhandledCountResp{
+		Count: count,
 	}, nil
 }
 
@@ -944,7 +982,7 @@ func (g *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 	if err = g.db.CreateGroupRequest(ctx, []*model.GroupRequest{&groupRequest}); err != nil {
 		return nil, err
 	}
-	g.notification.JoinGroupApplicationNotification(ctx, req)
+	g.notification.JoinGroupApplicationNotification(ctx, req, &groupRequest)
 	return &pbgroup.JoinGroupResp{}, nil
 }
 
@@ -1308,6 +1346,9 @@ func (g *groupServer) GetGroups(ctx context.Context, req *pbgroup.GetGroupsReq) 
 }
 
 func (g *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbgroup.GetGroupMembersCMSReq) (*pbgroup.GetGroupMembersCMSResp, error) {
+	if err := g.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
+	}
 	total, members, err := g.db.SearchGroupMember(ctx, req.UserName, req.GroupID, req.Pagination)
 	if err != nil {
 		return nil, err
@@ -1324,11 +1365,17 @@ func (g *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbgroup.GetGr
 }
 
 func (g *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbgroup.GetUserReqApplicationListReq) (*pbgroup.GetUserReqApplicationListResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	user, err := g.userClient.GetUserInfo(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	total, requests, err := g.db.PageGroupRequestUser(ctx, req.UserID, req.Pagination)
+	handleResults := datautil.Slice(req.HandleResults, func(e int32) int {
+		return int(e)
+	})
+	total, requests, err := g.db.PageGroupRequestUser(ctx, req.UserID, req.GroupIDs, handleResults, req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -1717,6 +1764,9 @@ func (g *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbgroup.Ge
 	if len(req.GroupIDs) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("groupIDs empty")
 	}
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	members, err := g.db.FindGroupMemberUser(ctx, req.GroupIDs, req.UserID)
 	if err != nil {
 		return nil, err
@@ -1748,6 +1798,9 @@ func (g *groupServer) GetGroupMemberRoleLevel(ctx context.Context, req *pbgroup.
 	if len(req.RoleLevels) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("RoleLevels empty")
 	}
+	if err := g.checkAdminOrInGroup(ctx, req.GroupID); err != nil {
+		return nil, err
+	}
 	members, err := g.db.FindGroupMemberRoleLevels(ctx, req.GroupID, req.RoleLevels)
 	if err != nil {
 		return nil, err
@@ -1763,6 +1816,9 @@ func (g *groupServer) GetGroupMemberRoleLevel(ctx context.Context, req *pbgroup.
 }
 
 func (g *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *pbgroup.GetGroupUsersReqApplicationListReq) (*pbgroup.GetGroupUsersReqApplicationListResp, error) {
+	if err := g.CheckGroupAdmin(ctx, req.GroupID); err != nil {
+		return nil, err
+	}
 	requests, err := g.db.FindGroupRequests(ctx, req.GroupID, req.UserIDs)
 	if err != nil {
 		return nil, err

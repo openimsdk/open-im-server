@@ -39,7 +39,7 @@ type Config struct {
 }
 
 // Start run ws server.
-func Start(ctx context.Context, conf *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, conf *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	log.CInfo(ctx, "MSG-GATEWAY server is initializing", "runtimeEnv", runtimeenv.RuntimeEnvironment(),
 		"rpcPorts", conf.MsgGateway.RPC.Ports,
 		"wsPort", conf.MsgGateway.LongConnSvr.Ports, "prometheusPorts", conf.MsgGateway.Prometheus.Ports)

@@ -39,7 +39,7 @@ type Config struct {
 	Index      conf.Index
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, service grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, service grpc.ServiceRegistrar) error {
 	apiPort, err := datautil.GetElemByIndex(config.API.Api.Ports, int(config.Index))
 	if err != nil {
 		return err

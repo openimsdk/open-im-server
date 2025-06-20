@@ -86,7 +86,8 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *pbmsg.SendMsgReq,
 		go m.setConversationAtInfo(ctx, req.MsgData)
 	}
 
-	m.webhookAfterSendGroupMsg(ctx, &m.config.WebhooksConfig.AfterSendGroupMsg, req)
+	// m.webhookAfterSendGroupMsg(ctx, &m.config.WebhooksConfig.AfterSendGroupMsg, req)
+
 	prommetrics.GroupChatMsgProcessSuccessCounter.Inc()
 	resp = &pbmsg.SendMsgResp{}
 	resp.SendTime = req.MsgData.SendTime
@@ -192,7 +193,8 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 			prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 			return nil, err
 		}
-		m.webhookAfterSendSingleMsg(ctx, &m.config.WebhooksConfig.AfterSendSingleMsg, req)
+
+		// m.webhookAfterSendSingleMsg(ctx, &m.config.WebhooksConfig.AfterSendSingleMsg, req)
 		prommetrics.SingleChatMsgProcessSuccessCounter.Inc()
 		return &pbmsg.SendMsgResp{
 			ServerMsgID: req.MsgData.ServerMsgID,
@@ -200,4 +202,26 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 			SendTime:    req.MsgData.SendTime,
 		}, nil
 	}
+}
+
+func (m *msgServer) SendSimpleMsg(ctx context.Context, req *pbmsg.SendSimpleMsgReq) (*pbmsg.SendSimpleMsgResp, error) {
+	if req.MsgData == nil {
+		return nil, errs.ErrArgs.WrapMsg("msg data is nil")
+	}
+	sender, err := m.UserLocalCache.GetUserInfo(ctx, req.MsgData.SendID)
+	if err != nil {
+		return nil, err
+	}
+	req.MsgData.SenderFaceURL = sender.FaceURL
+	req.MsgData.SenderNickname = sender.Nickname
+	resp, err := m.SendMsg(ctx, &pbmsg.SendMsgReq{MsgData: req.MsgData})
+	if err != nil {
+		return nil, err
+	}
+	return &pbmsg.SendSimpleMsgResp{
+		ServerMsgID: resp.ServerMsgID,
+		ClientMsgID: resp.ClientMsgID,
+		SendTime:    resp.SendTime,
+		Modify:      resp.Modify,
+	}, nil
 }

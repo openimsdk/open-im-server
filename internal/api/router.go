@@ -28,6 +28,7 @@ import (
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
+	"github.com/openimsdk/tools/mw/api"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -53,7 +54,7 @@ func prommetricsGin() gin.HandlerFunc {
 	}
 }
 
-func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin.Engine, error) {
+func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cfg *Config) (*gin.Engine, error) {
 	authConn, err := client.GetConn(ctx, cfg.Discovery.RpcService.Auth)
 	if err != nil {
 		return nil, err
@@ -96,7 +97,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 	case BestSpeed:
 		r.Use(gzip.Gzip(gzip.BestSpeed))
 	}
-	r.Use(prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(),
+	r.Use(api.GinLogger(), prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(),
 		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)), setGinIsAdmin(cfg.Share.IMAdminUserID))
 
 	u := NewUserApi(user.NewUserClient(userConn), client, cfg.Discovery.RpcService)
@@ -156,6 +157,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		friendRouterGroup.POST("/update_friends", f.UpdateFriends)
 		friendRouterGroup.POST("/get_incremental_friends", f.GetIncrementalFriends)
 		friendRouterGroup.POST("/get_full_friend_user_ids", f.GetFullFriendUserIDs)
+		friendRouterGroup.POST("/get_self_unhandled_apply_count", f.GetSelfUnhandledApplyCount)
 	}
 
 	g := NewGroupApi(group.NewGroupClient(groupConn))
@@ -192,6 +194,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		groupRouterGroup.POST("/get_incremental_group_members_batch", g.GetIncrementalGroupMemberBatch)
 		groupRouterGroup.POST("/get_full_group_member_user_ids", g.GetFullGroupMemberUserIDs)
 		groupRouterGroup.POST("/get_full_join_group_ids", g.GetFullJoinGroupIDs)
+		groupRouterGroup.POST("/get_group_application_unhandled_count", g.GetGroupApplicationUnhandledCount)
 	}
 	// certificate
 	{
@@ -250,6 +253,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		msgGroup.POST("/delete_msg_physical", m.DeleteMsgPhysical)
 
 		msgGroup.POST("/batch_send_msg", m.BatchSendMsg)
+		msgGroup.POST("/send_simple_msg", m.SendSimpleMessage)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 		msgGroup.POST("/get_server_time", m.GetServerTime)
 	}

@@ -69,7 +69,7 @@ type Config struct {
 	Discovery          config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	dbb := dbbuild.NewBuilder(&config.MongodbConfig, &config.RedisConfig)
 	mgocli, err := dbb.Mongo(ctx)
 	if err != nil {
@@ -430,6 +430,9 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 
 	err := c.conversationDatabase.CreateGroupChatConversation(ctx, req.GroupID, req.UserIDs, &conversation)
 	if err != nil {
+		return nil, err
+	}
+	if err := c.msgClient.SetUserConversationMaxSeq(ctx, conversation.ConversationID, req.UserIDs, 0); err != nil {
 		return nil, err
 	}
 

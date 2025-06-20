@@ -467,6 +467,10 @@ func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
 		sessionType int32
 		recvID      string
 	)
+	if err = c.BindJSON(&req); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
 	err = json.Unmarshal(decodedData, &keyMsgData)
 	if err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
@@ -490,6 +494,11 @@ func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
 		return
 	}
 
+	content, err := jsonutil.JsonMarshal(apistruct.MarkdownTextElem{Content: req.Content})
+	if err != nil {
+		apiresp.GinError(c, errs.Wrap(err))
+		return
+	}
 	msgData := &sdkws.MsgData{
 		SendID:           sendID,
 		RecvID:           recvID,
@@ -498,17 +507,17 @@ func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
 		SenderPlatformID: constant.AdminPlatformID,
 		SessionType:      sessionType,
 		MsgFrom:          constant.UserMsgType,
-		ContentType:      constant.Text,
-		Content:          []byte(req.Content),
+		ContentType:      constant.MarkdownText,
+		Content:          content,
 		OfflinePushInfo:  req.OfflinePushInfo,
 		Ex:               req.Ex,
 	}
 
-	sendReq := &msg.SendMsgReq{
+	sendReq := &msg.SendSimpleMsgReq{
 		MsgData: msgData,
 	}
 
-	respPb, err := m.Client.SendMsg(c, sendReq)
+	respPb, err := m.Client.SendSimpleMsg(c, sendReq)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return
@@ -525,7 +534,12 @@ func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
 		return
 	}
 
-	m.ginRespSendMsg(c, sendReq, respPb)
+	m.ginRespSendMsg(c, &msg.SendMsgReq{MsgData: sendReq.MsgData}, &msg.SendMsgResp{
+		ServerMsgID: respPb.ServerMsgID,
+		ClientMsgID: respPb.ClientMsgID,
+		SendTime:    respPb.SendTime,
+		Modify:      respPb.Modify,
+	})
 }
 
 func (m *MessageApi) CheckMsgIsSendSuccess(c *gin.Context) {
