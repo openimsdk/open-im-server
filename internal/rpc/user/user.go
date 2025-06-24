@@ -65,6 +65,8 @@ type userServer struct {
 	groupClient              *rpcli.GroupClient
 	relationClient           *rpcli.RelationClient
 	clientConfig             controller.ClientConfigDatabase
+
+	adminUserIDs []string
 }
 
 type Config struct {
@@ -92,8 +94,8 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 
 	users := make([]*tablerelation.User, 0)
 
-	for _, v := range config.Share.IMAdminUserID {
-		users = append(users, &tablerelation.User{UserID: v, Nickname: v, AppMangerLevel: constant.AppAdmin})
+	for uid, name := range config.Share.IMAdminUser {
+		users = append(users, &tablerelation.User{UserID: uid, Nickname: name, AppMangerLevel: constant.AppAdmin})
 	}
 	userDB, err := mgo.NewUserMongo(mgocli.GetDB())
 	if err != nil {
@@ -130,6 +132,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		clientConfig:             controller.NewClientConfigDatabase(clientConfigDB, redis.NewClientConfigCache(rdb, clientConfigDB), mgocli.GetTx()),
 		groupClient:              rpcli.NewGroupClient(groupConn),
 		relationClient:           rpcli.NewRelationClient(friendConn),
+		adminUserIDs:             datautil.Keys(config.Share.IMAdminUser),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.db.InitOnce(context.Background(), users)
@@ -648,7 +651,7 @@ func (s *userServer) userModelToResp(users []*tablerelation.User, pagination pag
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {
-		if v.AppMangerLevel >= constant.AppNotificationAdmin && !datautil.Contain(v.UserID, s.config.Share.IMAdminUserID...) {
+		if v.AppMangerLevel >= constant.AppNotificationAdmin && !datautil.Contain(v.UserID, s.adminUserIDs...) {
 			if appManagerLevel != nil {
 				if v.AppMangerLevel != *appManagerLevel {
 					continue

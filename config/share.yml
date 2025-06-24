@@ -1,6 +1,8 @@
 secret: openIM123
 
-imAdminUserID: [imAdmin]
+imAdminUser:
+  imAdmin: superAdmin  # The userID and nickname of the admin. Format: userID:nickname
+#  imAdmin2: superAdmin2  # You can add more admin users by following the format above.
 
 # 1: For Android, iOS, Windows, Mac, and web platforms, only one instance can be online at a time
 multiLogin:

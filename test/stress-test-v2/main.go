@@ -23,6 +23,7 @@ import (
 	pbuser "github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/system/program"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 // 1. Create 100K New Users
@@ -446,7 +447,7 @@ func main() {
 			Share: *share,
 			Api:   *apiConfig,
 		},
-		AdminUserID: share.IMAdminUserID[0],
+		AdminUserID: datautil.Keys(share.IMAdminUser)[0],
 		Ctx:         ctx,
 		Cancel:      cancel,
 		HttpClient: &http.Client{

@@ -29,6 +29,7 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
 	"github.com/openimsdk/tools/mw/api"
+	"github.com/openimsdk/tools/utils/datautil"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -98,7 +99,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 		r.Use(gzip.Gzip(gzip.BestSpeed))
 	}
 	r.Use(api.GinLogger(), prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(),
-		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)), setGinIsAdmin(cfg.Share.IMAdminUserID))
+		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)), setGinIsAdmin(datautil.Keys(cfg.Share.IMAdminUser)))
 
 	u := NewUserApi(user.NewUserClient(userConn), client, cfg.Discovery.RpcService)
 	{
@@ -232,7 +233,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 		objectGroup.GET("/*name", t.ObjectRedirect)
 	}
 	// Message
-	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), cfg.Share.IMAdminUserID)
+	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), datautil.Keys(cfg.Share.IMAdminUser))
 	{
 		msgGroup := r.Group("/msg")
 		msgGroup.POST("/newest_seq", m.GetSeq)
@@ -309,7 +310,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 	if cfg.Discovery.Enable == config.ETCD {
 		etcdClient = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 	}
-	cm := NewConfigManager(cfg.Share.IMAdminUserID, &cfg.AllConfig, etcdClient, string(cfg.ConfigPath))
+	cm := NewConfigManager(datautil.Keys(cfg.Share.IMAdminUser), &cfg.AllConfig, etcdClient, string(cfg.ConfigPath))
 	{
 		configGroup := r.Group("/config", cm.CheckAdmin)
 		configGroup.POST("/get_config_list", cm.GetConfigList)

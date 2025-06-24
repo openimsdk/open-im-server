@@ -49,6 +49,7 @@ type authServer struct {
 	RegisterCenter discovery.Conn
 	config         *Config
 	userClient     *rpcli.UserClient
+	adminUserIDs   []string
 }
 
 type Config struct {
@@ -90,10 +91,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
 			config.Share.MultiLogin,
-			config.Share.IMAdminUserID,
+			datautil.Keys(config.Share.IMAdminUser),
 		),
-		config:     config,
-		userClient: rpcli.NewUserClient(userConn),
+		config:       config,
+		userClient:   rpcli.NewUserClient(userConn),
+		adminUserIDs: datautil.Keys(config.Share.IMAdminUser),
 	})
 	return nil
 }
@@ -104,8 +106,8 @@ func (s *authServer) GetAdminToken(ctx context.Context, req *pbauth.GetAdminToke
 		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
 
-	if !datautil.Contain(req.UserID, s.config.Share.IMAdminUserID...) {
-		return nil, errs.ErrArgs.WrapMsg("userID is error.", "userID", req.UserID, "adminUserID", s.config.Share.IMAdminUserID)
+	if !datautil.Contain(req.UserID, s.adminUserIDs...) {
+		return nil, errs.ErrArgs.WrapMsg("userID is error.", "userID", req.UserID, "adminUserID", s.adminUserIDs)
 
 	}
 
