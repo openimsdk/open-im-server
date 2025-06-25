@@ -10,7 +10,6 @@ import (
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
-
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
@@ -32,7 +31,7 @@ func Start(ctx context.Context, conf *Config, client discovery.SvcDiscoveryRegis
 		<-ctx.Done()
 		return nil
 	}
-	ctx = mcontext.SetOpUserID(ctx, conf.Share.IMAdminUserID[0])
+	ctx = mcontext.SetOpUserID(ctx, conf.Share.IMAdminUser.UserIDs[0])
 
 	msgConn, err := client.GetConn(ctx, conf.Discovery.RpcService.Msg)
 	if err != nil {
