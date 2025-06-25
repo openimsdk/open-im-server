@@ -356,10 +356,13 @@ type AfterConfig struct {
 }
 
 type Share struct {
-	Secret         string            `yaml:"secret"`
-	IMAdminUser    map[string]string `yaml:"imAdminUser"`
-	MultiLogin     MultiLogin        `yaml:"multiLogin"`
-	RPCMaxBodySize MaxRequestBody    `yaml:"rpcMaxBodySize"`
+	Secret      string `yaml:"secret"`
+	IMAdminUser struct {
+		UserIDs   []string `yaml:"userIDs"`
+		Nicknames []string `yaml:"nicknames"`
+	} `yaml:"imAdminUser"`
+	MultiLogin     MultiLogin     `yaml:"multiLogin"`
+	RPCMaxBodySize MaxRequestBody `yaml:"rpcMaxBodySize"`
 }
 
 type MaxRequestBody struct {

@@ -1,8 +1,13 @@
 secret: openIM123
 
+# imAdminUser: Configuration for instant messaging system administrators
 imAdminUser:
-  imAdmin: superAdmin  # The userID and nickname of the admin. Format: userID:nickname
-#  imAdmin2: superAdmin2  # You can add more admin users by following the format above.
+  # userIDs: List of administrator user IDs.
+  # Each entry here corresponds by index to the matching entry in the nicknames list below.
+  userIDs: [imAdmin]
+  # nicknames: List of administrator display names.
+  # Each entry here corresponds by index to the matching entry in the userIDs list above.
+  nicknames: [superAdmin]
 
 # 1: For Android, iOS, Windows, Mac, and web platforms, only one instance can be online at a time
 multiLogin:

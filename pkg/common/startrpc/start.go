@@ -69,8 +69,8 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 		grpcsrv.GrpcServerRequestValidate(),
 		grpcsrv.GrpcServerPanicCapture(),
 	)
-	if shareConfig != nil && len(shareConfig.IMAdminUser) > 0 {
-		options = append(options, grpcServerIMAdminUserID(datautil.Keys(shareConfig.IMAdminUser)))
+	if shareConfig != nil && len(shareConfig.IMAdminUser.UserIDs) > 0 {
+		options = append(options, grpcServerIMAdminUserID(shareConfig.IMAdminUser.UserIDs))
 	}
 	var clientOptions []grpc.DialOption
 	if maxRequestBody != nil {

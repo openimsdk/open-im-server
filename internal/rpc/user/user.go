@@ -94,8 +94,12 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 
 	users := make([]*tablerelation.User, 0)
 
-	for uid, name := range config.Share.IMAdminUser {
-		users = append(users, &tablerelation.User{UserID: uid, Nickname: name, AppMangerLevel: constant.AppAdmin})
+	for i := range config.Share.IMAdminUser.UserIDs {
+		users = append(users, &tablerelation.User{
+			UserID:         config.Share.IMAdminUser.UserIDs[i],
+			Nickname:       config.Share.IMAdminUser.Nicknames[i],
+			AppMangerLevel: constant.AppAdmin,
+		})
 	}
 	userDB, err := mgo.NewUserMongo(mgocli.GetDB())
 	if err != nil {
@@ -132,7 +136,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		clientConfig:             controller.NewClientConfigDatabase(clientConfigDB, redis.NewClientConfigCache(rdb, clientConfigDB), mgocli.GetTx()),
 		groupClient:              rpcli.NewGroupClient(groupConn),
 		relationClient:           rpcli.NewRelationClient(friendConn),
-		adminUserIDs:             datautil.Keys(config.Share.IMAdminUser),
+		adminUserIDs:             config.Share.IMAdminUser.UserIDs,
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.db.InitOnce(context.Background(), users)

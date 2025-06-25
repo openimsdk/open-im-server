@@ -109,7 +109,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	revokerUserID := mcontext.GetOpUserID(ctx)
 	var flag bool
 
-	if len(m.config.Share.IMAdminUser) > 0 {
+	if len(m.config.Share.IMAdminUser.UserIDs) > 0 {
 		flag = datautil.Contain(revokerUserID, m.adminUserIDs...)
 	}
 	tips := sdkws.RevokeMsgTips{

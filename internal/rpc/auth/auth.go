@@ -91,11 +91,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
 			config.Share.MultiLogin,
-			datautil.Keys(config.Share.IMAdminUser),
+			config.Share.IMAdminUser.UserIDs,
 		),
 		config:       config,
 		userClient:   rpcli.NewUserClient(userConn),
-		adminUserIDs: datautil.Keys(config.Share.IMAdminUser),
+		adminUserIDs: config.Share.IMAdminUser.UserIDs,
 	})
 	return nil
 }

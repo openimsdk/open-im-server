@@ -22,8 +22,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
-	"github.com/openimsdk/tools/utils/datautil"
-
 	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -148,7 +146,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		config:                 config,
 		webhookClient:          webhook.NewWebhookClient(config.WebhooksConfig.URL),
 		conversationClient:     conversationClient,
-		adminUserIDs:           datautil.Keys(config.Share.IMAdminUser),
+		adminUserIDs:           config.Share.IMAdminUser.UserIDs,
 	}
 
 	s.notificationSender = notification.NewNotificationSender(&config.NotificationConfig, notification.WithLocalSendMsg(s.SendMsg))

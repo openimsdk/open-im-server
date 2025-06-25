@@ -317,8 +317,8 @@ func (c *ConsumerHandler) groupMessagesHandler(ctx context.Context, groupID stri
 					return err
 				}
 				log.ZDebug(ctx, "GroupDismissedNotificationInfo****", "groupID", groupID, "num", len(*pushToUserIDs), "list", pushToUserIDs)
-				if len(c.config.Share.IMAdminUser) > 0 {
-					ctx = mcontext.WithOpUserIDContext(ctx, datautil.Keys(c.config.Share.IMAdminUser)[0])
+				if len(c.config.Share.IMAdminUser.UserIDs) > 0 {
+					ctx = mcontext.WithOpUserIDContext(ctx, c.config.Share.IMAdminUser.UserIDs[0])
 				}
 				defer func(groupID string) {
 					if err := c.groupClient.DismissGroup(ctx, groupID, true); err != nil {

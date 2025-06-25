@@ -117,7 +117,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		userClient:         rpcli.NewUserClient(userConn),
 		msgClient:          rpcli.NewMsgClient(msgConn),
 		conversationClient: rpcli.NewConversationClient(conversationConn),
-		adminUserIDs:       datautil.Keys(config.Share.IMAdminUser),
+		adminUserIDs:       config.Share.IMAdminUser.UserIDs,
 	}
 	gs.db = controller.NewGroupDatabase(rdb, &config.LocalCacheConfig, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.notification = NewNotificationSender(gs.db, config, gs.userClient, gs.msgClient, gs.conversationClient)
