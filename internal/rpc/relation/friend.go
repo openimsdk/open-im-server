@@ -103,22 +103,24 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	}
 	userClient := rpcli.NewUserClient(userConn)
 
+	database := controller.NewFriendDatabase(
+		friendMongoDB,
+		friendRequestMongoDB,
+		redis.NewFriendCacheRedis(rdb, &config.LocalCacheConfig, friendMongoDB, redis.GetRocksCacheOptions()),
+		mgocli.GetTx(),
+	)
 	// Initialize notification sender
 	notificationSender := NewFriendNotificationSender(
 		&config.NotificationConfig,
 		rpcli.NewMsgClient(msgConn),
 		WithRpcFunc(userClient.GetUsersInfo),
+		WithFriendDB(database),
 	)
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 
 	// Register Friend server with refactored MongoDB and Redis integrations
 	relation.RegisterFriendServer(server, &friendServer{
-		db: controller.NewFriendDatabase(
-			friendMongoDB,
-			friendRequestMongoDB,
-			redis.NewFriendCacheRedis(rdb, &config.LocalCacheConfig, friendMongoDB, redis.GetRocksCacheOptions()),
-			mgocli.GetTx(),
-		),
+		db: database,
 		blackDatabase: controller.NewBlackDatabase(
 			blackMongoDB,
 			redis.NewBlackCacheRedis(rdb, &config.LocalCacheConfig, blackMongoDB, redis.GetRocksCacheOptions()),
