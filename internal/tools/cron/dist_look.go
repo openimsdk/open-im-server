@@ -52,15 +52,12 @@ func (e *EtcdLocker) ExecuteWithLock(ctx context.Context, taskName string, task 
 
 	err = mutex.TryLock(ctxWithTimeout)
 	if err != nil {
-		if err == context.DeadlineExceeded {
-			log.ZDebug(ctx, "Task is being executed by another instance, skipping",
-				"taskName", taskName,
-				"instanceID", e.instanceID)
-		} else {
-			log.ZWarn(ctx, "Failed to acquire task lock", err,
-				"taskName", taskName,
-				"instanceID", e.instanceID)
-		}
+		// errors.Is(err, concurrency.ErrLocked)
+		log.ZDebug(ctx, "Task is being executed by another instance, skipping",
+			"taskName", taskName,
+			"instanceID", e.instanceID,
+			"error", err.Error())
+
 		return
 	}
 
