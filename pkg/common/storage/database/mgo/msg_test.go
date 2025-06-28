@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/protocol/msg"
+	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -148,3 +150,29 @@ func TestName5(t *testing.T) {
 //	}
 //	t.Log(seq, sendTime)
 //}
+
+func TestSearchMessage(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*300)
+	defer cancel()
+	cli := Result(mongo.Connect(ctx, options.Client().ApplyURI("mongodb://openIM:openIM123@172.16.8.135:37017/openim_v3?maxPoolSize=100").SetConnectTimeout(5*time.Second)))
+
+	msgMongo, err := NewMsgMongo(cli.Database("openim_v3"))
+	if err != nil {
+		panic(err)
+	}
+	ts := time.Now().Add(-time.Hour * 24 * 5).UnixMilli()
+	t.Log(ts)
+	req := &msg.SearchMessageReq{
+		//SendID: "yjz",
+		//RecvID: "aibot",
+		Pagination: &sdkws.RequestPagination{
+			PageNumber: 1,
+			ShowNumber: 20,
+		},
+	}
+	count, resp, err := msgMongo.SearchMessage(ctx, req)
+	if err != nil {
+		panic(err)
+	}
+	t.Log(resp, count)
+}
