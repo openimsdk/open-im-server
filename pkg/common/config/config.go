@@ -71,15 +71,39 @@ type Minio struct {
 }
 
 type Mongo struct {
-	URI         string   `yaml:"uri"`
-	Address     []string `yaml:"address"`
-	Database    string   `yaml:"database"`
-	Username    string   `yaml:"username"`
-	Password    string   `yaml:"password"`
-	AuthSource  string   `yaml:"authSource"`
-	MaxPoolSize int      `yaml:"maxPoolSize"`
-	MaxRetry    int      `yaml:"maxRetry"`
+	URI            string   `yaml:"uri"`
+	Address        []string `yaml:"address"`
+	Database       string   `yaml:"database"`
+	Username       string   `yaml:"username"`
+	Password       string   `yaml:"password"`
+	AuthSource     string   `yaml:"authSource"`
+	MaxPoolSize    int      `yaml:"maxPoolSize"`
+	MaxRetry       int      `yaml:"maxRetry"`
+	MongoMode      string   `yaml:"mongoMode"`
+	ReplicaSet     ReplicaSetConfig
+	ReadPreference ReadPrefConfig
+	WriteConcern   WriteConcernConfig
 }
+
+type ReplicaSetConfig struct {
+	Name         string        `yaml:"name"`
+	Hosts        []string      `yaml:"hosts"`
+	ReadConcern  string        `yaml:"readConcern"`
+	MaxStaleness time.Duration `yaml:"maxStaleness"`
+}
+
+type ReadPrefConfig struct {
+	Mode         string              `yaml:"mode"`
+	TagSets      []map[string]string `yaml:"tagSets"`
+	MaxStaleness time.Duration       `yaml:"maxStaleness"`
+}
+
+type WriteConcernConfig struct {
+	W        any           `yaml:"w"`
+	J        bool          `yaml:"j"`
+	WTimeout time.Duration `yaml:"wtimeout"`
+}
+
 type Kafka struct {
 	Username           string   `yaml:"username"`
 	Password           string   `yaml:"password"`
@@ -493,6 +517,23 @@ func (m *Mongo) Build() *mongoutil.Config {
 		AuthSource:  m.AuthSource,
 		MaxPoolSize: m.MaxPoolSize,
 		MaxRetry:    m.MaxRetry,
+		MongoMode:   m.MongoMode,
+		ReplicaSet: &mongoutil.ReplicaSetConfig{
+			Name:         m.ReplicaSet.Name,
+			Hosts:        m.ReplicaSet.Hosts,
+			ReadConcern:  m.ReplicaSet.ReadConcern,
+			MaxStaleness: m.ReplicaSet.MaxStaleness,
+		},
+		ReadPreference: &mongoutil.ReadPrefConfig{
+			Mode:         m.ReadPreference.Mode,
+			TagSets:      m.ReadPreference.TagSets,
+			MaxStaleness: m.ReadPreference.MaxStaleness,
+		},
+		WriteConcern: &mongoutil.WriteConcernConfig{
+			W:        m.WriteConcern.W,
+			J:        m.WriteConcern.J,
+			WTimeout: m.WriteConcern.WTimeout,
+		},
 	}
 }
 
