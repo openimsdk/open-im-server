@@ -1,7 +1,7 @@
 # URI for database connection, leave empty if using address and credential settings directly
-uri: 
+uri:
 # List of MongoDB server addresses
-address: [ localhost:37017 ]
+address: [localhost:37017]
 # Name of the database
 database: openim_v3
 # Username for database authentication
@@ -14,3 +14,38 @@ authSource: openim_v3
 maxPoolSize: 100
 # Maximum number of retry attempts for a failed database connection
 maxRetry: 10
+# MongoDB Mode, including "standalone", "replicaSet"
+mongoMode: "standalone"
+
+# The following configurations only take effect when mongoMode is set to "replicaSet"
+replicaSet:
+  name: rs0
+  hosts: [127.0.0.1:37017, 127.0.0.1:37018, 127.0.0.1:37019]
+  # Read concern level: "local", "available", "majority", "linearizable", "snapshot"
+  readConcern: majority
+  # maximum staleness of data in seconds
+  maxStaleness: 90s
+
+# The following configurations only take effect when mongoMode is set to "replicaSet"
+readPreference:
+  # Read preference mode, can be "primary", "primaryPreferred", "secondary", "secondaryPreferred", "nearest"
+  mode: primary
+  maxStaleness: 90s
+  # TagSets is an array of maps with priority based on order, empty map must be placed last for fallback tagSets
+  tagSets:
+    - datacenter: "cn-east"
+      rack: "1"
+      storage: "ssd"
+    - datacenter: "cn-east"
+      storage: "ssd"
+    - datacenter: "cn-east"
+    - {} # Empty map, indicates any node
+
+# The following configurations only take effect when mongoMode is set to "replicaSet"
+writeConcern:
+  # Write node count or tag (int, "majority", or custom tag)
+  w: majority
+  # Whether to wait for journal confirmation
+  j: true
+  # Write timeout duration
+  wtimeout: 30s
