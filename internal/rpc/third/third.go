@@ -17,8 +17,11 @@ package third
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/tools/s3/aws"
+	"github.com/openimsdk/tools/s3/disable"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
@@ -90,6 +93,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		o, err = oss.NewOSS(*config.RpcConfig.Object.Oss.Build())
 	case "kodo":
 		o, err = kodo.NewKodo(*config.RpcConfig.Object.Kodo.Build())
+	case "aws":
+		o, err = aws.NewAws(*config.RpcConfig.Object.Aws.Build())
+	case "":
+		o = disable.NewDisable()
 	default:
 		err = fmt.Errorf("invalid object enable: %s", enable)
 	}
