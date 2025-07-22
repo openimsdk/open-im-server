@@ -8,13 +8,34 @@ jobs:
   update-version:
     runs-on: ubuntu-latest
     env:
-      TAG_VERSION: ${{ github.event.release.tag_name }} 
+      TAG_VERSION: ${{ github.event.release.tag_name }}
     steps:
       # Step 1: Checkout the original repository's code
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+        # submodules: "recursive"
+
+      - name: Safe submodule initialization
+        run: |
+          echo "Checking for submodules..."
+          if [ -f .gitmodules ]; then
+            if [ -s .gitmodules ]; then
+              echo "Initializing submodules..."
+              if git submodule sync --recursive 2>/dev/null; then
+                git submodule update --init --force --recursive || {
+                  echo "Warning: Some submodules failed to initialize, continuing anyway..."
+                }
+              else
+                echo "Warning: Submodule sync failed, continuing without submodules..."
+              fi
+            else
+              echo ".gitmodules exists but is empty, skipping submodule initialization"
+            fi
+          else
+            echo "No .gitmodules file found, no submodules to initialize"
+          fi
 
       # Step 2: Set up Git with official account
       - name: Set up Git
