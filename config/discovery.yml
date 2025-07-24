@@ -20,3 +20,4 @@ rpcService:
   auth: auth-rpc-service
   conversation: conversation-rpc-service
   third: third-rpc-service
+  encryption: encryption-rpc-service

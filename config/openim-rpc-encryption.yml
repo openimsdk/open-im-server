@@ -1,0 +1,59 @@
+# Copyright © 2024 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# RPC Configuration (following OpenIM standard format)
+rpc:
+  # API or other RPCs can access this RPC through this IP; if left blank, the internal network IP is obtained by default
+  registerIP: 
+  # Listening IP; 0.0.0.0 means both internal and external IPs are listened to, if blank, the internal network IP is automatically obtained by default
+  listenIP: 0.0.0.0
+  # autoSetPorts indicates whether to automatically set the ports
+  # if you use in kubernetes, set it to false
+  autoSetPorts: true
+  # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
+  # It will only take effect when autoSetPorts is set to false.
+  ports: [ 10800 ]
+
+prometheus:
+  # Whether to enable prometheus
+  enable: true
+  # Prometheus listening ports, must be consistent with the number of rpc.ports
+  # It will only take effect when autoSetPorts is set to false.
+  ports: [ 20800 ]
+
+# Encryption Configuration
+encryption:
+  # Encryption mode: "aes", "signal", "hybrid"
+  mode: "aes"  # Default to AES for compatibility
+  
+  # AES encryption settings (existing)
+  aes:
+    enabled: true
+    
+  # Signal Protocol settings
+  signal:
+    enabled: false  # Set to true when ready to use Signal Protocol
+    preKeyBatch: 100                    # Max one-time prekeys per upload
+    keyRotationInterval: "168h"         # 7 days
+    sessionCleanupInterval: "720h"      # 30 days
+    prekeyCleanupInterval: "168h"       # 7 days
+    
+    # Security settings
+    maxOneTimePreKeys: 100
+    maxSessionsPerDevice: 1000
+    
+    # Validation settings
+    validateSignatures: true
+    requireIdentityKeys: true
+

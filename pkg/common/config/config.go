@@ -385,6 +385,7 @@ type RpcService struct {
 	Auth           string `yaml:"auth"`
 	Conversation   string `yaml:"conversation"`
 	Third          string `yaml:"third"`
+	Encryption     string `yaml:"encryption"`
 }
 
 func (r *RpcService) GetServiceNames() []string {
@@ -398,6 +399,7 @@ func (r *RpcService) GetServiceNames() []string {
 		r.Auth,
 		r.Conversation,
 		r.Third,
+		r.Encryption,
 	}
 }
 

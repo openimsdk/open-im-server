@@ -11,6 +11,7 @@ serviceBinaries:
   openim-rpc-friend: 1
   openim-rpc-msg: 1
   openim-rpc-third: 1
+  openim-rpc-encryption: 1
 toolBinaries:
   - check-free-memory
   - check-component
