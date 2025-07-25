@@ -334,6 +334,24 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 		}
 	}
 
+	checkFunc := func(oldClients []*Client) []*Client {
+		var clientsToKick []*Client
+
+		for _, c := range oldClients {
+			if c.token == newClient.token {
+				log.ZDebug(newClient.ctx, "token is same, not kick",
+					"userID", newClient.UserID,
+					"platformID", newClient.PlatformID,
+					"token", newClient.token)
+				continue
+			}
+
+			clientsToKick = append(clientsToKick, c)
+		}
+
+		return clientsToKick
+	}
+
 	switch ws.msgGatewayConfig.Share.MultiLogin.Policy {
 	case constant.DefalutNotKick:
 	case constant.PCAndOther:
@@ -349,11 +367,14 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			}
 			oldClients = append(oldClients, c)
 		}
+		oldClients = checkFunc(oldClients)
 		fallthrough
 	case constant.AllLoginButSameTermKick:
 		if !clientOK {
 			return
 		}
+		oldClients = checkFunc(oldClients)
+
 		ws.clients.DeleteClients(newClient.UserID, oldClients)
 		for _, c := range oldClients {
 			err := c.KickOnlineMessage()
@@ -384,9 +405,13 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 		)
 		for _, client := range clients {
 			if constant.PlatformIDToClass(client.PlatformID) == constant.PlatformIDToClass(newClient.PlatformID) {
-				kickClients = append(kickClients, client)
+				{
+					kickClients = append(kickClients, client)
+				}
 			}
 		}
+		kickClients = checkFunc(kickClients)
+
 		kickTokenFunc(kickClients)
 	}
 }
