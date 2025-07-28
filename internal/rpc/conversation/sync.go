@@ -4,12 +4,16 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/util/hashutil"
 	"github.com/openimsdk/protocol/conversation"
 )
 
 func (c *conversationServer) GetFullOwnerConversationIDs(ctx context.Context, req *conversation.GetFullOwnerConversationIDsReq) (*conversation.GetFullOwnerConversationIDsResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	vl, err := c.conversationDatabase.FindMaxConversationUserVersionCache(ctx, req.UserID)
 	if err != nil {
 		return nil, err
@@ -31,6 +35,9 @@ func (c *conversationServer) GetFullOwnerConversationIDs(ctx context.Context, re
 }
 
 func (c *conversationServer) GetIncrementalConversation(ctx context.Context, req *conversation.GetIncrementalConversationReq) (*conversation.GetIncrementalConversationResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	opt := incrversion.Option[*conversation.Conversation, conversation.GetIncrementalConversationResp]{
 		Ctx:             ctx,
 		VersionKey:      req.UserID,

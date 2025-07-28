@@ -12,11 +12,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/openimsdk/open-im-server?style=for-the-badge)](https://goreportcard.com/report/github.com/openimsdk/open-im-server)
 [![Go Reference](https://img.shields.io/badge/Go%20Reference-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/openimsdk/open-im-server/v3)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)
-[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
 [![Best Practices](https://img.shields.io/badge/Best%20Practices-purple?style=for-the-badge)](https://www.bestpractices.dev/projects/8045)
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
-
 
 <p align="center">
   <a href="../../README.md">English</a> · 
@@ -46,7 +45,6 @@
   <a href="./README_tr.md">Türkçe</a>
 </p>
 
-
 </div>
 
 </p>
@@ -61,14 +59,14 @@ OpenIM là một nền tảng dịch vụ được thiết kế đặc biệt ch
 
 **OpenIMSDK** là một SDK IM được thiết kế cho **OpenIMServer**, được tạo ra đặc biệt để nhúng vào các ứng dụng khách. Các tính năng chính và các mô-đun của nó như sau:
 
-+ 🌟 Các Tính Năng Chính:
+- 🌟 Các Tính Năng Chính:
 
   - 📦 Lưu trữ cục bộ
   - 🔔 Gọi lại sự kiện (Listener callbacks)
   - 🛡️ Bọc API
   - 🌐 Quản lý kết nối
 
-+ 📚 Các Mô-đun Chính:
+- 📚 Các Mô-đun Chính:
 
   1. 🚀 Khởi tạo và Đăng nhập
   2. 👤 Quản lý Người dùng
@@ -82,24 +80,23 @@ Nó được xây dựng bằng Golang và hỗ trợ triển khai đa nền t�
 
 ## 🌐 Về OpenIMServer
 
-+ **OpenIMServer** có những đặc điểm sau:
+- **OpenIMServer** có những đặc điểm sau:
   - 🌐 Kiến trúc vi dịch vụ: Hỗ trợ chế độ cluster, bao gồm một gateway và nhiều dịch vụ rpc.
   - 🚀 Phương pháp triển khai đa dạng: Hỗ trợ triển khai qua mã nguồn, Kubernetes hoặc Docker.
   - Hỗ trợ cho cơ sở người dùng lớn: Nhóm siêu lớn với hàng trăm nghìn người dùng, hàng chục triệu người dùng và hàng tỷ tin nhắn.
 
 ### Tăng cường Chức năng Kinh doanh:
 
-+ **REST API**: OpenIMServer cung cấp REST APIs cho các hệ thống kinh doanh, nhằm tăng cường khả năng cho doanh nghiệp với nhiều chức năng hơn, như tạo nhóm và gửi tin nhắn đẩy qua giao diện backend.
-+ **Webhooks**: OpenIMServer cung cấp khả năng gọi lại để mở rộng thêm hình thức kinh doanh. Một gọi lại có nghĩa là OpenIMServer gửi một yêu cầu đến máy chủ kinh doanh trước hoặc sau một sự kiện nhất định, giống như gọi lại trước hoặc sau khi gửi một tin nhắn.
+- **REST API**: OpenIMServer cung cấp REST APIs cho các hệ thống kinh doanh, nhằm tăng cường khả năng cho doanh nghiệp với nhiều chức năng hơn, như tạo nhóm và gửi tin nhắn đẩy qua giao diện backend.
+- **Webhooks**: OpenIMServer cung cấp khả năng gọi lại để mở rộng thêm hình thức kinh doanh. Một gọi lại có nghĩa là OpenIMServer gửi một yêu cầu đến máy chủ kinh doanh trước hoặc sau một sự kiện nhất định, giống như gọi lại trước hoặc sau khi gửi một tin nhắn.
 
 👉 **[Learn more](https://docs.openim.io/guides/introduction/product)**
 
 ## :building_construction: Kiến trúc tổng thể
 
- Làm sâu sắc vào trái tim của chức năng Open-IM-Server với sơ đồ kiến trúc của chúng tôi.
+Làm sâu sắc vào trái tim của chức năng Open-IM-Server với sơ đồ kiến trúc của chúng tôi.
 
 ![Overall Architecture](../../docs/images/architecture-layers.png)
-
 
 ## :rocket: Bắt đầu nhanh
 
@@ -109,12 +106,12 @@ Chúng tôi hỗ trợ nhiều nền tảng. Dưới đây là các địa chỉ
 
 🤲 Để tạo thuận lợi cho trải nghiệm người dùng, chúng tôi cung cấp các giải pháp triển khai đa dạng. Bạn có thể chọn phương thức triển khai từ danh sách dưới đây:
 
-+ **[Hướng dẫn Triển khai Mã Nguồn](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Hướng dẫn Triển khai Docker](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[Hướng dẫn Triển khai Kubernetes](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
-+ **[Hướng dẫn Triển khai cho Nhà Phát Triển Mac](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
+- **[Hướng dẫn Triển khai Mã Nguồn](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
+- **[Hướng dẫn Triển khai Docker](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
+- **[Hướng dẫn Triển khai Kubernetes](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
+- **[Hướng dẫn Triển khai cho Nhà Phát Triển Mac](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
 
-## :hammer_and_wrench:  Để Bắt Đầu Phát Triển OpenIM
+## :hammer_and_wrench: Để Bắt Đầu Phát Triển OpenIM
 
 [![Mở trong Dev Contain](https://img.shields.io/static/v1?label=Dev%20Container&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/github/openimsdk/open-im-server)
 
@@ -122,8 +119,7 @@ Mục tiêu của OpenIM là xây dựng một cộng đồng mã nguồn mở c
 
 Nếu bạn muốn đóng góp cho kho lưu trữ Open-IM-Server này, vui lòng đọc [tài liệu hướng dẫn cho người đóng góp](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md).
 
-
-Trước khi bạn bắt đầu, hãy chắc chắn rằng các thay đổi của bạn được yêu cầu. Cách tốt nhất là tạo một [cuộc thảo luận mới](https://github.com/openimsdk/open-im-server/discussions/new/choose) hoặc [Giao tiếp Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q), hoặc nếu bạn tìm thấy một vấn đề, [báo cáo nó ](https://github.com/openimsdk/open-im-server/issues/new/choose) trước.
+Trước khi bạn bắt đầu, hãy chắc chắn rằng các thay đổi của bạn được yêu cầu. Cách tốt nhất là tạo một [cuộc thảo luận mới](https://github.com/openimsdk/open-im-server/discussions/new/choose) hoặc [Giao tiếp Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A), hoặc nếu bạn tìm thấy một vấn đề, [báo cáo nó ](https://github.com/openimsdk/open-im-server/issues/new/choose) trước.
 
 - [Tham khảo API OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/api.md)
 - [Nhật ký Bash OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/bash-log.md)
@@ -155,19 +151,18 @@ Trước khi bạn bắt đầu, hãy chắc chắn rằng các thay đổi củ
 - [Quản lý triển khai và giám sát backend](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
 - [Hướng dẫn Triển khai cho Nhà Phát triển Mac OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
 
-
 ## :busts_in_silhouette: Cộng đồng
 
-+ 📚 [Cộng đồng OpenIM](https://github.com/OpenIMSDK/community)
-+ 💕 [Nhóm Quan tâm OpenIM](https://github.com/Openim-sigs)
-+ 🚀 [Tham gia cộng đồng Slack của chúng tôi](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [Tham gia nhóm WeChat của chúng tôi (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
+- 📚 [Cộng đồng OpenIM](https://github.com/OpenIMSDK/community)
+- 💕 [Nhóm Quan tâm OpenIM](https://github.com/Openim-sigs)
+- 🚀 [Tham gia cộng đồng Slack của chúng tôi](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
+- :eyes: [Tham gia nhóm WeChat của chúng tôi (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: Cuộc họp Cộng đồng
 
 Chúng tôi muốn bất kỳ ai cũng có thể tham gia cộng đồng và đóng góp mã nguồn, chúng tôi cung cấp quà tặng và phần thưởng, và chúng tôi chào đón bạn tham gia cùng chúng tôi mỗi tối thứ Năm.
 
-Hội nghị của chúng tôi được tổ chức trên Slack của [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) 🎯, sau đó bạn có thể tìm kiếm pipeline Open-IM-Server để tham gia
+Hội nghị của chúng tôi được tổ chức trên Slack của [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A) 🎯, sau đó bạn có thể tìm kiếm pipeline Open-IM-Server để tham gia
 
 Chúng tôi ghi chú mỗi [cuộc họp hai tuần một lần](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) trong [các cuộc thảo luận GitHub](https://github.com/openimsdk/open-im-server/discussions/categories/meeting), ghi chú cuộc họp lịch sử của chúng tôi cũng như các bản ghi lại của cuộc họp có sẵn tại [Google Docs :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing).
 

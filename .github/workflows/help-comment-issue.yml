@@ -32,5 +32,5 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
           body: |
             This issue is available for anyone to work on. **Make sure to reference this issue in your pull request.** :sparkles: Thank you for your contribution! :sparkles:
-            [Join slack 🤖](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) to connect and communicate with our developers.
+            [Join slack 🤖](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A) to connect and communicate with our developers.
             If you wish to accept this assignment, please leave a comment in the comments section: `/accept`.🎯

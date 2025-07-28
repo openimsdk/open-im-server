@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
@@ -49,7 +50,7 @@ func (p pushServer) DelUserPushToken(ctx context.Context,
 	return &pbpush.DelUserPushTokenResp{}, nil
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	dbb := dbbuild.NewBuilder(&config.MongoConfig, &config.RedisConfig)
 	rdb, err := dbb.Redis(ctx)
 	if err != nil {
@@ -106,7 +107,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	go func() {
 		pushHandler.WaitCache()
 		fn := func(ctx context.Context, key string, value []byte) error {
-			pushHandler.HandleMs2PsChat(ctx, value)
+			pushHandler.HandleMs2PsChat(authverify.WithTempAdmin(ctx), value)
 			return nil
 		}
 		consumerCtx := mcontext.SetOperationID(context.Background(), "push_"+strconv.Itoa(int(rand.Uint32())))

@@ -18,6 +18,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/tools/errs"
 )
@@ -25,6 +26,9 @@ import (
 func (g *groupServer) GroupCreateCount(ctx context.Context, req *group.GroupCreateCountReq) (*group.GroupCreateCountResp, error) {
 	if req.Start > req.End {
 		return nil, errs.ErrArgs.WrapMsg("start > end: %d > %d", req.Start, req.End)
+	}
+	if err := authverify.CheckAdmin(ctx); err != nil {
+		return nil, err
 	}
 	total, err := g.db.CountTotal(ctx, nil)
 	if err != nil {

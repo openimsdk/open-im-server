@@ -165,3 +165,7 @@ func (o *GroupApi) GetFullGroupMemberUserIDs(c *gin.Context) {
 func (o *GroupApi) GetFullJoinGroupIDs(c *gin.Context) {
 	a2r.Call(c, group.GroupClient.GetFullJoinGroupIDs, o.Client)
 }
+
+func (o *GroupApi) GetGroupApplicationUnhandledCount(c *gin.Context) {
+	a2r.Call(c, group.GroupClient.GetGroupApplicationUnhandledCount, o.Client)
+}

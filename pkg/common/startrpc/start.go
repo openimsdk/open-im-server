@@ -21,6 +21,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"reflect"
 	"strconv"
 	"syscall"
 	"time"
@@ -36,7 +37,8 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/openimsdk/tools/mw"
+	grpccli "github.com/openimsdk/tools/mw/grpc/client"
+	grpcsrv "github.com/openimsdk/tools/mw/grpc/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -48,14 +50,39 @@ func init() {
 func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *conf.Prometheus, listenIP,
 	registerIP string, autoSetPorts bool, rpcPorts []int, index int, rpcRegisterName string, notification *conf.Notification, config T,
 	watchConfigNames []string, watchServiceNames []string,
-	rpcFn func(ctx context.Context, config T, client discovery.Conn, server grpc.ServiceRegistrar) error,
+	rpcFn func(ctx context.Context, config T, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error,
 	options ...grpc.ServerOption) error {
 
 	if notification != nil {
 		conf.InitNotification(notification)
 	}
 
-	options = append(options, mw.GrpcServer())
+	maxRequestBody := getConfigRpcMaxRequestBody(reflect.ValueOf(config))
+	shareConfig := getConfigShare(reflect.ValueOf(config))
+
+	log.ZDebug(ctx, "rpc start", "rpcMaxRequestBody", maxRequestBody, "rpcRegisterName", rpcRegisterName, "registerIP", registerIP, "listenIP", listenIP)
+
+	options = append(options,
+		grpcsrv.GrpcServerMetadataContext(),
+		grpcsrv.GrpcServerErrorConvert(),
+		grpcsrv.GrpcServerLogger(),
+		grpcsrv.GrpcServerRequestValidate(),
+		grpcsrv.GrpcServerPanicCapture(),
+	)
+	if shareConfig != nil && len(shareConfig.IMAdminUser.UserIDs) > 0 {
+		options = append(options, grpcServerIMAdminUserID(shareConfig.IMAdminUser.UserIDs))
+	}
+	var clientOptions []grpc.DialOption
+	if maxRequestBody != nil {
+		if maxRequestBody.RequestMaxBodySize > 0 {
+			options = append(options, grpc.MaxRecvMsgSize(maxRequestBody.RequestMaxBodySize))
+			clientOptions = append(clientOptions, grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(maxRequestBody.RequestMaxBodySize)))
+		}
+		if maxRequestBody.ResponseMaxBodySize > 0 {
+			options = append(options, grpc.MaxSendMsgSize(maxRequestBody.ResponseMaxBodySize))
+			clientOptions = append(clientOptions, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxRequestBody.ResponseMaxBodySize)))
+		}
+	}
 
 	registerIP, err := network.GetRpcRegisterIP(registerIP)
 	if err != nil {
@@ -81,9 +108,16 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 
 	defer client.Close()
 	client.AddOption(
-		mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, "round_robin")),
+
+		grpccli.GrpcClientLogger(),
+		grpccli.GrpcClientContext(),
+		grpccli.GrpcClientErrorConvert(),
 	)
+	if len(clientOptions) > 0 {
+		client.AddOption(clientOptions...)
+	}
 
 	ctx, cancel := context.WithCancelCause(ctx)
 
@@ -114,9 +148,11 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 		if err != nil {
 			return err
 		}
-		if err := client.SetKey(ctx, prommetrics.BuildDiscoveryKey(prommetrics.APIKeyName), target); err != nil {
-			if !errors.Is(err, discovery.ErrNotSupportedKeyValue) {
-				return err
+		if autoSetPorts {
+			if err = client.SetWithLease(ctx, prommetrics.BuildDiscoveryKey(rpcRegisterName, index), target, prommetrics.TTL); err != nil {
+				if !errors.Is(err, discovery.ErrNotSupported) {
+					return err
+				}
 			}
 		}
 		go func() {

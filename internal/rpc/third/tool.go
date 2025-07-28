@@ -54,7 +54,7 @@ func (t *thirdServer) checkUploadName(ctx context.Context, name string) error {
 	if opUserID == "" {
 		return errs.ErrNoPermission.WrapMsg("opUserID is empty")
 	}
-	if !authverify.IsManagerUserID(opUserID, t.config.Share.IMAdminUserID) {
+	if !authverify.CheckUserIsAdmin(ctx, opUserID) {
 		if !strings.HasPrefix(name, opUserID+"/") {
 			return errs.ErrNoPermission.WrapMsg(fmt.Sprintf("name must start with `%s/`", opUserID))
 		}
@@ -77,10 +77,6 @@ func checkValidObjectName(objectName string) error {
 		return errs.New("object name cannot be empty")
 	}
 	return checkValidObjectNamePrefix(objectName)
-}
-
-func (t *thirdServer) IsManagerUserID(opUserID string) bool {
-	return authverify.IsManagerUserID(opUserID, t.config.Share.IMAdminUserID)
 }
 
 func putUpdate[T any](update map[string]any, name string, val interface{ GetValuePtr() *T }) {

@@ -7,16 +7,16 @@ beforeSendSingleMsg:
   # If not set, all contentType messages will through this filter.
   deniedTypes: []
 beforeUpdateUserInfoEx:
-  enable:  false
+  enable: false
   timeout: 5
   failedContinue: true
 afterUpdateUserInfoEx:
-  enable:  false
+  enable: false
   timeout: 5
 afterSendSingleMsg:
   enable: false
   timeout: 5
-  # Only the recvID specified in attentionIds will send the callback
+  # Only the recvIDs specified in attentionIds will send the callback
   # if not set, all user messages will be callback
   attentionIds: []
   # See beforeSendSingleMsg comment.
@@ -36,7 +36,7 @@ beforeMsgModify:
 afterSendGroupMsg:
   enable: false
   timeout: 5
-  # Only the recvID specified in attentionIds will send the callback
+  # Only the GroupIDs specified in attentionIds will send the callback
   # if not set, all user messages will be callback
   attentionIds: []
   # See beforeSendSingleMsg comment.
@@ -181,3 +181,19 @@ afterImportFriends:
 afterRemoveBlack:
   enable: false
   timeout: 5
+beforeCreateSingleChatConversations:
+  enable: false
+  timeout: 5
+  failedContinue: false
+afterCreateSingleChatConversations:
+  enable: false
+  timeout: 5
+  failedContinue: false
+beforeCreateGroupChatConversations:
+  enable: false
+  timeout: 5
+  failedContinue: false
+afterCreateGroupChatConversations:
+  enable: false
+  timeout: 5
+  failedContinue: false

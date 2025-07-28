@@ -15,6 +15,7 @@ import (
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/runtimeenv"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -43,7 +44,7 @@ func NewConfigManager(IMAdminUserID []string, cfg *config.AllConfig, client *cli
 }
 
 func (cm *ConfigManager) CheckAdmin(c *gin.Context) {
-	if err := authverify.CheckAdmin(c, cm.imAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(c); err != nil {
 		apiresp.GinError(c, err)
 		c.Abort()
 	}
@@ -142,6 +143,110 @@ func (cm *ConfigManager) SetConfig(c *gin.Context) {
 		return
 	}
 	apiresp.GinSuccess(c, nil)
+}
+
+func (cm *ConfigManager) SetConfigs(c *gin.Context) {
+	if cm.config.Discovery.Enable != config.ETCD {
+		apiresp.GinError(c, errs.New("only etcd support set config").Wrap())
+		return
+	}
+	var req apistruct.SetConfigsReq
+	if err := c.BindJSON(&req); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	var (
+		err error
+		ops []*clientv3.Op
+	)
+
+	for _, cf := range req.Configs {
+		var op *clientv3.Op
+		switch cf.ConfigName {
+		case cm.config.Discovery.GetConfigFileName():
+			op, err = compareAndOp[config.Discovery](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Kafka.GetConfigFileName():
+			op, err = compareAndOp[config.Kafka](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.LocalCache.GetConfigFileName():
+			op, err = compareAndOp[config.LocalCache](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Log.GetConfigFileName():
+			op, err = compareAndOp[config.Log](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Minio.GetConfigFileName():
+			op, err = compareAndOp[config.Minio](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Mongo.GetConfigFileName():
+			op, err = compareAndOp[config.Mongo](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Notification.GetConfigFileName():
+			op, err = compareAndOp[config.Notification](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.API.GetConfigFileName():
+			op, err = compareAndOp[config.API](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.CronTask.GetConfigFileName():
+			op, err = compareAndOp[config.CronTask](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.MsgGateway.GetConfigFileName():
+			op, err = compareAndOp[config.MsgGateway](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.MsgTransfer.GetConfigFileName():
+			op, err = compareAndOp[config.MsgTransfer](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Push.GetConfigFileName():
+			op, err = compareAndOp[config.Push](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Auth.GetConfigFileName():
+			op, err = compareAndOp[config.Auth](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Conversation.GetConfigFileName():
+			op, err = compareAndOp[config.Conversation](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Friend.GetConfigFileName():
+			op, err = compareAndOp[config.Friend](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Group.GetConfigFileName():
+			op, err = compareAndOp[config.Group](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Msg.GetConfigFileName():
+			op, err = compareAndOp[config.Msg](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Third.GetConfigFileName():
+			op, err = compareAndOp[config.Third](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.User.GetConfigFileName():
+			op, err = compareAndOp[config.User](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Redis.GetConfigFileName():
+			op, err = compareAndOp[config.Redis](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Share.GetConfigFileName():
+			op, err = compareAndOp[config.Share](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		case cm.config.Webhooks.GetConfigFileName():
+			op, err = compareAndOp[config.Webhooks](c, cm.config.Name2Config(cf.ConfigName), &cf, cm)
+		default:
+			apiresp.GinError(c, errs.ErrArgs.Wrap())
+			return
+		}
+		if err != nil {
+			apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+			return
+		}
+		if op != nil {
+			ops = append(ops, op)
+		}
+	}
+	if len(ops) > 0 {
+		tx := cm.client.Txn(c)
+		if _, err = tx.Then(datautil.Batch(func(op *clientv3.Op) clientv3.Op { return *op }, ops)...).Commit(); err != nil {
+			apiresp.GinError(c, errs.WrapMsg(err, "save to etcd failed"))
+			return
+		}
+
+	}
+
+	apiresp.GinSuccess(c, nil)
+}
+
+func compareAndOp[T any](c *gin.Context, old any, req *apistruct.SetConfigReq, cm *ConfigManager) (*clientv3.Op, error) {
+	conf := new(T)
+	err := json.Unmarshal([]byte(req.Data), &conf)
+	if err != nil {
+		return nil, errs.ErrArgs.WithDetail(err.Error()).Wrap()
+	}
+	eq := reflect.DeepEqual(old, conf)
+	if eq {
+		return nil, nil
+	}
+	data, err := json.Marshal(conf)
+	if err != nil {
+		return nil, errs.ErrArgs.WithDetail(err.Error()).Wrap()
+	}
+	op := clientv3.OpPut(etcd.BuildKey(req.ConfigName), string(data))
+	return &op, nil
 }
 
 func compareAndSave[T any](c *gin.Context, old any, req *apistruct.SetConfigReq, cm *ConfigManager) error {

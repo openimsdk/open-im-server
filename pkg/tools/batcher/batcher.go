@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/idutil"
 )
@@ -253,13 +254,14 @@ func (b *Batcher[T]) distributeMessage(messages map[string][]*T, totalCount int,
 
 func (b *Batcher[T]) run(channelID int, ch <-chan *Msg[T]) {
 	defer b.wait.Done()
+	ctx := authverify.WithTempAdmin(context.Background())
 	for {
 		select {
 		case messages, ok := <-ch:
 			if !ok {
 				return
 			}
-			b.Do(context.Background(), channelID, messages)
+			b.Do(ctx, channelID, messages)
 			if b.config.syncWait {
 				b.counter.Done()
 			}

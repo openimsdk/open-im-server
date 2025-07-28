@@ -531,7 +531,7 @@ O:::::::OOO:::::::O p:::::ppppp:::::::pe::::::::e            n::::n    n::::nII:
     # Set text color to yellow for the Slack link
     echo -e "\033[1;33m"
 
-    print_with_delay "Join our developer community on Slack: https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q" 0.01
+    print_with_delay "Join our developer community on Slack: https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A" 0.01
 
     # Reset text color back to normal
     echo -e "\033[0m"
