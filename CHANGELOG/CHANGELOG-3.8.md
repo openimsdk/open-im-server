@@ -1,3 +1,26 @@
+## [v3.8.3-patch.6](https://github.com/openimsdk/open-im-server/releases/tag/v3.8.3-patch.6) 	(2025-07-23)
+
+### Bug Fixes
+* fix: Add friend DB in notification sender [#3438](https://github.com/openimsdk/open-im-server/pull/3438)
+* fix: remove update version file workflows have new line in 3.8.3-patch branch. [#3452](https://github.com/openimsdk/open-im-server/pull/3452)
+* fix: s3 aws init [#3454](https://github.com/openimsdk/open-im-server/pull/3454)
+* fix: use safe submodule init in workflows in v3.8.3-patch. [#3469](https://github.com/openimsdk/open-im-server/pull/3469)
+
+**Full Changelog**: [v3.8.3-patch.5...v3.8.3-patch.6](https://github.com/openimsdk/open-im-server/compare/v3.8.3-patch.5...v3.8.3-patch.6)
+
+## [v3.8.3-patch.5](https://github.com/openimsdk/open-im-server/releases/tag/v3.8.3-patch.5) 	(2025-06-10)
+
+### New Features
+* feat: optimize friend and group applications [#3396](https://github.com/openimsdk/open-im-server/pull/3396)
+
+### Bug Fixes
+* fix: solve unocrrect invite notification [Created [#3219](https://github.com/openimsdk/open-im-server/pull/3219)
+
+### Builds
+* build: update gomake version in dockerfile.[Patch branch] [#3416](https://github.com/openimsdk/open-im-server/pull/3416)
+
+**Full Changelog**: [v3.8.3...v3.8.3-patch.5](https://github.com/openimsdk/open-im-server/compare/v3.8.3...v3.8.3-patch.5)
+
 ## [v3.8.3-patch.4](https://github.com/openimsdk/open-im-server/releases/tag/v3.8.3-patch.4) 	(2025-03-13)
 
 ### Bug Fixes
