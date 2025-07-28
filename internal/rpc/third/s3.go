@@ -62,7 +62,7 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 		return nil, err
 	}
 	expireTime := time.Now().Add(t.defaultExpire)
-	result, err := t.s3dataBase.InitiateMultipartUpload(ctx, req.Hash, req.Size, t.defaultExpire, int(req.MaxParts))
+	result, err := t.s3dataBase.InitiateMultipartUpload(ctx, req.Hash, req.Size, t.defaultExpire, int(req.MaxParts), req.ContentType)
 	if err != nil {
 		if haErr, ok := errs.Unwrap(err).(*cont.HashAlreadyExistsError); ok {
 			obj := &model.Object{
@@ -198,7 +198,7 @@ func (t *thirdServer) InitiateFormData(ctx context.Context, req *third.InitiateF
 	var duration time.Duration
 	opUserID := mcontext.GetOpUserID(ctx)
 	var key string
-	if t.IsManagerUserID(opUserID) {
+	if authverify.CheckUserIsAdmin(ctx, opUserID) {
 		if req.Millisecond <= 0 {
 			duration = time.Minute * 10
 		} else {
@@ -289,7 +289,7 @@ func (t *thirdServer) apiAddress(prefix, name string) string {
 }
 
 func (t *thirdServer) DeleteOutdatedData(ctx context.Context, req *third.DeleteOutdatedDataReq) (*third.DeleteOutdatedDataResp, error) {
-	if err := authverify.CheckAdmin(ctx, t.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	engine := t.config.RpcConfig.Object.Enable

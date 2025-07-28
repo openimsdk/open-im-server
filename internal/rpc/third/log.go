@@ -25,6 +25,7 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
 )
 
@@ -45,7 +46,7 @@ func genLogID() string {
 
 func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) (*third.UploadLogsResp, error) {
 	var dbLogs []*relationtb.Log
-	userID := ctx.Value(constant.OpUserID).(string)
+	userID := mcontext.GetOpUserID(ctx)
 	platform := constant.PlatformID2Name[int(req.Platform)]
 	for _, fileURL := range req.FileURLs {
 		log := relationtb.Log{
@@ -82,7 +83,7 @@ func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) 
 }
 
 func (t *thirdServer) DeleteLogs(ctx context.Context, req *third.DeleteLogsReq) (*third.DeleteLogsResp, error) {
-	if err := authverify.CheckAdmin(ctx, t.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	userID := ""
@@ -123,7 +124,7 @@ func dbToPbLogInfos(logs []*relationtb.Log) []*third.LogInfo {
 }
 
 func (t *thirdServer) SearchLogs(ctx context.Context, req *third.SearchLogsReq) (*third.SearchLogsResp, error) {
-	if err := authverify.CheckAdmin(ctx, t.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	var (

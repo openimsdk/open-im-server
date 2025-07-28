@@ -12,11 +12,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/openimsdk/open-im-server?style=for-the-badge)](https://goreportcard.com/report/github.com/openimsdk/open-im-server)
 [![Go Reference](https://img.shields.io/badge/Go%20Reference-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/openimsdk/open-im-server/v3)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)
-[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
 [![Best Practices](https://img.shields.io/badge/Best%20Practices-purple?style=for-the-badge)](https://www.bestpractices.dev/projects/8045)
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
-
 
 <p align="center">
   <a href="../../README.md">English</a> · 
@@ -46,7 +45,6 @@
   <a href="./README_tr.md">Türkçe</a>
 </p>
 
-
 </div>
 
 </p>
@@ -61,14 +59,14 @@ Az OpenIM egy szolgáltatási platform, amelyet kifejezetten a csevegés, az aud
 
 Az **OpenIMSDK** egy **OpenIMServer** számára készült azonnali üzenetküldő SDK, amelyet kifejezetten ügyfélalkalmazásokba való beágyazáshoz hoztak létre. Fő jellemzői és moduljai a következők:
 
-+ 🌟 Főbb jellemzők:
+- 🌟 Főbb jellemzők:
 
   - 📦 Helyi raktár
   - 🔔 Hallgatói visszahívások
   - 🛡️ API-csomagolás
   - 🌐 Kapcsolatkezelés
 
-+ 📚 Fő modulok:
+- 📚 Fő modulok:
 
   1. 🚀 Inicializálás és bejelentkezés
   2. 👤 Felhasználókezelés
@@ -82,15 +80,15 @@ Golang használatával készült, és támogatja a többplatformos telepítést,
 
 ## 🌐 Az OpenIMServerről
 
-+ **OpenIMServer** a következő jellemzőkkel rendelkezik:
+- **OpenIMServer** a következő jellemzőkkel rendelkezik:
   - 🌐 Mikroszolgáltatási architektúra: Támogatja a fürt módot, beleértve az átjárót és több rpc szolgáltatást.
   - 🚀 Változatos telepítési módszerek: Támogatja a forráskódon, Kubernetesen vagy Dockeren keresztül történő telepítést.
   - Hatalmas felhasználói bázis támogatása: Szuper nagy csoportok több százezer felhasználóval, több tízmillió felhasználóval és több milliárd üzenettel.
 
 ### Továbbfejlesztett üzleti funkcionalitás:
 
-+ **REST API**: Az OpenIMServer REST API-kat kínál az üzleti rendszerek számára, amelyek célja, hogy a vállalkozásokat több funkcióval ruházza fel, mint például csoportok létrehozása és push üzenetek küldése háttérfelületeken keresztül.
-+ **Webhooks**: Az OpenIMServer visszahívási lehetőségeket biztosít több üzleti forma kiterjesztéséhez. A visszahívás azt jelenti, hogy az OpenIMServer kérelmet küld az üzleti szervernek egy bizonyos esemény előtt vagy után, például visszahívásokat üzenet küldése előtt vagy után.
+- **REST API**: Az OpenIMServer REST API-kat kínál az üzleti rendszerek számára, amelyek célja, hogy a vállalkozásokat több funkcióval ruházza fel, mint például csoportok létrehozása és push üzenetek küldése háttérfelületeken keresztül.
+- **Webhooks**: Az OpenIMServer visszahívási lehetőségeket biztosít több üzleti forma kiterjesztéséhez. A visszahívás azt jelenti, hogy az OpenIMServer kérelmet küld az üzleti szervernek egy bizonyos esemény előtt vagy után, például visszahívásokat üzenet küldése előtt vagy után.
 
 👉 **[Tudj meg többet](https://docs.openim.io/guides/introduction/product)**
 
@@ -100,7 +98,6 @@ Merüljön el az Open-IM-Server funkcióinak szívében az architektúra diagram
 
 ![Overall Architecture](../images/architecture-layers.png)
 
-
 ## :rocket: Gyors indítás
 
 Számos platformot támogatunk. Íme a címek a gyors weboldali használathoz:
@@ -109,10 +106,10 @@ Számos platformot támogatunk. Íme a címek a gyors weboldali használathoz:
 
 🤲 A felhasználói élmény megkönnyítése érdekében különféle telepítési megoldásokat kínálunk. Az alábbi listából választhatja ki a telepítési módot:
 
-+ **[Forráskód-telepítési útmutató](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Docker telepítési útmutató](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[Kubernetes telepítési útmutató](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
-+ **[Mac fejlesztői telepítési útmutató](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
+- **[Forráskód-telepítési útmutató](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
+- **[Docker telepítési útmutató](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
+- **[Kubernetes telepítési útmutató](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
+- **[Mac fejlesztői telepítési útmutató](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
 
 ## :hammer_and_wrench: Az OpenIM fejlesztésének megkezdéséhez
 
@@ -122,7 +119,7 @@ OpenIM Célunk egy felső szintű nyílt forráskódú közösség felépítése
 
 Ha hozzá szeretne járulni ehhez az Open-IM-Server adattárhoz, kérjük, olvassa el [közreműködői dokumentációnkat](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md).
 
-Mielőtt elkezdené, győződjön meg arról, hogy a változtatásokra van-e igény. Erre a legjobb egy [új beszélgetés](https://github.com/openimsdk/open-im-server/discussions/new/choose) VAGY [Slack Communication](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)létrehozása, vagy ha problémát talál, először [jelentse](https://github.com/openimsdk/open-im-server/issues/new/choose) first.
+Mielőtt elkezdené, győződjön meg arról, hogy a változtatásokra van-e igény. Erre a legjobb egy [új beszélgetés](https://github.com/openimsdk/open-im-server/discussions/new/choose) VAGY [Slack Communication](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)létrehozása, vagy ha problémát talál, először [jelentse](https://github.com/openimsdk/open-im-server/issues/new/choose) first.
 
 - [OpenIM API referencia](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/api.md)
 - [OpenIM Bash naplózás](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/bash-log.md)
@@ -154,19 +151,18 @@ Mielőtt elkezdené, győződjön meg arról, hogy a változtatásokra van-e ig�
 - [A háttérrendszer kezelése és a telepítés figyelése](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
 - [Mac Developer Deployment Guide for OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
 
-
 ## :busts_in_silhouette: Közösség
 
-+ 📚 [OpenIM közösség](https://github.com/OpenIMSDK/community)
-+ 💕 [OpenIM érdeklődési csoport](https://github.com/Openim-sigs)
-+ 🚀 [Csatlakozz a Slack közösségünkhöz](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [Csatlakozz a wechathez](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
+- 📚 [OpenIM közösség](https://github.com/OpenIMSDK/community)
+- 💕 [OpenIM érdeklődési csoport](https://github.com/Openim-sigs)
+- 🚀 [Csatlakozz a Slack közösségünkhöz](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
+- :eyes: [Csatlakozz a wechathez](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: Közösségi Találkozók
 
 Szeretnénk, ha bárki bekapcsolódna közösségünkbe és hozzájárulna kódunkhoz, ajándékokat és jutalmakat kínálunk, és szeretettel várjuk, hogy csatlakozzon hozzánk minden csütörtök este.
 
-Konferenciánk az [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) 🎯alatt van, akkor kereshet az Open-IM-Server folyamatban a csatlakozáshoz
+Konferenciánk az [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A) 🎯alatt van, akkor kereshet az Open-IM-Server folyamatban a csatlakozáshoz
 
 A [GitHub-beszélgetések](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting)minden [kéthetente történő megbeszélésről](https://github.com/openimsdk/open-im-server/discussions/categories/meeting) jegyzeteket készítünk. A találkozók történeti feljegyzései, valamint az értekezletek visszajátszásai a [Google Dokumentumok :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing) webhelyen érhetők el.
 

@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
@@ -27,6 +28,7 @@ import (
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
+	"github.com/openimsdk/tools/mw/api"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -52,7 +54,7 @@ func prommetricsGin() gin.HandlerFunc {
 	}
 }
 
-func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin.Engine, error) {
+func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cfg *Config) (*gin.Engine, error) {
 	authConn, err := client.GetConn(ctx, cfg.Discovery.RpcService.Auth)
 	if err != nil {
 		return nil, err
@@ -95,8 +97,8 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 	case BestSpeed:
 		r.Use(gzip.Gzip(gzip.BestSpeed))
 	}
-	r.Use(prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(),
-		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)))
+	r.Use(api.GinLogger(), prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(),
+		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)), setGinIsAdmin(cfg.Share.IMAdminUser.UserIDs))
 
 	u := NewUserApi(user.NewUserClient(userConn), client, cfg.Discovery.RpcService)
 	{
@@ -124,6 +126,11 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		userRouterGroup.POST("/add_notification_account", u.AddNotificationAccount)
 		userRouterGroup.POST("/update_notification_account", u.UpdateNotificationAccountInfo)
 		userRouterGroup.POST("/search_notification_account", u.SearchNotificationAccount)
+
+		userRouterGroup.POST("/get_user_client_config", u.GetUserClientConfig)
+		userRouterGroup.POST("/set_user_client_config", u.SetUserClientConfig)
+		userRouterGroup.POST("/del_user_client_config", u.DelUserClientConfig)
+		userRouterGroup.POST("/page_user_client_config", u.PageUserClientConfig)
 	}
 	// friend routing group
 	{
@@ -150,6 +157,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		friendRouterGroup.POST("/update_friends", f.UpdateFriends)
 		friendRouterGroup.POST("/get_incremental_friends", f.GetIncrementalFriends)
 		friendRouterGroup.POST("/get_full_friend_user_ids", f.GetFullFriendUserIDs)
+		friendRouterGroup.POST("/get_self_unhandled_apply_count", f.GetSelfUnhandledApplyCount)
 	}
 
 	g := NewGroupApi(group.NewGroupClient(groupConn))
@@ -186,6 +194,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		groupRouterGroup.POST("/get_incremental_group_members_batch", g.GetIncrementalGroupMemberBatch)
 		groupRouterGroup.POST("/get_full_group_member_user_ids", g.GetFullGroupMemberUserIDs)
 		groupRouterGroup.POST("/get_full_join_group_ids", g.GetFullJoinGroupIDs)
+		groupRouterGroup.POST("/get_group_application_unhandled_count", g.GetGroupApplicationUnhandledCount)
 	}
 	// certificate
 	{
@@ -223,7 +232,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		objectGroup.GET("/*name", t.ObjectRedirect)
 	}
 	// Message
-	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), cfg.Share.IMAdminUserID)
+	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), cfg.Share.IMAdminUser.UserIDs)
 	{
 		msgGroup := r.Group("/msg")
 		msgGroup.POST("/newest_seq", m.GetSeq)
@@ -244,10 +253,9 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		msgGroup.POST("/delete_msg_physical", m.DeleteMsgPhysical)
 
 		msgGroup.POST("/batch_send_msg", m.BatchSendMsg)
+		msgGroup.POST("/send_simple_msg", m.SendSimpleMessage)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 		msgGroup.POST("/get_server_time", m.GetServerTime)
-		msgGroup.POST("/get_stream_msg", m.GetStreamMsg)
-		msgGroup.POST("/append_stream_msg", m.AppendStreamMsg)
 	}
 	// Conversation
 	{
@@ -258,7 +266,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		conversationGroup.POST("/get_conversation", c.GetConversation)
 		conversationGroup.POST("/get_conversations", c.GetConversations)
 		conversationGroup.POST("/set_conversations", c.SetConversations)
-		conversationGroup.POST("/get_conversation_offline_push_user_ids", c.GetConversationOfflinePushUserIDs)
+		//conversationGroup.POST("/get_conversation_offline_push_user_ids", c.GetConversationOfflinePushUserIDs)
 		conversationGroup.POST("/get_full_conversation_ids", c.GetFullOwnerConversationIDs)
 		conversationGroup.POST("/get_incremental_conversations", c.GetIncrementalConversation)
 		conversationGroup.POST("/get_owner_conversation", c.GetOwnerConversation)
@@ -301,7 +309,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 	if cfg.Discovery.Enable == config.ETCD {
 		etcdClient = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 	}
-	cm := NewConfigManager(cfg.Share.IMAdminUserID, &cfg.AllConfig, etcdClient, string(cfg.ConfigPath))
+	cm := NewConfigManager(cfg.Share.IMAdminUser.UserIDs, &cfg.AllConfig, etcdClient, string(cfg.ConfigPath))
 	{
 		configGroup := r.Group("/config", cm.CheckAdmin)
 		configGroup.POST("/get_config_list", cm.GetConfigList)
@@ -345,6 +353,12 @@ func GinParseToken(authClient *rpcli.AuthClient) gin.HandlerFunc {
 			c.Set(constant.OpUserID, resp.UserID)
 			c.Next()
 		}
+	}
+}
+
+func setGinIsAdmin(imAdminUserID []string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set(authverify.CtxAdminUserIDsKey, imAdminUserID)
 	}
 }
 
