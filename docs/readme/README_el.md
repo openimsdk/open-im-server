@@ -12,11 +12,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/openimsdk/open-im-server?style=for-the-badge)](https://goreportcard.com/report/github.com/openimsdk/open-im-server)
 [![Go Reference](https://img.shields.io/badge/Go%20Reference-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/openimsdk/open-im-server/v3)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)
-[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
 [![Best Practices](https://img.shields.io/badge/Best%20Practices-purple?style=for-the-badge)](https://www.bestpractices.dev/projects/8045)
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
-
 
 <p align="center">
   <a href="../../README.md">English</a> · 
@@ -46,7 +45,6 @@
   <a href="./README_tr.md">Türkçe</a>
 </p>
 
-
 </div>
 
 </p>
@@ -61,14 +59,14 @@
 
 Το **OpenIMSDK** είναι ένα SDK για αμεση ανταλλαγή μηνυμάτων σχεδιασμένο για το **OpenIMServer**, δημιουργήθηκε ειδικά για ενσωμάτωση σε εφαρμογές πελατών. Οι κύριες δυνατότητες και μονάδες του είναι οι εξής:
 
-+ 🌟 Κύριες Δυνατότητες:
+- 🌟 Κύριες Δυνατότητες:
 
   - 📦 Τοπική αποθήκευση
   - 🔔 Callbacks ακροατών
   - 🛡️ Περιτύλιγμα API
   - 🌐 Διαχείριση σύνδεσης
 
-+ 📚 Κύριες Μονάδες:
+- 📚 Κύριες Μονάδες:
 
   1. 🚀 Αρχικοποίηση και Σύνδεση
   2. 👤 Διαχείριση Χρηστών
@@ -82,15 +80,15 @@
 
 ## 🌐 Σχετικά με το OpenIMServer
 
-+ Το **OpenIMServer** έχει τις ακόλουθες χαρακτηριστικές:
+- Το **OpenIMServer** έχει τις ακόλουθες χαρακτηριστικές:
   - 🌐 Αρχιτεκτονική μικροϋπηρεσιών: Υποστηρίζει λειτουργία σε σύμπλεγμα, περιλαμβάνοντας έναν πύλη και πολλαπλές υπηρεσίες rpc.
   - 🚀 Διάφοροι τρόποι ανάπτυξης: Υποστηρίζει ανάπτυξη μέσω πηγαίου κώδικα, Kubernetes, ή Docker.
   - Υποστήριξη για τεράστια βάση χρηστών: Πολύ μεγάλες ομάδες με εκατοντάδες χιλιάδες χρήστες, δεκάδες εκατομμύρια χρήστες και δισεκατομμύρια μηνύματα.
 
 ### Ενισχυμένη Επιχειρηματική Λειτουργικότητα:
 
-+ **REST API**: Το OpenIMServer προσφέρει REST APIs για επιχειρηματικά συστήματα, με στόχο την ενδυνάμωση των επιχειρήσεων με περισσότερες λειτουργικότητες, όπως η δημιουργία ομάδων και η αποστολή μηνυμάτων push μέσω backend διεπαφών.
-+ **Webhooks**: Το OpenIMServer παρέχει δυνατότητες επανάκλησης για την επέκταση περισσότερων επιχειρηματικών μορφών. Μια επανάκληση σημαίνει ότι το OpenIMServer στέλνει ένα αίτημα στον επιχειρηματικό διακομιστή πριν ή μετά από ένα συγκεκριμένο γεγονός, όπως επανακλήσεις πριν ή μετά την αποστολή ενός μηνύματος.
+- **REST API**: Το OpenIMServer προσφέρει REST APIs για επιχειρηματικά συστήματα, με στόχο την ενδυνάμωση των επιχειρήσεων με περισσότερες λειτουργικότητες, όπως η δημιουργία ομάδων και η αποστολή μηνυμάτων push μέσω backend διεπαφών.
+- **Webhooks**: Το OpenIMServer παρέχει δυνατότητες επανάκλησης για την επέκταση περισσότερων επιχειρηματικών μορφών. Μια επανάκληση σημαίνει ότι το OpenIMServer στέλνει ένα αίτημα στον επιχειρηματικό διακομιστή πριν ή μετά από ένα συγκεκριμένο γεγονός, όπως επανακλήσεις πριν ή μετά την αποστολή ενός μηνύματος.
 
 👉 **[Μάθετε περισσότερα](https://docs.openim.io/guides/introduction/product)**
 
@@ -100,7 +98,6 @@
 
 ![Overall Architecture](../../docs/images/architecture-layers.png)
 
-
 ## :rocket: Γρήγορη Εκκίνηση
 
 Υποστηρίζουμε πολλές πλατφόρμες. Εδώ είναι οι διευθύνσεις για γρήγορη εμπειρία στην πλευρά του διαδικτύου:
@@ -109,10 +106,10 @@
 
 🤲 Για να διευκολύνουμε την εμπειρία του χρήστη, προσφέρουμε διάφορες λύσεις ανάπτυξης. Μπορείτε να επιλέξετε τη μέθοδο ανάπτυξης σας από την παρακάτω λίστα:
 
-+ **[Οδηγός Ανάπτυξης Κώδικα Πηγής](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[δηγός Ανάπτυξης μέσω Docker](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[Οδηγός Ανάπτυξης Kubernetes](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
-+ **[Οδηγός Ανάπτυξης για Αναπτυξιακούς στο Mac](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
+- **[Οδηγός Ανάπτυξης Κώδικα Πηγής](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
+- **[δηγός Ανάπτυξης μέσω Docker](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
+- **[Οδηγός Ανάπτυξης Kubernetes](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
+- **[Οδηγός Ανάπτυξης για Αναπτυξιακούς στο Mac](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
 
 ## :hammer_and_wrench: Για να Αρχίσετε την Ανάπτυξη του OpenIM
 
@@ -122,7 +119,7 @@ OpenIM Στόχος μας είναι να δημιουργήσουμε μια �
 
 Εάν θέλετε να συνεισφέρετε σε αυτό το αποθετήριο Open-IM-Server, παρακαλούμε διαβάστε την [τεκμηρίωση συνεισφέροντος](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md).
 
-Πριν ξεκινήσετε, παρακαλούμε βεβαιωθείτε ότι οι αλλαγές σας είναι ζητούμενες. Το καλύτερο για αυτό είναι να δημιουργήσετε ένα [νέα συζήτηση](https://github.com/openimsdk/open-im-server/discussions/new/choose) ή [Επικοινωνία Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q), ή αν βρείτε ένα ζήτημα, [αναφέρετέ το](https://github.com/openimsdk/open-im-server/issues/new/choose) πρώτα.
+Πριν ξεκινήσετε, παρακαλούμε βεβαιωθείτε ότι οι αλλαγές σας είναι ζητούμενες. Το καλύτερο για αυτό είναι να δημιουργήσετε ένα [νέα συζήτηση](https://github.com/openimsdk/open-im-server/discussions/new/choose) ή [Επικοινωνία Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A), ή αν βρείτε ένα ζήτημα, [αναφέρετέ το](https://github.com/openimsdk/open-im-server/issues/new/choose) πρώτα.
 
 - [Αναφορά API του OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/api.md)
 - [Καταγραφή Bash του OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/bash-log.md)
@@ -154,28 +151,28 @@ OpenIM Στόχος μας είναι να δημιουργήσουμε μια �
 - [Διαχείριση backend και παρακολούθηση ανάπτυξης](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
 - [Οδηγός Ανάπτυξης για Προγραμματιστές Mac του OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
 
-
 ## :busts_in_silhouette: Κοινότητα
 
-+ 📚 [Κοινότητα OpenIM](https://github.com/OpenIMSDK/community)
-+ 💕 [Ομάδα Ενδιαφέροντος OpenIM](https://github.com/Openim-sigs)
-+ 🚀 [Εγγραφείτε στην κοινότητα Slack μας](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [γγραφείτε στην ομάδα μας wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
+- 📚 [Κοινότητα OpenIM](https://github.com/OpenIMSDK/community)
+- 💕 [Ομάδα Ενδιαφέροντος OpenIM](https://github.com/Openim-sigs)
+- 🚀 [Εγγραφείτε στην κοινότητα Slack μας](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
+- :eyes: [γγραφείτε στην ομάδα μας wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: Συναντήσεις της κοινότητας
 
 Θέλουμε οποιονδήποτε να εμπλακεί στην κοινότητά μας και να συνεισφέρει κώδικα. Προσφέρουμε δώρα και ανταμοιβές και σας καλωσορίζουμε να μας ενταχθείτε κάθε Πέμπτη βράδυ.
 
-Η διάσκεψή μας είναι στο [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) 🎯, στη συνέχεια μπορείτε να αναζητήσετε τη διαδικασία Open-IM-Server για να συμμετάσχετε
+Η διάσκεψή μας είναι στο [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A) 🎯, στη συνέχεια μπορείτε να αναζητήσετε τη διαδικασία Open-IM-Server για να συμμετάσχετε
 
 Κάνουμε σημειώσεις για κάθε μια [Σημειώνουμε κάθε διμηνιαία συνάντηση](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) στις [συζητήσεις του GitHub](https://github.com/openimsdk/open-im-server/discussions/categories/meeting), Οι ιστορικές μας σημειώσεις συναντήσεων, καθώς και οι επαναλήψεις των συναντήσεων είναι διαθέσιμες στο[Έγγραφα της Google :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing).
 
 ## :eyes: Ποιοί Χρησιμοποιούν το OpenIM
 
 Ελέγξτε τη σελίδα με τις [μελέτες περίπτωσης χρήσης ](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) μας για μια λίστα των χρηστών του έργου. Μην διστάσετε να αφήσετε ένα[📝σχόλιο](https://github.com/openimsdk/open-im-server/issues/379) και να μοιραστείτε την περίπτωση χρήσης σας.
+
 ## :page_facing_up: Άδεια Χρήσης
 
-Το OpenIM διατίθεται υπό την άδεια Apache 2.0. Δείτε τη [ΑΔΕΙΑ ΧΡΗΣΗΣ](https://github.com/openimsdk/open-im-server/tree/main/LICENSE)  για το πλήρες κείμενο της άδειας.
+Το OpenIM διατίθεται υπό την άδεια Apache 2.0. Δείτε τη [ΑΔΕΙΑ ΧΡΗΣΗΣ](https://github.com/openimsdk/open-im-server/tree/main/LICENSE) για το πλήρες κείμενο της άδειας.
 
 Το λογότυπο του OpenIM, συμπεριλαμβανομένων των παραλλαγών και των κινούμενων εικόνων, που εμφανίζονται σε αυτό το αποθετήριο[OpenIM](https://github.com/openimsdk/open-im-server) υπό τις διευθύνσεις [assets/logo](../../assets/logo) και [assets/logo-gif](../../assets/logo-gif) προστατεύονται από τους νόμους περί πνευματικής ιδιοκτησίας.
 

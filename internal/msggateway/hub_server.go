@@ -249,6 +249,7 @@ func (s *Server) MultiTerminalLoginCheck(ctx context.Context, req *msggateway.Mu
 		tempUserCtx.SetOperationID(mcontext.GetOperationID(ctx))
 		client := &Client{}
 		client.ctx = tempUserCtx
+		client.token = req.Token
 		client.UserID = req.UserID
 		client.PlatformID = int(req.PlatformID)
 		i := &kickHandler{

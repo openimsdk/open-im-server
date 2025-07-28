@@ -671,12 +671,18 @@ func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbmsg.Searc
 func (db *commonMsgDatabase) FindOneByDocIDs(ctx context.Context, conversationIDs []string, seqs map[string]int64) (map[string]*sdkws.MsgData, error) {
 	totalMsgs := make(map[string]*sdkws.MsgData)
 	for _, conversationID := range conversationIDs {
-		seq := seqs[conversationID]
+		seq, ok := seqs[conversationID]
+		if !ok {
+			log.ZWarn(ctx, "seq not found for conversationID", errs.New("seq not found for conversation"), "conversationID", conversationID)
+			continue
+		}
 		docID := db.msgTable.GetDocID(conversationID, seq)
 		msgs, err := db.msgDocDatabase.FindOneByDocID(ctx, docID)
 		if err != nil {
-			return nil, err
+			log.ZWarn(ctx, "FindOneByDocID failed", err, "conversationID", conversationID, "docID", docID, "seq", seq)
+			continue
 		}
+
 		index := db.msgTable.GetMsgIndex(seq)
 		totalMsgs[conversationID] = convert.MsgDB2Pb(msgs.Msg[index].Msg)
 	}
