@@ -334,8 +334,11 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 		}
 	}
 
-	checkFunc := func(oldClients []*Client) []*Client {
-		var clientsToKick []*Client
+	// If reconnect: When multiple msgGateway instances are deployed, a client may disconnect from instance A and reconnect to instance B.
+	// During this process, instance A might still be executing, resulting in two clients with the same token existing simultaneously.
+	// This situation needs to be filtered to prevent duplicate clients.
+	checkSameTokenFunc := func(oldClients []*Client) []*Client {
+		var clientsNeedToKick []*Client
 
 		for _, c := range oldClients {
 			if c.token == newClient.token {
@@ -346,10 +349,10 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 				continue
 			}
 
-			clientsToKick = append(clientsToKick, c)
+			clientsNeedToKick = append(clientsNeedToKick, c)
 		}
 
-		return clientsToKick
+		return clientsNeedToKick
 	}
 
 	switch ws.msgGatewayConfig.Share.MultiLogin.Policy {
@@ -367,13 +370,14 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			}
 			oldClients = append(oldClients, c)
 		}
-		oldClients = checkFunc(oldClients)
+
 		fallthrough
 	case constant.AllLoginButSameTermKick:
 		if !clientOK {
 			return
 		}
-		oldClients = checkFunc(oldClients)
+
+		oldClients = checkSameTokenFunc(oldClients)
 
 		ws.clients.DeleteClients(newClient.UserID, oldClients)
 		for _, c := range oldClients {
@@ -382,6 +386,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 				log.ZWarn(c.ctx, "KickOnlineMessage", err)
 			}
 		}
+
 		ctx := mcontext.WithMustInfoCtx(
 			[]string{newClient.ctx.GetOperationID(), newClient.ctx.GetUserID(),
 				constant.PlatformIDToName(newClient.PlatformID), newClient.ctx.GetConnID()},
@@ -400,9 +405,8 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 		if !ok {
 			return
 		}
-		var (
-			kickClients []*Client
-		)
+
+		var kickClients []*Client
 		for _, client := range clients {
 			if constant.PlatformIDToClass(client.PlatformID) == constant.PlatformIDToClass(newClient.PlatformID) {
 				{
@@ -410,7 +414,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 				}
 			}
 		}
-		kickClients = checkFunc(kickClients)
+		kickClients = checkSameTokenFunc(kickClients)
 
 		kickTokenFunc(kickClients)
 	}
