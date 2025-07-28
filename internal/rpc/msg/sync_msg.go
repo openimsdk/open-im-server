@@ -29,6 +29,9 @@ import (
 )
 
 func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	resp := &sdkws.PullMessageBySeqsResp{}
 	resp.Msgs = make(map[string]*sdkws.PullMsgs)
 	resp.NotificationMsgs = make(map[string]*sdkws.PullMsgs)
@@ -118,7 +121,7 @@ func (m *msgServer) GetSeqMessage(ctx context.Context, req *msg.GetSeqMessageReq
 }
 
 func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, m.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	conversationIDs, err := m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)

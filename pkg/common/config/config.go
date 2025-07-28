@@ -323,14 +323,22 @@ type RPC struct {
 }
 
 type Redis struct {
-	Disable     bool     `yaml:"-"`
-	Address     []string `yaml:"address"`
-	Username    string   `yaml:"username"`
-	Password    string   `yaml:"password"`
-	ClusterMode bool     `yaml:"clusterMode"`
-	DB          int      `yaml:"storage"`
-	MaxRetry    int      `yaml:"maxRetry"`
-	PoolSize    int      `yaml:"poolSize"`
+	Disable      bool     `yaml:"-"`
+	Address      []string `yaml:"address"`
+	Username     string   `yaml:"username"`
+	Password     string   `yaml:"password"`
+	RedisMode    string   `yaml:"redisMode"`
+	DB           int      `yaml:"db"`
+	MaxRetry     int      `yaml:"maxRetry"`
+	PoolSize     int      `yaml:"poolSize"`
+	SentinelMode Sentinel `yaml:"sentinelMode"`
+}
+
+type Sentinel struct {
+	MasterName     string   `yaml:"masterName"`
+	SentinelAddrs  []string `yaml:"sentinelsAddrs"`
+	RouteByLatency bool     `yaml:"routeByLatency"`
+	RouteRandomly  bool     `yaml:"routeRandomly"`
 }
 
 type BeforeConfig struct {
@@ -348,9 +356,18 @@ type AfterConfig struct {
 }
 
 type Share struct {
-	Secret        string     `yaml:"secret"`
-	IMAdminUserID []string   `yaml:"imAdminUserID"`
-	MultiLogin    MultiLogin `yaml:"multiLogin"`
+	Secret      string `yaml:"secret"`
+	IMAdminUser struct {
+		UserIDs   []string `yaml:"userIDs"`
+		Nicknames []string `yaml:"nicknames"`
+	} `yaml:"imAdminUser"`
+	MultiLogin     MultiLogin     `yaml:"multiLogin"`
+	RPCMaxBodySize MaxRequestBody `yaml:"rpcMaxBodySize"`
+}
+
+type MaxRequestBody struct {
+	RequestMaxBodySize  int `yaml:"requestMaxBodySize"`
+	ResponseMaxBodySize int `yaml:"responseMaxBodySize"`
 }
 
 type MultiLogin struct {
@@ -386,55 +403,59 @@ func (r *RpcService) GetServiceNames() []string {
 
 // FullConfig stores all configurations for before and after events
 type Webhooks struct {
-	URL                      string       `yaml:"url"`
-	BeforeSendSingleMsg      BeforeConfig `yaml:"beforeSendSingleMsg"`
-	BeforeUpdateUserInfoEx   BeforeConfig `yaml:"beforeUpdateUserInfoEx"`
-	AfterUpdateUserInfoEx    AfterConfig  `yaml:"afterUpdateUserInfoEx"`
-	AfterSendSingleMsg       AfterConfig  `yaml:"afterSendSingleMsg"`
-	BeforeSendGroupMsg       BeforeConfig `yaml:"beforeSendGroupMsg"`
-	BeforeMsgModify          BeforeConfig `yaml:"beforeMsgModify"`
-	AfterSendGroupMsg        AfterConfig  `yaml:"afterSendGroupMsg"`
-	AfterUserOnline          AfterConfig  `yaml:"afterUserOnline"`
-	AfterUserOffline         AfterConfig  `yaml:"afterUserOffline"`
-	AfterUserKickOff         AfterConfig  `yaml:"afterUserKickOff"`
-	BeforeOfflinePush        BeforeConfig `yaml:"beforeOfflinePush"`
-	BeforeOnlinePush         BeforeConfig `yaml:"beforeOnlinePush"`
-	BeforeGroupOnlinePush    BeforeConfig `yaml:"beforeGroupOnlinePush"`
-	BeforeAddFriend          BeforeConfig `yaml:"beforeAddFriend"`
-	BeforeUpdateUserInfo     BeforeConfig `yaml:"beforeUpdateUserInfo"`
-	AfterUpdateUserInfo      AfterConfig  `yaml:"afterUpdateUserInfo"`
-	BeforeCreateGroup        BeforeConfig `yaml:"beforeCreateGroup"`
-	AfterCreateGroup         AfterConfig  `yaml:"afterCreateGroup"`
-	BeforeMemberJoinGroup    BeforeConfig `yaml:"beforeMemberJoinGroup"`
-	BeforeSetGroupMemberInfo BeforeConfig `yaml:"beforeSetGroupMemberInfo"`
-	AfterSetGroupMemberInfo  AfterConfig  `yaml:"afterSetGroupMemberInfo"`
-	AfterQuitGroup           AfterConfig  `yaml:"afterQuitGroup"`
-	AfterKickGroupMember     AfterConfig  `yaml:"afterKickGroupMember"`
-	AfterDismissGroup        AfterConfig  `yaml:"afterDismissGroup"`
-	BeforeApplyJoinGroup     BeforeConfig `yaml:"beforeApplyJoinGroup"`
-	AfterGroupMsgRead        AfterConfig  `yaml:"afterGroupMsgRead"`
-	AfterSingleMsgRead       AfterConfig  `yaml:"afterSingleMsgRead"`
-	BeforeUserRegister       BeforeConfig `yaml:"beforeUserRegister"`
-	AfterUserRegister        AfterConfig  `yaml:"afterUserRegister"`
-	AfterTransferGroupOwner  AfterConfig  `yaml:"afterTransferGroupOwner"`
-	BeforeSetFriendRemark    BeforeConfig `yaml:"beforeSetFriendRemark"`
-	AfterSetFriendRemark     AfterConfig  `yaml:"afterSetFriendRemark"`
-	AfterGroupMsgRevoke      AfterConfig  `yaml:"afterGroupMsgRevoke"`
-	AfterJoinGroup           AfterConfig  `yaml:"afterJoinGroup"`
-	BeforeInviteUserToGroup  BeforeConfig `yaml:"beforeInviteUserToGroup"`
-	AfterSetGroupInfo        AfterConfig  `yaml:"afterSetGroupInfo"`
-	BeforeSetGroupInfo       BeforeConfig `yaml:"beforeSetGroupInfo"`
-	AfterSetGroupInfoEx      AfterConfig  `yaml:"afterSetGroupInfoEx"`
-	BeforeSetGroupInfoEx     BeforeConfig `yaml:"beforeSetGroupInfoEx"`
-	AfterRevokeMsg           AfterConfig  `yaml:"afterRevokeMsg"`
-	BeforeAddBlack           BeforeConfig `yaml:"beforeAddBlack"`
-	AfterAddFriend           AfterConfig  `yaml:"afterAddFriend"`
-	BeforeAddFriendAgree     BeforeConfig `yaml:"beforeAddFriendAgree"`
-	AfterAddFriendAgree      AfterConfig  `yaml:"afterAddFriendAgree"`
-	AfterDeleteFriend        AfterConfig  `yaml:"afterDeleteFriend"`
-	BeforeImportFriends      BeforeConfig `yaml:"beforeImportFriends"`
-	AfterImportFriends       AfterConfig  `yaml:"afterImportFriends"`
-	AfterRemoveBlack         AfterConfig  `yaml:"afterRemoveBlack"`
+	URL                                 string       `yaml:"url"`
+	BeforeSendSingleMsg                 BeforeConfig `yaml:"beforeSendSingleMsg"`
+	BeforeUpdateUserInfoEx              BeforeConfig `yaml:"beforeUpdateUserInfoEx"`
+	AfterUpdateUserInfoEx               AfterConfig  `yaml:"afterUpdateUserInfoEx"`
+	AfterSendSingleMsg                  AfterConfig  `yaml:"afterSendSingleMsg"`
+	BeforeSendGroupMsg                  BeforeConfig `yaml:"beforeSendGroupMsg"`
+	BeforeMsgModify                     BeforeConfig `yaml:"beforeMsgModify"`
+	AfterSendGroupMsg                   AfterConfig  `yaml:"afterSendGroupMsg"`
+	AfterUserOnline                     AfterConfig  `yaml:"afterUserOnline"`
+	AfterUserOffline                    AfterConfig  `yaml:"afterUserOffline"`
+	AfterUserKickOff                    AfterConfig  `yaml:"afterUserKickOff"`
+	BeforeOfflinePush                   BeforeConfig `yaml:"beforeOfflinePush"`
+	BeforeOnlinePush                    BeforeConfig `yaml:"beforeOnlinePush"`
+	BeforeGroupOnlinePush               BeforeConfig `yaml:"beforeGroupOnlinePush"`
+	BeforeAddFriend                     BeforeConfig `yaml:"beforeAddFriend"`
+	BeforeUpdateUserInfo                BeforeConfig `yaml:"beforeUpdateUserInfo"`
+	AfterUpdateUserInfo                 AfterConfig  `yaml:"afterUpdateUserInfo"`
+	BeforeCreateGroup                   BeforeConfig `yaml:"beforeCreateGroup"`
+	AfterCreateGroup                    AfterConfig  `yaml:"afterCreateGroup"`
+	BeforeMemberJoinGroup               BeforeConfig `yaml:"beforeMemberJoinGroup"`
+	BeforeSetGroupMemberInfo            BeforeConfig `yaml:"beforeSetGroupMemberInfo"`
+	AfterSetGroupMemberInfo             AfterConfig  `yaml:"afterSetGroupMemberInfo"`
+	AfterQuitGroup                      AfterConfig  `yaml:"afterQuitGroup"`
+	AfterKickGroupMember                AfterConfig  `yaml:"afterKickGroupMember"`
+	AfterDismissGroup                   AfterConfig  `yaml:"afterDismissGroup"`
+	BeforeApplyJoinGroup                BeforeConfig `yaml:"beforeApplyJoinGroup"`
+	AfterGroupMsgRead                   AfterConfig  `yaml:"afterGroupMsgRead"`
+	AfterSingleMsgRead                  AfterConfig  `yaml:"afterSingleMsgRead"`
+	BeforeUserRegister                  BeforeConfig `yaml:"beforeUserRegister"`
+	AfterUserRegister                   AfterConfig  `yaml:"afterUserRegister"`
+	AfterTransferGroupOwner             AfterConfig  `yaml:"afterTransferGroupOwner"`
+	BeforeSetFriendRemark               BeforeConfig `yaml:"beforeSetFriendRemark"`
+	AfterSetFriendRemark                AfterConfig  `yaml:"afterSetFriendRemark"`
+	AfterGroupMsgRevoke                 AfterConfig  `yaml:"afterGroupMsgRevoke"`
+	AfterJoinGroup                      AfterConfig  `yaml:"afterJoinGroup"`
+	BeforeInviteUserToGroup             BeforeConfig `yaml:"beforeInviteUserToGroup"`
+	AfterSetGroupInfo                   AfterConfig  `yaml:"afterSetGroupInfo"`
+	BeforeSetGroupInfo                  BeforeConfig `yaml:"beforeSetGroupInfo"`
+	AfterSetGroupInfoEx                 AfterConfig  `yaml:"afterSetGroupInfoEx"`
+	BeforeSetGroupInfoEx                BeforeConfig `yaml:"beforeSetGroupInfoEx"`
+	AfterRevokeMsg                      AfterConfig  `yaml:"afterRevokeMsg"`
+	BeforeAddBlack                      BeforeConfig `yaml:"beforeAddBlack"`
+	AfterAddFriend                      AfterConfig  `yaml:"afterAddFriend"`
+	BeforeAddFriendAgree                BeforeConfig `yaml:"beforeAddFriendAgree"`
+	AfterAddFriendAgree                 AfterConfig  `yaml:"afterAddFriendAgree"`
+	AfterDeleteFriend                   AfterConfig  `yaml:"afterDeleteFriend"`
+	BeforeImportFriends                 BeforeConfig `yaml:"beforeImportFriends"`
+	AfterImportFriends                  AfterConfig  `yaml:"afterImportFriends"`
+	AfterRemoveBlack                    AfterConfig  `yaml:"afterRemoveBlack"`
+	BeforeCreateSingleChatConversations BeforeConfig `yaml:"beforeCreateSingleChatConversations"`
+	AfterCreateSingleChatConversations  AfterConfig  `yaml:"afterCreateSingleChatConversations"`
+	BeforeCreateGroupChatConversations  BeforeConfig `yaml:"beforeCreateGroupChatConversations"`
+	AfterCreateGroupChatConversations   AfterConfig  `yaml:"afterCreateGroupChatConversations"`
 }
 
 type ZooKeeper struct {
@@ -477,13 +498,19 @@ func (m *Mongo) Build() *mongoutil.Config {
 
 func (r *Redis) Build() *redisutil.Config {
 	return &redisutil.Config{
-		ClusterMode: r.ClusterMode,
-		Address:     r.Address,
-		Username:    r.Username,
-		Password:    r.Password,
-		DB:          r.DB,
-		MaxRetry:    r.MaxRetry,
-		PoolSize:    r.PoolSize,
+		RedisMode: r.RedisMode,
+		Address:   r.Address,
+		Username:  r.Username,
+		Password:  r.Password,
+		DB:        r.DB,
+		MaxRetry:  r.MaxRetry,
+		PoolSize:  r.PoolSize,
+		Sentinel: &redisutil.Sentinel{
+			MasterName:     r.SentinelMode.MasterName,
+			SentinelAddrs:  r.SentinelMode.SentinelAddrs,
+			RouteByLatency: r.SentinelMode.RouteByLatency,
+			RouteRandomly:  r.SentinelMode.RouteRandomly,
+		},
 	}
 }
 

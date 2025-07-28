@@ -22,7 +22,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/mqbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
-
 	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -59,9 +58,8 @@ type Config struct {
 // MsgServer encapsulates dependencies required for message handling.
 type msgServer struct {
 	msg.UnimplementedMsgServer
-	RegisterCenter         discovery.Conn               // Service discovery registry for service registration.
-	MsgDatabase            controller.CommonMsgDatabase // Interface for message database operations.
-	StreamMsgDatabase      controller.StreamMsgDatabase
+	RegisterCenter         discovery.Conn                   // Service discovery registry for service registration.
+	MsgDatabase            controller.CommonMsgDatabase     // Interface for message database operations.
 	UserLocalCache         *rpccache.UserLocalCache         // Local cache for user data.
 	FriendLocalCache       *rpccache.FriendLocalCache       // Local cache for friend data.
 	GroupLocalCache        *rpccache.GroupLocalCache        // Local cache for group data.
@@ -72,6 +70,8 @@ type msgServer struct {
 	config                 *Config                          // Global configuration settings.
 	webhookClient          *webhook.Client
 	conversationClient     *rpcli.ConversationClient
+
+	adminUserIDs []string
 }
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
@@ -79,7 +79,7 @@ func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorF
 
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	builder := mqbuild.NewBuilder(&config.KafkaConfig)
 	redisProducer, err := builder.GetTopicProducer(ctx, config.KafkaConfig.ToRedisTopic)
 	if err != nil {
@@ -117,10 +117,6 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	if err != nil {
 		return err
 	}
-	streamMsg, err := mgo.NewStreamMsgMongo(mgocli.GetDB())
-	if err != nil {
-		return err
-	}
 	seqUserCache := redis.NewSeqUserCacheRedis(rdb, seqUser)
 	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
@@ -142,7 +138,6 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel, seqUserCache, seqConversationCache, redisProducer)
 	s := &msgServer{
 		MsgDatabase:            msgDatabase,
-		StreamMsgDatabase:      controller.NewStreamMsgDatabase(streamMsg),
 		RegisterCenter:         client,
 		UserLocalCache:         rpccache.NewUserLocalCache(rpcli.NewUserClient(userConn), &config.LocalCacheConfig, rdb),
 		GroupLocalCache:        rpccache.NewGroupLocalCache(rpcli.NewGroupClient(groupConn), &config.LocalCacheConfig, rdb),
@@ -151,6 +146,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		config:                 config,
 		webhookClient:          webhook.NewWebhookClient(config.WebhooksConfig.URL),
 		conversationClient:     conversationClient,
+		adminUserIDs:           config.Share.IMAdminUser.UserIDs,
 	}
 
 	s.notificationSender = notification.NewNotificationSender(&config.NotificationConfig, notification.WithLocalSendMsg(s.SendMsg))

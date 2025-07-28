@@ -16,6 +16,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/tools/a2r"
 )
@@ -48,9 +49,9 @@ func (o *ConversationApi) SetConversations(c *gin.Context) {
 	a2r.Call(c, conversation.ConversationClient.SetConversations, o.Client)
 }
 
-func (o *ConversationApi) GetConversationOfflinePushUserIDs(c *gin.Context) {
-	a2r.Call(c, conversation.ConversationClient.GetConversationOfflinePushUserIDs, o.Client)
-}
+//func (o *ConversationApi) GetConversationOfflinePushUserIDs(c *gin.Context) {
+//	a2r.Call(c, conversation.ConversationClient.GetConversationOfflinePushUserIDs, o.Client)
+//}
 
 func (o *ConversationApi) GetFullOwnerConversationIDs(c *gin.Context) {
 	a2r.Call(c, conversation.ConversationClient.GetFullOwnerConversationIDs, o.Client)
@@ -70,4 +71,8 @@ func (o *ConversationApi) GetNotNotifyConversationIDs(c *gin.Context) {
 
 func (o *ConversationApi) GetPinnedConversationIDs(c *gin.Context) {
 	a2r.Call(c, conversation.ConversationClient.GetPinnedConversationIDs, o.Client)
+}
+
+func (o *ConversationApi) UpdateConversationsByUser(c *gin.Context) {
+	a2r.Call(c, conversation.ConversationClient.UpdateConversationsByUser, o.Client)
 }

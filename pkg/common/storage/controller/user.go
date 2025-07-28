@@ -21,12 +21,11 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/db/pagination"
 	"github.com/openimsdk/tools/db/tx"
-	"github.com/openimsdk/tools/utils/datautil"
-
-	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils/datautil"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 )
@@ -98,14 +97,32 @@ func (u *userDatabase) InitOnce(ctx context.Context, users []*model.User) error 
 	}
 
 	// Determine which users are missing from the database.
-	missingUsers := datautil.SliceAnySub(users, existingUsers, func(e *model.User) string {
+	var (
+		missing, update []*model.User
+	)
+	existMap := datautil.SliceToMap(existingUsers, func(e *model.User) string {
 		return e.UserID
 	})
+	orgMap := datautil.SliceToMap(users, func(e *model.User) string { return e.UserID })
+	for k, u1 := range orgMap {
+		if u2, ok := existMap[k]; !ok {
+			missing = append(missing, u1)
+		} else if u1.Nickname != u2.Nickname {
+			update = append(update, u1)
+		}
+	}
 
 	// Create records for missing users.
-	if len(missingUsers) > 0 {
-		if err := u.userDB.Create(ctx, missingUsers); err != nil {
+	if len(missing) > 0 {
+		if err := u.userDB.Create(ctx, missing); err != nil {
 			return err
+		}
+	}
+	if len(update) > 0 {
+		for i := range update {
+			if err := u.userDB.UpdateByMap(ctx, update[i].UserID, map[string]any{"nickname": update[i].Nickname}); err != nil {
+				return err
+			}
 		}
 	}
 

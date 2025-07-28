@@ -28,6 +28,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const StructTagName = "yaml"
+
 const (
 	MaxSeq                 = "MAX_SEQ:"
 	MinSeq                 = "MIN_SEQ:"
@@ -54,13 +56,14 @@ func readConfig[T any](dir string, name string) (*T, error) {
 	if err := v.ReadInConfig(); err != nil {
 		return nil, err
 	}
-	fn := func(config *mapstructure.DecoderConfig) {
-		config.TagName = "mapstructure"
-	}
+
 	var conf T
-	if err := v.Unmarshal(&conf, fn); err != nil {
+	if err := v.Unmarshal(&conf, func(config *mapstructure.DecoderConfig) {
+		config.TagName = StructTagName
+	}); err != nil {
 		return nil, err
 	}
+
 	return &conf, nil
 }
 
@@ -69,6 +72,7 @@ func Main(conf string, del time.Duration) error {
 	if err != nil {
 		return err
 	}
+	
 	mongodbConfig, err := readConfig[config.Mongo](conf, config.MongodbConfigFileName)
 	if err != nil {
 		return err
@@ -337,7 +341,7 @@ func SetVersion(coll *mongo.Collection, key string, version int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	option := options.Update().SetUpsert(true)
-	filter := bson.M{"key": key, "value": strconv.Itoa(version)}
+	filter := bson.M{"key": key}
 	update := bson.M{"$set": bson.M{"key": key, "value": strconv.Itoa(version)}}
 	return mongoutil.UpdateOne(ctx, coll, filter, update, false, option)
 }

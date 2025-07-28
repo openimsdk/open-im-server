@@ -49,6 +49,7 @@ type authServer struct {
 	RegisterCenter discovery.Conn
 	config         *Config
 	userClient     *rpcli.UserClient
+	adminUserIDs   []string
 }
 
 type Config struct {
@@ -59,7 +60,7 @@ type Config struct {
 	Discovery   config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	dbb := dbbuild.NewBuilder(&config.MongoConfig, &config.RedisConfig)
 	rdb, err := dbb.Redis(ctx)
 	if err != nil {
@@ -90,10 +91,11 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
 			config.Share.MultiLogin,
-			config.Share.IMAdminUserID,
+			config.Share.IMAdminUser.UserIDs,
 		),
-		config:     config,
-		userClient: rpcli.NewUserClient(userConn),
+		config:       config,
+		userClient:   rpcli.NewUserClient(userConn),
+		adminUserIDs: config.Share.IMAdminUser.UserIDs,
 	})
 	return nil
 }
@@ -104,8 +106,8 @@ func (s *authServer) GetAdminToken(ctx context.Context, req *pbauth.GetAdminToke
 		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
 
-	if !datautil.Contain(req.UserID, s.config.Share.IMAdminUserID...) {
-		return nil, errs.ErrArgs.WrapMsg("userID is error.", "userID", req.UserID, "adminUserID", s.config.Share.IMAdminUserID)
+	if !datautil.Contain(req.UserID, s.adminUserIDs...) {
+		return nil, errs.ErrArgs.WrapMsg("userID is error.", "userID", req.UserID, "adminUserID", s.adminUserIDs)
 
 	}
 
@@ -125,7 +127,7 @@ func (s *authServer) GetAdminToken(ctx context.Context, req *pbauth.GetAdminToke
 }
 
 func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenReq) (*pbauth.GetUserTokenResp, error) {
-	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 
@@ -135,7 +137,7 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 
 	resp := pbauth.GetUserTokenResp{}
 
-	if authverify.IsManagerUserID(req.UserID, s.config.Share.IMAdminUserID) {
+	if authverify.CheckUserIsAdmin(ctx, req.UserID) {
 		return nil, errs.ErrNoPermission.WrapMsg("don't get Admin token")
 	}
 	user, err := s.userClient.GetUserInfo(ctx, req.UserID)
@@ -159,15 +161,17 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 	if err != nil {
 		return nil, err
 	}
-	isAdmin := authverify.IsManagerUserID(claims.UserID, s.config.Share.IMAdminUserID)
-	if isAdmin {
-		return claims, nil
-	}
 	m, err := s.authDatabase.GetTokensWithoutError(ctx, claims.UserID, claims.PlatformID)
 	if err != nil {
 		return nil, err
 	}
 	if len(m) == 0 {
+		isAdmin := authverify.CheckUserIsAdmin(ctx, claims.UserID)
+		if isAdmin {
+			if err = s.authDatabase.GetTemporaryTokensWithoutError(ctx, claims.UserID, claims.PlatformID, tokensString); err == nil {
+				return claims, nil
+			}
+		}
 		return nil, servererrs.ErrTokenNotExist.Wrap()
 	}
 	if v, ok := m[tokensString]; ok {
@@ -178,6 +182,13 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 			return nil, servererrs.ErrTokenKicked.Wrap()
 		default:
 			return nil, errs.Wrap(errs.ErrTokenUnknown)
+		}
+	} else {
+		isAdmin := authverify.CheckUserIsAdmin(ctx, claims.UserID)
+		if isAdmin {
+			if err = s.authDatabase.GetTemporaryTokensWithoutError(ctx, claims.UserID, claims.PlatformID, tokensString); err == nil {
+				return claims, nil
+			}
 		}
 	}
 	return nil, servererrs.ErrTokenNotExist.Wrap()
@@ -196,7 +207,7 @@ func (s *authServer) ParseToken(ctx context.Context, req *pbauth.ParseTokenReq) 
 }
 
 func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq) (*pbauth.ForceLogoutResp, error) {
-	if err := authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID); err != nil {

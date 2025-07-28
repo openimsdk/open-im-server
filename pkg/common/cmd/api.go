@@ -19,6 +19,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/internal/api"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/system/program"
@@ -84,7 +85,7 @@ func (a *ApiCmd) runE() error {
 		a.apiConfig.API.Api.ListenIP, "",
 		a.apiConfig.API.Prometheus.AutoSetPorts,
 		nil, int(a.apiConfig.Index),
-		a.apiConfig.Discovery.RpcService.MessageGateway,
+		prommetrics.APIKeyName,
 		&a.apiConfig.Notification,
 		a.apiConfig,
 		[]string{},

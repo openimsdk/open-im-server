@@ -29,10 +29,9 @@ import (
 )
 
 func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *relation.GetPaginationBlacksReq) (resp *relation.GetPaginationBlacksResp, err error) {
-	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-
 	total, blacks, err := s.blackDatabase.FindOwnerBlacks(ctx, req.UserID, req.Pagination)
 	if err != nil {
 		return nil, err
@@ -47,6 +46,9 @@ func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *relation.Ge
 }
 
 func (s *friendServer) IsBlack(ctx context.Context, req *relation.IsBlackReq) (*relation.IsBlackResp, error) {
+	if err := authverify.CheckAccessIn(ctx, req.UserID1, req.UserID2); err != nil {
+		return nil, err
+	}
 	in1, in2, err := s.blackDatabase.CheckIn(ctx, req.UserID1, req.UserID2)
 	if err != nil {
 		return nil, err
@@ -58,7 +60,7 @@ func (s *friendServer) IsBlack(ctx context.Context, req *relation.IsBlackReq) (*
 }
 
 func (s *friendServer) RemoveBlack(ctx context.Context, req *relation.RemoveBlackReq) (*relation.RemoveBlackResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 
@@ -73,7 +75,7 @@ func (s *friendServer) RemoveBlack(ctx context.Context, req *relation.RemoveBlac
 }
 
 func (s *friendServer) AddBlack(ctx context.Context, req *relation.AddBlackReq) (*relation.AddBlackResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 
@@ -99,7 +101,7 @@ func (s *friendServer) AddBlack(ctx context.Context, req *relation.AddBlackReq) 
 }
 
 func (s *friendServer) GetSpecifiedBlacks(ctx context.Context, req *relation.GetSpecifiedBlacksReq) (*relation.GetSpecifiedBlacksResp, error) {
-	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 

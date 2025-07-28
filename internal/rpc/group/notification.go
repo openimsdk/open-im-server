@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -243,7 +244,7 @@ func (g *NotificationSender) fillUserByUserID(ctx context.Context, userID string
 		return errs.ErrInternalServer.WrapMsg("**sdkws.GroupMemberFullInfo is nil")
 	}
 	if groupID != "" {
-		if authverify.IsManagerUserID(userID, g.config.Share.IMAdminUserID) {
+		if authverify.CheckUserIsAdmin(ctx, userID) {
 			*targetUser = &sdkws.GroupMemberFullInfo{
 				GroupID:        groupID,
 				UserID:         userID,
@@ -284,7 +285,8 @@ func (g *NotificationSender) fillUserByUserID(ctx context.Context, userID string
 
 func (g *NotificationSender) setVersion(ctx context.Context, version *uint64, versionID *string, collName string, id string) {
 	versions := versionctx.GetVersionLog(ctx).Get()
-	for _, coll := range versions {
+	for i := len(versions) - 1; i >= 0; i-- {
+		coll := versions[i]
 		if coll.Name == collName && coll.Doc.DID == id {
 			*version = uint64(coll.Doc.Version)
 			*versionID = coll.Doc.ID.Hex()
@@ -364,13 +366,46 @@ func (g *NotificationSender) GroupInfoSetAnnouncementNotification(ctx context.Co
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips, notification.WithRpcGetUserName(), notification.WithSendMessage(sendMessage))
 }
 
-func (g *NotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbgroup.JoinGroupReq) {
+func (g *NotificationSender) uuid() string {
+	return uuid.New().String()
+}
+
+func (g *NotificationSender) getGroupRequest(ctx context.Context, groupID string, userID string) (*sdkws.GroupRequest, error) {
+	request, err := g.db.TakeGroupRequest(ctx, groupID, userID)
+	if err != nil {
+		return nil, err
+	}
+	users, err := g.getUsersInfo(ctx, []string{userID})
+	if err != nil {
+		return nil, err
+	}
+	if len(users) == 0 {
+		return nil, servererrs.ErrUserIDNotFound.WrapMsg(fmt.Sprintf("user %s not found", userID))
+	}
+	info, ok := users[0].(*sdkws.UserInfo)
+	if !ok {
+		info = &sdkws.UserInfo{
+			UserID:   users[0].GetUserID(),
+			Nickname: users[0].GetNickname(),
+			FaceURL:  users[0].GetFaceURL(),
+			Ex:       users[0].GetEx(),
+		}
+	}
+	return convert.Db2PbGroupRequest(request, info, nil), nil
+}
+
+func (g *NotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbgroup.JoinGroupReq, dbReq *model.GroupRequest) {
 	var err error
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
+	request, err := g.getGroupRequest(ctx, dbReq.GroupID, dbReq.UserID)
+	if err != nil {
+		log.ZError(ctx, "JoinGroupApplicationNotification getGroupRequest", err, "dbReq", dbReq)
+		return
+	}
 	var group *sdkws.GroupInfo
 	group, err = g.getGroupInfo(ctx, req.GroupID)
 	if err != nil {
@@ -386,7 +421,13 @@ func (g *NotificationSender) JoinGroupApplicationNotification(ctx context.Contex
 		return
 	}
 	userIDs = append(userIDs, req.InviterUserID, mcontext.GetOpUserID(ctx))
-	tips := &sdkws.JoinGroupApplicationTips{Group: group, Applicant: user, ReqMsg: req.ReqMessage}
+	tips := &sdkws.JoinGroupApplicationTips{
+		Group:     group,
+		Applicant: user,
+		ReqMsg:    req.ReqMessage,
+		Uuid:      g.uuid(),
+		Request:   request,
+	}
 	for _, userID := range datautil.Distinct(userIDs) {
 		g.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.JoinGroupApplicationNotification, tips)
 	}
@@ -416,6 +457,11 @@ func (g *NotificationSender) GroupApplicationAcceptedNotification(ctx context.Co
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
+	request, err := g.getGroupRequest(ctx, req.GroupID, req.FromUserID)
+	if err != nil {
+		log.ZError(ctx, "GroupApplicationAcceptedNotification getGroupRequest", err, "req", req)
+		return
+	}
 	var group *sdkws.GroupInfo
 	group, err = g.getGroupInfo(ctx, req.GroupID)
 	if err != nil {
@@ -431,8 +477,14 @@ func (g *NotificationSender) GroupApplicationAcceptedNotification(ctx context.Co
 	if err = g.fillOpUser(ctx, &opUser, group.GroupID); err != nil {
 		return
 	}
+	tips := &sdkws.GroupApplicationAcceptedTips{
+		Group:     group,
+		OpUser:    opUser,
+		HandleMsg: req.HandledMsg,
+		Uuid:      g.uuid(),
+		Request:   request,
+	}
 	for _, userID := range append(userIDs, req.FromUserID) {
-		tips := &sdkws.GroupApplicationAcceptedTips{Group: group, OpUser: opUser, HandleMsg: req.HandledMsg}
 		if userID == req.FromUserID {
 			tips.ReceiverAs = applicantReceiver
 		} else {
@@ -449,6 +501,11 @@ func (g *NotificationSender) GroupApplicationRejectedNotification(ctx context.Co
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
+	request, err := g.getGroupRequest(ctx, req.GroupID, req.FromUserID)
+	if err != nil {
+		log.ZError(ctx, "GroupApplicationAcceptedNotification getGroupRequest", err, "req", req)
+		return
+	}
 	var group *sdkws.GroupInfo
 	group, err = g.getGroupInfo(ctx, req.GroupID)
 	if err != nil {
@@ -464,8 +521,14 @@ func (g *NotificationSender) GroupApplicationRejectedNotification(ctx context.Co
 	if err = g.fillOpUser(ctx, &opUser, group.GroupID); err != nil {
 		return
 	}
+	tips := &sdkws.GroupApplicationRejectedTips{
+		Group:     group,
+		OpUser:    opUser,
+		HandleMsg: req.HandledMsg,
+		Uuid:      g.uuid(),
+		Request:   request,
+	}
 	for _, userID := range append(userIDs, req.FromUserID) {
-		tips := &sdkws.GroupApplicationAcceptedTips{Group: group, OpUser: opUser, HandleMsg: req.HandledMsg}
 		if userID == req.FromUserID {
 			tips.ReceiverAs = applicantReceiver
 		} else {
@@ -521,6 +584,10 @@ func (g *NotificationSender) MemberKickedNotification(ctx context.Context, tips 
 }
 
 func (g *NotificationSender) GroupApplicationAgreeMemberEnterNotification(ctx context.Context, groupID string, SendMessage *bool, invitedOpUserID string, entrantUserID ...string) error {
+	return g.groupApplicationAgreeMemberEnterNotification(ctx, groupID, SendMessage, invitedOpUserID, entrantUserID...)
+}
+
+func (g *NotificationSender) groupApplicationAgreeMemberEnterNotification(ctx context.Context, groupID string, SendMessage *bool, invitedOpUserID string, entrantUserID ...string) error {
 	var err error
 	defer func() {
 		if err != nil {
