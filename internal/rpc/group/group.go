@@ -63,6 +63,7 @@ type groupServer struct {
 	userClient         *rpcli.UserClient
 	msgClient          *rpcli.MsgClient
 	conversationClient *rpcli.ConversationClient
+	adminUserIDs       []string
 }
 
 type Config struct {
@@ -76,7 +77,7 @@ type Config struct {
 	Discovery          config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	dbb := dbbuild.NewBuilder(&config.MongodbConfig, &config.RedisConfig)
 	mgocli, err := dbb.Mongo(ctx)
 	if err != nil {
@@ -116,6 +117,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		userClient:         rpcli.NewUserClient(userConn),
 		msgClient:          rpcli.NewMsgClient(msgConn),
 		conversationClient: rpcli.NewConversationClient(conversationConn),
+		adminUserIDs:       config.Share.IMAdminUser.UserIDs,
 	}
 	gs.db = controller.NewGroupDatabase(rdb, &config.LocalCacheConfig, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.notification = NewNotificationSender(gs.db, config, gs.userClient, gs.msgClient, gs.conversationClient)
@@ -1901,7 +1903,7 @@ func (g *groupServer) GetSpecifiedUserGroupRequestInfo(ctx context.Context, req 
 		}
 
 		adminIDs = append(adminIDs, owners[0].UserID)
-		adminIDs = append(adminIDs, g.config.Share.IMAdminUserID...)
+		adminIDs = append(adminIDs, g.adminUserIDs...)
 
 		if !datautil.Contain(opUserID, adminIDs...) {
 			return nil, errs.ErrNoPermission.WrapMsg("opUser no permission")

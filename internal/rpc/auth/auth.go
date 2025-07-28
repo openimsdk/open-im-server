@@ -49,6 +49,7 @@ type authServer struct {
 	RegisterCenter discovery.Conn
 	config         *Config
 	userClient     *rpcli.UserClient
+	adminUserIDs   []string
 }
 
 type Config struct {
@@ -59,7 +60,7 @@ type Config struct {
 	Discovery   config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	dbb := dbbuild.NewBuilder(&config.MongoConfig, &config.RedisConfig)
 	rdb, err := dbb.Redis(ctx)
 	if err != nil {
@@ -90,10 +91,11 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 			config.Share.Secret,
 			config.RpcConfig.TokenPolicy.Expire,
 			config.Share.MultiLogin,
-			config.Share.IMAdminUserID,
+			config.Share.IMAdminUser.UserIDs,
 		),
-		config:     config,
-		userClient: rpcli.NewUserClient(userConn),
+		config:       config,
+		userClient:   rpcli.NewUserClient(userConn),
+		adminUserIDs: config.Share.IMAdminUser.UserIDs,
 	})
 	return nil
 }
@@ -104,8 +106,8 @@ func (s *authServer) GetAdminToken(ctx context.Context, req *pbauth.GetAdminToke
 		return nil, errs.ErrNoPermission.WrapMsg("secret invalid")
 	}
 
-	if !datautil.Contain(req.UserID, s.config.Share.IMAdminUserID...) {
-		return nil, errs.ErrArgs.WrapMsg("userID is error.", "userID", req.UserID, "adminUserID", s.config.Share.IMAdminUserID)
+	if !datautil.Contain(req.UserID, s.adminUserIDs...) {
+		return nil, errs.ErrArgs.WrapMsg("userID is error.", "userID", req.UserID, "adminUserID", s.adminUserIDs)
 
 	}
 

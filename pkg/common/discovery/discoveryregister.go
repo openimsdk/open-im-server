@@ -35,7 +35,7 @@ func NewDiscoveryRegister(discovery *config.Discovery, watchNames []string) (dis
 		return standalone.GetSvcDiscoveryRegistry(), nil
 	}
 	if runtimeenv.RuntimeEnvironment() == config.KUBERNETES {
-		return kubernetes.NewKubernetesConnManager(discovery.Kubernetes.Namespace,
+		return kubernetes.NewConnManager(discovery.Kubernetes.Namespace, nil,
 			grpc.WithDefaultCallOptions(
 				grpc.MaxCallSendMsgSize(1024*1024*20),
 			),

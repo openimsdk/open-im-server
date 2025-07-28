@@ -10,7 +10,6 @@ import (
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
-
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
@@ -25,14 +24,14 @@ type Config struct {
 	Discovery config.Discovery
 }
 
-func Start(ctx context.Context, conf *Config, client discovery.Conn, service grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, conf *Config, client discovery.SvcDiscoveryRegistry, service grpc.ServiceRegistrar) error {
 	log.CInfo(ctx, "CRON-TASK server is initializing", "runTimeEnv", runtimeenv.RuntimeEnvironment(), "chatRecordsClearTime", conf.CronTask.CronExecuteTime, "msgDestructTime", conf.CronTask.RetainChatRecords)
 	if conf.CronTask.RetainChatRecords < 1 {
 		log.ZInfo(ctx, "disable cron")
 		<-ctx.Done()
 		return nil
 	}
-	ctx = mcontext.SetOpUserID(ctx, conf.Share.IMAdminUserID[0])
+	ctx = mcontext.SetOpUserID(ctx, conf.Share.IMAdminUser.UserIDs[0])
 
 	msgConn, err := client.GetConn(ctx, conf.Discovery.RpcService.Msg)
 	if err != nil {
@@ -49,6 +48,7 @@ func Start(ctx context.Context, conf *Config, client discovery.Conn, service grp
 		return err
 	}
 
+	var locker Locker
 	if conf.Discovery.Enable == config.ETCD {
 		cm := disetcd.NewConfigManager(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient(), []string{
 			conf.CronTask.GetConfigFileName(),
@@ -56,11 +56,14 @@ func Start(ctx context.Context, conf *Config, client discovery.Conn, service grp
 			conf.Discovery.GetConfigFileName(),
 		})
 		cm.Watch(ctx)
+		locker, err = NewEtcdLocker(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient())
+		if err != nil {
+			return err
+		}
 	}
 
-	locker, err := NewEtcdLocker(client.(*etcd.SvcDiscoveryRegistryImpl).GetClient())
-	if err != nil {
-		return err
+	if locker == nil {
+		locker = emptyLocker{}
 	}
 
 	srv := &cronServer{
@@ -92,6 +95,16 @@ func Start(ctx context.Context, conf *Config, client discovery.Conn, service grp
 	return nil
 }
 
+type Locker interface {
+	ExecuteWithLock(ctx context.Context, taskName string, task func())
+}
+
+type emptyLocker struct{}
+
+func (emptyLocker) ExecuteWithLock(ctx context.Context, taskName string, task func()) {
+	task()
+}
+
 type cronServer struct {
 	ctx                context.Context
 	config             *Config
@@ -99,7 +112,7 @@ type cronServer struct {
 	msgClient          msg.MsgClient
 	conversationClient pbconversation.ConversationClient
 	thirdClient        third.ThirdClient
-	locker             *EtcdLocker
+	locker             Locker
 }
 
 func (c *cronServer) registerClearS3() error {

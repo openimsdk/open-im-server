@@ -28,6 +28,7 @@ import (
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
+	"github.com/openimsdk/tools/mw/api"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -53,7 +54,7 @@ func prommetricsGin() gin.HandlerFunc {
 	}
 }
 
-func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin.Engine, error) {
+func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cfg *Config) (*gin.Engine, error) {
 	authConn, err := client.GetConn(ctx, cfg.Discovery.RpcService.Auth)
 	if err != nil {
 		return nil, err
@@ -96,8 +97,8 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 	case BestSpeed:
 		r.Use(gzip.Gzip(gzip.BestSpeed))
 	}
-	r.Use(prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(),
-		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)), setGinIsAdmin(cfg.Share.IMAdminUserID))
+	r.Use(api.GinLogger(), prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(),
+		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)), setGinIsAdmin(cfg.Share.IMAdminUser.UserIDs))
 
 	u := NewUserApi(user.NewUserClient(userConn), client, cfg.Discovery.RpcService)
 	{
@@ -231,7 +232,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 		objectGroup.GET("/*name", t.ObjectRedirect)
 	}
 	// Message
-	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), cfg.Share.IMAdminUserID)
+	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), cfg.Share.IMAdminUser.UserIDs)
 	{
 		msgGroup := r.Group("/msg")
 		msgGroup.POST("/newest_seq", m.GetSeq)
@@ -308,7 +309,7 @@ func newGinRouter(ctx context.Context, client discovery.Conn, cfg *Config) (*gin
 	if cfg.Discovery.Enable == config.ETCD {
 		etcdClient = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 	}
-	cm := NewConfigManager(cfg.Share.IMAdminUserID, &cfg.AllConfig, etcdClient, string(cfg.ConfigPath))
+	cm := NewConfigManager(cfg.Share.IMAdminUser.UserIDs, &cfg.AllConfig, etcdClient, string(cfg.ConfigPath))
 	{
 		configGroup := r.Group("/config", cm.CheckAdmin)
 		configGroup.POST("/get_config_list", cm.GetConfigList)

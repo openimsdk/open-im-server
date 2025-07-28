@@ -65,6 +65,8 @@ type userServer struct {
 	groupClient              *rpcli.GroupClient
 	relationClient           *rpcli.RelationClient
 	clientConfig             controller.ClientConfigDatabase
+
+	adminUserIDs []string
 }
 
 type Config struct {
@@ -79,7 +81,7 @@ type Config struct {
 	Discovery          config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	dbb := dbbuild.NewBuilder(&config.MongodbConfig, &config.RedisConfig)
 	mgocli, err := dbb.Mongo(ctx)
 	if err != nil {
@@ -92,8 +94,12 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 
 	users := make([]*tablerelation.User, 0)
 
-	for _, v := range config.Share.IMAdminUserID {
-		users = append(users, &tablerelation.User{UserID: v, Nickname: v, AppMangerLevel: constant.AppAdmin})
+	for i := range config.Share.IMAdminUser.UserIDs {
+		users = append(users, &tablerelation.User{
+			UserID:         config.Share.IMAdminUser.UserIDs[i],
+			Nickname:       config.Share.IMAdminUser.Nicknames[i],
+			AppMangerLevel: constant.AppAdmin,
+		})
 	}
 	userDB, err := mgo.NewUserMongo(mgocli.GetDB())
 	if err != nil {
@@ -130,6 +136,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 		clientConfig:             controller.NewClientConfigDatabase(clientConfigDB, redis.NewClientConfigCache(rdb, clientConfigDB), mgocli.GetTx()),
 		groupClient:              rpcli.NewGroupClient(groupConn),
 		relationClient:           rpcli.NewRelationClient(friendConn),
+		adminUserIDs:             config.Share.IMAdminUser.UserIDs,
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.db.InitOnce(context.Background(), users)
@@ -648,7 +655,7 @@ func (s *userServer) userModelToResp(users []*tablerelation.User, pagination pag
 	accounts := make([]*pbuser.NotificationAccountInfo, 0)
 	var total int64
 	for _, v := range users {
-		if v.AppMangerLevel >= constant.AppNotificationAdmin && !datautil.Contain(v.UserID, s.config.Share.IMAdminUserID...) {
+		if v.AppMangerLevel >= constant.AppNotificationAdmin && !datautil.Contain(v.UserID, s.adminUserIDs...) {
 			if appManagerLevel != nil {
 				if v.AppMangerLevel != *appManagerLevel {
 					continue

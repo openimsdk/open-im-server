@@ -8,19 +8,40 @@ jobs:
   update-version:
     runs-on: ubuntu-latest
     env:
-      TAG_VERSION: ${{ github.event.release.tag_name }} 
+      TAG_VERSION: ${{ github.event.release.tag_name }}
     steps:
       # Step 1: Checkout the original repository's code
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # submodules: "recursive"
+
+      - name: Safe submodule initialization
+        run: |
+          echo "Checking for submodules..."
+          if [ -f .gitmodules ]; then
+            if [ -s .gitmodules ]; then
+              echo "Initializing submodules..."
+              if git submodule sync --recursive 2>/dev/null; then
+                git submodule update --init --force --recursive || {
+                  echo "Warning: Some submodules failed to initialize, continuing anyway..."
+                }
+              else
+                echo "Warning: Submodule sync failed, continuing without submodules..."
+              fi
+            else
+              echo ".gitmodules exists but is empty, skipping submodule initialization"
+            fi
+          else
+            echo "No .gitmodules file found, no submodules to initialize"
+          fi
 
       # Step 2: Set up Git with official account
       - name: Set up Git
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       # Step 3: Check and delete existing tag
       - name: Check and delete existing tag
@@ -33,7 +54,8 @@ jobs:
       # Step 4: Update version file
       - name: Update version file
         run: |
-          echo "${{ env.TAG_VERSION }}" > version/version
+          mkdir -p version
+          echo -n "${{ env.TAG_VERSION }}" > version/version
 
       # Step 5: Commit and push changes
       - name: Commit and push changes
@@ -42,43 +64,56 @@ jobs:
         run: |
           git add version/version
           git commit -m "Update version to ${{ env.TAG_VERSION }}"
-          git push origin HEAD:${{ github.ref }}
 
-      # Step 6: Create and push tag
-      - name: Create and push tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Step 6: Update tag
+      - name: Update tag
         run: |
-          git tag ${{ env.TAG_VERSION }}
-          git push origin ${{ env.TAG_VERSION }}
+          git tag -fa ${{ env.TAG_VERSION }} -m "Update version to ${{ env.TAG_VERSION }}"
+          git push origin ${{ env.TAG_VERSION }} --force
 
       # Step 7: Find and Publish Draft Release
       - name: Find and Publish Draft Release
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Get the list of releases
-            const releases = await github.rest.repos.listReleases({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
+            const { owner, repo } = context.repo;
+            const tagName = process.env.TAG_VERSION;
 
-            // Find the draft release where the title and tag_name are the same
-            const draftRelease = releases.data.find(release => 
-              release.draft && release.name === release.tag_name
-            );
-
-            if (draftRelease) {
-              // Publish the draft release using the release_id
+            try {
+              let release;
+              try {
+                const response = await github.rest.repos.getReleaseByTag({
+                  owner,
+                  repo,
+                  tag: tagName
+                });
+                release = response.data;
+              } catch (tagError) {
+                core.info(`Release not found by tag, searching all releases...`);
+                const releases = await github.rest.repos.listReleases({
+                  owner,
+                  repo,
+                  per_page: 100
+                });
+                
+                release = releases.data.find(r => r.draft && r.tag_name === tagName);            
+                if (!release) {
+                  throw new Error(`No release found with tag ${tagName}`);
+                }
+              }
+              
               await github.rest.repos.updateRelease({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: draftRelease.id,  // Use release_id
-                draft: false
+                owner,
+                repo,
+                release_id: release.id,
+                draft: false,
+                prerelease: release.prerelease
               });
-
-              core.info(`Draft Release ${draftRelease.tag_name} published successfully.`);
-            } else {
-              core.info("No matching draft release found.");
+              
+              const status = release.draft ? "was draft" : "was already published";
+              core.info(`Release ${tagName} ensured to be published (${status}).`);
+              
+            } catch (error) {
+              core.warning(`Could not find or update release for tag ${tagName}: ${error.message}`);
             }

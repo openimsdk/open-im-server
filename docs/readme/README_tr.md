@@ -12,11 +12,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/openimsdk/open-im-server?style=for-the-badge)](https://goreportcard.com/report/github.com/openimsdk/open-im-server)
 [![Go Reference](https://img.shields.io/badge/Go%20Reference-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/openimsdk/open-im-server/v3)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)
-[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
 [![Best Practices](https://img.shields.io/badge/Best%20Practices-purple?style=for-the-badge)](https://www.bestpractices.dev/projects/8045)
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
-
 
 <p align="center">
   <a href="../../README.md">English</a> · 
@@ -46,25 +45,21 @@
   <a href="./README_tr.md">Türkçe</a>
 </p>
 
-
 </div>
 
 </p>
-
 
 ## Ⓜ️ OpenIM Hakkında
 
 OpenIM, uygulamalara sohbet, sesli-görüntülü aramalar, bildirimler ve AI sohbet robotları entegre etmek için özel olarak tasarlanmış bir hizmet platformudur. Güçlü API'ler ve Webhook'lar sunarak, geliştiricilerin bu etkileşimli özellikleri uygulamalarına kolayca dahil etmelerini sağlar. OpenIM bağımsız bir sohbet uygulaması değildir, ancak zengin iletişim işlevselliği sağlama amacıyla diğer uygulamaları destekleyen bir platform olarak hizmet verir. Aşağıdaki diyagram, AppServer, AppClient, OpenIMServer ve OpenIMSDK arasındaki etkileşimi detaylandırmak için açıklar.
 
-
-
 ![App-OpenIM Relationship](../images/oepnim-design.png)
 
 ## 🚀 OpenIMSDK Hakkında
 
- **OpenIMSDK**, müşteri uygulamalarına gömülmek üzere özel olarak oluşturulan **OpenIMServer** için tasarlanmış bir IM SDK'sıdır. Ana özellikleri ve modülleri aşağıdaki gibidir:
+**OpenIMSDK**, müşteri uygulamalarına gömülmek üzere özel olarak oluşturulan **OpenIMServer** için tasarlanmış bir IM SDK'sıdır. Ana özellikleri ve modülleri aşağıdaki gibidir:
 
-+ 🌟 Ana Özellikler:
+- 🌟 Ana Özellikler:
 
   - 📦 Yerel depolama
   - 🔔 Dinleyici geri çağırmaları
@@ -85,15 +80,15 @@ Golang kullanılarak inşa edilmiş ve tüm platformlarda tutarlı bir erişim d
 
 ## 🌐 OpenIMServer Hakkında
 
-+ **OpenIMServer** aşağıdaki özelliklere sahiptir:
+- **OpenIMServer** aşağıdaki özelliklere sahiptir:
   - 🌐 Mikroservis mimarisi: Bir kapı ve çoklu rpc servisleri içeren küme modunu destekler.
   - 🚀 Çeşitli dağıtım yöntemleri: Kaynak kodu, Kubernetes veya Docker aracılığıyla dağıtımı destekler.
   - Büyük kullanıcı tabanı desteği: Yüz binlerce kullanıcısı olan süper büyük gruplar, on milyonlarca kullanıcı ve milyarlarca mesaj.
 
 ### Geliştirilmiş İşlevsellik:
 
-+ **REST API**：OpenIMServer, işletmeleri gruplar oluşturma ve arka plan arayüzleri aracılığıyla itme mesajları gönderme gibi daha fazla işlevsellikle güçlendirmeyi amaçlayan iş sistemleri için REST API'leri sunar.
-+ **Webhooks**：OpenIMServer, daha fazla iş formunu genişletme yetenekleri sağlayan geri çağırma özellikleri sunar. Geri çağırma, OpenIMServer'ın belirli bir olaydan önce veya sonra, örneğin bir mesaj göndermeden önce veya sonra iş sunucusuna bir istek göndermesi anlamına gelir.
+- **REST API**：OpenIMServer, işletmeleri gruplar oluşturma ve arka plan arayüzleri aracılığıyla itme mesajları gönderme gibi daha fazla işlevsellikle güçlendirmeyi amaçlayan iş sistemleri için REST API'leri sunar.
+- **Webhooks**：OpenIMServer, daha fazla iş formunu genişletme yetenekleri sağlayan geri çağırma özellikleri sunar. Geri çağırma, OpenIMServer'ın belirli bir olaydan önce veya sonra, örneğin bir mesaj göndermeden önce veya sonra iş sunucusuna bir istek göndermesi anlamına gelir.
 
 👉 **[Daha fazla bilgi edinin](https://docs.openim.io/guides/introduction/product)**
 
@@ -111,10 +106,10 @@ Birçok platformu destekliyoruz. Web tarafında hızlı deneyim için adresler �
 
 🤲 Kullanıcı deneyimini kolaylaştırmak için çeşitli dağıtım çözümleri sunuyoruz. Aşağıdaki listeden dağıtım yönteminizi seçebilirsiniz:
 
-+ **[Kaynak Kodu Dağıtım Kılavuzu](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Docker Dağıtım Kılavuzu](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[Kubernetes Dağıtım Kılavuzu](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
-+ **[Mac Geliştirici Dağıtım Kılavuzu](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
+- **[Kaynak Kodu Dağıtım Kılavuzu](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
+- **[Docker Dağıtım Kılavuzu](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
+- **[Kubernetes Dağıtım Kılavuzu](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
+- **[Mac Geliştirici Dağıtım Kılavuzu](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
 
 ## :hammer_and_wrench: OpenIM Geliştirmeye Başlamak
 
@@ -124,7 +119,7 @@ OpenIM Amacımız, üst düzey bir açık kaynak topluluğu oluşturmaktır. [To
 
 Bu Open-IM-Server deposuna katkıda bulunmak istiyorsanız, lütfen katkıda bulunanlar için [dokümantasyonumuzu](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md) okuyun.
 
-Başlamadan önce, lütfen değişikliklerinizin talep edildiğinden emin olun. Bunun için en iyisi, [yeni bir tartışma OLUŞTURMAK](https://github.com/openimsdk/open-im-server/discussions/new/choose) veya [Slack İletişimi](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) kurmak, ya da bir sorun bulursanız, önce bunu [rapor](https://github.com/openimsdk/open-im-server/issues/new/choose) etmektir.
+Başlamadan önce, lütfen değişikliklerinizin talep edildiğinden emin olun. Bunun için en iyisi, [yeni bir tartışma OLUŞTURMAK](https://github.com/openimsdk/open-im-server/discussions/new/choose) veya [Slack İletişimi](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A) kurmak, ya da bir sorun bulursanız, önce bunu [rapor](https://github.com/openimsdk/open-im-server/issues/new/choose) etmektir.
 
 - [OpenIM API Referansı](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/api.md)
 - [OpenIM Bash Günlüğü](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/bash-log.md)
@@ -156,19 +151,18 @@ Başlamadan önce, lütfen değişikliklerinizin talep edildiğinden emin olun. 
 - [Arka uç yönetimi ve izleme dağıtımı](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
 - [Mac Geliştirici Dağıtım Kılavuzu for OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
 
-
 ## :busts_in_silhouette: Topluluk
 
-+ 📚 [OpenIM Topluluğu](https://github.com/OpenIMSDK/community)
-+ 💕 [OpenIM İlgi Grubu](https://github.com/Openim-sigs)
-+ 🚀 [Slack topluluğumuza katılın](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [Wechat grubumuza katılın (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
+- 📚 [OpenIM Topluluğu](https://github.com/OpenIMSDK/community)
+- 💕 [OpenIM İlgi Grubu](https://github.com/Openim-sigs)
+- 🚀 [Slack topluluğumuza katılın](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
+- :eyes: [Wechat grubumuza katılın (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: Topluluk Toplantıları
 
 Topluluğumuza herkesin katılmasını ve kod katkısında bulunmasını istiyoruz, hediyeler ve ödüller sunuyoruz ve sizi her Perşembe gecesi bize katılmaya davet ediyoruz.
 
-Konferansımız [OpenIM Slack'te](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) 🎯, ardından Open-IM-Server boru hattını arayıp katılabilirsiniz.
+Konferansımız [OpenIM Slack'te](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A) 🎯, ardından Open-IM-Server boru hattını arayıp katılabilirsiniz.
 
 İki haftada bir yapılan toplantının [notlarını](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) [GitHub tartışmalarında alıyoruz](https://github.com/openimsdk/open-im-server/discussions/categories/meeting), Tarihi toplantı notlarımız ve toplantıların tekrarları [Google Docs'ta](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing) 📑 mevcut.
 

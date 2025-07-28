@@ -16,13 +16,10 @@ package msg
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils/stringutil"
 
 	cbapi "github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -89,19 +86,20 @@ func (m *msgServer) webhookBeforeSendSingleMsg(ctx context.Context, before *conf
 	})
 }
 
-func (m *msgServer) webhookAfterSendSingleMsg(ctx context.Context, after *config.AfterConfig, msg *pbchat.SendMsgReq) {
-	if msg.MsgData.ContentType == constant.Typing {
-		return
-	}
-	if !filterAfterMsg(msg, after) {
-		return
-	}
-	cbReq := &cbapi.CallbackAfterSendSingleMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendSingleMsgCommand),
-		RecvID:            msg.MsgData.RecvID,
-	}
-	m.webhookClient.AsyncPostWithQuery(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendSingleMsgResp{}, after, buildKeyMsgDataQuery(msg.MsgData))
-}
+// Move to msgtransfer
+// func (m *msgServer) webhookAfterSendSingleMsg(ctx context.Context, after *config.AfterConfig, msg *pbchat.SendMsgReq) {
+// 	if msg.MsgData.ContentType == constant.Typing {
+// 		return
+// 	}
+// 	if !filterAfterMsg(msg, after) {
+// 		return
+// 	}
+// 	cbReq := &cbapi.CallbackAfterSendSingleMsgReq{
+// 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendSingleMsgCommand),
+// 		RecvID:            msg.MsgData.RecvID,
+// 	}
+// 	m.webhookClient.AsyncPostWithQuery(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendSingleMsgResp{}, after, buildKeyMsgDataQuery(msg.MsgData))
+// }
 
 func (m *msgServer) webhookBeforeSendGroupMsg(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
@@ -123,20 +121,21 @@ func (m *msgServer) webhookBeforeSendGroupMsg(ctx context.Context, before *confi
 	})
 }
 
-func (m *msgServer) webhookAfterSendGroupMsg(ctx context.Context, after *config.AfterConfig, msg *pbchat.SendMsgReq) {
-	if msg.MsgData.ContentType == constant.Typing {
-		return
-	}
-	if !filterAfterMsg(msg, after) {
-		return
-	}
-	cbReq := &cbapi.CallbackAfterSendGroupMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendGroupMsgCommand),
-		GroupID:           msg.MsgData.GroupID,
-	}
+// Move to msgtransfer
+// func (m *msgServer) webhookAfterSendGroupMsg(ctx context.Context, after *config.AfterConfig, msg *pbchat.SendMsgReq) {
+// 	if msg.MsgData.ContentType == constant.Typing {
+// 		return
+// 	}
+// 	if !filterAfterMsg(msg, after) {
+// 		return
+// 	}
+// 	cbReq := &cbapi.CallbackAfterSendGroupMsgReq{
+// 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendGroupMsgCommand),
+// 		GroupID:           msg.MsgData.GroupID,
+// 	}
 
-	m.webhookClient.AsyncPostWithQuery(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendGroupMsgResp{}, after, buildKeyMsgDataQuery(msg.MsgData))
-}
+// 	m.webhookClient.AsyncPostWithQuery(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendGroupMsgResp{}, after, buildKeyMsgDataQuery(msg.MsgData))
+// }
 
 func (m *msgServer) webhookBeforeMsgModify(ctx context.Context, before *config.BeforeConfig, msg *pbchat.SendMsgReq, beforeMsgData **sdkws.MsgData) error {
 	return webhook.WithCondition(ctx, before, func(ctx context.Context) error {
@@ -205,14 +204,14 @@ func (m *msgServer) webhookAfterRevokeMsg(ctx context.Context, after *config.Aft
 	m.webhookClient.AsyncPost(ctx, callbackReq.GetCallbackCommand(), callbackReq, &cbapi.CallbackAfterRevokeMsgResp{}, after)
 }
 
-func buildKeyMsgDataQuery(msg *sdkws.MsgData) map[string]string {
-	keyMsgData := apistruct.KeyMsgData{
-		SendID:  msg.SendID,
-		RecvID:  msg.RecvID,
-		GroupID: msg.GroupID,
-	}
+// func buildKeyMsgDataQuery(msg *sdkws.MsgData) map[string]string {
+// 	keyMsgData := apistruct.KeyMsgData{
+// 		SendID:  msg.SendID,
+// 		RecvID:  msg.RecvID,
+// 		GroupID: msg.GroupID,
+// 	}
 
-	return map[string]string{
-		webhook.Key: base64.StdEncoding.EncodeToString(stringutil.StructToJsonBytes(keyMsgData)),
-	}
-}
+// 	return map[string]string{
+// 		webhook.Key: base64.StdEncoding.EncodeToString(stringutil.StructToJsonBytes(keyMsgData)),
+// 	}
+// }
