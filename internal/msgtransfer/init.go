@@ -134,7 +134,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
-	historyMongoHandler := NewOnlineHistoryMongoConsumerHandler(msgTransferDatabase,config)
+	historyMongoHandler := NewOnlineHistoryMongoConsumerHandler(msgTransferDatabase, config)
 
 	msgTransfer := &MsgTransfer{
 		historyConsumer:      historyConsumer,
@@ -161,8 +161,8 @@ func (m *MsgTransfer) Start(ctx context.Context) error {
 	}()
 
 	go func() {
-		fn := func(ctx context.Context, key string, value []byte) error {
-			m.historyMongoHandler.HandleChatWs2Mongo(ctx, key, value)
+		fn := func(msg mq.Message) error {
+			m.historyMongoHandler.HandleChatWs2Mongo(msg)
 			return nil
 		}
 		for {

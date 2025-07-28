@@ -15,12 +15,12 @@
 package msgtransfer
 
 import (
-	"context"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/mq"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
-	"github.com/openimsdk/protocol/constant"
 	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/tools/log"
 	"google.golang.org/protobuf/proto"
@@ -40,7 +40,10 @@ func NewOnlineHistoryMongoConsumerHandler(database controller.MsgTransferDatabas
 	}
 }
 
-func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(ctx context.Context, key string, msg []byte) {
+func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(val mq.Message) {
+	ctx := val.Context()
+	key := val.Key()
+	msg := val.Value()
 	msgFromMQ := pbmsg.MsgDataToMongoByMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
@@ -58,6 +61,7 @@ func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(ctx context.Cont
 		prommetrics.MsgInsertMongoFailedCounter.Inc()
 	} else {
 		prommetrics.MsgInsertMongoSuccessCounter.Inc()
+		val.Mark()
 	}
 
 	for _, msgData := range msgFromMQ.MsgData {

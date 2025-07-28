@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/openimsdk/tools/mq"
 
 	"sync"
 	"time"
@@ -77,6 +78,7 @@ type ConsumerMessage struct {
 	Ctx   context.Context
 	Key   string
 	Value []byte
+	Raw   mq.Message
 }
 
 func NewOnlineHistoryRedisConsumerHandler(ctx context.Context, client discovery.Conn, config *Config, database controller.MsgTransferDatabase) (*OnlineHistoryRedisConsumerHandler, error) {
@@ -112,6 +114,11 @@ func NewOnlineHistoryRedisConsumerHandler(ctx context.Context, client discovery.
 	}
 	b.Do = och.do
 	och.redisMessageBatches = b
+
+	och.redisMessageBatches.OnComplete = func(lastMessage *ConsumerMessage, totalCount int) {
+		lastMessage.Raw.Mark()
+		lastMessage.Raw.Commit()
+	}
 
 	return &och, nil
 }
@@ -388,10 +395,10 @@ func withAggregationCtx(ctx context.Context, values []*ContextMsg) context.Conte
 	return mcontext.SetOperationID(ctx, allMessageOperationID)
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) HandlerRedisMessage(ctx context.Context, key string, value []byte) error { // a instance in the consumer group
-	err := och.redisMessageBatches.Put(ctx, &ConsumerMessage{Ctx: ctx, Key: key, Value: value})
+func (och *OnlineHistoryRedisConsumerHandler) HandlerRedisMessage(msg mq.Message) error { // a instance in the consumer group
+	err := och.redisMessageBatches.Put(msg.Context(), &ConsumerMessage{Ctx: msg.Context(), Key: msg.Key(), Value: msg.Value(), Raw: msg})
 	if err != nil {
-		log.ZWarn(ctx, "put msg to  error", err, "key", key, "value", value)
+		log.ZWarn(msg.Context(), "put msg to  error", err, "key", msg.Key(), "value", msg.Value())
 	}
 	return nil
 }

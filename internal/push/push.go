@@ -2,6 +2,7 @@ package push
 
 import (
 	"context"
+	"github.com/openimsdk/tools/mq"
 	"math/rand"
 	"strconv"
 
@@ -106,8 +107,8 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 
 	go func() {
 		pushHandler.WaitCache()
-		fn := func(ctx context.Context, key string, value []byte) error {
-			pushHandler.HandleMs2PsChat(authverify.WithTempAdmin(ctx), value)
+		fn := func(msg mq.Message) error {
+			pushHandler.HandleMs2PsChat(authverify.WithTempAdmin(msg.Context()), msg.Value())
 			return nil
 		}
 		consumerCtx := mcontext.SetOperationID(context.Background(), "push_"+strconv.Itoa(int(rand.Uint32())))
@@ -121,8 +122,8 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	}()
 
 	go func() {
-		fn := func(ctx context.Context, key string, value []byte) error {
-			offlineHandler.HandleMsg2OfflinePush(ctx, value)
+		fn := func(msg mq.Message) error {
+			offlineHandler.HandleMsg2OfflinePush(msg.Context(), msg.Value())
 			return nil
 		}
 		consumerCtx := mcontext.SetOperationID(context.Background(), "push_"+strconv.Itoa(int(rand.Uint32())))
