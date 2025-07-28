@@ -1,3 +1,10 @@
+## [v3.8.3-patch.4](https://github.com/openimsdk/open-im-server/releases/tag/v3.8.3-patch.4) 	(2025-03-13)
+
+### Bug Fixes
+* fix: solve unocrrect invite notificationfrom #3213
+
+**Full Changelog**: [v3.8.3-patch.3...v3.8.3-patch.4](https://github.com/openimsdk/open-im-server/compare/v3.8.3-patch.3...v3.8.3-patch.4)
+
 ## [v3.8.3-patch.3](https://github.com/openimsdk/open-im-server/releases/tag/v3.8.3-patch.3) 	(2025-03-07)
 
 ### New Features
@@ -38,4 +45,3 @@
 * build: improve workflows contents. [Created [#3125](https://github.com/openimsdk/open-im-server/pull/3125)
 
 **Full Changelog**: [v3.8.3-e-v1.1.5...v3.8.3-patch.1-e-v1.1.5](https://github.com/openimsdk/open-im-server-enterprise/compare/v3.8.3-e-v1.1.5...v3.8.3-patch.1-e-v1.1.5)
-
