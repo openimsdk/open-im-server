@@ -99,15 +99,62 @@ services:
     environment:
       #KAFKA_HEAP_OPTS: "-Xms128m -Xmx256m"
       TZ: Asia/Shanghai
+      # Unique identifier for the Kafka node (required in controller mode)
       KAFKA_CFG_NODE_ID: 0
+      # Defines the roles this Kafka node plays: broker, controller, or both
       KAFKA_CFG_PROCESS_ROLES: controller,broker
+      # Specifies which nodes are controller nodes for quorum voting.
+      # The syntax follows the KRaft mode (no ZooKeeper): node.id@host:port
+      # The controller listener endpoint here is kafka:9093
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:19094
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      # Specifies which listener is used for controller-to-controller communication
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # Default number of partitions for new topics
       KAFKA_NUM_PARTITIONS: 8
+      # Whether to enable automatic topic creation
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # Kafka internal listeners; Kafka supports multiple ports with different protocols
+      # Each port is used for a specific purpose: INTERNAL for internal broker communication,
+      # CONTROLLER for controller communication, EXTERNAL for external client connections.
+      # These logical listener names are mapped to actual protocols via KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+      # In short, Kafka is listening on three logical ports: 9092 for internal communication,
+      # 9093 for controller traffic, and 9094 for external access.
+      KAFKA_CFG_LISTENERS: "INTERNAL://:9092,CONTROLLER://:9093,EXTERNAL://:9094"
+      # Addresses advertised to clients. INTERNAL://kafka:9092 uses the internal Docker service name 'kafka',
+      # so other containers can access Kafka via kafka:9092.
+      # EXTERNAL://localhost:19094 is the address external clients (e.g., in the LAN) should use to connect.
+      # If Kafka is deployed on a different machine than IM, 'localhost' should be replaced with the LAN IP.
+      KAFKA_CFG_ADVERTISED_LISTENERS: "INTERNAL://kafka:9092,EXTERNAL://localhost:19094"
+      # Maps logical listener names to actual protocols.
+      # Supported protocols include: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT"
+      # Defines which listener is used for inter-broker communication within the Kafka cluster
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+
+
+      # Authentication configuration variables - comment out to disable auth
+      # KAFKA_USERNAME: "openIM"
+      # KAFKA_PASSWORD: "openIM123"
+    command: >
+      /bin/sh -c '
+        if [ -n "$${KAFKA_USERNAME}" ] && [ -n "$${KAFKA_PASSWORD}" ]; then
+          echo "=== Kafka SASL Authentication ENABLED ==="
+          echo "Username: $${KAFKA_USERNAME}"
+          
+          # Set environment variables for SASL authentication
+          export KAFKA_CFG_LISTENERS="SASL_PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094"
+          export KAFKA_CFG_ADVERTISED_LISTENERS="SASL_PLAINTEXT://kafka:9092,EXTERNAL://localhost:19094"
+          export KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP="CONTROLLER:PLAINTEXT,EXTERNAL:SASL_PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT"
+          export KAFKA_CFG_SASL_ENABLED_MECHANISMS="PLAIN"
+          export KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL="PLAIN"
+          export KAFKA_CFG_INTER_BROKER_LISTENER_NAME="SASL_PLAINTEXT"
+          export KAFKA_CLIENT_USERS="$${KAFKA_USERNAME}"
+          export KAFKA_CLIENT_PASSWORDS="$${KAFKA_PASSWORD}"
+        fi
+        
+        # Start Kafka with the configured environment
+        exec /opt/bitnami/scripts/kafka/entrypoint.sh /opt/bitnami/scripts/kafka/run.sh
+      '
     networks:
       - openim
 
