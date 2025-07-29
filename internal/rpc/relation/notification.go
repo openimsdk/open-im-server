@@ -171,11 +171,17 @@ func (f *FriendNotificationSender) FriendApplicationAddNotification(ctx context.
 	f.Notification(ctx, req.FromUserID, req.ToUserID, constant.FriendApplicationNotification, &tips)
 }
 
-func (f *FriendNotificationSender) FriendApplicationAgreedNotification(ctx context.Context, req *relation.RespondFriendApplyReq) {
-	request, err := f.getFriendRequests(ctx, req.FromUserID, req.ToUserID)
-	if err != nil {
-		log.ZError(ctx, "FriendApplicationAgreedNotification get friend request", err, "fromUserID", req.FromUserID, "toUserID", req.ToUserID)
-		return
+func (f *FriendNotificationSender) FriendApplicationAgreedNotification(ctx context.Context, req *relation.RespondFriendApplyReq, checkReq bool) {
+	var (
+		request *sdkws.FriendRequest
+		err     error
+	)
+	if checkReq {
+		request, err = f.getFriendRequests(ctx, req.FromUserID, req.ToUserID)
+		if err != nil {
+			log.ZError(ctx, "FriendApplicationAgreedNotification get friend request", err, "fromUserID", req.FromUserID, "toUserID", req.ToUserID)
+			return
+		}
 	}
 	tips := sdkws.FriendApplicationApprovedTips{
 		FromToUserID: &sdkws.FromToUserID{
