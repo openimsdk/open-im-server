@@ -445,7 +445,7 @@ func main() {
 			Share: *share,
 			Api:   *apiConfig,
 		},
-		AdminUserID: share.IMAdminUserID[0],
+		AdminUserID: share.IMAdminUser.UserIDs[0],
 		Ctx:         ctx,
 		Cancel:      cancel,
 		HttpClient: &http.Client{
@@ -476,8 +476,7 @@ func main() {
 	st.AdminToken = token
 	fmt.Println("Admin Token:", st.AdminToken)
 	fmt.Println("ApiAddress:", ApiAddress)
-
-	for i := range MaxUser {
+	for i := 0; i < MaxUser; i++ {
 		userID := fmt.Sprintf("v2_StressTest_User_%d", i)
 		st.CreatedUsers = append(st.CreatedUsers, userID)
 		st.CreateUserCounter++
@@ -520,7 +519,7 @@ func main() {
 		create100kGroupTicker := time.NewTicker(Create100KGroupTicker)
 		defer create100kGroupTicker.Stop()
 
-		for i := range Max100KGroup {
+		for i := 0; i < Max100KGroup; i++ {
 			select {
 			case <-st.Ctx.Done():
 				log.ZInfo(st.Ctx, "Stop Create 100K Group")
@@ -592,7 +591,7 @@ func main() {
 		create999GroupTicker := time.NewTicker(Create999GroupTicker)
 		defer create999GroupTicker.Stop()
 
-		for i := range Max999Group {
+		for i := 0; i < Max999Group; i++ {
 			select {
 			case <-st.Ctx.Done():
 				log.ZInfo(st.Ctx, "Stop Create 999 Group")
@@ -663,12 +662,12 @@ func main() {
 	var groups100K []string
 	var groups999 []string
 
-	for i := range Max100KGroup {
+	for i := 0; i < Max100KGroup; i++ {
 		groupID := fmt.Sprintf("v2_StressTest_Group_100K_%d", i)
 		groups100K = append(groups100K, groupID)
 	}
 
-	for i := range Max999Group {
+	for i := 0; i < Max999Group; i++ {
 		groupID := fmt.Sprintf("v2_StressTest_Group_1K_%d", i)
 		groups999 = append(groups999, groupID)
 	}
