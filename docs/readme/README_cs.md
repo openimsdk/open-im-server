@@ -12,11 +12,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/openimsdk/open-im-server?style=for-the-badge)](https://goreportcard.com/report/github.com/openimsdk/open-im-server)
 [![Go Reference](https://img.shields.io/badge/Go%20Reference-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/openimsdk/open-im-server/v3)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)
-[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
 [![Best Practices](https://img.shields.io/badge/Best%20Practices-purple?style=for-the-badge)](https://www.bestpractices.dev/projects/8045)
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
-
 
 <p align="center">
   <a href="../../README.md">English</a> · 
@@ -46,7 +45,6 @@
   <a href="./README_tr.md">Türkçe</a>
 </p>
 
-
 </div>
 
 </p>
@@ -61,14 +59,14 @@ OpenIM je platforma služeb speciálně navržená pro integraci chatu, audio-vi
 
 **OpenIMSDK** je IM SDK navržený pro**OpenIMServer**, vytvořený speciálně pro vkládání do klientských aplikací. Jeho hlavní vlastnosti a moduly jsou následující:
 
-+ 🌟 Hlavní vlastnosti:
+- 🌟 Hlavní vlastnosti:
 
   - 📦 Místní úložiště
   - 🔔 Zpětná volání posluchačů
   - 🛡️ API obalování
   - 🌐 Správa připojení
 
-+ 📚 hlavní moduly:
+- 📚 hlavní moduly:
 
   1. 🚀 Inicializace a přihlášení
   2. 👤 Správa uživatelů
@@ -82,15 +80,15 @@ Je postaven pomocí Golang a podporuje nasazení napříč platformami, což zaj
 
 ## 🌐 O OpenIMServeru
 
-+ **OpenIMServer** má následující vlastnosti:
+- **OpenIMServer** má následující vlastnosti:
   - 🌐 Architektura mikroslužeb: Podporuje režim clusteru, včetně brány a více služeb RPC.
   - 🚀 Různé metody nasazení: Podporuje nasazení prostřednictvím zdrojového kódu, Kubernetes nebo Docker.
   - Podpora masivní uživatelské základny: Super velké skupiny se stovkami tisíc uživatelů, desítkami milionů uživatelů a miliardami zpráv.
 
 ### Vylepšené obchodní funkce:
 
-+ **REST API**: OpenIMServer nabízí REST API pro podnikové systémy, jejichž cílem je poskytnout podnikům více funkcí, jako je vytváření skupin a odesílání push zpráv přes backendová rozhraní.
-+ **Webhooks**: OpenIMServer poskytuje možnosti zpětného volání pro rozšíření více obchodních formulářů. Zpětné volání znamená, že OpenIMServer odešle požadavek na obchodní server před nebo po určité události, jako jsou zpětná volání před nebo po odeslání zprávy.
+- **REST API**: OpenIMServer nabízí REST API pro podnikové systémy, jejichž cílem je poskytnout podnikům více funkcí, jako je vytváření skupin a odesílání push zpráv přes backendová rozhraní.
+- **Webhooks**: OpenIMServer poskytuje možnosti zpětného volání pro rozšíření více obchodních formulářů. Zpětné volání znamená, že OpenIMServer odešle požadavek na obchodní server před nebo po určité události, jako jsou zpětná volání před nebo po odeslání zprávy.
 
 👉 **[Další informace](https://docs.openim.io/guides/introduction/product)**
 
@@ -100,7 +98,6 @@ Ponořte se do srdce funkčnosti Open-IM-Server s naším diagramem architektury
 
 ![Overall Architecture](../images/architecture-layers.png)
 
-
 ## :rocket: Rychlý start
 
 Podporujeme mnoho platforem. Zde jsou adresy pro rychlou práci na webové stránce:
@@ -109,10 +106,10 @@ Podporujeme mnoho platforem. Zde jsou adresy pro rychlou práci na webové strá
 
 🤲 Pro usnadnění uživatelské zkušenosti nabízíme různá řešení nasazení. Způsob nasazení si můžete vybrat ze seznamu níže:
 
-+ **[Průvodce nasazením zdrojového kódu](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Docker Deployment Guide](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[Průvodce nasazením Kubernetes](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
-+ **[Průvodce nasazením pro vývojáře Mac](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
+- **[Průvodce nasazením zdrojového kódu](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
+- **[Docker Deployment Guide](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
+- **[Průvodce nasazením Kubernetes](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
+- **[Průvodce nasazením pro vývojáře Mac](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
 
 ## :hammer_and_wrench: Chcete-li začít vyvíjet OpenIM
 
@@ -122,7 +119,7 @@ OpenIM Naším cílem je vybudovat špičkovou open source komunitu. Máme soubo
 
 Pokud byste chtěli přispět do tohoto úložiště Open-IM-Server, přečtěte si naši [dokumentaci pro přispěvatele](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md).
 
-Než začnete, ujistěte se, že jsou vaše změny vyžadovány. Nejlepší pro to je vytvořit [nová diskuze](https://github.com/openimsdk/open-im-server/discussions/new/choose) NEBO [Slack Communication](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q), nebo pokud narazíte na problém, [nahlásit jej](https://github.com/openimsdk/open-im-server/issues/new/choose) jako první.
+Než začnete, ujistěte se, že jsou vaše změny vyžadovány. Nejlepší pro to je vytvořit [nová diskuze](https://github.com/openimsdk/open-im-server/discussions/new/choose) NEBO [Slack Communication](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A), nebo pokud narazíte na problém, [nahlásit jej](https://github.com/openimsdk/open-im-server/issues/new/choose) jako první.
 
 - [OpenIM API Reference](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/api.md)
 - [Protokolování OpenIM Bash](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/bash-log.md)
@@ -154,19 +151,18 @@ Než začnete, ujistěte se, že jsou vaše změny vyžadovány. Nejlepší pro 
 - [Spravovat backend a monitorovat nasazení](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
 - [Průvodce nasazením pro vývojáře Mac pro OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
 
-
 ## :busts_in_silhouette: Společenství
 
-+ 📚 [Komunita OpenIM](https://github.com/OpenIMSDK/community)
-+ 💕 [Zájmová skupina OpenIM](https://github.com/Openim-sigs)
-+ 🚀 [Připojte se k naší komunitě Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [Připojte se k našemu wechatu](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
+- 📚 [Komunita OpenIM](https://github.com/OpenIMSDK/community)
+- 💕 [Zájmová skupina OpenIM](https://github.com/Openim-sigs)
+- 🚀 [Připojte se k naší komunitě Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
+- :eyes: [Připojte se k našemu wechatu](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: Komunitní setkání
 
 Chceme, aby se do naší komunity a přispívání kódu zapojil kdokoli, nabízíme dárky a odměny a vítáme vás, abyste se k nám připojili každý čtvrtek večer.
 
-Naše konference je v [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) 🎯, pak můžete vyhledat kanál Open-IM-Server a připojit se
+Naše konference je v [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A) 🎯, pak můžete vyhledat kanál Open-IM-Server a připojit se
 
 Zaznamenáváme si každou [dvoutýdenní schůzku](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting)do [diskuzí na GitHubu](https://github.com/openimsdk/open-im-server/discussions/categories/meeting), naše historické poznámky ze schůzek a také záznamy schůzek jsou k dispozici na [Dokumenty Google :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing).
 

@@ -12,11 +12,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/openimsdk/open-im-server?style=for-the-badge)](https://goreportcard.com/report/github.com/openimsdk/open-im-server)
 [![Go Reference](https://img.shields.io/badge/Go%20Reference-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/openimsdk/open-im-server/v3)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)
-[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
 [![Best Practices](https://img.shields.io/badge/Best%20Practices-purple?style=for-the-badge)](https://www.bestpractices.dev/projects/8045)
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
-
 
 <p align="center">
   <a href="../../README.md">English</a> · 
@@ -46,7 +45,6 @@
   <a href="./README_tr.md">Türkçe</a>
 </p>
 
-
 </div>
 
 </p>
@@ -61,14 +59,14 @@ OpenIM — це сервісна платформа, спеціально роз
 
 **OpenIMSDK** – це пакет IM SDK, розроблений для **OpenIMServer**, створений спеціально для вбудовування в клієнтські програми. Його основні функції та модулі такі:
 
-+ 🌟 Основні характеристики:
+- 🌟 Основні характеристики:
 
   - 📦 Локальне сховище
   - 🔔 Зворотні виклики слухача
   - 🛡️ Обгортка API
   - 🌐 Керування підключенням
 
-+ 📚 Основні модулі:
+- 📚 Основні модулі:
 
   1. 🚀 Ініціалізація та вхід
   2. 👤 Керування користувачами
@@ -82,15 +80,15 @@ OpenIM — це сервісна платформа, спеціально роз
 
 ## 🌐 Про OpenIMServer
 
-+ **OpenIMServer** має такі характеристики:
+- **OpenIMServer** має такі характеристики:
   - 🌐 Архітектура мікросервісу: підтримує режим кластера, включаючи шлюз і кілька служб rpc.
   - 🚀 Різноманітні методи розгортання: підтримує розгортання через вихідний код, Kubernetes або Docker.
   - Підтримка величезної бази користувачів: надвеликі групи із сотнями тисяч користувачів, десятками мільйонів користувачів і мільярдами повідомлень.
 
 ### Розширена бізнес-функціональність:
 
-+ **REST API**: OpenIMServer пропонує REST API для бізнес-систем, спрямованих на надання компаніям додаткових можливостей, таких як створення груп і надсилання push-повідомлень через серверні інтерфейси.
-+ **Веб-перехоплення**: OpenIMServer надає можливості зворотного виклику, щоб розширити більше бізнес-форм. Зворотний виклик означає, що OpenIMServer надсилає запит на бізнес-сервер до або після певної події, як зворотні виклики до або після надсилання повідомлення.
+- **REST API**: OpenIMServer пропонує REST API для бізнес-систем, спрямованих на надання компаніям додаткових можливостей, таких як створення груп і надсилання push-повідомлень через серверні інтерфейси.
+- **Веб-перехоплення**: OpenIMServer надає можливості зворотного виклику, щоб розширити більше бізнес-форм. Зворотний виклик означає, що OpenIMServer надсилає запит на бізнес-сервер до або після певної події, як зворотні виклики до або після надсилання повідомлення.
 
 👉 **[Докладніше](https://docs.openim.io/guides/introduction/product)**
 
@@ -100,7 +98,6 @@ OpenIM — це сервісна платформа, спеціально роз
 
 ![Overall Architecture](../images/architecture-layers.png)
 
-
 ## :rocket: Швидкий початок
 
 Ми підтримуємо багато платформ. Ось адреси для швидкого використання веб-сайту:
@@ -109,10 +106,10 @@ OpenIM — це сервісна платформа, спеціально роз
 
 🤲 Щоб полегшити роботу користувача, ми пропонуємо різні рішення для розгортання. Ви можете вибрати спосіб розгортання зі списку нижче:
 
-+ **[Посібник із розгортання вихідного коду](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Посібник із розгортання Docker](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[Посібник із розгортання Kubernetes](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
-+ **[Посібник із розгортання розробника Mac](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
+- **[Посібник із розгортання вихідного коду](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
+- **[Посібник із розгортання Docker](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
+- **[Посібник із розгортання Kubernetes](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
+- **[Посібник із розгортання розробника Mac](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
 
 ## :hammer_and_wrench: Щоб розпочати розробку OpenIM
 
@@ -122,7 +119,7 @@ OpenIM. Наша мета — побудувати спільноту з від�
 
 Якщо ви хочете внести свій внесок у це сховище Open-IM-Server, прочитайте нашу [документацію для учасників](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md).
 
-Перш ніж почати, переконайтеся, що ваші зміни затребувані. Найкраще для цього створити [нове обговорення](https://github.com/openimsdk/open-im-server/discussions/new/choose) АБО [Нездійснене спілкування](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)або, якщо ви виявите проблему, спершу [повідомити про неї](https://github.com/openimsdk/open-im-server/issues/new/choose).
+Перш ніж почати, переконайтеся, що ваші зміни затребувані. Найкраще для цього створити [нове обговорення](https://github.com/openimsdk/open-im-server/discussions/new/choose) АБО [Нездійснене спілкування](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)або, якщо ви виявите проблему, спершу [повідомити про неї](https://github.com/openimsdk/open-im-server/issues/new/choose).
 
 - [Довідка щодо API OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/api.md)
 - [Ведення журналу OpenIM Bash](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/bash-log.md)
@@ -154,19 +151,18 @@ OpenIM. Наша мета — побудувати спільноту з від�
 - [Керування серверною частиною та моніторинг розгортання](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
 - [Посібник із розгортання розробника Mac для OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
 
-
 ## :busts_in_silhouette: Спільнота
 
-+ 📚 [Спільнота OpenIM](https://github.com/OpenIMSDK/community)
-+ 💕 [Група інтересів OpenIM](https://github.com/Openim-sigs)
-+ 🚀 [Приєднайтеся до нашої спільноти Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [Приєднайтеся до нашого wechat](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
+- 📚 [Спільнота OpenIM](https://github.com/OpenIMSDK/community)
+- 💕 [Група інтересів OpenIM](https://github.com/Openim-sigs)
+- 🚀 [Приєднайтеся до нашої спільноти Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
+- :eyes: [Приєднайтеся до нашого wechat](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: Збори громади
 
 Ми хочемо, щоб будь-хто долучився до нашої спільноти та додав код, ми пропонуємо подарунки та нагороди, і ми запрошуємо вас приєднатися до нас щочетверга ввечері.
 
-Наша конференція знаходиться в [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) 🎯, тоді ви можете шукати конвеєр Open-IM-Server, щоб приєднатися.
+Наша конференція знаходиться в [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A) 🎯, тоді ви можете шукати конвеєр Open-IM-Server, щоб приєднатися.
 
 Ми робимо нотатки про кожну [двотижневу зустріч](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting)в [обговореннях GitHub](https://github.com/openimsdk/open-im-server/discussions/categories/meeting). Наші історичні нотатки зустрічей, а також повтори зустрічей доступні в[Google Docs :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing).
 

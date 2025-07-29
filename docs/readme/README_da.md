@@ -12,11 +12,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/openimsdk/open-im-server?style=for-the-badge)](https://goreportcard.com/report/github.com/openimsdk/open-im-server)
 [![Go Reference](https://img.shields.io/badge/Go%20Reference-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/openimsdk/open-im-server/v3)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)
-[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
 [![Best Practices](https://img.shields.io/badge/Best%20Practices-purple?style=for-the-badge)](https://www.bestpractices.dev/projects/8045)
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
-
 
 <p align="center">
   <a href="../../README.md">English</a> · 
@@ -46,35 +45,30 @@
   <a href="./README_tr.md">Türkçe</a>
 </p>
 
-
 </div>
 
 </p>
 
-
 ## :busts_in_silhouette: Fællesskab
 
-+ 📚 [OpenIM-fællesskab](https://github.com/OpenIMSDK/community)
-+ 💕 [OpenIM-interessegruppe](https://github.com/Openim-sigs)
-+ 🚀 [Deltag i vores Slack-fællesskab](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [Deltag i vores WeChat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
-+ 👫 [Deltag i vores Reddit](https://www.reddit.com/r/OpenIMessaging)
-+ 💬 [Følg vores Twitter-konto](https://twitter.com/openimsdk)
-
+- 📚 [OpenIM-fællesskab](https://github.com/OpenIMSDK/community)
+- 💕 [OpenIM-interessegruppe](https://github.com/Openim-sigs)
+- 🚀 [Deltag i vores Slack-fællesskab](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
+- :eyes: [Deltag i vores WeChat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
+- 👫 [Deltag i vores Reddit](https://www.reddit.com/r/OpenIMessaging)
+- 💬 [Følg vores Twitter-konto](https://twitter.com/openimsdk)
 
 ## Ⓜ️ Om OpenIM
 
 OpenIM er en serviceplatform designet specifikt til integration af chat, lyd-videoopkald, notifikationer og AI-chatbots i applikationer. Den tilbyder en række kraftfulde API'er og Webhooks, som gør det let for udviklere at integrere disse interaktive funktioner i deres applikationer. OpenIM er ikke en selvstændig chatapplikation, men fungerer snarere som en platform, der understøtter andre applikationer i at opnå omfattende kommunikationsfunktionaliteter. Følgende diagram illustrerer interaktionen mellem AppServer, AppClient, OpenIMServer og OpenIMSDK for at forklare detaljeret.
 
-
-
 ![App-OpenIM Relationship](../images/oepnim-design.png)
 
 ## 🚀 Om OpenIMSDK
 
- **OpenIMSDK** er en IM SDK designet til **OpenIMServer**, skabt specifikt til indlejring i klientapplikationer. Dens vigtigste funktioner og moduler er som følger:
+**OpenIMSDK** er en IM SDK designet til **OpenIMServer**, skabt specifikt til indlejring i klientapplikationer. Dens vigtigste funktioner og moduler er som følger:
 
-+ 🌟 Hovedfunktioner:
+- 🌟 Hovedfunktioner:
 
   - 📦 Lokal lagring
   - 🔔 Lytter-callbacks
@@ -95,15 +89,15 @@ Det er bygget ved hjælp af Golang og understøtter tværplatformsudrulning, hvi
 
 ## 🌐 Om OpenIMServer
 
-+ **OpenIMServer** har følgende karakteristika:
+- **OpenIMServer** har følgende karakteristika:
   - 🌐 Mikroservicarkitektur: Understøtter klyngetilstand, inklusive en gateway og flere rpc-tjenester.
   - 🚀 Forskellige udrulningsmetoder: Understøtter udrulning via kildekode, Kubernetes eller Docker.
   - Støtte til massiv brugerbase: Super store grupper med hundredtusinder af brugere, titusinder af brugere og milliarder af beskeder.
 
 ### Forbedret forretningsfunktionalitet:
 
-+ **REST API**：OpenIMServer tilbyder REST API'er til forretningssystemer, med det formål at give virksomheder flere funktioner, såsom at oprette grupper og sende push-beskeder gennem backend-grænseflader.
-+ **Webhooks**：OpenIMServer giver mulighed for callback-funktionalitet for at udvide flere forretningsformer. Et callback betyder, at OpenIMServer sender en anmodning til forretningsserveren før eller efter en bestemt begivenhed, som callbacks før eller efter at have sendt en besked.
+- **REST API**：OpenIMServer tilbyder REST API'er til forretningssystemer, med det formål at give virksomheder flere funktioner, såsom at oprette grupper og sende push-beskeder gennem backend-grænseflader.
+- **Webhooks**：OpenIMServer giver mulighed for callback-funktionalitet for at udvide flere forretningsformer. Et callback betyder, at OpenIMServer sender en anmodning til forretningsserveren før eller efter en bestemt begivenhed, som callbacks før eller efter at have sendt en besked.
 
 👉 **[Lær mere](https://docs.openim.io/guides/introduction/product)**
 
@@ -121,10 +115,10 @@ Vi understøtter mange platforme. Her er adresserne for hurtig oplevelse på web
 
 🤲 For at lette brugeroplevelsen tilbyder vi forskellige udrulningsløsninger. Du kan vælge din udrulningsmetode fra listen nedenfor:
 
-+ **[Vejledning til udrulning af kildekode](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Vejledning til Docker-udrulning](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[Vejledning til Kubernetes-udrulning](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
-+ **[Vejledning til Mac-udviklerudrulning](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
+- **[Vejledning til udrulning af kildekode](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
+- **[Vejledning til Docker-udrulning](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
+- **[Vejledning til Kubernetes-udrulning](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
+- **[Vejledning til Mac-udviklerudrulning](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
 
 ## :hammer_and_wrench: For at starte udviklingen af OpenIM
 
@@ -134,7 +128,7 @@ OpenIM Vores mål er at bygge et topniveau åben kildekode-fællesskab. Vi har e
 
 Hvis du gerne vil bidrage til dette Open-IM-Server-repositorium, bedes du læse vores [dokumentation for bidragydere](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md).
 
-Før du starter, skal du sikre dig, at dine ændringer er efterspurgte. Det bedste for det er at oprette en [ny diskussion](https://github.com/openimsdk/open-im-server/discussions/new/choose) ELLER [Slack-kommunikation](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q), eller hvis du finder et problem, [rapportere det](https://github.com/openimsdk/open-im-server/issues/new/choose) først.
+Før du starter, skal du sikre dig, at dine ændringer er efterspurgte. Det bedste for det er at oprette en [ny diskussion](https://github.com/openimsdk/open-im-server/discussions/new/choose) ELLER [Slack-kommunikation](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A), eller hvis du finder et problem, [rapportere det](https://github.com/openimsdk/open-im-server/issues/new/choose) først.
 
 - [OpenIM API-referencer](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/api.md)
 - [OpenIM Bash-logging](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/bash-log.md)
@@ -166,12 +160,11 @@ Før du starter, skal du sikre dig, at dine ændringer er efterspurgte. Det beds
 - [Administrer backend og overvåg udrulning](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
 - [Mac-udviklerudrulningsguide for OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
 
-
 ## :calendar: Fællesskabsmøder
 
 Vi ønsker, at alle involverer sig i vores fællesskab og bidrager med kode, vi tilbyder gaver og belønninger, og vi byder dig velkommen til at deltage hver torsdag aften.
 
-Vores konference er på [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) 🎯, derefter kan du søge Open-IM-Server pipeline for at deltage.
+Vores konference er på [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A) 🎯, derefter kan du søge Open-IM-Server pipeline for at deltage.
 
 Vi tager [notater](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) af hvert fjortendages møde i [GitHub-diskussioner](https://github.com/openimsdk/open-im-server/discussions/categories/meeting), Vores historiske mødenotater samt genudsendelser af møderne er tilgængelige på [Google Docs](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing) 📑.
 

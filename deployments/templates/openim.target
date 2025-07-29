@@ -1,7 +1,0 @@
-[Unit]
-Description=Unified target for OpenIM servers
-Requires=openim-api.service openim-push.service openim-rpc-group.service openim-crontask.service openim-rpc-auth.service openim-rpc-msg.service openim-msggateway.service openim-rpc-conversation.service openim-rpc-third.service openim-msgtransfer.service openim-rpc-friend.service openim-rpc-user.service
-After=openim-api.service openim-push.service openim-rpc-group.service openim-crontask.service openim-rpc-auth.service openim-rpc-msg.service openim-msggateway.service openim-rpc-conversation.service openim-rpc-third.service openim-msgtransfer.service openim-rpc-friend.service openim-rpc-user.service
-
-[Install]
-WantedBy=multi-user.target

@@ -2,18 +2,18 @@ rpc:
   # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
   registerIP:
   # autoSetPorts indicates whether to automatically set the ports
+  # if you use in kubernetes, set it to false
   autoSetPorts: true
   # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
   # It will only take effect when autoSetPorts is set to false.
-  ports: [ 10140, 10141, 10142, 10143, 10144, 10145, 10146, 10147, 10148, 10149, 10150, 10151, 10152, 10153, 10154, 10155 ]
+  ports:
 
 prometheus:
   # Enable or disable Prometheus monitoring
   enable: true
   # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
   # It will only take effect when autoSetPorts is set to false.
-  ports: [ 12140, 12141, 12142, 12143, 12144, 12145, 12146, 12147, 12148, 12149, 12150, 12151, 12152, 12153, 12154, 12155 ]
-
+  ports:
 # IP address that the RPC/WebSocket service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
 listenIP: 0.0.0.0
 

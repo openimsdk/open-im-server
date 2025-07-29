@@ -2,6 +2,7 @@ package push
 
 import (
 	"context"
+	"github.com/openimsdk/tools/mq"
 	"math/rand"
 	"strconv"
 
@@ -50,7 +51,7 @@ func (p pushServer) DelUserPushToken(ctx context.Context,
 	return &pbpush.DelUserPushTokenResp{}, nil
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	dbb := dbbuild.NewBuilder(&config.MongoConfig, &config.RedisConfig)
 	rdb, err := dbb.Redis(ctx)
 	if err != nil {
@@ -106,8 +107,8 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 
 	go func() {
 		pushHandler.WaitCache()
-		fn := func(ctx context.Context, key string, value []byte) error {
-			pushHandler.HandleMs2PsChat(authverify.WithTempAdmin(ctx), value)
+		fn := func(msg mq.Message) error {
+			pushHandler.HandleMs2PsChat(authverify.WithTempAdmin(msg.Context()), msg.Value())
 			return nil
 		}
 		consumerCtx := mcontext.SetOperationID(context.Background(), "push_"+strconv.Itoa(int(rand.Uint32())))
@@ -121,8 +122,8 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	}()
 
 	go func() {
-		fn := func(ctx context.Context, key string, value []byte) error {
-			offlineHandler.HandleMsg2OfflinePush(ctx, value)
+		fn := func(msg mq.Message) error {
+			offlineHandler.HandleMsg2OfflinePush(msg.Context(), msg.Value())
 			return nil
 		}
 		consumerCtx := mcontext.SetOperationID(context.Background(), "push_"+strconv.Itoa(int(rand.Uint32())))

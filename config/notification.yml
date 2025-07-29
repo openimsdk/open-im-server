@@ -1,10 +1,10 @@
 groupCreated:
   isSendMsg: true
-  # Deprecated. Fixed as 1.
+# Deprecated. Fixed as 1.
   reliabilityLevel: 1
-  # Deprecated. Fixed as false.
+# Deprecated. Fixed as false.
   unreadCount: false
-  # Configuration for offline push notifications.
+# Configuration for offline push notifications.
   offlinePush:
     # Enables or disables offline push notifications.
     enable: false

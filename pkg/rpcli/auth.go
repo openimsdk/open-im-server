@@ -2,7 +2,6 @@ package rpcli
 
 import (
 	"context"
-
 	"github.com/openimsdk/protocol/auth"
 	"google.golang.org/grpc"
 )

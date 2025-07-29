@@ -120,15 +120,11 @@ func (m *MsgDocModel) GetDocID(conversationID string, seq int64) string {
 
 func (m *MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[string][]int64 {
 	t := make(map[string][]int64)
-	for i := 0; i < len(seqs); i++ {
-		docID := m.GetDocID(conversationID, seqs[i])
-		if value, ok := t[docID]; !ok {
-			var temp []int64
-			t[docID] = append(temp, seqs[i])
-		} else {
-			t[docID] = append(value, seqs[i])
-		}
+	for _, seq := range seqs {
+		docID := m.GetDocID(conversationID, seq)
+		t[docID] = append(t[docID], seq)
 	}
+
 	return t
 }
 
