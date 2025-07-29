@@ -266,7 +266,9 @@ func (x *JSSdk) checkMessagesAndGetLastMessage(ctx context.Context, userID strin
 				break
 			}
 		}
-		if allInValid {
+
+		// when the conversation has been deleted by the user, the length of message.Msgs is empty
+		if allInValid && len(message.Msgs) > 0 {
 			conversationIDs = append(conversationIDs, conversationID)
 		}
 	}

@@ -23,6 +23,8 @@ import (
 	"github.com/openimsdk/tools/s3/aws"
 	"github.com/openimsdk/tools/s3/disable"
 
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
@@ -37,7 +39,6 @@ import (
 	"github.com/openimsdk/tools/s3/kodo"
 	"github.com/openimsdk/tools/s3/minio"
 	"github.com/openimsdk/tools/s3/oss"
-	"google.golang.org/grpc"
 )
 
 type thirdServer struct {
