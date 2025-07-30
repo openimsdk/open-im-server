@@ -31,7 +31,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	dbModel "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
@@ -69,7 +68,7 @@ type Config struct {
 	Discovery          config.Discovery
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	dbb := dbbuild.NewBuilder(&config.MongodbConfig, &config.RedisConfig)
 	mgocli, err := dbb.Mongo(ctx)
 	if err != nil {
@@ -244,11 +243,14 @@ func (c *conversationServer) getConversations(ctx context.Context, ownerUserID s
 	return convert.ConversationsDB2Pb(conversations), nil
 }
 
+// Deprecated
 func (c *conversationServer) SetConversation(ctx context.Context, req *pbconversation.SetConversationReq) (*pbconversation.SetConversationResp, error) {
 	if err := authverify.CheckAccess(ctx, req.GetConversation().GetUserID()); err != nil {
 		return nil, err
 	}
 	var conversation dbModel.Conversation
+	conversation.CreateTime = time.Now()
+
 	if err := datautil.CopyStructFields(&conversation, req.Conversation); err != nil {
 		return nil, err
 	}
@@ -300,6 +302,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 	conversation.ConversationType = req.Conversation.ConversationType
 	conversation.UserID = req.Conversation.UserID
 	conversation.GroupID = req.Conversation.GroupID
+	conversation.CreateTime = time.Now()
 
 	m, conversation, err := UpdateConversationsMap(ctx, req)
 	if err != nil {
@@ -365,6 +368,8 @@ func (c *conversationServer) UpdateConversationsByUser(ctx context.Context, req 
 // create conversation without notification for msg redis transfer.
 func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, req *pbconversation.CreateSingleChatConversationsReq) (*pbconversation.CreateSingleChatConversationsResp, error) {
 	var conversation dbModel.Conversation
+	conversation.CreateTime = time.Now()
+
 	switch req.ConversationType {
 	case constant.SingleChatType:
 		// sendUser create
@@ -372,6 +377,7 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, 
 		conversation.ConversationType = req.ConversationType
 		conversation.OwnerUserID = req.SendID
 		conversation.UserID = req.RecvID
+
 		if err := c.webhookBeforeCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateSingleChatConversations, &conversation); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
@@ -387,6 +393,7 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, 
 		conversation2 := conversation
 		conversation2.OwnerUserID = req.RecvID
 		conversation2.UserID = req.SendID
+
 		if err := c.webhookBeforeCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateSingleChatConversations, &conversation); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
@@ -402,6 +409,7 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, 
 		conversation.ConversationType = req.ConversationType
 		conversation.OwnerUserID = req.RecvID
 		conversation.UserID = req.SendID
+
 		if err := c.webhookBeforeCreateSingleChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateSingleChatConversations, &conversation); err != nil && err != servererrs.ErrCallbackContinue {
 			return nil, err
 		}
@@ -423,6 +431,7 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 	conversation.ConversationID = msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, req.GroupID)
 	conversation.GroupID = req.GroupID
 	conversation.ConversationType = constant.ReadGroupChatType
+	conversation.CreateTime = time.Now()
 
 	if err := c.webhookBeforeCreateGroupChatConversations(ctx, &c.config.WebhooksConfig.BeforeCreateGroupChatConversations, &conversation); err != nil {
 		return nil, err
@@ -708,7 +717,7 @@ func (c *conversationServer) GetConversationsNeedClearMsg(ctx context.Context, _
 
 	maxPage := (num + batchNum - 1) / batchNum
 
-	temp := make([]*model.Conversation, 0, maxPage*batchNum)
+	temp := make([]*dbModel.Conversation, 0, maxPage*batchNum)
 
 	for pageNumber := 0; pageNumber < int(maxPage); pageNumber++ {
 		pagination := &sdkws.RequestPagination{

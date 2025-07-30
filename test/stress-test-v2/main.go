@@ -446,7 +446,7 @@ func main() {
 			Share: *share,
 			Api:   *apiConfig,
 		},
-		AdminUserID: share.IMAdminUserID[0],
+		AdminUserID: share.IMAdminUser.UserIDs[0],
 		Ctx:         ctx,
 		Cancel:      cancel,
 		HttpClient: &http.Client{

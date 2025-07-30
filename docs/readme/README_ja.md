@@ -12,11 +12,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/openimsdk/open-im-server?style=for-the-badge)](https://goreportcard.com/report/github.com/openimsdk/open-im-server)
 [![Go Reference](https://img.shields.io/badge/Go%20Reference-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/openimsdk/open-im-server/v3)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)
-[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
 [![Best Practices](https://img.shields.io/badge/Best%20Practices-purple?style=for-the-badge)](https://www.bestpractices.dev/projects/8045)
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
-
 
 <p align="center">
   <a href="../../README.md">English</a> · 
@@ -46,29 +45,25 @@
   <a href="./README_tr.md">Türkçe</a>
 </p>
 
-
 </div>
 
 </p>
 
+## Ⓜ️ OpenIM について
 
-## Ⓜ️ OpenIMについて
-
-OpenIMは、アプリケーション内でチャット、音声通話、通知、AIチャットボットなどの通信機能を統合するために特別に設計されたサービスプラットフォームです。一連の強力なAPIとWebhooksを提供することで、開発者はアプリケーションに簡単にこれらの通信機能を統合できます。OpenIM自体は独立したチャットアプリではなく、アプリケーションにサポートを提供し、豊富な通信機能を実現するプラットフォームです。以下の図は、AppServer、AppClient、OpenIMServer、OpenIMSDK間の相互作用を示しています。
-
-
+OpenIM は、アプリケーション内でチャット、音声通話、通知、AI チャットボットなどの通信機能を統合するために特別に設計されたサービスプラットフォームです。一連の強力な API と Webhooks を提供することで、開発者はアプリケーションに簡単にこれらの通信機能を統合できます。OpenIM 自体は独立したチャットアプリではなく、アプリケーションにサポートを提供し、豊富な通信機能を実現するプラットフォームです。以下の図は、AppServer、AppClient、OpenIMServer、OpenIMSDK 間の相互作用を示しています。
 
 ![App-OpenIM Relationship](../images/oepnim-design.png)
 
-## 🚀 OpenIMSDKについて
+## 🚀 OpenIMSDK について
 
- **OpenIMSDK**は、**OpenIMServer**用に設計されたIM SDKで、クライアントアプリケーションに組み込むためのものです。主な機能とモジュールは以下の通りです：
+**OpenIMSDK**は、**OpenIMServer**用に設計された IM SDK で、クライアントアプリケーションに組み込むためのものです。主な機能とモジュールは以下の通りです：
 
-+ 🌟 主な機能：
+- 🌟 主な機能：
 
-  - 📦  ローカルストレージ
+  - 📦 ローカルストレージ
   - 🔔 リスナーコールバック
-  - 🛡️ APIのラッピング
+  - 🛡️ API のラッピング
   - 🌐 接続管理
 
   ## 📚 主なモジュール：
@@ -79,54 +74,54 @@ OpenIMは、アプリケーション内でチャット、音声通話、通知�
   4. 🤖 グループ機能
   5. 💬 会話処理
 
-Golangを使用して構築され、クロスプラットフォームの導入をサポートし、すべてのプラットフォームで一貫したアクセス体験を提供します。
+Golang を使用して構築され、クロスプラットフォームの導入をサポートし、すべてのプラットフォームで一貫したアクセス体験を提供します。
 
-👉 **[GO SDKを探索する](https://github.com/openimsdk/openim-sdk-core)**
+👉 **[GO SDK を探索する](https://github.com/openimsdk/openim-sdk-core)**
 
-## 🌐 OpenIMServerについて
+## 🌐 OpenIMServer について
 
-+ **OpenIMServer** には以下の特徴があります：
-  - 🌐 マイクロサービスアーキテクチャ：クラスターモードをサポートし、ゲートウェイ（gateway）と複数のrpcサービスを含みます。
-  - 🚀 多様なデプロイメント方法：ソースコード、kubernetes、またはdockerでのデプロイメントをサポートします。
+- **OpenIMServer** には以下の特徴があります：
+  - 🌐 マイクロサービスアーキテクチャ：クラスターモードをサポートし、ゲートウェイ（gateway）と複数の rpc サービスを含みます。
+  - 🚀 多様なデプロイメント方法：ソースコード、kubernetes、または docker でのデプロイメントをサポートします。
   - 海量ユーザーサポート：十万人規模の超大型グループ、千万人のユーザー、および百億のメッセージ
 
 ### 強化されたビジネス機能：
 
-+ **REST API**：OpenIMServerは、ビジネスシステム用のREST APIを提供しており、ビジネスにさらに多くの機能を提供することを目指しています。たとえば、バックエンドインターフェースを通じてグループを作成したり、プッシュメッセージを送信したりするなどです。
-+ **Webhooks**：OpenIMServerは、より多くのビジネス形態を拡張するためのコールバック機能を提供しています。コールバックとは、特定のイベントが発生する前後に、OpenIMServerがビジネスサーバーにリクエストを送信することを意味します。例えば、メッセージ送信の前後のコールバックなどです。
+- **REST API**：OpenIMServer は、ビジネスシステム用の REST API を提供しており、ビジネスにさらに多くの機能を提供することを目指しています。たとえば、バックエンドインターフェースを通じてグループを作成したり、プッシュメッセージを送信したりするなどです。
+- **Webhooks**：OpenIMServer は、より多くのビジネス形態を拡張するためのコールバック機能を提供しています。コールバックとは、特定のイベントが発生する前後に、OpenIMServer がビジネスサーバーにリクエストを送信することを意味します。例えば、メッセージ送信の前後のコールバックなどです。
 
 👉 **[もっと詳しく知る](https://docs.openim.io/guides/introduction/product)**
 
 ## :building_construction: 全体のアーキテクチャ
 
-Open-IM-Serverの機能の核心に迫るために、アーキテクチャダイアグラムをご覧ください。
+Open-IM-Server の機能の核心に迫るために、アーキテクチャダイアグラムをご覧ください。
 
 ![Overall Architecture](../images/architecture-layers.png)
 
 ## :rocket: クイックスタート
 
-iOS/Android/H5/PC/Webでのオンライン体験：
+iOS/Android/H5/PC/Web でのオンライン体験：
 
 👉 **[OpenIM online demo](https://www.openim.io/zh/commercial)**
 
 🤲 ユーザー体験を容易にするために、私たちは様々なデプロイメントソリューションを提供しています。以下のリストから、ご自身のデプロイメント方法を選択できます：
 
-+ **[ソースコードデプロイメントガイド](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Docker デプロイメントガイド](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[Kubernetes デプロイメントガイド](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
-+ **[Mac 開発者向けデプロイメントガイド](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
+- **[ソースコードデプロイメントガイド](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
+- **[Docker デプロイメントガイド](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
+- **[Kubernetes デプロイメントガイド](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
+- **[Mac 開発者向けデプロイメントガイド](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
 
-## :hammer_and_wrench: OpenIMの開発を始める
+## :hammer_and_wrench: OpenIM の開発を始める
 
 [![Open in Dev Container](https://img.shields.io/static/v1?label=Dev%20Container&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/github/openimsdk/open-im-server)
 
 OpenIM 私たちの目標は、トップレベルのオープンソースコミュニティを構築することです。[コミュニティリポジトリ](https://github.com/OpenIMSDK/community)には一連の基準があります。
 
-このOpen-IM-Serverリポジトリに貢献したい場合は、[貢献者ドキュメントをお読みください](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md)。
+この Open-IM-Server リポジトリに貢献したい場合は、[貢献者ドキュメントをお読みください](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md)。
 
-始める前に、変更に必要があることを確認してください。最良の方法は、[新しいディスカッション](https://github.com/openimsdk/open-im-server/discussions/new/choose)や[Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)での通信を作成すること、または問題を発見した場合は、まずそれを[報告](https://github.com/openimsdk/open-im-server/issues/new/choose)することです。
+始める前に、変更に必要があることを確認してください。最良の方法は、[新しいディスカッション](https://github.com/openimsdk/open-im-server/discussions/new/choose)や[Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)での通信を作成すること、または問題を発見した場合は、まずそれを[報告](https://github.com/openimsdk/open-im-server/issues/new/choose)することです。
 
-- [OpenIM APIリファレンス](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/api.md)
+- [OpenIM API リファレンス](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/api.md)
 - [OpenIM Bash ロギング](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/bash-log.md)
 - [OpenIM CI/CD アクション](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/cicd-actions.md)
 - [OpenIM コード規約](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/code-conventions.md)
@@ -149,37 +144,35 @@ OpenIM 私たちの目標は、トップレベルのオープンソースコミ�
 - [OpenIM オフラインデプロイメント](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/offline-deployment.md)
 - [OpenIM Protoc ツール](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/protoc-tools.md)
 - [OpenIM テスティングガイド](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/test.md)
-- [OpenIM ユーティリティGo](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/util-go.md)
+- [OpenIM ユーティリティ Go](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/util-go.md)
 - [OpenIM Makefile ユーティリティ](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/util-makefile.md)
 - [OpenIM スクリプトユーティリティ](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/util-scripts.md)
 - [OpenIM バージョニング](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/version.md)
 - [バックエンド管理とモニターデプロイメント](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
-- [OpenIM用Mac開発者デプロイメントガイド](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
-
+- [OpenIM 用 Mac 開発者デプロイメントガイド](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
 
 ## :busts_in_silhouette: コミュニティ
 
-+ 📚 [OpenIM コミュニティ](https://github.com/OpenIMSDK/community)
-+ 💕 [OpenIM 興味グループ](https://github.com/Openim-sigs)
-+ 🚀 [私たちのSlackコミュニティに参加する](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [私たちのWeChat（微信群）に参加する](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
+- 📚 [OpenIM コミュニティ](https://github.com/OpenIMSDK/community)
+- 💕 [OpenIM 興味グループ](https://github.com/Openim-sigs)
+- 🚀 [私たちの Slack コミュニティに参加する](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
+- :eyes: [私たちの WeChat（微信群）に参加する](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: コミュニティミーティング
 
 私たちは、誰もがコミュニティに参加し、コードに貢献してもらいたいと考えています。私たちは、ギフトや報酬を提供し、毎週木曜日の夜に参加していただくことを歓迎します。
 
-私たちの会議は[OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)🎯で行われます。そこでOpen-IM-Serverパイプラインを検索して参加できます。
+私たちの会議は[OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)🎯 で行われます。そこで Open-IM-Server パイプラインを検索して参加できます。
 
+私たちは[隔週の会議](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting)のメモを[GitHub ディスカッション](https://github.com/openimsdk/open-im-server/discussions/categories/meeting)に記録しています。歴史的な会議のメモや会議のリプレイは[Google Docs📑](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing)で利用可能です。
 
-私たちは[隔週の会議](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting)のメモを[GitHubディスカッション](https://github.com/openimsdk/open-im-server/discussions/categories/meeting)に記録しています。歴史的な会議のメモや会議のリプレイは[Google Docs📑](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing)で利用可能です。
+## :eyes: OpenIM を使用している人たち
 
-## :eyes: OpenIMを使用している人たち
-
-プロジェクトユーザーのリストについては、[ユーザーケーススタディ](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md)ページをご覧ください。[コメント📝](https://github.com/openimsdk/open-im-server/issues/379)を残して、あなたの使用例を共有することを躊躇しないでください。
+プロジェクトユーザーのリストについては、[ユーザーケーススタディ](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md)ページをご覧ください。[コメント 📝](https://github.com/openimsdk/open-im-server/issues/379)を残して、あなたの使用例を共有することを躊躇しないでください。
 
 ## :page_facing_up: ライセンス
 
-OpenIMはApache 2.0ライセンスの下でライセンスされています。完全なライセンステキストについては、[LICENSE](https://github.com/openimsdk/open-im-server/tree/main/LICENSE)を参照してください。
+OpenIM は Apache 2.0 ライセンスの下でライセンスされています。完全なライセンステキストについては、[LICENSE](https://github.com/openimsdk/open-im-server/tree/main/LICENSE)を参照してください。
 
 このリポジトリに表示される[OpenIM](https://github.com/openimsdk/open-im-server)ロゴ、そのバリエーション、およびアニメーションバージョン（[assets/logo](./assets/logo)および[assets/logo-gif](assets/logo-gif)ディレクトリ内）は、著作権法によって保護されています。
 

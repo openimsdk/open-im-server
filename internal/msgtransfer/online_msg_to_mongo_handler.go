@@ -15,10 +15,12 @@
 package msgtransfer
 
 import (
-	"context"
+	"github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/mq"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	pbmsg "github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/tools/log"
 	"google.golang.org/protobuf/proto"
@@ -26,15 +28,22 @@ import (
 
 type OnlineHistoryMongoConsumerHandler struct {
 	msgTransferDatabase controller.MsgTransferDatabase
+	config              *Config
+	webhookClient       *webhook.Client
 }
 
-func NewOnlineHistoryMongoConsumerHandler(database controller.MsgTransferDatabase) *OnlineHistoryMongoConsumerHandler {
+func NewOnlineHistoryMongoConsumerHandler(database controller.MsgTransferDatabase, config *Config) *OnlineHistoryMongoConsumerHandler {
 	return &OnlineHistoryMongoConsumerHandler{
 		msgTransferDatabase: database,
+		config:              config,
+		webhookClient:       webhook.NewWebhookClient(config.WebhooksConfig.URL),
 	}
 }
 
-func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(ctx context.Context, key string, msg []byte) {
+func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(val mq.Message) {
+	ctx := val.Context()
+	key := val.Key()
+	msg := val.Value()
 	msgFromMQ := pbmsg.MsgDataToMongoByMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
@@ -52,7 +61,18 @@ func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(ctx context.Cont
 		prommetrics.MsgInsertMongoFailedCounter.Inc()
 	} else {
 		prommetrics.MsgInsertMongoSuccessCounter.Inc()
+		val.Mark()
 	}
+
+	for _, msgData := range msgFromMQ.MsgData {
+		switch msgData.SessionType {
+		case constant.SingleChatType:
+			mc.webhookAfterSendSingleMsg(ctx, &mc.config.WebhooksConfig.AfterSendSingleMsg, msgData)
+		case constant.ReadGroupChatType:
+			mc.webhookAfterSendGroupMsg(ctx, &mc.config.WebhooksConfig.AfterSendGroupMsg, msgData)
+		}
+	}
+
 	//var seqs []int64
 	//for _, msg := range msgFromMQ.MsgData {
 	//	seqs = append(seqs, msg.Seq)

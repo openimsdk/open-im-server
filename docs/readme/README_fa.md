@@ -12,11 +12,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/openimsdk/open-im-server?style=for-the-badge)](https://goreportcard.com/report/github.com/openimsdk/open-im-server)
 [![Go Reference](https://img.shields.io/badge/Go%20Reference-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/openimsdk/open-im-server/v3)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)
-[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
 [![Best Practices](https://img.shields.io/badge/Best%20Practices-purple?style=for-the-badge)](https://www.bestpractices.dev/projects/8045)
 [![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
-
 
 <p align="center">
   <a href="../../README.md">English</a> · 
@@ -46,7 +45,6 @@
   <a href="./README_tr.md">Türkçe</a>
 </p>
 
-
 </div>
 
 </p>
@@ -61,14 +59,14 @@ OpenIM یک پلتفرم خدماتی است که به طور خاص برای ا
 
 **OpenIMSDK** یک IM SDK است که برای **OpenIMServer** طراحی شده است که به طور خاص برای جاسازی در برنامه های مشتری ایجاد شده است. ویژگی ها و ماژول های اصلی آن به شرح زیر است:
 
-+ 🌟 ویژگی های اصلی:
+- 🌟 ویژگی های اصلی:
 
   - 📦 ذخیره سازی محلی
   - 🔔 پاسخ تماس شنونده
   - 🛡️ بسته بندی API
   - 🌐 مدیریت اتصال
 
-+ 📚 ماژول های اصلی:
+- 📚 ماژول های اصلی:
 
   1. 🚀 مقداردهی اولیه و ورود
   2. 👤 مدیریت کاربر
@@ -82,15 +80,15 @@ OpenIM یک پلتفرم خدماتی است که به طور خاص برای ا
 
 ## 🌐 درباره OpenIMServer
 
-+ **OpenIMServer** دارای ویژگی های زیر است:
+- **OpenIMServer** دارای ویژگی های زیر است:
   - 🌐 معماری Microservice: از حالت کلاستر، از جمله یک دروازه و چندین سرویس rpc پشتیبانی می کند.
   - 🚀 روش‌های استقرار متنوع: از استقرار از طریق کد منبع، Kubernetes یا Docker پشتیبانی می‌کند.
   - پشتیبانی از پایگاه عظیم کاربران: گروه های فوق العاده بزرگ با صدها هزار کاربر، ده ها میلیون کاربر و میلیاردها پیام.
 
 ### عملکردهای تجاری پیشرفته:
 
-+ **REST API**: OpenIMServer APIهای REST را برای سیستم‌های تجاری ارائه می‌کند، با هدف توانمندسازی کسب‌وکارها با قابلیت‌های بیشتر، مانند ایجاد گروه‌ها و ارسال پیام‌های فشار از طریق رابط‌های باطنی.
-+ **Webhooks**: OpenIMServer قابلیت های پاسخ به تماس را برای گسترش بیشتر فرم های تجاری ارائه می دهد. پاسخ به تماس به این معنی است که OpenIMServer درخواستی را قبل یا بعد از یک رویداد خاص به سرور تجاری ارسال می کند، مانند تماس های قبل یا بعد از ارسال یک پیام.
+- **REST API**: OpenIMServer APIهای REST را برای سیستم‌های تجاری ارائه می‌کند، با هدف توانمندسازی کسب‌وکارها با قابلیت‌های بیشتر، مانند ایجاد گروه‌ها و ارسال پیام‌های فشار از طریق رابط‌های باطنی.
+- **Webhooks**: OpenIMServer قابلیت های پاسخ به تماس را برای گسترش بیشتر فرم های تجاری ارائه می دهد. پاسخ به تماس به این معنی است که OpenIMServer درخواستی را قبل یا بعد از یک رویداد خاص به سرور تجاری ارسال می کند، مانند تماس های قبل یا بعد از ارسال یک پیام.
 
 👉 **[بیشتر بدانید](https://docs.openim.io/guides/introduction/product)**
 
@@ -100,7 +98,6 @@ OpenIM یک پلتفرم خدماتی است که به طور خاص برای ا
 
 ![Overall Architecture](../images/architecture-layers.png)
 
-
 ## :rocket: شروع سریع
 
 ما از بسیاری از پلتفرم ها پشتیبانی می کنیم. در اینجا آدرس هایی برای تجربه سریع در سمت وب آمده است:
@@ -109,10 +106,10 @@ OpenIM یک پلتفرم خدماتی است که به طور خاص برای ا
 
 🤲 برای تسهیل تجربه کاربر، ما راه حل های مختلف استقرار را ارائه می دهیم. می توانید روش استقرار خود را از لیست زیر انتخاب کنید:
 
-+ **[راهنمای استقرار کد منبع](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[راهنمای استقرار داکر](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
-+ **[راهنمای استقرار Kubernetes](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
-+ **[راهنمای استقرار توسعه دهنده مک](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
+- **[راهنمای استقرار کد منبع](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
+- **[راهنمای استقرار داکر](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
+- **[راهنمای استقرار Kubernetes](https://docs.openim.io/guides/gettingStarted/k8s-deployment)**
+- **[راهنمای استقرار توسعه دهنده مک](https://docs.openim.io/guides/gettingstarted/mac-deployment-guide)**
 
 ## :hammer_and_wrench: برای شروع توسعه OpenIM
 
@@ -122,7 +119,7 @@ OpenIM هدف ما ایجاد یک جامعه منبع باز سطح بالا ا
 
 اگر می‌خواهید در این مخزن Open-IM-Server مشارکت کنید، لطفاً [مستندات مشارکت‌کننده](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md) ما را بخوانید.
 
-قبل از شروع، لطفاً مطمئن شوید که تغییرات شما مورد تقاضا هستند. بهترین کار برای آن این است که یک [بحث جدید](https://github.com/openimsdk/open-im-server/discussions/new/choose) یا [ارتباط اسلک](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) ایجاد کنید، یا اگر مشکلی پیدا کردید، ابتدا [آن را گزارش کنید](https://github.com/openimsdk/open-im-server/issues/new/choose).
+قبل از شروع، لطفاً مطمئن شوید که تغییرات شما مورد تقاضا هستند. بهترین کار برای آن این است که یک [بحث جدید](https://github.com/openimsdk/open-im-server/discussions/new/choose) یا [ارتباط اسلک](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A) ایجاد کنید، یا اگر مشکلی پیدا کردید، ابتدا [آن را گزارش کنید](https://github.com/openimsdk/open-im-server/issues/new/choose).
 
 - [مرجع OpenIM API](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/api.md)
 - [OpenIM Bash Logging](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/bash-log.md)
@@ -154,21 +151,20 @@ OpenIM هدف ما ایجاد یک جامعه منبع باز سطح بالا ا
 - [مدیریت استقرار باطن و نظارت](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/prometheus-grafana.md)
 - [راهنمای استقرار توسعه دهنده مک برای OpenIM](https://github.com/openimsdk/open-im-server/tree/main/docs/contrib/mac-developer-deployment-guide.md)
 
-
 ## :busts_in_silhouette: انجمن
 
-+ 📚 [انجمن OpenIM](https://github.com/OpenIMSDK/community)
-+ 💕 [گروه علاقه OpenIM](https://github.com/Openim-sigs)
-+ 🚀 [به انجمن Slack ما بپیوندید](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
-+ :eyes: [به وی چت ما بپیوندید](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
+- 📚 [انجمن OpenIM](https://github.com/OpenIMSDK/community)
+- 💕 [گروه علاقه OpenIM](https://github.com/Openim-sigs)
+- 🚀 [به انجمن Slack ما بپیوندید](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A)
+- :eyes: [به وی چت ما بپیوندید](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: جلسات جامعه
 
 ما می‌خواهیم هر کسی در انجمن ما مشارکت کند و در کد مشارکت کند، ما هدایا و جوایزی ارائه می‌کنیم، و از شما استقبال می‌کنیم که هر پنجشنبه شب به ما بپیوندید.
 
-کنفرانس ما در [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) 🎯 است، سپس می توانید خط لوله Open-IM-Server را برای پیوستن جستجو کنید.
+کنفرانس ما در [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-2ijy1ys1f-O0aEDCr7ExRZ7mwsHAVg9A) 🎯 است، سپس می توانید خط لوله Open-IM-Server را برای پیوستن جستجو کنید.
 
-ما از هر [جلسه دو هفته‌ای](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) در  [بحث‌های GitHub](https://github.com/openimsdk/open-im-server/discussions/categories/meeting) یادداشت‌برداری می‌کنیم، یادداشت‌های جلسه تاریخی ما، و همچنین بازپخش جلسات در  [Google Docs :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing) موجود است.
+ما از هر [جلسه دو هفته‌ای](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) در [بحث‌های GitHub](https://github.com/openimsdk/open-im-server/discussions/categories/meeting) یادداشت‌برداری می‌کنیم، یادداشت‌های جلسه تاریخی ما، و همچنین بازپخش جلسات در [Google Docs :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing) موجود است.
 
 ## :eyes: چه کسانی از OpenIM استفاده می کنند
 

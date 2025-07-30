@@ -14,6 +14,8 @@
 
 package apistruct
 
+import "github.com/openimsdk/protocol/sdkws"
+
 type PictureBaseInfo struct {
 	UUID   string `mapstructure:"uuid"`
 	Type   string `mapstructure:"type"   validate:"required"`
@@ -61,9 +63,11 @@ type FileElem struct {
 	FileSize  int64  `mapstructure:"fileSize"  validate:"required"`
 }
 type AtElem struct {
-	Text       string   `mapstructure:"text"`
-	AtUserList []string `mapstructure:"atUserList" validate:"required,max=1000"`
-	IsAtSelf   bool     `mapstructure:"isAtSelf"`
+	Text         string     `mapstructure:"text"`
+	AtUserList   []string   `mapstructure:"atUserList" validate:"required,max=1000"`
+	AtUsersInfo  []*AtInfo  `json:"atUsersInfo"`
+	QuoteMessage *MsgStruct `json:"quoteMessage"`
+	IsAtSelf     bool       `mapstructure:"isAtSelf"`
 }
 type LocationElem struct {
 	Description string  `mapstructure:"description"`
@@ -94,6 +98,11 @@ type RevokeElem struct {
 	RevokeMsgClientID string `mapstructure:"revokeMsgClientID" validate:"required"`
 }
 
+type QuoteElem struct {
+	Text         string     `json:"text,omitempty"`
+	QuoteMessage *MsgStruct `json:"quoteMessage,omitempty"`
+}
+
 type OANotificationElem struct {
 	NotificationName    string       `mapstructure:"notificationName"    json:"notificationName"    validate:"required"`
 	NotificationFaceURL string       `mapstructure:"notificationFaceURL" json:"notificationFaceURL"`
@@ -107,6 +116,7 @@ type OANotificationElem struct {
 	FileElem            *FileElem    `mapstructure:"fileElem"            json:"fileElem"`
 	Ex                  string       `mapstructure:"ex"                  json:"ex"`
 }
+
 type MessageRevoked struct {
 	RevokerID       string `mapstructure:"revokerID"       json:"revokerID"       validate:"required"`
 	RevokerRole     int32  `mapstructure:"revokerRole"     json:"revokerRole"     validate:"required"`
@@ -114,4 +124,44 @@ type MessageRevoked struct {
 	RevokerNickname string `mapstructure:"revokerNickname" json:"revokerNickname"`
 	SessionType     int32  `mapstructure:"sessionType"     json:"sessionType"     validate:"required"`
 	Seq             uint32 `mapstructure:"seq"             json:"seq"             validate:"required"`
+}
+
+type MsgStruct struct {
+	ClientMsgID          string                 `json:"clientMsgID,omitempty"`
+	ServerMsgID          string                 `json:"serverMsgID,omitempty"`
+	CreateTime           int64                  `json:"createTime"`
+	SendTime             int64                  `json:"sendTime"`
+	SessionType          int32                  `json:"sessionType"`
+	SendID               string                 `json:"sendID,omitempty"`
+	RecvID               string                 `json:"recvID,omitempty"`
+	MsgFrom              int32                  `json:"msgFrom"`
+	ContentType          int32                  `json:"contentType"`
+	SenderPlatformID     int32                  `json:"senderPlatformID"`
+	SenderNickname       string                 `json:"senderNickname,omitempty"`
+	SenderFaceURL        string                 `json:"senderFaceUrl,omitempty"`
+	GroupID              string                 `json:"groupID,omitempty"`
+	Content              string                 `json:"content,omitempty"`
+	Seq                  int64                  `json:"seq"`
+	IsRead               bool                   `json:"isRead"`
+	Status               int32                  `json:"status"`
+	IsReact              bool                   `json:"isReact,omitempty"`
+	IsExternalExtensions bool                   `json:"isExternalExtensions,omitempty"`
+	OfflinePush          *sdkws.OfflinePushInfo `json:"offlinePush,omitempty"`
+	AttachedInfo         string                 `json:"attachedInfo,omitempty"`
+	Ex                   string                 `json:"ex,omitempty"`
+	LocalEx              string                 `json:"localEx,omitempty"`
+	TextElem             *TextElem              `json:"textElem,omitempty"`
+	PictureElem          *PictureElem           `json:"pictureElem,omitempty"`
+	SoundElem            *SoundElem             `json:"soundElem,omitempty"`
+	VideoElem            *VideoElem             `json:"videoElem,omitempty"`
+	FileElem             *FileElem              `json:"fileElem,omitempty"`
+	AtTextElem           *AtElem                `json:"atTextElem,omitempty"`
+	LocationElem         *LocationElem          `json:"locationElem,omitempty"`
+	CustomElem           *CustomElem            `json:"customElem,omitempty"`
+	QuoteElem            *QuoteElem             `json:"quoteElem,omitempty"`
+}
+
+type AtInfo struct {
+	AtUserID      string `json:"atUserID,omitempty"`
+	GroupNickname string `json:"groupNickname,omitempty"`
 }

@@ -4,14 +4,15 @@ rpc:
   # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
   listenIP: 0.0.0.0
   # autoSetPorts indicates whether to automatically set the ports
+  # if you use in kubernetes, set it to false
   autoSetPorts: true
   # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances. These must match the number of configured prometheus ports
   # It will only take effect when autoSetPorts is set to false.
-  ports: [ 10220 ]
+  ports:
 
 prometheus:
   # Enable or disable Prometheus monitoring
   enable: true
   # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
   # It will only take effect when autoSetPorts is set to false.
-  ports: [ 12220 ]
+  ports:

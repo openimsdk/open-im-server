@@ -94,7 +94,22 @@ func (*MessageApi) SetOptions(options map[string]bool, value bool) {
 	datautil.SetSwitchFromOptions(options, constant.IsConversationUpdate, value)
 }
 
-func (m *MessageApi) newUserSendMsgReq(_ *gin.Context, params *apistruct.SendMsg) *msg.SendMsgReq {
+func (m *MessageApi) newUserSendMsgReq(_ *gin.Context, params *apistruct.SendMsg, data any) *msg.SendMsgReq {
+	msgData := &sdkws.MsgData{
+		SendID:           params.SendID,
+		GroupID:          params.GroupID,
+		ClientMsgID:      idutil.GetMsgIDByMD5(params.SendID),
+		SenderPlatformID: params.SenderPlatformID,
+		SenderNickname:   params.SenderNickname,
+		SenderFaceURL:    params.SenderFaceURL,
+		SessionType:      params.SessionType,
+		MsgFrom:          constant.SysMsgType,
+		ContentType:      params.ContentType,
+		CreateTime:       timeutil.GetCurrentTimestampByMill(),
+		SendTime:         params.SendTime,
+		OfflinePushInfo:  params.OfflinePushInfo,
+		Ex:               params.Ex,
+	}
 	var newContent string
 	options := make(map[string]bool, 5)
 	switch params.ContentType {
@@ -103,6 +118,11 @@ func (m *MessageApi) newUserSendMsgReq(_ *gin.Context, params *apistruct.SendMsg
 		notification.Detail = jsonutil.StructToJsonString(params.Content)
 		newContent = jsonutil.StructToJsonString(&notification)
 	case constant.Text:
+		fallthrough
+	case constant.AtText:
+		if atElem, ok := data.(*apistruct.AtElem); ok {
+			msgData.AtUserIDList = atElem.AtUserList
+		}
 		fallthrough
 	case constant.Picture:
 		fallthrough
@@ -123,24 +143,10 @@ func (m *MessageApi) newUserSendMsgReq(_ *gin.Context, params *apistruct.SendMsg
 	if params.NotOfflinePush {
 		datautil.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
 	}
+	msgData.Content = []byte(newContent)
+	msgData.Options = options
 	pbData := msg.SendMsgReq{
-		MsgData: &sdkws.MsgData{
-			SendID:           params.SendID,
-			GroupID:          params.GroupID,
-			ClientMsgID:      idutil.GetMsgIDByMD5(params.SendID),
-			SenderPlatformID: params.SenderPlatformID,
-			SenderNickname:   params.SenderNickname,
-			SenderFaceURL:    params.SenderFaceURL,
-			SessionType:      params.SessionType,
-			MsgFrom:          constant.SysMsgType,
-			ContentType:      params.ContentType,
-			Content:          []byte(newContent),
-			CreateTime:       timeutil.GetCurrentTimestampByMill(),
-			SendTime:         params.SendTime,
-			Options:          options,
-			OfflinePushInfo:  params.OfflinePushInfo,
-			Ex:               params.Ex,
-		},
+		MsgData: msgData,
 	}
 	return &pbData
 }
@@ -198,23 +204,23 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 	log.ZDebug(c, "getSendMsgReq", "req", req.Content)
 	switch req.ContentType {
 	case constant.Text:
-		data = apistruct.TextElem{}
+		data = &apistruct.TextElem{}
 	case constant.Picture:
-		data = apistruct.PictureElem{}
+		data = &apistruct.PictureElem{}
 	case constant.Voice:
-		data = apistruct.SoundElem{}
+		data = &apistruct.SoundElem{}
 	case constant.Video:
-		data = apistruct.VideoElem{}
+		data = &apistruct.VideoElem{}
 	case constant.File:
-		data = apistruct.FileElem{}
+		data = &apistruct.FileElem{}
 	case constant.AtText:
-		data = apistruct.AtElem{}
+		data = &apistruct.AtElem{}
 	case constant.Custom:
-		data = apistruct.CustomElem{}
+		data = &apistruct.CustomElem{}
 	case constant.MarkdownText:
-		data = apistruct.MarkdownTextElem{}
+		data = &apistruct.MarkdownTextElem{}
 	case constant.OANotification:
-		data = apistruct.OANotificationElem{}
+		data = &apistruct.OANotificationElem{}
 		req.SessionType = constant.NotificationChatType
 		if err = m.userClient.GetNotificationByID(c, req.SendID); err != nil {
 			return nil, err
@@ -222,14 +228,14 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 	default:
 		return nil, errs.WrapMsg(errs.ErrArgs, "unsupported content type", "contentType", req.ContentType)
 	}
-	if err := mapstructure.WeakDecode(req.Content, &data); err != nil {
+	if err := mapstructure.WeakDecode(req.Content, data); err != nil {
 		return nil, errs.WrapMsg(err, "failed to decode message content")
 	}
 	log.ZDebug(c, "getSendMsgReq", "decodedContent", data)
 	if err := m.validate.Struct(data); err != nil {
 		return nil, errs.WrapMsg(err, "validation error")
 	}
-	return m.newUserSendMsgReq(c, &req), nil
+	return m.newUserSendMsgReq(c, &req, data), nil
 }
 
 func (m *MessageApi) getModifyFields(req, respModify *sdkws.MsgData) map[string]any {
@@ -467,6 +473,10 @@ func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
 		sessionType int32
 		recvID      string
 	)
+	if err = c.BindJSON(&req); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
 	err = json.Unmarshal(decodedData, &keyMsgData)
 	if err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
@@ -490,6 +500,11 @@ func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
 		return
 	}
 
+	content, err := jsonutil.JsonMarshal(apistruct.MarkdownTextElem{Content: req.Content})
+	if err != nil {
+		apiresp.GinError(c, errs.Wrap(err))
+		return
+	}
 	msgData := &sdkws.MsgData{
 		SendID:           sendID,
 		RecvID:           recvID,
@@ -498,17 +513,17 @@ func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
 		SenderPlatformID: constant.AdminPlatformID,
 		SessionType:      sessionType,
 		MsgFrom:          constant.UserMsgType,
-		ContentType:      constant.Text,
-		Content:          []byte(req.Content),
+		ContentType:      constant.MarkdownText,
+		Content:          content,
 		OfflinePushInfo:  req.OfflinePushInfo,
 		Ex:               req.Ex,
 	}
 
-	sendReq := &msg.SendMsgReq{
+	sendReq := &msg.SendSimpleMsgReq{
 		MsgData: msgData,
 	}
 
-	respPb, err := m.Client.SendMsg(c, sendReq)
+	respPb, err := m.Client.SendSimpleMsg(c, sendReq)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return
@@ -525,7 +540,12 @@ func (m *MessageApi) SendSimpleMessage(c *gin.Context) {
 		return
 	}
 
-	m.ginRespSendMsg(c, sendReq, respPb)
+	m.ginRespSendMsg(c, &msg.SendMsgReq{MsgData: sendReq.MsgData}, &msg.SendMsgResp{
+		ServerMsgID: respPb.ServerMsgID,
+		ClientMsgID: respPb.ClientMsgID,
+		SendTime:    respPb.SendTime,
+		Modify:      respPb.Modify,
+	})
 }
 
 func (m *MessageApi) CheckMsgIsSendSuccess(c *gin.Context) {

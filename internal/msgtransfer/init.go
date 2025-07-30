@@ -58,7 +58,7 @@ type Config struct {
 	Index          conf.Index
 }
 
-func Start(ctx context.Context, config *Config, client discovery.Conn, server grpc.ServiceRegistrar) error {
+func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
 	builder := mqbuild.NewBuilder(&config.KafkaConfig)
 
 	log.CInfo(ctx, "MSG-TRANSFER server is initializing", "runTimeEnv", runtimeenv.RuntimeEnvironment(), "prometheusPorts",
@@ -134,7 +134,7 @@ func Start(ctx context.Context, config *Config, client discovery.Conn, server gr
 	if err != nil {
 		return err
 	}
-	historyMongoHandler := NewOnlineHistoryMongoConsumerHandler(msgTransferDatabase)
+	historyMongoHandler := NewOnlineHistoryMongoConsumerHandler(msgTransferDatabase, config)
 
 	msgTransfer := &MsgTransfer{
 		historyConsumer:      historyConsumer,
@@ -161,8 +161,8 @@ func (m *MsgTransfer) Start(ctx context.Context) error {
 	}()
 
 	go func() {
-		fn := func(ctx context.Context, key string, value []byte) error {
-			m.historyMongoHandler.HandleChatWs2Mongo(ctx, key, value)
+		fn := func(msg mq.Message) error {
+			m.historyMongoHandler.HandleChatWs2Mongo(msg)
 			return nil
 		}
 		for {

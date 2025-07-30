@@ -50,7 +50,7 @@ func init() {
 func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *conf.Prometheus, listenIP,
 	registerIP string, autoSetPorts bool, rpcPorts []int, index int, rpcRegisterName string, notification *conf.Notification, config T,
 	watchConfigNames []string, watchServiceNames []string,
-	rpcFn func(ctx context.Context, config T, client discovery.Conn, server grpc.ServiceRegistrar) error,
+	rpcFn func(ctx context.Context, config T, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error,
 	options ...grpc.ServerOption) error {
 
 	if notification != nil {
@@ -69,8 +69,8 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 		grpcsrv.GrpcServerRequestValidate(),
 		grpcsrv.GrpcServerPanicCapture(),
 	)
-	if shareConfig != nil && len(shareConfig.IMAdminUserID) > 0 {
-		options = append(options, grpcServerIMAdminUserID(shareConfig.IMAdminUserID))
+	if shareConfig != nil && len(shareConfig.IMAdminUser.UserIDs) > 0 {
+		options = append(options, grpcServerIMAdminUserID(shareConfig.IMAdminUser.UserIDs))
 	}
 	var clientOptions []grpc.DialOption
 	if maxRequestBody != nil {
@@ -148,9 +148,11 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 		if err != nil {
 			return err
 		}
-		if err := client.SetKey(ctx, prommetrics.BuildDiscoveryKey(prommetrics.APIKeyName), target); err != nil {
-			if !errors.Is(err, discovery.ErrNotSupportedKeyValue) {
-				return err
+		if autoSetPorts {
+			if err = client.SetWithLease(ctx, prommetrics.BuildDiscoveryKey(rpcRegisterName, index), target, prommetrics.TTL); err != nil {
+				if !errors.Is(err, discovery.ErrNotSupported) {
+					return err
+				}
 			}
 		}
 		go func() {
