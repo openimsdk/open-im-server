@@ -165,16 +165,15 @@ func (c *tokenCache) DeleteTokenByTokenMap(ctx context.Context, userID string, t
 }
 
 func (c *tokenCache) DeleteAndSetTemporary(ctx context.Context, userID string, platformID int, fields []string) error {
-	key := cachekey.GetTokenKey(userID, platformID)
-	if err := c.rdb.HDel(ctx, key, fields...).Err(); err != nil {
-		return errs.Wrap(err)
-	}
 	for _, f := range fields {
 		k := cachekey.GetTemporaryTokenKey(userID, platformID, f)
 		if err := c.rdb.Set(ctx, k, "", time.Minute*5).Err(); err != nil {
 			return errs.Wrap(err)
 		}
 	}
-
+	key := cachekey.GetTokenKey(userID, platformID)
+	if err := c.rdb.HDel(ctx, key, fields...).Err(); err != nil {
+		return errs.Wrap(err)
+	}
 	return nil
 }
