@@ -97,6 +97,11 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 	case BestSpeed:
 		r.Use(gzip.Gzip(gzip.BestSpeed))
 	}
+	if config.Standalone() {
+		r.Use(func(c *gin.Context) {
+			c.Set(authverify.CtxAdminUserIDsKey, cfg.Share.IMAdminUser.UserIDs)
+		})
+	}
 	r.Use(api.GinLogger(), prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(),
 		mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)), setGinIsAdmin(cfg.Share.IMAdminUser.UserIDs))
 
