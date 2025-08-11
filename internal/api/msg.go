@@ -219,6 +219,8 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 		data = &apistruct.CustomElem{}
 	case constant.MarkdownText:
 		data = &apistruct.MarkdownTextElem{}
+	case constant.Quote:
+		data = &apistruct.QuoteElem{}
 	case constant.OANotification:
 		data = &apistruct.OANotificationElem{}
 		req.SessionType = constant.NotificationChatType
