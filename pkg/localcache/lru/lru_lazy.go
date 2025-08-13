@@ -59,8 +59,8 @@ func (x *LazyLRU[K, V]) Get(key K, fetch func() (V, error)) (V, error) {
 	x.lock.Lock()
 	v, ok := x.core.Get(key)
 	if ok {
-		v.lock.Lock()
 		x.lock.Unlock()
+		v.lock.Lock()
 		expires, value, err := v.expires, v.value, v.err
 		if expires != 0 && expires > time.Now().UnixMilli() {
 			v.lock.Unlock()
@@ -129,7 +129,7 @@ func (x *LazyLRU[K, V]) GetBatch(keys []K, fetch func(keys []K) (map[K]V, error)
 			err = fetchErr
 		})
 	}
-	
+
 	for key, val := range values {
 		v := &lazyLruItem[V]{}
 		v.value = val
