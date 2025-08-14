@@ -49,7 +49,7 @@ func New[V any](opts ...Option) Cache[V] {
 			if opt.expirationEvict {
 				return lru.NewExpirationLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
 			} else {
-				return lru.NewLayLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
+				return lru.NewLazyLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
 			}
 		}
 		if opt.localSlotNum == 1 {
