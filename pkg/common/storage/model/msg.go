@@ -132,6 +132,10 @@ func (*MsgDocModel) GetMsgIndex(seq int64) int64 {
 	return (seq - 1) % singleGocMsgNum
 }
 
+func (*MsgDocModel) GetLimitForSingleDoc(seq int64) int64 {
+	return seq % singleGocMsgNum
+}
+
 func (*MsgDocModel) indexGen(conversationID string, seqSuffix int64) string {
 	return conversationID + ":" + strconv.FormatInt(seqSuffix, 10)
 }
