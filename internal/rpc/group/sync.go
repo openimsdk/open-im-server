@@ -2,6 +2,7 @@ package group
 
 import (
 	"context"
+	"errors"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/incrversion"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
@@ -11,6 +12,7 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	pbgroup "github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/tools/log"
 )
 
 const versionSyncLimit = 500
@@ -170,19 +172,26 @@ func (g *groupServer) GetIncrementalJoinGroup(ctx context.Context, req *pbgroup.
 func (g *groupServer) BatchGetIncrementalGroupMember(ctx context.Context, req *pbgroup.BatchGetIncrementalGroupMemberReq) (*pbgroup.BatchGetIncrementalGroupMemberResp, error) {
 	var num int
 	resp := make(map[string]*pbgroup.GetIncrementalGroupMemberResp)
+
 	for _, memberReq := range req.ReqList {
 		if _, ok := resp[memberReq.GroupID]; ok {
 			continue
 		}
 		memberResp, err := g.GetIncrementalGroupMember(ctx, memberReq)
 		if err != nil {
+			if errors.Is(err, servererrs.ErrDismissedAlready) {
+				log.ZWarn(ctx, "Failed to get incremental group member", err, "groupID", memberReq.GroupID, "request", memberReq)
+				continue
+			}
 			return nil, err
 		}
+
 		resp[memberReq.GroupID] = memberResp
 		num += len(memberResp.Insert) + len(memberResp.Update) + len(memberResp.Delete)
 		if num >= versionSyncLimit {
 			break
 		}
 	}
+
 	return &pbgroup.BatchGetIncrementalGroupMemberResp{RespList: resp}, nil
 }
