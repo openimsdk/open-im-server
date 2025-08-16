@@ -63,7 +63,12 @@ services:
     restart: always
     sysctls:
       net.core.somaxconn: 1024
-    command: redis-server /usr/local/redis/config/redis.conf --requirepass openIM123 --appendonly yes
+    command: >
+      redis-server
+      --requirepass openIM123
+      --appendonly yes
+      --aof-use-rdb-preamble yes
+      --save ""
     networks:
       - openim
 
