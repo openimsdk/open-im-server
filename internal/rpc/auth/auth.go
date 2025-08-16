@@ -18,10 +18,13 @@ import (
 	"context"
 	"errors"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/mcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
+	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpccache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -46,6 +49,7 @@ import (
 type authServer struct {
 	pbauth.UnimplementedAuthServer
 	authDatabase   controller.AuthDatabase
+	AuthLocalCache *rpccache.AuthLocalCache
 	RegisterCenter discovery.Conn
 	config         *Config
 	userClient     *rpcli.UserClient
@@ -53,11 +57,12 @@ type authServer struct {
 }
 
 type Config struct {
-	RpcConfig   config.Auth
-	RedisConfig config.Redis
-	MongoConfig config.Mongo
-	Share       config.Share
-	Discovery   config.Discovery
+	RpcConfig        config.Auth
+	RedisConfig      config.Redis
+	MongoConfig      config.Mongo
+	Share            config.Share
+	LocalCacheConfig config.LocalCache
+	Discovery        config.Discovery
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error {
@@ -84,6 +89,13 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	authConn, err := client.GetConn(ctx, config.Discovery.RpcService.Auth)
+	if err != nil {
+		return err
+	}
+
+	localcache.InitLocalCache(&config.LocalCacheConfig)
+
 	pbauth.RegisterAuthServer(server, &authServer{
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
@@ -93,9 +105,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 			config.Share.MultiLogin,
 			config.Share.IMAdminUser.UserIDs,
 		),
-		config:       config,
-		userClient:   rpcli.NewUserClient(userConn),
-		adminUserIDs: config.Share.IMAdminUser.UserIDs,
+		AuthLocalCache: rpccache.NewAuthLocalCache(rpcli.NewAuthClient(authConn), &config.LocalCacheConfig, rdb),
+		config:         config,
+		userClient:     rpcli.NewUserClient(userConn),
+		adminUserIDs:   config.Share.IMAdminUser.UserIDs,
 	})
 	return nil
 }
@@ -121,6 +134,10 @@ func (s *authServer) GetAdminToken(ctx context.Context, req *pbauth.GetAdminToke
 	}
 
 	prommetrics.UserLoginCounter.Inc()
+
+	// Remove local cache for the token
+	s.AuthLocalCache.RemoveLocalTokenCache(ctx, req.UserID, int(constant.AdminPlatformID))
+
 	resp.Token = token
 	resp.ExpireTimeSeconds = s.config.RpcConfig.TokenPolicy.Expire * 24 * 60 * 60
 	return &resp, nil
@@ -151,9 +168,24 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 	if err != nil {
 		return nil, err
 	}
+
+	// Remove local cache for the token
+	s.AuthLocalCache.RemoveLocalTokenCache(ctx, req.UserID, int(req.PlatformID))
+
 	resp.Token = token
 	resp.ExpireTimeSeconds = s.config.RpcConfig.TokenPolicy.Expire * 24 * 60 * 60
 	return &resp, nil
+}
+
+func (s *authServer) GetExistingToken(ctx context.Context, req *pbauth.GetExistingTokenReq) (*pbauth.GetExistingTokenResp, error) {
+	m, err := s.authDatabase.GetTokensWithoutError(ctx, req.UserID, int(req.PlatformID))
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbauth.GetExistingTokenResp{
+		TokenStates: convert.TokenMapDB2Pb(m),
+	}, nil
 }
 
 func (s *authServer) parseToken(ctx context.Context, tokensString string) (claims *tokenverify.Claims, err error) {
@@ -161,10 +193,12 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 	if err != nil {
 		return nil, err
 	}
-	m, err := s.authDatabase.GetTokensWithoutError(ctx, claims.UserID, claims.PlatformID)
+
+	m, err := s.AuthLocalCache.GetExistingToken(ctx, claims.UserID, claims.PlatformID)
 	if err != nil {
 		return nil, err
 	}
+
 	if len(m) == 0 {
 		isAdmin := authverify.CheckUserIsAdmin(ctx, claims.UserID)
 		if isAdmin {

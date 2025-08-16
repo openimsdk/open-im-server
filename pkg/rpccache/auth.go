@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/open-im-server/v3/pkg/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"github.com/openimsdk/protocol/auth"
@@ -35,23 +37,37 @@ type AuthLocalCache struct {
 	local  localcache.Cache[[]byte]
 }
 
-// 感觉有点问题 是应该保存token map，还是根据OperationID来保存一个bool
+func (a *AuthLocalCache) GetExistingToken(ctx context.Context, userID string, platformID int) (val map[string]int, err error) {
+	resp, err := a.getExistingToken(ctx, userID, platformID)
+	if err != nil {
+		return nil, err
+	}
 
-// 也不应该只绑定token 是不是还得绑定其他属性 确认说是这个用户在操作的
+	res := convert.TokenMapPb2DB(resp.TokenStates)
 
-func (a *AuthLocalCache) ParseToken(ctx context.Context, token string) (val *auth.ParseTokenResp, err error) {
-	log.ZDebug(ctx, "AuthLocalCache ParseToken req", "token", token)
+	return res, nil
+}
+
+func (a *AuthLocalCache) getExistingToken(ctx context.Context, userID string, platformID int) (val *auth.GetExistingTokenResp, err error) {
+	log.ZDebug(ctx, "AuthLocalCache GetExistingToken req", "userID", userID, "platformID", platformID)
 	defer func() {
 		if err != nil {
-			log.ZError(ctx, "AuthLocalCache ParseToken error", err, "token", token, "err", err)
+			log.ZError(ctx, "AuthLocalCache GetExistingToken error", err, "userID", userID, "platformID", platformID)
 		} else {
-			log.ZDebug(ctx, "AuthLocalCache ParseToken resp", "token", token, "val", val)
+			log.ZDebug(ctx, "AuthLocalCache GetExistingToken resp", "userID", userID, "platformID", platformID, "val", val)
 		}
 	}()
 
-	var cache cacheProto[auth.ParseTokenResp]
-	return cache.Unmarshal(a.local.Get(ctx, token, func(ctx context.Context) ([]byte, error) {
-		log.ZDebug(ctx, "AuthLocalCache ParseToken call rpc", "token", token)
-		return cache.Marshal(a.client.ParseToken(ctx, token))
+	var cache cacheProto[auth.GetExistingTokenResp]
+
+	return cache.Unmarshal(a.local.Get(ctx, cachekey.GetTokenKey(userID, platformID), func(ctx context.Context) ([]byte, error) {
+		log.ZDebug(ctx, "AuthLocalCache GetExistingToken call rpc", "userID", userID, "platformID", platformID)
+		return cache.Marshal(a.client.AuthClient.GetExistingToken(ctx, &auth.GetExistingTokenReq{UserID: userID, PlatformID: int32(platformID)}))
 	}))
+}
+
+func (a *AuthLocalCache) RemoveLocalTokenCache(ctx context.Context, userID string, platformID int) {
+	key := cachekey.GetTokenKey(userID, platformID)
+	a.local.DelLocal(ctx, key)
+	log.ZDebug(ctx, "AuthLocalCache RemoveLocalTokenCache", "userID", userID, "platformID", platformID, "key", key)
 }
