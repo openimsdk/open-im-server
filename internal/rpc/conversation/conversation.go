@@ -132,6 +132,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbconvers
 	return resp, nil
 }
 
+// Deprecated: Use `GetConversations` instead.
 func (c *conversationServer) GetSortedConversationList(ctx context.Context, req *pbconversation.GetSortedConversationListReq) (resp *pbconversation.GetSortedConversationListResp, err error) {
 	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
@@ -183,9 +184,21 @@ func (c *conversationServer) GetSortedConversationList(ctx context.Context, req 
 
 	conversation_isPinTime := make(map[int64]string)
 	conversation_notPinTime := make(map[int64]string)
+
 	for _, v := range conversations {
 		conversationID := v.ConversationID
-		time := conversationMsg[conversationID].MsgInfo.LatestMsgRecvTime
+		var time int64
+		if _, ok := conversationMsg[conversationID]; ok {
+			time = conversationMsg[conversationID].MsgInfo.LatestMsgRecvTime
+		} else {
+			conversationMsg[conversationID] = &pbconversation.ConversationElem{
+				ConversationID: conversationID,
+				IsPinned:       v.IsPinned,
+				MsgInfo:        nil,
+			}
+			time = v.CreateTime.UnixMilli()
+		}
+
 		conversationMsg[conversationID].RecvMsgOpt = v.RecvMsgOpt
 		if v.IsPinned {
 			conversationMsg[conversationID].IsPinned = v.IsPinned
