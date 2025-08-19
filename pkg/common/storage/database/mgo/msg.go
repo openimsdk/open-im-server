@@ -5,6 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/protocol/constant"
@@ -14,10 +19,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/jsonutil"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func NewMsgMongo(db *mongo.Database) (database.Msg, error) {
@@ -1154,7 +1155,7 @@ func (m *MsgMgo) findBeforeDocSendTime(ctx context.Context, docID string, limit 
 	if err != nil {
 		return 0, 0, err
 	}
-	for i := len(res) - 1; i > 0; i-- {
+	for i := len(res) - 1; i >= 0; i-- {
 		v := res[i]
 		if v.Msgs != nil && v.Msgs.Msg != nil && v.Msgs.Msg.SendTime > 0 {
 			return v.Msgs.Msg.Seq, v.Msgs.Msg.SendTime, nil
@@ -1169,7 +1170,7 @@ func (m *MsgMgo) findBeforeSendTime(ctx context.Context, conversationID string, 
 		limit := int64(-1)
 		if first {
 			first = false
-			limit = m.model.GetMsgIndex(seq)
+			limit = m.model.GetLimitForSingleDoc(seq)
 		}
 		docID := m.model.BuildDocIDByIndex(conversationID, i)
 		msgSeq, msgSendTime, err := m.findBeforeDocSendTime(ctx, docID, limit)
