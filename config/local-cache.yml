@@ -1,3 +1,10 @@
+auth:
+  topic: DELETE_CACHE_AUTH
+  slotNum: 100
+  slotSize: 2000
+  successExpire: 300
+  failedExpire: 5
+
 user:
   topic: DELETE_CACHE_USER
   slotNum: 100

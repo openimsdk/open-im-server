@@ -40,6 +40,7 @@ func NewAuthRpcCmd() *AuthRpcCmd {
 		config.RedisConfigFileName:      &authConfig.RedisConfig,
 		config.MongodbConfigFileName:    &authConfig.MongoConfig,
 		config.ShareFileName:            &authConfig.Share,
+		config.LocalCacheConfigFileName: &authConfig.LocalCacheConfig,
 		config.DiscoveryConfigFilename:  &authConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
