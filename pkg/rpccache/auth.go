@@ -2,6 +2,7 @@ package rpccache
 
 import (
 	"context"
+	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
@@ -49,12 +50,13 @@ func (a *AuthLocalCache) GetExistingToken(ctx context.Context, userID string, pl
 }
 
 func (a *AuthLocalCache) getExistingToken(ctx context.Context, userID string, platformID int) (val *auth.GetExistingTokenResp, err error) {
+	start := time.Now()
 	log.ZDebug(ctx, "AuthLocalCache GetExistingToken req", "userID", userID, "platformID", platformID)
 	defer func() {
 		if err != nil {
-			log.ZError(ctx, "AuthLocalCache GetExistingToken error", err, "userID", userID, "platformID", platformID)
+			log.ZError(ctx, "AuthLocalCache GetExistingToken error", err, "cost", time.Since(start), "userID", userID, "platformID", platformID)
 		} else {
-			log.ZDebug(ctx, "AuthLocalCache GetExistingToken resp", "userID", userID, "platformID", platformID, "val", val)
+			log.ZDebug(ctx, "AuthLocalCache GetExistingToken resp", "cost", time.Since(start), "userID", userID, "platformID", platformID, "val", val)
 		}
 	}()
 
@@ -64,10 +66,4 @@ func (a *AuthLocalCache) getExistingToken(ctx context.Context, userID string, pl
 		log.ZDebug(ctx, "AuthLocalCache GetExistingToken call rpc", "userID", userID, "platformID", platformID)
 		return cache.Marshal(a.client.AuthClient.GetExistingToken(ctx, &auth.GetExistingTokenReq{UserID: userID, PlatformID: int32(platformID)}))
 	}))
-}
-
-func (a *AuthLocalCache) RemoveLocalTokenCache(ctx context.Context, userID string, platformID int) {
-	key := cachekey.GetTokenKey(userID, platformID)
-	a.local.DelLocal(ctx, key)
-	log.ZDebug(ctx, "AuthLocalCache RemoveLocalTokenCache", "userID", userID, "platformID", platformID, "key", key)
 }

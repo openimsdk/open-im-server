@@ -2,13 +2,16 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"strconv"
 	"sync"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
 )
@@ -16,16 +19,26 @@ import (
 type tokenCache struct {
 	rdb          redis.UniversalClient
 	accessExpire time.Duration
+	localCache   *config.LocalCache
 }
 
-func NewTokenCacheModel(rdb redis.UniversalClient, accessExpire int64) cache.TokenModel {
-	c := &tokenCache{rdb: rdb}
+func NewTokenCacheModel(rdb redis.UniversalClient, localCache *config.LocalCache, accessExpire int64) cache.TokenModel {
+	c := &tokenCache{rdb: rdb, localCache: localCache}
 	c.accessExpire = c.getExpireTime(accessExpire)
 	return c
 }
 
 func (c *tokenCache) SetTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
-	return errs.Wrap(c.rdb.HSet(ctx, cachekey.GetTokenKey(userID, platformID), token, flag).Err())
+	key := cachekey.GetTokenKey(userID, platformID)
+	if err := c.rdb.HSet(ctx, key, token, flag).Err(); err != nil {
+		return errs.Wrap(err)
+	}
+
+	if c.localCache != nil {
+		c.removeLocalTokenCache(ctx, key)
+	}
+
+	return nil
 }
 
 // SetTokenFlagEx set token and flag with expire time
@@ -37,6 +50,11 @@ func (c *tokenCache) SetTokenFlagEx(ctx context.Context, userID string, platform
 	if err := c.rdb.Expire(ctx, key, c.accessExpire).Err(); err != nil {
 		return errs.Wrap(err)
 	}
+
+	if c.localCache != nil {
+		c.removeLocalTokenCache(ctx, key)
+	}
+
 	return nil
 }
 
@@ -106,7 +124,17 @@ func (c *tokenCache) SetTokenMapByUidPid(ctx context.Context, userID string, pla
 	for k, v := range m {
 		mm[k] = v
 	}
-	return errs.Wrap(c.rdb.HSet(ctx, cachekey.GetTokenKey(userID, platformID), mm).Err())
+
+	err := c.rdb.HSet(ctx, cachekey.GetTokenKey(userID, platformID), mm).Err()
+	if err != nil {
+		return errs.Wrap(err)
+	}
+
+	if c.localCache != nil {
+		c.removeLocalTokenCache(ctx, cachekey.GetTokenKey(userID, platformID))
+	}
+
+	return nil
 }
 
 func (c *tokenCache) BatchSetTokenMapByUidPid(ctx context.Context, tokens map[string]map[string]any) error {
@@ -124,11 +152,23 @@ func (c *tokenCache) BatchSetTokenMapByUidPid(ctx context.Context, tokens map[st
 	}); err != nil {
 		return err
 	}
+
+	if c.localCache != nil {
+		c.removeLocalTokenCache(ctx, keys...)
+	}
 	return nil
 }
 
 func (c *tokenCache) DeleteTokenByUidPid(ctx context.Context, userID string, platformID int, fields []string) error {
-	return errs.Wrap(c.rdb.HDel(ctx, cachekey.GetTokenKey(userID, platformID), fields...).Err())
+	key := cachekey.GetTokenKey(userID, platformID)
+	if err := c.rdb.HDel(ctx, key, fields...).Err(); err != nil {
+		return errs.Wrap(err)
+	}
+
+	if c.localCache != nil {
+		c.removeLocalTokenCache(ctx, key)
+	}
+	return nil
 }
 
 func (c *tokenCache) getExpireTime(t int64) time.Duration {
@@ -161,6 +201,11 @@ func (c *tokenCache) DeleteTokenByTokenMap(ctx context.Context, userID string, t
 		return err
 	}
 
+	// Remove local cache for the token
+	if c.localCache != nil {
+		c.removeLocalTokenCache(ctx, keys...)
+	}
+
 	return nil
 }
 
@@ -175,5 +220,29 @@ func (c *tokenCache) DeleteAndSetTemporary(ctx context.Context, userID string, p
 	if err := c.rdb.HDel(ctx, key, fields...).Err(); err != nil {
 		return errs.Wrap(err)
 	}
+
+	if c.localCache != nil {
+		c.removeLocalTokenCache(ctx, key)
+	}
 	return nil
+}
+
+func (c *tokenCache) removeLocalTokenCache(ctx context.Context, keys ...string) {
+	if len(keys) == 0 {
+		return
+	}
+
+	topic := c.localCache.Auth.Topic
+	if topic == "" {
+		return
+	}
+
+	data, err := json.Marshal(keys)
+	if err != nil {
+		log.ZWarn(ctx, "keys json marshal failed", err, "topic", topic, "keys", keys)
+	} else {
+		if err := c.rdb.Publish(ctx, topic, string(data)).Err(); err != nil {
+			log.ZWarn(ctx, "redis publish cache delete error", err, "topic", topic, "keys", keys)
+		}
+	}
 }

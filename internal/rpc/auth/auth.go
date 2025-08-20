@@ -83,7 +83,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		}
 		token = mcache.NewTokenCacheModel(mc, config.RpcConfig.TokenPolicy.Expire)
 	} else {
-		token = redis2.NewTokenCacheModel(rdb, config.RpcConfig.TokenPolicy.Expire)
+		token = redis2.NewTokenCacheModel(rdb, &config.LocalCacheConfig, config.RpcConfig.TokenPolicy.Expire)
 	}
 	userConn, err := client.GetConn(ctx, config.Discovery.RpcService.User)
 	if err != nil {
@@ -135,9 +135,6 @@ func (s *authServer) GetAdminToken(ctx context.Context, req *pbauth.GetAdminToke
 
 	prommetrics.UserLoginCounter.Inc()
 
-	// Remove local cache for the token
-	s.AuthLocalCache.RemoveLocalTokenCache(ctx, req.UserID, int(constant.AdminPlatformID))
-
 	resp.Token = token
 	resp.ExpireTimeSeconds = s.config.RpcConfig.TokenPolicy.Expire * 24 * 60 * 60
 	return &resp, nil
@@ -168,9 +165,6 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 	if err != nil {
 		return nil, err
 	}
-
-	// Remove local cache for the token
-	s.AuthLocalCache.RemoveLocalTokenCache(ctx, req.UserID, int(req.PlatformID))
 
 	resp.Token = token
 	resp.ExpireTimeSeconds = s.config.RpcConfig.TokenPolicy.Expire * 24 * 60 * 60
