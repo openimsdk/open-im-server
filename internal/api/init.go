@@ -26,7 +26,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/system/program"
-	"github.com/openimsdk/tools/utils/jsonutil"
 )
 
 type Config struct {
@@ -96,10 +95,7 @@ func Start(ctx context.Context, index int, cfg *Config) error {
 
 			etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 
-			_, err = etcdClient.Put(ctx, prommetrics.BuildDiscoveryKey(prommetrics.APIKeyName), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
-			if err != nil {
-				return errs.WrapMsg(err, "etcd put err")
-			}
+			prommetrics.Register(ctx, etcdClient, prommetrics.APIKeyName, registerIP, prometheusPort)
 		} else {
 			prometheusPort, err = datautil.GetElemByIndex(cfg.API.Prometheus.Ports, index)
 			if err != nil {

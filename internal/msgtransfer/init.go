@@ -26,7 +26,6 @@ import (
 	"syscall"
 
 	"github.com/openimsdk/tools/discovery/etcd"
-	"github.com/openimsdk/tools/utils/jsonutil"
 	"github.com/openimsdk/tools/utils/network"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -178,10 +177,7 @@ func (m *MsgTransfer) Start(index int, cfg *Config) error {
 
 			etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
 
-			_, err = etcdClient.Put(context.TODO(), prommetrics.BuildDiscoveryKey(prommetrics.MessageTransferKeyName), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
-			if err != nil {
-				return errs.WrapMsg(err, "etcd put err")
-			}
+			prommetrics.Register(context.TODO(), etcdClient, prommetrics.MessageTransferKeyName, registerIP, prometheusPort)
 		} else {
 			prometheusPort, err = datautil.GetElemByIndex(cfg.MsgTransfer.Prometheus.Ports, index)
 			if err != nil {
