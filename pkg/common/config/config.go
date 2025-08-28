@@ -43,6 +43,7 @@ type CacheConfig struct {
 }
 
 type LocalCache struct {
+	Auth         CacheConfig `yaml:"auth"`
 	User         CacheConfig `yaml:"user"`
 	Group        CacheConfig `yaml:"group"`
 	Friend       CacheConfig `yaml:"friend"`
