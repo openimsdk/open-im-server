@@ -37,6 +37,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
 	pbconversation "github.com/openimsdk/protocol/conversation"
+	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
@@ -795,7 +796,7 @@ func (c *conversationServer) ClearUserConversationMsg(ctx context.Context, req *
 	}
 	latestMsgDestructTime := time.UnixMilli(req.Timestamp)
 	for i, conversation := range conversations {
-		if conversation.IsMsgDestruct == false || conversation.MsgDestructTime == 0 {
+		if !conversation.IsMsgDestruct || conversation.MsgDestructTime == 0 {
 			continue
 		}
 		seq, err := c.msgClient.GetLastMessageSeqByTime(ctx, conversation.ConversationID, req.Timestamp-(conversation.MsgDestructTime*1000))
@@ -834,4 +835,70 @@ func (c *conversationServer) setConversationMinSeqAndLatestMsgDestructTime(ctx c
 	}
 	c.conversationNotificationSender.ConversationChangeNotification(ctx, ownerUserID, []string{conversationID})
 	return nil
+}
+
+func (c *conversationServer) DeleteConversations(ctx context.Context, req *pbconversation.DeleteConversationsReq) (resp *pbconversation.DeleteConversationsResp, err error) {
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
+		return nil, err
+	}
+	if req.NeedDeleteTime == 0 {
+		return nil, errs.ErrArgs.WrapMsg("need_delete_time need be set")
+	}
+
+	deleteTimeThreshold := time.Now().AddDate(0, 0, -int(req.NeedDeleteTime)).UnixMilli()
+
+	var conversationIDs []string
+	if len(req.ConversationIDs) == 0 {
+		conversationIDs, err = c.conversationDatabase.GetConversationIDs(ctx, req.OwnerUserID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		conversationIDs = req.ConversationIDs
+	}
+
+	// Check Conversation have a specific status
+	conversations, err := c.conversationDatabase.FindConversations(ctx, req.OwnerUserID, conversationIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(conversations) == 0 {
+		return nil, errs.ErrRecordNotFound.Wrap()
+	}
+
+	needCheckConversationIDs := make([]string, 0, len(conversations))
+
+	for _, conversation := range conversations {
+		if conversation.IsPinned {
+			continue
+		}
+		needCheckConversationIDs = append(needCheckConversationIDs, conversation.ConversationID)
+	}
+
+	latestMsgs, err := c.msgClient.GetLastMessage(ctx, &msg.GetLastMessageReq{
+		UserID:          req.OwnerUserID,
+		ConversationIDs: needCheckConversationIDs,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var needDeleteConversationIDs []string
+	for conversationID, msg := range latestMsgs.Msgs {
+		if msg.SendTime < deleteTimeThreshold {
+			needDeleteConversationIDs = append(needDeleteConversationIDs, conversationID)
+		}
+	}
+
+	if len(needDeleteConversationIDs) == 0 {
+		return &pbconversation.DeleteConversationsResp{}, nil
+	}
+
+	if err := c.conversationDatabase.DeleteUsersConversations(ctx, req.OwnerUserID, needDeleteConversationIDs); err != nil {
+		return nil, err
+	}
+	c.conversationNotificationSender.ConversationDeleteNotification(ctx, req.OwnerUserID, needDeleteConversationIDs)
+
+	return &pbconversation.DeleteConversationsResp{}, nil
 }
