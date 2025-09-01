@@ -122,7 +122,7 @@ func (c *conversationDatabase) SetUsersConversationFieldTx(ctx context.Context, 
 				cache = cache.DelConversationNotNotifyMessageUserIDs(userIDs...)
 			}
 			if _, ok := fieldMap["is_pinned"]; ok {
-				cache = cache.DelConversationPinnedMessageUserIDs(userIDs...)
+				cache = cache.DelUserPinnedConversations(userIDs...)
 			}
 			cache = cache.DelConversationVersionUserIDs(haveUserIDs...)
 		}
@@ -174,7 +174,7 @@ func (c *conversationDatabase) UpdateUsersConversationField(ctx context.Context,
 		cache = cache.DelConversationNotNotifyMessageUserIDs(userIDs...)
 	}
 	if _, ok := args["is_pinned"]; ok {
-		cache = cache.DelConversationPinnedMessageUserIDs(userIDs...)
+		cache = cache.DelUserPinnedConversations(userIDs...)
 	}
 	return cache.ChainExecDel(ctx)
 }
@@ -205,7 +205,7 @@ func (c *conversationDatabase) CreateConversation(ctx context.Context, conversat
 		DelUserConversationIDsHash(userIDs...).
 		DelConversationVersionUserIDs(userIDs...).
 		DelConversationNotNotifyMessageUserIDs(notNotifyUserIDs...).
-		DelConversationPinnedMessageUserIDs(pinnedUserIDs...).
+		DelUserPinnedConversations(pinnedUserIDs...).
 		ChainExecDel(ctx)
 }
 
@@ -261,7 +261,7 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 		cache := c.cache.CloneConversationCache()
 		cache = cache.DelConversationVersionUserIDs(ownerUserID).
 			DelConversationNotNotifyMessageUserIDs(ownerUserID).
-			DelConversationPinnedMessageUserIDs(ownerUserID)
+			DelUserPinnedConversations(ownerUserID)
 
 		groupIDs := datautil.Distinct(datautil.Filter(conversations, func(e *relationtb.Conversation) (string, bool) {
 			return e.GroupID, e.GroupID != ""
@@ -444,7 +444,7 @@ func (c *conversationDatabase) DeleteUsersConversations(ctx context.Context, use
 			DelConversationIDs(userID).
 			DelUserConversationIDsHash(userID).
 			DelConversationNotNotifyMessageUserIDs(userID).
-			DelConversationPinnedMessageUserIDs(userID)
+			DelUserPinnedConversations(userID)
 
 		return cache.ChainExecDel(ctx)
 	})

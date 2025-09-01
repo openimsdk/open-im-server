@@ -841,64 +841,48 @@ func (c *conversationServer) DeleteConversations(ctx context.Context, req *pbcon
 	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	if req.NeedDeleteTime == 0 {
-		return nil, errs.ErrArgs.WrapMsg("need_delete_time need be set")
+	if req.NeedDeleteTime == 0 && len(req.ConversationIDs) == 0 {
+		return nil, errs.ErrArgs.WrapMsg("need_delete_time or conversationIDs need be set")
 	}
 
-	deleteTimeThreshold := time.Now().AddDate(0, 0, -int(req.NeedDeleteTime)).UnixMilli()
-
-	var conversationIDs []string
-	if len(req.ConversationIDs) == 0 {
-		conversationIDs, err = c.conversationDatabase.GetConversationIDs(ctx, req.OwnerUserID)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		conversationIDs = req.ConversationIDs
-	}
-
-	// Check Conversation have a specific status
-	conversations, err := c.conversationDatabase.FindConversations(ctx, req.OwnerUserID, conversationIDs)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(conversations) == 0 {
-		return nil, errs.ErrRecordNotFound.Wrap()
-	}
-
-	needCheckConversationIDs := make([]string, 0, len(conversations))
-
-	for _, conversation := range conversations {
-		if conversation.IsPinned {
-			continue
-		}
-		needCheckConversationIDs = append(needCheckConversationIDs, conversation.ConversationID)
-	}
-
-	latestMsgs, err := c.msgClient.GetLastMessage(ctx, &msg.GetLastMessageReq{
-		UserID:          req.OwnerUserID,
-		ConversationIDs: needCheckConversationIDs,
-	})
-	if err != nil {
-		return nil, err
+	if req.NeedDeleteTime != 0 && len(req.ConversationIDs) != 0 {
+		return nil, errs.ErrArgs.WrapMsg("need_delete_time and conversationIDs cannot both be set")
 	}
 
 	var needDeleteConversationIDs []string
-	for conversationID, msg := range latestMsgs.Msgs {
-		if msg.SendTime < deleteTimeThreshold {
-			needDeleteConversationIDs = append(needDeleteConversationIDs, conversationID)
-		}
-	}
 
-	if len(needDeleteConversationIDs) == 0 {
-		return &pbconversation.DeleteConversationsResp{}, nil
+	if len(req.ConversationIDs) == 0 {
+		deleteTimeThreshold := time.Now().AddDate(0, 0, -int(req.NeedDeleteTime)).UnixMilli()
+		conversationIDs, err := c.conversationDatabase.GetConversationIDs(ctx, req.OwnerUserID)
+		if err != nil {
+			return nil, err
+		}
+		latestMsgs, err := c.msgClient.GetLastMessage(ctx, &msg.GetLastMessageReq{
+			UserID:          req.OwnerUserID,
+			ConversationIDs: conversationIDs,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		for conversationID, msg := range latestMsgs.Msgs {
+			if msg.SendTime < deleteTimeThreshold {
+				needDeleteConversationIDs = append(needDeleteConversationIDs, conversationID)
+			}
+		}
+
+		if len(needDeleteConversationIDs) == 0 {
+			return &pbconversation.DeleteConversationsResp{}, nil
+		}
+	} else {
+		needDeleteConversationIDs = req.ConversationIDs
 	}
 
 	if err := c.conversationDatabase.DeleteUsersConversations(ctx, req.OwnerUserID, needDeleteConversationIDs); err != nil {
 		return nil, err
 	}
-	c.conversationNotificationSender.ConversationDeleteNotification(ctx, req.OwnerUserID, needDeleteConversationIDs)
+
+	// c.conversationNotificationSender.ConversationDeleteNotification(ctx, req.OwnerUserID, needDeleteConversationIDs)
 
 	return &pbconversation.DeleteConversationsResp{}, nil
 }
