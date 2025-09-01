@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"github.com/openimsdk/tools/mq"
 
 	"sync"
@@ -280,8 +281,6 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 		}
 
 		if isNewConversation {
-			// 需要每一条消息 都去检查了 有没有会话
-			
 			switch msg.SessionType {
 			case constant.ReadGroupChatType:
 				log.ZDebug(ctx, "group chat first create conversation", "conversationID",
