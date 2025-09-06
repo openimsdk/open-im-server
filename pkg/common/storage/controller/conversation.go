@@ -78,6 +78,8 @@ type ConversationDatabase interface {
 	GetPinnedConversationIDs(ctx context.Context, userID string) ([]string, error)
 	// FindRandConversation finds random conversations based on the specified timestamp and limit.
 	FindRandConversation(ctx context.Context, ts int64, limit int) ([]*relationtb.Conversation, error)
+
+	DeleteUsersConversations(ctx context.Context, userID string, conversationIDs []string) (err error)
 }
 
 func NewConversationDatabase(conversation database.Conversation, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -120,7 +122,7 @@ func (c *conversationDatabase) SetUsersConversationFieldTx(ctx context.Context, 
 				cache = cache.DelConversationNotNotifyMessageUserIDs(userIDs...)
 			}
 			if _, ok := fieldMap["is_pinned"]; ok {
-				cache = cache.DelConversationPinnedMessageUserIDs(userIDs...)
+				cache = cache.DelUserPinnedConversations(userIDs...)
 			}
 			cache = cache.DelConversationVersionUserIDs(haveUserIDs...)
 		}
@@ -172,7 +174,7 @@ func (c *conversationDatabase) UpdateUsersConversationField(ctx context.Context,
 		cache = cache.DelConversationNotNotifyMessageUserIDs(userIDs...)
 	}
 	if _, ok := args["is_pinned"]; ok {
-		cache = cache.DelConversationPinnedMessageUserIDs(userIDs...)
+		cache = cache.DelUserPinnedConversations(userIDs...)
 	}
 	return cache.ChainExecDel(ctx)
 }
@@ -203,7 +205,7 @@ func (c *conversationDatabase) CreateConversation(ctx context.Context, conversat
 		DelUserConversationIDsHash(userIDs...).
 		DelConversationVersionUserIDs(userIDs...).
 		DelConversationNotNotifyMessageUserIDs(notNotifyUserIDs...).
-		DelConversationPinnedMessageUserIDs(pinnedUserIDs...).
+		DelUserPinnedConversations(pinnedUserIDs...).
 		ChainExecDel(ctx)
 }
 
@@ -259,7 +261,7 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 		cache := c.cache.CloneConversationCache()
 		cache = cache.DelConversationVersionUserIDs(ownerUserID).
 			DelConversationNotNotifyMessageUserIDs(ownerUserID).
-			DelConversationPinnedMessageUserIDs(ownerUserID)
+			DelUserPinnedConversations(ownerUserID)
 
 		groupIDs := datautil.Distinct(datautil.Filter(conversations, func(e *relationtb.Conversation) (string, bool) {
 			return e.GroupID, e.GroupID != ""
@@ -428,4 +430,22 @@ func (c *conversationDatabase) GetPinnedConversationIDs(ctx context.Context, use
 
 func (c *conversationDatabase) FindRandConversation(ctx context.Context, ts int64, limit int) ([]*relationtb.Conversation, error) {
 	return c.conversationDB.FindRandConversation(ctx, ts, limit)
+}
+
+func (c *conversationDatabase) DeleteUsersConversations(ctx context.Context, userID string, conversationIDs []string) (err error) {
+	return c.tx.Transaction(ctx, func(ctx context.Context) error {
+		err = c.conversationDB.DeleteUsersConversations(ctx, userID, conversationIDs)
+		if err != nil {
+			return err
+		}
+		cache := c.cache.CloneConversationCache()
+		cache = cache.DelConversations(userID, conversationIDs...).
+			DelConversationVersionUserIDs(userID).
+			DelConversationIDs(userID).
+			DelUserConversationIDsHash(userID).
+			DelConversationNotNotifyMessageUserIDs(userID).
+			DelUserPinnedConversations(userID)
+
+		return cache.ChainExecDel(ctx)
+	})
 }
