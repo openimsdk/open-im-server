@@ -185,8 +185,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		}
 		m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID,
 			m.conversationAndGetRecvID(conversation, req.UserID), seqs, hasReadSeq)
-	} else if conversation.ConversationType == constant.ReadGroupChatType ||
-		conversation.ConversationType == constant.NotificationChatType {
+	} else if conversation.ConversationType == constant.NotificationChatType {
 		if req.HasReadSeq > hasReadSeq {
 			err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
 			if err != nil {
@@ -194,8 +193,19 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 			}
 			hasReadSeq = req.HasReadSeq
 		}
+
 		m.sendMarkAsReadNotification(ctx, req.ConversationID, constant.SingleChatType, req.UserID,
 			req.UserID, seqs, hasReadSeq)
+	} else if conversation.ConversationType == constant.ReadGroupChatType {
+		if req.HasReadSeq > hasReadSeq {
+			err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
+			if err != nil {
+				return nil, err
+			}
+			hasReadSeq = req.HasReadSeq
+		}
+		m.sendMarkAsReadNotification(ctx, req.ConversationID, constant.ReadGroupChatType, req.UserID,
+			conversation.GroupID, seqs, hasReadSeq)
 	}
 
 	if conversation.ConversationType == constant.SingleChatType {
