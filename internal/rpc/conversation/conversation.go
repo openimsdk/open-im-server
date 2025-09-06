@@ -835,3 +835,65 @@ func (c *conversationServer) setConversationMinSeqAndLatestMsgDestructTime(ctx c
 	c.conversationNotificationSender.ConversationChangeNotification(ctx, ownerUserID, []string{conversationID})
 	return nil
 }
+
+func (c *conversationServer) GetConversationReadCursors(ctx context.Context, req *pbconversation.GetConversationReadCursorsReq) (*pbconversation.GetConversationReadCursorsResp, error) {
+	if err := req.Check(); err != nil {
+		return nil, err
+	}
+
+	conversations, err := c.conversationDatabase.GetConversationsByConversationID(ctx, req.ConversationIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	conversationMap := make(map[string]*dbModel.Conversation)
+	for _, conv := range conversations {
+		conversationMap[conv.ConversationID] = conv
+	}
+
+	result := make(map[string]*pbconversation.ConversationReadCursorList)
+	for _, conversationID := range req.ConversationIDs {
+		conversation, exists := conversationMap[conversationID]
+		if !exists {
+			continue
+		}
+
+		var userIDs []string
+		if conversation.ConversationType == constant.ReadGroupChatType {
+			if conversation.GroupID == "" {
+				log.ZWarn(ctx, "groupID is empty for group conversation", nil, "conversationID", conversationID)
+				result[conversationID] = &pbconversation.ConversationReadCursorList{Cursors: []*pbconversation.ConversationReadCursor{}}
+				continue
+			}
+			userIDs, err = c.groupClient.GetGroupMemberUserIDs(ctx, conversation.GroupID)
+			if err != nil {
+				log.ZWarn(ctx, "GetGroupMemberUserIDs failed", err, "conversationID", conversationID, "groupID", conversation.GroupID)
+				result[conversationID] = &pbconversation.ConversationReadCursorList{Cursors: []*pbconversation.ConversationReadCursor{}}
+				continue
+			}
+		} else {
+			continue
+		}
+
+		var cursors []*pbconversation.ConversationReadCursor
+		for _, userID := range userIDs {
+			hasReadSeqs, err := c.msgClient.GetHasReadSeqs(ctx, []string{conversationID}, userID)
+			if err != nil {
+				log.ZWarn(ctx, "GetHasReadSeqs failed", err, "userID", userID, "conversationID", conversationID)
+				continue
+			}
+
+			readSeq := hasReadSeqs[conversationID]
+			cursors = append(cursors, &pbconversation.ConversationReadCursor{
+				UserID:     userID,
+				MaxReadSeq: readSeq,
+			})
+		}
+
+		result[conversationID] = &pbconversation.ConversationReadCursorList{Cursors: cursors}
+	}
+
+	return &pbconversation.GetConversationReadCursorsResp{
+		Cursors: result,
+	}, nil
+}
