@@ -168,7 +168,18 @@ func (c *conversationServer) GetSortedConversationList(ctx context.Context, req 
 	conversation_notPinTime := make(map[int64]string)
 	for _, v := range conversations {
 		conversationID := v.ConversationID
-		time := conversationMsg[conversationID].MsgInfo.LatestMsgRecvTime
+		var time int64
+		if _, ok := conversationMsg[conversationID]; ok {
+			time = conversationMsg[conversationID].MsgInfo.LatestMsgRecvTime
+		} else {
+			conversationMsg[conversationID] = &pbconversation.ConversationElem{
+				ConversationID: conversationID,
+				IsPinned:       v.IsPinned,
+				MsgInfo:        nil,
+			}
+			time = v.CreateTime.UnixMilli()
+		}
+
 		conversationMsg[conversationID].RecvMsgOpt = v.RecvMsgOpt
 		if v.IsPinned {
 			conversationMsg[conversationID].IsPinned = v.IsPinned
@@ -220,6 +231,7 @@ func (c *conversationServer) getConversations(ctx context.Context, ownerUserID s
 	return convert.ConversationsDB2Pb(conversations), nil
 }
 
+// Deprecated
 func (c *conversationServer) SetConversation(ctx context.Context, req *pbconversation.SetConversationReq) (*pbconversation.SetConversationResp, error) {
 	var conversation dbModel.Conversation
 	if err := datautil.CopyStructFields(&conversation, req.Conversation); err != nil {
