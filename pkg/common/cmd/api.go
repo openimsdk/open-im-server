@@ -81,6 +81,9 @@ func (a *ApiCmd) runE() error {
 	}
 	return startrpc.Start(
 		a.ctx, &a.apiConfig.Discovery,
+		nil,
+		nil,
+		// &a.apiConfig.API.RateLimiter,
 		&prometheus,
 		a.apiConfig.API.Api.ListenIP, "",
 		a.apiConfig.API.Prometheus.AutoSetPorts,
