@@ -32,4 +32,4 @@ circuitBreaker:
   window: 3s            # Time window size (seconds)
   bucket: 10            # Number of buckets
   success: 0.6          # Success rate threshold (0.6 means 60%)
-  requestThreshold: 100 # Request threshold; circuit breaker evaluation occurs when reached
+  request: 100 # Request threshold; circuit breaker evaluation occurs when reached

@@ -49,10 +49,17 @@ func UnaryCircuitBreakerInterceptor(breaker circuitbreaker.CircuitBreaker) grpc.
 		resp, err = handler(ctx, req)
 
 		if err != nil {
-			if st, ok := status.FromError(err); ok && st.Code() == codes.Internal {
-				breaker.MarkFailed()
+			if st, ok := status.FromError(err); ok {
+				switch st.Code() {
+				case codes.OK:
+					breaker.MarkSuccess()
+				case codes.InvalidArgument, codes.NotFound, codes.AlreadyExists, codes.PermissionDenied:
+					breaker.MarkSuccess()
+				default:
+					breaker.MarkFailed()
+				}
 			} else {
-				breaker.MarkSuccess()
+				breaker.MarkFailed()
 			}
 		} else {
 			breaker.MarkSuccess()
@@ -79,10 +86,17 @@ func StreamCircuitBreakerInterceptor(breaker circuitbreaker.CircuitBreaker) grpc
 		err := handler(srv, ss)
 
 		if err != nil {
-			if st, ok := status.FromError(err); ok && st.Code() == codes.Internal {
-				breaker.MarkFailed()
+			if st, ok := status.FromError(err); ok {
+				switch st.Code() {
+				case codes.OK:
+					breaker.MarkSuccess()
+				case codes.InvalidArgument, codes.NotFound, codes.AlreadyExists, codes.PermissionDenied:
+					breaker.MarkSuccess()
+				default:
+					breaker.MarkFailed()
+				}
 			} else {
-				breaker.MarkSuccess()
+				breaker.MarkFailed()
 			}
 		} else {
 			breaker.MarkSuccess()
