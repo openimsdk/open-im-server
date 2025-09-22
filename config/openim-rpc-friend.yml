@@ -19,17 +19,17 @@ prometheus:
 
 ratelimiter:
   # Whether to enable rate limiting
-  enable: true
+  enable: false
   # WindowSize defines time duration per window
-  window: 10s
+  window: 20s
   # BucketNum defines bucket number for each window
-  bucket: 100
+  bucket: 500
   # CPU threshold; valid range 0–1000 (1000 = 100%)
-  cpuThreshold: 800
+  cpuThreshold: 850
 
 circuitBreaker:
-  enable: true
-  window: 3s            # Time window size (seconds)
-  bucket: 10            # Number of buckets
+  enable: false
+  window: 5s            # Time window size (seconds)
+  bucket: 100            # Number of buckets
   success: 0.6          # Success rate threshold (0.6 means 60%)
-  request: 100 # Request threshold; circuit breaker evaluation occurs when reached
+  request: 500 # Request threshold; circuit breaker evaluation occurs when reached

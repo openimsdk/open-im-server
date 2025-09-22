@@ -20,10 +20,10 @@ prometheus:
 
 ratelimiter:
   # Whether to enable rate limiting
-  enable: true
+  enable: false
   # WindowSize defines time duration per window
-  window: 10s
+  window: 20s
   # BucketNum defines bucket number for each window
-  bucket: 100
+  bucket: 500
   # CPU threshold; valid range 0–1000 (1000 = 100%)
-  cpuThreshold: 800
+  cpuThreshold: 850
