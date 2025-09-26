@@ -176,9 +176,16 @@ func (m *MsgTransfer) Start(index int, cfg *Config) error {
 				return err
 			}
 
-			etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
+			etcdClient, ok := client.(*etcd.SvcDiscoveryRegistryImpl)
+			if !ok {
+				return errs.New("only etcd support autoSetPorts").Wrap()
+			}
 
-			_, err = etcdClient.Put(context.TODO(), prommetrics.BuildDiscoveryKey(prommetrics.MessageTransferKeyName), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
+			target, err := jsonutil.JsonMarshal(prommetrics.BuildDefaultTarget(registerIP, prometheusPort))
+			if err != nil {
+				return errs.Wrap(err)
+			}
+			err = etcdClient.SetWithLease(context.TODO(), prommetrics.BuildDiscoveryKey(prommetrics.MessageTransferKeyName, index), target, prommetrics.TTL)
 			if err != nil {
 				return errs.WrapMsg(err, "etcd put err")
 			}

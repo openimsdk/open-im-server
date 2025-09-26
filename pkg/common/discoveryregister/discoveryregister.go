@@ -29,7 +29,7 @@ import (
 func NewDiscoveryRegister(discovery *config.Discovery, share *config.Share, watchNames []string) (discovery.SvcDiscoveryRegistry, error) {
 	switch discovery.Enable {
 	case "k8s":
-		return kubernetes.NewKubernetesConnManager("default",
+		return kubernetes.NewConnManager("default", watchNames,
 			grpc.WithDefaultCallOptions(
 				grpc.MaxCallSendMsgSize(1024*1024*20),
 			),
