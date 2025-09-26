@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -38,10 +39,13 @@ func (p *PrometheusDiscoveryApi) Enable(c *gin.Context) {
 func (p *PrometheusDiscoveryApi) discovery(c *gin.Context, key string) {
 	value, err := p.client.GetKeyWithPrefix(c, prommetrics.BuildDiscoveryKeyPrefix(key))
 	if err != nil {
+		if errors.Is(err, discovery.ErrNotSupported) {
+			c.JSON(http.StatusOK, []struct{}{})
+			return
+		}
 		apiresp.GinError(c, errs.WrapMsg(err, "get key value"))
 		return
 	}
-
 	if len(value) == 0 {
 		c.JSON(http.StatusOK, []*prommetrics.RespTarget{})
 		return
