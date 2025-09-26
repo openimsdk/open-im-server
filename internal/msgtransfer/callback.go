@@ -51,7 +51,7 @@ func GetContent(msg *sdkws.MsgData) string {
 	}
 }
 
-func (mc *OnlineHistoryMongoConsumerHandler) webhookAfterSendSingleMsg(ctx context.Context, after *config.AfterConfig, msg *sdkws.MsgData) {
+func (mc *OnlineHistoryMongoConsumerHandler) webhookAfterMsgSaveDB(ctx context.Context, after *config.AfterConfig, msg *sdkws.MsgData) {
 	if msg.ContentType == constant.Typing {
 		return
 	}
@@ -60,28 +60,17 @@ func (mc *OnlineHistoryMongoConsumerHandler) webhookAfterSendSingleMsg(ctx conte
 		return
 	}
 
-	cbReq := &cbapi.CallbackAfterSendSingleMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendSingleMsgCommand),
-		RecvID:            msg.RecvID,
-	}
-	mc.webhookClient.AsyncPostWithQuery(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendSingleMsgResp{}, after, buildKeyMsgDataQuery(msg))
-}
-
-func (mc *OnlineHistoryMongoConsumerHandler) webhookAfterSendGroupMsg(ctx context.Context, after *config.AfterConfig, msg *sdkws.MsgData) {
-	if msg.ContentType == constant.Typing {
-		return
+	cbReq := &cbapi.CallbackAfterMsgSaveDBReq{
+		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterMsgSaveDBCommand),
 	}
 
-	if !filterAfterMsg(msg, after) {
-		return
+	if msg.RecvID != "" {
+		cbReq.RecvID = msg.RecvID
+	} else if msg.GroupID != "" {
+		cbReq.GroupID = msg.GroupID
 	}
 
-	cbReq := &cbapi.CallbackAfterSendGroupMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterSendGroupMsgCommand),
-		GroupID:           msg.GroupID,
-	}
-
-	mc.webhookClient.AsyncPostWithQuery(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterSendGroupMsgResp{}, after, buildKeyMsgDataQuery(msg))
+	mc.webhookClient.AsyncPostWithQuery(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterMsgSaveDBResp{}, after, buildKeyMsgDataQuery(msg))
 }
 
 func buildKeyMsgDataQuery(msg *sdkws.MsgData) map[string]string {
