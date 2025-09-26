@@ -64,10 +64,12 @@ func (mc *OnlineHistoryMongoConsumerHandler) webhookAfterMsgSaveDB(ctx context.C
 		CommonCallbackReq: toCommonCallback(ctx, msg, cbapi.CallbackAfterMsgSaveDBCommand),
 	}
 
-	if msg.RecvID != "" {
+	switch msg.SessionType {
+	case constant.SingleChatType, constant.NotificationChatType:
 		cbReq.RecvID = msg.RecvID
-	} else if msg.GroupID != "" {
+	case constant.ReadGroupChatType:
 		cbReq.GroupID = msg.GroupID
+	default:
 	}
 
 	mc.webhookClient.AsyncPostWithQuery(ctx, cbReq.GetCallbackCommand(), cbReq, &cbapi.CallbackAfterMsgSaveDBResp{}, after, buildKeyMsgDataQuery(msg))
