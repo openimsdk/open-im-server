@@ -17,8 +17,12 @@ type RespTarget struct {
 	Labels  map[string]string `json:"labels"`
 }
 
-func BuildDiscoveryKey(name string) string {
+func BuildDiscoveryKeyPrefix(name string) string {
 	return fmt.Sprintf("%s/%s/%s", "openim", "prometheus_discovery", name)
+}
+
+func BuildDiscoveryKey(name string, index int) string {
+	return fmt.Sprintf("%s/%s/%s/%d", "openim", "prometheus_discovery", name, index)
 }
 
 func BuildDefaultTarget(host string, ip int) Target {

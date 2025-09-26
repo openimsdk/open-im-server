@@ -38,7 +38,7 @@ func (p *PrometheusDiscoveryApi) Enable(c *gin.Context) {
 }
 
 func (p *PrometheusDiscoveryApi) discovery(c *gin.Context, key string) {
-	eResp, err := p.client.Get(c, prommetrics.BuildDiscoveryKey(key))
+	eResp, err := p.client.Get(c, prommetrics.BuildDiscoveryKeyPrefix(key), clientv3.WithPrefix())
 	if err != nil {
 		// Log and respond with an error if preparation fails.
 		apiresp.GinError(c, errs.WrapMsg(err, "etcd get err"))
