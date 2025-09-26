@@ -11,7 +11,8 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -40,33 +41,28 @@ func (p *PrometheusDiscoveryApi) Enable(c *gin.Context) {
 func (p *PrometheusDiscoveryApi) discovery(c *gin.Context, key string) {
 	eResp, err := p.client.Get(c, prommetrics.BuildDiscoveryKeyPrefix(key), clientv3.WithPrefix())
 	if err != nil {
-		// Log and respond with an error if preparation fails.
-		apiresp.GinError(c, errs.WrapMsg(err, "etcd get err"))
+		apiresp.GinError(c, errs.WrapMsg(err, "get key value"))
 		return
 	}
-	if len(eResp.Kvs) == 0 {
-		c.JSON(http.StatusOK, []*prommetrics.Target{})
+	value := datautil.Batch(func(kv *mvccpb.KeyValue) []byte { return kv.Value }, eResp.Kvs)
+
+	if len(value) == 0 {
+		c.JSON(http.StatusOK, []*prommetrics.RespTarget{})
+		return
+	}
+	var resp prommetrics.RespTarget
+	for i := range value {
+		var tmp prommetrics.Target
+		if err = json.Unmarshal(value[i], &tmp); err != nil {
+			apiresp.GinError(c, errs.WrapMsg(err, "json unmarshal err"))
+			return
+		}
+
+		resp.Targets = append(resp.Targets, tmp.Target)
+		resp.Labels = tmp.Labels // default label is fixed. See prommetrics.BuildDefaultTarget
 	}
 
-	var (
-		resp = &prommetrics.RespTarget{
-			Targets: make([]string, 0, len(eResp.Kvs)),
-		}
-	)
-
-	for i := range eResp.Kvs {
-		var target prommetrics.Target
-		err = json.Unmarshal(eResp.Kvs[i].Value, &target)
-		if err != nil {
-			log.ZError(c, "prometheus unmarshal err", errs.Wrap(err))
-		}
-		resp.Targets = append(resp.Targets, target.Target)
-		if resp.Labels == nil {
-			resp.Labels = target.Labels
-		}
-	}
-
-	c.JSON(200, []*prommetrics.RespTarget{resp})
+	c.JSON(http.StatusOK, []*prommetrics.RespTarget{&resp})
 }
 
 func (p *PrometheusDiscoveryApi) Api(c *gin.Context) {

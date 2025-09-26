@@ -164,9 +164,16 @@ func Start[T any](ctx context.Context, discovery *conf.Discovery, prometheusConf
 				return err
 			}
 
-			etcdClient := client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
+			etcdClient, ok := client.(*etcd.SvcDiscoveryRegistryImpl)
+			if !ok {
+				return errs.New("only etcd support autoSetPorts").Wrap()
+			}
 
-			_, err = etcdClient.Put(ctx, prommetrics.BuildDiscoveryKey(rpcRegisterName, index), jsonutil.StructToJsonString(prommetrics.BuildDefaultTarget(registerIP, prometheusPort)))
+			target, err := jsonutil.JsonMarshal(prommetrics.BuildDefaultTarget(registerIP, prometheusPort))
+			if err != nil {
+				return errs.Wrap(err)
+			}
+			err = etcdClient.SetWithLease(ctx, prommetrics.BuildDiscoveryKey(rpcRegisterName, index), target, prommetrics.TTL)
 			if err != nil {
 				return errs.WrapMsg(err, "etcd put err")
 			}

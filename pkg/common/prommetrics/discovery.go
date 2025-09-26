@@ -5,6 +5,7 @@ import "fmt"
 const (
 	APIKeyName             = "api"
 	MessageTransferKeyName = "message-transfer"
+	TTL                    = 300
 )
 
 type Target struct {
