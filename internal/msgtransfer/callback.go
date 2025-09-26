@@ -52,10 +52,6 @@ func GetContent(msg *sdkws.MsgData) string {
 }
 
 func (mc *OnlineHistoryMongoConsumerHandler) webhookAfterMsgSaveDB(ctx context.Context, after *config.AfterConfig, msg *sdkws.MsgData) {
-	if msg.ContentType == constant.Typing {
-		return
-	}
-
 	if !filterAfterMsg(msg, after) {
 		return
 	}
