@@ -11,14 +11,11 @@ import (
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/discovery/etcd"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils/datautil"
-	"go.etcd.io/etcd/api/v3/mvccpb"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type PrometheusDiscoveryApi struct {
 	config *Config
-	client *clientv3.Client
+	client discovery.SvcDiscoveryRegistry
 }
 
 func NewPrometheusDiscoveryApi(cfg *Config, client discovery.SvcDiscoveryRegistry) *PrometheusDiscoveryApi {
@@ -26,7 +23,7 @@ func NewPrometheusDiscoveryApi(cfg *Config, client discovery.SvcDiscoveryRegistr
 		config: cfg,
 	}
 	if cfg.Discovery.Enable == config.ETCD {
-		api.client = client.(*etcd.SvcDiscoveryRegistryImpl).GetClient()
+		api.client = client.(*etcd.SvcDiscoveryRegistryImpl)
 	}
 	return api
 }
@@ -39,12 +36,11 @@ func (p *PrometheusDiscoveryApi) Enable(c *gin.Context) {
 }
 
 func (p *PrometheusDiscoveryApi) discovery(c *gin.Context, key string) {
-	eResp, err := p.client.Get(c, prommetrics.BuildDiscoveryKeyPrefix(key), clientv3.WithPrefix())
+	value, err := p.client.GetKeyWithPrefix(c, prommetrics.BuildDiscoveryKeyPrefix(key))
 	if err != nil {
 		apiresp.GinError(c, errs.WrapMsg(err, "get key value"))
 		return
 	}
-	value := datautil.Batch(func(kv *mvccpb.KeyValue) []byte { return kv.Value }, eResp.Kvs)
 
 	if len(value) == 0 {
 		c.JSON(http.StatusOK, []*prommetrics.RespTarget{})
