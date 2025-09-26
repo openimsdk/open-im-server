@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -50,6 +51,7 @@ func (p *PrometheusDiscoveryApi) discovery(c *gin.Context, key string) {
 		c.JSON(http.StatusOK, []*prommetrics.RespTarget{})
 		return
 	}
+	fmt.Println(len(value))
 	var resp prommetrics.RespTarget
 	for i := range value {
 		var tmp prommetrics.Target
