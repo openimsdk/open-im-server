@@ -323,6 +323,7 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 			// During this process, instance A might still be executing, resulting in two clients with the same token existing simultaneously.
 			// This situation needs to be filtered to prevent duplicate clients.
 			if c.token == newClient.token {
+				log.ZDebug(newClient.ctx, "token is same, not kick", "userID", newClient.UserID, "platformID", newClient.PlatformID, "token", newClient.token)
 				continue
 			}
 			kickTokens = append(kickTokens, c.token)
