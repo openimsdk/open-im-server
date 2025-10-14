@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-kratos/aegis/circuitbreaker"
-	"github.com/go-kratos/aegis/circuitbreaker/sre"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/stability/circuitbreaker"
+	"github.com/openimsdk/tools/stability/circuitbreaker/sre"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -25,7 +25,7 @@ func NewCircuitBreaker(config *CircuitBreaker) circuitbreaker.CircuitBreaker {
 		return nil
 	}
 
-	return sre.NewBreaker(
+	return sre.NewSREBraker(
 		sre.WithWindow(config.Window),
 		sre.WithBucket(config.Bucket),
 		sre.WithSuccess(config.Success),

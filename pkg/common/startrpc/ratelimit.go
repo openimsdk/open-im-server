@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-kratos/aegis/ratelimit"
-	"github.com/go-kratos/aegis/ratelimit/bbr"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/stability/ratelimit"
+	"github.com/openimsdk/tools/stability/ratelimit/bbr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -24,7 +24,7 @@ func NewRateLimiter(config *RateLimiter) ratelimit.Limiter {
 		return nil
 	}
 
-	return bbr.NewLimiter(
+	return bbr.NewBBRLimiter(
 		bbr.WithWindow(config.Window),
 		bbr.WithBucket(config.Bucket),
 		bbr.WithCPUThreshold(config.CPUThreshold),

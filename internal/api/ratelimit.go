@@ -8,11 +8,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-kratos/aegis/ratelimit"
-	"github.com/go-kratos/aegis/ratelimit/bbr"
+
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/stability/ratelimit"
+	"github.com/openimsdk/tools/stability/ratelimit/bbr"
 )
 
 type RateLimiter struct {
@@ -29,7 +30,7 @@ func RateLimitMiddleware(config *RateLimiter) gin.HandlerFunc {
 		}
 	}
 
-	limiter := bbr.NewLimiter(
+	limiter := bbr.NewBBRLimiter(
 		bbr.WithWindow(config.Window),
 		bbr.WithBucket(config.Bucket),
 		bbr.WithCPUThreshold(config.CPUThreshold),
@@ -60,7 +61,6 @@ func RateLimitMiddleware(config *RateLimiter) gin.HandlerFunc {
 		}
 
 		c.Next()
-
 		done(ratelimit.DoneInfo{})
 	}
 }
