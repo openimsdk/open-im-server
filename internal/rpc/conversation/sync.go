@@ -27,7 +27,7 @@ func (c *conversationServer) GetFullOwnerConversationIDs(ctx context.Context, re
 		conversationIDs = nil
 	}
 	return &conversation.GetFullOwnerConversationIDsResp{
-		Version:         idHash,
+		Version:         uint64(vl.Version),
 		VersionID:       vl.ID.Hex(),
 		Equal:           req.IdHash == idHash,
 		ConversationIDs: conversationIDs,

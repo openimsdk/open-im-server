@@ -32,7 +32,7 @@ func (g *groupServer) GetFullGroupMemberUserIDs(ctx context.Context, req *pbgrou
 		userIDs = nil
 	}
 	return &pbgroup.GetFullGroupMemberUserIDsResp{
-		Version:   idHash,
+		Version:   uint64(vl.Version),
 		VersionID: vl.ID.Hex(),
 		Equal:     req.IdHash == idHash,
 		UserIDs:   userIDs,
@@ -56,7 +56,7 @@ func (g *groupServer) GetFullJoinGroupIDs(ctx context.Context, req *pbgroup.GetF
 		groupIDs = nil
 	}
 	return &pbgroup.GetFullJoinGroupIDsResp{
-		Version:   idHash,
+		Version:   uint64(vl.Version),
 		VersionID: vl.ID.Hex(),
 		Equal:     req.IdHash == idHash,
 		GroupIDs:  groupIDs,
