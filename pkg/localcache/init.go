@@ -15,10 +15,11 @@
 package localcache
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 	"strings"
 	"sync"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/cachekey"
 )
 
 var (
@@ -32,6 +33,10 @@ func InitLocalCache(localCache *config.LocalCache) {
 			Local config.CacheConfig
 			Keys  []string
 		}{
+			{
+				Local: localCache.Auth,
+				Keys:  []string{cachekey.UidPidToken},
+			},
 			{
 				Local: localCache.User,
 				Keys:  []string{cachekey.UserInfoKey, cachekey.UserGlobalRecvMsgOptKey},

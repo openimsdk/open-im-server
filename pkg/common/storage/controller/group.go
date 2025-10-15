@@ -195,7 +195,6 @@ func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*model.Group, 
 			for _, group := range groups {
 				c = c.DelGroupsInfo(group.GroupID).
 					DelGroupMembersHash(group.GroupID).
-					DelGroupMembersHash(group.GroupID).
 					DelGroupsMemberNum(group.GroupID).
 					DelGroupMemberIDs(group.GroupID).
 					DelGroupAllRoleLevel(group.GroupID).
