@@ -109,7 +109,7 @@ func GetConversationIDBySessionType(sessionType int, ids ...string) string {
 	case constant.ReadGroupChatType:
 		return "sg_" + ids[0] // super group chat
 	case constant.NotificationChatType:
-		return "sn_" + ids[0] // server notification chat
+		return "sn_" + strings.Join(ids, "_") // server notification chat
 	}
 	return ""
 }
