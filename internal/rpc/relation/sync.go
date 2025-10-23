@@ -56,7 +56,7 @@ func (s *friendServer) GetFullFriendUserIDs(ctx context.Context, req *relation.G
 		userIDs = nil
 	}
 	return &relation.GetFullFriendUserIDsResp{
-		Version:   idHash,
+		Version:   uint64(vl.Version),
 		VersionID: vl.ID.Hex(),
 		Equal:     req.IdHash == idHash,
 		UserIDs:   userIDs,
