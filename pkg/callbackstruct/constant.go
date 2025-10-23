@@ -66,4 +66,5 @@ const (
 	CallbackAfterCreateSingleChatConversationsCommand  = "callbackAfterCreateSingleChatConversationsCommand"
 	CallbackBeforeCreateGroupChatConversationsCommand  = "callbackBeforeCreateGroupChatConversationsCommand"
 	CallbackAfterCreateGroupChatConversationsCommand   = "callbackAfterCreateGroupChatConversationsCommand"
+	CallbackAfterMsgSaveDBCommand                      = "callbackAfterMsgSaveDBCommand"
 )

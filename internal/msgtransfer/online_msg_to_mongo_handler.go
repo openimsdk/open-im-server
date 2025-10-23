@@ -15,7 +15,6 @@
 package msgtransfer
 
 import (
-	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/mq"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
@@ -57,7 +56,7 @@ func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(val mq.Message) 
 	log.ZDebug(ctx, "mongo consumer recv msg", "msgs", msgFromMQ.String())
 	err = mc.msgTransferDatabase.BatchInsertChat2DB(ctx, msgFromMQ.ConversationID, msgFromMQ.MsgData, msgFromMQ.LastSeq)
 	if err != nil {
-		log.ZError(ctx, "single data insert to mongo err", err, "msg", msgFromMQ.MsgData, "conversationID", msgFromMQ.ConversationID)
+		log.ZError(ctx, "batch data insert to mongo err", err, "msg", msgFromMQ.MsgData, "conversationID", msgFromMQ.ConversationID)
 		prommetrics.MsgInsertMongoFailedCounter.Inc()
 	} else {
 		prommetrics.MsgInsertMongoSuccessCounter.Inc()
@@ -65,12 +64,7 @@ func (mc *OnlineHistoryMongoConsumerHandler) HandleChatWs2Mongo(val mq.Message) 
 	}
 
 	for _, msgData := range msgFromMQ.MsgData {
-		switch msgData.SessionType {
-		case constant.SingleChatType:
-			mc.webhookAfterSendSingleMsg(ctx, &mc.config.WebhooksConfig.AfterSendSingleMsg, msgData)
-		case constant.ReadGroupChatType:
-			mc.webhookAfterSendGroupMsg(ctx, &mc.config.WebhooksConfig.AfterSendGroupMsg, msgData)
-		}
+		mc.webhookAfterMsgSaveDB(ctx, &mc.config.WebhooksConfig.AfterMsgSaveDB, msgData)
 	}
 
 	//var seqs []int64
