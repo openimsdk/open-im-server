@@ -254,6 +254,10 @@ func (ws *WsServer) registerClient(client *Client) {
 		oldClients []*Client
 	)
 	oldClients, userOK, clientOK = ws.clients.Get(client.UserID, client.PlatformID)
+
+	log.ZInfo(client.ctx, "registerClient", "userID", client.UserID, "platformID", client.PlatformID,
+		"sdkVersion", client.SDKVersion)
+
 	if !userOK {
 		ws.clients.Set(client.UserID, client)
 		log.ZDebug(client.ctx, "user not exist", "userID", client.UserID, "platformID", client.PlatformID)
