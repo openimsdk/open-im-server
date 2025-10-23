@@ -97,6 +97,18 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 	case BestSpeed:
 		r.Use(gzip.Gzip(gzip.BestSpeed))
 	}
+
+	// Use rate limiter middleware
+	if cfg.API.RateLimiter.Enable {
+		rl := &RateLimiter{
+			Enable:       cfg.API.RateLimiter.Enable,
+			Window:       cfg.API.RateLimiter.Window,
+			Bucket:       cfg.API.RateLimiter.Bucket,
+			CPUThreshold: cfg.API.RateLimiter.CPUThreshold,
+		}
+		r.Use(RateLimitMiddleware(rl))
+	}
+
 	if config.Standalone() {
 		r.Use(func(c *gin.Context) {
 			c.Set(authverify.CtxAdminUserIDsKey, cfg.Share.IMAdminUser.UserIDs)

@@ -16,3 +16,20 @@ prometheus:
   # Prometheus listening ports, must be consistent with the number of rpc.ports
   # It will only take effect when autoSetPorts is set to false.
   ports:
+
+ratelimiter:
+  # Whether to enable rate limiting
+  enable: false
+  # WindowSize defines time duration per window
+  window: 20s
+  # BucketNum defines bucket number for each window
+  bucket: 500
+  # CPU threshold; valid range 0–1000 (1000 = 100%)
+  cpuThreshold: 850
+
+circuitBreaker:
+  enable: false
+  window: 5s            # Time window size (seconds)
+  bucket: 100            # Number of buckets
+  success: 0.6          # Success rate threshold (0.6 means 60%)
+  request: 500 # Request threshold; circuit breaker evaluation occurs when reached
