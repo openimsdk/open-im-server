@@ -354,13 +354,13 @@ type User struct {
 }
 
 type Redis struct {
-	Address     []string `mapstructure:"address"`
-	Username    string   `mapstructure:"username"`
-	Password    string   `mapstructure:"password"`
-	ClusterMode bool     `mapstructure:"clusterMode"`
-	DB          int      `mapstructure:"db"`
-	MaxRetry    int      `mapstructure:"maxRetry"`
-	PoolSize    int      `mapstructure:"poolSize"`
+	Address   []string `mapstructure:"address"`
+	Username  string   `mapstructure:"username"`
+	Password  string   `mapstructure:"password"`
+	RedisMode string   `mapstructure:"redisMode"`
+	DB        int      `mapstructure:"db"`
+	MaxRetry  int      `mapstructure:"maxRetry"`
+	PoolSize  int      `mapstructure:"poolSize"`
 }
 
 type BeforeConfig struct {
@@ -511,13 +511,13 @@ func (m *Mongo) Build() *mongoutil.Config {
 
 func (r *Redis) Build() *redisutil.Config {
 	return &redisutil.Config{
-		ClusterMode: r.ClusterMode,
-		Address:     r.Address,
-		Username:    r.Username,
-		Password:    r.Password,
-		DB:          r.DB,
-		MaxRetry:    r.MaxRetry,
-		PoolSize:    r.PoolSize,
+		RedisMode: r.RedisMode,
+		Address:   r.Address,
+		Username:  r.Username,
+		Password:  r.Password,
+		DB:        r.DB,
+		MaxRetry:  r.MaxRetry,
+		PoolSize:  r.PoolSize,
 	}
 }
 
