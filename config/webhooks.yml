@@ -41,6 +41,9 @@ afterSendGroupMsg:
   attentionIds: []
   # See beforeSendSingleMsg comment.
   deniedTypes: []
+afterMsgSaveDB:
+  enable: false
+  timeout: 5
 afterUserOnline:
   enable: false
   timeout: 5
