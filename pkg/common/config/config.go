@@ -473,6 +473,7 @@ type Webhooks struct {
 	BeforeSendGroupMsg                  BeforeConfig `yaml:"beforeSendGroupMsg"`
 	BeforeMsgModify                     BeforeConfig `yaml:"beforeMsgModify"`
 	AfterSendGroupMsg                   AfterConfig  `yaml:"afterSendGroupMsg"`
+	AfterMsgSaveDB                      AfterConfig  `yaml:"afterMsgSaveDB"`
 	AfterUserOnline                     AfterConfig  `yaml:"afterUserOnline"`
 	AfterUserOffline                    AfterConfig  `yaml:"afterUserOffline"`
 	AfterUserKickOff                    AfterConfig  `yaml:"afterUserKickOff"`
