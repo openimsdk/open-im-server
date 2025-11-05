@@ -1,17 +1,3 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package msg
 
 import (
@@ -160,7 +146,8 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 	var seqs []int64
 
 	log.ZDebug(ctx, "MarkConversationAsRead", "hasReadSeq", hasReadSeq, "req.HasReadSeq", req.HasReadSeq)
-	if conversation.ConversationType == constant.SingleChatType {
+	switch conversation.ConversationType {
+	case constant.SingleChatType:
 		for i := hasReadSeq + 1; i <= req.HasReadSeq; i++ {
 			seqs = append(seqs, i)
 		}
@@ -185,8 +172,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		}
 		m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID,
 			m.conversationAndGetRecvID(conversation, req.UserID), seqs, hasReadSeq)
-	} else if conversation.ConversationType == constant.ReadGroupChatType ||
-		conversation.ConversationType == constant.NotificationChatType {
+	case constant.ReadGroupChatType, constant.NotificationChatType:
 		if req.HasReadSeq > hasReadSeq {
 			err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
 			if err != nil {
@@ -198,7 +184,8 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 			req.UserID, seqs, hasReadSeq)
 	}
 
-	if conversation.ConversationType == constant.SingleChatType {
+	switch conversation.ConversationType {
+	case constant.SingleChatType:
 		reqCall := &cbapi.CallbackSingleMsgReadReq{
 			ConversationID: conversation.ConversationID,
 			UserID:         conversation.OwnerUserID,
@@ -206,7 +193,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 			ContentType:    conversation.ConversationType,
 		}
 		m.webhookAfterSingleMsgRead(ctx, &m.config.WebhooksConfig.AfterSingleMsgRead, reqCall)
-	} else if conversation.ConversationType == constant.ReadGroupChatType {
+	case constant.ReadGroupChatType:
 		reqCall := &cbapi.CallbackGroupMsgReadReq{
 			SendID:       conversation.OwnerUserID,
 			ReceiveID:    req.UserID,

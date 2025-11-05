@@ -35,12 +35,6 @@ func filterMsg(msg *pbchat.SendMsgReq, attentionIds []string, deniedTypes []int3
 	if len(deniedTypes) != 0 && datautil.Contain(msg.MsgData.ContentType, deniedTypes...) {
 		return false
 	}
-	//if len(allowedTypes) != 0 && !isInInterval(msg.MsgData.ContentType, allowedTypes) {
-	//	return false
-	//}
-	//if len(deniedTypes) != 0 && isInInterval(msg.MsgData.ContentType, deniedTypes) {
-	//	return false
-	//}
 	return true
 }
 

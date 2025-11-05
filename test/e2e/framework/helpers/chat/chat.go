@@ -1,17 +1,3 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package main
 
 import (
@@ -29,17 +15,7 @@ var (
 )
 
 func main() {
-	// Define the URL to get the latest version
-	// latestVersionURL := "https://github.com/openimsdk/chat/releases/latest"
-	// latestVersion, err := getLatestVersion(latestVersionURL)
-	// if err != nil {
-	// 	fmt.Printf("Failed to get the latest version: %v\n", err)
-	// 	return
-	// }
 	latestVersion := defaultTemplateVersion
-
-	// getLatestVersion
-
 	// Construct the download URL
 	downloadURL := fmt.Sprintf("https://github.com/openimsdk/chat/releases/download/%s/chat_Linux_x86_64.tar.gz", latestVersion)
 
@@ -99,23 +75,6 @@ func main() {
 	// Block the main thread indefinitely
 	select {}
 }
-
-/* func getLatestVersion(url string) (string, error) {
-	resp, err := webhook.Get(url)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-// 	location := resp.Header.Get("Location")
-// 	if location == "" {
-// 		return defaultTemplateVersion, nil
-// 	}
-
-	// Extract the version number from the URL
-	latestVersion := filepath.Base(location)
-	return latestVersion, nil
-} */
 
 // downloadAndExtract downloads a file from a URL and extracts it to a destination directory.
 func downloadAndExtract(url, destDir string) error {
