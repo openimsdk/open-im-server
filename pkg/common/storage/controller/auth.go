@@ -237,14 +237,6 @@ func (a *authDatabase) checkToken(ctx context.Context, tokens map[int]map[string
 		return nil, nil, nil, errs.New("unknown multiLogin policy").Wrap()
 	}
 
-	//var adminTokenMaxNum = a.multiLogin.MaxNumOneEnd
-	//l := len(adminToken)
-	//if platformID == constant.AdminPlatformID {
-	//	l++
-	//}
-	//if l > adminTokenMaxNum {
-	//	kickToken = append(kickToken, adminToken[:l-adminTokenMaxNum]...)
-	//}
 	var deleteAdminToken []string
 	if platformID == constant.AdminPlatformID {
 		deleteAdminToken = adminToken

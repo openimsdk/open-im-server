@@ -1,17 +1,3 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package controller
 
 import (
@@ -363,25 +349,6 @@ func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID
 	return msgs, err
 }
 
-// GetMsgBySeqsRange In the context of group chat, we have the following parameters:
-//
-// "maxSeq" of a conversation: It represents the maximum value of messages in the group conversation.
-// "minSeq" of a conversation (default: 1): It represents the minimum value of messages in the group conversation.
-//
-// For a user's perspective regarding the group conversation, we have the following parameters:
-//
-// "userMaxSeq": It represents the user's upper limit for message retrieval in the group. If not set (default: 0),
-// it means the upper limit is the same as the conversation's "maxSeq".
-// "userMinSeq": It represents the user's starting point for message retrieval in the group. If not set (default: 0),
-// it means the starting point is the same as the conversation's "minSeq".
-//
-// The scenarios for these parameters are as follows:
-//
-// For users who have been kicked out of the group, "userMaxSeq" can be set as the maximum value they had before
-// being kicked out. This limits their ability to retrieve messages up to a certain point.
-// For new users joining the group, if they don't need to receive old messages,
-// "userMinSeq" can be set as the same value as the conversation's "maxSeq" at the moment they join the group.
-// This ensures that their message retrieval starts from the point they joined.
 func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID string, conversationID string, begin, end, num, userMaxSeq int64) (int64, int64, []*sdkws.MsgData, error) {
 	userMinSeq, err := db.seqUser.GetUserMinSeq(ctx, conversationID, userID)
 	if err != nil && !errors.Is(err, redis.Nil) {

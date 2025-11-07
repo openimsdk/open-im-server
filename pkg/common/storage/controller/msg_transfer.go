@@ -38,18 +38,6 @@ type MsgTransferDatabase interface {
 }
 
 func NewMsgTransferDatabase(msgDocModel database.Msg, msg cache.MsgCache, seqUser cache.SeqUser, seqConversation cache.SeqConversationCache, mongoProducer, pushProducer mq.Producer) (MsgTransferDatabase, error) {
-	//conf, err := kafka.BuildProducerConfig(*kafkaConf.Build())
-	//if err != nil {
-	//	return nil, err
-	//}
-	//producerToMongo, err := kafka.NewKafkaProducerV2(conf, kafkaConf.Address, kafkaConf.ToMongoTopic)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//producerToPush, err := kafka.NewKafkaProducerV2(conf, kafkaConf.Address, kafkaConf.ToPushTopic)
-	//if err != nil {
-	//	return nil, err
-	//}
 	return &msgTransferDatabase{
 		msgDocDatabase:  msgDocModel,
 		msgCache:        msg,

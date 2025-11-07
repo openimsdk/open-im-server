@@ -10,10 +10,6 @@ import (
 )
 
 func TestName(t *testing.T) {
-	//var rocks rockscache.Client
-	//rdb := getRocksCacheRedisClient(&rocks)
-	//t.Log(rdb == nil)
-
 	ctx := context.Background()
 	rdb, err := redisutil.NewRedisClient(ctx, (&config.Redis{
 		Address:  []string{"172.16.8.48:16379"},
@@ -34,11 +30,6 @@ func TestName(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	//userMgo, err := mgo.NewUserMongo(mgocli.GetDB())
-	//if err != nil {
-	//	panic(err)
-	//}
-	//rock := rockscache.NewClient(rdb, rockscache.NewDefaultOptions())
 	mgoSeqUser, err := mgo.NewSeqUserMongo(mgocli.GetDB())
 	if err != nil {
 		panic(err)

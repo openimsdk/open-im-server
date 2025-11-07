@@ -1,17 +1,3 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package user
 
 import (
@@ -153,8 +139,6 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 	return resp, nil
 }
 
-// deprecated:
-// UpdateUserInfo
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) (resp *pbuser.UpdateUserInfoResp, err error) {
 	resp = &pbuser.UpdateUserInfoResp{}
 	err = authverify.CheckAccess(ctx, req.UserInfo.UserID)
@@ -204,19 +188,6 @@ func (s *userServer) UpdateUserInfoEx(ctx context.Context, req *pbuser.UpdateUse
 	}
 
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
-
-	//friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if req.UserInfo.Nickname != nil || req.UserInfo.FaceURL != nil {
-	//	if err := s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
-	//		return nil, err
-	//	}
-	//}
-	//for _, friendID := range friends {
-	//	s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
-	//}
 
 	s.webhookAfterUpdateUserInfoEx(ctx, &s.config.WebhooksConfig.AfterUpdateUserInfoEx, req)
 	if err := s.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID, oldUser); err != nil {
@@ -290,10 +261,6 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	if len(req.Users) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("users is empty")
 	}
-	// check if secret is changed
-	//if s.config.Share.Secret == defaultSecret {
-	//	return nil, servererrs.ErrSecretNotChanged.Wrap()
-	//}
 	if err = authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
@@ -350,8 +317,6 @@ func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Ge
 	}
 	return &pbuser.GetGlobalRecvMessageOptResp{GlobalRecvMsgOpt: user[0].GlobalRecvMsgOpt}, nil
 }
-
-// GetAllUserID Get user account by page.
 func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDReq) (resp *pbuser.GetAllUserIDResp, err error) {
 	total, userIDs, err := s.db.GetAllUserID(ctx, req.Pagination)
 	if err != nil {
@@ -360,7 +325,6 @@ func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDR
 	return &pbuser.GetAllUserIDResp{Total: int32(total), UserIDs: userIDs}, nil
 }
 
-// ProcessUserCommandAdd user general function add.
 func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.ProcessUserCommandAddReq) (*pbuser.ProcessUserCommandAddResp, error) {
 	err := authverify.CheckAccess(ctx, req.UserID)
 	if err != nil {
@@ -375,7 +339,6 @@ func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.Proc
 	if req.Ex != nil {
 		value = req.Ex.Value
 	}
-	// Assuming you have a method in s.storage to add a user command
 	err = s.db.AddUserCommand(ctx, req.UserID, req.Type, req.Uuid, value, ex)
 	if err != nil {
 		return nil, err
@@ -388,7 +351,6 @@ func (s *userServer) ProcessUserCommandAdd(ctx context.Context, req *pbuser.Proc
 	return &pbuser.ProcessUserCommandAddResp{}, nil
 }
 
-// ProcessUserCommandDelete user general function delete.
 func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.ProcessUserCommandDeleteReq) (*pbuser.ProcessUserCommandDeleteResp, error) {
 	err := authverify.CheckAccess(ctx, req.UserID)
 	if err != nil {
@@ -406,8 +368,6 @@ func (s *userServer) ProcessUserCommandDelete(ctx context.Context, req *pbuser.P
 	s.userNotificationSender.UserCommandDeleteNotification(ctx, tips)
 	return &pbuser.ProcessUserCommandDeleteResp{}, nil
 }
-
-// ProcessUserCommandUpdate user general function update.
 func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.ProcessUserCommandUpdateReq) (*pbuser.ProcessUserCommandUpdateResp, error) {
 	err := authverify.CheckAccess(ctx, req.UserID)
 	if err != nil {
@@ -415,7 +375,6 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 	}
 	val := make(map[string]any)
 
-	// Map fields from eax to val
 	if req.Value != nil {
 		val["value"] = req.Value.Value
 	}
@@ -423,7 +382,6 @@ func (s *userServer) ProcessUserCommandUpdate(ctx context.Context, req *pbuser.P
 		val["ex"] = req.Ex.Value
 	}
 
-	// Assuming you have a method in s.storage to update a user command
 	err = s.db.UpdateUserCommand(ctx, req.UserID, req.Type, req.Uuid, val)
 	if err != nil {
 		return nil, err
@@ -442,17 +400,14 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 	if err != nil {
 		return nil, err
 	}
-	// Fetch user commands from the database
 	commands, err := s.db.GetUserCommands(ctx, req.UserID, req.Type)
 	if err != nil {
 		return nil, err
 	}
 
-	// Initialize commandInfoSlice as an empty slice
 	commandInfoSlice := make([]*pbuser.CommandInfoResp, 0, len(commands))
 
 	for _, command := range commands {
-		// No need to use index since command is already a pointer
 		commandInfoSlice = append(commandInfoSlice, &pbuser.CommandInfoResp{
 			Type:       command.Type,
 			Uuid:       command.Uuid,
@@ -462,7 +417,6 @@ func (s *userServer) ProcessUserCommandGet(ctx context.Context, req *pbuser.Proc
 		})
 	}
 
-	// Return the response with the slice
 	return &pbuser.ProcessUserCommandGetResp{CommandResp: commandInfoSlice}, nil
 }
 
@@ -471,17 +425,14 @@ func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.P
 	if err != nil {
 		return nil, err
 	}
-	// Fetch user commands from the database
 	commands, err := s.db.GetAllUserCommands(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Initialize commandInfoSlice as an empty slice
 	commandInfoSlice := make([]*pbuser.AllCommandInfoResp, 0, len(commands))
 
 	for _, command := range commands {
-		// No need to use index since command is already a pointer
 		commandInfoSlice = append(commandInfoSlice, &pbuser.AllCommandInfoResp{
 			Type:       command.Type,
 			Uuid:       command.Uuid,
@@ -491,7 +442,6 @@ func (s *userServer) ProcessUserCommandGetAll(ctx context.Context, req *pbuser.P
 		})
 	}
 
-	// Return the response with the slice
 	return &pbuser.ProcessUserCommandGetAllResp{CommandResp: commandInfoSlice}, nil
 }
 
@@ -568,7 +518,6 @@ func (s *userServer) UpdateNotificationAccountInfo(ctx context.Context, req *pbu
 }
 
 func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.SearchNotificationAccountReq) (*pbuser.SearchNotificationAccountResp, error) {
-	// Check if user is an admin
 	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
@@ -576,21 +525,17 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 	var users []*tablerelation.User
 	var err error
 
-	// If a keyword is provided in the request
 	if req.Keyword != "" {
-		// Find users by keyword
 		users, err = s.db.Find(ctx, []string{req.Keyword})
 		if err != nil {
 			return nil, err
 		}
 
-		// Convert users to response format
 		resp := s.userModelToResp(users, req.Pagination, req.AppManagerLevel)
 		if resp.Total != 0 {
 			return resp, nil
 		}
 
-		// Find users by nickname if no users found by keyword
 		users, err = s.db.FindByNickname(ctx, req.Keyword)
 		if err != nil {
 			return nil, err
@@ -599,7 +544,6 @@ func (s *userServer) SearchNotificationAccount(ctx context.Context, req *pbuser.
 		return resp, nil
 	}
 
-	// If no keyword, find users with notification settings
 	if req.AppManagerLevel != nil {
 		users, err = s.db.FindNotification(ctx, int64(*req.AppManagerLevel))
 		if err != nil {

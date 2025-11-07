@@ -9,13 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-//func Limit(maxSync int, version uint64) int {
-//	if version == 0 {
-//		return 0
-//	}
-//	return maxSync
-//}
-
 const syncLimit = 200
 
 const (

@@ -16,22 +16,6 @@ import (
 
 func TestName1111(t *testing.T) {
 	coll := Mongodb().Collection("temp")
-
-	//updatePipeline := mongo.Pipeline{
-	//	{
-	//		{"$set", bson.M{
-	//			"age": bson.M{
-	//				"$toString": bson.M{
-	//					"$add": bson.A{
-	//						bson.M{"$toInt": "$age"},
-	//						1,
-	//					},
-	//				},
-	//			},
-	//		}},
-	//	},
-	//}
-
 	pipeline := mongo.Pipeline{
 		{
 			{"$set", bson.M{
