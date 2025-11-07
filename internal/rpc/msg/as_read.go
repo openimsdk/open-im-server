@@ -146,8 +146,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 	var seqs []int64
 
 	log.ZDebug(ctx, "MarkConversationAsRead", "hasReadSeq", hasReadSeq, "req.HasReadSeq", req.HasReadSeq)
-	switch conversation.ConversationType {
-	case constant.SingleChatType:
+	if conversation.ConversationType == constant.SingleChatType {
 		for i := hasReadSeq + 1; i <= req.HasReadSeq; i++ {
 			seqs = append(seqs, i)
 		}
@@ -172,7 +171,8 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		}
 		m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID,
 			m.conversationAndGetRecvID(conversation, req.UserID), seqs, hasReadSeq)
-	case constant.ReadGroupChatType, constant.NotificationChatType:
+	} else if conversation.ConversationType == constant.ReadGroupChatType ||
+		conversation.ConversationType == constant.NotificationChatType {
 		if req.HasReadSeq > hasReadSeq {
 			err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
 			if err != nil {
@@ -184,8 +184,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 			req.UserID, seqs, hasReadSeq)
 	}
 
-	switch conversation.ConversationType {
-	case constant.SingleChatType:
+	if conversation.ConversationType == constant.SingleChatType {
 		reqCall := &cbapi.CallbackSingleMsgReadReq{
 			ConversationID: conversation.ConversationID,
 			UserID:         conversation.OwnerUserID,
@@ -193,7 +192,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 			ContentType:    conversation.ConversationType,
 		}
 		m.webhookAfterSingleMsgRead(ctx, &m.config.WebhooksConfig.AfterSingleMsgRead, reqCall)
-	case constant.ReadGroupChatType:
+	} else if conversation.ConversationType == constant.ReadGroupChatType {
 		reqCall := &cbapi.CallbackGroupMsgReadReq{
 			SendID:       conversation.OwnerUserID,
 			ReceiveID:    req.UserID,
