@@ -59,3 +59,12 @@ func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(
 
 	c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, tips)
 }
+
+func (c *ConversationNotificationSender) ConversationDeleteNotification(ctx context.Context, userID string, conversationIDs []string) {
+	tips := &sdkws.ConversationDeleteTips{
+		UserID:          userID,
+		ConversationIDs: conversationIDs,
+	}
+
+	c.Notification(ctx, userID, userID, constant.ConversationDeleteNotification, tips)
+}

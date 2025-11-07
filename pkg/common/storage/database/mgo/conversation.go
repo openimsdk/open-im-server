@@ -294,3 +294,20 @@ func (c *ConversationMgo) FindRandConversation(ctx context.Context, ts int64, li
 	}
 	return mongoutil.Aggregate[*model.Conversation](ctx, c.coll, pipeline)
 }
+
+func (c *ConversationMgo) DeleteUsersConversations(ctx context.Context, userID string, conversationIDs []string) (err error) {
+	if len(conversationIDs) == 0 {
+		return nil
+	}
+	return mongoutil.IncrVersion(func() error {
+		err := mongoutil.DeleteMany(ctx, c.coll, bson.M{"owner_user_id": userID, "conversation_id": bson.M{"$in": conversationIDs}})
+		return err
+	}, func() error {
+		for _, conversationID := range conversationIDs {
+			if err := c.version.IncrVersion(ctx, userID, []string{conversationID}, model.VersionStateDelete); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}

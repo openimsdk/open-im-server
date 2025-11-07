@@ -42,6 +42,8 @@ func (a *CronTaskCmd) runE() error {
 	var prometheus config.Prometheus
 	return startrpc.Start(
 		a.ctx, &a.cronTaskConfig.Discovery,
+		nil,
+		nil,
 		&prometheus,
 		"", "",
 		true,
