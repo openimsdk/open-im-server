@@ -92,12 +92,13 @@ jobs:
       contents: write
     env:
       SDK_DIR: openim-sdk-core
-      CONFIG_PATH: config/notification.yml
-    #   pull-requests: write
+      NOTIFICATION_CONFIG_PATH: config/notification.yml
+      SHARE_CONFIG_PATH: config/share.yml
+
     strategy:
       matrix:
-        os: [ ubuntu-latest ]
-        go_version: [ "1.22.x" ]
+        os: [ubuntu-latest]
+        go_version: ["1.22.x"]
 
     steps:
       - name: Checkout Server repository
@@ -106,7 +107,8 @@ jobs:
       - name: Checkout SDK repository
         uses: actions/checkout@v4
         with:
-          repository: 'openimsdk/openim-sdk-core'
+          repository: "openimsdk/openim-sdk-core"
+          ref: "main"
           path: ${{ env.SDK_DIR }}
 
       - name: Set up Go ${{ matrix.go_version }}
@@ -119,15 +121,11 @@ jobs:
           go install github.com/magefile/mage@latest
           go mod download
 
-      - name: Install yq
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/download/v4.34.1/yq_linux_amd64 -O /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
-
       - name: Modify Server Configuration
         run: |
-          yq e '.groupCreated.unreadCount = true' -i ${{ env.CONFIG_PATH }}
-          yq e '.friendApplicationApproved.unreadCount = true' -i ${{ env.CONFIG_PATH }}
+          yq e '.groupCreated.isSendMsg = true' -i ${{ env.NOTIFICATION_CONFIG_PATH }}
+          yq e '.friendApplicationApproved.isSendMsg = true' -i ${{ env.NOTIFICATION_CONFIG_PATH }}
+          yq e '.secret = 123456' -i ${{ env.SHARE_CONFIG_PATH }}
 
       - name: Start Server Services
         run: |
