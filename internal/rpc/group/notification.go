@@ -476,14 +476,15 @@ func (g *NotificationSender) GroupApplicationAcceptedNotification(ctx context.Co
 	if err = g.fillOpUser(ctx, &opUser, group.GroupID); err != nil {
 		return
 	}
-	tips := &sdkws.GroupApplicationAcceptedTips{
-		Group:     group,
-		OpUser:    opUser,
-		HandleMsg: req.HandledMsg,
-		Uuid:      g.uuid(),
-		Request:   request,
-	}
+	uid := g.uuid()
 	for _, userID := range append(userIDs, req.FromUserID) {
+		tips := &sdkws.GroupApplicationAcceptedTips{
+			Group:     group,
+			OpUser:    opUser,
+			HandleMsg: req.HandledMsg,
+			Uuid:      uid,
+			Request:   request,
+		}
 		if userID == req.FromUserID {
 			tips.ReceiverAs = applicantReceiver
 		} else {
