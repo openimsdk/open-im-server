@@ -72,7 +72,7 @@ func Main(conf string, del time.Duration) error {
 	if err != nil {
 		return err
 	}
-	
+
 	mongodbConfig, err := readConfig[config.Mongo](conf, config.MongodbConfigFileName)
 	if err != nil {
 		return err

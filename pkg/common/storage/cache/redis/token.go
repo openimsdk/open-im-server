@@ -13,7 +13,6 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/redis/go-redis/v9"
 )
 
 type tokenCache struct {
@@ -220,7 +219,6 @@ func (c *tokenCache) DeleteAndSetTemporary(ctx context.Context, userID string, p
 	if err := c.rdb.HDel(ctx, key, fields...).Err(); err != nil {
 		return errs.Wrap(err)
 	}
-
 	if c.localCache != nil {
 		c.removeLocalTokenCache(ctx, key)
 	}

@@ -1,6 +1,6 @@
 rpc:
   # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
-  registerIP: 
+  registerIP:
   # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
   listenIP: 0.0.0.0
   # autoSetPorts indicates whether to automatically set the ports
