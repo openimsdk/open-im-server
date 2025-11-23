@@ -8,6 +8,7 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/openimsdk/open-im-server/v3/internal/api/jssdk"
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
