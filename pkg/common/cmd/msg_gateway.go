@@ -61,6 +61,8 @@ func (m *MsgGatewayCmd) runE() error {
 	var prometheus config.Prometheus
 	return startrpc.Start(
 		m.ctx, &m.msgGatewayConfig.Discovery,
+		&m.msgGatewayConfig.MsgGateway.CircuitBreaker,
+		&m.msgGatewayConfig.MsgGateway.RateLimiter,
 		&prometheus,
 		rpc.ListenIP, rpc.RegisterIP,
 		rpc.AutoSetPorts,

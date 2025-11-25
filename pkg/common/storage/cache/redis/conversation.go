@@ -253,7 +253,7 @@ func (c *ConversationRedisCache) DelConversationNotNotifyMessageUserIDs(userIDs 
 	return cache
 }
 
-func (c *ConversationRedisCache) DelConversationPinnedMessageUserIDs(userIDs ...string) cache.ConversationCache {
+func (c *ConversationRedisCache) DelUserPinnedConversations(userIDs ...string) cache.ConversationCache {
 	cache := c.CloneConversationCache()
 	for _, userID := range userIDs {
 		cache.AddKeys(c.getPinnedConversationIDsKey(userID))

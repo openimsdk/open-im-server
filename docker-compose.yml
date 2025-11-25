@@ -63,7 +63,12 @@ services:
     restart: always
     sysctls:
       net.core.somaxconn: 1024
-    command: redis-server /usr/local/redis/config/redis.conf --requirepass openIM123 --appendonly yes
+    command: >
+      redis-server
+      --requirepass openIM123
+      --appendonly yes
+      --aof-use-rdb-preamble yes
+      --save ""
     networks:
       - openim
 
@@ -208,7 +213,6 @@ services:
       # Defines which listener is used for inter-broker communication within the Kafka cluster
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
 
-
       # Authentication configuration variables - comment out to disable auth
       # KAFKA_USERNAME: "openIM"
       # KAFKA_PASSWORD: "openIM123"
@@ -262,14 +266,14 @@ services:
     networks:
       - openim
 
-  openim-admin-front:
-    image: ${OPENIM_ADMIN_FRONT_IMAGE}
-    container_name: openim-admin-front
-    restart: always
-    ports:
-      - "11002:80"
-    networks:
-      - openim
+  # openim-admin-front:
+  #   image: ${OPENIM_ADMIN_FRONT_IMAGE}
+  #   container_name: openim-admin-front
+  #   restart: always
+  #   ports:
+  #     - "11002:80"
+  #   networks:
+  #     - openim
 
   prometheus:
     image: ${PROMETHEUS_IMAGE}

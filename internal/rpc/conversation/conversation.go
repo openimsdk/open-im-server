@@ -37,6 +37,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/protocol/constant"
 	pbconversation "github.com/openimsdk/protocol/conversation"
+	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
@@ -132,6 +133,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbconvers
 	return resp, nil
 }
 
+// Deprecated: Use `GetConversations` instead.
 func (c *conversationServer) GetSortedConversationList(ctx context.Context, req *pbconversation.GetSortedConversationListReq) (resp *pbconversation.GetSortedConversationListResp, err error) {
 	if err := authverify.CheckAccess(ctx, req.UserID); err != nil {
 		return nil, err
@@ -183,9 +185,21 @@ func (c *conversationServer) GetSortedConversationList(ctx context.Context, req 
 
 	conversation_isPinTime := make(map[int64]string)
 	conversation_notPinTime := make(map[int64]string)
+
 	for _, v := range conversations {
 		conversationID := v.ConversationID
-		time := conversationMsg[conversationID].MsgInfo.LatestMsgRecvTime
+		var time int64
+		if _, ok := conversationMsg[conversationID]; ok {
+			time = conversationMsg[conversationID].MsgInfo.LatestMsgRecvTime
+		} else {
+			conversationMsg[conversationID] = &pbconversation.ConversationElem{
+				ConversationID: conversationID,
+				IsPinned:       v.IsPinned,
+				MsgInfo:        nil,
+			}
+			time = v.CreateTime.UnixMilli()
+		}
+
 		conversationMsg[conversationID].RecvMsgOpt = v.RecvMsgOpt
 		if v.IsPinned {
 			conversationMsg[conversationID].IsPinned = v.IsPinned
@@ -782,7 +796,7 @@ func (c *conversationServer) ClearUserConversationMsg(ctx context.Context, req *
 	}
 	latestMsgDestructTime := time.UnixMilli(req.Timestamp)
 	for i, conversation := range conversations {
-		if conversation.IsMsgDestruct == false || conversation.MsgDestructTime == 0 {
+		if !conversation.IsMsgDestruct || conversation.MsgDestructTime == 0 {
 			continue
 		}
 		seq, err := c.msgClient.GetLastMessageSeqByTime(ctx, conversation.ConversationID, req.Timestamp-(conversation.MsgDestructTime*1000))
@@ -821,4 +835,54 @@ func (c *conversationServer) setConversationMinSeqAndLatestMsgDestructTime(ctx c
 	}
 	c.conversationNotificationSender.ConversationChangeNotification(ctx, ownerUserID, []string{conversationID})
 	return nil
+}
+
+func (c *conversationServer) DeleteConversations(ctx context.Context, req *pbconversation.DeleteConversationsReq) (resp *pbconversation.DeleteConversationsResp, err error) {
+	if err := authverify.CheckAccess(ctx, req.OwnerUserID); err != nil {
+		return nil, err
+	}
+	if req.NeedDeleteTime == 0 && len(req.ConversationIDs) == 0 {
+		return nil, errs.ErrArgs.WrapMsg("need_delete_time or conversationIDs need be set")
+	}
+
+	if req.NeedDeleteTime != 0 && len(req.ConversationIDs) != 0 {
+		return nil, errs.ErrArgs.WrapMsg("need_delete_time and conversationIDs cannot both be set")
+	}
+
+	var needDeleteConversationIDs []string
+
+	if len(req.ConversationIDs) == 0 {
+		deleteTimeThreshold := time.Now().AddDate(0, 0, -int(req.NeedDeleteTime)).UnixMilli()
+		conversationIDs, err := c.conversationDatabase.GetConversationIDs(ctx, req.OwnerUserID)
+		if err != nil {
+			return nil, err
+		}
+		latestMsgs, err := c.msgClient.GetLastMessage(ctx, &msg.GetLastMessageReq{
+			UserID:          req.OwnerUserID,
+			ConversationIDs: conversationIDs,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		for conversationID, msg := range latestMsgs.Msgs {
+			if msg.SendTime < deleteTimeThreshold {
+				needDeleteConversationIDs = append(needDeleteConversationIDs, conversationID)
+			}
+		}
+
+		if len(needDeleteConversationIDs) == 0 {
+			return &pbconversation.DeleteConversationsResp{}, nil
+		}
+	} else {
+		needDeleteConversationIDs = req.ConversationIDs
+	}
+
+	if err := c.conversationDatabase.DeleteUsersConversations(ctx, req.OwnerUserID, needDeleteConversationIDs); err != nil {
+		return nil, err
+	}
+
+	// c.conversationNotificationSender.ConversationDeleteNotification(ctx, req.OwnerUserID, needDeleteConversationIDs)
+
+	return &pbconversation.DeleteConversationsResp{}, nil
 }

@@ -47,15 +47,15 @@ func New[V any](opts ...Option) Cache[V] {
 	if opt.localSlotNum > 0 && opt.localSlotSize > 0 {
 		createSimpleLRU := func() lru.LRU[string, V] {
 			if opt.expirationEvict {
-				return lru.NewExpirationLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
+				return lru.NewExpirationLRU(opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
 			} else {
-				return lru.NewLayLRU[string, V](opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
+				return lru.NewLazyLRU(opt.localSlotSize, opt.localSuccessTTL, opt.localFailedTTL, opt.target, c.onEvict)
 			}
 		}
 		if opt.localSlotNum == 1 {
 			c.local = createSimpleLRU()
 		} else {
-			c.local = lru.NewSlotLRU[string, V](opt.localSlotNum, LRUStringHash, createSimpleLRU)
+			c.local = lru.NewSlotLRU(opt.localSlotNum, LRUStringHash, createSimpleLRU)
 		}
 		if opt.linkSlotNum > 0 {
 			c.link = link.New(opt.linkSlotNum)
@@ -71,6 +71,8 @@ type cache[V any] struct {
 }
 
 func (c *cache[V]) onEvict(key string, value V) {
+	_ = value
+
 	if c.link != nil {
 		lks := c.link.Del(key)
 		for k := range lks {
