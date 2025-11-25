@@ -70,6 +70,7 @@ type Client struct {
 	UserID         string `json:"userID"`
 	IsBackground   bool   `json:"isBackground"`
 	SDKType        string `json:"sdkType"`
+	SDKVersion     string `json:"sdkVersion"`
 	Encoder        Encoder
 	ctx            *UserConnContext
 	longConnServer LongConnServer
@@ -97,6 +98,7 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, longConnServer
 	c.closedErr = nil
 	c.token = ctx.GetToken()
 	c.SDKType = ctx.GetSDKType()
+	c.SDKVersion = ctx.GetSDKVersion()
 	c.hbCtx, c.hbCancel = context.WithCancel(c.ctx)
 	c.subLock = new(sync.Mutex)
 	if c.subUserIDs != nil {

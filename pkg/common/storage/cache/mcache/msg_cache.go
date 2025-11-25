@@ -24,7 +24,7 @@ var (
 
 func NewMsgCache(cache database.Cache, msgDocDatabase database.Msg) cache.MsgCache {
 	initMemMsgCache.Do(func() {
-		memMsgCache = lru.NewLayLRU[string, *model.MsgInfoModel](1024*8, time.Hour, time.Second*10, localcache.EmptyTarget{}, nil)
+		memMsgCache = lru.NewLazyLRU[string, *model.MsgInfoModel](1024*8, time.Hour, time.Second*10, localcache.EmptyTarget{}, nil)
 	})
 	return &msgCache{
 		cache:          cache,

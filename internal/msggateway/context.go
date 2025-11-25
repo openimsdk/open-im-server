@@ -15,11 +15,12 @@
 package msggateway
 
 import (
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/utils/encrypt"
@@ -138,6 +139,10 @@ func (c *UserConnContext) SetOperationID(operationID string) {
 
 func (c *UserConnContext) GetToken() string {
 	return c.Req.URL.Query().Get(Token)
+}
+
+func (c *UserConnContext) GetSDKVersion() string {
+	return c.Req.URL.Query().Get(SDKVersion)
 }
 
 func (c *UserConnContext) GetCompression() bool {

@@ -47,7 +47,7 @@ func init() {
 	prommetrics.RegistryAll()
 }
 
-func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *conf.Prometheus, listenIP,
+func Start[T any](ctx context.Context, disc *conf.Discovery, circuitBreakerConfig *conf.CircuitBreaker, rateLimiterConfig *conf.RateLimiter, prometheusConfig *conf.Prometheus, listenIP,
 	registerIP string, autoSetPorts bool, rpcPorts []int, index int, rpcRegisterName string, notification *conf.Notification, config T,
 	watchConfigNames []string, watchServiceNames []string,
 	rpcFn func(ctx context.Context, config T, client discovery.SvcDiscoveryRegistry, server grpc.ServiceRegistrar) error,
@@ -82,6 +82,45 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 			options = append(options, grpc.MaxSendMsgSize(maxRequestBody.ResponseMaxBodySize))
 			clientOptions = append(clientOptions, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxRequestBody.ResponseMaxBodySize)))
 		}
+	}
+
+	if circuitBreakerConfig != nil && circuitBreakerConfig.Enable {
+		cb := &CircuitBreaker{
+			Enable:  circuitBreakerConfig.Enable,
+			Success: circuitBreakerConfig.Success,
+			Request: circuitBreakerConfig.Request,
+			Bucket:  circuitBreakerConfig.Bucket,
+			Window:  circuitBreakerConfig.Window,
+		}
+
+		breaker := NewCircuitBreaker(cb)
+
+		options = append(options,
+			UnaryCircuitBreakerInterceptor(breaker),
+			StreamCircuitBreakerInterceptor(breaker),
+		)
+
+		log.ZInfo(ctx, "RPC circuit breaker enabled",
+			"service", rpcRegisterName,
+			"window", circuitBreakerConfig.Window,
+			"bucket", circuitBreakerConfig.Bucket,
+			"success", circuitBreakerConfig.Success,
+			"requestThreshold", circuitBreakerConfig.Request)
+	}
+
+	if rateLimiterConfig != nil && rateLimiterConfig.Enable {
+		limiter := NewRateLimiter((*RateLimiter)(rateLimiterConfig))
+
+		options = append(options,
+			UnaryRateLimitInterceptor(limiter),
+			StreamRateLimitInterceptor(limiter),
+		)
+
+		log.ZInfo(ctx, "RPC rate limiter enabled",
+			"service", rpcRegisterName,
+			"window", rateLimiterConfig.Window,
+			"bucket", rateLimiterConfig.Bucket,
+			"cpuThreshold", rateLimiterConfig.CPUThreshold)
 	}
 
 	registerIP, err := network.GetRpcRegisterIP(registerIP)
@@ -123,7 +162,7 @@ func Start[T any](ctx context.Context, disc *conf.Discovery, prometheusConfig *c
 
 	go func() {
 		sigs := make(chan os.Signal, 1)
-		signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
+		signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT)
 		select {
 		case <-ctx.Done():
 			return
