@@ -13,6 +13,7 @@ import (
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/redis/go-redis/v9"
 )
 
 type tokenCache struct {
