@@ -97,6 +97,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, cf
 	case BestSpeed:
 		r.Use(gzip.Gzip(gzip.BestSpeed))
 	}
+
 	// Use rate limiter middleware
 	if cfg.API.RateLimiter.Enable {
 		rl := &RateLimiter{
