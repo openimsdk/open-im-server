@@ -92,7 +92,9 @@ func (a *ApiCmd) runE() error {
 		&a.apiConfig.Notification,
 		a.apiConfig,
 		[]string{},
-		[]string{},
+		[]string{
+			a.apiConfig.Discovery.RpcService.MessageGateway,
+		},
 		api.Start,
 	)
 }
