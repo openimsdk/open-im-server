@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 echo "Creating OpenIM user in database ${MONGO_INITDB_DATABASE}..."
