@@ -1,17 +1,3 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package relation
 
 import (
@@ -210,28 +196,6 @@ func (f *FriendNotificationSender) FriendApplicationRefusedNotification(ctx cont
 	}
 	f.Notification(ctx, req.ToUserID, req.FromUserID, constant.FriendApplicationRejectedNotification, &tips)
 }
-
-//func (f *FriendNotificationSender) FriendAddedNotification(ctx context.Context, operationID, opUserID, fromUserID, toUserID string) error {
-//	tips := sdkws.FriendAddedTips{Friend: &sdkws.FriendInfo{}, OpUser: &sdkws.PublicUserInfo{}}
-//	user, err := f.getUsersInfo(ctx, []string{opUserID})
-//	if err != nil {
-//		return err
-//	}
-//	tips.OpUser.UserID = user[0].GetUserID()
-//	tips.OpUser.Ex = user[0].GetEx()
-//	tips.OpUser.Nickname = user[0].GetNickname()
-//	tips.OpUser.FaceURL = user[0].GetFaceURL()
-//	friends, err := f.db.FindFriendsWithError(ctx, fromUserID, []string{toUserID})
-//	if err != nil {
-//		return err
-//	}
-//	tips.Friend, err = convert.FriendDB2Pb(ctx, friends[0], f.getUsersInfoMap)
-//	if err != nil {
-//		return err
-//	}
-//	f.Notification(ctx, fromUserID, toUserID, constant.FriendAddedNotification, &tips)
-//	return nil
-//}
 
 func (f *FriendNotificationSender) FriendDeletedNotification(ctx context.Context, req *relation.DeleteFriendReq) {
 	tips := sdkws.FriendDeletedTips{FromToUserID: &sdkws.FromToUserID{

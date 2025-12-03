@@ -9,13 +9,6 @@ import (
 	"time"
 )
 
-//func Result[V any](val V, err error) V {
-//	if err != nil {
-//		panic(err)
-//	}
-//	return val
-//}
-
 func Check(err error) {
 	if err != nil {
 		panic(err)

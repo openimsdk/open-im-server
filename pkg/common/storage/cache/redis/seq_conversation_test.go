@@ -131,13 +131,3 @@ func TestGetMaxSeqWithTime1(t *testing.T) {
 	ts := newTestSeq()
 	t.Log(ts.GetMaxSeqsWithTime(context.Background(), []string{"10000000", "12345", "111"}))
 }
-
-//
-//func TestHMGET(t *testing.T) {
-//	ts := newTestSeq()
-//	res, err := ts.rdb.HMGet(context.Background(), "MALLOC_SEQ:1", "CURR", "TIME1").Result()
-//	if err != nil {
-//		panic(err)
-//	}
-//	t.Log(res)
-//}

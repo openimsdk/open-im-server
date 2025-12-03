@@ -1,17 +1,3 @@
-// Copyright © 2023 OpenIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package api
 
 import (
@@ -74,7 +60,6 @@ func (o *GroupApi) GetSpecifiedUserGroupRequestInfo(c *gin.Context) {
 
 func (o *GroupApi) GetGroupsInfo(c *gin.Context) {
 	a2r.Call(c, group.GroupClient.GetGroupsInfo, o.Client)
-	//a2r.Call(c, group.GroupClient.GetGroupsInfo, o.Client, c, a2r.NewNilReplaceOption(group.GroupClient.GetGroupsInfo))
 }
 
 func (o *GroupApi) KickGroupMember(c *gin.Context) {
@@ -83,7 +68,6 @@ func (o *GroupApi) KickGroupMember(c *gin.Context) {
 
 func (o *GroupApi) GetGroupMembersInfo(c *gin.Context) {
 	a2r.Call(c, group.GroupClient.GetGroupMembersInfo, o.Client)
-	//a2r.Call(c, group.GroupClient.GetGroupMembersInfo, o.Client, c, a2r.NewNilReplaceOption(group.GroupClient.GetGroupMembersInfo))
 }
 
 func (o *GroupApi) GetGroupMemberList(c *gin.Context) {
@@ -125,14 +109,6 @@ func (o *GroupApi) SetGroupMemberInfo(c *gin.Context) {
 func (o *GroupApi) GetGroupAbstractInfo(c *gin.Context) {
 	a2r.Call(c, group.GroupClient.GetGroupAbstractInfo, o.Client)
 }
-
-// func (g *Group) SetGroupMemberNickname(c *gin.Context) {
-//	a2r.Call(c, group.GroupClient.SetGroupMemberNickname, g.userClient)
-//}
-//
-// func (g *Group) GetGroupAllMemberList(c *gin.Context) {
-//	a2r.Call(c, group.GroupClient.GetGroupAllMember, g.userClient)
-//}
 
 func (o *GroupApi) GroupCreateCount(c *gin.Context) {
 	a2r.Call(c, group.GroupClient.GroupCreateCount, o.Client)

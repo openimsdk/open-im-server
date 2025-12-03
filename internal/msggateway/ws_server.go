@@ -101,19 +101,6 @@ func (ws *WsServer) SetDiscoveryRegistry(ctx context.Context, disCov discovery.C
 	return nil
 }
 
-//func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, status int32) {
-//	err := ws.userClient.SetUserStatus(ctx, client.UserID, status, client.PlatformID)
-//	if err != nil {
-//		log.ZWarn(ctx, "SetUserStatus err", err)
-//	}
-//	switch status {
-//	case constant.Online:
-//		ws.webhookAfterUserOnline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOnline, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
-//	case constant.Offline:
-//		ws.webhookAfterUserOffline(ctx, &ws.msgGatewayConfig.WebhooksConfig.AfterUserOffline, client.UserID, client.PlatformID, client.ctx.GetConnID())
-//	}
-//}
-
 func (ws *WsServer) UnRegister(c *Client) {
 	ws.unregisterChan <- c
 }
@@ -294,13 +281,6 @@ func (ws *WsServer) registerClient(client *Client) {
 			_ = ws.sendUserOnlineInfoToOtherNode(client.ctx, client)
 		}()
 	}
-
-	//wg.Add(1)
-	//go func() {
-	//	defer wg.Done()
-	//	ws.SetUserOnlineStatus(client.ctx, client, constant.Online)
-	//}()
-
 	wg.Wait()
 
 	log.ZDebug(client.ctx, "user online", "online user Num", ws.onlineUserNum.Load(), "online user conn Num", ws.onlineUserConnNum.Load())

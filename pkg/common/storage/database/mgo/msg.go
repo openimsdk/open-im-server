@@ -1097,26 +1097,6 @@ func (m *MsgMgo) onlyFindDocIndex(ctx context.Context, docID string, indexes []i
 	return msgDocModel[0].Msg, nil
 }
 
-//func (m *MsgMgo) FindSeqs(ctx context.Context, conversationID string, seqs []int64) ([]*model.MsgInfoModel, error) {
-//	if len(seqs) == 0 {
-//		return nil, nil
-//	}
-//	result := make([]*model.MsgInfoModel, 0, len(seqs))
-//	for docID, seqs := range m.model.GetDocIDSeqsMap(conversationID, seqs) {
-//		res, err := m.onlyFindDocIndex(ctx, docID, datautil.Slice(seqs, m.model.GetMsgIndex))
-//		if err != nil {
-//			return nil, err
-//		}
-//		for i, re := range res {
-//			if re == nil || re.Msg == nil {
-//				continue
-//			}
-//			result = append(result, res[i])
-//		}
-//	}
-//	return result, nil
-//}
-
 func (m *MsgMgo) findBeforeDocSendTime(ctx context.Context, docID string, limit int64) (int64, int64, error) {
 	if limit == 0 {
 		return 0, 0, nil
