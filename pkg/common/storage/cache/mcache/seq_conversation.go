@@ -32,7 +32,7 @@ func (x *seqConversationCache) GetMinSeq(ctx context.Context, conversationID str
 func (x *seqConversationCache) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
 	res := make(map[string]int64)
 	for _, conversationID := range conversationIDs {
-		seq, err := x.GetMinSeq(ctx, conversationID)
+		seq, err := x.GetMaxSeq(ctx, conversationID)
 		if err != nil {
 			return nil, err
 		}
@@ -44,7 +44,7 @@ func (x *seqConversationCache) GetMaxSeqs(ctx context.Context, conversationIDs [
 func (x *seqConversationCache) GetMaxSeqsWithTime(ctx context.Context, conversationIDs []string) (map[string]database.SeqTime, error) {
 	res := make(map[string]database.SeqTime)
 	for _, conversationID := range conversationIDs {
-		seq, err := x.GetMinSeq(ctx, conversationID)
+		seq, err := x.GetMaxSeq(ctx, conversationID)
 		if err != nil {
 			return nil, err
 		}
