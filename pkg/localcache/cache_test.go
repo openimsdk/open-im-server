@@ -22,6 +22,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/localcache/lru"
 )
 
 func TestName(t *testing.T) {
@@ -90,4 +92,69 @@ func TestName(t *testing.T) {
 	t.Log("get", get.Load())
 	t.Log("del", del.Load())
 	// 137.35s
+}
+
+// Test deadlock scenario when eviction callback deletes a linked key that hashes to the same slot.
+func TestCacheEvictDeadlock(t *testing.T) {
+	ctx := context.Background()
+	c := New[string](WithLocalSlotNum(1), WithLocalSlotSize(1), WithLazy())
+
+	if _, err := c.GetLink(ctx, "k1", func(ctx context.Context) (string, error) {
+		return "v1", nil
+	}, "k2"); err != nil {
+		t.Fatalf("seed cache failed: %v", err)
+	}
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		_, _ = c.GetLink(ctx, "k2", func(ctx context.Context) (string, error) {
+			return "v2", nil
+		}, "k1")
+	}()
+
+	select {
+	case <-done:
+		// expected to finish quickly; current implementation deadlocks here.
+	case <-time.After(time.Second):
+		t.Fatal("GetLink deadlocked during eviction of linked key")
+	}
+}
+
+func TestExpirationLRUGetBatch(t *testing.T) {
+	l := lru.NewExpirationLRU[string, string](2, time.Minute, time.Second*5, EmptyTarget{}, nil)
+
+	keys := []string{"a", "b"}
+	values, err := l.GetBatch(keys, func(keys []string) (map[string]string, error) {
+		res := make(map[string]string)
+		for _, k := range keys {
+			res[k] = k + "_v"
+		}
+		return res, nil
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(values) != len(keys) {
+		t.Fatalf("expected %d values, got %d", len(keys), len(values))
+	}
+	for _, k := range keys {
+		if v, ok := values[k]; !ok || v != k+"_v" {
+			t.Fatalf("unexpected value for %s: %q, ok=%v", k, v, ok)
+		}
+	}
+
+	// second batch should hit cache
+	values, err = l.GetBatch(keys, func(keys []string) (map[string]string, error) {
+		t.Fatalf("should not fetch on cache hit")
+		return nil, nil
+	})
+	if err != nil {
+		t.Fatalf("unexpected error on cache hit: %v", err)
+	}
+	for _, k := range keys {
+		if v, ok := values[k]; !ok || v != k+"_v" {
+			t.Fatalf("unexpected cached value for %s: %q, ok=%v", k, v, ok)
+		}
+	}
 }
