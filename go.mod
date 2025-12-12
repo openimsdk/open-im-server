@@ -12,8 +12,8 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/openimsdk/protocol v0.0.73-alpha.14
-	github.com/openimsdk/tools v0.0.50-alpha.103
+	github.com/openimsdk/protocol v0.0.73-alpha.17
+	github.com/openimsdk/tools v0.0.50-alpha.105
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.10.0
@@ -27,6 +27,7 @@ require (
 require github.com/google/uuid v1.6.0
 
 require (
+	github.com/IBM/sarama v1.43.0
 	github.com/fatih/color v1.14.1
 	github.com/gin-contrib/gzip v1.0.1
 	github.com/go-redis/redis v6.15.9+incompatible
@@ -54,7 +55,6 @@ require (
 	cloud.google.com/go/iam v1.1.7 // indirect
 	cloud.google.com/go/longrunning v0.5.5 // indirect
 	cloud.google.com/go/storage v1.40.0 // indirect
-	github.com/IBM/sarama v1.43.0 // indirect
 	github.com/MicahParks/keyfunc v1.9.0 // indirect
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible // indirect
 	github.com/aws/aws-sdk-go-v2 v1.32.5 // indirect
@@ -135,6 +135,7 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/lithammer/shortuuid v3.0.0+incompatible // indirect
+	github.com/lufia/plan9stats v0.0.0-20230110061619-bbe2e5e100de // indirect
 	github.com/magefile/mage v1.15.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
@@ -151,6 +152,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
+	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
@@ -160,6 +162,8 @@ require (
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sercand/kuberesolver/v6 v6.0.1 // indirect
+	github.com/shirou/gopsutil/v3 v3.24.5 // indirect
+	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
