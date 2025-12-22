@@ -17,6 +17,7 @@ package group
 import (
 	"context"
 	"fmt"
+	"math"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -472,6 +473,9 @@ func (g *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		if err = g.notification.GroupApplicationAgreeMemberEnterNotification(ctx, req.GroupID, req.SendMessage, opUserID, userIDs...); err != nil {
 			return nil, err
 		}
+		if err := g.setMemberJoinSeq(ctx, req.GroupID, userIDs); err != nil {
+			return nil, err
+		}
 	}
 	return &pbgroup.InviteUserToGroupResp{}, nil
 }
@@ -890,6 +894,9 @@ func (g *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 					return nil, err
 				}
 			}
+			if err := g.setMemberJoinSeq(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
+				return nil, err
+			}
 		}
 	case constant.GroupResponseRefuse:
 		g.notification.GroupApplicationRejectedNotification(ctx, req)
@@ -952,6 +959,9 @@ func (g *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		if err = g.notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID); err != nil {
 			return nil, err
 		}
+		if err := g.setMemberJoinSeq(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
+			return nil, err
+		}
 		g.webhookAfterJoinGroup(ctx, &g.config.WebhooksConfig.AfterJoinGroup, req)
 
 		return &pbgroup.JoinGroupResp{}, nil
@@ -1011,6 +1021,11 @@ func (g *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 		return err
 	}
 	return g.conversationClient.SetConversationMaxSeq(ctx, conversationID, userIDs, maxSeq)
+}
+
+func (g *groupServer) setMemberJoinSeq(ctx context.Context, groupID string, userIDs []string) error {
+	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
+	return g.conversationClient.SetConversationMaxSeq(ctx, conversationID, userIDs, math.MaxInt64)
 }
 
 func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInfoReq) (*pbgroup.SetGroupInfoResp, error) {
