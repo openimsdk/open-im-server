@@ -970,14 +970,7 @@ func (g *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 
 func (g *groupServer) setMemberJoinSeq(ctx context.Context, groupID string, userIDs []string) error {
 	conversationID := msgprocessor.GetConversationIDBySessionType(constant.ReadGroupChatType, groupID)
-	maxSeq, err := g.msgClient.GetConversationMaxSeq(ctx, conversationID)
-	if err != nil {
-		return err
-	}
-	if err := g.conversationClient.SetConversationMinSeq(ctx, conversationID, userIDs, maxSeq+1); err != nil {
-		return err
-	}
-	return g.msgClient.SetUserConversationMaxSeq(ctx, conversationID, userIDs, 0)
+	return g.conversationClient.SetConversationMaxSeq(ctx, conversationID, userIDs, 0)
 }
 
 func (g *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInfoReq) (*pbgroup.SetGroupInfoResp, error) {
