@@ -151,12 +151,15 @@ func (b *Batcher[T]) Put(ctx context.Context, data *T) error {
 
 func (b *Batcher[T]) scheduler() {
 	ticker := time.NewTicker(b.config.interval)
+	alreadyClosed := false
 	defer func() {
 		ticker.Stop()
 		for _, ch := range b.chArrays {
 			close(ch)
 		}
-		close(b.data)
+		if !alreadyClosed {
+			close(b.data)
+		}
 		b.wait.Done()
 	}()
 
@@ -169,6 +172,7 @@ func (b *Batcher[T]) scheduler() {
 		case data, ok := <-b.data:
 			if !ok {
 				// If the data channel is closed unexpectedly
+				alreadyClosed = true
 				return
 			}
 			if data == nil {
