@@ -47,6 +47,12 @@ func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
 			},
 			Options: options.Index(),
 		},
+		{
+			Keys: bson.D{
+				{Key: "conversation_id", Value: 1},
+			},
+			Options: options.Index().SetUnique(true),
+		},
 	})
 	if err != nil {
 		return nil, errs.Wrap(err)
@@ -230,10 +236,6 @@ func (c *ConversationMgo) GetAllConversationIDsNumber(ctx context.Context) (int6
 
 func (c *ConversationMgo) PageConversationIDs(ctx context.Context, pagination pagination.Pagination) (conversationIDs []string, err error) {
 	return mongoutil.FindPageOnly[string](ctx, c.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"conversation_id": 1}))
-}
-
-func (c *ConversationMgo) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*model.Conversation, error) {
-	return mongoutil.Find[*model.Conversation](ctx, c.coll, bson.M{"conversation_id": bson.M{"$in": conversationIDs}})
 }
 
 func (c *ConversationMgo) GetConversationIDsNeedDestruct(ctx context.Context) ([]*model.Conversation, error) {

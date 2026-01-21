@@ -2,6 +2,7 @@ package rpcli
 
 import (
 	"context"
+
 	"github.com/openimsdk/protocol/conversation"
 	"google.golang.org/grpc"
 )
@@ -28,18 +29,6 @@ func (x *ConversationClient) SetConversations(ctx context.Context, ownerUserIDs 
 	}
 	req := &conversation.SetConversationsReq{UserIDs: ownerUserIDs, Conversation: info}
 	return ignoreResp(x.ConversationClient.SetConversations(ctx, req))
-}
-
-func (x *ConversationClient) GetConversationsByConversationIDs(ctx context.Context, conversationIDs []string) ([]*conversation.Conversation, error) {
-	if len(conversationIDs) == 0 {
-		return nil, nil
-	}
-	req := &conversation.GetConversationsByConversationIDReq{ConversationIDs: conversationIDs}
-	return extractField(ctx, x.ConversationClient.GetConversationsByConversationID, req, (*conversation.GetConversationsByConversationIDResp).GetConversations)
-}
-
-func (x *ConversationClient) GetConversationsByConversationID(ctx context.Context, conversationID string) (*conversation.Conversation, error) {
-	return firstValue(x.GetConversationsByConversationIDs(ctx, []string{conversationID}))
 }
 
 func (x *ConversationClient) SetConversationMinSeq(ctx context.Context, conversationID string, ownerUserIDs []string, minSeq int64) error {
