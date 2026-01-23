@@ -32,19 +32,26 @@ import (
 
 func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
 	coll := db.Collection(database.ConversationName)
-	_, err := coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{{
-		Keys: bson.D{
-			{Key: "owner_user_id", Value: 1},
-			{Key: "conversation_id", Value: 1},
+	_, err := coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "owner_user_id", Value: 1},
+				{Key: "conversation_id", Value: 1},
+			},
+			Options: options.Index().SetUnique(true),
 		},
-		Options: options.Index().SetUnique(true),
-	}, {
-		Keys: bson.D{
-			{Key: "conversation_id", Value: 1},
+		{
+			Keys: bson.D{
+				{Key: "user_id", Value: 1},
+			},
+			Options: options.Index(),
 		},
-		Options: options.Index().SetUnique(true),
-	}},
-	)
+		{
+			Keys: bson.D{
+				{Key: "conversation_id", Value: 1},
+			},
+		},
+	})
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
