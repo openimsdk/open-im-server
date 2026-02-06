@@ -1207,9 +1207,10 @@ func (s *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 				log.ZWarn(ctx, "GetGroupMemberIDs is failed.", err)
 				return nil, err
 			}
-
+			// use temp admin permission to force success.
+			adminCtx := mcontext.WithOpUserIDContext(ctx, s.config.Share.IMAdminUserID[0])
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
-			if err := s.conversationClient.SetConversations(ctx, resp.UserIDs, conversation); err != nil {
+			if err := s.conversationClient.SetConversations(adminCtx, resp.UserIDs, conversation); err != nil {
 				log.ZWarn(ctx, "SetConversations", err, "UserIDs", resp.UserIDs, "conversation", conversation)
 			}
 
