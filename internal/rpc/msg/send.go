@@ -87,8 +87,9 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 		}
 	}()
 
+	// template admin permission for next operation
 	ctx := mcontext.NewCtx("@@@" + mcontext.GetOperationID(nctx))
-
+	ctx = mcontext.WithOpUserIDContext(ctx, m.config.Share.IMAdminUserID[0])
 	var atUserID []string
 
 	conversation := &pbconversation.ConversationReq{
