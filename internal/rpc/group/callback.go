@@ -283,6 +283,7 @@ func (g *groupServer) webhookAfterJoinGroup(ctx context.Context, after *config.A
 		ReqMessage:      req.ReqMessage,
 		JoinSource:      req.JoinSource,
 		InviterUserID:   req.InviterUserID,
+		Ex:              req.Ex,
 	}
 	g.webhookClient.AsyncPost(ctx, cbReq.GetCallbackCommand(), cbReq, &callbackstruct.CallbackAfterJoinGroupResp{}, after)
 }
