@@ -960,6 +960,8 @@ func (g *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 			InviterUserID:  req.InviterUserID,
 			JoinTime:       time.Now(),
 			MuteEndTime:    time.UnixMilli(0),
+			JoinSource:     req.JoinSource,
+			Ex:             req.Ex,
 		}
 
 		if err := g.webhookBeforeMembersJoinGroup(ctx, &g.config.WebhooksConfig.BeforeMemberJoinGroup, []*model.GroupMember{groupMember}, group.GroupID, group.Ex); err != nil && err != servererrs.ErrCallbackContinue {

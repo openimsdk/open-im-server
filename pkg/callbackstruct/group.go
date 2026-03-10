@@ -194,6 +194,7 @@ type CallbackAfterJoinGroupReq struct {
 	ReqMessage      string `json:"reqMessage"`
 	JoinSource      int32  `json:"joinSource"`
 	InviterUserID   string `json:"inviterUserID"`
+	Ex              string `json:"ex"`
 }
 type CallbackAfterJoinGroupResp struct {
 	CommonCallbackResp
