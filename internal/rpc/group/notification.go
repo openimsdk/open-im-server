@@ -803,6 +803,182 @@ func (g *NotificationSender) GroupCancelMutedNotification(ctx context.Context, g
 	g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupCancelMutedNotification, tips)
 }
 
+func (g *NotificationSender) getPublicUserInfos(ctx context.Context, userIDs []string) ([]*sdkws.PublicUserInfo, error) {
+	users, err := g.getUsersInfo(ctx, userIDs)
+	if err != nil {
+		return nil, err
+	}
+	userMap := make(map[string]common_user.CommonUser)
+	for _, user := range users {
+		userMap[user.GetUserID()] = user
+	}
+	for _, userID := range userIDs {
+		if _, ok := userMap[userID]; !ok {
+			return nil, servererrs.ErrUserIDNotFound.WrapMsg(fmt.Sprintf("user %s not found", userID))
+		}
+	}
+
+	return datautil.Slice(users, func(e common_user.CommonUser) *sdkws.PublicUserInfo {
+		return &sdkws.PublicUserInfo{
+			UserID:   e.GetUserID(),
+			Nickname: e.GetNickname(),
+			FaceURL:  e.GetFaceURL(),
+			Ex:       e.GetEx(),
+		}
+	}), nil
+}
+
+func (g *NotificationSender) getGroupMembersForUser(ctx context.Context, groupIDs []string, userID string) ([]*sdkws.GroupMemberFullInfo, error) {
+	members, err := g.db.FindGroupMemberUser(ctx, groupIDs, userID)
+	if err != nil {
+		return nil, err
+	}
+	if err := g.PopulateGroupMember(ctx, members...); err != nil {
+		return nil, err
+	}
+	log.ZDebug(ctx, "getGroupMembers", "members", members)
+	return datautil.Slice(members, func(e *model.GroupMember) *sdkws.GroupMemberFullInfo { return g.groupMemberDB2PB(e, 0) }), nil
+}
+
+func (g *NotificationSender) getGroupMemberMapForUser(ctx context.Context, groupIDs []string, userID string) (map[string]*sdkws.GroupMemberFullInfo, error) {
+	members, err := g.getGroupMembersForUser(ctx, groupIDs, userID)
+	if err != nil {
+		return nil, err
+	}
+	m := make(map[string]*sdkws.GroupMemberFullInfo)
+	for i, member := range members {
+		m[member.GroupID] = members[i]
+	}
+	return m, nil
+}
+
+func (g *NotificationSender) migrateFallbackToGroupMemberFullInfo(groupMemberFullInfo *sdkws.GroupMemberFullInfo, publicUserInfo *sdkws.PublicUserInfo) *sdkws.GroupMemberFullInfo {
+	if groupMemberFullInfo == nil {
+		groupMemberFullInfo = &sdkws.GroupMemberFullInfo{}
+	}
+	if publicUserInfo == nil {
+		publicUserInfo = &sdkws.PublicUserInfo{}
+	}
+
+	firstNotEmpty := func(s ...string) string {
+		for _, s := range s {
+			if s != "" {
+				return s
+			}
+		}
+		return ""
+	}
+
+	return &sdkws.GroupMemberFullInfo{
+		GroupID:        groupMemberFullInfo.GroupID,
+		UserID:         firstNotEmpty(groupMemberFullInfo.UserID, publicUserInfo.UserID),
+		RoleLevel:      groupMemberFullInfo.RoleLevel,
+		JoinTime:       groupMemberFullInfo.JoinTime,
+		Nickname:       firstNotEmpty(groupMemberFullInfo.Nickname, publicUserInfo.Nickname),
+		FaceURL:        firstNotEmpty(groupMemberFullInfo.FaceURL, publicUserInfo.FaceURL),
+		AppMangerLevel: groupMemberFullInfo.AppMangerLevel,
+		JoinSource:     groupMemberFullInfo.JoinSource,
+		OperatorUserID: firstNotEmpty(groupMemberFullInfo.OperatorUserID, publicUserInfo.UserID),
+		InviterUserID:  groupMemberFullInfo.InviterUserID,
+		Ex:             groupMemberFullInfo.Ex,
+		MuteEndTime:    groupMemberFullInfo.MuteEndTime,
+	}
+}
+
+func (g *NotificationSender) getGroupInfos(ctx context.Context, groupIDs []string) ([]*sdkws.GroupInfo, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
+		}
+	}()
+
+	groups, err := g.db.FindGroup(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	numMap, err := g.db.FindGroupMemberNums(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	owners, err := g.db.FindGroupsOwner(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	ownerMap := make(map[string]string)
+	for _, owner := range owners {
+		ownerMap[owner.GroupID] = owner.UserID
+	}
+
+	return datautil.Slice(groups, func(group *model.Group) *sdkws.GroupInfo {
+		return convert.Db2PbGroupInfo(group, ownerMap[group.GroupID], numMap[group.GroupID])
+	}), nil
+}
+
+func (g *NotificationSender) GroupMemberInfoSetNotificationBulk(ctx context.Context, groupIDs []string, changedUserInfo *sdkws.UserInfo) error {
+	opUserID := mcontext.GetOpUserID(ctx)
+	opIsAdmin := authverify.CheckUserIsAdmin(ctx, opUserID)
+
+	groupInfos, err := g.getGroupInfos(ctx, groupIDs)
+	if err != nil {
+		return err
+	}
+
+	groupMemberMap, err := g.getGroupMemberMapForUser(ctx, groupIDs, changedUserInfo.UserID)
+	if err != nil {
+		return err
+	}
+
+	opMemberMap := groupMemberMap
+	if opUserID != changedUserInfo.UserID {
+		opMemberMap, err = g.getGroupMemberMapForUser(ctx, groupIDs, opUserID)
+		if err != nil {
+			return err
+		}
+	}
+
+	opPublicUser := &sdkws.PublicUserInfo{
+		UserID:   changedUserInfo.GetUserID(),
+		Nickname: changedUserInfo.GetNickname(),
+		FaceURL:  changedUserInfo.GetFaceURL(),
+		Ex:       changedUserInfo.GetEx(),
+	}
+	if opUserID != changedUserInfo.UserID {
+		opPublicUser, err = g.getUser(ctx, opUserID)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, groupInfo := range groupInfos {
+		if groupMemberMap[groupInfo.GroupID] == nil {
+			continue
+		}
+
+		opUserGroupMemberFullInfo := datautil.If(opIsAdmin, &sdkws.GroupMemberFullInfo{
+			GroupID:        groupInfo.GroupID,
+			UserID:         opUserID,
+			RoleLevel:      constant.GroupAdmin,
+			AppMangerLevel: constant.AppAdmin,
+		}, opMemberMap[groupInfo.GroupID])
+		if opUserGroupMemberFullInfo == nil {
+			opUserGroupMemberFullInfo = &sdkws.GroupMemberFullInfo{}
+		}
+		opUserGroupMemberFullInfo.GroupID = groupInfo.GroupID
+
+		tips := &sdkws.GroupMemberInfoSetTips{
+			Group:       groupInfo,
+			OpUser:      g.migrateFallbackToGroupMemberFullInfo(opUserGroupMemberFullInfo, opPublicUser),
+			ChangedUser: groupMemberMap[groupInfo.GroupID],
+		}
+
+		g.setSortVersion(ctx, &tips.GroupMemberVersion, &tips.GroupMemberVersionID, database.GroupMemberVersionName, tips.Group.GroupID, &tips.GroupSortVersion)
+		g.Notification(ctx, opUserID, groupInfo.GroupID, constant.GroupMemberInfoSetNotification, tips)
+	}
+
+	return nil
+}
+
 func (g *NotificationSender) GroupMemberInfoSetNotification(ctx context.Context, groupID, groupMemberUserID string) {
 	var err error
 	defer func() {
@@ -810,13 +986,11 @@ func (g *NotificationSender) GroupMemberInfoSetNotification(ctx context.Context,
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	var group *sdkws.GroupInfo
-	group, err = g.getGroupInfo(ctx, groupID)
+	group, err := g.getGroupInfo(ctx, groupID)
 	if err != nil {
 		return
 	}
-	var user map[string]*sdkws.GroupMemberFullInfo
-	user, err = g.getGroupMemberMap(ctx, groupID, []string{groupMemberUserID})
+	user, err := g.getGroupMemberMap(ctx, groupID, []string{groupMemberUserID})
 	if err != nil {
 		return
 	}
@@ -835,8 +1009,7 @@ func (g *NotificationSender) GroupMemberSetToAdminNotification(ctx context.Conte
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	var group *sdkws.GroupInfo
-	group, err = g.getGroupInfo(ctx, groupID)
+	group, err := g.getGroupInfo(ctx, groupID)
 	if err != nil {
 		return
 	}
@@ -859,13 +1032,11 @@ func (g *NotificationSender) GroupMemberSetToOrdinaryUserNotification(ctx contex
 			log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 		}
 	}()
-	var group *sdkws.GroupInfo
-	group, err = g.getGroupInfo(ctx, groupID)
+	group, err := g.getGroupInfo(ctx, groupID)
 	if err != nil {
 		return
 	}
-	var user map[string]*sdkws.GroupMemberFullInfo
-	user, err = g.getGroupMemberMap(ctx, groupID, []string{mcontext.GetOpUserID(ctx), groupMemberUserID})
+	user, err := g.getGroupMemberMap(ctx, groupID, []string{mcontext.GetOpUserID(ctx), groupMemberUserID})
 	if err != nil {
 		return
 	}
