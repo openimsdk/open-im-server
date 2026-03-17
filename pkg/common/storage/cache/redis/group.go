@@ -2,8 +2,12 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache"
@@ -258,6 +262,57 @@ func (g *GroupCacheRedis) GetGroupMemberNum(ctx context.Context, groupID string)
 	})
 }
 
+type groupMemberNumCache struct {
+	GroupID   string `json:"group_id"`
+	MemberNum int64  `json:"member_num"`
+}
+
+type groupMemberNumBatchCache struct {
+	GroupID   string
+	MemberNum int64
+}
+
+func (r *groupMemberNumBatchCache) BatchCache(groupID string) {
+	r.GroupID = groupID
+}
+func (r *groupMemberNumBatchCache) UnmarshalJSON(bytes []byte) error {
+	return json.Unmarshal(bytes, &r.MemberNum)
+}
+func (r *groupMemberNumBatchCache) MarshalJSON() ([]byte, error) {
+	return json.Marshal(r.MemberNum)
+}
+func (g *GroupCacheRedis) GetGroupMemberNums(ctx context.Context, groupIDs []string) (map[string]int64, error) {
+	items, err := batchGetCache2(
+		ctx,
+		g.rcClient,
+		g.expireTime,
+		groupIDs,
+		func(groupID string) string { return g.getGroupMemberNumKey(groupID) },
+		func(v *groupMemberNumBatchCache) string { return v.GroupID },
+		func(ctx context.Context, ids []string) ([]*groupMemberNumBatchCache, error) {
+			res := make([]*groupMemberNumBatchCache, 0, len(ids))
+			for _, groupID := range ids {
+				num, err := g.groupMemberDB.TakeGroupMemberNum(ctx, groupID)
+				if err != nil {
+					return nil, err
+				}
+				res = append(res, &groupMemberNumBatchCache{
+					GroupID:   groupID,
+					MemberNum: num,
+				})
+			}
+			return res, nil
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return datautil.SliceToMapAny(items, func(item *groupMemberNumBatchCache) (string, int64) {
+		return item.GroupID, item.MemberNum
+	}), nil
+}
+
 func (g *GroupCacheRedis) DelGroupsMemberNum(groupID ...string) cache.GroupCache {
 	keys := make([]string, 0, len(groupID))
 	for _, groupID := range groupID {
@@ -280,18 +335,111 @@ func (g *GroupCacheRedis) GetGroupOwner(ctx context.Context, groupID string) (*m
 	return members[0], nil
 }
 
-func (g *GroupCacheRedis) GetGroupsOwner(ctx context.Context, groupIDs []string) ([]*model.GroupMember, error) {
-	members := make([]*model.GroupMember, 0, len(groupIDs))
-	for _, groupID := range groupIDs {
-		items, err := g.GetGroupRoleLevelMemberInfo(ctx, groupID, constant.GroupOwner)
-		if err != nil {
-			return nil, err
+type groupRoleLevelMemberIDsBatchCache struct {
+	GroupID string
+	UserIDs []string
+}
+
+func (r *groupRoleLevelMemberIDsBatchCache) BatchCache(groupID string) {
+	r.GroupID = groupID
+}
+func (r *groupRoleLevelMemberIDsBatchCache) UnmarshalJSON(bytes []byte) (err error) {
+	return json.Unmarshal(bytes, &r.UserIDs)
+}
+func (r *groupRoleLevelMemberIDsBatchCache) MarshalJSON() ([]byte, error) {
+	return json.Marshal(r.UserIDs)
+}
+
+func (g *GroupCacheRedis) batchGetGroupRoleLevelMemberIDs(ctx context.Context, groupIDs []string, roleLevel int32) (map[string][]string, error) {
+	items, err := batchGetCache2(
+		ctx,
+		g.rcClient,
+		g.expireTime,
+		groupIDs,
+		func(groupID string) string {
+			return g.getGroupRoleLevelMemberIDsKey(groupID, roleLevel)
+		},
+		func(v *groupRoleLevelMemberIDsBatchCache) string {
+			return v.GroupID
+		},
+		func(ctx context.Context, ids []string) ([]*groupRoleLevelMemberIDsBatchCache, error) {
+			res := make([]*groupRoleLevelMemberIDsBatchCache, 0, len(ids))
+			for _, groupID := range ids {
+				userIDs, err := g.groupMemberDB.FindRoleLevelUserIDs(ctx, groupID, roleLevel)
+				if err != nil {
+					return nil, err
+				}
+				res = append(res, &groupRoleLevelMemberIDsBatchCache{
+					GroupID: groupID,
+					UserIDs: userIDs,
+				})
+			}
+			return res, nil
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return datautil.SliceToMapAny(items, func(item *groupRoleLevelMemberIDsBatchCache) (string, []string) {
+		return item.GroupID, item.UserIDs
+	}), nil
+}
+
+type groupUserIDPair struct {
+	GroupID string
+	UserID  string
+}
+
+func (g *GroupCacheRedis) batchGetGroupMembersByPairs(ctx context.Context, ids []groupUserIDPair) ([]*model.GroupMember, error) {
+	return batchGetCache2(ctx, g.rcClient, g.expireTime, ids, func(id groupUserIDPair) string {
+		return g.getGroupMemberInfoKey(id.GroupID, id.UserID)
+	}, func(member *model.GroupMember) groupUserIDPair {
+		return groupUserIDPair{GroupID: member.GroupID, UserID: member.UserID}
+	}, func(ctx context.Context, ids []groupUserIDPair) ([]*model.GroupMember, error) {
+		groupIDsByUser := make(map[string][]string)
+		for _, id := range ids {
+			groupIDsByUser[id.UserID] = append(groupIDsByUser[id.UserID], id.GroupID)
 		}
-		if len(items) > 0 {
-			members = append(members, items[0])
+		members := make([]*model.GroupMember, 0, len(ids))
+		for userID, groupIDs := range groupIDsByUser {
+			items, err := g.groupMemberDB.FindInGroup(ctx, userID, groupIDs)
+			if err != nil {
+				return nil, err
+			}
+			members = append(members, items...)
+		}
+		return members, nil
+	})
+}
+
+func (g *GroupCacheRedis) GetGroupsOwner(ctx context.Context, groupIDs []string) ([]*model.GroupMember, error) {
+	ownerIDs, err := g.batchGetGroupRoleLevelMemberIDs(ctx, groupIDs, constant.GroupOwner)
+	if err != nil {
+		return nil, err
+	}
+	pairs := make([]groupUserIDPair, 0, len(groupIDs))
+	for _, groupID := range groupIDs {
+		ids := ownerIDs[groupID]
+		if len(ids) == 0 {
+			continue
+		}
+		pairs = append(pairs, groupUserIDPair{GroupID: groupID, UserID: ids[0]})
+	}
+	members, err := g.batchGetGroupMembersByPairs(ctx, pairs)
+	if err != nil {
+		return nil, err
+	}
+	memberMap := datautil.SliceToMapAny(members, func(member *model.GroupMember) (groupUserIDPair, *model.GroupMember) {
+		return groupUserIDPair{GroupID: member.GroupID, UserID: member.UserID}, member
+	})
+	result := make([]*model.GroupMember, 0, len(pairs))
+	for _, pair := range pairs {
+		if member, ok := memberMap[pair]; ok {
+			result = append(result, member)
 		}
 	}
-	return members, nil
+	return result, nil
 }
 
 func (g *GroupCacheRedis) GetGroupRoleLevelMemberIDs(ctx context.Context, groupID string, roleLevel int32) ([]string, error) {
