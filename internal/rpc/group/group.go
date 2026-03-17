@@ -23,6 +23,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/openimsdk/tools/utils/stringutil"
+	"google.golang.org/grpc"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/dbbuild"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"google.golang.org/grpc"
@@ -143,8 +146,8 @@ func (g *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 			return nil, err
 		}
 	}
-	for _, groupID := range groupIDs {
-		g.notification.GroupMemberInfoSetNotification(ctx, groupID, req.UserID)
+	if err = g.notification.GroupMemberInfoSetNotificationBulk(ctx, groupIDs, req.NewUserInfo); err != nil {
+		log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 	}
 	if err = g.db.DeleteGroupMemberHash(ctx, groupIDs); err != nil {
 		return nil, err
