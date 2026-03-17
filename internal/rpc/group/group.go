@@ -24,6 +24,8 @@ import (
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
+	"github.com/openimsdk/tools/utils/stringutil"
+	"google.golang.org/grpc"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/common"
@@ -53,7 +55,6 @@ import (
 	"github.com/openimsdk/tools/mw/specialerror"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/encrypt"
-	"google.golang.org/grpc"
 )
 
 type groupServer struct {
@@ -147,8 +148,8 @@ func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 			return nil, err
 		}
 	}
-	for _, groupID := range groupIDs {
-		s.notification.GroupMemberInfoSetNotification(ctx, groupID, req.UserID)
+	if err = s.notification.GroupMemberInfoSetNotificationBulk(ctx, groupIDs, req.NewUserInfo); err != nil {
+		log.ZError(ctx, stringutil.GetFuncName(1)+" failed", err)
 	}
 	if err = s.db.DeleteGroupMemberHash(ctx, groupIDs); err != nil {
 		return nil, err
