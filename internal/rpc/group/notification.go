@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -917,7 +918,7 @@ func (g *NotificationSender) getGroupInfos(ctx context.Context, groupIDs []strin
 
 func (g *NotificationSender) GroupMemberInfoSetNotificationBulk(ctx context.Context, groupIDs []string, changedUserInfo *sdkws.UserInfo) error {
 	opUserID := mcontext.GetOpUserID(ctx)
-	opIsAdmin := authverify.CheckUserIsAdmin(ctx, opUserID)
+	opIsAdmin := slices.Contains(g.config.Share.IMAdminUserID, opUserID)
 
 	groupInfos, err := g.getGroupInfos(ctx, groupIDs)
 	if err != nil {
