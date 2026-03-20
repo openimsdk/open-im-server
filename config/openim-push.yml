@@ -10,7 +10,7 @@ rpc:
   ports: [ 10170, 10171, 10172, 10173, 10174, 10175, 10176, 10177, 10178, 10179, 10180, 10181, 10182, 10183, 10184, 10185 ]
 
 prometheus:
-  # Enable or disable Prometheus monitoring
+  # Enable Prometheus metrics exposure for this service; set to true to allow scraping.
   enable: true
   # List of ports that Prometheus listens on; these must match the number of rpc.ports to ensure correct monitoring setup
   # It will only take effect when autoSetPorts is set to false.
