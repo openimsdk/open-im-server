@@ -18,7 +18,6 @@ import (
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
-	"github.com/redis/go-redis/v9"
 )
 
 const (
