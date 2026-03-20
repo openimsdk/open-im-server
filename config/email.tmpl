@@ -1,3 +1,6 @@
+{{/* OpenIM Alertmanager email template.
+This template renders both firing and resolved alerts.
+Each alert entry reads labels and annotations from Prometheus rule definitions. */}}
 {{ define "email.to.html" }}
 {{ if eq .Status "firing" }}
     {{ range .Alerts }}
