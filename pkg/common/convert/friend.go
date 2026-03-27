@@ -21,18 +21,22 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/open-im-server/v3/pkg/notification/common_user"
 	"github.com/openimsdk/protocol/relation"
-
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func FriendPb2DB(friend *sdkws.FriendInfo) *model.Friend {
-	dbFriend := &model.Friend{}
-	err := datautil.CopyStructFields(dbFriend, friend)
-	if err != nil {
+	if friend == nil {
 		return nil
 	}
+	dbFriend := &model.Friend{}
+	dbFriend.OwnerUserID = friend.OwnerUserID
+	dbFriend.Remark = friend.Remark
+	dbFriend.AddSource = friend.AddSource
+	dbFriend.OperatorUserID = friend.OperatorUserID
+	dbFriend.Ex = friend.Ex
+	dbFriend.IsPinned = friend.IsPinned
 	dbFriend.FriendUserID = friend.FriendUser.UserID
 	dbFriend.CreateTime = timeutil.UnixSecondToTime(friend.CreateTime)
 	return dbFriend
@@ -69,10 +73,12 @@ func FriendsDB2Pb(ctx context.Context, friendsDB []*model.Friend, getUsers func(
 	}
 	for _, friend := range friendsDB {
 		friendPb := &sdkws.FriendInfo{FriendUser: &sdkws.UserInfo{}}
-		err := datautil.CopyStructFields(friendPb, friend)
-		if err != nil {
-			return nil, err
-		}
+		friendPb.OwnerUserID = friend.OwnerUserID
+		friendPb.Remark = friend.Remark
+		friendPb.AddSource = friend.AddSource
+		friendPb.OperatorUserID = friend.OperatorUserID
+		friendPb.Ex = friend.Ex
+		friendPb.IsPinned = friend.IsPinned
 
 		friendPb.FriendUser.UserID = users[friend.FriendUserID].UserID
 		friendPb.FriendUser.Nickname = users[friend.FriendUserID].Nickname
