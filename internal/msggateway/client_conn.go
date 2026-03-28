@@ -179,7 +179,7 @@ func (c *websocketClientConn) onReadTextMessage(buf []byte) error {
 }
 
 func (c *websocketClientConn) pingHandler(appData string) error {
-	log.ZWarn(context.Background(), "ping handler recv ping", nil, "remoteAddr", c.conn.RemoteAddr(), "appData", appData)
+	//log.ZWarn(context.Background(), "ping handler recv ping", nil, "remoteAddr", c.conn.RemoteAddr(), "appData", appData)
 	if err := c.setReadDeadline(); err != nil {
 		return err
 	}
@@ -187,7 +187,7 @@ func (c *websocketClientConn) pingHandler(appData string) error {
 	if err != nil {
 		log.ZWarn(context.Background(), "ping handler write pong error", err, "remoteAddr", c.conn.RemoteAddr(), "appData", appData)
 	}
-	log.ZWarn(context.Background(), "ping handler write pong success", nil, "remoteAddr", c.conn.RemoteAddr(), "appData", appData)
+	//log.ZWarn(context.Background(), "ping handler write pong success", nil, "remoteAddr", c.conn.RemoteAddr(), "appData", appData)
 	return nil
 }
 
