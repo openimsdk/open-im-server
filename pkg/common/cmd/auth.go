@@ -38,6 +38,7 @@ func NewAuthRpcCmd() *AuthRpcCmd {
 		OpenIMRPCAuthCfgFileName: &authConfig.RpcConfig,
 		RedisConfigFileName:      &authConfig.RedisConfig,
 		ShareFileName:            &authConfig.Share,
+		MongodbConfigFileName:    &authConfig.MongodbConfig,
 		DiscoveryConfigFilename:  &authConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))

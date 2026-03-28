@@ -54,6 +54,7 @@ const (
 	// Account error codes.
 	UserIDNotFoundError    = 1101 // UserID does not exist or is not registered
 	RegisteredAlreadyError = 1102 // user is already registered
+	UserBlockedError       = 1103 // user is blocked (global blacklist)
 
 	// Group error codes.
 	GroupIDNotFoundError  = 1201 // GroupID does not exist

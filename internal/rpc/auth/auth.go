@@ -22,6 +22,8 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	redis2 "github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
+	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/utils/datautil"
 	"github.com/redis/go-redis/v9"
@@ -42,6 +44,7 @@ import (
 
 type authServer struct {
 	pbauth.UnimplementedAuthServer
+	blacklistDB    controller.UserGlobalBlackDatabase
 	authDatabase   controller.AuthDatabase
 	RegisterCenter discovery.SvcDiscoveryRegistry
 	config         *Config
@@ -49,14 +52,23 @@ type authServer struct {
 }
 
 type Config struct {
-	RpcConfig   config.Auth
-	RedisConfig config.Redis
-	Share       config.Share
-	Discovery   config.Discovery
+	RpcConfig     config.Auth
+	RedisConfig   config.Redis
+	MongodbConfig config.Mongo
+	Share         config.Share
+	Discovery     config.Discovery
 }
 
 func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := redisutil.NewRedisClient(ctx, config.RedisConfig.Build())
+	if err != nil {
+		return err
+	}
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
+	if err != nil {
+		return err
+	}
+	userGlobalBlackDB, err := mgo.NewUserGlobalBlackMongo(mgocli.GetDB())
 	if err != nil {
 		return err
 	}
@@ -73,8 +85,9 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 			config.Share.MultiLogin,
 			config.Share.IMAdminUserID,
 		),
-		config:     config,
-		userClient: rpcli.NewUserClient(userConn),
+		config:      config,
+		blacklistDB: controller.NewUserGlobalBlackDatabase(userGlobalBlackDB),
+		userClient:  rpcli.NewUserClient(userConn),
 	})
 	return nil
 }
@@ -126,6 +139,16 @@ func (s *authServer) GetUserToken(ctx context.Context, req *pbauth.GetUserTokenR
 	if user.AppMangerLevel >= constant.AppNotificationAdmin {
 		return nil, errs.ErrArgs.WrapMsg("app account can`t get token")
 	}
+
+	blocked, _ := s.blacklistDB.IsBlocked(ctx, req.UserID)
+	if blocked {
+		// Blacklisted users should be actively kicked to invalidate existing sessions.
+		if kickErr := s.forceKickOffAllPlatforms(ctx, req.UserID); kickErr != nil {
+			log.ZWarn(ctx, "GetUserToken forceKickOffAllPlatforms failed", kickErr, "userID", req.UserID)
+		}
+		log.ZWarn(ctx, "GetUserToken is blocked", errors.New("user is in global blacklist, userID="+req.UserID), "userID", req.UserID, "blocked", blocked)
+		return nil, servererrs.ErrUserBlocked.WithDetail("user is in global blacklist, userID=" + req.UserID)
+	}
 	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(req.PlatformID))
 	if err != nil {
 		return nil, err
@@ -143,6 +166,16 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 	isAdmin := authverify.IsManagerUserID(claims.UserID, s.config.Share.IMAdminUserID)
 	if isAdmin {
 		return claims, nil
+	}
+	// 非管理员用户检查全局黑名单
+	blocked, _ := s.blacklistDB.IsBlocked(ctx, claims.UserID)
+	if blocked {
+		// Blacklisted users should be actively kicked to invalidate existing sessions.
+		if kickErr := s.forceKickOffAllPlatforms(ctx, claims.UserID); kickErr != nil {
+			log.ZWarn(ctx, "parseToken forceKickOffAllPlatforms failed", kickErr, "userID", claims.UserID)
+		}
+		log.ZWarn(ctx, "parseToken is blocked", errors.New("user is in global blacklist, userID="+claims.UserID), "userID", claims.UserID, "blocked", blocked)
+		return nil, servererrs.ErrUserBlocked.WithDetail("user is in global blacklist, userID=" + claims.UserID)
 	}
 	m, err := s.authDatabase.GetTokensWithoutError(ctx, claims.UserID, claims.PlatformID)
 	if err != nil {
@@ -212,6 +245,18 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 
 		err = s.authDatabase.SetTokenMapByUidPid(ctx, userID, int(platformID), m)
 		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *authServer) forceKickOffAllPlatforms(ctx context.Context, userID string) error {
+	for platformID := range constant.PlatformID2Name {
+		if int32(platformID) == constant.AdminPlatformID {
+			continue
+		}
+		if err := s.forceKickOff(ctx, userID, int32(platformID)); err != nil {
 			return err
 		}
 	}

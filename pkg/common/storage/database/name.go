@@ -17,4 +17,5 @@ const (
 	UserName                = "user"
 	SeqConversationName     = "seq"
 	SeqUserName             = "seq_user"
+	UserGlobalBlackName     = "user_global_black_list"
 )
