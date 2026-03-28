@@ -32,12 +32,25 @@ import (
 
 func NewConversationMongo(db *mongo.Database) (*ConversationMgo, error) {
 	coll := db.Collection(database.ConversationName)
-	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "owner_user_id", Value: 1},
-			{Key: "conversation_id", Value: 1},
+	_, err := coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "owner_user_id", Value: 1},
+				{Key: "conversation_id", Value: 1},
+			},
+			Options: options.Index().SetUnique(true),
 		},
-		Options: options.Index().SetUnique(true),
+		{
+			Keys: bson.D{
+				{Key: "user_id", Value: 1},
+			},
+			Options: options.Index(),
+		},
+		{
+			Keys: bson.D{
+				{Key: "conversation_id", Value: 1},
+			},
+		},
 	})
 	if err != nil {
 		return nil, errs.Wrap(err)
@@ -189,10 +202,6 @@ func (c *ConversationMgo) GetAllConversationIDsNumber(ctx context.Context) (int6
 
 func (c *ConversationMgo) PageConversationIDs(ctx context.Context, pagination pagination.Pagination) (conversationIDs []string, err error) {
 	return mongoutil.FindPageOnly[string](ctx, c.coll, bson.M{}, pagination, options.Find().SetProjection(bson.M{"conversation_id": 1}))
-}
-
-func (c *ConversationMgo) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*model.Conversation, error) {
-	return mongoutil.Find[*model.Conversation](ctx, c.coll, bson.M{"conversation_id": bson.M{"$in": conversationIDs}})
 }
 
 func (c *ConversationMgo) GetConversationIDsNeedDestruct(ctx context.Context) ([]*model.Conversation, error) {
