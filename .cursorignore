@@ -1,0 +1,68 @@
+# Cursor 代码索引忽略（语法与 .gitignore 相同）
+# 与根目录 .gitignore 对齐；未列出的规则仍以 .gitignore 为准（Git 不索引的路径 Cursor 通常也不关心）
+
+### OpenIM（与 .gitignore 一致）###
+logs
+.devcontainer
+components
+out-test
+Dockerfile.cross
+
+### 构建产物 ###
+tmp/
+bin/
+output/
+_output/
+deployments/charts/generated-configs/
+
+### 配置与密钥（勿入索引）###
+.env
+config/config.yaml
+config/notification.yaml
+
+### 部署生成物 ###
+deployments/openim-server/charts
+
+### 本地笔记 ###
+.idea.md
+.todo.md
+.note.md
+
+### 通用备份与临时文件 ###
+*.bak
+*.tmp
+*~
+dist/
+
+### VS Code（除团队共享配置外）###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+### Go ###
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+go.work.sum
+
+### JetBrains / IDE ###
+.idea/
+out/
+
+### Tags ###
+TAGS
+tags
+gtags.files
+GTAGS
+GRTAGS
+GPATH
+GSYMS
+cscope.files
+cscope.out
