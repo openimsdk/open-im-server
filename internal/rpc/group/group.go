@@ -358,6 +358,50 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbgroup.GetJo
 	return &resp, nil
 }
 
+func (g *groupServer) GetCommonGroupsWithFriend(ctx context.Context, req *pbgroup.GetCommonGroupsWithFriendReq) (*pbgroup.GetCommonGroupsWithFriendResp, error) {
+	if req.FriendUserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("friendUserID empty")
+	}
+	opUserID := mcontext.GetOpUserID(ctx)
+	if opUserID == "" {
+		return nil, errs.ErrNoPermission.WrapMsg("op user id empty")
+	}
+
+	selfGroupIDs, err := g.db.FindJoinGroupID(ctx, opUserID)
+	if err != nil {
+		return nil, err
+	}
+	if len(selfGroupIDs) == 0 {
+		return &pbgroup.GetCommonGroupsWithFriendResp{
+			Total:  0,
+			Groups: []*sdkws.GroupInfo{},
+		}, nil
+	}
+
+	friendMembers, err := g.db.FindGroupMemberUser(ctx, selfGroupIDs, req.FriendUserID)
+	if err != nil {
+		return nil, err
+	}
+	if len(friendMembers) == 0 {
+		return &pbgroup.GetCommonGroupsWithFriendResp{
+			Total:  0,
+			Groups: []*sdkws.GroupInfo{},
+		}, nil
+	}
+
+	commonGroupIDs := datautil.Distinct(datautil.Slice(friendMembers, func(e *model.GroupMember) string {
+		return e.GroupID
+	}))
+	groups, err := g.getGroupsInfo(ctx, commonGroupIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &pbgroup.GetCommonGroupsWithFriendResp{
+		Total:  uint32(len(groups)),
+		Groups: groups,
+	}, nil
+}
+
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.InviteUserToGroupReq) (*pbgroup.InviteUserToGroupResp, error) {
 	if len(req.InvitedUserIDs) == 0 {
 		return nil, errs.ErrArgs.WrapMsg("user empty")

@@ -187,6 +187,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		groupRouterGroup.POST("/get_full_group_member_user_ids", g.GetFullGroupMemberUserIDs)
 		groupRouterGroup.POST("/get_full_join_group_ids", g.GetFullJoinGroupIDs)
 		groupRouterGroup.POST("/get_group_application_unhandled_count", g.GetGroupApplicationUnhandledCount)
+		groupRouterGroup.POST("/get_common_groups_with_friend", g.GetCommonGroupsWithFriend)
 	}
 	// certificate
 	{
