@@ -1,0 +1,3 @@
+[submodule "protocol"]
+	path = protocol
+	url = https://github.com/sok-im/protocol
