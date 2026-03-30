@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/magefile/mage/sh"
 	"github.com/openimsdk/gomake/mageutil"
 	"github.com/openimsdk/open-im-server/v3/version"
 	"github.com/openimsdk/tools/utils/datautil"
@@ -37,6 +38,14 @@ func Build() {
 	if len(bin) != 0 {
 		bin = bin[1:]
 	}
+
+	mageutil.WithSpinner("Generating protocol artifacts...", func() {
+		if err := sh.Run("mage", "-d", "protocol", "GenGo"); err != nil {
+			mageutil.PrintRed("protocol compilation failed: " + err.Error())
+			os.Exit(1)
+		}
+	})
+
 	mageutil.WithSpinner("Building binaries...", func() { mageutil.Build(bin, nil, nil) })
 }
 
@@ -54,8 +63,25 @@ func BuildWithCustomConfig() {
 		ToolsDir:  &customToolsDir,
 	}
 
+	mageutil.WithSpinner("Generating protocol artifacts...", func() {
+		if err := sh.Run("mage", "-d", "protocol", "GenGo"); err != nil {
+			mageutil.PrintRed("protocol compilation failed: " + err.Error())
+			os.Exit(1)
+		}
+	})
+
 	mageutil.WithSpinner("Building binaries with custom config...", func() {
 		mageutil.Build(bin, config, nil)
+	})
+}
+
+// Protocol generates protobuf artifacts under `./protocol`.
+func Protocol() {
+	mageutil.WithSpinner("Generating protocol artifacts...", func() {
+		if err := sh.Run("mage", "-d", "protocol", "GenGo"); err != nil {
+			mageutil.PrintRed("protocol compilation failed: " + err.Error())
+			os.Exit(1)
+		}
 	})
 }
 

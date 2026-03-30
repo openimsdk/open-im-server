@@ -34,7 +34,9 @@ var (
 	OpenIMMsgGatewayCfgFileName      string
 	OpenIMMsgTransferCfgFileName     string
 	OpenIMPushCfgFileName            string
+	OpenIMCaptchaCfgFileName         string
 	OpenIMRPCAuthCfgFileName         string
+	OpenIMRPCCaptchaCfgFileName      string
 	OpenIMRPCConversationCfgFileName string
 	OpenIMRPCFriendCfgFileName       string
 	OpenIMRPCGroupCfgFileName        string
@@ -62,7 +64,9 @@ func init() {
 	OpenIMMsgGatewayCfgFileName = "openim-msggateway.yml"
 	OpenIMMsgTransferCfgFileName = "openim-msgtransfer.yml"
 	OpenIMPushCfgFileName = "openim-push.yml"
+	OpenIMCaptchaCfgFileName = "openim-captcha.yml"
 	OpenIMRPCAuthCfgFileName = "openim-rpc-auth.yml"
+	OpenIMRPCCaptchaCfgFileName = "openim-rpc-captcha.yml"
 	OpenIMRPCConversationCfgFileName = "openim-rpc-conversation.yml"
 	OpenIMRPCFriendCfgFileName = "openim-rpc-friend.yml"
 	OpenIMRPCGroupCfgFileName = "openim-rpc-group.yml"
@@ -77,7 +81,7 @@ func init() {
 		KafkaConfigFileName, RedisConfigFileName,
 		MongodbConfigFileName, MinioConfigFileName, LogConfigFileName,
 		OpenIMAPICfgFileName, OpenIMCronTaskCfgFileName, OpenIMMsgGatewayCfgFileName,
-		OpenIMMsgTransferCfgFileName, OpenIMPushCfgFileName, OpenIMRPCAuthCfgFileName,
+		OpenIMMsgTransferCfgFileName, OpenIMPushCfgFileName, OpenIMCaptchaCfgFileName, OpenIMRPCAuthCfgFileName, OpenIMRPCCaptchaCfgFileName,
 		OpenIMRPCConversationCfgFileName, OpenIMRPCFriendCfgFileName, OpenIMRPCGroupCfgFileName,
 		OpenIMRPCMsgCfgFileName, OpenIMRPCThirdCfgFileName, OpenIMRPCUserCfgFileName, DiscoveryConfigFilename,
 	}
