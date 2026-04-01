@@ -122,6 +122,17 @@ builds:
       - amd64
       - arm64
 
+  - binary: openim-rpc-captcha
+    id: openim-rpc-captcha
+    main: ./cmd/openim-rpc/openim-rpc-captcha/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
   - binary: openim-rpc-conversation
     id: openim-rpc-conversation
     main: ./cmd/openim-rpc/openim-rpc-conversation/main.go
@@ -355,6 +366,7 @@ nfpms:
       - openim-msgtransfer
       - openim-push
       - openim-rpc-auth
+      - openim-rpc-captcha
       - openim-rpc-conversation
       - openim-rpc-friend
       - openim-rpc-group

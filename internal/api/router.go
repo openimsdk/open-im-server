@@ -7,6 +7,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	pbAuth "github.com/openimsdk/protocol/auth"
+	pbcaptcha "github.com/openimsdk/protocol/captcha"
 	"github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/msg"
@@ -98,6 +99,10 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	if err != nil {
 		return nil, err
 	}
+	captchaConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Captcha)
+	if err != nil {
+		return nil, err
+	}
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -115,6 +120,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	r.Use(prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(), mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)))
 	u := NewUserApi(user.NewUserClient(userConn), client, config.Share.RpcRegisterName)
 	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), config.Share.IMAdminUserID)
+	cp := NewCaptchaApi(pbcaptcha.NewCaptchaClient(captchaConn))
 	bl := NewUserGlobalBlackApi(blacklistCtrl, userDB, config.Share.IMAdminUserID, rpcli.NewAuthClient(authConn))
 	userRouterGroup := r.Group("/user")
 	{
@@ -286,6 +292,12 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		conversationGroup.POST("/get_owner_conversation", c.GetOwnerConversation)
 		conversationGroup.POST("/get_not_notify_conversation_ids", c.GetNotNotifyConversationIDs)
 		conversationGroup.POST("/get_pinned_conversation_ids", c.GetPinnedConversationIDs)
+	}
+
+	{
+		captchaGroup := r.Group("/captcha")
+		captchaGroup.POST("/generate", cp.GenerateCaptcha)
+		captchaGroup.POST("/verify", cp.VerifyCaptcha)
 	}
 
 	{

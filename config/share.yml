@@ -9,6 +9,7 @@ rpcRegisterName:
   auth: auth
   conversation: conversation
   third: third
+  captcha: captcha
 
 imAdminUserID: [ imAdmin ]
 

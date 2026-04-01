@@ -1,0 +1,12 @@
+rpc:
+  registerIP: ""
+  listenIP: 0.0.0.0
+  autoSetPorts: false
+  ports: [10520]
+
+prometheus:
+  enable: false
+  ports: [12520]
+
+verifyPadding: 8
+expireSeconds: 120

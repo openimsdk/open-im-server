@@ -249,6 +249,18 @@ type Auth struct {
 	} `mapstructure:"tokenPolicy"`
 }
 
+type Captcha struct {
+	RPC struct {
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus    Prometheus `mapstructure:"prometheus"`
+	VerifyPadding int        `mapstructure:"verifyPadding"`
+	ExpireSeconds int        `mapstructure:"expireSeconds"`
+}
+
 type Conversation struct {
 	RPC struct {
 		RegisterIP   string `mapstructure:"registerIP"`
@@ -408,6 +420,7 @@ type RpcRegisterName struct {
 	Auth           string `mapstructure:"auth"`
 	Conversation   string `mapstructure:"conversation"`
 	Third          string `mapstructure:"third"`
+	Captcha        string `mapstructure:"captcha"`
 }
 
 func (r *RpcRegisterName) GetServiceNames() []string {
@@ -421,6 +434,7 @@ func (r *RpcRegisterName) GetServiceNames() []string {
 		r.Auth,
 		r.Conversation,
 		r.Third,
+		r.Captcha,
 	}
 }
 
@@ -626,6 +640,7 @@ var (
 	OpenIMMsgTransferCfgFileName     = "openim-msgtransfer.yml"
 	OpenIMPushCfgFileName            = "openim-push.yml"
 	OpenIMRPCAuthCfgFileName         = "openim-rpc-auth.yml"
+	OpenIMRPCCaptchaCfgFileName      = "openim-rpc-captcha.yml"
 	OpenIMRPCConversationCfgFileName = "openim-rpc-conversation.yml"
 	OpenIMRPCFriendCfgFileName       = "openim-rpc-friend.yml"
 	OpenIMRPCGroupCfgFileName        = "openim-rpc-group.yml"
@@ -687,6 +702,10 @@ func (p *Push) GetConfigFileName() string {
 
 func (a *Auth) GetConfigFileName() string {
 	return OpenIMRPCAuthCfgFileName
+}
+
+func (c *Captcha) GetConfigFileName() string {
+	return OpenIMRPCCaptchaCfgFileName
 }
 
 func (c *Conversation) GetConfigFileName() string {
