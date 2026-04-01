@@ -12,8 +12,8 @@ import (
 type UserGlobalBlackDatabase interface {
 	// AddBlack 将用户加入全局黑名单
 	AddBlack(ctx context.Context, blacks []*model.UserGlobalBlack) error
-	// RemoveBlack 按昵称将用户从全局黑名单移除
-	RemoveBlack(ctx context.Context, nicknames []string) error
+	// RemoveBlack 按 userID 将用户从全局黑名单移除
+	RemoveBlack(ctx context.Context, userIDs []string) error
 	// IsBlocked 检查用户是否在全局黑名单
 	IsBlocked(ctx context.Context, userID string) (bool, error)
 	// GetBlackList 分页获取黑名单列表
@@ -32,8 +32,8 @@ func (u *userGlobalBlackDatabase) AddBlack(ctx context.Context, blacks []*model.
 	return u.db.Add(ctx, blacks)
 }
 
-func (u *userGlobalBlackDatabase) RemoveBlack(ctx context.Context, nicknames []string) error {
-	return u.db.Remove(ctx, nicknames)
+func (u *userGlobalBlackDatabase) RemoveBlack(ctx context.Context, userIDs []string) error {
+	return u.db.Remove(ctx, userIDs)
 }
 
 func (u *userGlobalBlackDatabase) IsBlocked(ctx context.Context, userID string) (bool, error) {

@@ -11,8 +11,8 @@ import (
 type UserGlobalBlack interface {
 	// Add 批量添加用户到全局黑名单
 	Add(ctx context.Context, blacks []*model.UserGlobalBlack) error
-	// Remove 按昵称从全局黑名单移除用户
-	Remove(ctx context.Context, nicknames []string) error
+	// Remove 按 userID 从全局黑名单移除用户
+	Remove(ctx context.Context, userIDs []string) error
 	// Find 查询指定用户是否在黑名单（返回在黑名单中的记录）
 	Find(ctx context.Context, userIDs []string) ([]*model.UserGlobalBlack, error)
 	// IsBlocked 检查单个用户是否在黑名单

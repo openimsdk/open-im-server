@@ -27,12 +27,12 @@ func NewUserGlobalBlackApi(blacklistDB controller.UserGlobalBlackDatabase, userD
 }
 
 type addGlobalBlacklistReq struct {
-	Nicknames []string `json:"nicknames" binding:"required,min=1"`
-	Reason    string   `json:"reason"`
+	UserIDs []string `json:"userIDs" binding:"required,min=1"`
+	Reason  string   `json:"reason"`
 }
 
 type removeGlobalBlacklistReq struct {
-	Nicknames []string `json:"nicknames" binding:"required,min=1"`
+	UserIDs []string `json:"userIDs" binding:"required,min=1"`
 }
 
 type getGlobalBlacklistReq struct {
@@ -64,24 +64,25 @@ func (b *UserGlobalBlackApi) AddGlobalBlacklist(c *gin.Context) {
 		return
 	}
 	operatorID := mcontext.GetOpUserID(c)
-	blacks := make([]*model.UserGlobalBlack, 0, len(req.Nicknames))
-	for _, nickname := range req.Nicknames {
-		users, err := b.userDB.TakeByNickname(c, nickname)
-		if err != nil {
-			apiresp.GinError(c, err)
-			return
-		}
-		if len(users) == 0 {
-			apiresp.GinError(c, errs.ErrRecordNotFound.WrapMsg("nickname not found", "nickname", nickname))
-			return
-		}
-		if len(users) > 1 {
-			apiresp.GinError(c, errs.ErrArgs.WrapMsg("nickname matched multiple users", "nickname", nickname))
+	foundUsers, err := b.userDB.Find(c, req.UserIDs)
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+	userMap := make(map[string]*model.User, len(foundUsers))
+	for _, u := range foundUsers {
+		userMap[u.UserID] = u
+	}
+	blacks := make([]*model.UserGlobalBlack, 0, len(req.UserIDs))
+	for _, userID := range req.UserIDs {
+		u, ok := userMap[userID]
+		if !ok {
+			apiresp.GinError(c, errs.ErrRecordNotFound.WrapMsg("userID not found", "userID", userID))
 			return
 		}
 		blacks = append(blacks, &model.UserGlobalBlack{
-			UserID:     users[0].UserID,
-			Nickname:   users[0].Nickname,
+			UserID:     u.UserID,
+			Nickname:   u.Nickname,
 			OperatorID: operatorID,
 			Reason:     req.Reason,
 		})
@@ -119,24 +120,7 @@ func (b *UserGlobalBlackApi) RemoveGlobalBlacklist(c *gin.Context) {
 		apiresp.GinError(c, err)
 		return
 	}
-	userIDs := make([]string, 0, len(req.Nicknames))
-	for _, nickname := range req.Nicknames {
-		users, err := b.userDB.TakeByNickname(c, nickname)
-		if err != nil {
-			apiresp.GinError(c, err)
-			return
-		}
-		if len(users) == 0 {
-			apiresp.GinError(c, errs.ErrRecordNotFound.WrapMsg("nickname not found", "nickname", nickname))
-			return
-		}
-		if len(users) > 1 {
-			apiresp.GinError(c, errs.ErrArgs.WrapMsg("nickname matched multiple users", "nickname", nickname))
-			return
-		}
-		userIDs = append(userIDs, users[0].UserID)
-	}
-	if err := b.blacklistDB.RemoveBlack(c, userIDs); err != nil {
+	if err := b.blacklistDB.RemoveBlack(c, req.UserIDs); err != nil {
 		apiresp.GinError(c, err)
 		return
 	}

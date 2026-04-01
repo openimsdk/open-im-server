@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# 统一通过 API 新链路管理全局黑名单（按 nickname）
+# 统一通过 API 新链路管理全局黑名单（按 userID）
 #
 # 用法：
 #   1) 添加
-#      ./scripts/global_blacklist_api.sh add "alice,bob" [reason]
+#      ./scripts/global_blacklist_api.sh add "user001,user002" [reason]
 #
 #   2) 删除
-#      ./scripts/global_blacklist_api.sh remove "alice,bob"
+#      ./scripts/global_blacklist_api.sh remove "user001,user002"
 #
 #   3) 查询
 #      ./scripts/global_blacklist_api.sh list [pageNumber] [showNumber]
@@ -26,7 +26,7 @@ ADMIN_USER_ID="${ADMIN_USER_ID:-imAdmin}"
 OPERATION_ID="${OPERATION_ID:-gb_$(date +%s)_$RANDOM}"
 
 ACTION="${1:-}"
-NICKNAMES_RAW="${2:-}"
+USERIDS_RAW="${2:-}"
 REASON="${3:-manual_by_api_script}"
 PAGE_NUMBER="${2:-1}"
 SHOW_NUMBER="${3:-20}"
@@ -43,7 +43,7 @@ trim() {
   printf '%s' "$s"
 }
 
-nicknames_csv_to_json_array() {
+userids_csv_to_json_array() {
   local csv="$1"
   local arr_json="["
   local first=1
@@ -63,7 +63,7 @@ nicknames_csv_to_json_array() {
   arr_json="${arr_json}]"
 
   if [[ "$arr_json" == "[]" ]]; then
-    die "nicknames 为空，请传入逗号分隔昵称，如 \"alice,bob\""
+    die "userIDs 为空，请传入逗号分隔的 userID，如 \"user001,user002\""
   fi
   printf '%s' "$arr_json"
 }
@@ -128,8 +128,8 @@ call_api() {
 if [[ -z "$ACTION" ]]; then
   cat <<'EOF'
 用法:
-  添加: ./scripts/global_blacklist_api.sh add "alice,bob" [reason]
-  删除: ./scripts/global_blacklist_api.sh remove "alice,bob"
+  添加: ./scripts/global_blacklist_api.sh add "user001,user002" [reason]
+  删除: ./scripts/global_blacklist_api.sh remove "user001,user002"
   查询: ./scripts/global_blacklist_api.sh list [pageNumber] [showNumber]
 EOF
   exit 1
@@ -142,17 +142,17 @@ fi
 
 case "$ACTION" in
   add)
-    [[ -z "$NICKNAMES_RAW" ]] && die "add 需要 nicknames 参数"
-    NICKNAMES_JSON="$(nicknames_csv_to_json_array "$NICKNAMES_RAW")"
-    BODY="{\"nicknames\":${NICKNAMES_JSON},\"reason\":\"${REASON}\"}"
+    [[ -z "$USERIDS_RAW" ]] && die "add 需要 userIDs 参数"
+    USERIDS_JSON="$(userids_csv_to_json_array "$USERIDS_RAW")"
+    BODY="{\"userIDs\":${USERIDS_JSON},\"reason\":\"${REASON}\"}"
     echo ">>> POST /user/add_global_blacklist"
     call_api "/user/add_global_blacklist" "$BODY" "$ADMIN_TOKEN"
     ;;
 
   remove)
-    [[ -z "$NICKNAMES_RAW" ]] && die "remove 需要 nicknames 参数"
-    NICKNAMES_JSON="$(nicknames_csv_to_json_array "$NICKNAMES_RAW")"
-    BODY="{\"nicknames\":${NICKNAMES_JSON}}"
+    [[ -z "$USERIDS_RAW" ]] && die "remove 需要 userIDs 参数"
+    USERIDS_JSON="$(userids_csv_to_json_array "$USERIDS_RAW")"
+    BODY="{\"userIDs\":${USERIDS_JSON}}"
     echo ">>> POST /user/remove_global_blacklist"
     call_api "/user/remove_global_blacklist" "$BODY" "$ADMIN_TOKEN"
     ;;
