@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Captcha 验证码测试</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+     background:#f0f2f5;padding:20px;min-height:100vh}
+
+/* ── 卡片 ── */
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);
+      padding:20px;max-width:500px;margin:0 auto 16px}
+.card-title{font-size:15px;font-weight:600;color:#1a1a2e;margin-bottom:14px;
+            display:flex;align-items:center;gap:6px}
+
+/* ── 表单 ── */
+.field{margin-bottom:10px}
+.field label{display:block;font-size:11px;color:#888;margin-bottom:3px}
+input[type=text]{width:100%;padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;
+                 font-size:12px;outline:none;transition:border .15s}
+input[type=text]:focus{border-color:#4f46e5}
+
+/* ── 按钮 ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border:none;
+     border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:.15s}
+.btn:hover{filter:brightness(.92)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-indigo{background:#4f46e5;color:#fff}
+.btn-gray  {background:#6b7280;color:#fff}
+.btn-green {background:#10b981;color:#fff}
+.btn-row   {display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* ── 状态标签 ── */
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.tag-ok  {background:#d1fae5;color:#065f46}
+.tag-err {background:#fee2e2;color:#991b1b}
+.tag-info{background:#e0e7ff;color:#3730a3}
+#status,#verify-status{margin-top:10px;min-height:24px}
+
+/* ── 验证码区域 ── */
+#captcha-section{display:none}
+
+/* 背景图 + 滑块叠层 */
+.slide-wrap{
+  position:relative;width:300px;height:220px;
+  border:2px solid #e5e7eb;border-radius:10px;
+  overflow:hidden;background:#f3f4f6;
+  cursor:default;user-select:none;
+}
+#master-img{position:absolute;top:0;left:0;width:300px;height:220px;display:block}
+#tile-img  {position:absolute;cursor:grab;transition:none}
+#tile-img:active{cursor:grabbing}
+
+/* 滑轨 */
+.slider-row{display:flex;align-items:center;gap:6px;margin-top:8px}
+.slider-row span{font-size:11px;color:#6b7280;min-width:14px}
+.slider-row input[type=range]{flex:1;accent-color:#4f46e5;height:4px}
+.slider-row .val{font-size:11px;color:#4f46e5;min-width:30px;text-align:right}
+
+/* 提示箭头 */
+.hint{font-size:11px;color:#9ca3af;margin-top:6px}
+
+/* ── 调试区 ── */
+#debug-area{display:none;margin-top:14px}
+.debug-label{font-size:10px;color:#9ca3af;margin-bottom:4px}
+.image-preview{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.image-preview figure{text-align:center}
+.image-preview figcaption{font-size:10px;color:#888;margin-top:4px}
+pre{background:#1e1e2e;color:#cdd6f4;border-radius:8px;padding:12px;
+    font-size:10px;overflow:auto;max-height:160px;word-break:break-all}
+</style>
+</head>
+<body>
+
+<!-- ① 配置 -->
+<div class="card">
+  <div class="card-title">⚙️ 配置</div>
+  <div class="field">
+    <label>API Host</label>
+    <input type="text" id="host" value="http://127.0.0.1:10002">
+  </div>
+  <div class="field">
+    <label>Token（留空则自动获取 Admin Token）</label>
+    <input type="text" id="token" placeholder="eyJhbGci...">
+  </div>
+  <div class="field">
+    <label>Admin Secret</label>
+    <input type="text" id="secret" value="openIM123">
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-gray"   onclick="getToken()">🔑 获取 Token</button>
+    <button class="btn btn-indigo" id="btn-gen" onclick="generate()">🖼 生成验证码</button>
+  </div>
+  <div id="status"></div>
+</div>
+
+<!-- ② 验证码交互 -->
+<div class="card" id="captcha-section">
+  <div class="card-title">🧩 滑块验证码</div>
+  <p class="hint">拖动滑块或直接拖拽图中的小方块，使其嵌入背景缺口后点击「验证」。</p>
+
+  <div style="margin-top:12px">
+    <!-- 背景图 + 浮动滑块 -->
+    <div class="slide-wrap" id="slide-wrap">
+      <img id="master-img" alt="">
+      <img id="tile-img"   alt="">
+    </div>
+
+    <!-- X 轴滑轨 -->
+    <div class="slider-row">
+      <span>←→</span>
+      <input type="range" id="sx" min="0" max="240" value="0" oninput="syncTile()">
+      <span class="val" id="sx-val">0 px</span>
+    </div>
+    <!-- Y 轴调试用 -->
+    <div class="slider-row">
+      <span>↕</span>
+      <input type="range" id="sy" min="0" max="160" value="0" oninput="syncTile()">
+      <span class="val" id="sy-val">0 px</span>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-green"  onclick="verify()">✅ 验证</button>
+    <button class="btn btn-indigo" onclick="generate()">🔄 刷新</button>
+  </div>
+  <div id="verify-status"></div>
+
+  <!-- 调试：直接渲染两张图 + 原始数据 -->
+  <div id="debug-area">
+    <hr style="border:none;border-top:1px solid #f0f0f0;margin:14px 0">
+    <div class="debug-label">图片预览（直接从 Base64 渲染）</div>
+    <div class="image-preview">
+      <figure>
+        <img id="dbg-master" style="border-radius:6px;border:1px solid #e5e7eb" alt="">
+        <figcaption>masterImage（JPEG 背景）</figcaption>
+      </figure>
+      <figure>
+        <img id="dbg-tile" style="border-radius:4px;border:1px solid #e5e7eb;background:#ddd" alt="">
+        <figcaption>tileImage（PNG 滑块）</figcaption>
+      </figure>
+    </div>
+    <div class="debug-label" style="margin-top:10px">原始响应（去除图片数据）</div>
+    <pre id="raw-json"></pre>
+  </div>
+</div>
+
+<script>
+/* ── 工具 ── */
+const $ = id => document.getElementById(id);
+let captchaState = { id:'', tileW:68, tileH:68, tileY:0 };
+let opSeq = 0;
+
+function setStatus(elId, html, type='info'){
+  $(elId).innerHTML = `<span class="tag tag-${type}">${html}</span>`;
+}
+
+async function post(path, body){
+  const host = $('host').value.replace(/\/$/,'');
+  const tok  = $('token').value.trim();
+  const headers = {
+    'Content-Type':'application/json',
+    'operationID':`demo-${Date.now()}-${++opSeq}`,
+  };
+  if(tok) headers['token'] = tok;
+  const r = await fetch(host+path, {method:'POST', headers, body:JSON.stringify(body)});
+  return r.json();
+}
+
+/* ── 1. 获取 Token ── */
+async function getToken(){
+  setStatus('status','获取 Token 中…','info');
+  try{
+    const d = await post('/auth/get_admin_token',{
+      secret:$('secret').value, platformID:1, userID:'imAdmin'
+    });
+    if(d.errCode!==0){ setStatus('status',`获取失败: ${d.errMsg}`,'err'); return; }
+    $('token').value = d.data.token;
+    setStatus('status','Token 获取成功 ✓','ok');
+  }catch(e){ setStatus('status',`请求异常: ${e.message}`,'err'); }
+}
+
+/* ── 2. 生成验证码 ── */
+async function generate(){
+  if(!$('token').value.trim()){ await getToken(); if(!$('token').value.trim()) return; }
+
+  setStatus('status','生成验证码中…','info');
+  $('btn-gen').disabled = true;
+  try{
+    const d = await post('/captcha/generate',{});
+
+    /* 展示原始响应（隐去图片数据保持可读） */
+    const preview = JSON.parse(JSON.stringify(d));
+    if(preview.data){
+      if(preview.data.masterImage) preview.data.masterImage = `<base64 JPEG, ${preview.data.masterImage.length} chars>`;
+      if(preview.data.tileImage)   preview.data.tileImage   = `<base64 PNG,  ${preview.data.tileImage.length} chars>`;
+    }
+    $('raw-json').textContent = JSON.stringify(preview, null, 2);
+
+    if(d.errCode!==0){
+      setStatus('status',`生成失败 errCode=${d.errCode}: ${d.errMsg} — ${d.errDlt}`,'err');
+      return;
+    }
+
+    const {captchaID, masterImage, tileImage, tileY, expireAt} = d.data;
+    captchaState.id    = captchaID;
+    captchaState.tileY = tileY || 0;
+
+    /* ── 渲染 masterImage（JPEG）── */
+    const masterSrc = `data:image/jpeg;base64,${masterImage}`;
+    $('master-img').src  = masterSrc;
+    $('dbg-master').src  = masterSrc;
+    $('dbg-master').style.width = '300px';
+
+    /* ── 渲染 tileImage（PNG）── */
+    const tileSrc = `data:image/png;base64,${tileImage}`;
+    $('dbg-tile').src = tileSrc;
+
+    /* 等 tile 图片加载完毕后设置滑块 */
+    await loadImage($('tile-img'), tileSrc);
+
+    captchaState.tileW = $('tile-img').naturalWidth  || 68;
+    captchaState.tileH = $('tile-img').naturalHeight || 68;
+
+    /* 更新滑轨范围，初始化 Y = tileY */
+    $('sx').max   = 300 - captchaState.tileW;
+    $('sy').max   = 220 - captchaState.tileH;
+    $('sx').value = 0;
+    $('sy').value = captchaState.tileY;
+    syncTile();
+
+    const expire = new Date(expireAt * 1000).toLocaleTimeString();
+    setStatus('status',
+      `验证码已生成 | id: ${captchaID.slice(0,8)}… | tileY: ${tileY} | 过期: ${expire}`,'ok');
+
+    $('captcha-section').style.display = 'block';
+    $('debug-area').style.display = 'block';
+    $('verify-status').innerHTML = '';
+
+  }catch(e){
+    setStatus('status',`请求异常: ${e.message}`,'err');
+  }finally{
+    $('btn-gen').disabled = false;
+  }
+}
+
+/* 等待 img.onload（Promise 封装） */
+function loadImage(imgEl, src){
+  return new Promise((resolve, reject)=>{
+    imgEl.onload  = resolve;
+    imgEl.onerror = reject;
+    imgEl.src     = src;
+  });
+}
+
+/* ── 3. 同步滑块位置 ── */
+function syncTile(){
+  const x = parseInt($('sx').value);
+  const y = parseInt($('sy').value);
+  $('sx-val').textContent = x + ' px';
+  $('sy-val').textContent = y + ' px';
+  $('tile-img').style.left = x + 'px';
+  $('tile-img').style.top  = y + 'px';
+}
+
+/* ── 4. 鼠标 / 触屏拖拽 ── */
+(()=>{
+  let drag=false, sx0=0, sliderX0=0;
+  const wrap = $('slide-wrap');
+  const start = (cx)=>{ drag=true; sx0=cx; sliderX0=parseInt($('sx').value); };
+  const move  = (cx)=>{
+    if(!drag) return;
+    const nx = Math.max(0, Math.min(parseInt($('sx').max), sliderX0+(cx-sx0)));
+    $('sx').value = nx;
+    syncTile();
+  };
+  const end = ()=>{ drag=false; };
+
+  wrap.addEventListener('mousedown', e=>{ if(e.target.id==='tile-img') start(e.clientX); });
+  document.addEventListener('mousemove', e=>move(e.clientX));
+  document.addEventListener('mouseup',   end);
+
+  wrap.addEventListener('touchstart', e=>{
+    if(e.target.id==='tile-img'){ start(e.touches[0].clientX); e.preventDefault(); }
+  },{passive:false});
+  document.addEventListener('touchmove', e=>{
+    if(drag){ move(e.touches[0].clientX); e.preventDefault(); }
+  },{passive:false});
+  document.addEventListener('touchend', end);
+})();
+
+/* ── 5. 验证 ── */
+async function verify(){
+  if(!captchaState.id){ alert('请先生成验证码'); return; }
+  const x = parseInt($('sx').value);
+  const y = parseInt($('sy').value);
+  setStatus('verify-status',`提交验证 x=${x} y=${y}…`,'info');
+  try{
+    const d = await post('/captcha/verify',{captchaID:captchaState.id, x, y});
+    if(d.errCode!==0){
+      setStatus('verify-status',`请求失败 errCode=${d.errCode}: ${d.errMsg}`,'err');
+      return;
+    }
+    if(d.data.success){
+      setStatus('verify-status',`🎉 验证通过！x=${x} y=${y}`,'ok');
+    }else{
+      setStatus('verify-status',`❌ 验证失败，偏差过大，请重新拖动后再试`,'err');
+    }
+  }catch(e){
+    setStatus('verify-status',`请求异常: ${e.message}`,'err');
+  }
+}
+</script>
+</body>
+</html>

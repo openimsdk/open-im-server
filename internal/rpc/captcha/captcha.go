@@ -66,9 +66,17 @@ func Start(ctx context.Context, cfg *Config, _ discovery.SvcDiscoveryRegistry, g
 		return err
 	}
 
+	resources, err := loadResources()
+	if err != nil {
+		log.ZError(ctx, "captcha load resources failed", err)
+		return err
+	}
+
+	builder := slide.NewBuilder()
+	builder.SetResources(resources...)
 	s := &server{
 		conf:       cfg.RpcConfig,
-		capt:       slide.NewBuilder().Make(),
+		capt:       builder.Make(),
 		collection: collection,
 	}
 	if s.conf.ExpireSeconds <= 0 {
@@ -116,6 +124,7 @@ func (s *server) GenerateCaptcha(ctx context.Context, _ *pbcaptcha.GenerateCaptc
 		CaptchaID:   id,
 		MasterImage: masterImage,
 		TileImage:   tileImage,
+		TileY:       int32(block.DY),
 		ExpireAt:    expiredAt.Unix(),
 	}, nil
 }
