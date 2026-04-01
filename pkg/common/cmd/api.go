@@ -37,6 +37,7 @@ func NewApiCmd() *ApiCmd {
 		OpenIMAPICfgFileName:    &apiConfig.API,
 		ShareFileName:           &apiConfig.Share,
 		DiscoveryConfigFilename: &apiConfig.Discovery,
+		MongodbConfigFileName:   &apiConfig.MongodbConfig,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", version.Version)

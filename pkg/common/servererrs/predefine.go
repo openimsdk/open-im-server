@@ -29,6 +29,7 @@ var (
 	ErrRecordNotFound = errs.NewCodeError(RecordNotFoundError, "RecordNotFoundError")
 
 	ErrUserIDNotFound  = errs.NewCodeError(UserIDNotFoundError, "UserIDNotFoundError")
+	ErrUserBlocked     = errs.NewCodeError(UserBlockedError, "UserBlockedError")
 	ErrGroupIDNotFound = errs.NewCodeError(GroupIDNotFoundError, "GroupIDNotFoundError")
 	ErrGroupIDExisted  = errs.NewCodeError(GroupIDExisted, "GroupIDExisted")
 
