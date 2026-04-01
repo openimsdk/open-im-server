@@ -18,3 +18,4 @@ prometheus:
 
 
 enableHistoryForNewMembers: true
+commonGroupsLimitWithFriend: 3
