@@ -24,8 +24,11 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/apiresp"
+	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
@@ -54,6 +57,20 @@ func prommetricsGin() gin.HandlerFunc {
 }
 
 func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, config *Config) (*gin.Engine, error) {
+	mgocli, err := mongoutil.NewMongoDB(ctx, config.MongodbConfig.Build())
+	if err != nil {
+		return nil, err
+	}
+	userGlobalBlackDB, err := mgo.NewUserGlobalBlackMongo(mgocli.GetDB())
+	if err != nil {
+		return nil, err
+	}
+	userDB, err := mgo.NewUserMongo(mgocli.GetDB())
+	if err != nil {
+		return nil, err
+	}
+	blacklistCtrl := controller.NewUserGlobalBlackDatabase(userGlobalBlackDB)
+
 	authConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Auth)
 	if err != nil {
 		return nil, err
@@ -104,6 +121,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	u := NewUserApi(user.NewUserClient(userConn), client, config.Share.RpcRegisterName)
 	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), config.Share.IMAdminUserID)
 	cp := NewCaptchaApi(pbcaptcha.NewCaptchaClient(captchaConn))
+	bl := NewUserGlobalBlackApi(blacklistCtrl, userDB, config.Share.IMAdminUserID, rpcli.NewAuthClient(authConn))
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -129,6 +147,11 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		userRouterGroup.POST("/add_notification_account", u.AddNotificationAccount)
 		userRouterGroup.POST("/update_notification_account", u.UpdateNotificationAccountInfo)
 		userRouterGroup.POST("/search_notification_account", u.SearchNotificationAccount)
+
+		// 全局黑名单管理（仅管理员）
+		userRouterGroup.POST("/add_global_blacklist", bl.AddGlobalBlacklist)
+		userRouterGroup.POST("/remove_global_blacklist", bl.RemoveGlobalBlacklist)
+		userRouterGroup.POST("/get_global_blacklist", bl.GetGlobalBlacklist)
 	}
 	// friend routing group
 	{
@@ -193,6 +216,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		groupRouterGroup.POST("/get_full_group_member_user_ids", g.GetFullGroupMemberUserIDs)
 		groupRouterGroup.POST("/get_full_join_group_ids", g.GetFullJoinGroupIDs)
 		groupRouterGroup.POST("/get_group_application_unhandled_count", g.GetGroupApplicationUnhandledCount)
+		groupRouterGroup.POST("/get_common_groups_with_friend", g.GetCommonGroupsWithFriend)
 	}
 	// certificate
 	{

@@ -2,6 +2,8 @@ module github.com/openimsdk/open-im-server/v3
 
 go 1.25.0
 
+replace github.com/openimsdk/protocol => ./protocol
+
 require (
 	firebase.google.com/go/v4 v4.14.1
 	github.com/dtm-labs/rockscache v0.1.1

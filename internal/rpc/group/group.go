@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"math/big"
 	"math/rand"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -356,6 +357,68 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbgroup.GetJo
 		return convert.Db2PbGroupInfo(group, userID, groupMemberNum[group.GroupID])
 	})
 	return &resp, nil
+}
+
+func (g *groupServer) GetCommonGroupsWithFriend(ctx context.Context, req *pbgroup.GetCommonGroupsWithFriendReq) (*pbgroup.GetCommonGroupsWithFriendResp, error) {
+	if req.FriendUserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("friendUserID empty")
+	}
+	opUserID := mcontext.GetOpUserID(ctx)
+	if opUserID == "" {
+		return nil, errs.ErrNoPermission.WrapMsg("op user id empty")
+	}
+
+	selfGroupIDs, err := g.db.FindJoinGroupID(ctx, opUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(selfGroupIDs) == 0 {
+		return &pbgroup.GetCommonGroupsWithFriendResp{
+			Total:  0,
+			Groups: []*sdkws.GroupInfo{},
+		}, nil
+	}
+
+	friendMembers, err := g.db.FindGroupMemberUser(ctx, selfGroupIDs, req.FriendUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(friendMembers) == 0 {
+		return &pbgroup.GetCommonGroupsWithFriendResp{
+			Total:  0,
+			Groups: []*sdkws.GroupInfo{},
+		}, nil
+	}
+
+	commonGroupIDs := datautil.Distinct(datautil.Slice(friendMembers, func(e *model.GroupMember) string {
+		return e.GroupID
+	}))
+
+	groups, err := g.getGroupsInfo(ctx, commonGroupIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	// Keep response deterministic by sorting common groups with member count descending.
+	sort.SliceStable(groups, func(i, j int) bool {
+		return groups[i].MemberCount > groups[j].MemberCount
+	})
+	total := len(groups)
+
+	limit := g.config.RpcConfig.CommonGroupsLimitWithFriend
+	if limit <= 0 {
+		limit = 3
+	}
+	if len(groups) > limit {
+		groups = groups[:limit]
+	}
+
+	return &pbgroup.GetCommonGroupsWithFriendResp{
+		Total:  uint32(total),
+		Groups: groups,
+	}, nil
 }
 
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.InviteUserToGroupReq) (*pbgroup.InviteUserToGroupResp, error) {

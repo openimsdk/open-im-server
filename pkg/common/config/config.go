@@ -290,6 +290,7 @@ type Group struct {
 	} `mapstructure:"rpc"`
 	Prometheus                 Prometheus `mapstructure:"prometheus"`
 	EnableHistoryForNewMembers bool       `mapstructure:"enableHistoryForNewMembers"`
+	CommonGroupsLimitWithFriend int       `mapstructure:"commonGroupsLimitWithFriend"`
 }
 
 type Msg struct {

@@ -2,6 +2,7 @@ package rpcli
 
 import (
 	"context"
+
 	"github.com/openimsdk/protocol/auth"
 	"google.golang.org/grpc"
 )
@@ -27,4 +28,8 @@ func (x *AuthClient) InvalidateToken(ctx context.Context, req *auth.InvalidateTo
 
 func (x *AuthClient) ParseToken(ctx context.Context, token string) (*auth.ParseTokenResp, error) {
 	return x.AuthClient.ParseToken(ctx, &auth.ParseTokenReq{Token: token})
+}
+
+func (x *AuthClient) ForceLogout(ctx context.Context, userID string, platformID int32) error {
+	return ignoreResp(x.AuthClient.ForceLogout(ctx, &auth.ForceLogoutReq{UserID: userID, PlatformID: platformID}))
 }
