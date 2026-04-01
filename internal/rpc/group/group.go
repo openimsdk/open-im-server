@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"math/big"
 	"math/rand"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -371,6 +372,7 @@ func (g *groupServer) GetCommonGroupsWithFriend(ctx context.Context, req *pbgrou
 	if err != nil {
 		return nil, err
 	}
+
 	if len(selfGroupIDs) == 0 {
 		return &pbgroup.GetCommonGroupsWithFriendResp{
 			Total:  0,
@@ -382,6 +384,7 @@ func (g *groupServer) GetCommonGroupsWithFriend(ctx context.Context, req *pbgrou
 	if err != nil {
 		return nil, err
 	}
+
 	if len(friendMembers) == 0 {
 		return &pbgroup.GetCommonGroupsWithFriendResp{
 			Total:  0,
@@ -392,12 +395,28 @@ func (g *groupServer) GetCommonGroupsWithFriend(ctx context.Context, req *pbgrou
 	commonGroupIDs := datautil.Distinct(datautil.Slice(friendMembers, func(e *model.GroupMember) string {
 		return e.GroupID
 	}))
+
 	groups, err := g.getGroupsInfo(ctx, commonGroupIDs)
 	if err != nil {
 		return nil, err
 	}
+
+	// Keep response deterministic by sorting common groups with member count descending.
+	sort.SliceStable(groups, func(i, j int) bool {
+		return groups[i].MemberCount > groups[j].MemberCount
+	})
+	total := len(groups)
+
+	limit := g.config.RpcConfig.CommonGroupsLimitWithFriend
+	if limit <= 0 {
+		limit = 3
+	}
+	if len(groups) > limit {
+		groups = groups[:limit]
+	}
+
 	return &pbgroup.GetCommonGroupsWithFriendResp{
-		Total:  uint32(len(groups)),
+		Total:  uint32(total),
 		Groups: groups,
 	}, nil
 }

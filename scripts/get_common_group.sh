@@ -3,9 +3,9 @@ set -euo pipefail
 
 # ====== 按需修改 ======
 API_BASE="${API_BASE:-http://127.0.0.1:10002}"   # 你的 open-im-api 地址
-SELF_USER_ID="${SELF_USER_ID:-4642714021}"           # 当前登录用户（拿 token 的用户）
+SELF_USER_ID="${SELF_USER_ID:-5694418935}"           # 当前登录用户（拿 token 的用户）
 #FRIEND_USER_ID="${FRIEND_USER_ID:-1971806090}"       # 要查询共同群的好友
-FRIEND_USER_ID="${FRIEND_USER_ID:-3870738564}"       # 要查询共同群的好友
+FRIEND_USER_ID="${FRIEND_USER_ID:-1011009748}"       # 要查询共同群的好友
 PLATFORM_ID="${PLATFORM_ID:-2}"                  # 1=iOS, 2=Android, 3=Windows...
 ADMIN_USER_ID="${ADMIN_USER_ID:-imAdmin}"        # 管理员账号（用于签发用户 token）
 ADMIN_SECRET="${ADMIN_SECRET:-openIM123}"                 # 配置中的 share.secret
