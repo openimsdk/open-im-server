@@ -95,13 +95,17 @@ func NewServer(longConnServer LongConnServer, conf *Config, ready func(srv *Serv
 }
 
 func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUsersOnlineStatusReq) (*msggateway.GetUsersOnlineStatusResp, error) {
-	if !authverify.IsAppManagerUid(ctx, s.config.Share.IMAdminUserID) {
+	opUserID := mcontext.GetOpUserID(ctx)
+	isSelfQuery := len(req.UserIDs) == 1 && opUserID != "" && req.UserIDs[0] == opUserID
+	if !authverify.IsAppManagerUid(ctx, s.config.Share.IMAdminUserID) && !isSelfQuery {
 		return nil, errs.ErrNoPermission.WrapMsg("only app manager")
 	}
+	log.ZDebug(ctx, "GetUsersOnlineStatus", "userIDs", req.UserIDs)
 	var resp msggateway.GetUsersOnlineStatusResp
 	for _, userID := range req.UserIDs {
 		clients, ok := s.LongConnServer.GetUserAllCons(userID)
-		if !ok {
+		if !ok || len(clients) == 0 {
+			log.ZWarn(ctx, "get users online status failed", errs.ErrRecordNotFound.WrapMsg("get client failed"), "userID", userID)
 			continue
 		}
 
@@ -109,6 +113,7 @@ func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUs
 		uresp.UserID = userID
 		for _, client := range clients {
 			if client == nil {
+				log.ZWarn(ctx, "get users online status failed", errs.ErrRecordNotFound.WrapMsg("user client is nil"), "userID", userID)
 				continue
 			}
 
@@ -117,11 +122,17 @@ func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUs
 			ps.ConnID = client.ctx.GetConnID()
 			ps.Token = client.token
 			ps.IsBackground = client.IsBackground
+			ps.LoginTime = client.LoginTimestamp
+			ps.DeviceName = client.DeviceName
+			ps.DeviceModel = client.DeviceModel
+			ps.SdkVersion = client.SDKVersion
 			uresp.Status = constant.Online
 			uresp.DetailPlatformStatus = append(uresp.DetailPlatformStatus, ps)
 		}
 		if uresp.Status == constant.Online {
 			resp.SuccessResult = append(resp.SuccessResult, uresp)
+		} else {
+			log.ZWarn(ctx, "get users online status failed", errs.ErrRecordNotFound.WrapMsg("user not online"), "userID", userID)
 		}
 	}
 	return &resp, nil

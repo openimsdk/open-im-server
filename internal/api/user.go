@@ -33,6 +33,16 @@ type UserApi struct {
 	config config.RpcRegisterName
 }
 
+type GetSelfLoginPlatformsResp struct {
+	PlatformID   int32  `json:"platformID"`
+	ConnID       string `json:"connID"`
+	IsBackground bool   `json:"isBackground"`
+	LoginTime    int64  `json:"loginTime"`
+	DeviceName   string `json:"deviceName"`
+	DeviceModel  string `json:"deviceModel"`
+	SDKVersion   string `json:"sdkVersion"`
+}
+
 func NewUserApi(client user.UserClient, discov discovery.SvcDiscoveryRegistry, config config.RpcRegisterName) UserApi {
 	return UserApi{Client: client, discov: discov, config: config}
 }
@@ -189,6 +199,59 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 	}
 
 	apiresp.GinSuccess(c, respResult)
+}
+
+// GetSelfLoginPlatforms Get online terminals for current user.
+func (u *UserApi) GetSelfLoginPlatforms(c *gin.Context) {
+	opUserID, ok := c.Get(constant.OpUserID)
+	if !ok {
+		apiresp.GinError(c, errs.ErrNoPermission.WrapMsg("operator user id not found"))
+		return
+	}
+	userID, _ := opUserID.(string)
+	if userID == "" {
+		apiresp.GinError(c, errs.ErrNoPermission.WrapMsg("operator user id is empty"))
+		return
+	}
+	req := msggateway.GetUsersOnlineStatusReq{
+		UserIDs: []string{userID},
+	}
+	conns, err := u.discov.GetConns(c, u.config.MessageGateway)
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+	log.ZDebug(c, "GetSelfLoginPlatforms", "userID", userID)
+	result := make([]*GetSelfLoginPlatformsResp, 0, 8)
+	for _, v := range conns {
+		msgClient := msggateway.NewMsgGatewayClient(v)
+		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
+		if err != nil {
+			log.ZWarn(c, "GetUsersOnlineStatus rpc err", err)
+			continue
+		}
+
+		log.ZDebug(c, "GetSelfLoginPlatforms", "userID", userID, "reply", reply.SuccessResult)
+
+		for _, r := range reply.SuccessResult {
+			if r.UserID != userID || r.Status != constant.Online {
+				log.ZDebug(c, "GetUsersOnlineStatus result not match", "userID", r.UserID, "status", r.Status)
+				continue
+			}
+			for _, detail := range r.DetailPlatformStatus {
+				result = append(result, &GetSelfLoginPlatformsResp{
+					PlatformID:   detail.PlatformID,
+					ConnID:       detail.ConnID,
+					IsBackground: detail.IsBackground,
+					LoginTime:    detail.LoginTime,
+					DeviceName:   detail.DeviceName,
+					DeviceModel:  detail.DeviceModel,
+					SDKVersion:   detail.SdkVersion,
+				})
+			}
+		}
+	}
+	apiresp.GinSuccess(c, result)
 }
 
 // SubscriberStatus Presence status of subscribed users.
