@@ -251,6 +251,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		return nil, errs.ErrArgs.WrapMsg("conversation must not be nil")
 	}
 
+	log.ZDebug(ctx, "SetConversations", "conversation", req.Conversation)
 	if req.Conversation.ConversationType == constant.WriteGroupChatType {
 		groupInfo, err := c.groupClient.GetGroupInfo(ctx, req.Conversation.GroupID)
 		if err != nil {
@@ -376,6 +377,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			needUpdateUsersList = append(needUpdateUsersList, userID)
 		}
 	}
+	log.ZDebug(ctx, "SetConversations", "m", m, "conversation", conversation, "needUpdateUsersList", needUpdateUsersList)
 	if len(m) != 0 && len(needUpdateUsersList) != 0 {
 		if err := c.conversationDatabase.SetUsersConversationFieldTx(ctx, needUpdateUsersList, &conversation, m); err != nil {
 			return nil, err

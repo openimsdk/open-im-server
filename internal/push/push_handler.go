@@ -138,7 +138,7 @@ func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim s
 	}
 	c.onlineCache.Lock.Unlock()
 	ctx := mcontext.SetOperationID(context.TODO(), strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10))
-	log.ZInfo(ctx, "begin consume messages")
+	log.ZDebug(ctx, "ConsumeClaim", "begin consume messages")
 
 	for msg := range claim.Messages() {
 		ctx := c.pushConsumerGroup.GetContextFromMsg(msg)

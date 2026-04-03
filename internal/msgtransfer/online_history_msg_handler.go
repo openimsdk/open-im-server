@@ -257,9 +257,12 @@ func (och *OnlineHistoryRedisConsumerHandler) categorizeMessageLists(totalMsgs [
 }
 
 func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key, conversationID string, storageList, notStorageList []*ContextMsg) {
-	log.ZInfo(ctx, "handle storage msg")
+	log.ZDebug(ctx, "handleMsg", "conversationID", conversationID, "storageList", len(storageList), "notStorageList", len(notStorageList))
 	for _, storageMsg := range storageList {
-		log.ZDebug(ctx, "handle storage msg", "msg", storageMsg.message.String())
+		log.ZDebug(ctx, "handleMsg", "storage msg", storageMsg.message.String())
+	}
+	for _, notStorageMsg := range notStorageList {
+		log.ZDebug(ctx, "handleMsg", "not storage msg", notStorageMsg.message.String())
 	}
 
 	och.toPushTopic(ctx, key, conversationID, notStorageList)
@@ -274,7 +277,9 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 			log.ZWarn(ctx, "batch data insert to redis err", err, "storageMsgList", storageMessageList)
 			return
 		}
-		log.ZInfo(ctx, "BatchInsertChat2Cache end")
+
+		log.ZDebug(ctx, "handleMsg", "BatchInsertChat2Cache", "lastSeq", lastSeq, "isNewConversation", isNewConversation, "userSeqMap", userSeqMap)
+
 		err = och.msgTransferDatabase.SetHasReadSeqs(ctx, conversationID, userSeqMap)
 		if err != nil {
 			log.ZWarn(ctx, "SetHasReadSeqs error", err, "userSeqMap", userSeqMap, "conversationID", conversationID)
@@ -297,7 +302,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 					log.ZWarn(ctx, "get group member ids error", err, "conversationID",
 						conversationID)
 				} else {
-					log.ZInfo(ctx, "GetGroupMemberIDs end")
+					log.ZDebug(ctx, "handleMsg", "GetGroupMemberIDs", "userIDs", userIDs)
 
 					if err := och.conversationClient.CreateGroupChatConversations(ctx, msg.GroupID, userIDs); err != nil {
 						log.ZWarn(ctx, "single chat first create conversation error", err,
@@ -315,22 +320,22 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key
 					log.ZWarn(ctx, "single chat or notification first create conversation error", err,
 						"conversationID", conversationID, "sessionType", msg.SessionType)
 				}
+				log.ZDebug(ctx, "handleMsg", "CreateSingleChatConversations", "conversationID", conversationID, "sessionType", msg.SessionType, "recv", msg.RecvID, "send", msg.SendID)
 			default:
 				log.ZWarn(ctx, "unknown session type", nil, "sessionType",
 					msg.SessionType)
 			}
 		}
 
-		log.ZInfo(ctx, "success incr to next topic")
 		err = och.msgTransferDatabase.MsgToMongoMQ(ctx, key, conversationID, storageMessageList, lastSeq)
 		if err != nil {
 			log.ZError(ctx, "Msg To MongoDB MQ error", err, "conversationID",
 				conversationID, "storageList", storageMessageList, "lastSeq", lastSeq)
 		}
-		log.ZInfo(ctx, "MsgToMongoMQ end")
+		log.ZDebug(ctx, "handleMsg", "MsgToMongoMQ", "conversationID", conversationID, "storageList", len(storageList), "lastSeq", lastSeq, "key", key)
 
 		och.toPushTopic(ctx, key, conversationID, storageList)
-		log.ZInfo(ctx, "toPushTopic end")
+		log.ZDebug(ctx, "handleMsg", "toPushTopic", "conversationID", conversationID, "storageList", len(storageList), "key", key)
 	}
 }
 
