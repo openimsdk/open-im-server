@@ -28,6 +28,9 @@ const (
 	BackgroundStatus        = "isBackground"
 	SendResponse            = "isMsgResp"
 	SDKType                 = "sdkType"
+	DeviceName              = "deviceName"
+	DeviceModel             = "deviceModel"
+	SDKVersion              = "sdkVersion"
 )
 
 const (

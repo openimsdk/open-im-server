@@ -68,6 +68,10 @@ type Client struct {
 	UserID         string `json:"userID"`
 	IsBackground   bool   `json:"isBackground"`
 	SDKType        string `json:"sdkType"`
+	SDKVersion     string `json:"sdkVersion"`
+	DeviceName     string `json:"deviceName"`
+	DeviceModel    string `json:"deviceModel"`
+	LoginTimestamp int64  `json:"loginTimestamp"`
 	Encoder        Encoder
 	ctx            *UserConnContext
 	longConnServer LongConnServer
@@ -95,6 +99,10 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn ClientConn, longConnServ
 	c.closedErr = nil
 	c.token = ctx.GetToken()
 	c.SDKType = ctx.GetSDKType()
+	c.SDKVersion = ctx.GetSDKVersion()
+	c.DeviceName = ctx.GetDeviceName()
+	c.DeviceModel = ctx.GetDeviceModel()
+	c.LoginTimestamp = time.Now().Unix()
 	c.hbCtx, c.hbCancel = context.WithCancel(c.ctx)
 	c.subLock = new(sync.Mutex)
 	if c.subUserIDs != nil {

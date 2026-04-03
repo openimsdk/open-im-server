@@ -38,6 +38,9 @@ type UserConnContextInfo struct {
 	SDKType      string `json:"sdkType"`
 	SendResponse bool   `json:"sendResponse"`
 	Background   bool   `json:"background"`
+	DeviceName   string `json:"deviceName"`
+	DeviceModel  string `json:"deviceModel"`
+	SDKVersion   string `json:"sdkVersion"`
 }
 
 type UserConnContext struct {
@@ -117,6 +120,9 @@ func (c *UserConnContext) parseByQuery(query url.Values, header http.Header) err
 		OperationID: query.Get(OperationID),
 		Compression: query.Get(Compression),
 		SDKType:     query.Get(SDKType),
+		DeviceName:  query.Get(DeviceName),
+		DeviceModel: query.Get(DeviceModel),
+		SDKVersion:  query.Get(SDKVersion),
 	}
 	platformID, err := strconv.Atoi(query.Get(PlatformID))
 	if err != nil {
@@ -259,4 +265,25 @@ func (c *UserConnContext) SetToken(token string) {
 
 func (c *UserConnContext) GetBackground() bool {
 	return c != nil && c.info != nil && c.info.Background
+}
+
+func (c *UserConnContext) GetDeviceName() string {
+	if c == nil || c.info == nil {
+		return ""
+	}
+	return c.info.DeviceName
+}
+
+func (c *UserConnContext) GetDeviceModel() string {
+	if c == nil || c.info == nil {
+		return ""
+	}
+	return c.info.DeviceModel
+}
+
+func (c *UserConnContext) GetSDKVersion() string {
+	if c == nil || c.info == nil {
+		return ""
+	}
+	return c.info.SDKVersion
 }

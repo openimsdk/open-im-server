@@ -134,6 +134,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		userRouterGroup.POST("/get_users", u.GetUsers)
 		userRouterGroup.POST("/get_users_online_status", u.GetUsersOnlineStatus)
 		userRouterGroup.POST("/get_users_online_token_detail", u.GetUsersOnlineTokenDetail)
+		userRouterGroup.POST("/get_self_login_platforms", u.GetSelfLoginPlatforms)
 		userRouterGroup.POST("/subscribe_users_status", u.SubscriberStatus)
 		userRouterGroup.POST("/get_users_status", u.GetUserStatus)
 		userRouterGroup.POST("/get_subscribe_users_status", u.GetSubscribeUsersStatus)
