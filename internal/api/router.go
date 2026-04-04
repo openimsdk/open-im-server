@@ -369,4 +369,5 @@ func GinParseToken(authClient *rpcli.AuthClient) gin.HandlerFunc {
 var Whitelist = []string{
 	"/auth/get_admin_token",
 	"/auth/parse_token",
+	"/captcha",
 }
