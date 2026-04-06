@@ -17,8 +17,9 @@ package msggateway
 import (
 	"context"
 	"encoding/json"
-	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	"sync"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/protobuf/proto"
@@ -28,6 +29,7 @@ import (
 	"github.com/openimsdk/protocol/rtc"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/jsonutil"
 )
 
@@ -176,17 +178,28 @@ func (g *GrpcHandler) SendMessage(ctx context.Context, data *Req) ([]byte, error
 }
 
 func (g *GrpcHandler) SendSignalMessage(ctx context.Context, data *Req) ([]byte, error) {
-	var req rtc.SignalMessageAssembleReq
-	if err := proto.Unmarshal(data.Data, &req); err != nil {
-		return nil, errs.WrapMsg(err, "SendSignalMessage: error unmarshaling request", "action", "unmarshal", "dataType", "SignalMessageAssembleReq")
+	// SDK 长连接发送的是 proto.Marshal(SignalReq)；HTTP/gRPC 侧使用 SignalMessageAssembleReq 包装。
+	var assembleReq rtc.SignalMessageAssembleReq
+	if err := proto.Unmarshal(data.Data, &assembleReq); err != nil || assembleReq.SignalReq == nil {
+		var signalReq rtc.SignalReq
+		if err2 := proto.Unmarshal(data.Data, &signalReq); err2 != nil {
+			log.ZError(ctx, "SendSignalMessage", err2, "r", err2.Error())
+			return nil, errs.WrapMsg(err2, "SendSignalMessage: error unmarshaling request", "action", "unmarshal", "dataType", "SignalReq")
+		}
+		assembleReq.SignalReq = &signalReq
 	}
-	resp, err := g.rtcClient.RtcServiceClient.SignalMessageAssemble(ctx, &req)
+	resp, err := g.rtcClient.RtcServiceClient.SignalMessageAssemble(ctx, &assembleReq)
 	if err != nil {
+		log.ZError(ctx, "SendSignalMessage", err, "r", err.Error())
 		return nil, err
 	}
-	c, err := proto.Marshal(resp)
+	if resp == nil || resp.SignalResp == nil {
+		return nil, errs.WrapMsg(errs.ErrInternalServer.WrapMsg("empty signal response"), "SendSignalMessage")
+	}
+	c, err := proto.Marshal(resp.SignalResp)
 	if err != nil {
-		return nil, errs.WrapMsg(err, "SendSignalMessage: error marshaling response", "action", "marshal", "dataType", "SignalMessageAssembleResp")
+		log.ZError(ctx, "SendSignalMessage", err, "r", err.Error())
+		return nil, errs.WrapMsg(err, "SendSignalMessage: error marshaling response", "action", "marshal", "dataType", "SignalResp")
 	}
 	return c, nil
 }

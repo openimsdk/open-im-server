@@ -47,6 +47,7 @@ func (s *rtcServer) SignalMessageAssemble(ctx context.Context, req *rtc.SignalMe
 	)
 	switch payload := req.SignalReq.Payload.(type) {
 	case *rtc.SignalReq_Invite:
+		log.ZDebug(ctx, "SignalMessageAssemble", "handleInvite", "payload", payload)
 		r, err := s.handleInvite(ctx, payload.Invite, req.SignalReq)
 		resp.Payload = &rtc.SignalResp_Invite{Invite: r}
 		respErr = err
@@ -75,9 +76,11 @@ func (s *rtcServer) SignalMessageAssemble(ctx context.Context, req *rtc.SignalMe
 		resp.Payload = &rtc.SignalResp_GetTokenByRoomID{GetTokenByRoomID: r}
 		respErr = err
 	default:
+		log.ZError(ctx, "SignalMessageAssemble", respErr, "r", respErr.Error())
 		return nil, errs.ErrArgs.WrapMsg("unknown signal payload type")
 	}
 	if respErr != nil {
+		log.ZError(ctx, "SignalMessageAssemble", respErr, "r", respErr.Error())
 		return nil, respErr
 	}
 	return &rtc.SignalMessageAssembleResp{SignalResp: &resp}, nil
@@ -87,6 +90,7 @@ func (s *rtcServer) SignalMessageAssemble(ctx context.Context, req *rtc.SignalMe
 func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, signalReq *rtc.SignalReq) (*rtc.SignalInviteResp, error) {
 	inv := req.Invitation
 	if inv == nil {
+		log.ZError(ctx, "handleInvite", errs.ErrArgs, "r", "invitation is nil")
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
 	}
 	if inv.RoomID == "" {
@@ -96,11 +100,13 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 	inv.InitiateTime = time.Now().UnixMilli()
 
 	if _, err := s.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{Name: inv.RoomID}); err != nil {
+		log.ZError(ctx, "handleInvite", err, "r", err.Error())
 		return nil, errs.WrapMsg(err, "LiveKit CreateRoom failed", "roomID", inv.RoomID)
 	}
 
 	token, err := s.genToken(inv.RoomID, req.UserID)
 	if err != nil {
+		log.ZError(ctx, "handleInvite", err, "r", err.Error())
 		return nil, err
 	}
 
@@ -115,6 +121,7 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 		}
 	}
 
+	log.ZDebug(ctx, "handleInvite", "token", token, "roomID", inv.RoomID, "liveURL", s.config.RpcConfig.LiveKit.ExternalAddress)
 	return &rtc.SignalInviteResp{
 		Token:   token,
 		RoomID:  inv.RoomID,
