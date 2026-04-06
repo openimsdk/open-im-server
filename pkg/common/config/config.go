@@ -421,6 +421,7 @@ type RpcRegisterName struct {
 	Conversation   string `mapstructure:"conversation"`
 	Third          string `mapstructure:"third"`
 	Captcha        string `mapstructure:"captcha"`
+	Rtc            string `mapstructure:"rtc"`
 }
 
 func (r *RpcRegisterName) GetServiceNames() []string {
@@ -435,8 +436,29 @@ func (r *RpcRegisterName) GetServiceNames() []string {
 		r.Conversation,
 		r.Third,
 		r.Captcha,
+		r.Rtc,
 	}
 }
+
+type LiveKit struct {
+	InternalAddress string `mapstructure:"internalAddress"`
+	ExternalAddress string `mapstructure:"externalAddress"`
+	APIKey          string `mapstructure:"apiKey"`
+	APISecret       string `mapstructure:"apiSecret"`
+	TokenExpiry     int    `mapstructure:"tokenExpiry"`
+}
+
+type Rtc struct {
+	RPC struct {
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
+	LiveKit    LiveKit    `mapstructure:"liveKit"`
+}
+
 
 // FullConfig stores all configurations for before and after events
 type Webhooks struct {
@@ -647,6 +669,7 @@ var (
 	OpenIMRPCMsgCfgFileName          = "openim-rpc-msg.yml"
 	OpenIMRPCThirdCfgFileName        = "openim-rpc-third.yml"
 	OpenIMRPCUserCfgFileName         = "openim-rpc-user.yml"
+	OpenIMRPCRtcCfgFileName          = "openim-rpc-rtc.yml"
 	RedisConfigFileName              = "redis.yml"
 	ShareFileName                    = "share.yml"
 	WebhooksConfigFileName           = "webhooks.yml"
@@ -730,6 +753,10 @@ func (t *Third) GetConfigFileName() string {
 
 func (u *User) GetConfigFileName() string {
 	return OpenIMRPCUserCfgFileName
+}
+
+func (r *Rtc) GetConfigFileName() string {
+	return OpenIMRPCRtcCfgFileName
 }
 
 func (r *Redis) GetConfigFileName() string {

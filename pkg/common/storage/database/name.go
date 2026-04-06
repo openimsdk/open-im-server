@@ -18,4 +18,6 @@ const (
 	SeqConversationName     = "seq"
 	SeqUserName             = "seq_user"
 	UserGlobalBlackName     = "user_global_black_list"
+	SignalInvitationName    = "signal_invitation"
+	SignalRecordName        = "signal_record"
 )

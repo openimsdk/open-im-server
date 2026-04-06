@@ -8,6 +8,10 @@ components
 out-test
 Dockerfile.cross
 
+### macOS / 本地工具（不入索引）###
+.DS_Store
+.playwright-mcp/
+
 ### 构建产物 ###
 tmp/
 bin/

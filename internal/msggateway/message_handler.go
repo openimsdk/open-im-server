@@ -25,6 +25,7 @@ import (
 
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/push"
+	"github.com/openimsdk/protocol/rtc"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/jsonutil"
@@ -117,13 +118,15 @@ type GrpcHandler struct {
 	validate   *validator.Validate
 	msgClient  *rpcli.MsgClient
 	pushClient *rpcli.PushMsgServiceClient
+	rtcClient  *rpcli.RtcServiceClient
 }
 
-func NewGrpcHandler(validate *validator.Validate, msgClient *rpcli.MsgClient, pushClient *rpcli.PushMsgServiceClient) *GrpcHandler {
+func NewGrpcHandler(validate *validator.Validate, msgClient *rpcli.MsgClient, pushClient *rpcli.PushMsgServiceClient, rtcClient *rpcli.RtcServiceClient) *GrpcHandler {
 	return &GrpcHandler{
 		validate:   validate,
 		msgClient:  msgClient,
 		pushClient: pushClient,
+		rtcClient:  rtcClient,
 	}
 }
 
@@ -173,13 +176,17 @@ func (g *GrpcHandler) SendMessage(ctx context.Context, data *Req) ([]byte, error
 }
 
 func (g *GrpcHandler) SendSignalMessage(ctx context.Context, data *Req) ([]byte, error) {
-	resp, err := g.msgClient.MsgClient.SendMsg(ctx, nil)
+	var req rtc.SignalMessageAssembleReq
+	if err := proto.Unmarshal(data.Data, &req); err != nil {
+		return nil, errs.WrapMsg(err, "SendSignalMessage: error unmarshaling request", "action", "unmarshal", "dataType", "SignalMessageAssembleReq")
+	}
+	resp, err := g.rtcClient.RtcServiceClient.SignalMessageAssemble(ctx, &req)
 	if err != nil {
 		return nil, err
 	}
 	c, err := proto.Marshal(resp)
 	if err != nil {
-		return nil, errs.WrapMsg(err, "error marshaling response", "action", "marshal", "dataType", "SendMsgResp")
+		return nil, errs.WrapMsg(err, "SendSignalMessage: error marshaling response", "action", "marshal", "dataType", "SignalMessageAssembleResp")
 	}
 	return c, nil
 }

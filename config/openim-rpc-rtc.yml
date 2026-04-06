@@ -1,0 +1,31 @@
+rpc:
+  # The IP address where this RPC service registers itself; if left blank, it defaults to the internal network IP
+  registerIP:
+  # IP address that the RPC service listens on; setting to 0.0.0.0 listens on both internal and external IPs. If left blank, it automatically uses the internal network IP
+  listenIP: 0.0.0.0
+  # autoSetPorts indicates whether to automatically set the ports
+  autoSetPorts: true
+  # List of ports that the RPC service listens on; configuring multiple ports will launch multiple instances.
+  # It will only take effect when autoSetPorts is set to false.
+  ports: [ 10400 ]
+
+prometheus:
+  # Enable or disable Prometheus monitoring
+  enable: true
+  # List of ports that Prometheus listens on; these must match the number of rpc.ports.
+  # It will only take effect when autoSetPorts is set to false.
+  ports: [ 12400 ]
+
+liveKit:
+  # LiveKit server address reachable from the RTC service (internal/backend address)
+  # Example: http://livekit:7880
+  internalAddress: http://localhost:7880
+  # LiveKit server address reachable from clients (external/public address)
+  # Example: wss://livekit.example.com
+  externalAddress: ws://localhost:7880
+  # LiveKit API key (configured in your LiveKit server)
+  apiKey: devkey
+  # LiveKit API secret (configured in your LiveKit server)
+  apiSecret: secret
+  # Token expiry in seconds (default: 3600 = 1 hour)
+  tokenExpiry: 3600
