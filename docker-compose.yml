@@ -163,6 +163,24 @@ services:
     networks:
       - openim
 
+  livekit:
+    image: "${LIVEKIT_IMAGE:-livekit/livekit-server:latest}"
+    container_name: livekit
+    restart: always
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "50000-50100:50000-50100/udp"
+    volumes:
+      - ./config/livekit.yaml:/etc/livekit.yaml
+    command: --config /etc/livekit.yaml --node-ip=0.0.0.0
+    depends_on:
+      - redis
+    environment:
+      TZ: Asia/Shanghai
+    networks:
+      - openim
+
   minio:
     image: "${MINIO_IMAGE}"
     ports:

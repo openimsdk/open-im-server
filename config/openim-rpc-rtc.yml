@@ -18,14 +18,14 @@ prometheus:
 
 liveKit:
   # LiveKit server address reachable from the RTC service (internal/backend address)
-  # Example: http://livekit:7880
-  internalAddress: http://localhost:7880
+  # When deployed via docker-compose, use the service name 'livekit'
+  internalAddress: http://livekit:7880
   # LiveKit server address reachable from clients (external/public address)
-  # Example: wss://livekit.example.com
-  externalAddress: ws://localhost:7880
+  # Production should use wss://livekit.example.com with TLS
+  externalAddress: ws://192.168.1.91:7880
   # LiveKit API key (configured in your LiveKit server)
   apiKey: devkey
-  # LiveKit API secret (configured in your LiveKit server)
-  apiSecret: secret
+  # LiveKit API secret（须 ≥32 字符，须与 config/livekit.yaml keys 中对应值一致）
+  apiSecret: openim-livekit-default-secret-32chars-min
   # Token expiry in seconds (default: 3600 = 1 hour)
   tokenExpiry: 3600

@@ -32,7 +32,7 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 // SignalMessageAssemble processes a signal request from the WebSocket gateway
@@ -379,8 +379,8 @@ func (s *rtcServer) SignalSendCustomSignal(ctx context.Context, req *rtc.SignalS
 		if uid == opUserID {
 			continue
 		}
-		if err := s.sendSignalingNotification(ctx, opUserID, uid, int32(constant.SingleChatType), nil, content); err != nil {
-			log.ZWarn(ctx, "sendSignalingNotification customSignal failed", err, "to", uid)
+		if err := s.sendCustomSignalNotification(ctx, opUserID, uid, int32(constant.SingleChatType), content); err != nil {
+			log.ZWarn(ctx, "sendCustomSignalNotification failed", err, "to", uid)
 		}
 	}
 	return &rtc.SignalSendCustomSignalResp{}, nil
@@ -462,10 +462,28 @@ func (s *rtcServer) sendSignalingNotification(ctx context.Context, sendID, recvI
 	return err
 }
 
-// marshalSignalReq serialises a SignalReq to JSON bytes using protojson,
-// which correctly handles protobuf oneof fields for client-side parsing.
+// sendCustomSignalNotification sends a CustomSignalNotification (1605) to a user.
+func (s *rtcServer) sendCustomSignalNotification(ctx context.Context, sendID, recvID string, sessionType int32, content []byte) error {
+	now := time.Now().UnixMilli()
+	msgData := &sdkws.MsgData{
+		SendID:      sendID,
+		RecvID:      recvID,
+		SessionType: sessionType,
+		ContentType: int32(constant.CustomSignalNotification),
+		MsgFrom:     int32(constant.SysMsgType),
+		Content:     content,
+		CreateTime:  now,
+		SendTime:    now,
+		ServerMsgID: uuid.New().String(),
+		ClientMsgID: uuid.New().String(),
+		Options:     make(map[string]bool),
+	}
+	_, err := s.msgClient.MsgClient.SendMsg(ctx, &pbmsg.SendMsgReq{MsgData: msgData})
+	return err
+}
+
 func marshalSignalReq(req *rtc.SignalReq) []byte {
-	b, _ := protojson.Marshal(req)
+	b, _ := proto.Marshal(req)
 	return b
 }
 

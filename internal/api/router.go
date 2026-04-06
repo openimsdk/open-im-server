@@ -12,6 +12,7 @@ import (
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/relation"
+	"github.com/openimsdk/protocol/rtc"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/protocol/user"
 
@@ -100,6 +101,10 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		return nil, err
 	}
 	captchaConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Captcha)
+	if err != nil {
+		return nil, err
+	}
+	rtcConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Rtc)
 	if err != nil {
 		return nil, err
 	}
@@ -302,6 +307,20 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	}
 
 	{
+		rc := NewRtcApi(rtc.NewRtcServiceClient(rtcConn))
+		rtcGroup := r.Group("/rtc")
+		rtcGroup.POST("/signal_message_assemble", rc.SignalMessageAssemble)
+		rtcGroup.POST("/signal_get_room_by_group_id", rc.SignalGetRoomByGroupID)
+		rtcGroup.POST("/signal_get_token_by_room_id", rc.SignalGetTokenByRoomID)
+		rtcGroup.POST("/signal_get_rooms", rc.SignalGetRooms)
+		rtcGroup.POST("/get_signal_invitation_info", rc.GetSignalInvitationInfo)
+		rtcGroup.POST("/get_signal_invitation_info_start_app", rc.GetSignalInvitationInfoStartApp)
+		rtcGroup.POST("/signal_send_custom_signal", rc.SignalSendCustomSignal)
+		rtcGroup.POST("/get_signal_invitation_records", rc.GetSignalInvitationRecords)
+		rtcGroup.POST("/delete_signal_records", rc.DeleteSignalRecords)
+	}
+
+	{
 		statisticsGroup := r.Group("/statistics")
 		statisticsGroup.POST("/user/register", u.UserRegisterCount)
 		statisticsGroup.POST("/user/active", m.GetActiveUser)
@@ -330,6 +349,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		proDiscoveryGroup.GET("/push", pd.Push)
 		proDiscoveryGroup.GET("/msg_gateway", pd.MessageGateway)
 		proDiscoveryGroup.GET("/msg_transfer", pd.MessageTransfer)
+		proDiscoveryGroup.GET("/rtc", pd.Rtc)
 	}
 	return r, nil
 }
