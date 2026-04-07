@@ -69,6 +69,10 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	if err != nil {
 		return nil, err
 	}
+	phoneSNDB, err := mgo.NewPhoneSNMongo(mgocli.GetDB())
+	if err != nil {
+		return nil, err
+	}
 	blacklistCtrl := controller.NewUserGlobalBlackDatabase(userGlobalBlackDB)
 
 	authConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Auth)
@@ -122,6 +126,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), config.Share.IMAdminUserID)
 	cp := NewCaptchaApi(pbcaptcha.NewCaptchaClient(captchaConn))
 	bl := NewUserGlobalBlackApi(blacklistCtrl, userDB, config.Share.IMAdminUserID, rpcli.NewAuthClient(authConn))
+	phoneSN := NewPhoneSNApi(phoneSNDB)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -302,6 +307,12 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	}
 
 	{
+		phoneGroup := r.Group("/phone")
+		phoneGroup.POST("/get_sn_info", phoneSN.GetSNInfo)
+		phoneGroup.POST("/set_sn_info", phoneSN.SetSNInfo)
+	}
+
+	{
 		statisticsGroup := r.Group("/statistics")
 		statisticsGroup.POST("/user/register", u.UserRegisterCount)
 		statisticsGroup.POST("/user/active", m.GetActiveUser)
@@ -370,4 +381,5 @@ var Whitelist = []string{
 	"/auth/get_admin_token",
 	"/auth/parse_token",
 	"/captcha",
+	"/phone/get_sn_info",
 }

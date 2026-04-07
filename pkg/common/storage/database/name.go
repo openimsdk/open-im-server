@@ -18,4 +18,5 @@ const (
 	SeqConversationName     = "seq"
 	SeqUserName             = "seq_user"
 	UserGlobalBlackName     = "user_global_black_list"
+	PhoneSNInfoName         = "phone_sn_info"
 )
