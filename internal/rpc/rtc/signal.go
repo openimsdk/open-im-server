@@ -47,7 +47,7 @@ func (s *rtcServer) SignalMessageAssemble(ctx context.Context, req *rtc.SignalMe
 	)
 	switch payload := req.SignalReq.Payload.(type) {
 	case *rtc.SignalReq_Invite:
-		log.ZDebug(ctx, "SignalMessageAssemble", "handleInvite", "payload", payload)
+		log.ZInfo(ctx, "SignalMessageAssemble", "payload", payload.Invite)
 		r, err := s.handleInvite(ctx, payload.Invite, req.SignalReq)
 		resp.Payload = &rtc.SignalResp_Invite{Invite: r}
 		respErr = err
@@ -116,6 +116,7 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 
 	content := marshalSignalReq(signalReq)
 	for _, inviteeID := range inv.InviteeUserIDList {
+		log.ZInfo(ctx, "sendSignalingNotification to invitee", "sendID", req.UserID, "recvID", inviteeID)
 		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, int32(constant.SingleChatType), req.OfflinePushInfo, content); err != nil {
 			log.ZWarn(ctx, "sendSignalingNotification to invitee failed", err, "inviteeID", inviteeID)
 		}
@@ -465,8 +466,15 @@ func (s *rtcServer) sendSignalingNotification(ctx context.Context, sendID, recvI
 	if offlinePush != nil {
 		msgData.OfflinePushInfo = offlinePush
 	}
+
 	_, err := s.msgClient.MsgClient.SendMsg(ctx, &pbmsg.SendMsgReq{MsgData: msgData})
-	return err
+	if err != nil {
+		log.ZError(ctx, "sendSignalingNotification", err, "msgdata", msgData)
+		return err
+	}
+	log.ZInfo(ctx, "sendSignalingNotification", "msgData", msgData)
+
+	return nil
 }
 
 // sendCustomSignalNotification sends a CustomSignalNotification (1605) to a user.

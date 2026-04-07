@@ -17,11 +17,10 @@ prometheus:
   ports: [ 12400 ]
 
 liveKit:
-  # LiveKit server address reachable from the RTC service (internal/backend address)
-  # When deployed via docker-compose, use the service name 'livekit'
-  internalAddress: http://livekit:7880
-  # LiveKit server address reachable from clients (external/public address)
-  # Production should use wss://livekit.example.com with TLS
+  # RTC 进程访问 LiveKit HTTP API（CreateRoom 等）。本机跑 openim-rpc-rtc、LiveKit 映射 7880 时用 127.0.0.1。
+  # 与 livekit 容器同 Docker 网络时用 http://livekit:7880。也可用环境变量 OPENIM_LIVEKIT_INTERNAL_ADDRESS 覆盖。
+  internalAddress: http://127.0.0.1:7880
+  # 下发给客户端的 WebSocket（liveURL）。真机填本机局域网 IP；也可用 OPENIM_LIVEKIT_EXTERNAL_ADDRESS 覆盖。
   externalAddress: ws://192.168.1.91:7880
   # LiveKit API key (configured in your LiveKit server)
   apiKey: devkey

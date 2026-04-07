@@ -2,6 +2,10 @@ module github.com/openimsdk/open-im-server/v3
 
 go 1.25.0
 
+replace github.com/openimsdk/tools => ../tools
+
+replace github.com/openimsdk/protocol => ./protocol
+
 require (
 	firebase.google.com/go/v4 v4.14.1
 	github.com/dtm-labs/rockscache v0.1.1
@@ -272,5 +276,3 @@ require (
 	golang.org/x/crypto v0.48.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
-
-replace github.com/openimsdk/protocol => ./protocol
