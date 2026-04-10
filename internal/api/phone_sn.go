@@ -54,8 +54,13 @@ func (a *PhoneSNApi) GetSNInfo(c *gin.Context) {
 	}
 	info, err := a.db.GetByPhone(c, phone)
 	if err != nil {
-		apiresp.GinError(c, err)
+		if errs.ErrRecordNotFound.Is(err) {
+			apiresp.GinSuccess(c, phoneGetSNInfoResp{IsSnd: false, UserID: 0})
+			log.ZDebug(c, "GetSNInfo", "phone not found", phone)
+			return
+		}
 		log.ZError(c, "GetSNInfo", err)
+		apiresp.GinError(c, err)
 		return
 	}
 	resp := phoneGetSNInfoResp{IsSnd: false, UserID: 0}
