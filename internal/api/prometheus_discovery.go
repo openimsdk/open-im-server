@@ -108,3 +108,7 @@ func (p *PrometheusDiscoveryApi) MessageGateway(c *gin.Context) {
 func (p *PrometheusDiscoveryApi) MessageTransfer(c *gin.Context) {
 	p.discovery(c, prommetrics.MessageTransferKeyName)
 }
+
+func (p *PrometheusDiscoveryApi) Rtc(c *gin.Context) {
+	p.discovery(c, p.config.Share.RpcRegisterName.Rtc)
+}

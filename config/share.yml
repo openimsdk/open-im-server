@@ -10,6 +10,7 @@ rpcRegisterName:
   conversation: conversation
   third: third
   captcha: captcha
+  rtc: rtc
 
 imAdminUserID: [ imAdmin ]
 

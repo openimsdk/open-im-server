@@ -19,4 +19,6 @@ const (
 	SeqUserName             = "seq_user"
 	UserGlobalBlackName     = "user_global_black_list"
 	PhoneSNInfoName         = "phone_sn_info"
+	SignalInvitationName    = "signal_invitation"
+	SignalRecordName        = "signal_record"
 )

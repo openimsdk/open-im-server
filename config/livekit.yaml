@@ -1,0 +1,17 @@
+port: 7880
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 60000
+  use_external_ip: true
+
+redis:
+  address: redis:6379
+  password: openIM123
+
+# LiveKit 要求 API secret 至少 32 字符；生产环境请替换为强随机串并与 openim-rpc-rtc.yml 中 apiSecret 一致
+keys:
+  devkey: openim-livekit-default-secret-32chars-min
+
+logging:
+  level: info

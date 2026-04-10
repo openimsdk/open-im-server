@@ -24,6 +24,10 @@ components
 out-test
 Dockerfile.cross
 
+### macOS / 本地工具 ###
+.DS_Store
+.playwright-mcp/
+
 ### Makefile ###
 tmp/
 bin/
