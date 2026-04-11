@@ -34,12 +34,15 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/constant"
+	conversationpb "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
 )
@@ -54,6 +57,7 @@ type friendServer struct {
 	webhookClient      *webhook.Client
 	queue              *memamq.MemoryQueue
 	userClient         *rpcli.UserClient
+	conversationClient *rpcli.ConversationClient
 }
 
 type Config struct {
@@ -101,6 +105,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
+	if err != nil {
+		return err
+	}
 	userClient := rpcli.NewUserClient(userConn)
 
 	database := controller.NewFriendDatabase(
@@ -131,6 +139,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		webhookClient:      webhook.NewWebhookClient(config.WebhooksConfig.URL),
 		queue:              memamq.NewMemoryQueue(16, 1024*1024),
 		userClient:         userClient,
+		conversationClient: rpcli.NewConversationClient(conversationConn),
 	})
 	return nil
 }
@@ -549,6 +558,22 @@ func (s *friendServer) UpdateFriends(
 		return nil, err
 	}
 
+	if req.IsPinned != nil {
+		for _, friendUserID := range req.FriendUserIDs {
+			convID := conversationutil.GenConversationIDForSingle(req.OwnerUserID, friendUserID)
+			if err := s.conversationClient.SetConversations(ctx, []string{req.OwnerUserID},
+				&conversationpb.ConversationReq{
+					ConversationID:   convID,
+					ConversationType: constant.SingleChatType,
+					UserID:           friendUserID,
+					IsPinned:         req.IsPinned,
+				}); err != nil {
+				log.ZWarn(ctx, "sync conversation isPinned failed", err,
+					"ownerUserID", req.OwnerUserID, "friendUserID", friendUserID)
+			}
+		}
+	}
+
 	resp := &relation.UpdateFriendsResp{}
 
 	s.notificationSender.FriendsInfoUpdateNotification(ctx, req.OwnerUserID, req.FriendUserIDs)
@@ -568,6 +593,17 @@ func (s *friendServer) GetSelfUnhandledApplyCount(ctx context.Context, req *rela
 	return &relation.GetSelfUnhandledApplyCountResp{
 		Count: count,
 	}, nil
+}
+
+func (s *friendServer) GetPinnedFriendIDs(ctx context.Context, req *relation.GetPinnedFriendIDsReq) (*relation.GetPinnedFriendIDsResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	ids, err := s.db.GetPinnedFriendIDs(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return &relation.GetPinnedFriendIDsResp{FriendUserIDs: ids}, nil
 }
 
 func (s *friendServer) getCommonUserMap(ctx context.Context, userIDs []string) (map[string]common_user.CommonUser, error) {

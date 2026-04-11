@@ -118,3 +118,7 @@ func (o *FriendApi) GetFullFriendUserIDs(c *gin.Context) {
 func (o *FriendApi) GetSelfUnhandledApplyCount(c *gin.Context) {
 	a2r.Call(c, relation.FriendClient.GetSelfUnhandledApplyCount, o.Client)
 }
+
+func (o *FriendApi) GetPinnedFriendIDs(c *gin.Context) {
+	a2r.Call(c, relation.FriendClient.GetPinnedFriendIDs, o.Client)
+}

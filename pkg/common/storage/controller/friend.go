@@ -90,6 +90,8 @@ type FriendDatabase interface {
 	OwnerIncrVersion(ctx context.Context, ownerUserID string, friendUserIDs []string, state int32) error
 
 	GetUnhandledCount(ctx context.Context, userID string, ts int64) (int64, error)
+
+	GetPinnedFriendIDs(ctx context.Context, ownerUserID string) ([]string, error)
 }
 
 type friendDatabase struct {
@@ -401,4 +403,8 @@ func (f *friendDatabase) OwnerIncrVersion(ctx context.Context, ownerUserID strin
 
 func (f *friendDatabase) GetUnhandledCount(ctx context.Context, userID string, ts int64) (int64, error) {
 	return f.friendRequest.GetUnhandledCount(ctx, userID, ts)
+}
+
+func (f *friendDatabase) GetPinnedFriendIDs(ctx context.Context, ownerUserID string) ([]string, error) {
+	return f.friend.FindPinnedFriendUserIDs(ctx, ownerUserID)
 }
