@@ -22,6 +22,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/cache/redis"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/webhook"
 	"github.com/openimsdk/protocol/sdkws"
@@ -69,6 +70,7 @@ type msgServer struct {
 	config                 *Config                          // Global configuration settings.
 	webhookClient          *webhook.Client
 	conversationClient     *rpcli.ConversationClient
+	spamReportDB           database.SpamReport
 }
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
@@ -121,6 +123,10 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 	conversationClient := rpcli.NewConversationClient(conversationConn)
+	spamReportDB, err := mgo.NewSpamReportMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	s := &msgServer{
 		MsgDatabase:            msgDatabase,
 		RegisterCenter:         client,
@@ -131,6 +137,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		config:                 config,
 		webhookClient:          webhook.NewWebhookClient(config.WebhooksConfig.URL),
 		conversationClient:     conversationClient,
+		spamReportDB:           spamReportDB,
 	}
 
 	s.notificationSender = notification.NewNotificationSender(&config.NotificationConfig, notification.WithLocalSendMsg(s.SendMsg))

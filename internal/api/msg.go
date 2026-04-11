@@ -379,3 +379,15 @@ func (m *MessageApi) GetStreamMsg(c *gin.Context) {
 func (m *MessageApi) AppendStreamMsg(c *gin.Context) {
 	a2r.Call(c, msg.MsgClient.GetServerTime, m.Client)
 }
+
+func (m *MessageApi) ReportSpam(c *gin.Context) {
+	a2r.Call(c, msg.MsgClient.ReportSpam, m.Client)
+}
+
+func (m *MessageApi) GetSpamReports(c *gin.Context) {
+	a2r.Call(c, msg.MsgClient.GetSpamReports, m.Client)
+}
+
+func (m *MessageApi) HandleSpamReport(c *gin.Context) {
+	a2r.Call(c, msg.MsgClient.HandleSpamReport, m.Client)
+}
