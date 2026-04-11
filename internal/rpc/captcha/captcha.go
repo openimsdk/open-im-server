@@ -83,7 +83,7 @@ func Start(ctx context.Context, cfg *Config, _ discovery.SvcDiscoveryRegistry, g
 		s.conf.ExpireSeconds = 120
 	}
 	if s.conf.VerifyPadding <= 0 {
-		s.conf.VerifyPadding = 8
+		s.conf.VerifyPadding = 32
 	}
 	pbcaptcha.RegisterCaptchaServer(grpcServer, s)
 	return nil
@@ -161,7 +161,7 @@ func (s *server) VerifyCaptcha(ctx context.Context, req *pbcaptcha.VerifyCaptcha
 	}
 	success := slide.Validate(int(req.X), int(req.Y), doc.X, doc.Y, s.conf.VerifyPadding)
 	if !success {
-		log.ZWarn(ctx, "captcha validate failed", nil, "captchaID", req.CaptchaID, "x", req.X, "y", req.Y)
+		log.ZError(ctx, "captcha validate failed", nil, "captchaID", req.CaptchaID, "x", req.X, "y", req.Y, "docX", doc.X, "docY", doc.Y)
 	}
 	return &pbcaptcha.VerifyCaptchaResp{Success: success}, nil
 }
