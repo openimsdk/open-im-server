@@ -62,6 +62,7 @@ type userServer struct {
 	webhookClient            *webhook.Client
 	groupClient              *rpcli.GroupClient
 	relationClient           *rpcli.RelationClient
+	globalBlackDB            controller.UserGlobalBlackDatabase
 }
 
 type Config struct {
@@ -109,6 +110,10 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	msgClient := rpcli.NewMsgClient(msgConn)
 	userCache := redis.NewUserCacheRedis(rdb, &config.LocalCacheConfig, userDB, redis.GetRocksCacheOptions())
 	database := controller.NewUserDatabase(userDB, userCache, mgocli.GetTx())
+	globalBlackMgo, err := mgo.NewUserGlobalBlackMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	u := &userServer{
 		online:                   redis.NewUserOnline(rdb),
@@ -121,6 +126,7 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 
 		groupClient:    rpcli.NewGroupClient(groupConn),
 		relationClient: rpcli.NewRelationClient(friendConn),
+		globalBlackDB:  controller.NewUserGlobalBlackDatabase(globalBlackMgo),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.db.InitOnce(context.Background(), users)
@@ -131,6 +137,16 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 	users, err := s.db.Find(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err
+	}
+
+	if blocked, err := s.globalBlackDB.FindBlocked(ctx, req.UserIDs); err != nil {
+		return nil, err
+	} else if len(blocked) > 0 {
+		bannedIDs := make([]string, 0, len(blocked))
+		for _, b := range blocked {
+			bannedIDs = append(bannedIDs, b.UserID)
+		}
+		return nil, servererrs.ErrUserBlocked.WrapMsg("user is banned", "userIDs", bannedIDs)
 	}
 
 	resp.UsersInfo = convert.UsersDB2Pb(users)

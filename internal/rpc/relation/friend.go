@@ -51,6 +51,7 @@ type friendServer struct {
 	relation.UnimplementedFriendServer
 	db                 controller.FriendDatabase
 	blackDatabase      controller.BlackDatabase
+	globalBlackDB      controller.UserGlobalBlackDatabase
 	notificationSender *FriendNotificationSender
 	RegisterCenter     discovery.SvcDiscoveryRegistry
 	config             *Config
@@ -97,6 +98,11 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 
+	globalBlackMongoDB, err := mgo.NewUserGlobalBlackMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+
 	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
@@ -133,6 +139,7 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 			blackMongoDB,
 			redis.NewBlackCacheRedis(rdb, &config.LocalCacheConfig, blackMongoDB, redis.GetRocksCacheOptions()),
 		),
+		globalBlackDB:      controller.NewUserGlobalBlackDatabase(globalBlackMongoDB),
 		notificationSender: notificationSender,
 		RegisterCenter:     client,
 		config:             config,
@@ -296,6 +303,9 @@ func (s *friendServer) GetFriendInfo(ctx context.Context, req *relation.GetFrien
 	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
+	if err := s.checkUsersNotGlobalBlocked(ctx, req.FriendUserIDs); err != nil {
+		return nil, err
+	}
 	friends, err := s.db.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
 		return nil, err
@@ -311,6 +321,9 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *relation.G
 	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
+	if err := s.checkUsersNotGlobalBlocked(ctx, req.FriendUserIDs); err != nil {
+		return nil, err
+	}
 	friends, err := s.getFriend(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
 		return nil, err
@@ -318,6 +331,25 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *relation.G
 	return &relation.GetDesignatedFriendsResp{
 		FriendsInfo: friends,
 	}, nil
+}
+
+// checkUsersNotGlobalBlocked returns ErrUserBlocked if any of the given userIDs are in the global blacklist.
+func (s *friendServer) checkUsersNotGlobalBlocked(ctx context.Context, userIDs []string) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+	blocked, err := s.globalBlackDB.FindBlocked(ctx, userIDs)
+	if err != nil {
+		return err
+	}
+	if len(blocked) == 0 {
+		return nil
+	}
+	bannedIDs := make([]string, 0, len(blocked))
+	for _, b := range blocked {
+		bannedIDs = append(bannedIDs, b.UserID)
+	}
+	return servererrs.ErrUserBlocked.WrapMsg("user is banned", "userIDs", bannedIDs)
 }
 
 func (s *friendServer) getFriend(ctx context.Context, ownerUserID string, friendUserIDs []string) ([]*sdkws.FriendInfo, error) {

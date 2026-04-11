@@ -16,6 +16,8 @@ type UserGlobalBlackDatabase interface {
 	RemoveBlack(ctx context.Context, userIDs []string) error
 	// IsBlocked 检查用户是否在全局黑名单
 	IsBlocked(ctx context.Context, userID string) (bool, error)
+	// FindBlocked 批量查询哪些 userID 在全局黑名单中，返回被封禁的记录
+	FindBlocked(ctx context.Context, userIDs []string) ([]*model.UserGlobalBlack, error)
 	// GetBlackList 分页获取黑名单列表
 	GetBlackList(ctx context.Context, pagination pagination.Pagination) (count int64, blacks []*model.UserGlobalBlack, err error)
 }
@@ -42,4 +44,8 @@ func (u *userGlobalBlackDatabase) IsBlocked(ctx context.Context, userID string) 
 
 func (u *userGlobalBlackDatabase) GetBlackList(ctx context.Context, pagination pagination.Pagination) (int64, []*model.UserGlobalBlack, error) {
 	return u.db.Page(ctx, pagination)
+}
+
+func (u *userGlobalBlackDatabase) FindBlocked(ctx context.Context, userIDs []string) ([]*model.UserGlobalBlack, error) {
+	return u.db.Find(ctx, userIDs)
 }
