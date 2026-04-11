@@ -80,6 +80,9 @@ func FriendsDB2Pb(ctx context.Context, friendsDB []*model.Friend, getUsers func(
 		friendPb.FriendUser.Ex = users[friend.FriendUserID].Ex
 		friendPb.CreateTime = friend.CreateTime.Unix()
 		friendPb.IsPinned = friend.IsPinned
+		friendPb.IsMute = friend.IsMuted
+		friendPb.MuteDuration = friend.MuteDuration
+		friendPb.MuteEndTime = friend.MuteEndTime
 		friendsPb = append(friendsPb, friendPb)
 	}
 	return friendsPb, nil
@@ -96,6 +99,9 @@ func FriendOnlyDB2PbOnly(friendsDB []*model.Friend) []*relation.FriendInfoOnly {
 			OperatorUserID: f.OperatorUserID,
 			Ex:             f.Ex,
 			IsPinned:       f.IsPinned,
+			IsMute:         f.IsMuted,
+			MuteDuration:   f.MuteDuration,
+			MuteEndTime:    f.MuteEndTime,
 		}
 	})
 }

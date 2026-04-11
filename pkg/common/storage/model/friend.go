@@ -30,4 +30,7 @@ type Friend struct {
 	OperatorUserID string             `bson:"operator_user_id"`
 	Ex             string             `bson:"ex"`
 	IsPinned       bool               `bson:"is_pinned"`
+	IsMuted        bool               `bson:"is_muted"`
+	MuteDuration   int64              `bson:"mute_duration"` // 单位：秒
+	MuteEndTime    int64              `bson:"mute_end_time"` // Unix 毫秒时间戳，0 表示永久
 }

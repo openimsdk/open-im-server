@@ -39,6 +39,7 @@ import (
 	conversationpb "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/protocol/wrapperspb"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
@@ -531,6 +532,9 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *relatio
 				OperatorUserID: friend.OperatorUserID,
 				Ex:             friend.Ex,
 				IsPinned:       friend.IsPinned,
+				IsMute:         friend.IsMuted,
+				MuteDuration:   friend.MuteDuration,
+				MuteEndTime:    friend.MuteEndTime,
 			}
 		}
 
@@ -586,6 +590,15 @@ func (s *friendServer) UpdateFriends(
 	if req.Ex != nil {
 		val["ex"] = req.Ex.Value
 	}
+	if req.IsMute != nil {
+		val["is_muted"] = req.IsMute.Value
+	}
+	if req.MuteDuration != nil {
+		val["mute_duration"] = req.MuteDuration.Value
+	}
+	if req.MuteEndTime != nil {
+		val["mute_end_time"] = req.MuteEndTime.Value
+	}
 	if err = s.db.UpdateFriends(ctx, req.OwnerUserID, req.FriendUserIDs, val); err != nil {
 		return nil, err
 	}
@@ -601,6 +614,26 @@ func (s *friendServer) UpdateFriends(
 					IsPinned:         req.IsPinned,
 				}); err != nil {
 				log.ZWarn(ctx, "sync conversation isPinned failed", err,
+					"ownerUserID", req.OwnerUserID, "friendUserID", friendUserID)
+			}
+		}
+	}
+
+	if req.IsMute != nil {
+		recvMsgOpt := int32(constant.ReceiveNotNotifyMessage)
+		if !req.IsMute.Value {
+			recvMsgOpt = constant.ReceiveMessage
+		}
+		for _, friendUserID := range req.FriendUserIDs {
+			convID := conversationutil.GenConversationIDForSingle(req.OwnerUserID, friendUserID)
+			if err := s.conversationClient.SetConversations(ctx, []string{req.OwnerUserID},
+				&conversationpb.ConversationReq{
+					ConversationID:   convID,
+					ConversationType: constant.SingleChatType,
+					UserID:           friendUserID,
+					RecvMsgOpt:       &wrapperspb.Int32Value{Value: recvMsgOpt},
+				}); err != nil {
+				log.ZWarn(ctx, "sync conversation recvMsgOpt failed", err,
 					"ownerUserID", req.OwnerUserID, "friendUserID", friendUserID)
 			}
 		}
