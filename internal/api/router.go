@@ -238,7 +238,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		authRouterGroup.POST("/get_user_token", a.GetUserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", a.ForceLogout)
-
+		authRouterGroup.POST("/get_active_devices", a.GetActiveDevices)
+		authRouterGroup.POST("/kick_device", a.KickDevice)
 	}
 	// Third service
 	{
