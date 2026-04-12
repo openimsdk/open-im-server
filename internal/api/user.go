@@ -305,3 +305,15 @@ func (u *UserApi) UpdateNotificationAccountInfo(c *gin.Context) {
 func (u *UserApi) SearchNotificationAccount(c *gin.Context) {
 	a2r.Call(c, user.UserClient.SearchNotificationAccount, u.Client)
 }
+
+func (u *UserApi) SetPhoneVisibility(c *gin.Context) {
+	a2r.Call(c, user.UserClient.SetPhoneVisibility, u.Client)
+}
+
+func (u *UserApi) SetCallAcceptSetting(c *gin.Context) {
+	a2r.Call(c, user.UserClient.SetCallAcceptSetting, u.Client)
+}
+
+func (u *UserApi) SetMsgReceiveSetting(c *gin.Context) {
+	a2r.Call(c, user.UserClient.SetMsgReceiveSetting, u.Client)
+}

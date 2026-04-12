@@ -99,6 +99,18 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 	inv.InviterUserID = req.UserID
 	inv.InitiateTime = time.Now().UnixMilli()
 
+	// 校验每位被邀请者的通话接受权限，1-to-1 场景：有任一被邀请者拒绝则直接返错
+	for _, inviteeID := range inv.InviteeUserIDList {
+		allowed, err := s.isCallAllowed(ctx, req.UserID, inviteeID)
+		if err != nil {
+			log.ZError(ctx, "handleInvite: isCallAllowed failed", err, "inviteeID", inviteeID)
+			return nil, err
+		}
+		if !allowed {
+			return nil, errs.ErrNoPermission.WrapMsg("the invitee does not accept calls from you", "inviteeID", inviteeID)
+		}
+	}
+
 	if _, err := s.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{Name: inv.RoomID}); err != nil {
 		log.ZError(ctx, "handleInvite", err, "r", err.Error())
 		return nil, errs.WrapMsg(err, "LiveKit CreateRoom failed", "roomID", inv.RoomID)
@@ -157,6 +169,15 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 
 	content := marshalSignalReq(signalReq)
 	for _, inviteeID := range inv.InviteeUserIDList {
+		allowed, err := s.isCallAllowed(ctx, req.UserID, inviteeID)
+		if err != nil {
+			log.ZWarn(ctx, "handleInviteInGroup: isCallAllowed failed, skipping invitee", err, "inviteeID", inviteeID)
+			continue
+		}
+		if !allowed {
+			log.ZInfo(ctx, "handleInviteInGroup: skipping invitee (call setting blocked)", "inviteeID", inviteeID)
+			continue
+		}
 		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, int32(constant.ReadGroupChatType), req.OfflinePushInfo, content); err != nil {
 			log.ZWarn(ctx, "sendSignalingNotification to group invitee failed", err, "inviteeID", inviteeID)
 		}
@@ -167,6 +188,30 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 		RoomID:  inv.RoomID,
 		LiveURL: s.config.RpcConfig.LiveKit.ExternalAddress,
 	}, nil
+}
+
+// isCallAllowed 判断 inviterID 是否被允许向 inviteeID 发起音视频通话。
+// 规则：
+//   - CallAcceptSettingPublic(0)  → 所有人均可
+//   - CallAcceptSettingFriends(1) → 仅当 inviterID 在 inviteeID 好友列表中
+//   - CallAcceptSettingNobody(2)  → 任何人均不可
+func (s *rtcServer) isCallAllowed(ctx context.Context, inviterID, inviteeID string) (bool, error) {
+	userInfo, err := s.userClient.GetUserInfo(ctx, inviteeID)
+	if err != nil {
+		return false, err
+	}
+	switch userInfo.CallAcceptSetting {
+	case model.CallAcceptSettingNobody:
+		return false, nil
+	case model.CallAcceptSettingFriends:
+		isFriend, err := s.relationClient.IsFriend(ctx, inviteeID, inviterID)
+		if err != nil {
+			return false, err
+		}
+		return isFriend, nil
+	default: // CallAcceptSettingPublic
+		return true, nil
+	}
 }
 
 // handleAccept processes a call acceptance.

@@ -21,3 +21,15 @@ func (x *RelationClient) GetFriendsInfo(ctx context.Context, ownerUserID string,
 	req := &relation.GetFriendInfoReq{OwnerUserID: ownerUserID, FriendUserIDs: friendUserIDs}
 	return extractField(ctx, x.FriendClient.GetFriendInfo, req, (*relation.GetFriendInfoResp).GetFriendInfos)
 }
+
+// IsFriend checks whether userID2 is in userID1's friend list.
+func (x *RelationClient) IsFriend(ctx context.Context, ownerUserID, friendUserID string) (bool, error) {
+	resp, err := x.FriendClient.IsFriend(ctx, &relation.IsFriendReq{
+		UserID1: ownerUserID,
+		UserID2: friendUserID,
+	})
+	if err != nil {
+		return false, err
+	}
+	return resp.InUser1Friends, nil
+}

@@ -39,12 +39,13 @@ type Config struct {
 
 type rtcServer struct {
 	rtc.UnimplementedRtcServiceServer
-	config      *Config
-	db          controller.RtcDatabase
-	roomClient  *lksdk.RoomServiceClient
-	msgClient   *rpcli.MsgClient
-	userClient  *rpcli.UserClient
-	tokenExpiry time.Duration
+	config         *Config
+	db             controller.RtcDatabase
+	roomClient     *lksdk.RoomServiceClient
+	msgClient      *rpcli.MsgClient
+	userClient     *rpcli.UserClient
+	relationClient *rpcli.RelationClient
+	tokenExpiry    time.Duration
 }
 
 // Start initialises the RTC gRPC service and registers it with the gRPC server.
@@ -69,6 +70,11 @@ func Start(ctx context.Context, cfg *Config, client discovery.SvcDiscoveryRegist
 		return err
 	}
 
+	friendConn, err := client.GetConn(ctx, cfg.Share.RpcRegisterName.Friend)
+	if err != nil {
+		return err
+	}
+
 	lk := cfg.RpcConfig.LiveKit
 	roomClient := lksdk.NewRoomServiceClient(lk.InternalAddress, lk.APIKey, lk.APISecret)
 
@@ -78,12 +84,13 @@ func Start(ctx context.Context, cfg *Config, client discovery.SvcDiscoveryRegist
 	}
 
 	s := &rtcServer{
-		config:      cfg,
-		db:          controller.NewRtcDatabase(signalDB),
-		roomClient:  roomClient,
-		msgClient:   rpcli.NewMsgClient(msgConn),
-		userClient:  rpcli.NewUserClient(userConn),
-		tokenExpiry: tokenExpiry,
+		config:         cfg,
+		db:             controller.NewRtcDatabase(signalDB),
+		roomClient:     roomClient,
+		msgClient:      rpcli.NewMsgClient(msgConn),
+		userClient:     rpcli.NewUserClient(userConn),
+		relationClient: rpcli.NewRelationClient(friendConn),
+		tokenExpiry:    tokenExpiry,
 	}
 
 	rtc.RegisterRtcServiceServer(server, s)

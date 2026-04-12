@@ -18,6 +18,13 @@ import (
 	"time"
 )
 
+// GroupPermission 群组操作权限枚举。
+// 0=全员可操作（默认），1=仅群主/管理员可操作
+const (
+	GroupPermAllMember = int32(0) // 全员均可
+	GroupPermAdminOnly = int32(1) // 仅群主/管理员
+)
+
 type Group struct {
 	GroupID                string    `bson:"group_id"`
 	GroupName              string    `bson:"group_name"`
@@ -34,4 +41,12 @@ type Group struct {
 	ApplyMemberFriend      int32     `bson:"apply_member_friend"`
 	NotificationUpdateTime time.Time `bson:"notification_update_time"`
 	NotificationUserID     string    `bson:"notification_user_id"`
+	// AllowSendMsg 0=全员可发消息 1=仅群主/管理员可发消息
+	AllowSendMsg int32 `bson:"allow_send_msg"`
+	// AllowPinMsg 0=全员可置顶消息 1=仅群主/管理员可置顶消息
+	AllowPinMsg int32 `bson:"allow_pin_msg"`
+	// AllowAddMember 0=全员可拉人入群 1=仅群主/管理员可拉人入群
+	AllowAddMember int32 `bson:"allow_add_member"`
+	// AllowEditGroupInfo 0=全员可编辑群资料 1=仅群主/管理员可编辑群资料
+	AllowEditGroupInfo int32 `bson:"allow_edit_group_info"`
 }

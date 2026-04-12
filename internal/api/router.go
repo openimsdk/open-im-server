@@ -159,6 +159,11 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		userRouterGroup.POST("/update_notification_account", u.UpdateNotificationAccountInfo)
 		userRouterGroup.POST("/search_notification_account", u.SearchNotificationAccount)
 
+		// 手机号可见性设置（所有人/仅好友/隐藏）
+		userRouterGroup.POST("/set_phone_visibility", u.SetPhoneVisibility)
+		userRouterGroup.POST("/set_call_accept_setting", u.SetCallAcceptSetting)
+		userRouterGroup.POST("/set_msg_receive_setting", u.SetMsgReceiveSetting)
+
 		// 全局黑名单管理（仅管理员）
 		userRouterGroup.POST("/add_global_blacklist", bl.AddGlobalBlacklist)
 		userRouterGroup.POST("/remove_global_blacklist", bl.RemoveGlobalBlacklist)

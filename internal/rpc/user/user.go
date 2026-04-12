@@ -35,6 +35,7 @@ import (
 	"github.com/openimsdk/protocol/group"
 	friendpb "github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/mcontext"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
@@ -149,8 +150,48 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 		return nil, servererrs.ErrUserBlocked.WrapMsg("user is banned", "userIDs", bannedIDs)
 	}
 
-	resp.UsersInfo = convert.UsersDB2Pb(users)
+	pbUsers := convert.UsersDB2Pb(users)
+	viewerID := mcontext.GetOpUserID(ctx)
+	if err := s.applyPhoneVisibility(ctx, viewerID, pbUsers, users); err != nil {
+		return nil, err
+	}
+	resp.UsersInfo = pbUsers
 	return resp, nil
+}
+
+// applyPhoneVisibility 根据 phone_visibility 和好友关系决定是否下发明文手机号。
+// pbUsers 与 dbUsers 下标一一对应。
+func (s *userServer) applyPhoneVisibility(ctx context.Context, viewerID string, pbUsers []*sdkws.UserInfo, dbUsers []*tablerelation.User) error {
+	for i, db := range dbUsers {
+		pb := pbUsers[i]
+		if db.Phone == "" {
+			// 未设置手机号，直接跳过
+			continue
+		}
+		switch db.PhoneVisibility {
+		case tablerelation.PhoneVisibilityPublic:
+			// 所有人可见，保留 phone 字段（已由 UserDB2Pb 填充）
+		case tablerelation.PhoneVisibilityHidden:
+			// 完全隐藏：即使本人也不通过此接口暴露，客户端自行从个人设置接口获取
+			pb.Phone = ""
+		case tablerelation.PhoneVisibilityFriends:
+			// 仅好友可见
+			if viewerID == db.UserID {
+				// 本人始终可见
+				break
+			}
+			isFriend, err := s.relationClient.IsFriend(ctx, viewerID, db.UserID)
+			if err != nil {
+				return err
+			}
+			if !isFriend {
+				pb.Phone = ""
+			}
+		default:
+			pb.Phone = ""
+		}
+	}
+	return nil
 }
 
 // deprecated:
@@ -235,6 +276,82 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 	}
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
 	return resp, nil
+}
+
+// SetPhoneVisibility 设置手机号及其可见性（0=所有人，1=仅好友，2=隐藏）。
+// 只允许本人或管理员操作。
+func (s *userServer) SetPhoneVisibility(ctx context.Context, req *pbuser.SetPhoneVisibilityReq) (*pbuser.SetPhoneVisibilityResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("userID is required")
+	}
+	if req.PhoneVisibility < 0 || req.PhoneVisibility > 2 {
+		return nil, errs.ErrArgs.WrapMsg("phoneVisibility must be 0, 1 or 2")
+	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		return nil, err
+	}
+	m := map[string]any{
+		"phone_visibility": req.PhoneVisibility,
+	}
+	if req.Phone != "" {
+		m["phone"] = req.Phone
+	}
+	if err := s.db.UpdateByMap(ctx, req.UserID, m); err != nil {
+		return nil, err
+	}
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	return &pbuser.SetPhoneVisibilityResp{}, nil
+}
+
+// SetCallAcceptSetting 设置音视频通话接受权限（0=所有人，1=仅好友，2=不接受任何通话）。
+// 只允许本人或管理员操作。
+func (s *userServer) SetCallAcceptSetting(ctx context.Context, req *pbuser.SetCallAcceptSettingReq) (*pbuser.SetCallAcceptSettingResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("userID is required")
+	}
+	if req.CallAcceptSetting < 0 || req.CallAcceptSetting > 2 {
+		return nil, errs.ErrArgs.WrapMsg("callAcceptSetting must be 0, 1 or 2")
+	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		return nil, err
+	}
+	if err := s.db.UpdateByMap(ctx, req.UserID, map[string]any{
+		"call_accept_setting": req.CallAcceptSetting,
+	}); err != nil {
+		return nil, err
+	}
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	return &pbuser.SetCallAcceptSettingResp{}, nil
+}
+
+// SetMsgReceiveSetting 设置会话消息接收权限（0=所有人，1=仅好友，2=所有人不可发送）。
+// 只允许本人或管理员操作。
+func (s *userServer) SetMsgReceiveSetting(ctx context.Context, req *pbuser.SetMsgReceiveSettingReq) (*pbuser.SetMsgReceiveSettingResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("userID is required")
+	}
+	if req.MsgReceiveSetting < 0 || req.MsgReceiveSetting > 2 {
+		return nil, errs.ErrArgs.WrapMsg("msgReceiveSetting must be 0, 1 or 2")
+	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		return nil, err
+	}
+	if err := s.db.UpdateByMap(ctx, req.UserID, map[string]any{
+		"msg_receive_setting": req.MsgReceiveSetting,
+	}); err != nil {
+		return nil, err
+	}
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	return &pbuser.SetMsgReceiveSettingResp{}, nil
 }
 
 func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckReq) (resp *pbuser.AccountCheckResp, err error) {

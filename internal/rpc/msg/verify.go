@@ -59,15 +59,40 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			data.MsgData.ContentType >= constant.NotificationBegin {
 			return nil
 		}
-		if err := m.webhookBeforeSendSingleMsg(ctx, &m.config.WebhooksConfig.BeforeSendSingleMsg, data); err != nil {
-			return err
-		}
+		// 先做本地轻量级拦截（黑名单 + 消息接收权限），避免不必要的 webhook 触发
 		black, err := m.FriendLocalCache.IsBlack(ctx, data.MsgData.SendID, data.MsgData.RecvID)
 		if err != nil {
 			return err
 		}
 		if black {
 			return servererrs.ErrBlockedByPeer.Wrap()
+		}
+		// 校验接收方消息接收权限（MsgReceiveSetting）
+		// 0=所有人可发送，1=仅好友可发送，2=所有人不可发送
+		recvUserInfo, err := m.UserLocalCache.GetUserInfo(ctx, data.MsgData.RecvID)
+		if err != nil {
+			return err
+		}
+		switch recvUserInfo.MsgReceiveSetting {
+		case 2: // MsgReceiveSettingNobody
+			return servererrs.ErrMsgReceiveNotAllowed.Wrap()
+		case 1: // MsgReceiveSettingFriends
+			isFriend, err := m.FriendLocalCache.IsFriend(ctx, data.MsgData.RecvID, data.MsgData.SendID)
+			if err != nil {
+				return err
+			}
+			if !isFriend {
+				return servererrs.ErrMsgReceiveNotAllowed.Wrap()
+			}
+			// 已确认是好友，触发 webhook 后放行，不做 FriendVerify 冗余查询
+			if err := m.webhookBeforeSendSingleMsg(ctx, &m.config.WebhooksConfig.BeforeSendSingleMsg, data); err != nil {
+				return err
+			}
+			return nil
+		}
+		// MsgReceiveSetting==0（所有人可发），触发 webhook，再按全局 FriendVerify 兜底
+		if err := m.webhookBeforeSendSingleMsg(ctx, &m.config.WebhooksConfig.BeforeSendSingleMsg, data); err != nil {
+			return err
 		}
 		if m.config.RpcConfig.FriendVerify {
 			friend, err := m.FriendLocalCache.IsFriend(ctx, data.MsgData.SendID, data.MsgData.RecvID)
@@ -77,7 +102,6 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			if !friend {
 				return servererrs.ErrNotPeersFriend.Wrap()
 			}
-			return nil
 		}
 		return nil
 	case constant.ReadGroupChatType:
@@ -123,6 +147,10 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			}
 			if groupInfo.Status == constant.GroupStatusMuted && groupMemberInfo.RoleLevel != constant.GroupAdmin {
 				return servererrs.ErrMutedGroup.Wrap()
+			}
+			// AllowSendMsg == 1 时仅群主/管理员可发消息
+			if groupInfo.AllowSendMsg == 1 && groupMemberInfo.RoleLevel != constant.GroupAdmin {
+				return servererrs.ErrNoPermission.WrapMsg("only owner or admin can send messages in this group")
 			}
 		}
 		return nil
