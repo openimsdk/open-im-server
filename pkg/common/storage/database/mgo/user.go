@@ -38,9 +38,11 @@ func NewUserMongo(db *mongo.Database) (database.User, error) {
 			Options: options.Index().SetUnique(true),
 		},
 		{
-			// 支持按手机号快速查找，phone 为空串的文档不参与索引
 			Keys:    bson.D{{Key: "phone", Value: 1}},
 			Options: options.Index().SetSparse(true),
+		},
+		{
+			Keys: bson.D{{Key: "nickname", Value: 1}},
 		},
 	}
 	if _, err := coll.Indexes().CreateMany(context.Background(), indexes); err != nil {
@@ -78,6 +80,14 @@ func (u *UserMgo) TakeNotification(ctx context.Context, level int64) (user []*mo
 
 func (u *UserMgo) TakeByNickname(ctx context.Context, nickname string) (user []*model.User, err error) {
 	return mongoutil.Find[*model.User](ctx, u.coll, bson.M{"nickname": nickname})
+}
+
+func (u *UserMgo) FindOrdinaryUsersByNickname(ctx context.Context, level1, level2 int64, nickname string) ([]*model.User, error) {
+	query := bson.M{
+		"nickname":         nickname,
+		"app_manger_level": bson.M{"$in": []int64{level1, level2}},
+	}
+	return mongoutil.Find[*model.User](ctx, u.coll, query, options.Find().SetLimit(100))
 }
 
 func (u *UserMgo) FindByPhone(ctx context.Context, phone string) (*model.User, error) {

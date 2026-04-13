@@ -165,6 +165,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		userRouterGroup.POST("/set_msg_receive_setting", u.SetMsgReceiveSetting)
 		// 根据手机号精确查找用户（phoneSearchVisibility=true 时遵守 phone_visibility 设置）
 		userRouterGroup.POST("/get_user_by_phone", u.GetUserByPhone)
+		// 根据昵称精确查询用户（可多结果，与 getPaginationUsers 模糊搜索不同）
+		userRouterGroup.POST("/get_users_by_nickname", u.GetUsersByNickname)
 
 		// 全局黑名单管理（仅管理员）
 		userRouterGroup.POST("/add_global_blacklist", bl.AddGlobalBlacklist)

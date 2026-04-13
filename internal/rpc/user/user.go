@@ -22,6 +22,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -449,6 +450,61 @@ func (s *userServer) GetUserByPhone(ctx context.Context, req *pbuser.GetUserByPh
 
 	pbUser := convert.UserDB2Pb(dbUser)
 	return &pbuser.GetUserByPhoneResp{UserInfo: pbUser}, nil
+}
+
+// GetUsersByNickname 按昵称精确匹配查询普通用户（app_manger_level 与分页拉取用户一致）。
+// 全局黑名单用户会被过滤；手机号字段按 phone_visibility 与 getDesignateUsers 相同规则处理。
+func (s *userServer) GetUsersByNickname(ctx context.Context, req *pbuser.GetUsersByNicknameReq) (*pbuser.GetUsersByNicknameResp, error) {
+	nickname := strings.TrimSpace(req.Nickname)
+	if nickname == "" {
+		return nil, errs.ErrArgs.WrapMsg("nickname is required")
+	}
+	if n := utf8.RuneCountInString(nickname); n < 1 || n > 64 {
+		return nil, errs.ErrArgs.WrapMsg("nickname length must be 1-64 characters")
+	}
+
+	users, err := s.db.FindOrdinaryUsersByNickname(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, nickname)
+	if err != nil {
+		log.ZError(ctx, "GetUsersByNickname: FindOrdinaryUsersByNickname failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "nickname", nickname)
+		return nil, err
+	}
+	if len(users) == 0 {
+		return &pbuser.GetUsersByNicknameResp{}, nil
+	}
+
+	userIDs := datautil.Slice(users, func(u *tablerelation.User) string { return u.UserID })
+	blocked, err := s.globalBlackDB.FindBlocked(ctx, userIDs)
+	if err != nil {
+		log.ZError(ctx, "GetUsersByNickname: FindBlocked failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "count", len(userIDs))
+		return nil, err
+	}
+	if len(blocked) > 0 {
+		banned := make(map[string]struct{}, len(blocked))
+		for _, b := range blocked {
+			banned[b.UserID] = struct{}{}
+		}
+		filtered := make([]*tablerelation.User, 0, len(users))
+		for _, u := range users {
+			if _, ok := banned[u.UserID]; !ok {
+				filtered = append(filtered, u)
+			}
+		}
+		users = filtered
+	}
+	if len(users) == 0 {
+		return &pbuser.GetUsersByNicknameResp{}, nil
+	}
+
+	pbUsers := convert.UsersDB2Pb(users)
+	viewerID := mcontext.GetOpUserID(ctx)
+	if err := s.applyPhoneVisibility(ctx, viewerID, pbUsers, users); err != nil {
+		log.ZError(ctx, "GetUsersByNickname: applyPhoneVisibility failed", err,
+			"opUserID", viewerID, "count", len(users))
+		return nil, err
+	}
+	return &pbuser.GetUsersByNicknameResp{UsersInfo: pbUsers}, nil
 }
 
 func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckReq) (resp *pbuser.AccountCheckResp, err error) {

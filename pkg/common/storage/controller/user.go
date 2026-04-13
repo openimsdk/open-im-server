@@ -37,6 +37,8 @@ type UserDatabase interface {
 	Find(ctx context.Context, userIDs []string) (users []*model.User, err error)
 	// Find userInfo By Nickname
 	FindByNickname(ctx context.Context, nickname string) (users []*model.User, err error)
+	// FindOrdinaryUsersByNickname 昵称精确匹配，仅普通用户（与分页拉取用户 level 一致）
+	FindOrdinaryUsersByNickname(ctx context.Context, level1 int64, level2 int64, nickname string) (users []*model.User, err error)
 	// FindByPhone looks up a single user by exact phone number.
 	// Returns errs.ErrRecordNotFound if no user has the given phone.
 	FindByPhone(ctx context.Context, phone string) (user *model.User, err error)
@@ -136,6 +138,10 @@ func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*mod
 
 func (u *userDatabase) FindByNickname(ctx context.Context, nickname string) (users []*model.User, err error) {
 	return u.userDB.TakeByNickname(ctx, nickname)
+}
+
+func (u *userDatabase) FindOrdinaryUsersByNickname(ctx context.Context, level1, level2 int64, nickname string) ([]*model.User, error) {
+	return u.userDB.FindOrdinaryUsersByNickname(ctx, level1, level2, nickname)
 }
 
 func (u *userDatabase) FindByPhone(ctx context.Context, phone string) (*model.User, error) {
