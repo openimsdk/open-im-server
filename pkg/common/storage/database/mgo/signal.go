@@ -39,6 +39,12 @@ func NewSignalMongo(db *mongo.Database) (database.SignalDatabase, error) {
 		{
 			Keys: bson.D{{Key: "create_time", Value: -1}},
 		},
+		// Fix P1(TTL): expire_at 字段为 BSON Date，MongoDB 后台每 60s 扫描一次并自动删除过期文档。
+		// 覆盖场景：被叫网络断开、主叫 App 被杀、任何异常中断导致没有 Cancel/Reject/HungUp 的情况。
+		{
+			Keys:    bson.D{{Key: "expire_at", Value: 1}},
+			Options: options.Index().SetExpireAfterSeconds(0),
+		},
 	})
 	if err != nil {
 		return nil, err

@@ -53,7 +53,6 @@ type MessageRevoked struct {
 func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) error {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
-		// 单聊发送权限校验已迁移至 modifyMessageByUserMessageReceiveOpt
 		return nil
 	case constant.ReadGroupChatType:
 		groupInfo, err := m.GroupLocalCache.GetGroupInfo(ctx, data.MsgData.GroupID)

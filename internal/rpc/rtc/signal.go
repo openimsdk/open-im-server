@@ -32,6 +32,7 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/openimsdk/tools/utils/datautil"
+	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -76,11 +77,11 @@ func (s *rtcServer) SignalMessageAssemble(ctx context.Context, req *rtc.SignalMe
 		resp.Payload = &rtc.SignalResp_GetTokenByRoomID{GetTokenByRoomID: r}
 		respErr = err
 	default:
-		log.ZError(ctx, "SignalMessageAssemble", respErr, "r", respErr.Error())
+		// Fix P0: 原代码在此调用 respErr.Error()，而 respErr 为 nil，会直接 panic
 		return nil, errs.ErrArgs.WrapMsg("unknown signal payload type")
 	}
 	if respErr != nil {
-		log.ZError(ctx, "SignalMessageAssemble", respErr, "r", respErr.Error())
+		log.ZError(ctx, "SignalMessageAssemble", respErr, "err", respErr.Error())
 		return nil, respErr
 	}
 	return &rtc.SignalMessageAssembleResp{SignalResp: &resp}, nil
@@ -93,9 +94,8 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 		log.ZError(ctx, "handleInvite", errs.ErrArgs, "r", "invitation is nil")
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
 	}
-	if inv.RoomID == "" {
-		inv.RoomID = newRoomID()
-	}
+	// Fix P3: RoomID 统一由服务端生成，忽略客户端传入的值（客户端不应决定 RoomID）
+	inv.RoomID = newRoomID()
 	inv.InviterUserID = req.UserID
 	inv.InitiateTime = time.Now().UnixMilli()
 
@@ -118,19 +118,38 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 
 	token, err := s.genToken(inv.RoomID, req.UserID)
 	if err != nil {
-		log.ZError(ctx, "handleInvite", err, "r", err.Error())
+		// LiveKit Room 已创建，需要回滚
+		if _, delErr := s.roomClient.DeleteRoom(ctx, &livekit.DeleteRoomRequest{Room: inv.RoomID}); delErr != nil {
+			log.ZWarn(ctx, "handleInvite: rollback DeleteRoom failed", delErr, "roomID", inv.RoomID)
+		}
 		return nil, err
 	}
 
+	// Fix P1/幂等: CreateInvitation 失败分两种情况：
+	//   - 重复 key（相同 roomID 重试）→ 认为幂等成功，直接返回
+	//   - 其他错误 → 回滚 LiveKit Room，返回错误
+	// Fix P0: 原代码对失败仅打 warn，导致 DB 无记录、Room 泄漏、后续流程断裂
 	if err := s.db.CreateInvitation(ctx, invitationToModel(inv, req.OfflinePushInfo)); err != nil {
-		log.ZWarn(ctx, "CreateInvitation failed", err, "roomID", inv.RoomID)
+		if mongo.IsDuplicateKeyError(err) {
+			log.ZWarn(ctx, "handleInvite: duplicate invitation (idempotent retry)", err, "roomID", inv.RoomID)
+		} else {
+			if _, delErr := s.roomClient.DeleteRoom(ctx, &livekit.DeleteRoomRequest{Room: inv.RoomID}); delErr != nil {
+				log.ZWarn(ctx, "handleInvite: rollback DeleteRoom failed", delErr, "roomID", inv.RoomID)
+			}
+			return nil, errs.WrapMsg(err, "CreateInvitation failed", "roomID", inv.RoomID)
+		}
 	}
 
-	content := marshalSignalReq(signalReq)
+	content, err := marshalSignalReq(signalReq)
+	if err != nil {
+		return nil, err
+	}
+	// Fix P1: 1v1 场景下，通知失败应返回错误（被叫收不到来电意味着主叫白等）
 	for _, inviteeID := range inv.InviteeUserIDList {
 		log.ZInfo(ctx, "sendSignalingNotification to invitee", "sendID", req.UserID, "recvID", inviteeID)
 		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, int32(constant.SingleChatType), req.OfflinePushInfo, content); err != nil {
-			log.ZWarn(ctx, "sendSignalingNotification to invitee failed", err, "inviteeID", inviteeID)
+			log.ZError(ctx, "sendSignalingNotification to invitee failed", err, "inviteeID", inviteeID)
+			return nil, errs.WrapMsg(err, "failed to notify invitee", "inviteeID", inviteeID)
 		}
 	}
 
@@ -148,9 +167,8 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 	if inv == nil {
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
 	}
-	if inv.RoomID == "" {
-		inv.RoomID = newRoomID()
-	}
+	// Fix P3: RoomID 统一由服务端生成
+	inv.RoomID = newRoomID()
 	inv.InviterUserID = req.UserID
 	inv.InitiateTime = time.Now().UnixMilli()
 
@@ -160,14 +178,27 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 
 	token, err := s.genToken(inv.RoomID, req.UserID)
 	if err != nil {
+		if _, delErr := s.roomClient.DeleteRoom(ctx, &livekit.DeleteRoomRequest{Room: inv.RoomID}); delErr != nil {
+			log.ZWarn(ctx, "handleInviteInGroup: rollback DeleteRoom failed", delErr, "roomID", inv.RoomID)
+		}
 		return nil, err
 	}
 
+	// Fix P0: CreateInvitation 失败需要回滚 LiveKit Room
 	if err := s.db.CreateInvitation(ctx, invitationToModel(inv, req.OfflinePushInfo)); err != nil {
-		log.ZWarn(ctx, "CreateInvitation failed", err, "roomID", inv.RoomID)
+		if !mongo.IsDuplicateKeyError(err) {
+			if _, delErr := s.roomClient.DeleteRoom(ctx, &livekit.DeleteRoomRequest{Room: inv.RoomID}); delErr != nil {
+				log.ZWarn(ctx, "handleInviteInGroup: rollback DeleteRoom failed", delErr, "roomID", inv.RoomID)
+			}
+			return nil, errs.WrapMsg(err, "CreateInvitation failed", "roomID", inv.RoomID)
+		}
+		log.ZWarn(ctx, "handleInviteInGroup: duplicate invitation (idempotent retry)", err, "roomID", inv.RoomID)
 	}
 
-	content := marshalSignalReq(signalReq)
+	content, err := marshalSignalReq(signalReq)
+	if err != nil {
+		return nil, err
+	}
 	for _, inviteeID := range inv.InviteeUserIDList {
 		allowed, err := s.isCallAllowed(ctx, req.UserID, inviteeID)
 		if err != nil {
@@ -215,56 +246,90 @@ func (s *rtcServer) isCallAllowed(ctx context.Context, inviterID, inviteeID stri
 }
 
 // handleAccept processes a call acceptance.
+// Fix P1(安全): 原代码完全信任客户端传入的 Invitation，未从 DB 校验邀请真实存在。
+// 攻击者可伪造任意 RoomID/InviterUserID 来获取 LiveKit Token 并加入房间。
 func (s *rtcServer) handleAccept(ctx context.Context, req *rtc.SignalAcceptReq, signalReq *rtc.SignalReq) (*rtc.SignalAcceptResp, error) {
-	inv := req.Invitation
-	if inv == nil {
+	if req.Invitation == nil {
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
 	}
 
-	token, err := s.genToken(inv.RoomID, req.UserID)
+	// 从 DB 获取权威邀请数据，验证邀请存在且 userID 在被邀请人列表中
+	dbInv, err := s.db.GetInvitationByRoomID(ctx, req.Invitation.RoomID)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "invitation not found or expired", "roomID", req.Invitation.RoomID)
+	}
+	if !datautil.Contain(req.UserID, dbInv.InviteeUserIDList...) {
+		return nil, errs.ErrNoPermission.WrapMsg("user not in invitee list", "userID", req.UserID)
+	}
+
+	token, err := s.genToken(dbInv.RoomID, req.UserID)
 	if err != nil {
 		return nil, err
 	}
 
 	sessionType := int32(constant.SingleChatType)
-	if inv.GroupID != "" {
+	if dbInv.GroupID != "" {
 		sessionType = int32(constant.ReadGroupChatType)
 	}
-	content := marshalSignalReq(signalReq)
-	if err := s.sendSignalingNotification(ctx, req.UserID, inv.InviterUserID, sessionType, req.OfflinePushInfo, content); err != nil {
-		log.ZWarn(ctx, "sendSignalingNotification accept to inviter failed", err, "inviterID", inv.InviterUserID)
+
+	content, err := marshalSignalReq(signalReq)
+	if err != nil {
+		return nil, err
+	}
+	// 使用 DB 中的 InviterUserID，防止客户端伪造通知目标
+	if err := s.sendSignalingNotification(ctx, req.UserID, dbInv.InviterUserID, sessionType, req.OfflinePushInfo, content); err != nil {
+		log.ZWarn(ctx, "sendSignalingNotification accept to inviter failed", err, "inviterID", dbInv.InviterUserID)
+	}
+
+	// Fix P2: 1v1 通话接受后删除邀请记录，避免冷启动时重复弹出已接通的来电
+	// TODO: 群通话可通过 RemoveInvitee 实现精细化状态管理
+	if dbInv.GroupID == "" {
+		if err := s.db.DeleteInvitation(ctx, dbInv.RoomID); err != nil {
+			log.ZWarn(ctx, "handleAccept: DeleteInvitation failed (non-fatal)", err, "roomID", dbInv.RoomID)
+		}
 	}
 
 	return &rtc.SignalAcceptResp{
 		Token:   token,
-		RoomID:  inv.RoomID,
+		RoomID:  dbInv.RoomID,
 		LiveURL: s.config.RpcConfig.LiveKit.ExternalAddress,
 	}, nil
 }
 
 // handleReject processes a call rejection.
+// Fix P1(安全): 从 DB 验证邀请存在，并使用 DB 中的 InviterUserID，防止客户端伪造通知目标。
 func (s *rtcServer) handleReject(ctx context.Context, req *rtc.SignalRejectReq, signalReq *rtc.SignalReq) (*rtc.SignalRejectResp, error) {
-	inv := req.Invitation
-	if inv == nil {
+	if req.Invitation == nil {
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
 	}
 
-	sessionType := int32(constant.SingleChatType)
-	if inv.GroupID != "" {
-		sessionType = int32(constant.ReadGroupChatType)
+	dbInv, err := s.db.GetInvitationByRoomID(ctx, req.Invitation.RoomID)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "invitation not found or expired", "roomID", req.Invitation.RoomID)
 	}
-	content := marshalSignalReq(signalReq)
-	if err := s.sendSignalingNotification(ctx, req.UserID, inv.InviterUserID, sessionType, req.OfflinePushInfo, content); err != nil {
-		log.ZWarn(ctx, "sendSignalingNotification reject to inviter failed", err, "inviterID", inv.InviterUserID)
+	if !datautil.Contain(req.UserID, dbInv.InviteeUserIDList...) {
+		return nil, errs.ErrNoPermission.WrapMsg("user not in invitee list", "userID", req.UserID)
 	}
 
-	if inv.GroupID != "" {
-		if err := s.db.RemoveInvitee(ctx, inv.RoomID, req.UserID); err != nil {
-			log.ZWarn(ctx, "RemoveInvitee failed", err, "roomID", inv.RoomID, "userID", req.UserID)
+	sessionType := int32(constant.SingleChatType)
+	if dbInv.GroupID != "" {
+		sessionType = int32(constant.ReadGroupChatType)
+	}
+	content, err := marshalSignalReq(signalReq)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.sendSignalingNotification(ctx, req.UserID, dbInv.InviterUserID, sessionType, req.OfflinePushInfo, content); err != nil {
+		log.ZWarn(ctx, "sendSignalingNotification reject to inviter failed", err, "inviterID", dbInv.InviterUserID)
+	}
+
+	if dbInv.GroupID != "" {
+		if err := s.db.RemoveInvitee(ctx, dbInv.RoomID, req.UserID); err != nil {
+			log.ZWarn(ctx, "RemoveInvitee failed", err, "roomID", dbInv.RoomID, "userID", req.UserID)
 		}
 	} else {
-		if err := s.db.DeleteInvitation(ctx, inv.RoomID); err != nil {
-			log.ZWarn(ctx, "DeleteInvitation failed", err, "roomID", inv.RoomID)
+		if err := s.db.DeleteInvitation(ctx, dbInv.RoomID); err != nil {
+			log.ZWarn(ctx, "DeleteInvitation failed", err, "roomID", dbInv.RoomID)
 		}
 	}
 
@@ -272,62 +337,94 @@ func (s *rtcServer) handleReject(ctx context.Context, req *rtc.SignalRejectReq, 
 }
 
 // handleCancel processes a call cancellation.
+// Fix P1(安全): 从 DB 验证操作者是邀请发起方，防止被叫方冒充取消通话。
 func (s *rtcServer) handleCancel(ctx context.Context, req *rtc.SignalCancelReq, signalReq *rtc.SignalReq) (*rtc.SignalCancelResp, error) {
-	inv := req.Invitation
-	if inv == nil {
+	if req.Invitation == nil {
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
 	}
 
+	dbInv, err := s.db.GetInvitationByRoomID(ctx, req.Invitation.RoomID)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "invitation not found or expired", "roomID", req.Invitation.RoomID)
+	}
+	if req.UserID != dbInv.InviterUserID {
+		return nil, errs.ErrNoPermission.WrapMsg("only the inviter can cancel", "userID", req.UserID, "inviterUserID", dbInv.InviterUserID)
+	}
+
 	sessionType := int32(constant.SingleChatType)
-	if inv.GroupID != "" {
+	if dbInv.GroupID != "" {
 		sessionType = int32(constant.ReadGroupChatType)
 	}
-	content := marshalSignalReq(signalReq)
-	for _, inviteeID := range inv.InviteeUserIDList {
+	content, err := marshalSignalReq(signalReq)
+	if err != nil {
+		return nil, err
+	}
+	for _, inviteeID := range dbInv.InviteeUserIDList {
 		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, sessionType, req.OfflinePushInfo, content); err != nil {
 			log.ZWarn(ctx, "sendSignalingNotification cancel to invitee failed", err, "inviteeID", inviteeID)
 		}
 	}
 
-	if err := s.db.DeleteInvitation(ctx, inv.RoomID); err != nil {
-		log.ZWarn(ctx, "DeleteInvitation failed", err, "roomID", inv.RoomID)
+	if err := s.db.DeleteInvitation(ctx, dbInv.RoomID); err != nil {
+		log.ZWarn(ctx, "DeleteInvitation failed", err, "roomID", dbInv.RoomID)
 	}
 
 	return &rtc.SignalCancelResp{}, nil
 }
 
 // handleHungUp processes a call hang-up.
+// Fix P1(安全): 从 DB 验证操作者是通话参与者，防止任意用户挂断他人通话并删除 LiveKit Room。
 func (s *rtcServer) handleHungUp(ctx context.Context, req *rtc.SignalHungUpReq, signalReq *rtc.SignalReq) (*rtc.SignalHungUpResp, error) {
-	inv := req.Invitation
-	if inv == nil {
+	if req.Invitation == nil {
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
 	}
 
+	dbInv, err := s.db.GetInvitationByRoomID(ctx, req.Invitation.RoomID)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "invitation not found or expired", "roomID", req.Invitation.RoomID)
+	}
+	if req.UserID != dbInv.InviterUserID && !datautil.Contain(req.UserID, dbInv.InviteeUserIDList...) {
+		return nil, errs.ErrNoPermission.WrapMsg("user is not a participant of this call", "userID", req.UserID)
+	}
+
 	sessionType := int32(constant.SingleChatType)
-	if inv.GroupID != "" {
+	if dbInv.GroupID != "" {
 		sessionType = int32(constant.ReadGroupChatType)
 	}
-	content := marshalSignalReq(signalReq)
-	for _, peerID := range hungUpPeerIDs(inv, req.UserID) {
+	content, err := marshalSignalReq(signalReq)
+	if err != nil {
+		return nil, err
+	}
+	// 使用 DB 中的参与者列表，不信任客户端传入的 InviteeUserIDList
+	for _, peerID := range hungUpPeerIDsFromDB(dbInv, req.UserID) {
 		if err := s.sendSignalingNotification(ctx, req.UserID, peerID, sessionType, req.OfflinePushInfo, content); err != nil {
 			log.ZWarn(ctx, "sendSignalingNotification hungUp to peer failed", err, "peerID", peerID)
 		}
 	}
 
 	// Terminate the LiveKit room
-	if _, err := s.roomClient.DeleteRoom(ctx, &livekit.DeleteRoomRequest{Room: inv.RoomID}); err != nil {
-		log.ZWarn(ctx, "LiveKit DeleteRoom failed", err, "roomID", inv.RoomID)
+	if _, err := s.roomClient.DeleteRoom(ctx, &livekit.DeleteRoomRequest{Room: dbInv.RoomID}); err != nil {
+		log.ZWarn(ctx, "LiveKit DeleteRoom failed", err, "roomID", dbInv.RoomID)
 	}
 
-	if err := s.db.DeleteInvitation(ctx, inv.RoomID); err != nil {
-		log.ZWarn(ctx, "DeleteInvitation failed", err, "roomID", inv.RoomID)
+	if err := s.db.DeleteInvitation(ctx, dbInv.RoomID); err != nil {
+		log.ZWarn(ctx, "DeleteInvitation failed", err, "roomID", dbInv.RoomID)
 	}
 
 	return &rtc.SignalHungUpResp{}, nil
 }
 
 // handleGetTokenByRoomID returns a LiveKit token for an existing room.
+// Fix P0(安全): 原代码无权限校验，任意已登录用户可获取任意房间的 Token，可窃听他人通话。
 func (s *rtcServer) handleGetTokenByRoomID(ctx context.Context, req *rtc.SignalGetTokenByRoomIDReq) (*rtc.SignalGetTokenByRoomIDResp, error) {
+	dbInv, err := s.db.GetInvitationByRoomID(ctx, req.RoomID)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "room not found or expired", "roomID", req.RoomID)
+	}
+	if req.UserID != dbInv.InviterUserID && !datautil.Contain(req.UserID, dbInv.InviteeUserIDList...) {
+		return nil, errs.ErrNoPermission.WrapMsg("user is not a participant of this room", "userID", req.UserID)
+	}
+
 	token, err := s.genToken(req.RoomID, req.UserID)
 	if err != nil {
 		return nil, err
@@ -351,7 +448,16 @@ func (s *rtcServer) SignalGetRoomByGroupID(ctx context.Context, req *rtc.SignalG
 }
 
 // SignalGetTokenByRoomID returns a token for joining a room directly (HTTP API path).
+// Fix P0(安全): 同 handleGetTokenByRoomID，添加参与者身份校验。
 func (s *rtcServer) SignalGetTokenByRoomID(ctx context.Context, req *rtc.SignalGetTokenByRoomIDReq) (*rtc.SignalGetTokenByRoomIDResp, error) {
+	dbInv, err := s.db.GetInvitationByRoomID(ctx, req.RoomID)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "room not found or expired", "roomID", req.RoomID)
+	}
+	if req.UserID != dbInv.InviterUserID && !datautil.Contain(req.UserID, dbInv.InviteeUserIDList...) {
+		return nil, errs.ErrNoPermission.WrapMsg("user is not a participant of this room", "userID", req.UserID)
+	}
+
 	token, err := s.genToken(req.RoomID, req.UserID)
 	if err != nil {
 		return nil, err
@@ -421,10 +527,14 @@ func (s *rtcServer) SignalSendCustomSignal(ctx context.Context, req *rtc.SignalS
 		return &rtc.SignalSendCustomSignalResp{}, nil
 	}
 	opUserID := mcontext.GetOpUserID(ctx)
-	content, _ := json.Marshal(map[string]any{
+	// Fix P3: 处理 json.Marshal 错误
+	content, err := json.Marshal(map[string]any{
 		"roomID":     req.RoomID,
 		"customInfo": req.CustomInfo,
 	})
+	if err != nil {
+		return nil, errs.WrapMsg(err, "marshal custom signal content failed")
+	}
 	recipients := make([]string, 0, len(inv.InviteeUserIDList)+1)
 	recipients = append(recipients, inv.InviteeUserIDList...)
 	recipients = append(recipients, inv.InviterUserID)
@@ -492,6 +602,29 @@ func (s *rtcServer) genToken(roomID, userID string) (string, error) {
 	return at.ToJWT()
 }
 
+// signalingMsgOptions 返回信令通知消息应设置的 Options。
+//
+// Fix P2+P2(安全): 原代码传 make(map[string]bool) 空 map，导致：
+//  1. IsNotificationByMsg 将信令消息误判为普通聊天消息，触发黑名单/好友关系等权限拦截
+//  2. IsHistory/IsPersistent 默认为 true，信令消息被写入历史记录占用存储
+//  3. IsUnreadCount/IsConversationUpdate 默认 true，污染未读数和会话列表
+//
+// 信令消息应走 Notification 通道（对话 ID 前缀 "n_"），绕过聊天消息权限校验，
+// 且不写历史、不计未读、不更新会话。离线推送根据 offlinePushInfo 控制，此处不强制关闭。
+func signalingMsgOptions() map[string]bool {
+	opts := make(map[string]bool, 8)
+	// IsNotNotification=false 表示"这是通知消息"，让 IsNotificationByMsg 返回 true
+	// 从而跳过 modifyMessageByUserMessageReceiveOpt 中的黑名单/好友关系等校验
+	datautil.SetSwitchFromOptions(opts, constant.IsNotNotification, false)
+	datautil.SetSwitchFromOptions(opts, constant.IsHistory, false)
+	datautil.SetSwitchFromOptions(opts, constant.IsPersistent, false)
+	datautil.SetSwitchFromOptions(opts, constant.IsUnreadCount, false)
+	datautil.SetSwitchFromOptions(opts, constant.IsConversationUpdate, false)
+	datautil.SetSwitchFromOptions(opts, constant.IsSenderConversationUpdate, false)
+	datautil.SetSwitchFromOptions(opts, constant.IsSenderSync, false)
+	return opts
+}
+
 // sendSignalingNotification sends a SignalingNotification message to a user via the msg service.
 func (s *rtcServer) sendSignalingNotification(ctx context.Context, sendID, recvID string, sessionType int32, offlinePush *sdkws.OfflinePushInfo, content []byte) error {
 	now := time.Now().UnixMilli()
@@ -506,7 +639,7 @@ func (s *rtcServer) sendSignalingNotification(ctx context.Context, sendID, recvI
 		SendTime:    now,
 		ServerMsgID: uuid.New().String(),
 		ClientMsgID: uuid.New().String(),
-		Options:     make(map[string]bool),
+		Options:     signalingMsgOptions(),
 	}
 	if offlinePush != nil {
 		msgData.OfflinePushInfo = offlinePush
@@ -536,15 +669,20 @@ func (s *rtcServer) sendCustomSignalNotification(ctx context.Context, sendID, re
 		SendTime:    now,
 		ServerMsgID: uuid.New().String(),
 		ClientMsgID: uuid.New().String(),
-		Options:     make(map[string]bool),
+		Options:     signalingMsgOptions(),
 	}
 	_, err := s.msgClient.MsgClient.SendMsg(ctx, &pbmsg.SendMsgReq{MsgData: msgData})
 	return err
 }
 
-func marshalSignalReq(req *rtc.SignalReq) []byte {
-	b, _ := proto.Marshal(req)
-	return b
+// marshalSignalReq serializes a SignalReq to bytes.
+// Fix P2: 原代码使用 _ 吞掉错误，序列化失败时返回 nil，导致被叫收到空 Content 消息，来电通知丢失。
+func marshalSignalReq(req *rtc.SignalReq) ([]byte, error) {
+	b, err := proto.Marshal(req)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "marshal SignalReq failed")
+	}
+	return b, nil
 }
 
 // newRoomID generates a unique room ID.
@@ -554,6 +692,7 @@ func newRoomID() string {
 
 // invitationToModel converts a proto InvitationInfo to the database model.
 func invitationToModel(inv *rtc.InvitationInfo, push *sdkws.OfflinePushInfo) *model.SignalInvitation {
+	now := time.Now()
 	m := &model.SignalInvitation{
 		RoomID:             inv.RoomID,
 		InviterUserID:      inv.InviterUserID,
@@ -566,7 +705,9 @@ func invitationToModel(inv *rtc.InvitationInfo, push *sdkws.OfflinePushInfo) *mo
 		SessionType:        inv.SessionType,
 		InitiateTime:       inv.InitiateTime,
 		BusyLineUserIDList: inv.BusyLineUserIDList,
-		CreateTime:         time.Now().UnixMilli(),
+		CreateTime:         now.UnixMilli(),
+		// Fix P1(TTL): 根据 Timeout 设置过期时间，配合 MongoDB TTL 索引自动清理
+		ExpireAt: now.Add(time.Duration(inv.Timeout+30) * time.Second),
 	}
 	if push != nil {
 		m.OfflinePushTitle = push.Title
@@ -596,8 +737,9 @@ func modelToInvitationInfo(m *model.SignalInvitation) *rtc.InvitationInfo {
 	}
 }
 
-// hungUpPeerIDs returns the IDs that should receive hang-up notification.
-func hungUpPeerIDs(inv *rtc.InvitationInfo, callerID string) []string {
+// hungUpPeerIDsFromDB returns IDs that should receive hang-up notification, based on authoritative DB data.
+// Fix P1(安全): 原 hungUpPeerIDs 使用客户端传入的 inv，改为使用从 DB 获取的记录。
+func hungUpPeerIDsFromDB(inv *model.SignalInvitation, callerID string) []string {
 	if callerID == inv.InviterUserID {
 		return inv.InviteeUserIDList
 	}

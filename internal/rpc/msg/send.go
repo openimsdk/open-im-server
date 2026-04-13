@@ -153,10 +153,13 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *pbmsg.SendMsgR
 }
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
+	if err := m.messageVerification(ctx, req); err != nil {
+		return nil, err
+	}
+	isSend := true
 	isNotification := msgprocessor.IsNotificationByMsg(req.MsgData)
 	log.ZInfo(ctx, "sendMsgSingleChat", "isNotification", isNotification, "msgdata", req.MsgData)
 
-	isSend := true
 	if !isNotification {
 		// 非通知类消息：执行发送权限校验 + 接收偏好校验（含 blacklist / MsgReceiveSetting / webhook / FriendVerify / globalOpt / convOpt）
 		isSend, err = m.modifyMessageByUserMessageReceiveOpt(
