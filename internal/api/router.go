@@ -163,6 +163,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		userRouterGroup.POST("/set_phone_visibility", u.SetPhoneVisibility)
 		userRouterGroup.POST("/set_call_accept_setting", u.SetCallAcceptSetting)
 		userRouterGroup.POST("/set_msg_receive_setting", u.SetMsgReceiveSetting)
+		// 根据手机号精确查找用户（phoneSearchVisibility=true 时遵守 phone_visibility 设置）
+		userRouterGroup.POST("/get_user_by_phone", u.GetUserByPhone)
 
 		// 全局黑名单管理（仅管理员）
 		userRouterGroup.POST("/add_global_blacklist", bl.AddGlobalBlacklist)

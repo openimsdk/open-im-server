@@ -32,13 +32,18 @@ import (
 
 func NewUserMongo(db *mongo.Database) (database.User, error) {
 	coll := db.Collection(database.UserName)
-	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "user_id", Value: 1},
+	indexes := []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "user_id", Value: 1}},
+			Options: options.Index().SetUnique(true),
 		},
-		Options: options.Index().SetUnique(true),
-	})
-	if err != nil {
+		{
+			// 支持按手机号快速查找，phone 为空串的文档不参与索引
+			Keys:    bson.D{{Key: "phone", Value: 1}},
+			Options: options.Index().SetSparse(true),
+		},
+	}
+	if _, err := coll.Indexes().CreateMany(context.Background(), indexes); err != nil {
 		return nil, errs.Wrap(err)
 	}
 	return &UserMgo{coll: coll}, nil
@@ -73,6 +78,10 @@ func (u *UserMgo) TakeNotification(ctx context.Context, level int64) (user []*mo
 
 func (u *UserMgo) TakeByNickname(ctx context.Context, nickname string) (user []*model.User, err error) {
 	return mongoutil.Find[*model.User](ctx, u.coll, bson.M{"nickname": nickname})
+}
+
+func (u *UserMgo) FindByPhone(ctx context.Context, phone string) (*model.User, error) {
+	return mongoutil.FindOne[*model.User](ctx, u.coll, bson.M{"phone": phone})
 }
 
 func (u *UserMgo) Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*model.User, err error) {

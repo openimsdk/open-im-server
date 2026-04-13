@@ -37,6 +37,9 @@ type UserDatabase interface {
 	Find(ctx context.Context, userIDs []string) (users []*model.User, err error)
 	// Find userInfo By Nickname
 	FindByNickname(ctx context.Context, nickname string) (users []*model.User, err error)
+	// FindByPhone looks up a single user by exact phone number.
+	// Returns errs.ErrRecordNotFound if no user has the given phone.
+	FindByPhone(ctx context.Context, phone string) (user *model.User, err error)
 	// Find notificationAccounts
 	FindNotification(ctx context.Context, level int64) (users []*model.User, err error)
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the storage
@@ -133,6 +136,10 @@ func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*mod
 
 func (u *userDatabase) FindByNickname(ctx context.Context, nickname string) (users []*model.User, err error) {
 	return u.userDB.TakeByNickname(ctx, nickname)
+}
+
+func (u *userDatabase) FindByPhone(ctx context.Context, phone string) (*model.User, error) {
+	return u.userDB.FindByPhone(ctx, phone)
 }
 
 func (u *userDatabase) FindNotification(ctx context.Context, level int64) (users []*model.User, err error) {

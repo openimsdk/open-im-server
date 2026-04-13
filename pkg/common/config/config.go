@@ -364,6 +364,10 @@ type User struct {
 		Ports        []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
+	// PhoneSearchVisibility 控制 GetUserByPhone 是否尊重 phone_visibility 设置。
+	// false（默认）：任何人均可通过手机号搜到用户，忽略 phone_visibility；
+	// true：按 phone_visibility 过滤（Hidden 不可搜，Friends 仅好友可搜）。
+	PhoneSearchVisibility bool `mapstructure:"phoneSearchVisibility"`
 }
 
 type Redis struct {

@@ -317,3 +317,7 @@ func (u *UserApi) SetCallAcceptSetting(c *gin.Context) {
 func (u *UserApi) SetMsgReceiveSetting(c *gin.Context) {
 	a2r.Call(c, user.UserClient.SetMsgReceiveSetting, u.Client)
 }
+
+func (u *UserApi) GetUserByPhone(c *gin.Context) {
+	a2r.Call(c, user.UserClient.GetUserByPhone, u.Client)
+}

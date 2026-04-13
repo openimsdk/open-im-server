@@ -15,3 +15,6 @@ prometheus:
   # Prometheus listening ports, must be consistent with the number of rpc.ports
   # It will only take effect when autoSetPorts is set to false.
   ports: [ 12320 ]
+
+# GetUserByPhone: false = ignore phone_visibility when searching by phone; true = enforce phone_visibility (hidden / friends-only).
+phoneSearchVisibility: false

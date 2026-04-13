@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"math/rand"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -52,6 +53,10 @@ import (
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
 )
+
+// phoneRe 仅校验手机号的基本数字格式，不强制区号/国家码前缀。
+// 规则：纯数字，长度 5-20 位，允许可选的 + 前缀（如 +86...）。
+var phoneRe = regexp.MustCompile(`^\+?\d{5,20}$`)
 
 type userServer struct {
 	pbuser.UnimplementedUserServer
@@ -296,6 +301,9 @@ func (s *userServer) SetPhoneVisibility(ctx context.Context, req *pbuser.SetPhon
 	if req.PhoneVisibility < 0 || req.PhoneVisibility > 2 {
 		return nil, errs.ErrArgs.WrapMsg("phoneVisibility must be 0, 1 or 2")
 	}
+	if req.Phone != "" && !phoneRe.MatchString(req.Phone) {
+		return nil, errs.ErrArgs.WrapMsg("phone must contain digits only (5-20 digits), optionally prefixed with +")
+	}
 	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
 		log.ZWarn(ctx, "SetPhoneVisibility: access denied", err,
 			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
@@ -382,6 +390,65 @@ func (s *userServer) SetMsgReceiveSetting(ctx context.Context, req *pbuser.SetMs
 	}
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
 	return &pbuser.SetMsgReceiveSettingResp{}, nil
+}
+
+// GetUserByPhone 根据精确手机号查询用户。
+//
+// phoneSearchVisibility=false（默认）时忽略 phone_visibility，任何人均可搜到。
+// phoneSearchVisibility=true 时按 phone_visibility 过滤：
+//   - Hidden(2)  → 非管理员不可搜到
+//   - Friends(1) → 仅好友/管理员可搜到
+//   - Public(0)  → 任何人均可搜到
+//
+// 返回空 userInfo 并不代表错误，调用方应以 nil userInfo 判断"未找到"。
+func (s *userServer) GetUserByPhone(ctx context.Context, req *pbuser.GetUserByPhoneReq) (*pbuser.GetUserByPhoneResp, error) {
+	if req.Phone == "" {
+		return nil, errs.ErrArgs.WrapMsg("phone is required")
+	}
+	if !phoneRe.MatchString(req.Phone) {
+		return nil, errs.ErrArgs.WrapMsg("phone must contain digits only (5-20 digits), optionally prefixed with +")
+	}
+
+	dbUser, err := s.db.FindByPhone(ctx, req.Phone)
+	if err != nil {
+		if errs.ErrRecordNotFound.Is(err) {
+			// 手机号未注册，返回空响应而非错误，避免枚举攻击
+			return &pbuser.GetUserByPhoneResp{}, nil
+		}
+		log.ZError(ctx, "GetUserByPhone: FindByPhone failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "phone", req.Phone)
+		return nil, err
+	}
+
+	// 仅在 phoneSearchVisibility=true 时才按 phone_visibility 过滤，默认跳过
+	if s.config.RpcConfig.PhoneSearchVisibility {
+		callerID := mcontext.GetOpUserID(ctx)
+		isAdmin := datautil.Contain(callerID, s.config.Share.IMAdminUserID...)
+
+		switch dbUser.PhoneVisibility {
+		case tablerelation.PhoneVisibilityHidden:
+			// 完全隐藏：非管理员无法通过手机号搜到该用户
+			if !isAdmin {
+				return &pbuser.GetUserByPhoneResp{}, nil
+			}
+		case tablerelation.PhoneVisibilityFriends:
+			// 仅好友可搜索
+			if !isAdmin && callerID != dbUser.UserID {
+				isFriend, err := s.relationClient.IsFriend(ctx, callerID, dbUser.UserID)
+				if err != nil {
+					log.ZError(ctx, "GetUserByPhone: IsFriend failed", err,
+						"callerID", callerID, "targetUserID", dbUser.UserID)
+					return nil, err
+				}
+				if !isFriend {
+					return &pbuser.GetUserByPhoneResp{}, nil
+				}
+			}
+		}
+	}
+
+	pbUser := convert.UserDB2Pb(dbUser)
+	return &pbuser.GetUserByPhoneResp{UserInfo: pbUser}, nil
 }
 
 func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckReq) (resp *pbuser.AccountCheckResp, err error) {
