@@ -16,18 +16,19 @@ package msg
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
-	"github.com/openimsdk/tools/utils/datautil"
-	"github.com/openimsdk/tools/utils/encrypt"
-	"github.com/openimsdk/tools/utils/timeutil"
 	"math/rand"
 	"strconv"
 	"time"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/datautil"
+	"github.com/openimsdk/tools/utils/encrypt"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 var ExcludeContentType = []int{constant.HasReadReceipt}
@@ -52,61 +53,14 @@ type MessageRevoked struct {
 func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) error {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
-		if datautil.Contain(data.MsgData.SendID, m.config.Share.IMAdminUserID...) {
-			return nil
-		}
-		if data.MsgData.ContentType <= constant.NotificationEnd &&
-			data.MsgData.ContentType >= constant.NotificationBegin {
-			return nil
-		}
-		// 先做本地轻量级拦截（黑名单 + 消息接收权限），避免不必要的 webhook 触发
-		black, err := m.FriendLocalCache.IsBlack(ctx, data.MsgData.SendID, data.MsgData.RecvID)
-		if err != nil {
-			return err
-		}
-		if black {
-			return servererrs.ErrBlockedByPeer.Wrap()
-		}
-		// 校验接收方消息接收权限（MsgReceiveSetting）
-		// 0=所有人可发送，1=仅好友可发送，2=所有人不可发送
-		recvUserInfo, err := m.UserLocalCache.GetUserInfo(ctx, data.MsgData.RecvID)
-		if err != nil {
-			return err
-		}
-		switch recvUserInfo.MsgReceiveSetting {
-		case 2: // MsgReceiveSettingNobody
-			return servererrs.ErrMsgReceiveNotAllowed.Wrap()
-		case 1: // MsgReceiveSettingFriends
-			isFriend, err := m.FriendLocalCache.IsFriend(ctx, data.MsgData.RecvID, data.MsgData.SendID)
-			if err != nil {
-				return err
-			}
-			if !isFriend {
-				return servererrs.ErrMsgReceiveNotAllowed.Wrap()
-			}
-			// 已确认是好友，触发 webhook 后放行，不做 FriendVerify 冗余查询
-			if err := m.webhookBeforeSendSingleMsg(ctx, &m.config.WebhooksConfig.BeforeSendSingleMsg, data); err != nil {
-				return err
-			}
-			return nil
-		}
-		// MsgReceiveSetting==0（所有人可发），触发 webhook，再按全局 FriendVerify 兜底
-		if err := m.webhookBeforeSendSingleMsg(ctx, &m.config.WebhooksConfig.BeforeSendSingleMsg, data); err != nil {
-			return err
-		}
-		if m.config.RpcConfig.FriendVerify {
-			friend, err := m.FriendLocalCache.IsFriend(ctx, data.MsgData.SendID, data.MsgData.RecvID)
-			if err != nil {
-				return err
-			}
-			if !friend {
-				return servererrs.ErrNotPeersFriend.Wrap()
-			}
-		}
+		// 单聊发送权限校验已迁移至 modifyMessageByUserMessageReceiveOpt
 		return nil
 	case constant.ReadGroupChatType:
 		groupInfo, err := m.GroupLocalCache.GetGroupInfo(ctx, data.MsgData.GroupID)
 		if err != nil {
+			log.ZError(ctx, "messageVerification group: GetGroupInfo failed", err,
+				"groupID", data.MsgData.GroupID, "sendID", data.MsgData.SendID,
+				"contentType", data.MsgData.ContentType, "clientMsgID", data.MsgData.ClientMsgID)
 			return err
 		}
 		if groupInfo.Status == constant.GroupStatusDismissed &&
@@ -126,6 +80,9 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		}
 		memberIDs, err := m.GroupLocalCache.GetGroupMemberIDMap(ctx, data.MsgData.GroupID)
 		if err != nil {
+			log.ZError(ctx, "messageVerification group: GetGroupMemberIDMap failed", err,
+				"groupID", data.MsgData.GroupID, "sendID", data.MsgData.SendID,
+				"contentType", data.MsgData.ContentType, "clientMsgID", data.MsgData.ClientMsgID)
 			return err
 		}
 		if _, ok := memberIDs[data.MsgData.SendID]; !ok {
@@ -137,6 +94,9 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			if errs.ErrRecordNotFound.Is(err) {
 				return servererrs.ErrNotInGroupYet.WrapMsg(err.Error())
 			}
+			log.ZError(ctx, "messageVerification group: GetGroupMember failed", err,
+				"groupID", data.MsgData.GroupID, "sendID", data.MsgData.SendID,
+				"contentType", data.MsgData.ContentType, "clientMsgID", data.MsgData.ClientMsgID)
 			return err
 		}
 		if groupMemberInfo.RoleLevel == constant.GroupOwner {
@@ -211,21 +171,101 @@ func GetMsgID(sendID string) string {
 }
 
 func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, userID, conversationID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
+	// 第一优先级：接收方全局接收设置
+	// NotReceiveMessage 直接丢弃，无需执行后续任何权限或偏好查询
 	opt, err := m.UserLocalCache.GetUserGlobalMsgRecvOpt(ctx, userID)
 	if err != nil {
 		return false, err
 	}
-	switch opt {
-	case constant.ReceiveMessage:
-	case constant.NotReceiveMessage:
+	if opt == constant.NotReceiveMessage {
 		return false, nil
-	case constant.ReceiveNotNotifyMessage:
+	}
+	if opt == constant.ReceiveNotNotifyMessage {
 		if pb.MsgData.Options == nil {
 			pb.MsgData.Options = make(map[string]bool, 10)
 		}
 		datautil.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
-		return true, nil
+		// 全局静音：仅关闭离线推送，仍需继续执行发送权限校验 + 会话级偏好校验
 	}
+
+	// 第二优先级：单聊发送权限校验（从 messageVerification 迁移）
+	// 仅对非通知类消息生效（调用方已通过 !isNotification 做过前置过滤）
+	if sessionType == constant.SingleChatType {
+		// 管理员跳过发送权限拦截，直接进入接收偏好校验
+		if !datautil.Contain(pb.MsgData.SendID, m.config.Share.IMAdminUserID...) {
+			// 黑名单拦截
+			black, err := m.FriendLocalCache.IsBlack(ctx, pb.MsgData.SendID, pb.MsgData.RecvID)
+			if err != nil {
+				log.ZError(ctx, "modifyMessageByUserMessageReceiveOpt: IsBlack failed", err,
+					"sendID", pb.MsgData.SendID, "recvID", pb.MsgData.RecvID,
+					"contentType", pb.MsgData.ContentType, "clientMsgID", pb.MsgData.ClientMsgID)
+				return false, err
+			}
+			if black {
+				return false, servererrs.ErrBlockedByPeer.Wrap()
+			}
+
+			// 接收方消息接收权限（MsgReceiveSetting）
+			// 0=所有人可发送，1=仅好友可发送，2=所有人不可发送
+			recvUserInfo, err := m.UserLocalCache.GetUserInfo(ctx, pb.MsgData.RecvID)
+			if err != nil {
+				log.ZError(ctx, "modifyMessageByUserMessageReceiveOpt: GetUserInfo(recv) failed", err,
+					"sendID", pb.MsgData.SendID, "recvID", pb.MsgData.RecvID,
+					"contentType", pb.MsgData.ContentType, "clientMsgID", pb.MsgData.ClientMsgID)
+				return false, err
+			}
+
+			// skipFriendVerify: MsgReceiveSetting=1 已确认好友关系，无需再做 FriendVerify 重复查询
+			skipFriendVerify := false
+			switch recvUserInfo.MsgReceiveSetting {
+			case 2: // MsgReceiveSettingNobody
+				return false, servererrs.ErrMsgReceiveNotAllowed.Wrap()
+			case 1: // MsgReceiveSettingFriends
+				isFriend, err := m.FriendLocalCache.IsFriend(ctx, pb.MsgData.RecvID, pb.MsgData.SendID)
+				if err != nil {
+					log.ZError(ctx, "modifyMessageByUserMessageReceiveOpt: IsFriend failed (MsgReceiveSetting)", err,
+						"sendID", pb.MsgData.SendID, "recvID", pb.MsgData.RecvID,
+						"contentType", pb.MsgData.ContentType, "clientMsgID", pb.MsgData.ClientMsgID)
+					return false, err
+				}
+				if !isFriend {
+					return false, servererrs.ErrMsgReceiveNotAllowed.Wrap()
+				}
+				// 已确认好友关系，触发 webhook 后跳过 FriendVerify，直接进入接收偏好校验
+				if err := m.webhookBeforeSendSingleMsg(ctx, &m.config.WebhooksConfig.BeforeSendSingleMsg, pb); err != nil {
+					log.ZError(ctx, "modifyMessageByUserMessageReceiveOpt: webhookBeforeSendSingleMsg failed (friends-only)", err,
+						"sendID", pb.MsgData.SendID, "recvID", pb.MsgData.RecvID,
+						"contentType", pb.MsgData.ContentType, "clientMsgID", pb.MsgData.ClientMsgID)
+					return false, err
+				}
+				skipFriendVerify = true
+			}
+
+			if !skipFriendVerify {
+				// MsgReceiveSetting==0（所有人可发），触发 webhook，再按全局 FriendVerify 兜底
+				if err := m.webhookBeforeSendSingleMsg(ctx, &m.config.WebhooksConfig.BeforeSendSingleMsg, pb); err != nil {
+					log.ZError(ctx, "modifyMessageByUserMessageReceiveOpt: webhookBeforeSendSingleMsg failed", err,
+						"sendID", pb.MsgData.SendID, "recvID", pb.MsgData.RecvID,
+						"contentType", pb.MsgData.ContentType, "clientMsgID", pb.MsgData.ClientMsgID)
+					return false, err
+				}
+				if m.config.RpcConfig.FriendVerify {
+					friend, err := m.FriendLocalCache.IsFriend(ctx, pb.MsgData.SendID, pb.MsgData.RecvID)
+					if err != nil {
+						log.ZError(ctx, "modifyMessageByUserMessageReceiveOpt: IsFriend failed (FriendVerify)", err,
+							"sendID", pb.MsgData.SendID, "recvID", pb.MsgData.RecvID,
+							"contentType", pb.MsgData.ContentType, "clientMsgID", pb.MsgData.ClientMsgID)
+						return false, err
+					}
+					if !friend {
+						return false, servererrs.ErrNotPeersFriend.Wrap()
+					}
+				}
+			}
+		}
+	}
+
+	// 第三优先级：会话级接收偏好
 	singleOpt, err := m.ConversationLocalCache.GetSingleConversationRecvMsgOpt(ctx, userID, conversationID)
 	if errs.ErrRecordNotFound.Is(err) {
 		return true, nil

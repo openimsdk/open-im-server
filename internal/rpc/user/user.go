@@ -48,6 +48,7 @@ import (
 	"github.com/openimsdk/tools/db/pagination"
 	registry "github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
 )
@@ -137,10 +138,14 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 	resp = &pbuser.GetDesignateUsersResp{}
 	users, err := s.db.Find(ctx, req.UserIDs)
 	if err != nil {
+		log.ZError(ctx, "GetDesignateUsers: db.Find failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "reqUserCount", len(req.UserIDs))
 		return nil, err
 	}
 
 	if blocked, err := s.globalBlackDB.FindBlocked(ctx, req.UserIDs); err != nil {
+		log.ZError(ctx, "GetDesignateUsers: globalBlackDB.FindBlocked failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "reqUserCount", len(req.UserIDs))
 		return nil, err
 	} else if len(blocked) > 0 {
 		bannedIDs := make([]string, 0, len(blocked))
@@ -153,6 +158,8 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 	pbUsers := convert.UsersDB2Pb(users)
 	viewerID := mcontext.GetOpUserID(ctx)
 	if err := s.applyPhoneVisibility(ctx, viewerID, pbUsers, users); err != nil {
+		log.ZError(ctx, "GetDesignateUsers: applyPhoneVisibility failed", err,
+			"opUserID", viewerID, "userCount", len(users))
 		return nil, err
 	}
 	resp.UsersInfo = pbUsers
@@ -182,6 +189,8 @@ func (s *userServer) applyPhoneVisibility(ctx context.Context, viewerID string, 
 			}
 			isFriend, err := s.relationClient.IsFriend(ctx, viewerID, db.UserID)
 			if err != nil {
+				log.ZError(ctx, "applyPhoneVisibility: IsFriend failed", err,
+					"viewerID", viewerID, "targetUserID", db.UserID)
 				return err
 			}
 			if !isFriend {
@@ -288,9 +297,13 @@ func (s *userServer) SetPhoneVisibility(ctx context.Context, req *pbuser.SetPhon
 		return nil, errs.ErrArgs.WrapMsg("phoneVisibility must be 0, 1 or 2")
 	}
 	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		log.ZWarn(ctx, "SetPhoneVisibility: access denied", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
 		return nil, err
 	}
 	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		log.ZError(ctx, "SetPhoneVisibility: user not found or db error", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
 		return nil, err
 	}
 	m := map[string]any{
@@ -300,6 +313,9 @@ func (s *userServer) SetPhoneVisibility(ctx context.Context, req *pbuser.SetPhon
 		m["phone"] = req.Phone
 	}
 	if err := s.db.UpdateByMap(ctx, req.UserID, m); err != nil {
+		log.ZError(ctx, "SetPhoneVisibility: UpdateByMap failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
+			"phoneVisibility", req.PhoneVisibility, "hasPhoneUpdate", req.Phone != "")
 		return nil, err
 	}
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
@@ -316,14 +332,21 @@ func (s *userServer) SetCallAcceptSetting(ctx context.Context, req *pbuser.SetCa
 		return nil, errs.ErrArgs.WrapMsg("callAcceptSetting must be 0, 1 or 2")
 	}
 	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		log.ZWarn(ctx, "SetCallAcceptSetting: access denied", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
 		return nil, err
 	}
 	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		log.ZError(ctx, "SetCallAcceptSetting: user not found or db error", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
 		return nil, err
 	}
 	if err := s.db.UpdateByMap(ctx, req.UserID, map[string]any{
 		"call_accept_setting": req.CallAcceptSetting,
 	}); err != nil {
+		log.ZError(ctx, "SetCallAcceptSetting: UpdateByMap failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
+			"callAcceptSetting", req.CallAcceptSetting)
 		return nil, err
 	}
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
@@ -340,14 +363,21 @@ func (s *userServer) SetMsgReceiveSetting(ctx context.Context, req *pbuser.SetMs
 		return nil, errs.ErrArgs.WrapMsg("msgReceiveSetting must be 0, 1 or 2")
 	}
 	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		log.ZWarn(ctx, "SetMsgReceiveSetting: access denied", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
 		return nil, err
 	}
 	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		log.ZError(ctx, "SetMsgReceiveSetting: user not found or db error", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
 		return nil, err
 	}
 	if err := s.db.UpdateByMap(ctx, req.UserID, map[string]any{
 		"msg_receive_setting": req.MsgReceiveSetting,
 	}); err != nil {
+		log.ZError(ctx, "SetMsgReceiveSetting: UpdateByMap failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
+			"msgReceiveSetting", req.MsgReceiveSetting)
 		return nil, err
 	}
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
