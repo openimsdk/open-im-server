@@ -77,7 +77,6 @@ func (s *rtcServer) SignalMessageAssemble(ctx context.Context, req *rtc.SignalMe
 		resp.Payload = &rtc.SignalResp_GetTokenByRoomID{GetTokenByRoomID: r}
 		respErr = err
 	default:
-		// Fix P0: 原代码在此调用 respErr.Error()，而 respErr 为 nil，会直接 panic
 		return nil, errs.ErrArgs.WrapMsg("unknown signal payload type")
 	}
 	if respErr != nil {
@@ -94,12 +93,10 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 		log.ZError(ctx, "handleInvite", errs.ErrArgs, "r", "invitation is nil")
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
 	}
-	// Fix P3: RoomID 统一由服务端生成，忽略客户端传入的值（客户端不应决定 RoomID）
 	inv.RoomID = newRoomID()
 	inv.InviterUserID = req.UserID
 	inv.InitiateTime = time.Now().UnixMilli()
 
-	// 校验每位被邀请者的通话接受权限，1-to-1 场景：有任一被邀请者拒绝则直接返错
 	for _, inviteeID := range inv.InviteeUserIDList {
 		allowed, err := s.isCallAllowed(ctx, req.UserID, inviteeID)
 		if err != nil {
@@ -118,17 +115,12 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 
 	token, err := s.genToken(inv.RoomID, req.UserID)
 	if err != nil {
-		// LiveKit Room 已创建，需要回滚
 		if _, delErr := s.roomClient.DeleteRoom(ctx, &livekit.DeleteRoomRequest{Room: inv.RoomID}); delErr != nil {
 			log.ZWarn(ctx, "handleInvite: rollback DeleteRoom failed", delErr, "roomID", inv.RoomID)
 		}
 		return nil, err
 	}
 
-	// Fix P1/幂等: CreateInvitation 失败分两种情况：
-	//   - 重复 key（相同 roomID 重试）→ 认为幂等成功，直接返回
-	//   - 其他错误 → 回滚 LiveKit Room，返回错误
-	// Fix P0: 原代码对失败仅打 warn，导致 DB 无记录、Room 泄漏、后续流程断裂
 	if err := s.db.CreateInvitation(ctx, invitationToModel(inv, req.OfflinePushInfo)); err != nil {
 		if mongo.IsDuplicateKeyError(err) {
 			log.ZWarn(ctx, "handleInvite: duplicate invitation (idempotent retry)", err, "roomID", inv.RoomID)
@@ -144,7 +136,7 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 	if err != nil {
 		return nil, err
 	}
-	// Fix P1: 1v1 场景下，通知失败应返回错误（被叫收不到来电意味着主叫白等）
+
 	for _, inviteeID := range inv.InviteeUserIDList {
 		log.ZInfo(ctx, "sendSignalingNotification to invitee", "sendID", req.UserID, "recvID", inviteeID)
 		if err := s.sendSignalingNotification(ctx, req.UserID, inviteeID, int32(constant.SingleChatType), req.OfflinePushInfo, content); err != nil {
@@ -167,7 +159,7 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 	if inv == nil {
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
 	}
-	// Fix P3: RoomID 统一由服务端生成
+
 	inv.RoomID = newRoomID()
 	inv.InviterUserID = req.UserID
 	inv.InitiateTime = time.Now().UnixMilli()
@@ -184,7 +176,6 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 		return nil, err
 	}
 
-	// Fix P0: CreateInvitation 失败需要回滚 LiveKit Room
 	if err := s.db.CreateInvitation(ctx, invitationToModel(inv, req.OfflinePushInfo)); err != nil {
 		if !mongo.IsDuplicateKeyError(err) {
 			if _, delErr := s.roomClient.DeleteRoom(ctx, &livekit.DeleteRoomRequest{Room: inv.RoomID}); delErr != nil {
@@ -245,9 +236,6 @@ func (s *rtcServer) isCallAllowed(ctx context.Context, inviterID, inviteeID stri
 	}
 }
 
-// handleAccept processes a call acceptance.
-// Fix P1(安全): 原代码完全信任客户端传入的 Invitation，未从 DB 校验邀请真实存在。
-// 攻击者可伪造任意 RoomID/InviterUserID 来获取 LiveKit Token 并加入房间。
 func (s *rtcServer) handleAccept(ctx context.Context, req *rtc.SignalAcceptReq, signalReq *rtc.SignalReq) (*rtc.SignalAcceptResp, error) {
 	if req.Invitation == nil {
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
@@ -276,12 +264,11 @@ func (s *rtcServer) handleAccept(ctx context.Context, req *rtc.SignalAcceptReq, 
 	if err != nil {
 		return nil, err
 	}
-	// 使用 DB 中的 InviterUserID，防止客户端伪造通知目标
+
 	if err := s.sendSignalingNotification(ctx, req.UserID, dbInv.InviterUserID, sessionType, req.OfflinePushInfo, content); err != nil {
 		log.ZWarn(ctx, "sendSignalingNotification accept to inviter failed", err, "inviterID", dbInv.InviterUserID)
 	}
 
-	// Fix P2: 1v1 通话接受后删除邀请记录，避免冷启动时重复弹出已接通的来电
 	// TODO: 群通话可通过 RemoveInvitee 实现精细化状态管理
 	if dbInv.GroupID == "" {
 		if err := s.db.DeleteInvitation(ctx, dbInv.RoomID); err != nil {
@@ -297,7 +284,6 @@ func (s *rtcServer) handleAccept(ctx context.Context, req *rtc.SignalAcceptReq, 
 }
 
 // handleReject processes a call rejection.
-// Fix P1(安全): 从 DB 验证邀请存在，并使用 DB 中的 InviterUserID，防止客户端伪造通知目标。
 func (s *rtcServer) handleReject(ctx context.Context, req *rtc.SignalRejectReq, signalReq *rtc.SignalReq) (*rtc.SignalRejectResp, error) {
 	if req.Invitation == nil {
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
@@ -337,7 +323,6 @@ func (s *rtcServer) handleReject(ctx context.Context, req *rtc.SignalRejectReq, 
 }
 
 // handleCancel processes a call cancellation.
-// Fix P1(安全): 从 DB 验证操作者是邀请发起方，防止被叫方冒充取消通话。
 func (s *rtcServer) handleCancel(ctx context.Context, req *rtc.SignalCancelReq, signalReq *rtc.SignalReq) (*rtc.SignalCancelResp, error) {
 	if req.Invitation == nil {
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
@@ -373,7 +358,6 @@ func (s *rtcServer) handleCancel(ctx context.Context, req *rtc.SignalCancelReq, 
 }
 
 // handleHungUp processes a call hang-up.
-// Fix P1(安全): 从 DB 验证操作者是通话参与者，防止任意用户挂断他人通话并删除 LiveKit Room。
 func (s *rtcServer) handleHungUp(ctx context.Context, req *rtc.SignalHungUpReq, signalReq *rtc.SignalReq) (*rtc.SignalHungUpResp, error) {
 	if req.Invitation == nil {
 		return nil, errs.ErrArgs.WrapMsg("invitation is nil")
@@ -415,7 +399,6 @@ func (s *rtcServer) handleHungUp(ctx context.Context, req *rtc.SignalHungUpReq, 
 }
 
 // handleGetTokenByRoomID returns a LiveKit token for an existing room.
-// Fix P0(安全): 原代码无权限校验，任意已登录用户可获取任意房间的 Token，可窃听他人通话。
 func (s *rtcServer) handleGetTokenByRoomID(ctx context.Context, req *rtc.SignalGetTokenByRoomIDReq) (*rtc.SignalGetTokenByRoomIDResp, error) {
 	dbInv, err := s.db.GetInvitationByRoomID(ctx, req.RoomID)
 	if err != nil {
@@ -706,8 +689,7 @@ func invitationToModel(inv *rtc.InvitationInfo, push *sdkws.OfflinePushInfo) *mo
 		InitiateTime:       inv.InitiateTime,
 		BusyLineUserIDList: inv.BusyLineUserIDList,
 		CreateTime:         now.UnixMilli(),
-		// Fix P1(TTL): 根据 Timeout 设置过期时间，配合 MongoDB TTL 索引自动清理
-		ExpireAt: now.Add(time.Duration(inv.Timeout+30) * time.Second),
+		ExpireAt:           now.Add(time.Duration(inv.Timeout+30) * time.Second),
 	}
 	if push != nil {
 		m.OfflinePushTitle = push.Title
@@ -738,7 +720,6 @@ func modelToInvitationInfo(m *model.SignalInvitation) *rtc.InvitationInfo {
 }
 
 // hungUpPeerIDsFromDB returns IDs that should receive hang-up notification, based on authoritative DB data.
-// Fix P1(安全): 原 hungUpPeerIDs 使用客户端传入的 inv，改为使用从 DB 获取的记录。
 func hungUpPeerIDsFromDB(inv *model.SignalInvitation, callerID string) []string {
 	if callerID == inv.InviterUserID {
 		return inv.InviteeUserIDList
