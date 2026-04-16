@@ -1,0 +1,14 @@
+rpc:
+  registerIP: ''
+  listenIP: 0.0.0.0
+  autoSetPorts: true
+  ports:
+    - 10190
+prometheus:
+  enable: true
+  ports:
+    - 20190
+virgil:
+  appID: ''
+  appKey: ''
+  appKeyID: ''

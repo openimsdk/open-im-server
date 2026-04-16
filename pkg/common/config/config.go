@@ -426,6 +426,7 @@ type RpcRegisterName struct {
 	Third          string `mapstructure:"third"`
 	Captcha        string `mapstructure:"captcha"`
 	Rtc            string `mapstructure:"rtc"`
+	Crypto         string `mapstructure:"crypto"`
 }
 
 func (r *RpcRegisterName) GetServiceNames() []string {
@@ -441,6 +442,7 @@ func (r *RpcRegisterName) GetServiceNames() []string {
 		r.Third,
 		r.Captcha,
 		r.Rtc,
+		r.Crypto,
 	}
 }
 
@@ -461,6 +463,23 @@ type Rtc struct {
 	} `mapstructure:"rpc"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 	LiveKit    LiveKit    `mapstructure:"liveKit"`
+}
+
+type Crypto struct {
+	RPC struct {
+		RegisterIP   string `mapstructure:"registerIP"`
+		ListenIP     string `mapstructure:"listenIP"`
+		AutoSetPorts bool   `mapstructure:"autoSetPorts"`
+		Ports        []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus Prometheus  `mapstructure:"prometheus"`
+	Virgil     VirgilConfig `mapstructure:"virgil"`
+}
+
+type VirgilConfig struct {
+	AppID    string `mapstructure:"appID"`
+	AppKey   string `mapstructure:"appKey"`
+	AppKeyID string `mapstructure:"appKeyID"`
 }
 
 
@@ -674,6 +693,7 @@ var (
 	OpenIMRPCThirdCfgFileName        = "openim-rpc-third.yml"
 	OpenIMRPCUserCfgFileName         = "openim-rpc-user.yml"
 	OpenIMRPCRtcCfgFileName          = "openim-rpc-rtc.yml"
+	OpenIMRPCCryptoCfgFileName       = "openim-rpc-crypto.yml"
 	RedisConfigFileName              = "redis.yml"
 	ShareFileName                    = "share.yml"
 	WebhooksConfigFileName           = "webhooks.yml"
@@ -761,6 +781,10 @@ func (u *User) GetConfigFileName() string {
 
 func (r *Rtc) GetConfigFileName() string {
 	return OpenIMRPCRtcCfgFileName
+}
+
+func (c *Crypto) GetConfigFileName() string {
+	return OpenIMRPCCryptoCfgFileName
 }
 
 func (r *Redis) GetConfigFileName() string {

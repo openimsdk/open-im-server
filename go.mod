@@ -64,6 +64,8 @@ require (
 	cloud.google.com/go/longrunning v0.5.5 // indirect
 	cloud.google.com/go/storage v1.40.0 // indirect
 	github.com/MicahParks/keyfunc v1.9.0 // indirect
+	github.com/VirgilSecurity/virgil-crypto-go v0.0.0-20180221191626-33caf95f9a5d // indirect
+	github.com/VirgilSecurity/virgil-sdk-go v5.2.1+incompatible // indirect
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.32.5 // indirect
@@ -253,6 +255,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
+	gopkg.in/virgil.v5 v5.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gorm.io/gorm v1.25.8 // indirect
 	k8s.io/api v0.31.2 // indirect

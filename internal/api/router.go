@@ -12,6 +12,7 @@ import (
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/relation"
+	pbcrypto "github.com/openimsdk/protocol/crypto"
 	"github.com/openimsdk/protocol/rtc"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/protocol/user"
@@ -109,6 +110,10 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		return nil, err
 	}
 	rtcConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Rtc)
+	if err != nil {
+		return nil, err
+	}
+	cryptoConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Crypto)
 	if err != nil {
 		return nil, err
 	}
@@ -342,6 +347,20 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		rtcGroup.POST("/signal_send_custom_signal", rc.SignalSendCustomSignal)
 		rtcGroup.POST("/get_signal_invitation_records", rc.GetSignalInvitationRecords)
 		rtcGroup.POST("/delete_signal_records", rc.DeleteSignalRecords)
+	}
+
+	// Crypto / E2EE
+	{
+		cr := NewCryptoApi(pbcrypto.NewCryptoServiceClient(cryptoConn))
+		cryptoGroup := r.Group("/crypto")
+		cryptoGroup.POST("/register_device", cr.RegisterDevice)
+		cryptoGroup.POST("/get_devices", cr.GetDevices)
+		cryptoGroup.POST("/revoke_device", cr.RevokeDevice)
+		cryptoGroup.POST("/get_virgil_jwt", cr.GetVirgilJWT)
+		cryptoGroup.POST("/get_group_key_version", cr.GetGroupKeyVersion)
+		cryptoGroup.POST("/get_group_key_events", cr.GetGroupKeyEvents)
+		cryptoGroup.POST("/security_precheck", cr.SecurityPrecheck)
+		cryptoGroup.POST("/integrity_report", cr.IntegrityReport)
 	}
 
 	{
