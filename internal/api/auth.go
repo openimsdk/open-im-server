@@ -43,3 +43,11 @@ func (o *AuthApi) ParseToken(c *gin.Context) {
 func (o *AuthApi) ForceLogout(c *gin.Context) {
 	a2r.Call(c, auth.AuthClient.ForceLogout, o.Client)
 }
+
+func (o *AuthApi) GetActiveDevices(c *gin.Context) {
+	a2r.Call(c, auth.AuthClient.GetActiveDevices, o.Client)
+}
+
+func (o *AuthApi) KickDevice(c *gin.Context) {
+	a2r.Call(c, auth.AuthClient.KickDevice, o.Client)
+}

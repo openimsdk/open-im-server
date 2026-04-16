@@ -38,6 +38,10 @@ func (s *groupServer) groupDB2PB(group *model.Group, ownerUserID string, memberC
 		ApplyMemberFriend:      group.ApplyMemberFriend,
 		NotificationUpdateTime: group.NotificationUpdateTime.UnixMilli(),
 		NotificationUserID:     group.NotificationUserID,
+		AllowSendMsg:           group.AllowSendMsg,
+		AllowPinMsg:            group.AllowPinMsg,
+		AllowAddMember:         group.AllowAddMember,
+		AllowEditGroupInfo:     group.AllowEditGroupInfo,
 	}
 }
 

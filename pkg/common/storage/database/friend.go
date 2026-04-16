@@ -57,4 +57,6 @@ type Friend interface {
 	FindOwnerFriendUserIds(ctx context.Context, ownerUserID string, limit int) ([]string, error)
 
 	IncrVersion(ctx context.Context, ownerUserID string, friendUserIDs []string, state int32) error
+
+	FindPinnedFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error)
 }

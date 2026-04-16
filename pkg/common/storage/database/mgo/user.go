@@ -32,13 +32,20 @@ import (
 
 func NewUserMongo(db *mongo.Database) (database.User, error) {
 	coll := db.Collection(database.UserName)
-	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "user_id", Value: 1},
+	indexes := []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "user_id", Value: 1}},
+			Options: options.Index().SetUnique(true),
 		},
-		Options: options.Index().SetUnique(true),
-	})
-	if err != nil {
+		{
+			Keys:    bson.D{{Key: "phone", Value: 1}},
+			Options: options.Index().SetSparse(true),
+		},
+		{
+			Keys: bson.D{{Key: "nickname", Value: 1}},
+		},
+	}
+	if _, err := coll.Indexes().CreateMany(context.Background(), indexes); err != nil {
 		return nil, errs.Wrap(err)
 	}
 	return &UserMgo{coll: coll}, nil
@@ -73,6 +80,18 @@ func (u *UserMgo) TakeNotification(ctx context.Context, level int64) (user []*mo
 
 func (u *UserMgo) TakeByNickname(ctx context.Context, nickname string) (user []*model.User, err error) {
 	return mongoutil.Find[*model.User](ctx, u.coll, bson.M{"nickname": nickname})
+}
+
+func (u *UserMgo) FindOrdinaryUsersByNickname(ctx context.Context, level1, level2 int64, nickname string) ([]*model.User, error) {
+	query := bson.M{
+		"nickname":         nickname,
+		"app_manger_level": bson.M{"$in": []int64{level1, level2}},
+	}
+	return mongoutil.Find[*model.User](ctx, u.coll, query, options.Find().SetLimit(100))
+}
+
+func (u *UserMgo) FindByPhone(ctx context.Context, phone string) (*model.User, error) {
+	return mongoutil.FindOne[*model.User](ctx, u.coll, bson.M{"phone": phone})
 }
 
 func (u *UserMgo) Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*model.User, err error) {

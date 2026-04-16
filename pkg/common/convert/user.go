@@ -31,6 +31,10 @@ func UserDB2Pb(user *relationtb.User) *sdkws.UserInfo {
 		CreateTime:       user.CreateTime.UnixMilli(),
 		AppMangerLevel:   user.AppMangerLevel,
 		GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
+		Phone:             user.Phone,
+		PhoneVisibility:   user.PhoneVisibility,
+		CallAcceptSetting: user.CallAcceptSetting,
+		MsgReceiveSetting: user.MsgReceiveSetting,
 	}
 }
 
@@ -89,6 +93,18 @@ func UserPb2DBMapEx(user *sdkws.UserInfoWithEx) map[string]any {
 	}
 	if user.GlobalRecvMsgOpt != nil {
 		val["global_recv_msg_opt"] = user.GlobalRecvMsgOpt.Value
+	}
+	if user.Phone != nil {
+		val["phone"] = user.Phone.Value
+	}
+	if user.PhoneVisibility != nil {
+		val["phone_visibility"] = user.PhoneVisibility.Value
+	}
+	if user.CallAcceptSetting != nil {
+		val["call_accept_setting"] = user.CallAcceptSetting.Value
+	}
+	if user.MsgReceiveSetting != nil {
+		val["msg_receive_setting"] = user.MsgReceiveSetting.Value
 	}
 
 	return val

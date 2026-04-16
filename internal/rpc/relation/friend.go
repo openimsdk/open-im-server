@@ -34,12 +34,16 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/servererrs"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/util/conversationutil"
 	"github.com/openimsdk/protocol/constant"
+	conversationpb "github.com/openimsdk/protocol/conversation"
 	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/sdkws"
+	"github.com/openimsdk/protocol/wrapperspb"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
 )
@@ -48,12 +52,14 @@ type friendServer struct {
 	relation.UnimplementedFriendServer
 	db                 controller.FriendDatabase
 	blackDatabase      controller.BlackDatabase
+	globalBlackDB      controller.UserGlobalBlackDatabase
 	notificationSender *FriendNotificationSender
 	RegisterCenter     discovery.SvcDiscoveryRegistry
 	config             *Config
 	webhookClient      *webhook.Client
 	queue              *memamq.MemoryQueue
 	userClient         *rpcli.UserClient
+	conversationClient *rpcli.ConversationClient
 }
 
 type Config struct {
@@ -93,11 +99,20 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 		return err
 	}
 
+	globalBlackMongoDB, err := mgo.NewUserGlobalBlackMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
+
 	userConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.User)
 	if err != nil {
 		return err
 	}
 	msgConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Msg)
+	if err != nil {
+		return err
+	}
+	conversationConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Conversation)
 	if err != nil {
 		return err
 	}
@@ -125,12 +140,14 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 			blackMongoDB,
 			redis.NewBlackCacheRedis(rdb, &config.LocalCacheConfig, blackMongoDB, redis.GetRocksCacheOptions()),
 		),
+		globalBlackDB:      controller.NewUserGlobalBlackDatabase(globalBlackMongoDB),
 		notificationSender: notificationSender,
 		RegisterCenter:     client,
 		config:             config,
 		webhookClient:      webhook.NewWebhookClient(config.WebhooksConfig.URL),
 		queue:              memamq.NewMemoryQueue(16, 1024*1024),
 		userClient:         userClient,
+		conversationClient: rpcli.NewConversationClient(conversationConn),
 	})
 	return nil
 }
@@ -287,6 +304,9 @@ func (s *friendServer) GetFriendInfo(ctx context.Context, req *relation.GetFrien
 	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
+	if err := s.checkUsersNotGlobalBlocked(ctx, req.FriendUserIDs); err != nil {
+		return nil, err
+	}
 	friends, err := s.db.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
 		return nil, err
@@ -302,6 +322,9 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *relation.G
 	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID, s.config.Share.IMAdminUserID); err != nil {
 		return nil, err
 	}
+	if err := s.checkUsersNotGlobalBlocked(ctx, req.FriendUserIDs); err != nil {
+		return nil, err
+	}
 	friends, err := s.getFriend(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
 		return nil, err
@@ -309,6 +332,25 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *relation.G
 	return &relation.GetDesignatedFriendsResp{
 		FriendsInfo: friends,
 	}, nil
+}
+
+// checkUsersNotGlobalBlocked returns ErrUserBlocked if any of the given userIDs are in the global blacklist.
+func (s *friendServer) checkUsersNotGlobalBlocked(ctx context.Context, userIDs []string) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+	blocked, err := s.globalBlackDB.FindBlocked(ctx, userIDs)
+	if err != nil {
+		return err
+	}
+	if len(blocked) == 0 {
+		return nil
+	}
+	bannedIDs := make([]string, 0, len(blocked))
+	for _, b := range blocked {
+		bannedIDs = append(bannedIDs, b.UserID)
+	}
+	return servererrs.ErrUserBlocked.WrapMsg("user is banned", "userIDs", bannedIDs)
 }
 
 func (s *friendServer) getFriend(ctx context.Context, ownerUserID string, friendUserIDs []string) ([]*sdkws.FriendInfo, error) {
@@ -490,6 +532,9 @@ func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *relatio
 				OperatorUserID: friend.OperatorUserID,
 				Ex:             friend.Ex,
 				IsPinned:       friend.IsPinned,
+				IsMute:         friend.IsMuted,
+				MuteDuration:   friend.MuteDuration,
+				MuteEndTime:    friend.MuteEndTime,
 			}
 		}
 
@@ -545,8 +590,53 @@ func (s *friendServer) UpdateFriends(
 	if req.Ex != nil {
 		val["ex"] = req.Ex.Value
 	}
+	if req.IsMute != nil {
+		val["is_muted"] = req.IsMute.Value
+	}
+	if req.MuteDuration != nil {
+		val["mute_duration"] = req.MuteDuration.Value
+	}
+	if req.MuteEndTime != nil {
+		val["mute_end_time"] = req.MuteEndTime.Value
+	}
 	if err = s.db.UpdateFriends(ctx, req.OwnerUserID, req.FriendUserIDs, val); err != nil {
 		return nil, err
+	}
+
+	if req.IsPinned != nil {
+		for _, friendUserID := range req.FriendUserIDs {
+			convID := conversationutil.GenConversationIDForSingle(req.OwnerUserID, friendUserID)
+			if err := s.conversationClient.SetConversations(ctx, []string{req.OwnerUserID},
+				&conversationpb.ConversationReq{
+					ConversationID:   convID,
+					ConversationType: constant.SingleChatType,
+					UserID:           friendUserID,
+					IsPinned:         req.IsPinned,
+				}); err != nil {
+				log.ZWarn(ctx, "sync conversation isPinned failed", err,
+					"ownerUserID", req.OwnerUserID, "friendUserID", friendUserID)
+			}
+		}
+	}
+
+	if req.IsMute != nil {
+		recvMsgOpt := int32(constant.ReceiveNotNotifyMessage)
+		if !req.IsMute.Value {
+			recvMsgOpt = constant.ReceiveMessage
+		}
+		for _, friendUserID := range req.FriendUserIDs {
+			convID := conversationutil.GenConversationIDForSingle(req.OwnerUserID, friendUserID)
+			if err := s.conversationClient.SetConversations(ctx, []string{req.OwnerUserID},
+				&conversationpb.ConversationReq{
+					ConversationID:   convID,
+					ConversationType: constant.SingleChatType,
+					UserID:           friendUserID,
+					RecvMsgOpt:       &wrapperspb.Int32Value{Value: recvMsgOpt},
+				}); err != nil {
+				log.ZWarn(ctx, "sync conversation recvMsgOpt failed", err,
+					"ownerUserID", req.OwnerUserID, "friendUserID", friendUserID)
+			}
+		}
 	}
 
 	resp := &relation.UpdateFriendsResp{}
@@ -568,6 +658,17 @@ func (s *friendServer) GetSelfUnhandledApplyCount(ctx context.Context, req *rela
 	return &relation.GetSelfUnhandledApplyCountResp{
 		Count: count,
 	}, nil
+}
+
+func (s *friendServer) GetPinnedFriendIDs(ctx context.Context, req *relation.GetPinnedFriendIDsReq) (*relation.GetPinnedFriendIDsResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	ids, err := s.db.GetPinnedFriendIDs(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return &relation.GetPinnedFriendIDsResp{FriendUserIDs: ids}, nil
 }
 
 func (s *friendServer) getCommonUserMap(ctx context.Context, userIDs []string) (map[string]common_user.CommonUser, error) {

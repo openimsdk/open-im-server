@@ -158,8 +158,10 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 	}
 	isSend := true
 	isNotification := msgprocessor.IsNotificationByMsg(req.MsgData)
+	log.ZInfo(ctx, "sendMsgSingleChat", "isNotification", isNotification, "msgdata", req.MsgData)
+
 	if !isNotification {
-		log.ZInfo(ctx, "sendMsgSingleChat", "isNotification", isNotification, "msgdata", req.MsgData)
+		// 非通知类消息：执行发送权限校验 + 接收偏好校验（含 blacklist / MsgReceiveSetting / webhook / FriendVerify / globalOpt / convOpt）
 		isSend, err = m.modifyMessageByUserMessageReceiveOpt(
 			ctx,
 			req.MsgData.RecvID,
@@ -174,23 +176,21 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 	if !isSend {
 		prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 		return nil, nil
-	} else {
-		if err := m.webhookBeforeMsgModify(ctx, &m.config.WebhooksConfig.BeforeMsgModify, req); err != nil {
-			return nil, err
-		}
-
-		log.ZInfo(ctx, "sendMsgSingleChat", "isNotification", isNotification, "msgdata", req.MsgData)
-
-		if err := m.MsgDatabase.MsgToMQ(ctx, conversationutil.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
-			prommetrics.SingleChatMsgProcessFailedCounter.Inc()
-			return nil, err
-		}
-		m.webhookAfterSendSingleMsg(ctx, &m.config.WebhooksConfig.AfterSendSingleMsg, req)
-		prommetrics.SingleChatMsgProcessSuccessCounter.Inc()
-		return &pbmsg.SendMsgResp{
-			ServerMsgID: req.MsgData.ServerMsgID,
-			ClientMsgID: req.MsgData.ClientMsgID,
-			SendTime:    req.MsgData.SendTime,
-		}, nil
 	}
+
+	if err := m.webhookBeforeMsgModify(ctx, &m.config.WebhooksConfig.BeforeMsgModify, req); err != nil {
+		return nil, err
+	}
+	log.ZInfo(ctx, "sendMsgSingleChat after modify", "isNotification", isNotification, "msgdata", req.MsgData)
+	if err := m.MsgDatabase.MsgToMQ(ctx, conversationutil.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
+		prommetrics.SingleChatMsgProcessFailedCounter.Inc()
+		return nil, err
+	}
+	m.webhookAfterSendSingleMsg(ctx, &m.config.WebhooksConfig.AfterSendSingleMsg, req)
+	prommetrics.SingleChatMsgProcessSuccessCounter.Inc()
+	return &pbmsg.SendMsgResp{
+		ServerMsgID: req.MsgData.ServerMsgID,
+		ClientMsgID: req.MsgData.ClientMsgID,
+		SendTime:    req.MsgData.SendTime,
+	}, nil
 }

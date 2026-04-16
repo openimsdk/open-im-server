@@ -294,3 +294,50 @@ func (s *authServer) KickTokens(ctx context.Context, req *pbauth.KickTokensReq) 
 	}
 	return &pbauth.KickTokensResp{}, nil
 }
+
+// GetActiveDevices returns all platforms that have at least one valid (non-kicked) token for the user.
+// Only the user themselves or an admin can call this.
+func (s *authServer) GetActiveDevices(ctx context.Context, req *pbauth.GetActiveDevicesReq) (*pbauth.GetActiveDevicesResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+
+	var devices []*pbauth.DeviceInfo
+	for platformID, platformName := range constant.PlatformID2Name {
+		if int32(platformID) == constant.AdminPlatformID {
+			continue
+		}
+		m, err := s.authDatabase.GetTokensWithoutError(ctx, req.UserID, platformID)
+		if err != nil {
+			return nil, err
+		}
+		for _, state := range m {
+			if state == constant.NormalToken {
+				devices = append(devices, &pbauth.DeviceInfo{
+					PlatformID:   int32(platformID),
+					PlatformName: platformName,
+				})
+				break
+			}
+		}
+	}
+	return &pbauth.GetActiveDevicesResp{Devices: devices}, nil
+}
+
+// KickDevice kicks the specified platform device offline for the given user.
+// Only the user themselves or an admin can call this.
+func (s *authServer) KickDevice(ctx context.Context, req *pbauth.KickDeviceReq) (*pbauth.KickDeviceResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	if req.PlatformID == constant.AdminPlatformID {
+		return nil, errs.ErrArgs.WrapMsg("cannot kick admin platform")
+	}
+	if _, ok := constant.PlatformID2Name[int(req.PlatformID)]; !ok {
+		return nil, errs.ErrArgs.WrapMsg("invalid platformID", "platformID", req.PlatformID)
+	}
+	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID); err != nil {
+		return nil, err
+	}
+	return &pbauth.KickDeviceResp{}, nil
+}

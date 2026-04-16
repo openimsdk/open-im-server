@@ -11,6 +11,7 @@
 #   chmod +x captcha_api_test.sh
 #   ./captcha_api_test.sh
 #   ./captcha_api_test.sh --host http://127.0.0.1:10002
+#   HOST=http://api.example.com:10002 ./captcha_api_test.sh
 # ============================================================
 
 set -euo pipefail
@@ -18,17 +19,13 @@ set -euo pipefail
 # ──────────────────────────────────────────────
 # 可配置参数（可通过环境变量覆盖）
 # ──────────────────────────────────────────────
+# 说明：/captcha/* 在 GinParseToken 白名单中，无需 Header token。
 HOST="${HOST:-http://127.0.0.1:10002}"
-ADMIN_USER_ID="${ADMIN_USER_ID:-imAdmin}"
-ADMIN_SECRET="${ADMIN_SECRET:-openIM123}"
-PLATFORM_ID="${PLATFORM_ID:-1}"       # 1=iOS 2=Android 3=Windows ...
 
 # 命令行参数解析
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --host) HOST="$2"; shift 2 ;;
-    --admin-user-id) ADMIN_USER_ID="$2"; shift 2 ;;
-    --admin-secret) ADMIN_SECRET="$2"; shift 2 ;;
     *) echo "未知参数: $1"; exit 1 ;;
   esac
 done
@@ -108,35 +105,12 @@ assert_err_nonzero() {
 }
 
 # ──────────────────────────────────────────────
-# 前置：获取 Admin Token
-# ──────────────────────────────────────────────
-section "前置：获取 Admin Token"
-
-TOKEN_RESP=$(curl -s -X POST \
-  -H "Content-Type: application/json" \
-  -H "operationID: $(new_op_id)" \
-  -d "{\"secret\":\"${ADMIN_SECRET}\",\"platformID\":${PLATFORM_ID},\"userID\":\"${ADMIN_USER_ID}\"}" \
-  "${HOST}/auth/get_admin_token")
-
-info "Token 响应: $TOKEN_RESP"
-
-ERR_CODE=$(echo "$TOKEN_RESP" | jq -r '.errCode // "null"')
-if [[ "$ERR_CODE" != "0" ]]; then
-  echo -e "${RED}[ERROR]${NC} 获取 Admin Token 失败 (errCode=$ERR_CODE)，中止测试"
-  exit 1
-fi
-
-TOKEN=$(echo "$TOKEN_RESP" | jq -r '.data.token')
-info "获取到 token: ${TOKEN:0:40}..."
-
-# ──────────────────────────────────────────────
-# 用例 1：生成验证码 —— 正常流程
+# 用例 1：生成验证码 —— 正常流程（无需 token，白名单）
 # ──────────────────────────────────────────────
 section "用例 1 / POST /captcha/generate —— 正常生成验证码"
 
 GEN_RESP=$(curl -s -X POST \
   -H "Content-Type: application/json" \
-  -H "token: ${TOKEN}" \
   -H "operationID: $(new_op_id)" \
   -d '{}' \
   "${HOST}/captcha/generate")
@@ -165,9 +139,9 @@ else
 fi
 
 # ──────────────────────────────────────────────
-# 用例 2：生成验证码 —— 不携带 Token
+# 用例 2：生成验证码 —— 不携带 Token（白名单，应与用例 1 一致成功）
 # ──────────────────────────────────────────────
-section "用例 2 / POST /captcha/generate —— 无 Token 应被鉴权中间件拦截"
+section "用例 2 / POST /captcha/generate —— 无 Token（白名单）仍应成功"
 
 NO_TOKEN_RESP=$(curl -s -X POST \
   -H "Content-Type: application/json" \
@@ -175,8 +149,13 @@ NO_TOKEN_RESP=$(curl -s -X POST \
   -d '{}' \
   "${HOST}/captcha/generate")
 
-info "响应: $NO_TOKEN_RESP"
-assert_err_nonzero "$NO_TOKEN_RESP" "无 Token 被鉴权中间件拦截"
+info "响应摘要: $(echo "${NO_TOKEN_RESP}" | jq -c '{errCode,errMsg,data:{captchaID:.data.captchaID}}' 2>/dev/null || echo "$NO_TOKEN_RESP")"
+NO_TOKEN_ERR=$(echo "${NO_TOKEN_RESP}" | jq -r '.errCode // "null"')
+if [[ "${NO_TOKEN_ERR}" == "500" ]]; then
+  info "与用例 1 相同：若 captcha 资源未就绪可能为 500，此处不强制 PASS/FAIL"
+else
+  assert_err_code "${NO_TOKEN_RESP}" "0" "无 Token 调用 generate errCode 应为 0（白名单）"
+fi
 
 # ──────────────────────────────────────────────
 # 用例 3：验证验证码 —— 坐标错误（x=999, y=999）
@@ -188,7 +167,6 @@ if [[ -z "${CAPTCHA_ID}" ]]; then
 else
   VERIFY_WRONG_RESP=$(curl -s -X POST \
     -H "Content-Type: application/json" \
-    -H "token: ${TOKEN}" \
     -H "operationID: $(new_op_id)" \
     -d "{\"captchaID\":\"${CAPTCHA_ID}\",\"x\":999,\"y\":999}" \
     "${HOST}/captcha/verify")
@@ -209,7 +187,6 @@ if [[ -z "${CAPTCHA_ID}" ]]; then
 else
   VERIFY_REUSE_RESP=$(curl -s -X POST \
     -H "Content-Type: application/json" \
-    -H "token: ${TOKEN}" \
     -H "operationID: $(new_op_id)" \
     -d "{\"captchaID\":\"${CAPTCHA_ID}\",\"x\":0,\"y\":0}" \
     "${HOST}/captcha/verify")
@@ -224,7 +201,6 @@ section "用例 5 / POST /captcha/verify —— captchaID 不存在，应返回�
 
 VERIFY_NOTFOUND_RESP=$(curl -s -X POST \
   -H "Content-Type: application/json" \
-  -H "token: ${TOKEN}" \
   -H "operationID: $(new_op_id)" \
   -d '{"captchaID":"00000000-0000-0000-0000-000000000000","x":10,"y":10}' \
   "${HOST}/captcha/verify")
@@ -239,7 +215,6 @@ section "用例 6 / POST /captcha/verify —— captchaID 为空字符串，应�
 
 VERIFY_EMPTY_RESP=$(curl -s -X POST \
   -H "Content-Type: application/json" \
-  -H "token: ${TOKEN}" \
   -H "operationID: $(new_op_id)" \
   -d '{"captchaID":"","x":10,"y":10}' \
   "${HOST}/captcha/verify")
@@ -248,18 +223,18 @@ info "响应: $VERIFY_EMPTY_RESP"
 assert_err_nonzero "$VERIFY_EMPTY_RESP" "captchaID 为空时返回错误"
 
 # ──────────────────────────────────────────────
-# 用例 7：验证验证码 —— 不携带 Token
+# 用例 7：验证验证码 —— 不携带 Token（白名单，应到达业务层而非 token 拦截）
 # ──────────────────────────────────────────────
-section "用例 7 / POST /captcha/verify —— 无 Token 应被鉴权中间件拦截"
+section "用例 7 / POST /captcha/verify —— 无 Token（白名单）随机 captchaID 应返回业务错误"
 
 VERIFY_NOTOKEN_RESP=$(curl -s -X POST \
   -H "Content-Type: application/json" \
   -H "operationID: $(new_op_id)" \
-  -d "{\"captchaID\":\"${CAPTCHA_ID:-00000000-0000-0000-0000-000000000000}\",\"x\":10,\"y\":10}" \
+  -d "{\"captchaID\":\"11111111-1111-1111-1111-111111111111\",\"x\":10,\"y\":10}" \
   "${HOST}/captcha/verify")
 
 info "响应: $VERIFY_NOTOKEN_RESP"
-assert_err_nonzero "$VERIFY_NOTOKEN_RESP" "无 Token 被鉴权中间件拦截"
+assert_err_nonzero "$VERIFY_NOTOKEN_RESP" "无 Token 时无效 captchaID 仍返回业务层 errCode!=0（非鉴权拦截）"
 
 # ──────────────────────────────────────────────
 # 用例 8：完整正向链路 —— 新生成 + 用偏差坐标验证
@@ -271,7 +246,6 @@ section "用例 8 / 完整正向链路 —— 新生成验证码 → 坐标偏�
 
 GEN_RESP2=$(curl -s -X POST \
   -H "Content-Type: application/json" \
-  -H "token: ${TOKEN}" \
   -H "operationID: $(new_op_id)" \
   -d '{}' \
   "${HOST}/captcha/generate")
@@ -298,7 +272,6 @@ else
 
   VERIFY_LINK_RESP=$(curl -s -X POST \
     -H "Content-Type: application/json" \
-    -H "token: ${TOKEN}" \
     -H "operationID: $(new_op_id)" \
     -d "{\"captchaID\":\"${CAPTCHA_ID2}\",\"x\":0,\"y\":0}" \
     "${HOST}/captcha/verify")

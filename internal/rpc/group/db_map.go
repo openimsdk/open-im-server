@@ -53,6 +53,18 @@ func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[s
 	if group.Ex != nil {
 		m["ex"] = group.Ex.Value
 	}
+	if group.AllowSendMsg != nil {
+		m["allow_send_msg"] = group.AllowSendMsg.Value
+	}
+	if group.AllowPinMsg != nil {
+		m["allow_pin_msg"] = group.AllowPinMsg.Value
+	}
+	if group.AllowAddMember != nil {
+		m["allow_add_member"] = group.AllowAddMember.Value
+	}
+	if group.AllowEditGroupInfo != nil {
+		m["allow_edit_group_info"] = group.AllowEditGroupInfo.Value
+	}
 	return m
 }
 
@@ -98,6 +110,22 @@ func UpdateGroupInfoExMap(ctx context.Context, group *pbgroup.SetGroupInfoExReq)
 	}
 	if group.Ex != nil {
 		m["ex"] = group.Ex.Value
+		normalFlag = true
+	}
+	if group.AllowSendMsg != nil {
+		m["allow_send_msg"] = group.AllowSendMsg.Value
+		normalFlag = true
+	}
+	if group.AllowPinMsg != nil {
+		m["allow_pin_msg"] = group.AllowPinMsg.Value
+		normalFlag = true
+	}
+	if group.AllowAddMember != nil {
+		m["allow_add_member"] = group.AllowAddMember.Value
+		normalFlag = true
+	}
+	if group.AllowEditGroupInfo != nil {
+		m["allow_edit_group_info"] = group.AllowEditGroupInfo.Value
 		normalFlag = true
 	}
 

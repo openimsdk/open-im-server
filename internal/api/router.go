@@ -159,6 +159,15 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		userRouterGroup.POST("/update_notification_account", u.UpdateNotificationAccountInfo)
 		userRouterGroup.POST("/search_notification_account", u.SearchNotificationAccount)
 
+		// 手机号可见性设置（所有人/仅好友/隐藏）
+		userRouterGroup.POST("/set_phone_visibility", u.SetPhoneVisibility)
+		userRouterGroup.POST("/set_call_accept_setting", u.SetCallAcceptSetting)
+		userRouterGroup.POST("/set_msg_receive_setting", u.SetMsgReceiveSetting)
+		// 根据手机号精确查找用户（phoneSearchVisibility=true 时遵守 phone_visibility 设置）
+		userRouterGroup.POST("/get_user_by_phone", u.GetUserByPhone)
+		// 根据昵称精确查询用户（可多结果，与 getPaginationUsers 模糊搜索不同）
+		userRouterGroup.POST("/get_users_by_nickname", u.GetUsersByNickname)
+
 		// 全局黑名单管理（仅管理员）
 		userRouterGroup.POST("/add_global_blacklist", bl.AddGlobalBlacklist)
 		userRouterGroup.POST("/remove_global_blacklist", bl.RemoveGlobalBlacklist)
@@ -190,6 +199,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		friendRouterGroup.POST("/get_incremental_friends", f.GetIncrementalFriends)
 		friendRouterGroup.POST("/get_full_friend_user_ids", f.GetFullFriendUserIDs)
 		friendRouterGroup.POST("/get_self_unhandled_apply_count", f.GetSelfUnhandledApplyCount)
+		friendRouterGroup.POST("/get_pinned_friend_ids", f.GetPinnedFriendIDs)
 	}
 
 	g := NewGroupApi(group.NewGroupClient(groupConn))
@@ -237,7 +247,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		authRouterGroup.POST("/get_user_token", a.GetUserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", a.ForceLogout)
-
+		authRouterGroup.POST("/get_active_devices", a.GetActiveDevices)
+		authRouterGroup.POST("/kick_device", a.KickDevice)
 	}
 	// Third service
 	{
@@ -287,6 +298,9 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		msgGroup.POST("/batch_send_msg", m.BatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 		msgGroup.POST("/get_server_time", m.GetServerTime)
+		msgGroup.POST("/report_spam", m.ReportSpam)
+		msgGroup.POST("/get_spam_reports", m.GetSpamReports)
+		msgGroup.POST("/handle_spam_report", m.HandleSpamReport)
 	}
 	// Conversation
 	{

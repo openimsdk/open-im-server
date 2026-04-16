@@ -161,7 +161,7 @@ func (s *server) VerifyCaptcha(ctx context.Context, req *pbcaptcha.VerifyCaptcha
 	}
 	success := slide.Validate(int(req.X), int(req.Y), doc.X, doc.Y, s.conf.VerifyPadding)
 	if !success {
-		log.ZWarn(ctx, "captcha validate failed", nil, "captchaID", req.CaptchaID, "x", req.X, "y", req.Y)
+		log.ZError(ctx, "captcha validate failed", nil, "captchaID", req.CaptchaID, "x", req.X, "y", req.Y, "docX", doc.X, "docY", doc.Y)
 	}
 	return &pbcaptcha.VerifyCaptchaResp{Success: success}, nil
 }

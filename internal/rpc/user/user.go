@@ -18,9 +18,11 @@ import (
 	"context"
 	"errors"
 	"math/rand"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"github.com/openimsdk/open-im-server/v3/internal/rpc/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -35,6 +37,7 @@ import (
 	"github.com/openimsdk/protocol/group"
 	friendpb "github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/mcontext"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
@@ -47,9 +50,14 @@ import (
 	"github.com/openimsdk/tools/db/pagination"
 	registry "github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/datautil"
 	"google.golang.org/grpc"
 )
+
+// phoneRe 仅校验手机号的基本数字格式，不强制区号/国家码前缀。
+// 规则：纯数字，长度 5-20 位，允许可选的 + 前缀（如 +86...）。
+var phoneRe = regexp.MustCompile(`^\+?\d{5,20}$`)
 
 type userServer struct {
 	pbuser.UnimplementedUserServer
@@ -62,6 +70,7 @@ type userServer struct {
 	webhookClient            *webhook.Client
 	groupClient              *rpcli.GroupClient
 	relationClient           *rpcli.RelationClient
+	globalBlackDB            controller.UserGlobalBlackDatabase
 }
 
 type Config struct {
@@ -109,6 +118,10 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	msgClient := rpcli.NewMsgClient(msgConn)
 	userCache := redis.NewUserCacheRedis(rdb, &config.LocalCacheConfig, userDB, redis.GetRocksCacheOptions())
 	database := controller.NewUserDatabase(userDB, userCache, mgocli.GetTx())
+	globalBlackMgo, err := mgo.NewUserGlobalBlackMongo(mgocli.GetDB())
+	if err != nil {
+		return err
+	}
 	localcache.InitLocalCache(&config.LocalCacheConfig)
 	u := &userServer{
 		online:                   redis.NewUserOnline(rdb),
@@ -121,6 +134,7 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 
 		groupClient:    rpcli.NewGroupClient(groupConn),
 		relationClient: rpcli.NewRelationClient(friendConn),
+		globalBlackDB:  controller.NewUserGlobalBlackDatabase(globalBlackMgo),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.db.InitOnce(context.Background(), users)
@@ -130,11 +144,69 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 	resp = &pbuser.GetDesignateUsersResp{}
 	users, err := s.db.Find(ctx, req.UserIDs)
 	if err != nil {
+		log.ZError(ctx, "GetDesignateUsers: db.Find failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "reqUserCount", len(req.UserIDs))
 		return nil, err
 	}
 
-	resp.UsersInfo = convert.UsersDB2Pb(users)
+	if blocked, err := s.globalBlackDB.FindBlocked(ctx, req.UserIDs); err != nil {
+		log.ZError(ctx, "GetDesignateUsers: globalBlackDB.FindBlocked failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "reqUserCount", len(req.UserIDs))
+		return nil, err
+	} else if len(blocked) > 0 {
+		bannedIDs := make([]string, 0, len(blocked))
+		for _, b := range blocked {
+			bannedIDs = append(bannedIDs, b.UserID)
+		}
+		return nil, servererrs.ErrUserBlocked.WrapMsg("user is banned", "userIDs", bannedIDs)
+	}
+
+	pbUsers := convert.UsersDB2Pb(users)
+	viewerID := mcontext.GetOpUserID(ctx)
+	if err := s.applyPhoneVisibility(ctx, viewerID, pbUsers, users); err != nil {
+		log.ZError(ctx, "GetDesignateUsers: applyPhoneVisibility failed", err,
+			"opUserID", viewerID, "userCount", len(users))
+		return nil, err
+	}
+	resp.UsersInfo = pbUsers
 	return resp, nil
+}
+
+// applyPhoneVisibility 根据 phone_visibility 和好友关系决定是否下发明文手机号。
+// pbUsers 与 dbUsers 下标一一对应。
+func (s *userServer) applyPhoneVisibility(ctx context.Context, viewerID string, pbUsers []*sdkws.UserInfo, dbUsers []*tablerelation.User) error {
+	for i, db := range dbUsers {
+		pb := pbUsers[i]
+		if db.Phone == "" {
+			// 未设置手机号，直接跳过
+			continue
+		}
+		switch db.PhoneVisibility {
+		case tablerelation.PhoneVisibilityPublic:
+			// 所有人可见，保留 phone 字段（已由 UserDB2Pb 填充）
+		case tablerelation.PhoneVisibilityHidden:
+			// 完全隐藏：即使本人也不通过此接口暴露，客户端自行从个人设置接口获取
+			pb.Phone = ""
+		case tablerelation.PhoneVisibilityFriends:
+			// 仅好友可见
+			if viewerID == db.UserID {
+				// 本人始终可见
+				break
+			}
+			isFriend, err := s.relationClient.IsFriend(ctx, viewerID, db.UserID)
+			if err != nil {
+				log.ZError(ctx, "applyPhoneVisibility: IsFriend failed", err,
+					"viewerID", viewerID, "targetUserID", db.UserID)
+				return err
+			}
+			if !isFriend {
+				pb.Phone = ""
+			}
+		default:
+			pb.Phone = ""
+		}
+	}
+	return nil
 }
 
 // deprecated:
@@ -219,6 +291,220 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 	}
 	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
 	return resp, nil
+}
+
+// SetPhoneVisibility 设置手机号及其可见性（0=所有人，1=仅好友，2=隐藏）。
+// 只允许本人或管理员操作。
+func (s *userServer) SetPhoneVisibility(ctx context.Context, req *pbuser.SetPhoneVisibilityReq) (*pbuser.SetPhoneVisibilityResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("userID is required")
+	}
+	if req.PhoneVisibility < 0 || req.PhoneVisibility > 2 {
+		return nil, errs.ErrArgs.WrapMsg("phoneVisibility must be 0, 1 or 2")
+	}
+	if req.Phone != "" && !phoneRe.MatchString(req.Phone) {
+		return nil, errs.ErrArgs.WrapMsg("phone must contain digits only (5-20 digits), optionally prefixed with +")
+	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		log.ZWarn(ctx, "SetPhoneVisibility: access denied", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		log.ZError(ctx, "SetPhoneVisibility: user not found or db error", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	m := map[string]any{
+		"phone_visibility": req.PhoneVisibility,
+	}
+	if req.Phone != "" {
+		m["phone"] = req.Phone
+	}
+	if err := s.db.UpdateByMap(ctx, req.UserID, m); err != nil {
+		log.ZError(ctx, "SetPhoneVisibility: UpdateByMap failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
+			"phoneVisibility", req.PhoneVisibility, "hasPhoneUpdate", req.Phone != "")
+		return nil, err
+	}
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	return &pbuser.SetPhoneVisibilityResp{}, nil
+}
+
+// SetCallAcceptSetting 设置音视频通话接受权限（0=所有人，1=仅好友，2=不接受任何通话）。
+// 只允许本人或管理员操作。
+func (s *userServer) SetCallAcceptSetting(ctx context.Context, req *pbuser.SetCallAcceptSettingReq) (*pbuser.SetCallAcceptSettingResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("userID is required")
+	}
+	if req.CallAcceptSetting < 0 || req.CallAcceptSetting > 2 {
+		return nil, errs.ErrArgs.WrapMsg("callAcceptSetting must be 0, 1 or 2")
+	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		log.ZWarn(ctx, "SetCallAcceptSetting: access denied", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		log.ZError(ctx, "SetCallAcceptSetting: user not found or db error", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if err := s.db.UpdateByMap(ctx, req.UserID, map[string]any{
+		"call_accept_setting": req.CallAcceptSetting,
+	}); err != nil {
+		log.ZError(ctx, "SetCallAcceptSetting: UpdateByMap failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
+			"callAcceptSetting", req.CallAcceptSetting)
+		return nil, err
+	}
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	return &pbuser.SetCallAcceptSettingResp{}, nil
+}
+
+// SetMsgReceiveSetting 设置会话消息接收权限（0=所有人，1=仅好友，2=所有人不可发送）。
+// 只允许本人或管理员操作。
+func (s *userServer) SetMsgReceiveSetting(ctx context.Context, req *pbuser.SetMsgReceiveSettingReq) (*pbuser.SetMsgReceiveSettingResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("userID is required")
+	}
+	if req.MsgReceiveSetting < 0 || req.MsgReceiveSetting > 2 {
+		return nil, errs.ErrArgs.WrapMsg("msgReceiveSetting must be 0, 1 or 2")
+	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		log.ZWarn(ctx, "SetMsgReceiveSetting: access denied", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		log.ZError(ctx, "SetMsgReceiveSetting: user not found or db error", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if err := s.db.UpdateByMap(ctx, req.UserID, map[string]any{
+		"msg_receive_setting": req.MsgReceiveSetting,
+	}); err != nil {
+		log.ZError(ctx, "SetMsgReceiveSetting: UpdateByMap failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
+			"msgReceiveSetting", req.MsgReceiveSetting)
+		return nil, err
+	}
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	return &pbuser.SetMsgReceiveSettingResp{}, nil
+}
+
+// GetUserByPhone 根据精确手机号查询用户。
+//
+// phoneSearchVisibility=false（默认）时忽略 phone_visibility，任何人均可搜到。
+// phoneSearchVisibility=true 时按 phone_visibility 过滤：
+//   - Hidden(2)  → 非管理员不可搜到
+//   - Friends(1) → 仅好友/管理员可搜到
+//   - Public(0)  → 任何人均可搜到
+//
+// 返回空 userInfo 并不代表错误，调用方应以 nil userInfo 判断"未找到"。
+func (s *userServer) GetUserByPhone(ctx context.Context, req *pbuser.GetUserByPhoneReq) (*pbuser.GetUserByPhoneResp, error) {
+	if req.Phone == "" {
+		return nil, errs.ErrArgs.WrapMsg("phone is required")
+	}
+	if !phoneRe.MatchString(req.Phone) {
+		return nil, errs.ErrArgs.WrapMsg("phone must contain digits only (5-20 digits), optionally prefixed with +")
+	}
+
+	dbUser, err := s.db.FindByPhone(ctx, req.Phone)
+	if err != nil {
+		if errs.ErrRecordNotFound.Is(err) {
+			// 手机号未注册，返回空响应而非错误，避免枚举攻击
+			return &pbuser.GetUserByPhoneResp{}, nil
+		}
+		log.ZError(ctx, "GetUserByPhone: FindByPhone failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "phone", req.Phone)
+		return nil, err
+	}
+
+	// 仅在 phoneSearchVisibility=true 时才按 phone_visibility 过滤，默认跳过
+	if s.config.RpcConfig.PhoneSearchVisibility {
+		callerID := mcontext.GetOpUserID(ctx)
+		isAdmin := datautil.Contain(callerID, s.config.Share.IMAdminUserID...)
+
+		switch dbUser.PhoneVisibility {
+		case tablerelation.PhoneVisibilityHidden:
+			// 完全隐藏：非管理员无法通过手机号搜到该用户
+			if !isAdmin {
+				return &pbuser.GetUserByPhoneResp{}, nil
+			}
+		case tablerelation.PhoneVisibilityFriends:
+			// 仅好友可搜索
+			if !isAdmin && callerID != dbUser.UserID {
+				isFriend, err := s.relationClient.IsFriend(ctx, callerID, dbUser.UserID)
+				if err != nil {
+					log.ZError(ctx, "GetUserByPhone: IsFriend failed", err,
+						"callerID", callerID, "targetUserID", dbUser.UserID)
+					return nil, err
+				}
+				if !isFriend {
+					return &pbuser.GetUserByPhoneResp{}, nil
+				}
+			}
+		}
+	}
+
+	pbUser := convert.UserDB2Pb(dbUser)
+	return &pbuser.GetUserByPhoneResp{UserInfo: pbUser}, nil
+}
+
+// GetUsersByNickname 按昵称精确匹配查询普通用户（app_manger_level 与分页拉取用户一致）。
+// 全局黑名单用户会被过滤；手机号字段按 phone_visibility 与 getDesignateUsers 相同规则处理。
+func (s *userServer) GetUsersByNickname(ctx context.Context, req *pbuser.GetUsersByNicknameReq) (*pbuser.GetUsersByNicknameResp, error) {
+	nickname := strings.TrimSpace(req.Nickname)
+	if nickname == "" {
+		return nil, errs.ErrArgs.WrapMsg("nickname is required")
+	}
+	if n := utf8.RuneCountInString(nickname); n < 1 || n > 64 {
+		return nil, errs.ErrArgs.WrapMsg("nickname length must be 1-64 characters")
+	}
+
+	users, err := s.db.FindOrdinaryUsersByNickname(ctx, constant.IMOrdinaryUser, constant.AppOrdinaryUsers, nickname)
+	if err != nil {
+		log.ZError(ctx, "GetUsersByNickname: FindOrdinaryUsersByNickname failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "nickname", nickname)
+		return nil, err
+	}
+	if len(users) == 0 {
+		return &pbuser.GetUsersByNicknameResp{}, nil
+	}
+
+	userIDs := datautil.Slice(users, func(u *tablerelation.User) string { return u.UserID })
+	blocked, err := s.globalBlackDB.FindBlocked(ctx, userIDs)
+	if err != nil {
+		log.ZError(ctx, "GetUsersByNickname: FindBlocked failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "count", len(userIDs))
+		return nil, err
+	}
+	if len(blocked) > 0 {
+		banned := make(map[string]struct{}, len(blocked))
+		for _, b := range blocked {
+			banned[b.UserID] = struct{}{}
+		}
+		filtered := make([]*tablerelation.User, 0, len(users))
+		for _, u := range users {
+			if _, ok := banned[u.UserID]; !ok {
+				filtered = append(filtered, u)
+			}
+		}
+		users = filtered
+	}
+	if len(users) == 0 {
+		return &pbuser.GetUsersByNicknameResp{}, nil
+	}
+
+	pbUsers := convert.UsersDB2Pb(users)
+	viewerID := mcontext.GetOpUserID(ctx)
+	if err := s.applyPhoneVisibility(ctx, viewerID, pbUsers, users); err != nil {
+		log.ZError(ctx, "GetUsersByNickname: applyPhoneVisibility failed", err,
+			"opUserID", viewerID, "count", len(users))
+		return nil, err
+	}
+	return &pbuser.GetUsersByNicknameResp{UsersInfo: pbUsers}, nil
 }
 
 func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckReq) (resp *pbuser.AccountCheckResp, err error) {

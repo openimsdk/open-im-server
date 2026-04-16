@@ -12,6 +12,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 )
 
 type PhoneSNApi struct {
@@ -42,15 +43,23 @@ func (a *PhoneSNApi) GetSNInfo(c *gin.Context) {
 	var req phoneGetSNInfoReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WrapMsg(err.Error()))
+		log.ZError(c, "GetSNInfo", err)
 		return
 	}
 	phone := strings.TrimSpace(req.Phone)
 	if phone == "" {
 		apiresp.GinError(c, errs.ErrArgs.WrapMsg("phone is empty"))
+		log.ZError(c, "GetSNInfo", errs.ErrArgs.WrapMsg("phone is empty"))
 		return
 	}
 	info, err := a.db.GetByPhone(c, phone)
 	if err != nil {
+		if errs.ErrRecordNotFound.Is(err) {
+			apiresp.GinSuccess(c, phoneGetSNInfoResp{IsSnd: false, UserID: 0})
+			log.ZDebug(c, "GetSNInfo", "phone not found", phone)
+			return
+		}
+		log.ZError(c, "GetSNInfo", err)
 		apiresp.GinError(c, err)
 		return
 	}

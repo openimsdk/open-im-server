@@ -29,6 +29,9 @@ type User interface {
 	Take(ctx context.Context, userID string) (user *model.User, err error)
 	TakeNotification(ctx context.Context, level int64) (user []*model.User, err error)
 	TakeByNickname(ctx context.Context, nickname string) (user []*model.User, err error)
+	// FindOrdinaryUsersByNickname 按昵称精确匹配，且 app_manger_level 为普通用户范围（与分页拉取用户一致）
+	FindOrdinaryUsersByNickname(ctx context.Context, level1 int64, level2 int64, nickname string) (users []*model.User, err error)
+	FindByPhone(ctx context.Context, phone string) (user *model.User, err error)
 	Page(ctx context.Context, pagination pagination.Pagination) (count int64, users []*model.User, err error)
 	PageFindUser(ctx context.Context, level1 int64, level2 int64, pagination pagination.Pagination) (count int64, users []*model.User, err error)
 	PageFindUserWithKeyword(ctx context.Context, level1 int64, level2 int64, userID, nickName string, pagination pagination.Pagination) (count int64, users []*model.User, err error)

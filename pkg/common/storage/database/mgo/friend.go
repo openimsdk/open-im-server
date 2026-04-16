@@ -47,6 +47,17 @@ func NewFriendMongo(db *mongo.Database) (database.Friend, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Compound index to support efficient sorted pagination: pinned friends first, then by _id.
+	_, err = coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "owner_user_id", Value: 1},
+			{Key: "is_pinned", Value: -1},
+			{Key: "_id", Value: 1},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
 	owner, err := NewVersionLog(db.Collection(database.FriendVersionName))
 	if err != nil {
 		return nil, err
@@ -267,4 +278,11 @@ func (f *FriendMgo) IsUpdateIsPinned(data map[string]any) bool {
 	}
 	_, ok := data["is_pinned"]
 	return ok
+}
+
+func (f *FriendMgo) FindPinnedFriendUserIDs(ctx context.Context, ownerUserID string) ([]string, error) {
+	return mongoutil.Find[string](ctx, f.coll, bson.M{
+		"owner_user_id": ownerUserID,
+		"is_pinned":     true,
+	}, options.Find().SetProjection(bson.M{"_id": 0, "friend_user_id": 1}))
 }

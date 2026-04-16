@@ -458,6 +458,11 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		if err := s.PopulateGroupMember(ctx, groupMember); err != nil {
 			return nil, err
 		}
+		// AllowAddMember == 1 时仅群主/管理员可拉人
+		isOwnerOrAdmin := groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin
+		if group.AllowAddMember == model.GroupPermAdminOnly && !isOwnerOrAdmin {
+			return nil, errs.ErrNoPermission.WrapMsg("only owner or admin can add members to this group")
+		}
 	} else {
 		opUserID = mcontext.GetOpUserID(ctx)
 	}
@@ -1098,8 +1103,22 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbgroup.SetGroupInf
 		if err != nil {
 			return nil, err
 		}
-		if !(opMember.RoleLevel == constant.GroupOwner || opMember.RoleLevel == constant.GroupAdmin) {
-			return nil, errs.ErrNoPermission.WrapMsg("no group owner or admin")
+		isOwnerOrAdmin := opMember.RoleLevel == constant.GroupOwner || opMember.RoleLevel == constant.GroupAdmin
+		requestsPermField := req.GroupInfoForSet.AllowSendMsg != nil ||
+			req.GroupInfoForSet.AllowPinMsg != nil ||
+			req.GroupInfoForSet.AllowAddMember != nil ||
+			req.GroupInfoForSet.AllowEditGroupInfo != nil
+		if requestsPermField && !isOwnerOrAdmin {
+			return nil, errs.ErrNoPermission.WrapMsg("only owner or admin can change group permission settings")
+		}
+		if !isOwnerOrAdmin {
+			grp, err := s.db.TakeGroup(ctx, req.GroupInfoForSet.GroupID)
+			if err != nil {
+				return nil, err
+			}
+			if grp.AllowEditGroupInfo == model.GroupPermAdminOnly {
+				return nil, errs.ErrNoPermission.WrapMsg("only owner or admin can edit group info")
+			}
 		}
 		if err := s.PopulateGroupMember(ctx, opMember); err != nil {
 			return nil, err
@@ -1193,9 +1212,24 @@ func (s *groupServer) SetGroupInfoEx(ctx context.Context, req *pbgroup.SetGroupI
 		if err != nil {
 			return nil, err
 		}
-
-		if !(opMember.RoleLevel == constant.GroupOwner || opMember.RoleLevel == constant.GroupAdmin) {
-			return nil, errs.ErrNoPermission.WrapMsg("no group owner or admin")
+		isOwnerOrAdmin := opMember.RoleLevel == constant.GroupOwner || opMember.RoleLevel == constant.GroupAdmin
+		// 4个群权限字段始终只有群主/管理员可修改
+		requestsPermField := req.AllowSendMsg != nil ||
+			req.AllowPinMsg != nil ||
+			req.AllowAddMember != nil ||
+			req.AllowEditGroupInfo != nil
+		if requestsPermField && !isOwnerOrAdmin {
+			return nil, errs.ErrNoPermission.WrapMsg("only owner or admin can change group permission settings")
+		}
+		// 其他字段：按 AllowEditGroupInfo 决定是否允许普通成员操作
+		if !isOwnerOrAdmin {
+			grp, err := s.db.TakeGroup(ctx, req.GroupID)
+			if err != nil {
+				return nil, err
+			}
+			if grp.AllowEditGroupInfo == model.GroupPermAdminOnly {
+				return nil, errs.ErrNoPermission.WrapMsg("only owner or admin can edit group info")
+			}
 		}
 
 		if err := s.PopulateGroupMember(ctx, opMember); err != nil {
