@@ -83,7 +83,7 @@ func Start(ctx context.Context, cfg *Config, _ discovery.SvcDiscoveryRegistry, g
 		s.conf.ExpireSeconds = 120
 	}
 	if s.conf.VerifyPadding <= 0 {
-		s.conf.VerifyPadding = 32
+		s.conf.VerifyPadding = 8
 	}
 	pbcaptcha.RegisterCaptchaServer(grpcServer, s)
 	return nil
