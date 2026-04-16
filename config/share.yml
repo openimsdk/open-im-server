@@ -11,6 +11,7 @@ rpcRegisterName:
   third: third
   captcha: captcha
   rtc: rtc
+  crypto: crypto
 
 imAdminUserID: [ imAdmin ]
 

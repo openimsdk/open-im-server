@@ -66,6 +66,7 @@ type groupServer struct {
 	userClient         *rpcli.UserClient
 	msgClient          *rpcli.MsgClient
 	conversationClient *rpcli.ConversationClient
+	cryptoClient       *rpcli.CryptoClient
 }
 
 type Config struct {
@@ -117,12 +118,17 @@ func Start(ctx context.Context, config *Config, client discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	cryptoConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Crypto)
+	if err != nil {
+		return err
+	}
 	gs := groupServer{
 		config:             config,
 		webhookClient:      webhook.NewWebhookClient(config.WebhooksConfig.URL),
 		userClient:         rpcli.NewUserClient(userConn),
 		msgClient:          rpcli.NewMsgClient(msgConn),
 		conversationClient: rpcli.NewConversationClient(conversationConn),
+		cryptoClient:       rpcli.NewCryptoClient(cryptoConn),
 	}
 	gs.db = controller.NewGroupDatabase(rdb, &config.LocalCacheConfig, groupDB, groupMemberDB, groupRequestDB, mgocli.GetTx(), grouphash.NewGroupHashFromGroupServer(&gs))
 	gs.notification = NewNotificationSender(gs.db, config, gs.userClient, gs.msgClient, gs.conversationClient)
@@ -274,6 +280,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 	if err := s.db.CreateGroup(ctx, []*model.Group{group}, groupMembers); err != nil {
 		return nil, err
 	}
+	s.cryptoClient.InitGroupKeyVersion(ctx, group.GroupID)
 	resp := &pbgroup.CreateGroupResp{GroupInfo: &sdkws.GroupInfo{}}
 
 	resp.GroupInfo = convert.Db2PbGroupInfo(group, req.OwnerUserID, uint32(len(userIDs)))
@@ -544,6 +551,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 			return nil, err
 		}
 	}
+	s.cryptoClient.BumpGroupKeyVersion(ctx, req.GroupID, opUserID, "member_added")
 	return &pbgroup.InviteUserToGroupResp{}, nil
 }
 
@@ -709,6 +717,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbgroup.KickGrou
 		return nil, err
 	}
 	s.webhookAfterKickGroupMember(ctx, &s.config.WebhooksConfig.AfterKickGroupMember, req)
+	s.cryptoClient.BumpGroupKeyVersion(ctx, req.GroupID, opUserID, "member_removed")
 
 	return &pbgroup.KickGroupMemberResp{}, nil
 }
@@ -964,6 +973,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbgroup
 			if err := s.setMemberJoinSeq(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
 				return nil, err
 			}
+			s.cryptoClient.BumpGroupKeyVersion(ctx, req.GroupID, mcontext.GetOpUserID(ctx), "member_added")
 		}
 	case constant.GroupResponseRefuse:
 		s.notification.GroupApplicationRejectedNotification(ctx, req)
@@ -1029,6 +1039,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		if err := s.setMemberJoinSeq(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
 			return nil, err
 		}
+		s.cryptoClient.BumpGroupKeyVersion(ctx, req.GroupID, req.InviterUserID, "member_added")
 		s.webhookAfterJoinGroup(ctx, &s.config.WebhooksConfig.AfterJoinGroup, req)
 
 		return &pbgroup.JoinGroupResp{}, nil
@@ -1077,6 +1088,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 		return nil, err
 	}
 	s.webhookAfterQuitGroup(ctx, &s.config.WebhooksConfig.AfterQuitGroup, req)
+	s.cryptoClient.BumpGroupKeyVersion(ctx, req.GroupID, req.UserID, "member_left")
 
 	return &pbgroup.QuitGroupResp{}, nil
 }
@@ -1563,6 +1575,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbgroup.DismissGrou
 	}
 
 	s.webhookAfterDismissGroup(ctx, &s.config.WebhooksConfig.AfterDismissGroup, cbReq)
+	s.cryptoClient.BumpGroupKeyVersion(ctx, req.GroupID, mcontext.GetOpUserID(ctx), "group_dismissed")
 
 	return &pbgroup.DismissGroupResp{}, nil
 }
