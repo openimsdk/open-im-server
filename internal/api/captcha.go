@@ -41,7 +41,7 @@ func (c *CaptchaApi) VerifyCaptcha(ctx *gin.Context) {
 	}
 	resp, err := c.Client.VerifyCaptcha(ctx, req)
 	if err != nil {
-		log.ZError(ctx, "captcha verify rpc failed", err, "captchaID", req.GetCaptchaID(), "x", req.GetX(), "y", req.GetY())
+		log.ZError(ctx, "captcha verify rpc failed", err, "captchaID", req.GetCaptchaID(), "clickCount", len(req.GetClickPoints()))
 		apiresp.GinError(ctx, err)
 		return
 	}
