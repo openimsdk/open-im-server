@@ -16,6 +16,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/protocol/msggateway"
@@ -28,9 +29,10 @@ import (
 )
 
 type UserApi struct {
-	Client user.UserClient
-	discov discovery.SvcDiscoveryRegistry
-	config config.RpcRegisterName
+	Client        user.UserClient
+	discov        discovery.SvcDiscoveryRegistry
+	config        config.RpcRegisterName
+	imAdminUserID []string
 }
 
 type GetSelfLoginPlatformsResp struct {
@@ -47,8 +49,8 @@ type GetOnlineUserCountResp struct {
 	OnlineUserCount int64 `json:"onlineUserCount"`
 }
 
-func NewUserApi(client user.UserClient, discov discovery.SvcDiscoveryRegistry, config config.RpcRegisterName) UserApi {
-	return UserApi{Client: client, discov: discov, config: config}
+func NewUserApi(client user.UserClient, discov discovery.SvcDiscoveryRegistry, config config.RpcRegisterName, imAdminUserID []string) UserApi {
+	return UserApi{Client: client, discov: discov, config: config, imAdminUserID: imAdminUserID}
 }
 
 func (u *UserApi) UserRegister(c *gin.Context) {
@@ -146,6 +148,10 @@ func (u *UserApi) UserRegisterCount(c *gin.Context) {
 
 // GetOnlineUserCount Get current online user count.
 func (u *UserApi) GetOnlineUserCount(c *gin.Context) {
+	if err := authverify.CheckAdmin(c, u.imAdminUserID); err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
 	cursor := uint64(0)
 	var count int64
 	for {

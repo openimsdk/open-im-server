@@ -132,7 +132,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		r.Use(gzip.Gzip(gzip.BestSpeed))
 	}
 	r.Use(prommetricsGin(), gin.RecoveryWithWriter(gin.DefaultErrorWriter, mw.GinPanicErr), mw.CorsHandler(), mw.GinParseOperationID(), GinParseToken(rpcli.NewAuthClient(authConn)))
-	u := NewUserApi(user.NewUserClient(userConn), client, config.Share.RpcRegisterName)
+	u := NewUserApi(user.NewUserClient(userConn), client, config.Share.RpcRegisterName, config.Share.IMAdminUserID)
 	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), config.Share.IMAdminUserID)
 	cp := NewCaptchaApi(pbcaptcha.NewCaptchaClient(captchaConn))
 	bl := NewUserGlobalBlackApi(blacklistCtrl, userDB, config.Share.IMAdminUserID, rpcli.NewAuthClient(authConn))
