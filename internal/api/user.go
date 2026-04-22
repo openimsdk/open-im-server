@@ -43,6 +43,10 @@ type GetSelfLoginPlatformsResp struct {
 	SDKVersion   string `json:"sdkVersion"`
 }
 
+type GetOnlineUserCountResp struct {
+	OnlineUserCount int64 `json:"onlineUserCount"`
+}
+
 func NewUserApi(client user.UserClient, discov discovery.SvcDiscoveryRegistry, config config.RpcRegisterName) UserApi {
 	return UserApi{Client: client, discov: discov, config: config}
 }
@@ -138,6 +142,29 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 
 func (u *UserApi) UserRegisterCount(c *gin.Context) {
 	a2r.Call(c, user.UserClient.UserRegisterCount, u.Client)
+}
+
+// GetOnlineUserCount Get current online user count.
+func (u *UserApi) GetOnlineUserCount(c *gin.Context) {
+	cursor := uint64(0)
+	var count int64
+	for {
+		resp, err := u.Client.GetAllOnlineUsers(c, &user.GetAllOnlineUsersReq{Cursor: cursor})
+		if err != nil {
+			apiresp.GinError(c, err)
+			return
+		}
+		for _, status := range resp.StatusList {
+			if status.Status == constant.Online {
+				count++
+			}
+		}
+		if resp.NextCursor == 0 {
+			break
+		}
+		cursor = resp.NextCursor
+	}
+	apiresp.GinSuccess(c, &GetOnlineUserCountResp{OnlineUserCount: count})
 }
 
 // GetUsersOnlineTokenDetail Get user online token details.

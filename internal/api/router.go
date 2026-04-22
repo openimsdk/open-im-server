@@ -366,6 +366,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	{
 		statisticsGroup := r.Group("/statistics")
 		statisticsGroup.POST("/user/register", u.UserRegisterCount)
+		statisticsGroup.POST("/user/online", u.GetOnlineUserCount)
 		statisticsGroup.POST("/user/active", m.GetActiveUser)
 		statisticsGroup.POST("/group/create", g.GroupCreateCount)
 		statisticsGroup.POST("/group/active", m.GetActiveGroup)
