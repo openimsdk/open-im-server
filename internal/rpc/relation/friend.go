@@ -671,6 +671,37 @@ func (s *friendServer) GetPinnedFriendIDs(ctx context.Context, req *relation.Get
 	return &relation.GetPinnedFriendIDsResp{FriendUserIDs: ids}, nil
 }
 
+// AddOnewayFriend adds B to A's friend list without requiring B's consent.
+// Only the A->B side of the friendship is created; B's friend list is unaffected.
+func (s *friendServer) AddOnewayFriend(ctx context.Context, req *relation.ApplyToAddFriendReq) (*relation.ApplyToAddFriendResp, error) {
+	if err := authverify.CheckAccessV3(ctx, req.FromUserID, s.config.Share.IMAdminUserID); err != nil {
+		return nil, err
+	}
+	if req.ToUserID == req.FromUserID {
+		return nil, servererrs.ErrCanNotAddYourself.WrapMsg("req.ToUserID", req.ToUserID)
+	}
+	if err := s.userClient.CheckUser(ctx, []string{req.ToUserID, req.FromUserID}); err != nil {
+		return nil, err
+	}
+	in1, _, err := s.db.CheckIn(ctx, req.FromUserID, req.ToUserID)
+	if err != nil {
+		return nil, err
+	}
+	if in1 {
+		return nil, servererrs.ErrRelationshipAlready.WrapMsg("already in friend list")
+	}
+	if err := s.db.BecomeOnewayFriend(ctx, req.FromUserID, req.ToUserID, constant.BecomeFriendByOneway); err != nil {
+		return nil, err
+	}
+	// Notify only A so that A's incremental friend sync is triggered.
+	s.notificationSender.FriendApplicationAgreedNotification(ctx, &relation.RespondFriendApplyReq{
+		FromUserID:   req.FromUserID,
+		ToUserID:     req.ToUserID,
+		HandleResult: constant.FriendResponseAgree,
+	}, false)
+	return &relation.ApplyToAddFriendResp{}, nil
+}
+
 func (s *friendServer) getCommonUserMap(ctx context.Context, userIDs []string) (map[string]common_user.CommonUser, error) {
 	users, err := s.userClient.GetUsersInfo(ctx, userIDs)
 	if err != nil {

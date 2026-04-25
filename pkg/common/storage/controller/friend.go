@@ -92,6 +92,10 @@ type FriendDatabase interface {
 	GetUnhandledCount(ctx context.Context, userID string, ts int64) (int64, error)
 
 	GetPinnedFriendIDs(ctx context.Context, ownerUserID string) ([]string, error)
+
+	// BecomeOnewayFriend inserts a single-side friendship: ownerUserID -> friendUserID.
+	// The reverse side (friendUserID -> ownerUserID) is NOT created.
+	BecomeOnewayFriend(ctx context.Context, ownerUserID, friendUserID string, addSource int32) error
 }
 
 type friendDatabase struct {
@@ -407,4 +411,26 @@ func (f *friendDatabase) GetUnhandledCount(ctx context.Context, userID string, t
 
 func (f *friendDatabase) GetPinnedFriendIDs(ctx context.Context, ownerUserID string) ([]string, error) {
 	return f.friend.FindPinnedFriendUserIDs(ctx, ownerUserID)
+}
+
+// BecomeOnewayFriend creates only the ownerUserID->friendUserID side of the friendship.
+// The reverse side is intentionally omitted so that the target user is not aware of being added.
+func (f *friendDatabase) BecomeOnewayFriend(ctx context.Context, ownerUserID, friendUserID string, addSource int32) error {
+	return f.tx.Transaction(ctx, func(ctx context.Context) error {
+		existing, err := f.friend.FindFriends(ctx, ownerUserID, []string{friendUserID})
+		if err != nil {
+			return err
+		}
+		if len(existing) > 0 {
+			// already in ownerUserID's friend list, nothing to do
+			return nil
+		}
+		opUserID := mcontext.GetOpUserID(ctx)
+		if err := f.friend.Create(ctx, []*model.Friend{
+			{OwnerUserID: ownerUserID, FriendUserID: friendUserID, AddSource: addSource, OperatorUserID: opUserID},
+		}); err != nil {
+			return err
+		}
+		return f.cache.DelFriendIDs(ownerUserID).DelMaxFriendVersion(ownerUserID).ChainExecDel(ctx)
+	})
 }

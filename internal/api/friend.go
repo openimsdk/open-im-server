@@ -122,3 +122,7 @@ func (o *FriendApi) GetSelfUnhandledApplyCount(c *gin.Context) {
 func (o *FriendApi) GetPinnedFriendIDs(c *gin.Context) {
 	a2r.Call(c, relation.FriendClient.GetPinnedFriendIDs, o.Client)
 }
+
+func (o *FriendApi) AddOnewayFriend(c *gin.Context) {
+	a2r.Call(c, relation.FriendClient.AddOnewayFriend, o.Client)
+}
