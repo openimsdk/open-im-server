@@ -9,10 +9,10 @@ import (
 	pbAuth "github.com/openimsdk/protocol/auth"
 	pbcaptcha "github.com/openimsdk/protocol/captcha"
 	"github.com/openimsdk/protocol/conversation"
+	pbcrypto "github.com/openimsdk/protocol/crypto"
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/msg"
 	"github.com/openimsdk/protocol/relation"
-	pbcrypto "github.com/openimsdk/protocol/crypto"
 	"github.com/openimsdk/protocol/rtc"
 	"github.com/openimsdk/protocol/third"
 	"github.com/openimsdk/protocol/user"
@@ -334,8 +334,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		phoneGroup := r.Group("/phone")
 		phoneGroup.POST("/get_sn_info", phoneSN.GetSNInfo)
 		phoneGroup.POST("/set_sn_info", phoneSN.SetSNInfo)
-  }
-  {
+	}
+	{
 		rc := NewRtcApi(rtc.NewRtcServiceClient(rtcConn))
 		rtcGroup := r.Group("/rtc")
 		rtcGroup.POST("/signal_message_assemble", rc.SignalMessageAssemble)
