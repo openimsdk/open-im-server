@@ -696,12 +696,15 @@ func (s *friendServer) AddOnewayFriend(ctx context.Context, req *relation.ApplyT
 	if err := s.db.BecomeOnewayFriend(ctx, req.FromUserID, req.ToUserID, becomeFriendByOneway); err != nil {
 		return nil, err
 	}
-	// Notify only A so that A's incremental friend sync is triggered.
-	s.notificationSender.FriendApplicationAgreedNotification(ctx, &relation.RespondFriendApplyReq{
-		FromUserID:   req.FromUserID,
-		ToUserID:     req.ToUserID,
-		HandleResult: constant.FriendResponseAgree,
-	}, false)
+	// Notify only A (FromUserID) so incremental friend sync is triggered
+	// without notifying B (ToUserID).
+	tips := sdkws.FriendApplicationApprovedTips{
+		FromToUserID: &sdkws.FromToUserID{
+			FromUserID: req.FromUserID,
+			ToUserID:   req.ToUserID,
+		},
+	}
+	s.notificationSender.Notification(ctx, req.FromUserID, req.FromUserID, constant.FriendApplicationApprovedNotification, &tips)
 	return &relation.ApplyToAddFriendResp{}, nil
 }
 
