@@ -15,14 +15,10 @@
 package api
 
 import (
-	"context"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/grpc"
 
 	"github.com/openimsdk/protocol/relation"
-	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/a2r"
-	"github.com/openimsdk/tools/errs"
 )
 
 type FriendApi struct {
@@ -128,24 +124,5 @@ func (o *FriendApi) GetPinnedFriendIDs(c *gin.Context) {
 }
 
 func (o *FriendApi) AddOnewayFriend(c *gin.Context) {
-	// Current generated relation grpc client may not include AddOnewayFriend yet.
-	// Keep API route compile-safe and return a clear error instead of breaking build.
-	client, ok := any(o.Client).(interface {
-		AddOnewayFriend(ctx context.Context, in *relation.ApplyToAddFriendReq, opts ...grpc.CallOption) (*relation.ApplyToAddFriendResp, error)
-	})
-	if !ok {
-		apiresp.GinError(c, errs.New("add_oneway_friend rpc is not generated in relation_grpc.pb.go"))
-		return
-	}
-	var req relation.ApplyToAddFriendReq
-	if err := c.ShouldBindJSON(&req); err != nil {
-		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
-		return
-	}
-	resp, err := client.AddOnewayFriend(c, &req)
-	if err != nil {
-		apiresp.GinError(c, err)
-		return
-	}
-	apiresp.GinSuccess(c, resp)
+	a2r.Call(c, relation.FriendClient.AddOnewayFriend, o.Client)
 }
