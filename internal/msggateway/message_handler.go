@@ -188,9 +188,6 @@ func (g *GrpcHandler) SendSignalMessage(ctx context.Context, data *Req) ([]byte,
 		}
 		assembleReq.SignalReq = &signalReq
 	}
-
-	log.ZDebug(ctx, "SendSignalMessage", "assembleReq", assembleReq)
-
 	resp, err := g.rtcClient.RtcServiceClient.SignalMessageAssemble(ctx, &assembleReq)
 	if err != nil {
 		log.ZError(ctx, "SendSignalMessage", err, "r", err.Error())

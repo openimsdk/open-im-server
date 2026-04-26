@@ -48,7 +48,7 @@ func (s *rtcServer) SignalMessageAssemble(ctx context.Context, req *rtc.SignalMe
 	)
 	switch payload := req.SignalReq.Payload.(type) {
 	case *rtc.SignalReq_Invite:
-		log.ZDebug(ctx, "SignalMessageAssemble", "payload", payload.Invite)
+		log.ZInfo(ctx, "SignalMessageAssemble", "payload", payload.Invite)
 		r, err := s.handleInvite(ctx, payload.Invite, req.SignalReq)
 		resp.Payload = &rtc.SignalResp_Invite{Invite: r}
 		respErr = err

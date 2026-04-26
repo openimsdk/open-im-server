@@ -48,6 +48,9 @@ import (
 	"google.golang.org/grpc"
 )
 
+// keep stable add_source value for one-way friendship even if protocol constants lag behind.
+const becomeFriendByOneway int32 = 3
+
 type friendServer struct {
 	relation.UnimplementedFriendServer
 	db                 controller.FriendDatabase
@@ -690,7 +693,7 @@ func (s *friendServer) AddOnewayFriend(ctx context.Context, req *relation.ApplyT
 	if in1 {
 		return nil, servererrs.ErrRelationshipAlready.WrapMsg("already in friend list")
 	}
-	if err := s.db.BecomeOnewayFriend(ctx, req.FromUserID, req.ToUserID, constant.BecomeFriendByOneway); err != nil {
+	if err := s.db.BecomeOnewayFriend(ctx, req.FromUserID, req.ToUserID, becomeFriendByOneway); err != nil {
 		return nil, err
 	}
 	// Notify only A so that A's incremental friend sync is triggered.
