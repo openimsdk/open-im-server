@@ -2,8 +2,6 @@ module github.com/openimsdk/open-im-server/v3
 
 go 1.25.0
 
-replace github.com/openimsdk/tools => ../tools
-
 replace github.com/openimsdk/protocol => ./protocol
 
 require (
