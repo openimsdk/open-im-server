@@ -43,23 +43,19 @@ const (
 )
 
 type User struct {
-	UserID           string    `bson:"user_id"`
-	Nickname         string    `bson:"nickname"`
-	FaceURL          string    `bson:"face_url"`
-	Ex               string    `bson:"ex"`
-	AppMangerLevel   int32     `bson:"app_manger_level"`
-	GlobalRecvMsgOpt int32     `bson:"global_recv_msg_opt"`
-	CreateTime       time.Time `bson:"create_time"`
-	FirstName        string    `bson:"first_name"`
-	LastName         string    `bson:"last_name"`
-	// Phone 用户手机号（明文，仅服务端留存，下发时按 PhoneVisibility 过滤）
-	Phone string `bson:"phone"`
-	// PhoneVisibility 0=所有人可见 1=仅好友可见 2=隐藏
-	PhoneVisibility int32 `bson:"phone_visibility"`
-	// CallAcceptSetting 0=所有人可发起 1=仅好友可发起 2=不接受任何通话
-	CallAcceptSetting int32 `bson:"call_accept_setting"`
-	// MsgReceiveSetting 0=所有人可发送 1=仅好友可发送 2=所有人不可发送
-	MsgReceiveSetting int32 `bson:"msg_receive_setting"`
+	UserID            string    `bson:"user_id"`
+	Nickname          string    `bson:"nickname"`
+	FaceURL           string    `bson:"face_url"`
+	Ex                string    `bson:"ex"`
+	AppMangerLevel    int32     `bson:"app_manger_level"`
+	GlobalRecvMsgOpt  int32     `bson:"global_recv_msg_opt"`
+	CreateTime        time.Time `bson:"create_time"`
+	FirstName         string    `bson:"first_name"`
+	LastName          string    `bson:"last_name"`
+	Phone             string    `bson:"phone"`
+	PhoneVisibility   int32     `bson:"phone_visibility"`
+	CallAcceptSetting int32     `bson:"call_accept_setting"`
+	MsgReceiveSetting int32     `bson:"msg_receive_setting"`
 }
 
 func (u *User) GetNickname() string {
