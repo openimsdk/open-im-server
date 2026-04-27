@@ -31,8 +31,10 @@ func UserDB2Pb(user *relationtb.User) *sdkws.UserInfo {
 		CreateTime:       user.CreateTime.UnixMilli(),
 		AppMangerLevel:   user.AppMangerLevel,
 		GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
-		Phone:             user.Phone,
-		PhoneVisibility:   user.PhoneVisibility,
+		FirstName:        user.FirstName,
+		LastName:         user.LastName,
+		Phone:            user.Phone,
+		PhoneVisibility:  user.PhoneVisibility,
 		CallAcceptSetting: user.CallAcceptSetting,
 		MsgReceiveSetting: user.MsgReceiveSetting,
 	}
@@ -51,6 +53,8 @@ func UserPb2DB(user *sdkws.UserInfo) *relationtb.User {
 		CreateTime:       time.UnixMilli(user.CreateTime),
 		AppMangerLevel:   user.AppMangerLevel,
 		GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
+		FirstName:        user.FirstName,
+		LastName:         user.LastName,
 	}
 }
 
@@ -63,6 +67,8 @@ func UserPb2DBMap(user *sdkws.UserInfo) map[string]any {
 		"nickname":            user.Nickname,
 		"face_url":            user.FaceURL,
 		"ex":                  user.Ex,
+		"first_name":          user.FirstName,
+		"last_name":           user.LastName,
 		"app_manager_level":   user.AppMangerLevel,
 		"global_recv_msg_opt": user.GlobalRecvMsgOpt,
 	}
@@ -106,6 +112,7 @@ func UserPb2DBMapEx(user *sdkws.UserInfoWithEx) map[string]any {
 	if user.MsgReceiveSetting != nil {
 		val["msg_receive_setting"] = user.MsgReceiveSetting.Value
 	}
+	// TODO: Add FirstName/LastName support to UserInfoWithEx proto when regenerated
 
 	return val
 }

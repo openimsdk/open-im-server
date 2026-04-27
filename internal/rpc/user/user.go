@@ -598,6 +598,8 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 			CreateTime:       now,
 			AppMangerLevel:   user.AppMangerLevel,
 			GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
+			FirstName:        user.FirstName,
+			LastName:         user.LastName,
 		})
 	}
 	if err := s.db.Create(ctx, users); err != nil {

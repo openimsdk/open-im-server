@@ -50,6 +50,8 @@ type User struct {
 	AppMangerLevel   int32     `bson:"app_manger_level"`
 	GlobalRecvMsgOpt int32     `bson:"global_recv_msg_opt"`
 	CreateTime       time.Time `bson:"create_time"`
+	FirstName        string    `bson:"first_name"`
+	LastName         string    `bson:"last_name"`
 	// Phone 用户手机号（明文，仅服务端留存，下发时按 PhoneVisibility 过滤）
 	Phone string `bson:"phone"`
 	// PhoneVisibility 0=所有人可见 1=仅好友可见 2=隐藏
