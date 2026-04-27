@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+db:
+  driver: sqlite
+  dsn: redpacket.db
+
+chain:
+  rpc_url: "https://eth.llamarpc.com"
+  contract_address: "0xYourRedPacketContractAddress"
+  chain_id: 1
+  signer_private_key: "your-signer-private-key-here"
+  config_admin_private_key: "your-config-admin-private-key-here"
+
+tron:
+  full_node_url: ""
+  contract_base58: ""
+  owner_base58: ""
+  private_key_hex: ""
+  fee_limit: 100000000
+
+indexer:
+  poll_interval: 5
