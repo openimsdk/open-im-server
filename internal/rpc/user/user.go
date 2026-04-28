@@ -590,6 +590,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	now := time.Now()
 	users := make([]*tablerelation.User, 0, len(req.Users))
 	for _, user := range req.Users {
+		fullName := convert.BuildFullName(user.FirstName, user.LastName)
 		users = append(users, &tablerelation.User{
 			UserID:           user.UserID,
 			Nickname:         user.Nickname,
@@ -600,6 +601,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 			GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
 			FirstName:        user.FirstName,
 			LastName:         user.LastName,
+			FullName:         fullName,
 		})
 	}
 	if err := s.db.Create(ctx, users); err != nil {

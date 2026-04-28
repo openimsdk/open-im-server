@@ -15,26 +15,38 @@
 package convert
 
 import (
+	"strings"
+	"time"
+
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	"github.com/openimsdk/tools/utils/datautil"
-	"time"
 
 	"github.com/openimsdk/protocol/sdkws"
 )
 
+func BuildFullName(firstName, lastName string) string {
+	if firstName == "" {
+		return lastName
+	}
+	if lastName == "" {
+		return firstName
+	}
+	return strings.TrimSpace(firstName + " " + lastName)
+}
+
 func UserDB2Pb(user *relationtb.User) *sdkws.UserInfo {
 	return &sdkws.UserInfo{
-		UserID:           user.UserID,
-		Nickname:         user.Nickname,
-		FaceURL:          user.FaceURL,
-		Ex:               user.Ex,
-		CreateTime:       user.CreateTime.UnixMilli(),
-		AppMangerLevel:   user.AppMangerLevel,
-		GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
-		FirstName:        user.FirstName,
-		LastName:         user.LastName,
-		Phone:            user.Phone,
-		PhoneVisibility:  user.PhoneVisibility,
+		UserID:            user.UserID,
+		Nickname:          user.Nickname,
+		FaceURL:           user.FaceURL,
+		Ex:                user.Ex,
+		CreateTime:        user.CreateTime.UnixMilli(),
+		AppMangerLevel:    user.AppMangerLevel,
+		GlobalRecvMsgOpt:  user.GlobalRecvMsgOpt,
+		FirstName:         user.FirstName,
+		LastName:          user.LastName,
+		Phone:             user.Phone,
+		PhoneVisibility:   user.PhoneVisibility,
 		CallAcceptSetting: user.CallAcceptSetting,
 		MsgReceiveSetting: user.MsgReceiveSetting,
 	}
@@ -45,6 +57,7 @@ func UsersDB2Pb(users []*relationtb.User) []*sdkws.UserInfo {
 }
 
 func UserPb2DB(user *sdkws.UserInfo) *relationtb.User {
+	fullName := BuildFullName(user.FirstName, user.LastName)
 	return &relationtb.User{
 		UserID:           user.UserID,
 		Nickname:         user.Nickname,
@@ -55,6 +68,7 @@ func UserPb2DB(user *sdkws.UserInfo) *relationtb.User {
 		GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
 		FirstName:        user.FirstName,
 		LastName:         user.LastName,
+		FullName:         fullName,
 	}
 }
 
@@ -78,6 +92,10 @@ func UserPb2DBMap(user *sdkws.UserInfo) map[string]any {
 		} else if v, ok := value.(int32); ok && v != 0 {
 			val[key] = v
 		}
+	}
+	if user.FirstName != "" || user.LastName != "" {
+		fullName := BuildFullName(user.FirstName, user.LastName)
+		val["full_name"] = fullName
 	}
 	return val
 }
