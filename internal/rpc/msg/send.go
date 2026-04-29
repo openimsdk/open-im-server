@@ -34,6 +34,10 @@ import (
 func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (*pbmsg.SendMsgResp, error) {
 	if req.MsgData != nil {
 		m.encapsulateMsgData(req.MsgData)
+		// 全局账号状态校验：冻结/黑名单用户不可收发消息
+		if err := m.verifyUserStatus(ctx, req); err != nil {
+			return nil, err
+		}
 		switch req.MsgData.SessionType {
 		case constant.SingleChatType:
 			return m.sendMsgSingleChat(ctx, req)

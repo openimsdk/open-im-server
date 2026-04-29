@@ -42,6 +42,14 @@ const (
 	MsgReceiveSettingNobody  int32 = 2
 )
 
+// UserStatus 用户账号状态枚举。
+// 0=正常；1=冻结（可登录，不能收发消息）；2=黑名单（不可登录，自动踢下线，不能收发消息）
+const (
+	UserStatusNormal    int32 = 0
+	UserStatusFrozen    int32 = 1
+	UserStatusBlacklist int32 = 2
+)
+
 type User struct {
 	UserID            string    `bson:"user_id"`
 	Nickname          string    `bson:"nickname"`
@@ -57,6 +65,8 @@ type User struct {
 	PhoneVisibility   int32     `bson:"phone_visibility"`
 	CallAcceptSetting int32     `bson:"call_accept_setting"`
 	MsgReceiveSetting int32     `bson:"msg_receive_setting"`
+	// Status 账号状态：0=正常，1=冻结，2=黑名单
+	Status int32 `bson:"status"`
 }
 
 func (u *User) GetNickname() string {
