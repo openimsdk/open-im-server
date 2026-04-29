@@ -75,6 +75,29 @@ func (x *MsgClient) GetActiveConversation(ctx context.Context, conversationIDs [
 	return extractField(ctx, x.MsgClient.GetActiveConversation, req, (*msg.GetActiveConversationResp).GetConversations)
 }
 
+// GetSingleMsgBySeq 根据会话 ID 与 seq 拉取一条消息（不存在时返回 nil）
+func (x *MsgClient) GetSingleMsgBySeq(ctx context.Context, conversationID string, seq int64) (*sdkws.MsgData, error) {
+	if conversationID == "" || seq <= 0 {
+		return nil, nil
+	}
+	req := &msg.GetMsgByConversationIDsReq{
+		ConversationIDs: []string{conversationID},
+		MaxSeqs:         map[string]int64{conversationID: seq},
+	}
+	resp, err := x.MsgClient.GetMsgByConversationIDs(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	m := resp.GetMsgDatas()
+	if len(m) == 0 {
+		return nil, nil
+	}
+	if v, ok := m[conversationID]; ok && v != nil && v.Seq == seq {
+		return v, nil
+	}
+	return nil, nil
+}
+
 func (x *MsgClient) GetSeqMessage(ctx context.Context, userID string, conversations []*msg.ConversationSeqs) (map[string]*sdkws.PullMsgs, error) {
 	if len(conversations) == 0 {
 		return nil, nil
