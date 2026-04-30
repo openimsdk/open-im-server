@@ -314,7 +314,11 @@ func (s *friendServer) GetFriendInfo(ctx context.Context, req *relation.GetFrien
 	if err != nil {
 		return nil, err
 	}
-	return &relation.GetFriendInfoResp{FriendInfos: convert.FriendOnlyDB2PbOnly(friends)}, nil
+	users, err := s.userClient.GetUsersInfoMap(ctx, req.FriendUserIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &relation.GetFriendInfoResp{FriendInfos: convert.FriendOnlyDB2PbOnly(friends, users)}, nil
 }
 
 func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *relation.GetDesignatedFriendsReq) (resp *relation.GetDesignatedFriendsResp, err error) {
@@ -698,13 +702,13 @@ func (s *friendServer) AddOnewayFriend(ctx context.Context, req *relation.ApplyT
 	}
 	// Notify only A (FromUserID) so incremental friend sync is triggered
 	// without notifying B (ToUserID).
-	tips := sdkws.FriendApplicationApprovedTips{
-		FromToUserID: &sdkws.FromToUserID{
-			FromUserID: req.FromUserID,
-			ToUserID:   req.ToUserID,
-		},
-	}
-	s.notificationSender.Notification(ctx, req.FromUserID, req.FromUserID, constant.FriendApplicationApprovedNotification, &tips)
+	//tips := sdkws.FriendApplicationApprovedTips{
+	//	FromToUserID: &sdkws.FromToUserID{
+	//		FromUserID: req.FromUserID,
+	//		ToUserID:   req.ToUserID,
+	//	},
+	//}
+	//s.notificationSender.Notification(ctx, req.FromUserID, req.FromUserID, constant.FriendApplicationApprovedNotification, &tips)
 	return &relation.ApplyToAddFriendResp{}, nil
 }
 
