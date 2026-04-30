@@ -9,7 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-// ParsedEvent represents a parsed blockchain event
 type ParsedEvent struct {
 	Name        string
 	Data        map[string]interface{}
@@ -17,7 +16,6 @@ type ParsedEvent struct {
 	BlockNumber uint64
 }
 
-// ParseEventsFromLogs parses logs using the contract ABI
 func ParseEventsFromLogs(logs []*types.Log, contractABI abi.ABI) ([]*ParsedEvent, error) {
 	var events []*ParsedEvent
 
@@ -43,7 +41,6 @@ func parseEvent(log *types.Log, contractABI abi.ABI) (*ParsedEvent, error) {
 
 		data := make(map[string]interface{})
 
-		// Parse indexed parameters from topics
 		indexedIdx := 1
 		for _, arg := range event.Inputs {
 			if arg.Indexed {
@@ -60,7 +57,6 @@ func parseEvent(log *types.Log, contractABI abi.ABI) (*ParsedEvent, error) {
 			}
 		}
 
-		// Parse non-indexed parameters from data
 		if len(log.Data) > 0 {
 			unpacked, err := event.Inputs.Unpack(log.Data)
 			if err == nil {
@@ -87,7 +83,6 @@ func parseEvent(log *types.Log, contractABI abi.ABI) (*ParsedEvent, error) {
 	return nil, fmt.Errorf("unknown event: %s", log.Topics[0].Hex())
 }
 
-// GetPacketIDFromEvent extracts packetId from event data
 func GetPacketIDFromEvent(event *ParsedEvent) *big.Int {
 	if id, ok := event.Data["packetId"]; ok {
 		if b, ok := id.(*big.Int); ok {
@@ -97,7 +92,6 @@ func GetPacketIDFromEvent(event *ParsedEvent) *big.Int {
 	return big.NewInt(0)
 }
 
-// GetClaimerFromEvent extracts claimer address from event
 func GetAddressFromEvent(event *ParsedEvent, key string) common.Address {
 	value, ok := event.Data[key]
 	if !ok {
@@ -107,12 +101,10 @@ func GetAddressFromEvent(event *ParsedEvent, key string) common.Address {
 	return addr
 }
 
-// GetAmountFromEvent extracts amount from event
 func GetAmountFromEvent(event *ParsedEvent) *big.Int {
 	return GetUintFromEvent(event, "amount")
 }
 
-// GetUintFromEvent extracts a uint field from event data.
 func GetUintFromEvent(event *ParsedEvent, key string) *big.Int {
 	value, ok := event.Data[key]
 	if !ok {

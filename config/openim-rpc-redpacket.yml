@@ -1,0 +1,31 @@
+rpc:
+  registerIP: ""
+  listenIP: 0.0.0.0
+  autoSetPorts: false
+  ports: [10560]
+
+prometheus:
+  enable: false
+  ports: [12560]
+
+# EVM (Ethereum / Polygon / BSC / ...) chain configuration.
+# Leave rpcURL empty to disable the EVM client; the RPC service will then
+# only expose TRON-related functionality (or the offchain code paths).
+chain:
+  rpcURL: ""
+  contractAddress: ""
+  chainID: 0
+  signerPrivateKey: ""
+  configAdminPrivateKey: ""
+
+# TRON full-node configuration. Leave fullNodeURL empty to disable TRON.
+tron:
+  fullNodeURL: ""
+  contractBase58: ""
+  ownerBase58: ""
+  privateKeyHex: ""
+  feeLimit: 100000000
+
+# Indexer polling interval (in seconds). Used by both EVM and TRON event indexers.
+indexer:
+  pollInterval: 5

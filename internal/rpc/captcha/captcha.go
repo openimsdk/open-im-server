@@ -120,11 +120,11 @@ func (s *server) GenerateCaptcha(ctx context.Context, _ *pbcaptcha.GenerateCaptc
 		log.ZError(ctx, "captcha insert mongodb failed", err, "captchaID", id)
 		return nil, err
 	}
+	_ = tileImage
 	return &pbcaptcha.GenerateCaptchaResp{
 		CaptchaID:   id,
 		MasterImage: masterImage,
-		TileImage:   tileImage,
-		TileY:       int32(block.DY),
+		ThumbImage:  tileImage,
 		ExpireAt:    expiredAt.Unix(),
 	}, nil
 }
@@ -159,9 +159,14 @@ func (s *server) VerifyCaptcha(ctx context.Context, req *pbcaptcha.VerifyCaptcha
 		log.ZWarn(ctx, "captcha expired", nil, "captchaID", req.CaptchaID, "expiredAt", doc.ExpiredAt.Unix())
 		return nil, servererrs.ErrFileUploadedExpired.WrapMsg("captcha expired", "captchaID", req.CaptchaID)
 	}
-	success := slide.Validate(int(req.X), int(req.Y), doc.X, doc.Y, s.conf.VerifyPadding)
+	var x, y int32
+	if pts := req.GetClickPoints(); len(pts) > 0 && pts[0] != nil {
+		x = pts[0].GetX()
+		y = pts[0].GetY()
+	}
+	success := slide.Validate(int(x), int(y), doc.X, doc.Y, s.conf.VerifyPadding)
 	if !success {
-		log.ZError(ctx, "captcha validate failed", nil, "captchaID", req.CaptchaID, "x", req.X, "y", req.Y, "docX", doc.X, "docY", doc.Y)
+		log.ZError(ctx, "captcha validate failed", nil, "captchaID", req.CaptchaID, "x", x, "y", y, "docX", doc.X, "docY", doc.Y)
 	}
 	return &pbcaptcha.VerifyCaptchaResp{Success: success}, nil
 }

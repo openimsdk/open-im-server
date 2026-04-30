@@ -3,32 +3,29 @@ package chain
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
-	"redpacket/internal/model"
-	"redpacket/internal/repository"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/tools/log"
 )
 
-// TronIndexer provides production-grade event listening for TRON blockchain
 type TronIndexer struct {
 	client          *TronClient
-	repo            repository.Repository
+	db              controller.RedPacketDatabase
 	pollInterval    time.Duration
-	lastBlockNum    int64 // TRON uses block numbers
+	lastBlockNum    int64
 	contractAddress string
-	processedTxs    map[string]bool // Simple dedup for this session
+	processedTxs    map[string]bool
 }
 
-// NewTronIndexer creates a new TRON event indexer
-func NewTronIndexer(client *TronClient, repo repository.Repository, pollInterval int, startBlock int64) *TronIndexer {
+func NewTronIndexer(client *TronClient, db controller.RedPacketDatabase, pollInterval int, startBlock int64) *TronIndexer {
 	if pollInterval <= 0 {
-		pollInterval = 3 // TRON blocks are ~3s
+		pollInterval = 3
 	}
-
 	return &TronIndexer{
 		client:          client,
-		repo:            repo,
+		db:              db,
 		pollInterval:    time.Duration(pollInterval) * time.Second,
 		lastBlockNum:    startBlock,
 		contractAddress: client.contractBase58,
@@ -36,9 +33,8 @@ func NewTronIndexer(client *TronClient, repo repository.Repository, pollInterval
 	}
 }
 
-// Start begins polling for TRON blockchain events
 func (t *TronIndexer) Start(ctx context.Context) {
-	log.Println("🚀 Starting TRON event indexer... (Production mode)")
+	log.ZInfo(ctx, "starting RedPacket TRON event indexer")
 
 	go func() {
 		ticker := time.NewTicker(t.pollInterval)
@@ -47,12 +43,11 @@ func (t *TronIndexer) Start(ctx context.Context) {
 		for {
 			select {
 			case <-ctx.Done():
-				log.Println("TRON Indexer stopped")
+				log.ZInfo(ctx, "redpacket tron indexer stopped")
 				return
 			case <-ticker.C:
 				if err := t.poll(ctx); err != nil {
-					log.Printf("TRON Indexer poll error: %v", err)
-					// Backoff on error
+					log.ZWarn(ctx, "redpacket tron indexer poll error", err)
 					time.Sleep(2 * time.Second)
 				}
 			}
@@ -61,7 +56,6 @@ func (t *TronIndexer) Start(ctx context.Context) {
 }
 
 func (t *TronIndexer) poll(ctx context.Context) error {
-	// Get current block
 	currentBlock, err := t.getNowBlock(ctx)
 	if err != nil {
 		return fmt.Errorf("get now block failed: %w", err)
@@ -71,12 +65,11 @@ func (t *TronIndexer) poll(ctx context.Context) error {
 		return nil
 	}
 
-	log.Printf("📡 TRON scanning blocks %d to %d", t.lastBlockNum+1, currentBlock)
+	log.ZDebug(ctx, "redpacket tron scanning blocks", "from", t.lastBlockNum+1, "to", currentBlock)
 
-	// Scan blocks for contract transactions
 	for blockNum := t.lastBlockNum + 1; blockNum <= currentBlock; blockNum++ {
 		if err := t.scanBlock(ctx, blockNum); err != nil {
-			log.Printf("Warning: failed to scan TRON block %d: %v", blockNum, err)
+			log.ZWarn(ctx, "redpacket tron scan block failed", err, "block", blockNum)
 			continue
 		}
 	}
@@ -104,7 +97,6 @@ func (t *TronIndexer) getNowBlock(ctx context.Context) (int64, error) {
 }
 
 func (t *TronIndexer) scanBlock(ctx context.Context, blockNum int64) error {
-	// Get block by number
 	var blockResp map[string]interface{}
 	err := postJSON(ctx, t.client.fullNodeURL+"/wallet/getblockbynum", map[string]interface{}{
 		"num": blockNum,
@@ -115,7 +107,7 @@ func (t *TronIndexer) scanBlock(ctx context.Context, blockNum int64) error {
 
 	transactions, ok := blockResp["transactions"].([]interface{})
 	if !ok {
-		return nil // no transactions
+		return nil
 	}
 
 	for _, txInterface := range transactions {
@@ -130,7 +122,7 @@ func (t *TronIndexer) scanBlock(ctx context.Context, blockNum int64) error {
 		}
 
 		if err := t.processTransaction(ctx, txID); err != nil {
-			log.Printf("Failed to process TRON tx %s: %v", txID, err)
+			log.ZWarn(ctx, "redpacket tron process tx failed", err, "txID", txID)
 		} else {
 			t.processedTxs[txID] = true
 		}
@@ -140,7 +132,6 @@ func (t *TronIndexer) scanBlock(ctx context.Context, blockNum int64) error {
 }
 
 func (t *TronIndexer) processTransaction(ctx context.Context, txID string) error {
-	// Get transaction info with logs
 	var txInfo map[string]interface{}
 	err := postJSON(ctx, t.client.fullNodeURL+"/wallet/gettransactioninfobyid", map[string]interface{}{
 		"value": txID,
@@ -149,17 +140,14 @@ func (t *TronIndexer) processTransaction(ctx context.Context, txID string) error
 		return err
 	}
 
-	// Check if this transaction interacted with our contract
 	contractAddress := t.client.contractBase58
 	if logs, ok := txInfo["log"].([]interface{}); ok && len(logs) > 0 {
 		for _, logEntry := range logs {
 			if logMap, ok := logEntry.(map[string]interface{}); ok {
 				if address, ok := logMap["address"].(string); ok && address == contractAddress {
-					// This is our contract event
 					eventType := t.parseTronEvent(logMap)
-					log.Printf("🔍 TRON Event detected: %s in tx %s", eventType, txID)
+					log.ZDebug(ctx, "redpacket tron event detected", "event", eventType, "txID", txID)
 
-					// Process different event types
 					switch eventType {
 					case "PacketCreated":
 						t.handleTronPacketCreated(ctx, logMap, txID)
@@ -177,15 +165,11 @@ func (t *TronIndexer) processTransaction(ctx context.Context, txID string) error
 }
 
 func (t *TronIndexer) parseTronEvent(logEntry map[string]interface{}) string {
-	// TRON events are more complex. In production, you'd decode topics and data
-	// For this implementation, we use a simplified approach based on log data
 	if topics, ok := logEntry["topics"].([]interface{}); ok && len(topics) > 0 {
 		if topic0, ok := topics[0].(string); ok {
-			// Map common TRON event signatures (this would be expanded with real contract event IDs)
 			switch topic0 {
-			case "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": // Transfer (example)
+			case "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0":
 				return "Transfer"
-			// Add real RedPacket event signatures here from contract
 			default:
 				return "UnknownEvent"
 			}
@@ -194,46 +178,39 @@ func (t *TronIndexer) parseTronEvent(logEntry map[string]interface{}) string {
 	return "UnknownEvent"
 }
 
-// Event handlers - these would update the database with parsed event data
-
 func (t *TronIndexer) handleTronPacketCreated(ctx context.Context, logData map[string]interface{}, txID string) {
-	log.Printf("📦 [TRON] PacketCreated event in tx %s", txID)
-	// TODO: Parse packetId, creator, amount, etc. and update database
-	// This would typically link with the offchain biz_id created earlier
+	log.ZInfo(ctx, "tron PacketCreated event", "txID", txID)
 }
 
 func (t *TronIndexer) handleTronPacketClaimed(ctx context.Context, logData map[string]interface{}, txID string) {
-	log.Printf("🎁 [TRON] PacketClaimed event in tx %s", txID)
+	log.ZInfo(ctx, "tron PacketClaimed event", "txID", txID)
 
-	// Example: extract claimer and amount from log data
 	claimer := "unknown"
 	amount := "0"
 
 	if topics, ok := logData["topics"].([]interface{}); ok && len(topics) > 1 {
 		if claimerTopic, ok := topics[1].(string); ok {
-			claimer = claimerTopic // simplified
+			claimer = claimerTopic
 		}
 	}
 
 	claim := &model.RedPacketClaim{
-		PacketID:      "tron-packet-" + txID[:8], // placeholder
+		PacketID:      "tron-packet-" + txID[:8],
 		ClaimerWallet: claimer,
 		ClaimTxHash:   txID,
 		ClaimedAmount: amount,
 		Status:        "CONFIRMED",
 	}
 
-	if err := t.repo.SaveClaim(ctx, claim); err != nil {
-		log.Printf("Failed to save TRON claim: %v", err)
+	if err := t.db.SaveClaim(ctx, claim); err != nil {
+		log.ZWarn(ctx, "redpacket tron save claim failed", err)
 	}
 }
 
 func (t *TronIndexer) handleTronPacketRefunded(ctx context.Context, logData map[string]interface{}, txID string) {
-	log.Printf("♻️ [TRON] PacketRefunded event in tx %s", txID)
-	// Update packet status to REFUNDED
+	log.ZInfo(ctx, "tron PacketRefunded event", "txID", txID)
 }
 
-// GetLastProcessedBlock returns the last processed block for monitoring
 func (t *TronIndexer) GetLastProcessedBlock() int64 {
 	return t.lastBlockNum
 }

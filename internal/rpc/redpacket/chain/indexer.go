@@ -3,45 +3,40 @@ package chain
 import (
 	"context"
 	"fmt"
-	"log"
 	"math/big"
 	"time"
-
-	"redpacket/internal/model"
-	"redpacket/internal/repository"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
+	"github.com/openimsdk/tools/log"
 )
 
-// Indexer listens to blockchain events and updates database
 type Indexer struct {
 	client       *ChainClient
-	repo         repository.Repository
+	db           controller.RedPacketDatabase
 	pollInterval time.Duration
 	lastBlock    uint64
 	contractAddr common.Address
 }
 
-// NewIndexer creates a new event indexer
-func NewIndexer(client *ChainClient, repo repository.Repository, pollInterval int, startBlock uint64) *Indexer {
+func NewIndexer(client *ChainClient, db controller.RedPacketDatabase, pollInterval int, startBlock uint64) *Indexer {
 	if pollInterval <= 0 {
 		pollInterval = 5
 	}
-
 	return &Indexer{
 		client:       client,
-		repo:         repo,
+		db:           db,
 		pollInterval: time.Duration(pollInterval) * time.Second,
 		lastBlock:    startBlock,
 		contractAddr: client.contractAddr,
 	}
 }
 
-// Start begins polling for new events
 func (i *Indexer) Start(ctx context.Context) {
-	log.Println("🚀 Starting RedPacket event indexer...")
+	log.ZInfo(ctx, "starting RedPacket ETH event indexer")
 
 	go func() {
 		ticker := time.NewTicker(i.pollInterval)
@@ -50,11 +45,11 @@ func (i *Indexer) Start(ctx context.Context) {
 		for {
 			select {
 			case <-ctx.Done():
-				log.Println("Indexer stopped")
+				log.ZInfo(ctx, "redpacket eth indexer stopped")
 				return
 			case <-ticker.C:
 				if err := i.poll(ctx); err != nil {
-					log.Printf("Indexer poll error: %v", err)
+					log.ZWarn(ctx, "redpacket eth indexer poll error", err)
 				}
 			}
 		}
@@ -62,7 +57,6 @@ func (i *Indexer) Start(ctx context.Context) {
 }
 
 func (i *Indexer) poll(ctx context.Context) error {
-	// Get latest block
 	header, err := i.client.client.HeaderByNumber(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("get header failed: %w", err)
@@ -73,7 +67,6 @@ func (i *Indexer) poll(ctx context.Context) error {
 		return nil
 	}
 
-	// Query logs from lastBlock+1 to currentBlock
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(int64(i.lastBlock + 1)),
 		ToBlock:   big.NewInt(int64(currentBlock)),
@@ -85,30 +78,28 @@ func (i *Indexer) poll(ctx context.Context) error {
 		return fmt.Errorf("filter logs failed: %w", err)
 	}
 
-	// Convert to pointer slice for parser
 	logPtrs := make([]*types.Log, len(logs))
-	for i, log := range logs {
-		logPtrs[i] = &log
+	for idx := range logs {
+		logPtrs[idx] = &logs[idx]
 	}
 
-	// Parse and process events
 	events, err := ParseEventsFromLogs(logPtrs, i.client.contractABI)
 	if err != nil {
 		return err
 	}
 
 	for _, event := range events {
-		if err := i.processEvent(ctx, event, logPtrs); err != nil {
-			log.Printf("Process event %s failed: %v", event.Name, err)
+		if err := i.processEvent(ctx, event); err != nil {
+			log.ZWarn(ctx, "process redpacket eth event failed", err, "event", event.Name)
 		}
 	}
 
 	i.lastBlock = currentBlock
-	log.Printf("✅ Indexed up to block %d, processed %d events", currentBlock, len(events))
+	log.ZInfo(ctx, "redpacket eth indexed", "block", currentBlock, "events", len(events))
 	return nil
 }
 
-func (i *Indexer) processEvent(ctx context.Context, event *ParsedEvent, logs []*types.Log) error {
+func (i *Indexer) processEvent(ctx context.Context, event *ParsedEvent) error {
 	switch event.Name {
 	case "PacketCreated":
 		return i.handlePacketCreated(ctx, event)
@@ -117,7 +108,6 @@ func (i *Indexer) processEvent(ctx context.Context, event *ParsedEvent, logs []*
 	case "PacketRefunded":
 		return i.handlePacketRefunded(ctx, event)
 	default:
-		log.Printf("Unknown event: %s", event.Name)
 		return nil
 	}
 }
@@ -125,11 +115,7 @@ func (i *Indexer) processEvent(ctx context.Context, event *ParsedEvent, logs []*
 func (i *Indexer) handlePacketCreated(ctx context.Context, event *ParsedEvent) error {
 	packetID := GetPacketIDFromEvent(event)
 	creator := GetAddressFromEvent(event, "creator")
-
-	log.Printf("📦 PacketCreated: packetId=%s, creator=%s", packetID.String(), creator.Hex())
-
-	// Update database - in real implementation, link with biz_id via offchain record
-	// This would typically be triggered by the created-callback first
+	log.ZInfo(ctx, "PacketCreated event", "packetID", packetID.String(), "creator", creator.Hex())
 	return nil
 }
 
@@ -139,8 +125,7 @@ func (i *Indexer) handlePacketClaimed(ctx context.Context, event *ParsedEvent) e
 	amount := GetAmountFromEvent(event)
 	authNonce := GetUintFromEvent(event, "authNonce")
 
-	log.Printf("🎁 PacketClaimed: packetId=%s, claimer=%s, amount=%s",
-		packetID.String(), claimer.Hex(), amount.String())
+	log.ZInfo(ctx, "PacketClaimed event", "packetID", packetID.String(), "claimer", claimer.Hex(), "amount", amount.String())
 
 	claim := &model.RedPacketClaim{
 		PacketID:      packetID.String(),
@@ -154,26 +139,23 @@ func (i *Indexer) handlePacketClaimed(ctx context.Context, event *ParsedEvent) e
 		UpdatedAt:     time.Now(),
 	}
 
-	if err := i.repo.SaveClaim(ctx, claim); err != nil {
+	if err := i.db.SaveClaim(ctx, claim); err != nil {
 		return err
 	}
-	if err := i.repo.MarkClaimAuthUsed(ctx, authNonce.String()); err != nil {
+	if err := i.db.MarkClaimAuthUsed(ctx, authNonce.String()); err != nil {
 		return err
 	}
-
-	return i.repo.UpdateRedPacketClaimProgress(ctx, packetID.String(), amount.String(), "")
+	return i.db.UpdateRedPacketClaimProgress(ctx, packetID.String(), amount.String(), "")
 }
 
 func (i *Indexer) handlePacketRefunded(ctx context.Context, event *ParsedEvent) error {
 	packetID := GetPacketIDFromEvent(event)
-	operator := GetAddressFromEvent(event, "operator")
 	refundTo := GetAddressFromEvent(event, "refundTo")
 	amount := GetAmountFromEvent(event)
 
-	log.Printf("♻️ PacketRefunded: packetId=%s, operator=%s, refundTo=%s, amount=%s",
-		packetID.String(), operator.Hex(), refundTo.Hex(), amount.String())
+	log.ZInfo(ctx, "PacketRefunded event", "packetID", packetID.String(), "refundTo", refundTo.Hex(), "amount", amount.String())
 
-	if err := i.repo.SaveRefund(ctx, &model.RedPacketRefund{
+	if err := i.db.SaveRefund(ctx, &model.RedPacketRefund{
 		PacketID:  packetID.String(),
 		RefundTo:  refundTo.Hex(),
 		TxHash:    event.TxHash.Hex(),
@@ -183,5 +165,5 @@ func (i *Indexer) handlePacketRefunded(ctx context.Context, event *ParsedEvent) 
 		return err
 	}
 
-	return i.repo.UpdateRedPacketStatus(ctx, packetID.String(), "REFUNDED")
+	return i.db.UpdateRedPacketStatus(ctx, packetID.String(), "REFUNDED")
 }

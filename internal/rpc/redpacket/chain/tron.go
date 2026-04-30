@@ -16,7 +16,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-// TronClient handles TRON blockchain interactions using HTTP JSON-RPC
 type TronClient struct {
 	fullNodeURL    string
 	contractBase58 string
@@ -27,7 +26,6 @@ type TronClient struct {
 	parsedABI      abi.ABI
 }
 
-// NewTronClient creates a new TRON client
 func NewTronClient(fullNodeURL, contractBase58, ownerBase58, privateKeyHex string, abiJSON []byte, feeLimit int64) (*TronClient, error) {
 	if fullNodeURL == "" {
 		return nil, fmt.Errorf("fullNodeURL is required for TRON")
@@ -53,6 +51,16 @@ func (t *TronClient) ContractAddress() string {
 	return t.contractBase58
 }
 
+// ContractBase58 exposes the contract base58 address for indexers.
+func (t *TronClient) ContractBase58() string {
+	return t.contractBase58
+}
+
+// FullNodeURL exposes the full node URL for indexers.
+func (t *TronClient) FullNodeURL() string {
+	return t.fullNodeURL
+}
+
 func (t *TronClient) ParseTransactionReceipt(ctx context.Context, txID string) ([]*ParsedEvent, error) {
 	info, err := t.getTransactionInfo(ctx, txID)
 	if err != nil {
@@ -67,16 +75,13 @@ func (t *TronClient) ParseTransactionReceipt(ctx context.Context, txID string) (
 	return ParseEventsFromLogs(logs, t.parsedABI)
 }
 
-// SendAdminTransaction sends an admin transaction on TRON (setSigner, setToken, etc.)
 func (t *TronClient) SendAdminTransaction(ctx context.Context, methodName string, args ...interface{}) (string, error) {
 	if t.privateKeyHex == "" || t.ownerBase58 == "" {
 		return "", fmt.Errorf("TRON admin credentials not configured")
 	}
 
-	// Build function selector like "setSigner(address)"
 	selector := methodName
 	if len(args) > 0 {
-		// Simple selector generation - in production use full ABI encoding
 		selector = fmt.Sprintf("%s(%s)", methodName, getParamTypes(args))
 	}
 
@@ -98,10 +103,7 @@ func (t *TronClient) SendAdminTransaction(ctx context.Context, methodName string
 	)
 }
 
-// GetSignMessageForTron gets sign message from TRON contract (if needed)
 func (t *TronClient) GetSignMessageForTron(ctx context.Context, packetID *big.Int, claimer, authNonce, randomSeed, deadline string) (string, error) {
-	// TRON version would call triggersmartcontract with getSignMessage
-	// For simplicity, we can reuse similar logic as ETH or implement full TRON trigger
 	return "", fmt.Errorf("TRON getSignMessage not fully implemented yet - use ETH path for signing")
 }
 
@@ -114,8 +116,6 @@ type tronTxInfoResp struct {
 		Data    string   `json:"data"`
 	} `json:"log"`
 }
-
-// Helper functions
 
 func getParamTypes(args []interface{}) string {
 	types := make([]string, len(args))
@@ -134,7 +134,6 @@ func getParamTypes(args []interface{}) string {
 	return strings.Join(types, ",")
 }
 
-// SendTronAdminTx implements TRON transaction broadcasting (from design doc)
 func SendTronAdminTx(
 	ctx context.Context,
 	fullNodeURL, ownerBase58, contractBase58, selector, methodName string,
@@ -149,7 +148,6 @@ func SendTronAdminTx(
 		return "", err
 	}
 
-	// Trigger smart contract
 	var triggerResp map[string]interface{}
 	err = postJSON(ctx, fullNodeURL+"/wallet/triggersmartcontract", map[string]interface{}{
 		"owner_address":     ownerBase58,
@@ -169,7 +167,6 @@ func SendTronAdminTx(
 		return "", fmt.Errorf("transaction not found in trigger response")
 	}
 
-	// Sign transaction
 	var signedResp map[string]interface{}
 	err = postJSON(ctx, fullNodeURL+"/wallet/gettransactionsign", map[string]interface{}{
 		"transaction": txObj,
@@ -179,7 +176,6 @@ func SendTronAdminTx(
 		return "", fmt.Errorf("sign transaction failed: %w", err)
 	}
 
-	// Broadcast
 	var broadcastResp map[string]interface{}
 	err = postJSON(ctx, fullNodeURL+"/wallet/broadcasttransaction", signedResp, &broadcastResp)
 	if err != nil {

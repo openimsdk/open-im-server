@@ -18,7 +18,7 @@ import (
 //go:embed abi/RedPacket.json
 var embeddedABI []byte
 
-// ChainClient handles blockchain interactions for RedPacket
+// ChainClient handles blockchain interactions for RedPacket.
 type ChainClient struct {
 	client         *ethclient.Client
 	contractABI    abi.ABI
@@ -28,14 +28,12 @@ type ChainClient struct {
 	chainID        *big.Int
 }
 
-// NewClient creates a new ChainClient
 func NewClient(rpcURL, contractAddress string, chainID int64, signerPrivateKey, configAdminPrivateKey string) (*ChainClient, error) {
 	client, err := ethclient.Dial(rpcURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to ethereum: %w", err)
 	}
 
-	// Load ABI
 	abiJSON, err := ExtractABIFromEmbeddedArtifact()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load ABI: %w", err)
@@ -74,7 +72,6 @@ func NewClient(rpcURL, contractAddress string, chainID int64, signerPrivateKey, 
 	}, nil
 }
 
-// GetSignMessage calls contract's getSignMessage view function
 func (c *ChainClient) GetSignMessage(ctx context.Context, packetID *big.Int, claimer common.Address, authNonce, randomSeed, deadline *big.Int) ([32]byte, error) {
 	var digest [32]byte
 
@@ -97,7 +94,6 @@ func (c *ChainClient) GetSignMessage(ctx context.Context, packetID *big.Int, cla
 	return digest, nil
 }
 
-// SignClaim signs the digest using the signer key (naked signature as per contract)
 func (c *ChainClient) SignClaim(digest [32]byte) ([]byte, error) {
 	if c.signerKey == nil {
 		return nil, fmt.Errorf("signer key not configured")
@@ -108,7 +104,6 @@ func (c *ChainClient) SignClaim(digest [32]byte) ([]byte, error) {
 		return nil, fmt.Errorf("sign failed: %w", err)
 	}
 
-	// Adjust v from 0/1 to 27/28 as expected by EVM
 	if len(sig) == 65 && sig[64] < 27 {
 		sig[64] += 27
 	}
@@ -116,7 +111,6 @@ func (c *ChainClient) SignClaim(digest [32]byte) ([]byte, error) {
 	return sig, nil
 }
 
-// ParseTransactionReceipt parses events from a transaction receipt
 func (c *ChainClient) ParseTransactionReceipt(ctx context.Context, txHash common.Hash) ([]*ParsedEvent, error) {
 	receipt, err := c.client.TransactionReceipt(ctx, txHash)
 	if err != nil {
@@ -137,14 +131,22 @@ func (c *ChainClient) ChainID() *big.Int {
 	return new(big.Int).Set(c.chainID)
 }
 
-// Close closes the client connection
+// EthClient exposes the underlying ethclient for indexers.
+func (c *ChainClient) EthClient() *ethclient.Client {
+	return c.client
+}
+
+// ContractABI exposes the parsed ABI for indexers.
+func (c *ChainClient) ContractABI() abi.ABI {
+	return c.contractABI
+}
+
 func (c *ChainClient) Close() {
 	if c.client != nil {
 		c.client.Close()
 	}
 }
 
-// ExtractABIFromEmbeddedArtifact returns the embedded contract ABI
 func ExtractABIFromEmbeddedArtifact() ([]byte, error) {
 	if len(embeddedABI) == 0 {
 		return nil, fmt.Errorf("embedded ABI is empty")

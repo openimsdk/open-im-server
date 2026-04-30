@@ -12,6 +12,7 @@ rpcRegisterName:
   captcha: captcha
   rtc: rtc
   crypto: crypto
+  redPacket: redPacket
 
 imAdminUserID: [ imAdmin ]
 

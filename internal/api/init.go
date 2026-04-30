@@ -48,6 +48,7 @@ func Start(ctx context.Context, index int, cfg *Config) error {
 	client, err = kdisc.NewDiscoveryRegister(&cfg.Discovery, &cfg.Share, []string{
 		cfg.Share.RpcRegisterName.MessageGateway,
 		cfg.Share.RpcRegisterName.Captcha,
+		cfg.Share.RpcRegisterName.RedPacket,
 	})
 	if err != nil {
 		return errs.WrapMsg(err, "failed to register discovery service")
