@@ -435,16 +435,120 @@ func (s *redPacketServer) validateCreateHook(ctx context.Context, req *pbredpack
 	}
 }
 
+// validateCreateBaseFields validates the fields shared by every red packet type.
+// It does not look up creator identity or scope; those are handled by the per-type hooks.
+func validateCreateBaseFields(req *pbredpacket.CreateOrderReq) (*big.Int, error) {
+	if strings.TrimSpace(req.CreatorWallet) == "" {
+		return nil, errs.ErrArgs.WrapMsg("creator_wallet is required")
+	}
+	if strings.TrimSpace(req.TotalAmount) == "" {
+		return nil, errs.ErrArgs.WrapMsg("total_amount is required")
+	}
+	total, ok := new(big.Int).SetString(req.TotalAmount, 10)
+	if !ok || total.Sign() <= 0 {
+		return nil, errs.ErrArgs.WrapMsg("total_amount must be a positive integer string", "totalAmount", req.TotalAmount)
+	}
+	if req.ExpiryAt != 0 && req.ExpiryAt <= time.Now().Unix() {
+		return nil, errs.ErrArgs.WrapMsg("expiry_at must be 0 or a future unix timestamp", "expiryAt", req.ExpiryAt)
+	}
+	return total, nil
+}
+
+// validateCreatorScope verifies group membership / friend relationship for the creator
+// based on the requested scope. PUBLIC scope skips relationship checks.
+func (s *redPacketServer) validateCreatorScope(ctx context.Context, req *pbredpacket.CreateOrderReq) error {
+	creatorUserID := mcontext.GetOpUserID(ctx)
+	if creatorUserID == "" {
+		return servererrs.ErrNoPermission.WrapMsg("op user id is empty")
+	}
+	switch normalizeScopeType(req.ScopeType) {
+	case "GROUP":
+		return s.ensureGroupEligibility(ctx, req.GroupID, creatorUserID)
+	case "DIRECT":
+		if strings.TrimSpace(req.ReceiverUserID) != "" {
+			if err := s.ensureFriendRelationship(ctx, creatorUserID, req.ReceiverUserID); err != nil {
+				return err
+			}
+		}
+		for _, receiverID := range req.ReceiverUserIDs {
+			if strings.TrimSpace(receiverID) == "" {
+				continue
+			}
+			if err := s.ensureFriendRelationship(ctx, creatorUserID, receiverID); err != nil {
+				return err
+			}
+		}
+		return nil
+	default:
+		return nil
+	}
+}
+
+// validateFixedPacketCreate validates fixed red packets:
+//   - shared base fields
+//   - total_shares > 0
+//   - total_amount must be divisible by total_shares (each share is an integer in min units)
+//   - scope-based group/friend relationship for the creator
 func (s *redPacketServer) validateFixedPacketCreate(ctx context.Context, req *pbredpacket.CreateOrderReq) error {
-	return nil
+	total, err := validateCreateBaseFields(req)
+	if err != nil {
+		return err
+	}
+	if req.TotalShares <= 0 {
+		return errs.ErrArgs.WrapMsg("total_shares must be positive for fixed packet", "totalShares", req.TotalShares)
+	}
+	shares := big.NewInt(int64(req.TotalShares))
+	if new(big.Int).Mod(total, shares).Sign() != 0 {
+		return errs.ErrArgs.WrapMsg("total_amount must be divisible by total_shares for fixed packet",
+			"totalAmount", req.TotalAmount, "totalShares", req.TotalShares)
+	}
+	return s.validateCreatorScope(ctx, req)
 }
 
+// validateRandomPacketCreate validates random (lucky) red packets:
+//   - shared base fields
+//   - total_shares > 0
+//   - total_amount >= total_shares (at least 1 min unit per share)
+//   - scope-based group/friend relationship for the creator
 func (s *redPacketServer) validateRandomPacketCreate(ctx context.Context, req *pbredpacket.CreateOrderReq) error {
-	return nil
+	total, err := validateCreateBaseFields(req)
+	if err != nil {
+		return err
+	}
+	if req.TotalShares <= 0 {
+		return errs.ErrArgs.WrapMsg("total_shares must be positive for random packet", "totalShares", req.TotalShares)
+	}
+	shares := big.NewInt(int64(req.TotalShares))
+	if total.Cmp(shares) < 0 {
+		return errs.ErrArgs.WrapMsg("total_amount must be >= total_shares for random packet",
+			"totalAmount", req.TotalAmount, "totalShares", req.TotalShares)
+	}
+	return s.validateCreatorScope(ctx, req)
 }
 
+// validateTransferPacketCreate validates transfer red packets:
+//   - shared base fields
+//   - total_shares == 1
+//   - exactly one receiver_user_id, must be a friend of the creator
 func (s *redPacketServer) validateTransferPacketCreate(ctx context.Context, req *pbredpacket.CreateOrderReq) error {
-	return nil
+	if _, err := validateCreateBaseFields(req); err != nil {
+		return err
+	}
+	if req.TotalShares != 1 {
+		return errs.ErrArgs.WrapMsg("transfer packet must have total_shares == 1", "totalShares", req.TotalShares)
+	}
+	receiverUserID := strings.TrimSpace(req.ReceiverUserID)
+	if receiverUserID == "" {
+		return errs.ErrArgs.WrapMsg("receiver_user_id is required for transfer packet")
+	}
+	if len(req.ReceiverUserIDs) > 0 {
+		return errs.ErrArgs.WrapMsg("transfer packet only supports a single receiver_user_id")
+	}
+	creatorUserID := mcontext.GetOpUserID(ctx)
+	if creatorUserID == "" {
+		return servererrs.ErrNoPermission.WrapMsg("op user id is empty")
+	}
+	return s.ensureFriendRelationship(ctx, creatorUserID, receiverUserID)
 }
 
 func buildFallbackCreatedPacket(rp *model.RedPacket, packetID string) *createdPacketSnapshot {
@@ -587,13 +691,50 @@ func (s *redPacketServer) ensureWalletBinding(ctx context.Context, userID, claim
 	return nil
 }
 
-// ensureGroupEligibility reserves centralized group membership checks.
+// ensureGroupEligibility verifies that userID is an active member of groupID.
 func (s *redPacketServer) ensureGroupEligibility(ctx context.Context, groupID, userID string) error {
+	groupID = strings.TrimSpace(groupID)
+	userID = strings.TrimSpace(userID)
+	if groupID == "" {
+		return errs.ErrArgs.WrapMsg("group_id is required for group claim")
+	}
+	if userID == "" {
+		return errs.ErrArgs.WrapMsg("user_id is required for group claim")
+	}
+	if s.groupClient == nil {
+		return servererrs.ErrInternalServer.WrapMsg("group client is not initialized")
+	}
+	if _, err := s.groupClient.GetGroupMemberInfo(ctx, groupID, userID); err != nil {
+		if errs.ErrRecordNotFound.Is(err) {
+			return errs.ErrNoPermission.WrapMsg("user is not a member of the group", "groupID", groupID, "userID", userID)
+		}
+		return err
+	}
 	return nil
 }
 
-// ensureFriendRelationship reserves centralized relation validation for transfer packets.
+// ensureFriendRelationship verifies that creatorUserID and receiverUserID are friends
+// (used by transfer red packets to require a pre-existing relationship).
 func (s *redPacketServer) ensureFriendRelationship(ctx context.Context, creatorUserID, receiverUserID string) error {
+	creatorUserID = strings.TrimSpace(creatorUserID)
+	receiverUserID = strings.TrimSpace(receiverUserID)
+	if creatorUserID == "" || receiverUserID == "" {
+		return errs.ErrArgs.WrapMsg("creator_user_id and receiver_user_id are required")
+	}
+	if creatorUserID == receiverUserID {
+		return nil
+	}
+	if s.relationClient == nil {
+		return servererrs.ErrInternalServer.WrapMsg("relation client is not initialized")
+	}
+	ok, err := s.relationClient.IsFriend(ctx, creatorUserID, receiverUserID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errs.ErrNoPermission.WrapMsg("creator and receiver are not friends",
+			"creatorUserID", creatorUserID, "receiverUserID", receiverUserID)
+	}
 	return nil
 }
 

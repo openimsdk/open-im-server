@@ -1,615 +1,357 @@
-# 红包 Go 后台对接（ETH + TRON）
+# RedPacket Go 后端对接说明（ETH + TRON）
 
-这份文档按你的需求给出三部分：
-- 后端签名（`claim` 鉴权签名，ETH/TRON 通用）
-- ETH 后台调用 + 通过 `txhash` 解析事件
-- TRON 后台调用流程 + 通过 `txhash` 解析事件
+本文档基于当前 OpenIM 版红包服务实现整理，重点说明 Go 后端如何接入 EVM / TRON 链能力、如何签发 claim 授权、如何解析交易事件，以及当前实现中哪些能力是完整实现、哪些仍是 mock 或待补齐。
 
-说明：以下签名逻辑严格对应当前合约 `RedPacketBase` 的 `getSignMessage/claim`。
+相关代码位置：
 
----
+- RPC 入口：`cmd/openim-rpc/openim-rpc-redpacket/main.go`
+- 服务启动：`pkg/common/cmd/rpc_redpacket.go`
+- 业务逻辑：`internal/rpc/redpacket/service.go`
+- 管理接口：`internal/rpc/redpacket/admin.go`
+- 钱包绑定：`internal/rpc/redpacket/wallet.go`
+- 链客户端：`internal/rpc/redpacket/chain`
+- 合约 ABI：`internal/rpc/redpacket/chain/abi/RedPacket.json`
+- 配置文件：`config/openim-rpc-redpacket.yml`
 
-## 1. 依赖
+## 1. 当前架构
 
-```bash
-go get github.com/ethereum/go-ethereum@v1.14.12
+`openim-rpc-redpacket` 已经不再是独立 Gin + GORM 服务，而是标准 OpenIM RPC 服务：
+
+```text
+openim-api
+  -> /redpacket/* HTTP API
+  -> pbredpacket.RedPacketClient
+  -> openim-rpc-redpacket
+  -> MongoDB + EVM/TRON clients
 ```
 
----
+服务启动时会初始化：
 
-## 2. 关键合约事实（当前仓库）
+- MongoDB DAO：`controller.NewRedPacketDatabase(...)`
+- EVM client：当 `chain.rpcURL` 与 `chain.contractAddress` 配置完整时启用
+- TRON client：当 `tron.fullNodeURL` 与 `tron.contractBase58` 配置完整时启用
+- signer 私钥：当 `chain.signerPrivateKey` 配置完整时用于 claim 裸签名
 
-- 签名结构体：
-  `Claim(uint256 packetId,address claimer,uint256 authNonce,uint256 randomSeed,uint256 deadline)`
-- 领取函数：
-  `claim(packetId, authNonce, randomSeed, deadline, signature)`
-- 重点事件：
-  - `PacketCreated(uint256,address,uint8,address,uint256,uint256,uint256)`
-  - `PacketClaimed(uint256,address,uint256,uint256,uint256,uint256)`
-  - `PacketRefunded(uint256,address,address,uint256)`
+链客户端初始化失败不会阻止服务启动，但会导致链上确认、事件解析或签名 digest 获取降级。
 
----
+## 2. 配置
 
-## 3. Go：后端 claim 签名（ETH/TRON 通用）
+`config/openim-rpc-redpacket.yml` 示例：
 
-合约里验签是 `ecrecover(getSignMessage(...), v, r, s)`，所以后端要对 `digest` 做裸签名，不要加 `personal_sign` 前缀。
+```yaml
+rpc:
+  registerIP: ""
+  listenIP: 0.0.0.0
+  autoSetPorts: false
+  ports: [10560]
+
+prometheus:
+  enable: false
+  ports: [12560]
+
+chain:
+  rpcURL: "https://eth-mainnet.g.alchemy.com/v2/xxx"
+  contractAddress: "0x..."
+  chainID: 1
+  signerPrivateKey: "0x..."
+  configAdminPrivateKey: "0x..."
+
+tron:
+  fullNodeURL: "https://api.trongrid.io"
+  contractBase58: "T..."
+  ownerBase58: "T..."
+  privateKeyHex: "..."
+  feeLimit: 100000000
+
+indexer:
+  pollInterval: 5
+```
+
+配置含义：
+
+- `chain.rpcURL`: EVM JSON-RPC 地址
+- `chain.contractAddress`: EVM RedPacket 合约地址
+- `chain.chainID`: EVM 链 ID；用于记录业务单与构造交易
+- `chain.signerPrivateKey`: claim 授权签名私钥，应对应合约 `signer`
+- `chain.configAdminPrivateKey`: 管理写链私钥，当前 EVM admin 仍是 mock
+- `tron.fullNodeURL`: TRON FullNode / TronGrid 地址
+- `tron.contractBase58`: TRON 合约 Base58 地址
+- `tron.ownerBase58`: TRON 管理交易发送地址
+- `tron.privateKeyHex`: TRON 管理交易私钥
+- `tron.feeLimit`: TRON 交易 fee limit
+
+安全建议：
+
+- `signerPrivateKey` 与 `configAdminPrivateKey` 必须分离
+- 生产不要把管理私钥明文放在普通配置文件中，建议接入 KMS/HSM 或密钥托管服务
+- `signerPrivateKey` 是高频签名密钥，权限只能用于 claim 授权，不应拥有合约配置权限
+
+## 3. Claim 签名
+
+### 3.1 合约签名事实
+
+当前后端签名逻辑对应合约的：
+
+```text
+getSignMessage(packetId, claimer, authNonce, randomSeed, deadline)
+claim(packetId, authNonce, randomSeed, deadline, signature)
+```
+
+后端流程：
+
+1. 业务鉴权：登录用户、钱包绑定、红包状态、重复领取、群/转账资格
+2. 生成 `authNonce`、`randomSeed`、`deadline`
+3. EVM client 可用时调用链上 `getSignMessage(...)` 获取 digest
+4. 用 `signerPrivateKey` 对 digest 做裸签名
+5. 如果 `v` 是 0/1，转换为 27/28
+6. 保存 `red_packet_claim_auth`
+7. 返回前端调用 `claim(...)` 所需参数
+
+注意：不要使用 `personal_sign` 对 claim digest 签名。claim 授权使用的是裸 ECDSA 签名，不带 Ethereum Signed Message 前缀。
+
+### 3.2 Go 裸签名示例
 
 ```go
-package redpacket
-
-import (
-	"crypto/ecdsa"
-	"fmt"
-	"math/big"
-
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-)
-
-// SignClaimDigest 对合约返回的 digest 做裸签，返回 65 字节签名（r||s||v）
-func SignClaimDigest(priv *ecdsa.PrivateKey, digest [32]byte) ([]byte, error) {
-	sig, err := crypto.Sign(digest[:], priv)
-	if err != nil {
-		return nil, err
-	}
-	// go-ethereum 返回 v 为 0/1；EVM 合约通常期望 27/28
-	sig[64] += 27
-	return sig, nil
-}
-
-// RecoverAndCheckSigner 本地自检（可选）
-func RecoverAndCheckSigner(digest [32]byte, sig []byte, expected common.Address) error {
-	if len(sig) != 65 {
-		return fmt.Errorf("invalid sig length: %d", len(sig))
-	}
-	cpy := make([]byte, 65)
-	copy(cpy, sig)
-	if cpy[64] >= 27 {
-		cpy[64] -= 27
-	}
-	pub, err := crypto.SigToPub(digest[:], cpy)
-	if err != nil {
-		return err
-	}
-	got := crypto.PubkeyToAddress(*pub)
-	if got != expected {
-		return fmt.Errorf("signer mismatch, got=%s want=%s", got.Hex(), expected.Hex())
-	}
-	return nil
-}
-
-// BuildClaimTypeHash 仅当你要本地复算 digest 时才需要。
-func BuildClaimTypeHash() common.Hash {
-	return crypto.Keccak256Hash([]byte("Claim(uint256 packetId,address claimer,uint256 authNonce,uint256 randomSeed,uint256 deadline)"))
-}
-
-// BuildClaimStructHash 本地复算 structHash（可选）。
-func BuildClaimStructHash(packetId *big.Int, claimer common.Address, authNonce, randomSeed, deadline *big.Int) common.Hash {
-	typeHash := BuildClaimTypeHash()
-	encoded := make([]byte, 0, 32*6)
-	encoded = append(encoded, typeHash.Bytes()...)
-	encoded = append(encoded, common.LeftPadBytes(packetId.Bytes(), 32)...)
-	encoded = append(encoded, common.LeftPadBytes(claimer.Bytes(), 32)...)
-	encoded = append(encoded, common.LeftPadBytes(authNonce.Bytes(), 32)...)
-	encoded = append(encoded, common.LeftPadBytes(randomSeed.Bytes(), 32)...)
-	encoded = append(encoded, common.LeftPadBytes(deadline.Bytes(), 32)...)
-	return crypto.Keccak256Hash(encoded)
+func signClaimDigest(priv *ecdsa.PrivateKey, digest [32]byte) (string, error) {
+    sig, err := crypto.Sign(digest[:], priv)
+    if err != nil {
+        return "", err
+    }
+    if len(sig) == 65 && sig[64] < 27 {
+        sig[64] += 27
+    }
+    return "0x" + hex.EncodeToString(sig), nil
 }
 ```
 
-生产建议：
-- 最稳妥方式是先链上调用 `getSignMessage(...)` 拿 `digest`，再签名。
-- `authNonce` 必须按 `claimer` 做幂等和防重。
-- `deadline` 建议 5~30 分钟。
+### 3.3 当前降级行为
 
----
+当前代码有两个降级点：
 
-## 4. Go：ETH 后台调用 + txhash 解析事件
+- EVM client 不可用时，后端会用本地 `keccak256(packetID:claimer:nonce:randomSeed:deadline)` 生成 digest；该 digest 不保证与合约一致，仅适合调试。
+- signer 私钥未配置时，后端会返回 placeholder 签名；该签名不能通过链上验签。
 
-### 4.1 通过 txhash 解析 `PacketCreated/PacketClaimed/PacketRefunded`
+生产环境必须配置可用的 EVM client 和 signer 私钥。
 
-```go
-package redpacket
+## 4. ETH 接入
 
-import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"strings"
+### 4.1 创建红包
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
-)
+推荐调用顺序：
 
-type ParsedEvent struct {
-	Name string
-	Data map[string]any
-}
+1. 后端 `CreateOrder` 生成 `biz_id`
+2. 前端或托管钱包发起链上创建交易
+3. 从 `PacketCreated` 事件解析 `packetId`
+4. 调用 `CreatedCallback` 回写 `biz_id + tx_hash + packet_id`
+5. 后端使用 EVM client 解析 receipt 并校验事件字段
+6. 校验通过后业务单变为 `ACTIVE`
 
-func ParseEthEventsByTxHash(ctx context.Context, rpcURL, txHashHex, contractABIJSON string) ([]ParsedEvent, error) {
-	cli, err := ethclient.DialContext(ctx, rpcURL)
-	if err != nil {
-		return nil, err
-	}
-	defer cli.Close()
+当前代码中的校验点：
 
-	txHash := common.HexToHash(txHashHex)
-	rcpt, err := cli.TransactionReceipt(ctx, txHash)
-	if err != nil {
-		return nil, err
-	}
+- `tx_hash` 必填
+- receipt 中必须有可识别的 `PacketCreated`
+- event 解析出的 creator / packetType / token / amount / shares / expiry 要与业务单一致
+- 如果链客户端不可用，允许请求体提供 `packet_id` fallback
 
-	parsedABI, err := abi.JSON(strings.NewReader(contractABIJSON))
-	if err != nil {
-		return nil, err
-	}
+### 4.2 领取红包
 
-	var out []ParsedEvent
-	for _, lg := range rcpt.Logs {
-		ev, ok := eventFromLog(parsedABI, lg)
-		if ok {
-			out = append(out, ev)
-		}
-	}
-	return out, nil
-}
+推荐调用顺序：
 
-func eventFromLog(parsedABI abi.ABI, lg *types.Log) (ParsedEvent, bool) {
-	if len(lg.Topics) == 0 {
-		return ParsedEvent{}, false
-	}
-	for name, e := range parsedABI.Events {
-		if e.ID != lg.Topics[0] {
-			continue
-		}
-		vals := map[string]any{}
+1. 前端确认用户已经绑定当前 EVM 钱包
+2. 调用 `IssueClaimSign`
+3. 前端使用返回参数调用合约 `claim(...)`
+4. 交易提交后调用 `ClaimResult`
+5. 后端解析 `PacketClaimed`，补全 amount、authNonce、blockNumber
 
-		// 非 indexed 参数
-		nonIndexed, err := e.Inputs.NonIndexed().Unpack(lg.Data)
-		if err != nil {
-			return ParsedEvent{}, false
-		}
-		n := 0
-		idxTopic := 1
-		for _, input := range e.Inputs {
-			if input.Indexed {
-				if idxTopic >= len(lg.Topics) {
-					return ParsedEvent{}, false
-				}
-				vals[input.Name] = decodeIndexedTopic(input.Type, lg.Topics[idxTopic])
-				idxTopic++
-			} else {
-				vals[input.Name] = nonIndexed[n]
-				n++
-			}
-		}
-		return ParsedEvent{Name: name, Data: vals}, true
-	}
-	return ParsedEvent{}, false
-}
+`ClaimResult` 当前行为：
 
-func decodeIndexedTopic(t abi.Type, topic common.Hash) any {
-	switch t.T {
-	case abi.AddressTy:
-		return common.BytesToAddress(topic.Bytes()[12:])
-	default:
-		return topic
-	}
-}
+- 先落 `PENDING` 领取记录
+- 能解析 receipt 时更新为 `CONFIRMED`
+- 解析到 `PacketClaimed` 后更新红包领取进度
+- 已领取份数达到 `total_shares` 时状态更新为 `COMPLETED`
 
-func PrettyPrintEvents(events []ParsedEvent) string {
-	b, _ := json.MarshalIndent(events, "", "  ")
-	return string(b)
-}
+### 4.3 事件解析
 
-func MustReadABIFromArtifact(artifactJSON []byte) (string, error) {
-	var raw map[string]any
-	if err := json.Unmarshal(artifactJSON, &raw); err != nil {
-		return "", err
-	}
-	abiObj, ok := raw["abi"]
-	if !ok {
-		return "", fmt.Errorf("abi field not found")
-	}
-	abiBytes, err := json.Marshal(abiObj)
-	if err != nil {
-		return "", err
-	}
-	return string(abiBytes), nil
+EVM 事件解析由 `internal/rpc/redpacket/chain/parser.go` 负责。管理接口也提供手动解析入口：
+
+```http
+POST /redpacket/admin/parse_tx_events
+```
+
+请求：
+
+```json
+{
+  "chain": "eth",
+  "tx_hash": "0xabc123..."
 }
 ```
 
-### 4.2 ETH 创建/领取调用（示意）
+响应示例：
 
-建议用 `abigen` 生成 Go binding 后调用（最稳）。
-
-`abigen` 示例：
-```bash
-abigen --abi abi/contracts/RedPacket.sol/RedPacket.json --pkg redpacket --type RedPacket --out redpacket_binding.go
-```
-
-调用流程：
-1. `createFixedPacket/createRandomPacket/createTransfer` 发交易
-2. 拿到 `txHash` 后轮询 receipt
-3. 用上面的 `ParseEthEventsByTxHash` 解出 `PacketCreated`，拿到 `packetId`
-4. 后端签名下发给前端后，前端/后端发 `claim`
-5. 用 `PacketClaimed.amount` 作为最终到账金额
-
----
-
-## 5. Go：TRON 后台调用 + txhash 解析事件
-
-TRON 的 EVM 合约事件最终也是 topic/data 结构，因此事件解码可复用 EVM ABI。
-
-### 5.1 通过 txhash 解析 TRON 事件（推荐走 `/wallet/gettransactioninfobyid`）
-
-```go
-package redpacket
-
-import (
-	"bytes"
-	"context"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"strings"
-
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
-)
-
-type tronTxInfoResp struct {
-	ID  string `json:"id"`
-	Log []struct {
-		Address string   `json:"address"` // 合约地址hex(无0x)
-		Topics  []string `json:"topics"`  // topic hex(无0x)
-		Data    string   `json:"data"`    // data hex(无0x)
-	} `json:"log"`
-}
-
-func ParseTronEventsByTxHash(ctx context.Context, tronFullNodeURL, txID, contractABIJSON string) ([]ParsedEvent, error) {
-	body := map[string]string{"value": txID}
-	buf, _ := json.Marshal(body)
-
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, tronFullNodeURL+"/wallet/gettransactioninfobyid", bytes.NewReader(buf))
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	raw, _ := io.ReadAll(resp.Body)
-	if resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("tron http %d: %s", resp.StatusCode, string(raw))
-	}
-
-	var info tronTxInfoResp
-	if err := json.Unmarshal(raw, &info); err != nil {
-		return nil, err
-	}
-
-	parsedABI, err := abi.JSON(strings.NewReader(contractABIJSON))
-	if err != nil {
-		return nil, err
-	}
-
-	out := make([]ParsedEvent, 0, len(info.Log))
-	for _, lg := range info.Log {
-		if len(lg.Topics) == 0 {
-			continue
-		}
-		topic0 := common.HexToHash("0x" + lg.Topics[0])
-
-		for name, e := range parsedABI.Events {
-			if e.ID != topic0 {
-				continue
-			}
-			vals := map[string]any{}
-
-			dataBytes, err := hex.DecodeString(strings.TrimPrefix(lg.Data, "0x"))
-			if err != nil {
-				return nil, err
-			}
-			nonIndexed, err := e.Inputs.NonIndexed().Unpack(dataBytes)
-			if err != nil {
-				return nil, err
-			}
-
-			n := 0
-			idxTopic := 1
-			for _, input := range e.Inputs {
-				if input.Indexed {
-					if idxTopic >= len(lg.Topics) {
-						return nil, fmt.Errorf("missing indexed topic for event %s", name)
-					}
-					t := common.HexToHash("0x" + lg.Topics[idxTopic])
-					vals[input.Name] = decodeIndexedTopic(input.Type, t)
-					idxTopic++
-				} else {
-					vals[input.Name] = nonIndexed[n]
-					n++
-				}
-			}
-
-			out = append(out, ParsedEvent{Name: name, Data: vals})
-			break
-		}
-	}
-
-	return out, nil
+```json
+{
+  "chain": "eth",
+  "tx_hash": "0xabc123...",
+  "events": [
+    {
+      "name": "PacketCreated",
+      "data": {
+        "packetId": "10001",
+        "creator": "0x1111111111111111111111111111111111111111",
+        "packetType": "1"
+      }
+    }
+  ]
 }
 ```
 
-### 5.2 TRON 后台调用流程（实践）
+核心事件：
 
-1. 组装 ABI 参数（与 ETH 一样）
-2. 调用 TRON FullNode 的 `trigger*contract` 生成未签名交易
-3. 用托管私钥签名交易并广播
-4. 根据返回 `txID` 调用上面的 `ParseTronEventsByTxHash` 解事件
+- `PacketCreated`: 创建成功，提供唯一可信 `packetId`
+- `PacketClaimed`: 领取成功，提供实际领取金额
+- `PacketRefunded`: 退款成功，提供退款金额与接收方
 
-说明：TRON 发交易接口在不同节点服务（TronGrid/自建 FullNode/SDK 封装）字段细节略有差异，建议你在项目里固定一种（推荐固定 TronGrid 或 gotron-sdk 版本），避免线上环境差异。
+### 4.4 ETH 管理接口现状
 
----
+当前 `internal/rpc/redpacket/admin.go` 中 EVM 管理接口是 mock：
 
-## 6. 合约参数设置（管理员）
+- `SetSigner`
+- `SetToken`
+- `SetExpiry`
+- `SetAllowAllTokens`
+- `SetNativeTokenEnabled`
 
-需要 `CONFIG_ADMIN_ROLE` 的函数：
-- `setSigner(address signer)`
-- `setAllowAllTokens(bool allowAllTokens)`
-- `setNativeTokenEnabled(bool enabled)`
-- `setAllowedToken(address token, bool allowed, uint256 minShareAmount)`
-- `setDefaultExpiryDuration(uint256 duration)`
+这些接口在 EVM client 可用时只记录日志并返回成功 message，不会真正发链上交易。上线前如需后端托管管理交易，需要补充 EVM admin transaction 实现。
 
-对应配置事件（可按 `txhash` 解析校验）：
-- `SignerUpdated(oldSigner, newSigner)`
-- `AllowAllTokensUpdated(allowAllTokens)`
-- `NativeTokenEnabledUpdated(enabled)`
-- `AllowedTokenUpdated(token, allowed, minShareAmount)`
-- `DefaultExpiryDurationUpdated(duration)`
+## 5. TRON 接入
 
-### 6.1 ETH：Go 设置合约参数（通用写法）
+### 5.1 TRON 创建与领取
 
-```go
-package redpacket
+TRON 合约兼容 EVM ABI 的 topic/data 事件模型，但地址、签名与交易广播流程和 EVM 不同。
 
-import (
-	"context"
-	"crypto/ecdsa"
-	"fmt"
-	"math/big"
-	"strings"
+当前后端支持：
 
-	ethereum "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
-)
+- 创建业务单时 `chain_type=TRON`
+- `contract_address` 可从 `tron.contractBase58` 自动填充
+- TRON 钱包绑定 challenge 生成
+- TRON admin 写交易通过 `SendAdminTransaction(...)` 尝试调用 FullNode
 
-// SendEthAdminTx 通用管理员写调用：
-// method 例如 "setNativeTokenEnabled"
-// args 对应函数参数
-func SendEthAdminTx(
-	ctx context.Context,
-	rpcURL string,
-	contractAddr common.Address,
-	priv *ecdsa.PrivateKey,
-	contractABIJSON string,
-	method string,
-	args ...any,
-) (common.Hash, error) {
-	cli, err := ethclient.DialContext(ctx, rpcURL)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	defer cli.Close()
+当前后端尚未完整支持：
 
-	from := crypto.PubkeyToAddress(priv.PublicKey)
-	nonce, err := cli.PendingNonceAt(ctx, from)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	chainID, err := cli.NetworkID(ctx)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	gasPrice, err := cli.SuggestGasPrice(ctx)
-	if err != nil {
-		return common.Hash{}, err
-	}
+- TRON 钱包绑定签名验签
+- TRON claim digest 获取与 claim 签名链上闭环
+- TRON receipt 事件完整解析与索引
 
-	parsedABI, err := abi.JSON(strings.NewReader(contractABIJSON))
-	if err != nil {
-		return common.Hash{}, err
-	}
-	data, err := parsedABI.Pack(method, args...)
-	if err != nil {
-		return common.Hash{}, err
-	}
+### 5.2 TRON 管理交易
 
-	msg := ethereum.CallMsg{
-		From: from, To: &contractAddr, Data: data, Value: big.NewInt(0),
-	}
-	gasLimit, err := cli.EstimateGas(ctx, msg)
-	if err != nil {
-		return common.Hash{}, err
-	}
+当前 TRON admin 使用 FullNode HTTP 流程：
 
-	tx := types.NewTransaction(nonce, contractAddr, big.NewInt(0), gasLimit, gasPrice, data)
-	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), priv)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	if err = cli.SendTransaction(ctx, signedTx); err != nil {
-		return common.Hash{}, err
-	}
-	return signedTx.Hash(), nil
-}
+```text
+triggersmartcontract
+  -> gettransactionsign
+  -> broadcasttransaction
+```
 
-// 例子：开启原生币、放开所有 token、设置 token 白名单与最小份额
-func ExampleSetConfigEth(ctx context.Context, rpcURL, abiJSON, contractHex string, priv *ecdsa.PrivateKey, usdt common.Address) error {
-	contract := common.HexToAddress(contractHex)
+配置依赖：
 
-	tx1, err := SendEthAdminTx(ctx, rpcURL, contract, priv, abiJSON, "setNativeTokenEnabled", true)
-	if err != nil {
-		return err
-	}
-	fmt.Println("setNativeTokenEnabled tx:", tx1.Hex())
+- `tron.fullNodeURL`
+- `tron.contractBase58`
+- `tron.ownerBase58`
+- `tron.privateKeyHex`
+- `tron.feeLimit`
 
-	tx2, err := SendEthAdminTx(ctx, rpcURL, contract, priv, abiJSON, "setAllowAllTokens", false)
-	if err != nil {
-		return err
-	}
-	fmt.Println("setAllowAllTokens tx:", tx2.Hex())
+管理接口会把方法映射到合约调用：
 
-	tx3, err := SendEthAdminTx(ctx, rpcURL, contract, priv, abiJSON, "setAllowedToken", usdt, true, big.NewInt(1_000_000))
-	if err != nil {
-		return err
-	}
-	fmt.Println("setAllowedToken tx:", tx3.Hex())
+- `SetSigner` -> `setSigner`
+- `SetToken` -> `setAllowedToken`
+- `SetExpiry` -> `setDefaultExpiryDuration`
+- `SetAllowAllTokens` -> `setAllowAllTokens`
+- `SetNativeTokenEnabled` -> `setNativeTokenEnabled`
 
-	return nil
+### 5.3 TRON 事件解析现状
+
+`ParseTxEvents(chain=tron)` 当前返回：
+
+```json
+{
+  "chain": "tron",
+  "tx_hash": "7d9e...txid",
+  "note": "TRON event parsing not fully implemented in this version"
 }
 ```
 
-注意：`setAllowedToken(..., minShareAmount)` 的单位是 token 最小单位（例如 6 位精度 token，`1_000_000` 代表 1 个 token）。
+后续如果要补齐，应实现：
 
-### 6.2 TRON：Go 设置合约参数（FullNode HTTP）
+1. 调用 `/wallet/gettransactioninfobyid`
+2. 从 `log` 读取 topics/data
+3. 将 TRON 地址字段规范化为 Base58 或 hex
+4. 使用 `RedPacket.json` ABI 解码事件
+5. 复用 EVM 的 `PacketCreated` / `PacketClaimed` / `PacketRefunded` 业务回写逻辑
 
-TRON 推荐流程：`triggersmartcontract -> gettransactionsign -> broadcasttransaction`。
+## 6. 钱包绑定
 
-```go
-package redpacket
+### 6.1 EVM 绑定
 
-import (
-	"bytes"
-	"context"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"strings"
+EVM 绑定采用 SIWE 风格消息：
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-)
+- protocol: `siwe-eip4361`
+- sign method: `personal_sign`
+- challenge 有效期: 10 分钟
 
-func encodeTronParams(abiJSON, method string, args ...any) (string, error) {
-	parsed, err := abi.JSON(strings.NewReader(abiJSON))
-	if err != nil {
-		return "", err
-	}
-	m, ok := parsed.Methods[method]
-	if !ok {
-		return "", fmt.Errorf("method not found: %s", method)
-	}
-	packed, err := m.Inputs.Pack(args...)
-	if err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(packed), nil
-}
+确认绑定时，后端会：
 
-func postJSON(ctx context.Context, url string, body any, out any) error {
-	b, _ := json.Marshal(body)
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(b))
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	raw, _ := io.ReadAll(resp.Body)
-	if resp.StatusCode >= 300 {
-		return fmt.Errorf("http %d: %s", resp.StatusCode, string(raw))
-	}
-	if err := json.Unmarshal(raw, out); err != nil {
-		return err
-	}
-	return nil
-}
+1. 读取 `wallet_binding_challenge`
+2. 检查状态为 `PENDING`
+3. 检查未过期
+4. 用 `personalSignMessage(message)` 计算 hash
+5. `SigToPub` recover 地址
+6. 比对 recover 地址与 challenge wallet
+7. challenge 更新为 `VERIFIED`
+8. upsert `wallet_binding`
 
-// SendTronAdminTx 示例：
-// selector 例子 "setNativeTokenEnabled(bool)"
-// methodName 例子 "setNativeTokenEnabled"
-func SendTronAdminTx(
-	ctx context.Context,
-	fullNodeURL, ownerBase58, contractBase58, selector, methodName string,
-	feeLimit int64,
-	privateKeyHex string,
-	abiJSON string,
-	args ...any,
-) (string, error) {
-	paramHex, err := encodeTronParams(abiJSON, methodName, args...)
-	if err != nil {
-		return "", err
-	}
+### 6.2 TRON 绑定
 
-	var triggerResp map[string]any
-	err = postJSON(ctx, fullNodeURL+"/wallet/triggersmartcontract", map[string]any{
-		"owner_address":    ownerBase58,
-		"contract_address": contractBase58,
-		"function_selector": selector,
-		"parameter":        paramHex,
-		"fee_limit":        feeLimit,
-		"call_value":       0,
-		"visible":          true,
-	}, &triggerResp)
-	if err != nil {
-		return "", err
-	}
+TRON challenge 会生成：
 
-	txObj, ok := triggerResp["transaction"]
-	if !ok {
-		return "", fmt.Errorf("transaction not found in trigger response")
-	}
+- protocol: `tron-signmessagev2`
+- sign method: `signMessageV2`
 
-	var signedResp map[string]any
-	err = postJSON(ctx, fullNodeURL+"/wallet/gettransactionsign", map[string]any{
-		"transaction": txObj,
-		"privateKey":  privateKeyHex,
-	}, &signedResp)
-	if err != nil {
-		return "", err
-	}
+但确认绑定当前未实现，会返回：
 
-	var broadcastResp map[string]any
-	err = postJSON(ctx, fullNodeURL+"/wallet/broadcasttransaction", signedResp, &broadcastResp)
-	if err != nil {
-		return "", err
-	}
-	if result, _ := broadcastResp["result"].(bool); !result {
-		return "", fmt.Errorf("broadcast failed: %v", broadcastResp)
-	}
-
-	txid, _ := broadcastResp["txid"].(string)
-	return txid, nil
-}
+```text
+TRON wallet binding verification is not implemented yet
 ```
 
-调用示例：
-- `setNativeTokenEnabled(true)`：
-  `selector = "setNativeTokenEnabled(bool)"`，`methodName = "setNativeTokenEnabled"`，`args = true`
-- `setAllowAllTokens(false)`：
-  `selector = "setAllowAllTokens(bool)"`，`methodName = "setAllowAllTokens"`，`args = false`
-- `setAllowedToken(token, true, 1_000_000)`：
-  `selector = "setAllowedToken(address,bool,uint256)"`，`methodName = "setAllowedToken"`，`args = common.HexToAddress(tokenHexAddress), true, big.NewInt(1_000_000)`
+## 7. MongoDB 数据
 
-安全建议：生产环境不要把私钥直接传给节点接口，建议改为本地离线签名或托管签名服务。
+当前使用 6 个 collection：
 
----
+- `red_packet`: 红包主记录
+- `red_packet_claim`: 领取记录
+- `red_packet_claim_auth`: claim 签名授权记录
+- `red_packet_refund`: 退款记录
+- `wallet_binding_challenge`: 钱包绑定 challenge
+- `wallet_binding`: 钱包绑定关系
 
-## 7. 最小落地建议（直接可用）
+关键幂等约束：
 
-- 统一保存：`chain + txHash + packetId + eventName + rawEventJson`
-- 创建成功：只认 `PacketCreated.packetId`
-- 领取成功：只认 `PacketClaimed.amount`
-- 退款成功：只认 `PacketRefunded.amount`
-- 签名服务：`authNonce` 做地址维度去重；`deadline` 过期即废弃
+- `red_packet.biz_id` 唯一
+- `red_packet_claim.claim_tx_hash` 唯一
+- `red_packet_claim_auth.auth_nonce` 唯一
+- `wallet_binding_challenge.challenge_id` 唯一
+- `wallet_binding.user_id + chain_type + wallet_address` 唯一
+
+## 8. 部署检查清单
+
+上线前至少确认：
+
+- `share.yml` 中存在 `rpcRegisterName.redPacket: redPacket`
+- `openim-rpc-redpacket.yml` 已加入配置目录
+- `openim-api` watch service list 包含 `redPacket`
+- MongoDB 可用且服务启动时能创建索引
+- EVM 环境配置了有效 `rpcURL`、`contractAddress`、`signerPrivateKey`
+- 生产关闭 placeholder signer 降级路径
+- 管理接口补充管理员鉴权与操作审计
+- 如需 ETH admin 写链，补齐当前 mock 实现
+- 如需 TRON 完整闭环，补齐绑定验签、事件解析、claim 签名链路

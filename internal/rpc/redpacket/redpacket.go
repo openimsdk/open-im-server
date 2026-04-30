@@ -9,6 +9,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database/mgo"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcli"
 	pbredpacket "github.com/openimsdk/protocol/redpacket"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/discovery"
@@ -25,14 +26,16 @@ type Config struct {
 
 type redPacketServer struct {
 	pbredpacket.UnimplementedRedPacketServer
-	config      *Config
-	db          controller.RedPacketDatabase
-	chainClient *chain.ChainClient
-	tronClient  *chain.TronClient
-	signerKey   *ecdsa.PrivateKey
+	config         *Config
+	db             controller.RedPacketDatabase
+	chainClient    *chain.ChainClient
+	tronClient     *chain.TronClient
+	signerKey      *ecdsa.PrivateKey
+	groupClient    *rpcli.GroupClient
+	relationClient *rpcli.RelationClient
 }
 
-func Start(ctx context.Context, conf *Config, _ discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(ctx context.Context, conf *Config, registry discovery.SvcDiscoveryRegistry, server *grpc.Server) error {
 	mgoClient, err := mongoutil.NewMongoDB(ctx, conf.MongodbConfig.Build())
 	if err != nil {
 		return err
@@ -109,12 +112,23 @@ func Start(ctx context.Context, conf *Config, _ discovery.SvcDiscoveryRegistry, 
 		}
 	}
 
+	groupConn, err := registry.GetConn(ctx, conf.Share.RpcRegisterName.Group)
+	if err != nil {
+		return err
+	}
+	friendConn, err := registry.GetConn(ctx, conf.Share.RpcRegisterName.Friend)
+	if err != nil {
+		return err
+	}
+
 	srv := &redPacketServer{
-		config:      conf,
-		db:          repo,
-		chainClient: chainClient,
-		tronClient:  tronClient,
-		signerKey:   signerKey,
+		config:         conf,
+		db:             repo,
+		chainClient:    chainClient,
+		tronClient:     tronClient,
+		signerKey:      signerKey,
+		groupClient:    rpcli.NewGroupClient(groupConn),
+		relationClient: rpcli.NewRelationClient(friendConn),
 	}
 
 	pbredpacket.RegisterRedPacketServer(server, srv)

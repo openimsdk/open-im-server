@@ -1,751 +1,430 @@
 # RedPacket Web3 接入设计文档
 
-## 1. 文档目标
+本文档描述红包系统在当前 OpenIM 架构中的 Web3 接入设计。内容以当前代码为准，覆盖前端、钱包、API 网关、RPC 服务、MongoDB、EVM/TRON 合约交互与事件回写。
 
-本文档用于指导 `RedPacket` 红包系统的 Web3 接入落地，覆盖：
+## 1. 设计目标
 
-- 整体架构设计
-- 前端 / 钱包 / 后端 / 合约 / 监听服务 的职责划分
-- 初始化与配置流程
-- 创建红包流程
-- 领取红包流程
-- 退款流程
-- 关键接口定义
-- 关键数据流与安全边界
+业务目标：
 
-本文档基于当前 `RedPacket` 合约规则整理：
+- 支持固定红包、拼手气红包、待领取转账
+- 支持 EVM 链红包创建、领取签名、事件解析
+- 支持 TRON 链配置预留与部分管理交易能力
+- 支持用户钱包绑定，领取前强制校验“OpenIM 用户 ID + 钱包地址”的绑定关系
+- 通过 API 网关对外提供 HTTP 接口，内部保持标准 OpenIM gRPC 服务形态
 
-- 链上 `packetId` 由合约自增生成，创建成功后通过 `PacketCreated` 事件回传。fileciteturn1file1
-- `claim` 必须携带后端签名，签名消息绑定 `packetId + claimer + authNonce + randomSeed + deadline`，并与 `msg.sender` 强绑定。fileciteturn1file1
-- `createTransfer` 创建时不传 `recipient`，实际可领取人由后端签名中的 `claimer` 决定。fileciteturn1file1
-- 建议后端通过 `getSignMessage(...)` 获取 digest 后做裸签名，避免 `signMessage` 前缀导致链上验签失败。fileciteturn1file4
+安全目标：
 
----
+- 钱包归属必须先绑定后领取
+- claim 授权必须绑定 `packetId + claimer + authNonce + randomSeed + deadline`
+- 同一用户、同一钱包对同一红包都不能重复领取
+- signer 私钥只用于 claim 授权，不用于合约配置
+- 管理类交易与高频签名职责分离
 
-## 2. 设计目标
+工程目标：
 
-### 2.1 业务目标
+- RPC 服务接入 OpenIM 的配置、服务发现、日志和 MongoDB 体系
+- HTTP API 只做参数解析和 RPC 转发
+- MongoDB 保存业务状态、签名授权、领取记录和钱包绑定关系
+- 链上事件作为最终一致性的依据
 
-支持以下红包能力：
+## 2. 当前系统边界
 
-- 普通红包（固定金额）
-- 拼手气红包（随机金额）
-- 待领取转账（创建时不传接收地址，领取时由后端鉴权）fileciteturn1file1
+已经实现：
 
-### 2.2 安全目标
+- `openim-rpc-redpacket` 标准 RPC 入口
+- `/redpacket/*` API 网关路由
+- MongoDB 存储模型和 DAO
+- EVM claim digest 获取、裸签名、事件解析
+- EVM 钱包绑定验签
+- TRON 钱包绑定 challenge 生成
+- TRON admin transaction 调用框架
+- 创建回写、领取回写、详情查询
 
-系统需明确区分两类链上信任地址：
+仍需补齐：
 
-1. **参数配置地址（configAdmin）**
-   - 用于调用配置类函数
-   - 例如：`setSigner`、`setAllowAllTokens`、`setNativeTokenEnabled`、`setAllowedToken`、`setDefaultExpiryDuration`。fileciteturn1file4
-
-2. **业务签名地址（signer）**
-   - 用于后端签发领取授权
-   - 合约 `claim` 时通过验签校验是否为可信签名地址
-
-### 2.3 工程目标
-
-- 前端只负责钱包连接、读链、发交易、展示状态
-- 后端负责业务鉴权、nonce 管理、签名发放、审计落库
-- 合约负责最终状态机、权限控制、验签、防重放
-- 监听服务负责链上事件消费、对账与最终一致性
-
----
+- EVM admin 写链当前是 mock
+- TRON 钱包绑定签名验签未实现
+- TRON 交易事件解析未完整实现
+- refund API 当前未对外暴露，仅有退款模型与事件预留
+- 管理接口未做独立管理员鉴权
+- 自动 indexer loop 当前只是配置和代码结构预留，主要回写仍依赖 callback / parse
 
 ## 3. 总体架构
 
-## 3.1 架构图
-
 ```mermaid
 flowchart LR
-    U[用户] --> FE[前端 / H5 / App]
-    FE --> W[钱包 Wallet]
-    FE --> BE[业务后端 API]
-
-    BE --> AuthSvc[签名服务\n持有 signer 私钥]
-    BE --> AdminSvc[配置服务\n持有 configAdmin 私钥]
-    BE --> DB[(业务库 / 审计库)]
-
-    W --> RP[RedPacket 合约]
-    AuthSvc --> RP
-    AdminSvc --> RP
-
-    RP --> Indexer[链监听 / 索引服务]
-    Indexer --> DB
+    User[OpenIM 用户] --> App[App / H5 / Web]
+    App --> Wallet[钱包]
+    App --> API[openim-api /redpacket]
+    API --> RPC[openim-rpc-redpacket]
+    RPC --> DB[(MongoDB)]
+    RPC --> EVM[EVM RPC Client]
+    RPC --> TRON[TRON FullNode Client]
+    Wallet --> Contract[RedPacket Contract]
+    EVM --> Contract
+    TRON --> Contract
 ```
 
-## 3.2 模块职责
+模块职责：
 
-### 前端 / H5 / App
+- App/H5/Web：连接钱包、发起链上交易、调用后端接口、展示红包状态
+- 钱包：签名交易、签名绑定 challenge、广播交易
+- openim-api：解析 HTTP 请求、注入登录用户上下文、调用 gRPC client
+- openim-rpc-redpacket：业务鉴权、签名、存储、链上 receipt 解析
+- MongoDB：保存业务状态和审计数据
+- RedPacket 合约：维护链上红包状态、验签、防重放、转账结算
+- EVM/TRON client：链上读写、事件解析、管理交易预留
 
-负责：
+## 4. 核心数据模型
 
-- 连接钱包
-- 获取当前链地址
-- 读取红包状态
-- 创建红包前预校验
-- 发起创建交易
-- 调后端获取领取签名
-- 发起领取交易
-- 解析交易回执与事件
+### 4.1 红包主记录
 
-### 钱包
+collection: `red_packet`
 
-负责：
+保存内容：
 
-- 用户签名交易
-- 广播创建 / 领取 / 退款交易
-- 提供当前地址与网络信息
+- `biz_id`: 后端业务单号，唯一
+- `chain_type`: `EVM` 或 `TRON`
+- `packet_id`: 链上红包 ID
+- `chain_id`: 链 ID
+- `contract_address`: 合约地址
+- `creator_user_id`: OpenIM 发红包用户 ID
+- `creator_wallet`: 发红包钱包地址
+- `group_id`: 群红包所属群
+- `scope_type`: `GROUP`、`DIRECT`、`PUBLIC`
+- `receiver_user_id` / `receiver_user_ids`: 转账红包目标用户
+- `packet_type`: `0` 固定、`1` 拼手气、`2` 转账
+- `token`: token 地址
+- `total_amount` / `total_shares`: 总金额与总份数
+- `claimed_amount` / `claimed_shares`: 已领取进度
+- `expiry_at`: 过期时间
+- `tx_hash`: 创建交易 hash
+- `status`: `PENDING`、`ACTIVE`、`COMPLETED`、`REFUNDED`
 
-### 业务后端 API
+### 4.2 领取授权
 
-负责：
+collection: `red_packet_claim_auth`
 
-- 业务单管理
-- 创建结果落库
-- 领取资格鉴权
-- 签名发放接口
-- 配置管理接口
-- 审计与风控
+保存每次签名发放：
 
-### 签名服务
+- `packet_id`
+- `claimer`
+- `auth_nonce`
+- `random_seed`
+- `deadline`
+- `signature`
+- `used`
+- `created_at`
 
-负责：
+`auth_nonce` 建唯一索引，用于防止重复授权 nonce。
 
-- 使用 `signer` 私钥对领取摘要做裸签名
-- 不参与链上参数修改
-- 不应持有配置类权限
+### 4.3 领取记录
 
-### 配置服务
+collection: `red_packet_claim`
 
-负责：
+保存链上领取回写结果：
 
-- 使用 `configAdmin` 私钥调用配置类交易
-- 负责 `signer` 轮换与 token 配置变更
-- 不参与高频 claim 签名发放
+- `packet_id`
+- `user_id`
+- `claimer_wallet`
+- `auth_nonce`
+- `claim_tx_hash`
+- `claimed_amount`
+- `block_number`
+- `status`
 
-### RedPacket 合约
+重复领取判断同时检查：
 
-负责：
+- `packet_id + user_id`
+- `packet_id + claimer_wallet`
 
-- 红包状态管理
-- 红包 ID 自增
-- 创建 / 领取 / 退款规则执行
-- claim 验签
-- nonce 防重放
-- 事件输出
+### 4.4 钱包绑定
 
-### 链监听 / 索引服务
+collection:
 
-负责：
+- `wallet_binding_challenge`
+- `wallet_binding`
 
-- 监听 `PacketCreated / PacketClaimed / PacketRefunded`
-- 解析事件并更新数据库
-- 做对账与最终一致性
+绑定流程先保存 challenge，验签通过后 upsert active binding。领取签名前必须存在 `ACTIVE` 绑定。
 
----
+## 5. 创建红包流程
 
-## 4. 合约角色与权限模型
+```mermaid
+sequenceDiagram
+    autonumber
+    participant App as App/H5
+    participant API as openim-api
+    participant RPC as redpacket RPC
+    participant DB as MongoDB
+    participant Wallet as Wallet
+    participant C as Contract
 
-## 4.1 推荐角色
+    App->>API: POST /redpacket/create_order
+    API->>RPC: CreateOrder
+    RPC->>RPC: 校验登录用户和 scope
+    RPC->>DB: insert red_packet(PENDING)
+    RPC-->>App: biz_id
+    App->>Wallet: 发起 create transaction
+    Wallet->>C: createFixed/createRandom/createTransfer
+    C-->>Wallet: tx hash + receipt
+    App->>App: 解析 PacketCreated.packetId
+    App->>API: POST /redpacket/created_callback
+    API->>RPC: CreatedCallback
+    RPC->>C: 可选解析 receipt 并校验事件
+    RPC->>DB: update red_packet(ACTIVE)
+    RPC-->>App: ok
+```
 
-建议合约维护以下 3 类地址：
+关键规则：
 
-- `owner`：最高权限，建议多签控制
-- `configAdmin`：参数配置地址
-- `signer`：后端业务签名地址
+- `biz_id` 由后端生成，链上没有该字段
+- `packet_id` 的可信来源是 `PacketCreated`
+- 业务单先落 `PENDING`，链上确认后更新为 `ACTIVE`
+- 如果 EVM client 可用，后端会校验 receipt 事件与业务单参数是否一致
+- `creator_user_id` 从 token 上下文获取，不能由前端传入
 
-## 4.2 权限建议
+scope 规则：
 
-| 角色 | 用途 | 是否高频 | 建议托管方式 |
-|---|---|---:|---|
-| `owner` | 设置 `configAdmin`、兜底治理 | 否 | 多签 / 冷钱包 |
-| `configAdmin` | 修改 `signer`、token 配置、默认过期时间 | 低频 | KMS / HSM / 运维专用钱包 |
-| `signer` | 签发 claim 授权 | 高频 | 独立签名服务 |
+- `PUBLIC`: 公开红包，不要求 `group_id`
+- `GROUP`: 群红包，必须传 `group_id`
+- `DIRECT`: 指定用户红包，必须传 `receiver_user_id` 或 `receiver_user_ids`
 
-## 4.3 合约与服务端的鉴权方式
+## 6. 钱包绑定流程
 
-链上无法识别“某个后端进程”，只能识别两种身份：
+```mermaid
+sequenceDiagram
+    autonumber
+    participant App as App/H5
+    participant Wallet as Wallet
+    participant API as openim-api
+    participant RPC as redpacket RPC
+    participant DB as MongoDB
 
-1. **交易发送者地址**
-   - 用于配置类操作
-   - 通过 `msg.sender` 校验
+    App->>API: POST /redpacket/wallet_bind/challenge
+    API->>RPC: IssueWalletBindChallenge
+    RPC->>DB: insert challenge(PENDING)
+    RPC-->>App: message + sign_method
+    App->>Wallet: 对 message 签名
+    Wallet-->>App: signature
+    App->>API: POST /redpacket/wallet_bind/confirm
+    API->>RPC: ConfirmWalletBind
+    RPC->>RPC: 验签并 recover 钱包地址
+    RPC->>DB: challenge=VERIFIED, upsert binding(ACTIVE)
+    RPC-->>App: binding detail
+```
 
-2. **消息签名者地址**
-   - 用于领取授权
-   - 通过 `ECDSA.recover(signature)` 校验
+EVM 绑定：
 
-因此：
+- 使用 SIWE 风格 message
+- `sign_method=personal_sign`
+- 后端使用 Ethereum Signed Message 前缀 recover 地址
+- recover 地址必须等于 challenge 的 `wallet_address`
 
-- 配置鉴权依赖 `msg.sender == configAdmin` 或 `owner`
-- claim 鉴权依赖 `recover(signature) == signer`
+TRON 绑定：
 
----
+- 当前仅生成 challenge
+- `sign_method=signMessageV2`
+- confirm 阶段尚未实现验签
 
-## 5. 关键业务规则
+安全边界：
 
-### 5.1 红包 ID 规则
+- challenge 默认 10 分钟过期
+- challenge 只能从 `PENDING` 确认一次
+- 领取签名前必须查询到 active binding
 
-- 链上红包 ID 由 `nextPacketId` 自增生成。fileciteturn1file1
-- 前端和后端都不能自己猜 `packetId`。
-- 创建成功后必须从 `PacketCreated` 事件中解析 `packetId`。fileciteturn1file0
+## 7. 领取红包流程
 
-### 5.2 待领取转账规则
+```mermaid
+sequenceDiagram
+    autonumber
+    participant App as App/H5
+    participant API as openim-api
+    participant RPC as redpacket RPC
+    participant DB as MongoDB
+    participant C as Contract
+    participant Wallet as Wallet
 
-- `createTransfer` 不接收 `recipient` 参数。fileciteturn1file1
-- 实际领取人由后端签名中的 `claimer` 决定。fileciteturn1file1
+    App->>API: POST /redpacket/detail
+    API->>RPC: GetDetail
+    RPC->>DB: 查询红包和领取记录
+    RPC-->>App: detail
+    App->>API: POST /redpacket/issue_claim_sign
+    API->>RPC: IssueClaimSign
+    RPC->>DB: 校验红包、绑定、重复领取、scope
+    RPC->>C: getSignMessage(...)
+    RPC->>RPC: signer 私钥裸签名
+    RPC->>DB: insert claim_auth
+    RPC-->>App: authNonce + randomSeed + deadline + signature
+    App->>Wallet: claim(...)
+    Wallet->>C: claim transaction
+    C-->>Wallet: tx hash + receipt
+    App->>API: POST /redpacket/claim_result
+    API->>RPC: ClaimResult
+    RPC->>C: 可选解析 PacketClaimed
+    RPC->>DB: 保存 claim，更新领取进度
+    RPC-->>App: ok
+```
 
-### 5.3 claim 鉴权规则
+领取前后端校验：
 
-`claim` 必须携带后端签名，签名字段绑定：
+- 登录用户存在
+- 红包存在
+- 红包状态为 `ACTIVE`
+- 红包未过期
+- 当前用户绑定了 `claimer` 钱包
+- 当前用户未领取
+- 当前钱包未领取
+- 群红包必须有关联群
+- 转账红包必须匹配指定接收用户
+
+claim 签名字段：
 
 - `packetId`
 - `claimer`
 - `authNonce`
 - `randomSeed`
-- `deadline` fileciteturn1file1
+- `deadline`
 
-并且签名应与 `msg.sender` 强绑定，不能被其他地址复用。fileciteturn1file1
+前端必须原样把后端返回的参数传给合约 `claim(...)`。任一字段变化都会导致验签失败。
 
-### 5.4 过期规则
+## 8. 管理配置流程
 
-- 红包过期后不可继续领取。fileciteturn1file1
-- 过期后可调用 `refund(packetId)` 退回剩余金额。fileciteturn1file1
-- 允许创建人或管理员调用退款。fileciteturn1file4
+管理员接口位于：
 
-### 5.5 最小份额规则
-
-不同 token 可在 `setAllowedToken(token, allowed, minShareAmount)` 中配置最小份额。fileciteturn1file1
-
-创建校验：
-
-- 固定红包：`totalAmount / totalShares >= minShareAmount`
-- 拼手气红包：`totalAmount >= totalShares * minShareAmount`
-- 转账：`amount >= minShareAmount` fileciteturn1file1
-
----
-
-## 6. 关键交互时序图
-
-## 6.1 初始化与配置流程
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Owner as Owner/多签
-    participant ConfigSvc as 配置服务(configAdmin私钥)
-    participant RP as RedPacket合约
-    participant DB as 审计库
-
-    Owner->>RP: setConfigAdmin(configAdminAddress)
-    RP-->>Owner: tx success
-
-    ConfigSvc->>RP: setSigner(signerAddress)
-    RP-->>ConfigSvc: tx success
-
-    ConfigSvc->>RP: setAllowAllTokens(...)
-    RP-->>ConfigSvc: tx success
-
-    ConfigSvc->>RP: setNativeTokenEnabled(...)
-    RP-->>ConfigSvc: tx success
-
-    ConfigSvc->>RP: setAllowedToken(token, allowed, minShareAmount)
-    RP-->>ConfigSvc: tx success
-
-    ConfigSvc->>RP: setDefaultExpiryDuration(duration)
-    RP-->>ConfigSvc: tx success
-
-    ConfigSvc->>DB: 记录配置变更审计
+```text
+/redpacket/admin/*
 ```
 
-### 图意概述
+当前对外接口：
 
-该流程用于完成合约上线后的初始参数配置与权限分层。`owner` 负责设置 `configAdmin`，而日常配置由 `configAdmin` 地址发起。`signer` 地址由配置服务设置，用于后续领取签名验证。
+- `set_signer`
+- `set_token`
+- `set_expiry`
+- `set_allow_all_tokens`
+- `set_native_token_enabled`
+- `parse_tx_events`
 
-### 边界条件
+设计分权：
 
-- `signer` 与 `configAdmin` 必须是不同地址，避免签名服务被攻破后直接具备配置权限。
-- `owner` 建议使用多签地址，不建议使用个人热钱包。
-- 所有配置写操作都应带链上事件与业务侧审计单。
+- owner / 多签：最高权限
+- config admin：低频参数配置
+- signer：高频 claim 授权签名
 
-### 异常路径与回退
+当前实现边界：
 
-- 如果配置交易失败，前端/后台应展示链上 revert 原因。
-- 如果设置 `signer` 失败，旧 `signer` 应继续有效，避免线上 claim 全量失败。
-- 如果 token 配置更新失败，前端仍应以链上真实配置为准。
+- EVM 管理接口是 mock，只返回成功 message
+- TRON 管理接口会尝试通过 FullNode 发交易
+- API 层未做独立管理员角色校验，生产必须补齐
 
-### 性能与容量假设
+## 9. 事件与最终一致性
 
-- 配置操作为低频操作，可接受链上确认延迟。
-- 配置写入频率极低，因此可优先保障安全性而非吞吐。
+核心事件：
 
-### 版本与兼容性
+- `PacketCreated`: 创建成功，获得链上 `packetId`
+- `PacketClaimed`: 领取成功，获得真实领取金额
+- `PacketRefunded`: 退款成功，获得退款目标与金额
 
-- 若后续扩展角色（如 `pauser` / `upgrader`），建议继续沿用分权设计。
-- 配置事件建议保持向后兼容，便于监听服务稳定消费。
+当前一致性策略：
 
----
+- 创建阶段由 `created_callback` 回写，并在 EVM client 可用时解析 receipt 校验
+- 领取阶段由 `claim_result` 先保存 `PENDING`，能解析 receipt 时立即确认
+- 后续 indexer 可基于 `indexer.pollInterval` 扩展为后台轮询与补偿
 
-## 6.2 创建红包流程
+幂等建议：
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant U as 用户
-    participant FE as 前端
-    participant Wallet as 钱包
-    participant RP as RedPacket合约
-    participant BE as 业务后端
-    participant DB as 业务库
-    participant Indexer as 链监听服务
+- 以 `tx_hash` 做领取回写幂等
+- 以 `biz_id` 做创建业务单幂等
+- 以 `packet_id + user_id` 和 `packet_id + claimer_wallet` 做重复领取判断
+- 事件重复消费时，只允许状态向前推进，不回退已确认状态
 
-    U->>FE: 打开创建红包页面
-    FE->>RP: getAllTokenConfigs()
-    RP-->>FE: token配置
+## 10. API 设计摘要
 
-    U->>FE: 输入金额/份数/过期时间/类型
-    FE->>RP: getCreateValidation(token, packetType, totalAmount, totalShares)
-    RP-->>FE: 校验结果
+用户侧：
 
-    alt 校验失败
-        FE-->>U: 提示失败原因
-    else 校验通过
-        FE->>Wallet: 检查余额/allowance
-        Wallet-->>FE: 返回余额/授权状态
+- `POST /redpacket/create_order`: 创建业务单
+- `POST /redpacket/created_callback`: 创建交易回写
+- `POST /redpacket/detail`: 查询红包详情
+- `POST /redpacket/issue_claim_sign`: 领取签名发放
+- `POST /redpacket/claim_result`: 领取交易回写
+- `POST /redpacket/wallet_bind/challenge`: 钱包绑定 challenge
+- `POST /redpacket/wallet_bind/confirm`: 钱包绑定确认
+- `POST /redpacket/wallet_bind/detail`: 查询当前用户的钱包绑定
 
-        FE->>RP: staticCall(createXXX(...))
-        RP-->>FE: 模拟通过
+管理员侧：
 
-        FE->>Wallet: 发起 createXXX 交易
-        Wallet->>RP: createFixedPacket/createRandomPacket/createTransfer
-        RP-->>Wallet: tx hash
-        Wallet-->>FE: tx hash
+- `POST /redpacket/admin/set_signer`
+- `POST /redpacket/admin/set_token`
+- `POST /redpacket/admin/set_expiry`
+- `POST /redpacket/admin/set_allow_all_tokens`
+- `POST /redpacket/admin/set_native_token_enabled`
+- `POST /redpacket/admin/parse_tx_events`
 
-        FE->>Wallet: wait receipt
-        Wallet-->>FE: receipt + logs
+## 11. 前端接入建议
 
-        FE->>FE: 解析 PacketCreated
-        FE->>FE: 得到 packetId
+创建页：
 
-        FE->>BE: created-callback(bizId, txHash, packetId)
-        BE->>DB: 保存 bizId <-> txHash <-> packetId
+1. 用户选择红包类型、金额、份数、过期时间和链
+2. 调用 `create_order`
+3. 钱包发起链上创建交易
+4. 从 receipt 解析 `PacketCreated.packetId`
+5. 调用 `created_callback`
+6. 展示分享页或详情页
 
-        Indexer->>RP: 监听 PacketCreated
-        RP-->>Indexer: PacketCreated(...)
-        Indexer->>DB: 对账/补写
+领取页：
 
-        FE-->>U: 展示创建成功
-    end
+1. 查询 `detail`
+2. 检查当前钱包是否已绑定
+3. 未绑定则先走 wallet bind
+4. 调用 `issue_claim_sign`
+5. 钱包发起 `claim(...)`
+6. 调用 `claim_result`
+7. 刷新 `detail`
+
+钱包绑定页：
+
+1. 获取当前钱包地址和 chain type
+2. 调用 `wallet_bind/challenge`
+3. 按 `sign_method` 调钱包签名
+4. 调用 `wallet_bind/confirm`
+5. 调用 `wallet_bind/detail` 验证绑定状态
+
+## 12. 风险与待办
+
+必须尽快处理：
+
+- 修复 `protocol/redpacket/redpacket.proto` 与当前 `internal/api` / `internal/rpc` 使用的 protobuf 类型不一致问题
+- 补充管理员接口的 OpenIM 管理员权限校验
+- 移除或保护 placeholder signature 降级路径
+- EVM admin 从 mock 改为真实交易或明确只允许前端钱包管理
+
+按业务优先级处理：
+
+- 补齐 TRON 绑定验签
+- 补齐 TRON 事件解析
+- 增加 refund HTTP/RPC 接口
+- 增加后台 indexer loop 与事件补偿
+- 增加管理员操作审计 collection
+
+上线检查：
+
+- API 网关能发现 `redPacket` RPC 服务
+- MongoDB 索引创建成功
+- signer 地址与合约 signer 一致
+- EVM RPC 能稳定获取 receipt
+- claim 签名在测试链可通过合约验签
+- 钱包绑定 recover 地址与实际钱包一致
+
+## 13. 总结
+
+当前 RedPacket 的核心链路是：
+
+```text
+OpenIM 登录身份
+  -> 钱包绑定
+  -> 业务鉴权
+  -> 后端 signer 裸签 claim digest
+  -> 前端钱包发 claim 交易
+  -> 链上事件回写 MongoDB
 ```
 
-### 图意概述
-
-创建红包流程分为：读配置、权威校验、余额与授权检查、链上模拟、正式创建、事件解析、后端落库。`packetId` 的唯一可信来源是 `PacketCreated` 事件。fileciteturn1file0
-
-### 边界条件
-
-- 原生币需额外预留 gas，不应把余额全部作为 `totalAmount`。
-- ERC20 创建前需检查 `allowance >= totalAmount`。
-- `expiryAt == 0` 时由合约使用默认过期时间。fileciteturn1file4
-
-### 异常路径与回退
-
-- `getCreateValidation(...)` 返回 `passed == false` 时，应直接用 `code` 透传失败原因。fileciteturn1file3
-- `staticCall` 成功并不保证正式交易 100% 成功，链上配置变化、余额变化都可能导致最终失败。fileciteturn1file3
-- 若前端回传 `packetId` 失败，可由监听服务通过 `txHash` 和事件补写。
-
-### 性能与容量假设
-
-- 创建链路以用户交互为主，整体延迟由钱包签名和链确认决定。
-- `getAllTokenConfigs()` 适合页面初始化时缓存，减少重复读链。fileciteturn1file3
-
-### 版本与兼容性
-
-- 创建页应优先依赖聚合只读接口，避免未来 token 规则变化导致前端多处改动。
-- 若未来扩展红包类型，建议继续复用 `getCreateValidation(...)` 做统一校验出口。
-
----
-
-## 6.3 领取红包流程
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant U as 用户
-    participant FE as 前端
-    participant Wallet as 钱包
-    participant BE as 业务后端
-    participant AuthSvc as 签名服务(signer私钥)
-    participant DB as 业务库
-    participant RP as RedPacket合约
-    participant Indexer as 链监听服务
-
-    U->>FE: 打开红包详情页
-    FE->>Wallet: 获取当前地址
-    Wallet-->>FE: userAddress
-
-    FE->>RP: getPacketInfoForUser(packetId, userAddress)
-    RP-->>FE: packet/status/alreadyClaimed/canClaimByChain
-
-    alt 链上预判不可领取
-        FE-->>U: 展示不可领取状态
-    else 可领取
-        U->>FE: 点击领取
-        FE->>BE: POST /claim-sign(packetId, claimer, randomSeed)
-
-        BE->>DB: 查询业务资格/业务单
-        DB-->>BE: 返回业务状态
-
-        alt 鉴权失败
-            BE-->>FE: 拒绝签名
-            FE-->>U: 提示无资格领取
-        else 鉴权通过
-            BE->>DB: 生成 authNonce
-            DB-->>BE: authNonce
-
-            BE->>RP: getSignMessage(packetId, claimer, authNonce, randomSeed, deadline)
-            RP-->>BE: digest
-
-            BE->>AuthSvc: 使用 signer 私钥裸签 digest
-            AuthSvc-->>BE: signature
-
-            BE->>DB: 保存签名发放记录
-            BE-->>FE: authNonce + randomSeed + deadline + signature
-
-            FE->>Wallet: 调用 claim(packetId, authNonce, randomSeed, deadline, signature)
-            Wallet->>RP: 发起 claim
-
-            RP->>RP: 校验 packet 状态
-            RP->>RP: 校验 alreadyClaimed == false
-            RP->>RP: 校验 authNonce 未使用
-            RP->>RP: recover(signature) == signer
-            RP->>RP: 计算领取金额
-            RP->>RP: 更新红包剩余状态
-            RP-->>Wallet: tx hash
-
-            Wallet-->>FE: tx hash
-            FE->>Wallet: wait receipt
-            Wallet-->>FE: receipt + logs
-
-            FE->>FE: 解析 PacketClaimed.amount
-            FE-->>U: 展示领取成功与实际金额
-
-            Indexer->>RP: 监听 PacketClaimed
-            RP-->>Indexer: PacketClaimed(...)
-            Indexer->>DB: 更新领取记录/红包状态
-        end
-    end
-```
-
-### 图意概述
-
-领取链路是整个系统最核心的链路。前端只能做链上预判，最终是否允许领取由后端业务鉴权 + 后端签名 + 合约验签三者共同决定。`claim` 不是纯前端直连模式，而是“前端 + 后端签名服务 + 合约”三方联动。fileciteturn1file1
-
-### 边界条件
-
-- `authNonce` 必须对每个 `claimer` 唯一，不可重复。fileciteturn1file4
-- `deadline` 建议短时有效，如 5~30 分钟。fileciteturn1file4
-- `claimer` 应严格使用当前连接钱包地址，避免签给 A 地址却由 B 地址调用。
-- 拼手气红包最终领取金额必须以链上 `PacketClaimed.amount` 为准，前端不要本地复算。fileciteturn1file2
-
-### 异常路径与回退
-
-- 后端鉴权失败：直接拒绝签名。
-- `invalid signature`：签名人错误、参数不一致、`claimer` 被篡改、摘要计算不一致。fileciteturn1file1
-- `claim nonce used`：同地址重复使用 `authNonce`。fileciteturn1file1
-- `packet expired`：红包过期。fileciteturn1file1
-
-### 性能与容量假设
-
-- claim 为高频路径，签名服务应尽量轻量，避免承担复杂配置职责。
-- 建议签名接口短链路完成，仅依赖必要的业务状态查询与 nonce 生成。
-- 监听服务需具备幂等更新能力，防止事件重复消费。
-
-### 版本与兼容性
-
-- 若签名结构变更，应同步升级合约 `CLAIM_TYPEHASH`、后端签名逻辑与前端参数组装。
-- 若未来切换 signer 地址，保留 `setSigner(...)` 即可平滑轮换。fileciteturn1file4
-
----
-
-## 6.4 过期退款流程
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant U as 创建人/管理员
-    participant FE as 前端/后台
-    participant Wallet as 钱包
-    participant RP as RedPacket合约
-    participant Indexer as 链监听服务
-    participant DB as 业务库
-
-    U->>FE: 点击退款
-    FE->>RP: 查询 packet 状态
-    RP-->>FE: creator/expiryAt/refunded/remainingAmount
-
-    alt 不可退款
-        FE-->>U: 提示失败
-    else 可退款
-        FE->>Wallet: 调用 refund(packetId)
-        Wallet->>RP: 发起退款交易
-
-        RP->>RP: 校验 packet 存在
-        RP->>RP: 校验已过期
-        RP->>RP: 校验调用方是创建人或管理员
-        RP->>RP: 退还 remainingAmount
-        RP->>RP: 标记 refunded = true
-        RP-->>Wallet: tx hash
-
-        Wallet-->>FE: tx hash
-        FE-->>U: 提示退款已提交
-
-        Indexer->>RP: 监听 PacketRefunded
-        RP-->>Indexer: PacketRefunded(...)
-        Indexer->>DB: 更新状态为 REFUNDED
-    end
-```
-
-### 图意概述
-
-退款链路只允许在红包过期后执行，且调用方必须是创建人或管理员。成功后需通过 `PacketRefunded` 事件更新业务状态。fileciteturn1file4
-
-### 边界条件
-
-- 退款前必须确认 `refunded == false`。
-- 已领取完的红包理论上剩余金额为 0，退款交易应仍保持一致性处理。
-- 管理员退款与创建人退款都应有审计落库。
-
-### 异常路径与回退
-
-- 未过期调用应直接 revert。
-- 非创建人/管理员调用应直接拒绝。
-- 如果退款交易已提交但后端未更新，可由监听服务补偿。
-
-### 性能与容量假设
-
-- 退款为低频操作，对吞吐要求低。
-- 事件驱动回写可以接受秒级到分钟级延迟。
-
-### 版本与兼容性
-
-- 若未来增加自动退款策略，可在不改变 `refund(packetId)` 主接口的前提下扩展调度能力。
-
----
-
-## 7. 关键接口表
-
-## 7.1 合约接口表
-
-| 分类 | 接口 | 参数 | 返回 | 说明 |
-|---|---|---|---|---|
-| 创建 | `createFixedPacket` | `token, totalAmount, totalShares, expiryAt` | `packetId` / tx receipt | 创建固定金额红包。fileciteturn1file4 |
-| 创建 | `createRandomPacket` | `token, totalAmount, totalShares, expiryAt` | `packetId` / tx receipt | 创建拼手气红包。fileciteturn1file4 |
-| 创建 | `createTransfer` | `token, amount, expiryAt` | `packetId` / tx receipt | 创建待领取转账，不传 recipient。fileciteturn1file1turn1file4 |
-| 领取 | `claim` | `packetId, authNonce, randomSeed, deadline, signature` | tx receipt | 必须携带后端签名。fileciteturn1file1turn1file4 |
-| 退款 | `refund` | `packetId` | tx receipt | 红包过期后退款。fileciteturn1file4 |
-| 管理 | `setSigner` | `signer` | tx receipt | 设置验签地址。fileciteturn1file4 |
-| 管理 | `setAllowAllTokens` | `allowAllTokens` | tx receipt | 设置是否允许所有 token。fileciteturn1file4 |
-| 管理 | `setNativeTokenEnabled` | `enabled` | tx receipt | 设置原生币开关。fileciteturn1file4 |
-| 管理 | `setAllowedToken` | `token, allowed, minShareAmount` | tx receipt | 设置 token 白名单与最小份额。fileciteturn1file1turn1file4 |
-| 管理 | `setDefaultExpiryDuration` | `duration` | tx receipt | 设置默认过期时间。fileciteturn1file4 |
-| 只读 | `getSignMessage` | `packetId, claimer, authNonce, randomSeed, deadline` | `bytes32 digest` | 后端获取摘要再裸签名。fileciteturn1file4 |
-| 只读 | `getPacketInfoForUser` | `packetId, user` | `packet, status, alreadyClaimed, canClaimByChain` | 前端聚合查询红包状态。fileciteturn1file3 |
-| 只读 | `getAllTokenConfigs` | - | token 配置聚合结果 | 页面初始化时获取 token 配置。fileciteturn1file3 |
-| 只读 | `getCreateValidation` | `token, packetType, totalAmount, totalShares` | `passed/code/...` | 创建前权威校验。fileciteturn1file3 |
-
-## 7.2 后端 API 接口表
-
-| 分类 | 接口 | 方法 | 关键入参 | 关键出参 | 说明 |
-|---|---|---|---|---|---|
-| 创建 | `/api/redpacket/create-order` | `POST` | 业务发红包参数 | `bizId` | 创建业务单，链前预落库 |
-| 创建回写 | `/api/redpacket/created-callback` | `POST` | `bizId, txHash, packetId` | `ok` | 创建交易成功后回写链上 `packetId` |
-| 详情 | `/api/redpacket/detail` | `GET` | `packetId` | 红包业务详情 | 返回分享页需要的业务信息 |
-| 领取签名 | `/api/redpacket/claim-sign` | `POST` | `packetId, claimer, randomSeed` | `authNonce, deadline, signature` | 业务鉴权 + 发放 claim 授权 |
-| 领取回写 | `/api/redpacket/claim-result` | `POST` | `packetId, txHash` | `ok` | 可选，最终仍以监听服务为准 |
-| 配置 | `/admin/redpacket/set-signer` | `POST` | `newSigner` | `txHash` | 变更 signer |
-| 配置 | `/admin/redpacket/set-token` | `POST` | `token, allowed, minShareAmount` | `txHash` | 更新 token 配置 |
-| 配置 | `/admin/redpacket/set-expiry` | `POST` | `duration` | `txHash` | 更新默认过期时间 |
-
-## 7.3 事件表
-
-| 事件 | 字段 | 用途 |
-|---|---|---|
-| `PacketCreated` | `packetId, creator, packetType, token, totalAmount, totalShares, expiryAt` | 创建成功后的唯一 `packetId` 来源。fileciteturn1file0turn1file1 |
-| `PacketClaimed` | `packetId, claimer, amount, remainingAmount, remainingShares, authNonce` | 领取成功与实际领取金额来源。fileciteturn1file2 |
-| `PacketRefunded` | `packetId, operator, refundTo, amount` | 退款确认与状态同步。fileciteturn1file4 |
-
----
-
-## 8. 关键数据表建议
-
-## 8.1 红包主表 `red_packet`
-
-| 字段 | 说明 |
-|---|---|
-| `id` | 自增主键 |
-| `biz_id` | 业务单号 |
-| `packet_id` | 链上红包 ID |
-| `chain_id` | 链 ID |
-| `contract_address` | 合约地址 |
-| `creator_user_id` | 发红包业务用户 ID |
-| `creator_wallet` | 发红包钱包地址 |
-| `packet_type` | 红包类型 |
-| `token` | token 地址 |
-| `total_amount` | 总金额 |
-| `total_shares` | 总份数 |
-| `expiry_at` | 过期时间 |
-| `tx_hash` | 创建交易哈希 |
-| `status` | 业务状态 |
-| `created_at` | 创建时间 |
-
-## 8.2 领取授权表 `red_packet_claim_auth`
-
-| 字段 | 说明 |
-|---|---|
-| `id` | 主键 |
-| `packet_id` | 红包 ID |
-| `claimer_wallet` | 领取地址 |
-| `auth_nonce` | 授权 nonce |
-| `random_seed` | 随机参数 |
-| `deadline` | 过期时间 |
-| `signature` | 后端签名 |
-| `used` | 是否已使用 |
-| `user_id` | 业务用户 ID |
-| `created_at` | 创建时间 |
-
-## 8.3 领取记录表 `red_packet_claim`
-
-| 字段 | 说明 |
-|---|---|
-| `id` | 主键 |
-| `packet_id` | 红包 ID |
-| `claimer_wallet` | 领取地址 |
-| `auth_nonce` | 使用的 nonce |
-| `claim_tx_hash` | 领取交易哈希 |
-| `claimed_amount` | 实际领取金额 |
-| `block_number` | 区块号 |
-| `status` | 状态 |
-| `created_at` | 创建时间 |
-
-## 8.4 退款记录表 `red_packet_refund`
-
-| 字段 | 说明 |
-|---|---|
-| `id` | 主键 |
-| `packet_id` | 红包 ID |
-| `refund_tx_hash` | 退款交易哈希 |
-| `refund_to` | 退款目标地址 |
-| `amount` | 退款金额 |
-| `status` | 状态 |
-| `created_at` | 创建时间 |
-
----
-
-## 9. 前端接入建议
-
-## 9.1 创建页
-
-推荐顺序：
-
-1. 调 `getAllTokenConfigs()` 初始化页面配置。fileciteturn1file3
-2. 用户输入金额/份数后调 `getCreateValidation(...)`。fileciteturn1file3
-3. 检查余额 / allowance。
-4. 调 `staticCall` 做链上模拟。fileciteturn1file3
-5. 发创建交易。
-6. 从 `PacketCreated` 解析 `packetId`。fileciteturn1file0
-7. 回传后端落库。
-
-## 9.2 详情页 / 领取页
-
-推荐顺序：
-
-1. 调 `getPacketInfoForUser(packetId, userAddress)`。fileciteturn1file3
-2. 若链上预判可领，展示领取按钮。
-3. 点击领取后先调后端 `/claim-sign`。
-4. 拿到 `authNonce + deadline + signature` 后再发 `claim(...)`。
-5. 从 `PacketClaimed.amount` 获取真实领取金额。fileciteturn1file2
-
----
-
-## 10. 安全设计建议
-
-## 10.1 分权
-
-必须分离：
-
-- `configAdmin` 私钥
-- `signer` 私钥
-
-不要使用同一把私钥同时做：
-
-- 配置交易
-- claim 签名
-
-## 10.2 防重放
-
-- `authNonce` 必须唯一，建议按 `claimer` 维度发号。fileciteturn1file4
-- claim 成功后链上立即标记 nonce 已使用。
-
-## 10.3 签名规范
-
-- 推荐通过 `getSignMessage(...)` 获取 digest。fileciteturn1file4
-- 后端对 digest 做裸签名。
-- 不要使用 `signMessage`，否则会添加前缀导致验签失败。fileciteturn1file4
-
-## 10.4 审计与对账
-
-- 所有配置变更写审计单
-- 所有签名发放写记录
-- 所有链上事件由监听服务落最终状态
-- `txHash -> packetId`、`packetId -> claim records` 都要可追溯。fileciteturn1file0
-
----
-
-## 11. 常见失败原因
-
-| 错误 | 含义 |
-|---|---|
-| `invalid signature` | 签名不匹配、签名人错误、claimer 不匹配、参数被篡改。fileciteturn1file1 |
-| `claim nonce used` | 同地址重复使用授权 nonce。fileciteturn1file1 |
-| `packet expired` | 红包已过期。fileciteturn1file1 |
-| `random packet amount too small` | 拼手气总额不满足最小份额。fileciteturn1file1 |
-| `fixed packet amount too small` | 固定红包单份金额小于最小份额。fileciteturn1file1 |
-| `transfer amount too small` | 转账金额小于最小份额。fileciteturn1file1 |
-| `token not allowed` | token 未开放或被禁用。fileciteturn1file3 |
-| `native token disabled` | 原生币红包未开放。fileciteturn1file3 |
-
----
-
-## 12. 落地建议
-
-推荐按以下顺序推进：
-
-1. **先完成合约分权改造**
-   - 增加 `configAdmin`
-   - 保留 `setSigner`
-   - claim 使用 `signer` 验签
-
-2. **再完成后端两类服务拆分**
-   - 配置服务
-   - 签名服务
-
-3. **再接前端创建与领取流程**
-   - 创建页
-   - 红包详情页
-   - claim 签名获取接口
-
-4. **最后补监听与审计**
-   - 事件消费
-   - 对账补偿
-   - 配置与签名审计
-
----
-
-## 13. 一句话总结
-
-这套红包 Web3 接入的核心不是“前端直接调合约”，而是：
-
-> **前端负责发交易与展示，后端负责业务鉴权与签名发放，合约负责最终状态机与验签，监听服务负责最终一致性。**
-
+这条链路把“谁是 OpenIM 用户”“谁控制钱包”“谁有资格领取”“链上是否最终成功”分成四层校验，后端只签发授权，不直接替用户领取，从而保持用户资产操作仍由钱包确认。
