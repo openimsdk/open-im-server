@@ -12,6 +12,7 @@ import (
 	pbcrypto "github.com/openimsdk/protocol/crypto"
 	"github.com/openimsdk/protocol/group"
 	"github.com/openimsdk/protocol/msg"
+	pbredpacket "github.com/openimsdk/protocol/redpacket"
 	"github.com/openimsdk/protocol/relation"
 	"github.com/openimsdk/protocol/rtc"
 	"github.com/openimsdk/protocol/third"
@@ -114,6 +115,10 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		return nil, err
 	}
 	cryptoConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.Crypto)
+	if err != nil {
+		return nil, err
+	}
+	redpacketConn, err := client.GetConn(ctx, config.Share.RpcRegisterName.RedPacket)
 	if err != nil {
 		return nil, err
 	}
@@ -243,9 +248,6 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		groupRouterGroup.POST("/get_full_join_group_ids", g.GetFullJoinGroupIDs)
 		groupRouterGroup.POST("/get_group_application_unhandled_count", g.GetGroupApplicationUnhandledCount)
 		groupRouterGroup.POST("/get_common_groups_with_friend", g.GetCommonGroupsWithFriend)
-		groupRouterGroup.POST("/pin_group_message", g.PinGroupMessage)
-		groupRouterGroup.POST("/unpin_group_message", g.UnpinGroupMessage)
-		groupRouterGroup.POST("/get_group_pinned_messages", g.GetGroupPinnedMessages)
 	}
 	// certificate
 	{
@@ -364,6 +366,30 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		cryptoGroup.POST("/get_group_key_events", cr.GetGroupKeyEvents)
 		cryptoGroup.POST("/security_precheck", cr.SecurityPrecheck)
 		cryptoGroup.POST("/integrity_report", cr.IntegrityReport)
+	}
+
+	// RedPacket
+	{
+		rp := NewRedPacketApi(pbredpacket.NewRedPacketClient(redpacketConn))
+		redpacketGroup := r.Group("/redpacket")
+		redpacketGroup.POST("/create_order", rp.CreateOrder)
+		redpacketGroup.POST("/created_callback", rp.CreatedCallback)
+		redpacketGroup.POST("/detail", rp.GetDetail)
+		redpacketGroup.POST("/issue_claim_sign", rp.IssueClaimSign)
+		redpacketGroup.POST("/claim_result", rp.ClaimResult)
+		redpacketGroup.POST("/request_refund", rp.RequestRefund)
+		redpacketGroup.POST("/get_refund", rp.GetRefund)
+		redpacketGroup.POST("/wallet_bind/challenge", rp.IssueWalletBindChallenge)
+		redpacketGroup.POST("/wallet_bind/confirm", rp.ConfirmWalletBind)
+		redpacketGroup.POST("/wallet_bind/detail", rp.GetWalletBinding)
+
+		adminGroup := redpacketGroup.Group("/admin")
+		adminGroup.POST("/set_signer", rp.AdminSetSigner)
+		adminGroup.POST("/set_token", rp.AdminSetToken)
+		adminGroup.POST("/set_expiry", rp.AdminSetExpiry)
+		adminGroup.POST("/set_allow_all_tokens", rp.AdminSetAllowAllTokens)
+		adminGroup.POST("/set_native_token_enabled", rp.AdminSetNativeTokenEnabled)
+		adminGroup.POST("/parse_tx_events", rp.AdminParseTxEvents)
 	}
 
 	{

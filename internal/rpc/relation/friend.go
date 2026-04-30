@@ -314,7 +314,11 @@ func (s *friendServer) GetFriendInfo(ctx context.Context, req *relation.GetFrien
 	if err != nil {
 		return nil, err
 	}
-	return &relation.GetFriendInfoResp{FriendInfos: convert.FriendOnlyDB2PbOnly(friends)}, nil
+	users, err := s.userClient.GetUsersInfoMap(ctx, req.FriendUserIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &relation.GetFriendInfoResp{FriendInfos: convert.FriendOnlyDB2PbOnly(friends, users)}, nil
 }
 
 func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *relation.GetDesignatedFriendsReq) (resp *relation.GetDesignatedFriendsResp, err error) {
@@ -693,7 +697,7 @@ func (s *friendServer) AddOnewayFriend(ctx context.Context, req *relation.ApplyT
 	if in1 {
 		return nil, servererrs.ErrRelationshipAlready.WrapMsg("already in friend list")
 	}
-	if err := s.db.BecomeOnewayFriend(ctx, req.FromUserID, req.ToUserID, becomeFriendByOneway, req.Remark); err != nil {
+	if err := s.db.BecomeOnewayFriend(ctx, req.FromUserID, req.ToUserID, becomeFriendByOneway); err != nil {
 		return nil, err
 	}
 	// Notify only A (FromUserID) so incremental friend sync is triggered
