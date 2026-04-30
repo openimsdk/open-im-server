@@ -39,6 +39,11 @@ func (i *Indexer) Start(ctx context.Context) {
 	log.ZInfo(ctx, "starting RedPacket ETH event indexer")
 
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.ZError(ctx, "redpacket eth indexer panic recovered", fmt.Errorf("%v", r))
+			}
+		}()
 		ticker := time.NewTicker(i.pollInterval)
 		defer ticker.Stop()
 		for {
@@ -58,6 +63,11 @@ func (i *Indexer) Start(ctx context.Context) {
 	// and mark them EXPIRED so the UI reflects the correct state even if the
 	// on-chain refund event was missed.
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.ZError(ctx, "redpacket eth compensation panic recovered", fmt.Errorf("%v", r))
+			}
+		}()
 		ticker := time.NewTicker(60 * time.Second)
 		defer ticker.Stop()
 		for {
@@ -178,7 +188,10 @@ func (i *Indexer) handlePacketClaimed(ctx context.Context, event *ParsedEvent) e
 	if err := i.db.MarkClaimAuthUsed(ctx, authNonce.String()); err != nil {
 		return err
 	}
-	return i.db.UpdateRedPacketClaimProgress(ctx, packetID.String(), amount.String(), "")
+	// Pass "" for forced status; DB layer auto-derives COMPLETED/ACTIVE.
+	// TxHash is the idempotency key: prevents double-counting if ClaimResult RPC
+	// already processed this same transaction.
+	return i.db.UpdateRedPacketClaimProgress(ctx, packetID.String(), amount.String(), "", event.TxHash.Hex())
 }
 
 func (i *Indexer) handlePacketRefunded(ctx context.Context, event *ParsedEvent) error {

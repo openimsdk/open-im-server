@@ -104,7 +104,7 @@ func (m *RedPacketMgo) UpdateStatus(ctx context.Context, packetID, status string
 	return nil
 }
 
-func (m *RedPacketMgo) UpdateClaimProgress(ctx context.Context, packetID, claimedAmount, status string) error {
+func (m *RedPacketMgo) UpdateClaimProgress(ctx context.Context, packetID, claimedAmount, status, claimTxHash string) error {
 	var rp model.RedPacket
 	err := m.coll.FindOne(ctx, bson.M{"packet_id": packetID}).Decode(&rp)
 	if err != nil {
@@ -116,15 +116,45 @@ func (m *RedPacketMgo) UpdateClaimProgress(ctx context.Context, packetID, claime
 
 	totalClaimed := addNumericStrings(rp.ClaimedAmount, claimedAmount)
 	nextShares := rp.ClaimedShares + 1
-	updates := bson.M{
+
+	// Auto-derive status when the caller does not force one.
+	nextStatus := status
+	if nextStatus == "" {
+		if rp.PacketType == 2 {
+			nextStatus = "COMPLETED"
+		} else if rp.TotalShares > 0 && nextShares >= rp.TotalShares {
+			nextStatus = "COMPLETED"
+		} else {
+			tcBig, tok := new(big.Int).SetString(totalClaimed, 10)
+			taBig, taok := new(big.Int).SetString(rp.TotalAmount, 10)
+			if tok && taok && tcBig.Cmp(taBig) >= 0 {
+				nextStatus = "COMPLETED"
+			}
+		}
+	}
+
+	setFields := bson.M{
 		"claimed_amount": totalClaimed,
 		"claimed_shares": nextShares,
 		"updated_at":     time.Now(),
 	}
-	if status != "" {
-		updates["status"] = status
+	if nextStatus != "" {
+		setFields["status"] = nextStatus
 	}
-	_, err = m.coll.UpdateOne(ctx, bson.M{"packet_id": packetID}, bson.M{"$set": updates})
+
+	// The $addToSet + $ne filter makes the whole update idempotent per claimTxHash:
+	// if two code paths (RPC handler and indexer) both attempt to process the same
+	// transaction, only the first UpdateOne will match and the second is a no-op.
+	filter := bson.M{"packet_id": packetID}
+	if claimTxHash != "" {
+		filter["processed_claim_hashes"] = bson.M{"$ne": claimTxHash}
+	}
+	update := bson.M{"$set": setFields}
+	if claimTxHash != "" {
+		update["$addToSet"] = bson.M{"processed_claim_hashes": claimTxHash}
+	}
+
+	_, err = m.coll.UpdateOne(ctx, filter, update)
 	return err
 }
 
@@ -427,10 +457,10 @@ func NewWalletBindingMongo(db *mongo.Database) (database.WalletBinding, error) {
 }
 
 // GetExpiredPending returns red packets that have expired but are still in
-// "CREATED" status (i.e., not yet refunded or fully claimed).
+// "ACTIVE" status (i.e., on-chain creation confirmed, not yet fully claimed or refunded).
 func (m *RedPacketMgo) GetExpiredPending(ctx context.Context, now int64) ([]*model.RedPacket, error) {
 	cur, err := m.coll.Find(ctx, bson.M{
-		"status":    "CREATED",
+		"status":    "ACTIVE",
 		"expiry_at": bson.M{"$lt": now, "$gt": 0},
 	})
 	if err != nil {

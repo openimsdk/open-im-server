@@ -16,7 +16,7 @@ type RedPacketDatabase interface {
 	GetRedPacketByPacketID(ctx context.Context, packetID string) (*model.RedPacket, error)
 	UpdateRedPacketCreated(ctx context.Context, rp *model.RedPacket) error
 	UpdateRedPacketStatus(ctx context.Context, packetID, status string) error
-	UpdateRedPacketClaimProgress(ctx context.Context, packetID, claimedAmount, status string) error
+	UpdateRedPacketClaimProgress(ctx context.Context, packetID, claimedAmount, status, claimTxHash string) error
 	GetExpiredPendingPackets(ctx context.Context, nowUnix int64) ([]*model.RedPacket, error)
 
 	CreateClaimAuth(ctx context.Context, auth *model.RedPacketClaimAuth) error
@@ -91,8 +91,8 @@ func (d *redPacketDatabase) UpdateRedPacketStatus(ctx context.Context, packetID,
 	return d.rp.UpdateStatus(ctx, packetID, status)
 }
 
-func (d *redPacketDatabase) UpdateRedPacketClaimProgress(ctx context.Context, packetID, claimedAmount, status string) error {
-	return d.rp.UpdateClaimProgress(ctx, packetID, claimedAmount, status)
+func (d *redPacketDatabase) UpdateRedPacketClaimProgress(ctx context.Context, packetID, claimedAmount, status, claimTxHash string) error {
+	return d.rp.UpdateClaimProgress(ctx, packetID, claimedAmount, status, claimTxHash)
 }
 
 func (d *redPacketDatabase) CreateClaimAuth(ctx context.Context, auth *model.RedPacketClaimAuth) error {

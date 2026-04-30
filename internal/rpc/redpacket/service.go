@@ -85,6 +85,10 @@ func (s *redPacketServer) CreateOrder(ctx context.Context, req *pbredpacket.Crea
 }
 
 func (s *redPacketServer) CreatedCallback(ctx context.Context, req *pbredpacket.CreatedCallbackReq) (*pbredpacket.CreatedCallbackResp, error) {
+	opUserID := mcontext.GetOpUserID(ctx)
+	if opUserID == "" {
+		return nil, servererrs.ErrNoPermission.WrapMsg("op user id is empty")
+	}
 	if strings.TrimSpace(req.BizID) == "" || strings.TrimSpace(req.TxHash) == "" {
 		return nil, errs.ErrArgs.WrapMsg("biz_id and tx_hash are required")
 	}
@@ -92,6 +96,9 @@ func (s *redPacketServer) CreatedCallback(ctx context.Context, req *pbredpacket.
 	rp, err := s.db.GetRedPacketByBizID(ctx, req.BizID)
 	if err != nil {
 		return nil, err
+	}
+	if rp.CreatorUserID != opUserID {
+		return nil, servererrs.ErrNoPermission.WrapMsg("only the creator can submit the creation callback")
 	}
 
 	groupID := firstNonEmpty(req.GroupID, rp.GroupID)
@@ -202,7 +209,7 @@ func (s *redPacketServer) IssueClaimSign(ctx context.Context, req *pbredpacket.I
 			signature[64] += 27
 		}
 	} else {
-		signature = []byte("0xplaceholder-signature-for-testing")
+		return nil, errs.ErrInternalServer.WrapMsg("signer key not configured; cannot issue claim signature")
 	}
 
 	sigHex := "0x" + hex.EncodeToString(signature)
@@ -295,8 +302,10 @@ func (s *redPacketServer) ClaimResult(ctx context.Context, req *pbredpacket.Clai
 		}
 	}
 
-	nextStatus := derivePacketStatusAfterClaim(rp, claimedEvent.Amount)
-	if err := s.db.UpdateRedPacketClaimProgress(ctx, req.PacketID, claimedEvent.Amount, nextStatus); err != nil {
+	// Pass "" for status so the DB layer auto-derives COMPLETED/ACTIVE.
+	// Pass req.TxHash as the idempotency key so concurrent indexer processing
+	// of the same transaction cannot double-count the claim.
+	if err := s.db.UpdateRedPacketClaimProgress(ctx, req.PacketID, claimedEvent.Amount, "", req.TxHash); err != nil {
 		return nil, err
 	}
 	return &pbredpacket.ClaimResultResp{}, nil
@@ -350,6 +359,7 @@ type createdPacketSnapshot struct {
 func (s *redPacketServer) resolveCreatedPacket(ctx context.Context, rp *model.RedPacket, txHashHex, fallbackPacketID string) (*createdPacketSnapshot, error) {
 	switch rp.ChainType {
 	case "EVM":
+		// Offline mode: no chain client configured; caller must supply packet_id directly.
 		if s.chainClient == nil {
 			if fallbackPacketID == "" {
 				return nil, errs.ErrArgs.WrapMsg("packet_id is required when EVM client is unavailable")
@@ -359,10 +369,7 @@ func (s *redPacketServer) resolveCreatedPacket(ctx context.Context, rp *model.Re
 
 		events, err := s.chainClient.ParseTransactionReceipt(ctx, common.HexToHash(txHashHex))
 		if err != nil {
-			if fallbackPacketID == "" {
-				return nil, errs.ErrInternalServer.WrapMsg("parse created tx failed: " + err.Error())
-			}
-			return buildFallbackCreatedPacket(rp, fallbackPacketID), nil
+			return nil, errs.ErrInternalServer.WrapMsg("parse created tx failed: " + err.Error())
 		}
 
 		for _, event := range events {
@@ -379,12 +386,9 @@ func (s *redPacketServer) resolveCreatedPacket(ctx context.Context, rp *model.Re
 			}
 			return createdPacket, nil
 		}
-
-		if fallbackPacketID == "" {
-			return nil, errs.ErrInternalServer.WrapMsg("PacketCreated event not found in tx: " + txHashHex)
-		}
-		return buildFallbackCreatedPacket(rp, fallbackPacketID), nil
+		return nil, errs.ErrInternalServer.WrapMsg("PacketCreated event not found in tx: " + txHashHex)
 	case "TRON":
+		// Offline mode: no chain client configured; caller must supply packet_id directly.
 		if s.tronClient == nil {
 			if fallbackPacketID == "" {
 				return nil, errs.ErrArgs.WrapMsg("packet_id is required when TRON client is unavailable")
@@ -394,10 +398,7 @@ func (s *redPacketServer) resolveCreatedPacket(ctx context.Context, rp *model.Re
 
 		events, err := s.tronClient.ParseTransactionReceipt(ctx, txHashHex)
 		if err != nil {
-			if fallbackPacketID == "" {
-				return nil, errs.ErrInternalServer.WrapMsg("parse tron created tx failed: " + err.Error())
-			}
-			return buildFallbackCreatedPacket(rp, fallbackPacketID), nil
+			return nil, errs.ErrInternalServer.WrapMsg("parse tron created tx failed: " + err.Error())
 		}
 
 		for _, event := range events {
@@ -411,11 +412,7 @@ func (s *redPacketServer) resolveCreatedPacket(ctx context.Context, rp *model.Re
 			}
 			return createdPacket, nil
 		}
-
-		if fallbackPacketID == "" {
-			return nil, errs.ErrInternalServer.WrapMsg("PacketCreated event not found in TRON tx: " + txHashHex)
-		}
-		return buildFallbackCreatedPacket(rp, fallbackPacketID), nil
+		return nil, errs.ErrInternalServer.WrapMsg("PacketCreated event not found in TRON tx: " + txHashHex)
 	default:
 		return nil, errs.ErrArgs.WrapMsg("unsupported chain_type: " + rp.ChainType)
 	}
@@ -486,16 +483,23 @@ func (s *redPacketServer) validateCreatorScope(ctx context.Context, req *pbredpa
 
 // validateFixedPacketCreate validates fixed red packets:
 //   - shared base fields
-//   - total_shares > 0
+//   - scope_type must be GROUP (fixed packets are group-only; claim validators require group_id)
+//   - 0 < total_shares <= maxTotalShares
 //   - total_amount must be divisible by total_shares (each share is an integer in min units)
-//   - scope-based group/friend relationship for the creator
+//   - creator must be an active member of the group
 func (s *redPacketServer) validateFixedPacketCreate(ctx context.Context, req *pbredpacket.CreateOrderReq) error {
 	total, err := validateCreateBaseFields(req)
 	if err != nil {
 		return err
 	}
+	if normalizeScopeType(req.ScopeType) != "GROUP" {
+		return errs.ErrArgs.WrapMsg("fixed packet must use scope_type=GROUP")
+	}
 	if req.TotalShares <= 0 {
 		return errs.ErrArgs.WrapMsg("total_shares must be positive for fixed packet", "totalShares", req.TotalShares)
+	}
+	if req.TotalShares > maxTotalShares {
+		return errs.ErrArgs.WrapMsg(fmt.Sprintf("total_shares must not exceed %d for fixed packet", maxTotalShares), "totalShares", req.TotalShares)
 	}
 	shares := big.NewInt(int64(req.TotalShares))
 	if new(big.Int).Mod(total, shares).Sign() != 0 {
@@ -507,16 +511,23 @@ func (s *redPacketServer) validateFixedPacketCreate(ctx context.Context, req *pb
 
 // validateRandomPacketCreate validates random (lucky) red packets:
 //   - shared base fields
-//   - total_shares > 0
+//   - scope_type must be GROUP (random packets are group-only; claim validators require group_id)
+//   - 0 < total_shares <= maxTotalShares
 //   - total_amount >= total_shares (at least 1 min unit per share)
-//   - scope-based group/friend relationship for the creator
+//   - creator must be an active member of the group
 func (s *redPacketServer) validateRandomPacketCreate(ctx context.Context, req *pbredpacket.CreateOrderReq) error {
 	total, err := validateCreateBaseFields(req)
 	if err != nil {
 		return err
 	}
+	if normalizeScopeType(req.ScopeType) != "GROUP" {
+		return errs.ErrArgs.WrapMsg("random packet must use scope_type=GROUP")
+	}
 	if req.TotalShares <= 0 {
 		return errs.ErrArgs.WrapMsg("total_shares must be positive for random packet", "totalShares", req.TotalShares)
+	}
+	if req.TotalShares > maxTotalShares {
+		return errs.ErrArgs.WrapMsg(fmt.Sprintf("total_shares must not exceed %d for random packet", maxTotalShares), "totalShares", req.TotalShares)
 	}
 	shares := big.NewInt(int64(req.TotalShares))
 	if total.Cmp(shares) < 0 {
@@ -528,25 +539,35 @@ func (s *redPacketServer) validateRandomPacketCreate(ctx context.Context, req *p
 
 // validateTransferPacketCreate validates transfer red packets:
 //   - shared base fields
+//   - scope_type must be DIRECT (transfer is a 1-to-1 direct send)
 //   - total_shares == 1
-//   - exactly one receiver_user_id, must be a friend of the creator
+//   - exactly one receiver_user_id (receiver_user_ids must be empty)
+//   - receiver must not be the creator (no self-transfer)
+//   - creator and receiver must be friends
 func (s *redPacketServer) validateTransferPacketCreate(ctx context.Context, req *pbredpacket.CreateOrderReq) error {
 	if _, err := validateCreateBaseFields(req); err != nil {
 		return err
 	}
+	if normalizeScopeType(req.ScopeType) != "DIRECT" {
+		return errs.ErrArgs.WrapMsg("transfer packet must use scope_type=DIRECT")
+	}
 	if req.TotalShares != 1 {
 		return errs.ErrArgs.WrapMsg("transfer packet must have total_shares == 1", "totalShares", req.TotalShares)
+	}
+	// Reject ambiguous input: receiver_user_ids is not applicable for transfer.
+	if len(req.ReceiverUserIDs) > 0 {
+		return errs.ErrArgs.WrapMsg("transfer packet uses receiver_user_id (singular), not receiver_user_ids")
 	}
 	receiverUserID := strings.TrimSpace(req.ReceiverUserID)
 	if receiverUserID == "" {
 		return errs.ErrArgs.WrapMsg("receiver_user_id is required for transfer packet")
 	}
-	if len(req.ReceiverUserIDs) > 0 {
-		return errs.ErrArgs.WrapMsg("transfer packet only supports a single receiver_user_id")
-	}
 	creatorUserID := mcontext.GetOpUserID(ctx)
 	if creatorUserID == "" {
 		return servererrs.ErrNoPermission.WrapMsg("op user id is empty")
+	}
+	if creatorUserID == receiverUserID {
+		return errs.ErrArgs.WrapMsg("transfer packet cannot be sent to yourself")
 	}
 	return s.ensureFriendRelationship(ctx, creatorUserID, receiverUserID)
 }
@@ -615,14 +636,20 @@ func validateClaimBase(rp *model.RedPacket, userID, claimer string) error {
 	if strings.TrimSpace(claimer) == "" {
 		return errs.ErrArgs.WrapMsg("claimer is required")
 	}
-	if rp.Status != "ACTIVE" {
-		return errs.ErrArgs.WrapMsg("packet is not active, current status: " + rp.Status)
+	// Check status first to give precise error messages for each terminal state.
+	switch rp.Status {
+	case "ACTIVE":
+		// ok, continue to expiry check
+	case "REFUNDED":
+		return errs.ErrArgs.WrapMsg("packet has been refunded")
+	case "EXPIRED":
+		return errs.ErrArgs.WrapMsg("packet has expired")
+	default:
+		return errs.ErrArgs.WrapMsg("packet is not claimable, current status: " + rp.Status)
 	}
+	// Guard against the race where status is still ACTIVE but expiry has passed.
 	if rp.ExpiryAt > 0 && rp.ExpiryAt <= time.Now().Unix() {
-		return errs.ErrArgs.WrapMsg("packet is expired")
-	}
-	if rp.Status == "REFUNDED" {
-		return errs.ErrArgs.WrapMsg("packet is refunded")
+		return errs.ErrArgs.WrapMsg("packet has expired")
 	}
 	return nil
 }
@@ -713,27 +740,34 @@ func (s *redPacketServer) ensureGroupEligibility(ctx context.Context, groupID, u
 	return nil
 }
 
-// ensureFriendRelationship verifies that creatorUserID and receiverUserID are friends
-// (used by transfer red packets to require a pre-existing relationship).
-func (s *redPacketServer) ensureFriendRelationship(ctx context.Context, creatorUserID, receiverUserID string) error {
-	creatorUserID = strings.TrimSpace(creatorUserID)
-	receiverUserID = strings.TrimSpace(receiverUserID)
-	if creatorUserID == "" || receiverUserID == "" {
-		return errs.ErrArgs.WrapMsg("creator_user_id and receiver_user_id are required")
+// ensureFriendRelationship verifies that userA and userB are mutual friends.
+// It is used in two contexts:
+//   - validateCreatorScope (DIRECT scope): checking that each listed receiver is
+//     a friend of the creator. In that path userA == userB is theoretically possible
+//     (creator adding themselves to a list), which is allowed here; the transfer
+//     validator has its own explicit self-transfer prohibition.
+//   - validateTransferPacketClaim: re-confirming the friendship at claim time.
+//
+// Self-transfer is intentionally allowed at this level; call sites that need to
+// prohibit it (e.g. validateTransferPacketCreate) must do so before calling here.
+func (s *redPacketServer) ensureFriendRelationship(ctx context.Context, userA, userB string) error {
+	userA = strings.TrimSpace(userA)
+	userB = strings.TrimSpace(userB)
+	if userA == "" || userB == "" {
+		return errs.ErrArgs.WrapMsg("both user IDs are required for friend relationship check")
 	}
-	if creatorUserID == receiverUserID {
+	if userA == userB {
 		return nil
 	}
 	if s.relationClient == nil {
 		return servererrs.ErrInternalServer.WrapMsg("relation client is not initialized")
 	}
-	ok, err := s.relationClient.IsFriend(ctx, creatorUserID, receiverUserID)
+	ok, err := s.relationClient.IsFriend(ctx, userA, userB)
 	if err != nil {
 		return err
 	}
 	if !ok {
-		return errs.ErrNoPermission.WrapMsg("creator and receiver are not friends",
-			"creatorUserID", creatorUserID, "receiverUserID", receiverUserID)
+		return errs.ErrNoPermission.WrapMsg("users are not friends", "userA", userA, "userB", userB)
 	}
 	return nil
 }
@@ -782,38 +816,8 @@ func (s *redPacketServer) resolveClaimedEvent(ctx context.Context, rp *model.Red
 	return nil, nil
 }
 
-func derivePacketStatusAfterClaim(rp *model.RedPacket, claimedAmount string) string {
-	if rp == nil {
-		return ""
-	}
-	if rp.PacketType == 2 {
-		return "COMPLETED"
-	}
-
-	nextShares := rp.ClaimedShares + 1
-	if rp.TotalShares > 0 && nextShares >= rp.TotalShares {
-		return "COMPLETED"
-	}
-
-	totalClaimed := addNumericStrings(rp.ClaimedAmount, claimedAmount)
-	if rp.TotalAmount != "" && totalClaimed == rp.TotalAmount {
-		return "COMPLETED"
-	}
-
-	return "ACTIVE"
-}
-
-func addNumericStrings(current, delta string) string {
-	left := new(big.Int)
-	if current != "" {
-		left.SetString(current, 10)
-	}
-	right := new(big.Int)
-	if delta != "" {
-		right.SetString(delta, 10)
-	}
-	return new(big.Int).Add(left, right).String()
-}
+// maxTotalShares caps the number of shares to prevent abuse.
+const maxTotalShares = 10_000
 
 func normalizeScopeType(scopeType string) string {
 	switch strings.ToUpper(strings.TrimSpace(scopeType)) {

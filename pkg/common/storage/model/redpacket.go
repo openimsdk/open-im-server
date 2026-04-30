@@ -22,9 +22,10 @@ type RedPacket struct {
 	Token           string    `bson:"token"`
 	TotalAmount     string    `bson:"total_amount"`
 	TotalShares     int32     `bson:"total_shares"`
-	ClaimedAmount   string    `bson:"claimed_amount"`
-	ClaimedShares   int32     `bson:"claimed_shares"`
-	ExpiryAt        int64     `bson:"expiry_at"`
+	ClaimedAmount        string   `bson:"claimed_amount"`
+	ClaimedShares        int32    `bson:"claimed_shares"`
+	ProcessedClaimHashes []string `bson:"processed_claim_hashes"`
+	ExpiryAt             int64    `bson:"expiry_at"`
 	TxHash          string    `bson:"tx_hash"`
 	Status          string    `bson:"status"`
 	CreatedAt       time.Time `bson:"created_at"`

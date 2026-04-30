@@ -16,7 +16,6 @@ type TronIndexer struct {
 	pollInterval    time.Duration
 	lastBlockNum    int64
 	contractAddress string
-	processedTxs    map[string]bool
 }
 
 func NewTronIndexer(client *TronClient, db controller.RedPacketDatabase, pollInterval int, startBlock int64) *TronIndexer {
@@ -29,7 +28,6 @@ func NewTronIndexer(client *TronClient, db controller.RedPacketDatabase, pollInt
 		pollInterval:    time.Duration(pollInterval) * time.Second,
 		lastBlockNum:    startBlock,
 		contractAddress: client.contractBase58,
-		processedTxs:    make(map[string]bool),
 	}
 }
 
@@ -37,6 +35,11 @@ func (t *TronIndexer) Start(ctx context.Context) {
 	log.ZInfo(ctx, "starting RedPacket TRON event indexer")
 
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.ZError(ctx, "redpacket tron indexer panic recovered", fmt.Errorf("%v", r))
+			}
+		}()
 		ticker := time.NewTicker(t.pollInterval)
 		defer ticker.Stop()
 		for {
@@ -54,6 +57,11 @@ func (t *TronIndexer) Start(ctx context.Context) {
 	}()
 
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.ZError(ctx, "redpacket tron compensation panic recovered", fmt.Errorf("%v", r))
+			}
+		}()
 		ticker := time.NewTicker(60 * time.Second)
 		defer ticker.Stop()
 		for {
@@ -97,14 +105,18 @@ func (t *TronIndexer) poll(ctx context.Context) error {
 
 	log.ZDebug(ctx, "redpacket tron scanning blocks", "from", t.lastBlockNum+1, "to", currentBlock)
 
+	// Advance the cursor only up to the last successfully processed block so
+	// that a transient RPC failure does not cause blocks to be silently skipped.
+	lastOK := t.lastBlockNum
 	for blockNum := t.lastBlockNum + 1; blockNum <= currentBlock; blockNum++ {
 		if err := t.scanBlock(ctx, blockNum); err != nil {
 			log.ZWarn(ctx, "redpacket tron scan block failed", err, "block", blockNum)
-			continue
+			break
 		}
+		lastOK = blockNum
 	}
 
-	t.lastBlockNum = currentBlock
+	t.lastBlockNum = lastOK
 	return nil
 }
 
@@ -147,14 +159,12 @@ func (t *TronIndexer) scanBlock(ctx context.Context, blockNum int64) error {
 		}
 
 		txID, _ := tx["txID"].(string)
-		if txID == "" || t.processedTxs[txID] {
+		if txID == "" {
 			continue
 		}
 
 		if err := t.processTransaction(ctx, txID); err != nil {
 			log.ZWarn(ctx, "redpacket tron process tx failed", err, "txID", txID)
-		} else {
-			t.processedTxs[txID] = true
 		}
 	}
 
@@ -221,7 +231,10 @@ func (t *TronIndexer) handleTronPacketClaimed(ctx context.Context, event *Parsed
 	if err := t.db.MarkClaimAuthUsed(ctx, authNonce.String()); err != nil {
 		return err
 	}
-	return t.db.UpdateRedPacketClaimProgress(ctx, packetID.String(), amount.String(), "")
+	// Pass "" for forced status; DB layer auto-derives COMPLETED/ACTIVE.
+	// txID is the idempotency key: prevents double-counting if ClaimResult RPC
+	// already processed this same transaction.
+	return t.db.UpdateRedPacketClaimProgress(ctx, packetID.String(), amount.String(), "", txID)
 }
 
 func (t *TronIndexer) handleTronPacketRefunded(ctx context.Context, event *ParsedEvent, txID string) error {

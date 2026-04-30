@@ -81,7 +81,9 @@ func (s *redPacketServer) SetToken(ctx context.Context, req *pbredpacket.SetToke
 
 	minAmountBig := new(big.Int)
 	if req.MinAmount != "" {
-		minAmountBig.SetString(req.MinAmount, 10)
+		if _, ok := minAmountBig.SetString(req.MinAmount, 10); !ok {
+			return nil, errs.ErrArgs.WrapMsg("invalid min_amount", "minAmount", req.MinAmount)
+		}
 	}
 
 	if s.chainClient != nil {
@@ -167,12 +169,23 @@ func (s *redPacketServer) ParseTxEvents(ctx context.Context, req *pbredpacket.Pa
 		return nil, errs.ErrArgs.WrapMsg("tx_hash is required")
 	}
 
-	if req.Chain == "tron" && s.tronClient != nil {
-		return &pbredpacket.ParseTxEventsResp{
-			Chain:  "tron",
-			TxHash: req.TxHash,
-			Note:   "TRON event parsing not fully implemented in this version",
-		}, nil
+	if req.Chain == "tron" {
+		if s.tronClient == nil {
+			return nil, errs.ErrInternalServer.WrapMsg("TRON client not configured")
+		}
+		events, err := s.tronClient.ParseTransactionReceipt(ctx, req.TxHash)
+		if err != nil {
+			return nil, errs.ErrInternalServer.WrapMsg("parse TRON tx receipt failed: " + err.Error())
+		}
+		out := make([]*pbredpacket.ParsedEvent, 0, len(events))
+		for _, e := range events {
+			data := make(map[string]string, len(e.Data))
+			for k, v := range e.Data {
+				data[k] = fmt.Sprintf("%v", v)
+			}
+			out = append(out, &pbredpacket.ParsedEvent{Name: e.Name, Data: data})
+		}
+		return &pbredpacket.ParseTxEventsResp{Chain: "tron", TxHash: req.TxHash, Events: out}, nil
 	}
 
 	if s.chainClient != nil {

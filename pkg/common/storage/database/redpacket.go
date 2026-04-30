@@ -12,8 +12,12 @@ type RedPacket interface {
 	GetByPacketID(ctx context.Context, packetID string) (*model.RedPacket, error)
 	UpdateCreated(ctx context.Context, rp *model.RedPacket) error
 	UpdateStatus(ctx context.Context, packetID, status string) error
-	UpdateClaimProgress(ctx context.Context, packetID, claimedAmount, status string) error
-	// GetExpiredPending returns CREATED packets whose expiry_at < now (unix seconds).
+	// UpdateClaimProgress atomically increments the claim counter for packetID.
+	// claimTxHash is used as an idempotency key so that re-processing the same
+	// on-chain transaction never double-counts. When status is empty the method
+	// auto-derives the correct status (COMPLETED or ACTIVE).
+	UpdateClaimProgress(ctx context.Context, packetID, claimedAmount, status, claimTxHash string) error
+	// GetExpiredPending returns ACTIVE packets whose expiry_at < now (unix seconds).
 	GetExpiredPending(ctx context.Context, now int64) ([]*model.RedPacket, error)
 }
 
