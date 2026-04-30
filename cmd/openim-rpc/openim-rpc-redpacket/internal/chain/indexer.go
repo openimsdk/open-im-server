@@ -17,10 +17,10 @@ import (
 
 // Indexer listens to blockchain events and updates database
 type Indexer struct {
-	client     *ChainClient
-	repo       repository.Repository
+	client       *ChainClient
+	repo         repository.Repository
 	pollInterval time.Duration
-	lastBlock  uint64
+	lastBlock    uint64
 	contractAddr common.Address
 }
 
@@ -124,7 +124,7 @@ func (i *Indexer) processEvent(ctx context.Context, event *ParsedEvent, logs []*
 
 func (i *Indexer) handlePacketCreated(ctx context.Context, event *ParsedEvent) error {
 	packetID := GetPacketIDFromEvent(event)
-	creator := GetClaimerFromEvent(event) // creator is indexed as second topic
+	creator := GetAddressFromEvent(event, "creator")
 
 	log.Printf("📦 PacketCreated: packetId=%s, creator=%s", packetID.String(), creator.Hex())
 
@@ -135,29 +135,53 @@ func (i *Indexer) handlePacketCreated(ctx context.Context, event *ParsedEvent) e
 
 func (i *Indexer) handlePacketClaimed(ctx context.Context, event *ParsedEvent) error {
 	packetID := GetPacketIDFromEvent(event)
-	claimer := GetClaimerFromEvent(event)
+	claimer := GetAddressFromEvent(event, "claimer")
 	amount := GetAmountFromEvent(event)
+	authNonce := GetUintFromEvent(event, "authNonce")
 
-	log.Printf("🎁 PacketClaimed: packetId=%s, claimer=%s, amount=%s", 
+	log.Printf("🎁 PacketClaimed: packetId=%s, claimer=%s, amount=%s",
 		packetID.String(), claimer.Hex(), amount.String())
 
-	// Create claim record
 	claim := &model.RedPacketClaim{
 		PacketID:      packetID.String(),
 		ClaimerWallet: claimer.Hex(),
+		AuthNonce:     authNonce.String(),
+		ClaimTxHash:   event.TxHash.Hex(),
 		ClaimedAmount: amount.String(),
+		BlockNumber:   event.BlockNumber,
 		Status:        "CONFIRMED",
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
 	}
 
-	return i.repo.CreateClaim(ctx, claim)
+	if err := i.repo.SaveClaim(ctx, claim); err != nil {
+		return err
+	}
+	if err := i.repo.MarkClaimAuthUsed(ctx, authNonce.String()); err != nil {
+		return err
+	}
+
+	return i.repo.UpdateRedPacketClaimProgress(ctx, packetID.String(), amount.String(), "")
 }
 
 func (i *Indexer) handlePacketRefunded(ctx context.Context, event *ParsedEvent) error {
 	packetID := GetPacketIDFromEvent(event)
-	refundTo := GetClaimerFromEvent(event) // refundTo is indexed
+	operator := GetAddressFromEvent(event, "operator")
+	refundTo := GetAddressFromEvent(event, "refundTo")
+	amount := GetAmountFromEvent(event)
 
-	log.Printf("♻️ PacketRefunded: packetId=%s, refundTo=%s", packetID.String(), refundTo.Hex())
+	log.Printf("♻️ PacketRefunded: packetId=%s, operator=%s, refundTo=%s, amount=%s",
+		packetID.String(), operator.Hex(), refundTo.Hex(), amount.String())
 
-	// TODO: Update packet status to REFUNDED
-	return nil
+	if err := i.repo.SaveRefund(ctx, &model.RedPacketRefund{
+		PacketID:  packetID.String(),
+		RefundTo:  refundTo.Hex(),
+		TxHash:    event.TxHash.Hex(),
+		Amount:    amount.String(),
+		CreatedAt: time.Now(),
+	}); err != nil {
+		return err
+	}
+
+	return i.repo.UpdateRedPacketStatus(ctx, packetID.String(), "REFUNDED")
 }

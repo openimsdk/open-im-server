@@ -3,6 +3,7 @@ package chain
 import (
 	"context"
 	"crypto/ecdsa"
+	_ "embed"
 	"fmt"
 	"math/big"
 	"strings"
@@ -14,14 +15,17 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+//go:embed abi/RedPacket.json
+var embeddedABI []byte
+
 // ChainClient handles blockchain interactions for RedPacket
 type ChainClient struct {
-	client      *ethclient.Client
-	contractABI abi.ABI
-	contractAddr common.Address
-	signerKey   *ecdsa.PrivateKey
+	client         *ethclient.Client
+	contractABI    abi.ABI
+	contractAddr   common.Address
+	signerKey      *ecdsa.PrivateKey
 	configAdminKey *ecdsa.PrivateKey
-	chainID     *big.Int
+	chainID        *big.Int
 }
 
 // NewClient creates a new ChainClient
@@ -122,6 +126,17 @@ func (c *ChainClient) ParseTransactionReceipt(ctx context.Context, txHash common
 	return ParseEventsFromLogs(receipt.Logs, c.contractABI)
 }
 
+func (c *ChainClient) ContractAddress() common.Address {
+	return c.contractAddr
+}
+
+func (c *ChainClient) ChainID() *big.Int {
+	if c.chainID == nil {
+		return nil
+	}
+	return new(big.Int).Set(c.chainID)
+}
+
 // Close closes the client connection
 func (c *ChainClient) Close() {
 	if c.client != nil {
@@ -131,13 +146,8 @@ func (c *ChainClient) Close() {
 
 // ExtractABIFromEmbeddedArtifact returns the embedded contract ABI
 func ExtractABIFromEmbeddedArtifact() ([]byte, error) {
-	// In production, this would be embedded with go:embed
-	// For now, we return a simple version. In real implementation, use:
-	// var abiJSON embed.FS
-	// data, _ := abiJSON.ReadFile("abi/RedPacket.json")
-	return []byte(`[
-		{"anonymous":false,"inputs":[{"indexed":true,"name":"packetId","type":"uint256"},{"indexed":true,"name":"creator","type":"address"},{"indexed":false,"name":"packetType","type":"uint8"},{"indexed":false,"name":"token","type":"address"},{"indexed":false,"name":"totalAmount","type":"uint256"},{"indexed":false,"name":"totalShares","type":"uint256"},{"indexed":false,"name":"expiryAt","type":"uint256"}],"name":"PacketCreated","type":"event"},
-		{"anonymous":false,"inputs":[{"indexed":true,"name":"packetId","type":"uint256"},{"indexed":true,"name":"claimer","type":"address"},{"indexed":false,"name":"amount","type":"uint256"},{"indexed":false,"name":"authNonce","type":"uint256"},{"indexed":false,"name":"randomSeed","type":"uint256"},{"indexed":false,"name":"blockNumber","type":"uint256"}],"name":"PacketClaimed","type":"event"},
-		{"anonymous":false,"inputs":[{"indexed":true,"name":"packetId","type":"uint256"},{"indexed":true,"name":"refundTo","type":"address"},{"indexed":false,"name":"amount","type":"uint256"}],"name":"PacketRefunded","type":"event"}
-	]`), nil
+	if len(embeddedABI) == 0 {
+		return nil, fmt.Errorf("embedded ABI is empty")
+	}
+	return embeddedABI, nil
 }

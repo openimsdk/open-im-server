@@ -11,8 +11,10 @@ import (
 
 // ParsedEvent represents a parsed blockchain event
 type ParsedEvent struct {
-	Name string
-	Data map[string]interface{}
+	Name        string
+	Data        map[string]interface{}
+	TxHash      common.Hash
+	BlockNumber uint64
 }
 
 // ParseEventsFromLogs parses logs using the contract ABI
@@ -75,8 +77,10 @@ func parseEvent(log *types.Log, contractABI abi.ABI) (*ParsedEvent, error) {
 		}
 
 		return &ParsedEvent{
-			Name: name,
-			Data: data,
+			Name:        name,
+			Data:        data,
+			TxHash:      log.TxHash,
+			BlockNumber: log.BlockNumber,
 		}, nil
 	}
 
@@ -94,21 +98,28 @@ func GetPacketIDFromEvent(event *ParsedEvent) *big.Int {
 }
 
 // GetClaimerFromEvent extracts claimer address from event
-func GetClaimerFromEvent(event *ParsedEvent) common.Address {
-	if claimer, ok := event.Data["claimer"]; ok {
-		if addr, ok := claimer.(common.Address); ok {
-			return addr
-		}
+func GetAddressFromEvent(event *ParsedEvent, key string) common.Address {
+	value, ok := event.Data[key]
+	if !ok {
+		return common.Address{}
 	}
-	return common.Address{}
+	addr, _ := value.(common.Address)
+	return addr
 }
 
 // GetAmountFromEvent extracts amount from event
 func GetAmountFromEvent(event *ParsedEvent) *big.Int {
-	if amount, ok := event.Data["amount"]; ok {
-		if b, ok := amount.(*big.Int); ok {
-			return b
-		}
+	return GetUintFromEvent(event, "amount")
+}
+
+// GetUintFromEvent extracts a uint field from event data.
+func GetUintFromEvent(event *ParsedEvent, key string) *big.Int {
+	value, ok := event.Data[key]
+	if !ok {
+		return big.NewInt(0)
+	}
+	if b, ok := value.(*big.Int); ok {
+		return b
 	}
 	return big.NewInt(0)
 }

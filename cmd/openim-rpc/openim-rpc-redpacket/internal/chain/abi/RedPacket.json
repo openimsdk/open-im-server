@@ -4,7 +4,7 @@
     "inputs": [
       { "indexed": true, "name": "packetId", "type": "uint256" },
       { "indexed": true, "name": "creator", "type": "address" },
-      { "indexed": false, "name": "packetType", "type": "uint8" },
+      { "indexed": true, "name": "packetType", "type": "uint8" },
       { "indexed": false, "name": "token", "type": "address" },
       { "indexed": false, "name": "totalAmount", "type": "uint256" },
       { "indexed": false, "name": "totalShares", "type": "uint256" },
@@ -19,9 +19,9 @@
       { "indexed": true, "name": "packetId", "type": "uint256" },
       { "indexed": true, "name": "claimer", "type": "address" },
       { "indexed": false, "name": "amount", "type": "uint256" },
-      { "indexed": false, "name": "authNonce", "type": "uint256" },
-      { "indexed": false, "name": "randomSeed", "type": "uint256" },
-      { "indexed": false, "name": "blockNumber", "type": "uint256" }
+      { "indexed": false, "name": "remainingAmount", "type": "uint256" },
+      { "indexed": false, "name": "remainingShares", "type": "uint256" },
+      { "indexed": false, "name": "authNonce", "type": "uint256" }
     ],
     "name": "PacketClaimed",
     "type": "event"
@@ -30,6 +30,7 @@
     "anonymous": false,
     "inputs": [
       { "indexed": true, "name": "packetId", "type": "uint256" },
+      { "indexed": true, "name": "operator", "type": "address" },
       { "indexed": true, "name": "refundTo", "type": "address" },
       { "indexed": false, "name": "amount", "type": "uint256" }
     ],

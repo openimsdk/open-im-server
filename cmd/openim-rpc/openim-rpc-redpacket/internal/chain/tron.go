@@ -13,17 +13,18 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 // TronClient handles TRON blockchain interactions using HTTP JSON-RPC
 type TronClient struct {
-	fullNodeURL   string
+	fullNodeURL    string
 	contractBase58 string
-	ownerBase58   string
-	privateKeyHex string
-	feeLimit      int64
-	abiJSON       string
-	parsedABI     abi.ABI
+	ownerBase58    string
+	privateKeyHex  string
+	feeLimit       int64
+	abiJSON        string
+	parsedABI      abi.ABI
 }
 
 // NewTronClient creates a new TRON client
@@ -46,6 +47,24 @@ func NewTronClient(fullNodeURL, contractBase58, ownerBase58, privateKeyHex strin
 		abiJSON:        string(abiJSON),
 		parsedABI:      parsedABI,
 	}, nil
+}
+
+func (t *TronClient) ContractAddress() string {
+	return t.contractBase58
+}
+
+func (t *TronClient) ParseTransactionReceipt(ctx context.Context, txID string) ([]*ParsedEvent, error) {
+	info, err := t.getTransactionInfo(ctx, txID)
+	if err != nil {
+		return nil, err
+	}
+
+	logs, err := tronLogsToEVMLogs(info, txID)
+	if err != nil {
+		return nil, err
+	}
+
+	return ParseEventsFromLogs(logs, t.parsedABI)
 }
 
 // SendAdminTransaction sends an admin transaction on TRON (setSigner, setToken, etc.)
@@ -84,6 +103,16 @@ func (t *TronClient) GetSignMessageForTron(ctx context.Context, packetID *big.In
 	// TRON version would call triggersmartcontract with getSignMessage
 	// For simplicity, we can reuse similar logic as ETH or implement full TRON trigger
 	return "", fmt.Errorf("TRON getSignMessage not fully implemented yet - use ETH path for signing")
+}
+
+type tronTxInfoResp struct {
+	ID          string `json:"id"`
+	BlockNumber uint64 `json:"blockNumber"`
+	Log         []struct {
+		Address string   `json:"address"`
+		Topics  []string `json:"topics"`
+		Data    string   `json:"data"`
+	} `json:"log"`
 }
 
 // Helper functions
@@ -163,6 +192,62 @@ func SendTronAdminTx(
 
 	txid, _ := broadcastResp["txid"].(string)
 	return txid, nil
+}
+
+func (t *TronClient) getTransactionInfo(ctx context.Context, txID string) (*tronTxInfoResp, error) {
+	var info tronTxInfoResp
+	if err := postJSON(ctx, t.fullNodeURL+"/wallet/gettransactioninfobyid", map[string]interface{}{
+		"value": txID,
+	}, &info); err != nil {
+		return nil, err
+	}
+	return &info, nil
+}
+
+func tronLogsToEVMLogs(info *tronTxInfoResp, txID string) ([]*types.Log, error) {
+	if info == nil {
+		return nil, fmt.Errorf("tron tx info is nil")
+	}
+
+	txHash := common.HexToHash(addHexPrefix(txID))
+	logs := make([]*types.Log, 0, len(info.Log))
+	for _, entry := range info.Log {
+		topics := make([]common.Hash, 0, len(entry.Topics))
+		for _, topic := range entry.Topics {
+			topics = append(topics, common.HexToHash(addHexPrefix(topic)))
+		}
+
+		data, err := hex.DecodeString(strings.TrimPrefix(entry.Data, "0x"))
+		if err != nil {
+			return nil, fmt.Errorf("decode tron log data failed: %w", err)
+		}
+
+		logs = append(logs, &types.Log{
+			Address:     tronLogAddressToCommonAddress(entry.Address),
+			Topics:      topics,
+			Data:        data,
+			BlockNumber: info.BlockNumber,
+			TxHash:      txHash,
+		})
+	}
+
+	return logs, nil
+}
+
+func tronLogAddressToCommonAddress(raw string) common.Address {
+	raw = strings.TrimPrefix(raw, "0x")
+	raw = strings.TrimPrefix(raw, "41")
+	if len(raw) > 40 {
+		raw = raw[len(raw)-40:]
+	}
+	return common.HexToAddress(addHexPrefix(raw))
+}
+
+func addHexPrefix(value string) string {
+	if strings.HasPrefix(value, "0x") || strings.HasPrefix(value, "0X") {
+		return value
+	}
+	return "0x" + value
 }
 
 func encodeTronParams(abiJSON, method string, args ...interface{}) (string, error) {

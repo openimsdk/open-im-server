@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"redpacket/internal/authctx"
 	"redpacket/internal/service"
 	"redpacket/pkg/resp"
 
@@ -18,6 +19,11 @@ func NewRedPacketHandler(rpSvc *service.RedPacketService) *RedPacketHandler {
 }
 
 func (h *RedPacketHandler) CreateOrder(c *gin.Context) {
+	if err := authctx.BindCurrentUserID(c); err != nil {
+		resp.Forbidden(c, err.Error())
+		return
+	}
+
 	var req service.CreateOrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		resp.BadRequest(c, "invalid request body: "+err.Error())
@@ -65,10 +71,14 @@ func (h *RedPacketHandler) Detail(c *gin.Context) {
 }
 
 func (h *RedPacketHandler) ClaimSign(c *gin.Context) {
+	if err := authctx.BindCurrentUserID(c); err != nil {
+		resp.Forbidden(c, err.Error())
+		return
+	}
+
 	var req struct {
 		PacketID   string `json:"packet_id" binding:"required"`
 		Claimer    string `json:"claimer" binding:"required"`
-		UserID     string `json:"user_id" binding:"required"`
 		RandomSeed string `json:"random_seed"`
 	}
 
@@ -77,12 +87,7 @@ func (h *RedPacketHandler) ClaimSign(c *gin.Context) {
 		return
 	}
 
-	if err := h.rpSvc.CanClaim(c.Request.Context(), req.PacketID, req.Claimer, req.UserID); err != nil {
-		resp.Forbidden(c, err.Error())
-		return
-	}
-
-	result, err := h.rpSvc.IssueClaimSign(c.Request.Context(), req.PacketID, req.Claimer, req.UserID, req.RandomSeed)
+	result, err := h.rpSvc.IssueClaimSign(c.Request.Context(), req.PacketID, req.Claimer, req.RandomSeed)
 	if err != nil {
 		resp.InternalError(c, "failed to issue claim signature: "+err.Error())
 		return
@@ -92,6 +97,11 @@ func (h *RedPacketHandler) ClaimSign(c *gin.Context) {
 }
 
 func (h *RedPacketHandler) ClaimResult(c *gin.Context) {
+	if err := authctx.BindCurrentUserID(c); err != nil {
+		resp.Forbidden(c, err.Error())
+		return
+	}
+
 	var req service.ClaimResultRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		resp.BadRequest(c, "invalid request body: "+err.Error())
@@ -104,4 +114,63 @@ func (h *RedPacketHandler) ClaimResult(c *gin.Context) {
 	}
 
 	resp.OK(c, gin.H{"ok": true})
+}
+
+func (h *RedPacketHandler) WalletBindChallenge(c *gin.Context) {
+	if err := authctx.BindCurrentUserID(c); err != nil {
+		resp.Forbidden(c, err.Error())
+		return
+	}
+
+	var req service.WalletBindChallengeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		resp.BadRequest(c, "invalid request body: "+err.Error())
+		return
+	}
+
+	result, err := h.rpSvc.IssueWalletBindChallenge(c.Request.Context(), &req)
+	if err != nil {
+		resp.Fail(c, http.StatusBadRequest, 400, err.Error())
+		return
+	}
+
+	resp.OK(c, result)
+}
+
+func (h *RedPacketHandler) WalletBindConfirm(c *gin.Context) {
+	var req service.WalletBindConfirmRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		resp.BadRequest(c, "invalid request body: "+err.Error())
+		return
+	}
+
+	result, err := h.rpSvc.ConfirmWalletBind(c.Request.Context(), &req)
+	if err != nil {
+		resp.Fail(c, http.StatusBadRequest, 400, err.Error())
+		return
+	}
+
+	resp.OK(c, result)
+}
+
+func (h *RedPacketHandler) WalletBindDetail(c *gin.Context) {
+	if err := authctx.BindCurrentUserID(c); err != nil {
+		resp.Forbidden(c, err.Error())
+		return
+	}
+
+	chainType := c.Query("chain_type")
+	walletAddress := c.Query("wallet_address")
+	if chainType == "" || walletAddress == "" {
+		resp.BadRequest(c, "chain_type and wallet_address are required")
+		return
+	}
+
+	result, err := h.rpSvc.GetWalletBinding(c.Request.Context(), "", chainType, walletAddress)
+	if err != nil {
+		resp.Fail(c, http.StatusNotFound, 404, err.Error())
+		return
+	}
+
+	resp.OK(c, result)
 }

@@ -202,18 +202,58 @@ curl "http://127.0.0.1:8080/api/redpacket/detail?packet_id=10001"
 
 先做业务鉴权，再发放 `claim(...)` 所需签名参数。
 
+#### 鉴权说明
+
+- 该接口不再信任请求体中的 `user_id`
+- 当前领取用户从 RPC / 网关注入的登录上下文中获取
+- 服务端要求请求上下文里存在 `opUserID`
+- 如果缺少登录上下文，接口会直接拒绝
+
+#### 请求头
+
+- `token`: 用户登录 token
+
+> 约定：上游网关或鉴权中间件需要先解析 token，并把当前登录用户写入请求上下文中的 `opUserID`。
+
 #### 请求体
 
 ```json
 {
   "packet_id": "10001",
   "claimer": "0x3333333333333333333333333333333333333333",
-  "user_id": "u2002",
   "random_seed": "0"
 }
 ```
 
 > `random_seed` 可选；传 `0` 或空时后端自动生成。
+
+#### 字段说明
+
+- `packet_id`: 红包链上 ID
+- `claimer`: 本次真正发起链上 `claim(...)` 的钱包地址
+- `random_seed`: 可选随机种子；空或 `0` 时后端自动生成
+
+#### 服务端处理逻辑
+
+1. 从请求上下文提取当前登录用户 ID
+2. 校验红包是否存在、是否过期、是否仍可领取
+3. 校验当前登录用户与 `claimer` 钱包地址的绑定关系
+4. 校验当前用户在该红包下是否已领取
+5. 校验当前钱包在该红包下是否已领取
+6. 按红包类型校验群资格 / 指定接收人资格
+7. 生成 `auth_nonce`、`deadline`、`random_seed`
+8. 调合约 `getSignMessage(packetId, claimer, authNonce, randomSeed, deadline)` 获取摘要
+9. 使用后端 `signer` 私钥对摘要裸签名
+10. 落库 `red_packet_claim_auth`
+11. 返回前端发链所需参数
+
+#### 成功后前端下一步
+
+前端拿到响应后，直接调用链上：
+
+```text
+claim(packetId, authNonce, randomSeed, deadline, signature)
+```
 
 #### 成功响应
 
@@ -241,6 +281,33 @@ curl "http://127.0.0.1:8080/api/redpacket/detail?packet_id=10001"
 }
 ```
 
+同一用户已领取：
+
+```json
+{
+  "code": 403,
+  "message": "user already claimed"
+}
+```
+
+钱包未绑定：
+
+```json
+{
+  "code": 403,
+  "message": "wallet is not bound to user"
+}
+```
+
+缺少登录上下文：
+
+```json
+{
+  "code": 403,
+  "message": "op user id missing in context"
+}
+```
+
 签名服务异常：
 
 ```json
@@ -258,16 +325,43 @@ curl "http://127.0.0.1:8080/api/redpacket/detail?packet_id=10001"
 
 前端在领取交易提交后可调用该接口预写记录。最终状态仍以链监听（indexer）为准。
 
+#### 鉴权说明
+
+- 该接口不再接收可信 `user_id`
+- 当前用户从 RPC / 网关注入的登录上下文中获取
+- 服务端要求请求上下文里存在 `opUserID`
+
+#### 请求头
+
+- `token`: 用户登录 token
+
 #### 请求体
 
 ```json
 {
   "packet_id": "10001",
-  "claimer_wallet": "0x3333333333333333333333333333333333333333",
-  "tx_hash": "0xdef456...",
-  "auth_nonce": "328840239847239847"
+  "claimer": "0x3333333333333333333333333333333333333333",
+  "tx_hash": "0xdef456..."
 }
 ```
+
+#### 字段说明
+
+- `packet_id`: 红包链上 ID
+- `claimer`: 发起链上领取的钱包地址
+- `tx_hash`: 领取交易哈希
+
+#### 服务端处理逻辑
+
+1. 从请求上下文提取当前登录用户 ID
+2. 先落一条 `PENDING` 领取记录
+3. 如果当前节点能立即解析该交易 receipt，则补全：
+   - `auth_nonce`
+   - `claimed_amount`
+   - `block_number`
+   - `status=CONFIRMED`
+4. 如果当前节点暂时拿不到 receipt，则保持 `PENDING`
+5. 最终仍以链监听器写入结果为准
 
 #### 成功响应
 
@@ -285,8 +379,130 @@ curl "http://127.0.0.1:8080/api/redpacket/detail?packet_id=10001"
 
 ```json
 {
-  "code": 400,
-  "message": "packet_id and tx_hash are required"
+  "code": 403,
+  "message": "op user id missing in context"
+}
+```
+
+---
+
+## 6) 钱包绑定挑战
+
+### POST `/api/redpacket/wallet-bind/challenge`
+
+生成钱包绑定挑战消息，前端拿到消息后调用钱包签名。
+
+#### 鉴权说明
+
+- 该接口不再信任请求体中的 `user_id`
+- 当前用户从 RPC / 网关注入的登录上下文中获取
+
+#### 请求头
+
+- `token`: 用户登录 token
+
+#### 请求体
+
+```json
+{
+  "chain_type": "EVM",
+  "chain_id": 1,
+  "wallet_address": "0x3333333333333333333333333333333333333333",
+  "domain": "redpacket.example.com",
+  "uri": "https://redpacket.example.com/wallet-bind"
+}
+```
+
+#### 成功响应
+
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "challenge_id": "1f7d9b0d-7b43-4d84-bb11-65f2ecf7e321",
+    "user_id": "u2002",
+    "chain_type": "EVM",
+    "chain_id": 1,
+    "wallet": "0x3333333333333333333333333333333333333333",
+    "protocol": "siwe-eip4361",
+    "sign_method": "personal_sign",
+    "nonce": "7b7d8d48-9db6-4e95-9daa-40e9517a2a85",
+    "message": "redpacket.example.com wants you to sign in with your Ethereum account:\n0x3333333333333333333333333333333333333333\n\nBind wallet 0x3333333333333333333333333333333333333333 to user u2002.\nURI: https://redpacket.example.com/wallet-bind\nVersion: 1\nChain ID: 1\nNonce: 7b7d8d48-9db6-4e95-9daa-40e9517a2a85\nIssued At: 2026-04-30T03:00:00Z\nExpiration Time: 2026-04-30T03:10:00Z\nRequest ID: 1f7d9b0d-7b43-4d84-bb11-65f2ecf7e321",
+    "issued_at": "2026-04-30T03:00:00Z",
+    "expires_at": "2026-04-30T03:10:00Z"
+  }
+}
+```
+
+#### 前端下一步
+
+前端收到响应后：
+
+1. 使用 `sign_method` 指定的钱包方法对 `message` 进行签名
+2. 把 `challenge_id + signature` 提交给 `/api/redpacket/wallet-bind/confirm`
+
+---
+
+## 7) 钱包绑定确认
+
+### POST `/api/redpacket/wallet-bind/confirm`
+
+提交钱包签名，服务端验签成功后建立钱包绑定关系。
+
+#### 请求体
+
+```json
+{
+  "challenge_id": "1f7d9b0d-7b43-4d84-bb11-65f2ecf7e321",
+  "signature": "0x8f..."
+}
+```
+
+#### 成功响应
+
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "user_id": "u2002",
+    "chain_type": "EVM",
+    "chain_id": 1,
+    "wallet_address": "0x3333333333333333333333333333333333333333",
+    "status": "ACTIVE",
+    "verified_at": "2026-04-30T03:01:00Z"
+  }
+}
+```
+
+---
+
+## 8) 查询钱包绑定
+
+### GET `/api/redpacket/wallet-bind/detail?chain_type={chainType}&wallet_address={walletAddress}`
+
+查询当前登录用户与指定钱包地址的绑定详情。
+
+#### 鉴权说明
+
+- `user_id` 从登录上下文中获取，不需要也不应该由前端传入
+
+#### 成功响应
+
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "user_id": "u2002",
+    "chain_type": "EVM",
+    "chain_id": 1,
+    "wallet_address": "0x3333333333333333333333333333333333333333",
+    "status": "ACTIVE",
+    "challenge_id": "1f7d9b0d-7b43-4d84-bb11-65f2ecf7e321",
+    "verified_at": "2026-04-30T03:01:00Z"
+  }
 }
 ```
 
@@ -503,4 +719,3 @@ TRON 未配置：
 6. 钱包调用合约 `claim(...)`
 7. 可选：`POST /api/redpacket/claim-result`
 8. 详情页查询：`GET /api/redpacket/detail?packet_id=...`
-

@@ -46,6 +46,8 @@ func main() {
 		&model.RedPacketClaim{},
 		&model.RedPacketClaimAuth{},
 		&model.RedPacketRefund{},
+		&model.WalletBindingChallenge{},
+		&model.WalletBinding{},
 	); err != nil {
 		log.Fatalf("failed to auto-migrate: %v", err)
 	}
@@ -62,10 +64,6 @@ func main() {
 		log.Printf("Warning: failed to create chain client: %v (continuing with mock mode)", err)
 		// Continue without blockchain for now - can be configured later
 	}
-
-	// Create repository and service
-	repo := repository.New(db)
-	rpSvc := service.NewRedPacketService(repo, chainClient, cfg.Chain.SignerPrivateKey)
 
 	// Create TRON client if configured
 	var tronClient *chain.TronClient
@@ -90,6 +88,10 @@ func main() {
 			}
 		}
 	}
+
+	// Create repository and service
+	repo := repository.New(db)
+	rpSvc := service.NewRedPacketService(repo, chainClient, tronClient, cfg.Chain.SignerPrivateKey)
 
 	// Create admin service and handler
 	adminSvc := service.NewAdminService(chainClient, tronClient)

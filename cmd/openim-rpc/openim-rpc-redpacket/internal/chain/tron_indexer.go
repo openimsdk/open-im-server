@@ -15,9 +15,9 @@ type TronIndexer struct {
 	client          *TronClient
 	repo            repository.Repository
 	pollInterval    time.Duration
-	lastBlockNum    int64                    // TRON uses block numbers
+	lastBlockNum    int64 // TRON uses block numbers
 	contractAddress string
-	processedTxs    map[string]bool          // Simple dedup for this session
+	processedTxs    map[string]bool // Simple dedup for this session
 }
 
 // NewTronIndexer creates a new TRON event indexer
@@ -223,7 +223,7 @@ func (t *TronIndexer) handleTronPacketClaimed(ctx context.Context, logData map[s
 		Status:        "CONFIRMED",
 	}
 
-	if err := t.repo.CreateClaim(ctx, claim); err != nil {
+	if err := t.repo.SaveClaim(ctx, claim); err != nil {
 		log.Printf("Failed to save TRON claim: %v", err)
 	}
 }

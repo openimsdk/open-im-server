@@ -3,6 +3,7 @@
 A Web3 Red Packet service supporting Ethereum and TRON, following the design documents:
 
 - `backend-api.md` - API specifications
+- `client-integration-guide.md` - Frontend / gateway integration guide
 - `redpacket-web3-integration-design.md` - Architecture and flows
 - `red-packet-go-backend-eth-tron.md` - Blockchain integration details
 
@@ -14,8 +15,29 @@ A Web3 Red Packet service supporting Ethereum and TRON, following the design doc
 - ✅ Claim signature issuance (`/api/redpacket/claim-sign`)
 - ✅ Claim result reporting
 - ✅ SQLite/MySQL support
-- ✅ Blockchain signature logic ready for ETH/TRON
+- ✅ EVM signature generation via `getSignMessage(...)`
+- ✅ Basic EVM event indexing for claim/refund synchronization
+- ✅ Idempotent claim/refund persistence by transaction hash
 - ✅ Admin configuration endpoints
+
+## Current Status
+
+This service is runnable and suitable for continued iteration, but it is not yet fully production-complete.
+
+Working well now:
+
+- EVM-side claim signing uses the real `authNonce` in the digest
+- Claim pre-checks cover packet existence, active status, expiry, and already-claimed cases
+- EVM ABI and event parsing are aligned with the current contract events
+- Claim and refund events can be persisted idempotently
+
+Still incomplete:
+
+- ETH admin endpoints are still mostly mock behavior
+- `PacketCreated` indexing is not yet fully wired for automatic order reconciliation
+- TRON `getSignMessage` flow is not complete
+- TRON event decoding is still a scaffold
+- Admin APIs still need authentication and audit controls
 
 ## Quick Start
 
@@ -64,7 +86,7 @@ curl -X POST http://localhost:8080/api/redpacket/create-order \
 │   ├── model/           # Database models (GORM)
 │   ├── repository/      # Data access layer
 │   ├── service/         # Business logic
-│   └── chain/           # Blockchain integration (to be expanded)
+│   └── chain/           # Blockchain integration and event indexing
 ├── pkg/resp/            # Response helpers
 ├── router/              # Route definitions
 ├── main.go
@@ -72,27 +94,19 @@ curl -X POST http://localhost:8080/api/redpacket/create-order \
 └── README.md
 ```
 
-## Next Steps (from design docs)
+## Recommended Next Steps
 
-1. **Full Blockchain Integration**
-   - Implement `ChainClient` for ETH and TRON
-   - Add event indexer for `PacketCreated`, `PacketClaimed`, `PacketRefunded`
-   - Implement proper signature generation using `getSignMessage`
-
-2. **Advanced Features**
-   - Admin configuration APIs (`setSigner`, `setToken`, etc.)
-   - Refund logic
-   - Rate limiting and authentication
-   - Monitoring and metrics
-
-3. **Production**
-   - Add proper authentication middleware
-   - Configure production database
-   - Set up monitoring and logging
-   - Deploy with Docker/K8s
+1. Implement real ETH admin transactions for signer/token/expiry configuration
+2. Finish `PacketCreated` indexing and automatic order reconciliation
+3. Complete TRON `getSignMessage` and reliable event decoding
+4. Add authentication, audit, and rate limiting for sensitive endpoints
+5. Extend end-to-end test coverage
 
 See the three design documents for detailed specifications.
 
 ## API Documentation
 
-See `backend-api.md` for complete API reference with examples.
+See:
+
+- `backend-api.md` for complete API reference with request / response examples
+- `client-integration-guide.md` for frontend, wallet-binding, and claim-sign integration steps

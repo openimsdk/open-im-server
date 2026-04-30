@@ -17,7 +17,7 @@ tron:
   contract_base58: ""
   owner_base58: ""
   private_key_hex: ""
-  fee_limit: 100000000
+  fee_limit: 10000000000
 
 indexer:
   poll_interval: 5

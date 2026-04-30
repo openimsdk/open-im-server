@@ -19,6 +19,9 @@ func Setup(r *gin.Engine, rpHandler *handler.RedPacketHandler, adminHandler *han
 		api.GET("/detail", rpHandler.Detail)
 		api.POST("/claim-sign", rpHandler.ClaimSign)
 		api.POST("/claim-result", rpHandler.ClaimResult)
+		api.POST("/wallet-bind/challenge", rpHandler.WalletBindChallenge)
+		api.POST("/wallet-bind/confirm", rpHandler.WalletBindConfirm)
+		api.GET("/wallet-bind/detail", rpHandler.WalletBindDetail)
 	}
 
 	// Admin APIs - should be protected with authentication in production
