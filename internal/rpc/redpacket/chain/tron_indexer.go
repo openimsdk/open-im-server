@@ -39,7 +39,6 @@ func (t *TronIndexer) Start(ctx context.Context) {
 	go func() {
 		ticker := time.NewTicker(t.pollInterval)
 		defer ticker.Stop()
-
 		for {
 			select {
 			case <-ctx.Done():
@@ -53,6 +52,37 @@ func (t *TronIndexer) Start(ctx context.Context) {
 			}
 		}
 	}()
+
+	go func() {
+		ticker := time.NewTicker(60 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if err := t.compensate(ctx); err != nil {
+					log.ZWarn(ctx, "redpacket tron compensation error", err)
+				}
+			}
+		}
+	}()
+}
+
+func (t *TronIndexer) compensate(ctx context.Context) error {
+	now := time.Now().Unix()
+	packets, err := t.db.GetExpiredPendingPackets(ctx, now)
+	if err != nil {
+		return fmt.Errorf("get expired packets failed: %w", err)
+	}
+	for _, rp := range packets {
+		if err := t.db.UpdateRedPacketStatus(ctx, rp.PacketID, "EXPIRED"); err != nil {
+			log.ZWarn(ctx, "redpacket tron compensation mark expired failed", err, "packetID", rp.PacketID)
+			continue
+		}
+		log.ZInfo(ctx, "redpacket tron compensation: marked packet EXPIRED", "packetID", rp.PacketID)
+	}
+	return nil
 }
 
 func (t *TronIndexer) poll(ctx context.Context) error {
@@ -131,84 +161,86 @@ func (t *TronIndexer) scanBlock(ctx context.Context, blockNum int64) error {
 	return nil
 }
 
+// processTransaction parses the on-chain receipt through the ABI (same path as
+// the ETH indexer) and dispatches each decoded event to the appropriate handler.
 func (t *TronIndexer) processTransaction(ctx context.Context, txID string) error {
-	var txInfo map[string]interface{}
-	err := postJSON(ctx, t.client.fullNodeURL+"/wallet/gettransactioninfobyid", map[string]interface{}{
-		"value": txID,
-	}, &txInfo)
+	events, err := t.client.ParseTransactionReceipt(ctx, txID)
 	if err != nil {
-		return err
+		return fmt.Errorf("parse tron tx receipt failed: %w", err)
 	}
 
-	contractAddress := t.client.contractBase58
-	if logs, ok := txInfo["log"].([]interface{}); ok && len(logs) > 0 {
-		for _, logEntry := range logs {
-			if logMap, ok := logEntry.(map[string]interface{}); ok {
-				if address, ok := logMap["address"].(string); ok && address == contractAddress {
-					eventType := t.parseTronEvent(logMap)
-					log.ZDebug(ctx, "redpacket tron event detected", "event", eventType, "txID", txID)
-
-					switch eventType {
-					case "PacketCreated":
-						t.handleTronPacketCreated(ctx, logMap, txID)
-					case "PacketClaimed":
-						t.handleTronPacketClaimed(ctx, logMap, txID)
-					case "PacketRefunded":
-						t.handleTronPacketRefunded(ctx, logMap, txID)
-					}
-				}
+	for _, event := range events {
+		log.ZDebug(ctx, "redpacket tron event detected", "event", event.Name, "txID", txID)
+		switch event.Name {
+		case "PacketCreated":
+			if err := t.handleTronPacketCreated(ctx, event, txID); err != nil {
+				log.ZWarn(ctx, "redpacket tron handlePacketCreated failed", err, "txID", txID)
+			}
+		case "PacketClaimed":
+			if err := t.handleTronPacketClaimed(ctx, event, txID); err != nil {
+				log.ZWarn(ctx, "redpacket tron handlePacketClaimed failed", err, "txID", txID)
+			}
+		case "PacketRefunded":
+			if err := t.handleTronPacketRefunded(ctx, event, txID); err != nil {
+				log.ZWarn(ctx, "redpacket tron handlePacketRefunded failed", err, "txID", txID)
 			}
 		}
 	}
-
 	return nil
 }
 
-func (t *TronIndexer) parseTronEvent(logEntry map[string]interface{}) string {
-	if topics, ok := logEntry["topics"].([]interface{}); ok && len(topics) > 0 {
-		if topic0, ok := topics[0].(string); ok {
-			switch topic0 {
-			case "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0":
-				return "Transfer"
-			default:
-				return "UnknownEvent"
-			}
-		}
-	}
-	return "UnknownEvent"
+func (t *TronIndexer) handleTronPacketCreated(ctx context.Context, event *ParsedEvent, txID string) error {
+	packetID := GetPacketIDFromEvent(event)
+	creator := GetAddressFromEvent(event, "creator")
+	log.ZInfo(ctx, "tron PacketCreated event", "packetID", packetID.String(), "creator", creator.Hex(), "txID", txID)
+	return nil
 }
 
-func (t *TronIndexer) handleTronPacketCreated(ctx context.Context, logData map[string]interface{}, txID string) {
-	log.ZInfo(ctx, "tron PacketCreated event", "txID", txID)
-}
+func (t *TronIndexer) handleTronPacketClaimed(ctx context.Context, event *ParsedEvent, txID string) error {
+	packetID := GetPacketIDFromEvent(event)
+	claimer := GetAddressFromEvent(event, "claimer")
+	amount := GetAmountFromEvent(event)
+	authNonce := GetUintFromEvent(event, "authNonce")
 
-func (t *TronIndexer) handleTronPacketClaimed(ctx context.Context, logData map[string]interface{}, txID string) {
-	log.ZInfo(ctx, "tron PacketClaimed event", "txID", txID)
-
-	claimer := "unknown"
-	amount := "0"
-
-	if topics, ok := logData["topics"].([]interface{}); ok && len(topics) > 1 {
-		if claimerTopic, ok := topics[1].(string); ok {
-			claimer = claimerTopic
-		}
-	}
+	log.ZInfo(ctx, "tron PacketClaimed event", "packetID", packetID.String(), "claimer", claimer.Hex(), "amount", amount.String(), "txID", txID)
 
 	claim := &model.RedPacketClaim{
-		PacketID:      "tron-packet-" + txID[:8],
-		ClaimerWallet: claimer,
+		PacketID:      packetID.String(),
+		ClaimerWallet: claimer.Hex(),
+		AuthNonce:     authNonce.String(),
 		ClaimTxHash:   txID,
-		ClaimedAmount: amount,
+		ClaimedAmount: amount.String(),
+		BlockNumber:   event.BlockNumber,
 		Status:        "CONFIRMED",
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
 	}
-
 	if err := t.db.SaveClaim(ctx, claim); err != nil {
-		log.ZWarn(ctx, "redpacket tron save claim failed", err)
+		return err
 	}
+	if err := t.db.MarkClaimAuthUsed(ctx, authNonce.String()); err != nil {
+		return err
+	}
+	return t.db.UpdateRedPacketClaimProgress(ctx, packetID.String(), amount.String(), "")
 }
 
-func (t *TronIndexer) handleTronPacketRefunded(ctx context.Context, logData map[string]interface{}, txID string) {
-	log.ZInfo(ctx, "tron PacketRefunded event", "txID", txID)
+func (t *TronIndexer) handleTronPacketRefunded(ctx context.Context, event *ParsedEvent, txID string) error {
+	packetID := GetPacketIDFromEvent(event)
+	refundTo := GetAddressFromEvent(event, "refundTo")
+	amount := GetAmountFromEvent(event)
+
+	log.ZInfo(ctx, "tron PacketRefunded event", "packetID", packetID.String(), "refundTo", refundTo.Hex(), "amount", amount.String(), "txID", txID)
+
+	if err := t.db.SaveRefund(ctx, &model.RedPacketRefund{
+		PacketID:  packetID.String(),
+		RefundTo:  refundTo.Hex(),
+		TxHash:    txID,
+		Amount:    amount.String(),
+		CreatedAt: time.Now(),
+	}); err != nil {
+		return err
+	}
+	return t.db.UpdateRedPacketStatus(ctx, packetID.String(), "REFUNDED")
 }
 
 func (t *TronIndexer) GetLastProcessedBlock() int64 {

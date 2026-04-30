@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type RedPacket struct {
 	BizID           string    `bson:"biz_id"`
@@ -88,4 +92,15 @@ type WalletBinding struct {
 	RevokedAt     *time.Time `bson:"revoked_at,omitempty"`
 	CreatedAt     time.Time  `bson:"created_at"`
 	UpdatedAt     time.Time  `bson:"updated_at"`
+}
+
+// AdminAuditLog records each admin operation for accountability.
+type AdminAuditLog struct {
+	ID         primitive.ObjectID `bson:"_id"`
+	OperatorID string             `bson:"operator_id"`
+	Action     string             `bson:"action"`
+	Params     string             `bson:"params"`   // JSON-encoded request
+	Result     string             `bson:"result"`   // "success" | "failed"
+	ErrMsg     string             `bson:"err_msg"`
+	CreatedAt  time.Time          `bson:"created_at"`
 }

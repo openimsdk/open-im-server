@@ -88,6 +88,34 @@ func (h *RedPacketApi) ClaimResult(ctx *gin.Context) {
 	apiresp.GinSuccess(ctx, resp)
 }
 
+func (h *RedPacketApi) RequestRefund(ctx *gin.Context) {
+	req, err := a2r.ParseRequestNotCheck[pbredpacket.RequestRefundReq](ctx)
+	if err != nil {
+		apiresp.GinError(ctx, err)
+		return
+	}
+	resp, err := h.Client.RequestRefund(ctx, req)
+	if err != nil {
+		apiresp.GinError(ctx, err)
+		return
+	}
+	apiresp.GinSuccess(ctx, resp)
+}
+
+func (h *RedPacketApi) GetRefund(ctx *gin.Context) {
+	req, err := a2r.ParseRequestNotCheck[pbredpacket.GetRefundReq](ctx)
+	if err != nil {
+		apiresp.GinError(ctx, err)
+		return
+	}
+	resp, err := h.Client.GetRefund(ctx, req)
+	if err != nil {
+		apiresp.GinError(ctx, err)
+		return
+	}
+	apiresp.GinSuccess(ctx, resp)
+}
+
 func (h *RedPacketApi) IssueWalletBindChallenge(ctx *gin.Context) {
 	req, err := a2r.ParseRequestNotCheck[pbredpacket.IssueWalletBindChallengeReq](ctx)
 	if err != nil {

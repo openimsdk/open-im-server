@@ -41,7 +41,6 @@ func (i *Indexer) Start(ctx context.Context) {
 	go func() {
 		ticker := time.NewTicker(i.pollInterval)
 		defer ticker.Stop()
-
 		for {
 			select {
 			case <-ctx.Done():
@@ -54,6 +53,40 @@ func (i *Indexer) Start(ctx context.Context) {
 			}
 		}
 	}()
+
+	// Compensation loop: periodically scan DB for expired-but-unclosed packets
+	// and mark them EXPIRED so the UI reflects the correct state even if the
+	// on-chain refund event was missed.
+	go func() {
+		ticker := time.NewTicker(60 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if err := i.compensate(ctx); err != nil {
+					log.ZWarn(ctx, "redpacket eth compensation error", err)
+				}
+			}
+		}
+	}()
+}
+
+func (i *Indexer) compensate(ctx context.Context) error {
+	now := time.Now().Unix()
+	packets, err := i.db.GetExpiredPendingPackets(ctx, now)
+	if err != nil {
+		return fmt.Errorf("get expired packets failed: %w", err)
+	}
+	for _, rp := range packets {
+		if err := i.db.UpdateRedPacketStatus(ctx, rp.PacketID, "EXPIRED"); err != nil {
+			log.ZWarn(ctx, "redpacket eth compensation mark expired failed", err, "packetID", rp.PacketID)
+			continue
+		}
+		log.ZInfo(ctx, "redpacket eth compensation: marked packet EXPIRED", "packetID", rp.PacketID)
+	}
+	return nil
 }
 
 func (i *Indexer) poll(ctx context.Context) error {

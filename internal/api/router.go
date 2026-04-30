@@ -377,6 +377,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		redpacketGroup.POST("/detail", rp.GetDetail)
 		redpacketGroup.POST("/issue_claim_sign", rp.IssueClaimSign)
 		redpacketGroup.POST("/claim_result", rp.ClaimResult)
+		redpacketGroup.POST("/request_refund", rp.RequestRefund)
+		redpacketGroup.POST("/get_refund", rp.GetRefund)
 		redpacketGroup.POST("/wallet_bind/challenge", rp.IssueWalletBindChallenge)
 		redpacketGroup.POST("/wallet_bind/confirm", rp.ConfirmWalletBind)
 		redpacketGroup.POST("/wallet_bind/detail", rp.GetWalletBinding)

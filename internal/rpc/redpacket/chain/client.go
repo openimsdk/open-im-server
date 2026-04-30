@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -139,6 +140,57 @@ func (c *ChainClient) EthClient() *ethclient.Client {
 // ContractABI exposes the parsed ABI for indexers.
 func (c *ChainClient) ContractABI() abi.ABI {
 	return c.contractABI
+}
+
+// RefundPacket submits an on-chain refund transaction for an expired red
+// packet. It uses the configAdminKey to sign and broadcast the transaction.
+// Returns the transaction hash on success.
+func (c *ChainClient) RefundPacket(ctx context.Context, packetIDStr string) (string, error) {
+	if c.configAdminKey == nil {
+		return "", fmt.Errorf("config admin key not configured")
+	}
+
+	packetID, ok := new(big.Int).SetString(packetIDStr, 10)
+	if !ok {
+		return "", fmt.Errorf("invalid packetID: %s", packetIDStr)
+	}
+
+	data, err := c.contractABI.Pack("refundPacket", packetID)
+	if err != nil {
+		return "", fmt.Errorf("pack refundPacket failed: %w", err)
+	}
+
+	fromAddr := crypto.PubkeyToAddress(c.configAdminKey.PublicKey)
+	nonce, err := c.client.PendingNonceAt(ctx, fromAddr)
+	if err != nil {
+		return "", fmt.Errorf("get nonce failed: %w", err)
+	}
+
+	gasPrice, err := c.client.SuggestGasPrice(ctx)
+	if err != nil {
+		return "", fmt.Errorf("suggest gas price failed: %w", err)
+	}
+
+	gasLimit, err := c.client.EstimateGas(ctx, ethereum.CallMsg{
+		From: fromAddr,
+		To:   &c.contractAddr,
+		Data: data,
+	})
+	if err != nil {
+		gasLimit = 200000 // fallback
+	}
+
+	tx := types.NewTransaction(nonce, c.contractAddr, big.NewInt(0), gasLimit, gasPrice, data)
+	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(c.chainID), c.configAdminKey)
+	if err != nil {
+		return "", fmt.Errorf("sign refund tx failed: %w", err)
+	}
+
+	if err := c.client.SendTransaction(ctx, signedTx); err != nil {
+		return "", fmt.Errorf("send refund tx failed: %w", err)
+	}
+
+	return signedTx.Hash().Hex(), nil
 }
 
 func (c *ChainClient) Close() {

@@ -66,8 +66,12 @@ func Start(ctx context.Context, conf *Config, registry discovery.SvcDiscoveryReg
 	if err != nil {
 		return err
 	}
+	auditLogDB, err := mgo.NewAdminAuditLogMongo(db)
+	if err != nil {
+		return err
+	}
 
-	repo := controller.NewRedPacketDatabase(rpDB, claimDB, claimAuthDB, refundDB, challengeDB, bindingDB)
+	repo := controller.NewRedPacketDatabase(rpDB, claimDB, claimAuthDB, refundDB, challengeDB, bindingDB, auditLogDB)
 
 	chainClient, err := chain.NewClient(
 		conf.RpcConfig.Chain.RPCURL,

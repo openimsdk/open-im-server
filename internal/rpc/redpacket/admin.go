@@ -2,16 +2,58 @@ package redpacket
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
 	pbredpacket "github.com/openimsdk/protocol/redpacket"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (s *redPacketServer) SetSigner(ctx context.Context, req *pbredpacket.SetSignerReq) (*pbredpacket.SetSignerResp, error) {
+// checkAdminPermission is a convenience wrapper used by every admin handler.
+func (s *redPacketServer) checkAdminPermission(ctx context.Context) error {
+	return authverify.CheckAdmin(ctx, s.config.Share.IMAdminUserID)
+}
+
+// recordAudit persists an admin audit entry asynchronously; errors are only
+// logged so they never block the primary operation.
+func (s *redPacketServer) recordAudit(ctx context.Context, action string, req interface{}, opErr error) {
+	params := ""
+	if b, err := json.Marshal(req); err == nil {
+		params = string(b)
+	}
+	result := "success"
+	errMsg := ""
+	if opErr != nil {
+		result = "failed"
+		errMsg = opErr.Error()
+	}
+	entry := &model.AdminAuditLog{
+		ID:         primitive.NewObjectID(),
+		OperatorID: mcontext.GetOpUserID(ctx),
+		Action:     action,
+		Params:     params,
+		Result:     result,
+		ErrMsg:     errMsg,
+		CreatedAt:  time.Now().UTC(),
+	}
+	if err := s.db.CreateAdminAuditLog(ctx, entry); err != nil {
+		log.ZWarn(ctx, "redpacket admin audit log write failed", err, "action", action)
+	}
+}
+
+func (s *redPacketServer) SetSigner(ctx context.Context, req *pbredpacket.SetSignerReq) (resp *pbredpacket.SetSignerResp, retErr error) {
+	defer func() { s.recordAudit(ctx, "SetSigner", req, retErr) }()
+	if err := s.checkAdminPermission(ctx); err != nil {
+		return nil, err
+	}
 	if req.SignerAddress == "" {
 		return nil, errs.ErrArgs.WrapMsg("signer_address is required")
 	}
@@ -28,7 +70,11 @@ func (s *redPacketServer) SetSigner(ctx context.Context, req *pbredpacket.SetSig
 	return nil, errs.ErrInternalServer.WrapMsg("no blockchain client configured")
 }
 
-func (s *redPacketServer) SetToken(ctx context.Context, req *pbredpacket.SetTokenReq) (*pbredpacket.SetTokenResp, error) {
+func (s *redPacketServer) SetToken(ctx context.Context, req *pbredpacket.SetTokenReq) (resp *pbredpacket.SetTokenResp, retErr error) {
+	defer func() { s.recordAudit(ctx, "SetToken", req, retErr) }()
+	if err := s.checkAdminPermission(ctx); err != nil {
+		return nil, err
+	}
 	if req.TokenAddress == "" {
 		return nil, errs.ErrArgs.WrapMsg("token_address is required")
 	}
@@ -55,7 +101,11 @@ func (s *redPacketServer) SetToken(ctx context.Context, req *pbredpacket.SetToke
 	return nil, errs.ErrInternalServer.WrapMsg("no blockchain client configured")
 }
 
-func (s *redPacketServer) SetExpiry(ctx context.Context, req *pbredpacket.SetExpiryReq) (*pbredpacket.SetExpiryResp, error) {
+func (s *redPacketServer) SetExpiry(ctx context.Context, req *pbredpacket.SetExpiryReq) (resp *pbredpacket.SetExpiryResp, retErr error) {
+	defer func() { s.recordAudit(ctx, "SetExpiry", req, retErr) }()
+	if err := s.checkAdminPermission(ctx); err != nil {
+		return nil, err
+	}
 	if req.ExpirySeconds <= 0 {
 		return nil, errs.ErrArgs.WrapMsg("expiry_seconds must be positive")
 	}
@@ -72,7 +122,11 @@ func (s *redPacketServer) SetExpiry(ctx context.Context, req *pbredpacket.SetExp
 	return nil, errs.ErrInternalServer.WrapMsg("no blockchain client configured")
 }
 
-func (s *redPacketServer) SetAllowAllTokens(ctx context.Context, req *pbredpacket.SetAllowAllTokensReq) (*pbredpacket.SetAllowAllTokensResp, error) {
+func (s *redPacketServer) SetAllowAllTokens(ctx context.Context, req *pbredpacket.SetAllowAllTokensReq) (resp *pbredpacket.SetAllowAllTokensResp, retErr error) {
+	defer func() { s.recordAudit(ctx, "SetAllowAllTokens", req, retErr) }()
+	if err := s.checkAdminPermission(ctx); err != nil {
+		return nil, err
+	}
 	if s.chainClient != nil {
 		log.ZInfo(ctx, "redpacket admin setAllowAllTokens (eth mock)", "allowAll", req.AllowAll)
 		return &pbredpacket.SetAllowAllTokensResp{Message: "allow all tokens setting updated"}, nil
@@ -86,7 +140,11 @@ func (s *redPacketServer) SetAllowAllTokens(ctx context.Context, req *pbredpacke
 	return nil, errs.ErrInternalServer.WrapMsg("no blockchain client configured")
 }
 
-func (s *redPacketServer) SetNativeTokenEnabled(ctx context.Context, req *pbredpacket.SetNativeTokenEnabledReq) (*pbredpacket.SetNativeTokenEnabledResp, error) {
+func (s *redPacketServer) SetNativeTokenEnabled(ctx context.Context, req *pbredpacket.SetNativeTokenEnabledReq) (resp *pbredpacket.SetNativeTokenEnabledResp, retErr error) {
+	defer func() { s.recordAudit(ctx, "SetNativeTokenEnabled", req, retErr) }()
+	if err := s.checkAdminPermission(ctx); err != nil {
+		return nil, err
+	}
 	if s.chainClient != nil {
 		log.ZInfo(ctx, "redpacket admin setNativeTokenEnabled (eth mock)", "enabled", req.Enabled)
 		return &pbredpacket.SetNativeTokenEnabledResp{Message: "native token setting updated"}, nil
@@ -100,7 +158,11 @@ func (s *redPacketServer) SetNativeTokenEnabled(ctx context.Context, req *pbredp
 	return nil, errs.ErrInternalServer.WrapMsg("no blockchain client configured")
 }
 
-func (s *redPacketServer) ParseTxEvents(ctx context.Context, req *pbredpacket.ParseTxEventsReq) (*pbredpacket.ParseTxEventsResp, error) {
+func (s *redPacketServer) ParseTxEvents(ctx context.Context, req *pbredpacket.ParseTxEventsReq) (resp *pbredpacket.ParseTxEventsResp, retErr error) {
+	defer func() { s.recordAudit(ctx, "ParseTxEvents", req, retErr) }()
+	if err := s.checkAdminPermission(ctx); err != nil {
+		return nil, err
+	}
 	if req.TxHash == "" {
 		return nil, errs.ErrArgs.WrapMsg("tx_hash is required")
 	}

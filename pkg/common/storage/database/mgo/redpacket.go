@@ -331,6 +331,18 @@ func (m *RedPacketRefundMgo) Save(ctx context.Context, refund *model.RedPacketRe
 	return err
 }
 
+func (m *RedPacketRefundMgo) GetByPacketID(ctx context.Context, packetID string) (*model.RedPacketRefund, error) {
+	var r model.RedPacketRefund
+	err := m.coll.FindOne(ctx, bson.M{"packet_id": packetID}).Decode(&r)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, errs.ErrRecordNotFound.WrapMsg("refund not found", "packetID", packetID)
+		}
+		return nil, err
+	}
+	return &r, nil
+}
+
 // ---- WalletBindingChallenge ----
 
 type WalletBindingChallengeMgo struct {
@@ -414,6 +426,24 @@ func NewWalletBindingMongo(db *mongo.Database) (database.WalletBinding, error) {
 	return &WalletBindingMgo{coll: coll}, nil
 }
 
+// GetExpiredPending returns red packets that have expired but are still in
+// "CREATED" status (i.e., not yet refunded or fully claimed).
+func (m *RedPacketMgo) GetExpiredPending(ctx context.Context, now int64) ([]*model.RedPacket, error) {
+	cur, err := m.coll.Find(ctx, bson.M{
+		"status":    "CREATED",
+		"expiry_at": bson.M{"$lt": now, "$gt": 0},
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(ctx)
+	var out []*model.RedPacket
+	if err := cur.All(ctx, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (m *WalletBindingMgo) Upsert(ctx context.Context, b *model.WalletBinding) error {
 	filter := bson.M{
 		"user_id":        b.UserID,
@@ -453,4 +483,27 @@ func (m *WalletBindingMgo) GetActive(ctx context.Context, userID, chainType, wal
 		return nil, err
 	}
 	return &b, nil
+}
+
+// ---- AdminAuditLog ----
+
+type AdminAuditLogMgo struct {
+	coll *mongo.Collection
+}
+
+func NewAdminAuditLogMongo(db *mongo.Database) (database.AdminAuditLog, error) {
+	coll := db.Collection("admin_audit_log")
+	_, err := coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
+		{Keys: bson.D{{Key: "operator_id", Value: 1}}},
+		{Keys: bson.D{{Key: "created_at", Value: -1}}},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &AdminAuditLogMgo{coll: coll}, nil
+}
+
+func (m *AdminAuditLogMgo) Create(ctx context.Context, entry *model.AdminAuditLog) error {
+	_, err := m.coll.InsertOne(ctx, entry)
+	return err
 }

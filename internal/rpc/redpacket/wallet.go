@@ -1,9 +1,12 @@
 package redpacket
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"math/big"
 	"strings"
 	"time"
 
@@ -99,19 +102,21 @@ func (s *redPacketServer) ConfirmWalletBind(ctx context.Context, req *pbredpacke
 		return nil, errs.ErrArgs.WrapMsg("challenge is expired")
 	}
 
+	var verifyErr error
 	switch challenge.ChainType {
 	case "EVM":
-		if err := verifyEVMBindSignature(challenge.Message, challenge.WalletAddress, req.Signature); err != nil {
-			challenge.Status = "FAILED"
-			challenge.Signature = req.Signature
-			challenge.UpdatedAt = time.Now()
-			_ = s.db.UpdateWalletBindingChallenge(ctx, challenge)
-			return nil, err
-		}
+		verifyErr = verifyEVMBindSignature(challenge.Message, challenge.WalletAddress, req.Signature)
 	case "TRON":
-		return nil, errs.ErrInternalServer.WrapMsg("TRON wallet binding verification is not implemented yet")
+		verifyErr = verifyTRONBindSignature(challenge.Message, challenge.WalletAddress, req.Signature)
 	default:
 		return nil, errs.ErrArgs.WrapMsg("unsupported chain_type: " + challenge.ChainType)
+	}
+	if verifyErr != nil {
+		challenge.Status = "FAILED"
+		challenge.Signature = req.Signature
+		challenge.UpdatedAt = time.Now()
+		_ = s.db.UpdateWalletBindingChallenge(ctx, challenge)
+		return nil, verifyErr
 	}
 
 	now := time.Now().UTC()
@@ -248,4 +253,97 @@ func verifyEVMBindSignature(message, walletAddress, signature string) error {
 
 func personalSignMessage(message string) string {
 	return fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(message), message)
+}
+
+// verifyTRONBindSignature verifies a TRON signMessageV2 (TronLink) signature.
+// TRON uses the same secp256k1 curve as Ethereum; the only differences are:
+//   - message prefix: "\x19TRON Signed Message:\n<decimal_len>"
+//   - wallet address: base58check-encoded with a leading 0x41 byte
+func verifyTRONBindSignature(message, walletAddress, signature string) error {
+	if strings.TrimSpace(message) == "" {
+		return errs.ErrArgs.WrapMsg("bind message is empty")
+	}
+
+	sig, err := hex.DecodeString(strings.TrimPrefix(signature, "0x"))
+	if err != nil {
+		return errs.ErrArgs.WrapMsg("decode tron signature failed: " + err.Error())
+	}
+	if len(sig) != 65 {
+		return errs.ErrArgs.WrapMsg(fmt.Sprintf("invalid tron signature length: %d", len(sig)))
+	}
+	// Some TRON wallets encode v as 27/28; normalise to 0/1.
+	if sig[64] >= 27 {
+		sig[64] -= 27
+	}
+
+	prefix := fmt.Sprintf("\x19TRON Signed Message:\n%d", len(message))
+	hash := crypto.Keccak256Hash([]byte(prefix + message))
+
+	pubKey, err := crypto.SigToPub(hash.Bytes(), sig)
+	if err != nil {
+		return errs.ErrInternalServer.WrapMsg("recover tron signer failed: " + err.Error())
+	}
+
+	// Derive the raw 20-byte address (identical derivation to Ethereum).
+	recoveredAddr := crypto.PubkeyToAddress(*pubKey)
+
+	// Decode the TRON base58check address to its 20 raw bytes.
+	addrBytes, err := decodeTRONAddress(walletAddress)
+	if err != nil {
+		return errs.ErrArgs.WrapMsg("invalid tron address: " + err.Error())
+	}
+
+	if !bytes.Equal(recoveredAddr.Bytes(), addrBytes) {
+		return errs.ErrNoPermission.WrapMsg("tron signature does not match wallet address")
+	}
+	return nil
+}
+
+// decodeTRONAddress decodes a TRON base58check address and returns the 20
+// raw address bytes (i.e., without the leading 0x41 network prefix byte).
+func decodeTRONAddress(addr string) ([]byte, error) {
+	decoded := tronBase58Decode(addr)
+	if len(decoded) != 25 {
+		return nil, fmt.Errorf("invalid length %d", len(decoded))
+	}
+
+	payload := decoded[:21]
+	checksum := decoded[21:25]
+	h1 := sha256.Sum256(payload)
+	h2 := sha256.Sum256(h1[:])
+	if !bytes.Equal(h2[:4], checksum) {
+		return nil, fmt.Errorf("invalid base58check checksum")
+	}
+	if payload[0] != 0x41 {
+		return nil, fmt.Errorf("invalid tron address prefix byte: 0x%02x", payload[0])
+	}
+	return payload[1:], nil
+}
+
+const tronBase58Alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+
+func tronBase58Decode(s string) []byte {
+	n := new(big.Int)
+	base := big.NewInt(58)
+	for _, c := range s {
+		idx := strings.IndexRune(tronBase58Alphabet, c)
+		if idx < 0 {
+			return nil
+		}
+		n.Mul(n, base)
+		n.Add(n, big.NewInt(int64(idx)))
+	}
+
+	decoded := n.Bytes()
+	leadingOnes := 0
+	for _, c := range s {
+		if c == '1' {
+			leadingOnes++
+		} else {
+			break
+		}
+	}
+	out := make([]byte, leadingOnes+len(decoded))
+	copy(out[leadingOnes:], decoded)
+	return out
 }

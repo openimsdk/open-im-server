@@ -13,6 +13,8 @@ type RedPacket interface {
 	UpdateCreated(ctx context.Context, rp *model.RedPacket) error
 	UpdateStatus(ctx context.Context, packetID, status string) error
 	UpdateClaimProgress(ctx context.Context, packetID, claimedAmount, status string) error
+	// GetExpiredPending returns CREATED packets whose expiry_at < now (unix seconds).
+	GetExpiredPending(ctx context.Context, now int64) ([]*model.RedPacket, error)
 }
 
 type RedPacketClaim interface {
@@ -30,6 +32,11 @@ type RedPacketClaimAuth interface {
 
 type RedPacketRefund interface {
 	Save(ctx context.Context, refund *model.RedPacketRefund) error
+	GetByPacketID(ctx context.Context, packetID string) (*model.RedPacketRefund, error)
+}
+
+type AdminAuditLog interface {
+	Create(ctx context.Context, log *model.AdminAuditLog) error
 }
 
 type WalletBindingChallenge interface {

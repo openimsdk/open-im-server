@@ -895,6 +895,73 @@ func redPacketModelToProto(rp *model.RedPacket) *pbredpacket.RedPacketRecord {
 	}
 }
 
+// RequestRefund allows the red-packet creator to submit an on-chain refund
+// transaction for an expired packet. The indexer will asynchronously pick up
+// the on-chain RefundPacket event and mark the packet as REFUNDED in the DB.
+func (s *redPacketServer) RequestRefund(ctx context.Context, req *pbredpacket.RequestRefundReq) (*pbredpacket.RequestRefundResp, error) {
+	currentUserID := mcontext.GetOpUserID(ctx)
+	if currentUserID == "" {
+		return nil, servererrs.ErrNoPermission.WrapMsg("op user id is empty")
+	}
+	if req.GetPacketID() == "" {
+		return nil, errs.ErrArgs.WrapMsg("packet_id is required")
+	}
+
+	rp, err := s.db.GetRedPacketByPacketID(ctx, req.GetPacketID())
+	if err != nil {
+		return nil, err
+	}
+	if rp.CreatorUserID != currentUserID {
+		return nil, errs.ErrNoPermission.WrapMsg("only the creator can request a refund")
+	}
+	if rp.Status == "REFUNDED" {
+		return &pbredpacket.RequestRefundResp{TxHash: "", Status: "REFUNDED"}, nil
+	}
+	if rp.ExpiryAt > 0 && time.Now().Unix() < rp.ExpiryAt {
+		return nil, errs.ErrArgs.WrapMsg("red packet has not expired yet")
+	}
+
+	// Submit the on-chain refund transaction.
+	var txHash string
+	if s.chainClient != nil {
+		txHash, err = s.chainClient.RefundPacket(ctx, rp.PacketID)
+		if err != nil {
+			return nil, errs.ErrInternalServer.WrapMsg("submit refund tx failed: " + err.Error())
+		}
+	} else if s.tronClient != nil {
+		packetIDBig, ok := new(big.Int).SetString(rp.PacketID, 10)
+		if !ok {
+			return nil, errs.ErrInternalServer.WrapMsg("invalid packet id format")
+		}
+		txHash, err = s.tronClient.SendAdminTransaction(ctx, "refundPacket", packetIDBig)
+		if err != nil {
+			return nil, errs.ErrInternalServer.WrapMsg("submit tron refund tx failed: " + err.Error())
+		}
+	} else {
+		return nil, errs.ErrInternalServer.WrapMsg("no blockchain client configured")
+	}
+
+	log.ZInfo(ctx, "redpacket refund submitted", "packetID", rp.PacketID, "txHash", txHash)
+	return &pbredpacket.RequestRefundResp{TxHash: txHash, Status: "PENDING"}, nil
+}
+
+func (s *redPacketServer) GetRefund(ctx context.Context, req *pbredpacket.GetRefundReq) (*pbredpacket.GetRefundResp, error) {
+	if req.GetPacketID() == "" {
+		return nil, errs.ErrArgs.WrapMsg("packet_id is required")
+	}
+	refund, err := s.db.GetRefundByPacketID(ctx, req.GetPacketID())
+	if err != nil {
+		return nil, err
+	}
+	return &pbredpacket.GetRefundResp{
+		PacketID:  refund.PacketID,
+		RefundTo:  refund.RefundTo,
+		TxHash:    refund.TxHash,
+		Amount:    refund.Amount,
+		CreatedAt: refund.CreatedAt.Unix(),
+	}, nil
+}
+
 func claimsModelToProto(claims []*model.RedPacketClaim) []*pbredpacket.RedPacketClaimRecord {
 	out := make([]*pbredpacket.RedPacketClaimRecord, 0, len(claims))
 	for _, c := range claims {

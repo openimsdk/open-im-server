@@ -17,6 +17,7 @@ type RedPacketDatabase interface {
 	UpdateRedPacketCreated(ctx context.Context, rp *model.RedPacket) error
 	UpdateRedPacketStatus(ctx context.Context, packetID, status string) error
 	UpdateRedPacketClaimProgress(ctx context.Context, packetID, claimedAmount, status string) error
+	GetExpiredPendingPackets(ctx context.Context, nowUnix int64) ([]*model.RedPacket, error)
 
 	CreateClaimAuth(ctx context.Context, auth *model.RedPacketClaimAuth) error
 	GetClaimAuth(ctx context.Context, packetID, claimer string) (*model.RedPacketClaimAuth, error)
@@ -28,6 +29,7 @@ type RedPacketDatabase interface {
 	GetClaimsByPacketID(ctx context.Context, packetID string) ([]*model.RedPacketClaim, error)
 
 	SaveRefund(ctx context.Context, refund *model.RedPacketRefund) error
+	GetRefundByPacketID(ctx context.Context, packetID string) (*model.RedPacketRefund, error)
 
 	CreateWalletBindingChallenge(ctx context.Context, challenge *model.WalletBindingChallenge) error
 	GetWalletBindingChallenge(ctx context.Context, challengeID string) (*model.WalletBindingChallenge, error)
@@ -35,6 +37,8 @@ type RedPacketDatabase interface {
 
 	UpsertWalletBinding(ctx context.Context, binding *model.WalletBinding) error
 	GetActiveWalletBinding(ctx context.Context, userID, chainType, walletAddress string) (*model.WalletBinding, error)
+
+	CreateAdminAuditLog(ctx context.Context, entry *model.AdminAuditLog) error
 }
 
 type redPacketDatabase struct {
@@ -44,6 +48,7 @@ type redPacketDatabase struct {
 	refund    database.RedPacketRefund
 	challenge database.WalletBindingChallenge
 	binding   database.WalletBinding
+	auditLog  database.AdminAuditLog
 }
 
 func NewRedPacketDatabase(
@@ -53,6 +58,7 @@ func NewRedPacketDatabase(
 	refund database.RedPacketRefund,
 	challenge database.WalletBindingChallenge,
 	binding database.WalletBinding,
+	auditLog database.AdminAuditLog,
 ) RedPacketDatabase {
 	return &redPacketDatabase{
 		rp:        rp,
@@ -61,6 +67,7 @@ func NewRedPacketDatabase(
 		refund:    refund,
 		challenge: challenge,
 		binding:   binding,
+		auditLog:  auditLog,
 	}
 }
 
@@ -118,6 +125,18 @@ func (d *redPacketDatabase) GetClaimsByPacketID(ctx context.Context, packetID st
 
 func (d *redPacketDatabase) SaveRefund(ctx context.Context, refund *model.RedPacketRefund) error {
 	return d.refund.Save(ctx, refund)
+}
+
+func (d *redPacketDatabase) GetRefundByPacketID(ctx context.Context, packetID string) (*model.RedPacketRefund, error) {
+	return d.refund.GetByPacketID(ctx, packetID)
+}
+
+func (d *redPacketDatabase) GetExpiredPendingPackets(ctx context.Context, nowUnix int64) ([]*model.RedPacket, error) {
+	return d.rp.GetExpiredPending(ctx, nowUnix)
+}
+
+func (d *redPacketDatabase) CreateAdminAuditLog(ctx context.Context, entry *model.AdminAuditLog) error {
+	return d.auditLog.Create(ctx, entry)
 }
 
 func (d *redPacketDatabase) CreateWalletBindingChallenge(ctx context.Context, challenge *model.WalletBindingChallenge) error {
