@@ -208,7 +208,11 @@ func (c *websocketClientConn) pingHandler(appData string) error {
 	return nil
 }
 
-func (c *websocketClientConn) pongHandler(string) error {
+func (c *websocketClientConn) pongHandler(appData string) error {
+	log.ZDebug(context.Background(), "pong handler recv pong", "remoteAddr", c.conn.RemoteAddr(), "appData", appData)
+	if err := c.setReadDeadline(); err != nil {
+		return err
+	}
 	return nil
 }
 
