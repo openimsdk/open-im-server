@@ -54,6 +54,7 @@ type User struct {
 	LastName          string    `bson:"last_name"`
 	FullName          string    `bson:"full_name"`
 	Phone             string    `bson:"phone"`
+	AreaCode          string    `bson:"area_code"`
 	PhoneVisibility   int32     `bson:"phone_visibility"`
 	CallAcceptSetting int32     `bson:"call_accept_setting"`
 	MsgReceiveSetting int32     `bson:"msg_receive_setting"`

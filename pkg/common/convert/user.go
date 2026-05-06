@@ -46,6 +46,7 @@ func UserDB2Pb(user *relationtb.User) *sdkws.UserInfo {
 		FirstName:         user.FirstName,
 		LastName:          user.LastName,
 		Phone:             user.Phone,
+		AreaCode:          user.AreaCode,
 		PhoneVisibility:   user.PhoneVisibility,
 		CallAcceptSetting: user.CallAcceptSetting,
 		MsgReceiveSetting: user.MsgReceiveSetting,
@@ -70,6 +71,7 @@ func UserPb2DB(user *sdkws.UserInfo) *relationtb.User {
 		FirstName:       user.FirstName,
 		LastName:        user.LastName,
 		FullName:        fullName,
+		AreaCode:        user.AreaCode,
 		CallRingtoneURL: user.CallRingtoneURL,
 	}
 }
@@ -85,6 +87,7 @@ func UserPb2DBMap(user *sdkws.UserInfo) map[string]any {
 		"ex":                  user.Ex,
 		"first_name":          user.FirstName,
 		"last_name":           user.LastName,
+		"area_code":           user.AreaCode,
 		"app_manager_level":   user.AppMangerLevel,
 		"global_recv_msg_opt": user.GlobalRecvMsgOpt,
 		"call_ringtone_url":   user.CallRingtoneURL,
@@ -140,6 +143,9 @@ func UserPb2DBMapEx(user *sdkws.UserInfoWithEx) map[string]any {
 	}
 	if user.Phone != nil {
 		val["phone"] = user.Phone.Value
+	}
+	if user.AreaCode != nil {
+		val["area_code"] = user.AreaCode.Value
 	}
 	if user.PhoneVisibility != nil {
 		val["phone_visibility"] = user.PhoneVisibility.Value
