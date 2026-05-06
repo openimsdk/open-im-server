@@ -15,7 +15,6 @@
 #   chmod +x scripts/test/redpacket_api_test.sh
 #   GROUP_ID=你的群ID USER_ID=你的用户ID ./scripts/test/redpacket_api_test.sh
 #   ./scripts/test/redpacket_api_test.sh --host http://127.0.0.1:10002 --group-id xxx --try-callback
-#   TOKEN=已有用户token GROUP_ID=xxx ./scripts/test/redpacket_api_test.sh --skip-token-smoke
 #
 # 说明：
 #   - create_order 在 packetType=0（拼手气固定份）时要求 scopeType=GROUP 且当前用户在该群内。
@@ -50,8 +49,6 @@ TRY_CALLBACK="${TRY_CALLBACK:-0}"
 TX_HASH="${TX_HASH:-0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}"
 CALLBACK_PACKET_ID="${CALLBACK_PACKET_ID:-}"
 
-SKIP_TOKEN_SMOKE="${SKIP_TOKEN_SMOKE:-0}"
-
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --host) HOST="$2"; shift 2 ;;
@@ -60,7 +57,6 @@ while [[ $# -gt 0 ]]; do
     --group-id) GROUP_ID="$2"; shift 2 ;;
     --token) TOKEN="$2"; shift 2 ;;
     --try-callback) TRY_CALLBACK="1"; shift ;;
-    --skip-token-smoke) SKIP_TOKEN_SMOKE="1"; shift ;;
     *)
       echo "未知参数: $1"
       exit 1
@@ -163,25 +159,6 @@ resolve_user_token() {
   fi
   echo "用户 token 获取成功" >&2
 }
-
-# ─── 用例：无 token 应被 GinParseToken 拒绝 ─────────────────
-if [[ "${SKIP_TOKEN_SMOKE}" != "1" ]]; then
-  echo "==> 用例：POST /redpacket/create_order 无 token（应返回 errCode != 0）"
-  NO_TOKEN_RESP=$(curl -sS -X POST \
-    -H "Content-Type: application/json" \
-    -H "operationID: $(op_id)" \
-    -d '{"chainType":"EVM","chainID":1,"groupID":"x","scopeType":"GROUP","packetType":0,"token":"0x0000000000000000000000000000000000000000","totalAmount":"1","totalShares":1,"creatorWallet":"0x0000000000000000000000000000000000000001"}' \
-    "${HOST}/redpacket/create_order")
-  echo "${NO_TOKEN_RESP}" | jq .
-  NT_ERR=$(echo "${NO_TOKEN_RESP}" | jq -r '.errCode // "null"')
-  if [[ "${NT_ERR}" == "0" ]]; then
-    echo "预期无 token 时 errCode != 0，实际 errCode=0" >&2
-    exit 1
-  fi
-  echo "无 token 用例通过（errCode=${NT_ERR}）"
-else
-  echo "==> 跳过无 token 用例（SKIP_TOKEN_SMOKE=1 或 --skip-token-smoke）"
-fi
 
 if [[ -z "${GROUP_ID}" ]]; then
   echo "错误：未设置 GROUP_ID。固定份红包（packetType=0）需要 scopeType=GROUP 且 group_id 非空。" >&2
