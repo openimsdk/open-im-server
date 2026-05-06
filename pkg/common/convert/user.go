@@ -115,6 +115,23 @@ func UserPb2DBMapEx(user *sdkws.UserInfoWithEx) map[string]any {
 	if user.Ex != nil {
 		val["ex"] = user.Ex.Value
 	}
+	if user.FirstName != nil {
+		val["first_name"] = user.FirstName.Value
+	}
+	if user.LastName != nil {
+		val["last_name"] = user.LastName.Value
+	}
+	if user.FirstName != nil || user.LastName != nil {
+		firstName := ""
+		lastName := ""
+		if user.FirstName != nil {
+			firstName = user.FirstName.Value
+		}
+		if user.LastName != nil {
+			lastName = user.LastName.Value
+		}
+		val["full_name"] = BuildFullName(firstName, lastName)
+	}
 	if user.GlobalRecvMsgOpt != nil {
 		val["global_recv_msg_opt"] = user.GlobalRecvMsgOpt.Value
 	}
@@ -130,7 +147,5 @@ func UserPb2DBMapEx(user *sdkws.UserInfoWithEx) map[string]any {
 	if user.MsgReceiveSetting != nil {
 		val["msg_receive_setting"] = user.MsgReceiveSetting.Value
 	}
-	// TODO: Add FirstName/LastName support to UserInfoWithEx proto when regenerated
-
 	return val
 }
