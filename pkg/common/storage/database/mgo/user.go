@@ -16,9 +16,10 @@ package mgo
 
 import (
 	"context"
+	"time"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/database"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/storage/model"
-	"time"
 
 	"github.com/openimsdk/protocol/user"
 	"github.com/openimsdk/tools/db/mongoutil"
@@ -69,9 +70,35 @@ func (u *UserMgo) UpdateByMap(ctx context.Context, userID string, args map[strin
 		return err
 	}
 
+	return nil
+
 	// Keep user attributes in sync for consumers that read from the "attribute" collection.
-	attributeColl := u.coll.Database().Collection("attribute")
-	return mongoutil.UpdateOne(ctx, attributeColl, filter, update, true)
+	// Only sync the allowed attribute fields.
+	//attributeSet := make(map[string]any)
+	//for _, key := range []string{
+	//	"nickname",
+	//	"first_name",
+	//	"last_name",
+	//	"full_name",
+	//	"remark",
+	//	"face_url",
+	//	"phone_number",
+	//	"area_code",
+	//} {
+	//	if v, ok := args[key]; ok {
+	//		attributeSet[key] = v
+	//	}
+	//}
+	//// user collection uses "phone"; attribute collection uses "phone_number".
+	//if v, ok := args["phone"]; ok {
+	//	attributeSet["phone_number"] = v
+	//}
+	//if len(attributeSet) == 0 {
+	//	return nil
+	//}
+
+	//attributeColl := u.coll.Database().Collection("attribute")
+	//return mongoutil.UpdateOne(ctx, attributeColl, filter, bson.M{"$set": attributeSet}, true)
 }
 
 func (u *UserMgo) Find(ctx context.Context, userIDs []string) (users []*model.User, err error) {
