@@ -57,6 +57,8 @@ type User struct {
 	PhoneVisibility   int32     `bson:"phone_visibility"`
 	CallAcceptSetting int32     `bson:"call_accept_setting"`
 	MsgReceiveSetting int32     `bson:"msg_receive_setting"`
+	// CallRingtoneURL 用户自定义来电铃声 URL；对方来电时播放此铃声
+	CallRingtoneURL string `bson:"call_ringtone_url"`
 }
 
 func (u *User) GetNickname() string {

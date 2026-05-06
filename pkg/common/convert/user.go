@@ -49,6 +49,7 @@ func UserDB2Pb(user *relationtb.User) *sdkws.UserInfo {
 		PhoneVisibility:   user.PhoneVisibility,
 		CallAcceptSetting: user.CallAcceptSetting,
 		MsgReceiveSetting: user.MsgReceiveSetting,
+		CallRingtoneURL:   user.CallRingtoneURL,
 	}
 }
 
@@ -59,16 +60,17 @@ func UsersDB2Pb(users []*relationtb.User) []*sdkws.UserInfo {
 func UserPb2DB(user *sdkws.UserInfo) *relationtb.User {
 	fullName := BuildFullName(user.FirstName, user.LastName)
 	return &relationtb.User{
-		UserID:           user.UserID,
-		Nickname:         user.Nickname,
-		FaceURL:          user.FaceURL,
-		Ex:               user.Ex,
-		CreateTime:       time.UnixMilli(user.CreateTime),
-		AppMangerLevel:   user.AppMangerLevel,
+		UserID:          user.UserID,
+		Nickname:        user.Nickname,
+		FaceURL:         user.FaceURL,
+		Ex:              user.Ex,
+		CreateTime:      time.UnixMilli(user.CreateTime),
+		AppMangerLevel:  user.AppMangerLevel,
 		GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
-		FirstName:        user.FirstName,
-		LastName:         user.LastName,
-		FullName:         fullName,
+		FirstName:       user.FirstName,
+		LastName:        user.LastName,
+		FullName:        fullName,
+		CallRingtoneURL: user.CallRingtoneURL,
 	}
 }
 
@@ -85,6 +87,7 @@ func UserPb2DBMap(user *sdkws.UserInfo) map[string]any {
 		"last_name":           user.LastName,
 		"app_manager_level":   user.AppMangerLevel,
 		"global_recv_msg_opt": user.GlobalRecvMsgOpt,
+		"call_ringtone_url":   user.CallRingtoneURL,
 	}
 	for key, value := range fields {
 		if v, ok := value.(string); ok && v != "" {
@@ -146,6 +149,9 @@ func UserPb2DBMapEx(user *sdkws.UserInfoWithEx) map[string]any {
 	}
 	if user.MsgReceiveSetting != nil {
 		val["msg_receive_setting"] = user.MsgReceiveSetting.Value
+	}
+	if user.CallRingtoneURL != nil {
+		val["call_ringtone_url"] = user.CallRingtoneURL.Value
 	}
 	return val
 }
