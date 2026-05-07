@@ -180,7 +180,6 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		userRouterGroup.POST("/remove_global_blacklist", bl.RemoveGlobalBlacklist)
 		userRouterGroup.POST("/get_global_blacklist", bl.GetGlobalBlacklist)
 
-		// 真实删除账号（仅管理员）
 		userRouterGroup.POST("/delete_user", du.DeleteUser)
 	}
 	// friend routing group

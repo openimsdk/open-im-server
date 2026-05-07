@@ -46,14 +46,15 @@ type deleteUserReq struct {
 
 // DeleteUser permanently deletes a user account and cleans up associated data.
 // Steps: force-logout → delete friends → quit/kick groups → hard-delete user doc.
-// Only IM admins may call this endpoint.
+// Caller must be the same user as userID, or an IM admin (see CheckAccessV3).
 func (d *DeleteUserApi) DeleteUser(c *gin.Context) {
 	var req deleteUserReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WrapMsg(err.Error()))
 		return
 	}
-	if err := authverify.CheckAdmin(c, d.imAdminUserIDs); err != nil {
+	// Only the user themselves (or an IM admin) may delete the account.
+	if err := authverify.CheckAccessV3(c, req.UserID, d.imAdminUserIDs); err != nil {
 		apiresp.GinError(c, err)
 		return
 	}
