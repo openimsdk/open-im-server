@@ -45,6 +45,9 @@ type User interface {
 
 	SortQuery(ctx context.Context, userIDName map[string]string, asc bool) ([]*model.User, error)
 
+	// Delete permanently removes user documents by userID.
+	Delete(ctx context.Context, userIDs []string) error
+
 	// CRUD user command
 	AddUserCommand(ctx context.Context, userID string, Type int32, UUID string, value string, ex string) error
 	DeleteUserCommand(ctx context.Context, userID string, Type int32, UUID string) error

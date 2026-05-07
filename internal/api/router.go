@@ -137,6 +137,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 	m := NewMessageApi(msg.NewMsgClient(msgConn), rpcli.NewUserClient(userConn), config.Share.IMAdminUserID)
 	cp := NewCaptchaApi(pbcaptcha.NewCaptchaClient(captchaConn))
 	bl := NewUserGlobalBlackApi(blacklistCtrl, userDB, config.Share.IMAdminUserID, rpcli.NewAuthClient(authConn))
+	du := NewDeleteUserApi(userDB, rpcli.NewAuthClient(authConn), group.NewGroupClient(groupConn), relation.NewFriendClient(friendConn), config.Share.IMAdminUserID)
 	phoneSN := NewPhoneSNApi(phoneSNDB)
 	userRouterGroup := r.Group("/user")
 	{
@@ -178,6 +179,8 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		userRouterGroup.POST("/add_global_blacklist", bl.AddGlobalBlacklist)
 		userRouterGroup.POST("/remove_global_blacklist", bl.RemoveGlobalBlacklist)
 		userRouterGroup.POST("/get_global_blacklist", bl.GetGlobalBlacklist)
+
+		userRouterGroup.POST("/delete_user", du.DeleteUser)
 	}
 	// friend routing group
 	{
