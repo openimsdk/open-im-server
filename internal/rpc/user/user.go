@@ -602,6 +602,8 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 			FirstName:        user.FirstName,
 			LastName:         user.LastName,
 			FullName:         fullName,
+			Phone:            user.Phone,
+			AreaCode:         user.AreaCode,
 		})
 	}
 	if err := s.db.Create(ctx, users); err != nil {
