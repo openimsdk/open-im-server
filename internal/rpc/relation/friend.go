@@ -697,7 +697,7 @@ func (s *friendServer) AddOnewayFriend(ctx context.Context, req *relation.ApplyT
 	if in1 {
 		return nil, servererrs.ErrRelationshipAlready.WrapMsg("already in friend list")
 	}
-	if err := s.db.BecomeOnewayFriend(ctx, req.FromUserID, req.ToUserID, becomeFriendByOneway); err != nil {
+	if err := s.db.BecomeOnewayFriend(ctx, req.FromUserID, req.ToUserID, becomeFriendByOneway, req.Remark); err != nil {
 		return nil, err
 	}
 
