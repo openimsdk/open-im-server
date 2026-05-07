@@ -393,6 +393,37 @@ func (s *userServer) SetMsgReceiveSetting(ctx context.Context, req *pbuser.SetMs
 	return &pbuser.SetMsgReceiveSettingResp{}, nil
 }
 
+// SetGroupInviteSetting 设置群邀请权限（0=所有人可邀请，1=仅好友可邀请，2=所有人不可邀请）。
+// 只允许本人或管理员操作。
+func (s *userServer) SetGroupInviteSetting(ctx context.Context, req *pbuser.SetGroupInviteSettingReq) (*pbuser.SetGroupInviteSettingResp, error) {
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.WrapMsg("userID is required")
+	}
+	if req.GroupInviteSetting < 0 || req.GroupInviteSetting > 2 {
+		return nil, errs.ErrArgs.WrapMsg("groupInviteSetting must be 0, 1 or 2")
+	}
+	if err := authverify.CheckAccessV3(ctx, req.UserID, s.config.Share.IMAdminUserID); err != nil {
+		log.ZWarn(ctx, "SetGroupInviteSetting: access denied", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if _, err := s.db.FindWithError(ctx, []string{req.UserID}); err != nil {
+		log.ZError(ctx, "SetGroupInviteSetting: user not found or db error", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID)
+		return nil, err
+	}
+	if err := s.db.UpdateByMap(ctx, req.UserID, map[string]any{
+		"group_invite_setting": req.GroupInviteSetting,
+	}); err != nil {
+		log.ZError(ctx, "SetGroupInviteSetting: UpdateByMap failed", err,
+			"opUserID", mcontext.GetOpUserID(ctx), "targetUserID", req.UserID,
+			"groupInviteSetting", req.GroupInviteSetting)
+		return nil, err
+	}
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	return &pbuser.SetGroupInviteSettingResp{}, nil
+}
+
 // GetUserByPhone 根据精确手机号查询用户。
 //
 // phone_visibility 仅控制用户资料中手机号字段是否展示，不影响搜索本身：

@@ -351,6 +351,10 @@ func (u *UserApi) SetMsgReceiveSetting(c *gin.Context) {
 	a2r.Call(c, user.UserClient.SetMsgReceiveSetting, u.Client)
 }
 
+func (u *UserApi) SetGroupInviteSetting(c *gin.Context) {
+	a2r.Call(c, user.UserClient.SetGroupInviteSetting, u.Client)
+}
+
 func (u *UserApi) GetUserByPhone(c *gin.Context) {
 	a2r.Call(c, user.UserClient.GetUserByPhone, u.Client)
 }

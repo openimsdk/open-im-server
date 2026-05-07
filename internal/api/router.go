@@ -170,6 +170,7 @@ func newGinRouter(ctx context.Context, client discovery.SvcDiscoveryRegistry, co
 		userRouterGroup.POST("/set_phone_visibility", u.SetPhoneVisibility)
 		userRouterGroup.POST("/set_call_accept_setting", u.SetCallAcceptSetting)
 		userRouterGroup.POST("/set_msg_receive_setting", u.SetMsgReceiveSetting)
+		userRouterGroup.POST("/set_group_invite_setting", u.SetGroupInviteSetting)
 		// 根据手机号精确查找用户（phoneSearchVisibility=true 时遵守 phone_visibility 设置）
 		userRouterGroup.POST("/get_user_by_phone", u.GetUserByPhone)
 		// 根据昵称精确查询用户（可多结果，与 getPaginationUsers 模糊搜索不同）

@@ -48,9 +48,10 @@ func UserDB2Pb(user *relationtb.User) *sdkws.UserInfo {
 		Phone:             user.Phone,
 		AreaCode:          user.AreaCode,
 		PhoneVisibility:   user.PhoneVisibility,
-		CallAcceptSetting: user.CallAcceptSetting,
-		MsgReceiveSetting: user.MsgReceiveSetting,
-		CallRingtoneURL:   user.CallRingtoneURL,
+		CallAcceptSetting:  user.CallAcceptSetting,
+		MsgReceiveSetting:  user.MsgReceiveSetting,
+		GroupInviteSetting: user.GroupInviteSetting,
+		CallRingtoneURL:    user.CallRingtoneURL,
 	}
 }
 
@@ -155,6 +156,9 @@ func UserPb2DBMapEx(user *sdkws.UserInfoWithEx) map[string]any {
 	}
 	if user.MsgReceiveSetting != nil {
 		val["msg_receive_setting"] = user.MsgReceiveSetting.Value
+	}
+	if user.GroupInviteSetting != nil {
+		val["group_invite_setting"] = user.GroupInviteSetting.Value
 	}
 	if user.CallRingtoneURL != nil {
 		val["call_ringtone_url"] = user.CallRingtoneURL.Value

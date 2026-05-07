@@ -42,6 +42,14 @@ const (
 	MsgReceiveSettingNobody  int32 = 2
 )
 
+// GroupInviteSetting 群邀请权限枚举。
+// 0=所有人可邀请, 1=仅好友可邀请, 2=所有人不可邀请
+const (
+	GroupInviteSettingPublic  int32 = 0
+	GroupInviteSettingFriends int32 = 1
+	GroupInviteSettingNobody  int32 = 2
+)
+
 // UserStatus 用户账号状态枚举。
 // 0=正常；1=冻结（可登录，不能收发消息）；2=黑名单（不可登录，自动踢下线，不能收发消息）
 const (
@@ -66,6 +74,7 @@ type User struct {
 	PhoneVisibility   int32     `bson:"phone_visibility"`
 	CallAcceptSetting int32     `bson:"call_accept_setting"`
 	MsgReceiveSetting int32     `bson:"msg_receive_setting"`
+	GroupInviteSetting int32    `bson:"group_invite_setting"`
 	// CallRingtoneURL 用户自定义来电铃声 URL；对方来电时播放此铃声
 	CallRingtoneURL string `bson:"call_ringtone_url"`
 	// Status 账号状态：0=正常，1=冻结，2=黑名单
