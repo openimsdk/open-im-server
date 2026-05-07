@@ -62,9 +62,12 @@ type User struct {
 	LastName          string    `bson:"last_name"`
 	FullName          string    `bson:"full_name"`
 	Phone             string    `bson:"phone"`
+	AreaCode          string    `bson:"area_code"`
 	PhoneVisibility   int32     `bson:"phone_visibility"`
 	CallAcceptSetting int32     `bson:"call_accept_setting"`
 	MsgReceiveSetting int32     `bson:"msg_receive_setting"`
+	// CallRingtoneURL 用户自定义来电铃声 URL；对方来电时播放此铃声
+	CallRingtoneURL string `bson:"call_ringtone_url"`
 	// Status 账号状态：0=正常，1=冻结，2=黑名单
 	Status int32 `bson:"status"`
 }

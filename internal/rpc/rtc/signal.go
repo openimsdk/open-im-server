@@ -108,6 +108,19 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 		}
 	}
 
+	// 从主叫用户资料获取铃声 URL，注入到邀请信息中，被叫方收到后播放主叫方铃声
+	if inviterInfo, err := s.userClient.GetUserInfo(ctx, req.UserID); err == nil && inviterInfo.CallRingtoneURL != "" {
+		inv.CallerRingtoneURL = inviterInfo.CallRingtoneURL
+	}
+
+	// 查询被叫方铃声 URL，供主叫方在等待时播放
+	var calleeRingtoneURL string
+	if len(inv.InviteeUserIDList) > 0 {
+		if inviteeInfo, err := s.userClient.GetUserInfo(ctx, inv.InviteeUserIDList[0]); err == nil {
+			calleeRingtoneURL = inviteeInfo.CallRingtoneURL
+		}
+	}
+
 	if _, err := s.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{Name: inv.RoomID}); err != nil {
 		log.ZError(ctx, "handleInvite", err, "r", err.Error())
 		return nil, errs.WrapMsg(err, "LiveKit CreateRoom failed", "roomID", inv.RoomID)
@@ -147,9 +160,10 @@ func (s *rtcServer) handleInvite(ctx context.Context, req *rtc.SignalInviteReq, 
 
 	log.ZDebug(ctx, "handleInvite", "token", token, "roomID", inv.RoomID, "liveURL", s.config.RpcConfig.LiveKit.ExternalAddress)
 	return &rtc.SignalInviteResp{
-		Token:   token,
-		RoomID:  inv.RoomID,
-		LiveURL: s.config.RpcConfig.LiveKit.ExternalAddress,
+		Token:             token,
+		RoomID:            inv.RoomID,
+		LiveURL:           s.config.RpcConfig.LiveKit.ExternalAddress,
+		CalleeRingtoneURL: calleeRingtoneURL,
 	}, nil
 }
 
@@ -163,6 +177,19 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 	inv.RoomID = newRoomID()
 	inv.InviterUserID = req.UserID
 	inv.InitiateTime = time.Now().UnixMilli()
+
+	// 从主叫用户资料获取铃声 URL，注入到邀请信息中，被叫方收到后播放主叫方铃声
+	if inviterInfo, err := s.userClient.GetUserInfo(ctx, req.UserID); err == nil && inviterInfo.CallRingtoneURL != "" {
+		inv.CallerRingtoneURL = inviterInfo.CallRingtoneURL
+	}
+
+	// 查询第一位被叫的铃声 URL，供主叫方在等待时播放
+	var calleeRingtoneURL string
+	if len(inv.InviteeUserIDList) > 0 {
+		if inviteeInfo, err := s.userClient.GetUserInfo(ctx, inv.InviteeUserIDList[0]); err == nil {
+			calleeRingtoneURL = inviteeInfo.CallRingtoneURL
+		}
+	}
 
 	if _, err := s.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{Name: inv.RoomID}); err != nil {
 		return nil, errs.WrapMsg(err, "LiveKit CreateRoom failed", "roomID", inv.RoomID)
@@ -206,9 +233,10 @@ func (s *rtcServer) handleInviteInGroup(ctx context.Context, req *rtc.SignalInvi
 	}
 
 	return &rtc.SignalInviteInGroupResp{
-		Token:   token,
-		RoomID:  inv.RoomID,
-		LiveURL: s.config.RpcConfig.LiveKit.ExternalAddress,
+		Token:             token,
+		RoomID:            inv.RoomID,
+		LiveURL:           s.config.RpcConfig.LiveKit.ExternalAddress,
+		CalleeRingtoneURL: calleeRingtoneURL,
 	}, nil
 }
 

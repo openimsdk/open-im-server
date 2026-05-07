@@ -700,6 +700,12 @@ func (s *friendServer) AddOnewayFriend(ctx context.Context, req *relation.ApplyT
 	if err := s.db.BecomeOnewayFriend(ctx, req.FromUserID, req.ToUserID, becomeFriendByOneway); err != nil {
 		return nil, err
 	}
+
+	// Silently notify only A (FromUserID) to trigger an incremental friend-list sync
+	// so the remark is reflected in the conversation list.
+	// B (ToUserID) receives no notification of any kind.
+	s.notificationSender.FriendAddedOnewayNotification(ctx, req.FromUserID, req.ToUserID)
+
 	// Notify only A (FromUserID) so incremental friend sync is triggered
 	// without notifying B (ToUserID).
 	//tips := sdkws.FriendApplicationApprovedTips{
