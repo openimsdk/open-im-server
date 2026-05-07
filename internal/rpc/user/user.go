@@ -399,6 +399,7 @@ func (s *userServer) SetMsgReceiveSetting(ctx context.Context, req *pbuser.SetMs
 // 无论目标用户将手机号设置为何种可见性，只要手机号匹配就能找到该用户。
 // 返回的 UserInfo 中 phone 字段仍按 applyPhoneVisibility 规则处理。
 //
+// 当目标用户 MsgReceiveSetting=2（不接受任何人消息）时，对非本人搜索者不可见。
 // 返回空 userInfo 并不代表错误，调用方应以 nil userInfo 判断"未找到"。
 func (s *userServer) GetUserByPhone(ctx context.Context, req *pbuser.GetUserByPhoneReq) (*pbuser.GetUserByPhoneResp, error) {
 	if req.Phone == "" {
@@ -419,9 +420,14 @@ func (s *userServer) GetUserByPhone(ctx context.Context, req *pbuser.GetUserByPh
 		return nil, err
 	}
 
+	viewerID := mcontext.GetOpUserID(ctx)
+	// MsgReceiveSetting=2 表示不接受任何人消息，对非本人搜索者隐藏该用户
+	if dbUser.MsgReceiveSetting == tablerelation.MsgReceiveSettingNobody && viewerID != dbUser.UserID {
+		return &pbuser.GetUserByPhoneResp{}, nil
+	}
+
 	pbUser := convert.UserDB2Pb(dbUser)
 	// 搜索者已知手机号（主动输入），仍对返回的资料字段应用可见性规则
-	viewerID := mcontext.GetOpUserID(ctx)
 	if err := s.applyPhoneVisibility(ctx, viewerID, []*sdkws.UserInfo{pbUser}, []*tablerelation.User{dbUser}); err != nil {
 		log.ZError(ctx, "GetUserByPhone: applyPhoneVisibility failed", err,
 			"opUserID", viewerID, "targetUserID", dbUser.UserID)
@@ -432,6 +438,7 @@ func (s *userServer) GetUserByPhone(ctx context.Context, req *pbuser.GetUserByPh
 
 // GetUsersByNickname 按昵称精确匹配查询普通用户（app_manger_level 与分页拉取用户一致）。
 // 全局黑名单用户会被过滤；手机号字段按 phone_visibility 与 getDesignateUsers 相同规则处理。
+// MsgReceiveSetting=2 的用户对非本人搜索者不可见。
 func (s *userServer) GetUsersByNickname(ctx context.Context, req *pbuser.GetUsersByNicknameReq) (*pbuser.GetUsersByNicknameResp, error) {
 	nickname := strings.TrimSpace(req.Nickname)
 	if nickname == "" {
@@ -475,8 +482,23 @@ func (s *userServer) GetUsersByNickname(ctx context.Context, req *pbuser.GetUser
 		return &pbuser.GetUsersByNicknameResp{}, nil
 	}
 
-	pbUsers := convert.UsersDB2Pb(users)
+	// 过滤掉 MsgReceiveSetting=2（不接受任何人消息）的用户，本人除外
 	viewerID := mcontext.GetOpUserID(ctx)
+	{
+		visible := make([]*tablerelation.User, 0, len(users))
+		for _, u := range users {
+			if u.MsgReceiveSetting == tablerelation.MsgReceiveSettingNobody && viewerID != u.UserID {
+				continue
+			}
+			visible = append(visible, u)
+		}
+		users = visible
+	}
+	if len(users) == 0 {
+		return &pbuser.GetUsersByNicknameResp{}, nil
+	}
+
+	pbUsers := convert.UsersDB2Pb(users)
 	if err := s.applyPhoneVisibility(ctx, viewerID, pbUsers, users); err != nil {
 		log.ZError(ctx, "GetUsersByNickname: applyPhoneVisibility failed", err,
 			"opUserID", viewerID, "count", len(users))
